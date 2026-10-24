@@ -1,0 +1,19 @@
+-s tb_colorbar_ddr_hdmi
++incdir+rtl/include
++define+SIM_MODE
+rtl/com/edrv32_async_fifo.v
+rtl/soc/fabric/edrv32_axi_m2s_arbiter.v
+rtl/soc/fabric/edrv32_axi_m2s_read.v
+rtl/soc/fabric/edrv32_axi_m2s_write.v
+rtl/soc/fabric/edrv32_axi_m2s_interconnect.v
+rtl/vision/display/edrv32_colorbar_axi_writer.v
+rtl/vision/display/edrv32_hdmi_axi_reader.v
+rtl/vision/display/edrv32_hdmi_fifo.v
+rtl/vision/display/edrv32_hdmi_timing.v
+rtl/vision/display/edrv32_hdmi_scanout.v
+rtl/vision/display/edrv32_tmds_encoder.v
+rtl/vision/display/edrv32_tmds_serdes.v
+rtl/vision/display/edrv32_tmds_tx.v
+rtl/vision/display/edrv32_colorbar_hdmi.v
+sim/models/axi256_mem_model.sv
+sim/cases/vision/colorbar-ddr-hdmi/tb_colorbar_ddr_hdmi.sv

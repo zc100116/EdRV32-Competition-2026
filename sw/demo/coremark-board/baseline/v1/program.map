@@ -1,0 +1,426 @@
+Archive member included to satisfy reference by file (symbol)
+
+/home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+                              /tmp/ccjpTOzh.o (__udivdi3)
+/home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+                              /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o) (__clz_tab)
+
+Discarded input sections
+
+ .text          0x00000000        0x0 /tmp/ccTVWiTd.o
+ .data          0x00000000        0x0 /tmp/ccTVWiTd.o
+ .bss           0x00000000        0x0 /tmp/ccTVWiTd.o
+ .rodata.str1.4
+                0x00000000       0x16 /tmp/ccTVWiTd.o
+ .data.mem_name
+                0x00000000        0xc /tmp/ccTVWiTd.o
+ .comment       0x00000000       0x34 /tmp/ccTVWiTd.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccTVWiTd.o
+ .text          0x00000000        0x0 /tmp/ccjpTOzh.o
+ .data          0x00000000        0x0 /tmp/ccjpTOzh.o
+ .bss           0x00000000        0x0 /tmp/ccjpTOzh.o
+ .text.portable_malloc
+                0x00000000        0x4 /tmp/ccjpTOzh.o
+ .text.portable_free
+                0x00000000        0x2 /tmp/ccjpTOzh.o
+ .comment       0x00000000       0x34 /tmp/ccjpTOzh.o
+ .riscv.attributes
+                0x00000000       0x4f /tmp/ccjpTOzh.o
+ .text          0x00000000        0x0 /tmp/ccOtvbtM.o
+ .data          0x00000000        0x0 /tmp/ccOtvbtM.o
+ .bss           0x00000000        0x0 /tmp/ccOtvbtM.o
+ .comment       0x00000000       0x34 /tmp/ccOtvbtM.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccOtvbtM.o
+ .text          0x00000000        0x0 /tmp/ccClbOx9.o
+ .data          0x00000000        0x0 /tmp/ccClbOx9.o
+ .bss           0x00000000        0x0 /tmp/ccClbOx9.o
+ .comment       0x00000000       0x34 /tmp/ccClbOx9.o
+ .riscv.attributes
+                0x00000000       0x4f /tmp/ccClbOx9.o
+ .text          0x00000000        0x0 /tmp/ccgGMUVj.o
+ .data          0x00000000        0x0 /tmp/ccgGMUVj.o
+ .bss           0x00000000        0x0 /tmp/ccgGMUVj.o
+ .comment       0x00000000       0x34 /tmp/ccgGMUVj.o
+ .riscv.attributes
+                0x00000000       0x4f /tmp/ccgGMUVj.o
+ .text          0x00000000        0x0 /tmp/ccnBKiPc.o
+ .data          0x00000000        0x0 /tmp/ccnBKiPc.o
+ .bss           0x00000000        0x0 /tmp/ccnBKiPc.o
+ .riscv.attributes
+                0x00000000       0x49 /tmp/ccnBKiPc.o
+ .text          0x00000000        0x0 /tmp/ccOLtzOT.o
+ .data          0x00000000        0x0 /tmp/ccOLtzOT.o
+ .bss           0x00000000        0x0 /tmp/ccOLtzOT.o
+ .text.copy_info
+                0x00000000       0x12 /tmp/ccOLtzOT.o
+ .text.core_list_insert_new
+                0x00000000       0x4c /tmp/ccOLtzOT.o
+ .text.core_list_remove
+                0x00000000       0x16 /tmp/ccOLtzOT.o
+ .text.core_list_undo_remove
+                0x00000000       0x10 /tmp/ccOLtzOT.o
+ .text.core_list_find
+                0x00000000       0x34 /tmp/ccOLtzOT.o
+ .text.core_list_reverse
+                0x00000000       0x12 /tmp/ccOLtzOT.o
+ .comment       0x00000000       0x34 /tmp/ccOLtzOT.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccOLtzOT.o
+ .text          0x00000000        0x0 /tmp/cchrBRVZ.o
+ .data          0x00000000        0x0 /tmp/cchrBRVZ.o
+ .bss           0x00000000        0x0 /tmp/cchrBRVZ.o
+ .text.matrix_sum
+                0x00000000       0x58 /tmp/cchrBRVZ.o
+ .text.matrix_mul_const
+                0x00000000       0x38 /tmp/cchrBRVZ.o
+ .text.matrix_add_const
+                0x00000000       0x2a /tmp/cchrBRVZ.o
+ .comment       0x00000000       0x34 /tmp/cchrBRVZ.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/cchrBRVZ.o
+ .text          0x00000000        0x0 /tmp/ccd5fqaC.o
+ .data          0x00000000        0x0 /tmp/ccd5fqaC.o
+ .bss           0x00000000        0x0 /tmp/ccd5fqaC.o
+ .comment       0x00000000       0x34 /tmp/ccd5fqaC.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccd5fqaC.o
+ .text          0x00000000        0x0 /tmp/cc5NELlE.o
+ .data          0x00000000        0x0 /tmp/cc5NELlE.o
+ .bss           0x00000000        0x0 /tmp/cc5NELlE.o
+ .text.crcu8    0x00000000       0xde /tmp/cc5NELlE.o
+ .comment       0x00000000       0x34 /tmp/cc5NELlE.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/cc5NELlE.o
+ .text          0x00000000        0x0 /tmp/ccZxtZi6.o
+ .data          0x00000000        0x0 /tmp/ccZxtZi6.o
+ .bss           0x00000000        0x0 /tmp/ccZxtZi6.o
+ .text.edrv32_uart_clear_rx
+                0x00000000       0x1c /tmp/ccZxtZi6.o
+ .text.edrv32_uart_putc_timeout
+                0x00000000       0x22 /tmp/ccZxtZi6.o
+ .text.edrv32_uart_getc_timeout
+                0x00000000       0x4c /tmp/ccZxtZi6.o
+ .rodata.edrv32_uart_put_hex32.str1.4
+                0x00000000        0x3 /tmp/ccZxtZi6.o
+ .text.edrv32_uart_put_hex32
+                0x00000000       0x66 /tmp/ccZxtZi6.o
+ .rodata.hex.0  0x00000000       0x11 /tmp/ccZxtZi6.o
+ .comment       0x00000000       0x34 /tmp/ccZxtZi6.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccZxtZi6.o
+ .text          0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .data          0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .bss           0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .comment       0x00000000       0x34 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .eh_frame      0x00000000       0x28 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .riscv.attributes
+                0x00000000       0x36 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .text          0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+ .data          0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+ .bss           0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+ .comment       0x00000000       0x34 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+ .riscv.attributes
+                0x00000000       0x36 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ROM              0x00000000         0x00004000         xr
+SRAM             0x10000000         0x00008000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /tmp/ccTVWiTd.o
+LOAD /tmp/ccjpTOzh.o
+LOAD /tmp/ccOtvbtM.o
+LOAD /tmp/ccClbOx9.o
+LOAD /tmp/ccgGMUVj.o
+LOAD /tmp/ccnBKiPc.o
+LOAD /tmp/ccOLtzOT.o
+LOAD /tmp/cchrBRVZ.o
+LOAD /tmp/ccd5fqaC.o
+LOAD /tmp/cc5NELlE.o
+LOAD /tmp/ccZxtZi6.o
+LOAD /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a
+
+.boot           0x00000000      0x22c
+                0x00000000                        _boot_start = .
+ *(.text.boot)
+ .text.boot     0x00000000       0x42 /tmp/ccnBKiPc.o
+                0x00000000                _start
+ *(.text.boot.*)
+ .text.boot.message
+                0x00000042       0x6e /tmp/ccOtvbtM.o
+                0x00000042                edrv32_boot_banner
+ *(.rodata.boot.*)
+ .rodata.boot.message
+                0x000000b0      0x17b /tmp/ccOtvbtM.o
+ *(.srodata.boot.*)
+                0x0000022c                        . = ALIGN (0x4)
+ *fill*         0x0000022b        0x1 
+                0x0000022c                        _boot_end = .
+
+.rela.dyn       0x0000022c        0x0
+ .rela.text.boot
+                0x0000022c        0x0 /tmp/ccTVWiTd.o
+
+.runtime        0x10000000     0x379c
+                0x10000000                        _runtime_start = .
+                0x10000800                        __global_pointer$ = (. + 0x800)
+ *(.text.startup)
+ *(.text .text.*)
+ .text.iterate  0x10000000       0x70 /tmp/ccTVWiTd.o
+                0x10000000                iterate
+ .text.edrv32_coremark_run
+                0x10000070      0x66e /tmp/ccTVWiTd.o
+                0x10000070                edrv32_coremark_run
+ .text.put_unsigned
+                0x100006de       0xa6 /tmp/ccjpTOzh.o
+ .text.start_time
+                0x10000784       0x22 /tmp/ccjpTOzh.o
+                0x10000784                start_time
+ .text.stop_time
+                0x100007a6       0x26 /tmp/ccjpTOzh.o
+                0x100007a6                stop_time
+ .text.get_time
+                0x100007cc       0x14 /tmp/ccjpTOzh.o
+                0x100007cc                get_time
+ .text.time_in_secs
+                0x100007e0       0x10 /tmp/ccjpTOzh.o
+                0x100007e0                time_in_secs
+ .text.portable_init
+                0x100007f0        0x8 /tmp/ccjpTOzh.o
+                0x100007f0                portable_init
+ .text.ee_printf
+                0x100007f8      0x22e /tmp/ccjpTOzh.o
+                0x100007f8                ee_printf
+ .text.portable_fini
+                0x10000a26       0x7c /tmp/ccjpTOzh.o
+                0x10000a26                portable_fini
+ .text.hpm_prepare
+                0x10000aa2      0x50c /tmp/ccClbOx9.o
+                0x10000aa2                hpm_prepare
+ .text.hpm_capture
+                0x10000fae      0x212 /tmp/ccClbOx9.o
+                0x10000fae                hpm_capture
+ .text.hpm_report
+                0x100011c0      0x106 /tmp/ccClbOx9.o
+                0x100011c0                hpm_report
+ .text.startup.main
+                0x100012c6       0xda /tmp/ccgGMUVj.o
+                0x100012c6                main
+ .text.cmp_idx  0x100013a0       0x46 /tmp/ccOLtzOT.o
+                0x100013a0                cmp_idx
+ .text.calc_func
+                0x100013e6       0xec /tmp/ccOLtzOT.o
+                0x100013e6                calc_func
+ .text.cmp_complex
+                0x100014d2       0x32 /tmp/ccOLtzOT.o
+                0x100014d2                cmp_complex
+ .text.core_list_mergesort
+                0x10001504      0x108 /tmp/ccOLtzOT.o
+                0x10001504                core_list_mergesort
+ .text.core_bench_list
+                0x1000160c      0x222 /tmp/ccOLtzOT.o
+                0x1000160c                core_bench_list
+ .text.core_list_init
+                0x1000182e      0x11e /tmp/ccOLtzOT.o
+                0x1000182e                core_list_init
+ .text.core_init_matrix
+                0x1000194c       0xc0 /tmp/cchrBRVZ.o
+                0x1000194c                core_init_matrix
+ .text.matrix_mul_vect
+                0x10001a0c       0x3e /tmp/cchrBRVZ.o
+                0x10001a0c                matrix_mul_vect
+ .text.matrix_mul_matrix
+                0x10001a4a       0x66 /tmp/cchrBRVZ.o
+                0x10001a4a                matrix_mul_matrix
+ .text.matrix_mul_matrix_bitextract
+                0x10001ab0       0x76 /tmp/cchrBRVZ.o
+                0x10001ab0                matrix_mul_matrix_bitextract
+ .text.matrix_test
+                0x10001b26      0x2cc /tmp/cchrBRVZ.o
+                0x10001b26                matrix_test
+ .text.core_bench_matrix
+                0x10001df2       0x2a /tmp/cchrBRVZ.o
+                0x10001df2                core_bench_matrix
+ .text.core_init_state
+                0x10001e1c      0x10c /tmp/ccd5fqaC.o
+                0x10001e1c                core_init_state
+ .text.core_state_transition
+                0x10001f28      0x200 /tmp/ccd5fqaC.o
+                0x10001f28                core_state_transition
+ .text.core_bench_state
+                0x10002128      0x128 /tmp/ccd5fqaC.o
+                0x10002128                core_bench_state
+ .text.get_seed_32
+                0x10002250       0x4c /tmp/cc5NELlE.o
+                0x10002250                get_seed_32
+ .text.crcu16   0x1000229c      0x1a0 /tmp/cc5NELlE.o
+                0x1000229c                crcu16
+ .text.crcu32   0x1000243c      0x35e /tmp/cc5NELlE.o
+                0x1000243c                crcu32
+ .text.crc16    0x1000279a      0x1a4 /tmp/cc5NELlE.o
+                0x1000279a                crc16
+ .text.check_data_types
+                0x1000293e        0x4 /tmp/cc5NELlE.o
+                0x1000293e                check_data_types
+ .text.edrv32_uart_init
+                0x10002942       0x34 /tmp/ccZxtZi6.o
+                0x10002942                edrv32_uart_init
+ .text.edrv32_uart_flush_timeout
+                0x10002976       0x20 /tmp/ccZxtZi6.o
+                0x10002976                edrv32_uart_flush_timeout
+ .text.edrv32_uart_putc
+                0x10002996       0x22 /tmp/ccZxtZi6.o
+                0x10002996                edrv32_uart_putc
+ .text.edrv32_uart_puts
+                0x100029b8       0x60 /tmp/ccZxtZi6.o
+                0x100029b8                edrv32_uart_puts
+ .text.__udivdi3
+                0x10002a18      0x36e /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+                0x10002a18                __udivdi3
+ *(.srodata .srodata.*)
+ *(.rodata .rodata.*)
+ *fill*         0x10002d86        0x2 
+ .rodata.edrv32_coremark_run.str1.4
+                0x10002d88      0x669 /tmp/ccTVWiTd.o
+                                0x421 (size before relaxing)
+ *fill*         0x100033f1        0x3 
+ .rodata.state_known_crc
+                0x100033f4        0xa /tmp/ccTVWiTd.o
+ *fill*         0x100033fe        0x2 
+ .rodata.matrix_known_crc
+                0x10003400        0xa /tmp/ccTVWiTd.o
+ *fill*         0x1000340a        0x2 
+ .rodata.list_known_crc
+                0x1000340c        0xa /tmp/ccTVWiTd.o
+ .rodata.portable_fini.str1.4
+                0x10003416        0x0 /tmp/ccjpTOzh.o
+                                 0x18 (size before relaxing)
+ *fill*         0x10003416        0x2 
+ .rodata.digits.0
+                0x10003418       0x11 /tmp/ccjpTOzh.o
+ .rodata.hpm_report.str1.4
+                0x10003429        0x0 /tmp/ccClbOx9.o
+                                 0x9a (size before relaxing)
+ .rodata.main.str1.4
+                0x10003429        0x0 /tmp/ccgGMUVj.o
+                                 0xe4 (size before relaxing)
+ .rodata.str1.4
+                0x10003429        0x0 /tmp/ccd5fqaC.o
+                                 0xad (size before relaxing)
+ *fill*         0x10003429        0x3 
+ .rodata.errpat
+                0x1000342c       0x10 /tmp/ccd5fqaC.o
+ .rodata.scipat
+                0x1000343c       0x10 /tmp/ccd5fqaC.o
+ .rodata.floatpat
+                0x1000344c       0x10 /tmp/ccd5fqaC.o
+ .rodata.intpat
+                0x1000345c       0x10 /tmp/ccd5fqaC.o
+ .rodata.get_seed_32
+                0x1000346c       0x18 /tmp/cc5NELlE.o
+ .rodata        0x10003484      0x200 /tmp/cc5NELlE.o
+ .rodata.__clz_tab
+                0x10003684      0x100 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)
+                0x10003684                __clz_tab
+ *(.data .data.*)
+ *(.sdata .sdata.*)
+ .sdata.default_num_contexts
+                0x10003784        0x4 /tmp/ccjpTOzh.o
+                0x10003784                default_num_contexts
+ .sdata.seed4_volatile
+                0x10003788        0x4 /tmp/ccjpTOzh.o
+                0x10003788                seed4_volatile
+ .sdata.seed3_volatile
+                0x1000378c        0x4 /tmp/ccjpTOzh.o
+                0x1000378c                seed3_volatile
+ .sdata.seed2_volatile
+                0x10003790        0x4 /tmp/ccjpTOzh.o
+                0x10003790                seed2_volatile
+ .sdata.seed1_volatile
+                0x10003794        0x4 /tmp/ccjpTOzh.o
+                0x10003794                seed1_volatile
+ .sdata.uart_ctrl_shadow
+                0x10003798        0x4 /tmp/ccZxtZi6.o
+                0x1000379c                        . = ALIGN (0x4)
+                0x1000379c                        _runtime_end = .
+
+.bss            0x1000379c      0x160
+                0x1000379c                        _sbss = .
+ *(.bss .bss.*)
+ .bss.event_high_r
+                0x1000379c       0xa0 /tmp/ccClbOx9.o
+ .bss.event_low_r
+                0x1000383c       0xa0 /tmp/ccClbOx9.o
+ *(.sbss .sbss.*)
+ .sbss.stop_instret_r
+                0x100038dc        0x4 /tmp/ccjpTOzh.o
+ .sbss.start_instret_r
+                0x100038e0        0x4 /tmp/ccjpTOzh.o
+ .sbss.stop_cycle_r
+                0x100038e4        0x4 /tmp/ccjpTOzh.o
+ .sbss.start_cycle_r
+                0x100038e8        0x4 /tmp/ccjpTOzh.o
+ .sbss.seed5_volatile
+                0x100038ec        0x4 /tmp/ccjpTOzh.o
+                0x100038ec                seed5_volatile
+ .sbss.last_event_r
+                0x100038f0        0x4 /tmp/ccClbOx9.o
+ .sbss.first_event_r
+                0x100038f4        0x4 /tmp/ccClbOx9.o
+ .sbss.round_r  0x100038f8        0x4 /tmp/ccClbOx9.o
+ *(COMMON)
+                0x100038fc                        . = ALIGN (0x4)
+                0x100038fc                        _ebss = .
+
+.sram_test      0x10005800      0x800
+                0x10005800                        _sram_test_start = .
+                0x10006000                        . = (. + 0x800)
+ *fill*         0x10005800      0x800 
+                0x10006000                        _sram_test_end = .
+
+.stack          0x10006000     0x2000
+                0x10008000                        . = (. + 0x2000)
+ *fill*         0x10006000     0x2000 
+                0x10008000                        _sp = .
+                0x10008000                        _end = .
+
+/DISCARD/
+ *(.comment)
+ *(.riscv.attributes)
+ *(.eh_frame*)
+                0x00000001                        ASSERT ((_boot_end <= (ORIGIN (ROM) + LENGTH (ROM))), BootROM startup/banner exceeds 16 KiB)
+                0x00000001                        ASSERT ((_ebss <= _sram_test_start), SRAM runtime/BSS overlaps the SRAM test region)
+OUTPUT(sw/demo/coremark-board/build/program.elf elf32-littleriscv)
+
+.note.GNU-stack
+                0x00000000        0x0
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccTVWiTd.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccjpTOzh.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccOtvbtM.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccClbOx9.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccgGMUVj.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccOLtzOT.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/cchrBRVZ.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccd5fqaC.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/cc5NELlE.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccZxtZi6.o
+ .note.GNU-stack
+                0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_udivdi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a(_clz.o)

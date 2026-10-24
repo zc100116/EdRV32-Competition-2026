@@ -1,0 +1,33 @@
+
+Discarded input sections
+
+ .data          0x0000000000000000        0x0 /tmp/ccZI8cjJ.o
+ .bss           0x0000000000000000        0x0 /tmp/ccZI8cjJ.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /tmp/ccZI8cjJ.o
+LOAD /usr/lib/gcc/riscv64-unknown-elf/10.2.0/rv32im/ilp32/libgcc.a
+                0x0000000080000000                . = 0x80000000
+
+.text           0x0000000080000000       0x70
+ *(.text)
+ .text          0x0000000080000000       0x70 /tmp/ccZI8cjJ.o
+                0x0000000080000000                _start
+
+.data
+ *(.data)
+
+.bss
+ *(.bss)
+OUTPUT(sw/test/cpu/core-smoke/build/program.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x0000000000000000       0x24
+ .riscv.attributes
+                0x0000000000000000       0x24 /tmp/ccZI8cjJ.o

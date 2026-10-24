@@ -1,0 +1,11 @@
+# Generated simulation and FPGA build outputs
+/sim/build/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local operating-system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,430 @@
+{
+  "milestone": "Paired IF2/ALIGN with scalar backend",
+  "single_issue_baseline_commit": "429b2717298e90559df12b7faab33e82893acc4d",
+  "regression_runs": 49,
+  "all_regressions_passed": true,
+  "coremark_images": 2,
+  "coremark_configurations": 2,
+  "coremark_rounds": 12,
+  "style_added_issues": 0,
+  "style_existing_issues": {
+    "rtl/cpu/core/edrv32_cached_core.v": [],
+    "rtl/cpu/core/edrv32_core.v": [
+      "rtl/cpu/core/edrv32_core.v:1219: multiple named connections",
+      "rtl/cpu/core/edrv32_core.v:1220: multiple named connections",
+      "rtl/cpu/core/edrv32_core.v:1221: multiple named connections",
+      "rtl/cpu/core/edrv32_core.v:1222: multiple named connections",
+      "rtl/cpu/core/edrv32_core.v:1223: multiple named connections",
+      "rtl/cpu/core/edrv32_core.v:1224: multiple named connections",
+      "rtl/cpu/core/edrv32_core.v:1256: multiple named connections"
+    ],
+    "rtl/cpu/frontend/edrv32_if2_stage.v": [],
+    "rtl/soc/top/edrv32_soc_top.v": [],
+    "rtl/cpu/frontend/edrv32_align_pair_stage.v": [],
+    "rtl/cpu/pipeline/edrv32_pipe_if2_to_align_pair.v": [],
+    "rtl/cpu/pipeline/edrv32_pipe_align_to_decode_pair.v": []
+  },
+  "regression_results": [
+    {
+      "case": "mul-low1",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu-low1",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu-pango-low1",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "ex-mul-stable",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mul-low2",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "foundation",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "operand-resolve",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-mdu-waw-load",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-mdu-raw-irq",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-mdu-raw-irq-high",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "decode-stage",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "hpm-attribution",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "ex-stage",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "lsu-equality-load",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "lsu-control-load",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "lsu-decoupled-load",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "load-queue",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mem2-response-bypass",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "uncached-load-use",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "hpm-attribution-cached",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu-pango",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu-legacy",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu-pango-legacy",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mdu-commit",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-mdu",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-smoke",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "cached-core-smoke",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-csr-trap",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-pma-trap",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-irq-fencei",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "irq-store-commit",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "cached-irq-store",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mul-equivalence",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "div-equivalence",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "mul-pango-equivalence",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "frontend",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "frontend-early-redirect",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "dual-align",
+      "seed": 1,
+      "passed": true
+    },
+    {
+      "case": "dual-align",
+      "seed": 7,
+      "passed": true
+    },
+    {
+      "case": "dual-align",
+      "seed": 20261006,
+      "passed": true
+    },
+    {
+      "case": "dual-frontend",
+      "seed": 1,
+      "passed": true
+    },
+    {
+      "case": "dual-frontend",
+      "seed": 7,
+      "passed": true
+    },
+    {
+      "case": "dual-frontend",
+      "seed": 20261006,
+      "passed": true
+    },
+    {
+      "case": "if2-dual-prediction",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-dual-frontend",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-dual-csr-trap",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-dual-irq-fencei",
+      "seed": null,
+      "passed": true
+    },
+    {
+      "case": "core-dual-mdu-raw-irq",
+      "seed": null,
+      "passed": true
+    }
+  ],
+  "coremark": [
+    {
+      "optimization": "o2",
+      "scalar_rounds": [
+        {
+          "cycles": 3487415,
+          "instret": 2899049
+        },
+        {
+          "cycles": 3487221,
+          "instret": 2899049
+        },
+        {
+          "cycles": 3487216,
+          "instret": 2899049
+        }
+      ],
+      "paired_frontend_rounds": [
+        {
+          "cycles": 3489980,
+          "instret": 2899049
+        },
+        {
+          "cycles": 3489802,
+          "instret": 2899049
+        },
+        {
+          "cycles": 3489798,
+          "instret": 2899049
+        }
+      ],
+      "warm_cycle_change": 2581,
+      "crc": "e3c1/0747/8d84/c64e",
+      "passed": true
+    },
+    {
+      "optimization": "o3",
+      "scalar_rounds": [
+        {
+          "cycles": 3523989,
+          "instret": 2944145
+        },
+        {
+          "cycles": 3523737,
+          "instret": 2944145
+        },
+        {
+          "cycles": 3523735,
+          "instret": 2944145
+        }
+      ],
+      "paired_frontend_rounds": [
+        {
+          "cycles": 3506777,
+          "instret": 2944145
+        },
+        {
+          "cycles": 3506524,
+          "instret": 2944145
+        },
+        {
+          "cycles": 3506523,
+          "instret": 2944145
+        }
+      ],
+      "warm_cycle_change": -17213,
+      "crc": "e3c1/0747/8d84/c64e",
+      "passed": true
+    }
+  ],
+  "coverage": {
+    "dual-align": [
+      {
+        "seed": 1,
+        "checks": 15029,
+        "pair_capture": 172,
+        "pair_pop": 314,
+        "one_pop": 1022,
+        "full": 1,
+        "kills": 79
+      },
+      {
+        "seed": 20261006,
+        "checks": 14959,
+        "pair_capture": 155,
+        "pair_pop": 280,
+        "one_pop": 1008,
+        "full": 1,
+        "kills": 92
+      },
+      {
+        "seed": 7,
+        "checks": 15039,
+        "pair_capture": 172,
+        "pair_pop": 303,
+        "one_pop": 1035,
+        "full": 1,
+        "kills": 78
+      }
+    ],
+    "dual-frontend": [
+      {
+        "seed": 1,
+        "checks": 7158,
+        "delivered": 1771,
+        "paired": 493,
+        "longest_pair_run": 48,
+        "scalar": 785,
+        "stale": 8,
+        "redirects": 4,
+        "consume3": 258,
+        "consume4": 2
+      },
+      {
+        "seed": 20261006,
+        "checks": 7224,
+        "delivered": 1712,
+        "paired": 478,
+        "longest_pair_run": 47,
+        "scalar": 756,
+        "stale": 8,
+        "redirects": 4,
+        "consume3": 249,
+        "consume4": 1
+      },
+      {
+        "seed": 7,
+        "checks": 7158,
+        "delivered": 1801,
+        "paired": 504,
+        "longest_pair_run": 47,
+        "scalar": 793,
+        "stale": 8,
+        "redirects": 4,
+        "consume3": 263,
+        "consume4": 1
+      }
+    ]
+  },
+  "board_programmed": false,
+  "implementation_limit": "Only paired frontend is implemented; DECODE, execute and retirement are scalar. No new physical timing result.",
+  "wave_verified": {
+    "case": "dual-frontend",
+    "seed": 7,
+    "bytes": 11616856
+  },
+  "source_sha256": {
+    "rtl/competition/rv32imc_rewrite_core.f": "e6d8e55455505e47197f1606067d613af8ec752f798e545ce6c502f2d250cabb",
+    "rtl/cpu/core/edrv32_cached_core.v": "da794d051b98fda038f216d27e6720e57e3c17b07975503973cdf945c17f14fe",
+    "rtl/cpu/core/edrv32_core.v": "7b4826ecb4690b399b9a965b1ef3f635f935e37168b0b6a2497379edf460feab",
+    "rtl/cpu/frontend/edrv32_if2_stage.v": "d67fe2e1915043f6164c14155fb1910f06b9ee0a1c9281183745df978c273dc3",
+    "rtl/soc/top/edrv32_soc_top.v": "06cbb9a8e13bded0d4af17bc0aec26d22dc29c48f5c845b04952cadfe3aa8282",
+    "rtl/cpu/frontend/edrv32_align_pair_stage.v": "d82feb08ddd4829ddf8cb7908cd3180ffb93a1adc397988d4fdd1d9459fdcbc8",
+    "rtl/cpu/pipeline/edrv32_pipe_if2_to_align_pair.v": "51f26833f13d4b52ae7eb975543f33b2231eb6ce986e6a0732286f22def4b96a",
+    "rtl/cpu/pipeline/edrv32_pipe_align_to_decode_pair.v": "eaa5ccab378b0f71ce80176593fa3109c698d622c1797b2764d852cb3fe20d1a"
+  }
+}

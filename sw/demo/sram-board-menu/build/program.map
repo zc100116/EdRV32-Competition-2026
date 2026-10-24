@@ -1,0 +1,593 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 /tmp/ccx08yyS.o
+ .data          0x00000000        0x0 /tmp/ccx08yyS.o
+ .bss           0x00000000        0x0 /tmp/ccx08yyS.o
+ .rodata.str1.4
+                0x00000000       0x16 /tmp/ccx08yyS.o
+ .data.mem_name
+                0x00000000        0xc /tmp/ccx08yyS.o
+ .comment       0x00000000       0x34 /tmp/ccx08yyS.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccx08yyS.o
+ .text          0x00000000        0x0 /tmp/ccD9lgzb.o
+ .data          0x00000000        0x0 /tmp/ccD9lgzb.o
+ .bss           0x00000000        0x0 /tmp/ccD9lgzb.o
+ .text.portable_malloc
+                0x00000000        0x4 /tmp/ccD9lgzb.o
+ .text.portable_free
+                0x00000000        0x2 /tmp/ccD9lgzb.o
+ .comment       0x00000000       0x34 /tmp/ccD9lgzb.o
+ .riscv.attributes
+                0x00000000       0x4f /tmp/ccD9lgzb.o
+ .text          0x00000000        0x0 /tmp/cckyGl51.o
+ .data          0x00000000        0x0 /tmp/cckyGl51.o
+ .bss           0x00000000        0x0 /tmp/cckyGl51.o
+ .comment       0x00000000       0x34 /tmp/cckyGl51.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/cckyGl51.o
+ .text          0x00000000        0x0 /tmp/cc1ZRsq6.o
+ .data          0x00000000        0x0 /tmp/cc1ZRsq6.o
+ .bss           0x00000000        0x0 /tmp/cc1ZRsq6.o
+ .comment       0x00000000       0x34 /tmp/cc1ZRsq6.o
+ .riscv.attributes
+                0x00000000       0x4f /tmp/cc1ZRsq6.o
+ .text          0x00000000        0x0 /tmp/cc8ZcSXM.o
+ .data          0x00000000        0x0 /tmp/cc8ZcSXM.o
+ .bss           0x00000000        0x0 /tmp/cc8ZcSXM.o
+ .riscv.attributes
+                0x00000000       0x49 /tmp/cc8ZcSXM.o
+ .text          0x00000000        0x0 /tmp/ccziPe7Y.o
+ .data          0x00000000        0x0 /tmp/ccziPe7Y.o
+ .bss           0x00000000        0x0 /tmp/ccziPe7Y.o
+ .text.copy_info
+                0x00000000       0x12 /tmp/ccziPe7Y.o
+ .text.core_list_insert_new
+                0x00000000       0x4c /tmp/ccziPe7Y.o
+ .text.core_list_remove
+                0x00000000       0x16 /tmp/ccziPe7Y.o
+ .text.core_list_undo_remove
+                0x00000000       0x10 /tmp/ccziPe7Y.o
+ .text.core_list_find
+                0x00000000       0x34 /tmp/ccziPe7Y.o
+ .text.core_list_reverse
+                0x00000000       0x12 /tmp/ccziPe7Y.o
+ .comment       0x00000000       0x34 /tmp/ccziPe7Y.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccziPe7Y.o
+ .text          0x00000000        0x0 /tmp/ccUNyYzS.o
+ .data          0x00000000        0x0 /tmp/ccUNyYzS.o
+ .bss           0x00000000        0x0 /tmp/ccUNyYzS.o
+ .text.matrix_sum
+                0x00000000       0x58 /tmp/ccUNyYzS.o
+ .text.matrix_mul_const
+                0x00000000       0x38 /tmp/ccUNyYzS.o
+ .text.matrix_add_const
+                0x00000000       0x2a /tmp/ccUNyYzS.o
+ .comment       0x00000000       0x34 /tmp/ccUNyYzS.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccUNyYzS.o
+ .text          0x00000000        0x0 /tmp/ccQwkq0T.o
+ .data          0x00000000        0x0 /tmp/ccQwkq0T.o
+ .bss           0x00000000        0x0 /tmp/ccQwkq0T.o
+ .comment       0x00000000       0x34 /tmp/ccQwkq0T.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccQwkq0T.o
+ .text          0x00000000        0x0 /tmp/ccQcpnO2.o
+ .data          0x00000000        0x0 /tmp/ccQcpnO2.o
+ .bss           0x00000000        0x0 /tmp/ccQcpnO2.o
+ .text.crcu8    0x00000000       0xde /tmp/ccQcpnO2.o
+ .comment       0x00000000       0x34 /tmp/ccQcpnO2.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccQcpnO2.o
+ .text          0x00000000        0x0 /tmp/cccQK3Je.o
+ .data          0x00000000        0x0 /tmp/cccQK3Je.o
+ .bss           0x00000000        0x0 /tmp/cccQK3Je.o
+ .text.edrv32_cam_id
+                0x00000000        0x8 /tmp/cccQK3Je.o
+ .text.edrv32_cam_version
+                0x00000000        0x8 /tmp/cccQK3Je.o
+ .text.edrv32_cam_capability
+                0x00000000        0x8 /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_enabled
+                0x00000000       0x40 /tmp/cccQK3Je.o
+ .text.edrv32_cam_is_enabled
+                0x00000000       0x22 /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_irq_enable
+                0x00000000        0xa /tmp/cccQK3Je.o
+ .text.edrv32_cam_get_irq_status
+                0x00000000        0x8 /tmp/cccQK3Je.o
+ .text.edrv32_cam_clear_irq
+                0x00000000        0xa /tmp/cccQK3Je.o
+ .text.edrv32_cam_get_status
+                0x00000000       0x40 /tmp/cccQK3Je.o
+ .text.edrv32_cam_sccb_status
+                0x00000000        0x8 /tmp/cccQK3Je.o
+ .text.edrv32_cam_write_reg_async
+                0x00000000       0x62 /tmp/cccQK3Je.o
+ .text.edrv32_cam_wait_sccb
+                0x00000000       0x2c /tmp/cccQK3Je.o
+ .text.edrv32_cam_write_reg
+                0x00000000       0x84 /tmp/cccQK3Je.o
+ .text.edrv32_cam_read_reg_async
+                0x00000000       0x4c /tmp/cccQK3Je.o
+ .text.edrv32_cam_read_reg
+                0x00000000       0x72 /tmp/cccQK3Je.o
+ .text.edrv32_cam_read_chip_id
+                0x00000000       0xec /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_auto_exposure
+                0x00000000       0x94 /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_auto_gain
+                0x00000000       0x94 /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_exposure
+                0x00000000       0x84 /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_gain
+                0x00000000       0x9a /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_auto_white_balance
+                0x00000000       0x74 /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_mirror
+                0x00000000       0x7c /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_flip
+                0x00000000       0x7e /tmp/cccQK3Je.o
+ .text.edrv32_cam_set_test_pattern
+                0x00000000       0x76 /tmp/cccQK3Je.o
+ .sbss.aec_agc_shadow
+                0x00000000        0x2 /tmp/cccQK3Je.o
+ .comment       0x00000000       0x34 /tmp/cccQK3Je.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/cccQK3Je.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/cccQK3Je.o
+ .text          0x00000000        0x0 /tmp/ccBJB6lI.o
+ .data          0x00000000        0x0 /tmp/ccBJB6lI.o
+ .bss           0x00000000        0x0 /tmp/ccBJB6lI.o
+ .comment       0x00000000       0x34 /tmp/ccBJB6lI.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccBJB6lI.o
+ .text          0x00000000        0x0 /tmp/cc6kC8Ox.o
+ .data          0x00000000        0x0 /tmp/cc6kC8Ox.o
+ .bss           0x00000000        0x0 /tmp/cc6kC8Ox.o
+ .text.edrv32_gpio_set
+                0x00000000        0x8 /tmp/cc6kC8Ox.o
+ .text.edrv32_gpio_clear
+                0x00000000        0x8 /tmp/cc6kC8Ox.o
+ .text.edrv32_gpio_read_output
+                0x00000000        0x8 /tmp/cc6kC8Ox.o
+ .comment       0x00000000       0x34 /tmp/cc6kC8Ox.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/cc6kC8Ox.o
+ .text          0x00000000        0x0 /tmp/ccsHVU76.o
+ .data          0x00000000        0x0 /tmp/ccsHVU76.o
+ .bss           0x00000000        0x0 /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_id
+                0x00000000        0x8 /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_version
+                0x00000000        0x8 /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_capability
+                0x00000000        0x8 /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_set_enabled
+                0x00000000        0xc /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_is_enabled
+                0x00000000        0xa /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_active_buffer
+                0x00000000        0xc /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_buffer_base
+                0x00000000       0x2c /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_set_irq_enable
+                0x00000000        0xa /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_get_irq_status
+                0x00000000        0x8 /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_clear_irq
+                0x00000000        0xa /tmp/ccsHVU76.o
+ .text.edrv32_hdmi_get_status
+                0x00000000       0x60 /tmp/ccsHVU76.o
+ .comment       0x00000000       0x34 /tmp/ccsHVU76.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccsHVU76.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccsHVU76.o
+ .text          0x00000000        0x0 /tmp/ccQns19o.o
+ .data          0x00000000        0x0 /tmp/ccQns19o.o
+ .bss           0x00000000        0x0 /tmp/ccQns19o.o
+ .text.edrv32_pixel_id
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_version
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_capability
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_status
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_frame_count
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_error_count
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_configure
+                0x00000000       0x90 /tmp/ccQns19o.o
+ .text.edrv32_pixel_commit
+                0x00000000        0xa /tmp/ccQns19o.o
+ .text.edrv32_pixel_set_irq_enable
+                0x00000000        0xa /tmp/ccQns19o.o
+ .text.edrv32_pixel_get_irq_status
+                0x00000000        0x8 /tmp/ccQns19o.o
+ .text.edrv32_pixel_clear_irq
+                0x00000000        0xa /tmp/ccQns19o.o
+ .comment       0x00000000       0x34 /tmp/ccQns19o.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccQns19o.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccQns19o.o
+ .text          0x00000000        0x0 /tmp/ccjyfRFv.o
+ .data          0x00000000        0x0 /tmp/ccjyfRFv.o
+ .bss           0x00000000        0x0 /tmp/ccjyfRFv.o
+ .text.edrv32_spi_init
+                0x00000000       0x26 /tmp/ccjyfRFv.o
+ .text.edrv32_spi_flash_read_jedec_id
+                0x00000000       0x68 /tmp/ccjyfRFv.o
+ .comment       0x00000000       0x34 /tmp/ccjyfRFv.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccjyfRFv.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccjyfRFv.o
+ .text          0x00000000        0x0 /tmp/ccuo73IM.o
+ .data          0x00000000        0x0 /tmp/ccuo73IM.o
+ .bss           0x00000000        0x0 /tmp/ccuo73IM.o
+ .text.edrv32_uart_putc_timeout
+                0x00000000       0x22 /tmp/ccuo73IM.o
+ .comment       0x00000000       0x34 /tmp/ccuo73IM.o
+ .riscv.attributes
+                0x00000000       0x4b /tmp/ccuo73IM.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ROM              0x00000000         0x00004000         xr
+SRAM             0x10000000         0x00008000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /tmp/ccx08yyS.o
+LOAD /tmp/ccD9lgzb.o
+LOAD /tmp/cckyGl51.o
+LOAD /tmp/cc1ZRsq6.o
+LOAD /tmp/cc8ZcSXM.o
+LOAD /tmp/ccziPe7Y.o
+LOAD /tmp/ccUNyYzS.o
+LOAD /tmp/ccQwkq0T.o
+LOAD /tmp/ccQcpnO2.o
+LOAD /tmp/cccQK3Je.o
+LOAD /tmp/ccBJB6lI.o
+LOAD /tmp/cc6kC8Ox.o
+LOAD /tmp/ccsHVU76.o
+LOAD /tmp/ccQns19o.o
+LOAD /tmp/ccjyfRFv.o
+LOAD /tmp/ccuo73IM.o
+LOAD /home/edward/.local/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32imc/ilp32/libgcc.a
+
+.boot           0x00000000      0x230
+                0x00000000                        _boot_start = .
+ *(.text.boot)
+ .text.boot     0x00000000       0x42 /tmp/cc8ZcSXM.o
+                0x00000000                _start
+ *(.text.boot.*)
+ .text.boot.message
+                0x00000042       0x6e /tmp/cckyGl51.o
+                0x00000042                edrv32_boot_banner
+ *(.rodata.boot.*)
+ .rodata.boot.message
+                0x000000b0      0x180 /tmp/cckyGl51.o
+ *(.srodata.boot.*)
+                0x00000230                        . = ALIGN (0x4)
+                0x00000230                        _boot_end = .
+
+.rela.dyn       0x00000230        0x0
+ .rela.text.sram_pattern
+                0x00000230        0x0 /tmp/ccx08yyS.o
+ .rela.text.run_test
+                0x00000230        0x0 /tmp/ccx08yyS.o
+ .rela.text.boot
+                0x00000230        0x0 /tmp/ccx08yyS.o
+
+.runtime        0x10000000     0x3d6c
+                0x10000000                        _runtime_start = .
+                0x10000800                        __global_pointer$ = (. + 0x800)
+ *(.text.startup)
+ *(.text .text.*)
+ .text.iterate  0x10000000       0x70 /tmp/ccx08yyS.o
+                0x10000000                iterate
+ .text.edrv32_coremark_run
+                0x10000070      0x66e /tmp/ccx08yyS.o
+                0x10000070                edrv32_coremark_run
+ .text.put_unsigned
+                0x100006de       0xa6 /tmp/ccD9lgzb.o
+ .text.start_time
+                0x10000784       0x1a /tmp/ccD9lgzb.o
+                0x10000784                start_time
+ .text.stop_time
+                0x1000079e       0x1a /tmp/ccD9lgzb.o
+                0x1000079e                stop_time
+ .text.get_time
+                0x100007b8       0x14 /tmp/ccD9lgzb.o
+                0x100007b8                get_time
+ .text.time_in_secs
+                0x100007cc       0x10 /tmp/ccD9lgzb.o
+                0x100007cc                time_in_secs
+ .text.portable_init
+                0x100007dc        0x8 /tmp/ccD9lgzb.o
+                0x100007dc                portable_init
+ .text.ee_printf
+                0x100007e4      0x22e /tmp/ccD9lgzb.o
+                0x100007e4                ee_printf
+ .text.portable_fini
+                0x10000a12       0xc8 /tmp/ccD9lgzb.o
+                0x10000a12                portable_fini
+ .text.cache_clean_invalidate
+                0x10000ada       0x2c /tmp/cc1ZRsq6.o
+ .text.read_mtime_lo_stable
+                0x10000b06       0x18 /tmp/cc1ZRsq6.o
+ .text.print_prompt
+                0x10000b1e       0x10 /tmp/cc1ZRsq6.o
+ .text.print_menu
+                0x10000b2e       0x88 /tmp/cc1ZRsq6.o
+ .text.print_fail
+                0x10000bb6       0x8c /tmp/cc1ZRsq6.o
+ .text.print_monitor_metric
+                0x10000c42       0x2c /tmp/cc1ZRsq6.o
+ .text.print_command_state
+                0x10000c6e       0x7a /tmp/cc1ZRsq6.o
+ .text.sram_pattern
+                0x10000ce8       0xd6 /tmp/cc1ZRsq6.o
+ .text.run_test
+                0x10000dbe      0x622 /tmp/cc1ZRsq6.o
+ .text.startup.main
+                0x100013e0      0x2a6 /tmp/cc1ZRsq6.o
+                0x100013e0                main
+ .text.cmp_idx  0x10001686       0x46 /tmp/ccziPe7Y.o
+                0x10001686                cmp_idx
+ .text.calc_func
+                0x100016cc       0xec /tmp/ccziPe7Y.o
+                0x100016cc                calc_func
+ .text.cmp_complex
+                0x100017b8       0x32 /tmp/ccziPe7Y.o
+                0x100017b8                cmp_complex
+ .text.core_list_mergesort
+                0x100017ea      0x108 /tmp/ccziPe7Y.o
+                0x100017ea                core_list_mergesort
+ .text.core_bench_list
+                0x100018f2      0x222 /tmp/ccziPe7Y.o
+                0x100018f2                core_bench_list
+ .text.core_list_init
+                0x10001b14      0x11e /tmp/ccziPe7Y.o
+                0x10001b14                core_list_init
+ .text.core_init_matrix
+                0x10001c32       0xc0 /tmp/ccUNyYzS.o
+                0x10001c32                core_init_matrix
+ .text.matrix_mul_vect
+                0x10001cf2       0x3e /tmp/ccUNyYzS.o
+                0x10001cf2                matrix_mul_vect
+ .text.matrix_mul_matrix
+                0x10001d30       0x66 /tmp/ccUNyYzS.o
+                0x10001d30                matrix_mul_matrix
+ .text.matrix_mul_matrix_bitextract
+                0x10001d96       0x76 /tmp/ccUNyYzS.o
+                0x10001d96                matrix_mul_matrix_bitextract
+ .text.matrix_test
+                0x10001e0c      0x2cc /tmp/ccUNyYzS.o
+                0x10001e0c                matrix_test
+ .text.core_bench_matrix
+                0x100020d8       0x2a /tmp/ccUNyYzS.o
+                0x100020d8                core_bench_matrix
+ .text.core_init_state
+                0x10002102      0x10c /tmp/ccQwkq0T.o
+                0x10002102                core_init_state
+ .text.core_state_transition
+                0x1000220e      0x200 /tmp/ccQwkq0T.o
+                0x1000220e                core_state_transition
+ .text.core_bench_state
+                0x1000240e      0x128 /tmp/ccQwkq0T.o
+                0x1000240e                core_bench_state
+ .text.get_seed_32
+                0x10002536       0x4c /tmp/ccQcpnO2.o
+                0x10002536                get_seed_32
+ .text.crcu16   0x10002582      0x1a0 /tmp/ccQcpnO2.o
+                0x10002582                crcu16
+ .text.crcu32   0x10002722      0x35e /tmp/ccQcpnO2.o
+                0x10002722                crcu32
+ .text.crc16    0x10002a80      0x1a4 /tmp/ccQcpnO2.o
+                0x10002a80                crc16
+ .text.check_data_types
+                0x10002c24        0x4 /tmp/ccQcpnO2.o
+                0x10002c24                check_data_types
+ .text.edrv32_ddr_test_uncached
+                0x10002c28       0xbe /tmp/ccBJB6lI.o
+                0x10002c28                edrv32_ddr_test_uncached
+ .text.edrv32_ddr_test_alias
+                0x10002ce6       0x3a /tmp/ccBJB6lI.o
+                0x10002ce6                edrv32_ddr_test_alias
+ .text.edrv32_gpio_set_direction
+                0x10002d20        0x8 /tmp/cc6kC8Ox.o
+                0x10002d20                edrv32_gpio_set_direction
+ .text.edrv32_gpio_write
+                0x10002d28        0x8 /tmp/cc6kC8Ox.o
+                0x10002d28                edrv32_gpio_write
+ .text.edrv32_gpio_read
+                0x10002d30        0x8 /tmp/cc6kC8Ox.o
+                0x10002d30                edrv32_gpio_read
+ .text.edrv32_gpio_read_direction
+                0x10002d38        0x8 /tmp/cc6kC8Ox.o
+                0x10002d38                edrv32_gpio_read_direction
+ .text.edrv32_uart_init
+                0x10002d40       0x34 /tmp/ccuo73IM.o
+                0x10002d40                edrv32_uart_init
+ .text.edrv32_uart_clear_rx
+                0x10002d74       0x1c /tmp/ccuo73IM.o
+                0x10002d74                edrv32_uart_clear_rx
+ .text.edrv32_uart_getc_timeout
+                0x10002d90       0x4c /tmp/ccuo73IM.o
+                0x10002d90                edrv32_uart_getc_timeout
+ .text.edrv32_uart_flush_timeout
+                0x10002ddc       0x20 /tmp/ccuo73IM.o
+                0x10002ddc                edrv32_uart_flush_timeout
+ .text.edrv32_uart_putc
+                0x10002dfc       0x22 /tmp/ccuo73IM.o
+                0x10002dfc                edrv32_uart_putc
+ .text.edrv32_uart_puts
+                0x10002e1e       0x60 /tmp/ccuo73IM.o
+                0x10002e1e                edrv32_uart_puts
+ .text.edrv32_uart_put_hex32
+                0x10002e7e       0x66 /tmp/ccuo73IM.o
+                0x10002e7e                edrv32_uart_put_hex32
+ *(.srodata .srodata.*)
+ *(.rodata .rodata.*)
+ .rodata.edrv32_coremark_run.str1.4
+                0x10002ee4      0xb8b /tmp/ccx08yyS.o
+                                0x411 (size before relaxing)
+ *fill*         0x10003a6f        0x1 
+ .rodata.state_known_crc
+                0x10003a70        0xa /tmp/ccx08yyS.o
+ *fill*         0x10003a7a        0x2 
+ .rodata.matrix_known_crc
+                0x10003a7c        0xa /tmp/ccx08yyS.o
+ *fill*         0x10003a86        0x2 
+ .rodata.list_known_crc
+                0x10003a88        0xa /tmp/ccx08yyS.o
+ .rodata.portable_fini.str1.4
+                0x10003a92        0x0 /tmp/ccD9lgzb.o
+                                 0x42 (size before relaxing)
+ *fill*         0x10003a92        0x2 
+ .rodata.digits.0
+                0x10003a94       0x11 /tmp/ccD9lgzb.o
+ .rodata.print_prompt.str1.4
+                0x10003aa5        0x0 /tmp/cc1ZRsq6.o
+                                  0x3 (size before relaxing)
+ .rodata.print_menu.str1.4
+                0x10003aa5        0x0 /tmp/cc1ZRsq6.o
+                                0x110 (size before relaxing)
+ .rodata.print_fail.str1.4
+                0x10003aa5        0x0 /tmp/cc1ZRsq6.o
+                                 0x22 (size before relaxing)
+ .rodata.print_command_state.str1.4
+                0x10003aa5        0x0 /tmp/cc1ZRsq6.o
+                                 0x2f (size before relaxing)
+ .rodata.sram_pattern.str1.4
+                0x10003aa5        0x0 /tmp/cc1ZRsq6.o
+                                 0x2d (size before relaxing)
+ .rodata.run_test.str1.4
+                0x10003aa5        0x0 /tmp/cc1ZRsq6.o
+                                0x3d2 (size before relaxing)
+ *fill*         0x10003aa5        0x3 
+ .rodata.run_test
+                0x10003aa8       0x20 /tmp/cc1ZRsq6.o
+ .rodata.main.str1.4
+                0x10003ac8        0x0 /tmp/cc1ZRsq6.o
+                                0x11c (size before relaxing)
+ .rodata.patterns.0
+                0x10003ac8       0x20 /tmp/cc1ZRsq6.o
+ .rodata.str1.4
+                0x10003ae8        0x0 /tmp/ccQwkq0T.o
+                                 0xad (size before relaxing)
+ .rodata.errpat
+                0x10003ae8       0x10 /tmp/ccQwkq0T.o
+ .rodata.scipat
+                0x10003af8       0x10 /tmp/ccQwkq0T.o
+ .rodata.floatpat
+                0x10003b08       0x10 /tmp/ccQwkq0T.o
+ .rodata.intpat
+                0x10003b18       0x10 /tmp/ccQwkq0T.o
+ .rodata.get_seed_32
+                0x10003b28       0x18 /tmp/ccQcpnO2.o
+ .rodata        0x10003b40      0x200 /tmp/ccQcpnO2.o
+ .rodata.edrv32_uart_put_hex32.str1.4
+                0x10003d40        0x0 /tmp/ccuo73IM.o
+                                  0x3 (size before relaxing)
+ .rodata.hex.0  0x10003d40       0x11 /tmp/ccuo73IM.o
+ *(.data .data.*)
+ *(.sdata .sdata.*)
+ *fill*         0x10003d51        0x3 
+ .sdata.default_num_contexts
+                0x10003d54        0x4 /tmp/ccD9lgzb.o
+                0x10003d54                default_num_contexts
+ .sdata.seed4_volatile
+                0x10003d58        0x4 /tmp/ccD9lgzb.o
+                0x10003d58                seed4_volatile
+ .sdata.seed3_volatile
+                0x10003d5c        0x4 /tmp/ccD9lgzb.o
+                0x10003d5c                seed3_volatile
+ .sdata.seed2_volatile
+                0x10003d60        0x4 /tmp/ccD9lgzb.o
+                0x10003d60                seed2_volatile
+ .sdata.seed1_volatile
+                0x10003d64        0x4 /tmp/ccD9lgzb.o
+                0x10003d64                seed1_volatile
+ .sdata.uart_ctrl_shadow
+                0x10003d68        0x4 /tmp/ccuo73IM.o
+                0x10003d6c                        . = ALIGN (0x4)
+                0x10003d6c                        _runtime_end = .
+
+.bss            0x10003d6c       0x18
+                0x10003d6c                        _sbss = .
+ *(.bss .bss.*)
+ *(.sbss .sbss.*)
+ .sbss.stop_instret_r
+                0x10003d6c        0x4 /tmp/ccD9lgzb.o
+ .sbss.start_instret_r
+                0x10003d70        0x4 /tmp/ccD9lgzb.o
+ .sbss.stop_cycle_r
+                0x10003d74        0x4 /tmp/ccD9lgzb.o
+ .sbss.start_cycle_r
+                0x10003d78        0x4 /tmp/ccD9lgzb.o
+ .sbss.edrv32_hpm_profile
+                0x10003d7c        0x4 /tmp/ccD9lgzb.o
+                0x10003d7c                edrv32_hpm_profile
+ .sbss.seed5_volatile
+                0x10003d80        0x4 /tmp/ccD9lgzb.o
+                0x10003d80                seed5_volatile
+ *(COMMON)
+                0x10003d84                        . = ALIGN (0x4)
+                0x10003d84                        _ebss = .
+
+.sram_test      0x10005800      0x800
+                0x10005800                        _sram_test_start = .
+                0x10006000                        . = (. + 0x800)
+ *fill*         0x10005800      0x800 
+                0x10006000                        _sram_test_end = .
+
+.stack          0x10006000     0x2000
+                0x10008000                        . = (. + 0x2000)
+ *fill*         0x10006000     0x2000 
+                0x10008000                        _sp = .
+                0x10008000                        _end = .
+
+/DISCARD/
+ *(.comment)
+ *(.riscv.attributes)
+ *(.eh_frame*)
+                0x00000001                        ASSERT ((_boot_end <= (ORIGIN (ROM) + LENGTH (ROM))), BootROM startup/banner exceeds 16 KiB)
+                0x00000001                        ASSERT ((_ebss <= _sram_test_start), SRAM runtime/BSS overlaps the SRAM test region)
+OUTPUT(sw/demo/sram-board-menu/build/program.elf elf32-littleriscv)
+
+.note.GNU-stack
+                0x00000000        0x0
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccx08yyS.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccD9lgzb.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/cckyGl51.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/cc1ZRsq6.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccziPe7Y.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccUNyYzS.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccQwkq0T.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccQcpnO2.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccBJB6lI.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/cc6kC8Ox.o
+ .note.GNU-stack
+                0x00000000        0x0 /tmp/ccuo73IM.o

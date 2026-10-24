@@ -1,0 +1,46 @@
+
+sw/test/cpu/core-smoke/build/program.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+80000000 <_start>:
+80000000:	12300093          	li	ra,291
+80000004:	45600113          	li	sp,1110
+80000008:	002081b3          	add	gp,ra,sp
+8000000c:	57900213          	li	tp,1401
+80000010:	04419963          	bne	gp,tp,80000062 <fail>
+80000014:	4281                	li	t0,0
+80000016:	00028363          	beqz	t0,8000001c <_start+0x1c>
+8000001a:	a0a1                	j	80000062 <fail>
+8000001c:	cafec337          	lui	t1,0xcafec
+80000020:	abe30313          	addi	t1,t1,-1346 # cafebabe <TOHOST+0x4afeaabe>
+80000024:	800013b7          	lui	t2,0x80001
+80000028:	0391                	addi	t2,t2,4
+8000002a:	0063a023          	sw	t1,0(t2) # 80001000 <TOHOST+0x0>
+8000002e:	0003a403          	lw	s0,0(t2)
+80000032:	02831863          	bne	t1,s0,80000062 <fail>
+80000036:	deadc4b7          	lui	s1,0xdeadc
+8000003a:	eef48493          	addi	s1,s1,-273 # deadbeef <TOHOST+0x5eadaeef>
+8000003e:	80001537          	lui	a0,0x80001
+80000042:	10050513          	addi	a0,a0,256 # 80001100 <TOHOST+0x100>
+80000046:	c104                	sw	s1,0(a0)
+80000048:	410c                	lw	a1,0(a0)
+8000004a:	00b49c63          	bne	s1,a1,80000062 <fail>
+8000004e:	a019                	j	80000054 <_start+0x54>
+80000050:	0001                	nop
+80000052:	0001                	nop
+80000054:	0001                	nop
+80000056:	4785                	li	a5,1
+80000058:	80001837          	lui	a6,0x80001
+8000005c:	00f82023          	sw	a5,0(a6) # 80001000 <TOHOST+0x0>
+80000060:	a031                	j	8000006c <pass_loop>
+
+80000062 <fail>:
+80000062:	478d                	li	a5,3
+80000064:	80001837          	lui	a6,0x80001
+80000068:	00f82023          	sw	a5,0(a6) # 80001000 <TOHOST+0x0>
+
+8000006c <pass_loop>:
+8000006c:	0001                	nop
+8000006e:	bffd                	j	8000006c <pass_loop>
