@@ -14,8 +14,8 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P0 基础设施进行中（orca Run `run_6e42f8ce0f9c`） |
-| 正在进行 | P0-rest 工作包（Codex 项目经理）；C-R1 CPU 数据通路（Codex）；Cache 规格讨论 |
-| 等待用户 | 无 |
+| 正在进行 | P0-rest 工作包（Codex 项目经理）；C-R1 CPU 数据通路（Codex） |
+| 等待用户 | 确认 Cache 规格、验证方案、实施方案 |
 | 阻塞 | 无 |
 
 ---
@@ -24,10 +24,10 @@
 
 | 模块 | 规格 | 验证方案 | 实施方案 | 状态 |
 |---|---|---|---|---|
-| SoC 总体 | `spec/edrv32-soc-spec.md` v0.1 | — | 本文件 | [x] 草案完成 |
+| SoC 总体 | `spec/edrv32-soc-spec.md` v0.2 | — | 本文件 | [x] 草案完成 |
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
 | CPU | `spec/cpu-spec.md` v0.2 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
-| Cache | — | — | — | [~] 讨论中 |
+| Cache | `spec/cache-spec.md` v0.1 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 草案完成，待用户确认 |
 | 系统总线与外设（sys_xbar、APB、CLINT、PLIC、UART 等） | — | — | — | [ ] |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON） | — | — | — | [ ] |
 | 公共单元（CDC、FIFO、dma2d） | — | — | — | [ ] |
