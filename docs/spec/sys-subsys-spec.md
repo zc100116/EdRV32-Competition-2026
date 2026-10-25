@@ -247,7 +247,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 0x004 | CTRL | RW | 0x3 | bit0 TX_EN，bit1 RX_EN；bit2 TX_CLR、bit3 RX_CLR（写 1 清空对应 FIFO，读为 0） |
 | 0x008 | STATUS | RO | — | bit0 TX_EMPTY，bit1 TX_FULL，bit2 RX_EMPTY，bit3 RX_FULL，bit4 TX_BUSY（正在移位），[12:8] TX_LEVEL，[20:16] RX_LEVEL |
 | 0x00C | IRQ_EN | RW | 0 | 位定义同 IRQ_STAT |
-| 0x010 | IRQ_STAT | 见说明 | 0 | bit0 RX_THRESH（RO：RX_LEVEL ≥ RX_THRESH 且 RX_THRESH ≠ 0），bit1 TX_EMPTY（RO：发送 FIFO 空且不在移位），bit2 RX_OVERRUN（RW1C），bit3 FRAME_ERR（RW1C） |
+| 0x010 | IRQ_STAT | 见说明 | 见说明（复位后为 0x2：发送 FIFO 空） | bit0 RX_THRESH（RO：RX_LEVEL ≥ RX_THRESH 且 RX_THRESH ≠ 0），bit1 TX_EMPTY（RO：发送 FIFO 空且不在移位），bit2 RX_OVERRUN（RW1C），bit3 FRAME_ERR（RW1C） |
 | 0x014 | BAUD_DIV | RW | 115200 对应值 | [23:0] 位周期 × 16（单位 clk_sys 周期），最小 128 |
 | 0x018 | RX_THRESH | RW | 1 | [4:0]，0–16 |
 | 0x020 | TXDATA | WO | — | [7:0] 写入发送 FIFO |
