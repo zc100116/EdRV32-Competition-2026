@@ -136,6 +136,17 @@ class OutOfOrder(unittest.TestCase):
             self.assertEqual(when(timeline, 'execute', 1) - when(timeline, 'execute', 0),
                              latency)
 
+    def test_lsu_and_commit_port(self):
+        stream = [instruction(0), instruction(4, 'div', rd=1),
+                  instruction(8, 'mul', rd=2, sources=(1,)),
+                  instruction(12, 'store', sources=(0, 0)),
+                  instruction(16, 'load', rd=3, sources=(2,))]
+        result, timeline = run(stream, [0, 0, 0, 0x1000, 0x2000])
+        self.assertGreater(result['commit_store_port'], 0)
+        self.assertGreater(when(timeline, 'commit', 3), when(timeline, 'execute', 4))
+        _, timeline = run([instruction(0, 'load', rd=1), instruction(4, 'load', rd=2)])
+        self.assertEqual(when(timeline, 'execute', 1), when(timeline, 'execute', 0) + 1)
+
     def test_issue_three_unit_limits(self):
         stream = [instruction(0), instruction(4, 'div', rd=1)]
         stream += [instruction(pc, 'mul' if pc % 12 == 0 else 'alu', rd=2, sources=(1,))
