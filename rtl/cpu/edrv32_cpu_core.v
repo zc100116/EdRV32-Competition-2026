@@ -728,6 +728,8 @@ module edrv32_cpu_core #(
                         d_record_w[stage_idx][REC_PC_LSB +: 32] :
                         d_instr_w[stage_idx] == 32'h00000073 ||
                         d_instr_w[stage_idx] == 32'h00100073 ? 32'd0 :
+                        d_record_w[stage_idx][REC_RAW_LSB +: 2] != 2'b11 ?
+                        {16'b0, d_record_w[stage_idx][REC_RAW_LSB +: 16]} :
                         d_record_w[stage_idx][REC_RAW_LSB +: 32];
                 end
             end
