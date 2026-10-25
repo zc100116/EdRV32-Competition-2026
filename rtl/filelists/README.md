@@ -4,3 +4,4 @@
 |---|---|
 | `cpu.f` | 处理器核 `edrv32_cpu_core` 及其子模块、乘法器包装 |
 | `cache.f` | I$、D$、cache_ctrl、PMA 译码和 4 个 RAM 包装 |
+| `cpu_subsys.f` | CPU 子系统 `edrv32_cpu_subsys`（core + I$/D$ + cache_ctrl），包含 cpu.f 和 cache.f |
