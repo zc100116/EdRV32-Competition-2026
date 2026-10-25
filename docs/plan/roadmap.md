@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | C-E6 双发射调研（`ctx_9d2a60cccaf6`）；C-E5 CPU 流水线损耗分解（`ctx_2ed1887a102e`）；S-I1 系统子系统联调（`ctx_0bf2700f11d5`） |
+| 正在进行 | C-E5 CPU 流水线损耗分解（`ctx_2ed1887a102e`）；S-I1 系统子系统联调（`ctx_0bf2700f11d5`） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
