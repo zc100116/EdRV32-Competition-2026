@@ -84,7 +84,7 @@
 
 | 编号 | 规格条款 | 测试内容 | 档位 |
 |---|---|---|---|
-| I-01 | 2.1 | riscv-tests rv32ui/um/uc/mi 全部通过（除外：rv32mi 中专测 PMP 的 pmpaddr，不实现 PMP；rv32ui 的 ma_data，要求硬件支持不对齐访存，本 CPU 报地址不对齐异常）；Spike 配置 `--pmpregions=0`、ISA 含 zicntr_zihpm | S（子集）/ F（全部） |
+| I-01 | 2.1 | riscv-tests rv32ui/um/uc/mi 全部通过（除外：rv32mi 中专测 PMP 的 pmpaddr 和专测触发器的 breakpoint，不实现 PMP 和触发器；rv32ui 的 ma_data，要求硬件支持不对齐访存，本 CPU 报地址不对齐异常）；Spike 配置 `--pmpregions=0 --triggers=0`、ISA 含 zicntr_zihpm、marchid 等 ID 为 0 | S（子集）/ F（全部） |
 | I-02 | 2.1 | riscv-arch-test 适用部分全部通过，签名与参考一致 | F |
 | I-03 | 2.1 | `RVC_EN = 0` 时，C 编码报非法指令；跳转目标不对齐报 mcause 0 | F |
 
