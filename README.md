@@ -1,39 +1,15 @@
 # EdRV32 Competition 2026
 
-本项目是参加 **2026 全国大学生嵌入式芯片与系统设计竞赛·FPGA 创新设计赛道** 的作品。我们选的是紫光同创命题的 **选题一：基于紫光同创 RISC-V 指令集 CPU 设计**。竞赛说明见 [`2026-ziguang-guide.md`](2026-ziguang-guide.md)。
-
-## 赛题背景
-
-RISC-V 是开源的精简指令集架构，模块化、可扩展，而且免费。在 RISC-V 上设计高效、稳定的处理器，是嵌入式和集成电路设计的核心能力，也是国产芯片在各种场景落地的基础。
-
-赛题要求在紫光同创 FPGA 平台上，用 Verilog/SystemVerilog 实现一个 RISC-V CPU，并通过真实的软硬件协同设计和性能测评来验证。
-
-**基础任务**
-- 实现支持 RV32I 基础整数指令集的处理器内核；
-- 流水线不少于 3 级，并正确处理数据冲突和分支跳转；
-- 集成 UART、GPIO 等基础外设，用于系统控制和结果输出。
-
-**高阶任务**
-- 2 路组相联的指令 Cache 和数据 Cache，并优化总线突发传输；
-- 动态分支预测（如 BTB），以及完整的 RISC-V 异常和中断处理；
-- 基于自研的 RISC-V 处理器搭建边缘 AI 加速单元：移植 YOLO 或轻量模型，结合传感器或显示设备，完成图形加速、语义识别等功能。
-
-**测评**
-- 性能：CoreMark v1.0。比较 CoreMark/MHz、最高工作频率和 CoreMark/LUT；运行时间不少于 10 秒。
-- 应用场景：模型的资源、时序和主频，以及 AI 处理的延迟和识别率。
-- 工程与文档：代码模块化、时序约束、注释完整性；还要提交性能分析报告，用 ILA 抓取的波形分析 CPU 运行 CoreMark 时的流水线效率。
+本项目参加 **2026 全国大学生嵌入式芯片与系统设计竞赛·FPGA 创新设计赛道**，选择紫光同创赛道的 RISC-V 指令集 CPU 设计题目。项目目标是以自研 EdRV32 处理器为核心，构建具备边缘视觉处理能力的 SoC。
 
 ## 项目目标
 
-我们要做一个**以自研 RISC-V CPU 为核心的 SoC 图像系统**，包括：
-
-- **RISC-V CPU（EdRV32）**：带 Cache、分支预测和异常/中断处理的流水线处理器。它是整个 SoC 的控制核心，也负责 CoreMark 测评。
-- **YOLO 加速器**：在 FPGA 上实现的 YOLOv8n 推理加速，用于目标检测。
-- **图像处理系统**：摄像头采集、像素级处理和几何变换。
-- **图形渲染器**：负责绘制图形、组合多层画面，并输出到 HDMI。
+系统包括带缓存和异常中断处理的 EdRV32 CPU、YOLO 推理加速器、摄像头图像处理单元，以及 HDMI 图形渲染器；通过软硬件协同设计和性能测评验证系统能力。
 
 ## 硬件平台
 
-- FPGA：紫光同创 Logos-2 PG2L200H（盘古 676 系列）
-- 外设：OV5640 双目摄像头、HDMI 输出、DDR3、UART
-- 工具链：riscv32/riscv-none-elf-gcc，Pango Design Suite（PDS）
+目标 FPGA 为紫光同创 Logos-2 PG2L200H（盘古 676 系列），外设包括 OV5640 双目摄像头、HDMI、DDR3 和 UART；开发工具为 RISC-V GCC 工具链和 Pango Design Suite（PDS）。
+
+## 开发入口
+
+开发规则见 [CLAUDE.md](CLAUDE.md)，系统规格见 [docs/spec/edrv32-soc-spec.md](docs/spec/edrv32-soc-spec.md)，进度见 [docs/plan/roadmap.md](docs/plan/roadmap.md)。旧工程位于 `legacy/`，仅供只读参考。
