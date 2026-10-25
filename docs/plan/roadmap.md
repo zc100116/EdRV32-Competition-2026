@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0 已合入 main（7ada537） |
-| 正在进行 | C-R3 CPU 后端与顶层（`ctx_abec60409d26`）；C-V2 CPU B1 环境（`ctx_7585ec16e581`）；C-V3 随机指令生成器（`ctx_662b637b928f`）；C-V4 定向测试（`ctx_fb2842ea164c`）；C-E1–E3 评估（`ctx_741da2459d55`）；K-I1 cache 联调（`ctx_126df44bd1bd`） |
+| 正在进行 | C-R3 CPU 后端与顶层（`ctx_abec60409d26`）；C-V5 覆盖统计（`ctx_fd09140d4b1f`）；C-V3 随机指令生成器（`ctx_662b637b928f`）；C-V4 定向测试（`ctx_fb2842ea164c`）；C-E1–E3 评估（`ctx_741da2459d55`）；K-I1 cache 联调（`ctx_126df44bd1bd`） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
