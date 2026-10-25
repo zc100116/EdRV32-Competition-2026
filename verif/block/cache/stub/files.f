@@ -1,3 +1,3 @@
-verif/block/cache/stub/edrv32_icache.sv
-verif/block/cache/stub/edrv32_dcache.sv
-verif/block/cache/stub/edrv32_cache_ctrl.sv
+edrv32_icache.sv
+edrv32_dcache.sv
+edrv32_cache_ctrl.sv

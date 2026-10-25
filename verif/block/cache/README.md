@@ -134,7 +134,7 @@ OP_SIZE=0 仅适用于范围命令 1–3，整体 clean 忽略 OP_ADDR/OP_SIZE�
 原始数据：`build/cache/compile-summary.txt`、各测试目录下 `compile.log` / `lint.log`、
 `build/cache/selftest/seed-{1,17,101}.log`、`bad_axi_len.log`、`bad_core_hit.log`、
 `coverage.txt`。当时分支尚无 `tools/check/`，已检查全部 44 个 SystemVerilog 文件的
-100 列限制、空格缩进、接口分组和命名连接；仓库风格工具在 P0 集成后仍需补跑。
+100 列限制、空格缩进、接口分组和命名连接；仓库 RTL 风格工具已由 K-I1 在 P0 集成后补跑，正式结果见下方联调记录。
 
 ## K-I1 联调修复分类
 
@@ -157,3 +157,87 @@ MT-07 原始失败记录为 `build/cache/mt_07_failure_mailbox.log` 和
 `build/cache/mt_07_failure_bus_ownership.log`，修复后的窄范围测试 PASS；
 `build/cache/mt_07_debug-run.log` 记录该结果。以上均未改变 Cache 的维护或设备行为。
 新增 RTL 只有任务要求的生成 PMA 常量接入与 dc_wb_event_o 输出。
+
+## K-I1 验收结果（2026-10-25）
+
+正式 RTL/测试源快照：`a5ec3be`；基线 `main` 为 `7ada537`，随后仅更新报告及
+未被正式回归使用的 stub file list。工具为环境脚本提供的 Verilator 5.020，
+P0 单元测试另使用其清单规定的 Icarus。无工具代码、共享头文件或规格文件改动。
+
+从仓库根目录执行：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+make smoke
+make full OPT_FAST=-O0 OPT_SLOW=-O0
+python3 tools/regress.py perf
+make lint
+python3 tools/check/verilog_style.py rtl/
+python3 verif/block/cache/coverage.py build/regress/full/block/cache/*/verilator/run.log
+```
+
+OPT_FAST/OPT_SLOW 仅改变已生成 C++ 的编译优化级别，不改变 HDL 测试或仿真周期。
+另外按 `rtl/cache/README.md` 中的三个顶层命令执行 Cache 专属 `--lint-only -Wall`，
+均为 0 告警；额外核对的 MT-07 / DC-15_smoke 环境也通过 `--lint-only --timing -Wall`。
+
+| 项目 | 结果 |
+|---|---|
+| smoke | 44 PASS / 0 FAIL（固定源码最后一轮直接 make smoke） |
+| full | 56 PASS / 0 FAIL（35 个 Cache block 配置、5 个 Cache unit、16 个 P0 仿真配置） |
+| perf | 2 PASS / 0 FAIL |
+| make lint / 全 RTL 风格 | 17 文件，0 告警；公共 RTL lint 与 Cache 专属 lint 均通过 |
+| IC-08 / DC-15 full | 各 50 个独立种子，唯一序列均为 1–50，每个 300 个请求；全部 PASS |
+| dc_wb_event_o | full 总计 5590 个脉冲，对应 5590 次四拍写回 AW；逐周期一致 |
+| 新增单元检查 | AW 反压期间不提前脉冲，替换/维护共 4 个事件；设备 AW 不计入 |
+
+full 按框架规定包含 smoke 配置，因此还重跑各两个随机 smoke 种子。
+所要求的 29 个功能分箱全部覆盖，另有 instruction_hits 附加统计：
+
+```text
+bypass[0]: 1 covered
+bypass[1]: 2 covered
+command[0]: 9 covered
+command[1]: 1 covered
+command[2]: 1 covered
+command[3]: 2 covered
+command[4]: 63 covered
+command[5]: 2 covered
+error[0]: 2 covered
+error[1]: 2 covered
+error[2]: 1 covered
+hit[0]: 2179 covered
+hit[1]: 2248 covered
+instruction_hits: 4386 covered
+kill[0]: 1566 covered
+kill[1]: 3135 covered
+kill[2]: 10 covered
+miss[store=0][dirty=0]: 2087 covered
+miss[store=0][dirty=1]: 2314 covered
+miss[store=1][dirty=0]: 2164 covered
+miss[store=1][dirty=1]: 2372 covered
+pma[0]: 45 covered
+pma[1]: 31322 covered
+pma[2]: 80 covered
+pma[3]: 1 covered
+pma[4]: 2 covered
+pma[5]: 1 covered
+pma[6]: 1 covered
+pma[7]: 4 covered
+pma[8]: 3 covered
+
+```
+
+kill[1] 汇总缺失/读等待期间的取消；IC-05 和 DC-08 另外在 AR 握手之后定向取消，
+明确验证正在进行的填充继续完成、响应被丢弃，并在之后命中该行。
+性能结果：I$、D$ load、D$ store 均在 16 周期接收 16 个命中请求；冷缺失
+请求至返回为 8 周期，AXI 往返为 2 周期，外部可见上界 11 周期，判定 PASS。
+
+日志：`build/cache-integ-smoke-accepted.log`、`build/cache-integ-full.log`、
+`build/cache-integ-perf.log`、`build/cache-integ-lint-final.log`、
+`build/cache-integ-coverage.txt`；逐配置编译/运行日志在
+`build/regress/{smoke,full,perf}/`。构建产物均未入库。
+
+已发现的功能性失败均为上文两项测试错误，没有为通过测试更改维护、设备、
+写缓冲或错误处理 RTL；新增 RTL 为经要求的 PMA 常量接入与写回事件端口。
+局部 lint 豁免仅针对共享生成头中无关的 UNUSEDPARAM，以及 testbench 对异步
+DUT 复位进行同步观察的 SYNCASYNCNET；原子字节内存的既有 BLKSEQ 豁免保持不变。
