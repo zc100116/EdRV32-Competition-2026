@@ -1,5 +1,5 @@
 // File: edrv32_sys_cpu_tb.sv
-// Spec: sys-subsys-testplan 3.6 SC-01--SC-07; cpu-spec 3.4, 7.1.
+// Spec: sys-subsys-testplan 3.6 SC-01--SC-08; cpu-spec 3.4, 7.1.
 // Description: Run real ROM boot software through the CPU and system subsystems.
 //              Observe UART, SIM_EXIT and benchmark retirement/HPM windows.
 // Clock domains: clk_sys and clk_mem; unused engine clock ports use clk_mem.
@@ -27,6 +27,9 @@ module edrv32_sys_cpu_tb;
     longint unsigned timeout_cycles = 100000000;
     bit [151:0] uart_tail = 0;
     bit download_ready = 0;
+    string uart_line = "";
+    int unsigned menu_count = 0;
+    bit iterations_ready = 0;
     string image;
     bit gpio_trigger = 0;
     bit selected_port = 0;
@@ -351,6 +354,13 @@ module edrv32_sys_cpu_tb;
             data = u_uart.received.pop_front();
             uart_tail = {uart_tail[143:0], data};
             if (uart_tail == "UART download ready") download_ready = 1;
+            if (data == 8'h0a) begin
+                if (uart_line == "Menu: 1=CoreMark 2=Peripheral tests 3=System info\r")
+                    menu_count++;
+                if (uart_line == {"Iterations input: decimal 1..4294967295 then Enter; ",
+                                    "Enter selects default\r"}) iterations_ready = 1;
+                uart_line = "";
+            end else uart_line = {uart_line, string'(data)};
             $write("%c", data);
             $fflush();
         end
@@ -409,6 +419,22 @@ module edrv32_sys_cpu_tb;
                 value = $fgetc(fd);
             end
             $fclose(fd);
+        end
+    end
+    initial begin : monitor_commands
+        // SC-08 ends after both operations return; monitor never owns SIM_EXIT.
+        wait (rst_n);
+        if (case_id == 8) begin
+            wait (menu_count == 1);
+            u_uart.send(8'h33);
+            wait (menu_count == 2);
+            u_uart.send(8'h31);
+            wait (iterations_ready);
+            u_uart.send(8'h31);
+            u_uart.send(8'h0a);
+            wait (menu_count == 3);
+            $display("PASS sys_cpu SC-08");
+            $finish;
         end
     end
     initial begin
@@ -536,6 +562,7 @@ module edrv32_sys_cpu_tb;
                 $fatal(1, "FAIL SC timeout case=%0d cycles=%0d debug=%h", case_id,
                         cycle_count, debug);
             if (sim_exit_valid) begin
+                if (case_id == 8) $fatal(1, "FAIL monitor wrote SIM_EXIT before menu return");
                 if (sim_exit_code != 0)
                     $fatal(1, "FAIL SC-%02d SIM_EXIT=%h", case_id, sim_exit_code);
                 if (case_id == 5) begin

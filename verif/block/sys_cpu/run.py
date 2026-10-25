@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # File: run.py
-# Spec: sys-subsys-testplan 3.6, 6; S-I2.
+# Spec: sys-subsys-testplan 3.6, 6; S-I2, S-I3.
 # Description: Build SC software, pack ROM/SRAM images and run the integrated CPU/system bench.
 #              Preserve UART, CRC, benchmark HPM and actual build/run commands.
 # Clock domain: none (host tool).
-"""Run sc01--sc07 or the SRAM/DDR CoreMark performance measurements."""
+"""Run sc01--sc08 or the SRAM/DDR CoreMark performance measurements."""
 import argparse
 import csv
 from pathlib import Path
@@ -17,6 +17,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 from tools.regress import expand_files  # noqa: E402
+from verif.block.sys_cpu.uart_checks import check_boot, check_monitor  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 OUT = ROOT / 'build/sys_cpu'
@@ -139,6 +140,14 @@ def execute(sim, case, boot, program, name, *, memory='sram', opt='o2', latency=
     for text in ['EdRV32 Boot ROM', 'Boot SRAM']:
         if text not in output:
             raise RuntimeError(f'{out}/run.log: missing UART {text!r}')
+    if case in (1, 8):
+        commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'],
+                                         cwd=ROOT, text=True).strip()
+        compiler = 'GCC ' + subprocess.check_output(
+            ['riscv-none-elf-gcc', '-dumpfullversion'], text=True).strip()
+        check_boot(output.split('Boot SRAM\n')[0], commit, compiler)
+        if case == 8:
+            check_monitor(output, commit, compiler)
     if case == 4:
         for text in ['UART download ready', 'UART download complete']:
             if text not in output:
@@ -168,7 +177,7 @@ def execute(sim, case, boot, program, name, *, memory='sram', opt='o2', latency=
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('test', choices=[f'sc{n:02}' for n in range(1, 8)] + ['perf'])
+    parser.add_argument('test', choices=[f'sc{n:02}' for n in range(1, 9)] + ['perf'])
     args = parser.parse_args()
     _, boot, _ = build_program('bootloader', 'bootloader', 'rom')
     sim = compile_sim()
@@ -185,7 +194,8 @@ def main():
             writer.writerows(metrics)
     else:
         case = int(args.test[2:])
-        execute(sim, case, boot, 'coremark' if case == 7 else args.test, args.test)
+        program = 'coremark' if case == 7 else ('monitor' if case == 8 else args.test)
+        execute(sim, case, boot, program, args.test)
         if case == 4:
             execute(sim, case, boot, args.test, 'sc04_scratch', scratch=True)
     return 0
