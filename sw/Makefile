@@ -6,8 +6,10 @@ MEMORY ?= rom
 CC := riscv-none-elf-gcc
 OBJDUMP := riscv-none-elf-objdump
 OUT := $(ROOT)/build/sw/$(PROGRAM)
-ARCH := -march=rv32imc_zicsr -mabi=ilp32
-CFLAGS := $(ARCH) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
+ARCH ?= rv32imc_zicsr
+include $(wildcard $(ROOT)/sw/tests/$(PROGRAM)/program.mk)
+ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
+CFLAGS := $(ISA_FLAGS) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
           -ffunction-sections -fdata-sections -I$(ROOT)/sw/bsp/include
 LDFLAGS := -nostdlib -Wl,--gc-sections \
            -Wl,-T,sw/bsp/ld/$(MEMORY).ld -Wl,-Map,$(OUT)/$(PROGRAM).map
@@ -34,7 +36,7 @@ $(ROOT)/build/sw/soc_memory.ld: $(ROOT)/rtl/include/soc_address_map.json
 
 $(OUT)/$(PROGRAM).elf: $(OBJECTS) $(ROOT)/sw/bsp/ld/$(MEMORY).ld \
                       $(ROOT)/build/sw/soc_memory.ld FORCE
-	cd $(ROOT) && $(CC) $(ARCH) $(LDFLAGS) $(OBJECTS) -lgcc -o $@
+	cd $(ROOT) && $(CC) $(ISA_FLAGS) $(LDFLAGS) $(OBJECTS) -lgcc -o $@
 
 # The coordinator exempts unmodified third-party code from -Werror.
 $(OUT)/obj/third_party/coremark/%.o: $(ROOT)/third_party/coremark/%.c FORCE
