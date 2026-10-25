@@ -38,7 +38,7 @@ sys_xbar 和外设不属于 CLAUDE.md 11.1 的关键模块：RTL 由另一个 Co
 | S-T1 | 系统子系统顶层 `rtl/soc/edrv32_sys_subsys.v` 和文件列表 | Codex · GPT-6.1 Sol | S-R1–S-R3 | lint 0 告警 | zc100116/task-sys-integ | [x] 95f5278，13 个单元目录两种仿真器 26/0；评审意见修改 S-T1b dispatch ctx_890232ce9f24 |
 | S-I1 | 联调：S-T1 + S-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | S-T1、S-V1 | full 全部通过，覆盖全部命中 | zc100116/task-sys-integ | [x] 72b4aaf：SB smoke 40/40、full 50/50、覆盖 99/99；RTL 无修改，测试修复 7 项；协调者合入前全仓回归中 |
 | S-I2 | SC 环境：`edrv32_cpu_subsys` + 系统子系统，跑 SC-01–SC-07 | Codex · GPT-6.1 Sol | S-I1、S-W1、cpu-plan C-I2 | SC 测试通过，CoreMark CRC 正确 | zc100116/task-sys-integ（复用 S-I1 终端） | [~] dispatch ctx_8180c3283263 |
-| S-W2 | 启动软件按 SoC 规格 v0.5 7.5：bootloader 打印 "EdRV32" logo 和启动信息；SRAM 监控程序（UART 菜单：CoreMark 跑分输出 HPM/跑分/工具链信息、外设测试、系统信息） | Codex · GPT-6.1 Sol | S-W1 | 编译通过（-Werror），ROM/SRAM 容量内；外设测试项初值列出待用户确认 | zc100116/task-sys-monitor | [ ] |
+| S-W2 | 启动软件按 SoC 规格 v0.5 7.5：bootloader 打印 "EdRV32" logo 和启动信息；SRAM 监控程序（UART 菜单：CoreMark 跑分输出 HPM/跑分/工具链信息、外设测试、系统信息） | Codex · GPT-6.1 Sol | S-W1 | 编译通过（-Werror），ROM/SRAM 容量内；外设测试项初值列出待用户确认 | zc100116/task-sys-monitor | [~] dispatch ctx_7004d7ad353a |
 | S-I3 | SC-01 字段检查更新、SC-08 监控程序测试 | Codex · GPT-6.1 Sol | S-I2、S-W2 | SC-01、SC-08 通过 | — | [ ] |
 | S-A1 | 交叉评审 S-R1–S-R3 | Codex · GPT-6.1 Sol；协调者抽查 | S-R1–S-R3 | 意见全部处理 | — | [x] 15 个文件评审完：2 个缺陷（CLINT/PLIC 多余的未对齐检查）、1 项异步桥复位边界，已交 S-T1 修改；其余无意见 |
 | S-P1 | ROM、SRAM 的 IP 创建说明 `fpga/ip/*.md` | 协调者 | S-R1 | 用户在 PDS 中一次生成成功 | — | [~] 创建说明 04ac257 已写；生成和端口核对并入任务卡 `20261025-01-cpu-sys-synth` |
