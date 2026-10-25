@@ -1,5 +1,5 @@
 // File: edrv32_cpu_core.v
-// Spec: cpu-spec v0.8 2-7
+// Spec: cpu-spec v0.9 2-7
 // Description: Execute in-order dual-issue instructions through D/E/M/W.
 //              Commit precise traps, memory transactions and architectural state.
 // Clock: clk_sys.
@@ -724,10 +724,10 @@ module edrv32_cpu_core #(
                     e_cause_r <= d_record_w[stage_idx][REC_FETCH_ERR] ? 32'd1 :
                         d_instr_w[stage_idx] == 32'h00000073 ? 32'd11 :
                         d_instr_w[stage_idx] == 32'h00100073 ? 32'd3 : 32'd2;
-                    e_value_r <= d_record_w[stage_idx][REC_FETCH_ERR] ?
+                    e_value_r <= d_record_w[stage_idx][REC_FETCH_ERR] ||
+                        d_instr_w[stage_idx] == 32'h00100073 ?
                         d_record_w[stage_idx][REC_PC_LSB +: 32] :
-                        d_instr_w[stage_idx] == 32'h00000073 ||
-                        d_instr_w[stage_idx] == 32'h00100073 ? 32'd0 :
+                        d_instr_w[stage_idx] == 32'h00000073 ? 32'd0 :
                         d_record_w[stage_idx][REC_RAW_LSB +: 2] != 2'b11 ?
                         {16'b0, d_record_w[stage_idx][REC_RAW_LSB +: 16]} :
                         d_record_w[stage_idx][REC_RAW_LSB +: 32];

@@ -51,12 +51,10 @@ _start:
 .macro EXPECT cause, value, fault, resume
     li s8, \cause
     mv s9, \value
-#ifdef SPIKE_SMOKE
-    /* Spike reports breakpoint PC; cpu-spec 5 requires zero for EBREAK. */
+    /* cpu-spec v0.9: EBREAK reports the faulting instruction PC. */
     .if \cause == 3
     la s9, \fault
     .endif
-#endif
     la s10, \fault
     la s11, \resume
     csrr s7, mstatus
