@@ -1,0 +1,14 @@
++incdir+../include
+../cpu/edrv32_cpu_core.v
+../cpu/edrv32_cpu_frontend.v
+../cpu/edrv32_cpu_ib.v
+../cpu/edrv32_cpu_predictor.v
+../cpu/edrv32_cpu_rvc.v
+../cpu/edrv32_cpu_decode.v
+../cpu/edrv32_cpu_regfile.v
+../cpu/edrv32_cpu_alu.v
+../cpu/edrv32_cpu_branch.v
+../cpu/edrv32_cpu_mul.v
+../cpu/edrv32_cpu_div.v
+../cpu/edrv32_cpu_csr.v
+../tech/edrv32_mul_s33x33.v

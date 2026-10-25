@@ -1,0 +1,9 @@
++incdir+../include
+../cache/edrv32_icache.v
+../cache/edrv32_dcache.v
+../cache/edrv32_cache_ctrl.v
+../cache/edrv32_cache_pma.v
+../tech/edrv32_ram_icache_tag.v
+../tech/edrv32_ram_icache_data.v
+../tech/edrv32_ram_dcache_tag.v
+../tech/edrv32_ram_dcache_data.v
