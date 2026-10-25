@@ -149,6 +149,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
   3. `rst_sys_n` 在 `rst_mem_n` 释放（同步回 clk_sys）之后释放。
 - 媒体软复位（`SOFT_RESET.MEDIA`）：拉低 clk_mem、clk_pix、cam、eth 各域的引擎复位 16 个 clk_sys 周期后释放；mem_xbar 和 DDR 网关不受影响（使用独立的 `rst_mem_core_n`，只由 `rst_n_i` 和 `mem_ready` 控制）。
 - SoC 软复位（`SOFT_RESET.SOC`）：除 `rst_mem_core_n` 外所有复位（含 `rst_sys_n`）拉低 16 个 clk_sys 周期后按上面的顺序释放；SYSCTRL 的 scratch 寄存器不受影响。
+- 触发 MEDIA 软复位的写照常完成并返回 B；触发 SOC 软复位的写事务允许被复位取消，不保证返回 B（发起它的 CPU 同时被复位）。
 - 软复位期间 DDR 内容保持；mem_xbar 不复位，因此软复位前必须由软件保证各引擎已停止（SoC 规格 7.1 ABORT）。
 
 ---
