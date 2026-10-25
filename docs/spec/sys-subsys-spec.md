@@ -134,6 +134,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 ### 2.9 SYSCTRL
 
 - 只读信息：芯片 ID、`CLK_SYS_HZ`、`mem_ready` 状态（`mem_ready_i` 经 `cdc_sync_bit` 同步）。
+- SYSCTRL 整个模块用 `rst_sys_por_n` 复位（2.10），因此软复位不影响它。
 - 2 个 32 位 scratch 寄存器：只在 `rst_n_i` 复位时清零，软复位不清除。bootloader 和应用程序可以用它在软复位前后传递信息（例如"软复位后进入 UART 下载"）。
 - 软复位：写 `SOFT_RESET` 触发 `reset_ctrl`（2.10）。
 - `SIM_EXIT`：写入任意值时，仿真平台结束仿真，写入值为 0 表示通过（CLAUDE.md 9.2）。硬件上写入无副作用。
@@ -141,7 +142,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 ### 2.10 复位控制 reset_ctrl
 
 - 输入：`rst_n_i`（异步），`mem_ready_i`，SYSCTRL 的软复位请求（clk_sys 域单周期脉冲）。
-- 输出：`rst_sys_n`、`rst_mem_n`、`rst_pix_n`、`rst_cam0_n`、`rst_cam1_n`、`rst_eth_rx_n`、`rst_eth_tx_n`，每一路由 `reset_sync` 在本域同步释放（SoC 规格 5.3、5.2 X8）。
+- 输出：`rst_sys_por_n`（clk_sys 域，只由 `rst_n_i` 控制，软复位不影响；用于 SYSCTRL）、`rst_sys_n`、`rst_mem_n`、`rst_pix_n`、`rst_cam0_n`、`rst_cam1_n`、`rst_eth_rx_n`、`rst_eth_tx_n`，每一路由 `reset_sync` 在本域同步释放（SoC 规格 5.3、5.2 X8）。
 - 释放顺序（SoC 规格 5.3）：
   1. `rst_n_i` 释放后，`rst_mem_n` 等 `mem_ready`（同步到 clk_mem）有效后释放；
   2. `rst_pix_n`、`rst_cam*_n`、`rst_eth_*_n` 随 `rst_mem_n` 一起请求释放，各自在本域同步；
@@ -200,7 +201,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 |---|---|---|---|
 | `clk_sys_i`、`clk_mem_i`、`clk_pix_i`、`cam0_pclk_i`、`cam1_pclk_i`、`eth_rx_clk_i`、`eth_tx_clk_i` | in | — | 各域时钟（reset_ctrl 需要） |
 | `rst_n_i`、`mem_ready_i` | in | 异步 | SoC 规格 3.1 |
-| `rst_sys_n_o`、`rst_mem_core_n_o`、`rst_mem_n_o`、`rst_pix_n_o`、`rst_cam0_n_o`、`rst_cam1_n_o`、`rst_eth_rx_n_o`、`rst_eth_tx_n_o` | out | 各自域 | reset_ctrl 产生，供 SoC 顶层其他子系统使用（2.10） |
+| `rst_sys_por_n_o`、`rst_sys_n_o`、`rst_mem_core_n_o`、`rst_mem_n_o`、`rst_pix_n_o`、`rst_cam0_n_o`、`rst_cam1_n_o`、`rst_eth_rx_n_o`、`rst_eth_tx_n_o` | out | 各自域 | reset_ctrl 产生，供 SoC 顶层其他子系统使用（2.10） |
 | `m0_*` | AXI64 从侧，只读 | clk_sys | 接 I$ |
 | `m1_*` | AXI64 从侧，五通道 | clk_sys | 接 D$ |
 | `s6_*` | AXI64 主侧，五通道 | clk_sys | 接 DDR 网关 |
