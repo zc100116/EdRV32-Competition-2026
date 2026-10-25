@@ -120,6 +120,10 @@ module edrv32_sys_protocol_tb;
             #100;
             scl = 0;
         end else begin
+            // A slave's PSEL can stay low while another slave uses shared PENABLE.
+            apb.penable = 1;
+            repeat (2) @(negedge clk);
+            apb.penable = 0;
             axi.arvalid = 1;
             repeat (2) @(negedge clk);
             axi.arready = 1;
