@@ -39,7 +39,7 @@ sys_xbar 和外设不属于 CLAUDE.md 11.1 的关键模块：RTL 由另一个 Co
 | S-I1 | 联调：S-T1 + S-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | S-T1、S-V1 | full 全部通过，覆盖全部命中 | task-sys-integ | [ ] |
 | S-I2 | SC 环境：`edrv32_cpu_subsys` + 系统子系统，跑 SC-01–SC-07 | Codex · GPT-6.1 Sol | S-I1、S-W1、cpu-plan C-I2 | SC 测试通过，CoreMark CRC 正确 | task-sys-cpu | [ ] |
 | S-A1 | 交叉评审 S-R1–S-R3 | Codex · GPT-6.1 Sol；协调者抽查 | S-R1–S-R3 | 意见全部处理 | — | [ ] |
-| S-P1 | ROM、SRAM 的 IP 创建说明 `fpga/ip/*.md` | 协调者 | S-R1 | 用户在 PDS 中一次生成成功 | — | [ ] |
+| S-P1 | ROM、SRAM 的 IP 创建说明 `fpga/ip/*.md` | 协调者 | S-R1 | 用户在 PDS 中一次生成成功 | — | [~] 创建说明 04ac257 已写，待用户在 PDS 生成并回传实际端口 |
 
 可以并行的波次：
 - 波次 1：S-R1、S-R2、S-R3、S-V1、S-W1
