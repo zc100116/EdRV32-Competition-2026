@@ -42,19 +42,19 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
-| C-V1 | 参考模型和工具：配置 Spike（与测试环境内存映射一致）；RTL 追踪与 Spike 提交日志的比对脚本；riscv-tests 和 riscv-arch-test 的构建流程（含参考签名生成） | Codex · GPT-6.1 Sol | I-02、I-07 | 在 Spike 上跑通 rv32ui 全部测试并产生提交日志；比对脚本能发现人为制造的不一致 | zc100116/task-cpu-verif-ref | [~] dispatch ctx_5240f30c8908 |
+| C-V1 | 参考模型和工具：配置 Spike（与测试环境内存映射一致）；RTL 追踪与 Spike 提交日志的比对脚本；riscv-tests 和 riscv-arch-test 的构建流程（含参考签名生成） | Codex · GPT-6.1 Sol | I-02、I-07 | 在 Spike 上跑通 rv32ui 全部测试并产生提交日志；比对脚本能发现人为制造的不一致 | zc100116/task-cpu-verif-ref | [x] 144949a，65 项 riscv-tests 与 92 份 arch-test 签名在 Spike 上通过 |
 | C-V2 | B1 环境：I$/D$ 接口模型（可配置缺失、反压、错误注入）、内存模型、中断激励、退休追踪器、接口协议检查器 | Codex · GPT-6.1 Sol | I-03、cpu-spec 3.2–3.4 | 用一个只实现 3.2–3.4 接口时序的桩 core 自测通过 | zc100116/task-cpu-verif-env | [~] dispatch ctx_7585ec16e581 |
-| C-V3 | 随机指令流生成器（4 种配置，可控相关密度和指令比例） | Codex · GPT-6.1 Sol | C-V1 | 生成的程序在 Spike 上运行正常结束 | task/cpu-verif-rand | [ ] |
-| C-V4 | 定向汇编测试：验证方案 3.3 至 3.7 的全部测试项 | Codex · GPT-6.1 Sol | C-V1 | 每个测试在 Spike 上运行通过（中断类为自检） | task/cpu-verif-directed | [ ] |
+| C-V3 | 随机指令流生成器（4 种配置，可控相关密度和指令比例） | Codex · GPT-6.1 Sol | C-V1 | 生成的程序在 Spike 上运行正常结束 | zc100116/task-cpu-verif-rand | [~] dispatch ctx_662b637b928f |
+| C-V4 | 定向汇编测试：验证方案 3.3 至 3.7 的全部测试项 | Codex · GPT-6.1 Sol | C-V1 | 每个测试在 Spike 上运行通过（中断类为自检） | zc100116/task-cpu-verif-directed | [~] dispatch ctx_fb2842ea164c |
 | C-V5 | 覆盖统计：第 4 节的功能点计数器和覆盖报告 | Codex · GPT-6.1 Sol | C-V2 | 报告格式正确 | task/cpu-verif-env | [ ] |
 
 ### 3.3 评估（为规格定稿提供数据）
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 / 任务卡 | 状态 |
 |---|---|---|---|---|---|---|
-| C-E1 | ISA 评估：CoreMark 分别以 rv32im、rv32imc、rv32im_zba_zbb、rv32imc_zba_zbb、rv32im_zba、rv32imc_zba 编译，在 Spike 上统计动态指令数、代码体积、取指字节数 | Codex · GPT-6 Luna | C-V1、I-07 | 测量报告 `docs/reports/…-perf-isa-eval.md` | task/cpu-eval | [ ] |
-| C-E2 | 预测器规模：从 Spike 提交日志提取 CoreMark 的分支轨迹，用轨迹模拟器比较 BTB 16/32/64、gshare 256/512/1024、RAS 2/4/8 的误预测率 | Codex · GPT-6.1 Sol | C-V1 | 测量报告，含误预测率曲线 | task/cpu-eval | [ ] |
-| C-E3 | 配对机会统计：在 CoreMark 轨迹上统计不同配对规则（管线 1 是否支持分支、是否允许组内 RAW 等）下的可配对比例和各类失败原因 | Codex · GPT-6.1 Sol | C-V1 | 测量报告 | task/cpu-eval | [ ] |
+| C-E1 | ISA 评估：CoreMark 分别以 rv32im、rv32imc、rv32im_zba_zbb、rv32imc_zba_zbb、rv32im_zba、rv32imc_zba 编译，在 Spike 上统计动态指令数、代码体积、取指字节数 | Codex · GPT-6 Luna | C-V1、I-07 | 测量报告 `docs/reports/…-perf-isa-eval.md` | zc100116/task-cpu-eval | [~] dispatch ctx_741da2459d55 |
+| C-E2 | 预测器规模：从 Spike 提交日志提取 CoreMark 的分支轨迹，用轨迹模拟器比较 BTB 16/32/64、gshare 256/512/1024、RAS 2/4/8 的误预测率 | Codex · GPT-6.1 Sol | C-V1 | 测量报告，含误预测率曲线 | zc100116/task-cpu-eval | [~] dispatch ctx_741da2459d55 |
+| C-E3 | 配对机会统计：在 CoreMark 轨迹上统计不同配对规则（管线 1 是否支持分支、是否允许组内 RAW 等）下的可配对比例和各类失败原因 | Codex · GPT-6.1 Sol | C-V1 | 测量报告 | zc100116/task-cpu-eval | [~] dispatch ctx_741da2459d55 |
 | C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | 待写 | [ ] |
 
 ### 3.4 联调、评审与定稿
