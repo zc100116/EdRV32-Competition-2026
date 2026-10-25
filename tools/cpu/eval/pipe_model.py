@@ -136,6 +136,63 @@ def program_and_trace(out):
     return program, symbols, trace
 
 
+def fetch_request(predictor, pc, cross, group_bytes=8, dual_query=False,
+                  query_override=None):
+    """F1 hit request, including group truncation and a crossing instruction tail."""
+    query = predictor.query(pc)
+    first_query = query
+    second_query = None
+    midpoint = (pc & -group_bytes) + 8
+    if dual_query and pc < midpoint and cross is None:
+        second_query = predictor.query(midpoint)
+        if not query[1] and second_query[1]:
+            query = second_query
+    group_end = (pc & -group_bytes) + group_bytes
+    if query_override is not None:
+        query = first_query = query_override
+        second_query = None
+    entry, taken, target, history, checkpoint = query
+    request_end = group_end
+    next_cross = None
+    if cross is not None:
+        query = (None, False, 0, history, checkpoint)
+        request_end = pc + 2
+        next_fetch = cross
+    elif taken:
+        branch_end = entry[0].pc + entry[0].size
+        request_end = min(group_end, branch_end)
+        if branch_end > group_end:
+            next_fetch = group_end
+            next_cross = target
+        else:
+            next_fetch = target
+    else:
+        next_fetch = group_end
+    if dual_query and second_query:
+        response = [(address, first_query if address < midpoint else second_query)
+                    for address in range(pc, request_end, 2)]
+    else:
+        response = [(address, query) for address in range(pc, request_end, 2)]
+    return response, next_fetch, next_cross, query
+
+
+def fill_ib(program, ib, halfwords, depth=4, pht_size=1024):
+    """F2 appends up to two complete instructions using the saved F1 metadata."""
+    for _ in range(min(2, depth - len(ib))):
+        if not halfwords:
+            break
+        pc, meta = halfwords[0]
+        instruction = program[pc]
+        length = instruction.size // 2
+        if len(halfwords) < length:
+            break
+        entry, taken, target, history, checkpoint = meta
+        hit = bool(entry and entry[0].pc == pc)
+        ib.append(Record(instruction, hit, hit and taken, target,
+                         ((pc >> 1) ^ history) & (pht_size - 1), checkpoint))
+        del halfwords[:length]
+
+
 def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty=2,
              load_latency=2, mul_latency=3, perfect_prediction=False,
              perfect_frontend=False, relax_raw=False, all_slot1_types=False):
@@ -210,14 +267,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
 
     def request(pc, cross):
         nonlocal oracle_cursor
-        query = predictor.query(pc)
-        first_query = query
-        second_query = None
-        midpoint = (pc & -group_bytes) + 8
-        if dual_query and pc < midpoint and cross is None:
-            second_query = predictor.query(midpoint)
-            if not query[1] and second_query[1]:
-                query = second_query
+        query = None
         group_end = (pc & -group_bytes) + group_bytes
         if perfect_prediction and cross is None:
             query = (None, False, 0, predictor.history, predictor.snapshot())
@@ -231,31 +281,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     query = ((instruction, next_pc), True, next_pc,
                              predictor.history, predictor.snapshot())
                     break
-            first_query = query
-            second_query = None
-        entry, taken, target, history, checkpoint = query
-        request_end = group_end
-        next_cross = None
-        if cross is not None:
-            query = (None, False, 0, history, checkpoint)
-            request_end = pc + 2
-            next_fetch = cross
-        elif taken:
-            branch_end = entry[0].pc + entry[0].size
-            request_end = min(group_end, branch_end)
-            if branch_end > group_end:
-                next_fetch = group_end
-                next_cross = target
-            else:
-                next_fetch = target
-        else:
-            next_fetch = group_end
-        if dual_query and second_query:
-            response = [(address, first_query if address < midpoint else second_query)
-                        for address in range(pc, request_end, 2)]
-        else:
-            response = [(address, query) for address in range(pc, request_end, 2)]
-        return response, next_fetch, next_cross, query
+        return fetch_request(predictor, pc, cross, group_bytes, dual_query, query)
 
     def refill_ideal():
         nonlocal front_cursor, ideal_group, ideal_query, tail_pc
@@ -454,20 +480,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if not flush and not perfect_frontend:
             halfwords.extend(pending)
             pending = []
-            for _ in range(min(2, depth - len(ib))):
-                if not halfwords:
-                    break
-                pc, meta = halfwords[0]
-                instruction = program[pc]
-                length = instruction.size // 2
-                if len(halfwords) < length:
-                    break
-                entry, taken, target, history, checkpoint = meta
-                hit = bool(entry and entry[0].pc == pc)
-                record = Record(instruction, hit, hit and taken, target,
-                                ((pc >> 1) ^ history) & (pht - 1), checkpoint)
-                ib.append(record)
-                del halfwords[:length]
+            fill_ib(program, ib, halfwords, depth, pht)
             if fetch_delay:
                 fetch_delay -= 1
             elif len(halfwords) <= group_bytes // 2:
