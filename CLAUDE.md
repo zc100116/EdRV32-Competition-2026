@@ -453,7 +453,7 @@ worker 发送 `worker_done` 之前必须：
 
 ### 11.9 worker 的模型选择
 
-派发 worker 时按任务类型指定模型（`worker-start --model`）。思考强度使用默认值，不传 `--effort`。
+派发 worker 时按任务类型指定模型（`worker-start --model`），思考强度一律设为高（`--effort high`）。复用已有终端（`--terminal`）时沿用该终端启动时的设置，不能另行指定。
 
 | 任务类型 | agent | 模型 |
 |---|---|---|
@@ -463,7 +463,7 @@ worker 发送 `worker_done` 之前必须：
 | 特殊情况下需要 Claude 执行大批量脚本 | Claude | Sonnet 5.5（`claude-sonnet-5-5`） |
 
 - Claude 默认不承担大批量脚本执行。
-- 派发后核对启动回执中的 `launch.effective`，确认实际生效的模型与本表一致。
+- 派发后核对启动回执中的 `launch.effective`，确认实际生效的模型和思考强度与本节规定一致。
 
 ---
 
