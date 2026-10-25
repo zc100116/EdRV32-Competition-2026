@@ -1,0 +1,9 @@
+top: edrv32_cpu_b1_tb
+files: files.f
+defines:
+parameters:
+software:
+timeout: 120
+pass: PASS
+simulator: verilator
+tier: smoke

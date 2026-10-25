@@ -1,0 +1,8 @@
+edrv32_cpu_memory.sv
+edrv32_cpu_ic_model.sv
+edrv32_cpu_dc_model.sv
+edrv32_cpu_irq_model.sv
+edrv32_cpu_trace.sv
+edrv32_cpu_protocol_checker.sv
+../stub/edrv32_cpu_core.sv
+edrv32_cpu_b1_tb.sv
