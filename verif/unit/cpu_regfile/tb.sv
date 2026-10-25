@@ -1,3 +1,8 @@
+// cpu_regfile/tb.sv
+// cpu-testplan U-07; cpu-spec 2, 4, 5.
+// Compare four reads and two ordered writes against the register model.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: clk_sys.
 `timescale 1ns/1ps
 module tb;
     reg clk_i=0;

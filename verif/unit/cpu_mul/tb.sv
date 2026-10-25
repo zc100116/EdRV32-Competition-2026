@@ -1,3 +1,8 @@
+// cpu_mul/tb.sv
+// cpu-testplan U-05; cpu-spec 2, 4, 5.
+// Check four multiply forms, streaming latency and pipeline enable behavior.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: clk_sys.
 `timescale 1ns/1ps
 module tb;
     reg clk_i=0;

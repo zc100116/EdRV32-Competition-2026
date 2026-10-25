@@ -1,6 +1,8 @@
 // edrv32_cpu_rvc.v
-// cpu-spec 2, 4: rvc datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 2.1, 4.1
+// Expand RV32C halfwords into canonical RV32 instructions.
+// Identify reserved encodings and preserve the harmless effects of HINTs.
+// Clock domain: 组合逻辑.
 module edrv32_cpu_rvc (
     // One compressed halfword. Quadrant 3 belongs to the 32-bit fetch path.
     input wire [15:0] instr_i,

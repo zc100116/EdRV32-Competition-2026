@@ -1,3 +1,8 @@
+// cpu_decode/tb.sv
+// cpu-testplan U-01; cpu-spec 2, 4, 5.
+// Check instruction legality against the encoding table and directed controls.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: 组合逻辑.
 `timescale 1ns/1ps
 module tb;
     reg [31:0] instr_i;

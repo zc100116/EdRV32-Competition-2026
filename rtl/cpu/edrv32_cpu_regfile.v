@@ -1,6 +1,8 @@
 // edrv32_cpu_regfile.v
-// cpu-spec 2, 4: regfile datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 4.2, 4.3
+// Store the architectural integer registers with four reads and two writes.
+// Forward current writes to reads and give the younger write port priority.
+// Clock domain: clk_sys.
 module edrv32_cpu_regfile (
     // Clock; data array intentionally has no reset (CLAUDE 5.2).
     input wire clk_i,

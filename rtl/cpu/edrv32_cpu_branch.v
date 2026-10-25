@@ -1,6 +1,8 @@
 // edrv32_cpu_branch.v
-// cpu-spec 2, 4: branch datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 2.1, 4.4
+// Compare operands for the six RV32I conditional branch forms.
+// Signed and unsigned conditions use the instruction funct3 encoding.
+// Clock domain: 组合逻辑.
 module edrv32_cpu_branch (
     // Branch operands and instruction funct3.
     input wire [31:0] operand_a_i,

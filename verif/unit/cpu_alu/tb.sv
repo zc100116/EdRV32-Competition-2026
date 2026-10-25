@@ -1,3 +1,8 @@
+// cpu_alu/tb.sv
+// cpu-testplan U-03; cpu-spec 2, 4, 5.
+// Compare every integer ALU operation against boundary and random arithmetic.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: 组合逻辑.
 `timescale 1ns/1ps
 module tb;
     reg [31:0] operand_a_i;

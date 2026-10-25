@@ -1,3 +1,8 @@
+// cpu_rvc/tb.sv
+// cpu-testplan U-02; cpu-spec 2, 4, 5.
+// Exhaustively compare compressed expansion with generated encoding-table vectors.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: 组合逻辑.
 `timescale 1ns/1ps
 module tb;
     reg [15:0] instr_i;

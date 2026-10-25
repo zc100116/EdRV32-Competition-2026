@@ -1,3 +1,8 @@
+// cpu_csr/tb.sv
+// cpu-testplan U-10; cpu-spec 2, 4, 5.
+// Check CSR permissions, WARL masks, performance counters and precise trap state.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: clk_sys.
 `timescale 1ns/1ps
 module tb;
     reg clk_i=0;

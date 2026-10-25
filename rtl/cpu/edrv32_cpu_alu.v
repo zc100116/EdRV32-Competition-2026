@@ -1,6 +1,8 @@
 // edrv32_cpu_alu.v
-// cpu-spec 2, 4: alu datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 2.1, 4.1
+// Execute RV32I arithmetic, logical, comparison and shift operations.
+// The operation selects the combinational result for either pipeline.
+// Clock domain: 组合逻辑.
 module edrv32_cpu_alu (
     // Execute operands and operation (funct3; bit 3 selects SUB/SRA).
     input wire [31:0] operand_a_i,

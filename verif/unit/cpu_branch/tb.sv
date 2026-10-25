@@ -1,3 +1,8 @@
+// cpu_branch/tb.sv
+// cpu-testplan U-04; cpu-spec 2, 4, 5.
+// Compare all branch conditions on random and signed boundary operands.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: 组合逻辑.
 `timescale 1ns/1ps
 module tb;
     reg [31:0] operand_a_i;

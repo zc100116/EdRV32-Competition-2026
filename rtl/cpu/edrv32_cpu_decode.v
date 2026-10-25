@@ -1,6 +1,8 @@
 // edrv32_cpu_decode.v
-// cpu-spec 2, 4: decode datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 2.1, 4.1
+// Validate canonical RV32IM, Zicsr and Zifencei instruction encodings.
+// Produce register dependencies, immediates and pipeline control classes.
+// Clock domain: 组合逻辑.
 module edrv32_cpu_decode (
     // Canonical instruction from F2.
     input wire [31:0] instr_i,

@@ -1,6 +1,8 @@
 // edrv32_cpu_csr.v
-// cpu-spec 2, 4: csr datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 5, 7.1
+// Maintain machine CSRs, interrupt state and architectural counters.
+// Apply CSR access permissions, WARL masks and precise trap/MRET updates.
+// Clock domain: clk_sys.
 module edrv32_cpu_csr #(
     parameter RVC_EN = 1
 ) (

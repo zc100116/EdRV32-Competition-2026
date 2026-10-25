@@ -1,3 +1,8 @@
+// cpu_div/tb.sv
+// cpu-testplan U-06; cpu-spec 2, 4, 5.
+// Check quotient and remainder values and ordinary or exceptional completion latency.
+// Stop with a diagnostic on the first mismatch; print PASS on completion.
+// Clock domain: clk_sys.
 `timescale 1ns/1ps
 module tb;
     reg clk_i=0;

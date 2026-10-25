@@ -1,6 +1,8 @@
 // edrv32_mul_s33x33.v
-// cpu-spec 4.8: fixed 33-bit signed APM multiplier, two enabled registers.
-// Clock domain: clk_sys. Data registers intentionally have no reset.
+// cpu-spec 4.8
+// Wrap the fixed signed 33-by-33 APM multiplier with two enabled stages.
+// Match the behavioral product latency to the FPGA IP without data reset.
+// Clock domain: clk_sys.
 `include "edrv32_build_mode.vh"
 module edrv32_mul_s33x33 (
     // Clock and pipeline enable.

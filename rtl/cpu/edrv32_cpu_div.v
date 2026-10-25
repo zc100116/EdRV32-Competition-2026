@@ -1,6 +1,8 @@
 // edrv32_cpu_div.v
-// cpu-spec 2, 4: div datapath.
-// Clock domain: clk_sys (combinational where no clock port).
+// cpu-spec 4.8
+// Execute signed and unsigned division or remainder by radix-two iteration.
+// Return divide-by-zero and signed-overflow results without iteration.
+// Clock domain: clk_sys.
 module edrv32_cpu_div (
     // Clock and reset of iterative control.
     input wire clk_i,
