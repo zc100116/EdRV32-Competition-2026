@@ -14,8 +14,8 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0 已合入 main（7ada537） |
-| 正在进行 | C-R3 CPU 后端与顶层（`ctx_abec60409d26`）；C-V4 定向测试（`ctx_fb2842ea164c`）；K-I1 cache 联调（`ctx_126df44bd1bd`） |
-| 等待用户 | 无 |
+| 正在进行 | C-R3 CPU 后端与顶层（`ctx_abec60409d26`）；C-V4 定向测试（`ctx_fb2842ea164c`） |
+| 等待用户 | cache 工作包合入 main 批准 |
 | 阻塞 | 无 |
 
 ---

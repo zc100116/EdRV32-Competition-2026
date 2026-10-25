@@ -34,7 +34,7 @@ cache 属于关键模块：RTL 由协调者逐行评审。
 | K-R3 | D$ RTL（写缓冲、写回、设备访问、维护操作）和 `edrv32_cache_ctrl`；单元测试 | Codex · GPT-6.1 Sol | K-R2 | 单元测试通过；lint 0 告警 | task-cache-rtl | [x] a8f9b13（单元测试通过；等待中的 3 项语义已按 worker 建议确认） |
 | K-V1 | 模块级验证环境：core 侧驱动、AXI64 内存模型、架构内存参考模型、AXI 和 core 接口检查器、APB 驱动 | Codex · GPT-6.1 Sol（独立验证 worker） | P0 回归框架 | 用接口时序桩自测通过 | task-cache-verif | [x] 0d6f7c4（34 项测试桩编译、自测通过） |
 | K-V2 | 验证方案 3.1–3.4 的全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | K-V1 | 测试代码完成 | task-cache-verif | [x] 0d6f7c4（34 项测试桩编译、自测通过） |
-| K-I1 | 联调：smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | K-R3、K-V2 | full 全部通过，功能点全部覆盖 | task-cache-integ | [~] dispatch ctx_126df44bd1bd（复用 K-RTL worker，分支 zc100116/task-cache-rtl） |
+| K-I1 | 联调：smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | K-R3、K-V2 | full 全部通过，功能点全部覆盖 | task-cache-integ | [x] bf2a661，smoke 44/0、full 56/0、perf 2/0，覆盖 29/29；MT-07 两处判为测试错误，协调者已核对 |
 | K-A1 | 协调者逐行评审 K-R2、K-R3 | 协调者 | K-R3 | 评审意见全部处理 | — | [x] 无功能缺陷；PMA 改用生成常量、test.yaml 迁移并入 K-I1 |
 | K-P1 | 4 个 RAM IP 的创建说明 `fpga/ip/*.md`，以及乘法器 `ip_mul_s33x33` 的创建说明 | 协调者 | K-R1 | 用户在 PDS 中按说明一次生成成功 | — | [ ] |
 
