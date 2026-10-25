@@ -38,7 +38,7 @@ sys_xbar 和外设不属于 CLAUDE.md 11.1 的关键模块：RTL 由另一个 Co
 | S-T1 | 系统子系统顶层 `rtl/soc/edrv32_sys_subsys.v` 和文件列表 | Codex · GPT-6.1 Sol | S-R1–S-R3 | lint 0 告警 | zc100116/task-sys-integ | [~] dispatch ctx_a3940c37386f |
 | S-I1 | 联调：S-T1 + S-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | S-T1、S-V1 | full 全部通过，覆盖全部命中 | task-sys-integ | [ ] |
 | S-I2 | SC 环境：`edrv32_cpu_subsys` + 系统子系统，跑 SC-01–SC-07 | Codex · GPT-6.1 Sol | S-I1、S-W1、cpu-plan C-I2 | SC 测试通过，CoreMark CRC 正确 | task-sys-cpu | [ ] |
-| S-A1 | 交叉评审 S-R1–S-R3 | Codex · GPT-6.1 Sol；协调者抽查 | S-R1–S-R3 | 意见全部处理 | — | [~] dispatch ctx_f2acb6e82a1e（只读评审） |
+| S-A1 | 交叉评审 S-R1–S-R3 | Codex · GPT-6.1 Sol；协调者抽查 | S-R1–S-R3 | 意见全部处理 | — | [x] 15 个文件评审完：2 个缺陷（CLINT/PLIC 多余的未对齐检查）、1 项异步桥复位边界，已交 S-T1 修改；其余无意见 |
 | S-P1 | ROM、SRAM 的 IP 创建说明 `fpga/ip/*.md` | 协调者 | S-R1 | 用户在 PDS 中一次生成成功 | — | [~] 创建说明 04ac257 已写，待用户在 PDS 生成并回传实际端口 |
 
 可以并行的波次：
