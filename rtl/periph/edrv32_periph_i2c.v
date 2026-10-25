@@ -30,9 +30,11 @@ module edrv32_periph_i2c (
     // Interrupt.
     output wire irq_o
 );
-    // S-R3 integration: replace with generated EDRV32_CLK_SYS_HZ after S-R2 merges.
-    localparam [31:0] CLK_SYS_HZ = 150000000;
-    localparam [31:0] DIV_RESET = (CLK_SYS_HZ + 800000) / 1600000 - 1;
+    // Share the generated system clock constant with SYSCTRL (spec 4.6).
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
+    localparam [31:0] DIV_RESET = (EDRV32_CLK_SYS_HZ + 800000) / 1600000 - 1;
     localparam [2:0] S_IDLE = 3'd0;
     localparam [2:0] S_START = 3'd1;
     localparam [2:0] S_DATA = 3'd2;

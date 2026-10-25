@@ -26,9 +26,11 @@ module edrv32_periph_uart (
     // Interrupt.
     output wire irq_o
 );
-    // S-R3 integration: replace with generated EDRV32_CLK_SYS_HZ after S-R2 merges.
-    localparam [31:0] CLK_SYS_HZ = 150000000;
-    localparam [31:0] BAUD_RESET = (CLK_SYS_HZ * 16 + 57600) / 115200;
+    // Share the generated system clock constant with SYSCTRL (spec 4.6).
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
+    localparam [31:0] BAUD_RESET = (EDRV32_CLK_SYS_HZ * 16 + 57600) / 115200;
     reg [1:0] enable_r;
     reg [3:0] irq_en_r;
     reg [1:0] error_r;
