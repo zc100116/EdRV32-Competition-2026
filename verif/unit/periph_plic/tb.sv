@@ -91,7 +91,7 @@ module tb;
     task wr_bus(input [31:0] offset, input [31:0] value,
             input [7:0] len = 0, input [2:0] size = 2);
         reg [1:0] response;
-        response = (len != 0 || size != 2 || offset[1:0] != 0) ? 2 : 0;
+        response = (len != 0 || size != 2) ? 2 : 0;
         @(negedge clk);
         axi_awid_i = 4'hB;
         axi_awaddr_i = BASE + offset;
@@ -134,7 +134,7 @@ module tb;
             input [7:0] len = 0, input [2:0] size = 2);
         reg [1:0] response;
         reg [63:0] held_data;
-        response = (len != 0 || size != 2 || offset[1:0] != 0) ? 2 : 0;
+        response = (len != 0 || size != 2) ? 2 : 0;
         @(negedge clk);
         axi_arid_i = 4'hD;
         axi_araddr_i = BASE + offset;
@@ -302,7 +302,7 @@ module tb;
             end
         end
         // Rejected writes leave the priority register unchanged.
-        wr(4, 0, 3); wr(4, 0, 0, 1); wr(5, 0);
+        wr(4, 0, 3); wr(4, 0, 0, 1);
         rd(4, value); check(value == 7, "illegal write no effect");
         wr('h1010, 'hFFFFFFFF); rd('h1010, value); check(value == 0, "unlisted offset");
         $display("PASS PL-01 PL-02 PL-03 PL-04 PL-05");

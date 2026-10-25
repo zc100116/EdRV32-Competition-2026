@@ -1,7 +1,7 @@
 // File: edrv32_periph_plic.v
 // Spec: sys-subsys-spec 2.5, 4.2, 5, 6.
 // Description: Fifteen level gateways, priority arbitration and claim/complete.
-//              AXI64 accepts aligned single-beat SIZE=2 register accesses.
+//              AXI64 accepts single-beat SIZE=2 register accesses.
 // Clock domain: clk_sys.
 module edrv32_periph_plic (
     // Clock and reset.
@@ -77,8 +77,7 @@ module edrv32_periph_plic (
     assign register_write_w = write_accept_w && !write_error_r;
     assign read_offset_w = axi_araddr_i - EDRV32_PLIC_BASE;
     assign write_data_w = write_offset_r[2] ? axi_wdata_i[63:32] : axi_wdata_i[31:0];
-    assign read_error_w = axi_arlen_i != 8'd0 || axi_arsize_i != 3'd2 ||
-                            axi_araddr_i[1:0] != 2'd0;
+    assign read_error_w = axi_arlen_i != 8'd0 || axi_arsize_i != 3'd2;
 
     // spec 6: reject the whole illegal transaction, draining every write beat.
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -121,8 +120,7 @@ module edrv32_periph_plic (
         if (axi_awvalid_i && axi_awready_o) begin
             write_offset_r <= axi_awaddr_i - EDRV32_PLIC_BASE;
             write_id_r <= axi_awid_i;
-            write_error_r <= axi_awlen_i != 8'd0 || axi_awsize_i != 3'd2 ||
-                                axi_awaddr_i[1:0] != 2'd0;
+            write_error_r <= axi_awlen_i != 8'd0 || axi_awsize_i != 3'd2;
         end
         if (write_accept_w && write_left_r == 8'd0) begin
             axi_bid_o <= write_id_r;

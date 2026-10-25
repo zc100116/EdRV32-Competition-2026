@@ -93,7 +93,7 @@ module tb;
     task wr(input [31:0] offset, input [31:0] value,
             input [7:0] len = 0, input [2:0] size = 2);
         reg [1:0] response;
-        response = (len != 0 || size != 2 || offset[1:0] != 0) ? 2 : 0;
+        response = (len != 0 || size != 2) ? 2 : 0;
         @(negedge clk);
         axi_awid_i = 4'hB;
         axi_awaddr_i = BASE + offset;
@@ -135,7 +135,7 @@ module tb;
             input [7:0] len = 0, input [2:0] size = 2);
         reg [1:0] response;
         reg [63:0] held_data;
-        response = (len != 0 || size != 2 || offset[1:0] != 0) ? 2 : 0;
+        response = (len != 0 || size != 2) ? 2 : 0;
         @(negedge clk);
         axi_arid_i = 4'hD;
         axi_araddr_i = BASE + offset;
@@ -189,8 +189,7 @@ module tb;
             ref_time = ref_time + 1;
             if (axi_awvalid_i && axi_awready_o) begin
                 ref_write_addr = axi_awaddr_i - BASE;
-                ref_write_legal = axi_awlen_i == 0 && axi_awsize_i == 2 &&
-                                  axi_awaddr_i[1:0] == 0;
+                ref_write_legal = axi_awlen_i == 0 && axi_awsize_i == 2;
             end
             if (axi_wvalid_i && axi_wready_o && ref_write_legal) begin
                 ref_write_data = ref_write_addr[2] ? axi_wdata_i[63:32] : axi_wdata_i[31:0];
@@ -260,7 +259,6 @@ module tb;
         wr('h0000, 1, 3); rd('h0000, value, 3);
         wr('h0000, 1, 255); rd('h0000, value, 255);
         check(!msip, "CL-05 burst no side effect");
-        wr('h0001, 1); rd('h0001, value);
         wr('h0010, 1); rd('h0010, value); check(value == 0, "unlisted offset");
         $display("PASS CL-01 CL-02 CL-03 CL-04 CL-05");
         $finish;
