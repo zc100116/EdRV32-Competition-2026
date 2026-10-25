@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1（草案） |
+| 版本 | v0.2（草案） |
 | 日期 | 2026-10-25 |
 | 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | sys_xbar、Boot ROM、SRAM、系统 APB 桥、媒体 APB 桥、CLINT、PLIC、UART0、GPIO0、I2C0、SYSCTRL、复位控制 `reset_ctrl` |
@@ -31,7 +31,8 @@
 | `edrv32_bus_sys_xbar` | `rtl/bus/` | 系统 AXI64 交叉开关 |
 | `edrv32_bus_rom` | `rtl/bus/` | Boot ROM 的 AXI64 从接口，例化 `edrv32_rom_boot` |
 | `edrv32_bus_sram` | `rtl/bus/` | SRAM 的 AXI64 从接口，例化 `edrv32_ram_sram` |
-| `edrv32_bus_apb_bridge` | `rtl/bus/` | AXI64 从口 → APB 主口（同一时钟域），16 槽译码 |
+| `edrv32_bus_apb_bridge` | `rtl/bus/` | AXI64 从口 → 单个未译码的 APB 主口（`paddr[15:0]`）；在 AXI 侧检查不合规访问 |
+| `edrv32_bus_apb_decoder` | `rtl/bus/` | APB 16 槽译码、预留槽 SLVERR、256 拍超时；输出槽内 12 位地址和每槽 `psel` |
 | `edrv32_apb_async_bridge` | `rtl/common/` | APB 异步桥（公共原语，SoC 规格 5.2 X1） |
 | `edrv32_periph_clint` | `rtl/periph/` | CLINT，AXI64 从接口 |
 | `edrv32_periph_plic` | `rtl/periph/` | PLIC，AXI64 从接口 |
@@ -43,7 +44,7 @@
 | `edrv32_rom_boot` | `rtl/tech/` | Boot ROM 存储 IP 包装：2048 × 64 位，带初始化文件 |
 | `edrv32_ram_sram` | `rtl/tech/` | SRAM 存储 IP 包装：32768 × 64 位，8 位字节写使能 |
 
-媒体 APB 桥由 `edrv32_bus_apb_bridge`（clk_sys 侧的 AXI 从接口和槽译码）加 `edrv32_apb_async_bridge` 组成，槽译码在 clk_mem 侧完成。
+系统 APB 路径：`edrv32_bus_apb_bridge` → `edrv32_bus_apb_decoder`（均在 clk_sys）。媒体 APB 路径：`edrv32_bus_apb_bridge`（clk_sys）→ `edrv32_apb_async_bridge` → `edrv32_bus_apb_decoder`（clk_mem）。槽译码、预留槽检查和超时计数都在 decoder 所在的时钟域完成。
 
 ---
 
@@ -110,6 +111,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 - 8N1，波特率可编程，最高不低于 3 Mbps（clk_sys = 150 MHz 时）。
 - 波特率发生：位周期 = `BAUD_DIV / 16` 个 clk_sys 周期（定点数，小数部分累加），误差不超过 1/16 周期每位。`BAUD_DIV` 的最小合法值为 128（每位 8 个周期）。
 - 接收：`uart0_rx_i` 经 `cdc_sync_bit` 同步；检测到起始位下降沿后，在每一位的中点采样；停止位为 0 时记为帧错误（该字节丢弃，置 FRAME_ERR）。
+- `CTRL.TX_EN`、`RX_EN` 只决定是否开始新的一帧，已经开始的帧照常完成；`TX_CLR`、`RX_CLR` 只清空 FIFO，不打断正在移位的帧。
 - 收、发各 16 字节 FIFO。接收 FIFO 满时新到的字节丢弃并置 RX_OVERRUN。发送 FIFO 满时写 TXDATA 无效果（软件必须先查 TX_FULL）。
 - 复位后 `BAUD_DIV` 为 115200 波特率对应的值（由 `CLK_SYS_HZ` 在综合时算出），收发使能。
 
@@ -166,7 +168,9 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 模块 | 端口 |
 |---|---|
 | `edrv32_bus_rom`、`edrv32_bus_sram` | `clk_i`、`rst_n_i`；AXI64 从口 `axi_*` |
-| `edrv32_bus_apb_bridge` | `clk_i`、`rst_n_i`；AXI64 从口 `axi_*`；APB 主口 `apb_paddr_o[11:0]`、`apb_psel_o[15:0]`（每槽一位）、`apb_penable_o`、`apb_pwrite_o`、`apb_pwdata_o[31:0]`、`apb_pstrb_o[3:0]`、`apb_prdata_i[16×32-1:0]`、`apb_pready_i[15:0]`、`apb_pslverr_i[15:0]` |
+| `edrv32_bus_apb_bridge` | `clk_i`、`rst_n_i`；AXI64 从口 `axi_*`；APB 主口（未译码）`apb_paddr_o[15:0]`、`apb_psel_o`、`apb_penable_o`、`apb_pwrite_o`、`apb_pwdata_o[31:0]`、`apb_pstrb_o[3:0]`、`apb_prdata_i[31:0]`、`apb_pready_i`、`apb_pslverr_i` |
+| `edrv32_apb_async_bridge` | `clk_s_i`、`rst_s_n_i`、APB 从口（`paddr[15:0]`）；`clk_m_i`、`rst_m_n_i`、APB 主口（`paddr[15:0]`） |
+| `edrv32_bus_apb_decoder` | `clk_i`、`rst_n_i`；APB 从口（`paddr[15:0]`）；槽侧 APB 主口 `slot_paddr_o[11:0]`、`slot_psel_o[15:0]`、`slot_penable_o`、`slot_pwrite_o`、`slot_pwdata_o[31:0]`、`slot_pstrb_o[3:0]`、`slot_prdata_i[16×32-1:0]`、`slot_pready_i[15:0]`、`slot_pslverr_i[15:0]` |
 | `edrv32_periph_clint` | `clk_i`、`rst_n_i`；AXI64 从口；`mtime_o[63:0]`、`irq_mtip_o`、`irq_msip_o` |
 | `edrv32_periph_plic` | `clk_i`、`rst_n_i`；AXI64 从口；`irq_src_i[15:1]`（各源时钟域的电平）；`irq_meip_o` |
 | APB 外设 | `clk_i`、`rst_n_i`；APB 从口（SoC 规格 4.3，前缀 `apb_`）；`irq_o`（UART、GPIO、I2C） |
@@ -188,6 +192,26 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 
 ---
 
+### 3.4 系统子系统顶层 edrv32_sys_subsys
+
+`rtl/soc/edrv32_sys_subsys.v` 例化第 1 节的全部模块并连线，端口扁平，沿用子模块的信号词干。
+
+| 信号组 | 方向 | 时钟域 | 说明 |
+|---|---|---|---|
+| `clk_sys_i`、`clk_mem_i`、`clk_pix_i`、`cam0_pclk_i`、`cam1_pclk_i`、`eth_rx_clk_i`、`eth_tx_clk_i` | in | — | 各域时钟（reset_ctrl 需要） |
+| `rst_n_i`、`mem_ready_i` | in | 异步 | SoC 规格 3.1 |
+| `rst_sys_n_o`、`rst_mem_core_n_o`、`rst_mem_n_o`、`rst_pix_n_o`、`rst_cam0_n_o`、`rst_cam1_n_o`、`rst_eth_rx_n_o`、`rst_eth_tx_n_o` | out | 各自域 | reset_ctrl 产生，供 SoC 顶层其他子系统使用（2.10） |
+| `m0_*` | AXI64 从侧，只读 | clk_sys | 接 I$ |
+| `m1_*` | AXI64 从侧，五通道 | clk_sys | 接 D$ |
+| `s6_*` | AXI64 主侧，五通道 | clk_sys | 接 DDR 网关 |
+| `media_apb_*` | APB 主侧，已译码 16 槽（`paddr[11:0]`、`psel[15:0]`，`prdata/pready/pslverr` 各槽一组） | clk_mem | 接媒体 APB 各引擎 |
+| `cache_apb_*` | APB 主侧，单槽 | clk_sys | 系统 APB 槽 5，接 CPU 子系统中的 CACHE_CTRL |
+| `irq_cache_i` | in | clk_sys | PLIC 源 6 |
+| `irq_src_i[15:8]` | in | clk_mem | PLIC 源 8–15 |
+| `irq_meip_o`、`irq_msip_o`、`irq_mtip_o`、`mtime_o[63:0]` | out | clk_sys | 接 CPU 子系统 |
+| UART、GPIO、I2C 引脚 | — | — | 3.2 |
+| `sim_exit_valid_o`、`sim_exit_code_o[31:0]` | out | clk_sys | SYSCTRL，仿真平台读取 |
+
 ## 4. 寄存器
 
 除 CLINT、PLIC 采用 RISC-V 标准布局外，APB 外设偏移 0x000 都是 ID 寄存器：[31:16] 模块类型码（等于系统 APB 槽号），[15:0] 版本。未列出的偏移读出 0，写入无效果。APB 外设对 `pstrb` 的处理：除 GPIO 的 OUT、OE 按字节写外，其余寄存器忽略 `pstrb`，按整字写入。
@@ -202,7 +226,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 0xBFF8 | MTIME_LO | RW | 0 | mtime[31:0] |
 | 0xBFFC | MTIME_HI | RW | 0 | mtime[63:32] |
 
-访问为 32 位（AXI SIZE = 2）。写 MTIME_LO 或 MTIME_HI 时，该半部取写入值，另一半部继续计数。
+访问为 32 位（AXI SIZE = 2，按 `addr[2]` 选 64 位总线的半部）。合法写访问的 WSTRB 恒为所选半部全 1（D$ 的保证），寄存器整字写入，不按字节处理；PLIC 相同。写 MTIME_LO 或 MTIME_HI 时，该半部取写入值，另一半部继续计数。
 
 ### 4.2 PLIC（基址 0x3000_0000）
 
@@ -337,3 +361,4 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-25 | v0.1 | 初稿。与用户确认：mtime 每个 clk_sys 周期加 1、SYSCTRL 提供 CLK_SYS_HZ；PLIC 15 个源；去掉 QSPI0 和 TIMER0；Boot ROM 与 SRAM 由存储初始化文件提供上电内容；I2C0 一个主机两对引脚 |
+| 2026-10-25 | v0.2 | 开发中澄清：APB 路径拆为 bridge（AXI→单个 APB 口）+ decoder（槽译码、预留、超时），媒体路径 decoder 在 clk_mem；增加 3.4 系统子系统顶层端口；CLINT/PLIC 合法写的 WSTRB 恒为全 1、整字写入；UART EN/CLR 不打断进行中的帧 |

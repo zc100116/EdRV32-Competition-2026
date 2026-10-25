@@ -28,7 +28,7 @@
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
 | CPU | `spec/cpu-spec.md` v0.9 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
 | Cache | `spec/cache-spec.md` v0.4 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
-| 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.1 | `testplan/sys-subsys-testplan.md` v0.1 | `plan/sys-subsys-plan.md` | [x] 已确认 |
+| 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.2 | `testplan/sys-subsys-testplan.md` v0.1 | `plan/sys-subsys-plan.md` | [x] 已确认 |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON） | — | — | — | [ ] |
 | 公共单元（CDC、FIFO、dma2d） | — | — | — | [ ] |
 | VIN / PIX / DISP | — | — | — | [ ] |
