@@ -54,7 +54,7 @@ module edrv32_cpu_frontend #(
     output wire f2_valid_o,
     output wire fetch_wait_o
 );
-    localparam HALFWORD_BITS = 129;
+    localparam HALFWORD_BITS = 130;
     localparam HALFWORD_CAPACITY = 8;
     reg [31:0] f1_pc_r;
     reg f1_cross_r;
@@ -64,6 +64,7 @@ module edrv32_cpu_frontend #(
     reg [2:0] f2_end_r;
     reg f2_hit_r;
     reg f2_taken_r;
+    reg f2_compressed_r;
     reg [1:0] f2_position_r;
     reg [31:0] f2_target_r;
     reg [8:0] f2_history_r;
@@ -112,15 +113,24 @@ module edrv32_cpu_frontend #(
     reg first_error_w;
     reg second_error_w;
     reg [31:0] append_pc_w;
+    wire first_recover_w;
+    wire second_recover_w;
+    wire recover_w;
+    wire [31:0] recover_pc_w;
+    wire [36:0] recover_ras_w;
+    wire [4:0] recover_btb_index_w;
     wire [1:0] unused_alignment_w;
     assign unused_alignment_w = {update_pc_i[0], f2_pc_r[0]};
     integer append_idx;
     integer append_slot;
     assign redirect_w = redirect_valid_i || d_redirect_valid_i;
     assign redirect_pc_w = redirect_valid_i ? redirect_pc_i : d_redirect_pc_i;
-    assign restore_ras_w = redirect_valid_i ? redirect_ras_i : d_redirect_ras_i;
-    assign restore_push_w = redirect_valid_i ? redirect_push_i : d_redirect_push_i;
-    assign restore_pop_w = redirect_valid_i ? redirect_pop_i : d_redirect_pop_i;
+    assign restore_ras_w = redirect_valid_i ? redirect_ras_i :
+        d_redirect_valid_i ? d_redirect_ras_i : recover_ras_w;
+    assign restore_push_w = redirect_valid_i ? redirect_push_i :
+        d_redirect_valid_i && d_redirect_push_i;
+    assign restore_pop_w = redirect_valid_i ? redirect_pop_i :
+        d_redirect_valid_i && d_redirect_pop_i;
     assign restore_return_pc_w = redirect_valid_i ?
         redirect_return_pc_i : d_redirect_return_pc_i;
     assign branch_end_w = {1'b0, predict_position_w} +
@@ -130,11 +140,11 @@ module edrv32_cpu_frontend #(
     assign append_count_w = response_accept_w ?
         f2_end_r - {1'b0, f2_pc_r[2:1]} : 3'd0;
     // Include the arriving response and this cycle's drain when reserving the next group.
-    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w &&
+    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !recover_w &&
         (!f2_pending_r || ic_resp_valid_i) && remaining_w <= 4;
     assign ic_req_addr_o = {f1_pc_r[31:3], 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
-    assign ic_kill_o = redirect_w && f2_pending_r;
+    assign ic_kill_o = (redirect_w || recover_w) && f2_pending_r;
     assign ic_inv_o = invalidate_i;
     assign invalidate_done_o = ic_inv_done_i;
     assign f1_valid_o = ic_req_valid_o;
@@ -159,7 +169,9 @@ module edrv32_cpu_frontend #(
         .update_taken_i(update_taken_i),
         .update_compressed_i(update_compressed_i),
         .update_index_i(update_index_i),
-        .restore_valid_i(redirect_w),
+        .clear_valid_i(recover_w),
+        .clear_index_i(recover_btb_index_w),
+        .restore_valid_i(redirect_w || recover_w),
         .restore_ras_i(restore_ras_w),
         .restore_push_i(restore_push_w),
         .restore_pop_i(restore_pop_w),
@@ -188,7 +200,8 @@ module edrv32_cpu_frontend #(
         .illegal_o(second_illegal_w)
     );
     // Each halfword carries its PC so predicted targets may share the same stream buffer.
-    // Layout: {RAS[36:0], GHR[8:0], target[31:0], taken, hit, error, PC[31:0], data[15:0]}.
+    // Layout: {predicted_compressed, RAS[36:0], GHR[8:0], target[31:0],
+    //          taken, hit, error, PC[31:0], data[15:0]}.
     always @(*) begin
         merged_w = halfwords_r;
         available_w = halfword_count_r + {1'b0, append_count_w};
@@ -201,7 +214,7 @@ module edrv32_cpu_frontend #(
                 append_slot = {28'b0, halfword_count_r} + append_idx -
                     {30'b0, f2_pc_r[2:1]};
                 merged_w[append_slot * HALFWORD_BITS +: HALFWORD_BITS] =
-                    {f2_ras_r, f2_history_r, f2_target_r,
+                    {f2_compressed_r, f2_ras_r, f2_history_r, f2_target_r,
                     f2_taken_r && append_idx[1:0] == f2_position_r,
                     f2_hit_r && append_idx[1:0] == f2_position_r,
                     ic_resp_err_i, append_pc_w, ic_resp_data_i[append_idx * 16 +: 16]};
@@ -226,11 +239,57 @@ module edrv32_cpu_frontend #(
             {second_tail_w[15:0], second_w[15:0]};
         second_error_w = second_w[48] || (!second_compressed_w && second_tail_w[16]);
     end
+    // cpu-spec v0.3 4.4: only compressed fetch requires prediction boundary recovery.
+    generate
+        if (RVC_EN) begin : g_rvc_recover
+            wire [42:0] first_upper_prediction_w;
+            wire [42:0] second_upper_prediction_w;
+            wire first_length_mismatch_w;
+            wire second_length_mismatch_w;
+            assign first_upper_prediction_w = {merged_w[HALFWORD_BITS + 92 +: 37],
+                merged_w[HALFWORD_BITS + 49], merged_w[HALFWORD_BITS + 19 +: 5]};
+            assign second_upper_prediction_w =
+                {merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 92 +: 37],
+                merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 49],
+                merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 19 +: 5]};
+            assign first_length_mismatch_w = first_w[49] &&
+                first_w[129] != first_compressed_w;
+            assign second_length_mismatch_w = second_w[49] &&
+                second_w[129] != second_compressed_w;
+            assign first_recover_w = (available_w >= 1 && first_length_mismatch_w) ||
+                (available_w >= 2 && first_length_w == 2 && first_upper_prediction_w[5]);
+            assign second_recover_w =
+                (available_w >= {1'b0, first_length_w} + 1 && second_length_mismatch_w) ||
+                (available_w >= {1'b0, first_length_w} + 2 && second_length_w == 2 &&
+                second_upper_prediction_w[5]);
+            // A valid older first instruction may still enter IB while the second is retried.
+            assign recover_w = !redirect_w && (first_recover_w ||
+                (available_w >= {1'b0, first_length_w} && ib_free_count_w != 0 &&
+                second_recover_w));
+            assign recover_pc_w = first_recover_w ? first_w[47:16] : second_w[47:16];
+            assign recover_ras_w = first_recover_w ?
+                (first_length_mismatch_w ? first_w[128:92] : first_upper_prediction_w[42:6]) :
+                (second_length_mismatch_w ? second_w[128:92] : second_upper_prediction_w[42:6]);
+            assign recover_btb_index_w = first_recover_w ?
+                (first_length_mismatch_w ? first_w[23:19] : first_upper_prediction_w[4:0]) :
+                (second_length_mismatch_w ? second_w[23:19] : second_upper_prediction_w[4:0]);
+        end else begin : g_fixed_length
+            wire [1:0] unused_prediction_length_w;
+            assign unused_prediction_length_w = {first_w[129], second_w[129]};
+            assign first_recover_w = 1'b0;
+            assign second_recover_w = 1'b0;
+            assign recover_w = 1'b0;
+            assign recover_pc_w = 0;
+            assign recover_ras_w = 0;
+            assign recover_btb_index_w = 0;
+        end
+    endgenerate
     always @(*) begin
         push_count_w = 0;
         push_data_w = 0;
         consume_w = 0;
-        if (!redirect_w && available_w >= {1'b0, first_length_w} && ib_free_count_w != 0) begin
+        if (!redirect_w && !first_recover_w &&
+            available_w >= {1'b0, first_length_w} && ib_free_count_w != 0) begin
             push_count_w = 1;
             consume_w = first_length_w;
             push_data_w[178:0] = {first_w[128:92], 9'b0,
@@ -241,7 +300,7 @@ module edrv32_cpu_frontend #(
             // History is sampled at F1, but each instruction uses its own PC in gshare.
             push_data_w[141:133] = first_w[91:83] ^ first_w[25:17];
             if (available_w >= {1'b0, first_length_w} + {1'b0, second_length_w} &&
-                ib_free_count_w >= 2) begin
+                ib_free_count_w >= 2 && !second_recover_w) begin
                 push_count_w = 2;
                 consume_w = first_length_w + second_length_w;
                 push_data_w[357:179] = {second_w[128:92], 9'b0,
@@ -262,6 +321,11 @@ module edrv32_cpu_frontend #(
             halfword_count_r <= 0;
         end else if (redirect_w) begin
             f1_pc_r <= redirect_pc_w;
+            f1_cross_r <= 0;
+            f2_pending_r <= 0;
+            halfword_count_r <= 0;
+        end else if (recover_w) begin
+            f1_pc_r <= recover_pc_w;
             f1_cross_r <= 0;
             f2_pending_r <= 0;
             halfword_count_r <= 0;
@@ -288,13 +352,14 @@ module edrv32_cpu_frontend #(
         end
     end
     always @(posedge clk_i) begin
-        if (!redirect_w)
+        if (!redirect_w && !recover_w)
             halfwords_r <= merged_w >> (consume_w * HALFWORD_BITS);
         if (request_accept_w) begin
             f2_pc_r <= f1_pc_r;
             f2_end_r <= request_end_w > 4 ? 3'd4 : request_end_w;
             f2_hit_r <= predict_hit_w && !f1_cross_r;
             f2_taken_r <= predict_taken_w && !f1_cross_r;
+            f2_compressed_r <= predict_compressed_w;
             f2_position_r <= predict_position_w;
             f2_target_r <= predict_target_w;
             f2_history_r <= predict_history_w;

@@ -24,6 +24,8 @@ module tb;
     reg update_taken_i=0;
     reg update_compressed_i=0;
     reg [8:0] update_index_i=0;
+    reg clear_valid_i=0;
+    reg [4:0] clear_index_i=0;
     reg restore_valid_i=0;
     reg [36:0] restore_ras_i=0;
     reg restore_push_i=0;
@@ -75,6 +77,8 @@ module tb;
         .update_taken_i(update_taken_i),
         .update_compressed_i(update_compressed_i),
         .update_index_i(update_index_i),
+        .clear_valid_i(clear_valid_i),
+        .clear_index_i(clear_index_i),
         .restore_valid_i(restore_valid_i),
         .restore_ras_i(restore_ras_i),
         .restore_push_i(restore_push_i),

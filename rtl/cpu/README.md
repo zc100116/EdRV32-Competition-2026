@@ -209,18 +209,52 @@ C-R1评审修订包括全部RTL文件头和单元测试头部，以及把乘法�
 RVC=0：479请求、942条指令、312次双取、2次kill、427等待周期、
 165反压周期、2条携带取指错误的指令。计数用于证明上述用例被激励，不代表性能测量。
 
-### C-R2 未决正确性问题（本次派发未完成）
+### C-R2b F2 误取恢复（已解决）
 
-当前要求的U-08/U-09、前端组合测试和C-R1回归均通过，但存在尚未处理的陈旧BTB
-编码边界问题，因此本次派发不能据此声明前端全部完成。重叠指令流，或FENCE.I前后
-代码长度变化，可能让BTB记录的位置处于当前32位指令的上半字，或让记录的长度与
-当前编码不符。当前F1按BTB预测长度截断响应，可能造成真实指令字节丢失或错误拼接。
+依据用户确认的cpu-spec v0.3第4.4节（协调者提交038716b），原问题
+`msg_5ee8edcf1fe7`已由C-R2b实现并通过U-11关闭。
 
-已向协调者提出问题 `msg_5ee8edcf1fe7`：建议F2核对预测位置的实际指令边界与长度，
-不一致时取消目标请求、清除该BTB项、恢复预测前RAS并从实际指令PC重取；
-这是新增F2恢复路径，须先确认其规格与优先级。按CLAUDE第12节，未获批准前没有
-自行加入该检查或恢复路径。该问题连续三个600秒等待窗口未收到答复，期间已发送
-escalation和含提交号的status；已完成代码保留在本分支，未合入main。
+仅在 `RVC_EN=1` 的 `g_rvc_recover` generate分支核对两项：BTB位置是否落在
+实际指令的起始半字，以及记录长度是否与实际低半字编码一致。长度核对不需要等
+上半字返回，因此即使BTB错误地把32位指令截成16位，也能先恢复而不会拼入目标字节。
+半字元数据增加一位保存BTB记录的compressed，前后端179位记录布局不变。
 
-后续需协调者答复此问题，再派发补充实现和针对性回归；当前通过的组合测试没有
-声称覆盖陈旧BTB边界情形。此前已批准的预测器初值和37位RAS检查点约定不受影响。
+恢复优先级为M/E > D > F2。F2恢复清除对应BTB有效位，取消尚未返回请求，
+恢复该预测之前的37位RAS检查点，从包含该位置的实际指令PC重新发请求。
+只丢弃待重取指令及其后的拼接内容；IB中更老指令保留，且同拍较老的第一条
+指令仍可入队，不会因重取第二条而丢失。
+
+predictor新增内部接口 `clear_valid_i` / `clear_index_i[4:0]`，由F2恢复驱动；
+未增加core对外端口、错误标志或RTL计数器。`RVC_EN=0`的固定长度分支将恢复
+及BTB清除使能固定为0，不生成边界/长度比较或恢复选择逻辑；Verilator两种配置
+lint均0告警，关闭C的展开XML只含 `g_fixed_length`、不含 `g_rvc_recover`。
+这是Linux参数展开检查，未声称进行PDS综合或取得器件资源测量。
+
+U-11目录为 `verif/unit/cpu_f2_recover/`，独立命令如下：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+mkdir -p build/unit
+verilator --binary --timing -Wno-fatal --top-module tb -DSIM_MODE \
+    -f verif/unit/cpu_f2_recover/files.f --Mdir build/unit/cpu_f2_recover \
+    > build/unit/cpu_f2_recover-compile.log 2>&1
+build/unit/cpu_f2_recover/Vtb
+```
+
+U-11共8个场景PASS，每场景核对14条指令：同组32位指令上半字、跨组上半字、
+记录16位/实际32位、记录32位/实际16位，各触发1次恢复和1次kill；正确16位、
+正确32位预测均0恢复0kill；D和M/E同时覆盖F2的场景均0次F2恢复、1次外部kill。
+检查包含PC、原始字节、规范指令、每条RAS检查点，及恢复沿后的BTB有效位、
+重取PC与RAS状态。较老IB内容在恢复后仍与内存序列一致。
+
+参数展开复现命令：
+
+```sh
+verilator --xml-only -GRVC_EN=0 --top-module edrv32_cpu_frontend \
+    --Mdir build/unit/frontend_no_c_elab rtl/cpu/edrv32_cpu_frontend.v \
+    rtl/cpu/edrv32_cpu_ib.v rtl/cpu/edrv32_cpu_predictor.v rtl/cpu/edrv32_cpu_rvc.v
+```
+
+C-R2b完整验收回归：U-01至U-11（U-08/U-09/U-10/U-11含在内），以及前端
+RVC_EN=0/1组合测试全部Verilator PASS；这里的U-01至U-11指该范围内已定义的
+各项单元测试，不包含CPU模块级或SoC回归。未新增规格差异或待确认行为。

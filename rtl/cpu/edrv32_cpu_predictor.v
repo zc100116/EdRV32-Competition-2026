@@ -26,6 +26,11 @@ module edrv32_cpu_predictor (
     input wire update_taken_i,
     input wire update_compressed_i,
     input wire [8:0] update_index_i,
+
+    // F2 clears the stale fetch-group prediction after boundary or length mismatch.
+    input wire clear_valid_i,
+    input wire [4:0] clear_index_i,
+
     // Redirect restores the saved state and applies the actual call/return action.
     input wire restore_valid_i,
     input wire [36:0] restore_ras_i,
@@ -95,6 +100,8 @@ module edrv32_cpu_predictor (
                             direction_r[update_index_i * 2 +: 2] - 1'b1;
                 end
             end
+            if (clear_valid_i)
+                btb_valid_r[clear_index_i] <= 1'b0;
             if (restore_valid_i) begin
                 ras_ptr_r <= restore_ptr_w;
                 ras_count_r <= restore_count_w;
