@@ -318,7 +318,8 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 |---|---|---|
 | 地址未映射、连接矩阵禁止 | sys_xbar 译码 | DECERR |
 | 写 ROM | ROM 从接口 | SLVERR |
-| APB 不合规访问（突发、SIZE ≠ 2、未对齐）、预留槽 | APB 桥 | SLVERR，不发 APB 传输 |
+| APB 不合规访问（突发、SIZE ≠ 2、未对齐） | APB 桥（AXI 侧） | SLVERR，不发 APB 传输 |
+| 预留槽 | 例化处的 tie-off（2.3） | SLVERR，不向任何实际外设发出 APB 传输 |
 | APB 超时 | APB 桥计数 | SLVERR |
 | CLINT、PLIC 的突发或 SIZE ≠ 2 访问 | 从接口 | SLVERR |
 | UART 接收溢出、帧错误 | UART | IRQ_STAT.RX_OVERRUN / FRAME_ERR |
