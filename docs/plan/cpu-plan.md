@@ -55,11 +55,11 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-E1 | ISA 评估：CoreMark 分别以 rv32im、rv32imc、rv32im_zba_zbb、rv32imc_zba_zbb、rv32im_zba、rv32imc_zba 编译，在 Spike 上统计动态指令数、代码体积、取指字节数 | Codex · GPT-6 Luna | C-V1、I-07 | 测量报告 `docs/reports/…-perf-isa-eval.md` | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
 | C-E2 | 预测器规模：从 Spike 提交日志提取 CoreMark 的分支轨迹，用轨迹模拟器比较 BTB 16/32/64、gshare 256/512/1024、RAS 2/4/8 的误预测率 | Codex · GPT-6.1 Sol | C-V1 | 测量报告，含误预测率曲线 | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
 | C-E3 | 配对机会统计：在 CoreMark 轨迹上统计不同配对规则（管线 1 是否支持分支、是否允许组内 RAW 等）下的可配对比例和各类失败原因 | Codex · GPT-6.1 Sol | C-V1 | 测量报告 | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
-| C-E4 | 微结构优化方向评估：周期近似轨迹模型（与 C-I3 HPM 校准）评估发射交换、管线 1 支持分支、加宽取指/IB、预测器加大 | Codex · GPT-6.1 Sol | C-I3 | 测量报告 `docs/reports/2026-10-25-perf-cpu-uarch-eval.md` | zc100116/task-cpu-uarch-eval | [x] d5c75e3（分支待合入），模型校准误差 <1%；结论见设计记录 `2026-10-25-cpu-uarch-optimization.md` |
-| C-E5 | 流水线损耗分解：V2 受限形式（一对最多一条控制转移）和 V2s+V5 补测、CPI 损耗栈、理想化上限、流水参数敏感性（误预测代价、load/乘法延迟） | Codex · GPT-6.1 Sol | C-E4 | 测量报告 `docs/reports/2026-10-25-perf-cpu-pipeline-analysis.md` | zc100116/task-cpu-uarch-eval | [x] b0353bb（分支待合入），88 项测量；V2s 1.042–1.045，V2s+V5 1.059–1.069 |
+| C-E4 | 微结构优化方向评估：周期近似轨迹模型（与 C-I3 HPM 校准）评估发射交换、管线 1 支持分支、加宽取指/IB、预测器加大 | Codex · GPT-6.1 Sol | C-I3 | 测量报告 `docs/reports/2026-10-25-perf-cpu-uarch-eval.md` | zc100116/task-cpu-uarch-eval | [x] d5c75e3（已合入 main），模型校准误差 <1%；结论见设计记录 `2026-10-25-cpu-uarch-optimization.md` |
+| C-E5 | 流水线损耗分解：V2 受限形式（一对最多一条控制转移）和 V2s+V5 补测、CPI 损耗栈、理想化上限、流水参数敏感性（误预测代价、load/乘法延迟） | Codex · GPT-6.1 Sol | C-E4 | 测量报告 `docs/reports/2026-10-25-perf-cpu-pipeline-analysis.md` | zc100116/task-cpu-uarch-eval | [x] b0353bb（已合入 main），88 项测量；V2s 1.042–1.045，V2s+V5 1.059–1.069 |
 | C-E6 | 开源多发射 CPU 调研：顺序双发射核（biRISC-V、VeeR EH1/EH2、CVA6 双发射等）的配对规则、组内相关、load-use 隐藏、分支策略、性能数据；乱序核与商用核作对照 | Codex · GPT-6.1 Sol | — | 调研报告 `docs/design/2026-10-25-dual-issue-survey.md` | zc100116/task-cpu-dual-survey | [x] 9be707b（已拣入协调者分支），覆盖 11 个核 |
-| C-E7 | 后段 ALU 评估（模型）：V2s 基础上 M 级后段 ALU，仅管线 1 / 两条管线、后段分支、store 数据晚旁路，各自与 V5 组合 | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-late-alu.md` | zc100116/task-cpu-uarch-eval | [~] dispatch ctx_6664b03bac34（复用 C-E4/C-E5 终端） |
-| C-E8 | 乱序双发射周期模型评估（不写 RTL）：ROB/发射队列/误预测代价矩阵，与顺序 V2s+V5 及 C-E7 最佳配置对比；结果决定是否开发乱序 RTL | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-ooo-model.md` | zc100116/task-cpu-ooo-model | [~] dispatch ctx_b9b6710e02a8 |
+| C-E7 | 后段 ALU 评估（模型）：V2s 基础上 M 级后段 ALU，仅管线 1 / 两条管线、后段分支、store 数据晚旁路，各自与 V5 组合 | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-late-alu.md` | zc100116/task-cpu-uarch-eval | [x] da0f078（已合入 main）；L2b+V5 相对 V0 1.156–1.193 |
+| C-E8 | 乱序双发射周期模型评估（不写 RTL）：ROB/发射队列/误预测代价矩阵，与顺序 V2s+V5 及 C-E7 最佳配置对比；结果决定是否开发乱序 RTL | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-ooo-model.md` | zc100116/task-cpu-ooo-model | [x] ed7dea6（已合入 main）；默认点相对 V0 1.108–1.275 |
 | C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | `tasks/win/20261025-01-cpu-sys-synth`（与 S-P1 合并：IP 生成 + CPU+系统子系统测量顶层综合） | [~] 任务卡已下发 |
 
 ### 3.4 联调、评审与定稿
@@ -68,7 +68,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 |---|---|---|---|---|---|---|
 | C-I1 | 联调：RTL 与 B1 环境对接，跑 smoke；失败时判断属于 RTL 错误、测试错误还是规格歧义 | Codex · GPT-6.1 Sol | C-R3、C-V2、C-V4 | smoke 全部通过 | zc100116/task-cpu-integ | [x] smoke 135、full 820、覆盖 57/57；已合入 main（1c73c35） |
 | C-I2 | full 回归和覆盖收敛 | Codex · GPT-6.1 Sol | C-I1、C-V3、C-V5 | full 全部通过，覆盖报告中的功能点全部覆盖 | zc100116/task-cpu-integ | [x] 同 C-I1 |
-| C-I3 | B2 环境（core + 实际 cache）和性能测试 R-01 至 R-05 | Codex · GPT-6.1 Sol | C-I2、cache RTL | CoreMark CRC 正确；测量报告 | zc100116/task-cpu-perf | [x] 7c63c3b（分支 zc100116/task-cpu-perf，报告待合入）：-O2 3.585、调优 4.307 CoreMark/MHz，IPC 约 1.03 |
+| C-I3 | B2 环境（core + 实际 cache）和性能测试 R-01 至 R-05 | Codex · GPT-6.1 Sol | C-I2、cache RTL | CoreMark CRC 正确；测量报告 | zc100116/task-cpu-perf | [x] 7c63c3b（已合入 main）：-O2 3.585、调优 4.307 CoreMark/MHz，IPC 约 1.03 |
 | C-A1 | 评审：流水控制、配对、冒险、重定向、异常部分由协调者逐行评审；其余部分交叉评审 | 协调者；Codex · GPT-6.1 Sol | C-R3 起，逐项进行 | 评审意见全部处理 | — | [x] 协调者逐行评审 core，意见（FENCE.I 中断、记录字段命名、组合环、槽 1 异常）全部处理 |
 | C-S1 | 规格定稿：依据 C-E1/E2/E3、C-W2、C-I3 的数据，确定第 4 节中的各项；删除 `RVC_EN` 等评估参数；cpu-spec 升级 v1.0，cpu-testplan 同步修订 | 协调者 + 用户确认 | 上述数据齐全 | 用户确认 v1.0 | — | [ ] |
 | C-M1 | 合入 main，打里程碑 tag `m1-cpu-isa-pass` | 协调者 | C-I2，用户批准 | — | main | [ ] |

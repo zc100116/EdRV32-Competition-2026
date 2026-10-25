@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | C-E7 后段 ALU 评估（`ctx_6664b03bac34`）；C-E8 乱序模型评估（`ctx_b9b6710e02a8`）；S-I2 SC 联调（`ctx_8180c3283263`）；C-W2 Windows 综合（任务卡 `20261025-01-cpu-sys-synth`） |
+| 正在进行 | S-I3 SC-01 字段检查与 SC-08 监控程序测试（`ctx_2189918d59dd`）；C-W2 Windows 综合（任务卡 `20261025-01-cpu-sys-synth`）；待用户决定 CPU 方向（设计记录 `2026-10-25-cpu-uarch-optimization.md` §3.3） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
