@@ -506,7 +506,9 @@ module edrv32_cpu_core #(
     assign div_wait_w = e_valid_r[0] && e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
     assign e_advance_w = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
         (!e_memory_w || e_exception_r[0] || e_misaligned_w || dc_req_ready_i);
-    assign dc_req_valid_o = e_advance_w && e_memory_w && !e_exception_r[0] && !e_misaligned_w;
+    // spec 3.3: valid is independent of ready; acceptance advances E into M.
+    assign dc_req_valid_o = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
+        e_memory_w && !e_exception_r[0] && !e_misaligned_w;
     assign dc_req_addr_o = e_address_w;
     assign dc_req_store_o = e_class_r[0] == C_STORE;
     assign dc_req_size_o = e_instr_w[13:12];
