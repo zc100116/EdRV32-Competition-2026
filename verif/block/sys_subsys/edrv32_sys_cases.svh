@@ -1121,7 +1121,7 @@
         endcase
     endtask
 
-    // Selftest uses the external SCCB pins, independently of an unimplemented I2C DUT.
+    // Selftest directly drives external SCCB pins while the DUT I2C controller is disabled.
     task automatic peer_start(
         input bit port_index
     );
@@ -1238,13 +1238,18 @@
                 64'(int'(mem_access_cycles - timeout_start)));
         u_media.never_ready = 0;
         eq32(EDRV32_MEDIA_APB_BASE + 'h100, 'h12345678);
+        uart_config(3000000.0);
         fork
-            u_uart.send('h5a);
-            u_uart.expect_byte('h5a);
+            begin
+                w32(EDRV32_UART0_BASE + 'h020, 'h5a);
+                u_uart.expect_byte('h5a);
+            end
+            uart_byte_rx('h5a);
         join
-        u_uart.send('h0d, 1);
-        check(u_uart.frame_errors == 1 && u_uart.received.size() == 0,
-                "UART model bad stop detection", 1, 64'(u_uart.frame_errors));
+        uart_pop('h5a);
+        uart_byte_rx('h0d, 1);
+        eq32(EDRV32_UART0_BASE + 'h010, 8, 8);
+        eq32(EDRV32_UART0_BASE + 'h008, 4, 4);
         u_cam0.quarter_ns = 1000;
         peer_start(0);
         peer_byte(0, 'h78);
