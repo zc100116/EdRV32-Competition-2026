@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P0 基础设施进行中（orca Run `run_6e42f8ce0f9c`） |
-| 正在进行 | I-01 legacy 迁移（Codex）；Cache 规格讨论 |
+| 正在进行 | P0-rest 工作包（Codex 项目经理）；C-R1 CPU 数据通路（Codex）；Cache 规格讨论 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 

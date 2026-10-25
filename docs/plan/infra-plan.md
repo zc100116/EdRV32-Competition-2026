@@ -31,14 +31,14 @@
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 / 任务卡 | 状态 |
 |---|---|---|---|---|---|---|
 | I-00 | 提交规则、规格、方案，合入 main 并推送 | 协调者 | 用户批准 | `main` 上可以看到 `CLAUDE.md`、`AGENTS.md`、`docs/` | main | [x] 2026-10-25（d64fb11） |
-| I-01 | 迁移 legacy：把旧的 `rtl/ sim/ sw/ scripts/ thirdparty/ third_party/`（子模块除外）、`doc/architecture/`、`doc/axi4/`、`2026-ziguang-guide.md` 移入 `legacy/`；开发板资料 `doc/fpga/` 移到 `docs/reference/board/` 并保持不入库；建立第 2 节的新目录骨架 | Codex · GPT-6 Luna | I-00 | `git status` 中只有移动和新增；新目录存在；旧 README 更新为指向 `CLAUDE.md` | zc100116/task-infra-legacy \| [~] Codex gpt-6-luna，dispatch ctx_f14a61febb3b |
+| I-01 | 迁移 legacy：把旧的 `rtl/ sim/ sw/ scripts/ thirdparty/ third_party/`（子模块除外）、`doc/architecture/`、`doc/axi4/`、`2026-ziguang-guide.md` 移入 `legacy/`；开发板资料 `doc/fpga/` 移到 `docs/reference/board/` 并保持不入库；建立第 2 节的新目录骨架 | Codex · GPT-6 Luna | I-00 | `git status` 中只有移动和新增；新目录存在；旧 README 更新为指向 `CLAUDE.md` | zc100116/task-infra-legacy \| [x] 已合入 main（6580c12） |
 | I-02 | 工具链：Verilator 5.020、Icarus 12、GTKWave、xPack GCC 15.2.0、dtc、Spike，安装到用户目录；`docs/guides/env-setup.md` 和 `~/.local/opt/edrv32/env.sh` | 协调者 | — | 各工具版本检查通过；Verilator `--timing` 测试 PASS；Spike 输出提交日志 | — | [x] 2026-10-25 |
-| I-03 | 回归框架：`tools/regress.py`（读取 `test.yaml`、展开 `files.f`、调用 Verilator/Icarus、收集 PASS/FAIL、按档位运行）、`test.yaml` 格式说明、顶层 `Makefile`；附一个示例单元测试 | Codex · GPT-6.1 Sol | I-01、I-02 | `tools/regress.py smoke` 运行示例测试输出 PASS，故意改错后输出 FAIL 并返回非零 | task/infra-regress | [ ] |
-| I-04 | 风格检查和 lint：移植旧的 `verilog_style.py` 到 `tools/check/`，规则按 `CLAUDE.md` 第 5–7 节修订；`tools/check/lint.sh` 调用 Verilator `--lint-only -Wall` | Codex · GPT-6.1 Sol | I-01、I-02 | 对示例 RTL 运行通过；对故意违规的样例能逐条报出 | task/infra-check | [ ] |
-| I-05 | 生成器：按 SoC 规格第 6 节重写 `rtl/include/soc_address_map.json`；生成 `rtl/include/edrv32_soc_map.vh`、`sw/bsp/include/soc_map.h` 和 Markdown 表格；寄存器描述格式和生成器（RTL 寄存器块骨架、C 头文件） | Codex · GPT-6.1 Sol | I-01 | 生成的地址表与 SoC 规格 6.1 完全一致；重复运行输出不变 | task/infra-gen | [ ] |
-| I-06 | 公共原语：`reset_sync`、`cdc_sync_bit`、`cdc_pulse`、`cdc_handshake`、`cdc_gray_cnt`、`async_fifo`、`sync_fifo`、`rtl/include/edrv32_build_mode.vh`；各自的单元测试 | Codex · GPT-6.1 Sol | I-03、I-04 | 单元测试在 Verilator 和 Icarus 下都通过；lint 0 告警 | task/infra-common | [ ] |
-| I-07 | 软件骨架：`sw/Makefile`、启动代码、链接脚本 `rom.ld`/`sram.ld`/`ddr.ld`、`tools/elf2mem`（按地址段切分 hex）、`tohost` 和 `SIM_EXIT` 的约定实现；CoreMark 子模块初始化和移植框架 | Codex · GPT-6.1 Sol | I-01、I-02 | 最小程序编译出 ELF 和各段 hex；CoreMark 能编译 | task/infra-sw | [ ] |
-| I-08 | 评审：I-03 至 I-07 的交叉评审 | Codex · GPT-6.1 Sol | 各项完成 | 评审意见全部处理 | — | [ ] |
+| I-03 | 回归框架：`tools/regress.py`（读取 `test.yaml`、展开 `files.f`、调用 Verilator/Icarus、收集 PASS/FAIL、按档位运行）、`test.yaml` 格式说明、顶层 `Makefile`；附一个示例单元测试 | Codex · GPT-6.1 Sol | I-01、I-02 | `tools/regress.py smoke` 运行示例测试输出 PASS，故意改错后输出 FAIL 并返回非零 | zc100116/task-p0-rest \| [~] 工作包 P0-rest（Codex 项目经理） |
+| I-04 | 风格检查和 lint：移植旧的 `verilog_style.py` 到 `tools/check/`，规则按 `CLAUDE.md` 第 5–7 节修订；`tools/check/lint.sh` 调用 Verilator `--lint-only -Wall` | Codex · GPT-6.1 Sol | I-01、I-02 | 对示例 RTL 运行通过；对故意违规的样例能逐条报出 | zc100116/task-p0-rest \| [~] 工作包 P0-rest（Codex 项目经理） |
+| I-05 | 生成器：按 SoC 规格第 6 节重写 `rtl/include/soc_address_map.json`；生成 `rtl/include/edrv32_soc_map.vh`、`sw/bsp/include/soc_map.h` 和 Markdown 表格；寄存器描述格式和生成器（RTL 寄存器块骨架、C 头文件） | Codex · GPT-6.1 Sol | I-01 | 生成的地址表与 SoC 规格 6.1 完全一致；重复运行输出不变 | zc100116/task-p0-rest \| [~] 工作包 P0-rest（Codex 项目经理） |
+| I-06 | 公共原语：`reset_sync`、`cdc_sync_bit`、`cdc_pulse`、`cdc_handshake`、`cdc_gray_cnt`、`async_fifo`、`sync_fifo`、`rtl/include/edrv32_build_mode.vh`；各自的单元测试 | Codex · GPT-6.1 Sol | I-03、I-04 | 单元测试在 Verilator 和 Icarus 下都通过；lint 0 告警 | zc100116/task-p0-rest \| [~] 工作包 P0-rest（Codex 项目经理） |
+| I-07 | 软件骨架：`sw/Makefile`、启动代码、链接脚本 `rom.ld`/`sram.ld`/`ddr.ld`、`tools/elf2mem`（按地址段切分 hex）、`tohost` 和 `SIM_EXIT` 的约定实现；CoreMark 子模块初始化和移植框架 | Codex · GPT-6.1 Sol | I-01、I-02 | 最小程序编译出 ELF 和各段 hex；CoreMark 能编译 | zc100116/task-p0-rest \| [~] 工作包 P0-rest（Codex 项目经理） |
+| I-08 | 评审：I-03 至 I-07 的交叉评审 | Codex · GPT-6.1 Sol | 各项完成 | 评审意见全部处理 | zc100116/task-p0-rest \| [~] 工作包 P0-rest（Codex 项目经理） |
 | I-09 | 合入 main 并更新路线图 | 协调者 | I-08，用户批准 | `main` 上 smoke 通过 | main | [ ] |
 
 可以并行的波次：

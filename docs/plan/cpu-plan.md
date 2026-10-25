@@ -33,7 +33,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
-| C-R1 | 数据通路单元：译码器、RVC 展开、ALU、分支判定、寄存器堆（FF 4 读 2 写）、乘法器（APM 包装 + 行为模型）、除法器、CSR 文件；单元测试 U-01 至 U-07、U-10 | Codex · GPT-6.1 Sol | P0 | 上述单元测试通过；lint 0 告警 | task/cpu-datapath | [ ] |
+| C-R1 | 数据通路单元：译码器、RVC 展开、ALU、分支判定、寄存器堆（FF 4 读 2 写）、乘法器（APM 包装 + 行为模型）、除法器、CSR 文件；单元测试 U-01 至 U-07、U-10 | Codex · GPT-6.1 Sol | P0 | 上述单元测试通过；lint 0 告警 | zc100116/task-cpu-datapath \| [~] Codex gpt-6.1-sol |
 | C-R2 | 前端：F1、F2、指令缓冲、BTB/gshare/RAS、I$ 接口（3.2）；单元测试 U-08、U-09 | Codex · GPT-6.1 Sol | C-R1 | U-08、U-09 通过 | task/cpu-frontend | [ ] |
 | C-R3 | 后端与顶层：D/E/M/W、配对、冒险和旁路、重定向、异常和中断、D$ 接口（3.3）、HPM、debug_o、退休追踪信号（3.4）；顶层 `edrv32_cpu_core` | Codex · GPT-6.1 Sol | C-R2 | lint 0 告警；能在 C-V2 的环境中跑通一个最简单的程序 | task/cpu-backend | [ ] |
 | C-R4 | CPU 最小顶层：`edrv32_cpu_core` + I$/D$ + AXI64 引出，用于单独综合测 Fmax 和 LUT | Codex · GPT-6.1 Sol | C-R3、cache RTL | 能在 Verilator 中编译；导入脚本可以导入 | task/cpu-minimal-top | [ ] |
