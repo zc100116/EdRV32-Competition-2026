@@ -13,9 +13,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 当前阶段 | 规格制定；P0 基础设施待启动 |
-| 正在进行 | Cache 规格讨论 |
-| 等待用户 | 批准提交规则和规格并合入 main（之后才能下发 Windows 任务、派发 Codex） |
+| 当前阶段 | P0 基础设施进行中（orca Run `run_6e42f8ce0f9c`） |
+| 正在进行 | I-01 legacy 迁移（Codex）；Cache 规格讨论 |
+| 等待用户 | 无 |
 | 阻塞 | 无 |
 
 ---
@@ -44,7 +44,7 @@
 
 | 阶段 | 内容 | 实施方案 | 退出条件 | 状态 |
 |---|---|---|---|---|
-| P0 | 基础设施：legacy 迁移、目录骨架、工具链、回归框架、生成器、公共原语、软件 BSP | `plan/infra-plan.md` | 见 infra-plan 第 1 节 | [ ] |
+| P0 | 基础设施：legacy 迁移、目录骨架、工具链、回归框架、生成器、公共原语、软件 BSP | `plan/infra-plan.md` | 见 infra-plan 第 1 节 | [~] |
 | P1 | CPU（含 cache） | `plan/cpu-plan.md`、cache-plan | ISA/ACT 全部通过，CoreMark CRC 正确，上板测得 Fmax、LUT、CoreMark/MHz | [ ] |
 | P2 | SoC 骨架：系统总线、外设、中断、存储子系统、板级顶层 | 待写 | SoC 级 CoreMark 和 DDR 测试通过，上板运行 | [ ] |
 | P3 | 实时视频通路：dma2d、VIN、DISP | 待写 | 摄像头到 HDMI 闭环，无 underflow/overflow | [ ] |
