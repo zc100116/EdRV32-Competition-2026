@@ -5,16 +5,23 @@ PROGRAM ?= minimal
 MEMORY ?= rom
 CC := riscv-none-elf-gcc
 OBJDUMP := riscv-none-elf-objdump
+OBJCOPY := riscv-none-elf-objcopy
 OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32imc_zicsr
-include $(wildcard $(ROOT)/sw/tests/$(PROGRAM)/program.mk)
+SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
+PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
+               $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM)))
+-include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
 CFLAGS := $(ISA_FLAGS) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
           -ffunction-sections -fdata-sections -I$(ROOT)/sw/bsp/include
+CFLAGS += $(CFLAGS_EXTRA)
 LDFLAGS := -nostdlib -Wl,--gc-sections \
            -Wl,-T,sw/bsp/ld/$(MEMORY).ld -Wl,-Map,$(OUT)/$(PROGRAM).map
 BSP := sw/bsp/start.S sw/bsp/host.c
-ifeq ($(PROGRAM),coremark)
+ifneq ($(PROGRAM_SOURCES),)
+SOURCES := $(if $(PROGRAM_BSP),$(PROGRAM_BSP),$(BSP)) $(PROGRAM_SOURCES)
+else ifeq ($(PROGRAM),coremark)
 CORE := third_party/coremark
 SOURCES := $(BSP) $(addprefix $(CORE)/,core_main.c core_list_join.c core_matrix.c \
            core_state.c core_util.c) sw/apps/coremark/core_portme.c sw/apps/coremark/ee_printf.c
@@ -24,11 +31,14 @@ SOURCES := $(BSP) sw/tests/$(PROGRAM)/main.c
 endif
 OBJECTS := $(addprefix $(OUT)/obj/,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
-.PHONY: all coremark FORCE
+.PHONY: all coremark sys FORCE
 FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
+ifneq ($(filter bootloader $(SYS_PROGRAMS),$(PROGRAM)),)
+	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
+endif
 
 $(ROOT)/build/sw/soc_memory.ld: $(ROOT)/rtl/include/soc_address_map.json
 	mkdir -p $(@D)
@@ -53,3 +63,8 @@ $(OUT)/obj/%.o: $(ROOT)/%.S FORCE
 
 coremark:
 	$(MAKE) PROGRAM=coremark MEMORY=sram
+
+# ROM bootloader and the SC-01--SC-06 applications, plus software-only Spike checks.
+sys:
+	$(MAKE) PROGRAM=bootloader
+	$(foreach program,$(SYS_PROGRAMS),$(MAKE) PROGRAM=$(program) &&) true
