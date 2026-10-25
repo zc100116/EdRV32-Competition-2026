@@ -1,1 +1,0 @@
-wsim --sim verilator rv64gc {debug:--lockstepverbose} --elf
