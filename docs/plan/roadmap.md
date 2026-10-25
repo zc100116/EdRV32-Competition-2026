@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | C-I3 CPU 正式性能测量（`ctx_cb25ae055ea9`）；系统子系统：S-R1 总线、S-V1 验证环境（S-R2、S-R3、S-W1 已完成，分支待集成） |
+| 正在进行 | C-I3 CPU 正式性能测量（`ctx_cb25ae055ea9`）；系统子系统：S-V1 验证环境、S-T1 集成顶层（`ctx_a3940c37386f`）、S-A1 交叉评审（`ctx_f2acb6e82a1e`） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
