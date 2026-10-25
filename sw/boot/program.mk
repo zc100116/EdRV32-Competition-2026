@@ -3,7 +3,7 @@
 # Description: Select ROM startup and bootloader sources.
 # Clock domain: none (build tool).
 # ROM-only startup uses SRAM solely for its stack, preserving the preloaded app.
-ARCH := -march=rv32imc_zicsr_zifencei -mabi=ilp32
+ARCH := rv32imc_zicsr_zifencei
 MEMORY := rom
 PROGRAM_BSP := sw/boot/start.S
 PROGRAM_SOURCES := sw/boot/main.c sw/boot/enter.S sw/drivers/uart.c sw/drivers/gpio.c
