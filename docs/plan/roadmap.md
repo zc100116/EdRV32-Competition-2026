@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | SoC 总体 | `spec/edrv32-soc-spec.md` v0.3 | — | 本文件 | [x] 草案完成 |
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
-| CPU | `spec/cpu-spec.md` v0.6 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
+| CPU | `spec/cpu-spec.md` v0.7 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
 | Cache | `spec/cache-spec.md` v0.3 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
 | 系统总线与外设（sys_xbar、APB、CLINT、PLIC、UART 等） | — | — | — | [ ] |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON） | — | — | — | [ ] |
