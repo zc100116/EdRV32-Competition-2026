@@ -23,6 +23,85 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_late_same_group_alu(self):
+        stream = [instruction(0, rd=10), instruction(4, rd=11, sources=(10,))]
+        for variant in ('L1', 'L2'):
+            result = run(stream, variant)
+            self.assertEqual(result['cycles'], 1)
+            self.assertEqual(result['hpm1'], 1)
+            self.assertEqual(result['late_alu'], 1)
+
+    def test_load_to_late_alu_and_chains(self):
+        stream = [instruction(0, 'load', rd=10), instruction(4, rd=11, sources=(10,))]
+        result = run(stream, 'L2')
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual(result['hpm1'], 0)
+        self.assertEqual(result['late_alu'], 1)
+        self.assertEqual(result['slots_load_use'], 0)
+        self.assertEqual(run(stream, 'L1')['cycles'], 3)
+        # A previous-group late ALU can feed another late ALU, but not in the same M.
+        stream.append(instruction(8, rd=12, sources=(11,)))
+        result = run(stream, 'L2')
+        self.assertEqual(result['cycles'], 3)
+        self.assertEqual(result['hpm1'], 0)
+        self.assertEqual(result['late_alu'], 2)
+        stream[2] = instruction(8, 'load', rd=12, sources=(11,))
+        self.assertEqual(run(stream, 'L2')['cycles'], 4)
+
+    def test_late_multiply_and_waw(self):
+        stream = [instruction(0, 'mul', rd=10), instruction(4, sources=(10,))]
+        self.assertEqual(run(stream, 'L2')['cycles'], 3)
+        self.assertEqual(run(stream, 'L2')['late_alu'], 1)
+        stream = [instruction(0, 'load', rd=10), instruction(4, rd=11, sources=(10,)),
+                  instruction(8, rd=11, sources=(12,)),
+                  instruction(12, 'load', rd=13, sources=(11,))]
+        result = run(stream, 'L2')
+        self.assertEqual(result['cycles'], 3)
+        self.assertEqual(result['late_alu'], 1)
+
+    def test_late_store_data_only(self):
+        for sources, cycles, count in (((10, 2), 2, 1), ((2, 10), 3, 0), ((10, 10), 3, 0)):
+            stream = [instruction(0, 'load', rd=10), instruction(4, 'store', sources=sources)]
+            result = run(stream, 'L2s')
+            self.assertEqual(result['cycles'], cycles)
+            self.assertEqual(result['late_store_data'], count)
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[32] = instruction(32, rd=10)
+        program[36] = instruction(36, 'store', sources=(10, 2))
+        program[40] = instruction(40, 'serial')
+        result = simulate(program, list(range(0, 44, 4)), 0, 40, 'L2s')
+        self.assertGreaterEqual(result['hpm5'], 1)
+        self.assertEqual(result['late_store_data'], 0)
+
+    def test_late_branch_redirect_penalty(self):
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[0] = instruction(0, 'load', rd=10)
+        program[4] = instruction(4, 'branch', sources=(10,), target=32)
+        program[36] = instruction(36, 'serial')
+        for variant, cycles in (('L2', 5), ('L2b', 6)):
+            result = simulate(program, [0, 4, 32, 36], 4, 36, variant)
+            self.assertEqual(result['cycles'], cycles)
+            self.assertEqual(result['late_branch'], int(variant == 'L2b'))
+
+    def test_late_branch_training_and_flush_priority(self):
+        program = {pc: instruction(pc) for pc in range(0, 160, 4)}
+        program[32] = instruction(32, 'load', rd=10)
+        program[36] = instruction(36, 'branch', sources=(10,), target=64)
+        program[40] = instruction(40, 'branch', sources=(12,), target=64)
+        program[48] = instruction(48, 'serial')
+        result = simulate(program, list(range(0, 52, 4)), 0, 48, 'L2b')
+        self.assertEqual(result['training_conflicts'], 1)
+        self.assertEqual(result['hpm4'], 2)
+        self.assertEqual(result['cycles'], 7)
+        program[68] = instruction(68, 'serial')
+        trace = list(range(0, 40, 4)) + [64, 68]
+        result = simulate(program, trace, 0, 68, 'L2b')
+        self.assertEqual(result['training_conflicts'], 0)
+        self.assertEqual(result['hpm4'], 1)
+        self.assertGreater(result['slots_wrong_path'], 0)
+        self.assertEqual(sum(result['slots_' + key] for key in SLOT_CAUSES),
+                         2 * result['cycles'])
+
     def test_restricted_branch_lane(self):
         for older in ('branch', 'jal'):
             for younger in ('branch', 'jal'):

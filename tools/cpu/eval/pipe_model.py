@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # File: pipe_model.py; Spec: cpu-spec 2.3, 4.1-4.4, 7.1; Clock: host.
 # Replay Spike commits through a hit-only, cycle-stepped frontend and dual-issue backend.
-# Retain speculative fetch and F1 predictor indices; train surviving instructions in E.
+# Retain speculative fetch/F1 indices; train surviving E/M controls under C-E7 late execution.
 """Cycle approximation, with HPM windows defined by retired start_time/stop_time PCs."""
 import argparse
 from collections import deque
@@ -13,8 +13,10 @@ import subprocess
 from analyze import COMMIT, CONTROL, DISASM, decode
 
 VARIANTS = ('V0', 'V1', 'V2', 'V2s', 'V2s+V5', 'V3', 'V4a', 'V3+V4a',
-            'V4b', 'V3+V4b', 'V5', 'V3+V5')
-SLOT_CAUSES = ('effective', 'wrong_path', 'redirect_e', 'redirect_d', 'frontend', 'load_use',
+            'V4b', 'V3+V4b', 'V5', 'V3+V5',
+            'L1', 'L1+V5', 'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5')
+SLOT_CAUSES = ('effective', 'wrong_path', 'redirect_e', 'redirect_m', 'redirect_d',
+               'frontend', 'load_use',
                'other_result', 'csr_serial', 'pair_raw', 'pair_structural',
                'pair_type', 'pair_one')
 PAIR_CAUSES = {5: 'pair_raw', 6: 'pair_structural', 7: 'pair_type', 8: 'pair_one'}
@@ -32,6 +34,8 @@ class Record:
     d_redirect: bool = False
     trace_index: int = -1
     counted_issue: bool = False
+    late: bool = False
+    late_store_data: bool = False
 
 
 class Predictor:
@@ -136,12 +140,19 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              load_latency=2, mul_latency=3, perfect_prediction=False,
              perfect_frontend=False, relax_raw=False, all_slot1_types=False):
     swap = variant in {'V1', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
-    branch_lane = variant in {'V2', 'V2s', 'V2s+V5', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
-    single_control = variant in {'V2s', 'V2s+V5'}
+    late_backend = variant.startswith('L')
+    late_both = variant in {'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5'}
+    late_branch = variant in {'L2b', 'L2b+V5'}
+    late_store = variant in {'L2s', 'L2s+V5'}
+    branch_lane = late_backend or variant in {
+        'V2', 'V2s', 'V2s+V5', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
+    single_control = late_backend or variant in {'V2s', 'V2s+V5'}
     dual_query = variant in {'V4b', 'V3+V4b'}
     group_bytes = 16 if variant in {'V4a', 'V3+V4a', 'V4b', 'V3+V4b'} else 8
     depth = 8 if group_bytes == 16 else 4
-    btb, pht = (64, 1024) if variant in {'V5', 'V3+V5', 'V2s+V5'} else (32, 512)
+    large_predictor = variant in {'V5', 'V3+V5', 'V2s+V5'} or (
+        late_backend and variant.endswith('+V5'))
+    btb, pht = (64, 1024) if large_predictor else (32, 512)
     predictor = Predictor(btb, pht, 8 if dual_query else group_bytes)
     ib = deque()
     halfwords = []
@@ -153,6 +164,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     active = False
     cycles = 0
     counters = [0] * 17
+    late_retired = [0, 0, 0]
+    training_pending = deque()
+    training_conflicts = 0
     slots = dict.fromkeys(SLOT_CAUSES, 0)
     division_left = 0
     recovery = None
@@ -172,6 +186,27 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             if source != forwarded:
                 waits |= wait_kind.get(source, 0)
         return waits
+
+    def schedule(instruction, lane, older=None, older_late=False):
+        needs = []
+        for source in instruction.sources:
+            if older and older.rd and source == older.rd:
+                latency = 2 if older_late and older.kind == 'alu' else latencies.get(
+                    older.kind, 1)
+                needs.append(0 if relax_raw else latency)
+            else:
+                needs.append(ready_in.get(source, 0))
+        if not any(needs):
+            return True, False, False
+        if (instruction.kind == 'alu' and (lane == 1 or late_both)) or (
+                instruction.kind == 'branch' and late_branch):
+            if max(needs) <= 1:
+                return True, True, False
+        if instruction.kind == 'store' and late_store and lane == 0:
+            # GNU numeric store operands are data first, then the address base.
+            if needs[0] <= 1 and not any(needs[1:]):
+                return True, False, True
+        return False, False, False
 
     def request(pc, cross):
         nonlocal oracle_cursor
@@ -254,11 +289,15 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     while True:
         ending = False
         retired_controls = 0
+        retired_late = [0, 0, 0]
         for record in w:
             pc = record.instruction.pc
             ending |= pc == end
             active |= pc == begin
             retired_controls += record.instruction.kind in CONTROL
+            if record.late:
+                retired_late[0 if record.instruction.kind == 'alu' else 1] += 1
+            retired_late[2] += record.late_store_data
         if ending:
             break
         blocked_ideal = False
@@ -272,27 +311,43 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         retire_event = 1 if len(w) == 2 else 2 if w else 3
         events[4] = retired_controls
 
+        # A deferred M branch is older than every E record and resolves first.
+        m_redirect = None
+        m_surviving = m
+        if late_branch:
+            for index, record in enumerate(m):
+                instruction = record.instruction
+                if record.late and instruction.kind == 'branch':
+                    taken = record.next_pc != instruction.pc + instruction.size
+                    if record.taken != taken or (taken and record.target != record.next_pc):
+                        m_redirect = record
+                        m_surviving = m[:index + 1]
+                        break
+
         # E resolves before D can issue. A wrong younger member is squashed here.
         redirect = None
         surviving = []
-        for record in e:
+        for record in (() if m_redirect else e):
             instruction = record.instruction
+            surviving.append(record)
+            if record.late and instruction.kind == 'branch':
+                continue
             actual_taken = (instruction.kind in {'jal', 'jalr'} or
                             (instruction.kind == 'branch' and
                              record.next_pc != instruction.pc + instruction.size))
             wrong = (record.taken != actual_taken or
                      (record.taken and record.target != record.next_pc))
-            surviving.append(record)
             if wrong and not record.d_redirect:
                 redirect = record
                 break
-        div_wait = bool(division_left and any(r.instruction.kind == 'div' for r in e))
+        div_wait = bool(not m_redirect and division_left and
+                        any(r.instruction.kind == 'div' for r in e))
         events[10] = int(div_wait)
         if div_wait:
             division_left -= 1
             redirect = None
-        events[16] = int(redirect is not None)
-        available = not redirect and not div_wait and not blocked_ideal
+        events[16] = int(m_redirect is not None or redirect is not None)
+        available = not m_redirect and not redirect and not div_wait and not blocked_ideal
         events[12] = int(not ib and available)
         if ib and e:
             inst = ib[0].instruction
@@ -305,27 +360,44 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         pair_event = 0
         # Build closest-producer readiness once, including younger WAW priority.
         wait_kind = {}
+        ready_in = {}
         stages = ((3, w), (2, m), (1, e)) if long_results else ((2, m), (1, e))
         for age, records in stages:
             for record in records:
                 producer = record.instruction
                 if producer.rd:
                     code = 1 if producer.kind == 'load' else 2
-                    wait_kind[producer.rd] = code if latencies.get(producer.kind, 1) > age else 0
+                    latency = 2 if record.late and producer.kind == 'alu' else latencies.get(
+                        producer.kind, 1)
+                    wait_kind[producer.rd] = code if latency > age else 0
+                    if late_backend:
+                        ready_in[producer.rd] = max(0, latency - age)
         front_empty = not ib
         trace_exhausted = cursor >= len(trace)
         older_waits = hazard(ib[0].instruction) if ib else 0
+        older_late = older_store = False
+        if ib and late_backend:
+            allowed, older_late, older_store = schedule(ib[0].instruction, 0)
+            if allowed:
+                older_waits = 0
         csr_wait = bool(ib and ib[0].instruction.kind == 'csr' and (e or m))
         if ib and available and cursor < len(trace):
             older = ib[0].instruction
             if not older_waits and not csr_wait:
                 count = 1
                 reason = 8
+                younger_late = younger_store = False
                 if len(ib) >= 2:
                     younger = ib[1].instruction
                     raw = not relax_raw and older.rd and older.rd in younger.sources
                     forwarded = older.rd if relax_raw else 0
                     structural = older.kind in {'csr', 'serial'} or hazard(younger, forwarded)
+                    if late_backend:
+                        allowed, younger_late, younger_store = schedule(
+                            younger, 1, older, older_late)
+                        if allowed:
+                            raw = False
+                            structural = older.kind in {'csr', 'serial'}
                     if all_slot1_types and younger.kind in {'csr', 'serial'}:
                         structural = True
                     supported = (younger.kind == 'alu' or
@@ -357,15 +429,19 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     instruction = record.instruction
                     record.trace_index = cursor
                     record.counted_issue = active
+                    record.late = older_late if slot == 0 else younger_late
+                    record.late_store_data = older_store if slot == 0 else younger_store
                     record.next_pc = trace[cursor + 1] if cursor + 1 < len(trace) else end + 4
                     if cursor < len(trace) and instruction.pc == trace[cursor]:
                         cursor += 1
                     else:
-                        if slot == 0:
+                        speculative = late_branch and any(r.late and
+                            r.instruction.kind == 'branch' for r in e)
+                        if slot == 0 and not speculative:
                             raise ValueError(f'trace mismatch at commit {cursor}: '
                                              f'fetch PC {instruction.pc:08x}, '
                                              f'Spike PC {trace[cursor]:08x}')
-                        # Only a younger member of an unresolved taken branch can be wrong-path.
+                        # M-resolved branches also permit an entire younger E group to be wrong.
                         record.trace_index = -1
                         record.next_pc = instruction.pc + instruction.size
                     issued.append(record)
@@ -373,7 +449,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     division_left = 33
 
         # F2 can append the arriving hit and drain two instructions into IB in the same cycle.
-        flush = redirect or d_redirect
+        flush = m_redirect or redirect or d_redirect
         query = None
         if not flush and not perfect_frontend:
             halfwords.extend(pending)
@@ -398,8 +474,24 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 pending, fetch_pc, cross_target, query = request(fetch_pc, cross_target)
 
         # All predictor mutations occur at the edge, after the concurrent F1 query.
+        m_updates = []
+        if late_branch:
+            for record in m_surviving:
+                if record.late and record.instruction.kind == 'branch':
+                    m_updates.append(record)
+        e_updates = []
         if not div_wait:
             for record in surviving:
+                if record.instruction.kind in CONTROL and not (
+                        record.late and record.instruction.kind == 'branch'):
+                    e_updates.append(record)
+        if late_branch:
+            training_pending.extend(m_updates)
+            training_pending.extend(e_updates)
+            if training_pending:
+                predictor.update(training_pending.popleft())
+        else:
+            for record in e_updates:
                 predictor.update(record)
         if flush:
             predictor.restore(flush)
@@ -408,16 +500,18 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             halfwords = []
             pending = []
             cross_target = None
-            recovery = 'redirect_e' if redirect else 'redirect_d'
-            penalty = e_penalty if redirect else d_penalty
+            recovery = 'redirect_m' if m_redirect else 'redirect_e' if redirect else 'redirect_d'
+            penalty = e_penalty if m_redirect or redirect else d_penalty
+            if late_backend and (m_redirect or redirect):
+                cursor = flush.trace_index + 1
             if perfect_frontend:
                 cursor = flush.trace_index + 1
                 front_cursor = cursor
                 ideal_group = None
                 tail_pc = end + program[end].size
-                ideal_wait = penalty - 1 if redirect else penalty
+                ideal_wait = penalty - 1 if m_redirect or redirect else penalty
             else:
-                normal = 3 if redirect else 2
+                normal = 3 if m_redirect or redirect else 2
                 fetch_delay = max(0, penalty - normal)
                 if penalty < normal:
                     pending, fetch_pc, cross_target, query = request(fetch_pc, None)
@@ -430,8 +524,13 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if div_wait:
             w, m = m, []
         else:
-            killed = sum(r.counted_issue for r in e[len(surviving):]) if redirect else 0
-            w, m, e = m, surviving, issued
+            if m_redirect:
+                killed = sum(r.counted_issue for r in m[len(m_surviving):] + e)
+                w, m, e = m_surviving, [], []
+                division_left = 0
+            else:
+                killed = sum(r.counted_issue for r in e[len(surviving):]) if redirect else 0
+                w, m, e = m, surviving, issued
         if active:
             cycles += 1
             killed = 0 if div_wait else killed
@@ -457,10 +556,17 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 counters[pair_event] += 1
             for event in (4, 9, 10, 12, 16):
                 counters[event] += events[event]
+            for index, count in enumerate(retired_late):
+                late_retired[index] += count
+            training_conflicts += bool(m_updates and e_updates)
     result = dict(cycles=cycles, instructions=2 * counters[1] + counters[2],
                   **{f'hpm{i}': counters[i] for i in range(1, 17)})
     result['ipc'] = result['instructions'] / result['cycles']
     result.update({f'slots_{cause}': count for cause, count in slots.items()})
+    result.update(late_alu=late_retired[0], late_branch=late_retired[1],
+                  late_store_data=late_retired[2], late_instructions=sum(late_retired))
+    result['late_share'] = result['late_instructions'] / result['instructions']
+    result['training_conflicts'] = training_conflicts
     return result
 
 
