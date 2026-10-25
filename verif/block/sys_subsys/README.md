@@ -166,3 +166,46 @@ SCCB 写/读/NACK。P0 的 smoke 自测不传镜像时仍检查上述事务，�
 ## S-V1 验收记录
 
 最终命令、结果和源码提交见本节末尾；真实 RTL 的功能回归与覆盖收敛由 S-I1 完成。
+
+代码提交：`795400b`（基点 `7822d70`），分支 `zc100116/task-sys-verif`；
+2026-10-25，Verilator 5.020。后续报告提交只更新本记录。
+
+| 验收 | 命令或入口 | 结果与日志 |
+|---|---|---|
+| 桩自测 | `verify.py selftest`；P0 `run_test` 单独选择 `selftest/test.yaml` | PASS；`build/sys/selftest/run-final.log`、`build/regress/smoke/block/sys_subsys/selftest/verilator/run.log` |
+| 初始镜像 | 上述 P0 binary 加 `+ROM_HEX=build/sys/rom.hex +SRAM_HEX=build/sys/sram.hex` | PASS，首尾内容与独立参考模型一致 |
+| 协议正负例 | `verify.py probes` | 正例及 5 种负例全部符合预期；`build/sys/probe-summary.log`、`build/sys/protocol/*.log` |
+| 全部 HDL 配置 | `verify.py lint` | 50 功能项 + 自测 + 6 种绑定 fixture，0 告警；`build/sys/compile-summary-final.log`、`build/sys/*-lint.log` |
+| 代表 binary | `verify.py compile` | XB/MEM/AB/CL/PL/UA/GP/IC/SY 九组代表配置构建通过；`build/sys/binary-summary.log`、各组 `compile.log` |
+| 风格与公共 RTL lint | `verify.py style`、`make lint` | SB 25 文件 0 告警，RTL 17 文件 0 告警；`build/sys/sb-style.log`、`build/sys/make-lint.log` |
+| 共享检查器兼容 | P0 分别选择 cache `ic_01/test.yaml`、`dc_03/test.yaml` | 2 PASS / 0 FAIL；对应 `build/regress/smoke/block/cache/` 日志 |
+| 桩覆盖 | `coverage.py build/sys/selftest/run-final.log` | 13/99 分箱；`build/sys/coverage-final.txt`，其余保留 uncovered，真实 DUT 在 S-I1 收敛 |
+
+P0 单项回归的可复现调用（避免启动全仓并发编译）：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 - <<'PY'
+from pathlib import Path
+from tools.regress import read_test, run_test
+for item in ('sys_subsys/selftest', 'cache/ic_01', 'cache/dc_03'):
+    path = (Path('verif/block') / item / 'test.yaml').resolve()
+    assert run_test(path, read_test(path), 'verilator', 'smoke')
+PY
+build/regress/smoke/block/sys_subsys/selftest/verilator/obj/sim \
+    +ROM_HEX=build/sys/rom.hex +SRAM_HEX=build/sys/sram.hex
+```
+
+全量 `make smoke/full` 按协调者 2026-10-25 的资源安排未执行，改为上述本任务自测、
+两个 cache 代表测试、`make lint` 和风格检查；全量回归由协调者在集成时串行运行。
+九组 binary 构建后，桩复位进一步切换为公共同步原语；该最终桩已重新构建自测
+binary、通过 P0 回归和镜像自测，并重新对全部配置执行 HDL lint。
+
+自测曾在 SCCB 首个 ACK 处失败。独立最小复现中，Verilator 5.020 对定时 task 内
+动态位选写 `test_scl_oe[port_index]` 没有传播预期的引脚变化；改为整向量赋值后，
+SCL/SDA 事件和字节接收均正确。当前 selftest 固定覆盖两端口、ACK/NACK、写入和读取；
+负例另检查 START 保持时间。复现观察日志在 `build/sys/sccb-probe-*.log`。
+
+留下的工作仅为 S-I1：接入真实 DUT 和内部绑定、提供实际镜像、激活 50 项清单、
+运行 smoke/full（XB-07 为 50 种子）并使 99 个可达功能分箱全部覆盖；本次不声称
+真实外设功能、性能或全仓回归已经通过。
