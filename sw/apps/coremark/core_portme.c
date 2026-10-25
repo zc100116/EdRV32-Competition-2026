@@ -1,10 +1,11 @@
 /* File: core_portme.c
  * Spec: infra-plan I-07; cpu-spec 4 (cycle CSR)
- * Description: CoreMark seeds and cycle timing for the initial 150 MHz CPU target.
+ * Description: CoreMark seeds and cycle timing using the configured system clock.
  *              Uses the BSP host console; no UART register offsets are assumed.
  * Clock domain: clk_sys.
  */
 #include "coremark.h"
+#include "soc_map.h"
 
 volatile ee_s32 seed1_volatile = 0;
 volatile ee_s32 seed2_volatile = 0;
@@ -14,6 +15,12 @@ volatile ee_s32 seed5_volatile = 0;
 ee_u32 default_num_contexts = 1;
 static CORE_TICKS start_ticks;
 static CORE_TICKS stop_ticks;
+static uint32_t ticks_per_second = EDRV32_CLK_SYS_HZ;
+
+void coremark_set_clock(uint32_t clock_hz)
+{
+    ticks_per_second = clock_hz;
+}
 
 static CORE_TICKS cycles(void)
 {
@@ -46,7 +53,7 @@ CORE_TICKS get_time(void)
 
 secs_ret time_in_secs(CORE_TICKS ticks)
 {
-    return (secs_ret)(ticks / 150000000u);
+    return (secs_ret)(ticks / ticks_per_second);
 }
 
 void portable_init(core_portable *port, int *argc, char *argv[])

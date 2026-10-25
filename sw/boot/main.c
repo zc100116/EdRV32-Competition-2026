@@ -5,6 +5,7 @@
  */
 #include "boot.h"
 #include "gpio.h"
+#include "info.h"
 #include "sysctrl.h"
 #include "uart.h"
 
@@ -20,10 +21,15 @@ static const char logo[] =
 int main(void)
 {
     uart_init();
+    uart_set_baud(sysctrl_read(SYSCTRL_CLK_SYS_HZ), 115200u);
+    gpio_set_output_enable(0u);
     uart_puts(logo);
     while ((sysctrl_read(SYSCTRL_STATUS) & SYSCTRL_STATUS_MEM_READY) == 0u) {
     }
-    if (boot_download_requested(gpio_read(), sysctrl_read(SYSCTRL_SCRATCH0))) {
+    uint32_t mode = boot_download_requested(gpio_read(), sysctrl_read(SYSCTRL_SCRATCH0))
+                    ? BOOT_MODE_UART : BOOT_MODE_SRAM;
+    system_info(mode);
+    if (mode == BOOT_MODE_UART) {
         uint32_t length = 0u;
         volatile uint8_t *destination = (volatile uint8_t *)EDRV32_SRAM_BASE;
         sysctrl_write(SYSCTRL_SCRATCH0, 0u);
@@ -36,6 +42,7 @@ int main(void)
         }
         uart_puts("UART download complete\r\n");
     }
+    sysctrl_write(SYSCTRL_SCRATCH1, mode);
     uart_puts("Boot SRAM\r\n");
     uart_drain();
     boot_enter(EDRV32_SRAM_BASE);

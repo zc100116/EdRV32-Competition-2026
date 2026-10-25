@@ -10,8 +10,10 @@ or clear SRAM, preserving an application preloaded at SRAM base. Its temporary
 stack uses the final 4 KiB of SRAM; download payloads must leave that area free.
 The application starts at SRAM base and initializes its own stack/data/BSS.
 
-On reset the bootloader enables UART TX/RX, keeps the reset baud divisor
-(115200, 8N1), prints the ASCII logo, and waits for SYSCTRL `STATUS.MEM_READY`.
+On reset the bootloader enables UART TX/RX, programs the 115200 baud divisor
+from SYSCTRL `CLK_SYS_HZ` (`round(clock_hz * 16 / 115200)`, fixed 8N1),
+initializes GPIO as inputs, prints the ASCII logo, and waits for SYSCTRL
+`STATUS.MEM_READY`. It then prints the selected boot mode and system fields.
 `boot.h` defines the board convention: `BOOT_BUTTON_BIT=0`,
 `BOOT_BUTTON_ACTIVE=0` (pressed is low). SC normally drives GPIO bit0 high;
 a low value requests download. Board wiring changes belong in these constants.
@@ -19,6 +21,20 @@ A `SCRATCH0` value of `BOOT_DOWNLOAD_MAGIC=0x55415254` also requests download.
 An application can set that magic and request `SYSCTRL_RESET_SOC`; the scratch
 register survives the soft reset. The bootloader clears SCRATCH0 when consuming
 a download request, so the request is used once.
+
+Before the SRAM jump it writes `SCRATCH1=0` for a preloaded SRAM application or
+`SCRATCH1=1` for a UART-downloaded application. This coordinator-confirmed
+convention uses sys-subsys-spec 2.9's scratch handoff mechanism; monitor reads it
+to preserve the actual boot mode after SCRATCH0 has been consumed.
+
+Startup fields use the same fixed `Key: Value` format as monitor:
+`CHIP_ID`, `CLK_SYS_HZ`, `ROM bytes`, `SRAM bytes`, `I-cache bytes`,
+`D-cache bytes`, `MEM_READY`, `Boot mode`, `Build commit`, `Compiler version`.
+Memory sizes come from generated `soc_map.h`; the 8 KiB I/D cache capacities
+come from cache-spec 2.1 constants in `info.h`, not fictitious registers.
+Makefile passes the short git commit and GCC version through build macros.
+The measured image has text/data/bss = **3600/0/0 bytes**, including the logo,
+and fits in the 16384-byte Boot ROM; monitor README records verification commands.
 
 ## UART download protocol
 

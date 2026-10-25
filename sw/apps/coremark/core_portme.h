@@ -13,8 +13,8 @@
 #define USE_CLOCK 0
 #define HAS_STDIO 0
 #define HAS_PRINTF 0
-#define COMPILER_VERSION "GCC " __VERSION__
-#define COMPILER_FLAGS "-O2 -march=rv32imc_zicsr -mabi=ilp32"
+#define COMPILER_VERSION BUILD_COMPILER
+#define COMPILER_FLAGS BUILD_CFLAGS
 #define MEM_LOCATION "SRAM"
 #define SEED_METHOD SEED_VOLATILE
 #define MEM_METHOD MEM_STATIC
@@ -40,4 +40,5 @@ typedef struct {
 void portable_init(core_portable *port, int *argc, char *argv[]);
 void portable_fini(core_portable *port);
 int ee_printf(const char *format, ...);
+void coremark_set_clock(uint32_t clock_hz);
 #endif

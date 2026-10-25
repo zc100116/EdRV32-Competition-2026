@@ -10,7 +10,8 @@ OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32imc_zicsr
 SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
 PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
-               $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM)))
+               $(filter monitor,$(PROGRAM)),sw/apps/monitor,$(if \
+               $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM))))
 -include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
 CFLAGS := $(ISA_FLAGS) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
@@ -30,13 +31,17 @@ else
 SOURCES := $(BSP) sw/tests/$(PROGRAM)/main.c
 endif
 OBJECTS := $(addprefix $(OUT)/obj/,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
+# Keep the reported CFLAGS identical to the flags used below; metadata is separate.
+CPPFLAGS := '-DBUILD_COMMIT="$(shell git -C $(ROOT) rev-parse --short HEAD)"' \
+            '-DBUILD_COMPILER="GCC $(shell $(CC) -dumpfullversion)"' \
+            '-DBUILD_CFLAGS="$(CFLAGS)"' '-DBUILD_ISA="$(ARCH)"'
 
 .PHONY: all coremark sys FORCE
 FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
-ifneq ($(filter bootloader $(SYS_PROGRAMS),$(PROGRAM)),)
+ifneq ($(filter bootloader monitor $(SYS_PROGRAMS),$(PROGRAM)),)
 	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
 endif
 
@@ -51,15 +56,15 @@ $(OUT)/$(PROGRAM).elf: $(OBJECTS) $(ROOT)/sw/bsp/ld/$(MEMORY).ld \
 # The coordinator exempts unmodified third-party code from -Werror.
 $(OUT)/obj/third_party/coremark/%.o: $(ROOT)/third_party/coremark/%.c FORCE
 	mkdir -p $(@D)
-	$(CC) $(filter-out -Werror,$(CFLAGS)) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(filter-out -Werror,$(CFLAGS)) $(CORE_MAIN_FLAGS) -c $< -o $@
 
 $(OUT)/obj/%.o: $(ROOT)/%.c FORCE
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 $(OUT)/obj/%.o: $(ROOT)/%.S FORCE
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 coremark:
 	$(MAKE) PROGRAM=coremark MEMORY=sram

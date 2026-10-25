@@ -6,5 +6,6 @@
 ARCH := rv32imc_zicsr_zifencei
 MEMORY := rom
 PROGRAM_BSP := sw/boot/start.S
-PROGRAM_SOURCES := sw/boot/main.c sw/boot/enter.S sw/drivers/uart.c sw/drivers/gpio.c
+PROGRAM_SOURCES := sw/boot/main.c sw/boot/info.c sw/boot/enter.S sw/drivers/uart.c \
+                   sw/drivers/gpio.c
 CFLAGS_EXTRA := -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/boot
