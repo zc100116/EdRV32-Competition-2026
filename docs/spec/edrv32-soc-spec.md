@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2（草案） |
+| 版本 | v0.3（草案） |
 | 日期 | 2026-10-25 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
@@ -172,7 +172,7 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 |---|---|
 | 信号 | AW：`awid awaddr awlen awsize awburst awvalid awready`；W：`wdata wstrb wlast wvalid wready`；B：`bid bresp bvalid bready`；AR：`arid araddr arlen arsize arburst arvalid arready`；R：`rid rdata rresp rlast rvalid rready` |
 | 位宽 | 地址 32，数据 64，WSTRB 8，主设备 ID 4，LEN 8，SIZE 3，BURST 2 |
-| 突发 | 只用 INCR。单拍访问：SIZE ≤ 2（≤ 4 B），按 `addr[2]` 选择 64 位总线的高/低半部。cache 行访问：SIZE = 3，LEN = 3（4 拍 × 8 B = 32 B），地址 32 B 对齐 |
+| 突发 | 只用 INCR。单拍访问：SIZE ≤ 2（≤ 4 B），按 `addr[2]` 选择 64 位总线的高/低半部。例外：I$ 的 ROM 取指为单拍 SIZE = 3（8 B，地址 8 B 对齐），Boot ROM 从设备必须支持。cache 行访问：SIZE = 3，LEN = 3（4 拍 × 8 B = 32 B），地址 32 B 对齐 |
 | 不使用 | LOCK、CACHE、PROT、QOS、REGION、USER，也不支持 exclusive 访问 |
 | 并发 | 每个主设备每个方向至多 1 笔未完成事务 |
 | 响应 | OKAY；从设备错误回 SLVERR；地址未映射或连接矩阵禁止的访问，由交叉开关回 DECERR |
@@ -681,3 +681,4 @@ DRM 和 APM 的预算由各模块规格确定。
 |---|---|---|
 | 2026-10-25 | v0.1 | 初稿 |
 | 2026-10-25 | v0.2 | PLIC 源号 6 分配给 CACHE_CTRL（D$ 写回错误中断），见 cpu-spec 4.7、cache 规格 |
+| 2026-10-25 | v0.3 | 4.1 单拍 SIZE ≤ 2 增加例外：I$ 的 ROM 取指为单拍 SIZE = 3（K-RTL 开发中发现与 cache-spec 5.1 冲突） |

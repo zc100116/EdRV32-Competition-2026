@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1（草案） |
+| 版本 | v0.2（草案） |
 | 日期 | 2026-10-25 |
 | 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | 指令 cache `edrv32_icache`、数据 cache `edrv32_dcache`、维护寄存器块 `edrv32_cache_ctrl` |
@@ -113,7 +113,7 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 | 0x000 | ID | RO | 0x0005_0001 | [31:16] 模块类型码 5，[15:0] 版本 1 |
 | 0x008 | STATUS | RO | 0 | bit0 BUSY：维护操作进行中 |
 | 0x00C | IRQ_EN | RW | 0 | bit1：写回错误中断使能 |
-| 0x010 | IRQ_STAT | RW1C | 0 | bit1：写回错误 |
+| 0x010 | IRQ_STAT | RW1C | 0 | bit1：写回错误。软件写 1 清除与新的写回错误同一周期发生时，新错误优先：该位保持为 1，ERR_ADDR 记录新错误的地址 |
 | 0x014 | ERR_ADDR | RO | 0 | 最近一次写回出错的行地址 |
 | 0x020 | OP_ADDR | RW | 0 | 维护范围起始字节地址 |
 | 0x024 | OP_SIZE | RW | 0 | 维护范围长度（字节） |
@@ -133,7 +133,7 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 | 缺失（可缓存） | `ic_req_ready_i` 拉低；选 LRU 路作为替换路；发出 AR（行对齐地址，LEN = 3，SIZE = 3，INCR）；4 拍数据依次写入数据 RAM；写 tag、置有效位、更新 LRU；然后返回该请求的 64 位数据，`ic_req_ready_i` 恢复 |
 | ROM 取指 | 发出单拍 AR（SIZE = 3），数据直接返回，不装入 cache |
 | `ic_kill_o` | 丢弃尚未返回的响应；正在进行的填充继续完成并装入 cache，但不返回给 core |
-| `ic_inv_o` | 清除全部有效位，下一个周期给出 `ic_inv_done_i` |
+| `ic_inv_o` | 清除全部有效位，下一个周期给出 `ic_inv_done_i`。与在途填充重叠时 invalidate 优先：填充照常接收完 4 拍并把该请求的数据返回给 core（未被 `ic_kill_o` 取消时），但该行不置有效 |
 
 ### 5.2 D$：可缓存访问
 
@@ -166,7 +166,7 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 
 - 维护操作开始前先等写缓冲排空。
 - 维护操作进行期间（`maint_busy_o = 1`）：可缓存请求不被接受（`dc_req_ready_i = 0`）；设备和不可缓存请求照常接受，因此 CPU 可以轮询 STATUS。
-- OP_SIZE 为 0 时，操作立即完成。
+- 命令 1–3 的 OP_SIZE 为 0 时，操作立即完成。命令 4 和 FENCE.I 的整体 clean 不使用 OP_ADDR、OP_SIZE，总是遍历全部行。
 
 ### 5.5 复位
 
@@ -216,3 +216,4 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-25 | v0.1 | 初稿 |
+| 2026-10-25 | v0.2 | 澄清（K-RTL/K-VERIF 开发中确认）：5.1 ic_inv 与在途填充重叠时 invalidate 优先；第 4 节 IRQ_STAT 清位与新错误同拍时新错误优先；5.4 OP_SIZE=0 立即完成只适用于命令 1–3 |
