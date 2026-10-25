@@ -502,7 +502,7 @@ module edrv32_cpu_core #(
         !e_call_w;
     assign e_type_w = e_call_w ? 3'd3 : e_return_w ? 3'd4 :
         e_class_r[0] == C_JAL ? 3'd1 : e_class_r[0] == C_JALR ? 3'd2 : 3'd0;
-    assign e_jump_misaligned_w = !RVC_EN && e_control_w && e_actual_pc_w[1];
+    assign e_jump_misaligned_w = RVC_EN == 0 && e_control_w && e_actual_pc_w[1];
     assign e_redirect0_w = e_advance_w && e_valid_r[0] && !e_exception_r &&
         !e_jump_misaligned_w && ((e_control_w &&
         ((e_taken_w != e_record_r[0][REC_PRED_TAKEN]) || (e_taken_w
