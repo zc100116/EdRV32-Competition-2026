@@ -14,7 +14,7 @@
 #define HAS_STDIO 0
 #define HAS_PRINTF 0
 #define COMPILER_VERSION "GCC " __VERSION__
-#define COMPILER_FLAGS "-O0 -march=rv32imc_zicsr -mabi=ilp32"
+#define COMPILER_FLAGS "-O2 -march=rv32imc_zicsr -mabi=ilp32"
 #define MEM_LOCATION "SRAM"
 #define SEED_METHOD SEED_VOLATILE
 #define MEM_METHOD MEM_STATIC
