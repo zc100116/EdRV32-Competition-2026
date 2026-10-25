@@ -191,6 +191,8 @@ module edrv32_cpu_core #(
     wire [1:0] csr_command_w;
     wire [31:0] csr_operand_w;
     wire [1:0] retire_count_w;
+    wire [1:0] csr_retire_count_w;
+    wire w_instret_write_w;
     reg [31:0] event_count_w;
     wire mul_valid_w;
     wire [31:0] mul_result_w;
@@ -349,7 +351,7 @@ module edrv32_cpu_core #(
         .write_data_i(csr_operand_w),
         .read_data_o(csr_read_w),
         .illegal_o(csr_illegal_w),
-        .retire_count_i(retire_count_w),
+        .retire_count_i(csr_retire_count_w),
         .event_count_i(event_count_w),
         .trap_i(m_trap_w),
         .trap_pc_i(m_trap_pc_w),
@@ -756,6 +758,12 @@ module edrv32_cpu_core #(
             committed_ras_data_r <= committed_ras_data_w;
     end
     assign retire_count_w = {1'b0, w_valid_r[0]} + {1'b0, w_valid_r[1]};
+    // spec 5: a minstret write replaces the count including its own retirement.
+    // The write commits in M, one cycle before its instruction retires in W.
+    assign w_instret_write_w = w_valid_r[0] && w_class_r[0] == C_CSR &&
+        (w_record_r[0][95:84] == 12'hb02 || w_record_r[0][95:84] == 12'hb82) &&
+        (w_record_r[0][77:76] == 2'b01 || w_record_r[0][83:79] != 0);
+    assign csr_retire_count_w = w_instret_write_w ? 2'b0 : retire_count_w;
     assign ic_miss_start_w = ic_expect_r && !ic_resp_valid_i && !ic_kill_o;
     assign dc_miss_start_w = dc_expect_r && !dc_resp_valid_i && !dc_resp_device_i && !dc_kill_o;
     always @(*) begin
