@@ -13,8 +13,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0（7ada537）和 cache 工作包（6976b1c）已合入 main |
-| 正在进行 | C-I1/C-I2 CPU 联调与 full 回归（`ctx_303a33f7efcc`）；系统子系统第一波：S-R1 总线、S-R2 中断与系统控制、S-R3 外设、S-V1 验证环境、S-W1 软件 |
+| 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
+| 正在进行 | 系统子系统：S-R1 总线、S-V1 验证环境（S-R2、S-R3、S-W1 已完成，分支待集成） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
