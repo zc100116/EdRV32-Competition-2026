@@ -84,7 +84,7 @@
 
 | 编号 | 规格条款 | 测试内容 | 档位 |
 |---|---|---|---|
-| I-01 | 2.1 | riscv-tests rv32ui/um/uc/mi 全部通过 | S（子集）/ F（全部） |
+| I-01 | 2.1 | riscv-tests rv32ui/um/uc/mi 全部通过（rv32mi 中专测 PMP 的 pmpaddr 除外：不实现 PMP）；Spike 配置 `--pmpregions=0`、ISA 含 zicntr_zihpm | S（子集）/ F（全部） |
 | I-02 | 2.1 | riscv-arch-test 适用部分全部通过，签名与参考一致 | F |
 | I-03 | 2.1 | `RVC_EN = 0` 时，C 编码报非法指令；跳转目标不对齐报 mcause 0 | F |
 
