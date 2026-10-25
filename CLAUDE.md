@@ -53,6 +53,7 @@ verif/
 sw/
   bsp/  drivers/  lib/  tests/  apps/
 tools/                  生成器、检查脚本、回归脚本、模型工具链
+third_party/            外部依赖：coremark、ultralytics（子模块），riscv-tests、riscv-arch-test（源码副本）
 tasks/win/              Windows 任务卡
 legacy/                 旧工程，只读参考，不进任何文件列表
 build/                  所有生成物，不入库
@@ -445,13 +446,13 @@ worker 发送 `worker_done` 之前必须：
 
 | 任务类型 | agent | 模型 |
 |---|---|---|
-| 开发：RTL、testbench、驱动、工具、交叉评审、文档配图、前端 | Codex | GPT-6.1 Sol |
-| 大批量跑脚本、读取和总结文档等简单工作 | Codex | GPT-6 Luna |
+| 开发：RTL、testbench、驱动、工具、交叉评审、文档配图、前端 | Codex | GPT-6.1 Sol（`gpt-6.1-sol`） |
+| 大批量跑脚本、读取和总结文档等简单工作 | Codex | GPT-6 Luna（`gpt-6-luna`） |
 | Claude worker（复杂控制逻辑、Codex 连续失败的问题） | Claude | Opus 5.5（`claude-opus-5-5`） |
 | 特殊情况下需要 Claude 执行大批量脚本 | Claude | Sonnet 5.5（`claude-sonnet-5-5`） |
 
 - Claude 默认不承担大批量脚本执行。
-- Codex 模型的准确 ID 在第一次派发时，以启动回执中的 `launch.effective` 为准，确认后补写到本表。
+- 派发后核对启动回执中的 `launch.effective`，确认实际生效的模型与本表一致。
 
 ---
 
