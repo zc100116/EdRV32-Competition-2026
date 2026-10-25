@@ -117,3 +117,79 @@ writeback-value comparison. The explicit CSR set is in `trace_compare.py`.
 All other writeback values remain compared. `rv32mi-p-ma_fetch` uses tohost
 self-check only on RTL. Interrupt timing tests use B1 self-checking programs
 per testplan 3.5.
+
+## Random instruction streams (C-V3 / P-09)
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+# Generate assembly only, without C (default), or with explicit C instructions.
+python3 tools/cpu/randgen.py generate high-dep 17
+python3 tools/cpu/randgen.py generate high-dep 17 --c
+# Generate, build B1 images, and run Spike; seed upper bound is exclusive.
+python3 tools/cpu/randgen.py batch high-dep 0 50
+python3 tools/cpu/randgen.py batch high-dep 0 50 --c
+# Full generator acceptance: four configurations, 50 seeds, both ISA variants.
+for config in high-dep low-dep memory branch; do
+    python3 tools/cpu/randgen.py batch "$config" 0 50
+    python3 tools/cpu/randgen.py batch "$config" 0 50 --c
+done
+```
+
+`randgen.py` contains the complete configuration table: instruction category
+weights, source dependency distance weights, data offset range, branch/jump
+distances, stream length, compressed ALU fraction, and WAW probability. Only the
+configuration name, seed (or batch seed range), and C selection are exposed.
+`high-dep` favors adjacent producers; `low-dep` selects sources at least four
+instructions after their producer; `memory` favors loads/stores; `branch` favors
+conditional branches, JAL and JALR. The same configuration, seed, and C selection
+produce identical assembly independently of Python's process hash seed.
+
+Each stream has 1,024 generation slots. A JALR slot uses two additional explicit
+address instructions, so emitted instruction counts and category proportions
+include that overhead. Normal instructions remain 32-bit; `--c` additionally
+generates explicit 16-bit C.ADD, C.MV, C.ADDI and C.LI, mixing instruction lengths
+and halfword positions without assembler-selected compression. Register sources
+are initialized, x8 is the immutable data base, and x31 holds only generated
+JALR targets. All byte/halfword/word memory operands lie within initialized
+`rand_data` and have natural alignment. All control-flow targets move forward
+to generation-slot labels, bounding execution even when branches are taken.
+CSR operations use only writable `mscratch`; FENCE/FENCE.I do not modify code.
+Division by zero is legal RV32M behavior. No exception-generating system
+instruction, interrupt enable, counter-dependent value, or arbitrary indirect
+target is emitted. The program ends by writing 1 to the ELF's `tohost` symbol.
+
+Artifacts are under `build/cpu/rand/<config>/{c,no-c}/seed-<seed>/`:
+`program.S`, `program.elf`, `program.dis`, `build.log`, the three region images,
+absolute-addressed `mem.hex` for B1 `+MEM_HEX=`, and `spike.log`. Programs link
+against the same `verif/block/cpu/env/{boot.S,link.ld}` as C-V1. Nonzero tool
+exits and unexpected Spike traps fail the batch immediately. B1 can compare
+its retirement trace with `spike.log` using `trace_compare.py`; randomized cache
+misses/backpressure and cycle-level pairing/bypass/stall coverage belong to B1
+and the integration regression.
+
+Each batch writes `statistics-<first>-<stop>.txt` in its ISA directory. It reports
+both the generated static body and the body instructions actually retired by
+Spike, excluding startup and tohost handling. Categories count instructions;
+RAW distances count source operand occurrences in mutable GPRs (x1–x30 except
+the fixed x8 base), including implicit C read-modify-write operands. Distances
+1/2/3 mean that many body instructions since the last write; `4-8` and `9+`
+are buckets; `entry` means the last write preceded the body. x0 and reserved
+address registers are excluded from dependency statistics. Forward jumps can
+change dynamic producer distances by skipping static producers or intervening
+instructions, so both distributions are shown. No CPU cycle timing is inferred
+from Spike.
+
+Acceptance run: seeds 0–49 in each configuration and each C mode, **400/400
+normal Spike terminations**, Python 3.12.3, xPack GCC 15.2.0, Spike 1.1.1-dev.
+The table shows dynamic proportions (ranges span C disabled/enabled); full
+category and distance counts are in the eight `statistics-0-50.txt` files.
+
+| Configuration | ALU | Load + store | Branch/jump | RAW distance 1 | RAW distance 9+ |
+|---|---|---|---|---|---|
+| high-dep | 55.35–55.65% | 19.70–19.78% | 4.73–5.04% | 69.16–69.75% | 3.90–4.12% |
+| low-dep | 78.00–78.13% | 8.97–9.10% | 4.01–4.03% | 0.02% | 85.79–86.01% |
+| memory | 18.38–18.57% | 67.56–67.57% | 3.92–4.09% | 32.19–32.50% | 17.74–17.88% |
+| branch | 41.38–42.01% | 12.43–12.87% | 35.17–35.56% | 26.93–27.29% | 31.24–31.27% |
+
+The low-dep static body has no RAW distances 1–3. Forward jumps occasionally
+shorten dynamic distances, accounting for the small dynamic distance-1 fraction.
