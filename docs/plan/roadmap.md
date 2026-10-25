@@ -14,9 +14,9 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P0 基础设施进行中（orca Run `run_6e42f8ce0f9c`） |
-| 正在进行 | orca Run `run_6e42f8ce0f9c` 中 4 个 worker：P0-rest（Codex 项目经理，dispatch `ctx_ca175fbb445a`，自审验收中）；C-R2 CPU 前端（dispatch `ctx_92e534d83ec4`，复用 C-R1 终端，分支 `zc100116/task-cpu-datapath`）；K-RTL cache RTL（dispatch `ctx_4b3443f5e629`）；K-VERIF cache 验证（dispatch `ctx_2386d74f5e18`） |
-| 等待用户 | 无 |
-| 阻塞 | 无 |
+| 正在进行 | 协调者逐行评审 cache RTL（K-A1，分支 `zc100116/task-cache-rtl` a8f9b13） |
+| 等待用户 | cpu-spec 4.4 陈旧 BTB 恢复条款确认；P0 合入 main 批准 |
+| 阻塞 | C-R2 收尾（等待 BTB 条款） |
 
 ---
 
