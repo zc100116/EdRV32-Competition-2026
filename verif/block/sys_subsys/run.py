@@ -76,7 +76,7 @@ def run(selection):
               flush=True)
         if not passed:
             print(f'Simulator exit: {result.returncode}\n{output}', flush=True)
-    print(f'SB {selection}: {sum(results)} PASS, {len(results) - sum(results)} FAIL', flush=True)
+    print(f'SB {selection}: {sum(results)}/{len(results)} PASS', flush=True)
     return 0 if all(results) else 1
 
 
