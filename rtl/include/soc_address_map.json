@@ -1,0 +1,283 @@
+{
+  "regions": [
+    {
+      "name": "ROM",
+      "base": "0x00000000",
+      "size": "0x00004000",
+      "cacheable": false,
+      "executable": true,
+      "readable": true,
+      "writable": false,
+      "description": "Boot ROM"
+    },
+    {
+      "name": "SRAM",
+      "base": "0x10000000",
+      "size": "0x00040000",
+      "cacheable": true,
+      "executable": true,
+      "readable": true,
+      "writable": true,
+      "description": "SRAM"
+    },
+    {
+      "name": "CLINT",
+      "base": "0x20000000",
+      "size": "0x00010000",
+      "cacheable": false,
+      "executable": false,
+      "readable": true,
+      "writable": true,
+      "description": "CLINT"
+    },
+    {
+      "name": "PLIC",
+      "base": "0x30000000",
+      "size": "0x00400000",
+      "cacheable": false,
+      "executable": false,
+      "readable": true,
+      "writable": true,
+      "description": "PLIC"
+    },
+    {
+      "name": "SYS_APB",
+      "base": "0x40000000",
+      "size": "0x00010000",
+      "cacheable": false,
+      "executable": false,
+      "readable": true,
+      "writable": true,
+      "description": "System APB"
+    },
+    {
+      "name": "MEDIA_APB",
+      "base": "0x41000000",
+      "size": "0x00010000",
+      "cacheable": false,
+      "executable": false,
+      "readable": true,
+      "writable": true,
+      "description": "Media APB"
+    },
+    {
+      "name": "DDR",
+      "base": "0x80000000",
+      "size": "0x40000000",
+      "cacheable": true,
+      "executable": true,
+      "readable": true,
+      "writable": true,
+      "description": "DDR"
+    },
+    {
+      "name": "DDR_UNCACHED",
+      "base": "0xC0000000",
+      "size": "0x40000000",
+      "cacheable": false,
+      "executable": false,
+      "readable": true,
+      "writable": true,
+      "description": "DDR uncached alias"
+    }
+  ],
+  "apb_slot_size": "0x00001000",
+  "system_apb_slots": [
+    {
+      "slot": 0,
+      "name": "UART0"
+    },
+    {
+      "slot": 1,
+      "name": "GPIO0"
+    },
+    {
+      "slot": 2,
+      "name": "QSPI0"
+    },
+    {
+      "slot": 3,
+      "name": "TIMER0"
+    },
+    {
+      "slot": 4,
+      "name": "I2C0"
+    },
+    {
+      "slot": 5,
+      "name": "CACHE_CTRL"
+    },
+    {
+      "slot": 6,
+      "name": "SYSCTRL"
+    },
+    {
+      "slot": 7,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 8,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 9,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 10,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 11,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 12,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 13,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 14,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 15,
+      "name": "RESERVED"
+    }
+  ],
+  "media_apb_slots": [
+    {
+      "slot": 0,
+      "name": "MEDIA_CTRL"
+    },
+    {
+      "slot": 1,
+      "name": "VIN"
+    },
+    {
+      "slot": 2,
+      "name": "PIX"
+    },
+    {
+      "slot": 3,
+      "name": "GEO"
+    },
+    {
+      "slot": 4,
+      "name": "RND"
+    },
+    {
+      "slot": 5,
+      "name": "DISP"
+    },
+    {
+      "slot": 6,
+      "name": "NPU"
+    },
+    {
+      "slot": 7,
+      "name": "ETH"
+    },
+    {
+      "slot": 8,
+      "name": "MEM_XBAR"
+    },
+    {
+      "slot": 9,
+      "name": "PERF_MON"
+    },
+    {
+      "slot": 10,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 11,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 12,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 13,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 14,
+      "name": "RESERVED"
+    },
+    {
+      "slot": 15,
+      "name": "RESERVED"
+    }
+  ],
+  "plic_sources": [
+    {
+      "source": 0,
+      "name": "NONE"
+    },
+    {
+      "source": 1,
+      "name": "UART0"
+    },
+    {
+      "source": 2,
+      "name": "GPIO0"
+    },
+    {
+      "source": 3,
+      "name": "QSPI0"
+    },
+    {
+      "source": 4,
+      "name": "TIMER0"
+    },
+    {
+      "source": 5,
+      "name": "I2C0"
+    },
+    {
+      "source": 6,
+      "name": "RESERVED"
+    },
+    {
+      "source": 7,
+      "name": "RESERVED"
+    },
+    {
+      "source": 8,
+      "name": "VIN"
+    },
+    {
+      "source": 9,
+      "name": "PIX"
+    },
+    {
+      "source": 10,
+      "name": "GEO"
+    },
+    {
+      "source": 11,
+      "name": "RND"
+    },
+    {
+      "source": 12,
+      "name": "DISP"
+    },
+    {
+      "source": 13,
+      "name": "NPU"
+    },
+    {
+      "source": 14,
+      "name": "ETH"
+    },
+    {
+      "source": 15,
+      "name": "MEM_XBAR"
+    }
+  ]
+}
