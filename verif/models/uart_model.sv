@@ -69,7 +69,8 @@ module uart_model (
                     received.push_back(data);
                     captured++;
                 end else frame_errors++;
-                #(period / 2.0);
+                // Stop was sampled at its midpoint; resume searching before the next start.
+
             end
         end
     end
