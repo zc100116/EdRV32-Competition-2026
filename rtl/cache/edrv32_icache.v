@@ -5,9 +5,11 @@
 // Hit lookup is pipelined; an outstanding refill survives a core kill.
 // Clock domain: clk_sys.
 module edrv32_icache (
-    // Clock, reset and core instruction interface.
+    // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+
+    // Core instruction interface.
     input wire ic_req_valid_i,
     input wire [31:0] ic_req_addr_i,
     output wire ic_req_ready_o,

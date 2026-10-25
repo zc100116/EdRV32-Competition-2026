@@ -6,12 +6,16 @@
 // Contents and read data are not initialized or reset.
 `include "edrv32_build_mode.vh"
 module edrv32_ram_icache_tag (
-    // Clock and RAM ports.
-    input wire  clk_i,
+    // Clock.
+    input wire clk_i,
+
+    // Write port.
     input wire  wr_en_i,
     input wire [6:0] wr_addr_i,
     input wire [19:0] wr_data_i,
-    input wire  rd_en_i,
+
+    // Read port.
+    input wire rd_en_i,
     input wire [6:0] rd_addr_i,
     output wire [19:0] rd_data_o
 );
