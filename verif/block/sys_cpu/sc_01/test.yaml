@@ -1,0 +1,10 @@
+top: edrv32_sys_cpu_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 900
+pass: PASS
+tier: smoke
+simulator: verilator
+runner: python3 verif/block/sys_cpu/run.py sc01
