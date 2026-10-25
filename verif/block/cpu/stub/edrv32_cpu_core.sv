@@ -53,6 +53,10 @@ module edrv32_cpu_core (
     logic [63:0] trace_rd_data_w = 0;
     logic trace_trap_w = 0;
     logic [31:0] trace_cause_w = 0;
+    // Spec v0.6 3.4: this transaction stub has no pipeline bypass or stalls.
+    wire [11:0] trace_bypass_w = 0;
+    wire [1:0] trace_redirect_cause_w = 0;
+    wire [2:0] trace_stall_cause_w = 0;
     logic m_enter_w;
     int violation = 0;
     int retired = 0;

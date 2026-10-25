@@ -136,6 +136,21 @@ module edrv32_cpu_b1_tb;
         .trace_trap_i(u_core.trace_trap_w),
         .trace_cause_i(u_core.trace_cause_w)
     );
+    edrv32_cpu_coverage u_coverage (
+        .clk_i(clk),
+        .rst_n_i(rst_n),
+        .debug_i(debug),
+        .trace_valid_i(u_core.trace_valid_w),
+        .trace_instr_i(u_core.trace_instr_w),
+        .trace_trap_i(u_core.trace_trap_w),
+        .trace_cause_i(u_core.trace_cause_w),
+        .trace_bypass_i(u_core.trace_bypass_w),
+        .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
+        .trace_stall_cause_i(u_core.trace_stall_cause_w),
+        .irq_meip_i(irq_meip),
+        .irq_msip_i(irq_msip),
+        .irq_mtip_i(irq_mtip)
+    );
     edrv32_cpu_protocol_checker u_checker (
         .clk_i(clk),
         .rst_n_i(rst_n),

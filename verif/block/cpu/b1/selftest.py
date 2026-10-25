@@ -10,7 +10,7 @@ Run from the repository with the edrv32 tool environment sourced:
 
 The smoke manifest runs the default stress scenario. This script also checks hits,
 error injection, PC-triggered interrupts, ordered retirement text, and nonzero exits.
-Artifacts are build/cpu-b1/{compile.log,<scenario>.log,<scenario>.trace}.
+Artifacts are build/cpu-b1/{compile.log,<scenario>.log,<scenario>.trace,<scenario>.coverage.json}.
 
 For real-core integration, replace the stub and self-test harness in files.f with
 an integration top. Reuse the explicit model/checker/trace connections in the TB;
@@ -22,8 +22,9 @@ IC/DC_MISS_PCT and IC/DC_READY_LOW_PCT are percentages; IC/DC_DELAY_MIN/MAX are
 cycles (model defaults 0% miss, 0% ready-low, 5-40 cycles). IC/DC_ERROR_ADDR is hex.
 DC_WB_EVENT_CYCLE emits one dirty-writeback pulse and wb_event_count records it.
 MEIP/MSIP/MTIP_CYCLE or _PC selects an interrupt start, _DURATION sets high cycles.
-TRACE_FILE selects output text. The self-test defaults inject misses, backpressure,
-three interrupt pulses and one writeback pulse; explicit plusargs override these.
+TRACE_FILE selects output text; COVERAGE_FILE selects coverage JSON (default
+build/cpu-coverage.json from repo root). The self-test defaults inject misses,
+backpressure, three interrupt pulses and one writeback pulse; plusargs override these.
 """
 from pathlib import Path
 import subprocess
@@ -59,7 +60,9 @@ def main():
         trace = out / (name + '.trace')
         result = subprocess.run([str(out / 'obj/sim'),
                                  '+MEM_HEX=' + str(Path(__file__).with_name('program.hex')),
-                                 '+TRACE_FILE=' + str(trace)] + args,
+                                 '+TRACE_FILE=' + str(trace),
+                                 '+COVERAGE_FILE=' + str(out / (name + '.coverage.json'))]
+                                + args,
                                 cwd=out, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, timeout=30)
         (out / (name + '.log')).write_text(result.stdout)
