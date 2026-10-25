@@ -1,0 +1,42 @@
+/* File: rom.ld
+ * Spec: edrv32-soc-spec 6.1; CLAUDE.md 9.2
+ * Description: Link the ROM software image and initialize data via BSP startup.
+ *              Addresses are generated from the shared SoC address map.
+ * Clock domain: clk_sys.
+ */
+INCLUDE build/sw/soc_memory.ld
+OUTPUT_ARCH(riscv)
+ENTRY(_start)
+PHDRS
+{
+    text PT_LOAD FLAGS(5);
+    data PT_LOAD FLAGS(6);
+    bss PT_LOAD FLAGS(6);
+}
+SECTIONS
+{
+    .text : { KEEP(*(.text.start)) *(.text .text.*) } > ROM :text
+    .rodata : { *(.rodata .rodata.* .srodata .srodata.*) } > ROM :text
+    .data : ALIGN(4)
+    {
+        __data_start = .;
+        __global_pointer$ = . + 0x800;
+        *(.data .data.* .sdata .sdata.*)
+        . = ALIGN(4);
+        __data_end = .;
+    } > SRAM AT> ROM :data
+    __data_load = LOADADDR(.data);
+    .tohost ALIGN(64) (NOLOAD) : AT(ADDR(.tohost))
+    {
+        __bss_start = .;
+        KEEP(*(.tohost))
+    } > SRAM :bss
+    .bss ALIGN(4) (NOLOAD) : AT(ADDR(.bss))
+    {
+        *(.bss .bss.* .sbss .sbss.* COMMON)
+        . = ALIGN(4);
+        __bss_end = .;
+    } > SRAM :bss
+    __stack_top = ORIGIN(SRAM) + LENGTH(SRAM);
+    /DISCARD/ : { *(.comment .eh_frame .riscv.attributes) }
+}
