@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v0.1（草案） |
 | 日期 | 2026-10-25 |
-| 状态 | 草案。标 **[待定]** 的条目给出了开发初值 |
+| 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | sys_xbar、Boot ROM、SRAM、系统 APB 桥、媒体 APB 桥、CLINT、PLIC、UART0、GPIO0、I2C0、SYSCTRL、复位控制 `reset_ctrl` |
 | 关联文档 | SoC 规格 3.1、3.5、4.1、4.3、4.4、5.3、6.1、6.2、7.5、8.3；`docs/spec/cache-spec.md`（CACHE_CTRL）；`docs/testplan/sys-subsys-testplan.md`；`docs/plan/sys-subsys-plan.md` |
 
