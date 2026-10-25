@@ -1,2 +1,6 @@
-# S-I1 replaces this stub inclusion with the real S-T1 RTL list and slave binds.
--f stub.f
+-f models.f
+-f rtl.f
+../../common/edrv32_axi64_observer.sv
+../../common/edrv32_apb_observer.sv
+edrv32_sys_slave_binds.sv
+edrv32_sys_env.sv

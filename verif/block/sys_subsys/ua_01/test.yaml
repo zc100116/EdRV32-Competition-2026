@@ -5,5 +5,6 @@ parameters: CASE_ID=601
 software:
 timeout: 180
 pass: PASS
-tier: sb_smoke
+tier: smoke
 simulator: verilator
+runner: python3 verif/block/sys_subsys/run.py 601

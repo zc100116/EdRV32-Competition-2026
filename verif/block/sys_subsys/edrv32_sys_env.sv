@@ -42,6 +42,7 @@ module edrv32_sys_env;
     logic [31:0] sim_exit_code;
     // Reset outputs are deliberately sampled by checks and used as asynchronous resets.
     /* verilator lint_off SYNCASYNCNET */
+    logic unused_rst_sys_por_n;
     logic rst_sys_n;
     logic rst_mem_core_n;
     logic rst_mem_n;
@@ -130,6 +131,7 @@ module edrv32_sys_env;
         .eth_tx_clk_i(eth_tx_clk),
         .rst_n_i(rst_n),
         .mem_ready_i(mem_ready),
+        .rst_sys_por_n_o(unused_rst_sys_por_n),
         .rst_sys_n_o(rst_sys_n),
         .rst_mem_core_n_o(rst_mem_core_n),
         .rst_mem_n_o(rst_mem_n),
