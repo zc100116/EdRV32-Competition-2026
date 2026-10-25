@@ -173,6 +173,8 @@
         int done1;
         int first0;
         int first1;
+        int latency0;
+        int latency1;
         bases = '{EDRV32_ROM_BASE, EDRV32_SRAM_BASE, EDRV32_CLINT_BASE, EDRV32_PLIC_BASE,
                     EDRV32_SYS_APB_BASE, EDRV32_MEDIA_APB_BASE, EDRV32_DDR_BASE,
                     EDRV32_DDR_UNCACHED_BASE};
@@ -246,8 +248,16 @@
                 end
             end
             105: begin
+                edrv32_axi64_memory_pkg::random_stalls = 0;
+                edrv32_axi64_memory_pkg::delay_max = 0;
+                wait_sys(3);
                 for (int slave = 0; slave < 7; slave++) begin
                     if (slave == 0 || slave == 1 || slave == 6) begin
+                        // Different intrinsic slave latencies need not overlap R windows.
+                        rd(0, bases[slave], 3, 3);
+                        latency0 = u_m0.first_latency;
+                        rd(1, bases[slave == 0 ? 1 : 0], 3, 3);
+                        latency1 = u_m1.first_latency;
                         for (int round = 0; round < 8; round++) begin
                             fork
                                 begin
@@ -255,21 +265,20 @@
                                     bit [1:0] resp[256];
                                     u_m0.read(bases[slave], 3, 3, unused_data, resp);
                                     check(resp[0] == 0, "M0 concurrent response", 0, 64'(resp[0]));
-                                    first0 = u_m0.beat_cycle[0];
-                                    done0 = u_m0.cycle;
+                                    first0 = u_m0.first_latency;
                                 end
                                 begin
                                     bit [63:0] unused_data[256];
                                     bit [1:0] resp[256];
                                     u_m1.read(bases[slave == 0 ? 1 : 0], 3, 3, unused_data, resp);
                                     check(resp[0] == 0, "M1 concurrent response", 0, 64'(resp[0]));
-                                    first1 = u_m1.beat_cycle[0];
-                                    done1 = u_m1.cycle;
+                                    first1 = u_m1.first_latency;
                                 end
                             join
-                            check(first0 < done1 && first1 < done0,
-                                    "independent slaves overlap", 1,
-                                    64'(first0 < done1 && first1 < done0));
+                            check(first0 <= latency0, "M0 independent slave latency",
+                                    64'(latency0), 64'(first0));
+                            check(first1 <= latency1, "M1 independent slave latency",
+                                    64'(latency1), 64'(first1));
                         end
                     end
                 end
