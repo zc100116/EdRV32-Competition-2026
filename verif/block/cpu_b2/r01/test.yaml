@@ -1,0 +1,10 @@
+top: edrv32_cpu_b2_tb
+files: files.f
+simulator: verilator
+defines: SIM_MODE
+parameters: RVC_EN=1
+software: cpu_perf/r01
+runner: python3 tools/cpu/b2_run.py r01 --rvc 1
+timeout: 900
+pass: PASS
+tier: perf
