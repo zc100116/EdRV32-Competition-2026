@@ -55,6 +55,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-E1 | ISA 评估：CoreMark 分别以 rv32im、rv32imc、rv32im_zba_zbb、rv32imc_zba_zbb、rv32im_zba、rv32imc_zba 编译，在 Spike 上统计动态指令数、代码体积、取指字节数 | Codex · GPT-6 Luna | C-V1、I-07 | 测量报告 `docs/reports/…-perf-isa-eval.md` | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
 | C-E2 | 预测器规模：从 Spike 提交日志提取 CoreMark 的分支轨迹，用轨迹模拟器比较 BTB 16/32/64、gshare 256/512/1024、RAS 2/4/8 的误预测率 | Codex · GPT-6.1 Sol | C-V1 | 测量报告，含误预测率曲线 | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
 | C-E3 | 配对机会统计：在 CoreMark 轨迹上统计不同配对规则（管线 1 是否支持分支、是否允许组内 RAW 等）下的可配对比例和各类失败原因 | Codex · GPT-6.1 Sol | C-V1 | 测量报告 | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
+| C-E4 | 微结构优化方向评估：周期近似轨迹模型（与 C-I3 HPM 校准）评估发射交换、管线 1 支持分支、加宽取指/IB、预测器加大 | Codex · GPT-6.1 Sol | C-I3 | 测量报告 `docs/reports/2026-10-25-perf-cpu-uarch-eval.md` | zc100116/task-cpu-uarch-eval | [~] dispatch ctx_3d19c7fb2fbb |
 | C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | 待写 | [ ] |
 
 ### 3.4 联调、评审与定稿
@@ -63,7 +64,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 |---|---|---|---|---|---|---|
 | C-I1 | 联调：RTL 与 B1 环境对接，跑 smoke；失败时判断属于 RTL 错误、测试错误还是规格歧义 | Codex · GPT-6.1 Sol | C-R3、C-V2、C-V4 | smoke 全部通过 | zc100116/task-cpu-integ | [x] smoke 135、full 820、覆盖 57/57；已合入 main（1c73c35） |
 | C-I2 | full 回归和覆盖收敛 | Codex · GPT-6.1 Sol | C-I1、C-V3、C-V5 | full 全部通过，覆盖报告中的功能点全部覆盖 | zc100116/task-cpu-integ | [x] 同 C-I1 |
-| C-I3 | B2 环境（core + 实际 cache）和性能测试 R-01 至 R-05 | Codex · GPT-6.1 Sol | C-I2、cache RTL | CoreMark CRC 正确；测量报告 | zc100116/task-cpu-perf | [~] dispatch ctx_cb25ae055ea9 |
+| C-I3 | B2 环境（core + 实际 cache）和性能测试 R-01 至 R-05 | Codex · GPT-6.1 Sol | C-I2、cache RTL | CoreMark CRC 正确；测量报告 | zc100116/task-cpu-perf | [x] 7c63c3b（分支 zc100116/task-cpu-perf，报告待合入）：-O2 3.585、调优 4.307 CoreMark/MHz，IPC 约 1.03 |
 | C-A1 | 评审：流水控制、配对、冒险、重定向、异常部分由协调者逐行评审；其余部分交叉评审 | 协调者；Codex · GPT-6.1 Sol | C-R3 起，逐项进行 | 评审意见全部处理 | — | [x] 协调者逐行评审 core，意见（FENCE.I 中断、记录字段命名、组合环、槽 1 异常）全部处理 |
 | C-S1 | 规格定稿：依据 C-E1/E2/E3、C-W2、C-I3 的数据，确定第 4 节中的各项；删除 `RVC_EN` 等评估参数；cpu-spec 升级 v1.0，cpu-testplan 同步修订 | 协调者 + 用户确认 | 上述数据齐全 | 用户确认 v1.0 | — | [ ] |
 | C-M1 | 合入 main，打里程碑 tag `m1-cpu-isa-pass` | 协调者 | C-I2，用户批准 | — | main | [ ] |
