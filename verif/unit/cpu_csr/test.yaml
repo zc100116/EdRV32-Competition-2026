@@ -1,0 +1,9 @@
+name: cpu_csr
+top: tb
+files: files.f
+macros: [SIM_MODE]
+parameters: {}
+software: []
+timeout: 120
+pass_pattern: PASS
+tier: smoke
