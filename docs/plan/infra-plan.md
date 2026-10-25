@@ -39,7 +39,7 @@
 | I-06 | 公共原语：`reset_sync`、`cdc_sync_bit`、`cdc_pulse`、`cdc_handshake`、`cdc_gray_cnt`、`async_fifo`、`sync_fifo`、`rtl/include/edrv32_build_mode.vh`；各自的单元测试 | Codex · GPT-6.1 Sol | I-03、I-04 | 单元测试在 Verilator 和 Icarus 下都通过；lint 0 告警 | zc100116/task-p0-rest \| [x] 56057f3，smoke/full 16 PASS，协调者复跑 smoke 和 lint 通过 |
 | I-07 | 软件骨架：`sw/Makefile`、启动代码、链接脚本 `rom.ld`/`sram.ld`/`ddr.ld`、`tools/elf2mem`（按地址段切分 hex）、`tohost` 和 `SIM_EXIT` 的约定实现；CoreMark 子模块初始化和移植框架 | Codex · GPT-6.1 Sol | I-01、I-02 | 最小程序编译出 ELF 和各段 hex；CoreMark 能编译 | zc100116/task-p0-rest \| [x] 56057f3，smoke/full 16 PASS，协调者复跑 smoke 和 lint 通过 |
 | I-08 | 评审：I-03 至 I-07 的交叉评审 | Codex · GPT-6.1 Sol | 各项完成 | 评审意见全部处理 | zc100116/task-p0-rest \| [x] 56057f3，smoke/full 16 PASS，协调者复跑 smoke 和 lint 通过 |
-| I-09 | 合入 main 并更新路线图 | 协调者 | I-08，用户批准 | `main` 上 smoke 通过 | main | [ ] |
+| I-09 | 合入 main 并更新路线图 | 协调者 | I-08，用户批准 | `main` 上 smoke 通过 | main | [x] 7ada537，main 上 smoke 16 PASS、lint 0 告警 |
 
 可以并行的波次：
 - 波次 1：I-01（I-02 已由协调者完成）
