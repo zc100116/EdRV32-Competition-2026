@@ -55,7 +55,7 @@ def run(selection):
         obj = OUT / f'group{group}/obj'
         obj.parent.mkdir(parents=True, exist_ok=True)
         if group not in built:
-            args = ['verilator', '--binary', '--timing', '-Wall', '-j', '1',
+            args = ['verilator', '--binary', '--timing', '-Wall', '-j', '2',
                     '--top-module', fields['top'], '--Mdir', str(obj), '-o', 'sim',
                     f'-GCASE_ID={group * 100 + 1}', '+define+SIM_MODE']
             args += expand_files(path.parent / fields['files'])
@@ -75,7 +75,7 @@ def run(selection):
         print(f'{"PASS" if passed else "FAIL"} {path.parent.name}: {log_path.relative_to(ROOT)}',
               flush=True)
         if not passed:
-            print(output, flush=True)
+            print(f'Simulator exit: {result.returncode}\n{output}', flush=True)
     print(f'SB {selection}: {sum(results)} PASS, {len(results) - sum(results)} FAIL', flush=True)
     return 0 if all(results) else 1
 
