@@ -70,7 +70,7 @@ def main():
     if args.prepare:
         prepare()
         return
-    with ProcessPoolExecutor(max_workers=4) as pool:
+    with ProcessPoolExecutor(max_workers=2) as pool:
         groups = list(pool.map(evaluate, ((1, 'o2'), (1, 'tuned'), (0, 'o2'), (0, 'tuned'))))
     rows = [row for group in groups for row in group]
     with (OUT / 'variants.csv').open('w') as log:
