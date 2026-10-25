@@ -53,7 +53,7 @@
 | 来源 | 说明 |
 |---|---|
 | riscv-tests | rv32ui、rv32um、rv32uc、rv32mi 的 p 环境 |
-| riscv-arch-test | I、M、C、Zicsr、Zifencei、privilege 中适用于 M 模式的部分；**必须与参考签名比对**，不能只看是否跑完 |
+| riscv-arch-test | 3.10.0（最后一个签名式版本）的 I、M、C、Zifencei、privilege 中适用于 M 模式的部分（该版本没有独立的 Zicsr 用例，Zicsr 由 rv32mi 和 C-01 覆盖）；**必须与参考签名比对**，不能只看是否跑完 |
 | 定向汇编测试 | `sw/tests/cpu/` 下，按第 3 节的测试项编写 |
 | 随机指令流 | `tools/` 下的随机程序生成器，可以控制指令类别比例和相关性密度（见 3.3） |
 | CoreMark | `sw/apps/coremark` |
