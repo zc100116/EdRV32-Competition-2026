@@ -1,7 +1,7 @@
-# EdRV32 CPU datapath — C-R1
+# EdRV32 CPU datapath and frontend — C-R1/C-R2
 
 依据 `docs/spec/cpu-spec.md` v0.2 和 `docs/testplan/cpu-testplan.md` U-01–U-07、U-10。
-本目录只含当前任务的数据通路；前端、流水控制和 core 顶层属于 C-R2/C-R3。
+本目录包含C-R1数据通路与C-R2前端；后端流水控制和core顶层属于C-R3。
 
 ## 模块与接口
 
@@ -100,3 +100,111 @@ verilator --lint-only -Wall -GRVC_EN=0 rtl/cpu/edrv32_cpu_csr.v
 
 回归框架接入、P0-rest风格检查，以及FPGA乘法IP创建说明/Windows IP等价验证不在
 本次已执行的Linux单元测试中；IP分支的模块名与端口严格按Task要求实现。
+
+## C-R2 前端接口
+
+新增 `edrv32_cpu_frontend` 集成 F1/F2、`edrv32_cpu_predictor` 和
+`edrv32_cpu_ib`，复用 `edrv32_cpu_rvc`。时钟域均为 clk_sys，前端参数仅有
+规格允许的 RVC_EN；BTB=32、gshare=512、RAS=4、IB=4 均为固定 localparam。
+复位入口遵守 SoC 5.3，PC=0。
+
+后端提供 `decode_pop_count_i[1:0]`（0/1/2），每个时钟沿取走最老的指定数量记录；
+不得超过 `decode_valid_count_o`。`decode_data_o[357:0]` 的低179位是最老指令，
+高179位是下一条；仅有效记录有意义。`ib_count_o[2:0]` 为全部IB占用数。
+
+每条179位记录的字段如下，前后端直接用切片取得：
+
+| 位 | 字段 |
+|---|---|
+| 31:0 | 指令PC |
+| 63:32 | 规范32位指令 |
+| 95:64 | 原始编码；压缩指令高16位=0 |
+| 96 | compressed，决定顺序PC增量2或4 |
+| 97 | RVC展开发现非法；普通32位指令由D级译码器检查 |
+| 98 | 取指访问异常，跨边界任一半字错误均置位 |
+| 99 | 此指令BTB命中 |
+| 100 | 此指令预测跳转 |
+| 132:101 | 预测目标，仅命中/预测跳转时使用 |
+| 141:133 | 原查询gshare索引，供该条E级条件分支训练 |
+| 178:142 | 预测前RAS检查点（布局见下） |
+
+后端的较老 M/E 重定向已在后端按 M>E 仲裁后，通过 `redirect_valid_i`、
+`redirect_pc_i` 和对应 `redirect_ras/push/pop/return_pc` 输入；
+D级JAL通过同构的 `d_redirect_*` 输入。前端固定优先级为 M/E > D。
+重定向当拍不再接受请求，清空IB和拼接状态，对尚未返回请求输出ic_kill，
+下一周期从重定向PC所在的8字节组发起请求，并从PC的半字偏移开始解释。
+`halt_i` 只停止新请求，已接收的响应仍可进入IB；适用于WFI及后端停顿控制。
+`invalidate_i`、`invalidate_done_o` 直连I$的ic_inv/ic_inv_done，FENCE.I次序由后端负责。
+
+E级 `update_valid_i` 只能对未被冲刷的已判定分支置位；提供完整PC、实际目标、
+实际taken、compressed和随指令保存的9位index。`update_type_i`：0条件分支、
+1 JAL、2 JALR、3调用、4返回。JAL在D级未命中时仅重定向，最终仍在E级训练。
+调用/返回按RISC-V x1/x5的隐式RAS提示由后端分类；恢复动作的push/pop均可为1，
+实现协程的先pop后push。`return_pc` 是实际指令PC+2/4。
+
+经协调者批准的预测初值：BTB index=PC[7:3]，tag=PC[31:8]，位置=PC[2:1]，
+每组保留最近训练的一个分支；gshare index=实际分支PC[9:1] XOR 9位GHR，
+计数器复位01、GHR复位0；仅E级未冲刷条件分支非推测更新GHR，训练使用保存的原index。
+query_pc/update_pc在predictor子模块中只传[31:1]，半字对齐由CPU契约保证。
+BTB还保存compressed以确定预测截断位置；预测32位分支位于组末半字时，
+先取下一组的一个半字完成该指令，再请求预测目标，不把顺序后继送入IB。
+
+RAS在F1请求被I$接受时推测更新；调用push、返回pop、满栈覆盖最老项。
+37位检查点：`[36:34]`有效计数、`[33:32]`下一push指针、`[31:0]`当前栈顶值。
+空栈时栈顶值无意义。重定向恢复计数和指针、写回保存的栈顶，再按实际指令执行
+pop/push；异常使用后端维护的提交点检查点且不执行额外动作。
+后端负责从退休指令顺序维护提交点状态，不能直接使用当前推测指针。
+协调者明确选择只保存栈顶而非完整栈：错误路径满栈覆盖可能污染更深的预测项，
+只影响预测准确率；E级必须核对真实目标，保证架构执行正确。
+
+F2为最多8个半字预留响应空间，按IB当拍可用空间送入0/1/2条指令。
+响应可与下一个请求同拍；无IB空间时保存响应且暂停继续取指，不要求I$反压响应。
+每个半字保留PC、异常和预测元数据，跨组32位指令的两个半字拼接后作为一条送入IB。
+
+### C-R2 验证与命令
+
+U-08（`cpu_ib`）、U-09（`cpu_predictor`）、组合测试（`cpu_frontend`）均PASS。
+前端RVC=1测试包含组末32位预测调用：先顺序请求一个半字再跳预测目标；
+RVC=0也单独构建运行。组合测试随机改变I$ ready、缺失延迟和D级消费数量，
+覆盖同时响应/请求、预测截断、取指错误传播、较老重定向优先于D重定向、
+取消在途请求、halt与FENCE.I接口直连。所有C-R1测试重新PASS，
+寄存器堆与CSR另经Icarus复测PASS；新增前端还通过Icarus -g2001语法编译。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+mkdir -p build/unit
+for n in ib predictor frontend; do
+    verilator --binary --timing -Wno-fatal --top-module tb -DSIM_MODE \
+        -f verif/unit/cpu_$n/files.f --Mdir build/unit/cpu_$n \
+        > build/unit/cpu_$n-compile.log 2>&1 || exit
+    build/unit/cpu_$n/Vtb || exit
+done
+verilator --binary --timing -Wno-fatal --top-module tb -GRVC_EN=0 -DSIM_MODE \
+    -f verif/unit/cpu_frontend/files.f --Mdir build/unit/cpu_frontend_no_c \
+    > build/unit/cpu_frontend_no_c-compile.log 2>&1
+build/unit/cpu_frontend_no_c/Vtb
+```
+
+新增和修改的RTL全部 `verilator --lint-only -Wall` 0告警；组合顶层命令：
+
+```sh
+verilator --lint-only -Wall --top-module edrv32_cpu_frontend \
+    rtl/cpu/edrv32_cpu_frontend.v rtl/cpu/edrv32_cpu_ib.v \
+    rtl/cpu/edrv32_cpu_predictor.v rtl/cpu/edrv32_cpu_rvc.v
+verilator --lint-only -Wall -GRVC_EN=0 --top-module edrv32_cpu_frontend \
+    rtl/cpu/edrv32_cpu_frontend.v rtl/cpu/edrv32_cpu_ib.v \
+    rtl/cpu/edrv32_cpu_predictor.v rtl/cpu/edrv32_cpu_rvc.v
+```
+
+`tools/check/`仍未在本worktree就位，沿用C-R1协调者确认的合入前补风格工具安排。
+RTL人工检查无Tab，非注释行≤100列，文件头包含规格、功能和准确时钟域。
+C-R1评审修订包括全部RTL文件头和单元测试头部，以及把乘法器的有效64位乘积命名为
+`product_w`，仅物理乘积未使用的两个符号扩展位接入`unused_product_sign_w`。
+乘法tech包装仅修改文件头，已单独取得协调者授权。
+
+本次测试计数（Verilator默认确定性随机种子）：U-08满866次、空533次、
+同时入出1359次、冲刷137次；U-09满栈覆盖4次、恢复44次、BTB别名替换858次、
+饱和保持16次。前端RVC=1：293请求、1133条指令、390次双取、2次kill、
+257等待周期、99反压周期、1条跨组指令、4条携带取指错误的指令；
+RVC=0：479请求、942条指令、312次双取、2次kill、427等待周期、
+165反压周期、2条携带取指错误的指令。计数用于证明上述用例被激励，不代表性能测量。
