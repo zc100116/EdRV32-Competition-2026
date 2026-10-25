@@ -29,6 +29,12 @@ Measured with xPack GCC 15.2.0, `-O2`, `rv32imc_zicsr_zifencei/ilp32`:
 | bootloader | 3600 | 0 | 0 | 3600 | 16384 ROM bytes |
 | monitor | 15756 | 8 | 2116 | 17880 | 262144 SRAM bytes |
 
+Verification source commit: **`ca52144`** (`sw: add UART monitor and boot system
+information`); the following documentation-only commit records these results.
+The monitor's aligned SRAM extent is `0x10000000..0x10004604` (17924 bytes),
+with stack top `0x10040000`. Build logs are
+`build/sw/bootloader/build.log` and `build/sw/monitor/build.log`.
+
 Sizes are bytes, with constants included in text. The SRAM linker includes
 alignment between sections; stack top is at SRAM end. Build metadata contains
 the current worktree paths in CFLAGS, so a different checkout path can change
@@ -286,6 +292,17 @@ the exact UART strings for score normalization and every derived metric against
 hand-computed values, including fractional rounding, zero denominator and a
 counter above 32 bits. A nonzero `tohost` status fails the command.
 Its logs are `build/sw/monitor-spike/{build,console}.log`.
+
+On source commit `ca52144`, both build commands above passed; authored sources
+produced zero warnings under `-Werror`, and the unchanged upstream source
+produced the single documented warning. The standalone CoreMark target also
+built successfully after the port change (`make -C sw PROGRAM=coremark MEMORY=sram`,
+log `build/sw/monitor-spike/standalone-build.log`). Spike CRC checks passed for
+both iteration counts; recorded ticks were 288206 and 2882012 respectively
+(Spike instruction-model observations, not SoC timing). All score/metric string
+checks passed (`Spike formula result: PASS`). Source whitespace/100-column
+checks, `git diff --check`, and a comparison of all 92 production keys against
+this README passed.
 
 No fake peripheral or HPM implementation is used by this check. Actual boot,
 UART menu, HPM event semantics and external devices require SC/board testing;
