@@ -530,7 +530,8 @@ module edrv32_cpu_core #(
         csr_msie_w && irq_msip_i ? 32'h80000003 : 32'h80000007;
     assign m_interrupt_w = m_valid_r[0] && csr_global_mie_w && irq_pending_w &&
         !m_fault0_w && !(m_memory_w && (dc_resp_device_i || m_device_started_r)) &&
-        m_class_r[0] != C_DIV && !(div_started_r && !div_done_r);
+        m_class_r[0] != C_DIV && m_class_r[0] != C_FENCE_I &&
+        !(div_started_r && !div_done_r);
     assign m_trap_w = m_valid_r[0] && (m_fault0_w || m_fault1_w || m_interrupt_w);
     assign m_trap_pc_w = !m_fault0_w && !m_interrupt_w && m_fault1_w ?
         m_record_r[1][31:0] : m_record_r[0][31:0];
