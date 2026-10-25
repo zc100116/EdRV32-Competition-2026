@@ -1,5 +1,5 @@
 // File: edrv32_cpu_core.v
-// Spec: cpu-spec v0.4 2-7
+// Spec: cpu-spec v0.8 2-7
 // Description: Execute in-order dual-issue instructions through D/E/M/W.
 //              Commit precise traps, memory transactions and architectural state.
 // Clock: clk_sys.
