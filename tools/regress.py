@@ -82,6 +82,17 @@ def run_test(path, fields, simulator, tier):
         compile_args += ['-G' + item for item in parameters]
         run_args = [str(out / 'obj/sim')]
     elif simulator == 'iverilog':
+        # Icarus accepts +incdir+/+define+ in command files, not on its command line.
+        translated_sources = []
+        for source in sources:
+            if source.startswith('+incdir+'):
+                translated_sources.extend('-I' + item for item in source[8:].split('+'))
+            elif source.startswith('+define+'):
+                translated_sources.extend('-D' + item for item in source[8:].split('+'))
+            else:
+                translated_sources.append(source)
+        sources = translated_sources
+        defines = ['-D' + item[8:] for item in defines]
         compile_args = ['iverilog', '-g2012', '-s', top, '-o', str(out / 'sim')]
         compile_args += ['-P' + top + '.' + item for item in parameters]
         run_args = ['vvp', str(out / 'sim')]
