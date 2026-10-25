@@ -56,6 +56,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-E2 | 预测器规模：从 Spike 提交日志提取 CoreMark 的分支轨迹，用轨迹模拟器比较 BTB 16/32/64、gshare 256/512/1024、RAS 2/4/8 的误预测率 | Codex · GPT-6.1 Sol | C-V1 | 测量报告，含误预测率曲线 | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
 | C-E3 | 配对机会统计：在 CoreMark 轨迹上统计不同配对规则（管线 1 是否支持分支、是否允许组内 RAW 等）下的可配对比例和各类失败原因 | Codex · GPT-6.1 Sol | C-V1 | 测量报告 | zc100116/task-cpu-eval | [x] 7584c11（分支 zc100116/task-cpu-eval，报告待合入） |
 | C-E4 | 微结构优化方向评估：周期近似轨迹模型（与 C-I3 HPM 校准）评估发射交换、管线 1 支持分支、加宽取指/IB、预测器加大 | Codex · GPT-6.1 Sol | C-I3 | 测量报告 `docs/reports/2026-10-25-perf-cpu-uarch-eval.md` | zc100116/task-cpu-uarch-eval | [x] d5c75e3（分支待合入），模型校准误差 <1%；结论见设计记录 `2026-10-25-cpu-uarch-optimization.md` |
+| C-E5 | 流水线损耗分解：V2 受限形式（一对最多一条控制转移）和 V2s+V5 补测、CPI 损耗栈、理想化上限、流水参数敏感性（误预测代价、load/乘法延迟） | Codex · GPT-6.1 Sol | C-E4 | 测量报告 `docs/reports/2026-10-25-perf-cpu-pipeline-analysis.md` | zc100116/task-cpu-uarch-eval | [~] dispatch ctx_2ed1887a102e（复用 C-E4 终端） |
 | C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | 待写 | [ ] |
 
 ### 3.4 联调、评审与定稿
