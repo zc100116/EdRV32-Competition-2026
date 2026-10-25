@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def generate():
     data = json.loads((ROOT / 'rtl/include/soc_address_map.json').read_text())
-    constants = []
+    constants = [('CLK_SYS_HZ', data['clk_sys_hz'])]
     table = ['# SoC address map', '', 'Source: SoC specification 6.1 and '
              '`rtl/include/soc_address_map.json`.', '',
              '| Region | Base | Size | Cacheable | Executable | Read | Write |',

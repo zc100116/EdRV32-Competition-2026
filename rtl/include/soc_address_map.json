@@ -1,4 +1,5 @@
 {
+  "clk_sys_hz": 150000000,
   "regions": [
     {
       "name": "ROM",
