@@ -175,6 +175,7 @@
         int first1;
         int latency0;
         int latency1;
+        int random_start;
         bases = '{EDRV32_ROM_BASE, EDRV32_SRAM_BASE, EDRV32_CLINT_BASE, EDRV32_PLIC_BASE,
                     EDRV32_SYS_APB_BASE, EDRV32_MEDIA_APB_BASE, EDRV32_DDR_BASE,
                     EDRV32_DDR_UNCACHED_BASE};
@@ -298,16 +299,37 @@
                 wr(EDRV32_DDR_BASE + 'h1000, 0, 8'hff, 3, 3);
                 wr(EDRV32_SRAM_BASE + 'h2000, 0, 8'hff, 3, 3);
                 wr(EDRV32_DDR_BASE + 'h2000, 0, 8'hff, 3, 3);
-                for (int seed = 1; seed <= 50; seed++) begin
-                    int rng;
-                    rng = seed;
-                    rng = $urandom(rng);
-                    $display("SEED %0d first=%0d", seed, rng);
-                    fork
-                        random_master0();
-                        random_master1();
-                    join
-                end
+                done0 = 0;
+                done1 = 0;
+                random_start = 0;
+                // Reuse two long-lived streams; avoid recreating timed fork children per seed.
+                fork
+                    begin
+                        for (int seed = 1; seed <= 50; seed++) begin
+                            while (random_start != seed) @(negedge clk_sys);
+                            random_master0();
+                            done0 = seed;
+                        end
+                    end
+                    begin
+                        for (int seed = 1; seed <= 50; seed++) begin
+                            while (random_start != seed) @(negedge clk_sys);
+                            random_master1();
+                            done1 = seed;
+                        end
+                    end
+                    begin
+                        int rng;
+                        for (int seed = 1; seed <= 50; seed++) begin
+                            rng = seed;
+                            rng = $urandom(rng);
+                            $display("SEED %0d first=%0d", seed, rng);
+                            $fflush();
+                            random_start = seed;
+                            while (done0 != seed || done1 != seed) @(negedge clk_sys);
+                        end
+                    end
+                join
             end
             default: $fatal(1, "FAIL xbar case %0d", id);
         endcase
