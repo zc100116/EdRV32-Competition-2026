@@ -120,12 +120,12 @@ module edrv32_cpu_core #(
     reg e_write_r [0:1];
     reg m_write_r [0:1];
     reg w_write_r [0:1];
-    reg e_exception_r [0:1];
-    reg m_exception_r [0:1];
-    reg [31:0] e_cause_r [0:1];
-    reg [31:0] m_cause_r [0:1];
-    reg [31:0] e_value_r [0:1];
-    reg [31:0] m_value_r [0:1];
+    reg e_exception_r;
+    reg m_exception_r;
+    reg [31:0] e_cause_r;
+    reg [31:0] m_cause_r;
+    reg [31:0] e_value_r;
+    reg [31:0] m_value_r;
     wire [31:0] e_alu_w [0:1];
     wire [31:0] e_alu_b_w [0:1];
     reg [31:0] e_result_w [0:1];
@@ -163,7 +163,6 @@ module edrv32_cpu_core #(
     wire [1:0] m_commit_w;
     wire m_commit0_w;
     wire m_fault0_w;
-    wire m_fault1_w;
     wire m_interrupt_w;
     wire m_trap_w;
     wire [31:0] m_trap_pc_w;
@@ -305,10 +304,11 @@ module edrv32_cpu_core #(
         .d_redirect_ras_i(d_record_w[0][REC_RAS_LSB +: 37]),
         .d_redirect_push_i(d_rd_w[0] == 1 || d_rd_w[0] == 5),
         .d_redirect_pop_i(1'b0),
-        .d_redirect_return_pc_i(d_record_w[0][REC_PC_LSB +: 32] + (d_record_w[0][REC_COMPRESSED] ? 32'd2 : 32'd4)),
+        .d_redirect_return_pc_i(d_record_w[0][REC_PC_LSB +: 32] +
+            (d_record_w[0][REC_COMPRESSED] ? 32'd2 : 32'd4)),
         .halt_i(sleep_r || div_wait_w || m_wait_w),
         .update_valid_i(e_advance_w && e_valid_r[0] && e_control_w &&
-            !e_exception_r[0] && !e_jump_misaligned_w),
+            !e_exception_r && !e_jump_misaligned_w),
         .update_clear_i(e_redirect1_w || (e_redirect0_w && !e_control_w)),
         .update_clear_index_i(e_redirect1_w ? e_record_r[1][7:3] : e_record_r[0][7:3]),
         .update_pc_i(e_record_r[0][REC_PC_LSB +: 32]),
@@ -484,7 +484,7 @@ module edrv32_cpu_core #(
         d_class_w[0] == C_JAL && !d_record_w[0][REC_PRED_HIT] && !d_record_w[0][REC_FETCH_ERR] &&
         !d_record_w[0][REC_ILLEGAL] && !d_illegal_w[0];
     assign e_next_pc_w = e_record_r[0][REC_PC_LSB +: 32] + (e_record_r[0][REC_COMPRESSED]
-            ? 32'd2 : 32'd4);
+        ? 32'd2 : 32'd4);
     assign e_address_w = e_operand_a_r[0] + e_imm_r[0];
     assign e_branch_target_w = e_class_r[0] == C_JALR ?
         {e_address_w[31:1], 1'b0} : e_record_r[0][REC_PC_LSB +: 32] + e_imm_r[0];
@@ -503,16 +503,16 @@ module edrv32_cpu_core #(
     assign e_type_w = e_call_w ? 3'd3 : e_return_w ? 3'd4 :
         e_class_r[0] == C_JAL ? 3'd1 : e_class_r[0] == C_JALR ? 3'd2 : 3'd0;
     assign e_jump_misaligned_w = !RVC_EN && e_control_w && e_actual_pc_w[1];
-    assign e_redirect0_w = e_advance_w && e_valid_r[0] && !e_exception_r[0] &&
+    assign e_redirect0_w = e_advance_w && e_valid_r[0] && !e_exception_r &&
         !e_jump_misaligned_w && ((e_control_w &&
         ((e_taken_w != e_record_r[0][REC_PRED_TAKEN]) || (e_taken_w
-            && e_record_r[0][REC_PRED_TAKEN] &&
+        && e_record_r[0][REC_PRED_TAKEN] &&
         e_branch_target_w != e_record_r[0][REC_PRED_TARGET_LSB +: 32]))) ||
         (!e_control_w && e_record_r[0][REC_PRED_TAKEN]));
     assign e_second_next_pc_w = e_record_r[1][REC_PC_LSB +: 32] +
         (e_record_r[1][REC_COMPRESSED] ? 32'd2 : 32'd4);
     assign e_redirect1_w = e_advance_w && e_valid_r[1] && !e_redirect0_w &&
-        !e_exception_r[1] && e_record_r[1][REC_PRED_TAKEN];
+        e_record_r[1][REC_PRED_TAKEN];
     assign e_redirect_w = e_redirect0_w || e_redirect1_w;
     assign e_redirect_pc_w = e_redirect0_w ? e_actual_pc_w : e_second_next_pc_w;
     assign e_memory_w = e_class_r[0] == C_LOAD || e_class_r[0] == C_STORE;
@@ -522,23 +522,22 @@ module edrv32_cpu_core #(
         m_valid_r == 0 && w_valid_r == 0 && !m_redirect_w;
     assign div_wait_w = e_valid_r[0] && e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
     assign e_advance_w = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
-        (!e_memory_w || e_exception_r[0] || e_misaligned_w || dc_req_ready_i);
+        (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
     // spec 3.3: valid is independent of ready; acceptance advances E into M.
     assign dc_req_valid_o = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
-        e_memory_w && !e_exception_r[0] && !e_misaligned_w;
+        e_memory_w && !e_exception_r && !e_misaligned_w;
     assign dc_req_addr_o = e_address_w;
     assign dc_req_store_o = e_class_r[0] == C_STORE;
     assign dc_req_size_o = e_instr_w[13:12];
     assign dc_store_data_o = m_store_r;
     assign m_memory_w = m_class_r[0] == C_LOAD || m_class_r[0] == C_STORE;
-    assign m_fault0_w = m_exception_r[0] ||
+    assign m_fault0_w = m_exception_r ||
         (m_memory_w && dc_resp_valid_i && dc_resp_err_i);
     assign m_ready_w = !m_valid_r[0] || m_fault0_w ||
         (m_memory_w ? dc_resp_valid_i : m_class_r[0] == C_FENCE ? dc_fence_done_i :
         m_class_r[0] == C_FENCE_I ? m_fence_phase_r && ic_inv_done_i : 1'b1);
     assign m_wait_w = m_valid_r[0] && !m_ready_w;
     assign m_advance_w = m_valid_r[0] && m_ready_w;
-    assign m_fault1_w = m_valid_r[1] && m_exception_r[1] && m_ready_w;
     assign irq_pending_w = (csr_meie_w && irq_meip_i) ||
         (csr_msie_w && irq_msip_i) || (csr_mtie_w && irq_mtip_i);
     assign irq_cause_w = csr_meie_w && irq_meip_i ? 32'h8000000b :
@@ -547,18 +546,16 @@ module edrv32_cpu_core #(
         !m_fault0_w && !(m_memory_w && (dc_resp_device_i || m_device_started_r)) &&
         m_class_r[0] != C_DIV && m_class_r[0] != C_FENCE_I &&
         !(div_started_r && !div_done_r);
-    assign m_trap_w = m_valid_r[0] && (m_fault0_w || m_fault1_w || m_interrupt_w);
-    assign m_trap_pc_w = !m_fault0_w && !m_interrupt_w && m_fault1_w ?
-        m_record_r[1][REC_PC_LSB +: 32] : m_record_r[0][REC_PC_LSB +: 32];
-    assign m_trap_cause_w = m_fault0_w ? (m_exception_r[0] ? m_cause_r[0] :
-        m_class_r[0] == C_STORE ? 32'd7 : 32'd5) : m_interrupt_w ? irq_cause_w : m_cause_r[1];
-    assign m_trap_value_w = m_fault0_w ? (m_exception_r[0] ? m_value_r[0] : m_result_r[0]) :
-        m_interrupt_w ? 32'd0 : m_value_r[1];
+    assign m_trap_w = m_valid_r[0] && (m_fault0_w || m_interrupt_w);
+    assign m_trap_pc_w = m_record_r[0][REC_PC_LSB +: 32];
+    assign m_trap_cause_w = m_fault0_w ? (m_exception_r ? m_cause_r :
+        m_class_r[0] == C_STORE ? 32'd7 : 32'd5) : irq_cause_w;
+    assign m_trap_value_w = m_fault0_w ? (m_exception_r ? m_value_r : m_result_r[0]) : 32'd0;
     assign m_commit0_w = m_advance_w && !m_fault0_w && !m_interrupt_w;
-    assign m_commit_w = {m_commit0_w && m_valid_r[1] && !m_fault1_w, m_commit0_w};
+    assign m_commit_w = {m_commit0_w && m_valid_r[1], m_commit0_w};
     assign dc_commit_o = m_valid_r[0] && m_memory_w && !m_fault0_w && !m_interrupt_w &&
         !m_device_started_r && (dc_resp_device_i || dc_resp_valid_i);
-    assign dc_kill_o = m_trap_w && m_memory_w && !m_exception_r[0] && !m_device_started_r;
+    assign dc_kill_o = m_trap_w && m_memory_w && !m_exception_r && !m_device_started_r;
     assign dc_fence_o = m_valid_r[0] && m_class_r[0] == C_FENCE && !m_trap_w;
     assign dc_clean_all_o = m_valid_r[0] && m_class_r[0] == C_FENCE_I &&
         !m_fence_phase_r && !m_trap_w;
@@ -687,18 +684,20 @@ module edrv32_cpu_core #(
                 m_rd_r[stage_idx] <= e_rd_r[stage_idx];
                 m_write_r[stage_idx] <= e_write_r[stage_idx];
                 m_class_r[stage_idx] <= e_class_r[stage_idx];
-                m_exception_r[stage_idx] <= e_exception_r[stage_idx];
-                m_cause_r[stage_idx] <= e_cause_r[stage_idx];
-                m_value_r[stage_idx] <= e_value_r[stage_idx];
-                if (stage_idx == 0 && !e_exception_r[stage_idx]) begin
-                    if (e_memory_w && e_misaligned_w) begin
-                        m_exception_r[stage_idx] <= 1;
-                        m_cause_r[stage_idx] <= e_class_r[stage_idx] == C_STORE ? 32'd6 : 32'd4;
-                        m_value_r[stage_idx] <= e_address_w;
-                    end else if (e_jump_misaligned_w) begin
-                        m_exception_r[stage_idx] <= 1;
-                        m_cause_r[stage_idx] <= 0;
-                        m_value_r[stage_idx] <= e_actual_pc_w;
+                if (stage_idx == 0) begin
+                    m_exception_r <= e_exception_r;
+                    m_cause_r <= e_cause_r;
+                    m_value_r <= e_value_r;
+                    if (!e_exception_r) begin
+                        if (e_memory_w && e_misaligned_w) begin
+                            m_exception_r <= 1;
+                            m_cause_r <= e_class_r[stage_idx] == C_STORE ? 32'd6 : 32'd4;
+                            m_value_r <= e_address_w;
+                        end else if (e_jump_misaligned_w) begin
+                            m_exception_r <= 1;
+                            m_cause_r <= 0;
+                            m_value_r <= e_actual_pc_w;
+                        end
                     end
                 end
             end
@@ -716,17 +715,21 @@ module edrv32_cpu_core #(
                 e_operand_b_r[stage_idx] <= d_operand_w[stage_idx * 2 + 1];
                 e_rd_r[stage_idx] <= d_rd_w[stage_idx];
                 e_write_r[stage_idx] <= d_write_w[stage_idx];
-                e_exception_r[stage_idx] <= d_record_w[stage_idx][REC_FETCH_ERR] ||
-                    d_record_w[stage_idx][REC_ILLEGAL] || d_illegal_w[stage_idx] ||
-                    (stage_idx == 0 && csr_d_access_w && csr_illegal_w) ||
-                    d_instr_w[stage_idx] == 32'h00000073 || d_instr_w[stage_idx] == 32'h00100073;
-                e_cause_r[stage_idx] <= d_record_w[stage_idx][REC_FETCH_ERR] ? 32'd1 :
-                    d_instr_w[stage_idx] == 32'h00000073 ? 32'd11 :
-                    d_instr_w[stage_idx] == 32'h00100073 ? 32'd3 : 32'd2;
-                e_value_r[stage_idx] <= d_record_w[stage_idx][REC_FETCH_ERR]
-            ? d_record_w[stage_idx][REC_PC_LSB +: 32] :
-                    d_instr_w[stage_idx] == 32'h00000073 || d_instr_w[stage_idx] == 32'h00100073 ?
-                    32'd0 : d_record_w[stage_idx][REC_RAW_LSB +: 32];
+                if (stage_idx == 0) begin
+                    e_exception_r <= d_record_w[stage_idx][REC_FETCH_ERR] ||
+                        d_record_w[stage_idx][REC_ILLEGAL] || d_illegal_w[stage_idx] ||
+                        (csr_d_access_w && csr_illegal_w) ||
+                        d_instr_w[stage_idx] == 32'h00000073 ||
+                        d_instr_w[stage_idx] == 32'h00100073;
+                    e_cause_r <= d_record_w[stage_idx][REC_FETCH_ERR] ? 32'd1 :
+                        d_instr_w[stage_idx] == 32'h00000073 ? 32'd11 :
+                        d_instr_w[stage_idx] == 32'h00100073 ? 32'd3 : 32'd2;
+                    e_value_r <= d_record_w[stage_idx][REC_FETCH_ERR] ?
+                        d_record_w[stage_idx][REC_PC_LSB +: 32] :
+                        d_instr_w[stage_idx] == 32'h00000073 ||
+                        d_instr_w[stage_idx] == 32'h00100073 ? 32'd0 :
+                        d_record_w[stage_idx][REC_RAW_LSB +: 32];
+                end
             end
         end
         if (e_advance_w) begin
@@ -741,7 +744,7 @@ module edrv32_cpu_core #(
         (m_instr_r[19:15] == 1 || m_instr_r[19:15] == 5) &&
         !m_call_w;
     assign m_link_w = m_record_r[0][REC_PC_LSB +: 32] + (m_record_r[0][REC_COMPRESSED]
-            ? 32'd2 : 32'd4);
+        ? 32'd2 : 32'd4);
     always @(*) begin
         committed_ras_data_w = committed_ras_data_r;
         committed_ras_ptr_w = committed_ras_ptr_r;
@@ -780,7 +783,7 @@ module edrv32_cpu_core #(
     // The write commits in M, one cycle before its instruction retires in W.
     assign w_instret_write_w = w_valid_r[0] && w_class_r[0] == C_CSR &&
         (w_record_r[0][REC_RAW_LSB+20 +: 12] == 12'hb02
-            || w_record_r[0][REC_RAW_LSB+20 +: 12] == 12'hb82) &&
+        || w_record_r[0][REC_RAW_LSB+20 +: 12] == 12'hb82) &&
         (w_record_r[0][REC_RAW_LSB+12 +: 2] == 2'b01 || w_record_r[0][REC_RAW_LSB+15 +: 5] != 0);
     assign csr_retire_count_w = w_instret_write_w ? 2'b0 : retire_count_w;
     assign ic_miss_start_w = ic_expect_r && !ic_resp_valid_i && !ic_kill_o;
