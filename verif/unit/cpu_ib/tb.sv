@@ -78,7 +78,7 @@ module tb;
             if(count==0)empty_seen=empty_seen+1;
             if(count==4)full_seen=full_seen+1;
         end
-        if(!full_seen || !empty_seen || !simultaneous_seen || !flush_seen)
+        if((full_seen==0) || (empty_seen==0) || (simultaneous_seen==0) || (flush_seen==0))
             $fatal(1,"FAIL IB missing coverage");
         $display("PASS U-08 full=%0d empty=%0d simultaneous=%0d flush=%0d",
             full_seen,empty_seen,simultaneous_seen,flush_seen);$finish;

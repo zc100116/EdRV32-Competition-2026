@@ -1,6 +1,6 @@
-// edrv32_cpu_branch.v
-// cpu-spec 2.1, 4.4
-// Compare operands for the six RV32I conditional branch forms.
+// File: edrv32_cpu_branch.v
+// Spec: cpu-spec 2.1, 4.4
+// Description: Compare operands for the six RV32I conditional branch forms.
 // Signed and unsigned conditions use the instruction funct3 encoding.
 // Clock domain: 组合逻辑.
 module edrv32_cpu_branch (

@@ -1,9 +1,9 @@
-name: cpu_f2_recover
 top: tb
 files: files.f
-macros: [SIM_MODE]
-parameters: {}
-software: []
-timeout: 120
-pass_pattern: PASS
-tier: smoke
+defines: SIM_MODE
+parameters:
+software:
+timeout: 180
+pass: PASS
+tier: smoke full
+simulator: verilator

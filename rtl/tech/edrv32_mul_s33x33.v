@@ -1,6 +1,6 @@
-// edrv32_mul_s33x33.v
-// cpu-spec 4.8
-// Wrap the fixed signed 33-by-33 APM multiplier with two enabled stages.
+// File: edrv32_mul_s33x33.v
+// Spec: cpu-spec 4.8
+// Description: Wrap the fixed signed 33-by-33 APM multiplier with two enabled stages.
 // Match the behavioral product latency to the FPGA IP without data reset.
 // Clock domain: clk_sys.
 `include "edrv32_build_mode.vh"

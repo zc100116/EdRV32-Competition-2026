@@ -1,6 +1,6 @@
-// edrv32_cpu_csr.v
-// cpu-spec 5, 7.1
-// Maintain machine CSRs, interrupt state and architectural counters.
+// File: edrv32_cpu_csr.v
+// Spec: cpu-spec 5, 7.1
+// Description: Maintain machine CSRs, interrupt state and architectural counters.
 // Apply CSR access permissions, WARL masks and precise trap/MRET updates.
 // Clock domain: clk_sys.
 module edrv32_cpu_csr #(
@@ -14,6 +14,7 @@ module edrv32_cpu_csr #(
     input wire access_valid_i,
     input wire [11:0] addr_i,
     input wire write_i,
+    input wire commit_i,
     input wire [1:0] command_i,
     input wire [31:0] write_data_i,
     output reg [31:0] read_data_o,
@@ -62,7 +63,7 @@ module edrv32_cpu_csr #(
     assign mtvec_o = mtvec_r;
     assign mepc_o = mepc_r;
     assign illegal_o = access_valid_i && (!implemented_w || (write_i && readonly_w));
-    assign write_enable_w = access_valid_i && write_i && !illegal_o;
+    assign write_enable_w = access_valid_i && write_i && commit_i && !illegal_o;
     always @(*) begin
         read_data_o = 0;
         implemented_w = 1'b1;
@@ -97,22 +98,24 @@ module edrv32_cpu_csr #(
             end
             default: implemented_w = 1'b0;
         endcase
-        for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
-            if (addr_i == 12'h323 + read_idx[11:0]) begin
-                read_data_o = {27'b0, event_r[read_idx]};
-                implemented_w = 1'b1;
-            end
-            if (addr_i == 12'hb03 + read_idx[11:0] ||
-                addr_i == 12'hc03 + read_idx[11:0]) begin
-                read_data_o = counter_r[read_idx][31:0];
-                implemented_w = 1'b1;
-                readonly_w = addr_i[10];
-            end
-            if (addr_i == 12'hb83 + read_idx[11:0] ||
-                addr_i == 12'hc83 + read_idx[11:0]) begin
-                read_data_o = counter_r[read_idx][63:32];
-                implemented_w = 1'b1;
-                readonly_w = addr_i[10];
+        begin
+            for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
+                if (addr_i == 12'h323 + read_idx[11:0]) begin
+                    read_data_o = {27'b0, event_r[read_idx]};
+                    implemented_w = 1'b1;
+                end
+                if (addr_i == 12'hb03 + read_idx[11:0] ||
+                    addr_i == 12'hc03 + read_idx[11:0]) begin
+                    read_data_o = counter_r[read_idx][31:0];
+                    implemented_w = 1'b1;
+                    readonly_w = addr_i[10];
+                end
+                if (addr_i == 12'hb83 + read_idx[11:0] ||
+                    addr_i == 12'hc83 + read_idx[11:0]) begin
+                    read_data_o = counter_r[read_idx][63:32];
+                    implemented_w = 1'b1;
+                    readonly_w = addr_i[10];
+                end
             end
         end
     end
@@ -169,13 +172,15 @@ module edrv32_cpu_csr #(
                     12'hb82: instret_r <= {write_data_w, instret_r[31:0]};
                     default: begin end
                 endcase
-                for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
-                    if (addr_i == 12'h323 + update_idx[11:0])
-                        event_r[update_idx] <= write_data_w[4:0];
-                    if (addr_i == 12'hb03 + update_idx[11:0])
-                        counter_r[update_idx] <= {counter_r[update_idx][63:32], write_data_w};
-                    if (addr_i == 12'hb83 + update_idx[11:0])
-                        counter_r[update_idx] <= {write_data_w, counter_r[update_idx][31:0]};
+                begin
+                    for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
+                        if (addr_i == 12'h323 + update_idx[11:0])
+                            event_r[update_idx] <= write_data_w[4:0];
+                        if (addr_i == 12'hb03 + update_idx[11:0])
+                            counter_r[update_idx] <= {counter_r[update_idx][63:32], write_data_w};
+                        if (addr_i == 12'hb83 + update_idx[11:0])
+                            counter_r[update_idx] <= {write_data_w, counter_r[update_idx][31:0]};
+                    end
                 end
             end
             if (trap_i) begin

@@ -1,6 +1,6 @@
-// edrv32_cpu_ib.v
-// cpu-spec 4.1, 4.2
-// Queue four instruction records between F2 and D in program order.
+// File: edrv32_cpu_ib.v
+// Spec: cpu-spec 4.1, 4.2
+// Description: Queue four instruction records between F2 and D in program order.
 // Accept up to two records and retire up to two queue entries per clock.
 // Clock domain: clk_sys.
 module edrv32_cpu_ib (

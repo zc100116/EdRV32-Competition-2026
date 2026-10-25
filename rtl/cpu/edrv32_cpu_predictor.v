@@ -1,6 +1,6 @@
-// edrv32_cpu_predictor.v
-// cpu-spec 4.4
-// Predict one branch per fetch group with a tagged BTB and gshare direction table.
+// File: edrv32_cpu_predictor.v
+// Spec: cpu-spec 4.4
+// Description: Predict one branch per fetch group with a tagged BTB and gshare direction table.
 // Speculative return prediction uses a four-entry RAS with explicit recovery state.
 // Clock domain: clk_sys.
 module edrv32_cpu_predictor (

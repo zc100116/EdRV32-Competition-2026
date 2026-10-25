@@ -1,6 +1,6 @@
-// edrv32_cpu_mul.v
-// cpu-spec 2.3, 4.8
-// Extend RV32 operands for all four multiply forms using a signed APM core.
+// File: edrv32_cpu_mul.v
+// Spec: cpu-spec 2.3, 4.8
+// Description: Extend RV32 operands for all four multiply forms using a signed APM core.
 // Keep valid and result selection aligned with the two enabled product stages.
 // Clock domain: clk_sys.
 module edrv32_cpu_mul (

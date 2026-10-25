@@ -1,6 +1,6 @@
-// edrv32_cpu_frontend.v
-// cpu-spec 3.2, 4.1, 4.4
-// Fetch aligned groups, join boundary-spanning instructions and feed the four-entry IB.
+// File: edrv32_cpu_frontend.v
+// Spec: cpu-spec 3.2, 4.1, 4.4
+// Description: Fetch aligned groups, join boundary-spanning instructions and feed the four-entry IB.
 // Reserve response storage before issuing requests and recover speculative fetch on redirect.
 // Clock domain: clk_sys.
 module edrv32_cpu_frontend #(
@@ -25,6 +25,8 @@ module edrv32_cpu_frontend #(
     input wire halt_i,
     // Surviving E-stage branch training.
     input wire update_valid_i,
+    input wire update_clear_i,
+    input wire [4:0] update_clear_index_i,
     input wire [31:0] update_pc_i,
     input wire [31:0] update_target_i,
     input wire [2:0] update_type_i,
@@ -148,7 +150,7 @@ module edrv32_cpu_frontend #(
     assign ic_inv_o = invalidate_i;
     assign invalidate_done_o = ic_inv_done_i;
     assign f1_valid_o = ic_req_valid_o;
-    assign f2_valid_o = f2_pending_r;
+    assign f2_valid_o = f2_pending_r || halfword_count_r != 0;
     assign fetch_wait_o = f2_pending_r && !ic_resp_valid_i;
     edrv32_cpu_predictor u_predictor (
         .clk_i(clk_i),
@@ -169,8 +171,8 @@ module edrv32_cpu_frontend #(
         .update_taken_i(update_taken_i),
         .update_compressed_i(update_compressed_i),
         .update_index_i(update_index_i),
-        .clear_valid_i(recover_w),
-        .clear_index_i(recover_btb_index_w),
+        .clear_valid_i(update_clear_i || recover_w),
+        .clear_index_i(update_clear_i ? update_clear_index_i : recover_btb_index_w),
         .restore_valid_i(redirect_w || recover_w),
         .restore_ras_i(restore_ras_w),
         .restore_push_i(restore_push_w),

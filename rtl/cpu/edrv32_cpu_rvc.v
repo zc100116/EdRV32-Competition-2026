@@ -1,6 +1,6 @@
-// edrv32_cpu_rvc.v
-// cpu-spec 2.1, 4.1
-// Expand RV32C halfwords into canonical RV32 instructions.
+// File: edrv32_cpu_rvc.v
+// Spec: cpu-spec 2.1, 4.1
+// Description: Expand RV32C halfwords into canonical RV32 instructions.
 // Identify reserved encodings and preserve the harmless effects of HINTs.
 // Clock domain: 组合逻辑.
 module edrv32_cpu_rvc (

@@ -1,6 +1,6 @@
-// edrv32_cpu_regfile.v
-// cpu-spec 4.2, 4.3
-// Store the architectural integer registers with four reads and two writes.
+// File: edrv32_cpu_regfile.v
+// Spec: cpu-spec 4.2, 4.3
+// Description: Store the architectural integer registers with four reads and two writes.
 // Forward current writes to reads and give the younger write port priority.
 // Clock domain: clk_sys.
 module edrv32_cpu_regfile (

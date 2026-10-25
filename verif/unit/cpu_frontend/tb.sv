@@ -89,6 +89,8 @@ module tb #(parameter RVC_EN=1);
         .d_redirect_return_pc_i(d_redirect_return_pc_i),
         .halt_i(halt_i),
         .update_valid_i(update_valid_i),
+        .update_clear_i(1'b0),
+        .update_clear_index_i(5'b0),
         .update_pc_i(update_pc_i),
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),

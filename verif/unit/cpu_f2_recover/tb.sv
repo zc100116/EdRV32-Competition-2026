@@ -85,6 +85,8 @@ module tb;
         .d_redirect_return_pc_i(d_redirect_return_pc_i),
         .halt_i(halt_i),
         .update_valid_i(update_valid_i),
+        .update_clear_i(1'b0),
+        .update_clear_index_i(5'b0),
         .update_pc_i(update_pc_i),
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),
@@ -230,7 +232,7 @@ module tb;
                 @(negedge clk_i);
                 decode_pop_count_i=cycle_number<8?0:decode_valid_count_o;
                 redirect_valid_i=0;d_redirect_valid_i=0;
-                if(scenario>=6 && !priority_seen && dut.recover_w)begin
+                if(scenario>=6 && (priority_seen==0) && dut.recover_w)begin
                     // Resolve an older redirect on the same edge as an F2 mismatch.
                     d_redirect_valid_i=1;d_redirect_pc_i='h100;
                     d_redirect_ras_i={3'd1,2'd3,32'hbbbb0000};
@@ -253,7 +255,7 @@ module tb;
                         scenario,recoveries,kills);
             end else begin
                 if(recoveries!=0 || !dut.u_predictor.btb_valid_r[trained_pc>>3] ||
-                    (scenario>=6 && !priority_seen))
+                    (scenario>=6 && (priority_seen==0)))
                     $fatal(1,"FAIL U-11 unexpected recovery case=%0d",scenario);
             end
             $display("PASS U-11 case=%0d checked=%0d recovery=%0d kill=%0d",

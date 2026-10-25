@@ -1,0 +1,1 @@
+-f ../cpu_core_smoke/files.f

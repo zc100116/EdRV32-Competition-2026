@@ -87,8 +87,8 @@ module tb;
     );
     task automatic check;
         begin
-            q=query_pc_i[7:3];
-            index_value=({query_pc_i[9:3],position[q]} ^ history);
+            q=integer'(query_pc_i[7:3]);
+            index_value={23'b0,query_pc_i[9:3],position[q]} ^ {23'b0,history};
             expected_hit=valid[q] && tag[q]==query_pc_i[31:8] &&
                 position[q]>=query_pc_i[2:1];
             expected_taken=expected_hit && (kind[q]!=0 || direction[index_value]>=2);
@@ -131,7 +131,7 @@ module tb;
                 if(depth<4)depth=depth+1;else overflow_seen=overflow_seen+1;
             end else if(action==2 && depth>0)begin ptr=(ptr+3)%4;depth=depth-1;end
             if(update_valid_i)begin
-                slot=update_pc_i[7:3];
+                slot=integer'(update_pc_i[7:3]);
                 if(valid[slot] && tag[slot]!=update_pc_i[31:8])alias_seen=alias_seen+1;
                 valid[slot]=1;tag[slot]=update_pc_i[31:8];
                 target[slot]=update_target_i;position[slot]=update_pc_i[2:1];
@@ -189,7 +189,7 @@ module tb;
             cycle();
             if(i%61==0)checkpoint=predict_ras_o;
         end
-        if(!overflow_seen || !restore_seen || !alias_seen || !saturate_seen)
+        if((overflow_seen==0) || (restore_seen==0) || (alias_seen==0) || (saturate_seen==0))
             $fatal(1,"FAIL predictor missing coverage");
         $display("PASS U-09 overflow=%0d restore=%0d alias=%0d saturation=%0d",
             overflow_seen,restore_seen,alias_seen,saturate_seen);$finish;

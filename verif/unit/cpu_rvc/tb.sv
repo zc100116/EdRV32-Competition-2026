@@ -16,7 +16,10 @@ module tb;
         .instr_o(instr_o),
         .illegal_o(illegal_o)
     );
+    integer generator_status;
     initial begin
+        generator_status=$system("python3 verif/unit/cpu_rvc/vectors.py");
+        if(generator_status!=0)$fatal(1,"FAIL RVC vector generator status=%0d",generator_status);
         $readmemh("build/unit/cpu_rvc_vectors.hex",vectors);
         for(i=0;i<65536;i=i+1) begin
             instr_i=16'(i);#1;

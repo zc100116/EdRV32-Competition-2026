@@ -1,6 +1,6 @@
-// edrv32_cpu_decode.v
-// cpu-spec 2.1, 4.1
-// Validate canonical RV32IM, Zicsr and Zifencei instruction encodings.
+// File: edrv32_cpu_decode.v
+// Spec: cpu-spec 2.1, 4.1
+// Description: Validate canonical RV32IM, Zicsr and Zifencei instruction encodings.
 // Produce register dependencies, immediates and pipeline control classes.
 // Clock domain: 组合逻辑.
 module edrv32_cpu_decode (

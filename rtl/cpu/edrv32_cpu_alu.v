@@ -1,6 +1,6 @@
-// edrv32_cpu_alu.v
-// cpu-spec 2.1, 4.1
-// Execute RV32I arithmetic, logical, comparison and shift operations.
+// File: edrv32_cpu_alu.v
+// Spec: cpu-spec 2.1, 4.1
+// Description: Execute RV32I arithmetic, logical, comparison and shift operations.
 // The operation selects the combinational result for either pipeline.
 // Clock domain: 组合逻辑.
 module edrv32_cpu_alu (

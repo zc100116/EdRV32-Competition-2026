@@ -11,6 +11,7 @@ module tb;
     reg access_valid_i=0;
     reg [11:0] addr_i=0;
     reg write_i=0;
+    reg commit_i=1;
     reg [1:0] command_i=1;
     reg [31:0] write_data_i=0;
     wire [31:0] read_data_o;
@@ -47,6 +48,7 @@ module tb;
         .access_valid_i(access_valid_i),
         .addr_i(addr_i),
         .write_i(write_i),
+        .commit_i(commit_i),
         .command_i(command_i),
         .write_data_i(write_data_i),
         .read_data_o(read_data_o),
@@ -74,6 +76,7 @@ module tb;
         .access_valid_i(access_valid_i),
         .addr_i(addr_i),
         .write_i(write_i),
+        .commit_i(commit_i),
         .command_i(command_i),
         .write_data_i(write_data_i),
         .read_data_o(no_c_read),
@@ -168,6 +171,11 @@ module tb;
             csr_write('h343,data);read_check('h343,data);
         end
         csr_write('h340,32'h12345678);
+        // D may probe access legality; only the M-stage commit may mutate the CSR.
+        @(negedge clk_i);addr_i='h340;access_valid_i=1;write_i=1;
+        command_i=1;write_data_i=32'hdeadbeef;commit_i=0;
+        @(posedge clk_i);#1;@(negedge clk_i);write_i=0;commit_i=1;
+        read_check('h340,32'h12345678);
         @(negedge clk_i);addr_i='h340;write_data_i='hff;write_i=1;command_i=2;
         @(posedge clk_i);#1;@(negedge clk_i);write_i=0;
         read_check('h340,32'h123456ff);
