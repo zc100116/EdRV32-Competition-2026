@@ -85,7 +85,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 槽 | 16 槽 × 4 KiB，`addr[15:12]` 选槽，`addr[11:0]` 送到从设备的 `paddr` | 同左 |
 | 访问 | AXI 单拍、SIZE = 2、地址 4 B 对齐的访问转换为一次 APB 传输；`pstrb` 由 WSTRB 中对应 32 位半部的 4 位得到 | 同左 |
 | 不合规访问 | 突发（LEN ≠ 0）、SIZE ≠ 2 或地址未 4 B 对齐：回 SLVERR，不发出 APB 传输；突发的读回 LEN+1 拍 | 同左 |
-| 预留槽 | 访问回 SLVERR | 同左 |
+| 预留槽 | 访问回 SLVERR。decoder 与槽用途无关；预留槽在例化处把该槽的 `pready`、`pslverr` 接 1、`prdata` 接 0 | 同左 |
 | 超时 | SoC 规格 4.3：256 个 PCLK 内没有 `pready`，回 SLVERR 并结束本次访问 | 同左（在 clk_mem 侧计数） |
 | 并发 | 一次只有一笔 APB 传输 | 同左 |
 
