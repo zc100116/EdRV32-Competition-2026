@@ -56,6 +56,19 @@ module edrv32_cpu_frontend #(
     output wire f2_valid_o,
     output wire fetch_wait_o
 );
+    // Shared frontend/backend instruction-record layout (cpu-spec 4.1).
+    localparam REC_BITS = 179;
+    localparam REC_PC_LSB = 0;
+    localparam REC_INSTR_LSB = 32;
+    localparam REC_RAW_LSB = 64;
+    localparam REC_COMPRESSED = 96;
+    localparam REC_ILLEGAL = 97;
+    localparam REC_FETCH_ERR = 98;
+    localparam REC_PRED_HIT = 99;
+    localparam REC_PRED_TAKEN = 100;
+    localparam REC_PRED_TARGET_LSB = 101;
+    localparam REC_GHR_LSB = 133;
+    localparam REC_RAS_LSB = 142;
     localparam HALFWORD_BITS = 130;
     localparam HALFWORD_CAPACITY = 8;
     reg [31:0] f1_pc_r;
@@ -294,23 +307,34 @@ module edrv32_cpu_frontend #(
             available_w >= {1'b0, first_length_w} && ib_free_count_w != 0) begin
             push_count_w = 1;
             consume_w = first_length_w;
-            push_data_w[178:0] = {first_w[128:92], 9'b0,
-                first_w[82:51], first_w[50], first_w[49], first_error_w,
-                first_compressed_w && first_illegal_w, first_compressed_w,
-                first_raw_w, first_compressed_w ? first_expanded_w : first_raw_w,
-                first_w[47:16]};
+            push_data_w[REC_RAS_LSB +: 37] = first_w[128:92];
+            push_data_w[REC_PRED_TARGET_LSB +: 32] = first_w[82:51];
+            push_data_w[REC_PRED_TAKEN] = first_w[50];
+            push_data_w[REC_PRED_HIT] = first_w[49];
+            push_data_w[REC_FETCH_ERR] = first_error_w;
+            push_data_w[REC_ILLEGAL] = first_compressed_w && first_illegal_w;
+            push_data_w[REC_COMPRESSED] = first_compressed_w;
+            push_data_w[REC_RAW_LSB +: 32] = first_raw_w;
+            push_data_w[REC_INSTR_LSB +: 32] = first_compressed_w ? first_expanded_w : first_raw_w;
+            push_data_w[REC_PC_LSB +: 32] = first_w[47:16];
             // History is sampled at F1, but each instruction uses its own PC in gshare.
-            push_data_w[141:133] = first_w[91:83] ^ first_w[25:17];
+            push_data_w[REC_GHR_LSB +: 9] = first_w[91:83] ^ first_w[25:17];
             if (available_w >= {1'b0, first_length_w} + {1'b0, second_length_w} &&
                 ib_free_count_w >= 2 && !second_recover_w) begin
                 push_count_w = 2;
                 consume_w = first_length_w + second_length_w;
-                push_data_w[357:179] = {second_w[128:92], 9'b0,
-                    second_w[82:51], second_w[50], second_w[49], second_error_w,
-                    second_compressed_w && second_illegal_w, second_compressed_w,
-                    second_raw_w, second_compressed_w ? second_expanded_w : second_raw_w,
-                    second_w[47:16]};
-                push_data_w[320:312] = second_w[91:83] ^ second_w[25:17];
+                push_data_w[REC_BITS+REC_RAS_LSB +: 37] = second_w[128:92];
+                push_data_w[REC_BITS+REC_PRED_TARGET_LSB +: 32] = second_w[82:51];
+                push_data_w[REC_BITS+REC_PRED_TAKEN] = second_w[50];
+                push_data_w[REC_BITS+REC_PRED_HIT] = second_w[49];
+                push_data_w[REC_BITS+REC_FETCH_ERR] = second_error_w;
+                push_data_w[REC_BITS+REC_ILLEGAL] = second_compressed_w && second_illegal_w;
+                push_data_w[REC_BITS+REC_COMPRESSED] = second_compressed_w;
+                push_data_w[REC_BITS+REC_RAW_LSB +: 32] = second_raw_w;
+                push_data_w[REC_BITS+REC_INSTR_LSB +: 32] =
+                    second_compressed_w ? second_expanded_w : second_raw_w;
+                push_data_w[REC_BITS+REC_PC_LSB +: 32] = second_w[47:16];
+                push_data_w[REC_BITS+REC_GHR_LSB +: 9] = second_w[91:83] ^ second_w[25:17];
             end
         end
         remaining_w = available_w - {1'b0, consume_w};
