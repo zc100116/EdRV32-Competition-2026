@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1 |
+| 版本 | v0.2 |
 | 日期 | 2026-10-25 |
 | 对应规格 | `docs/spec/sys-subsys-spec.md` v0.1 |
 | 关联 | `docs/plan/sys-subsys-plan.md` |
@@ -120,13 +120,14 @@
 
 | 编号 | 规格条款 | 内容 | 检查 | 档位 |
 |---|---|---|---|---|
-| SC-01 | 2.2、SoC 7.5 | 从 ROM 启动：bootloader 打印 logo，跳到 SRAM 应用程序 | UART 日志 + SIM_EXIT | S |
+| SC-01 | 2.2、SoC 7.5 | 从 ROM 启动：bootloader 打印 "EdRV32" logo 和 SoC 7.5 第 2 条规定的启动信息字段，跳到 SRAM 应用程序 | UART 日志（逐字段检查）+ SIM_EXIT | S |
 | SC-02 | 2.4 | CLINT 定时器中断：程序设 mtimecmp，进入 MTI 处理 | 程序自检 | S |
 | SC-03 | 2.5、2.7 | GPIO 边沿经 PLIC 产生 MEI，处理程序认领、完成 | 程序自检 | S |
 | SC-04 | SoC 7.5 | UART 下载：bootloader 从 UART 模型接收程序写入 SRAM 并执行 | UART 日志 + SIM_EXIT | F |
 | SC-05 | 2.8 | 软件 I2C 驱动配置两个 SCCB 模型各 8 个寄存器 | 模型记录 | F |
 | SC-06 | 2.1 | 程序访问 DDR 窗口（可缓存和非缓存别名），数据一致 | 程序自检 | S |
 | SC-07 | 7 | CoreMark 10 次迭代在 SRAM 中运行，CRC 正确 | UART 日志 | S（CRC）/ perf（周期数） |
+| SC-08 | SoC 7.5 第 4 条 | 监控程序：从 ROM 启动进入 SRAM 监控程序菜单；UART 模型依次输入"系统信息"和"CoreMark"（迭代次数取 1，控制仿真时间）两个选项，检查输出包含 SoC 7.5 第 4 条规定的字段（分数、CoreMark/MHz、周期、CRC 结果、全部 HPM 事件、IPC、编译器版本和选项、ISA），每项结束后回到菜单 | UART 日志逐字段检查；testbench 在第二次回到菜单后结束（监控程序不写 SIM_EXIT） | F |
 
 ## 4. 参考模型
 
@@ -160,3 +161,4 @@
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-25 | v0.1 | 初稿 |
+| 2026-10-25 | v0.2 | 按 SoC 规格 v0.5 7.5：SC-01 检查 logo 和启动信息字段；新增 SC-08 监控程序菜单测试 |

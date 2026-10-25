@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.4（草案） |
+| 版本 | v0.5（草案） |
 | 日期 | 2026-10-25 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
@@ -457,9 +457,13 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 
 **启动流程**
 1. Boot ROM 和 SRAM 的上电内容由 FPGA bitstream 中的存储初始化文件提供：ROM 中是 bootloader 和启动 logo，SRAM 中是应用程序（系统子系统规格 2.2）。
-2. 复位释放后，CPU 从 Boot ROM 执行 bootloader：初始化 UART，打印启动 logo，读 SYSCTRL 的 `MEM_READY`。
+2. 复位释放后，CPU 从 Boot ROM 执行 bootloader：初始化必要的外设（UART 115200 8N1、GPIO），通过 UART 打印启动 logo（文字 "EdRV32" 的 ASCII 字符画）和启动信息，读 SYSCTRL 的 `MEM_READY`。启动信息至少包括：CHIP_ID、clk_sys 频率（SYSCTRL `CLK_SYS_HZ`）、ROM/SRAM 容量、I$/D$ 容量、`MEM_READY` 状态、本次启动方式（SRAM 应用 / UART 下载）、bootloader 的构建信息（git commit、编译器版本）。
 3. 默认跳转到 SRAM 中的应用程序执行。启动按键（GPIO）按下、或 SYSCTRL 的 scratch 寄存器中带有下载请求时，bootloader 改为从 UART 接收程序写入 SRAM，执行 FENCE.I 后跳转；ETH 下载在 ETH 模块完成后加入。
-4. 应用程序按需通过 ETH 加载 NPU 权重和图像资源到 DDR。
+4. SRAM 中的默认应用程序是监控程序（monitor）：通过 UART 输出菜单，按用户输入的选项执行测试或跑分，结束后回到菜单。菜单项至少包括：
+   - CoreMark：运行后输出 CoreMark 分数、CoreMark/MHz、计时周期数和迭代次数、CRC 校验结果、全部 HPM 事件计数及由其导出的 IPC 等指标、编译器版本和编译选项、ISA 字符串；
+   - 外设测试：GPIO/LED、CLINT 定时器中断、I2C 两个端口的设备探测；具体测试项 **[待定]**，开发初值由监控程序任务给出，经用户确认；
+   - 系统信息：同启动信息，外加 cache 配置和 HPM 事件列表。
+5. 应用程序按需通过 ETH 加载 NPU 权重和图像资源到 DDR。
 
 **S1 目标检测，每帧流程**
 1. VIN 把摄像头帧写入底图环形缓冲，同时 NPU 输入适配把缩放后的输入写入 NPU 输入环形缓冲，完成后报告 FRAME（带 frame_id）。
@@ -678,3 +682,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-25 | v0.2 | PLIC 源号 6 分配给 CACHE_CTRL（D$ 写回错误中断），见 cpu-spec 4.7、cache 规格 |
 | 2026-10-25 | v0.3 | 4.1 单拍 SIZE ≤ 2 增加例外：I$ 的 ROM 取指为单拍 SIZE = 3（K-RTL 开发中发现与 cache-spec 5.1 冲突） |
 | 2026-10-25 | v0.4 | 系统子系统规格讨论（用户确认）：去掉 QSPI0 和 TIMER0（APB 槽 2、3，PLIC 源 3、4 改为预留，删除对应顶层端口）；PLIC 15 个源；mtime 每个 clk_sys 周期加 1，SYSCTRL 增加 CLK_SYS_HZ；I2C0 一个主机两对引脚；启动流程改为 ROM/SRAM 由存储初始化文件提供上电内容 |
+| 2026-10-25 | v0.5 | 7.5 按用户要求细化启动软件：bootloader 初始化外设后打印 "EdRV32" logo 和启动信息；SRAM 默认应用为带 UART 菜单的监控程序（CoreMark 跑分并输出 HPM、跑分、工具链信息；外设测试；系统信息） |
