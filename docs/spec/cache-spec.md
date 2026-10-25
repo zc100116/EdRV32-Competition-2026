@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v0.1（草案） |
 | 日期 | 2026-10-25 |
-| 状态 | 草案。标 **[待定]** 的条目给出了开发初值 |
+| 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | 指令 cache `edrv32_icache`、数据 cache `edrv32_dcache`、维护寄存器块 `edrv32_cache_ctrl` |
 | 关联文档 | SoC 规格 4.1、6.1、6.2、8.2 节；`docs/spec/cpu-spec.md` 3.2、3.3、4.7 节；`docs/testplan/cache-testplan.md`；`docs/plan/cache-plan.md` |
 
