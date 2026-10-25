@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.3（草案） |
+| 版本 | v0.4（草案） |
 | 日期 | 2026-10-25 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
@@ -27,7 +27,7 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
 | 图形渲染 | 2D 绘制加速（RND），作为 LVGL 等图形库的绘制后端；多图层合成 |
 | 显示输出 | HDMI 720p60，单路输出 |
 | 网络 | 千兆以太网，硬件 UDP 收发直通 DDR（ETH） |
-| 系统外设 | UART、GPIO（按键/LED）、QSPI、定时器、I2C（摄像头 SCCB）、中断控制器 |
+| 系统外设 | UART、GPIO（按键/LED）、I2C（摄像头 SCCB）、中断控制器（CLINT 定时器、PLIC） |
 
 ### 1.2 演示场景
 
@@ -64,7 +64,7 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
  │  └──────────┘  D$ AXI64(RW)  └┬──────┬──────┬──────┬──────┬──────┬──────┘         │
  │                             ROM   SRAM  CLINT  PLIC  sys_apb  media_  ddr_         │
  │                                                     │       apb_brg gateway       │
- │                                  UART GPIO QSPI TIMER I2C       │       │          │
+ │                                  UART GPIO I2C                   │       │          │
  │                                  CACHE_CTRL SYSCTRL             │       │          │
  │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─│─ ─ ─ ─ ─ │
  │  clk_mem 域                              media_apb（16 槽）◄──────┘       │ P2     │
@@ -134,8 +134,8 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
 |---|---|---|---|---|
 | `camN_vsync_i`、`camN_href_i` | in | 1 | camN_pclk | N = 0、1 |
 | `camN_data_i` | in | 8 | camN_pclk | |
-| `camN_pwdn_o`、`camN_rst_n_o` | out | 1 | clk_sys | 由 GPIO 或 VIN 寄存器控制 [模块规格] |
-| `sccb_scl_o/_oe/_i`、`sccb_sda_o/_oe/_i` | — | 1 | clk_sys | I2C0，两路摄像头共用总线或分线 [模块规格] |
+| `camN_pwdn_o`、`camN_rst_n_o` | out | 1 | clk_sys | 由 GPIO0 输出驱动（系统子系统规格 2.7） |
+| `i2c0_scl_o/_oe/_i`、`i2c0_sda_o/_oe/_i` | — | 2 | clk_sys | I2C0 的两对开漏引脚，下标 0 接 cam0、1 接 cam1（系统子系统规格 2.8） |
 | `tmds_sym_o` | out | 3 × 10 | clk_pix | 依次为 B/G/R 三个通道的 TMDS 符号，FPGA 层负责 10:1 串化 |
 
 ### 3.4 网络（MAC 侧）
@@ -155,9 +155,6 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 |---|---|---|---|
 | `uart0_tx_o`、`uart0_rx_i` | out / in | 1 | |
 | `gpio_o`、`gpio_oe_o`、`gpio_i` | — | 16 | 按键、LED，具体分配由板级约束决定 |
-| `qspi_sck_o`、`qspi_cs_n_o` | out | 1 | |
-| `qspi_io_o/_oe/_i` | — | 4 | |
-| `timer_pwm_o` | out | 2 | |
 | `debug_o` | out | [CPU 规格] | CPU 流水线观察向量，供 ILA 使用 |
 
 ---
@@ -282,8 +279,8 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 |---|---|---|---|
 | 0 | UART0 | 4 | I2C0 |
 | 1 | GPIO0 | 5 | CACHE_CTRL |
-| 2 | QSPI0 | 6 | SYSCTRL |
-| 3 | TIMER0 | 7–15 | 预留，访问回 SLVERR |
+| 2 | 预留 | 6 | SYSCTRL |
+| 3 | 预留 | 7–15 | 预留 |
 
 **媒体 APB 槽位**
 
@@ -303,14 +300,14 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 | 0 | 保留（无中断） | 8 | VIN |
 | 1 | UART0 | 9 | PIX |
 | 2 | GPIO0 | 10 | GEO |
-| 3 | QSPI0 | 11 | RND |
-| 4 | TIMER0 | 12 | DISP |
+| 3 | 预留 | 11 | RND |
+| 4 | 预留 | 12 | DISP |
 | 5 | I2C0 | 13 | NPU |
 | 6 | CACHE_CTRL（D$ 写回错误） | 14 | ETH |
 | 7 | 预留 | | |
 | | | 15 | MEM_XBAR（错误、超时） |
 
-CLINT 提供 `mtime`、`mtimecmp`（MTIP）和 `msip`（MSIP）；PLIC 提供 1 个 M 模式上下文（MEIP），共 31 个源、7 级优先级。
+预留槽的访问回 SLVERR，预留中断源接 0。CLINT 提供 `mtime`（每个 clk_sys 周期加 1）、`mtimecmp`（MTIP）和 `msip`（MSIP）；PLIC 提供 1 个 M 模式上下文（MEIP），共 15 个源、7 级优先级。细节见 `docs/spec/sys-subsys-spec.md`。
 
 ### 6.2 sys_xbar：系统 AXI 交叉开关
 
@@ -459,10 +456,10 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 ### 7.5 系统级流程
 
 **启动流程**
-1. 复位释放后，CPU 从 Boot ROM 执行 bootloader。
-2. bootloader 初始化 UART，读 SYSCTRL 中的 `mem_ready` 状态，并根据启动模式（GPIO 按键状态，或 SYSCTRL 中的启动寄存器）选择应用程序来源：QSPI flash、UART、ETH。
-3. 把应用程序搬到 SRAM 或 DDR，执行 FENCE.I，然后跳转。
-4. 应用程序按需从 QSPI flash 或 ETH 加载 NPU 权重到 DDR。
+1. Boot ROM 和 SRAM 的上电内容由 FPGA bitstream 中的存储初始化文件提供：ROM 中是 bootloader 和启动 logo，SRAM 中是应用程序（系统子系统规格 2.2）。
+2. 复位释放后，CPU 从 Boot ROM 执行 bootloader：初始化 UART，打印启动 logo，读 SYSCTRL 的 `MEM_READY`。
+3. 默认跳转到 SRAM 中的应用程序执行。启动按键（GPIO）按下、或 SYSCTRL 的 scratch 寄存器中带有下载请求时，bootloader 改为从 UART 接收程序写入 SRAM，执行 FENCE.I 后跳转；ETH 下载在 ETH 模块完成后加入。
+4. 应用程序按需通过 ETH 加载 NPU 权重和图像资源到 DDR。
 
 **S1 目标检测，每帧流程**
 1. VIN 把摄像头帧写入底图环形缓冲，同时 NPU 输入适配把缩放后的输入写入 NPU 输入环形缓冲，完成后报告 FRAME（带 frame_id）。
@@ -523,13 +520,11 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 
 | 模块 | 功能规范 |
 |---|---|
-| UART0 | 8N1，波特率可编程（最高不低于 3 Mbps），16 字节收、发 FIFO，中断：接收非空/达到阈值、发送为空 |
-| GPIO0 | 16 位，每位方向可设；输入经同步和去抖（去抖时间可编程），可以按上升沿或下降沿触发中断 |
-| QSPI0 | SPI 模式 0/3，单线和四线；时钟分频可编程；支持命令 + 地址 + 空周期 + 数据的事务格式；读数据 FIFO。是否支持内存映射直读 [模块规格] |
-| TIMER0 | 2 个 32 位定时器，支持单次和周期模式，带中断；2 路 PWM 输出 |
-| I2C0 | 主模式，100/400 kHz，支持 7 位地址、重复起始位，用于摄像头 SCCB 配置 |
+| UART0 | 8N1，波特率可编程（最高不低于 3 Mbps），16 字节收、发 FIFO，中断：接收达到阈值、发送为空、溢出、帧错误 |
+| GPIO0 | 16 位，每位方向可设；输入经同步和去抖（去抖时间可编程），可以按上升沿或下降沿触发中断；驱动摄像头 `pwdn`、`rst_n` |
+| I2C0 | 主模式，100/400 kHz，支持 7 位地址、重复起始位；一个协议引擎、两对引脚（cam0、cam1），寄存器选择端口，用于摄像头 SCCB 配置 |
 | CACHE_CTRL | 见 8.2 |
-| SYSCTRL | 芯片 ID 和版本；scratch 寄存器；`mem_ready` 状态；启动模式；媒体子系统软复位和整 SoC 软复位；`SIM_EXIT` 寄存器（仿真平台据此结束仿真并判定结果，硬件上写入无副作用） |
+| SYSCTRL | 芯片 ID 和版本；clk_sys 频率 `CLK_SYS_HZ`；scratch 寄存器（软复位不清除）；`mem_ready` 状态；媒体子系统软复位和整 SoC 软复位；`SIM_EXIT` 寄存器（仿真平台据此结束仿真并判定结果，硬件上写入无副作用） |
 
 ### 8.4 存储子系统
 
@@ -672,7 +667,7 @@ DRM 和 APM 的预算由各模块规格确定。
 | Cache | 最终容量 |
 | RND / DISP | 图层合成方式、图层数和格式、命令格式 |
 | NPU | MAC 规模、时钟域、描述符格式、后处理分工、输入格式 |
-| GEO、ETH、QSPI | 内部结构和私有寄存器 |
+| GEO、ETH | 内部结构和私有寄存器 |
 | mem_xbar | 依据 DDR 有效带宽实测结果修订 6.4.5 的参数复位值 |
 
 ## 11. 变更记录
@@ -682,3 +677,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-25 | v0.1 | 初稿 |
 | 2026-10-25 | v0.2 | PLIC 源号 6 分配给 CACHE_CTRL（D$ 写回错误中断），见 cpu-spec 4.7、cache 规格 |
 | 2026-10-25 | v0.3 | 4.1 单拍 SIZE ≤ 2 增加例外：I$ 的 ROM 取指为单拍 SIZE = 3（K-RTL 开发中发现与 cache-spec 5.1 冲突） |
+| 2026-10-25 | v0.4 | 系统子系统规格讨论（用户确认）：去掉 QSPI0 和 TIMER0（APB 槽 2、3，PLIC 源 3、4 改为预留，删除对应顶层端口）；PLIC 15 个源；mtime 每个 clk_sys 周期加 1，SYSCTRL 增加 CLK_SYS_HZ；I2C0 一个主机两对引脚；启动流程改为 ROM/SRAM 由存储初始化文件提供上电内容 |

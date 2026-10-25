@@ -93,11 +93,11 @@
     },
     {
       "slot": 2,
-      "name": "QSPI0"
+      "name": "RESERVED"
     },
     {
       "slot": 3,
-      "name": "TIMER0"
+      "name": "RESERVED"
     },
     {
       "slot": 4,
@@ -229,11 +229,11 @@
     },
     {
       "source": 3,
-      "name": "QSPI0"
+      "name": "RESERVED"
     },
     {
       "source": 4,
-      "name": "TIMER0"
+      "name": "RESERVED"
     },
     {
       "source": 5,
@@ -241,7 +241,7 @@
     },
     {
       "source": 6,
-      "name": "RESERVED"
+      "name": "CACHE_CTRL"
     },
     {
       "source": 7,
