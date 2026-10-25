@@ -1,0 +1,6 @@
+{
+  "suite": "random",
+  "name": "memory",
+  "seed": 13,
+  "rvc": true
+}

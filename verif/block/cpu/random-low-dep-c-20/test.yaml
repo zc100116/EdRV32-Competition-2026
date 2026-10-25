@@ -1,0 +1,10 @@
+top: edrv32_cpu_b1_core_tb
+files: files.f
+defines: SIM_MODE
+parameters: RVC_EN=1
+software:
+timeout: 240
+pass: PASS
+simulator: runner
+tier: full
+runner: python3 tools/cpu/run_b1.py verif/block/cpu/random-low-dep-c-20/case.json

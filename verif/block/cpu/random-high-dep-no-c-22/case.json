@@ -1,0 +1,6 @@
+{
+  "suite": "random",
+  "name": "high-dep",
+  "seed": 22,
+  "rvc": false
+}

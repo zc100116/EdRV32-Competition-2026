@@ -1,0 +1,6 @@
+{
+  "suite": "arch-test",
+  "name": "Zifencei-Fencei",
+  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/Zifencei/src/Fencei.S",
+  "rvc": false
+}

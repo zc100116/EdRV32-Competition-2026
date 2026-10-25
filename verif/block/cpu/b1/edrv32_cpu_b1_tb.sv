@@ -140,6 +140,7 @@ module edrv32_cpu_b1_tb;
         .clk_i(clk),
         .rst_n_i(rst_n),
         .debug_i(debug),
+        .irq_arrival_debug_i(debug),
         .trace_valid_i(u_core.trace_valid_w),
         .trace_instr_i(u_core.trace_instr_w),
         .trace_trap_i(u_core.trace_trap_w),

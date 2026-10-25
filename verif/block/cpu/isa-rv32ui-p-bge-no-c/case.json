@@ -1,0 +1,6 @@
+{
+  "suite": "riscv-tests",
+  "name": "rv32ui-p-bge",
+  "source": "third_party/riscv-tests/isa/rv32ui/bge.S",
+  "rvc": false
+}

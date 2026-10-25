@@ -1,6 +1,6 @@
 # CPU 定向测试（C-V4）
 
-对应 cpu-spec v0.5、cpu-testplan 3.3–3.7 / 第4节。共31项、32个配置（E-01另有关闭C扩展的配置），不读取被测 `rtl/cpu/`。
+对应 cpu-spec v0.9、cpu-testplan 3.3–3.7 / 第4节。共31个测试项；独立构建脚本原有32个配置（E-01含无C配置），统一B1回归扩展为64个配置，见末节。
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
@@ -122,7 +122,7 @@ B-05必须观测M异常、E重定向、D重定向同拍，否则该场景未覆�
 E-02检查候选对第二位置，协调者会同步验证方案。MEI>MSI>MTI按标准优先级，协调者将补入规格。
 C-01在软件首读前mcycle/minstret已前进，复位零需要B1在复位释放时直接检查；其他稳定CSR由软件比较。
 `misa`及ID、WARL、HPM、计数器时序与Spike不同的断言仅在B1完整版本检查。
-Spike的EBREAK mtval为PC、spec规定0，P-01/E-01冒烟版本只调整该项期望。
+cpu-spec v0.9已统一EBREAK的mtval为指令PC，P-01/E-01与Spike采用相同期望。
 
 ## 验证记录
 
@@ -135,3 +135,17 @@ Spike的EBREAK mtval为PC、spec规定0，P-01/E-01冒烟版本只调整该项�
 另有E-01 no-C配置；全部完整B1版本也已编译，所有build.log为空（零诊断）。
 `PYTHONPYCACHEPREFIX=build/cpu/pycache python3 -m py_compile tools/cpu/build_directed.py`通过。
 仅新增汇编/Python/JSON/README，没有HDL改动，Verilator lint不适用。
+
+## C-I1/C-I2 接入
+
+统一回归由 `tools/cpu/generate_regress.py` 生成、`tools/cpu/run_b1.py` 执行。
+31 个既有测试项各有有 C / 无 C 两种构建，另有 M-04 的两种 FENCE.I clean 阶段
+IRQ 激励，共 64 个定向配置。I-03 合入 E-01 的无 C 激励，不新增测试项。
+P-01 用连续序列化指令预填 IB，观察器要求每个矩阵项实际出现两个候选；P-03
+使用独立填充指令和序列化起点，逐一检查真实旁路源；P-04 对紧邻消费者检查
+精确结果延迟。C-02/C-03 的参考邮箱由独立退休/事件模型写入，未读取硬件计数器
+作为期望值。每项的义务未命中时明确失败。
+
+协调者已确认：原表中 17 项 `spike=compare` 保持同 ELF 严格逐条比对；14 项
+`spike=smoke` 用完整 B1 程序的软件自检和独立断言验收，参考冒烟版另外运行并
+单列为 `SPIKE_SMOKE`，不计作逐条比对通过。新增 M-04 IRQ 配置按中断测试自检。

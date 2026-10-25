@@ -22,12 +22,17 @@ module edrv32_cpu_irq_model (
     logic [2:0] irq_r;
     string names[3] = '{"MEIP", "MSIP", "MTIP"};
 
+    integer parsed_cycle;
+    integer parsed_duration;
     initial begin
         for (int index = 0; index < 3; index++) begin
-            start_cycle[index] = -1;
-            duration[index] = 1;
-            void'($value$plusargs({names[index], "_CYCLE=%d"}, start_cycle[index]));
-            void'($value$plusargs({names[index], "_DURATION=%d"}, duration[index]));
+            // Scalar temporaries preserve absent-plusarg defaults in Verilator 5.020.
+            parsed_cycle = -1;
+            parsed_duration = 1;
+            void'($value$plusargs({names[index], "_CYCLE=%d"}, parsed_cycle));
+            void'($value$plusargs({names[index], "_DURATION=%d"}, parsed_duration));
+            start_cycle[index] = parsed_cycle;
+            duration[index] = parsed_duration;
             pc_enabled[index] = $value$plusargs({names[index], "_PC=%h"}, start_pc[index]);
         end
     end

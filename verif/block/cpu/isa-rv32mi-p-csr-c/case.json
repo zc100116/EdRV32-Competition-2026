@@ -1,0 +1,6 @@
+{
+  "suite": "riscv-tests",
+  "name": "rv32mi-p-csr",
+  "source": "third_party/riscv-tests/isa/rv32mi/csr.S",
+  "rvc": true
+}

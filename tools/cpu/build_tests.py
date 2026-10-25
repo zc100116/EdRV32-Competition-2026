@@ -17,13 +17,26 @@ TESTS = ROOT / 'third_party/riscv-tests'
 ARCH = ROOT / 'third_party/riscv-arch-test/riscv-test-suite'
 
 
-def build(source, name, arch=False):
+def build(source, name, arch=False, compressed=True):
     out = OUT / ('arch-test' if arch else 'riscv-tests') / name
+    if not compressed:
+        out /= 'no-c'
     out.mkdir(parents=True, exist_ok=True)
     elf = out / (name + '.elf')
     includes = [ENV, ARCH / 'env'] if arch else [
         ENV, TESTS / 'env', TESTS / 'isa/macros/scalar']
-    args = ['riscv-none-elf-gcc', '-march=' + ISA, '-mabi=ilp32', '-mcmodel=medany',
+    isa = ISA if compressed else ISA.replace('imc_', 'im_')
+    if arch and not compressed:
+        # The upstream macros enable RVC temporarily to fill alignment gaps.
+        # Build-local macro copies keep I/M-only programs entirely 32-bit.
+        adaptation = out / 'env-no-c'
+        adaptation.mkdir(exist_ok=True)
+        for header in ('arch_test.h', 'test_macros.h'):
+            text = (ARCH / 'env' / header).read_text()
+            text = text.replace('.option rvc', '.option norvc').replace('c.nop', 'nop')
+            (adaptation / header).write_text(text)
+        includes.insert(0, adaptation)
+    args = ['riscv-none-elf-gcc', '-march=' + isa, '-mabi=ilp32', '-mcmodel=medany',
             '-nostdlib', '-nostartfiles', '-static', '-Wl,--no-relax',
             '-T' + str(ENV / 'link.ld')]
     args += ['-I' + str(path) for path in includes]
@@ -43,7 +56,8 @@ def build(source, name, arch=False):
         for line in (out / (region + '.hex')).read_text().splitlines():
             image.append(f'@{int(line[1:], 16) + base:08x}' if line.startswith('@') else line)
     (out / 'mem.hex').write_text('\n'.join(image) + '\n')
-    run(elf, out, signature=arch)
+    run(elf, out, compressed=compressed, signature=arch)
+    return elf
 
 
 def main():
@@ -55,7 +69,7 @@ def main():
         for group in ('rv32ui', 'rv32um', 'rv32uc', 'rv32mi'):
             for source in sorted((TESTS / 'isa' / group).glob('*.S')):
                 # cpu-spec 5 has no PMP; coordinator-approved testplan exclusion.
-                if group == 'rv32mi' and source.stem == 'pmpaddr':
+                if group == 'rv32mi' and source.stem in ('pmpaddr', 'breakpoint'):
                     continue
                 # cpu-spec 4.7/6 requires traps, whereas ma_data requires emulation.
                 if group == 'rv32ui' and source.stem == 'ma_data':

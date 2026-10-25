@@ -8,8 +8,8 @@ python3 tools/cpu/build_tests.py
 python3 tools/cpu/test_trace_compare.py
 ```
 
-The first command builds and runs all applicable tests: **65 riscv-tests**
-(41 rv32ui, 8 rv32um, 1 rv32uc, 15 rv32mi) and **92 architectural tests**
+The first command builds and runs all applicable tests: **64 riscv-tests**
+(41 rv32ui, 8 rv32um, 1 rv32uc, 14 rv32mi) and **92 architectural tests**
 (39 I, 8 M, 29 C, 1 Zifencei, 15 privilege).
 Use `--suite riscv-tests` or `--suite arch-test` to run one suite.
 All generated files live in `build/cpu/{riscv-tests,arch-test}/<test>/`:
@@ -74,7 +74,7 @@ The comparator reads Spike's commits, GPR writes and trap/interrupt events,
 ignores disassembly and memory/CSR side effects, and compares ordered events.
 It reports the first mismatch, printing both PC, instruction, rd and writeback
 value (or mcause for a trap), and returns 1. A missing/extra event also fails.
-The self-test above converts all 65 real Spike logs to this RTL format, compares
+The self-test above converts all applicable real Spike logs to this RTL format, compares
 them, flips the first writeback value in the add test and verifies the failure
 index and nonzero exit status. It also verifies the counter-value waiver while
 keeping counter rd mismatches detectable. Evidence is in `build/cpu/trace-compare/`.
@@ -100,6 +100,7 @@ The coordinator approved these scope decisions:
 | riscv-tests | All rv32ui/um/uc/mi `.S` files, p environment, except the two below |
 | rv32ui-p-ma_data | Excluded: requires successful misaligned accesses; cpu-spec 4.7/6 requires mcause 4/6 |
 | rv32mi-p-ma_fetch | Runs on Spike; RTL uses upstream tohost self-check only, no commit comparison (misa.C probing) |
+| rv32mi-p-breakpoint | Excluded by coordinator: requires debug triggers absent from cpu-spec 2.1; C-01 verifies illegal trigger-CSR access |
 | rv32mi-p-pmpaddr | Excluded: specifically tests PMP, which cpu-spec does not implement |
 | arch-test | Signature-based upstream release 3.10.0; rv32i_m I/M/C/Zifencei/privilege |
 | C directory Zcb/Zbb tests | Not applicable: require extensions outside cpu-spec 2.1; retained as upstream source |
@@ -193,3 +194,41 @@ category and distance counts are in the eight `statistics-0-50.txt` files.
 
 The low-dep static body has no RAW distances 1–3. Forward jumps occasionally
 shorten dynamic distances, accounting for the small dynamic distance-1 fraction.
+
+## Real-core integration regression (C-I1/C-I2)
+
+`python3 tools/cpu/generate_regress.py` materializes 746 B1 descriptors under
+`verif/block/cpu/`: 127 riscv-tests configurations, 155 arch-test configurations,
+64 directed configurations, and 400 random streams. Run `make smoke` then
+`make full` with the installed tool environment loaded. The only upstream RV32UC
+source is `rvc.S`; smoke uses the coordinator-approved minimum of three or
+the number of applicable sources, running that single C source and three from
+each other ISA class.
+
+Both RVC settings run all applicable non-C programs; C programs run with RVC
+only. The no-C arch build uses build-local macro copies to remove temporary
+RVC alignment padding, without changing upstream test sources. E-01 no-C also
+checks an illegal C encoding and misaligned jump target (I-03).
+
+The runner builds and reuses one real-core Verilator binary per RVC setting,
+resolves ELF symbols into model plusargs, and compares successful tohost runs
+through the architectural tohost-store endpoint. Architectural signatures are
+also compared word for word. The Spike extension `spike_config.cc` configures
+implementation-ID CSRs to zero through Spike's CSR API; it implements no
+instructions. Spike runs with triggers disabled. No GPR comparison waivers were
+added; the existing counter-read waiver and ma_fetch exception remain explicit.
+
+As approved by the coordinator, 17 directed test IDs use the same ELF for strict
+retirement comparison (34 RVC configurations). The 14 existing `spike=smoke`
+IDs use complete B1 software self-checks plus independent observers, with
+separately built `SPIKE_SMOKE` reference sanity runs (28 configurations).
+Two additional M-04 configurations inject an interrupt during FENCE.I clean,
+checking delayed interrupt entry and the modified code's result. Output labels
+these 30 configurations `mode=b1-selfcheck`; they are not counted as Spike
+retirement comparisons. Random streams always compare with Spike, and use
+randomized I/D misses and ready backpressure with the program seed.
+
+Per-program ELF/images, RTL traces, signatures, simulator logs, obligation tables,
+predictor snapshots and real coverage live under `build/cpu/`; regression status
+logs live under `build/regress/{smoke,full}/`. Artificial coverage self-test files
+under `build/cpu-coverage-selftest/` must never be merged into real CPU coverage.

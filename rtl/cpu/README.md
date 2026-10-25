@@ -1,9 +1,9 @@
-# EdRV32 CPU — C-R1/C-R2/C-R3
+# EdRV32 CPU — RTL 与 B1 联调
 
 `edrv32_cpu_core` 集成RV32IM、Zicsr/Zicntr、Zifencei和可选RV32C，
 单一clk_sys时钟域，参数仅有 `RVC_EN`。当前包含数据通路、前端与D/E/M/W后端。
-规格依据为协调者分支的cpu-spec v0.4–v0.6（49dd90d、75465c8、d740144）及本次答复；
-共享docs、rtl/include和rtl/filelists未修改。
+当前行为依据协调者已确认的 cpu-spec v0.9 与开发约定；早期 C-R1/C-R2/C-R3
+依据 v0.4–v0.6 开发。共享规格、rtl/include 和 rtl/filelists 由协调者维护。
 
 ## 模块与接口
 
@@ -51,7 +51,7 @@ trap_i 的pc/cause/value由后端提供，覆盖同拍CSR写和MRET。
 不得超过 `decode_valid_count_o`。`decode_data_o[357:0]` 的低179位是最老指令，
 高179位是下一条；仅有效记录有意义。`ib_count_o[2:0]` 为全部IB占用数。
 
-每条179位记录的字段如下，前后端直接用切片取得：
+每条179位记录的字段如下，前后端用同名 `REC_*` localparam 取得字段：
 
 | 位 | 字段 |
 |---|---|
@@ -124,8 +124,9 @@ M等待load/store响应，load按size/unsigned符号扩展；store数据在提�
 不重复提交，不让该指令进入W，保持非推送store语义。
 M异常/中断取消尚未提交的D$请求；未发出请求的对齐/非法异常不产生无关kill。
 
-同步异常随指令到M；M槽0异常不提交该组，槽1异常允许正常槽0提交。
-中断优先级MEI>MSI>MTI，设备已提交访问与除法不被中断抢占。
+同步异常随指令到M，M槽0异常不提交该组；按配对规则，槽1只容纳无异常ALU，
+不保留槽1异常状态。中断优先级MEI>MSI>MTI，设备已提交访问、除法与FENCE.I
+执行期间不接受中断。EBREAK的mtval为指令PC；非法短编码不包含后续半字。
 CSR trap更新优先于CSR写和MRET，vectored只对中断增加4×cause。
 MRET恢复mstatus并跳mepc；WFI提交后停止新取指，被使能中断等待即可唤醒，
 不依赖全局MIE。FENCE等D$排空；FENCE.I按clean_all→ic_inv→提交/下一PC重取。
@@ -165,7 +166,7 @@ frontend内部新增`update_clear_i/update_clear_index_i`，供E清除已变为�
 ## 统一验证与复现
 
 全部CPU测试现用tools/regress.py清单：top/files/defines/parameters/software/
-timeout/pass/tier/simulator，files.f路径相对本文件。所有U级均纳入smoke；
+timeout/pass/tier/simulator，files.f中的路径相对于各自文件所在目录。所有U级均纳入smoke；
 寄存器堆、CSR另外自动运行Icarus。RVC参考表由testbench调用Python在build下生成。
 移除编译的-Wno-fatal；通过实际告警修正和正确文件顺序处理timescale与位宽。
 
@@ -180,7 +181,7 @@ verilator --lint-only -Wall -GRVC_EN=0 +incdir+rtl/include --top-module edrv32_c
     rtl/cpu/*.v rtl/tech/edrv32_mul_s33x33.v
 ```
 
-本次结果：make smoke为33 PASS、0 FAIL（含P0）；make lint通过，
+C-R3交付时的结果：make smoke为33 PASS、0 FAIL（含P0）；make lint通过，
 verilog_style.py为22文件、0告警；core两种RVC配置独立-Wall lint均0告警。
 日志在build/cpu-smoke-acceptance.log、build/cpu-lint-final.log及build/regress/smoke/。
 各test目录README列出框架入口与配置；无需人工先生成引用数据或软件镜像。
@@ -201,8 +202,8 @@ verilog_style.py为22文件、0告警；core两种RVC配置独立-Wall lint均0�
 
 顶层冒烟用理想I$/D$模型，命中下一拍返回、平坦ROM/SRAM、tohost判定。
 程序覆盖ALU、宽度/符号访存、分支、乘除余、CSR、FENCE/FENCE.I、
-SRAM自修改指令及槽1陈旧预测、紧邻store/load。它不替代后续独立B1环境的
-ISA比对、随机缺失/错误/中断回归，也未进行PDS时序或资源测量。
+SRAM自修改指令及槽1陈旧预测、紧邻store/load。该单元冒烟与独立B1环境互补；B1的ISA比对、随机缺失/错误/中断回归入口见
+`tools/cpu/README.md`。本目录的Linux验证不包含PDS时序或资源测量。
 
 ## 已确认的实现约定
 
@@ -216,7 +217,7 @@ ISA比对、随机缺失/错误/中断回归，也未进行PDS时序或资源测
 
 没有因10分钟未答复而先行采用的未确认约定。未修改共享规格或文件列表，未合入main。
 
-## 供协调者添加的rtl/filelists/cpu.f内容
+## 共享rtl/filelists/cpu.f内容
 
 以下路径相对rtl/filelists/cpu.f；按tools/regress.py文件列表规则解析：
 
@@ -236,3 +237,22 @@ ISA比对、随机缺失/错误/中断回归，也未进行PDS时序或资源测
 ../cpu/edrv32_cpu_csr.v
 ../tech/edrv32_mul_s33x33.v
 ```
+
+## C-I1/C-I2 联调结果
+
+功能 RTL 修复截至 `503c67a`，显式 RVC 参数的 lint 等价修订为 `8a223df`；
+真实 B1、生成清单与软件适配见本次集成提交。
+复现命令为 `. ~/.local/opt/edrv32/env.sh` 后执行 `make smoke`、`make full`。
+最终 smoke 为 **135 PASS / 0 FAIL**，full 为 **820 PASS / 0 FAIL**，包含 P0、cache、
+CPU 单元测试和 746 个真实 B1 配置（RVC_EN=1：388；RVC_EN=0：358）。
+
+CPU 配置中 714 项严格逐条比对 Spike，其中 155 项同时比对全部架构签名；
+30 项按协调者确认，以完整 B1 程序自检和独立观察器判定，另跑参考冒烟版；
+2 项 ma_fetch 采用已确认的 tohost 判据。400 个随机流均严格比对，包含随机缺失和反压。
+B-06 另外进行两次 NOP 补丁对照并比较真实预测器状态。
+
+`tools/cpu/coverage_report.py` 合并 748 次真实仿真，覆盖 **57/57**；
+`build/cpu/full-coverage-report.md` 为逐项报告。未混入桩或人工覆盖自测数据。
+`make lint`、`tools/check/verilog_style.py rtl/` 和 core / core+cache 两种 RVC 的
+独立 `-Wall` lint 均为 0 告警。完整日志位于 `build/cpu/make-smoke-final.log`、
+`build/cpu/make-full-final.log`、`build/cpu/make-lint-final.log`。

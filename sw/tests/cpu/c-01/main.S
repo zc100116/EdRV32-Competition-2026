@@ -10,7 +10,11 @@ _start:
     csrr a0, 0x300
     CHECK a0, 6144
     csrr a0, 0x301
+#ifdef RVC_DISABLED
+    CHECK a0, 1073746176
+#else
     CHECK a0, 1073746180
+#endif
     csrr a0, 0x304
     CHECK a0, 0
     csrr a0, 0x305
@@ -110,7 +114,11 @@ _start:
     li a0, 2147483651
     csrw mepc, a0
     csrr a1, mepc
+#ifdef RVC_DISABLED
+    CHECK a1, 2147483648
+#else
     CHECK a1, 2147483650
+#endif
     li a0, 2147483659
     csrw mcause, a0
     csrr a1, mcause
@@ -517,6 +525,38 @@ csr_resume_26:
 csr_fault_27:
     csrw 0x7ff, zero
 csr_resume_27:
+#endif
+#ifndef SPIKE_SMOKE
+    la a0, csr_fault_28
+    lw t2, 0(a0)
+    EXPECT 2, t2, csr_fault_28, csr_resume_28
+csr_fault_28:
+    csrw 0x7a0, zero
+csr_resume_28:
+#endif
+#ifndef SPIKE_SMOKE
+    la a0, csr_fault_29
+    lw t2, 0(a0)
+    EXPECT 2, t2, csr_fault_29, csr_resume_29
+csr_fault_29:
+    csrw 0x7a1, zero
+csr_resume_29:
+#endif
+#ifndef SPIKE_SMOKE
+    la a0, csr_fault_30
+    lw t2, 0(a0)
+    EXPECT 2, t2, csr_fault_30, csr_resume_30
+csr_fault_30:
+    csrw 0x7a2, zero
+csr_resume_30:
+#endif
+#ifndef SPIKE_SMOKE
+    la a0, csr_fault_31
+    lw t2, 0(a0)
+    EXPECT 2, t2, csr_fault_31, csr_resume_31
+csr_fault_31:
+    csrw 0x7a3, zero
+csr_resume_31:
 #endif
     li a0, 0x55
     csrrw a1, mscratch, a0

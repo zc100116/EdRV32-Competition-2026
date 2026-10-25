@@ -32,12 +32,18 @@ module edrv32_cpu_dc_model (
     int ready_low_pct = 0;
     int wb_event_cycle = -1;
     int cycle_r;
+    int clean_delay = 1;
+    int maintenance_count_r;
+    bit maintenance_active_r;
+    int buffer_hold_cycles = 0;
+    int buffer_hold_r;
     int wb_event_count = 0;
     bit resp_valid_r;
     bit resp_err_r;
     logic [31:0] error_addr;
     bit error_enabled;
     int delay_r;
+    int device_delay_r;
     bit active_r;
     bit ready_r;
     bit responded_r;
@@ -56,6 +62,8 @@ module edrv32_cpu_dc_model (
     bit tohost_enabled;
 
     initial begin
+        void'($value$plusargs("DC_CLEAN_ALL_DELAY=%d", clean_delay));
+        void'($value$plusargs("WB_HOLD_CYCLES=%d", buffer_hold_cycles));
         void'($value$plusargs("DC_MISS_PCT=%d", miss_pct));
         void'($value$plusargs("DC_DELAY_MIN=%d", delay_min));
         void'($value$plusargs("DC_DELAY_MAX=%d", delay_max));
@@ -68,7 +76,7 @@ module edrv32_cpu_dc_model (
     assign dc_req_ready_o = rst_n_i && ready_r && !dc_fence_i && !dc_clean_all_i
         && (!active_r || (!device_r && responded_r && dc_commit_i && !dc_kill_i));
     assign dc_resp_device_o = (active_r || resp_valid_r) && device_r;
-    assign dc_resp_valid_o = resp_valid_r && !dc_kill_i;
+    assign dc_resp_valid_o = resp_valid_r;
     assign dc_resp_err_o = resp_err_r && dc_resp_valid_o;
     assign miss_o = active_r && !device_r && delay_r != 0;
     assign write_buffer_valid_o = buffer_valid_r;
@@ -113,6 +121,9 @@ module edrv32_cpu_dc_model (
             responded_r <= 0;
             committed_r <= 0;
             buffer_valid_r <= 0;
+            buffer_hold_r <= 0;
+            maintenance_active_r <= 0;
+            maintenance_count_r <= 0;
             resp_valid_r <= 0;
             resp_err_r <= 0;
             dc_fence_done_o <= 0;
@@ -127,17 +138,32 @@ module edrv32_cpu_dc_model (
             resp_valid_r <= 0;
             resp_err_r <= 0;
             device_execute_o <= 0;
-            dc_fence_done_o <= (dc_fence_i || dc_clean_all_i)
-                && !buffer_valid_r && !active_r;
+            dc_fence_done_o <= 0;
+            if ((!dc_fence_i && !dc_clean_all_i) || dc_fence_done_o)
+                maintenance_active_r <= 0;
+            else if (!maintenance_active_r && !buffer_valid_r && !active_r) begin
+                maintenance_active_r <= 1;
+                maintenance_count_r <= dc_clean_all_i ? clean_delay - 1 : 0;
+                if (!dc_clean_all_i || clean_delay == 1)
+                    dc_fence_done_o <= 1;
+            end
+            if (maintenance_active_r && maintenance_count_r > 0) begin
+                maintenance_count_r <= maintenance_count_r - 1;
+                if (maintenance_count_r == 1)
+                    dc_fence_done_o <= 1;
+            end
             // Old buffer drains while the next committed store can replace it.
-            if (buffer_valid_r) begin
+            if (buffer_hold_r > 0)
+                buffer_hold_r <= buffer_hold_r - 1;
+            if (buffer_valid_r && buffer_hold_r == 0) begin
                 write_data(buffer_addr_r, buffer_size_r, buffer_data_r);
                 if (tohost_enabled && buffer_addr_r == tohost_addr) begin
                     tohost_valid <= 1;
                     tohost_value <= buffer_data_r;
                 end
             end
-            buffer_valid_r <= 0;
+            if (buffer_hold_r == 0)
+                buffer_valid_r <= 0;
             if (active_r) begin
                 if (dc_kill_i) begin
                     active_r <= 0;
@@ -147,11 +173,12 @@ module edrv32_cpu_dc_model (
                         committed_r <= 1;
                         store_data_r <= dc_store_data_i;
                         if (device_r) begin
-                            delay_r <= int'($urandom_range(32'(delay_min), 32'(delay_max)));
+                            delay_r <= device_delay_r;
                         end else begin
                             active_r <= 0;
                             if (store_r && !error_r) begin
                                 buffer_valid_r <= 1;
+                                buffer_hold_r <= buffer_hold_cycles;
                                 buffer_addr_r <= addr_r;
                                 buffer_size_r <= size_r;
                                 buffer_data_r <= dc_store_data_i;
@@ -188,6 +215,7 @@ module edrv32_cpu_dc_model (
                 size_r <= dc_req_size_i;
                 store_r <= dc_req_store_i;
                 device_r <= device(dc_req_addr_i);
+                device_delay_r <= int'($urandom_range(32'(delay_min), 32'(delay_max)));
                 error_r <= error_enabled && dc_req_addr_i == error_addr;
                 committed_r <= 0;
                 responded_r <= 0;

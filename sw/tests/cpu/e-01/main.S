@@ -59,6 +59,12 @@ fault_store:
 after_store:
 #endif
 #ifdef RVC_DISABLED
+    li t2, 1
+    EXPECT 2, t2, fault_compressed, after_compressed
+.balign 4
+fault_compressed:
+    .word 0x00000001
+after_compressed:
     la t2, halfword_target
     EXPECT 0, t2, fault_jump_align, after_jump_align
     la a0, halfword_target

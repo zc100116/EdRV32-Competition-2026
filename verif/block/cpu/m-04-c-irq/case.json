@@ -1,0 +1,6 @@
+{
+  "suite": "directed",
+  "name": "m-04",
+  "rvc": true,
+  "fence_irq": true
+}

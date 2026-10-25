@@ -1,0 +1,6 @@
+{
+  "suite": "arch-test",
+  "name": "I-sltiu-01",
+  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/I/src/sltiu-01.S",
+  "rvc": true
+}

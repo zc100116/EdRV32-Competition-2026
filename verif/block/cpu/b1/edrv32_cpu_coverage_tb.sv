@@ -21,6 +21,7 @@ module edrv32_cpu_coverage_tb;
         .clk_i(clk),
         .rst_n_i(rst_n),
         .debug_i(debug),
+        .irq_arrival_debug_i(debug),
         .trace_valid_i(valid),
         .trace_instr_i(instr),
         .trace_trap_i(trap),

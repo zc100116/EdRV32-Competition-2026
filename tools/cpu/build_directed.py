@@ -17,7 +17,7 @@ ENV = ROOT / 'verif/block/cpu/env'
 TESTS = ROOT / 'sw/tests/cpu'
 
 
-def build(source, out, smoke, compressed=True):
+def build(source, out, smoke, compressed=True, defines=()):
     out.mkdir(parents=True, exist_ok=True)
     elf = out / (source.parent.name + '.elf')
     isa = ISA if compressed else ISA.replace('imc_', 'im_')
@@ -26,6 +26,7 @@ def build(source, out, smoke, compressed=True):
             '-nostdlib', '-nostartfiles', '-static', '-Wl,--no-relax',
             '-Wl,--fatal-warnings', '-T' + str(ENV / 'link.ld'),
             '-I' + str(TESTS / 'common'), '-DTEST_ENTRY=_start']
+    args += ['-D' + define for define in defines]
     if smoke:
         args += ['-DSPIKE_SMOKE=1']
     if not compressed:

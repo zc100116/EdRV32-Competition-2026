@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 import re
 import subprocess
+import shutil
 
 ISA = 'rv32imc_zicsr_zifencei_zicntr_zihpm'
 MEMORY = '0:0x4000,0x10000000:0x40000,0x80000000:0x40000000'
@@ -17,17 +18,31 @@ def symbols(elf):
             if len(parts := line.split()) == 3}
 
 
+def configuration_library():
+    root = Path(__file__).resolve().parents[2]
+    source = Path(__file__).with_name('spike_config.cc')
+    library = root / 'build/cpu/spike_config.so'
+    library.parent.mkdir(parents=True, exist_ok=True)
+    if not library.exists() or source.stat().st_mtime > library.stat().st_mtime:
+        prefix = Path(shutil.which('spike')).resolve().parents[1]
+        subprocess.run(['g++', '-std=c++17', '-shared', '-fPIC',
+                        '-I' + str(prefix / 'include'), str(source), '-o', str(library)],
+                       check=True)
+    return library
+
+
 def run(elf, output, compressed=True, signature=False):
     output.mkdir(parents=True, exist_ok=True)
     names = symbols(elf)
     log = output / 'spike.log'
-    args = ['spike', '--isa=' + (ISA if compressed else ISA.replace('imc_', 'im_')),
+    args = ['spike', '--extlib=' + str(configuration_library()),
+            '--extension=edrv32_config', '--triggers=0', '--isa=' + (ISA if compressed else ISA.replace('imc_', 'im_')),
             '--priv=m', '--pmpregions=0', '--no-dm', '-m' + MEMORY,
             '--pc=0', '--disable-dtb', '-l', '--log-commits', '--log=' + str(log)]
     if signature:
         args += ['+signature=' + str(output / 'reference.signature'),
                  '+signature-granularity=4']
-    subprocess.run(args + [str(elf)], check=True)
+    subprocess.run(args + [str(elf)], check=True, timeout=60)
     # HTIF polls in batches. B1 terminates at the first nonzero tohost store;
     # discard only the extra commits executed after that same endpoint by Spike.
     lines = []

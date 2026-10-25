@@ -1,0 +1,6 @@
+{
+  "suite": "riscv-tests",
+  "name": "rv32ui-p-jalr",
+  "source": "third_party/riscv-tests/isa/rv32ui/jalr.S",
+  "rvc": false
+}

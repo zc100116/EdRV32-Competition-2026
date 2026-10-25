@@ -21,9 +21,9 @@ irq_division:
     div a4, a1, a2
     CHECK a4, 14
     addi a0, a0, 1
-irq_device:
 #ifndef SPIKE_SMOKE
     la a5, device_registers
+irq_device:
     lw a4, 0(a5)
 #endif
     addi a0, a0, 1

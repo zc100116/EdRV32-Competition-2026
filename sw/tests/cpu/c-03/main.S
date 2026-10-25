@@ -16,7 +16,10 @@
     li a0, 0x7f5
 hpm_0_begin:
     csrw mcountinhibit, a0
+    j hpm_0_single
 .balign 8
+    nop
+hpm_0_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -52,7 +55,10 @@ hpm_0_freeze:
     li a0, 0x7f5
 hpm_1_begin:
     csrw mcountinhibit, a0
+    j hpm_1_single
 .balign 8
+    nop
+hpm_1_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -87,7 +93,10 @@ hpm_1_freeze:
     li a0, 0x7f5
 hpm_2_begin:
     csrw mcountinhibit, a0
+    j hpm_2_single
 .balign 8
+    nop
+hpm_2_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -122,7 +131,10 @@ hpm_2_freeze:
     li a0, 0x7f5
 hpm_3_begin:
     csrw mcountinhibit, a0
+    j hpm_3_single
 .balign 8
+    nop
+hpm_3_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -157,7 +169,10 @@ hpm_3_freeze:
     li a0, 0x7f5
 hpm_4_begin:
     csrw mcountinhibit, a0
+    j hpm_4_single
 .balign 8
+    nop
+hpm_4_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -192,7 +207,10 @@ hpm_4_freeze:
     li a0, 0x7f5
 hpm_5_begin:
     csrw mcountinhibit, a0
+    j hpm_5_single
 .balign 8
+    nop
+hpm_5_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -227,7 +245,10 @@ hpm_5_freeze:
     li a0, 0x7f5
 hpm_6_begin:
     csrw mcountinhibit, a0
+    j hpm_6_single
 .balign 8
+    nop
+hpm_6_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -262,7 +283,10 @@ hpm_6_freeze:
     li a0, 0x7f5
 hpm_7_begin:
     csrw mcountinhibit, a0
+    j hpm_7_single
 .balign 8
+    nop
+hpm_7_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -297,7 +321,10 @@ hpm_7_freeze:
     li a0, 0x7f5
 hpm_8_begin:
     csrw mcountinhibit, a0
+    j hpm_8_single
 .balign 8
+    nop
+hpm_8_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -332,7 +359,10 @@ hpm_8_freeze:
     li a0, 0x7f5
 hpm_9_begin:
     csrw mcountinhibit, a0
+    j hpm_9_single
 .balign 8
+    nop
+hpm_9_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -367,7 +397,10 @@ hpm_9_freeze:
     li a0, 0x7f5
 hpm_10_begin:
     csrw mcountinhibit, a0
+    j hpm_10_single
 .balign 8
+    nop
+hpm_10_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -402,7 +435,10 @@ hpm_10_freeze:
     li a0, 0x7f5
 hpm_11_begin:
     csrw mcountinhibit, a0
+    j hpm_11_single
 .balign 8
+    nop
+hpm_11_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -437,7 +473,10 @@ hpm_11_freeze:
     li a0, 0x7f5
 hpm_12_begin:
     csrw mcountinhibit, a0
+    j hpm_12_single
 .balign 8
+    nop
+hpm_12_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -472,7 +511,10 @@ hpm_12_freeze:
     li a0, 0x7f5
 hpm_13_begin:
     csrw mcountinhibit, a0
+    j hpm_13_single
 .balign 8
+    nop
+hpm_13_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -507,7 +549,10 @@ hpm_13_freeze:
     li a0, 0x7f5
 hpm_14_begin:
     csrw mcountinhibit, a0
+    j hpm_14_single
 .balign 8
+    nop
+hpm_14_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -542,7 +587,10 @@ hpm_14_freeze:
     li a0, 0x7f5
 hpm_15_begin:
     csrw mcountinhibit, a0
+    j hpm_15_single
 .balign 8
+    nop
+hpm_15_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -577,7 +625,10 @@ hpm_15_freeze:
     li a0, 0x7f5
 hpm_16_begin:
     csrw mcountinhibit, a0
+    j hpm_16_single
 .balign 8
+    nop
+hpm_16_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -612,7 +663,10 @@ hpm_16_freeze:
     li a0, 0x7f5
 hpm_17_begin:
     csrw mcountinhibit, a0
+    j hpm_17_single
 .balign 8
+    nop
+hpm_17_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -648,7 +702,10 @@ hpm_17_freeze:
     li a0, 0x7f5
 hpm_18_begin:
     csrw mcountinhibit, a0
+    j hpm_18_single
 .balign 8
+    nop
+hpm_18_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -684,7 +741,10 @@ hpm_18_freeze:
     li a0, 0x7f5
 hpm_19_begin:
     csrw mcountinhibit, a0
+    j hpm_19_single
 .balign 8
+    nop
+hpm_19_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -720,7 +780,10 @@ hpm_19_freeze:
     li a0, 0x7f5
 hpm_20_begin:
     csrw mcountinhibit, a0
+    j hpm_20_single
 .balign 8
+    nop
+hpm_20_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -756,7 +819,10 @@ hpm_20_freeze:
     li a0, 0x7f5
 hpm_21_begin:
     csrw mcountinhibit, a0
+    j hpm_21_single
 .balign 8
+    nop
+hpm_21_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -792,7 +858,10 @@ hpm_21_freeze:
     li a0, 0x7f5
 hpm_22_begin:
     csrw mcountinhibit, a0
+    j hpm_22_single
 .balign 8
+    nop
+hpm_22_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -828,7 +897,10 @@ hpm_22_freeze:
     li a0, 0x7f5
 hpm_23_begin:
     csrw mcountinhibit, a0
+    j hpm_23_single
 .balign 8
+    nop
+hpm_23_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -864,7 +936,10 @@ hpm_23_freeze:
     li a0, 0x7f5
 hpm_24_begin:
     csrw mcountinhibit, a0
+    j hpm_24_single
 .balign 8
+    nop
+hpm_24_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -900,7 +975,10 @@ hpm_24_freeze:
     li a0, 0x7f5
 hpm_25_begin:
     csrw mcountinhibit, a0
+    j hpm_25_single
 .balign 8
+    nop
+hpm_25_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -936,7 +1014,10 @@ hpm_25_freeze:
     li a0, 0x7f5
 hpm_26_begin:
     csrw mcountinhibit, a0
+    j hpm_26_single
 .balign 8
+    nop
+hpm_26_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -972,7 +1053,10 @@ hpm_26_freeze:
     li a0, 0x7f5
 hpm_27_begin:
     csrw mcountinhibit, a0
+    j hpm_27_single
 .balign 8
+    nop
+hpm_27_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -1008,7 +1092,10 @@ hpm_27_freeze:
     li a0, 0x7f5
 hpm_28_begin:
     csrw mcountinhibit, a0
+    j hpm_28_single
 .balign 8
+    nop
+hpm_28_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -1044,7 +1131,10 @@ hpm_28_freeze:
     li a0, 0x7f5
 hpm_29_begin:
     csrw mcountinhibit, a0
+    j hpm_29_single
 .balign 8
+    nop
+hpm_29_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -1080,7 +1170,10 @@ hpm_29_freeze:
     li a0, 0x7f5
 hpm_30_begin:
     csrw mcountinhibit, a0
+    j hpm_30_single
 .balign 8
+    nop
+hpm_30_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2
@@ -1116,7 +1209,10 @@ hpm_30_freeze:
     li a0, 0x7f5
 hpm_31_begin:
     csrw mcountinhibit, a0
+    j hpm_31_single
 .balign 8
+    nop
+hpm_31_single:
     addi a1, zero, 10
     addi a2, zero, 20
     add a3, a1, a2

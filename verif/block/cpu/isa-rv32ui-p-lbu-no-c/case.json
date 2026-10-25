@@ -1,0 +1,6 @@
+{
+  "suite": "riscv-tests",
+  "name": "rv32ui-p-lbu",
+  "source": "third_party/riscv-tests/isa/rv32ui/lbu.S",
+  "rvc": false
+}

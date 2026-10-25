@@ -25,6 +25,12 @@ module edrv32_cpu_ic_model (
     logic [31:0] error_addr;
     bit error_enabled;
     int delay_r;
+    logic [31:0] delay_addr;
+    int address_delay = 0;
+    bit delay_enabled;
+    int inv_delay = 1;
+    int inv_count_r;
+    bit inv_active_r;
     logic [31:0] addr_r;
     bit canceled_r;
     bit ready_r;
@@ -36,11 +42,14 @@ module edrv32_cpu_ic_model (
         void'($value$plusargs("IC_DELAY_MIN=%d", delay_min));
         void'($value$plusargs("IC_DELAY_MAX=%d", delay_max));
         void'($value$plusargs("IC_READY_LOW_PCT=%d", ready_low_pct));
+        delay_enabled = $value$plusargs("IC_DELAY_ADDR=%h", delay_addr);
+        void'($value$plusargs("IC_DELAY_CYCLES=%d", address_delay));
+        void'($value$plusargs("IC_INV_DELAY=%d", inv_delay));
         error_enabled = $value$plusargs("IC_ERROR_ADDR=%h", error_addr);
     end
 
     assign ic_req_ready_o = rst_n_i && ready_r && delay_r == 0 && !ic_inv_i;
-    assign ic_resp_valid_o = resp_valid_r && !ic_kill_i;
+    assign ic_resp_valid_o = resp_valid_r;
     assign ic_resp_err_o = resp_err_r && ic_resp_valid_o;
     assign miss_o = delay_r != 0;
 
@@ -58,12 +67,27 @@ module edrv32_cpu_ic_model (
             resp_valid_r <= 0;
             resp_err_r <= 0;
             ic_inv_done_o <= 0;
+            inv_count_r <= 0;
+            inv_active_r <= 0;
             killed_fill_o <= 0;
         end else begin
             ready_r <= int'($urandom_range(0, 99)) >= ready_low_pct;
             resp_valid_r <= 0;
             resp_err_r <= 0;
-            ic_inv_done_o <= ic_inv_i;
+            ic_inv_done_o <= 0;
+            if (!ic_inv_i)
+                inv_active_r <= 0;
+            else if (!inv_active_r) begin
+                inv_active_r <= 1;
+                inv_count_r <= inv_delay - 1;
+                if (inv_delay == 1)
+                    ic_inv_done_o <= 1;
+            end
+            if (inv_active_r && inv_count_r > 0) begin
+                inv_count_r <= inv_count_r - 1;
+                if (inv_count_r == 1)
+                    ic_inv_done_o <= 1;
+            end
             killed_fill_o <= 0;
             if (ic_kill_i && delay_r != 0)
                 canceled_r <= 1;
@@ -79,7 +103,9 @@ module edrv32_cpu_ic_model (
             if (ic_req_valid_i && ic_req_ready_o) begin
                 addr_r <= ic_req_addr_i;
                 canceled_r <= ic_kill_i;
-                if (int'($urandom_range(0, 99)) < miss_pct)
+                if (delay_enabled && ic_req_addr_i == delay_addr)
+                    delay_r <= address_delay - 1;
+                else if (int'($urandom_range(0, 99)) < miss_pct)
                     delay_r <= int'($urandom_range(32'(delay_min), 32'(delay_max))) - 1;
                 else if (!ic_kill_i)
                     respond(ic_req_addr_i);

@@ -10,6 +10,7 @@ module edrv32_cpu_coverage (
 
     // Retirement and public debug interface.
     input logic [63:0] debug_i,
+    input logic [63:0] irq_arrival_debug_i,
     input logic [1:0] trace_valid_i,
     input logic [63:0] trace_instr_i,
     input logic trace_trap_i,
@@ -138,17 +139,17 @@ module edrv32_cpu_coverage (
             // are counted independently. Held-high requests are not new arrivals.
             for (int irq = 0; irq < 3; irq++) begin
                 if (irq_w[irq] && !irq_previous_r[irq]) begin
-                    if (debug_i[25])
+                    if (irq_arrival_debug_i[25])
                         counts["irq.divide"] += 1;
-                    if (debug_i[26])
+                    if (irq_arrival_debug_i[26])
                         counts["irq.device"] += 1;
-                    if (debug_i[28])
+                    if (irq_arrival_debug_i[28])
                         counts["irq.dc_miss"] += 1;
-                    if (debug_i[16] || debug_i[17])
+                    if (irq_arrival_debug_i[16] || irq_arrival_debug_i[17])
                         counts["irq.branch_flush"] += 1;
-                    if (!(debug_i[25] || debug_i[26] || debug_i[28]
-                        || debug_i[16] || debug_i[17] || debug_i[18] || debug_i[29])
-                        && ((|debug_i[12:5]) || (|trace_valid_i)))
+                    if (!(irq_arrival_debug_i[25] || irq_arrival_debug_i[26] || irq_arrival_debug_i[28]
+                        || irq_arrival_debug_i[16] || irq_arrival_debug_i[17] || irq_arrival_debug_i[18] || irq_arrival_debug_i[29])
+                        && ((|irq_arrival_debug_i[12:5]) || (|trace_valid_i)))
                         counts["irq.normal"] += 1;
                 end
             end
@@ -156,7 +157,7 @@ module edrv32_cpu_coverage (
         end
     end
 
-    wire unused_w = &{1'b0, debug_i};
+    wire unused_w = &{1'b0, debug_i, irq_arrival_debug_i};
 
     final begin
         descriptor = $fopen(path, "w");

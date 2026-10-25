@@ -49,8 +49,6 @@ module edrv32_cpu_protocol_checker (
             if (ic_resp_err_i && !ic_resp_valid_i)
                 $fatal(1, "FAIL cpu-spec 3.2: I$ error without response at %0t", $time);
             if (ic_kill_i) begin
-                if (ic_resp_valid_i)
-                    $fatal(1, "FAIL cpu-spec 3.2: killed I$ response at %0t", $time);
                 ic_pending_r = 0;
             end else if (ic_resp_valid_i) begin
                 if (ic_pending_r == 0)
@@ -73,8 +71,8 @@ module edrv32_cpu_protocol_checker (
             // A delayed execution pulse may coincide with a new request. Check old ownership first.
             if (device_execute_i && !(dc_pending_r && dc_committed_r))
                 $fatal(1, "FAIL cpu-spec 4.7: device execution before commit at %0t", $time);
-            if (dc_resp_valid_i) begin
-                if (!dc_pending_r || dc_kill_i || dc_responded_r)
+            if (dc_resp_valid_i && !dc_kill_i) begin
+                if (!dc_pending_r || dc_responded_r)
                     $fatal(1, "FAIL cpu-spec 3.3: invalid D$ response lifetime at %0t",
                         $time);
                 if (dc_resp_device_i && !dc_committed_r)

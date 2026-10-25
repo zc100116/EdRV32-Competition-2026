@@ -44,3 +44,18 @@ python3 verif/block/cpu/b1/coverage_selftest.py
 
 该测试在 `build/cpu-coverage-selftest/` 生成**人工接口观测数据**，验证全部字段解码、
 IRQ 持续电平与独立上升沿、逐项合并和退出码；它不是 CPU 功能覆盖，不得并入 CPU 回归报告。
+
+## 真实 core 联调
+
+`core.f` 通过 `rtl/filelists/cpu.f` 接入真实 core，使用
+`edrv32_cpu_b1_core_tb.sv`；原 `files.f` 和桩 core 自测继续保留。
+`m_enter` 取 `u_core.e_advance_w`，退休、旁路、重定向和停顿追踪均用显式层次引用。
+生成器 `tools/cpu/generate_regress.py` 和 runner `tools/cpu/run_b1.py`
+负责 test.yaml、软件构建、ELF 符号解析、plusarg 激励、追踪/签名比对。
+定向检查由 `edrv32_cpu_directed_checks.svh` 完成：配对原因独立解码、24项实际旁路、
+结果延迟、除法冻结、CSR序列化、独立退休/HPM计数、debug逐位比对和维护/设备时序。
+
+中断到达分类使用 `irq_arrival_debug_i`：E-03 在环境拉高 IRQ **前一刻**保存真实
+`debug_o`，避免组合中断优先级立即改变 debug 后丢失原窗口。此输入只用于五个 IRQ
+到达覆盖项，其余计数继续读取实时 debug/trace；此环境修正已经协调者确认。
+原桩和覆盖统计自测将实时 debug 连接到该输入。
