@@ -35,6 +35,7 @@ module edrv32_cache_core_checker (
     bit [63:0] store_mask;
     bit [63:0] shifted_store;
     bit bus_write_done;
+    bit device_write_active;
     bit ic_due;
     bit dc_due;
     bit device_committed;
@@ -49,6 +50,7 @@ module edrv32_cache_core_checker (
         if (!rst_n_i) begin
             request_device <= 0;
             bus_write_done <= 0;
+            device_write_active <= 0;
             ic_due <= 0;
             dc_due <= 0;
             device_committed <= 0;
@@ -64,10 +66,12 @@ module edrv32_cache_core_checker (
             if (dc_cancelled && dc_resp_i)
                 $fatal(1, "FAIL killed D response expected=0 actual=1 time=%0t", $time);
             if (dc_device_i && !device_committed && !dc_commit_i &&
-                (dc_arvalid_i || dc_awvalid_i))
+                ((dc_arvalid_i && bus.arlen == 0) ||
+                 (dc_awvalid_i && bus.awlen == 0)))
                 $fatal(1, "FAIL device AXI before commit expected=0 actual=1 time=%0t",
                        $time);
-            if (dc_device_i && (dc_arvalid_i || dc_awvalid_i)) begin
+            if (dc_device_i && ((dc_arvalid_i && bus.arlen == 0) ||
+                                (dc_awvalid_i && bus.awlen == 0))) begin
                 if ((request_store ? bus.awaddr : bus.araddr) != request_addr)
                     $fatal(1, "FAIL device addr expected=%h actual=%h time=%0t",
                            request_addr, request_store ? bus.awaddr : bus.araddr, $time);
@@ -75,12 +79,15 @@ module edrv32_cache_core_checker (
                     $fatal(1, "FAIL device size expected=%h actual=%h time=%0t",
                            request_size, request_store ? bus.awsize : bus.arsize, $time);
             end
-            if (dc_device_i && bus.wvalid) begin
+            // A maintenance writeback may overlap an uncommitted device request.
+            // Only W beats belonging to a single-beat device AW use core metadata.
+            if (device_write_active && bus.wvalid) begin
                 if ((bus.wdata & store_mask) != (shifted_store & store_mask))
                     $fatal(1, "FAIL device write data expected=%h actual=%h time=%0t",
                            shifted_store & store_mask, bus.wdata & store_mask, $time);
             end
-            if (request_device && dc_resp_i && request_store && !bus.bvalid && !bus_write_done)
+            if (request_device && dc_resp_i && request_store && !bus_write_done &&
+                !(device_write_active && bus.bvalid && bus.bready))
                 $fatal(1, "FAIL device store before B expected=B actual=no_B time=%0t",
                        $time);
             if (ic_accept_i) ic_cancelled <= 0;
@@ -96,7 +103,11 @@ module edrv32_cache_core_checker (
             if (dc_device_i) request_device <= 1;
             if (ic_kill_i) ic_cancelled <= 1;
             if (dc_kill_i) dc_cancelled <= 1;
-            if (bus.bvalid && bus.bready) bus_write_done <= 1;
+            if (bus.awvalid && bus.awready && bus.awlen == 0) device_write_active <= 1;
+            if (device_write_active && bus.bvalid && bus.bready) begin
+                bus_write_done <= 1;
+                device_write_active <= 0;
+            end
             if (dc_commit_i) begin
                 device_committed <= 1;
                 store_data <= dc_store_data_i;

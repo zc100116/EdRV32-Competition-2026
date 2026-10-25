@@ -104,6 +104,14 @@ module tb;
         write_reg(12'h010, 1); read_check(12'h010, 2);
         write_reg(12'h010, 2); read_check(12'h010, 0);
         if (irq_o) $fatal(1, "FAIL cleared irq");
+        // A newly arriving error wins over software clearing the old status.
+        step(); apb_paddr_i = 12'h010; apb_pwdata_i = 2; apb_pstrb_i = 4'hf;
+        apb_psel_i = 1; apb_penable_i = 1; apb_pwrite_i = 1;
+        wb_err_i = 1; wb_err_addr_i = 32'h800003e0;
+        tick(); step(); apb_psel_i = 0; apb_penable_i = 0; wb_err_i = 0;
+        read_check(12'h010, 2); read_check(12'h014, 32'h800003e0);
+        if (!irq_o) $fatal(1, "FAIL concurrent new error must win RW1C");
+        write_reg(12'h010, 2); read_check(12'h010, 0);
         for (int cmd = 1; cmd <= 4; cmd++) begin
             write_reg(12'h028, 32'(cmd));
             if (!maint_req_valid_o || maint_cmd_o != 3'(cmd)) $fatal(1, "FAIL cmd");

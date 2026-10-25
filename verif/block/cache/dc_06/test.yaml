@@ -1,10 +1,9 @@
-name: cache_dc_06
 top: edrv32_cache_dc_06_tb
 files: files.f
-macros: []
-parameters: {}
-software: null
-timeout: 1000000
-pass_pattern: "PASS cache"
-fail_pattern: "FAIL"
+defines: SIM_MODE
+parameters:
+software:
+timeout: 180
+pass: PASS
 tier: smoke
+simulator: verilator

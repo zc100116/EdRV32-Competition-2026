@@ -1,6 +1,6 @@
 # Cache 模块级验证
 
-依据 cache-spec v0.1、cache-testplan v0.1；独立于 RTL 开发，未读取 `rtl/cache/`。
+依据 cache-spec v0.1、cache-testplan v0.1；初版由独立验证 worker 编写，未读取 `rtl/cache/`；本分支随后完成真实 RTL 联调。
 
 环境入口 `edrv32_cache_env.sv` 连接 `edrv32_icache`、`edrv32_dcache` 和
 `edrv32_cache_ctrl` 的规格端口。core 驱动包含定向事务、连续命中流和可配置随机流；
@@ -21,63 +21,37 @@ AXI 模型提供设备数据；真实控制器寄存器由 APB 驱动检查，�
 参考模型在提交 store 时立即更新；load 比较有效访问字节。整体 clean 后比较两个
 内存已写字节的并集，能够检查未提交 store 导致的额外写入。所有失败打印期望、实际和时刻并退出非零。
 
-## 运行
+## 运行（真实 RTL 联调）
 
-从仓库根目录执行，生成物全部位于 `build/cache/`：
-
-```sh
-. ~/.local/opt/edrv32/env.sh
-mkdir -p build/cache/selftest
-verilator --binary --timing -Wall \
-    --top-module edrv32_cache_selftest_tb \
-    -f verif/block/cache/stub/files.f \
-    -f verif/block/cache/selftest/files.f \
-    --Mdir build/cache/selftest
-build/cache/selftest/Vedrv32_cache_selftest_tb +SEED=17
-```
-
-桩只执行最简单的总线转发，不实现 cache、LRU、PMA 或维护写回；不能用桩上的功能
-PASS 代替真实 RTL 回归。`selftest/` 验证定向/随机驱动、行读、单拍访问、kill、
-APB、维护握手和参考模型；真实功能测试必须换成 RTL worker 交付的源文件列表，
-替换上述命令中的 `-f verif/block/cache/stub/files.f`，其余环境不变。
-每项 `files.f` 包含环境和测试顶层，DUT 源列表由命令另外指定。
-
-全部 34 项的桩编译（不执行功能断言）：
+`environment.f` 现在包含真实 Cache/RAM RTL 和验证环境；所有路径相对所在
+file list。P0 清单使用 top、files、defines、parameters、software、timeout、pass、tier、
+simulator 字段。运行：
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
-for family in ic dc mt pf
-do
-    for test_dir in verif/block/cache/${family}_*
-    do
-        test_name=${test_dir##*/}
-        mkdir -p build/cache/${test_name}
-        verilator --binary --timing -Wall \
-            --top-module edrv32_cache_${test_name}_tb \
-            -f verif/block/cache/stub/files.f \
-            -f ${test_dir}/files.f \
-            --Mdir build/cache/${test_name} || exit 1
-    done
-done
+make smoke
+make full
+make lint
+python3 tools/check/verilog_style.py rtl/
 ```
 
-真实 RTL 测试执行示例：构建 `ic_01` 后运行
-`build/cache/ic_01/Vedrv32_cache_ic_01_tb`。
-随机测试支持 `+SEED=1 +COUNT=300 +BASE=10000000 +CONFLICT_LINES=6`
-以及 `+STORE_PERCENT=50 +KILL_PERCENT=15`。IC-08、DC-15 的 full 回归分别跑 50 个种子，
-smoke 跑两个种子；PF-02 自动关闭随机停顿，测量请求到响应和 AR 到首拍 R 的周期数。
-其外部可见上界为一个同步查找周期加 cache-spec 第 7 节缺失上界。
-
-故障注入自测（预期 FAIL 和非零退出码）：
+单项示例：
 
 ```sh
-ulimit -c 0
-build/cache/selftest/Vedrv32_cache_selftest_tb +BAD_AXI_LEN
-build/cache/selftest/Vedrv32_cache_selftest_tb +BAD_CORE_HIT
+mkdir -p build/cache/ic_01
+verilator --binary --timing -Wall -DSIM_MODE \
+    --top-module edrv32_cache_ic_01_tb \
+    -F verif/block/cache/ic_01/files.f --Mdir build/cache/ic_01 -o sim
+build/cache/ic_01/sim
 ```
 
-前者仅让桩的行 ARLEN 从 3 变为 2；后者将延迟返回的 ROM 请求声明为期望命中，
-验证 core 时序检查器。二者只用于环境自测，不属于验证方案新增的功能测试项。
+`ic_08_smoke` / `dc_15_smoke` 各运行种子 1–2；`ic_08` / `dc_15` 的 full
+清单各运行种子 1–50。每个种子重新复位 DUT、清空物理和架构内存，并输出
+`RANDOM` 与 `PASS seed`。顶层参数 `SEEDS` 选择种子数；单种子调试仍可用
+`+SEED=17 +COUNT=300 +BASE=10000000 +CONFLICT_LINES=6`，以及
+`+STORE_PERCENT=50 +KILL_PERCENT=15`。PF-01/02 保持 perf 档位。
+
+`stub/` 保留初版验证环境的桩自测产物；正式 smoke/full 不使用桩。
 
 ## 测试映射
 
@@ -139,13 +113,11 @@ python3 verif/block/cache/coverage.py build/cache/selftest/run.log \
 覆盖分箱采用命中 × load/store 两箱、缺失 × clean/dirty × load/store 四箱，空路填充计 clean。
 无需更改本 worker 归属之外的规格文件。
 
-尚待协调者回复：P0 的 test.yaml 字段名和文件列表约定、RTL 的平坦端口命名确认，
-以及 OP_SIZE=0 是否仅适用于范围命令。MT-04 使用非零 OP_SIZE=32，仍检查范围以外
-全部脏行的整体 clean；MT-08 独立检查范围命令的零长度行为，不依赖未确认的
-“整体 clean 且 OP_SIZE=0”语义。当前 test.yaml 的字段完整涵盖 CLAUDE 9.1 要求，
-直接 Verilator 命令不依赖 P0 框架。
+K-I1 已确认：P0 标量清单格式与相对 file-list 路径；RTL 使用规格的平坦端口；
+OP_SIZE=0 仅适用于范围命令 1–3，整体 clean 忽略 OP_ADDR/OP_SIZE；新写回错误
+优先于同拍 RW1C。core 驱动仅在 E 级请求本周期确定进入 M 时发出 dc_req_valid。
 
-## 本次桩验证结果（2026-10-25）
+## 原 K-VERIF 桩验证记录（合入前，2026-10-25）
 
 工具：Verilator 5.020；分支 `zc100116/task-cache-verif`，开发基点
 `7894b4438c62880b3984830ebb4b79a9dd4a6e66`，源代码随本文件一起提交。
@@ -161,5 +133,27 @@ python3 verif/block/cache/coverage.py build/cache/selftest/run.log \
 
 原始数据：`build/cache/compile-summary.txt`、各测试目录下 `compile.log` / `lint.log`、
 `build/cache/selftest/seed-{1,17,101}.log`、`bad_axi_len.log`、`bad_core_hit.log`、
-`coverage.txt`。当前分支没有 `tools/check/`，已检查全部 44 个 SystemVerilog 文件的
+`coverage.txt`。当时分支尚无 `tools/check/`，已检查全部 44 个 SystemVerilog 文件的
 100 列限制、空格缩进、接口分组和命名连接；仓库风格工具在 P0 集成后仍需补跑。
+
+## K-I1 联调修复分类
+
+- 集成适配：按 P0 标量 schema 重写清单，扁平 file lists 的路径相对自身目录，
+  同时适用于 P0 展开与直接 Verilator `-F`；随机顶层通过 SEEDS 执行 smoke 2 个、
+  full 50 个独立复位的种子。
+- 测试错误（维护启动）：MT-07/08 在 APB OP_CMD 返回后立即要求 maint_busy=1，
+  忽略了 cache_ctrl mailbox 的 valid/ready 接受周期；在 890 时刻观察到 expected=1、
+  actual=0。改为先等 maint_req_valid 被接受，再检查维护执行。
+- 测试错误（总线归属）：维护可与设备请求共存，原 core 驱动却将总 AW 计数变化
+  作为设备提前提交；940 时刻出现 device-before-commit AW expected=0、actual=1，
+  实际为合法四拍维护写回。现按 LEN=0 的单拍设备事务计数，core checker 也仅用
+  已接受的设备 AW 检查其 W 数据/B 完成；四拍写回仍由 AXI checker 和内存比对检查。
+- 测试合同修正：MT-07 探测维护对可缓存地址的 READY 时只驱动地址，不给尚未
+  进入 M 的 E 级指令发送 request-valid，遵守 K-I1 确认的 core 接口约定。
+- 覆盖计数修正：随机调用未声明 expected-hit 并不代表实际 miss，kill 分箱改为
+  取消完成后按实际读事务分类；PMA 错误/已取消请求不计作 instruction_hits。
+
+MT-07 原始失败记录为 `build/cache/mt_07_failure_mailbox.log` 和
+`build/cache/mt_07_failure_bus_ownership.log`，修复后的窄范围测试 PASS；
+`build/cache/mt_07_debug-run.log` 记录该结果。以上均未改变 Cache 的维护或设备行为。
+新增 RTL 只有任务要求的生成 PMA 常量接入与 dc_wb_event_o 输出。

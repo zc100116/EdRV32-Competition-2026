@@ -1,10 +1,13 @@
 // edrv32_cache_env.sv
 // cache-spec 3–7; independent module verification.
 // Clock domain: clk_sys.
-module edrv32_cache_env #(parameter int TEST = 0);
+module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
     import edrv32_axi64_memory_pkg::*;
     logic clk = 0;
+    // RTL resets asynchronously; bus models and monitors sample reset on clk.
+    /* verilator lint_off SYNCASYNCNET */
     logic rst_n = 0;
+    /* verilator lint_on SYNCASYNCNET */
     always #5 clk <= ~clk;
     edrv32_axi64_if ia();
     edrv32_axi64_if da();
@@ -32,6 +35,11 @@ module edrv32_cache_env #(parameter int TEST = 0);
     logic dc_resp_err;
     logic dc_resp_device;
     logic dc_fence_done;
+    logic dc_wb_event;
+    int unsigned wb_event_count = 0;
+    int unsigned wb_aw_count = 0;
+    int unsigned device_reads = 0;
+    int unsigned device_writes = 0;
     logic maint_req_valid;
     logic maint_req_ready;
     logic [2:0] maint_cmd;
@@ -102,6 +110,7 @@ module edrv32_cache_env #(parameter int TEST = 0);
         .dc_resp_err_o(dc_resp_err),
         .dc_resp_device_o(dc_resp_device),
         .dc_fence_done_o(dc_fence_done),
+        .dc_wb_event_o(dc_wb_event),
 
         // AXI memory interface
         .axi_awid_o(da.awid),
@@ -291,6 +300,12 @@ module edrv32_cache_env #(parameter int TEST = 0);
     // cache-spec 5.1–5.3: transaction shape follows PMA, not DUT-reported SIZE.
     always @(posedge clk) begin
         if (rst_n) begin
+            eq("writeback event timing", 64'(da.awvalid && da.awready && da.awlen == 3),
+               64'(dc_wb_event));
+            if (da.arvalid && da.arready && da.arlen == 0) device_reads <= device_reads + 1;
+            if (da.awvalid && da.awready && da.awlen == 0) device_writes <= device_writes + 1;
+            if (dc_wb_event) wb_event_count <= wb_event_count + 1;
+            if (da.awvalid && da.awready && da.awlen == 3) wb_aw_count <= wb_aw_count + 1;
             if (ia.arvalid) eq("I ARSIZE", 3, 64'(ia.arsize));
             if (da.arvalid && (pma(da.araddr) == 1 || pma(da.araddr) == 6))
                 eq("D fill ARSIZE", 3, 64'(da.arsize));
@@ -360,7 +375,6 @@ module edrv32_cache_env #(parameter int TEST = 0);
         end
         ic_kill = kill_request;
         if (kill_request) begin
-            kill_count[1]++;
             @(posedge clk);
             @(negedge clk);
             ic_kill = 0;
@@ -379,7 +393,9 @@ module edrv32_cache_env #(parameter int TEST = 0);
             if (hit_expected) eq("instruction hit latency", 10, 64'($time - accepted));
             @(negedge clk);
         end
-        if (u_imem.reads == before_reads) instruction_hits++;
+        if (kill_request) kill_count[u_imem.reads == before_reads ? 0 : 1]++;
+        if (!error_expected && !kill_request && u_imem.reads == before_reads)
+            instruction_hits++;
     endtask
 
     task automatic data_access(input bit [31:0] addr, input bit store = 0,
@@ -390,7 +406,11 @@ module edrv32_cache_env #(parameter int TEST = 0);
         bit [63:0] mask;
         int before_reads;
         int before_writes;
+        int before_device_reads;
+        int before_device_writes;
         time accepted;
+        before_device_reads = int'(device_reads);
+        before_device_writes = int'(device_writes);
         before_reads = u_dmem.reads;
         before_writes = u_dmem.writes;
         mask = (64'b1 << (8 * (1 << size))) - 1;
@@ -423,7 +443,6 @@ module edrv32_cache_env #(parameter int TEST = 0);
                 @(negedge clk);
             end
             dc_kill = 1;
-            kill_count[device ? 2 : (hit_expected ? 0 : 1)]++;
             @(negedge clk);
             dc_kill = 0;
             while (!dc_req_ready) begin
@@ -432,16 +451,19 @@ module edrv32_cache_env #(parameter int TEST = 0);
             end
             idle(3);
             if (device) begin
-                eq("killed device reads", 64'(before_reads), 64'(u_dmem.reads));
-                eq("killed device writes", 64'(before_writes), 64'(u_dmem.writes));
+                eq("killed device reads", 64'(before_device_reads), 64'(device_reads));
+                eq("killed device writes", 64'(before_device_writes), 64'(device_writes));
             end
+            // Expected-hit is optional in random tests; observed bus traffic
+            // distinguishes an actual hit from a refill after cancellation.
+            kill_count[device ? 2 : (u_dmem.reads == before_reads ? 0 : 1)]++;
             return;
         end
         if (device) begin
             // cache-spec 5.3: several uncommitted cycles must produce no AXI request.
             repeat (3) begin
-                eq("device before commit AR", 64'(before_reads), 64'(u_dmem.reads));
-                eq("device before commit AW", 64'(before_writes), 64'(u_dmem.writes));
+                eq("device before commit AR", 64'(before_device_reads), 64'(device_reads));
+                eq("device before commit AW", 64'(before_device_writes), 64'(device_writes));
                 eq("device before commit response", 0, 64'(dc_resp_valid));
                 @(negedge clk);
             end
@@ -555,6 +577,26 @@ module edrv32_cache_env #(parameter int TEST = 0);
             compare_memory();
         end
     endtask
+    task automatic random_seeds(input bit instruction);
+        int first_seed;
+        int draw;
+        first_seed = int'(seed);
+        for (int run_seed = 0; run_seed < SEEDS; run_seed++) begin
+            @(negedge clk);
+            rst_n = 0;
+            memory.delete();
+            reference_memory.delete();
+            idle(4);
+            seed = 32'(first_seed + run_seed);
+            draw = int'($urandom(seed));
+            $display("RANDOM test=%0d seed=%0d first_draw=%h", TEST, seed, draw);
+            rst_n = 1;
+            idle(2);
+            random_stream(instruction);
+            $display("PASS seed test=%0d seed=%0d", TEST, seed);
+        end
+    endtask
+
     // Warm line before this task. All transfers are sampled at rising edges.
     task automatic hit_stream(input bit instruction, input bit stores = 0);
         @(negedge clk);
@@ -641,6 +683,8 @@ module edrv32_cache_env #(parameter int TEST = 0);
     endtask
 
     task automatic coverage_report;
+        eq("writeback event count", 64'(wb_aw_count), 64'(wb_event_count));
+        $display("WB events=%0d bursts=%0d", wb_event_count, wb_aw_count);
         $display("COVER instruction_hits=%0d", instruction_hits);
         for (int i = 0; i < 2; i++) begin
             $display("COVER hit[%0d]=%0d", i, hit_count[i]);
@@ -774,7 +818,7 @@ module edrv32_cache_env #(parameter int TEST = 0);
                 error_read_addr = '1;
                 expect_fetch_bus(A, 1);
             end
-            108: random_stream(1);
+            108: random_seeds(1);
             201: begin
                 data_access(A);
                 data_access(A, 0, 2, 0, 0, 0, 1);
@@ -872,7 +916,7 @@ module edrv32_cache_env #(parameter int TEST = 0);
                 error_write_addr = '1;
                 error_count[1] += 2;
             end
-            215: random_stream(0);
+            215: random_seeds(0);
             301, 302, 303: begin
                 dirty_lines();
                 count = u_dmem.writes;
@@ -901,7 +945,8 @@ module edrv32_cache_env #(parameter int TEST = 0);
             end
             304: begin
                 dirty_lines();
-                maintain(4, 0, 32);
+                // Command 4 ignores both range registers, including zero size.
+                maintain(4, 32'hfffffff0, 0);
                 compare_memory();
                 count = u_dmem.writes;
                 maintain(4, 0, 32);
@@ -965,6 +1010,8 @@ module edrv32_cache_env #(parameter int TEST = 0);
                 put(12'h024, 64);
                 put(12'h028, 1);
                 command_count[0]++;
+                // APB completion queues the mailbox; D$ acceptance is a later edge.
+                while (maint_req_valid) idle();
                 eq("maintenance active", 1, 64'(maint_busy));
                 if (TEST == 308) begin
                     put(12'h020, B);
@@ -972,7 +1019,9 @@ module edrv32_cache_env #(parameter int TEST = 0);
                 end else begin
                     @(negedge clk);
                     dc_req_addr = A;
-                    dc_req_valid = 1;
+                    // The blocked E instruction cannot enter M, so it must not
+                    // assert request-valid merely to probe address-dependent READY.
+                    dc_req_valid = 0;
                     @(posedge clk);
                     eq("maintenance blocks cacheable", 0, 64'(dc_req_ready));
                     @(negedge clk);
