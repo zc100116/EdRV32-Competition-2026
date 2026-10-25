@@ -22,6 +22,7 @@ module edrv32_dcache (
     output logic dc_resp_err_o,
     output logic dc_resp_device_o,
     output logic dc_fence_done_o,
+    output wire dc_wb_event_o,
 
     // AXI memory interface
     output logic [3:0] axi_awid_o,
@@ -85,6 +86,8 @@ module edrv32_dcache (
     assign axi_wlast_o = 1;
     assign axi_bready_o = 1;
     assign maint_req_ready_o = !maint_busy_o;
+    // This forwarding stub has no cached dirty lines or writeback bursts.
+    assign dc_wb_event_o = 0;
     assign wb_err_o = 0;
     assign wb_err_addr_o = 0;
     always @(posedge clk_i) begin

@@ -20,6 +20,9 @@ module tb;
     logic dc_fence_i = 0;
     logic dc_clean_all_i = 0;
     logic dc_fence_done_o;
+    logic dc_wb_event_o;
+    integer wb_events = 0;
+    integer wb_bursts = 0;
     logic [3:0] axi_awid_o;
     logic [31:0] axi_awaddr_o;
     logic [7:0] axi_awlen_o;
@@ -76,6 +79,7 @@ module tb;
         .dc_fence_i(dc_fence_i),
         .dc_clean_all_i(dc_clean_all_i),
         .dc_fence_done_o(dc_fence_done_o),
+        .dc_wb_event_o(dc_wb_event_o),
         .axi_awid_o(axi_awid_o),
         .axi_awaddr_o(axi_awaddr_o),
         .axi_awlen_o(axi_awlen_o),
@@ -114,6 +118,16 @@ module tb;
         .wb_err_o(wb_err_o),
         .wb_err_addr_o(wb_err_addr_o)
     );
+    // The event must also remain low for device writes and AW backpressure.
+    always @(posedge clk_i) begin
+        if (rst_n_i) begin
+            if (dc_wb_event_o !== (axi_awvalid_o && axi_awready_i && axi_awlen_o == 3))
+                $fatal(1, "FAIL writeback event timing");
+            if (dc_wb_event_o) wb_events <= wb_events + 1;
+            if (axi_awvalid_o && axi_awready_i && axi_awlen_o == 3)
+                wb_bursts <= wb_bursts + 1;
+        end
+    end
     task automatic tick;
         @(posedge clk_i); #1;
     endtask
@@ -150,9 +164,10 @@ module tb;
         end
     end
     logic write_active = 0;
+    logic allow_aw = 1;
     logic [12:0] write_idx;
     logic [7:0] write_left;
-    assign axi_awready_i = !write_active && !axi_bvalid_i;
+    assign axi_awready_i = allow_aw && !write_active && !axi_bvalid_i;
     assign axi_wready_i = write_active;
     assign axi_bid_i = 0;
     assign axi_bresp_i = 0;
@@ -216,7 +231,16 @@ module tb;
         access_word(32'h10000000, 0, 2, 32'hdeadbeef);
         if (reads != 2 || dut.lru_r[0] != 1) $fatal(1, "FAIL D hit LRU");
         access_word(32'h10001000, 0, 2, 4608);
-        access_word(32'h10002000, 0, 2, 5120);
+        allow_aw = 0;
+        fork
+            access_word(32'h10002000, 0, 2, 5120);
+            begin
+                wait (axi_awvalid_o);
+                repeat (3) tick();
+                if (wb_events != 0) $fatal(1, "FAIL event before AW handshake");
+                step(); allow_aw = 1;
+            end
+        join
         if (reads != 3 || writes != 1 || memory[0][31:0] != 32'hdeadbeef)
             $fatal(1, "FAIL D dirty victim writes=%0d memory=%h", writes, memory[0]);
         access_word(32'h10002005, 1, 0, 32'haa);
@@ -273,6 +297,8 @@ module tb;
         if (maint_busy_o) $fatal(1, "FAIL clean request repeated");
         step(); dc_clean_all_i = 0;
         maintenance(4, 0, 0);
-        $display("PASS cache_dcache"); $finish;
+        if (wb_events != wb_bursts || wb_events != 4)
+            $fatal(1, "FAIL WB count events=%0d bursts=%0d", wb_events, wb_bursts);
+        $display("PASS cache_dcache WB events=%0d", wb_events); $finish;
     end
 endmodule

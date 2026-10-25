@@ -25,6 +25,7 @@ module edrv32_dcache (
     input wire dc_fence_i,
     input wire dc_clean_all_i,
     output wire dc_fence_done_o,
+    output wire dc_wb_event_o,
 
     // AXI64 read/write master.
     output wire [3:0] axi_awid_o,
@@ -263,6 +264,8 @@ module edrv32_dcache (
             device_state_r == D_IDLE && !lookup_valid_r && !store_pending_r && !buffer_valid_r);
     assign dc_fence_done_o = fence_done_r ||
         (dc_fence_i && !buffer_valid_r && !buffer_push_w);
+    // cache-spec v0.3, 5.2: one HPM event for each accepted dirty-line AW.
+    assign dc_wb_event_o = state_r == S_WB_AW && axi_awready_i;
     assign wb_err_o = state_r == S_WB_B && axi_bvalid_i && axi_bresp_i != 0;
     assign wb_err_addr_o = wb_addr_r;
 
