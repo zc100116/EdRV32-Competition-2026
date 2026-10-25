@@ -29,11 +29,11 @@ cache 属于关键模块：RTL 由协调者逐行评审。
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
-| K-R1 | RAM 包装模块：`rtl/tech/edrv32_ram_icache_tag.v`、`edrv32_ram_icache_data.v`、`edrv32_ram_dcache_tag.v`、`edrv32_ram_dcache_data.v`（行为模型 + IP 例化分支，CLAUDE.md 第 8 节） | Codex · GPT-6.1 Sol | P0 | 行为模型单元测试通过；lint 0 告警 | 与 K-R2 同分支 | [ ] |
-| K-R2 | I$ RTL、PMA 译码、LRU；单元测试 | Codex · GPT-6.1 Sol | K-R1 | 单元测试通过；lint 0 告警 | task-cache-rtl | [ ] |
-| K-R3 | D$ RTL（写缓冲、写回、设备访问、维护操作）和 `edrv32_cache_ctrl`；单元测试 | Codex · GPT-6.1 Sol | K-R2 | 单元测试通过；lint 0 告警 | task-cache-rtl | [ ] |
-| K-V1 | 模块级验证环境：core 侧驱动、AXI64 内存模型、架构内存参考模型、AXI 和 core 接口检查器、APB 驱动 | Codex · GPT-6.1 Sol（独立验证 worker） | P0 回归框架 | 用接口时序桩自测通过 | task-cache-verif | [ ] |
-| K-V2 | 验证方案 3.1–3.4 的全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | K-V1 | 测试代码完成 | task-cache-verif | [ ] |
+| K-R1 | RAM 包装模块：`rtl/tech/edrv32_ram_icache_tag.v`、`edrv32_ram_icache_data.v`、`edrv32_ram_dcache_tag.v`、`edrv32_ram_dcache_data.v`（行为模型 + IP 例化分支，CLAUDE.md 第 8 节） | Codex · GPT-6.1 Sol | P0 | 行为模型单元测试通过；lint 0 告警 | 与 K-R2 同分支 | [~] dispatch ctx_4b3443f5e629 |
+| K-R2 | I$ RTL、PMA 译码、LRU；单元测试 | Codex · GPT-6.1 Sol | K-R1 | 单元测试通过；lint 0 告警 | task-cache-rtl | [~] dispatch ctx_4b3443f5e629 |
+| K-R3 | D$ RTL（写缓冲、写回、设备访问、维护操作）和 `edrv32_cache_ctrl`；单元测试 | Codex · GPT-6.1 Sol | K-R2 | 单元测试通过；lint 0 告警 | task-cache-rtl | [~] dispatch ctx_4b3443f5e629 |
+| K-V1 | 模块级验证环境：core 侧驱动、AXI64 内存模型、架构内存参考模型、AXI 和 core 接口检查器、APB 驱动 | Codex · GPT-6.1 Sol（独立验证 worker） | P0 回归框架 | 用接口时序桩自测通过 | task-cache-verif | [~] dispatch ctx_2386d74f5e18 |
+| K-V2 | 验证方案 3.1–3.4 的全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | K-V1 | 测试代码完成 | task-cache-verif | [~] dispatch ctx_2386d74f5e18 |
 | K-I1 | 联调：smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | K-R3、K-V2 | full 全部通过，功能点全部覆盖 | task-cache-integ | [ ] |
 | K-A1 | 协调者逐行评审 K-R2、K-R3 | 协调者 | K-R3 | 评审意见全部处理 | — | [ ] |
 | K-P1 | 4 个 RAM IP 的创建说明 `fpga/ip/*.md`，以及乘法器 `ip_mul_s33x33` 的创建说明 | 协调者 | K-R1 | 用户在 PDS 中按说明一次生成成功 | — | [ ] |
