@@ -35,7 +35,7 @@ sys_xbar 和外设不属于 CLAUDE.md 11.1 的关键模块：RTL 由另一个 Co
 | S-R3 | 外设：`edrv32_periph_uart`、`edrv32_periph_gpio`、`edrv32_periph_i2c`；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 同上 | zc100116/task-sys-periph | [x] 9dd243a（分支保留待集成），15 项单元测试两种仿真器通过；CLK_SYS_HZ 暂用本地常量，联调时改引用生成常量 |
 | S-V1 | SB 环境和模型：AXI64 主设备驱动、参考存储模型、APB 检查器和从设备模型、UART 模型、SCCB 从设备模型（`verif/models/`）；验证方案 3.1–3.5 的全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | 规格确认 | 用桩从设备自测通过 | zc100116/task-sys-verif | [~] dispatch ctx_65c83e492e13 |
 | S-W1 | 软件：bootloader（logo、跳转 SRAM、UART 下载）、驱动（UART、GPIO、I2C、CLINT、PLIC）、SC-01–SC-06 的测试程序；ROM 链接与 `rom.hex` 生成 | Codex · GPT-6.1 Sol | 规格确认 | 在 Spike 上能编译运行到 tohost（依赖外设的部分只编译） | zc100116/task-sys-sw | [x] bf5046f（分支保留待集成），bootloader 624 B，三个程序在 Spike 上通过；外设相关程序待 SC 环境 |
-| S-T1 | 系统子系统顶层 `rtl/soc/edrv32_sys_subsys.v` 和文件列表 | Codex · GPT-6.1 Sol | S-R1–S-R3 | lint 0 告警 | zc100116/task-sys-integ | [~] dispatch ctx_a3940c37386f |
+| S-T1 | 系统子系统顶层 `rtl/soc/edrv32_sys_subsys.v` 和文件列表 | Codex · GPT-6.1 Sol | S-R1–S-R3 | lint 0 告警 | zc100116/task-sys-integ | [x] 95f5278，13 个单元目录两种仿真器 26/0；评审意见修改 S-T1b dispatch ctx_890232ce9f24 |
 | S-I1 | 联调：S-T1 + S-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | S-T1、S-V1 | full 全部通过，覆盖全部命中 | task-sys-integ | [ ] |
 | S-I2 | SC 环境：`edrv32_cpu_subsys` + 系统子系统，跑 SC-01–SC-07 | Codex · GPT-6.1 Sol | S-I1、S-W1、cpu-plan C-I2 | SC 测试通过，CoreMark CRC 正确 | task-sys-cpu | [ ] |
 | S-A1 | 交叉评审 S-R1–S-R3 | Codex · GPT-6.1 Sol；协调者抽查 | S-R1–S-R3 | 意见全部处理 | — | [x] 15 个文件评审完：2 个缺陷（CLINT/PLIC 多余的未对齐检查）、1 项异步桥复位边界，已交 S-T1 修改；其余无意见 |
