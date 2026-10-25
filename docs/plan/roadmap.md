@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | C-E4 CPU 微结构优化评估（`ctx_3d19c7fb2fbb`）；系统子系统：S-V1 验证环境、S-T1 集成顶层（`ctx_a3940c37386f`）、S-A1 交叉评审（`ctx_f2acb6e82a1e`） |
+| 正在进行 | C-E4 CPU 微结构优化评估（`ctx_3d19c7fb2fbb`）；S-I1 系统子系统联调（`ctx_0bf2700f11d5`） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
