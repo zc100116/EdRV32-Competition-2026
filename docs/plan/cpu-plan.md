@@ -34,16 +34,16 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
 | C-R1 | 数据通路单元：译码器、RVC 展开、ALU、分支判定、寄存器堆（FF 4 读 2 写）、乘法器（APM 包装 + 行为模型）、除法器、CSR 文件；单元测试 U-01 至 U-07、U-10 | Codex · GPT-6.1 Sol | P0 | 上述单元测试通过；lint 0 告警 | zc100116/task-cpu-datapath \| [x] 1ae5b6e，协调者已评审（小问题并入 C-R2） |
-| C-R2 | 前端：F1、F2、指令缓冲、BTB/gshare/RAS、I$ 接口（3.2）；单元测试 U-08、U-09 | Codex · GPT-6.1 Sol | C-R1 | U-08、U-09 通过 | zc100116/task-cpu-datapath \| [~] eee9e2d，U-08/U-09 通过；C-R2b 补 F2 误取恢复（cpu-spec v0.3），dispatch ctx_f6870df046d6 |
-| C-R3 | 后端与顶层：D/E/M/W、配对、冒险和旁路、重定向、异常和中断、D$ 接口（3.3）、HPM、debug_o、退休追踪信号（3.4）；顶层 `edrv32_cpu_core` | Codex · GPT-6.1 Sol | C-R2 | lint 0 告警；能在 C-V2 的环境中跑通一个最简单的程序 | task/cpu-backend | [ ] |
+| C-R2 | 前端：F1、F2、指令缓冲、BTB/gshare/RAS、I$ 接口（3.2）；单元测试 U-08、U-09 | Codex · GPT-6.1 Sol | C-R1 | U-08、U-09 通过 | zc100116/task-cpu-datapath \| [x] eee9e2d，U-08/U-09 通过；C-R2b 970412b，F2 误取恢复和 U-11 通过（前端逐行评审并入 C-A1） |
+| C-R3 | 后端与顶层：D/E/M/W、配对、冒险和旁路、重定向、异常和中断、D$ 接口（3.3）、HPM、debug_o、退休追踪信号（3.4）；顶层 `edrv32_cpu_core` | Codex · GPT-6.1 Sol | C-R2 | lint 0 告警；能在 C-V2 的环境中跑通一个最简单的程序 | zc100116/task-cpu-datapath | [~] dispatch ctx_abec60409d26 |
 | C-R4 | CPU 最小顶层：`edrv32_cpu_core` + I$/D$ + AXI64 引出，用于单独综合测 Fmax 和 LUT | Codex · GPT-6.1 Sol | C-R3、cache RTL | 能在 Verilator 中编译；导入脚本可以导入 | task/cpu-minimal-top | [ ] |
 
 ### 3.2 验证（独立的验证 worker，与 RTL 并行）
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
-| C-V1 | 参考模型和工具：配置 Spike（与测试环境内存映射一致）；RTL 追踪与 Spike 提交日志的比对脚本；riscv-tests 和 riscv-arch-test 的构建流程（含参考签名生成） | Codex · GPT-6.1 Sol | I-02、I-07 | 在 Spike 上跑通 rv32ui 全部测试并产生提交日志；比对脚本能发现人为制造的不一致 | task/cpu-verif-ref | [ ] |
-| C-V2 | B1 环境：I$/D$ 接口模型（可配置缺失、反压、错误注入）、内存模型、中断激励、退休追踪器、接口协议检查器 | Codex · GPT-6.1 Sol | I-03、cpu-spec 3.2–3.4 | 用一个只实现 3.2–3.4 接口时序的桩 core 自测通过 | task/cpu-verif-env | [ ] |
+| C-V1 | 参考模型和工具：配置 Spike（与测试环境内存映射一致）；RTL 追踪与 Spike 提交日志的比对脚本；riscv-tests 和 riscv-arch-test 的构建流程（含参考签名生成） | Codex · GPT-6.1 Sol | I-02、I-07 | 在 Spike 上跑通 rv32ui 全部测试并产生提交日志；比对脚本能发现人为制造的不一致 | zc100116/task-cpu-verif-ref | [~] dispatch ctx_5240f30c8908 |
+| C-V2 | B1 环境：I$/D$ 接口模型（可配置缺失、反压、错误注入）、内存模型、中断激励、退休追踪器、接口协议检查器 | Codex · GPT-6.1 Sol | I-03、cpu-spec 3.2–3.4 | 用一个只实现 3.2–3.4 接口时序的桩 core 自测通过 | zc100116/task-cpu-verif-env | [~] dispatch ctx_7585ec16e581 |
 | C-V3 | 随机指令流生成器（4 种配置，可控相关密度和指令比例） | Codex · GPT-6.1 Sol | C-V1 | 生成的程序在 Spike 上运行正常结束 | task/cpu-verif-rand | [ ] |
 | C-V4 | 定向汇编测试：验证方案 3.3 至 3.7 的全部测试项 | Codex · GPT-6.1 Sol | C-V1 | 每个测试在 Spike 上运行通过（中断类为自检） | task/cpu-verif-directed | [ ] |
 | C-V5 | 覆盖统计：第 4 节的功能点计数器和覆盖报告 | Codex · GPT-6.1 Sol | C-V2 | 报告格式正确 | task/cpu-verif-env | [ ] |
