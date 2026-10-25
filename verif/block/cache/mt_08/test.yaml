@@ -1,0 +1,10 @@
+name: cache_mt_08
+top: edrv32_cache_mt_08_tb
+files: files.f
+macros: []
+parameters: {}
+software: null
+timeout: 1000000
+pass_pattern: "PASS cache"
+fail_pattern: "FAIL"
+tier: full
