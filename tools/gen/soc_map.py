@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# File: soc_map.py
+# Spec: edrv32-soc-spec 6.1; infra-plan I-05
+# Description: Generate RTL/C constants and the address table from the shared JSON.
+#              Generated output follows source order for repeatable builds.
+# Clock domain: none (host tool).
 """Generate SoC address constants and the build/ address table (SoC spec 6.1)."""
 import json
 from pathlib import Path

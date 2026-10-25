@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# File: regress.py
+# Spec: CLAUDE.md 9.1; infra-plan I-03
+# Description: Compile and run tiered self-checking HDL tests.
+#              Preserve simulator exit codes and PASS/FAIL evidence in build/.
+# Clock domain: none (host tool).
 """Run the smoke, full or perf tier described by verif/**/test.yaml."""
 import argparse
 from pathlib import Path

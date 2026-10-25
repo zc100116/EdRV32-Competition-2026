@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# File: verilog_style.py
+# Spec: CLAUDE.md 5-7; infra-plan I-04
+# Description: Report mechanically recognizable Verilog language and style violations.
+#              Structural synthesis checks remain with Verilator lint.
+# Clock domain: none (host tool).
 """Check mechanically recognizable CLAUDE.md sections 5–7 rules."""
 import argparse
 from pathlib import Path
@@ -48,7 +53,8 @@ def check(path):
             if 'tech' not in path.parts and not build_header:
                 report(number, 'conditional compilation is only allowed in rtl/tech/')
         declaration = re.match(r'\s*(?:input|output|inout|wire|reg|integer)\b(.*)', line)
-        if declaration and top_commas(declaration[1].rstrip().rstrip(',')):
+        if declaration and (top_commas(declaration[1].rstrip().rstrip(','))
+                            or re.search(r';\s*(?:wire|reg|input|output|inout)\b', line)):
             report(number, 'declare one signal per line')
         port = re.match(r'\s*(input|output|inout)\b(.*)', line)
         if port:
@@ -57,7 +63,7 @@ def check(path):
             suffixes = ('_i',) if port[1] == 'input' else ('_o', '_oe')
             if not name.endswith(suffixes):
                 report(number, f'{port[1]} port {name} requires direction suffix')
-        forbidden = r'\b(logic|bit|int|always_comb|always_ff|always_latch|typedef|struct|enum|interface|package|endpackage|casex|force|release|fork|join)\b'
+        forbidden = r'\b(logic|bit|int|byte|shortint|longint|string|struct|union|class|program|modport|clocking|unique|priority|timeunit|timeprecision|always_comb|always_ff|always_latch|typedef|struct|enum|interface|package|endpackage|casex|force|release|fork|join)\b'
         match = re.search(forbidden, line)
         if match:
             report(number, f'forbidden syntax {match[0]}')
@@ -69,6 +75,10 @@ def check(path):
             report(number, 'gate primitive is forbidden')
         if len(re.findall(r'\.\w+\s*\(', line)) > 1:
             report(number, 'connect one port per line')
+    if path.suffix == '.v':
+        modules = re.findall(r'\bmodule\s+(\w+)', clean)
+        if modules != [path.stem] or not re.fullmatch(r'edrv32_[a-z0-9_]+', path.stem):
+            report(1, 'one edrv32_ module per file, matching the filename')
     # Module instantiations have a type, optional parameter block, and instance name.
     pattern = r'\b(\w+)\s+(?:#\s*\((?:[^()]|\([^()]*\))*\)\s*)?(\w+)\s*\('
     for match in re.finditer(pattern, clean):
