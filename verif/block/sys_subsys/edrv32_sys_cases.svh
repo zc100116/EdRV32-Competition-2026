@@ -5,7 +5,6 @@
     int coverage_count[string];
     bit [63:0] read_words[256];
     bit [31:0] value;
-    int previous_claim;
 
     // Coverage bins are a simulation scoreboard updated atomically by monitors.
     /* verilator lint_off BLKSEQ */
@@ -216,40 +215,62 @@
                 rd(1, 32'h50000000, 2, 0, 3);
                 wr(32'h50000000, '1, 8'hff, 3, 3, 3);
             end
-            104, 105: begin
+            104: begin
                 for (int slave = 0; slave < 7; slave++) begin
                     if (slave == 0 || slave == 1 || slave == 6) begin
-                    for (int round = 0; round < 8; round++) begin
-                    fork
-                        begin
-                            bit [63:0] unused_data[256];
-                            bit [1:0] resp[256];
-                            u_m0.read(bases[slave], 3, 3, unused_data, resp);
-                            check(resp[0] == 0, "M0 concurrent response", 0, 64'(resp[0]));
-                            first0 = u_m0.beat_cycle[0];
-                            done0 = u_m0.cycle;
+                        for (int round = 0; round < 8; round++) begin
+                            // Prime the last owner; the next tie must favor the other master.
+                            rd(round % 2, bases[slave], 3, 3);
+                            fork
+                                begin
+                                    bit [63:0] unused_data[256];
+                                    bit [1:0] resp[256];
+                                    u_m0.read(bases[slave], 3, 3, unused_data, resp);
+                                    check(resp[0] == 0, "M0 contended response", 0, 64'(resp[0]));
+                                    done0 = u_m0.cycle;
+                                end
+                                begin
+                                    bit [63:0] unused_data[256];
+                                    bit [1:0] resp[256];
+                                    u_m1.read(bases[slave], 3, 3, unused_data, resp);
+                                    check(resp[0] == 0, "M1 contended response", 0, 64'(resp[0]));
+                                    done1 = u_m1.cycle;
+                                end
+                            join
+                            check((done0 < done1) == (round % 2 != 0),
+                                    "round-robin follows the last completed owner",
+                                    64'(round % 2 != 0), 64'(done0 < done1));
+                            hit_coverage($sformatf("contention.s%0d", slave));
                         end
-                        begin
-                            bit [63:0] unused_data[256];
-                            bit [1:0] resp[256];
-                            u_m1.read(id == 104 ? bases[slave] : bases[slave == 0 ? 1 : 0],
-                                        3, 3, unused_data, resp);
-                            check(resp[0] == 0, "M1 concurrent response", 0, 64'(resp[0]));
-                            first1 = u_m1.beat_cycle[0];
-                            done1 = u_m1.cycle;
-                        end
-                    join
-                    if (id == 104) begin
-                        if (round != 0)
-                            check((done0 < done1) != (previous_claim == 0),
-                                    "round-robin winner alternates", 64'(previous_claim != 0),
-                                    64'(done0 < done1));
-                        previous_claim = done0 < done1 ? 0 : 1;
-                        hit_coverage($sformatf("contention.s%0d", slave));
-                    end else
-                        check(first0 < done1 && first1 < done0, "independent slaves overlap",
-                                1, 64'(first0 < done1 && first1 < done0));
                     end
+                end
+            end
+            105: begin
+                for (int slave = 0; slave < 7; slave++) begin
+                    if (slave == 0 || slave == 1 || slave == 6) begin
+                        for (int round = 0; round < 8; round++) begin
+                            fork
+                                begin
+                                    bit [63:0] unused_data[256];
+                                    bit [1:0] resp[256];
+                                    u_m0.read(bases[slave], 3, 3, unused_data, resp);
+                                    check(resp[0] == 0, "M0 concurrent response", 0, 64'(resp[0]));
+                                    first0 = u_m0.beat_cycle[0];
+                                    done0 = u_m0.cycle;
+                                end
+                                begin
+                                    bit [63:0] unused_data[256];
+                                    bit [1:0] resp[256];
+                                    u_m1.read(bases[slave == 0 ? 1 : 0], 3, 3, unused_data, resp);
+                                    check(resp[0] == 0, "M1 concurrent response", 0, 64'(resp[0]));
+                                    first1 = u_m1.beat_cycle[0];
+                                    done1 = u_m1.cycle;
+                                end
+                            join
+                            check(first0 < done1 && first1 < done0,
+                                    "independent slaves overlap", 1,
+                                    64'(first0 < done1 && first1 < done0));
+                        end
                     end
                 end
             end
