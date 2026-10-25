@@ -37,9 +37,9 @@ sys_xbar 和外设不属于 CLAUDE.md 11.1 的关键模块：RTL 由另一个 Co
 | S-W1 | 软件：bootloader（logo、跳转 SRAM、UART 下载）、驱动（UART、GPIO、I2C、CLINT、PLIC）、SC-01–SC-06 的测试程序；ROM 链接与 `rom.hex` 生成 | Codex · GPT-6.1 Sol | 规格确认 | 在 Spike 上能编译运行到 tohost（依赖外设的部分只编译） | zc100116/task-sys-sw | [x] bf5046f（分支保留待集成），bootloader 624 B，三个程序在 Spike 上通过；外设相关程序待 SC 环境 |
 | S-T1 | 系统子系统顶层 `rtl/soc/edrv32_sys_subsys.v` 和文件列表 | Codex · GPT-6.1 Sol | S-R1–S-R3 | lint 0 告警 | zc100116/task-sys-integ | [x] 95f5278，13 个单元目录两种仿真器 26/0；评审意见修改 S-T1b dispatch ctx_890232ce9f24 |
 | S-I1 | 联调：S-T1 + S-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | S-T1、S-V1 | full 全部通过，覆盖全部命中 | zc100116/task-sys-integ | [x] 72b4aaf：SB smoke 40/40、full 50/50、覆盖 99/99；RTL 无修改，测试修复 7 项；协调者合入前全仓回归中 |
-| S-I2 | SC 环境：`edrv32_cpu_subsys` + 系统子系统，跑 SC-01–SC-07 | Codex · GPT-6.1 Sol | S-I1、S-W1、cpu-plan C-I2 | SC 测试通过，CoreMark CRC 正确 | task-sys-cpu | [ ] |
+| S-I2 | SC 环境：`edrv32_cpu_subsys` + 系统子系统，跑 SC-01–SC-07 | Codex · GPT-6.1 Sol | S-I1、S-W1、cpu-plan C-I2 | SC 测试通过，CoreMark CRC 正确 | zc100116/task-sys-integ（复用 S-I1 终端） | [~] dispatch ctx_8180c3283263 |
 | S-A1 | 交叉评审 S-R1–S-R3 | Codex · GPT-6.1 Sol；协调者抽查 | S-R1–S-R3 | 意见全部处理 | — | [x] 15 个文件评审完：2 个缺陷（CLINT/PLIC 多余的未对齐检查）、1 项异步桥复位边界，已交 S-T1 修改；其余无意见 |
-| S-P1 | ROM、SRAM 的 IP 创建说明 `fpga/ip/*.md` | 协调者 | S-R1 | 用户在 PDS 中一次生成成功 | — | [~] 创建说明 04ac257 已写，待用户在 PDS 生成并回传实际端口 |
+| S-P1 | ROM、SRAM 的 IP 创建说明 `fpga/ip/*.md` | 协调者 | S-R1 | 用户在 PDS 中一次生成成功 | — | [~] 创建说明 04ac257 已写；生成和端口核对并入任务卡 `20261025-01-cpu-sys-synth` |
 
 可以并行的波次：
 - 波次 1：S-R1、S-R2、S-R3、S-V1、S-W1

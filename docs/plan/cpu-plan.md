@@ -60,7 +60,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-E6 | 开源多发射 CPU 调研：顺序双发射核（biRISC-V、VeeR EH1/EH2、CVA6 双发射等）的配对规则、组内相关、load-use 隐藏、分支策略、性能数据；乱序核与商用核作对照 | Codex · GPT-6.1 Sol | — | 调研报告 `docs/design/2026-10-25-dual-issue-survey.md` | zc100116/task-cpu-dual-survey | [x] 9be707b（已拣入协调者分支），覆盖 11 个核 |
 | C-E7 | 后段 ALU 评估（模型）：V2s 基础上 M 级后段 ALU，仅管线 1 / 两条管线、后段分支、store 数据晚旁路，各自与 V5 组合 | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-late-alu.md` | zc100116/task-cpu-uarch-eval | [~] dispatch ctx_6664b03bac34（复用 C-E4/C-E5 终端） |
 | C-E8 | 乱序双发射周期模型评估（不写 RTL）：ROB/发射队列/误预测代价矩阵，与顺序 V2s+V5 及 C-E7 最佳配置对比；结果决定是否开发乱序 RTL | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-ooo-model.md` | zc100116/task-cpu-ooo-model | [~] dispatch ctx_b9b6710e02a8 |
-| C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | 待写 | [ ] |
+| C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | `tasks/win/20261025-01-cpu-sys-synth`（与 S-P1 合并：IP 生成 + CPU+系统子系统测量顶层综合） | [~] 任务卡已写，待推送 |
 
 ### 3.4 联调、评审与定稿
 
