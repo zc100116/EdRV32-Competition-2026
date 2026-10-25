@@ -19,10 +19,7 @@ module edrv32_sys_subsys (
     output wire rst_sys_por_n_o,
     output wire rst_sys_n_o,
     output wire rst_mem_core_n_o,
-    // spec 2.10: reset_ctrl synchronizes this reset level back to clk_sys.
-    /* verilator lint_off SYNCASYNCNET */
     output wire rst_mem_n_o,
-    /* verilator lint_on SYNCASYNCNET */
     output wire rst_pix_n_o,
     output wire rst_cam0_n_o,
     output wire rst_cam1_n_o,
@@ -1059,12 +1056,13 @@ module edrv32_sys_subsys (
         .apb_pslverr_i(media_sys_apb_pslverr_w)
     );
 
+    // spec 2.10: keep both CDC toggle histories across MEDIA and SOC software resets.
     edrv32_apb_async_bridge u_media_apb_async (
         // Source and destination clocks and resets.
         .clk_s_i(clk_sys_i),
-        .rst_s_n_i(rst_sys_n_o),
+        .rst_s_n_i(rst_sys_por_n_o),
         .clk_m_i(clk_mem_i),
-        .rst_m_n_i(rst_mem_n_o),
+        .rst_m_n_i(rst_mem_core_n_o),
 
         // s_apb interface.
         .s_apb_paddr_i(media_sys_apb_paddr_w),
@@ -1118,9 +1116,9 @@ module edrv32_sys_subsys (
     );
 
     edrv32_bus_apb_decoder u_media_apb_decoder (
-        // Local APB clock and reset.
+        // spec 2.10: the media decoder shares the bridge destination reset boundary.
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_o),
+        .rst_n_i(rst_mem_core_n_o),
 
         // Undecoded upstream APB.
         .apb_paddr_i(media_mem_apb_paddr_w),
