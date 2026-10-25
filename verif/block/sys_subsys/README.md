@@ -41,20 +41,19 @@ SDA 建立/保持和 START/STOP 建立/保持。
 可配置；AB-07 遍历 0.5、0.83、1、2 的比率并随机化访问相位和从设备延迟。
 GPIO 激励由 `gpio` 提供，两个 SCCB peer 分别连接两对开漏引脚。
 
-## 桩和真实 RTL 的使用
+## 真实 RTL 的接入
 
-`stub.f` 固定使用 `stub/edrv32_sys_subsys.sv`，只用于环境自测；桩提供基本 AXI
-存储事务、DECERR/SLVERR、媒体和 CACHE_CTRL 的 APB 时序、UART 回环及上电复位顺序，
-不实现 CLINT/PLIC/UART/GPIO/I2C 寄存器功能或软复位。桩的跨时钟传输是测试平台
-事件调度，不是待综合的 CDC 实现；本 Task 没有增加 RTL CDC 或存储 IP。
+S-I1 的 `environment.f` 使用 `rtl.f` 中的真实系统子系统、共享模型以及内部绑定。
+`rtl.f` 路径相对本目录，与协调者维护的 `rtl/filelists/sys_subsys.f` 使用同一套 RTL，
+公共原语只列一次。`selftest/files.f` 也使用真实环境；UART 自测通过 APB 寄存器
+触发发送、接收及帧错误检查。`stub/` 仅保留绑定端口 fixture；旧顶层桩和其文件列表已删除，
+不进入任何已激活的 SB 功能测试文件列表。
 
-经协调者授权，40 项 S 测试的清单暂标 `sb_smoke`，10 项 F 测试标 `sb_full`，
-当前 `tools/regress.py` 不选择这些档位；`selftest/test.yaml` 属于 `smoke`。
-S-I1 应将 `environment.f` 中的桩替换为 S-T1 的真实 RTL 文件列表、加入内部绑定
-（`binds.f` 的 checker 源码已有一部分在 `models.f`，合并清单时只列一次），再将
-两个档位分别改为 `smoke` / `full`。MEM-01/05 和所有初始内存比较必须使用相同
-ROM/SRAM 镜像；现有 P0 清单不支持任意运行期 plusarg，镜像应在 S-I1 的运行入口
-或软件构建入口提供。不能将桩的通过结果当作这 50 项功能测试已通过。
+40 项 S 测试已激活为 `smoke`，10 项 F 测试为 `full`；`full` 同时运行全部 S、F 项。
+各清单的 `runner` 调用 `run.py`，自动生成完整 ROM/SRAM 镜像并同时传给 DUT 和参考模型。
+它按组复用 Verilator 模型，构建最多 `-j 2`，逐项串行运行；`CASE_ID` 参数选择测试组，
+同名 plusarg 选择组内场景。直接调用 `run.py smoke` 或 `run.py full` 可运行目标 SB 档位，
+不触发全仓回归。数值参数（如 `run.py 104`）只运行相应测试项。
 
 ## 已确认的测试契约
 
@@ -71,14 +70,16 @@ ROM/SRAM 镜像；现有 P0 清单不支持任意运行期 plusarg，镜像应�
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
+python3 verif/block/sys_subsys/run.py smoke
+python3 verif/block/sys_subsys/run.py full
+python3 verif/block/sys_subsys/coverage.py build/sys/full/*.log
 python3 verif/block/sys_subsys/verify.py selftest
 python3 verif/block/sys_subsys/verify.py probes
-python3 verif/block/sys_subsys/verify.py lint
-python3 verif/block/sys_subsys/verify.py compile
 python3 verif/block/sys_subsys/verify.py style
-make lint
-python3 verif/block/sys_subsys/coverage.py build/sys/selftest/run.log
 ```
+
+`run.py` 把各项日志写到 `build/sys/{smoke,full}/<测试项>.log`，模型构建日志在
+`build/sys/group<组号>/compile.log`；单项重现日志在 `build/sys/<CASE_ID>/`。
 
 `selftest` 构建环境、生成完整 ROM/SRAM 镜像并传 plusarg；检查双主、存储回读、
 DECERR、ROM 写错误、APB 延迟/错误/256 周期超时和恢复、UART 正常字节及帧错误、
@@ -97,14 +98,14 @@ SCCB 写/读/NACK。P0 的 smoke 自测不传镜像时仍检查上述事务，�
 
 覆盖脚本逐项打印 covered/uncovered 和计数，不把缺失分箱伪装为通过。功能日志输出
 `COVER name=count`，统计主从读写、三类响应、仲裁/隔离、APB、PLIC、UART、I2C 和复位；
-真实 full 回归将所有通过日志传入 `coverage.py` 做覆盖收敛。XB-07 每次执行种子 1–50，
+full 回归将所有通过日志传入 `coverage.py` 做覆盖收敛。XB-07 每次执行种子 1–50，
 每种子每个主设备 100 笔，记录 SEED；M0/M1 使用分离的数据区避免参考模型读写竞争。
 
 ## 测试项—文件对照
 
 全部场景实现在 `edrv32_sys_cases.svh`；目录内均有 `test.yaml` / `files.f`，
-`edrv32_sys_case_tb.sv` 按 CASE_ID 运行。S/F 是验证方案档位，对应当前暂存的
-`sb_smoke` / `sb_full`。
+`edrv32_sys_case_tb.sv` 按 CASE_ID 运行。S/F 是验证方案档位，对应已激活的
+`smoke` / `full`。
 
 | 测试项 | 目录（相对本目录） | CASE_ID | 场景任务 | 档位 |
 |---|---|---:|---|---|
@@ -206,6 +207,77 @@ binary、通过 P0 回归和镜像自测，并重新对全部配置执行 HDL li
 SCL/SDA 事件和字节接收均正确。当前 selftest 固定覆盖两端口、ACK/NACK、写入和读取；
 负例另检查 START 保持时间。复现观察日志在 `build/sys/sccb-probe-*.log`。
 
-留下的工作仅为 S-I1：接入真实 DUT 和内部绑定、提供实际镜像、激活 50 项清单、
+S-V1 交付时留给 S-I1 的工作为：接入真实 DUT 和内部绑定、提供实际镜像、激活 50 项清单、
 运行 smoke/full（XB-07 为 50 种子）并使 99 个可达功能分箱全部覆盖；本次不声称
 真实外设功能、性能或全仓回归已经通过。
+
+
+## S-I1 联调记录
+
+代码提交：`590e02a`，分支 `zc100116/task-sys-integ`；2026-10-25 Linux，
+Verilator 5.020（Debian 5.020-1）、Icarus Verilog 12.0。
+
+本轮没有修改 RTL。独立 SB 环境发现并修正了以下测试问题，每项独立提交：
+
+| 提交 | 场景、根因与修正 |
+|---|---|
+| `3eb495a` | XB-01/02：共享 PENABLE 在未选中外设处仍可以为 1，删除误报条件；保留选中事务的 SETUP、等待保持检查，并补协议正例 |
+| `2b1f302` | XB-04：每轮两次完成都会推进仲裁历史，不能要求下一轮的首个获胜者翻转；先用单主完成事务设定历史，再检查下一次平局让给另一主设备 |
+| `7b9d1cc` | XB-05：DDR 模型有随机等待，不同目标的 R 窗口不必重叠；该确定性场景关闭模型随机等待，逐主比较并行访问与无竞争访问的首拍延迟 |
+| `59c0221` | XB-07：每种子重复创建 timed fork 子协程在当前模拟器的第二种子异常退出；使用持久驱动流和时钟采样的种子屏障，保留 50 种子、每主每种子 100 笔 |
+| `9a88a17` | 原桩自测依赖 UART 引脚直接回环；改接真实顶层，由 APB 寄存器驱动 UART 收发并检查真实 RX 帧错误状态 |
+| `590e02a` | runner 成功汇总中的“0 FAIL”被 P0 判为失败；改为 PASS 比例，通过 XB-01 的 `regress.run_test` 确认公共入口接入 |
+
+XB-07 异常的观测在 `build/sys-integ-review/xb07-trace.log`：进程收到 SIGILL，
+程序计数器位于生成的 timed-fork coroutine actor 内的 `ud2` 指令。
+修正后的单项日志在 `build/sys/107/xb_07.log`，包含种子 1–50 和最终 PASS。
+
+| 验收 | 结果与日志 |
+|---|---|
+| SB smoke | 40 PASS / 0 FAIL；`build/sys-integ-review/sb-smoke-final.log` |
+| SB full | 50 PASS / 0 FAIL；`build/sys-integ-review/sb-full-final.log` |
+| XB-07 | 50 种子（1–50）、每种子双主各 100 笔，全部通过；`build/sys/full/xb_07.log` |
+| 功能覆盖 | 99/99 分箱；`build/sys-integ-review/coverage-final.txt`，M0 写和 PLIC 3/4/7 按已确认契约不统计 |
+| manifest 接入 | XB-01 通过 P0 `regress.run_test`；`build/sys-integ-review/manifest-final.log` |
+| 真实顶层自测 | PASS；`build/sys-integ-review/selftest-real.log`、`build/sys/selftest/run.log` |
+| 系统单元测试 | 14 个目录 × Verilator/Icarus，28 PASS / 0 FAIL；`build/sys-integ-review/system-units.log` |
+| 共享检查器兼容 | cache IC-01、DC-03，2 PASS / 0 FAIL；`build/sys-integ-review/cache-checker.log` |
+| 协议正负例 | 1 个正例和 5 个负例全部符合预期；`build/sys-integ-review/probes.log` |
+| 顶层 lint | `--lint-only -Wall` 0 告警；`build/sys-integ-review/lint-final.log` |
+| 风格 | RTL 47 文件、SB 24 文件均为 0 告警；`build/sys-integ-review/{rtl-style,sb-style}.log` |
+
+系统单元测试的复现命令：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 -u - <<'PYTEST'
+from pathlib import Path
+import tools.regress as r
+names = ('bus_sys_xbar', 'bus_rom', 'bus_sram', 'bus_apb_bridge', 'bus_apb_decoder',
+         'apb_async_bridge', 'periph_clint', 'periph_plic', 'periph_sysctrl',
+         'soc_reset_ctrl', 'periph_uart', 'periph_gpio', 'periph_i2c', 'sys_subsys_reset')
+results = []
+for name in names:
+    path = (Path('verif/unit') / name / 'test.yaml').resolve()
+    for simulator in ('verilator', 'iverilog'):
+        results.append(r.run_test(path, r.read_test(path), simulator, 'smoke'))
+print(f'S-I1 units: {sum(results)} PASS, {len(results)-sum(results)} FAIL')
+raise SystemExit(not all(results))
+PYTEST
+python3 - <<'PYTEST'
+from pathlib import Path
+from tools.regress import read_test, run_test
+path = Path('verif/block/sys_subsys/xb_01/test.yaml').resolve()
+assert run_test(path, read_test(path), 'verilator', 'smoke')
+PYTEST
+verilator --lint-only -Wall -Irtl/include --top-module edrv32_sys_subsys \
+  rtl/soc/edrv32_sys_subsys.v rtl/soc/edrv32_soc_reset_ctrl.v \
+  rtl/bus/*.v rtl/periph/*.v rtl/common/edrv32_apb_async_bridge.v \
+  rtl/common/edrv32_cdc_handshake.v rtl/common/edrv32_cdc_sync_bit.v \
+  rtl/common/edrv32_reset_sync.v rtl/tech/edrv32_rom_boot.v rtl/tech/edrv32_ram_sram.v
+python3 tools/check/verilog_style.py rtl/
+```
+
+SB 档位、自测、协议例和覆盖的命令见上方“命令”；cache 兼容检查按 S-V1
+验收记录中的 `run_test` 调用分别选择 `cache/ic_01`、`cache/dc_03`。
+本轮只运行上述系统相关测试和两项共享检查器兼容检查，未运行全仓 smoke/full。
