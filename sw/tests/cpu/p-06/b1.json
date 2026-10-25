@@ -1,0 +1,14 @@
+{
+  "test": "p-06",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "csr_serial 发射时 E/M 无更老指令、槽 1 无效",
+    "检查 CSR 读后消费者数值"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}

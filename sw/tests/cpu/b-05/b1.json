@@ -1,0 +1,24 @@
+{
+  "test": "b-05",
+  "spike": "smoke",
+  "stimulus": [
+    "scratch load 返回访问错误；I$ 全命中，观察 priority_branch/priority_jal 重叠"
+  ],
+  "checks": [
+    "oldest_fault 的 M 异常优先，mepc/mtval 正确，无年轻副作用",
+    "必须观测 M 异常、E 重定向、D 重定向同拍，否则本场景未覆盖"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "error",
+      "port": "dc",
+      "pc": "oldest_fault",
+      "address": "scratch",
+      "response_when": "M=oldest_fault && E=priority_branch && D=priority_jal"
+    }
+  ]
+}

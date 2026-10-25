@@ -1,0 +1,26 @@
+{
+  "test": "e-04",
+  "spike": "smoke",
+  "stimulus": [
+    "irq_priority_window M 入口同时置 MEIP/MSIP/MTIP；每次 trap 仅清除正在服务的中断源"
+  ],
+  "checks": [
+    "软件按顺序检查三个 mcause 并返回原 mepc"
+  ],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "irq",
+      "when": "M.pc=irq_priority_window",
+      "source": [
+        "MEIP",
+        "MSIP",
+        "MTIP"
+      ],
+      "clear": "only the cause taken at each trap entry"
+    }
+  ]
+}

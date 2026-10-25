@@ -1,0 +1,77 @@
+{
+  "test": "e-03",
+  "spike": "smoke",
+  "stimulus": [
+    "分别在 irq_ordinary M、irq_division 的 debug[25]、irq_device debug[26]、irq_dc_miss debug[28]、irq_redirect E 重定向同拍拉高 MEIP",
+    "每次 trap 入口清除 MEIP；设备/load 响应分别延迟20周期；device_registers 映射为设备寄存器"
+  ],
+  "checks": [
+    "每个窗口恰好一次 MEI，mepc 指向未提交指令，程序总计数为5",
+    "除法及设备事务完成后才允许进入中断；miss/redirect 的中断优先级按4.4/4.5",
+    "B1 独立记录每个中断边界，核对 irq_record 中5组 mepc/mcause"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "irq",
+      "when": "M.pc=irq_ordinary",
+      "source": "MEIP",
+      "clear": "trap entry",
+      "occurrences": 1
+    },
+    {
+      "kind": "irq",
+      "when": "debug[25] && divider.pc=irq_division",
+      "source": "MEIP",
+      "clear": "trap entry",
+      "occurrences": 1
+    },
+    {
+      "kind": "irq",
+      "when": "debug[26] && M.pc=irq_device",
+      "source": "MEIP",
+      "clear": "trap entry",
+      "occurrences": 1
+    },
+    {
+      "kind": "irq",
+      "when": "debug[28] && M.pc=irq_dc_miss",
+      "source": "MEIP",
+      "clear": "trap entry",
+      "occurrences": 1
+    },
+    {
+      "kind": "irq",
+      "when": "E.redirect && E.pc=irq_redirect",
+      "source": "MEIP",
+      "clear": "trap entry",
+      "occurrences": 1
+    },
+    {
+      "kind": "delay",
+      "port": "dc",
+      "pc": "irq_device",
+      "cycles": 20
+    },
+    {
+      "kind": "delay",
+      "port": "dc",
+      "pc": "irq_dc_miss",
+      "cycles": 20
+    }
+  ],
+  "device": {
+    "symbol": "device_registers",
+    "base": "0x40000000",
+    "bytes": 16,
+    "initial_words": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

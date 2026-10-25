@@ -1,0 +1,14 @@
+{
+  "test": "e-02",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "first_fault 的年轻 ALU 不提交",
+    "second_fault 前的 older_alu 恰好提交一次；4.2 禁止非法指令进入实际槽 1"
+  ],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}

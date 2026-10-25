@@ -1,0 +1,22 @@
+{
+  "test": "m-03",
+  "spike": "compare",
+  "stimulus": [
+    "fence_store 写缓冲保留8周期再排空，dc_fence_done_i 等待排空"
+  ],
+  "checks": [
+    "dc_fence_o 有效且完成前 fence_wait 不提交",
+    "after_fence 退休前写缓冲为空"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "write_buffer_hold",
+      "pc": "fence_store",
+      "cycles": 8
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "test": "c-03",
+  "spike": "smoke",
+  "stimulus": [
+    "每个事件窗口内给一次 I$缺失、D$缺失和设备延迟，制造IB仅一条并按case配对冲突",
+    "每个窗口在HPM使能后注入3个分离的 dc_wb_event_i 单拍脉冲",
+    "hpm_N_freeze 生效后将参考计数写 expected_hpm[N]，在程序load前完成"
+  ],
+  "checks": [
+    "程序逐项比较 observed_hpm 与B1独立计算 expected_hpm，事件0和17–31必须为0",
+    "窗口以HPM3 inhibit实际生效为边界，CSR写优先规则处理边界冲突",
+    "B1按7.1独立观察debug/退休/请求响应，5>6>7>8优先级后逐周期累计；每个1–16事件必须有非零覆盖"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "event_window",
+      "begin": "hpm_N_begin enable effective",
+      "end": "hpm_N_freeze inhibit effective",
+      "N": "0..31",
+      "stimulus": {
+        "ic_misses": 1,
+        "dc_misses": 1,
+        "device_delay": 20,
+        "writeback_pulses": 3,
+        "single_IB_entry": true
+      },
+      "reference_write": "expected_hpm + 4*N",
+      "reference": "independent event N count from model transactions, issue decisions and retirement; write before software loads"
+    }
+  ],
+  "device": {
+    "symbol": "device_registers",
+    "base": "0x40000000",
+    "bytes": 16,
+    "initial_words": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

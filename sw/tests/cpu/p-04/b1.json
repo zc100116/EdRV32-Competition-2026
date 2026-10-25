@@ -1,0 +1,88 @@
+{
+  "test": "p-04",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "程序比较消费者结果",
+    "按 cases 的 E 入口周期差验证延迟，D 停顿恰好覆盖尚未满足的延迟，load-use 对应 debug[24]"
+  ],
+  "cases": [
+    {
+      "producer": "latency_load_0_producer",
+      "consumer": "latency_load_0_consumer",
+      "gap": 0,
+      "latency": 2
+    },
+    {
+      "producer": "latency_load_1_producer",
+      "consumer": "latency_load_1_consumer",
+      "gap": 1,
+      "latency": 2
+    },
+    {
+      "producer": "latency_load_2_producer",
+      "consumer": "latency_load_2_consumer",
+      "gap": 2,
+      "latency": 2
+    },
+    {
+      "producer": "latency_load_3_producer",
+      "consumer": "latency_load_3_consumer",
+      "gap": 3,
+      "latency": 2
+    },
+    {
+      "producer": "latency_mul_0_producer",
+      "consumer": "latency_mul_0_consumer",
+      "gap": 0,
+      "latency": 3
+    },
+    {
+      "producer": "latency_mul_1_producer",
+      "consumer": "latency_mul_1_consumer",
+      "gap": 1,
+      "latency": 3
+    },
+    {
+      "producer": "latency_mul_2_producer",
+      "consumer": "latency_mul_2_consumer",
+      "gap": 2,
+      "latency": 3
+    },
+    {
+      "producer": "latency_mul_3_producer",
+      "consumer": "latency_mul_3_consumer",
+      "gap": 3,
+      "latency": 3
+    },
+    {
+      "producer": "latency_csr_0_producer",
+      "consumer": "latency_csr_0_consumer",
+      "gap": 0,
+      "latency": 2
+    },
+    {
+      "producer": "latency_csr_1_producer",
+      "consumer": "latency_csr_1_consumer",
+      "gap": 1,
+      "latency": 2
+    },
+    {
+      "producer": "latency_csr_2_producer",
+      "consumer": "latency_csr_2_consumer",
+      "gap": 2,
+      "latency": 2
+    },
+    {
+      "producer": "latency_csr_3_producer",
+      "consumer": "latency_csr_3_consumer",
+      "gap": 3,
+      "latency": 2
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}

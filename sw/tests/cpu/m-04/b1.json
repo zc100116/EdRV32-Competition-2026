@@ -1,0 +1,27 @@
+{
+  "test": "m-04",
+  "spike": "compare",
+  "stimulus": [
+    "D$ clean 和 I$ invalidate 各延迟8周期"
+  ],
+  "checks": [
+    "程序检查旧值1、新值42",
+    "dc_clean_all_o 完成后才 ic_inv_o，I$无效完成后 FENCE.I 提交并从下一PC重取"
+  ],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "maintenance_delay",
+      "operation": "dc_clean_all",
+      "cycles": 8
+    },
+    {
+      "kind": "maintenance_delay",
+      "operation": "ic_inv",
+      "cycles": 8
+    }
+  ]
+}

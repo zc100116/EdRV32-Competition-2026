@@ -1,0 +1,36 @@
+{
+  "test": "e-08",
+  "spike": "smoke",
+  "stimulus": [
+    "device_error_store 的设备写响应延迟20周期后返回错误；device_registers+4 必须无写入"
+  ],
+  "checks": [
+    "handler 比较 mcause=7/mepc/mtval",
+    "设备模型仅收到 fault store 一次且不产生成功写入，后续寄存器无访问"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": [
+    {
+      "kind": "error",
+      "port": "dc",
+      "pc": "device_error_store",
+      "address": "device_registers",
+      "response_delay": 20,
+      "apply_store": false
+    }
+  ],
+  "device": {
+    "symbol": "device_registers",
+    "base": "0x40000000",
+    "bytes": 16,
+    "initial_words": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "test": "e-07",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}

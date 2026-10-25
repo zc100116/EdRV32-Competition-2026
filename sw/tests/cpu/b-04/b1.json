@@ -1,0 +1,13 @@
+{
+  "test": "b-04",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "程序检查六层调用结果和返回路径，B1 记录 RAS 覆盖/溢出后返回"
+  ],
+  "tier": "full",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}

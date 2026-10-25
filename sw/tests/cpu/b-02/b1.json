@@ -1,0 +1,14 @@
+{
+  "test": "b-02",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "jalr_target 至少一次目标错误 E 重定向",
+    "ras_wrong_return 的实际目标优先于 RAS 预测且年轻指令被冲刷"
+  ],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}

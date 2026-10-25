@@ -1,0 +1,14 @@
+{
+  "test": "b-03",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "cold_jal 冷启动 BTB 未命中，D 重定向代价 2 周期",
+    "链接值为 PC+4，顺序年轻指令无副作用"
+  ],
+  "tier": "smoke",
+  "rvc": [
+    true
+  ],
+  "schedule": []
+}
