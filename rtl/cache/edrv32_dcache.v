@@ -199,7 +199,7 @@ module edrv32_dcache (
     assign cached_accept_w = accept_w && !device_w;
     assign device_accept_w = accept_w && device_w;
     assign dc_resp_device_o = device_state_r != D_IDLE;
-    assign dc_resp_valid_o = !dc_kill_i &&
+    assign dc_resp_valid_o =
         ((state_r == S_IDLE && lookup_done_w) ||
             (state_r == S_RETURN && !killed_r) || device_state_r == D_RETURN);
     assign dc_resp_err_o = device_state_r == D_RETURN ? device_err_r :
@@ -225,7 +225,7 @@ module edrv32_dcache (
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
     assign store_result_w = (state_r == S_IDLE && lookup_valid_r && !pma_err_r &&
                                 hit_w && store_r) || return_store_w;
-    assign buffer_push_w = dc_commit_i && !dc_kill_i && device_state_r == D_IDLE &&
+    assign buffer_push_w = dc_commit_i && device_state_r == D_IDLE &&
                             (store_pending_r || store_result_w);
     assign push_addr_w = store_result_w ? addr_r : store_addr_r;
     assign push_size_w = store_result_w ? size_r : store_size_r;

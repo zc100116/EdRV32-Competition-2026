@@ -84,7 +84,7 @@ module edrv32_icache (
     assign ic_req_ready_o = state_r == S_IDLE &&
                             (!lookup_valid_r || pma_err_r || (cacheable_r && hit_w));
     assign accept_w = ic_req_valid_i && ic_req_ready_o;
-    assign ic_resp_valid_o = !ic_kill_i &&
+    assign ic_resp_valid_o =
         ((state_r == S_IDLE && lookup_valid_r && (pma_err_r || (cacheable_r && hit_w))) ||
             (state_r == S_RETURN && !killed_r));
     assign ic_resp_data_o = state_r == S_RETURN ? result_r : (hit0_w ? data0_w : data1_w);
