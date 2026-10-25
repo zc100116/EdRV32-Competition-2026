@@ -31,7 +31,7 @@ sys_xbar 和外设不属于 CLAUDE.md 11.1 的关键模块：RTL 由另一个 Co
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
 | S-R1 | 总线：`edrv32_bus_sys_xbar`、`edrv32_bus_rom`、`edrv32_bus_sram`、`edrv32_bus_apb_bridge`、`edrv32_apb_async_bridge`（`rtl/common/`）、存储包装 `edrv32_rom_boot`、`edrv32_ram_sram`；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 单元测试通过；lint、风格 0 告警 | zc100116/task-sys-bus | [~] dispatch ctx_606dac10b240 |
-| S-R2 | 中断与系统控制：`edrv32_periph_clint`、`edrv32_periph_plic`、`edrv32_periph_sysctrl`、`edrv32_soc_reset_ctrl`；生成器增加 `EDRV32_CLK_SYS_HZ` 常量；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 同上 | zc100116/task-sys-ctrl | [~] dispatch ctx_4f83efe6e57b |
+| S-R2 | 中断与系统控制：`edrv32_periph_clint`、`edrv32_periph_plic`、`edrv32_periph_sysctrl`、`edrv32_soc_reset_ctrl`；生成器增加 `EDRV32_CLK_SYS_HZ` 常量；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 同上 | zc100116/task-sys-ctrl | [x] ce8aac5 + ec4b8c9（regress Icarus 参数修复）（分支保留待集成），CL/PL/SY 全部单元测试两种仿真器通过 |
 | S-R3 | 外设：`edrv32_periph_uart`、`edrv32_periph_gpio`、`edrv32_periph_i2c`；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 同上 | zc100116/task-sys-periph | [x] 9dd243a（分支保留待集成），15 项单元测试两种仿真器通过；CLK_SYS_HZ 暂用本地常量，联调时改引用生成常量 |
 | S-V1 | SB 环境和模型：AXI64 主设备驱动、参考存储模型、APB 检查器和从设备模型、UART 模型、SCCB 从设备模型（`verif/models/`）；验证方案 3.1–3.5 的全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | 规格确认 | 用桩从设备自测通过 | zc100116/task-sys-verif | [~] dispatch ctx_65c83e492e13 |
 | S-W1 | 软件：bootloader（logo、跳转 SRAM、UART 下载）、驱动（UART、GPIO、I2C、CLINT、PLIC）、SC-01–SC-06 的测试程序；ROM 链接与 `rom.hex` 生成 | Codex · GPT-6.1 Sol | 规格确认 | 在 Spike 上能编译运行到 tohost（依赖外设的部分只编译） | zc100116/task-sys-sw | [x] bf5046f（分支保留待集成），bootloader 624 B，三个程序在 Spike 上通过；外设相关程序待 SC 环境 |
