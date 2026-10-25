@@ -14,9 +14,9 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P0 基础设施进行中（orca Run `run_6e42f8ce0f9c`） |
-| 正在进行 | 协调者逐行评审 cache RTL（K-A1，分支 `zc100116/task-cache-rtl` a8f9b13） |
-| 等待用户 | cpu-spec 4.4 陈旧 BTB 恢复条款确认；P0 合入 main 批准 |
-| 阻塞 | C-R2 收尾（等待 BTB 条款） |
+| 正在进行 | C-R2b CPU 前端 F2 误取恢复（dispatch `ctx_f6870df046d6`）；协调者逐行评审 cache RTL（K-A1，分支 `zc100116/task-cache-rtl` a8f9b13） |
+| 等待用户 | P0 合入 main 批准 |
+| 阻塞 | 无 |
 
 ---
 
@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | SoC 总体 | `spec/edrv32-soc-spec.md` v0.2 | — | 本文件 | [x] 草案完成 |
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
-| CPU | `spec/cpu-spec.md` v0.2 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
+| CPU | `spec/cpu-spec.md` v0.3 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
 | Cache | `spec/cache-spec.md` v0.1 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
 | 系统总线与外设（sys_xbar、APB、CLINT、PLIC、UART 等） | — | — | — | [ ] |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON） | — | — | — | [ ] |
