@@ -72,7 +72,8 @@ def check(path):
     # Module instantiations have a type, optional parameter block, and instance name.
     pattern = r'\b(\w+)\s+(?:#\s*\((?:[^()]|\([^()]*\))*\)\s*)?(\w+)\s*\('
     for match in re.finditer(pattern, clean):
-        if match[1] in ('module', 'function', 'task', 'if', 'else', 'case'):
+        if match[1] in ('module', 'function', 'task', 'if', 'else', 'case',
+                        'begin', 'end', 'generate', 'for', 'while', 'always'):
             continue
         start = match.end()
         depth = 1
