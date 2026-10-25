@@ -38,3 +38,5 @@ inference and multiple drivers are checked by Verilator. The existing global
 build-mode header is the explicit conditional-compilation exception in
 CLAUDE.md 12.2. `tools/check/lint.sh <sources or -f files.f>` runs
 `verilator --lint-only -Wall`; `make lint` checks each common primitive as a top.
+
+`test.yaml` 可选 `runner` 字段指定在仓库根目录执行的命令；回归按退出码和 `pass` 字段判定，未指定时使用常规 HDL 编译流程。

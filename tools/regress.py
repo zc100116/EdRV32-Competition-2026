@@ -59,6 +59,15 @@ def run_test(path, fields, simulator, tier):
     name = path.parent.relative_to(ROOT / 'verif')
     out = ROOT / 'build/regress' / tier / name / simulator
     out.mkdir(parents=True, exist_ok=True)
+    if 'runner' in fields:
+        result = command(shlex.split(fields['runner']), out / 'run.log',
+                         float(fields['timeout']))
+        output = (out / 'run.log').read_text()
+        passed = (result == 0 and re.search(r'\b' + re.escape(fields['pass']) + r'\b', output)
+                  and not re.search(r'\bFAIL\b', output))
+        print(f'{"PASS" if passed else "FAIL"} {name} [{simulator}] '
+              f'({out.relative_to(ROOT)})')
+        return bool(passed)
     top = fields['top']
     sources = expand_files(path.parent / fields['files'])
     defines = ['+define+' + item for item in shlex.split(fields['defines'])]
