@@ -1,0 +1,9 @@
+top: edrv32_sys_case_tb
+files: files.f
+defines: SIM_MODE
+parameters: CASE_ID=902
+software:
+timeout: 180
+pass: PASS
+tier: sb_smoke
+simulator: verilator

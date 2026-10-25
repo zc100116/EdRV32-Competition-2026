@@ -1,0 +1,9 @@
+edrv32_sys_timescale.sv
+../../common/edrv32_axi64_if.sv
+../../common/edrv32_axi64_checker.sv
+../../common/edrv32_axi64_observer.sv
+../../common/edrv32_apb_observation_pkg.sv
+../../common/edrv32_apb_if.sv
+../../common/edrv32_apb_checker.sv
+../../common/edrv32_apb_observer.sv
+edrv32_sys_slave_binds.sv
