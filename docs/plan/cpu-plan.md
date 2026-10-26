@@ -72,6 +72,8 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-I2 | full 回归和覆盖收敛 | Codex · GPT-6.1 Sol | C-I1、C-V3、C-V5 | full 全部通过，覆盖报告中的功能点全部覆盖 | zc100116/task-cpu-integ | [x] 同 C-I1 |
 | C-I3 | B2 环境（core + 实际 cache）和性能测试 R-01 至 R-05 | Codex · GPT-6.1 Sol | C-I2、cache RTL | CoreMark CRC 正确；测量报告 | zc100116/task-cpu-perf | [x] 7c63c3b（已合入 main）：-O2 3.585、调优 4.307 CoreMark/MHz，IPC 约 1.03 |
 | C-A1 | 评审：流水控制、配对、冒险、重定向、异常部分由协调者逐行评审；其余部分交叉评审 | 协调者；Codex · GPT-6.1 Sol | C-R3 起，逐项进行 | 评审意见全部处理 | — | [x] 协调者逐行评审 core，意见（FENCE.I 中断、记录字段命名、组合环、槽 1 异常）全部处理 |
+| C-R5 | 时序优化：HPM 事件寄存一拍；前端取指缓冲改为环形结构 + 块元数据；MRET/WFI/FENCE.I 提交与 D$ 解耦 | Codex · GPT-6.1 Sol | C-W2 | 定向回归通过，CoreMark 不降；报告 `docs/reports/2026-10-26-perf-cpu-timing.md` | zc100116/task-cpu-timing | [x] 8e2d246..700dbf7，协调者逐行审查通过，CoreMark 周期不变，待与 C-R6 一起合入 |
+| C-R6 | 切断 D$ 命中到前端的组合路径：P1 访存错误不经 valid（cpu-spec v0.11、cache-spec v0.5）、P2 前端停顿不依赖本拍 M 等待、P3 E 级重定向在 M 停顿时先行；Yosys 结构路径分析 | Codex · GPT-6.1 Sol | C-R5 | 同上，另有 D$→前端路径分析 | zc100116/task-cpu-timing | [~] |
 | C-S1 | 规格定稿：依据 C-E1/E2/E3、C-W2、C-I3 的数据，确定第 4 节中的各项；删除 `RVC_EN` 等评估参数；cpu-spec 升级 v1.0，cpu-testplan 同步修订 | 协调者 + 用户确认 | 上述数据齐全 | 用户确认 v1.0 | — | [ ] |
 | C-M1 | 合入 main，打里程碑 tag `m1-cpu-isa-pass` | 协调者 | C-I2，用户批准 | — | main | [ ] |
 
