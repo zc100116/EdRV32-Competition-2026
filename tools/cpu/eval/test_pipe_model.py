@@ -214,6 +214,46 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(result['cycles'], 2)
         self.assertEqual(result['late_branch'], 1)
 
+    def test_backend_redirect_and_result_limits(self):
+        changes = {}
+        for variant in ('B1', 'B2', 'B3', 'B4', 'B6', 'B7'):
+            changes.update(INORDER_VARIANTS[variant])
+        INORDER_VARIANTS['B8-directed'] = changes
+        self.addCleanup(INORDER_VARIANTS.pop, 'B8-directed')
+        for variant in ('B0', 'B8-directed'):
+            for kind, parameter, expected in (('branch', 'e_penalty', 4),
+                                               ('jal', 'd_penalty', 3)):
+                program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+                program[0] = instruction(0, kind, target=32)
+                program[36] = instruction(36, 'serial')
+                timing = {parameter: 2 if kind == 'branch' else 1}
+                result = simulate(program, [0, 32, 36], 0, 36, variant, **timing)
+                self.assertEqual(result['cycles'], expected)
+            program[0] = instruction(0, 'load', rd=10)
+            program[4] = instruction(4, 'branch', sources=(10,), target=32)
+            result = simulate(program, [0, 4, 32, 36], 4, 36, variant, e_penalty=2)
+            self.assertEqual(result['cycles'], 5)  # M recovery falls from four to three.
+            for latency in (1, 2):
+                stream = [instruction(0, 'mul', rd=10), instruction(4, sources=(10,))]
+                result = run(stream, variant, mul_latency=latency)
+                self.assertEqual(result['cycles'], latency)
+            stream = [instruction(0, 'load', rd=10),
+                      instruction(4, 'load', sources=(10,))]
+            self.assertEqual(run(stream, variant, load_latency=1)['cycles'], 2)
+
+    def test_load_use_address_consumer_statistics(self):
+        for kind, sources, load_address, store_address in (
+                ('load', (10,), 1, 0), ('store', (2, 10), 0, 1),
+                ('store', (10, 2), 0, 0), ('store', (10, 10), 0, 1),
+                ('mul', (10,), 0, 0)):
+            stream = [instruction(pc) for pc in range(0, 32, 4)]
+            stream += [instruction(32, 'load', rd=10), instruction(36, kind, sources=sources)]
+            statistics = {}
+            result = run(stream, 'B0', statistics=statistics)
+            self.assertEqual(result['slots_load_use'], 2, (kind, sources))
+            self.assertEqual(statistics['load_use_load_address_cycles'], load_address)
+            self.assertEqual(statistics['load_use_store_address_cycles'], store_address)
+
     def test_late_same_group_alu(self):
         stream = [instruction(0, rd=10), instruction(4, rd=11, sources=(10,))]
         for variant in ('L1', 'L2'):

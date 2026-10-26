@@ -204,7 +204,8 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024):
 
 def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty=2,
              load_latency=2, mul_latency=3, perfect_prediction=False,
-             perfect_frontend=False, relax_raw=False, all_slot1_types=False):
+             perfect_frontend=False, relax_raw=False, all_slot1_types=False,
+             statistics=None):
     changes = INORDER_VARIANTS.get(variant, {})
     if variant in INORDER_VARIANTS:
         variant = 'L2b+V5'
@@ -255,6 +256,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     tail_pc = end + program[end].size
     latencies = {'load': load_latency, 'mul': mul_latency, 'csr': 2}
     long_results = max(load_latency, mul_latency) > 3
+    if statistics is not None:
+        statistics.update(load_use_load_address_cycles=0, load_use_store_address_cycles=0)
 
     def hazard(instruction, forwarded=0):
         waits = 0
@@ -619,6 +622,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 else:
                     cause = PAIR_CAUSES[reason]
                 slots[cause] += empty
+                if cause == 'load_use' and statistics is not None:
+                    consumer = ib[0].instruction
+                    if consumer.kind in {'load', 'store'} and (
+                            wait_kind.get(consumer.sources[-1], 0) & 1):
+                        statistics[f'load_use_{consumer.kind}_address_cycles'] += 1
             counters[retire_event] += 1
             if pair_event:
                 counters[pair_event] += 1
