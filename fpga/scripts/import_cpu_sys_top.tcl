@@ -6,7 +6,10 @@
 # implementation are run afterwards in PDS (see the task card).
 # Usage, in the PDS Tcl console: source <repo>/fpga/scripts/import_cpu_sys_top.tcl
 
-set edrv32_repo [file normalize [file join [file dirname [info script]] .. ..]]
+# Same root computation as the earlier CoreMark import script (works in PDS).
+set edrv32_script_dir [file dirname [file normalize [info script]]]
+set edrv32_repo [file normalize [file join $edrv32_script_dir .. ..]]
+puts "edrv32: script [info script], repo $edrv32_repo"
 set edrv32_top edrv32_fpga_cpu_sys_top
 set edrv32_include_dirs [list [file join $edrv32_repo rtl include]]
 set edrv32_defines [list FPGA_MODE]
