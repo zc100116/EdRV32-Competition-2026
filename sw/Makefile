@@ -31,10 +31,10 @@ else
 SOURCES := $(BSP) sw/tests/$(PROGRAM)/main.c
 endif
 OBJECTS := $(addprefix $(OUT)/obj/,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
-# Keep the reported CFLAGS identical to the flags used below; metadata is separate.
+# Report the compile flags used below without host include paths; metadata is separate.
 CPPFLAGS := '-DBUILD_COMMIT="$(shell git -C $(ROOT) rev-parse --short HEAD)"' \
             '-DBUILD_COMPILER="GCC $(shell $(CC) -dumpfullversion)"' \
-            '-DBUILD_CFLAGS="$(CFLAGS)"' '-DBUILD_ISA="$(ARCH)"'
+            '-DBUILD_CFLAGS="$(filter-out -I%,$(CFLAGS))"' '-DBUILD_ISA="$(ARCH)"'
 
 .PHONY: all coremark sys FORCE
 FORCE:
