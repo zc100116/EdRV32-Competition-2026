@@ -55,7 +55,7 @@ def command(args, log, timeout):
             return 1
 
 
-def run_test(path, fields, simulator, tier):
+def run_test(path, fields, simulator, tier, jobs=None, builds=None):
     name = path.parent.relative_to(ROOT / 'verif')
     out = ROOT / 'build/regress' / tier / name / simulator
     out.mkdir(parents=True, exist_ok=True)
@@ -77,10 +77,18 @@ def run_test(path, fields, simulator, tier):
         subprocess.run(['make', '-C', str(ROOT / 'sw'),
                         'PROGRAM=' + fields['software']], check=True)
     if simulator == 'verilator':
+        flags = shlex.split(fields.get('verilator_flags', ''))
+        build = out / 'obj'
+        if 'plusargs' in fields and builds is not None:
+            key = (top, tuple(sources), tuple(defines), tuple(parameters), tuple(flags))
+            build = builds.setdefault(key, build)
         compile_args = ['verilator', '--binary', '--timing', '--top-module', top,
-                        '--Mdir', str(out / 'obj'), '-o', 'sim']
+                        '--Mdir', str(build), '-o', 'sim']
+        if jobs is not None:
+            compile_args += ['-j', str(jobs)]
+        compile_args += flags
         compile_args += ['-G' + item for item in parameters]
-        run_args = [str(out / 'obj/sim')]
+        run_args = [str(build / 'sim')]
     elif simulator == 'iverilog':
         # Icarus accepts +incdir+/+define+ in command files, not on its command line.
         translated_sources = []
@@ -98,6 +106,7 @@ def run_test(path, fields, simulator, tier):
         run_args = ['vvp', str(out / 'sim')]
     else:
         raise ValueError(f'{path}: unknown simulator {simulator}')
+    run_args += shlex.split(fields.get('plusargs', ''))
     if fields['software']:
         image = ROOT / 'build/sw' / fields['software']
         run_args += [f'+{region.upper()}_HEX={image / (region + ".hex")}'
@@ -117,14 +126,19 @@ def run_test(path, fields, simulator, tier):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('tier', choices=('smoke', 'full', 'perf'))
+    parser.add_argument('--path', type=Path, default=ROOT / 'verif',
+                        help='Only discover tests below this directory')
+    parser.add_argument('-j', '--jobs', type=int,
+                        help='Verilator build jobs (default: Verilator default)')
     args = parser.parse_args()
     results = []
-    for path in sorted((ROOT / 'verif').rglob('test.yaml')):
+    builds = {}
+    for path in sorted(args.path.resolve().rglob('test.yaml')):
         fields = read_test(path)
         tiers = shlex.split(fields['tier'])
         if args.tier in tiers or (args.tier == 'full' and 'smoke' in tiers):
             for simulator in shlex.split(fields['simulator']):
-                results.append(run_test(path, fields, simulator, args.tier))
+                results.append(run_test(path, fields, simulator, args.tier, args.jobs, builds))
     print(f'Summary: {sum(results)} PASS, {len(results) - sum(results)} FAIL')
     return 0 if results and all(results) else 1
 
