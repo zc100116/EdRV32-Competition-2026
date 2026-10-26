@@ -15,6 +15,7 @@ module tb;
     wire [357:0] data_o;
     wire [1:0] valid_count_o;
     reg flush_i=0;
+    reg keep_head_i=0;
     wire [2:0] count_o;
     reg [178:0] model[0:3];
     integer count=0;
@@ -27,6 +28,7 @@ module tb;
     integer empty_seen=0;
     integer simultaneous_seen=0;
     integer flush_seen=0;
+    integer keep_seen=0;
 
     edrv32_cpu_ib dut (
         .clk_i(clk_i),
@@ -38,6 +40,7 @@ module tb;
         .data_o(data_o),
         .valid_count_o(valid_count_o),
         .flush_i(flush_i),
+        .keep_head_i(keep_head_i),
         .count_o(count_o)
     );
     task automatic check;
@@ -63,9 +66,14 @@ module tb;
             push_data_i={19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom,
                 19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom};
             flush_i=(i%29==0 && i>4);
+            keep_head_i=flush_i && count>0 && (i%2==0);
             #1;
             if(free_count_o!==3'(space))$fatal(1,"FAIL IB free slots");
-            if(flush_i)begin count=0;flush_seen=flush_seen+1;end
+            if(flush_i)begin
+                count=keep_head_i?1:0;
+                flush_seen=flush_seen+1;
+                if(keep_head_i)keep_seen=keep_seen+1;
+            end
             else begin
                 for(j=0;j<count-pops;j=j+1)model[j]=model[j+pops];
                 count=count-pops;
@@ -78,7 +86,8 @@ module tb;
             if(count==0)empty_seen=empty_seen+1;
             if(count==4)full_seen=full_seen+1;
         end
-        if((full_seen==0) || (empty_seen==0) || (simultaneous_seen==0) || (flush_seen==0))
+        if((full_seen==0) || (empty_seen==0) || (simultaneous_seen==0) ||
+            (flush_seen==0) || (keep_seen==0))
             $fatal(1,"FAIL IB missing coverage");
         $display("PASS U-08 full=%0d empty=%0d simultaneous=%0d flush=%0d",
             full_seen,empty_seen,simultaneous_seen,flush_seen);$finish;

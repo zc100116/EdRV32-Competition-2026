@@ -209,6 +209,7 @@ module edrv32_cpu_frontend #(
         .data_o(decode_data_o),
         .valid_count_o(decode_valid_count_o),
         .flush_i(redirect_w),
+        .keep_head_i(d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0),
         .count_o(ib_count_o)
     );
     edrv32_cpu_rvc u_expand_first (

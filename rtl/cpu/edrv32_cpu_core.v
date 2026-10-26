@@ -98,6 +98,7 @@ module edrv32_cpu_core #(
     wire d_csr_wait_w;
     wire d_available_w;
     wire d_redirect_w;
+    reg d_redirected_r;
     wire [31:0] d_target_w;
     reg [2:0] d_pair_reason_w;
     reg [1:0] e_valid_r;
@@ -483,8 +484,9 @@ module edrv32_cpu_core #(
             d_issue_w = 1;
     end
     assign d_target_w = d_record_w[0][REC_PC_LSB +: 32] + d_imm_w[0];
-    assign d_redirect_w = d_count_w != 0 && d_available_w && !d_csr_wait_w &&
-        !(d_use1_w[0] && d_hazard_w[0]) && !(d_use2_w[0] && d_hazard_w[1]) &&
+    // cpu-spec 4.4: a stalled JAL redirects once, then remains at the IB head.
+    assign d_redirect_w = d_count_w != 0 && !d_redirected_r &&
+        !backend_redirect_w && !sleep_r &&
         d_class_w[0] == C_JAL && !d_record_w[0][REC_PRED_HIT] && !d_record_w[0][REC_FETCH_ERR] &&
         !d_record_w[0][REC_ILLEGAL] && !d_illegal_w[0];
     assign e_next_pc_w = e_record_r[0][REC_PC_LSB +: 32] + (e_record_r[0][REC_COMPRESSED]
@@ -642,9 +644,14 @@ module edrv32_cpu_core #(
             dc_miss_r <= 0;
             m_wait_r <= 0;
             e_resolved_r <= 0;
+            d_redirected_r <= 0;
         end else begin
             // The frontend observes M backpressure one cycle after D-cache lookup.
             m_wait_r <= m_wait_w;
+            if (d_redirect_w)
+                d_redirected_r <= 1;
+            if (backend_redirect_w || d_issue_w != 0)
+                d_redirected_r <= 0;
             w_valid_r <= m_commit_w;
             if (!m_wait_w)
                 m_valid_r <= e_advance_w ? {e_valid_r[1] && !e_redirect0_w, e_valid_r[0]} : 2'b0;
@@ -727,7 +734,7 @@ module edrv32_cpu_core #(
             end
             if (d_issue_w != 0) begin
                 e_record_r[stage_idx] <= d_record_w[stage_idx];
-                if (stage_idx == 0 && d_redirect_w) begin
+                if (stage_idx == 0 && (d_redirect_w || d_redirected_r)) begin
                     e_record_r[stage_idx][REC_PRED_TAKEN] <= 1;
                     e_record_r[stage_idx][REC_PRED_TARGET_LSB +: 32] <= d_target_w;
                 end

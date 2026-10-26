@@ -15,8 +15,9 @@ module edrv32_cpu_ib (
     input wire [1:0] pop_count_i,
     output wire [357:0] data_o,
     output wire [1:0] valid_count_o,
-    // Redirect discards all queued instructions at the active edge.
+    // A stalled D redirect retains its head; older redirects discard the whole queue.
     input wire flush_i,
+    input wire keep_head_i,
     output wire [2:0] count_o
 );
     localparam RECORD_BITS = 179;
@@ -39,9 +40,9 @@ module edrv32_cpu_ib (
             write_ptr_r <= 0;
             count_r <= 0;
         end else if (flush_i) begin
-            read_ptr_r <= 0;
-            write_ptr_r <= 0;
-            count_r <= 0;
+            read_ptr_r <= keep_head_i ? read_ptr_r : 2'd0;
+            write_ptr_r <= keep_head_i ? read_next_w : 2'd0;
+            count_r <= keep_head_i ? 3'd1 : 3'd0;
         end else begin
             read_ptr_r <= read_ptr_r + pop_count_i;
             write_ptr_r <= write_ptr_r + push_count_i;

@@ -64,6 +64,8 @@ module tb #(parameter RVC_EN=1);
     integer errors=0;
     integer high_redirects=0;
     integer d_redirects=0;
+    reg held_d_redirect=0;
+    integer held_d_target=0;
     integer i;
     integer lane;
     integer length_bytes;
@@ -144,8 +146,12 @@ module tb #(parameter RVC_EN=1);
             if(fetch_wait_o)waits=waits+1;
             if(ic_req_valid_o && !ic_req_ready_i)blocked=blocked+1;
             if(invalidate_done_o!==ic_inv_done_i)$fatal(1,"FAIL invalidate completion");
-            if(redirect_valid_i)begin expected_pc=integer'(redirect_pc_i);end
-            else if(d_redirect_valid_i)begin expected_pc=integer'(d_redirect_pc_i);end
+            if(redirect_valid_i)begin
+                expected_pc=integer'(redirect_pc_i);held_d_redirect=0;
+            end else if(d_redirect_valid_i)begin
+                // P4: a D redirect with no issue preserves the oldest IB record.
+                held_d_redirect=1;held_d_target=integer'(d_redirect_pc_i);
+            end
             else begin
                 if(decode_pop_count_i>decode_valid_count_o)$fatal(1,"FAIL invalid test pop");
                 if(decode_pop_count_i==2)pairs=pairs+1;
@@ -183,7 +189,10 @@ module tb #(parameter RVC_EN=1);
                     if(expected_pc==6 && length_bytes==4)crossed=crossed+1;
                     if(expected_error)errors=errors+1;
                     retired=retired+1;
-                    expected_pc=(expected_pc==(RVC_EN?6:'hc))?'h40:expected_pc+length_bytes;
+                    if(held_d_redirect)begin
+                        expected_pc=held_d_target;held_d_redirect=0;
+                    end else
+                        expected_pc=(expected_pc==(RVC_EN?6:'hc))?'h40:expected_pc+length_bytes;
                 end
             end
         end
@@ -213,7 +222,8 @@ module tb #(parameter RVC_EN=1);
                 redirect_valid_i=1;redirect_pc_i='h180;
                 d_redirect_valid_i=1;d_redirect_pc_i='h1a0;
                 high_redirects=high_redirects+1;decode_pop_count_i=0;
-            end else if(cycle_number>=850 && d_redirects==0 && model_pending)begin
+            end else if(cycle_number>=850 && d_redirects==0 && model_pending &&
+                decode_valid_count_o!=0)begin
                 d_redirect_valid_i=1;d_redirect_pc_i='h200;
                 d_redirects=d_redirects+1;decode_pop_count_i=0;
             end
