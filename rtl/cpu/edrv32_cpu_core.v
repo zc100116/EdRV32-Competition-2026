@@ -159,6 +159,7 @@ module edrv32_cpu_core #(
     wire m_advance_w;
     wire m_memory_w;
     wire m_wait_w;
+    reg m_wait_r;
     wire m_ready_w;
     wire [1:0] m_commit_w;
     wire m_commit0_w;
@@ -307,7 +308,7 @@ module edrv32_cpu_core #(
         .d_redirect_pop_i(1'b0),
         .d_redirect_return_pc_i(d_record_w[0][REC_PC_LSB +: 32] +
             (d_record_w[0][REC_COMPRESSED] ? 32'd2 : 32'd4)),
-        .halt_i(sleep_r || div_wait_w || m_wait_w),
+        .halt_i(sleep_r || div_wait_w || m_wait_r),
         .update_valid_i(e_advance_w && e_valid_r[0] && e_control_w &&
             !e_exception_r && !e_jump_misaligned_w),
         .update_clear_i(e_redirect1_w || (e_redirect0_w && !e_control_w)),
@@ -635,7 +636,10 @@ module edrv32_cpu_core #(
             dc_expect_r <= 0;
             ic_miss_r <= 0;
             dc_miss_r <= 0;
+            m_wait_r <= 0;
         end else begin
+            // The frontend observes M backpressure one cycle after D-cache lookup.
+            m_wait_r <= m_wait_w;
             w_valid_r <= m_commit_w;
             if (!m_wait_w)
                 m_valid_r <= e_advance_w ? {e_valid_r[1] && !e_redirect0_w, e_valid_r[0]} : 2'b0;
