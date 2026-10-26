@@ -3,6 +3,10 @@
 // Description: Self-checking transactions, response scoreboards and protocol assertions.
 // Clock domain: clk_sys.
 module tb;
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     reg clk = 0;
     reg rst_n = 0;
     always #5 clk = ~clk;
@@ -80,7 +84,7 @@ module tb;
     integer grants [0:6][0:127];
     integer grant_count [0:6];
     reg [63:0] rom_reference [0:2047];
-    reg [63:0] sram_reference [0:32767];
+    reg [63:0] sram_reference [0:EDRV32_SRAM_SIZE/8-1];
     edrv32_bus_sys_xbar dut (
         .clk_i(clk),
         .rst_n_i(rst_n),
@@ -620,7 +624,7 @@ module tb;
         m_rready[0] = 0; m_rready[1] = 0;
         for (i=0;i<7;i=i+1) begin forwarded_reads[i]=0; forwarded_writes[i]=0; grant_count[i]=0; end
         starts[0]=32'h00000000; ends[0]=32'h00003fff;
-        starts[1]=32'h10000000; ends[1]=32'h1003ffff;
+        starts[1]=32'h10000000; ends[1]=EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE - 1;
         starts[2]=32'h20000000; ends[2]=32'h2000ffff;
         starts[3]=32'h30000000; ends[3]=32'h303fffff;
         starts[4]=32'h40000000; ends[4]=32'h4000ffff;

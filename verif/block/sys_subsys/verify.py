@@ -5,11 +5,13 @@
 # Clock domain: none (host tool).
 """Run from the repository root after sourcing env.sh: verify.py lint|style|selftest|probes|compile."""
 from pathlib import Path
+import json
 import subprocess
 import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+REGIONS = json.loads((ROOT / 'rtl/include/soc_address_map.json').read_text())['regions']
 sys.path.insert(0, str(ROOT))
 from tools.regress import expand_files, read_test  # noqa: E402
 
@@ -79,7 +81,10 @@ elif mode == 'selftest':
     with (obj.parent / 'compile.log').open('w') as log:
         subprocess.run(args, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     images = []
-    for region, base, words in [('rom', 0, 2048), ('sram', 0x10000000, 32768)]:
+    for entry in REGIONS:
+        if entry['name'] not in ('ROM', 'SRAM'):
+            continue
+        region, base, words = entry['name'].lower(), int(entry['base'], 0), int(entry['size'], 0)//8
         path = OUT / (region + '.hex')
         with path.open('w') as image:
             for word in range(words):

@@ -6,11 +6,13 @@
 # Clock domain: none (host tool).
 """Run smoke, full (S plus F), or one numeric CASE_ID from the repository root."""
 from pathlib import Path
+import json
 import re
 import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+REGIONS = json.loads((ROOT / 'rtl/include/soc_address_map.json').read_text())['regions']
 sys.path.insert(0, str(ROOT))
 from tools.regress import expand_files, read_test  # noqa: E402
 
@@ -20,7 +22,10 @@ OUT = ROOT / 'build/sys'
 
 def images():
     result = []
-    for region, base, words in [('rom', 0, 2048), ('sram', 0x10000000, 32768)]:
+    for entry in REGIONS:
+        if entry['name'] not in ('ROM', 'SRAM'):
+            continue
+        region, base, words = entry['name'].lower(), int(entry['base'], 0), int(entry['size'], 0)//8
         path = OUT / (region + '.hex')
         with path.open('w') as image:
             for word in range(words):

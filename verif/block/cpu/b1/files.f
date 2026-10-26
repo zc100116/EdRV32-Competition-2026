@@ -1,3 +1,4 @@
++incdir+../../../../rtl/include
 edrv32_cpu_memory.sv
 edrv32_cpu_ic_model.sv
 edrv32_cpu_dc_model.sv

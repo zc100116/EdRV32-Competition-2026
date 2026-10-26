@@ -3,7 +3,13 @@
 # Description: Compare boot fields and monitor menu/CoreMark UART output against the SC contract.
 # Clock domain: none (host checker).
 """Field checks for the S-W2 UART key contract in sw/apps/monitor/README.md."""
+import json
+from pathlib import Path
 import re
+
+REGIONS = {region['name']: region for region in json.loads(
+    (Path(__file__).resolve().parents[3] / 'rtl/include/soc_address_map.json').read_text()
+)['regions']}
 
 MENU = 'Menu: 1=CoreMark 2=Peripheral tests 3=System info'
 LOGO = (
@@ -44,7 +50,7 @@ def check_system_info(text, commit, compiler):
     # sys-subsys-spec 2.9/4.6 and SoC 6.1/8.2: fixed SC hardware configuration.
     expected = {
         'CHIP_ID': '0xed320001', 'CLK_SYS_HZ': '150000000',
-        'ROM bytes': '16384', 'SRAM bytes': '262144',
+        'ROM bytes': '16384', 'SRAM bytes': str(int(REGIONS['SRAM']['size'], 0)),
         'I-cache bytes': '8192', 'D-cache bytes': '8192', 'MEM_READY': '1',
         'Boot mode': 'SRAM app', 'Build commit': commit, 'Compiler version': compiler,
     }

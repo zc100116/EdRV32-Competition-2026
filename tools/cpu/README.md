@@ -41,7 +41,7 @@ The upstream architectural suite builder targets the C-enabled configuration;
 its alignment macros can emit C instructions even in I-only tests.
 Zicntr/Zihpm name the counters already present in cpu-spec section 5; enabling
 them was confirmed by the coordinator. Flat memory covers ROM `0:0x4000`,
-SRAM `0x10000000:0x40000`, and DDR `0x80000000:0x40000000` (SoC spec 6.1).
+SRAM `0x10000000:0x10000`, and DDR `0x80000000:0x40000000` (SoC spec 6.1).
 This is an instruction reference, not a model of ROM write protection or devices.
 `tohost` comes from the ELF symbol, never from a fixed device address.
 A nonzero test failure propagates Spike's exit status. Spike polls tohost in

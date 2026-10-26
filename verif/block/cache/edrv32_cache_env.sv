@@ -2,6 +2,10 @@
 // cache-spec 3–7; independent module verification.
 // Clock domain: clk_sys.
 module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     import edrv32_axi64_memory_pkg::*;
     logic clk = 0;
     // RTL resets asynchronously; bus models and monitors sample reset on clk.
@@ -287,7 +291,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
 
     function automatic int pma(input bit [31:0] addr);
         if (addr < 32'h4000) return 0;
-        if (addr >= A && addr < 32'h10040000) return 1;
+        if (addr >= A && addr < EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE) return 1;
         if (addr >= DEV && addr < 32'h20010000) return 2;
         if (addr >= 32'h30000000 && addr < 32'h30400000) return 3;
         if (addr >= 32'h40000000 && addr < 32'h40010000) return 4;

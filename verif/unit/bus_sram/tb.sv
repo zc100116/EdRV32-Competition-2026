@@ -3,6 +3,10 @@
 // Description: Self-checking transactions, response scoreboards and protocol assertions.
 // Clock domain: clk_sys.
 module tb;
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     reg clk = 0;
     reg rst_n = 0;
     always #5 clk = ~clk;
@@ -95,7 +99,7 @@ module tb;
         saved_r <= {axi_rid, axi_rdata, axi_rresp, axi_rlast};
         saved_b <= {axi_bid, axi_bresp};
     end
-    reg [63:0] reference [0:32767];
+    reg [63:0] reference [0:EDRV32_SRAM_SIZE/8-1];
     localparam [31:0] BASE = 32'h10000000;
     task automatic read_check(input [31:0] addr, input [2:0] size,
         input integer len, input integer stall);
@@ -202,7 +206,7 @@ module tb;
         for (size = 0; size <= 2; size = size + 1)
             read_check(BASE + (32'd1 << size), 3'(size), 0, 0);
         read_check(BASE + 8, 2, 0, 2);
-        read_check(BASE + 32'd262136, 2, 0, 0);
+        read_check(BASE + EDRV32_SRAM_SIZE - 8, 2, 0, 0);
         // MEM-03: every strobe mask at every supported single-beat size.
         for (size = 0; size <= 2; size = size + 1) begin
             for (strb = 0; strb < 256; strb = strb + 1) begin

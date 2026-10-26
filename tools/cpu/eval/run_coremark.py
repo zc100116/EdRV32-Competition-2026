@@ -3,12 +3,16 @@
 # Build the six requested ISA variants from the P0 port and retain Spike logs.
 """Run from the repository root after sourcing the edrv32 tool environment."""
 from pathlib import Path
+import json
 import shlex
 import subprocess
 
 VARIANTS = ('rv32im', 'rv32imc', 'rv32im_zba_zbb', 'rv32imc_zba_zbb',
             'rv32im_zba', 'rv32imc_zba')
 ROOT = Path(__file__).resolve().parents[3]
+REGIONS = json.loads((ROOT / 'rtl/include/soc_address_map.json').read_text())['regions']
+MEMORY = ','.join(f"{region['base']}:{region['size']}" for region in REGIONS
+                  if region['name'] in ('ROM', 'SRAM'))
 OUTPUT = ROOT / 'build/cpu/eval'
 
 
@@ -30,10 +34,10 @@ def run():
                  f'-I{ROOT}/sw/bsp/include -I{ROOT}/sw/apps/coremark '
                  f'-I{ROOT}/third_party/coremark -DITERATIONS=10')
         build = ['make', '-C', 'sw', 'PROGRAM=coremark', 'MEMORY=sram',
-                 f'OUT={out}', f'ARCH=-march={arch} -mabi=ilp32', f'CFLAGS={flags}']
+                 f'OUT={out}', f'ARCH={arch}', f'CFLAGS={flags}']
         elf = out / 'coremark.elf'
         spike = ['spike', f'--isa={arch}_zifencei_zicntr_zihpm', '--priv=m',
-                 '--pmpregions=0', '--no-dm', '-m0:0x4000,0x10000000:0x40000',
+                 '--pmpregions=0', '--no-dm', '-m' + MEMORY,
                  '--pc=0x10000000', '--disable-dtb', '-l', '--log-commits',
                  f'--log={out}/spike.log', str(elf)]
         (out / 'commands.txt').write_text(shlex.join(build) + '\n' + shlex.join(spike) + '\n')

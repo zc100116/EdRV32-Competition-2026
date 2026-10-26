@@ -3,6 +3,10 @@
 // Description: Self-checking directed cache unit tests.
 // Clock domain: clk_sys (PMA is combinational).
 module tb;
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     logic [31:0] addr;
     logic execute;
     logic store;
@@ -31,8 +35,8 @@ module tb;
         check(32'h00003fff, 3'b000, 3'b010, 3'b001);
         check(32'h00004000, 3'b001, 3'b001, 3'b001);
         check(32'h10000000, 3'b100, 3'b100, 3'b100);
-        check(32'h1003ffff, 3'b100, 3'b100, 3'b100);
-        check(32'h10040000, 3'b001, 3'b001, 3'b001);
+        check(EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE - 1, 3'b100, 3'b100, 3'b100);
+        check(EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE, 3'b001, 3'b001, 3'b001);
         check(32'h20000000, 3'b001, 3'b010, 3'b010);
         check(32'h2000ffff, 3'b001, 3'b010, 3'b010);
         check(32'h20010000, 3'b001, 3'b001, 3'b001);

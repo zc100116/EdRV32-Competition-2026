@@ -8,6 +8,7 @@
 import argparse
 import csv
 from pathlib import Path
+import json
 import re
 import shlex
 import struct
@@ -15,6 +16,9 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+REGIONS = {region['name']: region for region in json.loads(
+    (Path(__file__).resolve().parents[3] / 'rtl/include/soc_address_map.json').read_text()
+)['regions']}
 sys.path.insert(0, str(ROOT))
 from tools.regress import expand_files  # noqa: E402
 from verif.block.sys_cpu.uart_checks import check_boot, check_monitor  # noqa: E402
@@ -116,7 +120,8 @@ def execute(sim, case, boot, program, name, *, memory='sram', opt='o2', latency=
     rom = out / 'rom64.hex'
     sram = out / 'sram64.hex'
     pack_image(contents, 0, 0x4000, rom)
-    has_sram = pack_image(contents, 0x10000000, 0x40000, sram)
+    has_sram = pack_image(contents, int(REGIONS['SRAM']['base'], 0),
+                          int(REGIONS['SRAM']['size'], 0), sram)
     args = [str(sim), f'+CASE_ID={case}', f'+ROM_HEX={rom}',
             f'+DDR_LATENCY={latency}', '+TIMEOUT=100000000',
             f'+APP_ENTRY={struct.unpack_from("<I", elf.read_bytes(), 24)[0]:x}']

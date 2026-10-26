@@ -27,12 +27,12 @@ Measured with xPack GCC 15.2.0, `-O2`, `rv32imc_zicsr_zifencei/ilp32`:
 | Image | text | data | bss | Section total | Capacity |
 |---|---:|---:|---:|---:|---:|
 | bootloader | 3600 | 0 | 0 | 3600 | 16384 ROM bytes |
-| monitor | 15756 | 8 | 2116 | 17880 | 262144 SRAM bytes |
+| monitor | 15756 | 8 | 2116 | 17880 | 65536 SRAM bytes |
 
 Verification source commit: **`ca52144`** (`sw: add UART monitor and boot system
 information`); the following documentation-only commit records these results.
 The monitor's aligned SRAM extent is `0x10000000..0x10004604` (17924 bytes),
-with stack top `0x10040000`. Build logs are
+with stack top `0x10010000`. Build logs are
 `build/sw/bootloader/build.log` and `build/sw/monitor/build.log`.
 
 Sizes are bytes, with constants included in text. The SRAM linker includes

@@ -4,12 +4,16 @@
 """Run an ELF in the M-only B1 Spike reference configuration."""
 import argparse
 from pathlib import Path
+import json
 import re
 import subprocess
 import shutil
 
 ISA = 'rv32imc_zicsr_zifencei_zicntr_zihpm'
-MEMORY = '0:0x4000,0x10000000:0x40000,0x80000000:0x40000000'
+REGIONS = json.loads((Path(__file__).resolve().parents[2] /
+                      'rtl/include/soc_address_map.json').read_text())['regions']
+MEMORY = ','.join(f"{region['base']}:{region['size']}" for region in REGIONS
+                  if region['name'] in ('ROM', 'SRAM', 'DDR'))
 
 
 def symbols(elf):

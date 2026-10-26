@@ -5,6 +5,10 @@
 // Ordered model updates are immediate so later checks see this edge's transaction.
 /* verilator lint_off BLKSEQ */
 package edrv32_cpu_memory;
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     byte unsigned memory[bit [31:0]];
     logic [31:0] device_regs[bit [31:0]];
     logic tohost_valid = 0;
@@ -12,7 +16,7 @@ package edrv32_cpu_memory;
     int device_accesses = 0;
 
     function automatic bit device(input logic [31:0] addr);
-        return !((addr >= 32'h10000000 && addr < 32'h10040000)
+        return !((addr >= EDRV32_SRAM_BASE && addr < EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE)
             || (addr >= 32'h80000000 && addr < 32'hc0000000));
     endfunction
 

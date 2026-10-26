@@ -47,6 +47,11 @@ module edrv32_bus_sram (
     output wire axi_rvalid_o,
     input wire axi_rready_i
 );
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
+    localparam SRAM_ADDR_BITS = $clog2(EDRV32_SRAM_SIZE);
     localparam [1:0] S_IDLE = 2'd0;
     localparam [1:0] S_READ = 2'd1;
     localparam [1:0] S_WRITE = 2'd2;
@@ -82,7 +87,7 @@ module edrv32_bus_sram (
     assign rd_next_w = (state_r == S_READ) && axi_rready_i && (remain_r != 0);
     assign port_addr_w = ar_fire_w ? axi_araddr_i : addr_r;
     assign unused_w = &{1'b0, axi_awburst_i, axi_arburst_i, axi_wlast_i,
-        port_addr_w[31:18], port_addr_w[2:0]};
+        port_addr_w[31:SRAM_ADDR_BITS], port_addr_w[2:0]};
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -150,7 +155,7 @@ module edrv32_bus_sram (
         .en_i(ar_fire_w || rd_next_w || wr_fire_w),
         .wr_en_i({8{wr_fire_w}} & axi_wstrb_i),
         .wr_data_i(axi_wdata_i),
-        .addr_i(port_addr_w[17:3]),
+        .addr_i(port_addr_w[SRAM_ADDR_BITS-1:3]),
         .rd_data_o(rd_data_w)
     );
 endmodule

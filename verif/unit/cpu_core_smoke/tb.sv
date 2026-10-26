@@ -5,6 +5,10 @@
 // Clock: clk_sys.
 `timescale 1ns/1ps
 module tb #(parameter RVC_EN=1);
+    // The generated map also declares constants for other SoC clients.
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     reg clk_i=0;
     always #5 clk_i=~clk_i;
     reg rst_n_i=0;
@@ -39,7 +43,7 @@ module tb #(parameter RVC_EN=1);
     reg [63:0] mtime_i=0;
     wire [63:0] debug_o;
     reg [7:0] rom[0:16383];
-    reg [7:0] sram[0:262143];
+    reg [7:0] sram[0:EDRV32_SRAM_SIZE-1];
     string rom_path;
     string sram_path;
     reg [31:0] store_addr_r;
@@ -59,7 +63,7 @@ module tb #(parameter RVC_EN=1);
     function automatic [7:0] byte_at(input reg [31:0] address);
         begin
             if(address<16384)byte_at=rom[address];
-            else if(address>=32'h10000000 && address<32'h10040000)
+            else if(address>=EDRV32_SRAM_BASE && address<EDRV32_SRAM_BASE+EDRV32_SRAM_SIZE)
                 byte_at=sram[address-32'h10000000];
             else begin
                 $fatal(1,"FAIL smoke unmapped address %h",address);
@@ -162,7 +166,7 @@ module tb #(parameter RVC_EN=1);
     end
     initial begin
         for(i=0;i<16384;i=i+1)rom[i]=0;
-        for(i=0;i<262144;i=i+1)sram[i]=0;
+        for(i=0;i<EDRV32_SRAM_SIZE;i=i+1)sram[i]=0;
         if(!$value$plusargs("ROM_HEX=%s",rom_path))$fatal(1,"FAIL missing ROM_HEX");
         if(!$value$plusargs("SRAM_HEX=%s",sram_path))$fatal(1,"FAIL missing SRAM_HEX");
         $readmemh(rom_path,rom);$readmemh(sram_path,sram);

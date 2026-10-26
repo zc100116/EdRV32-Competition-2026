@@ -7,6 +7,7 @@ import argparse
 from concurrent.futures import ProcessPoolExecutor
 import csv
 from pathlib import Path
+import json
 import shlex
 import subprocess
 import sys
@@ -14,6 +15,9 @@ import sys
 from pipe_model import VARIANTS, program_and_trace, simulate
 
 ROOT = Path(__file__).resolve().parents[3]
+REGIONS = json.loads((ROOT / 'rtl/include/soc_address_map.json').read_text())['regions']
+MEMORY = ','.join(f"{region['base']}:{region['size']}" for region in REGIONS
+                  if region['name'] in ('ROM', 'SRAM'))
 OUT = ROOT / 'build/cpu_uarch_eval'
 sys.path.insert(0, str(ROOT / 'tools/cpu'))
 import b2_measure  # noqa: E402
@@ -33,7 +37,7 @@ def prepare():
             debug.write_text(f'until pc 0 {stop}\nrs 1\nquit\n')
             arch = 'rv32im' + ('c' if rvc else '') + '_zicsr_zifencei_zicntr_zihpm'
             command = ['spike', f'--isa={arch}', '--priv=m', '--pmpregions=0', '--no-dm',
-                       '-m0:0x4000,0x10000000:0x40000,0x40007000:0x1000',
+                       '-m' + MEMORY + ',0x40007000:0x1000',
                        '--pc=0x10000000', '--disable-dtb', '-d', f'--debug-cmd={debug}',
                        '-l', '--log-commits', f'--log={out}/spike.log', str(elf)]
             (out / 'spike_command.txt').write_text(shlex.join(command) + '\n')

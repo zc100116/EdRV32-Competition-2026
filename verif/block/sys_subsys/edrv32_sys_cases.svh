@@ -1308,7 +1308,7 @@
     task automatic load_reference_images();
         string path;
         bit [63:0] rom[2048];
-        bit [63:0] sram[32768];
+        bit [63:0] sram[EDRV32_SRAM_SIZE/8];
         if ($value$plusargs("ROM_HEX=%s", path)) begin
             $readmemh(path, rom);
             for (int n = 0; n < 2048; n++)
@@ -1317,7 +1317,7 @@
         end
         if ($value$plusargs("SRAM_HEX=%s", path)) begin
             $readmemh(path, sram);
-            for (int n = 0; n < 32768; n++)
+            for (int n = 0; n < EDRV32_SRAM_SIZE/8; n++)
                 edrv32_sys_reference::store(EDRV32_SRAM_BASE + 32'(n*8), sram[n], 8'hff);
             sram_image_loaded = 1;
         end

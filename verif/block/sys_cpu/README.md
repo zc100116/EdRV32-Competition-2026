@@ -49,7 +49,7 @@ each SCCB peer and continuously checks that the unselected port is released.
 
 SC-01 compares all five ASCII logo rows, the boot title, and every startup field
 against the SC hardware configuration: CHIP_ID `0xed320001`, clk_sys 150 MHz,
-ROM 16 KiB, SRAM 256 KiB, I$/D$ 8 KiB each, MEM_READY=1, SRAM application mode,
+ROM 16 KiB, SRAM 64 KiB, I$/D$ 8 KiB each, MEM_READY=1, SRAM application mode,
 and the actual build commit/compiler. The UART checker uses the S-W2 key contract
 in `sw/apps/monitor/README.md`.
 
@@ -122,7 +122,7 @@ System information:
 CHIP_ID: 0xed320001
 CLK_SYS_HZ: 150000000
 ROM bytes: 16384
-SRAM bytes: 262144
+SRAM bytes: 65536
 I-cache bytes: 8192
 D-cache bytes: 8192
 MEM_READY: 1
