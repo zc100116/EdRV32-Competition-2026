@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 更新日期 | 2026-10-25 |
+| 更新日期 | 2026-10-26 |
 | 维护者 | 协调者（每次派发、完成、合并、Windows 结果回传后更新） |
 
 状态标记：`[ ]` 未开始，`[~]` 进行中，`[x]` 完成，`[!]` 阻塞。
@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | SRAM 改 64 KiB 同步 S-R4（sys-subsys v0.3）；存储子系统 v0.2 规格修订待写；全局 full 补跑；C-W2 Windows 综合：第一阶段 7 个 IP 已生成、包装模块已适配，第二版任务卡（Linux 端提供约束与导入脚本）已下发；CPU v1.0 待 C-W2 数据 |
+| 正在进行 | CPU 时序优化 C-R5（任务书 HPM 寄存、取指缓冲重构、重定向解耦）；NPU 规格讨论：N-E2 数据通路评估；存储子系统 v0.2 规格修订待写；全局 full 补跑；CPU v1.0 待 C-R5 后的 PDS 数据。SRAM 64 KiB（S-R4）已合入 main（2676908） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -28,13 +28,13 @@
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
 | CPU | `spec/cpu-spec.md` v0.9 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
 | Cache | `spec/cache-spec.md` v0.4 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
-| 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.2 | `testplan/sys-subsys-testplan.md` v0.2 | `plan/sys-subsys-plan.md` | [x] 已确认 |
+| 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.3 | `testplan/sys-subsys-testplan.md` v0.2 | `plan/sys-subsys-plan.md` | [x] 已确认 |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON、板级 DDR 适配器） | `spec/mem-subsys-spec.md` v0.1 | `testplan/mem-subsys-testplan.md` v0.1 | `plan/mem-subsys-plan.md` | [x] 已确认 |
 | 公共单元（CDC、FIFO、dma2d） | — | — | — | [ ] |
 | VIN / PIX / DISP | — | — | — | [ ] |
 | RND | — | — | — | [ ] |
 | GEO | — | — | — | [ ] |
-| NPU | — | — | — | [ ] |
+| NPU | 讨论中（方向见 npu-plan 第 1 节） | — | `plan/npu-plan.md` | [~] |
 | ETH | — | — | — | [ ] |
 | 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |
 
@@ -59,7 +59,7 @@
 
 | 任务号 | 内容 | 所属 | 状态 |
 |---|---|---|---|
-| 20261025-01-cpu-sys-synth | 生成 7 个 IP；CPU + 系统子系统测量顶层综合与布局布线（Fmax、资源、RVC_EN 0/1 对照） | cpu-plan C-W2、sys-subsys-plan S-P1 | [~] 第一阶段完成（IP 与包装适配）；第二版已下发 |
+| 20261025-01-cpu-sys-synth | 生成 7 个 IP；CPU + 系统子系统测量顶层综合与布局布线（Fmax、资源、RVC_EN 0/1 对照） | cpu-plan C-W2、sys-subsys-plan S-P1 | [x] 结果在 origin/win/20261025-01-cpu-sys-synth（69.6 MHz，WNS −7.708 ns），待整理成报告；SRAM IP 需按 8192×64 重新生成 |
 
 ---
 
