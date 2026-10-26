@@ -532,8 +532,8 @@ module edrv32_cpu_core #(
     assign dc_req_size_o = e_instr_w[13:12];
     assign dc_store_data_o = m_store_r;
     assign m_memory_w = m_class_r[0] == C_LOAD || m_class_r[0] == C_STORE;
-    assign m_fault0_w = m_exception_r ||
-        (m_memory_w && dc_resp_valid_i && dc_resp_err_i);
+    // cpu-spec 3.3: a D-cache error already implies a valid response.
+    assign m_fault0_w = m_exception_r || (m_memory_w && dc_resp_err_i);
     assign m_ready_w = !m_valid_r[0] || m_fault0_w ||
         (m_memory_w ? dc_resp_valid_i : m_class_r[0] == C_FENCE ? dc_fence_done_i :
         m_class_r[0] == C_FENCE_I ? m_fence_phase_r && ic_inv_done_i : 1'b1);

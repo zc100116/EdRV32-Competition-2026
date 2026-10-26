@@ -121,6 +121,13 @@ module tb;
     // The event must also remain low for device writes and AW backpressure.
     always @(posedge clk_i) begin
         if (rst_n_i) begin
+            if (dc_resp_err_o && !dc_resp_valid_o)
+                $fatal(1, "FAIL D error without response time=%0t", $time);
+            // P1 preserves the old error on every valid response cycle.
+            if (dc_resp_err_o !== (dc_resp_valid_o &&
+                (dut.device_state_r == dut.D_RETURN ? dut.device_err_r :
+                (dut.state_r == dut.S_RETURN ? dut.fill_err_r : dut.pma_err_r))))
+                $fatal(1, "FAIL D effective error changed time=%0t", $time);
             if (dc_wb_event_o !== (axi_awvalid_o && axi_awready_i && axi_awlen_o == 3))
                 $fatal(1, "FAIL writeback event timing");
             if (dc_wb_event_o) wb_events <= wb_events + 1;
@@ -299,6 +306,12 @@ module tb;
         maintenance(4, 0, 0);
         if (wb_events != wb_bursts || wb_events != 4)
             $fatal(1, "FAIL WB count events=%0d bursts=%0d", wb_events, wb_bursts);
+        // A PMA error must drop with response valid even though pma_err_r stays set.
+        step(); dc_req_valid_i = 1; dc_req_addr_i = 32'h50000000;
+        tick();
+        if (!dc_resp_valid_o || !dc_resp_err_o) $fatal(1, "FAIL D PMA response");
+        step(); dc_req_valid_i = 0; tick();
+        if (dc_resp_valid_o || dc_resp_err_o) $fatal(1, "FAIL D stale PMA error");
         $display("PASS cache_dcache WB events=%0d", wb_events); $finish;
     end
 endmodule

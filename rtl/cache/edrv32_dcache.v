@@ -202,8 +202,10 @@ module edrv32_dcache (
     assign dc_resp_valid_o =
         ((state_r == S_IDLE && lookup_done_w) ||
             (state_r == S_RETURN && !killed_r) || device_state_r == D_RETURN);
+    // cache-spec 6: qualify errors with registered response state, never tag hit.
     assign dc_resp_err_o = device_state_r == D_RETURN ? device_err_r :
-                            (state_r == S_RETURN ? fill_err_r : pma_err_r);
+        (state_r == S_RETURN ? (!killed_r && fill_err_r) :
+        (state_r == S_IDLE && lookup_valid_r && pma_err_r));
     assign raw_load_w = state_r == S_RETURN ?
                         (addr_r[2] ? result_r[63:32] : result_r[31:0]) :
                         (addr_r[2] ? (hit0_w ? data0_w[63:32] : data1_w[63:32]) :
