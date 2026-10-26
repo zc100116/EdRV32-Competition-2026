@@ -27,8 +27,11 @@ module edrv32_ram_dcache_data (
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
         .wr_byte_en(wr_byte_en_i),
+        // Generated IP resets are active-high; storage stays unreset.
+        .wr_rst(1'b0),
         .rd_clk(clk_i),
-        .rd_en(rd_en_i),
+        .rd_clk_en(rd_en_i),
+        .rd_rst(1'b0),
         .rd_addr(rd_addr_i),
         .rd_data(rd_data_o)
     );

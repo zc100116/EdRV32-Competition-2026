@@ -18,6 +18,8 @@ module edrv32_mul_s33x33 (
     ip_mul_s33x33 u_ip (
         .clk(clk_i),
         .ce(enable_i),
+        // The generated pipeline reset is active-high; data stays unreset.
+        .rst(1'b0),
         .a(operand_a_i),
         .b(operand_b_i),
         .p(product_o)

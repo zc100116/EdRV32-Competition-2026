@@ -18,8 +18,12 @@ module edrv32_ram_sram (
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_sram u_ip (
         .clk(clk_i),
-        .en(en_i),
-        .wr_en(wr_en_i),
+        .clk_en(en_i),
+        // The IP separates word write enable from per-byte enables.
+        .wr_en(|wr_en_i),
+        .wr_byte_en(wr_en_i),
+        // The generated IP reset is active-high; storage stays unreset.
+        .rst(1'b0),
         .wr_data(wr_data_i),
         .addr(addr_i),
         .rd_data(rd_data_o)

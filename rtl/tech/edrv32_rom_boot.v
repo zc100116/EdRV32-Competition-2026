@@ -16,7 +16,9 @@ module edrv32_rom_boot (
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_rom_boot u_ip (
         .clk(clk_i),
-        .en(en_i),
+        .clk_en(en_i),
+        // The generated IP requires active-high reset; this ROM stays unreset.
+        .rst(1'b0),
         .addr(addr_i),
         .rd_data(rd_data_o)
     );
