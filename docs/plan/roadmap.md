@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | 存储子系统波次 1（M-R1、M-R2、M-R3、M-V1）；旧工程 YOLO 加速器架构与性能评估（协调者阅读）；C-W2 Windows 综合暂停（用户暂不方便上板），任务卡 `20261025-01-cpu-sys-synth` 保留；CPU v1.0 待 C-E9/C-Y1 数据讨论 |
+| 正在进行 | 存储子系统波次 1（M-R1、M-R2、M-R3、M-V1）；旧工程 YOLO 加速器性能评估 N-E1（`plan/npu-plan.md`）；C-W2 Windows 综合暂停（用户暂不方便上板），任务卡 `20261025-01-cpu-sys-synth` 保留；CPU v1.0 待 C-E9/C-Y1 数据讨论 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
