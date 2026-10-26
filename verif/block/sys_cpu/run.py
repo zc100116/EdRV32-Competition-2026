@@ -93,7 +93,7 @@ def pack_image(contents, base, size, path):
 
 def compile_sim():
     obj = OUT / 'obj'
-    args = ['verilator', '--binary', '--timing', '-Wall', '-j', '2', '+define+SIM_MODE',
+    args = ['verilator', '--binary', '--timing', '-Wall', '-j', '1', '+define+SIM_MODE',
             '--top-module', 'edrv32_sys_cpu_tb', '--Mdir', str(obj), '-o', 'sim']
     command(args + expand_files(HERE / 'files.f'), OUT / 'compile.log')
     return obj / 'sim'

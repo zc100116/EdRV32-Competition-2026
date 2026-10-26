@@ -57,7 +57,7 @@ def run(args):
     sources = expand_files(ROOT / 'verif/block/cpu_b2/files.f')
     compile_args = ['verilator', '--binary', '--timing', '-Wall', '+define+SIM_MODE',
                     '--top-module', 'edrv32_cpu_b2_tb', f'-GRVC_EN={args.rvc}',
-                    '--Mdir', str(obj), '-o', 'sim', '-j', '4', *sources]
+                    '--Mdir', str(obj), '-o', 'sim', '-j', '1', *sources]
     print(f'B2 test={args.test} RVC_EN={args.rvc} compile_log={out / "compile.log"}',
           flush=True)
     with (out / 'compile.log').open('w') as log:

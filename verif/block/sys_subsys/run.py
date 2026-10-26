@@ -60,7 +60,7 @@ def run(selection):
         obj = OUT / f'group{group}/obj'
         obj.parent.mkdir(parents=True, exist_ok=True)
         if group not in built:
-            args = ['verilator', '--binary', '--timing', '-Wall', '-j', '2',
+            args = ['verilator', '--binary', '--timing', '-Wall', '-j', '1',
                     '--top-module', fields['top'], '--Mdir', str(obj), '-o', 'sim',
                     f'-GCASE_ID={group * 100 + 1}', '+define+SIM_MODE']
             args += expand_files(path.parent / fields['files'])

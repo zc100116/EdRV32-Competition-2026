@@ -30,7 +30,7 @@ def simulator(compressed):
     sources += [ROOT / 'verif/block/cpu/b1/core.f', ROOT / 'rtl/filelists/cpu.f']
     sources += list((ROOT / 'verif/block/cpu/b1').glob('*.svh'))
     if not binary.exists() or any(p.stat().st_mtime > binary.stat().st_mtime for p in sources):
-        command = ['verilator', '--binary', '--timing', '-j', '2', '--top-module',
+        command = ['verilator', '--binary', '--timing', '-j', '1', '--top-module',
                    'edrv32_cpu_b1_core_tb', '--Mdir', str(out / 'obj'), '-o', 'sim',
                    '+define+SIM_MODE', '-GRVC_EN=' + str(int(compressed))]
         with (out / 'compile.log').open('w') as log:

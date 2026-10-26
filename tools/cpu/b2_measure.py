@@ -2,7 +2,7 @@
 # File: b2_measure.py
 # Spec: cpu-testplan 3.8 R-01..R-05; cpu-plan C-I3.
 # Description: Measure the requested B2/CoreMark matrix and preserve commands and raw logs.
-#              Compile each RVC bench once, with at most two compilation jobs.
+#              Compile each RVC bench once, with one compilation job.
 # Clock domain: none (host tool).
 """Run from the repository root after sourcing ~/.local/opt/edrv32/env.sh."""
 import csv
@@ -42,7 +42,7 @@ def compile_bench(rvc):
     obj = OUT / f'obj_rvc{rvc}'
     command = ['verilator', '--binary', '--timing', '-Wall', '+define+SIM_MODE',
                '--top-module', 'edrv32_cpu_b2_tb', f'-GRVC_EN={rvc}',
-               '--Mdir', str(obj), '-o', 'sim', '-j', '2',
+               '--Mdir', str(obj), '-o', 'sim', '-j', '1',
                *expand_files(ROOT / 'verif/block/cpu_b2/files.f')]
     logged(command, OUT / f'compile_rvc{rvc}.log')
     return obj / 'sim'
@@ -150,7 +150,7 @@ def main():
         writer = csv.DictWriter(table, fieldnames=fields)
         writer.writeheader()
         for rvc in (1, 0):
-            print(f'Compiling B2 RVC_EN={rvc} (-j 2)', flush=True)
+            print(f'Compiling B2 RVC_EN={rvc} (-j 1)', flush=True)
             sim = compile_bench(rvc)
             for test in ('r01', 'r02', 'r03', 'r04'):
                 out, elf = build(test, rvc, 'o2')
