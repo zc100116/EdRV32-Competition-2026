@@ -52,6 +52,7 @@ module edrv32_cpu_csr #(
     reg [63:0] cycle_r;
     reg [63:0] instret_r;
     reg [63:0] counter_r [0:7];
+    reg [31:0] event_count_r;
     reg implemented_w;
     reg readonly_w;
     reg [31:0] write_data_w;
@@ -127,6 +128,13 @@ module edrv32_cpu_csr #(
             default: write_data_w = write_data_i;
         endcase
     end
+    // cpu-spec 7.1: event generation ends here, before selection and the 64-bit increment.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            event_count_r <= 0;
+        else
+            event_count_r <= event_count_i;
+    end
     // Architectural state has specified reset values, unlike execution data registers.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -153,7 +161,7 @@ module edrv32_cpu_csr #(
                 if (!inhibit_r[update_idx + 3] && event_r[update_idx] >= 1 &&
                     event_r[update_idx] <= 16)
                     counter_r[update_idx] <= counter_r[update_idx] +
-                        {62'b0, event_count_i[(event_r[update_idx] - 1'b1) * 2 +: 2]};
+                        {62'b0, event_count_r[(event_r[update_idx] - 1'b1) * 2 +: 2]};
             end
             if (write_enable_w && !trap_i) begin
                 case (addr_i)

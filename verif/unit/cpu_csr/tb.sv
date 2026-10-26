@@ -212,6 +212,27 @@ module tb;
             if(code>=1 && code<=16)expected=expected+(code[0]?64'd6:64'd12);
             for(i=0;i<8;i=i+1)counter_check(12'hb03+12'(i),expected);
         end
+        // cpu-spec 7.1: every event pulse appears one edge later, including rollover.
+        for(code=1;code<=16;code=code+1)begin
+            csr_write('h323,32'(code));
+            csr_write('hb03,32'hffffffff);csr_write('hb83,0);
+            csr_write('h320,'h7f5);
+            @(negedge clk_i);event_count_i[(code-1)*2+:2]=2'd2;
+            @(posedge clk_i);#1;read_check('hb03,32'hffffffff);read_check('hb83,0);
+            @(negedge clk_i);event_count_i=0;
+            @(posedge clk_i);#1;counter_check('hb03,64'h100000001);
+            @(posedge clk_i);#1;counter_check('hb03,64'h100000001);
+            csr_write('h320,'h7fd);
+        end
+        // Register the whole vector: a selector write chooses from that vector next cycle.
+        csr_write('h323,1);csr_write('hb03,0);csr_write('hb83,0);
+        csr_write('h320,'h7f5);
+        @(negedge clk_i);event_count_i=32'h9;
+        addr_i='h323;write_i=1;command_i=1;write_data_i=2;
+        @(posedge clk_i);#1;read_check('hb03,0);
+        @(negedge clk_i);write_i=0;event_count_i=0;
+        @(posedge clk_i);#1;counter_check('hb03,2);
+        csr_write('h320,'h7fd);
         // mcycle and minstret increments and write priority, including overflow.
         csr_write('hb00,32'hffffffff);csr_write('hb80,0);
         csr_write('hb02,32'hffffffff);csr_write('hb82,0);
@@ -238,8 +259,9 @@ module tb;
         @(negedge clk_i);addr_i='hb02;write_i=1;write_data_i=32'h12345678;
         @(posedge clk_i);#1;
         read_check('hb02,32'h12345678);read_check('hb82,1);
+        @(negedge clk_i);event_count_i=32'hffffffff;
+        @(posedge clk_i);#1;
         @(negedge clk_i);addr_i='hb03;write_i=1;write_data_i=32'h11223344;
-        event_count_i=32'hffffffff;
         @(posedge clk_i);#1;read_check('hb03,32'h11223344);
         @(negedge clk_i);retire_count_i=0;event_count_i=0;
         addr_i='h320;write_i=1;write_data_i='h7fd;

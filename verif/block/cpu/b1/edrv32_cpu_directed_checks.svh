@@ -12,6 +12,7 @@
     logic [63:0] reference_hpm = 0;
     integer reference_selector = 0;
     integer reference_events[17];
+    integer delayed_reference_events[17];
     integer event_witness[17];
     integer window_events[17];
     bit hpm_reference_window = 0;
@@ -161,7 +162,10 @@
         end
     end
     always @(posedge clk) begin
-        if (rst_n) begin
+        if (!rst_n) begin
+            for (int code = 0; code <= 16; code++)
+                delayed_reference_events[code] = 0;
+        end else begin
             if (predictor_probe_enabled && !predictor_probe_seen && u_core.d_issue_w != 0 &&
                 u_core.d_record_w[0][31:0] == predictor_probe_pc) begin
                 predictor_probe_seen = 1;
@@ -256,9 +260,12 @@
                     window_events[code] += reference_events[code];
             end
             if (!reference_inhibit[3] && reference_selector >= 1 && reference_selector <= 16) begin
-                reference_hpm += 64'(reference_events[reference_selector]);
-                event_witness[reference_selector] += reference_events[reference_selector];
+                reference_hpm += 64'(delayed_reference_events[reference_selector]);
+                event_witness[reference_selector] += delayed_reference_events[reference_selector];
             end
+            // cpu-spec 7.1: select the preceding cycle using the current CSR controls.
+            for (int code = 0; code <= 16; code++)
+                delayed_reference_events[code] = reference_events[code];
             observer_instruction = u_core.m_instr_r;
             if (u_core.m_commit_w[0] && csr_instruction_write(observer_instruction)) begin
                 observer_operand = observer_instruction[14] ?
