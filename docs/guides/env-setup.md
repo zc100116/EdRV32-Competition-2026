@@ -16,6 +16,7 @@
 | GTKWave | 3.3.116 | `~/.local/opt/edrv32/usr/` | Ubuntu 24.04 deb 包解压 |
 | dtc | 1.7.0 | `~/.local/opt/edrv32/usr/` | Ubuntu 24.04 deb 包解压 |
 | Icarus Verilog | 12.0 | `~/.local/opt/iverilog/usr/` | Ubuntu 24.04 deb 包解压 |
+| Yosys | 0.70+219（OSS CAD Suite 2026-10-25） | `~/.local/opt/oss-cad-suite/` | YosysHQ 预编译包解压；只用于结构性时序预估，FPGA 综合以 PDS 为准 |
 
 `~/.local/opt/edrv32/usr/bin/` 下还有 Ubuntu 的 `riscv64-unknown-elf-gcc` 13.2，它的预编译库缺少 rv32imc 组合，**项目统一使用 `riscv-none-elf-gcc` 15.2.0**。
 
@@ -65,13 +66,23 @@ mkdir build && cd build
 make -j$(nproc) && make install
 ```
 
-### 4. 环境脚本 `~/.local/opt/edrv32/env.sh`
+### 4. Yosys（OSS CAD Suite）
+
+```sh
+curl -L -o oss-cad-suite.tgz https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-10-25/oss-cad-suite-linux-x64-20261025.tgz
+tar -xzf oss-cad-suite.tgz -C ~/.local/opt/
+```
+
+其 `bin/` 追加在 PATH 末尾，使套件自带的 Verilator、Icarus 不覆盖项目版本。
+
+### 5. 环境脚本 `~/.local/opt/edrv32/env.sh`
 
 ```sh
 export EDRV32_TOOLS=$HOME/.local/opt/edrv32
 export PATH=$EDRV32_TOOLS/bin:$HOME/.local/opt/xpack-riscv-none-elf-gcc-15.2.0-1/bin:$HOME/.local/opt/spike/bin:$EDRV32_TOOLS/usr/bin:$HOME/.local/opt/iverilog/usr/bin:$PATH
 export LD_LIBRARY_PATH=$EDRV32_TOOLS/usr/lib/x86_64-linux-gnu:$HOME/.local/opt/iverilog/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}
 export VERILATOR_ROOT=$EDRV32_TOOLS/usr/share/verilator
+export PATH=$PATH:$HOME/.local/opt/oss-cad-suite/bin
 ```
 
 ## 检查
@@ -81,4 +92,5 @@ verilator --version              # Verilator 5.020
 riscv-none-elf-gcc --version     # 15.2.0
 spike --help | head -1
 iverilog -V | head -1
+yosys -V                         # Yosys 0.70+219
 ```
