@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | 存储子系统联调 M-I1（DRR 补额度语义修正中）；C-W2 Windows 综合：第一阶段 7 个 IP 已生成、包装模块已适配，第二版任务卡（Linux 端提供约束与导入脚本）已下发；CPU v1.0 待 C-W2 数据 |
+| 正在进行 | SRAM 改 64 KiB 同步 S-R4（sys-subsys v0.3）；存储子系统 v0.2 规格修订待写；全局 full 补跑；C-W2 Windows 综合：第一阶段 7 个 IP 已生成、包装模块已适配，第二版任务卡（Linux 端提供约束与导入脚本）已下发；CPU v1.0 待 C-W2 数据 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -46,7 +46,7 @@
 |---|---|---|---|---|
 | P0 | 基础设施：legacy 迁移、目录骨架、工具链、回归框架、生成器、公共原语、软件 BSP | `plan/infra-plan.md` | 见 infra-plan 第 1 节 | [x] |
 | P1 | CPU（含 cache） | `plan/cpu-plan.md`、cache-plan | ISA/ACT 全部通过，CoreMark CRC 正确，上板测得 Fmax、LUT、CoreMark/MHz | [~] |
-| P2 | SoC 骨架：系统总线、外设、中断、存储子系统、板级顶层 | `plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md` | SoC 级 CoreMark 和 DDR 测试通过，上板运行 | [~] 系统子系统与 SC 联调已合入 main；存储子系统规格已确认，波次 1 开发中 |
+| P2 | SoC 骨架：系统总线、外设、中断、存储子系统、板级顶层 | `plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md` | SoC 级 CoreMark 和 DDR 测试通过，上板运行 | [~] 系统子系统与 SC 联调已合入 main；存储子系统已合入 main（58de802，全局 full 待补跑） |
 | P3 | 实时视频通路：dma2d、VIN、DISP | 待写 | 摄像头到 HDMI 闭环，无 underflow/overflow | [ ] |
 | P4 | 图像处理：PIX、GEO | 待写 | 像素级比对通过 | [ ] |
 | P5 | 渲染：RND、LVGL 移植 | 待写 | UI 画面比对通过 | [ ] |
