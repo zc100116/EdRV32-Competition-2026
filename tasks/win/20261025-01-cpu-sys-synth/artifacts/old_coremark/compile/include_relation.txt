@@ -1,0 +1,116 @@
+
+
+
+
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/datapath/edrv32_regfile.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/frontend/edrv32_rvc_decompress.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/frontend/edrv32_if1_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_if1_to_if2.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/frontend/edrv32_if2_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_if2_to_align.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/frontend/edrv32_align_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_align_to_decode.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/decode/edrv32_immgen.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/decode/edrv32_decoder.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/decode/edrv32_operand_resolve.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/decode/edrv32_decode_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_decode_to_ex.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/execute/edrv32_alu.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/execute/edrv32_branch_unit.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/execute/edrv32_ex_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_ex_to_mem1.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/lsu/edrv32_lsu_format.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/lsu/edrv32_pma_classifier.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pma.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pma.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_periph_abi.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/lsu/edrv32_load_queue.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/lsu/edrv32_store_queue.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/lsu/edrv32_mem1_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pma.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_mem1_to_mem2.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/lsu/edrv32_mem2_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_mem2_to_commit.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/csr/edrv32_hpm_counters.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_hpm.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/csr/edrv32_csr_file.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_csr.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_hpm.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/commit/edrv32_commit_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_csr.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_hpm.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/mdu/edrv32_mul_booth4_wallace.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/mdu/edrv32_mul_pango_apm.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/mdu/edrv32_div_nonrestoring.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/mdu/edrv32_mdu.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/control/edrv32_mdu_scoreboard.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/control/edrv32_redirect_ctrl.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_isa.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/control/edrv32_hpm_attribution.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_hpm.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/core/edrv32_core.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_exception.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_hpm.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pair.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/cache/edrv32_cache_array.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_build_mode.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/cache/edrv32_cache_maint.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/cache/edrv32_icache.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/cache/edrv32_dcache.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/core/edrv32_cached_core.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_lsu.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_pma.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/soc/fabric/axi2native.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/fabric/axi2apb.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/fabric/axi_rd_fabric.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/fabric/axi_wr_fabric.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/fabric/axi_interconnect.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/fabric/apb_mux.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_apb.vh|
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/soc/ddr/edrv32_ddr_monitor.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_periph_abi.vh|
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/soc/mem/sram_axi.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_build_mode.vh|
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/soc/mem/boot_rom_axi.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_build_mode.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/mem/itcm.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_build_mode.vh|
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/soc/mem/edrv32_tcm_subsystem.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_build_mode.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/intc/clint.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/intc/plic.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/periph/uart.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_apb.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+
+G:/claude code/EdRV32-Competition-2026/rtl/soc/periph/spi.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_apb.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/soc/top/edrv32_soc_top.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/vision/control/edrv32_cam_apb.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/vision/control/edrv32_disp_apb.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/vision/control/edrv32_pixel_apb.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_soc_map.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/core/edrv32_cpu_minimal_top.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_axi4.vh|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_bus.vh|
+
+
+
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_if2_to_align_pair.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/frontend/edrv32_align_pair_stage.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+G:/claude code/EdRV32-Competition-2026/rtl/cpu/pipeline/edrv32_pipe_align_to_decode_pair.v|G:/claude code/EdRV32-Competition-2026/rtl/include/edrv32_uop.vh|
+
+
+G:/claude code/EdRV32-Competition-2026/fpga/pango_200h/edrv32_soc_coremark/ipcore/sram/rtl/ipm2l_sdpram_v1_10_sram.v|G:/claude code/EdRV32-Competition-2026/fpga/pango_200h/edrv32_soc_coremark/ipcore/sram/rtl/sram_init_param.v|
+
+
+
+
+
+G:/claude code/EdRV32-Competition-2026/fpga/pango_200h/edrv32_soc_coremark/ipcore/boot_rom/rtl/ipm2l_spram_v1_8_boot_rom.v|G:/claude code/EdRV32-Competition-2026/fpga/pango_200h/edrv32_soc_coremark/ipcore/boot_rom/rtl/boot_rom_init_param.v|
+
+
+
+
+
+
+
+

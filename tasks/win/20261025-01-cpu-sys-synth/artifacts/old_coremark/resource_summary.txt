@@ -1,0 +1,95 @@
+
+SOURCE: synthesize/edrv32_pango_200h_coremark_top.snr
+LUT / FF / Distributed RAM / APM / DRM: 29245 / 15755 / 411 / 7 / 22
+
+SOURCE: device_map/edrv32_pango_200h_coremark_top.dmr
+| Logic Utilization     | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------+
+| APM                   | 7         | 740           | 1                  
+| FF                    | 15755     | 319600        | 5                  
+| LUT                   | 29245     | 159800        | 19                 
+| Distributed RAM       | 411       | 39500         | 2                  
+| DRM                   | 22        | 415           | 6                  
+| IO                    | 15        | 400           | 4                  
+| RCKB                  | 0         | 40            | 0                  
+| SCANCHAIN             | 0         | 1             | 0                  
+| USCM                  | 1         | 32            | 4                  
+| CCS                   | 1         | 1             | 100                
+| ADC                   | 0         | 1             | 0                  
+| DDR_PHY               | 0         | 40            | 0                  
+| HSSTLP                | 0         | 2             | 0                  
+| GPLL                  | 1         | 10            | 10                 
+| PPLL                  | 0         | 10            | 0                  
+| DDRPHY_CPD            | 0         | 20            | 0                  
+| HCKB                  | 0         | 120           | 0                  
+| IOCKB                 | 0         | 40            | 0                  
+| MRCKB                 | 0         | 20            | 0                  
+| PCIE                  | 0         | 1             | 0                  
+| DDRPHY_IOCLK_DIV      | 0         | 10            | 0                  
+| ANALOG                | 0         | 1             | 0                  
+| TSERDES               | 0         | 80            | 0                  
+| KEYRAM                | 0         | 1             | 0                  
++-------------------------------------------------------------------------+
+
+SOURCE: place_route/edrv32_pango_200h_coremark_top.prr
+| Logic Utilization                 | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0                  
+| Use of ANALOG                     | 0         | 1             | 0                  
+| Use of APM                        | 7         | 740           | 1                  
+| Use of BKCL                       | 1         | 10            | 10                 
+| Use of CCS                        | 1         | 1             | 100                
+| Use of CLMA                       | 7245      | 30075         | 25                 
+|   FF                              | 12104     | 240600        | 6                  
+|   LUT                             | 23571     | 120300        | 20                 
+|   LUT-FF pairs                    | 8140      | 120300        | 7                  
+| Use of CLMS                       | 2275      | 9875          | 24                 
+|   FF                              | 3678      | 79000         | 5                  
+|   LUT                             | 7485      | 39500         | 19                 
+|   LUT-FF pairs                    | 2430      | 39500         | 7                  
+|   Distributed RAM                 | 411       | 39500         | 2                  
+| Use of DDRPHY_CPD                 | 0         | 20            | 0                  
+| Use of DDRPHY_IOCLK_DIV           | 0         | 10            | 0                  
+| Use of DDR_PHY                    | 0         | 40            | 0                  
+| Use of DRM                        | 22        | 415           | 6                  
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0                  
+| Use of GPLL                       | 1         | 10            | 10                 
+| Use of GSEB                       | 0         | 512           | 0                  
+| Use of HARD0                      | 2295      | 25050         | 10                 
+| Use of HCKB                       | 5         | 120           | 5                  
+|  HCKB dataused                    | 0         | 120           | 0                  
+| Use of HCKMUX_TEST                | 0         | 10            | 0                  
+| Use of HSSTLP                     | 0         | 2             | 0                  
+| Use of IO                         | 15        | 400           | 4                  
+|   IOBD                            | 6         | 192           | 4                  
+|   IOBS                            | 9         | 208           | 5                  
+| Use of IOCKB                      | 0         | 40            | 0                  
+| Use of IOCKMUX_TEST               | 0         | 10            | 0                  
+| Use of IOLHR                      | 15        | 500           | 3                  
+| Use of KEYRAM                     | 0         | 1             | 0                  
+| Use of MFG_TEST                   | 0         | 1             | 0                  
+| Use of MRCKB                      | 0         | 20            | 0                  
+| Use of MRCKMUX_TEST               | 0         | 10            | 0                  
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0                  
+| Use of PCIE                       | 0         | 1             | 0                  
+| Use of PCKMUX_TEST                | 0         | 20            | 0                  
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0                  
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0                  
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0                  
+| Use of PPLL                       | 0         | 10            | 0                  
+| Use of PREGMUXC_TEST              | 0         | 3             | 0                  
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0                  
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0                  
+| Use of RCKB                       | 0         | 40            | 0                  
+|  RCKB dataused                    | 0         | 40            | 0                  
+| Use of RCKMUX_TEST                | 0         | 10            | 0                  
+| Use of SCANCHAIN                  | 0         | 1             | 0                  
+| Use of SCKMUX_TEST                | 0         | 20            | 0                  
+| Use of SFB                        | 0         | 5075          | 0                  
+| Use of SPAD                       | 0         | 8             | 0                  
+| Use of TSERDES                    | 0         | 80            | 0                  
+| Use of USCM                       | 1         | 32            | 4                  
+|  USCM dataused                    | 0         | 32            | 0                  
+| Use of USCMMUX_TEST               | 0         | 32            | 0                  
++-------------------------------------------------------------------------------------+
+Native hierarchy top row LUT / FF / Distributed RAM / APM / DRM: 29193 / 15782 / 411 / 7 / 22

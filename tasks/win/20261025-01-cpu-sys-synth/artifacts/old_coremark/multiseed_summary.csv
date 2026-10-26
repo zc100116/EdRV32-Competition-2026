@@ -1,0 +1,35 @@
+version,2022.2-SP6.1<build 138931>
+project name,edrv32_soc.pds
+
+Single Seed:
+Seed,State,Convergence,Setup(Slow),Setup(Fast),Hold(Slow),Hold(Fast),Recovery(Slow),Recovery(Fast),Removal(Slow),Removal(Fast),PBM-GP,PBM-PreGP,PBM-PostGP,LP,Total Placement Cpu Time,Detailed routing,Total Routing Cpu Time,Wire Length After Post-GP,Wire Length After LP,Wire Length After DP,Routing Arc Length,Worst Slack After GP Timing,Worst Slack After LP Timing,Worst Slack Before RP,Worst Slack Before DP,Worst Slack After DP,Worst Slack After Placement,Worst Slack After TA By Preroute,TNS After DP,TNS Before Route,Setup(Slow) Total Failing TNS,Setup(Slow) Total Failing Endpoints,Hold(Slow) Total Failing THS,Hold(Slow) Total Failing Endpoints,Power
+single,OK,OK,0.212,4.083,0.146,0.102,3.462,5.961,0.450,0.300,1.06,NA,0.00,0.75,79.61,206.81,251.02,NA,NA,NA,527581,NA,NA,-1593,-1402,-4,-6,NA,-10,NA,0.000,0,0.000,0,NA
+Pass Rate/Convergence Rate,100.00%,100.00%
+
+Synthesize:
+control_set,365
+Synthesize Performance Summary:
+slack category,Synthesize Setup WNS,Synthesize Setup TNS,Synthesize Recovery WNS,Synthesize Recovery TNS
+slack value,-0.939,-391.091,2.417,0.000
+Synthesize Process Cpu Time,0h:0m:39s
+
+Device Map:
+Device Map Resource Usage Summary:
+Logic Utilization,LUT,FF,DRM,APM,Distributed RAM,HSSTHP,USCM,HCKB,RCKB
+Used,29245,15755,22,7,411,NA,1,0,0
+Available,159800,319600,415,740,39500,NA,32,120,40
+Utilization(%),19%,5%,6%,1%,2%,NA,4%,0%,0%
+Device Map Process Cpu Time,0h:0m:6s
+
+Project Configurations:
+top module,edrv32_pango_200h_coremark_top
+compile," -include_path {G:/claude code/EdRV32-Competition-2026/rtl/include	} 
+ -compiler_directives {FPGA_MODE EDRV32_SOC_100MHZ EDRV32_ENABLE_DECOUPLED_LSU} "
+synthesize," -dir {G:/Program/pango/PDS_2022.2-SP6.1/syn/bin/synplify_pro.exe} 
+ -ads "
+device map,
+place & route,
+
+Test Parameters Configurations:
+testparam,
+

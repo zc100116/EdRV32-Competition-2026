@@ -1,0 +1,77 @@
+Counts are W:/E: log lines, not unique physical defects.
+
+
+STAGE compile
+Errors: 0; Warnings: 1149
+Verilog-2020	408
+Verilog-2008	269
+Verilog-2023	142
+ConstantProbeLoop	110
+Verilog-2038	108
+Sdm-2003	79
+Verilog-2039	15
+Public-4030	12
+Verilog-2036	4
+Sdm-2010	2
+Timing/memory (verbatim):
+Executing : rtl-analyze successfully. Time elapsed: 1.394s wall, 0.016s user + 0.000s system = 0.016s CPU (1.1%)
+Executing : rtl-elaborate successfully. Time elapsed: 0.291s wall, 0.016s user + 0.000s system = 0.016s CPU (5.4%)
+Executing : rtl-prep successfully. Time elapsed: 0.344s wall, 0.031s user + 0.000s system = 0.031s CPU (9.1%)
+Executing : rtl-infer successfully. Time elapsed: 37.660s wall, 9.641s user + 0.797s system = 10.438s CPU (27.7%)
+Executing : rtl-control-opt successfully. Time elapsed: 15.984s wall, 3.797s user + 0.359s system = 4.156s CPU (26.0%)
+Executing : rtl-data-opt successfully. Time elapsed: 74.895s wall, 19.766s user + 0.203s system = 19.969s CPU (26.7%)
+Executing : FSM inference successfully. Time elapsed: 7.213s wall, 2.109s user + 0.031s system = 2.141s CPU (29.7%)
+Executing : sdm2adm successfully. Time elapsed: 37.693s wall, 11.109s user + 0.250s system = 11.359s CPU (30.1%)
+Action compile: Real time elapsed is 0h:11m:0s
+Action compile: CPU time elapsed is 0h:1m:44s
+Action compile: Process CPU time elapsed is 0h:1m:44s
+Action compile: Peak memory pool usage is 2,394 MB
+
+STAGE synthesize
+Errors: 0; Warnings: 1500
+Public-4008	967
+ConstantRegisterRemoval	324
+FanoutConstraint	196
+Timing-4087	5
+NameConflictRenaming	3
+Timing-4086	3
+W: * The forced initial state for regs on FSM resp_r_fsm* is * and be encoded *.	2
+Timing/memory (verbatim):
+Executing : pre-mapping successfully. Time elapsed: 52.042s wall, 10.172s user + 0.422s system = 10.594s CPU (20.4%)
+Executing : mod-gen successfully. Time elapsed: 31.675s wall, 9.922s user + 0.328s system = 10.250s CPU (32.4%)
+Executing : logic-optimization successfully. Time elapsed: 117.325s wall, 29.062s user + 1.219s system = 30.281s CPU (25.8%)
+Executing : tech-mapping phase 1 successfully. Time elapsed: 11.568s wall, 3.156s user + 0.000s system = 3.156s CPU (27.3%)
+Executing : tech-mapping phase 2 successfully. Time elapsed: 41.538s wall, 10.469s user + 0.047s system = 10.516s CPU (25.3%)
+Executing : tech-optimization successfully. Time elapsed: 12.833s wall, 3.906s user + 0.047s system = 3.953s CPU (30.8%)
+Executing : phys-optimization successfully. Time elapsed: 0.000s wall, 0.000s user + 0.000s system = 0.000s CPU (n/a%)
+Executing : restore-hierarchy successfully. Time elapsed: 4.788s wall, 2.297s user + 0.000s system = 2.297s CPU (48.0%)
+Action synthesize: Real time elapsed is 0h:5m:30s
+Action synthesize: CPU time elapsed is 0h:1m:19s
+Action synthesize: Process CPU time elapsed is 0h:1m:23s
+Action synthesize: Peak memory pool usage is 5,615 MB
+
+STAGE device_map
+Errors: 0; Warnings: 0
+Timing/memory (verbatim):
+Action dev_map: Real time elapsed is 0h:0m:22s
+Action dev_map: CPU time elapsed is 0h:0m:3s
+Action dev_map: Process CPU time elapsed is 0h:0m:3s
+Action dev_map: Peak memory pool usage is 718 MB
+
+STAGE place_route
+Errors: 0; Warnings: 0
+Timing/memory (verbatim):
+Action pnr: Real time elapsed is 0h:26m:3s
+Action pnr: CPU time elapsed is 0h:6m:19s
+Action pnr: Process CPU time elapsed is 0h:7m:12s
+Action pnr: Peak memory pool usage is 3,508 MB
+
+STAGE report_timing
+Errors: 0; Warnings: 8
+Timing-4087	5
+Timing-4086	3
+Timing/memory (verbatim):
+Action report_timing: Real time elapsed is 0h:0m:29s
+Action report_timing: CPU time elapsed is 0h:0m:6s
+Action report_timing: Process CPU time elapsed is 0h:0m:6s
+Action report_timing: Peak memory pool usage is 2,337 MB

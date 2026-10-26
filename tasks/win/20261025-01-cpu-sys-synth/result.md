@@ -8,7 +8,108 @@
 | PDS 版本 | 2022.2-SP6.1，build 138931 |
 | ModelSim | SE-64 2020.4 |
 | 器件 | PG2L200H-6 FBB676（工程及 7 个 IP 的 .idf 已核对） |
-| 完成情况 | Compile 已结束，当前编译日志 0 个 E:、1149 个 W:；按用户要求回传完整编译信息，等待 VPS Claude 审阅；尚未执行综合、布局布线和 RVC_EN=0 对照 |
+| 完成情况 | RVC_EN=1 的 Compile、综合、器件映射、布局布线和时序报告均完成；150 MHz setup 未收敛；已另导出每角200条路径，并收集旧 CoreMark 对照；RVC_EN=0 对照未执行 |
+
+## 从编译到布局布线的完整回传（2026-10-26）
+
+用户要求详细整理全部日志、报告并推送，随后追加旧 CoreMark 工程对照，以及更多危险时序路径。
+本次保留完整原始日志；旧工程的 `.pds` 和全部 `.idf` 按用户明确要求作为对照资料回传，
+这些是通常不提交完整日志和工程文件规则的本次授权例外。两个工程的原生数据库、网表、bitstream 和 IP RTL 均不上传。
+
+当前工程全部测量使用 `157afa245359199cfa6bf7c18e2e21d165ae8203` 的设计输入；
+当前 `compile/run.log` 的实例参数明确 RVC_EN=1。
+日志原文确认 Compile、Synthesize、Device Map、Place & Route、Report Timing 均完成。
+流程完成不等于达到目标频率：最终报告写明 `Some Constraints Violated`。
+
+### 流程状态与耗时
+
+每阶段原始日志保存到 `artifacts/<阶段>/run.log`，项目总日志为 `artifacts/pds.log` 和 `project_run.log`。
+
+| 阶段 | Real time | CPU time | Process CPU time | 峰值内存 | E: / W: 行数 |
+|---|---|---|---|---|---|
+| Compile | 11m00s | 1m44s | 1m44s | 2,394 MB | 0 / 1149 |
+| Synthesize | 5m30s | 1m19s | 1m23s | 5,615 MB | 0 / 1500 |
+| Device Map | 22s | 3s | 3s | 718 MB | 0 / 0 |
+| Place & Route | 26m03s | 6m19s | 7m12s | 3,508 MB | 0 / 0 |
+| Report Timing | 29s | 6s | 6s | 2,337 MB | 0 / 8 |
+
+PDS 记录的 Compile 到 Report Timing 累计动作耗时为 43m24s，结束于 18:12:45；
+这是工具各动作累计值，不包含用户在各动作之间的等待间隔。
+全部 warning 分类和阶段原文统计见 `artifacts/flow_summary.txt`。
+综合 1500 条 W: 包含 967 条 Public-4008 悬空实例清理、常量寄存器删除、扇出约束未满足等提示；
+不将每条 warning 直接等同于独立硬件缺陷。器件映射和布局布线的日志虽无 E:/W:，最终 setup 仍违例。
+
+### 原始报告及附加资料
+
+- `compile/*.cmr`、`compile/run.log`、`compile/parse_design/run.log`、原有 logbackup 日志。
+- `synthesize/*.snr`、`synthesize/run.log`、APM/DRM/分布式 RAM 映射、加减器进位链和 control sets 报告。
+- `device_map/*.dmr`、`device_map/*_dmr.prt`、`device_map/run.log`。
+- `place_route/*.prr`、`place_route/*_prr.prt`、clock utilization、路由消息和 `place_route/run.log`。
+- `report_timing/*.rtr`、`report_timing/run.log`，以及 `constraint_check/*.ccr`。
+- `multiseed_summary.csv`、项目完整会话日志；项目中既有的 Generate Bitstream 日志和 `.bgr` 也仅作为原始记录保留，未上传 bitstream。
+- `resource_summary.txt`、`resource_hier.txt`、`timing_summary.txt` 为原报告数据的整理，不替代原文。
+- 全部保存文件的位置和字节数见 `artifacts/artifact_index.md`。
+
+`synthesize/run.log` 约8.43MB，完整项目 pds.log 约10.27MB、project_run.log 约9.12MB；
+扩展时序报告约13.25MB。单文件超过数MB的原因是用户明确要求完整原文，以供 VPS Claude 定位编译耗时、warning 和违例路径；未截断或筛掉重复内容。
+
+### 扩展时序报告：每角200条
+
+默认 report_timing 仅给每类每角3条。按用户追加要求，本次通过 PDS 的已验证命令选项
+从现有 PnR DB 重新导出，不重跑综合或布局布线，不修改原工程报告。
+导出脚本为 `src/export_timing_200.tcl`，执行命令：
+
+```powershell
+& G:/Program/pango/PDS_2022.2-SP6.1/bin/pds_shell.exe -file G:/codex_project/EdRV32-Competition-2026/tasks/win/20261025-01-cpu-sys-synth/src/export_timing_200.tcl -work_dir G:/codex_project/EdRV32-Competition-2026/build/win/20261025-01-cpu-sys-synth/timing_200 -project_name timing_200
+```
+
+脚本设置 max_path=200、nworst=1、input_pins=TRUE，直接读取原工程
+`place_route/edrv32_fpga_cpu_sys_top_pnr.adf`。导出过程 Real=29s、CPU=4s、Process CPU=5s，
+峰值内存2,365MB，19:05:54结束。
+完整 `.rtr` 和导出日志位于 `artifacts/report_timing_expanded/`，总计1640条路径：
+
+| 类别 | Slow corner | Fast corner |
+|---|---:|---:|
+| 顺序电路 setup | 200 | 200 |
+| 顺序电路 hold | 200 | 200 |
+| Recovery | 200 | 200 |
+| Removal | 200 | 200 |
+| 组合 max 路径（未约束 IO） | 10 | 10 |
+| 组合 min 路径（未约束 IO） | 10 | 10 |
+
+导出成功且时序汇总与原报告一致。父级 flow.log 末尾另有 `W: open run.log failed.`，
+子步骤 run.log 和完整 `.rtr` 均正常生成；原文已保留，未屏蔽该提示。
+
+`setup_top200.txt` 保留慢、快两角各200条起点、终点、裕量和级数；
+`setup_top20_detail.txt`、`hold_top20.txt` 保留两角各20条逐级明细。
+`report_timing_expanded/all_paths.tsv` 提供全部路径索引。
+
+危险路径分析见 `artifacts/dangerous_paths.md`：慢角前200条全部违例，裕量 -7.708 至 -7.143 ns；
+其中131条终止在 CSR、69条终止在 frontend。Fast setup 前200条也全部违例，-1.911 至 -1.528 ns。
+这些计数只描述导出的最差200条，不等同于全设计全部违例端点。
+
+工具仍提示8个 IO 没有 input/output delay 约束：key_n_i、rst_n_i、uart_rx_i、
+led_o[0..3] 和 uart_tx_o。它们被作为 combinational input/output，不能用内部寄存器时序通过代替外部 IO 时序验证。
+高扇出、复位和 CE 原始表与 PnR 时钟负载见 `high_fanout.txt`，不单凭扇出数认定逻辑错误。
+
+### 旧 CoreMark 对照资料
+
+旧工程目录：`G:/claude code/EdRV32-Competition-2026/fpga/pango_200h/edrv32_soc_coremark`。
+旧测量报告日期为2026-10-07，工具、器件与本次一致；目标时钟为100MHz，当前为150MHz，设计和存储配置不同。
+
+- 原始日志、报告和资源层次：`artifacts/old_coremark/`。
+- 导入脚本、两个相关 `.pds`、`impl.tcl`、时钟和 IO 约束均已复制。
+- `ipcore/` 下全部15份 `.idf` 已复制；导入脚本实际使用其中6个，不能把目录中全部IP都计入资源。
+- 所有 `.idf` 参数原值见 `old_coremark/ip_configuration.md`。
+- Compile阶段、CPU时间、warning、乘法流水、存储容量及资源消耗逐项对照见 `old_coremark/comparison.md`。
+
+旧工程 Compile 为1m42s/CPU26s，数据库6,210,072字节；本次为11m/CPU1m44s、147,420,498字节。
+旧工程 constant probe loop 为243条，本次110条，不能用loop数量单独解释本次编译偏慢。
+旧 SRAM 为4096×64的简单双口32KiB，本次32768×64单口256KiB；资源层次中SRAM分别占8和64个DRM。
+旧33×33主乘法IP为3级，本次为2级；旧主IP占4APM，加上低位乘法通路3APM共7APM，本次共4APM。
+
+旧测量commit未在报告中记录；采集时旧仓库HEAD为6028c445090f3bdb75ae753b0ca7fa0994304156，
+不能绑定到10月7日测量。旧 edrv32_soc.pds 在10月24日修改，晚于报告，已明确标为配置快照。
 
 ## 本轮 Compile 最终报告（2026-10-26）
 
@@ -106,7 +207,7 @@ Loop 诊断之后日志明确记录 sdm2adm 成功完成。当前日志不足以
 
 FPGA 工程目录仍为 `G:/codex_project/EdRV32-FPGA/EdRV32`。
 PDS 工程文件、IP 生成文件、原生数据库及中间文件未提交。
-本次仅 Compile 结束，没有综合资源、布局布线时序或 Fmax 结果。
+上次阶段回传时仅 Compile 结束；本次已补充综合资源、布局布线时序及 Fmax 结果，见本报告前部。
 
 ## 用户确认与 IP 端口差异
 
@@ -186,50 +287,86 @@ RTL 与检查源 commit：`cb547cbe3bb6b2e4783800191cb57281aa6998f1`。
 
 ## 引脚
 
-| 端口 | 引脚 | 出处 |
-|---|---|---|
-| clk_i | 未取得 | 待用户提供对应板卡的厂商 demo 约束文件 |
-| rst_n_i | 未取得 | 同上 |
-| uart_rx_i | 未取得 | 同上 |
-| uart_tx_o | 未取得 | 同上 |
-| key_n_i | 未取得 | 同上 |
-| led_o[3:0] | 未取得 | 同上 |
+下表已由最终 PnR `.prr` 的 IO Port Info 核对，均为 LVCMOS33、BANKL3。
+协调者入库约束文件注明厂商 uart_test/key_led_test demo 来源；原厂 demo 的行号本机未取得。
+
+| 端口 | 最终引脚 |
+|---|---|
+| clk_i | D18 |
+| rst_n_i | C22 |
+| key_n_i | C23 |
+| uart_rx_i | B24 |
+| uart_tx_o | C24 |
+| led_o[0] | A20 |
+| led_o[1] | C18 |
+| led_o[2] | C19 |
+| led_o[3] | E18 |
 
 ## 时序（RVC_EN=1）
 
-| 时钟 | WNS | TNS | WHS | THS | Fmax（推算） |
-|---|---|---|---|---|---|
-| clk_sys | 未取得 | 未取得 | 未取得 | 未取得 | 未取得 |
+| 时钟 / 角 | WNS ns | TNS ns | WHS ns | THS ns |
+|---|---:|---:|---:|---:|
+| clk_sys / Slow | -7.708 | -86183.305 | 0.153 | 0.000 |
+| clk_sys / Fast | -1.911 | -7980.510 | 0.107 | 0.000 |
 
-最差路径前 5 条：未取得，尚未运行顶层综合和布局布线。
+Performance Summary 原文 Estimated Frequency = **69.5652 MHz**，目标约150MHz未达到。
+任务公式：1000 / (6.667 - (-7.708)) = 69.565217 MHz。
+
+最差 setup 前5条（Slow corner）：
+
+| 排名 | 起点 | 终点 | 裕量 ns | 级数 |
+|---:|---|---|---:|---:|
+| 1 | u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK | u_cpu_subsys/u_core/u_csr/counter_r[2][62]/opit_0_inv_L6Q_perm/I5 | -7.708 | 30 |
+| 2 | u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK | u_cpu_subsys/u_core/u_csr/counter_r[2][61]/opit_0_inv_L6Q_perm/I1 | -7.677 | 30 |
+| 3 | u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK | u_cpu_subsys/u_core/u_csr/counter_r[1][62]/opit_0_inv_L6Q_perm/I5 | -7.649 | 30 |
+| 4 | u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK | u_cpu_subsys/u_core/u_csr/counter_r[2][60]/opit_0_inv_L6Q_perm/I5 | -7.632 | 30 |
+| 5 | u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK | u_cpu_subsys/u_core/u_csr/counter_r[1][61]/opit_0_inv_L6Q_perm/I1 | -7.620 | 30 |
 
 ## 资源（RVC_EN=1）
 
-| LUT | FF | DRM | APM | 分布式 RAM | IO | PLL |
-|---|---|---|---|---|---|---|
-| 未取得 | 未取得 | 未取得 | 未取得 | 未取得 | 未取得 | 未取得 |
+最终 `.prr` 的逻辑层次顶层行（不是 CLMA/CLMS 物理站点 LUT 明细的求和）：
 
-按层次（主要模块）：未取得。乘法器实际 APM 占用亦尚未取得。
+| LUT | FF | DRM | APM | 分布式 RAM | IO | GPLL / PPLL |
+|---:|---:|---:|---:|---:|---:|---|
+| 24441 | 9121 | 74 | 4 | 39 | 9 | 0 / 0 |
+
+器件映射阶段原文为 LUT=24347、FF=9099；阶段和统计口径不同，不混用。
+
+| 主要模块（PnR逻辑层次） | LUT | FF | 分布式RAM | APM | DRM |
+|---|---:|---:|---:|---:|---:|
+| u_cpu_subsys | 22746 | 7951 | 31 | 4 | 6 |
+| u_cpu_subsys/u_core | 19628 | 6209 | 31 | 4 | 0 |
+| u_cpu_subsys/u_core/u_frontend | 12776 | 3161 | 31 | 0 | 0 |
+| u_cpu_subsys/u_icache | 682 | 462 | 0 | 0 | 3 |
+| u_cpu_subsys/u_dcache | 2389 | 1119 | 0 | 0 | 3 |
+| u_sys_subsys | 1694 | 1170 | 8 | 0 | 68 |
+| u_sys_subsys/u_sram | 342 | 43 | 0 | 0 | 64 |
+| u_sys_subsys/u_rom | 60 | 30 | 0 | 0 | 4 |
+| u_sys_subsys/u_sys_xbar | 241 | 137 | 0 | 0 | 0 |
+
+完整层次包括外设、reset_ctrl等见 `artifacts/resource_hier.txt`；原始表与各阶段指标见
+`resource_summary.txt`、`.snr`、`.dmr`、`.prr`。
 
 ## RVC_EN=0 对照
 
 | 项 | RVC_EN=1 | RVC_EN=0 |
 |---|---|---|
-| WNS / Fmax | 未取得 | 未取得 |
-| LUT / FF | 未取得 | 未取得 |
+| WNS / Fmax | -7.708 ns / 69.5652 MHz | 未取得 |
+| LUT / FF（PnR逻辑层次） | 24441 / 9121 | 未取得 |
 
-顶层参数默认值未修改，仍为 RVC_EN=1。
+本次仅整理已完成流程，未修改默认参数或启动RVC_EN=0流程；现有编译实例参数确认RVC_EN=1。
 
 ## 完整报告在 Windows 本地的路径
 
 - 工程：`G:\codex_project\EdRV32-FPGA\EdRV32\EdRV32.pds`。
 - ModelSim 日志：`G:\codex_project\EdRV32-Competition-2026\build\win\20261025-01-cpu-sys-synth\check_ip_wrappers.log`。
-- PDS Compile 完整日志和最终 .cmr 已回传至 artifacts/compile/；综合、布局布线报告尚未生成。
+- PDS 各阶段原始报告和完整日志均已回传；扩展时序临时输出位于本地 `build/win/20261025-01-cpu-sys-synth/timing_200/`。
 
 ## 后续工作
 
 - VPS Claude：执行 Linux lint / 回归，审阅包装适配；据实际端口和物理 Tag 深度更新 IP 创建说明。
-- Windows：按用户要求先回传本轮完整 Compile 日志和最终报告，等待 VPS Claude 审阅后再继续综合、布局布线和 RVC_EN=0 对照。导入脚本和 150 MHz 约束已由协调者提供。
+- VPS Claude：审阅当前setup违例、危险路径、warning及旧工程对照，明确后续处理；本次不自行修改RTL或约束。
+- Windows：RVC_EN=0对照尚未运行，按后续任务继续。
 - 配置截图尚未归档；ROM/SRAM 外部初始化文件格式尚未实测加载。
 
 ## 备注
@@ -237,4 +374,4 @@ RTL 与检查源 commit：`cb547cbe3bb6b2e4783800191cb57281aa6998f1`。
 原 Git SSH 22 端口在认证前被关闭；本仓库 origin 已切换到
 `ssh://git@ssh.github.com:443/zc100116/EdRV32-Competition-2026.git`，fetch 已成功。
 本机提交身份仅在当前仓库配置，沿用现有提交作者 `zc100116`。
-本次用户明确要求完整编译信息，故回传本轮完整日志及最终报告；不提交 PDS 工程、厂商 IP、原生数据库或 bitstream。
+本次用户明确要求完整流程和旧工程配置，故回传全文日志、报告及旧工程.pds/.idf元数据；不提交原生数据库、网表、bitstream或厂商IP RTL。
