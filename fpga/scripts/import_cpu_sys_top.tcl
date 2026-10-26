@@ -44,8 +44,6 @@ foreach f $edrv32_sources {
 }
 add_constraint [file join $edrv32_repo fpga constraints edrv32_fpga_cpu_sys_top.fdc]
 
-set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
-
 compile \
     -top_module $edrv32_top \
     -include_path $edrv32_include_dirs \
