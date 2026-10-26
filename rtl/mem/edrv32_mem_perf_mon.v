@@ -5,6 +5,8 @@
 //              START ignores ENABLE; idle SOFT_RST; ABORT drains without DONE.
 //              Unused common registers read zero; software keeps config stable when BUSY.
 //              M-R3 confirmed: random block = (LFSR[31:16] * (SIZE/512)) >> 16.
+//              M-A1 confirmed: BASE[29:12], SIZE[29:9]; other bits read zero.
+//              Scale offsets before the command stage; AXI stalls hold command payloads.
 // Clock: clk_i (clk_mem).
 module edrv32_mem_perf_mon (
     // Clock and reset.
@@ -50,8 +52,8 @@ module edrv32_mem_perf_mon (
     output wire axi_rready_o
 );
     reg [31:0] mode_r;
-    reg [31:0] base_r;
-    reg [31:0] size_r;
+    reg [29:12] base_r;
+    reg [29:9] size_r;
     reg [31:0] burst_len_r;
     reg [31:0] addr_mode_r;
     reg [31:0] rw_ratio_r;
@@ -72,7 +74,10 @@ module edrv32_mem_perf_mon (
     reg [31:0] cmd_addr_r;
     reg [3:0] cmd_len_r;
     reg [31:0] launched_r;
-    reg [31:0] seq_offset_r;
+    reg [29:0] seq_offset_r;
+    reg offset_valid_r;
+    reg [29:0] offset_r;
+    reg [20:0] blocks_r;
     reg [31:0] lfsr_r;
     reg [4:0] ratio_r;
     reg [2:0] rd_count_r;
@@ -114,17 +119,22 @@ module edrv32_mem_perf_mon (
     wire w_last_w;
     wire cmd_fire_w;
     wire launch_w;
+    wire prepare_w;
     wire next_read_w;
     wire [32:0] ratio_sum_w;
     wire [31:0] next_addr_w;
-    wire [31:0] offset_w;
-    wire [31:0] region_beats_w;
+    wire [31:0] base_w;
+    wire [31:0] size_w;
+    wire [30:0] seq_next_w;
+    wire [24:0] region_beats_w;
     wire [7:0] page_beats_w;
-    reg [31:0] burst_beats_w;
+    reg [4:0] burst_beats_w;
     wire [31:0] wr_byte_addr_w;
     wire [31:0] rd_byte_addr_w;
     wire [31:0] latency_w;
-    wire [38:0] random_scaled_w;
+    wire [36:0] random_scaled_w;
+    wire [31:0] hist_value_w;
+    wire [31:0] hist_next_w;
     wire [31:0] lfsr_next_w;
     wire finished_w;
     wire check_error_w;
@@ -174,29 +184,33 @@ module edrv32_mem_perf_mon (
     assign ratio_sum_w = {28'b0, ratio_r} + {1'b0, rw_ratio_r};
     assign next_read_w = mode_r == 0 || (mode_r == 2 && ratio_sum_w >= 16);
     // A pending address counts toward the next launch's reservation.
-    assign launch_w = busy_r && !abort_r && !abort_w && launched_r < txn_count_r &&
+    assign prepare_w = busy_r && !abort_r && !abort_w &&
+        launched_r < txn_count_r && !offset_valid_r;
+    assign launch_w = busy_r && !abort_r && !abort_w && offset_valid_r &&
         (!cmd_valid_r || cmd_fire_w) &&
         (next_read_w ? ({29'b0, rd_count_r} + {31'b0, ar_fire_w} < outstanding_r) :
         ({29'b0, wr_count_r} + {31'b0, aw_fire_w} < outstanding_r));
-    assign random_scaled_w = lfsr_r[31:16] * size_r[31:9];
-    assign offset_w = addr_mode_r == 0 ? seq_offset_r : {random_scaled_w[38:16], 9'b0};
-    assign next_addr_w = base_r + offset_w;
-    assign region_beats_w = (size_r - offset_w) >> 5;
+    assign base_w = {2'b0, base_r, 12'b0};
+    assign size_w = {2'b0, size_r, 9'b0};
+    assign random_scaled_w = lfsr_r[31:16] * blocks_r;
+    assign next_addr_w = base_w + {2'b0, offset_r};
+    assign region_beats_w = {size_r, 4'b0} - offset_r[29:5];
     assign page_beats_w = 8'd128 - {1'b0, next_addr_w[11:5]};
+    assign seq_next_w = {1'b0, offset_r} + {21'b0, burst_beats_w, 5'b0};
     always @(*) begin
-        burst_beats_w = burst_len_r;
-        if (burst_beats_w > {24'b0, page_beats_w})
-            burst_beats_w = {24'b0, page_beats_w};
-        if (burst_beats_w > region_beats_w)
-            burst_beats_w = region_beats_w;
+        burst_beats_w = burst_len_r[4:0];
+        if ({3'b0, burst_beats_w} > page_beats_w)
+            burst_beats_w = page_beats_w[4:0];
+        if ({20'b0, burst_beats_w} > region_beats_w)
+            burst_beats_w = region_beats_w[4:0];
     end
     assign lfsr_next_w = {lfsr_r[30:0],
         lfsr_r[31] ^ lfsr_r[21] ^ lfsr_r[1] ^ lfsr_r[0]};
     assign wr_byte_addr_w = wr_addr_r[wr_head_r] + {23'b0, wr_beat_r, 5'b0};
     assign rd_byte_addr_w = rd_addr_r[rd_head_r] + {23'b0, rd_beat_r, 5'b0};
     assign latency_w = sat_add(rd_age_r[rd_head_r], 32'd1);
-    assign finished_w = busy_r && !cmd_valid_r && rd_count_r == 0 && wr_count_r == 0 &&
-        (abort_r || launched_r == txn_count_r);
+    assign finished_w = busy_r && !cmd_valid_r && !offset_valid_r &&
+        rd_count_r == 0 && wr_count_r == 0 && (abort_r || launched_r == txn_count_r);
     assign check_error_w = r_fire_w && (check_en_r != 0) && axi_rdata_i != expected_w;
 
     assign axi_awid_o = 1'b0;
@@ -252,12 +266,16 @@ module edrv32_mem_perf_mon (
         end
     end
 
+    // One shared saturating increment feeds the selected histogram counter.
+    assign hist_value_w = hist_r[hist_idx_w];
+    assign hist_next_w = sat_add(hist_value_w, 32'd1);
+
     // Configuration is byte writable; software leaves it stable while BUSY.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             mode_r <= 32'd0;
-            base_r <= 32'd0;
-            size_r <= 32'd4096;
+            base_r <= 18'd0;
+            size_r <= 21'd8;
             burst_len_r <= 32'd16;
             addr_mode_r <= 32'd0;
             rw_ratio_r <= 32'd8;
@@ -270,8 +288,8 @@ module edrv32_mem_perf_mon (
             irq_en_r <= 32'b0;
         end else if (soft_reset_w) begin
             mode_r <= 32'd0;
-            base_r <= 32'd0;
-            size_r <= 32'd4096;
+            base_r <= 18'd0;
+            size_r <= 21'd8;
             burst_len_r <= 32'd16;
             addr_mode_r <= 32'd0;
             rw_ratio_r <= 32'd8;
@@ -289,10 +307,10 @@ module edrv32_mem_perf_mon (
                     (apb_pwdata_i & write_mask_w);
                 12'h100: mode_r <= ((mode_r & ~write_mask_w) |
                     (apb_pwdata_i & write_mask_w));
-                12'h104: base_r <= ((base_r & ~write_mask_w) |
-                    (apb_pwdata_i & write_mask_w)) & 32'hffff_f000;
-                12'h108: size_r <= ((size_r & ~write_mask_w) |
-                    (apb_pwdata_i & write_mask_w)) & 32'hffff_fe00;
+                12'h104: base_r <= (base_r & ~write_mask_w[29:12]) |
+                    (apb_pwdata_i[29:12] & write_mask_w[29:12]);
+                12'h108: size_r <= (size_r & ~write_mask_w[29:9]) |
+                    (apb_pwdata_i[29:9] & write_mask_w[29:9]);
                 12'h10c: burst_len_r <= ((burst_len_r & ~write_mask_w) |
                     (apb_pwdata_i & write_mask_w));
                 12'h110: addr_mode_r <= ((addr_mode_r & ~write_mask_w) |
@@ -314,7 +332,11 @@ module edrv32_mem_perf_mon (
         end
     end
 
+    // START snapshots derived geometry; the first stage only scales the offset.
     always @(posedge clk_i) begin
+        if (start_w) blocks_r <= size_r;
+        if (prepare_w)
+            offset_r <= addr_mode_r == 0 ? seq_offset_r : {random_scaled_w[36:16], 9'b0};
         if (launch_w) begin
             cmd_read_r <= next_read_w;
             cmd_addr_r <= next_addr_w;
@@ -341,13 +363,24 @@ module edrv32_mem_perf_mon (
         end
     end
 
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            offset_valid_r <= 1'b0;
+        else if (start_w || soft_reset_w || abort_w || abort_r)
+            offset_valid_r <= 1'b0;
+        else if (prepare_w)
+            offset_valid_r <= 1'b1;
+        else if (launch_w)
+            offset_valid_r <= 1'b0;
+    end
+
     // Four-entry metadata queues; no AXI data storage is required.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             busy_r <= 1'b0;
             abort_r <= 1'b0;
             launched_r <= 32'b0;
-            seq_offset_r <= 32'b0;
+            seq_offset_r <= 30'b0;
             lfsr_r <= 32'b0;
             ratio_r <= 5'b0;
             rd_count_r <= 3'b0;
@@ -364,7 +397,7 @@ module edrv32_mem_perf_mon (
                 busy_r <= !invalid_w;
                 abort_r <= 1'b0;
                 launched_r <= 32'b0;
-                seq_offset_r <= 32'b0;
+                seq_offset_r <= 30'b0;
                 lfsr_r <= seed_r;
                 ratio_r <= 5'b0;
             end else if (busy_r) begin
@@ -375,10 +408,10 @@ module edrv32_mem_perf_mon (
                 if (launch_w) begin
                     launched_r <= launched_r + 1'b1;
                     ratio_r <= ratio_sum_w[4:0] - (next_read_w ? 5'd16 : 5'd0);
-                    if (offset_w + (burst_beats_w << 5) >= size_r)
-                        seq_offset_r <= 32'b0;
+                    if (seq_next_w >= {1'b0, size_w[29:0]})
+                        seq_offset_r <= 30'b0;
                     else
-                        seq_offset_r <= offset_w + (burst_beats_w << 5);
+                        seq_offset_r <= seq_next_w[29:0];
                     lfsr_r <= lfsr_next_w;
                 end
             end
@@ -470,7 +503,7 @@ module edrv32_mem_perf_mon (
                 if (latency_w > lat_max_r)
                     lat_max_r <= latency_w;
                 lat_sum_r <= sat_add(lat_sum_r, latency_w);
-                hist_r[hist_idx_w] <= sat_add(hist_r[hist_idx_w], 32'd1);
+                hist_r[hist_idx_w] <= hist_next_w;
             end
             if (check_error_w) begin
                 err_beats_r <= sat_add(err_beats_r, 32'd1);
@@ -491,8 +524,8 @@ module edrv32_mem_perf_mon (
             12'h014: apb_prdata_o = err_code_r;
             12'h02c: apb_prdata_o = done_count_r;
             12'h100: apb_prdata_o = mode_r;
-            12'h104: apb_prdata_o = base_r;
-            12'h108: apb_prdata_o = size_r;
+            12'h104: apb_prdata_o = base_w;
+            12'h108: apb_prdata_o = size_w;
             12'h10c: apb_prdata_o = burst_len_r;
             12'h110: apb_prdata_o = addr_mode_r;
             12'h114: apb_prdata_o = rw_ratio_r;

@@ -189,15 +189,16 @@ module tb_mem_perf_mon;
     task configure(input integer mode, input integer address_mode,
         input integer ratio, input integer burst, input integer count,
         input integer size_bytes, input integer limit, input integer seed,
-        input integer check_enable, input integer width_cycles);
+        input integer check_enable, input integer width_cycles, input integer base_addr = 0);
         begin
             observe = 0;
             wr('h010, 3);
-            wr('h100, mode); wr('h104, 0); wr('h108, size_bytes);
+            wr('h100, mode); wr('h104, base_addr); wr('h108, size_bytes);
             wr('h10c, burst); wr('h110, address_mode); wr('h114, ratio);
             wr('h118, count); wr('h11c, limit); wr('h120, seed);
             wr('h124, check_enable); wr('h128, width_cycles);
             expected_mode = mode; expected_addr_mode = address_mode;
+            expected_base = base_addr;
             expected_ratio = ratio; expected_burst = burst; expected_size = size_bytes;
             expected_outstanding = limit; expected_seed = seed; hist_width = width_cycles;
             seen_ar = 0; seen_aw = 0; seen_r = 0; seen_w = 0;
@@ -264,12 +265,15 @@ module tb_mem_perf_mon;
                 ref_ratio = ref_ratio + expected_ratio;
                 want_read = expected_mode == 0 || (expected_mode == 2 && ref_ratio >= 16);
                 if (want_read) ref_ratio = ref_ratio - 16;
-                if (accepted_addr != wanted_addr || accepted_len + 1 != wanted_beats ||
+                if (accepted_addr != expected_base + wanted_addr ||
+                    accepted_len + 1 != wanted_beats ||
                     (axi_arvalid != (want_read != 0)))
                     $fatal(1, "FAIL command %0d addr=%h/%h beats=%0d/%0d read=%b/%b",
-                        issued, accepted_addr, wanted_addr, accepted_len+1, wanted_beats,
+                        issued, accepted_addr, expected_base + wanted_addr,
+                        accepted_len+1, wanted_beats,
                         axi_arvalid, want_read != 0);
-                if (accepted_addr < 0 || accepted_addr + wanted_beats*32 > expected_size ||
+                if (accepted_addr < expected_base ||
+                    accepted_addr + wanted_beats*32 > expected_base + expected_size ||
                     accepted_addr%32 != 0 || accepted_addr%4096 + wanted_beats*32 > 4096)
                     $fatal(1, "FAIL address region/4KiB contract");
                 ref_offset = (wanted_addr + wanted_beats*32)%expected_size;
@@ -323,26 +327,26 @@ module tb_mem_perf_mon;
         eq_reg('h000, 'h0009_0001); eq_reg('h008, 2);
         eq_reg('h108, 4096); eq_reg('h10c, 16); eq_reg('h11c, 4);
         eq_reg('h114, 8); eq_reg('h128, 16); eq_reg('h20c, 32'hffff_ffff);
-        wr('h104, 'h0000_0fff); eq_reg('h104, 0);
-        wr('h108, 'h0000_11ff); eq_reg('h108, 'h1000);
+        wr('h104, 'hc000_0fff); eq_reg('h104, 0);
+        wr('h108, 'hc000_11ff); eq_reg('h108, 'h1000);
         pstrb = 1; wr('h120, 'h1234_5678); pstrb = 15; eq_reg('h120, 'h78);
         wr('h020, 123); eq_reg('h020, 0);
         wr('h024, 123); eq_reg('h024, 0);
         wr('h028, 123); eq_reg('h028, 0); eq_reg('h040, 0);
         eq_reg('hffc, 0);
         // PM-01: fill a full region and check every lane, then read it back.
-        configure(1, 0, 8, 16, 8, 4096, 4, mem_seed, 0, 16);
+        configure(1, 0, 8, 16, 8, 4096, 4, mem_seed, 0, 16, 'h1000);
         wr('h004, 2); finish_check(8); eq_reg('h21c, 0);
         for (i = 0; i < 1024; i = i + 1)
-            if (storage.memory[i] !== ((i*4)^mem_seed))
-                $fatal(1, "FAIL write pattern word=%0d actual=%h", i, storage.memory[i]);
-        configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16);
+            if (storage.memory[1024+i] !== (('h1000+i*4)^mem_seed))
+                $fatal(1, "FAIL write pattern word=%0d actual=%h", i, storage.memory[1024+i]);
+        configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16, 'h1000);
         wr('h004, 2); finish_check(8); eq_reg('h21c, 0);
         $display("PASS PM-01 sequential pattern and readback");
         // PM-02: a bad byte reports the containing beat, once.
-        storage.memory[27] = storage.memory[27] ^ 32'h0000_0100;
-        configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16);
-        wr('h004, 2); finish_check(8); eq_reg('h21c, 1); eq_reg('h220, 96);
+        storage.memory[1024+27] = storage.memory[1024+27] ^ 32'h0000_0100;
+        configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16, 'h1000);
+        wr('h004, 2); finish_check(8); eq_reg('h21c, 1); eq_reg('h220, 'h1060);
         eq_reg('h010, 1);
         $display("PASS PM-02 corrupt byte");
         // PM-04: exact bin boundaries, all sixteen bins, overflow to last bin.
@@ -366,7 +370,7 @@ module tb_mem_perf_mon;
             read_delay = 24;
             for (i = 0; i < 2; i = i + 1) begin
                 for (j = 0; j < 3; j = j + 1) begin
-                    configure(j, i, 8, 7, 40, 4608, 4, 'h19ad_732b, 0, 8);
+                    configure(j, i, 8, 7, 40, 4608, 4, 'h19ad_732b, 0, 8, 'h1000);
                     wr('h004, 2); finish_check(40);
                 end
                 configure(2, i, 0, 16, 32, 8192, 4, 0, 0, 16);
