@@ -287,6 +287,9 @@ module tb;
     reg [1:0] expected_bresp [0:13][0:255];
     integer expected_bhead [0:13];
     integer expected_btail [0:13];
+    bit expected_port_id [0:6][0:255];
+    integer expected_port_head [0:6];
+    integer expected_port_tail [0:6];
     integer ar_seen = 0;
     integer aw_seen = 0;
     integer r_seen = 0;
@@ -380,6 +383,8 @@ module tb;
                 expected_btail[monitor_i] = 0;
             end
             for (monitor_i = 0; monitor_i < 7; monitor_i = monitor_i + 1) begin
+                expected_port_head[monitor_i] = 0;
+                expected_port_tail[monitor_i] = 0;
                 live_reads[monitor_i] = 0;
                 live_writes[monitor_i] = 0;
                 cfg_rd[monitor_i] = monitor_i == 1 ? 0 : monitor_i == 2 ? 1 :
@@ -532,6 +537,10 @@ module tb;
             end
             for (monitor_p = 0; monitor_p < 7; monitor_p = monitor_p + 1) begin
                 if (rvalid[monitor_p] && rready[monitor_p]) begin
+                    if (rid[monitor_p] !==
+                        expected_port_id[monitor_p][expected_port_head[monitor_p] % 256])
+                        $fatal(1,"FAIL per-port read grant ordering p%0d",monitor_p);
+                    if (rlast[monitor_p]) expected_port_head[monitor_p]++;
                     monitor_q = monitor_p*2 + int'(rid[monitor_p]);
                     monitor_i = expected_head[monitor_q] % 4096;
                     if (expected_head[monitor_q] >= expected_tail[monitor_q])
@@ -614,10 +623,10 @@ module tb;
         @(negedge clk);
         apb_psel_i = 0;
         apb_penable_i = 0;
-        if (addr == 'h100) cfg_total = int'(value);
+        if (addr == 'h100) cfg_total = int'({28'b0,value[3:0]});
         for (integer p = 0; p < 7; p = p + 1) begin
-            if (int'(addr) == 'h200+32*p) cfg_rd[p] = int'(value);
-            if (int'(addr) == 'h204+32*p) cfg_wr[p] = int'(value);
+            if (int'(addr) == 'h200+32*p) cfg_rd[p] = int'({28'b0,value[3:0]});
+            if (int'(addr) == 'h204+32*p) cfg_wr[p] = int'({28'b0,value[3:0]});
         end
     endtask
     task automatic apb_check(input [11:0] addr, input [31:0] value);
@@ -641,6 +650,8 @@ module tb;
         integer e;
         @(negedge clk);
         q = p*2+int'(id);
+        expected_port_id[p][expected_port_tail[p] % 256] = id;
+        expected_port_tail[p]++;
         for (integer i = 0; i <= len; i = i + 1) begin
             e = expected_tail[q] % 4096;
             expected_data[q][e] = error ? 256'b0 : pattern(addr+32*i);
@@ -712,23 +723,30 @@ module tb;
     reg [69:0] s_beats = 0;
     reg [447:0] s_wait = 0;
     reg [1:0] s_urgent = 0;
+    wire [13:0] s_starved;
+    wire unused_s_prepare;
+    for (genvar n = 0; n < 14; n++) begin : g_starved
+        assign s_starved[n] = s_wait[n*32 +: 32] > {16'b0, s_starve};
+    end
     wire s_grant;
     wire [2:0] s_port;
     wire s_write;
     wire s_is_urgent;
     wire s_switch;
-    reg [31:0] s_urg_max = 8;
-    reg [31:0] s_starve = 256;
-    reg [31:0] s_batch = 4;
-    reg [223:0] s_weight = 0;
-    reg [223:0] s_rate = 0;
+    reg [7:0] s_urg_max = 8;
+    reg [15:0] s_starve = 256;
+    reg [7:0] s_batch = 4;
+    reg [27:0] s_weight = 0;
+    reg [62:0] s_rate = 0;
     edrv32_mem_xbar_sched scheduler (
         .clk_i(clk),
         .rst_n_i(s_rst_n),
         .enable_i(s_enable),
+        .prepare_o(unused_s_prepare),
+        .candidates_i(s_eligible),
         .eligible_i(s_eligible),
         .beats_i(s_beats),
-        .wait_i(s_wait),
+        .starved_i(s_starved),
         .urgent_i(s_urgent),
         .grant_o(s_grant),
         .port_o(s_port),
@@ -736,7 +754,6 @@ module tb;
         .urgent_o(s_is_urgent),
         .dir_switch_o(s_switch),
         .urg_max_i(s_urg_max),
-        .starve_cyc_i(s_starve),
         .dir_batch_i(s_batch),
         .weight_i(s_weight),
         .rate_i(s_rate)
@@ -752,8 +769,8 @@ module tb;
         s_starve = '1;
         s_batch = 4;
         for (integer p = 0; p < 7; p = p + 1) begin
-            s_weight[p*32 +: 32] = p < 2 ? 4 : p == 3 ? 3 : p == 6 ? 1 : 2;
-            s_rate[p*32 +: 32] = p == 2 ? 26 : p == 6 ? 13 : 0;
+            s_weight[p*4 +: 4] = p < 2 ? 4 : p == 3 ? 3 : p == 6 ? 1 : 2;
+            s_rate[p*9 +: 9] = p == 2 ? 26 : p == 6 ? 13 : 0;
             s_beats[(2*p)*5 +: 5] = 1;
             s_beats[(2*p+1)*5 +: 5] = 1;
         end
@@ -773,7 +790,7 @@ module tb;
         scheduler_reset;
         s_urgent = 1;
         s_urg_max = 2;
-        s_weight[0 +: 32] = 0;
+        s_weight[0 +: 4] = 0;
         s_eligible[0] = 1;
         s_eligible[6] = 1;
         grants = 0;
@@ -797,7 +814,7 @@ module tb;
         saw_other = 0;
         saw_resumed = 0;
         urgent_streak = 0;
-        for (integer i = 0; i < 100; i = i + 1) begin
+        for (integer i = 0; i < 200; i = i + 1) begin
             @(posedge clk);
             if (s_grant) begin
                 if (s_port != 0) begin
@@ -817,17 +834,21 @@ module tb;
         s_urgent = 3;
         s_eligible[0] = 1;
         s_eligible[3] = 1;
-        for (integer i = 0; i < 8; i = i + 1) begin
+        grants = 0;
+        while (grants < 8) begin
             @(posedge clk);
-            if (!s_grant || !s_is_urgent || s_port !== 3'(i % 2))
-                $fatal(1,"FAIL urgent tie rotation");
+            if (s_grant) begin
+                if (!s_is_urgent || s_port !== 3'(grants % 2))
+                    $fatal(1,"FAIL urgent tie rotation");
+                grants++;
+            end
             @(negedge clk);
         end
         $display("MX-05 direction batching");
         scheduler_reset;
         s_batch = 3;
-        s_weight[3*32 +: 32] = 32;
-        s_weight[4*32 +: 32] = 32;
+        s_weight[3*4 +: 4] = 15;
+        s_weight[4*4 +: 4] = 15;
         s_eligible[6] = 1;
         s_eligible[9] = 1;
         grants = 0;
@@ -844,6 +865,25 @@ module tb;
                 consecutive = consecutive + 1;
                 if (consecutive > 3) $fatal(1,"FAIL direction batch exceeded");
                 grants = grants + 1;
+            end
+            @(negedge clk);
+        end
+        scheduler_reset;
+        s_starve = 8;
+        s_eligible = 0;
+        s_eligible[6] = 1;
+        s_eligible[8] = 1;
+        s_eligible[10] = 1;
+        s_wait[6*32 +: 32] = 1000;
+        s_wait[8*32 +: 32] = 100;
+        s_wait[10*32 +: 32] = 10;
+        grants = 0;
+        while (grants < 9) begin
+            @(posedge clk);
+            if (s_grant) begin
+                if (s_port !== 3'(3+grants%3))
+                    $fatal(1,"FAIL rotating starvation grant=%0d p%0d",grants,s_port);
+                grants++;
             end
             @(negedge clk);
         end
@@ -879,8 +919,8 @@ module tb;
         $display("MX-03 starvation overrides zero DRR weight");
         scheduler_reset;
         s_starve = 8;
-        s_weight[6*32 +: 32] = 0;
-        s_rate[6*32 +: 32] = 0;
+        s_weight[6*4 +: 4] = 0;
+        s_rate[6*9 +: 9] = 0;
         s_eligible[6] = 1;
         s_eligible[12] = 1;
         age = 0;
@@ -900,7 +940,7 @@ module tb;
         $display("MX-04 variable-length DRR weighted beat shares");
         scheduler_reset;
         s_eligible = 14'b01_01_01_01_00_10_01;
-        s_rate[6*32 +: 32] = 256;
+        s_rate[6*9 +: 9] = 256;
         lfsr = 32'h57c2_a913;
         for (integer p = 0; p < 7; p = p + 1) begin
             granted[p] = 0;
@@ -938,6 +978,10 @@ module tb;
         apb_check('h004, 0);
         apb_check('h008, 2);
         apb_check('h100, 8);
+        apb_write('h100,32'hffff_fff8);
+        apb_check('h100,8);
+        apb_write('h224,32'hffff_fff4);
+        apb_check('h224,4);
         apb_check('h104, 8);
         apb_check('h108, 256);
         apb_check('h10c, 4);
@@ -952,18 +996,18 @@ module tb;
             apb_check(12'('h20c+32*p), p == 2 ? 26 : p == 6 ? 13 : 0);
             apb_check(12'('h400+32*p), 0);
         end
-        apb_write('h108, 1024);
+        apb_write('h108, 32'hffff_0400);
         apb_check('h108, 1024);
-        apb_write('h104, 3);
+        apb_write('h104, 32'hffff_0003);
         apb_check('h104, 3);
-        apb_write('h10c, 2);
+        apb_write('h10c, 32'hffff_0002);
         apb_check('h10c, 2);
-        apb_write('h288, 7);
+        apb_write('h288, 32'hffff_fff7);
         apb_check('h288, 7);
-        apb_write('h2cc, 77);
+        apb_write('h2cc, 32'hffff_fe4d);
         apb_check('h2cc, 77);
         apb_write('h2cc, 13);
-        apb_write('h2a0, 0); // P5 reads disabled while the queue is occupied.
+        apb_write('h2a0, 32'hffff_fff0); // P5 reads disabled while the queue is occupied.
         send_read(5, 1, 'h5000, 3, 0);
         tick(12);
         if (ar_seen != 0) $fatal(1,"FAIL disabled port granted");
@@ -1187,6 +1231,23 @@ module tb;
                 snap_wait_max[p] != 0 || snap_urgent[p] != 0)
                 $fatal(1,"FAIL clear p%0d",p);
         end
+        reset;
+        apb_write('h260,0);
+        apb_write('h108,65535);
+        send_read(3,0,'h3000,0,0);
+        @(negedge clk);
+        dut.ar_wait_r[3] = 16'hfffe;
+        tick(4);
+        if (dut.ar_wait_r[3] !== 16'hffff || dut.ar_starved_r[3])
+            $fatal(1,"FAIL 16-bit wait saturation");
+        apb_write('h108,0);
+        tick(2);
+        if (!dut.ar_starved_r[3]) $fatal(1,"FAIL saturated head starvation update");
+        apb_write('h260,4);
+        drain;
+        apb_write('h110,1);
+        apb_check('h468,65535);
+        apb_check('h46c,65535);
         $display("MX-10 saturating counters via testbench initial-value injection");
         reset;
         // No RTL test parameters: inject real counter state while the clock is low.
@@ -1194,7 +1255,7 @@ module tb;
         dut.u_regs.txn_cnt_r[0] = 32'hffff_fffe;
         dut.u_regs.beat_cnt_r[0] = 32'hffff_fffe;
         dut.u_regs.wait_sum_r[0] = 32'hffff_fffe;
-        dut.u_regs.wait_max_r[0] = 32'hffff_ffff;
+        dut.u_regs.wait_max_r[0] = 16'hffff;
         dut.u_regs.urg_cnt_r[0] = 32'hffff_fffe;
         dut.u_regs.dir_switch_r = 32'hffff_fffe;
         dut.u_regs.ds_busy_r = 32'hffff_fffe;
@@ -1208,7 +1269,7 @@ module tb;
         apb_write('h110,1);
         apb_check('h400,32'hffff_ffff);
         apb_check('h404,32'hffff_ffff);
-        apb_check('h408,32'hffff_ffff);
+        apb_check('h408,32'h0000_ffff);
         apb_check('h40c,32'hffff_ffff);
         apb_check('h410,32'hffff_ffff);
         apb_check('h500,32'hffff_ffff);

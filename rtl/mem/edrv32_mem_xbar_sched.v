@@ -1,19 +1,21 @@
 // File: edrv32_mem_xbar_sched.v
-// Spec: mem-subsys-spec 2.2; edrv32-soc-spec 6.4.2-6.4.5.
-// Description: Shared transaction scheduler: urgent, latency, starvation, then DRR.
-// Read/write batching only applies to DRR. Tokens use 1/256-beat fixed point.
-// Buckets reset full (32 beats). Any other port grant resets an RT urgent streak.
+// Spec: mem-subsys-spec 2.2; edrv32-soc-spec 6.4.2-6.4.5; task M-R2b.
+// Description: Registered affordability stage followed by mask-only priority selection.
+// Urgent, latency, rotating starvation and DRR share transaction grants. Batching
+// only chooses the DRR direction. Token buckets reset full at 32 beats.
 // Clock: clk_mem.
 module edrv32_mem_xbar_sched (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
 
-    // Eligible head transactions, indexed by 2*port + write.
+    // Preparation pulse also registers the top-level eligibility mask.
     input wire enable_i,
+    input wire [13:0] candidates_i,
+    output wire prepare_o,
     input wire [13:0] eligible_i,
     input wire [69:0] beats_i,
-    input wire [447:0] wait_i,
+    input wire [13:0] starved_i,
     input wire [1:0] urgent_i,
     output reg grant_o,
     output reg [2:0] port_o,
@@ -21,196 +23,210 @@ module edrv32_mem_xbar_sched (
     output reg urgent_o,
     output wire dir_switch_o,
 
-    // Runtime configuration.
-    input wire [31:0] urg_max_i,
-    input wire [31:0] starve_cyc_i,
-    input wire [31:0] dir_batch_i,
-    input wire [223:0] weight_i,
-    input wire [223:0] rate_i
+    // Runtime configuration, with exact implemented register widths.
+    input wire [7:0] urg_max_i,
+    input wire [7:0] dir_batch_i,
+    input wire [27:0] weight_i,
+    input wire [62:0] rate_i
 );
-    reg [13:0] tokens_r [0:6];
-    reg [36:0] deficit_r [0:6];
-    reg [31:0] urgent_cnt_r [0:1];
+    reg prepared_r;
+    reg [13:0] funded_r;
+    reg [13:0] deficit_enough_r;
+    reg [6:0] weighted_r;
+    reg [1:0] urgent_allowed_r;
+    reg preferred_r;
+    reg [13:0] tokens_r [0:1];
+    reg [7:0] deficit_r [0:6];
+    reg [7:0] urgent_cnt_r [0:1];
     reg urgent_turn_r;
     reg [2:0] round_ptr_r;
+    reg [2:0] starve_ptr_r;
     reg dir_valid_r;
     reg dir_write_r;
-    reg [31:0] dir_cnt_r;
-    reg [13:0] funded_w;
-    reg refill_w;
+    reg [7:0] dir_cnt_r;
+    wire [6:0] starve_ports_w;
+    wire [6:0] drr_read_w;
+    wire [6:0] drr_write_w;
+    wire [13:0] starve_w;
+    wire [1:0] rt_w;
+    wire [1:0] lat_w;
     reg drr_w;
-    reg latency_w;
-    reg preferred_w;
-    reg [31:0] oldest_w;
-    reg [33:0] token_sum_w;
-    reg [33:0] token_next_w [0:6];
-    integer p;
-    integer d;
-    integer step;
-    integer candidate;
-    integer urgent_port;
+    reg starvation_w;
+    reg [6:0] drr_ports_w;
+    wire refill_w;
+    wire [3:0] grant_queue_w;
+    wire [4:0] grant_beats_w;
+    reg [14:0] token_sum_w [0:1];
     integer update_idx;
     integer token_idx;
+    genvar p;
 
+    function [2:0] first7;
+        input [6:0] mask_i;
+        input [2:0] turn_i;
+        reg [13:0] unused_doubled_w;
+        reg [6:0] rotated_w;
+        reg [2:0] offset_w;
+        reg [3:0] index_w;
+        begin
+            unused_doubled_w = {mask_i, mask_i} >> turn_i;
+            rotated_w = unused_doubled_w[6:0];
+            if (rotated_w[0]) offset_w = 3'd0;
+            else if (rotated_w[1]) offset_w = 3'd1;
+            else if (rotated_w[2]) offset_w = 3'd2;
+            else if (rotated_w[3]) offset_w = 3'd3;
+            else if (rotated_w[4]) offset_w = 3'd4;
+            else if (rotated_w[5]) offset_w = 3'd5;
+            else offset_w = rotated_w[6] ? 3'd6 : 3'd0;
+            index_w = {1'b0, turn_i} + {1'b0, offset_w};
+            first7 = index_w >= 4'd7 ? index_w[2:0] - 3'd7 : index_w[2:0];
+        end
+    endfunction
+
+    assign prepare_o = enable_i && !prepared_r;
+    assign grant_queue_w = {port_o, write_o};
+    assign grant_beats_w = beats_i[grant_queue_w*5 +: 5];
     assign dir_switch_o = grant_o && dir_valid_r && write_o != dir_write_r;
+    assign starve_w = eligible_i & starved_i;
+    assign rt_w = {eligible_i[3], eligible_i[0]} & urgent_allowed_r;
+    assign lat_w = eligible_i[5:4] & funded_r[5:4];
+    assign refill_w = enable_i && prepared_r && !grant_o;
 
+    generate
+        for (p = 0; p < 7; p = p + 1) begin : g_masks
+            assign starve_ports_w[p] = |starve_w[p*2 +: 2];
+            assign drr_read_w[p] = eligible_i[p*2] && funded_r[p*2] &&
+                deficit_enough_r[p*2] && weighted_r[p] && p != 2;
+            assign drr_write_w[p] = eligible_i[p*2+1] && funded_r[p*2+1] &&
+                deficit_enough_r[p*2+1] && weighted_r[p] && p != 2;
+        end
+    endgenerate
+
+    // Only small masks and registered preference state enter grant selection.
     always @(*) begin
-        funded_w = 14'b0;
         grant_o = 1'b0;
         port_o = 3'b0;
         write_o = 1'b0;
         urgent_o = 1'b0;
-        refill_w = 1'b0;
         drr_w = 1'b0;
-        latency_w = 1'b0;
-        preferred_w = dir_valid_r && dir_cnt_r < dir_batch_i ?
-                        dir_write_r : !dir_write_r;
-        oldest_w = 32'b0;
-        candidate = 0;
-        urgent_port = 0;
-        for (p = 0; p < 7; p = p + 1) begin
-            for (d = 0; d < 2; d = d + 1) begin
-                funded_w[p*2+d] = eligible_i[p*2+d] &&
-                    ((p != 2 && p != 6) ||
-                        {24'b0, tokens_r[p]} >= {25'b0, beats_i[(p*2+d)*5 +: 5], 8'b0});
-            end
+        starvation_w = 1'b0;
+        drr_ports_w = preferred_r ? drr_write_w : drr_read_w;
+        if (drr_ports_w == 0) begin
+            drr_ports_w = preferred_r ? drr_read_w : drr_write_w;
         end
-        if (enable_i) begin
-            // RT tie-break rotates between P0-read and P1-write.
-            for (step = 0; step < 2; step = step + 1) begin
-                urgent_port = (int_unsigned(urgent_turn_r) + step) % 2;
-                if (!grant_o && urgent_i[urgent_port] &&
-                    urgent_cnt_r[urgent_port] < urg_max_i &&
-                    eligible_i[urgent_port*3]) begin
-                    grant_o = 1'b1;
-                    port_o = urgent_port == 0 ? 3'd0 : 3'd1;
-                    write_o = urgent_port != 0;
-                    urgent_o = 1'b1;
-                end
-            end
-            // P2 has no DRR weight; tokens qualify its low-latency grants.
-            for (step = 0; step < 2; step = step + 1) begin
-                candidate = preferred_w ? 5-step : 4+step;
-                if (!grant_o && funded_w[candidate]) begin
-                    grant_o = 1'b1;
-                    latency_w = 1'b1;
-                    port_o = 3'd2;
-                    write_o = candidate == 5;
-                end
-            end
-            for (p = 0; p < 7; p = p + 1) begin
-                for (d = 0; d < 2; d = d + 1) begin
-                    if (!urgent_o && !latency_w &&
-                        eligible_i[p*2+d] && wait_i[(p*2+d)*32 +: 32] > starve_cyc_i &&
-                        (!grant_o || wait_i[(p*2+d)*32 +: 32] > oldest_w)) begin
-                        grant_o = 1'b1;
-                        port_o = p[2:0];
-                        write_o = d != 0;
-                        oldest_w = wait_i[(p*2+d)*32 +: 32];
-                    end
-                end
-            end
-            if (!grant_o) begin
-                for (d = 0; d < 2; d = d + 1) begin
-                    for (step = 0; step < 7; step = step + 1) begin
-                        candidate = {29'b0, round_ptr_r} + step;
-                        if (candidate >= 7) begin
-                            candidate = candidate - 7;
-                        end
-                        if (!grant_o && candidate != 2 &&
-                            weight_i[candidate*32 +: 32] != 0 &&
-                            funded_w[candidate*2+int_unsigned(preferred_w ^ (d != 0))] &&
-                            deficit_r[candidate] >=
-                            {32'b0,
-                                beats_i[(candidate*2+int_unsigned(preferred_w ^ (d != 0)))*5 +: 5]})
-                        begin
-                            grant_o = 1'b1;
-                            port_o = candidate[2:0];
-                            write_o = preferred_w ^ (d != 0);
-                            drr_w = 1'b1;
-                        end
-                    end
-                end
-                refill_w = !grant_o;
+        if (enable_i && prepared_r) begin
+            if (|rt_w) begin
+                grant_o = 1'b1;
+                urgent_o = 1'b1;
+                write_o = rt_w[urgent_turn_r] ? urgent_turn_r : !urgent_turn_r;
+                port_o = {2'b0, write_o};
+            end else if (|lat_w) begin
+                grant_o = 1'b1;
+                port_o = 3'd2;
+                write_o = lat_w[preferred_r] ? preferred_r : !preferred_r;
+            end else if (|starve_ports_w) begin
+                grant_o = 1'b1;
+                starvation_w = 1'b1;
+                port_o = first7(starve_ports_w, starve_ptr_r);
+                write_o = starve_w[{port_o, preferred_r}] ? preferred_r : !preferred_r;
+            end else if (|drr_ports_w) begin
+                grant_o = 1'b1;
+                drr_w = 1'b1;
+                port_o = first7(drr_ports_w, round_ptr_r);
+                write_o = preferred_r ? drr_write_w[port_o] : !drr_read_w[port_o];
             end
         end
     end
 
-    // A Verilog-2001 sized conversion keeps loop-index arithmetic unsigned and explicit.
-    function integer int_unsigned;
-        input value_i;
-        begin
-            int_unsigned = value_i ? 1 : 0;
-        end
-    endfunction
-
     always @(*) begin
-        token_sum_w = 34'b0;
-        for (token_idx = 0; token_idx < 7; token_idx = token_idx + 1) begin
-            token_next_w[token_idx] = {20'b0, tokens_r[token_idx]};
-            if (token_idx == 2 || token_idx == 6) begin
-                token_sum_w = {20'b0, tokens_r[token_idx]} +
-                                {2'b0, rate_i[token_idx*32 +: 32]};
-                if (grant_o && {29'b0, port_o} == token_idx) begin
-                    // Starvation grants bypass tokens. They consume all remaining tokens.
-                    if (token_sum_w >=
-                        {21'b0, beats_i[(token_idx*2+int_unsigned(write_o))*5 +: 5], 8'b0}) begin
-                        token_sum_w = token_sum_w -
-                            {21'b0, beats_i[(token_idx*2+int_unsigned(write_o))*5 +: 5], 8'b0};
-                    end else begin
-                        token_sum_w = 34'b0;
-                    end
+        for (token_idx = 0; token_idx < 2; token_idx = token_idx + 1) begin
+            token_sum_w[token_idx] = {1'b0, tokens_r[token_idx]} +
+                {6'b0, rate_i[(token_idx == 0 ? 2 : 6)*9 +: 9]};
+            if (grant_o && port_o == (token_idx == 0 ? 3'd2 : 3'd6)) begin
+                if (token_sum_w[token_idx] >= {2'b0, grant_beats_w, 8'b0}) begin
+                    token_sum_w[token_idx] = token_sum_w[token_idx] -
+                        {2'b0, grant_beats_w, 8'b0};
+                end else begin
+                    // Rule 3 bypasses an empty bucket and consumes its remainder.
+                    token_sum_w[token_idx] = 15'b0;
                 end
-                token_next_w[token_idx] = token_sum_w > 34'd8192 ? 34'd8192 : token_sum_w;
             end
         end
     end
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
+            prepared_r <= 1'b0;
+            funded_r <= 14'b0;
+            deficit_enough_r <= 14'b0;
+            weighted_r <= 7'b0;
+            urgent_allowed_r <= 2'b0;
+            preferred_r <= 1'b0;
             urgent_turn_r <= 1'b0;
             round_ptr_r <= 3'b0;
+            starve_ptr_r <= 3'b0;
             dir_valid_r <= 1'b0;
             dir_write_r <= 1'b0;
-            dir_cnt_r <= 32'b0;
-            urgent_cnt_r[0] <= 32'b0;
-            urgent_cnt_r[1] <= 32'b0;
+            dir_cnt_r <= 8'b0;
+            urgent_cnt_r[0] <= 8'b0;
+            urgent_cnt_r[1] <= 8'b0;
+            tokens_r[0] <= 14'd8192;
+            tokens_r[1] <= 14'd8192;
             for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
-                tokens_r[update_idx] <= 14'd8192;
-                deficit_r[update_idx] <= 37'b0;
+                deficit_r[update_idx] <= 8'b0;
             end
         end else begin
+            prepared_r <= prepare_o && |candidates_i;
+            for (update_idx = 0; update_idx < 2; update_idx = update_idx + 1) begin
+                tokens_r[update_idx] <= token_sum_w[update_idx] > 15'd8192 ?
+                    14'd8192 : token_sum_w[update_idx][13:0];
+                if (!urgent_i[update_idx] ||
+                    (grant_o && port_o != {2'b0, update_idx[0]})) begin
+                    urgent_cnt_r[update_idx] <= 8'b0;
+                end
+            end
+            if (prepare_o) begin
+                preferred_r <= dir_valid_r && dir_cnt_r < dir_batch_i ?
+                    dir_write_r : !dir_write_r;
+                urgent_allowed_r <= urgent_i &
+                    {urgent_cnt_r[1] < urg_max_i, urgent_cnt_r[0] < urg_max_i};
+                for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
+                    weighted_r[update_idx] <= weight_i[update_idx*4 +: 4] != 0;
+                    funded_r[update_idx*2] <= (update_idx != 2 && update_idx != 6) ||
+                        tokens_r[update_idx == 2 ? 0 : 1] >=
+                        {1'b0, beats_i[update_idx*10 +: 5], 8'b0};
+                    funded_r[update_idx*2+1] <= (update_idx != 2 && update_idx != 6) ||
+                        tokens_r[update_idx == 2 ? 0 : 1] >=
+                        {1'b0, beats_i[update_idx*10+5 +: 5], 8'b0};
+                    deficit_enough_r[update_idx*2] <= deficit_r[update_idx] >=
+                        {3'b0, beats_i[update_idx*10 +: 5]};
+                    deficit_enough_r[update_idx*2+1] <= deficit_r[update_idx] >=
+                        {3'b0, beats_i[update_idx*10+5 +: 5]};
+                end
+            end
             for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
-                tokens_r[update_idx] <= token_next_w[update_idx][13:0];
                 if (refill_w && update_idx != 2 &&
-                    (funded_w[update_idx*2] || funded_w[update_idx*2+1])) begin
+                    (|(eligible_i[update_idx*2 +: 2] & funded_r[update_idx*2 +: 2]))) begin
                     deficit_r[update_idx] <= deficit_r[update_idx] +
-                                            {1'b0, weight_i[update_idx*32 +: 32], 4'b0};
+                        {weight_i[update_idx*4 +: 4], 4'b0};
                 end
-                if (grant_o && drr_w && {29'b0, port_o} == update_idx) begin
-                    deficit_r[update_idx] <= deficit_r[update_idx] -
-                        {32'b0, beats_i[(update_idx*2+int_unsigned(write_o))*5 +: 5]};
-                    round_ptr_r <= port_o;
+                if (grant_o && drr_w && port_o == update_idx[2:0]) begin
+                    deficit_r[update_idx] <= deficit_r[update_idx] - {3'b0, grant_beats_w};
                 end
             end
-            if (!urgent_i[0] || (grant_o && port_o != 3'd0)) begin
-                urgent_cnt_r[0] <= 32'b0;
-            end
-            if (!urgent_i[1] || (grant_o && port_o != 3'd1)) begin
-                urgent_cnt_r[1] <= 32'b0;
+            if (grant_o && drr_w) round_ptr_r <= port_o;
+            if (grant_o && starvation_w) begin
+                starve_ptr_r <= port_o == 3'd6 ? 3'd0 : port_o + 3'd1;
             end
             if (grant_o && urgent_o) begin
-                urgent_cnt_r[port_o[0]] <= urgent_cnt_r[port_o[0]] + 32'd1;
+                urgent_cnt_r[port_o[0]] <= urgent_cnt_r[port_o[0]] + 8'd1;
                 urgent_turn_r <= !port_o[0];
             end
             if (grant_o) begin
                 dir_valid_r <= 1'b1;
                 dir_write_r <= write_o;
-                if (!dir_valid_r || write_o != dir_write_r) begin
-                    dir_cnt_r <= 32'd1;
-                end else if (dir_cnt_r != 32'hffff_ffff) begin
-                    dir_cnt_r <= dir_cnt_r + 32'd1;
-                end
+                if (!dir_valid_r || write_o != dir_write_r) dir_cnt_r <= 8'd1;
+                else if (dir_cnt_r != 8'hff) dir_cnt_r <= dir_cnt_r + 8'd1;
             end
         end
     end

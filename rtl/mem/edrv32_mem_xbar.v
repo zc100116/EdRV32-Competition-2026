@@ -1,6 +1,6 @@
 // File: edrv32_mem_xbar.v
 // Spec: mem-subsys-spec 2.2, 4.1, 5-7; edrv32-soc-spec 4.2, 6.4, 7.1.
-// Description: Seven-port AXI256 crossbar with registered grant decisions.
+// Description: Seven-port AXI256 crossbar with two-stage registered grant decisions.
 // Global outstanding releases on DDR B/RLAST; port outstanding on upstream B/RLAST.
 // Port limits are 0-8. B FIFOs have eight entries; R credit reserves exact LEN+1 beats.
 // Statistics count DDR handshakes; WAIT includes capacity stalls and the grant pipeline.
@@ -390,8 +390,8 @@ module edrv32_mem_xbar (
     reg [3:0] arlen_r [0:6];
     reg [2:0] aw_error_r [0:6];
     reg [2:0] ar_error_r [0:6];
-    reg [31:0] aw_wait_r [0:6];
-    reg [31:0] ar_wait_r [0:6];
+    reg [15:0] aw_wait_r [0:6];
+    reg [15:0] ar_wait_r [0:6];
     reg [6:0] w_complete_r;
     reg [4:0] w_count_r [0:6];
     wire [2015:0] w_ram_data_w;
@@ -401,10 +401,10 @@ module edrv32_mem_xbar (
     reg [3:0] w_length_r;
     reg cmd_valid_r;
     reg cmd_write_r;
-    reg [31:0] cmd_wait_r;
+    reg [15:0] cmd_wait_r;
     reg cmd_urgent_r;
     reg cmd_switch_r;
-    wire [31:0] stat_wait_w;
+    wire [15:0] stat_wait_w;
     reg [3:0] cmd_id_r;
     reg [31:0] cmd_addr_r;
     reg [3:0] cmd_len_r;
@@ -417,23 +417,33 @@ module edrv32_mem_xbar (
     reg [2:0] b_tail_r [0:6];
     reg [3:0] b_count_r [0:6];
     reg [2:0] b_fifo_r [0:55];
-    wire [31:0] outst_total_w;
-    wire [31:0] urg_max_w;
-    wire [31:0] starve_cyc_w;
-    wire [31:0] dir_batch_w;
-    wire [223:0] outst_rd_w;
-    wire [223:0] outst_wr_w;
-    wire [223:0] weight_w;
-    wire [223:0] rate_w;
+    wire [3:0] outst_total_w;
+    wire [7:0] urg_max_w;
+    wire [15:0] starve_cyc_w;
+    wire [7:0] dir_batch_w;
+    wire [27:0] outst_rd_w;
+    wire [27:0] outst_wr_w;
+    wire [27:0] weight_w;
+    wire [62:0] rate_w;
     reg [13:0] eligible_w;
     reg [69:0] beats_w;
-    reg [447:0] wait_w;
+    reg [13:0] eligible_r;
+    wire prepare_w;
+    wire cfg_write_w;
+    wire slot_ready_w;
+    reg [6:0] ar_starved_r;
+    reg [6:0] aw_starved_r;
+    reg [1:0] urgent_level_r;
+    wire [13:0] starved_w;
     wire grant_w;
     wire [2:0] grant_port_w;
     wire grant_write_w;
     wire grant_urgent_w;
     wire dir_switch_w;
     reg bad_read_w;
+    reg bad_read_r;
+    reg [2:0] bad_read_port_r;
+    wire bad_read_do_w;
     reg [2:0] bad_read_port_w;
     reg bad_write_w;
     reg [2:0] bad_write_port_w;
@@ -460,37 +470,45 @@ module edrv32_mem_xbar (
                 ({1'b0, addr_i} + ({9'b0, len_i} + 13'd1)*13'd32) > 13'd4096};
         end
     endfunction
-    assign stat_wait_w = cmd_wait_r == 32'hffff_ffff ? cmd_wait_r : cmd_wait_r + 32'd1;
+    // A parameter write invalidates only the uncommitted eligibility stage.
+    assign cfg_write_w = apb_psel_i && apb_penable_i && apb_pwrite_i &&
+        apb_paddr_i[1:0] == 0 &&
+        ((apb_paddr_i[11:4] == 8'h10) ||
+            (apb_paddr_i[11:8] == 4'h2 && apb_paddr_i[7:5] != 3'd7 && !apb_paddr_i[4]));
+    assign bad_read_do_w = bad_read_r && !cmd_valid_r && !cfg_write_w;
+    assign stat_wait_w = cmd_wait_r == 16'hffff ? cmd_wait_r : cmd_wait_r + 16'd1;
     assign cmd_take_w = cmd_valid_r &&
                         (cmd_write_r ? ddr_awready_i : ddr_arready_i);
-    assign ddr_awvalid_o = rst_n_i && cmd_valid_r && cmd_write_r;
-    assign ddr_arvalid_o = rst_n_i && cmd_valid_r && !cmd_write_r;
+    assign ddr_awvalid_o = cmd_valid_r && cmd_write_r;
+    assign ddr_arvalid_o = cmd_valid_r && !cmd_write_r;
     assign ddr_awid_o = cmd_id_r;
     assign ddr_awaddr_o = cmd_addr_r;
     assign ddr_awlen_o = cmd_len_r;
     assign ddr_arid_o = cmd_id_r;
     assign ddr_araddr_o = cmd_addr_r;
     assign ddr_arlen_o = cmd_len_r;
-    assign ddr_wvalid_o = rst_n_i && w_active_r;
+    assign ddr_wvalid_o = w_active_r;
     assign ddr_wdata_o = w_ram_data_w[w_port_r*288 +: 256];
     assign ddr_wstrb_o = w_ram_data_w[w_port_r*288+256 +: 32];
     assign ddr_wlast_o = w_index_r == w_length_r;
     assign w_take_w = ddr_wvalid_o && ddr_wready_i;
-    assign reserve_w = bad_read_w || (grant_w && !grant_write_w);
-    assign reserve_port_w = bad_read_w ? bad_read_port_w : grant_port_w;
+    assign reserve_w = bad_read_do_w || (grant_w && !grant_write_w);
+    assign reserve_port_w = bad_read_do_w ? bad_read_port_r : grant_port_w;
     assign reserve_id_w = arid_r[reserve_port_w];
     assign reserve_beats_w = {1'b0, arlen_r[reserve_port_w]} + 5'd1;
     generate
         for (p = 0; p < 7; p = p + 1) begin : g_port
+            assign starved_w[p*2] = ar_starved_r[p];
+            assign starved_w[p*2+1] = aw_starved_r[p];
             wire w_read_w;
             wire [3:0] w_addr_w;
-            assign awready_w[p] = rst_n_i && !aw_pending_r[p] &&
+            assign awready_w[p] = !aw_pending_r[p] &&
                 !(cmd_valid_r && cmd_write_r && cmd_id_r[3:1] == p) &&
                                     !(w_active_r && w_port_r == p) && p != 0;
-            assign arready_w[p] = rst_n_i && !ar_pending_r[p] && p != 1;
-            assign wready_w[p] = rst_n_i && !w_complete_r[p] &&
+            assign arready_w[p] = !ar_pending_r[p] && p != 1;
+            assign wready_w[p] = !w_complete_r[p] &&
                                     !(w_active_r && w_port_r == p) && p != 0;
-            assign bvalid_w[p] = rst_n_i && b_count_r[p] != 0;
+            assign bvalid_w[p] = b_count_r[p] != 0;
             assign bid_w[p] = b_fifo_r[p*8+{29'b0, b_head_r[p]}][2];
             assign bresp_w[p*2 +: 2] = b_fifo_r[p*8+{29'b0, b_head_r[p]}][1:0];
             assign w_read_w = (cmd_take_w && cmd_write_r && cmd_id_r[3:1] == p) ||
@@ -520,8 +538,9 @@ module edrv32_mem_xbar (
         .reserve_port_i(reserve_port_w),
         .reserve_id_i(reserve_id_w),
         .reserve_beats_i(reserve_beats_w),
-        .reserve_error_i(bad_read_w),
+        .reserve_error_i(bad_read_do_w),
         .free_cnt_o(free_cnt_w),
+        .slot_ready_o(slot_ready_w),
         .ddr_rid_i(ddr_rid_i),
         .ddr_rdata_i(ddr_rdata_i),
         .ddr_rresp_i(ddr_rresp_i),
@@ -537,18 +556,19 @@ module edrv32_mem_xbar (
     edrv32_mem_xbar_sched u_sched (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .enable_i(rst_n_i && !cmd_valid_r && !bad_read_w),
-        .eligible_i(eligible_w),
+        .enable_i(!cmd_valid_r && !bad_read_r && !cfg_write_w),
+        .prepare_o(prepare_w),
+        .candidates_i(eligible_w),
+        .eligible_i(eligible_r),
         .beats_i(beats_w),
-        .wait_i(wait_w),
-        .urgent_i({p1_urgent_i, p0_urgent_i}),
+        .starved_i(starved_w),
+        .urgent_i(urgent_level_r),
         .grant_o(grant_w),
         .port_o(grant_port_w),
         .write_o(grant_write_w),
         .urgent_o(grant_urgent_w),
         .dir_switch_o(dir_switch_w),
         .urg_max_i(urg_max_w),
-        .starve_cyc_i(starve_cyc_w),
         .dir_batch_i(dir_batch_w),
         .weight_i(weight_w),
         .rate_i(rate_w)
@@ -589,7 +609,6 @@ module edrv32_mem_xbar (
     always @(*) begin
         eligible_w = 14'b0;
         beats_w = 70'b0;
-        wait_w = 448'b0;
         bad_read_w = 1'b0;
         bad_read_port_w = 3'b0;
         bad_write_w = 1'b0;
@@ -598,20 +617,18 @@ module edrv32_mem_xbar (
         for (eligible_idx = 0; eligible_idx < 7; eligible_idx = eligible_idx + 1) begin
             beats_w[(eligible_idx*2)*5 +: 5] = {1'b0, arlen_r[eligible_idx]} + 5'd1;
             beats_w[(eligible_idx*2+1)*5 +: 5] = {1'b0, awlen_r[eligible_idx]} + 5'd1;
-            wait_w[(eligible_idx*2)*32 +: 32] = ar_wait_r[eligible_idx];
-            wait_w[(eligible_idx*2+1)*32 +: 32] = aw_wait_r[eligible_idx];
-            if ({28'b0, ds_count_r} < outst_total_w) begin
+            if (ds_count_r < outst_total_w) begin
                 eligible_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
-                    ar_error_r[eligible_idx] == 0 &&
-                    {28'b0, rd_count_r[eligible_idx]} < outst_rd_w[eligible_idx*32 +: 32] &&
+                    ar_error_r[eligible_idx] == 0 && slot_ready_w &&
+                    rd_count_r[eligible_idx] < outst_rd_w[eligible_idx*4 +: 4] &&
                     free_cnt_w >= {4'b0, arlen_r[eligible_idx]} + 8'd1;
                 eligible_w[eligible_idx*2+1] = aw_pending_r[eligible_idx] &&
                     aw_error_r[eligible_idx] == 0 && w_complete_r[eligible_idx] &&
                     !w_active_r &&
-                    {28'b0, wr_count_r[eligible_idx]} < outst_wr_w[eligible_idx*32 +: 32];
+                    wr_count_r[eligible_idx] < outst_wr_w[eligible_idx*4 +: 4];
             end
             if (!bad_read_w && ar_pending_r[eligible_idx] &&
-                ar_error_r[eligible_idx] != 0 && rd_count_r[eligible_idx] < 8 &&
+                ar_error_r[eligible_idx] != 0 && rd_count_r[eligible_idx] < 8 && slot_ready_w &&
                 free_cnt_w >= {4'b0, arlen_r[eligible_idx]} + 8'd1) begin
                 bad_read_w = 1'b1;
                 bad_read_port_w = eligible_idx[2:0];
@@ -662,9 +679,14 @@ module edrv32_mem_xbar (
             w_port_r <= 3'b0;
             w_index_r <= 4'b0;
             w_length_r <= 4'b0;
+            eligible_r <= 14'b0;
+            bad_read_r <= 1'b0;
+            ar_starved_r <= 7'b0;
+            aw_starved_r <= 7'b0;
+            urgent_level_r <= 2'b0;
             cmd_valid_r <= 1'b0;
             cmd_write_r <= 1'b0;
-            cmd_wait_r <= 32'b0;
+            cmd_wait_r <= 16'b0;
             ds_count_r <= 4'b0;
             for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
                 w_count_r[update_idx] <= 5'b0;
@@ -673,15 +695,21 @@ module edrv32_mem_xbar (
                 b_count_r[update_idx] <= 4'b0;
                 b_head_r[update_idx] <= 3'b0;
                 b_tail_r[update_idx] <= 3'b0;
-                aw_wait_r[update_idx] <= 32'b0;
-                ar_wait_r[update_idx] <= 32'b0;
+                aw_wait_r[update_idx] <= 16'b0;
+                ar_wait_r[update_idx] <= 16'b0;
             end
         end else begin
+            urgent_level_r <= {p1_urgent_i, p0_urgent_i};
+            bad_read_r <= 1'b0;
+            if (prepare_w) begin
+                eligible_r <= eligible_w;
+                bad_read_r <= bad_read_w;
+            end
             ds_count_r <= ds_count_r + (cmd_take_w ? 4'd1 : 4'd0) -
                             (ddr_bvalid_i ? 4'd1 : 4'd0) -
                             (ddr_rvalid_i && ddr_rlast_i ? 4'd1 : 4'd0);
-            if (cmd_valid_r && cmd_wait_r != 32'hffff_ffff) begin
-                cmd_wait_r <= cmd_wait_r + 32'd1;
+            if (cmd_valid_r && cmd_wait_r != 16'hffff) begin
+                cmd_wait_r <= cmd_wait_r + 16'd1;
             end
             if (cmd_take_w) begin
                 cmd_valid_r <= 1'b0;
@@ -704,12 +732,14 @@ module edrv32_mem_xbar (
                 cmd_valid_r <= 1'b1;
                 cmd_write_r <= grant_write_w;
                 cmd_wait_r <= grant_write_w ?
-                    (aw_wait_r[grant_port_w] == 32'hffff_ffff ? 32'hffff_ffff :
-                        aw_wait_r[grant_port_w] + 32'd1) :
-                    (ar_wait_r[grant_port_w] == 32'hffff_ffff ? 32'hffff_ffff :
-                        ar_wait_r[grant_port_w] + 32'd1);
+                    (aw_wait_r[grant_port_w] == 16'hffff ? 16'hffff :
+                        aw_wait_r[grant_port_w] + 16'd1) :
+                    (ar_wait_r[grant_port_w] == 16'hffff ? 16'hffff :
+                        ar_wait_r[grant_port_w] + 16'd1);
             end
             for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
+                ar_starved_r[update_idx] <= ar_wait_r[update_idx] > starve_cyc_w;
+                aw_starved_r[update_idx] <= aw_wait_r[update_idx] > starve_cyc_w;
                 rd_count_r[update_idx] <= rd_count_r[update_idx] +
                     ((reserve_w && {29'b0, reserve_port_w} == update_idx) ? 4'd1 : 4'd0) -
                     ((rvalid_w[update_idx] && rready_w[update_idx] && rlast_w[update_idx]) ?
@@ -737,27 +767,33 @@ module edrv32_mem_xbar (
                 end
                 if (awvalid_w[update_idx] && awready_w[update_idx]) begin
                     aw_pending_r[update_idx] <= 1'b1;
-                    aw_wait_r[update_idx] <= 32'b0;
+                    aw_wait_r[update_idx] <= 16'b0;
+                    aw_starved_r[update_idx] <= 1'b0;
                 end else if (aw_pending_r[update_idx] && w_complete_r[update_idx] &&
-                    aw_wait_r[update_idx] != 32'hffff_ffff)
+                    aw_wait_r[update_idx] != 16'hffff)
                 begin
-                    aw_wait_r[update_idx] <= aw_wait_r[update_idx] + 32'd1;
+                    aw_wait_r[update_idx] <= aw_wait_r[update_idx] + 16'd1;
+                    aw_starved_r[update_idx] <= aw_wait_r[update_idx] + 16'd1 > starve_cyc_w;
                 end
                 if (arvalid_w[update_idx] && arready_w[update_idx]) begin
                     ar_pending_r[update_idx] <= 1'b1;
-                    ar_wait_r[update_idx] <= 32'b0;
-                end else if (ar_pending_r[update_idx] && ar_wait_r[update_idx] != 32'hffff_ffff)
+                    ar_wait_r[update_idx] <= 16'b0;
+                    ar_starved_r[update_idx] <= 1'b0;
+                end else if (ar_pending_r[update_idx] && ar_wait_r[update_idx] != 16'hffff)
                 begin
-                    ar_wait_r[update_idx] <= ar_wait_r[update_idx] + 32'd1;
+                    ar_wait_r[update_idx] <= ar_wait_r[update_idx] + 16'd1;
+                    ar_starved_r[update_idx] <= ar_wait_r[update_idx] + 16'd1 > starve_cyc_w;
                 end
                 if ((grant_w && grant_write_w && {29'b0, grant_port_w} == update_idx) ||
                     (bad_write_w && {29'b0, bad_write_port_w} == update_idx)) begin
                     aw_pending_r[update_idx] <= 1'b0;
-                    aw_wait_r[update_idx] <= 32'b0;
+                    aw_wait_r[update_idx] <= 16'b0;
+                    aw_starved_r[update_idx] <= 1'b0;
                 end
                 if (reserve_w && {29'b0, reserve_port_w} == update_idx) begin
                     ar_pending_r[update_idx] <= 1'b0;
-                    ar_wait_r[update_idx] <= 32'b0;
+                    ar_wait_r[update_idx] <= 16'b0;
+                    ar_starved_r[update_idx] <= 1'b0;
                 end
                 if (bad_write_w && {29'b0, bad_write_port_w} == update_idx) begin
                     w_complete_r[update_idx] <= 1'b0;
@@ -792,6 +828,7 @@ module edrv32_mem_xbar (
                     {awid_r[payload_idx], 2'b10};
             end
         end
+        if (prepare_w) bad_read_port_r <= bad_read_port_w;
         if (grant_w) begin
             cmd_urgent_r <= grant_urgent_w;
             cmd_switch_r <= dir_switch_w;

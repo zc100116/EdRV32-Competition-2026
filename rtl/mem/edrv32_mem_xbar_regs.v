@@ -5,6 +5,7 @@
 // Event counters saturate; simultaneous SNAPSHOT/CLEAR captures before clearing.
 // APB writes ignore PSTRB and update complete words (coordinator clarification).
 // CTRL and unused common registers read zero; ERR_CODE aliases ERR_TYPE.
+// Private parameters retain only their specified low bits; readback zero-extends.
 // Clock: clk_mem.
 module edrv32_mem_xbar_regs (
     // Clock and reset.
@@ -22,18 +23,18 @@ module edrv32_mem_xbar_regs (
     output wire apb_pslverr_o,
 
     // Scheduler configuration and events.
-    output reg [31:0] outst_total_o,
-    output reg [31:0] urg_max_o,
-    output reg [31:0] starve_cyc_o,
-    output reg [31:0] dir_batch_o,
-    output wire [223:0] outst_rd_o,
-    output wire [223:0] outst_wr_o,
-    output wire [223:0] weight_o,
-    output wire [223:0] rate_o,
+    output reg [3:0] outst_total_o,
+    output reg [7:0] urg_max_o,
+    output reg [15:0] starve_cyc_o,
+    output reg [7:0] dir_batch_o,
+    output wire [27:0] outst_rd_o,
+    output wire [27:0] outst_wr_o,
+    output wire [27:0] weight_o,
+    output wire [62:0] rate_o,
     input wire grant_i,
     input wire [2:0] grant_port_i,
     input wire [4:0] grant_beats_i,
-    input wire [31:0] grant_wait_i,
+    input wire [15:0] grant_wait_i,
     input wire grant_urgent_i,
     input wire dir_switch_i,
     input wire ds_busy_i,
@@ -46,10 +47,10 @@ module edrv32_mem_xbar_regs (
     // Interrupt.
     output wire irq_o
 );
-    reg [31:0] outst_rd_r [0:6];
-    reg [31:0] outst_wr_r [0:6];
-    reg [31:0] weight_r [0:6];
-    reg [31:0] rate_r [0:6];
+    reg [3:0] outst_rd_r [0:6];
+    reg [3:0] outst_wr_r [0:6];
+    reg [3:0] weight_r [0:6];
+    reg [8:0] rate_r [0:6];
     reg irq_en_r;
     reg irq_stat_r;
     reg [2:0] err_port_r;
@@ -57,12 +58,12 @@ module edrv32_mem_xbar_regs (
     reg [2:0] err_type_r;
     reg [31:0] txn_cnt_r [0:6];
     reg [31:0] beat_cnt_r [0:6];
-    reg [31:0] wait_max_r [0:6];
+    reg [15:0] wait_max_r [0:6];
     reg [31:0] wait_sum_r [0:6];
     reg [31:0] urg_cnt_r [0:6];
     reg [31:0] txn_snapshot_r [0:6];
     reg [31:0] beat_snapshot_r [0:6];
-    reg [31:0] max_snapshot_r [0:6];
+    reg [15:0] max_snapshot_r [0:6];
     reg [31:0] sum_snapshot_r [0:6];
     reg [31:0] urg_snapshot_r [0:6];
     reg [31:0] dir_switch_r;
@@ -71,12 +72,13 @@ module edrv32_mem_xbar_regs (
     reg [31:0] dir_snapshot_r;
     reg [31:0] busy_snapshot_r;
     reg [31:0] window_snapshot_r;
+    wire unused_pwdata_w;
+    assign unused_pwdata_w = &apb_pwdata_i[31:16];
     wire write_w;
     wire snapshot_w;
     wire clear_w;
     wire irq_clear_w;
     integer idx;
-    integer read_idx;
     integer stat_idx;
     genvar p;
 
@@ -102,57 +104,92 @@ module edrv32_mem_xbar_regs (
 
     generate
         for (p = 0; p < 7; p = p + 1) begin : g_config
-            assign outst_rd_o[p*32 +: 32] = outst_rd_r[p];
-            assign outst_wr_o[p*32 +: 32] = outst_wr_r[p];
-            assign weight_o[p*32 +: 32] = weight_r[p];
-            assign rate_o[p*32 +: 32] = rate_r[p];
+            assign outst_rd_o[p*4 +: 4] = outst_rd_r[p];
+            assign outst_wr_o[p*4 +: 4] = outst_wr_r[p];
+            assign weight_o[p*4 +: 4] = weight_r[p];
+            assign rate_o[p*9 +: 9] = rate_r[p];
         end
     endgenerate
 
+    // Disjoint address cases infer a parallel read mux, without a priority chain.
     always @(*) begin
         apb_prdata_o = 32'b0;
-        for (read_idx = 0; read_idx < 7; read_idx = read_idx + 1) begin
-            if ({20'b0, apb_paddr_i} == 32'h200 + 32*read_idx) begin
-                apb_prdata_o = outst_rd_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h204 + 32*read_idx) begin
-                apb_prdata_o = outst_wr_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h208 + 32*read_idx) begin
-                apb_prdata_o = weight_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h20c + 32*read_idx) begin
-                apb_prdata_o = rate_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h400 + 32*read_idx) begin
-                apb_prdata_o = txn_snapshot_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h404 + 32*read_idx) begin
-                apb_prdata_o = beat_snapshot_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h408 + 32*read_idx) begin
-                apb_prdata_o = max_snapshot_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h40c + 32*read_idx) begin
-                apb_prdata_o = sum_snapshot_r[read_idx];
-            end
-            if ({20'b0, apb_paddr_i} == 32'h410 + 32*read_idx) begin
-                apb_prdata_o = urg_snapshot_r[read_idx];
-            end
-        end
         case (apb_paddr_i)
             12'h000: apb_prdata_o = 32'h0008_0001;
             12'h008: apb_prdata_o = {29'b0, irq_stat_r, !busy_i, busy_i};
             12'h00c: apb_prdata_o = {30'b0, irq_en_r, 1'b0};
             12'h010: apb_prdata_o = {30'b0, irq_stat_r, 1'b0};
             12'h014: apb_prdata_o = {29'b0, err_type_r};
-            12'h100: apb_prdata_o = outst_total_o;
-            12'h104: apb_prdata_o = urg_max_o;
-            12'h108: apb_prdata_o = starve_cyc_o;
-            12'h10c: apb_prdata_o = dir_batch_o;
+            12'h100: apb_prdata_o = {28'b0, outst_total_o};
+            12'h104: apb_prdata_o = {24'b0, urg_max_o};
+            12'h108: apb_prdata_o = {16'b0, starve_cyc_o};
+            12'h10c: apb_prdata_o = {24'b0, dir_batch_o};
             12'h120: apb_prdata_o = {29'b0, err_port_r};
             12'h124: apb_prdata_o = err_addr_r;
             12'h128: apb_prdata_o = {29'b0, err_type_r};
+            12'h200: apb_prdata_o = {28'b0, outst_rd_r[0]};
+            12'h204: apb_prdata_o = {28'b0, outst_wr_r[0]};
+            12'h208: apb_prdata_o = {28'b0, weight_r[0]};
+            12'h20c: apb_prdata_o = {23'b0, rate_r[0]};
+            12'h220: apb_prdata_o = {28'b0, outst_rd_r[1]};
+            12'h224: apb_prdata_o = {28'b0, outst_wr_r[1]};
+            12'h228: apb_prdata_o = {28'b0, weight_r[1]};
+            12'h22c: apb_prdata_o = {23'b0, rate_r[1]};
+            12'h240: apb_prdata_o = {28'b0, outst_rd_r[2]};
+            12'h244: apb_prdata_o = {28'b0, outst_wr_r[2]};
+            12'h248: apb_prdata_o = {28'b0, weight_r[2]};
+            12'h24c: apb_prdata_o = {23'b0, rate_r[2]};
+            12'h260: apb_prdata_o = {28'b0, outst_rd_r[3]};
+            12'h264: apb_prdata_o = {28'b0, outst_wr_r[3]};
+            12'h268: apb_prdata_o = {28'b0, weight_r[3]};
+            12'h26c: apb_prdata_o = {23'b0, rate_r[3]};
+            12'h280: apb_prdata_o = {28'b0, outst_rd_r[4]};
+            12'h284: apb_prdata_o = {28'b0, outst_wr_r[4]};
+            12'h288: apb_prdata_o = {28'b0, weight_r[4]};
+            12'h28c: apb_prdata_o = {23'b0, rate_r[4]};
+            12'h2a0: apb_prdata_o = {28'b0, outst_rd_r[5]};
+            12'h2a4: apb_prdata_o = {28'b0, outst_wr_r[5]};
+            12'h2a8: apb_prdata_o = {28'b0, weight_r[5]};
+            12'h2ac: apb_prdata_o = {23'b0, rate_r[5]};
+            12'h2c0: apb_prdata_o = {28'b0, outst_rd_r[6]};
+            12'h2c4: apb_prdata_o = {28'b0, outst_wr_r[6]};
+            12'h2c8: apb_prdata_o = {28'b0, weight_r[6]};
+            12'h2cc: apb_prdata_o = {23'b0, rate_r[6]};
+            12'h400: apb_prdata_o = txn_snapshot_r[0];
+            12'h404: apb_prdata_o = beat_snapshot_r[0];
+            12'h408: apb_prdata_o = {16'b0, max_snapshot_r[0]};
+            12'h40c: apb_prdata_o = sum_snapshot_r[0];
+            12'h410: apb_prdata_o = urg_snapshot_r[0];
+            12'h420: apb_prdata_o = txn_snapshot_r[1];
+            12'h424: apb_prdata_o = beat_snapshot_r[1];
+            12'h428: apb_prdata_o = {16'b0, max_snapshot_r[1]};
+            12'h42c: apb_prdata_o = sum_snapshot_r[1];
+            12'h430: apb_prdata_o = urg_snapshot_r[1];
+            12'h440: apb_prdata_o = txn_snapshot_r[2];
+            12'h444: apb_prdata_o = beat_snapshot_r[2];
+            12'h448: apb_prdata_o = {16'b0, max_snapshot_r[2]};
+            12'h44c: apb_prdata_o = sum_snapshot_r[2];
+            12'h450: apb_prdata_o = urg_snapshot_r[2];
+            12'h460: apb_prdata_o = txn_snapshot_r[3];
+            12'h464: apb_prdata_o = beat_snapshot_r[3];
+            12'h468: apb_prdata_o = {16'b0, max_snapshot_r[3]};
+            12'h46c: apb_prdata_o = sum_snapshot_r[3];
+            12'h470: apb_prdata_o = urg_snapshot_r[3];
+            12'h480: apb_prdata_o = txn_snapshot_r[4];
+            12'h484: apb_prdata_o = beat_snapshot_r[4];
+            12'h488: apb_prdata_o = {16'b0, max_snapshot_r[4]};
+            12'h48c: apb_prdata_o = sum_snapshot_r[4];
+            12'h490: apb_prdata_o = urg_snapshot_r[4];
+            12'h4a0: apb_prdata_o = txn_snapshot_r[5];
+            12'h4a4: apb_prdata_o = beat_snapshot_r[5];
+            12'h4a8: apb_prdata_o = {16'b0, max_snapshot_r[5]};
+            12'h4ac: apb_prdata_o = sum_snapshot_r[5];
+            12'h4b0: apb_prdata_o = urg_snapshot_r[5];
+            12'h4c0: apb_prdata_o = txn_snapshot_r[6];
+            12'h4c4: apb_prdata_o = beat_snapshot_r[6];
+            12'h4c8: apb_prdata_o = {16'b0, max_snapshot_r[6]};
+            12'h4cc: apb_prdata_o = sum_snapshot_r[6];
+            12'h4d0: apb_prdata_o = urg_snapshot_r[6];
             12'h500: apb_prdata_o = dir_snapshot_r;
             12'h504: apb_prdata_o = busy_snapshot_r;
             12'h508: apb_prdata_o = window_snapshot_r;
@@ -162,47 +199,47 @@ module edrv32_mem_xbar_regs (
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
-            outst_total_o <= 32'd8;
-            urg_max_o <= 32'd8;
-            starve_cyc_o <= 32'd256;
-            dir_batch_o <= 32'd4;
+            outst_total_o <= 4'd8;
+            urg_max_o <= 8'd8;
+            starve_cyc_o <= 16'd256;
+            dir_batch_o <= 8'd4;
             irq_en_r <= 1'b0;
             irq_stat_r <= 1'b0;
             err_port_r <= 3'b0;
             err_addr_r <= 32'b0;
             err_type_r <= 3'b0;
             for (idx = 0; idx < 7; idx = idx + 1) begin
-                outst_rd_r[idx] <= idx == 1 ? 32'd0 :
-                                    idx == 2 ? 32'd1 :
-                                    idx == 0 || idx == 3 ? 32'd4 : 32'd2;
-                outst_wr_r[idx] <= idx == 0 ? 32'd0 :
-                                    idx == 2 ? 32'd1 : idx == 1 ? 32'd4 : 32'd2;
-                weight_r[idx] <= idx < 2 ? 32'd4 : idx == 2 ? 32'd0 :
-                                    idx == 3 ? 32'd3 : idx == 6 ? 32'd1 : 32'd2;
-                rate_r[idx] <= idx == 2 ? 32'd26 : idx == 6 ? 32'd13 : 32'd0;
+                outst_rd_r[idx] <= idx == 1 ? 4'd0 :
+                                    idx == 2 ? 4'd1 :
+                                    idx == 0 || idx == 3 ? 4'd4 : 4'd2;
+                outst_wr_r[idx] <= idx == 0 ? 4'd0 :
+                                    idx == 2 ? 4'd1 : idx == 1 ? 4'd4 : 4'd2;
+                weight_r[idx] <= idx < 2 ? 4'd4 : idx == 2 ? 4'd0 :
+                                    idx == 3 ? 4'd3 : idx == 6 ? 4'd1 : 4'd2;
+                rate_r[idx] <= idx == 2 ? 9'd26 : idx == 6 ? 9'd13 : 9'd0;
             end
         end else begin
             if (write_w) begin
                 for (idx = 0; idx < 7; idx = idx + 1) begin
                     if ({20'b0, apb_paddr_i} == 32'h200 + 32*idx) begin
-                        outst_rd_r[idx] <= apb_pwdata_i;
+                        outst_rd_r[idx] <= apb_pwdata_i[3:0];
                     end
                     if ({20'b0, apb_paddr_i} == 32'h204 + 32*idx) begin
-                        outst_wr_r[idx] <= apb_pwdata_i;
+                        outst_wr_r[idx] <= apb_pwdata_i[3:0];
                     end
                     if ({20'b0, apb_paddr_i} == 32'h208 + 32*idx) begin
-                        weight_r[idx] <= apb_pwdata_i;
+                        weight_r[idx] <= apb_pwdata_i[3:0];
                     end
                     if ({20'b0, apb_paddr_i} == 32'h20c + 32*idx) begin
-                        rate_r[idx] <= apb_pwdata_i;
+                        rate_r[idx] <= apb_pwdata_i[8:0];
                     end
                 end
                 case (apb_paddr_i)
                     12'h00c: irq_en_r <= apb_pwdata_i[1];
-                    12'h100: outst_total_o <= apb_pwdata_i;
-                    12'h104: urg_max_o <= apb_pwdata_i;
-                    12'h108: starve_cyc_o <= apb_pwdata_i;
-                    12'h10c: dir_batch_o <= apb_pwdata_i;
+                    12'h100: outst_total_o <= apb_pwdata_i[3:0];
+                    12'h104: urg_max_o <= apb_pwdata_i[7:0];
+                    12'h108: starve_cyc_o <= apb_pwdata_i[15:0];
+                    12'h10c: dir_batch_o <= apb_pwdata_i[7:0];
                     default: begin end
                 endcase
             end
@@ -233,12 +270,12 @@ module edrv32_mem_xbar_regs (
             for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
                 txn_cnt_r[stat_idx] <= 32'b0;
                 beat_cnt_r[stat_idx] <= 32'b0;
-                wait_max_r[stat_idx] <= 32'b0;
+                wait_max_r[stat_idx] <= 16'b0;
                 wait_sum_r[stat_idx] <= 32'b0;
                 urg_cnt_r[stat_idx] <= 32'b0;
                 txn_snapshot_r[stat_idx] <= 32'b0;
                 beat_snapshot_r[stat_idx] <= 32'b0;
-                max_snapshot_r[stat_idx] <= 32'b0;
+                max_snapshot_r[stat_idx] <= 16'b0;
                 sum_snapshot_r[stat_idx] <= 32'b0;
                 urg_snapshot_r[stat_idx] <= 32'b0;
             end
@@ -262,7 +299,7 @@ module edrv32_mem_xbar_regs (
                 for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
                     txn_cnt_r[stat_idx] <= 32'b0;
                     beat_cnt_r[stat_idx] <= 32'b0;
-                    wait_max_r[stat_idx] <= 32'b0;
+                    wait_max_r[stat_idx] <= 16'b0;
                     wait_sum_r[stat_idx] <= 32'b0;
                     urg_cnt_r[stat_idx] <= 32'b0;
                 end
@@ -279,7 +316,7 @@ module edrv32_mem_xbar_regs (
                     beat_cnt_r[grant_port_i] <=
                         sat_add(beat_cnt_r[grant_port_i], {27'b0, grant_beats_i});
                     wait_sum_r[grant_port_i] <=
-                        sat_add(wait_sum_r[grant_port_i], grant_wait_i);
+                        sat_add(wait_sum_r[grant_port_i], {16'b0, grant_wait_i});
                     if (grant_wait_i > wait_max_r[grant_port_i]) begin
                         wait_max_r[grant_port_i] <= grant_wait_i;
                     end
