@@ -10,9 +10,9 @@
 
 - commit：`main` 上包含本任务卡第二版的提交（Windows Codex 在 `result.md` 中记录实际使用的完整哈希）。
 - 顶层：`fpga/rtl/edrv32_fpga_cpu_sys_top.v`（模块 `edrv32_fpga_cpu_sys_top`，参数 `RVC_EN` 默认 1）。
-- 导入脚本：`fpga/scripts/import_cpu_sys_top.tcl`。按 `rtl/filelists/cpu_subsys.f`、`sys_subsys.f` 展开全部源文件（41 个）并加入顶层，共 42 个，导入约束文件。路径按脚本自身位置计算，仓库放在哪里都可以。
+- 导入脚本：`fpga/scripts/import_cpu_sys_top.tcl`。按 `rtl/filelists/cpu_subsys.f`、`sys_subsys.f` 展开全部源文件（41 个）并加入顶层，共 42 个，导入约束文件，设置器件，然后以头文件目录 `rtl/include`、宏 `FPGA_MODE` 编译（`compile -include_path -compiler_directives`）。路径按脚本自身位置计算，仓库放在哪里都可以。IP 已在工程中，脚本不重复添加。
 - 约束：`fpga/constraints/edrv32_fpga_cpu_sys_top.fdc`。`clk_i` 按 150 MHz（6.667 ns）约束；引脚取自厂商 demo：`clk_i` D18（板载 27 MHz）、`rst_n_i` C22、`key_n_i` C23、`uart_rx_i` B24、`uart_tx_o` C24、`led_o[0..3]` A20/C18/C19/E18。本任务只测时序和资源，不上板运行。
-- 头文件目录：`rtl/include`。宏定义：只定义 `FPGA_MODE`（不要定义 `SIM_MODE`）。这两项在工程设置中填写（步骤 3）。
+- 头文件目录 `rtl/include` 和宏 `FPGA_MODE`（只定义这一个，不定义 `SIM_MODE`）由导入脚本在编译命令中设置，不需要在工程设置里填。
 
 ## 3. 环境
 
@@ -28,12 +28,11 @@
 | 步骤 | 执行者 | 内容 |
 |---|---|---|
 | 1 | Windows Codex（C） | `git fetch origin`，然后 `git switch -C win/20261025-01-cpu-sys-synth origin/main`（第一阶段的提交已并入 main，旧分支直接覆盖）。阅读本任务卡，把用户步骤整理成清单交给用户。 |
-| 2 | 用户（U） | 打开第一阶段工程，在 PDS Tcl 控制台执行：`source <仓库路径>/fpga/scripts/import_cpu_sys_top.tcl`（路径用 `/`）。控制台应打印 `edrv32: added 42 sources`。 |
-| 3 | 用户（U） | 在工程设置的编译（Compile）选项中：头文件搜索路径加 `<仓库路径>/rtl/include`；宏定义加 `FPGA_MODE`。设置后 PDS 控制台会回显对应的 Tcl 命令，把回显原文交给 Codex 记入 `artifacts/pds_cmds.md`。 |
-| 4 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `compile -top_module edrv32_fpga_cpu_sys_top`、`synthesize -ads`、`dev_map`、`pnr`、`report_timing`（与厂商 demo 的 `impl.tcl` 相同的流程，不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex 写进 `result.md`。 |
-| 5 | Windows Codex（C） | 从工程目录收集第 6 节产物。 |
-| 6 | 用户（U）+ Codex（C） | 把顶层文件中 `RVC_EN` 默认值本地改为 0（只改这一处，不提交），重跑步骤 4；Codex 只收集第 6 节第 3、4 项的汇总数字，写入 `rvc0_summary.txt`。完成后把这处改动撤销。 |
-| 7 | Windows Codex（C） | 填写 `result.md`（在第一阶段内容基础上补全），提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261025-01-cpu-sys-synth results`，推送 `win/20261025-01-cpu-sys-synth`（需 `--force`，因为步骤 1 重建了分支），告诉用户完成并给出分支名。 |
+| 2 | 用户（U） | 打开第一阶段工程，在 PDS Tcl 控制台执行：`source <仓库路径>/fpga/scripts/import_cpu_sys_top.tcl`（路径用 `/`）。脚本导入源文件和约束并完成编译，最后打印 `edrv32: added 42 sources` 和顶层、头文件目录、宏。编译报错就停下，把报错原文交给 Codex 写进 `result.md`。 |
+| 3 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`（与厂商 demo 的 `impl.tcl` 相同的流程，不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex 写进 `result.md`。 |
+| 4 | Windows Codex（C） | 从工程目录收集第 6 节产物。 |
+| 5 | 用户（U）+ Codex（C） | 把顶层文件中 `RVC_EN` 默认值本地改为 0（只改这一处，不提交），在控制台重新执行 `compile -top_module edrv32_fpga_cpu_sys_top -include_path <仓库路径>/rtl/include -compiler_directives FPGA_MODE`（文件已在工程中，不再 source 脚本），再执行步骤 3；Codex 只收集第 6 节第 2、3 项的汇总数字，写入 `rvc0_summary.txt`。完成后把这处改动撤销。 |
+| 6 | Windows Codex（C） | 填写 `result.md`（在第一阶段内容基础上补全），提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261025-01-cpu-sys-synth results`，推送 `win/20261025-01-cpu-sys-synth`（需 `--force`，因为步骤 1 重建了分支），告诉用户完成并给出分支名。 |
 
 ## 6. 产物
 
@@ -41,14 +40,13 @@
 
 | # | 产物 | 内容 |
 |---|---|---|
-| 1 | `pds_cmds.md` | 步骤 3 中 PDS 控制台回显的设置头文件目录和宏的 Tcl 命令原文（协调者据此并入导入脚本） |
-| 2 | `ip_ports.md` | 已回传（第一阶段）；IP 若重新生成再更新 |
-| 3 | `timing_summary.txt` | 每个时钟的 WNS/TNS/WHS/THS；由 150 MHz 约束和 WNS 推算的 Fmax（`1000 / (6.667 − WNS)` MHz，WNS 为负时同样适用） |
-| 4 | `resource_summary.txt`、`resource_hier.txt` | 资源汇总（LUT、FF、DRM、APM、分布式 RAM、IO、PLL）；按模块层次的资源分布，至少到 `u_cpu_subsys` 下的 core、icache、dcache 和 `u_sys_subsys` 下的 xbar、ROM、SRAM、各外设 |
-| 5 | `setup_top200.txt` | 最差 200 条 setup 路径，一行一条：起点、终点、裕量、逻辑级数 |
-| 6 | `setup_top20_detail.txt` | 最差 20 条 setup 路径的逐级明细 |
-| 7 | `hold_top20.txt` | 最差 20 条 hold 路径 |
-| 8 | `rvc0_summary.txt` | 第 5 节步骤 6 `RVC_EN`=0 的时序汇总（同第 3 项）和资源汇总（同第 4 项的汇总表） |
+| 1 | `ip_ports.md` | 已回传（第一阶段）；IP 若重新生成再更新 |
+| 2 | `timing_summary.txt` | 每个时钟的 WNS/TNS/WHS/THS；由 150 MHz 约束和 WNS 推算的 Fmax（`1000 / (6.667 − WNS)` MHz，WNS 为负时同样适用） |
+| 3 | `resource_summary.txt`、`resource_hier.txt` | 资源汇总（LUT、FF、DRM、APM、分布式 RAM、IO、PLL）；按模块层次的资源分布，至少到 `u_cpu_subsys` 下的 core、icache、dcache 和 `u_sys_subsys` 下的 xbar、ROM、SRAM、各外设 |
+| 4 | `setup_top200.txt` | 最差 200 条 setup 路径，一行一条：起点、终点、裕量、逻辑级数 |
+| 5 | `setup_top20_detail.txt` | 最差 20 条 setup 路径的逐级明细 |
+| 6 | `hold_top20.txt` | 最差 20 条 hold 路径 |
+| 7 | `rvc0_summary.txt` | 第 5 节步骤 5 `RVC_EN`=0 的时序汇总（同第 2 项）和资源汇总（同第 3 项的汇总表） |
 
 不提交 PDS 工程文件、IP 生成目录、中间文件、bitstream、完整原始日志。
 
