@@ -155,7 +155,8 @@ module tb_axi_async_bridge #(
     reg [48:0] aw_held;
     reg aw_stalled = 0;
     function automatic [48:0] aw_value(input integer idx);
-        aw_value = 49'h1aeef11223344 ^ (49'(idx) * 49'd37);
+        aw_value = (49'b1 << (idx % 49)) ^
+            ((idx/49)%2 == 0 ? 49'b0 : {49{1'b1}});
     endfunction
     wire [48:0] aw_output = {m_awid, m_awaddr, m_awlen, m_awsize, m_awburst};
     task drive_aw;
@@ -198,7 +199,8 @@ module tb_axi_async_bridge #(
     reg [72:0] w_held;
     reg w_stalled = 0;
     function automatic [72:0] w_value(input integer idx);
-        w_value = 73'h1755bbdaeef11223344 ^ (73'(idx) * 73'd37);
+        w_value = (73'b1 << (idx % 73)) ^
+            ((idx/73)%2 == 0 ? 73'b0 : {73{1'b1}});
     endfunction
     wire [72:0] w_output = {m_wdata, m_wstrb, m_wlast};
     task drive_w;
@@ -241,7 +243,8 @@ module tb_axi_async_bridge #(
     reg [5:0] b_held;
     reg b_stalled = 0;
     function automatic [5:0] b_value(input integer idx);
-        b_value = 6'h4 ^ (6'(idx) * 6'd37);
+        b_value = (6'b1 << (idx % 6)) ^
+            ((idx/6)%2 == 0 ? 6'b0 : {6{1'b1}});
     endfunction
     wire [5:0] b_output = {s_bid, s_bresp};
     task drive_b;
@@ -284,7 +287,8 @@ module tb_axi_async_bridge #(
     reg [48:0] ar_held;
     reg ar_stalled = 0;
     function automatic [48:0] ar_value(input integer idx);
-        ar_value = 49'h1aeef11223344 ^ (49'(idx) * 49'd37);
+        ar_value = (49'b1 << (idx % 49)) ^
+            ((idx/49)%2 == 0 ? 49'b0 : {49{1'b1}});
     endfunction
     wire [48:0] ar_output = {m_arid, m_araddr, m_arlen, m_arsize, m_arburst};
     task drive_ar;
@@ -327,7 +331,8 @@ module tb_axi_async_bridge #(
     reg [70:0] r_held;
     reg r_stalled = 0;
     function automatic [70:0] r_value(input integer idx);
-        r_value = 71'h755bbdaeef11223344 ^ (71'(idx) * 71'd37);
+        r_value = (71'b1 << (idx % 71)) ^
+            ((idx/71)%2 == 0 ? 71'b0 : {71{1'b1}});
     endfunction
     wire [70:0] r_output = {s_rid, s_rdata, s_rresp, s_rlast};
     task drive_r;
