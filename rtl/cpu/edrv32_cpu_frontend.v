@@ -71,6 +71,7 @@ module edrv32_cpu_frontend #(
     localparam REC_RAS_LSB = 142;
     localparam HALFWORD_BITS = 130;
     localparam HALFWORD_CAPACITY = 8;
+    localparam BLOCK_BITS = 112;
     reg [31:0] f1_pc_r;
     reg f1_cross_r;
     reg [31:0] f1_cross_target_r;
@@ -84,7 +85,13 @@ module edrv32_cpu_frontend #(
     reg [31:0] f2_target_r;
     reg [8:0] f2_history_r;
     reg [36:0] f2_ras_r;
-    reg [HALFWORD_CAPACITY*HALFWORD_BITS-1:0] halfwords_r;
+    // Halfword: {block index, position within block, error, data}; block metadata is shared.
+    reg [21:0] halfwords_r [0:HALFWORD_CAPACITY-1];
+    // Block: {compressed, RAS, GHR, target, taken, hit, position[1:0], PC[31:3]}.
+    reg [BLOCK_BITS-1:0] blocks_r [0:HALFWORD_CAPACITY-1];
+    reg [2:0] halfword_read_ptr_r;
+    reg [2:0] halfword_write_ptr_r;
+    reg [2:0] block_write_ptr_r;
     reg [3:0] halfword_count_r;
     wire redirect_w;
     wire [31:0] redirect_pc_w;
@@ -103,10 +110,11 @@ module edrv32_cpu_frontend #(
     wire [2:0] request_end_w;
     wire [2:0] branch_end_w;
     wire response_accept_w;
+    wire [2:0] response_count_w;
     wire [2:0] append_count_w;
     wire [2:0] ib_free_count_w;
-    reg [HALFWORD_CAPACITY*HALFWORD_BITS-1:0] merged_w;
-    reg [3:0] available_w;
+    wire [HALFWORD_BITS-1:0] stream_w [0:3];
+    wire [3:0] available_w;
     reg [3:0] remaining_w;
     reg [2:0] consume_w;
     reg [1:0] push_count_w;
@@ -127,7 +135,6 @@ module edrv32_cpu_frontend #(
     reg [31:0] second_raw_w;
     reg first_error_w;
     reg second_error_w;
-    reg [31:0] append_pc_w;
     wire first_recover_w;
     wire second_recover_w;
     wire recover_w;
@@ -136,8 +143,8 @@ module edrv32_cpu_frontend #(
     wire [4:0] recover_btb_index_w;
     wire [1:0] unused_alignment_w;
     assign unused_alignment_w = {update_pc_i[0], f2_pc_r[0]};
-    integer append_idx;
-    integer append_slot;
+    genvar read_idx;
+    genvar write_idx;
     assign redirect_w = redirect_valid_i || d_redirect_valid_i;
     assign redirect_pc_w = redirect_valid_i ? redirect_pc_i : d_redirect_pc_i;
     assign restore_ras_w = redirect_valid_i ? redirect_ras_i :
@@ -152,8 +159,8 @@ module edrv32_cpu_frontend #(
         (RVC_EN && predict_compressed_w ? 3'd1 : 3'd2);
     assign request_end_w = f1_cross_r ? 3'd1 : predict_taken_w ? branch_end_w : 3'd4;
     assign response_accept_w = f2_pending_r && ic_resp_valid_i && !redirect_w;
-    assign append_count_w = response_accept_w ?
-        f2_end_r - {1'b0, f2_pc_r[2:1]} : 3'd0;
+    assign response_count_w = f2_end_r - {1'b0, f2_pc_r[2:1]};
+    assign append_count_w = response_accept_w ? response_count_w : 3'd0;
     // Include the arriving response and this cycle's drain when reserving the next group.
     assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !recover_w &&
         (!f2_pending_r || ic_resp_valid_i) && remaining_w <= 4;
@@ -214,40 +221,57 @@ module edrv32_cpu_frontend #(
         .instr_o(second_expanded_w),
         .illegal_o(second_illegal_w)
     );
-    // Each halfword carries its PC so predicted targets may share the same stream buffer.
-    // Layout: {predicted_compressed, RAS[36:0], GHR[8:0], target[31:0],
-    //          taken, hit, error, PC[31:0], data[15:0]}.
-    always @(*) begin
-        merged_w = halfwords_r;
-        available_w = halfword_count_r + {1'b0, append_count_w};
-        append_pc_w = 0;
-        append_slot = 0;
-        for (append_idx = 0; append_idx < 4; append_idx = append_idx + 1) begin
-            if (response_accept_w && append_idx >= {30'b0, f2_pc_r[2:1]} &&
-                append_idx < {29'b0, f2_end_r}) begin
-                append_pc_w = {f2_pc_r[31:3], 3'b0} + (append_idx << 1);
-                append_slot = {28'b0, halfword_count_r} + append_idx -
-                    {30'b0, f2_pc_r[2:1]};
-                merged_w[append_slot * HALFWORD_BITS +: HALFWORD_BITS] =
-                    {f2_compressed_r, f2_ras_r, f2_history_r, f2_target_r,
-                    f2_taken_r && append_idx[1:0] == f2_position_r,
-                    f2_hit_r && append_idx[1:0] == f2_position_r,
-                    ic_resp_err_i, append_pc_w, ic_resp_data_i[append_idx * 16 +: 16]};
+    // Eight block slots suffice: every live block owns at least one of eight halfwords.
+    // Reuse slots in response order; the reserved response and current drain bypass storage.
+    assign available_w = halfword_count_r + {1'b0, append_count_w};
+    generate
+        for (read_idx = 0; read_idx < 4; read_idx = read_idx + 1) begin : g_read
+            wire [2:0] slot_w;
+            wire [21:0] halfword_w;
+            wire [BLOCK_BITS-1:0] block_w;
+            wire [1:0] response_position_w;
+            wire [31:0] pc_w;
+            assign slot_w = halfword_read_ptr_r + read_idx[2:0];
+            assign halfword_w = halfwords_r[slot_w];
+            assign block_w = blocks_r[halfword_w[21:19]];
+            assign response_position_w = f2_pc_r[2:1] + read_idx[1:0] -
+                halfword_count_r[1:0];
+            assign pc_w = {block_w[28:0], halfword_w[18:17], 1'b0};
+            assign stream_w[read_idx] = halfword_count_r > read_idx ?
+                {block_w[111:33], block_w[32] && halfword_w[18:17] == block_w[30:29],
+                block_w[31] && halfword_w[18:17] == block_w[30:29], halfword_w[16],
+                pc_w, halfword_w[15:0]} :
+                {f2_compressed_r, f2_ras_r, f2_history_r, f2_target_r,
+                f2_taken_r && response_position_w == f2_position_r,
+                f2_hit_r && response_position_w == f2_position_r, ic_resp_err_i,
+                f2_pc_r[31:3], response_position_w, 1'b0,
+                ic_resp_data_i[response_position_w * 16 +: 16]};
+        end
+        for (write_idx = 0; write_idx < HALFWORD_CAPACITY;
+            write_idx = write_idx + 1) begin : g_write
+            wire [2:0] offset_w;
+            wire [1:0] position_w;
+            assign offset_w = write_idx[2:0] - halfword_write_ptr_r;
+            assign position_w = f2_pc_r[2:1] + offset_w[1:0];
+            // Redirect/recovery discards ownership via pointers, without gating payload FFs.
+            always @(posedge clk_i) begin
+                if (f2_pending_r && ic_resp_valid_i && offset_w < response_count_w)
+                    halfwords_r[write_idx] <= {block_write_ptr_r, position_w,
+                        ic_resp_err_i, ic_resp_data_i[position_w * 16 +: 16]};
             end
         end
-    end
+    endgenerate
     always @(*) begin
-        first_w = merged_w[0 +: HALFWORD_BITS];
-        first_tail_w = {merged_w[HALFWORD_BITS + 48],
-            merged_w[HALFWORD_BITS +: 16]};
+        first_w = stream_w[0];
+        first_tail_w = {stream_w[1][48], stream_w[1][15:0]};
         first_compressed_w = RVC_EN && first_w[1:0] != 3;
         first_length_w = first_compressed_w ? 3'd1 : 3'd2;
         first_raw_w = first_compressed_w ? {16'b0, first_w[15:0]} :
             {first_tail_w[15:0], first_w[15:0]};
         first_error_w = first_w[48] || (!first_compressed_w && first_tail_w[16]);
-        second_w = merged_w[first_length_w * HALFWORD_BITS +: HALFWORD_BITS];
-        second_tail_w = {merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 48],
-            merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS +: 16]};
+        second_w = first_compressed_w ? stream_w[1] : stream_w[2];
+        second_tail_w = first_compressed_w ? {stream_w[2][48], stream_w[2][15:0]} :
+            {stream_w[3][48], stream_w[3][15:0]};
         second_compressed_w = RVC_EN && second_w[1:0] != 3;
         second_length_w = second_compressed_w ? 3'd1 : 3'd2;
         second_raw_w = second_compressed_w ? {16'b0, second_w[15:0]} :
@@ -261,12 +285,11 @@ module edrv32_cpu_frontend #(
             wire [42:0] second_upper_prediction_w;
             wire first_length_mismatch_w;
             wire second_length_mismatch_w;
-            assign first_upper_prediction_w = {merged_w[HALFWORD_BITS + 92 +: 37],
-                merged_w[HALFWORD_BITS + 49], merged_w[HALFWORD_BITS + 19 +: 5]};
-            assign second_upper_prediction_w =
-                {merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 92 +: 37],
-                merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 49],
-                merged_w[({29'b0, first_length_w} + 1) * HALFWORD_BITS + 19 +: 5]};
+            assign first_upper_prediction_w = {stream_w[1][128:92],
+                stream_w[1][49], stream_w[1][23:19]};
+            assign second_upper_prediction_w = first_compressed_w ?
+                {stream_w[2][128:92], stream_w[2][49], stream_w[2][23:19]} :
+                {stream_w[3][128:92], stream_w[3][49], stream_w[3][23:19]};
             assign first_length_mismatch_w = first_w[49] &&
                 first_w[129] != first_compressed_w;
             assign second_length_mismatch_w = second_w[49] &&
@@ -345,18 +368,31 @@ module edrv32_cpu_frontend #(
             f1_cross_r <= 0;
             f2_pending_r <= 0;
             halfword_count_r <= 0;
+            halfword_read_ptr_r <= 0;
+            halfword_write_ptr_r <= 0;
+            block_write_ptr_r <= 0;
         end else if (redirect_w) begin
             f1_pc_r <= redirect_pc_w;
             f1_cross_r <= 0;
             f2_pending_r <= 0;
             halfword_count_r <= 0;
+            halfword_read_ptr_r <= 0;
+            halfword_write_ptr_r <= 0;
+            block_write_ptr_r <= 0;
         end else if (recover_w) begin
             f1_pc_r <= recover_pc_w;
             f1_cross_r <= 0;
             f2_pending_r <= 0;
             halfword_count_r <= 0;
+            halfword_read_ptr_r <= 0;
+            halfword_write_ptr_r <= 0;
+            block_write_ptr_r <= 0;
         end else begin
             halfword_count_r <= remaining_w;
+            halfword_read_ptr_r <= halfword_read_ptr_r + consume_w;
+            halfword_write_ptr_r <= halfword_write_ptr_r + append_count_w;
+            if (response_accept_w)
+                block_write_ptr_r <= block_write_ptr_r + 1'b1;
             if (response_accept_w)
                 f2_pending_r <= 0;
             if (request_accept_w) begin
@@ -378,8 +414,9 @@ module edrv32_cpu_frontend #(
         end
     end
     always @(posedge clk_i) begin
-        if (!redirect_w && !recover_w)
-            halfwords_r <= merged_w >> (consume_w * HALFWORD_BITS);
+        if (f2_pending_r && ic_resp_valid_i)
+            blocks_r[block_write_ptr_r] <= {f2_compressed_r, f2_ras_r, f2_history_r,
+                f2_target_r, f2_taken_r, f2_hit_r, f2_position_r, f2_pc_r[31:3]};
         if (request_accept_w) begin
             f2_pc_r <= f1_pc_r;
             f2_end_r <= request_end_w > 4 ? 3'd4 : request_end_w;
