@@ -15,10 +15,18 @@ from analyze import COMMIT, CONTROL, DISASM, decode
 VARIANTS = ('V0', 'V1', 'V2', 'V2s', 'V2s+V5', 'V3', 'V4a', 'V3+V4a',
             'V4b', 'V3+V4b', 'V5', 'V3+V5',
             'L1', 'L1+V5', 'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5')
+INORDER_VARIANTS = {
+    'B0': {}, 'B1': {'swap': True},
+    'B2-load': {'lsu': ('load',)}, 'B2': {'lsu': ('load', 'store')},
+    'B3': {'mul': True}, 'B4': {'dual_control': True},
+    'B5': {'mul_latency': 2}, 'B6': {'predictor': (128, 2048, 8)},
+    'B6-ras': {'predictor': (64, 1024, 8)}, 'B7': {'late_jalr': True},
+}
+VARIANTS += tuple(INORDER_VARIANTS)
 SLOT_CAUSES = ('effective', 'wrong_path', 'redirect_e', 'redirect_m', 'redirect_d',
                'frontend', 'load_use',
                'other_result', 'csr_serial', 'pair_raw', 'pair_structural',
-               'pair_type', 'pair_one')
+               'pair_type', 'pair_one', 'training_structural')
 PAIR_CAUSES = {5: 'pair_raw', 6: 'pair_structural', 7: 'pair_type', 8: 'pair_one'}
 
 
@@ -36,36 +44,37 @@ class Record:
     counted_issue: bool = False
     late: bool = False
     late_store_data: bool = False
+    deferred_control: bool = False
 
 
 class Predictor:
     """C-E2 grouped BTB/gshare/RAS algorithm, scheduled at F1 and E like the RTL."""
 
-    def __init__(self, btb_size, pht_size, group_bytes):
+    def __init__(self, btb_size, pht_size, group_bytes, ras_size=4):
         self.btb = [None] * btb_size
         self.pht = [1] * pht_size
         self.history = 0
         self.shift = group_bytes.bit_length() - 1
-        self.stack = [0] * 4
+        self.stack = [0] * ras_size
         self.pointer = 0
         self.count = 0
 
     def snapshot(self):
-        return self.pointer, self.count, self.stack[(self.pointer - 1) % 4]
+        return self.pointer, self.count, self.stack[(self.pointer - 1) % len(self.stack)]
 
     def action(self, instruction):
         if instruction.pop and self.count:
-            self.pointer = (self.pointer - 1) % 4
+            self.pointer = (self.pointer - 1) % len(self.stack)
             self.count -= 1
         if instruction.push:
             self.stack[self.pointer] = instruction.pc + instruction.size
-            self.pointer = (self.pointer + 1) % 4
-            self.count = min(4, self.count + 1)
+            self.pointer = (self.pointer + 1) % len(self.stack)
+            self.count = min(len(self.stack), self.count + 1)
 
     def restore(self, record):
         self.pointer, self.count, top = record.checkpoint
         if self.count:
-            self.stack[(self.pointer - 1) % 4] = top
+            self.stack[(self.pointer - 1) % len(self.stack)] = top
         self.action(record.instruction)
 
     def query(self, pc):
@@ -79,7 +88,7 @@ class Predictor:
             index = ((instruction.pc >> 1) ^ self.history) & (len(self.pht) - 1)
             taken = instruction.kind != 'branch' or self.pht[index] >= 2
             if instruction.pop and self.count:
-                target = self.stack[(self.pointer - 1) % 4]
+                target = self.stack[(self.pointer - 1) % len(self.stack)]
         return entry, taken, target, self.history, self.snapshot()
 
     def update(self, record):
@@ -196,7 +205,12 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024):
 def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty=2,
              load_latency=2, mul_latency=3, perfect_prediction=False,
              perfect_frontend=False, relax_raw=False, all_slot1_types=False):
+    changes = INORDER_VARIANTS.get(variant, {})
+    if variant in INORDER_VARIANTS:
+        variant = 'L2b+V5'
+    mul_latency = changes.get('mul_latency', mul_latency)
     swap = variant in {'V1', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
+    swap |= changes.get('swap', False)
     late_backend = variant.startswith('L')
     late_both = variant in {'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5'}
     late_branch = variant in {'L2b', 'L2b+V5'}
@@ -204,13 +218,16 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     branch_lane = late_backend or variant in {
         'V2', 'V2s', 'V2s+V5', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
     single_control = late_backend or variant in {'V2s', 'V2s+V5'}
+    single_control &= not changes.get('dual_control', False)
+    late_controls = {'branch', 'jalr'} if changes.get('late_jalr') else {'branch'}
     dual_query = variant in {'V4b', 'V3+V4b'}
     group_bytes = 16 if variant in {'V4a', 'V3+V4a', 'V4b', 'V3+V4b'} else 8
     depth = 8 if group_bytes == 16 else 4
     large_predictor = variant in {'V5', 'V3+V5', 'V2s+V5'} or (
         late_backend and variant.endswith('+V5'))
     btb, pht = (64, 1024) if large_predictor else (32, 512)
-    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes)
+    btb, pht, ras = changes.get('predictor', (btb, pht, 4))
+    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes, ras)
     ib = deque()
     halfwords = []
     pending = []
@@ -224,6 +241,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     late_retired = [0, 0, 0]
     training_pending = deque()
     training_conflicts = 0
+    training_peak = 0
+    training_over_one = 0
     slots = dict.fromkeys(SLOT_CAUSES, 0)
     division_left = 0
     recovery = None
@@ -256,7 +275,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if not any(needs):
             return True, False, False
         if (instruction.kind == 'alu' and (lane == 1 or late_both)) or (
-                instruction.kind == 'branch' and late_branch):
+                instruction.kind in late_controls and late_branch):
             if max(needs) <= 1:
                 return True, True, False
         if instruction.kind == 'store' and late_store and lane == 0:
@@ -343,20 +362,27 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if late_branch:
             for index, record in enumerate(m):
                 instruction = record.instruction
-                if record.late and instruction.kind == 'branch':
-                    taken = record.next_pc != instruction.pc + instruction.size
+                if (record.late and instruction.kind in late_controls) or record.deferred_control:
+                    taken = (instruction.kind in {'jal', 'jalr'} or
+                             record.next_pc != instruction.pc + instruction.size)
                     if record.taken != taken or (taken and record.target != record.next_pc):
                         m_redirect = record
                         m_surviving = m[:index + 1]
                         break
+        m_training = [r for r in m_surviving if (
+            r.late and r.instruction.kind in late_controls) or r.deferred_control]
+        bounded_training = changes.get('training_capacity') == 1
+        m_stall = bounded_training and len(training_pending) + len(m_training) > 2
+        if m_stall:
+            m_redirect = None
 
         # E resolves before D can issue. A wrong younger member is squashed here.
         redirect = None
         surviving = []
-        for record in (() if m_redirect else e):
+        for record in (() if m_redirect or m_stall else e):
             instruction = record.instruction
             surviving.append(record)
-            if record.late and instruction.kind == 'branch':
+            if (record.late and instruction.kind in late_controls) or record.deferred_control:
                 continue
             actual_taken = (instruction.kind in {'jal', 'jalr'} or
                             (instruction.kind == 'branch' and
@@ -366,14 +392,20 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             if wrong and not record.d_redirect:
                 redirect = record
                 break
-        div_wait = bool(not m_redirect and division_left and
-                        any(r.instruction.kind == 'div' for r in e))
+        e_training = [r for r in surviving if r.instruction.kind in CONTROL and not (
+            (r.late and r.instruction.kind in late_controls) or r.deferred_control)]
+        e_stall = m_stall or (bounded_training and
+            len(training_pending) + len(m_training) + len(e_training) > 2)
+        if e_stall:
+            redirect = None
+        div_wait = bool(not m_redirect and not e_stall and division_left and
+                        any(r.instruction.kind == 'div' for r in surviving))
         events[10] = int(div_wait)
         if div_wait:
             division_left -= 1
             redirect = None
         events[16] = int(m_redirect is not None or redirect is not None)
-        available = not m_redirect and not redirect and not div_wait and not blocked_ideal
+        available = not (m_redirect or redirect or div_wait or blocked_ideal or e_stall)
         events[12] = int(not ib and available)
         if ib and e:
             inst = ib[0].instruction
@@ -428,12 +460,22 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         structural = True
                     supported = (younger.kind == 'alu' or
                                  (branch_lane and younger.kind in {'branch', 'jal'}))
+                    if younger.kind in changes.get('lsu', ()):
+                        supported = True
+                        structural |= older.kind in {'load', 'store'}
+                    if younger.kind == 'mul' and changes.get('mul'):
+                        supported = True
+                        structural |= older.kind == 'mul'
                     if all_slot1_types:
                         supported = younger.kind != 'illegal'
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
                         supported = False
-                    exchanged = swap and older.kind == 'alu' and not supported
+                    older_supported = older.kind == 'alu' or (
+                        changes.get('swap') and older.kind in {'branch', 'jal'})
+                    exchanged = swap and older_supported and not supported
                     exchanged = exchanged and younger.kind not in {'csr', 'serial', 'illegal'}
+                    if single_control and older.kind in CONTROL and younger.kind in CONTROL:
+                        exchanged = False
                     reason = 5 if raw else 6 if structural else 7 if not (
                         supported or exchanged) else 0
                     if not reason:
@@ -457,12 +499,16 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     record.counted_issue = active
                     record.late = older_late if slot == 0 else younger_late
                     record.late_store_data = older_store if slot == 0 else younger_store
+                    record.deferred_control = bool(
+                        changes.get('dual_control') and slot == 1 and older_late and
+                        older.kind in CONTROL and instruction.kind in CONTROL)
                     record.next_pc = trace[cursor + 1] if cursor + 1 < len(trace) else end + 4
                     if cursor < len(trace) and instruction.pc == trace[cursor]:
                         cursor += 1
                     else:
-                        speculative = late_branch and any(r.late and
-                            r.instruction.kind == 'branch' for r in e)
+                        speculative = late_branch and any(
+                            (r.late and r.instruction.kind in late_controls) or
+                            r.deferred_control for r in e)
                         if slot == 0 and not speculative:
                             raise ValueError(f'trace mismatch at commit {cursor}: '
                                              f'fetch PC {instruction.pc:08x}, '
@@ -488,15 +534,17 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
 
         # All predictor mutations occur at the edge, after the concurrent F1 query.
         m_updates = []
-        if late_branch:
+        if late_branch and not m_stall:
             for record in m_surviving:
-                if record.late and record.instruction.kind == 'branch':
+                if (record.late and record.instruction.kind in late_controls) or (
+                        record.deferred_control):
                     m_updates.append(record)
         e_updates = []
-        if not div_wait:
+        if not div_wait and not e_stall:
             for record in surviving:
                 if record.instruction.kind in CONTROL and not (
-                        record.late and record.instruction.kind == 'branch'):
+                        (record.late and record.instruction.kind in late_controls) or
+                        record.deferred_control):
                     e_updates.append(record)
         if late_branch:
             training_pending.extend(m_updates)
@@ -534,7 +582,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             predictor.action(query[0][0])
         if not flush and issued:
             recovery = None
-        if div_wait:
+        killed = 0
+        if m_stall:
+            w = []
+        elif e_stall:
+            w, m = m_surviving, []
+        elif div_wait:
             w, m = m, []
         else:
             if m_redirect:
@@ -551,7 +604,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             slots['wrong_path'] += killed
             empty = 2 - len(issued)
             if empty:
-                if recovery:
+                if e_stall:
+                    cause = 'training_structural'
+                elif recovery:
                     cause = recovery
                 elif front_empty or trace_exhausted and not csr_wait:
                     cause = 'frontend'
@@ -571,7 +626,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 counters[event] += events[event]
             for index, count in enumerate(retired_late):
                 late_retired[index] += count
-            training_conflicts += bool(m_updates and e_updates)
+            training_conflicts += (len(m_updates) + len(e_updates) > 1)
+            training_over_one += len(training_pending) > 1
+            training_peak = max(training_peak, len(training_pending))
     result = dict(cycles=cycles, instructions=2 * counters[1] + counters[2],
                   **{f'hpm{i}': counters[i] for i in range(1, 17)})
     result['ipc'] = result['instructions'] / result['cycles']
@@ -580,6 +637,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                   late_store_data=late_retired[2], late_instructions=sum(late_retired))
     result['late_share'] = result['late_instructions'] / result['instructions']
     result['training_conflicts'] = training_conflicts
+    result['training_peak'] = training_peak
+    result['training_over_one'] = training_over_one
     return result
 
 

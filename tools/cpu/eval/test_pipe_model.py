@@ -6,7 +6,7 @@ from dataclasses import replace
 import unittest
 
 from analyze import Instruction
-from pipe_model import Predictor, Record, SLOT_CAUSES, simulate
+from pipe_model import INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, simulate
 
 
 def instruction(pc, kind='alu', rd=0, sources=(), size=4, target=0):
@@ -23,6 +23,197 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_b1_exchange_capability_and_single_control(self):
+        for older in ('alu', 'branch', 'jal'):
+            for younger in ('load', 'store', 'mul', 'div', 'jalr'):
+                stream = [instruction(0, older, target=4),
+                          instruction(4, younger, target=8)]
+                options = dict(perfect_frontend=True, perfect_prediction=True)
+                result = run(stream, 'B1', **options)
+                expected = 0 if older in {'branch', 'jal'} and younger == 'jalr' else 1
+                self.assertEqual(result['hpm1'], expected, (older, younger))
+        stream = [instruction(0, rd=10), instruction(4, 'load', sources=(10,))]
+        self.assertEqual(run(stream, 'B1')['hpm1'], 0)
+        stream[1] = instruction(4, 'load', rd=10)
+        stream.append(instruction(8, sources=(10,)))
+        self.assertEqual(run(stream, 'B1')['cycles'], 2)
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[0] = instruction(0, 'branch', target=32)
+        program[4] = instruction(4, 'div')
+        program[36] = instruction(36, 'serial')
+        result = simulate(program, [0, 32, 36], 0, 36, 'B1')
+        self.assertEqual(result['cycles'], 5)
+        self.assertEqual(result['hpm10'], 0)
+
+    def test_b2_unique_lsu_and_load_only(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for variant in ('B2-load', 'B2'):
+            for older in ('alu', 'branch', 'mul', 'load', 'store'):
+                for younger in ('load', 'store'):
+                    stream = [instruction(0, older, target=4), instruction(4, younger)]
+                    result = run(stream, variant, **options)
+                    expected = older not in {'load', 'store'} and (
+                        younger == 'load' or variant == 'B2')
+                    self.assertEqual(result['hpm1'], int(expected),
+                                     (variant, older, younger))
+        for sources in ((10, 2), (2, 10)):
+            stream = [instruction(0, rd=10), instruction(4, 'store', sources=sources)]
+            self.assertEqual(run(stream, 'B2')['hpm1'], 0)
+        stream = [instruction(pc) for pc in range(0, 32, 4)]
+        stream += [instruction(32, 'store'), instruction(36, 'load')]
+        self.assertGreater(run(stream, 'B2', **options)['slots_pair_structural'], 0)
+
+    def test_b3_unique_pipelined_multiplier(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for older in ('alu', 'load', 'store', 'branch', 'mul'):
+            stream = [instruction(0, older, target=4), instruction(4, 'mul')]
+            result = run(stream, 'B3', **options)
+            self.assertEqual(result['hpm1'], int(older != 'mul'))
+        stream = [instruction(0, rd=10), instruction(4, 'mul', sources=(10,))]
+        self.assertEqual(run(stream, 'B3')['hpm1'], 0)
+        stream = [instruction(0, 'mul', rd=10), instruction(4, 'mul', rd=11),
+                  instruction(8, 'load', sources=(11,))]
+        result = run(stream, 'B3', **options)
+        self.assertEqual(result['cycles'], 5)
+
+    def test_b5_multiplier_latency_two(self):
+        stream = [instruction(0, 'mul', rd=10), instruction(4, sources=(10,))]
+        self.assertEqual(run(stream, 'B0')['cycles'], 3)
+        self.assertEqual(run(stream, 'B5')['cycles'], 2)
+        self.assertEqual(run(stream, 'B5')['late_alu'], 1)
+        stream[1] = instruction(4, 'load', sources=(10,))
+        self.assertEqual(run(stream, 'B5')['cycles'], 3)
+
+    def test_b4_two_controls_and_deferred_younger(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        stream = [instruction(0, 'branch', target=4), instruction(4, 'branch', target=8)]
+        self.assertEqual(run(stream, 'B0', **options)['hpm1'], 0)
+        self.assertEqual(run(stream, 'B4', **options)['hpm1'], 1)
+        program = {pc: instruction(pc) for pc in range(0, 192, 4)}
+        program[32] = instruction(32, 'load', rd=10)
+        program[36] = instruction(36, 'branch', sources=(10,), target=96)
+        program[40] = instruction(40, 'branch', target=128)
+        program[44] = instruction(44, 'serial')
+        result = simulate(program, list(range(0, 48, 4)), 0, 44, 'B4')
+        self.assertEqual(result['late_branch'], 1)
+        self.assertEqual(result['training_conflicts'], 1)
+        self.assertEqual(result['training_peak'], 1)
+        self.assertEqual(result['hpm4'], 2)
+        program[100] = instruction(100, 'serial')
+        result = simulate(program, list(range(0, 40, 4)) + [96, 100], 0, 100, 'B4')
+        self.assertEqual(result['hpm4'], 1)
+        self.assertEqual(result['training_conflicts'], 0)
+        self.assertGreater(result['slots_wrong_path'], 0)
+
+    def test_single_training_buffer_backpressure(self):
+        INORDER_VARIANTS['B4-1buf'] = INORDER_VARIANTS['B4'] | {'training_capacity': 1}
+        self.addCleanup(INORDER_VARIANTS.pop, 'B4-1buf')
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        stream = [instruction(pc, 'branch', target=pc + 4) for pc in range(0, 80, 4)]
+        unlimited = run(stream, 'B4', **options)
+        limited = run(stream, 'B4-1buf', **options)
+        self.assertEqual(unlimited['training_peak'], 10)
+        self.assertEqual(limited['training_peak'], 1)
+        self.assertEqual(limited['training_over_one'], 0)
+        self.assertEqual(limited['cycles'], 19)
+        self.assertEqual(limited['hpm4'], 20)
+        self.assertEqual(limited['instructions'], 20)
+        self.assertGreater(limited['slots_training_structural'], 0)
+        self.assertEqual(sum(limited['slots_' + key] for key in SLOT_CAUSES),
+                         2 * limited['cycles'])
+        # A prior pair occupies the buffer when two M controls arrive together.
+        stream = [instruction(pc) for pc in range(0, 32, 4)]
+        for pc in range(32, 96, 16):
+            stream += [instruction(pc, 'load', rd=10),
+                       instruction(pc + 4, 'branch', sources=(10,), target=pc + 8),
+                       instruction(pc + 8, 'branch', target=pc + 12),
+                       instruction(pc + 12, 'branch', target=pc + 16)]
+        limited = run(stream, 'B4-1buf', **options)
+        self.assertEqual(limited['cycles'], 20)
+        self.assertEqual(limited['slots_training_structural'], 8)
+        self.assertEqual(limited['training_peak'], 1)
+        self.assertEqual(limited['hpm4'], 12)
+        self.assertEqual(limited['instructions'], 24)
+        self.assertEqual(sum(limited['slots_' + key] for key in SLOT_CAUSES),
+                         2 * limited['cycles'])
+
+    def test_b6_predictor_capacity_and_ras_eight(self):
+        self.assertEqual(INORDER_VARIANTS['B6']['predictor'], (128, 2048, 8))
+        self.assertEqual(INORDER_VARIANTS['B6-ras']['predictor'], (64, 1024, 8))
+        predictor = Predictor(128, 2048, 8, 8)
+        call = replace(instruction(0, 'jal'), push=True)
+        ret = replace(instruction(64, 'jalr'), pop=True)
+        for pc in range(0, 24, 4):
+            predictor.action(replace(call, pc=pc))
+        predictor.btb[8] = (ret, 100)
+        self.assertEqual(predictor.count, 6)
+        self.assertEqual(predictor.query(64)[2], 24)
+        checkpoint = predictor.snapshot()
+        predictor.action(ret)
+        predictor.restore(Record(ret, True, True, 24, 0, checkpoint))
+        self.assertEqual(predictor.count, 5)
+        self.assertEqual(predictor.query(64)[2], 20)
+        a, b = instruction(0, 'branch', target=16), instruction(512, 'branch', target=528)
+        for inst in (a, b):
+            predictor.update(Record(inst, False, False, 0, 1536, predictor.snapshot(),
+                                    next_pc=inst.target))
+        self.assertIsNotNone(predictor.query(0)[0])
+        self.assertIsNotNone(predictor.query(512)[0])
+        self.assertEqual(predictor.pht[1536], 3)
+        self.assertEqual(predictor.pht[512], 1)
+
+    def test_b7_late_jalr_return_and_link_latency(self):
+        program = {pc: instruction(pc) for pc in range(0, 160, 4)}
+        program[0] = instruction(0, 'load', rd=10)
+        program[4] = replace(instruction(4, 'jalr', rd=1, sources=(10,)), pop=True)
+        program[36] = instruction(36, 'serial')
+        trace = [0, 4, 32, 36]
+        baseline = simulate(program, trace, 4, 36, 'B0')
+        result = simulate(program, trace, 4, 36, 'B7')
+        self.assertEqual(baseline['cycles'], 5)
+        self.assertEqual(result['cycles'], 6)
+        self.assertEqual(result['late_branch'], 1)
+        self.assertGreater(result['slots_redirect_m'], 0)
+        self.assertEqual(sum(result['slots_' + key] for key in SLOT_CAUSES),
+                         2 * result['cycles'])
+        stream = [instruction(0, rd=10), instruction(4, 'jalr', rd=1, sources=(10,)),
+                  instruction(8, sources=(1,))]
+        result = run(stream, 'B7', perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(result['hpm1'], 1)  # JALR pairs with its younger late ALU.
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual(result['late_branch'], 0)
+        self.assertEqual(run(stream[:2], 'B7')['hpm1'], 0)  # JALR stays lane 0 only.
+
+    def test_b8_composition_and_positive_selection(self):
+        from run_inorder_max import select
+        from run_pipeline_analysis import CONFIGS
+        cycles = {'B0': 100, 'B1': 90, 'B2-load': 95, 'B2': 85, 'B3': 110,
+                  'B4': 99, 'B5': 50, 'B6': 102, 'B6-ras': 100, 'B7': 100}
+        rows = [dict(rvc=rvc, option=option, variant=variant, cycles=cycles[variant])
+                for rvc, option in CONFIGS for variant in cycles]
+        changes, components = select(rows)
+        self.assertEqual(components, 'B1+B2+B4')
+        self.assertEqual(changes, {'swap': True, 'lsu': ('load', 'store'),
+                                   'dual_control': True})
+        # Exercise simultaneous routing/late-control features and unique resources.
+        changes = {}
+        for variant in ('B1', 'B2', 'B3', 'B4', 'B6', 'B7'):
+            changes.update(INORDER_VARIANTS[variant])
+        INORDER_VARIANTS['B8-directed'] = changes
+        self.addCleanup(INORDER_VARIANTS.pop, 'B8-directed')
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for older, younger, pairs in (('load', 'mul', 1), ('mul', 'load', 1),
+                                       ('load', 'store', 0), ('mul', 'mul', 0),
+                                       ('branch', 'branch', 1)):
+            stream = [instruction(0, older, target=4), instruction(4, younger, target=8)]
+            self.assertEqual(run(stream, 'B8-directed', **options)['hpm1'], pairs)
+        stream = [instruction(0, rd=10), instruction(4, 'jalr', rd=1, sources=(10,)),
+                  instruction(8, sources=(1,))]
+        result = run(stream, 'B8-directed', **options)
+        self.assertEqual(result['instructions'], 3)
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual(result['late_branch'], 1)
+
     def test_late_same_group_alu(self):
         stream = [instruction(0, rd=10), instruction(4, rd=11, sources=(10,))]
         for variant in ('L1', 'L2'):
