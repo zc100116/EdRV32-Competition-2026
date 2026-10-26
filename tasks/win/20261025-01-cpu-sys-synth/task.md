@@ -10,7 +10,7 @@
 
 - commit：`main` 上包含本任务卡第二版的提交（Windows Codex 在 `result.md` 中记录实际使用的完整哈希）。
 - 顶层：`fpga/rtl/edrv32_fpga_cpu_sys_top.v`（模块 `edrv32_fpga_cpu_sys_top`，参数 `RVC_EN` 默认 1）。
-- 导入脚本：`fpga/scripts/import_cpu_sys_top.tcl`。按 `rtl/filelists/cpu_subsys.f`、`sys_subsys.f` 展开全部源文件（41 个）并加入顶层，共 42 个，导入约束文件，设置器件，然后以头文件目录 `rtl/include`、宏 `FPGA_MODE` 编译（`compile -include_path -compiler_directives`）。路径按脚本自身位置计算，仓库放在哪里都可以。IP 已在工程中，脚本不重复添加。
+- 导入脚本：`fpga/scripts/import_cpu_sys_top.tcl`。按 `rtl/filelists/cpu_subsys.f`、`sys_subsys.f` 展开全部源文件（41 个）并加入顶层，共 42 个，导入约束文件，然后以头文件目录 `rtl/include`、宏 `FPGA_MODE` 编译（`compile -include_path -compiler_directives`）。PDS Tcl 当前目录必须为 `EdRV32-FPGA/<工程名>`；源码仓库按 `../../EdRV32-Competition-2026` 解析，不依赖 `info script`。器件沿用工程设置。IP 已在工程中，脚本不重复添加。
 - 约束：`fpga/constraints/edrv32_fpga_cpu_sys_top.fdc`。`clk_i` 按 150 MHz（6.667 ns）约束；引脚取自厂商 demo：`clk_i` D18（板载 27 MHz）、`rst_n_i` C22、`key_n_i` C23、`uart_rx_i` B24、`uart_tx_o` C24、`led_o[0..3]` A20/C18/C19/E18。本任务只测时序和资源，不上板运行。
 - 头文件目录 `rtl/include` 和宏 `FPGA_MODE`（只定义这一个，不定义 `SIM_MODE`）由导入脚本在编译命令中设置，不需要在工程设置里填。
 
@@ -28,7 +28,7 @@
 | 步骤 | 执行者 | 内容 |
 |---|---|---|
 | 1 | Windows Codex（C） | `git fetch origin`，然后 `git switch -C win/20261025-01-cpu-sys-synth origin/main`（第一阶段的提交已并入 main，旧分支直接覆盖）。阅读本任务卡，把用户步骤整理成清单交给用户。 |
-| 2 | 用户（U） | 打开第一阶段工程，在 PDS Tcl 控制台执行：`source <仓库路径>/fpga/scripts/import_cpu_sys_top.tcl`（路径用 `/`）。脚本导入源文件和约束并完成编译，最后打印 `edrv32: added 42 sources` 和顶层、头文件目录、宏。编译报错就停下，把报错原文交给 Codex 写进 `result.md`。 |
+| 2 | 用户（U） | 打开第一阶段工程，将 PDS Tcl 当前目录设为 `G:/codex_project/EdRV32-FPGA/EdRV32`，执行 `source ../../EdRV32-Competition-2026/fpga/scripts/import_cpu_sys_top.tcl`。脚本导入源文件和约束并完成编译，最后打印 `edrv32: added 42 sources` 和顶层、头文件目录、宏。编译报错就停下，把报错原文交给 Codex 写进 `result.md`。 |
 | 3 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`（与厂商 demo 的 `impl.tcl` 相同的流程，不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex 写进 `result.md`。 |
 | 4 | Windows Codex（C） | 从工程目录收集第 6 节产物。 |
 | 5 | 用户（U）+ Codex（C） | 把顶层文件中 `RVC_EN` 默认值本地改为 0（只改这一处，不提交），在控制台重新执行 `compile -top_module edrv32_fpga_cpu_sys_top -include_path <仓库路径>/rtl/include -compiler_directives FPGA_MODE`（文件已在工程中，不再 source 脚本），再执行步骤 3；Codex 只收集第 6 节第 2、3 项的汇总数字，写入 `rvc0_summary.txt`。完成后把这处改动撤销。 |

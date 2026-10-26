@@ -11,6 +11,29 @@
 
 ## 用户确认与 IP 端口差异
 
+### 第二阶段导入路径调整（2026-10-26）
+
+输入 commit：`81163fe2e2136b8bc146909d65ae19bfed9ab58e`。
+PDS 日志确认原脚本将源码根目录算为 `G:/`，报错：
+
+```text
+E: Flow-0046: Execute tcl command fail. Error message is 'couldn't open "G:/rtl/filelists/cpu_subsys.f": no such file or directory'.
+```
+
+按用户确认的目录布局，工程位于 `G:/codex_project/EdRV32-FPGA/<工程名>`，
+源码位于 `G:/codex_project/EdRV32-Competition-2026`。
+本次将根目录计算改为 `[file normalize ../../EdRV32-Competition-2026]`，
+要求从 FPGA 工程目录执行，不再使用 `[info script]`，不写死盘符或绝对源码路径。
+任务卡同步更新执行命令。当前工程的相对导入命令为：
+
+```tcl
+source ../../EdRV32-Competition-2026/fpga/scripts/import_cpu_sys_top.tcl
+```
+
+Tcl 路径检查：从 `G:/codex_project/EdRV32-FPGA/EdRV32` 执行，
+42 个源码文件、约束、头文件目录均能定位，顶层及 FPGA_MODE 参数正确。
+检查仅捕获导入及编译参数，尚未运行实际 PDS 编译。
+
 2026-10-26 用户授权 Windows Codex 修改包装模块，并转达 VPS Claude 确认：
 其余包装模块复位统一接 `1'b0`、使能接实际端口；两个 Tag IP 用 512 深度，地址高位补零；
 SRAM 使用单口；Windows 不要求运行 Verilator，结果推送后由 VPS Linux 执行 lint 和仿真回归。

@@ -4,9 +4,10 @@
 # project whose 7 IPs are already generated in the project, then compiles with the
 # include directory rtl/include and the macro FPGA_MODE. Synthesis and
 # implementation are run afterwards in PDS (see the task card).
-# Usage, in the PDS Tcl console: source <repo>/fpga/scripts/import_cpu_sys_top.tcl
+# Run from the FPGA project directory EdRV32-FPGA/<project>:
+# source ../../EdRV32-Competition-2026/fpga/scripts/import_cpu_sys_top.tcl
 
-set edrv32_repo [file normalize [file join [file dirname [info script]] .. ..]]
+set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 set edrv32_top edrv32_fpga_cpu_sys_top
 set edrv32_include_dirs [list [file join $edrv32_repo rtl include]]
 set edrv32_defines [list FPGA_MODE]
