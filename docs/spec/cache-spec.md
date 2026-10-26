@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.4（草案） |
-| 日期 | 2026-10-25 |
+| 版本 | v0.5（草案） |
+| 日期 | 2026-10-26 |
 | 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | 指令 cache `edrv32_icache`、数据 cache `edrv32_dcache`、维护寄存器块 `edrv32_cache_ctrl` |
 | 关联文档 | SoC 规格 4.1、6.1、6.2、8.2 节；`docs/spec/cpu-spec.md` 3.2、3.3、4.7 节；`docs/testplan/cache-testplan.md`；`docs/plan/cache-plan.md` |
@@ -181,6 +181,8 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 | PMA 违例 | 地址译码 | `ic_resp_err_i` / `dc_resp_err_i` | 不发出总线事务 |
 | 填充读到错误响应（SLVERR/DECERR） | R 通道 | 该请求返回错误 | 该行不装入（有效位保持 0）；本次突发的剩余拍照常接收 |
 | 设备/不可缓存访问返回错误 | R/B 通道 | `dc_resp_err_i` | — |
+
+`dc_resp_err_i` 只在 `dc_resp_valid_i` 为 1 的周期为 1（cpu-spec 3.3）；D$ 必须用自身的寄存器状态产生 err，不得让 err 依赖本拍的 tag 比较结果。
 | 脏行写回返回错误 | B 通道 | `wb_err_o` 脉冲；`edrv32_cache_ctrl` 置 IRQ_STAT.bit1、记录 ERR_ADDR | 被替换行的数据丢失；后续填充照常进行 |
 
 ---
@@ -219,3 +221,4 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 | 2026-10-25 | v0.2 | 澄清（K-RTL/K-VERIF 开发中确认）：5.1 ic_inv 与在途填充重叠时 invalidate 优先；第 4 节 IRQ_STAT 清位与新错误同拍时新错误优先；5.4 OP_SIZE=0 立即完成只适用于命令 1–3 |
 | 2026-10-25 | v0.3 | 5.2 写回时给出 `dc_wb_event_i` 脉冲（cpu-spec v0.5 新增端口） |
 | 2026-10-25 | v0.4 | 5.1/5.2 kill 不屏蔽同一周期的响应（与 cpu-spec v0.8 一致，消除组合环） |
+| 2026-10-26 | v0.5 | 第 6 节 `dc_resp_err_i` 只在 `dc_resp_valid_i` 为 1 时有效，且不依赖本拍 tag 比较（与 cpu-spec v0.11 一致，C-R6 时序优化；用户确认） |
