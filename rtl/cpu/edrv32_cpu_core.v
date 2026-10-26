@@ -168,6 +168,7 @@ module edrv32_cpu_core #(
     wire [31:0] m_trap_pc_w;
     wire [31:0] m_trap_cause_w;
     wire [31:0] m_trap_value_w;
+    wire m_system_commit_w;
     wire m_mret_w;
     wire m_wfi_w;
     wire m_fence_i_done_w;
@@ -559,9 +560,17 @@ module edrv32_cpu_core #(
     assign dc_fence_o = m_valid_r[0] && m_class_r[0] == C_FENCE && !m_trap_w;
     assign dc_clean_all_o = m_valid_r[0] && m_class_r[0] == C_FENCE_I &&
         !m_fence_phase_r && !m_trap_w;
-    assign m_mret_w = m_commit_w[0] && m_class_r[0] == C_SYSTEM && m_instr_r == 32'h30200073;
-    assign m_wfi_w = m_commit_w[0] && m_class_r[0] == C_SYSTEM && m_instr_r == 32'h10500073;
-    assign m_fence_i_done_w = m_commit_w[0] && m_class_r[0] == C_FENCE_I;
+    // cpu-spec 4.5: system instructions are ready in M without a D-cache response.
+    // Specialize their commit predicate so D-cache hit/ready cannot feed MRET or WFI.
+    assign m_system_commit_w = m_valid_r[0] && !m_exception_r &&
+        !(csr_global_mie_w && irq_pending_w && !(div_started_r && !div_done_r));
+    assign m_mret_w = m_class_r[0] == C_SYSTEM && m_instr_r == 32'h30200073 &&
+        m_system_commit_w;
+    assign m_wfi_w = m_class_r[0] == C_SYSTEM && m_instr_r == 32'h10500073 &&
+        m_system_commit_w;
+    // FENCE.I accepts no interrupt and completes solely on the invalidate handshake.
+    assign m_fence_i_done_w = m_valid_r[0] && m_class_r[0] == C_FENCE_I &&
+        !m_exception_r && m_fence_phase_r && ic_inv_done_i;
     assign m_redirect_w = m_trap_w || m_mret_w || m_fence_i_done_w || m_wfi_w;
     assign m_redirect_pc_w = m_trap_w ?
         ({csr_mtvec_w[31:2], 2'b0} +
