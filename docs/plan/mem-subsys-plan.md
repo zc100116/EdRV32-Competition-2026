@@ -36,7 +36,7 @@ mem_xbar 是 CLAUDE.md 11.1 的关键模块：协调者逐行评审。
 | M-R4 | 板级 DDR 适配器 `fpga/rtl/edrv32_fpga_ddr_adapter.v` + IP 端口行为模型 + AD-01 | Codex · GPT-6.1 Sol | DDR3 IP 端口模板（板卡厂商例程） | AD-01 通过 | task-mem-adapter | [~] dispatch ctx_afb376e95e84 |
 | M-T1 | 存储子系统顶层和文件列表 `rtl/filelists/mem_subsys.f`（授权 M-I1 worker 写文件列表） | Codex · GPT-6.1 Sol | M-R1–M-R3 | lint 0 告警 | task-mem-integ | [~] 并入 M-I1 |
 | M-I1 | 联调：M-T1 + M-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | M-T1、M-V1 | full 全过，覆盖全部命中 | task-mem-integ | [~] dispatch ctx_e6a3398e34f8（基线 zc100116/mem-integ-base） |
-| M-A1 | 交叉评审 M-R1、M-R3（mem_xbar 由协调者评审） | Codex · GPT-6.1 Sol | M-R1、M-R3 | 意见全部处理 | task-mem-review | [~] dispatch ctx_568e15a45251 |
+| M-A1 | 交叉评审 M-R1、M-R3（mem_xbar 由协调者评审） | Codex · GPT-6.1 Sol | M-R1、M-R3 | 意见全部处理 | task-mem-review | [x] 无确定性功能错误，4 条建议并入 M-I1 |
 | M-W1 | 上板：PERF_MON 读写校验、带宽与延迟、自动预充电对照（Windows 任务卡） | 用户 + Windows Codex | SoC 板级顶层 | 校验通过，B_eff 实测 | — | [ ] |
 
 可以并行的波次：
