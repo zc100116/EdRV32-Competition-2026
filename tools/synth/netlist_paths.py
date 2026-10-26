@@ -69,7 +69,15 @@ def memory_write_port(kind, port):
     return port in {'D', 'WE'} or port.startswith('A')
 
 
-def analyze(design):
+def analyze(design, starts=None, ends=None, end_nets=None):
+    """Find longest paths between optional sets of signal/pin regular expressions.
+
+    Selected internal start nets become cuts: their driver is excluded from the
+    measured depth. Endpoint register names refer to Q, including D/enable pins.
+    end_nets selects actual internal interface nets, without treating register Q
+    aliases as D/enable endpoints.
+    Filtering starts happens before depth propagation, not after global ranking.
+    """
     top, = [name for name, module in design['modules'].items()
             if int(module.get('attributes', {}).get('top', '0'), 2)]
     module = design['modules'][top]
@@ -100,7 +108,7 @@ def analyze(design):
     scopes[''] = top
     drivers = {}
     roots = {}
-    ends = []
+    endpoints = []
     direct_constants = 0
     graph = {}
     logic = {}
@@ -112,6 +120,16 @@ def analyze(design):
     missing_src = Counter()
     memories = []
     state_bit = -1
+
+    def selected(patterns, bit, pin):
+        names = [pin, pin.rsplit('[', 1)[0]] + [label for _, label, _ in aliases[bit]]
+        return not patterns or any(re.search(pattern, name)
+                                   for pattern in patterns for name in names)
+
+    def endpoint(info, reference=None):
+        bit = info['bit'] if reference is None else reference
+        if (ends or not end_nets) and selected(ends, bit, info['pin']):
+            endpoints.append(info)
 
     def point(bit, boundary, pin, src='', reference=None):
         info = signal(bit if reference is None else reference)
@@ -142,7 +160,7 @@ def analyze(design):
                 graph[bit] = set()
                 drivers[bit] = info
             else:
-                ends.append(info)
+                endpoint(info)
                 loads[bit].append(info['pin'])
 
     for name, cell in cells.items():
@@ -202,9 +220,9 @@ def analyze(design):
                 inputs.append(bit)
                 if ff or blackbox or (memory and memory_write_port(kind, port)):
                     reference = q[index] if ff else bit
-                    ends.append(point(bit, 'FF' if ff else kind,
-                                      f'{name}.{port}[{index}]',
-                                      cell['attributes'].get('src', ''), reference))
+                    endpoint(point(bit, 'FF' if ff else kind,
+                                   f'{name}.{port}[{index}]',
+                                   cell['attributes'].get('src', ''), reference), reference)
         for port, index, bit in output_pins:
             info = point(bit, 'FF' if ff else kind, f'{name}.{port}[{index}]',
                          cell['attributes'].get('src', ''))
@@ -242,12 +260,26 @@ def analyze(design):
         if any(re.search(r'(^|_)(clk|clock|rst|reset)(_|$)', n.rpartition('.')[2])
                for n, _, _ in names):
             excluded.add(bit)
+    if starts:
+        # Named internal nets may be used to measure a subcone such as hit -> D.
+        cuts = {bit for bit in aliases if selected(starts, bit, '')}
+        for bit in cuts - roots.keys():
+            roots[bit] = point(bit, 'cut', drivers[bit]['pin'])
+            graph[bit] = set()
+        active_roots = {bit for bit, info in roots.items()
+                        if bit in cuts or selected(starts, bit, info['pin'])}
+    else:
+        active_roots = set(roots)
+    if end_nets:
+        for bit in aliases:
+            if selected(end_nets, bit, ''):
+                endpoints.append(point(bit, 'net', drivers[bit]['pin']))
     # One maximal-depth predecessor per bit; ties follow ascending net number.
     depth = {}
     predecessor = {}
     for bit in TopologicalSorter(graph).static_order():
         if bit in roots:
-            depth[bit] = 0
+            depth[bit] = 0 if bit in active_roots else None
         else:
             candidates = [b for b in sorted(graph[bit]) if depth[b] is not None]
             if candidates:
@@ -256,7 +288,7 @@ def analyze(design):
                 predecessor[bit] = prev
             else:
                 depth[bit] = None
-    reached = [end for end in ends if depth[end['bit']] is not None]
+    reached = [end for end in endpoints if depth[end['bit']] is not None]
     histogram = Counter(depth[end['bit']] for end in reached)
     ranked = sorted(reached, key=lambda end: (-depth[end['bit']], end['pin']))
     paths = []
@@ -292,9 +324,11 @@ def analyze(design):
                                src=drivers[bit]['src'], driver=drivers[bit]))
         if len(fanout) == 50:
             break
-    return {'top': top, 'totals': dict(totals), 'max_levels': max(histogram),
+    return {'top': top, 'totals': dict(totals), 'max_levels': max(histogram, default=None),
             'histogram': dict(sorted(histogram.items())), 'endpoint_count': len(reached),
-            'constant_endpoints': direct_constants + len(ends) - len(reached),
+            'constant_endpoints': direct_constants + len(endpoints) - len(reached),
+            'selected_start_bits': len(active_roots),
+            'selected_endpoint_count': len(endpoints),
             'paths': paths, 'fanout': fanout,
             'by_file': dict(sorted(by_file.items())), 'by_module': dict(sorted(by_module.items())),
             'missing_src': dict(missing_src), 'memory_cells': memories}
@@ -486,6 +520,9 @@ def main():
     parser.add_argument('netlist', type=Path)
     parser.add_argument('--hierarchical', action='store_true',
                         help='count resources per instance in an unflattened generic netlist')
+    parser.add_argument('--start', action='append', help='start signal/pin regex; repeat for a set')
+    parser.add_argument('--end', action='append', help='endpoint signal/pin regex; repeat for a set')
+    parser.add_argument('--end-net', action='append', help='internal net regex; repeat for a set')
     args = parser.parse_args()
     if args.hierarchical:
         result = hierarchy_resources(json.loads(args.netlist.read_text()))
@@ -493,8 +530,10 @@ def main():
         args.netlist.with_name('resources.md').write_text(resource_markdown(result))
         print(f"{result['top']}: hierarchical {result['totals']}")
         return
-    result = analyze(json.loads(args.netlist.read_text()))
+    result = analyze(json.loads(args.netlist.read_text()), args.start, args.end, args.end_net)
     prefix = 'xc7_paths' if args.netlist.stem == 'xc7' else 'paths'
+    if args.start or args.end or args.end_net:
+        prefix = 'filtered_' + prefix
     args.netlist.with_name(prefix + '.json').write_text(json.dumps(result, indent=2) + '\n')
     args.netlist.with_name(prefix + '.md').write_text(markdown(result))
     print(f"{result['top']}: {result['totals']}; max={result['max_levels']}")

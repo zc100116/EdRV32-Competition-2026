@@ -41,6 +41,55 @@ def fixture():
 
 
 class PathsTest(unittest.TestCase):
+    def test_filtered_internal_interface_endpoint(self):
+        result = analyze(fixture(), starts=[r'^a$'], end_nets=[r'^l1_w$'])
+        self.assertEqual(result['max_levels'], 1)
+        self.assertEqual(result['selected_endpoint_count'], 1)
+        self.assertEqual(result['paths'][0]['end']['signal'], 'l1_w')
+        self.assertEqual(result['paths'][0]['end']['boundary'], 'net')
+        # An output alias of register Q must not accidentally select register D.
+        result = analyze(fixture(), starts=[r'^a$'], end_nets=[r'^q_r$'])
+        self.assertEqual(result['selected_endpoint_count'], 1)
+        self.assertEqual(result['paths'], [])
+        result = analyze(fixture(), starts=[r'^q_r$'], end_nets=[r'^q_r$'])
+        self.assertEqual(result['max_levels'], 0)
+
+    def test_filtered_start_propagates_before_longest_path_selection(self):
+        design = fixture()
+        module = design['modules']['test']
+        # The selected IP root reaches FF.D in one level, while a takes two.
+        module['cells']['l2']['connections']['A'].append(8)
+        result = analyze(design, starts=[r'^ip_r$'], ends=[r'^q_r$'])
+        self.assertEqual(result['max_levels'], 1)
+        self.assertEqual(result['selected_start_bits'], 1)
+        self.assertEqual(result['selected_endpoint_count'], 3)  # D, E and reset.
+        self.assertEqual({p['end']['pin'] for p in result['paths']},
+                         {'ff.D[0]', 'ff.E[0]'})
+        self.assertTrue(all(p['start']['signal'] == 'ip_r' for p in result['paths']))
+
+    def test_filtered_alias_sets_and_internal_cut(self):
+        design = fixture()
+        module = design['modules']['test']
+        module['netnames']['u_cache.tag_w'] = dict(module['netnames']['l1_w'])
+        result = analyze(design, starts=[r'^u_cache\.tag_w$'], ends=[r'^tap$', r'^ff\.D'])
+        self.assertEqual(result['max_levels'], 1)
+        self.assertEqual({p['end']['pin'] for p in result['paths']}, {'tap[0]', 'ff.D[0]'})
+        self.assertTrue(all(p['start']['boundary'] == 'cut' for p in result['paths']))
+        result = analyze(design, starts=[r'^a$', r'^ip_r$'], ends=[r'^tap$'])
+        self.assertEqual(result['selected_start_bits'], 2)
+        self.assertEqual(result['max_levels'], 2)
+
+    def test_filtered_unreachable_endpoints_and_ff_cut(self):
+        result = analyze(fixture(), starts=[r'^a$'], ends=[r'^y$'])
+        self.assertIsNone(result['max_levels'])
+        self.assertEqual(result['paths'], [])
+        self.assertEqual(result['selected_endpoint_count'], 1)
+        result = analyze(fixture(), starts=[r'^q_r$'], ends=[r'^y$'])
+        self.assertEqual(result['max_levels'], 1)
+        result = analyze(fixture(), starts=[r'^missing$'], ends=[r'^y$'])
+        self.assertEqual(result['selected_start_bits'], 0)
+        self.assertEqual(result['paths'], [])
+
     def test_levels_boundaries_and_fanout(self):
         design = fixture()
         design['modules']['test']['netnames']['u_reset_ctrl.a_w'] = {
