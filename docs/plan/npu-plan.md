@@ -22,7 +22,7 @@
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
-| N-E1 | 旧加速器性能评估：静态逐层分析、旧 RTL 逐命令实测、周期模型校准、W1–W8 改进项评估 | Codex · GPT-6.1 Sol | — | 测量报告 `docs/reports/2026-10-26-perf-npu-legacy.md` | task-npu-legacy-eval | [~] dispatch ctx_d1bf586ceb02 |
+| N-E1 | 旧加速器性能评估：静态逐层分析、旧 RTL 逐命令实测、周期模型校准、W1–W8 改进项评估 | Codex · GPT-6.1 Sol | — | 测量报告 `docs/reports/2026-10-26-perf-npu-legacy.md` | task-npu-legacy-eval | [x] 已合入 f36219c |
 
 ## 4. 规格定稿项
 
