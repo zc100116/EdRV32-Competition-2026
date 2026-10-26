@@ -4,10 +4,109 @@
 |---|---|
 | 输入基线 | f6d6b256aaad2f268f04c0d4536a44f6dba69359 |
 | 本次 RTL / 检查源 commit | cb547cbe3bb6b2e4783800191cb57281aa6998f1 |
+| 本轮 Compile commit | 157afa245359199cfa6bf7c18e2e21d165ae8203 |
 | PDS 版本 | 2022.2-SP6.1，build 138931 |
 | ModelSim | SE-64 2020.4 |
 | 器件 | PG2L200H-6 FBB676（工程及 7 个 IP 的 .idf 已核对） |
-| 完成情况 | 阶段回传：7 个 IP 全部生成，包装模块适配及本机定向检查完成；顶层综合、布局布线和 RVC_EN=0 对照尚未执行 |
+| 完成情况 | Compile 已结束，当前编译日志 0 个 E:、1149 个 W:；按用户要求回传完整编译信息，等待 VPS Claude 审阅；尚未执行综合、布局布线和 RVC_EN=0 对照 |
+
+## 本轮 Compile 最终报告（2026-10-26）
+
+用户要求保存完整编译信息及最后的编译报告，推送后由 VPS Claude 审查编译耗时和 warning。
+本次据此完整回传日志，作为仓库通常要求精简日志的用户授权例外。
+
+PDS 项目主日志已打印 `Process "Compile" done.`，编译进程已结束。
+当前 `compile/run.log` 中没有 `E:` 行；项目级 `pds.log` 包含此前失败尝试，
+其中旧错误不能作为本轮 Compile 的错误统计。
+最终报告原文为 `artifacts/compile/edrv32_fpga_cpu_sys_top.cmr`。
+
+| 项 | 最终报告原文数据 |
+|---|---|
+| compile 输入 commit | 157afa245359199cfa6bf7c18e2e21d165ae8203 |
+| 顶层 / 参数 | edrv32_fpga_cpu_sys_top，RVC_EN 默认 1 |
+| 结束时间 | 2026-10-26 17:28:23（Windows 本地时间，Asia/Shanghai） |
+| 实际耗时 | 0h:11m:0s |
+| CPU 时间 | 0h:1m:44s |
+| Process CPU 时间 | 0h:1m:44s |
+| 峰值内存 | 2,394 MB |
+| 生成数据库（留在本地，不入库） | compile/edrv32_fpga_cpu_sys_top_comp.adf，147,420,498 字节 |
+
+复现时打开现有含 7 个 IP 的 PDS 工程，并从 FPGA 工程目录执行：
+
+```tcl
+source ../../EdRV32-Competition-2026/fpga/scripts/import_cpu_sys_top.tcl
+```
+
+本次最终 `.cmr` 中记录的实际 Flow Command（原文）为：
+
+```text
+Flow Command: compile -include_path {G:/codex_project/EdRV32-Competition-2026/rtl/include	G:/codex_project/EdRV32-FPGA/EdRV32} -compiler_directives {FPGA_MODE} -top_module edrv32_fpga_cpu_sys_top
+```
+
+### 阶段耗时
+
+以下数值直接来自本次 `compile/run.log`，均为 wall time：
+
+| 阶段 | 秒 |
+|---|---:|
+| rtl-analyze | 1.394 |
+| rtl-elaborate | 0.291 |
+| rtl-prep | 0.344 |
+| rtl-infer | 37.660 |
+| rtl-control-opt | 15.984 |
+| rtl-data-opt | 74.895 |
+| FSM inference | 7.213 |
+| sdm2adm | 37.693 |
+
+日志在 sdm2adm 完成后进入 `Saving design to DB.`，随后才打印最终 11 分钟耗时。
+该保存阶段没有单独耗时统计，不编造独立测量数字。
+观察期间数据库文件从 50,806,784 字节持续增长，最终为 147,420,498 字节；
+这说明当时仍有输出进展，但不能据此确定保存偏慢的根因。
+本次未做磁盘、杀毒软件或工具内部数据库性能分析，不把这些可能因素写成已确认结论。
+
+### warning 汇总
+
+逐行统计本次 `compile/run.log`：0 个 E:，1149 个 W:。
+完整原文和行号见 `artifacts/compile/run.log`；分类及代表项见 `warnings_summary.txt`。
+
+| 类别 | 次数 | 位置 / 说明 |
+|---|---:|---|
+| Public-4030 | 12 | 头文件重复处理、跳过提示 |
+| Verilog-2008 | 269 | 厂商 IP 的 $display / $finish 被忽略 |
+| Verilog-2036 | 4 | 厂商乘法器输入信号无驱动，接 0 |
+| Verilog-2020 | 408 | 厂商 RAM / 乘法器内部无驱动信号，接 0 |
+| Verilog-2039 | 15 | 厂商 RAM 模板中拼接重复次数为 0 |
+| Verilog-2038 | 108 | 厂商 RAM 模板中 case 分支不适用 |
+| Verilog-2023 | 142 | 厂商 RAM 未驱动端口的初值处理，包括 ECC 注入端口 |
+| Sdm-2003 | 79 | 厂商乘法器内部数组无驱动 |
+| Sdm-2010 | 2 | 自有 RTL：寄存器堆 registers_r、指令队列 entries_r 不支持同时多写的 RAM 推断 |
+| Loop was found during constant probe | 110 | sdm2adm 常量探测；日志未提供信号 / 实例路径 |
+
+两条自有 RTL 警告分别位于 `rtl/cpu/edrv32_cpu_regfile.v:26` 和
+`rtl/cpu/edrv32_cpu_ib.v:24`。源码确实存在两个写入口；实际映射和代价尚无综合报告可确认。
+
+Loop 诊断之后日志明确记录 sdm2adm 成功完成。当前日志不足以判断这些回路来自
+寄存器反馈、厂商 IP 内部结构还是实际组合回路，不将其直接认定为无害或已定位缺陷。
+未修改 RTL 或厂商 IP 来消除这些警告。
+
+### 完整回传文件与本地来源
+
+本轮文件均原样复制，未截断或过滤：
+
+| 仓库内位置（相对本任务目录） | 本地来源（相对 FPGA 工程目录） |
+|---|---|
+| artifacts/pds.log | pds.log，完整项目会话日志，含此前失败尝试 |
+| artifacts/project_run.log | run.log，完整本轮流程日志 |
+| artifacts/compile/run.log | compile/run.log，完整本轮编译日志 |
+| artifacts/compile/parse_design/run.log | compile/parse_design/run.log |
+| artifacts/compile/edrv32_fpga_cpu_sys_top.cmr | compile/edrv32_fpga_cpu_sys_top.cmr，最终编译报告 |
+| artifacts/compile/error_info.txt | compile/error_info.txt，原文件为空 |
+| artifacts/compile/include_relation.txt | compile/include_relation.txt，实际 include 关系 |
+| artifacts/compile/warnings_summary.txt | 从上述完整日志整理的分类和阶段耗时 |
+
+FPGA 工程目录仍为 `G:/codex_project/EdRV32-FPGA/EdRV32`。
+PDS 工程文件、IP 生成文件、原生数据库及中间文件未提交。
+本次仅 Compile 结束，没有综合资源、布局布线时序或 Fmax 结果。
 
 ## 用户确认与 IP 端口差异
 
@@ -32,7 +131,7 @@ source ../../EdRV32-Competition-2026/fpga/scripts/import_cpu_sys_top.tcl
 
 Tcl 路径检查：从 `G:/codex_project/EdRV32-FPGA/EdRV32` 执行，
 42 个源码文件、约束、头文件目录均能定位，顶层及 FPGA_MODE 参数正确。
-检查仅捕获导入及编译参数，尚未运行实际 PDS 编译。
+该项是导入前的路径检查；随后实际 PDS Compile 已完成，见上面的最终报告。
 
 2026-10-26 用户授权 Windows Codex 修改包装模块，并转达 VPS Claude 确认：
 其余包装模块复位统一接 `1'b0`、使能接实际端口；两个 Tag IP 用 512 深度，地址高位补零；
@@ -125,12 +224,12 @@ RTL 与检查源 commit：`cb547cbe3bb6b2e4783800191cb57281aa6998f1`。
 
 - 工程：`G:\codex_project\EdRV32-FPGA\EdRV32\EdRV32.pds`。
 - ModelSim 日志：`G:\codex_project\EdRV32-Competition-2026\build\win\20261025-01-cpu-sys-synth\check_ip_wrappers.log`。
-- PDS 综合、布局布线报告尚未生成。
+- PDS Compile 完整日志和最终 .cmr 已回传至 artifacts/compile/；综合、布局布线报告尚未生成。
 
 ## 后续工作
 
 - VPS Claude：执行 Linux lint / 回归，审阅包装适配；据实际端口和物理 Tag 深度更新 IP 创建说明。
-- Windows：取得厂商 demo 引脚约束后，编写导入 Tcl、150 MHz 约束，执行综合和布局布线，收集任务卡全部时序/资源产物及 RVC_EN=0 对照。
+- Windows：按用户要求先回传本轮完整 Compile 日志和最终报告，等待 VPS Claude 审阅后再继续综合、布局布线和 RVC_EN=0 对照。导入脚本和 150 MHz 约束已由协调者提供。
 - 配置截图尚未归档；ROM/SRAM 外部初始化文件格式尚未实测加载。
 
 ## 备注
@@ -138,4 +237,4 @@ RTL 与检查源 commit：`cb547cbe3bb6b2e4783800191cb57281aa6998f1`。
 原 Git SSH 22 端口在认证前被关闭；本仓库 origin 已切换到
 `ssh://git@ssh.github.com:443/zc100116/EdRV32-Competition-2026.git`，fetch 已成功。
 本机提交身份仅在当前仓库配置，沿用现有提交作者 `zc100116`。
-本阶段仅提交源码、可复现检查源和精简报告；不提交 PDS 工程、厂商 IP、完整日志或 bitstream。
+本次用户明确要求完整编译信息，故回传本轮完整日志及最终报告；不提交 PDS 工程、厂商 IP、原生数据库或 bitstream。

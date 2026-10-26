@@ -1,0 +1,57 @@
+Compile warning summary
+Source: artifacts/compile/run.log
+Compile commit: 157afa245359199cfa6bf7c18e2e21d165ae8203
+PDS: 2022.2-SP6.1 build 138931
+Errors (E: lines): 0
+Warnings (W: lines): 1149
+
+Public-4030: 12
+Verilog-2008: 269
+Verilog-2036: 4
+Verilog-2020: 408
+Verilog-2039: 15
+Verilog-2038: 108
+Verilog-2023: 142
+Sdm-2003: 79
+Sdm-2010: 2
+W: Loop was found during constant probe.: 110
+
+Project RTL warnings (vendor IP excluded):
+run.log:3165: W: Sdm-2010: [G:/codex_project/EdRV32-Competition-2026/rtl/cpu/edrv32_cpu_regfile.v(line number: 26)] Not support multi-write simultaneously for RAM registers_r.
+run.log:3166: W: Sdm-2010: [G:/codex_project/EdRV32-Competition-2026/rtl/cpu/edrv32_cpu_ib.v(line number: 24)] Not support multi-write simultaneously for RAM entries_r.
+
+Vendor warning examples:
+run.log:253: W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_tag/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_tag.v(line number: 290)] Ignore 'system task' $display
+run.log:254: W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_tag/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_tag.v(line number: 291)] Ignore 'system task' $finish
+run.log:2054: W: Verilog-2036: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_mul_s33x33/rtl/ipm2l_mult_v1_3_ip_mul_s33x33.v(line number: 451)] Net m_a_2 connected to input port of module instance edrv32_fpga_cpu_sys_top/u_cpu_subsys/u_core/u_mul/u_product/u_ip/u_ipm2l_mult_ip_mul_s33x33.m_a_2_pipe[0].m_a_2_pipe has no driver, tie it to 0
+run.log:2055: W: Verilog-2036: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_mul_s33x33/rtl/ipm2l_mult_v1_3_ip_mul_s33x33.v(line number: 508)] Net m_b_2 connected to input port of module instance edrv32_fpga_cpu_sys_top/u_cpu_subsys/u_core/u_mul/u_product/u_ip/u_ipm2l_mult_ip_mul_s33x33.m_b_2_pipe[0].m_b_2_pipe has no driver, tie it to 0
+run.log:2058: W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_mul_s33x33/rtl/ipm2l_mult_v1_3_ip_mul_s33x33.v(line number: 191)] Net m_p_o[83] in ipm2l_mult_v1_3_ip_mul_s33x33(original module ipm2l_mult_v1_3_ip_mul_s33x33) does not have a driver, tie it to 0
+run.log:2059: W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_mul_s33x33/rtl/ipm2l_mult_v1_3_ip_mul_s33x33.v(line number: 191)] Net m_p_o[84] in ipm2l_mult_v1_3_ip_mul_s33x33(original module ipm2l_mult_v1_3_ip_mul_s33x33) does not have a driver, tie it to 0
+run.log:2162: W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_tag/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_tag.v(line number: 446)] Repeat multiplier in concatenation evaluates to 0
+run.log:2171: W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_tag/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_tag.v(line number: 585)] Repeat multiplier in concatenation evaluates to 0
+run.log:2163: W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_tag/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_tag.v(line number: 454)] Case condition never applies
+run.log:2164: W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_tag/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_tag.v(line number: 455)] Case condition never applies
+run.log:2229: W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_data/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_data.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_SBITERR in module instance edrv32_fpga_cpu_sys_top/u_cpu_subsys/u_icache/u_data0/u_ip/U_ipm2l_sdpram_ip_ram_icache_data.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+run.log:2230: W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_ram_icache_data/rtl/ipm2l_sdpram_v1_10_ip_ram_icache_data.v(line number: 871)] Give initial value 0 for the no drive pin INJECT_DBITERR in module instance edrv32_fpga_cpu_sys_top/u_cpu_subsys/u_icache/u_data0/u_ip/U_ipm2l_sdpram_ip_ram_icache_data.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1
+run.log:3140: W: Sdm-2003: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_mul_s33x33/rtl/ipm2l_mult_v1_3_ip_mul_s33x33.v(line number: 184)] The net 'm_a_div[4]' in edrv32_fpga_cpu_sys_top.u_cpu_subsys.u_core.u_mul.u_product.u_ip.u_ipm2l_mult_ip_mul_s33x33 is un-driven.
+run.log:3141: W: Sdm-2003: [G:/codex_project/EdRV32-FPGA/EdRV32/ipcore/ip_mul_s33x33/rtl/ipm2l_mult_v1_3_ip_mul_s33x33.v(line number: 184)] The net 'm_a_div[5]' in edrv32_fpga_cpu_sys_top.u_cpu_subsys.u_core.u_mul.u_product.u_ip.u_ipm2l_mult_ip_mul_s33x33 is un-driven.
+
+Phase timing (verbatim log lines):
+run.log:612: Executing : rtl-analyze successfully. Time elapsed: 1.394s wall, 0.016s user + 0.000s system = 0.016s CPU (1.1%)
+run.log:3137: Executing : rtl-elaborate successfully. Time elapsed: 0.291s wall, 0.016s user + 0.000s system = 0.016s CPU (5.4%)
+run.log:3162: Executing : rtl-prep successfully. Time elapsed: 0.344s wall, 0.031s user + 0.000s system = 0.031s CPU (9.1%)
+run.log:3236: Executing : rtl-infer successfully. Time elapsed: 37.660s wall, 9.641s user + 0.797s system = 10.438s CPU (27.7%)
+run.log:3239: Executing : rtl-control-opt successfully. Time elapsed: 15.984s wall, 3.797s user + 0.359s system = 4.156s CPU (26.0%)
+run.log:3242: Executing : rtl-data-opt successfully. Time elapsed: 74.895s wall, 19.766s user + 0.203s system = 19.969s CPU (26.7%)
+run.log:3255: Executing : FSM inference successfully. Time elapsed: 7.213s wall, 2.109s user + 0.031s system = 2.141s CPU (29.7%)
+run.log:3378: Executing : sdm2adm successfully. Time elapsed: 37.693s wall, 11.109s user + 0.250s system = 11.359s CPU (30.1%)
+run.log:3380: Saving design to DB.
+run.log:3381: Action compile: Real time elapsed is 0h:11m:0s
+run.log:3382: Action compile: CPU time elapsed is 0h:1m:44s
+run.log:3383: Action compile: Process CPU time elapsed is 0h:1m:44s
+run.log:3384: Current time: Mon Oct 26 17:28:23 2026
+run.log:3385: Action compile: Peak memory pool usage is 2,394 MB
+
+The 110 constant-probe loop warnings contain no net/instance path.
+The log reports successful completion of sdm2adm afterwards.
+This summary does not establish whether any RTL combinational loop exists.
