@@ -368,7 +368,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 if (record.late and instruction.kind in late_controls) or record.deferred_control:
                     taken = (instruction.kind in {'jal', 'jalr'} or
                              record.next_pc != instruction.pc + instruction.size)
-                    if record.taken != taken or (taken and record.target != record.next_pc):
+                    if not record.d_redirect and (record.taken != taken or (
+                            taken and record.target != record.next_pc)):
                         m_redirect = record
                         m_surviving = m[:index + 1]
                         break

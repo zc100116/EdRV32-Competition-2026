@@ -105,6 +105,28 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(result['training_conflicts'], 0)
         self.assertGreater(result['slots_wrong_path'], 0)
 
+    def test_deferred_cold_jal_redirects_once(self):
+        program = {pc: instruction(pc) for pc in range(0, 256, 4)}
+        program[32] = instruction(32, 'load', rd=10)
+        program[36] = instruction(36, 'branch', sources=(10,), target=96)
+        program[40] = instruction(40, 'jal', target=128)
+        program[132] = instruction(132, 'serial')
+        trace = list(range(0, 44, 4)) + [128, 132]
+        result = simulate(program, trace, 0, 132, 'B4')
+        self.assertEqual(result['cycles'], 9)
+        self.assertEqual(result['hpm16'], 1)
+        self.assertEqual(result['hpm4'], 2)
+        self.assertEqual(result['slots_redirect_m'], 0)
+        self.assertGreater(result['slots_redirect_d'], 0)
+        self.assertEqual(result['training_conflicts'], 1)
+        program[100] = instruction(100, 'serial')
+        trace = list(range(0, 40, 4)) + [96, 100]
+        result = simulate(program, trace, 0, 100, 'B4')
+        self.assertEqual(result['hpm4'], 1)
+        self.assertEqual(result['training_conflicts'], 0)
+        self.assertGreater(result['slots_redirect_m'], 0)
+        self.assertGreater(result['slots_wrong_path'], 0)
+
     def test_single_training_buffer_backpressure(self):
         INORDER_VARIANTS['B4-1buf'] = INORDER_VARIANTS['B4'] | {'training_capacity': 1}
         self.addCleanup(INORDER_VARIANTS.pop, 'B4-1buf')
