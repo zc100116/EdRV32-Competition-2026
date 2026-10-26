@@ -429,6 +429,7 @@ module edrv32_mem_xbar (
     reg [69:0] beats_w;
     reg [13:0] eligible_r;
     wire prepare_w;
+    reg [13:0] queued_w;
     wire cfg_write_w;
     wire slot_ready_w;
     reg [6:0] ar_starved_r;
@@ -559,6 +560,7 @@ module edrv32_mem_xbar (
         .enable_i(!cmd_valid_r && !bad_read_r && !cfg_write_w),
         .prepare_o(prepare_w),
         .candidates_i(eligible_w),
+        .queued_i(queued_w),
         .eligible_i(eligible_r),
         .beats_i(beats_w),
         .starved_i(starved_w),
@@ -608,6 +610,7 @@ module edrv32_mem_xbar (
     );
     always @(*) begin
         eligible_w = 14'b0;
+        queued_w = 14'b0;
         beats_w = 70'b0;
         bad_read_w = 1'b0;
         bad_read_port_w = 3'b0;
@@ -617,6 +620,11 @@ module edrv32_mem_xbar (
         for (eligible_idx = 0; eligible_idx < 7; eligible_idx = eligible_idx + 1) begin
             beats_w[(eligible_idx*2)*5 +: 5] = {1'b0, arlen_r[eligible_idx]} + 5'd1;
             beats_w[(eligible_idx*2+1)*5 +: 5] = {1'b0, awlen_r[eligible_idx]} + 5'd1;
+            // Queue ownership is independent of temporary grant-capacity limits.
+            queued_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
+                ar_error_r[eligible_idx] == 0;
+            queued_w[eligible_idx*2+1] = aw_pending_r[eligible_idx] &&
+                aw_error_r[eligible_idx] == 0 && w_complete_r[eligible_idx];
             if (ds_count_r < outst_total_w) begin
                 eligible_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
                     ar_error_r[eligible_idx] == 0 && slot_ready_w &&

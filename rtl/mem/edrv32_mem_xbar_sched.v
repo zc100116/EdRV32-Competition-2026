@@ -3,6 +3,9 @@
 // Description: Registered affordability stage followed by mask-only priority selection.
 // Urgent, latency, rotating starvation and DRR share transaction grants. Batching
 // only chooses the DRR direction. Token buckets reset full at 32 beats.
+// M-I1 confirmed: queued nonzero-weight heads retain round credit under capacity
+// or token stalls. Refill only an insufficient deficit; its maximum is 15+240=255.
+// Start a round only with a capacity/token-ready DRR head; idle capacity never refills.
 // Clock: clk_mem.
 module edrv32_mem_xbar_sched (
     // Clock and reset.
@@ -12,6 +15,7 @@ module edrv32_mem_xbar_sched (
     // Preparation pulse also registers the top-level eligibility mask.
     input wire enable_i,
     input wire [13:0] candidates_i,
+    input wire [13:0] queued_i,
     output wire prepare_o,
     input wire [13:0] eligible_i,
     input wire [69:0] beats_i,
@@ -31,6 +35,7 @@ module edrv32_mem_xbar_sched (
 );
     reg prepared_r;
     reg [13:0] funded_r;
+    reg [13:0] queued_r;
     reg [13:0] deficit_enough_r;
     reg [6:0] weighted_r;
     reg [1:0] urgent_allowed_r;
@@ -54,6 +59,7 @@ module edrv32_mem_xbar_sched (
     reg starvation_w;
     reg [6:0] drr_ports_w;
     wire refill_w;
+    wire [6:0] drr_eligible_w;
     wire [3:0] grant_queue_w;
     wire [4:0] grant_beats_w;
     reg [14:0] token_sum_w [0:1];
@@ -90,10 +96,12 @@ module edrv32_mem_xbar_sched (
     assign starve_w = eligible_i & starved_i;
     assign rt_w = {eligible_i[3], eligible_i[0]} & urgent_allowed_r;
     assign lat_w = eligible_i[5:4] & funded_r[5:4];
-    assign refill_w = enable_i && prepared_r && !grant_o;
+    assign refill_w = enable_i && prepared_r && !grant_o && |drr_eligible_w;
 
     generate
         for (p = 0; p < 7; p = p + 1) begin : g_masks
+            assign drr_eligible_w[p] = (|(eligible_i[p*2 +: 2] &
+                funded_r[p*2 +: 2])) && weighted_r[p] && p != 2;
             assign starve_ports_w[p] = |starve_w[p*2 +: 2];
             assign drr_read_w[p] = eligible_i[p*2] && funded_r[p*2] &&
                 deficit_enough_r[p*2] && weighted_r[p] && p != 2;
@@ -158,6 +166,7 @@ module edrv32_mem_xbar_sched (
         if (!rst_n_i) begin
             prepared_r <= 1'b0;
             funded_r <= 14'b0;
+            queued_r <= 14'b0;
             deficit_enough_r <= 14'b0;
             weighted_r <= 7'b0;
             urgent_allowed_r <= 2'b0;
@@ -186,6 +195,7 @@ module edrv32_mem_xbar_sched (
                 end
             end
             if (prepare_o) begin
+                queued_r <= queued_i;
                 preferred_r <= dir_valid_r && dir_cnt_r < dir_batch_i ?
                     dir_write_r : !dir_write_r;
                 urgent_allowed_r <= urgent_i &
@@ -205,8 +215,9 @@ module edrv32_mem_xbar_sched (
                 end
             end
             for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
-                if (refill_w && update_idx != 2 &&
-                    (|(eligible_i[update_idx*2 +: 2] & funded_r[update_idx*2 +: 2]))) begin
+                if (refill_w && update_idx != 2 && weighted_r[update_idx] &&
+                    (|(queued_r[update_idx*2 +: 2] &
+                        ~deficit_enough_r[update_idx*2 +: 2]))) begin
                     deficit_r[update_idx] <= deficit_r[update_idx] +
                         {weight_i[update_idx*4 +: 4], 4'b0};
                 end

@@ -548,7 +548,7 @@ module tb;
                     if (rdata[monitor_p*256 +: 256] !== expected_data[monitor_q][monitor_i] ||
                         rresp[monitor_p*2 +: 2] !== expected_resp[monitor_q][monitor_i] ||
                         rlast[monitor_p] !== expected_last[monitor_q][monitor_i])
-                        $fatal(1, "FAIL R p%0d id%0d beat%0d got=%h resp=%b last=%b expected=%h/%b/%b at %0t",
+                        $fatal(1, "FAIL R p%0d id%0d n%0d got %h/%b/%b want %h/%b/%b t%0t",
                                monitor_p,rid[monitor_p],monitor_i,
                                rdata[monitor_p*256 +: 32],rresp[monitor_p*2 +: 2],
                                rlast[monitor_p],expected_data[monitor_q][monitor_i][31:0],
@@ -720,6 +720,8 @@ module tb;
     reg s_rst_n = 0;
     reg s_enable = 0;
     reg [13:0] s_eligible = 0;
+    reg [13:0] s_blocked = 0;
+    wire [13:0] s_queued = s_eligible | s_blocked;
     reg [69:0] s_beats = 0;
     reg [447:0] s_wait = 0;
     reg [1:0] s_urgent = 0;
@@ -744,6 +746,7 @@ module tb;
         .enable_i(s_enable),
         .prepare_o(unused_s_prepare),
         .candidates_i(s_eligible),
+        .queued_i(s_queued),
         .eligible_i(s_eligible),
         .beats_i(s_beats),
         .starved_i(s_starved),
@@ -763,6 +766,7 @@ module tb;
         s_rst_n = 0;
         s_enable = 0;
         s_eligible = 0;
+        s_blocked = 0;
         s_wait = 0;
         s_urgent = 0;
         s_urg_max = 8;
@@ -891,6 +895,7 @@ module tb;
     endtask
 
     task automatic scheduler_full;
+        integer grants;
         integer granted [0:6];
         integer cost;
         integer selected_queue;
@@ -937,6 +942,41 @@ module tb;
             end
             $fatal(1,"FAIL starvation never granted");
         end
+        $display("MX-04 global capacity full does not refill any deficit");
+        scheduler_reset;
+        s_eligible[0] = 1;
+        @(posedge clk);
+        @(negedge clk);
+        // Capacity closes after prepare; queued heads remain, but none can grant.
+        s_eligible = 0;
+        s_blocked = 14'h3fff;
+        repeat (8) begin
+            @(posedge clk);
+            @(negedge clk);
+            for (integer p = 0; p < 7; p = p + 1)
+                if (scheduler.deficit_r[p] != 0)
+                    $fatal(1,"FAIL full global capacity changed deficit p%0d",p);
+        end
+        $display("MX-04 retain one round while a queued head is capacity blocked");
+        scheduler_reset;
+        s_eligible[6] = 1;
+        s_blocked[0] = 1;
+        grants = 0;
+        // Four P3 rounds would wrap an unconditional 8-bit P0 accumulation to zero.
+        while (grants < 145) begin
+            @(posedge clk);
+            if (s_grant) begin
+                if (s_port != 3) $fatal(1,"FAIL blocked DRR port granted");
+                grants++;
+            end
+        end
+        @(negedge clk);
+        s_eligible = 1;
+        s_blocked = 0;
+        @(posedge clk);
+        @(negedge clk);
+        if (!s_grant || s_port != 0)
+            $fatal(1,"FAIL capacity-blocked DRR head lost its round credit");
         $display("MX-04 variable-length DRR weighted beat shares");
         scheduler_reset;
         s_eligible = 14'b01_01_01_01_00_10_01;
