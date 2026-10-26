@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2（草案） |
+| 版本 | v0.3（草案） |
 | 日期 | 2026-10-25 |
 | 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | sys_xbar、Boot ROM、SRAM、系统 APB 桥、媒体 APB 桥、CLINT、PLIC、UART0、GPIO0、I2C0、SYSCTRL、复位控制 `reset_ctrl` |
@@ -42,7 +42,7 @@
 | `edrv32_periph_sysctrl` | `rtl/periph/` | SYSCTRL，APB 从设备 |
 | `edrv32_soc_reset_ctrl` | `rtl/soc/` | 各时钟域复位的生成和软复位 |
 | `edrv32_rom_boot` | `rtl/tech/` | Boot ROM 存储 IP 包装：2048 × 64 位，带初始化文件 |
-| `edrv32_ram_sram` | `rtl/tech/` | SRAM 存储 IP 包装：32768 × 64 位，8 位字节写使能 |
+| `edrv32_ram_sram` | `rtl/tech/` | SRAM 存储 IP 包装：8192 × 64 位，8 位字节写使能 |
 
 系统 APB 路径：`edrv32_bus_apb_bridge` → `edrv32_bus_apb_decoder`（均在 clk_sys）。媒体 APB 路径：`edrv32_bus_apb_bridge`（clk_sys）→ `edrv32_apb_async_bridge` → `edrv32_bus_apb_decoder`（clk_mem）。槽译码、预留槽检查和超时计数都在 decoder 所在的时钟域完成。
 
@@ -68,7 +68,7 @@
 
 | 项 | Boot ROM | SRAM |
 |---|---|---|
-| 容量 | 16 KiB（2048 × 64 位） | 256 KiB（32768 × 64 位） |
+| 容量 | 16 KiB（2048 × 64 位） | 64 KiB（8192 × 64 位） |
 | 访问 | 只读。读 SIZE ≤ 3（I$ 单拍 SIZE = 3）；写回 SLVERR | 读写。单拍 SIZE ≤ 2、cache 行 4 拍 INCR SIZE = 3 |
 | 上电内容 | bootloader 和启动 logo，由 `sw/` 构建的 bootloader ELF 生成初始化文件 | 应用程序，由应用 ELF 生成初始化文件；不需要上电内容的工程可以使用空文件 |
 | 实现 | 单口同步读 ROM IP，读延迟 1 | 单口同步读写 RAM IP，读延迟 1，8 位字节写使能 |
@@ -338,7 +338,7 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | SRAM / ROM 读延迟 | 无竞争时从 ARVALID 被接收到第一个 RVALID ≤ 3 个 clk_sys 周期 |
 | SRAM 突发吞吐 | 4 拍突发连续 4 个周期返回 |
 | UART | 3 Mbps 下连续收发不丢字节（软件及时读写 FIFO 的前提下） |
-| 资源 | 本规格全部模块合计 ≤ 5K LUT（SoC 规格 9.3）；ROM 和 SRAM 使用 DRM：16 KiB + 256 KiB |
+| 资源 | 本规格全部模块合计 ≤ 5K LUT（SoC 规格 9.3）；ROM 和 SRAM 使用 DRM：16 KiB + 64 KiB |
 | 频率 | 在 clk_sys 目标频率下满足时序（CPU 规格待定项 10，初值 150 MHz） |
 
 ---
@@ -366,3 +366,4 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 |---|---|---|
 | 2026-10-25 | v0.1 | 初稿。与用户确认：mtime 每个 clk_sys 周期加 1、SYSCTRL 提供 CLK_SYS_HZ；PLIC 15 个源；去掉 QSPI0 和 TIMER0；Boot ROM 与 SRAM 由存储初始化文件提供上电内容；I2C0 一个主机两对引脚 |
 | 2026-10-25 | v0.2 | 开发中澄清：APB 路径拆为 bridge（AXI→单个 APB 口）+ decoder（槽译码、预留、超时），媒体路径 decoder 在 clk_mem；增加 3.4 系统子系统顶层端口；CLINT/PLIC 合法写的 WSTRB 恒为全 1、整字写入；UART EN/CLR 不打断进行中的帧 |
+| 2026-10-26 | v0.3 | SRAM 由 256 KiB 改为 64 KiB（8192 × 64 位）。用户确认：旧工程 FPGA 实际只用 32 KiB SRAM；现有 DDR 承担大块数据，SRAM 只放监控程序、CoreMark 和栈，省下的 DRM 留给 NPU 片上缓存 |

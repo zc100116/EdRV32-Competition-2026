@@ -14,7 +14,7 @@
     {
       "name": "SRAM",
       "base": "0x10000000",
-      "size": "0x00040000",
+      "size": "0x00010000",
       "cacheable": true,
       "executable": true,
       "readable": true,

@@ -12,7 +12,7 @@ module edrv32_ram_sram (
     input wire en_i,
     input wire [7:0] wr_en_i,
     input wire [63:0] wr_data_i,
-    input wire [14:0] addr_i,
+    input wire [12:0] addr_i,
     output wire [63:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
@@ -29,7 +29,7 @@ module edrv32_ram_sram (
         .rd_data(rd_data_o)
     );
 `else
-    reg [63:0] memory_r [0:32767];
+    reg [63:0] memory_r [0:8191];
     reg [63:0] rd_data_r;
     reg [4095:0] image_path_r;
     integer byte_idx;

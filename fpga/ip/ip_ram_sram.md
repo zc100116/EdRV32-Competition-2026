@@ -5,7 +5,7 @@
 | IP 类型 | IP Compiler → Memory → DRM（块 RAM）单口 RAM（Single Port） |
 | 模块名 | `ip_ram_sram` |
 | 包装模块 | `rtl/tech/edrv32_ram_sram.v` |
-| 使用者 | 片上 SRAM（256 KiB，系统子系统规格 2.2） |
+| 使用者 | 片上 SRAM（64 KiB，系统子系统规格 2.2） |
 | 器件 | PG2L200H |
 
 ## 选项
@@ -13,7 +13,7 @@
 | 选项 | 取值 |
 |---|---|
 | 数据位宽 | 64 |
-| 深度 | 32768（地址 15 位，共 256 KiB） |
+| 深度 | 8192（地址 13 位，共 64 KiB） |
 | 字节写使能 | 勾选，8 位 |
 | 时钟使能（端口使能） | 勾选。使能为 0 的周期不读不写，读数据输出保持 |
 | 输出寄存器 | 不勾选（读延迟 1） |
@@ -28,7 +28,7 @@
 | `clk` | in | 1 | `clk_i` |
 | `clk_en` | in | 1 | `en_i` |
 | `rst` | in | 1 | `1'b0`（高有效） |
-| `addr` | in | 15 | `addr_i` |
+| `addr` | in | 13 | `addr_i` |
 | `wr_data` | in | 64 | `wr_data_i` |
 | `wr_en` | in | 1 | `|wr_en_i`（任一字节写即为写周期） |
 | `wr_byte_en` | in | 8 | `wr_en_i` |

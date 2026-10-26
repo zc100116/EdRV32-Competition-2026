@@ -10,7 +10,7 @@
 | `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 512 × 64 | `edrv32_ram_dcache_data` | D$ ×2 | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 已生成（20261025-01） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
 | `ip_rom_boot` | DRM ROM，带初始化 | 2048 × 64 | `edrv32_rom_boot` | Boot ROM | [ip_rom_boot.md](ip_rom_boot.md) | 已生成（20261025-01） |
-| `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 32768 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（20261025-01） |
+| `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 需按 8192 深度重新生成 |
 
 PLL、DDR3 控制器等板级 IP 在板级阶段补充。
 
