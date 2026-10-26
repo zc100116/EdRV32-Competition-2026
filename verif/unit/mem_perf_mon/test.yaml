@@ -1,0 +1,9 @@
+top: tb_mem_perf_mon
+files: files.f
+defines:
+parameters: FULL=0
+software:
+timeout: 180
+pass: PASS
+tier: smoke
+simulator: verilator iverilog
