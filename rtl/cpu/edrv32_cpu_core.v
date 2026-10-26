@@ -156,6 +156,8 @@ module edrv32_cpu_core #(
     wire e_misaligned_w;
     wire e_jump_misaligned_w;
     wire e_advance_w;
+    wire e_resolve_w;
+    reg e_resolved_r;
     wire m_advance_w;
     wire m_memory_w;
     wire m_wait_w;
@@ -309,7 +311,7 @@ module edrv32_cpu_core #(
         .d_redirect_return_pc_i(d_record_w[0][REC_PC_LSB +: 32] +
             (d_record_w[0][REC_COMPRESSED] ? 32'd2 : 32'd4)),
         .halt_i(sleep_r || div_wait_w || m_wait_r),
-        .update_valid_i(e_advance_w && e_valid_r[0] && e_control_w &&
+        .update_valid_i(e_resolve_w && e_control_w &&
             !e_exception_r && !e_jump_misaligned_w),
         .update_clear_i(e_redirect1_w || (e_redirect0_w && !e_control_w)),
         .update_clear_index_i(e_redirect1_w ? e_record_r[1][7:3] : e_record_r[0][7:3]),
@@ -505,7 +507,9 @@ module edrv32_cpu_core #(
     assign e_type_w = e_call_w ? 3'd3 : e_return_w ? 3'd4 :
         e_class_r[0] == C_JAL ? 3'd1 : e_class_r[0] == C_JALR ? 3'd2 : 3'd0;
     assign e_jump_misaligned_w = RVC_EN == 0 && e_control_w && e_actual_pc_w[1];
-    assign e_redirect0_w = e_advance_w && e_valid_r[0] && !e_exception_r &&
+    // cpu-spec 4.4: resolve once while M waits; keep the instruction in E.
+    assign e_resolve_w = e_valid_r[0] && !e_resolved_r && !m_redirect_w && !div_wait_w;
+    assign e_redirect0_w = e_resolve_w && !e_exception_r &&
         !e_jump_misaligned_w && ((e_control_w &&
         ((e_taken_w != e_record_r[0][REC_PRED_TAKEN]) || (e_taken_w
         && e_record_r[0][REC_PRED_TAKEN] &&
@@ -513,7 +517,7 @@ module edrv32_cpu_core #(
         (!e_control_w && e_record_r[0][REC_PRED_TAKEN]));
     assign e_second_next_pc_w = e_record_r[1][REC_PC_LSB +: 32] +
         (e_record_r[1][REC_COMPRESSED] ? 32'd2 : 32'd4);
-    assign e_redirect1_w = e_advance_w && e_valid_r[1] && !e_redirect0_w &&
+    assign e_redirect1_w = e_resolve_w && e_valid_r[1] && !e_redirect0_w &&
         e_record_r[1][REC_PRED_TAKEN];
     assign e_redirect_w = e_redirect0_w || e_redirect1_w;
     assign e_redirect_pc_w = e_redirect0_w ? e_actual_pc_w : e_second_next_pc_w;
@@ -637,6 +641,7 @@ module edrv32_cpu_core #(
             ic_miss_r <= 0;
             dc_miss_r <= 0;
             m_wait_r <= 0;
+            e_resolved_r <= 0;
         end else begin
             // The frontend observes M backpressure one cycle after D-cache lookup.
             m_wait_r <= m_wait_w;
@@ -647,15 +652,21 @@ module edrv32_cpu_core #(
                 e_valid_r <= 0;
             if (d_issue_w != 0)
                 e_valid_r <= d_issue_w == 2 ? 2'b11 : 2'b01;
-            if (backend_redirect_w)
+            if (e_redirect0_w)
+                e_valid_r[1] <= 0;
+            if (m_redirect_w)
                 e_valid_r <= 0;
+            if (e_resolve_w)
+                e_resolved_r <= 1;
+            if (e_advance_w || m_redirect_w || d_issue_w != 0)
+                e_resolved_r <= 0;
             if (m_redirect_w)
                 m_valid_r <= 0;
             if (div_start_w)
                 div_started_r <= 1;
             if (div_valid_w)
                 div_done_r <= 1;
-            if (e_advance_w || backend_redirect_w || d_issue_w != 0) begin
+            if (e_advance_w || m_redirect_w || d_issue_w != 0) begin
                 div_started_r <= 0;
                 div_done_r <= 0;
             end
