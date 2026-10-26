@@ -6,7 +6,6 @@
     int pmon_observation_cycle = 0;
     int pmon_outstanding;
     always @(posedge clk_mem) begin : observe_pmon_ports
-        int started;
         int measured;
         pmon_observation_cycle <= pmon_observation_cycle+1;
         if (!rst_mem_n) begin
@@ -28,7 +27,7 @@
                     pmon_read_started[0] = 1;
                 end
                 if (u_dut.u_perf_mon.axi_rlast_i) begin
-                    started = pmon_latency[0].pop_front();
+                    pmon_latency[0].delete(0);
                     pmon_read_started[0] = 0;
                     pmon_outstanding--;
                 end

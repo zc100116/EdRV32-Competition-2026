@@ -1,9 +1,9 @@
-// File: edrv32_mem_axi256_empty.sv
+// File: edrv32_mem_master_slave.sv
 // Spec: task M-V1 master self-test; SoC 4.2 handshake behavior.
 // Description: Empty-response slave with address/data stalls and held responses.
 // Clock domain: clk_mem.
 `timescale 1ns/1ps
-module edrv32_mem_axi256_empty (
+module edrv32_mem_master_slave (
     input logic clk_i,
     input logic rst_n_i,
     edrv32_axi256_if bus

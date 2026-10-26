@@ -7,3 +7,4 @@ timeout: 180
 pass: PASS
 tier: smoke
 simulator: verilator
+verilator_flags: --output-split 10000 --output-split-cfuncs 100 -CFLAGS -O0

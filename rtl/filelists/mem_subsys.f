@@ -1,0 +1,13 @@
++incdir+../include
+../common/edrv32_async_fifo.v
+../common/edrv32_axi_async_bridge.v
+../mem/edrv32_mem_ddr_gw.v
+../tech/edrv32_ram_mem_xbar_r.v
+../tech/edrv32_ram_mem_xbar_w.v
+../mem/edrv32_mem_xbar_regs.v
+../mem/edrv32_mem_xbar_sched.v
+../mem/edrv32_mem_xbar_rbuf.v
+../mem/edrv32_mem_xbar.v
+../mem/edrv32_mem_perf_mon.v
+../mem/edrv32_mem_p6_arb.v
+../soc/edrv32_mem_subsys.v

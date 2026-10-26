@@ -149,12 +149,12 @@ module edrv32_mem_components_tb;
             .urgent_o(write_urgent),
             .bus(p1)
         );
-        edrv32_mem_axi256_empty u_read_slave (
+        edrv32_mem_master_slave u_read_slave (
             .clk_i(clk_mem),
             .rst_n_i(rst_mem_n),
             .bus(p0)
         );
-        edrv32_mem_axi256_empty u_write_slave (
+        edrv32_mem_master_slave u_write_slave (
             .clk_i(clk_mem),
             .rst_n_i(rst_mem_n),
             .bus(p1)

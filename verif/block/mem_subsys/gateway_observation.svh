@@ -20,6 +20,8 @@
     int gateway_writes_inflight;
     int local_gateway_reads_inflight;
     int local_gateway_writes_inflight;
+    bit [3:0] gateway_response_bid;
+    bit [3:0] gateway_response_rid;
     bit [3:0] gateway_parent_read_id;
     bit [3:0] gateway_parent_write_id;
     always @(posedge clk_mem) begin : observe_gateway_conversion
@@ -85,11 +87,13 @@
             local_gateway_writes_inflight = 0;
         end else begin
             if (gw.rvalid && gw.rready) begin
+                gateway_response_rid = gw.rid;
                 eq("GW every R beat RID", int'(gateway_parent_read_id), int'(gw.rid));
                 truth("GW read has parent", local_gateway_reads_inflight != 0);
                 if (gw.rlast) local_gateway_reads_inflight--;
             end
             if (gw.bvalid && gw.bready) begin
+                gateway_response_bid = gw.bid;
                 eq("GW parent BID", int'(gateway_parent_write_id), int'(gw.bid));
                 truth("GW write has parent", local_gateway_writes_inflight != 0);
                 local_gateway_writes_inflight--;

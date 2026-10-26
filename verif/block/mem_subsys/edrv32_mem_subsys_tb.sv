@@ -23,15 +23,15 @@ module edrv32_mem_subsys_tb;
     edrv32_axi256_if p[7]();
     edrv32_axi256_if #(.ID_WIDTH(4)) ddr();
     logic [6:0] urgent;
-    logic [11:0] apb_paddr[2];
-    logic apb_psel[2];
-    logic apb_penable[2];
-    logic apb_pwrite[2];
-    logic [31:0] apb_pwdata[2];
-    logic [3:0] apb_pstrb[2];
-    logic apb_pready[2];
-    logic [31:0] apb_prdata[2];
-    logic apb_pslverr[2];
+    logic [1:0][11:0] apb_paddr;
+    logic [1:0] apb_psel;
+    logic [1:0] apb_penable;
+    logic [1:0] apb_pwrite;
+    logic [1:0][31:0] apb_pwdata;
+    logic [1:0][3:0] apb_pstrb;
+    logic [1:0] apb_pready;
+    logic [1:0][31:0] apb_prdata;
+    logic [1:0] apb_pslverr;
     logic irq;
     int checker_errors;
     int checked_beats;
@@ -50,8 +50,6 @@ module edrv32_mem_subsys_tb;
     int upstream_read_beats;
     int direction_run;
     int last_direction = -1;
-    bit check_grouping = 0;
-    int batch_limit = 4;
     bit check_w_contiguous = 0;
     int w_remaining;
     int gw_count;
@@ -206,10 +204,15 @@ module edrv32_mem_subsys_tb;
     `include "p6_observation.svh"
     `include "gateway_observation.svh"
     `include "gateway_overlap.svh"
+    // Two-stage grant pipeline sampling times, see M-R2b (coordinator-approved observation).
+    wire [1:0] schedule_phase_w = {u_dut.u_xbar.u_sched.prepare_o,
+        u_dut.u_xbar.u_sched.grant_o};
     edrv32_mem_schedule_reference u_schedule_reference (
         .clk_i(clk_mem),
         .rst_n_i(rst_mem_n),
         .urgent_i({5'b0, u_dut.u_xbar.p1_urgent_i, u_dut.u_xbar.p0_urgent_i}),
+        .prepare_i(schedule_phase_w[1]),
+        .grant_i(schedule_phase_w[0]),
         .apb_write_i(apb_psel[0] && apb_penable[0] && apb_pready[0] && apb_pwrite[0]),
         .apb_addr_i(apb_paddr[0]),
         .apb_data_i(apb_pwdata[0]),
@@ -249,19 +252,20 @@ module edrv32_mem_subsys_tb;
         input bit [11:0] addr,
                        input bit [31:0] data, output bit [31:0] result);
         @(negedge clk_mem);
-        apb_psel[slot] = 1;
-        apb_paddr[slot] = addr;
-        apb_pwrite[slot] = write;
-        apb_pwdata[slot] = data;
-        apb_pstrb[slot] = '1;
+        // Whole-vector writes keep timed driver changes visible to Verilator 5.020.
+        apb_psel = slot == 0 ? 2'b01 : 2'b10;
+        apb_paddr = slot == 0 ? {12'b0, addr} : {addr, 12'b0};
+        apb_pwrite = write ? apb_psel : 2'b00;
+        apb_pwdata = slot == 0 ? {32'b0, data} : {data, 32'b0};
+        apb_pstrb = slot == 0 ? 8'h0f : 8'hf0;
         @(negedge clk_mem);
-        apb_penable[slot] = 1;
+        apb_penable = apb_psel;
         do @(posedge clk_mem); while (!apb_pready[slot]);
         eq("APB PSLVERR", 0, int'(apb_pslverr[slot]));
         result = apb_prdata[slot];
         @(negedge clk_mem);
-        apb_psel[slot] = 0;
-        apb_penable[slot] = 0;
+        apb_psel = 2'b00;
+        apb_penable = 2'b00;
     endtask
 
     task automatic wr(input int slot,
@@ -393,7 +397,7 @@ module edrv32_mem_subsys_tb;
         gw.awburst = burst;
         u_gateway.write(addr, 3'(size), len, data, strb, actual);
         eq("gateway BRESP", int'(resp), int'(actual));
-        eq("gateway BID", int'(transaction_id), int'(gw.bid));
+        eq("gateway BID", int'(transaction_id), int'(gateway_response_bid));
     endtask
 
     task automatic gateway_read(input bit [31:0] addr,
@@ -411,7 +415,7 @@ module edrv32_mem_subsys_tb;
         gw.arid = transaction_id;
         gw.arburst = burst;
         u_gateway.read(addr, 3'(size), len, data, actual);
-        eq("gateway RID", int'(transaction_id), int'(gw.rid));
+        eq("gateway RID", int'(transaction_id), int'(gateway_response_rid));
         for (int n = 0; n <= len; n++) begin
             eq("gateway RRESP", int'(resp), int'(actual[n]));
             physical = (addr & 32'h3ffffff8)+32'(n*8);
@@ -452,6 +456,13 @@ module edrv32_mem_subsys_tb;
         truth("PM 4KiB boundary", int'(addr[11:0])+beats*32 <= 4096);
     endtask
 
+    int ddr_read_stamp[16][$];
+    bit ddr_read_started[16];
+    int ddr_latency_count;
+    int ddr_latency_sum;
+    int ddr_latency_min;
+    int ddr_latency_max;
+
     always @(posedge clk_mem) begin : downstream_observation
         int id;
         int latency;
@@ -459,6 +470,14 @@ module edrv32_mem_subsys_tb;
         int direction;
         if (!rst_mem_n) begin
             cycle = 0;
+            ddr_latency_count = 0;
+            ddr_latency_sum = 0;
+            ddr_latency_min = 32'h7fffffff;
+            ddr_latency_max = 0;
+            for (int j = 0; j < 16; j++) begin
+                ddr_read_stamp[j].delete();
+                ddr_read_started[j] = 0;
+            end
             credit_reserved = 0;
             max_credit = 0;
             upstream_read_beats = 0;
@@ -484,6 +503,7 @@ module edrv32_mem_subsys_tb;
             if (ddr.awvalid && ddr.awready) w_remaining += int'(ddr.awlen)+1;
             if (ddr.arvalid && ddr.arready) begin
                 id = int'(ddr.arid);
+                ddr_read_stamp[id].push_back(cycle);
                 length = int'(ddr.arlen)+1;
                 if (selected_case == 207) begin
                     credit_reserved += length;
@@ -510,13 +530,27 @@ module edrv32_mem_subsys_tb;
                         upstream_read_beats++;
                     end
             end
+            if (ddr.rvalid) begin
+                id = int'(ddr.rid);
+                if (!ddr_read_started[id]) begin
+                    latency = cycle-ddr_read_stamp[id][0];
+                    ddr_latency_count++;
+                    ddr_latency_sum += latency;
+                    if (latency < ddr_latency_min) ddr_latency_min = latency;
+                    if (latency > ddr_latency_max) ddr_latency_max = latency;
+                    ddr_read_started[id] = 1;
+                end
+                if (ddr.rlast) begin
+                    ddr_read_stamp[id].delete(0);
+                    ddr_read_started[id] = 0;
+                end
+            end
             if (ddr.bvalid && ddr.bid == 12) pmon_last_response = cycle;
             if (ddr.arvalid && ddr.arready || ddr.awvalid && ddr.awready) begin
                 direction = ddr.awvalid && ddr.awready ? 1 : 0;
                 if (direction == last_direction) direction_run++;
                 else direction_run = 1;
                 last_direction = direction;
-                if (check_grouping) truth("DIR_BATCH cap", direction_run <= batch_limit);
             end
         end
     end
@@ -713,6 +747,27 @@ module edrv32_mem_subsys_tb;
         int start;
         int elapsed;
         int before_count[7];
+        int before_refills[7];
+        int before_completed[7];
+        int delivered_total;
+        int before_p0_ar_idle;
+        int before_p1_aw_idle;
+        int before_p0_empty;
+        int before_p0_block[6];
+        int before_rules[5];
+        int before_ddr_read;
+        int before_ddr_write;
+        int before_rd_sum[7];
+        int before_wr_sum[7];
+        int before_rd_full[7];
+        int before_wr_full[7];
+        int before_ideal_credit_full[7];
+        int before_ring_credit_full[7];
+        int before_ring_slot_full[7];
+        int before_global_full[7];
+        int before_r_not_ready[7];
+        int before_r_stall[7];
+
         int weights[7] = '{4,4,0,3,2,2,1};
         int total;
         real share;
@@ -735,6 +790,8 @@ module edrv32_mem_subsys_tb;
                 truth("URG_MAX permits competitor", u_schedule.grants[8].port != 0);
             end
             202: begin
+                // Measure token rate without the independent starvation bypass.
+                wr(0, 'h108, 65535);
                 wr(0, 'h24c, 4);
                 for (int k = 0; k < 5000; k++) send_read(3, 32'((k%8)*512));
                 start = cycle;
@@ -774,7 +831,12 @@ module edrv32_mem_subsys_tb;
                 eq("zero-weight port served", 1, u_schedule.transactions[5]);
             end
             204: begin
-                wr(0, 'h108, 1000000);
+                // Coordinator/user confirmed MX-04 conditions: judge ready read shares
+                // at TOTAL1; the single W buffer makes P1 a diagnostic-only share.
+                wr(0, 'h100, 1);
+                total_limit = 1;
+                wr(0, 'h108, 65535);
+                rd_eq(0, 'h108, 65535);
                 wr(0, 'h2cc, 256);
                 for (int k = 0; k < 4096; k++) begin
                     send_read(0, 32'((k%8)*512));
@@ -784,21 +846,127 @@ module edrv32_mem_subsys_tb;
                     send_read(5, 'h40000+32'((k%8)*512));
                     send_read(6, 'h50000+32'((k%8)*512));
                 end
-                drain(1000);
-                truth("DRR grants present", u_schedule.grants.size() != 0);
-                for (int j = 0; j < 7; j++) before_count[j] = u_schedule.beats[j];
-                drain(50000);
-                total = 0;
-                for (int j = 0; j < 7; j++) total += u_schedule.beats[j]-before_count[j];
-                truth("DRR grants present", total > 10000);
-                for (int j = 0; j < 7; j++)
-                    if (j != 2) begin
-                        share = real'(u_schedule.beats[j]-before_count[j])/real'(total);
-                        expected = real'(weights[j])/16.0;
-                        if (share < expected-0.05 || share > expected+0.05)
-                            $fatal(1, "FAIL DRR p=%0d expected=%f actual=%f time=%0t",
-                                   j, expected, share, $time);
+                for (int phase = 0; phase < 2; phase++) begin
+                    if (phase == 1) begin
+                        total_limit = 8;
+                        wr(0, 'h100, 8);
                     end
+                    $display("MX04 window TOTAL=%0d judge_reads=%0b", total_limit, phase == 0);
+                    drain(1000);
+                    truth("DRR grants present", u_schedule.grants.size() != 0);
+                    for (int j = 0; j < 7; j++) begin
+                        before_count[j] = u_schedule.beats[j];
+                        before_refills[j] = u_schedule_reference.refill_count[j];
+                        before_rd_sum[j] = u_schedule_reference.flow_rd_sum[j];
+                        before_wr_sum[j] = u_schedule_reference.flow_wr_sum[j];
+                        before_rd_full[j] = u_schedule_reference.flow_rd_full[j];
+                        before_wr_full[j] = u_schedule_reference.flow_wr_full[j];
+                        before_ideal_credit_full[j] =
+                            u_schedule_reference.flow_ideal_credit_full[j];
+                        before_ring_credit_full[j] = u_schedule_reference.flow_ring_credit_full[j];
+                        before_ring_slot_full[j] = u_schedule_reference.flow_ring_slot_full[j];
+                        before_global_full[j] = u_schedule_reference.flow_global_full[j];
+                        before_r_not_ready[j] = u_schedule_reference.flow_r_not_ready[j];
+                        before_r_stall[j] = u_schedule_reference.flow_r_stall[j];
+                        if (j != 2) before_completed[j] = local_reads[j]+local_writes[j];
+                    end
+                    before_p0_ar_idle = u_schedule_reference.flow_p0_ar_idle;
+                    before_p1_aw_idle = u_schedule_reference.flow_p1_aw_idle;
+                    before_p0_empty = u_schedule_reference.flow_p0_empty;
+                    for (int j = 0; j < 6; j++)
+                        before_p0_block[j] = u_schedule_reference.flow_p0_block[j];
+                    for (int j = 0; j < 5; j++)
+                        before_rules[j] = u_schedule_reference.rule_hits[j];
+                    before_ddr_read = u_ddr.read_data_beats;
+                    before_ddr_write = u_ddr.write_data_beats;
+                    ddr_latency_count = 0;
+                    ddr_latency_sum = 0;
+                    ddr_latency_min = 32'h7fffffff;
+                    ddr_latency_max = 0;
+                    start = cycle;
+                    drain(50000);
+                    elapsed = cycle-start;
+                    $display("FLOW source p0_ar_idle=%0d p1_aw_idle=%0d p0_head_empty=%0d",
+                        u_schedule_reference.flow_p0_ar_idle-before_p0_ar_idle,
+                        u_schedule_reference.flow_p1_aw_idle-before_p1_aw_idle,
+                        u_schedule_reference.flow_p0_empty-before_p0_empty);
+                    $display("FLOW P0: 0=global 1=port 2=ring 3=slot 4=direction 5=deficit");
+                    for (int j = 0; j < 6; j++)
+                        $display("FLOW P0 exclusive_reason=%0d cycles=%0d", j,
+                            u_schedule_reference.flow_p0_block[j]-before_p0_block[j]);
+                    for (int j = 0; j < 4; j++)
+                        $display("FLOW rule=%0d grants=%0d", j+1,
+                            u_schedule_reference.rule_hits[j]-before_rules[j]);
+                    $display("FLOW direction_switches=%0d",
+                        u_schedule_reference.rule_hits[4]-before_rules[4]);
+                    $display("FLOW DDR read=%0d write=%0d cyc=%0d busy=%f latency=%0d/%f/%0d",
+                        u_ddr.read_data_beats-before_ddr_read,
+                        u_ddr.write_data_beats-before_ddr_write, elapsed,
+                        real'(u_ddr.read_data_beats-before_ddr_read+
+                            u_ddr.write_data_beats-before_ddr_write)/real'(elapsed),
+                        ddr_latency_min, real'(ddr_latency_sum)/real'(ddr_latency_count),
+                        ddr_latency_max);
+                    $display("FLOW DDR config hit=%0d miss=%0d turn=%0d refi=%0d rfc=%0d b=%0d",
+                        u_ddr.t_hit, u_ddr.t_miss, u_ddr.t_turn, u_ddr.t_refi,
+                        u_ddr.t_rfc, u_ddr.t_b);
+                    total = 0;
+                    for (int j = 0; j < 7; j++) total += u_schedule.beats[j]-before_count[j];
+                    truth("DRR grants present", total > 10000);
+                    delivered_total = 0;
+                    for (int j = 0; j < 7; j++)
+                        if (j != 2)
+                            delivered_total +=
+                                (local_reads[j]+local_writes[j]-before_completed[j])*16;
+                    for (int j = 0; j < 7; j++)
+                        if (j != 2)
+                            $display("DRR port=%0d beats=%0d share=%f rounds=%0d deficit=%0d", j,
+                                u_schedule.beats[j]-before_count[j],
+                                real'(u_schedule.beats[j]-before_count[j])/real'(total),
+                                u_schedule_reference.refill_count[j]-before_refills[j],
+                                u_schedule_reference.deficit[j]);
+                    for (int j = 0; j < 7; j++)
+                        if (j != 2)
+                            $display("DRR delivered port=%0d beats=%0d share=%f", j,
+                                (local_reads[j]+local_writes[j]-before_completed[j])*16,
+                                real'((local_reads[j]+local_writes[j]-before_completed[j])*16)/
+                                real'(delivered_total));
+                    for (int j = 0; j < 7; j++) begin
+                        $display("FLOW occ p=%0d cyc=%0d rd=%f/%0d wr=%f/%0d", j, elapsed,
+                            real'(u_schedule_reference.flow_rd_sum[j]-before_rd_sum[j])/
+                                real'(elapsed),
+                            u_schedule_reference.flow_rd_peak[j],
+                            real'(u_schedule_reference.flow_wr_sum[j]-before_wr_sum[j])/
+                                real'(elapsed),
+                            u_schedule_reference.flow_wr_peak[j]);
+                        $display("FLOW caps p=%0d rd_full=%0d wr_full=%0d global_full=%0d", j,
+                            u_schedule_reference.flow_rd_full[j]-before_rd_full[j],
+                            u_schedule_reference.flow_wr_full[j]-before_wr_full[j],
+                            u_schedule_reference.flow_global_full[j]-before_global_full[j]);
+                        $display("FLOW credit p=%0d ideal=%0d ring=%0d slots=%0d", j,
+                            u_schedule_reference.flow_ideal_credit_full[j]-
+                                before_ideal_credit_full[j],
+                            u_schedule_reference.flow_ring_credit_full[j]-
+                                before_ring_credit_full[j],
+                            u_schedule_reference.flow_ring_slot_full[j]-before_ring_slot_full[j]);
+                        $display("FLOW ready p=%0d r_not_ready=%0d r_stall=%0d", j,
+                            u_schedule_reference.flow_r_not_ready[j]-before_r_not_ready[j],
+                            u_schedule_reference.flow_r_stall[j]-before_r_stall[j]);
+                    end
+                    for (int j = 0; j < 7; j++)
+                        if (phase == 0 && j != 1 && j != 2) begin
+                            share = real'(u_schedule.beats[j]-before_count[j])/real'(total);
+                            expected = real'(weights[j])/16.0;
+                            if (share < expected-0.05 || share > expected+0.05)
+                                $fatal(1, "FAIL DRR p=%0d expected=%f actual=%f time=%0t",
+                                       j, expected, share, $time);
+                            // Verify the allocated share also reaches the ready source ports.
+                            share = real'((local_reads[j]+local_writes[j]-before_completed[j])*16)/
+                                    real'(delivered_total);
+                            if (share < expected-0.05 || share > expected+0.05)
+                                $fatal(1, "FAIL DRR delivered p=%0d expected=%f actual=%f time=%0t",
+                                    j, expected, share, $time);
+                        end
+                end
             end
             205: begin
                 wr(0, 'h100, 1);
@@ -812,10 +980,11 @@ module edrv32_mem_subsys_tb;
                 @(negedge clk_mem);
                 direction_run = 0;
                 last_direction = -1;
-                check_grouping = 1;
                 wait_port(0, 60, 0);
                 wait_port(1, 0, 60);
-                check_grouping = 0;
+                // The reference checks the allowed direction at every grant, including
+                // tail draining when only one direction still has eligible work.
+                truth("DIR_BATCH contested choices", u_schedule_reference.batch_contests > 0);
                 truth("read/write direction switched", u_schedule.direction_switches > 4);
             end
             206: begin
@@ -1172,6 +1341,8 @@ module edrv32_mem_subsys_tb;
                 pmon_done(32);
             end
             304: begin
+                // Isolate fixed transport latency from DRR's first-round refill delay.
+                wr(0, 'h108, 0);
                 hist_width = 16;
                 // Determine only the fixed transport offset; all comparisons below use
                 // independently observed PERF_MON port handshakes.
@@ -1372,14 +1543,12 @@ module edrv32_mem_subsys_tb;
         u_gateway.idle();
         gw_count = 0;
         pmon_sequence_check = 0;
-        for (int j = 0; j < 2; j++) begin
-            apb_paddr[j] = 0;
-            apb_psel[j] = 0;
-            apb_penable[j] = 0;
-            apb_pwrite[j] = 0;
-            apb_pwdata[j] = 0;
-            apb_pstrb[j] = 0;
-        end
+        apb_paddr = '0;
+        apb_psel = '0;
+        apb_penable = '0;
+        apb_pwrite = '0;
+        apb_pwdata = '0;
+        apb_pstrb = '0;
         repeat (5) @(negedge clk_mem);
         eq("reset AR idle", 0, int'(ddr.arvalid));
         eq("reset AW idle", 0, int'(ddr.awvalid));
