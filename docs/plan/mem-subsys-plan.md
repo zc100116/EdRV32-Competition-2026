@@ -32,7 +32,7 @@ mem_xbar 是 CLAUDE.md 11.1 的关键模块：协调者逐行评审。
 | M-R1 | `edrv32_axi_async_bridge`（rtl/common，AXI64 五通道）+ DDR 网关；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 单元测试两种仿真器通过；lint、风格 0 告警 | task-mem-gw | [x] 完成 a02187b（待 M-A1 交叉评审、随工作包合入） |
 | M-R2 | mem_xbar（含 MEM_XBAR 寄存器、W 缓冲、读返回缓冲）；单元测试 | Codex · GPT-6.1 Sol；协调者逐行评审 | 规格确认 | 同上 | task-mem-xbar | [~] 评审返工 M-R2b dispatch ctx_1247b3577052（首版 ae135df：sched 7946 LUT/133 级） |
 | M-R3 | PERF_MON + P6 仲裁；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 同上 | task-mem-pmon | [x] 完成 0f0c0d8（待 M-A1 交叉评审、随工作包合入） |
-| M-V1 | MB 环境与模型：AXI256 主设备驱动、AXI256 检查器、DDR 时序模型、参考存储、调度观察器；验证方案 3.1–3.4 全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | 规格确认 | 用桩从设备自测通过 | task-mem-verif | [~] dispatch ctx_9d68f76e5c4a |
+| M-V1 | MB 环境与模型：AXI256 主设备驱动、AXI256 检查器、DDR 时序模型、参考存储、调度观察器；验证方案 3.1–3.4 全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | 规格确认 | 用桩从设备自测通过 | task-mem-verif | [x] 完成 8f11839（桩上 45 项预期失败；随 M-I1 接真实 RTL） |
 | M-R4 | 板级 DDR 适配器 `fpga/rtl/edrv32_fpga_ddr_adapter.v` + IP 端口行为模型 + AD-01 | Codex · GPT-6.1 Sol | DDR3 IP 端口模板（板卡厂商例程） | AD-01 通过 | task-mem-adapter | [ ] |
 | M-T1 | 存储子系统顶层和文件列表 `rtl/filelists/mem_subsys.f`（协调者写文件列表） | Codex · GPT-6.1 Sol | M-R1–M-R3 | lint 0 告警 | task-mem-integ | [ ] |
 | M-I1 | 联调：M-T1 + M-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | M-T1、M-V1 | full 全过，覆盖全部命中 | task-mem-integ | [ ] |
