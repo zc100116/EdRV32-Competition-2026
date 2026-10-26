@@ -28,7 +28,8 @@
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
 | CPU | `spec/cpu-spec.md` v0.9 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
 | Cache | `spec/cache-spec.md` v0.4 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
-| 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.2 | `testplan/sys-subsys-testplan.md` v0.1 | `plan/sys-subsys-plan.md` | [x] 已确认 |
+| 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.2 | `testplan/sys-subsys-testplan.md` v0.2 | `plan/sys-subsys-plan.md` | [x] 已确认 |
+| 存储子系统（DDR 网关、mem_xbar、PERF_MON、板级 DDR 适配器） | `spec/mem-subsys-spec.md` v0.1 | `testplan/mem-subsys-testplan.md` v0.1 | `plan/mem-subsys-plan.md` | [ ] 草案，待确认 |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON） | — | — | — | [ ] |
 | 公共单元（CDC、FIFO、dma2d） | — | — | — | [ ] |
 | VIN / PIX / DISP | — | — | — | [ ] |
@@ -46,7 +47,7 @@
 |---|---|---|---|---|
 | P0 | 基础设施：legacy 迁移、目录骨架、工具链、回归框架、生成器、公共原语、软件 BSP | `plan/infra-plan.md` | 见 infra-plan 第 1 节 | [x] |
 | P1 | CPU（含 cache） | `plan/cpu-plan.md`、cache-plan | ISA/ACT 全部通过，CoreMark CRC 正确，上板测得 Fmax、LUT、CoreMark/MHz | [~] |
-| P2 | SoC 骨架：系统总线、外设、中断、存储子系统、板级顶层 | `plan/sys-subsys-plan.md`、存储子系统待写 | SoC 级 CoreMark 和 DDR 测试通过，上板运行 | [~] 系统子系统已合入 main，SC 联调中 |
+| P2 | SoC 骨架：系统总线、外设、中断、存储子系统、板级顶层 | `plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md` | SoC 级 CoreMark 和 DDR 测试通过，上板运行 | [~] 系统子系统已合入 main，SC 联调中 |
 | P3 | 实时视频通路：dma2d、VIN、DISP | 待写 | 摄像头到 HDMI 闭环，无 underflow/overflow | [ ] |
 | P4 | 图像处理：PIX、GEO | 待写 | 像素级比对通过 | [ ] |
 | P5 | 渲染：RND、LVGL 移植 | 待写 | UI 画面比对通过 | [ ] |
