@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | 存储子系统波次 1（M-R1、M-R2、M-R3、M-V1）；旧工程 YOLO 加速器性能评估 N-E1（`plan/npu-plan.md`）；C-W2 Windows 综合暂停（用户暂不方便上板），任务卡 `20261025-01-cpu-sys-synth` 保留；CPU v1.0 待 C-E9/C-Y1 数据讨论 |
+| 正在进行 | 存储子系统联调 M-I1（DRR 补额度语义修正中）；C-W2 Windows 综合：第一阶段 7 个 IP 已生成、包装模块已适配，第二版任务卡（Linux 端提供约束与导入脚本）已下发；CPU v1.0 待 C-W2 数据 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -59,7 +59,7 @@
 
 | 任务号 | 内容 | 所属 | 状态 |
 |---|---|---|---|
-| 20261025-01-cpu-sys-synth | 生成 7 个 IP；CPU + 系统子系统测量顶层综合与布局布线（Fmax、资源、RVC_EN 0/1 对照） | cpu-plan C-W2、sys-subsys-plan S-P1 | [~] 已下发 |
+| 20261025-01-cpu-sys-synth | 生成 7 个 IP；CPU + 系统子系统测量顶层综合与布局布线（Fmax、资源、RVC_EN 0/1 对照） | cpu-plan C-W2、sys-subsys-plan S-P1 | [~] 第一阶段完成（IP 与包装适配）；第二版已下发 |
 
 ---
 

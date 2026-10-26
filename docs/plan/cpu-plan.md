@@ -62,7 +62,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-E8 | 乱序双发射周期模型评估（不写 RTL）：ROB/发射队列/误预测代价矩阵，与顺序 V2s+V5 及 C-E7 最佳配置对比；结果决定是否开发乱序 RTL | Codex · GPT-6.1 Sol | C-E5 | 测量报告 `docs/reports/2026-10-25-perf-cpu-ooo-model.md` | zc100116/task-cpu-ooo-model | [x] ed7dea6（已合入 main）；默认点相对 V0 1.108–1.275 |
 | C-E9 | 顺序双发射极致评估（模型）：L2b+V5 基础上叠加发射交换、槽 1 访存/乘法路由、一对两条分支、乘法延迟 2、预测器再加大、后段 JALR 及组合 | Codex · GPT-6.1 Sol | C-E7 | 测量报告 `docs/reports/2026-10-26-perf-cpu-inorder-max.md` | zc100116/task-cpu-inorder-max | [x] 已合入 c590fd0（含后端 B9–B13） |
 | C-Y1 | Yosys 结构性时序预估：LUT6 映射后的路径逻辑级数、高扇出网络、资源分布（cpu_core RVC 0/1、cpu_subsys、sys_subsys、测量顶层），作为每次 CPU 改动的对比基线 | Codex · GPT-6.1 Sol | — | 测量报告 `docs/reports/2026-10-26-timing-yosys-cpu.md` | zc100116/task-cpu-yosys | [x] 已合入 4fc3de8 |
-| C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | `tasks/win/20261025-01-cpu-sys-synth`（与 S-P1 合并：IP 生成 + CPU+系统子系统测量顶层综合） | [~] 任务卡已下发 |
+| C-W2 | CPU 最小顶层综合与布局布线：Fmax、LUT、关键路径、资源分布（Windows 任务卡） | 用户 + Windows Codex | C-R4 | 任务卡结果 | `tasks/win/20261025-01-cpu-sys-synth`（与 S-P1 合并：IP 生成 + CPU+系统子系统测量顶层综合） | [~] IP 已生成、包装已适配；第二版任务卡已下发 |
 
 ### 3.4 联调、评审与定稿
 
