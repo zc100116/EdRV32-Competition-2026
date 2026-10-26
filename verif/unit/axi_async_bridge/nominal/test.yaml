@@ -1,0 +1,9 @@
+top: tb_axi_async_bridge
+files: files.f
+defines: SIM_MODE
+parameters: SYS_MHZ=150 MEM_MHZ=125 FULL=1
+software:
+timeout: 120
+pass: PASS
+tier: full
+simulator: verilator iverilog

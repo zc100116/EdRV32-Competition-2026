@@ -1,0 +1,9 @@
+top: tb_axi_async_bridge
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 120
+pass: PASS
+tier: smoke
+simulator: verilator iverilog

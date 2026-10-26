@@ -1,0 +1,9 @@
+top: tb_mem_ddr_gw
+files: files.f
+defines: SIM_MODE
+parameters: SYS_MHZ=150 MEM_MHZ=125 FULL=1
+software:
+timeout: 300
+pass: PASS
+tier: full
+simulator: verilator iverilog

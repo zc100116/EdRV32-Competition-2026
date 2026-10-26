@@ -16,6 +16,7 @@ mid-transaction reset is outside these interfaces.
 | `edrv32_cdc_handshake` | `WIDTH` (default 32); source `valid_i/ready_o/data_i`, destination `valid_o/ready_i/data_o`; one outstanding bundled payload with req/ack toggles |
 | `edrv32_cdc_gray_cnt` | `WIDTH` (default 8); source binary `count_i`, destination binary `count_o`; source-registered Gray value crosses two destination stages |
 | `edrv32_sync_fifo` | `WIDTH` (default 32), `DEPTH` (default 16); `clk_i/rst_n_i`; producer `valid_i/ready_o/data_i`, consumer `valid_o/ready_i/data_o` |
+| `edrv32_axi_async_bridge` | Fixed AXI64 five-channel bridge, `s_axi_*` on `clk_sys_i/rst_sys_n_i`, `m_axi_*` on `clk_mem_i/rst_mem_n_i`; each channel uses a depth-2 async FIFO, supports independent channel backpressure |
 | `edrv32_async_fifo` | Same FIFO parameters and data interface; independent `clk_write_i/rst_write_n_i` and `clk_read_i/rst_read_n_i` |
 
 For both FIFOs DEPTH is a power of two and at least 2; WIDTH is positive.
