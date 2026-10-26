@@ -60,12 +60,14 @@ def bursts(beats, address):
 
 
 @lru_cache(maxsize=None)
-def writer_timing(k, pairs, tile, planes, addr0, addr1, latency, bandwidth):
+def writer_timing(k, pairs, tile, planes, addr0, addr1, latency, bandwidth,
+                  direct=False, merge=0, quant_pair_cycles=4):
     """Two 16-pair banks, per-plane bursts and four B credits.
 
     Quantized pair availability follows the measured tile issue spacing.
     Backpressure shifts later pairs; payload and B events are cycle scheduled.
     Returns producer stalls, post-acceptance W drain and B drain cycles.
+    Optional N-E2 modes change result arrivals; defaults preserve N-E1 timing.
     """
     full = [False, False]
     length = [0, 0]
@@ -83,7 +85,12 @@ def writer_timing(k, pairs, tile, planes, addr0, addr1, latency, bandwidth):
         response = bool(pending) and pending[0] <= time
         ready = (accepted < pairs and not full[fill_bank] and
                  not (state != 0 and fill_bank == drain_bank))
-        arrival = (accepted+1)*k + min(pairs, tile)*k + 10*(accepted//tile+1) + 13
+        if direct:
+            # N-E2 direct window feed: retain the old four-group quantizer.
+            arrival = (accepted+1)*max(k, quant_pair_cycles) + 13 + merge
+        else:
+            arrival = ((accepted+1)*k + min(pairs, tile)*k +
+                       (10+merge)*(accepted//tile+1) + 13)
         valid = accepted < pairs and time >= arrival + stalled
         take = ready and valid
         aw = state == 1 and outstanding < 4

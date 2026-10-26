@@ -3,6 +3,7 @@
 import unittest
 
 from npu_model import conv_stages, operator_cycles, read_cycles
+from datapath_model import datapath_stages
 
 
 class LegacyStageTests(unittest.TestCase):
@@ -57,6 +58,52 @@ class LegacyStageTests(unittest.TestCase):
         # 1920 vector pixels * 25 neighbours * 3 state cycles = 144000.
         self.assertEqual(operator_cycles(c, 0), 146164)
         self.assertEqual(operator_cycles(c, 30), 149464)
+
+    def test_d2_half_block(self):
+        c = self.small_conv() | dict(last_c16_only=1)
+        p = datapath_stages(c, 0, 4.8, ('D2',))
+        # K=18 -> 9. MAC=3 rows*4 pairs*9=108; each row has 36 fill,
+        # 10 chunk control, 1 merge pipeline and 14 tail clocks: 3*61=183.
+        self.assertEqual(p['mac'], 108)
+        self.assertEqual(p['patch_pipeline'], 183)
+        self.assertEqual(p['weight'], 149)  # Keep padded DDR weight layout.
+
+    def test_d3a_cross_row_fill(self):
+        c = self.small_conv()
+        p = datapath_stages(c, 0, 4.8, ('W1', 'D3a'))
+        # Old patch=3*(72+10+14)=288. The two row transitions each
+        # overlap min(first fill 72,last chunk MAC 72): 288-144=144.
+        self.assertEqual(p['mac'], 216)
+        self.assertEqual(p['patch_pipeline'], 144)
+        self.assertEqual(datapath_stages(c, 0, 4.8, ('D3a',))['patch_pipeline'], 288)
+
+    def test_d3a_short_last_chunk(self):
+        c = self.small_conv() | dict(output_width_pairs=6, tile_pairs=4)
+        p = datapath_stages(c, 0, 4.8, ('W1', 'D3a'))
+        # 3*(72+20+14)-2*min(72,2*18)=318-72=246.
+        self.assertEqual(p['patch_pipeline'], 246)
+
+    def test_d3b_direct_window(self):
+        c = self.small_conv()
+        p = datapath_stages(c, 0, 4.8, ('D3b',))
+        # No activation fill or tile restart: just 3 rows*14 pipeline clocks.
+        self.assertEqual(p['mac'], 216)
+        self.assertEqual(p['patch_pipeline'], 42)
+
+    def test_d3b_quantizer_pair_rate(self):
+        c = self.small_conv() | dict(kernel3=0)
+        p = datapath_stages(c, 0, 4.8, ('D3b',))
+        # K=2, old quantizer needs 4 clocks/pair. 3*(14+4*(4-2))=66.
+        self.assertEqual(p['mac'], 24)
+        self.assertEqual(p['patch_pipeline'], 66)
+        wide = datapath_stages(c, 0, 4.8, ('D3b', 'Q32'))
+        self.assertEqual(wide['patch_pipeline'], 42)
+
+    def test_d2_d3b_merge_is_per_row(self):
+        c = self.small_conv() | dict(last_c16_only=1)
+        p = datapath_stages(c, 0, 4.8, ('D2', 'D3b'))
+        # 3*(14 row pipeline+1 merge)=45; merger throughput is one pair/clock.
+        self.assertEqual(p['patch_pipeline'], 45)
 
 
 if __name__ == '__main__':
