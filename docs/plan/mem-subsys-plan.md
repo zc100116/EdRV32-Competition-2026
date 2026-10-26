@@ -33,7 +33,7 @@ mem_xbar 是 CLAUDE.md 11.1 的关键模块：协调者逐行评审。
 | M-R2 | mem_xbar（含 MEM_XBAR 寄存器、W 缓冲、读返回缓冲）；单元测试 | Codex · GPT-6.1 Sol；协调者逐行评审 | 规格确认 | 同上 | task-mem-xbar | [x] 完成 5b2122a（M-R2b 返工：XC7 7739 LUT/23 级，generic 12481 LUT；面积待 PDS 实测后定） |
 | M-R3 | PERF_MON + P6 仲裁；单元测试 | Codex · GPT-6.1 Sol | 规格确认 | 同上 | task-mem-pmon | [x] 完成 0f0c0d8（待 M-A1 交叉评审、随工作包合入） |
 | M-V1 | MB 环境与模型：AXI256 主设备驱动、AXI256 检查器、DDR 时序模型、参考存储、调度观察器；验证方案 3.1–3.4 全部测试项和覆盖统计 | Codex · GPT-6.1 Sol（独立验证 worker） | 规格确认 | 用桩从设备自测通过 | task-mem-verif | [x] 完成 8f11839（桩上 45 项预期失败；随 M-I1 接真实 RTL） |
-| M-R4 | 板级 DDR 适配器 `fpga/rtl/edrv32_fpga_ddr_adapter.v` + IP 端口行为模型 + AD-01 | Codex · GPT-6.1 Sol | DDR3 IP 端口模板（板卡厂商例程） | AD-01 通过 | task-mem-adapter | [~] dispatch ctx_afb376e95e84 |
+| M-R4 | 板级 DDR 适配器 `fpga/rtl/edrv32_fpga_ddr_adapter.v` + IP 端口行为模型 + AD-01 | Codex · GPT-6.1 Sol | DDR3 IP 端口模板（板卡厂商例程） | AD-01 通过 | task-mem-adapter | [x] 完成 0da8854（地址单位 4 B，随工作包合入） |
 | M-T1 | 存储子系统顶层和文件列表 `rtl/filelists/mem_subsys.f`（授权 M-I1 worker 写文件列表） | Codex · GPT-6.1 Sol | M-R1–M-R3 | lint 0 告警 | task-mem-integ | [~] 并入 M-I1 |
 | M-I1 | 联调：M-T1 + M-V1，smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | M-T1、M-V1 | full 全过，覆盖全部命中 | task-mem-integ | [~] dispatch ctx_e6a3398e34f8（基线 zc100116/mem-integ-base） |
 | M-A1 | 交叉评审 M-R1、M-R3（mem_xbar 由协调者评审） | Codex · GPT-6.1 Sol | M-R1、M-R3 | 意见全部处理 | task-mem-review | [x] 无确定性功能错误，4 条建议并入 M-I1 |
