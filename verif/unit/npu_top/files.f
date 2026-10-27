@@ -1,0 +1,2 @@
+-f ../../../verif/block/npu/sources.f
+-f ../../../verif/block/npu/dut.f

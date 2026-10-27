@@ -1,0 +1,11 @@
+top: tb_npu
+files: files.f
+defines: SIM_MODE
+parameters: SELFTEST=0
+software:
+timeout: 1800
+pass: PASS
+tier: smoke full
+simulator: verilator
+verilator_flags: -Wall
+runner: python3 verif/block/npu/run.py --test RG-02
