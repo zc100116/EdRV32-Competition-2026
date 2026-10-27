@@ -1,0 +1,11 @@
+top: edrv32_vin_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 900
+pass: PASS
+tier: full
+simulator: verilator
+plusargs: +CASE=full
+verilator_flags: -CFLAGS -O0
