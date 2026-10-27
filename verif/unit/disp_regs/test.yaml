@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 240
+pass: PASS
+tier: smoke full
+simulator: verilator
+plusargs:

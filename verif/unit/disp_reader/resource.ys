@@ -1,0 +1,20 @@
+# DISP generic LUT4/FF reference, retaining the scan FIFO as a memory cell.
+# Run from repository root: yosys -s verif/unit/disp_reader/resource.ys
+read_verilog rtl/media/disp/edrv32_disp.v
+read_verilog rtl/media/disp/edrv32_disp_regs.v
+read_verilog rtl/media/disp/edrv32_disp_reader.v
+read_verilog rtl/media/disp/edrv32_disp_scan.v
+read_verilog rtl/media/disp/edrv32_disp_timing.v
+read_verilog rtl/media/disp/edrv32_disp_tmds_enc.v
+read_verilog rtl/common/edrv32_dma2d_rd.v
+read_verilog rtl/common/edrv32_async_fifo.v
+read_verilog rtl/common/edrv32_cdc_sync_bit.v
+read_verilog rtl/common/edrv32_cdc_pulse.v
+read_verilog rtl/common/edrv32_cdc_gray_cnt.v
+synth -top edrv32_disp -flatten -lut 4 -run begin:fine
+techmap
+opt
+abc -lut 4
+opt_clean
+stat
+write_json build/disp_resource.json
