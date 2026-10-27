@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU 第三轮时序优化 C-R7（task-cpu-timing-r3）；NPU 规格 v0.3 已确认，控制和 DMA RTL N-C1 已派发（task-npu-ctrl）；图像通路方案讨论已决定（`design/2026-10-27-image-path.md`），旧工程盘点 V-L1 进行中，之后写 VIN/PIX/GEO/DISP 规格 |
+| 正在进行 | CPU：C-R7 完成（Yosys 47→36 级），C-W4 PDS 复测待合入 main 后下发；NPU：N-C1 控制和 DMA RTL（task-npu-ctrl）；图像通路：VIN、DISP 规格已确认，V-M1 mem_xbar P1 读通道、V-R1 VIN RTL、V-R2 DISP RTL 进行中，dma2d 已完成；PIX/GEO、ETH 规格待起草 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
