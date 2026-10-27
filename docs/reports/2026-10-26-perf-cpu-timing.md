@@ -416,3 +416,371 @@ lint 按上节 C-R5 的 `expand_files` 命令，对 `edrv32_cpu_core` / `cpu.f` 
 逐配置日志：`build/sys_cpu/coremark_*/run.log`；编译选项：
 `build/sys_cpu/sw/coremark_*/build.log`；仿真编译：`build/sys_cpu/compile.log`。
 完整测量 stdout：`build/cpu_timing/cr6/perf.log`。
+
+## C-R7：按 20261027-02 PDS 路径做周期等价重排
+
+日期：2026-10-27。软件/RTL 基线为 `c664061`；结果提交见本节末尾。
+PDS 依据为 `335bb0f` 的 PG2L200H-6、150 MHz、RVC_EN=1 实测：slow WNS
+−3.920 ns，估计 94.46 MHz，12645/43021 个端点违例。
+原始数据位于 `origin/win/20261027-02-cpu-npu-synth`（`1c3eda6`）的
+`tasks/win/20261027-02-cpu-npu-synth/artifacts/cpu/`，汇总见
+`docs/reports/2026-10-27-timing-cpu-sys-r2.md`。
+本轮没有运行 PDS；下文 Yosys 只计结构级数，不据此换算 PG2L200H 频率。
+
+最终四配置 CoreMark 周期差均为 **0**，全部定向验收通过。
+通用 LUT6 全子系统最长路径由 **47 → 36 级**，LUT +0.53%、FF +0.97%。
+D$ 地址到 CSR 计数器的组合通路消失，三个 E 操作数路径分别减少 13 级；
+F2 PC 已局部化，但分出的 I$ 地址副本支路仍需 PDS 复测，详见下表。
+
+
+### PDS 证据范围与六类 RTL 路径
+
+已读取 `setup_top20_detail.txt`、`all_paths.tsv`、`hold_top200.txt`、
+`high_fanout.txt`、`setup_near_positive_top20_detail.txt` 和原生 `.rtr`。
+`setup_top20_detail.txt` 实际有 40 条明细，全部是 D$/乘法结果 → CSR 计数器；
+其余五类的**所列最差路径**只有起终点、裕量和级数。near-positive 明细另有
+F2 PC → IB 的同族正裕量路径，可补充信号链证据，不能替代 −2.892 ns 最差路径的明细。
+经本任务的 `ask`，协调者确认：这五类写成“代码推导/Yosys 参考”，
+逐级物理延迟和扇出写“未取得”，下一轮 Windows 按起终点分组补导出。
+不能把下面的 RTL 信号链当成已经取得的 PDS 逐级明细。
+
+本小节的行号统一引用 **基线 `c664061`**；`core`、`FE`、`PRED`、`IB`、
+`CSR` 分别为 `rtl/cpu/edrv32_cpu_{core,frontend,predictor,ib,csr}.v`，
+`DC`、`IC` 为 `rtl/cache/edrv32_{dcache,icache}.v`。
+箭头中标出的算术、比较、选择、门控均为组合逻辑；模块端口连线和
+同一结果到多个负载的广播是布线/扇出，不增加 RTL 运算层次。
+
+| PDS 起点 → 终点 | WNS / 级数 | 基线 RTL 信号链、逻辑与布线 |
+|---|---|---|
+| `u_dcache/addr_r` → `u_csr/counter_r` | −3.920 ns / 24 | **有 PDS 逐级明细**。`DC:190–212`：索引 valid、tag 比较得到 `hit0_w`，选择路/字得到 `raw_load_w`；`DC:213–226`：写缓冲逐字节合并及装载移位；经 `dc_resp_data_i` 连线到 `core:617–628` 的 load 符号/零扩展，再经 `m_result_w`、`w_result_w` 和 `core:419–453` 的 D 操作数前递选择，到 `core:597–598` 的 `csr_operand_w`；端口连线到 `CSR:123–130` 的 CSRRW/CSRRS/CSRRC 写数据选择，最后到 `CSR:155–190` 的计数器写入/自动累加。PDS 中带 `e_operand_a_r/.../L6` 的点是寄存器旁的组合 LUT，并未跨过 E 寄存器。 |
+| `e_operand_a_r` → `PRED.ras_data_r` | −3.233 ns / 17 | **代码推导/Yosys 参考**。`core:494–518`：`e_address_w` 32 位加法 → JALR 目标低位清零及目标选择 → 与预测目标比较 → `e_redirect0_w`；`core:522–525,587–590`：槽间/后端重定向优先级及 RAS 检查点选择；经端口到 `FE:150–160,197–201` 的 restore 选择，再到 `PRED:93–96,143–149` 的 RAS 槽地址和写使能。PDS 最差终点是 RAS FF 的 **CE**，因此控制链也属于测量对象，不仅是返回地址数据链。逐级物理延迟/扇出未取得。 |
+| `FE.f2_pc_r` → `PRED.ras_data_r` | −3.102 ns / 9 | **代码推导/Yosys 参考**。本地支路为 `FE:162–163,238–248` 的响应数量/半字位置和数据选择 → `FE:265–315` 的指令长度、边界恢复判断及检查点选择 → `FE:151–155,197–201` 的 RAS restore → `PRED:143–149`。另有 Yosys 实测支路：F2 PC 与 I$ 接收地址 FF 被合并，共享网络经 `IC:81–88` 的命中/响应有效 → `FE:161–167,227,298–308` 的 append/容量与边界恢复 → RAS restore；容量支路也可经新请求接受影响 `PRED:147–149` 的推测调用写栈。两者不能仅凭 PDS 打包后的起点名称区分；明细未取得。 |
+| `e_operand_a_r` → `FE.f1_pc_r` | −3.085 ns / 17 | **代码推导/Yosys 参考**。同上 `core:494–525` 的目标计算和误预测判断，`core:587–590` 选择后端重定向，`FE:147–149` 选择后端/D 重定向，`FE:375–414` 的重定向/恢复/顺序取指优先级更新 F1 PC。目标数据和晚到的重定向使能是并行的两类输入；PDS 最差终点为 F1 FF 的 CE。逐级物理延迟/扇出未取得。 |
+| `e_operand_a_r` → I$ tag RAM `CEB` | −2.947 ns / 16 | **代码推导/Yosys 参考**。同上误预测控制链 → `FE.redirect_w` → `FE:166–169` 的 `ic_req_valid_o/request_accept_w` → `IC:84–86` 的 `accept_w` → `IC:103–127` 两路 tag 的 `rd_en_i`；经 `rtl/tech/edrv32_ram_icache_tag.v:31–35` 端口连线到 IP `rd_clk_en`/物理 CEB。最后这段是使能广播/布线，不是额外运算。逐级物理延迟/扇出未取得。 |
+| `FE.f2_pc_r` → `IB.entries_r` | −2.892 ns / 10 | **代码推导/Yosys 参考**。`FE:162–163,238–248` 的响应数量/位置和数据选择 → `FE:265–290` 的两条指令拼接及 RVC 展开 → `FE:326–364` 的 `push_count_w/push_data_w` → `IB:30–35,59–65` 的写槽选择/写使能；PC、GHR 和预测元数据还有直接数据广播支路。共享 I$ 接收地址 FF 引出的命中/响应数据及响应有效/容量支路也可到达 IB。最差路径的逐级物理延迟/扇出未取得；同族正裕量明细见下段。 |
+
+第一类明细给出的数据路径为逻辑 3.938 ns（38.867%）、布线 6.194 ns（61.133%）。
+关键网络：`addr_r[10]` 扇出 354，net 1.022 ns；tag 选择两级分别为
+0.352、0.305 ns；比较 LUT 0.113 ns 后的 `hit0_w` 扇出 74，net 0.513 ns；
+`raw_load_w` 选择 0.380 ns；CSR `write_data_w[11]` 扇出 25，net 0.835 ns；
+随后进入 64 位计数器 carry 链。`high_fanout.txt` 是布局前 DMR 数据，
+其中 F2 PC 的两个列出网络扇出为 115、111，不能把它们当作布局后的逐级数值。
+PDS 打包后 Startpoint 的寄存器名称与实际 Q 引脚信号名可能不同，例如
+第一条标 `addr_r[11]/.../CLK`，实际 Q2 输出为 `addr_r[10]`。
+`hold_top200.txt` 的最差裕量为 +0.143 ns，没有本轮需修复的 hold 违例。
+
+near-positive 第 5 条是 slow +0.001 ns、7 级的 F2 PC → IB 同族路径：
+`f2_pc_r[9]` 的 Q（扇出 65，net 1.008 ns）直接进入 I$ valid 选择与 tag 比较，
+`hit0_w`（扇出 86）选择 `ic_resp_data_w[16]`，再经前端半字选择到
+`first_length_w[1]`（扇出 221，net 0.600 ns），选择 `second_w[1]`
+（扇出 37，net 1.109 ns），到 `entries_r[0][65]` 的输入。
+逻辑 1.356 ns（21.004%）、布线 5.100 ns（78.996%）。这直接支持 F2 PC/I$ 地址网络
+共用及指令长度选择扇出的判断；这条已满足时序的支路不是表中的 −2.892 ns 最差路径，
+也没有提供 F2 PC → RAS 的最差逐级明细。它还说明 I$ 数据选择到长度译码的支路仍需下轮关注。
+
+
+### 结构修改及周期等价理由
+
+1. **CSR 写数据只取 M 级，提交条件按 CSR 类型展开。**
+   `core.csr_operand_w` 直接接 `m_csr_data_r`，删除 D 操作数前递到写数据的组合输入。
+   D 级仍读取同一个 CSR 地址并检查未实现/只读权限；这些检查不依赖写数据。
+   `commit_i` 使用 `csr_m_access_w && m_system_commit_w`：在 M 类别为 CSR 时，
+   `m_ready_w=1`、`m_memory_w=0`，故它与原来的 `csr_m_access_w && m_commit_w[0]`
+   完全相同，仍受异常、中断以及除法不可中断窗口约束，但不再绕经 D$ fence/ready。
+   CSR 内部 HPM 读数据按互斥地址译码后按位 OR，替代 24 次条件覆盖形成的优先链。
+   地址集合不相交，读值、illegal、只读属性不变。计数器的 64 位累加、CSR 写覆盖
+   自动加一、同拍未写半部保持原值、trap 优先级和写入边沿全部保持原样。
+   没有让 CSR 等待 W 级，也没有提前或延后提交。
+2. **E 级目标比较前移不依赖操作数的部分。**
+   在原 D→E 接收边沿、使用相同 `d_issue_w != 0` 使能，保存 PC 相对目标及其预测命中比较。
+   JAL 在 D 重定向后，比较位与原有预测字段覆盖一致。
+   JALR 在 D 级预计算 `even_expected = {prediction[31:1],0} - immediate` 和
+   `odd_expected = {prediction[31:1],1} - immediate`；E 级直接比较 rs1 是否等于两者之一，
+   并要求预测目标 bit0 为 0。模 2^32 运算下，这正好等价于
+   `((rs1 + immediate) & ~1) == prediction`，包含负立即数、溢出、奇数原始和与奇数预测目标。
+   因而 E 重定向控制不再串过完整目标加法和目标 mux。JALR 的正确目标数据仍由原加法器产生。
+   RVC=0 的目标对齐判断按指令类别直接取对应 bit1；E 级发出时点、不等 M 接收、只发一次、
+   槽 1 冲刷和 trace 的重定向原因均未改。
+   另把后端 redirect-valid 写成 M 请求与 E 原始原因的直接 OR，避免
+   M 重定向先取消 E resolve、再经 E 槽间优先级串回后端 valid。
+   令 `B=e_valid[0] && !e_resolved && !div_wait`、`N=槽0重定向原因`、
+   `Y=e_valid[1] && predicted_taken[1]`，原式为
+   `M || (B && !M && N) || (B && !M && Y && !(B && !M && N))`，
+   化简为 `M || (B && (N || Y))`。实际 E resolve/trace/update 仍使用原来受 M 取消的条件，
+   PC、RAS 和 push/pop 的 M 优先级 mux 不变。
+   Yosys SAT 对上述 JALR 32 位恒等式证明成功，
+   日志为 `build/c-r7/prove-jalr.log`。
+3. **RAS 写槽局部译码。**
+   `PRED.g_ras` 对四个固定槽分别生成 restore-top、restore-link、query-link 条件，
+   最后再接晚到的 restore-valid。消除动态 part-select 写造成的整条 128 位写掩码/数据优先链。
+   restore 仍压过 query；同槽 push 仍压过恢复栈顶；指针、计数、满栈覆盖和实际写入边沿不变。
+4. **F2 起点预译码、响应数量预计算和 PC 局部化。**
+   原请求接收边沿保存 `min(request_end,4)-f1_pc[2:1]` 与四位 one-hot 起点；
+   F2 的四条流分别旋转 one-hot，选择原来的半字与预测位。计数和位置是相同表达式跨原有寄存器边界
+   的移动，没有新增流水级，也不改变响应旁路、容量预留、IB 入队或边界恢复周期。
+   F2 PC 改在 `!f2_pending_r || ic_resp_valid_i` 时保存 F1 PC：无未完成请求时该负载没有所有者，
+   有未完成请求时一直保持到响应边沿；同拍响应/再请求也保存新请求的旧 F1 PC。
+   因此每个有效 F2 响应所见 PC 相同；只允许无效负载变化。
+   这个不同的寄存器使能防止综合把 F2 PC 与 I$ 已接收地址 FF 合并，分开两组负载（Yosys 中 [31:3] 的 29 个共享 bit 由 29 个降为 0 个），
+   没有添加 keep/dont_touch 属性、额外复位或新参数。
+5. **综合工具端口同步。**
+   原 `tools/synth/ip_stubs.v` 与当前 PDS 包装器端口不符，基线 FPGA_MODE 综合在
+   `ip_ram_icache_tag.rd_rst` 处明确失败。本轮按已有包装器同步 cache IP 的 reset/clock-enable、
+   tag 物理地址宽度以及 SRAM/ROM/multiplier 端口；前后比较共用修正后的 stub。
+   RTL 包装器、文件列表和 FPGA 文件均未修改。全 CPU+系统测量顶层的
+   `hierarchy -check` 也已验证端口可连接，日志为 `build/c-r7/elaborate-top.log`；
+   可用既有脚本 `python3 tools/synth/yosys_synth.py edrv32_fpga_cpu_sys_top` 的
+   hierarchy 阶段复核同一组端口。
+
+没有修改任何测试或内部观察检查。`verif/block/cpu/b1/edrv32_cpu_directed_checks.svh`
+对 `e_actual_pc_w` 的优先级观察仍成立；`verif/unit/cpu_redirect_wait/tb.sv`
+对 `ras_data_r` 的向量观察仍保持原名和位序。被替换的 `f2_end_r` 在验证目录没有层次引用。
+没有修改 cpu-spec、公共头文件、文件列表、FPGA 文件或 cache RTL。
+
+### Yosys 子系统结构对比
+
+工具：Yosys 0.70+219（5053d0e26，Clang 21.1.8），
+Verilator 5.020（Debian 5.020-1），xPack GCC 15.2.0。
+综合顶层为 `edrv32_cpu_subsys` 的测量 wrapper，RVC_EN=1、FPGA_MODE，
+I$/D$ RAM 和两拍乘法器按包装器边界作为黑盒；使用既有
+`tools/synth/yosys_synth.py` 的 `synth -flatten -noabc; abc -lut 6 -dress; opt_clean`。
+`tools/synth/netlist_paths.py.analyze` 包含 FF 的 D/enable 终点。
+与前一节 C-R6 的 SIM_MODE 展开存储器结果不能逐项混用。
+
+| 项目 | 基线 `c664061` | 本轮结果 | 变化 |
+|---|---:|---:|---:|
+| 通用 LUT6 | 29,817 | 29,974 | +157（+0.53%） |
+| FF | 9,985 | 10,082 | +97（+0.97%） |
+| IP 黑盒实例 | 9 | 9 | 0 |
+| 全子系统最长组合级数 | 47 | 36 | −11（−23.40%） |
+
+下表过滤起点后再求最长路径，不是从全局前若干条中反向筛选。
+`—` 表示该起点集合到指定终点没有组合可达路径，不表示 0 级通路。
+I$ CEB 用两路 tag wrapper 的 `rd_en_i` 实际内部网络作为终点；两路互为别名，选中 1 bit。
+F2 PC 的未使用 bit0 已在 `opt_clean` 后无驱动，查询只选 [31:1]。
+
+| 起点 → 终点集合 | 基线最长级数 | 本轮最长级数 | 处理结论 |
+|---|---:|---:|---|
+| D$ `addr_r` → CSR `counter_r` | 20 | — | 前递写数据入口与 fence/ready 提交入口均已消除，指定寄存器组无可达组合路径 |
+| E 槽 0 `e_operand_a_r[0]` → RAS `ras_data_r` | 47 | 34 | 目标加法后的误预测比较拆开；最深剩余路径经条件分支比较和前端容量/请求接收 |
+| F2 `f2_pc_r[31:1]` → RAS `ras_data_r` | 26 | — | F2/I$ 地址共享被解除，二进制起点不再控制半字数据/预测选择 |
+| E 槽 0 `e_operand_a_r[0]` → F1 `f1_pc_r` | 45 | 32 | 减少 13 级；仍保留同拍 E 重定向和正确目标数据 |
+| E 槽 0 `e_operand_a_r[0]` → I$ tag `rd_en_i` | 44 | 31 | 减少 13 级；没有把重定向推迟一拍 |
+| F2 `f2_pc_r[31:1]` → IB `entries_r` | 23 | 5 | 剩余是 PC/元数据等短数据通路，可达终点由 1424 个降为 160 个 |
+| F2 PC 及替代控制状态 `{pc,end/count,start}` → RAS | 26 | 19 | 把新寄存器也计入，避免只按旧名字报告“路径消失”；仍减少 7 级 |
+| F2 PC 及替代控制状态 `{pc,end/count,start}` → IB | 23 | 16 | 同上，减少 7 级 |
+| I$ `addr_r` → RAS（共享 PC 拆分后的另一份） | 26 | 28 | I$ 命中/响应有效及数据选择支路仍在；本轮未缩短，通用映射增加 2 级 |
+| I$ `addr_r` → IB（同上） | 23 | 25 | 同上，不能把起点分开后的结果说成整条取指响应链消失 |
+
+全子系统最深 10 条如下。省略公共前缀 `u_target.`，`FE/PRED` 展开为
+`u_core.u_frontend.u_predictor`；D/E/R 表示终点 D、enable 或映射 FF 的同步置零控制引脚。
+同级路径按既有分析器的 net 编号顺序输出，没有按寄存器组去重。
+
+| # | 基线起点 → 终点 | 级数 | 本轮起点 → 终点 | 级数 |
+|---:|---|---:|---|---:|
+| 1 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[33].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_count_r[0].E` | 36 |
+| 2 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[34].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_count_r[1].E` | 36 |
+| 3 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[35].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_count_r[2].E` | 36 |
+| 4 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[36].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[96].E` | 36 |
+| 5 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[37].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[64].E` | 36 |
+| 6 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[38].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[64].R` | 36 |
+| 7 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[39].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[32].E` | 36 |
+| 8 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[41].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[97].E` | 36 |
+| 9 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[44].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[98].E` | 36 |
+| 10 | `u_core.e_imm_r[0][1]` → `FE/PRED.ras_data_r[45].D` | 47 | `u_dcache.state_r[3]` → `FE/PRED.ras_data_r[99].E` | 36 |
+
+结果版的最深支路为：D$ 响应错误状态 → `dc_resp_err_i` → M 级 fault/interrupt/trap
+→ 后端重定向/D 重定向有效 → F2 响应接受/可用半字数 → 边界恢复/入队数量/剩余容量
+→ 新请求接受 → RAS query 更新使能。
+这是 Yosys 组合图，包含互斥状态下仍被计入的结构依赖，不能据 36 级认定为下一轮 PDS 的最差路径。
+E 操作数到前端剩余的最长支路经过条件分支操作数比较 → 重定向有效
+→ F2 响应/容量 → 新请求接受；本轮没有改请求接收或指令推进周期。
+表中 FF 的 R 是 Yosys 从数据选择映射出的同步置零控制，不是新增的 RTL 复位。
+64 位计数器自身的自动进位链也保留，未从结构深度推断其器件延迟。
+F2 PC 的局部化降低了共享负载，但 I$ 地址副本到 RAS/IB 的组合通路依然存在，
+Yosys 还各增加了 2 级；是否由布线/扇出改善抵消，必须看下一轮 PDS，不能宣称这一支已消除。
+
+原始结果：`build/c-r7/{before,after}/synth/netlist.{ys,log,json}`、
+同目录 `{all,dcache-csr,e-ras,f2-ras,e-f1,e-ic,f2-ib,f2state-ras,f2state-ib}.{json,md}`，
+以及 `build/c-r7/paths-{before,after}-summary.log`、
+`paths-ic-copy-summary.log` 和 `{before,after}/synth/icaddr-{ras,ib}.{json,md}`。
+中间方案只留在 `build/c-r7/after-v{1,2,3}/`，不作为本节结果。
+
+复现综合（在结果提交检出执行；基线导出目录只提供 `c664061` 的源代码，
+两侧使用同一版修正后的 IP 端口声明）：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+mkdir -p build/c-r7/reproduce-before/src
+git archive c664061 rtl tools/synth | tar -x -C build/c-r7/reproduce-before/src
+cp tools/synth/ip_stubs.v build/c-r7/reproduce-before/src/tools/synth/ip_stubs.v
+(cd build/c-r7/reproduce-before/src && python3 tools/synth/yosys_synth.py edrv32_cpu_subsys)
+python3 tools/synth/yosys_synth.py edrv32_cpu_subsys
+```
+
+对两侧生成的 JSON 执行以下查询；若直接复用本轮日志，设置 `files` 为
+`build/c-r7/{before,after}/synth/netlist.json` 即可：
+
+```python
+from pathlib import Path
+import json
+from tools.synth.netlist_paths import analyze, markdown
+files = {
+    'before': Path('build/c-r7/reproduce-before/src/build/synth/'
+                   'edrv32_cpu_subsys_rvc1/netlist.json'),
+    'after': Path('build/synth/edrv32_cpu_subsys_rvc1/netlist.json'),
+}
+root = r'^u_target\.'
+operand = root + r'u_core\.e_operand_a_r\[0\](?:\[|$)'
+pc = root + r'u_core\.u_frontend\.f2_pc_r\[(?:[1-9]|[12][0-9]|3[01])\]$'
+state = root + (r'u_core\.u_frontend\.f2_(?:(?:start|count|end)_r(?:\[|$)|'
+                r'pc_r\[(?:[1-9]|[12][0-9]|3[01])\]$)')
+ras = root + r'u_core\.u_frontend\.u_predictor\.ras_data_r(?:\[|$)'
+ib = root + r'u_core\.u_frontend\.u_ib\.entries_r(?:\[|$)'
+queries = {
+    'all': {},
+    'dcache-csr': {'starts': [root + r'u_dcache\.addr_r(?:\[|$)'],
+                  'ends': [root + r'u_core\.u_csr\.counter_r(?:\[|$)']},
+    'e-ras': {'starts': [operand], 'ends': [ras]},
+    'f2-ras': {'starts': [pc], 'ends': [ras]},
+    'e-f1': {'starts': [operand],
+             'ends': [root + r'u_core\.u_frontend\.f1_pc_r(?:\[|$)']},
+    'e-ic': {'starts': [operand],
+             'end_nets': [root + r'u_icache\.u_tag[01]\.rd_en_i$']},
+    'f2-ib': {'starts': [pc], 'ends': [ib]},
+    'f2state-ras': {'starts': [state], 'ends': [ras]},
+    'f2state-ib': {'starts': [state], 'ends': [ib]},
+    'icaddr-ras': {'starts': [root + r'u_icache\.addr_r(?:\[|$)'], 'ends': [ras]},
+    'icaddr-ib': {'starts': [root + r'u_icache\.addr_r(?:\[|$)'], 'ends': [ib]},
+}
+for label, path in files.items():
+    design = json.loads(path.read_text())
+    for name, selection in queries.items():
+        result = analyze(design, **selection)
+        path.with_name(name + '.json').write_text(json.dumps(result, indent=2) + '\n')
+        path.with_name(name + '.md').write_text(markdown(result))
+        print(label, name, result['max_levels'], result['selected_start_bits'],
+              result['selected_endpoint_count'], result['endpoint_count'])
+```
+
+JALR 比较恒等式的额外证明可复现为：
+
+```sh
+cat > build/c-r7/prove-jalr.v <<'V'
+module prove_jalr(input [31:0] operand, immediate, prediction, output equal);
+wire [31:0] address = operand + immediate;
+wire old_match = {address[31:1], 1'b0} == prediction;
+wire [31:0] even_expected = {prediction[31:1],1'b0} - immediate;
+wire [31:0] odd_expected = {prediction[31:1],1'b1} - immediate;
+wire new_match = !prediction[0] && (operand == even_expected || operand == odd_expected);
+assign equal = old_match == new_match;
+endmodule
+V
+yosys -Q -T -p 'read_verilog build/c-r7/prove-jalr.v; prep -top prove_jalr; sat -prove equal 1 -show-inputs'
+```
+
+### 定向验证与 CoreMark
+
+所有仿真串行，Verilator `-j 1`。风格检查使用仓库标准 RTL 范围；
+RVC=0/1 均对 core 和 CPU+cache 子系统运行 `--lint-only -Wall +define+SIM_MODE`。
+额外的综合脚本测试为 `python3 -m unittest discover -s tools/synth -v`，13 项全部通过。
+
+复现定向验收：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/check/verilog_style.py rtl/
+python3 - <<'PY_LINT'
+from pathlib import Path
+import subprocess
+from tools.regress import expand_files
+for top, filelist in [('edrv32_cpu_core', 'cpu.f'),
+                      ('edrv32_cpu_subsys', 'cpu_subsys.f')]:
+    for rvc in (0, 1):
+        subprocess.run(['verilator', '--lint-only', '-Wall', '+define+SIM_MODE',
+                        '--top-module', top, f'-GRVC_EN={rvc}'] +
+                       expand_files(Path('rtl/filelists') / filelist), check=True)
+PY_LINT
+for scope in cpu cpu_b2 cache; do
+    make smoke REGRESS_ARGS="-j 1 --path verif/block/$scope"
+done
+for scope in cpu_frontend cpu_csr; do
+    make smoke REGRESS_ARGS="-j 1 --path verif/unit/$scope"
+done
+for scope in cpu sys_cpu; do
+    make full REGRESS_ARGS="-j 1 --path verif/block/$scope"
+done
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/cpu_redirect_wait'
+python3 -m unittest discover -s tools/synth -v
+```
+
+CoreMark 在基线与结果检出各执行以下命令，四种配置和编译选项沿用前两轮：
+RVC_EN=1、64 KiB SRAM、8 KiB I$/D$、ITERATIONS=10，SRAM O2、SRAM tuned、
+DDR O2 latency=20/60。算法 CRC 必须为 list/matrix/state = `e714 / 1fd7 / 8e3a`。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+git submodule update --init third_party/coremark
+python3 verif/block/sys_cpu/run.py perf
+```
+
+原始基线为 `build/c-r7/before/sys_cpu/coremark.csv` 和 `coremark_*/run.log`。
+结果为 `build/c-r7/after/coremark.csv`、`build/sys_cpu/coremark_*/run.log`；
+各软件的完整构建命令保存在对应 `sw/*/build.log`，Verilator 编译在 `compile.log`。
+最终 RTL 的四配置复测日志为 `build/c-r7/coremark-after-final.log`。
+定向验收汇总日志为 `build/c-r7/{style,lint-*,smoke-*,full-*,tools-tests}.log`。
+
+本轮两次 `ask` 均已答复：其一确认其余五类缺失的 PDS 逐级明细按“代码推导/Yosys 参考”
+标注；其二确认单仿真进程约束针对本 worker 内部，不同 worker 可各自 `-j 1` 仿真。
+第二次提问期间暂停过本 worker 的 SC-08，答复后恢复并通过，未超时、未重跑；
+暂停不推进仿真时间或 CPU 周期。
+答复原文保存在 `build/c-r7/ask-{pds-details,sim-order}.log`。
+未提出改变重定向代价、CSR 排空条件或 load 结果延迟的方案，也没有修改规格。
+
+定向验收结果：
+
+| 命令/对象 | 结果 |
+|---|---|
+| `python3 tools/check/verilog_style.py rtl/` | 82 文件，0 告警 |
+| core 与 cpu_subsys 的 RVC_EN=0/1 Verilator lint | 4 次均 0 告警 |
+| `make smoke REGRESS_ARGS='-j 1 --path verif/block/cpu'` | 74 PASS，0 FAIL |
+| `make smoke REGRESS_ARGS='-j 1 --path verif/block/cpu_b2'` | 3 PASS，0 FAIL |
+| `make smoke REGRESS_ARGS='-j 1 --path verif/block/cache'` | 23 PASS，0 FAIL |
+| `make smoke REGRESS_ARGS='-j 1 --path verif/unit/cpu_frontend'` | 1 PASS，0 FAIL |
+| `make smoke REGRESS_ARGS='-j 1 --path verif/unit/cpu_csr'` | 2 PASS，0 FAIL（Verilator、Icarus） |
+| `make full REGRESS_ARGS='-j 1 --path verif/block/cpu'` | 747 PASS，0 FAIL |
+| `make full REGRESS_ARGS='-j 1 --path verif/block/sys_cpu'` | 8 PASS，0 FAIL，含 SC-07 CoreMark CRC 与 SC-08 monitor |
+| `make smoke REGRESS_ARGS='-j 1 --path verif/unit/cpu_redirect_wait'` | 2 PASS，0 FAIL（RVC=0/1，各五种 E/D 重定向与 M 等待/异常场景） |
+| `python3 -m unittest discover -s tools/synth -v` | 13 项全部通过 |
+
+
+| 配置 | `c664061` 基线周期 | 本轮最终周期 | 周期差 | 基线 CoreMark/MHz | 本轮 CoreMark/MHz |
+|---|---:|---:|---:|---:|---:|
+| coremark_sram_o2 | 2,811,516 | 2,811,516 | 0 | 3.556800 | 3.556800 |
+| coremark_sram_tuned | 2,308,675 | 2,308,675 | 0 | 4.331489 | 4.331489 |
+| coremark_ddr_o2_l20 | 2,814,447 | 2,814,447 | 0 | 3.553096 | 3.553096 |
+| coremark_ddr_o2_l60 | 2,820,607 | 2,820,607 | 0 | 3.545336 | 3.545336 |
+
+四种配置算法 CRC 均通过，逐项周期差均为 0；CSV 中的 HPM、填充/缺失等待计数和启动周期
+也逐列相同。最终 RTL 修改后的完整四配置复测已完成，未用中间方案的测量代替最终结果。
+
+尚需下一轮 PDS 确认的部分：I$ 地址副本 → 命中/响应及数据选择 → RAS/IB 的支路仍在，
+本轮通过分开 F2/缓存负载处理扇出，没有改变 I$ 的同拍响应和前端容量握手；
+Yosys 上该副本支路各增加 2 级，不能在物理复测前宣称时序已改善。
+条件分支比较、M 级错误/陷阱经前端容量到 RAS 的控制通路以及计数器自身的 64 位进位链也保留。
+本轮只移除/重排所列组合依赖，没有证据表明必须增加流水周期，因此没有实现或提出加拍方案。
+
+### 提交与结果对应
+
+| 提交 | 文件 | 内容 |
+|---|---|---|
+| `0139281` | `tools/synth/ip_stubs.v` | 同步现有 PDS IP 端口，前后综合共用 |
+| `e187075` | `rtl/cpu/edrv32_cpu_core.v`、`rtl/cpu/edrv32_cpu_csr.v` | M 级 CSR 写入口/提交分路，HPM 读选择并行化 |
+| `f4606f2` | `rtl/cpu/edrv32_cpu_core.v` | D 级预计算目标比较，后端重定向有效请求并行化 |
+| `e920f02` | `rtl/cpu/edrv32_cpu_predictor.v` | RAS 固定槽本地写译码 |
+| `d8fb52a` | `rtl/cpu/edrv32_cpu_frontend.v` | F2 数量/起点预计算、前端 PC 副本局部化 |
+
+最终 RTL 可检出 `d8fb52a` 复现；本报告作为后续独立提交。
+测量在上述提交前的同一份最终 RTL 工作树取得：Yosys/最终回归时 HEAD 为 `0139281`，
+因此生成物的 `commit.txt` 记录当时 HEAD；最终 RTL 版本对应 `d8fb52a`，
+基线与共用 stub 修正按上表和复现命令取得。
