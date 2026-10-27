@@ -14,8 +14,8 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | Windows 任务 20261027-02 完成：CPU 第二轮 94.46 MHz（仍未达 150 MHz），NPU 数据通路单独 158.08 MHz（满足 150 MHz）；下一步 CPU 第三轮时序优化、NPU 控制器 N-C1 |
-| 等待用户 | 协调者分支（20261027-02 结果整理）合入 main |
+| 正在进行 | CPU 第三轮时序优化 C-R7（task-cpu-timing-r3）；NPU 规格 v0.3 已确认，控制和 DMA RTL N-C1 已派发（task-npu-ctrl） |
+| 等待用户 | 无 |
 | 阻塞 | 无 |
 
 ---
