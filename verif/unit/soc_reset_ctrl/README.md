@@ -14,20 +14,10 @@ Run from the repository root after `. ~/.local/opt/edrv32/env.sh`:
 
 ```sh
 python3 tools/gen/soc_map.py
-python3 -u - <<'PYTEST'
-import sys
-from pathlib import Path
-sys.path.insert(0, 'tools')
-import regress
-results = []
-for name in ('periph_clint', 'periph_plic', 'periph_sysctrl', 'soc_reset_ctrl'):
-    path = Path('verif/unit') / name / 'test.yaml'
-    fields = regress.read_test(path)
-    for simulator in ('verilator', 'iverilog'):
-        results.append(regress.run_test(path.resolve(), fields, simulator, 'smoke'))
-print(f'S-R2 summary: {sum(results)} PASS, {len(results) - sum(results)} FAIL')
-sys.exit(not all(results))
-PYTEST
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/periph_clint'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/periph_plic'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/periph_sysctrl'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/soc_reset_ctrl'
 make lint
 python3 tools/check/verilog_style.py rtl/
 verilator --lint-only -Wall -Irtl/include --top-module edrv32_periph_clint \

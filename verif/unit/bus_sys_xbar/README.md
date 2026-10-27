@@ -23,18 +23,12 @@ host memory pressure; the repository-wide regression is deferred to integration)
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
-python3 -u - <<'PY'
-import tools.regress as r
-results = []
-for name in ('bus_rom', 'bus_sram', 'bus_apb_bridge', 'bus_apb_decoder',
-             'apb_async_bridge', 'bus_sys_xbar'):
-    path = r.ROOT / 'verif/unit' / name / 'test.yaml'
-    fields = r.read_test(path)
-    for simulator in fields['simulator'].split():
-        results.append(r.run_test(path, fields, simulator, 'smoke'))
-print(f'Summary: {sum(results)} PASS, {len(results)-sum(results)} FAIL')
-raise SystemExit(not all(results))
-PY
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/bus_rom'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/bus_sram'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/bus_apb_bridge'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/bus_apb_decoder'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/apb_async_bridge'
+make smoke REGRESS_ARGS='-j 1 --path verif/unit/bus_sys_xbar'
 make lint
 python3 tools/check/verilog_style.py rtl/
 ```
