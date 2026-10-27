@@ -1,93 +1,254 @@
 # 20261027-02-cpu-npu-synth 结果
 
+CPU、NPU 的 Compile、综合、器件映射、布局布线、路后时序报告均已完成。
+CPU 在 150 MHz 下仍违例；NPU 满足本轮独立顶层约束，但 setup/hold 裕度较小，不能据此保证完整 SoC 时序通过。
+
 | 项 | 内容 |
 |---|---|
-| commit | CPU 原测量源版本 335bb0fddc9f3f31eb8486390ece1a584d52c9e5；NPU B4 诊断 8fa223700974d6fba66a421559a966b8012f15df（含已提交的七个 RAM 适配） |
-| PDS 版本 | 2022.2-SP6.1，build 138931（工程及 IP 生成日志） |
-| ModelSim 版本 | ModelSim SE-64 2020.4 |
-| 要求器件 | PG2L200H-6 FBB676 |
-| A 工程路径 | G:/codex_project/EdRV32-FPGA/EdRV32/EdRV32.pds |
-| B 工程路径 | G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/EdRV32-NPU-DP.pds |
-| 完成情况 | A：本次未收集本轮报告；B：B4a/B4b 诊断完成，七个 RAM 均有失配，乘法独立检查 PASS；NPU 后续流程按任务卡暂停 |
+| 采集时 commit | ac19178df0b10f7df19d23d6e5c7d3fea1c4cafc |
+| 上游任务结论 | 8d2c16850b7592ef45ea85ff7ab71a3d8f359113，允许继续 B5–B7 |
+| CPU RTL 对应版本 | 与 335bb0fddc9f3f31eb8486390ece1a584d52c9e5 一致 |
+| NPU RTL 对应版本 | 与 6569f8a 的包装适配后版本一致；其后仅任务说明、报告、导入脚本变化 |
+| PDS | 2022.2-SP6.1 build 138931；Pre-silicon timing models；multi corner |
+| ModelSim | SE-64 2020.4 |
+| 器件 | PG2L200H-6 FBB676 |
+| A 工程 | G:/codex_project/EdRV32-FPGA/EdRV32/EdRV32.pds |
+| B 工程 | G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/EdRV32-NPU-DP.pds |
+| 约束 | 两个独立工程均为 6.667 ns、约 150 MHz |
+| 完成情况 | A、B 测量及产物收集完成；未生成 bitstream、未上板、未运行多种子或 RVC=0 对照 |
+
+PDS 原始报告不记录 Git HEAD；上表区分采集版本和源码对应版本，不把用户启动工具时的 Git HEAD 当作已由报告证明的事实。
+本次只从既有 pnr.adf 导出更多路径并整理报告，没有重新运行综合/布局布线，也没有修改 RTL、IP 或约束。
 
 ## A. CPU 第二轮
 
 ### SRAM IP
 
-2026-10-27 读取实际 `.idf`：ADDR_WIDTH=13、DATA_WIDTH=64、BE_WIDTH=8、
-WR_BYTE_EN=true、BYTE_SIZE=8、CLK_EN=true、OUTPUT_REG=false、INIT_EN=false。
-容量为 8192×64（64 KiB），符合任务要求。没有修改 CPU 工程、脚本或正在运行的流程。
+实际 IP 为单口 8192×64，字地址 13 位，64 KiB；字节写使能 8 位、BYTE_SIZE=8、clk_en 开启、输出寄存器关闭、rst 接 0。
+包装端口与实际 IP 一致，最终 PnR SRAM 占 16 DRM36K。端口和原始参数见 `artifacts/cpu/ip_sram_ports.md`。
 
-### 时序与资源
+### 时序
 
-本轮时序、资源和关键路径：未取得，等待用户运行结束后收集。
+| 角 | Setup WNS ns | TNS ns | Setup 违例/总端点 | Hold WHS ns | THS ns | Hold 违例/总端点 |
+|---|---:|---:|---|---:|---:|---|
+| slow | -3.920 | -19583.569 | 12645/43021 | 0.143 | 0.000 | 0/43021 |
+| fast | -0.069 | -0.201 | 7/43021 | 0.100 | 0.000 | 0/43021 |
 
-上一轮（20261025-01）：WNS −7.708 ns，估计 69.6 MHz，19008/46871 个端点违例；
-约 24.4K LUT、9.1K FF、74 DRM、4 APM。
+工具估计频率 **94.4555 MHz**、估计周期 10.5870 ns；按任务公式 1000/(6.667−(−3.920)) 得到 94.4555 MHz。
+上一轮 WNS −7.708 ns、TNS −86183.305 ns、19008/46871 个 setup 端点违例；本轮最差裕量改善 3.788 ns（计算值），但仍未达到 150 MHz。
+慢角最差路径仍由 Dcache 地址寄存器到 CSR 计数器，24 级逻辑；完整起终点按 PDS 原文保留。
+
+最差慢角 setup 前 10 条：
+
+| # | 起点 → 终点 | Slack ns | 逻辑级数 |
+|---:|---|---:|---:|
+| 1 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[2][63]/opit_0_inv_AQ_perm/CIN` | -3.920 | 24 |
+| 2 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[4][63]/opit_0_inv_AQ_perm/CIN` | -3.920 | 24 |
+| 3 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[3][63]/opit_0_inv_AQ_perm/CIN` | -3.837 | 24 |
+| 4 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[0][63]/opit_0_inv_AQ_perm/CIN` | -3.835 | 24 |
+| 5 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[2][59]/opit_0_inv_AQ_perm/CIN` | -3.829 | 23 |
+| 6 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[4][59]/opit_0_inv_AQ_perm/CIN` | -3.829 | 23 |
+| 7 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[6][63]/opit_0_inv_AQ_perm/CIN` | -3.796 | 24 |
+| 8 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[3][59]/opit_0_inv_AQ_perm/CIN` | -3.746 | 23 |
+| 9 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[0][59]/opit_0_inv_AQ_perm/CIN` | -3.744 | 23 |
+| 10 | `u_cpu_subsys/u_dcache/addr_r[11]/opit_0_AQ_perm/CLK` → `u_cpu_subsys/u_core/u_csr/counter_r[2][55]/opit_0_inv_AQ_perm/CIN` | -3.738 | 22 |
+
+### 危险但未违例的路径
+
+- 除慢、快角各 200 条最差 setup/hold 外，另导出 slack>0 且 slack<1 ns 的 setup 路径，每角 200 条。
+- 这批正裕量路径慢角 +0.001～+0.030 ns、快角 +0.008～+0.831 ns，均已保存，未只保存负裕量。
+- 全局快角最差 200 条 setup 中，7 条违例、193 条正裕量。
+- 最差 hold：慢角 +0.143 ns、快角 +0.100 ns；最差 removal：慢角 +0.452 ns、快角 +0.307 ns。
+- 8 个 IO 没有 input/output delay；其组合路径只报告到达时间，没有可用 slack。
+详见 `artifacts/cpu/dangerous_paths.md`、`setup_near_positive_top200.txt` 及逐级明细。
+
+### 资源
+
+最终 PRR 逻辑层次：**14879 LUT、8319 FF、231 分布式 RAM、4 APM、26 DRM36K 等效、9 IO、0 GPLL、0 PPLL、1 USCM**。
+综合原语计数为 4 个 DRM18K + 24 个 DRM36K，对应 26 DRM36K 等效；不能把 28 个原语当作 28 个 DRM36K。
+上一轮最终 PRR 为 24441 LUT、9121 FF、39 分布式 RAM、4 APM、74 DRM；口径均为逻辑层次统计。
+
+| 层次 | LUT | FF | 分布式 RAM | APM | DRM36K 等效 |
+|---|---:|---:|---:|---:|---:|
+| `edrv32_fpga_cpu_sys_top` | 14879 | 8319 | 231 | 4 | 26 |
+| `u_cpu_subsys` | 13428 | 7154 | 223 | 4 | 6 |
+| `u_cpu_subsys/u_cache_ctrl` | 45 | 161 | 0 | 0 | 0 |
+| `u_cpu_subsys/u_core` | 10479 | 5411 | 223 | 4 | 0 |
+| `u_cpu_subsys/u_core/u_csr` | 1427 | 870 | 0 | 0 | 0 |
+| `u_cpu_subsys/u_core/u_frontend` | 4027 | 2306 | 223 | 0 | 0 |
+| `u_cpu_subsys/u_dcache` | 2210 | 1120 | 0 | 0 | 3 |
+| `u_cpu_subsys/u_icache` | 694 | 462 | 0 | 0 | 3 |
+| `u_sys_subsys` | 1450 | 1165 | 8 | 0 | 20 |
+| `u_sys_subsys/u_clint` | 344 | 242 | 0 | 0 | 0 |
+| `u_sys_subsys/u_gpio` | 100 | 116 | 0 | 0 | 0 |
+| `u_sys_subsys/u_i2c` | 49 | 67 | 0 | 0 | 0 |
+| `u_sys_subsys/u_media_apb_async` | 6 | 19 | 0 | 0 | 0 |
+| `u_sys_subsys/u_media_apb_bridge` | 18 | 11 | 0 | 0 | 0 |
+| `u_sys_subsys/u_plic` | 163 | 151 | 0 | 0 | 0 |
+| `u_sys_subsys/u_reset_ctrl` | 9 | 19 | 0 | 0 | 0 |
+| `u_sys_subsys/u_rom` | 60 | 30 | 0 | 0 | 4 |
+| `u_sys_subsys/u_sram` | 138 | 37 | 0 | 0 | 16 |
+| `u_sys_subsys/u_sys_apb_bridge` | 98 | 127 | 0 | 0 | 0 |
+| `u_sys_subsys/u_sys_apb_decoder` | 69 | 0 | 0 | 0 | 0 |
+| `u_sys_subsys/u_sys_xbar` | 188 | 137 | 0 | 0 | 0 |
+| `u_sys_subsys/u_sysctrl` | 24 | 66 | 0 | 0 | 0 |
+| `u_sys_subsys/u_uart` | 184 | 143 | 8 | 0 | 0 |
+
+完整层次表及器件容量、物理利用率见 `resource_hier.txt`、`resource_summary.txt` 和原生 PRR；物理 CLMA/CLMS LUT 表与逻辑层次 LUT 口径不同，不混加。
 
 ## B. NPU 数据通路
 
-### IP 生成与包装模块
+### IP 与 ModelSim
 
-实际端口、全部 `.idf` 选项及适配差异见 `artifacts/npu/ip_ports.md`。
+全部 9 个 IP 为 PG2L200H-6 FBB676；weight 读写 256 位；量化 low/high 均为 XYREG=1、MREG=1、PREG/INREG/OUTREG=0。
+七个 RAM 的 FPGA 分支适配仅含读使能端口名和复位接 0；RTL include 引用保留原样，头文件路径由导入脚本配置。
+完整端口、参数、每 IP 资源及差异见 `artifacts/npu/ip_ports.md`。
 
-| 项 | 实际值 | 要求 | 状态 |
-|---|---|---|---|
-| 工程及全部 9 个 IP 的封装 | FBB676 | FBB676 | 配置符合；工程已保存 |
-| ip_ram_npu_weight 读写宽度 | 256 位 | 256 位 | 已修正；地址宽度 9、输出寄存器开启正确 |
-| 其余 6 个 RAM | 容量、读使能、输出寄存器选项符合说明 | 各创建说明 | 配置核对通过；完整语义仿真尚未通过 |
-| ip_mul_npu_quant_low | 18×16 signed，XYREG=1、MREG=1 | 两拍 | 已修正配置；全测试未完成 |
-| ip_mul_npu_quant_high | 16×16 signed，XYREG=1、MREG=1 | 两拍 | 已修正配置；全测试未完成 |
-| 每 IP DRM/APM 占用 | residual：界面报告 4 DRM36K；其余未取得 | 实际报告值 | 生成日志显示 Synthesis is disabled |
+原 `check_npu_ip.do` 在 residual 同址冲突激励中 FAIL（5166 ns），原日志保留，未改成 PASS。
+任务卡第 10 节已裁定：PDS SDP 同址读出值不确定，NPU 不使用该读出值，失配记为已知差异，不再阻塞。
+协调者在 Linux 的数据通路 12 个用例均通过、同址读写 0 次；这是协调者回传结论，本机未重跑 Linux 测试。
+本机四路独立乘法检查全部通过，每路 4026 次，打印 `PASS npu_mul_only`；B4 详细计数见附录。
 
-七个 RAM 包装模块仅修改 `ifdef EDRV32_FPGA_MEMORY_MODE` 分支：
+### 时序及裕度
 
-| 文件 | 改动 |
-|---|---|
-| rtl/tech/edrv32_ram_npu_line.v | rd_en 改为 rd_clk_en；增加 wr_rst=0、rd_rst=0 |
-| rtl/tech/edrv32_ram_npu_weight.v | 同上 |
-| rtl/tech/edrv32_ram_npu_quant.v | 同上 |
-| rtl/tech/edrv32_ram_npu_lut.v | 同上 |
-| rtl/tech/edrv32_ram_npu_residual.v | 同上 |
-| rtl/tech/edrv32_ram_npu_result.v | 同上 |
-| rtl/tech/edrv32_ram_npu_scratch.v | 同上 |
+| 角 | Setup WNS ns | TNS ns | Setup 违例/总端点 | Hold WHS ns | THS ns | Hold 违例/总端点 |
+|---|---:|---:|---|---:|---:|---|
+| slow | 0.341 | 0.000 | 0/114062 | 0.139 | 0.000 | 0/114062 |
+| fast | 2.756 | 0.000 | 0/114062 | 0.101 | 0.000 | 0/114062 |
 
-未修改包装模块对外端口、行为模型、IP 生成文件和检查程序。
+工具估计频率 **158.0778 MHz**、估计周期 6.3260 ns；按任务公式 1000/(6.667−0.341) 得到 158.0778 MHz。
+当前 Design Summary 为 All Constraints Met；慢角 setup 只剩 **+0.341 ns**，快角 hold 只剩 **+0.101 ns**。
+最差 setup 已计入 0.050 ns clock uncertainty，不能把现有的 0.050 ns 当作未计入项再重复扣减。
+0.341/6.667≈5.1% 是按报告数字计算的周期余量；任何额外时序损失都从这 0.341 ns 中消耗。
 
-### ModelSim 等价性检查
+最差慢角 setup 前 10 条：
 
-命令（仓库根目录 PowerShell）：
+| # | 起点 → 终点 | Slack ns | 逻辑级数 |
+|---:|---|---:|---:|
+| 1 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[25].g_lane[1].u_multiply/u_apm/gopapm/X[5]` | 0.341 | 1 |
+| 2 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[26].g_lane[1].u_multiply/u_apm/gopapm/X[11]` | 0.366 | 1 |
+| 3 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[25].g_lane[6].u_multiply/u_apm/gopapm/X[15]` | 0.439 | 1 |
+| 4 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[16].g_lane[2].u_multiply/u_apm/gopapm/X[2]` | 0.494 | 1 |
+| 5 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[24].g_lane[3].u_multiply/u_apm/gopapm/X[4]` | 0.527 | 1 |
+| 6 | `u_datapath/u_mac_array/g_channel[0].g_lane[7].u_multiply/u_apm/gopapm/CLK` → `u_datapath/u_mac_array/g_channel[0].g_pixel[0].r1_data_r[3][16]/opit_0_AQ_perm/CIN` | 0.532 | 4 |
+| 7 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[21].g_lane[2].u_multiply/u_apm/gopapm/X[15]` | 0.544 | 1 |
+| 8 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[25].g_lane[3].u_multiply/u_apm/gopapm/X[17]` | 0.577 | 1 |
+| 9 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[24].g_lane[3].u_multiply/u_apm/gopapm/X[17]` | 0.579 | 1 |
+| 10 | `u_datapath/u_window/a5_tag_r[48]/opit_0/CLK` → `u_datapath/u_mac_array/g_channel[23].g_lane[2].u_multiply/u_apm/gopapm/X[13]` | 0.589 | 1 |
+
+### 需要重点关注的路径
+
+- 最差路径是 window 的 a5_tag_r[48] → MAC APM X[5]，仅 1 级逻辑；到 APM 的一段线延迟达 **4.249 ns**。
+- 同一路径另一段 term_tag_w[48] 线延迟 0.956 ns、扇出 129；两段数据连线合计 5.205 ns（计算值）。
+- 导出的慢角前 200 条 setup 全为正裕量，但 **全部小于 1 ns，4 条小于 0.5 ns**。
+- 快角前 200 条 hold 全部小于 0.2 ns；内部 accum → result_quant 也有 +0.101 ns，不只是观测壳层 hold 接近边界。
+- removal 最差慢角 +0.488 ns、快角 +0.330 ns，也已保存逐级明细。
+- 映射阶段 window a4_valid_r 扇出 2869、a3_valid_r 2358；高扇出前 100 网络及完整 CE/复位/时钟表已保存。
+详见 `artifacts/npu/dangerous_paths.md`，包括内部最差 hold、setup 分布和逐级连线。
+
+### 为什么当前通过不能保证整机上板通过
+
+这是单时钟、0 PLL 的独立数据通路测量顶层。输入由串行移位寄存器驱动，输出经寄存器和 XOR 树折叠；真实 SoC 边界连接不同。
+当前 FDC 把 27 MHz 板载输入按 150 MHz 测量目标约束，本轮不上板。真实 PLL、外设接口和跨域约束需要由完整 SoC 工程给出。
+CPU、NPU、DDR、媒体等同时放进芯片后的布线拥塞、物理距离、时钟树和负载变化，本次没有测量。
+NPU 的 rst_n_i、stim_i、obs_o 未设置 input/output delay，工具报告为未约束组合 IO；这些路径没有 slack，不能计作通过。
+约束检查 0 error/0 warning 不等同于 IO 时序覆盖完整。整机是否收敛须由整机顶层、真实约束下的路后多角报告确认。
+
+### 资源
+
+最终 PRR：**22023 LUT、31747 FF、19 分布式 RAM、288 APM、148 DRM36K、0 DRM18K、4 IO、0 GPLL、0 PPLL、1 USCM**。
+器件容量为 159800 LUT、319600 FF、415 DRM36K、740 APM、400 IO；完整物理利用率由原生 PRR 给出。
+本次 148 DRM 与任务卡修正后的 148 基准一致；scratch 不例化，不能把它计入本次 NPU 数据通路资源。
+
+| 层次 | LUT | FF | 分布式 RAM | APM | DRM36K 等效 |
+|---|---:|---:|---:|---:|---:|
+| `edrv32_fpga_npu_dp_top` | 22023 | 31747 | 19 | 288 | 148 |
+| `u_datapath` | 21813 | 30320 | 16 | 288 | 148 |
+| `u_datapath/u_accum` | 2689 | 3345 | 0 | 0 | 0 |
+| `u_datapath/u_activation_lut` | 1 | 20 | 0 | 0 | 16 |
+| `u_datapath/u_input_unpack` | 273 | 273 | 0 | 0 | 0 |
+| `u_datapath/u_line_cache` | 2 | 0 | 0 | 0 | 16 |
+| `u_datapath/u_mac_array` | 8003 | 8181 | 0 | 256 | 0 |
+| `u_datapath/u_quant_param_store` | 8 | 480 | 0 | 0 | 8 |
+| `u_datapath/u_residual_add` | 1537 | 930 | 0 | 0 | 0 |
+| `u_datapath/u_residual_buffer` | 54 | 40 | 0 | 0 | 4 |
+| `u_datapath/u_result_quant` | 6371 | 8946 | 0 | 32 | 0 |
+| `u_datapath/u_weight_store` | 24 | 2148 | 0 | 0 | 96 |
+| `u_datapath/u_window` | 2774 | 5783 | 0 | 0 | 0 |
+| `u_datapath/u_writeback` | 72 | 116 | 16 | 0 | 8 |
+| `u_reset_sync` | 0 | 2 | 0 | 0 | 0 |
+
+顶层减去 u_datapath 的差额为 210 LUT、1427 FF、3 分布式 RAM（按层次行相减的计算值，含 reset_sync 和测量壳层）。
+具体每个激励/观测寄存器 bank 的优化后资源未在原始 PRR 单列；RTL 宽度为 stim_r=1025、obs_r=358、l1_r=60、l2_r=10、l3_r=2、obs_bit_r=1。
+这些是源码位宽，不冒充优化后资源。
+
+## 全流程耗时与警告
+
+下表耗时来自各最终 stage/run.log，W/E 数为相应前缀行计数；不等同于去重后的缺陷数。
+
+| 工程 | 阶段 | Real | CPU | Process CPU | 峰值 MB | W 行 | E 行 |
+|---|---|---|---|---|---:|---:|---:|
+| CPU | compile | 0h:0m:25s | 0h:0m:5s | 0h:0m:5s | 242 | 1052 | 0 |
+| CPU | synthesize | 0h:1m:26s | 0h:0m:14s | 0h:0m:14s | 1,027 | 1559 | 0 |
+| CPU | device_map | 0h:0m:21s | 0h:0m:3s | 0h:0m:3s | 631 | 1 | 0 |
+| CPU | place_route | 0h:9m:56s | 0h:1m:53s | 0h:2m:23s | 3,326 | 0 | 0 |
+| CPU | report_timing | 0h:0m:26s | 0h:0m:4s | 0h:0m:5s | 1,981 | 8 | 0 |
+| NPU | compile | 0h:0m:25s | 0h:0m:1s | 0h:0m:1s | 316 | 1522 | 0 |
+| NPU | synthesize | 0h:1m:37s | 0h:0m:8s | 0h:0m:9s | 2,400 | 6500 | 0 |
+| NPU | device_map | 0h:0m:29s | 0h:0m:3s | 0h:0m:4s | 1,014 | 256 | 0 |
+| NPU | place_route | 0h:18m:55s | 0h:2m:51s | 0h:3m:24s | 3,774 | 0 | 0 |
+| NPU | report_timing | 0h:0m:43s | 0h:0m:6s | 0h:0m:6s | 2,736 | 3 | 0 |
+
+阶段 Real 相加：CPU 12m34s，NPU 22m09s（计算值，不含人工等待，也不含本次另导出扩展时序的时间）。
+上一轮 CPU Compile 11m00s，本轮 25s；上一轮 compile→timing 各 action 合计 43m24s。
+所有最终 action 均完成，未发现未解析模块/黑盒错误，综合报告 Total Latches=0。
+
+### 警告说明
+
+- CPU Compile 1052 行 W：含 108 条 constant probe loop、两条自有 RTL Sdm-2010（regfile.v:26 与 cpu_ib.v:25，多写 RAM 推断不支持）；其余分类详见 flow_summary.txt。
+- NPU Compile 1522 行 W：含 112 条 constant probe loop，主要分类涉及厂商 IP 未驱动端口、存储内容未用、仿真系统任务忽略等。
+- constant probe loop 是工具常量探测提示，日志没有完整信号环路径；不能仅据此证明存在 RTL 组合环，也不能一律断言无影响。
+- NPU 综合的 Public-4008 有 6489 条，映射有 256 条，为具体实例 dangling 清理；未删减这些警告的原文。
+- CPU 综合另有 FSM 初态编码提示、常量寄存器移除、扇出相关提示；全部 W/E 原文保存在 logs/warnings_detail.txt。
+- CPU map 的唯一 W 为已有 pcf 被覆盖；两个工程 PnR 均无 W/E 行。
+- 时序报告未约束 IO：CPU 8 条、NPU 3 条，端口列表和未约束路径均保留。
+- constraint_check 原生报告：CPU 56 条约束、NPU 23 条约束，均为 0 error / 0 critical warning / 0 warning；与 IO timing 未约束警告含义不同。
+
+## 保存内容与复现
+
+本次按任务卡保存精简日志、所有最终阶段的原生报告，以及扩展路径索引和逐级明细。没有提交完整原始 run.log、PDS 工程、IP 生成目录、数据库、网表或 bitstream。
+日志节选保留全部 W:/E: 行、各阶段耗时、关键执行信息；GUI 历史导入错误单独放在 project_actions_excerpt.txt，不混进最终 stage 错误计数。
+原始报告和完整日志在本地项目的 compile/、synthesize/、device_map/、place_route/、report_timing/ 下。
+CPU 产物位于 `artifacts/cpu/`，NPU 产物位于 `artifacts/npu/`。两套 setup/hold 均保存慢、快各 200 条，逐级各 20 条。
+CPU 额外保存两角各 200 条正裕量 setup 及各 20 条明细。
+全局扩展报告 CPU 共 1640 条记录、NPU 共 1300 条；CPU 正裕量过滤另 400 条。全部索引共 3340 条记录，包含不同视图的重复路径，不称为 3340 条独立路径。
+其中未约束 IO 路径 CPU 40 条、NPU 12 条，slack 标为 N/A，不伪造裕量。
+扩展 .rtr 全文留在 build/win/20261027-02-cpu-npu-synth/timing_cpu_200/、timing_npu_200/、timing_cpu_near/；原始默认 .rtr 入库。
+扩展导出父进程出现 W: open run.log failed.，子步骤 run.log 及 .rtr 生成正常；各导出进程退出码 0，具体信息保留在 logs/timing_export_excerpt.txt。
+
+复现命令（PowerShell，仓库根目录）：
 
 ```powershell
-& 'G:\Program\modeltech64_2020.4\win64\vsim.exe' -c `
-  -l 'G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/artifacts/npu/check_npu_ip.log' `
-  -do 'do G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/check_npu_ip.do'
+& 'G:\Program\pango\PDS_2022.2-SP6.1\bin\pds_shell.exe' -file tasks/win/20261027-02-cpu-npu-synth/src/export_cpu_timing.tcl -work_dir build/win/20261027-02-cpu-npu-synth/timing_cpu_200 -project_name timing_cpu_200
+& 'G:\Program\pango\PDS_2022.2-SP6.1\bin\pds_shell.exe' -file tasks/win/20261027-02-cpu-npu-synth/src/export_npu_timing.tcl -work_dir build/win/20261027-02-cpu-npu-synth/timing_npu_200 -project_name timing_npu_200
+& 'G:\Program\pango\PDS_2022.2-SP6.1\bin\pds_shell.exe' -file tasks/win/20261027-02-cpu-npu-synth/src/export_cpu_near_timing.tcl -work_dir build/win/20261027-02-cpu-npu-synth/timing_cpu_near -project_name timing_cpu_near
+& 'C:\Python314\python.exe' tasks/win/20261027-02-cpu-npu-synth/src/collect_reports.py
 ```
 
-重新生成后结果：FAIL，进程退出码 1。未打印 `PASS npu_ip_check`，各检查器最终 checks
-计数未取得。日志已更新为本次运行，见 `artifacts/npu/check_npu_ip.log`。首个 fatal 原文：
+导出读取原始 PnR 数据库，输出写入独立目录。脚本只导出报告，不改变原工程布局布线。
+本次产物未包含超过数 MB 的单文件；完整原始扩展 .rtr 留在本机。
 
-```text
-** Fatal: FAIL ram AW=9 DW=256 expected=19861f335c63fbb807c42b0f56592bacd4e63ca968758dd0285d9750a8227850 actual=524ee3a4cb789e96ac53b658f3565ae6988bd0310fce171f342ce768f499a8e9 time=5166000
-Time: 5166 ns  Scope: npu_ip_check.u_chk_residual
-```
+## 导入路径与包装适配记录
 
-位置：`src/npu_ip_check.sv:63`。残差 RAM 实际选项为 WR/RD_ADDR_WIDTH=9、
-WR/RD_DATA_WIDTH=256、OUTPUT_REG=true、RD_CLK_EN=true、RD_OCE_EN=false、
-WR_CLK_EN=false、WR_BYTE_EN=false、FAB_REG=false、CAS_MODE=36K、INIT_EN=false、
-RESET_TYPE=ASYNC。生成顶层内部 rd_oce_mux2d 为 1，读时钟使能连接 rd_en_i，复位接 0。
-尚未确认具体触发条件和根因；未将本次失败归因于同址读写或输出保持中的某一种。
-按任务卡 B4 停止 NPU 后续流程；没有修改行为模型、检查程序或生成 IP。
+七个 RAM FPGA 分支将 rd_en 改为实际 rd_clk_en，并连接 wr_rst=0、rd_rst=0；行为分支和对外端口不变。
+check_npu_ip.do 与 diag_npu_ram.do 的 ip_root 已与实际目录一致，没有额外路径差异。
+NPU 导入脚本从 FPGA 工程目录通过 ../../EdRV32-Competition-2026 定位源码，以 compile -include_path 传入 rtl/include 和 FPGA 工程目录。
+此前对 RTL include 字符串的修改已全部撤回。最终 CMR 原文包含正确 include 路径、FPGA_MODE 与 edrv32_fpga_npu_dp_top。
 
-本次不再出现 weight 的 32/256 位端口警告；有既存工作库、两个乘法 IP 共同辅助模块
-重复编译，以及厂商 GTP_DRM36K_E1 的 mem_read_a 无返回值赋值告警，原文保留在日志。
+## 附录：历史 B4 诊断记录（第 10 节已解除阻塞）
 
-历史首轮失败：weight 为 32 位、量化乘法仅 MREG=1，16 ns 时 high 检查输出不符
-（expected=c0008000、actual=ffff8000）。用户重新生成后，9 个 IP 封装全部修正，
-weight 已改为 256 位，两个乘法的生成顶层实际为 XYREG=1、MREG=1、PREG=0、
-INREG=0、OUTREG=0。本次运行推进到 5166 ns，尚不能声称各乘法完成全部检查。
+以下保留当时的原始诊断数据。协调者随后确认全部失配由同址读写冲突解释，IP 读出不确定，NPU 不使用该读出值。
 
-### B4 诊断
 
 执行版本：`8fa223700974d6fba66a421559a966b8012f15df`（已 rebase 到新增诊断任务的 origin/main）。
 `diag_npu_ram.do` 的 ip_root 原本即为实际路径，无须修改。检查程序、诊断程序、行为模型、IP 均未修改。
@@ -176,77 +337,6 @@ INREG=0、OUTREG=0。本次运行推进到 5166 ns，尚不能声称各乘法完
 
 诊断结论：七个 RAM 均不完全匹配任何一个候选模型。七个首次 m0 失配均匹配 m1（写优先），
 但整段激励的 m1 仍有 283–333 次失配；因此不能将实际行为定为单一写优先，也不能归因为输出寄存器门控。
-具体根因尚未确认，需协调者判断下一步；按任务卡暂停 B5 之后的 NPU 流程。
+以上为当时诊断观察；最终以任务卡第 10 节的协调者结论为准，已解除阻塞。
 
 补充测量范围：scratch 不由当前 datapath 例化；本轮资源比较基准按新任务卡改为 148 DRM。
-
-### 时序与资源
-
-未取得。本次没有继续 NPU 综合、布局布线。PDS GUI 已显示正确顶层，头文件路径问题已由用户重跑导入后消失；编译测量报告本次未收集。
-
-## 完整报告在 Windows 本地的路径
-
-- CPU：G:/codex_project/EdRV32-FPGA/EdRV32/，用户正在执行本轮流程，报告待收集。
-- NPU IP：G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/，各 IP 的 .idf、.v、generate.log。
-- ModelSim：tasks/win/20261027-02-cpu-npu-synth/artifacts/npu/check_npu_ip.log。
-
-## 备注
-
-用户要求核对 NPU 导入脚本路径。已将 `fpga/scripts/import_npu_dp_top.tcl` 的仓库根目录
-计算改为从 FPGA 工程目录出发的 `file normalize ../../EdRV32-Competition-2026`，
-避免使用上一轮 PDS 控制台曾出现错误结果的 `info script` 方式。
-源码路径没有写死绝对路径，没有增加备用路径。CPU 导入脚本未修改。
-
-在标准 Tcl 中从 `G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP` 执行相对 source，
-将 add_design/add_constraint/compile 替换为空操作后验证：根目录解析正确，展开 25 个源文件，
-全部存在。这是路径静态检查，并未执行 PDS 编译。
-
-修正 IP 并通过检查后，PDS Tcl 控制台先进入 NPU 工程目录，再执行：
-
-```tcl
-source ../../EdRV32-Competition-2026/fpga/scripts/import_npu_dp_top.tcl
-```
-
-### NPU include 路径修正（用户最终要求）
-
-用户要求撤回对 RTL 头文件引用的修改，改由导入脚本设置 include 路径。
-全部 10 个 NPU 包装模块已恢复原来的 `include "edrv32_build_mode.vh"` 写法；
-原先授权的七个 RAM FPGA 端口适配保留，对外接口和行为模型均未改动。
-此前尝试的源码相对头文件路径已全部撤销，不属于最终改动。
-
-核对上一轮已完成的 Windows 结果分支 4517fe7 的 result.md：成功 Flow Command
-包含源码 rtl/include 和 FPGA 工程目录两项 include 搜索目录。
-本次只在 `fpga/scripts/import_npu_dp_top.tcl` 中按同样方式设置：
-
-```tcl
-set edrv32_include_dirs [list \
-    [file join $edrv32_repo rtl include] \
-    [file normalize .]]
-```
-
-由原有 `compile -include_path $edrv32_include_dirs` 传给 PDS，源码根目录继续以
-`../../EdRV32-Competition-2026` 计算，未硬编码源码绝对路径。
-
-独立 PDS 验证：将原样的全部 10 个 NPU 包装源文件加入临时工程，
-按上述脚本设置 include 搜索目录，执行
-`compile -top_module edrv32_ram_npu_scratch -include_path $edrv32_include_dirs`。
-进程退出码 0，各源文件均找到 edrv32_build_mode.vh，无 E: 行。
-此验证使用行为分支，只验证脚本的头文件搜索设置；随后只读查看 PDS GUI 时，层次显示正确顶层且控制台已打印 added 25 sources，
-也不代表完整 NPU FPGA_MODE 编译或 ModelSim 语义检查通过。
-
-复现命令：
-
-```powershell
-& 'G:\Program\pango\PDS_2022.2-SP6.1\bin\pds_shell.exe' `
-  -file 'G:/codex_project/EdRV32-Competition-2026/build/win/20261027-02-cpu-npu-synth/header_path_check/check_script_include.tcl' `
-  -work_dir 'G:/codex_project/EdRV32-Competition-2026/build/win/20261027-02-cpu-npu-synth/header_path_check' `
-  -project_name header_script_include_check
-```
-
-完整本机验证日志：
-`build/win/20261027-02-cpu-npu-synth/header_path_check/check_script_include_console.log`。
-此前 residual RAM 的 ModelSim 数据不符仍待处理。
-
-同步记录：先以用户指定信息提交七个 RAM 适配（原 c371cbb），fetch 后 rebase 到 origin/main，
-得到适配提交 8fa2237。check_npu_ip.do 的 ip_root 与仓库原值一致，因此无差异。
-既有导入脚本和结果文件暂存后已恢复，未建立备份分支。

@@ -1,0 +1,370 @@
+Source: final device_map DMR; counts are pre-PnR mapping fanout.
+
+Other High Fanout Signal:
++----------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                               | Driver                                                      | Fanout     
++----------------------------------------------------------------------------------------------------------------------------------------------------+
+| ntclkbufg_0                                                            | clkbufg_0                                                   | 8548       
+| u_cpu_subsys/u_cache_ctrl/N44                                          | u_cpu_subsys/u_cache_ctrl/N44                               | 3807       
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5804                       | u_cpu_subsys/u_core/u_frontend/u_predictor/N5804            | 1024       
+| u_cpu_subsys/u_core/u_frontend/N21                                     | u_cpu_subsys/u_core/u_frontend/N21                          | 731        
+| u_cpu_subsys/u_core/u_frontend/push_count_w [1]                        | u_cpu_subsys/u_core/u_frontend/N503_6[2]_1                  | 705        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/_N62023_2                   | u_cpu_subsys/u_core/u_frontend/u_predictor/N5805_1[0]_2     | 512        
+| u_cpu_subsys/u_core/N862                                               | u_cpu_subsys/u_core/N862_40                                 | 498        
+| u_cpu_subsys/u_core/u_frontend/u_ib/N69                                | u_cpu_subsys/u_core/u_frontend/u_ib/ND3[2]                  | 358        
+| u_cpu_subsys/u_core/u_frontend/u_ib/N70                                | u_cpu_subsys/u_core/u_frontend/u_ib/ND3[3]                  | 358        
+| u_cpu_subsys/u_core/u_frontend/u_ib/N68                                | u_cpu_subsys/u_core/u_frontend/u_ib/ND3[1]                  | 358        
+| u_cpu_subsys/u_core/u_frontend/u_ib/N67                                | u_cpu_subsys/u_core/u_frontend/u_ib/ND3[0]                  | 358        
+| u_cpu_subsys/u_dcache/addr_r [10]                                      | u_cpu_subsys/u_dcache/addr_r[10]                            | 354        
+| u_cpu_subsys/u_core/e_record_r[0] [141]                                | u_cpu_subsys/u_core/e_record_r[0][141]                      | 304        
+| u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r [1]                     | u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r[1]           | 304        
+| u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r [0]                     | u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r[0]           | 298        
+| u_cpu_subsys/u_core/w_rd_r[0] [2]                                      | u_cpu_subsys/u_core/w_rd_r[0][2]                            | 281        
+| u_cpu_subsys/u_core/w_rd_r[0] [3]                                      | u_cpu_subsys/u_core/w_rd_r[0][3]                            | 281        
+| u_cpu_subsys/u_core/e_advance_w                                        | u_cpu_subsys/u_core/N1081                                   | 276        
+| u_cpu_subsys/u_dcache/addr_r [9]                                       | u_cpu_subsys/u_dcache/addr_r[9]                             | 273        
+| u_cpu_subsys/u_core/d_data_w [50]                                      | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[229]               | 272        
+| u_cpu_subsys/u_core/d_data_w [55]                                      | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[234]               | 271        
+| u_cpu_subsys/u_core/d_data_w [49]                                      | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[228]               | 271        
+| u_cpu_subsys/u_core/e_record_r[0] [140]                                | u_cpu_subsys/u_core/e_record_r[0][140]                      | 269        
+| u_cpu_subsys/u_core/d_data_w[54]_cpy                                   | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[233]_cpy           | 268        
+| u_cpu_subsys/u_core/d_data_w [234]                                     | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[55]                | 268        
+| u_cpu_subsys/u_core/d_data_w [233]                                     | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[54]                | 268        
+| u_cpu_subsys/u_core/d_data_w [229]                                     | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[50]                | 267        
+| u_cpu_subsys/u_core/d_data_w [228]                                     | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[49]                | 267        
+| u_cpu_subsys/ic_inv_w                                                  | u_cpu_subsys/u_core/N111                                    | 267        
+| u_cpu_subsys/u_dcache/N342                                             | u_cpu_subsys/u_dcache/N342                                  | 260        
+| u_cpu_subsys/u_dcache/N351                                             | u_cpu_subsys/u_dcache/N351                                  | 259        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N372_inv                    | u_cpu_subsys/u_core/u_frontend/u_predictor/N372_3           | 258        
+| u_cpu_subsys/u_dcache/_N30670                                          | u_cpu_subsys/u_dcache/N4946_18                              | 255        
+| u_cpu_subsys/u_dcache/_N11841                                          | u_cpu_subsys/u_dcache/N5130_18                              | 255        
+| u_cpu_subsys/u_core/csr_addr_w [0]                                     | u_cpu_subsys/u_core/N1250[0]                                | 229        
+| u_cpu_subsys/u_core/u_frontend/first_length_w [1]                      | u_cpu_subsys/u_core/u_frontend/N634                         | 217        
+| u_cpu_subsys/u_core/u_frontend/N20                                     | u_cpu_subsys/u_core/u_frontend/N20_1                        | 210        
+| u_cpu_subsys/u_core/u_frontend/block_write_ptr_r [0]                   | u_cpu_subsys/u_core/u_frontend/block_write_ptr_r[0]         | 203        
+| u_cpu_subsys/u_core/u_frontend/block_write_ptr_r [1]                   | u_cpu_subsys/u_core/u_frontend/block_write_ptr_r[1]         | 202        
+| u_cpu_subsys/u_core/u_frontend/block_write_ptr_r [2]                   | u_cpu_subsys/u_core/u_frontend/block_write_ptr_r[2]         | 201        
+| u_cpu_subsys/u_dcache/maint_scan_r [6]                                 | u_cpu_subsys/u_dcache/maint_scan_r[6]                       | 200        
+| u_cpu_subsys/u_dcache/maint_scan_r [7]                                 | u_cpu_subsys/u_dcache/maint_scan_r[7]                       | 199        
+| u_cpu_subsys/u_core/N2782                                              | u_cpu_subsys/u_core/N2782                                   | 192        
+| u_cpu_subsys/u_core/u_frontend/N449                                    | u_cpu_subsys/u_core/u_frontend/N449_3                       | 191        
+| u_cpu_subsys/u_dcache/addr_r [11]                                      | u_cpu_subsys/u_dcache/addr_r[11]                            | 189        
+| u_cpu_subsys/dc_req_size_w [0]                                         | u_cpu_subsys/u_core/e_operation_r[0][0]                     | 187        
+| u_cpu_subsys/u_core/u_frontend/N93                                     | u_cpu_subsys/u_core/u_frontend/N93_mux3                     | 186        
+| u_cpu_subsys/u_core/u_frontend/u_ib/write_ptr_r [0]                    | u_cpu_subsys/u_core/u_frontend/u_ib/write_ptr_r[0]          | 185        
+| u_cpu_subsys/u_core/csr_addr_w [7]                                     | u_cpu_subsys/u_core/N1250[7]                                | 185        
+| u_cpu_subsys/u_core/csr_addr_w [2]                                     | u_cpu_subsys/u_core/N1250[2]                                | 184        
+| u_cpu_subsys/u_core/u_frontend/u_ib/write_ptr_r [1]                    | u_cpu_subsys/u_core/u_frontend/u_ib/write_ptr_r[1]          | 184        
+| u_cpu_subsys/u_core/u_frontend/N123                                    | u_cpu_subsys/u_core/u_frontend/N153_mux3_2                  | 173        
+| u_cpu_subsys/u_core/m_redirect_w                                       | u_cpu_subsys/u_core/N1210_7                                 | 173        
+| u_cpu_subsys/u_core/u_frontend/N153                                    | u_cpu_subsys/u_core/u_frontend/N153_mux3                    | 167        
+| u_cpu_subsys/u_core/u_csr/write_enable_w                               | u_cpu_subsys/u_core/u_csr/N7_10                             | 165        
+| u_cpu_subsys/u_core/u_frontend/N44                                     | u_cpu_subsys/u_core/N2493_1                                 | 152        
+| u_cpu_subsys/u_core/w_rd_r[0] [1]                                      | u_cpu_subsys/u_core/w_rd_r[0][1]                            | 149        
+| u_sys_subsys/u_sys_xbar/read_target_r[1] [0]                           | u_sys_subsys/u_sys_xbar/read_target_r[1][0]                 | 146        
+| u_cpu_subsys/u_core/d_data_w [53]                                      | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[232]               | 141        
+| u_cpu_subsys/u_core/d_data_w [48]                                      | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[227]               | 141        
+| u_cpu_subsys/u_core/e_record_r[0] [139]                                | u_cpu_subsys/u_core/e_record_r[0][139]                      | 141        
+| u_cpu_subsys/u_core/d_data_w [232]                                     | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[53]                | 138        
+| u_cpu_subsys/u_core/d_data_w [227]                                     | u_cpu_subsys/u_core/u_frontend/u_ib/N4_4[48]                | 137        
+| u_cpu_subsys/u_core/N1458                                              | u_cpu_subsys/u_core/N1458_17                                | 131        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/restore_write_ptr_w [0]     | u_cpu_subsys/u_core/u_frontend/u_predictor/N75[0]           | 130        
+| u_cpu_subsys/u_core/u_frontend/restore_ras_w [32]                      | u_cpu_subsys/u_core/u_frontend/N4_10[32]                    | 130        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/restore_write_ptr_w [1]     | u_cpu_subsys/u_core/u_frontend/u_predictor/N75[1]_2         | 129        
+| u_cpu_subsys/u_core/u_frontend/restore_ras_w [33]                      | u_cpu_subsys/u_core/u_frontend/N4_10[33]                    | 129        
+| u_cpu_subsys/u_icache/_N57831_2                                        | u_cpu_subsys/u_icache/N1682_1[0]_2                          | 128        
+| u_cpu_subsys/u_icache/_N11164                                          | u_cpu_subsys/u_icache/N1649_7                               | 128        
+| u_cpu_subsys/u_icache/_N11160                                          | u_cpu_subsys/u_icache/N1649_3_3                             | 128        
+| u_cpu_subsys/u_icache/_N10900                                          | u_cpu_subsys/u_icache/N1539_7                               | 128        
+| u_cpu_subsys/u_dcache/N4676                                            | u_cpu_subsys/u_dcache/N4676_4                               | 128        
+| u_cpu_subsys/u_dcache/N5160                                            | u_cpu_subsys/u_dcache/N5160                                 | 128        
+| u_cpu_subsys/u_icache/N1650                                            | u_cpu_subsys/u_icache/N1650                                 | 128        
+| u_cpu_subsys/u_dcache/N5131                                            | u_cpu_subsys/u_dcache/N503[0]                               | 128        
+| u_cpu_subsys/u_icache/N1540                                            | u_cpu_subsys/u_icache/N1540                                 | 128        
+| u_cpu_subsys/u_dcache/_N11430                                          | u_cpu_subsys/u_dcache/N4679_9                               | 128        
+| u_cpu_subsys/u_dcache/N4947                                            | u_cpu_subsys/u_dcache/N4947                                 | 128        
+| u_cpu_subsys/u_dcache/_N30661                                          | u_cpu_subsys/u_dcache/N4946_9                               | 128        
+| u_cpu_subsys/u_dcache/_N11439                                          | u_cpu_subsys/u_dcache/N4679_18                              | 128        
+| u_cpu_subsys/u_dcache/_N11832                                          | u_cpu_subsys/u_dcache/N5130_9                               | 128        
+| u_cpu_subsys/u_dcache/_N12234                                          | u_cpu_subsys/u_dcache/N4763_9                               | 128        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5813                       | u_cpu_subsys/u_core/u_frontend/u_predictor/N5813            | 128        
+| u_cpu_subsys/u_dcache/_N12243                                          | u_cpu_subsys/u_dcache/N4763_18                              | 128        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/_N67381                     | u_cpu_subsys/u_core/u_frontend/u_predictor/N5814_3[0]_1     | 128        
+| u_cpu_subsys/u_dcache/N4760                                            | u_cpu_subsys/u_dcache/N4760_4                               | 128        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [7]         | u_cpu_subsys/u_core/u_frontend/u_predictor/N2_7             | 128        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]         | u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8             | 128        
+| u_cpu_subsys/u_icache/N1679                                            | u_cpu_subsys/u_icache/N1679                                 | 128        
+| u_cpu_subsys/u_icache/_N10896                                          | u_cpu_subsys/u_icache/N1539_3_3                             | 128        
+| u_cpu_subsys/u_dcache/device_bus_active_w_inv                          | u_cpu_subsys/u_dcache/N264_1                                | 124        
+| u_cpu_subsys/u_dcache/device_addr_r [2]                                | u_cpu_subsys/u_dcache/device_addr_r[2]                      | 121        
+| u_cpu_subsys/u_dcache/_N58140_2                                        | u_cpu_subsys/u_dcache/N5163_1[0]_2                          | 120        
+| u_cpu_subsys/u_dcache/device_addr_r [0]                                | u_cpu_subsys/u_dcache/device_addr_r[0]                      | 118        
+| u_cpu_subsys/u_core/u_frontend/f2_pc_r [10]                            | u_cpu_subsys/u_core/u_frontend/f2_pc_r[10]                  | 115        
+| u_cpu_subsys/u_core/e_operation_r[1] [0]                               | u_cpu_subsys/u_core/e_operation_r[1][0]                     | 113        
+| u_cpu_subsys/u_core/u_frontend/g_read[0].slot_w [1]                    | u_cpu_subsys/u_core/u_frontend/halfword_read_ptr_r[1]       | 112        
+| u_cpu_subsys/u_core/u_frontend/f2_pc_r [11]                            | u_cpu_subsys/u_core/u_frontend/f2_pc_r[11]                  | 111        
+| u_cpu_subsys/u_core/u_frontend/g_read[0].slot_w [2]                    | u_cpu_subsys/u_core/u_frontend/halfword_read_ptr_r[2]       | 111        
++----------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Clock Signal:
++-----------------------------------------------------------------------------------------------+
+| Driver_Pin_Name     | Clk_Source_Inst     | Clk_Inst_Name     | Net_Name        | Fanout     
++-----------------------------------------------------------------------------------------------+
+| O                   | clk_i_ibuf          | clkbufg_0         | ntclkbufg_0     | 8548       
++-----------------------------------------------------------------------------------------------+
+
+
+
+Reset Signal:
++-----------------------------------------------------------------------------------------------------------------+
+| Net_Name                                        | Rst_Source_Inst                                 | Fanout     
++-----------------------------------------------------------------------------------------------------------------+
+| u_cpu_subsys/u_cache_ctrl/N44                   | u_cpu_subsys/u_cache_ctrl/N44                   | 3807       
+| u_sys_subsys/u_media_apb_async/N40              | u_sys_subsys/u_media_apb_async/N40              | 10         
+| u_sys_subsys/u_media_apb_async/N17              | u_sys_subsys/u_media_apb_async/N17              | 84         
+| u_sys_subsys/u_sys_apb_bridge/ar_fire_w         | u_sys_subsys/u_sys_apb_bridge/N7_3              | 64         
+| u_cpu_subsys/u_core/u_div/N11                   | u_cpu_subsys/u_core/u_div/N11                   | 32         
+| u_cpu_subsys/u_core/u_div/N258                  | u_cpu_subsys/u_core/u_div/N258                  | 32         
+| u_sys_subsys/u_reset_ctrl/u_cam0/N0             | u_sys_subsys/u_reset_ctrl/u_cam0/N0             | 2          
+| u_sys_subsys/u_reset_ctrl/u_mem_core/N0         | u_sys_subsys/u_reset_ctrl/u_mem_core/N0         | 2          
+| u_sys_subsys/u_reset_ctrl/u_mem_por/N0          | u_sys_subsys/u_reset_ctrl/u_mem_por/N0          | 2          
+| u_sys_subsys/u_reset_ctrl/u_mem_released/N0     | u_sys_subsys/u_reset_ctrl/u_mem_released/N0     | 2          
+| u_sys_subsys/u_reset_ctrl/u_sys/N0              | u_sys_subsys/u_reset_ctrl/u_sys/N0              | 2          
+| _$$_GND_$$_                                     | _$$_GND_$$_                                     | 56         
++-----------------------------------------------------------------------------------------------------------------+
+
+
+
+CE Signal:
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                            | CE_Source_Inst                                                      | Fanout     
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+| u_cpu_subsys/wb_err_w                                               | u_cpu_subsys/u_dcache/N246                                          | 27         
+| u_cpu_subsys/u_cache_ctrl/launch_w                                  | u_cpu_subsys/u_cache_ctrl/N16_3                                     | 67         
+| u_cpu_subsys/u_cache_ctrl/N306                                      | u_cpu_subsys/u_cache_ctrl/N228                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N287                                      | u_cpu_subsys/u_cache_ctrl/N267                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N267                                      | u_cpu_subsys/u_cache_ctrl/N267                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N247                                      | u_cpu_subsys/u_cache_ctrl/N209                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N228                                      | u_cpu_subsys/u_cache_ctrl/N228                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N344                                      | u_cpu_subsys/u_cache_ctrl/N325                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N325                                      | u_cpu_subsys/u_cache_ctrl/N325                                      | 8          
+| u_cpu_subsys/u_cache_ctrl/N209                                      | u_cpu_subsys/u_cache_ctrl/N209                                      | 8          
+| u_cpu_subsys/u_core/m_commit0_w                                     | u_cpu_subsys/u_core/N1158                                           | 65         
+| u_cpu_subsys/u_core/N2782                                           | u_cpu_subsys/u_core/N2782                                           | 128        
+| u_cpu_subsys/u_core/N862                                            | u_cpu_subsys/u_core/N862_40                                         | 482        
+| u_cpu_subsys/u_core/e_advance_w                                     | u_cpu_subsys/u_core/N1081                                           | 263        
+| u_cpu_subsys/u_core/N2454                                           | u_cpu_subsys/u_core/backend_redirect_pc_w_14                        | 2          
+| u_cpu_subsys/u_core/m_commit_w [1]                                  | u_cpu_subsys/u_core/N1159                                           | 38         
+| u_cpu_subsys/u_dcache/cached_accept_w                               | u_cpu_subsys/u_dcache/N27_1                                         | 72         
+| u_cpu_subsys/u_dcache/N5376                                         | u_cpu_subsys/u_dcache/N5376                                         | 2          
+| u_cpu_subsys/u_dcache/buffer_push_w                                 | u_cpu_subsys/u_dcache/N123_5                                        | 67         
+| u_cpu_subsys/u_dcache/device_accept_w                               | u_cpu_subsys/u_dcache/N33                                           | 35         
+| u_cpu_subsys/u_dcache/N390                                          | u_cpu_subsys/u_dcache/N390                                          | 32         
+| u_cpu_subsys/u_dcache/N394                                          | u_cpu_subsys/u_dcache/N285                                          | 32         
+| u_cpu_subsys/u_dcache/N4471                                         | u_cpu_subsys/u_dcache/N4471_15                                      | 9          
+| u_cpu_subsys/u_dcache/N4947                                         | u_cpu_subsys/u_dcache/N4947                                         | 128        
+| u_cpu_subsys/u_dcache/N5131                                         | u_cpu_subsys/u_dcache/N503[0]                                       | 128        
+| u_cpu_subsys/u_dcache/N5160                                         | u_cpu_subsys/u_dcache/N5160                                         | 128        
+| u_cpu_subsys/u_dcache/maintenance_start_w                           | u_cpu_subsys/u_dcache/N230                                          | 68         
+| u_cpu_subsys/u_dcache/N5423                                         | u_cpu_subsys/u_dcache/N674                                          | 8          
+| u_cpu_subsys/u_dcache/N371                                          | u_cpu_subsys/u_dcache/N371_3                                        | 64         
+| u_cpu_subsys/u_dcache/N4586                                         | u_cpu_subsys/u_dcache/N4586_14                                      | 11         
+| u_cpu_subsys/u_dcache/store_result_w                                | u_cpu_subsys/u_dcache/N118                                          | 35         
+| u_cpu_subsys/u_dcache/N4676                                         | u_cpu_subsys/u_dcache/N4676_4                                       | 128        
+| u_cpu_subsys/u_dcache/N4760                                         | u_cpu_subsys/u_dcache/N4760_4                                       | 128        
+| u_cpu_subsys/u_dcache/N5199                                         | u_cpu_subsys/u_dcache/N5199                                         | 8          
+| u_cpu_subsys/u_dcache/N4402                                         | u_cpu_subsys/u_dcache/N4402                                         | 27         
+| u_cpu_subsys/u_icache/N1762                                         | u_cpu_subsys/u_icache/N1762                                         | 3          
+| u_cpu_subsys/u_core/N1458                                           | u_cpu_subsys/u_core/N1458_17                                        | 123        
+| u_cpu_subsys/u_icache/N1679                                         | u_cpu_subsys/u_icache/N1679                                         | 128        
+| u_cpu_subsys/u_icache/N90                                           | u_cpu_subsys/u_icache/N90                                           | 64         
+| u_cpu_subsys/u_icache/N1425                                         | u_cpu_subsys/u_icache/N1419                                         | 4          
+| u_cpu_subsys/u_icache/N1540                                         | u_cpu_subsys/u_icache/N1540                                         | 128        
+| u_cpu_subsys/u_icache/N1650                                         | u_cpu_subsys/u_icache/N1650                                         | 128        
+| u_sys_subsys/u_clint/read_accept_w                                  | u_sys_subsys/u_clint/N40_9                                          | 65         
+| u_sys_subsys/u_clint/N342                                           | u_sys_subsys/u_clint/N342                                           | 32         
+| u_sys_subsys/u_clint/N374                                           | u_sys_subsys/u_clint/N374                                           | 32         
+| u_sys_subsys/u_clint/N303                                           | u_sys_subsys/u_clint/N303                                           | 8          
+| u_sys_subsys/u_clint/N25                                            | u_sys_subsys/u_clint/N25_8                                          | 33         
+| u_sys_subsys/u_clint/N25_inv_1_inv_1                                | u_sys_subsys/u_clint/N25_inv_1                                      | 2          
+| u_sys_subsys/u_gpio/N910                                            | u_sys_subsys/u_gpio/N910                                            | 24         
+| u_sys_subsys/u_gpio/N894                                            | u_sys_subsys/u_gpio/N894                                            | 16         
+| u_sys_subsys/u_gpio/N862                                            | u_sys_subsys/u_gpio/N862                                            | 8          
+| u_sys_subsys/u_gpio/N839                                            | u_sys_subsys/u_gpio/N839                                            | 8          
+| u_sys_subsys/u_gpio/N952                                            | u_sys_subsys/u_gpio/N839                                            | 8          
+| u_sys_subsys/u_gpio/N931                                            | u_sys_subsys/u_gpio/N862                                            | 8          
+| u_sys_subsys/u_gpio/N878                                            | u_sys_subsys/u_gpio/N878                                            | 16         
+| u_sys_subsys/u_i2c/N535                                             | u_sys_subsys/u_i2c/N535                                             | 3          
+| u_sys_subsys/u_i2c/N439                                             | u_sys_subsys/u_i2c/N439                                             | 16         
+| u_sys_subsys/u_i2c/N503                                             | u_sys_subsys/u_i2c/N503                                             | 2          
+| u_sys_subsys/u_i2c/N539                                             | u_sys_subsys/u_i2c/N28_1                                            | 16         
+| u_sys_subsys/u_i2c/command_w                                        | u_sys_subsys/u_uart/N566                                            | 2          
+| u_sys_subsys/u_i2c/N633                                             | u_sys_subsys/u_i2c/N633_5                                           | 8          
+| u_sys_subsys/u_i2c/N147                                             | u_sys_subsys/u_i2c/N355                                             | 8          
+| u_sys_subsys/u_i2c/N496                                             | u_sys_subsys/u_i2c/N496                                             | 5          
+| u_sys_subsys/u_media_apb_async/N150                                 | u_sys_subsys/u_media_apb_async/N150                                 | 4          
+| u_sys_subsys/u_media_apb_async/N123                                 | u_sys_subsys/u_media_apb_async/N123                                 | 3          
+| u_sys_subsys/u_media_apb_bridge/N323                                | u_sys_subsys/u_media_apb_bridge/N323                                | 2          
+| u_sys_subsys/u_media_apb_bridge/N289                                | u_sys_subsys/u_media_apb_bridge/N289                                | 6          
+| u_sys_subsys/u_plic/read_accept_w                                   | u_sys_subsys/u_plic/N40_3                                           | 20         
+| u_sys_subsys/u_plic/N957                                            | u_sys_subsys/u_plic/N957_59                                         | 15         
+| u_sys_subsys/u_plic/N1675                                           | u_sys_subsys/u_plic/N1663                                           | 3          
+| u_sys_subsys/u_plic/N1663                                           | u_sys_subsys/u_plic/N1663                                           | 3          
+| u_sys_subsys/u_plic/N1651                                           | u_sys_subsys/u_plic/N1627                                           | 3          
+| u_sys_subsys/u_plic/N1639                                           | u_sys_subsys/u_plic/N1639                                           | 3          
+| u_sys_subsys/u_plic/N1627                                           | u_sys_subsys/u_plic/N1627                                           | 3          
+| u_sys_subsys/u_plic/N1615                                           | u_sys_subsys/u_plic/N1603                                           | 3          
+| u_sys_subsys/u_plic/N1603                                           | u_sys_subsys/u_plic/N1603                                           | 3          
+| u_sys_subsys/u_plic/N1591                                           | u_sys_subsys/u_plic/N1591                                           | 3          
+| u_sys_subsys/u_plic/N1579                                           | u_sys_subsys/u_plic/N1567                                           | 3          
+| u_sys_subsys/u_plic/N1567                                           | u_sys_subsys/u_plic/N1567                                           | 3          
+| u_sys_subsys/u_plic/N1555                                           | u_sys_subsys/u_plic/N1531                                           | 3          
+| u_sys_subsys/u_plic/N1543                                           | u_sys_subsys/u_plic/N1543                                           | 3          
+| u_sys_subsys/u_plic/N1531                                           | u_sys_subsys/u_plic/N1531                                           | 3          
+| u_sys_subsys/u_plic/N1519                                           | u_sys_subsys/u_plic/N1507                                           | 3          
+| u_sys_subsys/u_plic/N1507                                           | u_sys_subsys/u_plic/N1507                                           | 3          
+| u_sys_subsys/u_plic/N1466                                           | u_sys_subsys/u_plic/N1466                                           | 8          
+| u_sys_subsys/u_plic/N963                                            | u_sys_subsys/u_plic/N963_8                                          | 3          
+| u_sys_subsys/u_plic/N25                                             | u_sys_subsys/u_plic/N25_5                                           | 33         
+| u_sys_subsys/u_plic/N25_inv_1_inv_1                                 | u_sys_subsys/u_plic/N25_inv_1                                       | 2          
+| u_sys_subsys/u_reset_ctrl/N49                                       | u_sys_subsys/u_reset_ctrl/N49                                       | 5          
+| u_sys_subsys/u_rom/N213                                             | u_sys_subsys/u_rom/N213                                             | 14         
+| u_sys_subsys/u_rom/N205                                             | u_sys_subsys/u_rom/N205_5                                           | 8          
+| u_sys_subsys/u_rom/N172                                             | u_sys_subsys/u_rom/N172                                             | 4          
+| u_sys_subsys/u_rom/N210                                             | u_sys_subsys/u_rom/N205_1                                           | 4          
+| u_sys_subsys/u_sram/N216                                            | u_sys_subsys/u_sram/N216                                            | 16         
+| u_sys_subsys/u_sram/N208                                            | u_sys_subsys/u_sram/N220                                            | 8          
+| u_sys_subsys/u_sram/N175                                            | u_sys_subsys/u_sram/N175                                            | 4          
+| u_sys_subsys/u_sram/N213                                            | u_sys_subsys/u_sram/N96_1                                           | 4          
+| u_sys_subsys/u_sys_apb_bridge/N328                                  | u_sys_subsys/u_sys_apb_bridge/N323_1                                | 17         
+| u_sys_subsys/u_sys_apb_bridge/N350                                  | u_sys_subsys/u_sys_apb_bridge/N350                                  | 64         
+| u_sys_subsys/u_sys_apb_bridge/N323                                  | u_sys_subsys/u_sys_apb_bridge/N323                                  | 2          
+| u_sys_subsys/u_sys_apb_bridge/N289                                  | u_sys_subsys/u_sys_apb_bridge/N289                                  | 6          
+| u_sys_subsys/u_sys_apb_bridge/N159                                  | u_sys_subsys/u_sys_apb_bridge/N319_1                                | 36         
+| u_sys_subsys/u_sys_xbar/ar_fire_w[1]_inv_1_inv_1                    | u_sys_subsys/u_sys_xbar/ar_fire_w[1]_inv_1                          | 2          
+| u_sys_subsys/u_sys_xbar/ar_fire_w[0]_inv_1_inv_1                    | u_sys_subsys/u_sys_xbar/ar_fire_w[0]_inv_1                          | 2          
+| u_sys_subsys/u_sys_xbar/ar_fire_w [0]                               | u_cpu_subsys/u_icache/N1421                                         | 32         
+| u_sys_subsys/u_sys_xbar/ar_fire_w_alias [1]                         | u_sys_subsys/u_sys_xbar/N47                                         | 38         
+| u_sys_subsys/u_sys_xbar/N641                                        | u_sys_subsys/u_sys_xbar/N641                                        | 2          
+| u_sys_subsys/u_sys_xbar/aw_fire_w                                   | u_sys_subsys/u_sys_xbar/N662                                        | 38         
+| u_sys_subsys/u_sys_xbar/aw_fire_w_inv_1_inv_1                       | u_sys_subsys/u_sys_xbar/aw_fire_w_inv_1                             | 2          
+| u_sys_subsys/u_sysctrl/N43                                          | u_sys_subsys/u_sysctrl/N43                                          | 32         
+| u_sys_subsys/u_sysctrl/N49                                          | u_sys_subsys/u_sysctrl/N49                                          | 32         
+| u_sys_subsys/u_uart/N552                                            | u_sys_subsys/u_uart/N538                                            | 24         
+| u_sys_subsys/u_uart/N7                                              | u_sys_subsys/u_uart/N7                                              | 2          
+| u_sys_subsys/u_uart/N538                                            | u_sys_subsys/u_uart/N538                                            | 4          
+| u_sys_subsys/u_uart/N633                                            | u_sys_subsys/u_uart/N640                                            | 4          
+| u_sys_subsys/u_uart/N590                                            | u_sys_subsys/u_uart/N590_1                                          | 5          
+| u_sys_subsys/u_uart/N582                                            | u_sys_subsys/u_uart/N582                                            | 4          
+| u_sys_subsys/u_uart/N213_rnmt                                       | _N64735_1_inv                                                       | 8          
+| u_sys_subsys/u_uart/N566                                            | u_sys_subsys/u_uart/N566                                            | 5          
+| u_sys_subsys/u_uart/N640                                            | u_sys_subsys/u_uart/N640                                            | 25         
+| u_sys_subsys/u_uart/N580                                            | u_sys_subsys/u_uart/N12                                             | 4          
+| u_sys_subsys/u_uart/N593                                            | u_sys_subsys/u_uart/N593                                            | 13         
+| u_sys_subsys/u_uart/N578                                            | u_sys_subsys/u_uart/N578_1                                          | 5          
+| u_sys_subsys/u_uart/N570                                            | u_sys_subsys/u_uart/N570                                            | 4          
+| u_sys_subsys/u_uart/N614                                            | u_sys_subsys/u_uart/N350_4_1_or[0]_2                                | 25         
+| u_sys_subsys/u_uart/N568                                            | u_sys_subsys/u_uart/N568                                            | 4          
+| u_cpu_subsys/u_core/u_csr/N9597                                     | u_cpu_subsys/u_core/u_csr/N16807_2                                  | 64         
+| u_cpu_subsys/u_core/u_csr/N9766                                     | u_cpu_subsys/u_core/u_csr/N9766_3                                   | 64         
+| u_cpu_subsys/u_core/u_csr/N9665                                     | u_cpu_subsys/u_core/u_csr/N9665_3                                   | 64         
+| u_cpu_subsys/u_core/u_csr/N9614                                     | u_cpu_subsys/u_core/u_csr/N16781_2                                  | 64         
+| u_cpu_subsys/u_core/u_csr/N9631                                     | u_cpu_subsys/u_core/u_csr/N16782_2                                  | 64         
+| u_cpu_subsys/u_core/u_csr/N9951                                     | u_cpu_subsys/u_core/u_csr/N16793_2                                  | 64         
+| u_cpu_subsys/u_core/u_csr/N12180                                    | u_cpu_subsys/u_core/u_csr/N16791_2                                  | 64         
+| u_cpu_subsys/u_core/u_csr/N9648                                     | u_cpu_subsys/u_core/u_csr/N16965_2                                  | 64         
+| u_cpu_subsys/u_core/u_csr/N2724                                     | u_cpu_subsys/u_core/u_csr/N2724_7                                   | 32         
+| u_cpu_subsys/u_core/u_csr/N2644_1                                   | u_cpu_subsys/u_core/u_csr/N2644                                     | 32         
+| u_cpu_subsys/u_core/u_csr/N2948                                     | u_cpu_subsys/u_core/u_csr/N2948                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2928                                     | u_cpu_subsys/u_core/u_csr/N2443                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2908                                     | u_cpu_subsys/u_core/u_csr/N2908                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2888                                     | u_cpu_subsys/u_core/u_csr/N2888                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2868                                     | u_cpu_subsys/u_core/u_csr/N2868                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2848                                     | u_cpu_subsys/u_core/u_csr/N2848                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2828                                     | u_cpu_subsys/u_core/u_csr/N2828                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2808                                     | u_cpu_subsys/u_core/u_csr/N2808                                     | 5          
+| u_cpu_subsys/u_core/u_csr/N2443                                     | u_cpu_subsys/u_core/u_csr/N2443                                     | 10         
+| u_cpu_subsys/u_core/u_csr/N2804_1                                   | u_cpu_subsys/u_core/u_csr/N2804                                     | 32         
+| u_cpu_subsys/u_core/u_csr/N2523_1                                   | u_cpu_subsys/u_core/u_csr/N2523                                     | 32         
+| u_cpu_subsys/u_core/u_csr/N2367                                     | u_cpu_subsys/u_core/u_csr/N2367                                     | 32         
+| u_cpu_subsys/u_core/u_csr/N2321                                     | u_cpu_subsys/u_core/u_csr/N2321                                     | 31         
+| u_cpu_subsys/u_core/u_csr/N2214                                     | u_cpu_subsys/u_core/u_csr/N2214                                     | 3          
+| u_cpu_subsys/u_core/u_csr/N2275                                     | u_cpu_subsys/u_core/u_csr/N2275                                     | 32         
+| u_cpu_subsys/u_core/u_csr/N2180                                     | u_cpu_subsys/u_core/u_csr/N2180_1                                   | 2          
+| u_cpu_subsys/u_core/u_csr/N2413                                     | u_cpu_subsys/u_core/u_csr/N2413                                     | 32         
+| u_cpu_subsys/u_core/u_csr/N2245                                     | u_cpu_subsys/u_core/u_csr/N2245                                     | 31         
+| u_cpu_subsys/u_core/u_div/N201                                      | u_cpu_subsys/u_core/u_div/N201                                      | 6          
+| u_cpu_subsys/u_core/u_div/N11                                       | u_cpu_subsys/u_core/u_div/N11                                       | 35         
+| u_cpu_subsys/u_core/u_div/N207                                      | u_cpu_subsys/u_core/u_div/N207                                      | 32         
+| u_cpu_subsys/u_core/u_div/busy_o                                    | u_cpu_subsys/u_core/u_div/busy_o                                    | 32         
+| u_cpu_subsys/u_core/u_div/N259                                      | u_cpu_subsys/u_core/u_div/N259_3                                    | 32         
+| u_cpu_subsys/u_core/u_frontend/N1008                                | u_cpu_subsys/u_core/u_frontend/N1008                                | 3          
+| u_cpu_subsys/u_core/u_frontend/N1018                                | u_cpu_subsys/u_core/u_frontend/N1018_3                              | 31         
+| u_cpu_subsys/u_core/u_frontend/N967                                 | u_cpu_subsys/u_core/u_frontend/N967_1                               | 31         
+| u_cpu_subsys/u_core/u_frontend/N208                                 | u_cpu_subsys/u_core/u_frontend/N208                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N224                                 | u_cpu_subsys/u_core/u_frontend/N224                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N240                                 | u_cpu_subsys/u_core/u_frontend/N240                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N256                                 | u_cpu_subsys/u_core/u_frontend/N256                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N272                                 | u_cpu_subsys/u_core/u_frontend/N272                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N288                                 | u_cpu_subsys/u_core/u_frontend/N288                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N304                                 | u_cpu_subsys/u_core/u_frontend/N304                                 | 22         
+| u_cpu_subsys/u_core/u_frontend/N320                                 | u_cpu_subsys/u_core/u_frontend/N256                                 | 22         
+| u_cpu_subsys/u_core/m_ready_w                                       | u_cpu_subsys/u_core/N1108_7                                         | 101        
+| u_cpu_subsys/u_core/u_regfile/N903                                  | u_cpu_subsys/u_core/u_regfile/N903_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N749                                  | u_cpu_subsys/u_core/u_regfile/N749_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N833                                  | u_cpu_subsys/u_core/u_regfile/N833_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N861                                  | u_cpu_subsys/u_core/u_regfile/N861_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N987                                  | u_cpu_subsys/u_core/u_regfile/N987_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N777                                  | u_cpu_subsys/u_core/u_regfile/N777_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N651                                  | u_cpu_subsys/u_core/u_regfile/N651_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N917                                  | u_cpu_subsys/u_core/u_regfile/N917_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N791                                  | u_cpu_subsys/u_core/u_regfile/N791_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N693                                  | u_cpu_subsys/u_core/u_regfile/N693_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N1029                                 | u_cpu_subsys/u_core/u_regfile/N1029_1                               | 32         
+| u_cpu_subsys/u_core/u_regfile/N945                                  | u_cpu_subsys/u_core/u_regfile/N945_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N875                                  | u_cpu_subsys/u_core/u_regfile/N875_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N805                                  | u_cpu_subsys/u_core/u_regfile/N805_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N721                                  | u_cpu_subsys/u_core/u_regfile/N721_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N679                                  | u_cpu_subsys/u_core/u_regfile/N679_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N1057                                 | u_cpu_subsys/u_core/u_regfile/N1057_1                               | 32         
+| u_cpu_subsys/u_core/u_regfile/N1001                                 | u_cpu_subsys/u_core/u_regfile/N1001_1                               | 32         
+| u_cpu_subsys/u_core/u_regfile/N959                                  | u_cpu_subsys/u_core/u_regfile/N959_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N889                                  | u_cpu_subsys/u_core/u_regfile/N889_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N847                                  | u_cpu_subsys/u_core/u_regfile/N847_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N819                                  | u_cpu_subsys/u_core/u_regfile/N819_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N763                                  | u_cpu_subsys/u_core/u_regfile/N763_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N735                                  | u_cpu_subsys/u_core/u_regfile/N735_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N707                                  | u_cpu_subsys/u_core/u_regfile/N707_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N665                                  | u_cpu_subsys/u_core/u_regfile/N665_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N637                                  | u_cpu_subsys/u_core/u_regfile/N637_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N1043                                 | u_cpu_subsys/u_core/u_regfile/N1043_1                               | 32         
+| u_cpu_subsys/u_core/u_regfile/N1015                                 | u_cpu_subsys/u_core/u_regfile/N1015_1                               | 32         
+| u_cpu_subsys/u_core/u_regfile/N973                                  | u_cpu_subsys/u_core/u_regfile/N973_1                                | 32         
+| u_cpu_subsys/u_core/u_regfile/N931                                  | u_cpu_subsys/u_core/u_regfile/N931_1                                | 32         
+| u_cpu_subsys/u_core/u_frontend/N21                                  | u_cpu_subsys/u_core/u_frontend/N21                                  | 716        
+| u_cpu_subsys/u_core/u_frontend/u_ib/N87                             | u_cpu_subsys/u_core/u_frontend/u_ib/N87                             | 2          
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5804                    | u_cpu_subsys/u_core/u_frontend/u_predictor/N5804                    | 1024       
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5723                    | u_cpu_subsys/u_core/N2169                                           | 9          
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5777                    | u_cpu_subsys/u_core/u_frontend/u_predictor/N5777                    | 3          
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5813                    | u_cpu_subsys/u_core/u_frontend/u_predictor/N5813                    | 128        
+| u_cpu_subsys/u_core/u_frontend/u_predictor/N5739                    | u_cpu_subsys/u_core/u_frontend/u_predictor/N5739                    | 2          
+| _$$_VCC_$$_                                                         | _$$_VCC_$$_                                                         | 8          
+| u_cpu_subsys/u_dcache/ram_read_w                                    | u_cpu_subsys/u_dcache/read_addr_w_3[0]                              | 4          
+| _$$_GND_$$_                                                         | _$$_GND_$$_                                                         | 76         
+| u_sys_subsys/u_sram/N96                                             | u_sys_subsys/u_sram/N96                                             | 19         
+| u_sys_subsys/u_sram/u_memory/u_ip/U_ipml_spram_ip_ram_sram/N519     | u_sys_subsys/u_sram/u_memory/u_ip/U_ipml_spram_ip_ram_sram/N519     | 2          
+| u_sys_subsys/u_rom/N95                                              | u_sys_subsys/u_rom/N209_26[2]_1                                     | 4          
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Final PnR clock distribution:
+
+Global Clock Info:
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst           | Driver Pin     | Site Of Driver Inst     
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 7270            | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386           
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

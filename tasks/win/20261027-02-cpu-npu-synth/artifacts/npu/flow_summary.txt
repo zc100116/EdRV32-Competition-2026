@@ -1,0 +1,54 @@
+Project: G:\codex_project\EdRV32-FPGA\EdRV32-NPU-DP
+Counts are W:/E: lines, not unique defects.
+Full raw stage logs remain at <project>/<stage>/run.log.
+
+STAGE compile: Errors=0 Warnings=1522
+Verilog-2020	480
+Verilog-2008	380
+Verilog-2038	258
+Sdm-2003	200
+ConstantProbeLoop	112
+Verilog-2023	52
+Verilog-2039	19
+Verilog-2036	12
+Public-4030	9
+Action compile: Real time elapsed is 0h:0m:25s
+Action compile: CPU time elapsed is 0h:0m:1s
+Action compile: Process CPU time elapsed is 0h:0m:1s
+Current time: Tue Oct 27 23:02:24 2026
+Action compile: Peak memory pool usage is 316 MB
+
+STAGE synthesize: Errors=0 Warnings=6500
+Public-4008	6489
+Uncoded warning	8
+Timing-4086	2
+Timing-4087	1
+Action synthesize: Real time elapsed is 0h:1m:37s
+Action synthesize: CPU time elapsed is 0h:0m:8s
+Action synthesize: Process CPU time elapsed is 0h:0m:9s
+Current time: Tue Oct 27 23:04:03 2026
+Action synthesize: Peak memory pool usage is 2,400 MB
+
+STAGE device_map: Errors=0 Warnings=256
+Public-4008	256
+Action dev_map: Real time elapsed is 0h:0m:29s
+Action dev_map: CPU time elapsed is 0h:0m:3s
+Action dev_map: Process CPU time elapsed is 0h:0m:4s
+Current time: Tue Oct 27 23:04:33 2026
+Action dev_map: Peak memory pool usage is 1,014 MB
+
+STAGE place_route: Errors=0 Warnings=0
+Action pnr: Real time elapsed is 0h:18m:55s
+Action pnr: CPU time elapsed is 0h:2m:51s
+Action pnr: Process CPU time elapsed is 0h:3m:24s
+Current time: Tue Oct 27 23:23:28 2026
+Action pnr: Peak memory pool usage is 3,774 MB
+
+STAGE report_timing: Errors=0 Warnings=3
+Timing-4086	2
+Timing-4087	1
+Action report_timing: Real time elapsed is 0h:0m:43s
+Action report_timing: CPU time elapsed is 0h:0m:6s
+Action report_timing: Process CPU time elapsed is 0h:0m:6s
+Current time: Tue Oct 27 23:24:13 2026
+Action report_timing: Peak memory pool usage is 2,736 MB

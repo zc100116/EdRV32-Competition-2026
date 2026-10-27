@@ -1,0 +1,231 @@
+Source: final device_map DMR; counts are pre-PnR mapping fanout.
+
+Other High Fanout Signal:
++------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                        | Driver                                                         | Fanout     
++------------------------------------------------------------------------------------------------------------------------------------------------+
+| ntclkbufg_0                                                     | clkbufg_0                                                      | 32350      
+| u_datapath/u_window/a4_valid_r                                  | u_datapath/u_window/a4_valid_r                                 | 2869       
+| u_datapath/u_window/a3_valid_r                                  | u_datapath/u_window/a3_valid_r                                 | 2358       
+| u_datapath/u_accum/g_channel[0].r4_valid_r                      | u_datapath/u_accum/g_channel[0].r4_valid_r                     | 2050       
+| u_datapath/u_accum/g_channel[0].r4_first_r                      | u_datapath/u_accum/g_channel[0].r4_first_r                     | 2048       
+| u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [0]     | u_datapath/u_weight_store/g_bank[0].rd_segment_output_r[0]     | 2048       
+| u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [1]     | u_datapath/u_weight_store/g_bank[0].rd_segment_output_r[1]     | 2048       
+| u_datapath/accum_valid_w                                        | u_datapath/u_accum/g_channel[0].accum_valid_r                  | 1585       
+| u_datapath/sum_tag_w [48]                                       | u_datapath/u_mac_array/tag_r[4][48]                            | 1248       
+| u_datapath/u_result_quant/q_tag_r[7] [36]                       | u_datapath/u_result_quant/q_tag_r[7][36]                       | 689        
+| u_datapath/quant_valid_w                                        | u_datapath/u_result_quant/N18                                  | 674        
+| u_datapath/quant_tag_w [28]                                     | u_datapath/u_result_quant/q_tag_r[12][28]                      | 640        
+| u_datapath/u_result_quant/prepare_phase_r[1] [0]                | u_datapath/u_result_quant/prepare_phase_r[1][0]                | 561        
+| u_datapath/u_result_quant/prepare_phase_r[1] [1]                | u_datapath/u_result_quant/prepare_phase_r[1][1]                | 561        
+| u_datapath/quant_tag_w [26]                                     | u_datapath/u_result_quant/q_tag_r[12][26]                      | 321        
+| u_datapath/u_weight_store/N146                                  | u_datapath/u_weight_store/N146                                 | 268        
+| u_datapath/u_weight_store/N99                                   | u_datapath/u_weight_store/N99                                  | 268        
+| u_datapath/u_weight_store/N52                                   | u_datapath/u_weight_store/N52                                  | 268        
+| u_datapath/u_weight_store/N5                                    | u_datapath/u_weight_store/N5                                   | 268        
+| u_datapath/u_weight_store/N287                                  | u_datapath/u_weight_store/N287                                 | 268        
+| u_datapath/u_weight_store/N193                                  | u_datapath/u_weight_store/N193                                 | 268        
+| u_datapath/u_weight_store/N334                                  | u_datapath/u_weight_store/N334                                 | 268        
+| u_datapath/u_weight_store/N240                                  | u_datapath/u_weight_store/N240                                 | 268        
+| u_datapath/residual_rd_valid_w                                  | u_datapath/u_residual_buffer/rd_valid_r[1]                     | 257        
+| u_datapath/u_input_unpack/N77                                   | u_datapath/u_residual_buffer/N314_1                            | 257        
+| u_datapath/u_result_quant/N7777                                 | u_datapath/u_result_quant/N7777                                | 256        
+| u_datapath/u_window/a3_in_c4_r                                  | u_datapath/u_window/a3_in_c4_r                                 | 192        
+| u_datapath/u_accum/N0                                           | u_datapath/u_accum/N0                                          | 192        
+| u_datapath/u_window/a3_d2_r                                     | u_datapath/u_window/a3_d2_r                                    | 192        
+| u_datapath/weight_rd_en_w                                       | u_datapath/u_window/a1_valid_r                                 | 162        
+| u_datapath/quant_tag_w [36]                                     | u_datapath/u_result_quant/q_tag_r[12][36]                      | 160        
+| u_datapath/u_window/promote_w                                   | u_datapath/u_window/N6_1                                       | 156        
+| u_datapath/u_input_unpack/N29                                   | u_datapath/u_input_unpack/N29_3                                | 143        
+| u_datapath/term_tag_w [48]                                      | u_datapath/u_window/a5_tag_r[48]                               | 129        
+| u_datapath/u_result_quant/N7672                                 | u_datapath/u_window/N578_1                                     | 129        
+| u_datapath/u_result_quant/q_tag_r[11] [27]                      | u_datapath/u_result_quant/q_tag_r[11][27]                      | 128        
+| u_datapath/u_window/a3_bank_r [0]                               | u_datapath/u_window/a3_bank_r[0]                               | 128        
+| u_datapath/u_window/a3_c8_half_r                                | u_datapath/u_window/a3_c8_half_r                               | 128        
+| u_datapath/u_result_quant/N7761                                 | u_datapath/u_result_quant/N7761                                | 128        
+| u_datapath/u_writeback/rd_plane_r [1]                           | u_datapath/u_writeback/rd_plane_r[1]                           | 128        
+| u_datapath/u_result_quant/N32443                                | u_datapath/u_result_quant/N32443                               | 128        
+| u_datapath/u_result_quant/N14009                                | u_datapath/u_result_quant/N7761                                | 128        
+| u_datapath/u_window/a3_pixel_r [1]                              | u_datapath/u_window/a3_pixel_r[1]                              | 128        
+| u_datapath/u_window/a3_pixel_r [0]                              | u_datapath/u_window/a3_pixel_r[0]                              | 128        
+| u_datapath/u_window/a3_bank_r [1]                               | u_datapath/u_window/a3_bank_r[1]                               | 128        
+| u_datapath/u_result_quant/g_lane[5].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[5].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[0].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[0].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[1].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[1].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[4].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[4].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[7].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[7].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[3].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[3].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[6].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[6].q_shift_r[6][3]            | 120        
+| u_datapath/u_result_quant/g_lane[2].q_shift_r[6] [3]            | u_datapath/u_result_quant/g_lane[2].q_shift_r[6][3]            | 120        
+| u_datapath/u_window/cmd_accept_w                                | u_datapath/u_window/N3                                         | 115        
+| u_datapath/u_result_quant/g_lane[1].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[1].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[2].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[2].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[3].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[3].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[4].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[4].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[7].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[7].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[0].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[0].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[5].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[5].q_shift_r[6][4]            | 112        
+| u_datapath/u_result_quant/g_lane[6].q_shift_r[6] [4]            | u_datapath/u_result_quant/g_lane[6].q_shift_r[6][4]            | 112        
+| u_datapath/u_window/issue_w                                     | u_datapath/u_window/N22_6                                      | 106        
+| u_datapath/u_result_quant/g_lane[6].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[6].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[5].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[5].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[0].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[0].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[2].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[2].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[3].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[3].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[7].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[7].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[1].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[1].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[4].q_shift_r[5] [1]            | u_datapath/u_result_quant/g_lane[4].q_shift_r[5][1]            | 100        
+| u_datapath/u_result_quant/g_lane[4].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[4].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[6].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[6].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[2].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[2].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[7].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[7].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[5].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[5].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[1].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[1].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[3].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[3].q_shift_r[5][0]            | 99         
+| u_datapath/u_result_quant/g_lane[0].q_shift_r[5] [0]            | u_datapath/u_result_quant/g_lane[0].q_shift_r[5][0]            | 99         
+| line_wr_idle_w                                                  | u_datapath/u_input_unpack/N11                                  | 98         
+| u_datapath/weight_rd_addr_w [4]                                 | u_datapath/u_window/weight_rd_addr_o[4]                        | 96         
+| u_datapath/u_window/a3_pixel_valid_r [0]                        | u_datapath/u_window/a3_pixel_valid_r[0]                        | 96         
+| u_datapath/weight_rd_addr_w [0]                                 | u_datapath/u_window/weight_rd_addr_o[0]                        | 96         
+| u_datapath/u_window/a3_pixel_valid_r [1]                        | u_datapath/u_window/a3_pixel_valid_r[1]                        | 96         
+| u_datapath/weight_rd_addr_w [8]                                 | u_datapath/u_window/weight_rd_addr_o[8]                        | 96         
+| u_datapath/weight_rd_addr_w [7]                                 | u_datapath/u_window/weight_rd_addr_o[7]                        | 96         
+| u_datapath/weight_rd_addr_w [6]                                 | u_datapath/u_window/weight_rd_addr_o[6]                        | 96         
+| u_datapath/weight_rd_addr_w [5]                                 | u_datapath/u_window/weight_rd_addr_o[5]                        | 96         
+| u_datapath/weight_rd_addr_w [1]                                 | u_datapath/u_window/weight_rd_addr_o[1]                        | 96         
+| u_datapath/weight_rd_addr_w [2]                                 | u_datapath/u_window/weight_rd_addr_o[2]                        | 96         
+| u_datapath/quant_tag_w [29]                                     | u_datapath/u_result_quant/q_tag_r[12][29]                      | 96         
+| u_datapath/weight_rd_addr_w [3]                                 | u_datapath/u_window/weight_rd_addr_o[3]                        | 96         
+| u_datapath/u_result_quant/g_lane[6].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[6].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[3].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[3].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[4].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[4].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[7].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[7].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[1].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[1].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[0].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[0].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[5].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[5].q_shift_r[6][5]            | 80         
+| u_datapath/u_result_quant/g_lane[2].q_shift_r[6] [5]            | u_datapath/u_result_quant/g_lane[2].q_shift_r[6][5]            | 80         
++------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Clock Signal:
++-----------------------------------------------------------------------------------------------+
+| Driver_Pin_Name     | Clk_Source_Inst     | Clk_Inst_Name     | Net_Name        | Fanout     
++-----------------------------------------------------------------------------------------------+
+| O                   | clk_i_ibuf          | clkbufg_0         | ntclkbufg_0     | 32350      
++-----------------------------------------------------------------------------------------------+
+
+
+
+Reset Signal:
++------------------------------------------------------------------------------------------------+
+| Net_Name                             | Rst_Source_Inst                           | Fanout     
++------------------------------------------------------------------------------------------------+
+| u_reset_sync/N0                      | u_reset_sync/N0                           | 2          
+| u_datapath/u_accum/N0                | u_datapath/u_accum/N0                     | 192        
+| u_datapath/sum_tag_w [48]            | u_datapath/u_mac_array/tag_r[4][48]       | 608        
+| u_datapath/u_result_quant/N879       | u_datapath/u_result_quant/N879_mux49      | 8          
+| u_datapath/u_result_quant/N947       | u_datapath/u_result_quant/N947_mux49      | 8          
+| u_datapath/u_result_quant/N1015      | u_datapath/u_result_quant/N1015_mux49     | 8          
+| u_datapath/u_result_quant/N1083      | u_datapath/u_result_quant/N1083_mux49     | 8          
+| u_datapath/u_result_quant/N1151      | u_datapath/u_result_quant/N1151_mux49     | 8          
+| u_datapath/u_result_quant/N1219      | u_datapath/u_result_quant/N1219_mux49     | 8          
+| u_datapath/u_result_quant/N1287      | u_datapath/u_result_quant/N1287_mux49     | 8          
+| u_datapath/u_result_quant/N1355      | u_datapath/u_result_quant/N1355_mux49     | 8          
+| u_datapath/u_result_quant/N1423      | u_datapath/u_result_quant/N1423_mux49     | 8          
+| u_datapath/u_result_quant/N1491      | u_datapath/u_result_quant/N1491_mux49     | 8          
+| u_datapath/u_result_quant/N1559      | u_datapath/u_result_quant/N1559_mux49     | 8          
+| u_datapath/u_result_quant/N1627      | u_datapath/u_result_quant/N1627_mux49     | 8          
+| u_datapath/u_result_quant/N1695      | u_datapath/u_result_quant/N1695_mux49     | 8          
+| u_datapath/u_result_quant/N1763      | u_datapath/u_result_quant/N1763_mux49     | 8          
+| u_datapath/u_result_quant/N1831      | u_datapath/u_result_quant/N1831_mux49     | 8          
+| u_datapath/u_result_quant/N1899      | u_datapath/u_result_quant/N1899_mux49     | 8          
+| u_datapath/u_result_quant/N7777      | u_datapath/u_result_quant/N7777           | 256        
+| u_datapath/quant_prepare_valid_w     | u_datapath/u_accum/N867                   | 4          
+| _$$_GND_$$_                          | _$$_GND_$$_                               | 296        
++------------------------------------------------------------------------------------------------+
+
+
+
+CE Signal:
++----------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                           | CE_Source_Inst                                    | Fanout     
++----------------------------------------------------------------------------------------------------------------------+
+| u_datapath/N16                                     | u_datapath/N16                                    | 58         
+| u_datapath/u_accum/g_channel[0].r4_valid_r         | u_datapath/u_accum/g_channel[0].r4_valid_r        | 2048       
+| stim_w[664]                                        | stim_r[664]                                       | 19         
+| u_datapath/u_input_unpack/N29                      | u_datapath/u_input_unpack/N29_3                   | 11         
+| u_datapath/u_input_unpack/N77                      | u_datapath/u_residual_buffer/N314_1               | 256        
+| u_datapath/u_input_unpack/N64                      | u_datapath/u_input_unpack/N64                     | 5          
+| u_datapath/u_quant_param_store/N5                  | u_datapath/u_quant_param_store/N194               | 59         
+| u_datapath/u_quant_param_store/N32                 | u_datapath/u_quant_param_store/N32                | 59         
+| u_datapath/u_quant_param_store/N59                 | u_datapath/u_quant_param_store/N32                | 59         
+| u_datapath/u_quant_param_store/N86                 | u_datapath/u_quant_param_store/N86                | 59         
+| u_datapath/u_quant_param_store/N113                | u_datapath/u_quant_param_store/N86                | 59         
+| u_datapath/u_quant_param_store/N140                | u_datapath/u_quant_param_store/N140               | 59         
+| u_datapath/u_quant_param_store/N167                | u_datapath/u_quant_param_store/N140               | 59         
+| u_datapath/u_quant_param_store/N194                | u_datapath/u_quant_param_store/N194               | 59         
+| u_datapath/quant_valid_w                           | u_datapath/u_result_quant/N18                     | 673        
+| u_datapath/residual_rd_valid_w                     | u_datapath/u_residual_buffer/rd_valid_r[1]        | 256        
+| u_datapath/u_residual_buffer/N314                  | u_datapath/u_residual_buffer/N314                 | 5          
+| u_datapath/u_residual_buffer/N352                  | u_datapath/u_residual_buffer/N314                 | 5          
+| u_datapath/u_residual_buffer/N274                  | u_datapath/u_residual_buffer/N274                 | 2          
+| u_datapath/u_residual_buffer/N340                  | u_datapath/u_residual_buffer/N340                 | 9          
+| u_datapath/u_residual_buffer/N308                  | u_datapath/u_residual_buffer/N172_2               | 9          
+| u_datapath/u_residual_buffer/N286                  | u_datapath/u_residual_buffer/N286_6               | 2          
+| u_datapath/accum_valid_w                           | u_datapath/u_accum/g_channel[0].accum_valid_r     | 1584       
+| u_datapath/u_result_quant/N7672                    | u_datapath/u_window/N578_1                        | 128        
+| u_datapath/u_result_quant/N14009                   | u_datapath/u_result_quant/N7761                   | 128        
+| u_datapath/u_result_quant/N32443                   | u_datapath/u_result_quant/N32443                  | 128        
+| u_datapath/u_result_quant/N7761                    | u_datapath/u_result_quant/N7761                   | 128        
+| u_datapath/quant_prepare_valid_w                   | u_datapath/u_accum/N867                           | 4          
+| u_datapath/u_result_quant/request_active_r         | u_datapath/u_result_quant/request_active_r        | 2          
+| u_datapath/u_result_quant/residual_low_w           | u_datapath/u_result_quant/N14_7                   | 5          
+| u_datapath/weight_rd_en_w                          | u_datapath/u_window/a1_valid_r                    | 159        
+| u_datapath/u_weight_store/N5                       | u_datapath/u_weight_store/N5                      | 267        
+| u_datapath/u_weight_store/N52                      | u_datapath/u_weight_store/N52                     | 267        
+| u_datapath/u_weight_store/N99                      | u_datapath/u_weight_store/N99                     | 267        
+| u_datapath/u_weight_store/N146                     | u_datapath/u_weight_store/N146                    | 267        
+| u_datapath/u_weight_store/N193                     | u_datapath/u_weight_store/N193                    | 267        
+| u_datapath/u_weight_store/N240                     | u_datapath/u_weight_store/N240                    | 267        
+| u_datapath/u_weight_store/N287                     | u_datapath/u_weight_store/N287                    | 267        
+| u_datapath/u_weight_store/N334                     | u_datapath/u_weight_store/N334                    | 267        
+| u_datapath/u_window/issue_w                        | u_datapath/u_window/N22_6                         | 92         
+| u_datapath/u_window/a2_valid_r                     | u_datapath/u_window/a2_valid_r                    | 61         
+| u_datapath/u_window/a3_valid_r                     | u_datapath/u_window/a3_valid_r                    | 2355       
+| u_datapath/u_window/a4_valid_r                     | u_datapath/u_window/a4_valid_r                    | 2867       
+| u_datapath/u_window/N603                           | u_datapath/u_window/N603_2                        | 12         
+| u_datapath/u_window/N592                           | u_datapath/u_window/N592                          | 16         
+| u_datapath/u_window/promote_w                      | u_datapath/u_window/N6_1                          | 114        
+| u_datapath/u_window/N572                           | u_datapath/u_window/N572_2                        | 2          
+| u_datapath/u_window/N545                           | u_datapath/u_window/N545_2                        | 2          
+| u_datapath/u_window/cmd_accept_w                   | u_datapath/u_window/N3                            | 114        
+| u_datapath/u_window/N516                           | u_datapath/u_writeback/N173_3                     | 25         
+| u_datapath/pair_fire_w                             | u_datapath/u_window/N25_2                         | 49         
+| u_datapath/u_window/N652                           | u_datapath/u_window/N652_7                        | 3          
+| u_datapath/u_writeback/N161                        | u_datapath/u_writeback/N161                       | 5          
+| u_datapath/u_writeback/N163                        | u_datapath/u_result_quant/N7617_1                 | 5          
+| u_datapath/u_writeback/N173                        | u_datapath/u_writeback/N161                       | 6          
+| u_datapath/u_writeback/chunk_start_r[31:0]_and     | u_datapath/u_writeback/N12                        | 32         
+| u_datapath/u_writeback/N165                        | u_datapath/u_writeback/N165                       | 5          
+| u_datapath/u_writeback/N44                         | u_datapath/u_writeback/N44                        | 15         
+| u_datapath/u_writeback/N155                        | u_datapath/u_writeback/N155                       | 5          
+| _$$_VCC_$$_                                        | _$$_VCC_$$_                                       | 444        
+| u_datapath/lut_rd_en_w                             | u_datapath/u_result_quant/N8                      | 16         
+| u_datapath/cache_rd_en_w [0]                       | u_datapath/u_window/cache_rd_en_o[0]              | 8          
+| u_datapath/cache_rd_en_w [1]                       | u_datapath/u_window/cache_rd_en_o[1]              | 8          
+| u_datapath/param_rd_en_w                           | u_datapath/u_result_quant/N3                      | 8          
+| u_datapath/residual_rd_en_w                        | u_datapath/u_result_quant/N16                     | 4          
+| u_datapath/u_writeback/rd_en_w                     | u_datapath/u_writeback/N12                        | 8          
++----------------------------------------------------------------------------------------------------------------------+
+
+
+
+Final PnR clock distribution:
+
+Global Clock Info:
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst           | Driver Pin     | Site Of Driver Inst     
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 29917           | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386           
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

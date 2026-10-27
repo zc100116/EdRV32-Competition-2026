@@ -1,0 +1,21 @@
+Expanded report: G:\codex_project\EdRV32-Competition-2026\build\win\20261027-02-cpu-npu-synth\timing_npu_200\report_timing\edrv32_fpga_npu_dp_top.rtr
+Command: report_timing -input_db_file <original pnr.adf> -max_path 200 -nworst 1 -input_pins TRUE -force_to_run
+Reports are exported in separate scratch projects; routed databases are unchanged.
+Full expanded reports remain local; indexed paths and required detail blocks are saved here.
+timing_npu_200
+W: Warning : The license will invalid in 7 days. In order not to affect your usage, please update the license in time.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/place_route/edrv32_fpga_npu_dp_top_pnr.adf -max_path 200 -nworst 1 -input_pins TRUE -force_to_run
+Process "Report Timing" started.
+W: Timing-4087: Port 'obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:55s
+Action report_timing: CPU time elapsed is 0h:0m:0s
+Action report_timing: Process CPU time elapsed is 0h:0m:1s
+Action report_timing: Peak memory pool usage is 2,750 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:55s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:0s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:1s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/place_route/edrv32_fpga_npu_dp_top_pnr.adf -max_path 200 -nworst 1 -input_pins TRUE -force_to_run successfully.

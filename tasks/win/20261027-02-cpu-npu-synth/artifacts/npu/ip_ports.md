@@ -6,7 +6,7 @@
 - 所有 9 个 IP 均为 Logos2 / PG2L200H / -6 / FBB676，生成日志均为 0 error / 0 warning。
 - weight 已改为读写 256 位；七个 RAM 的容量及输出寄存器、读使能选项均符合创建说明。
 - 两个量化乘法顶层实际 XYREG=1、MREG=1、PREG=0、INREG=0、OUTREG=0，配置为两级。
-- residual 在 PDS IP Compiler 界面显示 Used DRM36K Number=4；其余 IP 的资源数未取得，生成日志显示 Synthesis is disabled。
+- 使用到的八类 IP 已从最终 PnR PRR 取得每实例资源，见文末；scratch 不例化，单 IP 独立资源未取得。
 - 原 ModelSim 检查仍 FAIL：5166 ns，u_chk_residual 读数据与参考不符；各检查器尚未完成。
 
 ## 包装模块适配
@@ -32,7 +32,7 @@ FAIL ram AW=9 DW=256 expected=19861f335c63fbb807c42b0f56592bacd4e63ca968758dd028
 Time: 5166 ns  Scope: npu_ip_check.u_chk_residual
 ```
 
-尚未确认具体触发条件和根因。按任务卡 B4 停止 NPU 后续流程，不修改行为模型或检查程序。
+尚未确认具体触发条件和根因。该项为当时 B4 的停止记录。任务卡第 10 节已确认同址冲突不定、NPU 不使用冲突读出，解除阻塞；未改行为模型或检查程序。
 
 ## 每个 IP 的实际端口和选项
 
@@ -45,7 +45,7 @@ Time: 5166 ns  Scope: npu_ip_check.u_chk_residual
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 1 APM、0 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -108,7 +108,7 @@ B_SIGNED=1
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 1 APM、0 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -171,7 +171,7 @@ APM2_BOOL=false
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 0 APM、8 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -226,7 +226,7 @@ RST_VAL_EN=false
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 0 APM、1 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -281,7 +281,7 @@ RST_VAL_EN=false
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 0 APM、1 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -336,7 +336,7 @@ RST_VAL_EN=false
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | PDS IP Compiler 界面 Used DRM36K Number=4 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 0 APM、4 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -391,7 +391,7 @@ RST_VAL_EN=false
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 0 APM、8 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -501,7 +501,7 @@ RST_VAL_EN=false
 | device | PG2L200H |
 | speedgrade | -6 |
 | package | FBB676 |
-| DRM/APM 实测占用 | 未取得；IP 生成未运行综合 |
+| DRM/APM 实测占用 | 最终 PRR：每实例 0 APM、4 DRM36K |
 
 | 端口 | 方向 | 位宽 |
 |---|---|---|
@@ -557,7 +557,7 @@ OUTPUT_REG 在 scratch 为 false，其余六个为 true。各 `.idf` 均没有 W
 
 - DRM Based Simple Dual Port RAM 1.10，Logos2-PG2L200H-FBB676--6。
 - DRM Resource Mode=AUTO；Actual DRM Resource Mode=DRM36K。
-- Used DRM36K Number=4（该单个 residual IP 的界面报告；其余 IP 尚未从 GUI 读取资源数）。
+- Used DRM36K Number=4（该单个 residual IP 的界面报告；其余 IP 的资源随后已从最终 PRR 读取，见文末）。
 - Enable rd_clk_en 勾选；Enable rd_oce 未勾选；Enable Output Register 勾选。
 - 界面没有 Write Mode / Read First / Write First / No Change 冲突模式选项。
 - 查看后关闭，未保存或重新生成 IP。
@@ -579,3 +579,20 @@ OUTPUT_REG 在 scratch 为 false，其余六个为 true。各 `.idf` 均没有 W
 | scratch | 36K | false | 无可选项 | 6003 | 545 | 437 | 318 | 437 | 318 |
 
 所有候选模型均有失配，完整诊断日志见 diag_npu_ram.log，首失配与解释见 result.md。
+
+## 最终布局布线的 IP 资源（本轮报告）
+
+来源：`native_reports/place_route/edrv32_fpga_npu_dp_top.prr` 的模块层次表。
+每实例 APM、DRM 直接读取 u_ip 行；实例数为对应层次行的计数，不是按位宽估算。
+
+| IP | APM/实例 | DRM36K/实例 | 使用实例数 | 一个实际层次行 |
+|---|---:|---:|---:|---|
+| ip_ram_npu_line | 0 | 8 | 2 | `edrv32_fpga_npu_dp_top/u_datapath/u_line_cache/u_bank0/u_ip` |
+| ip_ram_npu_weight | 0 | 4 | 24 | `edrv32_fpga_npu_dp_top/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip` |
+| ip_ram_npu_quant | 0 | 1 | 8 | `edrv32_fpga_npu_dp_top/u_datapath/u_quant_param_store/g_bank[0].u_ram/u_ip` |
+| ip_ram_npu_lut | 0 | 1 | 16 | `edrv32_fpga_npu_dp_top/u_datapath/u_activation_lut/g_lane[0].u_ram/u_ip` |
+| ip_ram_npu_residual | 0 | 4 | 1 | `edrv32_fpga_npu_dp_top/u_datapath/u_residual_buffer/u_residual_ram/u_ip` |
+| ip_ram_npu_result | 0 | 8 | 1 | `edrv32_fpga_npu_dp_top/u_datapath/u_writeback/u_result_ram/u_ip` |
+| ip_mul_npu_quant_low | 1 | 0 | 16 | `edrv32_fpga_npu_dp_top/u_datapath/u_result_quant/g_lane[0].u_low/u_ip` |
+| ip_mul_npu_quant_high | 1 | 0 | 16 | `edrv32_fpga_npu_dp_top/u_datapath/u_result_quant/g_lane[0].u_high/u_ip` |
+| ip_ram_npu_scratch | 本轮不使用 | 本轮不使用 | 0 | 当前 datapath 不例化；单 IP 独立资源未取得 |

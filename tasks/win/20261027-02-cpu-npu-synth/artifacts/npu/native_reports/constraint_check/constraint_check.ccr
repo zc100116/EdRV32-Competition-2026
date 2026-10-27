@@ -1,0 +1,39 @@
+##### Written on 2026/10/27 23:02:36 ###############################
+
+
+##### INFO ##################################################
+
+Current device : 
+	PG2L200H-6FBB676
+
+Top Module : 
+	edrv32_fpga_npu_dp_top
+
+Constraint File(s) : 
+	G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_npu_dp_top.fdc
+
+##### SUMMARY ######################################################
+
+Found 0 error(s), 0 critical warning(s), 0 warning(s), out of 23 constraint(s)
+
+
+Inapplicable constraints(except overwritten constraints):
+********************************************
+
+
+Constraints with issues:
+********************************************
+
+
+Issues without commands:
+********************************************
+
+
+Unconstrained ports:
+********************************************
+
+
+Constraints with matching wildcard expressions:
+********************************************
+
+
