@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v0.2 |
 | 日期 | 2026-10-27 |
-| 对应规格 | `docs/spec/npu-spec.md` v0.2；SoC 规格 v0.7 的 4.2、4.3、5.2 X9/X10、7.1 |
+| 对应规格 | `docs/spec/npu-spec.md` v0.3；SoC 规格 v0.7 的 4.2、4.3、5.2 X9/X10、7.1 |
 | 关联 | `docs/plan/npu-plan.md`；`docs/design/2026-10-26-npu-architecture.md` |
 
 ---
