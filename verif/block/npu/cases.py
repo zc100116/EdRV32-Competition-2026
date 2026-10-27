@@ -171,7 +171,8 @@ def recipes(test):
     elif test == 'CP-02':
         add('k3_1020', [conv(in_w=16, cin=816, k=3, cout=16)])
         add('k1_1024', [conv(in_w=128, cin=256, k=1, cout=16)])
-        add('L15_split', [conv(in_w=80, in_h=48, cin=192, cout=64)])
+        # Output region must not overlap this layer's 720 KiB input (npu-spec 2.4).
+        add('L15_split', [conv(in_w=80, in_h=48, cin=192, cout=64, out_offset=0x200000)])
     elif test == 'CP-03':
         add('blocks8', [conv(cout=256)])
     elif test in ['SQ-01', 'SQ-02']:
