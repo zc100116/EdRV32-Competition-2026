@@ -1,0 +1,218 @@
+// File: edrv32_npu_result_quant.v
+// Spec: npu-spec 2.3, 5.4; datapath design 4.2, 4.3, 4.6.2.
+// Description: Sixteen always-advancing quantization lanes, four/two groups per pair.
+// Parameters are requested at R4; payload and tags follow Q0 through Q12.
+// Clock: clk_npu.
+module edrv32_npu_result_quant (
+    // Clock and local control.
+    input wire clk_i,
+    input wire rst_n_i,
+    input wire cancel_i,
+
+    // R4 preparation and ACC final vector.
+    input wire quant_prepare_valid_i,
+    input wire [48:0] quant_prepare_tag_i,
+    input wire accum_valid_i,
+    input wire [48:0] accum_tag_i,
+    input wire [2047:0] accum_data_i,
+
+    // Two-edge parameter and activation reads.
+    output wire param_rd_en_o,
+    output wire [2:0] param_rd_block_o,
+    output wire [1:0] param_rd_phase_o,
+    input wire [511:0] param_rd_data_i,
+    output wire lut_rd_en_o,
+    output wire [2:0] lut_rd_block_o,
+    output wire [127:0] lut_rd_addr_o,
+    input wire [127:0] lut_rd_data_i,
+
+    // Q10 residual prefetch and Q12 complete pair.
+    output wire residual_rd_en_o,
+    output wire [4:0] residual_rd_addr_o,
+    output wire quant_valid_o,
+    output wire [48:0] quant_tag_o,
+    output wire [511:0] quant_data_o,
+
+    // Local pipeline occupancy.
+    output wire idle_o
+);
+    reg request_active_r;
+    reg [1:0] request_phase_r;
+    reg [2:0] request_block_r;
+    reg request_half_r;
+    reg [1:0] prepare_valid_r;
+    reg [1:0] prepare_phase_r [0:1];
+    reg [2047:0] hold_data_r;
+    reg [48:0] hold_tag_r;
+    reg [12:0] q_valid_r;
+    reg [48:0] q_tag_r [0:12];
+    reg [1:0] q_phase_r [0:12];
+    reg [511:0] pair_data_r;
+    wire [127:0] q11_bypass_w;
+    reg residual_high_valid_r;
+    reg [4:0] residual_high_addr_r;
+    wire residual_low_w;
+    wire q9_last_w;
+    wire [44:0] unused_prepare_tag_w;
+    integer stage;
+    integer lane;
+
+    assign unused_prepare_tag_w = {quant_prepare_tag_i[48:27],
+        quant_prepare_tag_i[25:15], quant_prepare_tag_i[11:0]};
+    assign param_rd_en_o = (quant_prepare_valid_i || request_active_r) && !cancel_i;
+    assign param_rd_block_o = quant_prepare_valid_i
+        ? quant_prepare_tag_i[14:12] : request_block_r;
+    assign param_rd_phase_o = quant_prepare_valid_i ? 2'd0 : request_phase_r;
+    assign lut_rd_en_o = q_valid_r[9] && q_tag_r[9][27] && !cancel_i;
+    assign lut_rd_block_o = q_tag_r[9][14:12];
+    assign q9_last_w = q_phase_r[9] == (q_tag_r[9][26] ? 2'd1 : 2'd3);
+    assign residual_low_w = q_valid_r[9] && q9_last_w && q_tag_r[9][28];
+    assign residual_rd_en_o = (residual_low_w || residual_high_valid_r) && !cancel_i;
+    assign residual_rd_addr_o = residual_low_w ? q_tag_r[9][47:43] : residual_high_addr_r;
+    assign quant_valid_o = q_valid_r[12] && !cancel_i;
+    assign quant_tag_o = q_tag_r[12];
+    assign quant_data_o = pair_data_r;
+    assign idle_o = !(request_active_r || (|prepare_valid_r) || (|q_valid_r)
+        || residual_high_valid_r);
+
+    // The prepare pulse itself is phase0: no register before the RAM request.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            request_active_r <= 1'b0;
+            prepare_valid_r <= 2'd0;
+            q_valid_r <= 13'd0;
+            residual_high_valid_r <= 1'b0;
+        end else if (cancel_i) begin
+            request_active_r <= 1'b0;
+            prepare_valid_r <= 2'd0;
+            q_valid_r <= 13'd0;
+            residual_high_valid_r <= 1'b0;
+        end else begin
+            if (quant_prepare_valid_i) begin
+                request_active_r <= 1'b1;
+            end else if (request_active_r
+                && request_phase_r == (request_half_r ? 2'd1 : 2'd3)) begin
+                request_active_r <= 1'b0;
+            end
+            prepare_valid_r <= {prepare_valid_r[0], param_rd_en_o};
+            q_valid_r[0] <= prepare_valid_r[1];
+            q_valid_r[11:1] <= q_valid_r[10:0];
+            q_valid_r[12] <= q_valid_r[11]
+                && q_phase_r[11] == (q_tag_r[11][26] ? 2'd1 : 2'd3);
+            residual_high_valid_r <= residual_low_w && !q_tag_r[9][26];
+        end
+    end
+
+    always @(posedge clk_i) begin
+        if (quant_prepare_valid_i) begin
+            request_block_r <= quant_prepare_tag_i[14:12];
+            request_half_r <= quant_prepare_tag_i[26];
+            request_phase_r <= 2'd1;
+        end else if (request_active_r) begin
+            request_phase_r <= request_phase_r + 2'd1;
+        end
+        prepare_phase_r[0] <= param_rd_phase_o;
+        prepare_phase_r[1] <= prepare_phase_r[0];
+        if (accum_valid_i) begin
+            hold_data_r <= accum_data_i;
+            hold_tag_r <= accum_tag_i;
+        end
+        // ACC and the first parameter group are visible before the Q0 edge.
+        q_tag_r[0] <= (prepare_phase_r[1] == 2'd0) ? accum_tag_i : hold_tag_r;
+        q_phase_r[0] <= prepare_phase_r[1];
+        for (stage = 1; stage <= 12; stage = stage + 1) begin
+            q_tag_r[stage] <= q_tag_r[stage-1];
+            q_phase_r[stage] <= q_phase_r[stage-1];
+        end
+        if (residual_low_w) begin
+            residual_high_addr_r <= q_tag_r[9][47:43] + 5'd1;
+        end
+        // One assembly register suffices: group calendars never overlap pairs.
+        if (q_valid_r[11]) begin
+            if (q_tag_r[11][26] && q_phase_r[11] == 2'd0) begin
+                pair_data_r[511:256] <= 256'd0;
+            end
+            for (lane = 0; lane < 16; lane = lane + 1) begin
+                pair_data_r[8*(32*{30'd0,q_phase_r[11][1]} + 16*(lane/8)
+                    + 8*{30'd0,q_phase_r[11][0]} + lane%8) +: 8]
+                    <= q_tag_r[11][27] ? lut_rd_data_i[8*lane +: 8]
+                        : q11_bypass_w[8*lane +: 8];
+            end
+        end
+    end
+
+    genvar index;
+    generate
+        for (index = 0; index < 16; index = index + 1) begin : g_lane
+            reg signed [31:0] q0_acc_r;
+            reg signed [31:0] q0_bias_r;
+            reg [15:0] q0_mult_r;
+            reg [15:0] q1_mult_r;
+            reg [5:0] q_shift_r [0:6];
+            reg signed [32:0] q1_bias_sum_r;
+            wire [33:0] q3_low_product_w;
+            wire [31:0] q3_high_product_w;
+            reg signed [48:0] q4_product_r;
+            reg signed [48:0] q5_round_r;
+            reg signed [48:0] q6_q_shift_r;
+            reg signed [48:0] q7_q_shift_r;
+            reg signed [49:0] q8_zero_point_r;
+            reg [7:0] q9_clamp_r;
+            reg [7:0] q10_bypass_r;
+            reg [7:0] q11_bypass_r;
+            wire [9:0] unused_param_reserved_w;
+            integer shift_stage;
+
+            edrv32_mul_npu_quant_low u_low (
+                .clk_i(clk_i),
+                .operand_a_i({1'b0, q1_bias_sum_r[16:0]}),
+                .operand_b_i(q1_mult_r),
+                .product_o(q3_low_product_w)
+            );
+            edrv32_mul_npu_quant_high u_high (
+                .clk_i(clk_i),
+                .operand_a_i(q1_bias_sum_r[32:17]),
+                .operand_b_i(q1_mult_r),
+                .product_o(q3_high_product_w)
+            );
+            assign unused_param_reserved_w = param_rd_data_i[64*(index%8)+54 +: 10];
+            assign lut_rd_addr_o[8*index +: 8] = q9_clamp_r;
+            assign q11_bypass_w[8*index +: 8] = q11_bypass_r;
+
+            always @(posedge clk_i) begin
+                if (prepare_phase_r[1] == 2'd0) begin
+                    q0_acc_r <= accum_data_i[32*((index/8)*32 + index%8) +: 32];
+                end else begin
+                    q0_acc_r <= hold_data_r[32*((index/8)*32
+                        + 8*{30'd0,prepare_phase_r[1]} + index%8) +: 32];
+                end
+                q0_bias_r <= param_rd_data_i[64*(index%8) +: 32];
+                q0_mult_r <= param_rd_data_i[64*(index%8)+32 +: 16];
+                q_shift_r[0] <= param_rd_data_i[64*(index%8)+48 +: 6];
+                for (shift_stage = 1; shift_stage < 7; shift_stage = shift_stage + 1) begin
+                    q_shift_r[shift_stage] <= q_shift_r[shift_stage-1];
+                end
+                q1_bias_sum_r <= {q0_acc_r[31], q0_acc_r} + {q0_bias_r[31], q0_bias_r};
+                q1_mult_r <= q0_mult_r;
+                // Design 4.6.2: low17 is unsigned; high16 carries the sign.
+                q4_product_r <= $signed({q3_high_product_w, 17'd0})
+                    + $signed({{15{q3_low_product_w[33]}}, q3_low_product_w});
+                q5_round_r <= q4_product_r + ((q_shift_r[4] == 6'd0) ? 49'd0
+                    : (49'd1 << (q_shift_r[4] - 6'd1)));
+                q6_q_shift_r <= q5_round_r >>> q_shift_r[5][2:0];
+                q7_q_shift_r <= q6_q_shift_r >>> {q_shift_r[6][5:3], 3'd0};
+                q8_zero_point_r <= $signed({q7_q_shift_r[48], q7_q_shift_r})
+                    + $signed({{42{q_tag_r[7][36]}}, q_tag_r[7][36:29]});
+                if (q8_zero_point_r > 50'sd127) begin
+                    q9_clamp_r <= 8'h7f;
+                end else if (q8_zero_point_r < -50'sd128) begin
+                    q9_clamp_r <= 8'h80;
+                end else begin
+                    q9_clamp_r <= q8_zero_point_r[7:0];
+                end
+                q10_bypass_r <= q9_clamp_r;
+                q11_bypass_r <= q10_bypass_r;
+            end
+        end
+    endgenerate
+endmodule
