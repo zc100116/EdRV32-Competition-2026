@@ -2,9 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2 |
+| 版本 | v0.3 |
 | 日期 | 2026-10-27 |
-| 状态 | 已确认（v0.2，2026-10-27） |
+| 状态 | 已确认（v0.3，2026-10-27） |
 | 范围 | DDR 网关、mem_xbar（含 MEM_XBAR 寄存器）、PERF_MON、P6 口内部仲裁、存储子系统顶层 `rtl/soc/edrv32_mem_subsys.v`；附录 A 为板级 DDR 适配器契约 |
 | 关联文档 | SoC 规格 `edrv32-soc-spec.md` 3.2、4.2、5、6.3–6.5、7.1、8.4、9.1；系统子系统规格 `sys-subsys-spec.md`（S6）；DDR 带宽分析 `docs/design/2026-10-25-ddr-bandwidth-analysis.md` |
 
@@ -46,7 +46,7 @@ clk_mem 直接使用 DDR3 IP 输出的 125 MHz 用户时钟 core_clk（板级提
 
 | 项 | 规定 |
 |---|---|
-| 上游口 | P0–P6 各一个 AXI256 从口（SoC 4.2）；P0、P1 另有 `urgent_i`。P0 只有读通道，P1 只有写通道，其余读写都有 |
+| 上游口 | P0–P6 各一个 AXI256 从口（SoC 4.2）；P0、P1 另有 `urgent_i`。P0 只有读通道，其余读写都有 |
 | 下游口 | 一个 AXI256 主口，即 SoC 顶层 DDR 主口（SoC 3.2）：无 BREADY、无 RREADY，mem_xbar 必须随时接收 B 和 R |
 | ID | 下游 ID = `{端口号[2:0], 本地 ID[0]}`；B、R 按 ID[3:1] 路由回端口 |
 | 写数据 | 每个有写通道的端口有一个 16 拍 W 缓冲；一笔写事务的 W 数据全部进入缓冲后，该 AW 才参与仲裁。授权后 W 按 AW 授权顺序连续送往下游，不交织（SoC 6.4.2） |
@@ -91,7 +91,7 @@ ETH 和 PERF_MON 共用 P6：AR、AW 各自按事务轮询仲裁（本地 ID：P
 | `rst_sys_n_i`、`rst_mem_core_n_i` | 输入 | 各域 | 来自系统子系统 reset_ctrl |
 | `gw_*` | 从侧，AXI64 五通道 | clk_sys | 接 sys_xbar S6（系统子系统 `s6_*`） |
 | `p0_*`、`p0_urgent_i` | 从侧，AXI256 读 | clk_mem | DISP |
-| `p1_*`、`p1_urgent_i` | 从侧，AXI256 写 | clk_mem | VIN |
+| `p1_*`、`p1_urgent_i` | 从侧，AXI256 读写 | clk_mem | VIN（写：摄像头和 NPU 输入通道；读：内存源） |
 | `p3_*`、`p4_*`、`p5_*` | 从侧，AXI256 读写 | clk_mem | NPU、RND、GEO |
 | `eth_*` | 从侧，AXI256 读写 | clk_mem | ETH（经 P6 仲裁） |
 | `ddr_*` | 主侧 | clk_mem | SoC 顶层 DDR 主口（SoC 3.2），信号名不变 |
@@ -210,6 +210,7 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | 2026-10-26 | v0.1 | 用户确认，状态改为已确认 |
 | 2026-10-27 | v0.2 | 汇总开发中经问答确认的事项（M-R1–M-R4、M-V1、M-A1、M-T1、M-I1，DRR 两项由用户 2026-10-26 确认）：1 节子模块实例名；2.1 BURST 只接受 INCR；2.2 B FIFO、在途计数释放时点与 0–8 范围、读返回缓冲按序释放、令牌桶复位为满、URG_MAX 连续计数规则、饿死端口轮转、DRR 补额度规则与份额近似说明、删除 LEN > 15 违规、统计时点；2.3 混合模式累加器、LFSR 多项式与 SEED = 0、伪随机地址改为乘法缩放；4.1 寄存器位宽、公共寄存器语义、SNAPSHOT/CLEAR 时点、ERR_TYPE bit1 预留；4.2 公共寄存器语义、BASE/SIZE 实现位；附录 A 地址位、W 连续契约、B/R 响应 |
 | 2026-10-27 | v0.2 | 用户确认，状态改为已确认 |
+| 2026-10-27 | v0.3 | 随 SoC 规格 v0.9（用户确认）：P1 增加读通道（VIN 内存源，设计记录 `2026-10-27-image-path.md` Q7），`OUTST_RD[1]` 复位值 2（SoC 6.4.5） |
 
 ---
 
