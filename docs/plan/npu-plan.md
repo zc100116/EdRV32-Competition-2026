@@ -27,7 +27,7 @@
 | N-E1 | 旧加速器性能评估：静态逐层分析、旧 RTL 逐命令实测、周期模型校准、W1–W8 改进项评估 | Codex · GPT-6.1 Sol | — | 测量报告 `docs/reports/2026-10-26-perf-npu-legacy.md` | task-npu-legacy-eval | [x] 已合入 f36219c |
 | N-E2 | 512 MAC 数据通路与调度改进评估：D2 半块模式、D3a/D3b patch 填充、W 组合、带宽敏感性、DRM 估算 | Codex · GPT-6.1 Sol | N-E1 | 测量报告 `docs/reports/2026-10-26-perf-npu-datapath.md` | task-npu-datapath-eval | [x] 2026-10-27 合入 main |
 | N-S1 | NPU 规格 v0.1：设计记录 `docs/design/2026-10-26-npu-architecture.md` | 协调者 + 用户确认 | N-E2 | 用户确认 | — | [x] 2026-10-27 确认 |
-| N-S2 | SoC 规格同步修改：clk_npu、跨时钟域清单、INT8_C4 格式、8.5 输入适配 C4、8.9 引用 NPU 规格 | 协调者 + 用户确认 | N-S1 | 用户确认 | — | [ ] |
+| N-S2 | SoC 规格同步修改：clk_npu、跨时钟域清单、INT8_C4 格式、8.5 输入适配 C4、8.9 引用 NPU 规格 | 协调者 + 用户确认 | N-S1 | 用户确认 | — | [x] SoC 规格 v0.7，用户确认 2026-10-27。RTL 影响：SoC 顶层增加 `clk_npu_i`，reset_ctrl 增加 clk_npu 域复位，在 NPU 集成时一并实现 |
 | N-T1 | NPU 验证方案 `docs/testplan/npu-testplan.md`、本实施方案的开发任务拆分 | 协调者 | N-S1 | 文档完成 | — | [ ] |
 
 ## 4. 规格定稿项
@@ -47,3 +47,4 @@ npu-spec 第 9 节的 [待定] 项：clk_npu 频率与流水级在数据通路�
 | 2026-10-26 | v0.1 | 初稿：N-E1 |
 | 2026-10-26 | v0.2 | 记录已确认方向；新增 N-E2 |
 | 2026-10-27 | v0.3 | N-E2 完成；NPU 规格 v0.1 确认；新增 N-S2、N-T1 |
+| 2026-10-27 | v0.4 | N-S2 完成（SoC 规格 v0.7） |

@@ -14,8 +14,8 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU 时序优化 C-R5/C-R6 已合入 main，Windows 第二轮综合（任务 20261027-01，含 SRAM IP 重新生成）已下发；NPU 规格 v0.1 已确认，下一步 SoC 规格同步（N-S2）和 NPU 验证方案/任务拆分（N-T1）；存储子系统规格 v0.2 草案待确认；全局 full 补跑暂缓 |
-| 等待用户 | mem-subsys v0.2 确认；N-S2 SoC 规格修改确认；Windows 任务 20261027-01 执行 |
+| 正在进行 | CPU 时序优化 C-R5/C-R6 已合入 main，Windows 第二轮综合（任务 20261027-01，含 SRAM IP 重新生成）已下发；NPU 规格 v0.1 已确认，SoC 规格 v0.7 已同步（N-S2），下一步 NPU 验证方案和任务拆分（N-T1）；存储子系统规格 v0.2 已确认；全局 full 补跑暂缓 |
+| 等待用户 | Windows 任务 20261027-01 执行 |
 | 阻塞 | 无 |
 
 ---
@@ -24,12 +24,12 @@
 
 | 模块 | 规格 | 验证方案 | 实施方案 | 状态 |
 |---|---|---|---|---|
-| SoC 总体 | `spec/edrv32-soc-spec.md` v0.6 | — | 本文件 | [x] 草案完成 |
+| SoC 总体 | `spec/edrv32-soc-spec.md` v0.7 | — | 本文件 | [x] 草案完成 |
 | 基础设施 | — | — | `plan/infra-plan.md` | [x] 草案完成 |
 | CPU | `spec/cpu-spec.md` v0.11 | `testplan/cpu-testplan.md` v0.1 | `plan/cpu-plan.md` | [x] 草案完成 |
 | Cache | `spec/cache-spec.md` v0.5 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
 | 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.3 | `testplan/sys-subsys-testplan.md` v0.2 | `plan/sys-subsys-plan.md` | [x] 已确认 |
-| 存储子系统（DDR 网关、mem_xbar、PERF_MON、板级 DDR 适配器） | `spec/mem-subsys-spec.md` v0.2（草案） | `testplan/mem-subsys-testplan.md` v0.2 | `plan/mem-subsys-plan.md` | [x] 已确认 |
+| 存储子系统（DDR 网关、mem_xbar、PERF_MON、板级 DDR 适配器） | `spec/mem-subsys-spec.md` v0.2 | `testplan/mem-subsys-testplan.md` v0.2 | `plan/mem-subsys-plan.md` | [x] 已确认 |
 | 公共单元（CDC、FIFO、dma2d） | — | — | — | [ ] |
 | VIN / PIX / DISP | — | — | — | [ ] |
 | RND | — | — | — | [ ] |
