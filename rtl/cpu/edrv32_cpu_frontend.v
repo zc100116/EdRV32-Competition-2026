@@ -77,7 +77,8 @@ module edrv32_cpu_frontend #(
     reg [31:0] f1_cross_target_r;
     reg f2_pending_r;
     reg [31:0] f2_pc_r;
-    reg [2:0] f2_end_r;
+    reg [2:0] f2_count_r;
+    reg [3:0] f2_start_r;
     reg f2_hit_r;
     reg f2_taken_r;
     reg f2_compressed_r;
@@ -159,7 +160,7 @@ module edrv32_cpu_frontend #(
         (RVC_EN && predict_compressed_w ? 3'd1 : 3'd2);
     assign request_end_w = f1_cross_r ? 3'd1 : predict_taken_w ? branch_end_w : 3'd4;
     assign response_accept_w = f2_pending_r && ic_resp_valid_i && !redirect_w;
-    assign response_count_w = f2_end_r - {1'b0, f2_pc_r[2:1]};
+    assign response_count_w = f2_count_r;
     assign append_count_w = response_accept_w ? response_count_w : 3'd0;
     // Include the arriving response and this cycle's drain when reserving the next group.
     assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !recover_w &&
@@ -231,22 +232,39 @@ module edrv32_cpu_frontend #(
             wire [21:0] halfword_w;
             wire [BLOCK_BITS-1:0] block_w;
             wire [1:0] response_position_w;
+            wire [1:0] response_rotation_w;
+            wire [3:0] response_rotate_one_w;
+            wire [3:0] response_select_w;
+            wire [15:0] response_data_w;
+            wire response_prediction_w;
             wire [31:0] pc_w;
             assign slot_w = halfword_read_ptr_r + read_idx[2:0];
             assign halfword_w = halfwords_r[slot_w];
             assign block_w = blocks_r[halfword_w[21:19]];
             assign response_position_w = f2_pc_r[2:1] + read_idx[1:0] -
                 halfword_count_r[1:0];
+            // F1 predecodes the response start. Rotate four selects locally instead
+            // of broadcasting the binary F2 PC through the instruction-data muxes.
+            assign response_rotation_w = halfword_count_r[1:0] - read_idx[1:0];
+            assign response_rotate_one_w = response_rotation_w[0] ?
+                {f2_start_r[0], f2_start_r[3:1]} : f2_start_r;
+            assign response_select_w = response_rotation_w[1] ?
+                {response_rotate_one_w[1:0], response_rotate_one_w[3:2]} : response_rotate_one_w;
+            assign response_data_w = ({16{response_select_w[0]}} & ic_resp_data_i[15:0]) |
+                ({16{response_select_w[1]}} & ic_resp_data_i[31:16]) |
+                ({16{response_select_w[2]}} & ic_resp_data_i[47:32]) |
+                ({16{response_select_w[3]}} & ic_resp_data_i[63:48]);
+            assign response_prediction_w = response_select_w[f2_position_r];
             assign pc_w = {block_w[28:0], halfword_w[18:17], 1'b0};
             assign stream_w[read_idx] = halfword_count_r > read_idx ?
                 {block_w[111:33], block_w[32] && halfword_w[18:17] == block_w[30:29],
                 block_w[31] && halfword_w[18:17] == block_w[30:29], halfword_w[16],
                 pc_w, halfword_w[15:0]} :
                 {f2_compressed_r, f2_ras_r, f2_history_r, f2_target_r,
-                f2_taken_r && response_position_w == f2_position_r,
-                f2_hit_r && response_position_w == f2_position_r, ic_resp_err_i,
+                f2_taken_r && response_prediction_w,
+                f2_hit_r && response_prediction_w, ic_resp_err_i,
                 f2_pc_r[31:3], response_position_w, 1'b0,
-                ic_resp_data_i[response_position_w * 16 +: 16]};
+                response_data_w};
         end
         for (write_idx = 0; write_idx < HALFWORD_CAPACITY;
             write_idx = write_idx + 1) begin : g_write
@@ -415,12 +433,18 @@ module edrv32_cpu_frontend #(
         end
     end
     always @(posedge clk_i) begin
+        // Keep a frontend-local PC copy instead of sharing the I$ accepted-address
+        // FFs. Before acceptance there is no F2 owner; while a response is pending
+        // this holds its PC through the response edge, including simultaneous reissue.
+        if (!f2_pending_r || ic_resp_valid_i)
+            f2_pc_r <= f1_pc_r;
         if (f2_pending_r && ic_resp_valid_i)
             blocks_r[block_write_ptr_r] <= {f2_compressed_r, f2_ras_r, f2_history_r,
                 f2_target_r, f2_taken_r, f2_hit_r, f2_position_r, f2_pc_r[31:3]};
         if (request_accept_w) begin
-            f2_pc_r <= f1_pc_r;
-            f2_end_r <= request_end_w > 4 ? 3'd4 : request_end_w;
+            f2_count_r <= (request_end_w > 4 ? 3'd4 : request_end_w) -
+                {1'b0, f1_pc_r[2:1]};
+            f2_start_r <= 4'b0001 << f1_pc_r[2:1];
             f2_hit_r <= predict_hit_w && !f1_cross_r;
             f2_taken_r <= predict_taken_w && !f1_cross_r;
             f2_compressed_r <= predict_compressed_w;
