@@ -1,0 +1,2 @@
+-f ../sources.f
+-f ../dut.f
