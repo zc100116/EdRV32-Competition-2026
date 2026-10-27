@@ -97,6 +97,17 @@ module tb;
         .p1_bresp_o(bresp[2 +: 2]),
         .p1_bvalid_o(bvalid[1 +: 1]),
         .p1_bready_i(bready[1 +: 1]),
+        .p1_arid_i(arid[1 +: 1]),
+        .p1_araddr_i(araddr[32 +: 32]),
+        .p1_arlen_i(arlen[4 +: 4]),
+        .p1_arvalid_i(arvalid[1 +: 1]),
+        .p1_arready_o(arready[1 +: 1]),
+        .p1_rid_o(rid[1 +: 1]),
+        .p1_rdata_o(rdata[256 +: 256]),
+        .p1_rresp_o(rresp[2 +: 2]),
+        .p1_rlast_o(rlast[1 +: 1]),
+        .p1_rvalid_o(rvalid[1 +: 1]),
+        .p1_rready_i(rready[1 +: 1]),
         .p1_urgent_i(urgent[1]),
         .p2_awid_i(awid[2 +: 1]),
         .p2_awaddr_i(awaddr[64 +: 32]),
@@ -257,7 +268,6 @@ module tb;
         .apb_pslverr_o(apb_pslverr_o),
         .irq_o(irq_o)
     );
-    assign rvalid[1] = 1'b0;
     assign bvalid[0] = 1'b0;
     reg reverse_reads = 0;
     wire [7:0] read_slot = reverse_reads ? 8'(read_head ^ 1) : 8'(read_head);
@@ -387,7 +397,7 @@ module tb;
                 expected_port_tail[monitor_i] = 0;
                 live_reads[monitor_i] = 0;
                 live_writes[monitor_i] = 0;
-                cfg_rd[monitor_i] = monitor_i == 1 ? 0 : monitor_i == 2 ? 1 :
+                cfg_rd[monitor_i] = monitor_i == 1 ? 2 : monitor_i == 2 ? 1 :
                                    monitor_i == 0 || monitor_i == 3 ? 4 : 2;
                 cfg_wr[monitor_i] = monitor_i == 0 ? 0 : monitor_i == 2 ? 1 :
                                    monitor_i == 1 ? 4 : 2;
@@ -473,7 +483,7 @@ module tb;
                     if (elapsed > obs_wait_max[monitor_p]) obs_wait_max[monitor_p] = elapsed;
                     if (obs_dir_valid && obs_dir) obs_switch = obs_switch+1;
                     // Tests only assert urgent on P0/P1; the selected command retains class.
-                    if (monitor_p == 0 && dut.cmd_urgent_r) obs_urgent[monitor_p]++;
+                    if (monitor_p < 2 && dut.cmd_urgent_r) obs_urgent[monitor_p]++;
                 end
                 obs_dir_valid = 1;
                 obs_dir = 0;
@@ -837,6 +847,7 @@ module tb;
         scheduler_reset;
         s_urgent = 3;
         s_eligible[0] = 1;
+        s_eligible[2] = 1;
         s_eligible[3] = 1;
         grants = 0;
         while (grants < 8) begin
@@ -1054,7 +1065,7 @@ module tb;
         apb_write('h2a0, 2);
         drain;
         for (integer p = 0; p < 7; p = p + 1) begin
-            if (p != 1) send_read(p, 1, 32'('h10000+p*'h1000), p+1, 0);
+            send_read(p, 1, 32'('h10000+p*'h1000), p+1, 0);
             if (p != 0) send_write(p, 1, 32'('h20000+p*'h1000), p, 0);
         end
         drain;
@@ -1144,8 +1155,8 @@ module tb;
         reset;
         reverse_reads = 1;
         return_reads = 0;
-        send_read(3,0,'h1000,3,0);
-        send_read(3,1,'h2000,7,0);
+        send_read(1,0,'h1000,3,0);
+        send_read(1,1,'h2000,7,0);
         while (ar_seen != 2) tick(1);
         return_reads = 1;
         drain;
@@ -1175,9 +1186,9 @@ module tb;
         $display("MX-09 representable violations, SLVERR beat counts, IRQ and recovery");
         reset;
         apb_write('h00c,2);
-        send_read(3,1,'hfe0,1,1);
+        send_read(1,1,'hfe0,1,1);
         drain;
-        apb_check('h120,3);
+        apb_check('h120,1);
         apb_check('h124,'hfe0);
         apb_check('h128,1);
         apb_check('h014,1);
@@ -1243,6 +1254,7 @@ module tb;
         apb_write('h110,2);
         urgent = 3;
         send_read(0,1,'h1000,15,0);
+        send_read(1,1,'h1800,3,0);
         send_aw(1,0,'h2000,7,0);
         tick(12); // W-late time must not enter WAIT statistics.
         send_w(1,'h2000,7,2);

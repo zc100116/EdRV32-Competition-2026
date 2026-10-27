@@ -209,8 +209,7 @@ module edrv32_mem_xbar_regs (
             err_addr_r <= 32'b0;
             err_type_r <= 3'b0;
             for (idx = 0; idx < 7; idx = idx + 1) begin
-                outst_rd_r[idx] <= idx == 1 ? 4'd0 :
-                                    idx == 2 ? 4'd1 :
+                outst_rd_r[idx] <= idx == 2 ? 4'd1 :
                                     idx == 0 || idx == 3 ? 4'd4 : 4'd2;
                 outst_wr_r[idx] <= idx == 0 ? 4'd0 :
                                     idx == 2 ? 4'd1 : idx == 1 ? 4'd4 : 4'd2;

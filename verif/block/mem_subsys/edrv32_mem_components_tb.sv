@@ -143,7 +143,7 @@ module edrv32_mem_components_tb;
             .urgent_o(read_urgent),
             .bus(p0)
         );
-        edrv32_axi256_master #(.WRITE_ONLY(1)) u_write (
+        edrv32_axi256_master u_write (
             .clk_i(clk_mem),
             .rst_n_i(rst_mem_n),
             .urgent_o(write_urgent),
@@ -187,12 +187,13 @@ module edrv32_mem_components_tb;
             end
             for (int n = 0; n < 8; n++) begin
                 g_specialized.u_read.enqueue_read(32'(n*512), n);
+                g_specialized.u_write.enqueue_read(32'(n*512), n, 1'(n));
                 g_specialized.u_write.enqueue_write(32'(n*512), n, zeros, strobes);
             end
             g_specialized.u_read.wait_done(8, 0);
-            g_specialized.u_write.wait_done(0, 8);
+            g_specialized.u_write.wait_done(8, 8);
             eq("P0 no writes", 0, g_specialized.u_read.writes_done);
-            eq("P1 no reads", 0, g_specialized.u_write.reads_done);
+            eq("P1 reads", 8, g_specialized.u_write.reads_done);
             eq("P0 protocol", 0, read_errors);
             eq("P1 protocol", 0, write_errors);
             specialized_done = 1;
