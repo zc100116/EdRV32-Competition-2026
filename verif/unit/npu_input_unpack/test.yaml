@@ -1,0 +1,10 @@
+top: tb_npu_input_unpack
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 180
+pass: PASS
+tier: smoke full
+simulator: verilator
+verilator_flags: -Wall
