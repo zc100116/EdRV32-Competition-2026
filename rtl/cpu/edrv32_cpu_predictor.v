@@ -60,6 +60,7 @@ module edrv32_cpu_predictor (
     wire [2:0] restore_count_w;
     wire [1:0] restore_pop_ptr_w;
     wire [1:0] restore_write_ptr_w;
+    genvar ras_idx;
     assign query_idx_w = query_pc_i[7:3];
     assign branch_pc_w = {query_pc_i[31:3], btb_position_r[query_idx_w], 1'b0};
     assign direction_idx_w = branch_pc_w[9:1] ^ history_r;
@@ -138,14 +139,26 @@ module edrv32_cpu_predictor (
             btb_type_r[update_pc_i[7:3]] <= update_type_i;
             btb_compressed_r[update_pc_i[7:3]] <= update_compressed_i;
         end
-        if (restore_valid_i) begin
-            if (restore_count_w != 0)
-                ras_data_r[restore_pop_ptr_w * 32 +: 32] <= restore_ras_i[31:0];
-            if (restore_push_i)
-                ras_data_r[restore_write_ptr_w * 32 +: 32] <= restore_return_pc_i;
-        end else if (query_accept_i && predict_taken_o && btb_type_r[query_idx_w] == 3) begin
-            ras_data_r[ras_ptr_r * 32 +: 32] <= branch_pc_w +
-                (btb_compressed_r[query_idx_w] ? 32'd2 : 32'd4);
-        end
     end
+    // Decode each destination before the late redirect/recovery enable arrives.
+    // A push still overrides a restored top when both select the same entry.
+    generate
+        for (ras_idx = 0; ras_idx < RAS_ENTRIES; ras_idx = ras_idx + 1) begin : g_ras
+            wire restore_top_w;
+            wire restore_link_w;
+            wire query_link_w;
+            assign restore_top_w = restore_count_w != 0 && restore_pop_ptr_w == ras_idx[1:0];
+            assign restore_link_w = restore_push_i && restore_write_ptr_w == ras_idx[1:0];
+            assign query_link_w = query_accept_i && predict_taken_o &&
+                btb_type_r[query_idx_w] == 3 && ras_ptr_r == ras_idx[1:0];
+            always @(posedge clk_i) begin
+                if (restore_valid_i && (restore_top_w || restore_link_w))
+                    ras_data_r[ras_idx*32 +: 32] <= restore_link_w ?
+                        restore_return_pc_i : restore_ras_i[31:0];
+                else if (!restore_valid_i && query_link_w)
+                    ras_data_r[ras_idx*32 +: 32] <= branch_pc_w +
+                        (btb_compressed_r[query_idx_w] ? 32'd2 : 32'd4);
+            end
+        end
+    endgenerate
 endmodule
