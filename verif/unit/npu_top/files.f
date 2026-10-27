@@ -1,2 +1,3 @@
--f ../../../verif/block/npu/sources.f
--f ../../../verif/block/npu/dut.f
+lint.vlt
+tb_npu_top.sv
+-f ../../../rtl/filelists/npu.f
