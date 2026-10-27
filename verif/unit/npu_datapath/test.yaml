@@ -1,0 +1,11 @@
+top: tb_npu_datapath
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 600
+pass: PASS
+tier: smoke full
+simulator: verilator
+verilator_flags: -Wall
+runner: python3 verif/unit/npu_datapath/run.py
