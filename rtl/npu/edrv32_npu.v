@@ -268,7 +268,8 @@ module edrv32_npu (
             case (state_r)
                 S_IDLE: begin
                     if (start_w) begin
-                        cur_desc_r <= 32'd0;
+                        // With no descriptors, the completed index is COUNT-1 as in spec 4.
+                        cur_desc_r <= (desc_count_w == 32'd0) ? 32'hffffffff : 32'd0;
                         state_r <= (desc_count_w == 32'd0) ? S_COMPLETE : S_FETCH;
                     end
                 end
