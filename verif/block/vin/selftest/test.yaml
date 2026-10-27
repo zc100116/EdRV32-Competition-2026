@@ -1,0 +1,10 @@
+top: edrv32_vin_tb
+files: files.f
+defines: SIM_MODE
+parameters: HARNESS_SELFTEST=1
+software:
+timeout: 600
+pass: PASS
+tier: smoke full
+simulator: verilator
+plusargs: +CASE=selftest
