@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.6（草案） |
-| 日期 | 2026-10-26 |
+| 版本 | v0.7（草案） |
+| 日期 | 2026-10-27 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
 | 关联文档 | 开发规则 `CLAUDE.md`；设计决策记录 `docs/design/2026-10-25-soc-architecture-decisions.md`；DDR 带宽分析 `docs/design/2026-10-25-ddr-bandwidth-analysis.md` |
@@ -69,7 +69,7 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
  │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─│─ ─ ─ ─ ─ │
  │  clk_mem 域                              media_apb（16 槽）◄──────┘       │ P2     │
  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────────┐                 │        │
- │  │ VIN │ │DISP │ │ NPU │ │ RND │ │ GEO │ │ ETH │ │PERF_MON │                 │        │
+ │  │ VIN │ │DISP │ │NPU* │ │ RND │ │ GEO │ │ ETH │ │PERF_MON │                 │        │
  │  │+PIX │ │     │ │     │ │     │ │     │ │     │ │         │                 │        │
  │  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┴─┴────┬────┘                 │        │
  │     P1      P0      P3      P4      P5         P6                            │        │
@@ -80,6 +80,8 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
                                          ▼  DDR AXI256 主口（SoC 边界）
 ```
 
+\* NPU 在独立的 clk_npu 域，与 mem_xbar、媒体 APB 之间经异步桥连接（5.2 X9、X10）。
+
 ### 2.2 子系统
 
 | 子系统 | 组成 | 时钟域 | 本文章节 |
@@ -88,7 +90,7 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
 | 系统总线 | sys_xbar、Boot ROM、SRAM、CLINT、PLIC、系统 APB 及外设 | clk_sys | 6.1、8.3 |
 | 存储 | DDR 网关、mem_xbar、性能监视器 | clk_mem | 6.3–6.5、8.4 |
 | 媒体 | VIN（采集 + PIX + NPU 输入适配）、GEO、RND、DISP | clk_mem、clk_pix、camN_pclk | 8.5–8.8 |
-| NPU | YOLO 推理加速器 | clk_mem（[模块规格] 可能独立时钟） | 8.9 |
+| NPU | YOLO 推理加速器 | clk_npu（与 clk_mem 之间的异步桥在 NPU 边界） | 8.9 |
 | 网络 | ETH 引擎 | clk_mem、eth_rx_clk、eth_tx_clk | 8.10 |
 
 ### 2.3 架构原则
@@ -111,6 +113,7 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
 | `clk_sys_i` | in | 1 | CPU 和系统总线时钟，频率由 CPU 规格确定 |
 | `clk_mem_i` | in | 1 | 125 MHz，必须与 DDR 控制器用户接口时钟同源同相 |
 | `clk_pix_i` | in | 1 | 74.25 MHz 像素时钟（720p60） |
+| `clk_npu_i` | in | 1 | NPU 时钟，频率由 NPU 规格确定 |
 | `cam0_pclk_i`、`cam1_pclk_i` | in | 1 | 摄像头像素时钟 |
 | `eth_rx_clk_i`、`eth_tx_clk_i` | in | 1 | 125 MHz，千兆 MAC 侧收发时钟 |
 | `rst_n_i` | in | 1 | 全局异步复位，低有效 |
@@ -221,8 +224,9 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 | 时钟 | 频率 | 包含的逻辑 |
 |---|---|---|
 | clk_sys | [CPU 规格] | CPU、sys_xbar、ROM、SRAM、CLINT、PLIC、系统外设、媒体 APB 桥的主侧、DDR 网关的 64 位侧 |
-| clk_mem | 125 MHz | mem_xbar、DDR 网关的 256 位侧、媒体 APB 及全部媒体/NPU/ETH 引擎（另有规定的除外） |
+| clk_mem | 125 MHz | mem_xbar、DDR 网关的 256 位侧、媒体 APB 及全部媒体/ETH 引擎（另有规定的除外） |
 | clk_pix | 74.25 MHz | DISP 的显示时序、扫描 FIFO 读侧、TMDS 编码 |
+| clk_npu | [NPU 规格] | NPU 的计算、DMA 和寄存器块；AXI256 主口和 APB 从口的异步桥的 NPU 侧 |
 | camN_pclk | 由摄像头决定 | VIN 采集前端，到异步 FIFO 为止 |
 | eth_rx_clk / eth_tx_clk | 125 MHz | ETH 收发前端，到异步 FIFO 为止 |
 
@@ -234,12 +238,14 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 |---|---|---|---|
 | X1 | clk_sys → clk_mem | 媒体 APB | APB 异步桥 |
 | X2 | clk_sys ↔ clk_mem | DDR 网关（AXI64） | AXI 异步桥，放在 64 位侧 |
-| X3 | clk_mem → clk_sys | 媒体、NPU、ETH 中断 | 电平同步 |
+| X3 | clk_mem、clk_npu → clk_sys | 媒体、ETH 中断（clk_mem），NPU 中断（clk_npu） | 电平同步 |
 | X4 | camN_pclk → clk_mem | 采集像素 | 异步 FIFO |
 | X5 | clk_mem → clk_pix | 显示像素 | 异步 FIFO |
 | X6 | clk_pix → clk_mem | VBlank、行同步事件，FIFO 水位 | 脉冲同步 / 格雷码 |
 | X7 | eth_rx_clk → clk_mem，clk_mem → eth_tx_clk | 网络帧 | 异步 FIFO |
 | X8 | 任意 → 各域 | 复位释放、`mem_ready_i` | 复位同步器 / 电平同步 |
+| X9 | clk_npu ↔ clk_mem | NPU DDR 主口（AXI256，mem_xbar P3） | AXI 异步桥，放在 NPU 边界 |
+| X10 | clk_mem → clk_npu | NPU 寄存器（媒体 APB 槽 6） | APB 异步桥，放在 NPU 边界 |
 
 新增跨时钟域必须先登记到本表。
 
@@ -396,7 +402,7 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 
 ### 7.1 引擎寄存器模型
 
-所有 clk_mem 域的引擎（VIN、PIX、GEO、RND、DISP、NPU、ETH、MEM_XBAR、PERF_MON）都使用以下公共寄存器布局，偏移 0x100 以后是各模块私有寄存器，由模块规格定义。
+所有引擎（VIN、PIX、GEO、RND、DISP、NPU、ETH、MEM_XBAR、PERF_MON）都使用以下公共寄存器布局，偏移 0x100 以后是各模块私有寄存器，由模块规格定义。
 
 | 偏移 | 名称 | 访问 | 说明 |
 |---|---|---|---|
@@ -432,7 +438,7 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 | `base` | DDR 物理地址，4 KiB 对齐 |
 | `stride` | 行跨度（字节），32 B 的整数倍 |
 | `width`、`height` | 像素数，宽度为偶数 |
-| `format` | 0 RGB565，1 ARGB8888（预乘 alpha），2 A8，3 INT8_C16（NPU 特征图），其余预留 |
+| `format` | 0 RGB565，1 ARGB8888（预乘 alpha），2 A8，3 INT8_C16（NPU 特征图），4 INT8_C4（NPU 首层输入），其余预留；INT8_C16、INT8_C4 的布局见 NPU 规格 2.2 |
 
 **所有权状态**：`FREE → FILLING → READY → IN_USE → FREE`。
 
@@ -544,7 +550,7 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 | 选路 | 每个输出通道可以选择 cam0 或 cam1，在 SOF 生效 |
 | 写通道 | 2 个独立的 Surface 写通道（CH0、CH1），各有独立的 FIFO、环形缓冲配置和状态。首版只要求 CH0 工作，CH1 硬件完整实现，为两路拼接预留 |
 | PIX | 位于 CH0 路径上，可以旁路（见 8.6） |
-| NPU 输入适配 | 从选定的一路摄像头流分出：缩放和 letterbox 到 NPU 输入尺寸，转换为 NPU 输入格式，写入 NPU 输入环形缓冲。允许丢帧：FIFO 满时丢弃该通道的本帧，不得反压摄像头和其他通道。输入尺寸和格式 [NPU 规格] |
+| NPU 输入适配 | 从选定的一路摄像头流分出：缩放和 letterbox 到 NPU 输入尺寸，转换为 NPU 输入格式，写入 NPU 输入环形缓冲。允许丢帧：FIFO 满时丢弃该通道的本帧，不得反压摄像头和其他通道。输入尺寸 640×384，格式 INT8_C4（NPU 规格 2.2）；量化、缩放和 letterbox 在适配器内完成 |
 | 实时性 | 任何负载下摄像头写通道都不得溢出。溢出时丢弃本帧，置错误标志并计数 |
 | 端口 | P1 写口，带 `urgent_o`；媒体 APB 槽 1；中断源 8 |
 
@@ -598,9 +604,11 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 | 功能 | 执行 YOLOv8n 推理所需的算子：卷积（1×1、3×3，步长 1/2）、逐元素加、最大池化、上采样、通道拼接（零拷贝），以及 INT8 量化和激活 |
 | 模式 | 命令式，描述符驱动：每个描述符描述一个算子（类型、输入/输出/权重/量化参数地址、形状）。权重、特征图和工作区的地址全部由软件分配 |
 | 精度 | INT8 权重和激活，INT32 累加，每通道量化 |
-| 性能 | 640×384 输入下帧率尽量高，规划值约 15 fps |
+| 性能 | 640×384 输入，卷积部分（不含后处理）≥ 20 fps，测量条件见 NPU 规格 7 |
 | 端口 | P3；媒体 APB 槽 6；中断源 13 |
-| [模块规格] | MAC 阵列规模、时钟域、描述符格式、特征图布局、后处理的软硬件分工、输入格式 |
+| 时钟 | clk_npu（5.1），跨时钟域 X9、X10 |
+| 后处理 | DFL 解码和 NMS 由 CPU 软件完成，与 NPU 跨帧并行 |
+| 模块规格 | `docs/spec/npu-spec.md`：MAC 阵列、描述符格式、特征图布局、寄存器、资源预算 |
 
 ### 8.10 ETH：以太网引擎
 
@@ -670,7 +678,6 @@ DRM 和 APM 的预算由各模块规格确定。
 | CPU | 频率目标、流水级划分、配对规则、C 扩展、HPM 事件、`debug_o` |
 | Cache | 最终容量 |
 | RND / DISP | 图层合成方式、图层数和格式、命令格式 |
-| NPU | MAC 规模、时钟域、描述符格式、后处理分工、输入格式 |
 | GEO、ETH | 内部结构和私有寄存器 |
 | mem_xbar | 依据 DDR 有效带宽实测结果修订 6.4.5 的参数复位值 |
 
@@ -684,3 +691,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-25 | v0.4 | 系统子系统规格讨论（用户确认）：去掉 QSPI0 和 TIMER0（APB 槽 2、3，PLIC 源 3、4 改为预留，删除对应顶层端口）；PLIC 15 个源；mtime 每个 clk_sys 周期加 1，SYSCTRL 增加 CLK_SYS_HZ；I2C0 一个主机两对引脚；启动流程改为 ROM/SRAM 由存储初始化文件提供上电内容 |
 | 2026-10-25 | v0.5 | 7.5 按用户要求细化启动软件：bootloader 初始化外设后打印 "EdRV32" logo 和启动信息；SRAM 默认应用为带 UART 菜单的监控程序（CoreMark 跑分并输出 HPM、跑分、工具链信息；外设测试；系统信息） |
 | 2026-10-26 | v0.6 | 6.1 地址表 SRAM 容量由 256 KiB 改为 64 KiB（用户确认，见系统子系统规格 v0.3） |
+| 2026-10-27 | v0.7 | 随 NPU 规格 v0.1 同步（用户确认，见 `docs/design/2026-10-26-npu-architecture.md` Q2、Q5、Q7）：2.2、3.1、5.1 增加 clk_npu，clk_mem 不再包含 NPU；7.1 公共寄存器适用范围不限于 clk_mem 域；5.2 X3 增加 clk_npu 中断源，新增 X9、X10；7.3 增加 INT8_C4；8.5 NPU 输入尺寸和格式；8.9 时钟、后处理分工、性能指标改引 NPU 规格；10 节 NPU 事项关闭 |
