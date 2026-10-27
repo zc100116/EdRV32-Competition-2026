@@ -14,8 +14,8 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU 时序优化 C-R5/C-R6 已合入 main，Windows 第二轮综合（任务 20261027-01，含 SRAM IP 重新生成）已下发；NPU 规格 v0.1 已确认，SoC 规格 v0.7 已同步（N-S2），NPU 验证方案 v0.1 草案和任务拆分已完成（N-T1），待确认整网权重来源后派发 N-Q1/N-D0/N-C0；存储子系统规格 v0.2 已确认；全局 full 补跑暂缓 |
-| 等待用户 | Windows 任务 20261027-01 执行；NPU 验证方案 v0.1 和整网权重来源确认 |
+| 正在进行 | CPU 时序优化 C-R5/C-R6 已合入 main，Windows 第二轮综合（任务 20261027-01，含 SRAM IP 重新生成）已下发；NPU 规格 v0.2、验证方案 v0.2 已确认；N-Q1/N-D0/N-C0/N-IP1/N-M1/N-M2/N-M3/N-V1/N-D1 已完成（协调者分支，未合入 main）；下一步 N-W1 数据通路单独 PDS 任务卡 |
+| 等待用户 | Windows 任务 20261027-01 执行；协调者分支合入 main |
 | 阻塞 | 无 |
 
 ---
@@ -34,7 +34,7 @@
 | VIN / PIX / DISP | — | — | — | [ ] |
 | RND | — | — | — | [ ] |
 | GEO | — | — | — | [ ] |
-| NPU | `spec/npu-spec.md` v0.1 | `testplan/npu-testplan.md` v0.1（草案） | `plan/npu-plan.md` | [~] 规格已确认，验证方案待确认 |
+| NPU | `spec/npu-spec.md` v0.2 | `testplan/npu-testplan.md` v0.2 | `plan/npu-plan.md` | [~] 数据通路 RTL 完成，待 PDS 测量（N-W1）和控制器（N-C1） |
 | ETH | — | — | — | [ ] |
 | 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |
 
