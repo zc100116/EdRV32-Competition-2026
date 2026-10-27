@@ -1,0 +1,4 @@
+`verilator_config
+// Monitors sample the asynchronous reset and use blocking testbench counters.
+lint_off -rule SYNCASYNCNET -file "*/verif/unit/npu_*/tb_npu_*.sv"
+lint_off -rule BLKSEQ -file "*/verif/unit/npu_*/tb_npu_*.sv"
