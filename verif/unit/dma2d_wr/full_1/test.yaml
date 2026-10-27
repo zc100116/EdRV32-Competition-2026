@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters: OUTSTANDING=1
+software:
+timeout: 240
+pass: PASS
+tier: full
+simulator: verilator
+plusargs: +FULL
