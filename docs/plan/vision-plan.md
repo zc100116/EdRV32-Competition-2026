@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1 |
+| 版本 | v0.2 |
 | 日期 | 2026-10-27 |
 | 方案 | `docs/design/2026-10-27-image-path.md`（已决定） |
 | 规格 | `docs/spec/dma2d-spec.md` v0.1（已确认）；`vin-spec.md`、`disp-spec.md`、`pix-spec.md`、`geo-spec.md`、`eth-spec.md` 待写；SoC 规格 v0.8 |
@@ -22,12 +22,18 @@
 | V-L1 | 旧工程图像通路盘点 | Codex · GPT-6 Luna | — | `docs/design/2026-10-27-image-path-legacy-inventory.md` | task-vision-inventory | [x] 0af888b |
 | V-S1 | dma2d 规格和验证方案 | 协调者 + 用户确认 | — | 规格已确认 | — | [x] 2026-10-27 |
 | V-D1 | dma2d_rd / dma2d_wr RTL 和单元测试 | Codex · GPT-6.1 Sol | V-S1 | `verif/unit/dma2d_{rd,wr}` smoke/full 通过，lint 0 告警 | task-dma2d | [~] 2026-10-27 派发 |
-| V-S2 | VIN、DISP 规格（含内存源、NPU 适配接口）；SoC 与存储子系统规格修订（P1 读通道） | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [~] 草案 vin-spec、disp-spec v0.1，待用户确认 |
+| V-S2 | VIN、DISP 规格（含内存源、NPU 适配接口）；SoC 与存储子系统规格修订（P1 读通道） | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [x] 2026-10-27：vin-spec、disp-spec v0.1，SoC v0.9，mem-subsys v0.3；testplan vin、disp v0.1 |
 | V-M1 | mem_xbar P1 增加读通道（存储子系统规格 v0.3 2.2、3.1；testplan MX-13）：`edrv32_mem_xbar`、`edrv32_mem_subsys` 的 P1 读端口和 OUTST_RD[1] 复位值 | Codex · GPT-6.1 Sol | V-S2 | `verif/unit/mem_xbar`、`verif/block/mem_subsys` full 通过（含新增 MX-13），lint 0 告警 | task-mem-p1-read | [ ] |
+| V-R1 | VIN RTL（CH0、CH1、内存源、两路前端、P1 仲裁，CH2 不实现）和单元测试 | Codex · GPT-6.1 Sol | V-D1 | 单元测试通过，lint 0 告警 | task-vin-rtl | [ ] |
+| V-T1 | VIN 模块级测试（`verif/block/vin`，DVP 模型 `verif/models/dvp_camera_model.sv`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S2 | testbench 按 vin-testplan 完成，模型自测通过 | task-vin-verif | [ ] |
+| V-R2 | DISP RTL（时序、TMDS 编码按旧工程移植，读控制、扫描、欠账）和单元测试 | Codex · GPT-6.1 Sol | V-D1 | 单元测试通过，lint 0 告警 | task-disp-rtl | [ ] |
+| V-T2 | DISP 模块级测试（`verif/block/disp`，TMDS 接收模型、Python 参考编码），不读被测 RTL | Codex · GPT-6.1 Sol | V-S2 | testbench 按 disp-testplan 完成，模型自测通过 | task-disp-verif | [ ] |
+| V-I1 | VIN、DISP 联调：跑模块级回归，区分 RTL 错误、测试错误、规格歧义 | Codex · GPT-6.1 Sol | V-R1、V-T1、V-R2、V-T2 | vin、disp testplan smoke/full 通过 | task-vin-disp-int | [ ] |
+| V-P1 | 写 FIFO、内存源输入缓冲、扫描 FIFO 的存储 IP 创建说明和包装模块 | 协调者 | V-R1、V-R2 的存储需求 | `fpga/ip/` 创建说明、`rtl/tech/` 包装模块 | — | [ ] |
 | V-S3 | PIX、GEO 规格 | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [ ] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [ ] |
 
-后续待办（VIN、DISP、PIX、GEO、ETH 的 RTL、验证、联调、板级和 Windows 任务卡）在对应规格确认后补入。
+后续待办（PIX、GEO、ETH 的 RTL 和验证；OV5640 软件驱动；板级顶层、约束和 Windows 任务卡）在对应规格确认后补入。
 
 ## 4. 规格定稿项
 
@@ -45,3 +51,4 @@ dma2d 资源指标在 PDS 实测后定稿；其余模块随各自规格列出。
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-27 | v0.1 | 初稿：V-L1、V-S1 完成，V-D1 待派 |
+| 2026-10-27 | v0.2 | V-S2 完成；增加 V-M1、V-R1、V-T1、V-R2、V-T2、V-I1、V-P1 |
