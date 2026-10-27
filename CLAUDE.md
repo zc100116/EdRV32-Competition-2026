@@ -201,7 +201,7 @@ Linux 端工具安装在用户目录（没有 root 权限），使用前执行 `
 
 ### 5.3 跨时钟域
 
-- 跨时钟域**只能**使用 `rtl/common/` 中的原语：`cdc_sync_bit`、`cdc_pulse`、`cdc_handshake`、`cdc_gray_cnt`、`async_fifo`、`apb_async_bridge`、`axi_async_bridge`、`reset_sync`。
+- 跨时钟域**只能**使用 `rtl/common/` 中的原语：`cdc_sync_bit`、`cdc_pulse`、`cdc_handshake`、`cdc_gray_cnt`、`async_fifo`、`apb_async_bridge`、`axi_async_bridge`、`axi256_async_bridge`、`reset_sync`。
 - 新增跨时钟域必须先登记到 SoC 规格 5.2 节的跨时钟域清单。
 - 禁止在模块里直接对另一个时钟域的信号打两拍了事（必须用原语）。
 
