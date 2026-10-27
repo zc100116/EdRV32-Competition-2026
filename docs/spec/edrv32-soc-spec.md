@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.9（草案） |
+| 版本 | v0.10（草案） |
 | 日期 | 2026-10-27 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
@@ -240,8 +240,8 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 | X2 | clk_sys ↔ clk_mem | DDR 网关（AXI64） | AXI 异步桥，放在 64 位侧 |
 | X3 | clk_mem、clk_npu → clk_sys | 媒体、ETH 中断（clk_mem），NPU 中断（clk_npu） | 电平同步 |
 | X4 | camN_pclk → clk_mem | 采集像素 | 异步 FIFO |
-| X5 | clk_mem → clk_pix | 显示像素；DISP 扫描使能 | 异步 FIFO；电平同步 |
-| X6 | clk_pix → clk_mem | DISP 帧请求、读空事件；扫描 FIFO 读出计数、扫描侧性能计数 | 脉冲同步 / 格雷码 |
+| X5 | clk_mem → clk_pix | 显示像素；DISP 扫描使能；DISP 停止确认请求 | 异步 FIFO；电平同步；握手 |
+| X6 | clk_pix → clk_mem | DISP 帧请求；DISP 扫描侧仍可能发请求（scan_live）；读空事件；扫描 FIFO 读出计数、扫描侧性能计数 | 握手；电平同步；脉冲同步；格雷码 |
 | X7 | eth_rx_clk → clk_mem，clk_mem → eth_tx_clk | 网络帧 | 异步 FIFO |
 | X8 | 任意 → 各域 | 复位释放、`mem_ready_i` | 复位同步器 / 电平同步 |
 | X9 | clk_npu ↔ clk_mem | NPU DDR 主口（AXI256，mem_xbar P3） | AXI 异步桥，放在 NPU 边界 |
@@ -699,3 +699,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-27 | v0.7 | 随 NPU 规格 v0.1 同步（用户确认，见 `docs/design/2026-10-26-npu-architecture.md` Q2、Q5、Q7）：2.2、3.1、5.1 增加 clk_npu，clk_mem 不再包含 NPU；7.1 公共寄存器适用范围不限于 clk_mem 域；5.2 X3 增加 clk_npu 中断源，新增 X9、X10；7.3 增加 INT8_C4；8.5 NPU 输入尺寸和格式；8.9 时钟、后处理分工、性能指标改引 NPU 规格；10 节 NPU 事项关闭 |
 | 2026-10-27 | v0.8 | 图像通路方案（用户确认，见 `docs/design/2026-10-27-image-path.md`）：8.6 PIX 改为两级 3×3 的固定级联并增加 Gamma 查表；8.8 DISP 图像通路阶段为单层扫描；1.2 S2 注明本阶段全屏显示 |
 | 2026-10-27 | v0.9 | 图像通路 VIN/DISP 规格（用户确认，设计记录 `2026-10-27-image-path.md` Q7、Q8）：5.2 X5 增加 DISP 扫描使能，X6 改为 DISP 帧请求、读空事件和计数；6.4.1 P1 改为读写（内存源读），6.4.5 P1 `OUTST_RD` = 2；8.5 增加内存源、CH2，帧率不再由 VIN 寄存器切换；8.5、8.8 引用模块规格；9.1 增加内存源流量 |
+| 2026-10-27 | v0.10 | 5.2 X5、X6：DISP 帧请求改为握手同步，增加扫描侧 scan_live 电平和 clk_mem → clk_pix 停止确认握手，消除软复位/ABORT 时帧请求仍在跨域途中的窗口（用户确认，V-R2 问答；`disp-spec.md` v0.2 2.8） |
