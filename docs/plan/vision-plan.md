@@ -22,7 +22,7 @@
 | V-L1 | 旧工程图像通路盘点 | Codex · GPT-6 Luna | — | `docs/design/2026-10-27-image-path-legacy-inventory.md` | task-vision-inventory | [x] 0af888b |
 | V-S1 | dma2d 规格和验证方案 | 协调者 + 用户确认 | — | 规格已确认 | — | [x] 2026-10-27 |
 | V-D1 | dma2d_rd / dma2d_wr RTL 和单元测试 | Codex · GPT-6.1 Sol | V-S1 | `verif/unit/dma2d_{rd,wr}` smoke/full 通过，lint 0 告警 | task-dma2d | [~] 2026-10-27 派发 |
-| V-S2 | VIN、DISP 规格（含内存源、NPU 适配接口）；SoC 与存储子系统规格修订（P1 读通道） | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [ ] |
+| V-S2 | VIN、DISP 规格（含内存源、NPU 适配接口）；SoC 与存储子系统规格修订（P1 读通道） | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [~] 草案 vin-spec、disp-spec v0.1，待用户确认 |
 | V-S3 | PIX、GEO 规格 | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [ ] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [ ] |
 
