@@ -186,6 +186,8 @@ module tb_npu_conv_write;
             stop_i = 1;
         end
         while (!idle_o) tick;
+        check(expected_data.size() == 0 && expected_bursts.size() == 0,
+            "accepted burst drains even when the remaining chunk is cancelled");
         check(!result_release_o, "release is a pulse");
     endtask
     initial begin
@@ -203,7 +205,7 @@ module tb_npu_conv_write;
         chunk(16, 7, 0, 1, 0, 1, 0);
         chunk(23, 13, 0, 1, 7, 1, 0);
         chunk(19, 4, 1, 0, 0, 0, 1);
-        check(releases == 5 && requests >= 9, "normal and aborted chunk ownership");
+        check(releases == 4 && requests >= 9, "partial aborted chunk waits for cancel");
         cancel_i = 1;
         tick;
         cancel_i = 0;
@@ -214,7 +216,7 @@ module tb_npu_conv_write;
         tick;
         start_i = 0;
         chunk(31, 2, 0, 0, 0, 1, 0);
-        check(releases == 6 && idle_o, "restart after cancel");
+        check(releases == 5 && idle_o, "restart after cancel");
         $display("PASS chunk write ring wrap, plane bursts, long W stalls and ABORT");
         $finish;
     end

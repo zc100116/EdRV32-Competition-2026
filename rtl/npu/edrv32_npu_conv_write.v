@@ -91,7 +91,9 @@ module edrv32_npu_conv_write (
     assign write_data_valid_o = (state_r == S_STREAM) && (ready_r != 3'd0);
     assign write_data_o = data_r[read_ptr_r];
     assign send_w = write_data_valid_o && write_data_ready_i;
-    assign result_release_o = (state_r == S_RELEASE);
+    // On stop, cancel will reclaim the loan after AXI drains; an incomplete chunk
+    // must not use the normal all-planes-complete release handshake.
+    assign result_release_o = (state_r == S_RELEASE) && !stop_i;
     assign idle_o = (state_r == S_IDLE) && write_stream_idle_i;
     assign boundary_w = 5'd16 - {1'b0, addr_r[8:5]};
     assign remaining_w = pairs_r - plane_sent_r;
