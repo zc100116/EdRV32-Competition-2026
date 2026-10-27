@@ -18,8 +18,8 @@ All tests are self-checking and belong to both smoke and full:
 | Directory | Checks |
 |---|---|
 | `vin_dvp` | High-byte-first pixels, low-halfword-left packing, half pixels, odd pixel lines, coincident EOL/EOF, clock ratios, FIFO overflow and recovery |
-| `vin_fmt` | Disable, discard two frames, zero padding, line/frame truncation, dimension capture, frame IDs, incomplete and invalid-size events, output stalls |
-| `vin_ch` | Byte memory oracle, partial strobes, rings 2/3/4, busy-slot skip, EN capture, pending frame during B stalls, bus error, overflow/slot rollback, memory backpressure, ABORT |
+| `vin_fmt` | Disable, discard two frames, zero padding, line/frame truncation, dimension capture, frame IDs, incomplete and invalid-size events, output stalls, 100 random malformed frames |
+| `vin_ch` | Byte memory oracle, partial strobes, rings 2/3/4, busy-slot skip, EN capture, pending frame during B stalls, bus error, overflow/slot rollback, memory backpressure, ABORT, all busy masks for rings 2/3/4, first-word overflow after an exactly full frame |
 | `vin_p1_arb` | Whole-burst availability, stalled AW stability, round robin, contiguous W ownership, ordered B routing |
 | `vin_msrc` | Row/page address oracle, two-line reservation, continuous RREADY under output stalls, START while busy, partial row beats, read error, invalid size, ABORT |
 | `vin_regs` | Reset values, write masks, zero PSTRB whole-word writes, read-only completion fields, reserved/CH2 offsets, IRQ/RW1C, PERF and reset |
@@ -116,3 +116,25 @@ same VIN RTL; generic LUT6 mapping does not model Pango carry chains or DRM.
 Logs, generated Yosys scripts, netlists, tool versions and source commits are
 in `build/vin/synth/{full,logic}/`. These are reference estimates, not PDS
 utilization or timing results.
+
+Measured RTL/test commit: `0e98fd07ccc5653a0c6b62abde87e8a994451d3b`.
+Tool: Yosys 0.70+219, git sha1 5053d0e26, Clang 21.1.8. No device/speed-grade or
+clock constraint is modeled by this generic LUT6 flow. The storage-free run is
+**7,097 LUT6 and 3,644 FF**, including FIFO control and CDC logic. This exceeds
+the specification's 4K LUT development target; resource compliance is not
+claimed. DRM replacement, Pango carry-chain mapping and PDS measurement remain
+for the subsequent integration/resource work.
+
+The six FIFO instances contain 361,608 storage bits in total
+(`2*512*288 + 256*256 + 2*16*36 + 8`). Storage is not reset. The generic full
+run maps these behavioral arrays to FFs and muxes rather than to Pango DRM.
+
+| Measurement at the RTL commit above | LUT6 | FF |
+|---|---:|---:|
+| Full behavioral FIFO storage | 156,102 | 365,252 |
+| FIFO arrays blackboxed, real control retained | 7,097 | 3,644 |
+
+Both commands completed successfully. `build/vin/synth/full/summary.txt` and
+`build/vin/synth/logic/summary.txt` contain these totals. The FF difference is
+exactly the 361,608 modeled storage bits. The full mapped netlist is a generated
+build artifact, not a deliverable FPGA memory implementation.
