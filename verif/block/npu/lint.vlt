@@ -6,3 +6,5 @@ lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_axi256_master.sv"
 lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_axi256_checker.sv"
 // The NB connects slot zero of the shared sixteen-slot APB observation interface.
 lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_apb_if.sv"
+// The bench samples the DUT's asynchronous resets synchronously only to count cycles.
+lint_off -rule SYNCASYNCNET -file "*/verif/block/npu/tb_npu.sv"
