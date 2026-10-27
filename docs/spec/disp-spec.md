@@ -104,7 +104,7 @@ RGB565 展开为每通道 8 位：R、B `{v[4:0], v[4:2]}`，G `{v[5:0], v[5:4]}
 |---|---|---|
 | 0x000 | ID | 0x0005_0001 |
 | 0x004 | CTRL | bit0 ENABLE（2.4 第 1 条，下一帧生效）；bit1 START 无作用；bit2 ABORT（5.2）；bit3 SOFT_RST：先按 5.2 停止接受帧请求，等到 STATUS.IDLE（已请求的帧读完、欠账归零），再把 clk_mem 侧寄存器和控制状态回到复位值；扫描 FIFO 和跨域计数器不复位，PERF0–2 以 SOFT_RST 时的值为基线清零；clk_pix 侧由媒体软复位复位（系统子系统规格 2.10） |
-| 0x008 | STATUS | BUSY = 读控制正在读一帧或有记下的请求，或已发出的帧请求数不等于同步到 clk_mem 的 PERF0（扫描侧还有已请求未扫完的帧，不另设跨域信号）；IDLE = 非 BUSY；ERROR = IRQ_STAT.ERROR |
+| 0x008 | STATUS | BUSY = 读控制正在读一帧或有记下的请求，或已发出的帧请求数不等于同步到 clk_mem 的 PERF0（扫描侧还有已请求未扫完的帧），或扫描 FIFO 写入计数不等于同步后的读出计数（FIFO 未排空，含欠账待丢弃的 beat）；不另设跨域信号；IDLE = 非 BUSY；ERROR = IRQ_STAT.ERROR |
 | 0x010 | IRQ_STAT | bit1 ERROR；bit2 FRAME（2.4 第 4 条）；bit8 SWITCH |
 | 0x014 | ERR_CODE | 第 6 节 |
 | 0x020–0x028 | DESC_BASE、DESC_COUNT、DOORBELL | 不使用 |
@@ -191,4 +191,4 @@ DISP 没有可中止的命令。`CTRL.ABORT` 写 1 等同于把 `CTRL.ENABLE` �
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-27 | v0.1 | 初稿：依据 SoC 规格 8.8、设计记录 `2026-10-27-image-path.md`、旧工程盘点；用户确认（Q8 不完整帧补齐标记、ENABLE 后丢 2 帧、DISP 读空欠账） |
-| 2026-10-27 | v0.1 | 澄清（V-R2 问答，不改变已确认的行为）：4.1 STATUS.BUSY 的扫描部分由帧请求数与 PERF0 比较得到；4.3 PERF0 的计数时刻；2.7 欠账偿还在未扫描帧中继续；4.1 SOFT_RST 先停机排空再复位 clk_mem 侧 |
+| 2026-10-27 | v0.1 | 澄清（V-R2 问答，不改变已确认的行为）：4.1 STATUS.BUSY 的扫描部分由帧请求数与 PERF0、FIFO 写入与读出计数比较得到；4.3 PERF0 的计数时刻；2.7 欠账偿还在未扫描帧中继续；4.1 SOFT_RST 先停机排空再复位 clk_mem 侧 |
