@@ -2,9 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2 |
+| 版本 | v0.3 |
 | 日期 | 2026-10-27 |
-| 状态 | 已确认（v0.2，2026-10-27）。标 **[待定]** 的条目给出了开发初值，开发完成后根据实现和测量数据定稿 |
+| 状态 | 已确认（v0.3，2026-10-27）。标 **[待定]** 的条目给出了开发初值，开发完成后根据实现和测量数据定稿 |
 | 范围 | YOLOv8n 推理加速器 `edrv32_npu`：卷积、池化、上采样、融合残差加、INT8 量化与激活；描述符执行；寄存器块。不含 NPU 输入适配（属于 VIN，SoC 规格 8.5）和后处理（软件） |
 | 关联文档 | SoC 规格 4.2、4.3、5、7.1–7.3、8.9、8.11、9；`docs/design/2026-10-26-npu-architecture.md`；`docs/design/2026-10-27-npu-datapath.md`（数据通路微架构）；`docs/reports/2026-10-26-perf-npu-legacy.md`；`docs/reports/2026-10-26-perf-npu-datapath.md`；`docs/plan/npu-plan.md` |
 
@@ -77,15 +77,55 @@ y = LUT_EN ? lut[q 视为 8 位无符号下标] : q          // 256 项 INT8 激
 | `rst_npu_n_i` | in | 1 | clk_npu | 本域同步释放的复位（SoC 规格 5.3） |
 | `clk_mem_i` | in | 1 | — | mem_xbar 时钟，只用于两个异步桥的远端 |
 | `rst_mem_n_i` | in | 1 | clk_mem | 同上 |
-| `apb_*` | — | — | clk_mem | 媒体 APB 从口，SoC 规格 4.3 |
-| `axi_*` | — | — | clk_mem | AXI256 主口，SoC 规格 4.2；本地 ID 1 位 |
+| `apb_paddr_i` | in | 12 | clk_mem | 媒体 APB 从口（SoC 规格 4.3），槽内偏移 |
+| `apb_psel_i` | in | 1 | clk_mem | |
+| `apb_penable_i` | in | 1 | clk_mem | |
+| `apb_pwrite_i` | in | 1 | clk_mem | |
+| `apb_pwdata_i` | in | 32 | clk_mem | |
+| `apb_pstrb_i` | in | 4 | clk_mem | 忽略（第 4 节） |
+| `apb_pready_o` | out | 1 | clk_mem | |
+| `apb_prdata_o` | out | 32 | clk_mem | |
+| `apb_pslverr_o` | out | 1 | clk_mem | |
+| `axi_awid_o` | out | 1 | clk_mem | AXI256 主口（SoC 规格 4.2），本地 ID 1 位 |
+| `axi_awaddr_o` | out | 32 | clk_mem | |
+| `axi_awlen_o` | out | 4 | clk_mem | |
+| `axi_awvalid_o` | out | 1 | clk_mem | |
+| `axi_awready_i` | in | 1 | clk_mem | |
+| `axi_wdata_o` | out | 256 | clk_mem | |
+| `axi_wstrb_o` | out | 32 | clk_mem | |
+| `axi_wlast_o` | out | 1 | clk_mem | |
+| `axi_wvalid_o` | out | 1 | clk_mem | |
+| `axi_wready_i` | in | 1 | clk_mem | |
+| `axi_bid_i` | in | 1 | clk_mem | |
+| `axi_bresp_i` | in | 2 | clk_mem | |
+| `axi_bvalid_i` | in | 1 | clk_mem | |
+| `axi_bready_o` | out | 1 | clk_mem | |
+| `axi_arid_o` | out | 1 | clk_mem | |
+| `axi_araddr_o` | out | 32 | clk_mem | |
+| `axi_arlen_o` | out | 4 | clk_mem | |
+| `axi_arvalid_o` | out | 1 | clk_mem | |
+| `axi_arready_i` | in | 1 | clk_mem | |
+| `axi_rid_i` | in | 1 | clk_mem | |
+| `axi_rdata_i` | in | 256 | clk_mem | |
+| `axi_rresp_i` | in | 2 | clk_mem | |
+| `axi_rlast_i` | in | 1 | clk_mem | |
+| `axi_rvalid_i` | in | 1 | clk_mem | |
+| `axi_rready_o` | out | 1 | clk_mem | |
 | `irq_o` | out | 1 | clk_npu | `|(IRQ_STAT & IRQ_EN)`，电平 |
 
-NPU 不输出 `urgent_o`（P3 为 BE 端口）。
+AXI256 不输出 `size/burst`（固定 32 B/拍、INCR，SoC 规格 4.2）。NPU 不输出 `urgent_o`（P3 为 BE 端口）。
 
 ## 4. 寄存器
 
-公共寄存器 0x000–0x07C 见 SoC 规格 7.1：ID 的模块类型码 **[待定]**；`CTRL.START` 和 `STATUS.FRAME` 不使用；命令式引擎用 `DESC_BASE`、`DESC_COUNT`、`DOORBELL`、`DONE_COUNT`。私有寄存器：
+公共寄存器 0x000–0x07C 见 SoC 规格 7.1：`ID` = 0x0006_0001（模块类型码 6，等于媒体 APB 槽号）；`CTRL.START` 和 `STATUS.FRAME` 不使用；命令式引擎用 `DESC_BASE`、`DESC_COUNT`、`DOORBELL`、`DONE_COUNT`。
+
+公共寄存器的行为：
+- 复位值全部为 0，`STATUS` 复位为 0x2（IDLE）。
+- `CTRL.ENABLE` 不门控 `DOORBELL`。`STATUS.BUSY` = 1 时写 `DOORBELL` 被忽略。
+- `CTRL.SOFT_RST` 只在 IDLE 时生效。`CTRL.ABORT`、`CTRL.SOFT_RST` 等触发位读出为 0。
+- 未定义的偏移读出 0，写入被忽略。`apb_pstrb_i` 被忽略，每次写都按完整 32 位处理。
+
+私有寄存器：
 
 | 偏移 | 名称 | 访问 | 复位值 | 说明 |
 |---|---|---|---|---|
@@ -93,7 +133,7 @@ NPU 不输出 `urgent_o`（P3 为 BE 端口）。
 | 0x104 | WORK_BASE | RW | 0 | 中间特征图工作区基址，4 KiB 对齐 |
 | 0x108 | INPUT_BASE | RW | 0 | 首层输入（INT8_C4）基址，4 KiB 对齐 |
 | 0x10C | OUTPUT_BASE | RW | 0 | 检测头输出区基址，4 KiB 对齐 |
-| 0x110 | CUR_DESC | RO | 0 | 正在执行的描述符序号；出错时保持为出错的那一条 |
+| 0x110 | CUR_DESC | RO | 0 | 正在执行的描述符序号；出错时保持为出错的那一条；正常完成后保持为 `DESC_COUNT`−1，直到下一次 `DOORBELL` |
 
 `PERF[0..15]`（0x040–0x07C）**[待定]** 开发初值：0 总周期、1 MAC 有效拍、2 读 beat 数、3 写 beat 数、4 输入行等待拍、5 权重/参数装载等待拍、6 写响应等待拍、7 非卷积算子拍；每次 `DOORBELL` 清零。
 
@@ -234,7 +274,7 @@ NPU 不输出 `urgent_o`（P3 为 BE 端口）。
 
 | 项 | 指标 |
 |---|---|
-| 帧率 | **[待定]** 640×384 YOLOv8n 卷积部分（74 条命令，不含后处理），clk_npu 150 MHz、NPU 可用 DDR 带宽 1.4 GB/s 时 ≥ 20 fps。依据：N-E2 模型估算 20.97 fps |
+| 帧率 | **[待定]** 640×384 YOLOv8n 卷积部分（整网 68 条描述符，不含后处理），clk_npu 150 MHz、NPU 可用 DDR 带宽 1.4 GB/s 时 ≥ 20 fps。依据：N-E2 模型估算 20.97 fps |
 | 每帧 DDR 读写 | ≤ 27 MB（模型估算 26.15 MB） |
 | 时钟 | clk_npu **[待定]** 开发初值 150 MHz |
 | LUT | ≤ 50K（含 VIN 中的 NPU 输入适配，SoC 规格 9.3） |
@@ -246,7 +286,7 @@ NPU 不输出 `urgent_o`（P3 为 BE 端口）。
 ## 8. 验证要点
 
 1. 每种算子和每个描述符标志（K3、S2、LUT_EN、RES_EN、IN_C4、HALF_TAIL）至少一个小形状用例，与 Python 参考模型逐位比对。
-2. 整网 74 条命令（真实量化权重和一幅真实输入图像），检测头输出与 Python 参考模型逐位一致。
+2. 整网 68 条描述符（63 CONV + 3 POOL + 2 UPSAMPLE，6 个残差加已融合进卷积；真实量化权重和一幅真实输入图像），检测头输出与 Python 参考模型逐位一致。
 3. 行缓存和常驻权重的容量边界（最大层 L7、L15.split 的最宽输入）。
 4. 写响应栅栏：后一条描述符读到的是前一条的最终输出。
 5. 第 6 节的每种错误和 ABORT（含 ABORT 时有在途事务）。
@@ -262,7 +302,7 @@ NPU 不输出 `urgent_o`（P3 为 BE 端口）。
 | 4 | 描述符位域 | 4.1 表 | RTL 开发 |
 | 5 | 权重镜像格式 | 4.3 | RTL 开发 |
 | 6 | 帧率、APM、DRM 指标 | 第 7 节 | 整网仿真和 PDS |
-| 7 | PERF 计数器定义和 ID 类型码 | 第 4 节 | RTL 开发 |
+| 7 | PERF 计数器定义 | 第 4 节 | RTL 开发（ID 类型码已在 v0.3 确定） |
 | 8 | 后处理是否加入 NPU 类别最大值/阈值筛选（设计记录 Q7 的 B） | 不加入 | CPU 后处理实测 |
 | 9 | 非卷积算子与卷积并行、池化每采样 1 拍 | 不做 | 第二版评估 |
 
@@ -272,3 +312,4 @@ NPU 不输出 `urgent_o`（P3 为 BE 端口）。
 |---|---|---|
 | 2026-10-26 | v0.1 | 初稿，依据设计记录 `2026-10-26-npu-architecture.md`（Q1–Q8 用户确认）；2026-10-27 用户审阅确认 |
 | 2026-10-27 | v0.2 | 依据设计记录 `2026-10-27-npu-datapath.md`（N-D0）第 10 项，用户确认：2.2 IN_C4 时输入宽度为 8 的倍数；2.3 量化中间位宽；2.5 引用改为 4.3；4.1 HALF_TAIL 与 IN_C4 组合语义、K_COUNT/WEIGHT_BLOCK_BYTES 计算式、ROW_SLOT_BEATS 为每 bank 项数；新增 4.3 权重格式，量化记录第 7 字节为 0；5.1 W3 按块装载时点、C4 行缓存展开；5.2 存储组织和 DRM 估算；5.4 流水级细化、层内不排空、内部接口；7 APM/DRM 估算 |
+| 2026-10-27 | v0.3 | 用户确认开发中已回答验证 worker 的初值（N-V1 问答）：第 3 节端口展开为具体信号；第 4 节 ID = 0x0006_0001、公共寄存器复位值和触发位/DOORBELL/SOFT_RST/未定义偏移/pstrb 行为、CUR_DESC 正常完成后的值；第 7、8 节整网规模改为 68 条描述符；第 9 节第 7 项 ID 类型码关闭 |
