@@ -46,7 +46,7 @@
 | N-D1 | 数据通路 RTL：行缓存、窗口生成、MAC 阵列、累加、量化、激活表、残差加、写回打包、数据通路子顶层；各单元测试和 `verif/unit/npu_datapath/`（向量来自 N-M2 的参考模型） | Codex 项目经理 + 员工（GPT-6.1 Sol） | N-D0、N-IP1（包装模块）、N-M2 | 单元测试全过，lint 0 告警；协调者评审关键部分 | task-npu-datapath | [~] 2026-10-27 派发（Codex 项目经理 ctx_0d8974853053，task-npu-datapath） |
 | N-W1 | 数据通路单独 PDS（规格 5.4 第 4 条）：板级测量顶层 `fpga/rtl/edrv32_fpga_npu_dp_top.v`、约束、导入脚本、Windows 任务卡 | 协调者 + 用户 | N-D1、N-IP1 生成 | 时序和资源测量报告；不达标时回到 N-D1 修改 | win 任务卡 | [ ] |
 | N-C1 | 控制和 DMA RTL：寄存器块、描述符读取与译码、调度器（W1/W2/W3/W4b、发射信用）、读写 DMA、POOL、UPSAMPLE、错误和 ABORT、`edrv32_npu` 顶层和两个异步桥；单元测试 | Codex · GPT-6.1 Sol | N-D1、N-C0 | 单元测试全过，lint 0 告警；协调者逐行评审调度器 | task-npu-ctrl | [ ] |
-| N-V1 | NB 模块级环境和测试：存储模型 `npu_axi256_mem.sv`、APB 驱动、镜像装载与比对、验证方案 3.2–3.7 全部测试项（不读被测 RTL） | Codex · GPT-6.1 Sol（独立验证 worker） | N-M1、N-M2；与 N-D1/N-C1 并行 | 用参考模型自身产生的输出做回环自检；测试代码评审 | task-npu-verif | [~] 2026-10-27 派发（先做存储模型和环境自检，DUT 由 N-I1 接上） |
+| N-V1 | NB 模块级环境和测试：存储模型 `npu_axi256_mem.sv`、APB 驱动、镜像装载与比对、验证方案 3.2–3.7 全部测试项（不读被测 RTL） | Codex · GPT-6.1 Sol（独立验证 worker） | N-M1、N-M2；与 N-D1/N-C1 并行 | 用参考模型自身产生的输出做回环自检；测试代码评审 | task-npu-verif | [x] 2026-10-27（ec712a0、f0e8ade）：存储模型单元测试 3 档通过；NB 环境直通自检通过、故意改错时 FAIL；RG/OP/CP/SQ/ER/NET 共 30 项各有目录和用例生成命令，DUT 由 N-I1 接上 |
 | N-I1 | 联调：NB smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | N-C1、N-V1 | smoke、full 全过，第 5 节覆盖全部命中 | task-npu-integ | [ ] |
 | N-P1 | 整网性能 NET-02 和测量报告；NPU 整体 PDS（Windows 任务卡）；规格第 9 节 [待定] 项定稿 | Codex · GPT-6.1 Sol + 协调者 + 用户 | N-I1 | 测量报告 `docs/reports/…-perf-npu.md`、`…-timing-npu.md`；规格修订经用户确认 | task-npu-perf | [ ] |
 
