@@ -70,7 +70,7 @@ def main():
     for index in range(16):
         expected.add(f'histogram bin={index}')
     caps = {'global': 8}
-    for port, (read, write) in enumerate(zip((4, 0, 1, 4, 2, 2, 2),
+    for port, (read, write) in enumerate(zip((4, 2, 1, 4, 2, 2, 2),
                                             (0, 4, 1, 2, 2, 2, 2))):
         if read:
             caps['rd' + str(port)] = read

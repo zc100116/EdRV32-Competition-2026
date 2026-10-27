@@ -57,7 +57,7 @@ module edrv32_mem_subsys (
     input wire p0_rready_i,
     input wire p0_urgent_i,
 
-    // VIN write port P1.
+    // VIN read/write port P1.
     input wire p1_awid_i,
     input wire [31:0] p1_awaddr_i,
     input wire [3:0] p1_awlen_i,
@@ -72,6 +72,17 @@ module edrv32_mem_subsys (
     output wire [1:0] p1_bresp_o,
     output wire p1_bvalid_o,
     input wire p1_bready_i,
+    input wire p1_arid_i,
+    input wire [31:0] p1_araddr_i,
+    input wire [3:0] p1_arlen_i,
+    input wire p1_arvalid_i,
+    output wire p1_arready_o,
+    output wire p1_rid_o,
+    output wire [255:0] p1_rdata_o,
+    output wire [1:0] p1_rresp_o,
+    output wire p1_rlast_o,
+    output wire p1_rvalid_o,
+    input wire p1_rready_i,
     input wire p1_urgent_i,
 
     // p3 interface.
@@ -399,7 +410,7 @@ module edrv32_mem_subsys (
         .p0_rready_i(p0_rready_i),
         .p0_urgent_i(p0_urgent_i),
 
-        // VIN write port P1.
+        // VIN read/write port P1.
         .p1_awid_i(p1_awid_i),
         .p1_awaddr_i(p1_awaddr_i),
         .p1_awlen_i(p1_awlen_i),
@@ -414,6 +425,17 @@ module edrv32_mem_subsys (
         .p1_bresp_o(p1_bresp_o),
         .p1_bvalid_o(p1_bvalid_o),
         .p1_bready_i(p1_bready_i),
+        .p1_arid_i(p1_arid_i),
+        .p1_araddr_i(p1_araddr_i),
+        .p1_arlen_i(p1_arlen_i),
+        .p1_arvalid_i(p1_arvalid_i),
+        .p1_arready_o(p1_arready_o),
+        .p1_rid_o(p1_rid_o),
+        .p1_rdata_o(p1_rdata_o),
+        .p1_rresp_o(p1_rresp_o),
+        .p1_rlast_o(p1_rlast_o),
+        .p1_rvalid_o(p1_rvalid_o),
+        .p1_rready_i(p1_rready_i),
         .p1_urgent_i(p1_urgent_i),
 
         // p2 interface.

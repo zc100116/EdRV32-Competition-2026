@@ -40,7 +40,7 @@ module edrv32_mem_subsys_tb;
     int local_reads[7];
     int local_writes[7];
     int total_limit = 8;
-    int read_limit[7] = '{4,0,1,4,2,2,2};
+    int read_limit[7] = '{4,2,1,4,2,2,2};
     int write_limit[7] = '{0,4,1,2,2,2,2};
     bit check_read_data = 1;
     int grant_start;
@@ -87,8 +87,7 @@ module edrv32_mem_subsys_tb;
     );
     for (genvar n = 0; n < 7; n++) begin : g_port
         edrv32_axi256_master #(
-            .READ_ONLY(n == 0),
-            .WRITE_ONLY(n == 1)
+            .READ_ONLY(n == 0)
         ) u_master (
             .clk_i(clk_mem),
             .rst_n_i(rst_mem_n),
@@ -150,7 +149,7 @@ module edrv32_mem_subsys_tb;
             end
         end
     end
-    // P2 is internal to the subsystem, and unused halves of P0/P1 are not ports.
+    // P2 is internal to the subsystem, and the P0 write channels are not exposed.
     assign p[2].awready = 0;
     assign p[2].wready = 0;
     assign p[2].bvalid = 0;
@@ -167,12 +166,6 @@ module edrv32_mem_subsys_tb;
     assign p[0].bvalid = 0;
     assign p[0].bid = 0;
     assign p[0].bresp = 0;
-    assign p[1].arready = 0;
-    assign p[1].rvalid = 0;
-    assign p[1].rid = 0;
-    assign p[1].rdata = 0;
-    assign p[1].rresp = 0;
-    assign p[1].rlast = 0;
 
     edrv32_axi256_checker #(.DOWNSTREAM(1)) u_checker (
         .clk_i(clk_mem),
@@ -307,11 +300,12 @@ module edrv32_mem_subsys_tb;
         input bit id = 0);
         case (port)
             0: g_port[0].u_master.enqueue_read(addr, len, id);
+            1: g_port[1].u_master.enqueue_read(addr, len, id);
             3: g_port[3].u_master.enqueue_read(addr, len, id);
             4: g_port[4].u_master.enqueue_read(addr, len, id);
             5: g_port[5].u_master.enqueue_read(addr, len, id);
             6: g_port[6].u_master.enqueue_read(addr, len, 1'b1);
-            default: $fatal(1, "FAIL send_read expected=P0/P3/P4/P5/P6 actual=%0d time=%0t",
+            default: $fatal(1, "FAIL send_read expected=P0/P1/P3/P4/P5/P6 actual=%0d time=%0t",
                             port, $time);
         endcase
     endtask
@@ -831,8 +825,7 @@ module edrv32_mem_subsys_tb;
                 eq("zero-weight port served", 1, u_schedule.transactions[5]);
             end
             204: begin
-                // Coordinator/user confirmed MX-04 conditions: judge ready read shares
-                // at TOTAL1; the single W buffer makes P1 a diagnostic-only share.
+                // Judge all ready read ports, including P1, at OUTST_TOTAL=1.
                 wr(0, 'h100, 1);
                 total_limit = 1;
                 wr(0, 'h108, 65535);
@@ -840,7 +833,7 @@ module edrv32_mem_subsys_tb;
                 wr(0, 'h2cc, 256);
                 for (int k = 0; k < 4096; k++) begin
                     send_read(0, 32'((k%8)*512));
-                    send_write(1, 'h10000+32'((k%8)*512));
+                    send_read(1, 'h10000+32'((k%8)*512));
                     send_read(3, 'h20000+32'((k%8)*512));
                     send_read(4, 'h30000+32'((k%8)*512));
                     send_read(5, 'h40000+32'((k%8)*512));
@@ -953,7 +946,7 @@ module edrv32_mem_subsys_tb;
                             u_schedule_reference.flow_r_stall[j]-before_r_stall[j]);
                     end
                     for (int j = 0; j < 7; j++)
-                        if (phase == 0 && j != 1 && j != 2) begin
+                        if (phase == 0 && j != 2) begin
                             share = real'(u_schedule.beats[j]-before_count[j])/real'(total);
                             expected = real'(weights[j])/16.0;
                             if (share < expected-0.05 || share > expected+0.05)
@@ -992,7 +985,7 @@ module edrv32_mem_subsys_tb;
                 u_ddr.t_b = 100;
                 wr(0, 'h2cc, 256);
                 for (int port = 0; port < 7; port++) begin
-                    if (port == 1 || port == 2) continue;
+                    if (port == 2) continue;
                     for (int k = 0; k < read_limit[port]; k++)
                         send_read(port, 32'(port*65536+k*512));
                     wait_port(port, read_limit[port], 0);
@@ -1023,13 +1016,13 @@ module edrv32_mem_subsys_tb;
                 wr(0, 'h260, 1);
                 read_limit[3] = 1;
                 wait_port(0, 20, 0);
-                wait_port(1, 0, 20);
+                wait_port(1, 2, 20);
                 wait_port(3, 20, 18);
                 wait_port(4, 18, 18);
                 wait_port(5, 18, 18);
                 wait_port(6, 18, 18);
                 eq("global cap reached", 8, u_schedule.max_outstanding);
-                require_grants(186);
+                require_grants(188);
             end
             207: begin
                 g_port[0].u_master.r_on = 0;
@@ -1204,6 +1197,8 @@ module edrv32_mem_subsys_tb;
                 g_port[0].u_master.urgent_enable = 1;
                 g_port[0].u_master.urgent_period = 17;
                 g_port[0].u_master.urgent_on = 5;
+                g_port[1].u_master.r_period = 13;
+                g_port[1].u_master.r_on = 3;
                 g_port[1].u_master.b_period = 11;
                 g_port[1].u_master.b_on = 2;
                 g_port[1].u_master.urgent_enable = 1;
@@ -1227,13 +1222,15 @@ module edrv32_mem_subsys_tb;
                     begin
                         for (int k = 0; k < 48; k++) begin
                             send_read(0, 32'(k*512), int'(random_next()%16));
+                            send_read(1, 'h60000+32'(k*512),
+                                int'(random_next()%16), 1'(k));
                             send_write(1, 'h10000+32'(k*512), int'(random_next()%16), 1'(k), 1);
                             send_write(3, 'h20000+32'(k*512), int'(random_next()%16), 1'(k), 1);
                             send_write(4, 'h30000+32'(k*512), int'(random_next()%16), 1'(k), 1);
                             send_write(5, 'h40000+32'(k*512), int'(random_next()%16), 1'(k), 1);
                             send_write(6, 'h50000+32'(k*512), int'(random_next()%16), 1'(k), 1);
                         end
-                        wait_port(1, 0, 48);
+                        wait_port(1, 48, 48);
                         wait_port(3, 0, 48);
                         wait_port(4, 0, 48);
                         wait_port(5, 0, 48);
@@ -1251,7 +1248,67 @@ module edrv32_mem_subsys_tb;
                         wait_port(6, 48, 48);
                     end
                 join
-                require_grants(528);
+                require_grants(576);
+            end
+            213: begin
+                rd_eq(0, 'h220, 2);
+                // Read back committed P1 writes while new disjoint writes run.
+                send_write(1, 'h10000, 15, 1);
+                wait_port(1, 0, 1);
+                g_port[1].u_master.r_on = 0;
+                for (int k = 0; k < 4; k++)
+                    send_read(1, 'h10000, 15, 1'(k));
+                send_write(1, 'h20000, 15, 0);
+                drain(200);
+                eq("P1 completed writes under R stall", 2, local_writes[1]);
+                eq("P1 buffered reads retain port slots", 2,
+                    u_schedule_reference.rd_outstanding[1]);
+                eq("P1 read cap stops further DDR grants", 2, u_schedule.max_read[1]);
+                eq("P1 R backpressure", 0, local_reads[1]);
+                eq("P1 two reads plus two writes", 4, u_schedule.transactions[1]);
+                g_port[1].u_master.r_on = 1;
+                wait_port(1, 4, 2);
+                require_grants(6);
+
+                // A zero-weight P1 can win here only through urgent priority.
+                total_limit = 1;
+                wr(0, 'h100, 1);
+                wr(0, 'h104, 2);
+                wr(0, 'h228, 0);
+                g_port[1].u_master.urgent_enable = 1;
+                start = u_schedule.grants.size();
+                for (int k = 0; k < 6; k++) begin
+                    send_read(1, 'h10000, 3, 1'(k));
+                    send_read(3, 'h30000+32'(k*512), 3, 1'(k));
+                end
+                wait_port(1, 10, 2);
+                wait_port(3, 6, 0);
+                for (int k = 0; k < 2; k++) begin
+                    eq("P1 urgent read wins", 1, u_schedule.grants[start+k].port);
+                    eq("P1 urgent direction", 0, int'(u_schedule.grants[start+k].write));
+                end
+                eq("P1 URG_MAX lets P3 proceed", 3, u_schedule.grants[start+2].port);
+                truth("P1 urgent read statistics", u_schedule_reference.urg[1] >= 6);
+                require_grants(12);
+
+                g_port[1].u_master.urgent_enable = 0;
+                wr(0, 'h228, 4);
+                total_limit = 8;
+                wr(0, 'h100, 8);
+                g_port[1].u_master.r_random = 1;
+                g_port[1].u_master.b_random = 1;
+                g_port[1].u_master.r_period = 11;
+                g_port[1].u_master.r_on = 3;
+                g_port[1].u_master.b_period = 7;
+                g_port[1].u_master.b_on = 2;
+                for (int k = 0; k < 32; k++) begin
+                    send_read(1, 'h10000, int'(random_next()%16), 1'(k));
+                    send_write(1, 'h40000+32'(k*512), int'(random_next()%16), 1'(k), 1);
+                end
+                wait_port(1, 42, 34);
+                require_grants(64);
+                eq("P1 protocol errors", 0, local_errors[1]);
+                eq("P1 reference checked reads", 42, local_reads[1]);
             end
             default: $fatal(1, "FAIL unimplemented MX test=%0d time=%0t", test, $time);
         endcase
@@ -1481,9 +1538,11 @@ module edrv32_mem_subsys_tb;
         end
         wait_port(0, 1, 0);
         wait_port(1, 0, 1);
+        send_read(1, 'h10000, 15, 1);
+        wait_port(1, 1, 1);
         gateway_write('h80070000, 3, 3);
         gateway_read('hc0070000, 3, 3);
-        require_grants(12);
+        require_grants(13);
         wr(0, 'h00c, 2);
         g_port[3].u_master.expected_resp = 2;
         send_read(3, 'h80001, 0);
@@ -1564,13 +1623,13 @@ module edrv32_mem_subsys_tb;
         $display("MB START CASE=%0d SEED=%0d time=%0t", selected_case, seed, $time);
         if (CASE == 0) begin
             if (selected_case >= 101 && selected_case <= 105) test_gateway(selected_case);
-            else if (selected_case >= 201 && selected_case <= 212) test_xbar(selected_case);
+            else if (selected_case >= 201 && selected_case <= 213) test_xbar(selected_case);
             else if (selected_case >= 301 && selected_case <= 307) test_pmon(selected_case);
             else if (selected_case == 401) test_p6();
             else if (selected_case == 501) test_top();
             else $fatal(1, "FAIL unknown CASE=%0d time=%0t", selected_case, $time);
         end else if (CASE >= 101 && CASE <= 105) test_gateway(CASE);
-        else if (CASE >= 201 && CASE <= 212) test_xbar(CASE);
+        else if (CASE >= 201 && CASE <= 213) test_xbar(CASE);
         else if (CASE >= 301 && CASE <= 307) test_pmon(CASE);
         else if (CASE == 401) test_p6();
         else if (CASE == 501) test_top();

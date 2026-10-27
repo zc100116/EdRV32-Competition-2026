@@ -24,6 +24,7 @@ Every directory below has `test.yaml` and `files.f`, with the shared self-checki
 | MX-10 | `mx_10` | 210 | F |
 | MX-11 | `mx_11` | 211 | S |
 | MX-12 | `mx_12/seed_01` … `seed_20` | 212 | F |
+| MX-13 | `mx_13` | 213 | S |
 | PM-01 | `pm_01` | 301 | S |
 | PM-02 | `pm_02` | 302 | S |
 | PM-03 | `pm_03` | 303 | F |
@@ -34,7 +35,7 @@ Every directory below has `test.yaml` and `files.f`, with the shared self-checki
 | P6-01 | `p6_01` | 401 | S |
 | TOP-01 | `top_01` | 501 | S |
 
-There are 26 functional items / 45 MB regression entries and three environment
+There are 27 functional items / 46 MB regression entries and three environment
 self-test entries:
 
 - `model_selftest`: row hit/miss latency, bank selection, masked byte writes,
@@ -45,4 +46,5 @@ self-test entries:
   and error responses, implicit downstream response readiness and continuous W.
 - `master_selftest`: 12 queued writes plus 12 reads with independent W delay/gaps,
   random B/R readiness and urgent, checking 192 returned beats; additional P0-only
-  and P1-only drivers each complete eight transactions against stalled empty slaves.
+  and P1 read/write drivers complete eight P0 reads, eight P1 reads and eight P1
+  writes against stalled empty slaves.

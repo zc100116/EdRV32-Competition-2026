@@ -94,7 +94,7 @@ module edrv32_mem_xbar_sched (
     assign grant_beats_w = beats_i[grant_queue_w*5 +: 5];
     assign dir_switch_o = grant_o && dir_valid_r && write_o != dir_write_r;
     assign starve_w = eligible_i & starved_i;
-    assign rt_w = {eligible_i[3], eligible_i[0]} & urgent_allowed_r;
+    assign rt_w = {|eligible_i[3:2], eligible_i[0]} & urgent_allowed_r;
     assign lat_w = eligible_i[5:4] & funded_r[5:4];
     assign refill_w = enable_i && prepared_r && !grant_o && |drr_eligible_w;
 
@@ -126,8 +126,8 @@ module edrv32_mem_xbar_sched (
             if (|rt_w) begin
                 grant_o = 1'b1;
                 urgent_o = 1'b1;
-                write_o = rt_w[urgent_turn_r] ? urgent_turn_r : !urgent_turn_r;
-                port_o = {2'b0, write_o};
+                port_o = {2'b0, rt_w[urgent_turn_r] ? urgent_turn_r : !urgent_turn_r};
+                write_o = eligible_i[{port_o, preferred_r}] ? preferred_r : !preferred_r;
             end else if (|lat_w) begin
                 grant_o = 1'b1;
                 port_o = 3'd2;

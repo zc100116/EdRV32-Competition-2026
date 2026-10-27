@@ -39,6 +39,17 @@ module edrv32_mem_xbar (
     output wire [1:0] p1_bresp_o,
     output wire p1_bvalid_o,
     input wire p1_bready_i,
+    input wire p1_arid_i,
+    input wire [31:0] p1_araddr_i,
+    input wire [3:0] p1_arlen_i,
+    input wire p1_arvalid_i,
+    output wire p1_arready_o,
+    output wire p1_rid_o,
+    output wire [255:0] p1_rdata_o,
+    output wire [1:0] p1_rresp_o,
+    output wire p1_rlast_o,
+    output wire p1_rvalid_o,
+    input wire p1_rready_i,
     input wire p1_urgent_i,
     // p2 upstream.
     input wire p2_awid_i,
@@ -301,72 +312,67 @@ module edrv32_mem_xbar (
         p1_bready_i,
         1'b0};
     wire [6:0] arid_w;
-    assign arid_w = {p6_arid_i, p5_arid_i, p4_arid_i, p3_arid_i, p2_arid_i, 1'b0, p0_arid_i};
+    assign arid_w = {p6_arid_i, p5_arid_i, p4_arid_i, p3_arid_i, p2_arid_i, p1_arid_i, p0_arid_i};
     wire [223:0] araddr_w;
     assign araddr_w = {p6_araddr_i,
         p5_araddr_i,
         p4_araddr_i,
         p3_araddr_i,
         p2_araddr_i,
-        32'b0,
+        p1_araddr_i,
         p0_araddr_i};
     wire [27:0] arlen_w;
-    assign arlen_w = {p6_arlen_i, p5_arlen_i, p4_arlen_i, p3_arlen_i, p2_arlen_i, 4'b0, p0_arlen_i};
+    assign arlen_w = {p6_arlen_i, p5_arlen_i, p4_arlen_i, p3_arlen_i, p2_arlen_i,
+        p1_arlen_i, p0_arlen_i};
     wire [6:0] arvalid_w;
     assign arvalid_w = {p6_arvalid_i,
         p5_arvalid_i,
         p4_arvalid_i,
         p3_arvalid_i,
         p2_arvalid_i,
-        1'b0,
+        p1_arvalid_i,
         p0_arvalid_i};
     wire [6:0] arready_w;
-    wire unused_p1_arready_w;
     assign {p6_arready_o,
         p5_arready_o,
         p4_arready_o,
         p3_arready_o,
         p2_arready_o,
-        unused_p1_arready_w,
+        p1_arready_o,
         p0_arready_o} = arready_w;
     wire [6:0] rid_w;
-    wire unused_p1_rid_w;
-    assign {p6_rid_o, p5_rid_o, p4_rid_o, p3_rid_o, p2_rid_o, unused_p1_rid_w, p0_rid_o} = rid_w;
+    assign {p6_rid_o, p5_rid_o, p4_rid_o, p3_rid_o, p2_rid_o, p1_rid_o, p0_rid_o} = rid_w;
     wire [1791:0] rdata_w;
-    wire [255:0] unused_p1_rdata_w;
     assign {p6_rdata_o,
         p5_rdata_o,
         p4_rdata_o,
         p3_rdata_o,
         p2_rdata_o,
-        unused_p1_rdata_w,
+        p1_rdata_o,
         p0_rdata_o} = rdata_w;
     wire [13:0] rresp_w;
-    wire [1:0] unused_p1_rresp_w;
     assign {p6_rresp_o,
         p5_rresp_o,
         p4_rresp_o,
         p3_rresp_o,
         p2_rresp_o,
-        unused_p1_rresp_w,
+        p1_rresp_o,
         p0_rresp_o} = rresp_w;
     wire [6:0] rlast_w;
-    wire unused_p1_rlast_w;
     assign {p6_rlast_o,
         p5_rlast_o,
         p4_rlast_o,
         p3_rlast_o,
         p2_rlast_o,
-        unused_p1_rlast_w,
+        p1_rlast_o,
         p0_rlast_o} = rlast_w;
     wire [6:0] rvalid_w;
-    wire unused_p1_rvalid_w;
     assign {p6_rvalid_o,
         p5_rvalid_o,
         p4_rvalid_o,
         p3_rvalid_o,
         p2_rvalid_o,
-        unused_p1_rvalid_w,
+        p1_rvalid_o,
         p0_rvalid_o} = rvalid_w;
     wire [6:0] rready_w;
     assign rready_w = {p6_rready_i,
@@ -374,7 +380,7 @@ module edrv32_mem_xbar (
         p4_rready_i,
         p3_rready_i,
         p2_rready_i,
-        1'b0,
+        p1_rready_i,
         p0_rready_i};
     wire unused_no_w_port_w;
     assign unused_no_w_port_w = &{wdata_w[255:0], wstrb_w[31:0]};
@@ -506,7 +512,7 @@ module edrv32_mem_xbar (
             assign awready_w[p] = !aw_pending_r[p] &&
                 !(cmd_valid_r && cmd_write_r && cmd_id_r[3:1] == p) &&
                                     !(w_active_r && w_port_r == p) && p != 0;
-            assign arready_w[p] = !ar_pending_r[p] && p != 1;
+            assign arready_w[p] = !ar_pending_r[p];
             assign wready_w[p] = !w_complete_r[p] &&
                                     !(w_active_r && w_port_r == p) && p != 0;
             assign bvalid_w[p] = b_count_r[p] != 0;

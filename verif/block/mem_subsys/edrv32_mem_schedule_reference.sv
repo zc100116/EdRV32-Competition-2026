@@ -142,7 +142,8 @@ module edrv32_mem_schedule_reference (
         return addr[4:0] == 0 && int'(addr[11:0])+length*32 <= 4096;
     endfunction
 
-    task automatic choose_allowed();
+    task automatic choose_allowed(input int ring_used,
+        input int ring_count);
         bit [6:0] eligible_r;
         bit [6:0] eligible_w;
         bit [6:0] urgent_r;
@@ -166,7 +167,7 @@ module edrv32_mem_schedule_reference (
             nr = read_queue[p].size() != 0 ? read_queue[p][0].beats : 0;
             nw = write_queue[p].size() != 0 ? write_queue[p][0].beats : 0;
             eligible_r[p] = nr != 0 && outstanding < total_limit &&
-                            rd_outstanding[p] < rd_limit[p] && reserved+nr <= 128;
+                            rd_outstanding[p] < rd_limit[p] && ring_used+nr <= 128 && ring_count < 8;
             eligible_w[p] = nw != 0 && complete_writes[p].size() != 0 &&
                             outstanding < total_limit && wr_outstanding[p] < wr_limit[p] &&
                             downstream_w_remaining == 0;
@@ -320,6 +321,8 @@ module edrv32_mem_schedule_reference (
         request_t request;
         bit [31:0] addr;
         int port;
+        int ring_used;
+        int ring_count;
         if (!rst_n_i) begin
             cycle = 0;
             flow_reset();
@@ -364,7 +367,7 @@ module edrv32_mem_schedule_reference (
                 weights[p] = p < 2 ? 4 : p == 3 ? 3 : p == 6 ? 1 : 2;
                 rates[p] = p == 2 ? 26 : p == 6 ? 13 : 0;
                 tokens[p] = 32*256;
-                rd_limit[p] = p == 1 ? 0 : p == 2 ? 1 : p < 4 ? 4 : 2;
+                rd_limit[p] = p == 1 ? 2 : p == 2 ? 1 : p < 4 ? 4 : 2;
                 wr_limit[p] = p == 0 ? 0 : p == 1 ? 4 : p == 2 ? 1 : 2;
                 rd_outstanding[p] = 0;
                 wr_outstanding[p] = 0;
@@ -422,6 +425,9 @@ module edrv32_mem_schedule_reference (
                     commit_command(1, int'(downstream.awid)>>1, int'(downstream.awlen)+1);
                 else commit_command(0, int'(downstream.arid)>>1, int'(downstream.arlen)+1);
             end
+            // Eligibility samples occupancy before this edge retires the oldest slot.
+            ring_used = flow_ring_used;
+            ring_count = flow_ring_count;
             flow_observe();
             // Only a capacity/token-ready weighted head can start the next round.
             // Configuration writes cancel that decision before it can refill.
@@ -437,7 +443,7 @@ module edrv32_mem_schedule_reference (
                     end
             end
             if (prepare_i) begin
-                choose_allowed();
+                choose_allowed(ring_used, ring_count);
                 frozen_refill_ports = refill_ports;
                 frozen_drr_candidate_present = drr_candidate_present;
                 latched_read = allowed_read;
