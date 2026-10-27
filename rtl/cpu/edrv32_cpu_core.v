@@ -100,6 +100,8 @@ module edrv32_cpu_core #(
     wire d_redirect_w;
     reg d_redirected_r;
     wire [31:0] d_target_w;
+    wire [31:0] d_jalr_expected_even_w;
+    wire [31:0] d_jalr_expected_odd_w;
     reg [2:0] d_pair_reason_w;
     reg [1:0] e_valid_r;
     reg [1:0] m_valid_r;
@@ -115,6 +117,10 @@ module edrv32_cpu_core #(
     reg [31:0] e_imm_r [0:1];
     reg [31:0] e_operand_a_r [0:1];
     reg [31:0] e_operand_b_r [0:1];
+    reg [31:0] e_pc_target_r;
+    reg e_pc_target_match_r;
+    reg [31:0] e_jalr_expected_even_r;
+    reg [31:0] e_jalr_expected_odd_r;
     reg [4:0] e_rd_r [0:1];
     reg [4:0] m_rd_r [0:1];
     reg [4:0] w_rd_r [0:1];
@@ -150,12 +156,14 @@ module edrv32_cpu_core #(
     wire [2:0] e_type_w;
     wire e_redirect_w;
     wire e_redirect0_w;
+    wire e_redirect0_needed_w;
     wire e_redirect1_w;
     wire [31:0] e_second_next_pc_w;
     wire [31:0] e_redirect_pc_w;
     wire e_memory_w;
     wire e_misaligned_w;
     wire e_jump_misaligned_w;
+    wire e_target_match_w;
     wire e_advance_w;
     wire e_resolve_w;
     reg e_resolved_r;
@@ -485,6 +493,12 @@ module edrv32_cpu_core #(
             d_issue_w = 1;
     end
     assign d_target_w = d_record_w[0][REC_PC_LSB +: 32] + d_imm_w[0];
+    // JALR clears sum bit 0: either preimage of the aligned prediction is a match.
+    // These D computations use prediction/immediate only, before operand forwarding.
+    assign d_jalr_expected_even_w =
+        {d_record_w[0][REC_PRED_TARGET_LSB + 1 +: 31], 1'b0} - d_imm_w[0];
+    assign d_jalr_expected_odd_w =
+        {d_record_w[0][REC_PRED_TARGET_LSB + 1 +: 31], 1'b1} - d_imm_w[0];
     // cpu-spec 4.4: a stalled JAL redirects once, then remains at the IB head.
     assign d_redirect_w = d_count_w != 0 && !d_redirected_r &&
         !backend_redirect_w && !sleep_r &&
@@ -494,7 +508,7 @@ module edrv32_cpu_core #(
         ? 32'd2 : 32'd4);
     assign e_address_w = e_operand_a_r[0] + e_imm_r[0];
     assign e_branch_target_w = e_class_r[0] == C_JALR ?
-        {e_address_w[31:1], 1'b0} : e_record_r[0][REC_PC_LSB +: 32] + e_imm_r[0];
+        {e_address_w[31:1], 1'b0} : e_pc_target_r;
     assign e_control_w = e_class_r[0] == C_BRANCH || e_class_r[0] == C_JAL ||
         e_class_r[0] == C_JALR;
     assign e_taken_w = e_class_r[0] == C_BRANCH ? e_branch_taken_w :
@@ -509,15 +523,24 @@ module edrv32_cpu_core #(
         !e_call_w;
     assign e_type_w = e_call_w ? 3'd3 : e_return_w ? 3'd4 :
         e_class_r[0] == C_JAL ? 3'd1 : e_class_r[0] == C_JALR ? 3'd2 : 3'd0;
-    assign e_jump_misaligned_w = RVC_EN == 0 && e_control_w && e_actual_pc_w[1];
+    assign e_jump_misaligned_w = RVC_EN == 0 &&
+        ((e_class_r[0] == C_JALR && e_address_w[1]) ||
+        (e_class_r[0] == C_JAL && e_pc_target_r[1]) ||
+        (e_class_r[0] == C_BRANCH &&
+        (e_branch_taken_w ? e_pc_target_r[1] : e_next_pc_w[1])));
+    assign e_target_match_w = e_class_r[0] == C_JALR ?
+        (!e_record_r[0][REC_PRED_TARGET_LSB] &&
+        (e_operand_a_r[0] == e_jalr_expected_even_r ||
+        e_operand_a_r[0] == e_jalr_expected_odd_r)) : e_pc_target_match_r;
     // cpu-spec 4.4: resolve once while M waits; keep the instruction in E.
     assign e_resolve_w = e_valid_r[0] && !e_resolved_r && !m_redirect_w && !div_wait_w;
-    assign e_redirect0_w = e_resolve_w && !e_exception_r &&
+    assign e_redirect0_needed_w = !e_exception_r &&
         !e_jump_misaligned_w && ((e_control_w &&
         ((e_taken_w != e_record_r[0][REC_PRED_TAKEN]) || (e_taken_w
         && e_record_r[0][REC_PRED_TAKEN] &&
-        e_branch_target_w != e_record_r[0][REC_PRED_TARGET_LSB +: 32]))) ||
+        !e_target_match_w))) ||
         (!e_control_w && e_record_r[0][REC_PRED_TAKEN]));
+    assign e_redirect0_w = e_resolve_w && e_redirect0_needed_w;
     assign e_second_next_pc_w = e_record_r[1][REC_PC_LSB +: 32] +
         (e_record_r[1][REC_COMPRESSED] ? 32'd2 : 32'd4);
     assign e_redirect1_w = e_resolve_w && e_valid_r[1] && !e_redirect0_w &&
@@ -585,7 +608,11 @@ module edrv32_cpu_core #(
         (m_interrupt_w && csr_mtvec_w[1:0] == 1 ? {m_trap_cause_w[29:0], 2'b0} : 32'd0)) :
         m_mret_w ? csr_mepc_w :
         m_record_r[0][REC_PC_LSB +: 32] + (m_record_r[0][REC_COMPRESSED] ? 32'd2 : 32'd4);
-    assign backend_redirect_w = m_redirect_w || e_redirect_w;
+    // M already wins the PC/RAS muxes. OR its request with the E causes directly,
+    // without serializing M -> E cancellation -> slot priority -> backend valid.
+    assign backend_redirect_w = m_redirect_w ||
+        (e_valid_r[0] && !e_resolved_r && !div_wait_w &&
+        (e_redirect0_needed_w || (e_valid_r[1] && e_record_r[1][REC_PRED_TAKEN])));
     assign backend_redirect_pc_w = m_redirect_w ? m_redirect_pc_w : e_redirect_pc_w;
     assign backend_redirect_ras_w = m_redirect_w ? committed_ras_w :
         e_redirect0_w ? e_record_r[0][REC_RAS_LSB +: 37] : e_record_r[1][REC_RAS_LSB +: 37];
@@ -770,6 +797,14 @@ module edrv32_cpu_core #(
             m_store_r <= e_operand_b_r[0];
             m_instr_r <= e_instr_w;
             m_csr_data_r <= e_instr_w[14] ? {27'b0, e_instr_w[19:15]} : e_operand_a_r[0];
+        end
+        // Same D->E edge and enable as the instruction/operands; no extra resolve cycle.
+        if (d_issue_w != 0) begin
+            e_pc_target_r <= d_target_w;
+            e_pc_target_match_r <= d_redirect_w || d_redirected_r ||
+                d_target_w == d_record_w[0][REC_PRED_TARGET_LSB +: 32];
+            e_jalr_expected_even_r <= d_jalr_expected_even_w;
+            e_jalr_expected_odd_r <= d_jalr_expected_odd_w;
         end
     end
     assign m_call_w = (m_class_r[0] == C_JAL || m_class_r[0] == C_JALR) &&
