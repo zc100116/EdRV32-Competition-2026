@@ -259,6 +259,9 @@ def quantize_conv(weight: np.ndarray, bias: np.ndarray,
 
 
 def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
+    # Calibration results depend on the torch thread count (float reduction order);
+    # one thread makes every rebuild of the model image byte-identical.
+    torch.set_num_threads(1)
     images = calibration_images(DATA / "coco128/images/train2017", 96)
     network = YOLO(str(DEFAULT_WEIGHTS)).model.eval().fuse(verbose=False)
     checked = audit(network, plan)

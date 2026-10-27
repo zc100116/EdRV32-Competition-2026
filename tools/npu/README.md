@@ -33,6 +33,8 @@ export PYTHONPATH="$PWD/third_party/ultralytics"
 描述符表则将 add 融入前一条 CONV。后续换图像运行同一编译命令即可复用缓存。
 要重新标定，删除这两个生成文件后重跑上述命令；不自动判定缓存版本或审批状态。
 
+标定固定使用 1 个 torch 线程（`quantize.calibrate` 中 `torch.set_num_threads(1)`，2026-10-27 用户确认）：标定结果对线程数敏感，固定后任何环境下重新生成的模型镜像逐字节相同。实测：清空缓存后标定加编译 38 s；在 `OMP_NUM_THREADS=3` 环境下重跑，`model.bin` 和 `mem_model.hex` 与第一次逐字节相同。下文 N-M1 和 TL-04 的记录是固定线程之前的 3 线程结果。
+
 2026-10-27 在开发基线 `8c3cb98` 上的 N-M1 工作树实测，Linux 3 核/8 GB、
 Python 3.12、torch 2.14.1+cpu、numpy 2.5.2、OpenCV 5.0.0、
 ultralytics 8.4.160（子模块 `9d25f80daa5b3af71c16521eba353cb6e7fb66e2`），
