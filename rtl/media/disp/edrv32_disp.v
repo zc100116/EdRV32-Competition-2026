@@ -41,6 +41,7 @@ module edrv32_disp (
 );
     wire enable_w;
     wire enable_pix_w;
+    wire scan_live_mem_w;
     wire [31:0] next_base_w;
     wire [31:0] stride_w;
     wire soft_clear_w;
@@ -91,7 +92,8 @@ module edrv32_disp (
     wire [31:0] perf2_mem_w;
 
     // X6 completion and FIFO accounting include late debt repayment in STATUS.IDLE.
-    assign busy_w = reader_busy_w || fifo_pending_w || req_cnt_w != scan_cnt_w;
+    assign busy_w = scan_live_mem_w || reader_busy_w || fifo_pending_w ||
+        req_cnt_w != scan_cnt_w;
 
     edrv32_disp_regs u_regs (
         // Clock domains and resets.
@@ -131,26 +133,19 @@ module edrv32_disp (
         .irq_o(irq_o)
     );
 
-    edrv32_cdc_sync_bit u_enable (
+    edrv32_disp_control u_control (
         // Clock domains and resets.
-        .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_n_i),
+        .clk_mem_i(clk_mem_i),
+        .rst_mem_n_i(rst_mem_n_i),
+        .clk_pix_i(clk_pix_i),
+        .rst_pix_n_i(rst_pix_n_i),
 
-        // Domain-local interface.
-        .bit_i(enable_w),
-        .bit_o(enable_pix_w)
-    );
-
-    edrv32_cdc_pulse u_frame_req (
-        // Clock domains and resets.
-        .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_n_i),
-        .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_n_i),
-
-        // Domain-local interface.
-        .pulse_i(frame_req_pix_w),
-        .pulse_o(frame_req_mem_w)
+        // Scan enable and acknowledged frame request.
+        .enable_i(enable_w),
+        .frame_req_i(frame_req_pix_w),
+        .enable_o(enable_pix_w),
+        .frame_req_o(frame_req_mem_w),
+        .scan_live_o(scan_live_mem_w)
     );
 
     edrv32_cdc_pulse u_underflow (
