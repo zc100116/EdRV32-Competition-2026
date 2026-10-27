@@ -1,0 +1,5 @@
+`verilator_config
+// The isolated single-clock memory and protocol checkers observe reset synchronously.
+lint_off -rule SYNCASYNCNET -file "*/verif/unit/npu_conv/tb_npu_operator.sv"
+lint_off -rule BLKSEQ -file "*/verif/*"
+lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_axi256_checker.sv"

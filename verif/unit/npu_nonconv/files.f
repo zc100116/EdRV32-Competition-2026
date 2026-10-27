@@ -1,0 +1,10 @@
+../npu_conv/lint.vlt
+../../../verif/common/edrv32_axi256_if.sv
+../../../verif/common/edrv32_axi256_checker.sv
+../../../verif/models/npu_axi256_mem.sv
+../npu_conv/tb_npu_operator.sv
++incdir+../../../rtl/include
+../../../rtl/npu/edrv32_npu_nonconv.v
+../../../rtl/npu/edrv32_npu_read_dma.v
+../../../rtl/npu/edrv32_npu_write_dma.v
+../../../rtl/tech/edrv32_ram_npu_scratch.v
