@@ -10,17 +10,17 @@
 | `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 512 × 64 | `edrv32_ram_dcache_data` | D$ ×2 | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 已生成（20261025-01） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
 | `ip_rom_boot` | DRM ROM，带初始化 | 2048 × 64 | `edrv32_rom_boot` | Boot ROM | [ip_rom_boot.md](ip_rom_boot.md) | 已生成（20261025-01） |
-| `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 需按 8192 深度重新生成 |
-| `ip_ram_npu_line` | DRM 简单双口 RAM，输出寄存 | 1024 × 256 | `edrv32_ram_npu_line` | NPU 行缓存 ×2 | [ip_ram_npu_line.md](ip_ram_npu_line.md) | 未生成 |
-| `ip_ram_npu_weight` | DRM 简单双口 RAM，输出寄存 | 512 × 256 | `edrv32_ram_npu_weight` | NPU 常驻权重 ×24 | [ip_ram_npu_weight.md](ip_ram_npu_weight.md) | 未生成 |
-| `ip_ram_npu_quant` | DRM 简单双口 RAM，输出寄存 | 512 × 64（用 32 项） | `edrv32_ram_npu_quant` | NPU 量化参数 ×8 | [ip_ram_npu_quant.md](ip_ram_npu_quant.md) | 未生成 |
-| `ip_ram_npu_lut` | DRM 简单双口 RAM，输出寄存 | 4096 × 8（用 2048 项） | `edrv32_ram_npu_lut` | NPU 激活表 ×16 | [ip_ram_npu_lut.md](ip_ram_npu_lut.md) | 未生成 |
-| `ip_ram_npu_residual` | DRM 简单双口 RAM，输出寄存 | 512 × 256（用 32 项） | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_ram_npu_residual.md](ip_ram_npu_residual.md) | 未生成 |
-| `ip_ram_npu_result` | DRM 简单双口 RAM，输出寄存 | 512 × 512（用 32 项） | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_ram_npu_result.md](ip_ram_npu_result.md) | 未生成 |
-| `ip_ram_npu_scratch` | DRM 简单双口 RAM | 512 × 256 | `edrv32_ram_npu_scratch` | NPU 非卷积暂存 ×2 | [ip_ram_npu_scratch.md](ip_ram_npu_scratch.md) | 未生成 |
-| （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 乘法，不经 IP Compiler | 2 × (8 × 8) 有符号，2 级 | `edrv32_mul_npu_int8_pair` | NPU MAC 阵列 ×256 | [ip_mul_npu_int8_pair.md](ip_mul_npu_int8_pair.md) | 无需生成；待 ModelSim 等价性测试 |
-| `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 未生成 |
-| `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 未生成 |
+| `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（8192 深，20261027-02） |
+| `ip_ram_npu_line` | DRM 简单双口 RAM，输出寄存 | 1024 × 256 | `edrv32_ram_npu_line` | NPU 行缓存 ×2 | [ip_ram_npu_line.md](ip_ram_npu_line.md) | 已生成（20261027-02） |
+| `ip_ram_npu_weight` | DRM 简单双口 RAM，输出寄存 | 512 × 256 | `edrv32_ram_npu_weight` | NPU 常驻权重 ×24 | [ip_ram_npu_weight.md](ip_ram_npu_weight.md) | 已生成（20261027-02） |
+| `ip_ram_npu_quant` | DRM 简单双口 RAM，输出寄存 | 512 × 64（用 32 项） | `edrv32_ram_npu_quant` | NPU 量化参数 ×8 | [ip_ram_npu_quant.md](ip_ram_npu_quant.md) | 已生成（20261027-02） |
+| `ip_ram_npu_lut` | DRM 简单双口 RAM，输出寄存 | 4096 × 8（用 2048 项） | `edrv32_ram_npu_lut` | NPU 激活表 ×16 | [ip_ram_npu_lut.md](ip_ram_npu_lut.md) | 已生成（20261027-02） |
+| `ip_ram_npu_residual` | DRM 简单双口 RAM，输出寄存 | 512 × 256（用 32 项） | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_ram_npu_residual.md](ip_ram_npu_residual.md) | 已生成（20261027-02） |
+| `ip_ram_npu_result` | DRM 简单双口 RAM，输出寄存 | 512 × 512（用 32 项） | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_ram_npu_result.md](ip_ram_npu_result.md) | 已生成（20261027-02） |
+| `ip_ram_npu_scratch` | DRM 简单双口 RAM | 512 × 256 | `edrv32_ram_npu_scratch` | NPU 非卷积暂存 ×2 | [ip_ram_npu_scratch.md](ip_ram_npu_scratch.md) | 已生成（20261027-02） |
+| （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 乘法，不经 IP Compiler | 2 × (8 × 8) 有符号，2 级 | `edrv32_mul_npu_int8_pair` | NPU MAC 阵列 ×256 | [ip_mul_npu_int8_pair.md](ip_mul_npu_int8_pair.md) | 无需生成；ModelSim 检查通过（20261027-02） |
+| `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 已生成（20261027-02） |
+| `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
 
 PLL、DDR3 控制器等板级 IP 在板级阶段补充。
 

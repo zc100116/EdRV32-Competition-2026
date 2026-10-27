@@ -29,7 +29,8 @@
 | 端口 | 方向 | 位宽 |
 |---|---|---|
 | `wr_clk`、`rd_clk` | in | 1 |
-| `wr_en`、`rd_en` | in | 1 |
+| `wr_en`、`rd_clk_en`（读使能，PDS 实际端口名） | in | 1 |
+| `wr_rst`、`rd_rst` | in | 1（包装接 `1'b0`） |
 | `wr_addr`、`rd_addr` | in | 9 |
 | `wr_data` | in | 64 |
 | `rd_data` | out | 64 |
