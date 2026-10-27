@@ -14,8 +14,8 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU 时序优化 C-R5/C-R6 已合入 main，Windows 第二轮综合（任务 20261027-01，含 SRAM IP 重新生成）已下发；NPU 规格 v0.2、验证方案 v0.2 已确认；N-Q1/N-D0/N-C0/N-IP1/N-M1/N-M2/N-M3/N-V1/N-D1 已完成（协调者分支，未合入 main）；下一步 N-W1 数据通路单独 PDS 任务卡 |
-| 等待用户 | Windows 任务 20261027-01 执行；协调者分支合入 main |
+| 正在进行 | NPU 规格 v0.2、验证方案 v0.2 已确认；N-Q1/N-D0/N-C0/N-IP1/N-M1/N-M2/N-M3/N-V1/N-D1 已完成并合入 main；Windows 任务 20261027-02 已下发：CPU 第二轮综合（原 20261027-01，含 SRAM IP 重新生成）与 NPU 数据通路单独 PDS（N-W1，含 9 个 NPU IP 生成和 ModelSim 等价性检查）合并执行 |
+| 等待用户 | Windows 任务 20261027-02-cpu-npu-synth 执行，结果分支 `win/20261027-02-cpu-npu-synth` |
 | 阻塞 | 无 |
 
 ---
@@ -60,7 +60,8 @@
 | 任务号 | 内容 | 所属 | 状态 |
 |---|---|---|---|
 | 20261025-01-cpu-sys-synth | 生成 7 个 IP；CPU + 系统子系统测量顶层综合与布局布线（Fmax、资源、RVC_EN 0/1 对照） | cpu-plan C-W2、sys-subsys-plan S-P1 | [x] 69.6 MHz，WNS −7.708 ns；报告 `reports/2026-10-26-timing-cpu-sys.md` |
-| 20261027-01-cpu-sys-synth-r2 | 重新生成 SRAM IP（8192×64）；C-R5/C-R6 后第二轮综合与布局布线 | cpu-plan C-W3 | [~] 已下发 |
+| 20261027-01-cpu-sys-synth-r2 | 重新生成 SRAM IP（8192×64）；C-R5/C-R6 后第二轮综合与布局布线 | cpu-plan C-W3 | 并入 20261027-02，不单独执行 |
+| 20261027-02-cpu-npu-synth | A：CPU 第二轮综合（同 20261027-01）；B：NPU 9 个 IP 生成、10 个包装 ModelSim 检查、数据通路单独综合与布局布线 | cpu-plan C-W3、npu-plan N-W1 | [~] 已下发 |
 
 ---
 
