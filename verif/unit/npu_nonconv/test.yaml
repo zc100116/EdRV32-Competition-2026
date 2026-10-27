@@ -1,0 +1,11 @@
+top: tb_npu_operator
+files: files.f
+defines: SIM_MODE
+parameters: NONCONV=1
+software:
+timeout: 1800
+pass: PASS
+tier: smoke full
+simulator: verilator
+verilator_flags: -Wall
+runner: python3 verif/unit/npu_conv/run.py --nonconv
