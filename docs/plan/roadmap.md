@@ -30,12 +30,12 @@
 | Cache | `spec/cache-spec.md` v0.5 | `testplan/cache-testplan.md` v0.1 | `plan/cache-plan.md` | [x] 已确认 |
 | 系统子系统（sys_xbar、ROM/SRAM、APB 桥、CLINT、PLIC、UART、GPIO、I2C、SYSCTRL、复位） | `spec/sys-subsys-spec.md` v0.3 | `testplan/sys-subsys-testplan.md` v0.2 | `plan/sys-subsys-plan.md` | [x] 已确认 |
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON、板级 DDR 适配器） | `spec/mem-subsys-spec.md` v0.2 | `testplan/mem-subsys-testplan.md` v0.2 | `plan/mem-subsys-plan.md` | [x] 已确认 |
-| 公共单元（CDC、FIFO、dma2d） | — | — | — | [ ] |
-| VIN / PIX / DISP | — | — | — | [ ] |
+| 公共单元（CDC、FIFO、dma2d） | `spec/dma2d-spec.md` v0.1（草案） | — | — | [~] dma2d 规格起草中 |
+| VIN / PIX / DISP | 待写（方案见 `design/2026-10-27-image-path.md`） | — | — | [~] 方案已决定 |
 | RND | — | — | — | [ ] |
 | GEO | — | — | — | [ ] |
 | NPU | `spec/npu-spec.md` v0.2 | `testplan/npu-testplan.md` v0.2 | `plan/npu-plan.md` | [~] 数据通路 RTL 完成，待 PDS 测量（N-W1）和控制器（N-C1） |
-| ETH | — | — | — | [ ] |
+| ETH | 待写（随图像通路阶段实现，网口图像经 VIN 内存源处理） | — | — | [ ] |
 | 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |
 
 ---
