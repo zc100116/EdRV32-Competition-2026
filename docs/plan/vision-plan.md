@@ -27,9 +27,10 @@
 | V-R1 | VIN RTL（CH0、CH1、内存源、两路前端、P1 仲裁，CH2 不实现）和单元测试 | Codex · GPT-6.1 Sol | V-D1 | 单元测试通过，lint 0 告警 | task-vin-rtl | [x] 2026-10-28：6 组单元 smoke/full PASS；Yosys 不含存储 7097 LUT6（超 4K 目标，待 V-P1 与 PDS） |
 | V-T1 | VIN 模块级测试（`verif/block/vin`，DVP 模型 `verif/models/dvp_camera_model.sv`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S2 | testbench 按 vin-testplan 完成，模型自测通过 | task-vin-verif | [x] 2026-10-28：DVP 模型自测 PASS，VI-01–17 在桩下编译通过；通过判定在 V-I1 |
 | V-R2 | DISP RTL（时序、TMDS 编码按旧工程移植，读控制、扫描、欠账）和单元测试 | Codex · GPT-6.1 Sol | V-D1 | 单元测试通过，lint 0 告警 | task-disp-rtl | [x] 2026-10-28：6 组单元 smoke/full 12 PASS；停止确认握手（disp-spec v0.2 2.8）；Yosys 3920 LUT4（超 2.5K 目标，待 PDS） |
-| V-T2 | DISP 模块级测试（`verif/block/disp`，TMDS 接收模型、Python 参考编码），不读被测 RTL | Codex · GPT-6.1 Sol | V-S2 | testbench 按 disp-testplan 完成，模型自测通过 | task-disp-verif | [ ] |
+| V-T2 | DISP 模块级测试（`verif/block/disp`，TMDS 接收模型、Python 参考编码），不读被测 RTL | Codex · GPT-6.1 Sol | V-S2 | testbench 按 disp-testplan 完成，模型自测通过 | task-disp-verif | [~] 2026-10-28 派发 |
 | V-I1 | VIN、DISP 联调：跑模块级回归，区分 RTL 错误、测试错误、规格歧义 | Codex · GPT-6.1 Sol | V-R1、V-T1、V-R2、V-T2 | vin、disp testplan smoke/full 通过 | task-vin-disp-int | [ ] |
-| V-P1 | 写 FIFO、内存源输入缓冲、扫描 FIFO 的存储 IP 创建说明和包装模块 | 协调者 | V-R1、V-R2 的存储需求 | `fpga/ip/` 创建说明、`rtl/tech/` 包装模块 | — | [ ] |
+| V-P1 | 写 FIFO、内存源输入缓冲、扫描 FIFO 的存储 IP 创建说明和包装模块 | 协调者 | V-R1、V-R2 的存储需求 | `fpga/ip/` 创建说明、`rtl/tech/` 包装模块 | — | [x] 2026-10-28：`ip_ram_vin_wfifo`（512 × 288）、`ip_ram_disp_scan`（512 × 256 双时钟）创建说明和包装模块（8217c48） |
+| V-P2 | 基于 RAM 的 FIFO 控制器（`edrv32_sync_fifo_ram`、`edrv32_async_fifo_ram`），VIN 写 FIFO、内存源缓冲、DISP 扫描 FIFO 改用 V-P1 包装 | Codex · GPT-6.1 Sol | V-P1 | FIFO 单元测试与 VIN/DISP 全部单元测试通过，lint 0 告警 | task-media-fifo-ram | [~] 2026-10-28 派发 |
 | V-S3 | PIX、GEO 规格 | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [ ] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [ ] |
 
