@@ -34,7 +34,7 @@
 | VIN / PIX / DISP | — | — | — | [ ] |
 | RND | — | — | — | [ ] |
 | GEO | — | — | — | [ ] |
-| NPU | `spec/npu-spec.md` v0.1 | 待写 | `plan/npu-plan.md` | [~] 规格已确认 |
+| NPU | `spec/npu-spec.md` v0.1 | `testplan/npu-testplan.md` v0.1（草案） | `plan/npu-plan.md` | [~] 规格已确认，验证方案待确认 |
 | ETH | — | — | — | [ ] |
 | 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |
 
