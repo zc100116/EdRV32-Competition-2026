@@ -22,11 +22,13 @@ module edrv32_ram_npu_line (
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_npu_line u_ip (
         .wr_clk(clk_i),
+        .wr_rst(1'b0),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
         .rd_clk(clk_i),
-        .rd_en(rd_en_i),
+        .rd_rst(1'b0),
+        .rd_clk_en(rd_en_i),
         .rd_addr(rd_addr_i),
         .rd_data(rd_data_o)
     );
