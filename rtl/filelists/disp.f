@@ -1,0 +1,13 @@
+../common/edrv32_cdc_sync_bit.v
+../common/edrv32_cdc_pulse.v
+../common/edrv32_cdc_handshake.v
+../common/edrv32_cdc_gray_cnt.v
+../common/edrv32_async_fifo.v
+../common/edrv32_dma2d_rd.v
+../media/disp/edrv32_disp_control.v
+../media/disp/edrv32_disp_timing.v
+../media/disp/edrv32_disp_tmds_enc.v
+../media/disp/edrv32_disp_scan.v
+../media/disp/edrv32_disp_reader.v
+../media/disp/edrv32_disp_regs.v
+../media/disp/edrv32_disp.v
