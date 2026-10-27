@@ -2,9 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.2 |
+| 版本 | v0.3 |
 | 日期 | 2026-10-27 |
-| 对应规格 | `docs/spec/mem-subsys-spec.md` v0.2 |
+| 对应规格 | `docs/spec/mem-subsys-spec.md` v0.3 |
 | 关联 | `docs/plan/mem-subsys-plan.md` |
 
 ---
@@ -28,7 +28,7 @@
 | 组件 | 说明 |
 |---|---|
 | AXI64 主设备驱动 | 复用 `verif/common/edrv32_axi64_master.sv`，接网关 |
-| AXI256 主设备驱动 ×6 | 新增 `verif/common/edrv32_axi256_master.sv`：可配置事务序列、R/B 反压模式、`urgent` 驱动；P0 只读、P1 只写 |
+| AXI256 主设备驱动 ×6 | 新增 `verif/common/edrv32_axi256_master.sv`：可配置事务序列、R/B 反压模式、`urgent` 驱动；P0 只读，其余读写 |
 | DDR 时序模型 | 新增 `verif/models/ddr3_axi256_model.sv`，见 2.3 |
 | 参考存储 | 字节级稀疏存储，所有写按 B 返回顺序更新，读结果逐拍比对 |
 | AXI256 协议检查器 | 新增 `verif/common/edrv32_axi256_checker.sv`：SoC 4.2 全部规则（对齐、4 KiB、LEN、W 不交织、下游无 BREADY/RREADY 时 mem_xbar 必须接收） |
@@ -77,6 +77,7 @@
 | MX-10 | 4.1 | 统计计数器：SNAPSHOT 同拍锁存、CLEAR、饱和、WINDOW_CYC | 定向（饱和用强制初值的单元测试） | 与观察器计数比对 | F |
 | MX-11 | 4.1 | 参数寄存器复位值和运行中修改 | 定向 | 读回值、行为变化 | S |
 | MX-12 | 全部 | 7 口随机混合流量，随机反压、随机 urgent | 随机，20 种子 | 参考存储、协议检查器、无死锁（超时） | F |
+| MX-13 | 2.2、SoC 6.4.1 | P1 读通道：P1 同时读写，读数据与参考存储一致，R 经 ID 路由回 P1；P1 读在途数不超过 `OUTST_RD[1]`（复位值 2）；P1 `urgent` 有效时其读事务同样按紧急优先授权 | 定向 + 随机 | 参考存储、协议检查器、在途计数 | S |
 
 ### 3.3 PERF_MON（PM）
 
@@ -135,3 +136,4 @@
 |---|---|---|
 | 2026-10-26 | v0.1 | 初稿 |
 | 2026-10-27 | v0.2 | 对应规格 v0.2：MX-04 隔离饿死保护、按 `OUTST_TOTAL` = 1 判定比例；MX-09 删除 LEN > 15 一类（AXI256 LEN 为 4 位）；模块级调度测试以 `u_xbar.u_sched.prepare_o/grant_o` 作为两级授权的白盒取样时刻（M-I1 授权） |
+| 2026-10-27 | v0.3 | 对应规格 v0.3：P1 增加读通道，主设备驱动 P1 改为读写，新增 MX-13 |

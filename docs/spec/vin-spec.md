@@ -6,7 +6,7 @@
 | 日期 | 2026-10-27 |
 | 状态 | 草案 |
 | 范围 | `edrv32_vin`：两路 DVP 采集前端、内存源、选路、CH0/CH1 Surface 写通道、CH2 NPU 输入通道、P1 端口内部仲裁、VIN 寄存器块。PIX 只规定它在 CH0 上的位置，功能见 `pix-spec.md`；传感器初始化由软件经 I2C0 完成，不在本模块 |
-| 关联文档 | SoC 规格 v0.9 草案 4.2、4.5、5.2（X4）、7.1–7.3、8.5、8.11；`dma2d-spec.md` v0.1；`npu-spec.md` v0.3 2.2；设计记录 `2026-10-27-image-path.md`（Q5、Q6、Q7、NPU 输入适配）；旧工程盘点 `2026-10-27-image-path-legacy-inventory.md` 1.1、2、3 |
+| 关联文档 | SoC 规格 v0.9 4.2、4.5、5.2（X4）、7.1–7.3、8.5、8.11；`dma2d-spec.md` v0.1；`npu-spec.md` v0.3 2.2；设计记录 `2026-10-27-image-path.md`（Q5、Q6、Q7、NPU 输入适配）；旧工程盘点 `2026-10-27-image-path-legacy-inventory.md` 1.1、2、3 |
 
 ---
 

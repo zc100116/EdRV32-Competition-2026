@@ -6,7 +6,7 @@
 | 日期 | 2026-10-27 |
 | 状态 | 草案 |
 | 范围 | `edrv32_disp`：单层 RGB565 Surface 扫描、跨时钟域扫描 FIFO、720p60 显示时序、TMDS 编码、DISP 寄存器块。TMDS 10:1 串化、差分输出和 PLL 在 FPGA 层（`fpga/rtl/`）；图层合成在 RND 阶段与 RND 一起确定（SoC 8.8） |
-| 关联文档 | SoC 规格 v0.9 草案 3.3、4.2、5.1、5.2（X5、X6）、7.1、7.3、8.8、8.11；`dma2d-spec.md` v0.1；设计记录 `2026-10-27-image-path.md`（Q3、Q6）；旧工程盘点 `2026-10-27-image-path-legacy-inventory.md` 1.2、2 |
+| 关联文档 | SoC 规格 v0.9 3.3、4.2、5.1、5.2（X5、X6）、7.1、7.3、8.8、8.11；`dma2d-spec.md` v0.1；设计记录 `2026-10-27-image-path.md`（Q3、Q6）；旧工程盘点 `2026-10-27-image-path-legacy-inventory.md` 1.2、2 |
 
 ---
 
