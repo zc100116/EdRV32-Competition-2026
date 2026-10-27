@@ -1,0 +1,6 @@
+`verilator_config
+// Verification queues and drivers intentionally use blocking assignments.
+lint_off -rule BLKSEQ -file "*/verif/*"
+// Shared master/checker packed fields are intentionally unused for some channels.
+lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_axi256_master.sv"
+lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_axi256_checker.sv"
