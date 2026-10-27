@@ -1,0 +1,10 @@
+top: tb_npu_read_dma
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 300
+pass: PASS
+tier: smoke full
+simulator: verilator
+verilator_flags: -Wall
