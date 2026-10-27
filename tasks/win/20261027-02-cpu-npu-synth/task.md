@@ -165,3 +165,49 @@ B：放在 `tasks/win/20261027-02-cpu-npu-synth/artifacts/npu/`：
 
 ## 备注
 ```
+
+## 9. 补充（2026-10-27）：B4 诊断与测量范围
+
+背景：首次运行 `check_npu_ip.do` 在 `u_chk_residual` 失败（5166 ns，随机读写阶段第 3–4 拍；前 512 拍为只写填充），原检查第一处失败即停止，其余 RAM 与乘法器尚无结论。按 B4，NPU 后续流程暂停。
+
+### 9.1 同步
+
+Windows Codex 先在 `win/20261027-02-cpu-npu-synth` 上提交本机已有的包装模块适配和 `check_npu_ip.do` 的 `ip_root` 改动（提交信息 `win: adapt NPU wrappers to generated IP`），再 `git fetch origin`、`git rebase origin/main` 取得本节和诊断文件。
+
+### 9.2 诊断步骤
+
+| 步骤 | 执行者 | 内容 |
+|---|---|---|
+| B4a | Windows Codex（C） | 打开 `src/diag_npu_ram.do`，`ip_root` 改成与本机 `check_npu_ip.do` 相同。执行 `vsim -c -do "do <仓库路径>/tasks/win/20261027-02-cpu-npu-synth/src/diag_npu_ram.do"`，日志存为 `artifacts/npu/diag_npu_ram.log`。 |
+| B4b | Windows Codex（C） | 在 PDS 中查看 7 个 RAM IP 的 `CAS_MODE`、`RD_OCE_EN`，以及是否有读写冲突模式（Write Mode / Read First / Write First / No Change 等）选项及其取值，写进 `artifacts/npu/ip_ports.md`。 |
+| B4c | Windows Codex（C） | 填写 `result.md` 的"B4 诊断"小节，提交并推送 `win/20261027-02-cpu-npu-synth`（提交信息 `win: 20261027-02-cpu-npu-synth B4 diagnosis`），告诉用户。 |
+
+诊断期间不修改包装模块行为分支、IP、`npu_ip_check.sv` 和诊断程序；B5 之后（NPU 综合、布局布线）等协调者根据诊断结果给出处理后再做。A 部分不受影响，照常进行。
+
+`src/npu_ram_diag.sv` 包含两个顶层：
+
+- `npu_ram_diag_top`：7 个 RAM 用与 `npu_ip_check` 完全相同的激励和种子，每拍同时与 4 个候选模型比较，只计数、不停止。
+  - `m0_spec`：规格行为（同址读写读出旧数据，读使能只控制阵列读，输出寄存器每拍推进）；
+  - `m1_write_first`：同址读写读出新数据；
+  - `m2_oce_gated`：读使能同时门控输出寄存器；
+  - `m3_both`：两者同时成立。
+  每个 RAM 打印一行汇总，并打印第一次 m0 失配的时刻、期望/实际值、此前 4 拍端口记录，以及实际值是否与 m1/m2/m3 相符。最后打印 `DIAG DONE`。
+- `npu_mul_only_top`：只运行 `npu_ip_check` 中的 4 个乘法检查器（int8_pair 两路、quant_low、quant_high），通过时打印 `PASS npu_mul_only`。
+
+协调者已在 Linux 上用行为模型（SIM_MODE）运行：7 个 RAM 的 `m0_spec` 均为 0，m1–m3 各有数百到数千次失配（四个模型可区分）；`PASS npu_mul_only`。
+
+### 9.3 result.md 增加的小节
+
+```markdown
+### B4 诊断
+| RAM | CAS_MODE | RD_OCE_EN | 冲突模式选项 | checks | collisions | m0_spec | m1_write_first | m2_oce_gated | m3_both |
+|---|---|---|---|---|---|---|---|---|---|
+
+每个 RAM 第一次 m0 失配（日志原文，含 edge-0..3 和 actual matches 行）：
+
+乘法器：PASS npu_mul_only / 第一条 FAIL 原文
+```
+
+### 9.4 测量范围说明
+
+`edrv32_ram_npu_scratch` 属于 N-C1 的非卷积执行器，当前 `edrv32_npu_datapath` 不例化它；它在文件列表中存在但不计入本次 B 部分综合资源，IP 检查仍然要做。B 部分资源对比的基准为 148 DRM（设计记录估算 156 减去两块 scratch 的 8）。
