@@ -21,6 +21,8 @@
 | （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 乘法，不经 IP Compiler | 2 × (8 × 8) 有符号，2 级 | `edrv32_mul_npu_int8_pair` | NPU MAC 阵列 ×256 | [ip_mul_npu_int8_pair.md](ip_mul_npu_int8_pair.md) | 无需生成；ModelSim 检查通过（20261027-02） |
 | `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 已生成（20261027-02） |
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
+| `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 待生成 |
+| `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1 | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 待生成 |
 
 PLL、DDR3 控制器等板级 IP 在板级阶段补充。
 
