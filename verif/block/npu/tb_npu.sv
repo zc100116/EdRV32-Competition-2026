@@ -451,10 +451,11 @@ module tb_npu #(
         if (test_id == "RG-03") begin
             rd('h040, perf);
             perf_total = perf;
-            check(perf <= 32'(frame_busy_cycles) &&
+            // testplan RG-03: doorbell is accepted before the APB response returns.
+            check(int'(perf) <= frame_busy_cycles+16 &&
                 int'(perf) >= frame_busy_cycles-16,
                 $sformatf("PERF0 expected=[%0d,%0d] actual=%0d",
-                        frame_busy_cycles-16, frame_busy_cycles, perf));
+                        frame_busy_cycles-16, frame_busy_cycles+16, perf));
             for (int n = 1; n < 8; n++) begin
                 rd(12'('h040+n*4), perf);
                 check(perf != 0, $sformatf("PERF%0d expected nonzero actual=0", n));
