@@ -41,7 +41,7 @@
 | N-IP1 | NPU 用 IP 的创建说明和包装模块（`fpga/ip/`、`rtl/tech/`），Windows 任务卡生成 IP | 协调者 + 用户 | N-D0 | 包装模块 lint 0 告警；任务卡结果 | — | [ ] |
 | N-M1 | 离线编译工具 `tools/npu/`：移植旧工程量化流程，生成模型镜像（按 N-D0 的权重格式）、描述符表（规格 4.1）、量化记录（4.2）、INT8_C4 输入；随机小用例生成器 `gen_case.py`；TL-03 | Codex · GPT-6.1 Sol | N-D0、N-Q1 | TL-03 通过；整网镜像生成命令写进 README | task-npu-compiler | [ ] |
 | N-M2 | 参考模型 `tools/npu/ref/`：按规格解释描述符和存储镜像；TL-01、TL-02、TL-04 | Codex · GPT-6.1 Sol（与 N-M1 不同 worker） | N-D0（权重格式）、N-Q1 | TL-01/02 smoke 通过，TL-04 逐层一致 | task-npu-ref | [ ] |
-| N-C0 | `rtl/common/edrv32_axi256_async_bridge.v` 及单元测试 | Codex · GPT-6.1 Sol | — | 单元测试 smoke/full 通过，lint 0 告警 | task-npu-axi256-bridge | [ ] |
+| N-C0 | `rtl/common/edrv32_axi256_async_bridge.v` 及单元测试 | Codex · GPT-6.1 Sol | — | 单元测试 smoke/full 通过，lint 0 告警 | task-npu-axi256-bridge | [x] 2026-10-27 评审通过（92820c2，未合入，随 NPU 工作包合入）：五通道深度均为 8，三种频率比 W/R 实测 1 拍/慢侧周期；smoke 1/0、full 3/0，lint 0 告警 |
 | N-D1 | 数据通路 RTL：行缓存、窗口生成、MAC 阵列、累加、量化、激活表、残差加、写回打包、数据通路子顶层；各单元测试和 `verif/unit/npu_datapath/`（向量来自 N-M2 的参考模型） | Codex 项目经理 + 员工（GPT-6.1 Sol） | N-D0、N-IP1（包装模块）、N-M2 | 单元测试全过，lint 0 告警；协调者评审关键部分 | task-npu-datapath | [ ] |
 | N-W1 | 数据通路单独 PDS（规格 5.4 第 4 条）：板级测量顶层 `fpga/rtl/edrv32_fpga_npu_dp_top.v`、约束、导入脚本、Windows 任务卡 | 协调者 + 用户 | N-D1、N-IP1 生成 | 时序和资源测量报告；不达标时回到 N-D1 修改 | win 任务卡 | [ ] |
 | N-C1 | 控制和 DMA RTL：寄存器块、描述符读取与译码、调度器（W1/W2/W3/W4b、发射信用）、读写 DMA、POOL、UPSAMPLE、错误和 ABORT、`edrv32_npu` 顶层和两个异步桥；单元测试 | Codex · GPT-6.1 Sol | N-D1、N-C0 | 单元测试全过，lint 0 告警；协调者逐行评审调度器 | task-npu-ctrl | [ ] |
