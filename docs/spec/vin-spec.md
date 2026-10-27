@@ -97,7 +97,7 @@ PIX 在 CH0 上：摄像头帧下 PIX 的输出始终被接收；PIX 自身在�
 摄像头帧的数据到达通道而写 FIFO 已满时（SoC 8.5"实时性"）：
 
 1. 通道丢弃本帧余下的全部数据，FIFO 中已有的数据照常写出；
-2. 本帧的数据写完后，对 `dma2d_wr` 发 ABORT（`dma2d-spec` 5.3），等待 `idle_o`；
+2. FIFO 中已凑成完整突发的数据照常写出；剩余不足一个突发时对 `dma2d_wr` 发 ABORT（`dma2d-spec` 5.3，已提交 AW 的余下 beat 补 `strb` = 0），FIFO 中未提交的尾部丢弃，等待 `idle_o`；
 3. 本帧不报告完成，槽号不前进（下一帧重新从同一位置开始找）；
 4. 置 `IRQ_STAT.ERROR`，`ERR_CODE` 为该通道的溢出代码（第 6 节），溢出计数加 1。
 
@@ -156,7 +156,7 @@ PIX 是独立模块（媒体 APB 槽 2），在媒体子系统顶层与 VIN 连�
 | 偏移 | 名称 | 规定 |
 |---|---|---|
 | 0x000 | ID | 0x0001_0001 |
-| 0x004 | CTRL | bit0 ENABLE；bit1 START 无作用；bit2 ABORT（5.3）；bit3 SOFT_RST：VIN 全部寄存器和状态回到复位值（不影响 PIX） |
+| 0x004 | CTRL | bit0 ENABLE；bit1 START 无作用；bit2 ABORT（5.3）；bit3 SOFT_RST：先按 5.3 ABORT 排空全部 DMA，再把 clk_mem 侧全部寄存器和状态（含 frame_id、PERF、槽指针）回到复位值（不影响 PIX）。DVP 前端和异步 FIFO 只由各域复位复位，SOFT_RST 后 clk_mem 侧丢弃旧项直到下一个帧开始项；ENABLE 回到 0，下次置 1 重新丢 2 帧 |
 | 0x008 | STATUS | BUSY = 任一通道正在接收或写出一帧、内存源忙、或有未完成的 AXI 事务；IDLE = 非 BUSY；ERROR = IRQ_STAT.ERROR |
 | 0x010 | IRQ_STAT | bit0 DONE：内存源读完一帧；bit1 ERROR；bit2 FRAME：CH0 完成一帧；bit8 CH1_FRAME；bit9 CH2_FRAME |
 | 0x014 | ERR_CODE | 第 6 节 |
@@ -274,3 +274,4 @@ CHn 基址 = 0x200 + 0x80 × n，n = 0、1、2。CH2 在本阶段未实现，0x3
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-27 | v0.1 | 初稿：依据 SoC 规格 8.5、设计记录 `2026-10-27-image-path.md`、旧工程盘点；用户确认（Q8 不完整帧补齐标记、ENABLE 后丢 2 帧、DISP 读空欠账） |
+| 2026-10-27 | v0.1 | 澄清（V-R1 问答，不改变已确认的行为）：4.1 SOFT_RST 先排空 DMA，不复位 camN_pclk 域；2.7 溢出后不足一个突发的尾部经 ABORT 收尾，避免与 2.9 整突发仲裁互等 |
