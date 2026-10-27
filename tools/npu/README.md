@@ -253,3 +253,138 @@ NMS confidence=0.001、IoU=0.7，INT8 共 3953 个预测。
 
 要继续定位，需要旧次测量的原始量化结果、评估明细及环境版本；目前保留实测 0.611，
 不将 0.623 写成新工具已达到的结果。
+
+## TL-04：整网逐层、检测结果与 INT8 精度核对（N-M3）
+
+`tl04_compare.py` 默认比较 COCO128 的 `000000000009.jpg`（编译示例图）、
+`000000000529.jpg` 和 `000000000650.jpg`（验证集首、末图）。
+`--legacy-root` 指向已完成旧流程标定的目录，要求其中有
+`out/board/yolo_v8n_fixed_plan.json`、
+`out/models/yolov8n_int8_coco96_p95.bin` 及同名 `.json`；本机使用 N-M1 的 `/tmp/npuq`。
+
+```sh
+export PYTHONPATH="$PWD/third_party/ultralytics"
+mkdir -p build/npu/tl04
+OPENBLAS_NUM_THREADS=1 /usr/bin/time -f 'wall=%e s peak=%M KiB' \
+    ~/.local/opt/edrv32-py/bin/python tools/npu/tl04_compare.py \
+    --legacy-root /tmp/npuq > build/npu/tl04/compare.log 2>&1
+```
+
+可用 `--images <图像...>` 指定图像、`--out <build 下目录>` 指定生成物位置。
+工具把旧脚本和候选复制到输出目录的 `legacy/`，只在副本增加每命令观察回调、
+提取原有 DFL/解码/NMS 代码，不修改旧整数算术。
+两条路径使用**同一份旧候选量化结果**：以旧解包函数恢复逻辑权重，再调用新工具的
+`pack_weights` 按规格 4.3 打包 C4 首层、普通块和 HALF_TAIL；
+旧量化项 byte 7 清零，原零点交给描述符 OUT_ZP（规格 4.2）。
+转换结果放在本次输出目录的 `quantized/`，通过重定向 `quantize.CACHE`，在进程内调用
+原 `compile_yolo.main()` 生成各图用例；不覆盖编译器默认标定缓存，不重新标定或调整参数。
+
+参考模型保存全部 `ref_desc_<n>.hex`；旧路径保存全部 74 个命令的
+`legacy/cmd_<n>.npy`。按层名对应 68 个描述符，六个融合 CONV 取旧残差加之后的张量，
+其余取相应旧命令输出。物理平面还原为逻辑 `(通道, 行, 列)`，去掉平面间隙和物理补齐。
+逐层打印形状和差异元素数；失败打印首个差异坐标及两边数值，最终退出码为 1。
+检测对照将参考模型六个检测头按原尺度/零点反量化，再送入复制的旧 DFL/NMS；
+按 NMS 原顺序精确比较类别、四个框坐标和置信度。
+
+2026-10-27 在基线 `602d458` 加本节工具改动上实测；依赖版本同上，
+torch 默认 3 线程、参考模型 BLAS 1 线程；同一时刻仅运行一个本任务的重任务：
+
+| 图像 | 逐层比较 | 检测数：conf=0.001 / conf=0.25（前 20） | 检测对照 | 单图耗时 |
+|---|---|---:|---|---:|
+| 000000000009.jpg | 68/68，全部逐位一致 | 156 / 5 | 两组全部完全相同 | 2.680 s |
+| 000000000529.jpg | 68/68，全部逐位一致 | 21 / 2 | 两组全部完全相同 | 2.637 s |
+| 000000000650.jpg | 68/68，全部逐位一致 | 21 / 2 | 两组全部完全相同 | 2.135 s |
+
+两组 NMS 的 IoU 均为 0.7；conf=0.001 沿用旧库默认最多 300 个结果。
+共 204/204 个描述符输出、6/6 组检测对照通过，工具计时 7.583 s，
+含导入的 wall 为 11.11 s，峰值 RSS 455272 KiB。
+三图最大累加绝对值分别为 151774、146246、159935，均小于旧 float32 整数精确界限 2^24。
+日志为 `build/npu/tl04/compare.log`。另对首层快照翻转一个输出字节，
+工具报告恰好 1 个差异并返回 1，未跳过后续层；见 `build/npu/tl04/fault_compare.log`。
+`py_compile`、`git diff --check` 通过；Verilog 风格检查扫描 0 个文件、0 告警，
+本改动无 RTL，Verilator lint 不适用。
+
+**mAP 进一步定位：0.623 的根因仍未查明。** 发现了两个可复现的环境敏感项，
+但本次变体均未复现旧记录的 0.623；没有改变 percentile、margin、标定集或量化算法。
+
+- 相同线程设置各重复标定两次：3 线程组的 63 层记录和模型字节完全相同，
+  1 线程组也完全相同；跨组有 61/63 层量化记录不同。
+  新的默认 3 线程标定与 `/tmp/npuq` 候选记录完全相同。
+  因而当前证据支持**线程设置敏感**，未观察到固定线程数下的重复运行不稳定。
+  初版比较器用子进程调用编译器，父进程导入 ultralytics 后设置环境变量
+  `OMP_NUM_THREADS=1`，子进程据此初始化 torch 为 1 线程，造成两边重新标定结果不同；
+  这不是参考算术或权重布局错误。首图首次输出差异为 desc15/旧 cmd18
+  `L6.b0.cv1` 的 11 个元素，该层已有 1 个量化权重及 1 个参数字节不同。
+  所以 TL-04 固定使用同一份量化结果，标定确定化策略留给后续决策。
+- 当前 ultralytics 的 `non_max_suppression` 根据 `torchvision` 是否已导入，
+  分别调用 `torchvision.ops.nms` 或 `TorchNMS.nms`。
+  对同一批预测分别执行两条后端，旧候选的 128 次调用中有 49 次结果不同
+  （32 图 × 浮点/INT8 × 两个 confidence 阈值）；后端选择确实影响当前评估数字。
+  固定原 32 张验证图、225 个标注、45 个有标注类别，结果如下：
+
+| 标定线程数 | NMS 后端 | INT8 预测数 | mAP50 | mAP50-95 |
+|---|---|---:|---:|---:|
+| 3（原 Linux 候选） | TorchNMS | 3953 | 0.6112938378 | 0.4655402422 |
+| 3（同一候选） | torchvision | 3950 | 0.6126612881 | 0.4680217482 |
+| 1 | TorchNMS | 3933 | 0.6079594176 | 0.4639375846 |
+| 1（同一候选） | torchvision | 3934 | 0.6092105557 | 0.4623116645 |
+
+标定重复实验脚本/日志为 `build/npu/tl04/calibration_study.py` 和同名 `.log`，
+后三次标定 wall 合计 80.25 s；第一次默认线程标定另见 `default_compile.log`（75.509 s）。
+评估脚本/日志为 `build/npu/tl04/eval_nms.py`、`eval_nms.log`（52.44 s）和
+`eval_thread_variant.py`、`eval_thread_variant.log`（56.71 s）。
+1 线程候选仅还原成旧物理格式交给旧算术执行，量化数值保持原样。
+上述生成脚本均在 `build/`，不入库。
+
+以下命令可独立复现标定线程实验（先完成环境安装；四次标定顺序执行）：
+
+```sh
+PYTHONPATH="$PWD/tools/npu:$PWD/third_party/ultralytics" \
+    ~/.local/opt/edrv32-py/bin/python - <<'PY'
+import json
+from pathlib import Path
+import torch
+import quantize
+from fixed_plan import build_plan
+results = {}
+for threads in (3, 1):
+    for repeat in (1, 2):
+        torch.set_num_threads(threads)
+        quantize.CACHE = Path(f"build/npu/tl04/repeat_t{threads}_{repeat}")
+        quantize.calibrate(build_plan())
+        results[threads, repeat] = quantize.CACHE
+for left, right in (((3, 1), (3, 2)), ((1, 1), (1, 2)), ((3, 1), (1, 1))):
+    a, b = (results[key] for key in (left, right))
+    rows = [json.loads((p / "quantization.json").read_text())["convolutions"] for p in (a, b)]
+    print(left, right, "different rows", sum(x != y for x, y in zip(*rows)),
+          "model equal", (a / "model.bin").read_bytes() == (b / "model.bin").read_bytes())
+PY
+```
+
+完成 TL-04 后，以下命令用其复制的旧评估器复现原候选的两种 NMS 评估：
+
+```sh
+PYTHONPATH="$PWD/build/npu/tl04/legacy/scripts:$PWD/third_party/ultralytics" \
+    ~/.local/opt/edrv32-py/bin/python - <<'PY'
+import sys
+from pathlib import Path
+import torch
+import torchvision
+from ultralytics.utils.nms import TorchNMS
+import yolo_v8n_eval_quant as evaluation
+data = Path.home() / ".local/share/edrv32/npu"
+candidate = "build/npu/tl04/legacy/out/models/yolov8n_int8_coco96_p95.bin"
+for name, backend in (("torchvision", torchvision.ops.nms), ("torch", TorchNMS.nms)):
+    torchvision.ops.nms = backend
+    sys.argv = ["yolo_v8n_eval_quant.py", "--candidate", candidate,
+                "--weights", str(data / "yolov8n.pt"), "--dataset", str(data / "coco128"),
+                "--output", f"build/npu/tl04/eval_{name}.json"]
+    evaluation.main()
+PY
+```
+
+除上节 N-M1 已排除的布局迁移、标定图像排序、percentile/margin、预处理和 NMS 阈值外，
+本次另排除了这三幅图的参考算术/旧整数算术差异及当前两种 NMS 后端足以单独解释
+0.623 的假设；线程设置和 NMS 后端应随以后精度测量一并记录。
+旧 Windows 原始候选、完整 eval JSON、依赖版本和实际线程/NMS 后端仍缺失，
+无法将上述环境敏感项认定为旧差异的根因，结论保留“未查明”。
