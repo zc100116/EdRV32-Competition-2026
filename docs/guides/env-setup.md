@@ -17,6 +17,8 @@
 | dtc | 1.7.0 | `~/.local/opt/edrv32/usr/` | Ubuntu 24.04 deb 包解压 |
 | Icarus Verilog | 12.0 | `~/.local/opt/iverilog/usr/` | Ubuntu 24.04 deb 包解压 |
 | Yosys | 0.70+219（OSS CAD Suite 2026-10-25） | `~/.local/opt/oss-cad-suite/` | YosysHQ 预编译包解压；只用于结构性时序预估，FPGA 综合以 PDS 为准 |
+| Python 虚拟环境（NPU 离线工具） | Python 3.12，torch 2.14.1 CPU，numpy 2.5.2，版本见 `tools/requirements.txt` | `~/.local/opt/edrv32-py/` | pip；ultralytics 用仓库子模块 `third_party/ultralytics`（8.4.160） |
+| YOLOv8n 权重、COCO128 | ultralytics assets | `~/.local/share/edrv32/npu/` | GitHub release 下载，不入库 |
 
 `~/.local/opt/edrv32/usr/bin/` 下还有 Ubuntu 的 `riscv64-unknown-elf-gcc` 13.2，它的预编译库缺少 rv32imc 组合，**项目统一使用 `riscv-none-elf-gcc` 15.2.0**。
 
@@ -85,6 +87,31 @@ export VERILATOR_ROOT=$EDRV32_TOOLS/usr/share/verilator
 export PATH=$PATH:$HOME/.local/opt/oss-cad-suite/bin
 ```
 
+### 6. NPU 离线工具的 Python 环境
+
+系统 Python 没有 `ensurepip`，用 `--without-pip` 建虚拟环境，再用系统 pip 的 `--python` 安装：
+
+```sh
+python3 -m venv --without-pip ~/.local/opt/edrv32-py
+P=~/.local/opt/edrv32-py/bin/python
+python3 -m pip --python $P install torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cpu
+python3 -m pip --python $P install -r tools/requirements.txt
+git submodule update --init third_party/ultralytics
+```
+
+ultralytics 不装进虚拟环境，运行时用 `PYTHONPATH=<仓库>/third_party/ultralytics`，这样每个工作区都用自己检出的子模块版本。
+
+模型和数据放在仓库外：
+
+```sh
+D=~/.local/share/edrv32/npu; mkdir -p $D
+curl -L -o $D/yolov8n.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov8n.pt
+curl -L -o $D/coco128.zip https://github.com/ultralytics/assets/releases/download/v0.0.0/coco128.zip
+python3 -c "import zipfile; zipfile.ZipFile('$D/coco128.zip').extractall('$D')"
+```
+
+在本机（3 核）上用旧工程脚本实测（2026-10-27）：检查点核对 6 s；96 张图标定并导出 INT8 镜像 1 分 24 秒；单图整网 INT8 主机模拟 6 s；32 张图精度评估 2 分 5 秒（浮点 mAP50 0.642，INT8 0.611）。
+
 ## 检查
 
 ```sh
@@ -93,4 +120,5 @@ riscv-none-elf-gcc --version     # 15.2.0
 spike --help | head -1
 iverilog -V | head -1
 yosys -V                         # Yosys 0.70+219
+~/.local/opt/edrv32-py/bin/python -c "import torch, numpy; print(torch.__version__, numpy.__version__)"   # 2.14.1+cpu 2.5.2
 ```
