@@ -364,7 +364,8 @@ module edrv32_cpu_core #(
         .access_valid_i(csr_m_access_w || csr_d_access_w),
         .addr_i(csr_addr_w),
         .write_i(csr_write_w),
-        .commit_i(m_commit_w[0] && csr_m_access_w),
+        // CSR is ready immediately in M, with the same exception/interrupt priority.
+        .commit_i(m_system_commit_w && csr_m_access_w),
         .command_i(csr_command_w),
         .write_data_i(csr_operand_w),
         .read_data_o(csr_read_w),
@@ -594,8 +595,8 @@ module edrv32_cpu_core #(
     assign csr_command_w = csr_m_access_w ? m_instr_r[13:12] : d_instr_w[0][13:12];
     assign csr_write_w = csr_m_access_w ? (m_instr_r[13:12] == 1 || m_instr_r[19:15] != 0) :
         (d_instr_w[0][13:12] == 1 || d_instr_w[0][19:15] != 0);
-    assign csr_operand_w = csr_m_access_w ? m_csr_data_r :
-        (d_instr_w[0][14] ? {27'b0, d_instr_w[0][19:15]} : d_operand_w[0]);
+    // D only checks address/permission; only M can commit a CSR write (cpu-spec 4.6).
+    assign csr_operand_w = m_csr_data_r;
     always @(*) begin
         for (result_idx = 0; result_idx < 2; result_idx = result_idx + 1) begin
             e_result_w[result_idx] = e_alu_w[result_idx];

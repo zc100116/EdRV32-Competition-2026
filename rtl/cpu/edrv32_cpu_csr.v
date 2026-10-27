@@ -101,19 +101,24 @@ module edrv32_cpu_csr #(
         endcase
         begin
             for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
+                // All CSR addresses are disjoint. OR decoded banks rather than
+                // serially overriding the base read mux for every HPM register.
+                read_data_o = read_data_o |
+                    ({32{addr_i == 12'h323 + read_idx[11:0]}} & {27'b0, event_r[read_idx]}) |
+                    ({32{addr_i == 12'hb03 + read_idx[11:0] ||
+                    addr_i == 12'hc03 + read_idx[11:0]}} & counter_r[read_idx][31:0]) |
+                    ({32{addr_i == 12'hb83 + read_idx[11:0] ||
+                    addr_i == 12'hc83 + read_idx[11:0]}} & counter_r[read_idx][63:32]);
                 if (addr_i == 12'h323 + read_idx[11:0]) begin
-                    read_data_o = {27'b0, event_r[read_idx]};
                     implemented_w = 1'b1;
                 end
                 if (addr_i == 12'hb03 + read_idx[11:0] ||
                     addr_i == 12'hc03 + read_idx[11:0]) begin
-                    read_data_o = counter_r[read_idx][31:0];
                     implemented_w = 1'b1;
                     readonly_w = addr_i[10];
                 end
                 if (addr_i == 12'hb83 + read_idx[11:0] ||
                     addr_i == 12'hc83 + read_idx[11:0]) begin
-                    read_data_o = counter_r[read_idx][63:32];
                     implemented_w = 1'b1;
                     readonly_w = addr_i[10];
                 end
