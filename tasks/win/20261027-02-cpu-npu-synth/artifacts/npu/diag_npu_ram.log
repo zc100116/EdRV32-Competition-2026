@@ -1,0 +1,226 @@
+# do G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/diag_npu_ram.do
+# G:/codex_project/EdRV32-Competition-2026
+# G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore
+# G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation
+# G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src
+# G:/codex_project/EdRV32-Competition-2026/build/win/20261027-02-cpu-npu-synth
+# reading modelsim.ini
+# Model Technology ModelSim SE-64 vmap 2020.4 Lib Mapping Utility 2020.10 Oct 13 2020
+# vmap work npu_ram_diag_work 
+# Modifying modelsim.ini
+# ram_npu_line ram_npu_weight ram_npu_quant ram_npu_lut ram_npu_residual
+#     ram_npu_result ram_npu_scratch mul_npu_quant_low mul_npu_quant_high
+# +incdir+G:/codex_project/EdRV32-Competition-2026/rtl/include
+# G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_line.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/ip_ram_npu_line.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_line.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_weight.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/ip_ram_npu_weight.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_weight.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_quant.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/ip_ram_npu_quant.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_quant.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_lut.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/ip_ram_npu_lut.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_lut.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_residual.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/ip_ram_npu_residual.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_residual.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_result.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/ip_ram_npu_result.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_result.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_scratch.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/ip_ram_npu_scratch.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_scratch.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/ip_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_mult_v1_3_ip_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/ip_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_mult_v1_3_ip_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_int8_pair.v
+# G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_line.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/ip_ram_npu_line.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_line.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_weight.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/ip_ram_npu_weight.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_weight.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_quant.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/ip_ram_npu_quant.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_quant.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_lut.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/ip_ram_npu_lut.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_lut.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_residual.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/ip_ram_npu_residual.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_residual.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_result.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/ip_ram_npu_result.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_result.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_scratch.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/ip_ram_npu_scratch.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_scratch.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/ip_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_mult_v1_3_ip_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/ip_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_mult_v1_3_ip_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_int8_pair.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM18K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_APM_E2.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_GRS.v G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ip_check.sv G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv
+# Model Technology ModelSim SE-64 vlog 2020.4 Compiler 2020.10 Oct 13 2020
+# Start time: 22:32:47 on Oct 27,2026
+# vlog -sv -timescale 1ns/1ps "+define+FPGA_MODE" "+incdir+G:/codex_project/EdRV32-Competition-2026/rtl/include" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl" "+incdir+G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl" G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_line.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/ip_ram_npu_line.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_line/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_line.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_weight.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/ip_ram_npu_weight.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_weight/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_weight.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_quant.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/ip_ram_npu_quant.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_quant/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_quant.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_lut.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/ip_ram_npu_lut.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_lut/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_lut.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_residual.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/ip_ram_npu_residual.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_residual/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_residual.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_result.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/ip_ram_npu_result.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_result/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_result.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_npu_scratch.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/ip_ram_npu_scratch.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_ram_npu_scratch/rtl/ipm2l_sdpram_v1_10_ip_ram_npu_scratch.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/ip_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_mult_v1_3_ip_mul_npu_quant_low.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/ip_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_mult_v1_3_ip_mul_npu_quant_high.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_mul_npu_int8_pair.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM18K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_APM_E2.v G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_GRS.v G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ip_check.sv G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv 
+# -- Compiling module edrv32_ram_npu_line
+# -- Compiling module ip_ram_npu_line
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_line
+# -- Compiling module edrv32_ram_npu_weight
+# -- Compiling module ip_ram_npu_weight
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_weight
+# -- Compiling module edrv32_ram_npu_quant
+# -- Compiling module ip_ram_npu_quant
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_quant
+# -- Compiling module edrv32_ram_npu_lut
+# -- Compiling module ip_ram_npu_lut
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_lut
+# -- Compiling module edrv32_ram_npu_residual
+# -- Compiling module ip_ram_npu_residual
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_residual
+# -- Compiling module edrv32_ram_npu_result
+# -- Compiling module ip_ram_npu_result
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_result
+# -- Compiling module edrv32_ram_npu_scratch
+# -- Compiling module ip_ram_npu_scratch
+# -- Compiling module ipm2l_sdpram_v1_10_ip_ram_npu_scratch
+# -- Compiling module edrv32_mul_npu_quant_low
+# -- Compiling module ip_mul_npu_quant_low
+# -- Compiling module ipm2l_mult_v1_3_ip_mul_npu_quant_low
+# -- Compiling module ipm2l_apm_data_pipeline
+# -- Compiling module ipm2l_apm_distributed_sdpram
+# -- Compiling module ipm2l_apm_distributed_shiftregister
+# -- Compiling module edrv32_mul_npu_quant_high
+# -- Compiling module ip_mul_npu_quant_high
+# -- Compiling module ipm2l_mult_v1_3_ip_mul_npu_quant_high
+# -- Compiling module ipm2l_apm_data_pipeline
+# ** Warning: G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v(21): (vlog-2275) Existing module 'ipm2l_apm_data_pipeline' at G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_data_pipeline.v(21) will be overwritten.
+# -- Compiling module ipm2l_apm_distributed_sdpram
+# ** Warning: G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v(22): (vlog-2275) Existing module 'ipm2l_apm_distributed_sdpram' at G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_sdpram.v(22) will be overwritten.
+# -- Compiling module ipm2l_apm_distributed_shiftregister
+# ** Warning: G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_high/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v(21): (vlog-2275) Existing module 'ipm2l_apm_distributed_shiftregister' at G:/codex_project/EdRV32-FPGA/EdRV32-NPU-DP/ipcore/ip_mul_npu_quant_low/rtl/ipm2l_apm_data_pipeline/ipm2l_apm_distributed_shiftregister.v(21) will be overwritten.
+# -- Compiling module edrv32_mul_npu_int8_pair
+# -- Compiling module GTP_DRM18K_E1
+# -- Compiling module GTP_DRM36K_E1
+# -- Compiling module GTP_APM_E2
+# -- Compiling module GTP_GRS
+# -- Compiling module npu_ram_check
+# -- Compiling module npu_mul_check
+# -- Compiling module npu_ip_check
+# -- Compiling module npu_ram_diag
+# -- Compiling module npu_ram_diag_top
+# -- Compiling module npu_mul_only_top
+# 
+# Top level modules:
+# 	GTP_DRM18K_E1
+# 	npu_ip_check
+# 	npu_ram_diag_top
+# 	npu_mul_only_top
+# End time: 22:32:47 on Oct 27,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 3
+# vsim -voptargs="+acc" -onfinish stop work.npu_ram_diag_top 
+# Start time: 22:32:47 on Oct 27,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v(746): (vopt-2250) Function "mem_read_a" has no return value assignment.
+# ** Warning: G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v(746): (vopt-2250) Function "mem_read_a" has no return value assignment.
+# ** Warning: G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v(746): (vopt-2250) Function "mem_read_a" has no return value assignment.
+# ** Warning: G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_DRM36K_E1.v(746): (vopt-2250) Function "mem_read_a" has no return value assignment.
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=4.
+# //  ModelSim SE-64 2020.4 Oct 13 2020
+# //
+# //  Copyright 1991-2020 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.npu_ram_diag_top(fast)
+# Loading work.GTP_GRS(fast)
+# Loading work.edrv32_ram_npu_line(fast)
+# Loading work.ip_ram_npu_line(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_line(fast)
+# Loading work.GTP_DRM36K_E1(fast)
+# Loading work.npu_ram_diag(fast)
+# Loading work.edrv32_ram_npu_weight(fast)
+# Loading work.ip_ram_npu_weight(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_weight(fast)
+# Loading work.GTP_DRM36K_E1(fast__1)
+# Loading work.npu_ram_diag(fast__1)
+# Loading work.edrv32_ram_npu_quant(fast)
+# Loading work.ip_ram_npu_quant(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_quant(fast)
+# Loading work.GTP_DRM36K_E1(fast__2)
+# Loading work.npu_ram_diag(fast__2)
+# Loading work.edrv32_ram_npu_lut(fast)
+# Loading work.ip_ram_npu_lut(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_lut(fast)
+# Loading work.GTP_DRM36K_E1(fast__3)
+# Loading work.npu_ram_diag(fast__3)
+# Loading work.edrv32_ram_npu_residual(fast)
+# Loading work.ip_ram_npu_residual(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_residual(fast)
+# Loading work.npu_ram_diag(fast__4)
+# Loading work.edrv32_ram_npu_result(fast)
+# Loading work.ip_ram_npu_result(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_result(fast)
+# Loading work.GTP_DRM36K_E1(fast__4)
+# Loading work.npu_ram_diag(fast__5)
+# Loading work.edrv32_ram_npu_scratch(fast)
+# Loading work.ip_ram_npu_scratch(fast)
+# Loading work.ipm2l_sdpram_v1_10_ip_ram_npu_scratch(fast)
+# Loading work.GTP_DRM36K_E1(fast__5)
+# Loading work.npu_ram_diag(fast__6)
+# diag residual first m0 mismatch time=5166000 expected=19861f335c63fbb807c42b0f56592bacd4e63ca968758dd0285d9750a8227850 actual=524ee3a4cb789e96ac53b658f3565ae6988bd0310fce171f342ce768f499a8e9
+# diag residual   edge-0 we=1 wa=106 re=1 ra=180
+# diag residual   edge-1 we=1 wa=387 re=1 ra=387
+# diag residual   edge-2 we=1 wa=377 re=1 ra=377
+# diag residual   edge-3 we=1 wa=455 re=1 ra=288
+# diag residual   actual matches m1=1 m2=0 m3=1
+# diag result first m0 mismatch time=5256000 expected=775bf9ee382dcb7018dcdb31f94b54f2c6fd5a8d8fb66c1fc435da88b448aa68b6bef86dffd7a8ff7a42edf4381ef7707785edef6e74e9dc4a9d8b954a028594 actual=1e401d3c9690e42dd0efdaa15652cdac20836d4120db1f418bebf817fd7528fa1138d92283ae4e0799f90633f72fdaee39137b722ae3e555ceae849de11d30c2
+# diag result   edge-0 we=0 wa=144 re=0 ra=422
+# diag result   edge-1 we=1 wa=270 re=1 ra=270
+# diag result   edge-2 we=1 wa=41 re=0 ra=24
+# diag result   edge-3 we=1 wa=180 re=1 ra=267
+# diag result   actual matches m1=1 m2=0 m3=0
+# diag scratch first m0 mismatch time=5286000 expected=15932f2bec9b08d95e6543bcfd6ba4fa0942c91295c0a02b51f051a321019942 actual=3ab58d75c733568e756c2deab05fd460ee35f2dc6e893fddb8660870dffee6bf
+# diag scratch   edge-0 we=1 wa=340 re=1 ra=340
+# diag scratch   edge-1 we=1 wa=384 re=0 ra=384
+# diag scratch   edge-2 we=0 wa=128 re=1 ra=212
+# diag scratch   edge-3 we=0 wa=354 re=1 ra=250
+# diag scratch   actual matches m1=1 m2=0 m3=1
+# diag quant first m0 mismatch time=5376000 expected=b2c7de652cc46759 actual=ce318c9c2d946b5b
+# diag quant   edge-0 we=0 wa=32 re=1 ra=217
+# diag quant   edge-1 we=1 wa=202 re=1 ra=202
+# diag quant   edge-2 we=0 wa=341 re=1 ra=404
+# diag quant   edge-3 we=0 wa=355 re=1 ra=355
+# diag quant   actual matches m1=1 m2=0 m3=1
+# diag weight first m0 mismatch time=5506000 expected=238f0147bc33f6784dfd719bc26ad684f0e788e132977b65ad4d105ac049be80 actual=aff4845fd54494aad6f76ead21289b423706496ea8931a518fe5f81fdf3bc2be
+# diag weight   edge-0 we=0 wa=214 re=1 ra=411
+# diag weight   edge-1 we=1 wa=381 re=1 ra=381
+# diag weight   edge-2 we=0 wa=502 re=1 ra=502
+# diag weight   edge-3 we=0 wa=511 re=1 ra=0
+# diag weight   actual matches m1=1 m2=0 m3=1
+# diag line first m0 mismatch time=10356000 expected=499d279312a6c7252bb29b57a7fd104f6f1805de32278b64b532506af63514ec actual=23c2c7474b38f396121c9b248e5c941c47291b8e2bedd7571600112caed02c5d
+# diag line   edge-0 we=0 wa=28 re=1 ra=1023
+# diag line   edge-1 we=1 wa=812 re=1 ra=812
+# diag line   edge-2 we=0 wa=72 re=1 ra=532
+# diag line   edge-3 we=0 wa=644 re=1 ra=234
+# diag line   actual matches m1=1 m2=0 m3=1
+# diag lut first m0 mismatch time=41576000 expected=4f actual=25
+# diag lut   edge-0 we=0 wa=4015 re=0 ra=4015
+# diag lut   edge-1 we=1 wa=2670 re=1 ra=2670
+# diag lut   edge-2 we=0 wa=4095 re=1 ra=0
+# diag lut   edge-3 we=1 wa=4095 re=1 ra=0
+# diag lut   actual matches m1=1 m2=0 m3=0
+# diag weight AW=9 DW=256 LAT=2 checks=6002 collisions=507 m0_spec=418 m1_write_first=292 m2_oce_gated=2035 m3_both=1960
+# diag quant AW=9 DW=64 LAT=2 checks=6001 collisions=530 m0_spec=478 m1_write_first=283 m2_oce_gated=2083 m3_both=1948
+# diag residual AW=9 DW=256 LAT=2 checks=6001 collisions=519 m0_spec=443 m1_write_first=313 m2_oce_gated=2052 m3_both=1957
+# diag result AW=9 DW=512 LAT=2 checks=6002 collisions=552 m0_spec=460 m1_write_first=315 m2_oce_gated=2090 m3_both=1988
+# diag scratch AW=9 DW=256 LAT=1 checks=6003 collisions=545 m0_spec=437 m1_write_first=318 m2_oce_gated=437 m3_both=318
+# diag line AW=10 DW=256 LAT=2 checks=6002 collisions=525 m0_spec=428 m1_write_first=310 m2_oce_gated=2047 m3_both=1971
+# diag lut AW=12 DW=8 LAT=2 checks=6002 collisions=501 m0_spec=407 m1_write_first=333 m2_oce_gated=2063 m3_both=1992
+# DIAG DONE
+# ** Note: $finish    : G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv(364)
+#    Time: 100990 ns  Iteration: 2  Instance: /npu_ram_diag_top
+# Break in Module npu_ram_diag_top at G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv line 364
+# Stopped at G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv line 364
+# End time: 22:32:52 on Oct 27,2026, Elapsed time: 0:00:05
+# Errors: 0, Warnings: 4
+# vsim -voptargs="+acc" -onfinish stop work.npu_mul_only_top 
+# Start time: 22:32:52 on Oct 27,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# Loading sv_std.std
+# Loading work.npu_mul_only_top(fast)
+# Loading work.GTP_GRS(fast)
+# Loading work.edrv32_mul_npu_int8_pair(fast)
+# Loading work.GTP_APM_E2(fast)
+# Loading work.npu_mul_check(fast)
+# Loading work.npu_mul_check(fast__1)
+# Loading work.edrv32_mul_npu_quant_low(fast)
+# Loading work.ip_mul_npu_quant_low(fast)
+# Loading work.ipm2l_mult_v1_3_ip_mul_npu_quant_low(fast)
+# Loading work.ipm2l_apm_data_pipeline(fast)
+# Loading work.ipm2l_apm_distributed_shiftregister(fast)
+# Loading work.ipm2l_apm_distributed_sdpram(fast)
+# Loading work.ipm2l_apm_data_pipeline(fast__1)
+# Loading work.ipm2l_apm_distributed_shiftregister(fast__1)
+# Loading work.ipm2l_apm_distributed_sdpram(fast__1)
+# Loading work.ipm2l_apm_data_pipeline(fast__2)
+# Loading work.ipm2l_apm_distributed_shiftregister(fast__2)
+# Loading work.ipm2l_apm_distributed_sdpram(fast__2)
+# Loading work.GTP_APM_E2(fast__1)
+# Loading work.npu_mul_check(fast__2)
+# Loading work.edrv32_mul_npu_quant_high(fast)
+# Loading work.ip_mul_npu_quant_high(fast)
+# Loading work.ipm2l_mult_v1_3_ip_mul_npu_quant_high(fast)
+# Loading work.npu_mul_check(fast__3)
+# mul 8x8 checks=4026
+# mul 8x8 checks=4026
+# mul 18x16 checks=4026
+# mul 16x16 checks=4026
+# PASS npu_mul_only
+# ** Note: $finish    : G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv(443)
+#    Time: 40270 ns  Iteration: 2  Instance: /npu_mul_only_top
+# Break in Module npu_mul_only_top at G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv line 443
+# Stopped at G:/codex_project/EdRV32-Competition-2026/tasks/win/20261027-02-cpu-npu-synth/src/npu_ram_diag.sv line 443
+# End time: 22:32:55 on Oct 27,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 0
