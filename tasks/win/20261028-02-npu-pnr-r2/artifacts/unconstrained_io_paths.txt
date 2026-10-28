@@ -1,0 +1,1473 @@
+Unconstrained paths have no slack/pass verdict.
+
+Startpoint  : irq_r/opit_0_L6Q_perm/CLK
+Endpoint    : irq_obs_o (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_npu (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_npu_i (port) 
+                                   net (fanout=1)        0.046       0.046         clk_npu_i        
+ IOBD_0_1386/PAD                                                                   clk_npu_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_npu_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_npu_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_npu_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_npu_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_npu_i     
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=34401)
+                                                         1.593       4.337         ntclkbufg_0      
+ CLMA_477_786/CLK                                                          r       irq_r/opit_0_L6Q_perm/CLK
+
+ CLMA_477_786/Q3                   tco                   0.213       4.550 r       irq_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        5.499      10.049         nt_irq_obs_o     
+ IOLHR_16_1380/TX_DATA[0]                                                          irq_obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1380/DO_P                td                    0.641      10.690 r       irq_obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000      10.690         irq_obs_o_obuf/ntO
+ IOBS_0_1380/DO                                                                    irq_obs_o_obuf/opit_0/I
+ IOBS_0_1380/PAD                   td                    2.504      13.194 r       irq_obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.046      13.240         irq_obs_o        
+ C18                                                                       r       irq_obs_o (port) 
+
+ Data arrival time                                                  13.240         Logic Levels: 2  
+                                                                                   Logic: 3.358ns(37.718%), Route: 5.545ns(62.282%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+Endpoint    : obs_o (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ K21                                                     0.000       0.000 r       clk_mem_i (port) 
+                                   net (fanout=1)        0.019       0.019         clk_mem_i        
+ IOBD_0_1080/PAD                                                                   clk_mem_i_ibuf/opit_0/I
+ IOBD_0_1080/DIN                   td                    0.897       0.916 r       clk_mem_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.916         clk_mem_i_ibuf/ntD
+ IOLHR_16_1080/DI                                                                  clk_mem_i_ibuf/opit_1/DI
+ IOLHR_16_1080/DI_TO_CLK           td                    0.110       1.026 r       clk_mem_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.929         nt_clk_mem_i     
+ USCM_383_933/CLKIN0                                                               clkbufg_1/gopclkbufg/CLK
+ USCM_383_933/CLKOUT               td                    0.177       2.106 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=794)      1.628       3.734         ntclkbufg_1      
+ CLMA_537_715/CLK                                                          r       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+
+ CLMA_537_715/CR0                  tco                   0.261       3.995 r       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/L5Q
+                                   net (fanout=1)        5.327       9.322         nt_obs_o         
+ IOLHR_16_1338/TX_DATA[0]                                                          obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1338/DO_P                td                    0.641       9.963 r       obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       9.963         obs_o_obuf/ntO   
+ IOBS_0_1338/DO                                                                    obs_o_obuf/opit_0/I
+ IOBS_0_1338/PAD                   td                    2.504      12.467 r       obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.066      12.533         obs_o            
+ A20                                                                       r       obs_o (port)     
+
+ Data arrival time                                                  12.533         Logic Levels: 2  
+                                                                                   Logic: 3.406ns(38.709%), Route: 5.393ns(61.291%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stim_r[0]/opit_0_srl/D
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 r       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/PAD                                                                   stim_i_ibuf/opit_0/I
+ IOBS_0_1290/DIN                   td                    0.897       0.956 r       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.956         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI                                                                  stim_i_ibuf/opit_1/DI
+ IOLHR_16_1290/DI_TO_CLK           td                    0.110       1.066 r       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        5.853       6.919         nt_stim_i        
+ CLMA_513_756/M0                                                           r       stim_r[0]/opit_0_srl/D
+
+ Data arrival time                                                   6.919         Logic Levels: 2  
+                                                                                   Logic: 1.007ns(14.554%), Route: 5.912ns(85.446%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.794       0.853 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.853         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.110       0.963 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        5.294       6.257         nt_rst_n_i       
+ CLMA_465_775/RS                                                           f       u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   6.257         Logic Levels: 2  
+                                                                                   Logic: 0.904ns(14.448%), Route: 5.353ns(85.552%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.794       0.853 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.853         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.110       0.963 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        5.260       6.223         nt_rst_n_i       
+ CLMA_465_799/RS                                                           f       u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   6.223         Logic Levels: 2  
+                                                                                   Logic: 0.904ns(14.527%), Route: 5.319ns(85.473%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.678       0.737 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.737         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.095       0.832 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        3.972       4.804         nt_rst_n_i       
+ CLMA_465_799/RS                                                           f       u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   4.804         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(16.091%), Route: 4.031ns(83.909%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.678       0.737 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.737         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.095       0.832 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        4.007       4.839         nt_rst_n_i       
+ CLMA_465_775/RS                                                           f       u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   4.839         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(15.974%), Route: 4.066ns(84.026%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stim_r[0]/opit_0_srl/D
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/PAD                                                                   stim_i_ibuf/opit_0/I
+ IOBS_0_1290/DIN                   td                    0.678       0.737 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.737         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI                                                                  stim_i_ibuf/opit_1/DI
+ IOLHR_16_1290/DI_TO_CLK           td                    0.095       0.832 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        4.276       5.108         nt_stim_i        
+ CLMA_513_756/M0                                                           f       stim_r[0]/opit_0_srl/D
+
+ Data arrival time                                                   5.108         Logic Levels: 2  
+                                                                                   Logic: 0.773ns(15.133%), Route: 4.335ns(84.867%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+Endpoint    : obs_o (port)
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ K21                                                     0.000       0.000 r       clk_mem_i (port) 
+                                   net (fanout=1)        0.019       0.019         clk_mem_i        
+ IOBD_0_1080/PAD                                                                   clk_mem_i_ibuf/opit_0/I
+ IOBD_0_1080/DIN                   td                    0.766       0.785 r       clk_mem_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.785         clk_mem_i_ibuf/ntD
+ IOLHR_16_1080/DI                                                                  clk_mem_i_ibuf/opit_1/DI
+ IOLHR_16_1080/DI_TO_CLK           td                    0.095       0.880 r       clk_mem_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768       1.648         nt_clk_mem_i     
+ USCM_383_933/CLKIN0                                                               clkbufg_1/gopclkbufg/CLK
+ USCM_383_933/CLKOUT               td                    0.150       1.798 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=794)      1.397       3.195         ntclkbufg_1      
+ CLMA_537_715/CLK                                                          r       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+
+ CLMA_537_715/CR0                  tco                   0.182       3.377 f       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/L5Q
+                                   net (fanout=1)        4.174       7.551         nt_obs_o         
+ IOLHR_16_1338/TX_DATA[0]                                                          obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1338/DO_P                td                    0.392       7.943 f       obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       7.943         obs_o_obuf/ntO   
+ IOBS_0_1338/DO                                                                    obs_o_obuf/opit_0/I
+ IOBS_0_1338/PAD                   td                    2.139      10.082 f       obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.066      10.148         obs_o            
+ A20                                                                       f       obs_o (port)     
+
+ Data arrival time                                                  10.148         Logic Levels: 2  
+                                                                                   Logic: 2.713ns(39.019%), Route: 4.240ns(60.981%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : irq_r/opit_0_L6Q_perm/CLK
+Endpoint    : irq_obs_o (port)
+Path Group  : **default**
+Path Type   : min (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_npu (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_npu_i (port) 
+                                   net (fanout=1)        0.046       0.046         clk_npu_i        
+ IOBD_0_1386/PAD                                                                   clk_npu_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       0.812 r       clk_npu_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.812         clk_npu_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_npu_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       0.907 r       clk_npu_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       2.199         nt_clk_npu_i     
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       2.349 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=34401)
+                                                         1.362       3.711         ntclkbufg_0      
+ CLMA_477_786/CLK                                                          r       irq_r/opit_0_L6Q_perm/CLK
+
+ CLMA_477_786/Q3                   tco                   0.166       3.877 f       irq_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        4.174       8.051         nt_irq_obs_o     
+ IOLHR_16_1380/TX_DATA[0]                                                          irq_obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1380/DO_P                td                    0.392       8.443 f       irq_obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.443         irq_obs_o_obuf/ntO
+ IOBS_0_1380/DO                                                                    irq_obs_o_obuf/opit_0/I
+ IOBS_0_1380/PAD                   td                    2.139      10.582 f       irq_obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.046      10.628         irq_obs_o        
+ C18                                                                       f       irq_obs_o (port) 
+
+ Data arrival time                                                  10.628         Logic Levels: 2  
+                                                                                   Logic: 2.697ns(38.991%), Route: 4.220ns(61.009%)
+====================================================================================================
+
+{clk_npu} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_642/CLKA[0]     u_npu/u_axi_bridge/u_w_fifo/memory_r_0/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_888/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_888/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_828/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_828/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_888/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_888/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_612/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[3].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_612/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[3].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_552/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_552/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_828/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[5].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_828/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[5].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_552/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[6].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_552/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[6].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_918/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[7].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_918/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[7].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_858/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[8].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_858/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[8].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_948/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[9].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_948/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[9].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_858/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[10].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_858/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[10].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_582/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[11].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_582/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[11].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_732/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[12].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_732/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[12].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_798/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[13].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_798/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[13].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_582/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[14].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_550_582/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[14].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_918/CLKA[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[15].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_918/CLKB[0]     u_npu/u_conv/u_datapath/u_activation_lut/g_lane[15].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_lut/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_798/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_798/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_948/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_948/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_828/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_828/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_888/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_888/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_828/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[4].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_828/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[4].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_888/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[5].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_888/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[5].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_798/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[6].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_798/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[6].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_918/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[7].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_918/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank0/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[7].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_978/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_978/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1074/CLKA[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1074/CLKB[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1008/CLKA[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1008/CLKB[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1104/CLKA[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1104/CLKB[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_1008/CLKA[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[4].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_1008/CLKB[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[4].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1038/CLKA[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[5].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_1038/CLKB[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[5].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_978/CLKA[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[6].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_978/CLKB[0]     u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[6].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_1038/CLKA[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[7].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_1038/CLKB[0]    u_npu/u_conv/u_datapath/u_line_cache/u_bank1/u_ip/U_ipm2l_sdpram_ip_ram_npu_line/ADDR_LOOP[0].DATA_LOOP[7].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_858/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_858/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_948/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_948/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_858/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_858/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_732/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[3].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_732/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[3].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_552/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_552/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[4].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_768/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[5].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_768/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[5].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_702/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[6].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_702/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[6].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_918/CLKA[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[7].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_918/CLKB[0]     u_npu/u_conv/u_datapath/u_quant_param_store/g_bank[7].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_quant/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_672/CLKA[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_672/CLKB[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_672/CLKA[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_622_672/CLKB[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_732/CLKA[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_490_732/CLKB[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_768/CLKA[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_436_768/CLKB[0]     u_npu/u_conv/u_datapath/u_residual_buffer/u_residual_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_residual/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_768/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_768/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_582/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_582/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_582/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_582/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_642/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_642/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_732/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_732/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_612/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_612/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_552/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_552/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_582/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_582/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_732/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_732/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_612/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_612/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_642/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_642/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_612/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_612/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_306/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_306/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_336/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_336/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_276/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_276/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_336/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_336/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_216/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_216/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_306/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_306/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_276/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_276/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_306/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_306/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_306/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_306/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_246/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_246/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_336/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_336/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_246/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_246/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_396/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_396/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_426/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_426/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_366/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_366/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_426/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_426/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_426/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_426/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_396/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_396/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_426/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_426/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_366/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_366/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_396/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_396/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_396/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_396/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_462/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_462/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_366/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_366/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_768/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_768/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_672/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_672/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_642/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_642/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_672/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_672/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_798/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_798/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_642/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_642/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_612/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_612/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_672/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_672/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_768/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_768/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_702/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_702/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_672/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_672/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_702/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_702/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_segment[2].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_522/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_226_522/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_492/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_492/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_522/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_522/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_492/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_492/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[0].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_552/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_552/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_522/CLKA[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_40_522/CLKB[0]      u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_522/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_190_522/CLKB[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM36K_E1/gopdrm_36k/CLKB[0]
+ 2.373       3.333           0.960           High Pulse Width  DRM_280_492/CLKA[0]     u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_segment[1].u_ram/u_ip/U_ipm2l_sdpram_ip_ram_npu_weight/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/gopdrm_36k/CLKA[0]
+====================================================================================================
+
+{clk_mem} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 3.040       4.000           0.960           High Pulse Width  DRM_490_642/CLKB[0]     u_npu/u_axi_bridge/u_w_fifo/memory_r_0/gopdrm_36k/CLKB[0]
+ 3.040       4.000           0.960           Low Pulse Width   DRM_490_642/CLKB[0]     u_npu/u_axi_bridge/u_w_fifo/memory_r_0/gopdrm_36k/CLKB[0]
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_561_811/CLK        l1_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_561_811/CLK        l1_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        l1_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        l1_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        l1_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        l1_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        l1_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        l1_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_828/CLK        l1_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_828/CLK        l1_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_798/CLK        l1_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_798/CLK        l1_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_673/CLK        l1_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_673/CLK        l1_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_501_679/CLK        l1_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_501_679/CLK        l1_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_501_673/CLK        l1_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_501_673/CLK        l1_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_507_684/CLK        l1_r[9]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_507_684/CLK        l1_r[9]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_673/CLK        l1_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_673/CLK        l1_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_714/CLK        l1_r[11]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_714/CLK        l1_r[11]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[12]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[12]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[13]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[13]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[14]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[14]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[15]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[15]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[16]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[16]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[17]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[17]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[18]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[18]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[19]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[19]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l1_r[20]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l1_r[20]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l1_r[21]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l1_r[21]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l1_r[22]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l1_r[22]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_531_661/CLK        l1_r[23]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_531_661/CLK        l1_r[23]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_637/CLK        l1_r[24]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_637/CLK        l1_r[24]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_631/CLK        l1_r[25]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_631/CLK        l1_r[25]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_636/CLK        l1_r[26]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_636/CLK        l1_r[26]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_624/CLK        l1_r[27]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_624/CLK        l1_r[27]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_636/CLK        l1_r[28]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_636/CLK        l1_r[28]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_636/CLK        l1_r[29]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_636/CLK        l1_r[29]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_636/CLK        l1_r[30]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_636/CLK        l1_r[30]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_537_619/CLK        l1_r[31]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_537_619/CLK        l1_r[31]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_643/CLK        l1_r[32]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_643/CLK        l1_r[32]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_667/CLK        l1_r[33]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_667/CLK        l1_r[33]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_648/CLK        l1_r[34]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_648/CLK        l1_r[34]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_660/CLK        l1_r[35]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_660/CLK        l1_r[35]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_631/CLK        l1_r[36]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_631/CLK        l1_r[36]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_612/CLK        l1_r[37]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_612/CLK        l1_r[37]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_613/CLK        l1_r[38]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_613/CLK        l1_r[38]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_612/CLK        l1_r[39]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_612/CLK        l1_r[39]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_612/CLK        l1_r[40]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_612/CLK        l1_r[40]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_607/CLK        l1_r[41]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_607/CLK        l1_r[41]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_579_606/CLK        l1_r[42]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_579_606/CLK        l1_r[42]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[43]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[43]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[44]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[44]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[45]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[45]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[46]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[46]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_654/CLK        l1_r[47]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_654/CLK        l1_r[47]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_637/CLK        l1_r[48]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_637/CLK        l1_r[48]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_642/CLK        l1_r[49]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_642/CLK        l1_r[49]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_636/CLK        l1_r[50]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_636/CLK        l1_r[50]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_636/CLK        l1_r[51]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_636/CLK        l1_r[51]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_630/CLK        l1_r[52]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_630/CLK        l1_r[52]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_625/CLK        l1_r[53]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_625/CLK        l1_r[53]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_738/CLK        l1_r[60]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_738/CLK        l1_r[60]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_751/CLK        l1_r[61]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_751/CLK        l1_r[61]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_757/CLK        l1_r[62]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_757/CLK        l1_r[62]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_780/CLK        l1_r[63]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_780/CLK        l1_r[63]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_774/CLK        l1_r[64]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_774/CLK        l1_r[64]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_751/CLK        l1_r[65]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_751/CLK        l1_r[65]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_828/CLK        l2_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_828/CLK        l2_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_537_678/CLK        l2_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_537_678/CLK        l2_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l2_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l2_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_531_661/CLK        l2_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_531_661/CLK        l2_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_648/CLK        l2_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_648/CLK        l2_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_667/CLK        l2_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_667/CLK        l2_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_613/CLK        l2_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_613/CLK        l2_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_619/CLK        l2_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_619/CLK        l2_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_637/CLK        l2_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_637/CLK        l2_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_579_606/CLK        l2_r[9]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_579_606/CLK        l2_r[9]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_531_757/CLK        l2_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_531_757/CLK        l2_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_573_624/CLK        l2_r[11]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_573_624/CLK        l2_r[11]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_537_678/CLK        l3_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_537_678/CLK        l3_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_573_624/CLK        l3_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_573_624/CLK        l3_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_561_811/CLK        obs_r[0]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_561_811/CLK        obs_r[0]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_811/CLK        obs_r[1]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_811/CLK        obs_r[1]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_573_816/CLK        obs_r[2]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_573_816/CLK        obs_r[2]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_507_816/CLK        obs_r[3]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_507_816/CLK        obs_r[3]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_573_841/CLK        obs_r[4]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_573_841/CLK        obs_r[4]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_829/CLK        obs_r[5]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_829/CLK        obs_r[5]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_847/CLK        obs_r[6]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_847/CLK        obs_r[6]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_841/CLK        obs_r[7]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_841/CLK        obs_r[7]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_841/CLK        obs_r[8]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_841/CLK        obs_r[8]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_573_841/CLK        obs_r[9]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_573_841/CLK        obs_r[9]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_495_805/CLK        obs_r[10]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_495_805/CLK        obs_r[10]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_835/CLK        obs_r[11]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_835/CLK        obs_r[11]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        obs_r[12]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        obs_r[12]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        obs_r[13]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        obs_r[13]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_852/CLK        obs_r[14]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_852/CLK        obs_r[14]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_835/CLK        obs_r[15]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_835/CLK        obs_r[15]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_828/CLK        obs_r[16]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_828/CLK        obs_r[16]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_840/CLK        obs_r[17]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_840/CLK        obs_r[17]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[18]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[18]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_901/CLK        obs_r[19]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_901/CLK        obs_r[19]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[20]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[20]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[21]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[21]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[22]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[22]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_865/CLK        obs_r[23]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_865/CLK        obs_r[23]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_828/CLK        obs_r[24]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_828/CLK        obs_r[24]/opit_0/CLK
+====================================================================================================
+
+====================================================================================================
+Fast Corner
+****************************************************************************************************
+====================================================================================================
+
+Startpoint  : irq_r/opit_0_L6Q_perm/CLK
+Endpoint    : irq_obs_o (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_npu (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_npu_i (port) 
+                                   net (fanout=1)        0.046       0.046         clk_npu_i        
+ IOBD_0_1386/PAD                                                                   clk_npu_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_npu_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_npu_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_npu_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_npu_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.824       1.478         nt_clk_npu_i     
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.115       1.593 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=34401)
+                                                         0.994       2.587         ntclkbufg_0      
+ CLMA_477_786/CLK                                                          r       irq_r/opit_0_L6Q_perm/CLK
+
+ CLMA_477_786/Q3                   tco                   0.125       2.712 f       irq_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        3.505       6.217         nt_irq_obs_o     
+ IOLHR_16_1380/TX_DATA[0]                                                          irq_obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1380/DO_P                td                    0.353       6.570 f       irq_obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       6.570         irq_obs_o_obuf/ntO
+ IOBS_0_1380/DO                                                                    irq_obs_o_obuf/opit_0/I
+ IOBS_0_1380/PAD                   td                    2.022       8.592 f       irq_obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.046       8.638         irq_obs_o        
+ C18                                                                       f       irq_obs_o (port) 
+
+ Data arrival time                                                   8.638         Logic Levels: 2  
+                                                                                   Logic: 2.500ns(41.315%), Route: 3.551ns(58.685%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+Endpoint    : obs_o (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ K21                                                     0.000       0.000 r       clk_mem_i (port) 
+                                   net (fanout=1)        0.019       0.019         clk_mem_i        
+ IOBD_0_1080/PAD                                                                   clk_mem_i_ibuf/opit_0/I
+ IOBD_0_1080/DIN                   td                    0.521       0.540 r       clk_mem_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.540         clk_mem_i_ibuf/ntD
+ IOLHR_16_1080/DI                                                                  clk_mem_i_ibuf/opit_1/DI
+ IOLHR_16_1080/DI_TO_CLK           td                    0.087       0.627 r       clk_mem_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.215         nt_clk_mem_i     
+ USCM_383_933/CLKIN0                                                               clkbufg_1/gopclkbufg/CLK
+ USCM_383_933/CLKOUT               td                    0.115       1.330 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=794)      1.018       2.348         ntclkbufg_1      
+ CLMA_537_715/CLK                                                          r       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+
+ CLMA_537_715/CR0                  tco                   0.141       2.489 f       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/L5Q
+                                   net (fanout=1)        3.434       5.923         nt_obs_o         
+ IOLHR_16_1338/TX_DATA[0]                                                          obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1338/DO_P                td                    0.353       6.276 f       obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       6.276         obs_o_obuf/ntO   
+ IOBS_0_1338/DO                                                                    obs_o_obuf/opit_0/I
+ IOBS_0_1338/PAD                   td                    2.022       8.298 f       obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.066       8.364         obs_o            
+ A20                                                                       f       obs_o (port)     
+
+ Data arrival time                                                   8.364         Logic Levels: 2  
+                                                                                   Logic: 2.516ns(41.822%), Route: 3.500ns(58.178%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stim_r[0]/opit_0_srl/D
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 f       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/PAD                                                                   stim_i_ibuf/opit_0/I
+ IOBS_0_1290/DIN                   td                    0.515       0.574 f       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.574         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI                                                                  stim_i_ibuf/opit_1/DI
+ IOLHR_16_1290/DI_TO_CLK           td                    0.087       0.661 f       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        3.629       4.290         nt_stim_i        
+ CLMA_513_756/M0                                                           f       stim_r[0]/opit_0_srl/D
+
+ Data arrival time                                                   4.290         Logic Levels: 2  
+                                                                                   Logic: 0.602ns(14.033%), Route: 3.688ns(85.967%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.515       0.574 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.574         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.087       0.661 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        3.262       3.923         nt_rst_n_i       
+ CLMA_465_775/RS                                                           f       u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   3.923         Logic Levels: 2  
+                                                                                   Logic: 0.602ns(15.345%), Route: 3.321ns(84.655%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 f       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.515       0.574 f       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.574         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.087       0.661 f       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        3.224       3.885         nt_rst_n_i       
+ CLMA_465_799/RS                                                           f       u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   3.885         Logic Levels: 2  
+                                                                                   Logic: 0.602ns(15.495%), Route: 3.283ns(84.505%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.445       0.504 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.073       0.577 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        2.321       2.898         nt_rst_n_i       
+ CLMA_465_799/RS                                                           r       u_reset_npu/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   2.898         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(17.874%), Route: 2.380ns(82.126%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rst_n_i (port)
+Endpoint    : u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C22                                                     0.000       0.000 r       rst_n_i (port)   
+                                   net (fanout=1)        0.059       0.059         rst_n_i          
+ IOBD_0_1296/PAD                                                                   rst_n_i_ibuf/opit_0/I
+ IOBD_0_1296/DIN                   td                    0.445       0.504 r       rst_n_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         rst_n_i_ibuf/ntD 
+ IOLHR_16_1296/DI                                                                  rst_n_i_ibuf/opit_1/DI
+ IOLHR_16_1296/DI_TO_CLK           td                    0.073       0.577 r       rst_n_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        2.338       2.915         nt_rst_n_i       
+ CLMA_465_775/RS                                                           r       u_reset_mem/release_meta_r/opit_0_inv_srl/RS
+
+ Data arrival time                                                   2.915         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(17.770%), Route: 2.397ns(82.230%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : stim_i (port)
+Endpoint    : stim_r[0]/opit_0_srl/D
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+
+ C23                                                     0.000       0.000 r       stim_i (port)    
+                                   net (fanout=1)        0.059       0.059         stim_i           
+ IOBS_0_1290/PAD                                                                   stim_i_ibuf/opit_0/I
+ IOBS_0_1290/DIN                   td                    0.445       0.504 r       stim_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.504         stim_i_ibuf/ntD  
+ IOLHR_16_1290/DI                                                                  stim_i_ibuf/opit_1/DI
+ IOLHR_16_1290/DI_TO_CLK           td                    0.073       0.577 r       stim_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        2.632       3.209         nt_stim_i        
+ CLMA_513_756/M0                                                           r       stim_r[0]/opit_0_srl/D
+
+ Data arrival time                                                   3.209         Logic Levels: 2  
+                                                                                   Logic: 0.518ns(16.142%), Route: 2.691ns(83.858%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+Endpoint    : obs_o (port)
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ K21                                                     0.000       0.000 r       clk_mem_i (port) 
+                                   net (fanout=1)        0.019       0.019         clk_mem_i        
+ IOBD_0_1080/PAD                                                                   clk_mem_i_ibuf/opit_0/I
+ IOBD_0_1080/DIN                   td                    0.445       0.464 r       clk_mem_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.464         clk_mem_i_ibuf/ntD
+ IOLHR_16_1080/DI                                                                  clk_mem_i_ibuf/opit_1/DI
+ IOLHR_16_1080/DI_TO_CLK           td                    0.073       0.537 r       clk_mem_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493       1.030         nt_clk_mem_i     
+ USCM_383_933/CLKIN0                                                               clkbufg_1/gopclkbufg/CLK
+ USCM_383_933/CLKOUT               td                    0.097       1.127 r       clkbufg_1/gopclkbufg/CLKOUT
+                                   net (fanout=794)      0.866       1.993         ntclkbufg_1      
+ CLMA_537_715/CLK                                                          r       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/CLK
+
+ CLMA_537_715/CR0                  tco                   0.122       2.115 r       obs_r[361]/opit_0_L6Q_LUT6DQL5Q_perm/L5Q
+                                   net (fanout=1)        2.406       4.521         nt_obs_o         
+ IOLHR_16_1338/TX_DATA[0]                                                          obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1338/DO_P                td                    0.220       4.741 r       obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       4.741         obs_o_obuf/ntO   
+ IOBS_0_1338/DO                                                                    obs_o_obuf/opit_0/I
+ IOBS_0_1338/PAD                   td                    1.933       6.674 r       obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.066       6.740         obs_o            
+ A20                                                                       r       obs_o (port)     
+
+ Data arrival time                                                   6.740         Logic Levels: 2  
+                                                                                   Logic: 2.275ns(47.925%), Route: 2.472ns(52.075%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : irq_r/opit_0_L6Q_perm/CLK
+Endpoint    : irq_obs_o (port)
+Path Group  : **default**
+Path Type   : min (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_npu (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_npu_i (port) 
+                                   net (fanout=1)        0.046       0.046         clk_npu_i        
+ IOBD_0_1386/PAD                                                                   clk_npu_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       0.491 r       clk_npu_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.491         clk_npu_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_npu_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       0.564 r       clk_npu_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.690       1.254         nt_clk_npu_i     
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       1.351 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=34401)
+                                                         0.842       2.193         ntclkbufg_0      
+ CLMA_477_786/CLK                                                          r       irq_r/opit_0_L6Q_perm/CLK
+
+ CLMA_477_786/Q3                   tco                   0.103       2.296 r       irq_r/opit_0_L6Q_perm/L6Q
+                                   net (fanout=1)        2.481       4.777         nt_irq_obs_o     
+ IOLHR_16_1380/TX_DATA[0]                                                          irq_obs_o_obuf/opit_1/TX_DATA[0]
+ IOLHR_16_1380/DO_P                td                    0.220       4.997 r       irq_obs_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       4.997         irq_obs_o_obuf/ntO
+ IOBS_0_1380/DO                                                                    irq_obs_o_obuf/opit_0/I
+ IOBS_0_1380/PAD                   td                    1.933       6.930 r       irq_obs_o_obuf/opit_0/O
+                                   net (fanout=1)        0.046       6.976         irq_obs_o        
+ C18                                                                       r       irq_obs_o (port) 
+
+ Data arrival time                                                   6.976         Logic Levels: 2  
+                                                                                   Logic: 2.256ns(47.167%), Route: 2.527ns(52.833%)
+====================================================================================================
+
+{clk_npu} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 2.678       3.333           0.655           High Pulse Width  APM_65_522/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_522/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_552/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_522/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_582/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_948/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_461_582/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_552/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[0].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_336/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_306/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_216/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_336/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_396/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1224/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_672/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_426/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[1].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_366/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_306/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_396/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_276/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_552/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1254/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_552/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_552/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[2].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_336/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_306/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_246/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_276/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_306/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1074/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_582/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_246/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[3].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_276/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_216/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_186/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_186/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_366/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1314/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_461_582/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_366/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[4].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_396/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_396/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_426/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_426/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_492/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_948/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_461_612/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_492/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[5].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_462/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_462/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_426/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_366/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_492/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_978/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_461_612/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_522/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[6].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_246/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_336/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_156/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_246/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_492/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1164/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_461_552/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_462/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[7].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_396/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_426/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_396/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_396/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_1038/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1104/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_702/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_948/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[8].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_522/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_492/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_522/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_522/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1074/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1164/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_798/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_978/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[9].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_462/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_426/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_426/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_426/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1038/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_1134/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_888/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_978/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[10].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_366/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_336/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_336/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_306/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_918/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_978/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_612/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_948/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[11].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_492/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_492/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_492/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_552/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_918/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_978/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_642/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_612/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[12].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_336/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_366/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_366/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_366/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_948/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1008/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_672/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_642/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[13].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_306/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_276/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_216/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_306/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_1038/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1104/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_461_642/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_582/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[14].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_552/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_522/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_462/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_462/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_888/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1008/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_527_732/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_612/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[15].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_768/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_828/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1224/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_732/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1164/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1164/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1194/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_858/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_858/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_582/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1008/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_858/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1038/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1038/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1104/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_888/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_702/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_582/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1104/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_672/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1284/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1194/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1134/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_768/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_732/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_702/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1194/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_768/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1104/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1224/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1194/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_828/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_918/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_828/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1194/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_888/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1134/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1134/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1164/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_888/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_702/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_642/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_978/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_702/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_918/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_978/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_948/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_768/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_798/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_798/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1224/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_798/CLK_0        u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1134/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1074/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1284/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_828/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_858/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_732/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_978/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_858/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1074/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1104/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_1254/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_65_888/CLK_1        u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].g_lane[7].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_161_1194/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[0].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_798/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[1].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_828/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[2].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_858/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[3].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_888/CLK_1       u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[4].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_359_1074/CLK_1      u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[5].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_888/CLK_0       u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[6].u_multiply/u_apm/gopapm/CLK
+ 2.678       3.333           0.655           High Pulse Width  APM_311_1134/CLK_0      u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].g_lane[7].u_multiply/u_apm/gopapm/CLK
+====================================================================================================
+
+{clk_mem} Minimum Pulse Width :
+****************************************************************************************************
+ Slack       Actual Width    Require Width   Type              Location                Pin          
+----------------------------------------------------------------------------------------------------
+ 3.430       4.000           0.570           High Pulse Width  DRM_490_642/CLKB[0]     u_npu/u_axi_bridge/u_w_fifo/memory_r_0/gopdrm_36k/CLKB[0]
+ 3.430       4.000           0.570           Low Pulse Width   DRM_490_642/CLKB[0]     u_npu/u_axi_bridge/u_w_fifo/memory_r_0/gopdrm_36k/CLKB[0]
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_561_811/CLK        l1_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_561_811/CLK        l1_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        l1_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        l1_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        l1_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        l1_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        l1_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        l1_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_828/CLK        l1_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_828/CLK        l1_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_798/CLK        l1_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_798/CLK        l1_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_673/CLK        l1_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_673/CLK        l1_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_501_679/CLK        l1_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_501_679/CLK        l1_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_501_673/CLK        l1_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_501_673/CLK        l1_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_507_684/CLK        l1_r[9]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_507_684/CLK        l1_r[9]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_673/CLK        l1_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_673/CLK        l1_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_714/CLK        l1_r[11]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_714/CLK        l1_r[11]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[12]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[12]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[13]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[13]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[14]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[14]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[15]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[15]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[16]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[16]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_649/CLK        l1_r[17]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_649/CLK        l1_r[17]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[18]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[18]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_655/CLK        l1_r[19]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_655/CLK        l1_r[19]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l1_r[20]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l1_r[20]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l1_r[21]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l1_r[21]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l1_r[22]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l1_r[22]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_531_661/CLK        l1_r[23]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_531_661/CLK        l1_r[23]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_637/CLK        l1_r[24]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_637/CLK        l1_r[24]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_631/CLK        l1_r[25]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_631/CLK        l1_r[25]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_636/CLK        l1_r[26]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_636/CLK        l1_r[26]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_624/CLK        l1_r[27]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_624/CLK        l1_r[27]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_636/CLK        l1_r[28]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_636/CLK        l1_r[28]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_636/CLK        l1_r[29]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_636/CLK        l1_r[29]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_636/CLK        l1_r[30]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_636/CLK        l1_r[30]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_537_619/CLK        l1_r[31]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_537_619/CLK        l1_r[31]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_643/CLK        l1_r[32]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_643/CLK        l1_r[32]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_667/CLK        l1_r[33]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_667/CLK        l1_r[33]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_648/CLK        l1_r[34]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_648/CLK        l1_r[34]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_660/CLK        l1_r[35]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_660/CLK        l1_r[35]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_631/CLK        l1_r[36]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_631/CLK        l1_r[36]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_612/CLK        l1_r[37]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_612/CLK        l1_r[37]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_613/CLK        l1_r[38]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_613/CLK        l1_r[38]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_612/CLK        l1_r[39]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_612/CLK        l1_r[39]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_612/CLK        l1_r[40]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_612/CLK        l1_r[40]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_607/CLK        l1_r[41]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_607/CLK        l1_r[41]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_579_606/CLK        l1_r[42]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_579_606/CLK        l1_r[42]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[43]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[43]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[44]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[44]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[45]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[45]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_613/CLK        l1_r[46]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_613/CLK        l1_r[46]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_654/CLK        l1_r[47]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_654/CLK        l1_r[47]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_637/CLK        l1_r[48]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_637/CLK        l1_r[48]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_642/CLK        l1_r[49]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_642/CLK        l1_r[49]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_636/CLK        l1_r[50]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_636/CLK        l1_r[50]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_636/CLK        l1_r[51]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_636/CLK        l1_r[51]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_630/CLK        l1_r[52]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_630/CLK        l1_r[52]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_603_625/CLK        l1_r[53]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_603_625/CLK        l1_r[53]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_738/CLK        l1_r[60]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_738/CLK        l1_r[60]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_751/CLK        l1_r[61]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_751/CLK        l1_r[61]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_757/CLK        l1_r[62]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_757/CLK        l1_r[62]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_519_780/CLK        l1_r[63]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_519_780/CLK        l1_r[63]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_774/CLK        l1_r[64]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_774/CLK        l1_r[64]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_751/CLK        l1_r[65]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_751/CLK        l1_r[65]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_828/CLK        l2_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_828/CLK        l2_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_537_678/CLK        l2_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_537_678/CLK        l2_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_531_654/CLK        l2_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_531_654/CLK        l2_r[2]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_531_661/CLK        l2_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_531_661/CLK        l2_r[3]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_648/CLK        l2_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_648/CLK        l2_r[4]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_667/CLK        l2_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_667/CLK        l2_r[5]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_613/CLK        l2_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_613/CLK        l2_r[6]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_619/CLK        l2_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_619/CLK        l2_r[7]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_591_637/CLK        l2_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_591_637/CLK        l2_r[8]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_579_606/CLK        l2_r[9]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_579_606/CLK        l2_r[9]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_531_757/CLK        l2_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_531_757/CLK        l2_r[10]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_573_624/CLK        l2_r[11]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_573_624/CLK        l2_r[11]/opit_0_L6QQ_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_537_678/CLK        l3_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_537_678/CLK        l3_r[0]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_573_624/CLK        l3_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_573_624/CLK        l3_r[1]/opit_0_L6Q_perm/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_561_811/CLK        obs_r[0]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_561_811/CLK        obs_r[0]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_811/CLK        obs_r[1]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_811/CLK        obs_r[1]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_573_816/CLK        obs_r[2]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_573_816/CLK        obs_r[2]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_507_816/CLK        obs_r[3]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_507_816/CLK        obs_r[3]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_573_841/CLK        obs_r[4]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_573_841/CLK        obs_r[4]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_829/CLK        obs_r[5]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_829/CLK        obs_r[5]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_847/CLK        obs_r[6]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_847/CLK        obs_r[6]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_841/CLK        obs_r[7]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_841/CLK        obs_r[7]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_841/CLK        obs_r[8]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_841/CLK        obs_r[8]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_573_841/CLK        obs_r[9]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_573_841/CLK        obs_r[9]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_495_805/CLK        obs_r[10]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_495_805/CLK        obs_r[10]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_835/CLK        obs_r[11]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_835/CLK        obs_r[11]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        obs_r[12]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        obs_r[12]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_555_841/CLK        obs_r[13]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_555_841/CLK        obs_r[13]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_561_852/CLK        obs_r[14]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_561_852/CLK        obs_r[14]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_835/CLK        obs_r[15]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_835/CLK        obs_r[15]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_567_828/CLK        obs_r[16]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_567_828/CLK        obs_r[16]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_840/CLK        obs_r[17]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_840/CLK        obs_r[17]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[18]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[18]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_507_901/CLK        obs_r[19]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_507_901/CLK        obs_r[19]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[20]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[20]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[21]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[21]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_513_900/CLK        obs_r[22]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_513_900/CLK        obs_r[22]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMS_513_865/CLK        obs_r[23]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMS_513_865/CLK        obs_r[23]/opit_0/CLK
+ 3.800       4.000           0.200           High Pulse Width  CLMA_543_828/CLK        obs_r[24]/opit_0/CLK
+ 3.800       4.000           0.200           Low Pulse Width   CLMA_543_828/CLK        obs_r[24]/opit_0/CLK
+====================================================================================================
+
+====================================================================================================
+
+Inputs and Outputs :
++--------------------------------------------------------------------------------------------------------------------------------------------------+
+| Type       | File Name                                                                                                                          
++--------------------------------------------------------------------------------------------------------------------------------------------------+
+| Input      | G:/codex_project/EdRV32-FPGA/EdRV32-NPU/place_route/edrv32_fpga_npu_top_pnr.adf                                                    
+| Output     | G:/codex_project/EdRV32-Competition-2026/build/win/20261028-02-npu-pnr-r2/timing_200/report_timing/edrv32_fpga_npu_top_rtp.adf     
+|            | G:/codex_project/EdRV32-Competition-2026/build/win/20261028-02-npu-pnr-r2/timing_200/report_timing/edrv32_fpga_npu_top.rtr         
+|            | G:/codex_project/EdRV32-Competition-2026/build/win/20261028-02-npu-pnr-r2/timing_200/report_timing/rtr.db                          
++--------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+Flow Command: report_timing -force_to_run -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-NPU/place_route/edrv32_fpga_npu_top_pnr.adf} -max_path 200 -input_pins true 
+Peak memory: 3,134 MB
+Total CPU time to report_timing completion : 0h:0m:11s
+Process Total CPU time to report_timing completion : 0h:0m:13s
+Total real time to report_timing completion : 0h:1m:0s
