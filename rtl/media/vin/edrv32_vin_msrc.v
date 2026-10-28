@@ -70,6 +70,13 @@ module edrv32_vin_msrc (
     wire dma_done_w;
     wire dma_error_w;
     wire fifo_ready_w;
+    wire ram_wr_en_w;
+    wire [8:0] ram_wr_addr_w;
+    wire [255:0] ram_wr_data_w;
+    wire ram_rd_en_w;
+    wire [8:0] ram_rd_addr_w;
+    wire [255:0] ram_rd_data_w;
+    wire [31:0] unused_ram_data_w;
     wire fifo_valid_w;
     wire fifo_pop_w;
     wire [255:0] fifo_data_w;
@@ -101,9 +108,9 @@ module edrv32_vin_msrc (
     assign fifo_pop_w = stopping_r || (transfer_w && (word_r == 3'd7 || eol_o));
     assign unused_w = fifo_ready_w;
 
-    edrv32_sync_fifo #(
+    edrv32_sync_fifo_ram #(
         .WIDTH(256),
-        .DEPTH(256)
+        .DEPTH(512)
     ) u_buffer (
         // Reserved rows fit regardless of downstream pauses.
         .clk_i(clk_i),
@@ -113,7 +120,26 @@ module edrv32_vin_msrc (
         .data_i(dma_data_w),
         .valid_o(fifo_valid_w),
         .ready_i(fifo_pop_w),
-        .data_o(fifo_data_w)
+        .data_o(fifo_data_w),
+
+        // External DRM ports.
+        .wr_en_o(ram_wr_en_w),
+        .wr_addr_o(ram_wr_addr_w),
+        .wr_data_o(ram_wr_data_w),
+        .rd_en_o(ram_rd_en_w),
+        .rd_addr_o(ram_rd_addr_w),
+        .rd_data_i(ram_rd_data_w)
+    );
+
+    edrv32_ram_vin_wfifo u_fifo_ram (
+        // Storage clocks and enabled ports.
+        .clk_i(clk_i),
+        .wr_en_i(ram_wr_en_w),
+        .wr_addr_i(ram_wr_addr_w),
+        .wr_data_i({32'd0, ram_wr_data_w}),
+        .rd_en_i(ram_rd_en_w),
+        .rd_addr_i(ram_rd_addr_w),
+        .rd_data_o({unused_ram_data_w, ram_rd_data_w})
     );
 
     edrv32_dma2d_rd #(
@@ -217,7 +243,8 @@ module edrv32_vin_msrc (
                 busy_r <= 1'b0;
             if (abort_i && busy_r)
                 stopping_r <= 1'b1;
-            if (stopping_r && dma_idle_w && !fifo_valid_w) begin
+            // Count includes entries whose first RAM prefetch is still pending.
+            if (stopping_r && dma_idle_w && count_r == 9'd0) begin
                 busy_r <= 1'b0;
                 stopping_r <= 1'b0;
             end

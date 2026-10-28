@@ -64,6 +64,12 @@ module edrv32_disp (
     wire underflow_mem_w;
     wire [9:0] read_cnt_pix_w;
     wire [9:0] read_cnt_mem_w;
+    wire ram_wr_en_w;
+    wire [8:0] ram_wr_addr_w;
+    wire [255:0] ram_wr_data_w;
+    wire ram_rd_en_w;
+    wire [8:0] ram_rd_addr_w;
+    wire [255:0] ram_rd_data_w;
     wire fifo_valid_w;
     wire fifo_read_w;
     wire [255:0] fifo_data_w;
@@ -289,7 +295,7 @@ module edrv32_disp (
         .err_o(dma_err_w)
     );
 
-    edrv32_async_fifo #(
+    edrv32_async_fifo_ram #(
         .WIDTH(256),
         .DEPTH(512)
     ) u_scan_fifo (
@@ -307,7 +313,27 @@ module edrv32_disp (
         // Pixel-domain beat consumption.
         .valid_o(fifo_valid_w),
         .ready_i(fifo_read_w),
-        .data_o(fifo_data_w)
+        .data_o(fifo_data_w),
+
+        // External DRM ports.
+        .wr_en_o(ram_wr_en_w),
+        .wr_addr_o(ram_wr_addr_w),
+        .wr_data_o(ram_wr_data_w),
+        .rd_en_o(ram_rd_en_w),
+        .rd_addr_o(ram_rd_addr_w),
+        .rd_data_i(ram_rd_data_w)
+    );
+
+    edrv32_ram_disp_scan u_fifo_ram (
+        // Storage clocks and enabled ports.
+        .wr_clk_i(clk_mem_i),
+        .rd_clk_i(clk_pix_i),
+        .wr_en_i(ram_wr_en_w),
+        .wr_addr_i(ram_wr_addr_w),
+        .wr_data_i(ram_wr_data_w),
+        .rd_en_i(ram_rd_en_w),
+        .rd_addr_i(ram_rd_addr_w),
+        .rd_data_o(ram_rd_data_w)
     );
 
     edrv32_disp_timing u_timing (

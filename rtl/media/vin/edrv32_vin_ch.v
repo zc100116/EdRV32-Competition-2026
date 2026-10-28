@@ -118,6 +118,12 @@ module edrv32_vin_ch (
     wire result_fire_w;
     wire flush_w;
     wire fifo_ready_w;
+    wire ram_wr_en_w;
+    wire [8:0] ram_wr_addr_w;
+    wire [287:0] ram_wr_data_w;
+    wire ram_rd_en_w;
+    wire [8:0] ram_rd_addr_w;
+    wire [287:0] ram_rd_data_w;
     wire fifo_valid_w;
     wire fifo_push_w;
     wire fifo_pop_w;
@@ -204,7 +210,7 @@ module edrv32_vin_ch (
         packed_strb_w = 32'hffff_ffff >> ((7 - {29'd0, word_r}) * 4);
     end
 
-    edrv32_sync_fifo #(
+    edrv32_sync_fifo_ram #(
         .WIDTH(288),
         .DEPTH(512)
     ) u_write_fifo (
@@ -216,7 +222,26 @@ module edrv32_vin_ch (
         .data_i({packed_strb_w, packed_data_w}),
         .valid_o(fifo_valid_w),
         .ready_i(fifo_pop_w),
-        .data_o(fifo_data_w)
+        .data_o(fifo_data_w),
+
+        // External DRM ports.
+        .wr_en_o(ram_wr_en_w),
+        .wr_addr_o(ram_wr_addr_w),
+        .wr_data_o(ram_wr_data_w),
+        .rd_en_o(ram_rd_en_w),
+        .rd_addr_o(ram_rd_addr_w),
+        .rd_data_i(ram_rd_data_w)
+    );
+
+    edrv32_ram_vin_wfifo u_fifo_ram (
+        // Storage clocks and enabled ports.
+        .clk_i(clk_i),
+        .wr_en_i(ram_wr_en_w),
+        .wr_addr_i(ram_wr_addr_w),
+        .wr_data_i(ram_wr_data_w),
+        .rd_en_i(ram_rd_en_w),
+        .rd_addr_i(ram_rd_addr_w),
+        .rd_data_o(ram_rd_data_w)
     );
 
     edrv32_dma2d_wr #(
@@ -357,7 +382,8 @@ module edrv32_vin_ch (
                 else if (receiving_r || pending_r)
                     last_slot_r <= receive_previous_r;
             end
-            if (stopping_r && dma_idle_w && !fifo_valid_w && !receiving_r) begin
+            // Count includes entries whose first RAM prefetch is still pending.
+            if (stopping_r && dma_idle_w && count_r == 10'd0 && !receiving_r) begin
                 stopping_r <= 1'b0;
                 dropping_r <= 1'b0;
                 receiving_r <= 1'b0;
