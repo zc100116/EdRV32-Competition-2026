@@ -49,3 +49,44 @@ and Icarus. Tests cover reset, synchronization latency, pulse delivery, handshak
 stalling, counter wrap and snapshots, FIFO empty/full blocking, ordering,
 concurrent transfers, pointer wrap and occupancy reset. The async FIFO uses
 10-unit and 14-unit clock periods.
+
+## `edrv32_sync_fifo_ram`
+
+`WIDTH` (default 32), `DEPTH` (default 16); `clk_i/rst_n_i` and producer
+`valid_i/ready_o/data_i`, consumer `valid_o/ready_i/data_o` match
+`edrv32_sync_fifo`. WIDTH is positive; DEPTH is a power of two and at least 2.
+Full blocks writes even when a read occurs on the same edge. DEPTH counts all
+unconsumed entries, including prefetched output entries.
+
+External RAM ports are `wr_en_o/wr_addr_o/wr_data_o` and
+`rd_en_o/rd_addr_o/rd_data_i`; addresses have `$clog2(DEPTH)` bits and payloads
+have WIDTH bits. Both ports use clk_i. RAM must sample each enabled read at a
+rising edge and produce its data after that edge (one-cycle latency), retaining
+its output when read enable is low. The controller contains no storage array
+and does not reset payloads or RAM. It reads only previously written entries;
+same-address simultaneous read/write results are never used.
+
+A RAM output slot and held-head register implement FWFT: valid exposes a head
+without waiting for ready, and valid/data remain stable until accepted.
+Prefetch adds initial visibility latency; once data is available the consumer
+can accept one item per clock continuously. Only rising-edge valid/ready
+handshakes transfer entries. Reset discards queued and prefetched entries.
+
+## `edrv32_async_fifo_ram`
+
+The WIDTH/DEPTH parameters, producer/consumer handshake and RAM-port names are
+the same as `edrv32_sync_fifo_ram`. Clocks and resets match
+`edrv32_async_fifo`: `clk_write_i/rst_write_n_i` and
+`clk_read_i/rst_read_n_i`. The write RAM port uses clk_write_i; the read RAM port
+uses clk_read_i, with the same one-cycle enabled-read/held-output contract.
+DEPTH includes the two prefetch output slots; capacity is released only when
+an entry is consumed, and remote capacity changes incur synchronization latency.
+
+Only registered Gray write and consumption pointers cross two synchronization
+stages. Prefetch reads only entries visible through the synchronized write
+pointer. Output prefetch sustains one item per read clock when entries are
+available and preserves the head while stalled. Reset both domains together
+before new traffic; independent mid-transaction reset is outside the interface.
+Reset release must be synchronous in each domain, and physical implementation
+must constrain Gray-bus skew within one source clock period, as for
+`edrv32_async_fifo`. WIDTH is positive; DEPTH is a power of two and at least 2.
