@@ -28,6 +28,8 @@ module tb;
     int heights[4]='{1,2,3,5};
     int cycle=0;
     int input_eof_cycle;
+    int input_sof_cycle;
+    int maximum_overhead=0;
     bit checking=0;
     bit bound_enabled=0;
     bit stalled=0;
@@ -58,6 +60,10 @@ module tb;
                 $fatal(1,"FAIL filter changed during freeze t=%0t",$time);
             stalled=!advance && out_valid;
             held={out_valid,out_data,out_sof,out_eol,out_eof};
+            if (checking && bound_enabled && advance && received>0
+                && received<width*height/2 && !out_valid)
+                $fatal(1,"FAIL filter output bubble t=%0t op=%0d beat=%0d",
+                    $time,op,received);
             if (checking && advance && out_valid) begin
                 if (received>=width*height/2) $fatal(1,"FAIL extra output t=%0t",$time);
                 if (out_data!==expected[received]
@@ -67,11 +73,21 @@ module tb;
                     $fatal(1,"FAIL filter t=%0t op=%0d size=%0dx%0d beat=%0d exp=%h got=%h flags=%b%b%b",
                         $time,op,width,height,received,expected[received],out_data,
                         out_sof,out_eol,out_eof);
+                if (out_sof && bound_enabled) begin
+                    if (op!=0 && op!=7) begin
+                        if (cycle-input_sof_cycle-width/2>16)
+                            $fatal(1,"FAIL filter first latency=%0d width=%0d",
+                                cycle-input_sof_cycle,width);
+                        if (cycle-input_sof_cycle-width/2>maximum_overhead)
+                            maximum_overhead=cycle-input_sof_cycle-width/2;
+                    end
+                end
                 if (out_eof && bound_enabled && cycle-input_eof_cycle>width/2+16)
                     $fatal(1,"FAIL flush delay=%0d width=%0d",cycle-input_eof_cycle,width);
                 received++;
             end
             if (advance && valid && eof) input_eof_cycle=cycle;
+            if (advance && valid && sof) input_sof_cycle=cycle;
         end
     end
     task automatic prepare;
@@ -130,7 +146,8 @@ module tb;
                 end
             end
         end
-        $display("PASS pix_filter: 192 frames, all ops, zero borders, 2..1280, freeze/gaps");
+        $display("PASS pix_filter: 192 frames, all ops, borders, freeze/gaps; latency=1 line+%0d",
+            maximum_overhead);
         $finish;
     end
 endmodule

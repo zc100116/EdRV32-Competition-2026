@@ -119,13 +119,39 @@ module tb;
         end
         return result;
     endfunction
+    logic [47:0] expected1[$];
+    logic [31:0] expected2[$];
+    logic [47:0] want1;
+    logic [31:0] want2;
+    int checked1=0;
+    int checked2=0;
+    always @(posedge clk) begin
+        if (!rst_n || clear) begin
+            expected1.delete();
+            expected2.delete();
+        end else if (advance) begin
+            if (valid1) begin
+                if (expected1.size()==0) $fatal(1,"FAIL unexpected point1 t=%0t",$time);
+                want1=expected1.pop_front();
+                if (data1!==want1 || !sof1 || !eol1 || !eof1)
+                    $fatal(1,"FAIL point1 t=%0t exp=%h got=%h",$time,want1,data1);
+                checked1++;
+            end
+            if (valid2) begin
+                if (expected2.size()==0) $fatal(1,"FAIL unexpected point2 t=%0t",$time);
+                want2=expected2.pop_front();
+                if (data2!==want2 || !sof2 || !eol2 || !eof2)
+                    $fatal(1,"FAIL point2 t=%0t exp=%h got=%h",$time,want2,data2);
+                checked2++;
+            end
+            if (valid) begin
+                expected1.push_back(ref1(source));
+                expected2.push_back(ref2(source2));
+            end
+        end
+    end
     task automatic check1;
-        logic [47:0] expected;
-        expected=ref1(source);
         @(posedge clk); #1;
-        if (!valid1 || data1!==expected || !sof1 || !eol1 || !eof1)
-            $fatal(1,"FAIL point1 t=%0t in=%h bc=%h/%h gamma=%b/%b exp=%h got=%h",
-                $time,source,contrast,brightness,gamma_en,gamma_bank,expected,data1);
     endtask
     initial begin
         repeat(3) @(negedge clk);
@@ -170,13 +196,30 @@ module tb;
                         default: begin end
                     endcase
                     @(posedge clk); #1;
-                    if (!valid2 || data2!==ref2(source2) || !sof2 || !eol2 || !eof2)
-                        $fatal(1,"FAIL point2 t=%0t mode=%0d thresh=%0d exp=%h got=%h",
-                            $time,mode,thresh,ref2(source2),data2);
                     @(negedge clk);
                 end
             end
         end
+        // Change configuration per accepted beat and insert input gaps / global freezes.
+        repeat(1000) begin
+            source=$urandom;
+            source2={$urandom,16'($urandom)};
+            {inv_en,bin_en,gray_en}=3'($urandom);
+            bc_en=1'($urandom);
+            gamma_en=1'($urandom);
+            gamma_bank=1'($urandom);
+            contrast=9'($urandom);
+            brightness=9'($urandom);
+            thresh=8'($urandom);
+            valid=1'($urandom);
+            advance=1'($urandom);
+            @(negedge clk);
+        end
+        valid=0;
+        advance=1;
+        repeat(8) @(negedge clk);
+        if (expected1.size()!=0 || expected2.size()!=0)
+            $fatal(1,"FAIL point pipeline did not drain");
         advance=0;
         begin
             logic [79:0] held;
@@ -191,7 +234,8 @@ module tb;
         clear=1;
         @(posedge clk); #1;
         if (valid1 || valid2) $fatal(1,"FAIL clear t=%0t",$time);
-        $display("PASS pix_point: formulas, saturation, banks, order, freeze and clear");
+        $display("PASS pix_point: point1=%0d point2=%0d, formulas, banks, gaps, freeze, clear",
+            checked1,checked2);
         $finish;
     end
 endmodule

@@ -16,11 +16,11 @@ module edrv32_pix_filter (
     input wire eof_i,
 
     // Output stream.
-    output reg valid_o,
-    output reg [47:0] data_o,
-    output reg sof_o,
-    output reg eol_o,
-    output reg eof_o,
+    output wire valid_o,
+    output wire [47:0] data_o,
+    output wire sof_o,
+    output wire eol_o,
+    output wire eof_o,
 
     // Pipeline and frame configuration.
     input wire advance_i,
@@ -56,6 +56,28 @@ module edrv32_pix_filter (
     reg read_forward0_r;
     reg read_forward1_r;
     reg [47:0] read_forward_data_r;
+    // Capture raw DRM outputs before forwarding, bank selection or window logic.
+    reg [47:0] capture_ram0_r;
+    reg [47:0] capture_ram1_r;
+    reg capture_valid_r;
+    reg [47:0] capture_data_r;
+    reg [9:0] capture_column_r;
+    reg [1:0] capture_row_r;
+    reg capture_bank_r;
+    reg capture_last_r;
+    reg capture_flush_r;
+    reg capture_forward0_r;
+    reg capture_forward1_r;
+    reg [47:0] capture_forward_data_r;
+    reg [7:0] kernel_valid_r;
+    reg [7:0] kernel_sof_r;
+    reg [7:0] kernel_eol_r;
+    reg [7:0] kernel_eof_r;
+    reg bypass_valid_r;
+    reg [47:0] bypass_data_r;
+    reg bypass_sof_r;
+    reg bypass_eol_r;
+    reg bypass_eof_r;
     wire [47:0] line0_w;
     wire [47:0] line1_w;
     wire [47:0] top_w;
@@ -119,12 +141,12 @@ module edrv32_pix_filter (
         .rd_data_o(ram1_w)
     );
 
-    assign line0_w = read_forward0_r ? read_forward_data_r : ram0_w;
-    assign line1_w = read_forward1_r ? read_forward_data_r : ram1_w;
-    assign top_w = read_row_r == 2'd2 ? (read_bank_r ? line1_w : line0_w) : 48'd0;
-    assign middle_w = read_row_r != 2'd0 ? (read_bank_r ? line0_w : line1_w) : 48'd0;
-    assign bottom_w = read_flush_r ? 48'd0 : read_data_r;
-    assign emit_w = pending_r && (read_valid_r || pending_eol_r);
+    assign line0_w = capture_forward0_r ? capture_forward_data_r : capture_ram0_r;
+    assign line1_w = capture_forward1_r ? capture_forward_data_r : capture_ram1_r;
+    assign top_w = capture_row_r == 2'd2 ? (capture_bank_r ? line1_w : line0_w) : 48'd0;
+    assign middle_w = capture_row_r != 2'd0 ? (capture_bank_r ? line0_w : line1_w) : 48'd0;
+    assign bottom_w = capture_flush_r ? 48'd0 : capture_data_r;
+    assign emit_w = pending_r && (capture_valid_r || pending_eol_r);
     assign right_top_w = pending_eol_r ? 24'd0 : top_w[23:0];
     assign right_middle_w = pending_eol_r ? 24'd0 : middle_w[23:0];
     assign right_bottom_w = pending_eol_r ? 24'd0 : bottom_w[23:0];
@@ -134,6 +156,9 @@ module edrv32_pix_filter (
         right_middle_w, middle_r, right_top_w, top_r};
 
     edrv32_pix_kernel u_kernel0 (
+        .clk_i(clk_i),
+        .advance_i(advance_i),
+
         .window_i(window0_w),
 
         .data_o(result_w[23:0]),
@@ -142,12 +167,21 @@ module edrv32_pix_filter (
     );
 
     edrv32_pix_kernel u_kernel1 (
+        .clk_i(clk_i),
+        .advance_i(advance_i),
+
         .window_i(window1_w),
 
         .data_o(result_w[47:24]),
 
         .op_i(op_i)
     );
+
+    assign valid_o = enabled_w ? kernel_valid_r[7] : bypass_valid_r;
+    assign data_o = enabled_w ? result_w : bypass_data_r;
+    assign sof_o = enabled_w ? kernel_sof_r[7] : bypass_sof_r;
+    assign eol_o = enabled_w ? kernel_eol_r[7] : bypass_eol_r;
+    assign eof_o = enabled_w ? kernel_eof_r[7] : bypass_eof_r;
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -159,7 +193,9 @@ module edrv32_pix_filter (
             flush_column_r <= 10'd0;
             read_valid_r <= 1'b0;
             pending_r <= 1'b0;
-            valid_o <= 1'b0;
+            capture_valid_r <= 1'b0;
+            kernel_valid_r <= 8'd0;
+            bypass_valid_r <= 1'b0;
         end else if (clear_i) begin
             column_r <= 10'd0;
             width_r <= 10'd0;
@@ -169,19 +205,19 @@ module edrv32_pix_filter (
             flush_column_r <= 10'd0;
             read_valid_r <= 1'b0;
             pending_r <= 1'b0;
-            valid_o <= 1'b0;
+            capture_valid_r <= 1'b0;
+            kernel_valid_r <= 8'd0;
+            bypass_valid_r <= 1'b0;
         end else if (advance_i) begin
             read_valid_r <= request_w;
-            if (!enabled_w) begin
-                valid_o <= valid_i;
-            end else begin
-                valid_o <= emit_w;
-            end
+            capture_valid_r <= read_valid_r;
+            bypass_valid_r <= valid_i;
+            kernel_valid_r <= {kernel_valid_r[6:0], emit_w};
             if (emit_w) begin
                 pending_r <= 1'b0;
             end
-            if (read_valid_r) begin
-                pending_r <= read_row_r != 2'd0;
+            if (capture_valid_r) begin
+                pending_r <= capture_row_r != 2'd0;
             end
             if (request_w) begin
                 if (request_last_w) begin
@@ -228,28 +264,35 @@ module edrv32_pix_filter (
                 read_forward1_r <= forward1_w;
                 read_forward_data_r <= read_data_r;
             end
-            if (read_valid_r) begin
+            if (capture_valid_r) begin
                 top_r <= top_w;
                 middle_r <= middle_w;
                 bottom_r <= bottom_w;
-                top_left_r <= read_column_r == 10'd0 ? 24'd0 : top_r[47:24];
-                middle_left_r <= read_column_r == 10'd0 ? 24'd0 : middle_r[47:24];
-                bottom_left_r <= read_column_r == 10'd0 ? 24'd0 : bottom_r[47:24];
-                pending_sof_r <= read_row_r == 2'd1 && read_column_r == 10'd0;
-                pending_eol_r <= read_last_r;
-                pending_eof_r <= read_flush_r && read_last_r;
+                top_left_r <= capture_column_r == 10'd0 ? 24'd0 : top_r[47:24];
+                middle_left_r <= capture_column_r == 10'd0 ? 24'd0 : middle_r[47:24];
+                bottom_left_r <= capture_column_r == 10'd0 ? 24'd0 : bottom_r[47:24];
+                pending_sof_r <= capture_row_r == 2'd1 && capture_column_r == 10'd0;
+                pending_eol_r <= capture_last_r;
+                pending_eof_r <= capture_flush_r && capture_last_r;
             end
-            if (!enabled_w) begin
-                data_o <= data_i;
-                sof_o <= sof_i;
-                eol_o <= eol_i;
-                eof_o <= eof_i;
-            end else if (emit_w) begin
-                data_o <= result_w;
-                sof_o <= pending_sof_r;
-                eol_o <= pending_eol_r;
-                eof_o <= pending_eof_r;
-            end
+            capture_ram0_r <= ram0_w;
+            capture_ram1_r <= ram1_w;
+            capture_data_r <= read_data_r;
+            capture_column_r <= read_column_r;
+            capture_row_r <= read_row_r;
+            capture_bank_r <= read_bank_r;
+            capture_last_r <= read_last_r;
+            capture_flush_r <= read_flush_r;
+            capture_forward0_r <= read_forward0_r;
+            capture_forward1_r <= read_forward1_r;
+            capture_forward_data_r <= read_forward_data_r;
+            kernel_sof_r <= {kernel_sof_r[6:0], pending_sof_r};
+            kernel_eol_r <= {kernel_eol_r[6:0], pending_eol_r};
+            kernel_eof_r <= {kernel_eof_r[6:0], pending_eof_r};
+            bypass_data_r <= data_i;
+            bypass_sof_r <= sof_i;
+            bypass_eol_r <= eol_i;
+            bypass_eof_r <= eof_i;
         end
     end
 endmodule

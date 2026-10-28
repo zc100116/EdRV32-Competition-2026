@@ -107,7 +107,8 @@ module tb;
                 if (out_eof) begin
                     completed++;
                     if (flush_limit!=0 && cycle-eof_cycle>flush_limit)
-                        $fatal(1,"FAIL top flush cycles=%0d limit=%0d",cycle-eof_cycle,flush_limit);
+                        $fatal(1,"FAIL top flush cycles=%0d limit=%0d width=%0d",
+                            cycle-eof_cycle,flush_limit,width);
                 end
             end
         end
@@ -147,6 +148,7 @@ module tb;
         int yy;
         int op;
         width=w; height=h; received=0;
+        flush_limit=w+32;
         cfg=model_enable ? model_cfg : 0;
         for (int n=0; n<w*h; n++) begin
             raw[n]=16'(n*523+32'h4397);
