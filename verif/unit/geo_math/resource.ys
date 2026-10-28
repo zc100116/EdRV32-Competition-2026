@@ -1,0 +1,22 @@
+# Run from repository root: yosys -Q -T -s verif/unit/geo_math/resource.ys
+# RAM wrappers are black boxes; LUT6 mapping matches the CPU timing report.
+read_verilog -lib -D SIM_MODE -Irtl/include rtl/tech/edrv32_ram_geo_src.v
+read_verilog -D SIM_MODE rtl/common/edrv32_dma2d_rd.v rtl/common/edrv32_dma2d_wr.v
+read_verilog rtl/media/geo/edrv32_geo_address.v rtl/media/geo/edrv32_geo_desc.v
+read_verilog rtl/media/geo/edrv32_geo_range.v rtl/media/geo/edrv32_geo_coords.v
+read_verilog rtl/media/geo/edrv32_geo_tiles.v rtl/media/geo/edrv32_geo_bounds.v
+read_verilog rtl/media/geo/edrv32_geo_regs.v rtl/media/geo/edrv32_geo_source.v
+read_verilog rtl/media/geo/edrv32_geo_bilinear.v rtl/media/geo/edrv32_geo.v
+hierarchy -top edrv32_geo
+design -save source
+synth -top edrv32_geo -flatten -noabc
+abc -lut 6 -dress
+opt_clean
+stat
+write_json build/geo/netlist.json
+design -load source
+synth -top edrv32_geo -noabc
+abc -lut 6 -dress
+opt_clean
+stat
+write_json build/geo/hierarchy.json

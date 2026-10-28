@@ -2,4 +2,13 @@
 ../common/edrv32_dma2d_rd.v
 ../common/edrv32_dma2d_wr.v
 ../tech/edrv32_ram_geo_src.v
+../media/geo/edrv32_geo_address.v
+../media/geo/edrv32_geo_desc.v
+../media/geo/edrv32_geo_range.v
+../media/geo/edrv32_geo_coords.v
+../media/geo/edrv32_geo_tiles.v
+../media/geo/edrv32_geo_bounds.v
+../media/geo/edrv32_geo_regs.v
+../media/geo/edrv32_geo_source.v
+../media/geo/edrv32_geo_bilinear.v
 ../media/geo/edrv32_geo.v
