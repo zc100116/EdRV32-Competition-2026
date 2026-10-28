@@ -1,3 +1,8 @@
 +incdir+../include
 ../tech/edrv32_ram_pix_line.v
+../media/pix/edrv32_pix_kernel.v
+../media/pix/edrv32_pix_point1.v
+../media/pix/edrv32_pix_filter.v
+../media/pix/edrv32_pix_point2.v
+../media/pix/edrv32_pix_regs.v
 ../media/pix/edrv32_pix.v

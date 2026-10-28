@@ -1,0 +1,11 @@
+# Spec: pix-spec 7; generic LUT6 reference, line RAM wrappers blackboxed.
+# From repository root: mkdir -p build/pix_synth
+# yosys -Q -T -l build/pix_synth/pix.log -s verif/unit/pix_control/resource.ys
+read_verilog -lib -D SIM_MODE -Irtl/include rtl/tech/edrv32_ram_pix_line.v
+read_verilog rtl/media/pix/edrv32_pix.v rtl/media/pix/edrv32_pix_filter.v rtl/media/pix/edrv32_pix_kernel.v rtl/media/pix/edrv32_pix_point1.v rtl/media/pix/edrv32_pix_point2.v rtl/media/pix/edrv32_pix_regs.v
+hierarchy -check -top edrv32_pix
+synth -top edrv32_pix -flatten -noabc
+abc -lut 6 -dress
+opt_clean
+stat
+write_json build/pix_synth/pix.json
