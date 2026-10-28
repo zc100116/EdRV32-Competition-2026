@@ -2,10 +2,10 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.4 |
-| 日期 | 2026-10-27 |
+| 版本 | v0.5 |
+| 日期 | 2026-10-28 |
 | 方案 | `docs/design/2026-10-27-image-path.md`（已决定） |
-| 规格 | `docs/spec/dma2d-spec.md` v0.1、`vin-spec.md` v0.1、`disp-spec.md` v0.2、`pix-spec.md` v0.1、`geo-spec.md` v0.1（已确认）；`eth-spec.md` 待写；SoC 规格 v0.12 |
+| 规格 | `docs/spec/dma2d-spec.md` v0.1、`vin-spec.md` v0.1、`disp-spec.md` v0.2、`pix-spec.md` v0.1、`geo-spec.md` v0.1、`eth-spec.md` v0.1（已确认）；SoC 规格 v0.13 |
 
 ## 1. 目标和完成标准
 
@@ -34,15 +34,19 @@
 | V-S3 | PIX、GEO 规格 | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [x] 2026-10-28：pix-spec v0.1、geo-spec v0.1 与验证方案已确认；SoC 规格 v0.12 |
 | V-P3 | PIX 行缓存 IP 创建说明和包装模块 | 协调者 | V-S3（PIX） | `fpga/ip/ip_ram_pix_line.md`、`rtl/tech/edrv32_ram_pix_line.v` | — | [x] 2026-10-28：1024 × 48 简单双口，4 实例 |
 | V-R3 | PIX RTL 和单元测试 | Codex · GPT-6.1 Sol | V-P3 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-pix-rtl | [x] 2026-10-28：6 个 RTL 模块，单元 pix_point/pix_filter/pix_control smoke/full 6 PASS；Yosys 参考 33170 LUT6、5234 FF（远超 3K 估算，Gamma 表未映射为 LUTRAM；面积以 PDS 为准，另立任务） |
-| V-T3 | PIX 模块级测试（`verif/block/pix`，Python 参考模型 `pix_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（PIX） | testbench 按 pix-testplan 完成，参考模型自测通过 | task-pix-verif | [ ] |
+| V-T3 | PIX 模块级测试（`verif/block/pix`，Python 参考模型 `pix_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（PIX） | testbench 按 pix-testplan 完成，参考模型自测通过 | task-pix-verif | [~] |
 | V-I2 | PIX 联调：block/pix smoke/full；VIN + PIX 联合测试 VI-18（pix-testplan 待定事项 1） | Codex · GPT-6.1 Sol | V-R3、V-T3 | pix testplan smoke/full 通过，VI-18 通过 | task-pix-int | [ ] |
 | V-R4 | GEO RTL 和单元测试；源缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S3（GEO） | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-geo-rtl | [x] 2026-10-28：cfbe787（分支 zc100116/task-geo-rtl，待与 V-T4 一起合入）；单元 6 项 PASS；Yosys 参考 9292 LUT6，≤ 8K 由 PDS 判定 |
 | V-P4 | GEO 源缓冲 IP 创建说明和包装模块（按 V-R4 提出的组织） | 协调者 | V-R4 提问 | `fpga/ip/`、`rtl/tech/` | — | [x] 2026-10-28：`ip_ram_geo_src` 写 256 × 128 / 读 2048 × 16，8 实例（每组 96 列 × 80 行，不回绕、无字节使能） |
-| V-T4 | GEO 模块级测试（`verif/block/geo`，Python 参考模型 `geo_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（GEO） | testbench 按 geo-testplan 完成，参考模型自测通过 | task-geo-verif | [ ] |
+| V-T4 | GEO 模块级测试（`verif/block/geo`，Python 参考模型 `geo_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（GEO） | testbench 按 geo-testplan 完成，参考模型自测通过 | task-geo-verif | [~] |
 | V-I3 | GEO 联调：block/geo smoke/full/perf | Codex · GPT-6.1 Sol | V-R4、V-T4 | geo testplan smoke/full 通过，GE-12 满足第 7 节 | task-geo-int | [ ] |
-| V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [ ] |
+| V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [x] 2026-10-28：eth-spec v0.1、eth-testplan v0.1 已确认；SoC 规格 v0.13；设计记录 `2026-10-28-eth.md` |
+| V-R5 | ETH RTL（`rtl/eth/`：收发前端、异步 FIFO、过滤和 ARP、窗口写出、分包发送、MDIO、寄存器）和单元测试；接收/发送缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S4 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-eth-rtl | [ ] |
+| V-P5 | ETH 接收/发送缓冲 IP 创建说明和包装模块（按 V-R5 提出的组织）；`rtl/filelists/eth.f` | 协调者 | V-R5 提问 | `fpga/ip/`、`rtl/tech/`、`rtl/filelists/` | — | [ ] |
+| V-T5 | ETH 模块级测试（`verif/block/eth`，对端模型 `verif/models/eth_peer_model.sv`、参考模型 `eth_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S4 | testbench 按 eth-testplan 完成，对端模型和参考模型自测通过 | task-eth-verif | [ ] |
+| V-I4 | ETH 联调：block/eth smoke/full/perf | Codex · GPT-6.1 Sol | V-R5、V-T5 | eth testplan smoke/full 通过，ET-14 满足第 7 节 | task-eth-int | [ ] |
 
-后续待办（PIX、GEO、ETH 的 RTL 和验证；OV5640 软件驱动；板级顶层、约束和 Windows 任务卡）在对应规格确认后补入。
+后续待办（OV5640 软件驱动；PC 端网口工具和板上应用层协议；板级顶层、RGMII IO、约束和 Windows 任务卡；PIX、GEO、ETH 的 PDS 资源测量）在对应前置完成后补入。
 
 ## 4. 规格定稿项
 
@@ -63,3 +67,4 @@ dma2d 资源指标在 PDS 实测后定稿；其余模块随各自规格列出。
 | 2026-10-27 | v0.2 | V-S2 完成；增加 V-M1、V-R1、V-T1、V-R2、V-T2、V-I1、V-P1 |
 | 2026-10-28 | v0.3 | PIX 规格确认；增加 V-P3、V-R3、V-T3、V-I2 |
 | 2026-10-28 | v0.4 | GEO 规格确认；增加 V-R4、V-P4、V-T4、V-I3 |
+| 2026-10-28 | v0.5 | ETH 规格确认（V-S4）；增加 V-R5、V-P5、V-T5、V-I4 |
