@@ -28,13 +28,11 @@ def execute(command, log, timeout):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('tier', choices=('smoke', 'full'))
-    parser.add_argument('--stub', action='store_true',
-                        help='explicit environment-only PX-01; never selected by test.yaml')
     args = parser.parse_args()
-    out = ROOT / 'build/pix' / ('stub' if args.stub else 'dut')
+    out = ROOT / 'build/pix/dut'
     out.mkdir(parents=True, exist_ok=True)
-    top = 'edrv32_pix_stub_tb' if args.stub else 'edrv32_pix_tb'
-    files = 'stub.f' if args.stub else 'files.f'
+    top = 'edrv32_pix_tb'
+    files = 'files.f'
     sources = expand_files(ROOT / 'verif/block/pix' / files)
     compile_command = ['verilator', '--binary', '--timing', '-j', '1', '-Wall',
                        '--timescale', '1ns/1ps', '-CFLAGS', '-O0',
@@ -42,15 +40,12 @@ def main():
                        '+define+SIM_MODE', *sources]
     execute(compile_command, out / 'compile.log', 300)
     selected = cases(args.tier)
-    if args.stub:
-        selected = [case for case in selected if case[1] == 1]
     for name, number, frames in selected:
         directory = out / name
         directory.mkdir(exist_ok=True)
         (directory / 'scenario.txt').write_text(
             ''.join(' '.join(map(str, frame)) + '\n' for frame in frames))
-        command = [str(out / 'obj/sim'), f'+CASE={number}', f'+DIR={directory}',
-                   f'+STUB={int(args.stub)}']
+        command = [str(out / 'obj/sim'), f'+CASE={number}', f'+DIR={directory}']
         execute([*command, '+PREPARE=1'], directory / 'prepare.log', 120)
         # The TB has now written the exact RGB565 input frames; the model consumes them.
         generate(directory)
@@ -59,7 +54,7 @@ def main():
         if 'PASS' not in output or 'FAIL' in output:
             raise RuntimeError(f'{name}: missing PASS or reported FAIL: {output}')
         print(output.strip(), flush=True)
-    print(f'PASS PIX {args.tier}: {len(selected)} scenarios, stub={int(args.stub)}')
+    print(f'PASS PIX {args.tier}: {len(selected)} scenarios')
 
 
 if __name__ == '__main__':

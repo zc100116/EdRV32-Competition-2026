@@ -1,13 +1,13 @@
-# PIX 独立模块验证（V-T3）
+# PIX 模块验证（V-T3 / V-I2）
 
 依据 `docs/spec/pix-spec.md` v0.1、`docs/testplan/pix-testplan.md` v0.1 和 SoC
 4.3、4.5、7.1 实现 PX-01–PX-14。未阅读 `rtl/media/pix/`，未修改归属目录以外的文件。
 正式 DUT 为 `edrv32_pix`，仅经 `files.f` 的 `-f ../../../rtl/filelists/pix.f` 引入；
 所有检查只使用规格中的公开端口和寄存器。
 
-本阶段参考模型 selftest、完整环境的桩下 lint/编译和 PX-01 环境验证通过。
-真实 DUT 文件尚不存在，正式 smoke 会明确编译失败；**没有真实 RTL 的 PX-01–PX-14
-通过结论**，通过判定及真实性能测量留给 V-I2。
+V-I2 使用真实 `edrv32_pix` 联调；不再保留直通桩或桩运行选项。
+联调中的失败定性、修复及回归证据见
+[`2026-10-28-pix-block-integration.md`](../../../docs/debug/2026-10-28-pix-block-integration.md)。
 
 ## 文件和运行方式
 
@@ -22,10 +22,6 @@
   Python 模型产生 `outN.hex`，最后重放同一输入并检查输出。不完整帧不生成期望输出。
 - `selftest/test.yaml`：独立模型自测，无 RTL 依赖，smoke/full 均会发现。
 - `test.yaml`、`full/test.yaml`：正式 smoke 和 full；full runner 包含所有 PX 项。
-- `edrv32_pix_passthrough_stub.sv`、`edrv32_pix_stub_tb.sv`、`stub.f`：显式直通桩环境。
-  桩只接通流接口和 APB 应答，不实现 PIX 运算或寄存器；仅显式 `--stub` 命令使用。
-  该命令只执行 PX-01 的两个帧，跳过桩不存在的寄存器检查，保留数据、数量和标记检查。
-  正式 YAML 和正式文件列表均不引用桩，也不自动切换到桩。
 
 图案全部由 SV 像素源生成：随机、六种纯色、RGB 渐变、棋盘格，以及渐变加噪声。
 `verif/models/` 没有现成自然图像，PX-07 使用 1280×720 渐变加噪声，不依赖外部文件。
@@ -77,96 +73,31 @@ PX-13 对 PERF4–15、非使用的描述符寄存器和私有保留位检查读
 等于阈值、完整四级小图手算结果；另穷举 65536 个 RGB565 的展开再截断恒等。
 这些断言无需 DUT，也不把模型自身的另一路计算当期望值。
 
-## 复现和本阶段证据
-
-工具为 Verilator 5.020、Python 3，Linux；先执行 `. ~/.local/opt/edrv32/env.sh`。
-起始提交 `02586b3`（本次提交号由 `git log -1 -- verif/block/pix` 取得）。
-单核构建，始终只有一个仿真进程，无 `--parallel`。
+## 运行和复现
 
 ```sh
-make smoke REGRESS_ARGS='-j 1 --path verif/block/pix/selftest'
-python3 verif/block/pix/run.py smoke --stub
-make smoke REGRESS_ARGS='-j 1 --path verif/block/pix'
-```
-
-第一条：`Summary: 1 PASS, 0 FAIL`，模型自测通过。
-第二条：`PASS PX-01 frames=2 environment_stub=1`，两个 64×8 帧，共 1024 像素，
-数据及标记正确，仿真结束时刻 4,424,000 ps。
-第三条：参考自测 PASS，正式 DUT 项因缺少 `rtl/media/pix/edrv32_pix.v` 编译失败，
-`Summary: 1 PASS, 1 FAIL`；没有跳过或把桩计入正式结果。
-全部 smoke 场景还完成了 SV 导出输入/配置和 Python 期望文件生成；这只是环境文件流程检查。
-
-日志分别位于 `build/regress/smoke/block/pix/selftest/verilator/run.log`、
-`build/pix/stub/{compile.log,PX-01/{prepare.log,run.log}}`、
-`build/regress/smoke/block/pix/verilator/run.log`；源/模型导出检查放在
-`build/pix/export-check/`。所有生成物均在 `build/`。
-
-SV 桩本身通过仓库检查器：
-
-```sh
-python3 tools/check/verilog_style.py verif/block/pix/edrv32_pix_passthrough_stub.sv
-```
-
-结果 `Style: 1 files, 0 warnings`。仓库目录扫描只发现 `.v/.vh`，因此另按该检查器相同的
-文件头、100 列、4 空格缩进和 Tab 规则检查全部 5 个 SV/SVH 文件，0 告警；SV 语言特性
-按第 9 节允许，例化均采用命名连接、一行一端口。SV 风格检查复现：
-
-```sh
-python3 - <<'PY'
-from pathlib import Path
-import sys
-sys.dont_write_bytecode = True
-sys.path.insert(0, 'tools/check')
-from verilog_style import without_comments
-errors = []
-paths = sorted(p for p in Path('verif/block/pix').rglob('*') if p.suffix in ('.sv', '.svh'))
-for path in paths:
-    text = path.read_text()
-    header = '\n'.join(text.splitlines()[:12])
-    for label in ('File', 'Spec', 'Description', 'Clock'):
-        if label.lower() not in header.lower():
-            errors.append(f'{path}: missing {label}')
-    for line_number, (raw, clean) in enumerate(
-            zip(text.splitlines(), without_comments(text).splitlines()), 1):
-        if '\t' in raw or (clean.strip() and
-                (len(raw.rstrip()) > 100 or (len(clean) - len(clean.lstrip())) % 4)):
-            errors.append(f'{path}:{line_number}: style')
-print('\n'.join(errors))
-print(f'SV style: {len(paths)} files, {len(errors)} warnings')
-sys.exit(bool(errors))
-PY
-```
-
-复现完整环境 lint：
-
-```sh
-python3 - <<'PY'
-from pathlib import Path
-import subprocess
-import sys
-sys.dont_write_bytecode = True
-sys.path.insert(0, 'tools')
-from regress import expand_files
-subprocess.run(['verilator', '--lint-only', '--timing', '-Wall',
-                '--timescale', '1ns/1ps', '--top-module', 'edrv32_pix_stub_tb'] +
-               expand_files(Path('verif/block/pix/stub.f')), check=True)
-PY
-```
-
-结果退出码 0、0 告警，所有功能激励/检查 task 均完成 elaboration。
-`lint.vlt` 仅豁免行为环境的阻塞更新、Verilator 5.020 对 class 字段的未使用误报、整数
-切片、共享 APB 未用槽、桩未用输入、复位采样的同步/异步混用，以及 include 文件中的
-class 文件名。真实 RTL 的位宽、组合环、连接、锁存器等告警保持启用。
-
-V-I2 合入真实 RTL 后运行正式 smoke/full，确认编译及 smoke 总时长不超过约 60 秒：
-
-```sh
+. ~/.local/opt/edrv32/env.sh
 make smoke REGRESS_ARGS='-j 1 --path verif/block/pix'
 make full REGRESS_ARGS='-j 1 --path verif/block/pix'
 ```
 
-可用 `build/pix/dut/obj/sim +CASE=N +DIR=...` 重放对应 `build/pix/dut/PX-NN` 场景。
-输入、配置和期望图均已由 runner 生成，不在仿真期间调用外部模型。
+正式日志位于 `build/regress/<tier>/block/pix/`，各场景输入、配置、参考结果、
+仿真日志位于 `build/pix/dut/PX-NN/`。可直接重放：
+
+```sh
+build/pix/dut/obj/sim +CASE=13 +DIR="$PWD/build/pix/dut/PX-13"
+```
+
+`PX-10 input beats=... cycles=...` 记录连续吞吐；`PX-11 frame=... flush=... limit=...`
+记录两个背靠背帧的冲刷测量。超限立即 FAIL，判据保持验证方案原值。
+完整帧之外，不完整帧只检查规格规定的边界和丢弃行为。
+
+`lint.vlt` 仅豁免行为环境阻塞更新、class 字段/整数切片误报、共享 APB 未用槽、
+复位采样同步/异步混用及 include 中的 class 文件名；DUT 位宽、连接、锁存器等检查保持启用。
+`tools/check/verilog_style.py rtl/media/pix` 检查 RTL；SV/SVH 按同一工具的文件头、
+100 列、4 空格和 Tab 规则检查（测试按 CLAUDE.md 9.1 允许 SV）。
+
+VI-18 位于 `verif/block/vin/pix_integration/`，复用本目录的 `pix_ref.py`，接真实 PIX。
 
 ## 协调澄清
 

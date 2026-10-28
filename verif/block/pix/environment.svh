@@ -49,7 +49,6 @@
     string directory;
     int case_number;
     int prepare;
-    int stub_environment;
     int source_frame = 0;
     int input_frame = -1;
     int output_frame = 0;
@@ -353,6 +352,8 @@
                     item.done = 1;
                     completed++;
                     if ((item.flags & 1) != 0) begin
+                        $display("PX-11 frame=%0d flush=%0d limit=%0d cycles",
+                            output_frame, cycle - item.input_eof_cycle, item.width + 32);
                         if (cycle - item.input_eof_cycle > item.width + 32) begin
                             expect_value("EOF flush cycles maximum", 32'(item.width + 32),
                                             32'(cycle - item.input_eof_cycle));
@@ -362,7 +363,7 @@
                     output_pixel = 0;
                 end
             end
-            if (out_valid && out_ready && out_eof && stub_environment == 0) begin
+            if (out_valid && out_ready && out_eof) begin
                 #1;
                 expect_value("FRAME IRQ at output EOF edge", {31'b0, irq_enabled}, {31'b0, irq});
             end
@@ -507,9 +508,7 @@
         if (!$value$plusargs("DIR=%s", directory)) $fatal(1, "FAIL missing DIR");
         if (!$value$plusargs("CASE=%d", case_number)) $fatal(1, "FAIL missing CASE");
         prepare = 0;
-        stub_environment = 0;
         void'($value$plusargs("PREPARE=%d", prepare));
-        void'($value$plusargs("STUB=%d", stub_environment));
         load_scenario();
         if (prepare != 0) begin
             $display("PASS PIX source export frames=%0d", frames.size());
@@ -517,14 +516,12 @@
         end else begin
             repeat (5) @(negedge clk_mem);
             rst_mem_n = 1;
-            if (stub_environment == 0) begin
-                if (case_number == 13) begin
-                    reset_registers();
-                    register_writes();
-                end
-                gamma_initialize();
-                write_reg(12'h00c, 4);
+            if (case_number == 13) begin
+                reset_registers();
+                register_writes();
             end
+            gamma_initialize();
+            write_reg(12'h00c, 4);
             receiver_enabled = 1;
             for (int index = 0; index < frames.size(); index++) begin
                 source_frame = index;
@@ -542,15 +539,19 @@
                     send_frame(item);
                     midframe_write(item);
                 join
+                // Yield before reusing this fork: Verilator 5.020 resumes JOIN inline.
+                #1;
                 if (item.sent == item.width * item.height / 2 && (item.flags & 2) == 0) begin
                     while (!item.done) @(negedge clk_mem);
                     @(negedge clk_mem);
                     if (item.flow == 2) begin
+                        $display("PX-10 input beats=%0d cycles=%0d", item.sent,
+                            item.last_input_cycle - item.first_input_cycle + 1);
                         expect_value("continuous input cycles", 32'(item.sent),
                                         32'(item.last_input_cycle - item.first_input_cycle + 1));
                     end
                     if ((item.flags & 4) != 0) soft_reset_finished();
-                    else if (stub_environment == 0) begin
+                    else begin
                         check_counters();
                         if ((item.flags & 16) != 0) begin
                             expect_value("abort/reset was observed", 1, {31'b0, reset_seen});
@@ -581,8 +582,8 @@
             end
             repeat (8) @(negedge clk_mem);
             expect_value("final frame count", 32'(frames.size()), 32'(output_frame));
-            $display("PASS PX-%02d frames=%0d environment_stub=%0d t=%0t",
-                        case_number, frames.size(), stub_environment, $time);
+            $display("PASS PX-%02d frames=%0d t=%0t",
+                        case_number, frames.size(), $time);
             $finish;
         end
     end

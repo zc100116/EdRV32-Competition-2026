@@ -4,7 +4,6 @@
 // Clock domain: host lint configuration.
 `verilator_config
 lint_off -rule BLKSEQ -file "*/verif/block/pix/environment.svh"
-lint_off -rule UNUSEDSIGNAL -file "*/verif/block/pix/edrv32_pix_passthrough_stub.sv"
 lint_off -rule UNUSEDSIGNAL -file "*/verif/common/edrv32_apb_if.sv"
 lint_off -rule SYNCASYNCNET -file "*/verif/block/pix/*"
 lint_off -rule DECLFILENAME -file "*/verif/block/pix/environment.svh"
