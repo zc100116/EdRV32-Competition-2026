@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX RTL 完成（V-R3），模块级验证 V-T3 进行中；GEO RTL 完成（V-R4），模块级验证 V-T4 进行中；ETH 规格 v0.1 已确认，RTL 完成（V-R5），V-T5（验证）进行中 |
+| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX RTL 完成（V-R3），模块级验证 V-T3 进行中；GEO RTL 完成（V-R4），模块级验证 V-T4 进行中；ETH 规格 v0.1 已确认，RTL（V-R5）和模块级测试（V-T5）完成，联调 V-I4 进行中 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 

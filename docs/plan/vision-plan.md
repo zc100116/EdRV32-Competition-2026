@@ -41,10 +41,10 @@
 | V-T4 | GEO 模块级测试（`verif/block/geo`，Python 参考模型 `geo_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（GEO） | testbench 按 geo-testplan 完成，参考模型自测通过 | task-geo-verif | [~] |
 | V-I3 | GEO 联调：block/geo smoke/full/perf | Codex · GPT-6.1 Sol | V-R4、V-T4 | geo testplan smoke/full 通过，GE-12 满足第 7 节 | task-geo-int | [ ] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [x] 2026-10-28：eth-spec v0.1、eth-testplan v0.1 已确认；SoC 规格 v0.13；设计记录 `2026-10-28-eth.md` |
-| V-R5 | ETH RTL（`rtl/eth/`：收发前端、异步 FIFO、过滤和 ARP、窗口写出、分包发送、MDIO、寄存器）和单元测试；接收/发送缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S4 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-eth-rtl | [x] 2026-10-28：1f9148d（分支 zc100116/task-eth-rtl，待与 V-T5 一起合入）；单元 smoke 6、full 2 PASS；Yosys 参考 8684 LUT6（目标 5K，由 PDS 判定）|
+| V-R5 | ETH RTL（`rtl/eth/`：收发前端、异步 FIFO、过滤和 ARP、窗口写出、分包发送、MDIO、寄存器）和单元测试；接收/发送缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S4 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-eth-rtl | [x] 2026-10-28：ec3d2af（已并入协调者分支）；单元 smoke 6、full 2 PASS；Yosys 参考 8684 LUT6（目标 5K，由 PDS 判定）|
 | V-P5 | ETH 接收/发送缓冲 IP 创建说明和包装模块（按 V-R5 提出的组织）；`rtl/filelists/eth.f` | 协调者 | V-R5 提问 | `fpga/ip/`、`rtl/tech/`、`rtl/filelists/` | — | [x] 2026-10-28：`ip_ram_eth_buf` 1024 × 32（接收、发送缓冲各 1 实例），`ip_ram_eth_fifo` 512 × 10 独立时钟（两个异步 FIFO） |
-| V-T5 | ETH 模块级测试（`verif/block/eth`，对端模型 `verif/models/eth_peer_model.sv`、参考模型 `eth_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S4 | testbench 按 eth-testplan 完成，对端模型和参考模型自测通过 | task-eth-verif | [~] |
-| V-I4 | ETH 联调：block/eth smoke/full/perf | Codex · GPT-6.1 Sol | V-R5、V-T5 | eth testplan smoke/full 通过，ET-14 满足第 7 节 | task-eth-int | [ ] |
+| V-T5 | ETH 模块级测试（`verif/block/eth`，对端模型 `verif/models/eth_peer_model.sv`、参考模型 `eth_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S4 | testbench 按 eth-testplan 完成，对端模型和参考模型自测通过 | task-eth-verif | [x] 2026-10-28：647650b（ET-01–15 三档，selftest PASS，未读 RTL） |
+| V-I4 | ETH 联调：block/eth smoke/full/perf | Codex · GPT-6.1 Sol | V-R5、V-T5 | eth testplan smoke/full 通过，ET-14 满足第 7 节 | task-eth-int | [~] |
 
 后续待办（OV5640 软件驱动；PC 端网口工具和板上应用层协议；板级顶层、RGMII IO、约束和 Windows 任务卡；PIX、GEO、ETH 的 PDS 资源测量）在对应前置完成后补入。
 
