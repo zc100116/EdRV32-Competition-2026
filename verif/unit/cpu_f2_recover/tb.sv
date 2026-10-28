@@ -1,5 +1,5 @@
 // cpu_f2_recover/tb.sv
-// cpu-testplan U-11; cpu-spec v0.3 4.4.
+// cpu-testplan U-11; cpu-spec v0.11 4.4.
 // Preseed stale or correct BTB entries and compare instruction bytes with memory.
 // Verify request cancellation, BTB invalidation, RAS restoration and redirect priority.
 // Clock domain: clk_sys.
@@ -63,6 +63,9 @@ module tb;
     integer length_bytes;
     integer trained_pc;
     integer retry_pc;
+    reg held_d_redirect;
+    integer held_d_target;
+    reg [36:0] held_d_ras;
     reg [31:0] expected_raw;
     reg [31:0] expected_instr;
     reg [178:0] entry;
@@ -139,9 +142,16 @@ module tb;
     // Model checks the visible instruction stream, without inspecting assembled RTL data.
     always @(posedge clk_i) begin
         if(rst_n_i)begin
-            if(redirect_valid_i)expected_pc=integer'(redirect_pc_i);
-            else if(d_redirect_valid_i)expected_pc=integer'(d_redirect_pc_i);
-            else begin
+            if(redirect_valid_i)begin
+                expected_pc=integer'(redirect_pc_i);
+                expected_ras=redirect_ras_i;
+                held_d_redirect=0;
+            end else if(d_redirect_valid_i)begin
+                // cpu-spec 4.4: consume the stalled D head before the redirect target.
+                held_d_redirect=1;
+                held_d_target=integer'(d_redirect_pc_i);
+                held_d_ras=d_redirect_ras_i;
+            end else begin
                 for(lane=0;lane<integer'(decode_pop_count_i);lane=lane+1)begin
                     entry=decode_data_o[lane*179+:179];
                     length_bytes=memory[expected_pc/2][1:0]==3?4:2;
@@ -172,6 +182,11 @@ module tb;
                             expected_ras={3'd2,2'd2,32'(6+length_bytes)};
                         end else expected_pc=expected_pc+length_bytes;
                     end else expected_pc=expected_pc+length_bytes;
+                    if(held_d_redirect)begin
+                        expected_pc=held_d_target;
+                        expected_ras=held_d_ras;
+                        held_d_redirect=0;
+                    end
                     checked=checked+1;
                 end
             end
@@ -196,6 +211,7 @@ module tb;
             @(negedge clk_i);rst_n_i=0;halt_i=1;decode_pop_count_i=0;
             redirect_valid_i=0;d_redirect_valid_i=0;update_valid_i=0;
             expected_pc=0;checked=0;recoveries=0;kills=0;priority_seen=0;
+            held_d_redirect=0;
             expected_ras={3'd1,2'd1,32'habcdef00};
             for(i=0;i<512;i=i+1)memory[i]=16'h0001;
             trained_pc=6;retry_pc=6;
@@ -236,11 +252,9 @@ module tb;
                     // Resolve an older redirect on the same edge as an F2 mismatch.
                     d_redirect_valid_i=1;d_redirect_pc_i='h100;
                     d_redirect_ras_i={3'd1,2'd3,32'hbbbb0000};
-                    expected_ras=d_redirect_ras_i;
                     if(scenario==7)begin
                         redirect_valid_i=1;redirect_pc_i='h180;
                         redirect_ras_i={3'd1,2'd2,32'hcccc0000};
-                        expected_ras=redirect_ras_i;
                     end
                     decode_pop_count_i=0;priority_seen=1;
                     #1;if(dut.recover_w)$fatal(1,"FAIL U-11 redirect priority");
