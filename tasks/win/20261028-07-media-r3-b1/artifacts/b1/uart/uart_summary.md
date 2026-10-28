@@ -12,4 +12,4 @@
 
 O2: {'Iterations': '5000', 'Cycles': '1387629692', 'Instructions': '1441025033', 'Iterations/Sec': '360.326', 'CoreMark/MHz': '3.603', 'IPC': '1.038', 'CoreMark result': 'PASS', 'Compiler flags': '-march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10', 'Score status': 'duration >= 10 s; see CoreMark reporting rules', 'seconds': 13.87629692}
 
-tuned: 未取得；当前会话没有相应构建运行记录。
+tuned: {'Iterations': '5000', 'Cycles': '1159978150', 'Instructions': '1239834691', 'Iterations/Sec': '431.042', 'CoreMark/MHz': '4.310', 'IPC': '1.068', 'CoreMark result': 'PASS', 'Compiler flags': '-march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10 -O3 -funroll-all-loops -finline-limit=600 -falign-functions=4 -falign-jumps=4 -falign-loops=4', 'Score status': 'duration >= 10 s; see CoreMark reporting rules', 'seconds': 11.5997815}

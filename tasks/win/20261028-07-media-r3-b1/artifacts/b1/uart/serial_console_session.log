@@ -181,3 +181,99 @@
 [00:18:16.760][RX] HPM events 17-31: reserved, no counting
 [00:18:16.765][RX] System info result: PASS
 [00:18:16.765][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:24:07.303][RX] 
+[00:24:07.303][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:24:07.303][RX]   E         D   D   R   R   V   V      3      2 
+[00:24:07.303][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:24:07.303][RX]   E         D   D   R  R     V V       3   2    
+[00:24:07.303][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:24:07.303][RX] 
+[00:24:07.303][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:24:07.303][RX] CHIP_ID: 0xed320001
+[00:24:07.303][RX] CLK_SYS_HZ: 100000000
+[00:24:07.303][RX] ROM bytes: 16384
+[00:24:07.303][RX] SRAM bytes: 65536
+[00:24:07.303][RX] I-cache bytes: 8192
+[00:24:07.303][RX] D-cache bytes: 8192
+[00:24:07.303][RX] MEM_READY: 1
+[00:24:07.303][RX] Boot mode: UART download
+[00:24:07.303][RX] Build commit: 207b05a
+[00:24:07.303][RX] Compiler version: GCC 15.2.0
+[00:24:07.304][RX] UART download ready
+[00:25:02.160][SYS] sending file: monitor_tuned.wire (31896 B)
+[00:25:04.881][SYS] file sent: monitor_tuned.wire (31896 B)
+[00:25:04.937][RX] UART download complete
+[00:25:04.937][RX] Boot SRAM
+[00:25:04.937][RX] Monitor: EdRV32
+[00:25:04.937][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:25:12.356][TX] 1<CR>
+[00:25:12.365][RX] Iterations default: 10
+[00:25:12.365][RX] Iterations input: decimal 1..4294967295 then Enter; Enter selects default
+[00:25:16.811][TX] 5000<CR>
+[00:25:16.833][RX] Iterations: 5000
+[00:25:16.834][RX] HPM rounds: 2
+[00:25:28.443][RX] HPM round: 1
+[00:25:28.443][RX] HPM first event: 1
+[00:25:28.443][RX] HPM last event: 8
+[00:25:28.443][RX] HPM round cycles: 1159978150
+[00:25:28.443][RX] HPM round instructions: 1239834691
+[00:25:28.443][RX] CRC seed: 0x0000e9f5
+[00:25:28.443][RX] CRC list: 0x0000e714
+[00:25:28.443][RX] CRC matrix: 0x00001fd7
+[00:25:28.443][RX] CRC state: 0x00008e3a
+[00:25:28.443][RX] CRC final: 0x0000bd59
+[00:25:28.443][RX] CRC seed result: PASS
+[00:25:28.443][RX] CRC list result: PASS
+[00:25:28.443][RX] CRC matrix result: PASS
+[00:25:28.443][RX] CRC state result: PASS
+[00:25:28.443][RX] CRC result: PASS
+[00:25:40.087][RX] HPM round: 2
+[00:25:40.087][RX] HPM first event: 9
+[00:25:40.087][RX] HPM last event: 16
+[00:25:40.087][RX] HPM round cycles: 1159977815
+[00:25:40.087][RX] HPM round instructions: 1239834691
+[00:25:40.087][RX] CRC seed: 0x0000e9f5
+[00:25:40.087][RX] CRC list: 0x0000e714
+[00:25:40.087][RX] CRC matrix: 0x00001fd7
+[00:25:40.087][RX] CRC state: 0x00008e3a
+[00:25:40.087][RX] CRC final: 0x0000bd59
+[00:25:40.087][RX] CRC seed result: PASS
+[00:25:40.087][RX] CRC list result: PASS
+[00:25:40.087][RX] CRC matrix result: PASS
+[00:25:40.087][RX] CRC state result: PASS
+[00:25:40.087][RX] CRC result: PASS
+[00:25:40.087][RX] Cycles: 1159978150
+[00:25:40.087][RX] Instructions: 1239834691
+[00:25:40.087][RX] Iterations/Sec: 431.042
+[00:25:40.087][RX] CoreMark/MHz: 4.310
+[00:25:40.087][RX] Score status: duration >= 10 s; see CoreMark reporting rules
+[00:25:40.131][RX] HPM 01 dual retire: 315781668
+[00:25:40.131][RX] HPM 02 single retire: 608271355
+[00:25:40.131][RX] HPM 03 zero retire: 235925127
+[00:25:40.131][RX] HPM 04 branches: 252531577
+[00:25:40.131][RX] HPM 05 pair RAW: 142154593
+[00:25:40.131][RX] HPM 06 pair structural: 60904626
+[00:25:40.131][RX] HPM 07 pair slot1 type: 360733698
+[00:25:40.131][RX] HPM 08 pair missing slot1: 26256667
+[00:25:40.131][RX] HPM 09 load-use stall: 91204665
+[00:25:40.131][RX] HPM 10 divide stall: 0
+[00:25:40.131][RX] HPM 11 device wait: 0
+[00:25:40.131][RX] HPM 12 frontend empty: 93063686
+[00:25:40.131][RX] HPM 13 I-cache miss: 1343894
+[00:25:40.131][RX] HPM 14 D-cache miss: 1
+[00:25:40.131][RX] HPM 15 dirty writeback: 0
+[00:25:40.131][RX] HPM 16 branch mispredict: 40831267
+[00:25:40.131][RX] IPC: 1.068
+[00:25:40.175][RX] Dual retire ratio: 0.272
+[00:25:40.175][RX] Load-use stall ratio: 0.078
+[00:25:40.175][RX] Divide stall ratio: 0.000
+[00:25:40.175][RX] Device wait ratio: 0.000
+[00:25:40.175][RX] Frontend empty ratio: 0.080
+[00:25:40.175][RX] Branch mispredict rate: 0.161
+[00:25:40.175][RX] I-cache MPKI: 1.083
+[00:25:40.175][RX] D-cache MPKI: 0.000
+[00:25:40.175][RX] Compiler version: GCC 15.2.0
+[00:25:40.175][RX] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10 -O3 -funroll-all-loops -finline-limit=600 -falign-functions=4 -falign-jumps=4 -falign-loops=4
+[00:25:40.175][RX] ISA: rv32im_zicsr_zifencei
+[00:25:40.181][RX] CoreMark result: PASS
+[00:25:40.181][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
