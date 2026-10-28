@@ -19,14 +19,14 @@
 
 ### B 部分
 
-- 探针提交（在 `origin/probe/cpu-timing` 分支上，按顺序）：
+- 探针版本（源自 `origin/probe/cpu-timing` 的 3 个提交；各版本改动过的文件已复制到本任务卡的 `src/p1/`、`src/p2/`、`src/p3/`，路径与仓库根目录相同，**不需要检出探针分支**）：
   | 版本 | 提交 | 内容 |
   |---|---|---|
   | P1 | `15d21f8` | RVC_EN 默认 0（C 扩展已决定去掉），软件 rv32im；功能正确 |
   | P2 | `2ec4170` | P1 + 前端所有后端输入寄存一拍，重定向 valid 按 predictor / F1 / IB 三组复制 |
   | P3 | `3615a7e` | P2 + I$/D$ 命中寄存、乘法和 load 结果只从寄存级旁路、CSR 计数器进位寄存、core 区域约束 |
-- 约束：P1 只用 `fpga/constraints/edrv32_fpga_cpu_sys_top.fdc`；P2、P3 **另加** `fpga/constraints/edrv32_fpga_cpu_sys_top_probe.fdc`（P2：6 个复制寄存器的 `syn_preserve` / `syn_keep`；P3 另有 `u_cpu_subsys.u_core` 的 `PAP_REGION {423 600 806 791}`）。这些属性名、对象写法和区域语法是 Linux 端按资料推测的，**需要在 PDS 中确认**（见第 5 节步骤 3）。
-- 导入脚本：`fpga/scripts/import_cpu_sys_top.tcl`（与第四轮相同）。
+- 约束：三个版本都用 `fpga/constraints/edrv32_fpga_cpu_sys_top.fdc`；P2、P3 另加各自的 `src/p2|p3/fpga/constraints/edrv32_fpga_cpu_sys_top_probe.fdc`（P2：6 个复制寄存器的 `syn_preserve` / `syn_keep`；P3 另有 `u_cpu_subsys.u_core` 的 `PAP_REGION {423 600 806 791}`）。这些属性名、对象写法和区域语法是 Linux 端按资料推测的，**需要在 PDS 中确认**（步骤 B3）。
+- 导入脚本：`src/import_cpu_probe.tcl`。与 `fpga/scripts/import_cpu_sys_top.tcl` 相同，只是把 `src/<版本>/` 下有副本的文件替换成副本，并为 P2、P3 自动加上探针约束；打印每个被替换的文件和 `edrv32: added 42 sources (N from probe pK)`（P1 N = 2，P2 N = 3，P3 N = 7）。
 
 ## 3. 环境
 
@@ -57,18 +57,18 @@ B：无新增。
 
 | 步骤 | 执行者 | 内容 |
 |---|---|---|
-| 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261028-04-media-cpu-probes origin/main`（产物和 result.md 提交在这个分支）。另用 `git worktree add ../probe-src origin/probe/cpu-timing` 检出 B 部分的探针源码，B 部分按版本 `git -C ../probe-src checkout <提交>`，CPU 导入脚本中的仓库路径相应指向 `../probe-src`（只在本地改路径，不提交）。阅读本卡，把 A、B 两部分的用户步骤整理成一张清单交给用户。A、B 用不同的 PDS 工程，互不影响；建议先做 A 的 IP 生成，等 IP 时可以先跑 B。 |
+| 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261028-04-media-cpu-probes origin/main`。A、B 两部分都用这一个分支，不需要检出其他分支或切换提交；产物和 result.md 也提交在这个分支。阅读本卡，把 A、B 两部分的用户步骤整理成一张清单交给用户。A、B 用不同的 PDS 工程，互不影响；建议先做 A 的 IP 生成，等 IP 时可以先跑 B。 |
 | A2 | 用户（U） | 新建第 3 节的工程。 |
 | A3 | 用户（U） | 按第 4 节生成 6 个 IP（先 `ip_ram_geo_src`）；告诉 Codex 工程路径和 IP 目录。 |
 | A4 | Windows Codex（C） | 核对 6 个 IP 的模块名和端口（第 4 节）；记录每个 IP 实际占用的 DRM 块数（IP 生成报告中有）和选项截图（放 `artifacts/media/ip/`）。 |
 | A5 | 用户（U） | 在 PDS Tcl 控制台执行 `source ../../EdRV32-Competition-2026/fpga/scripts/import_media_top.tcl`，确认打印 `edrv32: added 58 sources`。编译报错就停下，把报错原文交给 Codex。 |
 | A6 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`（不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex。**不要加 `PAP_CLOCK_DEDICATED_ROUTE FALSE`**；报 Place-0084 时停下回传。资源超出器件容量（map 或 pnr 报资源不足）时也停下，回传综合后的资源报告。 |
 | A7 | Windows Codex（C） | 在 PnR 日志中确认 `clk_mem_i` 在 K21、`clk_ext_i` 在 D18，各经一个全局时钟缓冲；收集第 6 节产物。 |
-| B2 | 用户（U），或 Codex 在 PDS 控制台 | **P1**：检出 `15d21f8`，在 PDS Tcl 控制台 `source` 导入脚本，确认打印的源文件数；依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`（不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex。 |
-| B3 | Windows Codex（C） | 收集 P1 的第 6 节产物。查 PDS 文档（或用一个最小工程试验）确认：保留属性的正确写法（`syn_preserve` / `syn_keep` 或 PDS 的等效属性，对象类别 `i:` / `n:`、层次分隔符）；`PAP_REGION`（或 PDS 的等效区域约束）的语法、坐标单位，以及该区域在 PG2L200H 上是否合法、是否覆盖 4 个 APM。需要改写 `edrv32_fpga_cpu_sys_top_probe.fdc` 时，**只在本地改**，把改后的全文作为产物回传，并在 result.md 中说明改了什么。 |
-| B4 | 用户（U），或 Codex 在 PDS 控制台 | **P2**：检出 `2ec4170`，导入脚本之后再执行 `add_constraint <probe-src>/fpga/constraints/edrv32_fpga_cpu_sys_top_probe.fdc`（P2 版本中没有区域约束）；同步骤 B2 跑完四步。 |
+| B2 | 用户（U），或 Codex 在 PDS 控制台 | **P1**：在 B 工程中移除上一轮导入的设计源文件和约束，然后在 PDS Tcl 控制台执行 `set edrv32_probe p1`，再 `source ../../EdRV32-Competition-2026/tasks/win/20261028-04-media-cpu-probes/src/import_cpu_probe.tcl`，确认打印 `edrv32: added 42 sources (2 from probe p1)`；依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`（不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex。 |
+| B3 | Windows Codex（C） | 收集 P1 的第 6 节产物。查 PDS 文档（或用一个最小工程试验）确认：保留属性的正确写法（`syn_preserve` / `syn_keep` 或 PDS 的等效属性，对象类别 `i:` / `n:`、层次分隔符）；`PAP_REGION`（或 PDS 的等效区域约束）的语法、坐标单位，以及该区域在 PG2L200H 上是否合法、是否覆盖 4 个 APM。需要改写 `src/p2/`、`src/p3/` 下的 `edrv32_fpga_cpu_sys_top_probe.fdc` 时，**只在本地改**，把改后的全文作为产物回传，并在 result.md 中说明改了什么。 |
+| B4 | 用户（U），或 Codex 在 PDS 控制台 | **P2**：同 B2，移除上一版的源文件和约束后执行 `set edrv32_probe p2` 再 `source` 同一个脚本（自动加入 P2 的探针约束，P2 中没有区域约束），确认打印 `(3 from probe p2)` 和探针约束路径；跑完四步。 |
 | B5 | Windows Codex（C） | 收集 P2 产物；在 map 报告中确认 6 个复制的 valid 寄存器没有被合并（各自独立存在），合并了就写明。 |
-| B6 | 用户（U），或 Codex 在 PDS 控制台 | **P3**：检出 `3615a7e`，同步骤 B4（含区域约束）跑完四步。区域约束导致布局失败时，去掉区域约束再跑一次，两次的结果都回传。 |
+| B6 | 用户（U），或 Codex 在 PDS 控制台 | **P3**：同 B4，`set edrv32_probe p3`，确认打印 `(7 from probe p3)`；跑完四步。区域约束导致布局失败时，在本地把 `src/p3/` 探针约束中的 `PAP_REGION` 行去掉再跑一次，两次的结果都回传。 |
 | B7 | Windows Codex（C） | 收集 P3 产物。 |
 | C | Windows Codex（C） | 填写 `result.md`（A、B 两部分），提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261028-04-media-cpu-probes results`，推送 `win/20261028-04-media-cpu-probes`，告诉用户完成并给出分支名。A 或 B 中途停下时，已完成部分照常回传，并写明停在哪一步。 |
 
@@ -118,7 +118,7 @@ B：无新增。
 | 项 | 内容 |
 |---|---|
 | 任务卡 commit | <完整哈希> |
-| 探针提交 | P1 15d21f8 / P2 2ec4170 / P3 3615a7e（完整哈希） |
+| 探针版本 | src/p1、src/p2、src/p3（源自 15d21f8 / 2ec4170 / 3615a7e） |
 | PDS 版本 | |
 | A 工程路径 | |
 | B 工程路径 | |

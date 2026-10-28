@@ -1,0 +1,31 @@
+# File: edrv32_fpga_cpu_sys_top_probe.fdc
+# Timing-only P2/P3 overlay; load alongside edrv32_fpga_cpu_sys_top.fdc.
+# CANDIDATE syntax: Windows PDS must confirm attribute names, object selectors,
+# hierarchy separators and that all six distinct FF/Q nets survive synthesis.
+# Local vendor IP uses syn_preserve=1 on FFs and syn_keep=1 on nets, but the
+# available PDS quick guide does not document their external FDC form or whether
+# syn_preserve alone prevents identical-register merging. Apply both candidates.
+# No RTL vendor attributes and no conditional/ignored constraint commands.
+
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_predictor_redirect_valid_r} {syn_preserve} {1}
+define_attribute {n:u_cpu_subsys.u_core.u_frontend.probe_predictor_redirect_valid_r} {syn_keep} {1}
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_predictor_d_redirect_valid_r} {syn_preserve} {1}
+define_attribute {n:u_cpu_subsys.u_core.u_frontend.probe_predictor_d_redirect_valid_r} {syn_keep} {1}
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_f1_redirect_valid_r} {syn_preserve} {1}
+define_attribute {n:u_cpu_subsys.u_core.u_frontend.probe_f1_redirect_valid_r} {syn_keep} {1}
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_f1_d_redirect_valid_r} {syn_preserve} {1}
+define_attribute {n:u_cpu_subsys.u_core.u_frontend.probe_f1_d_redirect_valid_r} {syn_keep} {1}
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_ib_redirect_valid_r} {syn_preserve} {1}
+define_attribute {n:u_cpu_subsys.u_core.u_frontend.probe_ib_redirect_valid_r} {syn_keep} {1}
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_ib_d_redirect_valid_r} {syn_preserve} {1}
+define_attribute {n:u_cpu_subsys.u_core.u_frontend.probe_ib_d_redirect_valid_r} {syn_keep} {1}
+
+# P3 ONLY: CANDIDATE region attribute/coordinate format, pending Windows PDS.
+# R4 core: 10625 LUT + 5429 FF + 4 APM. At 4 LUT / 8 FF per CLM and
+# 70% LUT occupancy, ceil(10625 / (4 * 0.70)) = 3795 CLM; choose 64x64.
+# Capacity estimate: 16384 LUT / 32768 FF (R4 LUT occupancy 64.85%).
+# R4 path locations have x=6k+3 and y=6k or 6k+1: estimate 384x192
+# database units for 64x64 CLM. Windows must check actual usable CLM count,
+# hard/reserved columns, all four APM sites, hierarchy selection and syntax.
+# This is an initial region estimate, not a verified device-grid conversion.
+define_attribute {i:u_cpu_subsys.u_core} {PAP_REGION} {423 600 806 791}
