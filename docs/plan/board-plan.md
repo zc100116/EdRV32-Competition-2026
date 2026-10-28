@@ -28,13 +28,13 @@
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支或任务卡 | 状态 |
 |---|---|---|---|---|---|---|
-| B1-1 | P1 配置并入：`RVC_EN` 默认 0，`sw/Makefile`、`sw/boot/program.mk`、`verif/block/sys_cpu/run.py` 改为 rv32im | 协调者 | — | cpu_b2 smoke、sys_cpu smoke 通过 | 协调者分支 | [~] 2026-10-28 派发 task-board-b1 |
+| B1-1 | P1 配置并入：`RVC_EN` 默认 0，`sw/Makefile`、`sw/boot/program.mk`、`verif/block/sys_cpu/run.py` 改为 rv32im | 协调者 | — | cpu_b2 smoke、sys_cpu smoke 通过 | 协调者分支 | [x] 2026-10-28：P1 并入，生产软件 rv32im，`tools/cpu/` 的 C 验证保留到 C-R9 |
 | B1-2 | 时钟 IP：`ip_pll_sys` 创建说明（27 MHz 板钟 D18 → clk_sys 100 MHz，locked）和仿真模型 | 协调者 | — | `fpga/ip/ip_pll_sys.md`、`verif/models/` | — | [x] 2026-10-28：`fpga/ip/ip_pll_sys.md`；仿真模型随 task-board-b1 |
-| B1-3 | 存储初始化文件：确认 PDS 初始化文件格式（厂商 demo `2_6_ram_rom_fifo` 的 `init_param_*_exmp.dat`），写 `rom.hex`/`sram.hex` → PDS 初始化文件的转换脚本 | Codex · GPT-6.1 Sol | — | 转换结果与 demo 格式一致；ROM/SRAM 创建说明更新 | task-board-b1 | [~] 2026-10-28 派发 task-board-b1 |
-| B1-4 | B1 板级顶层 `fpga/rtl/edrv32_fpga_board_b1_top.v`（PLL、按键复位与 locked、CPU 子系统 + 系统子系统、UART、按键、LED）和板级仿真：从 ROM 启动，打印 logo，跑监控程序菜单中的 CoreMark（小迭代） | Codex · GPT-6.1 Sol | B1-1、B1-2 | 板级仿真 PASS，lint 0 告警 | task-board-b1 | [~] 2026-10-28 派发 task-board-b1 |
-| B1-5 | PC 端 UART 下载工具（按 bootloader 的下载协议，Python 标准库 + pyserial），用于不重新生成 bitstream 换 CoreMark 编译选项 | Codex · GPT-6.1 Sol | — | 与 bootloader 协议的仿真或回环测试通过 | task-board-b1 | [~] 2026-10-28 派发 task-board-b1 |
-| B1-6 | 约束 `edrv32_fpga_board_b1_top.fdc`（引脚取自厂商 demo）和导入脚本 | 协调者 | B1-4 | — | — | [~] 2026-10-28 派发 task-board-b1 |
-| B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [ ] |
+| B1-3 | 存储初始化文件：确认 PDS 初始化文件格式（厂商 demo `2_6_ram_rom_fifo` 的 `init_param_*_exmp.dat`），写 `rom.hex`/`sram.hex` → PDS 初始化文件的转换脚本 | Codex · GPT-6.1 Sol | — | 转换结果与 demo 格式一致；ROM/SRAM 创建说明更新 | task-board-b1 | [x] 2026-10-28：`tools/fpga/mem_init.py`，HEX 每行 16 字符、补满深度（依据厂商 2_6 demo），待上板确认 |
+| B1-4 | B1 板级顶层 `fpga/rtl/edrv32_fpga_board_b1_top.v`（PLL、按键复位与 locked、CPU 子系统 + 系统子系统、UART、按键、LED）和板级仿真：从 ROM 启动，打印 logo，跑监控程序菜单中的 CoreMark（小迭代） | Codex · GPT-6.1 Sol | B1-1、B1-2 | 板级仿真 PASS，lint 0 告警 | task-board-b1 | [x] 2026-10-28：`edrv32_fpga_board_b1_top`，`verif/soc/board_b1` 两项 smoke PASS；clk_sys 100 MHz（`clk_sys_hz`） |
+| B1-5 | PC 端 UART 下载工具（按 bootloader 的下载协议，Python 标准库 + pyserial），用于不重新生成 bitstream 换 CoreMark 编译选项 | Codex · GPT-6.1 Sol | — | 与 bootloader 协议的仿真或回环测试通过 | task-board-b1 | [x] 2026-10-28：`tools/board/uart_tool.py`（下载、日志、菜单和迭代次数），仿真端到端通过 |
+| B1-6 | 约束 `edrv32_fpga_board_b1_top.fdc`（引脚取自厂商 demo）和导入脚本 | 协调者 | B1-4 | — | — | [x] 2026-10-28：`edrv32_fpga_board_b1_top.fdc`（PLL 输出显式 generated clock，依据厂商 DDR3 demo）、`import_board_b1_top.tcl` |
+| B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [~] 2026-10-28 任务卡 `tasks/win/20261028-06-board-b1/` 已写 |
 
 ### B2（B1 上板后细化）
 
