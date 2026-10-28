@@ -1,0 +1,7 @@
+`verilator_config
+// Behavioral models and the common checker update queues on clock edges.
+lint_off -rule BLKSEQ -file "*/verif/*"
+// Shared APB interface has sixteen slots; this bench uses slot zero.
+lint_off -rule UNUSEDSIGNAL -file "*/common/edrv32_apb_if.sv"
+// The shared checker uses an integer to index its sixteen-entry ID table.
+lint_off -rule UNUSEDSIGNAL -file "*/common/edrv32_axi256_checker.sv"

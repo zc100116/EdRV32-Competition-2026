@@ -57,3 +57,5 @@ IP 的 `ddr_init_done` 接适配器 `ddr_init_done_i`，输出 `mem_ready_o` 给
 命令按序执行，一次执行一笔，AW/AR 同时有效时先接受 AW；固定 LFSR 提供
 命令、写数据和读数据的等待周期。内存不复位，测试必须先写后读，并在配置的
 存储窗口内访问；模型不代表 DDR 实际带宽或校准行为。
+
+`eth_peer_model.sv` 提供 ETH MAC 侧 8 位帧收发、前导码/SFD/FCS/IFG 检查和位翻转、rx_er、截短、加长注入；独立 selftest 与 ET-01–15 见 `verif/block/eth/README.md`。

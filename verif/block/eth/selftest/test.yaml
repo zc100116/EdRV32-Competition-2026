@@ -1,0 +1,10 @@
+top: eth_selftest
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 60
+pass: PASS
+tier: smoke full
+simulator: verilator
+runner: python3 verif/block/eth/selftest/selftest.py

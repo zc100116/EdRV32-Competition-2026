@@ -1,0 +1,10 @@
+top: edrv32_eth_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 1800
+pass: PASS
+tier: full
+simulator: verilator
+runner: python3 verif/block/eth/run.py random
