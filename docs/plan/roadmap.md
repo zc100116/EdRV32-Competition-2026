@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：第四轮 PDS 118.3 MHz（C-W5）；C 扩展已决定去掉（cpu-spec v0.13）；时序收敛方案见设计记录 `2026-10-28-cpu-timing-closure.md`，探针 C-P1 完成，PDS 测量在任务卡 20261028-04 B 部分；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX 模块级 smoke/full 和 VIN + PIX 联合测试 VI-18 通过（V-I2）；GEO 模块级 smoke/full/perf 全部通过（V-I3）；ETH 规格 v0.1 已确认，模块级 smoke/full/perf 全部通过（V-I4）；待 PDS 资源测量（Yosys 参考 8684 LUT6，目标 5K）；Windows 任务卡 20261028-04（A：6 个媒体/网络 IP + 五模块合并 PDS；B：CPU 时序探针 P1–P3）已下发 |
+| 正在进行 | CPU：探针 PDS 完成（C-W6）：去 C 扩展 129.1 MHz、净性能最好，B 类（切流水）净收益 ≤ 1.5% 不采用，全部切断也只到 138.9 MHz，150 MHz 达不到，频率目标待用户决定（设计记录 `2026-10-28-cpu-timing-closure.md` 5.1）；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路与 ETH：VIN/DISP/PIX/GEO/ETH 模块级全部通过；合并 PDS（V-W2）：GEO 3238、ETH 3863 LUT 在预算内，VIN+PIX+DISP 10523 超 10K 5.2%，clk_mem 只有 63.8 MHz，违例全在 PIX 组合 3×3 核，V-R6 流水化 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 

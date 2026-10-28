@@ -46,7 +46,8 @@
 | V-T5 | ETH 模块级测试（`verif/block/eth`，对端模型 `verif/models/eth_peer_model.sv`、参考模型 `eth_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S4 | testbench 按 eth-testplan 完成，对端模型和参考模型自测通过 | task-eth-verif | [x] 2026-10-28：647650b（ET-01–15 三档，selftest PASS，未读 RTL） |
 | V-I4 | ETH 联调：block/eth smoke/full/perf | Codex · GPT-6.1 Sol | V-R5、V-T5 | eth testplan smoke/full 通过，ET-14 满足第 7 节 | task-eth-int | [x] 2026-10-28：未改 RTL，修 3 处测试问题；block smoke 2、full 3、perf 1 PASS，单元 6 目录 smoke/full PASS；ET-14 接收 116.6 MB/s、发送 116.4 MB/s、ARP 0.10 µs（`docs/debug/2026-10-28-eth-block-integration.md`） |
 | V-W1 | 媒体与网络模块 PDS 测量顶层（VIN、DISP、PIX、GEO、ETH 合并为 `edrv32_fpga_media_top`）、约束、导入脚本 | Codex · GPT-6.1 Sol | V-I1–V-I4 | lint 0 告警；Yosys 确认五个模块和 6 种 RAM 包装都保留 | task-media-fpga-top | [x] 2026-10-28：91368b8；58 个源文件；Yosys 参考 LUT6 VIN 8422、DISP 3179、PIX 32535、GEO 9043、ETH 8279 |
-| V-W2 | Windows：生成 6 个新 IP，`edrv32_fpga_media_top` PDS 综合 + 布局布线，按层次资源和时序 | 用户 + Windows Codex | V-W1 | 任务卡、测量报告；PIX、GEO、ETH 资源与 SoC 9.3 对比 | `tasks/win/20261028-04-media-cpu-probes/`（A 部分），win/20261028-04-media-cpu-probes | [~] 2026-10-28 下发 |
+| V-W2 | Windows：生成 6 个新 IP，`edrv32_fpga_media_top` PDS 综合 + 布局布线，按层次资源和时序 | 用户 + Windows Codex | V-W1 | 任务卡、测量报告；PIX、GEO、ETH 资源与 SoC 9.3 对比 | `tasks/win/20261028-04-media-cpu-probes/`（A 部分），win/20261028-04-media-cpu-probes | [x] 2026-10-28：6 个 IP 端口一致；LUT VIN 3482、PIX 5593、DISP 1448（合计 10523，超 10K 预算 5.2%）、GEO 3238、ETH 3863；clk_mem −7.667 ns（63.8 MHz），最差 200 条全在 PIX 组合 3×3 核；clk_ext +2.064 ns；报告 `docs/reports/2026-10-28-timing-media-top.md` |
+| V-R6 | PIX 时序：3×3 核和点运算切成流水（pix-spec 7：每级 1 行 + ≤ 16 拍，点运算 ≤ 8 拍），÷9 改为精确的常数乘移位；clk_mem 125 MHz 下 PIX 内寄存器间逻辑按 DRM 输出/APM 各占一级划分 | Codex · GPT-6.1 Sol | V-W2 | 单元 pix_* 与 block/pix smoke/full、VI-18 通过；PX-10 2 像素/拍、PX-11 冲刷不超上限；lint 0 告警 | task-pix-pipeline | [ ] |
 
 后续待办（OV5640 软件驱动；PC 端网口工具和板上应用层协议；板级顶层、RGMII IO、约束和 Windows 任务卡；PIX、GEO、ETH 的 PDS 资源测量）在对应前置完成后补入。
 
@@ -70,3 +71,4 @@ dma2d 资源指标在 PDS 实测后定稿；其余模块随各自规格列出。
 | 2026-10-28 | v0.3 | PIX 规格确认；增加 V-P3、V-R3、V-T3、V-I2 |
 | 2026-10-28 | v0.4 | GEO 规格确认；增加 V-R4、V-P4、V-T4、V-I3 |
 | 2026-10-28 | v0.5 | ETH 规格确认（V-S4）；增加 V-R5、V-P5、V-T5、V-I4 |
+| 2026-10-28 | v0.6 | V-W2 完成；增加 V-R6（PIX 流水化） |
