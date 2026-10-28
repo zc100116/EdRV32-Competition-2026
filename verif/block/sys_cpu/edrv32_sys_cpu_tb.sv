@@ -28,8 +28,10 @@ module edrv32_sys_cpu_tb;
     int scratch_download = 0;
     longint unsigned cycle_count = 0;
     longint unsigned timeout_cycles = 100000000;
-    bit [151:0] uart_tail = 0;
     bit download_ready = 0;
+    int bios_menus = 0;
+    bit bios_seen = 0;
+    bit program_pass = 0;
     string uart_line = "";
     int unsigned menu_count = 0;
     bit iterations_ready = 0;
@@ -76,6 +78,34 @@ module edrv32_sys_cpu_tb;
     wire [1:0] sda_oe;
     wire sim_exit_valid;
     wire [31:0] sim_exit_code;
+    wire advance_time;
+    wire [63:0] next_time;
+    wire unused_released_key;
+
+    edrv32_boot_window u_window (
+        .clk_i(clk_sys),
+        .rst_n_i(rst_sys_n),
+        .enable_i(1'b1),
+        .release_once_i(1'b0),
+        .sample_i(u_sys.u_gpio.apb_psel_i && u_sys.u_gpio.apb_penable_i &&
+            !u_sys.u_gpio.apb_pwrite_i && u_sys.u_gpio.apb_paddr_i == 12'h00c),
+        .time_i(u_sys.u_clint.mtime_r),
+        .clock_hz_i(EDRV32_CLK_SYS_HZ),
+        .advance_o(advance_time),
+        .time_o(next_time),
+        .key_released_o(unused_released_key)
+    );
+
+    initial begin : advance_boot_time
+        forever begin
+            @(negedge clk_sys);
+            if (advance_time) begin
+                force u_sys.u_clint.mtime_next_w = next_time;
+                @(negedge clk_sys);
+                release u_sys.u_clint.mtime_next_w;
+            end
+        end
+    end
 
     edrv32_cpu_subsys u_cpu (
         // Clock and reset.
@@ -355,9 +385,12 @@ module edrv32_sys_cpu_tb;
         forever begin
             wait (u_uart.received.size() != 0);
             data = u_uart.received.pop_front();
-            uart_tail = {uart_tail[143:0], data};
-            if (uart_tail == "UART download ready") download_ready = 1;
             if (data == 8'h0a) begin
+                if (uart_line == "BIOS: EdRV32\r") bios_seen = 1;
+                if (uart_line == "BIOS menu: 1=Program SRAM\r") bios_menus++;
+                if (uart_line == "UART download ready\r") download_ready = 1;
+                if (uart_line == "Program SRAM result: PASS, press reset to run\r")
+                    program_pass = 1;
                 if (uart_line == "Menu: 1=CoreMark 2=Peripheral tests 3=System info\r")
                     menu_count++;
                 if (uart_line == {"Iterations input: decimal 1..4294967295 then Enter; ",
@@ -411,6 +444,10 @@ module edrv32_sys_cpu_tb;
         string path;
         if ($value$plusargs("DOWNLOAD_BIN=%s", path)) begin
             void'($value$plusargs("DOWNLOAD_LENGTH=%d", length));
+            wait (bios_menus == 1);
+            if (!bios_seen) $fatal(1, "FAIL missing BIOS banner time=%0t", $time);
+            u_uart.send("1");
+            u_uart.send(8'h0d);
             wait (download_ready);
             // The ROM owns protocol parsing; the peer supplies the exact raw image contract.
             for (int n = 0; n < 4; n++) u_uart.send(8'(length >> (8*n)));
@@ -422,6 +459,13 @@ module edrv32_sys_cpu_tb;
                 value = $fgetc(fd);
             end
             $fclose(fd);
+            wait (bios_menus == 2);
+            if (!program_pass) $fatal(1, "FAIL missing program PASS time=%0t", $time);
+            gpio[0] = 1;
+            @(negedge clk_sys);
+            rst_n = 0;
+            repeat (5) @(negedge clk_sys);
+            rst_n = 1;
         end
     end
     initial begin : monitor_commands

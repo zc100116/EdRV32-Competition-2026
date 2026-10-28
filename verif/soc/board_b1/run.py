@@ -30,8 +30,8 @@ def command(args, log):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('case', choices=('menu', 'download'))
-    case = 0 if parser.parse_args().case == 'menu' else 1
+    parser.add_argument('case', choices=('menu', 'download', 'window'))
+    case = {'menu': 0, 'download': 1, 'window': 2}[parser.parse_args().case]
     commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'],
                                      cwd=ROOT, text=True).strip()
     compiler = 'GCC ' + subprocess.check_output(
@@ -44,21 +44,26 @@ def main():
     if case == 0:
         command(['make', '-C', 'sw', 'PROGRAM=monitor'], OUT / 'monitor.log')
         pack_image(ROOT / 'build/sw/monitor/sram.hex', 8192, sram)
-    else:
+    elif case == 1:
         payload = OUT / 'download'
         command(['make', '-C', 'sw', 'PROGRAM=sc04', 'OUT=' + str(payload),
-                 'PROGRAM_SOURCES=verif/soc/board_b1/download.c sw/drivers/uart.c'],
+                 'PROGRAM_SOURCES=verif/soc/board_b1/download.c sw/drivers/uart.c '
+                 'sw/bsp/cache.c'],
                 OUT / 'download_build.log')
         command(['python3', 'tools/board/uart_tool.py', str(payload / 'sc04.bin'),
                  '--emit', str(wire)], OUT / 'emit.log')
     obj = OUT / 'obj'
-    command(['verilator', '--binary', '--timing', '-Wall', '-j', '1', '-CFLAGS', '-O3',
+    command(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
+             '-CFLAGS', '-O3 -march=native -flto', '-LDFLAGS', '-flto',
              '+define+SIM_MODE', '--top-module', 'edrv32_board_b1_tb',
              '--Mdir', str(obj), '-o', 'sim'] + expand_files(HERE / 'files.f'),
             OUT / 'compile.log')
     log = OUT / f'case{case}.log'
     args = [str(obj / 'sim'), f'+CASE_ID={case}', '+ROM_HEX=' + str(rom)]
-    args += (['+SRAM_HEX=' + str(sram)] if case == 0 else ['+DOWNLOAD_WIRE=' + str(wire)])
+    if case == 0:
+        args += ['+SRAM_HEX=' + str(sram)]
+    elif case == 1:
+        args += ['+DOWNLOAD_WIRE=' + str(wire)]
     start = time.monotonic()
     command(args, log)
     elapsed = time.monotonic() - start

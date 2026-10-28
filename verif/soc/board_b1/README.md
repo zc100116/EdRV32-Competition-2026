@@ -13,8 +13,8 @@ python3 verif/soc/board_b1/check_style.py
 
 | smoke 项 | 覆盖与通过判据 |
 |---|---|
-| 根目录（menu） | 后门加载 bootloader 和 monitor；完整五行 logo、系统字段、100 MHz、无 C ISA；收到菜单后 UART 发送 `3`，检查系统信息 PASS 和第二次菜单 |
-| `download/` | 启动键拉低，只预加载 ROM；`uart_tool.py --emit` 生成下载流，UART 模型逐字节发送；小程序打印 `B1 UART application PASS`，并写 `SIM_EXIT=0` |
+| 根目录（menu） | 后门加载 bootloader 和 monitor；完整五行 logo、系统字段、100 MHz、无 C ISA；收到菜单后 UART 发送 `3` 和 Enter，检查系统信息 PASS 和第二次菜单 |
+| `download/` | KEY1 拉低进入 BIOS，发送 `1` CR LF 后烧录；检查字节数、PASS 和返回菜单，松开 KEY1 后复位两次；两次都打印相同 data/BSS 初值和应用 PASS |
 
 `run.py menu` / `run.py download` 各自只运行一个场景，串行复用同一个 Verilator 构建目录。
 输出位于 `build/board_b1/`：`compile.log`、`case0.log`、`case1.log`、软件构建日志、
@@ -27,4 +27,27 @@ python3 verif/soc/board_b1/check_style.py
 
 串口日志由 testbench 逐行输出，Python 同时复用 `sys_cpu/uart_checks.py` 检查
 boot/monitor 固定字段和实际构建元数据。菜单程序本身持续运行，菜单场景由 testbench
-在第二次菜单时结束；下载场景由软件 `SIM_EXIT` 结束。
+在第二次菜单时结束；下载场景在第二次运行软件写 `SIM_EXIT=0` 后结束。
+
+B1-8 BIOS flow (SoC spec v0.14 7.5): `download/` holds KEY1 through reset,
+checks the BIOS banner/menu, sends `1` CR LF, waits for `UART download ready`,
+then sends the `uart_tool --emit` length/image stream. It checks the exact byte
+count and PASS result and a returned BIOS menu before releasing KEY1 and
+resetting through `rst_n_i` twice. Each execution prints `B1 data: 7 bss: 0`,
+then changes both globals and calls `cache_clean_all()` before SIM_EXIT; the
+second reset therefore proves data restoration and BSS clearing in SRAM.
+
+The shared `verif/block/sys_cpu/edrv32_boot_window.sv` helper accelerates only testbench CLINT time:
+a real 100 ms window is about 10 million clk_sys cycles. After observing three
+software GPIO reads, it advances mtime to just before the 100 ms deadline and
+lets the remaining samples execute normally. Both board and SC benches use
+this helper; software, its 100 ms constant and RTL remain identical to hardware.
+The menu case starts with KEY1 held, releases it for one sample, then presses
+it again; reaching the monitor proves any release suppresses BIOS entry.
+
+`window/` is a full-tier case with this acceleration disabled. It keeps KEY1
+pressed for the real 100 ms window and ends after checking the BIOS banner/menu:
+
+```sh
+python3 tools/regress.py full --path verif/soc/board_b1/window -j 1
+```

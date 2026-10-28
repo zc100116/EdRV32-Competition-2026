@@ -190,3 +190,22 @@ software `Total ticks`, separately from the retirement-boundary window):
 | coremark_sram_tuned | 2309196 | 4.330512 |
 | coremark_ddr_o2_l20 | 2814600 | 3.552903 |
 | coremark_ddr_o2_l60 | 2820760 | 3.545144 |
+
+## B1-8 BIOS programming
+
+SC-04 uses both KEY1 and SCRATCH0 requests to enter the ROM BIOS. Each run waits
+for `BIOS menu: 1=Program SRAM`, sends `1` CR, waits for the complete ready line,
+sends length/image, checks `Program SRAM bytes` and the exact PASS result, then
+releases KEY1 and resets before executing the application. The scratch case
+preloads an application that requests BIOS through SCRATCH0 and a soft reset;
+the bootloader clears that request so a later reset enters the programmed app.
+Startup and monitor system information no longer include a boot-mode field.
+SC-08 sends Enter for both monitor selections and the iteration count.
+
+All SC runs share `edrv32_boot_window.sv` with board_b1. It observes three actual
+GPIO reads in the boot window, then advances testbench CLINT mtime to just before
+the window deadline. The remaining polling runs normally. This avoids simulating
+about 10 million clk_sys cycles for each 100 ms wait; the bootloader binary,
+software constant and RTL are unchanged. `verif/soc/board_b1/window` provides the
+full-tier real-time 100 ms check, and board_b1 menu covers one KEY1 release inside
+the window followed by another press (normal application startup).

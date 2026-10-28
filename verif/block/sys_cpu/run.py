@@ -93,7 +93,8 @@ def pack_image(contents, base, size, path):
 
 def compile_sim():
     obj = OUT / 'obj'
-    args = ['verilator', '--binary', '--timing', '-Wall', '-j', '1', '+define+SIM_MODE',
+    args = ['verilator', '--binary', '--timing', '-Wall', '-j', '1', '-CFLAGS', '-O3',
+            '+define+SIM_MODE',
             '--top-module', 'edrv32_sys_cpu_tb', '--Mdir', str(obj), '-o', 'sim']
     command(args + expand_files(HERE / 'files.f'), OUT / 'compile.log')
     return obj / 'sim'
@@ -154,7 +155,9 @@ def execute(sim, case, boot, program, name, *, memory='sram', opt='o2', latency=
         if case == 8:
             check_monitor(output, commit, compiler)
     if case == 4:
-        for text in ['UART download ready', 'UART download complete']:
+        for text in ['BIOS: EdRV32', 'BIOS menu: 1=Program SRAM', 'UART download ready',
+                     f'Program SRAM bytes: {raw.stat().st_size}',
+                     'Program SRAM result: PASS, press reset to run']:
             if text not in output:
                 raise RuntimeError(f'{out}/run.log: missing UART {text!r}')
     metrics = {'name': name, 'memory': memory, 'opt': opt, 'latency': latency}

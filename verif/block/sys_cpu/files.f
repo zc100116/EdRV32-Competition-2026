@@ -9,3 +9,4 @@ edrv32_sys_cpu_timescale.sv
 ../../models/uart_model.sv
 ../../models/sccb_model.sv
 edrv32_sys_cpu_tb.sv
+edrv32_boot_window.sv
