@@ -1,0 +1,15 @@
+Source: G:\codex_project\EdRV32-FPGA\EdRV32-NPU\place_route\run.log
+
+Phase 1.2 Clock placement started.
+Mapping instance clkbufg_0/gopclkbufg to USCM_383_930.
+E: Place-0084: GLOBAL_CLOCK: the driver clk_mem_i_ibuf/opit_1 fixed at IOLHR_16_1242 is unreasonable. Sub-optimal placement for a clock source and a clock buffer.
+You may use the PAP_CLOCK_DEDICATED_ROUTE constraint in the .fdc file to demote this message to a WARNING.
+You can find the related information of the nets {clk_mem_i nt_clk_mem_i} to set the attribute.
+These following examples can be referenced in the .fdc file to override this clock rule, or you can find the actual object in the UCE GUI.
+define_attribute {n:clk_mem_i} {PAP_CLOCK_DEDICATED_ROUTE} {FALSE}
+Program Error Out.
+Action pnr: Real time elapsed is 0h:0m:38s
+Action pnr: CPU time elapsed is 0h:0m:7s
+Action pnr: Process CPU time elapsed is 0h:0m:7s
+Current time: Wed Oct 28 12:39:06 2026
+Action pnr: Peak memory pool usage is 2,798 MB

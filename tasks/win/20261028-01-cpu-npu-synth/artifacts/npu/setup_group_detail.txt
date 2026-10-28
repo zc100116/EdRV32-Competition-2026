@@ -1,0 +1,2 @@
+未取得：2026-10-28 完整 NPU 的 PnR 在 Phase 1.2 Clock placement 因 Place-0084 失败；没有 routed pnr.adf，也未运行路后 report_timing。
+不得用前一轮 NPU-DP 或本轮综合预估代替完整 NPU 的路后数据。

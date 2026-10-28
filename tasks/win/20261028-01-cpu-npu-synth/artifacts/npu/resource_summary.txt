@@ -1,0 +1,83 @@
+SYNTHESIS (not PnR):
+Cell Usage:
+GTP_APM_E2                  290 uses
+GTP_DFF                   16529 uses
+GTP_DFF_C                   290 uses
+GTP_DFF_CE                 1004 uses
+GTP_DFF_E                 17746 uses
+GTP_DFF_P                     8 uses
+GTP_DFF_PE                    6 uses
+GTP_DFF_R                   626 uses
+GTP_DFF_RE                  399 uses
+GTP_DFF_S                   112 uses
+GTP_DFF_SE                   17 uses
+GTP_DRM36K_E1               157 uses
+GTP_GRS                       1 use
+GTP_INV                       3 uses
+GTP_LUT1                      5 uses
+GTP_LUT2                    119 uses
+GTP_LUT3                    525 uses
+GTP_LUT4                    546 uses
+GTP_LUT5                   2815 uses
+GTP_LUT6                   3839 uses
+GTP_LUT6CARRY             16654 uses
+GTP_LUT6D                  2457 uses
+GTP_MUX2LUT7                  4 uses
+GTP_RAM32X1DP                 3 uses
+GTP_RAM32X2DP               409 uses
+
+I/O ports: 6
+GTP_INBUF                   4 uses
+GTP_OUTBUF                  2 uses
+
+Mapping Summary:
+Total LUTs: 27372 of 159800 (17.13%)
+	LUTs as dram: 412 of 39500 (1.04%)
+	LUTs as logic: 26960
+Total Registers: 36737 of 319600 (11.49%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 157.0 of 415 (37.83%)
+
+APMs:
+Total APMs = 290.00 of 740 (39.19%)
+
+Total I/O ports = 6 of 400 (1.50%)
+
+
+
+DRM18K=0; DRM36K=157. GPLL=0; PPLL=0.
+DEVICE MAP (last successful physical mapping stage):
+Device Utilization Summary:
++-------------------------------------------------------------------------+
+| Logic Utilization     | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------+
+| APM                   | 290       | 740           | 40                 
+| FF                    | 36481     | 319600        | 12                 
+| LUT                   | 27372     | 159800        | 18                 
+| Distributed RAM       | 412       | 39500         | 2                  
+| DRM                   | 157       | 415           | 38                 
+| IO                    | 6         | 400           | 2                  
+| RCKB                  | 0         | 40            | 0                  
+| SCANCHAIN             | 0         | 1             | 0                  
+| USCM                  | 2         | 32            | 7                  
+| CCS                   | 1         | 1             | 100                
+| ADC                   | 0         | 1             | 0                  
+| DDR_PHY               | 0         | 40            | 0                  
+| HSSTLP                | 0         | 2             | 0                  
+| GPLL                  | 0         | 10            | 0                  
+| PPLL                  | 0         | 10            | 0                  
+| DDRPHY_CPD            | 0         | 20            | 0                  
+| HCKB                  | 0         | 120           | 0                  
+| IOCKB                 | 0         | 40            | 0                  
+| MRCKB                 | 0         | 20            | 0                  
+| PCIE                  | 0         | 1             | 0                  
+| DDRPHY_IOCLK_DIV      | 0         | 10            | 0                  
+| ANALOG                | 0         | 1             | 0                  
+| TSERDES               | 0         | 80            | 0                  
+| KEYRAM                | 0         | 1             | 0                  
++-------------------------------------------------------------------------+
+
+Mapped logical LUT=27372, FF=36481, distributed RAM=412, APM=290, DRM36K=157, IO=6, USCM=2.
+Final post-PnR resource counts: 未取得 (Place-0084).
