@@ -35,6 +35,8 @@
 | B1-5 | PC 端 UART 下载工具（按 bootloader 的下载协议，Python 标准库 + pyserial），用于不重新生成 bitstream 换 CoreMark 编译选项 | Codex · GPT-6.1 Sol | — | 与 bootloader 协议的仿真或回环测试通过 | task-board-b1 | [x] 2026-10-28：`tools/board/uart_tool.py`（下载、日志、菜单和迭代次数），仿真端到端通过 |
 | B1-6 | 约束 `edrv32_fpga_board_b1_top.fdc`（引脚取自厂商 demo）和导入脚本 | 协调者 | B1-4 | — | — | [x] 2026-10-28：`edrv32_fpga_board_b1_top.fdc`（PLL 输出显式 generated clock，依据厂商 DDR3 demo）、`import_board_b1_top.tcl` |
 | B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [~] 2026-10-28 第一次上板：启动信息正确，O2 短诊断 3.600 CoreMark/MHz、CRC PASS，100 MHz 满足（+0.674 ns）（`docs/reports/2026-10-28-board-b1.md`）；监控程序修正输入和按键测试（207b05a）后，5000 次 O2/tuned 和按键补测随 `tasks/win/20261028-07-media-r3-b1/` B 部分下发 |
+| B1-8 | BIOS（SoC v0.14 7.5 第 3、3a 条：按住 KEY1 复位进入，烧录 SRAM 程序，按复位运行）；SRAM 应用每次启动恢复 `.data`、清零 `.bss`（第 3b 条）；uart_tool 和板级/sys_cpu 测试改为 BIOS 流程 | Codex · GPT-6.1 Sol | B1-7 | 板级仿真覆盖烧录、复位运行两次结果一致；sys_cpu、sys_subsys smoke | task-boot-bios | [~] 2026-10-28 派发 |
+| B1-9 | EdRV32 调试工具 `tools/debug_tool/`（用户串口工具改名入库）：BIOS 选择文件烧录、网口文件收发（eth-spec 2.3–2.6） | Codex · GPT-6.1 Sol | — | unittest：烧录字节流、应用头逐字节、本机回环 | task-debug-tool | [~] 2026-10-28 派发 |
 
 ### B2（B1 上板后细化）
 
@@ -71,3 +73,4 @@
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-28 | v0.1 | 初稿：用户要求开始上板，B1–B3 三个阶段，clk_sys 暂用 100 MHz |
+| 2026-10-28 | v0.2 | 用户上板反馈：监控程序输入按行读取、按键测试改为 10 s 内等待按下松开；增加 B1-8 BIOS、B1-9 调试工具（SoC v0.14） |
