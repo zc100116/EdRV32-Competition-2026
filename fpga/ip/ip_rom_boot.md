@@ -16,8 +16,24 @@
 | 深度 | 2048（地址 11 位，共 16 KiB） |
 | 时钟使能（读使能） | 勾选。使能为 0 的周期读数据输出保持 |
 | 输出寄存器 | 不勾选（读延迟 1） |
-| 初始化文件 | 必须加载：`build/sw/boot/rom.hex` 转换得到的 PDS 初始化文件（格式见 `fpga/ip/README.md`"初始化文件"一节） |
+| 初始化文件 | 使能（`INIT_EN=true`），HEX（`INIT_FORMAT=HEX`），选择 `build/fpga/ip_rom_boot.dat`；每行 16 个 HEX 字符，地址 0 起共 2048 行 |
 | 复位 | IP 强制带高有效 `rst`，只作用于读出通路；包装模块接 `1'b0` |
+
+## 初始化文件生成
+
+```sh
+make -C sw PROGRAM=bootloader
+make -C sw PROGRAM=monitor
+python3 tools/fpga/mem_init.py build/sw/bootloader/rom.hex build/sw/monitor/sram.hex
+```
+
+输入为 `make` 生成的字节镜像，转换后按小端排列为 64 位字，未用地址补零。
+选择上表的 `.dat` 文件，不直接选择字节 `rom.hex`/`sram.hex`。
+格式依据：厂商 `SOC系统设计/doc/fpga/pago_200/2_Demo/2_6_ram_rom_fifo/2_6_ram_rom_fifo/3_6_ram_rom_fifo/`
+下 `rom_test/rom_test/ipcore/rom_test/init_param_hex_exmp.dat`、
+`init_param_bin_exmp.dat` 和 `rom_test.idf`（实际 HEX 初始化选项）；
+完整路径和已选文件说明见 [README 初始化文件](README.md#初始化文件)。
+Windows B1 任务卡实测导入、地址顺序及启动输出。
 
 ## 实际端口（PDS 2022.2-SP6.1 生成，任务 20261025-01 回传）
 

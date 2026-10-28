@@ -43,4 +43,42 @@ DDR3 控制器、HDMI/摄像头相关 PLL 在 B2 补充。
 
 ## 初始化文件
 
-`sw/` 构建得到 `build/sw/<程序>/rom.hex`、`sram.hex`（每行一个 64 位字，十六进制，与仿真后门加载使用的文件相同）。PDS 生成器提供的 HEX 示例为每行一个 64 位字（16 个十六进制数字），尚未实测加载外部文件；确认后由 `tools/` 中的转换脚本从同一个 hex 文件生成，保证 FPGA 与仿真内容一致。
+`make -C sw PROGRAM=bootloader` 与 `PROGRAM=monitor` 输出的
+`build/sw/<程序>/rom.hex`、`sram.hex` 实际是**字节镜像**：每个 token 一个字节，
+`@` 后为区内字节地址（见 `tools/elf2mem.py`），不能直接选进 64 位 DRM IP。
+
+```sh
+make -C sw PROGRAM=bootloader
+make -C sw PROGRAM=monitor
+python3 tools/fpga/mem_init.py build/sw/bootloader/rom.hex build/sw/monitor/sram.hex
+```
+
+转换器按小端把连续 8 字节打包为 64 位字（低地址字节位于最低 8 位），从地址 0
+逐行递增写出纯 HEX，无 `@` 地址、注释、前缀或分隔符，每行 16 个十六进制字符。
+稀疏镜像中的空洞和末尾均补零，ROM 固定 2048 行，SRAM 固定 8192 行。
+同一文件可直接用于存储包装模块的 `$readmemh`，板级仿真共用此打包函数。
+
+在 IP Compiler 中使能初始化（`INIT_EN=true`），选择 HEX（`INIT_FORMAT=HEX`）：
+
+| IP | 初始化文件（相对于仓库） |
+|---|---|
+| `ip_rom_boot` | `build/fpga/ip_rom_boot.dat` |
+| `ip_ram_sram` | `build/fpga/ip_ram_sram.dat` |
+
+格式依据为厂商只读 demo 根目录
+`SOC系统设计/doc/fpga/pago_200/2_Demo/2_6_ram_rom_fifo/2_6_ram_rom_fifo/3_6_ram_rom_fifo/`：
+
+- `rom_test/rom_test/ipcore/rom_test/init_param_hex_exmp.dat` 注释明示 64 bit 数据、
+  10 bit 地址，“横向表示数据，纵向表示地址”，正文 1024 行、每行 16 个 HEX 字符；
+  同目录 `init_param_bin_exmp.dat` 每行 64 个二进制字符，也是 1024 行。
+- `rom_test/rom_test/ipcore/rom_test/rom_test.idf` 实际选择 `INIT_EN=true`、
+  `INIT_FORMAT=HEX`、`DATA_WIDTH=64`、`ADDR_WIDTH=10`，其 `INIT_FILE` 指向
+  `rom_test/rom_test/ipcore/init_param_hex_exmp.dat`。此已选文件去掉注释，前 3 行为
+  `ffffffffffffffff`、`ffffffffffffff22`、`ffffffffffffff33`。
+- `ram_test/ram_test/ipcore/ram_test/ram_test.idf` 有相同的 `INIT_FILE`、
+  `INIT_FORMAT` 和 `INIT_EN` 选项（demo RAM 未使能初始化）。
+
+示例总是填满深度，未证明短文件尾部的处理方式；本工具因此输出完整深度，避免依赖
+未定义的尾部内容。HEX 的行顺序按地址 0 起递增使用；Windows B1 任务卡需确认 IP
+Compiler 接受这两份文件、ROM 最初几条指令和 SRAM 首字正确，并通过真实启动 logo
+与监控菜单验证。Linux 没有执行 PDS 初始化导入。
