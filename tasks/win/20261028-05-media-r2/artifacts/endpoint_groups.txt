@@ -1,0 +1,67 @@
+PDS clk_mem slow setup failing endpoints=542; exported unique endpoints=542; coverage=complete.
+
+Command:
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf} -delay_type max -max_path 100000 -slack_less_than 0 -input_pins FALSE -nworst 1 -force_to_run
+
+(a) Endpoint top module
+module	endpoints	worst_slack_ns
+u_vin	172	-0.348
+u_pix	0	无违例
+u_geo	174	-0.995
+u_disp	0	无违例
+u_eth	196	-1.270
+top	0	无违例
+
+(b) Register pair groups
+Packed suffixes and register bit indices removed; generate instance indices retained. IP internals grouped by u_ip.
+start_register	end_register	endpoints	worst_slack_ns	worst_path_levels
+u_eth/u_rx/header_r	u_eth/arp_ip_r	32	-1.270	20
+u_eth/u_rx/header_r	u_eth/arp_mac_r	48	-1.203	20
+u_eth/u_rx/header_r	u_eth/u_rx_write/metadata_r	55	-1.165	20
+u_eth/u_rx/header_r	u_eth/u_rx/start_r	19	-1.135	22
+u_eth/u_rx/header_r	u_eth/u_rx_packets/count_r	4	-1.101	21
+u_eth/u_rx/header_r	u_eth/u_rx_packets/write_ptr_r	1	-1.065	20
+u_geo/desc_r	u_geo/u_regs/perf_r	62	-0.995	22
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_63/ram32x2d	1	-0.854	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_60/ram32x2d	1	-0.835	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_62/ram32x2d	1	-0.835	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_61/ram32x2d	1	-0.830	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_64/ram32x2d	1	-0.830	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_58/ram32x2d	1	-0.813	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_59/ram32x2d	1	-0.813	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_56/ram32x2d	1	-0.812	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_57/ram32x2d	1	-0.812	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_72/ram32x2d	1	-0.812	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_53/ram32x2d	1	-0.801	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_54/ram32x2d	1	-0.801	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_55/ram32x2d	1	-0.801	20
+u_eth/u_rx/header_r	u_eth/u_rx_write/addr_r	3	-0.777	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_71/ram32x2d	1	-0.776	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_73/ram32x2d	1	-0.776	20
+u_eth/u_tx/frame_r	u_eth/u_tx_fifo/u_memory/u_ip	8	-0.767	18
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_74/ram32x2d	1	-0.765	20
+u_eth/u_rx/header_r	u_eth/arp_pending_r	1	-0.720	20
+u_geo/desc_r	u_geo/u_regs/N133_29	1	-0.719	22
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_52/ram32x2d	1	-0.639	20
+u_eth/u_rx/header_r	u_eth/u_rx_packets/memory_r_75/ram32x2d	1	-0.628	20
+u_geo/u_source/g_bank[7].u_ram/u_ip	u_geo/u_bilinear/N82	25	-0.478	5
+u_eth/u_rx/header_r	u_eth/u_rx/drop_o	7	-0.473	19
+u_geo/u_source/g_bank[7].u_ram/u_ip	u_geo/u_bilinear/N41	24	-0.370	4
+u_vin/g_channel[0].u_channel/u_write/address_left_r	u_vin/g_channel[0].u_channel/u_write/write_data_r	93	-0.348	11
+u_vin/g_channel[0].u_channel/u_write/address_left_r	u_vin/g_channel[1].u_channel/u_write/write_data_r	63	-0.292	11
+u_vin/g_channel[0].u_channel/u_write/address_left_r	u_vin/g_channel[0].u_channel/count_r	5	-0.270	11
+u_geo/u_source/g_bank[3].u_ram/u_ip	u_geo/u_bilinear/N74	5	-0.267	4
+u_geo/u_source/g_bank[6].u_ram/u_ip	u_geo/u_bilinear/N74	18	-0.263	4
+u_geo/u_source/g_bank[2].u_ram/u_ip	u_geo/u_bilinear/N115	22	-0.239	4
+u_vin/g_channel[0].u_channel/u_write/address_left_r	u_vin/g_channel[0].u_channel/u_write_fifo/fetch_bin_r	5	-0.227	10
+u_geo/desc_r	u_geo/u_bilinear/N41	2	-0.193	13
+u_geo/u_source/g_bank[4].u_ram/u_ip	u_geo/u_bilinear/N33	4	-0.184	4
+u_geo/desc_r	u_geo/u_bilinear/N115	2	-0.156	13
+u_vin/g_channel[0].u_channel/u_write/address_left_r	u_vin/g_channel[0].u_channel/u_write/write_strb_r	3	-0.098	11
+u_geo/desc_r	u_geo/u_bilinear/N52	1	-0.091	13
+u_geo/desc_r	u_geo/u_bilinear/N134	1	-0.079	13
+u_geo/u_source/g_bank[3].u_ram/u_ip	u_geo/u_bilinear/N123	2	-0.060	5
+u_geo/desc_r	u_geo/u_bilinear/N123	2	-0.056	13
+u_geo/desc_r	u_geo/u_coords/row_y_r	3	-0.014	14
+u_vin/g_channel[0].u_channel/u_write/address_left_r	u_vin/g_channel[0].u_channel/u_write_fifo/head_data_r	3	-0.005	10
