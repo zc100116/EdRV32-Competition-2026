@@ -566,6 +566,7 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
     task automatic vi01();
         int width;
         int height;
+        bit first_complete;
         width = full_size ? 1280 : 64;
         height = full_size ? 720 : 8;
         reset();
@@ -594,10 +595,12 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         send_camera(0);
         check_reg('h02c, 3);
         u_memory.hold_b = 0;
+        // Keep the queue scan outside the loop condition for Verilator 5.020.
         do begin
             @(posedge clk_mem);
             #0.001;
-        end while (!final_b_seen(expected[0][0]));
+            first_complete = final_b_seen(expected[0][0]);
+        end while (!first_complete);
         u_memory.hold_b = 1;
         drain_channel(0, 1);
         u_memory.hold_b = 0;
