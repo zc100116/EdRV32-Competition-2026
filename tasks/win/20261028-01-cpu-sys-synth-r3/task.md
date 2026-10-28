@@ -6,7 +6,7 @@
 
 ## 2. 输入
 
-- commit：`main` 上包含本任务卡的提交（Windows Codex 在 `result.md` 中记录实际使用的完整哈希）。分支：`git switch -c win/20261028-01-cpu-sys-synth-r3 origin/main`。
+- commit：分支 `zc100116/SOC系统设计` 上包含本任务卡的提交（Windows Codex 在 `result.md` 中记录实际使用的完整哈希）。分支：`git fetch origin`，`git switch -c win/20261028-01-cpu-sys-synth-r3 origin/zc100116/SOC系统设计`。本轮 CPU RTL（C-R7）尚未合入 `main`。
 - 测量顶层、导入脚本、约束与上一轮（20261027-02 A 部分）相同：`fpga/rtl/edrv32_fpga_cpu_sys_top.v`、`fpga/scripts/import_cpu_sys_top.tcl`（应打印 `edrv32: added 42 sources`）、`fpga/constraints/edrv32_fpga_cpu_sys_top.fdc`（150 MHz）。
 - 本轮 RTL 改动只在 `rtl/cpu/edrv32_cpu_core.v`、`edrv32_cpu_csr.v`、`edrv32_cpu_frontend.v`、`edrv32_cpu_predictor.v`（C-R7），源文件数量不变。
 
@@ -23,7 +23,7 @@
 
 | 步骤 | 执行者 | 内容 |
 |---|---|---|
-| 1 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261028-01-cpu-sys-synth-r3 origin/main`。阅读本卡，把用户步骤整理成清单交给用户。 |
+| 1 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261028-01-cpu-sys-synth-r3 origin/zc100116/SOC系统设计`。阅读本卡，把用户步骤整理成清单交给用户。 |
 | 2 | 用户（U） | 打开 A 工程，在 PDS Tcl 控制台执行 `source <仓库路径>/fpga/scripts/import_cpu_sys_top.tcl`（路径用 `/`），确认打印 `edrv32: added 42 sources`。编译报错就停下，把报错原文交给 Codex。 |
 | 3 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`（不生成 bitstream）。任何一步报错就停下，把报错原文交给 Codex。 |
 | 4 | Windows Codex（C） | 收集第 6 节产物 1–6。 |
