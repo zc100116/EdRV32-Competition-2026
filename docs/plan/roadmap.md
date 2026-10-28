@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX 模块级 smoke/full 和 VIN + PIX 联合测试 VI-18 通过（V-I2）；GEO 模块级 smoke/full/perf 全部通过（V-I3）；ETH 规格 v0.1 已确认，模块级 smoke/full/perf 全部通过（V-I4）；待 PDS 资源测量（Yosys 参考 8684 LUT6，目标 5K）；Windows 任务卡 20261028-04（6 个媒体/网络 IP 生成 + 五模块合并 PDS）已下发 |
+| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX 模块级 smoke/full 和 VIN + PIX 联合测试 VI-18 通过（V-I2）；GEO 模块级 smoke/full/perf 全部通过（V-I3）；ETH 规格 v0.1 已确认，模块级 smoke/full/perf 全部通过（V-I4）；待 PDS 资源测量（Yosys 参考 8684 LUT6，目标 5K）；Windows 任务卡 20261028-04（A：6 个媒体/网络 IP + 五模块合并 PDS；B：CPU 时序探针 P1–P3）已下发 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
