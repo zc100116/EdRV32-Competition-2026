@@ -1,0 +1,7 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+synthesis_estimate	slow	clk_npu	max (slow corner)	sequential timing path	0.107	15	u_npu/u_conv/residual_pairs_r[0]/CLK (GTP_DFF_CE)	u_npu/u_conv/residual_addr_r[31]/D (GTP_DFF_E)
+synthesis_estimate	slow	clk_npu	max (slow corner)	sequential timing path	0.129	15	u_npu/u_conv/residual_pairs_r[0]/CLK (GTP_DFF_CE)	u_npu/u_conv/residual_addr_r[30]/D (GTP_DFF_E)
+synthesis_estimate	slow	clk_npu	max (slow corner)	sequential timing path	0.151	15	u_npu/u_conv/residual_pairs_r[0]/CLK (GTP_DFF_CE)	u_npu/u_conv/residual_addr_r[29]/D (GTP_DFF_E)
+synthesis_estimate	slow	clk_mem	max (slow corner)	sequential timing path	4.998	1	u_npu/u_axi_bridge/u_w_fifo/memory_r_0/CLKB (GTP_DRM36K_E1)	l1_r[12]/D (GTP_DFF)
+synthesis_estimate	slow	clk_mem	max (slow corner)	sequential timing path	4.998	1	u_npu/u_axi_bridge/u_w_fifo/memory_r_0/CLKB (GTP_DRM36K_E1)	l1_r[13]/D (GTP_DFF)
+synthesis_estimate	slow	clk_mem	max (slow corner)	sequential timing path	4.998	1	u_npu/u_axi_bridge/u_w_fifo/memory_r_0/CLKB (GTP_DRM36K_E1)	l1_r[14]/D (GTP_DFF)
