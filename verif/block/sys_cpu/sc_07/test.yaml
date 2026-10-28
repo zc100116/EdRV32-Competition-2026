@@ -5,6 +5,6 @@ parameters:
 software:
 timeout: 900
 pass: PASS
-tier: smoke
+tier: full
 simulator: verilator
 runner: python3 verif/block/sys_cpu/run.py sc07

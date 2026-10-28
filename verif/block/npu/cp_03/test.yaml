@@ -5,7 +5,7 @@ parameters: SELFTEST=0
 software:
 timeout: 14400
 pass: PASS
-tier: smoke
+tier: full
 simulator: verilator
 verilator_flags: -Wall
 runner: python3 verif/block/npu/run.py --test CP-03
