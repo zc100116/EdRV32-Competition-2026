@@ -44,6 +44,8 @@ module edrv32_geo_regs (
     reg [31:0] done_count_r;
     reg [31:0] perf_r [0:5];
     integer counter;
+    reg [4:0] pixel_r;
+    reg [4:0] perf_event_r;
     assign unused_w = &apb_pstrb_i;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
     assign start_o = write_w && apb_paddr_i == 12'h028 && !busy_i;
@@ -97,17 +99,17 @@ module edrv32_geo_regs (
             for (counter = 0; counter < 6; counter = counter + 1)
                 perf_r[counter] <= 32'd0;
         end else begin
-            if (busy_i)
+            if (perf_event_r[0])
                 perf_r[0] <= perf_r[0] + 32'd1;
-            if (pixel_i != 0)
-                perf_r[1] <= perf_r[1] + {27'd0, pixel_i};
-            if (read_beat_i)
+            if (pixel_r != 0)
+                perf_r[1] <= perf_r[1] + {27'd0, pixel_r};
+            if (perf_event_r[1])
                 perf_r[2] <= perf_r[2] + 32'd1;
-            if (write_beat_i)
+            if (perf_event_r[2])
                 perf_r[3] <= perf_r[3] + 32'd1;
-            if (source_wait_i)
+            if (perf_event_r[3])
                 perf_r[4] <= perf_r[4] + 32'd1;
-            if (writer_wait_i)
+            if (perf_event_r[4])
                 perf_r[5] <= perf_r[5] + 32'd1;
             if (write_w) begin
                 case (apb_paddr_i)
@@ -136,6 +138,20 @@ module edrv32_geo_regs (
                 irq_stat_r[1] <= 1'b1;
                 err_code_r <= error_i;
             end
+        end
+    end
+    // Capture the original event, including BUSY's final drain cycle, once.
+    // Clearing the event stage with DOORBELL prevents the previous run leaking in.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            pixel_r <= 5'd0;
+            perf_event_r <= 5'd0;
+        end else if (soft_reset_o || start_o) begin
+            pixel_r <= 5'd0;
+            perf_event_r <= 5'd0;
+        end else begin
+            pixel_r <= pixel_i;
+            perf_event_r <= {writer_wait_i, source_wait_i, write_beat_i, read_beat_i, busy_i};
         end
     end
 endmodule

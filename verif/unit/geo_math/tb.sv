@@ -233,7 +233,7 @@ module tb;
             bounds_width_bytes_o!=64 || bounds_height_o!=16)
             $fatal(1,"FAIL negative fraction source clipping");
         bounds_x_i=100*65536;
-        #1;
+        run_bounds();
         if (!bounds_empty_o) $fatal(1,"FAIL entirely outside source bounds");
         for (trial=0; trial<300; trial++) begin
             bounds_width_i=6'($urandom_range(1,32));

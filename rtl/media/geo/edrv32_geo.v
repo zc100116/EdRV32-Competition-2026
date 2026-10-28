@@ -184,8 +184,10 @@ module edrv32_geo (
     reg [31:0] pack_strb_r;
     reg [255:0] pack_next_w;
     wire pixel_fire_w;
-    reg [4:0] write_pixels_w;
-    integer pixel_lane;
+    wire [4:0] write_pixels_w;
+    reg [2:0] write_group_r [0:3];
+    reg write_fire_r;
+    genvar write_group;
     assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w;
     assign stop_w = busy_w && (abort_w || error_w != 0);
     assign clear_w = stop_w || state_r == S_DRAIN || soft_reset_w;
@@ -228,13 +230,30 @@ module edrv32_geo (
         state_r == S_RUN && compute_state_r == 3 && !stop_w;
     assign pixel_fire_w = pixel_valid_w && advance_w && !clear_w;
     // PERF1 counts pixels that actually cross the DDR write channel, including ABORT tails.
-    always @(*) begin
-        write_pixels_w = 5'd0;
-        if (p5_wvalid_o && p5_wready_i) begin
-            for (pixel_lane = 0; pixel_lane < 16; pixel_lane = pixel_lane + 1)
-                write_pixels_w = write_pixels_w + {4'd0, p5_wstrb_o[pixel_lane*2]};
-        end
+    // Count four independent groups before the counter event stage. The AXI
+    // handshake is registered alongside the byte enables, outside the sum tree.
+    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
+        if (!rst_mem_n_i)
+            write_fire_r <= 1'b0;
+        else
+            write_fire_r <= p5_wvalid_o && p5_wready_i;
     end
+    generate
+        for (write_group = 0; write_group < 4; write_group = write_group + 1) begin : g_count
+            wire [1:0] low_w;
+            wire [1:0] high_w;
+            assign low_w = {1'b0, p5_wstrb_o[write_group*8]}
+                + {1'b0, p5_wstrb_o[write_group*8+2]};
+            assign high_w = {1'b0, p5_wstrb_o[write_group*8+4]}
+                + {1'b0, p5_wstrb_o[write_group*8+6]};
+            always @(posedge clk_mem_i) begin
+                write_group_r[write_group] <= {1'b0, low_w} + {1'b0, high_w};
+            end
+        end
+    endgenerate
+    assign write_pixels_w = write_fire_r
+        ? (({2'd0, write_group_r[0]} + {2'd0, write_group_r[1]})
+        + ({2'd0, write_group_r[2]} + {2'd0, write_group_r[3]})) : 5'd0;
     always @(*) begin
         pack_next_w = accumulator_r;
         pack_next_w[{pack_lane_r, 4'd0} +: 16] = pixel_w;
@@ -367,8 +386,11 @@ module edrv32_geo (
             table_base_r <= desc_base_w;
             table_count_r <= desc_count_w;
         end
-        if (state_r == S_DESC_DATA && rd_valid_w)
-            desc_r[{desc_half_r, 8'd0} +: 256] <= rd_data_w;
+        // Each descriptor beat owns only its 256-bit half's clock enable.
+        if (state_r == S_DESC_DATA && rd_valid_w && !desc_half_r)
+            desc_r[255:0] <= rd_data_w;
+        if (state_r == S_DESC_DATA && rd_valid_w && desc_half_r)
+            desc_r[511:256] <= rd_data_w;
         if (tile_valid_w && tile_ready_w) begin
             group_u_r[fill_group_r] <= tile_u_w;
             group_v_r[fill_group_r] <= tile_v_w;

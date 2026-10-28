@@ -78,7 +78,7 @@ module edrv32_geo_bilinear (
         for (channel = 0; channel < 3; channel = channel + 1) begin : g_channel
             reg [15:0] top_r;
             reg [15:0] bottom_r;
-            reg [23:0] rounded_r;
+            reg [7:0] rounded_r;
             wire signed [8:0] top_delta_w;
             wire signed [8:0] bottom_delta_w;
             wire signed [16:0] vertical_delta_w;
@@ -96,15 +96,15 @@ module edrv32_geo_bilinear (
             assign vertical_delta_w = $signed({1'b0, bottom_r}) - $signed({1'b0, top_r});
             assign vertical_w = $signed({2'b0, top_r, 8'd0}) +
                 vertical_delta_w * $signed({1'b0, fy_r}) + 26'sd32768;
-            assign rgb_w[channel*8 +: 8] = rounded_r[23:16];
+            assign rgb_w[channel*8 +: 8] = rounded_r;
             wire unused_w;
             assign unused_w = &{horizontal_top_w[17:16], horizontal_bottom_w[17:16],
-                vertical_w[25:24], rounded_r[15:0]};
+                vertical_w[25:24], vertical_w[15:0]};
             always @(posedge clk_i) begin
                 if (advance_i) begin
                     top_r <= horizontal_top_w[15:0];
                     bottom_r <= horizontal_bottom_w[15:0];
-                    rounded_r <= vertical_w[23:0];
+                    rounded_r <= vertical_w[23:16];
                 end
             end
         end
