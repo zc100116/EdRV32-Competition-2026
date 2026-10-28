@@ -242,7 +242,7 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 | X4 | camN_pclk → clk_mem | 采集像素 | 异步 FIFO |
 | X5 | clk_mem → clk_pix | 显示像素；DISP 扫描使能；DISP 停止确认请求 | 异步 FIFO；电平同步；握手 |
 | X6 | clk_pix → clk_mem | DISP 帧请求；DISP 扫描侧仍可能发请求（scan_live）；读空事件；扫描 FIFO 读出计数、扫描侧性能计数 | 握手；电平同步；脉冲同步；格雷码 |
-| X7 | eth_rx_clk → clk_mem，clk_mem → eth_tx_clk | 网络帧 | 异步 FIFO |
+| X7 | eth_rx_clk → clk_mem，clk_mem → eth_tx_clk；eth_tx_clk → clk_mem | 网络帧；发送帧结束 | 异步 FIFO；脉冲同步（每帧一个脉冲，帧间隔远大于同步时间） |
 | X8 | 任意 → 各域 | 复位释放、`mem_ready_i` | 复位同步器 / 电平同步 |
 | X9 | clk_npu ↔ clk_mem | NPU DDR 主口（AXI256，mem_xbar P3） | AXI 异步桥，放在 NPU 边界 |
 | X10 | clk_mem → clk_npu | NPU 寄存器（媒体 APB 槽 6） | APB 异步桥，放在 NPU 边界 |
@@ -705,3 +705,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-28 | v0.11 | 8.6：PIX 中断源 9 只报帧完成，PIX 没有错误条件；模块规格见 `pix-spec.md`（用户确认） |
 | 2026-10-28 | v0.12 | 8.7：GEO 写入输出 Surface 中的矩形，矩阵由软件计算，均匀缩小上限 s ≤ 2，性能按 s ≤ 1 / s ≤ 2 分档；模块规格见 `geo-spec.md`（用户确认） |
 | 2026-10-28 | v0.13 | 3.4：MDIO 和 PHY 复位改为 clk_mem 域（在 ETH 寄存器块中）；8.10：接收改为按应用头写入 4 个窗口，硬件应答 ARP、其他帧丢弃，发送按描述符硬件分包，收发吞吐都 ≥ 100 MB/s；第 9 节 ETH 下载流程相应修改；第 10 节删除 ETH 行；模块规格见 `eth-spec.md`（用户确认，设计记录 `2026-10-28-eth.md`） |
+| 2026-10-28 | v0.13 | 澄清（V-R5 问答，不改变已确认的行为）：5.2 X7 增加 eth_tx_clk → clk_mem 的发送帧结束脉冲 |
