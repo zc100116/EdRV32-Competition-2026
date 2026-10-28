@@ -25,7 +25,7 @@ HPM_NAMES = (
     'divide stall', 'device wait', 'frontend empty', 'I-cache miss', 'D-cache miss',
     'dirty writeback', 'branch mispredict',
 )
-ISA = 'rv32imc_zicsr_zifencei'
+ISA = 'rv32im_zicsr_zifencei'
 
 
 def values(text, key):

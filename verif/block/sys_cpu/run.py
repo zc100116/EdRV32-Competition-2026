@@ -40,8 +40,6 @@ def command(args, log):
 def build_program(program, name, memory='sram', opt='o2', request=False):
     out = OUT / 'sw' / name
     args = ['make', '-C', 'sw', f'PROGRAM={program}', f'OUT={out}', f'MEMORY={memory}']
-    if program == 'bootloader':
-        args += ['ARCH=rv32im_zicsr_zifencei']
     if program == 'coremark':
         flags = ('-march=rv32im_zicsr -mabi=ilp32 -std=c11 -Wall -Wextra -Werror '
                  + OPTS[opt] + ' -ffreestanding -fno-builtin -ffunction-sections '

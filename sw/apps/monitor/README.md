@@ -22,7 +22,7 @@ Outputs are `build/sw/{bootloader,monitor}/` ELF, disassembly, map, raw `.bin` a
 Load bootloader ROM and monitor SRAM images together. UART download accepts the
 raw application image described in `../../boot/README.md`.
 
-Measured with xPack GCC 15.2.0, `-O2`, `rv32imc_zicsr_zifencei/ilp32`:
+Measured with xPack GCC 15.2.0, `-O2`, `rv32im_zicsr_zifencei/ilp32`:
 
 | Image | text | data | bss | Section total | Capacity |
 |---|---:|---:|---:|---:|---:|

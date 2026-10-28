@@ -2,7 +2,7 @@
 # Spec: edrv32-soc-spec 7.5; cpu-spec 7.1.
 # Description: Build the UART monitor with the existing CoreMark port and upstream algorithms.
 # Clock domain: none (build tool).
-ARCH := rv32imc_zicsr_zifencei
+ARCH := rv32im_zicsr_zifencei
 MEMORY := sram
 CORE := third_party/coremark
 PROGRAM_SOURCES := sw/apps/monitor/benchmark.c sw/apps/monitor/hpm.c \

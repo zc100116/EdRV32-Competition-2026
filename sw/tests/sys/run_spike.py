@@ -21,7 +21,7 @@ memory = ','.join(
     f'{constants["EDRV32_" + name + "_SIZE"]:#x}' for name in regions)
 for program in ('sys_spike', 'sc01', 'sc04'):
     command = [
-        'spike', '--isa=rv32imc_zicsr_zifencei', '--disable-dtb',
+        'spike', '--isa=rv32im_zicsr_zifencei', '--disable-dtb',
         f'--pc={constants["EDRV32_SRAM_BASE"]:#x}', '-m' + memory,
         str(root / f'build/sw/{program}/{program}.elf'),
     ]

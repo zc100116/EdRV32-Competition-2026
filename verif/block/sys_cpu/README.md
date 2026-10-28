@@ -1,6 +1,6 @@
 # CPU and system subsystem SC environment
 
-This bench connects the real `edrv32_cpu_subsys` (`RVC_EN=1`) and
+This bench connects the real `edrv32_cpu_subsys` (`RVC_EN=0`) and
 `edrv32_sys_subsys` with the production AXI, CACHE_CTRL APB, CLINT time and
 interrupt interfaces. The system reset controller generates the CPU reset;
 MEM_READY is initially delayed. Unused media APB slots return SLVERR.
@@ -133,8 +133,8 @@ Cache ways: 2
 Cache line bytes: 32
 D-cache policy: write-back, write-allocate
 Cache configuration source: cache-spec 2.1 constants
-Compiler flags: -march=rv32imc_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/bsp/include -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/drivers/include -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/boot -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/apps/coremark -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/third_party/coremark -DITERATIONS=10
-ISA: rv32imc_zicsr_zifencei
+Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/bsp/include -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/drivers/include -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/boot -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/apps/coremark -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/third_party/coremark -DITERATIONS=10
+ISA: rv32im_zicsr_zifencei
 HPM event 00: disabled
 HPM 01 dual retire: 1
 HPM 02 single retire: 2

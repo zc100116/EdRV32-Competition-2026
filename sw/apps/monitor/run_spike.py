@@ -24,7 +24,7 @@ constants = {
 memory = ','.join(
     f'{constants["EDRV32_" + name + "_BASE"]:#x}:'
     f'{constants["EDRV32_" + name + "_SIZE"]:#x}' for name in ('ROM', 'SRAM'))
-command = ['spike', '--isa=rv32imc_zicsr_zifencei_zicntr_zihpm', '--priv=m',
+command = ['spike', '--isa=rv32im_zicsr_zifencei_zicntr_zihpm', '--priv=m',
            '--pmpregions=0', '--no-dm', '--disable-dtb', '-m' + memory,
            f'--pc={constants["EDRV32_SRAM_BASE"]:#x}', str(output / 'monitor.elf')]
 with (output / 'console.log').open('w') as log:
