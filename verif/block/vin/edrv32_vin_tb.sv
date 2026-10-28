@@ -6,7 +6,10 @@
 module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
     import edrv32_vin_reference_pkg::*;
     logic clk_mem = 0;
+    // The bench observes reset synchronously; the DUT uses asynchronous reset.
+    /* verilator lint_off SYNCASYNCNET */
     logic rst_mem_n = 0;
+    /* verilator lint_on SYNCASYNCNET */
     logic rst_cam0_n = 0;
     logic rst_cam1_n = 0;
     wire cam0_pclk;
