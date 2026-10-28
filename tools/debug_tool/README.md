@@ -1,4 +1,4 @@
-# EdRV32 Serial Console 2.0
+# EdRV32 调试工具
 
 跨平台桌面串口工具（PySide6 / Qt），浅色主题。布局参考 VOFA+：
 **左栏图标页签（连接 / 命令 / 规则）+ 中间控制台 + 右侧数据面板**，
@@ -13,13 +13,13 @@
 pip install PySide6 pyserial
 
 # 桌面 GUI（同时内嵌 REST API，默认 127.0.0.1:8765）
-python tools/serial-console-2/main.py
+python tools/debug_tool/main.py
 
 # 无界面模式（纯引擎 + REST API，适合脚本/CI/AI 独占使用）
-python tools/serial-console-2/main.py --headless
+python tools/debug_tool/main.py --headless
 
 # 启动即连接
-python tools/serial-console-2/main.py --connect COM7 --baud 115200
+python tools/debug_tool/main.py --connect COM7 --baud 115200
 ```
 
 ## 界面功能
@@ -62,26 +62,26 @@ python tools/serial-console-2/main.py --connect COM7 --baud 115200
 CLI 走 HTTP API，GUI 开着时也能用（看到同一会话）：
 
 ```bash
-python tools/serial-console-2/cli.py ports
-python tools/serial-console-2/cli.py status
-python tools/serial-console-2/cli.py connect COM7 --baud 115200
-python tools/serial-console-2/cli.py send "6"                  # 默认行尾 \r
-python tools/serial-console-2/cli.py send "01 03 FF" --hex     # HEX 发送
-python tools/serial-console-2/cli.py sendfile firmware.bin     # 发送文件（带进度）
-python tools/serial-console-2/cli.py sendfile firmware.bin --echo  # 同时回显到控制台
-python tools/serial-console-2/cli.py sendfile --cancel         # 取消传输
-python tools/serial-console-2/cli.py tail -f                   # 持续观察缓冲区
-python tools/serial-console-2/cli.py tail --dir rx
-python tools/serial-console-2/cli.py save / clear
-python tools/serial-console-2/cli.py config --encoding gbk     # 切编码
-python tools/serial-console-2/cli.py modem --dtr on            # DTR/RTS
-python tools/serial-console-2/cli.py cmd list / add / run / del / export / import
-python tools/serial-console-2/cli.py rules list
-python tools/serial-console-2/cli.py rules add TEMP 'TEMP=(\d+)' --scale 0.1 --unit C
-python tools/serial-console-2/cli.py rules set temp --off      # 停用/启用
-python tools/serial-console-2/cli.py rules del temp
-python tools/serial-console-2/cli.py params                    # 当前参数快照
-python tools/serial-console-2/cli.py params --clear
+python tools/debug_tool/cli.py ports
+python tools/debug_tool/cli.py status
+python tools/debug_tool/cli.py connect COM7 --baud 115200
+python tools/debug_tool/cli.py send "6"                  # 默认行尾 \r
+python tools/debug_tool/cli.py send "01 03 FF" --hex     # HEX 发送
+python tools/debug_tool/cli.py sendfile firmware.bin     # 发送文件（带进度）
+python tools/debug_tool/cli.py sendfile firmware.bin --echo  # 同时回显到控制台
+python tools/debug_tool/cli.py sendfile --cancel         # 取消传输
+python tools/debug_tool/cli.py tail -f                   # 持续观察缓冲区
+python tools/debug_tool/cli.py tail --dir rx
+python tools/debug_tool/cli.py save / clear
+python tools/debug_tool/cli.py config --encoding gbk     # 切编码
+python tools/debug_tool/cli.py modem --dtr on            # DTR/RTS
+python tools/debug_tool/cli.py cmd list / add / run / del / export / import
+python tools/debug_tool/cli.py rules list
+python tools/debug_tool/cli.py rules add TEMP 'TEMP=(\d+)' --scale 0.1 --unit C
+python tools/debug_tool/cli.py rules set temp --off      # 停用/启用
+python tools/debug_tool/cli.py rules del temp
+python tools/debug_tool/cli.py params                    # 当前参数快照
+python tools/debug_tool/cli.py params --clear
 ```
 
 ### REST API（默认 `http://127.0.0.1:8765`）
@@ -116,7 +116,7 @@ AI 记住上次 `lastSeq` 后用 `?since=<lastSeq>` 轮询即可增量观测。
 ## 架构
 
 ```
-tools/serial-console-2/
+tools/debug_tool/
 ├── main.py            # 入口：--gui(默认) / --headless / --connect / --api-port
 ├── core/
 │   ├── engine.py      # SerialEngine：串口收发线程、seq 缓冲区、规则匹配、
@@ -129,7 +129,7 @@ tools/serial-console-2/
 ├── stress_test.py     # 压测：8000 行洪峰下事件循环响应率
 ├── commands.json      # 命令按钮（首次保存时生成）
 ├── rules.json         # 匹配规则（首次保存时生成）
-├── settings.json      # 上次串口配置
+├── settings.json      # 运行时生成的上次串口配置（不入库）
 └── logs/              # 一键保存的日志
 ```
 
@@ -140,8 +140,8 @@ tools/serial-console-2/
 
 ```bash
 pip install pyinstaller
-pyinstaller --noconfirm --windowed --name EdRV32SerialConsole \
-  tools/serial-console-2/main.py
+pyinstaller --noconfirm --windowed --name EdRV32DebugTool \
+  tools/debug_tool/main.py
 ```
 
 发布前把 `commands.json` / `rules.json` / `settings.json` 的存储路径从

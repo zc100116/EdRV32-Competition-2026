@@ -40,3 +40,5 @@ CLAUDE.md 12.2. `tools/check/lint.sh <sources or -f files.f>` runs
 `verilator --lint-only -Wall`; `make lint` checks each common primitive as a top.
 
 `test.yaml` 可选 `runner` 字段指定在仓库根目录执行的命令；回归按退出码和 `pass` 字段判定，未指定时使用常规 HDL 编译流程。
+
+`tools/debug_tool/`：EdRV32 调试工具（Windows PySide6 GUI、串口 CLI / REST API、BIOS 烧录与 UDP 文件收发）。

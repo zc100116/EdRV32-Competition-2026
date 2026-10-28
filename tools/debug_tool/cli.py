@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Terminal client for EdRV32 Serial Console 2.0.
+"""Terminal client for EdRV32 调试工具.
 
 Talks to the REST API of a running instance (GUI or --headless), so the
 terminal and the desktop window always see the same serial session.

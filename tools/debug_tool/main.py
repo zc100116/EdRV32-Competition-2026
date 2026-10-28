@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EdRV32 Serial Console 2.0 -- entry point.
+"""EdRV32 调试工具 -- entry point.
 
   python main.py                     # GUI + embedded REST API (default)
   python main.py --headless          # no GUI: engine + REST API only
@@ -16,7 +16,7 @@ import sys
 
 
 def main():
-    parser = argparse.ArgumentParser(description="EdRV32 Serial Console 2.0")
+    parser = argparse.ArgumentParser(description="EdRV32 调试工具")
     parser.add_argument("--headless", action="store_true",
                         help="run engine + REST API without the GUI")
     parser.add_argument("--host", default="127.0.0.1")
@@ -66,7 +66,7 @@ def main():
     from gui.app import MainWindow
 
     app = QApplication(sys.argv)
-    app.setApplicationName("EdRV32 Serial Console 2.0")
+    app.setApplicationName("EdRV32 调试工具")
     # crisp text on Windows: force the UI font with antialiasing preferred
     font = QFont("Microsoft YaHei UI", 9)
     font.setStyleStrategy(QFont.PreferAntialias)

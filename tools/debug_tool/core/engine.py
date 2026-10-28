@@ -1,4 +1,4 @@
-"""EdRV32 Serial Console 2.0 -- serial engine core.
+"""EdRV32 调试工具 -- serial engine core.
 
 Framework-agnostic: no GUI imports, no HTTP imports. The PySide6 GUI,
 the REST API server and the CLI all drive the same SerialEngine.

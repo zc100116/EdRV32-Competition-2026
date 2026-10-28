@@ -1,4 +1,4 @@
-"""PySide6 desktop UI for EdRV32 Serial Console 2.0.
+"""PySide6 desktop UI for EdRV32 调试工具.
 
 VOFA-style three-column layout:
   left   -- icon rail switching 连接 / 命令 / 规则 panels
@@ -1109,7 +1109,7 @@ class MainWindow(QMainWindow):
     def __init__(self, engine):
         super().__init__()
         self.engine = engine
-        self.setWindowTitle("EdRV32 Serial Console 2.0")
+        self.setWindowTitle("EdRV32 调试工具")
         self.resize(1360, 860)
         self.setMinimumSize(1080, 680)
         self.setStyleSheet(QSS)
@@ -1142,7 +1142,7 @@ class MainWindow(QMainWindow):
         title_box.setSpacing(1)
         title = QLabel(
             'EdRV32 <span style="color:#8b98a9; font-weight:400">'
-            'Serial Console</span> 2.0')
+            '调试工具</span>')
         title.setObjectName("appTitle")
         sub = QLabel("MES50HP · UART LINK · REST API READY")
         sub.setObjectName("appSub")
@@ -1249,7 +1249,7 @@ class MainWindow(QMainWindow):
             head.addWidget(btn)
         save_btn = QPushButton("保 存")
         save_btn.setObjectName("ghost")
-        save_btn.setToolTip("将缓冲区写入 tools/serial-console-2/logs/")
+        save_btn.setToolTip("将缓冲区写入 tools/debug_tool/logs/")
         save_btn.clicked.connect(self._save)
         clear_btn = QPushButton("清 空")
         clear_btn.setObjectName("ghostDanger")
@@ -1345,7 +1345,7 @@ class MainWindow(QMainWindow):
         f.setContentsMargins(18, 0, 18, 0)
         self.counters = QLabel("RX 0 B / TX 0 B")
         self.counters.setObjectName("footText")
-        right = QLabel("50 MHz · RV32IMC · RV32 Serial Console 2.0")
+        right = QLabel("50 MHz · RV32IMC · EdRV32 调试工具")
         right.setObjectName("footText")
         f.addWidget(self.counters)
         f.addStretch(1)

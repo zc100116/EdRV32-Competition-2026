@@ -1,4 +1,4 @@
-"""EdRV32 Serial Console 2.0 GUI package."""
+"""EdRV32 调试工具 GUI package."""
 
 from .app import MainWindow
 
