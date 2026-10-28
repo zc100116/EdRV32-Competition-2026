@@ -13,3 +13,5 @@ requests==2.34.2
 psutil==7.2.2
 polars==2.1.0
 ultralytics-thop==2.2.3
+# Windows board UART download and capture (tools/board/uart_tool.py).
+pyserial==3.5
