@@ -1,0 +1,8 @@
+Source: running Serial Console 2.0 REST API; same GUI serial session.
+COM7, 115200, 8N1; RX/TX/SYS timestamps retained. No commands sent to the board during collection.
+b1_o2.log and b1_periph.log are session segments; the complete export is serial_console_session.log.
+O2: 10 iterations, short diagnostic run, CRC PASS; no 5000-iteration official score captured.
+b1_tuned.log: 未取得；当前会话没有tuned下载/运行记录。菜单3系统信息已取得且PASS。
+GUI parameter panel has no captured rule parameters; HPM values are present in the RX log.
+User observation: LED正常，但是按键测试策略问题，不太好测试。
+LED sequence confirmed by user; button function not confirmed.

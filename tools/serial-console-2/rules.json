@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Render",
+    "pattern": "^R(?:PERF|STAT) (BASC|CLER|ROUN|COMP|FRTM|RBTS|WBTS|BBTS|ARWT|AWWT|DARW|FPS0|HBPS|RBPS|WBPS|BBPS|UFDL)=([0-9A-F]{8})$",
+    "enabled": true,
+    "keyGroup": 1,
+    "valueGroup": 2,
+    "base": 16,
+    "scale": 1.0,
+    "unit": "",
+    "names": {
+      "FPS0": "HDMI FPS",
+      "BBTS": "底图写 beat",
+      "ARWT": "渲染读地址等待周期",
+      "RBPS": "渲染读取 B/s",
+      "ROUN": "圆角绘制周期",
+      "HBPS": "HDMI读取 B/s",
+      "BBPS": "底图写入 B/s",
+      "CLER": "前景清除周期",
+      "COMP": "合成周期",
+      "RBTS": "渲染读 beat",
+      "WBTS": "渲染写 beat",
+      "FRTM": "首帧等待周期",
+      "WBPS": "渲染写入 B/s",
+      "UFDL": "本窗口HDMI下溢",
+      "BASC": "底图写入周期",
+      "AWWT": "渲染写地址等待周期",
+      "DARW": "HDMI读地址等待周期"
+    },
+    "id": "render-performance"
+  },
+  {
+    "name": "YOLOv8n 整网用时",
+    "pattern": "^YV8 (?:PASS|FAIL) STEP=[0-9A-F]{2} CYC=([0-9A-F]{8})$",
+    "enabled": true,
+    "keyGroup": 0,
+    "valueGroup": 1,
+    "base": 16,
+    "scale": 6.666666666666667e-06,
+    "unit": "ms",
+    "id": "yolo-v8n-frame-ms"
+  },
+  {
+    "name": "YOLOv8n 完成步骤",
+    "pattern": "^YV8 (?:PASS|FAIL) STEP=([0-9A-F]{2}) CYC=[0-9A-F]{8}$",
+    "enabled": true,
+    "keyGroup": 0,
+    "valueGroup": 1,
+    "base": 16,
+    "scale": 1.0,
+    "unit": "",
+    "id": "yolo-v8n-step"
+  },
+  {
+    "name": "YOLO卷积用时",
+    "pattern": "^YCORE CYC=([0-9A-F]{8})$",
+    "enabled": true,
+    "keyGroup": 0,
+    "valueGroup": 1,
+    "base": 16,
+    "scale": 6.666666666666667e-06,
+    "unit": "ms",
+    "id": "yolo-v8n-core-ms"
+  },
+  {
+    "name": "YOLO后处理用时",
+    "pattern": "^YPOST CYC=([0-9A-F]{8}) CAND=[0-9A-F]{4} DET=[0-9A-F]{2}$",
+    "enabled": true,
+    "keyGroup": 0,
+    "valueGroup": 1,
+    "base": 16,
+    "scale": 6.666666666666667e-06,
+    "unit": "ms",
+    "id": "yolo-v8n-post-ms"
+  },
+  {
+    "name": "YOLO候选数",
+    "pattern": "^YPOST CYC=[0-9A-F]{8} CAND=([0-9A-F]{4}) DET=[0-9A-F]{2}$",
+    "enabled": true,
+    "keyGroup": 0,
+    "valueGroup": 1,
+    "base": 16,
+    "scale": 1.0,
+    "unit": "",
+    "id": "yolo-v8n-candidates"
+  },
+  {
+    "name": "YOLO目标数",
+    "pattern": "^YPOST CYC=[0-9A-F]{8} CAND=[0-9A-F]{4} DET=([0-9A-F]{2})$",
+    "enabled": true,
+    "keyGroup": 0,
+    "valueGroup": 1,
+    "base": 16,
+    "scale": 1.0,
+    "unit": "",
+    "id": "yolo-v8n-detections"
+  }
+]

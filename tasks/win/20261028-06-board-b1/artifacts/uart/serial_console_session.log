@@ -1,0 +1,191 @@
+[23:31:38.516][SYS] connected COM7 @ 115200 8N1
+[23:31:41.718][RX] 
+[23:31:41.718][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:31:41.718][RX]   E         D   D   R   R   V   V      3      2 
+[23:31:41.718][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:31:41.718][RX]   E         D   D   R  R     V V       3   2    
+[23:31:41.718][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:31:41.718][RX] 
+[23:31:41.718][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:31:41.718][RX] CHIP_ID: 0xed320001
+[23:31:41.718][RX] CLK_SYS_HZ: 100000000
+[23:31:41.718][RX] ROM bytes: 16384
+[23:31:41.718][RX] SRAM bytes: 65536
+[23:31:41.718][RX] I-cache bytes: 8192
+[23:31:41.718][RX] D-cache bytes: 8192
+[23:31:41.718][RX] MEM_READY: 1
+[23:31:41.718][RX] Boot mode: SRAM app
+[23:31:41.718][RX] Build commit: 75dff18
+[23:31:41.718][RX] Compiler version: GCC 15.2.0
+[23:31:41.723][RX] Boot SRAM
+[23:31:41.723][RX] Monitor: EdRV32
+[23:31:41.723][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[23:31:48.382][TX] 1<CR>
+[23:31:48.411][RX] Iterations default: 10
+[23:31:48.411][RX] Iterations input: decimal 1..4294967295 then Enter; Enter selects default
+[23:31:48.411][RX] Iterations: 10
+[23:31:48.411][RX] HPM rounds: 2
+[23:31:48.450][RX] HPM round: 1
+[23:31:48.450][RX] HPM first event: 1
+[23:31:48.450][RX] HPM last event: 8
+[23:31:48.450][RX] HPM round cycles: 2777214
+[23:31:48.450][RX] HPM round instructions: 2882008
+[23:31:48.450][RX] CRC seed: 0x0000e9f5
+[23:31:48.450][RX] CRC list: 0x0000e714
+[23:31:48.450][RX] CRC matrix: 0x00001fd7
+[23:31:48.450][RX] CRC state: 0x00008e3a
+[23:31:48.450][RX] CRC final: 0x0000fcaf
+[23:31:48.450][RX] CRC seed result: PASS
+[23:31:48.450][RX] CRC list result: PASS
+[23:31:48.450][RX] CRC matrix result: PASS
+[23:31:48.450][RX] CRC state result: PASS
+[23:31:48.450][RX] CRC result: PASS
+[23:31:48.522][RX] HPM round: 2
+[23:31:48.522][RX] HPM first event: 9
+[23:31:48.522][RX] HPM last event: 16
+[23:31:48.522][RX] HPM round cycles: 2776175
+[23:31:48.522][RX] HPM round instructions: 2882008
+[23:31:48.522][RX] CRC seed: 0x0000e9f5
+[23:31:48.522][RX] CRC list: 0x0000e714
+[23:31:48.522][RX] CRC matrix: 0x00001fd7
+[23:31:48.522][RX] CRC state: 0x00008e3a
+[23:31:48.522][RX] CRC final: 0x0000fcaf
+[23:31:48.522][RX] CRC seed result: PASS
+[23:31:48.522][RX] CRC list result: PASS
+[23:31:48.522][RX] CRC matrix result: PASS
+[23:31:48.522][RX] CRC state result: PASS
+[23:31:48.522][RX] CRC result: PASS
+[23:31:48.522][RX] Cycles: 2777214
+[23:31:48.522][RX] Instructions: 2882008
+[23:31:48.522][RX] Iterations/Sec: 360.073
+[23:31:48.522][RX] CoreMark/MHz: 3.600
+[23:31:48.522][RX] Score status: short diagnostic run (<10 s); not a publishable CoreMark score
+[23:31:48.565][RX] HPM 01 dual retire: 777065
+[23:31:48.566][RX] HPM 02 single retire: 1327878
+[23:31:48.566][RX] HPM 03 zero retire: 672271
+[23:31:48.566][RX] HPM 04 branches: 609102
+[23:31:48.566][RX] HPM 05 pair RAW: 442170
+[23:31:48.566][RX] HPM 06 pair structural: 118872
+[23:31:48.566][RX] HPM 07 pair slot1 type: 655334
+[23:31:48.566][RX] HPM 08 pair missing slot1: 73680
+[23:31:48.566][RX] HPM 09 load-use stall: 264968
+[23:31:48.566][RX] HPM 10 divide stall: 0
+[23:31:48.566][RX] HPM 11 device wait: 0
+[23:31:48.566][RX] HPM 12 frontend empty: 153690
+[23:31:48.566][RX] HPM 13 I-cache miss: 69
+[23:31:48.566][RX] HPM 14 D-cache miss: 0
+[23:31:48.566][RX] HPM 15 dirty writeback: 0
+[23:31:48.566][RX] HPM 16 branch mispredict: 76572
+[23:31:48.566][RX] IPC: 1.037
+[23:31:48.566][RX] Dual retire ratio: 0.279
+[23:31:48.605][RX] Load-use stall ratio: 0.095
+[23:31:48.605][RX] Divide stall ratio: 0.000
+[23:31:48.605][RX] Device wait ratio: 0.000
+[23:31:48.605][RX] Frontend empty ratio: 0.055
+[23:31:48.605][RX] Branch mispredict rate: 0.125
+[23:31:48.605][RX] I-cache MPKI: 0.023
+[23:31:48.605][RX] D-cache MPKI: 0.000
+[23:31:48.605][RX] Compiler version: GCC 15.2.0
+[23:31:48.605][RX] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
+[23:31:48.605][RX] ISA: rv32im_zicsr_zifencei
+[23:31:48.605][RX] CoreMark result: PASS
+[23:31:48.605][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[23:32:47.345][TX] 2<CR>
+[23:32:47.362][RX] GPIO LED mask: 0x0000001e
+[23:32:47.362][RX] GPIO button bit: 0
+[23:32:47.362][RX] GPIO LED output: 0x00000002
+[23:32:47.457][RX] GPIO input: 0x00000001
+[23:32:47.457][RX] GPIO button pressed: 0
+[23:32:47.457][RX] GPIO LED output: 0x00000004
+[23:32:47.579][RX] GPIO input: 0x00000001
+[23:32:47.579][RX] GPIO button pressed: 0
+[23:32:47.579][RX] GPIO LED output: 0x00000008
+[23:32:47.667][RX] GPIO input: 0x00000001
+[23:32:47.667][RX] GPIO button pressed: 0
+[23:32:47.667][RX] GPIO LED output: 0x00000010
+[23:32:47.798][RX] GPIO input: 0x00000001
+[23:32:47.798][RX] GPIO button pressed: 0
+[23:32:47.798][RX] GPIO result: OBSERVE: verify LEDs and button against reported levels
+[23:32:47.798][RX] Timer requested cycles: 4096
+[23:32:47.798][RX] Timer elapsed cycles: 4168
+[23:32:47.798][RX] Timer lateness cycles: 72
+[23:32:47.798][RX] Timer mcause: 0x80000007
+[23:32:47.798][RX] Timer interrupts: 1
+[23:32:47.798][RX] Timer result: PASS
+[23:32:47.798][RX] I2C SCL Hz: 100000
+[23:32:47.798][RX] I2C first address: 0x00000008
+[23:32:47.798][RX] I2C last address: 0x00000077
+[23:32:47.798][RX] I2C port: 0
+[23:32:47.811][RX] I2C devices: 0
+[23:32:47.811][RX] I2C port: 1
+[23:32:47.834][RX] I2C devices: 0
+[23:32:47.834][RX] I2C result: SCAN COMPLETE (zero devices is a valid observation)
+[23:32:47.834][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[23:32:58.220][TX] 3<CR>
+[23:32:58.265][RX] CHIP_ID: 0xed320001
+[23:32:58.265][RX] CLK_SYS_HZ: 100000000
+[23:32:58.265][RX] ROM bytes: 16384
+[23:32:58.265][RX] SRAM bytes: 65536
+[23:32:58.265][RX] I-cache bytes: 8192
+[23:32:58.265][RX] D-cache bytes: 8192
+[23:32:58.265][RX] MEM_READY: 1
+[23:32:58.265][RX] Boot mode: SRAM app
+[23:32:58.265][RX] Build commit: 75dff18
+[23:32:58.265][RX] Compiler version: GCC 15.2.0
+[23:32:58.265][RX] Cache ways: 2
+[23:32:58.265][RX] Cache line bytes: 32
+[23:32:58.265][RX] D-cache policy: write-back, write-allocate
+[23:32:58.266][RX] Cache configuration source: cache-spec 2.1 constants
+[23:32:58.311][RX] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
+[23:32:58.311][RX] ISA: rv32im_zicsr_zifencei
+[23:32:58.311][RX] HPM event 00: disabled
+[23:32:58.311][RX] HPM 01 dual retire: 1
+[23:32:58.311][RX] HPM 02 single retire: 2
+[23:32:58.311][RX] HPM 03 zero retire: 3
+[23:32:58.311][RX] HPM 04 branches: 4
+[23:32:58.311][RX] HPM 05 pair RAW: 5
+[23:32:58.311][RX] HPM 06 pair structural: 6
+[23:32:58.311][RX] HPM 07 pair slot1 type: 7
+[23:32:58.311][RX] HPM 08 pair missing slot1: 8
+[23:32:58.311][RX] HPM 09 load-use stall: 9
+[23:32:58.311][RX] HPM 10 divide stall: 10
+[23:32:58.311][RX] HPM 11 device wait: 11
+[23:32:58.311][RX] HPM 12 frontend empty: 12
+[23:32:58.311][RX] HPM 13 I-cache miss: 13
+[23:32:58.311][RX] HPM 14 D-cache miss: 14
+[23:32:58.311][RX] HPM 15 dirty writeback: 15
+[23:32:58.311][RX] HPM 16 branch mispredict: 16
+[23:32:58.311][RX] HPM events 17-31: reserved, no counting
+[23:32:58.316][RX] System info result: PASS
+[23:32:58.316][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[23:33:45.651][TX] 2<CR>
+[23:33:45.658][RX] GPIO LED mask: 0x0000001e
+[23:33:45.658][RX] GPIO button bit: 0
+[23:33:45.658][RX] GPIO LED output: 0x00000002
+[23:33:45.764][RX] GPIO input: 0x00000001
+[23:33:45.764][RX] GPIO button pressed: 0
+[23:33:45.764][RX] GPIO LED output: 0x00000004
+[23:33:45.869][RX] GPIO input: 0x00000001
+[23:33:45.869][RX] GPIO button pressed: 0
+[23:33:45.869][RX] GPIO LED output: 0x00000008
+[23:33:45.993][RX] GPIO input: 0x00000001
+[23:33:45.993][RX] GPIO button pressed: 0
+[23:33:45.993][RX] GPIO LED output: 0x00000010
+[23:33:46.117][RX] GPIO input: 0x00000001
+[23:33:46.117][RX] GPIO button pressed: 0
+[23:33:46.117][RX] GPIO result: OBSERVE: verify LEDs and button against reported levels
+[23:33:46.117][RX] Timer requested cycles: 4096
+[23:33:46.117][RX] Timer elapsed cycles: 4142
+[23:33:46.117][RX] Timer lateness cycles: 46
+[23:33:46.117][RX] Timer mcause: 0x80000007
+[23:33:46.117][RX] Timer interrupts: 1
+[23:33:46.117][RX] Timer result: PASS
+[23:33:46.117][RX] I2C SCL Hz: 100000
+[23:33:46.117][RX] I2C first address: 0x00000008
+[23:33:46.117][RX] I2C last address: 0x00000077
+[23:33:46.117][RX] I2C port: 0
+[23:33:46.117][RX] I2C devices: 0
+[23:33:46.117][RX] I2C port: 1
+[23:33:46.140][RX] I2C devices: 0
+[23:33:46.140][RX] I2C result: SCAN COMPLETE (zero devices is a valid observation)
+[23:33:46.140][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info

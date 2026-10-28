@@ -1,0 +1,10 @@
+{
+  "port": "COM7",
+  "baud": 115200,
+  "dataBits": 8,
+  "parity": "none",
+  "stopBits": "1",
+  "encoding": "utf-8",
+  "dtr": false,
+  "rts": false
+}
