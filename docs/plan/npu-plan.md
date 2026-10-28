@@ -49,7 +49,7 @@
 | N-C1 | 控制和 DMA RTL：寄存器块、描述符读取与译码、调度器（W1/W2/W3/W4b、发射信用）、读写 DMA、POOL、UPSAMPLE、错误和 ABORT、`edrv32_npu` 顶层和两个异步桥；单元测试 | Codex · GPT-6.1 Sol | N-D1、N-C0 | 单元测试全过，lint 0 告警；协调者逐行评审调度器 | task-npu-ctrl | [x] 2026-10-28 合入协调者分支：单元 27 PASS，NB smoke 24 / full 30 PASS，68 描述符整网逐字节一致，NET-02 21.62 fps（150 MHz、1.4 GB/s 模型） |
 | N-V1 | NB 模块级环境和测试：存储模型 `npu_axi256_mem.sv`、APB 驱动、镜像装载与比对、验证方案 3.2–3.7 全部测试项（不读被测 RTL） | Codex · GPT-6.1 Sol（独立验证 worker） | N-M1、N-M2；与 N-D1/N-C1 并行 | 用参考模型自身产生的输出做回环自检；测试代码评审 | task-npu-verif | [x] 随 N-C1（NB full 30 项） |
 | N-I1 | 联调：NB smoke → full，覆盖收敛 | Codex · GPT-6.1 Sol | N-C1、N-V1 | smoke、full 全过，第 5 节覆盖全部命中 | task-npu-integ | [x] 随 N-C1 |
-| N-V2 | RG-01 补 SOFT_RST 检查（npu-testplan v0.4，规格 v0.4 第 4 节）：IDLE 时写 SOFT_RST 后全部寄存器读回复位值 | Codex · GPT-6.1 Sol | N-I1 | `verif/block/npu` RG-01 smoke 通过 | task-npu-rg01 | [ ] |
+| N-V2 | RG-01 补 SOFT_RST 检查（npu-testplan v0.4，规格 v0.4 第 4 节）：IDLE 时写 SOFT_RST 后全部寄存器读回复位值 | Codex · GPT-6.1 Sol | N-I1 | `verif/block/npu` RG-01 smoke 通过 | task-npu-rg01 | [x] |
 | N-P1 | 整网性能 NET-02 和测量报告；NPU 整体 PDS（Windows 任务卡）；规格第 9 节 [待定] 项定稿 | Codex · GPT-6.1 Sol + 协调者 + 用户 | N-I1 | 测量报告 `docs/reports/…-perf-npu.md`、`…-timing-npu.md`；规格修订经用户确认 | task-npu-perf | [ ] |
 
 依赖关系：N-Q1、N-D0、N-C0 可以立即并行开始；N-M1、N-M2、N-IP1 在 N-D0 之后并行；N-D1 和 N-V1 并行；N-W1 的结果可能让 N-D1 返工，N-C1 在 N-W1 结论之后再接数据通路。
