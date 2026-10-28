@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # File: uart_tool.py
 # Spec: board-plan B1-5; sw/boot/README.md UART download protocol.
-# Description: Optionally send an objcopy SRAM binary after the bootloader ready line, then
+# Description: Select Program SRAM in BIOS and send an objcopy binary after the ready line, then
 #              log UART. Optionally select a monitor menu item and enter the CoreMark
 #              iteration count; emit the identical download bytes for simulation.
 # Clock domain: none (Windows host tool).
@@ -21,9 +21,11 @@ def capture(port, image, log, menu, iterations):
     import serial
 
     ready = b'UART download ready\r\n'
+    bios_menu = b'BIOS menu: 1=Program SRAM\r\n'
     prompt = b'Menu: 1=CoreMark 2=Peripheral tests 3=System info\r\n'
     asked = b'Iterations input'
     pending = wire_bytes(image) if image else b''
+    program = bool(image)
     # A selection is one line; for CoreMark an empty count line selects the monitor default.
     selection = (menu + '\r').encode('ascii') if menu else b''
     count = ((str(iterations) if iterations else '') + '\r').encode('ascii') if menu == '1' else b''
@@ -37,6 +39,10 @@ def capture(port, image, log, menu, iterations):
             sys.stdout.buffer.write(data)
             sys.stdout.buffer.flush()
             tail += data
+            if program and bios_menu in tail:
+                uart.write(b'1\r')
+                uart.flush()
+                program = False
             if pending and ready in tail:
                 uart.write(pending)
                 uart.flush()
