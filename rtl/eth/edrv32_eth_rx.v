@@ -51,16 +51,25 @@ module edrv32_eth_rx (
     wire [15:0] udp_length_w;
     wire [31:0] offset_w;
     wire [1:0] window_w;
-    wire [15:0] payload_w;
-    wire [10:0] words_w;
-    wire [10:0] used_w;
+    reg [15:0] payload_r;
+    reg [10:0] words_r;
+    reg [10:0] end_r;
+    reg [32:0] limit_r;
+    reg [16:0] ip_end_r;
+    reg [16:0] ip_final_r;
+    reg [16:0] ip_frame_r;
+    reg [15:0] ip_udp_length_r;
+    reg [31:0] src_sum_r;
+    reg [31:0] dst_sum_r;
+    reg [31:0] address_sum_r;
+    reg [31:0] udp_length_sum_r;
+    reg [31:0] pseudo_header_r;
+    reg [31:0] pseudo_r;
+    reg [16:0] udp_fold_r;
+    reg ip_good_r;
+    reg udp_good_r;
     wire [27:0] size_w;
-    wire [32:0] limit_w;
-    wire [31:0] pseudo_w;
-    wire [32:0] udp_fold_w;
     wire [16:0] ip_fold_w;
-    wire ip_good_w;
-    wire udp_good_w;
     wire payload_byte_w;
     wire store_word_w;
     wire space_w;
@@ -107,23 +116,34 @@ module edrv32_eth_rx (
     assign udp_length_w = header_r[95:80];
     assign offset_w = header_r[31:0];
     assign window_w = header_r[57:56];
-    assign payload_w = udp_length_w - 16'd16;
-    assign words_w = {2'd0, payload_w[10:2]} + {10'd0, |payload_w[1:0]};
-    assign used_w = commit_r - release_i;
     assign size_w = sizes_i[window_w * 28 +: 28];
-    assign limit_w = {1'b0, offset_w} + {17'd0, payload_w};
-    assign pseudo_w = {16'd0, src_ip_w[31:16]} + {16'd0, src_ip_w[15:0]} +
-        {16'd0, dst_ip_w[31:16]} + {16'd0, dst_ip_w[15:0]} + 32'd17 +
-        {16'd0, udp_length_w} + udp_sum_r;
-    assign udp_fold_w = {17'd0, pseudo_w[15:0]} + {17'd0, pseudo_w[31:16]};
     assign ip_fold_w = {1'b0, ip_sum_r[15:0]} + {1'b0, ip_sum_r[31:16]};
-    assign ip_good_w = (ip_fold_w[15:0] + {15'd0, ip_fold_w[16]}) == 16'hffff;
-    assign udp_good_w = udp_check_w == 0 ||
-        ((udp_fold_w[15:0] + udp_fold_w[31:16]) == 16'hffff);
+    // Header-derived arithmetic settles during reception, before the FCS tail.
+    // The final UDP sum has four FCS byte clocks to cross these three stages.
+    always @(posedge clk_i) begin
+        payload_r <= udp_length_w - 16'd16;
+        words_r <= {2'd0, payload_r[10:2]} + {10'd0, |payload_r[1:0]};
+        end_r <= commit_r + words_r;
+        limit_r <= {1'b0, offset_w} + {17'd0, payload_r};
+        ip_end_r <= {1'b0, ip_length_w} + 17'd14;
+        ip_final_r <= {1'b0, ip_length_w} + 17'd13;
+        ip_frame_r <= {1'b0, ip_length_w} + 17'd18;
+        ip_udp_length_r <= ip_length_w - 16'd20;
+        src_sum_r <= {16'd0, src_ip_w[31:16]} + {16'd0, src_ip_w[15:0]};
+        dst_sum_r <= {16'd0, dst_ip_w[31:16]} + {16'd0, dst_ip_w[15:0]};
+        address_sum_r <= src_sum_r + dst_sum_r;
+        udp_length_sum_r <= {16'd0, udp_length_w} + 32'd17;
+        pseudo_header_r <= address_sum_r + udp_length_sum_r;
+        pseudo_r <= pseudo_header_r + udp_sum_r;
+        udp_fold_r <= {1'b0, pseudo_r[15:0]} + {1'b0, pseudo_r[31:16]};
+        udp_good_r <= udp_check_w == 0 ||
+            (udp_fold_r[15:0] + {15'd0, udp_fold_r[16]}) == 16'hffff;
+        ip_good_r <= (ip_fold_w[15:0] + {15'd0, ip_fold_w[16]}) == 16'hffff;
+    end
     assign lane_w = count_r[1:0] - 2'd2;
     assign payload_byte_w = valid_i && !data_i[9] && count_r >= 16'd50 &&
-        {1'b0, count_r} < ({1'b0, ip_length_w} + 17'd14);
-    assign final_byte_w = {1'b0, count_r} == ({1'b0, ip_length_w} + 17'd13);
+        {1'b0, count_r} < ip_end_r;
+    assign final_byte_w = {1'b0, count_r} == ip_final_r;
     assign payload_idx_w = count_r[11:0] - 12'd50;
     assign word_idx_w = {1'b0, payload_idx_w[11:2]};
     assign store_word_w = payload_byte_w && (lane_w == 2'd3 || final_byte_w);
@@ -132,13 +152,13 @@ module edrv32_eth_rx (
     assign wr_addr_o = start_r[9:0] + word_idx_w[9:0];
     assign wr_data_o = word_w;
     assign busy_o = commit_r != release_i;
-    assign metadata_o = {start_r[9:0], payload_w[10:0], offset_w, window_w,
+    assign metadata_o = {start_r[9:0], payload_r[10:0], offset_w, window_w,
         flags_w[0], src_w, src_ip_w, src_port_w};
     assign arp_o = valid_i && data_i[9] && action_w == 4'd2;
     assign arp_mac_o = arp_mac_w;
     assign arp_ip_o = arp_ip_w;
     assign unused_w = &{1'b0, header_r[63:58], header_r[47:32], flags_w[7:1],
-        payload_idx_w[1:0], window_w, udp_fold_w[32]};
+        payload_idx_w[1:0], window_w};
     always @(*) begin
         word_w = word_r;
         word_w[lane_w * 8 +: 8] = data_i[7:0];
@@ -155,16 +175,16 @@ module edrv32_eth_rx (
                 !arp_pending_i ? 4'd2 : 4'd5;
         end else if (type_w != 16'h0800 || version_w != 8'h45 ||
             (fragment_w & 16'h3fff) != 0 || protocol_w != 8'd17 || dst_ip_w != ip_i ||
-            {1'b0, ip_length_w} + 17'd18 > {1'b0, count_r})
+            ip_frame_r > {1'b0, count_r})
             action_w = 4'd5;
-        else if (!ip_good_w || !udp_good_w)
+        else if (!ip_good_r || !udp_good_r)
             action_w = 4'd4;
-        else if (dst_port_w != port_i || udp_length_w != ip_length_w - 16'd20 ||
+        else if (dst_port_w != port_i || udp_length_w != ip_udp_length_r ||
             udp_length_w < 16'd16)
             action_w = 4'd5;
-        else if (size_w == 0 || limit_w > {5'd0, size_w})
+        else if (size_w == 0 || limit_r > {5'd0, size_w})
             action_w = 4'd6;
-        else if (overflow_r || used_w + words_w > 11'd1024 || !metadata_ready_i)
+        else if (overflow_r || (end_r - release_i) > 11'd1024 || !metadata_ready_i)
             action_w = 4'd7;
     end
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -197,8 +217,8 @@ module edrv32_eth_rx (
                     drop_o <= action_w >= 3 ? action_w : 4'd0;
                     count_r <= 16'd0;
                     if (action_w == 4'd1) begin
-                        commit_r <= commit_r + words_w;
-                        start_r <= commit_r + words_w;
+                        commit_r <= end_r;
+                        start_r <= end_r;
                     end
                 end else begin
                     if (count_r != 16'd1519)
@@ -235,7 +255,7 @@ module edrv32_eth_rx (
             if (count_r >= 16'd14 && count_r < 16'd34 && count_r[0])
                 ip_sum_r <= ip_sum_r + {16'd0, high_r, data_i[7:0]};
             if (count_r >= 16'd34 &&
-                {1'b0, count_r} < {1'b0, ip_length_w} + 17'd14) begin
+                {1'b0, count_r} < ip_end_r) begin
                 if (count_r[0])
                     udp_sum_r <= udp_sum_r + {16'd0, high_r, data_i[7:0]};
                 else if (final_byte_w)

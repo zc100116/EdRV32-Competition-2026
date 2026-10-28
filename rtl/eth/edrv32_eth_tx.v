@@ -121,9 +121,14 @@ module edrv32_eth_tx (
     wire [10:0] frame_length_w;
     wire [15:0] ip_length_w;
     wire [15:0] udp_length_w;
-    wire [31:0] sum_w;
-    wire [16:0] fold_w;
-    wire [15:0] checksum_w;
+    reg [31:0] src_sum_r;
+    reg [31:0] dst_sum_r;
+    reg [31:0] address_sum_r;
+    reg [31:0] ip_length_sum_r;
+    reg [31:0] length_sum_r;
+    reg [31:0] sum_r;
+    reg [16:0] fold_r;
+    reg [15:0] checksum_r;
     wire frame_complete_w;
     wire packet_drop_w;
     wire reserved_w;
@@ -200,11 +205,17 @@ module edrv32_eth_tx (
     assign frame_length_w = frame_r[10:0];
     assign ip_length_w = {5'd0, frame_length_w} + 16'd36;
     assign udp_length_w = {5'd0, frame_length_w} + 16'd16;
-    assign sum_w = 32'h0000c511 + {16'd0, ip_length_w} + {16'd0, packet_id_r} +
-        {16'd0, ip_i[31:16]} + {16'd0, ip_i[15:0]} +
-        {16'd0, dst_ip_i[31:16]} + {16'd0, dst_ip_i[15:0]};
-    assign fold_w = {1'b0, sum_w[15:0]} + {1'b0, sum_w[31:16]};
-    assign checksum_w = ~(fold_w[15:0] + {15'd0, fold_w[16]});
+    // The checksum is transmitted at byte 24; derive it while earlier header bytes leave.
+    always @(posedge clk_i) begin
+        src_sum_r <= {16'd0, ip_i[31:16]} + {16'd0, ip_i[15:0]};
+        dst_sum_r <= {16'd0, dst_ip_i[31:16]} + {16'd0, dst_ip_i[15:0]};
+        address_sum_r <= src_sum_r + dst_sum_r;
+        ip_length_sum_r <= 32'h0000c511 + {16'd0, ip_length_w};
+        length_sum_r <= ip_length_sum_r + {16'd0, packet_id_r};
+        sum_r <= address_sum_r + length_sum_r;
+        fold_r <= {1'b0, sum_r[15:0]} + {1'b0, sum_r[31:16]};
+        checksum_r <= ~(fold_r[15:0] + {15'd0, fold_r[16]});
+    end
     assign arp_ready_o = frame_state_r == S_FRAME_IDLE;
     assign valid_o = (frame_state_r == S_HEADER || frame_state_r == S_PAYLOAD) &&
         !(frame_state_r == S_HEADER && byte_idx_r == 0 && !arp_r && (abort_i || abort_r));
@@ -298,8 +309,8 @@ module edrv32_eth_tx (
                 11'd21: header_w = 8'd0;
                 11'd22: header_w = 8'd64;
                 11'd23: header_w = 8'd17;
-                11'd24: header_w = checksum_w[15:8];
-                11'd25: header_w = checksum_w[7:0];
+                11'd24: header_w = checksum_r[15:8];
+                11'd25: header_w = checksum_r[7:0];
                 11'd26: header_w = ip_i[31:24];
                 11'd27: header_w = ip_i[23:16];
                 11'd28: header_w = ip_i[15:8];

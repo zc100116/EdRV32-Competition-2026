@@ -128,7 +128,7 @@ module tb;
         bytes_q[18]=6; bytes_q[19]=4; put16(20,1);
         put32(28,32'h0a000001); put32(38,32'hc0a80102);
     endtask
-    task automatic send(input integer result, input logic link_bad=0,input integer soft_at=-1,input integer free_at=-1);
+    task automatic send(input integer result, input logic link_bad=0,input integer soft_at=-1,input integer free_at=-1,input bit gaps=0);
         integer before_packets;
         integer before_arp;
         integer before_frames;
@@ -137,8 +137,11 @@ module tb;
         foreach(bytes_q[i]) begin
             @(negedge clk); valid=1; data={2'b00,bytes_q[i]}; clear=(i==soft_at);
             if(i==free_at) released=released+11'd732;
+            if(gaps && i%3==1) begin
+                @(negedge clk); valid=0;
+            end
         end
-        @(negedge clk); data={1'b1,link_bad,8'd0};clear=0;
+        @(negedge clk); valid=1; data={1'b1,link_bad,8'd0};clear=0;
         @(negedge clk); valid=0;
         repeat(3) @(negedge clk);
         if(frame_seen!=before_frames+1 || accepted!=before_packets+((result==1)?1:0) ||
@@ -151,6 +154,11 @@ module tb;
         repeat(3) @(negedge clk); rst=1;
         udp(0); send(1); udp(1); udp_checksum(); send(1); udp(33); udp_checksum(); send(1);
         udp(1464); udp_checksum(); send(1);
+        // Exercise the shortest four-byte FCS tail on either side of the padding boundary.
+        for(integer n=0;n<36;n++) begin
+            udp(n); udp_checksum(); send(1);
+        end
+        udp(19); udp_checksum(); send(1,0,-1,-1,1);
         for(integer w=0;w<4;w++) begin udp(9);bytes_q[42]=8'(w);send(1);end
         udp(33);send(0,0,20);
         udp(33);send(1);
