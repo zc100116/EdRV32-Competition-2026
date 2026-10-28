@@ -1040,6 +1040,33 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                             eq("maintenance request ready", 1, 64'(dc_req_ready));
                         end
                     end
+                    // cache-spec 2.3/5.4: a PMA violation returns in M without
+                    // joining the cached request's maintenance wait.
+                    begin : maintenance_pma_error
+                        int before_reads;
+                        before_reads = u_dmem.reads;
+                        @(negedge clk);
+                        dc_req_addr = 32'h50000000;
+                        dc_req_store = 0;
+                        dc_req_size = 2;
+                        dc_req_valid = 1;
+                        #1;
+                        eq("PMA request accepted during maintenance", 1, 64'(dc_req_ready));
+                        @(posedge clk);
+                        @(negedge clk);
+                        dc_req_valid = 0;
+                        eq("PMA response during maintenance", 1, 64'(dc_resp_valid));
+                        eq("PMA error during maintenance", 1, 64'(dc_resp_err));
+                        eq("maintenance continues after PMA", 1, 64'(maint_busy));
+                        eq("PMA has no AXI read", 64'(before_reads), 64'(u_dmem.reads));
+                        if (u_dcache.ram_read_w)
+                            eq("PMA does not take arrays", 1,
+                               64'(u_dcache.state_r == u_dcache.S_MREAD ||
+                                   u_dcache.state_r == u_dcache.S_WB_READ));
+                        @(negedge clk);
+                        eq("PMA response clears", 0, 64'(dc_resp_valid));
+                        eq("PMA error clears", 0, 64'(dc_resp_err));
+                    end
                     data_access(STATUS);
                     eq("STATUS completed during maintenance", 1, 64'(maint_busy));
                     // cache-spec 5.4: accept once, then retain the cached request
