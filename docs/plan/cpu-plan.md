@@ -77,7 +77,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | C-W3 | Windows 第二轮综合与布局布线（SRAM 8192×64、C-R5/C-R6 之后） | 用户 + Windows Codex | C-R6 | 任务卡 `tasks/win/20261027-02-cpu-npu-synth` A 部分结果回传（原 20261027-01 并入） | win/20261027-02-cpu-npu-synth | [x] 94.46 MHz（WNS −3.920 ns），14879 LUT；报告 `reports/2026-10-27-timing-cpu-sys-r2.md` |
 | C-R7 | 第三轮时序优化（依据 C-W3 PDS 路径）：D$ 装载结果 → CSR 写数据 → 64 位计数器、E 级操作数 → 重定向（RAS、F1 PC、I$ 读使能）、F2 PC 扇出；只做周期等价修改，需要改周期行为的方案先 ask | Codex · GPT-6.1 Sol | C-W3 | 定向回归通过，CoreMark 周期不变；Yosys 对比；报告追加到 `docs/reports/2026-10-26-perf-cpu-timing.md` | zc100116/task-cpu-timing-r3 | [x] 2026-10-27 合入协调者分支（974e8ae 等 6 个提交）：CoreMark 四配置周期不变，block/cpu full 747 PASS；Yosys 最深 47→36 级，LUT 29817→29974；实际时序待 C-W4 PDS |
 | C-D1 | unit/cpu_f2_recover U-11 失败（自 e3c67f4 起，main 也失败）：判定测试过时或 RTL 缺陷并修复，调试记录 | Codex · GPT-6.1 Sol | — | cpu_f2_recover smoke/full 通过，调试记录 | task-cpu-f2-recover | [~] 2026-10-28 派发 |
-| C-W4 | Windows：C-R7 后的 CPU 子系统 PDS 综合 + 布局布线，导出每个路径组的明细（第三轮复测） | 用户 + Windows Codex | C-R7、合入 main | 时序报告 | win/<任务号> | [~] 任务卡 `tasks/win/20261028-01-cpu-sys-synth-r3/`，2026-10-28 下发 |
+| C-W4 | Windows：C-R7 后的 CPU 子系统 PDS 综合 + 布局布线，导出每个路径组的明细（第三轮复测） | 用户 + Windows Codex | C-R7、合入 main | 时序报告 | win/<任务号> | [ ] 任务卡 `tasks/win/20261028-01-cpu-sys-synth-r3/` 已写好；按用户决定（2026-10-28），C-D1、V-I1（VIN）通过、smoke 全绿后合入 main 再下发 |
 | C-S1 | 规格定稿：依据 C-E1/E2/E3、C-W2、C-I3 的数据，确定第 4 节中的各项；删除 `RVC_EN` 等评估参数；cpu-spec 升级 v1.0，cpu-testplan 同步修订 | 协调者 + 用户确认 | 上述数据齐全 | 用户确认 v1.0 | — | [ ] |
 | C-M1 | 合入 main，打里程碑 tag `m1-cpu-isa-pass` | 协调者 | C-I2，用户批准 | — | main | [ ] |
 
