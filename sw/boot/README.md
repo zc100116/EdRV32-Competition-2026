@@ -1,59 +1,66 @@
-# Boot ROM
+# Boot ROM BIOS
 
 Source `. ~/.local/opt/edrv32/env.sh`, then run `make -C sw PROGRAM=bootloader`
-(or `make -C sw sys` for the bootloader and all SC programs). Outputs are in
-`build/sw/bootloader/`: `bootloader.elf`, `.dis`, `.map`, `.bin`, `rom.hex`,
-`sram.hex`, `ddr.hex`. The existing ROM linker places code and constant data in
-16 KiB ROM and sets the stack at the end of SRAM; the linker reports ROM overflow.
-The bootloader has no mutable static data and its private startup does not copy
-or clear SRAM, preserving an application preloaded at SRAM base. Its temporary
-stack uses the final 4 KiB of SRAM; download payloads must leave that area free.
-The application starts at SRAM base and initializes its own stack/data/BSS.
+(or `make -C sw sys` for the bootloader and SC programs). Outputs are under
+`build/sw/bootloader/`: ELF, disassembly, map, raw `.bin`, and byte-oriented
+`rom.hex`/`sram.hex`/`ddr.hex`. Code and constants occupy the 16 KiB ROM.
+The bootloader has no mutable static data; its private startup only sets GP/SP,
+leaving the SRAM application intact. Its stack uses the final 4 KiB of SRAM.
 
-On reset the bootloader enables UART TX/RX, programs the 115200 baud divisor
-from SYSCTRL `CLK_SYS_HZ` (`round(clock_hz * 16 / 115200)`, fixed 8N1),
-initializes GPIO as inputs, prints the ASCII logo, and waits for SYSCTRL
-`STATUS.MEM_READY`. It then prints the selected boot mode and system fields.
-`boot.h` defines the board convention: `BOOT_BUTTON_BIT=0`,
-`BOOT_BUTTON_ACTIVE=0` (pressed is low). SC normally drives GPIO bit0 high;
-a low value requests download. Board wiring changes belong in these constants.
-A `SCRATCH0` value of `BOOT_DOWNLOAD_MAGIC=0x55415254` also requests download.
-An application can set that magic and request `SYSCTRL_RESET_SOC`; the scratch
-register survives the soft reset. The bootloader clears SCRATCH0 when consuming
-a download request, so the request is used once.
-
-Before the SRAM jump it writes `SCRATCH1=0` for a preloaded SRAM application or
-`SCRATCH1=1` for a UART-downloaded application. This coordinator-confirmed
-convention uses sys-subsys-spec 2.9's scratch handoff mechanism; monitor reads it
-to preserve the actual boot mode after SCRATCH0 has been consumed.
-
-Startup fields use the same fixed `Key: Value` format as monitor:
+On reset, bootloader enables UART TX/RX, sets 115200 8N1 from SYSCTRL
+`CLK_SYS_HZ`, configures GPIO as inputs, prints the ASCII logo, waits for
+`STATUS.MEM_READY` and prints system information. Fixed `Key: Value` fields are
 `CHIP_ID`, `CLK_SYS_HZ`, `ROM bytes`, `SRAM bytes`, `I-cache bytes`,
-`D-cache bytes`, `MEM_READY`, `Boot mode`, `Build commit`, `Compiler version`.
-Memory sizes come from generated `soc_map.h`; the 8 KiB I/D cache capacities
-come from cache-spec 2.1 constants in `info.h`, not fictitious registers.
-Makefile passes the short git commit and GCC version through build macros.
-The measured image has text/data/bss = **4584/0/0 bytes** (B1, `9a4c485`, RV32IM, GCC 15.2.0, `-O2`), including the logo,
-and fits in the 16384-byte Boot ROM; monitor README records verification commands.
+`D-cache bytes`, `MEM_READY`, `Build commit`, `Compiler version`.
+Memory sizes come from generated `soc_map.h`; cache sizes are cache-spec 2.1
+constants. Build information comes from Makefile macros.
 
-## UART download protocol
+After this information, bootloader repeatedly samples KEY1 (GPIO bit0, active
+low) for `BOOT_BUTTON_WINDOW_MS=100` ms, measured by CLINT `mtime` using
+SYSCTRL `CLK_SYS_HZ`. KEY1 must stay pressed throughout this window to enter
+BIOS. Alternatively, `SCRATCH0=BOOT_DOWNLOAD_MAGIC=0x55415254` requests BIOS;
+SCRATCH0 is cleared after reading. Applications can set this request then write
+`SYSCTRL_RESET_SOC`; scratch survives soft reset. Otherwise bootloader prints
+`Boot SRAM`, drains UART, executes FENCE/FENCE.I and enters SRAM base.
+There is no SCRATCH1 boot-mode handoff.
 
-1. Host requests download through the button or scratch magic and resets the SoC.
-2. Host waits for ASCII `UART download ready\r\n` following the logo.
-3. Host sends a **four-byte unsigned little-endian byte length**, followed by
-   exactly that many bytes of a raw SRAM application image. Valid payloads have
-   length 1 through `EDRV32_SRAM_SIZE - 4096` and entry at `EDRV32_SRAM_BASE`.
-   Use `build/sw/sc04/sc04.bin`, not the ELF or the textual SRAM hex file.
-4. There is no echo, checksum, padding, or per-byte acknowledgement. The host
-   sends at 115200 8N1 and the bootloader consumes bytes as they arrive.
-5. After storing the last byte the bootloader prints
-   `UART download complete\r\n`, then `Boot SRAM\r\n`, drains UART TX,
-   executes FENCE and FENCE.I, and jumps to SRAM base.
+## BIOS and UART protocol
 
-For the normal preload path it prints `Boot SRAM\r\n`, drains UART TX and uses
-the same handoff. The sender owns the length/image contract; no extra validation
-or timeout is introduced. `rom.hex` is the byte-oriented image produced by the
-existing `tools/elf2mem.py`; SC/ROM storage models must use its documented format.
-Running this MMIO bootloader directly requires the SC environment (需 SC 环境).
-The shared request decision and actual FENCE.I/jump implementation run in the
-software-only Spike check described in `../tests/sys/README.md`.
+Hold KEY1, press and release reset, then wait for these exact lines:
+
+```text
+BIOS: EdRV32
+BIOS menu: 1=Program SRAM
+```
+
+Each line from BIOS ends with CR LF. Every menu selection is one line ending
+with CR, LF or CR LF; only the single character `1` selects Program SRAM.
+Other selections print `Input error: type 1 then Enter` and return to the menu.
+
+1. Send `1` followed by Enter. BIOS prints `UART download ready`.
+2. **The length must be sent only after receiving the complete ready line.**
+   Send four bytes of unsigned little-endian length, then exactly that many
+   bytes of the raw SRAM image produced by objcopy (`.bin`, not ELF or hex).
+   Entry is at `EDRV32_SRAM_BASE`. Length must be 1 through
+   `EDRV32_SRAM_SIZE - BOOT_STACK_BYTES` (61440 bytes on B1).
+3. An invalid length prints `Program SRAM result: FAIL length` without
+   receiving an image, then returns to the menu.
+4. After receiving a valid image, BIOS calls BSP `cache_clean_all()` and waits
+   for all dirty D$ lines to be written back. It prints
+   `Program SRAM bytes: <decimal length>` and
+   `Program SRAM result: PASS, press reset to run`, then the menu again.
+5. Release KEY1 and press reset to run the installed SRAM program. BIOS never
+   jumps directly to a newly programmed image. Reset retains SRAM; power loss
+   or bitstream reconfiguration restores the bitstream's SRAM initialization.
+
+There is no checksum, echo, retry or per-byte acknowledgement. The shared
+`sw/drivers/uart_input.c` parser keeps its CR LF state on the caller's stack.
+At the text/binary boundary, BIOS drains the ready line and consumes an already
+queued optional LF from the menu's CR LF before reading the raw binary length;
+this also preserves a length whose first byte is `0x0a` after a CR-only command.
+
+The SRAM application's BSP startup restores `.data` from an immutable initial
+copy inside the image and clears `.bss` on every entry, including repeated reset.
+See `../bsp/README.md` for the LMA/VMA layout. UART host instructions are in
+`../../tools/board/README.md`. Simulation and measured sizes for this change
+are recorded in `../../docs/debug/2026-10-28-boot-bios.md`.

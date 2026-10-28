@@ -1,6 +1,6 @@
 /* File: boot.h
  * Spec: edrv32-soc-spec 7.5
- * Description: UART download request convention and application handoff.
+ * Description: BIOS request convention, KEY1 sample window and application handoff.
  * Clock domain: clk_sys.
  */
 #ifndef EDRV32_BOOT_H
@@ -11,6 +11,8 @@
 #define BOOT_BUTTON_BIT 0u
 #define BOOT_BUTTON_ACTIVE 0u
 #define BOOT_DOWNLOAD_MAGIC 0x55415254u
+#define BOOT_BUTTON_WINDOW_MS 100u
+#define BOOT_STACK_BYTES 4096u
 
 static inline int boot_download_requested(uint32_t gpio, uint32_t scratch)
 {

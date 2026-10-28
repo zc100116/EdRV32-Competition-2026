@@ -36,3 +36,10 @@ clear. This is the BSP interface required by SoC 7.4; SC-06 uses it for DDR alia
 Driver operations require the specified hardware state and valid API arguments;
 there are no added timeouts, recovery paths or input gates. See
 `sw/tests/sys/README.md` for SC tests and the software-only Spike checks.
+
+`uart_input.h` / `uart_input.c` share Enter-terminated input between the ROM BIOS
+and SRAM monitor. The caller owns `struct uart_input` (initialized to zero), so
+BIOS has no mutable static SRAM state. `uart_read_selection()` consumes a whole
+line, accepts a single character, and treats CR LF as one Enter.
+`uart_input_binary_begin()` is called after draining the BIOS ready line; the
+host must wait for that line before sending binary bytes.

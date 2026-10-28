@@ -9,43 +9,9 @@
 #include "gpio.h"
 #include "sysctrl.h"
 #include "uart.h"
+#include "uart_input.h"
 
-/* Terminals send CR, LF or CR LF after a line; an LF right after a CR is the same Enter. */
-static uint8_t previous_cr;
-
-static uint8_t input_getc(void)
-{
-    for (;;) {
-        uint8_t character = uart_getc();
-        if (character == '\n' && previous_cr) {
-            previous_cr = 0u;
-            continue;
-        }
-        previous_cr = character == '\r';
-        return character;
-    }
-}
-
-static int is_enter(uint8_t character)
-{
-    return character == '\r' || character == '\n';
-}
-
-/* A menu selection is one line: the first character selects, Enter confirms. */
-static uint8_t read_selection(void)
-{
-    uint8_t selection;
-    do {
-        selection = input_getc();
-    } while (is_enter(selection));
-    int extra = 0;
-    while (!is_enter(input_getc())) {
-        extra = 1;
-    }
-    return extra ? 0u : selection;
-}
-
-static uint32_t read_iterations(void)
+static uint32_t read_iterations(struct uart_input *input)
 {
     info_number("Iterations default", MONITOR_DEFAULT_ITERATIONS);
     info_text("Iterations input", "decimal 1..4294967295 then Enter; Enter selects default");
@@ -53,8 +19,8 @@ static uint32_t read_iterations(void)
     int digits = 0;
     int invalid = 0;
     for (;;) {
-        uint8_t character = input_getc();
-        if (is_enter(character)) {
+        uint8_t character = uart_input_getc(input);
+        if (uart_input_is_enter(character)) {
             break;
         }
         if (character < '0' || character > '9') {
@@ -82,7 +48,7 @@ static uint32_t read_iterations(void)
 
 static void configuration(void)
 {
-    system_info(sysctrl_read(SYSCTRL_SCRATCH1));
+    system_info();
     info_number("Cache ways", SYSTEM_CACHE_WAYS);
     info_number("Cache line bytes", SYSTEM_CACHE_LINE_BYTES);
     info_text("D-cache policy", "write-back, write-allocate");
@@ -100,6 +66,7 @@ static void configuration(void)
 
 int main(void)
 {
+    struct uart_input input = {0u};
     uint32_t clock_hz = sysctrl_read(SYSCTRL_CLK_SYS_HZ);
     uart_init();
     uart_set_baud(clock_hz, 115200u);
@@ -107,9 +74,9 @@ int main(void)
     info_text("Monitor", "EdRV32");
     for (;;) {
         info_text("Menu", "1=CoreMark 2=Peripheral tests 3=System info");
-        switch (read_selection()) {
+        switch (uart_read_selection(&input)) {
         case '1': {
-            uint32_t iterations = read_iterations();
+            uint32_t iterations = read_iterations(&input);
             if (iterations != 0u) {
                 monitor_coremark(iterations, clock_hz);
             }

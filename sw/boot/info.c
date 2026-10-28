@@ -67,7 +67,7 @@ void info_ratio(const char *key, uint64_t numerator, uint64_t denominator)
     uart_puts("\r\n");
 }
 
-void system_info(uint32_t boot_mode)
+void system_info(void)
 {
     info_hex("CHIP_ID", sysctrl_read(SYSCTRL_CHIP_ID));
     info_number("CLK_SYS_HZ", sysctrl_read(SYSCTRL_CLK_SYS_HZ));
@@ -76,7 +76,6 @@ void system_info(uint32_t boot_mode)
     info_number("I-cache bytes", SYSTEM_ICACHE_BYTES);
     info_number("D-cache bytes", SYSTEM_DCACHE_BYTES);
     info_number("MEM_READY", sysctrl_read(SYSCTRL_STATUS) & SYSCTRL_STATUS_MEM_READY);
-    info_text("Boot mode", boot_mode == BOOT_MODE_UART ? "UART download" : "SRAM app");
     info_text("Build commit", BUILD_COMMIT);
     info_text("Compiler version", BUILD_COMPILER);
 }

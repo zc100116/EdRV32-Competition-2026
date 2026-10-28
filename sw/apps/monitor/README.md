@@ -1,6 +1,6 @@
 # SRAM UART monitor
 
-Implements SoC specification v0.5 section 7.5: ROM startup information followed
+Implements SoC specification v0.14 section 7.5: ROM startup information followed
 by a persistent SRAM menu. UART is 115200 8N1, with its fractional divisor
 calculated from SYSCTRL `CLK_SYS_HZ`. The monitor does not write `SIM_EXIT`.
 
@@ -22,7 +22,7 @@ Outputs are `build/sw/{bootloader,monitor}/` ELF, disassembly, map, raw `.bin` a
 Load bootloader ROM and monitor SRAM images together. UART download accepts the
 raw application image described in `../../boot/README.md`.
 
-Measured with xPack GCC 15.2.0, `-O2`, `rv32im_zicsr_zifencei/ilp32`:
+Historical B1 measurement (`9a4c485`), with xPack GCC 15.2.0, `-O2`, `rv32im_zicsr_zifencei/ilp32`:
 
 | Image | text | data | bss | Section total | Capacity |
 |---|---:|---:|---:|---:|---:|
@@ -45,6 +45,9 @@ GCC's upstream `core_list_join.c` maybe-uninitialized warning remains visible.
 Only upstream `core_main.c` gets `-Dmain=coremark_main` so the monitor can reuse
 `iterate()` without retaining the upstream standalone entry point.
 
+Current B1-8 BIOS/shared-parser sizes and regression results are recorded in
+`../../../docs/debug/2026-10-28-boot-bios.md`.
+
 ## Menu and input protocol
 
 Every completed operation returns to this exact line:
@@ -53,7 +56,7 @@ Every completed operation returns to this exact line:
 Menu: 1=CoreMark 2=Peripheral tests 3=System info
 ```
 
-Send one menu character, without an Enter:
+Send one menu character followed by Enter (CR, LF or CR LF):
 
 | Character | Operation |
 |---|---|
@@ -62,16 +65,14 @@ Send one menu character, without an Enter:
 | `3` | System information, cache configuration and HPM event encoding table |
 
 CoreMark accepts decimal 1..4294967295. Malformed, zero or overflowing input
-prints `Input error` and returns to the menu. CR/LF between menu commands is
-ignored. An Enter immediately after menu command `1` chooses the default;
-therefore send the numeric response after receiving `Iterations input`.
-For SC-08: send byte `3`, await the next `Menu`, then send bytes `1`, `1`, `\n`
-(hex `31 31 0a`); await the next `Menu` after `CoreMark result`.
+prints `Input error` and returns to the menu. A blank or multi-character menu
+line is invalid; CR LF counts as one Enter. After confirming menu command `1`,
+send the numeric response (or an empty line for the default) after receiving
+`Iterations input`. SC-08 sends `3` CR, then `1` CR, then `1` LF at the iteration
+prompt and waits for the next menu after `CoreMark result`.
 
-`Boot mode` reads the coordinator-confirmed scratch convention: bootloader sets
-SYSCTRL `SCRATCH1=0` for SRAM preload, `1` for UART download before jumping.
-SCRATCH0 retains its existing request/consume protocol. Direct SRAM execution
-without a bootloader does not establish a new boot-mode handoff.
+System information is shared with the ROM BIOS. SCRATCH0 requests BIOS and is
+cleared when read; there is no boot-mode field or SCRATCH1 handoff.
 ROM/SRAM sizes come from generated `soc_map.h`; cache sizes (8 KiB each),
 2 ways, 32-byte lines and D-cache write-back/write-allocate come from cache-spec
 2.1, explicitly reported as constants rather than register discovery.
@@ -169,7 +170,6 @@ SRAM bytes
 I-cache bytes
 D-cache bytes
 MEM_READY
-Boot mode
 Build commit
 Compiler version
 ```

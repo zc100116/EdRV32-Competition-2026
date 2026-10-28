@@ -21,5 +21,6 @@ ifeq ($(MONITOR_SPIKE),1)
 PROGRAM_SOURCES += sw/apps/monitor/spike.c
 else
 PROGRAM_SOURCES += sw/apps/monitor/main.c sw/apps/monitor/peripherals.c \
-                   sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c sw/drivers/i2c.c
+                   sw/drivers/uart.c sw/drivers/uart_input.c sw/drivers/gpio.c \
+                   sw/drivers/clint.c sw/drivers/i2c.c
 endif
