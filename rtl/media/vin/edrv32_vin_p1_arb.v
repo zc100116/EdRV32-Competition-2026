@@ -1,7 +1,7 @@
 // File: edrv32_vin_p1_arb.v
 // Spec: vin 2.9; SoC 4.2.
 // Description: Two-channel round robin with whole-burst admission and ordered B routing.
-//              Hold a grant from exposed AW through the final W handshake.
+//              Register whole-burst admission before exposing AW; retain ownership through W.
 // Clock domain: clk_mem.
 module edrv32_vin_p1_arb (
     // Clock and reset.
@@ -46,6 +46,8 @@ module edrv32_vin_p1_arb (
     reg writing_r;
     wire [1:0] eligible_w;
     wire selected_w;
+    wire candidate_w;
+    wire acquire_w;
     wire address_w;
     wire finish_w;
     wire owners_ready_w;
@@ -58,13 +60,13 @@ module edrv32_vin_p1_arb (
         (ch_abort_i[0] || ch_count_i[9:0] >= {6'd0, ch_awlen_i[3:0]} + 10'd1);
     assign eligible_w[1] = ch_awvalid_i[1] &&
         (ch_abort_i[1] || ch_count_i[19:10] >= {6'd0, ch_awlen_i[7:4]} + 10'd1);
-    assign selected_w = hold_r || writing_r ? grant_r :
-        (eligible_w[turn_r] ? turn_r : !turn_r);
+    assign candidate_w = eligible_w[turn_r] ? turn_r : !turn_r;
+    assign acquire_w = !hold_r && !writing_r && owners_ready_w && |eligible_w;
+    assign selected_w = grant_r;
     assign p1_awid_o = 1'b0;
     assign p1_awaddr_o = selected_w ? ch_awaddr_i[63:32] : ch_awaddr_i[31:0];
     assign p1_awlen_o = selected_w ? ch_awlen_i[7:4] : ch_awlen_i[3:0];
-    assign p1_awvalid_o = !writing_r && owners_ready_w &&
-        (hold_r || eligible_w[selected_w]);
+    assign p1_awvalid_o = hold_r;
     assign ch_awready_o = {2{p1_awvalid_o && p1_awready_i}} &
         (selected_w ? 2'b10 : 2'b01);
     assign address_w = p1_awvalid_o && p1_awready_i;
@@ -102,9 +104,12 @@ module edrv32_vin_p1_arb (
             hold_r <= 1'b0;
             writing_r <= 1'b0;
         end else begin
-            if (p1_awvalid_o) begin
-                grant_r <= selected_w;
-                hold_r <= !p1_awready_i;
+            // No client can consume FIFO beats before its registered grant is exposed.
+            if (acquire_w) begin
+                grant_r <= candidate_w;
+                hold_r <= 1'b1;
+            end else if (address_w) begin
+                hold_r <= 1'b0;
             end
             if (address_w)
                 writing_r <= !finish_w;

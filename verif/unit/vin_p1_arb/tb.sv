@@ -85,12 +85,12 @@ module tb;
         wready = cycle % 7 != 0 && cycle % 7 != 1;
         bvalid = response_owners.size() != 0 && cycle % 4 != 0;
         for (int c = 0; c < 2; c++) begin
-            ch_valid[c] = !active[c] && issued[c] < 8;
-            ch_len[c*4 +: 4] = 4'(issued[c] % 4);
+            ch_valid[c] = !active[c] && issued[c] < 16;
+            ch_len[c*4 +: 4] = 4'(issued[c] % 16);
             ch_addr[c*32 +: 32] = 32'(c*65536 + issued[c]*512);
             count[c*10 +: 10] = c == 0 && cycle < 30 ? 10'd0 : 10'd16;
             ch_data[c*256 +: 256] = {8{pattern(c, issued[c], position[c])}};
-            ch_last[c] = position[c] == issued[c] % 4;
+            ch_last[c] = position[c] == issued[c] % 16;
         end
     end
     // W is permitted in the AW handshake cycle, so use the committed grant combinationally.
@@ -112,7 +112,7 @@ module tb;
                 if (write_owner != -1) $fatal(1, "FAIL AW interleaves unfinished W");
                 if (count[owner*10 +: 10] < {6'd0, len} + 10'd1)
                     $fatal(1, "FAIL AW without complete burst");
-                if (cycle > 30 && issued[0] < 8 && issued[1] < 8 &&
+                if (cycle > 30 && issued[0] < 16 && issued[1] < 16 &&
                     previous_owner == owner)
                     $fatal(1, "FAIL round robin repeated owner %0d", owner);
                 previous_owner = owner;
@@ -154,9 +154,9 @@ module tb;
     initial begin
         repeat (4) @(negedge clk);
         rst_n = 1;
-        wait (completed == 16);
+        wait (completed == 32);
         @(negedge clk);
-        if (received != 16 || write_owner != -1 || response_owners.size() != 0)
+        if (received != 32 || write_owner != -1 || response_owners.size() != 0)
             $fatal(1, "FAIL burst accounting");
         $display("PASS vin_p1_arb");
         $finish;
