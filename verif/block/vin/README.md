@@ -1,5 +1,8 @@
 # VIN independent verification (V-T1)
 
+本文保留 V-T1 的独立验证交付记录。V-I1 的真实 RTL 联调、故障归因及最终回归结果见
+[`2026-10-28-vin-block-integration.md`](../../../docs/debug/2026-10-28-vin-block-integration.md)。
+
 依据 `vin-spec.md` v0.1（含变更记录澄清）、`vin-testplan.md` v0.1、SoC v0.9
 4.2/4.3/4.5/7.1/7.3 编写。没有阅读 `rtl/media/vin/`，没有修改 RTL、docs 或
 `verif/common/`。起始提交 `7a46a7a29c18d1e4fd7964361b204454d4ebe6da`；DVP 模型提交
