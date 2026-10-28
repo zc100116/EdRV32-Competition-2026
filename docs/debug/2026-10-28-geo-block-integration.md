@@ -69,7 +69,7 @@ PERF5/PERF0 分别约 19.96% 和 60.70%；PERF4/PERF0 分别约 0.0006% 和 0.03
 - `lint.vlt`：限定 TB 文件的混合复位诊断豁免。
 - `edrv32_geo_memory.sv`：GE-07 顺序检查移到新描述符开始的位置。
 - `edrv32_geo_tb.sv`：修正错误消息格式，并输出 GE-12 PERF4、PERF5。
-- `test.yaml`：原 smoke 目录迁移 full，超时调整至与 full 子目录相同的 1800 秒。
+- `test.yaml`：原 smoke 目录曾迁移 full；协调者复核后恢复 smoke（见文末）。
 - `check.py`：去掉独立测试开发阶段的临时空端口声明，直接 lint 真实 DUT 与完整 TB。
 - `README.md`：同步真实 RTL 联调状态、最终档位、真实 DUT lint 和记录位置。
 
@@ -134,3 +134,7 @@ done
 错误恢复和 ABORT 继续使用公共检查器及内存队列排空检查。
 所有拼接 `$fatal` 格式使用相同修复；其余非拼接格式不变。
 本次没有单个问题定位超过半小时，故无需额外专题调试记录。
+
+## 协调者复核：smoke 档位（2026-10-28）
+
+验证方案第 6 节规定 smoke 包含 GE-01–09、11，根目录整体移到 full 会使 smoke 只剩参考模型自测。协调者在清空构建目录后实测：`python3 tools/regress.py smoke -j 1 --path verif/block/geo`，根目录 57 秒 PASS（含构建，同时有另一个仿真在运行），满足 CLAUDE.md 9.1 的约 60 秒。根目录恢复为 `tier: smoke`，`timeout` 设为 120 秒（为机器负载留余量）。

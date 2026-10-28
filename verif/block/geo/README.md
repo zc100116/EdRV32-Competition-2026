@@ -9,9 +9,7 @@ V-T4 测试作者没有阅读 `rtl/media/geo/`；V-I3 联调按规格区分 RTL 
 V-I3 已将独立验证环境接入真实 RTL（输入提交 `92b340b`，包含 `7ac1a35`）。
 联调修改、失败定性、最终回归和性能数字见
 [`docs/debug/2026-10-28-geo-block-integration.md`](../../../docs/debug/2026-10-28-geo-block-integration.md)。
-原 smoke 整目录包含构建和 53 个向量，实测触及 60 秒上限，已整体移入 full；
-`selftest/` 仍属于 smoke。向量选择器的 `smoke` 名称保留，用于 root test.yaml 的
-53 向量集合；它的实际回归档位由 test.yaml 定义为 full。
+根目录 test.yaml 为 smoke 档（53 个向量，清空构建后实测 57 秒，含构建），`selftest/` 也属于 smoke。
 
 ## 文件与使用
 
@@ -68,7 +66,7 @@ V-I3 已将独立验证环境接入真实 RTL（输入提交 `92b340b`，包含 
 | GE-12 | `number == 12`、`check_completion()` | 1280×720，45° s=1/2；固定读延迟 40，R/W 合计 1.2 GB/s；全图逐位一致；PERF0×8 ns ≤16.7/33 ms | perf |
 | GE-13 | `number == 13` | 10 种子、每种子 4 描述符；随机尺寸 1–256、矩阵、矩形、BG、存储延迟和握手；全图及协议 | full |
 
-根目录（原 smoke 集合，现属 full）共 53 个 RTL 向量；full 子目录增加另外 20 个 s=2 角度、3 个 ABORT 场景和
+根目录（smoke）共 53 个 RTL 向量；full 子目录增加另外 20 个 s=2 角度、3 个 ABORT 场景和
 10 个随机种子，共 33 个向量。`tools/regress.py full` 选择两个目录及 smoke 自测，因此 full
 合计 86 个 RTL 向量，并含参考自测；perf 为 2 个向量。没有增加或删除 GE 测试项。
 GE-06 的 s=2.5 选 45°，因为规格按覆盖范围公式判定，s=2.5 的 0° 本身可能合法。
