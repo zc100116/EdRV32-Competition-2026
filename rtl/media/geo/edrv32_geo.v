@@ -56,7 +56,9 @@ module edrv32_geo (
     localparam [2:0] S_RUN = 3'd4;
     localparam [2:0] S_NEXT = 3'd5;
     localparam [2:0] S_DRAIN = 3'd6;
+    localparam [2:0] S_PREP = 3'd7;
     reg [2:0] state_r;
+    reg [1:0] prepare_r;
     reg [2:0] fill_state_r;
     reg [1:0] compute_state_r;
     reg fill_group_r;
@@ -240,6 +242,7 @@ module edrv32_geo (
     always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
         if (!rst_mem_n_i) begin
             state_r <= S_IDLE;
+            prepare_r <= 2'd0;
             fill_state_r <= 3'd0;
             compute_state_r <= 2'd0;
             fill_group_r <= 1'b0;
@@ -278,7 +281,15 @@ module edrv32_geo (
                 S_DESC_DATA: begin
                     if (rd_valid_w)
                         desc_half_r <= 1'b1;
-                    if (rd_done_w)
+                    if (rd_done_w) begin
+                        state_r <= S_PREP;
+                        prepare_r <= 2'd0;
+                    end
+                end
+                S_PREP: begin
+                    // Complete the four registered range-check stages before using the result.
+                    prepare_r <= prepare_r + 2'd1;
+                    if (prepare_r == 2'd3)
                         state_r <= S_CHECK;
                 end
                 S_CHECK: begin
@@ -486,6 +497,7 @@ module edrv32_geo (
         .ty_o(ty_w)
     );
     edrv32_geo_range u_range (
+        .clk_i(clk_mem_i),
         .a_i(a_w),
         .b_i(b_w),
         .c_i(c_w),

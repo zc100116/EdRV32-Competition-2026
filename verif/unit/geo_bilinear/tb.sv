@@ -41,9 +41,9 @@ module tb;
     integer sent;
     integer received;
     reg [15:0] expected [0:2047];
-    reg [1:0] valid_model;
-    reg [1:0] eol_model;
-    reg [15:0] pipeline [0:1];
+    reg [2:0] valid_model;
+    reg [2:0] eol_model;
+    reg [15:0] pipeline [0:2];
     function automatic integer expand_channel(input reg [15:0] p, input integer ch);
         integer v;
         begin
@@ -100,14 +100,15 @@ module tb;
             b_fy_i=(trial<256)?8'(255-trial):8'($urandom);
             if(trial<4) begin b_fx_i=trial%2==0?0:255;b_fy_i=trial/2==0?0:255;end
             if(b_advance_i) begin
-                if(valid_model[1]) begin
-                    if(!b_valid_o || b_pixel_o!==pipeline[1] || b_eol_o!==eol_model[1])
+                if(valid_model[2]) begin
+                    if(!b_valid_o || b_pixel_o!==pipeline[2] || b_eol_o!==eol_model[2])
                         $fatal(1,"FAIL interpolation exp=%h got=%h at %t",
-                            pipeline[1],b_pixel_o,$time);
+                            pipeline[2],b_pixel_o,$time);
                     received++;
                 end
-                valid_model={valid_model[0],b_valid_i};
-                eol_model={eol_model[0],b_eol_i};
+                valid_model={valid_model[1:0],b_valid_i};
+                eol_model={eol_model[1:0],b_eol_i};
+                pipeline[2]=pipeline[1];
                 pipeline[1]=pipeline[0];
                 pipeline[0]=reference_pixel(b_p00_i,b_p01_i,b_p10_i,b_p11_i,
                     int'(b_fx_i),int'(b_fy_i));

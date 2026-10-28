@@ -49,6 +49,7 @@ module tb;
     reg [31:0] range_d_i;
     wire range_error_o;
     edrv32_geo_range u_range_ (
+        .clk_i(clk),
         .a_i(range_a_i),
         .b_i(range_b_i),
         .c_i(range_c_i),
@@ -133,6 +134,7 @@ module tb;
             cc = c < 0 ? -64'(c) : 64'(c);
             dd = d < 0 ? -64'(d) : 64'(d);
             expected_range = int'(aa*31+bb*15 > 78*65536 || cc*31+dd*15 > 78*65536);
+            repeat (4) @(posedge clk);
             #1;
             if (range_error_o !== 1'(expected_range))
                 $fatal(1, "FAIL range a=%d b=%d c=%d d=%d exp=%d got=%d",

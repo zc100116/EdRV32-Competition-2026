@@ -1,6 +1,6 @@
 // File: edrv32_geo_bilinear.v
 // Spec: geo-spec 2.2, 5.2.
-// Description: Two-stage exact separable interpolation; rounding occurs only after both axes.
+// Description: Three-stage exact separable interpolation; rounding occurs only after both axes.
 // Clock domain: clk_mem.
 module edrv32_geo_bilinear (
     // Clock and reset.
@@ -22,14 +22,20 @@ module edrv32_geo_bilinear (
     output wire eol_o,
     output wire [15:0] pixel_o
 );
-    reg [1:0] valid_r;
-    reg [1:0] eol_r;
+    reg [2:0] valid_r;
+    reg [2:0] eol_r;
+    reg [15:0] p00_r;
+    reg [15:0] p01_r;
+    reg [15:0] p10_r;
+    reg [15:0] p11_r;
+    reg [7:0] fx_r;
+    reg [7:0] input_fy_r;
     reg [7:0] fy_r;
     wire [23:0] rgb_w;
     wire unused_rgb_w;
     assign unused_rgb_w = &{rgb_w[18:16], rgb_w[9:8], rgb_w[2:0]};
-    assign valid_o = valid_r[1];
-    assign eol_o = eol_r[1];
+    assign valid_o = valid_r[2];
+    assign eol_o = eol_r[2];
     assign pixel_o = {rgb_w[23:19], rgb_w[15:10], rgb_w[7:3]};
     function [23:0] expand;
         input [15:0] pixel_i;
@@ -42,22 +48,29 @@ module edrv32_geo_bilinear (
     wire [23:0] p01_w;
     wire [23:0] p10_w;
     wire [23:0] p11_w;
-    assign p00_w = expand(p00_i);
-    assign p01_w = expand(p01_i);
-    assign p10_w = expand(p10_i);
-    assign p11_w = expand(p11_i);
+    assign p00_w = expand(p00_r);
+    assign p01_w = expand(p01_r);
+    assign p10_w = expand(p10_r);
+    assign p11_w = expand(p11_r);
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i)
-            valid_r <= 2'd0;
+            valid_r <= 3'd0;
         else if (clear_i)
-            valid_r <= 2'd0;
+            valid_r <= 3'd0;
         else if (advance_i)
-            valid_r <= {valid_r[0], valid_i};
+            valid_r <= {valid_r[1:0], valid_i};
     end
     always @(posedge clk_i) begin
         if (advance_i) begin
-            eol_r <= {eol_r[0], eol_i};
-            fy_r <= fy_i;
+            eol_r <= {eol_r[1:0], eol_i};
+            // Isolate the source DRM/mux delay from the subtract/multiplier input.
+            p00_r <= p00_i;
+            p01_r <= p01_i;
+            p10_r <= p10_i;
+            p11_r <= p11_i;
+            fx_r <= fx_i;
+            input_fy_r <= fy_i;
+            fy_r <= input_fy_r;
         end
     end
     genvar channel;
@@ -77,9 +90,9 @@ module edrv32_geo_bilinear (
             assign bottom_delta_w = $signed({1'b0, p11_w[channel*8 +: 8]}) -
                 $signed({1'b0, p10_w[channel*8 +: 8]});
             assign horizontal_top_w = $signed({2'b0, p00_w[channel*8 +: 8], 8'd0}) +
-                top_delta_w * $signed({1'b0, fx_i});
+                top_delta_w * $signed({1'b0, fx_r});
             assign horizontal_bottom_w = $signed({2'b0, p10_w[channel*8 +: 8], 8'd0}) +
-                bottom_delta_w * $signed({1'b0, fx_i});
+                bottom_delta_w * $signed({1'b0, fx_r});
             assign vertical_delta_w = $signed({1'b0, bottom_r}) - $signed({1'b0, top_r});
             assign vertical_w = $signed({2'b0, top_r, 8'd0}) +
                 vertical_delta_w * $signed({1'b0, fy_r}) + 26'sd32768;
