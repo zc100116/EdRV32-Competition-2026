@@ -1,6 +1,7 @@
 /* File: main.c
  * Spec: edrv32-soc-spec 7.5.
  * Description: UART command menu for CoreMark, peripherals and system information.
+ *              Menu selections and the iteration count are each one Enter-terminated line.
  *              Every completed operation returns to the menu without SIM_EXIT.
  * Clock domain: clk_sys.
  */
@@ -8,6 +9,41 @@
 #include "gpio.h"
 #include "sysctrl.h"
 #include "uart.h"
+
+/* Terminals send CR, LF or CR LF after a line; an LF right after a CR is the same Enter. */
+static uint8_t previous_cr;
+
+static uint8_t input_getc(void)
+{
+    for (;;) {
+        uint8_t character = uart_getc();
+        if (character == '\n' && previous_cr) {
+            previous_cr = 0u;
+            continue;
+        }
+        previous_cr = character == '\r';
+        return character;
+    }
+}
+
+static int is_enter(uint8_t character)
+{
+    return character == '\r' || character == '\n';
+}
+
+/* A menu selection is one line: the first character selects, Enter confirms. */
+static uint8_t read_selection(void)
+{
+    uint8_t selection;
+    do {
+        selection = input_getc();
+    } while (is_enter(selection));
+    int extra = 0;
+    while (!is_enter(input_getc())) {
+        extra = 1;
+    }
+    return extra ? 0u : selection;
+}
 
 static uint32_t read_iterations(void)
 {
@@ -17,8 +53,8 @@ static uint32_t read_iterations(void)
     int digits = 0;
     int invalid = 0;
     for (;;) {
-        uint8_t character = uart_getc();
-        if (character == '\r' || character == '\n') {
+        uint8_t character = input_getc();
+        if (is_enter(character)) {
             break;
         }
         if (character < '0' || character > '9') {
@@ -71,11 +107,7 @@ int main(void)
     info_text("Monitor", "EdRV32");
     for (;;) {
         info_text("Menu", "1=CoreMark 2=Peripheral tests 3=System info");
-        uint8_t selection;
-        do {
-            selection = uart_getc();
-        } while (selection == '\r' || selection == '\n');
-        switch (selection) {
+        switch (read_selection()) {
         case '1': {
             uint32_t iterations = read_iterations();
             if (iterations != 0u) {
@@ -90,7 +122,7 @@ int main(void)
             configuration();
             break;
         default:
-            info_text("Input error", "select 1, 2 or 3");
+            info_text("Input error", "type 1, 2 or 3 then Enter");
             break;
         }
     }

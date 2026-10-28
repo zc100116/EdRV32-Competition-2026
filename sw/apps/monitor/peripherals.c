@@ -1,6 +1,6 @@
 /* File: peripherals.c
  * Spec: edrv32-soc-spec 7.5; sys-subsys-spec 2.4, 2.7, 2.8.
- * Description: Initial GPIO walk, CLINT interrupt and two-port I2C address probe.
+ * Description: GPIO LED walk and 10 s button edge test, CLINT interrupt, two-port I2C probe.
  *              Board pin choices are development values pending user confirmation.
  * Clock domain: clk_sys.
  */
@@ -12,6 +12,7 @@
 
 #define LED_MASK 0x001eu
 #define TIMER_DELAY_CYCLES 4096u
+#define BUTTON_WAIT_SECONDS 10u
 
 static volatile uint32_t timer_seen;
 static volatile uint64_t timer_arrival;
@@ -45,12 +46,36 @@ static void gpio_test(uint32_t clock_hz)
         uint64_t start = clint_time();
         while (clint_time() - start < clock_hz / 10u) {
         }
-        info_hex("GPIO input", gpio_read());
-        info_number("GPIO button pressed", (gpio_read() & 1u) == 0u);
+    }
+    /* Button: LEDs follow the active-low key; report each edge until press and release. */
+    info_number("GPIO button wait seconds", BUTTON_WAIT_SECONDS);
+    info_text("GPIO button action", "press and release KEY1 now; LEDs light while pressed");
+    uint32_t ticks_per_ms = clock_hz / 1000u;
+    uint64_t start = clint_time();
+    uint64_t limit = (uint64_t)clock_hz * BUTTON_WAIT_SECONDS;
+    uint32_t pressed = 0u;
+    uint32_t presses = 0u;
+    uint32_t releases = 0u;
+    while (clint_time() - start < limit && releases == 0u) {
+        uint32_t level = (gpio_read() & 1u) == 0u;
+        gpio_write(level ? LED_MASK : 0u);
+        if (level != pressed) {
+            pressed = level;
+            uint32_t elapsed_ms = (uint32_t)((clint_time() - start) / ticks_per_ms);
+            if (level) {
+                ++presses;
+                info_number("GPIO button pressed at ms", elapsed_ms);
+            } else if (presses != 0u) {
+                ++releases;
+                info_number("GPIO button released at ms", elapsed_ms);
+            }
+        }
     }
     gpio_write(0u);
     gpio_set_output_enable(0u);
-    info_text("GPIO result", "OBSERVE: verify LEDs and button against reported levels");
+    info_text("GPIO LED result", "OBSERVE: LEDs 1-4 lit one at a time, then followed KEY1");
+    info_text("GPIO button result", releases != 0u ? "PASS" :
+        (presses != 0u ? "FAIL: still pressed at timeout" : "NOT PRESSED within wait"));
 }
 
 static void timer_test(void)

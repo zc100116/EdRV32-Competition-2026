@@ -24,9 +24,9 @@ def capture(port, image, log, menu, iterations):
     prompt = b'Menu: 1=CoreMark 2=Peripheral tests 3=System info\r\n'
     asked = b'Iterations input'
     pending = wire_bytes(image) if image else b''
-    # Without an iteration count, Enter after '1' selects the monitor default.
-    selection = (menu + ('' if iterations else '\r')).encode('ascii') if menu else b''
-    count = (str(iterations) + '\r').encode('ascii') if iterations else b''
+    # A selection is one line; for CoreMark an empty count line selects the monitor default.
+    selection = (menu + '\r').encode('ascii') if menu else b''
+    count = ((str(iterations) if iterations else '') + '\r').encode('ascii') if menu == '1' else b''
     tail = b''
     log.parent.mkdir(parents=True, exist_ok=True)
     with serial.Serial(port, 115200) as uart, log.open('wb') as output:

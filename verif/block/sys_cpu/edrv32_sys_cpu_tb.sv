@@ -430,8 +430,10 @@ module edrv32_sys_cpu_tb;
         if (case_id == 8) begin
             wait (menu_count == 1);
             u_uart.send(8'h33);
+            u_uart.send(8'h0d);
             wait (menu_count == 2);
             u_uart.send(8'h31);
+            u_uart.send(8'h0d);
             wait (iterations_ready);
             u_uart.send(8'h31);
             u_uart.send(8'h0a);

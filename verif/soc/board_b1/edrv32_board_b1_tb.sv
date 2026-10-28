@@ -96,6 +96,7 @@ module edrv32_board_b1_tb;
         if (case_id == 0) begin
             wait (menus == 1);
             u_uart.send("3");
+            u_uart.send(8'h0d);
             wait (menus == 2);
             if (logo_seen != 5'b11111 || !clock_seen || !isa_seen || !info_pass)
                 $fatal(1, "FAIL board menu logo=%b clock=%b ISA=%b info=%b time=%0t",
