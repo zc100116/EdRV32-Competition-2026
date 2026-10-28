@@ -99,7 +99,7 @@ VIN 中止一帧时（`vin-spec.md` 5.3 ABORT、SOFT_RST），送入 PIX 的帧�
 | `rst_mem_n_i` | in | 1 | clk_mem | 媒体复位（系统子系统规格 2.10） |
 | `pix_in_valid_i`、`pix_in_ready_o`、`pix_in_data_i[31:0]`、`pix_in_sof_i`、`pix_in_eol_i`、`pix_in_eof_i` | — | — | clk_mem | 来自 VIN 的像素流（SoC 4.5） |
 | `pix_out_valid_o`、`pix_out_ready_i`、`pix_out_data_o[31:0]`、`pix_out_sof_o`、`pix_out_eol_o`、`pix_out_eof_o` | — | — | clk_mem | 送回 VIN 的像素流（SoC 4.5） |
-| `apb_*` | — | — | clk_mem | 媒体 APB 槽 2 从口（SoC 4.3） |
+| `apb_paddr_i[11:0]`、`apb_psel_i`、`apb_penable_i`、`apb_pwrite_i`、`apb_pwdata_i[31:0]`、`apb_pstrb_i[3:0]`、`apb_pready_o`、`apb_prdata_o[31:0]`、`apb_pslverr_o` | — | — | clk_mem | 媒体 APB 槽 2 从口（SoC 4.3），与 VIN 相同；`apb_pready_o` 恒为 1，`apb_pslverr_o` 恒为 0 |
 | `irq_o` | out | 1 | clk_mem | PLIC 源 9，`|(IRQ_STAT & IRQ_EN)` |
 
 ## 4. 寄存器
@@ -191,3 +191,4 @@ VIN 中止一帧时（`vin-spec.md` 5.3 ABORT、SOFT_RST），送入 PIX 的帧�
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-28 | v0.1 | 初稿。用户确认：内部 RGB888、腐蚀/膨胀为灰度 min/max、Gamma 三通道共用一张表且两组切换、PIX 没有错误条件（中断只报帧完成，SoC 8.6 同步修改） |
+| 2026-10-28 | v0.1 | 澄清（V-T3 问答，不改变已确认的行为）：第 3 节写出 APB 端口名，与 VIN 相同 |
