@@ -77,6 +77,8 @@ def make_handler(engine):
                     return self._json(200, {"params": engine.get_params()})
                 if path == "/api/file/status":
                     return self._json(200, engine.file_status())
+                if path == "/api/program/status":
+                    return self._json(200, engine.program.status())
                 return self._error(404, "unknown endpoint")
             except ValueError as exc:
                 return self._error(400, str(exc))
@@ -112,6 +114,8 @@ def make_handler(engine):
                         echo=bool(body.get("echo", False))))
                 if path == "/api/file/cancel":
                     return self._json(200, engine.cancel_file())
+                if path == "/api/program":
+                    return self._json(200, engine.start_program(body["path"]))
                 if path == "/api/clear":
                     return self._json(200, {"lastSeq": engine.clear()})
                 if path == "/api/save":
@@ -141,6 +145,8 @@ def make_handler(engine):
             except RuntimeError as exc:
                 return self._error(409, str(exc))
             except serial.SerialException as exc:
+                return self._error(500, str(exc))
+            except OSError as exc:
                 return self._error(500, str(exc))
 
         def do_PUT(self):

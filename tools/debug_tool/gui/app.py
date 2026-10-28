@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from core.engine import ENCODINGS, fmt_ts
+from gui.program import ProgramPanel
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1189,7 +1190,8 @@ class MainWindow(QMainWindow):
         for i, (label, tip, paths) in enumerate((
                 ("连接", "串口连接与参数", ICON_PLUG),
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
-                ("规则", "数据匹配规则", ICON_FILTER))):
+                ("规则", "数据匹配规则", ICON_FILTER),
+                ("烧录", "BIOS SRAM 烧录", ICON_TERMINAL))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1211,6 +1213,8 @@ class MainWindow(QMainWindow):
         self.left_stack.addWidget(self.conn)
         self.left_stack.addWidget(self.cmds)
         self.left_stack.addWidget(self.rules)
+        self.program = ProgramPanel(engine, self.toast)
+        self.left_stack.addWidget(self.program)
         left_layout.addWidget(self.left_stack, 1)
 
         # center: console
@@ -1449,6 +1453,7 @@ class MainWindow(QMainWindow):
         self.tx_input.setEnabled(connected)
         self.file_btn.setEnabled(connected)
         self._update_file_row()
+        self.program.refresh()
         self.counters.setText(
             f"RX {fmt_bytes(st['rxBytes'])} / TX {fmt_bytes(st['txBytes'])}")
 

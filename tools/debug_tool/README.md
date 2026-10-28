@@ -153,3 +153,22 @@ pyinstaller --noconfirm --windowed --name EdRV32DebugTool \
 2.0 的规则引擎是通用的，不内置任何厂商协议；针对 HPM 遥测，用
 `rules add` 配置相应正则即可（例如 `^HPM\s+cpi_x1000\s*=\s*(\d+)` +
 scale 0.001 得到 CPI）。
+
+## BIOS 烧录 SRAM
+
+在“连接”页打开串口（115200、8N1），切到“烧录”页，选择
+`build/sw/<程序>/<程序>.bin` 并点击“烧录 SRAM”。按住 KEY1 按复位，
+工具收到 `BIOS menu: 1=Program SRAM` 后发送 `1` + CR，收到
+`UART download ready` 后用 `tools/board/uart_tool.py:wire_bytes()` 发送
+4 字节小端长度和镜像。进度包含 4 字节长度头，结果显示 BIOS 原始
+`Program SRAM result` 与 `Program SRAM bytes`；串口输出仍显示在中栏。
+出现 PASS 后松开 KEY1，按复位运行；BIOS 不自动执行程序。
+
+```bash
+python tools/debug_tool/cli.py program build/sw/monitor/monitor.bin
+```
+
+CLI 启动传输后等待结果，失败退出码为 1；文件路径由运行工具的主机读取。
+REST：`POST /api/program {"path":"绝对路径.bin"}` 启动，
+`GET /api/program/status` 观察 `active/phase/sent/total/programmedBytes/result/error`。
+先启动烧录再按住 KEY1 按复位；等待提示或结果时不会自动超时、重试。

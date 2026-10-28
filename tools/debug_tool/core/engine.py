@@ -15,6 +15,8 @@ import re
 import threading
 import time
 
+from .program import BiosProgrammer
+
 try:
     import serial
     from serial.tools import list_ports
@@ -92,6 +94,8 @@ class SerialEngine:
         self._params = {}          # key -> param dict
         self._file_tx = None       # file transfer state dict
         self._listeners = []
+        self.program = BiosProgrammer(self._program_write,
+                                      lambda text: self.add_entry("sys", text))
 
     # ---------------------------------------------------------- observer --
     def add_listener(self, callback):
@@ -225,6 +229,8 @@ class SerialEngine:
         return self.status()
 
     def disconnect(self, silent=False):
+        if self.program.status()["active"]:
+            self.program.fail("serial port disconnected during BIOS programming")
         self._reader_running = False
         reader = self._reader
         if reader and reader.is_alive() and reader is not threading.current_thread():
@@ -312,6 +318,20 @@ class SerialEngine:
                 time.sleep(0.02)
 
     # -------------------------------------------------------------- save --
+    def start_program(self, path):
+        if not self.status()["connected"]:
+            raise RuntimeError("serial port is not connected")
+        return self.program.start(path)
+
+    def _program_write(self, data):
+        with self._lock:
+            ser = self._serial
+        if ser is None or not ser.is_open:
+            raise OSError("serial port disconnected during BIOS programming")
+        ser.write(data)
+        with self._lock:
+            self._tx_bytes += len(data)
+
     def save_log(self, path=None):
         entries, _ = self.get_entries(since=0, limit=BUFFER_MAX)
         if not path:
@@ -601,6 +621,7 @@ class SerialEngine:
 
     # ------------------------------------------------------------ params --
     def _match_line(self, text):
+        self.program.feed_line(text)
         with self._lock:
             compiled = list(self._compiled_rules)
         for rule, regex in compiled:
