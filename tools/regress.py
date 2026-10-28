@@ -6,11 +6,13 @@
 # Clock domain: none (host tool).
 """Run the smoke, full or perf tier described by verif/**/test.yaml."""
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import re
 import shlex
 import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -56,6 +58,7 @@ def command(args, log, timeout):
 
 
 def run_test(path, fields, simulator, tier, jobs=None, builds=None):
+    start = time.monotonic()
     name = path.parent.relative_to(ROOT / 'verif')
     out = ROOT / 'build/regress' / tier / name / simulator
     out.mkdir(parents=True, exist_ok=True)
@@ -66,7 +69,7 @@ def run_test(path, fields, simulator, tier, jobs=None, builds=None):
         passed = (result == 0 and re.search(r'\b' + re.escape(fields['pass']) + r'\b', output)
                   and not re.search(r'\bFAIL\b', output))
         print(f'{"PASS" if passed else "FAIL"} {name} [{simulator}] '
-              f'({out.relative_to(ROOT)})')
+              f'({out.relative_to(ROOT)}) {time.monotonic() - start:.0f}s', flush=True)
         return bool(passed)
     top = fields['top']
     sources = expand_files(path.parent / fields['files'])
@@ -119,7 +122,8 @@ def run_test(path, fields, simulator, tier, jobs=None, builds=None):
                   and not re.search(r'\bFAIL\b', output))
     else:
         passed = False
-    print(f'{"PASS" if passed else "FAIL"} {name} [{simulator}] ({out.relative_to(ROOT)})')
+    print(f'{"PASS" if passed else "FAIL"} {name} [{simulator}] ({out.relative_to(ROOT)}) '
+          f'{time.monotonic() - start:.0f}s', flush=True)
     return bool(passed)
 
 
@@ -130,15 +134,28 @@ def main():
                         help='Only discover tests below this directory')
     parser.add_argument('-j', '--jobs', type=int,
                         help='Verilator build jobs (default: Verilator default)')
+    parser.add_argument('--parallel', type=int, default=1,
+                        help='Test groups run at once (default: 1)')
     args = parser.parse_args()
-    results = []
-    builds = {}
+    # Tests in one group share build directories and run serially; the group is
+    # verif/<level>/<module> unless test.yaml names another one in "group".
+    groups = {}
     for path in sorted(args.path.resolve().rglob('test.yaml')):
         fields = read_test(path)
         tiers = shlex.split(fields['tier'])
         if args.tier in tiers or (args.tier == 'full' and 'smoke' in tiers):
-            for simulator in shlex.split(fields['simulator']):
-                results.append(run_test(path, fields, simulator, args.tier, args.jobs, builds))
+            group = fields.get('group') or '/'.join(
+                path.parent.relative_to(ROOT / 'verif').parts[:2])
+            groups.setdefault(group, []).append((path, fields))
+
+    def run_group(tests):
+        builds = {}
+        return [run_test(path, fields, simulator, args.tier, args.jobs, builds)
+                for path, fields in tests for simulator in shlex.split(fields['simulator'])]
+
+    with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+        results = [result for group in pool.map(run_group, groups.values())
+                   for result in group]
     print(f'Summary: {sum(results)} PASS, {len(results) - sum(results)} FAIL')
     return 0 if results and all(results) else 1
 

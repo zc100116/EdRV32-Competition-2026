@@ -9,3 +9,5 @@ tier: smoke full
 simulator: verilator
 verilator_flags: -Wall
 runner: python3 verif/unit/npu_top/run.py
+# Runs block/npu/run.py, which shares that group's build directory.
+group: block/npu
