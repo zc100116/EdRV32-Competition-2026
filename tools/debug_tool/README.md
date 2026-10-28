@@ -1,7 +1,7 @@
 # EdRV32 调试工具
 
 跨平台桌面串口工具（PySide6 / Qt），浅色主题。布局参考 VOFA+：
-**左栏图标页签（连接 / 命令 / 规则）+ 中间控制台 + 右侧数据面板**，
+**左栏图标页签（连接 / 命令 / 规则 / 烧录 / 网口）+ 中间控制台 + 右侧数据面板**，
 三栏之间都是可拖拽的分隔条。GUI、终端 CLI、AI 代理三条通道操作
 **同一个串口会话**——界面上看到的一切，都能通过 REST API 观察和操控。
 
@@ -11,6 +11,7 @@
 
 ```bash
 pip install PySide6 pyserial
+# 或从仓库 tools/requirements.txt 安装声明的依赖
 
 # 桌面 GUI（同时内嵌 REST API，默认 127.0.0.1:8765）
 python tools/debug_tool/main.py
@@ -121,9 +122,13 @@ tools/debug_tool/
 ├── core/
 │   ├── engine.py      # SerialEngine：串口收发线程、seq 缓冲区、规则匹配、
 │   │                  #   参数存储、命令/日志/配置持久化
-│   └── api.py         # 嵌入式 REST API（stdlib http.server，守护线程）
+│   ├── api.py         # 嵌入式 REST API（stdlib http.server，守护线程）
+│   ├── program.py     # BIOS 提示识别、wire_bytes() 下载、进度与结果
+│   └── ethernet.py    # UDP 应用头、文件分包、按窗口/偏移还原
 ├── gui/
-│   └── app.py         # PySide6 主窗口（浅色 QSS，VOFA 式三栏）
+│   ├── app.py         # PySide6 主窗口（浅色 QSS，VOFA 式三栏）
+│   ├── program.py     # 烧录页
+│   └── ethernet.py    # 网口页
 ├── cli.py             # 终端客户端（urllib 直连 REST API）
 ├── render_shot.py     # 开发辅助：渲染界面到 PNG
 ├── stress_test.py     # 压测：8000 行洪峰下事件循环响应率
@@ -204,3 +209,45 @@ REST：`POST /api/program {"path":"绝对路径.bin"}` 启动，
 REST 的 `interval` 单位是秒，默认为 0；`window/offset` 默认为 0。
 监听期间发送时 `localPort` 使用监听的本地端口，修改端口需停止监听再启动。
 路径均在运行调试工具的主机上解析；收到的数据不会剥除起始偏移。
+
+## 来源与验证
+
+串口工具取自 `origin/win/20261028-06-board-b1` 的提交
+`a7b8cf2f87ef2af1ffe55789ccff7a56b1865d84`，导入该提交下完整的
+`tools/serial-console-2/`（README、main/cli、core/、gui/、rules、settings、
+screenshot、render_shot、stress_test 和启动 bat），再改名为 `tools/debug_tool/`。
+窗口标题、应用名、CLI 说明、README 路径和 bat 名称/说明改为调试工具；
+`screenshot.png`、`render_shot.py`、`stress_test.py` 均保留。
+`settings.json` 是原工具运行时保存的个人串口配置（源文件为 COM7），已移除并忽略；
+首次保存连接参数时生成。`commands.json` 与 `logs/` 同样是本机运行数据，不入库。
+
+Linux 验证（2026-10-28）：
+
+```bash
+python3 -m unittest discover tools/debug_tool/tests
+python3 -m compileall -q tools/debug_tool
+git diff --check
+```
+
+14 个 unittest 全部通过：内存假串口经真实读线程识别分段 BIOS 提示，下载字节与
+`wire_bytes()` 完全相同，解析 PASS / FAIL length 和字节数；CLI 与 REST 烧录成功/
+失败返回值；UDP 头逐字节核对、长度边界、4 个窗口、参考模型收发交叉核对、
+127.0.0.1 文件还原、非零偏移、乱序收包、NOTIFY 及监听端口复用。
+另从 `/tmp` 启动真实 `main.py --headless`，REST status 正常响应，SIGINT 正常退出。
+本机 Python 与项目 Python 环境均没有 PySide6，因此未执行 GUI offscreen 启动。
+安装 PySide6 后可用保留的辅助脚本启动 GUI 并自动退出（输出置于 build）：
+
+```bash
+mkdir -p build/debug_tool
+QT_QPA_PLATFORM=offscreen python3 tools/debug_tool/render_shot.py build/debug_tool/gui.png
+```
+
+Windows 需实际确认：
+
+1. 安装 PySide6/pyserial，双击 `启动调试工具.bat`，确认五个页签、串口连接、
+   原有发送/HEX/文件/命令/规则功能和 CLI / REST 共同操作会话。
+2. 选择 make 生成的 .bin 开始烧录，按住 KEY1 按复位，确认 BIOS 菜单自动选 1、
+   进度、`Program SRAM bytes` 和 PASS；松开 KEY1 后按复位，确认新程序运行。
+3. 板上 ETH 软件配置 IP、端口和接收窗口后发送文件；再让板子向 PC 本地端口
+   发回带应用头的 UDP 数据，确认各窗口文件、偏移、包数、字节数和 NOTIFY。
+   Linux 回环不代替真实 Windows 串口或 PHY 上板验证。
