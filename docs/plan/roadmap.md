@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：探针 PDS 完成（C-W6）：去 C 扩展 129.1 MHz、净性能最好，B 类（切流水）净收益 ≤ 1.5% 不采用，全部切断也只到 138.9 MHz，150 MHz 达不到，频率目标待用户决定（设计记录 `2026-10-28-cpu-timing-closure.md` 5.1）；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路与 ETH：VIN/DISP/PIX/GEO/ETH 模块级全部通过；合并 PDS（V-W2）：GEO 3238、ETH 3863 LUT 在预算内，VIN+PIX+DISP 10523 超 10K 5.2%，clk_mem 只有 63.8 MHz，违例全在 PIX 组合 3×3 核，V-R6 流水化 |
+| 正在进行 | CPU：探针 PDS 完成（C-W6）：去 C 扩展 129.1 MHz、净性能最好，B 类（切流水）净收益 ≤ 1.5% 不采用，全部切断也只到 138.9 MHz，150 MHz 达不到，频率目标待用户决定（设计记录 `2026-10-28-cpu-timing-closure.md` 5.1）；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路与 ETH：VIN/DISP/PIX/GEO/ETH 模块级全部通过；合并 PDS（V-W2）：GEO 3238、ETH 3863 LUT 在预算内，VIN+PIX+DISP 10523 超 10K 5.2%，clk_mem 只有 63.8 MHz，违例全在 PIX 组合 3×3 核，V-R6 流水化已完成（待 PDS 复测）；PDS 布局优化能力调研进行中（`guides/pds-floorplan.md`）；上板计划 `plan/board-plan.md` 草案 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -36,7 +36,7 @@
 | GEO | `spec/geo-spec.md` v0.1 | `testplan/geo-testplan.md` v0.1 | `plan/vision-plan.md` | [~] 模块级验证通过，待 PDS 资源测量 |
 | NPU | `spec/npu-spec.md` v0.4 | `testplan/npu-testplan.md` v0.4 | `plan/npu-plan.md` | [~] 完整 NPU PDS 通过 150 MHz；待整网性能（N-P1） |
 | ETH | `spec/eth-spec.md` v0.1 | `testplan/eth-testplan.md` v0.1 | `plan/vision-plan.md`（V-R5、V-P5、V-T5、V-I4） | [~] 模块级验证通过，待 PDS 资源测量 |
-| 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |
+| 板级（fpga/rtl、约束、导入脚本）与上板实测 | — | — | `plan/board-plan.md`（B1 CPU 最小系统 100 MHz、B2 + 图像通路与 DDR、B3 + NPU 与 ETH 跑 YOLO） | [~] v0.1 草案待确认 |
 
 ---
 
