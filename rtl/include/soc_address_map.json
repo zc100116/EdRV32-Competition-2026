@@ -152,7 +152,7 @@
   "media_apb_slots": [
     {
       "slot": 0,
-      "name": "MEDIA_CTRL"
+      "name": "RESERVED"
     },
     {
       "slot": 1,

@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.3（草案） |
-| 日期 | 2026-10-25 |
+| 版本 | v0.4（草案） |
+| 日期 | 2026-10-28 |
 | 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | sys_xbar、Boot ROM、SRAM、系统 APB 桥、媒体 APB 桥、CLINT、PLIC、UART0、GPIO0、I2C0、SYSCTRL、复位控制 `reset_ctrl` |
 | 关联文档 | SoC 规格 3.1、3.5、4.1、4.3、4.4、5.3、6.1、6.2、7.5、8.3；`docs/spec/cache-spec.md`（CACHE_CTRL）；`docs/testplan/sys-subsys-testplan.md`；`docs/plan/sys-subsys-plan.md` |
@@ -141,13 +141,13 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 
 ### 2.10 复位控制 reset_ctrl
 
-- 输入：`rst_n_i`（异步），`mem_ready_i`，SYSCTRL 的软复位请求（clk_sys 域单周期脉冲）。
-- 输出：`rst_sys_por_n`（clk_sys 域，只由 `rst_n_i` 控制，软复位不影响；用于 SYSCTRL）、`rst_sys_n`、`rst_mem_n`、`rst_pix_n`、`rst_cam0_n`、`rst_cam1_n`、`rst_eth_rx_n`、`rst_eth_tx_n`，每一路由 `reset_sync` 在本域同步释放（SoC 规格 5.3、5.2 X8）。
+- 输入：`rst_n_i`（异步），`mem_ready_i`，SYSCTRL 的软复位请求（clk_sys 域单周期脉冲）；各域时钟（含 `clk_npu`）。
+- 输出：`rst_sys_por_n`（clk_sys 域，只由 `rst_n_i` 控制，软复位不影响；用于 SYSCTRL）、`rst_sys_n`、`rst_mem_n`、`rst_pix_n`、`rst_cam0_n`、`rst_cam1_n`、`rst_eth_rx_n`、`rst_eth_tx_n`、`rst_npu_n`（clk_npu 域），每一路由 `reset_sync` 在本域同步释放（SoC 规格 5.3、5.2 X8）。
 - 释放顺序（SoC 规格 5.3）：
   1. `rst_n_i` 释放后，`rst_mem_n` 等 `mem_ready`（同步到 clk_mem）有效后释放；
-  2. `rst_pix_n`、`rst_cam*_n`、`rst_eth_*_n` 随 `rst_mem_n` 一起请求释放，各自在本域同步；
+  2. `rst_pix_n`、`rst_cam*_n`、`rst_eth_*_n`、`rst_npu_n` 随 `rst_mem_n` 一起请求释放，各自在本域同步；
   3. `rst_sys_n` 在 `rst_mem_n` 释放（同步回 clk_sys）之后释放。
-- 媒体软复位（`SOFT_RESET.MEDIA`）：拉低 clk_mem、clk_pix、cam、eth 各域的引擎复位 16 个 clk_sys 周期后释放；mem_xbar 和 DDR 网关不受影响（使用独立的 `rst_mem_core_n`，只由 `rst_n_i` 和 `mem_ready` 控制）。
+- 媒体软复位（`SOFT_RESET.MEDIA`）：拉低 clk_mem、clk_pix、cam、eth、clk_npu 各域的引擎复位 16 个 clk_sys 周期后释放；mem_xbar 和 DDR 网关不受影响（使用独立的 `rst_mem_core_n`，只由 `rst_n_i` 和 `mem_ready` 控制）。
 - SoC 软复位（`SOFT_RESET.SOC`）：除 `rst_mem_core_n` 外所有复位（含 `rst_sys_n`）拉低 16 个 clk_sys 周期后按上面的顺序释放；SYSCTRL 的 scratch 寄存器不受影响。
 - 触发 MEDIA 软复位的写照常完成并返回 B；触发 SOC 软复位的写事务允许被复位取消，不保证返回 B（发起它的 CPU 同时被复位）。
 - 媒体 APB 异步桥（`edrv32_apb_async_bridge`）源侧使用 `rst_sys_por_n`、目标侧和媒体侧 decoder 使用 `rst_mem_core_n`：两端只由 `rst_n_i`（和 `mem_ready`）一起复位，软复位不影响，避免桥单边复位后重放或误应答。软复位时不会有媒体 APB 事务在途。
@@ -367,3 +367,4 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 2026-10-25 | v0.1 | 初稿。与用户确认：mtime 每个 clk_sys 周期加 1、SYSCTRL 提供 CLK_SYS_HZ；PLIC 15 个源；去掉 QSPI0 和 TIMER0；Boot ROM 与 SRAM 由存储初始化文件提供上电内容；I2C0 一个主机两对引脚 |
 | 2026-10-25 | v0.2 | 开发中澄清：APB 路径拆为 bridge（AXI→单个 APB 口）+ decoder（槽译码、预留、超时），媒体路径 decoder 在 clk_mem；增加 3.4 系统子系统顶层端口；CLINT/PLIC 合法写的 WSTRB 恒为全 1、整字写入；UART EN/CLR 不打断进行中的帧 |
 | 2026-10-26 | v0.3 | SRAM 由 256 KiB 改为 64 KiB（8192 × 64 位）。用户确认：旧工程 FPGA 实际只用 32 KiB SRAM；现有 DDR 承担大块数据，SRAM 只放监控程序、CoreMark 和栈，省下的 DRM 留给 NPU 片上缓存 |
+| 2026-10-28 | v0.4 | 2.10：reset_ctrl 增加 clk_npu 输入和 `rst_npu_n` 输出（与 `rst_mem_n` 一起请求释放，媒体软复位和 SoC 软复位覆盖），对应 npu-spec 3 节 `rst_npu_n_i` 和 SoC 5.3 第 2 条（用户确认 2026-10-28，B2-1 准备时发现遗漏） |
