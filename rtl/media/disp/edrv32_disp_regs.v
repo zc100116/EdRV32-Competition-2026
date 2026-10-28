@@ -23,7 +23,7 @@ module edrv32_disp_regs (
     output wire enable_o,
     output wire [31:0] next_base_o,
     output wire [31:0] stride_o,
-    output wire soft_clear_o,
+    output reg soft_clear_o,
     input wire busy_i,
     input wire frame_start_i,
     input wire underflow_i,
@@ -51,6 +51,11 @@ module edrv32_disp_regs (
     reg [31:0] cur_base_r;
     reg [31:0] rel_base_r;
     reg [31:0] frame_cnt_r;
+    reg [31:0] perf0_r;
+    reg [31:0] perf1_r;
+    reg [31:0] perf2_r;
+    reg urgent_r;
+    reg delayed_req_r;
     reg [31:0] perf0_base_r;
     reg [31:0] perf1_base_r;
     reg [31:0] perf2_base_r;
@@ -71,8 +76,26 @@ module edrv32_disp_regs (
     assign enable_o = enable_r;
     assign next_base_o = next_base_r;
     assign stride_o = stride_r;
-    assign soft_clear_o = soft_pending_r && !busy_i;
-    assign scan_cnt_o = perf0_i - perf0_base_r;
+    // The stop handshake makes IDLE stable before the registered clear pulse.
+    // Capture the CDC gray-to-binary outputs before subtraction and stop logic.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            soft_clear_o <= 1'b0;
+            perf0_r <= 32'd0;
+            perf1_r <= 32'd0;
+            perf2_r <= 32'd0;
+            urgent_r <= 1'b0;
+            delayed_req_r <= 1'b0;
+        end else begin
+            soft_clear_o <= soft_pending_r && !busy_i && !soft_clear_o;
+            perf0_r <= perf0_i;
+            perf1_r <= perf1_i;
+            perf2_r <= perf2_i;
+            urgent_r <= urgent_i && !soft_clear_o;
+            delayed_req_r <= delayed_req_i && !soft_clear_o;
+        end
+    end
+    assign scan_cnt_o = perf0_r - perf0_base_r;
     assign switch_w = frame_start_i && next_base_r != cur_base_r;
     assign irq_set_w = {23'd0, switch_w, 5'd0, frame_start_i,
                         (underflow_i || dma_err_i), 1'b0};
@@ -90,8 +113,8 @@ module edrv32_disp_regs (
             12'h014: apb_prdata_o = {30'd0, err_code_r};
             12'h02c: apb_prdata_o = frame_cnt_r;
             12'h040: apb_prdata_o = scan_cnt_o;
-            12'h044: apb_prdata_o = perf1_i - perf1_base_r;
-            12'h048: apb_prdata_o = perf2_i - perf2_base_r;
+            12'h044: apb_prdata_o = perf1_r - perf1_base_r;
+            12'h048: apb_prdata_o = perf2_r - perf2_base_r;
             12'h04c: apb_prdata_o = perf3_r;
             12'h050: apb_prdata_o = perf4_r;
             12'h100: apb_prdata_o = next_base_r;
@@ -131,9 +154,9 @@ module edrv32_disp_regs (
             cur_base_r <= 32'd0;
             rel_base_r <= 32'd0;
             frame_cnt_r <= 32'd0;
-            perf0_base_r <= perf0_i;
-            perf1_base_r <= perf1_i;
-            perf2_base_r <= perf2_i;
+            perf0_base_r <= perf0_r;
+            perf1_base_r <= perf1_r;
+            perf2_base_r <= perf2_r;
             perf3_r <= 32'd0;
             perf4_r <= 32'd0;
         end else begin
@@ -172,10 +195,10 @@ module edrv32_disp_regs (
             if (switch_w) begin
                 rel_base_r <= cur_base_r;
             end
-            if (urgent_i) begin
+            if (urgent_r) begin
                 perf3_r <= perf3_r + 32'd1;
             end
-            if (delayed_req_i) begin
+            if (delayed_req_r) begin
                 perf4_r <= perf4_r + 32'd1;
             end
         end
