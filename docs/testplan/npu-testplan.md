@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.3 |
+| 版本 | v0.4 |
 | 日期 | 2026-10-28 |
 | 对应规格 | `docs/spec/npu-spec.md` v0.3；SoC 规格 v0.7 的 4.2、4.3、5.2 X9/X10、7.1 |
 | 关联 | `docs/plan/npu-plan.md`；`docs/design/2026-10-26-npu-architecture.md` |
@@ -81,7 +81,7 @@
 
 | 编号 | 规格条款 | 内容 | 激励 | 检查 | 档位 |
 |---|---|---|---|---|---|
-| RG-01 | 4、SoC 7.1 | 公共和私有寄存器复位值、读写、只读位、ID | 定向 | 读回值 | S |
+| RG-01 | 4、SoC 7.1 | 公共和私有寄存器复位值、读写、只读位、ID；IDLE 时写 SOFT_RST 后全部寄存器回到复位值（规格 v0.4） | 定向 | 读回值 | S |
 | RG-02 | 2.4、SoC 7.1 | 门铃启动：DESC_BASE/COUNT，执行中 `STATUS.BUSY`、`CUR_DESC` 逐条前进，完成后 `DONE_COUNT` 加 1、`IRQ_STAT.DONE`、`irq_o` 按 IRQ_EN | 定向（3 条描述符） | 寄存器、中断 | S |
 | RG-03 | 4 | PERF 计数器：DOORBELL 清零；0 号（总周期）与测试侧计数 W 比对：W = DOORBELL 的 APB 写访问完成后到 `irq_o`（IRQ_EN.DONE = 1）上升沿的 clk_npu 周期数，要求 `W − 16 ≤ PERF[0] ≤ W + 16`（NPU 在 APB 响应跨域返回前已接受 DOORBELL，PERF[0] 可比 W 多出桥的返回延迟；`irq_o` 晚于 DONE 的延迟使 PERF[0] 可比 W 少；两者上界均取 16，开发初值）；1–7 号非零且 1 号不超过 0 号 | 定向 | 黑盒：只用 APB 和 `irq_o` | F |
 | RG-04 | 2.4 | 连续两帧：只改 INPUT_BASE、OUTPUT_BASE 再写 DOORBELL，两帧输出各自正确 | 小网络（4 条） | 参考输出 | S |
@@ -190,3 +190,4 @@ NET-03 用于在 full 中覆盖真实权重，并在 NET-01 失败时定位到�
 | 2026-10-27 | v0.2 | OP-08 改为模块级可达的量化边界（N-V1 指出合法卷积达不到 INT32 累加极值） |
 | 2026-10-27 | v0.2 | ER-05 改为黑盒可判定的条件（异步桥内已接受的请求可在 ABORT 后到达主口） |
 | 2026-10-28 | v0.3 | CP-03、NET-03 由 smoke 改为 full：单项耗时超过 60 秒（实测见 `tools/regress.py` 输出），smoke 缩短到约 15 分钟（用户确认） |
+| 2026-10-28 | v0.4 | RG-01 增加 SOFT_RST 恢复全部寄存器复位值的检查（对应规格 v0.4） |
