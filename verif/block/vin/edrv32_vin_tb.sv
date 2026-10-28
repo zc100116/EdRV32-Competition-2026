@@ -446,6 +446,7 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
     endtask
 
     task automatic drain();
+        bit [31:0] source_incomplete;
         drain_channel(0);
         drain_channel(1);
         clocks(100);
@@ -455,6 +456,11 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
             // A skipped, disabled or unselected channel must not report an extra frame.
             check_reg(12'('h04c+c*4), 32'(complete_count[c]));
             check_reg(12'('h064+c*4), 32'(skip_count[c]));
+            // Rejected camera frames finish padding without a channel completion IRQ.
+            for (int tries = 0; tries < 200000; tries++) begin
+                read_reg(12'('h070+c*4), source_incomplete);
+                if (source_incomplete >= 32'(incomplete_count[c])) break;
+            end
             check_reg(12'('h070+c*4), 32'(incomplete_count[c]));
         end
         equal("protocol checker", 0, 32'(checker_errors));
@@ -1235,6 +1241,16 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         int dx;
         int dy;
         int source;
+        // With every slot busy, missing-row padding still completes source accounting.
+        reset();
+        configure_camera(1, 1044, 18);
+        configure_channel(1, 1, 2, 2112);
+        channel_busy[1] = 3;
+        write_reg('h298, 3);
+        start_enabled();
+        warm_camera(1);
+        send_camera(1, 0, -1);
+        drain();
         for (int seed = 1; seed <= 10; seed++) begin
             reset();
             rng = 32'(seed*9733);
