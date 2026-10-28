@@ -64,7 +64,7 @@ int main(void)
     };
     capture_enabled = 1;
     monitor_metrics(cycles, 1500u, events);
-    info_ratio("Iterations/Sec", 150000000u, 200000u);
+    info_ratio("Iterations/Sec", EDRV32_CLK_SYS_HZ, 200000u);
     info_ratio("CoreMark/MHz", 1000000u, 200000u);
     info_ratio("Zero denominator", 0u, 0u);
     info_number("Wide count", UINT64_C(4294967297));

@@ -3,6 +3,7 @@
 // Description: Self-checking APB and multi-clock reset sequencing tests.
 // Clock: clk_sys and six asynchronous engine domains.
 module tb;
+    `include "edrv32_soc_map.vh"
     reg clk = 0;
     reg rst_n = 0;
     reg mem_ready = 0;
@@ -85,7 +86,7 @@ module tb;
         @(negedge clk); rst_n = 1;
         rd('h000, 'h00060001);
         rd('h004, 'hED320001);
-        rd('h008, 150000000);
+        rd('h008, EDRV32_CLK_SYS_HZ);
         rd('h00C, 0);
         @(negedge clk); mem_ready = 1;
         repeat (4) tick(); rd('h00C, 1);

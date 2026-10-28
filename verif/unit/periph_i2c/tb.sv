@@ -1,5 +1,6 @@
 // File: tb.sv; sys-subsys-testplan i2c unit coverage.
 module tb;
+    `include "edrv32_soc_map.vh"
     reg clk = 0;
     always #5 clk = !clk;
     reg rst_n = 0;
@@ -72,7 +73,7 @@ module tb;
     wire [1:0] scl = ~scl_oe;
     wire [1:0] sda = ~(sda_oe | slave_low);
     integer selected_port = 0;
-    integer quarter_cycles = 94;
+    integer quarter_cycles = (EDRV32_CLK_SYS_HZ + 800000) / 1600000;
     integer start_count [0:1];
     integer stop_count [0:1];
     integer byte_count [0:1];
@@ -266,7 +267,7 @@ module tb;
         check_reg('h008, 0);
         check_reg('h00c, 0);
         check_reg('h010, 0);
-        check_reg('h014, 93);
+        check_reg('h014, (EDRV32_CLK_SYS_HZ + 800000) / 1600000 - 1);
         check_reg('h01c, 0);
         write_reg('h018, 'h378);
         ticks(20);
@@ -276,7 +277,8 @@ module tb;
 
         // IC-01/04/05: both physical ports, real 400k and 100k divider values.
         for (speed = 0; speed < 2; speed = speed + 1) begin
-            quarter_cycles = speed == 0 ? 94 : 375;
+            quarter_cycles = speed == 0 ? (EDRV32_CLK_SYS_HZ + 800000) / 1600000
+                                      : (EDRV32_CLK_SYS_HZ + 200000) / 400000;
             write_reg('h014, quarter_cycles - 1, 0);
             for (port_number = 0; port_number < 2; port_number = port_number + 1) begin
                 @(negedge clk);

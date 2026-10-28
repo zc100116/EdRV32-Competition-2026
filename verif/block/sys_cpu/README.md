@@ -120,7 +120,7 @@ System information:
 
 ```text
 CHIP_ID: 0xed320001
-CLK_SYS_HZ: 150000000
+CLK_SYS_HZ: 100000000
 ROM bytes: 16384
 SRAM bytes: 65536
 I-cache bytes: 8192

@@ -1,5 +1,6 @@
 // File: tb.sv; sys-subsys-testplan uart unit coverage.
 module tb;
+    `include "edrv32_soc_map.vh"
     reg clk = 0;
     always #5 clk = !clk;
     reg rst_n = 0;
@@ -123,7 +124,7 @@ module tb;
         check_reg('h004, 3);
         check_reg('h008, 5);
         check_reg('h00c, 0);
-        check_reg('h014, 20833);
+        check_reg('h014, (EDRV32_CLK_SYS_HZ * 16 + 57600) / 115200);
         check_reg('h018, 1);
         check_reg('h024, 0);
         if (tx_pin !== 1 || irq !== 0) $fatal(1, "FAIL reset pads");
@@ -131,9 +132,9 @@ module tb;
         // UA-01: independent pin sampling plus loopback checks at each required rate.
         for (rate = 0; rate < 3; rate = rate + 1) begin
             case (rate)
-                0: divisor = 20833;
-                1: divisor = 2604;
-                default: divisor = 800;
+                0: divisor = (EDRV32_CLK_SYS_HZ * 16 + 57600) / 115200;
+                1: divisor = (EDRV32_CLK_SYS_HZ * 16 + 460800) / 921600;
+                default: divisor = (EDRV32_CLK_SYS_HZ * 16 + 1500000) / 3000000;
             endcase
             bit_period = divisor * 10.0 / 16.0;
             write_reg('h014, divisor, 0);

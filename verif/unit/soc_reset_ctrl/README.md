@@ -69,7 +69,7 @@ connects to reset_ctrl `rst_sys_por_n_o`; the other system devices use
 the integration boundary. CLINT/PLIC legal writes select the full 32-bit half
 by address bit 2 and ignore WSTRB, as confirmed by the coordinator.
 
-`clk_sys_hz: 150000000` in `rtl/include/soc_address_map.json` generates the
+`clk_sys_hz: 100000000` in `rtl/include/soc_address_map.json` generates the
 same `EDRV32_CLK_SYS_HZ` value in Verilog and C. The separately committed
 regression-tool fix translates command-file include/define syntax to the
 Icarus command-line equivalents; Verilator arguments are unchanged.

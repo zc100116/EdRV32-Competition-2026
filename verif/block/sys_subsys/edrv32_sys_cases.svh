@@ -708,7 +708,7 @@
         input real baud
     );
         u_uart.baud = baud;
-        w32(EDRV32_UART0_BASE + 'h014, 32'($rtoi(150000000.0 * 16.0 / baud + 0.5)));
+        w32(EDRV32_UART0_BASE + 'h014, 32'($rtoi(real'(EDRV32_CLK_SYS_HZ) * 16.0 / baud + 0.5)));
         w32(EDRV32_UART0_BASE + 'h004, 'hf);
     endtask
     task automatic uart_byte_rx(
@@ -1079,7 +1079,7 @@
             901: begin
                 eq32(EDRV32_SYSCTRL_BASE, 'h00060001);
                 eq32(EDRV32_SYSCTRL_BASE + 4, 'hed320001);
-                eq32(EDRV32_SYSCTRL_BASE + 8, 150000000);
+                eq32(EDRV32_SYSCTRL_BASE + 8, EDRV32_CLK_SYS_HZ);
                 eq32(EDRV32_SYSCTRL_BASE + 12, 1, 1);
             end
             902: begin
