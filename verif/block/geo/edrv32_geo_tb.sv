@@ -127,8 +127,8 @@ module edrv32_geo_tb;
         input logic [31:0] expected_i,
         input logic [31:0] actual_i);
         if (actual_i !== expected_i)
-            $fatal(1, {"FAIL GE-%02d %s desc=%0d coord=(-1,-1) ",
-                "expected=%08h actual=%08h time=%0t"},
+            $fatal(1, string'({"FAIL GE-%02d %s desc=%0d coord=(-1,-1) ",
+                "expected=%08h actual=%08h time=%0t"}),
                 test_case, what_i, current_desc, expected_i, actual_i, $time);
     endtask
 
@@ -195,8 +195,8 @@ module edrv32_geo_tb;
                     expected_pixel = {second_before[offset+1], second_before[offset]};
                 else expected_pixel = {expected[address+1], expected[address]};
                 if (actual_pixel !== expected_pixel)
-                    $fatal(1, {"FAIL GE-%02d Surface desc=%0d coord=(%0d,%0d) ",
-                        "expected=%04h actual=%04h time=%0t"}, test_case, current_desc,
+                    $fatal(1, string'({"FAIL GE-%02d Surface desc=%0d coord=(%0d,%0d) ",
+                        "expected=%04h actual=%04h time=%0t"}), test_case, current_desc,
                         x - surface_x[index_i], y - surface_y[index_i],
                         expected_pixel, actual_pixel, $time);
             end
@@ -257,8 +257,8 @@ module edrv32_geo_tb;
         // geo 4.3: errors and ABORT keep counting until BUSY deasserts, then freeze.
         // Consecutive APB STATUS samples bound that transition without DUT internals.
         if (cycles < 32'(perf_busy_lower) || cycles > 32'(perf_idle_upper))
-            $fatal(1, {"FAIL GE-%02d PERF0 desc=%0d coord=(-1,-1) ",
-                "expected_cycles=[%0d,%0d] actual=%0d time=%0t"},
+            $fatal(1, string'({"FAIL GE-%02d PERF0 desc=%0d coord=(-1,-1) ",
+                "expected_cycles=[%0d,%0d] actual=%0d time=%0t"}),
                 test_case, current_desc, perf_busy_lower, perf_idle_upper, cycles, $time);
         expect_reg(12'h040, cycles);
     endtask
@@ -271,6 +271,8 @@ module edrv32_geo_tb;
         int last_count;
         int pixels;
         int frame_ns;
+        logic [31:0] source_wait;
+        logic [31:0] writer_wait;
         last_count = expected_done;
         do begin
             read_reg(12'h008, status);
@@ -308,10 +310,12 @@ module edrv32_geo_tb;
         for (int index = 6; index < 16; index++) expect_reg(12'(64 + index * 4), 0);
         if (perf_limit_ns != 0) begin
             read_reg(12'h040, observed);
+            read_reg(12'h050, source_wait);
+            read_reg(12'h054, writer_wait);
             // GE-12: frame time comes exclusively from PERF0, at 125 MHz (8 ns/cycle).
             frame_ns = int'(observed) * 8;
-            $display("GE-12 PERF0=%0d frame_ns=%0d limit_ns=%0d", observed,
-                frame_ns, perf_limit_ns);
+            $display("GE-12 PERF0=%0d frame_ns=%0d limit_ns=%0d PERF4=%0d PERF5=%0d",
+                observed, frame_ns, perf_limit_ns, source_wait, writer_wait);
             equal("PERF0 frame time within limit", 1, 32'(frame_ns <= perf_limit_ns));
         end
         for (int index = 0; index < surface_count; index++) compare_surface(2'(index));
@@ -380,8 +384,8 @@ module edrv32_geo_tb;
         // Any bytes already emitted remain valid; unissued pixels are deliberately unspecified.
         foreach (u_memory.written[address]) begin
             if (u_memory.mem[address] !== expected[address])
-                $fatal(1, {"FAIL GE-10 desc=0 coord=(%0d,%0d) ",
-                    "expected_byte=%02h actual_byte=%02h time=%0t"},
+                $fatal(1, string'({"FAIL GE-10 desc=0 coord=(%0d,%0d) ",
+                    "expected_byte=%02h actual_byte=%02h time=%0t"}),
                     int'(address - 32'(surface_base[0])) % surface_stride[0] / 2,
                     int'(address - 32'(surface_base[0])) / surface_stride[0],
                     expected[address], u_memory.mem[address], $time);
@@ -479,8 +483,8 @@ module edrv32_geo_tb;
             read_reg(12'(64 + index * 4), next_perf);
             elapsed = int'(($time - 4 - doorbell_time) / 8);
             if (next_perf > 32'(elapsed))
-                $fatal(1, {"FAIL GE-11 PERF%0d clear desc=0 coord=(-1,-1) ",
-                    "expected_max=%0d actual=%0d time=%0t"},
+                $fatal(1, string'({"FAIL GE-11 PERF%0d clear desc=0 coord=(-1,-1) ",
+                    "expected_max=%0d actual=%0d time=%0t"}),
                     index, elapsed, next_perf, $time);
         end
         read_reg(12'h040, next_perf);
@@ -568,7 +572,7 @@ module edrv32_geo_tb;
 
     initial begin : watchdog
         #100000000;
-        $fatal(1, {"FAIL GE-%02d timeout desc=%0d coord=(-1,-1) ",
-            "expected=completion actual=100ms time=%0t"}, test_case, current_desc, $time);
+        $fatal(1, string'({"FAIL GE-%02d timeout desc=%0d coord=(-1,-1) ",
+            "expected=completion actual=100ms time=%0t"}), test_case, current_desc, $time);
     end
 endmodule

@@ -1,4 +1,6 @@
 `verilator_config
+// The shared synchronous BFMs sample the DUT's asynchronous reset on clock edges.
+lint_off -rule SYNCASYNCNET -file "*/verif/block/geo/edrv32_geo_tb.sv"
 // Behavioral models and BFMs intentionally update queues with blocking assignments.
 lint_off -rule BLKSEQ -file "*/verif/*"
 // The common APB interface exposes all sixteen slots; this harness uses slot 3.

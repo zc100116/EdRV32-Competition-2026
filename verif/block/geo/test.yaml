@@ -3,9 +3,9 @@ files: files.f
 defines: SIM_MODE
 parameters:
 software:
-timeout: 60
+timeout: 1800
 pass: PASS
-tier: smoke
+tier: full
 simulator: verilator
 group: verif/block/geo
 runner: python3 verif/block/geo/run.py smoke

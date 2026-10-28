@@ -134,13 +134,16 @@ module edrv32_geo_memory (
                     && bus.araddr < 32'h1000 + 32'(desc_count * 64);
                 if (descriptor) begin
                     descriptor_ar_count++;
-                    if (int'((bus.araddr - 32'h1000) / 64) > max_desc_read)
+                    if (int'((bus.araddr - 32'h1000) / 64) > max_desc_read) begin
+                        // geo 2.5: prior writes drain before the next descriptor starts.
+                        // Reads and writes belonging to that next descriptor may overlap.
+                        if (check_dependency && b_count != aw_count)
+                            $fatal(1, string'({"FAIL dependency desc=%0d coord=(-1,-1) ",
+                                "expected_B=%0d actual_B=%0d time=%0t"}),
+                                (bus.araddr - 32'h1000) / 64, aw_count, b_count, $time);
                         max_desc_read = int'((bus.araddr - 32'h1000) / 64);
+                    end
                 end else source_ar_count++;
-                if (check_dependency && bus.araddr >= 32'h900000 && b_count != aw_count)
-                    $fatal(1, {"FAIL dependency desc=%0d coord=(-1,-1) ",
-                        "expected_B=%0d actual_B=%0d time=%0t"},
-                        max_desc_read, aw_count, b_count, $time);
                 command.error = !injected && ((error_kind == 1 && descriptor)
                     || (error_kind == 2 && !descriptor)
                     || ar_count - 1 == r_error_transaction);
