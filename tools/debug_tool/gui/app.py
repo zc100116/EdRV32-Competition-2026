@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 
 from core.engine import ENCODINGS, fmt_ts
 from gui.program import ProgramPanel
+from gui.ethernet import EthernetPanel
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1191,7 +1192,8 @@ class MainWindow(QMainWindow):
                 ("连接", "串口连接与参数", ICON_PLUG),
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
                 ("规则", "数据匹配规则", ICON_FILTER),
-                ("烧录", "BIOS SRAM 烧录", ICON_TERMINAL))):
+                ("烧录", "BIOS SRAM 烧录", ICON_TERMINAL),
+                ("网口", "UDP 文件收发", ICON_PLUG))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1215,6 +1217,12 @@ class MainWindow(QMainWindow):
         self.left_stack.addWidget(self.rules)
         self.program = ProgramPanel(engine, self.toast)
         self.left_stack.addWidget(self.program)
+        self.ethernet = EthernetPanel(engine.ethernet, self.toast)
+        ethernet_scroll = QScrollArea()
+        ethernet_scroll.setWidgetResizable(True)
+        ethernet_scroll.setFrameShape(QFrame.NoFrame)
+        ethernet_scroll.setWidget(self.ethernet)
+        self.left_stack.addWidget(ethernet_scroll)
         left_layout.addWidget(self.left_stack, 1)
 
         # center: console
@@ -1454,6 +1462,7 @@ class MainWindow(QMainWindow):
         self.file_btn.setEnabled(connected)
         self._update_file_row()
         self.program.refresh()
+        self.ethernet.refresh()
         self.counters.setText(
             f"RX {fmt_bytes(st['rxBytes'])} / TX {fmt_bytes(st['txBytes'])}")
 
@@ -1462,5 +1471,6 @@ class MainWindow(QMainWindow):
         self.rules.reload()
 
     def closeEvent(self, event):
+        self.engine.ethernet.stop_receive()
         self.engine.disconnect(silent=True)
         super().closeEvent(event)

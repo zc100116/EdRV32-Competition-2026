@@ -56,6 +56,7 @@ def main():
         except KeyboardInterrupt:
             pass
         finally:
+            engine.ethernet.stop_receive()
             engine.disconnect(silent=True)
             if api:
                 api.stop()
@@ -74,6 +75,7 @@ def main():
     window = MainWindow(engine)
     window.show()
     code = app.exec()
+    engine.ethernet.stop_receive()
     engine.disconnect(silent=True)
     if api:
         api.stop()

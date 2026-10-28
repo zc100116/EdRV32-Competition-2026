@@ -10,6 +10,7 @@ GET /api/buffer?since=<lastSeq>.
 
 import datetime
 import json
+import struct
 import threading
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -79,6 +80,8 @@ def make_handler(engine):
                     return self._json(200, engine.file_status())
                 if path == "/api/program/status":
                     return self._json(200, engine.program.status())
+                if path == "/api/ethernet/status":
+                    return self._json(200, engine.ethernet.status())
                 return self._error(404, "unknown endpoint")
             except ValueError as exc:
                 return self._error(400, str(exc))
@@ -116,6 +119,16 @@ def make_handler(engine):
                     return self._json(200, engine.cancel_file())
                 if path == "/api/program":
                     return self._json(200, engine.start_program(body["path"]))
+                if path == "/api/ethernet/send":
+                    return self._json(200, engine.ethernet.send_file(
+                        body["path"], body["boardIp"], int(body["boardPort"]),
+                        int(body["localPort"]), int(body.get("window", 0)),
+                        int(body.get("offset", 0)), float(body.get("interval", 0))))
+                if path == "/api/ethernet/receive/start":
+                    return self._json(200, engine.ethernet.start_receive(
+                        int(body["localPort"]), body.get("directory")))
+                if path == "/api/ethernet/receive/stop":
+                    return self._json(200, engine.ethernet.stop_receive())
                 if path == "/api/clear":
                     return self._json(200, {"lastSeq": engine.clear()})
                 if path == "/api/save":
@@ -140,7 +153,7 @@ def make_handler(engine):
                 return self._error(404, "unknown endpoint")
             except KeyError as exc:
                 return self._error(404, f"unknown command id: {exc.args[0]}")
-            except ValueError as exc:
+            except (ValueError, struct.error) as exc:
                 return self._error(400, str(exc))
             except RuntimeError as exc:
                 return self._error(409, str(exc))

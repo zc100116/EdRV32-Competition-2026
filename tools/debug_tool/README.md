@@ -172,3 +172,35 @@ CLI 启动传输后等待结果，失败退出码为 1；文件路径由运行�
 REST：`POST /api/program {"path":"绝对路径.bin"}` 启动，
 `GET /api/program/status` 观察 `active/phase/sent/total/programmedBytes/result/error`。
 先启动烧录再按住 KEY1 按复位；等待提示或结果时不会自动超时、重试。
+
+## 网口文件收发
+
+“网口”页配置板子 IP、板子 `RX_PORT`、PC 本地 UDP 端口；界面初值
+192.168.1.10 / 5000 / 6000 仅供填写，必须与板上软件和 PC 配置一致。
+板上软件需配置 ETH 和接收窗口（`WINn_SIZE` 必须覆盖文件偏移与长度），
+板子发送时的 `TX_DST_IP/TX_DST_PORT` 指向 PC 地址和本地端口。
+
+- **发送**：选择文件、窗口 0–3、起始偏移（十进制或 `0x`）、包间隔（GUI 为 ms），
+  点击“发送文件”。每包最多 1024 字节数据，头为网络字节序 `WIN, FLAGS, 00, 00,
+  OFFSET[31:24], OFFSET[23:16], OFFSET[15:8], OFFSET[7:0]`。
+  仅最后一包 FLAGS.bit0 为 NOTIFY，空文件发送一个只有头的通知包。
+- **接收**：选择保存目录，点击“开始监听”，板子带应用头的数据按窗口分别写入
+  `window0.bin` … `window3.bin`，文件位置为头中的原始 OFFSET；未收到的偏移保留为空洞。
+  同一窗口本次监听首次收包时覆盖旧文件；收到乱序包或重复偏移时按收到的顺序写入。
+  默认目录是仓库的 `build/debug_tool/udp-rx/`。界面显示包数、数据字节数、
+  NOTIFY 次数与最后一包的窗口、偏移和 NOTIFY。NOTIFY 不停止监听，点击“停止监听”结束。
+- 先监听再发送可同时收发，发送复用监听端口；仅发送时也绑定所填的 PC 本地端口。
+  不提供重传、数据校验或应答协议；核对字节数等由板上应用和软件测试负责。
+
+网口同样可通过 REST 使用（`main.py --headless` 可用）：
+
+| 方法 | 路径 | 内容 |
+| --- | --- | --- |
+| POST | `/api/ethernet/send` | `{path, boardIp, boardPort, localPort, window?, offset?, interval?}` |
+| POST | `/api/ethernet/receive/start` | `{localPort, directory?}` |
+| POST | `/api/ethernet/receive/stop` | `{}` |
+| GET | `/api/ethernet/status` | `{tx, rx}` 进度、统计与明确错误 |
+
+REST 的 `interval` 单位是秒，默认为 0；`window/offset` 默认为 0。
+监听期间发送时 `localPort` 使用监听的本地端口，修改端口需停止监听再启动。
+路径均在运行调试工具的主机上解析；收到的数据不会剥除起始偏移。

@@ -16,6 +16,7 @@ import threading
 import time
 
 from .program import BiosProgrammer
+from .ethernet import EthernetTool
 
 try:
     import serial
@@ -96,6 +97,7 @@ class SerialEngine:
         self._listeners = []
         self.program = BiosProgrammer(self._program_write,
                                       lambda text: self.add_entry("sys", text))
+        self.ethernet = EthernetTool()
 
     # ---------------------------------------------------------- observer --
     def add_listener(self, callback):
