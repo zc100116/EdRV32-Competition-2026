@@ -34,8 +34,8 @@
 | B1-4 | B1 板级顶层 `fpga/rtl/edrv32_fpga_board_b1_top.v`（PLL、按键复位与 locked、CPU 子系统 + 系统子系统、UART、按键、LED）和板级仿真：从 ROM 启动，打印 logo，跑监控程序菜单中的 CoreMark（小迭代） | Codex · GPT-6.1 Sol | B1-1、B1-2 | 板级仿真 PASS，lint 0 告警 | task-board-b1 | [x] 2026-10-28：`edrv32_fpga_board_b1_top`，`verif/soc/board_b1` 两项 smoke PASS；clk_sys 100 MHz（`clk_sys_hz`） |
 | B1-5 | PC 端 UART 下载工具（按 bootloader 的下载协议，Python 标准库 + pyserial），用于不重新生成 bitstream 换 CoreMark 编译选项 | Codex · GPT-6.1 Sol | — | 与 bootloader 协议的仿真或回环测试通过 | task-board-b1 | [x] 2026-10-28：`tools/board/uart_tool.py`（下载、日志、菜单和迭代次数），仿真端到端通过 |
 | B1-6 | 约束 `edrv32_fpga_board_b1_top.fdc`（引脚取自厂商 demo）和导入脚本 | 协调者 | B1-4 | — | — | [x] 2026-10-28：`edrv32_fpga_board_b1_top.fdc`（PLL 输出显式 generated clock，依据厂商 DDR3 demo）、`import_board_b1_top.tcl` |
-| B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [x] 2026-10-28：第一次上板启动信息正确、100 MHz 满足（+0.674 ns）（`docs/reports/2026-10-28-board-b1.md`）；第二次（07 卡 B 部分）5000 次正式成绩 O2 **3.603**、tuned **4.310** CoreMark/MHz，CRC PASS，按键 PASS（`docs/reports/2026-10-28-perf-board-b1-coremark.md`）；LED 本次未目视记录 |
-| B1-8 | BIOS（SoC v0.14 7.5 第 3、3a 条：按住 KEY1 复位进入，烧录 SRAM 程序，按复位运行）；SRAM 应用每次启动恢复 `.data`、清零 `.bss`（第 3b 条）；uart_tool 和板级/sys_cpu 测试改为 BIOS 流程 | Codex · GPT-6.1 Sol | B1-7 | 板级仿真覆盖烧录、复位运行两次结果一致；sys_cpu、sys_subsys smoke | task-boot-bios | [~] 2026-10-28 派发 |
+| B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [x] 2026-10-28：第一次上板启动信息正确、100 MHz 满足（+0.674 ns）（`docs/reports/2026-10-28-board-b1.md`）；第二次（07 卡 B 部分）5000 次正式成绩 O2 **3.603**、tuned **4.310** CoreMark/MHz，CRC PASS，按键 PASS（`docs/reports/2026-10-28-perf-board-b1-coremark.md`）；LED 用户确认正常 |
+| B1-8 | BIOS（SoC v0.14 7.5 第 3、3a 条：按住 KEY1 复位进入，烧录 SRAM 程序，按复位运行）；SRAM 应用每次启动恢复 `.data`、清零 `.bss`（第 3b 条）；uart_tool 和板级/sys_cpu 测试改为 BIOS 流程 | Codex · GPT-6.1 Sol | B1-7 | 板级仿真覆盖烧录、复位运行两次结果一致；sys_cpu、sys_subsys smoke | task-boot-bios | [~] 2026-10-28 派发；上板验证按用户要求并入 B2 上板（B2-4） |
 | B1-9 | EdRV32 调试工具 `tools/debug_tool/`（用户串口工具改名入库）：BIOS 选择文件烧录、网口文件收发（eth-spec 2.3–2.6） | Codex · GPT-6.1 Sol | — | unittest：烧录字节流、应用头逐字节、本机回环 | task-debug-tool | [x] 2026-10-28：`tools/debug_tool/`（用户工具 a7b8cf2 导入改名）；BIOS 烧录（GUI/CLI/REST）、UDP 网口收发；14 项 unittest、本机回环通过；待 Windows 上确认 GUI 和烧录 |
 
 ### B2（B1 上板后细化）
@@ -45,7 +45,7 @@
 | B2-1 | 媒体子系统顶层（媒体 APB、VIN + PIX、GEO、DISP 到 mem_xbar 端口）和 `edrv32_soc_top`（本阶段不含 NPU、ETH、RND）；SoC 级测试 | Codex | — | [ ] |
 | B2-2 | 板级：DDR3 IP 创建说明（厂商 `6_IP_setup_packet/DDR3`、demo `2_9_ddr3_test`）、DDR 适配器、HDMI 输出串化、摄像头接口、各 PLL；约束 | 协调者 + Codex | B2-1 | [ ] |
 | B2-3 | 软件：VIN/PIX/GEO/DISP/PERF_MON 驱动、OV5640 初始化、演示程序（UART 菜单切换 PIX 运算和 GEO 变换，打印 DDR 带宽） | Codex | B2-1 | [ ] |
-| B2-4 | Windows：上板 | 用户 + Windows Codex | B2-1–B2-3 | [ ] |
+| B2-4 | Windows：上板（含 B1-8 BIOS 烧录、经 BIOS 运行 tuned CoreMark、调试工具 GUI 确认） | 用户 + Windows Codex | B2-1–B2-3 | [ ] |
 
 ### B3（B2 上板后细化）
 

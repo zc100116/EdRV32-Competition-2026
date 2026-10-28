@@ -31,7 +31,7 @@ tuned 的 HPM（`hpm_tuned.txt`）：双发射比例 0.272，load-use 停顿比�
 | 测试 | 结果 |
 |---|---|
 | 按键（10 s 内按下并松开 KEY1） | 第一次 `NOT PRESSED within wait`（未操作）；第二次按下 3748 ms、松开 4003 ms，PASS |
-| LED | 本次没有目视记录 |
+| LED | 用户目视确认正常 |
 | CLINT 定时器中断 | 请求 4096 周期，实际 4143，PASS |
 | I2C 扫描 | 两端口 0 个设备（未接设备） |
 | 系统信息 | PASS |
