@@ -714,7 +714,8 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         fork
             send_camera(0);
             begin
-                wait (cam0_href);
+                do @(posedge clk_mem);
+                while (!(pix_in_valid && pix_in_ready && pix_in_sof));
                 clocks(30);
                 channel_base[0][3] = 'h03000000;
                 configure_channel(0, 1, 4);
@@ -733,7 +734,8 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         fork
             send_camera(1);
             begin
-                wait (cam1_href);
+                do @(posedge clk_mem);
+                while (!(pix_in_valid && pix_in_ready && pix_in_sof));
                 clocks(10);
                 write_reg('h004, 0);
             end
@@ -768,7 +770,8 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
             fork
                 send_camera(0);
                 begin
-                    wait (cam0_href);
+                    do @(posedge clk_mem);
+                    while (!(pix_in_valid && pix_in_ready && pix_in_sof));
                     write_reg('h218, 'hf);
                     channel_busy[0] = 'hf;
                 end
