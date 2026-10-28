@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX RTL 完成（V-R3），模块级验证 V-T3 进行中；GEO RTL 完成（V-R4），模块级验证 V-T4 进行中；ETH 规格 v0.1 已确认，RTL（V-R5）和模块级测试（V-T5）完成，联调 V-I4 进行中 |
+| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX RTL 完成（V-R3），模块级验证 V-T3 进行中；GEO RTL 完成（V-R4），模块级验证 V-T4 进行中；ETH 规格 v0.1 已确认，模块级 smoke/full/perf 全部通过（V-I4）；待 PDS 资源测量（Yosys 参考 8684 LUT6，目标 5K） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -35,7 +35,7 @@
 | RND | — | — | — | [ ] |
 | GEO | `spec/geo-spec.md` v0.1 | `testplan/geo-testplan.md` v0.1 | `plan/vision-plan.md` | [~] RTL 完成，模块级验证中 |
 | NPU | `spec/npu-spec.md` v0.4 | `testplan/npu-testplan.md` v0.4 | `plan/npu-plan.md` | [~] 完整 NPU PDS 通过 150 MHz；待整网性能（N-P1） |
-| ETH | `spec/eth-spec.md` v0.1 | `testplan/eth-testplan.md` v0.1 | `plan/vision-plan.md`（V-R5、V-P5、V-T5、V-I4） | [~] 规格已确认，待开发 |
+| ETH | `spec/eth-spec.md` v0.1 | `testplan/eth-testplan.md` v0.1 | `plan/vision-plan.md`（V-R5、V-P5、V-T5、V-I4） | [~] 模块级验证通过，待 PDS 资源测量 |
 | 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |
 
 ---
