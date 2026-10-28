@@ -34,7 +34,7 @@ python3 tools/cpu/run_spike.py path/to/program.elf build/cpu/program --signature
 python3 tools/cpu/run_spike.py path/to/noncompressed.elf build/cpu/program --no-c
 ```
 
-Spike uses `rv32im_zicsr_zifencei_zicntr_zihpm`, `--priv=m`,
+Spike uses `rv32imc_zicsr_zifencei_zicntr_zihpm`, `--priv=m`,
 `--pmpregions=0`, `--no-dm`, `--pc=0`, `--disable-dtb`, `-l --log-commits`.
 `--no-c` removes C from the reference ISA; its input ELF must itself run without C.
 The upstream architectural suite builder targets the C-enabled configuration;

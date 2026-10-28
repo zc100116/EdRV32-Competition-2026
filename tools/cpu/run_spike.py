@@ -9,7 +9,7 @@ import re
 import subprocess
 import shutil
 
-ISA = 'rv32im_zicsr_zifencei_zicntr_zihpm'
+ISA = 'rv32imc_zicsr_zifencei_zicntr_zihpm'
 REGIONS = json.loads((Path(__file__).resolve().parents[2] /
                       'rtl/include/soc_address_map.json').read_text())['regions']
 MEMORY = ','.join(f"{region['base']}:{region['size']}" for region in REGIONS
