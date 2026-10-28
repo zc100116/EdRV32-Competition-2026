@@ -23,7 +23,9 @@ module edrv32_pix_filter (
     output wire eof_o,
 
     // Pipeline and frame configuration.
-    input wire advance_i,
+    input wire [3:0] advance_i,
+    input wire [20:0] advance_kernel0_i,
+    input wire [20:0] advance_kernel1_i,
     input wire clear_i,
     input wire [2:0] op_i
 );
@@ -108,9 +110,9 @@ module edrv32_pix_filter (
     assign request_last_w = flush_r ? flush_column_r == width_r : eol_i;
     assign request_bank_w = bank_r;
     assign request_row_w = row_kind_r;
-    assign wr0_w = advance_i && !clear_i && read_valid_r && !read_flush_r
+    assign wr0_w = advance_i[0] && !clear_i && read_valid_r && !read_flush_r
         && !read_bank_r;
-    assign wr1_w = advance_i && !clear_i && read_valid_r && !read_flush_r
+    assign wr1_w = advance_i[0] && !clear_i && read_valid_r && !read_flush_r
         && read_bank_r;
     // A one-beat line reads the preceding delayed write: forward it explicitly.
     // Suppressing that read honors the RAM wrapper's undefined collision contract.
@@ -124,7 +126,7 @@ module edrv32_pix_filter (
         .wr_addr_i(read_column_r),
         .wr_data_i(read_data_r),
 
-        .rd_en_i(advance_i && !clear_i && request_w && !forward0_w),
+        .rd_en_i(advance_i[0] && !clear_i && request_w && !forward0_w),
         .rd_addr_i(request_column_w),
         .rd_data_o(ram0_w)
     );
@@ -136,7 +138,7 @@ module edrv32_pix_filter (
         .wr_addr_i(read_column_r),
         .wr_data_i(read_data_r),
 
-        .rd_en_i(advance_i && !clear_i && request_w && !forward1_w),
+        .rd_en_i(advance_i[0] && !clear_i && request_w && !forward1_w),
         .rd_addr_i(request_column_w),
         .rd_data_o(ram1_w)
     );
@@ -157,7 +159,7 @@ module edrv32_pix_filter (
 
     edrv32_pix_kernel u_kernel0 (
         .clk_i(clk_i),
-        .advance_i(advance_i),
+        .advance_i(advance_kernel0_i),
 
         .window_i(window0_w),
 
@@ -168,7 +170,7 @@ module edrv32_pix_filter (
 
     edrv32_pix_kernel u_kernel1 (
         .clk_i(clk_i),
-        .advance_i(advance_i),
+        .advance_i(advance_kernel1_i),
 
         .window_i(window1_w),
 
@@ -208,7 +210,7 @@ module edrv32_pix_filter (
             capture_valid_r <= 1'b0;
             kernel_valid_r <= 8'd0;
             bypass_valid_r <= 1'b0;
-        end else if (advance_i) begin
+        end else if (advance_i[0]) begin
             read_valid_r <= request_w;
             capture_valid_r <= read_valid_r;
             bypass_valid_r <= valid_i;
@@ -252,7 +254,7 @@ module edrv32_pix_filter (
     end
 
     always @(posedge clk_i) begin
-        if (advance_i) begin
+        if (advance_i[0]) begin
             if (request_w) begin
                 read_data_r <= data_i;
                 read_column_r <= request_column_w;
@@ -264,17 +266,10 @@ module edrv32_pix_filter (
                 read_forward1_r <= forward1_w;
                 read_forward_data_r <= read_data_r;
             end
-            if (capture_valid_r) begin
-                top_r <= top_w;
-                middle_r <= middle_w;
-                bottom_r <= bottom_w;
-                top_left_r <= capture_column_r == 10'd0 ? 24'd0 : top_r[47:24];
-                middle_left_r <= capture_column_r == 10'd0 ? 24'd0 : middle_r[47:24];
-                bottom_left_r <= capture_column_r == 10'd0 ? 24'd0 : bottom_r[47:24];
-                pending_sof_r <= capture_row_r == 2'd1 && capture_column_r == 10'd0;
-                pending_eol_r <= capture_last_r;
-                pending_eof_r <= capture_flush_r && capture_last_r;
-            end
+        end
+    end
+    always @(posedge clk_i) begin
+        if (advance_i[1]) begin
             capture_ram0_r <= ram0_w;
             capture_ram1_r <= ram1_w;
             capture_data_r <= read_data_r;
@@ -286,6 +281,21 @@ module edrv32_pix_filter (
             capture_forward0_r <= read_forward0_r;
             capture_forward1_r <= read_forward1_r;
             capture_forward_data_r <= read_forward_data_r;
+        end
+        if (advance_i[2]) begin
+            if (capture_valid_r) begin
+                top_r <= top_w;
+                middle_r <= middle_w;
+                bottom_r <= bottom_w;
+                top_left_r <= capture_column_r == 10'd0 ? 24'd0 : top_r[47:24];
+                middle_left_r <= capture_column_r == 10'd0 ? 24'd0 : middle_r[47:24];
+                bottom_left_r <= capture_column_r == 10'd0 ? 24'd0 : bottom_r[47:24];
+                pending_sof_r <= capture_row_r == 2'd1 && capture_column_r == 10'd0;
+                pending_eol_r <= capture_last_r;
+                pending_eof_r <= capture_flush_r && capture_last_r;
+            end
+        end
+        if (advance_i[3]) begin
             kernel_sof_r <= {kernel_sof_r[6:0], pending_sof_r};
             kernel_eol_r <= {kernel_eol_r[6:0], pending_eol_r};
             kernel_eof_r <= {kernel_eof_r[6:0], pending_eof_r};

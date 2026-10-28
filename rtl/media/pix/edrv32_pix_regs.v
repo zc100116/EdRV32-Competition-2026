@@ -35,7 +35,7 @@ module edrv32_pix_regs (
     input wire output_stall_i,
     input wire discard_i,
     output wire soft_pending_o,
-    output wire soft_reset_o,
+    output reg soft_reset_o,
 
     // Interrupt.
     output wire irq_o
@@ -47,6 +47,8 @@ module edrv32_pix_regs (
     reg irq_en_r;
     reg irq_stat_r;
     reg [31:0] done_count_r;
+    reg input_stall_event_r;
+    reg output_stall_event_r;
     reg [31:0] input_stalls_r;
     reg [31:0] output_stalls_r;
     reg [31:0] discarded_r;
@@ -55,7 +57,17 @@ module edrv32_pix_regs (
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
     assign soft_request_w = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[3];
     assign soft_pending_o = soft_pending_r || soft_request_w;
-    assign soft_reset_o = soft_pending_o && !busy_i;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            soft_reset_o <= 1'b0;
+            input_stall_event_r <= 1'b0;
+            output_stall_event_r <= 1'b0;
+        end else begin
+            soft_reset_o <= soft_pending_o && !busy_i && !soft_reset_o;
+            input_stall_event_r <= input_stall_i && !soft_reset_o;
+            output_stall_event_r <= output_stall_i && !soft_reset_o;
+        end
+    end
     assign gamma_wr_o = write_w && apb_paddr_i == 12'h10c;
     assign gamma_addr_o = apb_pwdata_i[8:0];
     assign gamma_data_o = apb_pwdata_i[23:16];
@@ -111,10 +123,10 @@ module edrv32_pix_regs (
             if (soft_request_w) begin
                 soft_pending_r <= 1'b1;
             end
-            if (input_stall_i) begin
+            if (input_stall_event_r) begin
                 input_stalls_r <= input_stalls_r + 32'd1;
             end
-            if (output_stall_i) begin
+            if (output_stall_event_r) begin
                 output_stalls_r <= output_stalls_r + 32'd1;
             end
             if (discard_i) begin

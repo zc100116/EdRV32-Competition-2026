@@ -33,6 +33,8 @@ module tb;
     int received=0;
     int cycle=0;
     int eof_cycle=0;
+    int sof_cycle=0;
+    int first_cycle=0;
     int stall_in=0;
     int stall_out=0;
     int completed=0;
@@ -91,6 +93,8 @@ module tb;
                 $fatal(1,"FAIL output changed under backpressure t=%0t",$time);
             stalled=out_valid && !out_ready;
             held={out_data,out_sof,out_eol,out_eof};
+            if (in_valid && in_ready && in_sof) sof_cycle=cycle;
+            if (out_valid && out_ready && out_sof) first_cycle=cycle;
             if (in_valid && in_ready && in_eof) eof_cycle=cycle;
             if (out_valid && out_ready) begin
                 if (partial_frame && out_eof) $fatal(1,"FAIL incomplete frame emitted EOF");
@@ -106,6 +110,8 @@ module tb;
                 end
                 if (out_eof) begin
                     completed++;
+                    $display("PIX latency cfg=%h width=%0d first=%0d flush=%0d",
+                        model_cfg,width,first_cycle-sof_cycle,cycle-eof_cycle);
                     if (flush_limit!=0 && cycle-eof_cycle>flush_limit)
                         $fatal(1,"FAIL top flush cycles=%0d limit=%0d width=%0d",
                             cycle-eof_cycle,flush_limit,width);

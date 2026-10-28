@@ -37,11 +37,14 @@ module tb;
     int brights[4]='{-256,-1,0,255};
     `include "pix_ref.svh"
 
+    wire [47:0] centered_source = {expand_ref(source[31:16]),
+        expand_ref(source[15:0])} ^ 48'h808080808080;
+    wire [9:0] bias = $signed({brightness[8],brightness}) + 10'sd128;
     edrv32_pix_point1 dut1 (
         .clk_i(clk),
         .rst_n_i(rst_n),
         .valid_i(valid),
-        .data_i(source),
+        .data_i(centered_source),
         .sof_i(1'b1),
         .eol_i(1'b1),
         .eof_i(1'b1),
@@ -50,13 +53,13 @@ module tb;
         .sof_o(sof1),
         .eol_o(eol1),
         .eof_o(eof1),
-        .advance_i(advance),
+        .advance_i({7{advance}}),
         .clear_i(clear),
         .bc_en_i(bc_en),
         .gamma_en_i(gamma_en),
         .gamma_bank_i(gamma_bank),
         .contrast_i(contrast),
-        .brightness_i(brightness),
+        .bias_i(bias),
         .gamma_wr_i(gamma_wr),
         .gamma_addr_i(gamma_addr),
         .gamma_data_i(gamma_data)
@@ -74,7 +77,7 @@ module tb;
         .sof_o(sof2),
         .eol_o(eol2),
         .eof_o(eof2),
-        .advance_i(advance),
+        .advance_i({3{advance}}),
         .clear_i(clear),
         .gray_en_i(gray_en),
         .bin_en_i(bin_en),

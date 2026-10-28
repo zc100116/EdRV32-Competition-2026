@@ -22,7 +22,7 @@ module tb;
 
     edrv32_pix_kernel dut (
         .clk_i(clk),
-        .advance_i(advance),
+        .advance_i({21{advance}}),
         .window_i(window_data),
         .data_o(result),
         .op_i(op)

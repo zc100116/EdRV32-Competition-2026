@@ -49,7 +49,9 @@ module tb;
         .sof_o(out_sof),
         .eol_o(out_eol),
         .eof_o(out_eof),
-        .advance_i(advance),
+        .advance_i({4{advance}}),
+        .advance_kernel0_i({21{advance}}),
+        .advance_kernel1_i({21{advance}}),
         .clear_i(clear),
         .op_i(op)
     );
