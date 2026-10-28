@@ -11,3 +11,4 @@
 | `vin.f` | VIN `edrv32_vin`（DVP 前端、帧整形、内存源、写通道、P1 仲裁、寄存器）及所用公共原语和 dma2d（V-R1；存储包装在 V-P1 后替换） |
 | `disp.f` | DISP `edrv32_disp`（时序、TMDS 编码、读控制、扫描、停止确认、寄存器）及所用公共原语和 dma2d_rd（V-R2；扫描 FIFO 存储包装在 V-P1 后替换） |
 | `pix.f` | PIX `edrv32_pix`（点运算、两级 3×3、行缓存包装、寄存器）（V-R3 补齐 `rtl/media/pix/` 下的文件） |
+| `geo.f` | GEO `edrv32_geo`（描述符、块调度、源缓冲、插值、写出、寄存器）及 dma2d（V-R4 补齐 `rtl/media/geo/` 下的文件和存储包装） |
