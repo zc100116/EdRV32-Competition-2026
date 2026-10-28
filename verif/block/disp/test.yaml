@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 1800
+pass: PASS
+tier: smoke
+simulator: verilator
+runner: python3 verif/block/disp/run.py smoke
