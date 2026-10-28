@@ -1,0 +1,62 @@
+[00:18:16.670][TX] 3<CR>
+[00:18:16.715][RX] CHIP_ID: 0xed320001
+[00:18:16.715][RX] CLK_SYS_HZ: 100000000
+[00:18:16.715][RX] ROM bytes: 16384
+[00:18:16.715][RX] SRAM bytes: 65536
+[00:18:16.715][RX] I-cache bytes: 8192
+[00:18:16.715][RX] D-cache bytes: 8192
+[00:18:16.715][RX] MEM_READY: 1
+[00:18:16.715][RX] Boot mode: SRAM app
+[00:18:16.715][RX] Build commit: 207b05a
+[00:18:16.715][RX] Compiler version: GCC 15.2.0
+[00:18:16.715][RX] Cache ways: 2
+[00:18:16.715][RX] Cache line bytes: 32
+[00:18:16.715][RX] D-cache policy: write-back, write-allocate
+[00:18:16.715][RX] Cache configuration source: cache-spec 2.1 constants
+[00:18:16.760][RX] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
+[00:18:16.760][RX] ISA: rv32im_zicsr_zifencei
+[00:18:16.760][RX] HPM event 00: disabled
+[00:18:16.760][RX] HPM 01 dual retire: 1
+[00:18:16.760][RX] HPM 02 single retire: 2
+[00:18:16.760][RX] HPM 03 zero retire: 3
+[00:18:16.760][RX] HPM 04 branches: 4
+[00:18:16.760][RX] HPM 05 pair RAW: 5
+[00:18:16.760][RX] HPM 06 pair structural: 6
+[00:18:16.760][RX] HPM 07 pair slot1 type: 7
+[00:18:16.760][RX] HPM 08 pair missing slot1: 8
+[00:18:16.760][RX] HPM 09 load-use stall: 9
+[00:18:16.760][RX] HPM 10 divide stall: 10
+[00:18:16.760][RX] HPM 11 device wait: 11
+[00:18:16.760][RX] HPM 12 frontend empty: 12
+[00:18:16.760][RX] HPM 13 I-cache miss: 13
+[00:18:16.760][RX] HPM 14 D-cache miss: 14
+[00:18:16.760][RX] HPM 15 dirty writeback: 15
+[00:18:16.760][RX] HPM 16 branch mispredict: 16
+[00:18:16.760][RX] HPM events 17-31: reserved, no counting
+[00:18:16.765][RX] System info result: PASS
+[00:18:16.765][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:24:07.303][RX] 
+[00:24:07.303][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:24:07.303][RX]   E         D   D   R   R   V   V      3      2 
+[00:24:07.303][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:24:07.303][RX]   E         D   D   R  R     V V       3   2    
+[00:24:07.303][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:24:07.303][RX] 
+[00:24:07.303][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:24:07.303][RX] CHIP_ID: 0xed320001
+[00:24:07.303][RX] CLK_SYS_HZ: 100000000
+[00:24:07.303][RX] ROM bytes: 16384
+[00:24:07.303][RX] SRAM bytes: 65536
+[00:24:07.303][RX] I-cache bytes: 8192
+[00:24:07.303][RX] D-cache bytes: 8192
+[00:24:07.303][RX] MEM_READY: 1
+[00:24:07.303][RX] Boot mode: UART download
+[00:24:07.303][RX] Build commit: 207b05a
+[00:24:07.303][RX] Compiler version: GCC 15.2.0
+[00:24:07.304][RX] UART download ready
+[00:25:02.160][SYS] sending file: monitor_tuned.wire (31896 B)
+[00:25:04.881][SYS] file sent: monitor_tuned.wire (31896 B)
+[00:25:04.937][RX] UART download complete
+[00:25:04.937][RX] Boot SRAM
+[00:25:04.937][RX] Monitor: EdRV32
+[00:25:04.937][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info

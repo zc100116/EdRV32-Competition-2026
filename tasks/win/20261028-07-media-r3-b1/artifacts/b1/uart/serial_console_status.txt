@@ -1,0 +1,1 @@
+{"connected": true, "config": {"port": "COM7", "baud": 115200, "dataBits": 8, "parity": "none", "stopBits": "1", "encoding": "utf-8", "dtr": false, "rts": false}, "encoding": "utf-8", "dtr": false, "rts": false, "rxBytes": 8016, "txBytes": 31916, "lastSeq": 545}

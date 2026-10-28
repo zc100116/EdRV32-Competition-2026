@@ -1,0 +1,14 @@
+PDS violating endpoints=0; exported unique endpoints=0; coverage=complete
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf} -delay_type max -max_path 100000 -slack_less_than 0 -input_pins FALSE -nworst 1 -force_to_run
+
+(a) Endpoint module
+module	endpoints	worst_slack_ns
+u_vin	0	无违例
+u_pix	0	无违例
+u_geo	0	无违例
+u_disp	0	无违例
+u_eth	0	无违例
+top	0	无违例
+(b) Register pair groups
+无

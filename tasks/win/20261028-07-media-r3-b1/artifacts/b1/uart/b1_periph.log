@@ -1,0 +1,54 @@
+[00:14:58.576][TX] 2<CR>
+[00:14:58.593][RX] GPIO LED mask: 0x0000001e
+[00:14:58.593][RX] GPIO button bit: 0
+[00:14:58.593][RX] GPIO LED output: 0x00000002
+[00:14:58.685][RX] GPIO LED output: 0x00000004
+[00:14:58.786][RX] GPIO LED output: 0x00000008
+[00:14:58.887][RX] GPIO LED output: 0x00000010
+[00:14:59.011][RX] GPIO button wait seconds: 10
+[00:14:59.012][RX] GPIO button action: press and release KEY1 now; LEDs light while pressed
+[00:15:09.024][RX] GPIO LED result: OBSERVE: LEDs 1-4 lit one at a time, then followed KEY1
+[00:15:09.024][RX] GPIO button result: NOT PRESSED within wait
+[00:15:09.024][RX] Timer requested cycles: 4096
+[00:15:09.024][RX] Timer elapsed cycles: 4177
+[00:15:09.024][RX] Timer lateness cycles: 81
+[00:15:09.024][RX] Timer mcause: 0x80000007
+[00:15:09.025][RX] Timer interrupts: 1
+[00:15:09.025][RX] Timer result: PASS
+[00:15:09.025][RX] I2C SCL Hz: 100000
+[00:15:09.025][RX] I2C first address: 0x00000008
+[00:15:09.025][RX] I2C last address: 0x00000077
+[00:15:09.025][RX] I2C port: 0
+[00:15:09.038][RX] I2C devices: 0
+[00:15:09.038][RX] I2C port: 1
+[00:15:09.060][RX] I2C devices: 0
+[00:15:09.060][RX] I2C result: SCAN COMPLETE (zero devices is a valid observation)
+[00:15:09.060][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:15:13.968][TX] 2<CR>
+[00:15:13.975][RX] GPIO LED mask: 0x0000001e
+[00:15:13.975][RX] GPIO button bit: 0
+[00:15:13.975][RX] GPIO LED output: 0x00000002
+[00:15:14.076][RX] GPIO LED output: 0x00000004
+[00:15:14.178][RX] GPIO LED output: 0x00000008
+[00:15:14.279][RX] GPIO LED output: 0x00000010
+[00:15:14.400][RX] GPIO button wait seconds: 10
+[00:15:14.400][RX] GPIO button action: press and release KEY1 now; LEDs light while pressed
+[00:15:18.144][RX] GPIO button pressed at ms: 3748
+[00:15:18.421][RX] GPIO button released at ms: 4003
+[00:15:18.421][RX] GPIO LED result: OBSERVE: LEDs 1-4 lit one at a time, then followed KEY1
+[00:15:18.421][RX] GPIO button result: PASS
+[00:15:18.421][RX] Timer requested cycles: 4096
+[00:15:18.421][RX] Timer elapsed cycles: 4143
+[00:15:18.421][RX] Timer lateness cycles: 47
+[00:15:18.421][RX] Timer mcause: 0x80000007
+[00:15:18.421][RX] Timer interrupts: 1
+[00:15:18.421][RX] Timer result: PASS
+[00:15:18.421][RX] I2C SCL Hz: 100000
+[00:15:18.422][RX] I2C first address: 0x00000008
+[00:15:18.422][RX] I2C last address: 0x00000077
+[00:15:18.422][RX] I2C port: 0
+[00:15:18.435][RX] I2C devices: 0
+[00:15:18.435][RX] I2C port: 1
+[00:15:18.457][RX] I2C devices: 0
+[00:15:18.457][RX] I2C result: SCAN COMPLETE (zero devices is a valid observation)
+[00:15:18.457][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info

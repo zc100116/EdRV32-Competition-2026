@@ -1,0 +1,10 @@
+[00:24:07.303][RX] Boot mode: UART download
+[00:24:07.303][RX] Build commit: 207b05a
+[00:24:07.303][RX] Compiler version: GCC 15.2.0
+[00:24:07.304][RX] UART download ready
+[00:25:02.160][SYS] sending file: monitor_tuned.wire (31896 B)
+[00:25:04.881][SYS] file sent: monitor_tuned.wire (31896 B)
+[00:25:04.937][RX] UART download complete
+[00:25:04.937][RX] Boot SRAM
+[00:25:04.937][RX] Monitor: EdRV32
+[00:25:04.937][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
