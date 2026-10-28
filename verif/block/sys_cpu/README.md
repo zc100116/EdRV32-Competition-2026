@@ -5,7 +5,7 @@ This bench connects the real `edrv32_cpu_subsys` (`RVC_EN=0`) and
 interrupt interfaces. The system reset controller generates the CPU reset;
 MEM_READY is initially delayed. Unused media APB slots return SLVERR.
 UART and both SCCB peers reuse the S-V1 serial models; GPIO bit 0 selects the
-ROM preload/download path and bit 1 supplies the SC-03 interrupt edge.
+ROM application/BIOS path and bit 1 supplies the SC-03 interrupt edge.
 
 Run from the repository root:
 
@@ -24,10 +24,10 @@ python3 verif/block/sys_cpu/run.py perf
 python3 verif/block/sys_cpu/check_style.py
 ```
 
-Each manifest invokes the same runner. SC-01/02/03/06 and the SC-07 CRC run are
-`smoke`; SC-04/05/08 are `full`; the four SC-07 measurement runs are `perf`.
+Each manifest invokes the same runner. SC-02/03/06 are `smoke`;
+SC-01/04/05/07/08 are `full`; the four SC-07 measurement runs are `perf`.
 The runner builds through `sw/Makefile` and uses one Verilator binary with
-`--timing -Wall +define+SIM_MODE -j 2`; tests run serially. No repository-wide
+`--timing -Wall +define+SIM_MODE -j 1 -CFLAGS -O3`; tests run serially. No repository-wide
 regression is invoked. Software, build commands, simulation commands and UART
 logs are under `build/sys_cpu/`.
 
@@ -49,12 +49,12 @@ each SCCB peer and continuously checks that the unselected port is released.
 
 SC-01 compares all five ASCII logo rows, the boot title, and every startup field
 against the SC hardware configuration: CHIP_ID `0xed320001`, clk_sys 100 MHz,
-ROM 16 KiB, SRAM 64 KiB, I$/D$ 8 KiB each, MEM_READY=1, SRAM application mode,
+ROM 16 KiB, SRAM 64 KiB, I$/D$ 8 KiB each, MEM_READY=1,
 and the actual build commit/compiler. The UART checker uses the S-W2 key contract
 in `sw/apps/monitor/README.md`.
 
 SC-08 preloads the production monitor in SRAM. After the first complete menu it
-sends `3`; after the next complete menu it sends `1`, waits for the iteration
+sends `3` CR; after the next complete menu it sends `1` CR, waits for the iteration
 prompt, and sends `1` followed by LF. It ends after the third complete menu
 (initial entry plus two returns), requiring no SIM_EXIT write. System information
 is compared field by field, including cache configuration and all sixteen event
@@ -128,7 +128,6 @@ SRAM bytes: 65536
 I-cache bytes: 8192
 D-cache bytes: 8192
 MEM_READY: 1
-Boot mode: SRAM app
 Build commit: f3d5a90
 Compiler version: GCC 15.2.0
 Cache ways: 2

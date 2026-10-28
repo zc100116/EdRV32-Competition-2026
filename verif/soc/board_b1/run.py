@@ -54,7 +54,7 @@ def main():
                  '--emit', str(wire)], OUT / 'emit.log')
     obj = OUT / 'obj'
     command(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
-             '-CFLAGS', '-O3 -march=native -flto', '-LDFLAGS', '-flto',
+             '-CFLAGS', '-O3 -flto=1', '-LDFLAGS', '-flto=1',
              '+define+SIM_MODE', '--top-module', 'edrv32_board_b1_tb',
              '--Mdir', str(obj), '-o', 'sim'] + expand_files(HERE / 'files.f'),
             OUT / 'compile.log')

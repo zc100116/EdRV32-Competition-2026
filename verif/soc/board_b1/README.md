@@ -18,7 +18,7 @@ python3 verif/soc/board_b1/check_style.py
 
 `run.py menu` / `run.py download` 各自只运行一个场景，串行复用同一个 Verilator 构建目录。
 输出位于 `build/board_b1/`：`compile.log`、`case0.log`、`case1.log`、软件构建日志、
-`download.wire` 和 64 位 ROM/SRAM 镜像。模拟器使用 `-Wall -j 1 -CFLAGS -O3`；
+`download.wire` 和 64 位 ROM/SRAM 镜像。模拟器使用 `-Wall -j 1 -CFLAGS "-O3 -flto=1" -LDFLAGS -flto=1`；
 首次编译时间单独计入回归总耗时，单场景仿真约几十秒，不执行完整 CoreMark。
 
 软件镜像仍由 `sw/Makefile` 构建。make 的字节镜像通过
