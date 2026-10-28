@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.13（草案） |
+| 版本 | v0.14（草案） |
 | 日期 | 2026-10-28 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
@@ -463,8 +463,14 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 
 **启动流程**
 1. Boot ROM 和 SRAM 的上电内容由 FPGA bitstream 中的存储初始化文件提供：ROM 中是 bootloader 和启动 logo，SRAM 中是应用程序（系统子系统规格 2.2）。
-2. 复位释放后，CPU 从 Boot ROM 执行 bootloader：初始化必要的外设（UART 115200 8N1、GPIO），通过 UART 打印启动 logo（文字 "EdRV32" 的 ASCII 字符画）和启动信息，读 SYSCTRL 的 `MEM_READY`。启动信息至少包括：CHIP_ID、clk_sys 频率（SYSCTRL `CLK_SYS_HZ`）、ROM/SRAM 容量、I$/D$ 容量、`MEM_READY` 状态、本次启动方式（SRAM 应用 / UART 下载）、bootloader 的构建信息（git commit、编译器版本）。
-3. 默认跳转到 SRAM 中的应用程序执行。启动按键（GPIO）按下、或 SYSCTRL 的 scratch 寄存器中带有下载请求时，bootloader 改为从 UART 接收程序写入 SRAM，执行 FENCE.I 后跳转；ETH 下载在 ETH 模块完成后加入。
+2. 复位释放后，CPU 从 Boot ROM 执行 bootloader：初始化必要的外设（UART 115200 8N1、GPIO），通过 UART 打印启动 logo（文字 "EdRV32" 的 ASCII 字符画）和启动信息，读 SYSCTRL 的 `MEM_READY`。启动信息至少包括：CHIP_ID、clk_sys 频率（SYSCTRL `CLK_SYS_HZ`）、ROM/SRAM 容量、I$/D$ 容量、`MEM_READY` 状态、bootloader 的构建信息（git commit、编译器版本）。
+3. 打印启动信息后，bootloader 在 **[待定]** 100 ms 的窗口内反复采样启动按键 KEY1（GPIO bit0，低有效）：窗口内始终按下，或 SYSCTRL `SCRATCH0` 为下载请求值 `0x55415254`（读取后清零），进入 BIOS（第 3a 条）；否则跳转到 SRAM 中的应用程序执行。用户操作为按住 KEY1 按复位键。
+3a. **BIOS**：在 Boot ROM 中运行，通过 UART 提供菜单，每个选择是以 Enter（CR、LF 或 CR LF）结束的一行。提示文字固定如下（每行以 CR LF 结尾，供 PC 端调试工具识别）：
+   - 进入时打印 `BIOS: EdRV32`，随后打印菜单行 `BIOS menu: 1=Program SRAM`；每个操作结束后重新打印菜单行。
+   - `1` 烧录 SRAM 程序：打印 `UART download ready`，随后 PC 发送 4 字节小端无符号长度，再发送该长度的原始 SRAM 镜像（ELF 经 objcopy 得到的 `.bin`，入口在 SRAM 基址）。长度为 1 至 SRAM 容量 − 4 KiB（BIOS 栈）。长度不在此范围时打印 `Program SRAM result: FAIL length`，不接收镜像。收完后把 D$ 中的数据全部写回 SRAM，打印 `Program SRAM bytes: <十进制字节数>` 和 `Program SRAM result: PASS, press reset to run`。
+   - 其他输入打印 `Input error: type 1 then Enter`。
+   - BIOS 不自动运行烧录的程序；按复位键（不按 KEY1）后按第 3 条正常启动，运行 SRAM 中的程序。SRAM 内容在复位键复位和软复位后保持，重新配置 bitstream 或断电后恢复为初始化文件内容。
+3b. SRAM 应用程序每次启动都由启动代码从镜像中的初值副本恢复 `.data`、把 `.bss` 清零，保证复位后再次运行与第一次相同。ETH 下载在 ETH 模块完成后加入。
 4. SRAM 中的默认应用程序是监控程序（monitor）：通过 UART 输出菜单，按用户输入的选项执行测试或跑分，结束后回到菜单。菜单项至少包括：
    - CoreMark：运行后输出 CoreMark 分数、CoreMark/MHz、计时周期数和迭代次数、CRC 校验结果、全部 HPM 事件计数及由其导出的 IPC 等指标、编译器版本和编译选项、ISA 字符串；
    - 外设测试：GPIO/LED、CLINT 定时器中断、I2C 两个端口的设备探测；具体测试项 **[待定]**，开发初值由监控程序任务给出，经用户确认；
@@ -706,3 +712,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-28 | v0.12 | 8.7：GEO 写入输出 Surface 中的矩形，矩阵由软件计算，均匀缩小上限 s ≤ 2，性能按 s ≤ 1 / s ≤ 2 分档；模块规格见 `geo-spec.md`（用户确认） |
 | 2026-10-28 | v0.13 | 3.4：MDIO 和 PHY 复位改为 clk_mem 域（在 ETH 寄存器块中）；8.10：接收改为按应用头写入 4 个窗口，硬件应答 ARP、其他帧丢弃，发送按描述符硬件分包，收发吞吐都 ≥ 100 MB/s；第 9 节 ETH 下载流程相应修改；第 10 节删除 ETH 行；模块规格见 `eth-spec.md`（用户确认，设计记录 `2026-10-28-eth.md`） |
 | 2026-10-28 | v0.13 | 澄清（V-R5 问答，不改变已确认的行为）：5.2 X7 增加 eth_tx_clk → clk_mem 的发送帧结束脉冲 |
+| 2026-10-28 | v0.14 | 7.5 启动流程：按键/SCRATCH0 下载请求改为进入 BIOS（Boot ROM 中的 UART 菜单，第一项烧录 SRAM 程序，完成后写回 D$，按复位运行），取代原来的下载后立即跳转；KEY1 采样窗口初值 100 ms；SRAM 应用每次启动恢复 `.data`、清零 `.bss`；启动信息不再报告启动方式（程序总是从 SRAM 启动）。原因：用户上板后要求不重新生成 bitstream 即可更换并反复运行 SRAM 程序（用户确认 2026-10-28） |
