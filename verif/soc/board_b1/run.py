@@ -9,6 +9,7 @@ import argparse
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
@@ -58,7 +59,9 @@ def main():
     log = OUT / f'case{case}.log'
     args = [str(obj / 'sim'), f'+CASE_ID={case}', '+ROM_HEX=' + str(rom)]
     args += (['+SRAM_HEX=' + str(sram)] if case == 0 else ['+DOWNLOAD_WIRE=' + str(wire)])
+    start = time.monotonic()
     command(args, log)
+    elapsed = time.monotonic() - start
     text = log.read_text()
     if f'PASS board_b1 case={case}' not in text:
         raise RuntimeError(f'{log}: missing PASS')
@@ -67,7 +70,7 @@ def main():
         info = text.split(MENU + '\n')[1]
         check_system_info(info, commit, compiler)
         check_build_fields(info, compiler)
-    print(f'PASS board_b1 case={case}: {log}', flush=True)
+    print(f'PASS board_b1 case={case} simulation={elapsed:.1f}s: {log}', flush=True)
 
 
 if __name__ == '__main__':

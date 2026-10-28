@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # File: check_style.py
 # Spec: CLAUDE.md 7, 9.1; board-plan B1-4.
-# Description: Apply repository style rules to the timed SystemVerilog SC bench.
+# Description: Apply repository style rules to the timed SystemVerilog B1 bench.
 # Clock domain: none (host tool).
 from pathlib import Path
 import re

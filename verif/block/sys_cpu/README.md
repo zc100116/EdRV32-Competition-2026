@@ -111,12 +111,14 @@ PY
 ## S-I3 UART transcript
 
 Software input is `c4256d5` (S-W2); this commit adds the SC-01/08 checks.
-SC-08 uses the unmodified production monitor and bootloader. Below are the first
-20 lines of system information and CoreMark output from
-`build/sys_cpu/sc08/run.log`; the complete log contains all sixteen HPM counts,
+SC-08 used the production monitor and bootloader at that commit. The historical
+CoreMark excerpt comes from `build/sys_cpu/sc08/run.log`; its complete log
+contains all sixteen HPM counts,
 two complete CRC rounds, `CoreMark result: PASS`, and the final menu.
 
-System information:
+Current B1 system information (preload/menu scenario, `f3d5a90`,
+`build/board_b1/case0.log`; the CoreMark measurement below remains the historical
+S-I3 result at `c4256d5`):
 
 ```text
 CHIP_ID: 0xed320001
@@ -127,13 +129,13 @@ I-cache bytes: 8192
 D-cache bytes: 8192
 MEM_READY: 1
 Boot mode: SRAM app
-Build commit: c4256d5
+Build commit: f3d5a90
 Compiler version: GCC 15.2.0
 Cache ways: 2
 Cache line bytes: 32
 D-cache policy: write-back, write-allocate
 Cache configuration source: cache-spec 2.1 constants
-Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/bsp/include -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/drivers/include -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/boot -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/sw/apps/coremark -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-sys-integ/third_party/coremark -DITERATIONS=10
+Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
 ISA: rv32im_zicsr_zifencei
 HPM event 00: disabled
 HPM 01 dual retire: 1

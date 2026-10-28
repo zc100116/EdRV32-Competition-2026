@@ -26,19 +26,18 @@ Measured with xPack GCC 15.2.0, `-O2`, `rv32im_zicsr_zifencei/ilp32`:
 
 | Image | text | data | bss | Section total | Capacity |
 |---|---:|---:|---:|---:|---:|
-| bootloader | 3600 | 0 | 0 | 3600 | 16384 ROM bytes |
-| monitor | 15756 | 8 | 2116 | 17880 | 65536 SRAM bytes |
+| bootloader | 4584 | 0 | 0 | 4584 | 16384 ROM bytes |
+| monitor | 19492 | 8 | 2116 | 21616 | 65536 SRAM bytes |
 
-Verification source commit: **`ca52144`** (`sw: add UART monitor and boot system
-information`); the following documentation-only commit records these results.
-The monitor's aligned SRAM extent is `0x10000000..0x10004604` (17924 bytes),
-with stack top `0x10010000`. Build logs are
-`build/sw/bootloader/build.log` and `build/sw/monitor/build.log`.
+B1 verification source commit: **`9a4c485`**. The monitor's aligned SRAM extent
+is `0x10000000..0x10005484` (21636 bytes), with stack top `0x10010000`.
+Build logs are `build/board_b1/bootloader.log` and `build/board_b1/monitor.log`.
+The 19500-byte monitor binary fits below the bootloader's final 4 KiB stack area
+(61440-byte download limit), and its BSS ends 43900 bytes below stack top.
 
 Sizes are bytes, with constants included in text. The SRAM linker includes
-alignment between sections; stack top is at SRAM end. Build metadata contains
-the current worktree paths in CFLAGS, so a different checkout path can change
-text size. `Build commit` and `Compiler version` are Makefile string macros.
+alignment between sections; stack top is at SRAM end. Build metadata records the commit, compiler and CFLAGS, excluding host include
+paths; changing these strings can change text size. `Build commit` and `Compiler version` are Makefile string macros.
 `Compiler flags` is the exact CFLAGS string used for authored C and the shared
 port, including `-march` (also printed separately as `ISA`). The pre-existing
 coordinator exception removes `-Werror` only from unmodified third-party C;

@@ -33,7 +33,7 @@ Startup fields use the same fixed `Key: Value` format as monitor:
 Memory sizes come from generated `soc_map.h`; the 8 KiB I/D cache capacities
 come from cache-spec 2.1 constants in `info.h`, not fictitious registers.
 Makefile passes the short git commit and GCC version through build macros.
-The measured image has text/data/bss = **3600/0/0 bytes**, including the logo,
+The measured image has text/data/bss = **4584/0/0 bytes** (B1, `9a4c485`, RV32IM, GCC 15.2.0, `-O2`), including the logo,
 and fits in the 16384-byte Boot ROM; monitor README records verification commands.
 
 ## UART download protocol
