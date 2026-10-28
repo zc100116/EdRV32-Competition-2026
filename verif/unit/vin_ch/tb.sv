@@ -404,13 +404,29 @@ module tb;
             stride = 64;
             freeze_bus = 1;
             send_frame(80,32,256); // Exactly 512 beats, fills FIFO without overflow.
-            if (count != 512 || overflow_count != before_overflow)
-                $fatal(1,"FAIL exact-full initial frame count=%0d",count);
-            send_frame(81,2,1); // The first and only word of the next frame overflows.
-            if (overflow_count != before_overflow+1)
-                $fatal(1,"FAIL first-word overflow missing");
+            // Put the next SOF immediately after the preceding EOF. The last
+            // accepted beat must retain its FIFO credit while this frame drops.
+            source_valid = 1;
+            source_data = pattern(81,0,0);
+            source_sof = 1;
+            source_eol = 1;
+            source_eof = 1;
+            source_frame_id = 81;
+            source_width = 2;
+            source_height = 1;
+            source_incomplete = 0;
+            @(posedge clk);
+            if (!source_ready) $fatal(1,"FAIL camera back-to-back SOF backpressured");
+            @(negedge clk);
+            source_valid = 0;
+            source_sof = 0;
+            source_eof = 0;
+            if (count != 512 || overflow_count != before_overflow+1)
+                $fatal(1,"FAIL exact-full back-to-back overflow count=%0d events=%0d",
+                    count,overflow_count-before_overflow);
             freeze_bus = 0;
             check_done(before_done+1,first_slot,80);
+            check_surface(int'(bases[first_slot*32 +: 32]),80,32,256,64);
             send_frame(82,18,2);
             check_done(before_done+2,dropped_slot,82);
         end

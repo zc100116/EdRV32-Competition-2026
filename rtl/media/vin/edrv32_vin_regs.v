@@ -61,7 +61,10 @@ module edrv32_vin_regs (
     wire write_w;
     wire [31:0] clear_w;
     wire unused_strb_w;
-    integer index_r;
+    wire unused_perf_w;
+    reg [14:0] perf_event_r;
+    reg [3:0] cfg_errors_r;
+    genvar counter;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
     assign clear_w = write_w && apb_paddr_i == 12'h010 ? apb_pwdata_i : 32'd0;
     assign abort_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[2];
@@ -69,6 +72,7 @@ module edrv32_vin_regs (
     assign msrc_start_o = write_w && apb_paddr_i == 12'h11c && apb_pwdata_i[0];
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
+    assign unused_perf_w = perf_event_i[15];
     assign unused_strb_w = |apb_pstrb_i;
     assign irq_o = |(irq_stat_r & irq_en_r);
     assign ch_ctrl_o = {ch1_ctrl_r, ch0_ctrl_r};
@@ -139,18 +143,14 @@ module edrv32_vin_regs (
             ch1_bases_r <= 128'd0;
             ch0_slot_busy_r <= 4'd0;
             ch1_slot_busy_r <= 4'd0;
-            for (index_r = 0; index_r < 16; index_r = index_r + 1)
-                perf_r[index_r] <= 32'd0;
+
         end else begin
             irq_stat_r <= (irq_stat_r & ~clear_w) | irq_set_i;
             if (clear_w[1])
                 error_code_r <= 4'd0;
             if (error_code_i != 0)
                 error_code_r <= error_code_i;
-            for (index_r = 0; index_r < 15; index_r = index_r + 1)
-                if (perf_event_i[index_r])
-                    perf_r[index_r] <= perf_r[index_r] + 32'd1;
-            perf_r[15] <= perf_r[15] + {28'd0, cfg_errors_i};
+
             if (write_w) begin
                 case (apb_paddr_i)
                     12'h004: enable_o <= apb_pwdata_i[0];
@@ -179,4 +179,30 @@ module edrv32_vin_regs (
             end
         end
     end
+    // Each elaborated counter owns its adder; event selection ends at a register.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            perf_event_r <= 15'd0;
+            cfg_errors_r <= 4'd0;
+        end else begin
+            perf_event_r <= perf_event_i[14:0];
+            cfg_errors_r <= cfg_errors_i;
+        end
+    end
+    generate
+        for (counter = 0; counter < 16; counter = counter + 1) begin : g_perf
+            wire [31:0] increment_w;
+            if (counter == 15) begin : g_config
+                assign increment_w = {28'd0, cfg_errors_r};
+            end else begin : g_event
+                assign increment_w = {31'd0, perf_event_r[counter]};
+            end
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    perf_r[counter] <= 32'd0;
+                else
+                    perf_r[counter] <= perf_r[counter] + increment_w;
+            end
+        end
+    endgenerate
 endmodule

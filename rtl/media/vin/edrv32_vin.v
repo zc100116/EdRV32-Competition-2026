@@ -81,7 +81,7 @@ module edrv32_vin (
     wire enable_w;
     wire abort_w;
     wire soft_rst_w;
-    wire abort_all_w;
+    reg abort_all_r;
     wire busy_w;
     wire [31:0] cam0_size_w;
     wire [31:0] cam1_size_w;
@@ -152,7 +152,12 @@ module edrv32_vin (
 
     // Soft reset first drains committed AXI traffic; CDC FIFOs keep their external resets.
     assign rst_vin_n_w = rst_mem_n_i && !clear_r;
-    assign abort_all_w = abort_w || soft_rst_w;
+    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
+        if (!rst_mem_n_i)
+            abort_all_r <= 1'b0;
+        else
+            abort_all_r <= abort_w || soft_rst_w;
+    end
     assign busy_w = (|ch_busy_w) || msrc_busy_w;
     assign p1_urgent_o = |ch_urgent_w;
     assign unused_pix_sof_w = pix_out_sof_i;
@@ -186,7 +191,7 @@ module edrv32_vin (
             soft_pending_r <= 1'b0;
             clear_r <= 1'b0;
         end else begin
-            clear_r <= soft_pending_r && !busy_w;
+            clear_r <= soft_pending_r && !abort_all_r && !busy_w;
             if (soft_rst_w)
                 soft_pending_r <= 1'b1;
             else if (clear_r)
@@ -352,7 +357,7 @@ module edrv32_vin (
 
         // Memory-source command and surface.
         .start_i(msrc_start_w && !soft_pending_r),
-        .abort_i(abort_all_w),
+        .abort_i(abort_all_r),
         .base_i(msrc_base_w),
         .stride_i(msrc_stride_w),
         .width_i(msrc_size_w[10:0]),
@@ -474,7 +479,7 @@ module edrv32_vin (
                 .stride_i(ch_stride_w[channel_idx * 16 +: 16]),
                 .bases_i(ch_bases_w[channel_idx * 128 +: 128]),
                 .slot_busy_i(ch_slot_busy_w[channel_idx * 4 +: 4]),
-                .abort_i(abort_all_w),
+                .abort_i(abort_all_r),
                 .source_select_o(select_w),
                 .busy_o(ch_busy_w[channel_idx]),
                 .urgent_o(ch_urgent_w[channel_idx]),

@@ -99,7 +99,23 @@ module edrv32_vin_ch (
     reg [31:0] write_id_r;
     reg write_incomplete_r;
     reg [2:0] write_previous_r;
+    reg pack_valid_r;
+    reg [31:0] pack_data_r;
+    reg [2:0] pack_word_r;
+    reg fifo_push_r;
     reg [255:0] pack_r;
+    reg [9:0] fifo_write_r;
+    reg [9:0] fifo_fetch_r;
+    reg [1:0] fifo_output_count_r;
+    reg fifo_read_slot_r;
+    reg fifo_fetch_slot_r;
+    reg fifo_pending_r;
+    reg fifo_capture0_r;
+    reg fifo_capture1_r;
+    reg [287:0] fifo_head0_r;
+    reg [287:0] fifo_head1_r;
+    wire fifo_read_w;
+    wire [2:0] fifo_reserved_w;
     reg [2:0] word_r;
     reg [9:0] count_r;
     reg [255:0] packed_data_w;
@@ -126,6 +142,7 @@ module edrv32_vin_ch (
     wire [287:0] ram_rd_data_w;
     wire fifo_valid_w;
     wire fifo_push_w;
+    wire pack_accept_w;
     wire fifo_pop_w;
     wire fifo_discard_w;
     wire [287:0] fifo_data_w;
@@ -187,8 +204,9 @@ module edrv32_vin_ch (
         (receiving_r ? receive_src_r : src_i) != 2'd2 && !fifo_ready_w &&
         !dropping_r && !stopping_r && !abort_i;
     assign flush_w = word_r == 3'd7 || result_eol_i;
-    assign fifo_push_w = result_fire_w && flush_w && !dropping_r && !stopping_r &&
-        !abort_i && !overflow_o;
+    assign pack_accept_w = result_fire_w && flush_w && !dropping_r && !stopping_r
+        && !abort_i && !overflow_o;
+    assign fifo_push_w = fifo_push_r;
     assign fifo_discard_w = stopping_r && dma_idle_w;
     assign fifo_pop_w = fifo_discard_w || dma_data_ready_w;
     assign count_o = count_r;
@@ -206,32 +224,70 @@ module edrv32_vin_ch (
 
     always @(*) begin
         packed_data_w = pack_r;
-        packed_data_w[word_r * 32 +: 32] = result_data_i;
-        packed_strb_w = 32'hffff_ffff >> ((7 - {29'd0, word_r}) * 4);
+        packed_data_w[pack_word_r * 32 +: 32] = pack_data_r;
+        packed_strb_w = 32'hffff_ffff >> ((7 - {29'd0, pack_word_r}) * 4);
     end
 
-    edrv32_sync_fifo_ram #(
-        .WIDTH(288),
-        .DEPTH(512)
-    ) u_write_fifo (
-        // One pixel beat plus byte enables, spec 2.6.
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .valid_i(fifo_push_w),
-        .ready_o(fifo_ready_w),
-        .data_i({packed_strb_w, packed_data_w}),
-        .valid_o(fifo_valid_w),
-        .ready_i(fifo_pop_w),
-        .data_o(fifo_data_w),
-
-        // External DRM ports.
-        .wr_en_o(ram_wr_en_w),
-        .wr_addr_o(ram_wr_addr_w),
-        .wr_data_o(ram_wr_data_w),
-        .rd_en_o(ram_rd_en_w),
-        .rd_addr_o(ram_rd_addr_w),
-        .rd_data_i(ram_rd_data_w)
-    );
+    // Reserve an output slot when issuing a DRM read. Its capture enable is
+    // registered one clock before the RAM data arrives, so no READY/abort logic
+    // drives the 288-bit head registers' enables (vin 2.6).
+    // Reserve the entry when accepting its final word. The registered write
+    // owns that entry even if the next frame overflows or ABORT arrives later.
+    assign fifo_ready_w = count_r < 10'd512;
+    assign ram_wr_en_w = fifo_push_w;
+    assign ram_wr_addr_w = fifo_write_r[8:0];
+    assign ram_wr_data_w = {packed_strb_w, packed_data_w};
+    assign fifo_valid_w = fifo_output_count_r != 0;
+    assign fifo_data_w = fifo_read_slot_r ? fifo_head1_r : fifo_head0_r;
+    assign fifo_read_w = fifo_pop_w && fifo_valid_w;
+    assign fifo_reserved_w = {1'b0, fifo_output_count_r} + {2'd0, fifo_pending_r}
+        - {2'd0, fifo_read_w};
+    assign ram_rd_en_w = fifo_fetch_r != fifo_write_r && fifo_reserved_w < 3'd2;
+    assign ram_rd_addr_w = fifo_fetch_r[8:0];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            fifo_write_r <= 10'd0;
+            fifo_fetch_r <= 10'd0;
+            fifo_output_count_r <= 2'd0;
+            fifo_read_slot_r <= 1'b0;
+            fifo_fetch_slot_r <= 1'b0;
+            fifo_pending_r <= 1'b0;
+            fifo_capture0_r <= 1'b0;
+            fifo_capture1_r <= 1'b0;
+            pack_valid_r <= 1'b0;
+            fifo_push_r <= 1'b0;
+        end else begin
+            fifo_push_r <= pack_accept_w;
+            pack_valid_r <= result_fire_w && !dropping_r && !stopping_r && !abort_i
+                && !overflow_o;
+            if (ram_wr_en_w)
+                fifo_write_r <= fifo_write_r + 10'd1;
+            if (ram_rd_en_w) begin
+                fifo_fetch_r <= fifo_fetch_r + 10'd1;
+                fifo_fetch_slot_r <= !fifo_fetch_slot_r;
+            end
+            fifo_pending_r <= ram_rd_en_w;
+            fifo_capture0_r <= ram_rd_en_w && !fifo_fetch_slot_r;
+            fifo_capture1_r <= ram_rd_en_w && fifo_fetch_slot_r;
+            if (fifo_read_w)
+                fifo_read_slot_r <= !fifo_read_slot_r;
+            case ({fifo_pending_r, fifo_read_w})
+                2'b10: fifo_output_count_r <= fifo_output_count_r + 2'd1;
+                2'b01: fifo_output_count_r <= fifo_output_count_r - 2'd1;
+                default: begin end
+            endcase
+        end
+    end
+    always @(posedge clk_i) begin
+        if (fifo_capture0_r)
+            fifo_head0_r <= ram_rd_data_w;
+        if (fifo_capture1_r)
+            fifo_head1_r <= ram_rd_data_w;
+        if (result_fire_w) begin
+            pack_data_r <= result_data_i;
+            pack_word_r <= word_r;
+        end
+    end
 
     edrv32_ram_vin_wfifo u_fifo_ram (
         // Storage clocks and enabled ports.
@@ -293,8 +349,8 @@ module edrv32_vin_ch (
         end
         if (descriptor_w)
             write_id_r <= pending_id_r;
-        if (result_fire_w && !dropping_r && !stopping_r)
-            pack_r[word_r * 32 +: 32] <= result_data_i;
+        if (pack_valid_r)
+            pack_r[pack_word_r * 32 +: 32] <= pack_data_r;
     end
 
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -382,7 +438,7 @@ module edrv32_vin_ch (
                 else if (receiving_r || pending_r)
                     last_slot_r <= receive_previous_r;
             end
-            // Count includes entries whose first RAM prefetch is still pending.
+            // Count includes the registered write and entries awaiting RAM prefetch.
             if (stopping_r && dma_idle_w && count_r == 10'd0 && !receiving_r) begin
                 stopping_r <= 1'b0;
                 dropping_r <= 1'b0;
@@ -391,7 +447,7 @@ module edrv32_vin_ch (
                 pending_r <= 1'b0;
                 word_r <= 3'd0;
             end
-            case ({fifo_push_w && fifo_ready_w, fifo_pop_w && fifo_valid_w})
+            case ({pack_accept_w, fifo_pop_w && fifo_valid_w})
                 2'b10: count_r <= count_r + 10'd1;
                 2'b01: count_r <= count_r - 10'd1;
                 default: count_r <= count_r;
