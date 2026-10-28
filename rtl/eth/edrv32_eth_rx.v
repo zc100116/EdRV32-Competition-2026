@@ -22,7 +22,7 @@ module edrv32_eth_rx (
 
     // Packet metadata queue and RAM write port.
     output reg packet_o,
-    output wire [151:0] metadata_o,
+    output reg [151:0] metadata_o,
     input wire metadata_ready_i,
     output wire wr_en_o,
     output wire [9:0] wr_addr_o,
@@ -31,9 +31,9 @@ module edrv32_eth_rx (
 
     // Accepted ARP and accounting events.
     input wire arp_pending_i,
-    output wire arp_o,
-    output wire [47:0] arp_mac_o,
-    output wire [31:0] arp_ip_o,
+    output reg arp_o,
+    output reg [47:0] arp_mac_o,
+    output reg [31:0] arp_ip_o,
     output reg frame_o,
     output reg [3:0] drop_o
 );
@@ -151,12 +151,7 @@ module edrv32_eth_rx (
     assign wr_en_o = store_word_w && space_w;
     assign wr_addr_o = start_r[9:0] + word_idx_w[9:0];
     assign wr_data_o = word_w;
-    assign busy_o = commit_r != release_i;
-    assign metadata_o = {start_r[9:0], payload_r[10:0], offset_w, window_w,
-        flags_w[0], src_w, src_ip_w, src_port_w};
-    assign arp_o = valid_i && data_i[9] && action_w == 4'd2;
-    assign arp_mac_o = arp_mac_w;
-    assign arp_ip_o = arp_ip_w;
+    assign busy_o = commit_r != release_i || packet_o;
     assign unused_w = &{1'b0, header_r[63:58], header_r[47:32], flags_w[7:1],
         payload_idx_w[1:0], window_w};
     always @(*) begin
@@ -194,9 +189,13 @@ module edrv32_eth_rx (
             overflow_r <= 1'b0;
             commit_r <= 11'd0;
             start_r <= 11'd0;
+            packet_o <= 1'b0;
+            arp_o <= 1'b0;
             frame_o <= 1'b0;
             drop_o <= 4'd0;
         end else begin
+            packet_o <= valid_i && data_i[9] && action_w == 4'd1;
+            arp_o <= valid_i && data_i[9] && action_w == 4'd2;
             frame_o <= 1'b0;
             drop_o <= 4'd0;
             if (clear_i)
@@ -227,9 +226,15 @@ module edrv32_eth_rx (
             end
         end
     end
-    // Metadata is consumed on the frame-end cycle, before the next frame overwrites the header.
-    always @(*) begin
-        packet_o = valid_i && data_i[9] && action_w == 4'd1;
+    // Capture the decision and its payload together before either downstream CE.
+    // The next header may begin immediately; the accepted packet retains ownership.
+    always @(posedge clk_i) begin
+        if (valid_i && data_i[9]) begin
+            metadata_o <= {start_r[9:0], payload_r[10:0], offset_w, window_w,
+                flags_w[0], src_w, src_ip_w, src_port_w};
+            arp_mac_o <= arp_mac_w;
+            arp_ip_o <= arp_ip_w;
+        end
     end
     genvar header_idx;
     generate

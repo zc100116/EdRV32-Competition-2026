@@ -78,8 +78,20 @@ module edrv32_eth_regs (
     wire [11:0] irq_set_w;
     wire unused_w;
     integer idx;
+    reg clear_regs_r;
+    reg [8:0] perf_event_r;
+    reg [10:0] perf_length_r;
+    reg perf_rx_complete_r;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
     assign clear_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[3] && !busy_i;
+    // Preserve the command boundary at the parser; only the register bank's
+    // high-fanout reset enable is delayed. New events settle after that clear.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            clear_regs_r <= 1'b0;
+        else
+            clear_regs_r <= clear_o;
+    end
     assign start_o = write_w && apb_paddr_i == 12'h028 && !busy_i;
     assign abort_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[2];
     assign mdio_start_o = write_w && apb_paddr_i == 12'h180;
@@ -127,7 +139,7 @@ module edrv32_eth_regs (
             end
             for (idx = 0; idx < 11; idx = idx + 1)
                 perf_r[idx] <= 32'd0;
-        end else if (clear_o) begin
+        end else if (clear_regs_r) begin
             enable_o <= 1'd0;
             irq_en_o <= 12'd0;
             desc_base_o <= 32'd0;
@@ -165,21 +177,20 @@ module edrv32_eth_regs (
                 err_code_r <= 2'd2;
             if (desc_done_i)
                 done_count_r <= done_count_r + 32'd1;
-            if (frame_i)
+            if (perf_event_r[0])
                 perf_r[0] <= perf_r[0] + 32'd1;
-            if (drop_i == 4'd3)
+            if (perf_event_r[1])
                 perf_r[3] <= perf_r[3] + 32'd1;
-            if (drop_i == 4'd4)
+            if (perf_event_r[2])
                 perf_r[4] <= perf_r[4] + 32'd1;
-            if (drop_i == 4'd5)
+            if (perf_event_r[3])
                 perf_r[5] <= perf_r[5] + 32'd1;
-            if (drop_i == 4'd6)
+            if (perf_event_r[4])
                 perf_r[6] <= perf_r[6] + 32'd1;
-            if (drop_i == 4'd7)
+            if (perf_event_r[5])
                 perf_r[7] <= perf_r[7] + 32'd1;
             if (rx_complete_i) begin
-                perf_r[1] <= perf_r[1] + 32'd1;
-                perf_r[2] <= perf_r[2] + {21'd0, rx_length_i};
+
                 if (rx_window_i == 2'd0)
                     bytes_r[0] <= bytes_r[0] + {21'd0, rx_length_i};
                 if (rx_window_i == 2'd1)
@@ -193,11 +204,15 @@ module edrv32_eth_regs (
                 peer_ip_r <= peer_i[47:16];
                 peer_port_r <= peer_i[15:0];
             end
-            if (arp_done_i)
+            if (perf_length_r != 0)
+                perf_r[2] <= perf_r[2] + {21'd0, perf_length_r};
+            if (perf_rx_complete_r)
+                perf_r[1] <= perf_r[1] + 32'd1;
+            if (perf_event_r[6])
                 perf_r[8] <= perf_r[8] + 32'd1;
-            if (tx_busy_i)
+            if (perf_event_r[7])
                 perf_r[9] <= perf_r[9] + 32'd1;
-            if (udp_done_i)
+            if (perf_event_r[8])
                 perf_r[10] <= perf_r[10] + 32'd1;
             if (start_o) begin
                 perf_r[9] <= 32'd0;
@@ -287,5 +302,22 @@ module edrv32_eth_regs (
             12'h068: apb_prdata_o = perf_r[10];
             default: apb_prdata_o = 32'd0;
         endcase
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            perf_event_r <= 9'd0;
+            perf_length_r <= 11'd0;
+            perf_rx_complete_r <= 1'b0;
+        end else if (clear_o) begin
+            perf_event_r <= 9'd0;
+            perf_length_r <= 11'd0;
+            perf_rx_complete_r <= 1'b0;
+        end else begin
+            perf_event_r <= {udp_done_i && !start_o, tx_busy_i && !start_o, arp_done_i,
+                drop_i == 4'd7, drop_i == 4'd6, drop_i == 4'd5, drop_i == 4'd4,
+                drop_i == 4'd3, frame_i};
+            perf_length_r <= rx_complete_i ? rx_length_i : 11'd0;
+            perf_rx_complete_r <= rx_complete_i;
+        end
     end
 endmodule

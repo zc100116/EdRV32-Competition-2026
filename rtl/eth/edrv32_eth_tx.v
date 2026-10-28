@@ -107,6 +107,7 @@ module edrv32_eth_tx (
     wire [48:0] packet_head_w;
     wire queue_empty_w;
     reg [48:0] frame_r;
+    reg frame_busy_r;
     reg arp_r;
     reg [47:0] arp_mac_r;
     reg [31:0] arp_ip_r;
@@ -134,7 +135,7 @@ module edrv32_eth_tx (
     wire reserved_w;
     wire [10:0] next_length_w;
     assign running_o = active_r;
-    assign busy_o = active_r || frame_state_r != S_FRAME_IDLE;
+    assign busy_o = active_r || frame_busy_r;
     assign rd_base_w = state_r == S_DESC ? table_r : src_r;
     assign rd_width_w = state_r == S_DESC ? 16'd32 : {5'd0, length_r};
     assign rd_ready_w = state_r == S_DESC_DATA || state_r == S_DATA;
@@ -482,6 +483,7 @@ module edrv32_eth_tx (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             frame_state_r <= S_FRAME_IDLE;
+            frame_busy_r <= 1'b0;
             byte_idx_r <= 11'd0;
             arp_r <= 1'b0;
             identification_r <= 16'd0;
@@ -494,15 +496,18 @@ module edrv32_eth_tx (
                         arp_r <= 1'b1;
                         byte_idx_r <= 11'd0;
                         frame_state_r <= S_HEADER;
+                        frame_busy_r <= 1'b1;
                     end else if (packet_valid_w && !abort_r && !abort_i) begin
                         arp_r <= 1'b0;
                         byte_idx_r <= 11'd0;
                         frame_state_r <= S_HEADER;
+                        frame_busy_r <= 1'b1;
                     end
                 end
                 S_HEADER: begin
                     if (byte_idx_r == 0 && !arp_r && (abort_i || abort_r)) begin
                         frame_state_r <= S_FRAME_IDLE;
+                        frame_busy_r <= 1'b0;
                     end else if (ready_i) begin
                         if (byte_idx_r == 0 && !arp_r)
                             identification_r <= identification_r + 16'd1;
@@ -521,10 +526,15 @@ module edrv32_eth_tx (
                     end
                 end
                 S_FRAME_WAIT: begin
-                    if (frame_done_i)
+                    if (frame_done_i) begin
                         frame_state_r <= S_FRAME_IDLE;
+                        frame_busy_r <= 1'b0;
+                    end
                 end
-                default: frame_state_r <= S_FRAME_IDLE;
+                default: begin
+                    frame_state_r <= S_FRAME_IDLE;
+                    frame_busy_r <= 1'b0;
+                end
             endcase
         end
     end

@@ -180,7 +180,8 @@ module tb;
         write_reg(32'h10,2);
         for(integer i=3;i<=7;i++) begin
             @(negedge clk_i);drop_i=4'(i);
-            @(negedge clk_i);drop_i=0;check(32'h40+i*4,1);
+            @(negedge clk_i);drop_i=0;
+            @(negedge clk_i);check(32'h40+i*4,1);
         end
         write_reg(32'h168,32'h12345678);check(32'h168,0);
         write_reg(32'h28,0);check(32'h40,1);check(32'h60,1);check(32'h64,0);check(32'h68,0);
@@ -188,7 +189,7 @@ module tb;
         check(32'h180,0);check(32'h18c,0);check(32'hffc,0);
         write_reg(0,32'hffffffff);check(0,32'h00070001);
         write_reg(32'h188,0);check(32'h188,0);
-        write_reg(4,8);if(clears!=1) $fatal(1,"FAIL soft reset command");
+        write_reg(4,8);@(negedge clk_i);if(clears!=1) $fatal(1,"FAIL soft reset command");
         check(0,32'h00070001);check(8,2);check(32'h188,1);
         mdio_busy_i=0;mdio_data_i=0;
         for(integer a=4;a<32'h190;a+=4) if(a!=8 && a!=32'h188) check(a,0);
