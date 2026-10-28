@@ -1,8 +1,10 @@
++incdir+../include
 ../common/edrv32_cdc_sync_bit.v
 ../common/edrv32_cdc_pulse.v
 ../common/edrv32_cdc_handshake.v
 ../common/edrv32_cdc_gray_cnt.v
-../common/edrv32_async_fifo.v
+../common/edrv32_async_fifo_ram.v
+../tech/edrv32_ram_disp_scan.v
 ../common/edrv32_dma2d_rd.v
 ../media/disp/edrv32_disp_control.v
 ../media/disp/edrv32_disp_timing.v

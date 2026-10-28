@@ -1,5 +1,8 @@
++incdir+../include
 ../common/edrv32_async_fifo.v
 ../common/edrv32_sync_fifo.v
+../common/edrv32_sync_fifo_ram.v
+../tech/edrv32_ram_vin_wfifo.v
 ../common/edrv32_dma2d_rd.v
 ../common/edrv32_dma2d_wr.v
 ../media/vin/edrv32_vin_dvp.v
