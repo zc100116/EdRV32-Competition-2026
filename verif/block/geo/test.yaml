@@ -1,0 +1,11 @@
+top: edrv32_geo_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 60
+pass: PASS
+tier: smoke
+simulator: verilator
+group: verif/block/geo
+runner: python3 verif/block/geo/run.py smoke

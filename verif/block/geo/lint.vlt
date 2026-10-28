@@ -1,0 +1,7 @@
+`verilator_config
+// Behavioral models and BFMs intentionally update queues with blocking assignments.
+lint_off -rule BLKSEQ -file "*/verif/*"
+// The common APB interface exposes all sixteen slots; this harness uses slot 3.
+lint_off -rule UNUSEDSIGNAL -file "*/common/edrv32_apb_if.sv"
+// The existing checker uses 32-bit temporary integers for sixteen-entry table indices.
+lint_off -rule UNUSEDSIGNAL -file "*/common/edrv32_axi256_checker.sv"

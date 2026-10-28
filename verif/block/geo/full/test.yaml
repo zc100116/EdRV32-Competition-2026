@@ -1,0 +1,11 @@
+top: edrv32_geo_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 1800
+pass: PASS
+tier: full
+simulator: verilator
+group: verif/block/geo
+runner: python3 verif/block/geo/run.py full
