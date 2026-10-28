@@ -1,0 +1,10 @@
+top: edrv32_vin_pix_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 60
+pass: PASS
+tier: smoke
+simulator: verilator
+runner: python3 verif/block/vin/pix_integration/run.py
