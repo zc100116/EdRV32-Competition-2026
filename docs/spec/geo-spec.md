@@ -99,8 +99,8 @@ GEO 按块处理输出矩形：每个输出块（宽 BW × 高 BH 像素）在�
 | `clk_mem_i` | in | 1 | — | 125 MHz |
 | `rst_mem_n_i` | in | 1 | clk_mem | 媒体复位（系统子系统规格 2.10） |
 | `apb_paddr_i[11:0]`、`apb_psel_i`、`apb_penable_i`、`apb_pwrite_i`、`apb_pwdata_i[31:0]`、`apb_pstrb_i[3:0]`、`apb_pready_o`、`apb_prdata_o[31:0]`、`apb_pslverr_o` | — | — | clk_mem | 媒体 APB 槽 3 从口（SoC 4.3），与 VIN 相同；`apb_pready_o` 恒为 1，`apb_pslverr_o` 恒为 0 |
-| `p5_ar* p5_r*` | — | — | clk_mem | AXI256 读通道（SoC 4.2）：描述符、源像素 |
-| `p5_aw* p5_w* p5_b*` | — | — | clk_mem | AXI256 写通道（SoC 4.2）：输出像素 |
+| `p5_arid_o`、`p5_araddr_o[31:0]`、`p5_arlen_o[3:0]`、`p5_arvalid_o`、`p5_arready_i`、`p5_rid_i`、`p5_rdata_i[255:0]`、`p5_rresp_i[1:0]`、`p5_rlast_i`、`p5_rvalid_i`、`p5_rready_o` | — | — | clk_mem | AXI256 读通道（SoC 4.2）：描述符、源像素；ID 固定为 0 |
+| `p5_awid_o`、`p5_awaddr_o[31:0]`、`p5_awlen_o[3:0]`、`p5_awvalid_o`、`p5_awready_i`、`p5_wdata_o[255:0]`、`p5_wstrb_o[31:0]`、`p5_wlast_o`、`p5_wvalid_o`、`p5_wready_i`、`p5_bid_i`、`p5_bresp_i[1:0]`、`p5_bvalid_i`、`p5_bready_o` | — | — | clk_mem | AXI256 写通道（SoC 4.2）：输出像素；ID 固定为 0。P5 没有紧急信号（SoC 6.4.1） |
 | `irq_o` | out | 1 | clk_mem | PLIC 源 10，`|(IRQ_STAT & IRQ_EN)` |
 
 DDR 访问经 `dma2d_rd` / `dma2d_wr`（`dma2d-spec.md`），满足 SoC 4.2、8.11 的事务规则。
@@ -208,3 +208,4 @@ DDR 访问经 `dma2d_rd` / `dma2d_wr`（`dma2d-spec.md`），满足 SoC 4.2、8.
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-28 | v0.1 | 初稿。用户确认：软件给逆映射矩阵（Q16.16）；均匀缩小上限 s ≤ 2，超出报配置错误；帧时间按 s ≤ 1 / s ≤ 2 分档；越界采样点取背景色；输出写入输出 Surface 中的矩形 |
+| 2026-10-28 | v0.1 | 澄清（V-T4 问答，不改变已确认的行为）：第 3 节写出 P5 端口名和位宽 |
