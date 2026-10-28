@@ -78,6 +78,7 @@ module edrv32_eth (
     wire [31:0] rx_wr_data_w;
     wire rx_busy_w;
     wire arp_event_w;
+    wire arp_valid_w;
     wire [47:0] arp_rx_mac_w;
     wire [31:0] arp_rx_ip_w;
     wire frame_w;
@@ -147,6 +148,9 @@ module edrv32_eth (
     wire unused_w;
     assign write_error_w = axi_bvalid_i && axi_bready_o && axi_bresp_i != 0;
     assign busy_w = tx_busy_w || rx_busy_w || write_busy_w || write_packet_w || !write_idle_w;
+    // The registered RX event already owns the pending slot. Forward it when
+    // TX is idle so an extra pending-register hop cannot let a UDP packet win.
+    assign arp_valid_w = arp_pending_r || arp_event_w;
     assign eth_phy_rst_n_o = !phy_w;
     assign unused_w = &{1'b0, rx_front_ready_w, tx_front_data_w[9], irq_en_w, write_retire_error_w};
     always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
@@ -154,10 +158,10 @@ module edrv32_eth (
             arp_pending_r <= 1'b0;
         else if (clear_w)
             arp_pending_r <= 1'b0;
-        else if (arp_event_w)
-            arp_pending_r <= 1'b1;
         else if (arp_ready_w)
             arp_pending_r <= 1'b0;
+        else if (arp_event_w)
+            arp_pending_r <= 1'b1;
     end
     always @(posedge clk_mem_i) begin
         if (arp_event_w) begin
@@ -206,7 +210,7 @@ module edrv32_eth (
         .wr_addr_o(rx_wr_addr_w),
         .wr_data_o(rx_wr_data_w),
         .busy_o(rx_busy_w),
-        .arp_pending_i(arp_pending_r),
+        .arp_pending_i(arp_valid_w),
         .arp_o(arp_event_w),
         .arp_mac_o(arp_rx_mac_w),
         .arp_ip_o(arp_rx_ip_w),
@@ -312,10 +316,10 @@ module edrv32_eth (
         .dst_mac_i({dst_mac_hi_w, dst_mac_lo_w}),
         .dst_ip_i(dst_ip_w),
         .ports_i(ports_w),
-        .arp_valid_i(arp_pending_r),
+        .arp_valid_i(arp_valid_w),
         .arp_ready_o(arp_ready_w),
-        .arp_mac_i(arp_mac_r),
-        .arp_ip_i(arp_ip_r),
+        .arp_mac_i(arp_pending_r ? arp_mac_r : arp_rx_mac_w),
+        .arp_ip_i(arp_pending_r ? arp_ip_r : arp_rx_ip_w),
         .valid_o(tx_valid_w),
         .ready_i(tx_ready_w),
         .data_o(tx_data_w),
