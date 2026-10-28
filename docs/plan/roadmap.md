@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | Windows 任务卡 20261028-01-cpu-npu-synth：A 部分 CPU C-W4 第三轮 PDS 复测，B 部分完整 NPU N-W2 PDS；NPU：N-C1 完成，整网逐字节一致、21.6 fps（仿真模型），待 PDS 数据与规格 v0.4 确认；图像通路：VIN/DISP RTL、独立验证（V-T1/V-T2）和存储包装（V-P1/V-P2）完成，V-I1（VIN 联调）进行中；PIX/GEO、ETH 规格待起草 |
+| 正在进行 | Windows 任务卡 20261028-01-cpu-npu-synth：A 部分 CPU C-W4 第三轮 PDS 复测，B 部分完整 NPU N-W2 PDS；NPU：N-C1 完成，整网逐字节一致、21.6 fps（仿真模型），待 PDS 数据与规格 v0.4 确认；图像通路：VIN/DISP RTL、独立验证（V-T1/V-T2）和存储包装（V-P1/V-P2）完成，V-I1（VIN/DISP 联调）完成；PIX/GEO、ETH 规格待起草 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
