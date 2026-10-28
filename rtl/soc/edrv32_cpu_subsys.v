@@ -4,7 +4,7 @@
 //              Expose independent AXI64 masters and the PLIC source 6 interrupt.
 // Clock domain: clk_sys.
 module edrv32_cpu_subsys #(
-    parameter RVC_EN = 1
+    parameter RVC_EN = 0
 ) (
     // Clock and reset.
     input wire clk_i,

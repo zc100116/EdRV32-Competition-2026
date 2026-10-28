@@ -10,7 +10,7 @@
 // Clock       : clk_i only (constrained to the clk_sys target in the .fdc)
 // ============================================================================
 module edrv32_fpga_cpu_sys_top #(
-    parameter RVC_EN = 1
+    parameter RVC_EN = 0
 ) (
     // Board clock and active-low reset key.
     input wire clk_i,

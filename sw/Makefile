@@ -7,7 +7,7 @@ CC := riscv-none-elf-gcc
 OBJDUMP := riscv-none-elf-objdump
 OBJCOPY := riscv-none-elf-objcopy
 OUT := $(ROOT)/build/sw/$(PROGRAM)
-ARCH ?= rv32imc_zicsr
+ARCH ?= rv32im_zicsr
 SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
 PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
                $(filter monitor,$(PROGRAM)),sw/apps/monitor,$(if \

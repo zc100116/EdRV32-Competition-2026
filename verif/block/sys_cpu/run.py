@@ -40,15 +40,17 @@ def command(args, log):
 def build_program(program, name, memory='sram', opt='o2', request=False):
     out = OUT / 'sw' / name
     args = ['make', '-C', 'sw', f'PROGRAM={program}', f'OUT={out}', f'MEMORY={memory}']
+    if program == 'bootloader':
+        args += ['ARCH=rv32im_zicsr_zifencei']
     if program == 'coremark':
-        flags = ('-march=rv32imc_zicsr -mabi=ilp32 -std=c11 -Wall -Wextra -Werror '
+        flags = ('-march=rv32im_zicsr -mabi=ilp32 -std=c11 -Wall -Wextra -Werror '
                  + OPTS[opt] + ' -ffreestanding -fno-builtin -ffunction-sections '
                  '-fdata-sections -Isw/bsp/include -Isw/apps/coremark '
                  '-Ithird_party/coremark -Isw/drivers/include -DITERATIONS=10')
         # Make runs from sw/, while compilation resolves source paths from ROOT.
         flags = flags.replace('-Isw/', '-I' + str(ROOT / 'sw') + '/')
         flags = flags.replace('-Ithird_party/', '-I' + str(ROOT / 'third_party') + '/')
-        args += ['ARCH=rv32imc_zicsr', 'CFLAGS=' + flags,
+        args += ['ARCH=rv32im_zicsr', 'CFLAGS=' + flags,
                  'BSP=sw/bsp/start.S sw/tests/sys_cpu/host.c sw/drivers/uart.c',
                  'LDFLAGS=-nostdlib -Wl,--gc-sections -Wl,-T,sw/bsp/ld/' + memory +
                  '.ld -Wl,--wrap=main -Wl,-Map,' + str(out / 'coremark.map')]
