@@ -17,7 +17,9 @@ SECTIONS
 {
     .text : { KEEP(*(.text.start)) *(.text .text.*) } > SRAM :text
     .rodata : { *(.rodata .rodata.* .srodata .srodata.*) } > SRAM :text
-    .data : ALIGN(4)
+    /* SoC 7.5(3b): keep the initial values below their writable run-time copy. */
+    __data_image = ALIGN(4);
+    .data (__data_image + SIZEOF(.data)) : AT(__data_image)
     {
         __data_start = .;
         __global_pointer$ = . + 0x800;

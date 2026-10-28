@@ -17,7 +17,9 @@ SECTIONS
 {
     .text : { KEEP(*(.text.start)) *(.text .text.*) } > DDR :text
     .rodata : { *(.rodata .rodata.* .srodata .srodata.*) } > DDR :text
-    .data : ALIGN(4)
+    /* Preserve initial values across re-entry, as for SRAM applications. */
+    __data_image = ALIGN(4);
+    .data (__data_image + SIZEOF(.data)) : AT(__data_image)
     {
         __data_start = .;
         __global_pointer$ = . + 0x800;

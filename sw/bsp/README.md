@@ -30,7 +30,14 @@ addresses. Each hex token is **one byte** for `$readmemh` into a byte array.
 not emitted: BSP startup clears them, including tohost/fromhost. A memory with
 no file-backed bytes has an empty image; for the default ROM link, initialized
 SRAM data resides in ROM in the image and is copied at startup, so `sram.hex`
-and `ddr.hex` are empty. The SRAM and DDR link modes populate their own images.
+and `ddr.hex` are empty. The SRAM and DDR link modes populate their own images. For both, the aligned
+`.data` LMA follows text/rodata, while its VMA follows the initial-value copy:
+`VMA = LMA + SIZEOF(.data)`. BSS follows the writable data. Every startup copies
+LMA to VMA and clears BSS, leaving the image initial values intact for reset.
+GNU objcopy `-O binary` also emits file-backed bytes at their LMA; the raw SRAM
+binary therefore includes the initial-value copy. ROM already uses `> SRAM AT>
+ROM` for data and the same BSP copy loop; it needs no layout change. The BIOS
+uses a separate stack-only startup to preserve preloaded application memory.
 
 The testbench locates aligned 64-bit ELF symbols `tohost` and `fromhost`.
 `edrv32_exit(status)` writes `(status << 1) | 1`: **1 is PASS**, other odd values

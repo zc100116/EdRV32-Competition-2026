@@ -1,5 +1,5 @@
 /* File: start.S
- * Spec: CLAUDE.md 9.2; edrv32-soc-spec 5.3, 6.1
+ * Spec: CLAUDE.md 9.2; edrv32-soc-spec 5.3, 6.1, 7.5(3b)
  * Description: Initialize the stack, initialized data and zero data before main.
  *              Return main's status using the tohost test convention.
  * Clock domain: clk_sys.
