@@ -3,4 +3,17 @@
 ../common/edrv32_dma2d_wr.v
 ../tech/edrv32_ram_eth_buf.v
 ../tech/edrv32_ram_eth_fifo.v
+../common/edrv32_cdc_sync_bit.v
+../common/edrv32_cdc_pulse.v
+../common/edrv32_async_fifo_ram.v
+../common/edrv32_sync_fifo.v
+../eth/edrv32_eth_crc.v
+../eth/edrv32_eth_fifo.v
+../eth/edrv32_eth_mdio.v
+../eth/edrv32_eth_regs.v
+../eth/edrv32_eth_rx.v
+../eth/edrv32_eth_rx_front.v
+../eth/edrv32_eth_rx_write.v
+../eth/edrv32_eth_tx.v
+../eth/edrv32_eth_tx_front.v
 ../eth/edrv32_eth.v

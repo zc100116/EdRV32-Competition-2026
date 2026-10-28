@@ -1,0 +1,10 @@
+top: tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 180
+pass: PASS
+tier: smoke
+simulator: verilator
+verilator_flags: -Wall -Wno-TIMESCALEMOD -Wno-BLKSEQ -Wno-SYNCASYNCNET
