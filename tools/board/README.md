@@ -13,7 +13,18 @@ py tools/board/uart_tool.py build/sw/monitor/monitor.bin --port COM3 --log build
 先运行工具，再按住启动键（C23）并按复位键（C22），等下载开始后可松开启动键。
 工具等待 `UART download ready` 后发送镜像，持续显示串口输出并保存原始 CRLF 日志，
 Ctrl-C 停止。115200 波特、8N1，无流控。可选 `--menu 1` 在菜单出现后发送 `1` 和
-Enter，CoreMark 使用默认 10 次迭代；`--menu 3` 请求系统信息。要手动操作菜单时关闭
+Enter，CoreMark 使用默认 10 次迭代；加 `--iterations 5000` 时只发送 `1`，在
+`Iterations input` 提示出现后输入迭代次数和 Enter（CoreMark 要求运行至少 10 秒，
+100 MHz 下约需 4000 次以上）；`--menu 3` 请求系统信息。省略镜像参数时不下载，
+只记录 SRAM 初始化程序的输出并按 `--menu` 操作菜单：
+
+```sh
+py tools/board/uart_tool.py --port COM3 --log build/board/coremark_o2.log --menu 1 --iterations 5000
+```
+
+tuned 编译选项的监控程序：`make -C sw PROGRAM=monitor OUT=$PWD/build/sw/monitor_tuned
+MONITOR_OPT_FLAGS="-O3 -funroll-all-loops -finline-limit=600 -falign-functions=4
+-falign-jumps=4 -falign-loops=4"`。要手动操作菜单时关闭
 该工具后再用串口终端打开同一端口。
 
 仿真生成完全相同的下载字节流（不需要 pyserial）：
