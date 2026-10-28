@@ -14,7 +14,7 @@ module edrv32_sys_env;
     logic cam1_pclk = 0;
     logic eth_rx_clk = 0;
     logic eth_tx_clk = 0;
-    realtime sys_half = 3.333;
+    realtime sys_half = 5.0e8 / real'(EDRV32_CLK_SYS_HZ);
     realtime mem_half = 4.0;
     logic rst_n = 0;
     logic mem_ready = 0;

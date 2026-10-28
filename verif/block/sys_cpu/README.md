@@ -48,7 +48,7 @@ software's SCRATCH1 readiness marker. SC-05 checks eight register writes on
 each SCCB peer and continuously checks that the unselected port is released.
 
 SC-01 compares all five ASCII logo rows, the boot title, and every startup field
-against the SC hardware configuration: CHIP_ID `0xed320001`, clk_sys 150 MHz,
+against the SC hardware configuration: CHIP_ID `0xed320001`, clk_sys 100 MHz,
 ROM 16 KiB, SRAM 64 KiB, I$/D$ 8 KiB each, MEM_READY=1, SRAM application mode,
 and the actual build commit/compiler. The UART checker uses the S-W2 key contract
 in `sw/apps/monitor/README.md`.

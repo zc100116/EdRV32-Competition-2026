@@ -5,9 +5,12 @@
 // Clock domains: clk_sys and clk_mem; unused engine clock ports use clk_mem.
 /* verilator lint_off BLKSEQ */
 module edrv32_sys_cpu_tb;
+    /* verilator lint_off UNUSEDPARAM */
+    `include "edrv32_soc_map.vh"
+    /* verilator lint_on UNUSEDPARAM */
     reg clk_sys = 0;
     reg clk_mem = 0;
-    always #3.333 clk_sys = ~clk_sys;
+    always #(5.0e8 / real'(EDRV32_CLK_SYS_HZ)) clk_sys = ~clk_sys;
     always #4.0 clk_mem = ~clk_mem;
     reg rst_n = 0;
     reg mem_ready = 0;

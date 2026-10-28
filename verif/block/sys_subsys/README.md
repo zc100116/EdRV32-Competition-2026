@@ -36,8 +36,8 @@ SCCB 模型 `verif/models/sccb_model.sv` 响应写地址 0x78 / 读地址 0x79�
 `quarter_ns` 配置四相时序检查（0 关闭速率检查），覆盖 SCL 周期/高低时间、
 SDA 建立/保持和 START/STOP 建立/保持。
 
-默认系统时钟半周期 3.333 ns，媒体半周期 4 ns，相位偏移 1.137 ns；系统频率近似
-150 MHz（1 ps 时间精度），寄存器分频计算按规格 150 MHz。`sys_half` / `mem_half`
+默认系统时钟半周期 5 ns（从 `EDRV32_CLK_SYS_HZ` 计算），媒体半周期 4 ns，相位偏移 1.137 ns；系统频率为
+100 MHz（1 ps 时间精度），寄存器分频计算使用生成的时钟常量。`sys_half` / `mem_half`
 可配置；AB-07 遍历 0.5、0.83、1、2 的比率并随机化访问相位和从设备延迟。
 GPIO 激励由 `gpio` 提供，两个 SCCB peer 分别连接两对开漏引脚。
 
