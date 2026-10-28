@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX RTL 完成（V-R3），模块级验证 V-T3 进行中；GEO RTL 完成（V-R4），模块级验证 V-T4 进行中；ETH 规格 v0.1 已确认，模块级 smoke/full/perf 全部通过（V-I4）；待 PDS 资源测量（Yosys 参考 8684 LUT6，目标 5K） |
+| 正在进行 | CPU：C-R8 完成（CoreMark/MHz 3.553），Windows 任务卡 20261028-03（C-W5，第四轮 PDS）已下发；NPU：完整 NPU PDS 通过 150 MHz（+0.214 ns），规格 v0.4 已确认，N-V2 完成；图像通路：VIN/DISP 完成；PIX RTL 完成（V-R3），模块级验证 V-T3 进行中；GEO RTL（V-R4）和模块级测试（V-T4）完成，联调 V-I3 进行中；ETH 规格 v0.1 已确认，模块级 smoke/full/perf 全部通过（V-I4）；待 PDS 资源测量（Yosys 参考 8684 LUT6，目标 5K） |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -33,7 +33,7 @@
 | 公共单元（CDC、FIFO、dma2d） | `spec/dma2d-spec.md` v0.1（草案） | — | — | [~] dma2d 规格起草中 |
 | VIN / PIX / DISP | `spec/vin-spec.md` v0.1、`spec/pix-spec.md` v0.1、`spec/disp-spec.md` v0.2 | `testplan/vin-testplan.md`、`pix-testplan.md`、`disp-testplan.md` | `plan/vision-plan.md` | [~] VIN/DISP 完成；PIX RTL 完成，模块级验证中 |
 | RND | — | — | — | [ ] |
-| GEO | `spec/geo-spec.md` v0.1 | `testplan/geo-testplan.md` v0.1 | `plan/vision-plan.md` | [~] RTL 完成，模块级验证中 |
+| GEO | `spec/geo-spec.md` v0.1 | `testplan/geo-testplan.md` v0.1 | `plan/vision-plan.md` | [~] RTL 和模块级测试完成，联调中 |
 | NPU | `spec/npu-spec.md` v0.4 | `testplan/npu-testplan.md` v0.4 | `plan/npu-plan.md` | [~] 完整 NPU PDS 通过 150 MHz；待整网性能（N-P1） |
 | ETH | `spec/eth-spec.md` v0.1 | `testplan/eth-testplan.md` v0.1 | `plan/vision-plan.md`（V-R5、V-P5、V-T5、V-I4） | [~] 模块级验证通过，待 PDS 资源测量 |
 | 板级（fpga/rtl、约束、导入脚本） | — | — | — | [ ] |

@@ -36,10 +36,10 @@
 | V-R3 | PIX RTL 和单元测试 | Codex · GPT-6.1 Sol | V-P3 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-pix-rtl | [x] 2026-10-28：6 个 RTL 模块，单元 pix_point/pix_filter/pix_control smoke/full 6 PASS；Yosys 参考 33170 LUT6、5234 FF（远超 3K 估算，Gamma 表未映射为 LUTRAM；面积以 PDS 为准，另立任务） |
 | V-T3 | PIX 模块级测试（`verif/block/pix`，Python 参考模型 `pix_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（PIX） | testbench 按 pix-testplan 完成，参考模型自测通过 | task-pix-verif | [~] |
 | V-I2 | PIX 联调：block/pix smoke/full；VIN + PIX 联合测试 VI-18（pix-testplan 待定事项 1） | Codex · GPT-6.1 Sol | V-R3、V-T3 | pix testplan smoke/full 通过，VI-18 通过 | task-pix-int | [ ] |
-| V-R4 | GEO RTL 和单元测试；源缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S3（GEO） | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-geo-rtl | [x] 2026-10-28：cfbe787（分支 zc100116/task-geo-rtl，待与 V-T4 一起合入）；单元 6 项 PASS；Yosys 参考 9292 LUT6，≤ 8K 由 PDS 判定 |
+| V-R4 | GEO RTL 和单元测试；源缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S3（GEO） | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-geo-rtl | [x] 2026-10-28：7ac1a35（已并入协调者分支）；单元 6 项 PASS；Yosys 参考 9292 LUT6，≤ 8K 由 PDS 判定 |
 | V-P4 | GEO 源缓冲 IP 创建说明和包装模块（按 V-R4 提出的组织） | 协调者 | V-R4 提问 | `fpga/ip/`、`rtl/tech/` | — | [x] 2026-10-28：`ip_ram_geo_src` 写 256 × 128 / 读 2048 × 16，8 实例（每组 96 列 × 80 行，不回绕、无字节使能） |
-| V-T4 | GEO 模块级测试（`verif/block/geo`，Python 参考模型 `geo_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（GEO） | testbench 按 geo-testplan 完成，参考模型自测通过 | task-geo-verif | [~] |
-| V-I3 | GEO 联调：block/geo smoke/full/perf | Codex · GPT-6.1 Sol | V-R4、V-T4 | geo testplan smoke/full 通过，GE-12 满足第 7 节 | task-geo-int | [ ] |
+| V-T4 | GEO 模块级测试（`verif/block/geo`，Python 参考模型 `geo_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（GEO） | testbench 按 geo-testplan 完成，参考模型自测通过 | task-geo-verif | [x] 2026-10-28：92b340b（GE-01–13 三档，selftest PASS，未读 RTL） |
+| V-I3 | GEO 联调：block/geo smoke/full/perf | Codex · GPT-6.1 Sol | V-R4、V-T4 | geo testplan smoke/full 通过，GE-12 满足第 7 节 | task-geo-int | [~] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [x] 2026-10-28：eth-spec v0.1、eth-testplan v0.1 已确认；SoC 规格 v0.13；设计记录 `2026-10-28-eth.md` |
 | V-R5 | ETH RTL（`rtl/eth/`：收发前端、异步 FIFO、过滤和 ARP、窗口写出、分包发送、MDIO、寄存器）和单元测试；接收/发送缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S4 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-eth-rtl | [x] 2026-10-28：ec3d2af（已并入协调者分支）；单元 smoke 6、full 2 PASS；Yosys 参考 8684 LUT6（目标 5K，由 PDS 判定）|
 | V-P5 | ETH 接收/发送缓冲 IP 创建说明和包装模块（按 V-R5 提出的组织）；`rtl/filelists/eth.f` | 协调者 | V-R5 提问 | `fpga/ip/`、`rtl/tech/`、`rtl/filelists/` | — | [x] 2026-10-28：`ip_ram_eth_buf` 1024 × 32（接收、发送缓冲各 1 实例），`ip_ram_eth_fifo` 512 × 10 独立时钟（两个异步 FIFO） |
