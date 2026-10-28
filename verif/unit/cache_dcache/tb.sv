@@ -126,7 +126,7 @@ module tb;
             // P1 preserves the old error on every valid response cycle.
             if (dc_resp_err_o !== (dc_resp_valid_o &&
                 (dut.device_state_r == dut.D_RETURN ? dut.device_err_r :
-                (dut.state_r == dut.S_RETURN ? dut.fill_err_r : dut.pma_err_r))))
+                (dut.state_r == dut.S_RETURN ? dut.fill_err_r : dut.pma_err_w))))
                 $fatal(1, "FAIL D effective error changed time=%0t", $time);
             if (dc_wb_event_o !== (axi_awvalid_o && axi_awready_i && axi_awlen_o == 3))
                 $fatal(1, "FAIL writeback event timing");
@@ -291,7 +291,7 @@ module tb;
         while (!maint_req_ready_o) tick();
         tick(); step(); maint_req_valid_i = 0;
         dc_req_addr_i = 32'h10002000; #1;
-        if (dc_req_ready_o || !maint_busy_o) $fatal(1, "FAIL maintenance cache blocking");
+        if (!dc_req_ready_o || !maint_busy_o) $fatal(1, "FAIL maintenance request ready");
         access_word(32'h40000000, 0, 2, 32'h5aadbeef);
         while (maint_busy_o) tick();
         if (memory[1025] != 64'h1122aa0311223302)
@@ -306,7 +306,7 @@ module tb;
         maintenance(4, 0, 0);
         if (wb_events != wb_bursts || wb_events != 4)
             $fatal(1, "FAIL WB count events=%0d bursts=%0d", wb_events, wb_bursts);
-        // A PMA error must drop with response valid even though pma_err_r stays set.
+        // A PMA error must drop with response valid even though the registered address retains its PMA error.
         step(); dc_req_valid_i = 1; dc_req_addr_i = 32'h50000000;
         tick();
         if (!dc_resp_valid_o || !dc_resp_err_o) $fatal(1, "FAIL D PMA response");

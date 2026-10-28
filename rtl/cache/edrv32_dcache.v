@@ -79,6 +79,7 @@ module edrv32_dcache (
     localparam [3:0] S_MREAD = 4'd8;
     localparam [3:0] S_MCHECK = 4'd9;
     localparam [3:0] S_MNEXT = 4'd10;
+    localparam [3:0] S_REPLAY = 4'd11;
     localparam [3:0] D_IDLE = 4'd0;
     localparam [3:0] D_COMMIT = 4'd1;
     localparam [3:0] D_BUS = 4'd2;
@@ -99,7 +100,7 @@ module edrv32_dcache (
     reg [31:0] addr_r;
     reg store_r;
     reg [1:0] size_r;
-    reg pma_err_r;
+    reg deferred_lookup_r;
     reg victim_r;
     reg [6:0] victim_idx_r;
     reg [31:0] wb_addr_r;
@@ -136,7 +137,9 @@ module edrv32_dcache (
     wire device_w;
     wire pma_err_w;
     wire accept_w;
-    wire cached_accept_w;
+    wire request_cacheable_w;
+    wire request_device_w;
+    wire request_pma_err_w;
     wire device_accept_w;
     wire hit0_w;
     wire hit1_w;
@@ -178,11 +181,22 @@ module edrv32_dcache (
 
     assign device_shifted_w = axi_rdata_i >> {device_addr_r[2:0], 3'b0};
     assign unused_axi_w = &{1'b0, axi_rid_i, axi_bid_i, device_shifted_w[63:32],
-                                buffer_addr_r[1:0], cacheable_w};
-    edrv32_cache_pma u_pma (
+                                buffer_addr_r[1:0], cacheable_w,
+                                request_cacheable_w, request_pma_err_w};
+    // cache-spec 5.2/5.3: this early decode only suppresses device RAM reads.
+    // Acceptance and request control use the registered address's M-stage PMA.
+    edrv32_cache_pma u_request_pma (
         .addr_i(dc_req_addr_i),
         .execute_i(1'b0),
         .store_i(dc_req_store_i),
+        .cacheable_o(request_cacheable_w),
+        .device_o(request_device_w),
+        .err_o(request_pma_err_w)
+    );
+    edrv32_cache_pma u_pma (
+        .addr_i(addr_r),
+        .execute_i(1'b0),
+        .store_i(store_r),
         .cacheable_o(cacheable_w),
         .device_o(device_w),
         .err_o(pma_err_w)
@@ -190,22 +204,22 @@ module edrv32_dcache (
     assign hit0_w = valid0_r[addr_r[11:5]] && tag0_w == addr_r[31:12];
     assign hit1_w = valid1_r[addr_r[11:5]] && tag1_w == addr_r[31:12];
     assign hit_w = hit0_w || hit1_w;
-    assign lookup_done_w = lookup_valid_r && (pma_err_r || hit_w);
+    assign lookup_done_w = lookup_valid_r && !device_w && !deferred_lookup_r &&
+                            (pma_err_w || hit_w);
     assign dc_req_ready_o = device_state_r == D_IDLE &&
-        (maintenance_r ? device_w :
-            (state_r == S_IDLE && (!lookup_valid_r || lookup_done_w) &&
-            !maint_req_valid_i && !dc_clean_all_i));
+        (maintenance_r ? !lookup_valid_r :
+            (state_r == S_IDLE && (!lookup_valid_r || lookup_done_w)));
     assign accept_w = dc_req_valid_i && dc_req_ready_o;
-    assign cached_accept_w = accept_w && !device_w;
-    assign device_accept_w = accept_w && device_w;
-    assign dc_resp_device_o = device_state_r != D_IDLE;
+    assign device_accept_w = lookup_valid_r && device_w;
+    // PMA classification occurs after the E/M acceptance edge (cache-spec 5.3).
+    assign dc_resp_device_o = device_state_r != D_IDLE || device_accept_w;
     assign dc_resp_valid_o =
         ((state_r == S_IDLE && lookup_done_w) ||
             (state_r == S_RETURN && !killed_r) || device_state_r == D_RETURN);
     // cache-spec 6: qualify errors with registered response state, never tag hit.
     assign dc_resp_err_o = device_state_r == D_RETURN ? device_err_r :
         (state_r == S_RETURN ? (!killed_r && fill_err_r) :
-        (state_r == S_IDLE && lookup_valid_r && pma_err_r));
+        (state_r == S_IDLE && lookup_valid_r && !deferred_lookup_r && pma_err_w));
     assign raw_load_w = state_r == S_RETURN ?
                         (addr_r[2] ? result_r[63:32] : result_r[31:0]) :
                         (addr_r[2] ? (hit0_w ? data0_w[63:32] : data1_w[63:32]) :
@@ -225,8 +239,8 @@ module edrv32_dcache (
     assign dc_resp_data_o = device_state_r == D_RETURN ? device_result_r :
                             merged_load_w >> {addr_r[1:0], 3'b0};
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
-    assign store_result_w = (state_r == S_IDLE && lookup_valid_r && !pma_err_r &&
-                                hit_w && store_r) || return_store_w;
+    assign store_result_w = (state_r == S_IDLE && lookup_done_w && !pma_err_w && store_r) ||
+                            return_store_w;
     assign buffer_push_w = dc_commit_i && device_state_r == D_IDLE &&
                             (store_pending_r || store_result_w);
     assign push_addr_w = store_result_w ? addr_r : store_addr_r;
@@ -246,8 +260,10 @@ module edrv32_dcache (
     assign write_mask_w = buffer_valid_r ? buffer_mask64_w : 8'hff;
     assign read_addr_w = state_r == S_WB_READ ? {victim_idx_r, beat_r} :
                             (state_r == S_MREAD ? {maint_scan_r[7:1], 2'b0} :
-                                                                    dc_req_addr_i[11:3]);
-    assign ram_read_w = cached_accept_w || state_r == S_WB_READ || state_r == S_MREAD;
+                                (state_r == S_REPLAY ? addr_r[11:3] : dc_req_addr_i[11:3]));
+    assign ram_read_w = (accept_w && !maintenance_r && !maintenance_start_w &&
+                        !request_device_w) || state_r == S_REPLAY ||
+                        state_r == S_WB_READ || state_r == S_MREAD;
     assign scan_tag_w = maint_scan_r[0] ? tag1_w : tag0_w;
     assign scan_valid_w = maint_scan_r[0] ? valid1_r[maint_scan_r[7:1]] :
                                             valid0_r[maint_scan_r[7:1]];
@@ -339,11 +355,10 @@ module edrv32_dcache (
     );
     // Payload registers deliberately have no reset (cache-spec 5.5).
     always @(posedge clk_i) begin
-        if (cached_accept_w) begin
+        if (accept_w) begin
             addr_r <= dc_req_addr_i;
             size_r <= dc_req_size_i;
             store_r <= dc_req_store_i;
-            pma_err_r <= pma_err_w;
             forward_data_r <= buffer_data_r;
             forward_mask_r <= buffer_valid_r &&
                                 buffer_addr_r[31:2] == dc_req_addr_i[31:2] ? buffer_mask_r : 4'b0;
@@ -363,15 +378,17 @@ module edrv32_dcache (
             buffer_mask_r <= push_mask_w;
         end
         if (device_accept_w) begin
-            device_addr_r <= dc_req_addr_i;
-            device_size_r <= dc_req_size_i;
-            device_store_r <= dc_req_store_i;
+            device_addr_r <= addr_r;
+            device_size_r <= size_r;
+            device_store_r <= store_r;
         end
-        if (device_state_r == D_COMMIT && dc_commit_i) device_data_r <= dc_store_data_i;
+        if ((device_accept_w || device_state_r == D_COMMIT) && dc_commit_i)
+            device_data_r <= dc_store_data_i;
         if (device_state_r == D_R && axi_rvalid_i) begin
             device_result_r <= device_shifted_w[31:0];
         end
-        if (state_r == S_IDLE && lookup_valid_r && !pma_err_r && !hit_w) begin
+        if (state_r == S_IDLE && lookup_valid_r && !deferred_lookup_r &&
+            !device_w && !pma_err_w && !hit_w) begin
             wb_addr_r <= {lru_r[addr_r[11:5]] ? tag1_w : tag0_w, addr_r[11:5], 5'b0};
         end
         if (state_r == S_MCHECK && device_state_r == D_IDLE && !device_accept_w) begin
@@ -390,7 +407,9 @@ module edrv32_dcache (
             device_err_r <= 1'b0;
         end else begin
             case (device_state_r)
-                D_IDLE: if (device_accept_w) device_state_r <= D_COMMIT;
+                D_IDLE: if (device_accept_w && !dc_kill_i) begin
+                    device_state_r <= dc_commit_i ? D_BUS : D_COMMIT;
+                end
                 D_COMMIT: begin
                     if (dc_kill_i) device_state_r <= D_IDLE;
                     else if (dc_commit_i) device_state_r <= D_BUS;
@@ -426,6 +445,24 @@ module edrv32_dcache (
         end
     end
 
+    // A maintenance-time cached request owns the payload until its array replay.
+    // Device requests transfer to their sequencer without stopping the walker.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            lookup_valid_r <= 1'b0;
+            deferred_lookup_r <= 1'b0;
+        end else begin
+            if (accept_w) begin
+                lookup_valid_r <= 1'b1;
+                deferred_lookup_r <= maintenance_r || maintenance_start_w;
+            end else if (device_accept_w || dc_kill_i ||
+                (state_r == S_IDLE && !maintenance_r && !deferred_lookup_r)) begin
+                lookup_valid_r <= 1'b0;
+            end
+            if (state_r == S_REPLAY) deferred_lookup_r <= 1'b0;
+        end
+    end
+
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
@@ -434,7 +471,6 @@ module edrv32_dcache (
             dirty0_r <= 128'b0;
             dirty1_r <= 128'b0;
             lru_r <= 128'b0;
-            lookup_valid_r <= 1'b0;
             victim_r <= 1'b0;
             victim_idx_r <= 7'b0;
             killed_r <= 1'b0;
@@ -456,8 +492,7 @@ module edrv32_dcache (
             if (dc_kill_i && !maintenance_r && state_r != S_IDLE) killed_r <= 1'b1;
             case (state_r)
                 S_IDLE: begin
-                    lookup_valid_r <= cached_accept_w;
-                    if (lookup_valid_r && !pma_err_r) begin
+                    if (lookup_valid_r && !deferred_lookup_r && !device_w && !pma_err_w) begin
                         if (hit_w) lru_r[addr_r[11:5]] <= hit0_w;
                         else begin
                             victim_r <= lru_r[addr_r[11:5]];
@@ -476,6 +511,8 @@ module edrv32_dcache (
                             else valid0_r[addr_r[11:5]] <= 1'b0;
                         end
                     end
+                    if (lookup_valid_r && deferred_lookup_r && !device_w && !dc_kill_i)
+                        state_r <= S_REPLAY;
                     if (maintenance_start_w) begin
                         maintenance_r <= 1'b1;
                         fence_clean_r <= dc_clean_all_i;
@@ -487,6 +524,7 @@ module edrv32_dcache (
                         end
                     end
                 end
+                S_REPLAY: state_r <= S_IDLE;
                 S_AR: if (axi_arready_i) state_r <= S_FILL;
                 S_FILL: if (axi_rvalid_i) begin
                     fill_err_r <= fill_err_r || axi_rresp_i != 0;

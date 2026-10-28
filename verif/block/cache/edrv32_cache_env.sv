@@ -1021,16 +1021,48 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                     put(12'h020, B);
                     put(12'h028, 2);
                 end else begin
-                    @(negedge clk);
-                    dc_req_addr = A;
-                    // The blocked E instruction cannot enter M, so it must not
-                    // assert request-valid merely to probe address-dependent READY.
-                    dc_req_valid = 0;
-                    @(posedge clk);
-                    eq("maintenance blocks cacheable", 0, 64'(dc_req_ready));
-                    @(negedge clk);
-                    dc_req_valid = 0;
+                    // cpu-spec 3.3: unoccupied acceptance is independent of
+                    // request PMA, read/write type and size during maintenance.
+                    for (int kind = 0; kind < 6; kind++) begin
+                        for (int op = 0; op < 6; op++) begin
+                            @(negedge clk);
+                            case (kind)
+                                0: dc_req_addr = A;
+                                1: dc_req_addr = STATUS;
+                                2: dc_req_addr = 32'h80000000;
+                                3: dc_req_addr = 32'hc0000000;
+                                4: dc_req_addr = 0;
+                                default: dc_req_addr = 32'h50000000;
+                            endcase
+                            dc_req_store = 1'(op / 3);
+                            dc_req_size = 2'(op % 3);
+                            #1;
+                            eq("maintenance request ready", 1, 64'(dc_req_ready));
+                        end
+                    end
                     data_access(STATUS);
+                    eq("STATUS completed during maintenance", 1, 64'(maint_busy));
+                    // cache-spec 5.4: accept once, then retain the cached request
+                    // until the maintenance walker releases the arrays.
+                    fork
+                        data_access(A);
+                        begin
+                            wait (dc_req_valid && dc_req_ready);
+                            @(posedge clk);
+                            @(negedge clk);
+                            eq("cached accepted while busy", 1, 64'(maint_busy));
+                            while (maint_busy) begin
+                                eq("cached response waits for maintenance", 0,
+                                   64'(dc_resp_valid));
+                                if (u_dcache.ram_read_w) begin
+                                    eq("maintenance owns array reads", 1,
+                                       64'(u_dcache.state_r == u_dcache.S_MREAD ||
+                                           u_dcache.state_r == u_dcache.S_WB_READ));
+                                end
+                                @(negedge clk);
+                            end
+                        end
+                    join
                 end
                 while (maint_busy || maint_req_valid) idle();
                 expect_data_bus(B, 0, 0);
