@@ -33,7 +33,7 @@
 | V-P2 | 基于 RAM 的 FIFO 控制器（`edrv32_sync_fifo_ram`、`edrv32_async_fifo_ram`），VIN 写 FIFO、内存源缓冲、DISP 扫描 FIFO 改用 V-P1 包装 | Codex · GPT-6.1 Sol | V-P1 | FIFO 单元测试与 VIN/DISP 全部单元测试通过，lint 0 告警 | task-media-fifo-ram | [x] 2026-10-28 ea7f137：14 个单元目录 smoke/full 16/16 PASS；Yosys 参考 VIN 8829 LUT6（含 1160 位小 FIFO）、DISP 3947 LUT4，RAM 黑盒 3 + 1 |
 | V-S3 | PIX、GEO 规格 | 协调者 + 用户确认 | V-L1 | 规格已确认 | — | [~] 2026-10-28：PIX 规格 v0.1 与验证方案已确认（2951da8）；GEO 待起草 |
 | V-P3 | PIX 行缓存 IP 创建说明和包装模块 | 协调者 | V-S3（PIX） | `fpga/ip/ip_ram_pix_line.md`、`rtl/tech/edrv32_ram_pix_line.v` | — | [x] 2026-10-28：1024 × 48 简单双口，4 实例 |
-| V-R3 | PIX RTL 和单元测试 | Codex · GPT-6.1 Sol | V-P3 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-pix-rtl | [ ] |
+| V-R3 | PIX RTL 和单元测试 | Codex · GPT-6.1 Sol | V-P3 | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-pix-rtl | [x] 2026-10-28：6 个 RTL 模块，单元 pix_point/pix_filter/pix_control smoke/full 6 PASS；Yosys 参考 33170 LUT6、5234 FF（远超 3K 估算，Gamma 表未映射为 LUTRAM；面积以 PDS 为准，另立任务） |
 | V-T3 | PIX 模块级测试（`verif/block/pix`，Python 参考模型 `pix_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（PIX） | testbench 按 pix-testplan 完成，参考模型自测通过 | task-pix-verif | [ ] |
 | V-I2 | PIX 联调：block/pix smoke/full；VIN + PIX 联合测试 VI-18（pix-testplan 待定事项 1） | Codex · GPT-6.1 Sol | V-R3、V-T3 | pix testplan smoke/full 通过，VI-18 通过 | task-pix-int | [ ] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [ ] |
