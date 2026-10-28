@@ -281,7 +281,7 @@ Linux 端工具安装在用户目录（没有 root 权限），使用前执行 `
 
 - 每个测试目录包含 `test.yaml`（顶层、文件列表、宏、参数、软件程序、超时、判定方式、所属回归档位）和 `files.f`，以及 testbench 源文件。
 - testbench 用 Verilator 能运行的 SystemVerilog 子集编写。必须自检：输出 `PASS` 或 `FAIL`，并以进程退出码返回结果。
-- 回归统一入口：`tools/regress.py`（以及调用它的 `make` 目标）。档位：`smoke`（单项不超过约 60 秒，整套约 15 分钟）、`full`（里程碑）、`perf`（性能基线比对）。超过 60 秒的测试放进 `full`。
+- 回归统一入口：`tools/regress.py`（以及调用它的 `make` 目标）。档位：`smoke`（单项不超过约 60 秒，整套约 30 分钟，`--parallel 3`）、`full`（里程碑）、`perf`（性能基线比对）。超过 60 秒的测试放进 `full`。
 - 跑哪些测试：worker 提交前跑 Task 验收列出的测试和本次改动涉及的测试目录；合入 `main` 前跑本次改动涉及的测试目录（按改动的文件和文件列表依赖确定，`--path` 指定）；整套 `smoke`、`full` 只在里程碑跑。worker 的证据充分时，协调者不重复运行。
 - worker 运行回归用 `-j 1`、不用 `--parallel`，同一时刻只跑一个仿真；协调者在没有 worker 运行时可以用 `--parallel 3` 跑整套回归。共用构建目录的测试在 `test.yaml` 的 `group` 中写明所属组（默认 `verif/<层级>/<模块>`），同组串行。
 - 修复一个缺陷，必须同时新增或修改能复现它的测试。
