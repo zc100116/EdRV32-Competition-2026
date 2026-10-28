@@ -296,6 +296,18 @@ module tb;
         while (maint_busy_o) tick();
         if (memory[1025] != 64'h1122aa0311223302)
             $fatal(1, "FAIL clean data %h", memory[1025]);
+        // cache-spec 5.4: an empty range finishes immediately. A simultaneous
+        // accepted cached hit retains the next-cycle latency from 5.2.
+        step(); maint_cmd_i = 1; maint_size_i = 0; maint_req_valid_i = 1;
+        dc_req_valid_i = 1; dc_req_addr_i = 32'h1000200c;
+        dc_req_store_i = 0; dc_req_size_i = 2;
+        #1;
+        if (!dc_req_ready_o || !maint_req_ready_o)
+            $fatal(1, "FAIL empty maintenance simultaneous acceptance");
+        tick();
+        if (maint_busy_o || !dc_resp_valid_o || dc_resp_data_o != 32'h1122aa03)
+            $fatal(1, "FAIL empty maintenance hit latency/data got=%h", dc_resp_data_o);
+        step(); maint_req_valid_i = 0; dc_req_valid_i = 0; tick();
         // FENCE.I is a held request and completes once.
         access_word(32'h10002000, 1, 2, 32'h12345678);
         step(); dc_clean_all_i = 1;

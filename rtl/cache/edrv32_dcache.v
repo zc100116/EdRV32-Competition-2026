@@ -171,6 +171,7 @@ module edrv32_dcache (
     wire [31:0] scan_addr_w;
     wire scan_match_w;
     wire maintenance_start_w;
+    wire maintenance_array_start_w;
     wire device_bus_free_w;
     wire device_bus_active_w;
     wire [31:0] raw_load_w;
@@ -261,7 +262,7 @@ module edrv32_dcache (
     assign read_addr_w = state_r == S_WB_READ ? {victim_idx_r, beat_r} :
                             (state_r == S_MREAD ? {maint_scan_r[7:1], 2'b0} :
                                 (state_r == S_REPLAY ? addr_r[11:3] : dc_req_addr_i[11:3]));
-    assign ram_read_w = (accept_w && !maintenance_r && !maintenance_start_w &&
+    assign ram_read_w = (accept_w && !maintenance_r && !maintenance_array_start_w &&
                         !request_device_w) || state_r == S_REPLAY ||
                         state_r == S_WB_READ || state_r == S_MREAD;
     assign scan_tag_w = maint_scan_r[0] ? tag1_w : tag0_w;
@@ -280,6 +281,9 @@ module edrv32_dcache (
     assign maintenance_start_w = (maint_req_valid_i && maint_req_ready_o) ||
         (dc_clean_all_i && !clean_seen_r && !maintenance_r && state_r == S_IDLE &&
             device_state_r == D_IDLE && !lookup_valid_r && !store_pending_r && !buffer_valid_r);
+    // cache-spec 5.4: zero-length range commands finish without array ownership.
+    assign maintenance_array_start_w = maintenance_start_w &&
+        (dc_clean_all_i || maint_cmd_i == 4 || maint_size_i != 0);
     assign dc_fence_done_o = fence_done_r ||
         (dc_fence_i && !buffer_valid_r && !buffer_push_w);
     // cache-spec v0.3, 5.2: one HPM event for each accepted dirty-line AW.
@@ -454,7 +458,7 @@ module edrv32_dcache (
         end else begin
             if (accept_w) begin
                 lookup_valid_r <= 1'b1;
-                deferred_lookup_r <= maintenance_r || maintenance_start_w;
+                deferred_lookup_r <= maintenance_r || maintenance_array_start_w;
             end else if (device_accept_w || dc_kill_i ||
                 (state_r == S_IDLE && !maintenance_r && !deferred_lookup_r)) begin
                 lookup_valid_r <= 1'b0;
