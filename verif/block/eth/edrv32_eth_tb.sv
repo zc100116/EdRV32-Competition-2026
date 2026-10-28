@@ -145,10 +145,11 @@ module edrv32_eth_tb;
             end else u_memory.mem[address] = data;
         end
         if (checking_i) begin
-            foreach (u_memory.mem[address]) begin
-                data = expected.exists(address) != 0 ? expected[address] : 8'ha5;
-                compare($sformatf("DDR stray byte=%h", address), 32'(data),
-                    32'(u_memory.mem[address]));
+            foreach (u_memory.mem[written_address]) begin
+                data = expected.exists(written_address) != 0 ?
+                    expected[written_address] : 8'ha5;
+                compare($sformatf("DDR stray byte=%h", written_address), 32'(data),
+                    32'(u_memory.mem[written_address]));
             end
         end
         $fclose(fd);
@@ -210,6 +211,8 @@ module edrv32_eth_tb;
                 if (u_peer.frame_start-arp_deadline_start > 10000.0)
                     $fatal(1, "FAIL ARP latency expected<=10000ns actual=%0f time=%0t",
                         u_peer.frame_start-arp_deadline_start, $time);
+                $display("ETH ARP latency_ns=%0f frame=%0d",
+                    u_peer.frame_start-arp_deadline_start, checked_count);
             end
             checked_count++;
         end
@@ -382,8 +385,9 @@ module edrv32_eth_tb;
                             32'(u_memory.b_count));
                         compare("AXI checker", 0, 32'(checker_errors));
                         apb_access(0, 12'h064, 0, perf9_snapshot);
-                        if (perf9_snapshot == 0)
+                        if (a != 0 && perf9_snapshot == 0)
                             $fatal(1, "FAIL PERF9 expected>0 actual=0 time=%0t", $time);
+                        if (a == 0) compare("RX-only PERF9", 0, perf9_snapshot);
                         repeat (20) @(negedge clk_mem);
                         apb_access(0, 12'h064, 0, value);
                         compare("PERF9 stopped", perf9_snapshot, value);

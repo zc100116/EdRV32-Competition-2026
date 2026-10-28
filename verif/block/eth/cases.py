@@ -151,7 +151,7 @@ class Case:
         self.r(0x2c, self.desc_done)
         self.r(0x130, count)
         self.irq |= 1
-        self.cmd('E')
+        self.cmd('E', 1)
 
     def snapshot(self, *, counters=True, memory=True, peer=True, notify=True):
         if memory:
@@ -453,7 +453,7 @@ def et11(root):
                 case.poll(8, 6, 7)
             case.r(0x130, 0)
             case.r(0x2c, 0)
-            case.cmd('E')
+            case.cmd('E', 1)
             case.w(0x10, 2)
             case.r(0x14, 0)
             case.control(10, 0xffffffff)
