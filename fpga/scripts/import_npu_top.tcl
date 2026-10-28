@@ -12,11 +12,9 @@
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_npu_top
-# Match the previous Windows build: pass the source header directory and the
-# FPGA project directory explicitly to PDS through compile -include_path.
-set edrv32_include_dirs [list \
-    [file join $edrv32_repo rtl include] \
-    [file normalize .]]
+# Pass the header directory as one path to the PDS Tcl command. PDS adds the
+# project directory itself; no extra directory list is needed here.
+set edrv32_include_dirs [file join $edrv32_repo rtl include]
 set edrv32_defines [list FPGA_MODE]
 
 # Expand a filelist: "-f x.f" recurses, "+incdir+" lines are covered by
