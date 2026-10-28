@@ -215,11 +215,12 @@ module tb_npu #(
         access(0, addr, 0, value);
     endtask
 
-    task automatic equals(input bit [11:0] addr, input bit [31:0] expected);
+    task automatic equals(input bit [11:0] addr, input bit [31:0] expected,
+        input string name = "");
         bit [31:0] actual;
         rd(addr, actual);
-        check(actual == expected, $sformatf("reg=%03h expected=%08h actual=%08h",
-            addr, expected, actual));
+        check(actual == expected, $sformatf("reg=%s addr=%03h expected=%08h actual=%08h",
+            name, addr, expected, actual));
     endtask
 
     function automatic bit [11:0] reg_addr(input string name);
@@ -385,6 +386,40 @@ module tb_npu #(
         equals('h004, 0);
     endtask
 
+    task automatic soft_reset_registers();
+        bit [11:0] rw[8] = '{'h004, 'h00c, 'h020, 'h024, 'h100, 'h104, 'h108, 'h10c};
+        string names[8] = '{"CTRL", "IRQ_EN", "DESC_BASE", "DESC_COUNT",
+            "MODEL_BASE", "WORK_BASE", "INPUT_BASE", "OUTPUT_BASE"};
+        bit [31:0] expected;
+        bit [31:0] actual;
+        // npu-spec 4 / RG-01: reset a populated register block while IDLE.
+        equals('h008, 2, "STATUS before SOFT_RST");
+        equals('h010, 1, "IRQ_STAT before SOFT_RST");
+        equals('h02c, 1, "DONE_COUNT before SOFT_RST");
+        equals('h110, 32'(desc_count-1), "CUR_DESC before SOFT_RST");
+        for (int n = 0; n < 8; n++) begin
+            rd(12'('h040+n*4), actual);
+            check(actual != 0,
+                $sformatf("reg=PERF[%0d] before SOFT_RST expected=nonzero actual=%08h", n, actual));
+        end
+        for (int n = 0; n < 8; n++) begin
+            expected = n == 0 ? 1 : (n == 1 ? 3 : 'h12345000+32'(n*'h1000));
+            wr(rw[n], expected);
+            equals(rw[n], expected, {names[n], " before SOFT_RST"});
+        end
+        // Keep ENABLE set in the triggering write so SOFT_RST must clear it.
+        wr('h004, 9);
+        equals('h000, 'h00060001, "ID after SOFT_RST");
+        equals('h008, 2, "STATUS after SOFT_RST");
+        equals('h010, 0, "IRQ_STAT after SOFT_RST");
+        equals('h014, 0, "ERR_CODE after SOFT_RST");
+        equals('h02c, 0, "DONE_COUNT after SOFT_RST");
+        equals('h110, 0, "CUR_DESC after SOFT_RST");
+        for (int n = 0; n < 8; n++) equals(rw[n], 0, {names[n], " after SOFT_RST"});
+        for (int n = 0; n < 16; n++)
+            equals(12'('h040+n*4), 0, $sformatf("PERF[%0d] after SOFT_RST", n));
+    endtask
+
     task automatic wait_idle();
         bit [31:0] status;
         do rd('h008, status); while (status[0]);
@@ -472,10 +507,12 @@ module tb_npu #(
         end
         load_reference(path);
         compare_outputs(path);
-        wr('h010, 1);
-        equals('h010, 0);
-        repeat (3) @(negedge clk_npu);
-        check(!irq, "RW1C DONE did not clear irq");
+        if (test_id != "RG-01") begin
+            wr('h010, 1);
+            equals('h010, 0);
+            repeat (3) @(negedge clk_npu);
+            check(!irq, "RW1C DONE did not clear irq");
+        end
         $display("METRICS npu_cycles=%0d doorbell_irq_cycles=%0d", npu_cycles, frame_busy_cycles);
         $display("MEM read_beats=%0d write_beats=%0d mem_cycles=%0d",
             u_mem.read_beats, u_mem.write_beats, u_mem.elapsed_cycles());
@@ -667,6 +704,7 @@ module tb_npu #(
             start_frame();
         end
         finish_frame(case_dir);
+        if (test_id == "RG-01") soft_reset_registers();
         if (frame2_dir != "") begin
             // The model and descriptor image stay fixed across frames.
             base = reg_values[4];

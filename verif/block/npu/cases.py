@@ -100,7 +100,10 @@ def recipes(test):
             options or {}, patch))
 
     if test == 'RG-01':
-        add('registers', [conv()])
+        # Exercise MAC and non-CONV counters, and leave CUR_DESC nonzero before SOFT_RST.
+        add('registers', [conv(in_w=4, in_h=1, cout=16),
+                          dict(op='pool', in_w=4, in_h=1, cin=16, cout=16,
+                               in_from=0, out_sel='output', out_offset=0)])
     elif test == 'RG-02':
         layers = chain(3)
         for layer in layers:
