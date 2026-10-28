@@ -919,7 +919,7 @@
         input int id
     );
         int before_bytes;
-        w32(EDRV32_I2C0_BASE + 'h014, 93);
+        w32(EDRV32_I2C0_BASE + 'h014, (EDRV32_CLK_SYS_HZ + 800000) / 1600000 - 1);
         case (id)
             801: begin
                 for (int port_index = 0; port_index < 2; port_index++) begin
@@ -971,7 +971,8 @@
             805: begin
                 for (int speed = 0; speed < 2; speed++) begin
                     int div;
-                    div = speed == 0 ? 374 : 93;
+                    div = speed == 0 ? (EDRV32_CLK_SYS_HZ + 200000) / 400000 - 1
+                                    : (EDRV32_CLK_SYS_HZ + 800000) / 1600000 - 1;
                     w32(EDRV32_I2C0_BASE + 'h014, 32'(div));
                     u_cam0.quarter_ns = real'(div + 1) * 2.0 * sys_half;
                     i2c_write_register(0, 'hc3);

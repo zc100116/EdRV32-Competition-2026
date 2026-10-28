@@ -69,7 +69,8 @@ int main(void)
         return 7;
     }
     uart_set_baud(EDRV32_CLK_SYS_HZ, 115200u);
-    if (mmio_read32(EDRV32_UART0_BASE + UART_BAUD_DIV) != 20833u) {
+    if (mmio_read32(EDRV32_UART0_BASE + UART_BAUD_DIV) !=
+        ((uint64_t)EDRV32_CLK_SYS_HZ * 16u + 57600u) / 115200u) {
         return 8;
     }
     uart_init();

@@ -7,9 +7,12 @@ import json
 from pathlib import Path
 import re
 
-SOC_MAP = json.loads(
-    (Path(__file__).resolve().parents[3] / 'rtl/include/soc_address_map.json').read_text())
-REGIONS = {region['name']: region for region in SOC_MAP['regions']}
+ROOT = Path(__file__).resolve().parents[3]
+REGIONS = {region['name']: region for region in json.loads(
+    (ROOT / 'rtl/include/soc_address_map.json').read_text())['regions']}
+CONSTANTS = {name: int(value, 16) for name, value in re.findall(
+    r'^#define (EDRV32_\w+) (0x[0-9a-fA-F]+)u$',
+    (ROOT / 'sw/bsp/include/soc_map.h').read_text(), re.MULTILINE)}
 
 MENU = 'Menu: 1=CoreMark 2=Peripheral tests 3=System info'
 LOGO = (
@@ -49,7 +52,7 @@ def formatted(text, key, pattern, count=1):
 def check_system_info(text, commit, compiler):
     # sys-subsys-spec 2.9/4.6 and SoC 6.1/8.2: fixed SC hardware configuration.
     expected = {
-        'CHIP_ID': '0xed320001', 'CLK_SYS_HZ': str(SOC_MAP['clk_sys_hz']),
+        'CHIP_ID': '0xed320001', 'CLK_SYS_HZ': str(CONSTANTS['EDRV32_CLK_SYS_HZ']),
         'ROM bytes': '16384', 'SRAM bytes': str(int(REGIONS['SRAM']['size'], 0)),
         'I-cache bytes': '8192', 'D-cache bytes': '8192', 'MEM_READY': '1',
         'Boot mode': 'SRAM app', 'Build commit': commit, 'Compiler version': compiler,

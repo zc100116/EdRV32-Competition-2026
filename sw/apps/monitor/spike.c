@@ -64,7 +64,8 @@ int main(void)
     };
     capture_enabled = 1;
     monitor_metrics(cycles, 1500u, events);
-    info_ratio("Iterations/Sec", EDRV32_CLK_SYS_HZ, 200000u);
+    /* One synthetic iteration lasting 1/500 second at the generated clock. */
+    info_ratio("Iterations/Sec", EDRV32_CLK_SYS_HZ, EDRV32_CLK_SYS_HZ / 500u);
     info_ratio("CoreMark/MHz", 1000000u, 200000u);
     info_ratio("Zero denominator", 0u, 0u);
     info_number("Wide count", UINT64_C(4294967297));
@@ -78,7 +79,7 @@ int main(void)
                    "Branch mispredict rate: 0.050\r\n"
                    "I-cache MPKI: 2.000\r\n"
                    "D-cache MPKI: 4.000\r\n"
-                   "Iterations/Sec: 750.000\r\n"
+                   "Iterations/Sec: 500.000\r\n"
                    "CoreMark/MHz: 5.000\r\n"
                    "Zero denominator: N/A (denominator=0)\r\n"
                    "Wide count: 4294967297\r\n")) {
