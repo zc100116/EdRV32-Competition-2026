@@ -114,7 +114,7 @@ module edrv32_board_b1_tb;
                     "BIOS menu: 1=Program SRAM": bios_menus++;
                     "Program SRAM result: PASS, press reset to run": download_complete = 1;
                     "B1 UART application PASS": app_messages++;
-                    "B1 data: 7 bss: 0": app_values++;
+                    "B1 data hi/lo: 7/7 bss: 0": app_values++;
                     "System info result: PASS": info_pass = 1;
                     "ISA: rv32im_zicsr_zifencei": isa_seen = 1;
                     default: begin end

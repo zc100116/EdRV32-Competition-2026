@@ -32,7 +32,9 @@ no file-backed bytes has an empty image; for the default ROM link, initialized
 SRAM data resides in ROM in the image and is copied at startup, so `sram.hex`
 and `ddr.hex` are empty. The SRAM and DDR link modes populate their own images. For both, the aligned
 `.data` LMA follows text/rodata, while its VMA follows the initial-value copy:
-`VMA = LMA + SIZEOF(.data)`. BSS follows the writable data. Every startup copies
+`VMA = LMA + SIZEOF(.data)`. The image start and data end both use
+`MAX(4, ALIGNOF(.data))`, preserving input alignment and keeping the two copies
+disjoint even for aligned 64-bit globals. BSS follows the writable data. Every startup copies
 LMA to VMA and clears BSS, leaving the image initial values intact for reset.
 GNU objcopy `-O binary` also emits file-backed bytes at their LMA; the raw SRAM
 binary therefore includes the initial-value copy. ROM already uses `> SRAM AT>

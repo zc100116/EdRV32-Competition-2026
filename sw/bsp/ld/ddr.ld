@@ -18,13 +18,13 @@ SECTIONS
     .text : { KEEP(*(.text.start)) *(.text .text.*) } > DDR :text
     .rodata : { *(.rodata .rodata.* .srodata .srodata.*) } > DDR :text
     /* Preserve initial values across re-entry, as for SRAM applications. */
-    __data_image = ALIGN(4);
+    __data_image = ALIGN(MAX(4, ALIGNOF(.data)));
     .data (__data_image + SIZEOF(.data)) : AT(__data_image)
     {
         __data_start = .;
         __global_pointer$ = . + 0x800;
         *(.data .data.* .sdata .sdata.*)
-        . = ALIGN(4);
+        . = ALIGN(MAX(4, ALIGNOF(.data)));
         __data_end = .;
     } > DDR :data
     __data_load = LOADADDR(.data);

@@ -33,8 +33,8 @@ B1-8 BIOS flow (SoC spec v0.14 7.5): `download/` holds KEY1 through reset,
 checks the BIOS banner/menu, sends `1` CR LF, waits for `UART download ready`,
 then sends the `uart_tool --emit` length/image stream. It checks the exact byte
 count and PASS result and a returned BIOS menu before releasing KEY1 and
-resetting through `rst_n_i` twice. Each execution prints `B1 data: 7 bss: 0`,
-then changes both globals and calls `cache_clean_all()` before SIM_EXIT; the
+resetting through `rst_n_i` twice. Each execution prints `B1 data hi/lo: 7/7 bss: 0`,
+uses a 32-byte-aligned 64-bit initialized global, then changes both globals and calls `cache_clean_all()` before SIM_EXIT; the
 second reset therefore proves data restoration and BSS clearing in SRAM.
 
 The shared `verif/block/sys_cpu/edrv32_boot_window.sv` helper accelerates only testbench CLINT time:

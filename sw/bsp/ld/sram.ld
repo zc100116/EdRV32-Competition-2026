@@ -18,13 +18,13 @@ SECTIONS
     .text : { KEEP(*(.text.start)) *(.text .text.*) } > SRAM :text
     .rodata : { *(.rodata .rodata.* .srodata .srodata.*) } > SRAM :text
     /* SoC 7.5(3b): keep the initial values below their writable run-time copy. */
-    __data_image = ALIGN(4);
+    __data_image = ALIGN(MAX(4, ALIGNOF(.data)));
     .data (__data_image + SIZEOF(.data)) : AT(__data_image)
     {
         __data_start = .;
         __global_pointer$ = . + 0x800;
         *(.data .data.* .sdata .sdata.*)
-        . = ALIGN(4);
+        . = ALIGN(MAX(4, ALIGNOF(.data)));
         __data_end = .;
     } > SRAM :data
     __data_load = LOADADDR(.data);

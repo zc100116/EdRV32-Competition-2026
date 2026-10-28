@@ -7,14 +7,17 @@
 #include "uart.h"
 #include "cache.h"
 
-static volatile uint32_t initialized = 7u;
+static volatile uint64_t initialized __attribute__((aligned(32))) =
+    UINT64_C(0x0000000700000007);
 static volatile uint32_t zeroed;
 
 int main(void)
 {
     /* The bootloader has already configured UART at 115200 8N1. */
-    uart_puts("B1 data: ");
-    uart_putc((uint8_t)('0' + initialized));
+    uart_puts("B1 data hi/lo: ");
+    uart_putc((uint8_t)('0' + (uint32_t)(initialized >> 32)));
+    uart_putc('/');
+    uart_putc((uint8_t)('0' + (uint32_t)initialized));
     uart_puts(" bss: ");
     uart_putc((uint8_t)('0' + zeroed));
     uart_puts("\r\n");
