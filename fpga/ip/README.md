@@ -24,6 +24,7 @@
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 待生成 |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1 | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 待生成 |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 待生成 |
+| `ip_ram_geo_src` | DRM 简单双口 RAM，读写位宽不同 | 写 256 × 128 / 读 2048 × 16 | `edrv32_ram_geo_src` | GEO 源缓冲 ×8 | [ip_ram_geo_src.md](ip_ram_geo_src.md) | 待生成 |
 
 PLL、DDR3 控制器等板级 IP 在板级阶段补充。
 

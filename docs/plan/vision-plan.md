@@ -37,7 +37,7 @@
 | V-T3 | PIX 模块级测试（`verif/block/pix`，Python 参考模型 `pix_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（PIX） | testbench 按 pix-testplan 完成，参考模型自测通过 | task-pix-verif | [ ] |
 | V-I2 | PIX 联调：block/pix smoke/full；VIN + PIX 联合测试 VI-18（pix-testplan 待定事项 1） | Codex · GPT-6.1 Sol | V-R3、V-T3 | pix testplan smoke/full 通过，VI-18 通过 | task-pix-int | [ ] |
 | V-R4 | GEO RTL 和单元测试；源缓冲组织确定后 ask 协调者建存储包装 | Codex · GPT-6.1 Sol | V-S3（GEO） | 单元测试通过，lint 0 告警；Yosys 参考 LUT | task-geo-rtl | [ ] |
-| V-P4 | GEO 源缓冲 IP 创建说明和包装模块（按 V-R4 提出的组织） | 协调者 | V-R4 提问 | `fpga/ip/`、`rtl/tech/` | — | [ ] |
+| V-P4 | GEO 源缓冲 IP 创建说明和包装模块（按 V-R4 提出的组织） | 协调者 | V-R4 提问 | `fpga/ip/`、`rtl/tech/` | — | [x] 2026-10-28：`ip_ram_geo_src` 写 256 × 128 / 读 2048 × 16，8 实例（每组 96 列 × 80 行，不回绕、无字节使能） |
 | V-T4 | GEO 模块级测试（`verif/block/geo`，Python 参考模型 `geo_ref.py`），不读被测 RTL | Codex · GPT-6.1 Sol | V-S3（GEO） | testbench 按 geo-testplan 完成，参考模型自测通过 | task-geo-verif | [ ] |
 | V-I3 | GEO 联调：block/geo smoke/full/perf | Codex · GPT-6.1 Sol | V-R4、V-T4 | geo testplan smoke/full 通过，GE-12 满足第 7 节 | task-geo-int | [ ] |
 | V-S4 | ETH 规格（网口图像协议、ARP） | 协调者 + 用户确认 | — | 规格已确认 | — | [ ] |
