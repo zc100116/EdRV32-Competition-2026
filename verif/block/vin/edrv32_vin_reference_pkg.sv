@@ -53,8 +53,12 @@ package edrv32_vin_reference_pkg;
             input int ring_i,
             input bit [3:0] busy_i);
             int slot;
-            for (int step = 1; step <= ring_i; step++) begin
-                slot = (last_slot[channel_i]+step) % ring_i;
+            int first_slot;
+            // spec vin 2.6: wrap an old allocation outside the new ring to slot zero.
+            first_slot = last_slot[channel_i]+1;
+            if (first_slot >= ring_i) first_slot = 0;
+            for (int step = 0; step < ring_i; step++) begin
+                slot = (first_slot+step) % ring_i;
                 if (!busy_i[slot]) begin
                     last_slot[channel_i] = slot;
                     return slot;
@@ -151,6 +155,13 @@ package edrv32_vin_reference_pkg;
             actual = model.allocate(0, ring, 4'he);
             if (actual != 0)
                 $fatal(1, "FAIL busy skip expected=0 actual=%0d time=%0t", actual, $time);
+        end
+        for (int ring = 2; ring <= 3; ring++) begin
+            model.last_slot[0] = ring;
+            actual = model.allocate(0, ring, 0);
+            if (actual != 0)
+                $fatal(1, "FAIL ring shrink ring=%0d previous=%0d expected=0 actual=%0d time=%0t",
+                    ring, ring, actual, $time);
         end
         $display("PASS VIN reference selftest: shaping, discard, source IDs, ring 2/3/4");
     endtask
