@@ -1,0 +1,92 @@
+B1 IP inspection: PDS 2022.2-SP6.1 build138931; PG2L200H-6 FBB676.
+Project: G:/codex_project/EdRV32-FPGA/EdRV32-B1
+
+IP ip_pll_sys
+Module name: ip_pll_sys
+Port declarations:
+output wire clkout0,
+input wire clkin1,
+output wire lock
+Selected IDF settings:
+CLKOUT5_EN=false
+DYNAMIC_CLKIN_EN=false
+CLKIN_FREQ=27.00000000
+STATIC_RATIOM=2
+CLKOUT0_REQ_FREQ_basicPage=100.00000000
+CLKOUT6_EN=false
+CLKOUT2_EN=false
+CLKOUT0_REQ_PHASE_basicPage=0.000000
+CLKOUT0_BUFFER_OPTION_advancedPage=NO BUFFER
+CLKOUT0_EN=true
+CLKOUT0_BUFG_EN=false
+CLKOUT1_EN=false
+CLKOUT7_EN=false
+STATIC_RATIOI=1
+RST_INNER_EN=false
+CLKOUT8_EN=false
+CLKOUT0_REQ_DUTY_advancedPage=24
+CLKOUT4_EN=false
+CLKOUT3_EN=false
+CLKOUT0_BUFFER_OPTION_basicPage=NO BUFFER
+CLKOUT0_NOBUF_EN=true
+CLKOUT0_REQ_DUTY_basicPage=50.000000
+STATIC_RATIO0=10.125
+localparam real    STATIC_RATIOF    = 18.75; //@IPC int 1.0000,128.0000
+localparam         INTERNAL_FB      = "CLKOUTF"; //@IPC enum CLKOUT0,CLKOUT1,CLKOUT2,CLKOUT3,CLKOUT4,CLKOUT5,CLKOUT6,DISABLE
+Synthesis is disabled.
+Done: 0 error(s), 0 warning(s)
+
+IP ip_rom_boot
+Module name: ip_rom_boot
+Port declarations:
+input  [ADDR_WIDTH-1 : 0]     addr        ;
+output [DATA_WIDTH-1 : 0]     rd_data     ;
+input                         clk         ;
+input                         clk_en      ;
+input                         rst         ;
+Selected IDF settings:
+OUTPUT_REG=false
+INIT_EN=true
+DATA_WIDTH=64
+CLK_EN=true
+ADDR_WIDTH=11
+INIT_FILE=G:/codex_project/EdRV32-Competition-2026/tasks/win/20261028-06-board-b1/src/ip_rom_boot.dat
+INIT_FORMAT=HEX
+Initialization input exists: G:/codex_project/EdRV32-Competition-2026/tasks/win/20261028-06-board-b1/src/ip_rom_boot.dat
+Nonzero INIT vectors generated in rtl/ip_rom_boot_init_param.v; generated c_INIT_FILE=NONE uses inline INIT vectors.
+Synthesis is disabled.
+Done: 0 error(s), 0 warning(s)
+
+IP ip_ram_sram
+Module name: ip_ram_sram
+Port declarations:
+input  [ADDR_WIDTH-1 : 0]   addr        ;
+input  [DATA_WIDTH-1 : 0]   wr_data     ;
+output [DATA_WIDTH-1 : 0]   rd_data     ;
+input                       wr_en       ;
+input                       clk         ;
+input                       clk_en      ;
+input  [BE_WIDTH-1 : 0]     wr_byte_en  ;
+input                       rst         ;
+Selected IDF settings:
+INIT_EN=true
+OUTPUT_REG=false
+WR_BYTE_EN=true
+INIT_FILE=G:/codex_project/EdRV32-Competition-2026/tasks/win/20261028-06-board-b1/src/ip_ram_sram.dat
+CLK_EN=true
+INIT_FORMAT=HEX
+ADDR_WIDTH=13
+BYTE_SIZE=8
+DATA_WIDTH=64
+Initialization input exists: G:/codex_project/EdRV32-Competition-2026/tasks/win/20261028-06-board-b1/src/ip_ram_sram.dat
+Nonzero INIT vectors generated in rtl/ip_ram_sram_init_param.v; generated c_INIT_FILE=NONE uses inline INIT vectors.
+Synthesis is disabled.
+Done: 0 error(s), 0 warning(s)
+
+PLL generated parameters: I=1, M=2, F=18.75, O0=10.125; internal feedback CLKOUTF.
+Derived VCO=27*2*18.75/1=1012.5 MHz; CLKOUT0=1012.5/10.125=100.000 MHz.
+Formula checked in installed vendor GTP_GPLL.v: fbdiv_set_int=mdivider*fsdiv_set_int; vcoclk_period=(clkin_time*idivider)/fbdiv_set_int.
+Requested phase=0 degrees and duty=50%; NO BUFFER selected. Confirm PDS-inserted global buffer after mapping/PnR.
+Actual measured board clock and GUI option screenshot: 未取得.
+Source/include/constraint expansion from B1 directory: 42 sources, 1 FDC, 2 include directories, all exist.
+Latest impl.tcl contains all eight B1-local IP IDF imports. No generated IP, RTL or constraints changed.

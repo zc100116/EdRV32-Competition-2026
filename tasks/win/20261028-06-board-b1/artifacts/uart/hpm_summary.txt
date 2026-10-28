@@ -1,0 +1,69 @@
+[23:31:41.718][RX] Compiler version: GCC 15.2.0
+[23:31:48.411][RX] Iterations default: 10
+[23:31:48.411][RX] Iterations input: decimal 1..4294967295 then Enter; Enter selects default
+[23:31:48.411][RX] Iterations: 10
+[23:31:48.411][RX] HPM rounds: 2
+[23:31:48.450][RX] HPM round: 1
+[23:31:48.450][RX] HPM first event: 1
+[23:31:48.450][RX] HPM last event: 8
+[23:31:48.450][RX] HPM round cycles: 2777214
+[23:31:48.450][RX] HPM round instructions: 2882008
+[23:31:48.450][RX] CRC seed: 0x0000e9f5
+[23:31:48.450][RX] CRC list: 0x0000e714
+[23:31:48.450][RX] CRC matrix: 0x00001fd7
+[23:31:48.450][RX] CRC state: 0x00008e3a
+[23:31:48.450][RX] CRC final: 0x0000fcaf
+[23:31:48.450][RX] CRC seed result: PASS
+[23:31:48.450][RX] CRC list result: PASS
+[23:31:48.450][RX] CRC matrix result: PASS
+[23:31:48.450][RX] CRC state result: PASS
+[23:31:48.450][RX] CRC result: PASS
+[23:31:48.522][RX] HPM round: 2
+[23:31:48.522][RX] HPM first event: 9
+[23:31:48.522][RX] HPM last event: 16
+[23:31:48.522][RX] HPM round cycles: 2776175
+[23:31:48.522][RX] HPM round instructions: 2882008
+[23:31:48.522][RX] CRC seed: 0x0000e9f5
+[23:31:48.522][RX] CRC list: 0x0000e714
+[23:31:48.522][RX] CRC matrix: 0x00001fd7
+[23:31:48.522][RX] CRC state: 0x00008e3a
+[23:31:48.522][RX] CRC final: 0x0000fcaf
+[23:31:48.522][RX] CRC seed result: PASS
+[23:31:48.522][RX] CRC list result: PASS
+[23:31:48.522][RX] CRC matrix result: PASS
+[23:31:48.522][RX] CRC state result: PASS
+[23:31:48.522][RX] CRC result: PASS
+[23:31:48.522][RX] Cycles: 2777214
+[23:31:48.522][RX] Instructions: 2882008
+[23:31:48.522][RX] Iterations/Sec: 360.073
+[23:31:48.522][RX] CoreMark/MHz: 3.600
+[23:31:48.522][RX] Score status: short diagnostic run (<10 s); not a publishable CoreMark score
+[23:31:48.565][RX] HPM 01 dual retire: 777065
+[23:31:48.566][RX] HPM 02 single retire: 1327878
+[23:31:48.566][RX] HPM 03 zero retire: 672271
+[23:31:48.566][RX] HPM 04 branches: 609102
+[23:31:48.566][RX] HPM 05 pair RAW: 442170
+[23:31:48.566][RX] HPM 06 pair structural: 118872
+[23:31:48.566][RX] HPM 07 pair slot1 type: 655334
+[23:31:48.566][RX] HPM 08 pair missing slot1: 73680
+[23:31:48.566][RX] HPM 09 load-use stall: 264968
+[23:31:48.566][RX] HPM 10 divide stall: 0
+[23:31:48.566][RX] HPM 11 device wait: 0
+[23:31:48.566][RX] HPM 12 frontend empty: 153690
+[23:31:48.566][RX] HPM 13 I-cache miss: 69
+[23:31:48.566][RX] HPM 14 D-cache miss: 0
+[23:31:48.566][RX] HPM 15 dirty writeback: 0
+[23:31:48.566][RX] HPM 16 branch mispredict: 76572
+[23:31:48.566][RX] IPC: 1.037
+[23:31:48.566][RX] Dual retire ratio: 0.279
+[23:31:48.605][RX] Load-use stall ratio: 0.095
+[23:31:48.605][RX] Divide stall ratio: 0.000
+[23:31:48.605][RX] Device wait ratio: 0.000
+[23:31:48.605][RX] Frontend empty ratio: 0.055
+[23:31:48.605][RX] Branch mispredict rate: 0.125
+[23:31:48.605][RX] I-cache MPKI: 0.023
+[23:31:48.605][RX] D-cache MPKI: 0.000
+[23:31:48.605][RX] Compiler version: GCC 15.2.0
+[23:31:48.605][RX] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
+[23:31:48.605][RX] ISA: rv32im_zicsr_zifencei
+[23:31:48.605][RX] CoreMark result: PASS

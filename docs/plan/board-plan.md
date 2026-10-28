@@ -34,7 +34,7 @@
 | B1-4 | B1 板级顶层 `fpga/rtl/edrv32_fpga_board_b1_top.v`（PLL、按键复位与 locked、CPU 子系统 + 系统子系统、UART、按键、LED）和板级仿真：从 ROM 启动，打印 logo，跑监控程序菜单中的 CoreMark（小迭代） | Codex · GPT-6.1 Sol | B1-1、B1-2 | 板级仿真 PASS，lint 0 告警 | task-board-b1 | [x] 2026-10-28：`edrv32_fpga_board_b1_top`，`verif/soc/board_b1` 两项 smoke PASS；clk_sys 100 MHz（`clk_sys_hz`） |
 | B1-5 | PC 端 UART 下载工具（按 bootloader 的下载协议，Python 标准库 + pyserial），用于不重新生成 bitstream 换 CoreMark 编译选项 | Codex · GPT-6.1 Sol | — | 与 bootloader 协议的仿真或回环测试通过 | task-board-b1 | [x] 2026-10-28：`tools/board/uart_tool.py`（下载、日志、菜单和迭代次数），仿真端到端通过 |
 | B1-6 | 约束 `edrv32_fpga_board_b1_top.fdc`（引脚取自厂商 demo）和导入脚本 | 协调者 | B1-4 | — | — | [x] 2026-10-28：`edrv32_fpga_board_b1_top.fdc`（PLL 输出显式 generated clock，依据厂商 DDR3 demo）、`import_board_b1_top.tcl` |
-| B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [~] 2026-10-28 任务卡 `tasks/win/20261028-06-board-b1/` 已写 |
+| B1-7 | Windows：生成 PLL 和 7 个已有 IP（ROM/SRAM 带初始化文件），综合、布局布线、bitstream，上板，采集串口日志（启动信息、CoreMark O2 和 tuned）和资源时序报告 | 用户 + Windows Codex | B1-1–B1-6 | 串口日志、报告 | `tasks/win/<日期>-board-b1/` | [~] 2026-10-28 第一次上板：启动信息正确，O2 短诊断 3.600 CoreMark/MHz、CRC PASS，100 MHz 满足（+0.674 ns）；5000 次 O2、tuned、按键测试待补（`docs/reports/2026-10-28-board-b1.md`） |
 
 ### B2（B1 上板后细化）
 
