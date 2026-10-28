@@ -1,6 +1,6 @@
 // File: edrv32_cpu_ib.v
 // Spec: cpu-spec 4.1, 4.2
-// Description: Queue four instruction records between F2 and D in program order.
+// Description: Queue instruction records between F2 and D in program order.
 // Accept up to two records and retire up to two queue entries per clock.
 // Clock domain: clk_sys.
 module edrv32_cpu_ib (
@@ -21,7 +21,7 @@ module edrv32_cpu_ib (
     output wire [2:0] count_o
 );
     localparam RECORD_BITS = 179;
-    localparam DEPTH = 4;
+    localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
     reg [1:0] read_ptr_r;
     reg [1:0] write_ptr_r;
@@ -32,7 +32,8 @@ module edrv32_cpu_ib (
     assign write_next_w = write_ptr_r + 1'b1;
     assign data_o = {entries_r[read_next_w], entries_r[read_ptr_r]};
     assign valid_count_o = count_r >= 2 ? 2'd2 : count_r[1:0];
-    assign free_count_o = 3'd4 - count_r + {1'b0, pop_count_i};
+    // cpu-spec 4.1: only slots empty at cycle start can accept F2 records.
+    assign free_count_o = DEPTH - count_r;
     assign count_o = count_r;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
