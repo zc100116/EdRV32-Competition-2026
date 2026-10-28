@@ -48,9 +48,9 @@ module tb;
         begin
             if(count_o!==3'(count) || valid_count_o!==2'(count>=2?2:count))
                 $fatal(1,"FAIL IB count expected=%d actual=%d time=%t",count,count_o,$time);
-            if(free_count_o!==3'(dut.DEPTH-count))
+            if(free_count_o!==3'(integer'(dut.DEPTH)-count))
                 $fatal(1,"FAIL IB next-cycle free expected=%d actual=%d time=%t",
-                    dut.DEPTH-count,free_count_o,$time);
+                    integer'(dut.DEPTH)-count,free_count_o,$time);
             if(count>0 && data_o[178:0]!==model[0])
                 $fatal(1,"FAIL IB head expected=%h actual=%h time=%t",
                     model[0],data_o[178:0],$time);
@@ -64,7 +64,7 @@ module tb;
         for(i=0;i<4000;i=i+1)begin
             @(negedge clk_i);
             pops=(i<2)?0:(i<4)?2:integer'($urandom_range(0,count>=2?2:count));
-            space=dut.DEPTH-count;
+            space=integer'(dut.DEPTH)-count;
             pushes=(i<2)?2:(i<4)?0:integer'($urandom_range(0,space>=2?2:space));
             push_count_i=2'(pushes);pop_count_i=2'(pops);
             push_data_i={19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom,
@@ -78,7 +78,7 @@ module tb;
             if(free_count_o!==3'(space))$fatal(1,"FAIL IB free depends on pop=0");
             pop_count_i=2'(pops);#1;
             if(free_count_o!==3'(space))$fatal(1,"FAIL IB free depends on pop");
-            if(count==dut.DEPTH && pops>0)begin
+            if(count==integer'(dut.DEPTH) && pops>0)begin
                 if(pushes!=0)$fatal(1,"FAIL IB full accepts same-cycle slots");
                 delayed_space_seen++;
             end
@@ -97,7 +97,7 @@ module tb;
             end
             @(posedge clk_i);#1;check();
             if(count==0)empty_seen=empty_seen+1;
-            if(count==dut.DEPTH)full_seen=full_seen+1;
+            if(count==integer'(dut.DEPTH))full_seen=full_seen+1;
         end
         if((full_seen==0) || (empty_seen==0) || (simultaneous_seen==0) ||
             (flush_seen==0) || (keep_seen==0) || (delayed_space_seen==0))
