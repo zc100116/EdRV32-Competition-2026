@@ -784,3 +784,318 @@ Yosys 上该副本支路各增加 2 级，不能在物理复测前宣称时序�
 测量在上述提交前的同一份最终 RTL 工作树取得：Yosys/最终回归时 HEAD 为 `0139281`，
 因此生成物的 `commit.txt` 记录当时 HEAD；最终 RTL 版本对应 `d8fb52a`，
 基线与共用 stub 修正按上表和复现命令取得。
+
+## C-R8
+
+日期：2026-10-28。基线：`25acf413482c110a8612ef51f78d71837d6e9ff8`
+（C-R7 后的 RTL，cpu-spec v0.12 / cache-spec v0.6）。
+
+### 测试期望调整依据
+
+- U-08（`verif/unit/cpu_ib/tb.sv`）：按 cpu-spec 4.1，空位数由周期开始时
+  的占用量决定；同拍 pop 不再计入空位，下一拍才释放。队列模型按选定容量运行。
+- MT-07（`verif/block/cache/edrv32_cache_env.sv` 的 TEST=307，入口在
+  `verif/block/cache/mt_07/`）：按 cache-spec 5.4，删除维护期间可缓存地址
+  `ready=0` 的旧期望；改查地址/类型/大小不改变 ready，接受可缓存请求后等待维护
+  完成才访问阵列并响应，设备 STATUS 请求在维护中完成。另按 C-R8 问答补查维护期间
+  接受的 PMA 违例请求在 M 级立即返回有效错误，不读阵列、不发起总线事务。
+- `verif/unit/cache_dcache/tb.sv`：按 cache-spec 5.4 / cpu-spec 3.3，维护期间
+  尚未占用请求槽时，可缓存地址的 ready 期望从 0 改为 1；设备轮询、写回数据、
+  命中延迟及连续 store 吞吐的期望保留。错误检查中的层次化 PMA 信号引用随
+  M 级分类实现更新，仍检查 cache-spec 第 6 节的有效错误与响应一致性。另补查 5.4 的零长度范围维护
+  与缓存命中同拍接受时，维护立即完成且命中仍按 5.2 下一周期返回。
+
+### 实现与测量条件
+
+依据 `docs/reports/2026-10-28-timing-cpu-r3.md` 与
+`tasks/win/20261028-01-cpu-npu-synth/artifacts/cpu/setup_group_detail.txt` 的 T01：
+PG2L200H-6、150 MHz 约束下，原 E 操作数 → 地址加法 → PMA → ready →
+E 推进 → IB 空位 → 前端/RAS 使能路径为 19 级、−2.324 ns。
+本轮针对其中 ready 的请求分类依赖和 IB 的同拍 pop 空位依赖。
+
+D$ 接收边沿只锁存请求负载与有效状态；M 级以锁存的地址/读写类型执行 PMA，
+设备请求转交独立 sequencer，可缓存请求在维护期间保留，维护结束后重新读阵列。
+普通命中仍在请求后的下一周期响应，连续命中和连续 store 的吞吐约定保留。
+维护启动与 CPU 接收可以发生在同一边沿，该请求同样留待维护完成后读阵列。
+
+本轮第一项 `ask` 已确认：请求拍的 PMA 设备判定仅用于同步 RAM 读使能，避免设备请求读阵列；
+不进入 ready、accept 或接收控制状态使能。协调者追加要求单独测量
+“E 操作数 + imm → PMA → D$ RAM 读使能/地址”，结果列在下面。
+第二项 `ask` 确认维护期间 PMA 违例在 M 级立即返回有效错误，不等维护完成，
+协调者已将此条补入 cache-spec 5.4；MT-07 新增对应检查。
+IB 的 free_count 只由已寄存占用量计算，前端原有推进逻辑无需修改。
+
+工具：Verilator 5.020（Debian 5.020-1）、xPack GCC 15.2.0、
+Yosys 0.70+219（5053d0e26，Clang 21.1.8）。
+CoreMark 子模块为 `cfa9ab377835911f23d9b0831c7be302ed1f58de`，ITERATIONS=10，
+RVC_EN=1，64 KiB SRAM，8 KiB I$/D$（2 路、32 B 行）。
+四种配置编译选项与 C-R7 相同，完整软件构建命令在各 `sw/*/build.log`。
+本 worker 的所有仿真逐项串行运行，Verilator 构建与回归均 `-j 1`，未用 `--parallel`。
+
+### Yosys 结构对比
+
+沿用 C-R7 的 FPGA_MODE 测量 wrapper、RAM/乘法 IP 黑盒与通用 LUT6 映射命令：
+`python3 tools/synth/yosys_synth.py edrv32_cpu_subsys`，内部执行
+`synth -flatten -noabc; abc -lut 6 -dress; opt_clean`。
+本轮没有 PDS 物理测量，通用 LUT6 级数不换算为器件 MHz。
+
+| 项目 | C-R7 后基线 | C-R8（4 条 IB） | 变化 |
+|---|---:|---:|---:|
+| LUT6 | 29,974 | 30,015 | +41（+0.14%） |
+| FF | 10,082 | 10,082 | 0 |
+| IP 黑盒 | 9 | 9 | 0 |
+| 全子系统最长组合级数 | 36 | 35 | −1 |
+
+| 起点 → 终点 | 基线级数 | C-R8 级数 |
+|---|---:|---:|
+| 请求 addr/store/size → D$ ready | 6 | 无路径 |
+| E 槽 0 操作数 → D$ ready | 18 | 无路径 |
+| E 槽 0 操作数 → RAS 数据寄存器 D/enable | 34 | 30 |
+| E 槽 0 操作数 → F1 PC D/enable | 32 | 28 |
+| E 槽 0 操作数 + imm → PMA → D$ RAM 读使能 | 21 | 15 |
+| E 槽 0 操作数 + imm → D$ RAM 读地址 | 8 | 9 |
+| 请求地址（加法之后）→ D$ RAM 读使能/地址 | 9 | 5 |
+
+RAM 读使能结果是单独端点查询：最深结果路径从 `e_operand_a_r[0][1]` 开始，
+经地址加法和请求拍 PMA 的设备判定，至共享 `u_dcache.u_tag0.rd_en_i`，共 15 LUT6 级；
+RAM 读地址来自同一加法的地址位和维护/重读地址选择，共 9 级，地址数据支路不经过 PMA。
+使能别名匹配 1 bit、地址别名匹配 9 bit。PDS 复测仍需检查该读端口支路的实际裕量。
+“无路径”查询分别匹配 35 / 32 起点 bit 和 1 个 ready 端点，均非空查询。
+
+残留的 E 操作数到 RAS 路径经过条件分支比较和合法重定向；D$ tag 仍可经
+store 结果 → 写缓冲 push → FENCE 完成 → M 提交 → committed RAS 恢复元数据
+到 RAS（结构路径，可激活性未经约束）。不能据本轮结果声称所有 D$ 到前端的路径都已消失。
+全局最深 35 级路径从 M 级锁存地址的 PMA 错误开始，经陷阱/重定向和 F2 恢复到 RAS；
+本轮未改变异常、重定向优先级、误预测代价或 HPM 事件定义。
+
+综合原始数据：`build/c-r8/{before,after}/src/build/synth/edrv32_cpu_subsys_rvc1/`
+内的 `netlist.{ys,log,json}`、`wrapper.v`、`version.txt`。
+筛选路径数据：`build/c-r8/{before,after}/*.json`、`*.md`、`paths.log`；
+其中 `e-dram-enable` / `e-dram-addr` 是追加要求的两个独立端点查询。
+
+结构筛选同时记录 tag → 前端推进端点：
+
+| 起点（两路 tag RAM 输出 40 bit）→ 终点 | 基线级数 | C-R8 级数 | 匹配端点 bit |
+|---|---:|---:|---:|
+| F1 PC | 29 | 无路径 | 125 |
+| F2 控制/负载寄存器 | 29 | 无路径 | 249 |
+| IB push_count | 24 | 无路径 | 2 |
+| RAS 数据寄存器 D/enable | 31 | 25 | 260 |
+
+复现综合：在基线 `25acf41` 与本轮最终 RTL 检出分别执行：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/synth/yosys_synth.py edrv32_cpu_subsys
+```
+
+可在同一工作树导出两侧源文件后分别综合（本轮也是在这两个目录测量）：
+
+```sh
+mkdir -p build/c-r8/before/src build/c-r8/after/src
+git archive 25acf41 rtl tools/synth | tar -x -C build/c-r8/before/src
+git archive fdb416a rtl tools/synth | tar -x -C build/c-r8/after/src
+(cd build/c-r8/before/src && python3 tools/synth/yosys_synth.py edrv32_cpu_subsys)
+(cd build/c-r8/after/src && python3 tools/synth/yosys_synth.py edrv32_cpu_subsys)
+```
+结果副本使用已提交的 D$ 修改，并覆盖最终选定的 4 条 IB；与最终 RTL 提交内容相同。
+该副本的 `commit.txt` 记录的是测量时工作树 HEAD，最终 RTL 提交在本节末列出。
+
+路径统计使用仓库既有 `tools/synth/netlist_paths.py`，没有另写路径算法。
+在两侧 netlist.json 上执行以下查询（输出 JSON/Markdown 命名见上面的数据目录）：
+
+```python
+from pathlib import Path
+import json
+from tools.synth.netlist_paths import analyze, markdown
+root = r'^u_target\.'
+operand = root + r'u_core\.e_operand_a_r\[0\](?:\[|$)'
+tags = root + r'u_dcache\.tag[01]_w(?:\[|$)'
+frontend = root + r'u_core\.u_frontend\.'
+queries = {
+    'all': {},
+    'e-ras': {'starts': [operand],
+              'ends': [frontend + r'u_predictor\.ras_data_r(?:\[|$)']},
+    'e-f1': {'starts': [operand], 'ends': [frontend + r'f1_pc_r(?:\[|$)']},
+    'e-ready': {'starts': [operand],
+                'end_nets': [root + r'u_dcache\.dc_req_ready_o$']},
+    'request-ready': {
+        'starts': [root + r'u_dcache\.dc_req_(?:addr|store|size)_i(?:\[|$)'],
+        'end_nets': [root + r'u_dcache\.dc_req_ready_o$']},
+    'e-dram-enable': {'starts': [operand],
+        'end_nets': [root + r'u_dcache\.u_(?:tag|data)[01]\.rd_en_i$']},
+    'e-dram-addr': {'starts': [operand],
+        'end_nets': [root + r'u_dcache\.u_(?:tag|data)[01]\.rd_addr_i(?:\[|$)']},
+    'request-dram': {'starts': [root + r'u_dcache\.dc_req_addr_i(?:\[|$)'],
+        'end_nets': [root + r'u_dcache\.u_(?:tag|data)[01]\.rd_(?:en|addr)_i(?:\[|$)']},
+    'dtag-ras': {'starts': [tags],
+                 'ends': [frontend + r'u_predictor\.ras_data_r(?:\[|$)']},
+    'dtag-f1': {'starts': [tags], 'ends': [frontend + r'f1_pc_r(?:\[|$)']},
+    'dtag-f2': {'starts': [tags], 'ends': [frontend + r'f2_.*_r(?:\[|$)']},
+    'dtag-ib-push': {'starts': [tags],
+                     'end_nets': [frontend + r'push_count_w(?:\[|$)']},
+}
+for label in ('before', 'after'):
+    out = Path('build/c-r8') / label
+    design = json.loads((out / 'src/build/synth/edrv32_cpu_subsys_rvc1/netlist.json').read_text())
+    for name, selection in queries.items():
+        result = analyze(design, **selection)
+        (out / (name + '.json')).write_text(json.dumps(result, indent=2) + '\n')
+        (out / (name + '.md')).write_text(markdown(result))
+        print(label, name, result['max_levels'], result['selected_start_bits'],
+              result['selected_endpoint_count'])
+```
+
+### CoreMark 容量选择与复现
+
+容量评估只改变 IB 的 localparam 和对应的环形索引宽度/回绕，未增加 parameter。
+5/6 条候选使用 3 bit 指针，下一指针为 `sum=ptr+amount; sum>=DEPTH ? sum-DEPTH : sum`；
+第二条读/写索引用 amount=1，时序指针更新用 pop/push 条数。评估源码分别在
+`build/c-r8/ib5-eval.v`、`ib6-eval.v`，记录保留在 build 中。
+最终 4 条使用原来的 2 bit 环形指针，RTL 只保留 `localparam [2:0] DEPTH = 3'd4`。
+选择准则是满足 SRAM -O2 ≥ 3.45 CoreMark/MHz 的最小容量。
+
+| IB 容量 | SRAM -O2 周期 | CoreMark/MHz | HPM 12 前端断流 | HPM 8 第二条未取到 |
+|---|---:|---:|---:|---:|
+| 4 | 2,814,570 | 3.552941 | 183,492 | 64,848 |
+| 5 | 2,811,295 | 3.557080 | 180,948 | 61,298 |
+| 6 | 2,819,394 | 3.546861 | 186,082 | 61,633 |
+
+4 条满足 3.45 下限，按“满足下限的最小容量”选定 4 条。
+
+最终 4 条的四种配置如下，与 C-R7 的精确周期数计算分数对比
+（对应任务给出的 3.557 / 4.331 / 3.553 / 3.545）：
+
+| 配置 | C-R7 周期 | C-R8 周期 | 周期差 | C-R7 CoreMark/MHz | C-R8 CoreMark/MHz | 分数变化 |
+|---|---:|---:|---:|---:|---:|---:|
+| coremark_sram_o2 | 2,811,516 | 2,814,570 | +3,054 | 3.556800 | 3.552941 | -0.1085% |
+| coremark_sram_tuned | 2,308,675 | 2,305,649 | -3,026 | 4.331489 | 4.337174 | +0.1312% |
+| coremark_ddr_o2_l20 | 2,814,447 | 2,817,477 | +3,030 | 3.553096 | 3.549275 | -0.1075% |
+| coremark_ddr_o2_l60 | 2,820,607 | 2,823,597 | +2,990 | 3.545336 | 3.541582 | -0.1059% |
+
+四配置算法 CRC 均为 list/matrix/state = `e714 / 1fd7 / 8e3a`，全部正确。
+HPM 事件定义及寄存一拍计数的规则保持 cpu-spec 7.1。
+
+| 最终 4 条配置 | HPM 12 前端断流 | HPM 8 第二条未取到 |
+|---|---:|---:|
+| coremark_sram_o2 | 183,492 | 64,848 |
+| coremark_sram_tuned | 178,288 | 53,974 |
+| coremark_ddr_o2_l20 | 185,886 | 64,848 |
+| coremark_ddr_o2_l60 | 190,926 | 64,848 |
+
+三种候选容量均在包含两项维护边界修正的最终 D$ 上测量；
+最终四配置完整复测通过，未使用被停止的中间版本测量代替最终数据。
+
+实际测量入口如下；`measure.py` 的内容列在命令之后。
+三种容量均在最终 D$ 实现上测量；最终 RTL 对应 `fdb416a`（其中 IB 为 4 条）。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+git submodule update --init third_party/coremark
+cp build/c-r8/ib5-eval.v rtl/cpu/edrv32_cpu_ib.v
+python3 build/c-r8/measure.py ib5
+cp build/c-r8/ib6-eval.v rtl/cpu/edrv32_cpu_ib.v
+python3 build/c-r8/measure.py ib6
+git show fdb416a:rtl/cpu/edrv32_cpu_ib.v > rtl/cpu/edrv32_cpu_ib.v
+python3 build/c-r8/measure.py ib4 full
+```
+
+```python
+from pathlib import Path
+import importlib.util
+import json
+import sys
+spec = importlib.util.spec_from_file_location('sys_cpu_run', 'verif/block/sys_cpu/run.py')
+r = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(r)
+r.OUT = Path.cwd() / 'build/c-r8' / sys.argv[1] / 'sys_cpu'
+_, boot, _ = r.build_program('bootloader', 'bootloader', 'rom')
+sim = r.compile_sim()
+metrics = [r.execute(sim, 7, boot, 'coremark', 'coremark_sram_o2')]
+if metrics[0]['score'] < 3.45:
+    raise RuntimeError('C-R8 SRAM -O2 score below 3.45: ' + str(metrics[0]['score']))
+if len(sys.argv) > 2:
+    metrics.append(r.execute(sim, 7, boot, 'coremark', 'coremark_sram_tuned', opt='tuned'))
+    for latency in (20, 60):
+        metrics.append(r.execute(sim, 7, boot, 'coremark', f'coremark_ddr_o2_l{latency}',
+                                 memory='ddr', latency=latency))
+(r.OUT / 'metrics.json').write_text(json.dumps(metrics, indent=2) + '\n')
+```
+
+最终四配置也可直接在 `fdb416a` 检出上执行
+`python3 verif/block/sys_cpu/run.py perf`，输出改在 `build/sys_cpu/`。
+本轮原始日志为 `build/c-r8/ib{4,5,6}/sys_cpu/metrics.json`、
+`coremark_*/run.log`、`compile.log`、`sw/*/build.log`，汇总 stdout 在
+`build/c-r8/ib{4,5,6}.log`。分数公式：`10,000,000 / Total ticks`。
+HPM 事件取 testbench `SC_HPM window=0`，其中事件 12 是 cpu-spec 7.1 的前端断流周期，
+事件 8 是“发射槽 0、第二条未取到”的配对失败周期。
+
+
+### 验收命令与提交
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/check/verilog_style.py rtl/
+for scope in verif/unit/cpu_* verif/unit/cache_*; do
+    make smoke REGRESS_ARGS="-j 1 --path $scope"
+done
+make full REGRESS_ARGS='-j 1 --path verif/block/cpu'
+make full REGRESS_ARGS='-j 1 --path verif/block/cache'
+make smoke REGRESS_ARGS='-j 1 --path verif/block/cpu_b2'
+make full REGRESS_ARGS='-j 1 --path verif/block/sys_cpu'
+```
+
+RTL lint 与 C-R7 相同，在 core / cpu_subsys 两个顶层分别运行 RVC_EN=0/1：
+
+```python
+from pathlib import Path
+import subprocess
+from tools.regress import expand_files
+for top, filelist in [('edrv32_cpu_core', 'cpu.f'),
+                      ('edrv32_cpu_subsys', 'cpu_subsys.f')]:
+    for rvc in (0, 1):
+        subprocess.run(['verilator', '--lint-only', '-Wall', '+define+SIM_MODE',
+                        '--top-module', top, f'-GRVC_EN={rvc}'] +
+                       expand_files(Path('rtl/filelists') / filelist), check=True)
+```
+
+最终验收结果：
+
+| 对象 | PASS | FAIL / 告警 |
+|---|---:|---:|
+| RTL 风格（110 文件） | — | 0 告警 |
+| core/subsys × RVC=0/1 的 Verilator lint | 4 次通过 | 0 告警 |
+| CPU/cache 单元 smoke | 24 | 0 |
+| CPU full | 747 | 0 |
+| Cache full | 35 | 0 |
+| CPU B2 smoke | 3 | 0 |
+| sys_cpu full | 8 | 0 |
+| CoreMark 四配置 CRC | 4 | 0 |
+
+五组指定回归合计 817 PASS、0 FAIL，四配置 CoreMark CRC 另计。
+sys_cpu full 包含 SC-04 的普通/带 scratch 请求两次下载、SC-07 CoreMark CRC 与 SC-08 monitor。
+
+最终分项汇总日志在 `build/c-r8/regression/unit-*.log`、`full-cpu.log`、
+`full-cache.log`、`smoke-cpu_b2.log`、`full-sys_cpu.log`；逐项原始仿真输出在
+`build/regress/{smoke,full}/`，系统测试的 UART/构建日志在 `build/sys_cpu/`。
+风格日志为 `build/c-r8/style.log`，lint 为
+`build/c-r8/lint-edrv32_cpu_{core,subsys}-rvc{0,1}.log`。
+
+首次 U-08 回归中，容量常量改为 3 bit 后，testbench 与 32 bit 模型计数器的算术触发
+5 条宽度告警而未编译；模型容量显式转换为 integer 后重跑通过，未改变任何期望行为。
+零长度范围维护与 CPU 同拍接收的边界在复查时补正并加入 D$ 单元测试。
+中间四配置测量在 SRAM O2 之后停止，修正后的最终 RTL 重新测量三种容量和完整四配置；
+被停止测量保留在 `build/c-r8/pre-zero-range/`，不计入最终结果。
+
+| 提交 | 内容 |
+|---|---|
+| `e741a86` | D$ 接收后在 M 分类；维护期间暂存可缓存请求，设备 sequencer 保持可用 |
+| `575836a` | IB 空位只取周期开始的占用状态，最终容量 4；U-08 新规则 |
+| `866b102` | 零长度范围维护与 CPU 请求同拍接受时，保留下一周期命中响应 |
+| `a4a8efc` | U-08 容量与模型算术显式匹配位宽 |
+| `fdb416a` | 按 C-R8 问答，维护期间 PMA 违例直接在 M 返回错误；MT-07 覆盖 |
+
+最终 RTL 可检出 `fdb416a` 复现。Yosys 的结果副本与该提交的两个改动 RTL 文件逐字相同；
+结果副本生成时 HEAD 为 `866b102`、最后一项 PMA 修改尚未提交，因此
+生成物中的 `commit.txt` 记录 `866b102`，源码版本以上表最终提交为准。
+本轮没有修改 docs/spec、docs/testplan、公共头文件、文件列表、FPGA 文件或开发规则。
