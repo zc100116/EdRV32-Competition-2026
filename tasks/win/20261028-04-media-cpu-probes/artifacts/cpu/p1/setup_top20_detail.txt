@@ -1,0 +1,1790 @@
+Startpoint  : u_cpu_subsys/u_icache/addr_r[11]/opit_0/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_ib/entries_r[2][74]/opit_0_L6Q_perm/I3
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.101  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.775
+  Launch Clock Delay      :  4.430
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.686       4.430         ntclkbufg_0      
+ CLMA_651_781/CLK                                                          r       u_cpu_subsys/u_icache/addr_r[11]/opit_0/CLK
+
+ CLMA_651_781/Q0                   tco                   0.213       4.643 r       u_cpu_subsys/u_icache/addr_r[11]/opit_0/Q
+                                   net (fanout=100)      0.798       5.441         iaxi_araddr_w[11]
+ CLMA_675_739/C5                                                                   u_cpu_subsys/u_icache/N5_79[0]_muxf8_perm/C5
+ CLMA_675_739/CR1                  td                    0.321       5.762 r       u_cpu_subsys/u_icache/N5_79[0]_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.245         u_cpu_subsys/u_icache/_N10627
+ CLMA_669_768/A2                                                                   u_cpu_subsys/u_icache/N5_128[0]_muxf7_perm/A2
+ CLMA_669_768/CR0                  td                    0.379       6.624 r       u_cpu_subsys/u_icache/N5_128[0]_muxf7_perm/L7
+                                   net (fanout=1)        1.135       7.759         u_cpu_subsys/u_icache/N5
+ CLMA_555_810/B4                                                                   u_cpu_subsys/u_icache/N6.eq_9/gateop_perm/I4
+ CLMA_555_810/Y1                   td                    0.101       7.860 r       u_cpu_subsys/u_icache/N6.eq_9/gateop_perm/Y
+                                   net (fanout=88)       1.324       9.184         u_cpu_subsys/u_icache/hit0_w
+ CLMA_441_858/B3                                                                   u_cpu_subsys/u_icache/N34_6[58]/gateop_perm/I3
+ CLMA_441_858/Y1                   td                    0.113       9.297 r       u_cpu_subsys/u_icache/N34_6[58]/gateop_perm/L6
+                                   net (fanout=6)        0.301       9.598         u_cpu_subsys/ic_resp_data_w [58]
+ CLMA_429_859/D2                                                                   u_cpu_subsys/u_core/u_frontend/N222_10_3/LUT6D_inst_perm/I2
+ CLMA_429_859/CR3                  td                    0.297       9.895 r       u_cpu_subsys/u_core/u_frontend/N222_10_3/LUT6D_inst_perm/L5
+                                   net (fanout=1)        0.256      10.151         u_cpu_subsys/u_core/u_frontend/_N64527
+ CLMA_429_858/A5                                                                   u_cpu_subsys/u_core/u_frontend/N117[10]_muxf7_perm/A5
+ CLMA_429_858/CR0                  td                    0.269      10.420 r       u_cpu_subsys/u_core/u_frontend/N117[10]_muxf7_perm/L7
+                                   net (fanout=8)        1.446      11.866         u_cpu_subsys/u_core/u_frontend/stream_w[0] [10]
+ CLMS_573_853/A3                                                           r       u_cpu_subsys/u_core/u_frontend/u_ib/entries_r[2][74]/opit_0_L6Q_perm/I3
+
+ Data arrival time                                                  11.866         Logic Levels: 6  
+                                                                                   Logic: 1.693ns(22.768%), Route: 5.743ns(77.232%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.426      10.442         ntclkbufg_0      
+ CLMS_573_853/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_ib/entries_r[2][74]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.996                          
+ clock uncertainty                                      -0.050      10.946                          
+
+ Setup time                                             -0.158      10.788                          
+
+ Data required time                                                 10.788                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.788                          
+ Data arrival time                                                  11.866                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.078                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_icache/addr_r[11]/opit_0/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_ib/entries_r[0][74]/opit_0_L6Q_perm/I4
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.101  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.775
+  Launch Clock Delay      :  4.430
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.686       4.430         ntclkbufg_0      
+ CLMA_651_781/CLK                                                          r       u_cpu_subsys/u_icache/addr_r[11]/opit_0/CLK
+
+ CLMA_651_781/Q0                   tco                   0.213       4.643 r       u_cpu_subsys/u_icache/addr_r[11]/opit_0/Q
+                                   net (fanout=100)      0.798       5.441         iaxi_araddr_w[11]
+ CLMA_675_739/C5                                                                   u_cpu_subsys/u_icache/N5_79[0]_muxf8_perm/C5
+ CLMA_675_739/CR1                  td                    0.321       5.762 r       u_cpu_subsys/u_icache/N5_79[0]_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.245         u_cpu_subsys/u_icache/_N10627
+ CLMA_669_768/A2                                                                   u_cpu_subsys/u_icache/N5_128[0]_muxf7_perm/A2
+ CLMA_669_768/CR0                  td                    0.379       6.624 r       u_cpu_subsys/u_icache/N5_128[0]_muxf7_perm/L7
+                                   net (fanout=1)        1.135       7.759         u_cpu_subsys/u_icache/N5
+ CLMA_555_810/B4                                                                   u_cpu_subsys/u_icache/N6.eq_9/gateop_perm/I4
+ CLMA_555_810/Y1                   td                    0.101       7.860 r       u_cpu_subsys/u_icache/N6.eq_9/gateop_perm/Y
+                                   net (fanout=88)       1.324       9.184         u_cpu_subsys/u_icache/hit0_w
+ CLMA_441_858/B3                                                                   u_cpu_subsys/u_icache/N34_6[58]/gateop_perm/I3
+ CLMA_441_858/Y1                   td                    0.113       9.297 r       u_cpu_subsys/u_icache/N34_6[58]/gateop_perm/L6
+                                   net (fanout=6)        0.301       9.598         u_cpu_subsys/ic_resp_data_w [58]
+ CLMA_429_859/D2                                                                   u_cpu_subsys/u_core/u_frontend/N222_10_3/LUT6D_inst_perm/I2
+ CLMA_429_859/CR3                  td                    0.297       9.895 r       u_cpu_subsys/u_core/u_frontend/N222_10_3/LUT6D_inst_perm/L5
+                                   net (fanout=1)        0.256      10.151         u_cpu_subsys/u_core/u_frontend/_N64527
+ CLMA_429_858/A5                                                                   u_cpu_subsys/u_core/u_frontend/N117[10]_muxf7_perm/A5
+ CLMA_429_858/CR0                  td                    0.269      10.420 r       u_cpu_subsys/u_core/u_frontend/N117[10]_muxf7_perm/L7
+                                   net (fanout=8)        1.448      11.868         u_cpu_subsys/u_core/u_frontend/stream_w[0] [10]
+ CLMS_573_853/C4                                                           r       u_cpu_subsys/u_core/u_frontend/u_ib/entries_r[0][74]/opit_0_L6Q_perm/I4
+
+ Data arrival time                                                  11.868         Logic Levels: 6  
+                                                                                   Logic: 1.693ns(22.761%), Route: 5.745ns(77.239%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.426      10.442         ntclkbufg_0      
+ CLMS_573_853/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_ib/entries_r[0][74]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.996                          
+ clock uncertainty                                      -0.050      10.946                          
+
+ Setup time                                             -0.147      10.799                          
+
+ Data required time                                                 10.799                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.799                          
+ Data arrival time                                                  11.868                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.069                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB
+Endpoint    : u_cpu_subsys/u_core/N791[3][0]_17[1]/gateop_perm/I3
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.016  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.772
+  Launch Clock Delay      :  4.342
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.598       4.342         ntclkbufg_0      
+ DRM_490_768/CLKB[0]                                                       r       u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB
+
+ DRM_490_768/QA0[4]                tco                   1.644       5.986 r       u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/QA[4]
+                                   net (fanout=3)        0.727       6.713         u_cpu_subsys/u_dcache/tag0_w [4]
+ CLMS_513_751/C2                                                                   u_cpu_subsys/u_dcache/N12.eq_2/gateop_perm/I2
+ CLMS_513_751/COUT                 td                    0.369       7.082 f       u_cpu_subsys/u_dcache/N12.eq_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.082         u_cpu_subsys/u_dcache/N12.co [6]
+ CLMS_513_757/CIN                                                                  u_cpu_subsys/u_dcache/N12.eq_4/gateop_perm/CIN
+ CLMS_513_757/COUT                 td                    0.090       7.172 f       u_cpu_subsys/u_dcache/N12.eq_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.172         u_cpu_subsys/u_dcache/N12.co [14]
+ CLMS_513_769/CIN                                                                  u_cpu_subsys/u_dcache/N12.eq_8/gateop_perm/CIN
+ CLMS_513_769/Y1                   td                    0.142       7.314 r       u_cpu_subsys/u_dcache/N12.eq_9/gateop_perm/Y
+                                   net (fanout=72)       0.888       8.202         u_cpu_subsys/u_dcache/hit0_w
+ CLMA_513_870/D2                                                                   u_cpu_subsys/u_dcache/N65_18[18]_muxf7_perm/B2
+ CLMA_513_870/CR2                  td                    0.380       8.582 r       u_cpu_subsys/u_dcache/N65_18[18]_muxf7_perm/L7
+                                   net (fanout=1)        0.125       8.707         u_cpu_subsys/u_dcache/raw_load_w [18]
+ CLMS_513_871/B1                                                                   u_cpu_subsys/u_dcache/N89[23:16]_6[2]/LUT6_inst_perm/I1
+ CLMS_513_871/Y1                   td                    0.235       8.942 r       u_cpu_subsys/u_dcache/N89[23:16]_6[2]/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.456       9.398         u_cpu_subsys/u_dcache/merged_load_w [18]
+ CLMA_537_871/A3                                                                   u_cpu_subsys/u_dcache/N104_9[10]/gateop_perm/I3
+ CLMA_537_871/Y1                   td                    0.242       9.640 r       u_cpu_subsys/u_dcache/N104_9[10]_1/gateop_perm/Y
+                                   net (fanout=1)        0.842      10.482         u_cpu_subsys/u_dcache/dc_resp_data_o [10]
+ CLMA_579_828/B4                                                                   u_cpu_subsys/u_dcache/N104_10[7]_1/gateop_perm/I4
+ CLMA_579_828/Y1                   td                    0.097      10.579 f       u_cpu_subsys/u_dcache/N104_10[7]_1/gateop_perm/Y
+                                   net (fanout=1)        0.466      11.045         u_cpu_subsys/_N14616
+ CLMS_579_799/A3                                                                   u_cpu_subsys/u_core/w_result_r[0][10]/opit_0_AQ_perm/I3
+ CLMS_579_799/Y0                   td                    0.113      11.158 r       u_cpu_subsys/u_core/w_result_r[0][10]/opit_0_AQ_perm/Y
+                                   net (fanout=3)        0.483      11.641         u_cpu_subsys/u_core/m_result_w[0] [10]
+ CLMA_591_787/A3                                                           r       u_cpu_subsys/u_core/N791[3][0]_17[1]/gateop_perm/I3
+
+ Data arrival time                                                  11.641         Logic Levels: 8  
+                                                                                   Logic: 3.312ns(45.376%), Route: 3.987ns(54.624%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.423      10.439         ntclkbufg_0      
+ CLMA_591_787/CLK                                                          r       u_cpu_subsys/u_core/e_operand_b_r[1][10]/opit_0_AQ_perm/CLK
+ clock pessimism                                         0.554      10.993                          
+ clock uncertainty                                      -0.050      10.943                          
+
+ Setup time                                             -0.338      10.605                          
+
+ Data required time                                                 10.605                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.605                          
+ Data arrival time                                                  11.641                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.036                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB
+Endpoint    : u_cpu_subsys/u_core/N630[2][31]_15[8]/gateop_perm/I3
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.002  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.790
+  Launch Clock Delay      :  4.342
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.598       4.342         ntclkbufg_0      
+ DRM_490_768/CLKB[0]                                                       r       u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB
+
+ DRM_490_768/QA0[4]                tco                   1.644       5.986 r       u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/QA[4]
+                                   net (fanout=3)        0.727       6.713         u_cpu_subsys/u_dcache/tag0_w [4]
+ CLMS_513_751/C2                                                                   u_cpu_subsys/u_dcache/N12.eq_2/gateop_perm/I2
+ CLMS_513_751/COUT                 td                    0.369       7.082 f       u_cpu_subsys/u_dcache/N12.eq_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.082         u_cpu_subsys/u_dcache/N12.co [6]
+ CLMS_513_757/CIN                                                                  u_cpu_subsys/u_dcache/N12.eq_4/gateop_perm/CIN
+ CLMS_513_757/COUT                 td                    0.090       7.172 f       u_cpu_subsys/u_dcache/N12.eq_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.172         u_cpu_subsys/u_dcache/N12.co [14]
+ CLMS_513_769/CIN                                                                  u_cpu_subsys/u_dcache/N12.eq_8/gateop_perm/CIN
+ CLMS_513_769/Y1                   td                    0.142       7.314 r       u_cpu_subsys/u_dcache/N12.eq_9/gateop_perm/Y
+                                   net (fanout=72)       0.135       7.449         u_cpu_subsys/u_dcache/hit0_w
+ CLMS_513_769/D1                                                                   u_cpu_subsys/u_dcache/N65_18[23]_muxf7_perm/B1
+ CLMS_513_769/CR2                  td                    0.410       7.859 r       u_cpu_subsys/u_dcache/N65_18[23]_muxf7_perm/L7
+                                   net (fanout=1)        0.282       8.141         u_cpu_subsys/u_dcache/raw_load_w [23]
+ CLMA_519_768/D5                                                                   u_cpu_subsys/u_dcache/N89[23:16]_6[7]/LUT6_inst_perm/I5
+ CLMA_519_768/Y3                   td                    0.078       8.219 r       u_cpu_subsys/u_dcache/N89[23:16]_6[7]/LUT6_inst_perm/L6
+                                   net (fanout=4)        1.064       9.283         u_cpu_subsys/u_dcache/merged_load_w [23]
+ CLMS_573_829/A3                                                                   u_cpu_subsys/u_dcache/N103_3_23/LUT6_inst_perm/I3
+ CLMS_573_829/Y0                   td                    0.113       9.396 r       u_cpu_subsys/u_dcache/N103_3_23/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.283       9.679         u_cpu_subsys/u_dcache/_N4825
+ CLMA_579_828/A3                                                                   u_cpu_subsys/u_dcache/N104_10[7]/gateop_perm/I3
+ CLMA_579_828/Y0                   td                    0.113       9.792 r       u_cpu_subsys/u_dcache/N104_10[7]/gateop_perm/Y
+                                   net (fanout=8)        0.818      10.610         u_cpu_subsys/dc_resp_data_w [7]
+ CLMS_633_835/A4                                                                   u_cpu_subsys/u_core/N1364[0][10]_7[5]/gateop_perm/I4
+ CLMS_633_835/Y1                   td                    0.230      10.840 r       u_cpu_subsys/u_core/w_result_r[0][15]/opit_0_AQ_perm/Y
+                                   net (fanout=4)        0.817      11.657         u_cpu_subsys/u_core/m_result_w[0] [15]
+ CLMA_633_756/A3                                                           r       u_cpu_subsys/u_core/N630[2][31]_15[8]/gateop_perm/I3
+
+ Data arrival time                                                  11.657         Logic Levels: 8  
+                                                                                   Logic: 3.189ns(43.595%), Route: 4.126ns(56.405%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.441      10.457         ntclkbufg_0      
+ CLMA_633_756/CLK                                                          r       u_cpu_subsys/u_core/e_operand_a_r[1][15]/opit_0_AQ_perm/CLK
+ clock pessimism                                         0.554      11.011                          
+ clock uncertainty                                      -0.050      10.961                          
+
+ Setup time                                             -0.338      10.623                          
+
+ Data required time                                                 10.623                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.623                          
+ Data arrival time                                                  11.657                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.034                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/f1_pc_r[18]/opit_0_inv_AQ_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.085  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.782
+  Launch Clock Delay      :  4.421
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.677       4.421         ntclkbufg_0      
+ CLMS_633_787/CLK                                                          r       u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/CLK
+
+ CLMS_633_787/Q1                   tco                   0.213       4.634 r       u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/Q
+                                   net (fanout=23)       1.389       6.023         u_cpu_subsys/u_core/e_operand_a_r[0] [15]
+ CLMA_537_853/D3                                                                   u_cpu_subsys/u_core/N1023.eq_7/gateop_perm/I3
+ CLMA_537_853/COUT                 td                    0.160       6.183 r       u_cpu_subsys/u_core/N1023.eq_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.183         u_cpu_subsys/u_core/N1023.co [14]
+ CLMA_537_859/CIN                                                                  u_cpu_subsys/u_core/N1023.eq_8/gateop_perm/CIN
+ CLMA_537_859/COUT                 td                    0.090       6.273 f       u_cpu_subsys/u_core/N1023.eq_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.273         u_cpu_subsys/u_core/N1023.co [22]
+ CLMA_537_865/CIN                                                                  u_cpu_subsys/u_core/N1023.eq_12/gateop_perm/CIN
+ CLMA_537_865/CR3                  td                    0.211       6.484 r       u_cpu_subsys/u_core/N1023.eq_15/gateop_l6l5_perm/L5
+                                   net (fanout=1)        0.426       6.910         _N0              
+ CLMA_537_882/D4                                                                   u_cpu_subsys/u_core/N1022.eq_15/gateop_perm/I4
+ CLMA_537_882/COUT                 td                    0.150       7.060 f       u_cpu_subsys/u_core/N1022.eq_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.060         u_cpu_subsys/u_core/N1024
+ CLMA_537_888/CIN                                                                  u_cpu_subsys/u_core/N1022.eq_16/gateop_perm/CIN
+ CLMA_537_888/Y0                   td                    0.071       7.131 r       u_cpu_subsys/u_core/N1022.eq_16/gateop_perm/Y
+                                   net (fanout=2)        0.842       7.973         u_cpu_subsys/u_core/e_target_match_w
+ CLMS_561_829/B3                                                                   u_cpu_subsys/u_core/N952_1/gateop_perm/I3
+ CLMS_561_829/Y1                   td                    0.113       8.086 r       u_cpu_subsys/u_core/N952_1/gateop_perm/Y
+                                   net (fanout=100)      0.510       8.596         u_cpu_subsys/u_core/N1260
+ CLMA_537_811/C0                                                                   u_cpu_subsys/u_core/u_frontend/f1_pc_r[2]/opit_0_inv_L5Q_perm/I0
+ CLMA_537_811/Y2                   td                    0.240       8.836 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[2]/opit_0_inv_L5Q_perm/L6
+                                   net (fanout=5)        0.286       9.122         u_cpu_subsys/u_core/backend_redirect_w
+ CLMS_543_811/B2                                                                   u_cpu_subsys/u_core/N927_25/gateop_perm/I2
+ CLMS_543_811/Y1                   td                    0.188       9.310 r       u_cpu_subsys/u_core/N927_25/gateop_perm/Y
+                                   net (fanout=2)        0.128       9.438         u_cpu_subsys/u_core/_N1774
+ CLMA_543_810/C5                                                                   u_cpu_subsys/u_core/u_frontend/N78_sum2_3/gateop_perm/I5
+ CLMA_543_810/Y2                   td                    0.078       9.516 r       u_cpu_subsys/u_core/u_frontend/N78_sum2_3/gateop_perm/L6
+                                   net (fanout=11)       0.288       9.804         u_cpu_subsys/u_core/u_frontend/available_w [2]
+ CLMS_543_817/C2                                                                   u_cpu_subsys/u_core/u_frontend/N456_sum3_5/gateop_perm/I2
+ CLMS_543_817/Y2                   td                    0.188       9.992 r       u_cpu_subsys/u_core/u_frontend/N456_sum3_5/gateop_perm/L6
+                                   net (fanout=8)        0.438      10.430         u_cpu_subsys/u_core/_N55200_1
+ CLMA_543_792/C2                                                                   u_cpu_subsys/u_core/u_frontend/N835/gateop_perm/I2
+ CLMA_543_792/Y2                   td                    0.188      10.618 r       u_cpu_subsys/u_core/u_frontend/N835/gateop_perm/L6
+                                   net (fanout=31)       1.129      11.747         u_cpu_subsys/u_core/u_frontend/N835
+ CLMA_615_768/CE0                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[18]/opit_0_inv_AQ_perm/CE
+
+ Data arrival time                                                  11.747         Logic Levels: 11 
+                                                                                   Logic: 1.890ns(25.799%), Route: 5.436ns(74.201%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.433      10.449         ntclkbufg_0      
+ CLMA_615_768/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[20]/opit_0_inv_AQ_perm/CLK
+ clock pessimism                                         0.554      11.003                          
+ clock uncertainty                                      -0.050      10.953                          
+
+ Setup time                                             -0.238      10.715                          
+
+ Data required time                                                 10.715                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.715                          
+ Data arrival time                                                  11.747                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.032                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[10]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.124  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.729
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.732      10.741         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_531_774/B3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/I3
+ CLMA_531_774/Y1                   td                    0.113      10.854 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126      10.980         u_cpu_subsys/u_core/u_frontend/u_predictor/N320
+ CLMA_531_774/D0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/I0
+ CLMA_531_774/Y3                   td                    0.223      11.203 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/L6
+                                   net (fanout=32)       0.458      11.661         u_cpu_subsys/u_core/u_frontend/u_predictor/N5909
+ CLMA_513_780/CE0                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[10]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.661         Logic Levels: 9  
+                                                                                   Logic: 2.219ns(30.590%), Route: 5.035ns(69.410%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.380      10.396         ntclkbufg_0      
+ CLMA_513_780/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[10]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.950                          
+ clock uncertainty                                      -0.050      10.900                          
+
+ Setup time                                             -0.238      10.662                          
+
+ Data required time                                                 10.662                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.662                          
+ Data arrival time                                                  11.661                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.999                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[11]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.124  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.729
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.732      10.741         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_531_774/B3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/I3
+ CLMA_531_774/Y1                   td                    0.113      10.854 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126      10.980         u_cpu_subsys/u_core/u_frontend/u_predictor/N320
+ CLMA_531_774/D0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/I0
+ CLMA_531_774/Y3                   td                    0.223      11.203 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/L6
+                                   net (fanout=32)       0.458      11.661         u_cpu_subsys/u_core/u_frontend/u_predictor/N5909
+ CLMA_513_780/CE0                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[11]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.661         Logic Levels: 9  
+                                                                                   Logic: 2.219ns(30.590%), Route: 5.035ns(69.410%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.380      10.396         ntclkbufg_0      
+ CLMA_513_780/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[11]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.950                          
+ clock uncertainty                                      -0.050      10.900                          
+
+ Setup time                                             -0.238      10.662                          
+
+ Data required time                                                 10.662                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.662                          
+ Data arrival time                                                  11.661                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.999                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[112]/opit_0_L6Q_perm/I2
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.137  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.730
+  Launch Clock Delay      :  4.421
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.677       4.421         ntclkbufg_0      
+ CLMS_633_787/CLK                                                          r       u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/CLK
+
+ CLMS_633_787/Q1                   tco                   0.213       4.634 r       u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/Q
+                                   net (fanout=23)       1.389       6.023         u_cpu_subsys/u_core/e_operand_a_r[0] [15]
+ CLMA_537_853/D3                                                                   u_cpu_subsys/u_core/N1023.eq_7/gateop_perm/I3
+ CLMA_537_853/COUT                 td                    0.160       6.183 r       u_cpu_subsys/u_core/N1023.eq_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.183         u_cpu_subsys/u_core/N1023.co [14]
+ CLMA_537_859/CIN                                                                  u_cpu_subsys/u_core/N1023.eq_8/gateop_perm/CIN
+ CLMA_537_859/COUT                 td                    0.090       6.273 f       u_cpu_subsys/u_core/N1023.eq_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.273         u_cpu_subsys/u_core/N1023.co [22]
+ CLMA_537_865/CIN                                                                  u_cpu_subsys/u_core/N1023.eq_12/gateop_perm/CIN
+ CLMA_537_865/CR3                  td                    0.211       6.484 r       u_cpu_subsys/u_core/N1023.eq_15/gateop_l6l5_perm/L5
+                                   net (fanout=1)        0.426       6.910         _N0              
+ CLMA_537_882/D4                                                                   u_cpu_subsys/u_core/N1022.eq_15/gateop_perm/I4
+ CLMA_537_882/COUT                 td                    0.150       7.060 f       u_cpu_subsys/u_core/N1022.eq_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.060         u_cpu_subsys/u_core/N1024
+ CLMA_537_888/CIN                                                                  u_cpu_subsys/u_core/N1022.eq_16/gateop_perm/CIN
+ CLMA_537_888/Y0                   td                    0.071       7.131 r       u_cpu_subsys/u_core/N1022.eq_16/gateop_perm/Y
+                                   net (fanout=2)        0.864       7.995         u_cpu_subsys/u_core/e_target_match_w
+ CLMA_561_816/C4                                                                   u_cpu_subsys/u_core/N1038_1/LUT6_inst_perm/I4
+ CLMA_561_816/Y2                   td                    0.101       8.096 r       u_cpu_subsys/u_core/N1038_1/LUT6_inst_perm/L6
+                                   net (fanout=4)        0.126       8.222         u_cpu_subsys/u_core/N1038
+ CLMA_561_816/B2                                                                   u_cpu_subsys/u_core/u_csr/N66_12[9]_5/LUT6_inst_perm/I2
+ CLMA_561_816/Y1                   td                    0.188       8.410 r       u_cpu_subsys/u_core/u_csr/N66_12[9]_5/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.484       8.894         u_cpu_subsys/u_core/_N65946
+ CLMS_543_811/A4                                                                   u_cpu_subsys/u_core/N927_21/gateop_perm/I4
+ CLMS_543_811/Y0                   td                    0.101       8.995 r       u_cpu_subsys/u_core/N927_21/gateop_perm/Y
+                                   net (fanout=81)       0.653       9.648         u_cpu_subsys/u_core/debug_o [17]
+ CLMA_561_774/C5                                                                   u_cpu_subsys/u_core/u_frontend/N4_13[34]_muxf7_perm/A5
+ CLMA_561_774/CR2                  td                    0.270       9.918 r       u_cpu_subsys/u_core/u_frontend/N4_13[34]_muxf7_perm/L7
+                                   net (fanout=12)       0.448      10.366         u_cpu_subsys/u_core/u_frontend/restore_ras_w_alias [34]
+ CLMA_555_787/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N75[1]_1/LUT6_inst_perm/I3
+ CLMA_555_787/Y2                   td                    0.113      10.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N75[1]_1/LUT6_inst_perm/L6
+                                   net (fanout=12)       0.494      10.973         u_cpu_subsys/u_core/u_frontend/u_predictor/restore_write_ptr_w [1]
+ CLMA_531_774/C2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N409/gateop_perm/I2
+ CLMA_531_774/Y2                   td                    0.188      11.161 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N409/gateop_perm/L6
+                                   net (fanout=32)       0.500      11.661         u_cpu_subsys/u_core/u_frontend/u_predictor/g_ras[3].restore_link_w
+ CLMA_513_786/A2                                                           r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[112]/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                  11.661         Logic Levels: 11 
+                                                                                   Logic: 1.856ns(25.635%), Route: 5.384ns(74.365%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.381      10.397         ntclkbufg_0      
+ CLMA_513_786/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[112]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.951                          
+ clock uncertainty                                      -0.050      10.901                          
+
+ Setup time                                             -0.233      10.668                          
+
+ Data required time                                                 10.668                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.668                          
+ Data arrival time                                                  11.661                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.993                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[111]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.116  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.737
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.472      11.660         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_531_768/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[111]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.660         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.760%), Route: 5.022ns(69.240%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.388      10.404         ntclkbufg_0      
+ CLMA_531_768/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[111]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.958                          
+ clock uncertainty                                      -0.050      10.908                          
+
+ Setup time                                             -0.238      10.670                          
+
+ Data required time                                                 10.670                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.670                          
+ Data arrival time                                                  11.660                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.990                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[105]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.121  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.732
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.463      11.651         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_519_774/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[105]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.651         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.798%), Route: 5.013ns(69.202%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.383      10.399         ntclkbufg_0      
+ CLMA_519_774/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[105]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.953                          
+ clock uncertainty                                      -0.050      10.903                          
+
+ Setup time                                             -0.238      10.665                          
+
+ Data required time                                                 10.665                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.665                          
+ Data arrival time                                                  11.651                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.986                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[122]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.121  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.732
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.463      11.651         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_519_774/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[122]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.651         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.798%), Route: 5.013ns(69.202%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.383      10.399         ntclkbufg_0      
+ CLMA_519_774/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[122]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.953                          
+ clock uncertainty                                      -0.050      10.903                          
+
+ Setup time                                             -0.238      10.665                          
+
+ Data required time                                                 10.665                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.665                          
+ Data arrival time                                                  11.651                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.986                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[112]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.123  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.730
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.459      11.647         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_513_786/CE0                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[112]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.647         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.815%), Route: 5.009ns(69.185%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.381      10.397         ntclkbufg_0      
+ CLMA_513_786/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[112]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.951                          
+ clock uncertainty                                      -0.050      10.901                          
+
+ Setup time                                             -0.238      10.663                          
+
+ Data required time                                                 10.663                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.663                          
+ Data arrival time                                                  11.647                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.984                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[101]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.121  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.732
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.460      11.648         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_519_775/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[101]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.648         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.811%), Route: 5.010ns(69.189%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.383      10.399         ntclkbufg_0      
+ CLMA_519_775/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[101]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.953                          
+ clock uncertainty                                      -0.050      10.903                          
+
+ Setup time                                             -0.238      10.665                          
+
+ Data required time                                                 10.665                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.665                          
+ Data arrival time                                                  11.648                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.983                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[125]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.121  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.732
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.460      11.648         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_519_775/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[125]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.648         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.811%), Route: 5.010ns(69.189%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.383      10.399         ntclkbufg_0      
+ CLMA_519_775/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[125]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.953                          
+ clock uncertainty                                      -0.050      10.903                          
+
+ Setup time                                             -0.238      10.665                          
+
+ Data required time                                                 10.665                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.665                          
+ Data arrival time                                                  11.648                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.983                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[115]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.112  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.741
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.467      11.655         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_531_792/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[115]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.655         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.781%), Route: 5.017ns(69.219%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.392      10.408         ntclkbufg_0      
+ CLMA_531_792/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[115]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.962                          
+ clock uncertainty                                      -0.050      10.912                          
+
+ Setup time                                             -0.238      10.674                          
+
+ Data required time                                                 10.674                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.674                          
+ Data arrival time                                                  11.655                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.981                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[116]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.112  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.741
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.706      10.715         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_537_775/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/I3
+ CLMA_537_775/Y2                   td                    0.113      10.828 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N425_2/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.125      10.953         u_cpu_subsys/u_core/u_frontend/u_predictor/N425
+ CLMA_537_775/A1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/I1
+ CLMA_537_775/Y0                   td                    0.235      11.188 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5905/LUT6_inst_perm/L6
+                                   net (fanout=32)       0.467      11.655         u_cpu_subsys/u_core/u_frontend/u_predictor/N5905
+ CLMA_531_792/CE1                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[116]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.655         Logic Levels: 9  
+                                                                                   Logic: 2.231ns(30.781%), Route: 5.017ns(69.219%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.392      10.408         ntclkbufg_0      
+ CLMA_531_792/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[116]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.962                          
+ clock uncertainty                                      -0.050      10.912                          
+
+ Setup time                                             -0.238      10.674                          
+
+ Data required time                                                 10.674                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.674                          
+ Data arrival time                                                  11.655                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.981                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[46]/opit_0_L6Q_perm/I2
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.125  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.742
+  Launch Clock Delay      :  4.421
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.677       4.421         ntclkbufg_0      
+ CLMS_633_787/CLK                                                          r       u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/CLK
+
+ CLMS_633_787/Q1                   tco                   0.213       4.634 r       u_cpu_subsys/u_core/e_operand_a_r[0][15]/opit_0_AQ_perm/Q
+                                   net (fanout=23)       1.389       6.023         u_cpu_subsys/u_core/e_operand_a_r[0] [15]
+ CLMA_537_853/D3                                                                   u_cpu_subsys/u_core/N1023.eq_7/gateop_perm/I3
+ CLMA_537_853/COUT                 td                    0.160       6.183 r       u_cpu_subsys/u_core/N1023.eq_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.183         u_cpu_subsys/u_core/N1023.co [14]
+ CLMA_537_859/CIN                                                                  u_cpu_subsys/u_core/N1023.eq_8/gateop_perm/CIN
+ CLMA_537_859/COUT                 td                    0.090       6.273 f       u_cpu_subsys/u_core/N1023.eq_11/gateop_perm/COUT
+                                   net (fanout=1)        0.000       6.273         u_cpu_subsys/u_core/N1023.co [22]
+ CLMA_537_865/CIN                                                                  u_cpu_subsys/u_core/N1023.eq_12/gateop_perm/CIN
+ CLMA_537_865/CR3                  td                    0.211       6.484 r       u_cpu_subsys/u_core/N1023.eq_15/gateop_l6l5_perm/L5
+                                   net (fanout=1)        0.426       6.910         _N0              
+ CLMA_537_882/D4                                                                   u_cpu_subsys/u_core/N1022.eq_15/gateop_perm/I4
+ CLMA_537_882/COUT                 td                    0.150       7.060 f       u_cpu_subsys/u_core/N1022.eq_15/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.060         u_cpu_subsys/u_core/N1024
+ CLMA_537_888/CIN                                                                  u_cpu_subsys/u_core/N1022.eq_16/gateop_perm/CIN
+ CLMA_537_888/Y0                   td                    0.071       7.131 r       u_cpu_subsys/u_core/N1022.eq_16/gateop_perm/Y
+                                   net (fanout=2)        0.864       7.995         u_cpu_subsys/u_core/e_target_match_w
+ CLMA_561_816/C4                                                                   u_cpu_subsys/u_core/N1038_1/LUT6_inst_perm/I4
+ CLMA_561_816/Y2                   td                    0.101       8.096 r       u_cpu_subsys/u_core/N1038_1/LUT6_inst_perm/L6
+                                   net (fanout=4)        0.126       8.222         u_cpu_subsys/u_core/N1038
+ CLMA_561_816/B2                                                                   u_cpu_subsys/u_core/u_csr/N66_12[9]_5/LUT6_inst_perm/I2
+ CLMA_561_816/Y1                   td                    0.188       8.410 r       u_cpu_subsys/u_core/u_csr/N66_12[9]_5/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.484       8.894         u_cpu_subsys/u_core/_N65946
+ CLMS_543_811/A4                                                                   u_cpu_subsys/u_core/N927_21/gateop_perm/I4
+ CLMS_543_811/Y0                   td                    0.101       8.995 r       u_cpu_subsys/u_core/N927_21/gateop_perm/Y
+                                   net (fanout=81)       0.653       9.648         u_cpu_subsys/u_core/debug_o [17]
+ CLMA_561_774/C5                                                                   u_cpu_subsys/u_core/u_frontend/N4_13[34]_muxf7_perm/A5
+ CLMA_561_774/CR2                  td                    0.270       9.918 r       u_cpu_subsys/u_core/u_frontend/N4_13[34]_muxf7_perm/L7
+                                   net (fanout=12)       0.448      10.366         u_cpu_subsys/u_core/u_frontend/restore_ras_w_alias [34]
+ CLMA_555_787/C3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N75[1]_1/LUT6_inst_perm/I3
+ CLMA_555_787/Y2                   td                    0.113      10.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N75[1]_1/LUT6_inst_perm/L6
+                                   net (fanout=12)       0.490      10.969         u_cpu_subsys/u_core/u_frontend/u_predictor/restore_write_ptr_w [1]
+ CLMA_537_781/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N339/gateop_perm/I2
+ CLMA_537_781/Y3                   td                    0.188      11.157 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N339/gateop_perm/L6
+                                   net (fanout=32)       0.506      11.663         u_cpu_subsys/u_core/u_frontend/u_predictor/g_ras[1].restore_link_w
+ CLMS_531_799/D2                                                           r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[46]/opit_0_L6Q_perm/I2
+
+ Data arrival time                                                  11.663         Logic Levels: 11 
+                                                                                   Logic: 1.856ns(25.628%), Route: 5.386ns(74.372%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.393      10.409         ntclkbufg_0      
+ CLMS_531_799/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[46]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.963                          
+ clock uncertainty                                      -0.050      10.913                          
+
+ Setup time                                             -0.228      10.685                          
+
+ Data required time                                                 10.685                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.685                          
+ Data arrival time                                                  11.663                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.978                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB
+Endpoint    : u_cpu_subsys/u_core/N630[2][31]_15[22]/gateop_perm/I3
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.018  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.770
+  Launch Clock Delay      :  4.342
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.598       4.342         ntclkbufg_0      
+ DRM_490_768/CLKB[0]                                                       r       u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/CLKB
+
+ DRM_490_768/QA0[4]                tco                   1.644       5.986 r       u_cpu_subsys/u_dcache/u_tag0/u_ip/U_ipm2l_sdpram_ip_ram_dcache_tag/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/gopdrm_18k/QA[4]
+                                   net (fanout=3)        0.727       6.713         u_cpu_subsys/u_dcache/tag0_w [4]
+ CLMS_513_751/C2                                                                   u_cpu_subsys/u_dcache/N12.eq_2/gateop_perm/I2
+ CLMS_513_751/COUT                 td                    0.369       7.082 f       u_cpu_subsys/u_dcache/N12.eq_3/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.082         u_cpu_subsys/u_dcache/N12.co [6]
+ CLMS_513_757/CIN                                                                  u_cpu_subsys/u_dcache/N12.eq_4/gateop_perm/CIN
+ CLMS_513_757/COUT                 td                    0.090       7.172 f       u_cpu_subsys/u_dcache/N12.eq_7/gateop_perm/COUT
+                                   net (fanout=1)        0.000       7.172         u_cpu_subsys/u_dcache/N12.co [14]
+ CLMS_513_769/CIN                                                                  u_cpu_subsys/u_dcache/N12.eq_8/gateop_perm/CIN
+ CLMS_513_769/Y1                   td                    0.142       7.314 r       u_cpu_subsys/u_dcache/N12.eq_9/gateop_perm/Y
+                                   net (fanout=72)       0.888       8.202         u_cpu_subsys/u_dcache/hit0_w
+ CLMA_513_870/D2                                                                   u_cpu_subsys/u_dcache/N65_18[18]_muxf7_perm/B2
+ CLMA_513_870/CR2                  td                    0.380       8.582 r       u_cpu_subsys/u_dcache/N65_18[18]_muxf7_perm/L7
+                                   net (fanout=1)        0.125       8.707         u_cpu_subsys/u_dcache/raw_load_w [18]
+ CLMS_513_871/B1                                                                   u_cpu_subsys/u_dcache/N89[23:16]_6[2]/LUT6_inst_perm/I1
+ CLMS_513_871/Y1                   td                    0.235       8.942 r       u_cpu_subsys/u_dcache/N89[23:16]_6[2]/LUT6_inst_perm/L6
+                                   net (fanout=3)        0.456       9.398         u_cpu_subsys/u_dcache/merged_load_w [18]
+ CLMA_537_871/A3                                                                   u_cpu_subsys/u_dcache/N104_9[10]/gateop_perm/I3
+ CLMA_537_871/Y1                   td                    0.242       9.640 r       u_cpu_subsys/u_dcache/N104_9[10]_1/gateop_perm/Y
+                                   net (fanout=1)        0.842      10.482         u_cpu_subsys/u_dcache/dc_resp_data_o [10]
+ CLMA_579_828/B4                                                                   u_cpu_subsys/u_dcache/N104_10[7]_1/gateop_perm/I4
+ CLMA_579_828/Y1                   td                    0.097      10.579 f       u_cpu_subsys/u_dcache/N104_10[7]_1/gateop_perm/Y
+                                   net (fanout=1)        0.466      11.045         u_cpu_subsys/_N14616
+ CLMS_579_799/A3                                                                   u_cpu_subsys/u_core/w_result_r[0][10]/opit_0_AQ_perm/I3
+ CLMS_579_799/Y0                   td                    0.113      11.158 r       u_cpu_subsys/u_core/w_result_r[0][10]/opit_0_AQ_perm/Y
+                                   net (fanout=3)        0.482      11.640         u_cpu_subsys/u_core/m_result_w[0] [10]
+ CLMA_591_775/A3                                                           r       u_cpu_subsys/u_core/N630[2][31]_15[22]/gateop_perm/I3
+
+ Data arrival time                                                  11.640         Logic Levels: 8  
+                                                                                   Logic: 3.312ns(45.382%), Route: 3.986ns(54.618%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.421      10.437         ntclkbufg_0      
+ CLMA_591_775/CLK                                                          r       u_cpu_subsys/u_core/e_operand_a_r[1][10]/opit_0_AQ_perm/CLK
+ clock pessimism                                         0.554      10.991                          
+ clock uncertainty                                      -0.050      10.941                          
+
+ Setup time                                             -0.278      10.663                          
+
+ Data required time                                                 10.663                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.663                          
+ Data arrival time                                                  11.640                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.977                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[16]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.111  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.742
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.732      10.741         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_531_774/B3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/I3
+ CLMA_531_774/Y1                   td                    0.113      10.854 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126      10.980         u_cpu_subsys/u_core/u_frontend/u_predictor/N320
+ CLMA_531_774/D0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/I0
+ CLMA_531_774/Y3                   td                    0.223      11.203 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/L6
+                                   net (fanout=32)       0.445      11.648         u_cpu_subsys/u_core/u_frontend/u_predictor/N5909
+ CLMA_531_798/CE0                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[16]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.648         Logic Levels: 9  
+                                                                                   Logic: 2.219ns(30.645%), Route: 5.022ns(69.355%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.393      10.409         ntclkbufg_0      
+ CLMA_531_798/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[16]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.963                          
+ clock uncertainty                                      -0.050      10.913                          
+
+ Setup time                                             -0.238      10.675                          
+
+ Data required time                                                 10.675                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.675                          
+ Data arrival time                                                  11.648                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.973                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+Endpoint    : u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[17]/opit_0_L6Q_perm/CE
+Path Group  : clk_sys
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.111  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.742
+  Launch Clock Delay      :  4.407
+  Clock Pessimism Removal :  0.554
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ D18                                                     0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.046       0.046         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.514       2.567         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       2.744 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.663       4.407         ntclkbufg_0      
+ CLMA_615_750/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[12]/opit_0_inv_AQ_perm/CLK
+
+ CLMA_615_750/Q0                   tco                   0.213       4.620 r       u_cpu_subsys/u_core/u_frontend/f1_pc_r[9]/opit_0_inv_AQ_perm/Q
+                                   net (fanout=12)       0.897       5.517         u_cpu_subsys/ic_req_addr_w [9]
+ CLMA_663_702/D5                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/I5
+ CLMA_663_702/Y3                   td                    0.078       5.595 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N2_8/gateop_perm/L6
+                                   net (fanout=128)      0.468       6.063         u_cpu_subsys/u_core/u_frontend/u_predictor/direction_idx_w [8]
+ CLMA_681_708/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/D2
+ CLMA_681_708/CR1                  td                    0.431       6.494 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_444_muxf8_perm/L8
+                                   net (fanout=1)        0.483       6.977         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28817
+ CLMS_699_715/D2                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/B2
+ CLMS_699_715/CR2                  td                    0.380       7.357 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_510_muxf7_perm/L7
+                                   net (fanout=1)        1.021       8.378         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28883
+ CLMS_609_733/D4                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/I4
+ CLMS_609_733/Y3                   td                    0.101       8.479 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N24_511/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126       8.605         u_cpu_subsys/u_core/u_frontend/u_predictor/_N28884
+ CLMS_609_733/B1                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/I1
+ CLMS_609_733/Y1                   td                    0.235       8.840 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N26/LUT6_inst_perm/L6
+                                   net (fanout=7)        0.598       9.438         u_cpu_subsys/u_core/u_frontend/predict_taken_w
+ CLMA_567_732/D3                                                                   u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/I3
+ CLMA_567_732/Y3                   td                    0.113       9.551 r       u_cpu_subsys/u_core/u_frontend/f2_taken_r/opit_0_L6QL5Q1_perm/L6
+                                   net (fanout=4)        0.126       9.677         u_cpu_subsys/u_core/u_frontend/N525
+ CLMA_567_732/B0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/I0
+ CLMA_567_732/CR1                  td                    0.332      10.009 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N25_3/LUT6D_inst_perm/L5
+                                   net (fanout=9)        0.732      10.741         u_cpu_subsys/u_core/u_frontend/u_predictor/_N65955
+ CLMA_531_774/B3                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/I3
+ CLMA_531_774/Y1                   td                    0.113      10.854 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N320_8/LUT6_inst_perm/L6
+                                   net (fanout=1)        0.126      10.980         u_cpu_subsys/u_core/u_frontend/u_predictor/N320
+ CLMA_531_774/D0                                                                   u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/I0
+ CLMA_531_774/Y3                   td                    0.223      11.203 r       u_cpu_subsys/u_core/u_frontend/u_predictor/N5909/gateop_perm/L6
+                                   net (fanout=32)       0.445      11.648         u_cpu_subsys/u_core/u_frontend/u_predictor/N5909
+ CLMA_531_798/CE0                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[17]/opit_0_L6Q_perm/CE
+
+ Data arrival time                                                  11.648         Logic Levels: 9  
+                                                                                   Logic: 2.219ns(30.645%), Route: 5.022ns(69.355%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             6.667       6.667 r                        
+ D18                                                     0.000       6.667 r       clk_i (port)     
+                                   net (fanout=1)        0.046       6.713         clk_i            
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       7.479 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       7.479         clk_i_ibuf/ntD   
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       7.574 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        1.292       8.866         nt_clk_i         
+ USCM_383_930/CLKIN0                                                               clkbufg_0/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       9.016 r       clkbufg_0/gopclkbufg/CLKOUT
+                                   net (fanout=7300)     1.393      10.409         ntclkbufg_0      
+ CLMA_531_798/CLK                                                          r       u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r[17]/opit_0_L6Q_perm/CLK
+ clock pessimism                                         0.554      10.963                          
+ clock uncertainty                                      -0.050      10.913                          
+
+ Setup time                                             -0.238      10.675                          
+
+ Data required time                                                 10.675                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 10.675                          
+ Data arrival time                                                  11.648                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.973                          
+====================================================================================================
+
+====================================================================================================

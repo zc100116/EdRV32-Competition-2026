@@ -1,0 +1,71 @@
+IP: ip_ram_pix_line
+IDF: G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/ipcore/ip_ram_pix_line/ip_ram_pix_line.idf
+Type: DRM Based Simple Dual Port RAM
+Device: PG2L200H, FBB676, -6
+Wrapper: G:/codex_project/EdRV32-Competition-2026/rtl/tech/edrv32_ram_pix_line.v
+Write: depth x width = 1024×48; address width=10
+Read: depth x width = 1024×48; address width=10
+Port names match wrapper: True
+
+Actual port declarations:
+input  [WR_DATA_WIDTH-1:0]    wr_data        ; //input write data    [WR_DATA_WIDTH-1:0]
+input  [WR_ADDR_WIDTH-1:0]    wr_addr        ; //input write address [WR_ADDR_WIDTH-1:0]
+input                         wr_en          ; //input write enable
+input                         wr_clk         ; //input write clock
+input                         wr_rst         ; //input write reset
+output [RD_DATA_WIDTH-1:0]    rd_data        ; //output read data    [C_RD_DATA_WIDTH-1:0]
+input  [RD_ADDR_WIDTH-1:0]    rd_addr        ; //input read address [RD_ADDR_WIDTH-1:0]
+input                         rd_clk         ; //input read clock
+input                         rd_clk_en      ; //input read clock enable
+input                         rd_rst         ; //input read reset
+
+Wrapper connections:
+.wr_clk(clk_i)
+.wr_rst(1'b0)
+.wr_en(wr_en_i)
+.wr_addr(wr_addr_i)
+.wr_data(wr_data_i)
+.rd_clk(clk_i)
+.rd_rst(1'b0)
+.rd_clk_en(rd_en_i)
+.rd_addr(rd_addr_i)
+.rd_data(rd_data_o)
+
+Actual IDF settings:
+BE_WIDTH=1
+BYTE_SIZE=8
+CAS_MODE=36K
+CAS_MODE_SEL=AUTO
+FAB_REG=false
+INIT_EN=false
+INIT_FILE=NONE
+INIT_FORMAT=BIN
+OUTPUT_REG=false
+POWER_OPT=false
+RD_ADDR_STROBE_EN=false
+RD_ADDR_WIDTH=10
+RD_BE_WIDTH=1
+RD_CLK_EN=true
+RD_CLK_OR_POL_INV=false
+RD_DATA_WIDTH=48
+RD_OCE_EN=false
+RESET_TYPE=ASYNC
+RST_VAL=0
+RST_VAL_EN=false
+SAMEWIDTH_EN=true
+WR_ADDR_STROBE_EN=false
+WR_ADDR_WIDTH=10
+WR_BYTE_EN=false
+WR_CLK_EN=false
+WR_DATA_WIDTH=48
+
+Generation log excerpt:
+IP Generator (Version 2022.2-SP6.1 build 138931)
+Instance: ip_ram_pix_line (G:\codex_project\EdRV32-FPGA\EdRV32-MEDIA\ipcore\ip_ram_pix_line\ip_ram_pix_line.idf)
+IP: Pango DRM Based Simple Dual Port RAM (1.10)
+Part: Logos2-PG2L200H-FBB676--6
+Synthesis is disabled.
+Done: 0 error(s), 0 warning(s)
+
+Actual DRM block count: 2 DRM36K per instance; source: final MEDIA PRR hierarchy.
+IP option screenshot: 未取得；当前没有选项截图文件，未操控桌面采集。

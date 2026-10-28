@@ -1,0 +1,21 @@
+Reported violating endpoints: 432; exported unique endpoints: 432; coverage=complete.
+Command: report_timing -delay_type max -max_path 100000 -nworst 1 -slack_less_than 0 -input_pins FALSE -force_to_run
+
+start_register	end_register	endpoints	worst_slack_ns	worst_logic_levels
+u_cpu_subsys/u_core/u_frontend/u_predictor/history_r	u_cpu_subsys/u_core/u_frontend/u_predictor/ras_data_r	109	-0.534	8
+u_cpu_subsys/u_dcache/addr_r	u_cpu_subsys/u_core/w_result_r	15	-0.405	8
+u_cpu_subsys/u_core/u_frontend/u_predictor/history_r	u_cpu_subsys/u_core/u_frontend/f1_pc_r	20	-0.354	8
+u_cpu_subsys/u_dcache/u_tag1/u_ip	u_cpu_subsys/u_dcache/dirty1_r	132	-0.314	9
+u_cpu_subsys/u_dcache/u_tag1/u_ip	u_cpu_subsys/u_dcache/dirty0_r	58	-0.281	9
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/e_record_r	16	-0.214	7
+u_cpu_subsys/u_core/u_frontend/u_predictor/history_r	u_cpu_subsys/u_core/u_frontend/u_predictor/ras_count_r	5	-0.205	8
+u_cpu_subsys/u_dcache/u_tag1/u_ip	u_cpu_subsys/u_dcache/valid0_r	54	-0.146	9
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/u_csr/instret_r	10	-0.143	9
+u_cpu_subsys/u_core/u_frontend/u_predictor/history_r	u_cpu_subsys/u_core/u_frontend/u_predictor/ras_ptr_r	2	-0.098	8
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/u_csr/mtvec_r	2	-0.069	8
+u_cpu_subsys/u_dcache/addr_r	u_cpu_subsys/u_core/u_frontend/probe_predictor_redirect_ras_r	1	-0.046	7
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/N819_17	1	-0.033	8
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/u_csr/cycle_r	4	-0.033	9
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/u_csr/counter_r	1	-0.024	8
+u_cpu_subsys/u_core/u_frontend/u_ib/read_ptr_r	u_cpu_subsys/u_core/u_csr/mscratch_r	1	-0.005	9
+u_cpu_subsys/u_dcache/addr_r	u_cpu_subsys/u_core/probe_load_result_r	1	-0.003	8

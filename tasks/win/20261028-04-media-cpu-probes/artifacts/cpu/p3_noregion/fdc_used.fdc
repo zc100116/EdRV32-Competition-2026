@@ -1,0 +1,7 @@
+# Six requested FFs collapse to two during Compile DFF inference.
+# FDC is applied later: PAP_DONT_TOUCH only protects the two surviving FFs in Device Map.
+# This does NOT implement six-copy synthesis preservation; report this limitation.
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_f1_redirect_valid_r} {PAP_DONT_TOUCH} {TRUE}
+define_attribute {i:u_cpu_subsys.u_core.u_frontend.probe_f1_d_redirect_valid_r} {PAP_DONT_TOUCH} {TRUE}
+
+# Region removed after PDS ConstraintEditor-0027: illegal floorplan coordinates.

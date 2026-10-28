@@ -1,0 +1,124 @@
+Executing : def_port {led_o[0]} LOC=A20 VCCIO=3.3 IOSTANDARD=LVCMOS33 DRIVE=8 SLEW=SLOW NONE=TRUE successfully
+Executing : def_port {led_o[1]} LOC=C18 VCCIO=3.3 IOSTANDARD=LVCMOS33 DRIVE=8 SLEW=SLOW NONE=TRUE successfully
+Executing : def_port {led_o[2]} LOC=C19 VCCIO=3.3 IOSTANDARD=LVCMOS33 DRIVE=8 SLEW=SLOW NONE=TRUE successfully
+Executing : def_port {led_o[3]} LOC=E18 VCCIO=3.3 IOSTANDARD=LVCMOS33 DRIVE=8 SLEW=SLOW NONE=TRUE successfully
+Executing : def_port {uart_tx_o} LOC=C24 VCCIO=3.3 IOSTANDARD=LVCMOS33 DRIVE=8 SLEW=SLOW NONE=TRUE successfully
+Executing : def_port {clk_i} LOC=D18 VCCIO=3.3 IOSTANDARD=LVCMOS33 NONE=TRUE successfully
+Executing : def_port {key_n_i} LOC=C23 VCCIO=3.3 IOSTANDARD=LVCMOS33 NONE=TRUE successfully
+Executing : def_port {rst_n_i} LOC=C22 VCCIO=3.3 IOSTANDARD=LVCMOS33 NONE=TRUE successfully
+Executing : def_port {uart_rx_i} LOC=B24 VCCIO=3.3 IOSTANDARD=LVCMOS33 NONE=TRUE successfully
+Phase 1 Pre global placement started.
+Phase 1.1 1st GP placement started.
+Phase 1.2 Clock placement started.
+Phase 2 Global placement started.
+Phase 2.1 Fixed placement started.
+Phase 2.2 Process placement started.
+Process placement takes 0.00 sec.
+Phase 2.3 IO placement started.
+Phase 2.4 2nd GP placement started.
+Worst slack after global placement is -1272
+Phase 3 Post global placement started.
+Phase 3.1 Macro cell placement started.
+Phase 3.2 3rd GP placement started.
+Worst slack after post global placement is -1239
+Phase 4 Legalization started.
+Phase 5 Timing-driven detailed placement started.
+Phase 5.1 Replication placement started.
+Worst slack before Replication Place is -1563.
+Phase 5.2 Swapping placement started.
+Worst slack before detailed placement is -1290, TNS before detailed placement is -3848098. 
+Worst slack after detailed placement is -699, TNS after detailed placement is -333208. 
+Worst slack is -694, TNS after placement is -329587.
+Finished placement.
+Worst slack is -694, TNS before route is -329587.
+Unrouted general nets at iteration 2 (MT total route time: 5.748 sec): 17121(overused: 176810)
+Unrouted general nets at iteration 3 (MT total route time: 6.533 sec): 15870(overused: 145652)
+Unrouted general nets at iteration 4 (MT total route time: 6.062 sec): 14680(overused: 114749)
+Unrouted general nets at iteration 5 (MT total route time: 5.877 sec): 13676(overused: 93780)
+Unrouted general nets at iteration 6 (MT total route time: 5.574 sec): 12712(overused: 78892)
+Unrouted general nets at iteration 7 (MT total route time: 5.222 sec): 10914(overused: 69660)
+Unrouted general nets at iteration 8 (MT total route time: 4.963 sec): 9635(overused: 58046)
+Unrouted general nets at iteration 9 (MT total route time: 4.616 sec): 8748(overused: 49129)
+Unrouted general nets at iteration 10 (MT total route time: 4.293 sec): 7873(overused: 41066)
+Unrouted general nets at iteration 11 (MT total route time: 4.206 sec): 7204(overused: 36184)
+Unrouted general nets at iteration 12 (MT total route time: 3.902 sec): 6749(overused: 31984)
+Unrouted general nets at iteration 13 (MT total route time: 3.428 sec): 6594(overused: 31068)
+Unrouted general nets at iteration 14 (MT total route time: 3.331 sec): 6221(overused: 28133)
+Unrouted general nets at iteration 15 (MT total route time: 3.400 sec): 5787(overused: 25719)
+Unrouted general nets at iteration 16 (MT total route time: 3.249 sec): 5622(overused: 24022)
+Unrouted general nets at iteration 17 (MT total route time: 3.122 sec): 5294(overused: 21945)
+Unrouted general nets at iteration 18 (MT total route time: 2.846 sec): 4891(overused: 19517)
+Unrouted general nets at iteration 19 (MT total route time: 2.734 sec): 4512(overused: 17320)
+Unrouted general nets at iteration 20 (MT total route time: 2.694 sec): 4238(overused: 16044)
+Unrouted general nets at iteration 21 (MT total route time: 2.620 sec): 4048(overused: 15065)
+Unrouted general nets at iteration 22 (MT total route time: 2.183 sec): 3727(overused: 12960)
+Unrouted general nets at iteration 23 (MT total route time: 2.059 sec): 3631(overused: 12502)
+Unrouted general nets at iteration 24 (MT total route time: 1.998 sec): 3496(overused: 12038)
+Unrouted general nets at iteration 25 (MT total route time: 1.976 sec): 3254(overused: 11179)
+Unrouted general nets at iteration 26 (MT total route time: 1.953 sec): 2974(overused: 9696)
+Unrouted general nets at iteration 27 (MT total route time: 1.852 sec): 2902(overused: 9433)
+Unrouted general nets at iteration 28 (MT total route time: 1.699 sec): 2632(overused: 8033)
+Unrouted general nets at iteration 29 (MT total route time: 1.642 sec): 2594(overused: 8006)
+Unrouted general nets at iteration 30 (MT total route time: 1.580 sec): 2409(overused: 7350)
+Unrouted general nets at iteration 31 (MT total route time: 1.350 sec): 2156(overused: 6040)
+Unrouted general nets at iteration 32 (MT total route time: 1.227 sec): 1884(overused: 5238)
+Unrouted general nets at iteration 33 (MT total route time: 1.075 sec): 1814(overused: 4966)
+Unrouted general nets at iteration 34 (MT total route time: 1.008 sec): 1747(overused: 4483)
+Unrouted general nets at iteration 35 (MT total route time: 0.857 sec): 1584(overused: 3969)
+Unrouted general nets at iteration 36 (MT total route time: 0.869 sec): 1530(overused: 3781)
+Unrouted general nets at iteration 37 (MT total route time: 0.917 sec): 1469(overused: 3663)
+Unrouted general nets at iteration 38 (MT total route time: 0.909 sec): 1389(overused: 3656)
+Unrouted general nets at iteration 39 (MT total route time: 0.856 sec): 1399(overused: 3538)
+Unrouted general nets at iteration 40 (MT total route time: 0.795 sec): 1369(overused: 3339)
+Unrouted general nets at iteration 41 (MT total route time: 0.788 sec): 1322(overused: 3259)
+Unrouted general nets at iteration 42 (MT total route time: 0.883 sec): 1296(overused: 3283)
+Unrouted general nets at iteration 43 (MT total route time: 0.762 sec): 1174(overused: 2842)
+Unrouted general nets at iteration 44 (MT total route time: 0.703 sec): 1093(overused: 2715)
+Unrouted general nets at iteration 45 (MT total route time: 0.745 sec): 1097(overused: 2686)
+Unrouted general nets at iteration 46 (MT total route time: 0.626 sec): 1012(overused: 2363)
+Unrouted general nets at iteration 47 (MT total route time: 0.569 sec): 925(overused: 2140)
+Unrouted general nets at iteration 48 (MT total route time: 0.547 sec): 874(overused: 1992)
+Unrouted general nets at iteration 49 (MT total route time: 0.465 sec): 727(overused: 1528)
+Unrouted general nets at iteration 50 (MT total route time: 0.460 sec): 719(overused: 1705)
+Unrouted general nets at iteration 51 (MT total route time: 0.458 sec): 676(overused: 1490)
+Unrouted general nets at iteration 52 (MT total route time: 0.440 sec): 660(overused: 1503)
+Unrouted general nets at iteration 53 (MT total route time: 0.433 sec): 715(overused: 1695)
+Unrouted general nets at iteration 54 (MT total route time: 0.468 sec): 683(overused: 1569)
+Unrouted general nets at iteration 55 (MT total route time: 0.398 sec): 637(overused: 1402)
+Unrouted general nets at iteration 56 (MT total route time: 0.366 sec): 592(overused: 1252)
+Unrouted general nets at iteration 57 (MT total route time: 0.348 sec): 533(overused: 1050)
+Unrouted general nets at iteration 58 (MT total route time: 0.411 sec): 558(overused: 1235)
+Unrouted general nets at iteration 59 (MT total route time: 0.380 sec): 578(overused: 1253)
+Unrouted general nets at iteration 60 (MT total route time: 0.437 sec): 570(overused: 1181)
+Unrouted general nets at iteration 61 (MT total route time: 0.357 sec): 512(overused: 1029)
+Unrouted general nets at iteration 62 (MT total route time: 0.352 sec): 458(overused: 874)
+Unrouted general nets at iteration 63 (MT total route time: 0.270 sec): 405(overused: 736)
+Unrouted general nets at iteration 64 (MT total route time: 0.254 sec): 339(overused: 619)
+Unrouted general nets at iteration 65 (MT total route time: 0.234 sec): 352(overused: 703)
+Unrouted general nets at iteration 66 (MT total route time: 0.228 sec): 290(overused: 573)
+Unrouted general nets at iteration 67 (MT total route time: 0.203 sec): 221(overused: 456)
+Unrouted general nets at iteration 68 (MT total route time: 0.204 sec): 245(overused: 450)
+Unrouted general nets at iteration 69 (MT total route time: 0.179 sec): 186(overused: 353)
+Unrouted general nets at iteration 70 (MT total route time: 0.146 sec): 139(overused: 242)
+Unrouted general nets at iteration 71 (MT total route time: 0.151 sec): 113(overused: 184)
+Unrouted general nets at iteration 72 (MT total route time: 0.149 sec): 100(overused: 176)
+Unrouted general nets at iteration 73 (MT total route time: 0.130 sec): 82(overused: 122)
+Unrouted general nets at iteration 74 (MT total route time: 0.135 sec): 63(overused: 118)
+Unrouted general nets at iteration 75 (MT total route time: 0.113 sec): 39(overused: 64)
+Unrouted general nets at iteration 76 (MT total route time: 0.099 sec): 19(overused: 30)
+Unrouted general nets at iteration 77 (MT total route time: 0.090 sec): 14(overused: 28)
+Unrouted general nets at iteration 78 (MT total route time: 0.098 sec): 23(overused: 40)
+Unrouted general nets at iteration 79 (MT total route time: 0.094 sec): 15(overused: 32)
+Unrouted general nets at iteration 80 (MT total route time: 0.093 sec): 10(overused: 18)
+Unrouted general nets at iteration 81 (MT total route time: 0.095 sec): 7(overused: 12)
+Unrouted general nets at iteration 82 (MT total route time: 0.089 sec): 8(overused: 14)
+Unrouted general nets at iteration 83 (MT total route time: 0.084 sec): 6(overused: 8)
+Unrouted general nets at iteration 84 (MT total route time: 0.094 sec): 2(overused: 4)
+Unrouted general nets at iteration 85 (MT total route time: 0.092 sec): 0(overused: 0)
+Finished routing.
+Finished placement and routing.
+Action pnr: Real time elapsed is 0h:6m:14s
+Action pnr: CPU time elapsed is 0h:1m:6s
+Action pnr: Process CPU time elapsed is 0h:1m:19s
+Current time: Wed Oct 28 21:11:44 2026
+Action pnr: Peak memory pool usage is 3,312 MB

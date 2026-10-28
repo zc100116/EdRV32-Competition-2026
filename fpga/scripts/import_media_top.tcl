@@ -10,7 +10,11 @@
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_media_top
-set edrv32_include_dirs [file join $edrv32_repo rtl include]
+# Match the include list used by the successful CPU project. Keep both the
+# source header directory and the current FPGA project directory explicit.
+set edrv32_include_dirs [list \
+    [file join $edrv32_repo rtl include] \
+    [file normalize .]]
 set edrv32_defines [list FPGA_MODE]
 
 # Source paths are relative to their filelist; include paths are set above.
@@ -52,10 +56,12 @@ foreach f $edrv32_sources {
 }
 add_constraint [file join $edrv32_repo fpga constraints edrv32_fpga_media_top.fdc]
 
+# Recompile with these include settings even if PDS considers Compile up to date.
 compile \
     -top_module $edrv32_top \
     -include_path $edrv32_include_dirs \
-    -compiler_directives $edrv32_defines
+    -compiler_directives $edrv32_defines \
+    -force_to_run
 
 puts "edrv32: added [llength $edrv32_sources] sources from $edrv32_repo"
 puts "edrv32: top $edrv32_top, include path $edrv32_include_dirs, defines $edrv32_defines"

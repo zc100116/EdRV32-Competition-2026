@@ -1,0 +1,10 @@
+Reported violating endpoints: 8196; exported unique endpoints: 8196; coverage=complete.
+Command: report_timing -delay_type max -max_path 100000 -nworst 1 -slack_less_than 0 -input_pins FALSE -force_to_run
+
+Full local project: G:\codex_project\EdRV32-Competition-2026\build\win\20261028-04-media-cpu-probes\cpu\p1
+General paths: G:\codex_project\EdRV32-Competition-2026\build\win\20261028-04-media-cpu-probes\exports\p1_top200\report_timing\edrv32_fpga_cpu_sys_top.rtr
+Near-positive paths: G:\codex_project\EdRV32-Competition-2026\build\win\20261028-04-media-cpu-probes\exports\p1_near\report_timing\edrv32_fpga_cpu_sys_top.rtr
+Additional report commands: build/win/20261028-04-media-cpu-probes/exports/*/export.tcl
+No RTL, IP or routed databases were changed for report extraction.
+Clock/IO unconstrained warnings retained; board timing of unconstrained IO is not certified.
+ConstantProbeLoop warnings are constant-propagation diagnostics, not by themselves proof of an RTL combinational loop.

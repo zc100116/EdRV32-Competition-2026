@@ -1,0 +1,13 @@
+W: Timing-4087: Port 'led_o[0]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[1]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[2]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[3]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'uart_tx_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'key_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'uart_rx_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:28s
+Action report_timing: CPU time elapsed is 0h:0m:2s
+Action report_timing: Process CPU time elapsed is 0h:0m:2s
+Current time: Wed Oct 28 21:12:18 2026
+Action report_timing: Peak memory pool usage is 2,016 MB

@@ -1,0 +1,40 @@
+##### Written on 2026/10/28 21:03:45 ###############################
+
+
+##### INFO ##################################################
+
+Current device : 
+	PG2L200H-6FBB676
+
+Top Module : 
+	edrv32_fpga_cpu_sys_top
+
+Constraint File(s) : 
+	G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_cpu_sys_top.fdc
+	G:/codex_project/EdRV32-Competition-2026/tasks/win/20261028-04-media-cpu-probes/src/p2/fpga/constraints/edrv32_fpga_cpu_sys_top_probe.fdc
+
+##### SUMMARY ######################################################
+
+Found 0 error(s), 0 critical warning(s), 0 warning(s), out of 58 constraint(s)
+
+
+Inapplicable constraints(except overwritten constraints):
+********************************************
+
+
+Constraints with issues:
+********************************************
+
+
+Issues without commands:
+********************************************
+
+
+Unconstrained ports:
+********************************************
+
+
+Constraints with matching wildcard expressions:
+********************************************
+
+
