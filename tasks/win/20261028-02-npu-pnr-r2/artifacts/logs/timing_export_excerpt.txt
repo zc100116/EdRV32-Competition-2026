@@ -1,0 +1,38 @@
+Expanded timing reports were generated into separate scratch projects.
+Original routed DB and FPGA project were not modified; PnR was not rerun.
+timing_200
+W: Warning : The license will invalid in 6 days. In order not to affect your usage, please update the license in time.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-NPU/place_route/edrv32_fpga_npu_top_pnr.adf -max_path 200 -nworst 1 -input_pins TRUE -force_to_run
+Process "Report Timing" started.
+W: Timing-4087: Port 'irq_obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:1m:0s
+Action report_timing: CPU time elapsed is 0h:0m:11s
+Action report_timing: Process CPU time elapsed is 0h:0m:13s
+Action report_timing: Peak memory pool usage is 3,134 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:1m:0s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:11s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:13s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-NPU/place_route/edrv32_fpga_npu_top_pnr.adf -max_path 200 -nworst 1 -input_pins TRUE -force_to_run successfully.
+timing_near
+W: Warning : The license will invalid in 6 days. In order not to affect your usage, please update the license in time.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-NPU/place_route/edrv32_fpga_npu_top_pnr.adf -delay_type max -max_path 200 -nworst 1 -slack_greater_than 0 -slack_less_than 1 -input_pins TRUE -force_to_run
+Process "Report Timing" started.
+W: Timing-4087: Port 'irq_obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:49s
+Action report_timing: CPU time elapsed is 0h:0m:9s
+Action report_timing: Process CPU time elapsed is 0h:0m:10s
+Action report_timing: Peak memory pool usage is 2,873 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:49s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:9s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:10s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-NPU/place_route/edrv32_fpga_npu_top_pnr.adf -delay_type max -max_path 200 -nworst 1 -slack_greater_than 0 -slack_less_than 1 -input_pins TRUE -force_to_run successfully.
