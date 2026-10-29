@@ -1,7 +1,7 @@
 // File: edrv32_soc_top.v
 // Spec: edrv32-soc-spec 2-6; sys-subsys-spec 2.10; engine-spec 3.
-// Description: B2 full SoC integration with media APB and seven DDR master ports.
-//              RND is reserved; all other engines connect without optional configurations.
+// Description: Full SoC integration with media APB and seven DDR master ports.
+//              RND uses P4, APB slot 4 and PLIC source 11 in the media reset domain.
 // Clock domains: sys, mem, pix, npu, camera 0/1 and Ethernet RX/TX.
 module edrv32_soc_top (
     // Board clocks and global asynchronous reset.
@@ -259,17 +259,31 @@ module edrv32_soc_top (
     wire p3_rlast_w;
     wire p3_rvalid_w;
     wire p3_rready_w;
-    wire unused_p4_awready_w;
-    wire unused_p4_wready_w;
-    wire unused_p4_bid_w;
-    wire [1:0] unused_p4_bresp_w;
-    wire unused_p4_bvalid_w;
-    wire unused_p4_arready_w;
-    wire unused_p4_rid_w;
-    wire [255:0] unused_p4_rdata_w;
-    wire [1:0] unused_p4_rresp_w;
-    wire unused_p4_rlast_w;
-    wire unused_p4_rvalid_w;
+    wire p4_awid_w;
+    wire [31:0] p4_awaddr_w;
+    wire [3:0] p4_awlen_w;
+    wire p4_awvalid_w;
+    wire p4_awready_w;
+    wire [255:0] p4_wdata_w;
+    wire [31:0] p4_wstrb_w;
+    wire p4_wlast_w;
+    wire p4_wvalid_w;
+    wire p4_wready_w;
+    wire p4_bid_w;
+    wire [1:0] p4_bresp_w;
+    wire p4_bvalid_w;
+    wire p4_bready_w;
+    wire p4_arid_w;
+    wire [31:0] p4_araddr_w;
+    wire [3:0] p4_arlen_w;
+    wire p4_arvalid_w;
+    wire p4_arready_w;
+    wire p4_rid_w;
+    wire [255:0] p4_rdata_w;
+    wire [1:0] p4_rresp_w;
+    wire p4_rlast_w;
+    wire p4_rvalid_w;
+    wire p4_rready_w;
     wire p5_awid_w;
     wire [31:0] p5_awaddr_w;
     wire [3:0] p5_awlen_w;
@@ -333,14 +347,10 @@ module edrv32_soc_top (
     wire pix_out_eol_w;
     wire pix_out_eof_w;
 
-    // SoC 6.1: RND is absent and reserved APB slots return SLVERR.
-    assign irq_src_w[11] = 1'b0;
+    // SoC 6.1: reserved APB slots return SLVERR.
     assign media_apb_prdata_w[0 +: 32] = 32'b0;
     assign media_apb_pready_w[0] = 1'b1;
     assign media_apb_pslverr_w[0] = 1'b1;
-    assign media_apb_prdata_w[128 +: 32] = 32'b0;
-    assign media_apb_pready_w[4] = 1'b1;
-    assign media_apb_pslverr_w[4] = 1'b1;
     assign media_apb_prdata_w[320 +: 32] = 32'b0;
     assign media_apb_pready_w[10] = 1'b1;
     assign media_apb_pslverr_w[10] = 1'b1;
@@ -361,8 +371,7 @@ module edrv32_soc_top (
     assign media_apb_pslverr_w[15] = 1'b1;
 
     wire unused_media_psel_w;
-    assign unused_media_psel_w = |{media_apb_psel_w[15:10], media_apb_psel_w[4],
-        media_apb_psel_w[0]};
+    assign unused_media_psel_w = |{media_apb_psel_w[15:10], media_apb_psel_w[0]};
 
     // SoC 3.5: the board camera control pins mirror GPIO0 outputs 12 through 15.
     assign cam0_pwdn_o = gpio_o[12];
@@ -717,31 +726,31 @@ module edrv32_soc_top (
         .p3_rready_i(p3_rready_w),
 
         // p4 interface.
-        .p4_awid_i(1'b0),
-        .p4_awaddr_i(32'b0),
-        .p4_awlen_i(4'b0),
-        .p4_awvalid_i(1'b0),
-        .p4_awready_o(unused_p4_awready_w),
-        .p4_wdata_i(256'b0),
-        .p4_wstrb_i(32'b0),
-        .p4_wlast_i(1'b0),
-        .p4_wvalid_i(1'b0),
-        .p4_wready_o(unused_p4_wready_w),
-        .p4_bid_o(unused_p4_bid_w),
-        .p4_bresp_o(unused_p4_bresp_w),
-        .p4_bvalid_o(unused_p4_bvalid_w),
-        .p4_bready_i(1'b1),
-        .p4_arid_i(1'b0),
-        .p4_araddr_i(32'b0),
-        .p4_arlen_i(4'b0),
-        .p4_arvalid_i(1'b0),
-        .p4_arready_o(unused_p4_arready_w),
-        .p4_rid_o(unused_p4_rid_w),
-        .p4_rdata_o(unused_p4_rdata_w),
-        .p4_rresp_o(unused_p4_rresp_w),
-        .p4_rlast_o(unused_p4_rlast_w),
-        .p4_rvalid_o(unused_p4_rvalid_w),
-        .p4_rready_i(1'b1),
+        .p4_awid_i(p4_awid_w),
+        .p4_awaddr_i(p4_awaddr_w),
+        .p4_awlen_i(p4_awlen_w),
+        .p4_awvalid_i(p4_awvalid_w),
+        .p4_awready_o(p4_awready_w),
+        .p4_wdata_i(p4_wdata_w),
+        .p4_wstrb_i(p4_wstrb_w),
+        .p4_wlast_i(p4_wlast_w),
+        .p4_wvalid_i(p4_wvalid_w),
+        .p4_wready_o(p4_wready_w),
+        .p4_bid_o(p4_bid_w),
+        .p4_bresp_o(p4_bresp_w),
+        .p4_bvalid_o(p4_bvalid_w),
+        .p4_bready_i(p4_bready_w),
+        .p4_arid_i(p4_arid_w),
+        .p4_araddr_i(p4_araddr_w),
+        .p4_arlen_i(p4_arlen_w),
+        .p4_arvalid_i(p4_arvalid_w),
+        .p4_arready_o(p4_arready_w),
+        .p4_rid_o(p4_rid_w),
+        .p4_rdata_o(p4_rdata_w),
+        .p4_rresp_o(p4_rresp_w),
+        .p4_rlast_o(p4_rlast_w),
+        .p4_rvalid_o(p4_rvalid_w),
+        .p4_rready_i(p4_rready_w),
 
         // p5 interface.
         .p5_awid_i(p5_awid_w),
@@ -1011,6 +1020,55 @@ module edrv32_soc_top (
 
         // irq interface.
         .irq_o(irq_src_w[10])
+    );
+
+    // RND interfaces retain their owning subsystem and engine signal stems.
+    edrv32_rnd u_rnd (
+
+        // Media reset includes SYSCTRL media soft reset (sys-subsys 2.10).
+        .clk_mem_i(clk_mem_i),
+        .rst_mem_n_i(rst_mem_n_w),
+
+        // APB engine control.
+        .apb_paddr_i(media_apb_paddr_w),
+        .apb_psel_i(media_apb_psel_w[4]),
+        .apb_penable_i(media_apb_penable_w),
+        .apb_pwrite_i(media_apb_pwrite_w),
+        .apb_pwdata_i(media_apb_pwdata_w),
+        .apb_pstrb_i(media_apb_pstrb_w),
+        .apb_pready_o(media_apb_pready_w[4]),
+        .apb_prdata_o(media_apb_prdata_w[128 +: 32]),
+        .apb_pslverr_o(media_apb_pslverr_w[4]),
+
+        // P4 AXI256 read/write channels (SoC 6.4.1).
+        .p4_awid_o(p4_awid_w),
+        .p4_awaddr_o(p4_awaddr_w),
+        .p4_awlen_o(p4_awlen_w),
+        .p4_awvalid_o(p4_awvalid_w),
+        .p4_awready_i(p4_awready_w),
+        .p4_wdata_o(p4_wdata_w),
+        .p4_wstrb_o(p4_wstrb_w),
+        .p4_wlast_o(p4_wlast_w),
+        .p4_wvalid_o(p4_wvalid_w),
+        .p4_wready_i(p4_wready_w),
+        .p4_bid_i(p4_bid_w),
+        .p4_bresp_i(p4_bresp_w),
+        .p4_bvalid_i(p4_bvalid_w),
+        .p4_bready_o(p4_bready_w),
+        .p4_arid_o(p4_arid_w),
+        .p4_araddr_o(p4_araddr_w),
+        .p4_arlen_o(p4_arlen_w),
+        .p4_arvalid_o(p4_arvalid_w),
+        .p4_arready_i(p4_arready_w),
+        .p4_rid_i(p4_rid_w),
+        .p4_rdata_i(p4_rdata_w),
+        .p4_rresp_i(p4_rresp_w),
+        .p4_rlast_i(p4_rlast_w),
+        .p4_rvalid_i(p4_rvalid_w),
+        .p4_rready_o(p4_rready_w),
+
+        // irq interface.
+        .irq_o(irq_src_w[11])
     );
 
     // DISP interfaces retain their owning subsystem and engine signal stems.

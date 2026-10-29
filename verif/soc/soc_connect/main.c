@@ -1,6 +1,6 @@
 /* File: main.c
- * Spec: B2-1a connection smoke; edrv32-soc-spec 6.1, 7.4; cpu-spec 6.
- * Description: Check media decode, DDR aliases, directional P2 statistics and GEO MEIP.
+ * Spec: B2-1a, R-S2 connection smoke; edrv32-soc-spec 6.1, 7.4; rnd-spec 2.6; cpu-spec 6.
+ * Description: Check media decode, DDR aliases, P2 statistics and GEO/RND MEIP.
  *              Private register constants are authorized for this connection test only.
  * Clock domain: clk_sys software; hardware bridges reach the other domains.
  */
@@ -10,7 +10,7 @@
 #include "sysctrl.h"
 #include "plic.h"
 
-/* SoC 7.1 public media register layout; GEO 4.1 uses these offsets. */
+/* SoC 7.1 public media register layout; GEO/RND 4.1 use these offsets. */
 #define MEDIA_ID 0x000u
 #define MEDIA_IRQ_EN 0x00cu
 #define MEDIA_IRQ_STAT 0x010u
@@ -28,6 +28,7 @@
 static volatile uint32_t expected_fault;
 static volatile uint32_t fault_count;
 static volatile uint32_t geo_interrupts;
+static volatile uint32_t rnd_interrupts;
 
 static uint32_t read_reg(uintptr_t base, uint32_t offset)
 {
@@ -71,11 +72,18 @@ static void __attribute__((interrupt("machine"), aligned(4))) trap_handler(void)
         __asm__ volatile ("csrw mepc, %0" :: "r"(pc));
     } else if (cause == 0x8000000bu) {
         uint32_t source = plic_claim();
-        require(source == EDRV32_PLIC_SOURCE_GEO, 0x102u);
-        require((read_reg(EDRV32_GEO_BASE, MEDIA_IRQ_STAT) & 1u) != 0u, 0x103u);
-        write_reg(EDRV32_GEO_BASE, MEDIA_IRQ_STAT, 1u);
+        if (source == EDRV32_PLIC_SOURCE_GEO) {
+            require((read_reg(EDRV32_GEO_BASE, MEDIA_IRQ_STAT) & 1u) != 0u, 0x103u);
+            write_reg(EDRV32_GEO_BASE, MEDIA_IRQ_STAT, 1u);
+            geo_interrupts++;
+        } else if (source == EDRV32_PLIC_SOURCE_RND) {
+            require(read_reg(EDRV32_RND_BASE, MEDIA_IRQ_STAT) == 1u, 0x104u);
+            write_reg(EDRV32_RND_BASE, MEDIA_IRQ_STAT, 1u);
+            rnd_interrupts++;
+        } else {
+            finish(0x102u);
+        }
         plic_complete(source);
-        geo_interrupts++;
     } else {
         finish(0x180u | cause);
     }
@@ -83,8 +91,8 @@ static void __attribute__((interrupt("machine"), aligned(4))) trap_handler(void)
 
 static void media_decode(void)
 {
-    static const uint32_t connected[] = {1u, 2u, 3u, 5u, 6u, 7u, 8u, 9u};
-    static const uint32_t reserved[] = {0u, 4u, 10u, 11u, 12u, 13u, 14u, 15u};
+    static const uint32_t connected[] = {1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 9u};
+    static const uint32_t reserved[] = {0u, 10u, 11u, 12u, 13u, 14u, 15u};
     for (unsigned int i = 0; i < sizeof(connected) / sizeof(connected[0]); i++) {
         uint32_t slot = connected[i];
         /* Engine-spec 4 ID tables; DISP v0.3 (two layers) reports version 2. */
@@ -170,6 +178,43 @@ static void geo_meip(void)
     require(read_reg(EDRV32_GEO_BASE, MEDIA_DONE_COUNT) == 1u, 0x501u);
 }
 
+static void rnd_fill_meip(void)
+{
+    /* RND 2.5-2.6: opaque ARGB8888 FILL of [0,7] x [0,7], no rounding.
+       CPU uses the uncached alias; command addresses are DDR physical offsets. */
+    volatile uint32_t *command = (volatile uint32_t *)(EDRV32_DDR_UNCACHED_BASE + 0xc000u);
+    volatile uint32_t *pixels = (volatile uint32_t *)(EDRV32_DDR_UNCACHED_BASE + 0xd000u);
+    for (uint32_t i = 0; i < 16u; i++) {
+        command[i] = 0u;
+    }
+    for (uint32_t i = 0; i < 64u; i++) {
+        pixels[i] = 0u;
+    }
+    command[0] = 0x101u;
+    command[1] = 0xd000u;
+    command[2] = 32u;
+    command[4] = (7u << 16) | 7u;
+    command[6] = (7u << 16) | 7u;
+    command[7] = 0xff123456u;
+    __asm__ volatile ("fence iorw, iorw" ::: "memory");
+    plic_set_priority(EDRV32_PLIC_SOURCE_RND, 1u);
+    plic_set_enable(1u << EDRV32_PLIC_SOURCE_RND);
+    write_reg(EDRV32_RND_BASE, MEDIA_IRQ_EN, 1u);
+    write_reg(EDRV32_RND_BASE, MEDIA_DESC_BASE, 0xc000u);
+    write_reg(EDRV32_RND_BASE, MEDIA_DESC_COUNT, 1u);
+    __asm__ volatile ("csrsi mstatus, 8");
+    write_reg(EDRV32_RND_BASE, MEDIA_DOORBELL, 1u);
+    while (rnd_interrupts == 0u) {
+        __asm__ volatile ("nop");
+    }
+    __asm__ volatile ("csrci mstatus, 8");
+    require(rnd_interrupts == 1u, 0x600u);
+    require(read_reg(EDRV32_RND_BASE, MEDIA_DONE_COUNT) == 1u, 0x601u);
+    for (uint32_t i = 0; i < 64u; i++) {
+        require(pixels[i] == 0xff123456u, 0x620u + i);
+    }
+}
+
 int main(void)
 {
     __asm__ volatile ("csrw mtvec, %0" :: "r"((uintptr_t)trap_handler));
@@ -177,5 +222,6 @@ int main(void)
     ddr_aliases();
     gateway_statistics();
     geo_meip();
+    rnd_fill_meip();
     finish(0u);
 }
