@@ -61,6 +61,7 @@ module edrv32_rnd_draw (
     localparam [4:0] S_WRITE_WAIT = 5'd16;
     localparam [4:0] S_NEXT_ROW = 5'd17;
     localparam [4:0] S_DONE = 5'd18;
+    localparam [4:0] S_PALETTE_LOAD = 5'd19;
 
     reg [4:0] state_r;
     reg [4:0] read_return_r;
@@ -73,8 +74,11 @@ module edrv32_rnd_draw (
     reg pair_r;
     reg [63:0] src_r;
     reg [31:0] raw_r;
-    reg [31:0] palette_r;
     reg [15:0] map_entry_r;
+    reg [7:0] palette_index_r;
+    reg map_valid_r;
+    reg [31:0] map_addr_r;
+    reg [255:0] map_data_r;
     reg source_valid_r;
     reg [31:0] source_addr_r;
     reg [255:0] source_data_r;
@@ -142,6 +146,9 @@ module edrv32_rnd_draw (
     wire [31:0] unused_sample_x_w;
     wire [31:0] unused_sample_y_w;
     wire [7:0] index_w;
+    wire [7:0] palette_last_w;
+    wire [31:0] palette_data_w [0:1];
+    wire palette_write_w;
     wire [31:0] converted_w;
     wire [31:0] query_addr_w;
     wire [255:0] query_shifted_w;
@@ -277,7 +284,7 @@ module edrv32_rnd_draw (
         .raw_i(raw_r),
         .sub_shift_i(sub_shift_w),
         .sub_mask_i(sub_mask_w),
-        .palette_i(palette_r),
+        .palette_i(palette_data_w[lane_r]),
         .color_i(command_i[247:224]),
         .opacity_i(command_i[255:248]),
         .colorkey_i(flags_w[2]),
@@ -289,10 +296,29 @@ module edrv32_rnd_draw (
     );
     assign src_adjusted_w = src_addr_w + unused_sample_y_w *
         (source_stride_i - {16'd0, command_i[303:288]});
-    assign query_addr_w = state_r == S_MAP ? map_addr_w : state_r == S_PALETTE ?
-        command_i[447:416] + {22'd0, index_w, 2'd0} : src_adjusted_w;
-    assign query_hit_w = source_valid_r && source_addr_r == {query_addr_w[31:5], 5'd0};
-    assign query_shifted_w = source_data_r >> {query_addr_w[4:0], 3'd0};
+    assign palette_last_w = format_w == 4'd6 ? 8'd255 : format_w == 4'd7 ? 8'd15 :
+        format_w == 4'd8 ? 8'd3 : 8'd1;
+    assign query_addr_w = state_r == S_MAP ? map_addr_w : state_r == S_PALETTE_LOAD ?
+        command_i[447:416] + {22'd0, palette_index_r, 2'd0} : src_adjusted_w;
+    assign query_hit_w = state_r == S_MAP ?
+        map_valid_r && map_addr_r == {query_addr_w[31:5], 5'd0} :
+        source_valid_r && source_addr_r == {query_addr_w[31:5], 5'd0};
+    assign query_shifted_w = (state_r == S_MAP ? map_data_r : source_data_r) >>
+        {query_addr_w[4:0], 3'd0};
+    assign palette_write_w = state_r == S_PALETTE_LOAD && query_hit_w && !cancel_i;
+    genvar palette_lane;
+    generate for (palette_lane = 0; palette_lane < 2; palette_lane = palette_lane + 1)
+    begin : g_palette
+        edrv32_ram_rnd_palette u_palette (
+            .clk_i(clk_i),
+            .wr_en_i(palette_write_w),
+            .wr_addr_i(palette_index_r),
+            .wr_data_i(query_shifted_w[31:0]),
+            .rd_en_i(state_r == S_PALETTE && lane_r == palette_lane && !cancel_i),
+            .rd_addr_i(index_w),
+            .rd_data_o(palette_data_w[palette_lane])
+        );
+    end endgenerate
     assign target_wide_w = target_data_r >> {dst_addr_w[4:0], 3'd0};
     assign target_shifted_w = target_wide_w[63:0];
     assign gradient_k_w = flags_w[1] ? {20'd0, y_r} -
@@ -336,6 +362,8 @@ module edrv32_rnd_draw (
             lane_r <= 1'b0;
             pair_r <= 1'b0;
             source_valid_r <= 1'b0;
+            map_valid_r <= 1'b0;
+            palette_index_r <= 8'd0;
             target_valid_r <= 1'b0;
             inner_r <= 1'b0;
             outer_inside_r <= 1'b0;
@@ -344,6 +372,8 @@ module edrv32_rnd_draw (
         end else if (cancel_i) begin
             state_r <= S_IDLE;
             source_valid_r <= 1'b0;
+            map_valid_r <= 1'b0;
+            palette_index_r <= 8'd0;
             target_valid_r <= 1'b0;
             pixel_count_r <= 5'd0;
         end else begin
@@ -353,8 +383,11 @@ module edrv32_rnd_draw (
                     x_r <= left_w[11:0];
                     y_r <= top_w[11:0];
                     source_valid_r <= 1'b0;
+                    map_valid_r <= 1'b0;
+                    palette_index_r <= 8'd0;
                     target_valid_r <= 1'b0;
-                    state_r <= S_ROW;
+                    state_r <= (op_w == 8'h04 || op_w == 8'h08) && format_w >= 4'd6 ?
+                        S_PALETTE_LOAD : S_ROW;
                 end
                 S_ROW: begin
                     inner_r <= 1'b0;
@@ -403,17 +436,28 @@ module edrv32_rnd_draw (
                     end else
                         state_r <= op_w == 8'h08 ? S_MAP : S_SAMPLE;
                 end
-                S_MAP, S_SAMPLE, S_PALETTE: begin
+                S_MAP, S_SAMPLE: begin
                     if (query_hit_w) begin
                         if (state_r == S_MAP)
                             state_r <= S_SAMPLE;
-                        else if (state_r == S_SAMPLE)
-                            state_r <= format_w >= 4'd6 ? S_PALETTE : S_CONVERT;
                         else
-                            state_r <= S_CONVERT;
+                            state_r <= format_w >= 4'd6 ? S_PALETTE : S_CONVERT;
                     end else begin
                         read_dest_r <= 1'b0;
                         read_return_r <= state_r;
+                        state_r <= S_READ;
+                    end
+                end
+                S_PALETTE: state_r <= S_CONVERT;
+                S_PALETTE_LOAD: begin
+                    if (query_hit_w) begin
+                        if (palette_index_r == palette_last_w)
+                            state_r <= S_ROW;
+                        else
+                            palette_index_r <= palette_index_r + 8'd1;
+                    end else begin
+                        read_dest_r <= 1'b0;
+                        read_return_r <= S_PALETTE_LOAD;
                         state_r <= S_READ;
                     end
                 end
@@ -441,8 +485,12 @@ module edrv32_rnd_draw (
                 S_READ: if (rd_ready_i)
                     state_r <= S_READ_WAIT;
                 S_READ_WAIT: if (rd_data_valid_i) begin
-                    if (!read_dest_r)
-                        source_valid_r <= 1'b1;
+                    if (!read_dest_r) begin
+                        if (read_return_r == S_MAP)
+                            map_valid_r <= 1'b1;
+                        else
+                            source_valid_r <= 1'b1;
+                    end
                     state_r <= read_return_r;
                 end
                 S_WRITE: if (wr_ready_i)
@@ -472,13 +520,16 @@ module edrv32_rnd_draw (
             read_addr_r <= {dst_addr_w[31:5], 5'd0};
             target_addr_r <= {dst_addr_w[31:5], 5'd0};
         end
-        if ((state_r == S_MAP || state_r == S_SAMPLE || state_r == S_PALETTE) &&
+        if ((state_r == S_MAP || state_r == S_SAMPLE || state_r == S_PALETTE_LOAD) &&
             !query_hit_w)
             read_addr_r <= {query_addr_w[31:5], 5'd0};
         if (state_r == S_READ_WAIT && rd_data_valid_i) begin
             if (read_dest_r) begin
                 target_data_r <= rd_data_i;
                 target_strb_r <= 32'd0;
+            end else if (read_return_r == S_MAP) begin
+                map_data_r <= rd_data_i;
+                map_addr_r <= read_addr_r;
             end else begin
                 source_data_r <= rd_data_i;
                 source_addr_r <= read_addr_r;
@@ -489,8 +540,6 @@ module edrv32_rnd_draw (
                 map_entry_r <= query_shifted_w[15:0];
             if (state_r == S_SAMPLE)
                 raw_r <= query_shifted_w[31:0];
-            if (state_r == S_PALETTE)
-                palette_r <= query_shifted_w[31:0];
         end
         if (state_r == S_CONVERT)
             src_r[lane_r*32 +: 32] <= converted_w;
