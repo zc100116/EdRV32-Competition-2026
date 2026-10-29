@@ -19,7 +19,7 @@
 #include "plic.h"
 #include "sysctrl.h"
 #include "uart.h"
-#include "draw.h"
+#include "rnd.h"
 
 enum demo_reference { REF_READY = 1, REF_PAIR = 2, REF_NPU = 4,
     REF_GEO = 8, REF_DISPLAY = 16, REF_ETH = 32, REF_POST = 64 };
@@ -111,6 +111,11 @@ _Noreturn void demo_fail(const char *reason, enum engine_id engine);
 void demo_wait_idle(enum engine_id engine);
 void demo_present(unsigned int slot, uint32_t frame_id, unsigned int detection_bytes,
                   int check_buffer);
+void demo_overlay_init(void);
+void demo_overlay_draw(const yolo_detection *detections, unsigned int count);
+void demo_overlay_present(unsigned int initial);
+void demo_overlay_frame(uint32_t irq);
+void demo_overlay_stop(void);
 void demo_pipeline_init(void);
 void demo_pipeline_stop(void);
 void demo_pipeline_configure(enum vin_source source);

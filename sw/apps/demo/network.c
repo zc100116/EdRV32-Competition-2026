@@ -127,8 +127,11 @@ void demo_present(unsigned int slot, uint32_t frame_id, unsigned int detection_b
     uint32_t surface = demo_surface_address(slot);
     if (demo.output != DEMO_ETHERNET) {
         demo_reference(slot, REF_DISPLAY, 0);
+        if (demo.scene == 1u) {
+            demo_overlay_present(!demo.display_enabled);
+        }
         if (!demo.display_enabled) {
-            disp_submit(surface, DEMO_STRIDE);
+            disp_submit(DISP_L0, surface, DEMO_STRIDE);
             demo.display_next = (int)slot;
             demo.display_enabled = 1;
             ++demo.submitted;

@@ -162,8 +162,9 @@ static void display_event(const struct engine_event *event, void *context)
     if (event->error || (event->irq & EDRV32_DISP_IRQ_STAT_ERROR_MASK)) {
         demo_fail("DISP", ENGINE_DISP);
     }
+    demo_overlay_frame(event->irq);
     if (event->irq & EDRV32_DISP_IRQ_STAT_SWITCH_MASK) {
-        uint32_t released = disp_released();
+        uint32_t released = disp_released(DISP_L0);
         if (demo.display_current >= 0 &&
             released == demo_surface_address((unsigned int)demo.display_current)) {
             demo_reference((unsigned int)demo.display_current, 0, REF_DISPLAY);
@@ -172,14 +173,15 @@ static void display_event(const struct engine_event *event, void *context)
     }
     if (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) {
         if (demo.display_next >= 0 &&
-            disp_current() == demo_surface_address((unsigned int)demo.display_next)) {
+            disp_current(DISP_L0) == demo_surface_address((unsigned int)demo.display_next)) {
             demo.display_current = demo.display_next;
             demo.display_next = -1;
         }
         if (!demo.transitioning && demo.display_next < 0 && demo.display_queue >= 0) {
             demo.display_next = demo.display_queue;
             demo.display_queue = -1;
-            disp_submit(demo_surface_address((unsigned int)demo.display_next), DEMO_STRIDE);
+            disp_submit(DISP_L0, demo_surface_address((unsigned int)demo.display_next),
+                        DEMO_STRIDE);
             ++demo.submitted;
         }
     }
@@ -222,6 +224,11 @@ static void error_event(const struct engine_event *event, void *context)
 
 void demo_pipeline_init(void)
 {
+    engine_control(ENGINE_DISP, 0);
+    demo_wait_idle(ENGINE_DISP);
+    disp_l0_scroll(0, 0);
+    disp_layer_enable(DISP_L0, 1);
+    demo_overlay_init();
     engine_irq_register(ENGINE_VIN, EDRV32_VIN_IRQ_EN_ERROR_MASK |
                         EDRV32_VIN_IRQ_EN_FRAME_MASK | EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK,
                         3, vin_event, NULL);
@@ -230,7 +237,8 @@ void demo_pipeline_init(void)
     engine_irq_register(ENGINE_GEO, EDRV32_GEO_IRQ_EN_ERROR_MASK |
                         EDRV32_GEO_IRQ_EN_DONE_MASK, 2, geo_event, NULL);
     engine_irq_register(ENGINE_DISP, EDRV32_DISP_IRQ_EN_ERROR_MASK |
-                        EDRV32_DISP_IRQ_EN_FRAME_MASK | EDRV32_DISP_IRQ_EN_SWITCH_MASK,
+                        EDRV32_DISP_IRQ_EN_FRAME_MASK | EDRV32_DISP_IRQ_EN_SWITCH_MASK |
+                        EDRV32_DISP_IRQ_EN_SWITCH1_MASK,
                         4, display_event, NULL);
     engine_irq_register(ENGINE_PIX, EDRV32_PIX_IRQ_EN_ERROR_MASK,
                         4, error_event, (void *)(uintptr_t)ENGINE_PIX);
@@ -316,6 +324,7 @@ void demo_pipeline_stop(void)
     demo_wait_idle(ENGINE_DISP);
     lock = demo_irq_lock();
     pair_release();
+    demo_overlay_stop();
     for (unsigned int i = 0; i < 6; ++i) {
         demo.references[i] = 0;
     }
@@ -412,14 +421,9 @@ void demo_pipeline_service(void)
             detections, &stats);
         demo.post_cycles = (uint32_t)(clint_time() - start);
         demo.detection_count = count;
-        uint32_t image = demo_surface_address(job->image_slot);
-        engine_dma_invalidate(demo_cached(image), DEMO_IMAGE_BYTES);
-        draw_surface surface = {(uint16_t *)demo_cached(image), DEMO_STRIDE,
-                                 DEMO_WIDTH, DEMO_HEIGHT};
-        for (unsigned int i = 0; i < count; ++i) {
-            draw_detection(&surface, &detections[i], 0x07e0, 0xffff);
+        if (demo.output != DEMO_ETHERNET) {
+            demo_overlay_draw(detections, count);
         }
-        engine_dma_clean(demo_cached(image), DEMO_IMAGE_BYTES);
         /* The previous TX owns the EDDT/header storage until DONE_COUNT advances. */
         unsigned int due = demo.output != DEMO_HDMI &&
             demo_frame_due(job->frame_id, demo_frame_divisor(DEMO_CAMERA_FPS, demo.fps));

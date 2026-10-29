@@ -1,4 +1,4 @@
-# B2 演示程序
+# B2 演示程序（B3 两层显示升级）
 
 依据：`docs/design/2026-10-29-b2-software.md` 全文、SoC 7.3–7.5，
 驱动调用契约见 `sw/drivers/README.md`。默认 S2、PIX 旁路、GEO 关闭、HDMI、
@@ -19,7 +19,8 @@ git diff --check
 `rom.hex` / `sram.hex` / `ddr.hex`。在调试工具“烧录 SRAM”页选择 `demo.bin`，
 按住 KEY1 再按复位；看到 BIOS 的烧录成功提示后，松开 KEY1 再按复位运行。
 BIOS 不自动执行刚烧录的镜像。也可用同一 ELF 生成的 SRAM hex 初始化 bitstream。
-程序、量化表、字库、100 项检测结果和状态全部在 SRAM；大块图像与候选工作区在 DDR。
+程序、量化表、字库初值、100 项检测结果和状态在 SRAM；图像、候选工作区、
+RND 命令及绘制时使用的字体副本在 DDR。
 
 启动打印 `Demo: EdRV32 B2 v1`、构建 commit/编译器、CHIP_ID/CLK_SYS_HZ、
 全部八个引擎的实际 ID，以及两路摄像头的 chip ID 原始读值。
@@ -144,10 +145,19 @@ EDDT `+0x200`（最多 1216 B），GEO 描述符 `+0x700`，
 VIN 中断及时锁住同 frame_id 的 CH0/CH2；NPU 忙则跳过摄像头帧。
 NPU DONE 后释放普通推理的 CH2 输入，当前 OUTPUT 交 CPU，另一 OUTPUT 可供下一帧。
 真实 `yolo_post_process(output,yolo_default_heads,workspace,detections,&stats)` 接口
-和 `draw_detection()` 已接在 `pipeline.c`，不留占位调用。
-OUTPUT/底图在 CPU 访问前通过 BSP `engine_dma_invalidate()`，
-画框后通过 `engine_dma_clean()`，然后才能交 DISP/ETH；这些驱动入口调用 BSP cache。
-MODEL、描述符、EDDT/EDVF 和监控记录用非缓存别名。
+接在 `pipeline.c`。CPU 访问前只对 NPU OUTPUT 作废 cache；不再读写摄像头像素。
+L0 显示摄像头帧；`overlay.c` 用 RND 的 BORDER/FILL/GLYPH 在 L1 画框及原有 COCO 标签。
+L1 两块 ARGB8888 缓冲分别保留上次的框/标签脏矩形；复用时先 COPY 全透明源的对应
+矩形，再重画，其他像素保持透明。OPA=0 的 FILL 不会清像素，因此不用于清除。
+完成的 L1 与对应 L0 在同一个提交临界区发布，FRAME 后成组提交两层 shadow 参数。
+两块 L1 分别等待 SWITCH1/REL_BASE 后复用，禁止写扫描或 shadow-next 缓冲。
+
+B3 DDR 布局（常数统一在 `demo.h`；设计 3.3 已补充）：L1 双缓冲从 0x07400000 起、
+每块占 4 MiB；0x07c00000 起 4 MiB 资源区放透明源、命令列表、DDR A1 字体。
+RND 驱动 clean 命令和声明的源，DONE 后 invalidate 声明的目标；均通过 BSP cache。
+仅 HDMI/both 需要生成 L1；ETH-only 不启动叠加绘制。
+网口始终直接发送 L0，S1 检测框由同 frame_id 的 EDDT 提供给 PC 自行叠加。
+MODEL、NPU 描述符、EDDT/EDVF 和监控记录继续使用非缓存别名。
 
 每个 CH0/GEO Surface 分别保留处理中、显示和 ETH 引用；DISP 的待提交、已写 shadow、
 当前扫描状态分别维护。FRAME 中断提交下一张，SWITCH/REL_BASE 释放旧张；
@@ -184,9 +194,12 @@ seq 每次采样仍递增，`status` 的 `Monitor dropped records` 计本地丢�
 | KEY2–4 | KEY2 S1/S2 切换；S2 下 KEY3/4 各循环 PIX/GEO；一次按下只有一次操作；S1 下后两键打印要求 S2 |
 | PC 监听 6000 后发 WIN3 短包 | status 出现 PC peer IP/6000；调试工具 DDR 监控页出现 EDTM；无 peer 前本地 dropped 递增且画面照常 |
 | 加载模型到 WIN2 | UART 打印准确 WIN2_BYTES、`EDNM: loaded`；不存在 hash/self-test 成功门禁；不正确 EDNM 显示头字/寄存器后停止 |
-| 模型加载后 `s1` | HDMI 目标框、COCO 类名和千分比置信度标签；NPU 推理次数增长；调试工具检测帧率、NPU/后处理耗时有值；CH0/CH2 同帧，无错误 |
+| 模型加载后 `s1` | HDMI 的 L0 摄像头加 L1 目标框、COCO 类名和千分比置信度标签；NPU 推理次数增长；调试工具检测帧率、NPU/后处理耗时有值；CH0/CH2 同帧，无错误 |
+| S1 移动/移走目标 | L1 框及标签更新，旧位置恢复透明，无前两帧残影；L0 摄像头帧不被写框；分别观察 SWITCH/SWITCH1 和 REL_BASE/L1_REL_BASE，复用只在释放后 |
+| S1 连续检测、`s1`/`s2` 切换 | 双层翻页无撕裂/错配，S2 无旧框；返回 S1 后新检测出现；零检测时旧框全部清除 |
+| S1 `output both` | HDMI 有框，PC 收到的原始 L0 视频无板端框，EDDT 可在 PC 按 frame_id 叠加；不要求两端视频像素含相同 UI |
 | YOLO 页发 WIN0 图像，再发 WIN1 图像 | 自动内存源；依次收齐 CH2 983040 B、OUTPUT 725760 B、EDDT；与工具 input_pack、NPU 参考、Python 后处理逐字节/逐项相同；两窗口可重复使用，收到最终 NOTIFY 后再发下一图 |
-| `output hdmi` / `output eth` / `output both` | HDMI 正常/黑色但时序保留/正常；视频无/有/有；ETH-only 时监控 P0 读带宽停止；both 下 HDMI 与工具视频画面及 S1 frame_id 对应 |
+| `output hdmi` / `output eth` / `output both` | HDMI 正常/黑色但时序保留/正常；视频无/有/有；ETH-only 时监控 P0 读带宽停止；both 下底图与 S1 frame_id 对应；L1 框仅 HDMI，PC 使用 EDDT |
 | `fps 1` / `fps 15` / `fps 30` / `fps 60` | 30 fps 源分别名义 1/15/30/30 fps；S1 不超过推理率；核对收到帧号分频；带宽压力下 vid_skip 增长，显示 Surface 不被提前覆写；真实 60 fps 源另配置后验证约 111 MB/s 极限档 |
 | `sample 10` / `sample 100` / `sample 1000` | EDTM WINDOW_CYC 随采样周期变化，帧率/带宽按实际窗口换算；vid_skip 在偏移 292；保留尾 24 B 全零；场景切换有尾批，seq 间隔显示丢记录 |
 | DDR 监控页运行 S1/S2 | 端口读写堆叠图、利用率、等待、VIN 溢出/DISP 读空、NPU/后处理耗时符合页面字段；实时性异常计数正常应为零；保存 UART/CSV/必要视频截图作为实板证据 |
@@ -217,3 +230,19 @@ BIOS 镜像 `demo.bin=41132 B`，也小于 BIOS 的 SRAM−4 KiB 栈下载上限
 后处理入口 128 B；这些是函数自身帧，不冒充实板栈高水位测量。
 未取得硬件性能数字；真实摄像头帧率、60 fps 源配置、PHY 时序、HDMI/UDP 功能现象
 按上述清单在实板验证并记录，Linux 验收未替代这些检查。
+
+
+## B3 本次验收
+
+```sh
+make -C sw PROGRAM=demo
+make -C sw/apps/demo test
+make -C sw PROGRAM=rnd_board MEMORY=ddr_app
+make -C sw/tests/rnd_board test
+python3 sw/tests/rnd_board/expect.py
+```
+
+前述 `6119551` 的大小为 B2 历史记录。B3 的构建与主机测试日志在同一 build 目录；
+RND 独立的 16 组 CRC、屏幕图案及 BIOS DDR 加载流程见
+[`rnd_board/README.md`](../../tests/rnd_board/README.md)。
+本次仍未执行实板检查或 SoC 仿真，上板按本节之前的清单记录真实结果。
