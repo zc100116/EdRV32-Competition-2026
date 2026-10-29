@@ -95,10 +95,13 @@ module edrv32_rnd_copy (
     wire ram_rd_en_w;
     wire [8:0] ram_rd_addr_w;
     wire data_fire_w;
-    wire [17:0] write_byte_w;
     wire unused_geometry_w;
     reg [5:0] enabled_bytes_w;
-    integer byte_index;
+    wire [4:0] tail_invalid_w;
+    wire [5:0] head_invalid_w;
+    wire [5:0] last_invalid_w;
+    wire first_beat_w;
+    wire last_beat_w;
 
     edrv32_rnd_decode u_decode (
         .command_i(command_i),
@@ -158,8 +161,7 @@ module edrv32_rnd_copy (
     assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i) ||
         (data_fire_w && write_next_w < normalized_beats_w));
     assign ram_rd_addr_w = state_r == S_WRITE ? 9'd0 : write_next_w[8:0];
-    assign write_byte_w = {3'd0, write_index_r, 5'd0};
-    assign unused_geometry_w = ^{left_w[17:12], top_w[17:12], right_w[17:12],
+    assign unused_geometry_w = ^{enabled_bytes_w[0], left_w[17:12], top_w[17:12], right_w[17:12],
         bottom_w[17:12], row_bytes_w[17:15], source_bytes_w[17:16],
         target_bytes_w[17:16], source_shift_w[511:256], target_shift_w[255:0],
         source_rounded_w[17:15], source_rounded_w[4:0], target_rounded_w[17:15],
@@ -184,16 +186,16 @@ module edrv32_rnd_copy (
     assign wr_data_valid_o = state_r == S_STREAM && !cancel_i;
     assign pixel_count_o = data_fire_w ?
         (argb_w ? {1'd0, enabled_bytes_w[5:2]} : enabled_bytes_w[5:1]) : 5'd0;
+    // Only boundary beats need masking; the interior is a full 256-bit transfer.
+    assign first_beat_w = write_index_r == 0;
+    assign last_beat_w = write_index_r + 10'd1 == target_beats_w;
+    assign tail_invalid_w = 5'd0 - target_bytes_w[4:0];
+    assign head_invalid_w = first_beat_w ? {1'd0, dst_addr_w[4:0]} : 6'd0;
+    assign last_invalid_w = last_beat_w ? {1'd0, tail_invalid_w} : 6'd0;
     always @(*) begin
-        wr_strb_o = 32'd0;
-        enabled_bytes_w = 6'd0;
-        for (byte_index = 0; byte_index < 32; byte_index = byte_index + 1) begin
-            if ({14'd0, write_byte_w} + byte_index >= {27'd0, dst_addr_w[4:0]} &&
-                {14'd0, write_byte_w} + byte_index < {14'd0, target_bytes_w}) begin
-                wr_strb_o[byte_index] = 1'b1;
-                enabled_bytes_w = enabled_bytes_w + 6'd1;
-            end
-        end
+        wr_strb_o = (first_beat_w ? 32'hffff_ffff << dst_addr_w[4:0] : 32'hffff_ffff) &
+            (last_beat_w ? 32'hffff_ffff >> tail_invalid_w : 32'hffff_ffff);
+        enabled_bytes_w = 6'd32 - head_invalid_w - last_invalid_w;
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

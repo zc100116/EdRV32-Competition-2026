@@ -169,15 +169,15 @@ module edrv32_rnd_draw (
     endfunction
     function automatic [7:0] gradient;
         input [7:0] channel_start_i;
-        input [31:0] k_i;
+        input [15:0] k_i;
         input signed [31:0] step_i;
-        reg signed [63:0] value;
+        reg signed [48:0] value;
         begin
-            value = $signed({32'd0, k_i}) * $signed({{32{step_i[31]}}, step_i}) +
-                $signed({40'd0, channel_start_i, 16'd0}) + 64'sd32768;
+            value = $signed({1'd0, k_i}) * step_i +
+                $signed({25'd0, channel_start_i, 16'd0}) + 49'sd32768;
             if (value < 0)
                 gradient = 8'd0;
-            else if (value >= 64'sd16777216)
+            else if (value >= 49'sd16777216)
                 gradient = 8'd255;
             else
                 gradient = value[23:16];
@@ -221,7 +221,7 @@ module edrv32_rnd_draw (
     assign row_width_w = inner_r ? inner_width_w : {1'd0, width_w};
     assign row_height_w = inner_r ? inner_height_w : {1'd0, height_w};
     assign row_valid_w = state_r == S_EDGE_REQ;
-    assign unused_geometry_w = ^{flags_w[15:4], target_wide_w[255:64],
+    assign unused_geometry_w = ^{gradient_k_w[31:16], flags_w[15:4], target_wide_w[255:64],
         row_width_w[17], row_height_w[17], row_local_w[17],
         inner_width_w[17], inner_height_w[17], query_shifted_w[255:32],
         left_w[17:12], top_w[17:12], right_w[17:12], bottom_w[17:12]};
@@ -298,11 +298,11 @@ module edrv32_rnd_draw (
     assign gradient_k_w = flags_w[1] ? {20'd0, y_r} -
         {{16{command_i[191]}}, command_i[191:176]} : {20'd0, sample_target_x_w} -
         {{16{command_i[175]}}, command_i[175:160]};
-    assign gradient_a_w = gradient(command_i[319:312], gradient_k_w, command_i[351:320]);
+    assign gradient_a_w = gradient(command_i[319:312], gradient_k_w[15:0], command_i[351:320]);
     assign gradient_color_w = {
-        gradient(command_i[311:304], gradient_k_w, command_i[383:352]),
-        gradient(command_i[303:296], gradient_k_w, command_i[415:384]),
-        gradient(command_i[295:288], gradient_k_w, command_i[447:416])};
+        gradient(command_i[311:304], gradient_k_w[15:0], command_i[383:352]),
+        gradient(command_i[303:296], gradient_k_w[15:0], command_i[415:384]),
+        gradient(command_i[295:288], gradient_k_w[15:0], command_i[447:416])};
     assign fill_a0_w = flags_w[0] ? gradient_a_w : 8'd255;
     assign fill_pixel_w = {divide255(divide255(command_i[255:248] *
         fill_a0_w) * coverage_w),

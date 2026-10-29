@@ -76,7 +76,7 @@ module edrv32_rnd (
     reg [31:0] simple_strb_r;
     wire start_w;
     wire abort_w;
-    wire unused_soft_reset_w;
+    wire soft_reset_w;
     wire busy_w;
     wire cancel_w;
     wire [31:0] desc_base_w;
@@ -167,6 +167,8 @@ module edrv32_rnd (
     wire blit_eligible_w;
     wire [17:0] row_pixels_w;
     wire [2:0] source_offset_w;
+    wire [4:0] source_low_w;
+    wire [4:0] target_low_w;
     wire blit_rd_valid_w;
     wire [31:0] blit_rd_addr_w;
     wire [15:0] blit_rd_bytes_w;
@@ -195,17 +197,18 @@ module edrv32_rnd (
 
     assign row_pixels_w = unused_right_w - unused_left_w + 18'd1;
     assign source_offset_w = command_r[322:320] + unused_left_w[2:0] - command_r[162:160];
+    assign source_low_w = command_r[260:256] + {source_offset_w, 2'd0};
+    assign target_low_w = command_r[36:32] + {unused_left_w[2:0], 2'd0};
     assign blit_eligible_w = op_w == 8'h04 && command_r[8] && command_r[15:12] == 4'd1 &&
         command_r[22:16] == 0 && command_r[383:352] == 32'h0001_0000 &&
         command_r[415:384] == 32'h0001_0000 && command_r[68:64] == 0 &&
         command_r[292:288] == 0 && row_pixels_w[2:0] == 0 &&
-        command_r[36:32] + {unused_left_w[2:0], 2'd0} == 0 &&
-        command_r[260:256] + {source_offset_w, 2'd0} == 0;
+        target_low_w == 0 && source_low_w == 0;
     assign unused_geometry_w = ^row_pixels_w[17:3];
     assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w;
     assign read_fault_w = p4_rvalid_i && p4_rready_o && p4_rresp_i != 0;
     assign write_fault_w = p4_bvalid_i && p4_bready_o && p4_bresp_i != 0;
-    assign cancel_w = abort_w || read_fault_w || write_fault_w;
+    assign cancel_w = abort_w || soft_reset_w || read_fault_w || write_fault_w;
     assign error_w = write_fault_w ? 2'd2 : read_fault_w ? 2'd1 :
         state_r == S_CHECK && illegal_w && !abort_w ? 2'd3 : 2'd0;
     assign pixels_w = state_r == S_DRAW ? draw_pixels_w : state_r == S_COPY ?
@@ -236,7 +239,7 @@ module edrv32_rnd (
             (state_r == S_BLIT && blit_write_wait_w)),
         .start_o(start_w),
         .abort_o(abort_w),
-        .soft_reset_o(unused_soft_reset_w),
+        .soft_reset_o(soft_reset_w),
         .desc_base_o(desc_base_w),
         .desc_count_o(desc_count_w),
         .cur_desc_o(cur_desc_w),
@@ -510,6 +513,7 @@ module edrv32_rnd (
             simple_valid_r <= 1'b0;
         end else if (cancel_w) begin
             state_r <= busy_w ? S_DRAIN : S_IDLE;
+            fetch_half_r <= 1'b0;
             simple_valid_r <= 1'b0;
         end else begin
             if (scalar_write_w && wr_desc_valid_w && wr_desc_ready_w)

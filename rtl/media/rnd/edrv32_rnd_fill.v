@@ -39,7 +39,6 @@ module edrv32_rnd_fill (
     wire [17:0] span_bytes_w;
     wire [17:0] rounded_bytes_w;
     wire [9:0] beats_w;
-    wire [31:0] beat_byte_w;
     wire argb_w;
     wire [15:0] color565_w;
     wire signed [17:0] left_w;
@@ -56,7 +55,11 @@ module edrv32_rnd_fill (
     wire unused_fast_w;
     wire unused_geometry_w;
     reg [5:0] enabled_bytes_w;
-    integer byte_index;
+    wire [4:0] tail_invalid_w;
+    wire [5:0] head_invalid_w;
+    wire [5:0] last_invalid_w;
+    wire first_beat_w;
+    wire last_beat_w;
     edrv32_rnd_decode u_decode (
         .command_i(command_i),
         .illegal_o(unused_illegal_w),
@@ -79,7 +82,6 @@ module edrv32_rnd_fill (
     assign span_bytes_w = row_bytes_w + {13'd0, dst_addr_w[4:0]};
     assign rounded_bytes_w = span_bytes_w + 18'd31;
     assign beats_w = rounded_bytes_w[14:5];
-    assign beat_byte_w = {17'd0, beat_r, 5'd0};
     assign color565_w = {command_i[247:243], command_i[239:234], command_i[231:227]};
     assign wr_data_o = argb_w ? {8{{8'hff, command_i[247:224]}}} : {16{color565_w}};
     assign wr_addr_o = {dst_addr_w[31:5], 5'd0};
@@ -89,18 +91,18 @@ module edrv32_rnd_fill (
     assign pixel_count_o = wr_data_valid_o && wr_data_ready_i ?
         (argb_w ? {1'd0, enabled_bytes_w[5:2]} : enabled_bytes_w[5:1]) : 5'd0;
     assign done_o = state_r == S_DONE;
-    assign unused_geometry_w = ^{left_w[17:12], top_w[17:12], right_w[17:12],
+    assign unused_geometry_w = ^{enabled_bytes_w[0], left_w[17:12], top_w[17:12], right_w[17:12],
         bottom_w[17:12], rounded_bytes_w[17:15], rounded_bytes_w[4:0], span_bytes_w[17:16]};
+    // Only boundary beats need masking; the interior is a full 256-bit transfer.
+    assign first_beat_w = beat_r == 0;
+    assign last_beat_w = beat_r + 10'd1 == beats_w;
+    assign tail_invalid_w = 5'd0 - span_bytes_w[4:0];
+    assign head_invalid_w = first_beat_w ? {1'd0, dst_addr_w[4:0]} : 6'd0;
+    assign last_invalid_w = last_beat_w ? {1'd0, tail_invalid_w} : 6'd0;
     always @(*) begin
-        wr_strb_o = 32'd0;
-        enabled_bytes_w = 6'd0;
-        for (byte_index = 0; byte_index < 32; byte_index = byte_index + 1) begin
-            if (beat_byte_w + byte_index >= {27'd0, dst_addr_w[4:0]} &&
-                beat_byte_w + byte_index < {14'd0, span_bytes_w}) begin
-                wr_strb_o[byte_index] = 1'b1;
-                enabled_bytes_w = enabled_bytes_w + 6'd1;
-            end
-        end
+        wr_strb_o = (first_beat_w ? 32'hffff_ffff << dst_addr_w[4:0] : 32'hffff_ffff) &
+            (last_beat_w ? 32'hffff_ffff >> tail_invalid_w : 32'hffff_ffff);
+        enabled_bytes_w = 6'd32 - head_invalid_w - last_invalid_w;
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
