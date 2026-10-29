@@ -12,6 +12,9 @@ int main(void)
     write_reg(EDRV32_VIN_BASE, EDRV32_VIN_MSRC_CTRL_OFFSET, EDRV32_VIN_MSRC_CTRL_START_MASK);
     while (read_reg(EDRV32_VIN_BASE, EDRV32_VIN_PERF_OFFSET(5)) != 1u ||
            read_reg(EDRV32_VIN_BASE, EDRV32_VIN_PERF_OFFSET(3)) != 1u) {
+        equal("VIN CH2 overflow", 0u,
+              read_reg(EDRV32_VIN_BASE, EDRV32_VIN_PERF_OFFSET(8)));
+        equal("VIN ERR_CODE", 0u, read_reg(EDRV32_VIN_BASE, EDRV32_VIN_ERR_CODE_OFFSET));
     }
     equal("CH0/CH2 frame_id", read_reg(EDRV32_VIN_BASE, EDRV32_VIN_CH_DONE_FRAME_ID_OFFSET(0)),
           read_reg(EDRV32_VIN_BASE, EDRV32_VIN_CH_DONE_FRAME_ID_OFFSET(2)));
