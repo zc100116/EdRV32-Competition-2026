@@ -10,7 +10,7 @@ OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32im_zicsr
 SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
 PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
-               $(filter monitor demo nes,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
+               $(filter monitor demo nes s3,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
                $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM))))
 -include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
