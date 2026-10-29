@@ -23,15 +23,14 @@ module tb_blend_ref;
             for (int row = 0; row < 720; row++) begin
                 for (int column = 0; column < 1280; column++) begin
                     if ($fscanf(source, "%h", expected) != 1)
-                        $fatal(1, {"FAIL DS-15 frame input expected=pixel actual=EOF ",
-                                "row=%0d col=%0d"},
-                                row, column);
+                        $fatal(1, "FAIL DS15 expected=pixel actual=EOF row=%0d col=%0d",
+                            row, column);
                     actual = mix(expand(pixel565(BASE_A, column, row)),
                                     pixel_argb(BASE_1, column, row), OPACITY[f]);
                     if (expected != actual)
-                        $fatal(1, {"FAIL DS-15 Python/SV expected=%h actual=%h layer=blend ",
-                                "row=%0d col=%0d OPA=%0d"},
-                                expected, actual, row, column, OPACITY[f]);
+                        $fatal(1,
+                            "FAIL DS15 expected=%h actual=%h L=blend row=%0d col=%0d OPA=%0d",
+                            expected, actual, row, column, OPACITY[f]);
                     count++;
                 end
             end

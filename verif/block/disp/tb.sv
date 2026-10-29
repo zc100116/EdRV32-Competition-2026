@@ -147,9 +147,8 @@ module tb;
     task automatic check(input string name_i, input logic [31:0] expected_i,
                             input logic [31:0] actual_i);
         if (actual_i != expected_i)
-            $fatal(1, {"FAIL DS-%02d %s expected=%0h actual=%0h time=%0t ",
-                     "frame=%0d layer=0 col=%0d row=%0d"},
-                    test_case, name_i, expected_i, actual_i, $time, frame_index, x, y);
+            $fatal(1, "FAIL DS-%0d %s expected=%h actual=%h t=%0t L0 row=%0d col=%0d",
+                    test_case, name_i, expected_i, actual_i, $time, y, x);
     endtask
 
     function automatic logic [15:0] pixel565(input logic [31:0] base_i,
