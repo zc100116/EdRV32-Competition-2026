@@ -7,7 +7,7 @@
             "name": "ID",
             "offset": "0x000",
             "access": "RO",
-            "reset": 327681,
+            "reset": 327682,
             "spec": "edrv32-soc-spec.md 7.1; disp-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -118,6 +118,12 @@
                     "lsb": 8,
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; disp-spec.md 4.1"
+                },
+                {
+                    "name": "SWITCH1",
+                    "lsb": 9,
+                    "width": 1,
+                    "spec": "disp-spec.md 4.1"
                 }
             ]
         },
@@ -152,6 +158,12 @@
                     "lsb": 8,
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; disp-spec.md 4.1"
+                },
+                {
+                    "name": "SWITCH1",
+                    "lsb": 9,
+                    "width": 1,
+                    "spec": "disp-spec.md 4.1"
                 }
             ]
         },
@@ -223,7 +235,8 @@
                     "width": 32,
                     "spec": "edrv32-soc-spec.md 7.1; disp-spec.md 4.1; disp-spec.md 4.3"
                 }
-            ]
+            ],
+            "note": "PERF0 scan frames; PERF1/2 L0 underflow frames/beats; PERF3 urgent cycles; PERF4 delayed requests; PERF5/6 L1 underflow frames/beats; PERF7..15 unused."
         },
         {
             "name": "NEXT_BASE",
@@ -290,6 +303,160 @@
                     "spec": "disp-spec.md 4.2"
                 }
             ]
+        },
+        {
+            "name": "L0_SCROLL",
+            "offset": "0x114",
+            "access": "RW",
+            "reset": 0,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "SCROLL_X",
+                    "lsb": 0,
+                    "width": 15,
+                    "spec": "disp-spec.md 4.2"
+                },
+                {
+                    "name": "SCROLL_Y",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "LAYER_CTRL",
+            "offset": "0x118",
+            "access": "RW",
+            "reset": 1,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "L0_EN",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "disp-spec.md 4.2"
+                },
+                {
+                    "name": "L1_EN",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "L1_NEXT_BASE",
+            "offset": "0x120",
+            "access": "RW",
+            "reset": 0,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 12,
+                    "width": 20,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "L1_STRIDE",
+            "offset": "0x124",
+            "access": "RW",
+            "reset": 5120,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 5,
+                    "width": 11,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "L1_POS",
+            "offset": "0x128",
+            "access": "RW",
+            "reset": 0,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "X",
+                    "lsb": 3,
+                    "width": 8,
+                    "spec": "disp-spec.md 4.2"
+                },
+                {
+                    "name": "Y",
+                    "lsb": 16,
+                    "width": 10,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "L1_SIZE",
+            "offset": "0x12C",
+            "access": "RW",
+            "reset": 47187200,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "W",
+                    "lsb": 3,
+                    "width": 8,
+                    "spec": "disp-spec.md 4.2"
+                },
+                {
+                    "name": "H",
+                    "lsb": 16,
+                    "width": 10,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "L1_OPA",
+            "offset": "0x130",
+            "access": "RW",
+            "reset": 255,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "OPA",
+                    "lsb": 0,
+                    "width": 8,
+                    "spec": "disp-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "L1_CUR_BASE",
+            "offset": "0x134",
+            "access": "RO",
+            "reset": 0,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "L1_REL_BASE",
+            "offset": "0x138",
+            "access": "RO",
+            "reset": 0,
+            "spec": "disp-spec.md 4.2",
+            "dimensions": [],
+            "fields": []
         }
     ],
     "layouts": []
