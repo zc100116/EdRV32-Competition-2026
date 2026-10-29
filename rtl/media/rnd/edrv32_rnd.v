@@ -125,6 +125,10 @@ module edrv32_rnd (
     wire scalar_write_w;
     wire draw_rd_valid_w;
     wire [31:0] draw_rd_addr_w;
+    wire [15:0] draw_rd_bytes_w;
+    wire [15:0] draw_wr_bytes_w;
+    wire draw_data_valid_w;
+    wire [31:0] draw_blend_tag_w;
     wire draw_wr_valid_w;
     wire [31:0] draw_wr_addr_w;
     wire [255:0] draw_wr_data_w;
@@ -277,11 +281,16 @@ module edrv32_rnd (
         .rd_valid_o(draw_rd_valid_w),
         .rd_ready_i(rd_desc_ready_w && state_r == S_DRAW),
         .rd_addr_o(draw_rd_addr_w),
+        .rd_bytes_o(draw_rd_bytes_w),
+        .rd_done_i(rd_done_w && state_r == S_DRAW),
         .rd_data_valid_i(rd_data_valid_w && state_r == S_DRAW),
         .rd_data_i(rd_data_w),
         .wr_valid_o(draw_wr_valid_w),
         .wr_ready_i(wr_desc_ready_w && state_r == S_DRAW),
         .wr_addr_o(draw_wr_addr_w),
+        .wr_bytes_o(draw_wr_bytes_w),
+        .wr_data_valid_o(draw_data_valid_w),
+        .wr_data_ready_i(wr_data_ready_w && state_r == S_DRAW),
         .wr_data_o(draw_wr_data_w),
         .wr_strb_o(draw_wr_strb_w),
         .wr_done_i(wr_done_w && state_r == S_DRAW),
@@ -289,6 +298,8 @@ module edrv32_rnd (
         .blend_ready_i(blend_ready_w && state_r == S_DRAW),
         .blend_src_o(draw_blend_src_w),
         .blend_dst_o(draw_blend_dst_w),
+        .blend_tag_o(draw_blend_tag_w),
+        .blend_tag_i(blend_tag_w),
         .blend_valid_i(blend_valid_w && state_r == S_DRAW),
         .blend_pixel_i(blend_pixel_w)
     );
@@ -403,7 +414,7 @@ module edrv32_rnd (
         .in_dst_i(state_r == S_BLIT ? blit_blend_dst_w : draw_blend_dst_w),
         .in_argb_i(command_r[8]),
         .in_mode_i(op_w == 8'h04 ? command_r[21:20] : 2'd0),
-        .in_tag_i(state_r == S_BLIT ? blit_blend_tag_w : 32'd0),
+        .in_tag_i(state_r == S_BLIT ? blit_blend_tag_w : draw_blend_tag_w),
         .out_valid_o(blend_valid_w),
         .out_ready_i(1'b1),
         .out_pixel_o(blend_pixel_w),
@@ -421,7 +432,8 @@ module edrv32_rnd (
         state_r == S_DRAW ? draw_rd_addr_w : state_r == S_COPY ? copy_rd_addr_w :
         state_r == S_BLIT ? blit_rd_addr_w : blur_rd_addr_w;
     assign rd_bytes_w = state_r == S_FETCH ? 16'd64 :
-        state_r == S_COPY ? copy_rd_bytes_w : state_r == S_BLIT ? blit_rd_bytes_w : 16'd32;
+        state_r == S_DRAW ? draw_rd_bytes_w : state_r == S_COPY ? copy_rd_bytes_w :
+        state_r == S_BLIT ? blit_rd_bytes_w : 16'd32;
     edrv32_dma2d_rd #(
         .OUTSTANDING(8)
     ) u_read (
@@ -455,7 +467,7 @@ module edrv32_rnd (
         .done_o(rd_done_w),
         .err_o(unused_rd_error_w)
     );
-    assign scalar_write_w = state_r == S_DRAW || state_r == S_BLUR;
+    assign scalar_write_w = state_r == S_BLUR;
     assign wr_desc_valid_w = !cancel_w && ((state_r == S_DRAW && draw_wr_valid_w) ||
         (state_r == S_COPY && copy_wr_valid_w) || (state_r == S_FILL && fill_wr_valid_w) ||
         (state_r == S_BLUR && blur_wr_valid_w) ||
@@ -463,14 +475,16 @@ module edrv32_rnd (
     assign wr_addr_w = state_r == S_DRAW ? draw_wr_addr_w : state_r == S_COPY ?
         copy_wr_addr_w : state_r == S_FILL ? fill_wr_addr_w :
         state_r == S_BLIT ? blit_wr_addr_w : blur_wr_addr_w;
-    assign wr_bytes_w = state_r == S_COPY ? copy_wr_bytes_w :
+    assign wr_bytes_w = state_r == S_DRAW ? draw_wr_bytes_w : state_r == S_COPY ? copy_wr_bytes_w :
         state_r == S_FILL ? fill_wr_bytes_w : state_r == S_BLIT ? blit_wr_bytes_w : 16'd32;
-    assign wr_data_valid_w = scalar_write_w ? simple_valid_r :
-        state_r == S_COPY ? copy_data_valid_w : state_r == S_BLIT ? blit_data_valid_w :
-        state_r == S_FILL && fill_data_valid_w;
+    assign wr_data_valid_w = |{scalar_write_w && simple_valid_r,
+        state_r == S_DRAW && draw_data_valid_w, state_r == S_COPY && copy_data_valid_w,
+        state_r == S_BLIT && blit_data_valid_w, state_r == S_FILL && fill_data_valid_w};
     assign wr_data_w = scalar_write_w ? simple_data_r :
+        state_r == S_DRAW ? draw_wr_data_w :
         state_r == S_COPY ? copy_data_w : state_r == S_BLIT ? blit_data_w : fill_data_w;
     assign wr_strb_w = scalar_write_w ? simple_strb_r :
+        state_r == S_DRAW ? draw_wr_strb_w :
         state_r == S_COPY ? copy_strb_w : state_r == S_BLIT ? blit_strb_w : fill_strb_w;
     edrv32_dma2d_wr #(
         .OUTSTANDING(8)
@@ -587,8 +601,8 @@ module edrv32_rnd (
             source_stride_r <= shadow_stride_w;
         end
         if (scalar_write_w && wr_desc_valid_w && wr_desc_ready_w) begin
-            simple_data_r <= state_r == S_DRAW ? draw_wr_data_w : blur_wr_data_w;
-            simple_strb_r <= state_r == S_DRAW ? draw_wr_strb_w : blur_wr_strb_w;
+            simple_data_r <= blur_wr_data_w;
+            simple_strb_r <= blur_wr_strb_w;
         end
     end
 endmodule
