@@ -24,6 +24,11 @@ set_clock_uncertainty {0.4} -from [get_clocks {clk_mem}] -to [get_clocks {phy_dq
 set_clock_uncertainty {0.4} -from [get_clocks {phy_dq_sysclk_0}] -to [get_clocks {clk_mem}] -setup -hold
 set_clock_uncertainty {0.4} -from [get_clocks {clk_mem}] -to [get_clocks {phy_dq_sysclk_1}] -setup -hold
 set_clock_uncertainty {0.4} -from [get_clocks {phy_dq_sysclk_1}] -to [get_clocks {clk_mem}] -setup -hold
+# Vendor 2_9_ddr3_test ddr_test.fdc: the DDR IP reset and DQ PHY clocks are
+# asynchronous to every other clock (IP-internal reset synchronization).
+set_clock_groups -name rst_clk -asynchronous -group [get_clocks {rst_clk}]
+set_clock_groups -name phy_dq_clk_0 -asynchronous -group [get_clocks {phy_dq_clk_0}]
+set_clock_groups -name phy_dq_clk_1 -asynchronous -group [get_clocks {phy_dq_clk_1}]
 define_attribute {i:u_ddr3.u_ddrphy_top.u_ddrphy_cpd} {PAP_LOC} {DDRPHY_CPD_729_772}
 define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[0]} {PAP_LOC} {CLMA_717_672:FF3}
 define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[1]} {PAP_LOC} {CLMA_717_978:FF3}
@@ -32,7 +37,7 @@ create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pi
 create_generated_clock -name {clk_rgmii_tx} -source [get_pins {u_rgmii/u_pll_eth/clkout0}] [get_ports {rgmii_txc_o}] -edges {1 2 3} -edge_shift {1 1 1}
 
 # X1/X2 sys<->mem, X3 IRQ, X4 cameras, X5/X6 display, X7 ETH, X9/X10 NPU.
-# Pairwise groups list only SoC-facing clocks; DDR PHY implementation stays timed.
+# Pairwise groups list only SoC-facing clocks; DDR PHY groups follow the vendor example above.
 set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_mem}]
 set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_pix clk_serial}]
 set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_npu}]
