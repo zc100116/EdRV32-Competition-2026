@@ -50,7 +50,7 @@
 | B2-3a | 引擎寄存器 JSON 描述（`rtl/include/regs/`）和 C 头生成器 `tools/gen/regs.py` | Codex · GPT-6.1 Sol | — | 重复生成不变；`_Static_assert` 与规格数字对照 | task-regs-gen | [x] 2026-10-29：8 个模块 JSON 与头文件，142 条静态断言通过 |
 | B2-3b | 引擎驱动（VIN/PIX/GEO/DISP/NPU/ETH/MEM_XBAR/PERF_MON）；OV5640 初始化（I2C0、GPIO bit12–15） | Codex · GPT-6.1 Sol | B2-1a、B2-3a | SoC 级仿真中驱动用例通过 | — | [ ] |
 | B2-4 | 演示程序 `sw/apps/demo`：S2 图像处理（菜单/KEY2–4 切换 PIX、GEO）；S1 目标检测（CH2 → NPU → 后处理 → 画框）；网口加载 NPU 镜像、网口图像检查；DDR 监控记录 100 Hz 经网口上报（设计记录 3.5） | Codex · GPT-6.1 Sol | B2-3 | 后处理 C 实现与 Python 参考逐项一致；SoC 级仿真跑通 S1 小用例和监控记录 | — | [ ] |
-| B2-5a | 调试工具：DDR 监控页、场景控制、YOLO 数据发送与回传接收（设计记录 3.5、3.6） | Codex · GPT-6.1 Sol | 设计记录 3.5 记录格式 | unittest：记录解析、带宽换算、CSV、UDP 回环；合成数据截图 | task-debug-monitor | [~] 2026-10-29 派发 |
+| B2-5a | 调试工具：DDR 监控页、场景控制、YOLO 数据发送与回传接收（设计记录 3.5、3.6） | Codex · GPT-6.1 Sol | 设计记录 3.5 记录格式 | unittest：记录解析、带宽换算、CSV、UDP 回环；合成数据截图 | task-debug-monitor | [x] 2026-10-29：DDR 监控页、场景控制、YOLO 发送/回传接收、`telemetry_sim.py`；33 项 unittest；截图 `tools/debug_tool/ddr-monitor.png`；场景命令待 B2-4 填写，Windows GUI 待 B2-6 确认 |
 | B2-5b | 调试工具 YOLO 页：板上检测框显示、参考模型与后处理参考比对 | Codex · GPT-6.1 Sol | B2-4 后处理参考 | 参考比对用例 | — | [ ] |
 | B2-6 | Windows：生成 DDR3、PLL 等 IP，PDS 综合布局布线（完整 SoC 时序、资源）；上板 S2、S1、监控；B1-8 BIOS 烧录和经 BIOS 运行 tuned CoreMark；调试工具 GUI 确认 | 用户 + Windows Codex | B2-1–B2-5 | 串口日志、截图、监控 CSV、报告 | `tasks/win/<日期>-board-b2/` | [ ] |
 
