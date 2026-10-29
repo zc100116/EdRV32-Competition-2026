@@ -6,7 +6,11 @@
 #ifndef EDRV32_ETH_H
 #define EDRV32_ETH_H
 #include "engine.h"
-struct eth_endpoint { uint8_t mac[6]; uint8_t ip[4]; uint16_t port; };
+struct eth_endpoint {
+    uint8_t mac[6];
+    uint8_t ip[4];
+    uint16_t port;
+};
 struct eth_tx_descriptor { uint32_t word[8]; };
 /* ETH 2.1: pack four network-order octets into a register value. */
 uint32_t eth_ipv4_pack(const uint8_t ip[4]);

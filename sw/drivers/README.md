@@ -43,3 +43,148 @@ BIOS has no mutable static SRAM state. `uart_read_selection()` consumes a whole
 line, accepts a single character, and treats CR LF as one Enter.
 `uart_input_binary_begin()` is called after draining the BIOS ready line; the
 host must wait for that line before sending binary bytes.
+
+# B2 媒体引擎驱动
+
+依据：`docs/design/2026-10-29-b2-software.md` 3.2–3.5a、SoC 6.1/7.1–7.4，
+各头文件逐函数标注模块规格条款。所有引擎 MMIO 地址、字段和描述符偏移来自
+`sw/bsp/include/regs/` 与 `soc_map.h`；没有手写新寄存器地址。
+驱动不做参数检查、重试、超时或错误恢复。调用者提供合法配置、空闲引擎和有效生命周期；
+硬件错误由 `engine_poll()` 或中断回调中的原始 `irq/status/error` 上报。
+
+| 头文件 | API（完整公开入口） | 作用 |
+|---|---|---|
+| `engine.h` | `engine_control`, `engine_poll`, `engine_irq_clear`, `engine_perf` | 公共 CTRL、状态/错误/完成数、RW1C、PERF |
+| `engine.h` | `engine_irq_register`, `engine_irq_handle`, `engine_irq_dispatch` | PLIC 注册、处理已 claim 的源、单次 claim/handle/complete |
+| `engine.h` | `surface_ring_slot`, `engine_dma_clean`, `engine_dma_invalidate` | 等间距 Surface 地址转槽号；调用 BSP cache 接口 |
+| `vin.h` | `vin_camera_size`, `vin_channel_configure`, `vin_channel_enable` | 摄像头尺寸、CH0–2 源/环/跨距/使能 |
+| `vin.h` | `vin_slots_busy`, `vin_frame_done`, `vin_frame_slot`, `vin_write_status` | 软件占用位图、原始完成信息与 frame_id、槽提取、当前写状态 |
+| `vin.h` | `vin_memory_start`, `vin_memory_status` | 单帧内存源启动和状态 |
+| `pix.h` | `pix_config_word`, `pix_configure`, `pix_gamma_load` | 点运算、两级 3×3、256 项 Gamma 表 |
+| `geo.h` | `geo_q16`, `geo_descriptor_pack`, `geo_submit` | 有理数转 Q16.16、64 B 描述符打包和提交 |
+| `disp.h` | `disp_submit`, `disp_current`, `disp_released` | 单层 RGB565 Surface 提交、当前/释放地址 |
+| `npu.h` | `npu_configure`, `npu_start`, `npu_current_descriptor` | 六项基址/数量配置、更新输入输出并启动、错误描述符定位 |
+| `eth.h` | `eth_ipv4_pack`, `eth_local_configure`, `eth_peer_configure` | MAC/IP/端口（字节数组按网络顺序） |
+| `eth.h` | `eth_window_configure`, `eth_window_bytes` | 四个接收窗口及已提交字节数 |
+| `eth.h` | `eth_tx_descriptor_pack`, `eth_header_pack`, `eth_send` | 32 B TX 描述符、8 B 网络序应用头、提交 |
+| `eth.h` | `eth_phy_reset`, `eth_mdio_write`, `eth_mdio_read` | PHY 复位电平、阻塞 Clause 22 访问 |
+| `mem_xbar.h` | `mem_xbar_snapshot`, `mem_xbar_rate`, `mem_xbar_error` | SNAPSHOT\|CLEAR 后读七端口统计、RATE、错误详情 |
+| `perf_mon.h` | `perf_mon_start`, `perf_mon_read` | 配置并 START、读取计数/校验错误/16 格直方图 |
+| `ov5640.h` | `ov5640_table`, `ov5640_init`, `ov5640_chip_id` | 双端口初始化、244 项表及长度、读取芯片 ID |
+
+`geo_q16(n,d)` 用有符号 64 位中间数计算 `n*65536/d`，向零截断；分母非零、结果
+适合 int32 是调用者契约。矩阵顺序是 **A, B, TX, C, D, TY**，描述符由
+`geo-spec` 2.6 的生成宏打包，保留字置零。`struct geo_descriptor` /
+`struct eth_tx_descriptor` 是 64 / 32 B 的字数组，小端 RV32 上可直接放 DDR；
+表首地址另由调用者保证 32 B 对齐。NPU 描述符由离线工具产生，驱动不重建模型。
+`surface_ring_slot(base, first, spacing)` 返回 `(base-first)/spacing`，这里 spacing 是
+分配间距（CH0 为 2 MiB，CH2 为 1 MiB），不是有效图像字节数；只对本环的槽首地址调用。
+
+所有传给引擎的地址都是 **DDR 物理地址**，例如 `0x06000000`；CPU 的缓存地址为
+`EDRV32_DDR_BASE + physical`，非缓存地址为 `EDRV32_DDR_UNCACHED_BASE + physical`。
+驱动不会隐式 clean/invalidate：调用者知道数据来自 CPU 还是其他引擎，按 SoC 7.4
+在 CPU 写完/引擎读取前调用 `engine_dma_clean(cached_address, bytes)`，在引擎写完/CPU
+读取前调用 `engine_dma_invalidate(cached_address, bytes)`，或始终使用非缓存别名。
+GEO 的源/目标、ETH 的载荷/描述符、NPU 的模型/描述符等分别维护；只 clean 描述符不足以
+覆盖 CPU 修改过的载荷。DMA 写入目标先前若有 CPU 脏行，交接前通过 BSP
+`cache_clean_invalidate()` 放弃 CPU 所有权；完成后再 invalidate。
+
+PLIC 源号按生成头：VIN=8、PIX=9、GEO=10、DISP=12、NPU=13、ETH=14、MEM_XBAR=15。
+PERF_MON 没有 PLIC 源，使用 `engine_poll(ENGINE_PERF_MON)` 轮询。
+`engine_irq_register(engine, irq_mask, priority, callback, context)` 只用于上述七个有源引擎，
+在 CPU MEIE/MIE 开启前调用；它保留其他 PLIC enable 位，不修改 threshold。
+应用设置 `plic_set_threshold(0)` 并启用 CPU 中断。
+回调拿到 IRQ、STATUS、ERR_CODE、DONE_COUNT 的值拷贝，在回调内读取 VIN 完成信息、
+DISP REL_BASE 或 MEM_XBAR 错误详情；回调返回后驱动清除本次捕获的 IRQ，再 complete。
+回调内不重复 RW1C。ERR_CODE 清零前的值保存在 event 中，必须由应用显式处理/上报。
+`engine_irq_dispatch()` 适用于只开启这些已注册媒体源的应用；若同时开启 UART/GPIO，
+由应用自己 `plic_claim()` 分流，媒体源调用 `engine_irq_handle(source)` 后由应用
+`plic_complete(source)`。驱动不接管 trap vector，也不设置 CLINT 中断。
+
+**S2 典型顺序。** `ov5640_init(0, clk_sys_hz)`（双目再初始化 camera 1），
+`vin_camera_size()`；配置 CH0 的四个 2 MiB 槽、stride=2560、SRC=VIN_CAM0。
+`pix_gamma_load()` 写未使用 bank，`pix_configure()` 设置点运算和两级滤波，
+`engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK)`；注册 VIN FRAME/ERROR、
+DISP FRAME/SWITCH/ERROR，最后使能 VIN。VIN FRAME 回调读取 `vin_frame_done(0)`，
+保留 info 中 INCOMPLETE/BUS_ERR；应用选用该帧后置 SLOT_BUSY，再 `disp_submit(base,2560)`
+并使能 DISP。新帧可选经 `geo_descriptor_pack()` → coherent 描述符 → `geo_submit()`，
+GEO DONE 后提交其输出 Surface。DISP SWITCH 时读取 `disp_released()`，旧 Surface 的
+其他消费者也已完成后清占用。PIX 参数在 SOF 锁存，Gamma 用非活动 bank 双缓冲；
+DISP 参数在 FRAME 中断后集中提交，下一 VBlank 生效。停止 DISP 后须等 IDLE 才释放最后
+一张 Surface；ENABLE=0 不再产生后续 SWITCH，不能无限等释放中断。
+
+**S1 典型顺序。** PIX 旁路；CH0 四槽、CH2 三槽同时选择一个源（CH2 stride=2560）。
+`npu_configure()` 一次配置 MODEL/WORK/DESC/count，CH2_FRAME 回调读两路完成状态，
+按相同 frame_id 配对。只有 NPU 空闲才占用该 CH2 槽和匹配的 CH0 槽，然后
+`npu_start(input_slot, output_buffer)`；NPU 忙时应用跳过新帧。
+NPU DONE 后对 OUTPUT invalidate（缓存 CPU 访问时），将输出交给后处理，并在 NPU
+最后读事务完成后释放 CH2 输入；应用可切换 OUTPUT 双缓冲启动下一帧。
+CPU 在保留的 CH0 Surface 画框，clean 修改范围后 `disp_submit()`。
+DISP SWITCH 和 ETH DONE_COUNT 都满足释放条件后才解除该 CH0 SLOT_BUSY。
+全部 bitmap 更新由应用串行化；DISP/ETH 共用的占用由应用合并，驱动不隐式改环状态。
+NPU 的 DONE_COUNT 是完成描述符数；应用在整次 DONE 时增加推理次数。
+
+**网口加载/视频典型顺序。** 按 PHY 手册控制 `eth_phy_reset(1/0)` 和等待间隔，
+必要时 `eth_mdio_read/write()`，再 `eth_local_configure()`、`eth_peer_configure()`、
+配置四个窗口，注册 RX_NOTIFYn/ERROR/DONE 并使能 ETH。RX_NOTIFYn 后读
+`eth_window_bytes(n)`，应用按设计记录核对字节数/EDNM 基址，复制模型/描述符到 NPU 区，
+CPU 使用缓存时做 clean；网口测试图用 `vin_memory_start()` 同时送 CH0/CH2。
+内存源 DONE 仅表示读完，后续 CH0/CH2 FRAME 才表示目标写完。
+TX 用 `eth_tx_descriptor_pack()`，clean 描述符和 CPU 写过的载荷，再 `eth_send()`；
+硬件每包切 1024 B 并构造应用头，不需 CPU 复制像素。
+一帧视频为两条描述符：32 B EDVF 帧头（OFFSET=0）和原地 RGB565（LEN=1843200、
+OFFSET=32、NOTIFY=1）。LEN=0 表示零数据包，仍由硬件发出。
+不在 ETH BUSY 时重配 TX 地址/端口或提交新列表；应用以 DONE_COUNT 前进确认源缓冲
+可释放。下一块接收前重新 `eth_window_configure()` 清计数。
+HDMI/网口/同时由应用控制 DISP ENABLE 和是否提交 ETH；关闭 HDMI 后先等 DISP IDLE。
+
+**监控上报典型顺序。** CLINT 100 Hz 定时回调里 `mem_xbar_snapshot(&stats)`，一次写
+SNAPSHOT|CLEAR 后读出冻结值；读取 `engine_perf(ENGINE_VIN,3/5/6/8)` 等求回绕增量，
+拼设计记录规定的 320 B 小端 EDTM，应用每 16 条经 WIN3 描述符发送。
+`mem_xbar_rate(6, rate)` 的单位为 1/256 beat/cycle。
+可选延迟探针使用 `perf_mon_start()`（MODE=0、ADDR_MODE=0、合法区域/有限事务数），
+轮询 DONE/ERROR 后 `perf_mon_read()`，由应用拼 type=2 记录；再次运行前清已处理 IRQ。
+PERF_MON START 清测量结果；不在 BUSY 时改其配置。ERR_BEATS 是读校验结果，另行上报。
+
+OV5640 移植依据与差异：
+
+- 来源：本机厂商 `SOC系统设计/doc/fpga/pago_200/2_Demo/5_1 双目摄像头例程/`
+  `ov5640_200k/rtl/camera/data_init.v` 的 **0–243，共 244 项**。
+  经协调者确认删除 244–247 四项占位（向只读 ID 寄存器 `0x300a` 写 0）。
+- 与 `legacy/rtl/vision/camera/ov5640_720p.hex` 的前 244 项逐项比较，**0 处差异**。
+  旧 hex 共 512 行，其 244–247 同为上述占位，248–511 为零填充；均未移植。
+  `legacy/sw/hal/drivers/cam.c` 没有初始化表；核对其芯片 ID 高/低字节位置为
+  0x300a/0x300b、镜像/翻转寄存器为 0x3821/0x3820、测试图寄存器为 0x503d。
+- `0x4300=0x61`、`0x501f=0x01` 选择 RGB565/RGB；
+  `0x3808..0x380b=05 00 02 d0`，尺寸 1280×720。
+  PLL `0x3035=0x11`、`0x3036=0x3c`，HTS=`0x09c0`，VTS=`0x04c8` 原样保留。
+  **实际帧率待上板用 VIN PERF0/1 的计数增量测量，本交付不宣称已验证 30 fps。**
+- 表不写 `0x4740`，沿用复位值 `0x20`。极性沿用默认，与 legacy 板上结果一致，
+  上板再确认一次。配套 legacy 采集模块按 HREF 高有效、VSYNC 下降沿帧开始、PCLK
+  上升沿采样，与 vin-spec 2.1 一致；厂商采集模块也按 VSYNC 下降沿开始。
+  [OV5640 数据手册](https://cdn.sparkfun.com/datasheets/Sensors/LightImaging/OV5640_datasheet.pdf)
+  的 0x4740 极性说明与此存在文字差异，
+  [Linux OV5640 驱动](https://gbmc.googlesource.com/linux/+/9a5523f72bd2b0d66eef3d58810c6eb7b5ffc143/drivers/media/i2c/ov5640.c)
+  也记录了 VSYNC 手册与硬件极性相反；经协调者确认保持原表，不额外写极性寄存器。
+- 两路摄像头分别选 I2C0 port 0/1，7 位地址 0x3c（线上写地址 0x78）。
+  GPIO bit12/13、14/15 为 PWDN/RST_N，保留其他 GPIO 位；复位等待按厂商 camera.v
+  的 5 ms、1.3 ms、21 ms 顺序，用 CLINT 实现，然后 100 kHz SCCB 连续写表。
+  这些是器件复位时序，不是超时兜底；首个 NACK 立即返回 -1。
+  上电先调用 init，再 chip_id；后者只选端口读 ID，不重复复位，也不判断芯片型号。
+
+验收命令（仓库根目录，禁止运行 Verilator 的本 Task 只验 C 编译和纯逻辑）：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+make -C sw PROGRAM=drivers_build MEMORY=sram -j1
+make -C sw/tests/drivers_build test
+riscv-none-elf-size build/sw/drivers_build/drivers_build.elf
+git diff --check
+```
+
+`drivers_build/main.c` 对全部驱动入口建立可达地址表，防止链接时 `--gc-sections`
+删掉未用驱动，确保所有驱动和 BSP cache 真正链接；不执行 MMIO。
+主机测试链接实际驱动 C，BSP cache 仅提供调用即终止的链接符号；测试不碰硬件，
+覆盖 GEO 描述符和 Q16.16、ETH 描述符/网络序头/IP、CH0/CH2 Surface 槽映射、
+VIN DONE_INFO 槽提取、PIX Gaussian+Sobel CFG、OV5640 表长度/关键寄存器。
+期望值是规格布局的独立字面值，没有使用被测打包函数构造期望。

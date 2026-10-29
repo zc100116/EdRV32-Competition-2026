@@ -14,11 +14,16 @@ struct vin_channel {
     uint32_t base[4];
     uint32_t busy_slots;
 };
-struct vin_frame { uint32_t info; uint32_t frame_id; };
+struct vin_frame {
+    uint32_t info;
+    uint32_t frame_id;
+};
 /* VIN 4.2: set one camera's expected width/height before its next frame. */
 void vin_camera_size(unsigned int camera, unsigned int width, unsigned int height);
 /* VIN 4.3: configure bases/stride/ownership before enabling the selected channel. */
 void vin_channel_configure(unsigned int channel, const struct vin_channel *config);
+/* VIN 4.3, 5.2: enable/disable one channel, retaining its source and ring settings. */
+void vin_channel_enable(unsigned int channel, unsigned int enabled);
 /* VIN 4.3: write the complete ownership bitmap; caller serializes IRQ/main updates. */
 void vin_slots_busy(unsigned int channel, uint32_t slots);
 /* VIN 4.3, 5.1: read the last frame's raw flags/slot/source and matching frame_id. */

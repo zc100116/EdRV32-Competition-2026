@@ -39,7 +39,7 @@ uint32_t engine_perf(enum engine_id engine, unsigned int counter);
 /* SoC 6.1: register callback, set engine IRQ mask and enable its PLIC source at priority. */
 void engine_irq_register(enum engine_id engine, uint32_t mask, unsigned int priority,
                          engine_irq_callback callback, void *context);
-/* SoC 6.1: service an already claimed source, snapshot/clear IRQ then invoke callback. */
+/* SoC 6.1: service a claimed source; callback precedes captured-flag acknowledgement. */
 void engine_irq_handle(unsigned int source);
 /* SoC 6.1: claim one pending PLIC source, service it, then complete; 0 means none. */
 unsigned int engine_irq_dispatch(void);
