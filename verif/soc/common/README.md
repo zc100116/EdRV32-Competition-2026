@@ -75,7 +75,9 @@ unused model instrumentation and the harness's shared reset.
 
 SC-05 uses the independent VIN CH2 reference and `tools/npu/ref/npu_ref.py`.
 `sc_05_s1/npu.json` generates K3/S2, K1/S1 and K1/S1 plus RES_EN, each with
-16 output channels; the residual source is the first layer's output. Reference
+16 output channels; the residual source is the first layer's output. All three
+OUT_ZP values are 0 to satisfy the shared-zero-point residual contract; weights,
+biases, multipliers and shifts retain the generator's random values. Reference
 execution consumes the predicted CH2 result, while the simulation must produce
 CH2 itself; the expected CH2 image is never preloaded into its output buffer.
 NPU generation/reference use the documented `~/.local/opt/edrv32-py` interpreter.
