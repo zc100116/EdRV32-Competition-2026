@@ -19,11 +19,30 @@ define_attribute {p:rst_n_i} {PAP_IO_VCCIO} {3.3}
 define_attribute {p:rst_n_i} {PAP_IO_STANDARD} {LVCMOS33}
 define_attribute {p:rst_n_i} {PAP_IO_NONE} {TRUE}
 
-define_attribute {p:key_n_i} {PAP_IO_DIRECTION} {INPUT}
-define_attribute {p:key_n_i} {PAP_IO_LOC} {C23}
-define_attribute {p:key_n_i} {PAP_IO_VCCIO} {3.3}
-define_attribute {p:key_n_i} {PAP_IO_STANDARD} {LVCMOS33}
-define_attribute {p:key_n_i} {PAP_IO_NONE} {TRUE}
+# KEY1-KEY4 = GPIO0 bit0-3 (SoC 3.5; mini-base USER_BUTTON1-4).
+define_attribute {p:key_n_i[0]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:key_n_i[0]} {PAP_IO_LOC} {C23}
+define_attribute {p:key_n_i[0]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:key_n_i[0]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:key_n_i[0]} {PAP_IO_NONE} {TRUE}
+
+define_attribute {p:key_n_i[1]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:key_n_i[1]} {PAP_IO_LOC} {B22}
+define_attribute {p:key_n_i[1]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:key_n_i[1]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:key_n_i[1]} {PAP_IO_NONE} {TRUE}
+
+define_attribute {p:key_n_i[2]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:key_n_i[2]} {PAP_IO_LOC} {A22}
+define_attribute {p:key_n_i[2]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:key_n_i[2]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:key_n_i[2]} {PAP_IO_NONE} {TRUE}
+
+define_attribute {p:key_n_i[3]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:key_n_i[3]} {PAP_IO_LOC} {B20}
+define_attribute {p:key_n_i[3]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:key_n_i[3]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:key_n_i[3]} {PAP_IO_NONE} {TRUE}
 
 define_attribute {p:uart_rx_i} {PAP_IO_DIRECTION} {INPUT}
 define_attribute {p:uart_rx_i} {PAP_IO_LOC} {B24}
@@ -39,6 +58,7 @@ define_attribute {p:uart_tx_o} {PAP_IO_DRIVE} {8}
 define_attribute {p:uart_tx_o} {PAP_IO_NONE} {TRUE}
 define_attribute {p:uart_tx_o} {PAP_IO_SLEW} {SLOW}
 
+# LED0-LED4 = GPIO0 bit4-8 (SoC 3.5; mini-base USER_LED0-4).
 define_attribute {p:led_o[0]} {PAP_IO_DIRECTION} {OUTPUT}
 define_attribute {p:led_o[0]} {PAP_IO_LOC} {A20}
 define_attribute {p:led_o[0]} {PAP_IO_VCCIO} {3.3}
@@ -70,3 +90,11 @@ define_attribute {p:led_o[3]} {PAP_IO_STANDARD} {LVCMOS33}
 define_attribute {p:led_o[3]} {PAP_IO_DRIVE} {8}
 define_attribute {p:led_o[3]} {PAP_IO_NONE} {TRUE}
 define_attribute {p:led_o[3]} {PAP_IO_SLEW} {SLOW}
+
+define_attribute {p:led_o[4]} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:led_o[4]} {PAP_IO_LOC} {A17}
+define_attribute {p:led_o[4]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:led_o[4]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:led_o[4]} {PAP_IO_DRIVE} {8}
+define_attribute {p:led_o[4]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:led_o[4]} {PAP_IO_SLEW} {SLOW}

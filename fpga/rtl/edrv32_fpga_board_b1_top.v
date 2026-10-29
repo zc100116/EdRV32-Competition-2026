@@ -1,5 +1,5 @@
 // File: edrv32_fpga_board_b1_top.v
-// Spec: board-plan B1-4; edrv32-soc-spec 7.5; sys-subsys-spec 3.4.
+// Spec: board-plan B1-4; edrv32-soc-spec 3.5 (GPIO0 bit map), 7.5; sys-subsys-spec 3.4.
 // Description: Bootable CPU/cache/system board top, with 27 MHz to 100 MHz PLL.
 //              External reset and PLL lock feed the subsystem reset sequencer.
 // Clock domain: clk_sys (100 MHz); clk_i is the 27 MHz PLL reference.
@@ -11,8 +11,9 @@ module edrv32_fpga_board_b1_top (
     // UART0 and GPIO pins.
     input wire uart_rx_i,
     output wire uart_tx_o,
-    input wire key_n_i,
-    output wire [3:0] led_o
+    // KEY1-KEY4 (active low) and LED0-LED4, SoC 3.5 GPIO0 bits 0-3 and 4-8.
+    input wire [3:0] key_n_i,
+    output wire [4:0] led_o
 );
 
     // PLL lock qualifies asynchronous reset; reset_ctrl synchronizes its release.
@@ -313,7 +314,7 @@ module edrv32_fpga_board_b1_top (
         .uart0_tx_o(uart_tx_o),
 
         // GPIO.
-        .gpio_i({15'd0, key_n_i}),
+        .gpio_i({12'd0, key_n_i}),
         .gpio_o(gpio_o_w),
         .gpio_oe_o(),
 
@@ -332,6 +333,6 @@ module edrv32_fpga_board_b1_top (
 
     /* verilator lint_on PINCONNECTEMPTY */
 
-    assign led_o = gpio_o_w[3:0];
+    assign led_o = gpio_o_w[8:4];
 
 endmodule

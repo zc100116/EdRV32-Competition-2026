@@ -14,7 +14,7 @@ module edrv32_board_b1_tb;
     reg key_n = 1;
     wire uart_rx;
     wire uart_tx;
-    wire [3:0] led;
+    wire [4:0] led;
     int case_id = 0;
     int menus = 0;
     int bios_menus = 0;
@@ -39,7 +39,7 @@ module edrv32_board_b1_tb;
         .rst_n_i(rst_n),
         .uart_rx_i(uart_rx),
         .uart_tx_o(uart_tx),
-        .key_n_i(case_id == 0 ? released_key : key_n),
+        .key_n_i({3'b111, case_id == 0 ? released_key : key_n}),
         .led_o(led)
     );
 

@@ -132,9 +132,10 @@ runs, following upstream's duration requirement for published scores.
 
 ## Peripheral development values (pending user confirmation)
 
-GPIO initializes all pins as inputs at boot. The test drives bits **1..4**
-(`0x001e`) as a walking LED pattern, each for **100 ms** measured by CLINT;
-bit **0** is the active-low button (same convention as bootloader). Each step
+GPIO initializes all pins as inputs at boot. Bit map per SoC spec 3.5: bits
+**0..3** are KEY1..KEY4 (active low; KEY1 is the bootloader BIOS key), bits
+**4..8** are LED0..LED4. The test drives `0x01f0` as a walking LED pattern, each
+for **100 ms** measured by CLINT, then LEDs follow KEY1. Each step
 prints input levels and pressed state, then outputs are cleared and GPIO returns
 to inputs. LED/button verification is observational, so the test prints
 `GPIO result: OBSERVE...` rather than claiming an automatic board-level PASS.

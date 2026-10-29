@@ -10,7 +10,8 @@
 #include "i2c.h"
 #include "uart.h"
 
-#define LED_MASK 0x001eu
+/* SoC 3.5 GPIO0 bit map: KEY1 bit0, LED0-LED4 bits 4-8. */
+#define LED_MASK 0x01f0u
 #define TIMER_DELAY_CYCLES 4096u
 #define BUTTON_WAIT_SECONDS 10u
 
@@ -40,7 +41,7 @@ static void gpio_test(uint32_t clock_hz)
     info_number("GPIO button bit", 0u);
     gpio_write(0u);
     gpio_set_output_enable(LED_MASK);
-    for (unsigned int pin = 1u; pin <= 4u; ++pin) {
+    for (unsigned int pin = 4u; pin <= 8u; ++pin) {
         gpio_write((uint16_t)(1u << pin));
         info_hex("GPIO LED output", 1u << pin);
         uint64_t start = clint_time();
@@ -73,7 +74,7 @@ static void gpio_test(uint32_t clock_hz)
     }
     gpio_write(0u);
     gpio_set_output_enable(0u);
-    info_text("GPIO LED result", "OBSERVE: LEDs 1-4 lit one at a time, then followed KEY1");
+    info_text("GPIO LED result", "OBSERVE: LED0-LED4 lit one at a time, then followed KEY1");
     info_text("GPIO button result", releases != 0u ? "PASS" :
         (presses != 0u ? "FAIL: still pressed at timeout" : "NOT PRESSED within wait"));
 }
