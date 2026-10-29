@@ -1,0 +1,11 @@
+`verilator_config
+// The shared synchronous BFM samples the DUT's asynchronous reset on clock edges.
+lint_off -rule SYNCASYNCNET -file "*/verif/block/rnd/edrv32_rnd_tb.sv"
+// Behavioral queues and test stimulus intentionally use blocking assignments.
+lint_off -rule BLKSEQ -file "*/verif/*"
+// Only media APB slot 4 is connected; the remaining slots are unused.
+lint_off -rule UNUSEDSIGNAL -file "*/common/edrv32_apb_if.sv"
+// The shared checker indexes its sixteen-entry tables using integers.
+lint_off -rule UNUSEDSIGNAL -file "*/common/edrv32_axi256_checker.sv"
+// Declaration-only port stub deliberately consumes no DUT inputs.
+lint_off -rule UNUSEDSIGNAL -file "*/rnd/selftest/edrv32_rnd.sv"
