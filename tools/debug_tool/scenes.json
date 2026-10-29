@@ -1,0 +1,14 @@
+{
+  "s1": {"label": "S1 · 目标检测", "command": null, "ending": "cr"},
+  "s2": {"label": "S2 · 图像处理", "command": null, "ending": "cr"},
+  "pix_bypass": {"label": "PIX · 旁路", "command": null, "ending": "cr"},
+  "pix_brightness": {"label": "PIX · 亮度 / 对比度", "command": null, "ending": "cr"},
+  "pix_gamma": {"label": "PIX · Gamma", "command": null, "ending": "cr"},
+  "pix_gaussian": {"label": "PIX · 高斯", "command": null, "ending": "cr"},
+  "pix_sobel": {"label": "PIX · Sobel", "command": null, "ending": "cr"},
+  "geo_rotate": {"label": "GEO · 旋转", "command": null, "ending": "cr"},
+  "geo_scale": {"label": "GEO · 缩放", "command": null, "ending": "cr"},
+  "sample_rate": {"label": "采样率", "command": null, "ending": "cr"},
+  "probe_on": {"label": "开启延迟探针", "command": null, "ending": "cr"},
+  "probe_off": {"label": "关闭延迟探针", "command": null, "ending": "cr"}
+}

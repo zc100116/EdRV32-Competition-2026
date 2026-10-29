@@ -166,11 +166,53 @@ def main():
     p = sub.add_parser("params")
     p.add_argument("--clear", action="store_true")
 
+    p = sub.add_parser("telemetry", help="latest DDR measurements and CSV")
+    p.add_argument("action", choices=["latest", "export", "replay", "clear"])
+    p.add_argument("path", nargs="?")
+    p = sub.add_parser("yolo", help="send compiler output or RGB565 test image")
+    p.add_argument("kind", choices=["model", "image"])
+    p.add_argument("path")
+    p.add_argument("--board-ip", default="192.168.1.10")
+    p.add_argument("--board-port", type=int, default=5000)
+    p.add_argument("--local-port", type=int, default=6000)
+    p.add_argument("--window", type=int, choices=[0, 1], default=0)
+    p = sub.add_parser("scene")
+    p.add_argument("name")
+    p.add_argument("--rate", type=int, default=100)
+    p = sub.add_parser("listen", help="start the shared UDP listener")
+    p.add_argument("--port", type=int, default=6000)
+    p.add_argument("--directory")
+
     args = parser.parse_args()
     global BASE
     BASE = args.url.rstrip("/")
 
-    if args.cmd == "ports":
+    if args.cmd == "telemetry":
+        if args.action == "latest":
+            print_json(request("GET", "/api/telemetry"))
+        else:
+            print_json(request("POST", "/api/telemetry/" + args.action,
+                               {"path": os.path.abspath(args.path)} if args.path else {}))
+    elif args.cmd == "listen":
+        print_json(request("POST", "/api/ethernet/receive/start",
+                           {"localPort": args.port, "directory": args.directory}))
+    elif args.cmd == "scene":
+        print_json(request("POST", "/api/scenes/send", {"name": args.name, "rate": args.rate}))
+    elif args.cmd == "yolo":
+        body = {"path": os.path.abspath(args.path), "boardIp": args.board_ip,
+                "boardPort": args.board_port, "localPort": args.local_port}
+        if args.kind == "image":
+            body["window"] = args.window
+        request("POST", "/api/yolo/" + args.kind, body)
+        while True:
+            state = request("GET", "/api/ethernet/status")["tx"]
+            if not state["active"]:
+                print_json(state)
+                if state["error"]:
+                    raise SystemExit(1)
+                break
+            time.sleep(0.2)
+    elif args.cmd == "ports":
         ports = request("GET", "/api/ports")["ports"]
         if args.json:
             print_json(ports)

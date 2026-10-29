@@ -31,7 +31,8 @@ def unpack(packet):
 
 
 class EthernetTool:
-    def __init__(self):
+    def __init__(self, telemetry=None):
+        self.telemetry = telemetry
         self.lock = threading.Lock()
         self.rx_socket = None
         self.rx_thread = None
@@ -47,15 +48,26 @@ class EthernetTool:
     def send_file(self, path, board_ip, board_port, local_port, window=0, offset=0,
                   interval=0):
         data = Path(path).read_bytes()
-        # Materialize headers before starting so format errors reach the caller directly.
-        datagrams = list(packets(data, window, offset))
+        return self.send_blocks([(window, offset, data)], board_ip, board_port,
+                                local_port, interval, str(path))
+
+    def send_blocks(self, blocks, board_ip, board_port, local_port, interval=0,
+                    name="data"):
+        datagrams = []
+        total = 0
+        for window, offset, data in blocks:
+            datagrams.extend(packets(data, window, offset))
+            total += len(data)
+        # One notification marks the end of the entire image, including sparse blocks.
+        datagrams = [packet[:1] + bytes([int(i == len(datagrams) - 1)]) + packet[2:]
+                     for i, packet in enumerate(datagrams)]
         if interval < 0:
             raise ValueError("packet interval must be nonnegative")
         with self.lock:
             if self.tx["active"]:
                 raise RuntimeError("UDP file send is already active")
-            self.tx = {"active": True, "sent": 0, "total": len(data), "packets": 0,
-                       "path": str(path), "error": None}
+            self.tx = {"active": True, "sent": 0, "total": total, "packets": 0,
+                       "path": name, "error": None}
             receiver = self.rx_socket
         threading.Thread(target=self._send, args=(datagrams, board_ip, board_port,
                                                   local_port, interval, receiver),
@@ -116,6 +128,8 @@ class EthernetTool:
                 except socket.timeout:
                     continue
                 window, notify, offset, data = unpack(packet)
+                if window == 3 and self.telemetry is not None:
+                    self.telemetry.receive(offset, data, notify)
                 if window not in files:
                     path = directory / f"window{window}.bin"
                     files[window] = path.open("w+b")
@@ -131,7 +145,7 @@ class EthernetTool:
                     self.rx["notifyCount"] += int(notify)
                     self.rx.update(lastWindow=window, lastOffset=offset, lastNotify=notify,
                                    peer=[peer[0], peer[1]])
-        except (OSError, struct.error) as exc:
+        except (OSError, struct.error, ValueError) as exc:
             with self.lock:
                 self.rx["error"] = str(exc)
         finally:

@@ -17,6 +17,9 @@ import time
 
 from .program import BiosProgrammer
 from .ethernet import EthernetTool
+from .telemetry import Telemetry
+from .yolo import YoloTool
+from .scene import SceneControl
 
 try:
     import serial
@@ -97,7 +100,10 @@ class SerialEngine:
         self._listeners = []
         self.program = BiosProgrammer(self._program_write,
                                       lambda text: self.add_entry("sys", text))
-        self.ethernet = EthernetTool()
+        self.telemetry = Telemetry()
+        self.ethernet = EthernetTool(self.telemetry)
+        self.yolo = YoloTool(self.ethernet)
+        self.scenes = SceneControl(self)
 
     # ---------------------------------------------------------- observer --
     def add_listener(self, callback):
