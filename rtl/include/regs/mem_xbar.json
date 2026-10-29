@@ -1,0 +1,601 @@
+{
+    "module": "mem_xbar",
+    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+    "note": "VALUE names unnamed ranges; common bit names include unused bits (SoC 7.1).",
+    "registers": [
+        {
+            "name": "ID",
+            "offset": "0x000",
+            "access": "RO",
+            "reset": 524289,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE_31_16",
+                    "lsb": 16,
+                    "width": 16,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "VALUE_15_0",
+                    "lsb": 0,
+                    "width": 16,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "CTRL",
+            "offset": "0x004",
+            "access": "RW",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "ENABLE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "START",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "ABORT",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "SOFT_RST",
+                    "lsb": 3,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "STATUS",
+            "offset": "0x008",
+            "access": "RO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "BUSY",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "IDLE",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "IRQ_EN",
+            "offset": "0x00C",
+            "access": "RW",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "FRAME",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "IRQ_STAT",
+            "offset": "0x010",
+            "access": "RW1C",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "FRAME",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "ERR_CODE",
+            "offset": "0x014",
+            "access": "RO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "DESC_BASE",
+            "offset": "0x020",
+            "access": "RW",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "note": "Unused; reads zero and writes ignored."
+        },
+        {
+            "name": "DESC_COUNT",
+            "offset": "0x024",
+            "access": "RW",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "note": "Unused; reads zero and writes ignored."
+        },
+        {
+            "name": "DOORBELL",
+            "offset": "0x028",
+            "access": "WO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "reset_status": "not_applicable",
+            "note": "Unused; reads zero and writes ignored."
+        },
+        {
+            "name": "DONE_COUNT",
+            "offset": "0x02C",
+            "access": "RO",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "PERF",
+            "offset": "0x040",
+            "access": "RO",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 16,
+                    "stride": 4
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "OUTST_TOTAL",
+            "offset": "0x100",
+            "access": "RW",
+            "reset": 8,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 4,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "URG_MAX",
+            "offset": "0x104",
+            "access": "RW",
+            "reset": 8,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 8,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "STARVE_CYC",
+            "offset": "0x108",
+            "access": "RW",
+            "reset": 256,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 16,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "DIR_BATCH",
+            "offset": "0x10C",
+            "access": "RW",
+            "reset": 4,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 8,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "STAT_CTRL",
+            "offset": "0x110",
+            "access": "WO",
+            "reset": null,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "SNAPSHOT",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "CLEAR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ],
+            "reset_status": "not_applicable"
+        },
+        {
+            "name": "ERR_PORT",
+            "offset": "0x120",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "ERR_ADDR",
+            "offset": "0x124",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "ERR_TYPE",
+            "offset": "0x128",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE_0",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "mem-subsys-spec.md 4.1"
+                },
+                {
+                    "name": "VALUE_2",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "OUTST_RD",
+            "offset": "0x200",
+            "access": "RW",
+            "reset": [
+                4,
+                2,
+                1,
+                4,
+                2,
+                2,
+                2
+            ],
+            "spec": "mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 4,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ],
+            "note": "Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6."
+        },
+        {
+            "name": "OUTST_WR",
+            "offset": "0x204",
+            "access": "RW",
+            "reset": [
+                0,
+                4,
+                1,
+                2,
+                2,
+                2,
+                2
+            ],
+            "spec": "mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 4,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ],
+            "note": "Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6."
+        },
+        {
+            "name": "WEIGHT",
+            "offset": "0x208",
+            "access": "RW",
+            "reset": [
+                4,
+                4,
+                null,
+                3,
+                2,
+                2,
+                1
+            ],
+            "spec": "mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 4,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ],
+            "reset_status": "null entries are unspecified or unused in the cited table",
+            "note": "Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6."
+        },
+        {
+            "name": "RATE",
+            "offset": "0x20C",
+            "access": "RW",
+            "reset": [
+                null,
+                null,
+                26,
+                null,
+                null,
+                null,
+                13
+            ],
+            "spec": "mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 9,
+                    "spec": "mem-subsys-spec.md 4.1"
+                }
+            ],
+            "reset_status": "null entries are unspecified or unused in the cited table",
+            "note": "Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6."
+        },
+        {
+            "name": "RD_TXN",
+            "offset": "0x400",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "RD_BEAT",
+            "offset": "0x404",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "WAIT_MAX",
+            "offset": "0x408",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "WAIT_SUM",
+            "offset": "0x40C",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "URG_CNT",
+            "offset": "0x410",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "WR_TXN",
+            "offset": "0x414",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "WR_BEAT",
+            "offset": "0x418",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [
+                {
+                    "index": "p",
+                    "count": 7,
+                    "stride": 32
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "DIR_SWITCH",
+            "offset": "0x500",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "DS_BUSY",
+            "offset": "0x504",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "WINDOW_CYC",
+            "offset": "0x508",
+            "access": "RO",
+            "reset": 0,
+            "spec": "mem-subsys-spec.md 4.1",
+            "dimensions": [],
+            "fields": []
+        }
+    ],
+    "layouts": []
+}

@@ -1,0 +1,300 @@
+/* File: vin_regs.h
+ * Spec: edrv32-soc-spec.md 7.1; vin-spec.md 4.1
+ * Description: Engine register offsets, fields and descriptor layouts.
+ * Clock domain: none (constants).
+ */
+// 由 tools/gen/regs.py 从 rtl/include/regs/*.json 生成，不要手改。
+#ifndef EDRV32_VIN_REGS_H
+#define EDRV32_VIN_REGS_H
+
+/* VALUE names unnamed ranges; common bit names include unused bits (SoC 7.1). */
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RO; reset: 65537. */
+#define EDRV32_VIN_ID_OFFSET 0x00000000u
+#define EDRV32_VIN_ID_RESET 0x00010001u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_ID_VALUE_31_16_POS 0x00000010u
+#define EDRV32_VIN_ID_VALUE_31_16_WIDTH 0x00000010u
+#define EDRV32_VIN_ID_VALUE_31_16_MASK 0xFFFF0000u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_ID_VALUE_15_0_POS 0x00000000u
+#define EDRV32_VIN_ID_VALUE_15_0_WIDTH 0x00000010u
+#define EDRV32_VIN_ID_VALUE_15_0_MASK 0x0000FFFFu
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RW; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_CTRL_OFFSET 0x00000004u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_CTRL_ENABLE_POS 0x00000000u
+#define EDRV32_VIN_CTRL_ENABLE_WIDTH 0x00000001u
+#define EDRV32_VIN_CTRL_ENABLE_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_CTRL_START_POS 0x00000001u
+#define EDRV32_VIN_CTRL_START_WIDTH 0x00000001u
+#define EDRV32_VIN_CTRL_START_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_CTRL_ABORT_POS 0x00000002u
+#define EDRV32_VIN_CTRL_ABORT_WIDTH 0x00000001u
+#define EDRV32_VIN_CTRL_ABORT_MASK 0x00000004u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_CTRL_SOFT_RST_POS 0x00000003u
+#define EDRV32_VIN_CTRL_SOFT_RST_WIDTH 0x00000001u
+#define EDRV32_VIN_CTRL_SOFT_RST_MASK 0x00000008u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RO; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_STATUS_OFFSET 0x00000008u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_STATUS_BUSY_POS 0x00000000u
+#define EDRV32_VIN_STATUS_BUSY_WIDTH 0x00000001u
+#define EDRV32_VIN_STATUS_BUSY_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_STATUS_IDLE_POS 0x00000001u
+#define EDRV32_VIN_STATUS_IDLE_WIDTH 0x00000001u
+#define EDRV32_VIN_STATUS_IDLE_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_STATUS_ERROR_POS 0x00000002u
+#define EDRV32_VIN_STATUS_ERROR_WIDTH 0x00000001u
+#define EDRV32_VIN_STATUS_ERROR_MASK 0x00000004u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RW; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_IRQ_EN_OFFSET 0x0000000Cu
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_EN_DONE_POS 0x00000000u
+#define EDRV32_VIN_IRQ_EN_DONE_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_EN_DONE_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_EN_ERROR_POS 0x00000001u
+#define EDRV32_VIN_IRQ_EN_ERROR_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_EN_ERROR_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_EN_FRAME_POS 0x00000002u
+#define EDRV32_VIN_IRQ_EN_FRAME_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_EN_FRAME_MASK 0x00000004u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_EN_CH1_FRAME_POS 0x00000008u
+#define EDRV32_VIN_IRQ_EN_CH1_FRAME_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_EN_CH1_FRAME_MASK 0x00000100u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_EN_CH2_FRAME_POS 0x00000009u
+#define EDRV32_VIN_IRQ_EN_CH2_FRAME_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK 0x00000200u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RW1C; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_IRQ_STAT_OFFSET 0x00000010u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_STAT_DONE_POS 0x00000000u
+#define EDRV32_VIN_IRQ_STAT_DONE_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_STAT_DONE_MASK 0x00000001u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_STAT_ERROR_POS 0x00000001u
+#define EDRV32_VIN_IRQ_STAT_ERROR_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_STAT_ERROR_MASK 0x00000002u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_STAT_FRAME_POS 0x00000002u
+#define EDRV32_VIN_IRQ_STAT_FRAME_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_STAT_FRAME_MASK 0x00000004u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_STAT_CH1_FRAME_POS 0x00000008u
+#define EDRV32_VIN_IRQ_STAT_CH1_FRAME_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_STAT_CH1_FRAME_MASK 0x00000100u
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1 */
+#define EDRV32_VIN_IRQ_STAT_CH2_FRAME_POS 0x00000009u
+#define EDRV32_VIN_IRQ_STAT_CH2_FRAME_WIDTH 0x00000001u
+#define EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK 0x00000200u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RO; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_ERR_CODE_OFFSET 0x00000014u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RW; reset: 0. */
+/* Unused; reads zero and writes ignored. */
+#define EDRV32_VIN_DESC_BASE_OFFSET 0x00000020u
+#define EDRV32_VIN_DESC_BASE_RESET 0x00000000u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RW; reset: 0. */
+/* Unused; reads zero and writes ignored. */
+#define EDRV32_VIN_DESC_COUNT_OFFSET 0x00000024u
+#define EDRV32_VIN_DESC_COUNT_RESET 0x00000000u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; WO; reset: null. */
+/* Reset metadata: not_applicable. */
+/* Unused; reads zero and writes ignored. */
+#define EDRV32_VIN_DOORBELL_OFFSET 0x00000028u
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; RO; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_DONE_COUNT_OFFSET 0x0000002Cu
+
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; vin-spec.md 4.4; RO; reset: null. */
+/* Reset metadata: unspecified. */
+#define EDRV32_VIN_PERF_N_COUNT 0x00000010u
+#define EDRV32_VIN_PERF_OFFSET(n) \
+    (0x00000040u + 0x00000004u * (n))
+/* edrv32-soc-spec.md 7.1; vin-spec.md 4.1; vin-spec.md 4.4 */
+#define EDRV32_VIN_PERF_VALUE_POS 0x00000000u
+#define EDRV32_VIN_PERF_VALUE_WIDTH 0x00000020u
+#define EDRV32_VIN_PERF_VALUE_MASK 0xFFFFFFFFu
+
+/* vin-spec.md 4.2; RW; reset: 47187200. */
+#define EDRV32_VIN_CAM0_SIZE_OFFSET 0x00000100u
+#define EDRV32_VIN_CAM0_SIZE_RESET 0x02D00500u
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_CAM0_SIZE_WIDTH_POS 0x00000000u
+#define EDRV32_VIN_CAM0_SIZE_WIDTH_WIDTH 0x0000000Bu
+#define EDRV32_VIN_CAM0_SIZE_WIDTH_MASK 0x000007FFu
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_CAM0_SIZE_HEIGHT_POS 0x00000010u
+#define EDRV32_VIN_CAM0_SIZE_HEIGHT_WIDTH 0x0000000Cu
+#define EDRV32_VIN_CAM0_SIZE_HEIGHT_MASK 0x0FFF0000u
+
+/* vin-spec.md 4.2; RW; reset: 47187200. */
+#define EDRV32_VIN_CAM1_SIZE_OFFSET 0x00000104u
+#define EDRV32_VIN_CAM1_SIZE_RESET 0x02D00500u
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_CAM1_SIZE_WIDTH_POS 0x00000000u
+#define EDRV32_VIN_CAM1_SIZE_WIDTH_WIDTH 0x0000000Bu
+#define EDRV32_VIN_CAM1_SIZE_WIDTH_MASK 0x000007FFu
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_CAM1_SIZE_HEIGHT_POS 0x00000010u
+#define EDRV32_VIN_CAM1_SIZE_HEIGHT_WIDTH 0x0000000Cu
+#define EDRV32_VIN_CAM1_SIZE_HEIGHT_MASK 0x0FFF0000u
+
+/* vin-spec.md 4.2; RW; reset: 0. */
+#define EDRV32_VIN_MSRC_BASE_OFFSET 0x00000110u
+#define EDRV32_VIN_MSRC_BASE_RESET 0x00000000u
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_MSRC_BASE_VALUE_POS 0x0000000Cu
+#define EDRV32_VIN_MSRC_BASE_VALUE_WIDTH 0x00000014u
+#define EDRV32_VIN_MSRC_BASE_VALUE_MASK 0xFFFFF000u
+
+/* vin-spec.md 4.2; RW; reset: 2560. */
+#define EDRV32_VIN_MSRC_STRIDE_OFFSET 0x00000114u
+#define EDRV32_VIN_MSRC_STRIDE_RESET 0x00000A00u
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_MSRC_STRIDE_VALUE_POS 0x00000005u
+#define EDRV32_VIN_MSRC_STRIDE_VALUE_WIDTH 0x0000000Bu
+#define EDRV32_VIN_MSRC_STRIDE_VALUE_MASK 0x0000FFE0u
+
+/* vin-spec.md 4.2; RW; reset: 47187200. */
+#define EDRV32_VIN_MSRC_SIZE_OFFSET 0x00000118u
+#define EDRV32_VIN_MSRC_SIZE_RESET 0x02D00500u
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_MSRC_SIZE_WIDTH_POS 0x00000000u
+#define EDRV32_VIN_MSRC_SIZE_WIDTH_WIDTH 0x0000000Bu
+#define EDRV32_VIN_MSRC_SIZE_WIDTH_MASK 0x000007FFu
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_MSRC_SIZE_HEIGHT_POS 0x00000010u
+#define EDRV32_VIN_MSRC_SIZE_HEIGHT_WIDTH 0x0000000Cu
+#define EDRV32_VIN_MSRC_SIZE_HEIGHT_MASK 0x0FFF0000u
+
+/* vin-spec.md 4.2; WO; reset: null. */
+/* Reset metadata: not_applicable. */
+#define EDRV32_VIN_MSRC_CTRL_OFFSET 0x0000011Cu
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_MSRC_CTRL_START_POS 0x00000000u
+#define EDRV32_VIN_MSRC_CTRL_START_WIDTH 0x00000001u
+#define EDRV32_VIN_MSRC_CTRL_START_MASK 0x00000001u
+
+/* vin-spec.md 4.2; RO; reset: 0. */
+#define EDRV32_VIN_MSRC_STAT_OFFSET 0x00000120u
+#define EDRV32_VIN_MSRC_STAT_RESET 0x00000000u
+/* vin-spec.md 4.2 */
+#define EDRV32_VIN_MSRC_STAT_BUSY_POS 0x00000000u
+#define EDRV32_VIN_MSRC_STAT_BUSY_WIDTH 0x00000001u
+#define EDRV32_VIN_MSRC_STAT_BUSY_MASK 0x00000001u
+
+/* vin-spec.md 4.3; RW; reset: 48. */
+#define EDRV32_VIN_CH_CTRL_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_CTRL_OFFSET(n) \
+    (0x00000200u + 0x00000080u * (n))
+#define EDRV32_VIN_CH_CTRL_RESET 0x00000030u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_CTRL_EN_POS 0x00000000u
+#define EDRV32_VIN_CH_CTRL_EN_WIDTH 0x00000001u
+#define EDRV32_VIN_CH_CTRL_EN_MASK 0x00000001u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_CTRL_SRC_POS 0x00000001u
+#define EDRV32_VIN_CH_CTRL_SRC_WIDTH 0x00000002u
+#define EDRV32_VIN_CH_CTRL_SRC_MASK 0x00000006u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_CTRL_RING_N_POS 0x00000004u
+#define EDRV32_VIN_CH_CTRL_RING_N_WIDTH 0x00000003u
+#define EDRV32_VIN_CH_CTRL_RING_N_MASK 0x00000070u
+
+/* vin-spec.md 4.3; RW; reset: 2560. */
+#define EDRV32_VIN_CH_STRIDE_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_STRIDE_OFFSET(n) \
+    (0x00000204u + 0x00000080u * (n))
+#define EDRV32_VIN_CH_STRIDE_RESET 0x00000A00u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_STRIDE_VALUE_POS 0x00000005u
+#define EDRV32_VIN_CH_STRIDE_VALUE_WIDTH 0x0000000Bu
+#define EDRV32_VIN_CH_STRIDE_VALUE_MASK 0x0000FFE0u
+
+/* vin-spec.md 4.3; RW; reset: 0. */
+#define EDRV32_VIN_CH_SURF_BASE_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_SURF_BASE_S_COUNT 0x00000004u
+#define EDRV32_VIN_CH_SURF_BASE_OFFSET(n, s) \
+    (0x00000208u + 0x00000080u * (n) + 0x00000004u * (s))
+#define EDRV32_VIN_CH_SURF_BASE_RESET 0x00000000u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_SURF_BASE_VALUE_POS 0x0000000Cu
+#define EDRV32_VIN_CH_SURF_BASE_VALUE_WIDTH 0x00000014u
+#define EDRV32_VIN_CH_SURF_BASE_VALUE_MASK 0xFFFFF000u
+
+/* vin-spec.md 4.3; RW; reset: 0. */
+#define EDRV32_VIN_CH_SLOT_BUSY_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_SLOT_BUSY_OFFSET(n) \
+    (0x00000218u + 0x00000080u * (n))
+#define EDRV32_VIN_CH_SLOT_BUSY_RESET 0x00000000u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_SLOT_BUSY_VALUE_POS 0x00000000u
+#define EDRV32_VIN_CH_SLOT_BUSY_VALUE_WIDTH 0x00000004u
+#define EDRV32_VIN_CH_SLOT_BUSY_VALUE_MASK 0x0000000Fu
+
+/* vin-spec.md 4.3; RO; reset: 0. */
+#define EDRV32_VIN_CH_DONE_INFO_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_DONE_INFO_OFFSET(n) \
+    (0x00000220u + 0x00000080u * (n))
+#define EDRV32_VIN_CH_DONE_INFO_RESET 0x00000000u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_DONE_INFO_VALUE_1_0_POS 0x00000000u
+#define EDRV32_VIN_CH_DONE_INFO_VALUE_1_0_WIDTH 0x00000002u
+#define EDRV32_VIN_CH_DONE_INFO_VALUE_1_0_MASK 0x00000003u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_DONE_INFO_VALUE_3_2_POS 0x00000002u
+#define EDRV32_VIN_CH_DONE_INFO_VALUE_3_2_WIDTH 0x00000002u
+#define EDRV32_VIN_CH_DONE_INFO_VALUE_3_2_MASK 0x0000000Cu
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_POS 0x00000004u
+#define EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_WIDTH 0x00000001u
+#define EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_MASK 0x00000010u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_DONE_INFO_BUS_ERR_POS 0x00000005u
+#define EDRV32_VIN_CH_DONE_INFO_BUS_ERR_WIDTH 0x00000001u
+#define EDRV32_VIN_CH_DONE_INFO_BUS_ERR_MASK 0x00000020u
+
+/* vin-spec.md 4.3; RO; reset: 0. */
+#define EDRV32_VIN_CH_DONE_FRAME_ID_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_DONE_FRAME_ID_OFFSET(n) \
+    (0x00000224u + 0x00000080u * (n))
+#define EDRV32_VIN_CH_DONE_FRAME_ID_RESET 0x00000000u
+
+/* vin-spec.md 4.3; RO; reset: 0. */
+#define EDRV32_VIN_CH_WR_STAT_N_COUNT 0x00000003u
+#define EDRV32_VIN_CH_WR_STAT_OFFSET(n) \
+    (0x00000228u + 0x00000080u * (n))
+#define EDRV32_VIN_CH_WR_STAT_RESET 0x00000000u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_WR_STAT_ACTIVE_POS 0x00000000u
+#define EDRV32_VIN_CH_WR_STAT_ACTIVE_WIDTH 0x00000001u
+#define EDRV32_VIN_CH_WR_STAT_ACTIVE_MASK 0x00000001u
+/* vin-spec.md 4.3 */
+#define EDRV32_VIN_CH_WR_STAT_VALUE_2_1_POS 0x00000001u
+#define EDRV32_VIN_CH_WR_STAT_VALUE_2_1_WIDTH 0x00000002u
+#define EDRV32_VIN_CH_WR_STAT_VALUE_2_1_MASK 0x00000006u
+
+#endif

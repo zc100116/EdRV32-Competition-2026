@@ -1,0 +1,569 @@
+{
+    "module": "vin",
+    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+    "note": "VALUE names unnamed ranges; common bit names include unused bits (SoC 7.1).",
+    "registers": [
+        {
+            "name": "ID",
+            "offset": "0x000",
+            "access": "RO",
+            "reset": 65537,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE_31_16",
+                    "lsb": 16,
+                    "width": 16,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "VALUE_15_0",
+                    "lsb": 0,
+                    "width": 16,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                }
+            ]
+        },
+        {
+            "name": "CTRL",
+            "offset": "0x004",
+            "access": "RW",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "ENABLE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "START",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "ABORT",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "SOFT_RST",
+                    "lsb": 3,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "STATUS",
+            "offset": "0x008",
+            "access": "RO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "BUSY",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "IDLE",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "IRQ_EN",
+            "offset": "0x00C",
+            "access": "RW",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "FRAME",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "CH1_FRAME",
+                    "lsb": 8,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "CH2_FRAME",
+                    "lsb": 9,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "IRQ_STAT",
+            "offset": "0x010",
+            "access": "RW1C",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "FRAME",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "CH1_FRAME",
+                    "lsb": 8,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                },
+                {
+                    "name": "CH2_FRAME",
+                    "lsb": 9,
+                    "width": 1,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "ERR_CODE",
+            "offset": "0x014",
+            "access": "RO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "DESC_BASE",
+            "offset": "0x020",
+            "access": "RW",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "note": "Unused; reads zero and writes ignored."
+        },
+        {
+            "name": "DESC_COUNT",
+            "offset": "0x024",
+            "access": "RW",
+            "reset": 0,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "note": "Unused; reads zero and writes ignored."
+        },
+        {
+            "name": "DOORBELL",
+            "offset": "0x028",
+            "access": "WO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "reset_status": "not_applicable",
+            "note": "Unused; reads zero and writes ignored."
+        },
+        {
+            "name": "DONE_COUNT",
+            "offset": "0x02C",
+            "access": "RO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
+            "dimensions": [],
+            "fields": [],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "PERF",
+            "offset": "0x040",
+            "access": "RO",
+            "reset": null,
+            "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1; vin-spec.md 4.4",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 16,
+                    "stride": 4
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1; vin-spec.md 4.4"
+                }
+            ],
+            "reset_status": "unspecified"
+        },
+        {
+            "name": "CAM0_SIZE",
+            "offset": "0x100",
+            "access": "RW",
+            "reset": 47187200,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "WIDTH",
+                    "lsb": 0,
+                    "width": 11,
+                    "spec": "vin-spec.md 4.2"
+                },
+                {
+                    "name": "HEIGHT",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "CAM1_SIZE",
+            "offset": "0x104",
+            "access": "RW",
+            "reset": 47187200,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "WIDTH",
+                    "lsb": 0,
+                    "width": 11,
+                    "spec": "vin-spec.md 4.2"
+                },
+                {
+                    "name": "HEIGHT",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "MSRC_BASE",
+            "offset": "0x110",
+            "access": "RW",
+            "reset": 0,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 12,
+                    "width": 20,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "MSRC_STRIDE",
+            "offset": "0x114",
+            "access": "RW",
+            "reset": 2560,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 5,
+                    "width": 11,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "MSRC_SIZE",
+            "offset": "0x118",
+            "access": "RW",
+            "reset": 47187200,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "WIDTH",
+                    "lsb": 0,
+                    "width": 11,
+                    "spec": "vin-spec.md 4.2"
+                },
+                {
+                    "name": "HEIGHT",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "MSRC_CTRL",
+            "offset": "0x11C",
+            "access": "WO",
+            "reset": null,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "START",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ],
+            "reset_status": "not_applicable"
+        },
+        {
+            "name": "MSRC_STAT",
+            "offset": "0x120",
+            "access": "RO",
+            "reset": 0,
+            "spec": "vin-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "BUSY",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "vin-spec.md 4.2"
+                }
+            ]
+        },
+        {
+            "name": "CH_CTRL",
+            "offset": "0x200",
+            "access": "RW",
+            "reset": 48,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                }
+            ],
+            "fields": [
+                {
+                    "name": "EN",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "vin-spec.md 4.3"
+                },
+                {
+                    "name": "SRC",
+                    "lsb": 1,
+                    "width": 2,
+                    "spec": "vin-spec.md 4.3"
+                },
+                {
+                    "name": "RING_N",
+                    "lsb": 4,
+                    "width": 3,
+                    "spec": "vin-spec.md 4.3"
+                }
+            ]
+        },
+        {
+            "name": "CH_STRIDE",
+            "offset": "0x204",
+            "access": "RW",
+            "reset": 2560,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 5,
+                    "width": 11,
+                    "spec": "vin-spec.md 4.3"
+                }
+            ]
+        },
+        {
+            "name": "CH_SURF_BASE",
+            "offset": "0x208",
+            "access": "RW",
+            "reset": 0,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                },
+                {
+                    "index": "s",
+                    "count": 4,
+                    "stride": 4
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 12,
+                    "width": 20,
+                    "spec": "vin-spec.md 4.3"
+                }
+            ]
+        },
+        {
+            "name": "CH_SLOT_BUSY",
+            "offset": "0x218",
+            "access": "RW",
+            "reset": 0,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 4,
+                    "spec": "vin-spec.md 4.3"
+                }
+            ]
+        },
+        {
+            "name": "CH_DONE_INFO",
+            "offset": "0x220",
+            "access": "RO",
+            "reset": 0,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE_1_0",
+                    "lsb": 0,
+                    "width": 2,
+                    "spec": "vin-spec.md 4.3"
+                },
+                {
+                    "name": "VALUE_3_2",
+                    "lsb": 2,
+                    "width": 2,
+                    "spec": "vin-spec.md 4.3"
+                },
+                {
+                    "name": "INCOMPLETE",
+                    "lsb": 4,
+                    "width": 1,
+                    "spec": "vin-spec.md 4.3"
+                },
+                {
+                    "name": "BUS_ERR",
+                    "lsb": 5,
+                    "width": 1,
+                    "spec": "vin-spec.md 4.3"
+                }
+            ]
+        },
+        {
+            "name": "CH_DONE_FRAME_ID",
+            "offset": "0x224",
+            "access": "RO",
+            "reset": 0,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                }
+            ],
+            "fields": []
+        },
+        {
+            "name": "CH_WR_STAT",
+            "offset": "0x228",
+            "access": "RO",
+            "reset": 0,
+            "spec": "vin-spec.md 4.3",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 3,
+                    "stride": 128
+                }
+            ],
+            "fields": [
+                {
+                    "name": "ACTIVE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "vin-spec.md 4.3"
+                },
+                {
+                    "name": "VALUE_2_1",
+                    "lsb": 1,
+                    "width": 2,
+                    "spec": "vin-spec.md 4.3"
+                }
+            ]
+        }
+    ],
+    "layouts": []
+}
