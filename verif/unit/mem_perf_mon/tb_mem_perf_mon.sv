@@ -350,17 +350,54 @@ module tb_mem_perf_mon;
         eq_reg('h010, 1);
         $display("PASS PM-02 corrupt byte");
         // PM-04: exact bin boundaries, all sixteen bins, overflow to last bin.
-        for (i = 0; i < 18; i = i + 1) begin
-            read_delay = i < 16 ? (i+1)*4 : 100;
-            configure(0, 0, 8, 1, 1, 4096, 1, 0, 0, 4);
-            wr('h004, 2); finish_check(1);
-            eq_reg('h20c, read_delay); eq_reg('h210, read_delay);
-            eq_reg('h214, read_delay);
+        for (i = 1; i < 16; i = i + 1) begin
+            for (j = -1; j <= 1; j = j + 1) begin
+                read_delay = 4*i + j;
+                configure(0, 0, 8, 1, 1, 4096, 1, 0, 0, 4);
+                wr('h004, 2); finish_check(1);
+                eq_reg('h20c, read_delay); eq_reg('h210, read_delay);
+                eq_reg('h214, read_delay);
+            end
         end
-        read_delay = 1;
+        read_delay = 100;
         configure(0, 0, 8, 1, 1, 4096, 1, 0, 0, 4);
-        wr('h004, 2); finish_check(1); eq_reg('h300, 1);
+        wr('h004, 2); finish_check(1); eq_reg('h33c, 1);
+        read_delay = 1;
+        configure(0, 0, 8, 1, 8, 4096, 4, 0, 0, 4);
+        wr('h004, 2); finish_check(8); eq_reg('h300, 8);
         $display("PASS PM-04 fixed latency and histogram boundaries");
+        // Saturated latency must not cross a mathematically overflowing boundary.
+        for (i = 0; i < 4; i = i + 1) begin
+            read_delay = 8;
+            case (i)
+                0: hist_width = 32'h1111_1111; // 15*W equals the largest latency.
+                1: hist_width = 32'h1111_1112; // 15*W is just above it.
+                2: hist_width = 32'h4000_0000; // Several boundaries overflow.
+                3: hist_width = 32'hffff_ffff; // Only the first boundary is reachable.
+                default: $fatal(1, "FAIL histogram test case");
+            endcase
+            configure(0, 0, 8, 1, 1, 4096, 1, 0, 0, hist_width);
+            observe = 0;
+            wr('h004, 2);
+            do @(posedge clk); while (!(axi_arvalid && axi_arready));
+            // Allow clocked age updates before R so both simulators observe
+            // the injected saturation through the normal sequential datapath.
+            @(negedge clk);
+            dut.rd_age_r[dut.rd_head_r] = 32'hffff_fffe;
+            wait_idle();
+            eq_reg('h20c, 32'hffff_ffff); eq_reg('h210, 32'hffff_ffff);
+            eq_reg('h214, 32'hffff_ffff);
+            case (i)
+                0: bucket = 15;
+                1: bucket = 14;
+                2: bucket = 3;
+                3: bucket = 1;
+                default: $fatal(1, "FAIL histogram test case");
+            endcase
+            for (j = 0; j < 16; j = j + 1)
+                eq_reg(12'h300 + 12'(j*4), j == bucket ? 1 : 0);
+        end
+        $display("PASS PM-04 full-width and overflowing histogram boundaries");
         // Idle soft reset resets common/private registers and all results.
         observe = 0; wr('h004, 8);
         eq_reg('h004, 0); eq_reg('h02c, 0); eq_reg('h200, 0);

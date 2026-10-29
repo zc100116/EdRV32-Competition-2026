@@ -133,18 +133,23 @@ module edrv32_mem_perf_mon (
     wire [31:0] rd_byte_addr_w;
     wire [31:0] latency_w;
     wire [36:0] random_scaled_w;
-    wire [31:0] hist_value_w;
-    wire [31:0] hist_next_w;
+    wire [32:0] hist_limit_w [1:15];
+    reg [31:0] hist_age_r;
+    reg [31:0] hist_latency_r;
+    reg hist_latency_valid_r;
+    reg [14:0] hist_compare_r;
+    reg hist_compare_valid_r;
+    reg hist_sample_valid_r;
+    reg [3:0] hist_idx_r;
+    reg hist_valid_r;
     wire [31:0] lfsr_next_w;
     wire finished_w;
     wire check_error_w;
     wire unused_w;
     reg [255:0] expected_w;
     reg [3:0] hist_idx_w;
-    reg [35:0] hist_limit_w;
     integer word_idx_w;
     integer hist_loop_w;
-    integer reset_idx_r;
 
     function [31:0] sat_add;
         input [31:0] value_i;
@@ -210,7 +215,9 @@ module edrv32_mem_perf_mon (
     assign rd_byte_addr_w = rd_addr_r[rd_head_r] + {23'b0, rd_beat_r, 5'b0};
     assign latency_w = sat_add(rd_age_r[rd_head_r], 32'd1);
     assign finished_w = busy_r && !cmd_valid_r && !offset_valid_r &&
-        rd_count_r == 0 && wr_count_r == 0 && (abort_r || launched_r == txn_count_r);
+        rd_count_r == 0 && wr_count_r == 0 && !hist_sample_valid_r &&
+        !hist_latency_valid_r && !hist_compare_valid_r && !hist_valid_r &&
+        (abort_r || launched_r == txn_count_r);
     assign check_error_w = r_fire_w && (check_en_r != 0) && axi_rdata_i != expected_w;
 
     assign axi_awid_o = 1'b0;
@@ -257,18 +264,101 @@ module edrv32_mem_perf_mon (
         expected_w = 256'b0;
         for (word_idx_w = 0; word_idx_w < 8; word_idx_w = word_idx_w + 1)
             expected_w[word_idx_w*32 +: 32] = (rd_byte_addr_w + word_idx_w*4) ^ seed_r;
+    end
+
+    // spec 4.2: config stays stable while BUSY. Three arithmetic stages settle
+    // before the earliest first R sample after a HIST_WIDTH write and START.
+    // Bit 32 distinguishes an overflowing boundary from exactly 0xffff_ffff.
+    assign hist_limit_w[1] = {1'b0, hist_width_r};
+    genvar hist_bound;
+    genvar hist_byte;
+    generate
+        for (hist_bound = 2; hist_bound < 16; hist_bound = hist_bound + 1) begin : g_hist_limit
+            localparam [3:0] MULTIPLE = hist_bound;
+            reg [11:0] byte_product_r [0:3];
+            reg [19:0] low_product_r;
+            reg [19:0] high_product_r;
+            reg [32:0] limit_r;
+            wire [16:0] high_sum_w;
+            for (hist_byte = 0; hist_byte < 4; hist_byte = hist_byte + 1) begin : g_byte
+                always @(posedge clk_i) begin
+                    byte_product_r[hist_byte] <= hist_width_r[hist_byte*8 +: 8] * MULTIPLE;
+                end
+            end
+            assign high_sum_w = {1'b0, high_product_r[15:0]} +
+                {13'b0, low_product_r[19:16]};
+            always @(posedge clk_i) begin
+                low_product_r <= {8'b0, byte_product_r[0]} + {byte_product_r[1], 8'b0};
+                high_product_r <= {8'b0, byte_product_r[2]} + {byte_product_r[3], 8'b0};
+                limit_r <= (|high_product_r[19:16] || high_sum_w[16]) ? 33'h1_ffff_ffff :
+                    {1'b0, high_sum_w[15:0], low_product_r[15:0]};
+            end
+            assign hist_limit_w[hist_bound] = limit_r;
+        end
+    endgenerate
+
+    // spec 2.3: equality belongs to the higher bin; bin 15 also collects overflow.
+    always @(*) begin
         hist_idx_w = 4'b0;
-        hist_limit_w = {4'b0, hist_width_r};
         for (hist_loop_w = 1; hist_loop_w < 16; hist_loop_w = hist_loop_w + 1) begin
-            if ({4'b0, latency_w} >= hist_limit_w)
+            if (hist_compare_r[hist_loop_w-1])
                 hist_idx_w = hist_loop_w[3:0];
-            hist_limit_w = hist_limit_w + {4'b0, hist_width_r};
         end
     end
 
-    // One shared saturating increment feeds the selected histogram counter.
-    assign hist_value_w = hist_r[hist_idx_w];
-    assign hist_next_w = sat_add(hist_value_w, 32'd1);
+    genvar hist_compare;
+    generate
+        for (hist_compare = 1; hist_compare < 16;
+            hist_compare = hist_compare + 1) begin : g_hist_compare
+            always @(posedge clk_i) begin
+                if (hist_latency_valid_r)
+                    hist_compare_r[hist_compare-1] <=
+                        {1'b0, hist_latency_r} >= hist_limit_w[hist_compare];
+            end
+        end
+    endgenerate
+
+    // Separate age selection, increment, comparison, encoding and accumulation.
+    // Completion waits for these samples, including a final single-beat read.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            hist_sample_valid_r <= 1'b0;
+            hist_latency_valid_r <= 1'b0;
+            hist_compare_valid_r <= 1'b0;
+            hist_valid_r <= 1'b0;
+        end else if (start_w || soft_reset_w) begin
+            hist_sample_valid_r <= 1'b0;
+            hist_latency_valid_r <= 1'b0;
+            hist_compare_valid_r <= 1'b0;
+            hist_valid_r <= 1'b0;
+        end else begin
+            hist_sample_valid_r <= r_fire_w && rd_beat_r == 0;
+            hist_latency_valid_r <= hist_sample_valid_r;
+            hist_compare_valid_r <= hist_latency_valid_r;
+            hist_valid_r <= hist_compare_valid_r;
+        end
+    end
+    always @(posedge clk_i) begin
+        if (r_fire_w && rd_beat_r == 0)
+            hist_age_r <= rd_age_r[rd_head_r];
+        if (hist_sample_valid_r)
+            hist_latency_r <= sat_add(hist_age_r, 32'd1);
+        if (hist_compare_valid_r)
+            hist_idx_r <= hist_idx_w;
+    end
+    genvar hist_bin;
+    generate
+        for (hist_bin = 0; hist_bin < 16; hist_bin = hist_bin + 1) begin : g_hist_counter
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    hist_r[hist_bin] <= 32'b0;
+                else if (start_w || soft_reset_w)
+                    hist_r[hist_bin] <= 32'b0;
+                else if (hist_valid_r && hist_idx_r == hist_bin)
+                    hist_r[hist_bin] <= sat_add(hist_r[hist_bin], 32'd1);
+            end
+        end
+    endgenerate
 
     // Configuration is byte writable; software leaves it stable while BUSY.
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -476,8 +566,6 @@ module edrv32_mem_perf_mon (
             read_cnt_r <= 32'b0;
             err_beats_r <= 32'b0;
             first_err_addr_r <= 32'b0;
-            for (reset_idx_r = 0; reset_idx_r < 16; reset_idx_r = reset_idx_r + 1)
-                hist_r[reset_idx_r] <= 32'b0;
         end else if (start_w || soft_reset_w) begin
             txn_done_r <= 32'b0;
             beats_r <= 32'b0;
@@ -488,8 +576,6 @@ module edrv32_mem_perf_mon (
             read_cnt_r <= 32'b0;
             err_beats_r <= 32'b0;
             first_err_addr_r <= 32'b0;
-            for (reset_idx_r = 0; reset_idx_r < 16; reset_idx_r = reset_idx_r + 1)
-                hist_r[reset_idx_r] <= 32'b0;
         end else begin
             if (busy_r)
                 cycles_r <= sat_add(cycles_r, 32'd1);
@@ -503,7 +589,6 @@ module edrv32_mem_perf_mon (
                 if (latency_w > lat_max_r)
                     lat_max_r <= latency_w;
                 lat_sum_r <= sat_add(lat_sum_r, latency_w);
-                hist_r[hist_idx_w] <= hist_next_w;
             end
             if (check_error_w) begin
                 err_beats_r <= sat_add(err_beats_r, 32'd1);
