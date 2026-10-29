@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | CPU：探针 PDS 完成（C-W6），150 MHz 达不到，上板暂用 100 MHz，频率在 C-S1 依据布局实验定（设计记录 `2026-10-28-cpu-timing-closure.md` 5.1）；PDS 布局优化调研完成（`guides/pds-floorplan.md`，实验 E00–E05 待下发）；NPU：完整 NPU PDS 通过 150 MHz，N-V2 完成；图像通路与 ETH：模块级全部通过，合并 PDS 第三轮 clk_mem 125 MHz 满足（+0.388 ns），VIN+PIX+DISP 9973 LUT（V-W4）；上板（`plan/board-plan.md`）：B1 完成，100 MHz 下 CoreMark O2 3.603、tuned 4.310 CoreMark/MHz（`reports/2026-10-28-perf-board-b1-coremark.md`）；BIOS（B1-8）开发中，调试工具（B1-9）已完成 |
+| 正在进行 | B2（`plan/board-plan.md` v0.3，设计记录 `design/2026-10-29-b2-software.md` 待用户确认）：完整 SoC 顶层 B2-1a、VIN CH2 RTL B2-1b 与独立验证 B2-1c 开发中；媒体 V-R8 已合入，第四轮 PDS V-W5 已下发（`tasks/win/20261029-01-media-r4/`）；B1 完成：100 MHz 下 CoreMark O2 3.603、tuned 4.310 CoreMark/MHz；BIOS 已合入，上板验证并入 B2-6；CPU 频率在 C-S1 依据布局实验定 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 
@@ -36,7 +36,7 @@
 | GEO | `spec/geo-spec.md` v0.1 | `testplan/geo-testplan.md` v0.1 | `plan/vision-plan.md` | [~] 模块级验证通过，待 PDS 资源测量 |
 | NPU | `spec/npu-spec.md` v0.4 | `testplan/npu-testplan.md` v0.4 | `plan/npu-plan.md` | [~] 完整 NPU PDS 通过 150 MHz；待整网性能（N-P1） |
 | ETH | `spec/eth-spec.md` v0.1 | `testplan/eth-testplan.md` v0.1 | `plan/vision-plan.md`（V-R5、V-P5、V-T5、V-I4） | [~] 模块级验证通过，待 PDS 资源测量 |
-| 板级（fpga/rtl、约束、导入脚本）与上板实测 | — | — | `plan/board-plan.md`（B1 CPU 最小系统 100 MHz、B2 + 图像通路与 DDR、B3 + NPU 与 ETH 跑 YOLO） | [~] v0.2：B1 上板完成，B1-8 BIOS 进行中 |
+| 板级（fpga/rtl、约束、导入脚本）与上板实测 | — | — | `plan/board-plan.md`（B1 CPU 最小系统 100 MHz、B2 + 图像通路与 DDR、B3 + NPU 与 ETH 跑 YOLO） | [~] v0.3：B1 完成；B2 完整 SoC（含 NPU、ETH、YOLO、DDR 监控）开发中 |
 
 ---
 
