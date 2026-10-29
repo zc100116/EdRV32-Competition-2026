@@ -20,14 +20,17 @@ module edrv32_ram_mem_xbar_w (
     output wire [287:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
+    // fpga/ip README: 18K DRM needs a 9-bit address; unused high bits are 0.
     ip_ram_mem_xbar_w u_ip (
         .wr_clk(clk_i),
+        .wr_rst(1'b0),
         .wr_en(wr_en_i),
-        .wr_addr(wr_addr_i),
+        .wr_addr({5'b0, wr_addr_i}),
         .wr_data(wr_data_i),
         .rd_clk(clk_i),
-        .rd_en(rd_en_i),
-        .rd_addr(rd_addr_i),
+        .rd_rst(1'b0),
+        .rd_clk_en(rd_en_i),
+        .rd_addr({5'b0, rd_addr_i}),
         .rd_data(rd_data_o)
     );
 `else
