@@ -5,6 +5,9 @@
  */
 #include <stdio.h>
 #include "nes_port.h"
+#if NES_DISPLAY
+#include "display.h"
+#endif
 #ifndef NES_SPIKE
 #include "clint.h"
 #include "sysctrl.h"
@@ -77,8 +80,12 @@ unsigned nes_buttons(void)
 
 void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned frame)
 {
+#if NES_DISPLAY
+    nes_display_frame(pixels, palette);
+#else
     (void)pixels;
     (void)palette;
+#endif
     (void)frame;
 }
 
@@ -89,6 +96,9 @@ int main(void)
     clock_hz = sysctrl_read(SYSCTRL_CLK_SYS_HZ);
 #endif
     setvbuf(stdout, NULL, _IONBF, 0);
+#if NES_DISPLAY
+    nes_display_init();
+#endif
     nes_frame_limit = NES_FRAMES;
     nes_skip_render = NES_SKIP;
     nes_run();

@@ -24,11 +24,12 @@ volatile int nofrendo_ticks;
 rgb_t gui_pal[GUI_TOTALCOLORS];
 struct nes_stats nes_stats;
 unsigned nes_frames;
+unsigned nes_shown;
 unsigned nes_frame_limit;
 int nes_skip_render;
 static uint8_t surface[240][272] __attribute__((aligned(16)));
-static uint8_t pixels[240 * 256] __attribute__((aligned(32)));
-static struct nes_rgb palette[256] __attribute__((aligned(32)));
+static uint8_t pixels[240 * 256] __attribute__((aligned(64)));
+static struct nes_rgb palette[256] __attribute__((aligned(64)));
 static union {
     max_align_t alignment;
     unsigned char bytes[sizeof(bitmap_t) + 240 * sizeof(uint8_t *)];
@@ -85,6 +86,7 @@ void osd_getinput(void)
         uint64_t instructions = nes_instructions();
         nes_report(now - report_start, instructions - instruction_start);
         memset(&nes_stats, 0, sizeof(nes_stats));
+        nes_shown = 0;
         report_start = nes_ticks();
         instruction_start = nes_instructions();
     }
@@ -135,6 +137,7 @@ char *osd_newextension(char *path, char *extension)
 void nes_report(uint64_t elapsed, uint64_t instructions)
 {
     uint64_t fps10 = 600 * nes_tick_hz() / elapsed;
+    uint64_t shown10 = 10 * (uint64_t)nes_shown * nes_tick_hz() / elapsed;
     unsigned cpu = (unsigned)(100 * nes_stats.cpu_ticks / nes_stats.frame_ticks);
     unsigned ppu = (unsigned)(100 * nes_stats.ppu_ticks / nes_stats.frame_ticks);
 #ifdef NES_SPIKE
@@ -142,8 +145,9 @@ void nes_report(uint64_t elapsed, uint64_t instructions)
 #else
     const char *label = "NES fps=";
 #endif
-    printf("%s%lu.%lu cpu=%u%% ppu=%u%%\n", label,
-           (unsigned long)(fps10 / 10), (unsigned long)(fps10 % 10), cpu, ppu);
+    printf("%s%lu.%lu shown=%lu.%lu cpu=%u%% ppu=%u%%\n", label,
+           (unsigned long)(fps10 / 10), (unsigned long)(fps10 % 10),
+           (unsigned long)(shown10 / 10), (unsigned long)(shown10 % 10), cpu, ppu);
     if (instructions)
         printf("NES RV32 instructions/frame=%lu\n", (unsigned long)(instructions / 60));
 }

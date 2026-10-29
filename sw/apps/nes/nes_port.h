@@ -15,6 +15,7 @@ struct nes_stats {
 };
 extern struct nes_stats nes_stats;
 extern unsigned nes_frames;
+extern unsigned nes_shown;
 extern unsigned nes_frame_limit;
 extern int nes_skip_render;
 uint64_t nes_ticks(void);

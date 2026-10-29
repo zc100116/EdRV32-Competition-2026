@@ -13,7 +13,7 @@ for optimization in ('O2', 'O3'):
         output.mkdir(parents=True, exist_ok=True)
         with (output / 'build.log').open('w') as log:
             subprocess.run(['make', '-C', str(root / 'sw'), 'PROGRAM=nes',
-                            'MEMORY=ddr_app', 'NES_SPIKE=1', 'NES_FRAMES=180',
+                            'MEMORY=ddr_app', 'NES_SPIKE=1', 'NES_DISPLAY=0', 'NES_FRAMES=180',
                             f'NES_OPT=-{optimization}', f'NES_SKIP={skip}', f'OUT={output}'],
                            cwd=root, stdout=log, stderr=subprocess.STDOUT, check=True)
         command = ['spike', '--isa=rv32im_zicsr_zifencei_zicntr_zihpm', '--priv=m',
