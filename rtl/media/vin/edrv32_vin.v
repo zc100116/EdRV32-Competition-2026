@@ -1,7 +1,7 @@
 // File: edrv32_vin.v
 // Spec: vin 1--6; SoC 4.2--4.5, 5.2 X4, 7.1--7.3.
-// Description: Two DVP sources and a memory source feed CH0 through external PIX and CH1.
-//              DMA writers share whole-burst arbitration; CH2 is not implemented.
+// Description: Two DVP sources and a memory source feed CH0 through external PIX and CH1/CH2.
+//              DMA writers share whole-burst arbitration; CH2 adapts the source to INT8_C4.
 // Clock domain: cam0_pclk/cam1_pclk frontends, clk_mem for all other logic.
 module edrv32_vin (
     // Memory clock and reset.
@@ -93,36 +93,36 @@ module edrv32_vin (
     wire msrc_done_w;
     wire msrc_error_w;
     wire msrc_cfg_error_w;
-    wire [15:0] ch_ctrl_w;
-    wire [31:0] ch_stride_w;
-    wire [255:0] ch_bases_w;
-    wire [7:0] ch_slot_busy_w;
-    wire [11:0] ch_done_info_w;
-    wire [63:0] ch_done_frame_id_w;
-    wire [5:0] ch_wr_stat_w;
-    wire [1:0] ch_done_w;
-    wire [1:0] ch_error_w;
-    wire [1:0] ch_overflow_w;
-    wire [1:0] ch_skip_w;
-    wire [1:0] ch_cfg_error_w;
-    wire [1:0] ch_busy_w;
+    wire [23:0] ch_ctrl_w;
+    wire [47:0] ch_stride_w;
+    wire [383:0] ch_bases_w;
+    wire [11:0] ch_slot_busy_w;
+    wire [17:0] ch_done_info_w;
+    wire [95:0] ch_done_frame_id_w;
+    wire [8:0] ch_wr_stat_w;
+    wire [2:0] ch_done_w;
+    wire [2:0] ch_error_w;
+    wire [2:0] ch_overflow_w;
+    wire [2:0] ch_skip_w;
+    wire [2:0] ch_cfg_error_w;
+    wire [2:0] ch_busy_w;
     wire [1:0] ch_urgent_w;
-    wire [19:0] ch_count_w;
-    wire [1:0] ch_abort_w;
-    wire [3:0] ch_select_w;
+    wire [29:0] ch_count_w;
+    wire [2:0] ch_abort_w;
+    wire [5:0] ch_select_w;
     wire [1:0] ch_ready_w;
-    wire [63:0] ch_awaddr_w;
-    wire [7:0] ch_awlen_w;
-    wire [1:0] ch_awvalid_w;
-    wire [1:0] ch_awready_w;
-    wire [511:0] ch_wdata_w;
-    wire [63:0] ch_wstrb_w;
-    wire [1:0] ch_wlast_w;
-    wire [1:0] ch_wvalid_w;
-    wire [1:0] ch_wready_w;
-    wire [3:0] ch_bresp_w;
-    wire [1:0] ch_bvalid_w;
-    wire [1:0] ch_bready_w;
+    wire [95:0] ch_awaddr_w;
+    wire [11:0] ch_awlen_w;
+    wire [2:0] ch_awvalid_w;
+    wire [2:0] ch_awready_w;
+    wire [767:0] ch_wdata_w;
+    wire [95:0] ch_wstrb_w;
+    wire [2:0] ch_wlast_w;
+    wire [2:0] ch_wvalid_w;
+    wire [2:0] ch_wready_w;
+    wire [5:0] ch_bresp_w;
+    wire [2:0] ch_bvalid_w;
+    wire [2:0] ch_bready_w;
     wire [2:0] source_valid_w;
     wire [2:0] source_ready_w;
     wire [95:0] source_data_w;
@@ -138,7 +138,7 @@ module edrv32_vin (
     wire [1:0] cam_cfg_error_w;
     wire msrc_frame_w;
     wire [2:0] frame_boundary_w;
-    wire [3:0] ch_cfg_errors_w;
+    wire [5:0] ch_cfg_errors_w;
     wire unused_pix_sof_w;
     wire unused_reserved_w;
     wire [3:0] cfg_errors_w;
@@ -163,20 +163,21 @@ module edrv32_vin (
     assign unused_pix_sof_w = pix_out_sof_i;
     assign unused_reserved_w = |{cam0_size_w[31:28], cam0_size_w[15:11],
         cam1_size_w[31:28], cam1_size_w[15:11], msrc_size_w[31:28], msrc_size_w[15:11],
-        ch_ctrl_w[15], ch_ctrl_w[11], ch_ctrl_w[7], ch_ctrl_w[3]};
+        ch_ctrl_w[23], ch_ctrl_w[19], ch_ctrl_w[15], ch_ctrl_w[11], ch_ctrl_w[7], ch_ctrl_w[3]};
     assign frame_boundary_w = source_valid_w & source_ready_w & source_sof_w;
     assign cfg_errors_w = {3'd0, cam_cfg_error_w[0]} + {3'd0, cam_cfg_error_w[1]} +
         {3'd0, msrc_cfg_error_w} + {2'd0, ch_cfg_errors_w[1:0]} +
-        {2'd0, ch_cfg_errors_w[3:2]};
-    assign irq_set_w = {23'd0, ch_done_w[1], 5'd0, ch_done_w[0],
+        {2'd0, ch_cfg_errors_w[3:2]} + {2'd0, ch_cfg_errors_w[5:4]};
+    assign irq_set_w = {22'd0, ch_done_w[2:1], 5'd0, ch_done_w[0],
         (error_code_w != 0), msrc_done_w};
-    assign perf_event_w = {1'b0, p1_urgent_o, cam_incomplete_w, 1'b0, ch_skip_w,
-        1'b0, ch_overflow_w, 1'b0, ch_done_w, msrc_frame_w, cam_frame_w};
+    assign perf_event_w = {1'b0, p1_urgent_o, cam_incomplete_w, ch_skip_w,
+        ch_overflow_w, ch_done_w, msrc_frame_w, cam_frame_w};
 
     always @(*) begin
         error_code_w = 4'd0;
         if (ch_overflow_w[0]) error_code_w = 4'd1;
         if (ch_overflow_w[1]) error_code_w = 4'd2;
+        if (ch_overflow_w[2]) error_code_w = 4'd3;
         if (cam_incomplete_w[0]) error_code_w = 4'd4;
         if (cam_incomplete_w[1]) error_code_w = 4'd5;
         if (|cam_cfg_error_w) error_code_w = 4'd6;
@@ -511,6 +512,63 @@ module edrv32_vin (
             );
         end
     endgenerate
+    wire [1:0] ch2_source_w;
+    wire unused_ch2_ready_w;
+    assign ch2_source_w = ch_select_w[5:4] == 2'd3 ? 2'd0 : ch_select_w[5:4];
+    edrv32_vin_ch2 u_ch2 (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_vin_n_w),
+
+        // Selected source before the channel pipeline.
+        .source_valid_i(source_valid_w[ch2_source_w] && source_ready_w[ch2_source_w]),
+        .source_ready_o(unused_ch2_ready_w),
+        .source_data_i(source_data_w[ch2_source_w * 32 +: 32]),
+        .source_sof_i(source_sof_w[ch2_source_w]),
+        .source_eol_i(source_eol_w[ch2_source_w]),
+        .source_eof_i(source_eof_w[ch2_source_w]),
+        .source_frame_id_i(source_frame_id_w[ch2_source_w * 32 +: 32]),
+        .source_width_i(source_width_w[ch2_source_w * 11 +: 11]),
+        .source_height_i(source_height_w[ch2_source_w * 12 +: 12]),
+        .source_incomplete_i(source_incomplete_w[ch2_source_w]),
+        .frame_boundary_i(frame_boundary_w),
+
+        // Frame admission and shadow configuration.
+        .enable_i(enable_w && !soft_pending_r),
+        .en_i(ch_ctrl_w[2 * 8]),
+        .src_i(ch_ctrl_w[2 * 8 + 1 +: 2]),
+        .ring_i(ch_ctrl_w[2 * 8 + 4 +: 3]),
+        .stride_i(ch_stride_w[2 * 16 +: 16]),
+        .bases_i(ch_bases_w[2 * 128 +: 128]),
+        .slot_busy_i(ch_slot_busy_w[2 * 4 +: 4]),
+        .abort_i(abort_all_r),
+        .source_select_o(ch_select_w[5:4]),
+        .busy_o(ch_busy_w[2]),
+        .count_o(ch_count_w[2 * 10 +: 10]),
+        .dma_abort_o(ch_abort_w[2]),
+        .wr_stat_o(ch_wr_stat_w[2 * 3 +: 3]),
+        .done_info_o(ch_done_info_w[2 * 6 +: 6]),
+        .done_frame_id_o(ch_done_frame_id_w[2 * 32 +: 32]),
+        .done_o(ch_done_w[2]),
+        .bus_error_o(ch_error_w[2]),
+        .overflow_o(ch_overflow_w[2]),
+        .skip_o(ch_skip_w[2]),
+        .cfg_error_o(ch_cfg_error_w[2]),
+        .cfg_errors_o(ch_cfg_errors_w[2 * 2 +: 2]),
+
+        // DMA write client.
+        .axi_awaddr_o(ch_awaddr_w[2 * 32 +: 32]),
+        .axi_awlen_o(ch_awlen_w[2 * 4 +: 4]),
+        .axi_awvalid_o(ch_awvalid_w[2]),
+        .axi_awready_i(ch_awready_w[2]),
+        .axi_wdata_o(ch_wdata_w[2 * 256 +: 256]),
+        .axi_wstrb_o(ch_wstrb_w[2 * 32 +: 32]),
+        .axi_wlast_o(ch_wlast_w[2]),
+        .axi_wvalid_o(ch_wvalid_w[2]),
+        .axi_wready_i(ch_wready_w[2]),
+        .axi_bresp_i(ch_bresp_w[2 * 2 +: 2]),
+        .axi_bvalid_i(ch_bvalid_w[2]),
+        .axi_bready_o(ch_bready_w[2])
+    );
     edrv32_vin_p1_arb u_p1 (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_vin_n_w),

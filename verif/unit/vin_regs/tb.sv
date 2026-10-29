@@ -1,6 +1,6 @@
 // File: tb.sv
 // Spec: vin 4, 6; SoC 7.1.
-// Description: APB oracle checks masks, reserved CH2, RW1C precedence and performance events.
+// Description: APB oracle checks masks, CH2 configuration, RW1C precedence and performance events.
 // Clock domain: clk_mem.
 module tb;
     bit clk = 0;
@@ -23,10 +23,10 @@ module tb;
     wire [15:0] msrc_stride;
     wire [31:0] msrc_size;
     wire msrc_start;
-    wire [15:0] ch_ctrl;
-    wire [31:0] ch_stride;
-    wire [255:0] ch_bases;
-    wire [7:0] ch_slot_busy;
+    wire [23:0] ch_ctrl;
+    wire [47:0] ch_stride;
+    wire [383:0] ch_bases;
+    wire [11:0] ch_slot_busy;
     bit busy = 0;
     bit [31:0] irq_set = 0;
     bit [3:0] error_code = 0;
@@ -60,9 +60,9 @@ module tb;
         .ch_slot_busy_o(ch_slot_busy),
         .busy_i(busy),
         .msrc_busy_i(busy),
-        .ch_done_info_i(12'h123),
-        .ch_done_frame_id_i(64'h11223344_aabbccdd),
-        .ch_wr_stat_i(6'h2d),
+        .ch_done_info_i(18'h3a123),
+        .ch_done_frame_id_i(96'h55667788_11223344_aabbccdd),
+        .ch_wr_stat_i(9'h16d),
         .irq_set_i(irq_set),
         .error_code_i(error_code),
         .perf_event_i(perf_event),
@@ -121,39 +121,51 @@ module tb;
         get('h208,'hfedcb000);
         put('h218,'hffffffff);
         get('h218,15);
-        for (int a = 'h300; a < 'h380; a += 4) begin
-            put(12'(a),'hffffffff);
-            get(12'(a),0);
+        get('h300,'h30);
+        get('h304,'ha00);
+        put('h300,'hffffffff);
+        get('h300,'h77);
+        put('h304,'hffffffff);
+        get('h304,'hffe0);
+        for (int a = 'h308; a <= 'h314; a += 4) begin
+            put(12'(a),'h12345fff);
+            get(12'(a),'h12345000);
         end
+        put('h318,'hffffffff);
+        get('h318,15);
+        get('h320,'h3a);
+        get('h324,'h55667788);
+        get('h328,5);
+        get('h330,0);
         get('h220,'h23);
         get('h224,'haabbccdd);
         get('h2a0,4);
         get('h2a4,'h11223344);
         put('h00c,'hffffffff);
-        get('h00c,'h107);
+        get('h00c,'h307);
         @(negedge clk);
-        irq_set = 'h106;
+        irq_set = 'h306;
         error_code = 9;
-        perf_event = 16'h1459;
+        perf_event = 16'h1d79;
         cfg_errors = 5;
         @(negedge clk);
         irq_set = 0;
         error_code = 0;
         perf_event = 0;
         cfg_errors = 0;
-        get('h010,'h106);
+        get('h010,'h306);
         get('h014,9);
         get('h008,6);
         get('h02c,1);
-        get('h054,0); // CH2 PERF5.
-        get('h060,0); // CH2 PERF8.
-        get('h06c,0); // CH2 PERF11.
+        get('h054,1); // CH2 PERF5.
+        get('h060,1); // CH2 PERF8.
+        get('h06c,1); // CH2 PERF11.
         get('h07c,5);
         if (!irq) $fatal(1,"FAIL IRQ enable");
         put('h010,2);
-        get('h010,'h104);
+        get('h010,'h304);
         get('h014,0);
-        put('h010,'h104);
+        put('h010,'h304);
         if (irq) $fatal(1,"FAIL IRQ clear");
         put('h004,1);
         get('h004,1);

@@ -47,14 +47,14 @@ module tb;
     wire [31:0] ch_awaddr;
     wire [3:0] ch_awlen;
     wire ch_awvalid;
-    wire [1:0] ch_awready;
+    wire [2:0] ch_awready;
     wire [255:0] ch_wdata;
     wire [31:0] ch_wstrb;
     wire ch_wlast;
     wire ch_wvalid;
-    wire [1:0] ch_wready;
-    wire [3:0] ch_bresp;
-    wire [1:0] ch_bvalid;
+    wire [2:0] ch_wready;
+    wire [5:0] ch_bresp;
+    wire [2:0] ch_bvalid;
     wire ch_bready;
     wire awid;
     wire [31:0] awaddr;
@@ -150,20 +150,20 @@ module tb;
     edrv32_vin_p1_arb u_arb (
         .clk_i(clk),
         .rst_n_i(rst_n),
-        .ch_awaddr_i({32'd0, ch_awaddr}),
-        .ch_awlen_i({4'd0, ch_awlen}),
-        .ch_awvalid_i({1'd0, ch_awvalid}),
+        .ch_awaddr_i({64'd0, ch_awaddr}),
+        .ch_awlen_i({8'd0, ch_awlen}),
+        .ch_awvalid_i({2'd0, ch_awvalid}),
         .ch_awready_o(ch_awready),
-        .ch_wdata_i({256'd0, ch_wdata}),
-        .ch_wstrb_i({32'd0, ch_wstrb}),
-        .ch_wlast_i({1'd0, ch_wlast}),
-        .ch_wvalid_i({1'd0, ch_wvalid}),
+        .ch_wdata_i({512'd0, ch_wdata}),
+        .ch_wstrb_i({64'd0, ch_wstrb}),
+        .ch_wlast_i({2'd0, ch_wlast}),
+        .ch_wvalid_i({2'd0, ch_wvalid}),
         .ch_wready_o(ch_wready),
         .ch_bresp_o(ch_bresp),
         .ch_bvalid_o(ch_bvalid),
-        .ch_bready_i({1'd0, ch_bready}),
-        .ch_count_i({10'd0, count}),
-        .ch_abort_i({1'd0, dma_abort}),
+        .ch_bready_i({2'd0, ch_bready}),
+        .ch_count_i({20'd0, count}),
+        .ch_abort_i({2'd0, dma_abort}),
         .p1_awid_o(awid),
         .p1_awaddr_o(awaddr),
         .p1_awlen_o(awlen),

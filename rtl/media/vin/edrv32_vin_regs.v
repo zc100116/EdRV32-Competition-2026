@@ -1,7 +1,7 @@
 // File: edrv32_vin_regs.v
 // Spec: vin 4, 6; SoC 4.3, 7.1.
 // Description: Whole-word APB configuration, sticky interrupts and wrapping counters.
-//              Unimplemented CH2 and reserved offsets read zero and ignore writes.
+//              Reserved offsets read zero and ignore writes.
 // Clock domain: clk_mem.
 module edrv32_vin_regs (
     // Clock and reset.
@@ -29,17 +29,17 @@ module edrv32_vin_regs (
     output reg [15:0] msrc_stride_o,
     output reg [31:0] msrc_size_o,
     output wire msrc_start_o,
-    output wire [15:0] ch_ctrl_o,
-    output wire [31:0] ch_stride_o,
-    output wire [255:0] ch_bases_o,
-    output wire [7:0] ch_slot_busy_o,
+    output wire [23:0] ch_ctrl_o,
+    output wire [47:0] ch_stride_o,
+    output wire [383:0] ch_bases_o,
+    output wire [11:0] ch_slot_busy_o,
 
     // Live status and event inputs.
     input wire busy_i,
     input wire msrc_busy_i,
-    input wire [11:0] ch_done_info_i,
-    input wire [63:0] ch_done_frame_id_i,
-    input wire [5:0] ch_wr_stat_i,
+    input wire [17:0] ch_done_info_i,
+    input wire [95:0] ch_done_frame_id_i,
+    input wire [8:0] ch_wr_stat_i,
     input wire [31:0] irq_set_i,
     input wire [3:0] error_code_i,
     input wire [15:0] perf_event_i,
@@ -51,12 +51,16 @@ module edrv32_vin_regs (
     reg [3:0] error_code_r;
     reg [7:0] ch0_ctrl_r;
     reg [7:0] ch1_ctrl_r;
+    reg [7:0] ch2_ctrl_r;
     reg [15:0] ch0_stride_r;
     reg [15:0] ch1_stride_r;
+    reg [15:0] ch2_stride_r;
     reg [127:0] ch0_bases_r;
     reg [127:0] ch1_bases_r;
+    reg [127:0] ch2_bases_r;
     reg [3:0] ch0_slot_busy_r;
     reg [3:0] ch1_slot_busy_r;
+    reg [3:0] ch2_slot_busy_r;
     reg [31:0] perf_r [0:15];
     wire write_w;
     wire [31:0] clear_w;
@@ -75,10 +79,10 @@ module edrv32_vin_regs (
     assign unused_perf_w = perf_event_i[15];
     assign unused_strb_w = |apb_pstrb_i;
     assign irq_o = |(irq_stat_r & irq_en_r);
-    assign ch_ctrl_o = {ch1_ctrl_r, ch0_ctrl_r};
-    assign ch_stride_o = {ch1_stride_r, ch0_stride_r};
-    assign ch_bases_o = {ch1_bases_r, ch0_bases_r};
-    assign ch_slot_busy_o = {ch1_slot_busy_r, ch0_slot_busy_r};
+    assign ch_ctrl_o = {ch2_ctrl_r, ch1_ctrl_r, ch0_ctrl_r};
+    assign ch_stride_o = {ch2_stride_r, ch1_stride_r, ch0_stride_r};
+    assign ch_bases_o = {ch2_bases_r, ch1_bases_r, ch0_bases_r};
+    assign ch_slot_busy_o = {ch2_slot_busy_r, ch1_slot_busy_r, ch0_slot_busy_r};
 
     always @(*) begin
         apb_prdata_o = 32'd0;
@@ -116,6 +120,16 @@ module edrv32_vin_regs (
             12'h2a0: apb_prdata_o = {26'd0, ch_done_info_i[11:6]};
             12'h2a4: apb_prdata_o = ch_done_frame_id_i[63:32];
             12'h2a8: apb_prdata_o = {29'd0, ch_wr_stat_i[5:3]};
+            12'h300: apb_prdata_o = {24'd0, ch2_ctrl_r};
+            12'h304: apb_prdata_o = {16'd0, ch2_stride_r};
+            12'h308: apb_prdata_o = ch2_bases_r[31:0];
+            12'h30c: apb_prdata_o = ch2_bases_r[63:32];
+            12'h310: apb_prdata_o = ch2_bases_r[95:64];
+            12'h314: apb_prdata_o = ch2_bases_r[127:96];
+            12'h318: apb_prdata_o = {28'd0, ch2_slot_busy_r};
+            12'h320: apb_prdata_o = {26'd0, ch_done_info_i[17:12]};
+            12'h324: apb_prdata_o = ch_done_frame_id_i[95:64];
+            12'h328: apb_prdata_o = {29'd0, ch_wr_stat_i[8:6]};
             default: begin
                 if (apb_paddr_i >= 12'h040 && apb_paddr_i <= 12'h07c &&
                     apb_paddr_i[1:0] == 0)
@@ -137,12 +151,16 @@ module edrv32_vin_regs (
             msrc_size_o <= 32'h02d0_0500;
             ch0_ctrl_r <= 8'h30;
             ch1_ctrl_r <= 8'h30;
+            ch2_ctrl_r <= 8'h30;
             ch0_stride_r <= 16'h0a00;
             ch1_stride_r <= 16'h0a00;
+            ch2_stride_r <= 16'h0a00;
             ch0_bases_r <= 128'd0;
             ch1_bases_r <= 128'd0;
+            ch2_bases_r <= 128'd0;
             ch0_slot_busy_r <= 4'd0;
             ch1_slot_busy_r <= 4'd0;
+            ch2_slot_busy_r <= 4'd0;
 
         end else begin
             irq_stat_r <= (irq_stat_r & ~clear_w) | irq_set_i;
@@ -154,7 +172,7 @@ module edrv32_vin_regs (
             if (write_w) begin
                 case (apb_paddr_i)
                     12'h004: enable_o <= apb_pwdata_i[0];
-                    12'h00c: irq_en_r <= apb_pwdata_i & 32'h0000_0107;
+                    12'h00c: irq_en_r <= apb_pwdata_i & 32'h0000_0307;
                     12'h100: cam0_size_o <= apb_pwdata_i & 32'h0fff_07fe;
                     12'h104: cam1_size_o <= apb_pwdata_i & 32'h0fff_07fe;
                     12'h110: msrc_base_o <= {apb_pwdata_i[31:12], 12'd0};
@@ -174,6 +192,13 @@ module edrv32_vin_regs (
                     12'h290: ch1_bases_r[95:64] <= {apb_pwdata_i[31:12], 12'd0};
                     12'h294: ch1_bases_r[127:96] <= {apb_pwdata_i[31:12], 12'd0};
                     12'h298: ch1_slot_busy_r <= apb_pwdata_i[3:0];
+                    12'h300: ch2_ctrl_r <= apb_pwdata_i[7:0] & 8'h77;
+                    12'h304: ch2_stride_r <= {apb_pwdata_i[15:5], 5'd0};
+                    12'h308: ch2_bases_r[31:0] <= {apb_pwdata_i[31:12], 12'd0};
+                    12'h30c: ch2_bases_r[63:32] <= {apb_pwdata_i[31:12], 12'd0};
+                    12'h310: ch2_bases_r[95:64] <= {apb_pwdata_i[31:12], 12'd0};
+                    12'h314: ch2_bases_r[127:96] <= {apb_pwdata_i[31:12], 12'd0};
+                    12'h318: ch2_slot_busy_r <= apb_pwdata_i[3:0];
                     default: begin end
                 endcase
             end

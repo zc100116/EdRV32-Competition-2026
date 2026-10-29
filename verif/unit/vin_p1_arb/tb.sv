@@ -6,18 +6,18 @@ module tb;
     bit clk = 0;
     always #4 clk = ~clk;
     bit rst_n = 0;
-    bit [63:0] ch_addr;
-    bit [7:0] ch_len;
-    bit [1:0] ch_valid;
-    wire [1:0] ch_ready;
-    bit [511:0] ch_data;
-    bit [63:0] ch_strb = '1;
-    bit [1:0] ch_last;
-    bit [1:0] ch_wvalid;
-    wire [1:0] ch_wready;
-    wire [3:0] ch_resp;
-    wire [1:0] ch_bvalid;
-    bit [19:0] count;
+    bit [95:0] ch_addr;
+    bit [11:0] ch_len;
+    bit [2:0] ch_valid;
+    wire [2:0] ch_ready;
+    bit [767:0] ch_data;
+    bit [95:0] ch_strb = '1;
+    bit [2:0] ch_last;
+    bit [2:0] ch_wvalid;
+    wire [2:0] ch_wready;
+    wire [5:0] ch_resp;
+    wire [2:0] ch_bvalid;
+    bit [29:0] count;
     wire id;
     wire [31:0] addr;
     wire [3:0] len;
@@ -30,9 +30,9 @@ module tb;
     bit wready;
     bit bvalid;
     wire bready;
-    int issued[2];
-    int position[2];
-    bit active[2];
+    int issued[3];
+    int position[3];
+    bit active[3];
     int cycle;
     int received;
     int completed;
@@ -58,9 +58,9 @@ module tb;
         .ch_wready_o(ch_wready),
         .ch_bresp_o(ch_resp),
         .ch_bvalid_o(ch_bvalid),
-        .ch_bready_i(2'b11),
+        .ch_bready_i(3'b111),
         .ch_count_i(count),
-        .ch_abort_i(2'b00),
+        .ch_abort_i(3'b000),
         .p1_awid_o(id),
         .p1_awaddr_o(addr),
         .p1_awlen_o(len),
@@ -84,7 +84,7 @@ module tb;
         ready = cycle % 5 != 0 && cycle > 8;
         wready = cycle % 7 != 0 && cycle % 7 != 1;
         bvalid = response_owners.size() != 0 && cycle % 4 != 0;
-        for (int c = 0; c < 2; c++) begin
+        for (int c = 0; c < 3; c++) begin
             ch_valid[c] = !active[c] && issued[c] < 16;
             ch_len[c*4 +: 4] = 4'(issued[c] % 16);
             ch_addr[c*32 +: 32] = 32'(c*65536 + issued[c]*512);
@@ -95,7 +95,7 @@ module tb;
     end
     // W is permitted in the AW handshake cycle, so use the committed grant combinationally.
     always @(*) begin
-        for (int c = 0; c < 2; c++) begin
+        for (int c = 0; c < 3; c++) begin
             ch_wvalid[c] = active[c] || (ch_valid[c] && ch_ready[c]);
         end
     end
@@ -108,7 +108,7 @@ module tb;
             stalled = valid && !ready;
             saved_address = {addr, len};
             if (valid && ready) begin
-                owner = int'(addr[16]);
+                owner = int'(addr[17:16]);
                 if (write_owner != -1) $fatal(1, "FAIL AW interleaves unfinished W");
                 if (count[owner*10 +: 10] < {6'd0, len} + 10'd1)
                     $fatal(1, "FAIL AW without complete burst");
@@ -144,7 +144,7 @@ module tb;
             if (bvalid && bready) begin
                 if (response_owners.size() == 0) $fatal(1, "FAIL unexpected B");
                 expected_owner = response_owners.pop_front();
-                if (ch_bvalid !== (expected_owner == 0 ? 2'b01 : 2'b10) ||
+                if (ch_bvalid !== (3'b001 << expected_owner) ||
                     ch_resp[expected_owner*2 +: 2] !== 2'b10)
                     $fatal(1, "FAIL B owner wanted=%0d actual=%b", expected_owner, ch_bvalid);
                 completed++;
@@ -154,9 +154,9 @@ module tb;
     initial begin
         repeat (4) @(negedge clk);
         rst_n = 1;
-        wait (completed == 32);
+        wait (completed == 48);
         @(negedge clk);
-        if (received != 32 || write_owner != -1 || response_owners.size() != 0)
+        if (received != 48 || write_owner != -1 || response_owners.size() != 0)
             $fatal(1, "FAIL burst accounting");
         $display("PASS vin_p1_arb");
         $finish;

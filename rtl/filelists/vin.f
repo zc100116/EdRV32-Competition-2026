@@ -3,12 +3,15 @@
 ../common/edrv32_sync_fifo.v
 ../common/edrv32_sync_fifo_ram.v
 ../tech/edrv32_ram_vin_wfifo.v
+../tech/edrv32_ram_pix_line.v
 ../common/edrv32_dma2d_rd.v
 ../common/edrv32_dma2d_wr.v
 ../media/vin/edrv32_vin_dvp.v
 ../media/vin/edrv32_vin_fmt.v
 ../media/vin/edrv32_vin_msrc.v
 ../media/vin/edrv32_vin_ch.v
+../media/vin/edrv32_vin_ch2_data.v
+../media/vin/edrv32_vin_ch2.v
 ../media/vin/edrv32_vin_p1_arb.v
 ../media/vin/edrv32_vin_regs.v
 ../media/vin/edrv32_vin.v
