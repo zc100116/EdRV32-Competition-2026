@@ -23,10 +23,18 @@ module edrv32_disp_regs (
     output wire enable_o,
     output wire [31:0] next_base_o,
     output wire [31:0] stride_o,
+    output wire [31:0] l0_scroll_o,
+    output wire [1:0] layer_ctrl_o,
+    output wire [31:0] l1_next_base_o,
+    output wire [31:0] l1_stride_o,
+    output wire [31:0] l1_pos_o,
+    output wire [31:0] l1_size_o,
+    output wire [7:0] l1_opa_o,
     output reg soft_clear_o,
     input wire busy_i,
     input wire frame_start_i,
     input wire underflow_i,
+    input wire underflow1_i,
     input wire dma_err_i,
     input wire urgent_i,
     input wire delayed_req_i,
@@ -35,12 +43,14 @@ module edrv32_disp_regs (
     input wire [31:0] perf0_i,
     input wire [31:0] perf1_i,
     input wire [31:0] perf2_i,
+    input wire [31:0] perf5_i,
+    input wire [31:0] perf6_i,
     output wire [31:0] scan_cnt_o,
 
     // Interrupt output.
     output wire irq_o
 );
-    localparam [31:0] IRQ_MASK = 32'h0000_0106;
+    localparam [31:0] IRQ_MASK = 32'h0000_0306;
     reg enable_r;
     reg soft_pending_r;
     reg [31:0] irq_en_r;
@@ -51,19 +61,34 @@ module edrv32_disp_regs (
     reg [31:0] cur_base_r;
     reg [31:0] rel_base_r;
     reg [31:0] frame_cnt_r;
+    reg [31:0] l0_scroll_r;
+    reg [1:0] layer_ctrl_r;
+    reg [1:0] cur_layer_ctrl_r;
+    reg [31:0] l1_next_base_r;
+    reg [31:0] l1_stride_r;
+    reg [31:0] l1_pos_r;
+    reg [31:0] l1_size_r;
+    reg [7:0] l1_opa_r;
+    reg [31:0] l1_cur_base_r;
+    reg [31:0] l1_rel_base_r;
     reg [31:0] perf0_r;
     reg [31:0] perf1_r;
     reg [31:0] perf2_r;
+    reg [31:0] perf5_r;
+    reg [31:0] perf6_r;
     reg urgent_r;
     reg delayed_req_r;
     reg [31:0] perf0_base_r;
     reg [31:0] perf1_base_r;
     reg [31:0] perf2_base_r;
+    reg [31:0] perf5_base_r;
+    reg [31:0] perf6_base_r;
     reg [31:0] perf3_r;
     reg [31:0] perf4_r;
     wire write_w;
     wire ctrl_write_w;
     wire switch_w;
+    wire switch1_w;
     wire [31:0] irq_set_w;
     wire [31:0] irq_clear_w;
     wire [3:0] unused_pstrb_w;
@@ -76,6 +101,13 @@ module edrv32_disp_regs (
     assign enable_o = enable_r;
     assign next_base_o = next_base_r;
     assign stride_o = stride_r;
+    assign l0_scroll_o = l0_scroll_r;
+    assign layer_ctrl_o = layer_ctrl_r;
+    assign l1_next_base_o = l1_next_base_r;
+    assign l1_stride_o = l1_stride_r;
+    assign l1_pos_o = l1_pos_r;
+    assign l1_size_o = l1_size_r;
+    assign l1_opa_o = l1_opa_r;
     // The stop handshake makes IDLE stable before the registered clear pulse.
     // Capture the CDC gray-to-binary outputs before subtraction and stop logic.
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -84,6 +116,8 @@ module edrv32_disp_regs (
             perf0_r <= 32'd0;
             perf1_r <= 32'd0;
             perf2_r <= 32'd0;
+            perf5_r <= 32'd0;
+            perf6_r <= 32'd0;
             urgent_r <= 1'b0;
             delayed_req_r <= 1'b0;
         end else begin
@@ -91,21 +125,26 @@ module edrv32_disp_regs (
             perf0_r <= perf0_i;
             perf1_r <= perf1_i;
             perf2_r <= perf2_i;
+            perf5_r <= perf5_i;
+            perf6_r <= perf6_i;
             urgent_r <= urgent_i && !soft_clear_o;
             delayed_req_r <= delayed_req_i && !soft_clear_o;
         end
     end
     assign scan_cnt_o = perf0_r - perf0_base_r;
-    assign switch_w = frame_start_i && next_base_r != cur_base_r;
-    assign irq_set_w = {23'd0, switch_w, 5'd0, frame_start_i,
-                        (underflow_i || dma_err_i), 1'b0};
+    assign switch_w = frame_start_i && cur_layer_ctrl_r[0] &&
+        (!layer_ctrl_r[0] || next_base_r != cur_base_r);
+    assign switch1_w = frame_start_i && cur_layer_ctrl_r[1] &&
+        (!layer_ctrl_r[1] || l1_next_base_r != l1_cur_base_r);
+    assign irq_set_w = {22'd0, switch1_w, switch_w, 5'd0, frame_start_i,
+                        (underflow_i || underflow1_i || dma_err_i), 1'b0};
     assign irq_clear_w = write_w && apb_paddr_i == 12'h010 ? apb_pwdata_i : 32'd0;
     assign irq_o = |(irq_en_r & irq_stat_r);
 
     always @(*) begin
         apb_prdata_o = 32'd0;
         case (apb_paddr_i)
-            12'h000: apb_prdata_o = 32'h0005_0001;
+            12'h000: apb_prdata_o = 32'h0005_0002;
             12'h004: apb_prdata_o = {31'd0, enable_r};
             12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_i, busy_i};
             12'h00c: apb_prdata_o = irq_en_r;
@@ -117,11 +156,22 @@ module edrv32_disp_regs (
             12'h048: apb_prdata_o = perf2_r - perf2_base_r;
             12'h04c: apb_prdata_o = perf3_r;
             12'h050: apb_prdata_o = perf4_r;
+            12'h054: apb_prdata_o = perf5_r - perf5_base_r;
+            12'h058: apb_prdata_o = perf6_r - perf6_base_r;
             12'h100: apb_prdata_o = next_base_r;
             12'h104: apb_prdata_o = stride_r;
             12'h108: apb_prdata_o = cur_base_r;
             12'h10c: apb_prdata_o = rel_base_r;
             12'h110: apb_prdata_o = frame_cnt_r;
+            12'h114: apb_prdata_o = l0_scroll_r;
+            12'h118: apb_prdata_o = {30'd0, layer_ctrl_r};
+            12'h120: apb_prdata_o = l1_next_base_r;
+            12'h124: apb_prdata_o = l1_stride_r;
+            12'h128: apb_prdata_o = l1_pos_r;
+            12'h12c: apb_prdata_o = l1_size_r;
+            12'h130: apb_prdata_o = {24'd0, l1_opa_r};
+            12'h134: apb_prdata_o = l1_cur_base_r;
+            12'h138: apb_prdata_o = l1_rel_base_r;
             default: begin end
         endcase
     end
@@ -138,9 +188,21 @@ module edrv32_disp_regs (
             cur_base_r <= 32'd0;
             rel_base_r <= 32'd0;
             frame_cnt_r <= 32'd0;
+            l0_scroll_r <= 32'd0;
+            layer_ctrl_r <= 2'd1;
+            cur_layer_ctrl_r <= 2'd0;
+            l1_next_base_r <= 32'd0;
+            l1_stride_r <= 32'h0000_1400;
+            l1_pos_r <= 32'd0;
+            l1_size_r <= 32'h02d0_0500;
+            l1_opa_r <= 8'd255;
+            l1_cur_base_r <= 32'd0;
+            l1_rel_base_r <= 32'd0;
             perf0_base_r <= 32'd0;
             perf1_base_r <= 32'd0;
             perf2_base_r <= 32'd0;
+            perf5_base_r <= 32'd0;
+            perf6_base_r <= 32'd0;
             perf3_r <= 32'd0;
             perf4_r <= 32'd0;
         end else if (soft_clear_o) begin
@@ -154,9 +216,21 @@ module edrv32_disp_regs (
             cur_base_r <= 32'd0;
             rel_base_r <= 32'd0;
             frame_cnt_r <= 32'd0;
+            l0_scroll_r <= 32'd0;
+            layer_ctrl_r <= 2'd1;
+            cur_layer_ctrl_r <= 2'd0;
+            l1_next_base_r <= 32'd0;
+            l1_stride_r <= 32'h0000_1400;
+            l1_pos_r <= 32'd0;
+            l1_size_r <= 32'h02d0_0500;
+            l1_opa_r <= 8'd255;
+            l1_cur_base_r <= 32'd0;
+            l1_rel_base_r <= 32'd0;
             perf0_base_r <= perf0_r;
             perf1_base_r <= perf1_r;
             perf2_base_r <= perf2_r;
+            perf5_base_r <= perf5_r;
+            perf6_base_r <= perf6_r;
             perf3_r <= 32'd0;
             perf4_r <= 32'd0;
         end else begin
@@ -179,6 +253,9 @@ module edrv32_disp_regs (
             if (underflow_i) begin
                 err_code_r <= 2'd1;
             end
+            if (underflow1_i) begin
+                err_code_r <= 2'd3;
+            end
             if (dma_err_i) begin
                 err_code_r <= 2'd2;
             end
@@ -188,12 +265,33 @@ module edrv32_disp_regs (
             if (write_w && apb_paddr_i == 12'h104) begin
                 stride_r <= {16'd0, apb_pwdata_i[15:5], 5'd0};
             end
+            if (write_w) begin
+                case (apb_paddr_i)
+                    12'h114: l0_scroll_r <= apb_pwdata_i & 32'h0fff_7fff;
+                    12'h118: layer_ctrl_r <= apb_pwdata_i[1:0];
+                    12'h120: l1_next_base_r <= {apb_pwdata_i[31:12], 12'd0};
+                    12'h124: l1_stride_r <= {16'd0, apb_pwdata_i[15:5], 5'd0};
+                    12'h128: l1_pos_r <= apb_pwdata_i & 32'h03ff_07f8;
+                    12'h12c: l1_size_r <= apb_pwdata_i & 32'h03ff_07f8;
+                    12'h130: l1_opa_r <= apb_pwdata_i[7:0];
+                    default: begin end
+                endcase
+            end
             if (frame_start_i) begin
-                cur_base_r <= next_base_r;
+                cur_layer_ctrl_r <= layer_ctrl_r;
+                if (layer_ctrl_r[0]) begin
+                    cur_base_r <= next_base_r;
+                end
+                if (layer_ctrl_r[1]) begin
+                    l1_cur_base_r <= l1_next_base_r;
+                end
                 frame_cnt_r <= frame_cnt_r + 32'd1;
             end
             if (switch_w) begin
                 rel_base_r <= cur_base_r;
+            end
+            if (switch1_w) begin
+                l1_rel_base_r <= l1_cur_base_r;
             end
             if (urgent_r) begin
                 perf3_r <= perf3_r + 32'd1;
