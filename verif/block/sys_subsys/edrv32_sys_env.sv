@@ -121,6 +121,7 @@ module edrv32_sys_env;
     always #4.1 eth_rx_clk = ~eth_rx_clk;
     always #4.3 eth_tx_clk = ~eth_tx_clk;
     /* verilator lint_on BLKSEQ */
+    wire unused_rst_npu_n;
     edrv32_sys_subsys u_dut (
         .clk_sys_i(clk_sys),
         .clk_mem_i(clk_mem),
@@ -137,7 +138,7 @@ module edrv32_sys_env;
         .rst_mem_core_n_o(rst_mem_core_n),
         .rst_mem_n_o(rst_mem_n),
         .rst_pix_n_o(rst_pix_n),
-        .rst_npu_n_o(),
+        .rst_npu_n_o(unused_rst_npu_n),
         .rst_cam0_n_o(rst_cam0_n),
         .rst_cam1_n_o(rst_cam1_n),
         .rst_eth_rx_n_o(rst_eth_rx_n),

@@ -178,6 +178,7 @@ module edrv32_sys_cpu_tb;
         .irq_o(irq_cache)
     );
 
+    wire unused_rst_npu_n;
     edrv32_sys_subsys u_sys (
         // Domain clocks and asynchronous reset/status.
         .clk_sys_i(clk_sys),
@@ -197,7 +198,7 @@ module edrv32_sys_cpu_tb;
         .rst_mem_core_n_o(rst_mem_core_n),
         .rst_mem_n_o(unused_rst_mem_n),
         .rst_pix_n_o(unused_rst_pix_n),
-        .rst_npu_n_o(),
+        .rst_npu_n_o(unused_rst_npu_n),
         .rst_cam0_n_o(unused_rst_cam0_n),
         .rst_cam1_n_o(unused_rst_cam1_n),
         .rst_eth_rx_n_o(unused_rst_eth_rx_n),
