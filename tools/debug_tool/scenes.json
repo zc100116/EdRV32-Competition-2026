@@ -10,5 +10,9 @@
   "geo_scale": {"label": "GEO · 缩放", "command": null, "ending": "cr"},
   "sample_rate": {"label": "采样率", "command": null, "ending": "cr"},
   "probe_on": {"label": "开启延迟探针", "command": null, "ending": "cr"},
-  "probe_off": {"label": "关闭延迟探针", "command": null, "ending": "cr"}
+  "probe_off": {"label": "关闭延迟探针", "command": null, "ending": "cr"},
+  "output_hdmi": {"label": "输出 · HDMI", "command": null, "ending": "cr"},
+  "output_eth": {"label": "输出 · 网口", "command": null, "ending": "cr"},
+  "output_both": {"label": "输出 · 同时", "command": null, "ending": "cr"},
+  "video_fps": {"label": "网口帧率", "command": null, "ending": "cr"}
 }

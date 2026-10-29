@@ -1,12 +1,21 @@
 """yolo.py — B2 design 3.4/3.5a model and image transfers; host Qt thread.
 
 The shared ETH listener saves WIN0/1/2 at exact byte offsets.
-Reference comparison and detection overlays await the B2-4 postprocessor.
+Reference inference uses the returned CH2 bytes and compiler model directory.
 """
+
+import json
+from pathlib import Path
+import threading
+import struct
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QImage
+from gui.video import DetectionView
 
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-    QProgressBar, QPushButton, QSpinBox, QVBoxLayout, QWidget,
+    QProgressBar, QPushButton, QSpinBox, QWidget,
 )
 from core.ethernet import DEFAULT_SAVE_DIR
 from gui.telemetry import card
@@ -17,6 +26,9 @@ class YoloPanel(QWidget):
         super().__init__()
         self.engine = engine
         self.toast = toast
+        self.generation = -1
+        self.comparison = None
+        self.comparing = False
         layout = QHBoxLayout(self)
         frame, box = card('YOLO · 数据发送')
         form = QFormLayout()
@@ -77,12 +89,48 @@ class YoloPanel(QWidget):
         self.received.setWordWrap(True)
         box.addWidget(self.received)
         box.addStretch()
-        placeholder, placeholder_box = card('参考比对与检测预览')
-        hint = QLabel('等待 B2-4 后处理参考实现。\n本页已保留原始 CH2、OUTPUT 和检测结果，供后续比对。')
-        hint.setWordWrap(True)
-        placeholder_box.addWidget(hint)
-        box.addWidget(placeholder)
         layout.addWidget(frame, 1)
+        frame, box = card('YOLO · 检测与参考比对')
+        self.view = DetectionView()
+        box.addWidget(self.view, 1)
+        self.quant = QLineEdit(str(Path(__file__).resolve().parents[3] /
+                                   'build/npu/quantized/quantization.json'))
+        self.quant.setPlaceholderText('quantize.py 的 quantization.json')
+        box.addWidget(self.quant)
+        choose = QPushButton('选择后处理量化 JSON')
+        choose.clicked.connect(self._quant_path)
+        box.addWidget(choose)
+        self.compare_button = QPushButton('运行参考模型并比对')
+        self.compare_button.setObjectName('primary')
+        self.compare_button.clicked.connect(self._compare)
+        box.addWidget(self.compare_button)
+        self.result = QLabel('等待完整回传；参考模型在后台执行。')
+        self.result.setWordWrap(True)
+        box.addWidget(self.result)
+        layout.addWidget(frame, 3)
+
+    def _quant_path(self):
+        path, _ = QFileDialog.getOpenFileName(self, '后处理量化参数', filter='JSON (*.json)')
+        if path:
+            self.quant.setText(path)
+
+    def _compare(self):
+        if self.comparing:
+            return
+        image, directory, quant = self.image.text(), self.model.text(), self.quant.text()
+        self.comparing = True
+        self.comparison = None
+        self.result.setText('参考模型运行中…')
+
+        def run():
+            try:
+                parameters = json.loads(Path(quant).read_text(encoding='utf-8'))
+                self.comparison = self.engine.yolo.compare(image, directory, parameters)
+            except (OSError, ValueError, RuntimeError, ImportError, KeyError, struct.error) as exc:
+                self.comparison = str(exc)
+            finally:
+                self.comparing = False
+        threading.Thread(target=run, name='yolo-reference', daemon=True).start()
 
     def _model_path(self):
         path = QFileDialog.getExistingDirectory(self, '选择 compile_yolo 输出目录')
@@ -93,6 +141,9 @@ class YoloPanel(QWidget):
         path, _ = QFileDialog.getOpenFileName(self, '选择测试图片')
         if path:
             self.image.setText(path)
+            image = QImage(path).scaled(1280, 720, Qt.IgnoreAspectRatio,
+                                        Qt.SmoothTransformation)
+            self.view.set_image(image, ())
 
     def _send(self, model):
         try:
@@ -111,7 +162,8 @@ class YoloPanel(QWidget):
             if self.engine.ethernet.status()['rx']['active']:
                 self.engine.ethernet.stop_receive()
             else:
-                self.engine.ethernet.start_receive(self.local_port.value(), self.directory.text())
+                self.engine.ethernet.start_receive(
+                    self.local_port.value(), self.directory.text(), mode='yolo')
         except (OSError, RuntimeError) as exc:
             self.toast.show_message(str(exc), error=True)
 
@@ -127,3 +179,31 @@ class YoloPanel(QWidget):
                               f"{rx['bytes']:,} B\n" +
                               '\n'.join(f'WIN {key}: {path}' for key, path in rx['files'].items()) +
                               (f"\n错误: {rx['error']}" if rx['error'] else ''))
+
+        generation, capture = self.engine.yolo.snapshot()
+        if capture is not None and generation != self.generation:
+            self.generation = generation
+            self.result.setText('完整回传已收到；选择模型和量化参数后运行参考比对。')
+            detections = capture[2]
+            image = QImage(self.image.text()).scaled(1280, 720, Qt.IgnoreAspectRatio,
+                                                     Qt.SmoothTransformation)
+            self.view.set_image(image, detections.boxes)
+        if capture is not None:
+            detections = capture[2]
+            self.received.setText(f'三块回传完毕 · FRAME {detections.frame_id} · '
+                                  f'{len(detections.boxes)} 个检测框')
+        self.compare_button.setEnabled(not self.comparing)
+        if self.comparison is not None:
+            if isinstance(self.comparison, str):
+                self.result.setText('参考比对失败: ' + self.comparison)
+            else:
+                result = self.comparison
+                first = result['output']['first']
+                first_text = '无' if first is None else f'{first} / 0x{first:x}'
+                self.result.setText(
+                    f"CH2 输入差异: {result['input']['count']:,} 字节\n"
+                    f"NPU OUTPUT 差异: {result['output']['count']:,} 字节\n"
+                    f"首个 OUTPUT 差异位置: {first_text}\n"
+                    f"后处理检测差异: {result['detections']['count']} 个框 "
+                    f"(参考 {result['detections']['expected']} / "
+                    f"板端 {result['detections']['actual']})")

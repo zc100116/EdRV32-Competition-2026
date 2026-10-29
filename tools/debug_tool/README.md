@@ -244,7 +244,7 @@ QT_QPA_PLATFORM=offscreen python3 tools/debug_tool/render_shot.py build/debug_to
 
 Windows 需实际确认：
 
-1. 安装 PySide6/pyserial，双击 `启动调试工具.bat`，确认八个页签、串口连接、
+1. 安装 PySide6/pyserial，双击 `启动调试工具.bat`，确认九个页签、串口连接、
    原有发送/HEX/文件/命令/规则功能和 CLI / REST 共同操作会话。
 2. 选择 make 生成的 .bin 开始烧录，按住 KEY1 按复位，确认 BIOS 菜单自动选 1、
    进度、`Program SRAM bytes` 和 PASS；松开 KEY1 后按复位，确认新程序运行。
@@ -254,9 +254,10 @@ Windows 需实际确认：
 
 ## DDR 监控、场景控制与 YOLO（B2）
 
-新增左栏 **DDR / 场景 / YOLO** 页签，打开后使用整个工作区。
+新增左栏 **DDR / 场景 / YOLO / 视频** 页签，打开后使用整个工作区。
 GUI、CLI、REST 共用 `SerialEngine.telemetry / ethernet / yolo / scenes`；
 全部网络接收页共用一个 UDP 监听端口。已有监听时发送复用该端口。
+YOLO 与视频页在启动接收时分别选择 WIN 0 的 CH2 / EDVF 用途，切换用途先停止监听。
 图表使用 PySide6 的 QPainter，不引入其他依赖。
 
 ![DDR 监控：UDP 模拟器实时推送 10 秒](ddr-monitor.png)
@@ -321,7 +322,7 @@ python3 tools/debug_tool/cli.py scene s1
 python3 tools/debug_tool/cli.py scene sample_rate --rate 100
 ```
 
-### YOLO 发送与原始回传
+### YOLO 检测与参考比对
 
 ![YOLO 数据发送与回传](yolo.png)
 
@@ -344,8 +345,24 @@ hex 每行按编译器的 256 位 readmemh 顺序还原为 DDR 字节，按 3.5a
 点击「开始接收」，按应用头 OFFSET 落盘：WIN 0 → `window0.bin`（CH2，983040 B），
 WIN 1 → `window1.bin`（NPU OUTPUT，725760 B），WIN 2 → `window2.bin`（EDDT 检测结果）。
 板端按 WIN 0、1、2 的顺序返回，WIN 2 末包 NOTIFY 表示三块发送完毕。
-当前保存原始数据并显示接收状态；参考模型比对、后处理比对和画框等待 B2-4 参考实现，
-页面保留说明区域，没有未实现的比对/画框操作按钮。
+收齐三块后解析 EDDT，在缩放为 1280×720 的原图上画框，显示 COCO 类别编号及千分比分数。
+回传缺包时明确报告缺失窗口并停止监听；不以文件空洞中的零代替缺失数据。
+
+选择本次模型的编译输出目录、原图与 `quantize.py` 的 `quantization.json`，点击
+「运行参考模型并比对」。量化 JSON 默认位置为 `build/npu/quantized/quantization.json`。
+后台线程执行以下三项，完成后在页面显示结果：
+
+- 把**板端回传的 CH2** 写入 `npu_ref.py` 的 INPUT_BASE，执行编译描述符，读出
+  725760 B OUTPUT，与板端 OUTPUT 逐字节比较，显示差异字节数及首个差异的十进制/十六进制偏移。
+- 对所选原图调用 `input_pack.py`，与 CH2 逐字节比较，显示差异字节数。
+- 调用 `yolo_post_ref.run(reference_output, quant_params)`，其中 `quant_params` 是量化
+  JSON 经 `json.loads` 得到的 dict；返回的坐标、class、score 单位均与 EDDT 相同，按输出顺序
+  逐项相等比较，显示差异框数、参考框数和板端框数。坐标为 1280×720 整数，分数为 0–1000 整数。
+
+NPU 参考使用仓库已有 `tools/requirements.txt` 中的 torch/numpy/OpenCV 等依赖，
+并需要 `git submodule update --init third_party/ultralytics`；本任务没有新增第三方库。
+B2-4a 的 `tools/npu/yolo_post_ref.py` 尚待协调者合入；当前已接好上述调用契约，回归用 mock
+验证后处理参数与比对结果。缺少模块或模型文件时页面明确报错，不替换为其他算法。
 
 ```bash
 python3 tools/debug_tool/cli.py yolo model build/npu/yolo --board-ip 192.168.1.10
@@ -403,4 +420,78 @@ DDR 截图由独立 `telemetry_sim.py` 向实际 UDP 监听器推送 10 s 数据
 
 Windows 上仍需随 B2-4 联调确认：填入菜单命令后验证 S1/S2、PIX/GEO、10/100/1000 Hz、
 探针开关；接收真实板端遥测，确认 scene、错误计数和直方图；加载编译输出，核对板端
-WIN2_BYTES 结果；发送图片并收齐三份原始回传。后处理参考比对不属于此 Task。
+WIN2_BYTES 结果；发送图片并收齐三份原始回传。后处理实际算法的集成由协调者在 B2-4a 合入后联调。
+
+
+### 视频接收与输出控制（B2-5b）
+
+![视频回环接收与检测框](video.png)
+
+视频页使用共享 UDP 监听器，以 WIN 0 接收 EDVF v1 的 32 B 小端帧头与 RGB565 像素，
+Qt 直接显示 RGB565。每帧按头中的 frame_id 关联 WIN 2 EDDT 检测结果；勾选项控制叠加，
+后一帧的检测结果提前到达时，当前显示帧继续使用自己的框。
+
+接收约定由协调者确认：**帧头在前，帧内像素包允许乱序，帧与帧之间不交错**。
+ETH 应用 OFFSET 不带 frame_id，不能支持任意跨帧交错。只有像素字节完整覆盖该帧时才显示；
+缺包帧在下一帧头到达或停止监听时丢弃并计数，帧头丢失的像素批次按末包 NOTIFY 计数丢弃。
+没有重传、重试或像素校验和。视频像素与检测块只保存在内存，不持续写入原始文件。
+
+页面同时显示完整帧数、接收帧率、缺包丢帧数及网口跳帧累计值。帧率按最近约 1 s 内完整帧的
+接收时间间隔计算，停流 1 s 后归零，并保留计算 1 fps 所需的前一个时间戳。
+网口跳帧来自 EDTM type 1 的 `vid_skip`（偏移 292，u32，本窗口增量），对收到的有效记录累计；
+与摄像头 frame_id 的间隔分开统计，避免将配置降帧误算为跳帧。清空 DDR 监控记录也会清空此累计值。
+CSV 和 REST `/api/telemetry` 保留 `vid_skip`，REST `video_skipped` 为累计值。
+
+输出选择为 HDMI / 网口 / 同时，网口帧率范围 1–60 fps，点击「下发输出与帧率」通过
+同一 UART 场景通道发送 `output_hdmi` / `output_eth` / `output_both` 和 `video_fps`。
+`scenes.json` 中这四项的 command 按协调者确认暂为 null，待 B2-4 菜单确定后填入；
+`video_fps` 的模板使用 `{rate}`。未配置时明确报错，不发送猜测的菜单命令。
+
+共享接收 REST `POST /api/ethernet/receive/start` 新增 `mode` 参数：
+`files`（默认，保持原文件收发）、`yolo`（三块回传）或 `video`（EDVF/EDDT）。
+终端使用 `cli.py listen --mode video` 或 `--mode yolo`，场景通道仍为
+`cli.py scene video_fps --rate 30` 等已有命令。
+
+模拟器保留原遥测默认模式，新增视频和 YOLO 模式：
+
+```bash
+# 在视频页开始接收后，发送 720p RGB565、对应的三框 EDDT 与含 vid_skip 的遥测。
+python3 tools/debug_tool/telemetry_sim.py --mode video --port 6000 --seconds 10 --fps 3
+
+# 在 YOLO 页开始接收后，发送零填充 CH2/OUTPUT 与三框 EDDT，供界面和传输自测。
+python3 tools/debug_tool/telemetry_sim.py --mode yolo --port 6000
+# 也可发送指定的真实原始数据；检测结果仍为示例三框。
+python3 tools/debug_tool/telemetry_sim.py --mode yolo --port 6000 \
+  --ch2 build/ch2.bin --output build/output.bin
+```
+
+模拟器每 4 包作 1 ms 发送节拍，避免 PC 回环瞬间突发；不重传丢包。
+`--fps` 表示目标发送帧率，受 PC 发送与接收速度约束，不能作为硬件吞吐率测量。
+示例图像来自模拟器内确定性的 RGB565 图案，YOLO 页的 demo.png 仅生成在 build 目录。
+
+### B2-5b 验证
+
+本次 49 项 unittest 全部通过，无跳过，其中新增 16 项覆盖：EDVF 小端头、像素乱序、
+缺中包/末包/帧头、frame_id 间隔、EDDT 有符号坐标/空结果/类别/分数、检测与显示帧对应、
+帧率与停流、vid_skip 解析累计、真实 UDP 视频和 YOLO 模拟回传、字节差异及首位置、
+框顺序和数量差异、参考调用契约、缺失回传报错、实际 npu_ref UPSAMPLE、实际 input_pack
+的 letterbox 与 INT8_C4。原 EDTM 手工偏移测试及 CSV 往返也覆盖了非零 vid_skip。
+
+复现环境使用既有 NPU Python 环境，并把已有声明的 GUI/串口依赖放在 build 目录：
+
+```bash
+pip install --target build/debug-tool-deps PySide6 pyserial
+PYTHONPATH=build/debug-tool-deps ~/.local/opt/edrv32-py/bin/python \
+  -m unittest discover tools/debug_tool/tests
+python3 -m compileall -q tools/debug_tool
+git diff --check
+QT_QPA_PLATFORM=offscreen PYTHONPATH=build/debug-tool-deps python3 \
+  tools/debug_tool/render_shot.py tools/debug_tool/video.png --page video --simulate-seconds 3
+QT_QPA_PLATFORM=offscreen PYTHONPATH=build/debug-tool-deps python3 \
+  tools/debug_tool/render_shot.py tools/debug_tool/yolo.png --page yolo --simulate-seconds 2
+```
+
+两张截图均来自 `telemetry_sim.py` 子进程经真实 UDP 监听器回环收包，视频截图在模拟发送
+仍进行时采集。截图助手的视频模拟为 3 fps；界面的接收帧率和丢帧数取自实际收包，受共享机器负载影响。
+本次全部为 Python/Qt 改动，Verilog 风格检查与 Verilator lint 不适用；compileall 和 diff 检查无错误。
+待协调者合入 B2-4a 后运行一次真实 `yolo_post_ref` 的联调；Windows 串口菜单和真实板端网口仍需上板验证。

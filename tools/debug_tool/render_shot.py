@@ -21,7 +21,8 @@ from gui.app import MainWindow
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('out', nargs='?', default='render.png')
-    parser.add_argument('--page', choices=['serial', 'ddr', 'scene', 'yolo'], default='serial')
+    parser.add_argument('--page', choices=['serial', 'ddr', 'scene', 'yolo', 'video'],
+                        default='serial')
     parser.add_argument('--simulate-seconds', type=int, default=0)
     args = parser.parse_args()
     out = args.out
@@ -73,29 +74,58 @@ def main():
 
     window = MainWindow(engine)
     window.setAttribute(Qt.WA_DeleteOnClose)
-    index = {'serial': 0, 'ddr': 5, 'scene': 6, 'yolo': 7}[args.page]
+    index = {'serial': 0, 'ddr': 5, 'scene': 6, 'yolo': 7, 'video': 8}[args.page]
     window.rail_group.button(index).setChecked(True)
     window._select_page(index)
     window.show()
     simulator = None
     if args.simulate_seconds:
-        rx = engine.ethernet.start_receive(0)
+        mode = args.page if args.page in ('video', 'yolo') else 'files'
+        rx = engine.ethernet.start_receive(0, mode=mode)
+        if args.page == 'yolo':
+            from PySide6.QtGui import QImage
+            from telemetry_sim import demo_pixels
+            from pathlib import Path
+            image = QImage(demo_pixels(), 1280, 720, 2560, QImage.Format_RGB16).copy()
+            image_path = Path(__file__).resolve().parents[2] / 'build/debug_tool/demo.png'
+            image_path.parent.mkdir(parents=True, exist_ok=True)
+            image.save(str(image_path))
+            window.yolo.image.setText(str(image_path))
         simulator = subprocess.Popen([
             sys.executable, os.path.join(os.path.dirname(__file__), 'telemetry_sim.py'),
-            '--seconds', str(args.simulate_seconds), '--port', str(rx['localPort'])])
+            '--seconds', str(args.simulate_seconds), '--port', str(rx['localPort']),
+            '--mode', args.page if args.page in ('video', 'yolo') else 'telemetry',
+            '--fps', '3'])
 
     def shoot():
-        if simulator:
-            simulator.wait(timeout=3)
-            if simulator.returncode:
-                raise RuntimeError(f'telemetry simulator exited {simulator.returncode}')
         window.telemetry.refresh(force=True)
+        window.yolo.refresh()
+        window.video.refresh()
+        if args.page == 'video' and args.simulate_seconds:
+            if engine.video.snapshot()['received'] == 0:
+                raise RuntimeError('video simulator produced no complete video frames')
+        if args.page == 'yolo' and args.simulate_seconds:
+            if engine.yolo.snapshot()[1] is None:
+                raise RuntimeError('YOLO simulator produced no complete capture')
         window.grab().save(out)
-        engine.ethernet.stop_receive()
         print(f"saved {out}")
+        finish_timer.start(100)
+
+    def finish():
+        if simulator and simulator.poll() is None:
+            return
+        if simulator and simulator.returncode:
+            raise RuntimeError(f'telemetry simulator exited {simulator.returncode}')
+        finish_timer.stop()
+        engine.ethernet.stop_receive()
         window.close()
 
-    QTimer.singleShot(args.simulate_seconds * 1000 + 800, shoot)
+    finish_timer = QTimer()
+    finish_timer.timeout.connect(finish)
+
+    delay = (args.simulate_seconds * 1000 - 200 if args.page == 'video'
+             and args.simulate_seconds else args.simulate_seconds * 1000 + 800)
+    QTimer.singleShot(delay, shoot)
     app.exec()
 
 

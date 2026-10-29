@@ -8,8 +8,11 @@ Run beside main.py: python3 telemetry_sim.py --seconds 10 --port 6000
 import argparse
 import math
 import socket
+import struct
 import time
-from core.ethernet import packets
+from core.ethernet import packets, HEADER
+from core.video import VIDEO_HEADER, DETECTION_HEADER, DETECTION
+from core.yolo import INPUT_BYTES, OUTPUT_BYTES
 from core.telemetry import FIELDS, encode
 
 
@@ -30,7 +33,8 @@ def periodic(seq, tick, hz):
         record[f'p{p}_wait_max'] = (p + 1) * 15
         record[f'p{p}_urg_cnt'] = int(p == 0 and tick % 101 == 0)
     record.update(npu_completed=int(tick % 5 == 0), npu_cycles=6_450_000,
-                  post_cycles=1_470_000, boxes=8 + tick % 5)
+                  post_cycles=1_470_000, boxes=8 + tick % 5,
+                  vid_skip=int(tick > 0 and tick % hz == 0))
     return record
 
 
@@ -68,14 +72,108 @@ def run(host, port, seconds, hz):
                 time.sleep(delay)
 
 
+
+def demo_pixels():
+    """A reproducible 720p road scene, built without image or GUI dependencies."""
+    width, height = 1280, 720
+    pixels = bytearray(width * height * 2)
+
+    def rectangle(x0, y0, x1, y1, color):
+        row = struct.pack('<H', color) * (x1 - x0)
+        for y in range(y0, y1):
+            pixels[(y * width + x0) * 2:(y * width + x1) * 2] = row
+
+    rectangle(0, 0, width, 330, 0x64f7)
+    rectangle(0, 300, width, height, 0x424a)
+    rectangle(0, 270, width, 350, 0x328b)
+    for x, h in [(30, 180), (190, 250), (410, 150), (700, 210), (1010, 240), (1170, 170)]:
+        rectangle(x, 300 - h, min(x + 125, width), 300, 0x3aaf)
+        for y in range(320 - h, 270, 30):
+            rectangle(x + 15, y, min(x + 105, width), y + 9, 0x8e18)
+    for x in (210, 640, 1070):
+        rectangle(x, 350, x + 8, 435, 0xadd5)
+        rectangle(x, 480, x + 12, 580, 0xadd5)
+        rectangle(x, 650, x + 18, 720, 0xadd5)
+    # Car, bus and pedestrian silhouettes correspond to the EDDT demo boxes.
+    rectangle(360, 370, 565, 515, 0x167b)
+    rectangle(388, 338, 535, 410, 0x167b)
+    rectangle(400, 349, 524, 393, 0x9e7b)
+    rectangle(374, 490, 411, 531, 0x10a3)
+    rectangle(513, 490, 550, 531, 0x10a3)
+    rectangle(790, 288, 1122, 483, 0xdd66)
+    rectangle(806, 305, 1105, 375, 0x9518)
+    rectangle(816, 461, 867, 505, 0x10a3)
+    rectangle(1044, 461, 1095, 505, 0x10a3)
+    rectangle(170, 391, 206, 430, 0xded9)
+    rectangle(157, 430, 218, 510, 0xd148)
+    rectangle(165, 510, 182, 578, 0x18e5)
+    rectangle(194, 510, 211, 578, 0x18e5)
+    return bytes(pixels)
+
+
+def demo_detections(frame_id):
+    boxes = [(352, 329, 572, 540, 2, 942), (780, 279, 1133, 514, 5, 908),
+             (148, 383, 229, 587, 0, 876)]
+    return (DETECTION_HEADER.pack(b'EDDT', 1, len(boxes), frame_id, 0) +
+            b''.join(DETECTION.pack(*box) for box in boxes))
+
+
+def send_block(sock, destination, data, window, offset=0, notify=True):
+    for index, packet in enumerate(packets(data, window, offset)):
+        if not notify:
+            packet = packet[:1] + b'\0' + packet[2:]
+        sock.sendto(packet, destination)
+        # PC loopback still traverses the actual socket receive thread and file writes.
+        if index % 4 == 3:
+            time.sleep(.001)
+
+
+def run_video(host, port, seconds, fps):
+    pixels = demo_pixels()
+    started = time.monotonic()
+    destination = host, port
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        for frame_id in range(int(seconds * fps)):
+            send_block(sock, destination, demo_detections(frame_id), 2)
+            header = VIDEO_HEADER.pack(b'EDVF', 1, 1, 1280, 720, 2560,
+                                       frame_id, int(frame_id * 100e6 / fps), 1)
+            send_block(sock, destination, header, 0, notify=False)
+            send_block(sock, destination, pixels, 0, offset=32)
+            record = periodic(frame_id, frame_id, fps)
+            send_block(sock, destination, encode(record), 3)
+            delay = started + (frame_id + 1) / fps - time.monotonic()
+            if delay > 0:
+                time.sleep(delay)
+
+
+def run_yolo(host, port, ch2=None, output=None):
+    """Synthetic raw returns by default; explicit files exercise real model comparisons."""
+    from pathlib import Path
+    inputs = bytes(INPUT_BYTES) if ch2 is None else Path(ch2).read_bytes()
+    outputs = bytes(OUTPUT_BYTES) if output is None else Path(output).read_bytes()
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        destination = host, port
+        send_block(sock, destination, inputs, 0, notify=False)
+        send_block(sock, destination, outputs, 1, notify=False)
+        send_block(sock, destination, demo_detections(42), 2)
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=6000)
     parser.add_argument('--seconds', type=float, default=60)
     parser.add_argument('--hz', type=int, choices=range(10, 1001), default=100, metavar='10..1000')
+    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo'], default='telemetry')
+    parser.add_argument('--fps', type=int, choices=range(1, 61), default=10, metavar='1..60')
+    parser.add_argument('--ch2', help='YOLO mode: raw CH2 input file')
+    parser.add_argument('--output', help='YOLO mode: raw NPU OUTPUT file')
     args = parser.parse_args()
-    run(args.host, args.port, args.seconds, args.hz)
+    if args.mode == 'telemetry':
+        run(args.host, args.port, args.seconds, args.hz)
+    elif args.mode == 'video':
+        run_video(args.host, args.port, args.seconds, args.fps)
+    else:
+        run_yolo(args.host, args.port, args.ch2, args.output)
 
 
 if __name__ == '__main__':

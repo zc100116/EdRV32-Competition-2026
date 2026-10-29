@@ -6,6 +6,9 @@ Image decoding uses the existing PySide6 dependency, imported only when needed.
 
 from pathlib import Path
 import struct
+import threading
+
+from .video import Block, parse_detections
 
 
 def read_hex(path, base):
@@ -61,6 +64,45 @@ class YoloTool:
     def __init__(self, ethernet):
         self.ethernet = ethernet
         self.image_bytes = 0
+        self.lock = threading.Lock()
+        self.blocks = [Block() for _ in range(3)]
+        self.capture = None
+        self.generation = 0
+
+    def reset_capture(self):
+        with self.lock:
+            self.blocks = [Block() for _ in range(3)]
+            self.capture = None
+
+    def receive(self, window, offset, data, notify):
+        if window not in (0, 1, 2):
+            return
+        with self.lock:
+            self.blocks[window].receive(offset, data, notify)
+            if window == 2 and notify:
+                sizes = (INPUT_BYTES, OUTPUT_BYTES, offset + len(data))
+                for index, size in enumerate(sizes):
+                    if not self.blocks[index].complete(size):
+                        raise ValueError(f'YOLO WIN {index}: incomplete return ({size} B expected)')
+                ch2, output, detections = (block.data(size)
+                                           for block, size in zip(self.blocks, sizes))
+                self.capture = (ch2, output, parse_detections(detections))
+                self.generation += 1
+
+    def snapshot(self):
+        with self.lock:
+            return self.generation, self.capture
+
+    def compare(self, image, directory, quant_params):
+        _, capture = self.snapshot()
+        if capture is None:
+            raise ValueError('YOLO: no complete return received')
+        ch2, output, detections = capture
+        reference = reference_output(directory, ch2)
+        boxes = reference_detections(reference, quant_params)
+        return dict(input=byte_difference(reference_input(image), ch2),
+                    output=byte_difference(reference, output),
+                    detections=detection_difference(boxes, detections.boxes))
 
     def send_model(self, path, board_ip, board_port, local_port):
         blocks = pack_model(path)
@@ -71,5 +113,64 @@ class YoloTool:
     def send_image(self, path, board_ip, board_port, local_port, window=0):
         if window not in (0, 1):
             raise ValueError('test image window must be 0 or 1 (B2 design 3.5a)')
+        self.reset_capture()
         return self.ethernet.send_blocks([(window, 0, image_rgb565(path))],
                                          board_ip, board_port, local_port, name=str(path))
+
+
+OUTPUT_BYTES = 725760
+INPUT_BYTES = 983040
+
+
+def byte_difference(expected, actual):
+    """Count unequal byte positions, including any unmatched suffix."""
+    first = None
+    count = abs(len(expected) - len(actual))
+    for index, (left, right) in enumerate(zip(expected, actual)):
+        if left != right:
+            count += 1
+            if first is None:
+                first = index
+    if first is None and len(expected) != len(actual):
+        first = min(len(expected), len(actual))
+    return dict(count=count, first=first)
+
+
+def reference_output(directory, ch2):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from tools.npu.ref.npu_ref import load_case, execute, NpuError
+    memory, registers = load_case(directory)
+    memory.write(registers['INPUT_BASE'], ch2)
+    try:
+        execute(memory, registers)
+    except NpuError as exc:
+        raise ValueError(f'NPU reference: {exc}') from exc
+    return memory.read(registers['OUTPUT_BASE'], OUTPUT_BYTES)
+
+
+def reference_input(path):
+    # The NPU scripts use sibling imports; the fixed repository path is shared with CLI.
+    import sys
+    root = Path(__file__).resolve().parents[3]
+    sys.path.insert(0, str(root / 'third_party/ultralytics'))
+    npu_path = str(root / 'tools/npu')
+    if npu_path not in sys.path:
+        sys.path.insert(0, npu_path)
+    from input_pack import pack
+    return pack(Path(path))
+
+
+def reference_detections(output, quant_params):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from tools.npu import yolo_post_ref
+    return yolo_post_ref.run(output, quant_params)
+
+
+def detection_difference(expected, actual):
+    expected = tuple(tuple(box) for box in expected)
+    actual = tuple(tuple(box) for box in actual)
+    count = sum(left != right for left, right in zip(expected, actual))
+    count += abs(len(expected) - len(actual))
+    return dict(count=count, expected=len(expected), actual=len(actual))

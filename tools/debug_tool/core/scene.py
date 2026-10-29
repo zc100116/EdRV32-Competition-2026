@@ -18,7 +18,9 @@ class SceneControl:
         return json.loads(CONFIG.read_text(encoding='utf-8'))
 
     def send(self, name, rate=100):
-        if not 10 <= rate <= 1000:
+        if name == 'video_fps' and not 1 <= rate <= 60:
+            raise ValueError('video frame rate must be 1..60 fps')
+        if name != 'video_fps' and not 10 <= rate <= 1000:
             raise ValueError('sampling rate must be 10..1000 Hz')
         item = self.mapping()[name]
         if item['command'] is None:

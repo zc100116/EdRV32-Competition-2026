@@ -182,6 +182,7 @@ def main():
     p = sub.add_parser("listen", help="start the shared UDP listener")
     p.add_argument("--port", type=int, default=6000)
     p.add_argument("--directory")
+    p.add_argument("--mode", choices=["files", "yolo", "video"], default="files")
 
     args = parser.parse_args()
     global BASE
@@ -195,7 +196,7 @@ def main():
                                {"path": os.path.abspath(args.path)} if args.path else {}))
     elif args.cmd == "listen":
         print_json(request("POST", "/api/ethernet/receive/start",
-                           {"localPort": args.port, "directory": args.directory}))
+                           {"localPort": args.port, "directory": args.directory, "mode": args.mode}))
     elif args.cmd == "scene":
         print_json(request("POST", "/api/scenes/send", {"name": args.name, "rate": args.rate}))
     elif args.cmd == "yolo":

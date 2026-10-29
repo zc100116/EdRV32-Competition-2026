@@ -155,7 +155,7 @@ def make_handler(engine):
                         int(body.get("offset", 0)), float(body.get("interval", 0))))
                 if path == "/api/ethernet/receive/start":
                     return self._json(200, engine.ethernet.start_receive(
-                        int(body["localPort"]), body.get("directory")))
+                        int(body["localPort"]), body.get("directory"), body.get("mode", "files")))
                 if path == "/api/ethernet/receive/stop":
                     return self._json(200, engine.ethernet.stop_receive())
                 if path == "/api/clear":

@@ -20,6 +20,7 @@ from .ethernet import EthernetTool
 from .telemetry import Telemetry
 from .yolo import YoloTool
 from .scene import SceneControl
+from .video import VideoReceiver
 
 try:
     import serial
@@ -103,6 +104,9 @@ class SerialEngine:
         self.telemetry = Telemetry()
         self.ethernet = EthernetTool(self.telemetry)
         self.yolo = YoloTool(self.ethernet)
+        self.video = VideoReceiver()
+        self.ethernet.yolo = self.yolo
+        self.ethernet.video = self.video
         self.scenes = SceneControl(self)
 
     # ---------------------------------------------------------- observer --

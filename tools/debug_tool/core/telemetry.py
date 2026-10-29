@@ -20,7 +20,7 @@ TAIL_FIELDS = ('vin_ch0_frames', 'vin_ch2_frames', 'vin_ch0_overflow',
 HEADER = struct.Struct('<4sHHIIQIII')
 FIELDS = ['version', 'type', 'seq', 'scene', 'mtime', 'window_cyc', 'ds_busy', 'dir_switch']
 FIELDS += [f'p{p}_{field}' for p in range(7) for field in PORT_FIELDS]
-PERIOD_FIELDS = FIELDS + list(TAIL_FIELDS) + ['clk_sys_hz', 'clk_npu_hz']
+PERIOD_FIELDS = FIELDS + list(TAIL_FIELDS) + ['clk_sys_hz', 'clk_npu_hz', 'vid_skip']
 HIST_FIELDS = ['hist_width', 'read_cnt', 'lat_min', 'lat_max', 'lat_sum']
 HIST_FIELDS += [f'hist{i}' for i in range(16)]
 FIELDS = PERIOD_FIELDS + HIST_FIELDS
@@ -43,7 +43,7 @@ def decode(data):
     record.update(version=version, type=kind, seq=seq, scene=scene, mtime=mtime)
     if kind == 1:
         values = [version, kind, seq, scene, mtime, window, busy, switches]
-        values += list(struct.unpack_from('<64I', data, 36))
+        values += list(struct.unpack_from('<65I', data, 36))
         record.update(zip(PERIOD_FIELDS, values))
     elif kind == 2:
         record.update(zip(HIST_FIELDS, struct.unpack_from('<21I', data, 24)))
@@ -58,7 +58,7 @@ def encode(record):
     struct.pack_into('<4sHHIIQ', data, 0, b'EDTM',
                      *(record[name] for name in FIELDS[:5]))
     if record['type'] == 1:
-        struct.pack_into('<67I', data, 24,
+        struct.pack_into('<68I', data, 24,
                          *(record[name] for name in PERIOD_FIELDS[5:]))
     else:
         struct.pack_into('<21I', data, 24, *(record[name] for name in HIST_FIELDS))
@@ -96,6 +96,7 @@ class Telemetry:
             self.histogram = None
             self.last_seq = None
             self.lost = 0
+            self.video_skipped = 0
             self.errors = 0
             self.error = None
             self.fragments = {}
@@ -119,6 +120,7 @@ class Telemetry:
             if record['type'] == 2:
                 self.histogram = record
                 return
+            self.video_skipped += record['vid_skip']
             self.latest = measurements(record)
             self.history.append(self.latest)
             while self.history and self.history[0]['time_s'] < self.latest['time_s'] - 60:
@@ -148,7 +150,8 @@ class Telemetry:
     def status(self):
         with self.lock:
             return dict(latest=self.latest, histogram=self.histogram, lost=self.lost,
-                        errors=self.errors, error=self.error, records=len(self.records))
+                        errors=self.errors, error=self.error, records=len(self.records),
+                        video_skipped=self.video_skipped)
 
     def snapshot(self):
         with self.lock:

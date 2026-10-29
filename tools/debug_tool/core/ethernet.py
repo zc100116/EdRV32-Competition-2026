@@ -33,6 +33,9 @@ def unpack(packet):
 class EthernetTool:
     def __init__(self, telemetry=None):
         self.telemetry = telemetry
+        self.video = None
+        self.yolo = None
+        self.mode = "files"
         self.lock = threading.Lock()
         self.rx_socket = None
         self.rx_thread = None
@@ -96,9 +99,12 @@ class EthernetTool:
             with self.lock:
                 self.tx["active"] = False
 
-    def start_receive(self, local_port, directory=None):
+    def start_receive(self, local_port, directory=None, mode="files"):
         if self.rx_socket is not None:
             raise RuntimeError("UDP receive is already active")
+        self.mode = mode
+        if mode == 'yolo':
+            self.yolo.reset_capture()
         directory = Path(directory) if directory else DEFAULT_SAVE_DIR
         directory.mkdir(parents=True, exist_ok=True)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -130,15 +136,20 @@ class EthernetTool:
                 window, notify, offset, data = unpack(packet)
                 if window == 3 and self.telemetry is not None:
                     self.telemetry.receive(offset, data, notify)
-                if window not in files:
-                    path = directory / f"window{window}.bin"
-                    files[window] = path.open("w+b")
-                    with self.lock:
-                        self.rx["files"][str(window)] = str(path)
-                output = files[window]
-                output.seek(offset)
-                output.write(data)
-                output.flush()
+                if self.mode == 'video' and window in (0, 2):
+                    self.video.receive(window, offset, data, notify)
+                elif self.mode == 'yolo':
+                    self.yolo.receive(window, offset, data, notify)
+                if self.mode != 'video' or window not in (0, 2):
+                    if window not in files:
+                        path = directory / f"window{window}.bin"
+                        files[window] = path.open("w+b")
+                        with self.lock:
+                            self.rx["files"][str(window)] = str(path)
+                    output = files[window]
+                    output.seek(offset)
+                    output.write(data)
+                    output.flush()
                 with self.lock:
                     self.rx["packets"] += 1
                     self.rx["bytes"] += len(data)
@@ -149,6 +160,8 @@ class EthernetTool:
             with self.lock:
                 self.rx["error"] = str(exc)
         finally:
+            if self.mode == 'video':
+                self.video.finish()
             for output in files.values():
                 output.close()
             sock.close()

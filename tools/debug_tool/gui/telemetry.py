@@ -377,7 +377,9 @@ class ScenePanel(QWidget):
         self.rate.setSuffix(' Hz')
         box.addWidget(self.rate)
         grid = QGridLayout()
-        for index, (key, item) in enumerate(engine.scenes.mapping().items()):
+        mapping = [(key, item) for key, item in engine.scenes.mapping().items()
+                   if not key.startswith('output_') and key != 'video_fps']
+        for index, (key, item) in enumerate(mapping):
             button = QPushButton(item['label'])
             button.clicked.connect(lambda checked=False, name=key: self._send(engine, toast, name))
             grid.addWidget(button, index // 3, index % 3)

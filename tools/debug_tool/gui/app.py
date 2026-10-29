@@ -27,6 +27,7 @@ from gui.program import ProgramPanel
 from gui.ethernet import EthernetPanel
 from gui.telemetry import TelemetryPanel, ScenePanel
 from gui.yolo import YoloPanel
+from gui.video import VideoPanel
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1198,7 +1199,8 @@ class MainWindow(QMainWindow):
                 ("网口", "UDP 文件收发", ICON_PLUG),
                 ("DDR", "DDR 监控", ICON_FILTER),
                 ("场景", "场景控制", ICON_TERMINAL),
-                ("YOLO", "YOLO 数据发送", ICON_PLUG))):
+                ("YOLO", "YOLO 数据发送", ICON_PLUG),
+                ("视频", "网口实时视频", ICON_PLUG))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1231,7 +1233,8 @@ class MainWindow(QMainWindow):
         self.telemetry = TelemetryPanel(engine, self.toast)
         self.scene = ScenePanel(engine, self.toast)
         self.yolo = YoloPanel(engine, self.toast)
-        for panel in (self.telemetry, self.scene, self.yolo):
+        self.video = VideoPanel(engine, self.toast)
+        for panel in (self.telemetry, self.scene, self.yolo, self.video):
             scroll = QScrollArea()
             scroll.setWidgetResizable(True)
             scroll.setFrameShape(QFrame.NoFrame)
@@ -1489,6 +1492,7 @@ class MainWindow(QMainWindow):
         self.ethernet.refresh()
         self.telemetry.refresh()
         self.yolo.refresh()
+        self.video.refresh()
         self.counters.setText(
             f"RX {fmt_bytes(st['rxBytes'])} / TX {fmt_bytes(st['txBytes'])}")
 

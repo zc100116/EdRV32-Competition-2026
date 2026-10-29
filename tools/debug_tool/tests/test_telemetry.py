@@ -25,7 +25,7 @@ def wire(seq=0, kind=1):
                              2, 31250 * (port + 1), 3, 15625, 45, 72, port)
         struct.pack_into('<13I', data, 232, 11, 12, 13, 14, 15, 16,
                          1, 6_000_000, 1_000_000, 7, 99, 100, 101)
-        struct.pack_into('<2I', data, 284, 100_000_000, 150_000_000)
+        struct.pack_into('<3I', data, 284, 100_000_000, 150_000_000, 17)
     else:
         struct.pack_into('<5I', data, 24, 16, 100, 12, 300, 2600)
         struct.pack_into('<16I', data, 44, *range(16))
@@ -43,6 +43,7 @@ class TelemetryTest(unittest.TestCase):
         self.assertEqual(row['npu_completed'], 1)
         self.assertEqual(row['cpu_idle'], 101)
         self.assertEqual(row['clk_npu_hz'], 150_000_000)
+        self.assertEqual(row['vid_skip'], 17)
         self.assertEqual(encode(row), wire())
 
     def test_manual_histogram_offsets(self):
