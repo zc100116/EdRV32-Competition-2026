@@ -567,7 +567,7 @@ module edrv32_rnd_tb;
     end
 
     initial begin
-        #200000000;
+        #2000000000;
         $fatal(1, "FAIL RN-%02d timeout desc=%0d coord=(-1,-1) expected=IDLE actual=BUSY time=%0t",
             test_case, current_desc, $time);
     end

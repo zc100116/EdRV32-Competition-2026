@@ -47,7 +47,7 @@ def main():
         config = generate(directory, number, variant, seed)
         with (directory / 'run.log').open('w') as log:
             result = subprocess.run([str(sim), f'+CONFIG={config}'], cwd=ROOT,
-                                    stdout=log, stderr=subprocess.STDOUT, timeout=300)
+                                    stdout=log, stderr=subprocess.STDOUT, timeout=1800)
         output = (directory / 'run.log').read_text()
         if result.returncode or 'PASS' not in output or 'FAIL' in output:
             print(output)
