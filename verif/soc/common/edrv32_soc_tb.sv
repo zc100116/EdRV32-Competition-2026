@@ -82,6 +82,7 @@ module edrv32_soc_tb;
     wire [63:0] unused_debug_o;
 
     edrv32_soc_top u_dut (
+        // Clocks, reset and DDR initialization.
         .clk_sys_i(clk_sys_i),
         .clk_mem_i(clk_mem_i),
         .clk_pix_i(clk_pix_i),
@@ -92,6 +93,21 @@ module edrv32_soc_tb;
         .eth_tx_clk_i(eth_tx_clk_i),
         .rst_n_i(rst_n_i),
         .mem_ready_i(mem_ready_i),
+
+        // Camera, network and system inputs.
+        .cam0_vsync_i(cam0_vsync_i),
+        .cam0_href_i(cam0_href_i),
+        .cam0_data_i(cam0_data_i),
+        .cam1_vsync_i(cam1_vsync_i),
+        .cam1_href_i(cam1_href_i),
+        .cam1_data_i(cam1_data_i),
+        .eth_rxd_i(eth_rxd_i),
+        .eth_rx_dv_i(eth_rx_dv_i),
+        .eth_rx_er_i(eth_rx_er_i),
+        .uart0_rx_i(uart0_rx_i),
+        .gpio_i(gpio_i),
+
+        // DDR master, video, network and system outputs.
         .ddr_awid_o(ddr_awid_o),
         .ddr_awaddr_o(ddr_awaddr_o),
         .ddr_awlen_o(ddr_awlen_o),
@@ -115,12 +131,15 @@ module edrv32_soc_tb;
         .ddr_rresp_i(ddr_rresp_i),
         .ddr_rlast_i(ddr_rlast_i),
         .ddr_rvalid_i(ddr_rvalid_i),
-        .cam0_vsync_i(cam0_vsync_i),
-        .cam0_href_i(cam0_href_i),
-        .cam0_data_i(cam0_data_i),
-        .cam1_vsync_i(cam1_vsync_i),
-        .cam1_href_i(cam1_href_i),
-        .cam1_data_i(cam1_data_i),
+        .tmds_sym_o(tmds_sym_o),
+        .eth_txd_o(eth_txd_o),
+        .eth_tx_en_o(eth_tx_en_o),
+        .eth_tx_er_o(eth_tx_er_o),
+        .uart0_tx_o(uart0_tx_o),
+        .gpio_o(unused_gpio_o),
+        .gpio_oe_o(unused_gpio_oe_o),
+
+        // Sensor and PHY control interfaces.
         .cam0_pwdn_o(unused_cam0_pwdn_o),
         .cam0_rst_n_o(unused_cam0_rst_n_o),
         .cam1_pwdn_o(unused_cam1_pwdn_o),
@@ -131,29 +150,22 @@ module edrv32_soc_tb;
         .i2c0_sda_i(i2c0_sda_i),
         .i2c0_sda_o(i2c0_sda_o),
         .i2c0_sda_oe_o(i2c0_sda_oe_o),
-        .tmds_sym_o(tmds_sym_o),
-        .eth_rxd_i(eth_rxd_i),
-        .eth_rx_dv_i(eth_rx_dv_i),
-        .eth_rx_er_i(eth_rx_er_i),
-        .eth_txd_o(eth_txd_o),
-        .eth_tx_en_o(eth_tx_en_o),
-        .eth_tx_er_o(eth_tx_er_o),
         .eth_mdc_o(unused_eth_mdc_o),
         .eth_mdio_o(unused_eth_mdio_o),
         .eth_mdio_oe_o(unused_eth_mdio_oe_o),
         .eth_mdio_i(eth_mdio_i),
         .eth_phy_rst_n_o(unused_eth_phy_rst_n_o),
-        .uart0_rx_i(uart0_rx_i),
-        .uart0_tx_o(uart0_tx_o),
-        .gpio_i(gpio_i),
-        .gpio_o(unused_gpio_o),
-        .gpio_oe_o(unused_gpio_oe_o),
+
+        // Public CPU debug observation.
         .debug_o(unused_debug_o)
     );
 
     ddr3_axi256_model u_ddr (
+        // Memory clock and model reset.
         .clk_i(clk_mem_i),
         .rst_n_i(rst_n_i),
+
+        // Slave interface accepting the SoC DDR master.
         .awid_i(ddr_awid_o),
         .awaddr_i(ddr_awaddr_o),
         .awlen_i(ddr_awlen_o),
