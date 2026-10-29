@@ -1,0 +1,14 @@
+{
+  "bases": {
+    "DESC_BASE": "0x00080000", "MODEL_BASE": "0x00100000",
+    "WORK_BASE": "0x01000000", "INPUT_BASE": "0x04000000",
+    "OUTPUT_BASE": "0x05000000"
+  },
+  "layers": [
+    {"op": "conv", "in_c4": true, "in_w": 640, "in_h": 384,
+     "in_offset": 0, "k": 3, "s": 2, "cout": 16, "out_offset": 0},
+    {"op": "conv", "k": 1, "s": 1, "cout": 16, "out_offset": "0x100000"},
+    {"op": "conv", "k": 1, "s": 1, "cout": 16, "out_sel": "output",
+     "out_offset": 0, "res": true, "res_from": 0}
+  ]
+}
