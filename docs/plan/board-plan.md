@@ -54,7 +54,7 @@
 | B2-4 | 演示程序 `sw/apps/demo`：S2 图像处理（菜单/KEY2–4 切换 PIX、GEO）；S1 目标检测（CH2 → NPU → 后处理 → 画框）；网口加载 NPU 镜像、网口图像检查；输出选择 HDMI/网口/同时、网口 720p 视频 1–60 fps（设计记录 3.4a）；DDR 监控记录 100 Hz 经网口上报（设计记录 3.5） | Codex · GPT-6.1 Sol | B2-3 | B2-4a 后处理 C 与 Python 参考逐项一致（主机端）；B2-4b 编译通过、上板验证（不做 SoC 级仿真） | — | [x] 2026-10-29：B2-4a 后处理 + 画框、B2-4b 演示程序均已合入（demo 41132 B text，SRAM 占用 43 KiB；主机纯逻辑测试通过）；功能待上板 |
 | B2-5a | 调试工具：DDR 监控页、场景控制、YOLO 数据发送与回传接收（设计记录 3.5、3.6） | Codex · GPT-6.1 Sol | 设计记录 3.5 记录格式 | unittest：记录解析、带宽换算、CSV、UDP 回环；合成数据截图 | task-debug-monitor | [x] 2026-10-29：DDR 监控页、场景控制、YOLO 发送/回传接收、`telemetry_sim.py`；33 项 unittest；截图 `tools/debug_tool/ddr-monitor.png`；场景命令待 B2-4 填写，Windows GUI 待 B2-6 确认 |
 | B2-5b | 调试工具 YOLO 页：板上检测框显示、参考模型与后处理参考比对；视频页（网口视频接收、检测框叠加、输出选择，设计记录 3.4a、3.6） | Codex · GPT-6.1 Sol | B2-4 后处理参考 | 参考比对用例 | — | [x] 2026-10-29：已合入协调者分支；YOLO 页（检测框、CH2/input_pack、OUTPUT/npu_ref、yolo_post_ref 比对）、视频页（EDVF 拼帧、帧率/丢帧/vid_skip）；50 项 unittest，真实 UDP 回环截图 `tools/debug_tool/{yolo,video}.png`；场景命令待 B2-4b 菜单定稿后填入 |
-| B2-6 | Windows：生成 DDR3、PLL 等 IP，PDS 综合布局布线（完整 SoC 时序、资源）；上板 S2、S1、监控；B1-8 BIOS 烧录和经 BIOS 运行 tuned CoreMark；调试工具 GUI 确认 | 用户 + Windows Codex | B2-1–B2-5 | 串口日志、截图、监控 CSV、报告 | `tasks/win/<日期>-board-b2/` | [~] 任务卡 `tasks/win/20261029-02-board-b2` 重新发布到 main（e508931）：PLL 合并为 3 个（sys 100+150、video、eth），含第二部分演示程序上板清单；已知 VIN CH2 内存源溢出待 V-F1 |
+| B2-6 | Windows：生成 DDR3、PLL 等 IP，PDS 综合布局布线（完整 SoC 时序、资源）；上板 S2、S1、监控；B1-8 BIOS 烧录和经 BIOS 运行 tuned CoreMark；调试工具 GUI 确认 | 用户 + Windows Codex | B2-1–B2-5 | 串口日志、截图、监控 CSV、报告 | `tasks/win/<日期>-board-b2/` | [~] 任务卡 `tasks/win/20261029-02-board-b2` 重新发布到 main（e508931）：PLL 合并为 3 个（sys 100+150、video、eth），含第二部分演示程序上板清单；VIN CH2 流控修复 V-F1 已随卡合入 |
 
 ### B3（设计记录 `2026-10-29-rnd-disp.md`；规格写好后细化为任务）
 

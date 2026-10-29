@@ -76,7 +76,7 @@
 | 11 | Windows Codex（C） | **BIOS**：按住 KEY1 并复位，确认进入 BIOS 菜单（日志 `b2_bios.log`），然后复位退出。 |
 | 12 | 用户（U） | 观察并告诉 Codex：HDMI 显示器是否检测到信号（DISP 在监控程序下未使能，黑屏或"无信号"都如实记录）；网口 PHY 指示灯状态。第一部分到此结束。 |
 | 13 | 用户（U）+ Windows Codex（C） | **第二部分：演示程序**。按 `sw/apps/demo/README.md`"构建和烧录"一节，用调试工具经 BIOS 烧录本卡 `src/demo.bin`：按住 KEY1 复位 → 烧录成功 → 松开 KEY1 再复位。串口日志 `b2_demo.log` 应出现 `Demo: EdRV32 B2 v1`、八个引擎 ID、两路摄像头 chip ID。启动就停在错误时，把日志交给 Codex 回传，不再继续本部分。 |
-| 14 | 用户（U）+ Windows Codex（C） | 按 `sw/apps/demo/README.md`"上板检查清单"逐行执行：S2 与 5 种 PIX、GEO、KEY2–4、建立网口对端、加载模型（本卡 `src/npu/`）、S1、YOLO 页图像检查、三种输出、`fps`、`sample`、DDR 监控页、复位重跑。<br>• Codex 记录每行的结果（正常 / 异常 + 现象）和 `status` 输出；<br>• 用户提供 HDMI 画面照片和调试工具截图；<br>• 某一行异常时记下现象继续下一行，不调试。<br>• 已知问题：本 commit 的 VIN 在内存源同时开 CH0 和 CH2 时，CH2 会溢出（SoC 级仿真 SC-05 发现，修复 V-F1 尚未合入）。因此"YOLO 页图像检查"一行可能报 VIN ERR_CODE 3，如实记录即可；摄像头 S1 不受影响。 |
+| 14 | 用户（U）+ Windows Codex（C） | 按 `sw/apps/demo/README.md`"上板检查清单"逐行执行：S2 与 5 种 PIX、GEO、KEY2–4、建立网口对端、加载模型（本卡 `src/npu/`）、S1、YOLO 页图像检查、三种输出、`fps`、`sample`、DDR 监控页、复位重跑。<br>• Codex 记录每行的结果（正常 / 异常 + 现象）和 `status` 输出；<br>• 用户提供 HDMI 画面照片和调试工具截图；<br>• 某一行异常时记下现象继续下一行，不调试。 |
 | 15 | Windows Codex（C） | 收集第 6 节产物，填写 `result.md`，提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261029-02-board-b2 results`，推送 `win/20261029-02-board-b2`，告诉用户完成并给出分支名。中途停下时，已完成部分照常回传，并写明停在哪一步和现象。 |
 
 ## 6. 产物
