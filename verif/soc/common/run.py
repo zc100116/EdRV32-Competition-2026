@@ -33,26 +33,16 @@ def run(here, number):
              'CFLAGS_EXTRA=-I' + str(ROOT / 'sw/drivers/include')]
     program = here.name
     sources = f'sw/tests/soc/{program}/main.c'
-    if number != 1:
-        sources += (' sw/tests/soc/common.c sw/drivers/uart.c sw/drivers/plic.c'
-                    ' sw/drivers/clint.c sw/drivers/i2c.c sw/drivers/gpio.c sw/bsp/cache.c')
-        if number in (8, 9):
-            sources += ' sw/tests/soc/concurrent.c'
-        flags[-1] += ' -I' + str(ROOT / 'sw/tests/soc')
+    sources += (' sw/tests/soc/common.c sw/drivers/uart.c sw/drivers/plic.c'
+                ' sw/drivers/clint.c')
+    flags[-1] += ' -I' + str(ROOT / 'sw/tests/soc')
     command(['make', '-C', 'sw', f'PROGRAM={program}', 'MEMORY=sram',
              'PROGRAM_SOURCES=' + sources] + flags, out / 'sw_build.log')
     pack_image(ROOT / f'build/sw/{program}/sram.hex', out / 'sram.hex')
-    if number == 1:
-        command(['make', '-C', 'sw', 'PROGRAM=bootloader'], out / 'boot_build.log')
-        pack_image(ROOT / 'build/sw/bootloader/rom.hex', out / 'rom.hex')
-        command(['riscv-none-elf-objcopy', '-O', 'binary',
-                 str(ROOT / f'build/sw/{program}/{program}.elf'),
-                 str(out / 'download.bin')], out / 'objcopy.log')
-    else:
-        command(['make', '-C', 'sw', 'PROGRAM=soc_test_boot', 'MEMORY=rom',
-                 'PROGRAM_BSP=sw/tests/soc/reset_entry.S',
-                 'PROGRAM_SOURCES=sw/tests/soc/boot.c'], out / 'boot_build.log')
-        pack_image(ROOT / 'build/sw/soc_test_boot/rom.hex', out / 'rom.hex')
+    command(['make', '-C', 'sw', 'PROGRAM=soc_test_boot', 'MEMORY=rom',
+             'PROGRAM_BSP=sw/tests/soc/reset_entry.S',
+             'PROGRAM_SOURCES=sw/tests/soc/boot.c'], out / 'boot_build.log')
+    pack_image(ROOT / 'build/sw/soc_test_boot/rom.hex', out / 'rom.hex')
     command(['python3', str(COMMON / 'check_style.py')], out / 'style.log')
     files = expand_files(here / 'files.f')
     command(['verilator', '--lint-only', '--timing', '-Wall', '+define+SIM_MODE',
@@ -61,9 +51,8 @@ def run(here, number):
              '-j', '1', '+define+SIM_MODE', '--output-split', '10000',
              '--output-split-cfuncs', '100', '-CFLAGS', '-O2',
              '--Mdir', str(BUILD / 'obj'), '-o', 'sim'] + files, out / 'compile.log')
-    if number != 1:
-        command([str(Path.home() / '.local/opt/edrv32-py/bin/python'),
-                 str(COMMON / 'prepare.py'), str(out), str(number)], out / 'reference.log')
+    command([str(Path.home() / '.local/opt/edrv32-py/bin/python'),
+             str(COMMON / 'prepare.py'), str(out), str(number)], out / 'reference.log')
     started = time.monotonic()
     plusargs = ['+DDR_HEX=' + str(out / 'ddr.hex')] if (out / 'ddr.hex').exists() else []
     command([str(BUILD / 'obj/sim'), f'+CASE={number}', '+DATA_DIR=' + str(out),

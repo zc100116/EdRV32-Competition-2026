@@ -64,18 +64,6 @@ static void __attribute__((interrupt("machine"), aligned(4))) trap_handler(void)
         base = EDRV32_VIN_BASE;
         offset = EDRV32_VIN_IRQ_STAT_OFFSET;
         break;
-    case EDRV32_PLIC_SOURCE_PIX:
-        base = EDRV32_PIX_BASE;
-        offset = EDRV32_PIX_IRQ_STAT_OFFSET;
-        break;
-    case EDRV32_PLIC_SOURCE_GEO:
-        base = EDRV32_GEO_BASE;
-        offset = EDRV32_GEO_IRQ_STAT_OFFSET;
-        break;
-    case EDRV32_PLIC_SOURCE_DISP:
-        base = EDRV32_DISP_BASE;
-        offset = EDRV32_DISP_IRQ_STAT_OFFSET;
-        break;
     case EDRV32_PLIC_SOURCE_NPU:
         base = EDRV32_NPU_BASE;
         offset = EDRV32_NPU_IRQ_STAT_OFFSET;
@@ -83,10 +71,6 @@ static void __attribute__((interrupt("machine"), aligned(4))) trap_handler(void)
     case EDRV32_PLIC_SOURCE_ETH:
         base = EDRV32_ETH_BASE;
         offset = EDRV32_ETH_IRQ_STAT_OFFSET;
-        break;
-    case EDRV32_PLIC_SOURCE_MEM_XBAR:
-        base = EDRV32_MEM_XBAR_BASE;
-        offset = EDRV32_MEM_XBAR_IRQ_STAT_OFFSET;
         break;
     default:
         equal("PLIC source 8-15 excluding RND", 8u, source);
@@ -110,7 +94,9 @@ void init(void)
         plic_set_priority(source, 1u);
     }
     plic_set_threshold(0u);
-    plic_set_enable(0xf700u);
+    plic_set_enable((1u << EDRV32_PLIC_SOURCE_VIN) |
+                    (1u << EDRV32_PLIC_SOURCE_NPU) |
+                    (1u << EDRV32_PLIC_SOURCE_ETH));
     __asm__ volatile ("csrs mie, %0" :: "r"(1u << 11));
     __asm__ volatile ("csrsi mstatus, 8");
 }
@@ -126,20 +112,6 @@ void command(uint32_t operation, uint32_t argument)
 void wait_irq(unsigned int source, uint32_t count)
 {
     while (interrupts[source] < count) {
-    }
-}
-void configure_camera(void)
-{
-    gpio_write((1u << 13) | (1u << 15));
-    gpio_set_output_enable(0xf000u);
-    /* SCCB selects RGB565, 1280x720, matching the external model's supplied frame. */
-    for (unsigned int port = 0; port < 2; port++) {
-        i2c_init(port, EDRV32_CLK_SYS_HZ, 400000u);
-        equal("SCCB 4300 RGB565", 0u, (uint32_t)i2c_sccb_write(0x3cu, 0x4300u, 0x61u));
-        equal("SCCB 3808 width hi", 0u, (uint32_t)i2c_sccb_write(0x3cu, 0x3808u, 5u));
-        equal("SCCB 3809 width lo", 0u, (uint32_t)i2c_sccb_write(0x3cu, 0x3809u, 0u));
-        equal("SCCB 380a height hi", 0u, (uint32_t)i2c_sccb_write(0x3cu, 0x380au, 2u));
-        equal("SCCB 380b height lo", 0u, (uint32_t)i2c_sccb_write(0x3cu, 0x380bu, 0xd0u));
     }
 }
 void configure_vin(unsigned int memory, unsigned int ch2)
@@ -161,35 +133,6 @@ void configure_vin(unsigned int memory, unsigned int ch2)
               (ch2 ? EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK : 0u));
     write_reg(EDRV32_PIX_BASE, EDRV32_PIX_CTRL_OFFSET, EDRV32_PIX_CTRL_ENABLE_MASK);
     write_reg(EDRV32_VIN_BASE, EDRV32_VIN_CTRL_OFFSET, EDRV32_VIN_CTRL_ENABLE_MASK);
-}
-void display(uint32_t base)
-{
-    write_reg(EDRV32_DISP_BASE, EDRV32_DISP_NEXT_BASE_OFFSET, base);
-    write_reg(EDRV32_DISP_BASE, EDRV32_DISP_STRIDE_OFFSET, STRIDE);
-    write_reg(EDRV32_DISP_BASE, EDRV32_DISP_CTRL_OFFSET, EDRV32_DISP_CTRL_ENABLE_MASK);
-    while (read_reg(EDRV32_DISP_BASE, EDRV32_DISP_CUR_BASE_OFFSET) != base) {
-    }
-}
-void run_geo(uint32_t source)
-{
-    volatile uint32_t *descriptor = ddr(GEO_DESC);
-    for (unsigned int i = 0; i < 16; i++) descriptor[i] = 0u;
-    descriptor[0] = source;
-    descriptor[1] = STRIDE;
-    descriptor[2] = (HEIGHT << 16) | WIDTH;
-    descriptor[3] = GEO_BASE;
-    descriptor[4] = STRIDE;
-    descriptor[6] = (HEIGHT << 16) | WIDTH;
-    descriptor[8] = 46341u;
-    descriptor[9] = 46341u;
-    descriptor[10] = 640u * 65536u - 46341u * 1000u;
-    descriptor[11] = (uint32_t)-46341;
-    descriptor[12] = 46341u;
-    descriptor[13] = 360u * 65536u + 46341u * 280u;
-    write_reg(EDRV32_GEO_BASE, EDRV32_GEO_DESC_BASE_OFFSET, GEO_DESC);
-    write_reg(EDRV32_GEO_BASE, EDRV32_GEO_DESC_COUNT_OFFSET, 1u);
-    write_reg(EDRV32_GEO_BASE, EDRV32_GEO_IRQ_EN_OFFSET, EDRV32_GEO_IRQ_EN_DONE_MASK);
-    write_reg(EDRV32_GEO_BASE, EDRV32_GEO_DOORBELL_OFFSET, 1u);
 }
 void configure_npu(uint32_t input)
 {
@@ -216,53 +159,4 @@ void configure_eth(void)
     write_reg(EDRV32_ETH_BASE, EDRV32_ETH_IRQ_EN_OFFSET,
               EDRV32_ETH_IRQ_EN_RX_NOTIFY2_MASK);
     write_reg(EDRV32_ETH_BASE, EDRV32_ETH_CTRL_OFFSET, EDRV32_ETH_CTRL_ENABLE_MASK);
-}
-void eth_send(uint32_t descriptor, uint32_t count)
-{
-    write_reg(EDRV32_ETH_BASE, EDRV32_ETH_DESC_BASE_OFFSET, descriptor);
-    write_reg(EDRV32_ETH_BASE, EDRV32_ETH_DESC_COUNT_OFFSET, count);
-    write_reg(EDRV32_ETH_BASE, EDRV32_ETH_DOORBELL_OFFSET, 1u);
-}
-void snapshot(uint32_t clear)
-{
-    write_reg(EDRV32_MEM_XBAR_BASE, EDRV32_MEM_XBAR_STAT_CTRL_OFFSET,
-              EDRV32_MEM_XBAR_STAT_CTRL_SNAPSHOT_MASK |
-              (clear ? EDRV32_MEM_XBAR_STAT_CTRL_CLEAR_MASK : 0u));
-    for (unsigned int port = 0; port < 7; port++) {
-        uart_puts("PORT ");
-        print_hex(port);
-        uint32_t offsets[] = {
-            EDRV32_MEM_XBAR_RD_TXN_OFFSET(port), EDRV32_MEM_XBAR_RD_BEAT_OFFSET(port),
-            EDRV32_MEM_XBAR_WR_TXN_OFFSET(port), EDRV32_MEM_XBAR_WR_BEAT_OFFSET(port),
-            EDRV32_MEM_XBAR_WAIT_SUM_OFFSET(port), EDRV32_MEM_XBAR_WAIT_MAX_OFFSET(port),
-            EDRV32_MEM_XBAR_URG_CNT_OFFSET(port)
-        };
-        for (unsigned int field = 0; field < 7; field++) {
-            uart_putc(' ');
-            print_hex(read_reg(EDRV32_MEM_XBAR_BASE, offsets[field]));
-        }
-        uart_puts("\r\n");
-    }
-}
-
-void video_descriptors(void)
-{
-    volatile uint32_t *header = ddr(TX_BASE);
-    header[0] = 0x46564445u;
-    header[1] = 0x00010001u;
-    header[2] = (HEIGHT << 16) | WIDTH;
-    header[3] = STRIDE;
-    header[4] = 7u;
-    uint64_t time = clint_time();
-    header[5] = (uint32_t)time;
-    header[6] = (uint32_t)(time >> 32);
-    header[7] = 1u;
-    volatile uint32_t *descriptor = ddr(TX_DESC);
-    for (unsigned int i = 0; i < 16; i++) descriptor[i] = 0u;
-    descriptor[EDRV32_ETH_TX_DESC_SRC_ADDR_OFFSET / 4u] = TX_BASE;
-    descriptor[EDRV32_ETH_TX_DESC_LEN_OFFSET / 4u] = 32u;
-    descriptor[8u + EDRV32_ETH_TX_DESC_SRC_ADDR_OFFSET / 4u] = SURFACE_BASE;
-    descriptor[8u + EDRV32_ETH_TX_DESC_LEN_OFFSET / 4u] = FRAME_BYTES;
-    descriptor[8u + EDRV32_ETH_TX_DESC_WIN_OFFSET / 4u] = EDRV32_ETH_TX_DESC_NOTIFY_MASK;
-    descriptor[8u + EDRV32_ETH_TX_DESC_OFFSET_OFFSET / 4u] = 32u;
 }

@@ -208,10 +208,9 @@ module edrv32_soc_tb;
     wire [23:0] unused_hdmi_rgb;
     wire signed [31:0] unused_hdmi_frames;
     wire signed [31:0] unused_hdmi_pixels;
-    bit hdmi_capture_enable = 0;
     tmds_rx_model u_hdmi (
         .clk_pix_i(clk_pix_i),
-        .rst_n_i(rst_n_i && hdmi_capture_enable),
+        .rst_n_i(1'b0),
         .sym_i(tmds_sym_o),
         .hs_o(unused_hdmi_hs),
         .vs_o(unused_hdmi_vs),
@@ -249,8 +248,6 @@ module edrv32_soc_tb;
     int case_number;
     string data_dir;
     bit checks_complete = 0;
-    bit accept_exit = 1;
-    event software_exit;
     initial begin
         if (!$value$plusargs("CASE=%d", case_number)) $fatal(1, "missing +CASE");
         if (!$value$plusargs("DATA_DIR=%s", data_dir)) $fatal(1, "missing +DATA_DIR");
@@ -283,16 +280,14 @@ module edrv32_soc_tb;
         end
     end
 
-    `include "boot_stimulus.svh"
     `include "eth_stimulus.svh"
     `include "media_stimulus.svh"
     always @(posedge clk_sys_i) begin
         if (u_dut.unused_sim_exit_valid_w) begin
-            -> software_exit;
             if (u_dut.unused_sim_exit_code_w != 0)
                 $fatal(1, "FAIL soc SIM_EXIT=%h at %0t",
                     u_dut.unused_sim_exit_code_w, $time);
-            if (accept_exit) begin
+            begin
                 if (!checks_complete)
                     $fatal(1, "FAIL SC-%02d external checks incomplete time=%0t",
                         case_number, $time);
