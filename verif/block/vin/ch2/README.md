@@ -1,7 +1,7 @@
 # VIN CH2 独立模块级验证（B2-1c）
 
-依据 `vin-spec.md` v0.2 第 2.4、2.6–2.9、4、5.1、6 节和
-`vin-testplan.md` v0.3 的 VI-19–23、VI-15 CH2 部分实现。
+依据 `vin-spec.md` v0.3 第 2.4、2.6–2.9、4、5.1、6 节和
+`vin-testplan.md` v0.4 的 VI-19–23、VI-15 CH2 部分实现。
 开发基线为 `729338d`，测试提交为本报告所属提交；未阅读 `rtl/media/vin/` 的实现。
 只复用了既有公开端口连接、DVP 模型、AXI RAM、APB 接口和协议检查器。
 
@@ -12,7 +12,7 @@
 | VI-15 CH2 | `../edrv32_vin_tb.sv::vi15()`，`../test.yaml`、`../full/test.yaml` | smoke/full | CH2 全寄存器复位、CTRL/SLOT_BUSY 读写、STRIDE/BASE 对齐、RO/保留偏移、SOFT_RST 后复位 |
 | VI-19 | `full/`，`edrv32_vin_ch2_tb.sv::vi19()` | full | cam0 同送 CH0/CH2，三帧三槽，两通道逐字节比对和相同 frame_id；CH2_FRAME、DONE_INFO、PERF5、最后 B 后完成 |
 | VI-20 | `full/`，`::vi20()` | full | 内存源同送 CH0/CH2，逐字节结果、相同 frame_id、读 DONE、持续 RREADY |
-| VI-21 | `full/`，`::vi21()` | full | (a) cam0 只开 CH2；(b) 内存源只开 CH2；(c) cam0 同送 CH0/CH2；全程停止 P1 写，检查丢帧、计数、无完成、排空、下帧原槽恢复 |
+| VI-21 | `full/`，`::vi21()` | full | (a)(c) 摄像头有效数据溢出及恢复；(b) 内存源 CH2 长停顿反压；(d) 上补齐停顿 1500 周期；(e) 内存源 CH0+CH2 全速逐字节比较 |
 | VI-22 | `test.yaml`、`full/`，`::vi22()` | smoke/full | 64×8 cam0，CH2 配置错误 8/PERF15，无 CH2 写或完成，同源 CH0 正确 |
 | VI-23 | `full/`，`::vi23()` | full | 全槽占用跳帧、帧中改 SLOT_BUSY、下一帧采样；成功槽序列 0/1/2/0、PERF11、源 frame_id 包含跳过帧 |
 | 参考模型 / harness 自测 | `selftest/` | smoke/full | 整数参考模型自测、DVP 像素计数、RAM 字节序、CH0/CH2 完整逐字节及行间空隙比对 |
@@ -21,10 +21,17 @@
 正式测试使用真实 `rtl/filelists/vin.f`，只有 `selftest/files.f` 使用既有接口桩。
 接口桩不实现 VIN 功能，selftest 不构成真实 CH2 功能通过证据。
 
-VI-21 按协调者问答修改后的方案（`729338d`）实现：共享 P1 无法仅阻止内部
-CH2 仲裁授权，采用公共 AWREADY/WREADY 停止的三种场景，不增加 wrapper 或层次引用。
-场景 (b) 在写停止期间等待内存源 DONE，同时持续检查 RREADY，验证 CH2 不暂停源。
-场景 (c) 检查两个溢出计数；最近错误代码由先后顺序决定，不假定固定的最后错误通道。
+VI-21 按 `vin-testplan` v0.4 实现五种公开接口情形，不读取内部 FIFO 或选路状态：
+
+- (a)(c)：摄像头有效行到达时长时间停止 P1 写，继续检查丢帧、计数、排空、
+  槽复用与下一帧恢复；摄像头源始终不被反压。
+- (b)：只开内存源 CH2，停止写 20000 周期后检查无溢出、MSRC_BUSY；再等待
+  4096 周期检查 AR 计数保持，证明源暂停。RREADY 始终为 1；恢复写后逐字节
+  比较整帧、检查最后 B 后完成和内存源 DONE。
+- (d)：cam0 只开 CH2，用公开 PERF0 观察 SOF，停止写 1500 个 clk_mem 周期，
+  该窗口早于第一行有效缩放结果。检查上补齐不因满 FIFO 而溢出，恢复后比较整帧。
+- (e)：内存源同送 CH0/CH2，P1 不添加停顿，比较两通道整帧和相同 frame_id，
+  检查 CH0/CH2 溢出计数均为 0。
 
 ## 参考模型
 
@@ -111,20 +118,61 @@ PY
 `--binary --timing -Wall -j 1 -CFLAGS -O0` 编译和链接，退出码 0、0 告警，未运行。
 编译日志为 `build/vin_ch2/elaborate/compile.log`。
 
-**当前尚未合入 CH2 RTL，VI-19–23 和修改后的 VI-15 未运行功能回归。**
-协调者已明确要求本轮先交付测试，真实 RTL 联调另行安排；届时应执行：
+原 B2-1c 的 v0.2 联调已完成，见
+`docs/debug/2026-10-29-vin-ch2-integration.md`；v0.3 的追加验证记录见文末。
+完整目录的回归入口仍为：
 
 ```sh
 python3 tools/regress.py smoke -j 1 --path verif/block/vin
 python3 tools/regress.py full -j 1 --path verif/block/vin
 ```
 
-新增 runner 生成数据后以 `-Wall -j 1 -CFLAGS -O0` 编译，不重试或替代失败结果。
+runner 生成数据后以 `-Wall -j 1` 编译，full 使用 `-CFLAGS -O1`，
+smoke/selftest 使用 `-O0`，不重试或替代失败结果。
 full 二进制可用 `+DIR=<绝对 build/vin_ch2/full 路径> +CASE=19`（至 23）定位单项。
-`+CASE=smoke` 只跑 VI-22，`+CASE=full` 跑 VI-19–23。
+`+CASE=smoke` 只跑 VI-22，`+CASE=full` 跑 VI-19–23；
+`+CASE=21a` 至 `21e` 分别定位五个子场景，`+CASE=21` 运行全部五项。
+runner 的第二个参数也可选择子场景，例如 `python3 verif/block/vin/ch2/run.py full 21b`。
 
 ## 修改的文件
 
 `../edrv32_vin_tb.sv` 仅修改 VI-15 的 CH2 寄存器部分；本目录新增
 `reference.py`、`crosscheck.py`、`run.py`、`edrv32_vin_ch2_tb.sv`、`support.f`、
 `files.f`、`test.yaml`、`full/{files.f,test.yaml}`、`selftest/{files.f,test.yaml}` 和本报告。
+
+
+## v0.3 反压追加验证（B2-1d）
+
+用户通过协调者确认 VIN v0.3（规格提交 `6537bc8`），追加测试提交 `48b3cb9`。
+测试在独立验证分支编写，未读取被测 RTL。旧 RTL 的失败证据和修复后结果将分别
+记录；旧 RTL 结果不能作为 v0.3 通过证据。
+
+### 修复前：v0.2 RTL
+
+测试源码提交 `48b3cb9`，Verilator 5.020，`-Wall -j 1 -CFLAGS -O1`。
+先用 runner 生成参考数据、构建并运行 (b)，再复用同一二进制逐项运行 (d)(e)：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 verif/block/vin/ch2/run.py full 21b
+build/vin_ch2/full/obj/sim +DIR=$PWD/build/vin_ch2/full +CASE=21d
+build/vin_ch2/full/obj/sim +DIR=$PWD/build/vin_ch2/full +CASE=21e
+```
+
+| 子场景 | v0.2 实测 | 现象 |
+|---|---|---|
+| VI-21b | FAIL | 仿真 160.760 µs，PERF8（0x060）期望 0、实际 1 |
+| VI-21d | FAIL | 仿真 77.291568 ms，PERF8（0x060）期望 0、实际 1；已丢弃前两帧并在第三帧 SOF 后停写 1500 周期 |
+| VI-21e | PASS | 两通道整帧、frame_id、溢出计数检查均通过；单次仿真墙钟 16.92 s |
+
+(b)(d) 的进程退出码非零，均直接在无溢出断言处失败；没有删除或放宽该断言。
+(e) 的实测与“旧 RTL 预期失败”的预估不同：现有 `edrv32_vin_memory` 在无停顿时
+可独立并行接收写拍和返回读拍，不模拟 SoC DDR 的共享数据线和命令延迟。
+该模型下 (e) 不复现 SC-05 默认 DDR 时序模型下的溢出；保留原判据和无停顿激励，
+不为制造失败而添加停顿。SC-05 的实际失败见
+`docs/debug/2026-10-29-soc-sc05-ch2-overflow.md`。
+
+原始证据：`build/vin_ch2/flow/old-21{b,d,e}.log`，(b) runner 日志
+`build/vin_ch2/flow/old-21b-runner.log`。`old-sim` 是该次修复前二进制的保留副本；
+生成物不入库。提交 `4ac07cd` 随后把五个子场景分到独立定时进程，避免把全部
+大型逐字节记分板展开到同一个 C++ 协程；不改变激励或判据，lint 为 0 告警。
