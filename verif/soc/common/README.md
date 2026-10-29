@@ -38,7 +38,7 @@ No stimulus or functional comparison was weakened to fix that lint warning.
 
 ## Archived tests
 
-Commit `38c7901` contains all implemented tests before scope reduction;
+Commit `fe48c72` contains all implemented tests before scope reduction;
 `6975d9a` introduced the complete suite, `6463fa2` includes the capture-control
 and boot-timeout adjustments, and `a17f1e6` adds SC-05 failure diagnostics.
 The archived tests have not been accepted as passing tests.
@@ -57,12 +57,12 @@ The archived tests have not been accepted as passing tests.
 Recover a selected directory from that commit for a targeted investigation:
 
 ```sh
-git restore --source=38c7901 -- verif/soc/sc_03_s2 sw/tests/soc/sc_03_s2
+git restore --source=fe48c72 -- verif/soc/sc_03_s2 sw/tests/soc/sc_03_s2
 ```
 
 The archived testbench supplements were shared under `verif/soc/common/`, and
 software helpers were shared under `sw/tests/soc/`; recover the corresponding
-helpers from `38c7901` as required by the selected test. No SC-08/09 port
+helpers from `fe48c72` as required by the selected test. No SC-08/09 port
 statistics were measured before those tests were removed from scope.
 
 | Archived item | MEM_XBAR per-port statistics | urgent count |
