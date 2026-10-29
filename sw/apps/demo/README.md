@@ -196,4 +196,24 @@ seq 每次采样仍递增，`status` 的 `Monitor dropped records` 计本地丢�
 
 Linux 仅验证 C11 构建和纯逻辑，未运行 Verilator、SoC 仿真、FPGA 或真实串口/PHY/HDMI。
 构建/主机日志在 `build/sw/demo/{rv32-build.log,host-test.log}`；静态栈帧信息在
-`build/sw/demo/obj/**/*.su`，供重复测量。最终 commit 与尺寸见本节后续记录。
+`build/sw/demo/obj/**/*.su`，供重复测量。
+
+2026-10-29 在实现提交 `6119551` 上的结果（已 rebase 并接入 B2-4a）：
+
+| 验收 | 结果 |
+|---|---|
+| `make -C sw PROGRAM=demo MEMORY=sram -j1` | PASS，xPack GCC 15.2.0，C11 / RV32IM+Zicsr / `-O2 -Wall -Wextra -Werror`，0 warning / 0 error |
+| `make -C sw/apps/demo test` | PASS，主机 GCC 13.3.0，C11 / `-Wall -Wextra -Werror` / UBSan，7 类纯逻辑覆盖均通过，无 UBSan 错误 |
+| `riscv-none-elf-nm -u build/sw/demo/demo.elf` | 无未解析符号 |
+| `python3 tools/check/verilog_style.py sw/apps/demo` | 0 Verilog 文件、0 warning；没有 RTL 改动，Verilator lint 不适用 |
+| `git diff --check` | PASS |
+
+`riscv-none-elf-size`：text=**41132 B**（指令 28148 B、只读数据 12984 B），
+data=**0 B**，bss=**1996 B**（含 BSP `.tohost` 72 B），合计 **43128 B**。
+链接对齐另占 20 B，`__bss_end=0x1000a88c`，
+距 SRAM 栈顶 `0x10010000` 尚余 **22388 B**；整个程序和栈放得进 64 KiB SRAM。
+BIOS 镜像 `demo.bin=41132 B`，也小于 BIOS 的 SRAM−4 KiB 栈下载上限。
+静态 `.su` 中最大单函数栈帧为监控采样 336 B，main 320 B、
+后处理入口 128 B；这些是函数自身帧，不冒充实板栈高水位测量。
+未取得硬件性能数字；真实摄像头帧率、60 fps 源配置、PHY 时序、HDMI/UDP 功能现象
+按上述清单在实板验证并记录，Linux 验收未替代这些检查。
