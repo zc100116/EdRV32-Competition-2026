@@ -26,7 +26,7 @@
     initial begin : camera_source
         realtime start_ns;
         #1;
-        if (case_number != 1) begin
+        if (case_number inside {3, 4, 8, 9, 10, 11}) begin
             $readmemh({data_dir, "/camera.hex"}, camera_storage);
             camera_image = new[1280*720];
             foreach (camera_image[i]) camera_image[i] = camera_storage[i];
@@ -75,6 +75,7 @@
         bit [23:0] expected;
         bit [23:0] actual;
         // Discard the frame in progress when the check is armed, then inspect one full frame.
+        hdmi_capture_enable = 1;
         target = unused_hdmi_frames + 2;
         wait (unused_hdmi_frames >= target);
         @(negedge clk_pix_i);
@@ -95,6 +96,7 @@
                     name, i%1280, i/1280, expected, actual, $time);
         end
         $fclose(fd);
+        hdmi_capture_enable = 0;
         checked_frames++;
         $display("CHECK HDMI %s pixels=921600 time=%0t", name, $time);
     endtask

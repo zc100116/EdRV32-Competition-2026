@@ -208,9 +208,10 @@ module edrv32_soc_tb;
     wire [23:0] unused_hdmi_rgb;
     wire signed [31:0] unused_hdmi_frames;
     wire signed [31:0] unused_hdmi_pixels;
+    bit hdmi_capture_enable = 0;
     tmds_rx_model u_hdmi (
         .clk_pix_i(clk_pix_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_n_i && hdmi_capture_enable),
         .sym_i(tmds_sym_o),
         .hs_o(unused_hdmi_hs),
         .vs_o(unused_hdmi_vs),

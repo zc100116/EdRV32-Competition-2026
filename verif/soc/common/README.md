@@ -37,8 +37,9 @@ Reference frames come directly from `pix_ref.py`, `geo_ref.py`, VIN CH2's
 `reference.py`, and `tools/npu/ref/npu_ref.py`. The NPU generator's random C4
 input is replaced with the independently predicted CH2 image before reference
 execution; the simulator does **not** preload that CH2 result. CH2 and NPU
-output must actually be produced by their engines. HDMI compares every pixel
-of a complete captured frame; DDR compares every expected byte. ETH checks ARP
+output must actually be produced by their engines. The TMDS receiver records only during requested frame checks; its model reset
+holds its capture queues empty at other times and has no connection to DUT reset.
+HDMI compares every pixel of a complete captured frame; DDR compares every expected byte. ETH checks ARP
 fields, UDP offsets/notifications, IPv4 checksums, EDVF fields and every Surface
 byte, and all 16 EDTM records against the software's corresponding register
 snapshot export. The ETH peer independently checks wire framing and FCS.
