@@ -1,113 +1,100 @@
-# RN-17 主机结果与 B3-3b A 交接
+# RN-17 定稿容差主机结果
 
-日期：2026-10-29。被测实现提交：`76e0513`（工具）、`146b4fd`（服务/绘制单元）、
-`546be8a`（公共 API/配置）；本文件另行提交，不改变被测代码。
-LVGL v9.6.0 原始子模块 `80ca777e37a2b176770726a02e07a6fb79ef0b39`。
+日期：2026-10-29。集成基线 `34a49ee`；本次被测 C 实现 `4053b9a`，主机工具 `80e54f5`。
+判据来自用户确认的 `docs/testplan/rnd-testplan.md` 第 6 节（`ef191bf`），
+LVGL v9.6.0 子模块仍为 `80ca777e37a2b176770726a02e07a6fb79ef0b39`。
+没有修改绘制算法、edge mask 分类、规格或 testplan。
 
-**初始容差结果：11 帧全部 FAIL，容差没有修改。**
-这份交付实现了真实 LVGL → RND 命令 → Python 参考模型的比对与板上 CPU 比对入口；
-不能把“比对已实现/执行完成”称为“RN-17 初值通过”。
-原始判据仍为全覆盖区通道差≤3、边缘≤48、>3 像素≤全帧 1%，由协调者处理 testplan 待定项 1。
+## 当前判定和输出
 
-## 条件和命令
+两边原始 RGB565 像素直接拆成 R5/G6/B5 后逐通道相减，单位为相应通道的最低位：
 
-- 主机：Ubuntu GCC 13.3.0，Python 3.12.3；1280×720 RGB565，DIRECT 双缓冲。
-- 目标编译：xPack riscv-none-elf-gcc 15.2.0，RV32IM_Zicsr / ilp32。
-- 主机/目标同一 `lv_conf.h`、单 SW unit、无 OS、静态 24 MiB 堆、batch=32。
-- C11 `-O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin`；第三方告警豁免：无。
-- 所有构建/执行串行，无 SoC 仿真，无 RTL 读取/修改。
+- 全覆盖区（两边覆盖率均255）的每个通道差≤1 LSB。
+- 全帧中任一通道差>1 LSB 的像素数≤全帧的1%，含等号。
+- 边缘（任一覆盖率不为255，以及 BOX_SHADOW 区域）没有单像素上限。
+
+`rn17_compare.c:s3_compare_pixels` 共用逐像素统计；`s3_compare_passes` 共用判定。
+板上 UART 和 Python runner 都调用这两个 C 实现，Python 不复制判定公式。
+原有 8 位通道统计字段及旧判定已删除。
+每帧统计 full_max_lsb、edge_max_lsb、>1 LSB 像素数和比例、五档分布、PASS/FAIL。
+五档是像素最大 R5/G6/B5 通道差为0、1、2、3–4、≥5 LSB的计数。
+
+## 11 帧重跑结果
+
+每帧921600像素，`RND/SW` 是混合渲染中实际认领/未认领的任务数，不含纯 SW 参考重画。
+
+**11 帧全部 PASS，runner 返回0。** 全覆盖区最大差均为1 LSB，
+超过1 LSB的像素比例最大为0.464844%（4284/921600，containers场景）。
+
+frame|full max LSB|edge max LSB|>1 LSB pixels|>1 LSB %|RND/SW tasks|bins|result
+---|---:|---:|---:|---:|---:|---|---
+widgets-16|1|8|1736|0.188368|62/0|[881741, 38123, 922, 792, 22]|PASS
+widgets-176|1|8|1736|0.188368|62/0|[881741, 38123, 922, 792, 22]|PASS
+widgets-656|1|8|1761|0.191081|62/0|[881274, 38565, 947, 792, 22]|PASS
+benchmark-00-empty|1|1|0|0.000000|5/0|[912999, 8601, 0, 0, 0]|PASS
+benchmark-02-rectangle|1|2|151|0.016385|6/0|[912234, 9215, 151, 0, 0]|PASS
+benchmark-04-rgb-images|1|2|151|0.016385|26/0|[912187, 9262, 151, 0, 0]|PASS
+benchmark-05-argb-images|1|2|886|0.096137|26/0|[902040, 18674, 886, 0, 0]|PASS
+benchmark-06-rotated-images|1|2|151|0.016385|5/10|[912090, 9359, 151, 0, 0]|PASS
+benchmark-07-labels|1|2|1720|0.186632|40/0|[893756, 26124, 1720, 0, 0]|PASS
+benchmark-10-containers|1|6|4284|0.464844|78/0|[895654, 21662, 1643, 2523, 118]|PASS
+benchmark-13-opa-layer|1|4|2642|0.286675|278/0|[672306, 246652, 2538, 104, 0]|PASS
+
+实际 `rnd_ref` 执行总量：{'batches': 668, 'commands': 2891, 'pixels': 21168044}。
+
+## 命令与验证
+
+所有生成物都在本 worktree 自己的 `build/` 中，没有复用其他 worktree 的编译/链接产物。
+主机 GCC 13.3.0、Python 3.12.3；目标 xPack riscv-none-elf-gcc 15.2.0。
+C11 `-O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin`，无第三方告警豁免。
+主机/板上使用同一 lv_conf、DIRECT RGB565 1280×720 双缓冲、batch=32。
 
 ```sh
-python3 tools/s3/lvgl_host.py > build/s3/lvgl/build.log 2>&1
-python3 tools/s3/rn17.py --no-build > build/s3/lvgl/rn17.log 2>&1
+python3 tools/s3/lvgl_host.py > build/s3/lvgl/build-lsb.log 2>&1
+python3 tools/s3/rn17.py --no-build > build/s3/lvgl/rn17-lsb.log 2>&1
 . ~/.local/opt/edrv32/env.sh
-python3 tools/s3/lvgl_target.py > build/s3/lvgl/target-build.log 2>&1
-PYTHONPYCACHEPREFIX=build/s3/pycache python3 -m py_compile \
-    tools/s3/lvgl_assets.py tools/s3/lvgl_host.py tools/s3/lvgl_target.py tools/s3/rn17.py
+make -C sw PROGRAM=s3 MEMORY=ddr_app -j1 > build/s3/lvgl/s3-build-lsb.log 2>&1
+PYTHONPYCACHEPREFIX=build/s3/pycache python3 -m py_compile tools/s3/rn17.py
 git diff --check
 ```
 
-主机：510 个 C 源文件编译并 `--no-undefined` 链接共享库，PASS，0 告警。
-RV32：509 个源文件编译和可重定位链接，PASS，0 告警；不再有 libc/math 未解析符号。
-剩余引用是 libgcc、BSP cache、RND encoder/physical、共享 S3 平台，以及最终链接
-`--wrap=lv_draw_sw_blend` 的 `__real_` 引用，均属于约定的集成依赖。
-Python 语法检查和 `git diff --check` 均 PASS。
-RN-17 runner 正确返回 1，表示容差超限；它仍完成全部帧，生成完整差异分布。
+- 主机510个C源编译并链接共享库：PASS，0告警；`build-lsb.log`。
+- `python3 tools/s3/rn17.py --no-build`：返回0，11帧全部PASS；`rn17-lsb.log`。
+- 完整 `make -C sw PROGRAM=s3 MEMORY=ddr_app -j1`：返回0，0 warning、0 error；
+  本worktree的 `build/sw/s3/s3.elf` 和 `.map`，完整日志 `s3-build-lsb.log`。
+- 共用C判定的定向边界检查：PASS；1 LSB的R/G/B均允许，全覆盖区2 LSB拒绝，
+  单个边缘63 LSB在100像素中允许，两个>1 LSB边缘像素在100像素中拒绝，验证1%含等号；
+  C11 `-Wall -Wextra -Werror` 编译的临时检查在 `build/s3/lvgl/lsb-check.c` / `.log`。
+- 两次benchmark退出后菜单保持不变的检查：PASS；真正benchmark结束回调已执行。
+- Python语法与 `git diff --check`：PASS。
 
-## 实际 LVGL 帧的结果
+完整ELF为RISC-V ELF32，入口 `0x90000000`；`riscv-none-elf-size` 给出
+text=1119908、data=1408、bss=53206592，共54327908字节（不含运行期栈）。
 
-`RND/SW` 是该帧混合渲染中的任务数，不包含前一次纯 SW 参考重画。
-bins 是每像素最大通道差的五档计数：0–3、4–8、9–16、17–48、49–255。
-所有帧均为 921600 像素；RGB565 按规格展开到 8 位通道再比较。
-边缘分类为协调者确认的 SW 非255 AA mask / RND 非255 coverage 并集，
-BOX_SHADOW 模糊网格整体计入边缘，主机和板上共用同一 C 代码。
+真正板上 RN-17、边缘目视检查和benchmark FPS仍待上板；host时钟人工推进的FPS不是硬件性能。
 
-| frame | max R | max G | max B | full max | edge max | >3 pixels | >3 % | RND/SW | bins | 结果 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
-| widgets-16 | 66 | 32 | 25 | 9 | 66 | 39859 | 4.324978 | 62/0 | 881741,37250,2279,314,16 | FAIL |
-| widgets-176 | 66 | 32 | 25 | 9 | 66 | 39859 | 4.324978 | 62/0 | 881741,37250,2279,314,16 | FAIL |
-| widgets-656 | 66 | 32 | 25 | 9 | 66 | 40331 | 4.376194 | 62/0 | 881269,37686,2314,315,16 | FAIL |
-| benchmark-00-empty | 9 | 4 | 9 | 9 | 9 | 8607 | 0.933919 | 5/0 | 912993,1448,7159,0,0 | FAIL |
-| benchmark-02-rectangle | 9 | 8 | 9 | 4 | 9 | 9366 | 1.016276 | 6/0 | 912234,9141,225,0,0 | FAIL |
-| benchmark-04-rgb-images | 9 | 8 | 9 | 4 | 9 | 9413 | 1.021376 | 26/0 | 912187,9177,236,0,0 | FAIL |
-| benchmark-05-argb-images | 16 | 9 | 16 | 4 | 16 | 19182 | 2.081380 | 26/0 | 902418,15507,3675,0,0 | FAIL |
-| benchmark-06-rotated-images | 9 | 8 | 9 | 4 | 9 | 9029 | 0.979709 | 5/10 | 912571,8770,259,0,0 | FAIL |
-| benchmark-07-labels | 16 | 9 | 9 | 4 | 16 | 27415 | 2.974718 | 40/0 | 894185,21239,6176,0,0 | FAIL |
-| benchmark-10-containers | 49 | 24 | 25 | 4 | 49 | 25946 | 2.815321 | 78/0 | 895654,20653,4879,356,58 | FAIL |
-| benchmark-13-opa-layer | 33 | 12 | 17 | 4 | 33 | 248301 | 26.942383 | 278/0 | 673299,233576,13616,1109,0 | FAIL |
-
-真实模型执行总计：668 个 batch、2881 条命令、21164490 个目标像素。
-选帧导出 2874 条原始命令：FILL=178、BORDER=85、GLYPH=2431、BLIT=138、BOX_SHADOW=42；
-另外 7 条来自帧间 DIRECT 脏区 COPY。每条均交给 `rnd_ref.execute`，不是手写模型场景。
-旋转图像场景的 10 个 IMAGE 任务未被认领，与该帧 `RN-17 type=6 unclaimed=10` 一致。
-
-产物在 `build/s3/lvgl/`：22 张 `*-sw.ppm` / `*-rnd.ppm`，11 份各帧
-`*.commands.bin`，`rn17-results.md`，`rn17.log`。
-源数据是实际 LVGL 解码/字体 staging 和目标字节，由 host callback 直接传给 Python 模型；
-重新运行上述 runner 可重新取得，不另造源图或命令。
-CPU idle 文本由 Linux sysmon 采样，重复运行时该文字及其涉及的少量像素计数可能改变；
+runner 执行真实 widgets 三帧和 benchmark 八场景，由真实 LVGL 任务生成原始64 B描述符和源数据，
+交仓库 `rnd_ref.execute` 执行并写回目标内存；没有用 SW 替代 RND。
+CPU idle 文本由 Linux sysmon 采样，重复运行时该文字及少量涉及像素的计数可能改变；
 每一对 SW/RND 比较期间时间和 UI 内容均冻结。
+`build/s3/lvgl/` 保留22张 `*-sw.ppm` / `*-rnd.ppm`、11份 `*.commands.bin`、
+当前 `rn17-results.md` 和 `rn17-lsb.log`。所有生成物不入库。
 
-## 观察、限制和独立检查
+## 旧初值的历史说明
 
-源码中可以确认两组算法差异：
+定稿前曾按展开后的8位通道统计，11帧均超出当时开发初值；
+随后的 A2 核对确认圆角坐标/半径换算正确，差异来自两套覆盖率算法。
+用户据此确认现在的 RGB565 LSB 判据；旧判据结果表已删除，详细旧数据保留在 git 历史中，
+不作为当前验收标准。下面仅保留 A2 的参数、像素与算法推导依据。
 
-- LVGL `src/draw/sw/blend/lv_draw_sw_blend_private.h` 的 RGB565 mix 把 opacity
-  化成 `mix5=(mix+4)>>3`，在 RGB565 通道内混合；RND 2.2 是展开 RGB888 后按 /255 四舍五入，
-  最后截成 RGB565。两者并非逐位相同，单个 RGB565 LSB 展开就是 R/B 8–9、G 4–5。
-- LVGL `lv_draw_sw_box_shadow.c` 的 `SHADOW_ENHANCE=1` 将半宽盒滤波再重复一次，
-  RND BOX_SHADOW 是规格定义的一组水平/竖直盒滤波和 Q4 圆角覆盖率。
-
-这些是已检查源码的差异，不代表已经逐任务归因了表中所有差异；
-本轮没有改 SW 参考、硬件算法、容差，也没有为了通过初值而禁用正常认领。
-需要进一步逐任务归因或容差定稿时，可从保留的 PPM/命令及该实现继续。
-
-真实 benchmark 的 16 个场景及平均 FPS 打印路径已执行；人工推进 host tick 下输出为 0，
-这只验证结束回调，不是硬件性能值。两个“benchmark → stop → menu → 越过场景期限”
-检查均 PASS，菜单中心像素保持不变。host 的 Surface 重叠检查未报错。
-
-目标片段 `riscv-none-elf-size build/s3/lvgl-rv32/lvgl.o`：
-
-| text（含常量） | data | bss | 合计 |
-|---:|---:|---:|---:|
-| 1761060 | 1405 | 38436764 | 40199229 B |
-
-这是未最终放置、未执行应用级 `--gc-sections` 的可重定位片段；
-不代表最终 ELF，也不含共享 S3/game/stack 的布局。
-主静态对象逐项大小、对齐、DDR CPU/物理窗口、cache 交接和 perf 估算输入见 `README.md`。
-最终绝对地址/应用 DDR 总量由项目经理在完整 S3 map 中记录。
-
-未验项：真实板上 RN-17、RND 中断和 DISP SWITCH/FRAME、KEY/UART、
-真实 benchmark FPS、最终 S3 DDR ELF/主界面 PPM；前五项需要上板，最终集成由 C/项目经理负责。
-本员工没有运行完整 SoC 仿真，没有修改归属外文件。
-
-## A2：圆角 FILL / BORDER 差异归因
+## A2 历史说明：圆角 FILL / BORDER 差异归因
 
 ### 结论与参数核对
 
 **归类：rnd-spec 2.3 与 LVGL v9.6 软件圆角光栅算法的固有差异，未发现绘制单元换算错误。**
-本次不修改 `draw_rnd.c`、参考模型、LVGL、规格或容差，前面的 RN-17 表保留原始结果。
-被分析实现仍是 `e45a150` 及其上述父提交。
+A2 当时未修改 `draw_rnd.c`、参考模型、LVGL 或规格；被分析实现为 `e45a150`
+及其父提交（集成为 `34a49ee`）。下述 RGB 读数/8 位上界仅保存历史归因依据，
+不再用于容差判定；现行判定及唯一的逐帧统计表是前面的 LSB 表。
 
 通过一个只观察 `evaluate_cb`、不改变任务偏好的临时 draw unit，重新运行真正 widgets 的
 16 ms SW 帧，取得如下原始 LVGL task 参数；再解码该帧已保留的 descriptors。
@@ -232,17 +219,17 @@ Sn = Bn + floor(((F8>>(8-n))-Bn)*m/32)
 bound = max(abs(E_n(Rn)-E_n(Sn)))
 ```
 
-纯连续颜色的粗估也说明 48 不构成算法上界：#252 的覆盖率差79，
+历史上，纯连续颜色的粗估说明 8 位差48不构成算法上界：#252 的覆盖率差79，
 蓝/白的红通道反差222，仅 `222*79/255≈68.78`，就已超过48，尚未计量化；
-本次实际 RGB565 差66与这个量级一致。不能把“圆角 AA 允许48”当作由现有两套公式保证的性质。
+当时观察到的展开通道差66与这个量级一致；这项归因是用户最终改用 LSB 容差的依据之一。
 
-### 本次验证和复现
+### A2 当时的验证和复现
 
 只重新生成 widgets 16 ms 的 SW task 参数，未重跑无关 benchmark、完整 RN-17 或目标构建。
 临时 C probe 用 `-std=c11 -Wall -Wextra -Werror -O2` 链接现有
 `build/s3/lvgl/lvgl_rn17.so`，0 告警；观察 unit 只提供 evaluate 日志，dispatch 始终 IDLE。
 输出与 mask/bound 的临时计算程序在 `build/s3/lvgl/corner/`，均非产品代码。
-原始 PPM、descriptor 与 RN-17 差异表没有覆盖或变更。
+A2 未修改当时的样本；A3 已重跑样本，并以定稿 LSB 统计替换旧判据结果表。
 
 下面的独立片段可以直接重现关键 SW mask 和 RND 整数计算；前提是按前文命令建立同配置
 host library。48 是这个 x86_64 host ABI 下 `lv_draw_sw_mask_radius_param_t` 的大小，
@@ -276,4 +263,4 @@ for w, h, r in ((238,40,13), (23,23,11), (41,41,20)):
 PY
 ```
 
-`git diff --check` PASS。本次仅追加本节，不需要改绘制单元或为不存在的换算 bug 添加回归用例。
+A2 的 `git diff --check` PASS；仅追加归因，没有改绘制单元或为不存在的换算 bug 添加回归用例。

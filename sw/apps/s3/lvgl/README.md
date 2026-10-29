@@ -137,13 +137,15 @@ host stub 同时检查 batch target 与当前扫描 Surface 不重叠。
 `*.commands.bin`、`rn17-results.md` 和 UART 风格日志。生成物均不入库。
 RND Python 模型直接读取批次 source；需要重现源数据时重新运行 runner，源数据没有另外伪造。
 
-统计按 RGB565 展开后的 RGB888 通道做比较，主机/板上共用同一 C 实现。
+统计直接比较 RGB565 的 R5/G6/B5 通道最低位，主机/板上共用
+`rn17_compare.c:s3_compare_pixels` 和 `s3_compare_passes`。
 按协调者确认的规则，边缘是 SW 非255 AA mask 与 RND FILL/BORDER/GLYPH 非255覆盖率的并集，
 BOX_SHADOW 模糊区域整体归边缘；其余为全覆盖区。
-每帧打印 max_rgb、full_max、edge_max、>3 像素数/百万分比、五档差异分布、该帧认领/未认领数。
-分布区间为 0–3、4–8、9–16、17–48、49–255（按像素的最大通道差）。
-原始判据保持 full≤3、edge≤48、>3像素≤1%，超出时打印 FAIL，runner 返回 1。
-**初值超限必须保留并报告，不自动放宽容差。** 实测表见同目录 `RN17_RESULTS.md`。
+每帧打印 full_max_lsb、edge_max_lsb、>1 LSB 像素数/百万分比、五档 LSB 差异分布，
+以及该帧认领/未认领数。分布档为 0、1、2、3–4、≥5（按像素的最大通道 LSB 差）。
+按用户定稿的 rnd-testplan 第 6 节，全覆盖区每通道≤1 LSB，全帧>1 LSB 的像素≤1%；
+边缘没有单像素上限。超出时打印 FAIL，runner 返回 1；仅保留这一套判据。
+实测表及被取代的初值历史说明见同目录 `RN17_RESULTS.md`。
 
 板上在想检查的 widgets/benchmark 帧调用 `s3_lvgl_self_compare()`，输入/动画暂停在同一时刻，
 显示停止后 SW/RND 各重画一次，用 CPU 输出相同统计；随后恢复 RND 开关原值和 L0 显示。
