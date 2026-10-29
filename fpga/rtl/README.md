@@ -204,3 +204,167 @@ IP 和器件原语空壳只放 `build/board_b2/ip_stubs.v`，不入库；本次�
 Tcl mock 检查：141 个 SoC 源文件顺序与 Python 展开完全一致，去重后加 4 个板级文件；
 FDC Tcl 语法通过（17 个时钟定义）。137 个物理引脚逐位覆盖，无重复占用，README
 引脚/标准与 FDC 一致。Tcl mock 不验证 PDS 命令或实际网表层级，Windows 仍需实现。
+
+
+## B3 渲染验证板级顶层
+
+`edrv32_fpga_board_render_top.v` 直接例化 CPU、系统、存储子系统、RND 和 DISP v0.3
+（L0/L1 两层），用于在板上运行 LVGL、游戏和验证 RND。RND 接 mem_xbar P4、媒体
+APB 槽 4、PLIC 源 11；DISP 接 P0、槽 5、源 12；CPU DDR 网关接 P2。存储子系统保留
+MEM_XBAR（槽 8、源 15）和 PERF_MON（槽 9）。VIN、PIX、GEO、NPU、ETH 不例化。
+
+板级 DDR 适配器、DDR IP、TMDS 串化与 B2 相同。`ip_pll_sys` 输出 100 MHz 系统时钟；
+DDR `core_clk` 输出 125 MHz `clk_mem`；`ip_pll_video` 同相输出 74.25 MHz 像素时钟和
+371.25 MHz 串化时钟。只例化 sys/video PLL，未使用的 NPU、摄像头和 ETH 域时钟输入
+在系统子系统处同 B1 接 `clk_sys`。板级复位为 `rst_n_i & sys_lock & video_lock`，DDR
+控制器直接使用该复位；系统子系统中的 reset_ctrl 同步 `mem_ready` 并按 SoC 5.3 释放
+各域，CPU 不会阻塞 DDR 初始化。CDC 沿用 SoC 5.2 X1/X2/X3/X5/X6/X8。
+
+### 裁剪端口接法
+
+这是板级裁剪，空槽依据 SoC 6.1 / sys-subsys 2.3 的约定；协调者于 2026-10-29 确认
+已移除引擎的已分配槽也适用同一约定。
+
+| 端口 | 接值 | 依据 |
+|---|---|---|
+| mem_subsys P1/P3/P5/ETH 的 AWVALID/WVALID/ARVALID、负载、BREADY/RREADY；P1 urgent | 全 0，响应输出不接 | SoC 6.4.1、4.2；B3-6 裁剪及协调者确认 |
+| 媒体 APB 槽 0/1/2/3/6/7/10–15 | PRDATA=0、PREADY=1、PSLVERR=1 | SoC 6.1、sys-subsys 2.3 空槽约定 |
+| PLIC 源 8/9/10/13/14 | 0 | SoC 6.1 中断源表、B3-6 裁剪 |
+| GPIO 输入 [15:4] / [3:0]，LED 输出 | 0 / KEY[3:0]，GPIO[8:4] | SoC 3.5，与 B1/B2 相同 |
+| I2C SCL/SDA 输入，输出及 OE | 2'b11，输出不接 | 同 B1，无板级 I2C 引脚 |
+| DDR APB、诊断控制 | APB 输入全 0；dbg_ddrphy_rst_n=1，其余控制为 0 | fpga/ip/ip_ddr3.md，与 B2 相同 |
+
+### 渲染顶层端口表
+
+引脚和 IO 标准逐位沿用上面的 B2 表，约束文件为
+`fpga/constraints/edrv32_fpga_board_render_top.fdc`。只保留 sys/mem/video 三组的异步关系，
+pix/serial 相关时钟及 DDR PHY 内部时序约束保留。
+
+| 顶层端口（逐位） | FPGA 引脚 | IO 标准 | 来源 |
+|---|---|---|---|
+| `clk_i` | D18 | LVCMOS33 | 2_8_uart_test/uart_test.fdc: clk |
+| `rst_n_i` | C22 | LVCMOS33 | 2_7_key_led_test/source/key_led_test.fdc: rstn |
+| `ddr_ref_clk_p_i` | N3 | HSTL15D_I | ov5640.fdc: clk_p |
+| `ddr_ref_clk_n_i` | N2 | HSTL15D_I | ov5640.fdc: clk_n |
+| `uart_rx_i` | B24 | LVCMOS33 | 2_8_uart_test/uart_test.fdc: uart_rx |
+| `uart_tx_o` | C24 | LVCMOS33 | 2_8_uart_test/uart_test.fdc: uart_tx |
+| `key_n_i[0]` | C23 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行101 USER_BUTTON1 |
+| `key_n_i[1]` | B22 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行102 USER_BUTTON2 |
+| `key_n_i[2]` | A22 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行103 USER_BUTTON3 |
+| `key_n_i[3]` | B20 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行104 USER_BUTTON4 |
+| `led_o[0]` | A20 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行105 USER_LED0 |
+| `led_o[1]` | C18 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行109 USER_LED1 |
+| `led_o[2]` | C19 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行107 USER_LED2 |
+| `led_o[3]` | E18 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行109 USER_LED3 |
+| `led_o[4]` | A17 | LVCMOS33 | mini-base管脚映射.xlsx sheet1 行110 USER_LED4 |
+| `tmds_data_p_o[0]` | R25 | TMDS | ov5640.fdc: tmds_data_p[0] |
+| `tmds_data_p_o[1]` | P23 | TMDS | ov5640.fdc: tmds_data_p[1] |
+| `tmds_data_p_o[2]` | N23 | TMDS | ov5640.fdc: tmds_data_p[2] |
+| `tmds_data_n_o[0]` | P25 | TMDS | ov5640.fdc: tmds_data_n[0] |
+| `tmds_data_n_o[1]` | P24 | TMDS | ov5640.fdc: tmds_data_n[1] |
+| `tmds_data_n_o[2]` | N24 | TMDS | ov5640.fdc: tmds_data_n[2] |
+| `tmds_clk_p_o` | N21 | TMDS | ov5640.fdc: tmds_clk_p |
+| `tmds_clk_n_o` | N22 | TMDS | ov5640.fdc: tmds_clk_n |
+| `mem_cs_n_o` | N4 | HSTL15_I | ov5640.fdc: mem_cs_n |
+| `mem_rst_n_o` | H1 | HSTL15_I | ov5640.fdc: mem_rst_n |
+| `mem_ck_o` | U6 | HSTL15D_I | ov5640.fdc: mem_ck |
+| `mem_ck_n_o` | U5 | HSTL15D_I | ov5640.fdc: mem_ck_n |
+| `mem_cke_o` | R1 | HSTL15_I | ov5640.fdc: mem_cke |
+| `mem_ras_n_o` | P6 | HSTL15_I | ov5640.fdc: mem_ras_n |
+| `mem_cas_n_o` | T7 | HSTL15_I | ov5640.fdc: mem_cas_n |
+| `mem_we_n_o` | T8 | HSTL15_I | ov5640.fdc: mem_we_n |
+| `mem_odt_o` | H2 | HSTL15_I | ov5640.fdc: mem_odt |
+| `mem_a_o[0]` | J1 | HSTL15_I | ov5640.fdc: mem_a[0] |
+| `mem_a_o[1]` | L3 | HSTL15_I | ov5640.fdc: mem_a[1] |
+| `mem_a_o[2]` | L2 | HSTL15_I | ov5640.fdc: mem_a[2] |
+| `mem_a_o[3]` | P3 | HSTL15_I | ov5640.fdc: mem_a[3] |
+| `mem_a_o[4]` | T2 | HSTL15_I | ov5640.fdc: mem_a[4] |
+| `mem_a_o[5]` | M1 | HSTL15_I | ov5640.fdc: mem_a[5] |
+| `mem_a_o[6]` | U1 | HSTL15_I | ov5640.fdc: mem_a[6] |
+| `mem_a_o[7]` | K1 | HSTL15_I | ov5640.fdc: mem_a[7] |
+| `mem_a_o[8]` | U2 | HSTL15_I | ov5640.fdc: mem_a[8] |
+| `mem_a_o[9]` | K2 | HSTL15_I | ov5640.fdc: mem_a[9] |
+| `mem_a_o[10]` | T3 | HSTL15_I | ov5640.fdc: mem_a[10] |
+| `mem_a_o[11]` | P1 | HSTL15_I | ov5640.fdc: mem_a[11] |
+| `mem_a_o[12]` | T4 | HSTL15_I | ov5640.fdc: mem_a[12] |
+| `mem_a_o[13]` | M2 | HSTL15_I | ov5640.fdc: mem_a[13] |
+| `mem_a_o[14]` | N1 | HSTL15_I | ov5640.fdc: mem_a[14] |
+| `mem_ba_o[0]` | P4 | HSTL15_I | ov5640.fdc: mem_ba[0] |
+| `mem_ba_o[1]` | R2 | HSTL15_I | ov5640.fdc: mem_ba[1] |
+| `mem_ba_o[2]` | T5 | HSTL15_I | ov5640.fdc: mem_ba[2] |
+| `mem_dqs_o[0]` | J4 | HSTL15D_I | ov5640.fdc: mem_dqs[0] |
+| `mem_dqs_o[1]` | H7 | HSTL15D_I | ov5640.fdc: mem_dqs[1] |
+| `mem_dqs_o[2]` | B5 | HSTL15D_I | ov5640.fdc: mem_dqs[2] |
+| `mem_dqs_o[3]` | C1 | HSTL15D_I | ov5640.fdc: mem_dqs[3] |
+| `mem_dqs_n_o[0]` | H4 | HSTL15D_I | ov5640.fdc: mem_dqs_n[0] |
+| `mem_dqs_n_o[1]` | G7 | HSTL15D_I | ov5640.fdc: mem_dqs_n[1] |
+| `mem_dqs_n_o[2]` | A5 | HSTL15D_I | ov5640.fdc: mem_dqs_n[2] |
+| `mem_dqs_n_o[3]` | B1 | HSTL15D_I | ov5640.fdc: mem_dqs_n[3] |
+| `mem_dq_o[0]` | G5 | HSTL15_I | ov5640.fdc: mem_dq[0] |
+| `mem_dq_o[1]` | J6 | HSTL15_I | ov5640.fdc: mem_dq[1] |
+| `mem_dq_o[2]` | F5 | HSTL15_I | ov5640.fdc: mem_dq[2] |
+| `mem_dq_o[3]` | L8 | HSTL15_I | ov5640.fdc: mem_dq[3] |
+| `mem_dq_o[4]` | G4 | HSTL15_I | ov5640.fdc: mem_dq[4] |
+| `mem_dq_o[5]` | K7 | HSTL15_I | ov5640.fdc: mem_dq[5] |
+| `mem_dq_o[6]` | F4 | HSTL15_I | ov5640.fdc: mem_dq[6] |
+| `mem_dq_o[7]` | J5 | HSTL15_I | ov5640.fdc: mem_dq[7] |
+| `mem_dq_o[8]` | H6 | HSTL15_I | ov5640.fdc: mem_dq[8] |
+| `mem_dq_o[9]` | F8 | HSTL15_I | ov5640.fdc: mem_dq[9] |
+| `mem_dq_o[10]` | H8 | HSTL15_I | ov5640.fdc: mem_dq[10] |
+| `mem_dq_o[11]` | D6 | HSTL15_I | ov5640.fdc: mem_dq[11] |
+| `mem_dq_o[12]` | G8 | HSTL15_I | ov5640.fdc: mem_dq[12] |
+| `mem_dq_o[13]` | E6 | HSTL15_I | ov5640.fdc: mem_dq[13] |
+| `mem_dq_o[14]` | H9 | HSTL15_I | ov5640.fdc: mem_dq[14] |
+| `mem_dq_o[15]` | G6 | HSTL15_I | ov5640.fdc: mem_dq[15] |
+| `mem_dq_o[16]` | C4 | HSTL15_I | ov5640.fdc: mem_dq[16] |
+| `mem_dq_o[17]` | D4 | HSTL15_I | ov5640.fdc: mem_dq[17] |
+| `mem_dq_o[18]` | A4 | HSTL15_I | ov5640.fdc: mem_dq[18] |
+| `mem_dq_o[19]` | E3 | HSTL15_I | ov5640.fdc: mem_dq[19] |
+| `mem_dq_o[20]` | C3 | HSTL15_I | ov5640.fdc: mem_dq[20] |
+| `mem_dq_o[21]` | F3 | HSTL15_I | ov5640.fdc: mem_dq[21] |
+| `mem_dq_o[22]` | B4 | HSTL15_I | ov5640.fdc: mem_dq[22] |
+| `mem_dq_o[23]` | D3 | HSTL15_I | ov5640.fdc: mem_dq[23] |
+| `mem_dq_o[24]` | F2 | HSTL15_I | ov5640.fdc: mem_dq[24] |
+| `mem_dq_o[25]` | D1 | HSTL15_I | ov5640.fdc: mem_dq[25] |
+| `mem_dq_o[26]` | G1 | HSTL15_I | ov5640.fdc: mem_dq[26] |
+| `mem_dq_o[27]` | A2 | HSTL15_I | ov5640.fdc: mem_dq[27] |
+| `mem_dq_o[28]` | E1 | HSTL15_I | ov5640.fdc: mem_dq[28] |
+| `mem_dq_o[29]` | A3 | HSTL15_I | ov5640.fdc: mem_dq[29] |
+| `mem_dq_o[30]` | G2 | HSTL15_I | ov5640.fdc: mem_dq[30] |
+| `mem_dq_o[31]` | C2 | HSTL15_I | ov5640.fdc: mem_dq[31] |
+| `mem_dm_o[0]` | K6 | HSTL15_I | ov5640.fdc: mem_dm[0] |
+| `mem_dm_o[1]` | F7 | HSTL15_I | ov5640.fdc: mem_dm[1] |
+| `mem_dm_o[2]` | D5 | HSTL15_I | ov5640.fdc: mem_dm[2] |
+| `mem_dm_o[3]` | E2 | HSTL15_I | ov5640.fdc: mem_dm[3] |
+
+### 导入和验证
+
+在已按 `fpga/ip/README.md` 生成 IP 的 PDS 工程中执行
+`source <仓库路径>/fpga/scripts/import_board_render_top.tcl`。脚本从
+`cpu_subsys.f`、`sys_subsys.f`、`mem_subsys.f`、`rnd.f`、`disp.f` 展开源文件并去重，
+设置 `FPGA_MODE`。需要的 15 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
+`ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、`ip_ram_dcache_data`、
+`ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`、`ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w`、
+`ip_ram_rnd_line`（5 实例）、`ip_ram_rnd_palette`（2 实例）、`ip_ram_disp_scan`（2 实例）。
+TMDS 和 DDR 参考差分时钟使用器件原语，无需 GUI 生成串化 IP。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/check/verilog_style.py fpga/rtl/edrv32_fpga_board_render_top.v
+tclsh verif/soc/board_render/check_import.tcl
+python3 tools/regress.py smoke --path verif/soc/board_render -j 1
+```
+
+`verif/soc/board_render/run.py` 构建真实 bootloader 和 `sw/tests/board_render/` 程序，
+打包 ROM/SRAM 后门镜像；对顶层、全部依赖及行为模型运行 `verilator --lint-only
+--timing -Wall +define+SIM_MODE --top-module edrv32_board_render_tb`（源文件由
+`tools.regress.expand_files` 展开 `verif/soc/board_render/files.f`）。日志在
+`build/board_render/{lint,compile,simulation}.log`。同一仿真先按住 KEY1 检查 BIOS 菜单，
+再释放 KEY1 复位、从 Boot ROM 跳到预加载的 SRAM 程序；B1 的 CLINT 测试窗口加速器
+用于两次启动。软件检查 RND/DISP ID、64×4 ARGB8888 FILL、PLIC 源 11 DONE、非缓存
+DDR 别名逐字读回，最后写 SIM_EXIT。DDR 用户口复用已有带停顿的行为模型；PHY/诊断
+引脚保持空闲，视频只建模串化连线，不运行显示帧，画面留给板上验收。
+
+协调者批准的 testbench UART 加速：强制 BAUD_DIV=256（Q4，即每位 16 个系统周期），
+UART peer=6.25 Mbaud，保留实际 BIOS 和应用的全部字节。这只用于仿真加速，不验收
+UART 时序；UART 时序由 B1 测试和上板覆盖。软件仍按 115200 配置，打印文本不改。
