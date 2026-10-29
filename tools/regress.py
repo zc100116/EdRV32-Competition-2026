@@ -28,6 +28,16 @@ def read_test(path):
 
 
 def expand_files(path):
+    # Shared sources reached through several -f lists are kept once, at their first
+    # position, matching the PDS import scripts (fpga/scripts/import_*.tcl).
+    result = []
+    for token in _expand_tokens(path):
+        if token.startswith('+') or token not in result:
+            result.append(token)
+    return result
+
+
+def _expand_tokens(path):
     result = []
     tokens = shlex.split(path.read_text(), comments=True)
     index = 0
@@ -35,7 +45,7 @@ def expand_files(path):
         token = tokens[index]
         if token == '-f':
             index += 1
-            result.extend(expand_files(path.parent / tokens[index]))
+            result.extend(_expand_tokens(path.parent / tokens[index]))
         elif token.startswith('+incdir+'):
             result.append('+incdir+' + '+'.join(
                 str((path.parent / item).resolve()) for item in token[8:].split('+')))
