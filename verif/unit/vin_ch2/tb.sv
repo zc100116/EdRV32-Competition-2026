@@ -89,6 +89,7 @@ module tb;
     int first_write_cycle;
     int last_write_cycle;
     int output_beats = 0;
+    int stalled_source_cycles = 0;
     bit [255:0] stalled_data;
     bit [31:0] stalled_strb;
     bit stalled_last;
@@ -224,8 +225,10 @@ module tb;
         int byte_index;
         int expected;
         if (rst_n) begin
-            if (!ready) $fatal(1,"FAIL CH2 backpressures source t=%0t",$time);
-            if (valid) begin
+            if (source != 2 && !ready)
+                $fatal(1,"FAIL CH2 backpressures camera t=%0t",$time);
+            if (valid && !ready) stalled_source_cycles++;
+            if (valid && ready) begin
                 source_words++;
                 if (sof) sof_cycle = cycle;
                 if (eof) eof_cycle = cycle;
@@ -300,7 +303,7 @@ module tb;
         boundaries = 0;
         repeat (4) @(negedge clk);
     endtask
-    task automatic send_frame(input int f, input bit gaps);
+    task automatic send_frame(input int f, input bit gaps, input bit camera_pace = 0);
         frame_id = 32'(f);
         for (int y = 0; y < 720; y++) begin
             for (int x = 0; x < 1280; x += 2) begin
@@ -317,6 +320,13 @@ module tb;
                 eof = y == 719 && eol;
                 incomplete = expected_incomplete && eof;
                 boundaries = sof ? (3'b001 << source) : 3'd0;
+                do @(posedge clk); while (!ready);
+                if (camera_pace) begin
+                    @(negedge clk);
+                    valid = 0;
+                    boundaries = 0;
+                    @(negedge clk);
+                end
             end
         end
         @(negedge clk);
@@ -408,16 +418,62 @@ module tb;
         inject_error = 0;
         source = 2;
         stalled = 1;
-        send_frame(2,0);
-        if (overflows != 1 || completions != 2)
-            $fatal(1,"FAIL memory-source CH2 overflow/drop");
-        stalled = 0;
-        wait (!busy);
-        repeat (4) @(negedge clk);
-        // Overflow rolls allocation back: reuse slot two.
-        start_check(3,2);
-        send_frame(3,0);
+        start_check(2,2);
+        fork
+            send_frame(2,0);
+            begin
+                // Hold the FIFO full during top padding, an effective row and EOF flush.
+                repeat (20000) @(negedge clk);
+                if (overflows != 0 || stalled_source_cycles == 0)
+                    $fatal(1,"FAIL memory top-padding backpressure");
+                stalled = 0;
+                wait (observed_bytes >= 40000);
+                @(negedge clk);
+                stalled = 1;
+                repeat (12000) @(negedge clk);
+                stalled = 0;
+                wait (eof && valid && ready);
+                @(negedge clk);
+                stalled = 1;
+                repeat (12000) @(negedge clk);
+                stalled = 0;
+            end
+        join
         finish_frame(3);
+        if (overflows != 0) $fatal(1,"FAIL memory-source overflow");
+        source = 0;
+        stalled = 1;
+        start_check(3,0);
+        fork
+            send_frame(3,0,1);
+            begin
+                wait (valid && sof);
+                repeat (1500) @(negedge clk);
+                stalled = 0;
+            end
+        join
+        finish_frame(4);
+        if (overflows != 0) $fatal(1,"FAIL camera top-padding overflow");
+        // A camera remains realtime when a long stall covers effective rows.
+        frame_id = 4;
+        fork
+            send_frame(4,0);
+            begin
+                repeat (3000) @(negedge clk);
+                stalled = 1;
+                repeat (12000) @(negedge clk);
+                stalled = 0;
+            end
+        join
+        wait (!busy);
+        if (overflows != 1 || completions != 4)
+            $fatal(1,"FAIL camera effective-row overflow/drop");
+        repeat (4) @(negedge clk);
+        // Overflow rolls allocation back: reuse slot one.
+        source = 2;
+        start_check(5,1);
+        send_frame(5,0);
+        finish_frame(5);
         for (int c = 0; c < 256; c++) begin
             if (!average_seen[c]) $fatal(1,"FAIL untested quantizer input %0d",c);
         end
@@ -435,10 +491,10 @@ module tb;
         abort_request = 0;
         wait (!busy);
         repeat (4) @(negedge clk);
-        if (completions != 3) $fatal(1,"FAIL abort reports completion");
-        start_check(4,0);
-        send_frame(4,1);
-        finish_frame(4);
+        if (completions != 5) $fatal(1,"FAIL abort reports completion");
+        start_check(6,2);
+        send_frame(6,1);
+        finish_frame(6);
         if (overflows != 1 || configs != 3 || skips != 1)
             $fatal(1,"FAIL event accounting");
         $display("PASS vin_ch2: all 256 averages, every byte, padding, FIFO, errors and recovery");
