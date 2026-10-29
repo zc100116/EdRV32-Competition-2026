@@ -103,8 +103,10 @@ module edrv32_fpga_tmds (
                 .MIPI_CTRL(1'b0),
                 .UPD0_SHIFT(1'b0),
                 .UPD1_SHIFT(1'b0),
-                .OSHIFTIN0(1'b0),
-                .OSHIFTIN1(1'b0),
+                // Cascade inputs have no fabric route; leave them open as the vendor
+                // outputserdes.v and legacy serializer do (B3V Route-2014 on GND).
+                .OSHIFTIN0(),
+                .OSHIFTIN1(),
                 .DI({4'b0, symbols_w[channel*10+8 +: 2], 2'b0}),
                 .TI(1'b0),
                 .TBYTE_IN(1'b0),
