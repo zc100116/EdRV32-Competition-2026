@@ -70,6 +70,9 @@ _Static_assert(EDRV32_GEO_CUR_DESC_OFFSET == 0x100, "GEO CUR_DESC offset");
 
 /* rnd-spec 4: 64-byte command alignment and private command index. */
 _Static_assert(EDRV32_RND_ID_RESET == 0x00040001, "RND ID");
+_Static_assert(EDRV32_RND_ID_TYPE_POS == 16, "RND ID TYPE");
+_Static_assert(EDRV32_RND_ID_VERSION_MASK == 0xFFFF, "RND ID VERSION");
+_Static_assert(EDRV32_RND_DOORBELL_RESET == 0, "RND DOORBELL reads zero");
 _Static_assert(EDRV32_RND_DESC_BASE_VALUE_MASK == 0xFFFFFFC0, "RND descriptor alignment");
 _Static_assert(EDRV32_RND_DESC_COUNT_VALUE_MASK == 0xFFFF, "RND count width");
 _Static_assert(EDRV32_RND_CTRL_ABORT_MASK == 4, "RND abort");

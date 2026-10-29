@@ -12,13 +12,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_31_16",
+                    "name": "TYPE",
                     "lsb": 16,
                     "width": 16,
                     "spec": "rnd-spec.md 4"
                 },
                 {
-                    "name": "VALUE_15_0",
+                    "name": "VERSION",
                     "lsb": 0,
                     "width": 16,
                     "spec": "rnd-spec.md 4"
@@ -176,11 +176,11 @@
             "name": "DOORBELL",
             "offset": "0x028",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "rnd-spec.md 4",
             "dimensions": [],
             "fields": [],
-            "reset_status": "not_applicable"
+            "note": "Reads return 0; any whole-word write starts an idle engine."
         },
         {
             "name": "DONE_COUNT",
