@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.16（草案） |
+| 版本 | v0.17（草案） |
 | 日期 | 2026-10-29 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
@@ -485,10 +485,22 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 2. 复位释放后，CPU 从 Boot ROM 执行 bootloader：初始化必要的外设（UART 115200 8N1、GPIO），通过 UART 打印启动 logo（文字 "EdRV32" 的 ASCII 字符画）和启动信息，读 SYSCTRL 的 `MEM_READY`。启动信息至少包括：CHIP_ID、clk_sys 频率（SYSCTRL `CLK_SYS_HZ`）、ROM/SRAM 容量、I$/D$ 容量、`MEM_READY` 状态、bootloader 的构建信息（git commit、编译器版本）。
 3. 打印启动信息后，bootloader 在 **[待定]** 100 ms 的窗口内反复采样启动按键 KEY1（GPIO bit0，低有效）：窗口内始终按下，或 SYSCTRL `SCRATCH0` 为下载请求值 `0x55415254`（读取后清零），进入 BIOS（第 3a 条）；否则跳转到 SRAM 中的应用程序执行。用户操作为按住 KEY1 按复位键。
 3a. **BIOS**：在 Boot ROM 中运行，通过 UART 提供菜单，每个选择是以 Enter（CR、LF 或 CR LF）结束的一行。提示文字固定如下（每行以 CR LF 结尾，供 PC 端调试工具识别）：
-   - 进入时打印 `BIOS: EdRV32`，随后打印菜单行 `BIOS menu: 1=Program SRAM`；每个操作结束后重新打印菜单行。
-   - `1` 烧录 SRAM 程序：打印 `UART download ready`，随后 PC 发送 4 字节小端无符号长度，再发送该长度的原始 SRAM 镜像（ELF 经 objcopy 得到的 `.bin`，入口在 SRAM 基址）。长度为 1 至 SRAM 容量 − 4 KiB（BIOS 栈）。长度不在此范围时打印 `Program SRAM result: FAIL length`，不接收镜像。收完后把 D$ 中的数据全部写回 SRAM，打印 `Program SRAM bytes: <十进制字节数>` 和 `Program SRAM result: PASS, press reset to run`。
-   - 其他输入打印 `Input error: type 1 then Enter`。
-   - BIOS 不自动运行烧录的程序；按复位键（不按 KEY1）后按第 3 条正常启动，运行 SRAM 中的程序。SRAM 内容在复位键复位和软复位后保持，重新配置 bitstream 或断电后恢复为初始化文件内容。
+   - 进入时打印 `BIOS: EdRV32`，随后打印菜单行 `BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`；每个操作结束后重新打印菜单行。
+   - 多字节数值一律小端；地址和长度以字节计。"可加载范围"指 SRAM 基址至 SRAM 末尾 − 4 KiB（BIOS 栈），以及整个 DDR 可缓存区（6.1）。
+   - `1` 烧录 SRAM 程序：打印 `UART download ready`，随后 PC 发送 4 字节无符号长度，再发送该长度的原始 SRAM 镜像（ELF 经 objcopy 得到的 `.bin`，入口在 SRAM 基址）。长度为 1 至 SRAM 容量 − 4 KiB（BIOS 栈）。长度不在此范围时打印 `Program SRAM result: FAIL length`，不接收镜像。收完后把 D$ 中的数据全部写回 SRAM，打印 `Program SRAM bytes: <十进制字节数>` 和 `Program SRAM result: PASS, press reset to run`。
+   - `2` 加载到指定地址：打印 `UART load ready`，随后 PC 发送 4 字节目标地址、4 字节长度，再发送该长度的数据。
+     - 目标区间必须整个落在可加载范围内的一个区域中，且长度 ≥ 1；否则打印 `Load result: FAIL range`，不接收数据。
+     - 收完后把 D$ 中的数据全部写回，打印 `Load bytes: <十进制字节数> at 0x<8 位十六进制地址>` 和 `Load result: PASS`。
+     - 可以连续执行多次，加载多个段。PC 工具解析 ELF，每个可加载段（PT_LOAD，文件长度不为 0）各执行一次；BIOS 不解析 ELF。
+   - `3` 从指定地址启动：打印 `Run address:`，随后一行输入 `0x` 开头的十六进制入口地址。
+     - 地址必须 4 字节对齐并落在可加载范围内，否则打印 `Run result: FAIL address`。
+     - 合法时打印 `Run: 0x<8 位十六进制地址>`，等 UART 发送完毕，作废 I$（`fence.i`），关中断后跳转。程序自己设置栈和运行环境（BSP 启动代码）。
+   - `4` 切换波特率：打印 `Baud:`，随后一行输入 `115200`、`921600` 或 `2000000`。
+     - 其他值打印 `Baud result: FAIL`。
+     - 合法时以原波特率打印 `Baud result: <值>`，等 UART 发送完毕再改 `BAUD_DIV`；此后的收发都用新波特率，复位后恢复 115200。
+   - 其他输入打印 `Input error: type 1-4 then Enter`。
+   - 不按 KEY1 复位时，按第 3 条正常启动，运行 SRAM 中的程序。SRAM 内容在复位键复位和软复位后保持，重新配置 bitstream 或断电后恢复为初始化文件内容。
+   - DDR 程序不能跨复位启动：复位键会使 DDR 控制器重新初始化和校准，DDR 内容不保证保留，而且板上没有用于记住启动位置的非易失存储。DDR 程序的用法是"进入 BIOS → `2` 加载 → `3` 启动"，由 PC 端工具连续完成。
 3b. SRAM 应用程序每次启动都由启动代码从镜像中的初值副本恢复 `.data`、把 `.bss` 清零，保证复位后再次运行与第一次相同。ETH 下载在 ETH 模块完成后加入。
 4. SRAM 中的默认应用程序是监控程序（monitor）：通过 UART 输出菜单，按用户输入的选项执行测试或跑分，结束后回到菜单。菜单项至少包括：
    - CoreMark：运行后输出 CoreMark 分数、CoreMark/MHz、计时周期数和迭代次数、CRC 校验结果、全部 HPM 事件计数及由其导出的 IPC 等指标、编译器版本和编译选项、ISA 字符串；
@@ -736,3 +748,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-29 | v0.15 | 澄清（B2-1a 问答，不改变行为）：3.3、3.4 的三态缩写写全为 `_o`、`_oe_o`、`_i`，与系统子系统、ETH 端口一致 |
 | 2026-10-29 | v0.16 | RND/DISP（设计记录 `2026-10-29-rnd-disp.md`，用户决定 Q1–Q4）：1.2 三个场景改为 DISP 两层叠加（S3 LVGL 画在 L0）；5.2 X5/X6 增加 L1 扫描 FIFO 和本帧扫描参数握手；7.3 format 1 改为非预乘 ARGB8888；8.8 RND 命令集 T2、图层合成由 DISP 完成、DISP 两层；9.3 VIN+PIX+DISP 12K [待定]、RND 10K [待定]，按 B3 PDS 实测定稿；第 10 节删去 RND/DISP 行（用户确认 2026-10-29） |
 | 2026-10-29 | v0.16 | 寄存器复位值回填（B2-1f 调查 `docs/reports/2026-10-29-regs-reset-survey.md`，与 RTL 一致，用户确认 2026-10-29）：7.1 公共寄存器表增加复位值列；ID 位域命名 TYPE/VERSION；WO 寄存器、未定义的 PERF 编号读为 0 |
+| 2026-10-29 | v0.17 | 7.5 第 3a 条 BIOS 升级：增加 `2` 加载到指定地址（SRAM 或 DDR，可多段）、`3` 从指定地址启动、`4` 切换波特率（115200/921600/2000000），菜单行和提示文字相应修改；明确 DDR 程序不能跨复位启动。原因：B3 的 LVGL 和游戏放不进 64 KiB SRAM，需要在 DDR 运行（用户确认 2026-10-29） |
