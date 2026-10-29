@@ -1,0 +1,25 @@
+RV32: EdRV32 cpu-spec traps misaligned loads; fetch 6502 words as bytes.
+Approved Task B3-4b core portability patch; upstream stays unmodified.
+
+--- a/cpu/nes6502.c
++++ b/cpu/nes6502.c
+@@ -1152,7 +1152,7 @@
+ */
+ INLINE uint32 zp_readword(register uint8 address)
+ {
+-   return (uint32) (*(uint16 *)(ram + address));
++   return ram[address] | ((uint32) ram[(uint8) (address + 1)] << 8);
+ }
+
+ INLINE uint32 bank_readword(register uint32 address)
+@@ -1162,7 +1162,9 @@
+    ** be fetching a word across page boundaries, which only would
+    ** make sense if the banks were physically consecutive.
+    */
+-   return (uint32) (*(uint16 *)(cpu.mem_page[address >> NES6502_BANKSHIFT] + (address & NES6502_BANKMASK)));
++   return cpu.mem_page[address >> NES6502_BANKSHIFT][address & NES6502_BANKMASK]
++      | ((uint32) cpu.mem_page[((address + 1) & 0xFFFF) >> NES6502_BANKSHIFT]
++         [(address + 1) & NES6502_BANKMASK] << 8);
+ }
+
+ #else /* !HOST_LITTLE_ENDIAN */

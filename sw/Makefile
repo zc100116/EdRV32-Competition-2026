@@ -10,7 +10,7 @@ OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32im_zicsr
 SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
 PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
-               $(filter monitor demo,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
+               $(filter monitor demo nes,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
                $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM))))
 -include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
@@ -41,7 +41,7 @@ FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
-ifneq ($(filter bootloader monitor demo $(SYS_PROGRAMS),$(PROGRAM)),)
+ifneq ($(filter bootloader monitor demo nes $(SYS_PROGRAMS),$(PROGRAM)),)
 	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
 endif
 
@@ -51,7 +51,7 @@ $(ROOT)/build/sw/soc_memory.ld: $(ROOT)/rtl/include/soc_address_map.json
 
 $(OUT)/$(PROGRAM).elf: $(OBJECTS) $(ROOT)/sw/bsp/ld/$(MEMORY).ld \
                       $(ROOT)/build/sw/soc_memory.ld FORCE
-	cd $(ROOT) && $(CC) $(ISA_FLAGS) $(LDFLAGS) $(OBJECTS) -lgcc -o $@
+	cd $(ROOT) && $(CC) $(ISA_FLAGS) $(LDFLAGS) $(OBJECTS) $(PROGRAM_LDLIBS) -lgcc -o $@
 
 # The coordinator exempts unmodified third-party code from -Werror.
 $(OUT)/obj/third_party/coremark/%.o: $(ROOT)/third_party/coremark/%.c FORCE

@@ -1,0 +1,32 @@
+RV32: EdRV32 cpu-spec traps misaligned access; use byte-storage operations.
+Approved Task B3-4b PPU 8-pixel clear/save/restore portability patch.
+
+--- a/nes/nes_ppu.c
++++ b/nes/nes_ppu.c
+@@ -767,9 +767,5 @@
+    if (ppu.bg_mask)
+    {
+-      uint32 *buf_ptr = (uint32 *) vidbuf;
+-      uint32 bg_clear = FULLBG | FULLBG << 8 | FULLBG << 16 | FULLBG << 24;
+-
+-      ((uint32 *) buf_ptr)[0] = bg_clear;
+-      ((uint32 *) buf_ptr)[1] = bg_clear;
++      memset(vidbuf, FULLBG, 8);
+    }
+ }
+@@ -802,6 +798,5 @@
+    if (ppu.obj_mask)
+    {
+-      savecol[0] = ((uint32 *) buf_ptr)[0];
+-      savecol[1] = ((uint32 *) buf_ptr)[1];
++      memcpy(savecol, buf_ptr, sizeof(savecol));
+    }
+
+@@ -890,6 +885,5 @@
+    if (ppu.obj_mask)
+    {
+-      ((uint32 *) buf_ptr)[0] = savecol[0];
+-      ((uint32 *) buf_ptr)[1] = savecol[1];
++      memcpy(buf_ptr, savecol, sizeof(savecol));
+    }
+ }
