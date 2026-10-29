@@ -442,6 +442,12 @@ module tb;
             end
         cases++;
     endtask
+    function automatic [31:0] load_memory_word(input int word_index);
+        reg [31:0] value;
+        for(int byte_index=0;byte_index<4;byte_index++)
+            value[byte_index*8+:8]=memory[word_index*4+byte_index];
+        return value;
+    endfunction
     task automatic performance;
         reg[31:0] cycles_value,pixel_value;
         random_stalls=0;
@@ -467,6 +473,8 @@ module tb;
         if(pixel_value!=921600 || cycles_value>614400)
             $fatal(1,"BLIT throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
         $display("PERF BLIT cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        if(!$test$plusargs("R1_BASELINE") && cycles_value>485052)
+            $fatal(1,"R-R2 ARGB regression cycles=%0d pixels=%0d",cycles_value,pixel_value);
         for(int scale_value=1;scale_value<=3;scale_value+=2) begin
             setup(4,6,0,0);
             put(1,BASE+32'h400000); put(2,32'(512*scale_value)); put(3,0);
@@ -481,8 +489,50 @@ module tb;
             if(pixel_value!=32'(61440*scale_value*scale_value))
                 $fatal(1,"I8 pixel count scale=%0d got=%0d",scale_value,pixel_value);
             $display("PERF I8 scale=%0d cycles=%0d pixels=%0d",scale_value,cycles_value,pixel_value);
+            if(!$test$plusargs("R1_BASELINE") && cycles_value>32'(40960*scale_value*scale_value))
+                $fatal(1,"R-R2 I8 throughput scale=%0d cycles=%0d",scale_value,cycles_value);
         end
-        $display("PASS full-frame fill, >=1.5 pixel/cycle ARGB BLIT and I8 1:1/3x measurements");
+        setup(3,2,1,0);
+        put(1,BASE+32'h400000); put(2,1024); put(3,0); put(4,32'h003f00ff);
+        put(5,0); put(6,32'h003f00ff); put(8,BASE+32'h10000); put(9,256); put(10,0);
+        execute(1,1);
+        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
+        if(pixel_value!=16384 || (!$test$plusargs("R1_BASELINE") && cycles_value>10922))
+            $fatal(1,"A8 GLYPH throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        $display("PERF A8 GLYPH cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        setup(3,3,1,0);
+        put(1,BASE+32'h400000); put(2,64); put(3,0); put(4,32'h0013000f);
+        put(5,0); put(6,32'h0013000f); put(8,BASE+32'h20000); put(9,8); put(10,0);
+        for(int descriptor=1;descriptor<1000;descriptor++)
+            for(int word_index=0;word_index<16;word_index++)
+                put(descriptor*16+word_index,load_memory_word(word_index));
+        execute(1000,1);
+        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
+        if(pixel_value!=320000) $fatal(1,"A4 GLYPH count=%0d",pixel_value);
+        $display("PERF 1000 A4 GLYPH cycles=%0d pixels=%0d avg_cycles=%0f",
+            cycles_value,pixel_value,real'(cycles_value)/1000.0);
+        setup(8,6,0,1);
+        put(1,BASE+32'h400000); put(2,2560); put(3,0); put(4,32'h02cf04ff);
+        put(5,0); put(6,32'h02cf04ff); put(8,BASE+32'h20000);
+        put(9,BASE+32'h6000); put(10,160); put(11,0); put(13,BASE+32'h9000);
+        for(int tile_index=0;tile_index<80*45;tile_index++) begin
+            memory[32'h6000+tile_index*2]=8'(tile_index%256);
+            memory[32'h6001+tile_index*2]=8'((tile_index%4)<<4);
+        end
+        execute(1,1);
+        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
+        if(pixel_value!=921600 || (!$test$plusargs("R1_BASELINE") && cycles_value>921600))
+            $fatal(1,"TILEMAP throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        $display("PERF TILEMAP cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        setup(1,0,1,0);
+        put(1,BASE+32'h400000); put(2,4096); put(3,0); put(4,32'h01ff03ff);
+        put(5,0); put(6,32'h01ff03ff); put(8,16);
+        execute(1,1);
+        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
+        if(pixel_value!=524288 || (!$test$plusargs("R1_BASELINE") && cycles_value>349525))
+            $fatal(1,"round FILL throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        $display("PERF round FILL cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        $display("PASS RND throughput and pixel comparisons");
         $finish;
     endtask
     initial begin
@@ -555,6 +605,38 @@ module tb;
                 setup(6,0,d,0); put(8,4095); put(9,31); put(10,BASE+32'h10000); execute(1,1);
             end
         end
+        if($test$plusargs("FULL")) begin
+            // Source pixels straddle beats; the two lanes can require four separate beats.
+            for(int source_format=0;source_format<2;source_format++) begin
+                setup(4,source_format,1,0);
+                put(1,BASE+32'h8004); put(2,160); put(3,0); put(4,32'h00020024);
+                put(5,0); put(6,32'h00020024); put(8,BASE+32'h401f);
+                put(9,103); put(10,0); execute(1,1);
+                setup(4,source_format,1,3);
+                put(1,BASE+32'h8004); put(2,80); put(3,0); put(4,32'h00010012);
+                put(5,0); put(6,32'h00010012); put(8,BASE+32'h401f);
+                put(9,257); put(10,0);
+                put(11,source_format==0 ? 32'h04000000 : 32'h02000000);
+                execute(1,1);
+            end
+            // Unaligned palette start and disjoint target chunks across a long row.
+            setup(4,6,0,0);
+            put(1,BASE+32'h8002); put(2,2112); put(3,0); put(4,32'h00020416);
+            put(5,0); put(6,32'h00020416); put(8,BASE+32'h4001); put(9,1053);
+            put(10,0); put(13,BASE+32'h7004); execute(1,1);
+            for(int source_format=0;source_format<8;source_format++) begin
+                if(source_format>=2 && source_format<=5) continue;
+                setup(8,source_format,1,0);
+                put(1,BASE+32'h8004); put(2,4160); put(3,0); put(4,32'h0002040c);
+                put(5,0); put(6,32'h0002040c); put(8,BASE+32'h4000);
+                put(9,BASE+32'h6000); put(10,300); put(11,6); put(13,BASE+32'h7004);
+                for(int tile_index=0;tile_index<132;tile_index++) begin
+                    memory[32'h6000+tile_index*2]=8'(tile_index%3);
+                    memory[32'h6001+tile_index*2]=8'((tile_index%4)<<4);
+                end
+                execute(1,1);
+            end
+        end
         // Empty and inverted primitives consume only their command beats.
         for(int empty_case=0;empty_case<3;empty_case++) begin
             setup(1,0,1,0); put(8,0); put(7,32'hff123456);
@@ -604,6 +686,21 @@ module tb;
         apb_read(12'h010,value);
         if(value!==0 || read_active || write_active || rvalid || bvalid)
             $fatal(1,"abort stat=%h t=%0t",value,$time);
+        // Cancel the common pipeline with source reads, alpha results and result writes active.
+        for(int abort_case=0;abort_case<2;abort_case++) begin
+            setup(abort_case==0 ? 3 : 4,abort_case==0 ? 2 : 6,1,0);
+            put(1,BASE+32'h8000); put(2,256); put(3,0); put(4,32'h001f003f);
+            put(5,0); put(6,32'h001f003f); put(8,BASE+32'h4000); put(9,64); put(10,0);
+            apb_write(12'h010,3); apb_write(12'h020,BASE); apb_write(12'h024,1);
+            apb_write(12'h028,0);
+            repeat(abort_case==0 ? 100 : 1000) @(negedge clk);
+            apb_write(12'h004,4);
+            value=1;
+            while(value[0]) apb_read(12'h008,value);
+            apb_read(12'h010,value);
+            if(value!==0 || read_active || write_active || rvalid || bvalid)
+                $fatal(1,"common pipeline abort case=%0d stat=%h t=%0t",abort_case,value,$time);
+        end
         apb_write(12'h004,8); apb_read(12'h02c,value);
         if(value!==0) $fatal(1,"soft reset DONE_COUNT %0d",value);
         $display("PASS %0d rendered command cases, ordering, three errors and ABORT",cases);
