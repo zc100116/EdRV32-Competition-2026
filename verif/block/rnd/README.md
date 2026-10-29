@@ -115,7 +115,7 @@ No temporary storage contents are assumed. Python computes intermediates in memo
 `temp_region` identifies only the bytes whose final contents the specification leaves
 unspecified. All Python code uses the standard library.
 
-## Acceptance results
+## Independent acceptance results (R-T1)
 
 Tested source commit: `ab6527b`, based on coordinator clarification commit `e6ff241`.
 Date: 2026-10-29. Tools: Verilator 5.020 (Debian 5.020-1), Python 3.12.3.
@@ -142,3 +142,24 @@ The two cold serial compiles exceeded sixty seconds under the shared build load;
 the independent acceptance manifest is therefore full. Real-DUT image correctness,
 RN-01–16 smoke duration and RN-18 cycle/throughput measurements require the separate
 RTL integration task. No RND RTL was read or executed in this task.
+
+
+## Real-RTL integration results (R-I1)
+
+Tested source: `15cf7e1`, unchanged RND RTL from `5bb8e38`.
+`python3 tools/regress.py full --path verif/block/rnd -j 1` reports 3 PASS, 0 FAIL:
+531 directed real-DUT cases, 105 supplemental cases (including ten seeds of fifty
+commands), and the independent environment selftest. The respective directory
+runtimes are 274, 1428 and 461 seconds, including any required compilation.
+`python3 tools/regress.py perf --path verif/block/rnd -j 1` reports 1 PASS, 0 FAIL:
+all eight no-wait/latency-40 scenes pass whole-memory comparison; the three no-wait
+performance thresholds pass. The four arithmetic/address unit smoke tests pass.
+Style and both top-level/verification lint report zero warnings.
+
+Integration fixes affect only tier assignment, simulator optimization, existing
+time budgets and formatted diagnostics; stimulus, oracle and checking conditions
+are unchanged. No RND RTL changes were required. See the
+[measurement report](../../../docs/reports/2026-10-29-perf-rnd.md) for commands,
+cycle counts and specification comparisons, and the
+[debug record](../../../docs/debug/2026-10-29-rnd-regression-timeouts.md) for timeout
+reproduction and classification.
