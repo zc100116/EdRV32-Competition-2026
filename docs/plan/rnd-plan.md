@@ -41,7 +41,7 @@
 | D-I1 | DISP 联调：block/disp smoke/full | Codex · GPT-6.1 Sol | D-R1、D-T1 | disp-testplan v0.3 smoke/full 通过 | task-disp-layers-int | [ ] |
 | R-R1 | RND RTL 和单元测试：<br>• 命令执行、读客户端仲裁、alpha 通路（2 像素/拍，移植旧工程 `edrv32_render_alpha_pipe.v` 并改为 2.2 的非预乘 over）、256 位快速通路；<br>• 覆盖率（移植 `edrv32_render_round_*`，按 2.3 逐位规定改写）、GLYPH、BLIT、COPY、模糊和阴影（移植并改为 2.4）、TILEMAP（新写）。<br>片上存储需求整理后 ask 协调者建 IP 包装 | Codex · GPT-6.1 Sol | R-S1 | 单元测试通过，lint 0 告警；Yosys 参考 LUT；设计记录写明 dma2d 实例、片上缓冲组织（rnd-spec 3、5.2） | task-rnd-rtl | [~] 2026-10-29 派发（ctx_5aba7849fdf7） |
 | R-P1 | RND 片上存储（行缓冲、调色板、瓦片缓存、Q 表等）的 IP 创建说明和包装模块，按 R-R1 提出的组织 | 协调者 | R-R1 提问 | `fpga/ip/`、`rtl/tech/` | — | [ ] |
-| R-T1 | RND 模块级测试（`verif/block/rnd`，`rnd_ref.py`），按 rnd-testplan RN-01–16、18、19，不读被测 RTL | Codex · GPT-6.1 Sol | R-S1 | testbench 完成，参考模型自测通过 | task-rnd-verif | [~] 2026-10-29 派发（ctx_484a46c4bbc2） |
+| R-T1 | RND 模块级测试（`verif/block/rnd`，`rnd_ref.py`），按 rnd-testplan RN-01–16、18、19，不读被测 RTL | Codex · GPT-6.1 Sol | R-S1 | testbench 完成，参考模型自测通过 | task-rnd-verif | [x] 2026-10-29：ab6527b、b1a1950（分支 zc100116/task-rnd-verif，未合入，等 R-I1）；参考模型自测和 636 个场景通过，桩编译通过 |
 | R-I1 | RND 联调：block/rnd smoke/full/perf；perf 数字写测量报告 | Codex · GPT-6.1 Sol | R-R1、R-T1、R-P1 | rnd-testplan smoke/full 通过；`docs/reports/<日期>-perf-rnd.md` | task-rnd-int | [ ] |
 | R-S2 | RND 接入 `edrv32_soc_top`：P4、槽 4（删去预留 SLVERR）、PLIC 源 11；`soc_connect` 增加 RND ID 和一条最小命令的 DONE 中断 | Codex · GPT-6.1 Sol | R-I1、B2-1a | `verif/soc/soc_connect` smoke 通过 | task-soc-rnd | [ ] |
 | R-W1 | Windows：media（含 DISP 两层）与 RND 的 PDS 时序、资源 | 用户 + Windows Codex | D-I1、R-I1 | 任务卡结果；测量报告 | `tasks/win/<日期>-rnd-pds/` | [ ] |
