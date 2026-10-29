@@ -2,7 +2,7 @@
 
 ## 1. 目标
 
-20261029-03 的 B3R（渲染验证）bitstream 点亮后，**不重新生成 bitstream**，经新 BIOS 把 DDR 程序下载运行：
+20261029-07 的 B3R（渲染验证）bitstream 点亮后，**不重新生成 bitstream**，经新 BIOS 把 DDR 程序下载运行：
 - RND 自检：16 组图案的 CRC 与参考模型逐行比对；
 - S3：LVGL 主界面，从界面启动自制游戏 Amber Run、LVGL widgets 演示、LVGL benchmark、RN-17 自比对；
 - NES 模拟器：画面检查，实测帧率。
@@ -10,7 +10,7 @@
 ## 2. 输入
 
 - 代码分支 `origin/zc100116/b3`（包含本卡的提交）。B3 尚未合入 `main`。
-- 前置：20261029-03 中 B3R 已经能进入新 BIOS（`BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`）。
+- 前置：20261029-07 中 B3R 已经能进入新 BIOS（`BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`）。原 20261029-03 已停止。
 - 本卡 `src/`：在 Linux 端构建（`rnd_board`、`nes*` 来自 9510c64，`s3.elf` 来自 4fba534），GCC 15.2.0，程序链接在 DDR 应用区（CPU 0x9000_0000）：
 
   | 文件 | 内容 |
@@ -32,7 +32,7 @@
 
 ## 4. 需要的 IP
 
-无（使用 20261029-03 的 B3R bitstream）。
+无（使用 20261029-07 的 B3R bitstream）。
 
 ## 5. 操作步骤
 
@@ -72,7 +72,7 @@
 | 项 | 内容 |
 |---|---|
 | 代码 commit（origin/zc100116/b3） | <完整哈希> |
-| bitstream 来源 | 20261029-03 B3R（commit） |
+| bitstream 来源 | 20261029-07 B3R（commit） |
 | 完成情况 | 全部完成 / 在步骤 N 停止（原因） |
 
 ## RND 自检
