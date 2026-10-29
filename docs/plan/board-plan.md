@@ -42,7 +42,7 @@
 
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支或任务卡 | 状态 |
 |---|---|---|---|---|---|---|
-| B2-1a | `edrv32_soc_top`（全部子系统和引擎、APB 槽、PLIC 源、复位、GPIO 位分配）；reset_ctrl 增加 `rst_npu_n`；mem_xbar 统计读写拆分；`soc.f`；连接冒烟测试 `verif/soc/soc_connect` | Codex · GPT-6.1 Sol | — | lint 0 告警；soc_connect smoke；mem_xbar/mem_subsys/sys_subsys/sys_cpu 不回退 | task-soc-top | [~] 2026-10-29 派发 |
+| B2-1a | `edrv32_soc_top`（全部子系统和引擎、APB 槽、PLIC 源、复位、GPIO 位分配）；reset_ctrl 增加 `rst_npu_n`；mem_xbar 统计读写拆分；`soc.f`；连接冒烟测试 `verif/soc/soc_connect` | Codex · GPT-6.1 Sol | — | lint 0 告警；soc_connect smoke；mem_xbar/mem_subsys/sys_subsys/sys_cpu 不回退 | task-soc-top | [x] 2026-10-29：5f311e2–07eeff1 已合入协调者分支；121 次验收 PASS，SoC lint 0 告警（expand_files 去重），GEO 空矩形描述符 DONE 经 PLIC 源 10 到 MEIP |
 | B2-1b | VIN CH2 RTL（2×2 平均、量化、letterbox、INT8_C4） | Codex · GPT-6.1 Sol | — | lint 0 告警；`verif/unit/vin_ch2`；VIN 现有测试不回退 | task-vin-ch2 | [~] 2026-10-29 RTL 完成（Yosys 1523 LUT / 2049 FF）；与 B2-1c 测试合并后 VI-20 失败，联调 B2-1e 进行中 |
 | B2-1c | VIN CH2 模块级验证 VI-19–VI-23（独立，与 `tools/npu` 预处理交叉核对） | Codex · GPT-6.1 Sol | 与 B2-1b 并行 | VIN block smoke/full 通过 | task-vin-ch2-verif | [~] 2026-10-29 测试已交付（abcd685，与 input_pack.py 交叉核对 983040 B 差异 0），待与 B2-1b 一起合入后对真实 RTL 回归 |
 | B2-1d | SoC 级验证（`docs/testplan/soc-testplan.md`，待写）：S2 数据流、S1 数据流（小用例 NPU）、ETH 收发、并发流量下 DISP 不读空/VIN 不溢出、监控统计 | Codex · GPT-6.1 Sol | B2-1a、B2-1b | SoC 级 smoke/full | — | [ ] |
