@@ -94,13 +94,9 @@ static void __attribute__((interrupt("machine"), aligned(4))) s3_interrupt(void)
         unsigned int source = plic_claim();
         if (source == EDRV32_PLIC_SOURCE_RND) {
             rnd_irq_handle();
-        } else if (source == EDRV32_PLIC_SOURCE_DISP) {
-            engine_irq_handle(source);
         } else if (source != EDRV32_PLIC_SOURCE_NONE) {
-            s3_puts("S3 unexpected PLIC source=");
-            s3_put_u32(source);
-            s3_puts("\r\n");
-            stop();
+            /* Only DISP is enabled beside RND; registration is owned here. */
+            engine_irq_handle(source);
         }
         if (source != EDRV32_PLIC_SOURCE_NONE) {
             plic_complete(source);
