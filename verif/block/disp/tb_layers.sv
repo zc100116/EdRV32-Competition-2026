@@ -251,7 +251,8 @@ module tb_layers;
         int occupancy;
         int reserved;
         logic [31:0] expected_address;
-        bit l1_relevant;
+        bit l1_inside;
+        bit l1_outside;
         if (rst_mem_n) begin
             cycles++;
             if (urgent) urgent_cycles++;
@@ -310,22 +311,31 @@ module tb_layers;
             check("at most four outstanding", 1, 32'(outstanding <= 4));
             if (test_case == 9 && ar_frame != 0 && ar_row < 720) begin
                 cfg = latched[ar_frame];
-                l1_relevant = cfg.en1 && ar_row >= cfg.top && ar_row < cfg.top+cfg.height;
+                // FRAME case 9 uses full-width L1 when L0 is off. Otherwise L0
+                // constrains descriptor lookahead: 512 FIFO beats / >=80 per row
+                // permits at most seven partial/full rows; eight rows bound it.
+                // AR is observable, the DMA's pending descriptor is not. Only
+                // classify intervals wholly inside/outside the rectangle.
+                l1_inside = cfg.en1 && ar_row >= cfg.top &&
+                            ar_row+8 < cfg.top+cfg.height;
+                l1_outside = !cfg.en1 || ar_row+8 < cfg.top ||
+                                ar_row >= cfg.top+cfg.height;
                 for (int l = 0; l < 2; l++) begin
                     occupancy = returned[l] - demanded[l];
                     row_beats = l == 0 ? 81 : cfg.width/8;
-                    if ((l == 0 ? cfg.en0 : l1_relevant) &&
+                    if ((l == 0 ? cfg.en0 : l1_inside) &&
                         occupancy < row_beats-16 && cycles-last_return[l] > 24 &&
                         cycles-last_demand[l] > 24) begin
                         check("urgent below layer row watermark", 1, 32'(urgent), l);
                         urgent_low[l]++;
                     end
                 end
-                if ((!cfg.en0 || returned[0]-demanded[0] >= 97) &&
-                    (!l1_relevant || returned[1]-demanded[1] >= cfg.width/8+16)) begin
+                if ((l1_inside || l1_outside) &&
+                    (!cfg.en0 || returned[0]-demanded[0] >= 97) &&
+                    (l1_outside || returned[1]-demanded[1] >= cfg.width/8+16)) begin
                     check("urgent clear above applicable watermarks", 0, 32'(urgent));
                     urgent_high++;
-                    if (cfg.en1 && !l1_relevant) urgent_outside++;
+                    if (cfg.en1 && l1_outside) urgent_outside++;
                 end
             end
         end
@@ -641,6 +651,7 @@ module tb_layers;
                 repeat (200) @(negedge clk_mem);
                 stopped = 0;
                 position(2, 600);
+                wr(12'h12c, 32'h00640100);
                 wr(12'h118, 3);
                 await_frame(3);
                 position(3, 700);

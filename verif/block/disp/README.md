@@ -80,7 +80,11 @@ Late responses during a disabled frame must repay the old debt; the next scanned
 frame must be fully correct. This is an external observation of debt and alignment,
 not a direct measurement of internal empty signals or exact repayment cycles.
 Row reservation uses the existing eight-beat CDC/encoder boundary margin; urgent
-uses sixteen-beat margins, and PERF3 is counted exactly at every memory edge.
+uses sixteen-beat margins. DS-09 classifies L1 only when the observable AR row
+through AR row + 8 lies wholly inside or outside its rectangle; the 512-beat
+FIFO and at least 80 L0 beats per row bound descriptor lookahead (the L1-only
+phase uses 160 beats per row). The mixed phase uses 32 L1 beats per row to
+exercise a different W/8 watermark. PERF3 is counted exactly at every memory edge.
 
 The timing monitor's origin is the first active pixel. CEA vertical line
 boundaries occur at the HS rising edge: VBlank starts at (1390,719), and VS rises
