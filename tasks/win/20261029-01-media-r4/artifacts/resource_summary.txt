@@ -1,0 +1,182 @@
+SYNTHESIS:
+Cell Usage:
+GTP_APM_E2                  141 uses
+GTP_DFF                    3648 uses
+GTP_DFF_C                  1474 uses
+GTP_DFF_CE                 3456 uses
+GTP_DFF_E                 15834 uses
+GTP_DFF_P                   110 uses
+GTP_DFF_PE                   64 uses
+GTP_DFF_R                   170 uses
+GTP_DFF_RE                  397 uses
+GTP_DFF_S                    10 uses
+GTP_DFF_SE                   64 uses
+GTP_DRM18K_E1                 8 uses
+GTP_DRM36K_E1                42 uses
+GTP_GRS                       1 use
+GTP_INV                       5 uses
+GTP_LUT1                     53 uses
+GTP_LUT2                    241 uses
+GTP_LUT3                    339 uses
+GTP_LUT4                    479 uses
+GTP_LUT5                   2647 uses
+GTP_LUT6                   3313 uses
+GTP_LUT6CARRY              8448 uses
+GTP_LUT6D                  2706 uses
+GTP_MUX2LUT7                616 uses
+GTP_MUX2LUT8                 86 uses
+GTP_RAM32X1DP                 1 use
+GTP_RAM32X2DP               112 uses
+
+I/O ports: 7
+GTP_INBUF                   4 uses
+GTP_OUTBUF                  3 uses
+
+Mapping Summary:
+Total LUTs: 18339 of 159800 (11.48%)
+	LUTs as dram: 113 of 39500 (0.29%)
+	LUTs as logic: 18226
+Total Registers: 25227 of 319600 (7.89%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 46.0 of 415 (11.08%)
+
+APMs:
+Total APMs = 141.00 of 740 (19.05%)
+
+Total I/O ports = 7 of 400 (1.75%)
+
+
+
+PNR physical resource use and device capacity:
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0                  
+| Use of ANALOG                     | 0         | 1             | 0                  
+| Use of APM                        | 141       | 740           | 20                 
+| Use of BKCL                       | 2         | 10            | 20                 
+| Use of CCS                        | 1         | 1             | 100                
+| Use of CLMA                       | 5662      | 30075         | 19                 
+|   FF                              | 19315     | 240600        | 9                  
+|   LUT                             | 15482     | 120300        | 13                 
+|   LUT-FF pairs                    | 9519      | 120300        | 8                  
+| Use of CLMS                       | 1628      | 9875          | 17                 
+|   FF                              | 5912      | 79000         | 8                  
+|   LUT                             | 4678      | 39500         | 12                 
+|   LUT-FF pairs                    | 2907      | 39500         | 8                  
+|   Distributed RAM                 | 113       | 39500         | 1                  
+| Use of DDRPHY_CPD                 | 0         | 20            | 0                  
+| Use of DDRPHY_IOCLK_DIV           | 0         | 10            | 0                  
+| Use of DDR_PHY                    | 0         | 40            | 0                  
+| Use of DRM                        | 46        | 415           | 12                 
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0                  
+| Use of GPLL                       | 0         | 10            | 0                  
+| Use of GSEB                       | 0         | 512           | 0                  
+| Use of HARD0                      | 2083      | 25050         | 9                  
+| Use of HCKB                       | 8         | 120           | 7                  
+|  HCKB dataused                    | 0         | 120           | 0                  
+| Use of HCKMUX_TEST                | 0         | 10            | 0                  
+| Use of HSSTLP                     | 0         | 2             | 0                  
+| Use of IO                         | 7         | 400           | 2                  
+|   IOBD                            | 3         | 192           | 2                  
+|   IOBS                            | 4         | 208           | 2                  
+| Use of IOCKB                      | 0         | 40            | 0                  
+| Use of IOCKMUX_TEST               | 0         | 10            | 0                  
+| Use of IOLHR                      | 7         | 500           | 2                  
+| Use of KEYRAM                     | 0         | 1             | 0                  
+| Use of MFG_TEST                   | 0         | 1             | 0                  
+| Use of MRCKB                      | 0         | 20            | 0                  
+| Use of MRCKMUX_TEST               | 0         | 10            | 0                  
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0                  
+| Use of PCIE                       | 0         | 1             | 0                  
+| Use of PCKMUX_TEST                | 0         | 20            | 0                  
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0                  
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0                  
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0                  
+| Use of PPLL                       | 0         | 10            | 0                  
+| Use of PREGMUXC_TEST              | 0         | 3             | 0                  
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0                  
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0                  
+| Use of RCKB                       | 0         | 40            | 0                  
+|  RCKB dataused                    | 0         | 40            | 0                  
+| Use of RCKMUX_TEST                | 0         | 10            | 0                  
+| Use of SCANCHAIN                  | 0         | 1             | 0                  
+| Use of SCKMUX_TEST                | 0         | 20            | 0                  
+| Use of SFB                        | 0         | 5075          | 0                  
+| Use of SPAD                       | 0         | 8             | 0                  
+| Use of TSERDES                    | 0         | 80            | 0                  
+| Use of USCM                       | 2         | 32            | 7                  
+|  USCM dataused                    | 0         | 32            | 0                  
+| Use of USCMMUX_TEST               | 0         | 32            | 0                  
++-------------------------------------------------------------------------------------+
+
+PNR logical hierarchy totals [LUT,FF,distributed RAM,APM,DRM36K-equivalent]:
+[18223, 25227, 113, 141, 46]
+
+edrv32_fpga_media_top	[18223, 25227, 113, 141, 46]
+edrv32_fpga_media_top/u_disp	[1420, 1828, 0, 0, 4]
+edrv32_fpga_media_top/u_disp/u_blue	[47, 43, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_control	[6, 19, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_dma	[157, 121, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_fifo_ram	[0, 0, 0, 0, 4]
+edrv32_fpga_media_top/u_disp/u_green	[45, 40, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_perf0	[16, 96, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_perf1	[16, 96, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_perf2	[16, 96, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_read_cnt	[8, 29, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_reader	[131, 124, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_red	[38, 38, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_regs	[426, 372, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_scan	[395, 381, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_scan_fifo	[53, 348, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_timing	[46, 21, 0, 0, 0]
+edrv32_fpga_media_top/u_disp/u_underflow	[1, 4, 0, 0, 0]
+edrv32_fpga_media_top/u_eth	[3899, 4462, 76, 0, 3]
+edrv32_fpga_media_top/u_eth/u_mdio	[58, 110, 0, 0, 0]
+edrv32_fpga_media_top/u_eth/u_regs	[1088, 1117, 0, 0, 0]
+edrv32_fpga_media_top/u_eth/u_rx	[740, 984, 0, 0, 0]
+edrv32_fpga_media_top/u_eth/u_rx_buffer	[0, 0, 0, 0, 1]
+edrv32_fpga_media_top/u_eth/u_rx_fifo	[50, 90, 0, 0, 0.5]
+edrv32_fpga_media_top/u_eth/u_rx_front	[45, 34, 0, 0, 0]
+edrv32_fpga_media_top/u_eth/u_rx_packets	[23, 7, 18, 0, 0]
+edrv32_fpga_media_top/u_eth/u_rx_write	[560, 488, 58, 0, 0]
+edrv32_fpga_media_top/u_eth/u_tx	[1053, 1006, 0, 0, 1]
+edrv32_fpga_media_top/u_eth/u_tx_done	[1, 4, 0, 0, 0]
+edrv32_fpga_media_top/u_eth/u_tx_fifo	[53, 100, 0, 0, 0.5]
+edrv32_fpga_media_top/u_eth/u_tx_front	[67, 53, 0, 0, 0]
+edrv32_fpga_media_top/u_eth/u_write_dma	[158, 388, 0, 0, 0]
+edrv32_fpga_media_top/u_geo	[3054, 3306, 0, 9, 16]
+edrv32_fpga_media_top/u_geo/u_bilinear	[191, 79, 0, 9, 0]
+edrv32_fpga_media_top/u_geo/u_bounds	[565, 487, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_coords	[280, 140, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_range	[287, 275, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_rd	[201, 130, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_read_address	[57, 70, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_regs	[390, 284, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_source	[184, 7, 0, 0, 16]
+edrv32_fpga_media_top/u_geo/u_tiles	[227, 144, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_wr	[154, 379, 0, 0, 0]
+edrv32_fpga_media_top/u_geo/u_write_address	[57, 71, 0, 0, 0]
+edrv32_fpga_media_top/u_pix	[4947, 7860, 0, 132, 11]
+edrv32_fpga_media_top/u_pix/u_point1	[148, 323, 0, 6, 3]
+edrv32_fpga_media_top/u_pix/u_point2	[76, 200, 0, 6, 0]
+edrv32_fpga_media_top/u_pix/u_regs	[229, 173, 0, 0, 0]
+edrv32_fpga_media_top/u_pix/u_stage1	[2184, 3448, 0, 60, 4]
+edrv32_fpga_media_top/u_pix/u_stage2	[2185, 3448, 0, 60, 4]
+edrv32_fpga_media_top/u_reset_ext	[0, 2, 0, 0, 0]
+edrv32_fpga_media_top/u_reset_mem	[0, 2, 0, 0, 0]
+edrv32_fpga_media_top/u_vin	[3521, 4862, 37, 0, 12]
+edrv32_fpga_media_top/u_vin/g_channel[0].u_channel	[793, 1491, 0, 0, 4]
+edrv32_fpga_media_top/u_vin/g_channel[1].u_channel	[803, 1490, 0, 0, 4]
+edrv32_fpga_media_top/u_vin/u_cam0	[79, 107, 18, 0, 0]
+edrv32_fpga_media_top/u_vin/u_cam1	[78, 107, 18, 0, 0]
+edrv32_fpga_media_top/u_vin/u_fmt0	[170, 156, 0, 0, 0]
+edrv32_fpga_media_top/u_vin/u_fmt1	[172, 155, 0, 0, 0]
+edrv32_fpga_media_top/u_vin/u_msrc	[538, 593, 0, 0, 4]
+edrv32_fpga_media_top/u_vin/u_p1	[20, 14, 1, 0, 0]
+edrv32_fpga_media_top/u_vin/u_regs	[824, 746, 0, 0, 0]
+Physical CLMA/CLMS LUT usage includes packing effects; do not label its sum as logical LUTs.
+DRM18K/DRM36K primitive split is in SNR Cell Usage; PRR DRM is 36K equivalent.

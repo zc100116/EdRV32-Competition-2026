@@ -1,0 +1,96 @@
+G:\codex_project\EdRV32-Competition-2026\build\win\20261029-01-media-r4\exports\media_disp
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf} -delay_type max -max_path 200 -to {u_disp/*} -input_pins TRUE -nworst 1 -force_to_run
+
+W: Warning : The license will invalid in 5 days. In order not to affect your usage, please update the license in time.
+Executing : set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676 successfully.
+Process "Report Timing" started.
+Current time: Thu Oct 29 09:40:02 2026
+W: Timing-4087: Port 'irq_obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_ext_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_mem_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:31s
+Action report_timing: CPU time elapsed is 0h:0m:5s
+Action report_timing: Process CPU time elapsed is 0h:0m:5s
+Current time: Thu Oct 29 09:40:32 2026
+Action report_timing: Peak memory pool usage is 2,288 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:31s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:5s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:5s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf -delay_type max -max_path 200 -to u_disp/* -input_pins TRUE -nworst 1 -force_to_run successfully.
+G:\codex_project\EdRV32-Competition-2026\build\win\20261029-01-media-r4\exports\media_near
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf} -delay_type max -max_path 100000 -slack_greater_than 0 -slack_less_than 1 -input_pins TRUE -nworst 1 -force_to_run
+
+W: Warning : The license will invalid in 5 days. In order not to affect your usage, please update the license in time.
+Executing : set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676 successfully.
+Process "Report Timing" started.
+Current time: Thu Oct 29 09:39:28 2026
+W: Timing-4087: Port 'irq_obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_ext_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_mem_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:32s
+Action report_timing: CPU time elapsed is 0h:0m:9s
+Action report_timing: Process CPU time elapsed is 0h:0m:11s
+Current time: Thu Oct 29 09:39:59 2026
+Action report_timing: Peak memory pool usage is 2,430 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:32s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:9s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:11s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf -delay_type max -max_path 100000 -slack_greater_than 0 -slack_less_than 1 -input_pins TRUE -nworst 1 -force_to_run successfully.
+G:\codex_project\EdRV32-Competition-2026\build\win\20261029-01-media-r4\exports\media_top200
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf} -max_path 200 -input_pins TRUE -nworst 1 -force_to_run
+
+W: Warning : The license will invalid in 5 days. In order not to affect your usage, please update the license in time.
+Executing : set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676 successfully.
+Process "Report Timing" started.
+Current time: Thu Oct 29 09:39:28 2026
+W: Timing-4087: Port 'irq_obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_ext_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_mem_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:38s
+Action report_timing: CPU time elapsed is 0h:0m:10s
+Action report_timing: Process CPU time elapsed is 0h:0m:12s
+Current time: Thu Oct 29 09:40:05 2026
+Action report_timing: Peak memory pool usage is 2,640 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:38s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:10s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:12s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf -max_path 200 -input_pins TRUE -nworst 1 -force_to_run successfully.
+G:\codex_project\EdRV32-Competition-2026\build\win\20261029-01-media-r4\exports\media_violating
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf} -delay_type max -max_path 100000 -slack_less_than 0 -input_pins FALSE -nworst 1 -force_to_run
+
+W: Warning : The license will invalid in 5 days. In order not to affect your usage, please update the license in time.
+Executing : set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676 successfully.
+Process "Report Timing" started.
+Current time: Thu Oct 29 09:39:28 2026
+W: Timing-4087: Port 'irq_obs_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_ext_o' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'obs_mem_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'stim_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:32s
+Action report_timing: CPU time elapsed is 0h:0m:9s
+Action report_timing: Process CPU time elapsed is 0h:0m:10s
+Current time: Thu Oct 29 09:39:59 2026
+Action report_timing: Peak memory pool usage is 2,429 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:32s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:9s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:10s
+Process "Report Timing" done.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-MEDIA/place_route/edrv32_fpga_media_top_pnr.adf -delay_type max -max_path 100000 -slack_less_than 0 -input_pins FALSE -nworst 1 -force_to_run successfully.
