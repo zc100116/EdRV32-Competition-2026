@@ -12,13 +12,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_31_16",
+                    "name": "TYPE",
                     "lsb": 16,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
                 },
                 {
-                    "name": "VALUE_15_0",
+                    "name": "VERSION",
                     "lsb": 0,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
@@ -63,7 +63,7 @@
             "name": "STATUS",
             "offset": "0x008",
             "access": "RO",
-            "reset": null,
+            "reset": 2,
             "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -85,14 +85,13 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "IRQ_EN",
             "offset": "0x00C",
             "access": "RW",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -114,14 +113,13 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "IRQ_STAT",
             "offset": "0x010",
             "access": "RW1C",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -143,18 +141,16 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "ERR_CODE",
             "offset": "0x014",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
             "dimensions": [],
-            "fields": [],
-            "reset_status": "unspecified"
+            "fields": []
         },
         {
             "name": "DESC_BASE",
@@ -180,12 +176,11 @@
             "name": "DOORBELL",
             "offset": "0x028",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1",
             "dimensions": [],
             "fields": [],
-            "reset_status": "not_applicable",
-            "note": "Unused; reads zero and writes ignored."
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "DONE_COUNT",
@@ -279,7 +274,7 @@
             "name": "STAT_CTRL",
             "offset": "0x110",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "mem-subsys-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -296,7 +291,7 @@
                     "spec": "mem-subsys-spec.md 4.1"
                 }
             ],
-            "reset_status": "not_applicable"
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "ERR_PORT",
@@ -325,13 +320,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_0",
+                    "name": "CROSS_4K",
                     "lsb": 0,
                     "width": 1,
                     "spec": "mem-subsys-spec.md 4.1"
                 },
                 {
-                    "name": "VALUE_2",
+                    "name": "MISALIGN",
                     "lsb": 2,
                     "width": 1,
                     "spec": "mem-subsys-spec.md 4.1"
@@ -407,7 +402,7 @@
             "reset": [
                 4,
                 4,
-                null,
+                0,
                 3,
                 2,
                 2,
@@ -437,12 +432,12 @@
             "offset": "0x20C",
             "access": "RW",
             "reset": [
-                null,
-                null,
+                0,
+                0,
                 26,
-                null,
-                null,
-                null,
+                0,
+                0,
+                0,
                 13
             ],
             "spec": "mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5",

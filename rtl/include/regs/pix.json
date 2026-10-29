@@ -12,13 +12,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_31_16",
+                    "name": "TYPE",
                     "lsb": 16,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1"
                 },
                 {
-                    "name": "VALUE_15_0",
+                    "name": "VERSION",
                     "lsb": 0,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1"
@@ -63,7 +63,7 @@
             "name": "STATUS",
             "offset": "0x008",
             "access": "RO",
-            "reset": null,
+            "reset": 2,
             "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -85,8 +85,7 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "IRQ_EN",
@@ -120,7 +119,7 @@
             "name": "IRQ_STAT",
             "offset": "0x010",
             "access": "RW1C",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -142,8 +141,7 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "ERR_CODE",
@@ -178,22 +176,20 @@
             "name": "DOORBELL",
             "offset": "0x028",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1",
             "dimensions": [],
             "fields": [],
-            "reset_status": "not_applicable",
-            "note": "Unused; reads zero and writes ignored."
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "DONE_COUNT",
             "offset": "0x02C",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; pix-spec.md 4.1",
             "dimensions": [],
-            "fields": [],
-            "reset_status": "unspecified"
+            "fields": []
         },
         {
             "name": "PERF",
@@ -317,7 +313,7 @@
             "name": "GAMMA_WR",
             "offset": "0x10C",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "pix-spec.md 4.2",
             "dimensions": [],
             "fields": [
@@ -340,7 +336,7 @@
                     "spec": "pix-spec.md 4.2"
                 }
             ],
-            "reset_status": "not_applicable"
+            "note": "WO; reads 0 (SoC 7.1)."
         }
     ],
     "layouts": []

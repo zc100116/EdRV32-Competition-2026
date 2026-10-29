@@ -12,13 +12,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_31_16",
+                    "name": "TYPE",
                     "lsb": 16,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; npu-spec.md 4"
                 },
                 {
-                    "name": "VALUE_15_0",
+                    "name": "VERSION",
                     "lsb": 0,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; npu-spec.md 4"
@@ -174,11 +174,11 @@
             "name": "DOORBELL",
             "offset": "0x028",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; npu-spec.md 4",
             "dimensions": [],
             "fields": [],
-            "reset_status": "not_applicable"
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "DONE_COUNT",

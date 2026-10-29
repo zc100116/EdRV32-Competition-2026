@@ -214,7 +214,7 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | 2026-10-27 | v0.2 | 用户确认，状态改为已确认 |
 | 2026-10-27 | v0.3 | 随 SoC 规格 v0.9（用户确认）：P1 增加读通道（VIN 内存源，设计记录 `2026-10-27-image-path.md` Q7），`OUTST_RD[1]` 复位值 2（SoC 6.4.5） |
 | 2026-10-29 | v0.4 | 4.1、2.2：每端口统计的事务数和拍数拆成读、写两组（RD_TXN/RD_BEAT 取代 TXN_CNT/BEAT_CNT，新增 WR_TXN 0x414、WR_BEAT 0x418），供 B2 调试工具实时显示各端口读写带宽（用户确认 2026-10-29） |
-| 2026-10-29 | v0.4 | 寄存器回填（B2-1f 调查，与 RTL 一致，草案待用户确认）：4.1 WEIGHT[P2] 复位 0、RATE 除 P2/P6 外复位 0；ERR_TYPE 位域命名 CROSS_4K、MISALIGN |
+| 2026-10-29 | v0.4 | 寄存器回填（B2-1f 调查，与 RTL 一致，用户确认 2026-10-29）：4.1 WEIGHT[P2] 复位 0、RATE 除 P2/P6 外复位 0；ERR_TYPE 位域命名 CROSS_4K、MISALIGN |
 
 ---
 

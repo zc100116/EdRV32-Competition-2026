@@ -13,13 +13,13 @@
 #define EDRV32_NPU_ID_OFFSET 0x00000000u
 #define EDRV32_NPU_ID_RESET 0x00060001u
 /* edrv32-soc-spec.md 7.1; npu-spec.md 4 */
-#define EDRV32_NPU_ID_VALUE_31_16_POS 0x00000010u
-#define EDRV32_NPU_ID_VALUE_31_16_WIDTH 0x00000010u
-#define EDRV32_NPU_ID_VALUE_31_16_MASK 0xFFFF0000u
+#define EDRV32_NPU_ID_TYPE_POS 0x00000010u
+#define EDRV32_NPU_ID_TYPE_WIDTH 0x00000010u
+#define EDRV32_NPU_ID_TYPE_MASK 0xFFFF0000u
 /* edrv32-soc-spec.md 7.1; npu-spec.md 4 */
-#define EDRV32_NPU_ID_VALUE_15_0_POS 0x00000000u
-#define EDRV32_NPU_ID_VALUE_15_0_WIDTH 0x00000010u
-#define EDRV32_NPU_ID_VALUE_15_0_MASK 0x0000FFFFu
+#define EDRV32_NPU_ID_VERSION_POS 0x00000000u
+#define EDRV32_NPU_ID_VERSION_WIDTH 0x00000010u
+#define EDRV32_NPU_ID_VERSION_MASK 0x0000FFFFu
 
 /* edrv32-soc-spec.md 7.1; npu-spec.md 4; RW; reset: 0. */
 #define EDRV32_NPU_CTRL_OFFSET 0x00000004u
@@ -101,9 +101,10 @@
 #define EDRV32_NPU_DESC_COUNT_OFFSET 0x00000024u
 #define EDRV32_NPU_DESC_COUNT_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; npu-spec.md 4; WO; reset: null. */
-/* Reset metadata: not_applicable. */
+/* edrv32-soc-spec.md 7.1; npu-spec.md 4; WO; reset: 0. */
+/* WO; reads 0 (SoC 7.1). */
 #define EDRV32_NPU_DOORBELL_OFFSET 0x00000028u
+#define EDRV32_NPU_DOORBELL_RESET 0x00000000u
 
 /* edrv32-soc-spec.md 7.1; npu-spec.md 4; RO; reset: 0. */
 #define EDRV32_NPU_DONE_COUNT_OFFSET 0x0000002Cu

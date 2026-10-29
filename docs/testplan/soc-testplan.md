@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1（草案，待用户确认） |
+| 版本 | v0.1（用户确认 2026-10-29） |
 | 日期 | 2026-10-29 |
 | 对应规格 | SoC 规格 v0.16（1.2、5、6、7.3–7.5、8、9.1–9.2）；`sys-subsys-spec.md` v0.4；`mem-subsys-spec.md` v0.4；`vin-spec.md` v0.2；`pix-spec.md` v0.1；`geo-spec.md` v0.1；`disp-spec.md` v0.2（B2 用的 RTL）；`npu-spec.md` v0.4；`eth-spec.md` v0.1 |
 | 关联 | 设计记录 `2026-10-29-b2-software.md`（3.3 DDR 布局、3.4 数据流、3.4a 输出选择、3.5 监控记录、3.5a 线协议）；`board-plan.md` B2-1d |

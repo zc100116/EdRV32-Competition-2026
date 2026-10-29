@@ -13,13 +13,13 @@
 #define EDRV32_MEM_XBAR_ID_OFFSET 0x00000000u
 #define EDRV32_MEM_XBAR_ID_RESET 0x00080001u
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1 */
-#define EDRV32_MEM_XBAR_ID_VALUE_31_16_POS 0x00000010u
-#define EDRV32_MEM_XBAR_ID_VALUE_31_16_WIDTH 0x00000010u
-#define EDRV32_MEM_XBAR_ID_VALUE_31_16_MASK 0xFFFF0000u
+#define EDRV32_MEM_XBAR_ID_TYPE_POS 0x00000010u
+#define EDRV32_MEM_XBAR_ID_TYPE_WIDTH 0x00000010u
+#define EDRV32_MEM_XBAR_ID_TYPE_MASK 0xFFFF0000u
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1 */
-#define EDRV32_MEM_XBAR_ID_VALUE_15_0_POS 0x00000000u
-#define EDRV32_MEM_XBAR_ID_VALUE_15_0_WIDTH 0x00000010u
-#define EDRV32_MEM_XBAR_ID_VALUE_15_0_MASK 0x0000FFFFu
+#define EDRV32_MEM_XBAR_ID_VERSION_POS 0x00000000u
+#define EDRV32_MEM_XBAR_ID_VERSION_WIDTH 0x00000010u
+#define EDRV32_MEM_XBAR_ID_VERSION_MASK 0x0000FFFFu
 
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_MEM_XBAR_CTRL_OFFSET 0x00000004u
@@ -41,9 +41,9 @@
 #define EDRV32_MEM_XBAR_CTRL_SOFT_RST_WIDTH 0x00000001u
 #define EDRV32_MEM_XBAR_CTRL_SOFT_RST_MASK 0x00000008u
 
-/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RO; reset: 2. */
 #define EDRV32_MEM_XBAR_STATUS_OFFSET 0x00000008u
+#define EDRV32_MEM_XBAR_STATUS_RESET 0x00000002u
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1 */
 #define EDRV32_MEM_XBAR_STATUS_BUSY_POS 0x00000000u
 #define EDRV32_MEM_XBAR_STATUS_BUSY_WIDTH 0x00000001u
@@ -57,9 +57,9 @@
 #define EDRV32_MEM_XBAR_STATUS_ERROR_WIDTH 0x00000001u
 #define EDRV32_MEM_XBAR_STATUS_ERROR_MASK 0x00000004u
 
-/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RW; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_MEM_XBAR_IRQ_EN_OFFSET 0x0000000Cu
+#define EDRV32_MEM_XBAR_IRQ_EN_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1 */
 #define EDRV32_MEM_XBAR_IRQ_EN_DONE_POS 0x00000000u
 #define EDRV32_MEM_XBAR_IRQ_EN_DONE_WIDTH 0x00000001u
@@ -73,9 +73,9 @@
 #define EDRV32_MEM_XBAR_IRQ_EN_FRAME_WIDTH 0x00000001u
 #define EDRV32_MEM_XBAR_IRQ_EN_FRAME_MASK 0x00000004u
 
-/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RW1C; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RW1C; reset: 0. */
 #define EDRV32_MEM_XBAR_IRQ_STAT_OFFSET 0x00000010u
+#define EDRV32_MEM_XBAR_IRQ_STAT_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1 */
 #define EDRV32_MEM_XBAR_IRQ_STAT_DONE_POS 0x00000000u
 #define EDRV32_MEM_XBAR_IRQ_STAT_DONE_WIDTH 0x00000001u
@@ -89,9 +89,9 @@
 #define EDRV32_MEM_XBAR_IRQ_STAT_FRAME_WIDTH 0x00000001u
 #define EDRV32_MEM_XBAR_IRQ_STAT_FRAME_MASK 0x00000004u
 
-/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RO; reset: 0. */
 #define EDRV32_MEM_XBAR_ERR_CODE_OFFSET 0x00000014u
+#define EDRV32_MEM_XBAR_ERR_CODE_RESET 0x00000000u
 
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RW; reset: 0. */
 /* Unused; reads zero and writes ignored. */
@@ -103,10 +103,10 @@
 #define EDRV32_MEM_XBAR_DESC_COUNT_OFFSET 0x00000024u
 #define EDRV32_MEM_XBAR_DESC_COUNT_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; WO; reset: null. */
-/* Reset metadata: not_applicable. */
-/* Unused; reads zero and writes ignored. */
+/* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; WO; reset: 0. */
+/* WO; reads 0 (SoC 7.1). */
 #define EDRV32_MEM_XBAR_DOORBELL_OFFSET 0x00000028u
+#define EDRV32_MEM_XBAR_DOORBELL_RESET 0x00000000u
 
 /* edrv32-soc-spec.md 7.1; mem-subsys-spec.md 4.1; RO; reset: 0. */
 #define EDRV32_MEM_XBAR_DONE_COUNT_OFFSET 0x0000002Cu
@@ -150,9 +150,10 @@
 #define EDRV32_MEM_XBAR_DIR_BATCH_VALUE_WIDTH 0x00000008u
 #define EDRV32_MEM_XBAR_DIR_BATCH_VALUE_MASK 0x000000FFu
 
-/* mem-subsys-spec.md 4.1; WO; reset: null. */
-/* Reset metadata: not_applicable. */
+/* mem-subsys-spec.md 4.1; WO; reset: 0. */
+/* WO; reads 0 (SoC 7.1). */
 #define EDRV32_MEM_XBAR_STAT_CTRL_OFFSET 0x00000110u
+#define EDRV32_MEM_XBAR_STAT_CTRL_RESET 0x00000000u
 /* mem-subsys-spec.md 4.1 */
 #define EDRV32_MEM_XBAR_STAT_CTRL_SNAPSHOT_POS 0x00000000u
 #define EDRV32_MEM_XBAR_STAT_CTRL_SNAPSHOT_WIDTH 0x00000001u
@@ -174,13 +175,13 @@
 #define EDRV32_MEM_XBAR_ERR_TYPE_OFFSET 0x00000128u
 #define EDRV32_MEM_XBAR_ERR_TYPE_RESET 0x00000000u
 /* mem-subsys-spec.md 4.1 */
-#define EDRV32_MEM_XBAR_ERR_TYPE_VALUE_0_POS 0x00000000u
-#define EDRV32_MEM_XBAR_ERR_TYPE_VALUE_0_WIDTH 0x00000001u
-#define EDRV32_MEM_XBAR_ERR_TYPE_VALUE_0_MASK 0x00000001u
+#define EDRV32_MEM_XBAR_ERR_TYPE_CROSS_4K_POS 0x00000000u
+#define EDRV32_MEM_XBAR_ERR_TYPE_CROSS_4K_WIDTH 0x00000001u
+#define EDRV32_MEM_XBAR_ERR_TYPE_CROSS_4K_MASK 0x00000001u
 /* mem-subsys-spec.md 4.1 */
-#define EDRV32_MEM_XBAR_ERR_TYPE_VALUE_2_POS 0x00000002u
-#define EDRV32_MEM_XBAR_ERR_TYPE_VALUE_2_WIDTH 0x00000001u
-#define EDRV32_MEM_XBAR_ERR_TYPE_VALUE_2_MASK 0x00000004u
+#define EDRV32_MEM_XBAR_ERR_TYPE_MISALIGN_POS 0x00000002u
+#define EDRV32_MEM_XBAR_ERR_TYPE_MISALIGN_WIDTH 0x00000001u
+#define EDRV32_MEM_XBAR_ERR_TYPE_MISALIGN_MASK 0x00000004u
 
 /* mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5; RW; reset: [4, 2, 1, 4, 2, 2, 2]. */
 /* Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6. */
@@ -216,7 +217,7 @@
 #define EDRV32_MEM_XBAR_OUTST_WR_VALUE_WIDTH 0x00000004u
 #define EDRV32_MEM_XBAR_OUTST_WR_VALUE_MASK 0x0000000Fu
 
-/* mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5; RW; reset: [4, 4, null, 3, 2, 2, 1]. */
+/* mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5; RW; reset: [4, 4, 0, 3, 2, 2, 1]. */
 /* Reset metadata: null entries are unspecified or unused in the cited table. */
 /* Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6. */
 #define EDRV32_MEM_XBAR_WEIGHT_P_COUNT 0x00000007u
@@ -224,6 +225,7 @@
     (0x00000208u + 0x00000020u * (p))
 #define EDRV32_MEM_XBAR_WEIGHT_RESET_0 0x00000004u
 #define EDRV32_MEM_XBAR_WEIGHT_RESET_1 0x00000004u
+#define EDRV32_MEM_XBAR_WEIGHT_RESET_2 0x00000000u
 #define EDRV32_MEM_XBAR_WEIGHT_RESET_3 0x00000003u
 #define EDRV32_MEM_XBAR_WEIGHT_RESET_4 0x00000002u
 #define EDRV32_MEM_XBAR_WEIGHT_RESET_5 0x00000002u
@@ -233,13 +235,18 @@
 #define EDRV32_MEM_XBAR_WEIGHT_VALUE_WIDTH 0x00000004u
 #define EDRV32_MEM_XBAR_WEIGHT_VALUE_MASK 0x0000000Fu
 
-/* mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5; RW; reset: [null, null, 26, null, null, null, 13]. */
+/* mem-subsys-spec.md 4.1; edrv32-soc-spec.md 6.4.5; RW; reset: [0, 0, 26, 0, 0, 0, 13]. */
 /* Reset metadata: null entries are unspecified or unused in the cited table. */
 /* Reset sources are cited in spec; WEIGHT P2 unused; RATE only P2/P6. */
 #define EDRV32_MEM_XBAR_RATE_P_COUNT 0x00000007u
 #define EDRV32_MEM_XBAR_RATE_OFFSET(p) \
     (0x0000020Cu + 0x00000020u * (p))
+#define EDRV32_MEM_XBAR_RATE_RESET_0 0x00000000u
+#define EDRV32_MEM_XBAR_RATE_RESET_1 0x00000000u
 #define EDRV32_MEM_XBAR_RATE_RESET_2 0x0000001Au
+#define EDRV32_MEM_XBAR_RATE_RESET_3 0x00000000u
+#define EDRV32_MEM_XBAR_RATE_RESET_4 0x00000000u
+#define EDRV32_MEM_XBAR_RATE_RESET_5 0x00000000u
 #define EDRV32_MEM_XBAR_RATE_RESET_6 0x0000000Du
 /* mem-subsys-spec.md 4.1 */
 #define EDRV32_MEM_XBAR_RATE_VALUE_POS 0x00000000u

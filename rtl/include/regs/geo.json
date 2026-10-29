@@ -12,13 +12,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_31_16",
+                    "name": "TYPE",
                     "lsb": 16,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
                 },
                 {
-                    "name": "VALUE_15_0",
+                    "name": "VERSION",
                     "lsb": 0,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
@@ -29,7 +29,7 @@
             "name": "CTRL",
             "offset": "0x004",
             "access": "RW",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -57,14 +57,13 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "STATUS",
             "offset": "0x008",
             "access": "RO",
-            "reset": null,
+            "reset": 2,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -86,8 +85,7 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "IRQ_EN",
@@ -121,7 +119,7 @@
             "name": "IRQ_STAT",
             "offset": "0x010",
             "access": "RW1C",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -143,24 +141,22 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "ERR_CODE",
             "offset": "0x014",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
-            "fields": [],
-            "reset_status": "unspecified"
+            "fields": []
         },
         {
             "name": "DESC_BASE",
             "offset": "0x020",
             "access": "RW",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -170,14 +166,13 @@
                     "width": 27,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "DESC_COUNT",
             "offset": "0x024",
             "access": "RW",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -187,34 +182,32 @@
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "DOORBELL",
             "offset": "0x028",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
             "fields": [],
-            "reset_status": "not_applicable"
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "DONE_COUNT",
             "offset": "0x02C",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1",
             "dimensions": [],
-            "fields": [],
-            "reset_status": "unspecified"
+            "fields": []
         },
         {
             "name": "PERF",
             "offset": "0x040",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1; geo-spec.md 4.3",
             "dimensions": [
                 {
@@ -230,8 +223,7 @@
                     "width": 32,
                     "spec": "edrv32-soc-spec.md 7.1; geo-spec.md 4.1; geo-spec.md 4.3"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "CUR_DESC",

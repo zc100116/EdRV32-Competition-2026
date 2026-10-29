@@ -13,17 +13,17 @@
 #define EDRV32_GEO_ID_OFFSET 0x00000000u
 #define EDRV32_GEO_ID_RESET 0x00030001u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
-#define EDRV32_GEO_ID_VALUE_31_16_POS 0x00000010u
-#define EDRV32_GEO_ID_VALUE_31_16_WIDTH 0x00000010u
-#define EDRV32_GEO_ID_VALUE_31_16_MASK 0xFFFF0000u
+#define EDRV32_GEO_ID_TYPE_POS 0x00000010u
+#define EDRV32_GEO_ID_TYPE_WIDTH 0x00000010u
+#define EDRV32_GEO_ID_TYPE_MASK 0xFFFF0000u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
-#define EDRV32_GEO_ID_VALUE_15_0_POS 0x00000000u
-#define EDRV32_GEO_ID_VALUE_15_0_WIDTH 0x00000010u
-#define EDRV32_GEO_ID_VALUE_15_0_MASK 0x0000FFFFu
+#define EDRV32_GEO_ID_VERSION_POS 0x00000000u
+#define EDRV32_GEO_ID_VERSION_WIDTH 0x00000010u
+#define EDRV32_GEO_ID_VERSION_MASK 0x0000FFFFu
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_GEO_CTRL_OFFSET 0x00000004u
+#define EDRV32_GEO_CTRL_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
 #define EDRV32_GEO_CTRL_ENABLE_POS 0x00000000u
 #define EDRV32_GEO_CTRL_ENABLE_WIDTH 0x00000001u
@@ -41,9 +41,9 @@
 #define EDRV32_GEO_CTRL_SOFT_RST_WIDTH 0x00000001u
 #define EDRV32_GEO_CTRL_SOFT_RST_MASK 0x00000008u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RO; reset: 2. */
 #define EDRV32_GEO_STATUS_OFFSET 0x00000008u
+#define EDRV32_GEO_STATUS_RESET 0x00000002u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
 #define EDRV32_GEO_STATUS_BUSY_POS 0x00000000u
 #define EDRV32_GEO_STATUS_BUSY_WIDTH 0x00000001u
@@ -73,9 +73,9 @@
 #define EDRV32_GEO_IRQ_EN_FRAME_WIDTH 0x00000001u
 #define EDRV32_GEO_IRQ_EN_FRAME_MASK 0x00000004u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW1C; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW1C; reset: 0. */
 #define EDRV32_GEO_IRQ_STAT_OFFSET 0x00000010u
+#define EDRV32_GEO_IRQ_STAT_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
 #define EDRV32_GEO_IRQ_STAT_DONE_POS 0x00000000u
 #define EDRV32_GEO_IRQ_STAT_DONE_WIDTH 0x00000001u
@@ -89,39 +89,40 @@
 #define EDRV32_GEO_IRQ_STAT_FRAME_WIDTH 0x00000001u
 #define EDRV32_GEO_IRQ_STAT_FRAME_MASK 0x00000004u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RO; reset: 0. */
 #define EDRV32_GEO_ERR_CODE_OFFSET 0x00000014u
+#define EDRV32_GEO_ERR_CODE_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_GEO_DESC_BASE_OFFSET 0x00000020u
+#define EDRV32_GEO_DESC_BASE_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
 #define EDRV32_GEO_DESC_BASE_VALUE_POS 0x00000005u
 #define EDRV32_GEO_DESC_BASE_VALUE_WIDTH 0x0000001Bu
 #define EDRV32_GEO_DESC_BASE_VALUE_MASK 0xFFFFFFE0u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_GEO_DESC_COUNT_OFFSET 0x00000024u
+#define EDRV32_GEO_DESC_COUNT_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1 */
 #define EDRV32_GEO_DESC_COUNT_VALUE_POS 0x00000000u
 #define EDRV32_GEO_DESC_COUNT_VALUE_WIDTH 0x00000010u
 #define EDRV32_GEO_DESC_COUNT_VALUE_MASK 0x0000FFFFu
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; WO; reset: null. */
-/* Reset metadata: not_applicable. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; WO; reset: 0. */
+/* WO; reads 0 (SoC 7.1). */
 #define EDRV32_GEO_DOORBELL_OFFSET 0x00000028u
+#define EDRV32_GEO_DOORBELL_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; RO; reset: 0. */
 #define EDRV32_GEO_DONE_COUNT_OFFSET 0x0000002Cu
+#define EDRV32_GEO_DONE_COUNT_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; geo-spec.md 4.3; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; geo-spec.md 4.3; RO; reset: 0. */
 #define EDRV32_GEO_PERF_N_COUNT 0x00000010u
 #define EDRV32_GEO_PERF_OFFSET(n) \
     (0x00000040u + 0x00000004u * (n))
+#define EDRV32_GEO_PERF_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; geo-spec.md 4.1; geo-spec.md 4.3 */
 #define EDRV32_GEO_PERF_VALUE_POS 0x00000000u
 #define EDRV32_GEO_PERF_VALUE_WIDTH 0x00000020u

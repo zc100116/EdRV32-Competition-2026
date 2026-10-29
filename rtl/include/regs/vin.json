@@ -12,13 +12,13 @@
             "dimensions": [],
             "fields": [
                 {
-                    "name": "VALUE_31_16",
+                    "name": "TYPE",
                     "lsb": 16,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
                 },
                 {
-                    "name": "VALUE_15_0",
+                    "name": "VERSION",
                     "lsb": 0,
                     "width": 16,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
@@ -29,7 +29,7 @@
             "name": "CTRL",
             "offset": "0x004",
             "access": "RW",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -57,14 +57,13 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "STATUS",
             "offset": "0x008",
             "access": "RO",
-            "reset": null,
+            "reset": 2,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -86,14 +85,13 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "IRQ_EN",
             "offset": "0x00C",
             "access": "RW",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -127,14 +125,13 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "IRQ_STAT",
             "offset": "0x010",
             "access": "RW1C",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
             "fields": [
@@ -168,18 +165,16 @@
                     "width": 1,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "ERR_CODE",
             "offset": "0x014",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
-            "fields": [],
-            "reset_status": "unspecified"
+            "fields": []
         },
         {
             "name": "DESC_BASE",
@@ -205,28 +200,26 @@
             "name": "DOORBELL",
             "offset": "0x028",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
             "fields": [],
-            "reset_status": "not_applicable",
-            "note": "Unused; reads zero and writes ignored."
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "DONE_COUNT",
             "offset": "0x02C",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1",
             "dimensions": [],
-            "fields": [],
-            "reset_status": "unspecified"
+            "fields": []
         },
         {
             "name": "PERF",
             "offset": "0x040",
             "access": "RO",
-            "reset": null,
+            "reset": 0,
             "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1; vin-spec.md 4.4",
             "dimensions": [
                 {
@@ -242,8 +235,7 @@
                     "width": 32,
                     "spec": "edrv32-soc-spec.md 7.1; vin-spec.md 4.1; vin-spec.md 4.4"
                 }
-            ],
-            "reset_status": "unspecified"
+            ]
         },
         {
             "name": "CAM0_SIZE",
@@ -347,7 +339,7 @@
             "name": "MSRC_CTRL",
             "offset": "0x11C",
             "access": "WO",
-            "reset": null,
+            "reset": 0,
             "spec": "vin-spec.md 4.2",
             "dimensions": [],
             "fields": [
@@ -358,7 +350,7 @@
                     "spec": "vin-spec.md 4.2"
                 }
             ],
-            "reset_status": "not_applicable"
+            "note": "WO; reads 0 (SoC 7.1)."
         },
         {
             "name": "MSRC_STAT",
@@ -496,13 +488,13 @@
             ],
             "fields": [
                 {
-                    "name": "VALUE_1_0",
+                    "name": "SLOT",
                     "lsb": 0,
                     "width": 2,
                     "spec": "vin-spec.md 4.3"
                 },
                 {
-                    "name": "VALUE_3_2",
+                    "name": "SRC",
                     "lsb": 2,
                     "width": 2,
                     "spec": "vin-spec.md 4.3"
@@ -557,7 +549,7 @@
                     "spec": "vin-spec.md 4.3"
                 },
                 {
-                    "name": "VALUE_2_1",
+                    "name": "SLOT",
                     "lsb": 1,
                     "width": 2,
                     "spec": "vin-spec.md 4.3"

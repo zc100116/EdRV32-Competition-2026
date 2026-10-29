@@ -13,17 +13,17 @@
 #define EDRV32_DISP_ID_OFFSET 0x00000000u
 #define EDRV32_DISP_ID_RESET 0x00050001u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1 */
-#define EDRV32_DISP_ID_VALUE_31_16_POS 0x00000010u
-#define EDRV32_DISP_ID_VALUE_31_16_WIDTH 0x00000010u
-#define EDRV32_DISP_ID_VALUE_31_16_MASK 0xFFFF0000u
+#define EDRV32_DISP_ID_TYPE_POS 0x00000010u
+#define EDRV32_DISP_ID_TYPE_WIDTH 0x00000010u
+#define EDRV32_DISP_ID_TYPE_MASK 0xFFFF0000u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1 */
-#define EDRV32_DISP_ID_VALUE_15_0_POS 0x00000000u
-#define EDRV32_DISP_ID_VALUE_15_0_WIDTH 0x00000010u
-#define EDRV32_DISP_ID_VALUE_15_0_MASK 0x0000FFFFu
+#define EDRV32_DISP_ID_VERSION_POS 0x00000000u
+#define EDRV32_DISP_ID_VERSION_WIDTH 0x00000010u
+#define EDRV32_DISP_ID_VERSION_MASK 0x0000FFFFu
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_DISP_CTRL_OFFSET 0x00000004u
+#define EDRV32_DISP_CTRL_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1 */
 #define EDRV32_DISP_CTRL_ENABLE_POS 0x00000000u
 #define EDRV32_DISP_CTRL_ENABLE_WIDTH 0x00000001u
@@ -41,9 +41,9 @@
 #define EDRV32_DISP_CTRL_SOFT_RST_WIDTH 0x00000001u
 #define EDRV32_DISP_CTRL_SOFT_RST_MASK 0x00000008u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RO; reset: 2. */
 #define EDRV32_DISP_STATUS_OFFSET 0x00000008u
+#define EDRV32_DISP_STATUS_RESET 0x00000002u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1 */
 #define EDRV32_DISP_STATUS_BUSY_POS 0x00000000u
 #define EDRV32_DISP_STATUS_BUSY_WIDTH 0x00000001u
@@ -57,9 +57,9 @@
 #define EDRV32_DISP_STATUS_ERROR_WIDTH 0x00000001u
 #define EDRV32_DISP_STATUS_ERROR_MASK 0x00000004u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW; reset: 0. */
 #define EDRV32_DISP_IRQ_EN_OFFSET 0x0000000Cu
+#define EDRV32_DISP_IRQ_EN_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1 */
 #define EDRV32_DISP_IRQ_EN_DONE_POS 0x00000000u
 #define EDRV32_DISP_IRQ_EN_DONE_WIDTH 0x00000001u
@@ -77,9 +77,9 @@
 #define EDRV32_DISP_IRQ_EN_SWITCH_WIDTH 0x00000001u
 #define EDRV32_DISP_IRQ_EN_SWITCH_MASK 0x00000100u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW1C; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW1C; reset: 0. */
 #define EDRV32_DISP_IRQ_STAT_OFFSET 0x00000010u
+#define EDRV32_DISP_IRQ_STAT_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1 */
 #define EDRV32_DISP_IRQ_STAT_DONE_POS 0x00000000u
 #define EDRV32_DISP_IRQ_STAT_DONE_WIDTH 0x00000001u
@@ -97,9 +97,9 @@
 #define EDRV32_DISP_IRQ_STAT_SWITCH_WIDTH 0x00000001u
 #define EDRV32_DISP_IRQ_STAT_SWITCH_MASK 0x00000100u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RO; reset: 0. */
 #define EDRV32_DISP_ERR_CODE_OFFSET 0x00000014u
+#define EDRV32_DISP_ERR_CODE_RESET 0x00000000u
 
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RW; reset: 0. */
 /* Unused; reads zero and writes ignored. */
@@ -111,20 +111,20 @@
 #define EDRV32_DISP_DESC_COUNT_OFFSET 0x00000024u
 #define EDRV32_DISP_DESC_COUNT_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; WO; reset: null. */
-/* Reset metadata: not_applicable. */
-/* Unused; reads zero and writes ignored. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; WO; reset: 0. */
+/* WO; reads 0 (SoC 7.1). */
 #define EDRV32_DISP_DOORBELL_OFFSET 0x00000028u
+#define EDRV32_DISP_DOORBELL_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; RO; reset: 0. */
 #define EDRV32_DISP_DONE_COUNT_OFFSET 0x0000002Cu
+#define EDRV32_DISP_DONE_COUNT_RESET 0x00000000u
 
-/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; disp-spec.md 4.3; RO; reset: null. */
-/* Reset metadata: unspecified. */
+/* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; disp-spec.md 4.3; RO; reset: 0. */
 #define EDRV32_DISP_PERF_N_COUNT 0x00000010u
 #define EDRV32_DISP_PERF_OFFSET(n) \
     (0x00000040u + 0x00000004u * (n))
+#define EDRV32_DISP_PERF_RESET 0x00000000u
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; disp-spec.md 4.3 */
 #define EDRV32_DISP_PERF_VALUE_POS 0x00000000u
 #define EDRV32_DISP_PERF_VALUE_WIDTH 0x00000020u
