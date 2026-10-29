@@ -4,6 +4,7 @@
  * Clock domain: clk_sys or host; active only during RN-17.
  */
 #include "rn17_compare.h"
+#include "s3_lvgl.h"
 #include "src/draw/lv_draw_private.h"
 #include "src/misc/lv_area_private.h"
 #include "src/draw/sw/blend/lv_draw_sw_blend_private.h"
@@ -16,6 +17,34 @@ static bool recording;
 void s3_compare_begin(void) { lv_memzero(edges, sizeof(edges)); recording = true; }
 void s3_compare_end(void) { recording = false; }
 bool s3_compare_edge(unsigned index) { return edges[index] != 0; }
+
+void s3_compare_pixels(struct s3_lvgl_comparison *result, const uint16_t *reference,
+                       const uint16_t *rendered, uint32_t pixels)
+{
+    const unsigned shifts[3] = { 11, 5, 0 };
+    const unsigned masks[3] = { 31, 63, 31 };
+    *result = (struct s3_lvgl_comparison) { .pixels = pixels };
+    for (uint32_t i = 0; i < pixels; ++i) {
+        uint32_t delta = 0;
+        for (unsigned c = 0; c < 3; ++c) {
+            unsigned a = (reference[i] >> shifts[c]) & masks[c];
+            unsigned b = (rendered[i] >> shifts[c]) & masks[c];
+            unsigned d = a > b ? a - b : b - a;
+            delta = LV_MAX(delta, d);
+        }
+        if (delta > 1) result->over1++;
+        unsigned bin = delta <= 2 ? delta : delta <= 4 ? 3 : 4;
+        result->histogram[bin]++;
+        if (s3_compare_edge(i)) result->edge_max_lsb = LV_MAX(result->edge_max_lsb, delta);
+        else result->full_max_lsb = LV_MAX(result->full_max_lsb, delta);
+    }
+}
+
+bool s3_compare_passes(const struct s3_lvgl_comparison *result)
+{
+    /* rnd-testplan 6: edge pixels have no individual limit. */
+    return result->full_max_lsb <= 1 && result->over1 * 100u <= result->pixels;
+}
 
 static bool clipped(lv_draw_task_t *t, const lv_area_t *area, lv_area_t *result)
 {

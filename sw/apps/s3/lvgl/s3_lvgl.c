@@ -189,16 +189,6 @@ void s3_lvgl_start_benchmark(void)
     lv_demo_benchmark();
 }
 
-static void channels(uint16_t p, uint8_t c[3])
-{
-    uint8_t r = p >> 11;
-    uint8_t g = (p >> 5) & 63;
-    uint8_t b = p & 31;
-    c[0] = (r << 3) | (r >> 2);
-    c[1] = (g << 2) | (g >> 4);
-    c[2] = (b << 3) | (b >> 2);
-}
-
 void s3_lvgl_self_compare(void)
 {
     bool was_enabled = s3_draw_rnd_enabled();
@@ -214,45 +204,22 @@ void s3_lvgl_self_compare(void)
     s3_draw_rnd_enable(true);
     invalidate_all();
     lv_refr_now(display);
-    comparison = (struct s3_lvgl_comparison) { .pixels = PIXELS };
+    s3_compare_pixels(&comparison, reference, front, PIXELS);
     const struct s3_draw_rnd_stats *after = s3_draw_rnd_stats();
     comparison.rnd_tasks = after->executed - before.executed;
     comparison.sw_tasks = after->software - before.software;
-    for (unsigned i = 0; i < PIXELS; ++i) {
-        uint8_t a[3];
-        uint8_t b[3];
-        channels(reference[i], a);
-        channels(front[i], b);
-        uint32_t delta = 0;
-        for (unsigned c = 0; c < 3; ++c) {
-            uint32_t d = a[c] > b[c] ? a[c] - b[c] : b[c] - a[c];
-            comparison.max_channel[c] = LV_MAX(comparison.max_channel[c], d);
-            delta = LV_MAX(delta, d);
-        }
-        if (delta > 3) comparison.over3++;
-        unsigned bin = delta <= 3 ? 0 : delta <= 8 ? 1 : delta <= 16 ? 2 :
-                       delta <= 48 ? 3 : 4;
-        comparison.histogram[bin]++;
-        if (s3_compare_edge(i)) comparison.edge_max = LV_MAX(comparison.edge_max, delta);
-        else comparison.full_max = LV_MAX(comparison.full_max, delta);
-    }
-    s3_puts("RN-17 max_rgb=");
-    for (unsigned c = 0; c < 3; ++c) {
-        s3_put_u32(comparison.max_channel[c]); s3_puts(c == 2 ? "" : ",");
-    }
-    s3_puts(" full_max="); s3_put_u32(comparison.full_max);
-    s3_puts(" edge_max="); s3_put_u32(comparison.edge_max);
-    s3_puts(" over3="); s3_put_u32(comparison.over3);
+    s3_puts("RN-17 full_max_lsb="); s3_put_u32(comparison.full_max_lsb);
+    s3_puts(" edge_max_lsb="); s3_put_u32(comparison.edge_max_lsb);
+    s3_puts(" over1="); s3_put_u32(comparison.over1);
     s3_puts(" pixels="); s3_put_u32(PIXELS);
-    s3_puts(" over3_ppm="); s3_put_u32(comparison.over3 * 1000000ull / PIXELS);
-    s3_puts(" bins_0_3_8_16_48_255=");
+    s3_puts(" over1_ppm="); s3_put_u32(comparison.over1 * 1000000ull / PIXELS);
+    s3_puts(" bins_0_1_2_3to4_5plus=");
     for (unsigned i = 0; i < 5; ++i) {
         s3_put_u32(comparison.histogram[i]); s3_puts(i == 4 ? "" : ",");
     }
     s3_puts(" rnd_tasks="); s3_put_u32(comparison.rnd_tasks);
     s3_puts(" sw_tasks="); s3_put_u32(comparison.sw_tasks);
-    s3_puts(comparison.full_max <= 3 && comparison.edge_max <= 48 &&
-            comparison.over3 * 100u <= PIXELS ? " PASS" : " FAIL");
+    s3_puts(s3_compare_passes(&comparison) ? " PASS" : " FAIL");
     s3_puts("\r\n");
     s3_compare_end();
     s3_draw_rnd_print_stats();

@@ -6,6 +6,10 @@
 #ifndef S3_RN17_COMPARE_H
 #define S3_RN17_COMPARE_H
 #include "lvgl.h"
+struct s3_lvgl_comparison;
+void s3_compare_pixels(struct s3_lvgl_comparison *result, const uint16_t *reference,
+                       const uint16_t *rendered, uint32_t pixels);
+bool s3_compare_passes(const struct s3_lvgl_comparison *result);
 void s3_compare_begin(void);
 void s3_compare_end(void);
 bool s3_compare_edge(unsigned index);

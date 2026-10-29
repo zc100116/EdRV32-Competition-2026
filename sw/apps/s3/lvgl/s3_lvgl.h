@@ -22,12 +22,11 @@ lv_display_t *s3_lvgl_display(void);
 
 /* Last RN-17 pair, also accessible to the Linux runner for PPM export. */
 struct s3_lvgl_comparison {
-    uint32_t max_channel[3];
-    uint32_t full_max;
-    uint32_t edge_max;
-    uint32_t over3;
+    uint32_t full_max_lsb;
+    uint32_t edge_max_lsb;
+    uint32_t over1;
     uint32_t pixels;
-    /* Pixel maximum-channel difference: 0..3, 4..8, 9..16, 17..48, 49..255. */
+    /* Maximum R5/G6/B5 channel difference: 0, 1, 2, 3..4, >=5 LSB. */
     uint32_t histogram[5];
     uint32_t rnd_tasks;
     uint32_t sw_tasks;
