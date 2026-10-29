@@ -1,4 +1,104 @@
-# D-T1 DISP v0.3 独立模块验证结果
+# D-I1 DISP v0.3 两层联调结果
+
+日期：2026-10-29。被测 RTL：`cfc7fb2`（含 D-R1、D-R2）；最终运行器：
+`aff6f5f`。规格和验证方案均为 DISP v0.3，覆盖 DS-01–19。
+**smoke、full 全部 PASS；75 个完整 DUT 仿真实例零失败，没有修改 RTL。**
+
+## 合入与改动
+
+按任务顺序合入六个独立验证提交：
+
+| 原提交 | 本分支 cherry-pick |
+|---|---|
+| `1c63e21` | `22fad03` |
+| `03b723c` | `2742a36` |
+| `beb0481` | `a2140b3` |
+| `cbbd985` | `32e5228` |
+| `eac0a88` | `6516ccc` |
+| `4be2d55` | `972ed3b` |
+
+本次没有功能失败，因此没有 RTL 错误、像素参考错误或规格歧义需要修复。
+发现的回归档位问题属于测试组织与 CLAUDE.md 9.1 / Task D-I1 第 4 项不符：
+原 smoke 的 DS-01、DS-03 初测分别约 64、65 秒，六帧参考生成/比较也曾达到
+105.73 秒。`2e93900` 将所有完整 raster 用例移入 full 并记录每项耗时；
+`aff6f5f` 将六帧 Python/SV 比对也留在 full，smoke 保留原有快速 Python 自测。
+合并后的 full 超时预算为原两个入口之和（7200 + 10800 = 18000 秒）。
+所有 75 个实例的帧数、种子、variant 和逐像素检查均保留；没有压缩覆盖或改变逐位期望。
+
+## 命令、结果和目录耗时
+
+环境：`. ~/.local/opt/edrv32/env.sh`；Verilator 5.020、Python 3.12.3。
+全部构建 `-j 1`，不用 `--parallel`，同一时刻只有一个本任务的仿真。
+耗时为共享主机上的实际墙钟时间，统一入口取整至秒；最终 full 复用了已构建的目标。
+
+```sh
+python3 tools/regress.py smoke --path verif/block/disp -j 1
+python3 tools/regress.py full --path verif/block/disp -j 1
+python3 tools/check/verilog_style.py rtl/media/disp verif/block/disp
+(cd rtl/filelists && verilator --lint-only -Wall -DSIM_MODE \
+    -f disp.f --top-module edrv32_disp)
+```
+
+| 档位 | 实际测试目录 | 结果 | 耗时 |
+|---|---|---|---:|
+| smoke | `verif/block/disp` | Python 自测 PASS；1 PASS、0 FAIL | 0 秒（小于 1 秒） |
+| full | `verif/block/disp/full` | 六帧 Python/SV 比对、75 个 DUT 实例全部 PASS | 10108 秒 |
+| full | `verif/block/disp` | Python 自测 PASS | 0 秒（小于 1 秒） |
+
+full 汇总为 **2 PASS、0 FAIL**，墙钟约 **2 小时 48 分 28 秒**。
+最终参考生成/比对为 83.96 秒，比较 5,529,600 个像素；DUT 实例耗时之和为
+10007.97 秒。剩余时间包含 Python TMDS 参考生成、构建和运行器开销。
+
+| 测试项 | PASS 实例数 | 仿真合计（秒） | 单项范围（秒） |
+|---|---:|---:|---:|
+| DS-01 | 1 | 65.65 | 65.65 |
+| DS-02 | 1 | 73.22 | 73.22 |
+| DS-03 | 2 | 181.29 | 89.41–91.88 |
+| DS-04 | 1 | 155.05 | 155.05 |
+| DS-05 | 1 | 115.24 | 115.24 |
+| DS-06 | 1 | 106.98 | 106.98 |
+| DS-07 | 3 | 622.62 | 155.83–262.38 |
+| DS-08 | 1 | 117.56 | 117.56 |
+| DS-09 | 1 | 134.62 | 134.62 |
+| DS-10 | 4 | 266.90 | 59.09–85.80 |
+| DS-11 | 1 | 88.42 | 88.42 |
+| DS-12 | 5 | 593.36 | 74.35–237.24 |
+| DS-13 | 10 | 2128.69 | 185.74–250.86 |
+| DS-14 | 19 | 1940.21 | 71.77–142.99 |
+| DS-15 | 1 | 265.55 | 265.55 |
+| DS-16 | 3 | 223.94 | 67.97–87.42 |
+| DS-17 | 1 | 293.29 | 293.29 |
+| DS-18 | 18 | 2540.86 | 130.35–171.49 |
+| DS-19 | 1 | 94.52 | 94.52 |
+
+RTL 风格检查：7 个文件，0 告警；完整 DISP filelist lint：退出 0、0 告警。
+三个测试顶层 `tb`、`tb_layers`、`tb_blend_ref` 也均 lint 退出 0、日志为空，
+命令与原有行为模型豁免见下方 D-T1 报告。SV/SVH/Python 的 100 列和 Tab 检查为 0 告警；
+`git diff --check` 通过。
+
+原始证据：`build/disp-i1-{smoke,full}.log`、
+`build/regress/{smoke,full}/block/disp/verilator/run.log`、
+`build/regress/full/block/disp/full/verilator/run.log`、
+`build/disp/DS-*.log`、`build/disp/blend-ref-sv.log`、
+`build/disp/{tb,tb_layers,tb_blend_ref}-lint.log`、`build/disp/format.log`。
+初次 smoke 在 DS-01、DS-03 通过后为调整档位而停止；初次 full 在三个实例通过后为
+保留合并入口的超时预算而停止，两次均不是功能失败，也不计作完整通过的回归。
+记录保存在 `build/disp-i1-initial-{smoke,full}.log`；上表只统计最终完整运行。
+
+## 剩余与修改文件
+
+本任务验收无剩余。RTL 未修改，因此没有触发单元 smoke/full 重跑及 Yosys 路径复查条件；
+原 D-R2 的 16 级路径结论没有被本任务改动影响。不涉及需调试半小时以上的失败，未新增调试记录。
+按协调者暂停安排，完成当前 full 后不再启动仿真。
+
+相对 `cfc7fb2` 修改文件均位于 `verif/block/disp/`：`README.md`、`blend_ref.py`、
+`blend_ref.svh`、`files.f`、`full/test.yaml`、`results.md`、`run.py`、`tb.sv`、
+`tb_blend_ref.sv`、`tb_layers.sv`、`test.yaml`。
+没有修改规格、验证方案、RTL common/tech/include/filelists 或其他模块。
+
+---
+
+# D-T1 DISP v0.3 独立模块验证结果（历史：v0.2 RTL）
 
 日期：2026-10-29。被测 RTL 基线：`4412a299b4e8c054ed73ab335226c8760470f5d9`
 （v0.2）；smoke 功能激励/判定：`1c63e21`。后续 `03b723c` 修正诊断格式，
