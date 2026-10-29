@@ -110,3 +110,12 @@ Host range tests compile the same `boot.h` predicates used by BIOS:
 ```sh
 python3 -m unittest discover -s sw/boot/tests -v
 ```
+
+## B1-10 measured ROM size
+
+On implementation commit `eefa446` with xPack GCC 15.2.0, the required
+`make -C sw PROGRAM=bootloader` completes with zero warnings. GNU size reports
+`text=6708`, `data=0`, `bss=0` bytes (`0x1a34` total), leaving 9676 bytes of the
+16 KiB ROM. No mutable static data is introduced. The implementation's B1
+smoke, host range/protocol tests and UART transcript are recorded in
+[`verif/soc/board_b1/README.md`](../../verif/soc/board_b1/README.md#b1-10-验收记录).

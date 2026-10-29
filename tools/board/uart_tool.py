@@ -186,14 +186,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('image', type=Path, nargs='?',
                         help='make-generated SRAM .bin, or ELF with --elf; omit to only log')
-    parser.add_argument('--elf', action='store_true', help='load PT_LOAD segments, then run ELF entry')
+    parser.add_argument('--elf', action='store_true',
+                        help='load PT_LOAD segments, then run ELF entry')
     parser.add_argument('--baud', type=int, choices=BAUDS, default=2000000,
                         help='ELF transfer baud (default 2000000; 115200 skips the switch)')
     destination = parser.add_mutually_exclusive_group(required=True)
     destination.add_argument('--port', help='Windows serial port, e.g. COM3')
     destination.add_argument('--emit', type=Path, help='write protocol bytes instead of serial I/O')
     parser.add_argument('--log', type=Path, default=Path('build/board/uart.log'))
-    parser.add_argument('--menu', choices=('1', '2', '3'), help='select once after the monitor menu')
+    parser.add_argument('--menu', choices=('1', '2', '3'),
+                        help='select once after the monitor menu')
     parser.add_argument('--iterations', type=int, help='CoreMark iterations entered after --menu 1')
     args = parser.parse_args()
     if args.iterations and args.menu != '1':
@@ -208,7 +210,8 @@ def main():
         args.emit.write_bytes(stream)
     else:
         try:
-            capture(args.port, args.image, args.log, args.menu, args.iterations, args.elf, args.baud)
+            capture(args.port, args.image, args.log, args.menu, args.iterations,
+                    args.elf, args.baud)
         except KeyboardInterrupt:
             pass
 

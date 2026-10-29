@@ -114,7 +114,8 @@ class ProgramTest(unittest.TestCase):
         self.assertIsNone(state["error"])
         entries, _ = self.engine.get_entries()
         rx = [entry["text"] for entry in entries if entry["dir"] == "rx"]
-        for text in ("BIOS: EdRV32", "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud", "UART download ready",
+        for text in ("BIOS: EdRV32", "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud",
+                     "UART download ready",
                      f"Program SRAM bytes: {len(data)}", state["result"]):
             self.assertIn(text, rx)
         self.assertEqual(self.engine.status()["txBytes"], len(data) + 6)
