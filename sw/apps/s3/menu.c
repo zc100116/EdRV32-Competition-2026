@@ -49,9 +49,10 @@ void s3_menu_show(void)
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
     lv_obj_set_scrollable(screen, false);
     label(screen, "EdRV32  /  S3", 64, 42, 0x71e8bb);
-    label(screen, "APPLICATIONS", 64, 91, 0xf2f7fc);
+    lv_obj_t *title = label(screen, "APPLICATIONS", 64, 84, 0xf2f7fc);
+    lv_obj_set_style_text_font(title, &lv_font_montserrat_40, 0);
     label(screen, "Choose an application with KEY1 / KEY2, then press KEY3 to launch.",
-          64, 126, 0xa4b9cc);
+          64, 140, 0xa4b9cc);
     for (unsigned int i = 0; i < S3_APP_COUNT; ++i) {
         lv_obj_t *card = lv_obj_create(screen);
         cards[i] = card;
