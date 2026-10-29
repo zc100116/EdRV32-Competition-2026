@@ -18,6 +18,7 @@ int main(void)
     uint32_t previous = 0;
     for (;;) {
         uint32_t keys = s3_input();
+        s3_lvgl_input(keys);
         uint32_t pressed = keys & ~previous;
         previous = keys;
         if (active == S3_APP_NONE) {
