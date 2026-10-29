@@ -383,7 +383,10 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         $display("PASS VI-20 memory -> CH0/CH2, no read backpressure");
     endtask
 
+    // The harness-only build removes the functional processes that read this request.
+    /* verilator lint_off UNUSEDSIGNAL */
     int vi21_requested = 0;
+    /* verilator lint_on UNUSEDSIGNAL */
     int vi21_finished = 0;
 
     // vin v0.3: cameras still drop on valid-data overflow; memory frames pause.
