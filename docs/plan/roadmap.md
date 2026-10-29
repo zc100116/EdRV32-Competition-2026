@@ -32,7 +32,7 @@
 | 存储子系统（DDR 网关、mem_xbar、PERF_MON、板级 DDR 适配器） | `spec/mem-subsys-spec.md` v0.2 | `testplan/mem-subsys-testplan.md` v0.2 | `plan/mem-subsys-plan.md` | [x] 已确认 |
 | 公共单元（CDC、FIFO、dma2d） | `spec/dma2d-spec.md` v0.1（草案） | — | — | [~] dma2d 规格起草中 |
 | VIN / PIX / DISP | `spec/vin-spec.md` v0.1、`spec/pix-spec.md` v0.1、`spec/disp-spec.md` v0.3（两层叠加，B3 实现）| `testplan/vin-testplan.md`、`pix-testplan.md`、`disp-testplan.md` | `plan/vision-plan.md` | [~] VIN/DISP/PIX 模块级验证通过，待 PDS 资源测量和 SoC 级集成 |
-| RND | `spec/rnd-spec.md` v0.1；设计记录 `design/2026-10-29-rnd-disp.md` | 待写 | `plan/board-plan.md` B3 | [~] 设计决策和 DISP v0.3 已确认；RND 规格 v0.1 已确认，验证方案和实施方案待写 |
+| RND | `spec/rnd-spec.md` v0.1；设计记录 `design/2026-10-29-rnd-disp.md` | `testplan/rnd-testplan.md` v0.1 | `plan/rnd-plan.md`（含 DISP 两层）、`plan/board-plan.md` B3 | [~] 规格、验证方案、实施方案完成；开发待派发 |
 | GEO | `spec/geo-spec.md` v0.1 | `testplan/geo-testplan.md` v0.1 | `plan/vision-plan.md` | [~] 模块级验证通过，待 PDS 资源测量 |
 | NPU | `spec/npu-spec.md` v0.4 | `testplan/npu-testplan.md` v0.4 | `plan/npu-plan.md` | [~] 完整 NPU PDS 通过 150 MHz；待整网性能（N-P1） |
 | ETH | `spec/eth-spec.md` v0.1 | `testplan/eth-testplan.md` v0.1 | `plan/vision-plan.md`（V-R5、V-P5、V-T5、V-I4） | [~] 模块级验证通过，待 PDS 资源测量 |
@@ -49,7 +49,7 @@
 | P2 | SoC 骨架：系统总线、外设、中断、存储子系统、板级顶层 | `plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md` | SoC 级 CoreMark 和 DDR 测试通过，上板运行 | [~] 系统子系统与 SC 联调已合入 main；存储子系统已合入 main（58de802，全局 full 待补跑） |
 | P3 | 实时视频通路：dma2d、VIN、DISP | 待写 | 摄像头到 HDMI 闭环，无 underflow/overflow | [ ] |
 | P4 | 图像处理：PIX、GEO | 待写 | 像素级比对通过 | [ ] |
-| P5 | 渲染：RND、LVGL 移植 | 待写 | UI 画面比对通过 | [ ] |
+| P5 | 渲染：RND、LVGL 移植 | `plan/rnd-plan.md`、board-plan B3 | UI 画面比对通过 | [ ] |
 | P6 | NPU | 待写 | 逐层与参考模型逐位一致，帧率达标 | [ ] |
 | P7 | ETH、三场景演示、系统集成与性能报告 | 待写 | SoC 规格第 9 节的指标全部达标 | [ ] |
 
