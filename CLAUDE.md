@@ -53,7 +53,7 @@ verif/
 sw/
   bsp/  drivers/  lib/  tests/  apps/
 tools/                  生成器、检查脚本、回归脚本、模型工具链
-third_party/            外部依赖：coremark、ultralytics、lvgl（子模块，lvgl 锁定 v9.6.0），riscv-tests、riscv-arch-test（源码副本）
+third_party/            外部依赖：coremark、ultralytics、lvgl、nofrendo（子模块；lvgl 锁定 v9.6.0，nofrendo 为 espressif/esp32-nesemu 693e378），riscv-tests、riscv-arch-test（源码副本）
 tasks/win/              Windows 任务卡
 legacy/                 旧工程，只读参考，不进任何文件列表
 build/                  所有生成物，不入库
