@@ -45,6 +45,26 @@ module tb;
     bit random_stalls=1;
     bit inject_read=0,inject_write=0;
     bit perf_mode=0;
+    bit check_chunk_overlap=0;
+    bit checked_chunk_overlap=0;
+    int common_issued=0;
+    int common_returned=0;
+    // A loaded second chunk must start before the first chunk's alpha results drain.
+    always @(posedge clk) begin
+        if(check_chunk_overlap) begin
+            if(u_dut.draw_blend_valid_w && u_dut.blend_ready_w) begin
+                if(common_issued==256) begin
+                    if(common_returned>=256)
+                        $fatal(1,"common chunk issue waited for alpha: issued=%0d returned=%0d",
+                            common_issued,common_returned);
+                    checked_chunk_overlap=1;
+                end
+                common_issued++;
+            end
+            if(u_dut.blend_valid_w) common_returned++;
+        end
+    end
+
     int compare_size=65536;
     int cases=0;
     assign arready=!read_active && !rvalid && (!random_stalls || cycle%5!=0);
@@ -483,7 +503,12 @@ module tb;
             put(8,BASE+32'h10000); put(9,256); put(10,0);
             put(11,scale_value==1 ? 32'h10000 : 32'h5555);
             put(12,scale_value==1 ? 32'h10000 : 32'h5555);
+            common_issued=0; common_returned=0; checked_chunk_overlap=0;
+            check_chunk_overlap=scale_value==3 && !$test$plusargs("R1_BASELINE");
             execute(1,1);
+            if(check_chunk_overlap && !checked_chunk_overlap)
+                $fatal(1,"common chunk overlap was not observed");
+            check_chunk_overlap=0;
             apb_read(12'h040,cycles_value);
             apb_read(12'h044,pixel_value);
             if(pixel_value!=32'(61440*scale_value*scale_value))
