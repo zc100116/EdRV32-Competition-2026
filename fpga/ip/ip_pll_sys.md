@@ -4,8 +4,8 @@
 |---|---|
 | IP 类型 | IP Compiler → Clock → 28nm PLL（厂商例程 `2_Demo/2_5_pll_test` 使用的同一 IP，版本 1.4） |
 | 模块名 | `ip_pll_sys` |
-| 例化位置 | 板级顶层 `fpga/rtl/edrv32_fpga_board_b1_top.v`（板级 IP，不经 `rtl/tech/` 包装；仿真用 `verif/models/ip_pll_sys.sv` 行为模型，模块名和端口相同） |
-| 用途 | 上板阶段 B1（`docs/plan/board-plan.md`）：由板载 27 MHz 时钟产生 clk_sys |
+| 例化位置 | 板级顶层 `fpga/rtl/edrv32_fpga_board_b1_top.v` 及 B2 `edrv32_fpga_board_b2_top.v`（板级 IP，不经 `rtl/tech/` 包装；仿真用 `verif/models/ip_pll_sys.sv` 行为模型，模块名和端口相同） |
+| 用途 | 上板阶段 B1/B2（`docs/plan/board-plan.md`）：由板载 27 MHz 时钟产生 clk_sys |
 | 依据 | 板载晶振 27 MHz，引脚 D18（厂商 demo `.fdc`：`create_clock -period 37.000`，`PAP_IO_LOC D18`）；clk_sys 上板暂定 100 MHz（用户 2026-10-28） |
 | 器件 | PG2L200H-6 FBB676 |
 

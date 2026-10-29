@@ -21,8 +21,8 @@
 | （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 乘法，不经 IP Compiler | 2 × (8 × 8) 有符号，2 级 | `edrv32_mul_npu_int8_pair` | NPU MAC 阵列 ×256 | [ip_mul_npu_int8_pair.md](ip_mul_npu_int8_pair.md) | 无需生成；ModelSim 检查通过（20261027-02） |
 | `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 已生成（20261027-02） |
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
-| `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读返回缓冲 ×1 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | 待生成（B2） |
-| `ip_ram_mem_xbar_w` | DRM 简单双口 RAM | 512 × 288（用 16 项） | `edrv32_ram_mem_xbar_w` | mem_xbar W 缓冲 ×6（P1–P6） | [ip_ram_mem_xbar_w.md](ip_ram_mem_xbar_w.md) | 待生成（B2） |
+| `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读缓冲 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | B2 待生成 |
+| `ip_ram_mem_xbar_w` | DRM 简单双口 RAM | 512 × 288（用 16 项） | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_ram_mem_xbar_w.md](ip_ram_mem_xbar_w.md) | B2 待生成 |
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 已生成（20261028-04） |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1（B3 起 ×2：L0、L1，disp-spec v0.3） | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 已生成（20261028-04） |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 已生成（20261028-04） |
@@ -31,10 +31,45 @@
 | `ip_ram_eth_fifo` | DRM 简单双口 RAM，独立时钟 | 512 × 10 | `edrv32_ram_eth_fifo` | ETH 接收、发送异步 FIFO ×2 | [ip_ram_eth_fifo.md](ip_ram_eth_fifo.md) | 已生成（20261028-04） |
 | `ip_ram_rnd_line` | DRM 简单双口 RAM，字节写使能 | 512 × 256 | `edrv32_ram_rnd_line` | RND 行缓冲 ×5 | [ip_ram_rnd_line.md](ip_ram_rnd_line.md) | 待生成（B3） |
 | `ip_ram_rnd_palette` | DRM 简单双口 RAM | 512 × 32（用 256 项） | `edrv32_ram_rnd_palette` | RND 调色板 ×2 | [ip_ram_rnd_palette.md](ip_ram_rnd_palette.md) | 待生成（B3） |
+| `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
+| `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
+| `ip_pll_npu` | PLL | 27 → 150 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
+| `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
+| `ip_pll_eth` | PLL | 125 → 125 MHz，30° | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
 
-| `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | 待生成 |
+B2 保留 `ip_pll_sys` 的 B1 配置，新增上表四个 IP；不要把视频输出合入系统 PLL，
+74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。
+TMDS 及 RGMII 使用器件原语，无需另生成 GUI IP：
+`GTP_OSERDES_E2`、`GTP_OUTBUFDS`、`GTP_IDDR_E1`、`GTP_ODDR_E1`、
+`GTP_IODELAY_E2`、`GTP_INBUF`、`GTP_OUTBUF`、`GTP_CLKBUFG`、`GTP_INBUFDS`。
+原语配置固定在 `fpga/rtl/edrv32_fpga_tmds.v` 和 `edrv32_fpga_rgmii.v`；
+SERDES 数据寄存器不使用本地复位，持续发送 SoC 的 TMDS 符号（CLAUDE 5.2）。
 
-DDR3 控制器、HDMI/摄像头相关 PLL 在 B2 补充。
+### B2 Windows 用户 IP 生成顺序
+
+1. 新建独立 B2 工程（PG2L200H-6/FBB676），保留 B1 工程供对照。
+2. 按 `ip_pll_sys.md` 复用或生成 100 MHz PLL；按新说明生成 NPU、video、ETH PLL。
+3. 按 `ip_ddr3.md` 生成 DDR3，确认 `ref_clk`、`core_clk` 及全部用户口/物理端口。
+4. 在 B2 工程加入 soc.f 所用存储/乘法 IP（见下表），ROM/SRAM 用 B2 BIOS/监控
+   程序重新生成的初始化文件。尤其 `ip_ram_mem_xbar_r`/`ip_ram_mem_xbar_w`
+   是 B2 DDR fabric 所需，不能只复制 B1 的七种 IP。
+5. 执行 `fpga/scripts/import_board_b2_top.tcl`，随后综合、实现和上板；
+   在 PDS 确认时钟约束命中真实 IP 层级，回传实际 IP 版本/端口、频率及参数截图。
+   本次没有板级仿真或 Windows PDS 运行结果。
+
+B2 soc.f 的 24 种生成 IP（不含上面 5 种板级 IP，APM 原语另计）：
+
+- CPU/SYS：`ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、
+  `ip_ram_dcache_data`、`ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`。
+- MEM：`ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w`。
+- VIN/PIX/GEO/DISP：`ip_ram_vin_wfifo`、`ip_ram_pix_line`、`ip_ram_geo_src`、
+  `ip_ram_disp_scan`。
+- NPU：`ip_ram_npu_line`、`ip_ram_npu_weight`、`ip_ram_npu_quant`、`ip_ram_npu_lut`、
+  `ip_ram_npu_residual`、`ip_ram_npu_result`、`ip_ram_npu_scratch`、
+  `ip_mul_npu_quant_low`、`ip_mul_npu_quant_high`。
+- ETH：`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
+
+RND 的两种 RAM 不在 B2 soc.f 依赖内。
 
 ## 通用约定
 
