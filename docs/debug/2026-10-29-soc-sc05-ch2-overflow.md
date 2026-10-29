@@ -16,7 +16,11 @@ backpressure, and letterbox padding must wait for write-FIFO space.
 
 ## 2. Reproduction
 
-Source commit: `2a2a18a06de4ff9a857b4584a7f6ff8006c6f9f0`.
+Original pre-rebase source commit: `2a2a18a06de4ff9a857b4584a7f6ff8006c6f9f0`.
+The same verification content is now in `a17f1e6`, whose rebased ancestry
+already contains the RTL correction. To reproduce with reachable history in a
+temporary checkout, start at `6537bc8` (specification v0.3, pre-fix RTL), restore
+`verif/soc/` and `sw/tests/soc/` from `a17f1e6`, then run the command below.
 Simulator: Verilator 5.020, Debian 5.020-1; C++ optimization `-O2`; one simulation.
 NPU generator seed: 42 (the NPU has not started when this failure occurs).
 
@@ -62,22 +66,48 @@ read RTL. No internal FIFO timing or arbitration defect is asserted here.
 
 ## 5. Fix
 
-No RTL or model change. The software completion loop checks VIN overflow/error
+This worker made no RTL or model changes. The software completion loop checks VIN overflow/error
 state and fails with expected/actual values instead of waiting for a frame
 that cannot complete. The DDR timing, source traffic and passing criterion remain intact. RTL
-implementation of the user-approved v0.3 contract is assigned separately;
-SC-05 will be rerun after the coordinator integrates that correction.
+implementation of the user-approved v0.3 contract was integrated separately
+in coordinator commit `40743c6`. The verification branch has been rebased onto
+that correction for the full VIN regression and SC-05 rerun.
 
 ## 6. Regression
 
-SC-05 retains the full-sized CH2 byte comparison, matching CH0/CH2 frame IDs,
-PLIC checks and three-layer NPU byte comparison. They remain pending because
-this run fails earlier; none was removed or bypassed.
+The rerun against coordinator correction `40743c6`, with verification source
+`105ed67`, passed in 150.58 s total (63.197 s simulation execution). Command:
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/regress.py full --path verif/soc/sc_05_s1 -j 1
+```
+
+The full-sized CH2 byte comparison, matching CH0/CH2 frame IDs, VIN/NPU PLIC
+checks, NPU DONE_COUNT=1 and three-layer NPU byte comparison all passed.
+The coordinator approved setting all three NPU OUT_ZP values to 0 for the
+residual contract; weights, biases, multipliers, shifts and full case size
+remain as generated with seed 42. Expected CH2 data is used only by the
+independent reference, never preloaded into the simulated CH2 output buffer.
+
+```text
+CHECK DDR ch2 bytes=983040 address=04000000 time=4430300000
+CHECK DDR npu bytes=983040 address=05000000 time=7961000000
+PASS SC-05
+```
+
+Times in this log are ps. The regression log is
+`build/soc_full/reduced/sc05-postfix-regress.log`; UART/model output is
+`build/soc_full/sc_05_s1/run.log`. The final test timeout is 300 s based on
+the measured 150.58 s total. VIN module regression details, including the
+unchanged VI-21b/d failure assertions now passing, are recorded in
+`verif/block/vin/ch2/README.md`.
 
 ## 7. Similar paths
 
-SC-08/09 also use CH0 plus CH2 and will be run with their specified camera
-source. Camera overflow is explicitly prohibited in their concurrency load.
+SC-08/09 also specify CH0 plus CH2 with a camera source, but the user removed
+those tests from this task before they were run. Their archived prototypes
+and lack of measured statistics are recorded in `verif/soc/common/README.md`.
 The existing module-integration history is documented in
 `2026-10-29-vin-ch2-integration.md`; it describes a separate test with random
 P1 stalls, whereas this SoC test uses the required DDR timing model defaults.
