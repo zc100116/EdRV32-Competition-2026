@@ -183,6 +183,7 @@ class YoloPanel(QWidget):
         generation, capture = self.engine.yolo.snapshot()
         if capture is not None and generation != self.generation:
             self.generation = generation
+            self.comparison = None
             self.result.setText('完整回传已收到；选择模型和量化参数后运行参考比对。')
             detections = capture[2]
             image = QImage(self.image.text()).scaled(1280, 720, Qt.IgnoreAspectRatio,

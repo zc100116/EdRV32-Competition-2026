@@ -361,8 +361,9 @@ WIN 1 → `window1.bin`（NPU OUTPUT，725760 B），WIN 2 → `window2.bin`（E
 
 NPU 参考使用仓库已有 `tools/requirements.txt` 中的 torch/numpy/OpenCV 等依赖，
 并需要 `git submodule update --init third_party/ultralytics`；本任务没有新增第三方库。
-B2-4a 的 `tools/npu/yolo_post_ref.py` 尚待协调者合入；当前已接好上述调用契约，回归用 mock
-验证后处理参数与比对结果。缺少模块或模型文件时页面明确报错，不替换为其他算法。
+B2-4a 的 `tools/npu/yolo_post_ref.py` 已接入确认的调用契约；回归同时保留 mock 参数检查，
+并实际执行 npu_ref、input_pack、yolo_post_ref 的完整比对。缺少模块或模型文件时页面明确报错，
+不替换为其他算法。
 
 ```bash
 python3 tools/debug_tool/cli.py yolo model build/npu/yolo --board-ip 192.168.1.10
@@ -420,7 +421,7 @@ DDR 截图由独立 `telemetry_sim.py` 向实际 UDP 监听器推送 10 s 数据
 
 Windows 上仍需随 B2-4 联调确认：填入菜单命令后验证 S1/S2、PIX/GEO、10/100/1000 Hz、
 探针开关；接收真实板端遥测，确认 scene、错误计数和直方图；加载编译输出，核对板端
-WIN2_BYTES 结果；发送图片并收齐三份原始回传。后处理实际算法的集成由协调者在 B2-4a 合入后联调。
+WIN2_BYTES 结果；发送图片并收齐三份原始回传。后处理 Python 接口已用实际模块联调。
 
 
 ### 视频接收与输出控制（B2-5b）
@@ -471,11 +472,14 @@ python3 tools/debug_tool/telemetry_sim.py --mode yolo --port 6000 \
 
 ### B2-5b 验证
 
-本次 49 项 unittest 全部通过，无跳过，其中新增 16 项覆盖：EDVF 小端头、像素乱序、
+本次 50 项 unittest 全部通过，无跳过，其中新增 17 项覆盖：EDVF 小端头、像素乱序、
 缺中包/末包/帧头、frame_id 间隔、EDDT 有符号坐标/空结果/类别/分数、检测与显示帧对应、
 帧率与停流、vid_skip 解析累计、真实 UDP 视频和 YOLO 模拟回传、字节差异及首位置、
 框顺序和数量差异、参考调用契约、缺失回传报错、实际 npu_ref UPSAMPLE、实际 input_pack
-的 letterbox 与 INT8_C4。原 EDTM 手工偏移测试及 CSV 往返也覆盖了非零 vid_skip。
+的 letterbox 与 INT8_C4，以及调用实际 yolo_post_ref 的完整比对流水线。
+后者用已知红图/UPSAMPLE 描述符，在 CH2 最后一字节及 OUTPUT 第 125 字节各注入一处差异，
+实际后处理预期空结果而板端模拟回传一个框，三项报告均准确定位为一处差异。
+原 EDTM 手工偏移测试及 CSV 往返也覆盖了非零 vid_skip。
 
 复现环境使用既有 NPU Python 环境，并把已有声明的 GUI/串口依赖放在 build 目录：
 
@@ -494,4 +498,6 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=build/debug-tool-deps python3 \
 两张截图均来自 `telemetry_sim.py` 子进程经真实 UDP 监听器回环收包，视频截图在模拟发送
 仍进行时采集。截图助手的视频模拟为 3 fps；界面的接收帧率和丢帧数取自实际收包，受共享机器负载影响。
 本次全部为 Python/Qt 改动，Verilog 风格检查与 Verilator lint 不适用；compileall 和 diff 检查无错误。
-待协调者合入 B2-4a 后运行一次真实 `yolo_post_ref` 的联调；Windows 串口菜单和真实板端网口仍需上板验证。
+已 rebase 到协调者集成分支并接上 B2-4a；实际 Python 后处理联调通过。
+实现基础提交 `1d8dff1`，联调基线含 B2-4a 提交 `c748c78`。
+Windows 串口菜单和真实板端网口仍需上板验证。

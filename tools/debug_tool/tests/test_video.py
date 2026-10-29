@@ -35,6 +35,20 @@ def detection_wire(frame_id=9):
             struct.pack('<4hHH', 400, 300, 700, 600, 79, 1000))
 
 
+def upsample_case(directory):
+    directory = Path(directory)
+    (directory / 'regs.txt').write_text(
+        'DESC_BASE 00080000\nMODEL_BASE 00100000\nDESC_COUNT 00000001\n'
+        'WORK_BASE 01000000\nINPUT_BASE 04000000\nOUTPUT_BASE 05000000\n')
+    words = [0] * 16
+    words[0] = 2 | (2 << 12) | (3 << 14)
+    words[2], words[4] = 16, 64
+    words[8], words[9], words[10] = (1 << 16) | 1, (2 << 16) | 2, 1
+    raw = struct.pack('<16I', *words)
+    (directory / 'mem_desc.hex').write_text('@00004000\n' + '\n'.join(
+        raw[i:i + 32][::-1].hex() for i in range(0, 64, 32)))
+
+
 def feed_frame(video, frame_id=9, missing=None, reverse=False):
     video.receive(0, 0, frame_header(frame_id), False)
     pixels = bytes(range(256)) * 5
@@ -217,16 +231,7 @@ class ComparisonTest(unittest.TestCase):
             self.skipTest('NPU tool environment is required for real reference execution')
         with TemporaryDirectory() as directory:
             directory = Path(directory)
-            (directory / 'regs.txt').write_text(
-                'DESC_BASE 00080000\nMODEL_BASE 00100000\nDESC_COUNT 00000001\n'
-                'WORK_BASE 01000000\nINPUT_BASE 04000000\nOUTPUT_BASE 05000000\n')
-            words = [0] * 16
-            words[0] = 2 | (2 << 12) | (3 << 14)
-            words[2], words[4] = 16, 64
-            words[8], words[9], words[10] = (1 << 16) | 1, (2 << 16) | 2, 1
-            raw = struct.pack('<16I', *words)
-            (directory / 'mem_desc.hex').write_text('@00004000\n' + '\n'.join(
-                raw[i:i + 32][::-1].hex() for i in range(0, 64, 32)))
+            upsample_case(directory)
             ch2 = bytes(range(16)) + bytes(INPUT_BYTES - 16)
             result = reference_output(directory, ch2)
         self.assertEqual(result, bytes(range(16)) * 4 + bytes(OUTPUT_BYTES - 64))
@@ -246,3 +251,35 @@ class ComparisonTest(unittest.TestCase):
         padding = bytes([57, 57, 57, 0]) * (640 * 12)
         red = bytes([127, 0, 0, 0]) * (640 * 360)
         self.assertEqual(actual, padding + red + padding)
+
+
+    def test_real_reference_pipeline_input_output_and_postprocess(self):
+        import importlib.util
+        if importlib.util.find_spec('torch') is None:
+            self.skipTest('NPU tool environment is required for reference pipeline')
+        from PySide6.QtGui import QImage, QColor
+        # Red letterbox input and the first 16 bytes repeated into a 2x2 C16 output.
+        padding = bytes([57, 57, 57, 0]) * (640 * 12)
+        ch2 = bytearray(padding + bytes([127, 0, 0, 0]) * (640 * 360) + padding)
+        ch2[-1] = 1
+        output = bytearray(bytes([57, 57, 57, 0]) * 16 + bytes(OUTPUT_BYTES - 64))
+        output[125] = 1
+        quant = {'convolutions': [
+            dict(name=f'D{scale}.{branch}.out', output_scale=.1, output_zero_point=127)
+            for scale in range(3) for branch in ('box', 'cls')]}
+        board_boxes = (struct.pack('<4sHHII', b'EDDT', 1, 1, 42, 0) +
+                       struct.pack('<4hHH', 10, 20, 100, 200, 0, 900))
+        yolo = YoloTool(None)
+        yolo.receive(0, 0, ch2, False)
+        yolo.receive(1, 0, output, False)
+        yolo.receive(2, 0, board_boxes, True)
+        with TemporaryDirectory() as directory:
+            upsample_case(directory)
+            image = QImage(1280, 720, QImage.Format_RGB888)
+            image.fill(QColor('red'))
+            path = Path(directory) / 'red.png'
+            self.assertTrue(image.save(str(path)))
+            result = yolo.compare(path, directory, quant)
+        self.assertEqual(result['input'], dict(count=1, first=INPUT_BYTES - 1))
+        self.assertEqual(result['output'], dict(count=1, first=125))
+        self.assertEqual(result['detections'], dict(count=1, expected=0, actual=1))

@@ -47,9 +47,13 @@ class DetectionView(QWidget):
         painter.setPen(pen)
         for x0, y0, x1, y1, class_id, score in self.boxes:
             painter.drawRect(QRectF(x0, y0, x1 - x0, y1 - y0))
-            painter.fillRect(QRectF(x0, y0 - 27, 170, 27), QColor('#102e37'))
-            painter.drawText(QRectF(x0 + 6, y0 - 27, 165, 27), Qt.AlignVCenter,
-                             f'COCO {class_id} · {score / 1000:.3f}')
+            label = f'COCO {class_id} · {score / 1000:.3f}'
+            metrics = painter.fontMetrics()
+            width = metrics.horizontalAdvance(label) + 12
+            height = metrics.height() + 8
+            painter.fillRect(QRectF(x0, y0 - height, width, height), QColor('#102e37'))
+            painter.drawText(QRectF(x0 + 6, y0 - height, width - 6, height),
+                             Qt.AlignVCenter, label)
 
 
 class VideoPanel(QWidget):
