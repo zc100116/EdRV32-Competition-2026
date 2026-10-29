@@ -49,7 +49,7 @@ SERDES 数据寄存器不使用本地复位，持续发送 SoC 的 TMDS 符号�
 
 1. 新建独立 B2 工程（PG2L200H-6/FBB676），保留 B1 工程供对照。
 2. 按 `ip_pll_sys.md` 复用或生成 100 MHz PLL；按新说明生成 NPU、video、ETH PLL。
-3. 按 `ip_ddr3.md` 生成 DDR3，确认 `ref_clk`、`core_clk` 及全部用户口/物理端口。
+3. 按 `ip_ddr3.md` 导入 `ip_ddr3.idf` 生成 DDR3（导入失败时用 GUI 步骤），确认 `ref_clk`、`core_clk` 及全部用户口/物理端口。
 4. 在 B2 工程加入 soc.f 所用存储/乘法 IP（见下表），ROM/SRAM 用 B2 BIOS/监控
    程序重新生成的初始化文件。尤其 `ip_ram_mem_xbar_r`/`ip_ram_mem_xbar_w`
    是 B2 DDR fabric 所需，不能只复制 B1 的七种 IP。

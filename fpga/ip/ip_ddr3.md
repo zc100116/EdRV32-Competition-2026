@@ -11,7 +11,25 @@
 | 板级物理接线来源 | `2_Demo/5_1 双目摄像头例程/ov5640_200k/ov5640.fdc`（同一 Mini Base） |
 | 初始化文件 | 无，DDR 上电内容未定义 |
 
-## 用户 GUI 生成步骤
+## 推荐：导入现成配置 `fpga/ip/ip_ddr3.idf`
+
+`fpga/ip/ip_ddr3.idf` 是厂商 `2_9_ddr3_test` 例程的 `ddr3_test.idf` 原样复制，只把实例名和文件名中的 `ddr3_test` 改为 `ip_ddr3`。其他参数一项未改：
+- 控制器和 PHY 设置；
+- 存储器型号、位宽、速率、时序；
+- DQ 组和引脚规划。
+
+这个例程已在同一块 Mini Base 板上跑通。
+
+1. 在 B2 工程目录下建 `ipcore/ip_ddr3/`，把 `ip_ddr3.idf` 复制进去。
+2. 在 PDS 中打开这个 `.idf`（IP Compiler 打开已有 IP 配置，或在工程中添加该 IP 后选择重新定制），确认实例名为 `ip_ddr3`，点击 Generate。
+3. 版本处理：
+   - 本机 DDR IP 版本与 idf 记录的 HMIC_S v1.10 不同时，PDS 会提示升级。接受升级。
+   - 升级后用下文"有效配置值"表逐项核对，把实际版本和不一致的项回传。
+4. 生成后按下文第 5、6 条核对：不加入 example_design 顶层；端口与期望端口一致，尤其 `ref_clk`。
+
+导入失败（PDS 不能打开、或版本无法升级）时，改用下面的 GUI 步骤手动配置。
+
+## 用户 GUI 生成步骤（导入失败时使用）
 
 1. 新建 B2 PG2L200H-6/FBB676 工程，在 IP Compiler 创建 DDR3 Interface，
    名称 **ip_ddr3**，Operating Mode 选 **Controller + PHY**。

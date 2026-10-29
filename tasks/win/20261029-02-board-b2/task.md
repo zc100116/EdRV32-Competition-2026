@@ -50,7 +50,7 @@
 |---|---|
 | `ip_pll_sys` | 从 B1 工程复制（`ip_pll_sys.md`，27 → 100 MHz，不改） |
 | `ip_pll_npu`、`ip_pll_video`、`ip_pll_eth` | **新生成**。共 4 个 PLL IP：sys 100 MHz、npu 150 MHz、video 74.25 + 371.25 MHz、eth 125 MHz 30°。<br>• sys 和 npu 不合并：这个 PLL 只有 CLKOUT0 能小数分频，两路共用 VCO 需要手动指定 1350 MHz，用户决定分开；<br>• video 与 sys、npu 无法共用 VCO；<br>• eth 的输入是 PHY 的 RGMII 接收时钟。<br>DDR3 的 PLL 在 DDR IP 内部，不另生成。IP Compiler 显示的实际频率与说明不一致时停下，把实际频率和分频参数告诉 Codex 写进 result.md |
-| `ip_ddr3` | **新生成**（`ip_ddr3.md`，按厂商 `2_9_ddr3_test` 的设置）。生成后把实际端口列表、`core_clk` 频率交给 Codex 核对 |
+| `ip_ddr3` | **导入生成**：把 `fpga/ip/ip_ddr3.idf`（厂商 `2_9_ddr3_test` 例程配置，仅改名）复制到工程 `ipcore/ip_ddr3/`，在 PDS 中打开后 Generate，步骤见 `ip_ddr3.md`"推荐"一节。<br>• 版本不同时接受升级并回传版本；<br>• 导入失败时改用该文件中的 GUI 步骤。<br>生成后把实际端口列表、`core_clk` 频率交给 Codex 核对 |
 | `ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w` | **新生成**（512 深，分别只用 128、16 项） |
 | `ip_rom_boot`、`ip_ram_sram` | **重新生成**，初始化文件选本卡 `src/` 中的两个 `.dat`（HEX） |
 | CPU/SYS 其余 5 个（I$/D$ tag/data、`ip_mul_s33x33`） | 从 B1 工程复制 |
