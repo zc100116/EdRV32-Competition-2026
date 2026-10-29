@@ -10,7 +10,7 @@ OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32im_zicsr
 SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
 PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
-               $(filter monitor,$(PROGRAM)),sw/apps/monitor,$(if \
+               $(filter monitor demo,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
                $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM))))
 -include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
@@ -41,7 +41,7 @@ FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
-ifneq ($(filter bootloader monitor $(SYS_PROGRAMS),$(PROGRAM)),)
+ifneq ($(filter bootloader monitor demo $(SYS_PROGRAMS),$(PROGRAM)),)
 	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
 endif
 
