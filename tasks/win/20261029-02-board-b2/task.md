@@ -48,9 +48,8 @@
 
 | IP | 操作 |
 |---|---|
-| `ip_pll_sys` | **重新生成**（`ip_pll_sys.md`）：在 B1 的 CLKOUT0 100 MHz 基础上增加 CLKOUT1 150 MHz（clk_npu）。**分频必须手动指定**：I=1、M=2、F=25（VCO 1350 MHz）、O0=13.5、O1=9。工具不接受时按说明停下回报 |
-| `ip_pll_video`、`ip_pll_eth` | **新生成** |
-| PLL 共同要求 | 一共只有 3 个 PLL IP：sys（100 + 150 MHz）、video（74.25 + 371.25 MHz，与前者无法共用 VCO）、eth（输入是 PHY 的 RGMII 接收时钟，与 27 MHz 不同源）。DDR3 的 PLL 在 DDR IP 内部，不另生成。IP Compiler 显示的实际频率与说明不一致时停下，把实际频率和分频参数告诉 Codex 写进 result.md |
+| `ip_pll_sys` | 从 B1 工程复制（`ip_pll_sys.md`，27 → 100 MHz，不改） |
+| `ip_pll_npu`、`ip_pll_video`、`ip_pll_eth` | **新生成**。共 4 个 PLL IP：sys 100 MHz、npu 150 MHz、video 74.25 + 371.25 MHz、eth 125 MHz 30°。<br>• sys 和 npu 不合并：这个 PLL 只有 CLKOUT0 能小数分频，两路共用 VCO 需要手动指定 1350 MHz，用户决定分开；<br>• video 与 sys、npu 无法共用 VCO；<br>• eth 的输入是 PHY 的 RGMII 接收时钟。<br>DDR3 的 PLL 在 DDR IP 内部，不另生成。IP Compiler 显示的实际频率与说明不一致时停下，把实际频率和分频参数告诉 Codex 写进 result.md |
 | `ip_ddr3` | **新生成**（`ip_ddr3.md`，按厂商 `2_9_ddr3_test` 的设置）。生成后把实际端口列表、`core_clk` 频率交给 Codex 核对 |
 | `ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w` | **新生成**（512 深，分别只用 128、16 项） |
 | `ip_rom_boot`、`ip_ram_sram` | **重新生成**，初始化文件选本卡 `src/` 中的两个 `.dat`（HEX） |
@@ -64,7 +63,7 @@
 |---|---|---|
 | 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261029-02-board-b2 origin/main`；阅读本卡和 `fpga/ip/README.md`，把用户步骤整理成清单交给用户。 |
 | 1 | 用户（U） | 新建 B2 工程（PG2L200H-6 / FBB676）；按第 4 节复制已有 IP。 |
-| 2 | 用户（U） | 按第 4 节生成 3 个 PLL（sys 为重新生成）、`ip_ddr3`、两个 mem_xbar RAM，重新生成 ROM/SRAM（选本卡 `src/` 的初始化文件）。告诉 Codex IP 目录。 |
+| 2 | 用户（U） | 按第 4 节生成 npu、video、eth 三个 PLL，以及 `ip_ddr3`、两个 mem_xbar RAM，重新生成 ROM/SRAM（选本卡 `src/` 的初始化文件）。告诉 Codex IP 目录。 |
 | 3 | Windows Codex（C） | 逐个核对 IP 的模块名和端口与 `rtl/tech/` 包装模块、板级顶层的例化一致（`fpga/ip/*.md` 末尾的期望端口），并检查 ROM/SRAM `.idf` 的初始化选项。不一致时停下，写进 result.md（不改生成文件，也不改 RTL）。 |
 | 4 | 用户（U），或 Codex 在 PDS 控制台 | 执行 `source ../../EdRV32-Competition-2026/fpga/scripts/import_board_b2_top.tcl`，把打印的 `edrv32: added <N> sources` 告诉 Codex（预期 145：SoC 141 + 板级 4）。编译报错就停下，把报错原文交给 Codex。 |
 | 5 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`。任何一步报错就停下，把报错原文交给 Codex。 |

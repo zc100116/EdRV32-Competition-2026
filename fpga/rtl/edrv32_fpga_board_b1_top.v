@@ -18,14 +18,12 @@ module edrv32_fpga_board_b1_top (
 
     // PLL lock qualifies asynchronous reset; reset_ctrl synchronizes its release.
     wire clk_sys_w;
-    wire clk_npu_w;
     wire pll_lock_w;
     wire rst_board_n_w;
 
     ip_pll_sys u_pll_sys (
         .clkin1(clk_i),
         .clkout0(clk_sys_w),
-        .clkout1(clk_npu_w),
         .lock(pll_lock_w)
     );
 
@@ -186,7 +184,7 @@ module edrv32_fpga_board_b1_top (
         .cam1_pclk_i(clk_sys_w),
         .eth_rx_clk_i(clk_sys_w),
         .eth_tx_clk_i(clk_sys_w),
-        .clk_npu_i(clk_npu_w),
+        .clk_npu_i(clk_sys_w),
         .rst_n_i(rst_board_n_w),
         .mem_ready_i(1'b1),
 

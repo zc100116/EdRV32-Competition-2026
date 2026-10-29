@@ -31,12 +31,13 @@
 | `ip_ram_eth_fifo` | DRM 简单双口 RAM，独立时钟 | 512 × 10 | `edrv32_ram_eth_fifo` | ETH 接收、发送异步 FIFO ×2 | [ip_ram_eth_fifo.md](ip_ram_eth_fifo.md) | 已生成（20261028-04） |
 | `ip_ram_rnd_line` | DRM 简单双口 RAM，字节写使能 | 512 × 256 | `edrv32_ram_rnd_line` | RND 行缓冲 ×5 | [ip_ram_rnd_line.md](ip_ram_rnd_line.md) | 待生成（B3） |
 | `ip_ram_rnd_palette` | DRM 简单双口 RAM | 512 × 32（用 256 项） | `edrv32_ram_rnd_palette` | RND 调色板 ×2 | [ip_ram_rnd_palette.md](ip_ram_rnd_palette.md) | 待生成（B3） |
-| `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz、clk_npu 150 MHz（B2） | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成；B2 增加 CLKOUT1 需重新生成 |
+| `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
+| `ip_pll_npu` | PLL | 27 → 150 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，30° | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
 
-B2 的 `ip_pll_sys` 增加 CLKOUT1 150 MHz（clk_npu，与 clk_sys 共用 1350 MHz VCO，分频须手动指定，见其说明），需要重新生成；新增上表三个 IP；不要把视频输出合入系统 PLL，
+B2 保留 `ip_pll_sys` 的 B1 配置，新增上表四个 IP；不要把视频输出合入系统 PLL，
 74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。
 TMDS 及 RGMII 使用器件原语，无需另生成 GUI IP：
 `GTP_OSERDES_E2`、`GTP_OUTBUFDS`、`GTP_IDDR_E1`、`GTP_ODDR_E1`、
@@ -47,7 +48,7 @@ SERDES 数据寄存器不使用本地复位，持续发送 SoC 的 TMDS 符号�
 ### B2 Windows 用户 IP 生成顺序
 
 1. 新建独立 B2 工程（PG2L200H-6/FBB676），保留 B1 工程供对照。
-2. 按 `ip_pll_sys.md` 重新生成 100 + 150 MHz PLL；按新说明生成 video、ETH PLL。
+2. 按 `ip_pll_sys.md` 复用或生成 100 MHz PLL；按新说明生成 NPU、video、ETH PLL。
 3. 按 `ip_ddr3.md` 生成 DDR3，确认 `ref_clk`、`core_clk` 及全部用户口/物理端口。
 4. 在 B2 工程加入 soc.f 所用存储/乘法 IP（见下表），ROM/SRAM 用 B2 BIOS/监控
    程序重新生成的初始化文件。尤其 `ip_ram_mem_xbar_r`/`ip_ram_mem_xbar_w`
