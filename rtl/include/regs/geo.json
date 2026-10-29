@@ -235,5 +235,134 @@
             "fields": []
         }
     ],
-    "layouts": []
+    "layouts": [
+        {
+            "name": "DESC",
+            "size": 64,
+            "byte_order": "little endian 32-bit words",
+            "spec": "geo-spec.md 2.6",
+            "fields": [
+                {
+                    "name": "SRC_BASE",
+                    "offset": "0x00",
+                    "lsb": 12,
+                    "width": 20,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "SRC_STRIDE",
+                    "offset": "0x04",
+                    "lsb": 5,
+                    "width": 11,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "SRC_W",
+                    "offset": "0x08",
+                    "lsb": 0,
+                    "width": 12,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "SRC_H",
+                    "offset": "0x08",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "DST_BASE",
+                    "offset": "0x0C",
+                    "lsb": 12,
+                    "width": 20,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "DST_STRIDE",
+                    "offset": "0x10",
+                    "lsb": 5,
+                    "width": 11,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "RECT_X",
+                    "offset": "0x14",
+                    "lsb": 4,
+                    "width": 8,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "RECT_Y",
+                    "offset": "0x14",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "RECT_W",
+                    "offset": "0x18",
+                    "lsb": 1,
+                    "width": 11,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "RECT_H",
+                    "offset": "0x18",
+                    "lsb": 16,
+                    "width": 12,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "BG",
+                    "offset": "0x1C",
+                    "lsb": 0,
+                    "width": 16,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "A",
+                    "offset": "0x20",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "B",
+                    "offset": "0x24",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "TX",
+                    "offset": "0x28",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "C",
+                    "offset": "0x2C",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "D",
+                    "offset": "0x30",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "geo-spec.md 2.6"
+                },
+                {
+                    "name": "TY",
+                    "offset": "0x34",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "geo-spec.md 2.6"
+                }
+            ],
+            "note": "Fields keep their pixel/byte positions: SRC_BASE/DST_BASE are addresses with [11:0] ignored, strides with [4:0] ignored, RECT_X with [3:0] ignored, RECT_W with [0] ignored. A–TY are signed Q16.16. Words 14–15 and unspecified bits are ignored."
+        }
+    ]
 }
