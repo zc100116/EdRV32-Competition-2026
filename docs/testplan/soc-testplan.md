@@ -59,7 +59,7 @@
 | SC-07 | SoC 8.10；设计记录 b2-software 3.4a、3.5、3.5a | ETH 发送：<br>• 软件按 3.4a 发一帧视频，EDVF 帧头 + Surface 原地发送，Surface 用 1280×720；<br>• 按 3.5 发一组监控记录（type 1，16 条） | 软件程序 + 对端模型 | 对端重组的帧头字段、像素与 DDR 中的 Surface 逐字节一致；监控记录的 magic、version、seq 连续，port 统计与软件同一快照读到的 MEM_XBAR 寄存器一致 | full |
 | SC-08 | SoC 9.1、9.2 | 并发实时性（S1 负载）：<br>• 摄像头 CH0 + CH2 连续采集；<br>• NPU 循环执行带宽较大的描述符表；<br>• ETH 以 720p30 发送视频（"同时"档）；<br>• DISP 扫描；<br>• 运行至少 3 个显示帧 **[待定]** | 软件程序 | DISP PERF1（读空帧）= 0；VIN CH0/CH2 溢出丢帧 = 0；记录 MEM_XBAR 各端口统计和 `urgent` 计数（写入测试日志，供 SoC 9.1 规划值对照） | full |
 | SC-09 | mem-subsys-spec 2.3（PERF_MON） | PERF_MON 延迟探针：在 SC-08 的负载下开启顺序读探针 | 软件程序 | 直方图各格之和 = READ_CNT；LAT_MIN ≤ 平均 ≤ LAT_MAX；P6 限速生效（P6 读拍数不超过 RATE[P6] 规定的份额） | full |
-| SC-10 | sys-subsys-spec 2.10；SoC 5.3 | 媒体软复位：S2 + GEO + ETH 接收进行中，软件写 SYSCTRL `SOFT_RESET.MEDIA` | 软件程序 | 复位后各引擎 STATUS.IDLE；mem_xbar 没有挂起的事务（随后 CPU 经网关读写 DDR 正常）；重新配置后 SC-03 的一帧再次逐像素正确 | full |
+| SC-10 | sys-subsys-spec 2.10；SoC 5.3、7.1 | 媒体软复位：<br>• 建立 S2 + GEO + ETH 接收三类并发流量；<br>• 软件按 sys-subsys-spec 2.10 末条先停止各引擎：VIN、GEO 写 ABORT，DISP 写 ABORT（等同 ENABLE 清零），ETH 清 ENABLE，对端模型停止发包；<br>• 等各引擎 STATUS.BUSY = 0 后写 SYSCTRL `SOFT_RESET.MEDIA` | 软件程序 | 复位后各引擎 STATUS.IDLE；mem_xbar 没有挂起的事务（随后 CPU 经网关读写 DDR 正常）；重新配置后 SC-03 的一帧再次逐像素正确 | full |
 | SC-11 | SoC 6.1 PLIC 源 8–15 | 中断全覆盖：<br>• 源 8–10、12–14 各触发一次可由软件或模型产生的事件（VIN FRAME、PIX FRAME、GEO DONE、DISP FRAME、NPU DONE、ETH 接收 NOTIFY）；<br>• 源 11（RND）始终不挂起；<br>• 源 15（MEM_XBAR 错误）不在本层触发：B2 中没有软件合法产生违规事务的路径（各引擎 DMA 和 PERF_MON 都保证对齐、不跨 4 KiB），其中断由存储子系统模块级测试验证，顶层连接由协调者评审核对 | 软件程序 | 每个源经 PLIC claim/complete 一次，源号正确 | full |
 
 ## 4. 参考模型
@@ -92,3 +92,4 @@ SoC 7.5 的每一个流程至少有一个测试项：启动、BIOS、S1、S2、E
 | 2026-10-29 | v0.1 | 初稿 |
 | 2026-10-29 | v0.1 | 第 7 节 #1 更正：逐元素加改为 1×1 卷积 + RES_EN（B2-1d 问答，npu-spec 2.1） |
 | 2026-10-29 | v0.1 | SC-11：源 15（MEM_XBAR 错误）不在 SoC 级触发（无合法触发路径，B2-1d 问答），由模块级测试和连接评审覆盖 |
+| 2026-10-29 | v0.1 | SC-10：写 MEDIA 前先 ABORT/停止各引擎并等待空闲（sys-subsys-spec 2.10 末条：mem_xbar 不复位，软件须保证引擎已停止；B2-1d 问答） |
