@@ -1,0 +1,10 @@
+top: edrv32_soc_connect_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 600
+pass: PASS
+tier: smoke
+simulator: verilator
+runner: python3 verif/soc/soc_connect/run.py

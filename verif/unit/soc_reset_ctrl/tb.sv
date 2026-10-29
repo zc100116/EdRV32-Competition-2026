@@ -1,7 +1,7 @@
 // File: tb.sv
 // Spec: sys-subsys-testplan SY-01--SY-06.
 // Description: Self-checking APB and multi-clock reset sequencing tests.
-// Clock: clk_sys and six asynchronous engine domains.
+// Clock: clk_sys and seven asynchronous engine domains.
 module tb;
     reg clk = 0;
     reg rst_n = 0;
