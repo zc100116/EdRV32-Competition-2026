@@ -1,0 +1,161 @@
+Source: G:\codex_project\EdRV32-FPGA\EdRV32-B3I\place_route\run.log
+19: C: ConstraintEditor-2009: i2c0_scl_o[0] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+20: C: ConstraintEditor-2009: i2c0_scl_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+21: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 3)] | Port i2c0_scl_o[0] has been placed at location P19, whose type is share pin.
+24: C: ConstraintEditor-2009: i2c0_scl_o[1] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+25: C: ConstraintEditor-2009: i2c0_scl_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+28: C: ConstraintEditor-2009: i2c0_sda_o[0] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+29: C: ConstraintEditor-2009: i2c0_sda_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+30: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 5)] | Port i2c0_sda_o[0] has been placed at location R20, whose type is share pin.
+33: C: ConstraintEditor-2009: i2c0_sda_o[1] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+34: C: ConstraintEditor-2009: i2c0_sda_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+39: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 8)] | Port mem_dq_o[1] has been placed at location J6, whose type is share pin.
+44: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 10)] | Port mem_dq_o[3] has been placed at location L8, whose type is share pin.
+49: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 12)] | Port mem_dq_o[5] has been placed at location K7, whose type is share pin.
+54: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 14)] | Port mem_dq_o[7] has been placed at location J5, whose type is share pin.
+57: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 15)] | Port mem_dq_o[8] has been placed at location H6, whose type is share pin.
+62: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 17)] | Port mem_dq_o[10] has been placed at location H8, whose type is share pin.
+65: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 18)] | Port mem_dq_o[11] has been placed at location D6, whose type is share pin.
+68: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 19)] | Port mem_dq_o[12] has been placed at location G8, whose type is share pin.
+71: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 20)] | Port mem_dq_o[13] has been placed at location E6, whose type is share pin.
+76: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 22)] | Port mem_dq_o[15] has been placed at location G6, whose type is share pin.
+111: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 39)] | Port mem_dqs_n_o[0] has been placed at location H4, whose type is share pin.
+114: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 40)] | Port mem_dqs_n_o[1] has been placed at location G7, whose type is share pin.
+121: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 43)] | Port mem_dqs_o[0] has been placed at location J4, whose type is share pin.
+124: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 44)] | Port mem_dqs_o[1] has been placed at location H7, whose type is share pin.
+131: C: ConstraintEditor-2009: cam0_rst_n_o is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+132: C: ConstraintEditor-2009: cam0_rst_n_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+133: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 47)] | Port cam0_rst_n_o has been placed at location T22, whose type is share pin.
+136: C: ConstraintEditor-2009: cam1_rst_n_o is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+137: C: ConstraintEditor-2009: cam1_rst_n_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+196: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 77)] | Port mem_dm_o[0] has been placed at location K6, whose type is share pin.
+213: C: ConstraintEditor-2009: tmds_clk_n_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+216: C: ConstraintEditor-2009: tmds_clk_p_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+219: C: ConstraintEditor-2009: tmds_data_n_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+220: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 87)] | Port tmds_data_n_o[0] has been placed at location P25, whose type is share pin.
+223: C: ConstraintEditor-2009: tmds_data_n_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+224: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 88)] | Port tmds_data_n_o[1] has been placed at location P24, whose type is share pin.
+227: C: ConstraintEditor-2009: tmds_data_n_o[2] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+228: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 89)] | Port tmds_data_n_o[2] has been placed at location N24, whose type is share pin.
+231: C: ConstraintEditor-2009: tmds_data_p_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+232: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 90)] | Port tmds_data_p_o[0] has been placed at location R25, whose type is share pin.
+235: C: ConstraintEditor-2009: tmds_data_p_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+236: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 91)] | Port tmds_data_p_o[1] has been placed at location P23, whose type is share pin.
+239: C: ConstraintEditor-2009: tmds_data_p_o[2] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+240: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 92)] | Port tmds_data_p_o[2] has been placed at location N23, whose type is share pin.
+243: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 93)] | Port cam0_data_i[0] has been placed at location M24, whose type is share pin.
+246: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 94)] | Port cam0_data_i[1] has been placed at location R22, whose type is share pin.
+249: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 95)] | Port cam0_data_i[2] has been placed at location K26, whose type is share pin.
+252: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 96)] | Port cam0_data_i[3] has been placed at location K25, whose type is share pin.
+255: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 97)] | Port cam0_data_i[4] has been placed at location M25, whose type is share pin.
+258: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 98)] | Port cam0_data_i[5] has been placed at location N19, whose type is share pin.
+263: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 100)] | Port cam0_data_i[7] has been placed at location R21, whose type is share pin.
+266: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 101)] | Port cam0_href_i has been placed at location T25, whose type is share pin.
+275: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 105)] | Port cam1_data_i[1] has been placed at location R23, whose type is share pin.
+278: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 106)] | Port cam1_data_i[2] has been placed at location T23, whose type is share pin.
+283: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 108)] | Port cam1_data_i[4] has been placed at location P26, whose type is share pin.
+286: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 109)] | Port cam1_data_i[5] has been placed at location M26, whose type is share pin.
+311: C: ConstraintEditor-2001: [G:/codex_project/EdRV32-FPGA/EdRV32-B3I/device_map/edrv32_fpga_board_imgtest_top.pcf(line number: 121)] Object 'key_n_i[3]' is dangling, which has no connection. it will be ignored.
+326: Phase 1 Pre global placement started.
+341: Phase 1.1 1st GP placement started.
+347: Phase 1.2 Clock placement started.
+363: Phase 2 Global placement started.
+364: Phase 2.1 Fixed placement started.
+511: Phase 2.2 Process placement started.
+513: Process placement takes 0.00 sec.
+515: Phase 2.3 IO placement started.
+519: Total cost after SA planning is 1559728.243510.
+522: Phase 2.4 2nd GP placement started.
+524: 	Initial slack -11745.
+526: 	Final slack -4644.
+530: Worst slack after global placement is 261
+536: Phase 3 Post global placement started.
+537: Phase 3.1 Macro cell placement started.
+544: Phase 3.2 3rd GP placement started.
+547: Worst slack after post global placement is 198
+556: Phase 4 Legalization started.
+561: Phase 5 Timing-driven detailed placement started.
+562: Phase 5.1 Replication placement started.
+563: Worst slack before Replication Place is -968.
+567: Phase 5.2 Swapping placement started.
+568: Worst slack before detailed placement is -968, TNS before detailed placement is -41819.
+599: Worst slack after detailed placement is 372, TNS after detailed placement is 0.
+634: Worst slack is -6375, TNS after placement is -630014.
+636: Total placement takes 2.11 sec.
+650: Worst slack is -6375, TNS before route is -630014.
+651: Total nets for routing: 40298.
+652: Total loads for routing: 165832.
+660: Total 40296 subnets.
+661: Unrouted clock nets at iteration 0 (0.103 sec): 12
+662: Unrouted clock nets at iteration 1 (0.090 sec): 6
+663: Unrouted clock nets at iteration 2 (0.084 sec): 0
+664: Total route nets size: 40261
+666: Unrouted general nets at iteration 4 (MT total route time: 4.259 sec): 34377(overused: 203743)
+667: Unrouted general nets at iteration 5 (MT total route time: 3.929 sec): 30051(overused: 150445)
+668: Unrouted general nets at iteration 6 (MT total route time: 3.460 sec): 25956(overused: 108423)
+669: Unrouted general nets at iteration 7 (MT total route time: 2.949 sec): 22098(overused: 80221)
+670: Unrouted general nets at iteration 8 (MT total route time: 2.561 sec): 19174(overused: 62140)
+671: Unrouted general nets at iteration 9 (MT total route time: 2.237 sec): 14885(overused: 51310)
+672: Unrouted general nets at iteration 10 (MT total route time: 2.154 sec): 11879(overused: 40626)
+673: Unrouted general nets at iteration 11 (MT total route time: 2.101 sec): 10001(overused: 33145)
+674: Unrouted general nets at iteration 12 (MT total route time: 1.902 sec): 8385(overused: 26589)
+675: Unrouted general nets at iteration 13 (MT total route time: 1.755 sec): 7173(overused: 21450)
+676: Unrouted general nets at iteration 14 (MT total route time: 1.620 sec): 6251(overused: 17973)
+677: Unrouted general nets at iteration 15 (MT total route time: 1.406 sec): 5829(overused: 16734)
+678: Unrouted general nets at iteration 16 (MT total route time: 1.421 sec): 5462(overused: 15483)
+679: Unrouted general nets at iteration 17 (MT total route time: 1.261 sec): 4886(overused: 13099)
+680: Unrouted general nets at iteration 18 (MT total route time: 1.165 sec): 4397(overused: 11231)
+681: Unrouted general nets at iteration 19 (MT total route time: 0.965 sec): 3925(overused: 9583)
+682: Unrouted general nets at iteration 20 (MT total route time: 0.879 sec): 3490(overused: 8629)
+683: Unrouted general nets at iteration 21 (MT total route time: 0.817 sec): 3138(overused: 7420)
+684: Unrouted general nets at iteration 22 (MT total route time: 0.955 sec): 2983(overused: 7269)
+685: Unrouted general nets at iteration 23 (MT total route time: 0.861 sec): 2672(overused: 6319)
+686: Unrouted general nets at iteration 24 (MT total route time: 0.795 sec): 2276(overused: 5263)
+687: Unrouted general nets at iteration 25 (MT total route time: 0.627 sec): 2051(overused: 4418)
+688: Unrouted general nets at iteration 26 (MT total route time: 0.554 sec): 1874(overused: 3876)
+689: Unrouted general nets at iteration 27 (MT total route time: 0.486 sec): 1646(overused: 3385)
+690: Unrouted general nets at iteration 28 (MT total route time: 0.417 sec): 1367(overused: 2686)
+691: Unrouted general nets at iteration 29 (MT total route time: 0.392 sec): 1298(overused: 2615)
+692: Unrouted general nets at iteration 30 (MT total route time: 0.368 sec): 1190(overused: 2339)
+693: Unrouted general nets at iteration 31 (MT total route time: 0.338 sec): 1109(overused: 2271)
+694: Unrouted general nets at iteration 32 (MT total route time: 0.350 sec): 1001(overused: 2009)
+695: Unrouted general nets at iteration 33 (MT total route time: 0.312 sec): 806(overused: 1556)
+696: Unrouted general nets at iteration 34 (MT total route time: 0.292 sec): 738(overused: 1443)
+697: Unrouted general nets at iteration 35 (MT total route time: 0.250 sec): 624(overused: 1157)
+698: Unrouted general nets at iteration 36 (MT total route time: 0.248 sec): 577(overused: 1117)
+699: Unrouted general nets at iteration 37 (MT total route time: 0.239 sec): 573(overused: 1070)
+700: Unrouted general nets at iteration 38 (MT total route time: 0.222 sec): 484(overused: 843)
+701: Unrouted general nets at iteration 39 (MT total route time: 0.189 sec): 376(overused: 633)
+702: Unrouted general nets at iteration 40 (MT total route time: 0.165 sec): 307(overused: 526)
+703: Unrouted general nets at iteration 41 (MT total route time: 0.155 sec): 272(overused: 436)
+704: Unrouted general nets at iteration 42 (MT total route time: 0.149 sec): 223(overused: 414)
+705: Unrouted general nets at iteration 43 (MT total route time: 0.137 sec): 181(overused: 330)
+706: Unrouted general nets at iteration 44 (MT total route time: 0.128 sec): 173(overused: 308)
+707: Unrouted general nets at iteration 45 (MT total route time: 0.131 sec): 135(overused: 222)
+708: Unrouted general nets at iteration 46 (MT total route time: 0.127 sec): 119(overused: 226)
+709: Unrouted general nets at iteration 47 (MT total route time: 0.150 sec): 196(overused: 386)
+710: Unrouted general nets at iteration 48 (MT total route time: 0.146 sec): 240(overused: 466)
+711: Unrouted general nets at iteration 49 (MT total route time: 0.134 sec): 164(overused: 258)
+712: Unrouted general nets at iteration 50 (MT total route time: 0.126 sec): 156(overused: 276)
+713: Unrouted general nets at iteration 51 (MT total route time: 0.134 sec): 181(overused: 311)
+714: Unrouted general nets at iteration 52 (MT total route time: 0.137 sec): 165(overused: 277)
+715: Unrouted general nets at iteration 53 (MT total route time: 0.129 sec): 129(overused: 216)
+716: Unrouted general nets at iteration 54 (MT total route time: 0.127 sec): 94(overused: 148)
+717: Unrouted general nets at iteration 55 (MT total route time: 0.119 sec): 74(overused: 112)
+718: Unrouted general nets at iteration 56 (MT total route time: 0.105 sec): 47(overused: 88)
+719: Unrouted general nets at iteration 57 (MT total route time: 0.110 sec): 47(overused: 78)
+720: Unrouted general nets at iteration 58 (MT total route time: 0.108 sec): 41(overused: 66)
+721: Unrouted general nets at iteration 59 (MT total route time: 0.108 sec): 23(overused: 38)
+722: Unrouted general nets at iteration 60 (MT total route time: 0.100 sec): 10(overused: 20)
+723: Unrouted general nets at iteration 61 (MT total route time: 0.101 sec): 2(overused: 2)
+724: Unrouted general nets at iteration 62 (MT total route time: 0.095 sec): 0(overused: 0)
+727: Unrouted nets at iteration 63 (0.416 sec): 1
+730: Unrouted nets at iteration 64 (0.135 sec): 1
+733: Unrouted nets at iteration 65 (0.137 sec): 0
+740: Total net: 40298, route succeed net: 40298
+748: Total routing takes 142.51 sec.
+818: Action pnr: Real time elapsed is 0h:5m:39s
+819: Action pnr: CPU time elapsed is 0h:0m:16s
+820: Action pnr: Process CPU time elapsed is 0h:0m:24s
+821: Current time: Fri Oct 30 00:43:26 2026
+822: Action pnr: Peak memory pool usage is 4,210 MB

@@ -1,0 +1,66 @@
+compile: W=1686, C=0, E=0
+Action compile: Real time elapsed is 0h:1m:2s
+Action compile: CPU time elapsed is 0h:0m:11s
+Action compile: Process CPU time elapsed is 0h:0m:11s
+Action compile: Peak memory pool usage is 359 MB
+ConstantProbeLoop	700
+Verilog-2008	324
+Verilog-2038	237
+Sdm-2000	181
+Verilog-2023	74
+Verilog-2020	64
+Sdm-2003	40
+Verilog-2019	25
+Verilog-2039	21
+Verilog-2006	10
+Public-4030	5
+Verilog-2021	3
+Uncoded warning	1
+Sdm-2010	1
+
+synthesize: W=11991, C=56, E=0
+Action synthesize: Real time elapsed is 0h:2m:5s
+Action synthesize: CPU time elapsed is 0h:0m:1s
+Action synthesize: Process CPU time elapsed is 0h:0m:2s
+Action synthesize: Peak memory pool usage is 1,486 MB
+Uncoded warning	7186
+Public-4008	4630
+Timing-4087	90
+Timing-4086	57
+ConstraintEditor-2002	36
+Uncoded fanout warning	26
+ConstraintEditor-2009	20
+Adm-4019	2
+
+device_map: W=19, C=0, E=0
+Action dev_map: Real time elapsed is 0h:0m:27s
+Action dev_map: CPU time elapsed is 0h:0m:1s
+Action dev_map: Process CPU time elapsed is 0h:0m:1s
+Action dev_map: Peak memory pool usage is 951 MB
+Public-4008	11
+DeviceMap-4011	8
+
+place_route: W=0, C=57, E=0
+Action pnr: Real time elapsed is 0h:5m:39s
+Action pnr: CPU time elapsed is 0h:0m:16s
+Action pnr: Process CPU time elapsed is 0h:0m:24s
+Action pnr: Peak memory pool usage is 4,210 MB
+ConstraintEditor-2002	36
+ConstraintEditor-2009	20
+ConstraintEditor-2001	1
+
+report_timing: W=148, C=0, E=0
+Action report_timing: Real time elapsed is 0h:0m:40s
+Action report_timing: CPU time elapsed is 0h:0m:3s
+Action report_timing: Process CPU time elapsed is 0h:0m:4s
+Action report_timing: Peak memory pool usage is 2,790 MB
+Timing-4087	90
+Timing-4086	57
+Flow-4065	1
+
+generate_bitstream: W=0, C=1, E=0
+Action gen_bit_stream: Real time elapsed is 0h:0m:47s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:6s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:6s
+Action gen_bit_stream: Peak memory pool usage is 2,837 MB
+Bitstream-2001	1

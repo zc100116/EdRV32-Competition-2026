@@ -1,0 +1,17 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.706	0	u_tmds/g_channel[0].u_pair/opit_2_com/OCLK	u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.706	0	u_tmds/g_channel[1].u_pair/opit_2_com/OCLK	u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.706	0	u_tmds/g_channel[2].u_pair/opit_2_com/OCLK	u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.706	0	u_tmds/g_channel[3].u_pair/opit_2_com/OCLK	u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.774	0	u_tmds/g_channel[0].u_pair/opit_2_com/OCLK	u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.774	0	u_tmds/g_channel[1].u_pair/opit_2_com/OCLK	u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.774	0	u_tmds/g_channel[2].u_pair/opit_2_com/OCLK	u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+expanded routed report	slow	clk_serial	max (slow corner)	sequential timing path	1.774	0	u_tmds/g_channel[3].u_pair/opit_2_com/OCLK	u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.084	0	u_tmds/g_channel[0].u_pair/opit_2_com/OCLK	u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.084	0	u_tmds/g_channel[1].u_pair/opit_2_com/OCLK	u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.084	0	u_tmds/g_channel[2].u_pair/opit_2_com/OCLK	u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.084	0	u_tmds/g_channel[3].u_pair/opit_2_com/OCLK	u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.114	0	u_tmds/g_channel[0].u_pair/opit_2_com/OCLK	u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.114	0	u_tmds/g_channel[1].u_pair/opit_2_com/OCLK	u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.114	0	u_tmds/g_channel[2].u_pair/opit_2_com/OCLK	u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+expanded routed report	fast	clk_serial	max (fast corner)	sequential timing path	2.114	0	u_tmds/g_channel[3].u_pair/opit_2_com/OCLK	u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1
