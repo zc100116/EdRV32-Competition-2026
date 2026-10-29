@@ -41,14 +41,18 @@ module edrv32_disp_reader (
     output wire [31:0] req_cnt_o,
     output wire fifo_pending_o
 );
-    localparam [2:0] S_IDLE = 3'd0;
-    localparam [2:0] S_SCROLL = 3'd1;
-    localparam [2:0] S_PICK = 3'd2;
-    localparam [2:0] S_WAIT = 3'd3;
-    localparam [2:0] S_DESC = 3'd4;
-    localparam [2:0] S_RUN = 3'd5;
-    localparam [2:0] S_NEXT = 3'd6;
-    reg [2:0] state_r;
+    localparam [3:0] S_IDLE = 4'd0;
+    localparam [3:0] S_SCROLL = 4'd1;
+    localparam [3:0] S_PICK = 4'd2;
+    localparam [3:0] S_WAIT = 4'd3;
+    localparam [3:0] S_DESC = 4'd4;
+    localparam [3:0] S_RUN = 4'd5;
+    localparam [3:0] S_NEXT = 4'd6;
+    localparam [3:0] S_LOAD = 4'd7;
+    localparam [3:0] S_INIT = 4'd8;
+    localparam [3:0] S_SCROLL_ADD = 4'd9;
+    localparam [3:0] S_ROW_ADD = 4'd10;
+    reg [3:0] state_r;
     reg [9:0] line_r;
     reg [11:0] scroll_rows_r;
     reg [1:0] layer_ctrl_r;
@@ -59,6 +63,7 @@ module edrv32_disp_reader (
     reg [9:0] l0_limit_r;
     reg [9:0] l1_limit_r;
     reg [31:0] pending_cnt_r;
+    reg pending_nonzero_r;
     reg [31:0] req_cnt_r;
     reg [9:0] write_cnt_r;
     reg [9:0] write1_cnt_r;
@@ -68,6 +73,12 @@ module edrv32_disp_reader (
     reg [31:0] stride_r;
     reg [31:0] l1_line_base_r;
     reg [31:0] l1_stride_r;
+    reg [15:0] scroll_bytes_r;
+    reg [16:0] line_low_sum_r;
+    reg [15:0] line_high_sum_r;
+    reg [16:0] l1_low_sum_r;
+    reg [15:0] l1_high_sum_r;
+    reg l1_advance_r;
     wire [9:0] used_w;
     wire [9:0] used1_w;
     wire l1_row_w;
@@ -78,18 +89,27 @@ module edrv32_disp_reader (
     assign unused_cfg_w = {l0_scroll_i[31:28], l0_scroll_i[15], l1_pos_i[31:26],
         l1_pos_i[15:0], l1_size_i[31:26], l1_size_i[15:11], l1_size_i[2:0]};
 
-    assign used_w = write_cnt_r - read_cnt_i;
-    assign used1_w = write1_cnt_r - read1_cnt_i;
+    // spec 2.5-2.6: modulo FIFO occupancy; split arithmetic after Gray decoding.
+    assign used_w[2:0] = write_cnt_r[2:0] - read_cnt_i[2:0];
+    assign used_w[5:3] = write_cnt_r[5:3] - read_cnt_i[5:3] -
+        {2'd0, write_cnt_r[2:0] < read_cnt_i[2:0]};
+    assign used_w[9:6] = write_cnt_r[9:6] - read_cnt_i[9:6] -
+        {3'd0, write_cnt_r[5:0] < read_cnt_i[5:0]};
+    assign used1_w[2:0] = write1_cnt_r[2:0] - read1_cnt_i[2:0];
+    assign used1_w[5:3] = write1_cnt_r[5:3] - read1_cnt_i[5:3] -
+        {2'd0, write1_cnt_r[2:0] < read1_cnt_i[2:0]};
+    assign used1_w[9:6] = write1_cnt_r[9:6] - read1_cnt_i[9:6] -
+        {3'd0, write1_cnt_r[5:0] < read1_cnt_i[5:0]};
     assign active_w = state_r != S_IDLE;
     assign l1_row_w = layer_ctrl_r[1] && line_r >= l1_y_r &&
         {1'b0, line_r} < l1_y_end_r;
-    assign frame_start_o = !active_w && (pending_cnt_r != 32'd0 || frame_req_i);
-    assign busy_o = active_w || pending_cnt_r != 32'd0 || frame_req_i;
+    assign frame_start_o = !active_w && (pending_nonzero_r || frame_req_i);
+    assign busy_o = active_w || pending_nonzero_r || frame_req_i;
     assign urgent_o = active_w && ((layer_ctrl_r[0] && used_w < 10'd81) ||
         (l1_row_w && used1_w < {2'd0, l1_beats_r}));
     assign delayed_req_o = frame_req_i && active_w;
     assign req_cnt_o = req_cnt_r;
-    assign fifo_pending_o = used_w != 10'd0 || used1_w != 10'd0;
+    assign fifo_pending_o = write_cnt_r != read_cnt_i || write1_cnt_r != read1_cnt_i;
     // No following descriptor is offered until DONE, hence no unreturned reservation
     // remains at S_WAIT. Admission reserves the entire next line through S_RUN.
     assign space_w = write_layer_o ? admission_used1_r <= l1_limit_r :
@@ -123,15 +143,20 @@ module edrv32_disp_reader (
             l0_limit_r <= 10'd432;
             l1_limit_r <= 10'd512;
             pending_cnt_r <= 32'd0;
+            pending_nonzero_r <= 1'b0;
             req_cnt_r <= 32'd0;
             write_cnt_r <= 10'd0;
             write1_cnt_r <= 10'd0;
             write_layer_o <= 1'b0;
+            l1_advance_r <= 1'b0;
         end else begin
             if (soft_clear_i) begin
                 req_cnt_r <= 32'd0;
             end else if (frame_req_i) begin
-                req_cnt_r <= req_cnt_r + 32'd1;
+                req_cnt_r[15:0] <= req_cnt_r[15:0] + 16'd1;
+                if (req_cnt_r[15:0] == 16'hffff) begin
+                    req_cnt_r[31:16] <= req_cnt_r[31:16] + 16'd1;
+                end
             end
             if (write_i && !write_layer_o) begin
                 write_cnt_r <= write_cnt_r + 10'd1;
@@ -139,13 +164,26 @@ module edrv32_disp_reader (
             if (write_i && write_layer_o) begin
                 write1_cnt_r <= write1_cnt_r + 10'd1;
             end
+            // Keep the frame-start control separate from the 32-bit queue arithmetic.
             if (frame_req_i != frame_start_o) begin
-                pending_cnt_r <= frame_req_i ? pending_cnt_r + 32'd1 : pending_cnt_r - 32'd1;
+                pending_nonzero_r <= frame_req_i ? pending_cnt_r != 32'hffff_ffff :
+                    pending_cnt_r != 32'd1;
+                if (frame_req_i) begin
+                    pending_cnt_r[15:0] <= pending_cnt_r[15:0] + 16'd1;
+                    if (pending_cnt_r[15:0] == 16'hffff) begin
+                        pending_cnt_r[31:16] <= pending_cnt_r[31:16] + 16'd1;
+                    end
+                end else begin
+                    pending_cnt_r[15:0] <= pending_cnt_r[15:0] - 16'd1;
+                    if (pending_cnt_r[15:0] == 16'd0) begin
+                        pending_cnt_r[31:16] <= pending_cnt_r[31:16] - 16'd1;
+                    end
+                end
             end
             case (state_r)
                 S_IDLE: begin
                     if (frame_start_o) begin
-                        state_r <= S_SCROLL;
+                        state_r <= S_LOAD;
                         line_r <= 10'd0;
                         scroll_rows_r <= layer_ctrl_i[0] ? l0_scroll_i[27:16] : 12'd0;
                         layer_ctrl_r <= layer_ctrl_i;
@@ -159,11 +197,24 @@ module edrv32_disp_reader (
                         write_layer_o <= 1'b0;
                     end
                 end
+                S_LOAD: begin
+                    state_r <= S_INIT;
+                end
+                S_INIT: begin
+                    state_r <= S_SCROLL;
+                end
+                S_SCROLL_ADD: begin
+                    scroll_rows_r <= scroll_rows_r - 12'd1;
+                    state_r <= S_SCROLL;
+                end
+                S_ROW_ADD: begin
+                    state_r <= S_PICK;
+                end
                 S_SCROLL: begin
                     if (scroll_rows_r == 12'd0) begin
                         state_r <= S_PICK;
                     end else begin
-                        scroll_rows_r <= scroll_rows_r - 12'd1;
+                        state_r <= S_SCROLL_ADD;
                     end
                 end
                 S_PICK: begin
@@ -200,11 +251,12 @@ module edrv32_disp_reader (
                 end
                 S_NEXT: begin
                     write_layer_o <= 1'b0;
+                    l1_advance_r <= l1_row_w;
                     if (line_r == 10'd719) begin
                         state_r <= S_IDLE;
                     end else begin
                         line_r <= line_r + 10'd1;
-                        state_r <= S_PICK;
+                        state_r <= S_ROW_ADD;
                     end
                 end
                 default: begin end
@@ -212,21 +264,33 @@ module edrv32_disp_reader (
         end
     end
 
-    // spec 2.5: repeated row addition also forms SCROLL_Y*STRIDE during prefetch.
-    // At most 4095 additions fit comfortably within the 30-line blanking interval.
+    // spec 2.5: split row additions at a register boundary, including carry.
+    // SCROLL_Y prefetch uses two clocks per row (at most 65.6 us at 125 MHz).
+    // All frame inputs still latch together on frame_start_o.
     always @(posedge clk_i) begin
         if (frame_start_o) begin
-            line_base_r <= next_base_i + {16'd0, l0_scroll_i[14:4], 5'd0};
+            line_base_r <= next_base_i;
+            scroll_bytes_r <= {l0_scroll_i[14:4], 5'd0};
             stride_r <= stride_i;
             l1_line_base_r <= l1_next_base_i;
             l1_stride_r <= l1_stride_i;
         end else begin
-            if ((state_r == S_SCROLL && scroll_rows_r != 12'd0) || state_r == S_NEXT) begin
-                line_base_r <= line_base_r + stride_r;
+            if (state_r == S_INIT || state_r == S_SCROLL_ADD || state_r == S_ROW_ADD) begin
+                line_base_r <= {line_high_sum_r + {15'd0, line_low_sum_r[16]},
+                    line_low_sum_r[15:0]};
             end
-            if (state_r == S_NEXT && l1_row_w) begin
-                l1_line_base_r <= l1_line_base_r + l1_stride_r;
+            if (state_r == S_ROW_ADD && l1_advance_r) begin
+                l1_line_base_r <= {l1_high_sum_r + {15'd0, l1_low_sum_r[16]},
+                    l1_low_sum_r[15:0]};
             end
+        end
+        if (state_r == S_LOAD || state_r == S_SCROLL || state_r == S_NEXT) begin
+            line_low_sum_r <= {1'b0, line_base_r[15:0]} +
+                {1'b0, state_r == S_LOAD ? scroll_bytes_r : stride_r[15:0]};
+            line_high_sum_r <= line_base_r[31:16] +
+                (state_r == S_LOAD ? 16'd0 : stride_r[31:16]);
+            l1_low_sum_r <= {1'b0, l1_line_base_r[15:0]} + {1'b0, l1_stride_r[15:0]};
+            l1_high_sum_r <= l1_line_base_r[31:16] + l1_stride_r[31:16];
         end
         if (state_r == S_PICK) begin
             desc_base_o <= write_layer_o ? l1_line_base_r : line_base_r;

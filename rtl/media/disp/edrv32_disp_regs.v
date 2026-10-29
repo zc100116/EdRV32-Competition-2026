@@ -52,6 +52,8 @@ module edrv32_disp_regs (
 );
     localparam [31:0] IRQ_MASK = 32'h0000_0306;
     reg enable_r;
+    reg busy_r;
+    reg soft_pending_d_r;
     reg soft_pending_r;
     reg [31:0] irq_en_r;
     reg [31:0] irq_stat_r;
@@ -72,10 +74,25 @@ module edrv32_disp_regs (
     reg [31:0] l1_cur_base_r;
     reg [31:0] l1_rel_base_r;
     reg [31:0] perf0_r;
+    reg [5:0] perf0_less_r;
+    reg [5:1] perf0_equal_r;
+    wire [23:0] perf0_base_w;
     reg [31:0] perf1_r;
+    reg [5:0] perf1_less_r;
+    reg [5:1] perf1_equal_r;
+    wire [23:0] perf1_base_w;
     reg [31:0] perf2_r;
+    reg [5:0] perf2_less_r;
+    reg [5:1] perf2_equal_r;
+    wire [23:0] perf2_base_w;
     reg [31:0] perf5_r;
+    reg [5:0] perf5_less_r;
+    reg [5:1] perf5_equal_r;
+    wire [23:0] perf5_base_w;
     reg [31:0] perf6_r;
+    reg [5:0] perf6_less_r;
+    reg [5:1] perf6_equal_r;
+    wire [23:0] perf6_base_w;
     reg urgent_r;
     reg delayed_req_r;
     reg [31:0] perf0_base_r;
@@ -93,6 +110,35 @@ module edrv32_disp_regs (
     wire [31:0] irq_clear_w;
     wire [3:0] unused_pstrb_w;
 
+    // spec 4.3: register nibble comparisons alongside the same raw count sample.
+    // This separates Gray decoding/borrow detection from APB count subtraction.
+    // On SOFT_RST the newly installed baseline is the previous raw count sample.
+    assign perf0_base_w = soft_clear_o ? perf0_r[23:0] : perf0_base_r[23:0];
+    assign perf1_base_w = soft_clear_o ? perf1_r[23:0] : perf1_base_r[23:0];
+    assign perf2_base_w = soft_clear_o ? perf2_r[23:0] : perf2_base_r[23:0];
+    assign perf5_base_w = soft_clear_o ? perf5_r[23:0] : perf5_base_r[23:0];
+    assign perf6_base_w = soft_clear_o ? perf6_r[23:0] : perf6_base_r[23:0];
+
+    function [31:0] count_delta;
+        input [31:0] count_i;
+        input [31:0] base_i;
+        input [5:0] less_i;
+        input [5:1] equal_i;
+        reg [5:0] borrow_w;
+        integer nibble;
+        begin
+            borrow_w[0] = less_i[0];
+            for (nibble = 1; nibble < 6; nibble = nibble + 1) begin
+                borrow_w[nibble] = less_i[nibble] ||
+                    (equal_i[nibble] && borrow_w[nibble-1]);
+            end
+            count_delta[7:0] = count_i[7:0] - base_i[7:0];
+            count_delta[15:8] = count_i[15:8] - base_i[15:8] - {7'd0, borrow_w[1]};
+            count_delta[23:16] = count_i[23:16] - base_i[23:16] - {7'd0, borrow_w[3]};
+            count_delta[31:24] = count_i[31:24] - base_i[31:24] - {7'd0, borrow_w[5]};
+        end
+    endfunction
+
     assign unused_pstrb_w = apb_pstrb_i;
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
@@ -108,30 +154,101 @@ module edrv32_disp_regs (
     assign l1_pos_o = l1_pos_r;
     assign l1_size_o = l1_size_r;
     assign l1_opa_o = l1_opa_r;
+    // spec 2.8, 4.1: register BUSY/IDLE before APB and the reset-drain decision.
+    // Delay the reset request alongside BUSY so an old IDLE cannot skip disable ACK.
     // The stop handshake makes IDLE stable before the registered clear pulse.
     // Capture the CDC gray-to-binary outputs before subtraction and stop logic.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             soft_clear_o <= 1'b0;
+            busy_r <= 1'b0;
+            soft_pending_d_r <= 1'b0;
             perf0_r <= 32'd0;
+            perf0_less_r <= 6'd0;
+            perf0_equal_r <= 5'b11111;
             perf1_r <= 32'd0;
+            perf1_less_r <= 6'd0;
+            perf1_equal_r <= 5'b11111;
             perf2_r <= 32'd0;
+            perf2_less_r <= 6'd0;
+            perf2_equal_r <= 5'b11111;
             perf5_r <= 32'd0;
+            perf5_less_r <= 6'd0;
+            perf5_equal_r <= 5'b11111;
             perf6_r <= 32'd0;
+            perf6_less_r <= 6'd0;
+            perf6_equal_r <= 5'b11111;
             urgent_r <= 1'b0;
             delayed_req_r <= 1'b0;
         end else begin
-            soft_clear_o <= soft_pending_r && !busy_i && !soft_clear_o;
+            busy_r <= busy_i;
+            soft_pending_d_r <= soft_pending_r;
+            soft_clear_o <= soft_pending_r && soft_pending_d_r && !busy_r && !soft_clear_o;
             perf0_r <= perf0_i;
+            perf0_less_r <= {perf0_i[23:20] < perf0_base_w[23:20],
+                perf0_i[19:16] < perf0_base_w[19:16],
+                perf0_i[15:12] < perf0_base_w[15:12],
+                perf0_i[11:8] < perf0_base_w[11:8],
+                perf0_i[7:4] < perf0_base_w[7:4],
+                perf0_i[3:0] < perf0_base_w[3:0]};
+            perf0_equal_r <= {perf0_i[23:20] == perf0_base_w[23:20],
+                perf0_i[19:16] == perf0_base_w[19:16],
+                perf0_i[15:12] == perf0_base_w[15:12],
+                perf0_i[11:8] == perf0_base_w[11:8],
+                perf0_i[7:4] == perf0_base_w[7:4]};
             perf1_r <= perf1_i;
+            perf1_less_r <= {perf1_i[23:20] < perf1_base_w[23:20],
+                perf1_i[19:16] < perf1_base_w[19:16],
+                perf1_i[15:12] < perf1_base_w[15:12],
+                perf1_i[11:8] < perf1_base_w[11:8],
+                perf1_i[7:4] < perf1_base_w[7:4],
+                perf1_i[3:0] < perf1_base_w[3:0]};
+            perf1_equal_r <= {perf1_i[23:20] == perf1_base_w[23:20],
+                perf1_i[19:16] == perf1_base_w[19:16],
+                perf1_i[15:12] == perf1_base_w[15:12],
+                perf1_i[11:8] == perf1_base_w[11:8],
+                perf1_i[7:4] == perf1_base_w[7:4]};
             perf2_r <= perf2_i;
+            perf2_less_r <= {perf2_i[23:20] < perf2_base_w[23:20],
+                perf2_i[19:16] < perf2_base_w[19:16],
+                perf2_i[15:12] < perf2_base_w[15:12],
+                perf2_i[11:8] < perf2_base_w[11:8],
+                perf2_i[7:4] < perf2_base_w[7:4],
+                perf2_i[3:0] < perf2_base_w[3:0]};
+            perf2_equal_r <= {perf2_i[23:20] == perf2_base_w[23:20],
+                perf2_i[19:16] == perf2_base_w[19:16],
+                perf2_i[15:12] == perf2_base_w[15:12],
+                perf2_i[11:8] == perf2_base_w[11:8],
+                perf2_i[7:4] == perf2_base_w[7:4]};
             perf5_r <= perf5_i;
+            perf5_less_r <= {perf5_i[23:20] < perf5_base_w[23:20],
+                perf5_i[19:16] < perf5_base_w[19:16],
+                perf5_i[15:12] < perf5_base_w[15:12],
+                perf5_i[11:8] < perf5_base_w[11:8],
+                perf5_i[7:4] < perf5_base_w[7:4],
+                perf5_i[3:0] < perf5_base_w[3:0]};
+            perf5_equal_r <= {perf5_i[23:20] == perf5_base_w[23:20],
+                perf5_i[19:16] == perf5_base_w[19:16],
+                perf5_i[15:12] == perf5_base_w[15:12],
+                perf5_i[11:8] == perf5_base_w[11:8],
+                perf5_i[7:4] == perf5_base_w[7:4]};
             perf6_r <= perf6_i;
+            perf6_less_r <= {perf6_i[23:20] < perf6_base_w[23:20],
+                perf6_i[19:16] < perf6_base_w[19:16],
+                perf6_i[15:12] < perf6_base_w[15:12],
+                perf6_i[11:8] < perf6_base_w[11:8],
+                perf6_i[7:4] < perf6_base_w[7:4],
+                perf6_i[3:0] < perf6_base_w[3:0]};
+            perf6_equal_r <= {perf6_i[23:20] == perf6_base_w[23:20],
+                perf6_i[19:16] == perf6_base_w[19:16],
+                perf6_i[15:12] == perf6_base_w[15:12],
+                perf6_i[11:8] == perf6_base_w[11:8],
+                perf6_i[7:4] == perf6_base_w[7:4]};
             urgent_r <= urgent_i && !soft_clear_o;
             delayed_req_r <= delayed_req_i && !soft_clear_o;
         end
     end
-    assign scan_cnt_o = perf0_r - perf0_base_r;
+    assign scan_cnt_o = count_delta(perf0_r, perf0_base_r, perf0_less_r, perf0_equal_r);
     assign switch_w = frame_start_i && cur_layer_ctrl_r[0] &&
         (!layer_ctrl_r[0] || next_base_r != cur_base_r);
     assign switch1_w = frame_start_i && cur_layer_ctrl_r[1] &&
@@ -146,18 +263,18 @@ module edrv32_disp_regs (
         case (apb_paddr_i)
             12'h000: apb_prdata_o = 32'h0005_0002;
             12'h004: apb_prdata_o = {31'd0, enable_r};
-            12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_i, busy_i};
+            12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_r, busy_r};
             12'h00c: apb_prdata_o = irq_en_r;
             12'h010: apb_prdata_o = irq_stat_r;
             12'h014: apb_prdata_o = {30'd0, err_code_r};
             12'h02c: apb_prdata_o = frame_cnt_r;
             12'h040: apb_prdata_o = scan_cnt_o;
-            12'h044: apb_prdata_o = perf1_r - perf1_base_r;
-            12'h048: apb_prdata_o = perf2_r - perf2_base_r;
+            12'h044: apb_prdata_o = count_delta(perf1_r, perf1_base_r, perf1_less_r, perf1_equal_r);
+            12'h048: apb_prdata_o = count_delta(perf2_r, perf2_base_r, perf2_less_r, perf2_equal_r);
             12'h04c: apb_prdata_o = perf3_r;
             12'h050: apb_prdata_o = perf4_r;
-            12'h054: apb_prdata_o = perf5_r - perf5_base_r;
-            12'h058: apb_prdata_o = perf6_r - perf6_base_r;
+            12'h054: apb_prdata_o = count_delta(perf5_r, perf5_base_r, perf5_less_r, perf5_equal_r);
+            12'h058: apb_prdata_o = count_delta(perf6_r, perf6_base_r, perf6_less_r, perf6_equal_r);
             12'h100: apb_prdata_o = next_base_r;
             12'h104: apb_prdata_o = stride_r;
             12'h108: apb_prdata_o = cur_base_r;
@@ -285,7 +402,10 @@ module edrv32_disp_regs (
                 if (layer_ctrl_r[1]) begin
                     l1_cur_base_r <= l1_next_base_r;
                 end
-                frame_cnt_r <= frame_cnt_r + 32'd1;
+                frame_cnt_r[15:0] <= frame_cnt_r[15:0] + 16'd1;
+                if (frame_cnt_r[15:0] == 16'hffff) begin
+                    frame_cnt_r[31:16] <= frame_cnt_r[31:16] + 16'd1;
+                end
             end
             if (switch_w) begin
                 rel_base_r <= cur_base_r;
@@ -294,10 +414,16 @@ module edrv32_disp_regs (
                 l1_rel_base_r <= l1_cur_base_r;
             end
             if (urgent_r) begin
-                perf3_r <= perf3_r + 32'd1;
+                perf3_r[15:0] <= perf3_r[15:0] + 16'd1;
+                if (perf3_r[15:0] == 16'hffff) begin
+                    perf3_r[31:16] <= perf3_r[31:16] + 16'd1;
+                end
             end
             if (delayed_req_r) begin
-                perf4_r <= perf4_r + 32'd1;
+                perf4_r[15:0] <= perf4_r[15:0] + 16'd1;
+                if (perf4_r[15:0] == 16'hffff) begin
+                    perf4_r[31:16] <= perf4_r[31:16] + 16'd1;
+                end
             end
         end
     end

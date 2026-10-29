@@ -58,6 +58,7 @@ module edrv32_disp (
     wire write_layer_w;
     wire soft_clear_w;
     wire busy_w;
+    reg [3:0] frames_pending_r;
     wire reader_busy_w;
     wire fifo_pending_w;
     wire frame_start_w;
@@ -131,7 +132,20 @@ module edrv32_disp (
 
     // X6 completion and FIFO accounting include late debt repayment in STATUS.IDLE.
     assign busy_w = scan_live_mem_w || reader_busy_w || fifo_pending_w || !params_ready_w ||
-        req_cnt_w != scan_cnt_w;
+        |frames_pending_r;
+
+    // spec 4.1: isolate completed-frame arithmetic from stop and STATUS reduction.
+    // Each byte comparison has its own register boundary; the count values retain
+    // their existing sampling time. Reader/scan-live cover a newly arriving request.
+    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
+        if (!rst_mem_n_i) begin
+            frames_pending_r <= 4'd0;
+        end else begin
+            frames_pending_r <= {req_cnt_w[31:24] != scan_cnt_w[31:24],
+                req_cnt_w[23:16] != scan_cnt_w[23:16],
+                req_cnt_w[15:8] != scan_cnt_w[15:8], req_cnt_w[7:0] != scan_cnt_w[7:0]};
+        end
+    end
 
     assign params_mem_w = {layer_ctrl_w[0], l0_scroll_w[3:0], layer_ctrl_w[1],
         l1_pos_w[10:0], l1_pos_w[25:16], l1_size_w[10:0], l1_size_w[25:16], l1_opa_w};
