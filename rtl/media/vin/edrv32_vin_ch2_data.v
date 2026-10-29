@@ -8,7 +8,7 @@ module edrv32_vin_ch2_data (
     input wire clk_i,
     input wire rst_n_i,
 
-    // Admitted 1280x720 source, always consumed without backpressure.
+    // Admitted 1280x720 source words; the parent throttles memory frames.
     input wire valid_i,
     input wire [31:0] data_i,
     input wire sof_i,
@@ -17,9 +17,12 @@ module edrv32_vin_ch2_data (
     input wire abort_i,
 
     // Packed INT8_C4 beats, including twelve top and bottom rows.
+    input wire padding_ready_i,
+    output wire top_pending_o,
     output reg valid_o,
     output reg [255:0] data_o,
-    output reg eof_o
+    output reg eof_o,
+    output reg blocked_o
 );
     reg [9:0] column_r;
     reg [9:0] row_r;
@@ -60,7 +63,12 @@ module edrv32_vin_ch2_data (
     wire [9:0] vertical_green_w;
     wire [9:0] vertical_blue_w;
     wire unused_line_w;
+    wire padding_w;
+    wire packed_w;
 
+    assign top_pending_o = top_r != 0;
+    assign padding_w = (top_r != 0 || bottom_r != 0) && padding_ready_i;
+    assign packed_w = pixel_valid_r && pack_word_r == 3'd7;
     assign column_w = sof_i ? 10'd0 : column_r;
     assign row_w = sof_i ? 10'd0 : row_r;
     assign flush_read_w = flushing_r;
@@ -115,6 +123,7 @@ module edrv32_vin_ch2_data (
             pack_word_r <= 3'd0;
             valid_o <= 1'b0;
             eof_o <= 1'b0;
+            blocked_o <= 1'b0;
         end else begin
             horizontal_valid_r <= valid_i || flush_read_w;
             horizontal_odd_r <= valid_i && row_w[0];
@@ -129,9 +138,10 @@ module edrv32_vin_ch2_data (
             write_r <= read_valid_r && read_write_r;
             pixel_valid_r <= read_valid_r && read_output_r;
             pixel_last_r <= read_last_r;
-            valid_o <= (top_r != 0) || (bottom_r != 0) ||
-                (pixel_valid_r && pack_word_r == 3'd7);
-            eof_o <= bottom_r == 10'd1;
+            valid_o <= padding_w || packed_w;
+            eof_o <= bottom_r == 10'd1 && padding_ready_i;
+            // vin 2.8: a camera's effective beat cannot overtake top padding.
+            blocked_o <= packed_w && top_r != 0;
             if (valid_i) begin
                 column_r <= eol_i ? 10'd0 : column_w + 10'd1;
                 row_r <= eol_i ? row_w + 10'd1 : row_w;
@@ -148,9 +158,9 @@ module edrv32_vin_ch2_data (
                 else
                     flush_column_r <= flush_column_r + 10'd1;
             end
-            if (top_r != 0)
+            if (top_r != 0 && padding_ready_i)
                 top_r <= top_r - 10'd1;
-            if (bottom_r != 0)
+            if (bottom_r != 0 && padding_ready_i)
                 bottom_r <= bottom_r - 10'd1;
             if (pixel_valid_r) begin
                 pack_word_r <= pack_word_r + 3'd1;
@@ -168,6 +178,7 @@ module edrv32_vin_ch2_data (
                 pack_word_r <= 3'd0;
                 valid_o <= 1'b0;
                 eof_o <= 1'b0;
+                blocked_o <= 1'b0;
             end
         end
     end

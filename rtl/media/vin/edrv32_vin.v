@@ -111,6 +111,7 @@ module edrv32_vin (
     wire [2:0] ch_abort_w;
     wire [5:0] ch_select_w;
     wire [1:0] ch_ready_w;
+    wire ch2_ready_w;
     wire [95:0] ch_awaddr_w;
     wire [11:0] ch_awlen_w;
     wire [2:0] ch_awvalid_w;
@@ -249,7 +250,8 @@ module edrv32_vin (
         for (source_idx = 0; source_idx < 3; source_idx = source_idx + 1) begin : g_ready
             assign source_ready_w[source_idx] =
                 (ch_select_w[1:0] != source_idx || ch_ready_w[0]) &&
-                (ch_select_w[3:2] != source_idx || ch_ready_w[1]);
+                (ch_select_w[3:2] != source_idx || ch_ready_w[1]) &&
+                (source_idx != 2 || ch_select_w[5:4] != 2'd2 || ch2_ready_w);
         end
     endgenerate
     wire item0_valid_w;
@@ -418,7 +420,8 @@ module edrv32_vin (
             assign source_w = select_w == 2'd3 ? 2'd0 : select_w;
             assign other_select_w = ch_select_w[(1 - channel_idx) * 2 +: 2];
             assign valid_w = source_valid_w[source_w] &&
-                (other_select_w != source_w || ch_ready_w[1 - channel_idx]);
+                (other_select_w != source_w || ch_ready_w[1 - channel_idx]) &&
+                (source_w != 2'd2 || ch_select_w[5:4] != 2'd2 || ch2_ready_w);
             if (channel_idx == 0) begin : g_pix
                 assign pix_in_valid_o = pipe_valid_w;
                 assign pix_in_data_o = pipe_data_w;
@@ -513,7 +516,6 @@ module edrv32_vin (
         end
     endgenerate
     wire [1:0] ch2_source_w;
-    wire unused_ch2_ready_w;
     assign ch2_source_w = ch_select_w[5:4] == 2'd3 ? 2'd0 : ch_select_w[5:4];
     edrv32_vin_ch2 u_ch2 (
         .clk_i(clk_mem_i),
@@ -521,7 +523,7 @@ module edrv32_vin (
 
         // Selected source before the channel pipeline.
         .source_valid_i(source_valid_w[ch2_source_w] && source_ready_w[ch2_source_w]),
-        .source_ready_o(unused_ch2_ready_w),
+        .source_ready_o(ch2_ready_w),
         .source_data_i(source_data_w[ch2_source_w * 32 +: 32]),
         .source_sof_i(source_sof_w[ch2_source_w]),
         .source_eol_i(source_eol_w[ch2_source_w]),

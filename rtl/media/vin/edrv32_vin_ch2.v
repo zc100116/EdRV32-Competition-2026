@@ -131,6 +131,9 @@ module edrv32_vin_ch2 (
     wire result_valid_w;
     wire [255:0] result_data_w;
     wire result_eof_w;
+    wire result_blocked_w;
+    wire top_pending_w;
+    reg source_capacity_r;
     wire size_valid_w;
     reg [255:0] fifo_data_r;
 
@@ -169,11 +172,18 @@ module edrv32_vin_ch2 (
     assign admit_w = can_admit_w && source_valid_i;
     assign passing_w = (route_r || can_admit_w) && !abort_i &&
         (!stopping_r || dropping_r);
-    // vin 2.8: the selected source always transfers, including memory frames.
-    assign source_ready_o = 1'b1;
-    assign source_fire_w = source_valid_i;
+    // vin 2.5/2.8: cameras never stall; memory waits for padding and FIFO capacity.
+    // Once count reaches 430, the registered capacity can admit one more word.
+    // Horizontal/read/pixel plus that word contribute at most four pixels: with
+    // seven packed pixels, at most one beat, plus one registered result beat.
+    // EOF may independently flush 640 pixels = 80 beats. Thus 430 + 2 + 80 = 512.
+    // Top padding is serialized before memory input; bottom padding is paced
+    // separately with one slot reserved for valid_o (count < 511).
+    assign source_ready_o = source_select_o != 2'd2 || !passing_w || dropping_r ||
+        (source_capacity_r && !top_pending_w);
+    assign source_fire_w = source_valid_i && source_ready_o;
     assign result_fire_w = result_valid_w && receiving_r;
-    assign overflow_o = result_fire_w && !fifo_ready_w &&
+    assign overflow_o = result_fire_w && (!fifo_ready_w || result_blocked_w) &&
         !dropping_r && !stopping_r && !abort_i;
     assign beat_accept_w = result_fire_w && !dropping_r && !stopping_r
         && !abort_i && !overflow_o;
@@ -196,17 +206,20 @@ module edrv32_vin_ch2 (
         // An admitted frame owns the pipeline through its bottom padding.
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .valid_i(source_valid_i && passing_w),
+        .valid_i(source_fire_w && passing_w),
         .data_i(source_data_i),
         .sof_i(source_sof_i),
         .eol_i(source_eol_i),
         .eof_i(source_eof_i),
         .abort_i(abort_i),
 
-        // Whole beats have no downstream backpressure (vin 2.8).
+        // Only padding waits; effective camera beats retain the overflow path.
+        .padding_ready_i(count_r < 10'd511),
+        .top_pending_o(top_pending_w),
         .valid_o(result_valid_w),
         .data_o(result_data_w),
-        .eof_o(result_eof_w)
+        .eof_o(result_eof_w),
+        .blocked_o(result_blocked_w)
     );
 
     // Reserve an output slot when issuing a DRM read. Its capture enable is
@@ -345,9 +358,11 @@ module edrv32_vin_ch2 (
             write_incomplete_r <= 1'b0;
             write_previous_r <= 3'd7;
             count_r <= 10'd0;
+            source_capacity_r <= 1'b1;
             done_info_o <= 6'd0;
             done_frame_id_o <= 32'd0;
         end else begin
+            source_capacity_r <= count_r < 10'd430;
             if (descriptor_w) begin
                 pending_r <= 1'b0;
                 write_meta_r <= 1'b1;
