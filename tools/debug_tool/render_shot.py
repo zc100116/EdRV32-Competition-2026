@@ -3,13 +3,15 @@
 Run:  python render_shot.py [out.png]
 """
 
+import argparse
+import subprocess
 import os
 import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication
 
 from core.engine import SerialEngine
@@ -17,7 +19,12 @@ from gui.app import MainWindow
 
 
 def main():
-    out = sys.argv[1] if len(sys.argv) > 1 else "render.png"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('out', nargs='?', default='render.png')
+    parser.add_argument('--page', choices=['serial', 'ddr', 'scene', 'yolo'], default='serial')
+    parser.add_argument('--simulate-seconds', type=int, default=0)
+    args = parser.parse_args()
+    out = args.out
     app = QApplication(sys.argv)
     engine = SerialEngine()
 
@@ -65,14 +72,30 @@ def main():
     ]
 
     window = MainWindow(engine)
+    window.setAttribute(Qt.WA_DeleteOnClose)
+    index = {'serial': 0, 'ddr': 5, 'scene': 6, 'yolo': 7}[args.page]
+    window.rail_group.button(index).setChecked(True)
+    window._select_page(index)
     window.show()
+    simulator = None
+    if args.simulate_seconds:
+        rx = engine.ethernet.start_receive(0)
+        simulator = subprocess.Popen([
+            sys.executable, os.path.join(os.path.dirname(__file__), 'telemetry_sim.py'),
+            '--seconds', str(args.simulate_seconds), '--port', str(rx['localPort'])])
 
     def shoot():
+        if simulator:
+            simulator.wait(timeout=3)
+            if simulator.returncode:
+                raise RuntimeError(f'telemetry simulator exited {simulator.returncode}')
+        window.telemetry.refresh(force=True)
         window.grab().save(out)
+        engine.ethernet.stop_receive()
         print(f"saved {out}")
-        app.quit()
+        window.close()
 
-    QTimer.singleShot(600, shoot)
+    QTimer.singleShot(args.simulate_seconds * 1000 + 800, shoot)
     app.exec()
 
 

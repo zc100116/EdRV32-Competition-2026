@@ -25,6 +25,8 @@ from PySide6.QtWidgets import (
 from core.engine import ENCODINGS, fmt_ts
 from gui.program import ProgramPanel
 from gui.ethernet import EthernetPanel
+from gui.telemetry import TelemetryPanel, ScenePanel
+from gui.yolo import YoloPanel
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1146,7 +1148,7 @@ class MainWindow(QMainWindow):
             'EdRV32 <span style="color:#8b98a9; font-weight:400">'
             '调试工具</span>')
         title.setObjectName("appTitle")
-        sub = QLabel("MES50HP · UART LINK · REST API READY")
+        sub = QLabel("PG2L200H · UART / ETH · REST API READY")
         sub.setObjectName("appSub")
         title_box.addWidget(title)
         title_box.addWidget(sub)
@@ -1193,7 +1195,10 @@ class MainWindow(QMainWindow):
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
                 ("规则", "数据匹配规则", ICON_FILTER),
                 ("烧录", "BIOS SRAM 烧录", ICON_TERMINAL),
-                ("网口", "UDP 文件收发", ICON_PLUG))):
+                ("网口", "UDP 文件收发", ICON_PLUG),
+                ("DDR", "DDR 监控", ICON_FILTER),
+                ("场景", "场景控制", ICON_TERMINAL),
+                ("YOLO", "YOLO 数据发送", ICON_PLUG))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1205,7 +1210,7 @@ class MainWindow(QMainWindow):
             self.rail_group.addButton(btn, i)
             rail_layout.addWidget(btn)
         rail_layout.addStretch(1)
-        self.rail_group.idClicked.connect(self.left_stack.setCurrentIndex)
+        self.rail_group.idClicked.connect(self._select_page)
         self.rail_group.button(0).setChecked(True)
         left_layout.addWidget(rail)
 
@@ -1223,6 +1228,15 @@ class MainWindow(QMainWindow):
         ethernet_scroll.setFrameShape(QFrame.NoFrame)
         ethernet_scroll.setWidget(self.ethernet)
         self.left_stack.addWidget(ethernet_scroll)
+        self.telemetry = TelemetryPanel(engine, self.toast)
+        self.scene = ScenePanel(engine, self.toast)
+        self.yolo = YoloPanel(engine, self.toast)
+        for panel in (self.telemetry, self.scene, self.yolo):
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setFrameShape(QFrame.NoFrame)
+            scroll.setWidget(panel)
+            self.left_stack.addWidget(scroll)
         left_layout.addWidget(self.left_stack, 1)
 
         # center: console
@@ -1347,6 +1361,8 @@ class MainWindow(QMainWindow):
         main_split.setStretchFactor(1, 1)
         main_split.setStretchFactor(2, 0)
         main_split.setSizes([330, 680, 300])
+        self.main_split = main_split
+        self.console_card = console_card
         body.addWidget(main_split)
 
         # ---- footer ----
@@ -1357,7 +1373,7 @@ class MainWindow(QMainWindow):
         f.setContentsMargins(18, 0, 18, 0)
         self.counters = QLabel("RX 0 B / TX 0 B")
         self.counters.setObjectName("footText")
-        right = QLabel("50 MHz · RV32IMC · EdRV32 调试工具")
+        right = QLabel("RV32IM · clk_sys 100 MHz · clk_mem 125 MHz")
         right.setObjectName("footText")
         f.addWidget(self.counters)
         f.addStretch(1)
@@ -1447,6 +1463,14 @@ class MainWindow(QMainWindow):
                 lines.append(entry)
         self.console.append_many(lines)
 
+    def _select_page(self, index):
+        self.left_stack.setCurrentIndex(index)
+        wide = index >= 5
+        self.console_card.setVisible(not wide)
+        self.data_panel.setVisible(not wide)
+        if not wide:
+            self.main_split.setSizes([330, 680, 300])
+
     def _poll_status(self):
         st = self.engine.status()
         connected = st["connected"]
@@ -1463,6 +1487,8 @@ class MainWindow(QMainWindow):
         self._update_file_row()
         self.program.refresh()
         self.ethernet.refresh()
+        self.telemetry.refresh()
+        self.yolo.refresh()
         self.counters.setText(
             f"RX {fmt_bytes(st['rxBytes'])} / TX {fmt_bytes(st['txBytes'])}")
 
