@@ -1,4 +1,4 @@
-# DISP v0.3: DS-02, DS-08..10, DS-13, DS-18..19 (plus smoke via regress.py)
+# DISP v0.3: all DS-01..19, 75 complete raster instances (CLAUDE.md 9.1).
 top: tb
 files: files.f
 defines: SIM_MODE

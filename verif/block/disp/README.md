@@ -14,11 +14,15 @@ python3 tools/regress.py full -j 1 --path verif/block/disp
 ```
 
 Both YAML entries use `group: verif/block/disp`, since both runners share
-`build/disp/`. The smoke entry covers DS-01, DS-03–07, DS-11–12 and DS-14–17.
-The full entry adds DS-02, DS-08–10, DS-13 and DS-18–19; the regression tool also
-selects the smoke entry for full. Both tops build with `--timing -Wall -j 1`.
+`build/disp/`. D-I1 measured DS-01 at 64 seconds and DS-03 at 65 seconds before
+retiering. Under CLAUDE.md 9.1 and Task D-I1, smoke runs the existing Python/SV
+reference checks; full runs all DS-01–19 (75 complete raster instances), including
+all former smoke cases. No frames, seeds, variants or pixel checks are removed.
+The regression tool also selects the reference smoke entry for full.
+All tops build with `--timing -Wall -j 1`.
 All simulations run one at a time. Logs and generated references stay in
 `build/disp/`; standard summaries stay in `build/regress/{smoke,full}/block/disp/`.
+The runner prints separate build, reference and individual-case wall times.
 
 | Item | Implementation | Stimulus and direct checks |
 |---|---|---|

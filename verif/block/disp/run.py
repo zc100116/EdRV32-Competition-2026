@@ -7,6 +7,7 @@ import argparse
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.dont_write_bytecode = True
@@ -24,8 +25,11 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     self_test()
     sources = expand_files(ROOT / 'verif/block/disp/files.f')
-    for top, directory in (('tb', 'obj'), ('tb_layers', 'obj_layers'),
-                            ('tb_blend_ref', 'obj_ref')):
+    tops = [('tb_blend_ref', 'obj_ref')]
+    if args.tier == 'full':
+        tops = [('tb', 'obj'), ('tb_layers', 'obj_layers'), *tops]
+    for top, directory in tops:
+        started = time.monotonic()
         compile_args = ['verilator', '--binary', '--timing', '-j', '1', '-Wall',
                         '--timescale', '1ns/1ps', '-Wno-BLKSEQ', '-Wno-UNUSEDSIGNAL',
                         '-Wno-SYNCASYNCNET', '--top-module', top, '--Mdir', str(out / directory),
@@ -33,12 +37,14 @@ def main():
         compile_log = out / f'{top}-compile.log'
         with compile_log.open('w') as log:
             result = subprocess.run(compile_args, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+        print(f'Build {top}: {time.monotonic() - started:.2f}s', flush=True)
         if result.returncode:
             print('\n'.join(line for line in compile_log.read_text().splitlines()
                             if line.startswith(('%Warning', '%Error'))))
             print(f'FAIL DISP compile {top}')
             return 1
-    # Full's YAML contains full-only instances; regress.py also selects smoke's YAML.
+    # D-I1 measured DS-01 and DS-03 above 60 seconds each. Keep the complete
+    # raster suites in full (CLAUDE.md 9.1); smoke checks the existing reference.
     cases = [(n, 1, 4096, 999, 0) for n in (1, 3, 4, 5, 11, 12)]
     cases.insert(1, (3, 1, 2560, 999, 0))
     cases += [(12, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
@@ -50,22 +56,26 @@ def main():
     cases += [(17, 1, 4096, 999, 0)]
     if args.tier == 'full':
         generate(out / 'tmds.hex')
-        cases = [(n, 1, 4096, 999, 0) for n in (2, 8, 9, 10, 19)]
+        cases += [(n, 1, 4096, 999, 0) for n in (2, 8, 9, 10, 19)]
         cases += [(10, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
         cases += [(13, seed, 4096, 999, 0) for seed in range(1, 11)]
         cases += [(18, 1, 4096, 999, v) for v in range(18)]
     else:
-        generate_blend(out / 'blend.hex')
-        with (out / 'blend-ref-sv.log').open('w') as log:
-            result = subprocess.run([str(out / 'obj_ref/sim'),
-                                        f'+BLEND_REF={out / "blend.hex"}'], cwd=ROOT,
-                                    stdout=log, stderr=subprocess.STDOUT, timeout=300)
-        reference_result = (out / 'blend-ref-sv.log').read_text()
-        print(reference_result, flush=True)
-        if result.returncode:
-            return 1
+        cases = []
+    started = time.monotonic()
+    generate_blend(out / 'blend.hex')
+    with (out / 'blend-ref-sv.log').open('w') as log:
+        result = subprocess.run([str(out / 'obj_ref/sim'),
+                                    f'+BLEND_REF={out / "blend.hex"}'], cwd=ROOT,
+                                stdout=log, stderr=subprocess.STDOUT, timeout=300)
+    reference_result = (out / 'blend-ref-sv.log').read_text()
+    print(reference_result, flush=True)
+    print(f'Blend reference: {time.monotonic() - started:.2f}s', flush=True)
+    if result.returncode:
+        return 1
     failures = 0
     for case, seed, stride, phase, variant in cases:
+        started = time.monotonic()
         name = f'DS-{case:02d}-seed{seed}-stride{stride}'
         if phase != 999:
             name += f'-phase{phase}'
@@ -83,7 +93,8 @@ def main():
                                     stdout=log, stderr=subprocess.STDOUT, timeout=600)
         output = (out / (name + '.log')).read_text()
         passed = result.returncode == 0 and 'PASS' in output and 'FAIL' not in output
-        print(f'{"PASS" if passed else "FAIL"} {name}', flush=True)
+        print(f'{"PASS" if passed else "FAIL"} {name} '
+              f'{time.monotonic() - started:.2f}s', flush=True)
         if not passed:
             print(output, flush=True)
             failures += 1

@@ -1,4 +1,4 @@
-# DISP v0.3: DS-01, DS-03..07, DS-11..12, DS-14..17
+# DISP v0.3 reference self-test; complete raster cases moved to full (CLAUDE.md 9.1).
 top: tb
 files: files.f
 defines: SIM_MODE
