@@ -31,8 +31,8 @@ class Batch(C.Structure):
 
 
 class Comparison(C.Structure):
-    _fields_ = [("max_channel", C.c_uint32 * 3), ("full_max", C.c_uint32),
-                ("edge_max", C.c_uint32), ("over3", C.c_uint32), ("pixels", C.c_uint32)]
+    _fields_ = [("full_max_lsb", C.c_uint32), ("edge_max_lsb", C.c_uint32),
+                ("over1", C.c_uint32), ("pixels", C.c_uint32)]
     _fields_ += [("histogram", C.c_uint32 * 5), ("rnd_tasks", C.c_uint32),
                  ("sw_tasks", C.c_uint32)]
 
@@ -75,6 +75,8 @@ def main():
     lib.s3_lvgl_input.argtypes = [C.c_uint32]
     lib.s3_lvgl_set_rnd.argtypes = [C.c_bool]
     lib.s3_lvgl_comparison.restype = C.POINTER(Comparison)
+    lib.s3_compare_passes.argtypes = [C.POINTER(Comparison)]
+    lib.s3_compare_passes.restype = C.c_bool
     lib.s3_lvgl_reference_pixels.restype = C.c_void_p
     lib.s3_lvgl_rendered_pixels.restype = C.c_void_p
     callback_type = C.CFUNCTYPE(None, C.POINTER(Batch))
@@ -121,19 +123,17 @@ def main():
     lib.s3_lvgl_init()
     lib.s3_lvgl_set_rnd(False)
     lib.s3_lvgl_input(0)
-    rows = ["frame|max R|max G|max B|full max|edge max|>3 pixels|>3 %|RND/SW tasks|bins|result",
-            "---|---:|---:|---:|---:|---:|---:|---:|---:|---|---"]
+    rows = ["frame|full max LSB|edge max LSB|>1 LSB pixels|>1 LSB %|RND/SW tasks|bins|result",
+            "---|---:|---:|---:|---:|---:|---|---"]
 
     def compare(name):
         print(f"RN-17 frame={name}", flush=True)
         start = len(descriptors)
         lib.s3_lvgl_self_compare()
         result = lib.s3_lvgl_comparison().contents
-        good = (result.full_max <= 3 and result.edge_max <= 48 and
-                result.over3 * 100 <= result.pixels)
-        rows.append(f"{name}|" + "|".join(map(str, result.max_channel)) +
-                    f"|{result.full_max}|{result.edge_max}|{result.over3}|"
-                    f"{result.over3 * 100 / result.pixels:.6f}|"
+        good = lib.s3_compare_passes(C.byref(result))
+        rows.append(f"{name}|{result.full_max_lsb}|{result.edge_max_lsb}|{result.over1}|"
+                    f"{result.over1 * 100 / result.pixels:.6f}|"
                     f"{result.rnd_tasks}/{result.sw_tasks}|{list(result.histogram)}|"
                     f"{'PASS' if good else 'FAIL'}")
         if not good:
