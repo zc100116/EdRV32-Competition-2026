@@ -179,7 +179,7 @@ module edrv32_vin_ch2 (
     // EOF may independently flush 640 pixels = 80 beats. Thus 430 + 2 + 80 = 512.
     // Top padding is serialized before memory input; bottom padding is paced
     // separately with one slot reserved for valid_o (count < 511).
-    assign source_ready_o = source_select_o != 2'd2 || !passing_w || dropping_r ||
+    assign source_ready_o = source_select_o != 2'd2 || !passing_w ||
         (source_capacity_r && !top_pending_w);
     assign source_fire_w = source_valid_i && source_ready_o;
     assign result_fire_w = result_valid_w && receiving_r;
