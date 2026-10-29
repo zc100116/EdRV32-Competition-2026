@@ -6,7 +6,7 @@
 | 模块名 | `ip_ram_rnd_line` |
 | 包装模块 | `rtl/tech/edrv32_ram_rnd_line.v` |
 | 用途 | RND 行缓冲的一个 bank（源、目标行，每项一个 256 位 beat） |
-| 使用者 | RND，源、目标各 2 个 bank，共 4 实例 |
+| 使用者 | RND，源、目标各 2 个 bank，COPY 行快照 1 个 bank，共 5 实例 |
 | 依据 | RND 规格 5.2、7；R-R1 片上存储请求（2026-10-29） |
 | 器件 | PG2L200H，速度等级以工程为准 |
 
