@@ -137,7 +137,7 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
 |---|---|---|---|---|
 | `camN_vsync_i`、`camN_href_i` | in | 1 | camN_pclk | N = 0、1 |
 | `camN_data_i` | in | 8 | camN_pclk | |
-| `camN_pwdn_o`、`camN_rst_n_o` | out | 1 | clk_sys | 由 GPIO0 输出驱动（系统子系统规格 2.7） |
+| `camN_pwdn_o`、`camN_rst_n_o` | out | 1 | clk_sys | 由 GPIO0 输出 bit12–15 驱动（3.5 位分配；系统子系统规格 2.7） |
 | `i2c0_scl_o/_oe/_i`、`i2c0_sda_o/_oe/_i` | — | 2 | clk_sys | I2C0 的两对开漏引脚，下标 0 接 cam0、1 接 cam1（系统子系统规格 2.8） |
 | `tmds_sym_o` | out | 3 × 10 | clk_pix | 依次为 B/G/R 三个通道的 TMDS 符号，FPGA 层负责 10:1 串化 |
 
@@ -157,8 +157,23 @@ RGMII 与上述 8 位单沿接口之间的转换在 FPGA 层完成。
 | 信号 | 方向 | 位宽 | 说明 |
 |---|---|---|---|
 | `uart0_tx_o`、`uart0_rx_i` | out / in | 1 | |
-| `gpio_o`、`gpio_oe_o`、`gpio_i` | — | 16 | 按键、LED，具体分配由板级约束决定 |
+| `gpio_o`、`gpio_oe_o`、`gpio_i` | — | 16 | 位分配见下表；引脚由板级约束决定 |
 | `debug_o` | out | [CPU 规格] | CPU 流水线观察向量，供 ILA 使用 |
+
+GPIO0 位分配（板级顶层和软件必须一致）：
+
+| 位 | 方向 | 用途 | 开发板（MES-PG2L676 Mini Base） |
+|---|---|---|---|
+| 0 | 输入 | KEY1，低有效；Boot ROM 的 BIOS 键（7.5） | USER_BUTTON1，C23 |
+| 1–3 | 输入 | KEY2–KEY4，低有效 | USER_BUTTON2–4，B22、A22、B20 |
+| 4–8 | 输出 | LED0–LED4，高电平点亮 | USER_LED0–4，A20、C18、C19、E18、A17 |
+| 9–11 | — | 不使用 | — |
+| 12 | 输出 | `cam0_pwdn_o` | 摄像头接口 |
+| 13 | 输出 | `cam0_rst_n_o` | 摄像头接口 |
+| 14 | 输出 | `cam1_pwdn_o` | 摄像头接口 |
+| 15 | 输出 | `cam1_rst_n_o` | 摄像头接口 |
+
+USER_BUTTON0（C22）是全局复位 `rst_n_i`，不接 GPIO。`camN_pwdn_o`、`camN_rst_n_o` 与 `gpio_o` 的对应位相同（3.3）。
 
 ---
 
@@ -716,3 +731,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-28 | v0.13 | 澄清（V-R5 问答，不改变已确认的行为）：5.2 X7 增加 eth_tx_clk → clk_mem 的发送帧结束脉冲 |
 | 2026-10-28 | v0.14 | 7.5 启动流程：按键/SCRATCH0 下载请求改为进入 BIOS（Boot ROM 中的 UART 菜单，第一项烧录 SRAM 程序，完成后写回 D$，按复位运行），取代原来的下载后立即跳转；KEY1 采样窗口初值 100 ms；SRAM 应用每次启动恢复 `.data`、清零 `.bss`；启动信息不再报告启动方式（程序总是从 SRAM 启动）。原因：用户上板后要求不重新生成 bitstream 即可更换并反复运行 SRAM 程序（用户确认 2026-10-28） |
 | 2026-10-28 | v0.15 | 6.1：媒体 APB 槽 0（原 MEDIA_CTRL，无寄存器定义、无使用者）改为预留，访问回 SLVERR（用户确认 2026-10-28，B2-1 准备时发现）；NPU 复位 `rst_npu_n` 由 reset_ctrl 产生（sys-subsys-spec v0.4 2.10） |
+| 2026-10-29 | v0.15 | 3.3、3.5：固定 GPIO0 位分配（bit0–3 KEY1–4、bit4–8 LED0–4、bit12–15 两路摄像头 pwdn/rst_n），接上开发板全部 4 个用户按键和 5 个 LED（用户确认 2026-10-29，B2-1a 问答） |
