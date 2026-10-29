@@ -87,9 +87,9 @@ static void media_decode(void)
     static const uint32_t reserved[] = {0u, 4u, 10u, 11u, 12u, 13u, 14u, 15u};
     for (unsigned int i = 0; i < sizeof(connected) / sizeof(connected[0]); i++) {
         uint32_t slot = connected[i];
-        /* Engine-spec 4 ID tables; DISP is the B2 v0.2 implementation. */
+        /* Engine-spec 4 ID tables; DISP v0.3 (two layers) reports version 2. */
         require(read_reg(EDRV32_MEDIA_APB_BASE + slot * 0x1000u, MEDIA_ID) ==
-                ((slot << 16) | 1u), 0x200u + slot);
+                ((slot << 16) | (slot == 5u ? 2u : 1u)), 0x200u + slot);
     }
     for (unsigned int i = 0; i < sizeof(reserved) / sizeof(reserved[0]); i++) {
         uintptr_t address = EDRV32_MEDIA_APB_BASE + reserved[i] * 0x1000u;
