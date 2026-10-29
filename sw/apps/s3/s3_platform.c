@@ -201,6 +201,14 @@ void s3_display_begin(const void *l0, uint32_t l0_stride,
                       const void *l1, uint32_t l1_stride)
 {
     s3_display_stop();
+    uint32_t interrupt_state;
+    __asm__ volatile ("csrrci %0, mstatus, 8" : "=r"(interrupt_state) :: "memory");
+    /* The stopped scan can leave an unserviced last FRAME. It belongs to the
+     * previous owner, rather than the first frame of this new configuration.
+     */
+    engine_irq_clear(ENGINE_DISP, EDRV32_DISP_IRQ_STAT_FRAME_MASK |
+        EDRV32_DISP_IRQ_STAT_SWITCH_MASK | EDRV32_DISP_IRQ_STAT_SWITCH1_MASK);
+    uint32_t initial_frame = frames;
     scroll_x = 0;
     scroll_y = 0;
     disp_l0_scroll(0, 0);
@@ -212,8 +220,12 @@ void s3_display_begin(const void *l0, uint32_t l0_stride,
     }
     disp_layer_enable(DISP_L1, l1 != NULL);
     engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
+    if (interrupt_state & 8u) {
+        __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
+    }
     /* DISP v0.3: first enabled frame has FRAME, without a Surface release. */
-    s3_wait_frame();
+    while (frames == initial_frame) {
+    }
     submitted_frame = frames - 1u;
 }
 
