@@ -115,7 +115,28 @@ unspecified. All Python code uses the standard library.
 
 ## Acceptance results
 
-Results and final measured commands are recorded after the independent acceptance run.
-Real-DUT image correctness, smoke duration and RN-18 performance numbers require the
-separate RTL integration task; this task supplies their stimuli, scoreboard and numeric
-reporting without claiming measurements from the declaration stub.
+Tested source commit: `ab6527b`, based on coordinator clarification commit `e6ff241`.
+Date: 2026-10-29. Tools: Verilator 5.020 (Debian 5.020-1), Python 3.12.3.
+
+| Check | Command / evidence | Result |
+|---|---|---|
+| Style and complete public-port harness lint | `python3 verif/block/rnd/check.py` | Four SV files plus Python sources, 0 style warnings; Verilator `--lint-only --timing -Wall`, 0 warnings |
+| Independent acceptance | `python3 tools/regress.py full --path verif/block/rnd/selftest -j 1` | 1 PASS, 0 FAIL; final warm run 25 seconds |
+| Arithmetic/reference selftest | `rnd_ref.selftest`, called by the acceptance runner | d: all 65026 inputs; RGB565: all 65536 words; over: all 65536 sa/Da pairs; Q: all 255 entries; blur: every possible sum for R=0–31 and both edge policies; 32768 legality combinations; PASS |
+| Hand-calculated command examples | `rnd_ref.selftest` and `selftest.command_examples`, same runner | All eight operations, signed32 gradient steps, COPY overlap, subbyte alpha, blend modes, radius coverage, shadow R=1, BLUR nearest edges, RGB565 intermediate precision and temporary size; PASS |
+| Directed/random vector construction | `selftest.vector_selftest`, same runner | 531 smoke variants + 105 full variants = 636 cases; ten seeds x fifty commands; all eight operations and ten formats; PASS |
+| Public-port stub | `run.py stub`, same runner; `build/rnd/stub_obj/compile.log` | Verilator `--binary --timing -Wall -j 1` compile and stub elaboration PASS |
+| Memory model | `selftest/edrv32_rnd_memory_tb.sv`, same runner; `build/rnd/memory_obj/compile.log` | Strobes, bursts up to sixteen beats, held R/B payloads, random stalls, exact forty-cycle first-read latency and SLVERR kinds 1–5; PASS |
+| RN-18 reference images | `vectors.generate` for `selections('perf')`; `build/rnd/perf_vectors/summary.txt` | All eight no-wait/latency-40 scenes generated and rendered successfully |
+
+The final acceptance transcript is
+`build/regress/full/block/rnd/selftest/verilator/run.log`; the lint transcript is
+`build/rnd/lint/lint.log`. The no-wait/latency-40 reference images are in
+`build/rnd/perf_vectors/{argb,rgb565,blit,glyph}_lat{0,40}/`. Their expected target
+pixel counts are 921600 for either fill, 524288 for BLIT and 320000 for the glyph list.
+These are reference-model counts, not measured DUT performance.
+
+The two cold serial compiles exceeded sixty seconds under the shared build load;
+the independent acceptance manifest is therefore full. Real-DUT image correctness,
+RN-01–16 smoke duration and RN-18 cycle/throughput measurements require the separate
+RTL integration task. No RND RTL was read or executed in this task.
