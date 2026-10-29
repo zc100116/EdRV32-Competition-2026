@@ -21,7 +21,7 @@ def compile_sim(stub):
     obj.mkdir(parents=True, exist_ok=True)
     sources = expand_files(HERE / ('selftest/files.f' if stub else 'files.f'))
     command = ['verilator', '--binary', '--timing', '-Wall', '-j', '1',
-               '--timescale', '1ns/1ps', '-CFLAGS', '-O0', '--top-module', 'edrv32_rnd_tb',
+               '--timescale', '1ns/1ps', '--top-module', 'edrv32_rnd_tb',
                '--Mdir', str(obj), '-o', 'sim', '+define+SIM_MODE', *sources]
     with (obj / 'compile.log').open('w') as log:
         result = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)

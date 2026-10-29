@@ -48,22 +48,22 @@ and `build/regress/<tier>/block/rnd/`.
 
 | Test | Stimulus in `vectors.py` | Checks in `edrv32_rnd_tb.sv` | Tier |
 |---|---|---|---|
-| RN-01 | Both destinations, OPA 0/1/128/254/255, destination alpha 0/1/128/255 | Whole-memory oracle | smoke |
-| RN-02 | Partial/outside/negative/empty/single-pixel geometry, every aligned destination byte offset, non-32-byte strides | Whole memory, no W for empty area | smoke |
-| RN-03 | Radius 0/1/2/7/4095, dimensions 19x16/1x2/2x1 | Whole memory | smoke |
-| RN-04 | Horizontal/vertical gradients, signed fractional steps, both saturation directions, three clipped pieces | Whole memory; generator checks pieces equal one draw | smoke |
-| RN-05 | Width 1/7/9/20, radius 7, six selected side masks or all sixteen | Whole memory | smoke/full |
-| RN-06 | A8/A4/A2/A1, every intra-byte starting pixel, unaligned base/stride | Whole memory | smoke |
-| RN-07 | RGB565/ARGB8888/I8/I4/I2/I1, both destinations, unaligned source offsets/stride | Whole memory | smoke |
-| RN-08 | Enlargement 2/3.5, reduction 1.5/4/16, scale zero, all flip combinations, clipped RECT | Whole memory, numbered source grid | smoke |
-| RN-09 | Key hits/misses and ignored formats, RC_OPA 0/128/255, modes 0–3, destination alpha 0/255 | Whole memory | smoke |
-| RN-10 | Different buffers, identity and four overlapping directions, source byte offset | Whole memory against source snapshot | smoke |
-| RN-11 | R 0/1/8/31, corner radius 0/4095, clipped expanded grid | Whole memory except specified temporary bytes | smoke/full |
-| RN-12 | R 0/1/8/31, 3x2 area smaller than kernel, both destinations | Whole memory except specified temporary bytes | smoke/full |
-| RN-13 | Tile 8/16, four formats, all map flips, MAP_X/Y 7/13, multirow map, tile 0/4095, key hits/misses | Whole memory | smoke |
-| RN-14 | Twelve dependent commands, newly written data reused as destination/source | Whole memory, DONE_COUNT and CUR_DESC increments, descriptor reads after B drain | smoke |
-| RN-15 | Descriptor/source/target/palette R errors, B error, illegal OP/format/COPY/modes 4–7, ABORT in three phases | Error/IRQ/stop/drain, whole partial memory, explicit successful restart after error clear | smoke/full |
-| RN-16 | Reset/RO/ignored registers, address/count masks, busy DOORBELL, empty list, idle/busy SOFT_RST | APB readback, IRQ masking/W1C, exact PERF1 and observed beat PERF2/3, PERF reset | smoke |
+| RN-01 | Both destinations, OPA 0/1/128/254/255, destination alpha 0/1/128/255 | Whole-memory oracle | full |
+| RN-02 | Partial/outside/negative/empty/single-pixel geometry, every aligned destination byte offset, non-32-byte strides | Whole memory, no W for empty area | full |
+| RN-03 | Radius 0/1/2/7/4095, dimensions 19x16/1x2/2x1 | Whole memory | full |
+| RN-04 | Horizontal/vertical gradients, signed fractional steps, both saturation directions, three clipped pieces | Whole memory; generator checks pieces equal one draw | full |
+| RN-05 | Width 1/7/9/20, radius 7, six selected side masks or all sixteen | Whole memory | full |
+| RN-06 | A8/A4/A2/A1, every intra-byte starting pixel, unaligned base/stride | Whole memory | full |
+| RN-07 | RGB565/ARGB8888/I8/I4/I2/I1, both destinations, unaligned source offsets/stride | Whole memory | full |
+| RN-08 | Enlargement 2/3.5, reduction 1.5/4/16, scale zero, all flip combinations, clipped RECT | Whole memory, numbered source grid | full |
+| RN-09 | Key hits/misses and ignored formats, RC_OPA 0/128/255, modes 0–3, destination alpha 0/255 | Whole memory | full |
+| RN-10 | Different buffers, identity and four overlapping directions, source byte offset | Whole memory against source snapshot | full |
+| RN-11 | R 0/1/8/31, corner radius 0/4095, clipped expanded grid | Whole memory except specified temporary bytes | full |
+| RN-12 | R 0/1/8/31, 3x2 area smaller than kernel, both destinations | Whole memory except specified temporary bytes | full |
+| RN-13 | Tile 8/16, four formats, all map flips, MAP_X/Y 7/13, multirow map, tile 0/4095, key hits/misses | Whole memory | full |
+| RN-14 | Twelve dependent commands, newly written data reused as destination/source | Whole memory, DONE_COUNT and CUR_DESC increments, descriptor reads after B drain | full |
+| RN-15 | Descriptor/source/target/palette R errors, B error, illegal OP/format/COPY/modes 4–7, ABORT in three phases | Error/IRQ/stop/drain, whole partial memory, explicit successful restart after error clear | full |
+| RN-16 | Reset/RO/ignored registers, address/count masks, busy DOORBELL, empty list, idle/busy SOFT_RST | APB readback, IRQ masking/W1C, exact PERF1 and observed beat PERF2/3, PERF reset | full |
 | RN-18 | 1280x720 fills, 1024x512 BLIT, 1000 16x20 A4 glyphs | Whole memory; PERF0 ms, PERF1/PERF0, average cycles/glyph; no-wait thresholds and latency-40 recording | perf |
 | RN-19 | Ten seeds, fifty legal random commands each, all eight operations, randomized geometry/format/fields/delays | Whole memory, protocol checker | full |
 
