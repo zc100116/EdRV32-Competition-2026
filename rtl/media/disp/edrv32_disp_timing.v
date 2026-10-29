@@ -17,6 +17,7 @@ module edrv32_disp_timing (
     output wire frame_start_o,
     output wire vblank_o
 );
+    reg frame_start_r;
     reg [10:0] horizontal_r;
     reg [9:0] vertical_r;
     wire horizontal_active_w;
@@ -29,8 +30,17 @@ module edrv32_disp_timing (
     assign de_o = horizontal_active_w && vertical_active_w;
     assign x_o = horizontal_active_w ? horizontal_r - 11'd260 : 11'd0;
     assign y_o = vertical_active_w ? vertical_r - 10'd25 : 10'd0;
-    assign frame_start_o = horizontal_r == 11'd260 && vertical_r == 10'd25;
+    assign frame_start_o = frame_start_r;
     assign vblank_o = horizontal_r == 11'd0 && vertical_r == 10'd745;
+
+    // Decode the next counter value one clock early; pulse phase stays at (260,25).
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            frame_start_r <= 1'b0;
+        end else begin
+            frame_start_r <= horizontal_r == 11'd259 && vertical_r == 10'd25;
+        end
+    end
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

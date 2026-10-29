@@ -65,6 +65,10 @@ module edrv32_disp (
     wire delayed_req_w;
     wire [31:0] req_cnt_w;
     wire [31:0] scan_cnt_w;
+    // Eleven scan stages; the row/column predicates precede their combined rectangle decision.
+    reg [10:0] hs_pipe_r;
+    reg [10:0] vs_pipe_r;
+    reg [10:0] de_pipe_r;
     wire hs_w;
     wire vs_w;
     wire de_w;
@@ -116,7 +120,7 @@ module edrv32_disp (
     wire unused_dma_eol_w;
     wire unused_dma_eof_w;
     wire unused_dma_idle_w;
-    wire unused_raster_start_w;
+    wire raster_start_w;
     wire [31:0] perf0_pix_w;
     wire [31:0] perf0_mem_w;
     wire [31:0] perf1_pix_w;
@@ -529,7 +533,7 @@ module edrv32_disp (
         .x_o(x_w),
         .y_o(y_w),
         .vblank_o(vblank_w),
-        .frame_start_o(unused_raster_start_w)
+        .frame_start_o(raster_start_w)
     );
 
     edrv32_disp_scan u_scan (
@@ -543,6 +547,7 @@ module edrv32_disp (
         .x_i(x_w),
         .y_i(y_w),
         .vblank_i(vblank_w),
+        .frame_start_i(raster_start_w),
         .params_valid_i(params_valid_w),
         .params_i(params_pix_w),
 
@@ -568,6 +573,20 @@ module edrv32_disp (
         .perf6_o(perf6_pix_w)
     );
 
+    // spec 2.1/2.2/2.7: sync and DE travel with the same pixel through scan/blend.
+    always @(posedge clk_pix_i or negedge rst_pix_n_i) begin
+        if (!rst_pix_n_i) begin
+            de_pipe_r <= 11'd0;
+        end else begin
+            de_pipe_r <= {de_pipe_r[9:0], de_w};
+        end
+    end
+
+    always @(posedge clk_pix_i) begin
+        hs_pipe_r <= {hs_pipe_r[9:0], hs_w};
+        vs_pipe_r <= {vs_pipe_r[9:0], vs_w};
+    end
+
     edrv32_disp_tmds_enc u_blue (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
@@ -575,9 +594,9 @@ module edrv32_disp (
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[7:0]),
-        .control0_i(hs_w),
-        .control1_i(vs_w),
-        .de_i(de_w),
+        .control0_i(hs_pipe_r[10]),
+        .control1_i(vs_pipe_r[10]),
+        .de_i(de_pipe_r[10]),
 
         // Parallel TMDS symbol.
         .symbol_o(tmds_sym_o[9:0])
@@ -592,7 +611,7 @@ module edrv32_disp (
         .data_i(rgb_w[15:8]),
         .control0_i(1'b0),
         .control1_i(1'b0),
-        .de_i(de_w),
+        .de_i(de_pipe_r[10]),
 
         // Parallel TMDS symbol.
         .symbol_o(tmds_sym_o[19:10])
@@ -607,7 +626,7 @@ module edrv32_disp (
         .data_i(rgb_w[23:16]),
         .control0_i(1'b0),
         .control1_i(1'b0),
-        .de_i(de_w),
+        .de_i(de_pipe_r[10]),
 
         // Parallel TMDS symbol.
         .symbol_o(tmds_sym_o[29:20])

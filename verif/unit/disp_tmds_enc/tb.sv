@@ -10,7 +10,7 @@ module tb;
     reg [1:0] control = 0;
     reg de = 0;
     wire [9:0] symbol;
-    reg [9:0] expected [0:2];
+    reg [9:0] expected [0:3];
     int balance = 0;
     int compared = 0;
     bit positive = 0;
@@ -59,14 +59,16 @@ module tb;
             expected[0] = 10'b1101010100;
             expected[1] = 10'b1101010100;
             expected[2] = 10'b1101010100;
+            expected[3] = 10'b1101010100;
         end else begin
+            expected[3] = expected[2];
             expected[2] = expected[1];
             expected[1] = expected[0];
             expected[0] = reference_encode(data, de, control);
             #1;
-            if (symbol !== expected[2])
+            if (symbol !== expected[3])
                 $fatal(1, "FAIL symbol=%010b expected=%010b cycle=%0d",
-                       symbol, expected[2], compared);
+                       symbol, expected[3], compared);
             compared++;
         end
     end

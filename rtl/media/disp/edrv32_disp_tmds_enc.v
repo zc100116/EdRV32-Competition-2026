@@ -1,7 +1,7 @@
 // File: edrv32_disp_tmds_enc.v
 // Spec: disp-spec 2.2.
 // Description: Legacy TMDS transition minimization and running disparity algorithm.
-//              Two preparation stages precede the registered channel symbol.
+//              Three preparation stages precede the registered channel symbol.
 // Clock domain: clk_pix (clk_i).
 module edrv32_disp_tmds_enc (
     // Clock and reset.
@@ -45,6 +45,15 @@ module edrv32_disp_tmds_enc (
         transition_w[8] = !use_xnor_w;
     end
 
+    // Register transition minimization before its population count.
+    reg [8:0] transition_stage2_r;
+    reg de_stage3_r;
+    reg control0_stage3_r;
+    reg control1_stage3_r;
+    wire [3:0] transition_ones_w;
+    reg transition_balanced_r;
+    reg transition_positive_r;
+    reg transition_negative_r;
     reg [3:0] transition_ones_r;
     reg [3:0] transition_zeros_r;
     reg [8:0] transition_r;
@@ -56,10 +65,16 @@ module edrv32_disp_tmds_enc (
     reg [9:0] symbol_r;
 
     wire disparity_balanced_w = (disparity_r == 0) ||
-        (transition_ones_r == transition_zeros_r);
+        transition_balanced_r;
     wire invert_transition_w =
-        (!disparity_r[4] && (transition_ones_r > transition_zeros_r)) ||
-        (disparity_r[4] && (transition_zeros_r > transition_ones_r));
+        (!disparity_r[4] && transition_positive_r) ||
+        (disparity_r[4] && transition_negative_r);
+
+    assign transition_ones_w = {3'b0, transition_stage2_r[0]} +
+        {3'b0, transition_stage2_r[1]} + {3'b0, transition_stage2_r[2]} +
+        {3'b0, transition_stage2_r[3]} + {3'b0, transition_stage2_r[4]} +
+        {3'b0, transition_stage2_r[5]} + {3'b0, transition_stage2_r[6]} +
+        {3'b0, transition_stage2_r[7]};
 
     assign symbol_o = symbol_r;
 
@@ -67,9 +82,11 @@ module edrv32_disp_tmds_enc (
         if (!rst_n_i) begin
             de_stage1_r <= 1'b0;
             de_stage2_r <= 1'b0;
+            de_stage3_r <= 1'b0;
         end else begin
             de_stage1_r <= de_i;
             de_stage2_r <= de_stage1_r;
+            de_stage3_r <= de_stage2_r;
         end
     end
 
@@ -80,24 +97,24 @@ module edrv32_disp_tmds_enc (
         data_r <= data_i;
         control0_stage1_r <= control0_i;
         control1_stage1_r <= control1_i;
-        transition_ones_r <= {3'b0, transition_w[0]} + {3'b0, transition_w[1]} +
-            {3'b0, transition_w[2]} + {3'b0, transition_w[3]} +
-            {3'b0, transition_w[4]} + {3'b0, transition_w[5]} +
-            {3'b0, transition_w[6]} + {3'b0, transition_w[7]};
-        transition_zeros_r <= 4'd8 -
-            ({3'b0, transition_w[0]} + {3'b0, transition_w[1]} +
-            {3'b0, transition_w[2]} + {3'b0, transition_w[3]} +
-            {3'b0, transition_w[4]} + {3'b0, transition_w[5]} +
-            {3'b0, transition_w[6]} + {3'b0, transition_w[7]});
-        transition_r <= transition_w;
+        transition_ones_r <= transition_ones_w;
+        transition_zeros_r <= 4'd8 - transition_ones_w;
+        // These predicates depend only on the symbol, so prepare them before feedback.
+        transition_balanced_r <= transition_ones_w == 4'd4;
+        transition_positive_r <= transition_ones_w > 4'd4;
+        transition_negative_r <= transition_ones_w < 4'd4;
+        transition_stage2_r <= transition_w;
+        transition_r <= transition_stage2_r;
         control0_stage2_r <= control0_stage1_r;
         control1_stage2_r <= control1_stage1_r;
+        control0_stage3_r <= control0_stage2_r;
+        control1_stage3_r <= control1_stage2_r;
     end
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             disparity_r <= 5'sd0;
-        end else if (!de_stage2_r) begin
+        end else if (!de_stage3_r) begin
             disparity_r <= 5'sd0;
         end else if (disparity_balanced_w) begin
             disparity_r <= !transition_r[8]
@@ -113,8 +130,8 @@ module edrv32_disp_tmds_enc (
     end
 
     always @(posedge clk_i) begin
-        if (!de_stage2_r) begin
-            case ({control1_stage2_r, control0_stage2_r})
+        if (!de_stage3_r) begin
+            case ({control1_stage3_r, control0_stage3_r})
                 2'b00: symbol_r <= CONTROL_00;
                 2'b01: symbol_r <= CONTROL_01;
                 2'b10: symbol_r <= CONTROL_10;
