@@ -9,5 +9,7 @@
 boot_enter:
     fence rw, rw
     fence.i
+    csrci mstatus, 8
+    csrw mie, zero
     jr a0
 .size boot_enter, .-boot_enter

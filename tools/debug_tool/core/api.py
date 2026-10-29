@@ -147,7 +147,8 @@ def make_handler(engine):
                 if path == "/api/file/cancel":
                     return self._json(200, engine.cancel_file())
                 if path == "/api/program":
-                    return self._json(200, engine.start_program(body["path"]))
+                    return self._json(200, engine.start_program(
+                        body["path"], bool(body.get("elf", False)), int(body.get("baud", 2000000))))
                 if path == "/api/ethernet/send":
                     return self._json(200, engine.ethernet.send_file(
                         body["path"], body["boardIp"], int(body["boardPort"]),

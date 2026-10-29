@@ -100,7 +100,8 @@ class SerialEngine:
         self._file_tx = None       # file transfer state dict
         self._listeners = []
         self.program = BiosProgrammer(self._program_write,
-                                      lambda text: self.add_entry("sys", text))
+                                      lambda text: self.add_entry("sys", text),
+                                      self._program_baud)
         self.telemetry = Telemetry()
         self.ethernet = EthernetTool(self.telemetry)
         self.yolo = YoloTool(self.ethernet)
@@ -330,10 +331,15 @@ class SerialEngine:
                 time.sleep(0.02)
 
     # -------------------------------------------------------------- save --
-    def start_program(self, path):
+    def start_program(self, path, elf=False, baud=2000000):
         if not self.status()["connected"]:
             raise RuntimeError("serial port is not connected")
-        return self.program.start(path)
+        return self.program.start(path, elf, baud)
+
+    def _program_baud(self, baud):
+        with self._lock:
+            self._serial.baudrate = baud
+            self._config["baud"] = baud
 
     def _program_write(self, data):
         with self._lock:

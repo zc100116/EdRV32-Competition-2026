@@ -53,6 +53,15 @@ void info_hex(const char *key, uint32_t value)
     uart_puts("\r\n");
 }
 
+void info_load(uint32_t length, uint32_t address)
+{
+    key_start("Load bytes");
+    number(length, 10u, 0u);
+    uart_puts(" at 0x");
+    number(address, 16u, 8u);
+    uart_puts("\r\n");
+}
+
 void info_ratio(const char *key, uint64_t numerator, uint64_t denominator)
 {
     key_start(key);

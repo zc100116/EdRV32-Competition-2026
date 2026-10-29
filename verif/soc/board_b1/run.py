@@ -8,6 +8,7 @@
 import argparse
 from pathlib import Path
 import subprocess
+import struct
 import sys
 import time
 
@@ -15,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 from tools.fpga.mem_init import pack_image  # noqa: E402
 from tools.regress import expand_files  # noqa: E402
+from tools.board.uart_tool import elf_segments, load_wire_bytes  # noqa: E402
 from verif.block.sys_cpu.uart_checks import (  # noqa: E402
     check_boot, check_system_info, check_build_fields, MENU)
 
@@ -30,8 +32,8 @@ def command(args, log):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('case', choices=('menu', 'download', 'window'))
-    case = {'menu': 0, 'download': 1, 'window': 2}[parser.parse_args().case]
+    parser.add_argument('case', choices=('menu', 'download', 'window', 'load'))
+    case = {'menu': 0, 'download': 1, 'window': 2, 'load': 3}[parser.parse_args().case]
     commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'],
                                      cwd=ROOT, text=True).strip()
     compiler = 'GCC ' + subprocess.check_output(
@@ -52,6 +54,17 @@ def main():
                 OUT / 'download_build.log')
         command(['python3', 'tools/board/uart_tool.py', str(payload / 'sc04.bin'),
                  '--emit', str(wire)], OUT / 'emit.log')
+    elif case == 3:
+        payload = OUT / 'load'
+        command(['make', '-C', 'sw', 'PROGRAM=sc04', 'OUT=' + str(payload),
+                 'PROGRAM_SOURCES=verif/soc/board_b1/load.c sw/drivers/uart.c'],
+                OUT / 'load_build.log')
+        entry, segments = elf_segments(payload / 'sc04.elf')
+        if len(segments) != 2:
+            raise RuntimeError(f'load test requires 2 file-backed PT_LOADs, got {len(segments)}')
+        wire = OUT / 'load.wire'
+        wire.write_bytes(b''.join(load_wire_bytes(address, data) for address, data in segments)
+                         + struct.pack('<I', entry))
     obj = OUT / 'obj'
     command(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
              '-CFLAGS', '-O3 -flto=1', '-LDFLAGS', '-flto=1',
@@ -62,7 +75,7 @@ def main():
     args = [str(obj / 'sim'), f'+CASE_ID={case}', '+ROM_HEX=' + str(rom)]
     if case == 0:
         args += ['+SRAM_HEX=' + str(sram)]
-    elif case == 1:
+    elif case in (1, 3):
         args += ['+DOWNLOAD_WIRE=' + str(wire)]
     start = time.monotonic()
     command(args, log)

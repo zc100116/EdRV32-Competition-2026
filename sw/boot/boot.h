@@ -20,5 +20,25 @@ static inline int boot_download_requested(uint32_t gpio, uint32_t scratch)
            scratch == BOOT_DOWNLOAD_MAGIC;
 }
 
+/* SoC 7.5(3a): the complete nonempty interval must fit one loadable region.
+ * Subtract only after establishing the address belongs to that region, so
+ * a wrapping address+length cannot turn an invalid interval into a valid one.
+ */
+static inline int boot_load_range(uint32_t address, uint32_t length)
+{
+    uint32_t sram_end = EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE - BOOT_STACK_BYTES;
+    uint32_t ddr_end = EDRV32_DDR_BASE + EDRV32_DDR_SIZE;
+    return length != 0u &&
+           ((address >= EDRV32_SRAM_BASE && address < sram_end &&
+             length <= sram_end - address) ||
+            (address >= EDRV32_DDR_BASE && address < ddr_end &&
+             length <= ddr_end - address));
+}
+
+static inline int boot_run_address(uint32_t address)
+{
+    return (address & 3u) == 0u && boot_load_range(address, 1u);
+}
+
 _Noreturn void boot_enter(uintptr_t entry);
 #endif

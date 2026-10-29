@@ -163,7 +163,7 @@ scale 0.001 得到 CPI）。
 
 在“连接”页打开串口（115200、8N1），切到“烧录”页，选择
 `build/sw/<程序>/<程序>.bin` 并点击“烧录 SRAM”。按住 KEY1 按复位，
-工具收到 `BIOS menu: 1=Program SRAM` 后发送 `1` + CR，收到
+工具收到 `BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud` 后发送 `1` + CR，收到
 `UART download ready` 后用 `tools/board/uart_tool.py:wire_bytes()` 发送
 4 字节小端长度和镜像。进度包含 4 字节长度头，结果显示 BIOS 原始
 `Program SRAM result` 与 `Program SRAM bytes`；串口输出仍显示在中栏。
@@ -501,3 +501,32 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=build/debug-tool-deps python3 \
 已 rebase 到协调者集成分支并接上 B2-4a；实际 Python 后处理联调通过。
 实现基础提交 `1d8dff1`，联调基线含 B2-4a 提交 `c748c78`。
 Windows 串口菜单和真实板端网口仍需上板验证。
+
+## BIOS 加载 ELF 并运行
+
+烧录页现在可选两种模式：原有“烧录 SRAM（.bin，复位后运行）”，以及
+“加载 ELF 并运行（SRAM / DDR）”。先以 115200 连接串口，选择模式和相应文件，
+点击开始，再按住 KEY1 按复位。ELF 模式默认先用 BIOS `4` 提速至 2000000，
+也可选 921600 或 115200（不切换）；主机收到完整 `Baud result` 后同步切换串口。
+程序串口输出继续显示在同一个控制台。
+
+每个非空 PT_LOAD 以物理地址 `p_paddr`、文件长度 `p_filesz` 执行一次 `2`；
+全部 PASS 后以 ELF 入口执行 `3`，立即运行。BSS 和数据运行环境由 BSP 启动代码处理。
+界面和命令行共用 `tools/board/uart_tool.py` 的 ELF 解析和提示驱动协议。
+任一 BIOS FAIL 会显示原文并停止；不加校验和或重试。
+
+DDR 程序在加载后直接运行，不能通过复位启动；复位后恢复 115200 并按正常流程从
+SRAM 启动。Boot ROM 更新随下一次 bitstream 生效，DDR 实际下载仍需上板验证。
+
+同一串口会话的脚本接口：
+
+```sh
+python tools/debug_tool/cli.py program build/sw/<程序>/<程序>.elf --elf --baud 2000000
+```
+
+`POST /api/program` 仍接受原来的 `{"path":"app.bin"}`；ELF 可使用
+`{"path":"app.elf","elf":true,"baud":2000000}`，状态仍从 `/api/program/status` 读取。
+
+```sh
+python3 -m unittest discover -s tools/debug_tool/tests -v
+```

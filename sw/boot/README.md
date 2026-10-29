@@ -30,12 +30,12 @@ Hold KEY1, press and release reset, then wait for these exact lines:
 
 ```text
 BIOS: EdRV32
-BIOS menu: 1=Program SRAM
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
 ```
 
 Each line from BIOS ends with CR LF. Every menu selection is one line ending
-with CR, LF or CR LF; only the single character `1` selects Program SRAM.
-Other selections print `Input error: type 1 then Enter` and return to the menu.
+with CR, LF or CR LF. Select `1`, `2`, `3` or `4`; other selections print
+`Input error: type 1-4 then Enter` and return to the menu.
 
 1. Send `1` followed by Enter. BIOS prints `UART download ready`.
 2. **The length must be sent only after receiving the complete ready line.**
@@ -56,7 +56,7 @@ Other selections print `Input error: type 1 then Enter` and return to the menu.
 There is no checksum, echo, retry or per-byte acknowledgement. The shared
 `sw/drivers/uart_input.c` parser keeps its CR LF state on the caller's stack.
 At the text/binary boundary, BIOS drains the ready line and consumes an already
-queued optional LF from the menu's CR LF before reading the raw binary length;
+queued optional LF from the menu's CR LF before reading the raw binary header;
 this also preserves a length whose first byte is `0x0a` after a CR-only command.
 
 The SRAM application's BSP startup restores `.data` from an immutable initial
@@ -64,3 +64,49 @@ copy inside the image and clears `.bss` on every entry, including repeated reset
 See `../bsp/README.md` for the LMA/VMA layout. UART host instructions are in
 `../../tools/board/README.md`. Simulation and measured sizes for this change
 are recorded in `../../docs/debug/2026-10-28-boot-bios.md`.
+
+## Load, Run and Baud (SoC v0.17 7.5(3a))
+
+`2` selects Load and prints `UART load ready`. Wait for its complete CR LF line,
+then send a little-endian 32-bit target address, little-endian 32-bit byte length,
+and exactly that many bytes. The nonempty interval must fit entirely within
+SRAM excluding the final 4 KiB BIOS stack, or within the DDR cached region.
+The predicates in `boot.h` use generated `soc_map.h` addresses and sizes.
+Invalid intervals print `Load result: FAIL range` without receiving payload.
+After a valid load, BSP `cache_clean_all()` completes D$ writeback before:
+
+```text
+Load bytes: <decimal byte count> at 0x<8 lowercase hex digits>
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+```
+
+Repeat `2` for every nonempty file-backed PT_LOAD in the ELF. The PC loads at
+`p_paddr` (LMA), sends only `p_filesz` bytes, then uses `e_entry` for Run. BSP
+startup copies the initialized data image to its VMA and clears BSS; the host
+must not replace the initial-image layout with zero padding to `p_memsz`.
+BIOS itself does not parse ELF.
+
+`3` prints `Run address:`. Send an Enter-terminated hexadecimal address beginning
+with `0x`. It must be 4-byte aligned and inside one loadable region. Invalid
+input prints `Run result: FAIL address` and returns to the menu. A valid entry
+prints `Run: 0x<8 lowercase hex digits>`, drains UART, executes `fence rw,rw` and
+`fence.i`, clears MSTATUS.MIE and MIE, and jumps. The application sets its own
+stack and runtime environment. UART retains the selected baud.
+
+`4` prints `Baud:`. Send an Enter-terminated `115200`, `921600` or `2000000`.
+Any other value prints `Baud result: FAIL`. For a valid value BIOS prints
+`Baud result: <value>` at the old baud, drains UART, then computes BAUD_DIV from
+SYSCTRL `CLK_SYS_HZ` through `uart_set_baud()`. The next menu uses the new baud;
+reset restores 115200. For 100 MHz and 2000000 baud, BAUD_DIV is 800 (minimum
+legal divisor is 128).
+
+DDR programs must be loaded and started using `2` and `3` without reset.
+Reset always takes the normal SRAM boot path; DDR content is not a persistent
+boot image. The updated ROM takes effect with the next bitstream generation.
+
+Host range tests compile the same `boot.h` predicates used by BIOS:
+
+```sh
+python3 -m unittest discover -s sw/boot/tests -v
+```

@@ -85,8 +85,10 @@ def main():
     p.add_argument("--stop-bits", default="1", choices=["1", "1.5", "2"])
     sub.add_parser("disconnect")
 
-    p = sub.add_parser("program", help="program an SRAM .bin through the BIOS menu")
+    p = sub.add_parser("program", help="program SRAM .bin or load and run ELF through BIOS")
     p.add_argument("path")
+    p.add_argument("--elf", action="store_true")
+    p.add_argument("--baud", type=int, choices=(115200, 921600, 2000000), default=2000000)
 
     p = sub.add_parser("send")
     p.add_argument("text")
@@ -241,7 +243,8 @@ def main():
     elif args.cmd == "disconnect":
         print_json(request("POST", "/api/disconnect", {}))
     elif args.cmd == "program":
-        request("POST", "/api/program", {"path": os.path.abspath(args.path)})
+        request("POST", "/api/program", {"path": os.path.abspath(args.path),
+                                          "elf": args.elf, "baud": args.baud})
         print("按住 KEY1 按复位；等待 BIOS menu", flush=True)
         while True:
             st = request("GET", "/api/program/status")
@@ -249,7 +252,7 @@ def main():
             if not st["active"]:
                 print()
                 print_json(st)
-                if st["error"] or st["result"] == "Program SRAM result: FAIL length":
+                if st["error"] or (st["result"] and "FAIL" in st["result"]):
                     raise SystemExit(1)
                 break
             time.sleep(0.2)

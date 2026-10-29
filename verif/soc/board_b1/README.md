@@ -8,15 +8,16 @@ python3 verif/soc/board_b1/check_style.py
 
 测试直接例化 `edrv32_fpga_board_b1_top`，CPU 子系统使用默认 `RVC_EN=0`，
 板钟 27 MHz，`ip_pll_sys` 模型产生 100 MHz、8 个参考周期后置 `lock`。
-系统子系统已有的 reset_ctrl/reset_sync 负责复位释放。UART 保持真实 115200 8N1，
+系统子系统已有的 reset_ctrl/reset_sync 负责复位释放。UART 初始使用真实 115200 8N1，
 复用 `verif/models/uart_model.sv`，不加速 UART 或后门注入接收数据。
 
 | smoke 项 | 覆盖与通过判据 |
 |---|---|
 | 根目录（menu） | 后门加载 bootloader 和 monitor；完整五行 logo、系统字段、100 MHz、无 C ISA；收到菜单后 UART 发送 `3` 和 Enter，检查系统信息 PASS 和第二次菜单 |
 | `download/` | KEY1 拉低进入 BIOS，发送 `1` CR LF 后烧录；检查字节数、PASS 和返回菜单，松开 KEY1 后复位两次；两次都打印相同 data/BSS 初值和应用 PASS |
+| `load/` | BIOS `4` 切换 2000000，`2` 加载两个 SRAM ELF 段；检查非法地址和越过 BIOS 栈的 FAIL range、越界及未对齐入口的 FAIL address；`3` 跳转后打印应用 PASS 并写 SIM_EXIT=0 |
 
-`run.py menu` / `run.py download` 各自只运行一个场景，串行复用同一个 Verilator 构建目录。
+`run.py menu` / `run.py download` / `run.py load` 各自只运行一个场景，串行复用同一个 Verilator 构建目录。
 输出位于 `build/board_b1/`：`compile.log`、`case0.log`、`case1.log`、软件构建日志、
 `download.wire` 和 64 位 ROM/SRAM 镜像。模拟器使用 `-Wall -j 1 -CFLAGS "-O3 -flto=1" -LDFLAGS -flto=1`；
 首次编译时间单独计入回归总耗时，单场景仿真约几十秒，不执行完整 CoreMark。
@@ -51,3 +52,36 @@ pressed for the real 100 ms window and ends after checking the BIOS banner/menu:
 ```sh
 python3 tools/regress.py full --path verif/soc/board_b1/window -j 1
 ```
+
+## B1-10 BIOS v0.17 加载场景
+
+`load/` 使用真实 UART 波特率，等待旧波特率完整 `Baud result: 2000000` 后
+修改 peer 的波特率，检查硬件 BAUD_DIV 等于从生成的 CLK_SYS_HZ 计算的值。
+`load.c` 的 ELF 有两个文件长度非零的 PT_LOAD（代码/常量和数据初值副本），
+`run.py` 复用 `uart_tool.elf_segments()`、`load_wire_bytes()` 生成地址/长度/数据。
+BSP 启动恢复 data、清零 BSS 后，程序检查初值、打印一行，再写 SIM_EXIT=0。
+
+错误用例在成功 Run 之前执行，因为应用随后结束仿真：
+
+- Load 到系统 APB 地址，发送 8 字节长度但不发 payload，必须 FAIL range 并返回菜单。
+- Load 从 BIOS 栈前 4 字节开始、长度 8，必须 FAIL range 并返回菜单。
+- Run 指向系统 APB 或 SRAM 基址加 2，必须 FAIL address 并返回菜单。
+
+B1 没有 DDR，不向 DDR 发实际写事务。`sw/boot/tests/ranges.c` 主机编译 BIOS
+同一个 `boot.h`，覆盖 DDR 可缓存区完整范围、首尾字节、跨界、非缓存别名、
+长度为零和溢出区间，以及 SRAM 栈边界和 Run 对齐。实际 DDR 加载需上板验证。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+make -C sw PROGRAM=bootloader
+riscv-none-elf-size build/sw/bootloader/bootloader.elf
+python3 tools/regress.py smoke --path verif/soc/board_b1 -j 1
+python3 -m unittest discover -s sw/boot/tests -v
+python3 -m unittest discover -s tools/board/tests -v
+python3 -m unittest discover -s tools/debug_tool/tests -v
+python3 verif/soc/board_b1/check_style.py
+```
+
+首次工作树须先 `git submodule update --init third_party/coremark`，普通菜单场景
+需要仓库指定版本的 CoreMark。软件构建使用 GCC 15.2.0，Verilator 编译带
+`-Wall -j 1`；C/C11 编译带 `-Wall -Wextra -Werror`。

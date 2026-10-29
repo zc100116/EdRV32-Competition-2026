@@ -12,7 +12,8 @@ from tempfile import TemporaryDirectory
 from tools.board.uart_tool import wire_bytes
 from tools.debug_tool.core.api import ApiServer
 from tools.debug_tool.core.engine import SerialEngine
-from test_program import FakeSerial, wait_for
+from test_program import ElfSerial, FakeSerial, wait_for
+from tools.board.tests.elf_fixture import ENTRY, elf_fixture, expected_steps
 
 TOOL_DIR = Path(__file__).resolve().parents[1]
 
@@ -42,7 +43,7 @@ class ApiCliTest(unittest.TestCase):
             return json.load(response)
 
     def boot(self):
-        self.serial.inject(b"BIOS: EdRV32\r\nBIOS menu: 1=Program SRAM\r\n")
+        self.serial.inject(b"BIOS: EdRV32\r\nBIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud\r\n")
 
     def test_rest_program_and_console(self):
         path = Path(self.temp.name) / "app.bin"
@@ -83,6 +84,48 @@ class ApiCliTest(unittest.TestCase):
         code, stdout = self.run_cli(b"")
         self.assertEqual(code, 1)
         self.assertIn("Program SRAM result: FAIL length", stdout)
+
+    def elf_peer(self, baud):
+        self.engine.disconnect(silent=True)
+        self.serial = ElfSerial(baud)
+        self.engine._serial = self.serial
+        self.engine._reader_running = True
+        self.engine._reader = threading.Thread(target=self.engine._reader_loop)
+        self.engine._reader.start()
+        path = Path(self.temp.name) / "app.elf"
+        path.write_bytes(elf_fixture())
+        return path
+
+    def assert_elf_wire(self, baud):
+        actual = b"".join(self.serial.writes)
+        expected = b"".join(data for data, _ in expected_steps(baud))
+        self.assertEqual(len(actual), len(expected))
+        for index, (got, want) in enumerate(zip(actual, expected)):
+            self.assertEqual(got, want, f"byte {index}")
+
+    def test_rest_load_elf_and_run(self):
+        path = self.elf_peer(2000000)
+        state = self.request("/api/program", {"path": str(path), "elf": True, "baud": 2000000})
+        self.assertEqual(state["phase"], "wait_menu")
+        self.boot()
+        wait_for(self, lambda: not self.engine.program.status()["active"])
+        self.assertEqual(self.request("/api/program/status")["result"], f"Run: 0x{ENTRY:08x}")
+        self.assert_elf_wire(2000000)
+
+    def test_cli_load_elf_and_run(self):
+        path = self.elf_peer(921600)
+        process = subprocess.Popen(
+            [sys.executable, str(TOOL_DIR / "cli.py"), "--url", self.url,
+             "program", str(path), "--elf", "--baud", "921600"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+        self.addCleanup(lambda: process.kill() if process.poll() is None else None)
+        wait_for(self, lambda: self.engine.program.status()["active"])
+        self.boot()
+        stdout, stderr = process.communicate(timeout=5)
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(stderr, "")
+        self.assertIn(f"Run: 0x{ENTRY:08x}", stdout)
+        self.assert_elf_wire(921600)
 
     def test_rest_udp_file_loopback(self):
         path = Path(self.temp.name) / "udp.bin"
