@@ -7,10 +7,12 @@ The full SoC SC-05 memory-source test reports VIN `ERR_CODE=3` (CH2 FIFO
 CH0 and CH2 for the same preloaded 1280x720 RGB565 source. DISP, NPU and ETH
 have not started; CPU configuration and polling are the only other activity.
 
-This is a confirmed integration-test failure. Its classification as an RTL
-problem or a missing testplan traffic precondition is awaiting the coordinator:
-VIN 2.8 permits CH2 to drop even a memory-source frame when its FIFO fills,
-while soc-testplan SC-05 requires a complete CH2 frame for NPU input.
+This is a confirmed integration-test failure against the original v0.2 flow
+contract: VIN 2.8 permitted CH2 to drop even a memory-source frame when its
+FIFO filled, while soc-testplan SC-05 requires a complete CH2 frame for NPU
+input. The coordinator confirmed the cause and the user changed the contract
+to VIN v0.3 in specification commit `6537bc8`: memory-source CH2 must apply
+backpressure, and letterbox padding must wait for write-FIFO space.
 
 ## 2. Reproduction
 
@@ -62,8 +64,9 @@ read RTL. No internal FIFO timing or arbitration defect is asserted here.
 
 No RTL or model change. The software completion loop checks VIN overflow/error
 state and fails with expected/actual values instead of waiting for a frame
-that cannot complete. Coordinator clarification is required before changing
-the traffic setup or passing criterion.
+that cannot complete. The DDR timing, source traffic and passing criterion remain intact. RTL
+implementation of the user-approved v0.3 contract is assigned separately;
+SC-05 will be rerun after the coordinator integrates that correction.
 
 ## 6. Regression
 
