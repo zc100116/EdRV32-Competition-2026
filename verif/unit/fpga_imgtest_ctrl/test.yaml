@@ -1,0 +1,10 @@
+top: edrv32_fpga_imgtest_ctrl_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 60
+pass: PASS fpga_imgtest
+tier: smoke full
+simulator: verilator
+runner: python3 verif/unit/fpga_imgtest_ctrl/run.py
