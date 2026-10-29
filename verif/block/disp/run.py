@@ -13,6 +13,7 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / 'tools'))
 from regress import expand_files  # noqa: E402
 from tmds_ref import generate  # noqa: E402
+from blend_ref import generate as generate_blend, self_test  # noqa: E402
 
 
 def main():
@@ -21,37 +22,65 @@ def main():
     args = parser.parse_args()
     out = ROOT / 'build/disp'
     out.mkdir(parents=True, exist_ok=True)
+    self_test()
     sources = expand_files(ROOT / 'verif/block/disp/files.f')
-    compile_args = ['verilator', '--binary', '--timing', '-j', '1', '-Wall',
-                    '--timescale', '1ns/1ps', '-Wno-BLKSEQ', '-Wno-UNUSEDSIGNAL',
-                    '-Wno-SYNCASYNCNET', '--top-module', 'tb', '--Mdir', str(out / 'obj'), '-o', 'sim',
-                    '+define+SIM_MODE', *sources]
-    with (out / 'compile.log').open('w') as log:
-        result = subprocess.run(compile_args, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
-    if result.returncode:
-        print('\n'.join(line for line in (out / 'compile.log').read_text().splitlines()
-                        if line.startswith(('%Warning', '%Error'))))
-        print('FAIL DISP compile')
-        return 1
-    cases = [(n, 1, 4096, 999) for n in (1, 3, 4, 5, 6, 7, 11, 12)]
-    cases.insert(1, (3, 1, 2560, 999))
-    cases += [(12, 1, 4096, phase) for phase in (-8, -2, 4)]
+    for top, directory in (('tb', 'obj'), ('tb_layers', 'obj_layers'),
+                            ('tb_blend_ref', 'obj_ref')):
+        compile_args = ['verilator', '--binary', '--timing', '-j', '1', '-Wall',
+                        '--timescale', '1ns/1ps', '-Wno-BLKSEQ', '-Wno-UNUSEDSIGNAL',
+                        '-Wno-SYNCASYNCNET', '--top-module', top, '--Mdir', str(out / directory),
+                        '-o', 'sim', '+define+SIM_MODE', *sources]
+        compile_log = out / f'{top}-compile.log'
+        with compile_log.open('w') as log:
+            result = subprocess.run(compile_args, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+        if result.returncode:
+            print('\n'.join(line for line in compile_log.read_text().splitlines()
+                            if line.startswith(('%Warning', '%Error'))))
+            print(f'FAIL DISP compile {top}')
+            return 1
+    # Full's YAML contains full-only instances; regress.py also selects smoke's YAML.
+    cases = [(n, 1, 4096, 999, 0) for n in (1, 3, 4, 5, 11, 12)]
+    cases.insert(1, (3, 1, 2560, 999, 0))
+    cases += [(12, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
+    cases += [(6, 1, 4096, 999, 0), (12, 1, 4096, 999, 1)]
+    cases += [(7, 1, 4096, 999, v) for v in range(3)]
+    cases += [(14, 1, 4096, 999, v) for v in (*range(16), 16, 31, 48)]
+    cases += [(15, 1, 4096, 999, 0)]
+    cases += [(16, 1, 4096, 999, v) for v in range(3)]
+    cases += [(17, 1, 4096, 999, 0)]
     if args.tier == 'full':
         generate(out / 'tmds.hex')
-        cases = [(n, 1, 4096, 999) for n in (2, 8, 9, 10)]
-        cases += [(10, 1, 4096, phase) for phase in (-8, -2, 4)]
-        cases += [(13, seed, 4096, 999) for seed in range(1, 11)]
+        cases = [(n, 1, 4096, 999, 0) for n in (2, 8, 9, 10, 19)]
+        cases += [(10, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
+        cases += [(13, seed, 4096, 999, 0) for seed in range(1, 11)]
+        cases += [(18, 1, 4096, 999, v) for v in range(18)]
+    else:
+        generate_blend(out / 'blend.hex')
+        with (out / 'blend-ref-sv.log').open('w') as log:
+            result = subprocess.run([str(out / 'obj_ref/sim'),
+                                        f'+BLEND_REF={out / "blend.hex"}'], cwd=ROOT,
+                                    stdout=log, stderr=subprocess.STDOUT, timeout=300)
+        reference_result = (out / 'blend-ref-sv.log').read_text()
+        print(reference_result, flush=True)
+        if result.returncode:
+            return 1
     failures = 0
-    for case, seed, stride, phase in cases:
+    for case, seed, stride, phase, variant in cases:
         name = f'DS-{case:02d}-seed{seed}-stride{stride}'
         if phase != 999:
             name += f'-phase{phase}'
+        layers = (case in (6, 7, 9, 13, 14, 15, 16, 17, 18, 19) or
+                    (case == 12 and variant == 1))
+        if layers:
+            name += f'-variant{variant}'
+        executable = out / ('obj_layers' if layers else 'obj') / 'sim'
         with (out / (name + '.log')).open('w') as log:
-            result = subprocess.run([str(out / 'obj/sim'), f'+CASE={case}',
-                                     f'+SEED={seed}', f'+STRIDE={stride}',
-                                     f'+STOP_PHASE={phase}',
-                                     f'+REF={out / "tmds.hex"}'], cwd=ROOT,
-                                    stdout=log, stderr=subprocess.STDOUT, timeout=300)
+            result = subprocess.run([str(executable), f'+CASE={case}',
+                                        f'+SEED={seed}', f'+STRIDE={stride}',
+                                        f'+STOP_PHASE={phase}', f'+VARIANT={variant}',
+                                        f'+BLEND_REF={out / "blend.hex"}',
+                                        f'+REF={out / "tmds.hex"}'], cwd=ROOT,
+                                    stdout=log, stderr=subprocess.STDOUT, timeout=600)
         output = (out / (name + '.log')).read_text()
         passed = result.returncode == 0 and 'PASS' in output and 'FAIL' not in output
         print(f'{"PASS" if passed else "FAIL"} {name}', flush=True)

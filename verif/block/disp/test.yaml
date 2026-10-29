@@ -1,10 +1,12 @@
+# DISP v0.3: DS-01, DS-03..07, DS-11..12, DS-14..17
 top: tb
 files: files.f
 defines: SIM_MODE
 parameters:
 software:
-timeout: 1800
+timeout: 7200
 pass: PASS
 tier: smoke
 simulator: verilator
 runner: python3 verif/block/disp/run.py smoke
+group: verif/block/disp

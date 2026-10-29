@@ -1,85 +1,95 @@
-# DISP black-box module verification
+# DISP v0.3 independent module verification
 
-The DUT is compiled through `rtl/filelists/disp.f`. The testbench uses only the
-specified top-level ports and APB registers; it does not inspect or force DUT
-hierarchy. The common AXI256 checker and APB interface are reused unchanged.
+The DUT is compiled through `rtl/filelists/disp.f`. Neither testbench reads or
+forces DUT hierarchy. The frozen APB/AXI/TMDS ports, common protocol checker and
+TMDS receiver are the only DUT connections. No DISP RTL source was read while
+implementing these tests.
 
-Run after `. ~/.local/opt/edrv32/env.sh`:
+After `. ~/.local/opt/edrv32/env.sh`, run serially:
 
 ```sh
-make smoke REGRESS_ARGS='-j 1 --path verif/unit/tmds_rx_model'
-make smoke REGRESS_ARGS='-j 1 --path verif/block/disp'
-make full REGRESS_ARGS='-j 1 --path verif/block/disp'
+python3 verif/block/disp/blend_ref.py
+python3 tools/regress.py smoke -j 1 --path verif/block/disp
+python3 tools/regress.py full -j 1 --path verif/block/disp
 ```
 
-`run.py` builds with Verilator `--timing -j 1 -Wall` and executes one simulation
-at a time. The full make target runs the full-only cases and all smoke cases.
-Raw case logs, compile output and the generated TMDS frame are in `build/disp/`;
-the standard regression summaries are under `build/regress/{smoke,full}/block/disp/`.
-Individual cases can be reproduced with
-`build/disp/obj/sim +CASE=7 +SEED=1 +STRIDE=4096` after building. DS-02 additionally
-requires `+REF=build/disp/tmds.hex`.
+Both YAML entries use `group: verif/block/disp`, since both runners share
+`build/disp/`. The smoke entry covers DS-01, DS-03–07, DS-11–12 and DS-14–17.
+The full entry adds DS-02, DS-08–10, DS-13 and DS-18–19; the regression tool also
+selects the smoke entry for full. Both tops build with `--timing -Wall -j 1`.
+All simulations run one at a time. Logs and generated references stay in
+`build/disp/`; standard summaries stay in `build/regress/{smoke,full}/block/disp/`.
 
-The memory BFM constructs a distinct nonblack RGB565 pattern for every surface,
-row and column and checks all AR addresses against the latched base/stride.
-AXI frame starts may precede the visible TMDS blanking edge by encoder latency;
-the request accounting check settles at the following active-coordinate line start.
-Each accepted burst is queued and returned in order with pseudorandom ARREADY
-and RVALID gaps. Directed stops cover late data across a frame boundary and a
-single SLVERR response. Responses remain outstanding through stalls.
-
-`tmds_ref.py` produces all 1,237,500 symbols of a frame, with a separate running
-disparity per channel and a reset at every control interval. It follows
-[DDWG DVI 1.0 Figure 3-5](https://glenwing.github.io/docs/DVI-1.0.pdf), independently
-of the RTL and of the receiver's inverse decode equations. DS-02 checks every
-symbol, including blanking, rather than comparing only decoded pixels.
-
-The pixel monitor uses active coordinates with the first DE pixel at (0, 0).
-Per the coordinator's timing clarification, the vertical line boundary is the HS
-rising edge: VS rises at active coordinates (1390, 724), stays high for five
-whole lines and falls at (1390, 729). Vertical blank starts at (1390, 719).
-
-For underflow, the source pattern cannot be black. A complete black group is
-therefore observable without internal FIFO access. The monitor accounts every
-requested group and every returned AXI beat, checks that data cannot appear
-before it was returned, checks the first black group against the externally available data bound,
-tracks the possible debt repayment window until nonblack data resumes, and compares every subsequent nonblack pixel against its original
-position. PERF0/1/2 are checked against completed scans/black frames/black groups.
-The coordinator approved this black-box method and external FIFO occupancy
-bounds: row reservation and urgent are checked outside the CDC/encoder boundary
-window, with an eight-beat row margin and sixteen-beat urgent margin; precise internal
-boundary checks
-remain in the RTL unit tests. PERF3 is counted on every memory clock with no
-approximation.
-
-| Test | Implementation in `tb.sv` | Stimulus and checks |
+| Item | Implementation | Stimulus and direct checks |
 |---|---|---|
-| DS-01 | `display_monitor`, scenario 1 | Two complete frames; all HS/VS/DE symbols, polarity and periods |
-| DS-02 | `display_monitor`, scenario 2; `tmds_ref.py` | Full frame symbol comparison including disparity and controls |
-| DS-03 | `memory_monitor`, `display_monitor`, scenario 3 | Both 2560 and 4096 strides; every pixel and every burst address |
-| DS-04 | Scenario 4 and both monitors | Active/VBlank base updates, repeats, FRAME/SWITCH/REL_BASE/CUR_BASE/count |
-| DS-05 | Scenario 5 and `display_monitor` | Disabled black, first enabled frame, stop after requested scan, IDLE |
-| DS-06 | `memory_drive`, `memory_monitor`, scenario 6 | Random AR/R gaps, permanent RREADY, row capacity bound, four outstanding |
-| DS-07 | Scenario 7, `display_monitor`, `check_perf` | Cross-frame stop, debt repayment in an unscanned frame, recovery, PERF1/2 |
-| DS-08 | Scenario 8 and `memory_monitor` | Pending request, prior frame completion before next frame, PERF4 |
-| DS-09 | Scenario 9 and `memory_monitor` | Known high/low occupancy regions, exact PERF3 clock count |
-| DS-10 | Scenario 10 and `wait_idle` | ABORT during read and at three VBlank phases; complete scan, no post-IDLE AR |
-| DS-11 | Scenario 11, `memory_drive`, `display_monitor` | Injected SLVERR, ERR_CODE 2/IRQ/RW1C, unchanged pixel stream |
-| DS-12 | `register_reset_checks`, scenario 12 | Reset fields/RW1C/START, SOFT_RST drain/baselines and three VBlank phases |
-| DS-13 | Scenario 13 and both monitors | Ten seeds, six frame intervals, random switches/stalls/enable, clock phase/ratio |
+| DS-01 | `tb.sv`, `display_monitor`, case 1 | Two full timing frames, HS/VS/DE positions and polarity |
+| DS-02 | `tb.sv`, case 2; `tmds_ref.py` | Python TMDS symbols, including blanking and disparity |
+| DS-03 | `tb.sv`, both monitors, case 3 | Reset L0 configuration; stride 2560/4096; all pixels and AR addresses |
+| DS-04 | `tb.sv`, case 4 | Mid-frame/VBlank base updates, repeats, FRAME/SWITCH/CUR/REL/count |
+| DS-05 | `tb.sv`, case 5 | Black before enable, first scan, complete requested scan on disable |
+| DS-06 | `tb_layers.sv`, both memory processes, case 6 | Both layers full screen; random AR/R gaps; RREADY; layer order and FIFO reservation bounds including in-flight beats |
+| DS-07 | `tb_layers.sv`, `display_monitor`, case 7 | Separate L1-only, L0-only and both-layer stalls across the frame boundary; exact PERF1/2/5/6, ERR_CODE 3/1, per-layer recovery |
+| DS-08 | `tb.sv`, case 8 | Pending request, previous read completion, PERF4 |
+| DS-09 | `tb_layers.sv`, `memory_monitor`, case 9 | L1-only, L0-only, both layers; low/high watermarks and L1 outside rectangle; exact PERF3 |
+| DS-10 | `tb.sv`, case 10, `boundary_stop_test` | ABORT during reads and at -8/-2/+4 pixel phases around VBlank |
+| DS-11 | `tb.sv`, case 11 | SLVERR code/IRQ/RW1C with unchanged pixel data |
+| DS-12 | `tb.sv`, register tasks/case 12; `tb_layers.sv`, case 12 | New ID/reset/alignment fields, drain/baseline reset and stop phases; SWITCH1 RW1C and populated L1 underflow counters cleared by SOFT_RST |
+| DS-13 | `tb_layers.sv`, case 13 | Ten seeds, six requested frames; bases/enables/scroll/rectangle/OPA, stop intervals, enable changes, clock phase and ratio |
+| DS-14 | `tb_layers.sv`, case 14 | SCROLL_X 0–15, 16, 31, 48; SCROLL_Y=3; 80/81 beats per row |
+| DS-15 | `tb_layers.sv`, case 15; `blend_ref.py` | Six full frames with OPA 0/1/128/255/73/219; alpha endpoints/intermediates and pseudorandom values; every Python/SV/RGB pixel |
+| DS-16 | `tb_layers.sv`, case 16 | Three rectangles: origin 8×1, bottom-right 8×1, right/bottom-aligned large rectangle; no extra L1 descriptors |
+| DS-17 | `tb_layers.sv`, case 17 | First enable, independent base replacement, L1 disable/re-enable, scroll/position/size/OPA-only changes; exact SWITCH bits and release bases |
+| DS-18 | `tb_layers.sv`, case 18 | Eighteen instances: every frame-latched register written just before/after FRAME; current/next frame AR and scan parameters |
+| DS-19 | `tb_layers.sv`, case 19 | ENABLE with both layers off still gives FRAME/count and black without AR; subsequent L1-only frame |
 
-The coordinator also approved phase sweeps for spec 2.8 in DS-10 and DS-12.
-Separate fresh simulations write ABORT or SOFT_RST at -8, -2 and +4 pixel clocks
-relative to the visible VBlank start. Because ENABLE synchronizer latency is not
-specified, the boundary reference permits zero or one critical request, adopts
-that request from the first AR, and then compares the entire resulting scan.
-After the first APB observation of IDLE, every ARVALID must remain zero through
-another complete frame, and soft-reset registers must retain their reset values.
-The ordinary mid-frame ABORT/SOFT_RST cases remain separate runs.
+`tb.sv` retains its original L0-only DS-06/07/09/13 scenarios for direct baseline
+diagnosis. The tier runners select the two-layer versions of those items.
+Reproduce an individual case after a build:
 
-Lint enables `-Wall` and waives only behavioral/environment categories:
-`BLKSEQ` for ordered BFM/model/scoreboard sampling, `UNUSEDSIGNAL` for unused APB
-slots and fixed-width field slicing, and `SYNCASYNCNET` because testbench
-monitors sample reset while DUT reset pins are asynchronous. `--timescale
-1ns/1ps` supplies the default for RTL modules without a timescale. Width,
-connectivity, latch and functional warnings remain enabled.
+```sh
+build/disp/obj/sim +CASE=3 +SEED=1 +STRIDE=4096
+build/disp/obj_layers/sim +CASE=14 +SEED=1 +VARIANT=15
+build/disp/obj_layers/sim +CASE=7 +SEED=1 +VARIANT=2
+build/disp/obj_layers/sim +CASE=15 +SEED=1 +BLEND_REF=build/disp/blend.hex
+```
+
+`blend_ref.py` uses only the standard library. `Frame.descriptors()` independently
+implements spec 2.5 ordering/addresses/widths; `Frame.pixel()` implements L0
+windowing, L1 placement, disabled/missing layers and spec 2.7 blending. `LayerDebt`
+models ordered arrivals, missed demands and repayment during disabled frames.
+Self-test checks d(x) against integer division for all 65,026 inputs, blend cases,
+scroll descriptors, rectangle edges and independent cross-frame debts. The separate `tb_blend_ref` top compares all six Python/SV expected frames even
+when the installed DUT predates v0.3; the pixel monitor repeats this comparison
+while checking the live output. The six DS-15 expected frames exercise the complete Python frame model, with the same
+specified d(x) formula implemented separately in SV. Surface patterns use
+explicit 32-bit arithmetic, so Python and SV agree on overflow.
+
+The layer scoreboard snapshots software parameters at the public FRAME interrupt
+(with only FRAME enabled), then verifies active-layer CUR_BASE values over APB.
+It validates every AXI burst against the next layer/row descriptor. Responses
+carry their layer/frame ownership through the BFM queue; FIFO space bounds
+subtract both returned and in-flight reserved beats.
+
+For DS-07/12/13, L0 contributes nonzero red and zero blue; L1 contributes only
+nonzero blue with alpha 255. OPA remains between 32 and 223 in randomized
+underflow tests. Thus L0 absence and L1 absence are independently observable.
+Each inferred missing beat holds across its entire visible pixel group; every
+channel is compared with the blend formula and the original surface coordinates.
+Missing beats/frames are counted separately and compared exactly with PERF.
+Late responses during a disabled frame must repay the old debt; the next scanned
+frame must be fully correct. This is an external observation of debt and alignment,
+not a direct measurement of internal empty signals or exact repayment cycles.
+Row reservation uses the existing eight-beat CDC/encoder boundary margin; urgent
+uses sixteen-beat margins, and PERF3 is counted exactly at every memory edge.
+
+The timing monitor's origin is the first active pixel. CEA vertical line
+boundaries occur at the HS rising edge: VBlank starts at (1390,719), and VS rises
+at (1390,724), remaining high for five complete lines. Stop-phase tests permit
+zero or one in-flight critical request; any accepted request must drain and scan
+completely, with no AR after the first IDLE or soft-reset counter rebound.
+
+Lint uses the existing behavioral waivers `BLKSEQ`, `UNUSEDSIGNAL` and
+`SYNCASYNCNET`; width, latch and connectivity warnings remain enabled. Supply
+`--timescale 1ns/1ps` for RTL without an explicit timescale. Both top names must
+be linted with the expanded `files.f` list. Results and exact commands are in
+`results.md`.

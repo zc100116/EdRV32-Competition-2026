@@ -1,5 +1,5 @@
 // File: tb.sv
-// Spec: DISP 2-6; DISP testplan DS-01 through DS-13; SoC 4.2, 4.3, 7.1.
+// Spec: DISP 2-6; DISP testplan DS-01 through DS-19; SoC 4.2, 4.3, 7.1.
 // Description: Black-box APB/AXI/TMDS verification with deterministic surfaces,
 //              independent pixel/debt accounting and observable FIFO bounds.
 // Clock domains: independent clk_mem and clk_pix.
@@ -147,7 +147,8 @@ module tb;
     task automatic check(input string name_i, input logic [31:0] expected_i,
                             input logic [31:0] actual_i);
         if (actual_i != expected_i)
-            $fatal(1, "FAIL DS-%02d %s expected=%0h actual=%0h time=%0t frame=%0d x=%0d y=%0d",
+            $fatal(1, {"FAIL DS-%02d %s expected=%0h actual=%0h time=%0t ",
+                     "frame=%0d layer=0 col=%0d row=%0d"},
                     test_case, name_i, expected_i, actual_i, $time, frame_index, x, y);
     endtask
 
@@ -487,6 +488,7 @@ module tb;
             rd_check(12'h108, 0);
             rd_check(12'h10c, 0);
             rd_check(12'h110, 0);
+            layer_reset_checks();
             for (int p = 0; p < 16; p++) rd_check(12'(64+p*4), 0);
         end else begin
             rd_check(12'h100, BASE_A);
@@ -497,9 +499,47 @@ module tb;
                 stop_phase, boundary_request_seen, soft_reset_i);
     endtask
 
+    task automatic layer_reset_checks;
+        rd_check(12'h114, 0);
+        rd_check(12'h118, 1);
+        rd_check(12'h120, 0);
+        rd_check(12'h124, 5120);
+        rd_check(12'h128, 0);
+        rd_check(12'h12c, 32'h02d00500);
+        rd_check(12'h130, 255);
+        rd_check(12'h134, 0);
+        rd_check(12'h138, 0);
+    endtask
+
+    task automatic layer_alignment_checks;
+        wr(12'h114, 32'hffffffff);
+        rd_check(12'h114, 32'h0fff7fff);
+        wr(12'h118, 32'hffffffff);
+        rd_check(12'h118, 3);
+        wr(12'h120, BASE_B | 32'hfff);
+        rd_check(12'h120, BASE_B);
+        wr(12'h124, 32'hffff141f);
+        rd_check(12'h124, 5120);
+        wr(12'h128, 32'hffffffff);
+        rd_check(12'h128, 32'h03ff07f8);
+        wr(12'h12c, 32'hffffffff);
+        rd_check(12'h12c, 32'h03ff07f8);
+        wr(12'h130, 32'hffffffff);
+        rd_check(12'h130, 255);
+        wr(12'h134, 32'hffffffff);
+        wr(12'h138, 32'hffffffff);
+        rd_check(12'h134, 0);
+        rd_check(12'h138, 0);
+        wr(12'h114, 0);
+        wr(12'h118, 1);
+        wr(12'h120, 0);
+        wr(12'h128, 0);
+        wr(12'h12c, 32'h02d00500);
+    endtask
+
     // DS-12: reset values, field alignment, RO/unused locations and ignored PSTRB.
     task automatic register_reset_checks;
-        rd_check(12'h000, 32'h00050001);
+        rd_check(12'h000, 32'h00050002);
         rd_check(12'h004, 0);
         rd_check(12'h008, 2);
         rd_check(12'h00c, 0);
@@ -510,6 +550,7 @@ module tb;
         rd_check(12'h108, 0);
         rd_check(12'h10c, 0);
         rd_check(12'h110, 0);
+        layer_reset_checks();
         for (int p = 0; p < 16; p++) rd_check(12'(64+p*4), 0);
         wr(12'h100, BASE_A | 32'hfff, 0);
         rd_check(12'h100, BASE_A);
@@ -523,8 +564,9 @@ module tb;
         rd_check(12'h024, 0);
         rd_check(12'h028, 0);
         rd_check(12'h11c, 0);
+        layer_alignment_checks();
         wr(12'h000, 32'hffffffff);
-        rd_check(12'h000, 32'h00050001);
+        rd_check(12'h000, 32'h00050002);
         wr(12'h004, 2);
         rd_check(12'h004, 0);
     endtask
@@ -613,7 +655,7 @@ module tb;
                 rd_check(12'h108, BASE_A);
                 rd_check(12'h10c, 0);
                 rd_check(12'h110, 1);
-                rd_check(12'h010, 32'h104);
+                rd_check(12'h010, 4);
                 wr(12'h010, 32'h104);
                 rd_check(12'h010, 0);
                 check("RW1C deasserts IRQ", 0, 32'(irq));
@@ -733,7 +775,7 @@ module tb;
                     wr(12'h004, 8);
                     wait_idle();
                     settle_cdc();
-                    rd_check(12'h000, 32'h00050001);
+                    rd_check(12'h000, 32'h00050002);
                     rd_check(12'h004, 0);
                     rd_check(12'h008, 2);
                     rd_check(12'h00c, 0);
@@ -744,6 +786,7 @@ module tb;
                     rd_check(12'h108, 0);
                     rd_check(12'h10c, 0);
                     rd_check(12'h110, 0);
+                    layer_reset_checks();
                     for (int p = 0; p < 16; p++) rd_check(12'(64+p*4), 0);
                     saved_frames = read_frames;
                     position(3, 721);
