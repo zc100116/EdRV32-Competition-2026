@@ -239,9 +239,26 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
 
     task automatic wait_irq(input bit [31:0] mask_i);
         bit [31:0] actual;
+        bit [31:0] diagnostic;
         for (int cycle = 0; cycle < 300000; cycle++) begin
             read_reg('h010, actual);
             if ((actual & mask_i) == mask_i) return;
+        end
+        read_reg('h008, diagnostic);
+        $display("STATUS=%h", diagnostic);
+        read_reg('h014, diagnostic);
+        $display("ERR_CODE=%h", diagnostic);
+        read_reg('h120, diagnostic);
+        $display("MSRC_STAT=%h", diagnostic);
+        for (int p = 0; p < 16; p++) begin
+            read_reg(12'('h040+4*p), diagnostic);
+            $display("PERF%0d=%0d", p, diagnostic);
+        end
+        for (int c = 0; c < 3; c++) begin
+            for (int offset = 'h20; offset <= 'h28; offset += 4) begin
+                read_reg(channel_address(c, offset), diagnostic);
+                $display("CH%0d offset=%h value=%h", c, offset, diagnostic);
+            end
         end
         $fatal(1, "FAIL VI-%0d IRQ expected mask=%h actual=%h time=%0t",
             current_test, mask_i, actual, $time);
@@ -346,7 +363,9 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         load_image(1);
         configure(0, 2);
         configure(2, 2);
-        u_memory.random_percent = 35;
+        // VI-20 checks both complete surfaces with an unstalled P1. CH2 always
+        // consumes memory frames (vin 2.8); write stalls may legitimately drop
+        // CH2 while CH0 completes. VI-21 checks that overflow behavior.
         u_memory.check_read_ready = 1;
         forbid_urgent = 1;
         write_reg('h004, 1);
@@ -358,6 +377,9 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         check_reg('h324, 0);
         check_reg('h224, 0);
         check_reg('h010, 1);
+        check_reg('h014, 0);
+        check_reg('h058, 0);
+        check_reg('h060, 0);
         wait_idle();
         $display("PASS VI-20 memory -> CH0/CH2, no read backpressure");
     endtask
@@ -382,7 +404,13 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
                 start_memory();
                 // CH2 must continue accepting the entire input while writes are stopped.
                 wait_irq(1);
-                check_reg('h120, 0);
+                // vin 2.3: DONE releases the input surface after the last DMA
+                // read; buffered pixels may still be awaiting source output.
+                for (int cycle = 0; cycle < 300000; cycle++) begin
+                    read_reg('h120, status);
+                    if (status == 0) break;
+                end
+                equal("memory output drained during write stop", 0, status);
                 check_reg('h048, 1);
                 equal("read completed during write stop", 0, 32'(u_memory.aw_count));
             end else begin

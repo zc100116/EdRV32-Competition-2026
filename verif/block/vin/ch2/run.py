@@ -24,8 +24,9 @@ def main():
     if mode == 'selftest':
         files = files.parent / 'selftest/files.f'
         flags = ['-GHARNESS_SELFTEST=1']
+    optimization = '-O1' if mode == 'full' else '-O0'
     compile_cmd = ['verilator', '--binary', '--timing', '-Wall', '-j', '1',
-                   '-CFLAGS', '-O0', '--top-module', 'edrv32_vin_ch2_tb',
+                   '-CFLAGS', optimization, '--top-module', 'edrv32_vin_ch2_tb',
                    '--Mdir', str(out / 'obj'), '-o', 'sim', '+define+SIM_MODE',
                    *flags, *expand_files(files)]
     commands = [compile_cmd, [str(out / 'obj/sim'), f'+DIR={out}', f'+CASE={mode}']]
