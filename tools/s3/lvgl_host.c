@@ -1,0 +1,74 @@
+/* File: lvgl_host.c
+ * Spec: rnd-testplan RN-17(a); Task B3-3b.
+ * Description: Linux platform services; real descriptor execution is supplied by rnd_ref.py.
+ * Clock domain: deterministic host milliseconds controlled by the RN-17 runner.
+ */
+#include "s3_lvgl.h"
+#include "s3_platform.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+static uint32_t milliseconds;
+static uint32_t frame_count;
+static const void *scan_surface;
+static uint32_t scan_bytes;
+static void (*execute_batch)(const struct rnd_batch *);
+
+void s3_host_install(void (*execute)(const struct rnd_batch *)) { execute_batch = execute; }
+void s3_host_time(uint32_t value) { milliseconds = value; }
+uint32_t rnd_physical(const void *pointer) { return (uint32_t)(uintptr_t)pointer; }
+void s3_platform_init(void) { }
+uint64_t s3_ticks(void) { return milliseconds * UINT64_C(100000); }
+uint32_t s3_clock_hz(void) { return 100000000; }
+uint32_t s3_milliseconds(void) { return milliseconds; }
+uint32_t s3_input(void) { return 0; }
+uint32_t s3_frame_count(void) { return frame_count; }
+void s3_wait_frame(void) { frame_count++; }
+void s3_rnd_run(const struct rnd_batch *batch)
+{
+    /* RN-17 checks the ownership protocol in the host platform boundary. */
+    for (size_t i = 0; i < batch->target_count; ++i) {
+        uintptr_t begin = (uintptr_t)batch->targets[i].address;
+        uintptr_t scan = (uintptr_t)scan_surface;
+        if (scan_surface && begin < scan + scan_bytes &&
+            scan < begin + batch->targets[i].bytes) {
+            fputs("FAIL RND target is the scanning Surface\n", stderr);
+            abort();
+        }
+    }
+    execute_batch(batch);
+}
+void s3_display_begin(const void *l0, uint32_t stride, const void *l1, uint32_t stride1)
+{
+    (void)stride; (void)l1; (void)stride1;
+    scan_surface = l0;
+    scan_bytes = stride * 720;
+    frame_count++;
+}
+void s3_display_stop(void) { scan_surface = NULL; }
+void s3_display_present(const void *l0, uint32_t stride, const void *l1, uint32_t stride1)
+{
+    s3_display_begin(l0, stride, l1, stride1);
+}
+void s3_puts(const char *text) { fputs(text, stdout); fflush(stdout); }
+void s3_put_u32(uint32_t value) { printf("%u", value); }
+void s3_put_hex(uint32_t value) { printf("%08x", value); }
+void cache_clean(uintptr_t address, uint32_t bytes) { (void)address; (void)bytes; }
+void cache_invalidate(uintptr_t address, uint32_t bytes) { (void)address; (void)bytes; }
+void cache_clean_invalidate(uintptr_t address, uint32_t bytes) { (void)address; (void)bytes; }
+void cache_clean_all(void) { }
+void plic_set_priority(uint32_t source, uint32_t priority) { (void)source; (void)priority; }
+void plic_set_enable(uint32_t mask) { (void)mask; }
+
+/* The integration test's small menu is created by the caller, never by the
+ * LVGL service. C's complete S3 menu can use the same host platform services.
+ */
+void s3_host_menu(void)
+{
+    lv_obj_t *screen = lv_screen_active();
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_color(screen, lv_color_hex(0x102133), 0);
+    lv_obj_t *label = lv_label_create(screen);
+    lv_label_set_text(label, "S3 host lifecycle check");
+    lv_obj_center(label);
+}
