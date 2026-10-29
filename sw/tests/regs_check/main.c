@@ -8,6 +8,7 @@
 #include "regs/vin_regs.h"
 #include "regs/pix_regs.h"
 #include "regs/geo_regs.h"
+#include "regs/rnd_regs.h"
 #include "regs/disp_regs.h"
 #include "regs/npu_regs.h"
 #include "regs/eth_regs.h"
@@ -66,6 +67,14 @@ _Static_assert(EDRV32_GEO_DESC_COUNT_VALUE_MASK == 0xFFFF, "GEO DESC_COUNT mask"
 _Static_assert(EDRV32_GEO_DOORBELL_OFFSET == 0x028, "GEO DOORBELL offset");
 /* geo-spec 4.2: CUR_DESC. */
 _Static_assert(EDRV32_GEO_CUR_DESC_OFFSET == 0x100, "GEO CUR_DESC offset");
+
+/* rnd-spec 4: 64-byte command alignment and private command index. */
+_Static_assert(EDRV32_RND_ID_RESET == 0x00040001, "RND ID");
+_Static_assert(EDRV32_RND_DESC_BASE_VALUE_MASK == 0xFFFFFFC0, "RND descriptor alignment");
+_Static_assert(EDRV32_RND_DESC_COUNT_VALUE_MASK == 0xFFFF, "RND count width");
+_Static_assert(EDRV32_RND_CTRL_ABORT_MASK == 4, "RND abort");
+_Static_assert(EDRV32_RND_PERF_OFFSET(15) == 0x07C, "RND performance window");
+_Static_assert(EDRV32_RND_CUR_DESC_OFFSET == 0x100, "RND command index");
 
 /* disp-spec 4.1: IRQ_STAT.SWITCH=bit8. */
 _Static_assert(EDRV32_DISP_IRQ_STAT_OFFSET == 0x010, "DISP IRQ_STAT offset");

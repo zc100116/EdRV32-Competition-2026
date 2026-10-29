@@ -1,0 +1,227 @@
+{
+    "module": "rnd",
+    "spec": "edrv32-soc-spec.md 7.1; rnd-spec.md 4",
+    "note": "APB pstrb is ignored; writes update the whole word (rnd-spec 4).",
+    "registers": [
+        {
+            "name": "ID",
+            "offset": "0x000",
+            "access": "RO",
+            "reset": 262145,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE_31_16",
+                    "lsb": 16,
+                    "width": 16,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "VALUE_15_0",
+                    "lsb": 0,
+                    "width": 16,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "CTRL",
+            "offset": "0x004",
+            "access": "RW",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "ENABLE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "START",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "ABORT",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "SOFT_RST",
+                    "lsb": 3,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "STATUS",
+            "offset": "0x008",
+            "access": "RO",
+            "reset": 2,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "BUSY",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "IDLE",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 2,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "IRQ_EN",
+            "offset": "0x00C",
+            "access": "RW",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "IRQ_STAT",
+            "offset": "0x010",
+            "access": "RW1C",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "DONE",
+                    "lsb": 0,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                },
+                {
+                    "name": "ERROR",
+                    "lsb": 1,
+                    "width": 1,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "ERR_CODE",
+            "offset": "0x014",
+            "access": "RO",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "DESC_BASE",
+            "offset": "0x020",
+            "access": "RW",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 6,
+                    "width": 26,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "DESC_COUNT",
+            "offset": "0x024",
+            "access": "RW",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 16,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "DOORBELL",
+            "offset": "0x028",
+            "access": "WO",
+            "reset": null,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": [],
+            "reset_status": "not_applicable"
+        },
+        {
+            "name": "DONE_COUNT",
+            "offset": "0x02C",
+            "access": "RO",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": []
+        },
+        {
+            "name": "PERF",
+            "offset": "0x040",
+            "access": "RO",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [
+                {
+                    "index": "n",
+                    "count": 16,
+                    "stride": 4
+                }
+            ],
+            "fields": [
+                {
+                    "name": "VALUE",
+                    "lsb": 0,
+                    "width": 32,
+                    "spec": "rnd-spec.md 4"
+                }
+            ]
+        },
+        {
+            "name": "CUR_DESC",
+            "offset": "0x100",
+            "access": "RO",
+            "reset": 0,
+            "spec": "rnd-spec.md 4",
+            "dimensions": [],
+            "fields": []
+        }
+    ],
+    "layouts": []
+}
