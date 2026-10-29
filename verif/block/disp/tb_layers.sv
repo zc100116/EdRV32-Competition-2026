@@ -47,6 +47,8 @@ module tb_layers;
     int ar_row;
     int ar_layer;
     int ar_column;
+    int urgent_row;
+    bit urgent_row_valid;
     int frame_request[64];
     int scanned;
     int accepted[2];
@@ -227,6 +229,7 @@ module tb_layers;
                 ar_row = 0;
                 ar_layer = 0;
                 ar_column = 0;
+                urgent_row_valid = 0;
                 expected_descriptors[0] += software_cfg.en0 ? 720 : 0;
                 expected_descriptors[1] += software_cfg.en1 ? software_cfg.height : 0;
                 next_descriptor();
@@ -259,6 +262,10 @@ module tb_layers;
             cycles++;
             if (urgent) urgent_cycles++;
             check("RREADY always high", 1, 32'(axi.rready));
+            if (axi.arvalid) begin
+                urgent_row = ar_row;
+                urgent_row_valid = 1;
+            end
             if (axi.arvalid && axi.arready) begin
                 cfg = latched[ar_frame];
                 check("descriptor has a latched frame", 1, 32'(ar_frame > 0), ar_layer);
@@ -311,17 +318,19 @@ module tb_layers;
                 end else commands[0].index++;
             end
             check("at most four outstanding", 1, 32'(outstanding <= 4));
-            if (test_case == 9 && ar_frame != 0 && ar_row < 720) begin
+            if (test_case == 9 && ar_frame != 0 && ar_row < 720 && urgent_row_valid) begin
                 cfg = latched[ar_frame];
                 // FRAME case 9 uses full-width L1 when L0 is off. Otherwise L0
                 // constrains descriptor lookahead: 512 FIFO beats / >=80 per row
                 // permits at most seven partial/full rows; eight rows bound it.
-                // AR is observable, the DMA's pending descriptor is not. Only
-                // classify intervals wholly inside/outside the rectangle.
-                l1_inside = cfg.en1 && ar_row >= cfg.top &&
-                            ar_row+8 < cfg.top+cfg.height;
-                l1_outside = !cfg.en1 || ar_row+8 < cfg.top ||
-                                ar_row >= cfg.top+cfg.height;
+                // Use the last observed AR row, not the next expected descriptor:
+                // before the first AR the reader may still be skipping absent rows.
+                // The DMA's pending row is not observable; classify only intervals
+                // wholly inside/outside the rectangle after a real AR is seen.
+                l1_inside = cfg.en1 && urgent_row >= cfg.top &&
+                            urgent_row+8 < cfg.top+cfg.height;
+                l1_outside = !cfg.en1 || urgent_row+8 < cfg.top ||
+                                urgent_row >= cfg.top+cfg.height;
                 for (int l = 0; l < 2; l++) begin
                     occupancy = returned[l] - demanded[l];
                     row_beats = l == 0 ? 81 : cfg.width/8;
