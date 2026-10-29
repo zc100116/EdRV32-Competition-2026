@@ -27,6 +27,10 @@ struct s3_lvgl_comparison {
     uint32_t edge_max;
     uint32_t over3;
     uint32_t pixels;
+    /* Pixel maximum-channel difference: 0..3, 4..8, 9..16, 17..48, 49..255. */
+    uint32_t histogram[5];
+    uint32_t rnd_tasks;
+    uint32_t sw_tasks;
 };
 const struct s3_lvgl_comparison *s3_lvgl_comparison(void);
 const uint16_t *s3_lvgl_reference_pixels(void);
