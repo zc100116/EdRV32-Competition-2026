@@ -1,0 +1,299 @@
+Declared clocks from repository FDC (no local FDC edits):
+create_clock -name {clk_board} [get_ports {clk_i}] -period {37.037037} -waveform {0 18.518519}
+create_clock -name {clk_ddr_ref} [get_ports {ddr_ref_clk_p_i}] -period {8} -waveform {0 4}
+create_clock -name {clk_cam0} [get_ports {cam0_pclk_i}] -period {10} -waveform {0 5}
+create_clock -name {clk_cam1} [get_ports {cam1_pclk_i}] -period {10} -waveform {0 5}
+create_clock -name {clk_rgmii_ref} [get_ports {rgmii_rxc_i}] -period {8} -waveform {0 4}
+create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -multiply_by {100} -divide_by {27}
+create_generated_clock -name {clk_pix} -source [get_ports {clk_i}] [get_pins {u_pll_video/clkout0}] -multiply_by {11} -divide_by {4}
+create_generated_clock -name {clk_serial} -source [get_ports {clk_i}] [get_pins {u_pll_video/clkout1}] -multiply_by {55} -divide_by {4}
+create_generated_clock -name {rst_clk} -source [get_ports {ddr_ref_clk_p_i}] [get_pins {u_ddr3.u_ddrphy_top.rst_clk_gpll/clkout0}] -master_clock [get_clocks {clk_ddr_ref}] -multiply_by {16} -divide_by {16}
+create_generated_clock -name {clk_mem} -source [get_ports {ddr_ref_clk_p_i}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_gpll/clkout0}] -master_clock [get_clocks {clk_ddr_ref}] -multiply_by {16} -divide_by {16}
+create_generated_clock -name {phy_dq_clk_0} -source [get_ports {ddr_ref_clk_p_i}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}] -master_clock [get_clocks {clk_ddr_ref}] -multiply_by {16} -divide_by {2}
+create_generated_clock -name {phy_dq_sysclk_0} -source [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT}] -master_clock [get_clocks {phy_dq_clk_0}] -edges {5 13 21} -edge_shift {0 0 0}
+create_generated_clock -name {phy_dq_clk_1} -source [get_ports {ddr_ref_clk_p_i}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}] -master_clock [get_clocks {clk_ddr_ref}] -multiply_by {16} -divide_by {2}
+create_generated_clock -name {phy_dq_sysclk_1} -source [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT}] -master_clock [get_clocks {phy_dq_clk_1}] -edges {5 13 21} -edge_shift {0 0 0}
+create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pins {u_rgmii/u_pll_eth/clkout0}] -edges {1 2 3} -edge_shift {0.666667 0.666667 0.666667}
+create_generated_clock -name {clk_rgmii_tx} -source [get_pins {u_rgmii/u_pll_eth/clkout0}] [get_ports {rgmii_txc_o}] -edges {1 2 3} -edge_shift {1 1 1}
+
+SNR Clock Summary and clock groups:
+Timing analysis mode : single corner
+
+ Clock Summary:                                                                                                                                                                             
+********************************************************************************************************************************************************************************************
+                                                                                       Clock   Non-clock                                                                                    
+ Clock                    Period       Waveform            Type                        Loads       Loads  Sources                                                                           
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ clk_board                37.0370      {0.0000 18.5180}    Declared                        0           3  {clk_i}                                                                           
+   clk_sys                10.0000      {0.0000 4.9990}     Generated (clk_board)        9167           0  {u_pll_sys/u_gpll/CLKOUT0}                                                        
+   clk_pix                13.4680      {0.0000 6.7340}     Generated (clk_board)        1804           0  {u_pll_video/u_gpll/CLKOUT0}                                                      
+   clk_serial             2.6936       {0.0000 1.3460}     Generated (clk_board)          16           0  {u_pll_video/u_gpll/CLKOUT1}                                                      
+ clk_ddr_ref              8.0000       {0.0000 4.0000}     Declared                        0           4  {ddr_ref_clk_p_i}                                                                 
+   rst_clk                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)       164           0  {u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKOUT0}                                 
+   clk_mem                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)     36991           1  {u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0}                                  
+   phy_dq_clk_0           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)        35           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY} 
+     phy_dq_sysclk_0      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_0)       35           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT}  
+   phy_dq_clk_1           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)        84           5  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKOUTPHY} 
+     phy_dq_sysclk_1      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_1)       88           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT}  
+ clk_cam0                 10.0000      {0.0000 5.0000}     Declared                      107           0  {cam0_pclk_i}                                                                     
+ clk_cam1                 10.0000      {0.0000 5.0000}     Declared                      107           0  {cam1_pclk_i}                                                                     
+ clk_rgmii_ref            8.0000       {0.0000 4.0000}     Declared                        0           1  {rgmii_rxc_i}                                                                     
+   clk_eth                8.0000       {0.6660 4.6660}     Generated (clk_rgmii_ref)     203           1  {u_rgmii/u_pll_eth/u_gpll/CLKOUT0}                                                
+     clk_rgmii_tx         8.0000       {1.6660 5.6660}     Generated (clk_eth)             0           1  {rgmii_txc_o}                                                                     
+============================================================================================================================================================================================
+
+ Clock Groups:                                                                                      
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks                                    
+----------------------------------------------------------------------------------------------------
+ clock_group_0                 asynchronous                                                         
+     clock_group_0_0                                      clk_sys                                   
+     clock_group_0_1                                      clk_mem                                   
+ clock_group_1                 asynchronous                                                         
+     clock_group_1_0                                      clk_sys                                   
+     clock_group_1_1                                      clk_pix  clk_serial                       
+ clock_group_2                 asynchronous                                                         
+     clock_group_2_0                                      clk_sys                                   
+     clock_group_2_1                                      clk_cam0                                  
+ clock_group_3                 asynchronous                                                         
+     clock_group_3_0                                      clk_sys                                   
+     clock_group_3_1                                      clk_cam1                                  
+ clock_group_4                 asynchronous                                                         
+     clock_group_4_0                                      clk_sys                                   
+     clock_group_4_1                                      clk_eth  clk_rgmii_tx                     
+ clock_group_5                 asynchronous                                                         
+     clock_group_5_0                                      clk_mem                                   
+     clock_group_5_1                                      clk_pix  clk_serial                       
+ clock_group_6                 asynchronous                                                         
+     clock_group_6_0                                      clk_mem                                   
+     clock_group_6_1                                      clk_cam0                                  
+ clock_group_7                 asynchronous                                                         
+     clock_group_7_0                                      clk_mem                                   
+     clock_group_7_1                                      clk_cam1                                  
+ clock_group_8                 asynchronous                                                         
+     clock_group_8_0                                      clk_mem                                   
+     clock_group_8_1                                      clk_eth  clk_rgmii_tx                     
+ clock_group_9                 asynchronous                                                         
+     clock_group_9_0                                      clk_pix  clk_serial                       
+     clock_group_9_1                                      clk_cam0                                  
+ clock_group_10                asynchronous                                                         
+     clock_group_10_0                                     clk_pix  clk_serial                       
+     clock_group_10_1                                     clk_cam1                                  
+ clock_group_11                asynchronous                                                         
+     clock_group_11_0                                     clk_pix  clk_serial                       
+     clock_group_11_1                                     clk_eth  clk_rgmii_tx                     
+ clock_group_12                asynchronous                                                         
+     clock_group_12_0                                     clk_cam0                                  
+     clock_group_12_1                                     clk_cam1                                  
+ clock_group_13                asynchronous                                                         
+     clock_group_13_0                                     clk_cam0                                  
+     clock_group_13_1                                     clk_eth  clk_rgmii_tx                     
+ clock_group_14                asynchronous                                                         
+     clock_group_14_0                                     clk_cam1                                  
+     clock_group_14_1                                     clk_eth  clk_rgmii_tx                     
+====================================================================================================
+
+
+
+PNR Global Clock Info:
+Global Clock Info:
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                                         | Site Of GClk Inst     | GClk Fanout Net                 | Clock Loads     | Non_Clock Loads     | Driver Inst                                           | Driver Pin     | Site Of Driver Inst     
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg                              | USCM_383_930          | ntclkbufg_0                     | 7793            | 0                   | u_pll_sys/u_gpll/gpll_inst                            | CLKOUT0        | GPLL_7_1381             
+| clkbufg_1/gopclkbufg                              | USCM_383_891          | ntclkbufg_1                     | 1652            | 0                   | u_pll_video/u_gpll/gpll_inst                          | CLKOUT0        | GPLL_7_769              
+| clkbufg_2/gopclkbufg                              | USCM_383_885          | ntclkbufg_2                     | 99              | 0                   | cam1_pclk_i_ibuf/opit_1                               | DI_TO_CLK      | IOLHR_16_774            
+| clkbufg_3/gopclkbufg                              | USCM_383_888          | ntclkbufg_3                     | 99              | 0                   | cam0_pclk_i_ibuf/opit_1                               | DI_TO_CLK      | IOLHR_16_786            
+| clkbufg_4/gopclkbufg                              | USCM_383_894          | ntclkbufg_4                     | 8               | 0                   | u_pll_video/u_gpll/gpll_inst                          | CLKOUT1        | GPLL_7_769              
+| u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg     | USCM_383_900          | u_ddr3/u_ddrphy_top/rst_clk     | 118             | 0                   | u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst     | CLKOUT0        | GPLL_7_463              
+| u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg      | USCM_383_882          | clk_mem_w                       | 32635           | 1                   | u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst      | CLKOUT0        | GPLL_727_769            
+| u_rgmii/u_eth_clk/gopclkbufg                      | USCM_383_897          | clk_eth_w                       | 164             | 0                   | u_rgmii/u_pll_eth/u_gpll/gpll_inst                    | CLKOUT0        | GPLL_727_463            
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+Constraint checker:
+##### Written on 2026/10/29 22:39:44 ###############################
+
+
+##### INFO ##################################################
+
+Current device : 
+	PG2L200H-6FBB676
+
+Top Module : 
+	edrv32_fpga_board_vision_top
+
+Constraint File(s) : 
+	G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc
+
+##### SUMMARY ######################################################
+
+Found 0 error(s), 61 critical warning(s), 0 warning(s), out of 857 constraint(s)
+
+
+Inapplicable constraints(except overwritten constraints):
+********************************************
+
+define_attribute {p:cam0_href_i} {PAP_IO_LOC} {T25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 192)] | Port cam0_href_i has been placed at location T25, whose type is share pin.
+
+define_attribute {p:cam0_data_i[0]} {PAP_IO_LOC} {M24}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 198)] | Port cam0_data_i[0] has been placed at location M24, whose type is share pin.
+
+define_attribute {p:cam0_data_i[1]} {PAP_IO_LOC} {R22}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 204)] | Port cam0_data_i[1] has been placed at location R22, whose type is share pin.
+
+define_attribute {p:cam0_data_i[2]} {PAP_IO_LOC} {K26}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 210)] | Port cam0_data_i[2] has been placed at location K26, whose type is share pin.
+
+define_attribute {p:cam0_data_i[3]} {PAP_IO_LOC} {K25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 216)] | Port cam0_data_i[3] has been placed at location K25, whose type is share pin.
+
+define_attribute {p:cam0_data_i[4]} {PAP_IO_LOC} {M25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 222)] | Port cam0_data_i[4] has been placed at location M25, whose type is share pin.
+
+define_attribute {p:cam0_data_i[5]} {PAP_IO_LOC} {N19}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 228)] | Port cam0_data_i[5] has been placed at location N19, whose type is share pin.
+
+define_attribute {p:cam0_data_i[7]} {PAP_IO_LOC} {R21}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 240)] | Port cam0_data_i[7] has been placed at location R21, whose type is share pin.
+
+define_attribute {p:cam1_data_i[1]} {PAP_IO_LOC} {R23}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 264)] | Port cam1_data_i[1] has been placed at location R23, whose type is share pin.
+
+define_attribute {p:cam1_data_i[2]} {PAP_IO_LOC} {T23}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 270)] | Port cam1_data_i[2] has been placed at location T23, whose type is share pin.
+
+define_attribute {p:cam1_data_i[4]} {PAP_IO_LOC} {P26}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 282)] | Port cam1_data_i[4] has been placed at location P26, whose type is share pin.
+
+define_attribute {p:cam1_data_i[5]} {PAP_IO_LOC} {M26}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 288)] | Port cam1_data_i[5] has been placed at location M26, whose type is share pin.
+
+define_attribute {p:cam0_rst_n_o} {PAP_IO_LOC} {T22}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 306)] | Port cam0_rst_n_o has been placed at location T22, whose type is share pin.
+
+define_attribute {p:i2c0_scl_o[0]} {PAP_IO_LOC} {P19}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 318)] | Port i2c0_scl_o[0] has been placed at location P19, whose type is share pin.
+
+define_attribute {p:i2c0_sda_o[0]} {PAP_IO_LOC} {R20}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 330)] | Port i2c0_sda_o[0] has been placed at location R20, whose type is share pin.
+
+define_attribute {p:tmds_data_p_o[0]} {PAP_IO_LOC} {R25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 342)] | Port tmds_data_p_o[0] has been placed at location R25, whose type is share pin.
+
+define_attribute {p:tmds_data_p_o[1]} {PAP_IO_LOC} {P23}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 348)] | Port tmds_data_p_o[1] has been placed at location P23, whose type is share pin.
+
+define_attribute {p:tmds_data_p_o[2]} {PAP_IO_LOC} {N23}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 354)] | Port tmds_data_p_o[2] has been placed at location N23, whose type is share pin.
+
+define_attribute {p:tmds_data_n_o[0]} {PAP_IO_LOC} {P25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 360)] | Port tmds_data_n_o[0] has been placed at location P25, whose type is share pin.
+
+define_attribute {p:tmds_data_n_o[1]} {PAP_IO_LOC} {P24}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 366)] | Port tmds_data_n_o[1] has been placed at location P24, whose type is share pin.
+
+define_attribute {p:tmds_data_n_o[2]} {PAP_IO_LOC} {N24}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 372)] | Port tmds_data_n_o[2] has been placed at location N24, whose type is share pin.
+
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_LOC} {G25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 498)] | Port eth_phy_rst_n_o has been placed at location G25, whose type is share pin.
+
+define_attribute {p:mem_dqs_o[0]} {PAP_IO_LOC} {J4}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 750)] | Port mem_dqs_o[0] has been placed at location J4, whose type is share pin.
+
+define_attribute {p:mem_dqs_o[1]} {PAP_IO_LOC} {H7}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 759)] | Port mem_dqs_o[1] has been placed at location H7, whose type is share pin.
+
+define_attribute {p:mem_dqs_n_o[0]} {PAP_IO_LOC} {H4}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 786)] | Port mem_dqs_n_o[0] has been placed at location H4, whose type is share pin.
+
+define_attribute {p:mem_dqs_n_o[1]} {PAP_IO_LOC} {G7}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 795)] | Port mem_dqs_n_o[1] has been placed at location G7, whose type is share pin.
+
+define_attribute {p:mem_dq_o[1]} {PAP_IO_LOC} {J6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 831)] | Port mem_dq_o[1] has been placed at location J6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[3]} {PAP_IO_LOC} {L8}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 849)] | Port mem_dq_o[3] has been placed at location L8, whose type is share pin.
+
+define_attribute {p:mem_dq_o[5]} {PAP_IO_LOC} {K7}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 867)] | Port mem_dq_o[5] has been placed at location K7, whose type is share pin.
+
+define_attribute {p:mem_dq_o[7]} {PAP_IO_LOC} {J5}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 885)] | Port mem_dq_o[7] has been placed at location J5, whose type is share pin.
+
+define_attribute {p:mem_dq_o[8]} {PAP_IO_LOC} {H6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 894)] | Port mem_dq_o[8] has been placed at location H6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[10]} {PAP_IO_LOC} {H8}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 912)] | Port mem_dq_o[10] has been placed at location H8, whose type is share pin.
+
+define_attribute {p:mem_dq_o[11]} {PAP_IO_LOC} {D6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 921)] | Port mem_dq_o[11] has been placed at location D6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[12]} {PAP_IO_LOC} {G8}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 930)] | Port mem_dq_o[12] has been placed at location G8, whose type is share pin.
+
+define_attribute {p:mem_dq_o[13]} {PAP_IO_LOC} {E6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 939)] | Port mem_dq_o[13] has been placed at location E6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[15]} {PAP_IO_LOC} {G6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 957)] | Port mem_dq_o[15] has been placed at location G6, whose type is share pin.
+
+define_attribute {p:mem_dm_o[0]} {PAP_IO_LOC} {K6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1110)] | Port mem_dm_o[0] has been placed at location K6, whose type is share pin.
+
+
+Constraints with issues:
+********************************************
+
+
+Issues without commands:
+********************************************
+
+C: ConstraintEditor-2009: p:cam0_rst_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:cam0_rst_n_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:cam1_rst_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:cam1_rst_n_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[0] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[1] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[0] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[1] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:tmds_data_p_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_p_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_p_o[2] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_n_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_n_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_n_o[2] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_clk_p_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_clk_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:eth_mdc_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:eth_mdc_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:eth_mdio_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:eth_mdio_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+
+Unconstrained ports:
+********************************************
+
+
+Constraints with matching wildcard expressions:
+********************************************
+
+set_false_path -from [get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}]
+	I: The pattern 'key_n_i[*]' in command 'get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}' match 4 objects below:
+	I: port key_n_i[0]
+	I: port key_n_i[1]
+	I: port key_n_i[2]
+	I: port key_n_i[3]
+	I: The pattern 'i2c0_scl_o[*]' in command 'get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}' match 2 objects below:
+	I: port i2c0_scl_o[0]
+	I: port i2c0_scl_o[1]
+	I: The pattern 'i2c0_sda_o[*]' in command 'get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}' match 2 objects below:
+	I: port i2c0_sda_o[0]
+	I: port i2c0_sda_o[1]

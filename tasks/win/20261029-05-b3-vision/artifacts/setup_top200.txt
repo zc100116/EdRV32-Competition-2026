@@ -1,0 +1,1 @@
+未取得：PnR因Route-0038/Route-0008失败，没有完成布线的pnr.adf和路后report_timing。已有综合单角预估和全部172条路径另存，不作为路后WNS/TNS/WHS/THS，也不宣称满足每时钟200条/逐级20条要求。

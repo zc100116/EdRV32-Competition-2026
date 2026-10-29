@@ -1,0 +1,99 @@
+Source: fpga/rtl/edrv32_fpga_tmds.v (repository RTL, unchanged)
+25:     assign {tmds_clk_p_o, tmds_data_p_o} = pair_p_w;
+26:     assign {tmds_clk_n_o, tmds_data_n_o} = pair_n_w;
+27: 
+28:     // Serializer data registers need no local reset (CLAUDE 5.2).
+29:     /* verilator lint_off PINCONNECTEMPTY */
+30:     genvar channel;
+31:     generate
+32:         for (channel = 0; channel < 4; channel = channel + 1) begin : g_channel
+33:             GTP_OSERDES_E2 #(
+34:                 .GRS_EN("TRUE"),
+35:                 .OSERDES_MODE("DDR10TO1"),
+36:                 .TSERDES_EN("FALSE"),
+37:                 .UPD0_SHIFT_EN("FALSE"),
+38:                 .UPD1_SHIFT_EN("FALSE"),
+39:                 .INIT_SET(2'b00),
+40:                 .GRS_TYPE_DQ("RESET"),
+41:                 .LRS_TYPE_DQ0("ASYNC_RESET"),
+42:                 .LRS_TYPE_DQ1("ASYNC_RESET"),
+43:                 .LRS_TYPE_DQ2("ASYNC_RESET"),
+44:                 .LRS_TYPE_DQ3("ASYNC_RESET"),
+45:                 .GRS_TYPE_TQ("RESET"),
+46:                 .LRS_TYPE_TQ0("ASYNC_RESET"),
+47:                 .LRS_TYPE_TQ1("ASYNC_RESET"),
+48:                 .LRS_TYPE_TQ2("ASYNC_RESET"),
+49:                 .LRS_TYPE_TQ3("ASYNC_RESET"),
+50:                 .TRI_EN("FALSE"),
+51:                 .TBYTE_EN("FALSE"),
+52:                 .MIPI_EN("FALSE"),
+53:                 .OCASCADE_EN("FALSE")
+54:             ) u_master (
+55:                 .RST(1'b0),
+56:                 .OCE(1'b1),
+57:                 .TCE(1'b0),
+58:                 .OCLKDIV(clk_pix_i),
+59:                 .SERCLK(clk_serial_i),
+60:                 .OCLK(clk_serial_i),
+61:                 .MIPI_CTRL(1'b0),
+62:                 .UPD0_SHIFT(1'b0),
+63:                 .UPD1_SHIFT(1'b0),
+64:                 .OSHIFTIN0(cascade0_w[channel]),
+65:                 .OSHIFTIN1(cascade1_w[channel]),
+66:                 .DI(symbols_w[channel*10 +: 8]),
+67:                 .TI(1'b0),
+68:                 .TBYTE_IN(1'b0),
+69:                 .OSHIFTOUT0(),
+70:                 .OSHIFTOUT1(),
+71:                 .DO(serial_w[channel]),
+72:                 .TQ()
+73:             );
+74: 
+75:             GTP_OSERDES_E2 #(
+76:                 .GRS_EN("TRUE"),
+77:                 .OSERDES_MODE("DDR10TO1"),
+78:                 .TSERDES_EN("FALSE"),
+79:                 .UPD0_SHIFT_EN("FALSE"),
+80:                 .UPD1_SHIFT_EN("FALSE"),
+81:                 .INIT_SET(2'b00),
+82:                 .GRS_TYPE_DQ("RESET"),
+83:                 .LRS_TYPE_DQ0("ASYNC_RESET"),
+84:                 .LRS_TYPE_DQ1("ASYNC_RESET"),
+85:                 .LRS_TYPE_DQ2("ASYNC_RESET"),
+86:                 .LRS_TYPE_DQ3("ASYNC_RESET"),
+87:                 .GRS_TYPE_TQ("RESET"),
+88:                 .LRS_TYPE_TQ0("ASYNC_RESET"),
+89:                 .LRS_TYPE_TQ1("ASYNC_RESET"),
+90:                 .LRS_TYPE_TQ2("ASYNC_RESET"),
+91:                 .LRS_TYPE_TQ3("ASYNC_RESET"),
+92:                 .TRI_EN("FALSE"),
+93:                 .TBYTE_EN("FALSE"),
+94:                 .MIPI_EN("FALSE"),
+95:                 .OCASCADE_EN("TRUE")
+96:             ) u_slave (
+97:                 .RST(1'b0),
+98:                 .OCE(1'b1),
+99:                 .TCE(1'b0),
+100:                 .OCLKDIV(clk_pix_i),
+101:                 .SERCLK(clk_serial_i),
+102:                 .OCLK(clk_serial_i),
+103:                 .MIPI_CTRL(1'b0),
+104:                 .UPD0_SHIFT(1'b0),
+105:                 .UPD1_SHIFT(1'b0),
+106:                 .OSHIFTIN0(1'b0),
+107:                 .OSHIFTIN1(1'b0),
+108:                 .DI({4'b0, symbols_w[channel*10+8 +: 2], 2'b0}),
+109:                 .TI(1'b0),
+110:                 .TBYTE_IN(1'b0),
+111:                 .OSHIFTOUT0(cascade0_w[channel]),
+112:                 .OSHIFTOUT1(cascade1_w[channel]),
+113:                 .DO(),
+114:                 .TQ()
+115:             );
+116: 
+117:             GTP_OUTBUFDS #(
+118:                 .IOSTANDARD("TMDS")
+119:             ) u_pair (
+120:                 .I(serial_w[channel]),
+121:                 .O(pair_p_w[channel]),
+122:                 .OB(pair_n_w[channel])

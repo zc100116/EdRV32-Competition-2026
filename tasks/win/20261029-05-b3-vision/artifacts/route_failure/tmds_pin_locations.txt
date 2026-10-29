@@ -1,0 +1,9 @@
+Source: PRR port placement table. This does not itself map every IOLHR to an RTL instance.
+N21|IOBD_0_756|BANKL5||tmds_clk_p_o|output|YES
+N23|IOBD_0_732|BANKL5||tmds_data_p_o[2]|output|YES
+P23|IOBD_0_708|BANKL5||tmds_data_p_o[1]|output|YES
+R25|IOBD_0_684|BANKL5||tmds_data_p_o[0]|output|YES
+N22|IOBS_0_750|BANKL5||tmds_clk_n_o|output|YES
+N24|IOBS_0_726|BANKL5||tmds_data_n_o[2]|output|YES
+P24|IOBS_0_702|BANKL5||tmds_data_n_o[1]|output|YES
+P25|IOBS_0_678|BANKL5||tmds_data_n_o[0]|output|YES

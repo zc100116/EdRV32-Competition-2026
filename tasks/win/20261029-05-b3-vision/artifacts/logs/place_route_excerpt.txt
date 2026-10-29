@@ -1,0 +1,411 @@
+Source: G:\codex_project\EdRV32-FPGA\EdRV32-B3V\place_route\run.log
+19: C: ConstraintEditor-2009: eth_mdio_o is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+20: C: ConstraintEditor-2009: eth_mdio_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+23: C: ConstraintEditor-2009: i2c0_scl_o[0] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+24: C: ConstraintEditor-2009: i2c0_scl_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+25: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 4)] | Port i2c0_scl_o[0] has been placed at location P19, whose type is share pin.
+28: C: ConstraintEditor-2009: i2c0_scl_o[1] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+29: C: ConstraintEditor-2009: i2c0_scl_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+32: C: ConstraintEditor-2009: i2c0_sda_o[0] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+33: C: ConstraintEditor-2009: i2c0_sda_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+34: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 6)] | Port i2c0_sda_o[0] has been placed at location R20, whose type is share pin.
+37: C: ConstraintEditor-2009: i2c0_sda_o[1] is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+38: C: ConstraintEditor-2009: i2c0_sda_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+43: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 9)] | Port mem_dq_o[1] has been placed at location J6, whose type is share pin.
+48: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 11)] | Port mem_dq_o[3] has been placed at location L8, whose type is share pin.
+53: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 13)] | Port mem_dq_o[5] has been placed at location K7, whose type is share pin.
+58: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 15)] | Port mem_dq_o[7] has been placed at location J5, whose type is share pin.
+61: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 16)] | Port mem_dq_o[8] has been placed at location H6, whose type is share pin.
+66: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 18)] | Port mem_dq_o[10] has been placed at location H8, whose type is share pin.
+69: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 19)] | Port mem_dq_o[11] has been placed at location D6, whose type is share pin.
+72: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 20)] | Port mem_dq_o[12] has been placed at location G8, whose type is share pin.
+75: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 21)] | Port mem_dq_o[13] has been placed at location E6, whose type is share pin.
+80: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 23)] | Port mem_dq_o[15] has been placed at location G6, whose type is share pin.
+115: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 40)] | Port mem_dqs_n_o[0] has been placed at location H4, whose type is share pin.
+118: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 41)] | Port mem_dqs_n_o[1] has been placed at location G7, whose type is share pin.
+125: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 44)] | Port mem_dqs_o[0] has been placed at location J4, whose type is share pin.
+128: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 45)] | Port mem_dqs_o[1] has been placed at location H7, whose type is share pin.
+135: C: ConstraintEditor-2009: cam0_rst_n_o is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+136: C: ConstraintEditor-2009: cam0_rst_n_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+137: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 48)] | Port cam0_rst_n_o has been placed at location T22, whose type is share pin.
+140: C: ConstraintEditor-2009: cam1_rst_n_o is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+141: C: ConstraintEditor-2009: cam1_rst_n_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+144: C: ConstraintEditor-2009: eth_mdc_o is lack of SLEW, OUTPUT or INOUT PORT had better set SLEW, the optional value is {SLOW, FAST}.
+145: C: ConstraintEditor-2009: eth_mdc_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {8, 4, 12, 16}.
+148: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 51)] | Port eth_phy_rst_n_o has been placed at location G25, whose type is share pin.
+207: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 80)] | Port mem_dm_o[0] has been placed at location K6, whose type is share pin.
+236: C: ConstraintEditor-2009: tmds_clk_n_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+239: C: ConstraintEditor-2009: tmds_clk_p_o is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+242: C: ConstraintEditor-2009: tmds_data_n_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+243: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 96)] | Port tmds_data_n_o[0] has been placed at location P25, whose type is share pin.
+246: C: ConstraintEditor-2009: tmds_data_n_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+247: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 97)] | Port tmds_data_n_o[1] has been placed at location P24, whose type is share pin.
+250: C: ConstraintEditor-2009: tmds_data_n_o[2] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+251: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 98)] | Port tmds_data_n_o[2] has been placed at location N24, whose type is share pin.
+254: C: ConstraintEditor-2009: tmds_data_p_o[0] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+255: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 99)] | Port tmds_data_p_o[0] has been placed at location R25, whose type is share pin.
+258: C: ConstraintEditor-2009: tmds_data_p_o[1] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+259: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 100)] | Port tmds_data_p_o[1] has been placed at location P23, whose type is share pin.
+262: C: ConstraintEditor-2009: tmds_data_p_o[2] is lack of DRIVE, OUTPUT or INOUT PORT had better set DRIVE, the optional value is {5, 4.5}.
+263: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 101)] | Port tmds_data_p_o[2] has been placed at location N23, whose type is share pin.
+268: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 103)] | Port cam0_data_i[0] has been placed at location M24, whose type is share pin.
+271: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 104)] | Port cam0_data_i[1] has been placed at location R22, whose type is share pin.
+274: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 105)] | Port cam0_data_i[2] has been placed at location K26, whose type is share pin.
+277: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 106)] | Port cam0_data_i[3] has been placed at location K25, whose type is share pin.
+280: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 107)] | Port cam0_data_i[4] has been placed at location M25, whose type is share pin.
+283: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 108)] | Port cam0_data_i[5] has been placed at location N19, whose type is share pin.
+288: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 110)] | Port cam0_data_i[7] has been placed at location R21, whose type is share pin.
+291: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 111)] | Port cam0_href_i has been placed at location T25, whose type is share pin.
+300: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 115)] | Port cam1_data_i[1] has been placed at location R23, whose type is share pin.
+303: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 116)] | Port cam1_data_i[2] has been placed at location T23, whose type is share pin.
+308: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 118)] | Port cam1_data_i[4] has been placed at location P26, whose type is share pin.
+311: C: ConstraintEditor-2002: [G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf(line number: 119)] | Port cam1_data_i[5] has been placed at location M26, whose type is share pin.
+363: Placement started.
+364: Phase 1 Pre global placement started.
+379: Phase 1.1 1st GP placement started.
+381: Build SRB system takes 0.38 sec.
+383: 1st GP placement takes 2.06 sec.
+385: Phase 1.2 Clock placement started.
+400: Clock placement takes 0.11 sec.
+403: Pre global placement takes 2.36 sec.
+405: Phase 2 Global placement started.
+406: Phase 2.1 Fixed placement started.
+407: First map gop timing takes 1.12 sec
+409: Read place coarse delay table takes 0.12 sec.
+574: Fixed placement takes 1.36 sec.
+576: Phase 2.2 Process placement started.
+580: Process placement takes 0.02 sec.
+582: Phase 2.3 IO placement started.
+583: IO placement takes 0.05 sec.
+586: Total cost after SA planning is 4786559.511346.
+588: PBM of GP end, takes 0.86 sec.
+589: Phase 2.4 2nd GP placement started.
+591: 	Initial slack -24665.
+593: 	Final slack -13191.
+597: Worst slack after global placement is -8307
+598: 2nd GP placement takes 9.23 sec.
+601: Global placement takes 11.52 sec.
+603: Phase 3 Post global placement started.
+604: Phase 3.1 Macro cell placement started.
+607: Macro cell placement takes 0.06 sec.
+610: PBM of PostGP end, takes 0.00 sec.
+611: Phase 3.2 3rd GP placement started.
+614: Worst slack after post global placement is -9010
+615: 3rd GP placement takes 5.39 sec.
+620: Packing LUT6D takes 1.52 sec.
+621: Post global placement takes 6.98 sec.
+623: Phase 4 Legalization started.
+626: Legalization takes 0.41 sec.
+628: Phase 5 Timing-driven detailed placement started.
+629: Phase 5.1 Replication placement started.
+630: Worst slack before Replication Place is -9282.
+631: Replication placement takes 4.03 sec.
+634: Phase 5.2 Swapping placement started.
+635: Worst slack before detailed placement is -9282, TNS before detailed placement is -38776428. 
+636: Cost at Swap iteration 0 : -9282, wslk -9022, tns -38050742, takes 0.34 sec.
+638: Cost at DP iteration 0 : -9022, wslk -8349, tns -36429668, takes 0.42 sec.
+640: Cost at Swap iteration 1 : -8349, wslk -8349, tns -36428883, takes 0.06 sec.
+642: Cost at Swap iteration 2 : -8349, wslk -8349, tns -36428887, takes 0.03 sec.
+644: Cost at DP iteration 2 : -8349, wslk -8271, tns -36376869, takes 0.03 sec.
+646: Cost at Swap iteration 3 : -8271, wslk -8271, tns -35253011, takes 0.08 sec.
+648: Cost at Swap iteration 4 : -8271, wslk -8271, tns -35253451, takes 0.14 sec.
+650: Cost at DP iteration 4 : -8271, wslk -8253, tns -35222522, takes 0.12 sec.
+652: Cost at Swap iteration 5 : -8253, wslk -8253, tns -35222522, takes 0.17 sec.
+654: Cost at Swap iteration 6 : -8253, wslk -8253, tns -35221568, takes 0.09 sec.
+656: Cost at DP iteration 6 : -8253, wslk -8253, tns -35213705, takes 0.08 sec.
+658: Cost at Swap iteration 7 : -8253, wslk -8253, tns -35213705, takes 0.05 sec.
+660: Worst slack after detailed placement is -8253, TNS after detailed placement is -35213705. 
+661: Swapping placement takes 2.11 sec.
+674: Timing-driven detailed placement takes 6.17 sec.
+676: Worst slack is -8253, TNS after placement is -35950609.
+677: Placement done.
+678: Total placement takes 29.77 sec.
+681: Routing started.
+685: Building routing graph takes 12.85 sec.
+687: Read place coarse delay table takes 0.33 sec.
+688: Build SRB system takes 0.47 sec.
+692: Worst slack is -8253, TNS before route is -35950609.
+693: Total nets for routing: 80380.
+694: Total loads for routing: 370592.
+697: Processing design graph takes 19.08 sec.
+701: Global routing takes 0.00 sec.
+702: Total 80378 subnets.
+708: Total route nets size: 80338
+709: Pre route takes 42.072 sec
+710: Unrouted general nets at iteration 6 (MT total route time: 15.477 sec): 70501(overused: 498477)
+711: Unrouted general nets at iteration 7 (MT total route time: 15.678 sec): 63551(overused: 388646)
+712: Unrouted general nets at iteration 8 (MT total route time: 15.130 sec): 56941(overused: 296917)
+713: Unrouted general nets at iteration 9 (MT total route time: 13.102 sec): 50673(overused: 233269)
+714: Unrouted general nets at iteration 10 (MT total route time: 12.064 sec): 45907(overused: 193898)
+715: Unrouted general nets at iteration 11 (MT total route time: 12.101 sec): 36176(overused: 166073)
+716: Unrouted general nets at iteration 12 (MT total route time: 12.007 sec): 30584(overused: 138528)
+717: Unrouted general nets at iteration 13 (MT total route time: 13.698 sec): 26815(overused: 116463)
+718: Unrouted general nets at iteration 14 (MT total route time: 11.549 sec): 23532(overused: 97383)
+719: Unrouted general nets at iteration 15 (MT total route time: 12.126 sec): 20931(overused: 83824)
+720: Unrouted general nets at iteration 16 (MT total route time: 10.356 sec): 18547(overused: 70388)
+721: Unrouted general nets at iteration 17 (MT total route time: 9.630 sec): 17510(overused: 66333)
+722: Unrouted general nets at iteration 18 (MT total route time: 9.839 sec): 16120(overused: 60149)
+723: Unrouted general nets at iteration 19 (MT total route time: 9.418 sec): 15001(overused: 53965)
+724: Unrouted general nets at iteration 20 (MT total route time: 9.140 sec): 14032(overused: 48596)
+725: Unrouted general nets at iteration 21 (MT total route time: 8.420 sec): 12901(overused: 44197)
+726: Unrouted general nets at iteration 22 (MT total route time: 7.918 sec): 11630(overused: 37800)
+727: Unrouted general nets at iteration 23 (MT total route time: 7.169 sec): 10549(overused: 33808)
+728: Unrouted general nets at iteration 24 (MT total route time: 6.621 sec): 9877(overused: 30493)
+729: Unrouted general nets at iteration 25 (MT total route time: 6.404 sec): 9133(overused: 27498)
+730: Unrouted general nets at iteration 26 (MT total route time: 6.528 sec): 8378(overused: 25074)
+731: Unrouted general nets at iteration 27 (MT total route time: 7.073 sec): 8293(overused: 24706)
+732: Unrouted general nets at iteration 28 (MT total route time: 6.260 sec): 7787(overused: 22923)
+733: Unrouted general nets at iteration 29 (MT total route time: 5.293 sec): 7052(overused: 20236)
+734: Unrouted general nets at iteration 30 (MT total route time: 4.754 sec): 6371(overused: 17675)
+735: Unrouted general nets at iteration 31 (MT total route time: 4.309 sec): 5886(overused: 16009)
+736: Unrouted general nets at iteration 32 (MT total route time: 4.209 sec): 5440(overused: 14603)
+737: Unrouted general nets at iteration 33 (MT total route time: 4.773 sec): 5044(overused: 13471)
+738: Unrouted general nets at iteration 34 (MT total route time: 4.101 sec): 4656(overused: 12075)
+739: Unrouted general nets at iteration 35 (MT total route time: 3.624 sec): 4297(overused: 11050)
+740: Unrouted general nets at iteration 36 (MT total route time: 3.176 sec): 3964(overused: 10149)
+741: Unrouted general nets at iteration 37 (MT total route time: 3.490 sec): 3889(overused: 10101)
+742: Unrouted general nets at iteration 38 (MT total route time: 2.926 sec): 3628(overused: 9124)
+743: Unrouted general nets at iteration 39 (MT total route time: 3.225 sec): 3541(overused: 9170)
+744: Unrouted general nets at iteration 40 (MT total route time: 3.137 sec): 3425(overused: 8642)
+745: Unrouted general nets at iteration 41 (MT total route time: 3.018 sec): 3453(overused: 8502)
+746: Unrouted general nets at iteration 42 (MT total route time: 2.574 sec): 3270(overused: 7888)
+747: Unrouted general nets at iteration 43 (MT total route time: 3.035 sec): 2959(overused: 7003)
+748: Unrouted general nets at iteration 44 (MT total route time: 2.116 sec): 2696(overused: 6371)
+749: Unrouted general nets at iteration 45 (MT total route time: 1.781 sec): 2363(overused: 5485)
+750: Unrouted general nets at iteration 46 (MT total route time: 1.577 sec): 2135(overused: 4696)
+751: Unrouted general nets at iteration 47 (MT total route time: 1.507 sec): 2147(overused: 4871)
+752: Unrouted general nets at iteration 48 (MT total route time: 1.308 sec): 1975(overused: 4327)
+753: Unrouted general nets at iteration 49 (MT total route time: 1.314 sec): 1816(overused: 3930)
+754: Unrouted general nets at iteration 50 (MT total route time: 1.157 sec): 1643(overused: 3613)
+755: Unrouted general nets at iteration 51 (MT total route time: 1.294 sec): 1530(overused: 3379)
+756: Unrouted general nets at iteration 52 (MT total route time: 1.431 sec): 1604(overused: 3620)
+757: Unrouted general nets at iteration 53 (MT total route time: 1.381 sec): 1416(overused: 3153)
+758: Unrouted general nets at iteration 54 (MT total route time: 1.243 sec): 1506(overused: 3649)
+759: Unrouted general nets at iteration 55 (MT total route time: 1.309 sec): 1382(overused: 3112)
+760: Unrouted general nets at iteration 56 (MT total route time: 1.175 sec): 1239(overused: 2683)
+761: Unrouted general nets at iteration 57 (MT total route time: 1.007 sec): 1102(overused: 2331)
+762: Unrouted general nets at iteration 58 (MT total route time: 0.915 sec): 1006(overused: 2165)
+763: Unrouted general nets at iteration 59 (MT total route time: 0.896 sec): 940(overused: 2046)
+764: Unrouted general nets at iteration 60 (MT total route time: 1.089 sec): 907(overused: 2068)
+765: Unrouted general nets at iteration 61 (MT total route time: 0.891 sec): 800(overused: 1776)
+766: Unrouted general nets at iteration 62 (MT total route time: 0.734 sec): 687(overused: 1537)
+767: Unrouted general nets at iteration 63 (MT total route time: 0.712 sec): 631(overused: 1379)
+768: Unrouted general nets at iteration 64 (MT total route time: 0.764 sec): 700(overused: 1545)
+769: Unrouted general nets at iteration 65 (MT total route time: 0.670 sec): 702(overused: 1446)
+770: Unrouted general nets at iteration 66 (MT total route time: 0.734 sec): 675(overused: 1451)
+771: Unrouted general nets at iteration 67 (MT total route time: 0.697 sec): 643(overused: 1393)
+772: Unrouted general nets at iteration 68 (MT total route time: 0.736 sec): 688(overused: 1389)
+773: Unrouted general nets at iteration 69 (MT total route time: 0.712 sec): 600(overused: 1225)
+774: Unrouted general nets at iteration 70 (MT total route time: 0.621 sec): 556(overused: 1091)
+775: Unrouted general nets at iteration 71 (MT total route time: 0.575 sec): 484(overused: 955)
+776: Unrouted general nets at iteration 72 (MT total route time: 0.576 sec): 419(overused: 857)
+777: Unrouted general nets at iteration 73 (MT total route time: 0.540 sec): 380(overused: 750)
+778: Unrouted general nets at iteration 74 (MT total route time: 0.459 sec): 328(overused: 686)
+779: Unrouted general nets at iteration 75 (MT total route time: 0.445 sec): 288(overused: 618)
+780: Unrouted general nets at iteration 76 (MT total route time: 0.443 sec): 278(overused: 588)
+781: Unrouted general nets at iteration 77 (MT total route time: 0.477 sec): 245(overused: 539)
+782: Unrouted general nets at iteration 78 (MT total route time: 0.442 sec): 216(overused: 482)
+783: Unrouted general nets at iteration 79 (MT total route time: 0.852 sec): 259(overused: 641)
+784: Unrouted general nets at iteration 80 (MT total route time: 0.577 sec): 277(overused: 567)
+785: Unrouted general nets at iteration 81 (MT total route time: 0.533 sec): 264(overused: 590)
+786: Unrouted general nets at iteration 82 (MT total route time: 0.435 sec): 236(overused: 462)
+787: Unrouted general nets at iteration 83 (MT total route time: 0.448 sec): 204(overused: 389)
+788: Unrouted general nets at iteration 84 (MT total route time: 0.392 sec): 159(overused: 350)
+789: Unrouted general nets at iteration 85 (MT total route time: 0.376 sec): 161(overused: 352)
+790: Unrouted general nets at iteration 86 (MT total route time: 0.377 sec): 137(overused: 292)
+791: Unrouted general nets at iteration 87 (MT total route time: 0.343 sec): 102(overused: 228)
+792: Unrouted general nets at iteration 88 (MT total route time: 0.328 sec): 98(overused: 220)
+793: Unrouted general nets at iteration 89 (MT total route time: 0.333 sec): 85(overused: 202)
+794: Unrouted general nets at iteration 90 (MT total route time: 0.341 sec): 85(overused: 212)
+795: Unrouted general nets at iteration 91 (MT total route time: 0.387 sec): 81(overused: 202)
+796: Unrouted general nets at iteration 92 (MT total route time: 0.358 sec): 86(overused: 192)
+797: Unrouted general nets at iteration 93 (MT total route time: 0.364 sec): 98(overused: 214)
+798: Unrouted general nets at iteration 94 (MT total route time: 0.362 sec): 93(overused: 206)
+799: Unrouted general nets at iteration 95 (MT total route time: 0.355 sec): 110(overused: 206)
+800: Unrouted general nets at iteration 96 (MT total route time: 0.373 sec): 111(overused: 200)
+801: Unrouted general nets at iteration 97 (MT total route time: 0.464 sec): 96(overused: 202)
+802: Unrouted general nets at iteration 98 (MT total route time: 0.409 sec): 88(overused: 210)
+803: Unrouted general nets at iteration 99 (MT total route time: 0.357 sec): 82(overused: 180)
+804: Unrouted general nets at iteration 100 (MT total route time: 0.395 sec): 89(overused: 182)
+805: Unrouted general nets at iteration 101 (MT total route time: 0.388 sec): 81(overused: 164)
+806: Unrouted general nets at iteration 102 (MT total route time: 0.463 sec): 100(overused: 240)
+807: Unrouted general nets at iteration 103 (MT total route time: 0.561 sec): 138(overused: 288)
+808: Unrouted general nets at iteration 104 (MT total route time: 0.445 sec): 115(overused: 234)
+809: Unrouted general nets at iteration 105 (MT total route time: 0.392 sec): 134(overused: 246)
+810: Unrouted general nets at iteration 106 (MT total route time: 0.350 sec): 115(overused: 225)
+811: Unrouted general nets at iteration 107 (MT total route time: 0.352 sec): 107(overused: 204)
+812: Unrouted general nets at iteration 108 (MT total route time: 0.329 sec): 107(overused: 190)
+813: Unrouted general nets at iteration 109 (MT total route time: 0.328 sec): 90(overused: 168)
+814: Unrouted general nets at iteration 110 (MT total route time: 0.322 sec): 80(overused: 156)
+815: Unrouted general nets at iteration 111 (MT total route time: 0.311 sec): 76(overused: 156)
+816: Unrouted general nets at iteration 112 (MT total route time: 0.326 sec): 66(overused: 152)
+817: Unrouted general nets at iteration 113 (MT total route time: 0.316 sec): 68(overused: 140)
+818: Unrouted general nets at iteration 114 (MT total route time: 0.307 sec): 79(overused: 170)
+819: Unrouted general nets at iteration 115 (MT total route time: 0.337 sec): 71(overused: 152)
+820: Unrouted general nets at iteration 116 (MT total route time: 0.342 sec): 60(overused: 124)
+821: Unrouted general nets at iteration 117 (MT total route time: 0.314 sec): 53(overused: 100)
+822: Unrouted general nets at iteration 118 (MT total route time: 0.303 sec): 52(overused: 104)
+823: Unrouted general nets at iteration 119 (MT total route time: 0.295 sec): 52(overused: 94)
+824: Unrouted general nets at iteration 120 (MT total route time: 0.302 sec): 41(overused: 84)
+825: Unrouted general nets at iteration 121 (MT total route time: 0.294 sec): 36(overused: 116)
+826: Unrouted general nets at iteration 122 (MT total route time: 0.331 sec): 34(overused: 92)
+827: Unrouted general nets at iteration 123 (MT total route time: 0.341 sec): 37(overused: 96)
+828: Unrouted general nets at iteration 124 (MT total route time: 0.340 sec): 33(overused: 92)
+829: Unrouted general nets at iteration 125 (MT total route time: 0.322 sec): 36(overused: 76)
+830: Unrouted general nets at iteration 126 (MT total route time: 0.355 sec): 31(overused: 74)
+831: Unrouted general nets at iteration 127 (MT total route time: 0.349 sec): 29(overused: 50)
+832: Unrouted general nets at iteration 128 (MT total route time: 0.355 sec): 25(overused: 48)
+833: Unrouted general nets at iteration 129 (MT total route time: 0.367 sec): 28(overused: 52)
+834: Unrouted general nets at iteration 130 (MT total route time: 0.341 sec): 22(overused: 48)
+835: Unrouted general nets at iteration 131 (MT total route time: 0.322 sec): 23(overused: 46)
+836: Unrouted general nets at iteration 132 (MT total route time: 0.321 sec): 23(overused: 42)
+837: Unrouted general nets at iteration 133 (MT total route time: 0.318 sec): 19(overused: 40)
+838: Unrouted general nets at iteration 134 (MT total route time: 0.323 sec): 25(overused: 46)
+839: Unrouted general nets at iteration 135 (MT total route time: 0.332 sec): 18(overused: 38)
+840: Unrouted general nets at iteration 136 (MT total route time: 0.285 sec): 19(overused: 42)
+841: Unrouted general nets at iteration 137 (MT total route time: 0.272 sec): 18(overused: 38)
+842: Unrouted general nets at iteration 138 (MT total route time: 0.268 sec): 20(overused: 38)
+843: Unrouted general nets at iteration 139 (MT total route time: 0.275 sec): 19(overused: 36)
+844: Unrouted general nets at iteration 140 (MT total route time: 0.268 sec): 17(overused: 30)
+845: Unrouted general nets at iteration 141 (MT total route time: 0.264 sec): 15(overused: 28)
+846: Unrouted general nets at iteration 142 (MT total route time: 0.267 sec): 15(overused: 28)
+847: Unrouted general nets at iteration 143 (MT total route time: 0.269 sec): 17(overused: 28)
+848: Unrouted general nets at iteration 144 (MT total route time: 0.283 sec): 13(overused: 26)
+849: Unrouted general nets at iteration 145 (MT total route time: 0.284 sec): 15(overused: 26)
+850: Unrouted general nets at iteration 146 (MT total route time: 0.279 sec): 16(overused: 34)
+851: Unrouted general nets at iteration 147 (MT total route time: 0.279 sec): 13(overused: 30)
+852: Unrouted general nets at iteration 148 (MT total route time: 0.278 sec): 15(overused: 28)
+853: Unrouted general nets at iteration 149 (MT total route time: 0.274 sec): 16(overused: 30)
+854: Unrouted general nets at iteration 150 (MT total route time: 0.281 sec): 14(overused: 22)
+855: Unrouted general nets at iteration 151 (MT total route time: 0.294 sec): 14(overused: 26)
+856: Unrouted general nets at iteration 152 (MT total route time: 0.293 sec): 15(overused: 28)
+857: Unrouted general nets at iteration 153 (MT total route time: 0.285 sec): 13(overused: 26)
+858: Unrouted general nets at iteration 154 (MT total route time: 0.298 sec): 15(overused: 34)
+859: Unrouted general nets at iteration 155 (MT total route time: 0.295 sec): 16(overused: 32)
+860: Unrouted general nets at iteration 156 (MT total route time: 0.304 sec): 20(overused: 36)
+861: Unrouted general nets at iteration 157 (MT total route time: 0.288 sec): 23(overused: 48)
+862: Unrouted general nets at iteration 158 (MT total route time: 0.300 sec): 18(overused: 40)
+863: Unrouted general nets at iteration 159 (MT total route time: 0.281 sec): 14(overused: 26)
+864: Unrouted general nets at iteration 160 (MT total route time: 0.287 sec): 16(overused: 32)
+865: Unrouted general nets at iteration 161 (MT total route time: 0.288 sec): 14(overused: 30)
+866: Unrouted general nets at iteration 162 (MT total route time: 0.281 sec): 13(overused: 22)
+867: Unrouted general nets at iteration 163 (MT total route time: 0.289 sec): 11(overused: 24)
+868: Unrouted general nets at iteration 164 (MT total route time: 0.306 sec): 10(overused: 18)
+869: Unrouted general nets at iteration 165 (MT total route time: 0.291 sec): 12(overused: 20)
+870: Unrouted general nets at iteration 166 (MT total route time: 0.273 sec): 12(overused: 22)
+871: Unrouted general nets at iteration 167 (MT total route time: 0.266 sec): 12(overused: 18)
+872: Unrouted general nets at iteration 168 (MT total route time: 0.263 sec): 16(overused: 22)
+873: Unrouted general nets at iteration 169 (MT total route time: 0.272 sec): 10(overused: 14)
+874: Unrouted general nets at iteration 170 (MT total route time: 0.263 sec): 10(overused: 14)
+875: Unrouted general nets at iteration 171 (MT total route time: 0.282 sec): 7(overused: 12)
+876: Unrouted general nets at iteration 172 (MT total route time: 0.275 sec): 8(overused: 12)
+877: Unrouted general nets at iteration 173 (MT total route time: 0.276 sec): 8(overused: 12)
+878: Unrouted general nets at iteration 174 (MT total route time: 0.265 sec): 11(overused: 24)
+879: Unrouted general nets at iteration 175 (MT total route time: 0.283 sec): 17(overused: 30)
+880: Unrouted general nets at iteration 176 (MT total route time: 0.287 sec): 19(overused: 30)
+881: Unrouted general nets at iteration 177 (MT total route time: 0.272 sec): 16(overused: 30)
+882: Unrouted general nets at iteration 178 (MT total route time: 0.269 sec): 17(overused: 30)
+883: Unrouted general nets at iteration 179 (MT total route time: 0.275 sec): 18(overused: 36)
+884: Unrouted general nets at iteration 180 (MT total route time: 0.292 sec): 14(overused: 22)
+885: Unrouted general nets at iteration 181 (MT total route time: 0.302 sec): 12(overused: 20)
+886: Unrouted general nets at iteration 182 (MT total route time: 0.289 sec): 18(overused: 30)
+887: Unrouted general nets at iteration 183 (MT total route time: 0.300 sec): 14(overused: 22)
+888: Unrouted general nets at iteration 184 (MT total route time: 0.290 sec): 15(overused: 22)
+889: Unrouted general nets at iteration 185 (MT total route time: 0.306 sec): 19(overused: 28)
+890: Unrouted general nets at iteration 186 (MT total route time: 0.283 sec): 16(overused: 30)
+891: Unrouted general nets at iteration 187 (MT total route time: 0.298 sec): 11(overused: 16)
+892: Unrouted general nets at iteration 188 (MT total route time: 0.279 sec): 9(overused: 12)
+893: Unrouted general nets at iteration 189 (MT total route time: 0.279 sec): 7(overused: 12)
+894: Unrouted general nets at iteration 190 (MT total route time: 0.291 sec): 6(overused: 12)
+895: Unrouted general nets at iteration 191 (MT total route time: 0.304 sec): 5(overused: 10)
+896: Unrouted general nets at iteration 192 (MT total route time: 0.279 sec): 5(overused: 8)
+897: Unrouted general nets at iteration 193 (MT total route time: 0.263 sec): 5(overused: 8)
+898: Unrouted general nets at iteration 194 (MT total route time: 0.267 sec): 4(overused: 6)
+899: Unrouted general nets at iteration 195 (MT total route time: 0.260 sec): 3(overused: 8)
+900: Unrouted general nets at iteration 196 (MT total route time: 0.298 sec): 3(overused: 8)
+901: Unrouted general nets at iteration 197 (MT total route time: 0.290 sec): 4(overused: 6)
+902: Unrouted general nets at iteration 198 (MT total route time: 0.297 sec): 3(overused: 8)
+903: Unrouted general nets at iteration 199 (MT total route time: 0.268 sec): 3(overused: 6)
+904: Unrouted general nets at iteration 200 (MT total route time: 0.274 sec): 3(overused: 8)
+905: Unrouted general nets at iteration 201 (MT total route time: 0.266 sec): 2(overused: 8)
+906: Unrouted general nets at iteration 202 (MT total route time: 0.266 sec): 3(overused: 6)
+907: Unrouted general nets at iteration 203 (MT total route time: 0.289 sec): 4(overused: 8)
+908: Unrouted general nets at iteration 204 (MT total route time: 0.272 sec): 4(overused: 12)
+909: Unrouted general nets at iteration 205 (MT total route time: 0.262 sec): 4(overused: 4)
+910: Unrouted general nets at iteration 206 (MT total route time: 0.272 sec): 2(overused: 2)
+911: Unrouted general nets at iteration 207 (MT total route time: 0.279 sec): 2(overused: 2)
+912: Unrouted general nets at iteration 208 (MT total route time: 0.269 sec): 2(overused: 2)
+913: Unrouted general nets at iteration 209 (MT total route time: 0.253 sec): 0(overused: 0)
+916: Unrouted nets at iteration 210 (1.112 sec): 1
+919: Unrouted nets at iteration 211 (0.366 sec): 1
+922: Unrouted nets at iteration 212 (0.374 sec): 1
+925: Unrouted nets at iteration 213 (0.371 sec): 1
+928: Unrouted nets at iteration 214 (0.374 sec): 1
+931: Unrouted nets at iteration 215 (0.353 sec): 1
+935: Unrouted nets at iteration 210 (0.367 sec): 1
+938: Unrouted nets at iteration 211 (0.377 sec): 1
+941: Unrouted nets at iteration 212 (0.373 sec): 1
+944: Unrouted nets at iteration 213 (0.368 sec): 1
+947: Unrouted nets at iteration 214 (0.352 sec): 1
+950: Unrouted nets at iteration 215 (0.369 sec): 1
+953: Unrouted nets at iteration 216 (0.351 sec): 1
+956: Unrouted nets at iteration 217 (0.350 sec): 1
+959: Unrouted nets at iteration 218 (0.378 sec): 1
+962: Unrouted nets at iteration 219 (0.366 sec): 1
+965: Unrouted nets at iteration 220 (0.356 sec): 1
+968: Unrouted nets at iteration 221 (0.367 sec): 1
+971: Unrouted nets at iteration 222 (0.362 sec): 1
+974: Unrouted nets at iteration 223 (0.365 sec): 1
+977: Unrouted nets at iteration 224 (0.367 sec): 1
+980: Unrouted nets at iteration 225 (0.369 sec): 1
+983: Unrouted nets at iteration 226 (0.368 sec): 1
+986: Unrouted nets at iteration 227 (0.349 sec): 1
+989: Unrouted nets at iteration 228 (0.359 sec): 1
+992: Unrouted nets at iteration 229 (0.363 sec): 1
+995: Unrouted nets at iteration 230 (0.348 sec): 1
+998: Unrouted nets at iteration 231 (0.348 sec): 1
+1001: Unrouted nets at iteration 232 (0.355 sec): 1
+1004: Unrouted nets at iteration 233 (0.364 sec): 1
+1007: Unrouted nets at iteration 234 (0.370 sec): 1
+1010: Unrouted nets at iteration 235 (0.366 sec): 1
+1013: Unrouted nets at iteration 236 (0.377 sec): 1
+1016: Unrouted nets at iteration 237 (0.367 sec): 1
+1019: Unrouted nets at iteration 238 (0.389 sec): 1
+1022: Unrouted nets at iteration 239 (0.391 sec): 1
+1025: Unrouted nets at iteration 240 (0.393 sec): 1
+1028: Unrouted nets at iteration 241 (0.419 sec): 1
+1031: Unrouted nets at iteration 242 (0.410 sec): 1
+1034: Unrouted nets at iteration 243 (0.384 sec): 1
+1037: Unrouted nets at iteration 244 (0.370 sec): 1
+1040: Unrouted nets at iteration 245 (0.377 sec): 1
+1043: Unrouted nets at iteration 246 (0.370 sec): 1
+1046: Unrouted nets at iteration 247 (0.392 sec): 1
+1049: Unrouted nets at iteration 248 (0.390 sec): 1
+1052: Unrouted nets at iteration 249 (0.371 sec): 1
+1055: Unrouted nets at iteration 250 (0.374 sec): 1
+1058: Unrouted nets at iteration 251 (0.365 sec): 1
+1061: Unrouted nets at iteration 252 (0.380 sec): 1
+1064: Unrouted nets at iteration 253 (0.376 sec): 1
+1067: Unrouted nets at iteration 254 (0.380 sec): 1
+1070: Unrouted nets at iteration 255 (0.378 sec): 1
+1073: Unrouted nets at iteration 256 (0.389 sec): 1
+1076: Unrouted nets at iteration 257 (0.380 sec): 1
+1079: Unrouted nets at iteration 258 (0.402 sec): 1
+1082: Unrouted nets at iteration 259 (0.403 sec): 1
+1083: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_678:OSHIFTIN0.
+1084: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_678:OSHIFTIN1.
+1085: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_702:OSHIFTIN0.
+1086: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_702:OSHIFTIN1.
+1087: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_726:OSHIFTIN0.
+1088: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_726:OSHIFTIN1.
+1089: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_750:OSHIFTIN0.
+1090: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_750:OSHIFTIN1.
+1092: Total net: 80380, route succeed net: 80379
+1098: E: Route-0038: General design net could not be routed.
+1099: Total routing takes 853.38 sec.
+1165: E: Route-0008: Design cannot be routed.
+1166: Action pnr: Real time elapsed is 0h:23m:7s
+1167: Action pnr: CPU time elapsed is 0h:2m:34s
+1168: Action pnr: Process CPU time elapsed is 0h:4m:19s
+1169: Current time: Thu Oct 29 23:08:32 2026
+1170: Action pnr: Peak memory pool usage is 6,581 MB

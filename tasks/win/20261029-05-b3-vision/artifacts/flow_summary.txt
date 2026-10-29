@@ -1,0 +1,59 @@
+Counts are W:/C:/E: log lines, not unique defects. Full raw logs stay in the FPGA project.
+
+STAGE compile: W=2842; C=0; E=0
+Action compile: Real time elapsed is 0h:1m:47s
+Action compile: CPU time elapsed is 0h:0m:7s
+Action compile: Process CPU time elapsed is 0h:0m:7s
+Action compile: Peak memory pool usage is 488 MB
+ConstantProbeLoop	762
+Verilog-2008	693
+Verilog-2020	480
+Verilog-2038	375
+Sdm-2000	181
+Verilog-2023	122
+Sdm-2003	119
+Verilog-2039	41
+Verilog-2019	25
+Public-4030	21
+Verilog-2006	10
+Verilog-2036	4
+Verilog-2021	3
+Sdm-2010	3
+Sdm-2014	2
+Uncoded warning	1
+
+STAGE synthesize: W=7899; C=62; E=0
+Action synthesize: Real time elapsed is 0h:5m:1s
+Action synthesize: CPU time elapsed is 0h:0m:27s
+Action synthesize: Process CPU time elapsed is 0h:0m:30s
+Action synthesize: Peak memory pool usage is 2,507 MB
+Public-4008	4808
+Uncoded warning	2897
+Timing-4087	99
+Timing-4086	67
+ConstraintEditor-2002	37
+Uncoded fanout warning	26
+ConstraintEditor-2009	24
+Adm-4019	2
+DRC-2018	1
+
+STAGE device_map: W=19; C=0; E=0
+Action dev_map: Real time elapsed is 0h:0m:52s
+Action dev_map: CPU time elapsed is 0h:0m:4s
+Action dev_map: Process CPU time elapsed is 0h:0m:5s
+Action dev_map: Peak memory pool usage is 1,448 MB
+Public-4008	11
+DeviceMap-4011	8
+
+STAGE place_route: W=0; C=69; E=2
+Action pnr: Real time elapsed is 0h:23m:7s
+Action pnr: CPU time elapsed is 0h:2m:34s
+Action pnr: Process CPU time elapsed is 0h:4m:19s
+Action pnr: Peak memory pool usage is 6,581 MB
+ConstraintEditor-2002	37
+ConstraintEditor-2009	24
+Route-2014	8
+Route-0038	1
+Route-0008	1
+
+report_timing/gen_bit_stream: not run after routing failure.

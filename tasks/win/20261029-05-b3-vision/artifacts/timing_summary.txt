@@ -1,0 +1,12 @@
+未取得：PnR因Route-0038/Route-0008失败，没有完成布线的pnr.adf和路后report_timing。已有综合单角预估和全部172条路径另存，不作为路后WNS/TNS/WHS/THS，也不宣称满足每时钟200条/逐级20条要求。
+
+Placement log raw diagnostics (units not stated on these lines; not per-clock STA):
+	Initial slack -24665.
+	Final slack -13191.
+Worst slack after global placement is -8307
+Worst slack after post global placement is -9010
+Worst slack before Replication Place is -9282.
+Worst slack before detailed placement is -9282, TNS before detailed placement is -38776428. 
+Worst slack after detailed placement is -8253, TNS after detailed placement is -35213705. 
+Worst slack is -8253, TNS after placement is -35950609.
+Worst slack is -8253, TNS before route is -35950609.

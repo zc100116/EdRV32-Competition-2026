@@ -1,0 +1,20 @@
+1083: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_678:OSHIFTIN0.
+1084: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_678:OSHIFTIN1.
+1085: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_702:OSHIFTIN0.
+1086: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_702:OSHIFTIN1.
+1087: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_726:OSHIFTIN0.
+1088: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_726:OSHIFTIN1.
+1089: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_750:OSHIFTIN0.
+1090: C: Route-2014: Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_750:OSHIFTIN1.
+1092: Total net: 80380, route succeed net: 80379
+1098: E: Route-0038: General design net could not be routed.
+1099: Total routing takes 853.38 sec.
+1108: | Use of APM                        | 153       | 740           | 21                 
+1111: | Use of CLMA                       | 12620     | 30075         | 42                 
+1115: | Use of CLMS                       | 3974      | 9875          | 41                 
+1123: | Use of DRM                        | 109       | 415           | 27                 
+1165: E: Route-0008: Design cannot be routed.
+1166: Action pnr: Real time elapsed is 0h:23m:7s
+1167: Action pnr: CPU time elapsed is 0h:2m:34s
+1168: Action pnr: Process CPU time elapsed is 0h:4m:19s
+1170: Action pnr: Peak memory pool usage is 6,581 MB

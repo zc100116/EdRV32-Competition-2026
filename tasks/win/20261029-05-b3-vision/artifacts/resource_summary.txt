@@ -1,0 +1,169 @@
+SYNTHESIS PRIMITIVE COUNTS:
+Cell Usage:
+GTP_APM_E2                  153 uses
+GTP_CLKBUFG                   3 uses
+GTP_CLKBUFM                   1 use
+GTP_CLKBUFR                   2 uses
+GTP_CLKPD                     1 use
+GTP_DDC_E2                    7 uses
+GTP_DFF                    1128 uses
+GTP_DFF_C                  6092 uses
+GTP_DFF_CE                13788 uses
+GTP_DFF_E                 24578 uses
+GTP_DFF_P                   267 uses
+GTP_DFF_PE                  874 uses
+GTP_DFF_R                   106 uses
+GTP_DFF_RE                  765 uses
+GTP_DFF_S                   106 uses
+GTP_DFF_SE                   96 uses
+GTP_DLL_E2                    4 uses
+GTP_DRM18K_E1                12 uses
+GTP_DRM36K_E1               103 uses
+GTP_GPLL                      5 uses
+GTP_GRS                       1 use
+GTP_IDDR_E1                   5 uses
+GTP_INV                      29 uses
+GTP_IOCLKDIV_E3               2 uses
+GTP_IODELAY_E2               63 uses
+GTP_ISERDES_E2               32 uses
+GTP_LUT1                     94 uses
+GTP_LUT2                    776 uses
+GTP_LUT3                   1364 uses
+GTP_LUT4                   2465 uses
+GTP_LUT5                   8520 uses
+GTP_LUT6                  14658 uses
+GTP_LUT6CARRY             14872 uses
+GTP_LUT6D                  6872 uses
+GTP_MUX2LUT7               3324 uses
+GTP_MUX2LUT8                721 uses
+GTP_ODDR_E1                   6 uses
+GTP_OSERDES_E2               87 uses
+GTP_PPLL                      2 uses
+GTP_RAM32X1DP                 5 uses
+GTP_RAM32X2DP               341 uses
+
+I/O ports: 127
+GTP_INBUF                  35 uses
+GTP_INBUFDS                 1 use
+GTP_IOBUF                  35 uses
+GTP_IOBUFCO                 4 uses
+GTP_OUTBUF                 17 uses
+GTP_OUTBUFDS                4 uses
+GTP_OUTBUFT                30 uses
+GTP_OUTBUFTCO               1 use
+
+Mapping Summary:
+Total LUTs: 49967 of 159800 (31.27%)
+	LUTs as dram: 346 of 39500 (0.88%)
+	LUTs as logic: 49621
+Total Registers: 47800 of 319600 (14.96%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 109.0 of 415 (26.27%)
+
+APMs:
+Total APMs = 153.00 of 740 (20.68%)
+
+Total I/O ports = 137 of 400 (34.25%)
+
+
+
+DEVICE MAP (successful mapping stage):
+Device Utilization Summary:
++-------------------------------------------------------------------------+
+| Logic Utilization     | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------+
+| APM                   | 153       | 740           | 21                 
+| FF                    | 47789     | 319600        | 15                 
+| LUT                   | 49963     | 159800        | 32                 
+| Distributed RAM       | 346       | 39500         | 1                  
+| DRM                   | 109       | 415           | 27                 
+| IO                    | 137       | 400           | 35                 
+| RCKB                  | 2         | 40            | 5                  
+| SCANCHAIN             | 0         | 1             | 0                  
+| USCM                  | 8         | 32            | 25                 
+| CCS                   | 1         | 1             | 100                
+| ADC                   | 0         | 1             | 0                  
+| DDR_PHY               | 7         | 40            | 18                 
+| HSSTLP                | 0         | 2             | 0                  
+| GPLL                  | 5         | 10            | 50                 
+| PPLL                  | 2         | 10            | 20                 
+| DDRPHY_CPD            | 1         | 20            | 5                  
+| HCKB                  | 0         | 120           | 0                  
+| IOCKB                 | 0         | 40            | 0                  
+| MRCKB                 | 1         | 20            | 5                  
+| PCIE                  | 0         | 1             | 0                  
+| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 
+| ANALOG                | 0         | 1             | 0                  
+| TSERDES               | 14        | 80            | 18                 
+| KEYRAM                | 0         | 1             | 0                  
++-------------------------------------------------------------------------+
+
+FAILED PNR PHYSICAL UTILIZATION (not a successful routed result):
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0                  
+| Use of ANALOG                     | 0         | 1             | 0                  
+| Use of APM                        | 153       | 740           | 21                 
+| Use of BKCL                       | 6         | 10            | 60                 
+| Use of CCS                        | 1         | 1             | 100                
+| Use of CLMA                       | 12620     | 30075         | 42                 
+|   FF                              | 36490     | 240600        | 16                 
+|   LUT                             | 37822     | 120300        | 32                 
+|   LUT-FF pairs                    | 18823     | 120300        | 16                 
+| Use of CLMS                       | 3974      | 9875          | 41                 
+|   FF                              | 11299     | 79000         | 15                 
+|   LUT                             | 11909     | 39500         | 31                 
+|   LUT-FF pairs                    | 5560      | 39500         | 15                 
+|   Distributed RAM                 | 346       | 39500         | 1                  
+| Use of DDRPHY_CPD                 | 1         | 20            | 5                  
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20                 
+| Use of DDR_PHY                    | 7         | 40            | 18                 
+| Use of DRM                        | 109       | 415           | 27                 
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0                  
+| Use of GPLL                       | 5         | 10            | 50                 
+| Use of GSEB                       | 0         | 512           | 0                  
+| Use of HARD0                      | 4391      | 25050         | 18                 
+| Use of HCKB                       | 28        | 120           | 24                 
+|  HCKB dataused                    | 0         | 120           | 0                  
+| Use of HCKMUX_TEST                | 0         | 10            | 0                  
+| Use of HSSTLP                     | 0         | 2             | 0                  
+| Use of IO                         | 137       | 400           | 35                 
+|   IOBD                            | 69        | 192           | 36                 
+|   IOBS                            | 68        | 208           | 33                 
+| Use of IOCKB                      | 0         | 40            | 0                  
+| Use of IOCKMUX_TEST               | 0         | 10            | 0                  
+| Use of IOLHR                      | 136       | 500           | 28                 
+| Use of KEYRAM                     | 0         | 1             | 0                  
+| Use of MFG_TEST                   | 0         | 1             | 0                  
+| Use of MRCKB                      | 1         | 20            | 5                  
+| Use of MRCKMUX_TEST               | 0         | 10            | 0                  
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0                  
+| Use of PCIE                       | 0         | 1             | 0                  
+| Use of PCKMUX_TEST                | 0         | 20            | 0                  
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0                  
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0                  
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0                  
+| Use of PPLL                       | 2         | 10            | 20                 
+| Use of PREGMUXC_TEST              | 0         | 3             | 0                  
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0                  
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0                  
+| Use of RCKB                       | 4         | 40            | 10                 
+|  RCKB dataused                    | 2         | 40            | 5                  
+| Use of RCKMUX_TEST                | 0         | 10            | 0                  
+| Use of SCANCHAIN                  | 0         | 1             | 0                  
+| Use of SCKMUX_TEST                | 0         | 20            | 0                  
+| Use of SFB                        | 0         | 5075          | 0                  
+| Use of SPAD                       | 0         | 8             | 0                  
+| Use of TSERDES                    | 14        | 80            | 18                 
+| Use of USCM                       | 10        | 32            | 32                 
+|  USCM dataused                    | 0         | 32            | 0                  
+| Use of USCMMUX_TEST               | 0         | 32            | 0                  
++-------------------------------------------------------------------------------------+
+
+Synthesis logical hierarchy top [LUT,FF,distributed RAM,APM,DRM36K equivalent]:
+[49967, 47800, 346, 153, 109]
+Physical CLMA/CLMS usage and logical SNR totals have different packing conventions.

@@ -1,0 +1,8 @@
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_678:OSHIFTIN0.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_678:OSHIFTIN1.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_702:OSHIFTIN0.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_702:OSHIFTIN1.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_726:OSHIFTIN0.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_726:OSHIFTIN1.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_750:OSHIFTIN0.
+Design net _$$_GND_$$_ can not be routed from driver const_inst:const_pin to load IOLHR_16_750:OSHIFTIN1.
