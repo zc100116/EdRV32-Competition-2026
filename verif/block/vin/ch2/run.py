@@ -16,6 +16,7 @@ from reference import generate, selftest
 
 def main():
     mode = sys.argv[1]
+    selected = sys.argv[2] if len(sys.argv) == 3 else mode
     out = ROOT / 'build/vin_ch2' / mode
     selftest()
     generate(out, mode == 'full')
@@ -29,7 +30,7 @@ def main():
                    '-CFLAGS', optimization, '--top-module', 'edrv32_vin_ch2_tb',
                    '--Mdir', str(out / 'obj'), '-o', 'sim', '+define+SIM_MODE',
                    *flags, *expand_files(files)]
-    commands = [compile_cmd, [str(out / 'obj/sim'), f'+DIR={out}', f'+CASE={mode}']]
+    commands = [compile_cmd, [str(out / 'obj/sim'), f'+DIR={out}', f'+CASE={selected}']]
     for label, command in zip(('compile', 'run'), commands):
         log = out / f'{label}.log'
         with log.open('w') as stream:

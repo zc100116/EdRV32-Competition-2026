@@ -363,9 +363,8 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         load_image(1);
         configure(0, 2);
         configure(2, 2);
-        // VI-20 checks both complete surfaces with an unstalled P1. CH2 always
-        // consumes memory frames (vin 2.8); write stalls may legitimately drop
-        // CH2 while CH0 completes. VI-21 checks that overflow behavior.
+        // vin v0.3: memory frames use CH2 backpressure. VI-21 adds write-stop
+        // and top-padding pacing checks to this complete-frame baseline.
         u_memory.check_read_ready = 1;
         forbid_urgent = 1;
         write_reg('h004, 1);
@@ -384,70 +383,154 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         $display("PASS VI-20 memory -> CH0/CH2, no read backpressure");
     endtask
 
-    // VI-21's three public-interface scenarios were clarified by the coordinator.
-    task automatic vi21();
+    // vin v0.3: cameras still drop on valid-data overflow; memory frames pause.
+    task automatic vi21_camera_overflow(input bit both_i);
         int before_pixels;
         bit [31:0] status;
-        for (int scenario = 0; scenario < 3; scenario++) begin
-            current_test = 21;
-            reset();
-            load_image(0);
-            configure(2, scenario == 1 ? 2 : 0);
-            if (scenario == 2) configure(0, 0);
-            forbid_urgent = scenario != 2;
-            if (scenario == 1) write_reg('h004, 1);
-            else warm_camera();
-            u_memory.stop_write = 1;
-            before_pixels = camera_pixels;
-            if (scenario == 1) begin
-                u_memory.check_read_ready = 1;
-                start_memory();
-                // CH2 must continue accepting the entire input while writes are stopped.
-                wait_irq(1);
-                // vin 2.3: DONE releases the input surface after the last DMA
-                // read; buffered pixels may still be awaiting source output.
-                for (int cycle = 0; cycle < 300000; cycle++) begin
-                    read_reg('h120, status);
-                    if (status == 0) break;
-                end
-                equal("memory output drained during write stop", 0, status);
-                check_reg('h048, 1);
-                equal("read completed during write stop", 0, 32'(u_memory.aw_count));
-            end else begin
-                u_cam0.send_frame(width, height, image);
-                equal("camera not backpressured", 32'(width*height),
-                    32'(camera_pixels-before_pixels));
-            end
-            wait_irq(2);
-            check_reg('h060, 1);
-            check_reg('h054, 0);
-            check_reg('h320, 0);
-            check_reg('h324, 0);
-            if (scenario != 2) check_error(3);
-            else begin
-                check_reg('h058, 1);
-                check_reg('h04c, 0);
-            end
-            read_reg('h010, status);
-            equal("no dropped-frame completion", 0, status & 'h204);
-            u_memory.stop_write = 0;
-            wait_idle();
-            check_reg('h054, 0);
-            if (scenario == 2) check_reg('h04c, 0);
-            read_reg('h010, status);
-            equal("no completion after abort drain", 0, status & 'h204);
-            write_reg('h010, 'h3ff);
-            load_image(2);
-            if (scenario == 1) start_memory();
-            else u_cam0.send_frame(width, height, image);
-            if (scenario == 2) complete(0, 0, 0, 1);
-            complete(2, 0, scenario == 1 ? 2 : 0, 1);
-            check_reg('h060, 1);
-            check_reg('h014, 0);
-            check_reg('h054, 1);
-            wait_idle();
-            $display("PASS VI-21 scenario=%0d drop, drain, slot reuse, recovery", scenario);
+        current_test = 21;
+        reset();
+        load_image(0);
+        configure(2, 0);
+        if (both_i) configure(0, 0);
+        forbid_urgent = !both_i;
+        warm_camera();
+        u_memory.stop_write = 1;
+        before_pixels = camera_pixels;
+        u_cam0.send_frame(width, height, image);
+        equal("camera not backpressured", 32'(width*height),
+            32'(camera_pixels-before_pixels));
+        wait_irq(2);
+        check_reg('h060, 1);
+        check_reg('h054, 0);
+        check_reg('h320, 0);
+        check_reg('h324, 0);
+        if (!both_i) check_error(3);
+        else begin
+            check_reg('h058, 1);
+            check_reg('h04c, 0);
         end
+        read_reg('h010, status);
+        equal("no dropped-frame completion", 0, status & 'h204);
+        u_memory.stop_write = 0;
+        wait_idle();
+        check_reg('h054, 0);
+        if (both_i) check_reg('h04c, 0);
+        read_reg('h010, status);
+        equal("no completion after abort drain", 0, status & 'h204);
+        write_reg('h010, 'h3ff);
+        load_image(2);
+        u_cam0.send_frame(width, height, image);
+        if (both_i) complete(0, 0, 0, 1);
+        complete(2, 0, 0, 1);
+        check_reg('h060, 1);
+        check_reg('h014, 0);
+        check_reg('h054, 1);
+        wait_idle();
+        $display("PASS VI-21%c camera drop, drain, slot reuse, recovery", both_i ? "c" : "a");
+        $fflush();
+    endtask
+
+    task automatic vi21_memory_backpressure();
+        int paused_reads;
+        current_test = 21;
+        reset();
+        load_image(0);
+        configure(2, 2);
+        forbid_urgent = 1;
+        u_memory.check_read_ready = 1;
+        write_reg('h004, 1);
+        u_memory.stop_write = 1;
+        start_memory();
+        // Long enough to fill the write FIFO and both memory-source input lines.
+        clocks(20000);
+        check_reg('h060, 0);
+        check_reg('h014, 0);
+        check_reg('h120, 1);
+        check_reg('h054, 0);
+        equal("VI-21b no AW during write stop", 0, 32'(u_memory.aw_count));
+        paused_reads = u_memory.ar_count;
+        clocks(4096);
+        equal("VI-21b memory-source reads paused", 32'(paused_reads), 32'(u_memory.ar_count));
+        u_memory.stop_write = 0;
+        complete(2, 0, 2, 0);
+        wait_irq(1);
+        check_reg('h048, 1);
+        check_reg('h060, 0);
+        check_reg('h014, 0);
+        wait_idle();
+        $display("PASS VI-21b memory pauses, RREADY stays high, complete CH2 bytes");
+        $fflush();
+    endtask
+
+    task automatic vi21_padding();
+        current_test = 21;
+        reset();
+        load_image(0);
+        configure(2, 0);
+        forbid_urgent = 1;
+        warm_camera();
+        u_memory.stop_write = 1;
+        fork
+            begin
+                u_cam0.send_frame(width, height, image);
+            end
+            begin : release_before_active_output
+                bit [31:0] frames;
+                // PERF0 marks the source SOF through the public APB interface.
+                frames = 0;
+                for (int cycle = 0; cycle < 300000 && frames == 0; cycle++)
+                    read_reg('h040, frames);
+                equal("VI-21d source SOF", 1, frames);
+                clocks(1500);
+                check_reg('h060, 0);
+                check_reg('h014, 0);
+                u_memory.stop_write = 0;
+            end
+        join
+        complete(2, 0, 0, 0);
+        check_reg('h060, 0);
+        check_reg('h014, 0);
+        wait_idle();
+        $display("PASS VI-21d top padding paced while writes stop for 1500 cycles");
+        $fflush();
+    endtask
+
+    task automatic vi21_memory_fullspeed();
+        current_test = 21;
+        reset();
+        load_image(0);
+        configure(0, 2);
+        configure(2, 2);
+        forbid_urgent = 1;
+        u_memory.check_read_ready = 1;
+        write_reg('h004, 1);
+        start_memory();
+        wait_irq('h204);
+        check_reg('h058, 0);
+        check_reg('h060, 0);
+        check_reg('h014, 0);
+        complete(0, 0, 2, 0);
+        complete(2, 0, 2, 0);
+        check_reg('h224, 0);
+        check_reg('h324, 0);
+        wait_irq(1);
+        check_reg('h048, 1);
+        wait_idle();
+        $display("PASS VI-21e full-speed memory -> CH0/CH2, no overflow, complete bytes");
+        $fflush();
+    endtask
+
+    task automatic vi21();
+        if (selected_case == "full" || selected_case == "21" || selected_case == "21a")
+            vi21_camera_overflow(0);
+        if (selected_case == "full" || selected_case == "21" || selected_case == "21b")
+            vi21_memory_backpressure();
+        if (selected_case == "full" || selected_case == "21" || selected_case == "21c")
+            vi21_camera_overflow(1);
+        if (selected_case == "full" || selected_case == "21" || selected_case == "21d")
+            vi21_padding();
+        if (selected_case == "full" || selected_case == "21" || selected_case == "21e")
+            vi21_memory_fullspeed();
     endtask
 
     task automatic vi22();
@@ -591,6 +674,7 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
     task automatic run_test(input int number_i);
         requested = number_i;
         $display("VI-%0d BEGIN time=%0t", requested, $time);
+        $fflush();
         wait (finished == number_i);
         requested = 0;
         clocks(1);
