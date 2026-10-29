@@ -54,13 +54,16 @@
 | B2-5b | 调试工具 YOLO 页：板上检测框显示、参考模型与后处理参考比对；视频页（网口视频接收、检测框叠加、输出选择，设计记录 3.4a、3.6） | Codex · GPT-6.1 Sol | B2-4 后处理参考 | 参考比对用例 | — | [ ] |
 | B2-6 | Windows：生成 DDR3、PLL 等 IP，PDS 综合布局布线（完整 SoC 时序、资源）；上板 S2、S1、监控；B1-8 BIOS 烧录和经 BIOS 运行 tuned CoreMark；调试工具 GUI 确认 | 用户 + Windows Codex | B2-1–B2-5 | 串口日志、截图、监控 CSV、报告 | `tasks/win/<日期>-board-b2/` | [ ] |
 
-### B3（B2 上板后细化）
+### B3（设计记录 `2026-10-29-rnd-disp.md`；规格写好后细化为任务）
 
 | 编号 | 内容 | 执行者 | 依赖 | 状态 |
 |---|---|---|---|---|
-| B3-1 | RND 规格、开发、验证；DISP 图层合成方式（SoC 8.8） | 协调者 + Codex | B2 | [ ] |
-| B3-2 | S3 图形界面（LVGL + RND）；S1 改为 RND 画框 | Codex | B3-1 | [ ] |
-| B3-3 | Windows：上板 | 用户 + Windows Codex | B3-1、B3-2 | [ ] |
+| B3-0 | RND/DISP 设计决策：DISP 两层扫描叠加（L0 RGB565 带卷轴，L1 ARGB8888 非预乘）、RND 命令集 T2、游戏路线 G3、预算初值（VIN+PIX+DISP 12K、RND 10K，[待定]）、LVGL 子模块 | 协调者 + 用户 | — | [x] |
+| B3-1 | 规格：`disp-spec.md` v0.3、`rnd-spec.md` v0.1、SoC 8.8/9.3/10 修订；验证方案 `disp-testplan`、`rnd-testplan`；实施方案 `rnd-plan.md` | 协调者 | B3-0 | [ ] |
+| B3-2 | DISP 两层 RTL 与验证；RND RTL 与验证（移植旧工程 alpha 流水线、圆角、字形、位图、模糊；新增 TILEMAP、索引色、混合模式、BORDER） | Codex | B3-1 | [ ] |
+| B3-3 | 软件：LVGL 子模块和绘制单元驱动、DDR 资源段、S3 界面；S1 改为 RND 画框进 L1；网口发送帧按设计记录 3.6 | Codex | B3-2 | [ ] |
+| B3-4 | 游戏：自制横版游戏（TILEMAP + L0 卷轴 + L1 精灵）；NES 模拟器纯软件移植并实测帧率（效果不好时另写设计记录评估硬件 PPU 辅助） | Codex | B3-2 | [ ] |
+| B3-5 | Windows：PDS 时序资源（定稿预算）、上板 S1–S3 和游戏 | 用户 + Windows Codex | B3-2–B3-4 | [ ] |
 
 ## 4. 规格定稿项
 
@@ -86,3 +89,4 @@
 | 2026-10-28 | v0.1 | 初稿：用户要求开始上板，B1–B3 三个阶段，clk_sys 暂用 100 MHz |
 | 2026-10-28 | v0.2 | 用户上板反馈：监控程序输入按行读取、按键测试改为 10 s 内等待按下松开；增加 B1-8 BIOS、B1-9 调试工具（SoC v0.14） |
 | 2026-10-29 | v0.3 | 用户要求：B2 用完整 SoC（含 NPU、ETH），跑通 YOLO，DDR 带宽经网口实时监控并在调试工具可视化，BIOS 上板验证并入 B2；B2 拆为 B2-1a–B2-6（设计记录 `2026-10-29-b2-software.md`）；原 B3 内容并入 B2，B3 改为 RND 与 S3 |
+| 2026-10-29 | v0.4 | B3 按 RND/DISP 设计记录（`2026-10-29-rnd-disp.md`，用户决定 Q1–Q4）拆为 B3-0–B3-5 |
