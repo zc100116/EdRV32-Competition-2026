@@ -143,13 +143,14 @@ runner 的第二个参数也可选择子场景，例如 `python3 verif/block/vin
 
 ## v0.3 反压追加验证（B2-1d）
 
-用户通过协调者确认 VIN v0.3（规格提交 `6537bc8`），追加测试提交 `48b3cb9`。
-测试在独立验证分支编写，未读取被测 RTL。旧 RTL 的失败证据和修复后结果将分别
-记录；旧 RTL 结果不能作为 v0.3 通过证据。
+用户通过协调者确认 VIN v0.3（规格提交 `6537bc8`），追加测试现位于 `aaa86c2`。
+测试在独立验证分支编写，未读取被测 RTL。旧 RTL 的失败证据和修复后结果分别
+记录如下；旧 RTL 结果不能作为 v0.3 通过证据。
 
 ### 修复前：v0.2 RTL
 
-测试源码提交 `48b3cb9`，Verilator 5.020，`-Wall -j 1 -CFLAGS -O1`。
+实测的原始测试源码提交 `48b3cb9`（rebase 后的同内容提交为 `aaa86c2`），
+Verilator 5.020，`-Wall -j 1 -CFLAGS -O1`。
 先用 runner 生成参考数据、构建并运行 (b)，再复用同一二进制逐项运行 (d)(e)：
 
 ```sh
@@ -174,5 +175,45 @@ build/vin_ch2/full/obj/sim +DIR=$PWD/build/vin_ch2/full +CASE=21e
 
 原始证据：`build/vin_ch2/flow/old-21{b,d,e}.log`，(b) runner 日志
 `build/vin_ch2/flow/old-21b-runner.log`。`old-sim` 是该次修复前二进制的保留副本；
-生成物不入库。提交 `4ac07cd` 随后把五个子场景分到独立定时进程，避免把全部
+生成物不入库。提交 `5d42962` 随后把五个子场景分到独立定时进程，避免把全部
 大型逐字节记分板展开到同一个 C++ 协程；不改变激励或判据，lint 为 0 告警。
+
+当前分支已 rebase 到修复提交 `40743c6`；上述新提交的父版本已含修复，
+不能直接 checkout 它们来复现旧 RTL 失败。需要复现时，在临时工作目录中
+checkout 规格提交 `6537bc8`（尚未含修复的 RTL），再从 `aaa86c2` 恢复
+`verif/block/vin/ch2/`，运行上面的命令。
+
+### 修复后：v0.3 RTL
+
+基于协调者修复提交 `40743c6`，运行以下完整 VIN 命令；全程只运行一个仿真：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/regress.py full --path verif/block/vin -j 1
+```
+
+| 目录 | 结果 | 墙钟时间（含构建，秒） |
+|---|---|---:|
+| `verif/block/vin/ch2/full` | PASS：VI-19–23，含 VI-21a/b/c/d/e | 1122 |
+| `verif/block/vin/ch2/selftest` | 首次 lint FAIL；修正后单独复跑 PASS | 2 / 12.79 |
+| `verif/block/vin/ch2` | PASS | 60 |
+| `verif/block/vin/full` | PASS：VI-01–17，VI-17 全部 10 个 seed | 1684 |
+| `verif/block/vin/pix_integration` | PASS | 38 |
+| `verif/block/vin/selftest` | PASS | 15 |
+| `verif/block/vin` | PASS | 236 |
+
+首次完整命令为 6 PASS / 1 FAIL，总耗时 3157.01 s；日志为
+`build/vin_ch2/flow/postfix-parent-full.log`。唯一失败属于测试平台：
+HARNESS_SELFTEST=1 会移除功能进程，因此它不读取 `vi21_requested`。
+提交 `105ed67` 仅对该声明标明这一配置下的预期未使用，不改变激励或判据；
+功能和 selftest 两种配置的 `--lint-only --timing -Wall` 均为 0 告警。
+原始告警保存在 `build/vin_ch2/flow/selftest-initial-lint.log`。
+
+修正后执行 `python3 tools/regress.py full --path verif/block/vin/ch2/selftest -j 1`，
+结果 1 PASS / 0 FAIL，耗时 12.79 s，日志为 `build/vin_ch2/flow/selftest-fixed.log`。
+七个目录的最终结果均为 PASS；没有重复运行已经通过的六个目录。
+
+VI-21b/d 的旧版失败断言在本轮均通过；VI-21e 继续通过。所有完整 CH2
+字节比较、CH0/CH2 frame_id、RREADY 和相机溢出恢复检查均保留。
+CH2 功能日志为 `build/vin_ch2/full/run.log`，双配置 lint 日志为
+`build/vin_ch2/flow/lint-{full,selftest}.log`，风格检查为 0 告警。

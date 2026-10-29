@@ -4,25 +4,43 @@ The coordinator reduced B2-1d to SC-02 (existing), SC-05 and SC-06 after the
 user's decision. SC-01, SC-03, SC-04 and SC-07 through SC-11 are archived in Git
 and are no longer part of this working tree or regression discovery.
 
-| Retained item | Directory | Current evidence |
-|---|---|---|
-| SC-02 | `../soc_connect` | Existing connection smoke, unchanged |
-| SC-05 | `../sc_05_s1` | v0.2 historical FAIL, 111 s; v0.3 retest pending RTL integration |
-| SC-06 | `../sc_06_eth_rx` | PASS after cleanup, 480.26 s total, 298.490 s simulation |
+| Retained item | Directory | Current evidence | Timeout |
+|---|---|---|---|
+| SC-02 | `../soc_connect` | Existing connection smoke, unchanged and not rerun by this task | Existing |
+| SC-05 | `../sc_05_s1` | PASS on VIN v0.3, 150.58 s total, 63.197 s simulation | 300 s |
+| SC-06 | `../sc_06_eth_rx` | PASS after cleanup, 480.26 s total, 298.490 s simulation | 600 s |
 
 The SC-05 failure is documented in
 [`2026-10-29-soc-sc05-ch2-overflow.md`](../../../docs/debug/2026-10-29-soc-sc05-ch2-overflow.md).
 The user approved VIN v0.3 memory-source backpressure and paced padding; its
-RTL implementation is assigned separately. DDR timing and required comparisons
-remain unchanged. SC-06 was rerun after scope reduction with source `8934bfa`;
+RTL implementation was integrated in coordinator commit `40743c6`. DDR timing
+and required comparisons remain unchanged. SC-06 was rerun after scope reduction
+with original pre-rebase source `8934bfa` (verification content now `26a52ba`);
 its regression log is `build/soc_full/reduced/sc06-regress.log`. The SoC bench
 and both software programs passed lint/build checks after cleanup.
 
+SC-05 was rerun with source `105ed67`, based on the VIN v0.3 correction.
+Its full CH2 and NPU comparisons each checked 983040 bytes, at simulation times
+4.430300 ms and 7.961000 ms respectively. VIN overflow/error, matching CH0/CH2
+frame IDs, VIN/NPU PLIC delivery and NPU DONE_COUNT=1 all passed. The result is
+`build/soc_full/reduced/sc05-postfix-regress.log`; detailed UART/model output is
+`build/soc_full/sc_05_s1/run.log`. Its timeout is twice the measured total,
+rounded to 300 seconds; SC-06 retains 600 seconds for its measured 480-second run.
+
+The requested full VIN command also ran against the correction. Six directories
+passed immediately; CH2 selftest first failed on an unused test-dispatch signal,
+then passed its targeted rerun after a scoped lint annotation (12.79 s). All seven
+directories have final passing results; the initial whole command was 6 PASS /
+1 FAIL, not a clean seven-pass invocation. Detailed per-directory times, the
+exact commands and VI-21b/d/e results are in
+[`VIN CH2 README`](../../block/vin/ch2/README.md#修复后v03-rtl).
+No stimulus or functional comparison was weakened to fix that lint warning.
+
 ## Archived tests
 
-Commit `31cdfbd` contains all implemented tests before scope reduction;
-`09227de` introduced the complete suite, `338dad3` includes the capture-control
-and boot-timeout adjustments, and `2a2a18a` adds SC-05 failure diagnostics.
+Commit `38c7901` contains all implemented tests before scope reduction;
+`6975d9a` introduced the complete suite, `6463fa2` includes the capture-control
+and boot-timeout adjustments, and `a17f1e6` adds SC-05 failure diagnostics.
 The archived tests have not been accepted as passing tests.
 
 | Item | Archived verification directory | Archived software directory |
@@ -39,13 +57,18 @@ The archived tests have not been accepted as passing tests.
 Recover a selected directory from that commit for a targeted investigation:
 
 ```sh
-git restore --source=31cdfbd -- verif/soc/sc_03_s2 sw/tests/soc/sc_03_s2
+git restore --source=38c7901 -- verif/soc/sc_03_s2 sw/tests/soc/sc_03_s2
 ```
 
 The archived testbench supplements were shared under `verif/soc/common/`, and
 software helpers were shared under `sw/tests/soc/`; recover the corresponding
-helpers from `31cdfbd` as required by the selected test. No SC-08/09 port
+helpers from `38c7901` as required by the selected test. No SC-08/09 port
 statistics were measured before those tests were removed from scope.
+
+| Archived item | MEM_XBAR per-port statistics | urgent count |
+|---|---|---|
+| SC-08 | Not measured: removed from active scope | Not measured |
+| SC-09 | Not measured: removed from active scope | Not measured |
 
 ## Retained environment
 
