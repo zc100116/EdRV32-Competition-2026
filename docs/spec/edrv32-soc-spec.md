@@ -421,21 +421,23 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 
 所有引擎（VIN、PIX、GEO、RND、DISP、NPU、ETH、MEM_XBAR、PERF_MON）都使用以下公共寄存器布局，偏移 0x100 以后是各模块私有寄存器，由模块规格定义。
 
-| 偏移 | 名称 | 访问 | 说明 |
-|---|---|---|---|
-| 0x000 | ID | RO | [31:16] 模块类型码，[15:0] 版本 |
-| 0x004 | CTRL | RW | bit0 ENABLE，bit1 START（写 1 触发，读为 0），bit2 ABORT（写 1 触发），bit3 SOFT_RST（写 1 触发） |
-| 0x008 | STATUS | RO | bit0 BUSY，bit1 IDLE，bit2 ERROR |
-| 0x00C | IRQ_EN | RW | 中断使能，位定义与 IRQ_STAT 相同 |
-| 0x010 | IRQ_STAT | RW1C | bit0 DONE，bit1 ERROR，bit2 FRAME，[31:8] 模块私有 |
-| 0x014 | ERR_CODE | RO | 最近一次错误的代码，写 IRQ_STAT.ERROR 清零时一并清除 |
-| 0x020 | DESC_BASE | RW | 描述符或命令列表的 DDR 物理地址（命令式引擎） |
-| 0x024 | DESC_COUNT | RW | 描述符或命令条数 |
-| 0x028 | DOORBELL | WO | 写入任意值启动执行描述符列表 |
-| 0x02C | DONE_COUNT | RO | 已完成的描述符或帧数（自增，回绕） |
-| 0x040–0x07C | PERF[0..15] | RO | 性能计数器，定义由模块规格给出 |
+| 偏移 | 名称 | 访问 | 复位值 | 说明 |
+|---|---|---|---|---|
+| 0x000 | ID | RO | 模块规格 | [31:16] TYPE 模块类型码（等于媒体 APB 槽号），[15:0] VERSION 版本 |
+| 0x004 | CTRL | RW | 0 | bit0 ENABLE，bit1 START（写 1 触发，读为 0），bit2 ABORT（写 1 触发，读为 0），bit3 SOFT_RST（写 1 触发，读为 0） |
+| 0x008 | STATUS | RO | 0x2 | bit0 BUSY，bit1 IDLE，bit2 ERROR |
+| 0x00C | IRQ_EN | RW | 0 | 中断使能，位定义与 IRQ_STAT 相同 |
+| 0x010 | IRQ_STAT | RW1C | 0 | bit0 DONE，bit1 ERROR，bit2 FRAME，[31:8] 模块私有 |
+| 0x014 | ERR_CODE | RO | 0 | 最近一次错误的代码，写 IRQ_STAT.ERROR 清零时一并清除 |
+| 0x020 | DESC_BASE | RW | 0 | 描述符或命令列表的 DDR 物理地址（命令式引擎） |
+| 0x024 | DESC_COUNT | RW | 0 | 描述符或命令条数 |
+| 0x028 | DOORBELL | WO | — | 写入任意值启动执行描述符列表；读为 0 |
+| 0x02C | DONE_COUNT | RO | 0 | 已完成的描述符或帧数（自增，回绕） |
+| 0x040–0x07C | PERF[0..15] | RO | 0 | 性能计数器，定义由模块规格给出；模块规格没有定义的编号读为 0 |
 
 规则：
+- **复位值**：上表的复位值适用于所有引擎，模块规格另有规定的除外（例如 DISP 的 DONE_COUNT 等于 FRAME_CNT）。
+- **只写寄存器**：访问类型为 WO 的寄存器（公共的 DOORBELL 和各模块私有的 WO 寄存器）读为 0。不使用的公共寄存器同样读为 0、写忽略。
 - **ABORT**：引擎停止接收新工作，等待所有已发出的 AXI 事务全部完成后，回到 IDLE。ABORT 不得留下未完成的总线事务。
 - **"下一帧生效"的寄存器**：采用影子寄存器，在模块规定的帧边界（SOF 或 VBlank）一次性生效，模块规格必须指明哪些寄存器属于这一类。
 
@@ -733,3 +735,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-29 | v0.15 | 3.3、3.5：固定 GPIO0 位分配（bit0–3 KEY1–4、bit4–8 LED0–4、bit12–15 两路摄像头 pwdn/rst_n），接上开发板全部 4 个用户按键和 5 个 LED（用户确认 2026-10-29，B2-1a 问答） |
 | 2026-10-29 | v0.15 | 澄清（B2-1a 问答，不改变行为）：3.3、3.4 的三态缩写写全为 `_o`、`_oe_o`、`_i`，与系统子系统、ETH 端口一致 |
 | 2026-10-29 | v0.16 | RND/DISP（设计记录 `2026-10-29-rnd-disp.md`，用户决定 Q1–Q4）：1.2 三个场景改为 DISP 两层叠加（S3 LVGL 画在 L0）；5.2 X5/X6 增加 L1 扫描 FIFO 和本帧扫描参数握手；7.3 format 1 改为非预乘 ARGB8888；8.8 RND 命令集 T2、图层合成由 DISP 完成、DISP 两层；9.3 VIN+PIX+DISP 12K [待定]、RND 10K [待定]，按 B3 PDS 实测定稿；第 10 节删去 RND/DISP 行（用户确认 2026-10-29） |
+| 2026-10-29 | v0.16 | 寄存器复位值回填（B2-1f 调查 `docs/reports/2026-10-29-regs-reset-survey.md`，与 RTL 一致，草案待用户确认）：7.1 公共寄存器表增加复位值列；ID 位域命名 TYPE/VERSION；WO 寄存器、未定义的 PERF 编号读为 0 |

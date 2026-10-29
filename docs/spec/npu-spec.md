@@ -117,10 +117,10 @@ AXI256 不输出 `size/burst`（固定 32 B/拍、INCR，SoC 规格 4.2）。NPU
 
 ## 4. 寄存器
 
-公共寄存器 0x000–0x07C 见 SoC 规格 7.1：`ID` = 0x0006_0001（模块类型码 6，等于媒体 APB 槽号）；`CTRL.START` 和 `STATUS.FRAME` 不使用；命令式引擎用 `DESC_BASE`、`DESC_COUNT`、`DOORBELL`、`DONE_COUNT`。
+公共寄存器 0x000–0x07C 见 SoC 规格 7.1：`ID` = 0x0006_0001（模块类型码 6，等于媒体 APB 槽号）；`CTRL.START` 和 `IRQ_STAT.FRAME` 不使用；命令式引擎用 `DESC_BASE`、`DESC_COUNT`、`DOORBELL`、`DONE_COUNT`。
 
 公共寄存器的行为：
-- 复位值全部为 0，`STATUS` 复位为 0x2（IDLE）。
+- 复位值按 SoC 规格 7.1（`ID` 见上，`STATUS` 复位为 0x2（IDLE），其余为 0）。
 - `CTRL.ENABLE` 不门控 `DOORBELL`。`STATUS.BUSY` = 1 时写 `DOORBELL` 被忽略。
 - `CTRL.SOFT_RST` 只在 IDLE 时生效，把寄存器块的全部寄存器（含 ENABLE、IRQ_EN、DESC_BASE、DESC_COUNT、各基址寄存器、DONE_COUNT、PERF）和控制状态恢复到复位值；片上存储内容不清除。`CTRL.ABORT`、`CTRL.SOFT_RST` 等触发位读出为 0。
 - 未定义的偏移读出 0，写入被忽略。`apb_pstrb_i` 被忽略，每次写都按完整 32 位处理。
@@ -314,3 +314,4 @@ AXI256 不输出 `size/burst`（固定 32 B/拍、INCR，SoC 规格 4.2）。NPU
 | 2026-10-27 | v0.2 | 依据设计记录 `2026-10-27-npu-datapath.md`（N-D0）第 10 项，用户确认：2.2 IN_C4 时输入宽度为 8 的倍数；2.3 量化中间位宽；2.5 引用改为 4.3；4.1 HALF_TAIL 与 IN_C4 组合语义、K_COUNT/WEIGHT_BLOCK_BYTES 计算式、ROW_SLOT_BEATS 为每 bank 项数；新增 4.3 权重格式，量化记录第 7 字节为 0；5.1 W3 按块装载时点、C4 行缓存展开；5.2 存储组织和 DRM 估算；5.4 流水级细化、层内不排空、内部接口；7 APM/DRM 估算 |
 | 2026-10-27 | v0.3 | 用户确认开发中已回答验证 worker 的初值（N-V1 问答）：第 3 节端口展开为具体信号；第 4 节 ID = 0x0006_0001、公共寄存器复位值和触发位/DOORBELL/SOFT_RST/未定义偏移/pstrb 行为、CUR_DESC 正常完成后的值；第 7、8 节整网规模改为 68 条描述符；第 9 节第 7 项 ID 类型码关闭 |
 | 2026-10-28 | v0.4 | 2 节：同一描述符的输入区、残差源区不得与输出区重叠（离线工具保证，NPU 不检查）；4 节：SOFT_RST 把寄存器块全部寄存器和控制状态恢复到复位值，片上存储不清除；按 N-W2 PDS 实测定稿 clk_npu 150 MHz、片上存储 157 DRM、APM 290（≤ 300）、DRM ≤ 170；帧率仍待定（报告 `docs/reports/2026-10-28-timing-npu.md`；用户确认） |
+| 2026-10-29 | v0.4 | 文字更正（B2-1f 调查，不改变行为，草案待用户确认）：第 4 节"STATUS.FRAME 不使用"改为 IRQ_STAT.FRAME；"复位值全部为 0"改为按 SoC 7.1（ID 除外） |

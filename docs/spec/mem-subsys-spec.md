@@ -117,11 +117,11 @@ ID = 0x0008_0001。公共寄存器：CTRL 读为 0、写忽略；STATUS 由内�
 | 0x110 | STAT_CTRL | WO | — | bit0 SNAPSHOT：所有统计计数器同一拍锁存到 0x400 起的读寄存器，锁存的是该拍更新前的值；bit1 CLEAR：所有统计计数器清零，CLEAR 优先于同拍的递增。两位同时写 1 时先锁存后清零 |
 | 0x120 | ERR_PORT | RO | 0 | 最近一次违规的端口号 |
 | 0x124 | ERR_ADDR | RO | 0 | 最近一次违规的地址 |
-| 0x128 | ERR_TYPE | RO | 0 | bit0 跨 4 KiB，bit1 预留（读为 0），bit2 未对齐（可同时置位）；写 IRQ_STAT.ERROR 清零时一并清除 |
+| 0x128 | ERR_TYPE | RO | 0 | bit0 CROSS_4K 跨 4 KiB，bit1 预留（读为 0），bit2 MISALIGN 未对齐（可同时置位）；写 IRQ_STAT.ERROR 清零时一并清除 |
 | 0x200 + 0x20·p | OUTST_RD[p] | RW | SoC 6.4.5 | [3:0]，0–8；p = 0–6 |
 | 0x204 + 0x20·p | OUTST_WR[p] | RW | SoC 6.4.5 | [3:0]，0–8 |
-| 0x208 + 0x20·p | WEIGHT[p] | RW | SoC 6.4.5 | [3:0]；P2 的权重不使用 |
-| 0x20C + 0x20·p | RATE[p] | RW | P2 26，P6 13 | [8:0]，单位 1/256；只对 P2、P6 有效（26/256 ≈ 10%，13/256 ≈ 5%） |
+| 0x208 + 0x20·p | WEIGHT[p] | RW | SoC 6.4.5；P2 为 0 | [3:0]；P2 的权重不使用 |
+| 0x20C + 0x20·p | RATE[p] | RW | P2 26，P6 13，其余 0 | [8:0]，单位 1/256；只对 P2、P6 有效（26/256 ≈ 10%，13/256 ≈ 5%） |
 | 0x400 + 0x20·p | RD_TXN[p] | RO | 0 | 快照值：授权的读事务数（下游 AR 握手） |
 | 0x404 + 0x20·p | RD_BEAT[p] | RO | 0 | 快照值：授权的读拍数（ARLEN + 1 之和） |
 | 0x408 + 0x20·p | WAIT_MAX[p] | RO | 0 | 快照值：最长等待周期 |
@@ -214,6 +214,7 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | 2026-10-27 | v0.2 | 用户确认，状态改为已确认 |
 | 2026-10-27 | v0.3 | 随 SoC 规格 v0.9（用户确认）：P1 增加读通道（VIN 内存源，设计记录 `2026-10-27-image-path.md` Q7），`OUTST_RD[1]` 复位值 2（SoC 6.4.5） |
 | 2026-10-29 | v0.4 | 4.1、2.2：每端口统计的事务数和拍数拆成读、写两组（RD_TXN/RD_BEAT 取代 TXN_CNT/BEAT_CNT，新增 WR_TXN 0x414、WR_BEAT 0x418），供 B2 调试工具实时显示各端口读写带宽（用户确认 2026-10-29） |
+| 2026-10-29 | v0.4 | 寄存器回填（B2-1f 调查，与 RTL 一致，草案待用户确认）：4.1 WEIGHT[P2] 复位 0、RATE 除 P2/P6 外复位 0；ERR_TYPE 位域命名 CROSS_4K、MISALIGN |
 
 ---
 
