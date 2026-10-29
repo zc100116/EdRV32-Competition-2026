@@ -117,9 +117,9 @@ module edrv32_rnd_tb;
         input logic [31:0] expected_i,
         input logic [31:0] actual_i);
         if (actual_i !== expected_i)
-            $fatal(1, string'({"FAIL RN-%02d %s desc=%0d coord=(-1,-1) ",
-                "expected=%08h actual=%08h time=%0t"}),
-                test_case, what_i, current_desc, expected_i, actual_i, $time);
+            $fatal(1, "%s expected=%08h actual=%08h time=%0t",
+                $sformatf("FAIL RN-%02d %s desc=%0d coord=(-1,-1)",
+                    test_case, what_i, current_desc), expected_i, actual_i, $time);
     endtask
 
     always @(negedge clk_mem) begin
@@ -214,9 +214,9 @@ module edrv32_rnd_tb;
                 y = (address_i - base) / stride;
             end
         end
-        $fatal(1, string'({"FAIL RN-%02d memory desc=%0d coord=(%0d,%0d) addr=%08h ",
-            "expected=%02h actual=%02h time=%0t"}), test_case, current_desc, x, y,
-            address_i, wanted_i, actual_i, $time);
+        $fatal(1, "%s addr=%08h expected=%02h actual=%02h time=%0t",
+            $sformatf("FAIL RN-%02d memory desc=%0d coord=(%0d,%0d)",
+                test_case, current_desc, x, y), address_i, wanted_i, actual_i, $time);
     endtask
 
     task automatic compare_memory(input bit incomplete_i);
@@ -305,12 +305,12 @@ module edrv32_rnd_tb;
         if (perf_kind != 0) begin
             read_reg(12'h050, source_wait);
             read_reg(12'h054, writer_wait);
-            $display(string'({"RN-18 kind=%0d read_latency=%0d PERF0=%0d PERF1=%0d ",
-                "threshold_check=%0d time_ms=%0.6f pixels_per_cycle=%0.6f ",
-                "cycles_per_glyph=%0.3f ",
-                "PERF4=%0d PERF5=%0d"}), perf_kind < 0 ? -perf_kind : perf_kind,
-                latency, cycles, pixels, perf_kind > 0,
-                real'(cycles) * 8.0 / 1000000.0, real'(pixels) / real'(cycles),
+            $write("RN-18 kind=%0d read_latency=%0d PERF0=%0d PERF1=%0d ",
+                perf_kind < 0 ? -perf_kind : perf_kind, latency, cycles, pixels);
+            $write("threshold_check=%0d time_ms=%0.6f pixels_per_cycle=%0.6f ",
+                perf_kind > 0, real'(cycles) * 8.0 / 1000000.0,
+                real'(pixels) / real'(cycles));
+            $display("cycles_per_glyph=%0.3f PERF4=%0d PERF5=%0d",
                 real'(cycles) / 1000.0, source_wait, writer_wait);
             if (perf_kind == 1) equal("ARGB fill <=3ms", 1, 32'(cycles <= 375000));
             if (perf_kind == 2) equal("RGB565 fill <=1.5ms", 1, 32'(cycles <= 187500));

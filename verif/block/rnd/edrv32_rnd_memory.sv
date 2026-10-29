@@ -132,9 +132,9 @@ module edrv32_rnd_memory (
                         // rnd 5.1: prior writes drain before the next descriptor starts.
                         // Reads and writes belonging to that next descriptor may overlap.
                         if (check_dependency && b_count != aw_count)
-                            $fatal(1, string'({"FAIL dependency desc=%0d coord=(-1,-1) ",
-                                "expected_B=%0d actual_B=%0d time=%0t"}),
-                                (bus.araddr - 32'h1000) / 64, aw_count, b_count, $time);
+                            $fatal(1, "%s expected_B=%0d actual_B=%0d time=%0t",
+                                $sformatf("FAIL dependency desc=%0d coord=(-1,-1)",
+                                    (bus.araddr - 32'h1000) / 64), aw_count, b_count, $time);
                         max_desc_read = int'((bus.araddr - 32'h1000) / 64);
                     end
                 end else begin
