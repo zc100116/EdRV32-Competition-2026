@@ -181,7 +181,9 @@ module tb_layers;
         cfg = latched[command_i.frame_id];
         address = command_i.address + 32'(command_i.index*32);
         base = command_i.layer == 0 ? cfg.base0 : cfg.base1;
-        pitch = command_i.layer == 0 ? cfg.stride0 : cfg.stride1;
+        // RAM contents depend on physical address, not this frame's programmed
+        // stride. DS-18 changes the view of the same stored surface.
+        pitch = command_i.layer == 0 ? 4096 : 5120;
         offset = int'(address - base);
         row = offset / pitch;
         column = offset % pitch;
@@ -348,6 +350,7 @@ module tb_layers;
         int request;
         int p;
         int within0;
+        int offset;
         bit inside1;
         bit need0;
         bit need1;
@@ -402,10 +405,15 @@ module tb_layers;
                         end
                         background = 0;
                         foreground = 0;
-                        if (cfg.en0 && !group_missing[0])
-                            background = expand(pixel565(cfg.base0, x+cfg.sx, y+cfg.sy));
-                        if (inside1 && !group_missing[1])
-                            foreground = pixel_argb(cfg.base1, x-cfg.left, y-cfg.top);
+                        if (cfg.en0 && !group_missing[0]) begin
+                            offset = (y+cfg.sy)*cfg.stride0 + 2*(x+cfg.sx);
+                            background = expand(pixel565(cfg.base0, (offset%4096)/2,
+                                                            offset/4096));
+                        end
+                        if (inside1 && !group_missing[1]) begin
+                            offset = (y-cfg.top)*cfg.stride1 + 4*(x-cfg.left);
+                            foreground = pixel_argb(cfg.base1, (offset%5120)/4, offset/5120);
+                        end
                         expected = mix(background, foreground, cfg.opacity);
                         if (test_case == 15 && request <= 6) begin
                             check("Python reference available", 1,

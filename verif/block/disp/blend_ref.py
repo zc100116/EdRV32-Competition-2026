@@ -143,6 +143,17 @@ def self_test():
                             missing1=True) == (255, 0, 0)
         assert frame.pixel(1271, 719, read565, lambda _: 0, missing0=True) == (0, 0, 0)
         assert frame.pixel(0, 0, read565, lambda _: 0, scan=False) == (0, 0, 0)
+    # DS-18: changing the view stride must not change stored RAM contents.
+    frame = Frame(l0_stride=4128, scroll_x=31, scroll_y=3, l1_stride=5152,
+                    x=8, y=1, width=1272, height=719, opacity=128, l1_enable=True)
+    def fixed565(address):
+        offset = address - frame.l0_base
+        return pattern565(0, (offset % 4096) // 2, offset // 4096)
+    def fixed_argb(address):
+        offset = address - frame.l1_base
+        return pattern_argb(0, (offset % 5120) // 4, offset // 5120)
+    assert frame.pixel(19, 2, fixed565, fixed_argb) == blend(
+        expand565(pattern565(0, 130, 5)), pattern_argb(0, 19, 1), 128)
     layers = [LayerDebt(), LayerDebt()]
     assert layers[0].demand() is None
     assert layers[0].demand() is None

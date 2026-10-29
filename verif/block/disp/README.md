@@ -66,7 +66,9 @@ explicit 32-bit arithmetic, so Python and SV agree on overflow.
 
 The layer scoreboard snapshots software parameters at the public FRAME interrupt
 (with only FRAME enabled), then verifies active-layer CUR_BASE values over APB.
-It validates every AXI burst against the next layer/row descriptor. Responses
+It validates every AXI burst against the next layer/row descriptor. The physical
+source layouts stay at 4096/5120 bytes per row; changing STRIDE changes the view
+of those fixed memory contents, including in DS-18. Responses
 carry their layer/frame ownership through the BFM queue; FIFO space bounds
 subtract both returned and in-flight reserved beats.
 
