@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.15（草案） |
-| 日期 | 2026-10-28 |
+| 版本 | v0.16（草案，v0.16 条款待用户确认） |
+| 日期 | 2026-10-29 |
 | 状态 | SoC 层已确认；标有 **[模块规格]** 的条目，由对应模块的规格补全 |
 | 范围 | SoC 层：`edrv32_soc_top` 及其内部。FPGA 板级层（PLL、DDR 控制器/PHY、TMDS 串化、RGMII IO、引脚）不在本文范围内 |
 | 关联文档 | 开发规则 `CLAUDE.md`；设计决策记录 `docs/design/2026-10-25-soc-architecture-decisions.md`；DDR 带宽分析 `docs/design/2026-10-25-ddr-bandwidth-analysis.md` |
@@ -35,9 +35,9 @@ EdRV32 SoC 是一个以自研 RISC-V 处理器为控制核心的边缘视觉系�
 
 | 场景 | 数据流 |
 |---|---|
-| S1 目标检测 | 摄像头 → DDR 底图 Surface；摄像头 → NPU 输入适配 → NPU → 检测结果 → CPU → RND 绘制检测框和标签 → 图层合成 → HDMI |
-| S2 图像处理 | 摄像头 → PIX → DDR → （可选）GEO → DDR → 图层合成（叠加 UI）→ HDMI。图像通路阶段：PIX/GEO 的结果全屏显示（DISP 直接扫描），UI 叠加在 RND 阶段加入 |
-| S3 图形界面 | CPU 运行 LVGL → RND 绘制 → 图层合成 → HDMI |
+| S1 目标检测 | 摄像头 → DDR 底图 Surface（L0）；摄像头 → NPU 输入适配 → NPU → 检测结果 → CPU → RND 把检测框和标签绘制到 UI 层（L1）→ DISP 两层叠加 → HDMI |
+| S2 图像处理 | 摄像头 → PIX → DDR → （可选）GEO → DDR（L0）；RND 绘制菜单和参数（L1）→ DISP 两层叠加 → HDMI |
+| S3 图形界面 | CPU 运行 LVGL → RND 绘制到显示缓冲（L0，RGB565）→ DISP → HDMI |
 
 场景由 GPIO 按键或上位机串口命令切换。
 
@@ -255,8 +255,8 @@ USER_BUTTON0（C22）是全局复位 `rst_n_i`，不接 GPIO。`camN_pwdn_o`、`
 | X2 | clk_sys ↔ clk_mem | DDR 网关（AXI64） | AXI 异步桥，放在 64 位侧 |
 | X3 | clk_mem、clk_npu → clk_sys | 媒体、ETH 中断（clk_mem），NPU 中断（clk_npu） | 电平同步 |
 | X4 | camN_pclk → clk_mem | 采集像素 | 异步 FIFO |
-| X5 | clk_mem → clk_pix | 显示像素；DISP 扫描使能；DISP 停止确认请求 | 异步 FIFO；电平同步；握手 |
-| X6 | clk_pix → clk_mem | DISP 帧请求；DISP 扫描侧仍可能发请求（scan_live）；读空事件；扫描 FIFO 读出计数、扫描侧性能计数 | 握手；电平同步；脉冲同步；格雷码 |
+| X5 | clk_mem → clk_pix | 显示像素（L0、L1 各一个扫描 FIFO）；DISP 扫描使能；DISP 停止确认请求；DISP 本帧扫描参数 | 异步 FIFO；电平同步；握手；握手 |
+| X6 | clk_pix → clk_mem | DISP 帧请求；DISP 扫描侧仍可能发请求（scan_live）；两层的读空事件；两个扫描 FIFO 的读出计数、扫描侧性能计数 | 握手；电平同步；脉冲同步；格雷码 |
 | X7 | eth_rx_clk → clk_mem，clk_mem → eth_tx_clk；eth_tx_clk → clk_mem | 网络帧；发送帧结束 | 异步 FIFO；脉冲同步（每帧一个脉冲，帧间隔远大于同步时间） |
 | X8 | 任意 → 各域 | 复位释放、`mem_ready_i` | 复位同步器 / 电平同步 |
 | X9 | clk_npu ↔ clk_mem | NPU DDR 主口（AXI256，mem_xbar P3） | AXI 异步桥，放在 NPU 边界 |
@@ -455,7 +455,7 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 | `base` | DDR 物理地址，4 KiB 对齐 |
 | `stride` | 行跨度（字节），32 B 的整数倍 |
 | `width`、`height` | 像素数，宽度为偶数 |
-| `format` | 0 RGB565，1 ARGB8888（预乘 alpha），2 A8，3 INT8_C16（NPU 特征图），4 INT8_C4（NPU 首层输入），其余预留；INT8_C16、INT8_C4 的布局见 NPU 规格 2.2 |
+| `format` | 0 RGB565，1 ARGB8888（非预乘 alpha，`[31:24]` = α；设计记录 `2026-10-29-rnd-disp.md` 3.4），2 A8，3 INT8_C16（NPU 特征图），4 INT8_C4（NPU 首层输入），其余预留；INT8_C16、INT8_C4 的布局见 NPU 规格 2.2 |
 
 **所有权状态**：`FREE → FILLING → READY → IN_USE → FREE`。
 
@@ -606,10 +606,10 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 
 | 项 | 规定 |
 |---|---|
-| 功能 | 执行 DDR 中的命令列表，在 Surface 上绘制，作为 LVGL 等图形库的绘制后端。命令类型至少包括：矩形填充、渐变填充、同格式搬运、位图混合绘制（含缩放）、A8 字形着色、圆角矩形；格式支持 RGB565、ARGB8888、A8 |
-| 图层合成 | 负责把底图层和 UI 层合成到显示输出。合成方式（扫描时叠加，或者离线合成到显示 Surface）[RND/DISP 模块规格] |
+| 功能 | 执行 DDR 中的命令列表，在 Surface 上绘制，作为 LVGL 等图形库的绘制后端，并支持瓦片和精灵类游戏。命令：FILL（纯色、线性渐变、圆角）、BORDER、GLYPH（A1/A2/A4/A8 着色）、BLIT（格式转换、透明度、重新着色、颜色键、最近邻缩放、翻转、正常/相加/相减/相乘混合）、COPY、BOX_SHADOW、BLUR、TILEMAP。目标格式 RGB565、ARGB8888；源格式另含 A1–A8、索引色。线、弧、三角、矢量、任意角度旋转不由 RND 实现（设计记录 `2026-10-29-rnd-disp.md` 4.2） |
+| 图层合成 | 不在 RND：由 DISP 扫描时两层叠加（见下方 DISP 层数）。RND 只绘制 |
 | 端口 | P4；媒体 APB 槽 4；中断源 11 |
-| [模块规格] | 命令格式、图层数、像素流水吞吐 |
+| [模块规格] | 命令格式、像素流水吞吐（`docs/spec/rnd-spec.md`） |
 
 **DISP**
 
@@ -619,8 +619,8 @@ DDR 子系统的读数据不能反压。mem_xbar 必须为每个在途读事务�
 | 扫描 | 从 READY 的显示 Surface 按行读取。新 Surface 只在 VBlank 生效；切换后通过状态寄存器和中断报告上一块 Surface 已释放 |
 | 实时性 | 扫描 FIFO 至少能容纳 2 行；低于 1 行时 `urgent_o` 有效；任何负载下不得读空。读空时输出黑像素，计数并置错误标志 |
 | 无新帧 | 重复显示当前 Surface |
-| 层数 | 图像通路阶段为单层：扫描一张 RGB565 Surface。图层合成方式在 RND 阶段与 RND 一起确定（见上方 RND 图层合成） |
-| 端口 | P0 读口，带 `urgent_o`；媒体 APB 槽 5；中断源 12 |
+| 层数 | 两层，扫描时逐像素叠加：底图层 L0（RGB565，不透明，可开窗偏移实现卷轴）在下，UI 层 L1（ARGB8888 非预乘，位置、大小、全局透明度可设）在上；两层各自开关、各自在帧边界切换并报告释放 |
+| 端口 | P0 读口，带 `urgent_o`；两层全屏打开时实时读 332 MB/s；媒体 APB 槽 5；中断源 12 |
 | 模块规格 | `docs/spec/disp-spec.md` |
 
 ### 8.9 NPU：YOLO 推理加速器
@@ -691,9 +691,9 @@ S2 使用内存源时另加内存源读：720p30 约 55 MB/s（60 fps 约 110 MB
 | CPU 核 + cache 控制 | 10K |
 | 系统总线 + 外设 + CLINT/PLIC | 5K |
 | DDR 网关 + mem_xbar | 8K |
-| VIN + PIX + DISP | 10K |
+| VIN + PIX + DISP | 12K **[待定]** |
 | GEO | 8K |
-| RND | 12K |
+| RND | 10K **[待定]** |
 | ETH | 5K |
 | NPU（含输入适配） | 50K |
 | **合计** | **108K** |
@@ -708,7 +708,6 @@ DRM 和 APM 的预算由各模块规格确定。
 |---|---|
 | CPU | 频率目标、流水级划分、配对规则、C 扩展、HPM 事件、`debug_o` |
 | Cache | 最终容量 |
-| RND / DISP | 图层合成方式、图层数和格式、命令格式 |
 | mem_xbar | 依据 DDR 有效带宽实测结果修订 6.4.5 的参数复位值 |
 
 ## 11. 变更记录
@@ -733,3 +732,4 @@ DRM 和 APM 的预算由各模块规格确定。
 | 2026-10-28 | v0.15 | 6.1：媒体 APB 槽 0（原 MEDIA_CTRL，无寄存器定义、无使用者）改为预留，访问回 SLVERR（用户确认 2026-10-28，B2-1 准备时发现）；NPU 复位 `rst_npu_n` 由 reset_ctrl 产生（sys-subsys-spec v0.4 2.10） |
 | 2026-10-29 | v0.15 | 3.3、3.5：固定 GPIO0 位分配（bit0–3 KEY1–4、bit4–8 LED0–4、bit12–15 两路摄像头 pwdn/rst_n），接上开发板全部 4 个用户按键和 5 个 LED（用户确认 2026-10-29，B2-1a 问答） |
 | 2026-10-29 | v0.15 | 澄清（B2-1a 问答，不改变行为）：3.3、3.4 的三态缩写写全为 `_o`、`_oe_o`、`_i`，与系统子系统、ETH 端口一致 |
+| 2026-10-29 | v0.16 | RND/DISP（设计记录 `2026-10-29-rnd-disp.md`，用户决定 Q1–Q4）：1.2 三个场景改为 DISP 两层叠加（S3 LVGL 画在 L0）；5.2 X5/X6 增加 L1 扫描 FIFO 和本帧扫描参数握手；7.3 format 1 改为非预乘 ARGB8888；8.8 RND 命令集 T2、图层合成由 DISP 完成、DISP 两层；9.3 VIN+PIX+DISP 12K [待定]、RND 10K [待定]，按 B3 PDS 实测定稿；第 10 节删去 RND/DISP 行 |
