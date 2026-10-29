@@ -60,7 +60,7 @@
 |---|---|---|---|---|
 | B3-0 | RND/DISP 设计决策：DISP 两层扫描叠加（L0 RGB565 带卷轴，L1 ARGB8888 非预乘）、RND 命令集 T2、游戏路线 G3、预算初值（VIN+PIX+DISP 12K、RND 10K，[待定]）、LVGL 子模块 | 协调者 + 用户 | — | [x] |
 | B3-1 | 规格：`disp-spec.md` v0.3、`rnd-spec.md` v0.1、SoC v0.16；验证方案 `disp-testplan` v0.3、`rnd-testplan` v0.1；实施方案 `rnd-plan.md` | 协调者 | B3-0 | [x] 2026-10-29 |
-| B3-2 | （`rnd-plan.md` D-R1–R-W1）DISP 两层 RTL 与验证；RND RTL 与验证（移植旧工程 alpha 流水线、圆角、字形、位图、模糊；新增 TILEMAP、索引色、混合模式、BORDER） | Codex | B3-1 | [ ] |
+| B3-2 | （`rnd-plan.md` D-R1–R-W1）DISP 两层 RTL 与验证；RND RTL 与验证（移植旧工程 alpha 流水线、圆角、字形、位图、模糊；新增 TILEMAP、索引色、混合模式、BORDER） | Codex | B3-1 | [~] 2026-10-29 D-R1、D-T1、R-R1、R-T1 派发；DISP 合入等 B2-6 PDS 之后 |
 | B3-3 | 软件：LVGL 子模块和绘制单元驱动、DDR 资源段、S3 界面；S1 改为 RND 画框进 L1；网口发送帧按设计记录 3.6 | Codex | B3-2 | [ ] |
 | B3-4 | 游戏：自制横版游戏（TILEMAP + L0 卷轴 + L1 精灵）；NES 模拟器纯软件移植并实测帧率（效果不好时另写设计记录评估硬件 PPU 辅助） | Codex | B3-2 | [ ] |
 | B3-5 | Windows：PDS 时序资源（定稿预算）、上板 S1–S3 和游戏 | 用户 + Windows Codex | B3-2–B3-4 | [ ] |
