@@ -75,21 +75,17 @@ module edrv32_fpga_board_b2_top (
     wire ddr_ref_clk_w;
     wire clk_eth_w;
     wire pll_sys_lock_w;
-    wire pll_npu_lock_w;
     wire pll_video_lock_w;
     wire rst_board_n_w;
     wire ddr_init_done_w;
     wire mem_ready_w;
 
+    // One VCO (900 MHz) serves clk_sys 100 MHz and clk_npu 150 MHz (fpga/ip/ip_pll_sys.md).
     ip_pll_sys u_pll_sys (
         .clkin1(clk_i),
         .clkout0(clk_sys_w),
+        .clkout1(clk_npu_w),
         .lock(pll_sys_lock_w)
-    );
-    ip_pll_npu u_pll_npu (
-        .clkin1(clk_i),
-        .clkout0(clk_npu_w),
-        .lock(pll_npu_lock_w)
     );
     ip_pll_video u_pll_video (
         .clkin1(clk_i),
@@ -102,7 +98,7 @@ module edrv32_fpga_board_b2_top (
         .IB(ddr_ref_clk_n_i),
         .O(ddr_ref_clk_w)
     );
-    assign rst_board_n_w = rst_n_i & pll_sys_lock_w & pll_npu_lock_w & pll_video_lock_w;
+    assign rst_board_n_w = rst_n_i & pll_sys_lock_w & pll_video_lock_w;
 
     // AXI256 connection between SoC and the combinational DDR adapter.
     wire [3:0] ddr_awid_w;
