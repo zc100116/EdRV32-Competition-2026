@@ -7,15 +7,16 @@ and are no longer part of this working tree or regression discovery.
 | Retained item | Directory | Current evidence |
 |---|---|---|
 | SC-02 | `../soc_connect` | Existing connection smoke, unchanged |
-| SC-05 | `../sc_05_s1` | FAIL, 111 s: VIN ERR_CODE=3 before CH2 completion |
-| SC-06 | `../sc_06_eth_rx` | PASS, 381 s total, 239.198 s simulation |
+| SC-05 | `../sc_05_s1` | v0.2 historical FAIL, 111 s; v0.3 retest pending RTL integration |
+| SC-06 | `../sc_06_eth_rx` | PASS after cleanup, 480.26 s total, 298.490 s simulation |
 
 The SC-05 failure is documented in
 [`2026-10-29-soc-sc05-ch2-overflow.md`](../../../docs/debug/2026-10-29-soc-sc05-ch2-overflow.md).
-The coordinator will investigate its RTL-side cause. DDR model timing and
-required comparisons remain unchanged. The table records the completed runs
-before removal of unused scenarios; the reduced common code still needs its
-post-cleanup regression evidence.
+The user approved VIN v0.3 memory-source backpressure and paced padding; its
+RTL implementation is assigned separately. DDR timing and required comparisons
+remain unchanged. SC-06 was rerun after scope reduction with source `8934bfa`;
+its regression log is `build/soc_full/reduced/sc06-regress.log`. The SoC bench
+and both software programs passed lint/build checks after cleanup.
 
 ## Archived tests
 
