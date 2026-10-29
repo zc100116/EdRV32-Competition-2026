@@ -82,6 +82,8 @@ module tb;
     endtask
     reg clk_mem = 0;
     always #7 clk_mem = ~clk_mem;
+    reg clk_npu = 0;
+    always #23 clk_npu = ~clk_npu;
     reg clk_pix = 0;
     always #9 clk_pix = ~clk_pix;
     reg clk_cam0 = 0;
@@ -97,6 +99,7 @@ module tb;
     wire rst_mem_core_n;
     wire rst_mem_n;
     wire rst_pix_n;
+    wire rst_npu_n;
     wire rst_cam0_n;
     wire rst_cam1_n;
     wire rst_eth_rx_n;
@@ -105,6 +108,7 @@ module tb;
         .clk_sys_i(clk),
         .clk_mem_i(clk_mem),
         .clk_pix_i(clk_pix),
+        .clk_npu_i(clk_npu),
         .clk_cam0_i(clk_cam0),
         .clk_cam1_i(clk_cam1),
         .clk_eth_rx_i(clk_eth_rx),
@@ -118,6 +122,7 @@ module tb;
         .rst_mem_core_n_o(rst_mem_core_n),
         .rst_mem_n_o(rst_mem_n),
         .rst_pix_n_o(rst_pix_n),
+        .rst_npu_n_o(rst_npu_n),
         .rst_cam0_n_o(rst_cam0_n),
         .rst_cam1_n_o(rst_cam1_n),
         .rst_eth_rx_n_o(rst_eth_rx_n),
@@ -170,6 +175,15 @@ module tb;
         check(clk_pix === 1'b1 && last_pix == $time, "pix synchronous release");
         if (monitor_soft) check($time >= soft_end, "pix sixteen-cycle hold");
     end
+    time last_npu = 0;
+    always @(posedge clk_npu) last_npu = $time;
+    always @(posedge rst_npu_n) begin
+        check(rst_mem_core_n, "npu release follows memory core");
+        check($time == second_edge(monitor_soft ? soft_end : media_request_time, 23),
+              "npu releases after exactly two destination clocks");
+        check(clk_npu === 1'b1 && last_npu == $time, "npu synchronous release");
+        if (monitor_soft) check($time >= soft_end, "npu sixteen-cycle hold");
+    end
     time last_cam0 = 0;
     always @(posedge clk_cam0) last_cam0 = $time;
     always @(posedge rst_cam0_n) begin
@@ -213,13 +227,13 @@ module tb;
             if (media_only) check(rst_sys_n, "SY-03 media reset leaves system running");
         end
     end
-    wire [5:0] media_resets = {rst_mem_n, rst_pix_n, rst_cam0_n,
-                             rst_cam1_n, rst_eth_rx_n, rst_eth_tx_n};
-    wire [8:0] all_resets = {rst_sys_por_n, rst_sys_n, rst_mem_core_n, media_resets};
+    wire [6:0] media_resets = {rst_mem_n, rst_pix_n, rst_cam0_n,
+                             rst_cam1_n, rst_eth_rx_n, rst_eth_tx_n, rst_npu_n};
+    wire [9:0] all_resets = {rst_sys_por_n, rst_sys_n, rst_mem_core_n, media_resets};
     task wait_release;
         wait (rst_sys_n && (&media_resets));
         #1;
-        check(all_resets === 9'h1FF, "all domains released");
+        check(all_resets === 10'h3FF, "all domains released");
     endtask
     task software_reset(input bit soc_request);
         media_only = !soc_request;
@@ -228,11 +242,11 @@ module tb;
         soft_end = $time + 160;
         monitor_soft = 1;
         #1;
-        check(media_resets === 6'd0, "SY-03/04 all media domains assert together");
+        check(media_resets === 7'd0, "SY-03/04 all media domains assert together");
         check(rst_sys_n == !soc_request, "SY-03/04 system reset selection");
         repeat (15) begin
             tick();
-            check(media_resets === 6'd0, "SY-03/04 sixteen system clocks");
+            check(media_resets === 7'd0, "SY-03/04 sixteen system clocks");
             if (soc_request) check(!rst_sys_n, "SY-04 system held in reset");
         end
         wait_release();
@@ -241,10 +255,10 @@ module tb;
     endtask
     initial begin
         repeat (3) tick();
-        check(all_resets === 9'd0, "SY-05 external reset all domains");
+        check(all_resets === 10'd0, "SY-05 external reset all domains");
         @(negedge clk); rst_n = 1;
         repeat (25) tick();
-        check(rst_sys_por_n && !rst_mem_core_n && !rst_sys_n && media_resets === 6'd0,
+        check(rst_sys_por_n && !rst_mem_core_n && !rst_sys_n && media_resets === 7'd0,
               "SY-05 wait for delayed memory readiness");
         #2; mem_ready = 1;
         wait_release();
@@ -254,7 +268,7 @@ module tb;
         software_reset(1);
         // SY-02 scratch is retained by both software resets, cleared by reset input.
         #2; rst_n = 0;
-        #1; check(all_resets === 9'd0, "asynchronous reset assertion between clocks");
+        #1; check(all_resets === 10'd0, "asynchronous reset assertion between clocks");
         mem_ready = 0;
         repeat (4) tick();
         @(negedge clk); rst_n = 1;

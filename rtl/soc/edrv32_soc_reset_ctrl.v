@@ -2,12 +2,13 @@
 // Spec: sys-subsys-spec 2.10; edrv32-soc-spec 5.2 X8, 5.3.
 // Description: Sequence power-on and sixteen-system-clock software resets.
 //              Keep the memory fabric running during either software reset.
-// Clock domain: clk_sys, clk_mem, clk_pix, cam0, cam1, eth_rx and eth_tx.
+// Clock domain: clk_sys, clk_mem, clk_pix, clk_npu, cam0, cam1, eth_rx and eth_tx.
 module edrv32_soc_reset_ctrl (
     // Clocks and external asynchronous reset.
     input wire clk_sys_i,
     input wire clk_mem_i,
     input wire clk_pix_i,
+    input wire clk_npu_i,
     input wire clk_cam0_i,
     input wire clk_cam1_i,
     input wire clk_eth_rx_i,
@@ -25,6 +26,7 @@ module edrv32_soc_reset_ctrl (
     output wire rst_mem_core_n_o,
     output wire rst_mem_n_o,
     output wire rst_pix_n_o,
+    output wire rst_npu_n_o,
     output wire rst_cam0_n_o,
     output wire rst_cam1_n_o,
     output wire rst_eth_rx_n_o,
@@ -85,6 +87,11 @@ module edrv32_soc_reset_ctrl (
         .clk_i(clk_mem_i),
         .rst_n_i(media_release_n_w),
         .rst_n_o(rst_mem_n_o)
+    );
+    edrv32_reset_sync u_npu (
+        .clk_i(clk_npu_i),
+        .rst_n_i(media_release_n_w),
+        .rst_n_o(rst_npu_n_o)
     );
     edrv32_reset_sync u_pix (
         .clk_i(clk_pix_i),

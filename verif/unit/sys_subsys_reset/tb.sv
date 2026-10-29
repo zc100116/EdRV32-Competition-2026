@@ -8,6 +8,8 @@ module tb;
     reg clk_mem_i = 0;
     always #5 clk_sys_i = ~clk_sys_i;
     always #7 clk_mem_i = ~clk_mem_i;
+    reg clk_npu_i = 0;
+    always #11 clk_npu_i = ~clk_npu_i;
     reg rst_n_i = 0;
     reg mem_ready_i = 1;
     wire rst_sys_por_n_o;
@@ -15,6 +17,7 @@ module tb;
     wire rst_mem_core_n_o;
     wire rst_mem_n_o;
     wire rst_pix_n_o;
+    wire rst_npu_n_o;
     wire rst_cam0_n_o;
     wire rst_cam1_n_o;
     wire rst_eth_rx_n_o;
@@ -105,6 +108,7 @@ module tb;
         .clk_sys_i(clk_sys_i),
         .clk_mem_i(clk_mem_i),
         .clk_pix_i(clk_mem_i),
+        .clk_npu_i(clk_npu_i),
         .cam0_pclk_i(clk_mem_i),
         .cam1_pclk_i(clk_mem_i),
         .eth_rx_clk_i(clk_mem_i),
@@ -116,6 +120,7 @@ module tb;
         .rst_mem_core_n_o(rst_mem_core_n_o),
         .rst_mem_n_o(rst_mem_n_o),
         .rst_pix_n_o(rst_pix_n_o),
+        .rst_npu_n_o(rst_npu_n_o),
         .rst_cam0_n_o(rst_cam0_n_o),
         .rst_cam1_n_o(rst_cam1_n_o),
         .rst_eth_rx_n_o(rst_eth_rx_n_o),
@@ -372,7 +377,7 @@ module tb;
             @(negedge clk_sys_i); rst_n_i = 0;
             repeat (5) @(negedge clk_sys_i);
             rst_n_i = 1;
-            wait (rst_sys_n_o && rst_mem_n_o);
+            wait (rst_sys_n_o && rst_mem_n_o && rst_npu_n_o);
             idle_check();
             media_access(16'h3004, 1, 32'h1234A5A5);
             if (transfer_count != 1) $fatal(1, "FAIL reset scenario must start after odd count");
@@ -380,9 +385,10 @@ module tb;
             write_word(32'h40006018, scenario == 0 ? 1 : 2, scenario == 1);
             wait (!rst_mem_n_o);
             #1;
-            if (rst_sys_n_o !== (scenario == 0) || !rst_sys_por_n_o || !rst_mem_core_n_o)
+            if (rst_sys_n_o !== (scenario == 0) || rst_npu_n_o ||
+                !rst_sys_por_n_o || !rst_mem_core_n_o)
                 $fatal(1, "FAIL software reset selection scenario=%0d at %0t", scenario, $time);
-            wait (rst_sys_n_o && rst_mem_n_o);
+            wait (rst_sys_n_o && rst_mem_n_o && rst_npu_n_o);
             idle_check();
             monitor_soft = 0;
             // Different slots and payloads distinguish fresh requests from an old response.

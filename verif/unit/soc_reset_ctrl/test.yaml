@@ -5,5 +5,5 @@ parameters:
 software:
 timeout: 120
 pass: PASS
-tier: smoke
+tier: smoke full
 simulator: verilator iverilog
