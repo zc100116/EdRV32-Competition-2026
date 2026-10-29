@@ -52,13 +52,13 @@ python3 - <<'PY'
 from pathlib import Path
 import subprocess
 from tools.regress import expand_files
-subprocess.run(['verilator', '--lint-only', '-Wall', '+define+SIM_MODE',
-                '--top-module', 'edrv32_soc_top'] +
-               expand_files(Path('rtl/filelists/soc.f')), check=True)
+for name in ('soc_top', 'sys_subsys', 'mem_subsys'):
+    filename = 'soc' if name == 'soc_top' else name
+    subprocess.run(['verilator', '--lint-only', '-Wall', '+define+SIM_MODE',
+                    '--top-module', 'edrv32_' + name] +
+                   expand_files(Path('rtl/filelists/' + filename + '.f')), check=True)
 PY
-python3 tools/check/verilog_style.py rtl/soc/edrv32_soc_top.v \
-    rtl/soc/edrv32_soc_reset_ctrl.v rtl/soc/edrv32_sys_subsys.v \
-    rtl/mem/edrv32_mem_xbar.v rtl/mem/edrv32_mem_xbar_regs.v
+python3 tools/check/verilog_style.py rtl/soc rtl/mem
 ```
 
 ## Connection smoke
@@ -85,3 +85,88 @@ PLIC source 10 must reach the CPU as machine external interrupt (`mcause=0x80000
 the handler claims source 10, checks/clears GEO DONE and completes the PLIC claim.
 The main program checks `DONE_COUNT=1` and writes SYSCTRL `SIM_EXIT=0`.
 Logs, packed images and the compiled simulator are in `build/soc_connect/`.
+
+## Verilator structure reference
+
+Measured RTL commit: `f084837` (B2 top and reset/statistics changes), using
+Verilator 5.020 (Debian 5.020-1), `SIM_MODE`. Reuse the expansion in the lint
+command above, replacing `--lint-only` with
+`--xml-only --stats --Mdir build/soc_connect/scale`.
+
+The XML contains 9 direct top instances, 154 specialized RTL modules,
+589 instance declarations across those specialized modules, and 12,306 variable
+declarations. These are elaboration structure counts; FPGA resource utilization
+still requires PDS. The statistics report's final MODULE node count is 155;
+the XML module-definition count above is reported separately.
+
+Raw data and the exact source command/commit are in:
+`build/soc_connect/scale/command.log`, `Vedrv32_soc_top.xml` and
+`Vedrv32_soc_top__stats.txt` in the same directory.
+
+## Verification results
+
+All commands use `. ~/.local/opt/edrv32/env.sh` and `-j 1`, with no `--parallel`.
+Run each row as `python3 tools/regress.py <tier> --path <directory> -j 1`.
+The reset/statistics results cover commits `8c408c7` and `32dec38`; the integrated
+SoC and system test connections are in `f084837`; the connection smoke
+software/testbench are in `f21ce62`.
+
+| Directory | Tier | Result |
+|---|---|---|
+| `verif/unit/soc_reset_ctrl` | smoke / full | 2 / 2 PASS |
+| `verif/unit/sys_subsys_reset` | smoke / full | 2 / 2 PASS |
+| `verif/unit/mem_xbar` | smoke / full | 2 / 3 PASS |
+| `verif/block/mem_subsys` | smoke / full | 17 / 49 PASS |
+| `verif/soc/soc_connect` | smoke | 1 PASS; simulation 4.460 s |
+| `verif/block/sys_subsys` | smoke | 38 PASS |
+| `verif/block/sys_cpu` | smoke | 3 PASS |
+
+The table totals 121 passing simulator executions across the requested tiers.
+
+Verilator `--lint-only -Wall` has zero warnings for the SoC, system subsystem
+and memory subsystem. The style check over `rtl/soc` and `rtl/mem` reports
+12 files, zero warnings. Detailed per-case logs are under `build/regress/`;
+the aggregate logs are `build/soc_connect/*verif*.log`, `mem_xbar_full.log` and
+`regress.log`. The SoC RTL lint command and output are `build/soc_connect/lint.log`.
+
+## Changed files
+
+RTL and integration documentation:
+
+- `rtl/soc/edrv32_soc_top.v`
+- `rtl/soc/edrv32_soc_reset_ctrl.v`
+- `rtl/soc/edrv32_sys_subsys.v`
+- `rtl/mem/edrv32_mem_xbar.v`
+- `rtl/mem/edrv32_mem_xbar_regs.v`
+- `rtl/filelists/soc.f`
+- `rtl/soc/README.md`
+
+Existing verification updated for this task:
+
+- `verif/unit/soc_reset_ctrl/tb.sv`, `test.yaml`
+- `verif/unit/sys_subsys_reset/tb.sv`
+- `verif/unit/mem_xbar/tb.sv`
+- `verif/block/mem_subsys/edrv32_mem_subsys_tb.sv` (MX-10 only)
+- `verif/block/sys_subsys/edrv32_sys_env.sv` (NPU reset ports only, coordinator authorized)
+- `verif/block/sys_cpu/edrv32_sys_cpu_tb.sv` (NPU reset ports only, coordinator authorized)
+
+New `verif/soc/soc_connect/` files: `test.yaml`, `files.f`,
+`edrv32_soc_connect_tb.sv`, `reset_entry.S`, `boot.c`, `main.c`, `run.py`, `README.md`.
+
+The first cold system smoke hit the existing 180-second runner timeout while
+compiling the PLIC and UART groups. The timeout left compiler children running;
+subsequent entries used the same build directory and reported missing/invalid
+PCH files. The initial output is retained in
+`build/soc_connect/first_smoke_verif_block_sys_subsys.log` and `first_pl_*.log`.
+Those compilation processes were stopped, and the same unmodified runners and
+`-j 1` build settings were used to complete the affected builds before the final
+regression invocation:
+
+```sh
+python3 verif/block/sys_subsys/run.py 502
+python3 verif/block/sys_subsys/run.py 602
+python3 verif/block/sys_subsys/run.py 101
+```
+
+Their logs are `build/soc_connect/prebuild_sys_<case>.log`; no runner, test timeout
+or RTL behavior was changed to resolve the cold-build failure.

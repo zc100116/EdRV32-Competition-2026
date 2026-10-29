@@ -14,7 +14,7 @@ P2 directional snapshots, and GEO DONE through PLIC to CPU MEIP. The descriptor
 has an empty output rectangle, as allowed by GEO 2.3; it completes normally under
 GEO 5.1. The trap handler checks `mcause`, `mtval` and PLIC claim results.
 
-The benchmark ends only after software writes SYSCTRL SIM_EXIT. UART bytes and
+The test ends only after software writes SYSCTRL SIM_EXIT. UART bytes and
 the result go to `build/soc_connect/run.log`; compiler, lint and build logs are
 in the same directory. Regression-level output is under
 `build/regress/smoke/soc/soc_connect/verilator/`.

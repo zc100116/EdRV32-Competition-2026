@@ -2,7 +2,7 @@
 // Spec: sys-subsys-spec 2.3, 2.10; S-T1b regression.
 // Description: Odd media APB transaction history survives MEDIA and SOC soft resets.
 //              Score each external APB transfer and reject stale or duplicated AXI responses.
-// Clock domain: clk_sys and independent clk_mem.
+// Clock domain: clk_sys and independent clk_mem/clk_npu.
 module tb;
     reg clk_sys_i = 0;
     reg clk_mem_i = 0;
