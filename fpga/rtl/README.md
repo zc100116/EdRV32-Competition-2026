@@ -368,3 +368,118 @@ DDR 别名逐字读回，最后写 SIM_EXIT。DDR 用户口复用已有带停顿
 协调者批准的 testbench UART 加速：强制 BAUD_DIV=256（Q4，即每位 16 个系统周期），
 UART peer=6.25 Mbaud，保留实际 BIOS 和应用的全部字节。这只用于仿真加速，不验收
 UART 时序；UART 时序由 B1 测试和上板覆盖。软件仍按 115200 配置，打印文本不改。
+
+## B3 图像通路板级顶层
+
+`edrv32_fpga_board_vision_top.v` 用于单独检查图像通路时序、上板运行 S2，以及通过
+调试工具监控 DDR 带宽、通过网口发送测试图和视频。直接例化 `edrv32_cpu_subsys`、
+`edrv32_sys_subsys`（含 reset_ctrl）、`edrv32_mem_subsys`、`edrv32_vin`、`edrv32_pix`、
+`edrv32_geo`、`edrv32_disp`、`edrv32_eth`；不经过完整 `edrv32_soc_top`。
+
+与 B2 的差异：去掉 NPU 和 RND，以及 NPU PLL、NPU CDC X9/X10 和相关时钟约束；
+DISP 使用当前 v0.3 的 L0/L1 两层。保留全部 B2 板级端口、引脚和 IO 标准，保留两路
+DVP、I2C、DDR、HDMI、ETH/RGMII。VIN CH2 仍写 DDR，只是没有 NPU 消费它的数据。
+CPU DDR 网关接 P2，VIN 接 P1、APB 槽 1、PLIC8，PIX 接槽 2、PLIC9，GEO 接 P5、
+槽 3、PLIC10，DISP 接 P0、槽 5、PLIC12，ETH 接 P6 的 ETH 口、槽 7、PLIC14；
+MEM_XBAR（槽 8、PLIC15）和 PERF_MON（槽 9，P6 内部仲裁）照常保留。
+
+### 时钟与复位
+
+| 时钟 | 来源 | 频率 / 用途 |
+|---|---|---|
+| `clk_i` | 板载晶振 | 27 MHz，sys/video PLL 输入 |
+| `clk_sys_w` | `ip_pll_sys` | 100 MHz，CPU 和系统外设 |
+| `ddr_ref_clk_w` | 差分参考输入经 GTP_INBUFDS | 125 MHz，DDR IP 输入 |
+| `clk_mem_w` | `ip_ddr3.core_clk` | 125 MHz，DDR fabric、VIN/PIX/GEO、DISP/ETH 控制侧 |
+| `clk_pix_w` | `ip_pll_video.clkout0` | 74.25 MHz，DISP 扫描和 TMDS 编码 |
+| `clk_serial_w` | 同一 video PLL 的 clkout1 | 371.25 MHz，与像素时钟同相、5:1 |
+| `cam0_pclk_i`、`cam1_pclk_i` | 两路摄像头 | 独立 DVP 时钟，FDC 各按 100 MHz 约束 |
+| `rgmii_rxc_i` | PHY | 125 MHz，ETH PLL 输入 |
+| `clk_eth_w` | `u_rgmii.u_pll_eth`，经 GTP_CLKBUFG | 125 MHz、30° 相移，MAC RX/TX 共用 |
+| `rgmii_txc_o` | ODDR 和固定 IO 延迟 | 125 MHz，延迟 1 ns 的发送时钟 |
+| 系统子系统 `clk_npu_i` | `clk_sys_w` | 同 B1，未使用的 NPU 域不生成 PLL |
+
+板级复位为 `rst_n_i & sys_lock & video_lock`，DDR IP 直接使用它。reset_ctrl 在系统
+子系统中同步 `mem_ready`、生成各域复位，维持 SoC 5.3 的释放顺序；DDR 初始化不依赖
+CPU 释放。ETH PLL lock 与 B2 一样不接入全局复位。CDC 沿用 SoC 5.2 X1–X8。
+约束文件 `fpga/constraints/edrv32_fpga_board_vision_top.fdc` 从 B2 删除 `clk_npu`
+及其异步组，保留 DDR PHY 时钟/布局约束和 pix/serial 的相关时序。
+
+### 未接入端口
+
+空槽接法由协调者在 B3-7 中确认：已移除引擎的已分配槽适用预留槽约定。
+
+| 端口 → 接值 | 依据 |
+|---|---|
+| mem_subsys P3（NPU）、P4（RND）的 AWVALID/WVALID/ARVALID、AWID/AWADDR/AWLEN、WDATA/WSTRB/WLAST、ARID/ARADDR/ARLEN、BREADY/RREADY → 全 0；响应输出不接 | SoC 4.2、6.4.1，B3-7 裁剪契约；这两个口没有 urgent 输入 |
+| 媒体 APB 槽 4/6 → PRDATA=0、PREADY=1、PSLVERR=1 | SoC 6.1、sys-subsys 2.3，B3-7 已确认空槽约定 |
+| 媒体 APB 预留槽 0/10–15 → PRDATA=0、PREADY=1、PSLVERR=1 | SoC 6.1 |
+| PLIC 源 11/13 → 0 | SoC 6.1 中断源表，B3-7 裁剪契约 |
+| GPIO 输入 [15:4]/[3:0] → 0/KEY[3:0]；LED → GPIO[8:4] | SoC 3.5，与 B2 相同 |
+| 摄像头 PWDN 输出、其余 GPIO OE、CPU debug、未用复位/仿真状态输出 → 不引出 | SoC 3.5，与 B2 的板级引脚相同 |
+| DDR APB 输入 → 全 0；dbg_ddrphy_rst_n → 1，其余诊断控制 → 0 | fpga/ip/ip_ddr3.md，与 B2 相同 |
+
+### 图像通路顶层端口表
+
+本顶层与 B2 **逐个端口、逐位引脚、IO 标准完全相同**。下表列出全部端口分组；
+每一位的封装引脚和来源沿用上文 B2 的逐位引脚表，无新增物理引脚。
+
+| 顶层端口 | 方向 | 位宽 | 引脚 / 功能 |
+|---|---|---|---|
+| `clk_i`、`rst_n_i` | 输入 | 各 1 | D18、C22 |
+| `ddr_ref_clk_p_i`、`ddr_ref_clk_n_i` | 输入 | 各 1 | N3、N2，差分参考 |
+| `uart_rx_i`、`uart_tx_o` | 输入、输出 | 各 1 | B24、C24 |
+| `key_n_i`、`led_o` | 输入、输出 | 4、5 | B2 按键和 LED 逐位引脚 |
+| `cam0_pclk_i`、`cam1_pclk_i` | 输入 | 各 1 | L22、M21 |
+| `cam0_vsync_i`、`cam0_href_i`、`cam0_data_i` | 输入 | 1、1、8 | L23、T25、B2 camera_data_0[7:0] 引脚 |
+| `cam1_vsync_i`、`cam1_href_i`、`cam1_data_i` | 输入 | 1、1、8 | U25、U26、B2 camera_data_1[7:0] 引脚 |
+| `cam0_rst_n_o`、`cam1_rst_n_o` | 输出 | 各 1 | T22、AC26，GPIO13/15 |
+| `i2c0_scl_o`、`i2c0_sda_o` | 双向 | 各 2 | SCL[0/1]=P19/AC24，SDA[0/1]=R20/Y25，开漏 |
+| `tmds_data_p_o`、`tmds_data_n_o` | 输出 | 各 3 | P[0/1/2]=R25/P23/N23，N[0/1/2]=P25/P24/N24 |
+| `tmds_clk_p_o`、`tmds_clk_n_o` | 输出 | 各 1 | N21、N22 |
+| `rgmii_rxc_i`、`rgmii_rxd_i`、`rgmii_rx_ctl_i` | 输入 | 1、4、1 | D19、RXD[0/1/2/3]=D16/E16/A19/B19、H16 |
+| `rgmii_txc_o`、`rgmii_txd_o`、`rgmii_tx_ctl_o` | 输出 | 1、4、1 | G16、TXD[0/1/2/3]=E20/B21/C21/D21、D20 |
+| `eth_mdc_o`、`eth_mdio_o`、`eth_phy_rst_n_o` | 输出、双向、输出 | 各 1 | A25、E21、G25 |
+| `mem_cs_n_o`、`mem_rst_n_o` | 输出 | 各 1 | N4、H1 |
+| `mem_ck_o`、`mem_ck_n_o` | 输出 | 各 1 | U6、U5 |
+| `mem_cke_o`、`mem_ras_n_o`、`mem_cas_n_o`、`mem_we_n_o`、`mem_odt_o` | 输出 | 各 1 | R1、P6、T7、T8、H2 |
+| `mem_a_o`、`mem_ba_o` | 输出 | 15、3 | B2 DDR 地址 / Bank 逐位引脚 |
+| `mem_dqs_o`、`mem_dqs_n_o` | 双向 | 各 4 | B2 DDR DQS 差分逐位引脚 |
+| `mem_dq_o`、`mem_dm_o` | 双向、输出 | 32、4 | B2 DDR 数据 / 掩码逐位引脚 |
+
+### 导入与验证
+
+PDS 工程中先按 `fpga/ip/README.md` 生成 IP，再执行
+`source <仓库路径>/fpga/scripts/import_board_vision_top.tcl`。脚本展开
+`cpu_subsys.f`、`sys_subsys.f`、`mem_subsys.f`、`vin.f`、`pix.f`、`geo.f`、`disp.f`、
+`eth.f` 并保持首次出现顺序去重，加入四个板级文件、约束和 `FPGA_MODE`。
+需要 19 种 IP（不含 NPU/RND IP）：
+
+- 板级：`ip_pll_sys`、`ip_pll_video`、`ip_pll_eth`、`ip_ddr3`。
+- CPU/SYS：`ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、
+  `ip_ram_dcache_data`、`ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`。
+- MEM：`ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w`。
+- 图像通路：`ip_ram_vin_wfifo`、`ip_ram_pix_line`、`ip_ram_geo_src`、
+  `ip_ram_disp_scan`（L0/L1 各一个）。
+- ETH：`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
+
+TMDS、RGMII 和差分参考使用器件原语，无需另生成 IP。Linux 仿真复用 board_render
+的 DDR、video PLL、TMDS 原语模型，补充 RGMII PLL/缓冲/延迟/DDR IO 行为模型；本项
+只验收连线，不检查摄像头采集、显示帧和网口包协议或 IO 时序。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/check/verilog_style.py fpga/rtl/edrv32_fpga_board_vision_top.v
+tclsh verif/soc/board_vision/check_import.tcl
+python3 tools/regress.py smoke --path verif/soc/board_vision -j 1
+```
+
+`verif/soc/board_vision/run.py` 构建真实 BIOS 和 `sw/tests/board_vision/` SRAM 程序，
+后门加载 ROM/SRAM，先检查 BIOS 菜单再复位启动应用。复用已确认的 CLINT 启动窗口
+和 UART 加速：强制 Q4 BAUD_DIV=256、peer=6.25 Mbaud。软件检查 VIN/PIX/GEO/DISP/ETH
+ID，对 NPU/RND 槽各执行一次读并验证 load access fault；再执行 GEO RGB565 64×4
+恒等变换，经 PLIC 源 10 接收 DONE，从非缓存别名逐字比较 128 个 32 位字后写 SIM_EXIT。
+顶层及全部依赖、行为模型的 lint 命令由 runner 使用 `files.f` 展开执行：
+`verilator --lint-only --timing -Wall +define+SIM_MODE --top-module edrv32_board_vision_tb`。
+原始日志在 `build/board_vision/{lint,compile,simulation}.log`，回归日志在
+`build/regress/smoke/soc/board_vision/verilator/run.log`；Linux 结果不代表 PDS 实现或上板验收。
