@@ -188,3 +188,15 @@ git diff --check
 覆盖 GEO 描述符和 Q16.16、ETH 描述符/网络序头/IP、CH0/CH2 Surface 槽映射、
 VIN DONE_INFO 槽提取、PIX Gaussian+Sobel CFG、OV5640 表长度/关键寄存器。
 期望值是规格布局的独立字面值，没有使用被测打包函数构造期望。
+
+2026-10-29 在实现提交 `9fa9bcf` 上的结果：xPack RISC-V GCC 15.2.0 的全部驱动
+编译/链接成功，0 warning、0 error，产出 ELF、dis、rom/sram/ddr hex；
+GCC 13.3.0 主机纯逻辑测试 PASS，0 warning、0 error；`git diff --check` 通过。
+完整命令输出分别在 `build/sw/drivers_build/rv32-build.log`、`host-test.log`。
+`riscv-none-elf-size`：text=10460 B、data=0 B、bss=268 B，总计 10728 B
+（包含原有系统驱动、全部新驱动、OV5640 表、接受测试和 BSP；不含栈）。
+未运行 SoC 仿真/Verilator；功能效果、实际摄像头帧率/极性、PHY/HDMI 待上板验收。
+
+提交关系：`f1dd1f4` 冻结首版 API；协调者 `be1848f` 补全 GEO 描述符生成头，本分支
+以 `039850f` 复用；`9fa9bcf` 为完整实现与验收程序。无其他规格/设计布局偏差；
+OV5640 占位删除、帧率及默认极性处理均已通过协调者 ask 确认。
