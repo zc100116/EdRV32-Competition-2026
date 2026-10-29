@@ -62,6 +62,12 @@ module edrv32_rnd_draw (
     localparam [4:0] S_NEXT_ROW = 5'd17;
     localparam [4:0] S_DONE = 5'd18;
     localparam [4:0] S_PALETTE_LOAD = 5'd19;
+    localparam [4:0] S_GEOMETRY_RADIUS = 5'd20;
+    localparam [4:0] S_GEOMETRY_INNER = 5'd21;
+    localparam [4:0] S_GEOMETRY_SIZE = 5'd22;
+    localparam [4:0] S_COVERAGE = 5'd23;
+    localparam [4:0] S_OPACITY = 5'd24;
+    localparam [4:0] S_COLOR = 5'd25;
 
     reg [4:0] state_r;
     reg [4:0] read_return_r;
@@ -92,6 +98,25 @@ module edrv32_rnd_draw (
     reg outer_inside_r;
     reg inner_inside_r;
     reg [4:0] pixel_count_r;
+    reg [16:0] width_r;
+    reg [16:0] height_r;
+    reg signed [17:0] rect_left_r;
+    reg signed [17:0] rect_top_r;
+    reg signed [17:0] rect_right_r;
+    reg signed [17:0] rect_bottom_r;
+    reg [11:0] radius_r;
+    reg [11:0] inner_radius_r;
+    reg signed [17:0] inner_left_r;
+    reg signed [17:0] inner_top_r;
+    reg signed [17:0] inner_right_r;
+    reg signed [17:0] inner_bottom_r;
+    reg signed [17:0] inner_width_r;
+    reg signed [17:0] inner_height_r;
+    reg [23:0] source_color_r;
+    reg [7:0] source_a0_r;
+    reg [7:0] coverage_r;
+    reg [15:0] coverage_product_r;
+    reg [15:0] opacity_product_r;
 
     wire [7:0] op_w;
     wire argb_w;
@@ -134,8 +159,9 @@ module edrv32_rnd_draw (
     wire [7:0] coverage_w;
     wire [7:0] inverse_inner_w;
     wire [7:0] fill_a0_w;
+    wire [7:0] opacity_scale_w;
     wire [255:0] target_wide_w;
-    wire [7:0] border_coverage_w;
+    
     wire [11:0] sample_target_x_w;
     wire [31:0] dst_addr_w;
     wire [31:0] src_addr_w;
@@ -157,8 +183,6 @@ module edrv32_rnd_draw (
     wire [7:0] gradient_a_w;
     wire [23:0] gradient_color_w;
     wire [31:0] gradient_k_w;
-    wire [31:0] fill_pixel_w;
-    wire [31:0] border_pixel_w;
     wire unused_geometry_w;
     integer lane;
 
@@ -211,22 +235,22 @@ module edrv32_rnd_draw (
     assign rect_top_w = {{2{command_i[191]}}, command_i[191:176]};
     assign rect_right_w = {{2{command_i[207]}}, command_i[207:192]};
     assign rect_bottom_w = {{2{command_i[223]}}, command_i[223:208]};
-    assign half_min_w = (width_w < height_w ? width_w : height_w) >> 1;
+    assign half_min_w = (width_r < height_r ? width_r : height_r) >> 1;
     assign radius_w = {5'd0, command_i[267:256]} < half_min_w ?
         command_i[267:256] : half_min_w[11:0];
     assign border_w = $signed({6'd0, command_i[299:288]});
-    assign extension_w = $signed({6'd0, radius_w}) + 18'sd1;
-    assign inner_left_w = rect_left_w + (command_i[306] ? border_w : -extension_w);
-    assign inner_top_w = rect_top_w + (command_i[304] ? border_w : -extension_w);
-    assign inner_right_w = rect_right_w - (command_i[307] ? border_w : -extension_w);
-    assign inner_bottom_w = rect_bottom_w - (command_i[305] ? border_w : -extension_w);
-    assign inner_width_w = inner_right_w - inner_left_w + 18'sd1;
-    assign inner_height_w = inner_bottom_w - inner_top_w + 18'sd1;
-    assign inner_radius_w = radius_w > command_i[299:288] ?
-        radius_w - command_i[299:288] : 12'd0;
-    assign row_local_w = $signed({6'd0, y_r}) - (inner_r ? inner_top_w : rect_top_w);
-    assign row_width_w = inner_r ? inner_width_w : {1'd0, width_w};
-    assign row_height_w = inner_r ? inner_height_w : {1'd0, height_w};
+    assign extension_w = $signed({6'd0, radius_r}) + 18'sd1;
+    assign inner_left_w = rect_left_r + (command_i[306] ? border_w : -extension_w);
+    assign inner_top_w = rect_top_r + (command_i[304] ? border_w : -extension_w);
+    assign inner_right_w = rect_right_r - (command_i[307] ? border_w : -extension_w);
+    assign inner_bottom_w = rect_bottom_r - (command_i[305] ? border_w : -extension_w);
+    assign inner_width_w = inner_right_r - inner_left_r + 18'sd1;
+    assign inner_height_w = inner_bottom_r - inner_top_r + 18'sd1;
+    assign inner_radius_w = radius_r > command_i[299:288] ?
+        radius_r - command_i[299:288] : 12'd0;
+    assign row_local_w = $signed({6'd0, y_r}) - (inner_r ? inner_top_r : rect_top_r);
+    assign row_width_w = inner_r ? inner_width_r : {1'd0, width_r};
+    assign row_height_w = inner_r ? inner_height_r : {1'd0, height_r};
     assign row_valid_w = state_r == S_EDGE_REQ;
     assign unused_geometry_w = ^{gradient_k_w[31:16], flags_w[15:4], target_wide_w[255:64],
         row_width_w[17], row_height_w[17], row_local_w[17],
@@ -241,29 +265,28 @@ module edrv32_rnd_draw (
         .width_i(row_width_w[16:0]),
         .height_i(row_height_w[16:0]),
         .row_y_i(row_local_w[16:0]),
-        .radius_i(inner_r ? inner_radius_w : command_i[267:256]),
+        .radius_i(inner_r ? inner_radius_r : radius_r),
         .edge_valid_o(edge_valid_w),
         .edge_ready_i(state_r == S_EDGE_WAIT || cancel_i),
         .edge_q4_o(edge_w),
         .radius_o(unused_radius_w)
     );
     edrv32_rnd_coverage u_outer_coverage (
-        .x_i($signed({6'd0, x_r}) - rect_left_w),
-        .width_i(width_w),
+        .x_i($signed({6'd0, x_r}) - rect_left_r),
+        .width_i(width_r),
         .edge_q4_i(outer_edge_r),
         .row_inside_i(outer_inside_r),
         .coverage_o(outer_cov_w)
     );
     edrv32_rnd_coverage u_inner_coverage (
-        .x_i($signed({6'd0, x_r}) - inner_left_w),
-        .width_i(inner_width_w[16:0]),
+        .x_i($signed({6'd0, x_r}) - inner_left_r),
+        .width_i(inner_width_r[16:0]),
         .edge_q4_i(inner_edge_r),
         .row_inside_i(inner_inside_r),
         .coverage_o(inner_cov_w)
     );
     assign coverage_w = lane_r ? outer_cov_w[15:8] : outer_cov_w[7:0];
     assign inverse_inner_w = 8'd255 - (lane_r ? inner_cov_w[15:8] : inner_cov_w[7:0]);
-    assign border_coverage_w = divide255(coverage_w * inverse_inner_w);
     assign sample_target_x_w = x_r + {11'd0, lane_r};
     edrv32_rnd_address u_address (
         .command_i(command_i),
@@ -330,11 +353,7 @@ module edrv32_rnd_draw (
         gradient(command_i[303:296], gradient_k_w[15:0], command_i[415:384]),
         gradient(command_i[295:288], gradient_k_w[15:0], command_i[447:416])};
     assign fill_a0_w = flags_w[0] ? gradient_a_w : 8'd255;
-    assign fill_pixel_w = {divide255(divide255(command_i[255:248] *
-        fill_a0_w) * coverage_w),
-        flags_w[0] ? gradient_color_w : command_i[247:224]};
-    assign border_pixel_w = {divide255(command_i[255:248] * border_coverage_w),
-        command_i[247:224]};
+    assign opacity_scale_w = op_w == 8'h01 ? coverage_r : command_i[255:248];
     assign blend_valid_o = state_r == S_BLEND;
     assign blend_src_o = src_r;
     assign blend_dst_o = argb_w ? target_shifted_w :
@@ -387,8 +406,11 @@ module edrv32_rnd_draw (
                     palette_index_r <= 8'd0;
                     target_valid_r <= 1'b0;
                     state_r <= (op_w == 8'h04 || op_w == 8'h08) && format_w >= 4'd6 ?
-                        S_PALETTE_LOAD : S_ROW;
+                        S_PALETTE_LOAD : S_GEOMETRY_RADIUS;
                 end
+                S_GEOMETRY_RADIUS: state_r <= S_GEOMETRY_INNER;
+                S_GEOMETRY_INNER: state_r <= S_GEOMETRY_SIZE;
+                S_GEOMETRY_SIZE: state_r <= S_ROW;
                 S_ROW: begin
                     inner_r <= 1'b0;
                     outer_inside_r <= 1'b1;
@@ -398,9 +420,9 @@ module edrv32_rnd_draw (
                 S_EDGE_REQ: if (row_ready_w)
                     state_r <= S_EDGE_WAIT;
                 S_EDGE_WAIT: if (edge_valid_w) begin
-                    if (!inner_r && op_w == 8'h02 && inner_width_w > 0 &&
-                        inner_height_w > 0 && $signed({6'd0, y_r}) >= inner_top_w &&
-                        $signed({6'd0, y_r}) <= inner_bottom_w) begin
+                    if (!inner_r && op_w == 8'h02 && inner_width_r > 0 &&
+                        inner_height_r > 0 && $signed({6'd0, y_r}) >= inner_top_r &&
+                        $signed({6'd0, y_r}) <= inner_bottom_r) begin
                         inner_r <= 1'b1;
                         inner_inside_r <= 1'b1;
                         state_r <= S_EDGE_REQ;
@@ -426,15 +448,21 @@ module edrv32_rnd_draw (
                     state_r <= S_SOURCE;
                 end
                 S_SOURCE: begin
-                    if (op_w == 8'h01 || op_w == 8'h02) begin
-                        if (!lane_r && pair_r)
-                            lane_r <= 1'b1;
-                        else begin
-                            lane_r <= 1'b0;
-                            state_r <= S_BLEND;
-                        end
-                    end else
+                    if (op_w == 8'h01 || op_w == 8'h02)
+                        state_r <= S_COVERAGE;
+                    else
                         state_r <= op_w == 8'h08 ? S_MAP : S_SAMPLE;
+                end
+                S_COVERAGE: state_r <= S_OPACITY;
+                S_OPACITY: state_r <= S_COLOR;
+                S_COLOR: begin
+                    if (!lane_r && pair_r) begin
+                        lane_r <= 1'b1;
+                        state_r <= S_SOURCE;
+                    end else begin
+                        lane_r <= 1'b0;
+                        state_r <= S_BLEND;
+                    end
                 end
                 S_MAP, S_SAMPLE: begin
                     if (query_hit_w) begin
@@ -452,7 +480,7 @@ module edrv32_rnd_draw (
                 S_PALETTE_LOAD: begin
                     if (query_hit_w) begin
                         if (palette_index_r == palette_last_w)
-                            state_r <= S_ROW;
+                            state_r <= S_GEOMETRY_RADIUS;
                         else
                             palette_index_r <= palette_index_r + 8'd1;
                     end else begin
@@ -543,8 +571,43 @@ module edrv32_rnd_draw (
         end
         if (state_r == S_CONVERT)
             src_r[lane_r*32 +: 32] <= converted_w;
-        if (state_r == S_SOURCE && (op_w == 8'h01 || op_w == 8'h02))
-            src_r[lane_r*32 +: 32] <= op_w == 8'h01 ? fill_pixel_w : border_pixel_w;
+        if (state_r == S_IDLE && start_i) begin
+            width_r <= width_w;
+            height_r <= height_w;
+            rect_left_r <= rect_left_w;
+            rect_top_r <= rect_top_w;
+            rect_right_r <= rect_right_w;
+            rect_bottom_r <= rect_bottom_w;
+        end
+        if (state_r == S_GEOMETRY_RADIUS)
+            radius_r <= radius_w;
+        if (state_r == S_GEOMETRY_INNER) begin
+            inner_left_r <= inner_left_w;
+            inner_top_r <= inner_top_w;
+            inner_right_r <= inner_right_w;
+            inner_bottom_r <= inner_bottom_w;
+            inner_radius_r <= inner_radius_w;
+        end
+        if (state_r == S_GEOMETRY_SIZE) begin
+            inner_width_r <= inner_width_w;
+            inner_height_r <= inner_height_w;
+        end
+        // Break coverage normalization and opacity into separate APM stages.
+        if (state_r == S_SOURCE && (op_w == 8'h01 || op_w == 8'h02)) begin
+            source_color_r <= op_w == 8'h01 && flags_w[0] ?
+                gradient_color_w : command_i[247:224];
+            source_a0_r <= fill_a0_w;
+        end
+        if (state_r == S_COVERAGE) begin
+            coverage_r <= coverage_w;
+            coverage_product_r <= op_w == 8'h01 ? command_i[255:248] * source_a0_r :
+                coverage_w * inverse_inner_w;
+        end
+        if (state_r == S_OPACITY)
+            opacity_product_r <= divide255(coverage_product_r) *
+                opacity_scale_w;
+        if (state_r == S_COLOR)
+            src_r[lane_r*32 +: 32] <= {divide255(opacity_product_r), source_color_r};
         if (state_r == S_BLEND_WAIT && blend_valid_i) begin
             for (lane = 0; lane < 2; lane = lane + 1) begin
                 if (lane == 0 || pair_r) begin
