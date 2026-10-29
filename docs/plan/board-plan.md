@@ -45,8 +45,8 @@
 | B2-1a | `edrv32_soc_top`（全部子系统和引擎、APB 槽、PLIC 源、复位、GPIO 位分配）；reset_ctrl 增加 `rst_npu_n`；mem_xbar 统计读写拆分；`soc.f`；连接冒烟测试 `verif/soc/soc_connect` | Codex · GPT-6.1 Sol | — | lint 0 告警；soc_connect smoke；mem_xbar/mem_subsys/sys_subsys/sys_cpu 不回退 | task-soc-top | [x] 2026-10-29：5f311e2–07eeff1 已合入协调者分支；121 次验收 PASS，SoC lint 0 告警（expand_files 去重），GEO 空矩形描述符 DONE 经 PLIC 源 10 到 MEIP |
 | B2-1b | VIN CH2 RTL（2×2 平均、量化、letterbox、INT8_C4） | Codex · GPT-6.1 Sol | — | lint 0 告警；`verif/unit/vin_ch2`；VIN 现有测试不回退 | task-vin-ch2 | [~] 2026-10-29 RTL 完成（Yosys 1523 LUT / 2049 FF）；与 B2-1c 测试合并后 VI-20 失败，联调 B2-1e 进行中 |
 | B2-1c | VIN CH2 模块级验证 VI-19–VI-23（独立，与 `tools/npu` 预处理交叉核对） | Codex · GPT-6.1 Sol | 与 B2-1b 并行 | VIN block smoke/full 通过 | task-vin-ch2-verif | [~] 2026-10-29 测试已交付（abcd685，与 input_pack.py 交叉核对 983040 B 差异 0），待与 B2-1b 一起合入后对真实 RTL 回归 |
-| B2-1f | 寄存器复位值与位域缺项整理（只读 RTL，报告 `docs/reports/2026-10-29-regs-reset-survey.md`），之后协调者起草规格回填交用户确认（第 4 节） | Codex · GPT-6 Luna | B2-1a | 报告覆盖全部 null 复位值和多位域 VALUE 字段 | task-regs-reset-survey | [x] 2026-10-29：报告已合入；规格回填草案已起草，待用户确认后更新 regs JSON 和头文件 |
-| B2-1d | SoC 级验证（`docs/testplan/soc-testplan.md`，待写）：S2 数据流、S1 数据流（小用例 NPU）、ETH 收发、并发流量下 DISP 不读空/VIN 不溢出、监控统计 | Codex · GPT-6.1 Sol | B2-1a、B2-1b、B2-1f 回填 | SoC 级 smoke/full | — | [ ] |
+| B2-1f | 寄存器复位值与位域缺项整理（只读 RTL，报告 `docs/reports/2026-10-29-regs-reset-survey.md`），之后协调者起草规格回填交用户确认（第 4 节） | Codex · GPT-6 Luna | B2-1a | 报告覆盖全部 null 复位值和多位域 VALUE 字段 | task-regs-reset-survey | [x] 2026-10-29：报告已合入；规格回填用户确认，regs JSON 与头文件已更新（24e5523） |
+| B2-1d | SoC 级验证（`docs/testplan/soc-testplan.md` v0.1 已确认）：S2 数据流、S1 数据流（小用例 NPU）、ETH 收发、并发流量下 DISP 不读空/VIN 不溢出、监控统计 | Codex · GPT-6.1 Sol | B2-1a、B2-1b、B2-1f 回填 | SoC 级 smoke/full | — | [ ] |
 | B2-2 | 板级：DDR3 IP 创建说明（厂商 `6_IP_setup_packet`、`2_9_ddr3_test`）、DDR 适配器（已有，接入）、PLL（clk_mem 由 DDR IP 给出，clk_pix 74.25 MHz 与 5 倍串化时钟，clk_npu 150 MHz，clk_sys 100 MHz）、HDMI TMDS 串化、两路 DVP 摄像头 IO、RGMII ↔ 8 位 MAC 适配（厂商 `2_11_ethernet_test`）、B2 板级顶层、约束（引脚取自厂商例程和 `mini-base管脚映射.xlsx`）、导入脚本 | 协调者 + Codex | B2-1a | 板级仿真（DDR/TMDS/RGMII 模型）PASS；约束与引脚表逐项核对 | — | [ ] |
 | B2-3a | 引擎寄存器 JSON 描述（`rtl/include/regs/`）和 C 头生成器 `tools/gen/regs.py` | Codex · GPT-6.1 Sol | — | 重复生成不变；`_Static_assert` 与规格数字对照 | task-regs-gen | [x] 2026-10-29：8 个模块 JSON 与头文件，142 条静态断言通过 |
 | B2-3b | 引擎驱动（VIN/PIX/GEO/DISP/NPU/ETH/MEM_XBAR/PERF_MON）；OV5640 初始化（I2C0、GPIO bit12–15） | Codex · GPT-6.1 Sol | B2-1a、B2-3a | SoC 级仿真中驱动用例通过 | — | [ ] |
@@ -68,7 +68,7 @@
 
 ## 4. 规格定稿项
 
-- 寄存器描述缺项回填（B2-3a 列出，生成头中暂为"未规定"、不产生复位值宏）：SoC 7.1 公共寄存器（CTRL、STATUS、IRQ_EN、IRQ_STAT、ERR_CODE、DESC_BASE/COUNT、DONE_COUNT、PERF）在 VIN/PIX/GEO/DISP/ETH/PERF_MON/MEM_XBAR 规格中的复位值；MEM_XBAR `WEIGHT[P2]`、`RATE[P0/1/3/4/5]` 复位值；各模块只有取值范围、没有位宽或位域名的寄存器（以 `VALUE` 命名）；npu-spec 第 4 节"STATUS.FRAME 不使用"应为 IRQ_STAT.FRAME、"公共寄存器复位全 0"与 ID = 0x00060001 的矛盾。依据 RTL 实际复位值整理后经用户确认写入规格（B2-1d 前完成）。
+- [x] 2026-10-29 完成（24e5523）。寄存器描述缺项回填（B2-3a 列出，生成头中暂为"未规定"、不产生复位值宏）：SoC 7.1 公共寄存器（CTRL、STATUS、IRQ_EN、IRQ_STAT、ERR_CODE、DESC_BASE/COUNT、DONE_COUNT、PERF）在 VIN/PIX/GEO/DISP/ETH/PERF_MON/MEM_XBAR 规格中的复位值；MEM_XBAR `WEIGHT[P2]`、`RATE[P0/1/3/4/5]` 复位值；各模块只有取值范围、没有位宽或位域名的寄存器（以 `VALUE` 命名）；npu-spec 第 4 节"STATUS.FRAME 不使用"应为 IRQ_STAT.FRAME、"公共寄存器复位全 0"与 ID = 0x00060001 的矛盾。依据 RTL 实际复位值整理后经用户确认写入规格（B2-1d 前完成）。
 
 - clk_sys 频率：B1 用 100 MHz；正式值在 C-S1 依据完整 SoC 的 PDS 结果和布局优化调研（`docs/guides/pds-floorplan.md`）确定。
 - 监控程序外设测试项（SoC 7.5 第 4 条 [待定]）：B1 上板时按实际结果由用户确认。
