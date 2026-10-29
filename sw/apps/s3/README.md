@@ -86,7 +86,7 @@ LVGL 与游戏使用独立的静态分配，同时保留，切换时不动态分
   `LVGL fps=<> rnd_tasks=<> sw_tasks=<>`。
 - widgets 文字、圆角、渐变、阴影、图像和透明混合正确。
 - benchmark 完成后保存每场景帧率与平均帧率；这是规格第 7 节待定指标的上板依据。
-- RN-17 自比对保存每通道最大差、超过 3 的像素占比、边缘最大差，不修改开发容差。
+- RN-17 自比对保存全覆盖/边缘最大 LSB 差、>1 LSB 像素占比和五档分布，按定稿容差判定。
 - 游戏四屏卷轴平滑、无撕裂，左右朝向和透明区正确，得分条正确，收集、死亡重来、
   终点和暂停继续/退出均正常。
 - 保存每秒 `GAME fps=<> rnd_ms=<> cpu_ms=<>`，核对 60 fps 与实际 RND/CPU 开销。
@@ -145,14 +145,15 @@ VECTOR/3D 不认领；这些是正常的软件任务分配，不是 RND 出错�
 图像回调在解码缓冲释放前完成提交。按类型打印 claimed/unclaimed，统计每秒实际任务数。
 
 RN-17 主机已由 A 员工用真实 widgets 三帧和 benchmark 八场景完整执行：
-668 批、2881 条原始描述符、21164490 个目标像素；软件参考由 LVGL 软件单元生成，
+本次按定稿判据重跑668批、2891条原始描述符、21168044个目标像素；软件参考由 LVGL 软件单元生成，
 硬件侧描述符交 `rnd_ref.py` 执行。完整差异表、五档分布、源代码依据和条件见
-[`lvgl/RN17_RESULTS.md`](lvgl/RN17_RESULTS.md)。此集成复用员工的完整证据，未改绘制算法。
+[`lvgl/RN17_RESULTS.md`](lvgl/RN17_RESULTS.md)。本次重跑未改绘制算法。
 
-**11 帧均超出开发初值，不能称为 RN-17 容差通过。** 容差保持 full≤3、edge≤48、
-超过 3 的像素≤1%；runner 返回 1，仍完成全部帧和差异分布。widgets 的超过 3 比例为
-4.324978%…4.376194%，最大通道差 66；透明图层场景比例为 26.942383%，最大通道差 33。
-圆角和混合差异交协调者归因与定稿，不在本程序中放宽容差或禁用正常认领。
+用户已定稿的容差按 RGB565 的 R5/G6/B5 最低位计：全覆盖区每通道≤1 LSB，
+全帧>1 LSB 的像素≤1%，边缘不设单像素上限。主机和板上的统计及 PASS/FAIL
+均调用 `lvgl/rn17_compare.c` 的共用实现，不保留旧 8 位通道统计或判据。
+本次11帧全部PASS，全覆盖区最大差均1 LSB，>1 LSB像素比例最大0.464844%。
+初版超出开发初值的记录已改为历史说明，不保留旧判据的结果表。
 LVGL 的 RGB565 通道内量化混合与 RND 的 RGB888 展开后混合不同，阴影算法也不同；
 这些已检查的事实不构成对所有差异的逐任务归因。
 
@@ -165,7 +166,7 @@ python3 tools/s3/menu_capture.py > build/s3/lvgl/menu-capture.log 2>&1
 主机脚本只用 Python 标准库和主机 C 编译器。RN-17 的 22 张 SW/RND PPM、命令与原始日志
 在 `build/s3/lvgl/`；菜单导出调用生产 `menu.c`，独立检查列表导航后输出真实 RND 合成帧。
 主机和板上共用相同逐像素比较代码及边缘分类。主界面 RN-17 项运行板上同帧 SW/RND
-自比对，并将每通道最大差、全覆盖/边缘最大差、超过 3 的像素比例和差异分布打印到 UART。
+自比对，并将全覆盖/边缘最大 LSB 差、>1 LSB 像素比例和五档 LSB 分布打印到 UART。
 
 ## 完整 ELF 与静态地址表
 
@@ -230,7 +231,7 @@ BLIT→圆角/边框均为外推。静态菜单空闲时不会持续重画整个
 |---|---|---|
 | 完整 DDR 程序 | `make -C sw PROGRAM=s3 MEMORY=ddr_app -j1` | PASS，0 告警 |
 | 主机 LVGL 构建 | `python3 tools/s3/lvgl_host.py` | PASS，510 源文件，0 告警 |
-| RN-17 演示逐像素比对 | `python3 tools/s3/rn17.py --no-build`；复用员工完整结果 | 跑完 11 帧，初值 11 FAIL，未改容差 |
+| RN-17 演示逐像素比对 | `python3 tools/s3/rn17.py --no-build` | 定稿 LSB 判据下11帧全部PASS，最多0.464844%像素>1 LSB |
 | 生产菜单与 RND PPM | `python3 tools/s3/menu_capture.py` | PASS，PPM 已人工确认 |
 | 游戏逻辑/入口/参考合成 | `python3 tools/s3/game_check.py` | PASS，PPM 已人工确认 |
 | Python 语法、C/Python 行风格、提交差异 | AST parse、`git diff --check` | PASS |
@@ -242,7 +243,7 @@ BLIT→圆角/边框均为外推。静态菜单空闲时不会持续重画整个
 - ELF：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-b3-s3/build/sw/s3/s3.elf`
 - 主界面 PPM：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-b3-s3/build/s3/lvgl/menu-rnd.ppm`
 - 游戏 PPM：`/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-b3-s3/build/s3/game/game-frame.ppm`
-- RN-17 表与日志：本工作树 `build/s3/lvgl/rn17-results.md`、`rn17.log`（从 A 的最终验证产物复用）
+- RN-17 表与日志：本工作树 `build/s3/lvgl/rn17-results.md`、`rn17-lsb.log`（A3 按定稿判据重跑）
 - 集成构建/游戏日志：`build/s3/pm/rv32-build.log`、`game-check.log`；菜单日志：`build/s3/lvgl/menu-capture.log`
 
 员工任务由本项目经理拆分，Orca 运行时拒绝深度 2（设置最大 1）后，由协调者按原任务卡
