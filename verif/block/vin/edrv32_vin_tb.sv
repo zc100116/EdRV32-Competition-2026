@@ -1088,7 +1088,7 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         drain();
     endtask
 
-    // VI-15: complete reset map, alignment, RO, RW1C, unused CH2 and draining reset.
+    // VI-15: complete reset map, alignment, RO, RW1C, CH2 registers and draining reset.
     task automatic vi15();
         reset();
         check_reg('h000, 'h00010001);
@@ -1105,7 +1105,7 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         check_reg('h118, 'h02d00500);
         check_reg('h120, 0);
         for (int i = 0; i < 16; i++) check_reg(12'('h040+4*i), 0);
-        for (int c = 0; c < 2; c++) begin
+        for (int c = 0; c < 3; c++) begin
             check_reg(channel_address(c, 0), 'h30);
             check_reg(channel_address(c, 4), 'ha00);
             for (int s = 0; s < 4; s++) check_reg(channel_address(c, 8+s*4), 0);
@@ -1120,7 +1120,20 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
                 check_reg(channel_address(c, 8+s*4), 'h12345000);
             end
         end
-        for (int address = 'h300; address < 'h380; address += 4) begin
+        // spec vin 4.3: CH2 has the same writable and read-only register layout.
+        write_reg('h300, 'hffffffff);
+        check_reg('h300, 'h77);
+        write_reg('h300, 'h30);
+        write_reg('h318, 'hffffffff);
+        check_reg('h318, 'hf);
+        write_reg('h318, 0);
+        for (int offset = 'h20; offset <= 'h28; offset += 4) begin
+            write_reg(12'('h300+offset), 'hffffffff);
+            check_reg(12'('h300+offset), 0);
+        end
+        write_reg('h31c, 'hffffffff);
+        check_reg('h31c, 0);
+        for (int address = 'h32c; address < 'h380; address += 4) begin
             write_reg(12'(address), 'hffffffff);
             check_reg(12'(address), 0);
         end
@@ -1184,6 +1197,13 @@ module edrv32_vin_tb #(parameter int HARNESS_SELFTEST = 0);
         check_reg('h004, 0);
         check_reg('h100, 'h02d00500);
         check_reg('h200, 'h30);
+        check_reg('h300, 'h30);
+        check_reg('h304, 'ha00);
+        for (int s = 0; s < 4; s++) check_reg(12'('h308+s*4), 0);
+        check_reg('h318, 0);
+        check_reg('h320, 0);
+        check_reg('h324, 0);
+        check_reg('h328, 0);
         check_reg('h02c, 0);
         check_reg('h010, 0);
         for (int i = 0; i < 16; i++) check_reg(12'('h040+4*i), 0);
