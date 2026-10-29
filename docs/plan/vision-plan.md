@@ -52,7 +52,7 @@
 | V-R7 | ETH、GEO、VIN 时序修复（按 V-W3 全部违例分组），只增加固定延迟 | Codex · GPT-6.1 Sol | V-W3 | 改动模块单元与 block smoke/full/perf 通过；ET-14、GE-12 数字前后对比；lint 0 告警 | task-media-timing-r2 | [x] 2026-10-28：ETH c0b5716、GEO 1d15bb4、VIN 1c8f1c9；42 项 PASS；ET-14 116.56/116.42 MB/s 不变，GE-12 9.628/19.627 ms（+0.003 ms）；待 PDS 复测（`docs/debug/2026-10-28-media-timing-r2.md`） |
 | V-W4 | Windows：V-R7 后媒体合并 PDS 第三轮复测 | 用户 + Windows Codex | V-R7 | 时序和资源报告 | `tasks/win/20261028-07-media-r3-b1/`（A 部分，与 B1 补测合卡），win/20261028-07-media-r3-b1 | [x] 2026-10-28：clk_mem 125 MHz 满足（slow +0.388 ns，0 违例，131.4 MHz）；VIN+PIX+DISP 9973 LUT（`docs/reports/2026-10-28-timing-media-top-r3.md`） |
 | V-R8 | 图像通路 clk_mem 余量提升到 ≥ 1.0 ns：PIX 推进使能只由内部寄存器产生并复制（扇出 2358 → 局部），VIN abort/ready 寄存，VIN/GEO/DISP 性能计数链拆分，ETH 剩余 0–1 ns 路径；只增加固定延迟 | Codex · GPT-6.1 Sol | V-W4 | 改动模块单元与 block smoke/full/perf 通过；PIX 延迟在 pix-spec 7 节以内；lint 0 告警 | task-media-timing-r3 | [x] 2026-10-29：PIX 两槽输出缓冲 + 103 份寄存推进（最大负载 250，原 2358）、输入槽兼作 point1 操作数级，PIX 延迟不变；VIN abort/FIFO 头/性能计数、GEO bounds、DISP、ETH 收包判定寄存；GE-12 9.673/19.671 ms，ET-14 116.6/116.4 MB/s；全部单元与模块 smoke/full 通过（`docs/debug/2026-10-28-media-timing-r3.md`） |
-| V-W5 | Windows：V-R8 后媒体合并 PDS 第四轮复测 | 用户 + Windows Codex | V-R8 | clk_mem slow WNS ≥ +1.0 ns | 待写 | [ ] |
+| V-W5 | Windows：V-R8 后媒体合并 PDS 第四轮复测 | 用户 + Windows Codex | V-R8 | clk_mem slow WNS ≥ +1.0 ns；复制寄存器保留情况 | `tasks/win/20261029-01-media-r4/` | [ ] 卡已写，待合入 main 下发 |
 
 后续待办（OV5640 软件驱动；PC 端网口工具和板上应用层协议；板级顶层、RGMII IO、约束和 Windows 任务卡；PIX、GEO、ETH 的 PDS 资源测量）在对应前置完成后补入。
 

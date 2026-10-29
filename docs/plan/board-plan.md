@@ -2,9 +2,9 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.1（草案，待用户确认） |
-| 日期 | 2026-10-28 |
-| 关联 | SoC 规格 v0.13 第 3、7.5、9 节；`plan/cpu-plan.md`、`plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md`、`plan/vision-plan.md`、`plan/npu-plan.md` |
+| 版本 | v0.3（草案，B2 待用户确认） |
+| 日期 | 2026-10-29 |
+| 关联 | SoC 规格 v0.15 第 3、7.5、9 节；设计记录 `docs/design/2026-10-29-b2-software.md`；`plan/cpu-plan.md`、`plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md`、`plan/vision-plan.md`、`plan/npu-plan.md` |
 
 阶段编号用 B1–B3，避免与 SoC 规格中的演示场景 S1–S3 混淆。
 
@@ -13,8 +13,8 @@
 | 阶段 | 内容 | 完成标准 |
 |---|---|---|
 | B1 | CPU 最小系统：CPU、I$/D$、系统子系统（ROM、SRAM、UART、GPIO、CLINT、PLIC、I2C、SYSCTRL），clk_sys 100 MHz（用户 2026-10-28 指定，C-S1 前的临时值） | 上板打印启动 logo 和启动信息；监控程序 CoreMark CRC 正确，输出分数、CoreMark/MHz、HPM；PDS 资源和时序报告 |
-| B2 | B1 + DDR3 + 图像通路：VIN（OV5640）、PIX、GEO、DISP（HDMI 输出），clk_mem 125 MHz | 摄像头 → PIX → DDR → DISP 显示正确；GEO 对 DDR 中的帧做变换并显示；PERF_MON 输出各主设备 DDR 带宽 |
-| B3 | B2 + NPU + ETH：PC 经网口下载权重和图像，NPU 跑通 YOLO | 检测结果与参考模型一致；帧率、DDR 带宽 |
+| B2 | 完整 SoC（CPU、系统、存储、VIN + PIX + CH2、GEO、DISP、NPU、ETH；RND 未开发不接）：DDR3、HDMI 输出、两路 OV5640、千兆网口；clk_mem 125 MHz、clk_npu 150 MHz、clk_sys 100 MHz | S2：摄像头 → PIX →（GEO）→ HDMI 显示正确；S1：摄像头/网口图像 → CH2 → NPU → CPU 后处理 → 画框显示，网口回传的 NPU 输出与参考模型逐字节一致；调试工具实时显示各端口 DDR 读写带宽；BIOS 烧录、经 BIOS 运行 tuned CoreMark；PDS 时序和资源 |
+| B3 | B2 + RND（2D 绘制、图层合成）+ S3 图形界面（LVGL） | RND 规格和开发完成后细化 |
 
 ## 2. 前置条件
 
@@ -38,22 +38,27 @@
 | B1-8 | BIOS（SoC v0.14 7.5 第 3、3a 条：按住 KEY1 复位进入，烧录 SRAM 程序，按复位运行）；SRAM 应用每次启动恢复 `.data`、清零 `.bss`（第 3b 条）；uart_tool 和板级/sys_cpu 测试改为 BIOS 流程 | Codex · GPT-6.1 Sol | B1-7 | 板级仿真覆盖烧录、复位运行两次结果一致；sys_cpu、sys_subsys smoke | task-boot-bios | [x] 2026-10-29：BIOS（KEY1 100 ms 窗口、SCRATCH0、烧录后写回 D$）、`.data` LMA 恢复，板级/sys_cpu 两次复位一致，52 个目录通过（`docs/debug/2026-10-28-boot-bios.md`）；上板验证按用户要求并入 B2-4 |
 | B1-9 | EdRV32 调试工具 `tools/debug_tool/`（用户串口工具改名入库）：BIOS 选择文件烧录、网口文件收发（eth-spec 2.3–2.6） | Codex · GPT-6.1 Sol | — | unittest：烧录字节流、应用头逐字节、本机回环 | task-debug-tool | [x] 2026-10-28：`tools/debug_tool/`（用户工具 a7b8cf2 导入改名）；BIOS 烧录（GUI/CLI/REST）、UDP 网口收发；14 项 unittest、本机回环通过；待 Windows 上确认 GUI 和烧录 |
 
-### B2（B1 上板后细化）
+### B2
 
-| 编号 | 内容 | 执行者 | 依赖 | 状态 |
-|---|---|---|---|---|
-| B2-1 | 媒体子系统顶层（媒体 APB、VIN + PIX、GEO、DISP 到 mem_xbar 端口）和 `edrv32_soc_top`（本阶段不含 NPU、ETH、RND）；SoC 级测试 | Codex | — | [ ] |
-| B2-2 | 板级：DDR3 IP 创建说明（厂商 `6_IP_setup_packet/DDR3`、demo `2_9_ddr3_test`）、DDR 适配器、HDMI 输出串化、摄像头接口、各 PLL；约束 | 协调者 + Codex | B2-1 | [ ] |
-| B2-3 | 软件：VIN/PIX/GEO/DISP/PERF_MON 驱动、OV5640 初始化、演示程序（UART 菜单切换 PIX 运算和 GEO 变换，打印 DDR 带宽） | Codex | B2-1 | [ ] |
-| B2-4 | Windows：上板（含 B1-8 BIOS 烧录、经 BIOS 运行 tuned CoreMark、调试工具 GUI 确认） | 用户 + Windows Codex | B2-1–B2-3 | [ ] |
+| 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支或任务卡 | 状态 |
+|---|---|---|---|---|---|---|
+| B2-1a | `edrv32_soc_top`（全部子系统和引擎、APB 槽、PLIC 源、复位、GPIO 位分配）；reset_ctrl 增加 `rst_npu_n`；mem_xbar 统计读写拆分；`soc.f`；连接冒烟测试 `verif/soc/soc_connect` | Codex · GPT-6.1 Sol | — | lint 0 告警；soc_connect smoke；mem_xbar/mem_subsys/sys_subsys/sys_cpu 不回退 | task-soc-top | [~] 2026-10-29 派发 |
+| B2-1b | VIN CH2 RTL（2×2 平均、量化、letterbox、INT8_C4） | Codex · GPT-6.1 Sol | — | lint 0 告警；`verif/unit/vin_ch2`；VIN 现有测试不回退 | task-vin-ch2 | [~] 2026-10-29 派发 |
+| B2-1c | VIN CH2 模块级验证 VI-19–VI-23（独立，与 `tools/npu` 预处理交叉核对） | Codex · GPT-6.1 Sol | 与 B2-1b 并行 | VIN block smoke/full 通过 | task-vin-ch2-verif | [~] 2026-10-29 派发 |
+| B2-1d | SoC 级验证（`docs/testplan/soc-testplan.md`，待写）：S2 数据流、S1 数据流（小用例 NPU）、ETH 收发、并发流量下 DISP 不读空/VIN 不溢出、监控统计 | Codex · GPT-6.1 Sol | B2-1a、B2-1b | SoC 级 smoke/full | — | [ ] |
+| B2-2 | 板级：DDR3 IP 创建说明（厂商 `6_IP_setup_packet`、`2_9_ddr3_test`）、DDR 适配器（已有，接入）、PLL（clk_mem 由 DDR IP 给出，clk_pix 74.25 MHz 与 5 倍串化时钟，clk_npu 150 MHz，clk_sys 100 MHz）、HDMI TMDS 串化、两路 DVP 摄像头 IO、RGMII ↔ 8 位 MAC 适配（厂商 `2_11_ethernet_test`）、B2 板级顶层、约束（引脚取自厂商例程和 `mini-base管脚映射.xlsx`）、导入脚本 | 协调者 + Codex | B2-1a | 板级仿真（DDR/TMDS/RGMII 模型）PASS；约束与引脚表逐项核对 | — | [ ] |
+| B2-3 | 软件基础：寄存器 JSON 描述和 C 头生成器；VIN/PIX/GEO/DISP/NPU/ETH/MEM_XBAR/PERF_MON 驱动；OV5640 初始化（I2C0、GPIO bit12–15） | Codex · GPT-6.1 Sol | B2-1a | 生成头与规格寄存器表一致；SoC 级仿真中驱动用例通过 | — | [ ] |
+| B2-4 | 演示程序 `sw/apps/demo`：S2 图像处理（菜单/KEY2–4 切换 PIX、GEO）；S1 目标检测（CH2 → NPU → 后处理 → 画框）；网口加载 NPU 镜像、网口图像检查；DDR 监控记录 100 Hz 经网口上报（设计记录 3.5） | Codex · GPT-6.1 Sol | B2-3 | 后处理 C 实现与 Python 参考逐项一致；SoC 级仿真跑通 S1 小用例和监控记录 | — | [ ] |
+| B2-5 | 调试工具：DDR 监控页、YOLO 页（发镜像、发图、显示框、参考模型比对）、场景控制（设计记录 3.6） | Codex · GPT-6.1 Sol | B2-4 记录格式 | unittest：记录解析、带宽换算、本机回环；参考比对用例 | — | [ ] |
+| B2-6 | Windows：生成 DDR3、PLL 等 IP，PDS 综合布局布线（完整 SoC 时序、资源）；上板 S2、S1、监控；B1-8 BIOS 烧录和经 BIOS 运行 tuned CoreMark；调试工具 GUI 确认 | 用户 + Windows Codex | B2-1–B2-5 | 串口日志、截图、监控 CSV、报告 | `tasks/win/<日期>-board-b2/` | [ ] |
 
 ### B3（B2 上板后细化）
 
 | 编号 | 内容 | 执行者 | 依赖 | 状态 |
 |---|---|---|---|---|
-| B3-1 | `edrv32_soc_top` 加入 NPU（clk_npu）和 ETH；板级 RGMII 适配和 PHY 约束 | Codex + 协调者 | B2 | [ ] |
-| B3-2 | 软件：ETH、NPU 驱动；YOLO 应用（权重和图像经网口下载到 DDR、NPU 推理、CPU 后处理、结果经 UART/网口输出）；PC 端 UDP 发送工具 | Codex | B3-1 | [ ] |
-| B3-3 | Windows：上板，与参考模型比对检测结果，测帧率和 DDR 带宽 | 用户 + Windows Codex | B3-1、B3-2 | [ ] |
+| B3-1 | RND 规格、开发、验证；DISP 图层合成方式（SoC 8.8） | 协调者 + Codex | B2 | [ ] |
+| B3-2 | S3 图形界面（LVGL + RND）；S1 改为 RND 画框 | Codex | B3-1 | [ ] |
+| B3-3 | Windows：上板 | 用户 + Windows Codex | B3-1、B3-2 | [ ] |
 
 ## 4. 规格定稿项
 
@@ -64,9 +69,11 @@
 
 | 风险 | 应对 |
 |---|---|
-| PDS 存储初始化文件格式未实测（`fpga/ip/README.md`） | B1-3 先按厂商 demo 确认，B1-7 上板前用 ROM 打印 logo 验证 |
-| B2 需要的 SoC 顶层和媒体子系统顶层尚未编写，工作量最大 | B1 进行期间并行开始 B2-1 |
-| 完整 SoC 的时序（PIX 修改后未复测，NPU、媒体同片） | B2 的 PDS 先单独看 clk_mem 和 clk_sys |
+| PDS 存储初始化文件格式 | B1 已上板确认（HEX 每行 16 字符、补满深度） |
+| 完整 SoC 的时序：NPU 单独测量只有 +0.214 ns（150 MHz），clk_mem 第三轮 +0.388 ns，同片后布线更拥挤 | V-R8 提升媒体余量，V-W5 复测；B2-6 先看各域时序，不满足时按域单独处理（布局约束见 `guides/pds-floorplan.md`） |
+| 完整 SoC 的资源：器件约 160K LUT、415 DRM、740 APM；NPU 157 DRM / 290 APM，媒体 46 DRM / 141 APM | B2-1a 后用 Yosys 估计，B2-6 以 PDS 为准 |
+| 演示程序超出 SRAM 64 KiB | 设计记录 3.1 估算 40 KiB；超出时讨论 BIOS 增加烧录 DDR 程序 |
+| DDR3 IP、HDMI、RGMII、OV5640 板级部分没有在本项目中验证过 | B2-2 依据厂商例程逐项移植，先做板级仿真；B2-6 上板按"DDR → HDMI → 摄像头 → 网口 → NPU"顺序逐项确认 |
 
 ## 6. 变更记录
 
@@ -74,3 +81,4 @@
 |---|---|---|
 | 2026-10-28 | v0.1 | 初稿：用户要求开始上板，B1–B3 三个阶段，clk_sys 暂用 100 MHz |
 | 2026-10-28 | v0.2 | 用户上板反馈：监控程序输入按行读取、按键测试改为 10 s 内等待按下松开；增加 B1-8 BIOS、B1-9 调试工具（SoC v0.14） |
+| 2026-10-29 | v0.3 | 用户要求：B2 用完整 SoC（含 NPU、ETH），跑通 YOLO，DDR 带宽经网口实时监控并在调试工具可视化，BIOS 上板验证并入 B2；B2 拆为 B2-1a–B2-6（设计记录 `2026-10-29-b2-software.md`）；原 B3 内容并入 B2，B3 改为 RND 与 S3 |
