@@ -25,7 +25,10 @@ module tb;
     int events = 0;
     edrv32_disp_scan dut (
         .clk_i(clk), .rst_n_i(rst_n), .enable_i(enable), .de_i(de), .x_i(x), .y_i(y),
-        .vblank_i(vblank), .fifo_valid_i(fifo_valid), .fifo_ready_o(fifo_ready),
+        .vblank_i(vblank), .params_valid_i(1'b0), .params_i(56'd0),
+        .fifo1_valid_i(1'b0), .fifo1_ready_o(), .fifo1_data_i(256'd0),
+        .underflow1_o(), .read1_cnt_o(), .perf5_o(), .perf6_o(),
+        .fifo_valid_i(fifo_valid), .fifo_ready_o(fifo_ready),
         .fifo_data_i(fifo_data), .rgb_o(rgb), .frame_req_o(frame_req),
         .underflow_o(underflow), .read_cnt_o(read_cnt),
         .perf0_o(perf0), .perf1_o(perf1), .perf2_o(perf2)

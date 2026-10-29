@@ -1,156 +1,236 @@
-# V-R2 DISP RTL / unit verification report
+# D-R1 DISP v0.3 RTL and unit verification
 
-## Implementation and source revision
+Baseline: `4412a299b4e8c054ed73ab335226c8760470f5d9` (v0.2 RTL).
+Specification clarifications: coordinator commits `e6ff241` and `b230b95` confirm
+that disabled layers retain their last actually read CUR_BASE, first activation
+has no release SWITCH, and the L0 urgent threshold is fixed at 81 beats even when
+p=0 (v0.2 used 80). Along with the explicit ID version update, these are the
+intentional v0.2 compatibility changes. No `docs/` files were modified by this worker.
+RTL source: `e0f07bd` (`disp: implement two-layer scanout and frame parameters`).
+Register description/header: `a62702c` (`regs: describe DISP v0.3 layers and counters`).
+Verification sources and this report are committed together in the `verif:` commit.
+The task was rebased onto coordinator register-metadata commit `24e5523`; ID fields
+are TYPE/VERSION and public reset values are explicit. RTL/common/DISP filelist
+inputs stayed unchanged across this rebase; only JSON/header metadata was merged.
+The regenerated header was rebuilt with `regs_check` after the rebase.
 
-RTL/source revision: `4c1e7dd460c2910ff91c2ce479b22ff0b53d3829`.
-Implementation commits:
+## Implementation
 
-- `e9fdb7df7d51c596185716164cc711edaa6e205e`: DISP RTL and initial five units.
-- `4c1e7dd460c2910ff91c2ce479b22ff0b53d3829`: reset/drain CDC and control unit.
-
-The implementation uses the requested top plus timing, TMDS encoder, reader,
-scan, register and control-CDC submodules. `edrv32_dma2d_rd` is instantiated at top level
-with OUTSTANDING=4; reader owns line descriptors and frame scheduling.
-No files outside the assigned RTL and unit-test directories were changed.
-
-| Files | Purpose |
+| Spec | Change |
 |---|---|
-| `rtl/media/disp/edrv32_disp.v` | APB/P0/TMDS top, DMA, scan FIFO and common CDC instances |
-| `rtl/media/disp/edrv32_disp_control.v` | ENABLE/frame-request acknowledgement and reset-drain CDC |
-| `rtl/media/disp/edrv32_disp_timing.v` | Fixed continuous 1650x750 raster, 1280x720 active |
-| `rtl/media/disp/edrv32_disp_tmds_enc.v` | Legacy three-stage TMDS algorithm, explicit arithmetic widths |
-| `rtl/media/disp/edrv32_disp_reader.v` | Queued frames, per-line descriptors, occupancy reservation |
-| `rtl/media/disp/edrv32_disp_scan.v` | RGB565 expansion, whole-group black, cross-frame debt |
-| `rtl/media/disp/edrv32_disp_regs.v` | Surface handoff, IRQ/ERR, performance and local reset |
-| `verif/unit/disp_{timing,tmds_enc,scan,reader,regs,control}/{tb.sv,files.f,test.yaml}` | Six self-checking unit tests |
-| `verif/unit/disp_reader/resource.ys` | Reproducible generic LUT4 synthesis with FIFO memory retained |
-| `verif/unit/disp_reader/README.md` | This report |
+| 2.4 | Atomically sample all frame registers at reader start; send the 56-bit scan parameter bundle with `edrv32_cdc_handshake`; apply the most recently received bundle at the first pixel of row 0 |
+| 2.5 | Process rows 0..719, L0 before the applicable L1 rectangle row; hold the descriptor's layer through DONE and route all its DMA data to that FIFO |
+| 2.5 | Form L0 base plus horizontal offset once, add STRIDE SCROLL_Y times during prefetch, then once per screen row; advance L1 address once per applicable row; no address multipliers |
+| 2.5 | Admit a full line against its own occupancy; serialize descriptors through DONE, so there are no unreturned reservations when evaluating the next admission |
+| 2.6 | Two independent 512x256 external-RAM FIFOs using `edrv32_async_fifo_ram` and two instances of the existing `edrv32_ram_disp_scan` wrapper; per-layer read-count gray CDC; specified urgent thresholds |
+| 2.7 | L0 pixel lane `(x+p) mod 16`, with a fresh beat at x=0 and each lane wrap; discard the unused tail at the next row; L1 rectangular eight-pixel groups |
+| 2.7, 6 | Independent missing-beat debts, transparent L1 misses, black L0 misses, repayment during blanking and unscanned frames; L1 event/pixel counts via common CDC primitives |
+| 2.7 | Non-premultiplied ARGB8888 and per-frame OPA; alpha product and channel sums use the exact specified `d(x)` including both additions and the final shift |
+| 2.8, 4.1 | BUSY includes parameter-handshake completion and both FIFO occupancies; existing stop/frame-request handshakes remain in force |
+| 4.1-4.3 | ID version 2, SWITCH1/L1_REL_BASE, frame-latched new registers, PERF5/6 reset baselines; JSON register table and regenerated C header |
 
-## Verification
+No range checks, new errors, timeouts, watchdogs or IP were added.
+`rtl/filelists/disp.f` remains unchanged because no RTL files were added or removed.
 
-Environment: `. ~/.local/opt/edrv32/env.sh`;
-Verilator `5.020 2024-01-01 rev (Debian 5.020-1)`.
-All Verilator builds use `-j 1`; tests run sequentially.
-The added control test's first full build hit its 240-second compilation limit
-while other workers were compiling. Its test timeout is now 600 seconds;
-the same Verilator flow is used. Initial evidence is retained in
-`build/disp_control_compile_timeout.log`.
+## Verification commands
+
+Environment: `. ~/.local/opt/edrv32/env.sh`.
+Verilator 5.020; Yosys 0.70+219 (`5053d0e26`); xPack GCC 15.2.0.
+All simulation invocations use one build job and run directories sequentially.
 
 ```sh
 python3 tools/check/verilog_style.py rtl/media/disp
-verilator --lint-only -Wall --top-module edrv32_disp \
-    rtl/media/disp/*.v \
-    rtl/common/edrv32_dma2d_rd.v \
-    rtl/common/edrv32_async_fifo.v \
-    rtl/common/edrv32_cdc_sync_bit.v \
-    rtl/common/edrv32_cdc_pulse.v \
-    rtl/common/edrv32_cdc_gray_cnt.v \
-    rtl/common/edrv32_cdc_handshake.v
+(cd rtl/filelists && verilator --lint-only -Wall -DSIM_MODE \
+    -f disp.f --top-module edrv32_disp)
 for tier in smoke full; do
-    for name in timing tmds_enc scan reader regs control; do
+    for name in timing tmds_enc scan reader regs control layers; do
         make "$tier" REGRESS_ARGS="-j 1 --path verif/unit/disp_${name}" || exit $?
     done
 done
+make smoke REGRESS_ARGS="-j 1 --path verif/block/disp"
+make -C sw PROGRAM=regs_check
 ```
 
-Style: 7 files, 0 warnings; top-level `-Wall` lint: exit 0, no warnings.
-All six smoke and six full tests passed (12/12 total).
-Raw logs: `build/disp_style.log`, `build/disp_lint.log`, and
-`build/regress/{smoke,full}/unit/disp_<name>/verilator/{compile,run}.log`.
+| Unit | Checked behavior |
+|---|---|
+| reader | Every descriptor of five baseline frames, all 16 scroll offsets with nonzero SCROLL_Y, L0/L1 ordering, L1 Y/height/stride/width, both independent FIFO admission boundaries, urgent thresholds, backpressure stability, queued requests, modulo counter wraps and two disabled layers |
+| scan | Original RGB565/debt regression including late arrivals, simultaneous miss/discard, cross-frame and disabled repayment |
+| layers | Two-clock parameter handshake and mid-frame receipt isolation, 16 scroll offsets over two rows, every alpha/OPA pair (65,536), varying channels and RGB565 colors, eight-pixel rectangle at the right/bottom boundary, L0-off, L1-off and independent debts |
+| regs | New reset values and masks, first-frame/no-release, per-layer base changes and disabling, simultaneous release, IRQ9 and ERR_CODE3, PERF5/6 and SOFT_RST baselines; existing APB/IRQ/reset regression |
+| timing, tmds_enc, control | Existing complete raster, symbol and stop/request-handshake regressions |
 
-| Unit | Checked behavior | Smoke | Full |
-|---|---|---|---|
-| timing | Every cycle of two frames; all sync/active/porch boundaries, coordinates, frame/VBlank pulses and totals | PASS | PASS |
-| tmds_enc | All byte values, all control symbols, 20K random symbols, both disparity signs, blanking reset; independent serial encoder updates disparity from emitted symbol popcount | PASS | PASS |
-| scan | Pixel order/expansion, all 16 pixels black on miss, late arrival mid-group, simultaneous missing/discard, cross-frame and disabled debt, one underflow event per frame | PASS | PASS |
-| reader | Every descriptor of five frames (3600 lines), stride/base latching, 79/80 free threshold, full FIFO, pointer wrap, three queued requests, simultaneous enqueue/start, local count clear | PASS | PASS |
-| regs | Defaults, aligned fields, unknown offsets, frame/switch/release, RW1C/set priority, both error codes, PERF counters and deferred reset/baselines | PASS | PASS |
-| control | Sixty in-flight disables, 36 short ENABLE pulses, three overlapping stop requests, three clock ratios | PASS | PASS |
+Validation results:
 
-Module-level `verif/block/disp` verification belongs to the independent worker
-and was not run here.
+| Check | Result |
+|---|---|
+| RTL style | 7 files, 0 warnings |
+| Complete DISP filelist, Verilator `--lint-only -Wall` | PASS, 0 warnings |
+| All seven units, smoke | 7/7 PASS |
+| All seven units, full | 7/7 PASS |
+| `sw/tests/regs_check` build after metadata rebase | PASS |
+| Original v0.2 block smoke | 10/12 PASS; two expected version assertions |
+| Authorized copy, four assertion updates only | 12/12 PASS |
 
-## Resource reference and storage
+The reader results include explicit 80/81 L0 urgency checks; the layers results
+include a requested frame with both layers disabled, no FIFO consumption or errors,
+and correct PERF0 completion. All 65,536 alpha/OPA pairs passed the independent
+integer-division reference.
+
+Raw logs are in `build/disp_<unit>_{smoke,full}.log` and
+`build/regress/{smoke,full}/unit/disp_<unit>/verilator/{compile,run}.log`.
+
+## Resource and memory-clock path reference
 
 ```sh
-yosys -Q -T -s verif/unit/disp_reader/resource.ys > build/disp_resource.log
+yosys -Q -T -l build/disp_resource_v03.log -s verif/unit/disp_reader/resource.ys
+python3 verif/unit/disp_reader/resource_path.py
 ```
 
-Yosys `0.70+219 (git sha1 5053d0e26, Release, Clang 21.1.8)`.
-Generic 4-input LUT mapping, flattened full DISP including common DMA and CDC;
-no Pango device, speed grade or clock constraint is applied.
-The FIFO remains one `$mem_v2` cell: its storage is excluded from LUT/FF counts,
-while FIFO pointers and synchronizers are included.
+The v0.2 baseline can be reproduced with:
 
-| Item | Reference count |
-|---|---:|
-| Generic LUT4 | 3920 |
-| FF (all DFF/DFFE/SDFF variants) | 1519 |
-| FIFO memory | 512 x 256 = 131072 bits = 16 KiB |
-| Other inferred memories | 0 |
-
-Raw results: `build/disp_resource.log`, `build/disp_resource.json`.
-The LUT4 reference exceeds the spec's 2.5K LUT target; it does not establish a
-Pango LUT result. PDS mapping/resource and timing measurements remain outstanding.
-There is no previous DISP RTL resource baseline in this repository.
-The scan FIFO currently uses the authorized common behavioral implementation;
-the coordinator will replace its storage implementation in V-P1.
-
-## Suggested `rtl/filelists/disp.f`
-
-Entries below are relative to `rtl/filelists/`, consistent with existing lists.
-The coordinator owns creation of this file and must avoid duplicate common
-sources when composing subsystem lists.
-
-```text
-../common/edrv32_cdc_sync_bit.v
-../common/edrv32_cdc_pulse.v
-../common/edrv32_cdc_handshake.v
-../common/edrv32_cdc_gray_cnt.v
-../common/edrv32_async_fifo.v
-../common/edrv32_dma2d_rd.v
-../media/disp/edrv32_disp_control.v
-../media/disp/edrv32_disp_timing.v
-../media/disp/edrv32_disp_tmds_enc.v
-../media/disp/edrv32_disp_scan.v
-../media/disp/edrv32_disp_reader.v
-../media/disp/edrv32_disp_regs.v
-../media/disp/edrv32_disp.v
+```sh
+mkdir -p build/disp_v02
+git archive 4412a299b4e8c054ed73ab335226c8760470f5d9 rtl/media/disp | \
+    tar -x -C build/disp_v02
+sed -e 's@rtl/media/disp/@build/disp_v02/rtl/media/disp/@g' \
+    -e 's@build/disp_resource.json@build/disp_resource_v02.json@' \
+    verif/unit/disp_reader/resource.ys > build/disp_resource_v02.ys
+yosys -Q -T -l build/disp_resource_v02.log -s build/disp_resource_v02.ys
+python3 verif/unit/disp_reader/resource_path.py build/disp_resource_v02.json
 ```
 
-## Coordinator questions and confirmed interpretations
+Both revisions use the same generic LUT4 mapping command and black-box the physical
+scan RAM wrapper. This comparison excludes RAM contents from LUT/FF totals and counts
+the FIFO controller/prefetch registers. It is a Yosys reference, not Pango area or timing.
 
-1. **Scan BUSY crossing:** do not add a scan-active level CDC. PERF0 increments
-   at the last visible pixel of each scanned frame. BUSY compares the local
-   received-request count against synchronized PERF0 (both adjusted for local
-   reset baselines), in addition to reader activity/backlog.
-2. **Debt after disabling:** debt repayment continues in blanking and unscanned
-   frames; only normal display reads depend on frame enable. Disabled frames
-   create no new underflow.
-3. **Local SOFT_RST:** stop issuing new frame requests, drain all requested
-   frames, then reset memory-domain registers/status. Keep FIFO pointers and
-   raw crossed counters intact; clear PERF0-2 via baseline subtraction.
-4. **Drain completion:** BUSY also includes FIFO write count unequal to the
-   synchronized read count, so IDLE includes final debt/data drainage.
-5. **In-flight request during SOFT_RST:** replace the frame-request pulse CDC
-   with `edrv32_cdc_handshake` (acknowledgement on the edge receiving/counting
-   the request). Synchronize `scan_live = enable_pix || !frame_req_ready` to
-   memory with `edrv32_cdc_sync_bit`, and include it in BUSY/reset drainage.
-   This supersedes the original frame-request pulse-only boundary; the
-   coordinator is updating X6; it provisionally authorized this implementation
-   while obtaining the user's final specification confirmation.
-6. **Consecutive ENABLE/SOFT_RST before scan_live returns:** Orca question
-   `msg_43c520df0325` received no answer within 600000 ms. Following the Task's
-   explicit ten-minute fallback, implement the proposed explicit stop handshake:
-   every falling memory-domain ENABLE starts a memory-to-pixel handshake;
-   pixels acknowledge only with synchronized ENABLE=0 and no outstanding frame
-   request handshake. Pending stop state holds BUSY until the round trip returns.
-   This also handles rapid ENABLE/ABORT and overlapping disables without a
-   software timing precondition. The coordinator must register the stop handshake
-   in X5/X6 alongside the previously agreed frame-request/live changes.
+The new address datapath has one 32-bit stride addition per clock, followed by an
+independent registered descriptor selection stage. The full-line admission path is
+write count minus synchronized read count into registered occupancies, then comparison
+with a **latched** capacity-minus-line limit into the descriptor-valid state register.
+S_PICK separates previous DONE from S_WAIT, ensuring the prior final write is included
+before this staged occupancy can admit a descriptor. Its result never controls P0
+RREADY: DMA data-ready remains tied high. There is no address multiplier or chained
+row multiplication on clk_mem. SCROLL_Y initialization takes at most 4095 additions
+(32.76 us at 125 MHz), within the approximately 667 us VBlank prefetch interval.
 
-Items 1-4 are coordinator-confirmed clarifications; item 5 is provisionally
-authorized by the coordinator; item 6 is the explicitly
-authorized timeout assumption from the Task. The coordinator owns the
-corresponding specification updates. No new RTL error codes or timeout logic were
-introduced.
+PDS timing and actual LUT/FF/DRM/APM measurements remain for the coordinator's later
+board task; no PDS result is claimed by this Linux work.
+
+## Compatibility test adjustment authorized by coordinator
+
+The original v0.2 `verif/block/disp` test has four assertions whose expected values
+changed explicitly in v0.3. Coordinator reply to `msg_ff656bbeabf9` authorizes a
+build-only copy that changes exactly these assertions:
+
+| Original tb.sv line | Change |
+|---|---|
+| 502 | ID `0x00050001` to `0x00050002` |
+| 527 | ID after ignored RO write: same version update |
+| 616 | DS-04 first activation IRQ_STAT `0x104` to `0x004` (no previous Surface release) |
+| 736 | ID after SOFT_RST: same version update |
+
+The urgent threshold change is also an expected compatibility difference;
+the old smoke cases do not assert its exact 80/81 boundary. The reader unit checks
+urgent=0 at occupancy 81 and urgent=1 at occupancy 80, including the reset L0-only
+configuration. This threshold follows spec 2.6, independent of p.
+
+The original test is run first without changes. The compatibility copy is
+`build/disp_v02_compat/tb.sv`; its complete diff is
+`build/disp_v02_compat/tb.diff`. The copied runner uses the same sources, compiler
+flags, single build job and 12 smoke case/stride/phase combinations, with only
+its root/output locations and testbench path redirected into build.
+
+```sh
+make smoke REGRESS_ARGS="-j 1 --path verif/block/disp"
+python3 build/disp_v02_compat/run.py smoke
+```
+
+To reproduce the authorized build-only copy from a clean checkout, run this before
+its runner command:
+
+```sh
+python3 - <<'PYTHON'
+from pathlib import Path
+root = Path.cwd()
+out = root / 'build/disp_v02_compat'
+out.mkdir(parents=True, exist_ok=True)
+tb = (root / 'verif/block/disp/tb.sv').read_text()
+tb = tb.replace("rd_check(12'h010, 32'h104);", "rd_check(12'h010, 32'h004);", 1)
+tb = tb.replace("32'h00050001", "32'h00050002")
+(out / 'tb.sv').write_text(tb)
+runner = (root / 'verif/block/disp/run.py').read_text()
+runner = runner.replace('ROOT = Path(__file__).resolve().parents[3]',
+                        f'ROOT = Path({str(root)!r})')
+runner = runner.replace('from tmds_ref import generate',
+    "sys.path.insert(0, str(ROOT / 'verif/block/disp'))\nfrom tmds_ref import generate")
+runner = runner.replace("out = ROOT / 'build/disp'", "out = ROOT / 'build/disp_v02_compat'")
+runner = runner.replace("sources = expand_files(ROOT / 'verif/block/disp/files.f')",
+    "sources = expand_files(ROOT / 'verif/block/disp/files.f')\n"
+    "    sources = [str(ROOT / 'build/disp_v02_compat/tb.sv') if p == "
+    "str(ROOT / 'verif/block/disp/tb.sv') else p for p in sources]")
+(out / 'run.py').write_text(runner)
+PYTHON
+```
+
+Original result: **10/12 PASS**, with exactly the two expected failures:
+DS-04 IRQ_STAT expected `0x104`, actual `0x004`; DS-12 ID expected `0x00050001`,
+actual `0x00050002`. The three phase-swept DS-12 cases passed unchanged.
+Original logs: `build/disp_block_v02_original_smoke.log`,
+`build/regress/smoke/block/disp/verilator/run.log`, and `build/disp/DS-*.log`.
+
+Authorized compatibility copy: **12/12 PASS**, including DS-04 full Surface
+handoff/repeat behavior, DS-12 SOFT_RST and all three phase variants.
+Copy logs: `build/disp_block_v02_compat_smoke.log` and
+`build/disp_v02_compat/{compile,DS-*}.log`. The copy compiled with `-Wall`
+without warnings and ran every selected scenario serially.
+
+No `verif/block/` file is modified or committed. The independent v0.3 block tests
+and their integration remain D-T1/D-I1 work, as assigned.
+
+## Modified files
+
+| Files | Purpose |
+|---|---|
+| `rtl/media/disp/edrv32_disp.v` | Second FIFO/RAM, new CDC instances, frame parameter bundle and BUSY integration |
+| `rtl/media/disp/edrv32_disp_reader.v` | Ordered layer descriptors, accumulated addresses, staged per-layer admission and urgency |
+| `rtl/media/disp/edrv32_disp_scan.v` | Frame parameters, scrolled L0, rectangular L1, exact blend, independent debts/counters |
+| `rtl/media/disp/edrv32_disp_regs.v` | Shadow registers, layer release, CUR retention, IRQ/ERR and PERF5/6 |
+| `rtl/include/regs/disp.json` | v0.3 register description |
+| `sw/bsp/include/regs/disp_regs.h` | Generated C constants |
+| `verif/unit/disp_reader/tb.sv` | Two-layer DMA and admission unit |
+| `verif/unit/disp_scan/tb.sv` | Existing debt regression with explicit new interface connections |
+| `verif/unit/disp_regs/tb.sv` | v0.3 register and release unit |
+| `verif/unit/disp_layers/{tb.sv,files.f,test.yaml}` | New scan/blend/parameter-CDC unit |
+| `verif/unit/disp_reader/{resource.ys,resource_path.py,README.md}` | Reproducible resource/path measurement and this report |
+
+## Final Yosys reference (RTL e0f07bd)
+
+| Same flow / physical RAM black boxes | v0.2 (4412a29) | v0.3 (e0f07bd) | Delta |
+|---|---:|---:|---:|
+| Generic LUT4 | 2947 | 6260 | +3313 |
+| FF | 1864 | 3391 | +1527 |
+| Scan RAM instances | 1 | 2 | +1 |
+| Scan RAM storage bits (excluded from LUT/FF) | 131072 | 262144 | +131072 |
+
+This generic flow implements the blend multipliers in LUTs; Pango APM mapping is
+not measured. The generic LUT4 count is above the specification's provisional 4K
+Pango-LUT budget, so that budget still needs evaluation in PDS.
+
+Raw logs/netlists: `build/disp_resource_v0{2,3}.{log,json}` and
+`build/disp_path_v0{2,3}.log`. `resource_path.py` reports **structural LUT4 levels**,
+including D and enable inputs of memory-clock FFs, with FF boundaries as path stops.
+It does not model Pango carry chains, cell delays, placement or routing.
+
+The added admission comparator path is 9 generic LUT4 levels, from the registered
+L1 occupancy to scheduler state; the prior occupancy capture is 14 levels including
+the synchronized Gray-count decode and subtraction. Descriptor payload registers
+separate row-address addition from the DMA input. The longest descriptor-register
+enable path is 1 LUT4 level in this mapping. The L1 address data path is a single
+32-bit registered stride accumulation plus selection; its longest generic path is
+23 LUT4 levels, including the frame-load control/selection cone.
+
+The complete memory-clock mapping has a longest structural path of 50 LUT4 levels,
+from the synchronized frame-request signal through BUSY/drain control to SOFT_CLEAR
+(and APB STATUS), compared with 16 levels in the baseline mapping. No nanosecond
+slack or timing closure is inferred from those generic levels; the tight clk_mem
+margin must be checked by PDS after integration.
