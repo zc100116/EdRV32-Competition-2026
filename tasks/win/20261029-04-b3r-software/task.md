@@ -11,7 +11,7 @@
 
 - 代码分支 `origin/zc100116/b3`（包含本卡的提交）。B3 尚未合入 `main`。
 - 前置：20261029-03 中 B3R 已经能进入新 BIOS（`BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`）。
-- 本卡 `src/`：在 Linux 端构建（`rnd_board`、`nes*` 来自 9510c64，`s3.elf` 来自 911ec63），GCC 15.2.0，程序链接在 DDR 应用区（CPU 0x9000_0000）：
+- 本卡 `src/`：在 Linux 端构建（`rnd_board`、`nes*` 来自 9510c64，`s3.elf` 来自 4fba534），GCC 15.2.0，程序链接在 DDR 应用区（CPU 0x9000_0000）：
 
   | 文件 | 内容 |
   |---|---|
@@ -60,7 +60,7 @@
 ## 7. 通过判据
 
 - RND：`expect.py` 16 组全部 PASS，ERR_CODE 为 0；画面与 README 描述一致。
-- S3：主界面、游戏、widgets 显示正常，应用切换后恢复正常；benchmark 帧率和 RN-17 统计如实记录（RN-17 容差尚未定稿，不作为通过条件）。
+- S3：主界面、游戏、widgets 显示正常，应用切换后恢复正常；benchmark 帧率如实记录；RN-17 自比对按定稿容差（rnd-testplan 第 6 节：全覆盖区 ≤1 个 RGB565 最低位，>1 LSB 像素 ≤1%）应打印 PASS，主机 11 帧已全部 PASS。
 - NES：画面居中、颜色正确，按键有响应；记录显示版和只计时版的实测帧率。帧率多少不作为通过条件，如实记录。
 - 某项异常时记下现象继续，不调试；所有数字来自串口日志原文。
 
