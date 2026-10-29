@@ -325,13 +325,17 @@ module tb;
     integer ar_start [0:6];
     integer aw_start [0:6];
     integer w_start [0:6];
-    integer obs_txn [0:6];
-    integer obs_beats [0:6];
+    integer obs_rd_txn [0:6];
+    integer obs_wr_txn [0:6];
+    integer obs_rd_beats [0:6];
+    integer obs_wr_beats [0:6];
     integer obs_wait_sum [0:6];
     integer obs_wait_max [0:6];
     integer obs_urgent [0:6];
-    integer snap_txn [0:6];
-    integer snap_beats [0:6];
+    integer snap_rd_txn [0:6];
+    integer snap_wr_txn [0:6];
+    integer snap_rd_beats [0:6];
+    integer snap_wr_beats [0:6];
     integer snap_wait_sum [0:6];
     integer snap_wait_max [0:6];
     integer snap_urgent [0:6];
@@ -408,8 +412,10 @@ module tb;
             obs_switch = 0;
             obs_dir_valid = 0;
             for (monitor_i = 0; monitor_i < 7; monitor_i = monitor_i + 1) begin
-                obs_txn[monitor_i] = 0;
-                obs_beats[monitor_i] = 0;
+                obs_rd_txn[monitor_i] = 0;
+                obs_wr_txn[monitor_i] = 0;
+                obs_rd_beats[monitor_i] = 0;
+                obs_wr_beats[monitor_i] = 0;
                 obs_wait_sum[monitor_i] = 0;
                 obs_wait_max[monitor_i] = 0;
                 obs_urgent[monitor_i] = 0;
@@ -423,8 +429,10 @@ module tb;
                 snap_busy = obs_busy;
                 snap_switch = obs_switch;
                 for (monitor_i = 0; monitor_i < 7; monitor_i = monitor_i + 1) begin
-                    snap_txn[monitor_i] = obs_txn[monitor_i];
-                    snap_beats[monitor_i] = obs_beats[monitor_i];
+                    snap_rd_txn[monitor_i] = obs_rd_txn[monitor_i];
+                    snap_wr_txn[monitor_i] = obs_wr_txn[monitor_i];
+                    snap_rd_beats[monitor_i] = obs_rd_beats[monitor_i];
+                    snap_wr_beats[monitor_i] = obs_wr_beats[monitor_i];
                     snap_wait_sum[monitor_i] = obs_wait_sum[monitor_i];
                     snap_wait_max[monitor_i] = obs_wait_max[monitor_i];
                     snap_urgent[monitor_i] = obs_urgent[monitor_i];
@@ -435,8 +443,10 @@ module tb;
                 obs_busy = 0;
                 obs_switch = 0;
                 for (monitor_i = 0; monitor_i < 7; monitor_i = monitor_i + 1) begin
-                    obs_txn[monitor_i] = 0;
-                    obs_beats[monitor_i] = 0;
+                    obs_rd_txn[monitor_i] = 0;
+                    obs_wr_txn[monitor_i] = 0;
+                    obs_rd_beats[monitor_i] = 0;
+                    obs_wr_beats[monitor_i] = 0;
                     obs_wait_sum[monitor_i] = 0;
                     obs_wait_max[monitor_i] = 0;
                     obs_urgent[monitor_i] = 0;
@@ -477,8 +487,8 @@ module tb;
                     $fatal(1, "FAIL read outstanding limit p%0d", monitor_p);
                 if (!stat_clear) begin
                     elapsed = cycles-ar_start[monitor_p];
-                    obs_txn[monitor_p] = obs_txn[monitor_p]+1;
-                    obs_beats[monitor_p] = obs_beats[monitor_p]+int'(ddr_arlen_o)+1;
+                    obs_rd_txn[monitor_p] = obs_rd_txn[monitor_p]+1;
+                    obs_rd_beats[monitor_p] = obs_rd_beats[monitor_p]+int'(ddr_arlen_o)+1;
                     obs_wait_sum[monitor_p] = obs_wait_sum[monitor_p]+elapsed;
                     if (elapsed > obs_wait_max[monitor_p]) obs_wait_max[monitor_p] = elapsed;
                     if (obs_dir_valid && obs_dir) obs_switch = obs_switch+1;
@@ -503,8 +513,8 @@ module tb;
                 if (!stat_clear) begin
                     elapsed = cycles-(aw_start[monitor_p] > w_start[monitor_p] ?
                                       aw_start[monitor_p] : w_start[monitor_p]);
-                    obs_txn[monitor_p] = obs_txn[monitor_p]+1;
-                    obs_beats[monitor_p] = obs_beats[monitor_p]+int'(ddr_awlen_o)+1;
+                    obs_wr_txn[monitor_p] = obs_wr_txn[monitor_p]+1;
+                    obs_wr_beats[monitor_p] = obs_wr_beats[monitor_p]+int'(ddr_awlen_o)+1;
                     obs_wait_sum[monitor_p] = obs_wait_sum[monitor_p]+elapsed;
                     if (elapsed > obs_wait_max[monitor_p]) obs_wait_max[monitor_p] = elapsed;
                     if (obs_dir_valid && !obs_dir) obs_switch = obs_switch+1;
@@ -1238,8 +1248,10 @@ module tb;
     endtask
     task automatic compare_snapshot;
         for (integer p = 0; p < 7; p = p + 1) begin
-            apb_check(12'('h400+32*p),32'(snap_txn[p]));
-            apb_check(12'('h404+32*p),32'(snap_beats[p]));
+            apb_check(12'('h400+32*p),32'(snap_rd_txn[p]));
+            apb_check(12'('h404+32*p),32'(snap_rd_beats[p]));
+            apb_check(12'('h414+32*p),32'(snap_wr_txn[p]));
+            apb_check(12'('h418+32*p),32'(snap_wr_beats[p]));
             apb_check(12'('h408+32*p),32'(snap_wait_max[p]));
             apb_check(12'('h40c+32*p),32'(snap_wait_sum[p]));
             apb_check(12'('h410+32*p),32'(snap_urgent[p]));
@@ -1264,6 +1276,14 @@ module tb;
         ddr_arready_i = 1;
         drain;
         urgent = 0;
+        send_read(3,0,'h8000,2,0);
+        drain;
+        send_write(3,0,'h9000,4,0);
+        drain;
+        send_read(3,1,'ha000,0,0);
+        drain;
+        send_write(3,1,'hb000,1,0);
+        drain;
         for (integer p = 2; p < 7; p = p + 1) begin
             send_read(p,1,32'('h10000+p*'h1000),p,0);
             send_write(p,0,32'('h20000+p*'h1000),p+1,0);
@@ -1279,7 +1299,8 @@ module tb;
         apb_write('h110,1);
         compare_snapshot;
         for (integer p = 0; p < 7; p = p + 1) begin
-            if (snap_txn[p] != 0 || snap_beats[p] != 0 || snap_wait_sum[p] != 0 ||
+            if (snap_rd_txn[p] != 0 || snap_rd_beats[p] != 0 ||
+                snap_wr_txn[p] != 0 || snap_wr_beats[p] != 0 || snap_wait_sum[p] != 0 ||
                 snap_wait_max[p] != 0 || snap_urgent[p] != 0)
                 $fatal(1,"FAIL clear p%0d",p);
         end
@@ -1304,8 +1325,10 @@ module tb;
         reset;
         // No RTL test parameters: inject real counter state while the clock is low.
         @(negedge clk);
-        dut.u_regs.txn_cnt_r[0] = 32'hffff_fffe;
-        dut.u_regs.beat_cnt_r[0] = 32'hffff_fffe;
+        dut.u_regs.rd_txn_r[0] = 32'hffff_fffe;
+        dut.u_regs.rd_beat_r[0] = 32'hffff_fffe;
+        dut.u_regs.wr_txn_r[1] = 32'hffff_fffe;
+        dut.u_regs.wr_beat_r[1] = 32'hffff_fffe;
         dut.u_regs.wait_sum_r[0] = 32'hffff_fffe;
         dut.u_regs.wait_max_r[0] = 16'hffff;
         dut.u_regs.urg_cnt_r[0] = 32'hffff_fffe;
@@ -1316,11 +1339,14 @@ module tb;
         send_read(0,0,'h1000,3,0);
         send_read(0,1,'h2000,3,0);
         send_write(1,0,'h3000,0,0);
+        send_write(1,1,'h3800,1,0);
         send_read(3,0,'h4000,0,0);
         drain;
         apb_write('h110,1);
         apb_check('h400,32'hffff_ffff);
         apb_check('h404,32'hffff_ffff);
+        apb_check('h434,32'hffff_ffff);
+        apb_check('h438,32'hffff_ffff);
         apb_check('h408,32'h0000_ffff);
         apb_check('h40c,32'hffff_ffff);
         apb_check('h410,32'hffff_ffff);
@@ -1331,6 +1357,8 @@ module tb;
         apb_write('h110,1);
         apb_check('h400,0);
         apb_check('h404,0);
+        apb_check('h434,0);
+        apb_check('h438,0);
         apb_check('h408,0);
         apb_check('h40c,0);
         apb_check('h410,0);

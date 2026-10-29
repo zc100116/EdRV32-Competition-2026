@@ -1112,10 +1112,20 @@ module edrv32_mem_subsys_tb;
                 wait_port(3, 0, 6);
                 wait_port(4, 6, 0);
                 drain();
+                // Same P5 alternates reads and writes with unequal beat counts.
+                for (int k = 0; k < 3; k++) begin
+                    send_write(5, 'h30000+32'(k*512), k);
+                    wait_port(5, k, k+1);
+                    send_read(5, 'h30000+32'(k*512), k+1);
+                    wait_port(5, k+1, k+1);
+                end
+                drain();
                 wr(0, 'h110, 3);
                 for (int j = 0; j < 7; j++) begin
-                    rd_eq(0, 12'('h400+j*32), 32'(u_schedule.transactions[j]));
-                    rd_eq(0, 12'('h404+j*32), 32'(u_schedule.beats[j]));
+                    rd_eq(0, 12'('h400+j*32), j == 4 ? 6 : j == 5 ? 3 : 0);
+                    rd_eq(0, 12'('h404+j*32), j == 4 ? 96 : j == 5 ? 9 : 0);
+                    rd_eq(0, 12'('h414+j*32), j == 3 ? 6 : j == 5 ? 3 : 0);
+                    rd_eq(0, 12'('h418+j*32), j == 3 ? 96 : j == 5 ? 6 : 0);
                     rd_eq(0, 12'('h408+j*32), u_schedule_reference.snap_wait_max[j]);
                     rd_eq(0, 12'('h40c+j*32), u_schedule_reference.snap_wait_sum[j]);
                     rd_eq(0, 12'('h410+j*32), u_schedule_reference.snap_urg[j]);
@@ -1128,6 +1138,8 @@ module edrv32_mem_subsys_tb;
                 for (int j = 0; j < 7; j++) begin
                     rd_eq(0, 12'('h400+j*32), 0);
                     rd_eq(0, 12'('h404+j*32), 0);
+                    rd_eq(0, 12'('h414+j*32), 0);
+                    rd_eq(0, 12'('h418+j*32), 0);
                     rd_eq(0, 12'('h408+j*32), 0);
                     rd_eq(0, 12'('h40c+j*32), 0);
                     rd_eq(0, 12'('h410+j*32), 0);
@@ -1137,7 +1149,7 @@ module edrv32_mem_subsys_tb;
                    int'(value));
                 truth("WINDOW_CYC advancing", value != 0);
                 coverage_clear = 1;
-                require_grants(12);
+                require_grants(18);
             end
             211: begin
                 rd_eq(0, 0, 'h00080001);

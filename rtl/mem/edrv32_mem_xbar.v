@@ -601,6 +601,7 @@ module edrv32_mem_xbar (
         .weight_o(weight_w),
         .rate_o(rate_w),
         .grant_i(cmd_take_w),
+        .grant_write_i(cmd_write_r),
         .grant_port_i(cmd_id_r[3:1]),
         .grant_beats_i({1'b0, cmd_len_r} + 5'd1),
         .grant_wait_i(stat_wait_w),

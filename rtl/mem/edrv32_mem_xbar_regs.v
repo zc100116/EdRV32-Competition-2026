@@ -32,6 +32,7 @@ module edrv32_mem_xbar_regs (
     output wire [27:0] weight_o,
     output wire [62:0] rate_o,
     input wire grant_i,
+    input wire grant_write_i,
     input wire [2:0] grant_port_i,
     input wire [4:0] grant_beats_i,
     input wire [15:0] grant_wait_i,
@@ -56,13 +57,17 @@ module edrv32_mem_xbar_regs (
     reg [2:0] err_port_r;
     reg [31:0] err_addr_r;
     reg [2:0] err_type_r;
-    reg [31:0] txn_cnt_r [0:6];
-    reg [31:0] beat_cnt_r [0:6];
+    reg [31:0] rd_txn_r [0:6];
+    reg [31:0] wr_txn_r [0:6];
+    reg [31:0] rd_beat_r [0:6];
+    reg [31:0] wr_beat_r [0:6];
     reg [15:0] wait_max_r [0:6];
     reg [31:0] wait_sum_r [0:6];
     reg [31:0] urg_cnt_r [0:6];
-    reg [31:0] txn_snapshot_r [0:6];
-    reg [31:0] beat_snapshot_r [0:6];
+    reg [31:0] rd_txn_snapshot_r [0:6];
+    reg [31:0] wr_txn_snapshot_r [0:6];
+    reg [31:0] rd_beat_snapshot_r [0:6];
+    reg [31:0] wr_beat_snapshot_r [0:6];
     reg [15:0] max_snapshot_r [0:6];
     reg [31:0] sum_snapshot_r [0:6];
     reg [31:0] urg_snapshot_r [0:6];
@@ -155,38 +160,52 @@ module edrv32_mem_xbar_regs (
             12'h2c4: apb_prdata_o = {28'b0, outst_wr_r[6]};
             12'h2c8: apb_prdata_o = {28'b0, weight_r[6]};
             12'h2cc: apb_prdata_o = {23'b0, rate_r[6]};
-            12'h400: apb_prdata_o = txn_snapshot_r[0];
-            12'h404: apb_prdata_o = beat_snapshot_r[0];
+            12'h400: apb_prdata_o = rd_txn_snapshot_r[0];
+            12'h414: apb_prdata_o = wr_txn_snapshot_r[0];
+            12'h404: apb_prdata_o = rd_beat_snapshot_r[0];
+            12'h418: apb_prdata_o = wr_beat_snapshot_r[0];
             12'h408: apb_prdata_o = {16'b0, max_snapshot_r[0]};
             12'h40c: apb_prdata_o = sum_snapshot_r[0];
             12'h410: apb_prdata_o = urg_snapshot_r[0];
-            12'h420: apb_prdata_o = txn_snapshot_r[1];
-            12'h424: apb_prdata_o = beat_snapshot_r[1];
+            12'h420: apb_prdata_o = rd_txn_snapshot_r[1];
+            12'h434: apb_prdata_o = wr_txn_snapshot_r[1];
+            12'h424: apb_prdata_o = rd_beat_snapshot_r[1];
+            12'h438: apb_prdata_o = wr_beat_snapshot_r[1];
             12'h428: apb_prdata_o = {16'b0, max_snapshot_r[1]};
             12'h42c: apb_prdata_o = sum_snapshot_r[1];
             12'h430: apb_prdata_o = urg_snapshot_r[1];
-            12'h440: apb_prdata_o = txn_snapshot_r[2];
-            12'h444: apb_prdata_o = beat_snapshot_r[2];
+            12'h440: apb_prdata_o = rd_txn_snapshot_r[2];
+            12'h454: apb_prdata_o = wr_txn_snapshot_r[2];
+            12'h444: apb_prdata_o = rd_beat_snapshot_r[2];
+            12'h458: apb_prdata_o = wr_beat_snapshot_r[2];
             12'h448: apb_prdata_o = {16'b0, max_snapshot_r[2]};
             12'h44c: apb_prdata_o = sum_snapshot_r[2];
             12'h450: apb_prdata_o = urg_snapshot_r[2];
-            12'h460: apb_prdata_o = txn_snapshot_r[3];
-            12'h464: apb_prdata_o = beat_snapshot_r[3];
+            12'h460: apb_prdata_o = rd_txn_snapshot_r[3];
+            12'h474: apb_prdata_o = wr_txn_snapshot_r[3];
+            12'h464: apb_prdata_o = rd_beat_snapshot_r[3];
+            12'h478: apb_prdata_o = wr_beat_snapshot_r[3];
             12'h468: apb_prdata_o = {16'b0, max_snapshot_r[3]};
             12'h46c: apb_prdata_o = sum_snapshot_r[3];
             12'h470: apb_prdata_o = urg_snapshot_r[3];
-            12'h480: apb_prdata_o = txn_snapshot_r[4];
-            12'h484: apb_prdata_o = beat_snapshot_r[4];
+            12'h480: apb_prdata_o = rd_txn_snapshot_r[4];
+            12'h494: apb_prdata_o = wr_txn_snapshot_r[4];
+            12'h484: apb_prdata_o = rd_beat_snapshot_r[4];
+            12'h498: apb_prdata_o = wr_beat_snapshot_r[4];
             12'h488: apb_prdata_o = {16'b0, max_snapshot_r[4]};
             12'h48c: apb_prdata_o = sum_snapshot_r[4];
             12'h490: apb_prdata_o = urg_snapshot_r[4];
-            12'h4a0: apb_prdata_o = txn_snapshot_r[5];
-            12'h4a4: apb_prdata_o = beat_snapshot_r[5];
+            12'h4a0: apb_prdata_o = rd_txn_snapshot_r[5];
+            12'h4b4: apb_prdata_o = wr_txn_snapshot_r[5];
+            12'h4a4: apb_prdata_o = rd_beat_snapshot_r[5];
+            12'h4b8: apb_prdata_o = wr_beat_snapshot_r[5];
             12'h4a8: apb_prdata_o = {16'b0, max_snapshot_r[5]};
             12'h4ac: apb_prdata_o = sum_snapshot_r[5];
             12'h4b0: apb_prdata_o = urg_snapshot_r[5];
-            12'h4c0: apb_prdata_o = txn_snapshot_r[6];
-            12'h4c4: apb_prdata_o = beat_snapshot_r[6];
+            12'h4c0: apb_prdata_o = rd_txn_snapshot_r[6];
+            12'h4d4: apb_prdata_o = wr_txn_snapshot_r[6];
+            12'h4c4: apb_prdata_o = rd_beat_snapshot_r[6];
+            12'h4d8: apb_prdata_o = wr_beat_snapshot_r[6];
             12'h4c8: apb_prdata_o = {16'b0, max_snapshot_r[6]};
             12'h4cc: apb_prdata_o = sum_snapshot_r[6];
             12'h4d0: apb_prdata_o = urg_snapshot_r[6];
@@ -267,13 +286,17 @@ module edrv32_mem_xbar_regs (
             busy_snapshot_r <= 32'b0;
             window_snapshot_r <= 32'b0;
             for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
-                txn_cnt_r[stat_idx] <= 32'b0;
-                beat_cnt_r[stat_idx] <= 32'b0;
+                rd_txn_r[stat_idx] <= 32'b0;
+                wr_txn_r[stat_idx] <= 32'b0;
+                rd_beat_r[stat_idx] <= 32'b0;
+                wr_beat_r[stat_idx] <= 32'b0;
                 wait_max_r[stat_idx] <= 16'b0;
                 wait_sum_r[stat_idx] <= 32'b0;
                 urg_cnt_r[stat_idx] <= 32'b0;
-                txn_snapshot_r[stat_idx] <= 32'b0;
-                beat_snapshot_r[stat_idx] <= 32'b0;
+                rd_txn_snapshot_r[stat_idx] <= 32'b0;
+                wr_txn_snapshot_r[stat_idx] <= 32'b0;
+                rd_beat_snapshot_r[stat_idx] <= 32'b0;
+                wr_beat_snapshot_r[stat_idx] <= 32'b0;
                 max_snapshot_r[stat_idx] <= 16'b0;
                 sum_snapshot_r[stat_idx] <= 32'b0;
                 urg_snapshot_r[stat_idx] <= 32'b0;
@@ -284,8 +307,10 @@ module edrv32_mem_xbar_regs (
                 busy_snapshot_r <= ds_busy_r;
                 window_snapshot_r <= window_cyc_r;
                 for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
-                    txn_snapshot_r[stat_idx] <= txn_cnt_r[stat_idx];
-                    beat_snapshot_r[stat_idx] <= beat_cnt_r[stat_idx];
+                    rd_txn_snapshot_r[stat_idx] <= rd_txn_r[stat_idx];
+                    wr_txn_snapshot_r[stat_idx] <= wr_txn_r[stat_idx];
+                    rd_beat_snapshot_r[stat_idx] <= rd_beat_r[stat_idx];
+                    wr_beat_snapshot_r[stat_idx] <= wr_beat_r[stat_idx];
                     max_snapshot_r[stat_idx] <= wait_max_r[stat_idx];
                     sum_snapshot_r[stat_idx] <= wait_sum_r[stat_idx];
                     urg_snapshot_r[stat_idx] <= urg_cnt_r[stat_idx];
@@ -296,8 +321,10 @@ module edrv32_mem_xbar_regs (
                 ds_busy_r <= 32'b0;
                 window_cyc_r <= 32'b0;
                 for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
-                    txn_cnt_r[stat_idx] <= 32'b0;
-                    beat_cnt_r[stat_idx] <= 32'b0;
+                    rd_txn_r[stat_idx] <= 32'b0;
+                    wr_txn_r[stat_idx] <= 32'b0;
+                    rd_beat_r[stat_idx] <= 32'b0;
+                    wr_beat_r[stat_idx] <= 32'b0;
                     wait_max_r[stat_idx] <= 16'b0;
                     wait_sum_r[stat_idx] <= 32'b0;
                     urg_cnt_r[stat_idx] <= 32'b0;
@@ -311,9 +338,15 @@ module edrv32_mem_xbar_regs (
                     dir_switch_r <= sat_add(dir_switch_r, 32'd1);
                 end
                 if (grant_i) begin
-                    txn_cnt_r[grant_port_i] <= sat_add(txn_cnt_r[grant_port_i], 32'd1);
-                    beat_cnt_r[grant_port_i] <=
-                        sat_add(beat_cnt_r[grant_port_i], {27'b0, grant_beats_i});
+                    if (grant_write_i) begin
+                        wr_txn_r[grant_port_i] <= sat_add(wr_txn_r[grant_port_i], 32'd1);
+                        wr_beat_r[grant_port_i] <=
+                            sat_add(wr_beat_r[grant_port_i], {27'b0, grant_beats_i});
+                    end else begin
+                        rd_txn_r[grant_port_i] <= sat_add(rd_txn_r[grant_port_i], 32'd1);
+                        rd_beat_r[grant_port_i] <=
+                            sat_add(rd_beat_r[grant_port_i], {27'b0, grant_beats_i});
+                    end
                     wait_sum_r[grant_port_i] <=
                         sat_add(wait_sum_r[grant_port_i], {16'b0, grant_wait_i});
                     if (grant_wait_i > wait_max_r[grant_port_i]) begin
