@@ -181,7 +181,8 @@ module tb;
         perf1 = 3;
         perf2 = 99;
         busy = 0;
-        tick();
+        // STATUS and the drain decision use the registered BUSY sample.
+        repeat (2) tick();
         if (!soft_clear) $fatal(1, "FAIL missing deferred reset completion");
         tick();
         check_reg('h004, 0);

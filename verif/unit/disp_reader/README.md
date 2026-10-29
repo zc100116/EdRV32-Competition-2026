@@ -1,3 +1,145 @@
+# D-R2 DISP v0.3 memory-clock path cuts
+
+Sources: v0.2 `4412a29`; D-R1 `23ed7ad`; D-R2 RTL `5a490f9`.
+The D-R1 report below is retained as historical evidence.
+The Yosys script, LUT4 mapping options and RAM black boxes are unchanged.
+
+| Structural LUT4 levels | v0.2 | D-R1 | D-R2 |
+|---|---:|---:|---:|
+| clk_mem FF D/E, excluding common DMA internals | 16 | 50 | **16** |
+| clk_mem outputs (excluding TMDS) | 16 | 50 | **15** |
+| reader FF D/E | 16 | 25 | **12** |
+| L1 row-address data | — | 23 | **10** |
+| admission occupancy capture | — | 14 | **11** |
+| admission occupancy to scheduler | — | 9 | **8** |
+| descriptor FF D/E | 16 | 1 | **3** |
+| common dma2d_rd internal FF D/E (authorized exception) | 16 | 29 | **24** |
+| clk_mem FF D/E including common DMA | 16 | 50 | **24** |
+
+| Resource, same generic flow | v0.2 | D-R1 | D-R2 | D-R2 minus D-R1 |
+|---|---:|---:|---:|---:|
+| LUT4 | 2947 | 6260 | **6767** | +507 (+8.10%) |
+| FF, both clocks | 1864 | 3391 | **3557** | +166 (+4.90%) |
+| Physical scan RAM instances | 1 | 2 | 2 | 0 |
+| Physical scan RAM storage bits, excluded above | 131072 | 262144 | 262144 | 0 |
+
+The five longest D-R2 paths, including FF D/E and memory-domain outputs but
+excluding DMA-internal FF endpoints, are:
+
+| Levels | Start | Endpoint |
+|---:|---|---|
+| 16 | `u_read1_cnt.sync_r[8]` | `u_regs.urgent_r[0]` (D) |
+| 15 | `u_perf1.sync_r[30]` | `u_regs.perf1_less_r[0]` (D) |
+| 15 | `u_regs.perf1_less_r[1]` | `apb_prdata_o[30]` |
+| 15 | `u_regs.perf6_equal_r[1]` | `apb_prdata_o[31]` |
+| 15 | `u_read1_cnt.sync_r[8]` | `p0_urgent_o[0]` |
+
+## Path composition and implementation
+
+D-R1's 50-level cone starts at the synchronized frame-request toggle. The queue
+nonzero/frame-start control shared a long mapped cone with 32-bit queue arithmetic;
+BUSY then combined that control with the PERF0 baseline subtraction/comparison,
+FIFO drain, scan-live/stop acknowledgement and parameter-handshake state. The same
+unregistered BUSY drove both the SOFT_CLEAR decision and APB STATUS. Independent
+32-bit counter increments and PERF subtraction/APB cones also exceeded 16 levels.
+
+D-R2 makes these cuts:
+
+- Keep a registered queue-nonzero flag alongside the exact queue count, including
+  modulo wrap. Frame requests, frame latching, FRAME IRQ and frame-count updates
+  retain their original edge. Split 32-bit count updates into 16-bit increments
+  or decrements with carry/borrow conditions from the previous low half.
+- Capture low-half address sums/carry and high-half sums before committing row
+  addresses. Initial horizontal scroll uses the same stages. SCROLL_Y now needs
+  two clocks per addition: 4095 additions take 8190 clocks (65.520 us at
+  125 MHz), plus fixed setup cycles, within the 30-line VBlank.
+  Descriptor ordering, values, backpressure stability and full-line admission
+  remain unchanged.
+- Register each byte of the requested-versus-scanned count comparison before the
+  final BUSY reduction. Register STATUS.BUSY/IDLE, and use this registered state
+  for SOFT_CLEAR. Delay the reset request alongside BUSY so the prior IDLE sample
+  cannot skip the stop handshake. The BUSY register's longest D path is 9 levels;
+  the SOFT_CLEAR register's D path is 1 level. STATUS has one register after its
+  final reduction; frame-completion accounting has one additional prior stage.
+- Capture small less/equal comparisons alongside each existing raw PERF sample,
+  then form modulo count differences with independent byte arithmetic. At
+  SOFT_CLEAR, comparisons use the baseline installed on that same edge. PERF
+  read values retain their previous sampling latency, including reset baselines.
+- Factor FIFO occupancy subtraction into short arithmetic slices and use direct
+  write/read-count equality for empty detection. Urgent thresholds and their
+  observation cycles stay unchanged; admission still uses registered occupancy.
+
+No defensive checks, fallback paths, timeouts, IP, register-map or CDC changes
+were added. All original frame parameters still latch atomically on frame start.
+
+## Common DMA exception approved by the coordinator
+
+The coordinator explicitly amended D-R2 acceptance to exclude internal
+`dma2d_rd`/`dma2d_wr` paths while requiring every other clk_mem path to be at most
+16 LUT4 levels, and required the exception to be listed here. D-R1's internal
+DMA path was 29 levels; D-R2's is 24, from `u_dma.line_addr_r[6]` to the D input
+of `p0_araddr_o[30]`. The common RTL is unchanged; different surrounding logic
+changes generic mapper choices.
+
+The fixed v0.2 width allowed constant folding, while v0.3 variable line widths
+expose common DMA address/burst arithmetic. The coordinator retained the common
+module because variable-width DMA instances already exist in media, and changing
+it would also affect VIN and GEO. The existing
+[media r4 PDS report](../../../docs/reports/2026-10-29-timing-media-top-r4.md)
+uses 125 MHz constraints and reports clk_mem slow-corner +0.592 ns and 135.0 MHz
+Fmax. That is prior media evidence; D-R2 has no PDS timing claim. If the later
+R-W1 result makes this DMA path critical, the coordinator will open a separate
+common-module task.
+
+## Verification and reproduction
+
+All seven unit smoke and full suites passed. After the final arithmetic
+cuts, the reader and regs smoke suites were rerun; the full suites already used
+those final unit sources. Original block smoke: **10/12 PASS**, with exactly
+D-R1's expected DS-04 first-release IRQ and DS-12 ID assertions.
+Authorized four-assertion compatibility copy: **12/12 PASS**.
+
+The only unit-test edit is in `verif/unit/disp_regs/tb.sv`: after lowering the
+synthetic BUSY input, sample deferred SOFT_CLEAR after **two** ticks instead of
+one, because the drain decision now consumes the registered BUSY sample. Every
+assertion and expected value is retained. No other unit sampling was changed.
+No `docs/`, `verif/block/`, common/tech/include or unrelated RTL was modified.
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/check/verilog_style.py rtl/media/disp
+(cd rtl/filelists && verilator --lint-only -Wall -DSIM_MODE \
+    -f disp.f --top-module edrv32_disp)
+for tier in smoke full; do
+    for name in timing tmds_enc scan reader regs control layers; do
+        make "$tier" REGRESS_ARGS="-j 1 --path verif/unit/disp_${name}" || exit $?
+    done
+done
+make smoke REGRESS_ARGS="-j 1 --path verif/block/disp"
+# Create the already-authorized copy using the recipe in the D-R1 report below.
+python3 build/disp_v02_compat/run.py smoke
+yosys -Q -T -l build/disp_dr2_iter7.log -s verif/unit/disp_reader/resource.ys
+python3 verif/unit/disp_reader/resource_path.py
+```
+
+All commands use the versions listed in D-R1 below; simulations run serially
+with one build job. The analyzer now reports the common DMA group separately
+by FF source filename, the five longest remaining paths, and declared bit offsets.
+The Yosys synthesis flow itself is unchanged. Reproduce D-R1 with the v0.2 archive
+recipe below, substituting `23ed7ad` for the revision and `dr1` for output names.
+
+Raw evidence: `build/disp_dr2_{style,lint}.log`,
+`build/disp_dr2_<unit>_{smoke,full}.log`,
+`build/disp_dr2_block_{original,compat}_smoke.log`,
+`build/disp_dr2_iter7.{log,stdout}`, `build/disp_resource_{v02,dr1,dr2}.json`,
+`build/disp_path_{v02,dr1,dr2}.log`, and `build/disp_v02_compat/tb.diff`.
+
+Modified files: `rtl/media/disp/edrv32_disp{,_reader,_regs}.v`,
+`verif/unit/disp_reader/{README.md,resource_path.py}`,
+`verif/unit/disp_regs/tb.sv`.
+
+---
+
 # D-R1 DISP v0.3 RTL and unit verification
 
 Baseline: `4412a299b4e8c054ed73ab335226c8760470f5d9` (v0.2 RTL).

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # File: resource_path.py
-# Spec: disp-spec 7; Task D-R1 resource/path reference.
-# Description: Count mapped LUT4/FF cells and list the longest memory-clock LUT path.
+# Spec: disp-spec 7; Tasks D-R1/D-R2 resource/path reference.
+# Description: Count LUT4/FF cells and report memory-clock paths, including DMA separately.
 # Clock domain: host analysis of a Yosys generic mapped netlist.
 """Run after resource.ys: python3 verif/unit/disp_reader/resource_path.py [netlist.json]."""
 import argparse
@@ -19,7 +19,7 @@ for name, net in module['netnames'].items():
         continue
     for index, bit in enumerate(net['bits']):
         if isinstance(bit, int):
-            lookup.setdefault(bit, []).append(f'{name}[{index}]')
+            lookup.setdefault(bit, []).append(f'{name}[{index + net.get("offset", 0)}]')
 
 
 def label(bit):
@@ -52,9 +52,15 @@ for name, cell in ffs.items():
             if port in cell['connections']:
                 bit = cell['connections'][port][0]
                 endpoints.append((path_to(bit), name, port, cell['connections']['Q'][0]))
+# Coordinator D-R2 clarification: common DMA internals retain their own timing task.
+dma_endpoints = [e for e in endpoints if 'rtl/common/edrv32_dma2d_' in
+                 ffs[e[1]]['attributes']['src']]
+disp_endpoints = [e for e in endpoints if e not in dma_endpoints]
 print(f'{source}: LUT4={len(luts)} FF={len(ffs)}')
 for group, candidates in (
         ('clk_mem', endpoints),
+        ('clk_mem excluding DMA internals', disp_endpoints),
+        ('DMA internals (authorized exception)', dma_endpoints),
         ('reader', [e for e in endpoints if any(n.startswith('u_reader.')
                    for n in lookup.get(e[3], [])) and not any(n.startswith('u_regs.')
                    for n in lookup.get(e[3], []))]),
@@ -80,6 +86,12 @@ mem_outputs = [(path_to(bit), f'{name}[{index}]')
                for index, bit in enumerate(port['bits'])]
 path, output = max(mem_outputs, key=lambda entry: len(entry[0]))
 print(f'clk_mem output path: {len(path)-1} LUT4 levels: {label(path[0])} -> {output}')
+
+ranked = [(e[0], f'{label(e[3])} ({e[2]})') for e in disp_endpoints] + mem_outputs
+for rank, (path, output) in enumerate(sorted(ranked, key=lambda e: len(e[0]),
+                                           reverse=True)[:5], 1):
+    print(f'clk_mem excluding DMA top {rank}: {len(path)-1} LUT4 levels: '
+          f'{label(path[0])} -> {output}')
 
 # Isolate the new admission cone from FIFO accounting to the scheduler state.
 source_bits = set()
