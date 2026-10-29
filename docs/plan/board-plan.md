@@ -47,9 +47,11 @@
 | B2-1c | VIN CH2 模块级验证 VI-19–VI-23（独立，与 `tools/npu` 预处理交叉核对） | Codex · GPT-6.1 Sol | 与 B2-1b 并行 | VIN block smoke/full 通过 | task-vin-ch2-verif | [~] 2026-10-29 测试已交付（abcd685，与 input_pack.py 交叉核对 983040 B 差异 0），待与 B2-1b 一起合入后对真实 RTL 回归 |
 | B2-1d | SoC 级验证（`docs/testplan/soc-testplan.md`，待写）：S2 数据流、S1 数据流（小用例 NPU）、ETH 收发、并发流量下 DISP 不读空/VIN 不溢出、监控统计 | Codex · GPT-6.1 Sol | B2-1a、B2-1b | SoC 级 smoke/full | — | [ ] |
 | B2-2 | 板级：DDR3 IP 创建说明（厂商 `6_IP_setup_packet`、`2_9_ddr3_test`）、DDR 适配器（已有，接入）、PLL（clk_mem 由 DDR IP 给出，clk_pix 74.25 MHz 与 5 倍串化时钟，clk_npu 150 MHz，clk_sys 100 MHz）、HDMI TMDS 串化、两路 DVP 摄像头 IO、RGMII ↔ 8 位 MAC 适配（厂商 `2_11_ethernet_test`）、B2 板级顶层、约束（引脚取自厂商例程和 `mini-base管脚映射.xlsx`）、导入脚本 | 协调者 + Codex | B2-1a | 板级仿真（DDR/TMDS/RGMII 模型）PASS；约束与引脚表逐项核对 | — | [ ] |
-| B2-3 | 软件基础：寄存器 JSON 描述和 C 头生成器；VIN/PIX/GEO/DISP/NPU/ETH/MEM_XBAR/PERF_MON 驱动；OV5640 初始化（I2C0、GPIO bit12–15） | Codex · GPT-6.1 Sol | B2-1a | 生成头与规格寄存器表一致；SoC 级仿真中驱动用例通过 | — | [ ] |
+| B2-3a | 引擎寄存器 JSON 描述（`rtl/include/regs/`）和 C 头生成器 `tools/gen/regs.py` | Codex · GPT-6.1 Sol | — | 重复生成不变；`_Static_assert` 与规格数字对照 | task-regs-gen | [~] 2026-10-29 派发 |
+| B2-3b | 引擎驱动（VIN/PIX/GEO/DISP/NPU/ETH/MEM_XBAR/PERF_MON）；OV5640 初始化（I2C0、GPIO bit12–15） | Codex · GPT-6.1 Sol | B2-1a、B2-3a | SoC 级仿真中驱动用例通过 | — | [ ] |
 | B2-4 | 演示程序 `sw/apps/demo`：S2 图像处理（菜单/KEY2–4 切换 PIX、GEO）；S1 目标检测（CH2 → NPU → 后处理 → 画框）；网口加载 NPU 镜像、网口图像检查；DDR 监控记录 100 Hz 经网口上报（设计记录 3.5） | Codex · GPT-6.1 Sol | B2-3 | 后处理 C 实现与 Python 参考逐项一致；SoC 级仿真跑通 S1 小用例和监控记录 | — | [ ] |
-| B2-5 | 调试工具：DDR 监控页、YOLO 页（发镜像、发图、显示框、参考模型比对）、场景控制（设计记录 3.6） | Codex · GPT-6.1 Sol | B2-4 记录格式 | unittest：记录解析、带宽换算、本机回环；参考比对用例 | — | [ ] |
+| B2-5a | 调试工具：DDR 监控页、场景控制、YOLO 数据发送与回传接收（设计记录 3.5、3.6） | Codex · GPT-6.1 Sol | 设计记录 3.5 记录格式 | unittest：记录解析、带宽换算、CSV、UDP 回环；合成数据截图 | task-debug-monitor | [~] 2026-10-29 派发 |
+| B2-5b | 调试工具 YOLO 页：板上检测框显示、参考模型与后处理参考比对 | Codex · GPT-6.1 Sol | B2-4 后处理参考 | 参考比对用例 | — | [ ] |
 | B2-6 | Windows：生成 DDR3、PLL 等 IP，PDS 综合布局布线（完整 SoC 时序、资源）；上板 S2、S1、监控；B1-8 BIOS 烧录和经 BIOS 运行 tuned CoreMark；调试工具 GUI 确认 | 用户 + Windows Codex | B2-1–B2-5 | 串口日志、截图、监控 CSV、报告 | `tasks/win/<日期>-board-b2/` | [ ] |
 
 ### B3（B2 上板后细化）
