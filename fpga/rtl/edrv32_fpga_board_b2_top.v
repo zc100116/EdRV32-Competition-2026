@@ -80,7 +80,7 @@ module edrv32_fpga_board_b2_top (
     wire ddr_init_done_w;
     wire mem_ready_w;
 
-    // One VCO (900 MHz) serves clk_sys 100 MHz and clk_npu 150 MHz (fpga/ip/ip_pll_sys.md).
+    // One VCO (1350 MHz) serves clk_sys 100 MHz and clk_npu 150 MHz (fpga/ip/ip_pll_sys.md).
     ip_pll_sys u_pll_sys (
         .clkin1(clk_i),
         .clkout0(clk_sys_w),

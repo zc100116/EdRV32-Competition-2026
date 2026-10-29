@@ -24,7 +24,27 @@
 | lock 输出 | 保留（例程默认有 `lock` 端口） |
 | 锁定模式（LOCK_MODE） | 默认 0 |
 
-IP Compiler 显示的实际输出频率必须是 CLKOUT0 100.000 MHz、CLKOUT1 150.000 MHz。两路共用一个 VCO：N = 3、M = 100（PFD 9 MHz、VCO 900 MHz），O0 = 9、O1 = 6，由 IP Compiler 计算。B1 生成的版本只有 CLKOUT0（工具当时选了 VCO 1012.5 MHz 的小数分频），B2 必须按本说明**重新生成**。**如果显示的实际频率不是这两个值，停下来，把显示的频率和分频参数告诉协调者**：板级顶层里的 `CLK_SYS_HZ` 必须等于 clk_sys 实际频率（SYSCTRL `CLK_SYS_HZ`，CoreMark 计时依赖它）。
+IP Compiler 显示的实际输出频率必须是 CLKOUT0 100.000 MHz、CLKOUT1 150.000 MHz。
+
+**必须手动指定分频，不能让工具按 CLKOUT0 自动计算。**
+- 原因：这个 PLL 只有 CLKOUT0 和反馈分频 F 支持小数（1/8 步进），CLKOUT1–6 只能整数分频。
+- 工具按 100 MHz 自动选出的 VCO 是 1012.5 MHz（B1：I=1、M=2、F=18.75、O0=10.125）。1012.5 / 150 不是整数，CLKOUT1 就设不出 150 MHz。
+
+两路共用的 VCO 必须是 150 MHz 的整数倍，同时等于 27 × M × F（F 为 1/8 的倍数，PFD = 27 MHz）。满足条件的最小值是 1350 MHz：
+
+| 参数 | 取值 |
+|---|---|
+| `STATIC_RATIOI` | 1（PFD 27 MHz） |
+| `STATIC_RATIOM` | 2 |
+| `STATIC_RATIOF` | 25（VCO = 27 × 2 × 25 = 1350 MHz） |
+| `STATIC_RATIO0` | 13.5 → CLKOUT0 = 100.000 MHz |
+| `STATIC_RATIO1` | 9 → CLKOUT1 = 150.000 MHz |
+
+在 IP Compiler 的高级页（advanced page）填这些分频值。
+
+**如果工具不接受 1350 MHz 的 VCO，或者不能手动填分频**，停下来，把工具给出的 VCO 范围和报错原文告诉协调者，不要自行改成别的频率。协调者届时会改回 clk_npu 单独一个 PLL（`ip_pll_npu`）。
+
+板级顶层里的 `CLK_SYS_HZ` 必须等于 clk_sys 的实际频率（SYSCTRL `CLK_SYS_HZ`，CoreMark 计时依赖它）。
 
 ## 期望端口
 

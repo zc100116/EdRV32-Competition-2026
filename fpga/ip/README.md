@@ -36,7 +36,7 @@
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，30° | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
 
-B2 的 `ip_pll_sys` 增加 CLKOUT1 150 MHz（clk_npu，与 clk_sys 共用 900 MHz VCO），需要重新生成；新增上表三个 IP；不要把视频输出合入系统 PLL，
+B2 的 `ip_pll_sys` 增加 CLKOUT1 150 MHz（clk_npu，与 clk_sys 共用 1350 MHz VCO，分频须手动指定，见其说明），需要重新生成；新增上表三个 IP；不要把视频输出合入系统 PLL，
 74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。
 TMDS 及 RGMII 使用器件原语，无需另生成 GUI IP：
 `GTP_OSERDES_E2`、`GTP_OUTBUFDS`、`GTP_IDDR_E1`、`GTP_ODDR_E1`、

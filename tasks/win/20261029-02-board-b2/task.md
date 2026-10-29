@@ -48,7 +48,7 @@
 
 | IP | 操作 |
 |---|---|
-| `ip_pll_sys` | **重新生成**（`ip_pll_sys.md`）：在 B1 的 CLKOUT0 100 MHz 基础上增加 CLKOUT1 150 MHz（clk_npu），两路共用 900 MHz VCO |
+| `ip_pll_sys` | **重新生成**（`ip_pll_sys.md`）：在 B1 的 CLKOUT0 100 MHz 基础上增加 CLKOUT1 150 MHz（clk_npu）。**分频必须手动指定**：I=1、M=2、F=25（VCO 1350 MHz）、O0=13.5、O1=9。工具不接受时按说明停下回报 |
 | `ip_pll_video`、`ip_pll_eth` | **新生成** |
 | PLL 共同要求 | 一共只有 3 个 PLL IP：sys（100 + 150 MHz）、video（74.25 + 371.25 MHz，与前者无法共用 VCO）、eth（输入是 PHY 的 RGMII 接收时钟，与 27 MHz 不同源）。DDR3 的 PLL 在 DDR IP 内部，不另生成。IP Compiler 显示的实际频率与说明不一致时停下，把实际频率和分频参数告诉 Codex 写进 result.md |
 | `ip_ddr3` | **新生成**（`ip_ddr3.md`，按厂商 `2_9_ddr3_test` 的设置）。生成后把实际端口列表、`core_clk` 频率交给 Codex 核对 |
