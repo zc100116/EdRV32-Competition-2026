@@ -32,8 +32,11 @@ void s3_rnd_run(const struct rnd_batch *batch);
 void s3_display_begin(const void *l0, uint32_t l0_stride,
                       const void *l1, uint32_t l1_stride);
 void s3_display_stop(void);
-/* Submit together just after FRAME, then await each enabled layer's SWITCH.
+/* Stage scroll for the same submission window as the next Surface flip. */
+void s3_display_scroll(uint16_t x, uint16_t y);
+/* Submit together in the current FRAME window, then await each layer's SWITCH.
  * NULL means leave that layer unchanged; initial setup uses display_begin.
+ * Return is already in the next FRAME: no extra wait_frame in the app loop.
  */
 void s3_display_present(const void *l0, uint32_t l0_stride,
                         const void *l1, uint32_t l1_stride);
