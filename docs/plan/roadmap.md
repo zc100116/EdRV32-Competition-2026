@@ -14,7 +14,7 @@
 | 项 | 内容 |
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
-| 正在进行 | B2（`plan/board-plan.md` v0.3，设计记录 `design/2026-10-29-b2-software.md` 待用户确认）：完整 SoC 顶层 B2-1a、VIN CH2 RTL B2-1b 与独立验证 B2-1c 开发中；媒体 V-R8 已合入，第四轮 PDS V-W5 已下发（`tasks/win/20261029-01-media-r4/`）；B1 完成：100 MHz 下 CoreMark O2 3.603、tuned 4.310 CoreMark/MHz；BIOS 已合入，上板验证并入 B2-6；CPU 频率在 C-S1 依据布局实验定 |
+| 正在进行 | B2（`plan/board-plan.md` v0.3，设计记录 `design/2026-10-29-b2-software.md` 已确认）：完整 SoC 顶层 B2-1a、VIN CH2 RTL B2-1b 与独立验证 B2-1c 开发中；媒体 V-R8 已合入，第四轮 PDS V-W5 已下发（`tasks/win/20261029-01-media-r4/`）；B1 完成：100 MHz 下 CoreMark O2 3.603、tuned 4.310 CoreMark/MHz；BIOS 已合入，上板验证并入 B2-6；CPU 频率在 C-S1 依据布局实验定 |
 | 等待用户 | 无 |
 | 阻塞 | 无 |
 

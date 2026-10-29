@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.3（草案，B2 待用户确认） |
+| 版本 | v0.3（B2 已确认 2026-10-29） |
 | 日期 | 2026-10-29 |
 | 关联 | SoC 规格 v0.15 第 3、7.5、9 节；设计记录 `docs/design/2026-10-29-b2-software.md`；`plan/cpu-plan.md`、`plan/sys-subsys-plan.md`、`plan/mem-subsys-plan.md`、`plan/vision-plan.md`、`plan/npu-plan.md` |
 
