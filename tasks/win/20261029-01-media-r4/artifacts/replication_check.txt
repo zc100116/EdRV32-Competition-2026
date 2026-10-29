@@ -1,0 +1,67 @@
+PIX replication: synthesis VM plus flattened post-PnR functional netlist.
+Fanout = number of primitive input pins on each physical FF Q net; counted from vendor VOP pin directions.
+This is post-route physical fanout, not DMR pre-route logical fanout. Packing/replication may produce more physical FFs per RTL bit.
+Advance expected bits=103; opcode expected bits=60 (4 kernels * (3+3+3*3)).
+Synthesis PAP_PRESERVE retained advance bits=103
+
+register	rtl_bits	synthesis_bits	PAP_PRESERVE_bits	routed_logical_bits	routed_physical_FFs
+u_pix/advance_input_r	1	1	1	1	1
+u_pix/advance_point1_r	7	7	7	7	7
+u_pix/advance_point2_r	3	3	3	3	3
+u_pix/advance_filter1_r	4	4	4	4	4
+u_pix/advance_filter2_r	4	4	4	4	4
+u_pix/advance_kernel10_r	21	21	21	21	21
+u_pix/advance_kernel11_r	21	21	21	21	21
+u_pix/advance_kernel20_r	21	21	21	21	21
+u_pix/advance_kernel21_r	21	21	21	21	21
+u_pix/u_stage1/u_kernel0/op_spatial_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel0/op_result_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel0/g_color[0].op_color_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel0/g_color[1].op_color_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel0/g_color[2].op_color_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel1/op_spatial_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel1/op_result_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel1/g_color[0].op_color_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel1/g_color[1].op_color_r	3	3	3	3	3
+u_pix/u_stage1/u_kernel1/g_color[2].op_color_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel0/op_spatial_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel0/op_result_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel0/g_color[0].op_color_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel0/g_color[1].op_color_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel0/g_color[2].op_color_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel1/op_spatial_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel1/op_result_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel1/g_color[0].op_color_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel1/g_color[1].op_color_r	3	3	3	3	3
+u_pix/u_stage2/u_kernel1/g_color[2].op_color_r	3	3	3	3	3
+
+Per-bit Q fanout: replication_fanout.tsv (all physical FFs).
+
+u_pix top10 driven networks (post-PnR; net name may be renamed by packing):
+net	fanout_input_pins	driver_type	logical_driver	physical_driver	output_pin
+u_pix/advance_kernel21_r[0]	231	V_FFASYN	u_pix/advance_kernel21_r[0]/opit_0_inv/FFAPP0/FF	CLMA_183_630/FFAPP0/FF	Q
+u_pix/advance_kernel11_r[0]	220	V_FFASYN	u_pix/advance_kernel11_r[0]/opit_0_inv/FFAPP0/FF	CLMA_183_774/FFAPP0/FF	Q
+u_pix/advance_kernel20_r[0]	218	V_FFASYN	u_pix/advance_kernel20_r[0]/opit_0_inv/FFAPP0/FF	CLMA_201_649/FFAPP0/FF	Q
+u_pix/advance_kernel10_r[0]	209	V_FFASYN	u_pix/advance_kernel10_r[0]/opit_0_inv/FF0/FF	CLMA_165_811/FF0/FF	Q
+CLMS_267_883/ntCE0	196	V_LUT6CARRY	u_pix/u_stage2/N372_1/gateop_LUT6DL5_perm/FYB/LUT6CARRY	CLMA_213_792/FYB/LUT6CARRY	Z
+CLMS_231_961/ntCE1	193	V_LUT6CARRY	u_pix/u_stage2/read_column_r[8]/opit_0_L6Q_LUT6DQL5_perm/FYC/LUT6CARRY	CLMS_207_883/FYC/LUT6CARRY	Z5
+u_pix/advance_filter2_r[1]	184	V_FFASYN	u_pix/advance_filter2_r[1]/opit_0_inv/FF0/FF	CLMA_183_805/FF0/FF	Q
+u_pix/advance_filter1_r[1]	165	V_FFASYN	u_pix/advance_filter1_r[1]/opit_0_inv/FF0/FF	CLMA_183_774/FF0/FF	Q
+u_pix/advance_point2_r[0]	160	V_FFASYN	u_pix/advance_point2_r[0]/opit_0_inv/FFAPP0/FF	CLMS_243_559/FFAPP0/FF	Q
+u_pix/soft_reset_w	156	V_FFASYN	u_pix/u_regs/soft_reset_o/opit_0_inv_L6Q_perm/FF3/FF	CLMA_237_529/FF3/FF	Q
+
+Original attribute messages:
+SOURCE compile/run.log
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix_kernel.v(line number: 20)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix_kernel.v(line number: 21)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix_kernel.v(line number: 79)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 66)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 67)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 68)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 69)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 70)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 71)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 72)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 73)] Convert attribute name from syn_preserve to PAP_PRESERVE
+I: [G:/codex_project/EdRV32-Competition-2026/rtl/media/pix/edrv32_pix.v(line number: 74)] Convert attribute name from syn_preserve to PAP_PRESERVE
+SOURCE synthesize/run.log

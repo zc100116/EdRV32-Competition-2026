@@ -1,0 +1,641 @@
+Source: Device Map, before PnR. Full native table retained.
+
+Other High Fanout Signal:
++---------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                         | Driver                                                           | Fanout     
++---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ntclkbufg_0                                                      | clkbufg_0                                                        | 24151      
+| u_disp/u_control/N12                                             | u_disp/u_control/N12                                             | 3219       
+| ntclkbufg_1                                                      | clkbufg_1                                                        | 1430       
+| u_vin/g_channel[0].u_channel/N291                                | u_vin/g_channel[0].u_channel/N291                                | 1362       
+| u_disp/u_blue/N70                                                | u_disp/u_blue/N70                                                | 519        
+| u_eth/u_regs/clear_regs_r                                        | u_eth/u_regs/clear_regs_r                                        | 490        
+| u_vin/g_channel[0].u_channel/fifo_read_slot_r                    | u_vin/g_channel[0].u_channel/fifo_read_slot_r                    | 449        
+| u_vin/g_channel[1].u_channel/fifo_read_slot_r                    | u_vin/g_channel[1].u_channel/fifo_read_slot_r                    | 449        
+| stim_mem_r[1011]                                                 | stim_mem_r[1011]                                                 | 339        
+| stim_mem_r[1005]                                                 | stim_mem_r[1005]                                                 | 332        
+| u_vin/u_p1/selected_w                                            | u_vin/u_p1/grant_r                                               | 316        
+| u_eth/u_rx_write/state_r_reg [3]                                 | u_eth/u_rx_write/state_r_reg[3]                                  | 300        
+| u_disp/u_scan_fifo/head_valid_r                                  | u_disp/u_scan_fifo/head_valid_r                                  | 295        
+| u_vin/g_channel[1].u_channel/u_write/write_hold_r                | u_vin/g_channel[1].u_channel/u_write/write_hold_r                | 290        
+| u_vin/g_channel[0].u_channel/u_write/write_hold_r                | u_vin/g_channel[0].u_channel/u_write/write_hold_r                | 290        
+| stim_mem_r[7]                                                    | stim_mem_r[7]                                                    | 290        
+| u_vin/g_channel[0].u_channel/u_write/N61                         | u_vin/g_channel[0].u_channel/u_write/N61                         | 288        
+| u_eth/u_write_dma/N61                                            | u_eth/u_write_dma/N61                                            | 288        
+| u_vin/g_channel[1].u_channel/fifo_capture0_r                     | u_vin/g_channel[1].u_channel/fifo_capture0_r                     | 288        
+| u_vin/g_channel[0].u_channel/fifo_capture0_r                     | u_vin/g_channel[0].u_channel/fifo_capture0_r                     | 288        
+| u_vin/g_channel[1].u_channel/fifo_capture1_r                     | u_vin/g_channel[1].u_channel/fifo_capture1_r                     | 288        
+| u_vin/g_channel[0].u_channel/fifo_capture1_r                     | u_vin/g_channel[0].u_channel/fifo_capture1_r                     | 288        
+| u_vin/g_channel[1].u_channel/u_write/write_data_r[255:0]_and     | u_vin/g_channel[1].u_channel/u_write/write_data_r[255:0]_and     | 288        
+| stim_mem_r[2]                                                    | stim_mem_r[2]                                                    | 287        
+| u_geo/N1206                                                      | u_geo/N1206                                                      | 272        
+| u_geo/u_wr/N61                                                   | u_geo/u_wr/N61                                                   | 272        
+| u_geo/pack_lane_r [1]                                            | u_geo/pack_lane_r[1]                                             | 266        
+| u_geo/pack_lane_r [3]                                            | u_geo/pack_lane_r[3]                                             | 265        
+| u_geo/pack_lane_r [0]                                            | u_geo/pack_lane_r[0]                                             | 265        
+| u_geo/pack_lane_r [2]                                            | u_geo/pack_lane_r[2]                                             | 265        
+| u_eth/u_tx/N1528                                                 | u_eth/u_tx/N1528                                                 | 259        
+| u_disp/u_scan_fifo/head_load_w                                   | u_disp/u_scan_fifo/N32                                           | 257        
+| u_vin/u_msrc/u_buffer/head_load_w                                | u_vin/u_msrc/u_buffer/N23_1                                      | 257        
+| u_vin/g_channel[0].u_channel/pack_valid_r                        | u_vin/g_channel[0].u_channel/pack_valid_r                        | 256        
+| u_geo/pixel_fire_w                                               | u_geo/N159                                                       | 256        
+| u_vin/g_channel[1].u_channel/pack_valid_r                        | u_vin/g_channel[1].u_channel/pack_valid_r                        | 256        
+| stim_mem_r[1006]                                                 | stim_mem_r[1006]                                                 | 251        
+| u_eth/u_rx/N222                                                  | u_eth/u_rx/N479_1                                                | 244        
+| u_pix/advance_kernel20_r [0]                                     | u_pix/advance_kernel20_r[0]                                      | 243        
+| u_pix/advance_kernel11_r [0]                                     | u_pix/advance_kernel11_r[0]                                      | 243        
+| u_pix/advance_kernel21_r [0]                                     | u_pix/advance_kernel21_r[0]                                      | 243        
+| u_pix/advance_kernel10_r [0]                                     | u_pix/advance_kernel10_r[0]                                      | 243        
+| u_disp/u_scan/N1                                                 | u_disp/u_scan/N1                                                 | 241        
+| u_geo/soft_reset_w                                               | u_geo/u_regs/N16_6                                               | 240        
+| u_disp/u_scan/N83_cpy                                            | u_disp/u_scan/N83_cpy                                            | 240        
+| u_geo/start_w                                                    | u_geo/u_regs/N7_3                                                | 236        
+| u_disp/soft_clear_w                                              | u_disp/u_regs/soft_clear_o                                       | 232        
+| stim_mem_r[4]                                                    | stim_mem_r[4]                                                    | 231        
+| u_pix/u_stage2/N445                                              | u_pix/u_stage2/N372_1                                            | 219        
+| u_pix/u_stage1/N445                                              | u_pix/u_stage2/N352_1                                            | 219        
+| u_geo/coord_start_w                                              | u_geo/N144_2                                                     | 213        
+| u_pix/advance_filter1_r [1]                                      | u_pix/advance_filter1_r[1]                                       | 209        
+| u_pix/advance_filter2_r [1]                                      | u_pix/advance_filter2_r[1]                                       | 209        
+| u_vin/g_channel[1].u_channel/pack_word_r [2]                     | u_vin/g_channel[1].u_channel/pack_word_r[2]                      | 196        
+| u_vin/g_channel[0].u_channel/pack_word_r [2]                     | u_vin/g_channel[0].u_channel/pack_word_r[2]                      | 196        
+| u_eth/u_tx/byte_idx_r [0]                                        | u_eth/u_tx/byte_idx_r[0]                                         | 193        
+| u_geo/N449                                                       | u_geo/N449                                                       | 192        
+| u_vin/g_channel[1].u_channel/pack_word_r [1]                     | u_vin/g_channel[1].u_channel/pack_word_r[1]                      | 192        
+| u_vin/g_channel[0].u_channel/pack_word_r [1]                     | u_vin/g_channel[0].u_channel/pack_word_r[1]                      | 192        
+| u_vin/g_channel[1].u_channel/pack_word_r [0]                     | u_vin/g_channel[1].u_channel/pack_word_r[0]                      | 192        
+| u_vin/g_channel[0].u_channel/pack_word_r [0]                     | u_vin/g_channel[0].u_channel/pack_word_r[0]                      | 192        
+| u_pix/advance_point2_r [0]                                       | u_pix/advance_point2_r[0]                                        | 187        
+| u_geo/compute_group_r                                            | u_geo/compute_group_r                                            | 179        
+| stim_mem_r[3]                                                    | stim_mem_r[3]                                                    | 175        
+| u_pix/advance_kernel11_r [1]                                     | u_pix/advance_kernel11_r[1]                                      | 168        
+| u_pix/advance_kernel21_r [1]                                     | u_pix/advance_kernel21_r[1]                                      | 168        
+| u_pix/advance_kernel20_r [1]                                     | u_pix/advance_kernel20_r[1]                                      | 168        
+| u_pix/advance_kernel10_r [1]                                     | u_pix/advance_kernel10_r[1]                                      | 168        
+| u_eth/u_write_dma/write_hold_r                                   | u_eth/u_write_dma/write_hold_r                                   | 162        
+| u_geo/bounds_start_w                                             | u_geo/N80_0                                                      | 158        
+| u_eth/u_tx/byte_idx_r [5]                                        | u_eth/u_tx/byte_idx_r[5]                                         | 157        
+| u_geo/u_wr/write_hold_r                                          | u_geo/u_wr/write_hold_r                                          | 157        
+| u_eth/u_rx_packets/read_w                                        | u_eth/u_rx_write/state_r_fsm[2:0]_35                             | 156        
+| u_pix/soft_reset_w                                               | u_pix/u_regs/soft_reset_o                                        | 156        
+| stim_mem_r[1008]                                                 | stim_mem_r[1008]                                                 | 148        
+| u_geo/N443                                                       | u_geo/N443                                                       | 145        
+| u_eth/u_tx/state_r_reg [6]                                       | u_eth/u_tx/state_r_reg[6]                                        | 142        
+| u_vin/u_msrc/u_buffer/head_valid_r                               | u_vin/u_msrc/u_buffer/head_valid_r                               | 133        
+| u_vin/u_msrc/word_r [2]                                          | u_vin/u_msrc/word_r[2]                                           | 130        
+| u_pix/advance_kernel10_r [16]                                    | u_pix/advance_kernel10_r[16]                                     | 128        
+| u_pix/advance_kernel20_r [14]                                    | u_pix/advance_kernel20_r[14]                                     | 128        
+| u_pix/advance_kernel10_r [17]                                    | u_pix/advance_kernel10_r[17]                                     | 128        
+| u_pix/advance_kernel21_r [17]                                    | u_pix/advance_kernel21_r[17]                                     | 128        
+| u_pix/advance_kernel11_r [12]                                    | u_pix/advance_kernel11_r[12]                                     | 128        
+| u_pix/u_stage2/N407                                              | u_pix/u_stage1/N16_1                                             | 128        
+| u_pix/advance_kernel21_r [16]                                    | u_pix/advance_kernel21_r[16]                                     | 128        
+| u_pix/advance_kernel20_r [16]                                    | u_pix/advance_kernel20_r[16]                                     | 128        
+| u_pix/advance_kernel21_r [12]                                    | u_pix/advance_kernel21_r[12]                                     | 128        
+| u_pix/advance_kernel11_r [17]                                    | u_pix/advance_kernel11_r[17]                                     | 128        
+| u_geo/u_bounds/N273                                              | u_geo/u_bounds/N273_7                                            | 128        
+| u_pix/advance_kernel20_r [17]                                    | u_pix/advance_kernel20_r[17]                                     | 128        
+| u_pix/advance_kernel11_r [16]                                    | u_pix/advance_kernel11_r[16]                                     | 128        
+| u_pix/advance_kernel10_r [14]                                    | u_pix/advance_kernel10_r[14]                                     | 128        
+| u_pix/advance_kernel11_r [14]                                    | u_pix/advance_kernel11_r[14]                                     | 128        
+| u_pix/advance_kernel20_r [12]                                    | u_pix/advance_kernel20_r[12]                                     | 128        
+| u_pix/advance_kernel10_r [12]                                    | u_pix/advance_kernel10_r[12]                                     | 128        
+| u_pix/advance_kernel21_r [14]                                    | u_pix/advance_kernel21_r[14]                                     | 128        
+| stim_mem_r[321]                                                  | stim_mem_r[321]                                                  | 127        
+| stim_mem_r[685]                                                  | stim_mem_r[685]                                                  | 124        
+| u_geo/N1154                                                      | u_geo/N115_6[23]                                                 | 123        
++---------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Clock Signal:
++-----------------------------------------------------------------------------------------------+
+| Driver_Pin_Name     | Clk_Source_Inst     | Clk_Inst_Name     | Net_Name        | Fanout     
++-----------------------------------------------------------------------------------------------+
+| O                   | clk_mem_i_ibuf      | clkbufg_0         | ntclkbufg_0     | 24151      
+| O                   | clk_ext_i_ibuf      | clkbufg_1         | ntclkbufg_1     | 1430       
++-----------------------------------------------------------------------------------------------+
+
+
+
+Reset Signal:
++--------------------------------------------------------------------------------------------------+
+| Net_Name                              | Rst_Source_Inst                            | Fanout     
++--------------------------------------------------------------------------------------------------+
+| _N62897_inv                           | u_vin/u_regs/N147_85[3]_1_inv              | 32         
+| _N63054_inv                           | u_disp/u_regs/apb_prdata_o_39[6]_1_inv     | 32         
+| _N63058_inv                           | u_pix/busy_r_2_inv                         | 32         
+| _N62828_inv                           | u_geo/state_r_fsm[2:0]_285_inv             | 32         
+| _N62712_inv                           | u_eth/u_regs/N7_1_inv                      | 32         
+| u_disp/u_control/N12                  | u_disp/u_control/N12                       | 3219       
+| u_reset_ext/N0                        | u_reset_ext/N0                             | 4          
+| u_disp/u_blue/N70                     | u_disp/u_blue/N70                          | 519        
+| u_disp/u_blue/N145_1                  | u_disp/u_blue/N145_1                       | 20         
+| u_eth/u_rx/N1408                      | u_eth/u_rx/N1408                           | 32         
+| u_eth/u_rx/N222                       | u_eth/u_rx/N479_1                          | 32         
+| u_eth/u_rx_front/N12_1                | u_eth/u_rx_front/N12_1                     | 32         
+| u_eth/u_rx_write/N427                 | u_eth/u_rx_write/N427                      | 24         
+| u_eth/u_rx_write/N206                 | u_eth/u_write_dma/N38_1                    | 5          
+| u_eth/u_tx_front/state_r_reg [0]      | u_eth/u_tx_front/state_r_reg[0]            | 32         
+| u_geo/bounds_start_w                  | u_geo/N80_0                                | 96         
+| _$$_GND_$$_                           | _$$_GND_$$_                                | 100        
+| u_pix/u_stage1/N459                   | u_pix/u_stage1/N459_21                     | 72         
+| u_pix/u_stage2/N459                   | u_pix/u_stage2/N459_11                     | 72         
+| u_vin/g_channel[0].u_channel/N291     | u_vin/g_channel[0].u_channel/N291          | 1362       
+| u_vin/u_fmt0/N345                     | u_vin/u_fmt0/N345_6                        | 32         
+| u_vin/u_fmt1/N345                     | u_vin/u_fmt1/N345_6                        | 32         
++--------------------------------------------------------------------------------------------------+
+
+
+
+CE Signal:
++---------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                         | CE_Source_Inst                                                   | Fanout     
++---------------------------------------------------------------------------------------------------------------------------------------------------+
+| u_eth/arp_event_w                                                | u_eth/u_rx/arp_o                                                 | 80         
+| u_geo/pixel_fire_w                                               | u_geo/N159                                                       | 256        
+| u_geo/N1007                                                      | u_geo/N1007_1_3                                                  | 4          
+| u_geo/N1150                                                      | u_geo/N876                                                       | 16         
+| u_geo/N443                                                       | u_geo/N443                                                       | 145        
+| u_geo/N449                                                       | u_geo/N449                                                       | 192        
+| u_geo/N1101                                                      | u_geo/N1101                                                      | 7          
+| u_geo/N967                                                       | u_geo/N967_1_3                                                   | 5          
+| u_geo/N1121                                                      | u_geo/N1121                                                      | 3          
+| u_geo/N1190                                                      | u_geo/N1190                                                      | 123        
+| u_geo/N1154                                                      | u_geo/N115_6[23]                                                 | 123        
+| u_geo/N289                                                       | u_geo/N41_2                                                      | 2          
+| u_geo/N1206                                                      | u_geo/N1206                                                      | 271        
+| u_geo/N1213                                                      | u_geo/N1198                                                      | 4          
+| u_geo/N919                                                       | u_geo/N17                                                        | 2          
+| u_geo/sample_fire_w                                              | u_geo/N156_3                                                     | 24         
+| u_geo/N1198                                                      | u_geo/N1198                                                      | 4          
+| u_geo/N1064                                                      | u_geo/N1064                                                      | 2          
+| u_geo/N902                                                       | u_geo/N902                                                       | 8          
+| u_geo/start_w                                                    | u_geo/u_regs/N7_3                                                | 43         
+| u_pix/N250                                                       | u_pix/N236_1                                                     | 39         
+| u_pix/advance_input_r                                            | u_pix/advance_input_r                                            | 62         
+| u_pix/N222                                                       | u_pix/N222                                                       | 34         
+| u_pix/N276                                                       | u_pix/N222                                                       | 34         
+| u_disp/u_dma/N232                                                | u_disp/u_dma/N232                                                | 39         
+| u_disp/u_dma/N238                                                | u_disp/u_dma/N238                                                | 39         
+| u_disp/u_dma/N222                                                | u_disp/u_dma/N222                                                | 12         
+| u_disp/u_dma/N228                                                | u_disp/u_dma/N228                                                | 12         
+| u_disp/u_dma/N271                                                | u_disp/u_dma/N271                                                | 3          
+| u_disp/u_dma/desc_fire_w                                         | u_disp/u_dma/N35_1                                               | 11         
+| u_disp/u_reader/N162                                             | u_disp/u_reader/N138_1                                           | 27         
+| u_disp/u_reader/N150                                             | u_disp/u_reader/N150                                             | 10         
+| u_disp/u_reader/N154                                             | u_disp/u_reader/N159                                             | 32         
+| u_disp/u_reader/N159                                             | u_disp/u_reader/N159                                             | 32         
+| u_disp/frame_start_w                                             | u_disp/u_reader/N6                                               | 11         
+| u_disp/dma_valid_w                                               | u_disp/u_dma/N35_1                                               | 10         
+| u_disp/u_regs/N261                                               | u_disp/u_regs/N11                                                | 52         
+| u_disp/u_regs/N246                                               | u_disp/u_regs/N246_1                                             | 2          
+| u_disp/u_regs/N240                                               | u_disp/u_regs/N240                                               | 3          
+| u_disp/u_regs/N255                                               | u_disp/u_regs/N255                                               | 20         
+| u_disp/soft_clear_w                                              | u_disp/u_regs/soft_clear_o                                       | 96         
+| u_disp/u_regs/N269                                               | u_disp/u_regs/N269                                               | 32         
+| u_disp/u_regs/N272                                               | u_disp/u_regs/N269                                               | 32         
+| u_disp/u_regs/N264                                               | u_disp/u_regs/N264                                               | 20         
+| u_disp/u_regs/N258                                               | u_disp/u_regs/N258                                               | 11         
+| u_disp/u_scan/N147                                               | u_disp/u_scan/N147_1                                             | 32         
+| u_disp/u_scan/N51                                                | u_disp/u_timing/N22_1.fsub_9                                     | 32         
+| u_disp/underflow_pix_w                                           | u_disp/u_scan/N9_1                                               | 33         
+| u_disp/u_scan/missing_w                                          | u_disp/u_scan/N9                                                 | 32         
+| u_disp/u_scan/N1                                                 | u_disp/u_scan/N1                                                 | 240        
+| u_disp/u_scan/N41                                                | u_disp/u_scan/N41_1                                              | 10         
+| u_disp/ram_rd_en_w                                               | u_disp/u_scan_fifo/N16                                           | 14         
+| u_disp/u_scan_fifo/head_load_w                                   | u_disp/u_scan_fifo/N32                                           | 256        
+| u_disp/u_timing/N76                                              | u_disp/u_timing/N76_16                                           | 10         
+| u_eth/u_mdio/N121                                                | u_eth/u_mdio/N121                                                | 16         
+| u_eth/u_mdio/N123                                                | u_eth/u_mdio/N123                                                | 64         
+| u_eth/u_mdio/N93                                                 | u_eth/u_mdio/N93                                                 | 6          
+| u_eth/u_mdio/N70                                                 | u_eth/u_mdio/N70_5                                               | 16         
+| u_eth/u_regs/N2562                                               | u_eth/u_regs/N2562                                               | 27         
+| u_eth/u_regs/N2504                                               | u_eth/u_regs/N2504                                               | 27         
+| u_eth/u_regs/N2446                                               | u_eth/u_regs/N2446                                               | 27         
+| u_eth/u_regs/N2262                                               | u_eth/u_regs/N2262                                               | 27         
+| u_eth/u_regs/N24219                                              | u_eth/u_regs/N24219                                              | 32         
+| u_eth/u_regs/N17114                                              | u_eth/u_regs/N17114                                              | 32         
+| u_eth/u_regs/N10009                                              | u_eth/u_regs/N10009                                              | 32         
+| u_eth/u_regs/N2904                                               | u_eth/u_regs/N2904                                               | 32         
+| u_eth/u_regs/N1600                                               | u_eth/u_regs/N1600                                               | 27         
+| u_eth/u_regs/N1658                                               | u_eth/u_regs/N1658                                               | 16         
+| u_eth/u_regs/N2195                                               | u_eth/u_regs/N2195                                               | 32         
+| u_eth/u_regs/N2064                                               | u_eth/u_regs/N2064                                               | 32         
+| u_eth/u_regs/N2006                                               | u_eth/u_regs/N2006                                               | 16         
+| u_eth/u_regs/N1948                                               | u_eth/u_regs/N1948                                               | 32         
+| u_eth/u_regs/N2186                                               | u_eth/u_regs/N2186_3                                             | 2          
+| u_eth/u_regs/N1832                                               | u_eth/u_regs/N1452                                               | 32         
+| u_eth/u_regs/N1542                                               | u_eth/u_regs/N31487                                              | 6          
+| u_eth/u_regs/N1774                                               | u_eth/u_regs/N2195                                               | 16         
+| u_eth/u_regs/N1716                                               | u_eth/u_regs/N1716                                               | 32         
+| u_eth/u_regs/N2198                                               | u_eth/u_regs/N2198                                               | 96         
+| u_eth/u_regs/N2381                                               | u_eth/u_regs/N2381                                               | 32         
+| u_eth/u_regs/N31941                                              | u_eth/u_regs/N31941                                              | 32         
+| u_eth/u_regs/N31876                                              | u_eth/u_regs/N31876_23                                           | 32         
+| u_eth/u_regs/N31812                                              | u_eth/u_regs/N31747                                              | 32         
+| u_eth/u_regs/N31747                                              | u_eth/u_regs/N31747                                              | 32         
+| u_eth/u_regs/N31682                                              | u_eth/u_regs/N31682                                              | 32         
+| u_eth/u_regs/N31617                                              | u_eth/u_regs/N31617                                              | 32         
+| u_eth/u_regs/N31552                                              | u_eth/u_regs/N31552                                              | 32         
+| u_eth/u_regs/N31487                                              | u_eth/u_regs/N31487                                              | 32         
+| u_eth/u_regs/N31294                                              | u_eth/u_regs/N2198                                               | 32         
+| u_eth/u_regs/N2681                                               | u_eth/u_regs/N31941                                              | 32         
+| u_eth/u_regs/N2122                                               | u_eth/u_regs/N2122                                               | 32         
+| u_eth/u_regs/N1890                                               | u_eth/u_regs/N1890                                               | 16         
+| u_eth/u_regs/N2378                                               | u_eth/u_regs/N2381                                               | 28         
+| u_eth/u_regs/N2678                                               | u_eth/u_regs/N2678                                               | 28         
+| u_eth/u_regs/N2620                                               | u_eth/u_regs/N2320                                               | 28         
+| u_eth/u_regs/N2320                                               | u_eth/u_regs/N2320                                               | 28         
+| u_eth/u_rx/N222                                                  | u_eth/u_rx/N479_1                                                | 200        
+| u_eth/u_rx/N1267                                                 | u_eth/u_rx/N1267                                                 | 16         
+| u_eth/u_rx/N887                                                  | u_eth/u_rx/N887                                                  | 8          
+| u_eth/u_rx/N875                                                  | u_eth/u_rx/N803                                                  | 8          
+| u_eth/u_rx/N863                                                  | u_eth/u_rx/N731                                                  | 8          
+| u_eth/u_rx/N851                                                  | u_eth/u_rx/N767                                                  | 8          
+| u_eth/u_rx/N803                                                  | u_eth/u_rx/N803                                                  | 2          
+| u_eth/u_rx/N791                                                  | u_eth/u_rx/N779                                                  | 8          
+| u_eth/u_rx/N779                                                  | u_eth/u_rx/N779                                                  | 8          
+| u_eth/u_rx/N767                                                  | u_eth/u_rx/N767                                                  | 8          
+| u_eth/u_rx/N755                                                  | u_eth/u_rx/N743                                                  | 8          
+| u_eth/u_rx/N743                                                  | u_eth/u_rx/N743                                                  | 8          
+| u_eth/u_rx/N731                                                  | u_eth/u_rx/N731                                                  | 8          
+| u_eth/u_rx/N719                                                  | u_eth/u_rx/N707                                                  | 8          
+| u_eth/u_rx/N707                                                  | u_eth/u_rx/N707                                                  | 8          
+| u_eth/u_rx/N695                                                  | u_eth/u_rx/N683                                                  | 8          
+| u_eth/u_rx/N683                                                  | u_eth/u_rx/N683                                                  | 8          
+| u_eth/u_rx/N671                                                  | u_eth/u_rx/N659                                                  | 8          
+| u_eth/u_rx/N659                                                  | u_eth/u_rx/N659                                                  | 8          
+| u_eth/u_rx/N647                                                  | u_eth/u_rx/N635                                                  | 8          
+| u_eth/u_rx/N635                                                  | u_eth/u_rx/N635                                                  | 8          
+| u_eth/u_rx/N623                                                  | u_eth/u_rx/N539_1                                                | 8          
+| u_eth/u_rx/N611                                                  | u_eth/u_rx/N599                                                  | 8          
+| u_eth/u_rx/N599                                                  | u_eth/u_rx/N599                                                  | 8          
+| u_eth/u_rx/N587                                                  | u_eth/u_rx/N527                                                  | 8          
+| u_eth/u_rx/N575                                                  | u_eth/u_rx/N563                                                  | 8          
+| u_eth/u_rx/N563                                                  | u_eth/u_rx/N563                                                  | 8          
+| u_eth/u_rx/N551                                                  | u_eth/u_rx/N539                                                  | 8          
+| u_eth/u_rx/N539                                                  | u_eth/u_rx/N539                                                  | 8          
+| u_eth/u_rx/N527                                                  | u_eth/u_rx/N527                                                  | 8          
+| u_eth/u_rx/N515                                                  | u_eth/u_rx/N503                                                  | 8          
+| u_eth/u_rx/N503                                                  | u_eth/u_rx/N503                                                  | 8          
+| u_eth/u_rx/N491                                                  | u_eth/u_rx/N431                                                  | 8          
+| u_eth/u_rx/N479                                                  | u_eth/u_rx/N467                                                  | 8          
+| u_eth/u_rx/N467                                                  | u_eth/u_rx/N467                                                  | 8          
+| u_eth/u_rx/N455                                                  | u_eth/u_rx/N443                                                  | 8          
+| u_eth/u_rx/N443                                                  | u_eth/u_rx/N443                                                  | 8          
+| u_eth/u_rx/N431                                                  | u_eth/u_rx/N431                                                  | 8          
+| u_eth/u_rx/N419                                                  | u_eth/u_rx/N407                                                  | 8          
+| u_eth/u_rx/N407                                                  | u_eth/u_rx/N407                                                  | 8          
+| u_eth/u_rx/N395                                                  | u_eth/u_rx/N335                                                  | 8          
+| u_eth/u_rx/N383                                                  | u_eth/u_rx/N371                                                  | 8          
+| u_eth/u_rx/N371                                                  | u_eth/u_rx/N371                                                  | 8          
+| u_eth/u_rx/N359                                                  | u_eth/u_rx/N347                                                  | 8          
+| u_eth/u_rx/N347                                                  | u_eth/u_rx/N347                                                  | 8          
+| u_eth/u_rx/N335                                                  | u_eth/u_rx/N335                                                  | 8          
+| u_eth/u_rx/N323                                                  | u_eth/u_rx/N311                                                  | 8          
+| u_eth/u_rx/N311                                                  | u_eth/u_rx/N311                                                  | 8          
+| u_eth/u_rx/N299                                                  | u_eth/u_rx/N299                                                  | 8          
+| u_eth/u_rx/N71                                                   | u_eth/u_rx/N71                                                   | 8          
+| u_eth/u_rx/N1402                                                 | u_eth/u_rx/N1402_7                                               | 32         
+| u_eth/N138_1_inv_1                                               | u_eth/N138_1                                                     | 11         
+| u_eth/u_rx/udp_sum_r[31:0]_and                                   | u_eth/u_rx/udp_sum_r[31:0]_and_2                                 | 32         
+| u_eth/u_rx/payload_byte_w                                        | u_eth/u_rx/N78_6                                                 | 32         
+| stim_ext_r[28]                                                   | stim_ext_r[28]                                                   | 32         
+| u_eth/u_rx_packets/N50                                           | u_eth/u_rx_packets/N50                                           | 3          
+| u_eth/u_rx_packets/read_w                                        | u_eth/u_rx_write/state_r_fsm[2:0]_35                             | 149        
+| u_eth/u_rx_packets/write_w                                       | u_eth/u_rx_packets/N9                                            | 2          
+| u_eth/u_rx_write/state_r_reg [3]                                 | u_eth/u_rx_write/state_r_reg[3]                                  | 248        
+| u_eth/u_rx_write/N418                                            | u_eth/u_rx_write/N418                                            | 6          
+| u_eth/u_rx_write/N402                                            | u_eth/u_rx_write/N402                                            | 21         
+| u_eth/u_rx_write/N429                                            | u_eth/u_rx_write/N418_1                                          | 16         
+| u_eth/u_rx_write/N433_1                                          | u_eth/u_rx_write/N433_1                                          | 32         
+| u_eth/u_rx_write/N396                                            | u_eth/u_rx_write/N396_1                                          | 11         
+| u_eth/u_rx_write/N361                                            | u_eth/u_rx_write/N361                                            | 7          
+| u_eth/u_tx/N1793                                                 | u_eth/u_tx/N1793                                                 | 80         
+| u_eth/u_tx/N1528                                                 | u_eth/u_tx/N1528                                                 | 259        
+| u_eth/u_tx/N1714                                                 | u_eth/u_tx/N1714_1                                               | 11         
+| u_eth/start_w                                                    | u_eth/u_regs/N13_4                                               | 16         
+| u_eth/u_tx/N1838                                                 | u_eth/u_tx/N1838                                                 | 16         
+| u_eth/u_tx/N1560                                                 | u_eth/u_tx/N1560                                                 | 12         
+| u_eth/u_tx/N625                                                  | u_eth/u_tx/state_r_fsm[3:0]_298_14                               | 3          
+| u_eth/u_tx/N1807                                                 | u_eth/u_tx/N595_1                                                | 48         
+| u_eth/u_tx/N1661                                                 | u_eth/u_tx/N1661                                                 | 4          
+| u_eth/u_tx/N1790                                                 | u_eth/u_tx/N1790                                                 | 16         
+| u_eth/u_tx/N1580                                                 | u_eth/u_tx/N1580                                                 | 83         
+| u_eth/u_tx/N1811                                                 | u_eth/u_tx/N1811                                                 | 16         
+| u_eth/u_tx/N1821                                                 | u_eth/u_tx/N1821_1                                               | 32         
+| u_eth/u_tx/N1201                                                 | u_eth/u_tx/N1201                                                 | 9          
+| u_eth/u_tx/N1576                                                 | u_eth/u_tx/N1576                                                 | 27         
+| u_eth/u_tx/N1543                                                 | u_eth/u_tx/N1543                                                 | 9          
+| u_eth/u_tx_front/N227                                            | u_eth/u_tx_front/N227                                            | 11         
+| u_eth/u_tx_front/N233                                            | u_eth/u_tx_front/N233_0                                          | 32         
+| u_eth/u_tx_front/N216                                            | u_eth/u_tx_front/N216_6                                          | 4          
+| u_eth/u_tx_front/N198                                            | u_eth/u_tx_front/N198                                            | 6          
+| u_eth/u_write_dma/N236                                           | u_eth/u_write_dma/N236                                           | 39         
+| u_eth/u_write_dma/N242                                           | u_eth/u_write_dma/N242                                           | 39         
+| u_eth/u_write_dma/N275                                           | u_eth/u_write_dma/N275                                           | 3          
+| u_eth/u_write_dma/desc_fire_w                                    | u_eth/u_rx_write/state_r_fsm[2:0]_3                              | 8          
+| u_eth/u_write_dma/N229                                           | u_eth/u_write_dma/N229                                           | 6          
+| u_eth/u_write_dma/N61                                            | u_eth/u_write_dma/N61                                            | 288        
+| u_geo/advance_w                                                  | u_geo/N146                                                       | 99         
+| u_geo/u_bounds/N313                                              | u_geo/u_bounds/N313                                              | 105        
+| u_geo/u_bounds/N331                                              | u_geo/u_bounds/N275_3                                            | 48         
+| u_geo/u_bounds/N275                                              | u_geo/u_bounds/N275_3                                            | 45         
+| u_geo/u_bounds/N327                                              | u_geo/u_bounds/N273_7                                            | 48         
+| u_geo/u_bounds/N270                                              | u_geo/u_bounds/N270                                              | 44         
+| u_geo/u_bounds/N273                                              | u_geo/u_bounds/N273_7                                            | 128        
+| u_geo/u_bounds/N274                                              | u_geo/u_bounds/N270                                              | 64         
+| u_geo/u_bounds/N305                                              | u_geo/u_bounds/N305_9                                            | 4          
+| u_geo/u_coords/N74                                               | u_geo/u_coords/N74                                               | 6          
+| u_geo/u_coords/N82                                               | u_geo/u_coords/N82                                               | 5          
+| u_geo/u_coords/N88                                               | u_geo/u_coords/N74                                               | 64         
+| u_geo/u_coords/N98                                               | u_geo/u_coords/N98                                               | 64         
+| u_geo/u_rd/N232                                                  | u_geo/u_rd/N228                                                  | 39         
+| u_geo/u_rd/N238                                                  | u_geo/u_rd/N271                                                  | 39         
+| u_geo/u_rd/N222                                                  | u_geo/u_rd/N222                                                  | 12         
+| u_geo/u_rd/N228                                                  | u_geo/u_rd/N228                                                  | 12         
+| u_geo/u_rd/N271                                                  | u_geo/u_rd/N271                                                  | 3          
+| u_geo/u_rd/desc_fire_w                                           | u_geo/u_rd/N0_5                                                  | 20         
+| u_geo/u_read_address/N54                                         | u_geo/u_read_address/N54                                         | 27         
+| u_geo/u_read_address/N44                                         | u_geo/u_read_address/N44                                         | 4          
+| u_geo/u_read_address/N56                                         | u_geo/u_tiles/N126_1                                             | 39         
+| u_geo/u_regs/N798                                                | u_geo/u_regs/N798                                                | 27         
+| u_geo/u_regs/N816                                                | u_geo/u_regs/N816                                                | 16         
+| u_geo/u_regs/N780                                                | u_geo/u_tiles/u_o[11:0]_2                                        | 32         
+| u_geo/u_regs/N773                                                | u_geo/u_regs/N742[1]                                             | 2          
+| u_geo/u_regs/N741                                                | u_geo/u_regs/N741                                                | 2          
+| u_geo/u_regs/N745                                                | u_geo/u_regs/N745                                                | 32         
+| u_geo/u_regs/N1643                                               | u_geo/u_regs/N1643_6                                             | 32         
+| u_geo/u_regs/N1451                                               | u_geo/u_regs/N1451                                               | 32         
+| u_geo/u_regs/N1258                                               | u_geo/u_regs/N1065                                               | 32         
+| u_geo/u_regs/N1065                                               | u_geo/u_regs/N1065                                               | 32         
+| u_geo/u_regs/N872                                                | u_geo/u_regs/N745                                                | 32         
+| u_geo/u_tiles/N158                                               | u_geo/u_tiles/N158                                               | 64         
+| u_geo/u_tiles/N136                                               | u_geo/u_tiles/N136                                               | 7          
+| u_geo/u_tiles/N144                                               | u_geo/u_tiles/u_o[11:0]_1                                        | 8          
+| u_geo/u_tiles/N148                                               | u_geo/u_tiles/N148                                               | 64         
+| u_geo/u_wr/N236                                                  | u_geo/u_wr/N236                                                  | 39         
+| u_geo/u_wr/N242                                                  | u_geo/u_wr/N242                                                  | 39         
+| u_geo/u_wr/N275                                                  | u_geo/u_wr/N275                                                  | 3          
+| u_geo/coord_start_w                                              | u_geo/N144_2                                                     | 14         
+| u_geo/u_wr/N229                                                  | u_geo/u_wr/N229                                                  | 6          
+| u_geo/u_wr/N61                                                   | u_geo/u_wr/N61                                                   | 272        
+| u_geo/u_write_address/N54                                        | u_geo/u_write_address/N54                                        | 27         
+| u_geo/u_write_address/N44                                        | u_geo/u_write_address/N44                                        | 4          
+| u_geo/u_write_address/N56                                        | u_geo/u_wr/N310_1                                                | 40         
+| u_pix/advance_point1_r [1]                                       | u_pix/advance_point1_r[1]                                        | 20         
+| u_pix/advance_point1_r [2]                                       | u_pix/advance_point1_r[2]                                        | 20         
+| u_pix/advance_point1_r [3]                                       | u_pix/advance_point1_r[3]                                        | 20         
+| u_pix/advance_point1_r [4]                                       | u_pix/advance_point1_r[4]                                        | 20         
+| u_pix/advance_point1_r [5]                                       | u_pix/advance_point1_r[5]                                        | 20         
+| u_pix/advance_point1_r [6]                                       | u_pix/advance_point1_r[6]                                        | 20         
+| u_pix/advance_point1_r [0]                                       | u_pix/advance_point1_r[0]                                        | 102        
+| u_pix/u_point1/u_pix/advance_point1_r_1                          | u_pix/u_point1/data_o                                            | 8          
+| u_pix/u_point1/u_pix/advance_point1_r_2                          | u_pix/u_point1/data_o_1                                          | 8          
+| u_pix/u_point1/u_pix/advance_point1_r_3                          | u_pix/u_point1/data_o_4                                          | 8          
+| u_pix/u_point1/u_pix/advance_point1_r_4                          | u_pix/u_point1/data_o_5                                          | 8          
+| u_pix/u_point1/u_pix/advance_point1_r_5                          | u_pix/u_point1/data_o_3                                          | 8          
+| u_pix/u_point1/u_pix/advance_point1_r_6                          | u_pix/u_point1/data_o_2                                          | 8          
+| _$$_VCC_$$_                                                      | _$$_VCC_$$_                                                      | 56         
+| u_pix/u_point1/N163                                              | u_pix/u_point1/N163                                              | 4          
+| u_pix/advance_point2_r [0]                                       | u_pix/advance_point2_r[0]                                        | 186        
+| u_pix/advance_point2_r [1]                                       | u_pix/advance_point2_r[1]                                        | 13         
+| u_pix/advance_point2_r [2]                                       | u_pix/advance_point2_r[2]                                        | 13         
+| u_pix/u_point2/N127                                              | u_pix/u_point2/N127                                              | 4          
+| u_pix/u_regs/N240                                                | u_pix/u_regs/N240                                                | 18         
+| u_pix/u_regs/N220                                                | u_pix/u_regs/N220                                                | 12         
+| u_pix/clear_w                                                    | u_pix/u_stage2/flush_r_1                                         | 32         
+| u_pix/u_regs/N310                                                | u_pix/u_regs/N304_1                                              | 32         
+| u_pix/u_regs/N313                                                | u_pix/u_regs/N313                                                | 32         
+| u_pix/u_regs/N316                                                | u_pix/u_regs/N316                                                | 32         
+| u_pix/u_regs/N260                                                | u_pix/u_regs/N220                                                | 8          
+| u_pix/u_stage1/N445                                              | u_pix/u_stage2/N352_1                                            | 218        
+| u_pix/advance_filter1_r [3]                                      | u_pix/advance_filter1_r[3]                                       | 66         
+| u_pix/u_stage1/N383                                              | u_pix/u_stage1/N383                                              | 11         
+| u_pix/advance_filter1_r [1]                                      | u_pix/advance_filter1_r[1]                                       | 209        
+| u_pix/u_stage1/N285                                              | u_pix/u_stage1/N285                                              | 10         
+| u_pix/u_stage1/N377                                              | u_pix/u_stage1/N377                                              | 10         
+| u_pix/u_stage1/N407                                              | u_pix/N36_1                                                      | 113        
+| u_pix/u_stage1/N319                                              | u_pix/u_stage1/N319                                              | 2          
+| u_pix/u_stage1/N301                                              | u_pix/u_stage1/N301                                              | 10         
+| u_pix/u_stage2/N445                                              | u_pix/u_stage2/N372_1                                            | 218        
+| u_pix/advance_filter2_r [3]                                      | u_pix/advance_filter2_r[3]                                       | 66         
+| u_pix/u_stage2/N383                                              | u_pix/u_stage2/N383                                              | 11         
+| u_pix/advance_filter2_r [1]                                      | u_pix/advance_filter2_r[1]                                       | 209        
+| u_pix/u_stage2/N285                                              | u_pix/u_stage2/N285                                              | 10         
+| u_pix/u_stage2/N377                                              | u_pix/u_stage2/N377                                              | 10         
+| u_pix/u_stage2/N407                                              | u_pix/u_stage1/N16_1                                             | 113        
+| u_pix/u_stage2/N319                                              | u_pix/u_stage2/N319                                              | 2          
+| u_pix/u_stage2/N301                                              | u_pix/u_stage2/N301                                              | 10         
+| u_vin/g_channel[0].u_channel/N761                                | u_vin/g_channel[0].u_channel/N761                                | 10         
+| u_vin/ch_done_w [0]                                              | u_vin/g_channel[0].u_channel/N247_7                              | 38         
+| u_vin/g_channel[0].u_channel/ram_rd_en_w                         | u_vin/g_channel[0].u_channel/N286.eq_4                           | 15         
+| u_vin/g_channel[0].u_channel/fifo_capture0_r                     | u_vin/g_channel[0].u_channel/fifo_capture0_r                     | 288        
+| u_vin/g_channel[0].u_channel/fifo_capture1_r                     | u_vin/g_channel[0].u_channel/fifo_capture1_r                     | 288        
+| u_vin/g_channel[0].u_channel/N644                                | u_vin/g_channel[0].u_channel/N644                                | 2          
+| u_vin/g_channel[0].u_channel/ram_wr_en_w                         | u_vin/g_channel[0].u_channel/fifo_push_r                         | 10         
+| u_vin/g_channel[0].u_channel/N815_1                              | u_vin/g_channel[0].u_channel/N815                                | 3          
+| u_vin/g_channel[0].u_channel/result_fire_w                       | u_vin/g_channel[0].u_channel/N191                                | 35         
+| u_vin/g_channel[0].u_channel/pack_valid_r                        | u_vin/g_channel[0].u_channel/pack_valid_r                        | 256        
+| u_vin/g_channel[0].u_channel/N359                                | u_vin/g_channel[0].u_channel/N359                                | 92         
+| u_vin/g_channel[0].u_channel/N751                                | u_vin/g_channel[0].u_channel/N751_5                              | 3          
+| u_vin/g_channel[0].u_channel/u_write/desc_fire_w                 | u_vin/g_channel[0].u_channel/u_write/N0_5                        | 58         
+| u_vin/g_channel[1].u_channel/N761                                | u_vin/g_channel[1].u_channel/N761                                | 10         
+| u_vin/ch_done_w [1]                                              | u_vin/g_channel[1].u_channel/N247_9                              | 38         
+| u_vin/g_channel[1].u_channel/ram_rd_en_w                         | u_vin/g_channel[1].u_channel/N286.eq_4                           | 15         
+| u_vin/g_channel[1].u_channel/fifo_capture0_r                     | u_vin/g_channel[1].u_channel/fifo_capture0_r                     | 288        
+| u_vin/g_channel[1].u_channel/fifo_capture1_r                     | u_vin/g_channel[1].u_channel/fifo_capture1_r                     | 288        
+| u_vin/g_channel[1].u_channel/N644                                | u_vin/g_channel[1].u_channel/N644                                | 2          
+| u_vin/g_channel[1].u_channel/ram_wr_en_w                         | u_vin/g_channel[1].u_channel/fifo_push_r                         | 10         
+| u_vin/g_channel[1].u_channel/N815_1                              | u_vin/g_channel[1].u_channel/N815                                | 3          
+| u_vin/g_channel[1].u_channel/result_fire_w                       | u_vin/g_channel[1].u_channel/N191                                | 35         
+| u_vin/g_channel[1].u_channel/pack_valid_r                        | u_vin/g_channel[1].u_channel/pack_valid_r                        | 256        
+| u_vin/g_channel[1].u_channel/N359                                | u_vin/g_channel[1].u_channel/N778_5                              | 92         
+| u_vin/g_channel[1].u_channel/N751                                | u_vin/g_channel[1].u_channel/N751_5                              | 3          
+| u_vin/g_channel[1].u_channel/descriptor_w                        | u_vin/g_channel[1].u_channel/N243_5                              | 58         
+| u_vin/u_cam0/N124                                                | u_vin/u_cam0/N124                                                | 8          
+| u_vin/u_cam0/word_w                                              | u_vin/u_cam0/N14                                                 | 32         
+| u_vin/u_cam0/N134                                                | u_vin/u_cam0/N124                                                | 16         
+| u_vin/u_cam1/N124                                                | u_vin/u_cam1/N124                                                | 8          
+| u_vin/u_cam1/word_w                                              | u_vin/u_cam1/N14                                                 | 32         
+| u_vin/u_cam1/N134                                                | u_vin/u_cam1/N124                                                | 16         
+| u_vin/u_fmt0/N525                                                | u_vin/u_fmt0/N525                                                | 2          
+| u_vin/u_fmt0/frame_start_w                                       | u_vin/u_fmt0/N25_13                                              | 64         
+| u_vin/u_fmt0/N88                                                 | u_vin/u_fmt0/N88                                                 | 22         
+| u_vin/u_fmt0/N97                                                 | u_vin/u_fmt0/N97                                                 | 32         
+| u_vin/u_fmt0/N479                                                | u_vin/u_fmt0/N479                                                | 7          
+| u_vin/u_fmt0/N627                                                | u_vin/u_fmt0/N627_5                                              | 10         
+| u_vin/u_fmt0/N662                                                | u_vin/u_fmt0/N662_1                                              | 12         
+| u_vin/u_fmt1/N525                                                | u_vin/u_fmt1/N525                                                | 2          
+| u_vin/u_fmt1/frame_start_w                                       | u_vin/u_fmt1/N25_13                                              | 64         
+| u_vin/u_fmt1/N88                                                 | u_vin/u_fmt1/N88                                                 | 22         
+| u_vin/u_fmt1/N97                                                 | u_vin/u_fmt1/N97                                                 | 32         
+| u_vin/u_fmt1/N479                                                | u_vin/u_fmt1/N479                                                | 7          
+| u_vin/u_fmt1/N627                                                | u_vin/u_fmt1/N627_5                                              | 10         
+| u_vin/u_fmt1/N662                                                | u_vin/u_fmt1/N662_1                                              | 12         
+| u_vin/u_msrc/N404                                                | u_vin/u_msrc/N404                                                | 9          
+| u_vin/msrc_frame_w                                               | u_vin/u_msrc/N69_5                                               | 32         
+| u_vin/u_msrc/launch_w                                            | u_vin/u_msrc/N39_9                                               | 65         
+| u_vin/u_msrc/N343                                                | u_vin/u_msrc/N343                                                | 39         
+| u_vin/u_msrc/N378                                                | u_vin/u_msrc/N421                                                | 13         
+| u_vin/u_msrc/N421                                                | u_vin/u_msrc/N421                                                | 12         
+| u_vin/u_regs/N681                                                | u_vin/u_regs/N777                                                | 22         
+| u_vin/u_regs/N729                                                | u_vin/u_regs/N729                                                | 22         
+| u_vin/u_regs/N1590                                               | u_vin/u_regs/N1590                                               | 20         
+| u_vin/u_regs/N1495                                               | u_vin/u_regs/N147_85[5]_1                                        | 20         
+| u_vin/u_regs/N1400                                               | u_vin/u_regs/N1305                                               | 20         
+| u_vin/u_regs/N1305                                               | u_vin/u_regs/N1305                                               | 20         
+| u_vin/u_regs/N921                                                | u_vin/u_regs/N147_85[4]_2                                        | 6          
+| u_vin/u_regs/N1209                                               | u_vin/u_regs/N873                                                | 4          
+| u_vin/u_regs/N1017                                               | u_vin/u_regs/N1017                                               | 11         
+| u_vin/u_regs/N1921                                               | u_vin/u_regs/N1921                                               | 20         
+| u_vin/u_regs/N1827                                               | u_vin/u_regs/N1827                                               | 20         
+| u_vin/u_regs/N1732                                               | u_vin/u_regs/N1732                                               | 20         
+| u_vin/u_regs/N1113                                               | u_vin/u_regs/N969                                                | 20         
+| u_vin/u_regs/N969                                                | u_vin/u_regs/N969                                                | 6          
+| u_vin/u_regs/N1257                                               | u_vin/u_regs/N1257_3                                             | 4          
+| u_vin/u_regs/N1065                                               | u_vin/u_regs/N1017                                               | 11         
+| u_vin/u_regs/N633                                                | u_vin/u_regs/N633                                                | 4          
+| u_vin/u_regs/N630                                                | u_vin/u_regs/N630_3                                              | 4          
+| u_vin/u_regs/N777                                                | u_vin/u_regs/N777                                                | 20         
+| u_vin/u_regs/N873                                                | u_vin/u_regs/N873                                                | 22         
+| u_vin/u_regs/N825                                                | u_vin/u_regs/N729                                                | 11         
+| u_eth/u_rx_fifo/rd_en_w                                          | u_eth/u_rx_fifo/u_fifo/N13.eq_4                                  | 11         
+| u_eth/u_tx/u_packets/N53                                         | u_eth/u_tx/u_packets/N53                                         | 2          
+| u_eth/u_tx/u_packets/N49                                         | u_eth/u_tx/u_packets/N49                                         | 48         
+| u_eth/u_tx/u_packets/N59                                         | u_eth/u_tx/u_packets/N59                                         | 48         
+| u_eth/u_tx/u_read/N232                                           | u_eth/u_tx/u_read/N232                                           | 39         
+| u_eth/u_tx/u_read/N238                                           | u_eth/u_tx/u_read/N238                                           | 39         
+| u_eth/u_tx/u_read/N222                                           | u_eth/u_tx/u_read/N42                                            | 12         
+| u_eth/u_tx/u_read/N228                                           | u_eth/u_tx/u_read/N228                                           | 12         
+| u_eth/u_tx/u_read/N271                                           | u_eth/u_tx/u_read/N34                                            | 3          
+| u_eth/u_tx/u_read/desc_fire_w                                    | u_eth/u_tx/u_read/N0_4                                           | 7          
+| u_eth/u_tx_fifo/rd_en_w                                          | u_eth/u_tx_fifo/u_fifo/N16                                       | 11         
+| u_eth/u_tx_fifo/u_fifo/head_load_w                               | u_eth/u_tx_fifo/u_fifo/N17                                       | 9          
+| u_pix/advance_kernel10_r [0]                                     | u_pix/advance_kernel10_r[0]                                      | 243        
+| u_pix/advance_kernel10_r [2]                                     | u_pix/advance_kernel10_r[2]                                      | 13         
+| u_pix/advance_kernel10_r [3]                                     | u_pix/advance_kernel10_r[3]                                      | 13         
+| u_pix/advance_kernel10_r [4]                                     | u_pix/advance_kernel10_r[4]                                      | 13         
+| u_pix/advance_kernel10_r [5]                                     | u_pix/advance_kernel10_r[5]                                      | 13         
+| u_pix/advance_kernel10_r [6]                                     | u_pix/advance_kernel10_r[6]                                      | 13         
+| u_pix/advance_kernel10_r [7]                                     | u_pix/advance_kernel10_r[7]                                      | 13         
+| u_pix/advance_kernel10_r [8]                                     | u_pix/advance_kernel10_r[8]                                      | 13         
+| u_pix/advance_kernel10_r [9]                                     | u_pix/advance_kernel10_r[9]                                      | 13         
+| u_pix/advance_kernel10_r [10]                                    | u_pix/advance_kernel10_r[10]                                     | 13         
+| u_pix/advance_kernel10_r [12]                                    | u_pix/advance_kernel10_r[12]                                     | 128        
+| u_pix/advance_kernel10_r [14]                                    | u_pix/advance_kernel10_r[14]                                     | 128        
+| u_pix/advance_kernel10_r [16]                                    | u_pix/advance_kernel10_r[16]                                     | 128        
+| u_pix/advance_kernel10_r [1]                                     | u_pix/advance_kernel10_r[1]                                      | 168        
+| u_pix/advance_kernel10_r [20]                                    | u_pix/advance_kernel10_r[20]                                     | 24         
+| u_pix/advance_kernel10_r [11]                                    | u_pix/advance_kernel10_r[11]                                     | 79         
+| u_pix/advance_kernel10_r [13]                                    | u_pix/advance_kernel10_r[13]                                     | 79         
+| u_pix/advance_kernel10_r [15]                                    | u_pix/advance_kernel10_r[15]                                     | 79         
+| u_pix/advance_kernel10_r [17]                                    | u_pix/advance_kernel10_r[17]                                     | 128        
+| u_pix/advance_kernel10_r [19]                                    | u_pix/advance_kernel10_r[19]                                     | 80         
+| u_pix/advance_kernel10_r [18]                                    | u_pix/advance_kernel10_r[18]                                     | 80         
+| u_pix/advance_kernel11_r [0]                                     | u_pix/advance_kernel11_r[0]                                      | 243        
+| u_pix/advance_kernel11_r [2]                                     | u_pix/advance_kernel11_r[2]                                      | 13         
+| u_pix/advance_kernel11_r [3]                                     | u_pix/advance_kernel11_r[3]                                      | 13         
+| u_pix/advance_kernel11_r [4]                                     | u_pix/advance_kernel11_r[4]                                      | 13         
+| u_pix/advance_kernel11_r [5]                                     | u_pix/advance_kernel11_r[5]                                      | 13         
+| u_pix/advance_kernel11_r [6]                                     | u_pix/advance_kernel11_r[6]                                      | 13         
+| u_pix/advance_kernel11_r [7]                                     | u_pix/advance_kernel11_r[7]                                      | 13         
+| u_pix/advance_kernel11_r [8]                                     | u_pix/advance_kernel11_r[8]                                      | 13         
+| u_pix/advance_kernel11_r [9]                                     | u_pix/advance_kernel11_r[9]                                      | 13         
+| u_pix/advance_kernel11_r [10]                                    | u_pix/advance_kernel11_r[10]                                     | 13         
+| u_pix/advance_kernel11_r [12]                                    | u_pix/advance_kernel11_r[12]                                     | 128        
+| u_pix/advance_kernel11_r [14]                                    | u_pix/advance_kernel11_r[14]                                     | 128        
+| u_pix/advance_kernel11_r [16]                                    | u_pix/advance_kernel11_r[16]                                     | 128        
+| u_pix/advance_kernel11_r [1]                                     | u_pix/advance_kernel11_r[1]                                      | 168        
+| u_pix/advance_kernel11_r [20]                                    | u_pix/advance_kernel11_r[20]                                     | 24         
+| u_pix/advance_kernel11_r [11]                                    | u_pix/advance_kernel11_r[11]                                     | 79         
+| u_pix/advance_kernel11_r [13]                                    | u_pix/advance_kernel11_r[13]                                     | 79         
+| u_pix/advance_kernel11_r [15]                                    | u_pix/advance_kernel11_r[15]                                     | 79         
+| u_pix/advance_kernel11_r [17]                                    | u_pix/advance_kernel11_r[17]                                     | 128        
+| u_pix/advance_kernel11_r [19]                                    | u_pix/advance_kernel11_r[19]                                     | 80         
+| u_pix/advance_kernel11_r [18]                                    | u_pix/advance_kernel11_r[18]                                     | 80         
+| u_pix/advance_kernel20_r [0]                                     | u_pix/advance_kernel20_r[0]                                      | 243        
+| u_pix/advance_kernel20_r [2]                                     | u_pix/advance_kernel20_r[2]                                      | 13         
+| u_pix/advance_kernel20_r [3]                                     | u_pix/advance_kernel20_r[3]                                      | 13         
+| u_pix/advance_kernel20_r [4]                                     | u_pix/advance_kernel20_r[4]                                      | 13         
+| u_pix/advance_kernel20_r [5]                                     | u_pix/advance_kernel20_r[5]                                      | 13         
+| u_pix/advance_kernel20_r [6]                                     | u_pix/advance_kernel20_r[6]                                      | 13         
+| u_pix/advance_kernel20_r [7]                                     | u_pix/advance_kernel20_r[7]                                      | 13         
+| u_pix/advance_kernel20_r [8]                                     | u_pix/advance_kernel20_r[8]                                      | 13         
+| u_pix/advance_kernel20_r [9]                                     | u_pix/advance_kernel20_r[9]                                      | 13         
+| u_pix/advance_kernel20_r [10]                                    | u_pix/advance_kernel20_r[10]                                     | 13         
+| u_pix/advance_kernel20_r [12]                                    | u_pix/advance_kernel20_r[12]                                     | 128        
+| u_pix/advance_kernel20_r [14]                                    | u_pix/advance_kernel20_r[14]                                     | 128        
+| u_pix/advance_kernel20_r [16]                                    | u_pix/advance_kernel20_r[16]                                     | 128        
+| u_pix/advance_kernel20_r [1]                                     | u_pix/advance_kernel20_r[1]                                      | 168        
+| u_pix/advance_kernel20_r [20]                                    | u_pix/advance_kernel20_r[20]                                     | 24         
+| u_pix/advance_kernel20_r [11]                                    | u_pix/advance_kernel20_r[11]                                     | 79         
+| u_pix/advance_kernel20_r [13]                                    | u_pix/advance_kernel20_r[13]                                     | 79         
+| u_pix/advance_kernel20_r [15]                                    | u_pix/advance_kernel20_r[15]                                     | 79         
+| u_pix/advance_kernel20_r [17]                                    | u_pix/advance_kernel20_r[17]                                     | 128        
+| u_pix/advance_kernel20_r [19]                                    | u_pix/advance_kernel20_r[19]                                     | 80         
+| u_pix/advance_kernel20_r [18]                                    | u_pix/advance_kernel20_r[18]                                     | 80         
+| u_pix/advance_kernel21_r [0]                                     | u_pix/advance_kernel21_r[0]                                      | 243        
+| u_pix/advance_kernel21_r [2]                                     | u_pix/advance_kernel21_r[2]                                      | 13         
+| u_pix/advance_kernel21_r [3]                                     | u_pix/advance_kernel21_r[3]                                      | 13         
+| u_pix/advance_kernel21_r [4]                                     | u_pix/advance_kernel21_r[4]                                      | 13         
+| u_pix/advance_kernel21_r [5]                                     | u_pix/advance_kernel21_r[5]                                      | 13         
+| u_pix/advance_kernel21_r [6]                                     | u_pix/advance_kernel21_r[6]                                      | 13         
+| u_pix/advance_kernel21_r [7]                                     | u_pix/advance_kernel21_r[7]                                      | 13         
+| u_pix/advance_kernel21_r [8]                                     | u_pix/advance_kernel21_r[8]                                      | 13         
+| u_pix/advance_kernel21_r [9]                                     | u_pix/advance_kernel21_r[9]                                      | 13         
+| u_pix/advance_kernel21_r [10]                                    | u_pix/advance_kernel21_r[10]                                     | 13         
+| u_pix/advance_kernel21_r [12]                                    | u_pix/advance_kernel21_r[12]                                     | 128        
+| u_pix/advance_kernel21_r [14]                                    | u_pix/advance_kernel21_r[14]                                     | 128        
+| u_pix/advance_kernel21_r [16]                                    | u_pix/advance_kernel21_r[16]                                     | 128        
+| u_pix/advance_kernel21_r [1]                                     | u_pix/advance_kernel21_r[1]                                      | 168        
+| u_pix/advance_kernel21_r [20]                                    | u_pix/advance_kernel21_r[20]                                     | 24         
+| u_pix/advance_kernel21_r [11]                                    | u_pix/advance_kernel21_r[11]                                     | 79         
+| u_pix/advance_kernel21_r [13]                                    | u_pix/advance_kernel21_r[13]                                     | 79         
+| u_pix/advance_kernel21_r [15]                                    | u_pix/advance_kernel21_r[15]                                     | 79         
+| u_pix/advance_kernel21_r [17]                                    | u_pix/advance_kernel21_r[17]                                     | 128        
+| u_pix/advance_kernel21_r [19]                                    | u_pix/advance_kernel21_r[19]                                     | 80         
+| u_pix/advance_kernel21_r [18]                                    | u_pix/advance_kernel21_r[18]                                     | 80         
+| u_vin/g_channel[0].u_channel/u_write/N236                        | u_vin/g_channel[0].u_channel/u_write/N236                        | 39         
+| u_vin/g_channel[0].u_channel/u_write/N242                        | u_vin/g_channel[0].u_channel/u_write/N242                        | 39         
+| u_vin/g_channel[0].u_channel/u_write/N275                        | u_vin/g_channel[0].u_channel/u_write/N275                        | 3          
+| u_vin/g_channel[0].u_channel/u_write/N229                        | u_vin/g_channel[0].u_channel/u_write/N229                        | 6          
+| u_vin/g_channel[0].u_channel/u_write/N61                         | u_vin/g_channel[0].u_channel/u_write/N61                         | 288        
+| u_vin/g_channel[1].u_channel/u_write/N236                        | u_vin/g_channel[1].u_channel/u_write/N236                        | 39         
+| u_vin/g_channel[1].u_channel/u_write/N242                        | u_vin/g_channel[1].u_channel/u_write/N242                        | 39         
+| u_vin/g_channel[1].u_channel/u_write/N275                        | u_vin/g_channel[1].u_channel/u_write/N275                        | 3          
+| u_vin/g_channel[1].u_channel/u_write/N229                        | u_vin/g_channel[1].u_channel/u_write/N275                        | 6          
+| u_vin/g_channel[1].u_channel/u_write/write_data_r[255:0]_and     | u_vin/g_channel[1].u_channel/u_write/write_data_r[255:0]_and     | 288        
+| u_vin/u_msrc/ram_rd_en_w                                         | u_vin/u_msrc/u_buffer/N7_1                                       | 14         
+| u_vin/u_msrc/u_buffer/head_load_w                                | u_vin/u_msrc/u_buffer/N23_1                                      | 256        
+| u_vin/u_msrc/N195                                                | u_vin/u_msrc/N195                                                | 9          
+| u_vin/u_msrc/u_read/N231                                         | u_vin/u_msrc/u_read/N231                                         | 39         
+| u_vin/u_msrc/u_read/N237                                         | u_vin/u_msrc/u_read/N237                                         | 39         
+| u_vin/u_msrc/u_read/N221                                         | u_vin/u_msrc/u_read/N221                                         | 12         
+| u_vin/u_msrc/u_read/N227                                         | u_vin/u_msrc/u_read/N227                                         | 12         
+| u_vin/u_msrc/u_read/N270                                         | u_vin/u_msrc/u_read/N270                                         | 2          
+| u_vin/u_msrc/N107                                                | u_vin/u_msrc/N18.lt_4                                            | 19         
+| u_vin/u_p1/u_owners/N51                                          | u_vin/u_p1/u_owners/N51                                          | 4          
+| u_vin/u_p1/N52                                                   | u_vin/u_p1/N52                                                   | 3          
+| u_vin/u_p1/u_owners/write_w                                      | u_vin/u_p1/u_owners/N9                                           | 3          
+| _$$_GND_$$_                                                      | _$$_GND_$$_                                                      | 88         
+| u_eth/rx_rd_en_w                                                 | u_eth/u_rx_write/state_r_reg[2]                                  | 1          
+| u_eth/u_tx/ram_read_w                                            | u_eth/u_tx/N161_7                                                | 1          
+| u_geo/u_source/N156                                              | u_geo/u_source/N156                                              | 8          
+| u_geo/u_source/N292                                              | u_geo/u_source/N156                                              | 8          
+| u_pix/u_stage1/N30                                               | u_pix/u_stage1/N30                                               | 2          
+| u_pix/u_stage1/N35                                               | u_pix/u_stage1/N35                                               | 2          
+| u_pix/u_stage2/N30                                               | u_pix/u_stage2/N383                                              | 2          
+| u_pix/u_stage2/N35                                               | u_pix/u_stage2/N35                                               | 2          
++---------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Global Clock Info:
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst               | Driver Pin     | Site Of Driver Inst     
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 20565           | 0                   | clk_mem_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1080           
+| clkbufg_1/gopclkbufg     | USCM_383_933          | ntclkbufg_1         | 1265            | 0                   | clk_ext_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386           
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
