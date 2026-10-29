@@ -60,7 +60,7 @@
 | SC-08 | SoC 9.1、9.2 | 并发实时性（S1 负载）：<br>• 摄像头 CH0 + CH2 连续采集；<br>• NPU 循环执行带宽较大的描述符表；<br>• ETH 以 720p30 发送视频（"同时"档）；<br>• DISP 扫描；<br>• 运行至少 3 个显示帧 **[待定]** | 软件程序 | DISP PERF1（读空帧）= 0；VIN CH0/CH2 溢出丢帧 = 0；记录 MEM_XBAR 各端口统计和 `urgent` 计数（写入测试日志，供 SoC 9.1 规划值对照） | full |
 | SC-09 | mem-subsys-spec 2.3（PERF_MON） | PERF_MON 延迟探针：在 SC-08 的负载下开启顺序读探针 | 软件程序 | 直方图各格之和 = READ_CNT；LAT_MIN ≤ 平均 ≤ LAT_MAX；P6 限速生效（P6 读拍数不超过 RATE[P6] 规定的份额） | full |
 | SC-10 | sys-subsys-spec 2.10；SoC 5.3 | 媒体软复位：S2 + GEO + ETH 接收进行中，软件写 SYSCTRL `SOFT_RESET.MEDIA` | 软件程序 | 复位后各引擎 STATUS.IDLE；mem_xbar 没有挂起的事务（随后 CPU 经网关读写 DDR 正常）；重新配置后 SC-03 的一帧再次逐像素正确 | full |
-| SC-11 | SoC 6.1 PLIC 源 8–15 | 中断全覆盖：<br>• 每个媒体中断源各触发一次可由软件或模型产生的事件（VIN FRAME、PIX FRAME、GEO DONE、DISP FRAME、NPU DONE、ETH 接收 NOTIFY、MEM_XBAR 错误）；<br>• 源 11（RND）始终不挂起 | 软件程序 | 每个源经 PLIC claim/complete 一次，源号正确 | full |
+| SC-11 | SoC 6.1 PLIC 源 8–15 | 中断全覆盖：<br>• 源 8–10、12–14 各触发一次可由软件或模型产生的事件（VIN FRAME、PIX FRAME、GEO DONE、DISP FRAME、NPU DONE、ETH 接收 NOTIFY）；<br>• 源 11（RND）始终不挂起；<br>• 源 15（MEM_XBAR 错误）不在本层触发：B2 中没有软件合法产生违规事务的路径（各引擎 DMA 和 PERF_MON 都保证对齐、不跨 4 KiB），其中断由存储子系统模块级测试验证，顶层连接由协调者评审核对 | 软件程序 | 每个源经 PLIC claim/complete 一次，源号正确 | full |
 
 ## 4. 参考模型
 
@@ -70,7 +70,7 @@
 
 ## 5. 覆盖目标
 
-SoC 7.5 的每一个流程至少有一个测试项：启动、BIOS、S1、S2、ETH 下载。B2 中接入的每个 mem_xbar 端口（P0、P1、P2、P3、P5、P6）都在至少一个测试中有读、写流量（P0 只有读）。每个媒体中断源都被触发一次。
+SoC 7.5 的每一个流程至少有一个测试项：启动、BIOS、S1、S2、ETH 下载。B2 中接入的每个 mem_xbar 端口（P0、P1、P2、P3、P5、P6）都在至少一个测试中有读、写流量（P0 只有读）。媒体中断源 8–10、12–14 都被触发一次（源 15 见 SC-11）。
 
 ## 6. 通过判据和回归档位
 
@@ -91,3 +91,4 @@ SoC 7.5 的每一个流程至少有一个测试项：启动、BIOS、S1、S2、E
 |---|---|---|
 | 2026-10-29 | v0.1 | 初稿 |
 | 2026-10-29 | v0.1 | 第 7 节 #1 更正：逐元素加改为 1×1 卷积 + RES_EN（B2-1d 问答，npu-spec 2.1） |
+| 2026-10-29 | v0.1 | SC-11：源 15（MEM_XBAR 错误）不在 SoC 级触发（无合法触发路径，B2-1d 问答），由模块级测试和连接评审覆盖 |
