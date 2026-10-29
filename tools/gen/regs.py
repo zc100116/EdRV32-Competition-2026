@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # File: regs.py
 # Spec: edrv32-soc-spec 7.1; engine specifications section 4.
-# Description: Generate C register and descriptor constants from engine JSON tables.
+# Description: Generate C and Verilog constants from engine JSON tables.
 #              Preserve table order and keep generated headers reproducible.
 # Clock domain: none (host tool).
-"""Generate engine C headers from rtl/include/regs/*.json."""
+"""Generate engine C and Verilog headers from rtl/include/regs/*.json."""
 import json
 from pathlib import Path
 
@@ -86,6 +86,43 @@ def generate():
             lines.append('')
         lines.append('#endif')
         (output / f'{module}_regs.h').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+        generate_verilog(data)
+
+
+def generate_verilog(data):
+    module = data['module']
+    filename = f'edrv32_{module}_regs.vh'
+    prefix = 'EDRV32_' + module.upper()
+    lines = [f'// File: {filename}', f'// Spec: {data["spec"]}',
+             '// Description: Generated register offsets, fields and descriptor layouts.',
+             '//              Include inside a module; regenerate with tools/gen/regs.py.',
+             '// Clock domain: none (constants).']
+
+    def emit(name, value):
+        lines.append(f'localparam [31:0] {name} = 32\'h{value:08X};')
+
+    def fields(name, field):
+        stem = name + '_' + field['name']
+        emit(stem + '_POS', field['lsb'])
+        emit(stem + '_WIDTH', field['width'])
+        emit(stem + '_MASK', ((1 << field['width']) - 1) << field['lsb'])
+
+    for register in data['registers']:
+        name = prefix + '_' + register['name']
+        emit(name + '_OFFSET', int(register['offset'], 0))
+        for dimension in register['dimensions']:
+            stem = name + '_' + dimension['index'].upper()
+            emit(stem + '_COUNT', dimension['count'])
+            emit(stem + '_STRIDE', dimension['stride'])
+        for field in register['fields']:
+            fields(name, field)
+    for layout in data['layouts']:
+        name = prefix + '_' + layout['name']
+        emit(name + '_SIZE', layout['size'])
+        for field in layout['fields']:
+            emit(name + '_' + field['name'] + '_OFFSET', int(field['offset'], 0))
+            fields(name, field)
+    (ROOT / 'rtl/include/regs' / filename).write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
 if __name__ == '__main__':

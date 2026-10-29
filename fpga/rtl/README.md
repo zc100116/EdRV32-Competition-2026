@@ -483,3 +483,189 @@ ID，对 NPU/RND 槽各执行一次读并验证 load access fault；再执行 GE
 `verilator --lint-only --timing -Wall +define+SIM_MODE --top-module edrv32_board_vision_tb`。
 原始日志在 `build/board_vision/{lint,compile,simulation}.log`，回归日志在
 `build/regress/smoke/soc/board_vision/verilator/run.log`；Linux 结果不代表 PDS 实现或上板验收。
+
+## B3-9 无 CPU 图像通路验证顶层
+
+`edrv32_fpga_board_imgtest_top.v` 用硬件配置器代替 CPU，运行
+摄像头 → VIN CH0 → PIX → DDR 底图环 → DISP L0；KEY2 可插入 GEO，
+变成底图 → GEO 输出 → DISP L0。L0 固定 1280×720 RGB565、stride=2560，
+L1 关闭。无程序镜像、UART 或网络操作，复位后自动开始。
+
+### 例化、接死与时钟
+
+| 例化 | 用途 / 连接 |
+|---|---|
+| `edrv32_mem_subsys` | P0=DISP、P1=VIN、P5=GEO、网关=配置器；保留内部网关、mem_xbar、PERF_MON、P6 仲裁 |
+| `edrv32_vin`、`edrv32_pix` | 两路 DVP 输入；只使能 CH0，CH1/CH2 保持复位配置的关闭状态；PIX 流接法与 SoC 相同 |
+| `edrv32_geo`、`edrv32_disp` | GEO P5 读写独立输出；DISP P0 只读，保留两层 RTL、关闭 L1 |
+| `edrv32_soc_reset_ctrl` | POR/DDR ready 和各域同步释放；软件复位输入=0；未用域时钟接 clk_mem，未用复位输出开路 |
+| `edrv32_fpga_imgtest_ctrl` | clk_mem APB 主机；轮询完成/ERROR，无中断控制器 |
+| `edrv32_fpga_imgtest_cam_init`、`cam_rom`、`sccb` | 两摄像头依次写固定传感器表，100 kHz SCCB；无需 ROM IP |
+| `edrv32_cdc_sync_bit` ×3、`edrv32_fpga_imgtest_keys` | KEY1–3 电平同步，稳定 10 ms 后每次按下产生一个脉冲 |
+| `ip_ddr3`、`edrv32_fpga_ddr_adapter`、`GTP_INBUFDS` | DDR 用户接口直接使用 DDR core_clk，无额外 PLL |
+| `ip_pll_video`、`edrv32_fpga_tmds` | 720p60 TMDS，使用 B3 修复后的串化器 |
+
+没有 CPU、sys_subsys、NPU、RND、ETH。mem_subsys 的 P3、P4、ETH 请求、
+负载、BREADY/RREADY 全接 0，返回输出开路；网关读方向全接 0、返回开路。
+网关写方向固定 ID=0、LEN=0、SIZE=2、BURST=INCR、WLAST=1，逐个写 32 位字，
+按地址 bit2 选择 AXI64 的 WDATA/WSTRB 通道。APB 空槽返回常数，
+所有引擎 IRQ 输出开路；配置器直接读 `IRQ_STAT`。
+
+| 时钟 | 来源 / 频率 | 使用者 |
+|---|---|---|
+| 板振荡器 | `clk_i`，27 MHz | 仅视频 PLL |
+| DDR 参考 | N3/N2，125 MHz | DDR IP；差分输入缓冲 |
+| clk_mem | DDR `core_clk`，125 MHz | 存储、VIN 后端、PIX、GEO、DISP 读端、配置器、SCCB、KEY；网关两侧均接此时钟 |
+| clk_pix | 视频 PLL clkout0，74.25 MHz | DISP 扫描/TMDS 编码、串化器并行侧 |
+| clk_serial | 视频 PLL clkout1，371.25 MHz | TMDS 串化器；与 clk_pix 保持同步时序关系 |
+| cam0/1 pclk | 摄像头输出；沿用 100 MHz 最严约束 | VIN DVP 前端，沿用 X4 异步 FIFO |
+| DDR PHY 内部 | 沿用 board_vision 的 rst_clk、两组 dq/sysclk | 厂商 DDR PHY；不与 core_clk 切异步组 |
+
+`rst_n_i & pll_video_lock` 驱动 DDR resetn 和 reset_ctrl；DDR 初始化完成后再释放
+存储和媒体域。SCCB 和配置器都在 clk_mem，初始化完成不新增跨域。
+KEY 是外部异步输入，使用 common CDC 原语；VIN/DISP 保持 SoC X4–X6，
+复位保持 X8。没有 clk_sys、clk_npu 或 ETH PLL 实例/时钟约束。
+
+PDS 只需要 B2 已有 IP：`ip_pll_video`、`ip_ddr3`、`ip_ram_mem_xbar_r`、
+`ip_ram_mem_xbar_w`、`ip_ram_vin_wfifo`、`ip_ram_pix_line`、`ip_ram_geo_src`、
+`ip_ram_disp_scan`（DISP L0/L1 两实例）。设备原语为 DDR 参考差分输入以及
+TMDS 的 `GTP_OSERDES_E2`、`GTP_OUTBUFDS`；无需创建新 IP。
+
+### 端口
+
+引脚位置、IO 标准逐位沿用上文 B2 表和新顶层 FDC，只裁去 UART/ETH。
+
+| 端口 | 方向 / 位宽 | 连接 |
+|---|---|---|
+| `clk_i`、`rst_n_i` | in / 各 1 | D18 板时钟、C22 USER_BUTTON0 全局复位 |
+| `ddr_ref_clk_p_i`、`ddr_ref_clk_n_i` | in / 各 1 | N3/N2 DDR 参考 |
+| `key_n_i` | in / 4 | C23、B22、A22、B20；低有效 |
+| `led_o` | out / 5 | A20、C18、C19、E18、A17；高有效 |
+| `cam0_pclk_i`、`cam1_pclk_i` | in / 各 1 | L22、M21 |
+| `cam0_vsync_i`、`cam1_vsync_i` | in / 各 1 | L23、U25 |
+| `cam0_href_i`、`cam1_href_i` | in / 各 1 | T25、U26 |
+| `cam0_data_i`、`cam1_data_i` | in / 各 8 | 两路 DVP 数据，逐位位置见 B2 表/FDC |
+| `cam0_rst_n_o`、`cam1_rst_n_o` | out / 各 1 | T22、AC26；同时释放；PWDN 与 B2 一样不引出 |
+| `i2c0_scl_o`、`i2c0_sda_o` | inout / 各 2 | P19/AC24、R20/Y25；开漏输出，SCCB 不读回 SDA |
+| `tmds_data_p_o`、`tmds_data_n_o` | out / 各 3 | HDMI 三路差分数据 |
+| `tmds_clk_p_o`、`tmds_clk_n_o` | out / 各 1 | HDMI 差分时钟 |
+| `mem_cs_n_o`、`mem_rst_n_o`、`mem_ck_o`、`mem_ck_n_o`、`mem_cke_o` | out / 各 1 | DDR 片选、复位、时钟、使能 |
+| `mem_ras_n_o`、`mem_cas_n_o`、`mem_we_n_o`、`mem_odt_o` | out / 各 1 | DDR 命令/终端 |
+| `mem_a_o`、`mem_ba_o`、`mem_dm_o` | out / 15、3、4 | DDR 地址、bank、数据掩码 |
+| `mem_dqs_o`、`mem_dqs_n_o`、`mem_dq_o` | inout / 4、4、32 | DDR 选通和数据 |
+
+### KEY / LED
+
+| 按键 | 功能 |
+|---|---|
+| KEY1 | 旁路 → 亮度/对比度 → Gamma → 高斯 → Sobel → 旁路 |
+| KEY2 | 关 → 旋转 180° → 中心缩小 0.5 → 中心放大 2 → 关（协调者 2026-10-29 确认四档） |
+| KEY3 | 摄像头 0/1 切换；初始为 0 |
+| KEY4 | 未使用；USER_BUTTON0 已提供完整复位重启配置 |
+
+PIX 参数与 B2 `pipeline.c` 相同：亮度=24、对比度 Q8=320；其余档对比度=256、
+亮度=0；阈值=128；Gamma bank1 为 `2*x - x*x/255`；高斯 S1_OP=2；
+Sobel S1_OP=4 并开灰度。KEY1/KEY3 修改先关闭 VIN，等 STATUS.IDLE，
+再一次写完整 PIX 影子组/CH0 源，最后重新开启 VIN（重新丢前两帧）。
+等待 VIN IDLE 期间继续轮询 DISP 和引擎事件，保持帧翻转与所有权交接。
+KEY2 只改变下一次 GEO 作业，已在运行的作业保持原矩阵。
+
+| LED | 含义 |
+|---|---|
+| LED0 | DDR 初始化完成 |
+| LED1 | 摄像头 0 的 244 次 SCCB 写全部发完 |
+| LED2 | 摄像头 1 的 244 次 SCCB 写全部发完 |
+| LED3 | 每次 DISP FRAME 翻转，表示帧持续扫描 |
+| LED4 | 任一 VIN/PIX/GEO/DISP 的 IRQ_STAT.ERROR；复位前保持点亮 |
+
+ERROR 仅点 LED，不清错误、不复位或恢复引擎。PIX 规格中 ERROR 恒为 0，
+配置器仍与其余引擎一样轮询该位。SCCB 按旧工程写事务的第九位 don't-care
+语义发送，不检查 ACK，不读芯片 ID；初始化完成 LED 表示发送完成。
+
+### 配置表与帧交接
+
+以下地址和位域在 RTL 中只引用 `edrv32_soc_map.vh`、
+`regs/edrv32_{vin,pix,geo,disp}_regs.vh`；引擎头由同一份 JSON 生成 localparam。
+`tools/gen/regs.py` 同时输出 C/Verilog，C 头保持原内容。
+
+DDR 底图环为物理 `0x06000000 + slot*0x200000`（4 槽），GEO 输出为
+`0x07000000 + slot*0x200000`（2 槽），与 B2 设计记录 3.3 相同。
+本工程的单条 64 B GEO 描述符放在物理 `0x00090000`，网关通过非缓存别名
+`0xC0090000` 写入；没有 CPU/NPU 或其他描述符分配者。
+
+DDR ready 和两摄像头 done 后，先连续写 256 个 PIX `GAMMA_WR`（bank1，
+index=0..255，VALUE 为上述 Gamma 表），然后按顺序写下表；未列配置使用复位值。
+
+| 次序 | 引擎寄存器 | 写入值 |
+|---|---|---|
+| 0–3 | PIX CTRL、BC、THRESH、CFG | 1、256、128、GAMMA_BANK=1（运算全旁路） |
+| 4–5 | VIN CAM0_SIZE、CAM1_SIZE | 1280×720 |
+| 6–9 | VIN CH0_SURF_BASE[0..3] | 上述四个底图地址 |
+| 10–12 | VIN CH0_STRIDE、SLOT_BUSY、CTRL | 2560、0、EN=1/SRC=cam0/RING_N=4 |
+| 13–15 | DISP LAYER_CTRL、L0_SCROLL、STRIDE | L0_EN=1/L1_EN=0、0、2560 |
+| 16–18 | GEO CTRL、DESC_BASE、DESC_COUNT | 1、0x00090000、1 |
+| 19 | VIN CTRL | ENABLE=1 |
+
+DISP CTRL 初始保持 0，第一张完成的图像提交后才写 ENABLE=1，避免扫描未写 DDR。
+IRQ_EN 保持 0，全部事件轮询 IRQ_STAT。运行时写表如下。
+
+| 触发 | 读写顺序 |
+|---|---|
+| VIN FRAME | W1C FRAME → 读 DONE_INFO；消费者可用时锁该槽并写 SLOT_BUSY；直通则写 DISP NEXT_BASE |
+| DISP FRAME/SWITCH | 只 W1C FRAME/SWITCH；有 SWITCH 时读 REL_BASE，解除被释放 VIN/GEO 槽；写回 VIN SLOT_BUSY；读 CUR_BASE 确认 pending 提交已锁存 |
+| GEO 作业 | 锁源/目标 → 网关顺序写完整 16 字描述符并逐笔等 B → GEO DOORBELL=1 |
+| GEO DONE | W1C DONE → 解除源槽、写 VIN SLOT_BUSY → DISP NEXT_BASE=输出地址 |
+| KEY1/KEY3 | VIN CTRL=0 → 轮询 IDLE → PIX BC/THRESH/CFG → VIN CH0_CTRL → VIN CTRL=1 |
+
+仅保留一个 pending DISP 提交；提交未被 CUR_BASE 确认或 GEO 忙时，新完成的
+VIN 帧跳过、不锁槽。当前扫描槽和 pending 槽一直保持占用，只有 DISP REL_BASE
+释放当前扫描引用；GEO 的源保持到 DONE，输出保持到 DISP SWITCH。
+这实现 SoC 7.3 R1–R3，没有额外恢复路径或队列。
+
+GEO 逐作业写全 1280×720 输出矩形，背景色 0。矩阵 `[A,B,TX;C,D,TY]` 为：
+180° `[-1,0,1279;0,-1,719]`；缩小 `[2,0,-640;0,2,-360]`；
+放大 `[0.5,0,320;0,0.5,180]`，均为 Q16.16。缩小覆盖图外背景色路径；
+放大与 B2 程序相同。
+
+### 摄像头表来源与上板
+
+`edrv32_fpga_imgtest_cam_rom.v` 的 244 项逐项等于 `sw/drivers/ov5640.c`，
+也等于 `legacy/rtl/vision/camera/ov5640_720p.hex` 的前 244 项。
+旧表随后四次 `300A00` 是芯片 ID 寄存器的无效写，本工程按 B2 软件表省去；
+其余填零不发送。分辨率寄存器 3808–380B=05/00/02/D0（1280×720），
+4300=61、501F=01（RGB565），3035=11、3036=3C、380C–380F=09/C0/04/C8
+全部与 B2 的 720p30 表相同。VIN 按传感器 VSYNC/HREF 工作，不自行生成帧率。
+复位保持 6.3 ms，释放后等 21 ms，再以 100 kHz 依次配置两路；
+PWDN 不引出与 B2 的实物约定一致。代码已移植至 fpga/rtl，不引用 legacy 文件。
+
+1. 使用 PG2L200H-6/FBB676 的 PDS 工程，保留上述 B2 已生成的八种 IP。
+2. 在 PDS 中执行 `source <repo>/fpga/scripts/import_board_imgtest_top.tcl`，
+   顶层为 `edrv32_fpga_board_imgtest_top`，约束为同名 `.fdc`，定义 FPGA_MODE。
+3. 综合、布局布线、查看 clk_mem/clk_pix/clk_serial 和 DDR PHY 时序，再生成下载文件。
+4. 连接双摄像头和 HDMI，按 USER_BUTTON0 复位；LED0/1/2 应依次完成，
+   屏幕出现摄像头 0，LED3 随帧翻转；按 KEY1–3 验证各档和切源。
+5. 记录画面、各时钟 WNS/TNS/WHS/THS 和 LED4 状态；LED4 点亮时保留现场，
+   由全局复位重新开始，不存在自动恢复操作。
+
+Linux 复现命令（一次只运行一个仿真）：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 tools/check/verilog_style.py fpga/rtl/edrv32_fpga_board_imgtest_top.v \
+    fpga/rtl/edrv32_fpga_imgtest_*.v rtl/include/regs/*.vh
+python3 verif/unit/fpga_imgtest_ctrl/run.py --lint-only
+python3 tools/regress.py smoke --path verif/unit/fpga_imgtest_ctrl -j 1
+python3 tools/regress.py smoke --path verif/unit/fpga_imgtest_cam -j 1
+tclsh verif/unit/fpga_imgtest_ctrl/check_import.tcl
+python3 tools/gen/regs.py
+git diff --exit-code -- sw/bsp/include/regs/
+```
+
+`run.py --lint-only` 使用 `top_files.f` 展开后的真实顶层与已有 IP 行为模型，
+执行 `verilator --lint-only --timing -Wall +define+SIM_MODE --top-module
+edrv32_fpga_board_imgtest_top <expanded sources>`，不关闭警告。
+控制器测试用有等待周期的 APB 从机，核对全部启动写入、所有档位和 Surface
+提交/释放，以及活动 GEO/pending 时丢帧不破坏所有权；摄像头测试按实际分频
+解码两路 SCCB 对照软件表。日志和仿真生成物在 `build/fpga_imgtest/`，
+回归入口日志在 `build/regress/smoke/unit/fpga_imgtest_*/verilator/`。
+Linux 验证不代表 PDS 时序或摄像头/HDMI 实物已经验收。
