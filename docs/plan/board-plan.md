@@ -47,7 +47,7 @@
 | B2-1c | VIN CH2 模块级验证 VI-19–VI-23（独立，与 `tools/npu` 预处理交叉核对） | Codex · GPT-6.1 Sol | 与 B2-1b 并行 | VIN block smoke/full 通过 | task-vin-ch2-verif | [~] 2026-10-29 测试已交付（abcd685，与 input_pack.py 交叉核对 983040 B 差异 0），待与 B2-1b 一起合入后对真实 RTL 回归 |
 | B2-1d | SoC 级验证（`docs/testplan/soc-testplan.md`，待写）：S2 数据流、S1 数据流（小用例 NPU）、ETH 收发、并发流量下 DISP 不读空/VIN 不溢出、监控统计 | Codex · GPT-6.1 Sol | B2-1a、B2-1b | SoC 级 smoke/full | — | [ ] |
 | B2-2 | 板级：DDR3 IP 创建说明（厂商 `6_IP_setup_packet`、`2_9_ddr3_test`）、DDR 适配器（已有，接入）、PLL（clk_mem 由 DDR IP 给出，clk_pix 74.25 MHz 与 5 倍串化时钟，clk_npu 150 MHz，clk_sys 100 MHz）、HDMI TMDS 串化、两路 DVP 摄像头 IO、RGMII ↔ 8 位 MAC 适配（厂商 `2_11_ethernet_test`）、B2 板级顶层、约束（引脚取自厂商例程和 `mini-base管脚映射.xlsx`）、导入脚本 | 协调者 + Codex | B2-1a | 板级仿真（DDR/TMDS/RGMII 模型）PASS；约束与引脚表逐项核对 | — | [ ] |
-| B2-3a | 引擎寄存器 JSON 描述（`rtl/include/regs/`）和 C 头生成器 `tools/gen/regs.py` | Codex · GPT-6.1 Sol | — | 重复生成不变；`_Static_assert` 与规格数字对照 | task-regs-gen | [~] 2026-10-29 派发 |
+| B2-3a | 引擎寄存器 JSON 描述（`rtl/include/regs/`）和 C 头生成器 `tools/gen/regs.py` | Codex · GPT-6.1 Sol | — | 重复生成不变；`_Static_assert` 与规格数字对照 | task-regs-gen | [x] 2026-10-29：8 个模块 JSON 与头文件，142 条静态断言通过 |
 | B2-3b | 引擎驱动（VIN/PIX/GEO/DISP/NPU/ETH/MEM_XBAR/PERF_MON）；OV5640 初始化（I2C0、GPIO bit12–15） | Codex · GPT-6.1 Sol | B2-1a、B2-3a | SoC 级仿真中驱动用例通过 | — | [ ] |
 | B2-4 | 演示程序 `sw/apps/demo`：S2 图像处理（菜单/KEY2–4 切换 PIX、GEO）；S1 目标检测（CH2 → NPU → 后处理 → 画框）；网口加载 NPU 镜像、网口图像检查；DDR 监控记录 100 Hz 经网口上报（设计记录 3.5） | Codex · GPT-6.1 Sol | B2-3 | 后处理 C 实现与 Python 参考逐项一致；SoC 级仿真跑通 S1 小用例和监控记录 | — | [ ] |
 | B2-5a | 调试工具：DDR 监控页、场景控制、YOLO 数据发送与回传接收（设计记录 3.5、3.6） | Codex · GPT-6.1 Sol | 设计记录 3.5 记录格式 | unittest：记录解析、带宽换算、CSV、UDP 回环；合成数据截图 | task-debug-monitor | [~] 2026-10-29 派发 |
@@ -63,6 +63,8 @@
 | B3-3 | Windows：上板 | 用户 + Windows Codex | B3-1、B3-2 | [ ] |
 
 ## 4. 规格定稿项
+
+- 寄存器描述缺项回填（B2-3a 列出，生成头中暂为"未规定"、不产生复位值宏）：SoC 7.1 公共寄存器（CTRL、STATUS、IRQ_EN、IRQ_STAT、ERR_CODE、DESC_BASE/COUNT、DONE_COUNT、PERF）在 VIN/PIX/GEO/DISP/ETH/PERF_MON/MEM_XBAR 规格中的复位值；MEM_XBAR `WEIGHT[P2]`、`RATE[P0/1/3/4/5]` 复位值；各模块只有取值范围、没有位宽或位域名的寄存器（以 `VALUE` 命名）；npu-spec 第 4 节"STATUS.FRAME 不使用"应为 IRQ_STAT.FRAME、"公共寄存器复位全 0"与 ID = 0x00060001 的矛盾。依据 RTL 实际复位值整理后经用户确认写入规格（B2-1d 前完成）。
 
 - clk_sys 频率：B1 用 100 MHz；正式值在 C-S1 依据完整 SoC 的 PDS 结果和布局优化调研（`docs/guides/pds-floorplan.md`）确定。
 - 监控程序外设测试项（SoC 7.5 第 4 条 [待定]）：B1 上板时按实际结果由用户确认。
