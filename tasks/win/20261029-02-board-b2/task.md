@@ -1,4 +1,4 @@
-# 任务卡 20261029-02-board-b2：B2 完整 SoC 生成 IP、综合实现、点亮
+# 任务卡 20261029-02-board-b2：B2 完整 SoC 生成 IP、综合实现、上板（点亮 + 演示程序）
 
 ## 1. 目标
 
@@ -8,7 +8,11 @@
 - 流程：生成全部 IP，综合、布局布线、生成 bitstream，下载上板；
 - 点亮：确认启动信息、监控程序和 I2C 摄像头应答。
 
-演示程序（S1/S2、网口、监控）不在本卡。它经 BIOS 烧录到 SRAM 运行，**不需要重新生成 bitstream**，由后续任务卡提供。
+第二部分：经 BIOS 把演示程序 `src/demo.bin` 烧录到 SRAM（**不需要重新生成 bitstream**），按 `sw/apps/demo/README.md` 的上板检查清单验证：
+- S2 图像处理、S1 目标检测；
+- 网口加载模型、YOLO 逐字节比对；
+- 网口视频；
+- DDR 监控。
 
 ## 2. 输入
 
@@ -25,8 +29,13 @@
   |---|---|
   | `ip_rom_boot.dat` | bootloader + BIOS（5348 字节），ROM 初始化文件，2048 行 × 16 HEX 字符 |
   | `ip_ram_sram.dat` | 监控程序（20392 字节 text），SRAM 初始化文件，8192 行 × 16 HEX 字符 |
+  | `demo.bin` | 演示程序（41132 字节），经 BIOS 烧录到 SRAM |
+  | `npu/` | YOLO 模型镜像（`tools/npu/compile_yolo.py` 输出：`mem_desc.hex`、`mem_model.hex`、`regs.txt`）和量化参数 `quantization.json`，供调试工具 YOLO 页发送和比对。`mem_model.hex` 约 6.6 MB：Windows 端没有量化和编译模型的 Python/torch 环境，必须随卡提供；它与 `sw/lib/yolo_tables.c` 来自同一次量化 |
 
-- 串口工具：`tools/board/uart_tool.py` 或调试工具 `tools/debug_tool/`（B1 已用过）。
+- 串口和网口工具：调试工具 `tools/debug_tool/`。
+  - BIOS 烧录：用 B1 已用过的方式；
+  - 场景控制、DDR 监控、YOLO、视频页：用法见其 README。
+  - PC 网口设为 192.168.1.x（不要用 .10），调试工具板子地址 192.168.1.10、板子端口 5000、PC 本地端口 6000。
 
 ## 3. 环境
 
@@ -39,8 +48,9 @@
 
 | IP | 操作 |
 |---|---|
-| `ip_pll_sys` | 从 B1 工程复制（`ip_pll_sys.md`，27 → 100 MHz） |
-| `ip_pll_npu`、`ip_pll_video`、`ip_pll_eth` | **新生成**。IP Compiler 显示的实际频率与说明不一致时停下，把实际频率和分频参数告诉 Codex 写进 result.md |
+| `ip_pll_sys` | **重新生成**（`ip_pll_sys.md`）：在 B1 的 CLKOUT0 100 MHz 基础上增加 CLKOUT1 150 MHz（clk_npu），两路共用 900 MHz VCO |
+| `ip_pll_video`、`ip_pll_eth` | **新生成** |
+| PLL 共同要求 | 一共只有 3 个 PLL IP：sys（100 + 150 MHz）、video（74.25 + 371.25 MHz，与前者无法共用 VCO）、eth（输入是 PHY 的 RGMII 接收时钟，与 27 MHz 不同源）。DDR3 的 PLL 在 DDR IP 内部，不另生成。IP Compiler 显示的实际频率与说明不一致时停下，把实际频率和分频参数告诉 Codex 写进 result.md |
 | `ip_ddr3` | **新生成**（`ip_ddr3.md`，按厂商 `2_9_ddr3_test` 的设置）。生成后把实际端口列表、`core_clk` 频率交给 Codex 核对 |
 | `ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w` | **新生成**（512 深，分别只用 128、16 项） |
 | `ip_rom_boot`、`ip_ram_sram` | **重新生成**，初始化文件选本卡 `src/` 中的两个 `.dat`（HEX） |
@@ -54,7 +64,7 @@
 |---|---|---|
 | 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261029-02-board-b2 origin/main`；阅读本卡和 `fpga/ip/README.md`，把用户步骤整理成清单交给用户。 |
 | 1 | 用户（U） | 新建 B2 工程（PG2L200H-6 / FBB676）；按第 4 节复制已有 IP。 |
-| 2 | 用户（U） | 按第 4 节生成 3 个 PLL、`ip_ddr3`、两个 mem_xbar RAM，重新生成 ROM/SRAM（选本卡 `src/` 的初始化文件）。告诉 Codex IP 目录。 |
+| 2 | 用户（U） | 按第 4 节生成 3 个 PLL（sys 为重新生成）、`ip_ddr3`、两个 mem_xbar RAM，重新生成 ROM/SRAM（选本卡 `src/` 的初始化文件）。告诉 Codex IP 目录。 |
 | 3 | Windows Codex（C） | 逐个核对 IP 的模块名和端口与 `rtl/tech/` 包装模块、板级顶层的例化一致（`fpga/ip/*.md` 末尾的期望端口），并检查 ROM/SRAM `.idf` 的初始化选项。不一致时停下，写进 result.md（不改生成文件，也不改 RTL）。 |
 | 4 | 用户（U），或 Codex 在 PDS 控制台 | 执行 `source ../../EdRV32-Competition-2026/fpga/scripts/import_board_b2_top.tcl`，把打印的 `edrv32: added <N> sources` 告诉 Codex（预期 145：SoC 141 + 板级 4）。编译报错就停下，把报错原文交给 Codex。 |
 | 5 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`。任何一步报错就停下，把报错原文交给 Codex。 |
@@ -64,8 +74,10 @@
 | 9 | Windows Codex（C） | **启动信息**：打开串口记录 `build/board/b2_boot.log`，请用户按一下复位键（不按 KEY1）。日志应出现 EdRV32 logo、启动信息（`CLK_SYS_HZ 100000000`）和监控程序菜单。没有输出时，请用户报告 LED 状态。DDR 初始化未完成时 SoC 保持复位（`mem_ready`），串口不会有任何输出，记下这一现象。 |
 | 10 | Windows Codex（C） | **系统信息和外设测试**：菜单 3、菜单 2 各运行一次，日志 `b2_sysinfo.log`、`b2_periph.log`。记录 I2C 扫描到的地址。监控程序不释放摄像头复位（GPIO bit13/15 复位后为 0），扫不到 OV5640 的 0x3C 属正常；摄像头在演示程序任务卡中检查。 |
 | 11 | Windows Codex（C） | **BIOS**：按住 KEY1 并复位，确认进入 BIOS 菜单（日志 `b2_bios.log`），然后复位退出。 |
-| 12 | 用户（U） | 观察并告诉 Codex：HDMI 显示器是否检测到信号（DISP 在监控程序下未使能，黑屏或"无信号"都如实记录）；网口 PHY 指示灯状态。 |
-| 13 | Windows Codex（C） | 收集第 6 节产物，填写 `result.md`，提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261029-02-board-b2 results`，推送 `win/20261029-02-board-b2`，告诉用户完成并给出分支名。中途停下时，已完成部分照常回传，并写明停在哪一步和现象。 |
+| 12 | 用户（U） | 观察并告诉 Codex：HDMI 显示器是否检测到信号（DISP 在监控程序下未使能，黑屏或"无信号"都如实记录）；网口 PHY 指示灯状态。第一部分到此结束。 |
+| 13 | 用户（U）+ Windows Codex（C） | **第二部分：演示程序**。按 `sw/apps/demo/README.md`"构建和烧录"一节，用调试工具经 BIOS 烧录本卡 `src/demo.bin`：按住 KEY1 复位 → 烧录成功 → 松开 KEY1 再复位。串口日志 `b2_demo.log` 应出现 `Demo: EdRV32 B2 v1`、八个引擎 ID、两路摄像头 chip ID。启动就停在错误时，把日志交给 Codex 回传，不再继续本部分。 |
+| 14 | 用户（U）+ Windows Codex（C） | 按 `sw/apps/demo/README.md`"上板检查清单"逐行执行：S2 与 5 种 PIX、GEO、KEY2–4、建立网口对端、加载模型（本卡 `src/npu/`）、S1、YOLO 页图像检查、三种输出、`fps`、`sample`、DDR 监控页、复位重跑。<br>• Codex 记录每行的结果（正常 / 异常 + 现象）和 `status` 输出；<br>• 用户提供 HDMI 画面照片和调试工具截图；<br>• 某一行异常时记下现象继续下一行，不调试。 |
+| 15 | Windows Codex（C） | 收集第 6 节产物，填写 `result.md`，提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261029-02-board-b2 results`，推送 `win/20261029-02-board-b2`，告诉用户完成并给出分支名。中途停下时，已完成部分照常回传，并写明停在哪一步和现象。 |
 
 ## 6. 产物
 
@@ -73,7 +85,8 @@
 
 | # | 产物 | 内容 |
 |---|---|---|
-| 1 | `uart/b2_boot.log`、`b2_sysinfo.log`、`b2_periph.log`、`b2_bios.log` | 串口原始日志（文本） |
+| 1 | `uart/b2_boot.log`、`b2_sysinfo.log`、`b2_periph.log`、`b2_bios.log`、`b2_demo.log` | 串口原始日志（文本） |
+| 1a | `demo/checklist.md`、`demo/*.png`、`demo/*.csv` | 演示程序检查清单逐行结果；HDMI 照片、调试工具 YOLO/视频/DDR 监控页截图；DDR 监控导出的 CSV（几十秒即可） |
 | 2 | `ip/` | 新生成 IP 的实际端口、PLL 实际频率和参数、DDR3 选项截图；ROM/SRAM 的初始化选项（`.idf` 中相关行） |
 | 3 | `timing_summary.txt` | 每个时钟 slow/fast 角的 WNS/TNS/WHS/THS、违例端点数、推算 Fmax |
 | 4 | `resource_summary.txt`、`resource_hier.txt` | 资源汇总（LUT、FF、DRM 18K/36K、APM、分布式 RAM、IO、PLL）；按层次到 `u_soc` 下一级（CPU 子系统、系统子系统、存储子系统、各媒体引擎、NPU、ETH）和板级适配 |
@@ -85,7 +98,8 @@
 ## 7. 通过判据
 
 - 实现：综合、布局布线、bitstream 完成；资源在器件容量内。
-- 上板：串口打印 logo 和启动信息（说明 DDR 初始化完成、`mem_ready` 释放了复位）；监控程序菜单 2、3 有输出；能进入 BIOS。
+- 上板第一部分：串口打印 logo 和启动信息（说明 DDR 初始化完成、`mem_ready` 释放了复位）；监控程序菜单 2、3 有输出；能进入 BIOS。
+- 上板第二部分：检查清单逐行有结果记录。异常行不阻止回传，由协调者据此安排针对性仿真或修改。
 - 报告：第 6 节产物齐全；所有数字来自 PDS 报告和串口日志原文，找不到的写"未取得"。时序是否满足不作为停止条件，但必须写明。
 
 ## 8. result.md 模板
@@ -126,6 +140,10 @@
 - 系统信息、外设测试（I2C 扫描地址）：
 - BIOS：
 - HDMI 显示器、网口指示灯（用户观察）：
+
+## 演示程序
+| 检查项 | 结果（正常/异常） | 现象、status 摘录 |
+|---|---|---|
 
 ## 完整报告在 Windows 本地的路径
 
