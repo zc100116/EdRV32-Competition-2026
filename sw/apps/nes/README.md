@@ -1,9 +1,9 @@
-# nofrendo DDR 移植（B3-4b 第 1 步）
+# nofrendo DDR 移植（B3-4b）
 
 实现依据：`docs/design/2026-10-29-rnd-disp.md` 5.2。
-本步交付 CPU/PPU 软件模拟、I8 帧接口、主机 PPM、UART/KEY 输入和板上计时。
-RND/DISP 在 B3-3a 合入后接入，当前板上不显示、不限速、无声音。
-板上 CLINT 实测帧率**未取得**；协调者确认本卡按 Linux 验收交付，后续上板补测。
+已实现 CPU/PPU 软件模拟、I8 帧接口、主机 PPM、UART/KEY 输入、板上计时，
+以及 RND I8 BLIT → DISP L0 双缓冲显示；模拟不限速，无声音。
+板上 CLINT 实测帧率**未取得**；Linux 验收通过后仍需上板补测显示效果和帧率。
 
 ## 上游、许可与补丁
 
@@ -63,10 +63,14 @@ build/sw/nes-host/nes-host 180 build/nes/frames skip > build/nes/host-skip.log
 ```sh
 . ~/.local/opt/edrv32/env.sh
 make -C sw PROGRAM=nes MEMORY=ddr_app
+make -C sw PROGRAM=nes MEMORY=ddr_app NES_DISPLAY=0 OUT=$PWD/build/sw/nes-nodisplay
 ```
 
 输出 `build/sw/nes/nes.elf`、`.bin`、`.map`、`.dis` 及地址分段 hex。
-默认 `NES_OPT=-O2`；比较选项可传 `NES_OPT=-O3`，禁画可传 `NES_SKIP=1`。
+默认 `NES_OPT=-O2 NES_DISPLAY=1`；比较选项可传 `NES_OPT=-O3`。
+`NES_DISPLAY=0` 完全不链接显示接收端和 RND/DISP/cache 驱动，保留第 1 步只计时模式；
+`NES_SKIP=1` 则连 PPU 像素绘制也跳过，两个选项含义不同。
+Spike 默认禁用显示，`run_spike.py` 也显式传入 `NES_DISPLAY=0`。
 板上默认无限运行；测量可传 `NES_FRAMES=180` 固定帧数。
 所有程序段、ROM、位图、I8 帧、状态和 newlib 堆均在 DDR 应用区
 CPU `0x90000000`（DDR 物理偏移 `0x10000000`）起的 64 MiB 内。
@@ -75,11 +79,19 @@ CPU `0x90000000`（DDR 物理偏移 `0x10000000`）起的 64 MiB 内。
 
 ## BIOS 2 Load / 3 Run
 
-需要支持 SoC v0.17 菜单的 BIOS；本卡基线的旧 BIOS 只有 1，须等 BIOS 更新合入。
-按住 KEY1 并复位进入 BIOS，先可用 4 Baud 切换到 2000000 baud，再用
-`tools/board/uart_tool.py` 加载 `build/sw/nes/nes.elf` 并运行；参数见
-`tools/board/README.md` 的 ELF 加载用法（该功能由另一个 Task 交付）。
+当前已合入 BIOS v1.10，菜单为 `1=Program SRAM 2=Load 3=Run 4=Baud`。
+按 [`tools/board/README.md`](../../../tools/board/README.md) 的 ELF 加载用法执行：
+
+```sh
+py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --port COM3 --log build/board/nes.log
+py tools/board/uart_tool.py build/sw/nes-nodisplay/nes.elf --elf --port COM3 --log build/board/nes-nodisplay.log
+```
+
+先启动工具，再按住 KEY1 并复位；默认自动从 115200 切到 2000000 baud，分段加载并
+立即运行，不需再次复位。可加 `--baud 921600` 或 `--baud 115200`。
 **BIOS 不解析 ELF，不能把 ELF 文件整体当作一个裸镜像发送。**
+UART 游戏输入使用相同波特率的串口终端发送小写字符；加载工具用于加载和日志捕获，
+要切换终端时先停止捕获并释放串口，或直接用板上 KEY1–4。
 
 手动协议（由协调者提供，SoC v0.17 7.5 3a）：
 
@@ -94,12 +106,15 @@ CPU `0x90000000`（DDR 物理偏移 `0x10000000`）起的 64 MiB 内。
 板上每 60 帧打印一行：
 
 ```text
-NES fps=75.4 cpu=30% ppu=62%
+NES fps=75.4 shown=30.0 cpu=30% ppu=62%
 ```
 
 上面只是格式示例，**不是上板实测**。计时用 `clint_time()`，单位为 clk_sys 周期，
 频率读 SYSCTRL `CLK_SYS_HZ`；fps 不用写死的 100 MHz。
 FPS 计入帧复制/接收端及输入处理，排除上一次的串口统计打印时间。
+`shown` 是同一统计窗口内已观察到 DISP SWITCH 的新帧数/秒，不把重复扫描算成新帧；
+主机 PPM、`NES_DISPLAY=0` 和 Spike 的 `shown` 为 0。模拟可快于或慢于显示，
+RND 忙、等待新 FRAME 提交或等待 SWITCH 释放时，本模拟帧只计模拟帧数，跳过显示。
 CPU/PPU 百分比的分母是模拟核心帧时间，排除帧复制/接收端、输入和统计打印。
 CPU 计入 `nes6502_execute()` 内发生的 PPU 寄存器访问和 mapper 回调；
 PPU 计入 `ppu_scanline()` 和 `ppu_endscanline()`，两项不重复计时。
@@ -131,9 +146,39 @@ UART 使用单个小写字符，不要发送 Enter。每次接收延长对应按
 `pixels` 是行距 256 的 256×240 I8，`palette` 是 256 项 RGB888（每项 3 字节）。
 两个指针至少到下一帧前有效，帧号从 1 开始。PPU 的左右各 8 像素 overdraw
 留在独立的 272×240 工作面，交付前逐行复制出连续的 I8 帧；优先级位由调色板
-的重复项解释，保留上游 I8 值。板上接收端本步只丢弃，供后续 RND 接收端替换。
-第 2 步须在接收端按 BSP cache 契约准备 RND 源、调色板及 L0 目标，
-用 I8 BLIT 最近邻 3 倍输出 768×720；本步没有 RND 命令或 DISP 操作。
+的重复项解释，保留上游 I8 值。
+
+板上显示接收端 `display.c` 的所有大缓冲都在 DDR 应用区 bss：
+
+| 缓冲 | 大小/对齐 | 所有权 |
+|---|---|---|
+| L0 RGB565 Surface ×2 | 每张 1280×720×2 = 1843200 B，4 KiB 对齐 | 扫描/后台交替 |
+| RND I8 快照 | 256×240 = 61440 B，64 B 对齐 | 只在空闲时复制，DONE 前不改 |
+| ARGB8888 调色板 | 256×4 = 1024 B，64 B 对齐 | 只在空闲且内容变化时写 |
+| BLIT 命令 | 64 B，64 B 对齐 | DONE 前不改 |
+
+`display_command.c` 把 RGB888 调色板转为不透明 `0xffRRGGBB`，通过数值比较仅写
+变化项。每次 `rnd_submit()` 的 `sources` 包含 I8 快照；只有调色板改变时才再包含
+调色板，驱动负责在 DOORBELL 前 clean 源和命令。独立快照保证下一模拟帧改写
+`port.c` 的像素/调色板时，仍在运行的 RND 不会读到混合帧。
+
+启动时先停 DISP 并等 IDLE，再将两张 Surface 清黑并经 BSP
+`cache_clean_invalidate()` 交给硬件。L1 关闭，L0 卷轴为 0。
+`BLIT` 从 I8 读取，目标为 L0 RGB565，矩形 `(256,0)–(1023,719)`，左右各 256 像素
+保持黑色。源步长 `21846 = ceil(65536/3)`：对 0≤k<768，
+`floor(k×21846/65536) == floor(k/3)`，所以每个源像素严格放大为 3×3；
+不能用向下取整的 21845，否则 3 的整数倍采样点会落到前一个像素。
+
+运行中无帧完成等待循环：每个模拟帧轮询一次，若 RND 尚未 DONE 或仍 BUSY 就丢弃
+本次显示。DONE 且总线已 drain 才调用 `rnd_wait()` 收集/确认结果，此时它无需等硬件。
+随后清掉旧 FRAME，观察到新的 FRAME 后提交已画好的后台 Surface；观察 SWITCH 后，
+才用 `disp_released()` 把旧 Surface 交回 RND。初始黑屏不计 `shown`。
+不在 `CUR_BASE` 正在扫描的 Surface 上绘制，不覆盖尚待锁存的 NEXT_BASE。
+
+Surface 在启动 clean/invalidate 后完全由 RND/DISP 使用，CPU 不再访问；因此
+`rnd_batch.targets` 为空，不在每帧对 1.84 MiB Surface 做无必要的 CPU cache 作废。
+RND/DISP 硬件错误会打印 ERR_CODE（RND 另带 CUR_DESC）并退出，不重试、不降级。
+显示翻页的完成与缓存规则由现有驱动和 DISP 5.3 提供，未修改驱动/RTL。
 
 `osd_setsound()` 不调用上游 APU process 函数，所以完全不生成音频采样，
 仍保留 APU 寄存器状态；依赖音频采样时钟/DMC DMA 的 ROM 行为未验证。
@@ -142,7 +187,7 @@ UART 使用单个小写字符，不要发送 Enter。每次接收延长对应按
 sprite-0 hit 所需 fake OAM 逻辑；不是停止整个 PPU。禁画帧不交付帧接口。
 测量这一模式可以区分 PPU 像素绘制成本和其他模拟成本，不代表可显示的实际帧率。
 
-## 验证记录
+## 第 1 步验证记录（历史基线）
 
 测量实现提交：`f93a9f9a82a468744a40839692f5133248e0751c`；
 上游/ROM 提交见前文。Linux x86_64，AMD EPYC 7742（共享运行环境），gcc 13.3.0；
@@ -221,11 +266,62 @@ O2 禁画比完整绘制少约 61.81% 指令，理想吞吐比约 2.62 倍。
 `-fno-strict-aliasing` 用于上游按字节/字读写 PPU 工作面及 bitmap 存储的别名约定。
 没有全局 `-w` 或全局移除 `-Werror`。
 
-## 上板检查清单（本步只看串口）
+## 第 2 步显示路径验证
 
-- BIOS 已支持 2/3；DDR MEM_READY，ELF 两个有文件数据的 PT_LOAD 都加载成功。
-- Run 后出现 ROM loaded / mapper 0 / NES powered on；每 60 帧持续打印 fps/cpu/ppu。
-- 记录默认 O2 的至少三个 60 帧窗口，丢弃首次启动窗口；保存完整 UART 日志和提交号。
-- 同样 ROM 用 `NES_SKIP=1` 重建并重载，记录禁画结果；恢复普通构建。
-- 接入显示后再验证 UART 八键及 KEY1–4；本步无画面，不能仅靠帧率验证按键效果。
-- 重复 Run 能重新初始化状态；记录真实频率、cache 配置与 BIOS 版本。
+```sh
+python3 sw/apps/nes/check_blit.py > build/nes/blit-check.log 2>&1
+```
+
+脚本构建并运行主机模拟器 180 帧，从最后一张 PPM 重建无损 I8/调色板；
+使用实际 `nes_palette_update()`、`nes_blit_encode()` 和 RND 驱动编码描述符，
+再让 `verif/block/rnd/rnd_ref.py` 渲染。逐像素比较 1280×720 全部 921600 像素：
+中心区域与主机 PPM 最近邻放大 3 倍一致，左右黑边也逐像素验证。
+因为目标是 RGB565，期望值先按 RND 2.1 对主机 RGB888 截位量化，避免把固有的色深
+损失误报为颜色错误。生成物在 `build/nes/blit-check/`，包括 `display.ppm`、
+原始主机 PPM、`blit.bin`、`frame.i8` 和 `palette.argb`，不入库。
+
+同一脚本编译实际 `display.c` 和 RND/DISP 驱动，只替换 MMIO/cache 为主机测试事件：
+验证 RND BUSY 跳帧、DONE 先于 bus drain、帧快照不被下一帧覆盖、FRAME 后提交、
+SWITCH 前不复用、目标永不等于当前扫描基址，以及调色板未变时不再 clean。
+这只是软件交接测试，不是 SoC 仿真或硬件时序验证。
+
+实现提交：`998494db9b728a4250761b2c73adbe065b5ea059`（基线 `e499516`）。
+Linux gcc 13.3.0 / xPack RV32 GCC 15.2.0；主机检查用 Python 标准库及仓库 RND 参考模型。
+
+| 检查 | 命令 | 结果/原始记录 |
+|---|---|---|
+| 默认显示构建 | `make -C sw PROGRAM=nes MEMORY=ddr_app` | PASS，零告警；`build/nes/display-build.log` |
+| 只计时构建 | `make -C sw PROGRAM=nes MEMORY=ddr_app NES_DISPLAY=0 OUT=$PWD/build/sw/nes-nodisplay` | PASS，零告警；`build/nes/nodisplay-build.log` |
+| 主机 BLIT/交接 | `python3 sw/apps/nes/check_blit.py` | 两项 PASS；`build/nes/blit-check.log` |
+
+显示版 ELF text/data/bss = 218740 / 4384 / 5994716 B；只计时版为
+215176 / 4376 / 2242724 B。两张 Surface 在 `0x9026b000` 起，4 KiB 对齐；
+命令/I8 快照/调色板均 64 B 对齐，三个 PT_LOAD 都在 DDR 应用区内。
+只计时版没有链接 `nes_display*`、`rnd_submit` 或显示 DMA 缓冲。
+
+另作一次 60 帧的 Spike 非显示执行检查，退出状态 0：
+
+```sh
+make -C sw PROGRAM=nes MEMORY=ddr_app NES_SPIKE=1 NES_DISPLAY=0 NES_FRAMES=60 \
+  OUT=$PWD/build/sw/nes-display-spike
+spike --isa=rv32im_zicsr_zifencei_zicntr_zihpm --priv=m --pmpregions=0 \
+  --no-dm --disable-dtb -m0x90000000:0x04000000 --pc=0x90000000 \
+  build/sw/nes-display-spike/nes.elf
+```
+
+原始记录 `build/nes/display-spike-build.log`、`build/nes/display-spike.log`；
+输出带 `shown=0.0`，本窗口为 1274389 RV32 指令/模拟帧（含启动窗口，不作稳态对比）。
+未运行 SoC 仿真；真实板上的颜色、撕裂、按键和 fps/shown 仍待上板检查。
+
+
+## 上板检查清单
+
+- BIOS v1.10 的 `--elf` 加载成功，启动出现 ROM loaded / mapper 0 / NES powered on。
+- 720p L0 画面为 768×720，水平居中，左右各 256 像素黑色，L1 关闭。
+- 人物、草地、木箱和背景颜色正确；移动时无撕裂、混合帧或局部旧像素。
+- UART 八键及 KEY1–4 响应正确，UART 字符约保持 100 ms；不带 Enter。
+- 串口每 60 模拟帧报告 fps/shown/cpu/ppu，`shown` 不高于 60 Hz，也不把重复帧计数。
+- 分别加载默认显示版与 `NES_DISPLAY=0` 版本，丢弃首个窗口，保存至少三个窗口的
+  日志，记录真实频率、cache 配置、ROM、编译选项、提交和 BIOS 版本。
+- 如需区分 PPU 成本，再用 `NES_DISPLAY=0 NES_SKIP=1`，然后恢复默认显示构建。
+- 真实板上帧率、无撕裂和按键响应目前未取得硬件验证；由后续 Windows 上板完成。
