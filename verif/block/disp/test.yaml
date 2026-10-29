@@ -1,4 +1,4 @@
-# DISP v0.3 reference self-test; complete raster cases moved to full (CLAUDE.md 9.1).
+# DISP v0.3 Python reference self-test; raster and Python/SV frames are full (CLAUDE.md 9.1).
 top: tb
 files: files.f
 defines: SIM_MODE

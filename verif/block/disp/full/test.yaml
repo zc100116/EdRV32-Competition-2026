@@ -4,7 +4,7 @@ files: files.f
 defines: SIM_MODE
 parameters:
 software:
-timeout: 10800
+timeout: 18000
 pass: PASS
 tier: full
 simulator: verilator

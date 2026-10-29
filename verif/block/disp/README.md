@@ -15,8 +15,10 @@ python3 tools/regress.py full -j 1 --path verif/block/disp
 
 Both YAML entries use `group: verif/block/disp`, since both runners share
 `build/disp/`. D-I1 measured DS-01 at 64 seconds and DS-03 at 65 seconds before
-retiering. Under CLAUDE.md 9.1 and Task D-I1, smoke runs the existing Python/SV
-reference checks; full runs all DS-01–19 (75 complete raster instances), including
+retiering. Six-frame reference generation/comparison also reached 106 seconds.
+Under CLAUDE.md 9.1 and Task D-I1, smoke runs the existing Python reference
+self-test; full runs the Python/SV frame comparison and all DS-01–19
+(75 complete raster instances), including
 all former smoke cases. No frames, seeds, variants or pixel checks are removed.
 The regression tool also selects the reference smoke entry for full.
 All tops build with `--timing -Wall -j 1`.

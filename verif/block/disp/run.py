@@ -24,11 +24,11 @@ def main():
     out = ROOT / 'build/disp'
     out.mkdir(parents=True, exist_ok=True)
     self_test()
+    if args.tier == 'smoke':
+        return 0
     sources = expand_files(ROOT / 'verif/block/disp/files.f')
-    tops = [('tb_blend_ref', 'obj_ref')]
-    if args.tier == 'full':
-        tops = [('tb', 'obj'), ('tb_layers', 'obj_layers'), *tops]
-    for top, directory in tops:
+    for top, directory in (('tb', 'obj'), ('tb_layers', 'obj_layers'),
+                            ('tb_blend_ref', 'obj_ref')):
         started = time.monotonic()
         compile_args = ['verilator', '--binary', '--timing', '-j', '1', '-Wall',
                         '--timescale', '1ns/1ps', '-Wno-BLKSEQ', '-Wno-UNUSEDSIGNAL',
@@ -44,7 +44,7 @@ def main():
             print(f'FAIL DISP compile {top}')
             return 1
     # D-I1 measured DS-01 and DS-03 above 60 seconds each. Keep the complete
-    # raster suites in full (CLAUDE.md 9.1); smoke checks the existing reference.
+    # raster suites in full (CLAUDE.md 9.1); smoke runs the Python self-test.
     cases = [(n, 1, 4096, 999, 0) for n in (1, 3, 4, 5, 11, 12)]
     cases.insert(1, (3, 1, 2560, 999, 0))
     cases += [(12, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
@@ -54,14 +54,11 @@ def main():
     cases += [(15, 1, 4096, 999, 0)]
     cases += [(16, 1, 4096, 999, v) for v in range(3)]
     cases += [(17, 1, 4096, 999, 0)]
-    if args.tier == 'full':
-        generate(out / 'tmds.hex')
-        cases += [(n, 1, 4096, 999, 0) for n in (2, 8, 9, 10, 19)]
-        cases += [(10, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
-        cases += [(13, seed, 4096, 999, 0) for seed in range(1, 11)]
-        cases += [(18, 1, 4096, 999, v) for v in range(18)]
-    else:
-        cases = []
+    generate(out / 'tmds.hex')
+    cases += [(n, 1, 4096, 999, 0) for n in (2, 8, 9, 10, 19)]
+    cases += [(10, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
+    cases += [(13, seed, 4096, 999, 0) for seed in range(1, 11)]
+    cases += [(18, 1, 4096, 999, v) for v in range(18)]
     started = time.monotonic()
     generate_blend(out / 'blend.hex')
     with (out / 'blend-ref-sv.log').open('w') as log:
