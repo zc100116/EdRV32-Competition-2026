@@ -1,0 +1,10 @@
+top: edrv32_board_vnpu_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software: board_vnpu
+timeout: 300
+pass: PASS
+tier: smoke
+simulator: verilator
+runner: python3 verif/soc/board_vnpu/run.py
