@@ -30,14 +30,16 @@ for RGB565 fill and at least 1.5 pixels/cycle for BLIT.
 After the independent RTL is ready, the integration task runs:
 
 ```sh
-python3 tools/regress.py smoke --path verif/block/rnd -j 1
 python3 tools/regress.py full --path verif/block/rnd -j 1
 python3 tools/regress.py perf --path verif/block/rnd/perf -j 1
 ```
 
 Each command has one directory argument and runs one simulation at a time. All
-manifests use group `verif/block/rnd`. The full invocation includes the root smoke
-manifest, the full supplement and the independent selftest. The real-DUT file list
+manifests use group `verif/block/rnd`. The full invocation includes the root directed
+manifest, the full supplement and the independent selftest. The root manifest
+covers the RN-01–16 subset originally called smoke; its 531 serial cases exceed
+the sixty-second budget, so coordinator clarification `7dcb7ed` assigns it to full.
+RND smoke coverage is provided by `verif/unit/rnd_*`. The real-DUT file list
 uses `rtl/filelists/rnd.f`; the declaration stub is confined to `selftest/files.f`.
 Builds, generated binary images, configuration files and logs live in `build/rnd/`
 and `build/regress/<tier>/block/rnd/`.

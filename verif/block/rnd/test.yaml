@@ -5,7 +5,7 @@ parameters:
 software:
 timeout: 600
 pass: PASS
-tier: smoke
+tier: full
 simulator: verilator
 group: verif/block/rnd
 runner: python3 verif/block/rnd/run.py smoke
