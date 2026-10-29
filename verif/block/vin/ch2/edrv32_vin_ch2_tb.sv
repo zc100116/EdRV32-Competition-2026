@@ -383,6 +383,9 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         $display("PASS VI-20 memory -> CH0/CH2, no read backpressure");
     endtask
 
+    int vi21_requested = 0;
+    int vi21_finished = 0;
+
     // vin v0.3: cameras still drop on valid-data overflow; memory frames pause.
     task automatic vi21_camera_overflow(input bit both_i);
         int before_pixels;
@@ -520,17 +523,26 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
         $fflush();
     endtask
 
+    task automatic run_vi21_subcase(input int number_i);
+        vi21_requested = number_i;
+        $display("VI-21%c BEGIN time=%0t", 8'(96+number_i), $time);
+        $fflush();
+        wait (vi21_finished == number_i);
+        vi21_requested = 0;
+        clocks(1);
+    endtask
+
     task automatic vi21();
         if (selected_case == "full" || selected_case == "21" || selected_case == "21a")
-            vi21_camera_overflow(0);
+            run_vi21_subcase(1);
         if (selected_case == "full" || selected_case == "21" || selected_case == "21b")
-            vi21_memory_backpressure();
+            run_vi21_subcase(2);
         if (selected_case == "full" || selected_case == "21" || selected_case == "21c")
-            vi21_camera_overflow(1);
+            run_vi21_subcase(3);
         if (selected_case == "full" || selected_case == "21" || selected_case == "21d")
-            vi21_padding();
+            run_vi21_subcase(4);
         if (selected_case == "full" || selected_case == "21" || selected_case == "21e")
-            vi21_memory_fullspeed();
+            run_vi21_subcase(5);
     endtask
 
     task automatic vi22();
@@ -656,6 +668,31 @@ module edrv32_vin_ch2_tb #(parameter int HARNESS_SELFTEST = 0);
                 vi21();
                 finished = 21;
                 wait (requested == 0);
+            end
+            // Separate timed processes keep the generated C++ coroutines bounded.
+            initial forever begin
+                wait (vi21_requested == 1 || vi21_requested == 3);
+                vi21_camera_overflow(vi21_requested == 3);
+                vi21_finished = vi21_requested;
+                wait (vi21_requested == 0);
+            end
+            initial forever begin
+                wait (vi21_requested == 2);
+                vi21_memory_backpressure();
+                vi21_finished = 2;
+                wait (vi21_requested == 0);
+            end
+            initial forever begin
+                wait (vi21_requested == 4);
+                vi21_padding();
+                vi21_finished = 4;
+                wait (vi21_requested == 0);
+            end
+            initial forever begin
+                wait (vi21_requested == 5);
+                vi21_memory_fullspeed();
+                vi21_finished = 5;
+                wait (vi21_requested == 0);
             end
             initial forever begin
                 wait (requested == 22);
