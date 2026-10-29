@@ -54,7 +54,7 @@ def run(here, number):
     command([str(Path.home() / '.local/opt/edrv32-py/bin/python'),
              str(COMMON / 'prepare.py'), str(out), str(number)], out / 'reference.log')
     started = time.monotonic()
-    plusargs = ['+DDR_HEX=' + str(out / 'ddr.hex')] if (out / 'ddr.hex').exists() else []
+    plusargs = ['+DDR_HEX=' + str(out / 'ddr.hex')] if number == 5 else []
     command([str(BUILD / 'obj/sim'), f'+CASE={number}', '+DATA_DIR=' + str(out),
              '+ROM_HEX=' + str(out / 'rom.hex'),
              '+SRAM_HEX=' + str(out / 'sram.hex')] + plusargs, out / 'run.log')
