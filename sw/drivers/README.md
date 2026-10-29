@@ -62,7 +62,8 @@ host must wait for that line before sending binary bytes.
 | `vin.h` | `vin_memory_start`, `vin_memory_status` | 单帧内存源启动和状态 |
 | `pix.h` | `pix_config_word`, `pix_configure`, `pix_gamma_load` | 点运算、两级 3×3、256 项 Gamma 表 |
 | `geo.h` | `geo_q16`, `geo_descriptor_pack`, `geo_submit` | 有理数转 Q16.16、64 B 描述符打包和提交 |
-| `disp.h` | `disp_submit`, `disp_current`, `disp_released` | 单层 RGB565 Surface 提交、当前/释放地址 |
+| `disp.h` | `disp_submit`, `disp_current`, `disp_switched`, `disp_released` | v0.3 两层 Surface 提交、当前/释放地址和切换标志 |
+| `disp.h` | `disp_layer_enable`, `disp_l0_scroll`, `disp_l1_geometry` | 两层使能、L0 卷轴、L1 位置/大小/OPA |
 | `npu.h` | `npu_configure`, `npu_start`, `npu_current_descriptor` | 六项基址/数量配置、更新输入输出并启动、错误描述符定位 |
 | `eth.h` | `eth_ipv4_pack`, `eth_local_configure`, `eth_peer_configure` | MAC/IP/端口（字节数组按网络顺序） |
 | `eth.h` | `eth_window_configure`, `eth_window_bytes` | 四个接收窗口及已提交字节数 |
@@ -82,7 +83,7 @@ host must wait for that line before sending binary bytes.
 
 所有传给引擎的地址都是 **DDR 物理地址**，例如 `0x06000000`；CPU 的缓存地址为
 `EDRV32_DDR_BASE + physical`，非缓存地址为 `EDRV32_DDR_UNCACHED_BASE + physical`。
-驱动不会隐式 clean/invalidate：调用者知道数据来自 CPU 还是其他引擎，按 SoC 7.4
+上述 B2 接口不隐式 clean/invalidate（RND 批次接口见下节）：调用者按 SoC 7.4
 在 CPU 写完/引擎读取前调用 `engine_dma_clean(cached_address, bytes)`，在引擎写完/CPU
 读取前调用 `engine_dma_invalidate(cached_address, bytes)`，或始终使用非缓存别名。
 GEO 的源/目标、ETH 的载荷/描述符、NPU 的模型/描述符等分别维护；只 clean 描述符不足以
@@ -200,3 +201,74 @@ GCC 13.3.0 主机纯逻辑测试 PASS，0 warning、0 error；`git diff --check`
 提交关系：`f1dd1f4` 冻结首版 API；协调者 `be1848f` 补全 GEO 描述符生成头，本分支
 以 `039850f` 复用；`9fa9bcf` 为完整实现与验收程序。无其他规格/设计布局偏差；
 OV5640 占位删除、帧率及默认极性处理均已通过协调者 ask 确认。
+
+## B3：RND 与 DISP v0.3
+
+RND 依据 `rnd-spec.md` v0.2，DISP 依据 `disp-spec.md` v0.3。
+参数范围、对齐、源读取范围、COPY 以外的非重叠条件由调用者保证，驱动不检查。
+交给 DISP 的 Surface 必须满足 SoC 7.3；正在扫描的 Surface 禁止写入。
+
+| RND 函数 | 用途 |
+|---|---|
+| `rnd_fill` | 编码纯色/线性渐变、圆角填充；四个有符号 Q15.16 步长 |
+| `rnd_border` | 编码指定边、宽度和半径的边框 |
+| `rnd_glyph` | 编码 A8/A4/A2/A1 掩码着色 |
+| `rnd_blit` | 编码缩放/翻转、颜色键、重着色、四种混合和调色板 |
+| `rnd_copy` | 编码同格式逐位搬运，支持规格规定的重叠 |
+| `rnd_box_shadow` | 编码圆角阴影，显式提供临时区 |
+| `rnd_blur` | 编码原地两遍模糊，显式提供临时区 |
+| `rnd_tilemap` | 编码 8/16 像素瓦片地图及调色板 |
+| `rnd_physical` | 由生成头的两个 DDR 别名基址换算物理地址 |
+| `rnd_submit` | clean 命令及声明的源区，写 DESC_BASE/COUNT，再写 DOORBELL |
+| `rnd_wait` | 轮询 DONE/ERROR，等在途事务排空，返回 irq/error/cur_desc |
+| `rnd_irq_register` | 注册回调、设置 RND DONE/ERROR 及 PLIC 源 11 的优先级/使能 |
+| `rnd_irq_handle` | 服务应用已 claim 的源 11，完成 cache 交接并通知回调 |
+| `rnd_abort` | 请求 ABORT，等 IDLE，返回捕获结果并交回目标区 |
+
+编码函数只写调用者 DDR 数组中的一条 64 B 命令；**列表起点**须 64 B 对齐。
+描述符中的所有地址均为物理地址。`rnd_batch` 中命令和范围地址则为 CPU 地址；
+范围数组需存活到完成，单次只允许一个在途 batch。
+
+`rnd_submit()` 只执行 rnd 5.4 的 cache 维护；源区应包括 CPU 修改过、将被 RND
+读取的数据（图片、字体、调色板、地图等），以及读改写需要的 CPU 修改目标像素。
+RND 完成或停止后，驱动在 CPU 再次访问前 invalidate 调用者声明的目标区；
+临时区若需要 CPU 读取，也应列入目标区。LVGL 软件单元接手前必须等这一交接，
+软件单元修改的像素则在下次提交时作为源区 clean。未声明区域不作 cache 操作。
+
+ERROR 先等总线排空，读 `ERR_CODE`/`CUR_DESC`，最后 RW1C；返回值保留清除前的错误。
+不重试、不复位、不恢复。ABORT 后部分结果保留。轮询与中断完成路径不可同时消费同一批。
+IRQ 方式由应用安装 trap、设置 mie/mstatus，并在 claim/complete 之间调用处理函数：
+
+```c
+unsigned int source = plic_claim();
+if (source == EDRV32_PLIC_SOURCE_RND) {
+    rnd_irq_handle();
+} else if (source != EDRV32_PLIC_SOURCE_NONE) {
+    engine_irq_handle(source); /* 仅适用于已注册的其他媒体源 */
+}
+if (source != EDRV32_PLIC_SOURCE_NONE) {
+    plic_complete(source);
+}
+```
+
+回调发生在目标 invalidate 和 IRQ_STAT 确认之后，可以提交下一批；PLIC completion
+仍由上层负责。普通 `engine_irq_dispatch()` 不替应用路由 RND 专用回调。
+轮询使用 IRQ_EN=0（复位状态）；切换为轮询时由调用者关闭 RND IRQ_EN。
+
+| DISP 函数 | 用途 |
+|---|---|
+| `disp_submit(layer, base, stride)` | 向 L0/L1 提交下一帧 Surface，替代 v0.2 两参数接口 |
+| `disp_layer_enable` | 分别使能 L0 或 L1，保留另一层使能位 |
+| `disp_l0_scroll` | 配置 L0 像素卷轴 X/Y |
+| `disp_l1_geometry` | 配置 L1 位置、大小和整体 OPA；X/W 按 8 像素粒度 |
+| `disp_current` | 分层读取 CUR_BASE |
+| `disp_switched` | 读取对应层 SWITCH 标志，不清除 |
+| `disp_released` | 分层读取 REL_BASE，结合捕获的 SWITCH 使用 |
+
+同一帧生效的一组配置由调用者在 FRAME 后一次写完。两层分别保留扫描、shadow-next
+和待提交 Surface 的所有权；只改位置/大小/卷轴/OPA 不释放 Surface。
+v0.3 第一次启用不报告复位基址 0 的释放；关闭图层可在后续 SWITCH 释放，
+关闭整个 DISP 则等 IDLE 后释放最后的占用。B2 demo 已迁移到显式 `DISP_L0`。
+
+B3 验收命令及硬件检查见 [`rnd_board/README.md`](../tests/rnd_board/README.md)
+和 [`demo/README.md`](../apps/demo/README.md)。不执行 SoC 仿真。
