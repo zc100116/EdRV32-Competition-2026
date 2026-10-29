@@ -8,6 +8,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
+sys.dont_write_bytecode = True
 import time
 
 ROOT = Path(__file__).resolve().parents[3]

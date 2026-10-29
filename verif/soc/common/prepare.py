@@ -7,6 +7,7 @@ from pathlib import Path
 import struct
 import subprocess
 import sys
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
@@ -26,7 +27,7 @@ def prepare(out, number):
         expected = ch2_ref.process(pixels)
         (out / 'ch2.bin').write_bytes(expected)
         npu_dir = out / 'npu'
-        subprocess.run([sys.executable, str(ROOT / 'tools/npu/gen_case.py'),
+        subprocess.run([sys.executable, '-B', str(ROOT / 'tools/npu/gen_case.py'),
                         '--config', str(ROOT / 'verif/soc/sc_05_s1/npu.json'),
                         '--seed', '42', '--offset', '0', '--out', str(npu_dir)], check=True)
         memory = npu_ref.Memory()
