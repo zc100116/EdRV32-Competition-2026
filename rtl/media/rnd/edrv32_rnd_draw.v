@@ -74,7 +74,6 @@ module edrv32_rnd_draw (
     localparam [4:0] S_PALETTE_WRITE = 5'd21;
     localparam [1:0] S_RENDER_IDLE = 2'd0;
     localparam [1:0] S_RENDER_STREAM = 2'd1;
-    localparam [1:0] S_RENDER_DRAIN = 2'd2;
     localparam [1:0] S_WRITE_IDLE = 2'd0;
     localparam [1:0] S_WRITE_DESC = 2'd1;
     localparam [1:0] S_WRITE_DATA = 2'd2;
@@ -244,6 +243,9 @@ module edrv32_rnd_draw (
     wire [7:0] palette_last_w;
     wire palette_write_w;
     wire [255:0] palette_shift_w;
+    wire sample_bank_w;
+    wire source_bank_w;
+    wire palette_bank_w;
     wire render_start_w;
     wire render_finish_w;
     wire write_start_w;
@@ -468,6 +470,9 @@ module edrv32_rnd_draw (
     assign load_data_w = rd_data_valid_i && read_busy_r && !read_render_r;
     assign load_done_w = rd_done_i && read_busy_r && !read_render_r;
 
+    assign sample_bank_w = pipe_tag_r[0][31];
+    assign source_bank_w = pipe_tag_r[1][31];
+    assign palette_bank_w = pipe_tag_r[2][31];
     assign render_start_w = active_r && render_state_r == S_RENDER_IDLE &&
         loaded_r[render_bank_r];
     assign render_finish_w = blend_valid_i && blend_tag_i[30];
@@ -481,8 +486,8 @@ module edrv32_rnd_draw (
         {1'b0, bank_right_r[render_bank_r]};
     assign issue_offset_w = {18'd0, issue_byte_r};
     assign target_offset_w = {18'd0, pipe_tag_r[0][13:0]};
-    assign target_shift_w = target_data_w[render_bank_r] >> {target_offset_w[4:0], 3'd0};
-    assign source_ready_w = !pipe_valid_r[1] || fill_w || !bank_sparse_r[render_bank_r] ||
+    assign target_shift_w = target_data_w[sample_bank_w] >> {target_offset_w[4:0], 3'd0};
+    assign source_ready_w = !pipe_valid_r[1] || fill_w || !bank_sparse_r[source_bank_w] ||
         (lane_hit_w[0] && (!pipe_tag_r[1][29] || lane_hit_w[1]));
     assign pipeline_step_w = (!pipe_valid_r[4] || blend_ready_i) && source_ready_w;
     assign issue_w = render_state_r == S_RENDER_STREAM && pipeline_step_w;
@@ -529,8 +534,8 @@ module edrv32_rnd_draw (
         edrv32_rnd_address u_address (
             .command_i(command_i),
             .x_i(coordinate_w),
-            .y_i(bank_y_r[render_bank_r]),
-            .map_entry_i(map_entry_w[render_bank_r][pixel][15:0]),
+            .y_i(bank_y_r[sample_bank_w]),
+            .map_entry_i(map_entry_w[sample_bank_w][pixel][15:0]),
             .dst_addr_o(unused_dst_w),
             .src_addr_o(lane_src_w[pixel]),
             .map_addr_o(unused_map_w),
@@ -541,17 +546,17 @@ module edrv32_rnd_draw (
         );
         assign lane_adjusted_w[pixel] = lane_src_w[pixel] + lane_sample_y_w[pixel] *
             (source_stride_i - {16'd0, command_i[303:288]});
-        assign lane_tile_pixel_w[pixel] = map_entry_w[render_bank_r][pixel][12] ?
+        assign lane_tile_pixel_w[pixel] = map_entry_w[sample_bank_w][pixel][12] ?
             tile_mask_w - (lane_sample_x_w[pixel] & tile_mask_w) :
             lane_sample_x_w[pixel] & tile_mask_w;
         assign lane_tile_base_w[pixel] = lane_src_w[pixel] -
             ((lane_tile_pixel_w[pixel] << bits_log2_w) >> 3);
         assign lane_tile_index_w[pixel] = (lane_sample_x_w[pixel] >> tile_log2_w) -
-            bank_tile_first_r[render_bank_r];
+            bank_tile_first_r[sample_bank_w];
         assign lane_source_index_w[pixel] = tile_w ? lane_tile_index_w[pixel] * 32'd3 +
             (({lane_src_w[pixel][31:5], 5'd0} -
                 {lane_tile_base_w[pixel][31:5], 5'd0}) >> 5) :
-            (lane_adjusted_w[pixel] - bank_source_r[render_bank_r]) >> 5;
+            (lane_adjusted_w[pixel] - bank_source_r[sample_bank_w]) >> 5;
         assign issue_map_x_w = {16'd0, command_i[367:352]} +
             {20'd0, issue_x_r} + pixel - {{16{command_i[175]}}, command_i[175:160]};
         assign issue_map_index_w[pixel] = (issue_map_x_w >> tile_log2_w) -
@@ -562,8 +567,8 @@ module edrv32_rnd_draw (
         assign lane_hit_w[pixel] = lane_low_hit_w[pixel] &&
             (!lane_cross_w[pixel] || lane_high_hit_w[pixel]);
         assign lane_cache_w[pixel] = {lane_cache_high_w[pixel], lane_cache_low_w[pixel]};
-        assign raw_shift_w[pixel] = (bank_sparse_r[render_bank_r] ? sparse_data_r[pixel] :
-            {source_next_w[render_bank_r][pixel], source_data_w[render_bank_r][pixel]}) >>
+        assign raw_shift_w[pixel] = (bank_sparse_r[palette_bank_w] ? sparse_data_r[pixel] :
+            {source_next_w[palette_bank_w][pixel], source_data_w[palette_bank_w][pixel]}) >>
                 {source_offset_r[2][pixel], 3'd0};
         assign palette_index_w[pixel] =
             (raw_shift_w[pixel][7:0] >> source_shift_r[2][pixel]) & source_mask_r[2][pixel];
@@ -684,7 +689,7 @@ module edrv32_rnd_draw (
                 .wr_addr_i(source_write_addr_w),
                 .wr_data_i(rd_data_i),
                 .wr_strb_i(32'hffff_ffff),
-                .rd_en_i(render_bank_r == bank && pipe_valid_r[1] &&
+                .rd_en_i(source_bank_w == bank && pipe_valid_r[1] &&
                     pipeline_step_w && !cancel_i),
                 .rd_addr_i(source_index_r[pixel]),
                 .rd_data_o(source_data_w[bank][pixel])
@@ -695,7 +700,7 @@ module edrv32_rnd_draw (
                 .wr_addr_i(source_write_addr_w),
                 .wr_data_i(rd_data_i),
                 .wr_strb_i(32'hffff_ffff),
-                .rd_en_i(render_bank_r == bank && pipe_valid_r[1] &&
+                .rd_en_i(source_bank_w == bank && pipe_valid_r[1] &&
                     pipeline_step_w && !cancel_i),
                 .rd_addr_i(source_index_r[pixel] + 9'd1),
                 .rd_data_o(source_next_w[bank][pixel])
@@ -983,12 +988,10 @@ module edrv32_rnd_draw (
                     issue_x_r <= issue_x_r + (issue_pair_w ? 12'd2 : 12'd1);
                     issue_byte_r <= issue_byte_r + (argb_w ?
                         (issue_pair_w ? 14'd8 : 14'd4) : (issue_pair_w ? 14'd4 : 14'd2));
-                    if (issue_last_w)
-                        render_state_r <= S_RENDER_DRAIN;
-                end
-                S_RENDER_DRAIN: if (render_finish_w) begin
-                    render_state_r <= S_RENDER_IDLE;
-                    render_bank_r <= !render_bank_r;
+                    if (issue_last_w) begin
+                        render_state_r <= S_RENDER_IDLE;
+                        render_bank_r <= !render_bank_r;
+                    end
                 end
                 default: render_state_r <= render_state_r;
             endcase
