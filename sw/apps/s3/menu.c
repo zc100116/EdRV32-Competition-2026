@@ -34,7 +34,7 @@ static void select_card(void)
 void s3_menu_show(void)
 {
     static const char *titles[] = {
-        "01   PIXEL TRAIL", "02   LVGL WIDGETS", "03   BENCHMARK", "04   RN-17 COMPARE"
+        "01   AMBER RUN", "02   LVGL WIDGETS", "03   BENCHMARK", "04   RN-17 COMPARE"
     };
     static const char *descriptions[] = {
         "Run, jump and collect.\nA four-screen platform adventure.",
