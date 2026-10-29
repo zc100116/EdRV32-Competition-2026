@@ -81,7 +81,7 @@ module tb;
                     end
         for(int n=0;n<10000;n++) begin
             int o,f,d,x0,y0,x1,y1,sx,sy,sstride,dstride,t,tx,ty,fl;
-            longint unsigned ux,vy,bits_value,want_src,want_dst,want_map,kx,ky,scx,scy;
+            longint unsigned ux,vy,bits_value,want_src,want_dst,want_map,kx,ky,scx,scy,source_base;
             o=int'($urandom_range(3,8));
             if(o==6 || o==7) o=4;
             f=int'($urandom_range(0,9));
@@ -100,6 +100,11 @@ module tb;
             sy=int'($urandom_range(0,65535));
             sstride=int'($urandom_range(1,65535));
             dstride=int'($urandom_range(1,65535));
+            if(f==0) sstride=(sstride&~1)|2;
+            if(f==1) sstride=(sstride&~3)|4;
+            dstride=d==1 ? (dstride&~3)|4 : (dstride&~1)|2;
+            source_base=o==8 ? 64'h82000000 : f==1 ? 64'h82000004 : 64'h82000002;
+            if(o==8) sx=(sx&~1)|2;
             scx=64'($urandom);
             scy=64'($urandom);
             fl=int'($urandom_range(0,3));
@@ -111,11 +116,12 @@ module tb;
             word_value(5,{16'(y0),16'(x0)});
             word_value(6,{16'(y1),16'(x1)});
             word_value(7,32'hff5379bd);
-            word_value(8,32'h82000002);
-            word_value(9,32'(sstride));
+            word_value(8,32'(source_base));
+            word_value(9,o==8 ? 32'h83000020 : 32'(sstride));
             word_value(10,{16'(sy),16'(sx)});
             word_value(11,32'(scx));
             word_value(12,32'(scy));
+            word_value(13,32'h84000000);
             entry_value=16'($urandom);
             kx=o==4 && (fl&1)!=0 ? 64'(x1)-64'(x) : 64'(x)-64'(x0);
             ky=o==4 && (fl&2)!=0 ? 64'(y1)-64'(y) : 64'(y)-64'(y0);
@@ -126,17 +132,17 @@ module tb;
                 t=(fl&1)!=0 ? 16 : 8;
                 ux=64'(command_value[367:352])+kx;
                 vy=64'(command_value[383:368])+ky;
-                want_map=64'(sstride)+(vy/64'(t))*64'(command_value[335:320])+2*(ux/64'(t));
+                want_map=64'h83000020+(vy/64'(t))*64'(command_value[335:320])+2*(ux/64'(t));
                 tx=int'(ux%64'(t));
                 ty=int'(vy%64'(t));
                 if(entry_value[12]) tx=t-1-tx;
                 if(entry_value[13]) ty=t-1-ty;
                 bits_value=(64'(entry_value[11:0])*64'(t)*64'(t)+64'(ty)*64'(t)+64'(tx))*
                     64'(bytes_bits(f));
-                want_src=64'h82000002+bits_value/8;
+                want_src=source_base+bits_value/8;
             end else begin
                 bits_value=ux*64'(bytes_bits(f));
-                want_src=64'h82000002+vy*64'(sstride)+bits_value/8;
+                want_src=source_base+vy*64'(sstride)+bits_value/8;
             end
             want_dst=64'h81000200+64'(y)*64'(dstride)+64'(x)*64'(d==1 ? 4 : 2);
             #1;
