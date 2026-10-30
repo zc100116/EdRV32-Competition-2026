@@ -2,7 +2,7 @@
 # File: rom_survey.py
 # Spec: sw/apps/nes/README.md "ROM"; nofrendo nes_rom.c rom_getheader, mmclist.c.
 # Description: Classify every ROM under a directory the way the board NES port would see it:
-#              iNES header and mapper (nofrendo rules), 1 MiB slot fit, then a host run of
+#              iNES header and mapper (nofrendo rules), 2 MiB + header slot fit, then a host run of
 #              600 frames that must exit cleanly and end on a non-uniform picture.
 # Clock domain: host.
 import argparse
@@ -15,7 +15,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 NOF = ROOT / 'third_party/nofrendo/components/nofrendo'
 HOST = ROOT / 'build/sw/nes-host/nes-host'
-SLOT_BYTES = 1024 * 1024  # sw/apps/nes/rom.S nes_rom_slot
+SLOT_BYTES = 2 * 1024 * 1024 + 16  # sw/apps/nes/rom.S nes_rom_slot
 FRAMES = 600
 
 
@@ -83,7 +83,7 @@ def main():
             if info['mapper'] not in mappers:
                 row['verdict'] = f'mapper {info["mapper"]} unsupported'
             elif len(blob) > SLOT_BYTES:
-                row['verdict'] = 'larger than 1 MiB slot'
+                row['verdict'] = 'larger than 2 MiB + header slot'
             elif len(blob) < info['need']:
                 row['verdict'] = 'file shorter than header sizes'
             else:

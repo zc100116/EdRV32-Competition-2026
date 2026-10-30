@@ -9,7 +9,8 @@
 .global nes_rom_slot_end
 .type nes_rom_slot,@object
 nes_rom_slot:
-.space 1024 * 1024
+/* Largest supplied image: 2097168 bytes = 16-byte iNES header + 2 MiB. */
+.space 2 * 1024 * 1024 + 16
 nes_rom_slot_end:
 .size nes_rom_slot, nes_rom_slot_end - nes_rom_slot
 .section .note.GNU-stack,"",@progbits
