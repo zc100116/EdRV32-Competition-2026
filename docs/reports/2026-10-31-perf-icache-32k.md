@@ -34,7 +34,7 @@ NES 使用 O2、RV32IM、180 帧、NES_DISPLAY=0、NES_SKIP=0；MPKI 采用 Spik
 - Lint：按 `tools.regress.expand_files` 展开 `rtl/filelists/cpu_subsys.f`，执行 `verilator --lint-only -Wall -DSIM_MODE --top-module edrv32_cpu_subsys <展开源列表>`；0 告警；I$ 单模块同选项也为 0 告警，日志 `lint-edrv32_{icache,cpu_subsys}.log`。
 - 单元：`python3 tools/regress.py smoke --path verif/unit/cache_icache -j 1` 和 `--path verif/unit/cache_ram`，各 1 PASS；覆盖全部组双路容量、扩展 RAM 地址、旧数据冲突、读保持、整体失效。
 - CPU：`python3 tools/regress.py smoke --path verif/block/cpu -j 1`，74 PASS（含 19 项 riscv-tests）；arch-test 没有 smoke 条目，额外逐 `verif/block/cpu/arch-*` 目录执行同入口的 `full --path "$test_dir" -j 1`，155 PASS，日志 `arch-full.log`。
-- Cache 模块：`python3 tools/regress.py smoke --path verif/block/cache -j 1`，22 PASS / 1 FAIL；IC-02 的旧 0x1000 冲突间隔不适用于新容量，共享测试文件不在 Task 归属内，申请授权三轮等待未获回复，故未改；日志 `cache-smoke.log`。
+- Cache 模块：`python3 tools/regress.py smoke --path verif/block/cache -j 2`，23 PASS。IC-02 的 I$ 同组冲突地址改为 16 KiB 间隔（`IC_B`/`IC_C`，协调者提交 `fdf00b62`）；改前该项因 0x1000 间隔已不同组而 FAIL。
 - CoreMark：前后各执行 `python3 tools/cpu/b2_run.py r05 --rvc 0 --read-latency 2`；O2、10 iterations，`before/run.log`、`after/run.log`。
 - NES：使用 `sw/apps/nes/run_spike.py` 的 O2/skip=0 分支，仅在 Spike 命令增加 `--ic=128:2:32` 或 `--ic=512:2:32`，分别输出到 `build/sw/nes-ic{128,512}-O2-skip0/`；编排命令 `python3 build/icache-32k/nes_cache.py`，原始 `console.log` 含统计。
 - Yosys：基线源码以 `git show d240547f:<文件>` 放入 `before/src/`，评估版读工作树；`read_verilog -D FPGA_MODE -Irtl/include` 读 I$、PMA、两种 I$ RAM 包装和 `tools/synth/ip_stubs.v`。
@@ -43,6 +43,6 @@ NES 使用 O2、RV32IM、180 帧、NES_DISPLAY=0、NES_SKIP=0；MPKI 采用 Spik
 
 ## 未完成项与上板前提
 
-本任务验收未全部完成：需协调者授权并修正共享 IC-02 的冲突地址间隔为 0x4000 后复测，同时决策高扇出评估风险。
+有效位/LRU 寄存器实现及其扇出（`ic_inv_i` 1030）在评估版中保留，以 PDS 时序为准（协调者决定）。
 用户需按更新后的 `fpga/ip/ip_ram_icache_{tag,data}.md` 在 PDS 重新生成两个评估用 IP，模块名保持不变。
 本报告不决定容量定稿；尚需上板评估 LVGL 收益、DRM 占用和时序，由协调者随后修订规格并决定合入。
