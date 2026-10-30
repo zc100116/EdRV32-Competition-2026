@@ -133,3 +133,45 @@ flock /tmp/edrv32-sim.lock python3 tools/s3/rn17.py --no-build
 从 `s3_rnd_last_timing()` 读取 driver cache_ops（主机桩按 batch source/target 数计数）。
 冒烟/像素对照命令：`flock /tmp/edrv32-sim.lock python3 build/s3/lvgl/split-smoke.py`、
 `python3 build/s3/lvgl/compare-before.py`；改前可在 `e98d739c` 检出上用上述 host/RN-17 命令复现。
+
+## 板上结果（卡 17，T-LVP2）
+
+- 结果分支 `origin/win/20261030-17-b3r-lvgl-speed`（`570c1934`）；程序为卡 17 的 `src/s3.elf`，由 `6bcce541` 构建；bitstream 沿用卡 14 B3R，GUI 115200 加载。原始数据在 `tasks/win/20261030-17-b3r-lvgl-speed/artifacts/lvgl_split.tsv`（17 行 × 52 列）和 `comparison_card16.tsv`。
+- 原生 Summary 全场景平均 15 → **18 fps**。几个场景的变化：
+
+  | 场景 | 卡 16 | 卡 17 |
+  |---|---|---|
+  | Empty screen | 32 fps | 57 fps |
+  | Screen sized text | 3 fps | 5 fps |
+  | Multiple labels | 12 fps | 13 fps |
+
+- 板上 RN-17 PASS：全覆盖区 0 LSB；超过 1 LSB 的像素 1094 ppm，卡 14 为 1116 ppm。未出现 `S3 glyph cache full`。
+
+ALL（943 帧加权，每帧 ms）：
+
+| 字段 | 卡 16 | 卡 17 |
+|---|---:|---:|
+| render | 67.110 | 57.464 |
+| rnd（墙钟） | 17.713 | 13.358 |
+| RND 硬件 perf0 | 9.305 | 9.212 |
+| 驱动（rnd − perf0） | 8.408 | 4.146 |
+| sw | 12.825 | 12.151 |
+| other | 36.571 | 31.954 |
+
+- 驱动细分（ALL，每帧 ms）：clean 2.615，wait 9.302（与 perf0 9.212 基本相同，中断延迟可忽略），finish 1.021。
+- Screen sized text：render 272.8 → 155.6 ms，glyph_cpu 36.4 ms，other 129.3 ms。
+
+CPU 计数器（ALL，每帧；窗口包含等待 RND 和 SWITCH 时的空转）：
+
+| 计数 | 值 | 占周期 |
+|---|---:|---:|
+| 周期 | 7249296 | — |
+| 退休指令 | 2736863（IPC 0.377；B1 板上 CoreMark 为 1.04） | — |
+| 前端空 | 3143346 | 43% |
+| load-use | 695496 | 9.6% |
+| 设备访问等待 | 273177 | 3.8% |
+| I$ 缺失 | 55888（20.4 MPKI；CoreMark 为 1.08） | — |
+| D$ 缺失 | 7517（2.7 MPKI） | — |
+| 分支预测错误 | 124873 | — |
+
+前端空周期 ÷ I$ 缺失 ≈ 56 周期/次，这是 DDR 取指缺失代价的**估算**，假设前端空全部来自 I$ 缺失。按 100 MHz 计，前端空约 31.4 ms/帧，与 other 的 32.0 ms 相当。
