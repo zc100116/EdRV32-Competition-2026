@@ -1,6 +1,6 @@
 // File: tb_npu_mac_array.sv
 // Spec: npu-testplan OP-01/02/04/07/08; datapath design 4.2/4.3/5.2 D1-C.
-// Description: Independently model signed dot products and all five register boundaries.
+// Description: Independently model signed dot products and all ten register boundaries.
 // Check full throughput, D2 input selection, local activation copies, tags and cancel.
 // Clock: clk_npu, 10 ns test clock.
 module tb_npu_mac_array;
@@ -21,11 +21,31 @@ module tb_npu_mac_array;
     wire mac_beat_o;
     wire idle_o;
 
-    bit [4:0] expected_valid = 0;
-    bit [4:0] expected_first = 0;
-    bit [4:0] expected_last = 0;
-    bit [48:0] expected_tag [0:4];
-    bit [1215:0] expected_data [0:4];
+    bit [9:0] expected_valid = 0;
+    bit [9:0] expected_first = 0;
+    bit [9:0] expected_last = 0;
+    bit [48:0] expected_tag [0:9];
+    bit [1215:0] expected_data [0:9];
+    wire [2047:0] skew_weight_w;
+    genvar skew_item;
+    genvar skew_channel;
+    generate
+        for (skew_item = 0; skew_item < 8; skew_item++) begin : g_skew_item
+            for (skew_channel = 0; skew_channel < 32; skew_channel++) begin : g_skew_channel
+                if (skew_item == 0) begin : g_direct
+                    assign skew_weight_w[8*(8*skew_channel+skew_item) +: 8] =
+                        term_weight_i[8*(8*skew_channel+skew_item) +: 8];
+                end else begin : g_skew
+                    reg [8*skew_item-1:0] history;
+                    always @(posedge clk_i)
+                        history <= (history << 8) |
+                            {{(8*skew_item-8){1'b0}}, term_weight_i[8*(8*skew_channel+skew_item) +: 8]};
+                    assign skew_weight_w[8*(8*skew_channel+skew_item) +: 8] =
+                        history[8*(skew_item-1) +: 8];
+                end
+            end
+        end
+    endgenerate
     int checked = 0;
     int cycle = 0;
     int seed = 32'h326ac851;
@@ -42,7 +62,7 @@ module tb_npu_mac_array;
         .term_last_i(term_last_i),
         .term_tag_i(term_tag_i),
         .term_activation_i(term_activation_i),
-        .term_weight_i(term_weight_i),
+        .term_weight_i(skew_weight_w),
 
         .sum_valid_o(sum_valid_o),
         .sum_first_o(sum_first_o),
@@ -62,12 +82,12 @@ module tb_npu_mac_array;
         int dot;
         int offset;
         cycle++;
-        for (int stage = 4; stage > 0; stage--) begin
+        for (int stage = 9; stage > 0; stage--) begin
             expected_tag[stage] = expected_tag[stage-1];
             expected_data[stage] = expected_data[stage-1];
         end
-        expected_first = {expected_first[3:0], term_first_i};
-        expected_last = {expected_last[3:0], term_last_i};
+        expected_first = {expected_first[8:0], term_first_i};
+        expected_last = {expected_last[8:0], term_last_i};
         expected_tag[0] = term_tag_i;
         for (int pixel = 0; pixel < 2; pixel++) begin
             for (int channel = 0; channel < 32; channel++) begin
@@ -83,21 +103,21 @@ module tb_npu_mac_array;
             end
         end
         if (!rst_n_i || cancel_i) expected_valid = 0;
-        else expected_valid = {expected_valid[3:0], term_valid_i};
+        else expected_valid = {expected_valid[8:0], term_valid_i};
         #1;
-        if (sum_valid_o !== expected_valid[4] || mac_beat_o !== expected_valid[0] ||
+        if (sum_valid_o !== expected_valid[9] || mac_beat_o !== expected_valid[0] ||
             idle_o !== !(|expected_valid))
             $fatal(1, "FAIL MAC valid/beat/idle cycle=%0d expected=%b actual=%b/%b/%b t=%0t",
                 cycle, expected_valid, sum_valid_o, mac_beat_o, idle_o, $time);
         if (sum_valid_o) begin
-            if (sum_first_o !== expected_first[4] || sum_last_o !== expected_last[4] ||
-                sum_tag_o !== expected_tag[4])
+            if (sum_first_o !== expected_first[9] || sum_last_o !== expected_last[9] ||
+                sum_tag_o !== expected_tag[9])
                 $fatal(1, "FAIL MAC control cycle=%0d tag exp=%h actual=%h t=%0t",
-                    cycle, expected_tag[4], sum_tag_o, $time);
+                    cycle, expected_tag[9], sum_tag_o, $time);
             for (int item = 0; item < 64; item++) begin
-                if (sum_data_o[19*item +: 19] !== expected_data[4][19*item +: 19])
+                if (sum_data_o[19*item +: 19] !== expected_data[9][19*item +: 19])
                     $fatal(1, "FAIL MAC item=%0d exp=%0d actual=%0d cycle=%0d t=%0t",
-                        item, $signed(expected_data[4][19*item +: 19]),
+                        item, $signed(expected_data[9][19*item +: 19]),
                         $signed(sum_data_o[19*item +: 19]), cycle, $time);
             end
             checked++;
@@ -174,7 +194,7 @@ module tb_npu_mac_array;
                 end
             end
         end
-        bubble(7);
+        bubble(12);
         // Back-to-back block/row tags and randomized signed arithmetic at II=1.
         for (int pair_idx = 0; pair_idx < 180; pair_idx++) begin
             tag = {17'($urandom), 32'($urandom)};
@@ -183,9 +203,9 @@ module tb_npu_mac_array;
                 drive_term(pair_idx % 3, 4, term_idx == 0, term_idx == length-1, tag);
             if (pair_idx % 9 == 0) bubble(2);
         end
-        bubble(7);
+        bubble(12);
         // Cancel at every occupied boundary, then restart without resetting data.
-        for (int depth = 0; depth < 5; depth++) begin
+        for (int depth = 0; depth < 10; depth++) begin
             drive_term(1, 0, 1, 1, 49'(depth));
             bubble(depth);
             @(negedge clk_i);
@@ -194,9 +214,9 @@ module tb_npu_mac_array;
             @(negedge clk_i);
             cancel_i = 0;
             term_valid_i = 0;
-            bubble(6);
+            bubble(11);
             drive_term(0, 2, 1, 1, 49'(depth)+49'd32);
-            bubble(6);
+            bubble(11);
         end
         // Asynchronous reset also flushes occupied control without data reset.
         drive_term(0, 0, 1, 1, 49'h100);
@@ -206,10 +226,10 @@ module tb_npu_mac_array;
         bubble(2);
         rst_n_i = 1;
         drive_term(2, 4, 1, 1, 49'h200);
-        bubble(7);
+        bubble(12);
         @(negedge clk_i);
         if (checked < 1000) $fatal(1, "FAIL insufficient MAC coverage: %0d", checked);
-        $display("PASS MAC: %0d terms, 5 boundaries M1/M2/R1/R2/R3, seed=326ac851", checked);
+        $display("PASS MAC: %0d terms, 10 boundaries M1/M2/C1-C8, seed=326ac851", checked);
         $finish;
     end
 endmodule

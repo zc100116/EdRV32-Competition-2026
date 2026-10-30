@@ -49,12 +49,12 @@ module edrv32_npu_window (
     input wire [255:0] cache_rd_data0_i,
     input wire [255:0] cache_rd_data1_i,
 
-    // Parallel weight reads.
+    // Item-skewed weights: input item k returns at A3+k.
     output wire weight_rd_en_o,
     output reg [10:0] weight_rd_addr_o,
     input wire [2047:0] weight_rd_data_i,
 
-    // Unstalled A5 terms.
+    // A5 control/activation; weight item k follows at A5+k.
     output wire term_valid_o,
     output wire term_first_o,
     output wire term_last_o,
@@ -497,13 +497,17 @@ module edrv32_npu_window (
             a4_last_r <= a3_last_r;
             a4_tag_r <= a3_tag_r;
             a4_activation_r <= {pixel1_activation_w, pixel0_activation_w};
-            a4_weight_r <= weight_rd_data_i;
         end
         if (a4_valid_r) begin
             a5_first_r <= a4_first_r;
             a5_last_r <= a4_last_r;
             a5_tag_r <= a4_tag_r;
         end
+    end
+
+    // Each weight item has its own read skew; A3/A4 valid only describes item zero.
+    always @(posedge clk_i) begin
+        a4_weight_r <= weight_rd_data_i;
     end
 
     // Design 4.3.2: retain four physical activation copies, as in the legacy APM layout.
@@ -525,9 +529,7 @@ module edrv32_npu_window (
             reg [63:0] weight_r;
             assign term_weight_o[64*channel+:64] = weight_r;
             always @(posedge clk_i) begin
-                if (a4_valid_r) begin
-                    weight_r <= a4_weight_r[64*channel+:64];
-                end
+                weight_r <= a4_weight_r[64*channel+:64];
             end
         end
     endgenerate

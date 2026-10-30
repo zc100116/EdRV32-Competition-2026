@@ -15,10 +15,8 @@ module tb_npu_weight_store;
     wire [2047:0] rd_data;
     reg [255:0] memory [0:9215];
     reg pending = 0;
-    reg [13:0] pending_addr;
-    reg [255:0] pending_data;
+    reg [10:0] pending_addr;
     reg [2047:0] array_data;
-    reg array_known = 0;
     integer checks = 0;
     integer cycles = 0;
 
@@ -35,30 +33,58 @@ module tb_npu_weight_store;
         .weight_rd_data_o(rd_data)
     );
 
-    // Reads use the old memory contents; writes commit one edge after input acceptance.
+    // Independent DDR-format storage model; complete rows commit after beat seven.
     initial begin : p_scoreboard
         reg [2047:0] expected;
-        reg known;
+        reg [7:0] known;
+        reg [7:0] array_lane_known;
+        reg [7:0] request_en;
+        reg [10:0] request_addr [0:7];
+        reg [255:0] row_beats [0:7];
+        integer row;
+        integer byte_idx;
+        known = 0;
+        array_lane_known = 0;
+        request_en = 0;
         forever begin
             @(posedge clk);
             cycles = cycles + 1;
             expected = array_data;
-            known = array_known;
-            if (rd_en) begin
-                for (int b = 0; b < 8; b++)
-                    array_data[256*b +: 256] = memory[8*int'(rd_addr)+b];
-                array_known = 1;
+            known = array_lane_known;
+            for (int k = 7; k >= 0; k--) begin
+                if (k == 0 ? rd_en : request_en[k-1]) begin
+                    row = k == 0 ? int'(rd_addr) : int'(request_addr[k-1]);
+                    for (int c = 0; c < 32; c++) begin
+                        byte_idx = 8*(c%4)+k;
+                        array_data[8*(8*c+k) +: 8] =
+                            memory[8*row+c/4][8*byte_idx +: 8];
+                    end
+                    array_lane_known[k] = 1;
+                end
+                if (k == 0) begin
+                    request_en[0] = rd_en;
+                    request_addr[0] = rd_addr;
+                end else begin
+                    request_en[k] = request_en[k-1];
+                    request_addr[k] = request_addr[k-1];
+                end
             end
-            if (pending) memory[pending_addr] = pending_data;
-            pending = rst_n && !cancel && wr_valid;
-            pending_addr = wr_addr;
-            pending_data = wr_data;
+            if (pending) begin
+                for (int b = 0; b < 8; b++) memory[8*int'(pending_addr)+b] = row_beats[b];
+            end
+            if (wr_valid) row_beats[wr_addr[2:0]] = wr_data;
+            pending = rst_n && !cancel && wr_valid && wr_addr[2:0] == 7;
+            pending_addr = wr_addr[13:3];
             #1;
-            if (known) begin
-                checks = checks + 1;
-                if (rd_data !== expected)
-                    $fatal(1, "FAIL cycle=%0d time=%0t expected=%h actual=%h",
-                           cycles, $time, expected, rd_data);
+            for (int k = 0; k < 8; k++) begin
+                if (known[k]) begin
+                    checks = checks + 1;
+                    for (int c = 0; c < 32; c++) begin
+                        if (rd_data[8*(8*c+k) +: 8] !== expected[8*(8*c+k) +: 8])
+                            $fatal(1, "FAIL cycle=%0d bank=%0d channel=%0d exp=%h actual=%h",
+                                cycles,k,c,expected[8*(8*c+k) +: 8],rd_data[8*(8*c+k) +: 8]);
+                    end
+                end
             end
         end
     end
@@ -137,12 +163,14 @@ module tb_npu_weight_store;
             cycle();
         end
         rd_en = 0;
-        repeat (3) cycle();
+        repeat (10) cycle();
         // Pending write commits on cancel; the write presented with cancel is discarded.
         wr_valid = 1;
-        wr_addr = 0;
-        wr_data = ~capacity_beat(0, 0);
-        cycle();
+        for (int b = 0; b < 8; b++) begin
+            wr_addr = 14'(b);
+            wr_data = ~capacity_beat(0, b);
+            cycle();
+        end
         cancel = 1;
         wr_addr = 8;
         wr_data = 0;
@@ -179,9 +207,9 @@ module tb_npu_weight_store;
                 cycle();
             end
             rd_en = 0;
-            repeat (3) cycle();
+            repeat (10) cycle();
         end
-        $display("PASS weight_store checks=%0d cycles=%0d write=1 read=2", checks, cycles);
+        $display("PASS weight_store checks=%0d cycles=%0d row_commit=beat7+1 read=2+k", checks, cycles);
         $finish;
     end
 endmodule

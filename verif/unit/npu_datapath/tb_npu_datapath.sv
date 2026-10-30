@@ -250,10 +250,10 @@ module tb_npu_datapath;
             end
             if (dut.writeback_valid_w) begin
                 if (cycle - last_cycle[dut.writeback_tag_w[42:38]] !=
-                    (dut.writeback_tag_w[26] ? 27 : 29)) begin
+                    (dut.writeback_tag_w[26] ? 32 : 34)) begin
                     $fatal(1, "FAIL WB2 latency at %0d: actual=%0d expected=%0d", cycle,
                         cycle-last_cycle[dut.writeback_tag_w[42:38]],
-                        dut.writeback_tag_w[26] ? 27 : 29);
+                        dut.writeback_tag_w[26] ? 32 : 34);
                 end
             end
             if (result_credit_o == 0) full_cycles = full_cycles + 1;
@@ -289,7 +289,7 @@ module tb_npu_datapath;
                     $fatal(1, "FAIL done tag actual=%0d/%0d expected=%0d/%0d at %0t",
                         cmd_done_row_o, cmd_done_block_o, done_row, done_block, $time);
                 if (cycle-issued_cycle[done_count] !=
-                    ((cfg_half_tail_i && done_block == cout_blocks-1) ? 27 : 29))
+                    ((cfg_half_tail_i && done_block == cout_blocks-1) ? 32 : 34))
                     $fatal(1, "FAIL done latency at %0t", $time);
                 done_count = done_count + 1;
             end
@@ -603,7 +603,7 @@ module tb_npu_datapath;
             $fatal(1, "FAIL final ownership");
         $display("PASS datapath: %0d commands %0d pairs %0d beats %0d MAC beats",
             command_count, pair_count, output_count, mac_count);
-        $display("latency dual=29 half=27; overlap=%0d (row=%0d block=%0d) full_cycles=%0d",
+        $display("latency dual=34 half=32; overlap=%0d (row=%0d block=%0d) full_cycles=%0d",
             overlap_count, row_overlap_count, block_overlap_count, full_cycles);
         $finish;
     end

@@ -6,5 +6,5 @@ parameters:
 software:
 timeout: 600
 pass: PASS
-tier: smoke
+tier: smoke full
 verilator_flags: -Wall

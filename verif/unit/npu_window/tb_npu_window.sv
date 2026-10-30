@@ -61,6 +61,26 @@ module tb_npu_window;
     wire [255:0] cache_data1;
     reg [2047:0] weight_array;
     reg [2047:0] weight_output;
+    wire [2047:0] skew_weight_w;
+    genvar item;
+    generate
+        for (item = 0; item < 8; item++) begin : g_weight_item
+            reg [2047:0] history [0:6];
+            always @(posedge clk_i) begin
+                history[0] <= weight_output;
+                for (integer j = 1; j < 7; j++) history[j] <= history[j-1];
+            end
+            for (genvar channel = 0; channel < 32; channel++) begin : g_channel
+                if (item == 0) begin : g_direct
+                    assign skew_weight_w[8*(8*channel+item) +: 8] =
+                        weight_output[8*(8*channel+item) +: 8];
+                end else begin : g_skew
+                    assign skew_weight_w[8*(8*channel+item) +: 8] =
+                        history[item-1][8*(8*channel+item) +: 8];
+                end
+            end
+        end
+    endgenerate
     bit checking = 0;
     integer cycle = 0;
     integer terms = 0;
@@ -99,7 +119,7 @@ module tb_npu_window;
         reg [10:0] weight_addr;
     } expected_t;
     expected_t waiting_terms[$];
-    expected_t pipeline [0:4];
+    expected_t pipeline [0:11];
     expected_t candidate;
 
     edrv32_npu_window dut (
@@ -140,7 +160,7 @@ module tb_npu_window;
         .cache_rd_data1_i(cache_data1),
         .weight_rd_en_o(weight_rd_en_o),
         .weight_rd_addr_o(weight_rd_addr_o),
-        .weight_rd_data_i(weight_output),
+        .weight_rd_data_i(skew_weight_w),
         .term_valid_o(term_valid_o),
         .term_first_o(term_first_o),
         .term_last_o(term_last_o),
@@ -265,7 +285,7 @@ module tb_npu_window;
         sampled_cancel = cancel_i;
         sampled_slot = pair_result_slot_i;
         sampled_residual = pair_residual_addr_i;
-        for (integer stage = 4; stage > 0; stage--) pipeline[stage] = pipeline[stage-1];
+        for (integer stage = 11; stage > 0; stage--) pipeline[stage] = pipeline[stage-1];
         pipeline[0] = '0;
         if (checking && !sampled_cancel && cmd_valid_i && cmd_ready_o) queue_command();
         expected_issue = 0;
@@ -285,7 +305,7 @@ module tb_npu_window;
         end
         if (sampled_cancel) begin
             waiting_terms.delete();
-            for (integer stage = 0; stage < 5; stage++) pipeline[stage] = '0;
+            for (integer stage = 0; stage < 12; stage++) pipeline[stage] = '0;
             last_issue_cycle = -100;
             last_pair_cycle = -100;
             command_end_cycle = -100;
@@ -344,6 +364,15 @@ module tb_npu_window;
             end
             if (term_valid_o !== pipeline[4].valid)
                 $fatal(1, "FAIL term must be A1+4 cycle=%0d", cycle);
+            for (integer k = 0; k < 8; k++) begin
+                if (pipeline[4+k].valid) begin
+                    for (integer c = 0; c < 32; c++) begin
+                        if (term_weight_o[8*(8*c+k) +: 8] !==
+                            8'(int'(pipeline[4+k].weight_addr)*19+(8*c+k)*13))
+                            $fatal(1, "FAIL A5 weight item=%0d channel=%0d cycle=%0d", k,c,cycle);
+                    end
+                end
+            end
             if (term_valid_o) begin
                 if ({term_first_o, term_last_o, term_tag_o} !==
                     {pipeline[4].first_term, pipeline[4].last_term, pipeline[4].tag})
@@ -352,8 +381,7 @@ module tb_npu_window;
                 if (term_activation_o !== {4{pipeline[4].activation}})
                     $fatal(1, "FAIL A5 activation cycle=%0d expected=%h got=%h", cycle,
                         pipeline[4].activation, term_activation_o[255:0]);
-                if (term_weight_o !== weight_pattern(int'(pipeline[4].weight_addr)))
-                    $fatal(1, "FAIL A5 weight alignment cycle=%0d", cycle);
+
             end
         end
     end

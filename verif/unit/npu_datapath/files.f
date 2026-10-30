@@ -13,7 +13,7 @@ tb_npu_datapath.sv
 ../../../rtl/npu/edrv32_npu_weight_store.v
 ../../../rtl/npu/edrv32_npu_window.v
 ../../../rtl/npu/edrv32_npu_writeback.v
-../../../rtl/tech/edrv32_mul_npu_int8_pair.v
+../../../rtl/tech/edrv32_mac_npu_int8_chain.v
 ../../../rtl/tech/edrv32_mul_npu_quant_high.v
 ../../../rtl/tech/edrv32_mul_npu_quant_low.v
 ../../../rtl/tech/edrv32_ram_npu_line.v

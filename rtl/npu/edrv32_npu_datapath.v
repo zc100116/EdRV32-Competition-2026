@@ -299,12 +299,12 @@ module edrv32_npu_datapath (
         .cache_rd_data0_i(cache_rd_data0_w),
         .cache_rd_data1_i(cache_rd_data1_w),
 
-        // Parallel weight reads.
+        // Item-skewed weights: input item k returns at A3+k.
         .weight_rd_en_o(weight_rd_en_w),
         .weight_rd_addr_o(weight_rd_addr_w),
         .weight_rd_data_i(weight_rd_data_w),
 
-        // Unstalled A5 terms.
+        // A5 control/activation; weight item k follows at A5+k.
         .term_valid_o(term_valid_w),
         .term_first_o(term_first_w),
         .term_last_o(term_last_w),
@@ -324,25 +324,25 @@ module edrv32_npu_datapath (
         .idle_o(window_idle_w)
     );
 
-    // Weights return at A3 and are carried through A4/A5 by window.
+    // Weight item k returns at A3+k and advances through window A4/A5 unconditionally.
     edrv32_npu_weight_store u_weight_store (
         // Clock and local control; only the pending write enable is cleared.
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .cancel_i(cancel_i),
 
-        // Sequential DMA beats: low three address bits select the bank.
+        // Sequential DMA beats: eight beats supply one 32-channel K row.
         .weight_wr_valid_i(weight_wr_valid_i),
         .weight_wr_addr_i(weight_wr_addr_i),
         .weight_wr_data_i(weight_wr_data_i),
 
-        // Parallel K-row read, bank zero in the least significant 256 bits.
+        // Item-skewed K-row read in [channel][item] byte order.
         .weight_rd_en_i(weight_rd_en_w),
         .weight_rd_addr_i(weight_rd_addr_w),
         .weight_rd_data_o(weight_rd_data_w)
     );
 
-    // R3 last prepares phase0 at the R4 sampling edge.
+    // C8 last prepares phase0 at the R4 sampling edge.
     edrv32_npu_quant_param_store u_quant_param_store (
         // Clock and local control; only the pending write enable is cleared.
         .clk_i(clk_i),
@@ -364,7 +364,7 @@ module edrv32_npu_datapath (
         .param_rd_data_o(param_rd_data_w)
     );
 
-    // A5 directly feeds M1; there is no extra top-level register.
+    // A5 item zero directly feeds M1; there is no extra top-level register.
     edrv32_npu_mac_array u_mac_array (
         // Clock and control reset; payload registers are not reset.
         .clk_i(clk_i),
@@ -379,7 +379,7 @@ module edrv32_npu_datapath (
         .term_activation_i(term_activation_w),
         .term_weight_i(term_weight_w),
 
-        // R3 sums: [pixel][physical output channel], each signed 19 bits.
+        // C8 sums: [pixel][physical output channel], each signed 19 bits.
         .sum_valid_o(sum_valid_w),
         .sum_first_o(sum_first_w),
         .sum_last_o(sum_last_w),
@@ -398,7 +398,7 @@ module edrv32_npu_datapath (
         .rst_n_i(rst_n_i),
         .cancel_i(cancel_i),
 
-        // Signed R3 sums, one unstallable term per clock.
+        // Signed C8 sums, one unstallable term per clock.
         .sum_valid_i(sum_valid_w),
         .sum_first_i(sum_first_w),
         .sum_last_i(sum_last_w),

@@ -12,7 +12,7 @@
 ../npu/edrv32_npu_weight_store.v
 ../npu/edrv32_npu_window.v
 ../npu/edrv32_npu_writeback.v
-../tech/edrv32_mul_npu_int8_pair.v
+../tech/edrv32_mac_npu_int8_chain.v
 ../tech/edrv32_mul_npu_quant_high.v
 ../tech/edrv32_mul_npu_quant_low.v
 ../tech/edrv32_ram_npu_line.v
