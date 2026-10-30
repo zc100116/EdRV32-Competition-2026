@@ -21,6 +21,7 @@ extern mapintf_t map69_intf;
 extern mapintf_t map30_intf;
 extern mapintf_t map140_intf;
 extern mapintf_t map87_intf;
+extern mapintf_t map71_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[16];
@@ -54,6 +55,7 @@ void mmc_bankvrom(int size, uint32 address, int bank)
 }
 void ppu_mirror(int a, int b, int c, int d)
 { mirror[0] = a; mirror[1] = b; mirror[2] = c; mirror[3] = d; }
+void ppu_setlatchfunc(ppulatchfunc_t callback) { (void)callback; }
 bool ppu_enabled(void) { return true; }
 void nes6502_setirq(uint8 source, bool asserted)
 { assert(source == NES6502_IRQ_MAPPER); mapper_irq = asserted; }
@@ -242,6 +244,16 @@ static void test87(void)
         assert(pages[0] == vrom + bank * 8192);
     }
 }
+static void test71(void)
+{
+    write_reg(&map71_intf, 0xc000, 5);
+    assert(prg[0] == 10);
+    ppu_mirror(0, 1, 0, 1);
+    write_reg(&map71_intf, 0x8000, 0);
+    assert(mirror[1] == 1); /* Fixed H/V games also write $8000. */
+    write_reg(&map71_intf, 0x9000, 0x10);
+    assert(mirror[0] == 1 && mirror[3] == 1);
+}
 int main(void)
 {
     test74();
@@ -254,6 +266,7 @@ int main(void)
     test30();
     test140();
     test87();
+    test71();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }
