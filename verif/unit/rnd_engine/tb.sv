@@ -583,7 +583,7 @@ module tb;
         if(value!==32'h00040001) $fatal(1,"ID %h",value);
         if($test$plusargs("PERF")) performance();
         apb_write(12'h00c,3);
-        if($test$plusargs("PERF_ROUND")) begin
+        if($test$plusargs("ROUND_PERF")) begin
             round_performance();
             $display("PASS RND round FILL performance and pixel comparison");
             $finish;
