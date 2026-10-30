@@ -18,9 +18,12 @@ extern mapintf_t map191_intf;
 extern mapintf_t map199_intf;
 extern mapintf_t map245_intf;
 extern mapintf_t map69_intf;
+extern mapintf_t map30_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
-static uint8 *pages[8];
+static uint8 *pages[16];
+static uint8 bus = 0xff;
+uint8 nes6502_getbyte(uint32 address) { (void)address; return bus; }
 static int prg[4];
 static int mirror[4];
 static uint32 cycles;
@@ -31,8 +34,9 @@ uint32 nes6502_getcycles(bool reset) { (void)reset; return cycles; }
 rominfo_t *mmc_getinfo(void) { return &cart; }
 void mmc_bankrom(int size, uint32 address, int bank)
 {
-    assert(size == 8);
-    prg[(address - 0x8000) / 0x2000] = bank;
+    assert(size == 8 || size == 16);
+    for (int i = 0; i < size / 8; ++i)
+        prg[(address - 0x8000) / 0x2000 + i] = bank < 0 ? bank : bank * (size / 8) + i;
 }
 void ppu_setpage(int size, int page, uint8 *location)
 {
@@ -200,6 +204,26 @@ static void test69(void)
     map69_intf.hblank(1);
     assert(!mapper_irq); /* count continues with output disabled */
 }
+static void test30(void)
+{
+    cart.flags = ROM_FLAG_BATTERY | ROM_FLAG_FOURSCREEN;
+    cart.mirror = MIRROR_HORIZ;
+    map30_intf.init();
+    write_reg(&map30_intf, 0xc000, 0xa3);
+    assert(prg[0] == 6 && mirror[0] == 1 && mirror[3] == 1);
+    pages[0][0] = 0x30;
+    write_reg(&map30_intf, 0xc000, 0);
+    assert(pages[0][0] == 0);
+    write_reg(&map30_intf, 0xc000, 0xa3);
+    assert(pages[0][0] == 0x30);
+    write_reg(&map30_intf, 0x8000, 5);
+    assert(prg[0] == 6); /* Flash command space does not bank-switch. */
+    cart.flags = 0;
+    bus = 0x21;
+    write_reg(&map30_intf, 0x8000, 0xff);
+    assert(prg[0] == 2);
+    bus = 0xff;
+}
 int main(void)
 {
     test74();
@@ -209,6 +233,7 @@ int main(void)
     test199();
     test245();
     test69();
+    test30();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }
