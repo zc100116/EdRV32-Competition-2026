@@ -1,0 +1,4 @@
+RN-17 full_max_lsb=0 edge_max_lsb=17 over1=1009 pixels=921600 over1_ppm=1094 bins_0_1_2_3to4_5plus=905425,15166,917,56,36 rnd_tasks=25 sw_tasks=0 PASS
+RN-17 type=1 claimed=6 unclaimed=0
+RN-17 type=2 claimed=4 unclaimed=0
+RN-17 type=5 claimed=15 unclaimed=0
