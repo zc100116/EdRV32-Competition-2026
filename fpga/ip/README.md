@@ -18,7 +18,7 @@
 | `ip_ram_npu_residual` | DRM 简单双口 RAM，输出寄存 | 512 × 256（用 32 项） | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_ram_npu_residual.md](ip_ram_npu_residual.md) | 已生成（20261027-02） |
 | `ip_ram_npu_result` | DRM 简单双口 RAM，输出寄存 | 512 × 512（用 32 项） | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_ram_npu_result.md](ip_ram_npu_result.md) | 已生成（20261027-02） |
 | `ip_ram_npu_scratch` | DRM 简单双口 RAM | 512 × 256 | `edrv32_ram_npu_scratch` | NPU 非卷积暂存 ×2 | [ip_ram_npu_scratch.md](ip_ram_npu_scratch.md) | 已生成（20261027-02） |
-| （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 级联乘加，不经 IP Compiler | 2 × INT8 乘法 + 独立 24 位后加，单元 3 沿、八级链 10 沿 | `edrv32_mac_npu_int8_chain` | NPU MAC 阵列 ×256 | [ip_mac_npu_int8_chain.md](ip_mac_npu_int8_chain.md) | 无需生成；EQ-01 厂商模型对比 PASS |
+| （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 级联乘加，不经 IP Compiler | 2 × INT8 乘法 + 独立 24 位后加，单元 3 沿、八级链 10 沿 | `edrv32_mac_npu_int8_head` / `edrv32_mac_npu_int8_chain` | NPU MAC 阵列 head ×32 / chain ×224 | [ip_mac_npu_int8_chain.md](ip_mac_npu_int8_chain.md) | 无需生成；EQ-01 厂商模型对比 PASS |
 | `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 已生成（20261027-02） |
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
 | `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读缓冲 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | B2 待生成 |

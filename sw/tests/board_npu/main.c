@@ -19,6 +19,7 @@
 #define LED_FAIL (1u << 5)
 
 static uint32_t passed;
+static uint32_t failed;
 static void performance(void);
 
 static uint32_t npu_read(uint32_t offset)
@@ -95,7 +96,7 @@ static _Noreturn void fail(const char *name, uint32_t descriptor, uint32_t addre
     performance();
     field(" passed=", passed);
     uart_puts("\r\n");
-    finish(1u);
+    finish(failed + 1u);
 }
 
 static void pass(const char *name)
@@ -215,7 +216,50 @@ static void run(const struct board_case *test, const char *name)
     }
 }
 
-static void compare(const struct board_case *test, const char *name)
+static void channel_errors(const struct board_case *test)
+{
+    const uint32_t bases[] = {
+        test->config.model, test->config.work, test->config.input, test->config.output
+    };
+    for (uint32_t i = 0u; i < test->check_count; ++i) {
+        const struct board_check *check = &test->checks[i];
+        const uint32_t *descriptor = (const uint32_t *)cached(
+            test->config.descriptors + 64u * check->descriptor);
+        uint32_t stride = descriptor[4];
+        uint32_t output = bases[(descriptor[0] >> 14) & 3u] + descriptor[3];
+        const uint8_t *actual = cached(check->address);
+        const uint8_t *expected = _binary_cases_bin_start + check->offset;
+        uint32_t counts[256];
+        uint32_t differences = 0u;
+        for (uint32_t channel = 0u; channel < ARRAY_SIZE(counts); ++channel) {
+            counts[channel] = 0u;
+        }
+        for (uint32_t byte = 0u; byte < check->size; ++byte) {
+            if (actual[byte] != expected[byte]) {
+                uint32_t offset = check->address - output + byte;
+                /* npu-spec 4.1: C16 planes, then pixels, then channel bytes. */
+                uint32_t channel = offset / stride * 16u + offset % stride % 16u;
+                ++counts[channel];
+                ++differences;
+            }
+        }
+        if (differences != 0u) {
+            item(test->name, " channels");
+            field(" desc=", check->descriptor);
+            for (uint32_t channel = 0u; channel < ARRAY_SIZE(counts); ++channel) {
+                if (counts[channel] != 0u) {
+                    uart_putc(' ');
+                    decimal(channel);
+                    uart_putc(':');
+                    decimal(counts[channel]);
+                }
+            }
+            uart_puts("\r\n");
+        }
+    }
+}
+
+static void compare(const struct board_case *test, const char *name, uint32_t small)
 {
     uint32_t differences = 0u;
     uint32_t first_address = 0u;
@@ -238,7 +282,22 @@ static void compare(const struct board_case *test, const char *name)
             }
         }
     }
-    if (differences != 0u) {
+    if (small != 0u) {
+        item(name, differences == 0u ? " PASS" : " FAIL");
+        field(" mismatches=", differences);
+        field(" desc=", first_descriptor);
+        hex_field(" addr=", first_address);
+        hex_field(" expected=", first_expected);
+        hex_field(" actual=", first_actual);
+        performance();
+        uart_puts("\r\n");
+        if (differences != 0u) {
+            ++failed;
+            channel_errors(test);
+        } else {
+            ++passed;
+        }
+    } else if (differences != 0u) {
         fail(name, first_descriptor, first_address, first_expected, first_actual, differences);
     }
 }
@@ -284,17 +343,13 @@ int main(void)
         const struct board_case *test = &board_cases[i];
         prepare(test);
         run(test, test->name);
-        compare(test, test->name);
-        ++passed;
-        item(test->name, " PASS");
-        performance();
-        uart_puts("\r\n");
+        compare(test, test->name, 1u);
     }
 
     const struct board_case *network = &board_cases[ARRAY_SIZE(board_cases) - 1u];
     prepare(network);
     run(network, network->name);
-    compare(network, network->name);
+    compare(network, network->name, 0u);
     uint32_t reference_crc = crc32(network);
     uint32_t cycles = npu_read(EDRV32_NPU_PERF_OFFSET(0));
     ++passed;
@@ -314,7 +369,7 @@ int main(void)
         uint32_t actual_crc = crc32(network);
         if (actual_crc != reference_crc) {
             /* C passed against the same bytes; report the first differing output byte. */
-            compare(network, name);
+            compare(network, name, 0u);
         }
         ++passed;
         item(name, " PASS");
@@ -322,5 +377,5 @@ int main(void)
         performance();
         uart_puts("\r\n");
     }
-    finish(0u);
+    finish(failed);
 }

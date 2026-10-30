@@ -13,11 +13,13 @@ An unset variable terminates with an explicit error. The model stays outside
 Git; the runner compiles it from that directory. The test supplies the vendor
 model's `GRS_INST.GRSNET` hierarchical reference.
 
-The runner compiles the committed wrapper twice, retaining its SIM_MODE branch
-and renaming a second copy to select its FPGA branch. The test compares each
+The runner compiles both committed wrappers twice, retaining each SIM_MODE branch
+and renaming a second copy to select its FPGA branch. The generated FPGA head
+copy exposes only the unused vendor CPI as a test probe; random nonzero CPI must
+be ignored by MODEZ=0 while its P/CPO match the head SIM model each cycle. The test compares each
 SIM CPO against the matching FPGA CPO, and both wrappers' P outputs against
 vendor P after every rising edge's settling interval. A single cell receives
-arbitrary CPI values, including positive and negative 24-bit wraparound. Eight cells receive operands skewed
+arbitrary CPI values, including positive and negative 24-bit wraparound. A head followed by seven chain cells receives operands skewed
 by their stage index and accumulate through independent reference/DUT chains.
 The last cell's P is also checked against a scalar signed sum delayed ten
 edges. Both lanes cover random inputs and repeated −128/127 extremes over

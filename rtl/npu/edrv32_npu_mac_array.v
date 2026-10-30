@@ -83,10 +83,9 @@ module edrv32_npu_mac_array (
             reg [9:0] valid_r;
             reg [9:0] first_r;
             reg [9:0] last_r;
-            wire [47:0] cascade_w [0:7];
+            wire [47:0] cascade_w [1:7];
             wire [47:0] sum_w;
             wire [9:0] unused_sum_w;
-            assign cascade_w[0] = 48'd0;
             assign unused_sum_w = {sum_w[47:43], sum_w[23:19]};
             wire [1:0] unused_control_w;
 
@@ -116,7 +115,21 @@ module edrv32_npu_mac_array (
                 wire [7:0] lane_weight_w;
                 assign lane_activation_w = activation_w[channel/8][16*lane +: 16];
                 assign lane_weight_w = term_weight_i[8*(8*channel+lane) +: 8];
-                if (lane < 7) begin : g_cascade
+                if (lane == 0) begin : g_head
+                    wire [47:0] unused_p_w;
+                    edrv32_mac_npu_int8_head u_mac (
+                        // MODEZ selects zero; the head has no cascade input.
+                        .clk_i(clk_i),
+
+                        .a0_i(lane_activation_w[7:0]),
+                        .b0_i(lane_weight_w),
+                        .a1_i(lane_activation_w[15:8]),
+                        .b1_i(lane_weight_w),
+
+                        .cpo_o(cascade_w[1]),
+                        .p_o(unused_p_w)
+                    );
+                end else if (lane < 7) begin : g_cascade
                     wire [47:0] unused_p_w;
                     edrv32_mac_npu_int8_chain u_mac (
                         // M1/M2/Ck are inside the APM; each next CPO adds one edge.

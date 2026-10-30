@@ -303,3 +303,12 @@ for phase in sys.argv[1:]:
                 (d/(label+'.json')).write_text(json.dumps(result,indent=2)+'\n')
 ```
 
+
+## T-NPU3：MODEZ=0 链首与 B 失败诊断
+本条所在提交（父提交 `e2cb1ca6`）：32 个 lane 0 改为无 CPI 输入的 head（MODEZ=0）；其余 224 级保持 chain，十沿延迟不变；B 输出失配累计并继续、打印首错及按描述符平面跨距统计的 `通道:错误字节数`，C 通过再跑 D；IRQ.ERROR 仍立即报错停止。
+环境：EQ-01、MAC、OP-01 的主机初始不可用，使用本机；board_npu 使用用户提供的仿真主机（环境不记录）；仿真均由 `flock /tmp/edrv32-sim.lock` 串行包裹，`-j 1`。
+EQ-01：`EDRV32_PANGO_SIM_DIR="$HOME/.local/share/edrv32/pango" python3 tools/regress.py smoke --path verif/unit/npu_mac_chain -j 1` PASS，head 厂商 CPI 随机非零、SIM/厂商 P/CPO 逐拍一致，1003 点积。
+风格：`python3 tools/check/verilog_style.py rtl/npu rtl/tech` 49 文件、0 warnings；上文两套 filelist lint 命令均 0 warnings，日志 `build/npu3/lint.log`。
+ELF：`make -C sw PROGRAM=board_npu -j 1` 成功、0 warnings；`build/sw/board_npu/board_npu.elf` 为 5186612 B，日志 `build/npu3/elf-rebuild.log`，布局 `build/npu3/elf-layout.log`。
+主机自检：构建自动执行 `tools/npu/board_cases.py`，B 15/15 和 C 全部 PASS（C 比较 725760 B），日志 `build/npu3/elf.log`；未上板，MODEZ 改动能否消除卡 13 失配仍待上板确认。
+其余 smoke：`python3 tools/regress.py smoke --path <目录> -j 1`，目录依次为 `verif/unit/npu_mac_array`（1305 terms）、`verif/block/npu/op_01`（9 变体）、`verif/soc/board_npu`，全部 PASS；board top/testbench lint 均 0 warnings；本机日志 `build/npu3/rtl-regress.log`，主机结果仅保留自行汇总的 `build/npu3/remote-result.log`，临时构建与目录已清理。
