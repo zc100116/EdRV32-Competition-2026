@@ -22,7 +22,8 @@ void mmc_bankvrom(int size, uint32 address, int bank)
 { assert(size == 1); chr[address / 0x400] = bank; }
 void ppu_mirror(int a, int b, int c, int d) { (void)a; (void)b; (void)c; (void)d; }
 bool ppu_enabled(void) { return rendering; }
-void nes_irq(void) { ++interrupts; }
+void nes6502_setirq(uint8 source, bool asserted)
+{ (void)source; if (asserted) ++interrupts; }
 static void write_reg(uint32 address, uint8 value)
 { map4_intf.mem_write[0].write_func(address, value); }
 static void clock_line(void) { map4_intf.hblank(0); }

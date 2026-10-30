@@ -42,7 +42,7 @@ void mmc_bankvrom(int size, uint32 address, int bank)
 void ppu_mirror(int a, int b, int c, int d)
 { mirror[0] = a; mirror[1] = b; mirror[2] = c; mirror[3] = d; }
 bool ppu_enabled(void) { return true; }
-void nes_irq(void) {}
+void nes6502_setirq(uint8 source, bool asserted) { (void)source; (void)asserted; }
 static void write_reg(mapintf_t *mapper, uint32 address, uint8 value)
 {
     for (map_memwrite *entry = mapper->mem_write; entry->write_func; ++entry) {
