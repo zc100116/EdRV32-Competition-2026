@@ -4,7 +4,7 @@
 
 在已经布好的 B3V 工程上导出布局位置和器件坐标对应关系，并从 PDS 安装目录找出 APM、DRM 的用户手册，供 Linux 端做 CPU/NPU/RND/PIX/mem 的全局区域规划。**本卡不综合、不布局布线、不生成 bitstream。**
 
-背景：卡 10 的 B3VN/B3R/B3F 布线 80–100 分钟仍未收敛（APM 61–77%、DRM 64–79%，RND 有大负裕量）。用户决定先停掉这三个工程，先优化 NPU/RND/PIX 的结构和资源，再给大模块统一做区域约束，最后只跑一次。区域约束需要 APM/DRM 列和 IO bank 在 floorplan 坐标中的精确位置，现有资料只到时钟区域级别（`docs/guides/pds-floorplan.md` 1.2、1.3 节，6.1 节 R-W01）。
+背景：卡 10 的 B3VN/B3R/B3F 布线 80–100 分钟仍未收敛（APM 61–77%、DRM 64–79%，RND 有大负裕量）。用户决定先停掉这三个工程，先优化 NPU/RND/PIX 的结构和资源，再给大模块统一做区域约束，最后只跑一次。区域约束需要 APM/DRM 列和 IO 在 floorplan 坐标中的精确位置（IO 和已用 APM/DRM 的站点由布局导出给出，本卡只补站点 ↔ floorplan 坐标的换算样点），现有资料只到时钟区域级别（`docs/guides/pds-floorplan.md` 1.2、1.3 节，6.1 节 R-W01）。
 
 ## 2. 输入
 
@@ -28,10 +28,10 @@
 | 1 | Windows Codex（C） | 从三个已停工程的 `place_route/run.log` 中各取最后一次迭代的路由进度行（与卡 10 `route_progress.tsv` 同格式），写入 `artifacts/stopped_route_progress.tsv`，并记下停止时间。日志不存在就写"未取得"。 |
 | 2 | 用户（GUI） | 打开 B3V 工程，确认 Place & Route 显示已完成；打开 PDS Console。告诉 Codex 工程路径。 |
 | 3 | 用户（GUI，Console 中粘贴） | 在 B3V 工程目录下依次执行：<br>`generate_constraint -file {b3v-placement.pcf}`<br>`generate_constraint -file {b3v-apm.pcf} -device {APM}`<br>`generate_constraint -file {b3v-drm.pcf} -device {DRM}`<br>`generate_constraint -file {b3v-placement.fdc} -logic`<br>告诉 Codex 生成文件所在目录。 |
-| 4 | 用户（GUI，PCE） | 打开 PCE（Physical Constraint Editor），floorplan view，打开 Properties 窗口（工具栏 Properties 按钮，保持 Automatically update）。逐个点选下面的器件，每个都截图 Properties 页（含 name、site(x,y)、(x,y)）：<br>a. **每一条 APM 列**：列内最下面一个和最上面一个 APM（从左到右逐列，直到最右侧）；<br>b. **每一条 DRM 列**：同上；<br>c. 3 个相距较远的 CLMA，3 个 CLMS；<br>d. 每个 IO bank（L3、L4、L5、L6、R4、R5，以及视图中能看到的其他 bank）各点一个 IO pad。<br>截图文件名用 `pce-<类型>-<序号>.png`，类型为 apm/drm/clma/clms/io，列从左到右编号。另外整体截两张 floorplan view：一张只高亮 APM 和 DRM，一张显示 I/O Banks 和 Clock Region 边界。 |
-| 5 | 用户（GUI，PCE Console） | 用 Tcl 建 10 个与时钟区域相同的 region，读每个 region 的 Properties → Statistics（各类资源数量）并截图：<br>`region -in`<br>`region -create cr_x0y0 -value (0,91,0,49)`<br>`region -create cr_x0y1 -value (0,121,50,99)`<br>`region -create cr_x0y2 -value (0,121,100,149)`<br>`region -create cr_x0y3 -value (0,121,150,199)`<br>`region -create cr_x0y4 -value (0,91,200,249)`<br>`region -create cr_x1y0 -value (157,238,0,49)`<br>`region -create cr_x1y1 -value (124,238,50,99)`<br>`region -create cr_x1y2 -value (124,238,100,149)`<br>`region -create cr_x1y3 -value (124,238,150,199)`<br>`region -create cr_x1y4 -value (157,238,200,249)`<br>截图名 `pce-region-<名>.png`。**截图后关闭 PCE，不保存约束**（这些 region 只用来读数，不进入工程）。 |
+| 4 | 用户（GUI，PCE） | 打开 PCE（Physical Constraint Editor），floorplan view，打开 Properties 窗口（工具栏 Properties 按钮，保持 Automatically update）。只点 **6 个器件**，每个截一张 Properties 页（要能看到 name、site(x,y)、(x,y) 三项）：<br>a. 芯片**左下角附近**的一个 APM 和**右上角附近**的一个 APM；<br>b. 左下、右上附近的 DRM 各一个；<br>c. 左下、右上附近的 CLMA 各一个。<br>不必是空闲器件，已占用的也可以。截图名 `pce-<apm/drm/clma>-<ll/ur>.png`。<br>用途：B3V 布局导出中已有全部已用 APM/DRM 的站点名，Linux 端用这 6 个样点拟合"站点坐标 ↔ floorplan 坐标"的换算，不需要逐列点选。 |
+| 5 | 用户（GUI，PCE Console） | 建 1 个与时钟区域 X1,Y2 相同的 region，截它的 Properties → Statistics（各类资源数量）：<br>`region -in`<br>`region -create cr_x1y2 -value (124,238,100,149)`<br>截图名 `pce-region-cr_x1y2.png`。用途：确认 region 坐标与 `docs/guides/pds-floorplan.md` 1.2 节的时钟区域表是同一套坐标（该区应为 APM 100、DRM 50）。**截图后关闭 PCE，不保存约束。** |
 | 6 | Windows Codex（C） | 在 PDS 安装目录（含其下的 `doc`、`help`、`ipcore`、IP Compiler 文档目录）中查找 Logos2/PG2L 的 APM、DRM 用户手册（文件名或标题含 APM、DRM、算术、存储、Arithmetic、Memory、UG 等），以及 APM/DRM 相关 IP（如乘法器、乘加、SDPRAM）的 IP 说明文档。列出找到的全部文件（完整路径、大小、标题、版本），把 APM 和 DRM 的用户手册各一份及 APM 乘法/乘加 IP 的说明复制到 `artifacts/manuals/`。找不到就写"未找到"并列出查过的目录，**不要从网上下载**。 |
-| 7 | Windows Codex（C） | 把步骤 3 的 4 个文件、步骤 4/5 的截图复制到 `artifacts/`。按截图整理 `artifacts/pce_devices.tsv`：`类型	列号	位置(下/上)	name	site_x	site_y	fp_x	fp_y	截图文件`；整理 `artifacts/pce_regions.tsv`：`region	CLMA	CLMS	APM	DRM	其他资源（原样）	截图文件`。数字一律从截图原文抄，看不清的写"未取得"。 |
+| 7 | Windows Codex（C） | 把步骤 3 的 4 个文件、步骤 4/5 的截图复制到 `artifacts/`。按截图整理 `artifacts/pce_devices.tsv`：`类型	位置(ll/ur)	name	site_x	site_y	fp_x	fp_y	截图文件`；把 region 统计原样抄进 `result.md`。数字一律从截图原文抄，看不清的写"未取得"。 |
 | 8 | Windows Codex（C） | 填写 `result.md`，提交 `result.md` 和 `artifacts/`，提交信息 `win: 20261030-11-b3-device-map results`，推送 `win/20261030-11-b3-device-map`。 |
 
 ## 6. 产物
@@ -40,15 +40,15 @@
 |---|---|---|
 | `stopped_route_progress.tsv` | 三个停掉的工程最后一次迭代的进度和停止时间 | `artifacts/` |
 | `b3v-placement.pcf`、`b3v-apm.pcf`、`b3v-drm.pcf`、`b3v-placement.fdc` | B3V 布局导出原文（可能数 MB，属必要产物） | `artifacts/` |
-| `pce-*.png` | 器件 Properties 截图、两张整体 floorplan 截图、10 张 region 统计截图 | `artifacts/pce/` |
-| `pce_devices.tsv`、`pce_regions.tsv` | 截图数字的整理表 | `artifacts/` |
+| `pce-*.png` | 6 张器件 Properties 截图、1 张 region 统计截图 | `artifacts/pce/` |
+| `pce_devices.tsv` | 6 个样点的整理表 | `artifacts/` |
 | `manuals/` | APM、DRM 用户手册及 APM IP 说明（PDF 原文） | `artifacts/manuals/` |
 
 ## 7. 通过判据
 
 - 4 个导出文件都存在，`b3v-apm.pcf` 中的 APM 实例数为 161，`b3v-drm.pcf` 的 DRM 数与 B3V 资源报告（109）的口径一致或在 `result.md` 中说明差异。
-- `pce_devices.tsv` 覆盖视图中全部 APM 列和 DRM 列（每列上下各一项）。
-- 10 个 region 的 APM/DRM 统计都已取得，并与 `docs/guides/pds-floorplan.md` 1.2 节的时钟区域表逐项对比（一致或说明差异）。
+- `pce_devices.tsv` 有 6 个样点，每个都有 site(x,y) 和 (x,y)。
+- cr_x1y2 的统计已取得，并与指南 1.2 节的 X1,Y2 行对比（一致或说明差异）。
 - APM/DRM 手册：找到则已复制，找不到则列出查过的目录。
 
 ## 8. result.md 模板
@@ -67,17 +67,13 @@
 | 文件 | 行数 | 大小 | APM/DRM 实例数 |
 |---|---|---|---|
 
-## APM/DRM 列（按 floorplan x 从左到右）
-| 类型 | 列号 | fp_x | fp_y 下 | fp_y 上 | site_x | site_y 下 | site_y 上 |
-|---|---|---|---|---|---|---|---|
+## 坐标样点
+| 类型 | 位置 | name | site(x,y) | fp(x,y) |
+|---|---|---|---|---|
 
-## 时钟区域统计（PCE region）与指南 1.2 节对比
-| region | CLMA | CLMS | APM | DRM | 与指南一致？ |
-|---|---|---|---|---|---|
-
-## IO bank 位置
-| bank | pad | site(x,y) | fp(x,y) |
-|---|---|---|---|
+## region cr_x1y2 统计与指南 1.2 节对比
+| CLMA | CLMS | APM | DRM | 与指南一致？ |
+|---|---|---|---|---|
 
 ## APM/DRM 手册
 | 文件 | 完整路径 | 版本/日期 | 是否复制 |
