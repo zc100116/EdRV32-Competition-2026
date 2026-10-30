@@ -14,12 +14,12 @@
 . ~/.local/opt/edrv32/env.sh
 git submodule update --init third_party/ultralytics
 export PYTHONPATH="$PWD/third_party/ultralytics"
-flock /tmp/edrv32-sim.lock ~/.local/opt/edrv32-py/bin/python tools/npu/board_cases.py
+~/.local/opt/edrv32-py/bin/python tools/npu/board_cases.py
 make -C sw PROGRAM=board_npu -j 1
 riscv-none-elf-readelf -SW -lW build/sw/board_npu/board_npu.elf
 ```
 
-也可直接运行上述 make：`program.mk` 自动在锁内调用生成器。
+也可直接运行上述 make：`program.mk` 自动调用生成器。
 生成器使用当前 Python 解释器调用原 `gen_case.py`、`compile_yolo.py`，
 整网输入固定为
 `~/.local/share/edrv32/npu/coco128/images/train2017/000000000009.jpg`。
@@ -131,9 +131,9 @@ NPU board: FAIL 1/39
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
-flock /tmp/edrv32-sim.lock ~/.local/opt/edrv32-py/bin/python \
+~/.local/opt/edrv32-py/bin/python \
     -m unittest discover -s tools/npu/tests -p 'test_board_cases.py' -v
-flock /tmp/edrv32-sim.lock ~/.local/opt/edrv32-py/bin/python \
+~/.local/opt/edrv32-py/bin/python \
     tools/npu/board_cases.py --out build/sw/board_npu/repeat-data
 diff -r build/sw/board_npu/data build/sw/board_npu/repeat-data
 ```

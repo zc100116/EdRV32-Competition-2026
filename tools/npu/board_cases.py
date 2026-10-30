@@ -4,7 +4,7 @@
 # Description: Generate board cases, pack read-only ELF data and re-execute it
 #              with the independent reference model to check the packed bytes.
 # Clock domain: none (host tool).
-"""Build board_npu data. Run under flock /tmp/edrv32-sim.lock."""
+"""Build board_npu data."""
 
 import argparse
 import json

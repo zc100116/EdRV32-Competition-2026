@@ -13,7 +13,7 @@ BOARD_GENERATORS := $(wildcard $(ROOT)/tools/npu/*.py $(ROOT)/tools/npu/ref/*.py
     $(ROOT)/verif/block/npu/cases.py $(ROOT)/verif/block/npu/prepare.py
 
 $(OUT)/data/board_data.h $(OUT)/data/cases.o &: $(BOARD_GENERATORS)
-	cd $(ROOT) && flock /tmp/edrv32-sim.lock $(BOARD_PYTHON) tools/npu/board_cases.py
+	cd $(ROOT) && $(BOARD_PYTHON) tools/npu/board_cases.py
 
 $(OUT)/obj/sw/tests/board_npu/main.o: $(OUT)/data/board_data.h
 $(OUT)/$(PROGRAM).elf: $(OUT)/data/cases.o
