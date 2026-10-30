@@ -3,7 +3,6 @@
 ../common/edrv32_dma2d_wr.v
 ../tech/edrv32_ram_rnd_line.v
 ../tech/edrv32_ram_rnd_palette.v
-../media/rnd/edrv32_rnd_address.v
 ../media/rnd/edrv32_rnd_alpha_pipe.v
 ../media/rnd/edrv32_rnd_blit.v
 ../media/rnd/edrv32_rnd_blur.v
@@ -16,5 +15,4 @@
 ../media/rnd/edrv32_rnd_fill.v
 ../media/rnd/edrv32_rnd_regs.v
 ../media/rnd/edrv32_rnd_round_row.v
-../media/rnd/edrv32_rnd_source.v
 ../media/rnd/edrv32_rnd.v

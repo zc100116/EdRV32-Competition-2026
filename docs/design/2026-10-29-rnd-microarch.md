@@ -52,8 +52,8 @@ TILEMAP 在加载时按地图顺序收集瓦片行，每瓦片分配三个 beat 
 | `edrv32_rnd` | 命令抓取、合法性检查、执行器选择、读写客户端互斥仲裁、错误和 ABORT 排空 |
 | `edrv32_rnd_regs` | APB、DONE_COUNT/CUR_DESC、IRQ、PERF；ENABLE 不门控 DOORBELL |
 | `edrv32_rnd_decode` | OP/格式/MODE 错误 3；有符号 RECT、含端点 CLIP、空区域和快速填充条件 |
-| `edrv32_rnd_address` | GLYPH/COPY 采样、BLIT Q16.16 缩放/翻转、TILEMAP 地图/瓦片和亚字节地址 |
-| `edrv32_rnd_source` | RGB565 展开、A1/A2/A4/A8、I1/I2/I4/I8、颜色键、recolor 和整体 OPA |
+| ~~`edrv32_rnd_address`~~ | GLYPH/COPY 采样、BLIT Q16.16 缩放/翻转、TILEMAP 地图/瓦片和亚字节地址。2026-10-30 时序优化（T-RND1/T-RND2）中拆成分级寄存的逻辑并入 `edrv32_rnd_draw`、`edrv32_rnd_copy`，模块已删除 |
+| ~~`edrv32_rnd_source`~~ | RGB565 展开、A1/A2/A4/A8、I1/I2/I4/I8、颜色键、recolor 和整体 OPA。2026-10-30 并入 `edrv32_rnd_draw`，模块已删除 |
 | `edrv32_rnd_draw` | 通用 FILL/BORDER/GLYPH/BLIT/TILEMAP、阴影着色；双 bank chunk 调度、双 lane 采样和标签写回 |
 | `edrv32_rnd_alpha_pipe` | 全部 over 和 BLIT 模式的公共双像素流水线 |
 | `edrv32_rnd_round_row` / `coverage` | 逐行半径钳位、16 步整数平方根、双像素 Q4 覆盖率 |

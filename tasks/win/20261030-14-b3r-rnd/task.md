@@ -11,7 +11,7 @@ RND 已完成时序和结构优化（T-RND1/T-RND2，报告 `docs/reports/2026-1
 ## 2. 输入
 
 - **代码分支**：`origin/zc100116/b3`（包含本卡的提交）。Windows Codex 从这里拉出 `win/20261030-14-b3r-rnd`，在 `result.md` 中记录完整哈希。
-- 约束 `fpga/constraints/edrv32_fpga_board_render_top.fdc`（11 个时钟定义）；导入脚本 `fpga/scripts/import_board_render_top.tcl`，预期 `edrv32: added 86 sources`。
+- 约束 `fpga/constraints/edrv32_fpga_board_render_top.fdc`（11 个时钟定义）；导入脚本 `fpga/scripts/import_board_render_top.tcl`，预期 `edrv32: added 84 sources`（2026-10-30 删除了不再例化的 `edrv32_rnd_address`、`edrv32_rnd_source`；已建工程把这两个文件从 Designs 中移除即可）。
 - 上板程序：沿用卡 04 的 `tasks/win/20261029-04-b3r-software/src/`（`rnd_board.elf`、`rnd_expected.log`、`s3.elf`、`nes.elf`、`nes_nodisplay.elf`）。这些程序此后没有改动；RND 的寄存器和命令格式不变。
 
 ## 3. 环境
