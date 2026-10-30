@@ -1,0 +1,27 @@
+Source: G:\codex_project\EdRV32-FPGA\EdRV32-B3V\device_map\run.log
+20: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+21: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+22: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+23: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+24: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+25: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+26: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+27: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+28: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+29: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+30: W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+2018: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit_2_com) has been disconnected.
+2019: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2_com) has been disconnected.
+2020: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2_com) has been disconnected.
+2021: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2_com) has been disconnected.
+2022: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2) has been disconnected.
+2023: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit_2) has been disconnected.
+2024: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2) has been disconnected.
+2025: W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2) has been disconnected.
+2057: Total device mapping takes 1.70 sec.
+2061: W: Public-4010: Pcf file G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf has been covered.
+2062: Action dev_map: Real time elapsed is 0h:0m:47s
+2063: Action dev_map: CPU time elapsed is 0h:0m:8s
+2064: Action dev_map: Process CPU time elapsed is 0h:0m:8s
+2065: Current time: Fri Oct 30 09:18:46 2026
+2066: Action dev_map: Peak memory pool usage is 1,450 MB

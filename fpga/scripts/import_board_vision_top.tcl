@@ -8,10 +8,14 @@
 # ip_ram_disp_scan (two instances, DISP v0.3 L0/L1).
 # TMDS/RGMII and DDR reference use device primitives listed in fpga/ip/README.md.
 # No NPU/RND IP; ip_pll_eth is instantiated inside edrv32_fpga_rgmii.
-# Then source this script; checkout location comes from the script itself.
-set edrv32_repo [file normalize [file join [file dirname [info script]] ../..]]
+# Run from the FPGA project directory under EdRV32-FPGA.
+# The source checkout is its sibling: ../../EdRV32-Competition-2026.
+set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
+puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_board_vision_top
-set edrv32_include_dirs [list [file join $edrv32_repo rtl include] [file normalize .]]
+# Pass the repository header directory; PDS adds the project directory.
+set edrv32_include_dirs [file join $edrv32_repo rtl include]
+puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 
 # Filelists use -f, +incdir+ and source tokens, with # comments. Resolve each

@@ -1,0 +1,124 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Fri Oct 30 09:37:20 2026
+| Design       : edrv32_fpga_board_vision_top
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:
+**************************************************************************************************************************************************************************************************************
+                                                                                       Clock   Non-clock
+ Clock                    Period       Waveform            Type                        Loads       Loads  Sources
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ clk_board                37.0370      {0.0000 18.5180}    Declared                        0           3  {clk_i}
+   clk_sys                10.0000      {0.0000 4.9990}     Generated (clk_board)        7089         723  {u_pll_sys/u_gpll/gpll_inst/CLKOUT0}
+   clk_pix                13.4680      {0.0000 6.7340}     Generated (clk_board)        1537         246  {u_pll_video/u_gpll/gpll_inst/CLKOUT0}
+   clk_serial             2.6936       {0.0000 1.3460}     Generated (clk_board)          16           0  {u_pll_video/u_gpll/gpll_inst/CLKOUT1}
+ clk_ddr_ref              8.0000       {0.0000 4.0000}     Declared                        0           4  {ddr_ref_clk_p_i}
+   rst_clk                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)       101          19  {u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst/CLKOUT0}
+   clk_mem                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)     28092        5630  {u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0}
+   phy_dq_clk_0           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)        35           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY}
+     phy_dq_sysclk_0      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_0)       35           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT}
+   phy_dq_clk_1           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)        84           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY}
+     phy_dq_sysclk_1      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_1)       84           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT}
+ clk_cam0                 10.0000      {0.0000 5.0000}     Declared                       99           0  {cam0_pclk_i}
+ clk_cam1                 10.0000      {0.0000 5.0000}     Declared                       99           0  {cam1_pclk_i}
+ clk_rgmii_ref            8.0000       {0.0000 4.0000}     Declared                        0           1  {rgmii_rxc_i}
+   clk_eth                8.0000       {0.6660 4.6660}     Generated (clk_rgmii_ref)     143          28  {u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0}
+     clk_rgmii_tx         8.0000       {1.6660 5.6660}     Generated (clk_eth)             0           1  {rgmii_txc_o}
+==============================================================================================================================================================================================================
+
+ Clock Groups:
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks
+----------------------------------------------------------------------------------------------------
+ rst_clk                       asynchronous               rst_clk
+ phy_dq_clk_0                  asynchronous               phy_dq_clk_0
+ phy_dq_clk_1                  asynchronous               phy_dq_clk_1
+ clock_group_0                 asynchronous
+     clock_group_0_0                                      clk_sys
+     clock_group_0_1                                      clk_mem
+ clock_group_1                 asynchronous
+     clock_group_1_0                                      clk_sys
+     clock_group_1_1                                      clk_pix  clk_serial
+ clock_group_2                 asynchronous
+     clock_group_2_0                                      clk_sys
+     clock_group_2_1                                      clk_cam0
+ clock_group_3                 asynchronous
+     clock_group_3_0                                      clk_sys
+     clock_group_3_1                                      clk_cam1
+ clock_group_4                 asynchronous
+     clock_group_4_0                                      clk_sys
+     clock_group_4_1                                      clk_eth  clk_rgmii_tx
+ clock_group_5                 asynchronous
+     clock_group_5_0                                      clk_mem
+     clock_group_5_1                                      clk_pix  clk_serial
+ clock_group_6                 asynchronous
+     clock_group_6_0                                      clk_mem
+     clock_group_6_1                                      clk_cam0
+ clock_group_7                 asynchronous
+     clock_group_7_0                                      clk_mem
+     clock_group_7_1                                      clk_cam1
+ clock_group_8                 asynchronous
+     clock_group_8_0                                      clk_mem
+     clock_group_8_1                                      clk_eth  clk_rgmii_tx
+ clock_group_9                 asynchronous
+     clock_group_9_0                                      clk_pix  clk_serial
+     clock_group_9_1                                      clk_cam0
+ clock_group_10                asynchronous
+     clock_group_10_0                                     clk_pix  clk_serial
+     clock_group_10_1                                     clk_cam1
+ clock_group_11                asynchronous
+     clock_group_11_0                                     clk_pix  clk_serial
+     clock_group_11_1                                     clk_eth  clk_rgmii_tx
+ clock_group_12                asynchronous
+     clock_group_12_0                                     clk_cam0
+     clock_group_12_1                                     clk_cam1
+ clock_group_13                asynchronous
+     clock_group_13_0                                     clk_cam0
+     clock_group_13_1                                     clk_eth  clk_rgmii_tx
+ clock_group_14                asynchronous
+     clock_group_14_0                                     clk_cam1
+     clock_group_14_1                                     clk_eth  clk_rgmii_tx
+====================================================================================================
+
+ Performance Summary:
+****************************************************************************************************
+                              Requested       Estimated      Requested      Estimated
+ Clock                        Frequency       Frequency      Period         Period             Slack
+----------------------------------------------------------------------------------------------------
+ clk_cam0                  100.0000 MHz    221.9756 MHz        10.0000         4.5050          5.495
+ clk_cam1                  100.0000 MHz    206.5262 MHz        10.0000         4.8420          5.158
+ clk_sys                   100.0001 MHz    101.8540 MHz        10.0000         9.8180          0.182
+ clk_pix                    74.2501 MHz    161.2903 MHz        13.4680         6.2000          7.268
+ clk_serial                371.2504 MHz   1012.9455 MHz         2.6936         0.9872          1.706
+ rst_clk                   125.0000 MHz    297.8850 MHz         8.0000         3.3570          4.643
+ clk_mem                   125.0000 MHz    116.9044 MHz         8.0000         8.5540         -0.554
+ clk_eth                   125.0000 MHz    138.8503 MHz         8.0000         7.2020          0.798
+====================================================================================================
+
+Design Summary : Some Constraints Violated.
+
+
+Global Clock Info:
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                                         | Site Of GClk Inst     | GClk Fanout Net                 | Clock Loads     | Non_Clock Loads     | Driver Inst                                           | Driver Pin     | Site Of Driver Inst
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg                              | USCM_383_930          | ntclkbufg_0                     | 7784            | 0                   | u_pll_sys/u_gpll/gpll_inst                            | CLKOUT0        | GPLL_7_1381
+| clkbufg_1/gopclkbufg                              | USCM_383_891          | ntclkbufg_1                     | 1783            | 0                   | u_pll_video/u_gpll/gpll_inst                          | CLKOUT0        | GPLL_7_769
+| clkbufg_2/gopclkbufg                              | USCM_383_885          | ntclkbufg_2                     | 99              | 0                   | cam1_pclk_i_ibuf/opit_1                               | DI_TO_CLK      | IOLHR_16_774
+| clkbufg_3/gopclkbufg                              | USCM_383_888          | ntclkbufg_3                     | 99              | 0                   | cam0_pclk_i_ibuf/opit_1                               | DI_TO_CLK      | IOLHR_16_786
+| clkbufg_4/gopclkbufg                              | USCM_383_894          | ntclkbufg_4                     | 8               | 0                   | u_pll_video/u_gpll/gpll_inst                          | CLKOUT1        | GPLL_7_769
+| u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg     | USCM_383_900          | u_ddr3/u_ddrphy_top/rst_clk     | 120             | 0                   | u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst     | CLKOUT0        | GPLL_7_463
+| u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg      | USCM_383_882          | clk_mem_w                       | 33644           | 1                   | u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst      | CLKOUT0        | GPLL_727_769
+| u_rgmii/u_eth_clk/gopclkbufg                      | USCM_383_897          | clk_eth_w                       | 165             | 0                   | u_rgmii/u_pll_eth/u_gpll/gpll_inst                    | CLKOUT0        | GPLL_727_463
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

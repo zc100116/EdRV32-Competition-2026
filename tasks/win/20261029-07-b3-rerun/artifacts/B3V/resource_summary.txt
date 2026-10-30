@@ -1,0 +1,134 @@
+Post-route physical resources:
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0
+| Use of ANALOG                     | 0         | 1             | 0
+| Use of APM                        | 161       | 740           | 22
+| Use of BKCL                       | 6         | 10            | 60
+| Use of CCS                        | 1         | 1             | 100
+| Use of CLMA                       | 13585     | 30075         | 46
+|   FF                              | 37580     | 240600        | 16
+|   LUT                             | 41377     | 120300        | 35
+|   LUT-FF pairs                    | 19442     | 120300        | 17
+| Use of CLMS                       | 4057      | 9875          | 42
+|   FF                              | 11558     | 79000         | 15
+|   LUT                             | 12679     | 39500         | 33
+|   LUT-FF pairs                    | 6002      | 39500         | 16
+|   Distributed RAM                 | 346       | 39500         | 1
+| Use of DDRPHY_CPD                 | 1         | 20            | 5
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20
+| Use of DDR_PHY                    | 7         | 40            | 18
+| Use of DRM                        | 109       | 415           | 27
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0
+| Use of GPLL                       | 5         | 10            | 50
+| Use of GSEB                       | 0         | 512           | 0
+| Use of HARD0                      | 4796      | 25050         | 20
+| Use of HCKB                       | 28        | 120           | 24
+|  HCKB dataused                    | 0         | 120           | 0
+| Use of HCKMUX_TEST                | 0         | 10            | 0
+| Use of HSSTLP                     | 0         | 2             | 0
+| Use of IO                         | 137       | 400           | 35
+|   IOBD                            | 69        | 192           | 36
+|   IOBS                            | 68        | 208           | 33
+| Use of IOCKB                      | 0         | 40            | 0
+| Use of IOCKMUX_TEST               | 0         | 10            | 0
+| Use of IOLHR                      | 136       | 500           | 28
+| Use of KEYRAM                     | 0         | 1             | 0
+| Use of MFG_TEST                   | 0         | 1             | 0
+| Use of MRCKB                      | 1         | 20            | 5
+| Use of MRCKMUX_TEST               | 0         | 10            | 0
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0
+| Use of PCIE                       | 0         | 1             | 0
+| Use of PCKMUX_TEST                | 0         | 20            | 0
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0
+| Use of PPLL                       | 2         | 10            | 20
+| Use of PREGMUXC_TEST              | 0         | 3             | 0
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0
+| Use of RCKB                       | 4         | 40            | 10
+|  RCKB dataused                    | 2         | 40            | 5
+| Use of RCKMUX_TEST                | 0         | 10            | 0
+| Use of SCANCHAIN                  | 0         | 1             | 0
+| Use of SCKMUX_TEST                | 0         | 20            | 0
+| Use of SFB                        | 0         | 5075          | 0
+| Use of SPAD                       | 0         | 8             | 0
+| Use of TSERDES                    | 14        | 80            | 18
+| Use of USCM                       | 10        | 32            | 32
+|  USCM dataused                    | 0         | 32            | 0
+| Use of USCMMUX_TEST               | 0         | 32            | 0
++-------------------------------------------------------------------------------------+
+
+Post-route logical top [LUT,FF,distributed RAM,APM,DRM36K equivalent]:
+[49938, 49138, 346, 161, 109]
+Synthesis primitive counts (DRM18K/36K split):
+Cell Usage:
+GTP_APM_E2                  161 uses
+GTP_CLKBUFG                   3 uses
+GTP_CLKBUFM                   1 use
+GTP_CLKBUFR                   2 uses
+GTP_CLKPD                     1 use
+GTP_DDC_E2                    7 uses
+GTP_DFF                    1809 uses
+GTP_DFF_C                  6129 uses
+GTP_DFF_CE                13792 uses
+GTP_DFF_E                 24661 uses
+GTP_DFF_P                   267 uses
+GTP_DFF_PE                  874 uses
+GTP_DFF_R                   167 uses
+GTP_DFF_RE                  765 uses
+GTP_DFF_S                   543 uses
+GTP_DFF_SE                   96 uses
+GTP_DLL_E2                    4 uses
+GTP_DRM18K_E1                12 uses
+GTP_DRM36K_E1               103 uses
+GTP_GPLL                      5 uses
+GTP_GRS                       1 use
+GTP_IDDR_E1                   5 uses
+GTP_INV                      29 uses
+GTP_IOCLKDIV_E3               2 uses
+GTP_IODELAY_E2               63 uses
+GTP_ISERDES_E2               32 uses
+GTP_LUT1                     98 uses
+GTP_LUT2                    784 uses
+GTP_LUT3                   1048 uses
+GTP_LUT4                   2321 uses
+GTP_LUT5                   8610 uses
+GTP_LUT6                  14560 uses
+GTP_LUT6CARRY             15337 uses
+GTP_LUT6D                  7111 uses
+GTP_MUX2LUT7               3310 uses
+GTP_MUX2LUT8                704 uses
+GTP_ODDR_E1                   6 uses
+GTP_OSERDES_E2               87 uses
+GTP_PPLL                      2 uses
+GTP_RAM32X1DP                 5 uses
+GTP_RAM32X2DP               341 uses
+
+I/O ports: 127
+GTP_INBUF                  35 uses
+GTP_INBUFDS                 1 use
+GTP_IOBUF                  35 uses
+GTP_IOBUFCO                 4 uses
+GTP_OUTBUF                 17 uses
+GTP_OUTBUFDS                4 uses
+GTP_OUTBUFT                30 uses
+GTP_OUTBUFTCO               1 use
+
+Mapping Summary:
+Total LUTs: 50215 of 159800 (31.42%)
+	LUTs as dram: 346 of 39500 (0.88%)
+	LUTs as logic: 49869
+Total Registers: 49103 of 319600 (15.36%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 109.0 of 415 (26.27%)
+
+APMs:
+Total APMs = 161.00 of 740 (21.76%)
+
+Total I/O ports = 137 of 400 (34.25%)
