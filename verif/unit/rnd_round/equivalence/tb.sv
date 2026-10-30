@@ -11,7 +11,7 @@ module tb_round_equivalence;
     reg row_valid = 0;
     reg edge_ready = 0;
     reg [11:0] radius_value;
-    reg [16:0] row_value [0:LANES-1];
+    reg [16:0] first_row_value;
     wire [LANES-1:0] actual_ready;
     wire [LANES-1:0] expected_ready;
     wire [LANES-1:0] actual_valid;
@@ -24,6 +24,8 @@ module tb_round_equivalence;
 
     genvar lane;
     generate for (lane = 0; lane < LANES; lane = lane + 1) begin : g_lane
+        wire [16:0] row_value_w;
+        assign row_value_w = first_row_value + 17'(lane);
         edrv32_rnd_round_row u_actual (
             .clk_i(clk),
             .rst_n_i(rst_n),
@@ -32,7 +34,7 @@ module tb_round_equivalence;
             .row_ready_o(actual_ready[lane]),
             .width_i(17'd65536),
             .height_i(17'd65536),
-            .row_y_i(row_value[lane]),
+            .row_y_i(row_value_w),
             .radius_i(radius_value),
             .edge_valid_o(actual_valid[lane]),
             .edge_ready_i(edge_ready),
@@ -47,7 +49,7 @@ module tb_round_equivalence;
             .row_ready_o(expected_ready[lane]),
             .width_i(17'd65536),
             .height_i(17'd65536),
-            .row_y_i(row_value[lane]),
+            .row_y_i(row_value_w),
             .radius_i(radius_value),
             .edge_valid_o(expected_valid[lane]),
             .edge_ready_i(edge_ready),
@@ -63,7 +65,7 @@ module tb_round_equivalence;
             for (int first_row = 0; first_row < 65536; first_row += LANES) begin
                 while (!(&actual_ready && &expected_ready)) @(negedge clk);
                 radius_value = 12'(r);
-                for (int i = 0; i < LANES; i++) row_value[i] = 17'(first_row + i);
+                first_row_value = 17'(first_row);
                 row_valid = 1;
                 @(negedge clk);
                 row_valid = 0;
