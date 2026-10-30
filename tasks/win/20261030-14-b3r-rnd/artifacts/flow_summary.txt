@@ -1,0 +1,47 @@
+compile
+Action compile: Real time elapsed is 0h:1m:44s
+Action compile: CPU time elapsed is 0h:0m:12s
+Action compile: Process CPU time elapsed is 0h:0m:12s
+Action compile: Peak memory pool usage is 494 MB
+W/C/E line counts: {'W': 2662}
+Message categories: {'Public-4030:': 18, 'Verilog-2006:': 10, 'Verilog-2008:': 531, 'Verilog-2036:': 4, 'Verilog-2020:': 476, 'Verilog-2039:': 37, 'Verilog-2038:': 312, 'Verilog-2023:': 112, 'Verilog-2021:': 9, 'Verilog-2019:': 25, 'Sdm-2003:': 119, 'Sdm-2010:': 4, 'Loop': 817, 'Sdm-2000:': 188}
+
+synthesize
+Action synthesize: Real time elapsed is 0h:4m:35s
+Action synthesize: CPU time elapsed is 0h:0m:52s
+Action synthesize: Process CPU time elapsed is 0h:0m:56s
+Action synthesize: Peak memory pool usage is 2,422 MB
+W/C/E line counts: {'C': 29, 'W': 8340}
+Message categories: {'ConstraintEditor-2002:': 21, 'ConstraintEditor-2009:': 8, 'Adm-4019:': 1, 'Public-4008:': 5123, '[G:/codex_project/EdRV32-Competition-2026/rtl/bus/edrv32_bus_apb_bridge.v(line': 2, 'Removed': 1895, 'pmux': 1, 'Unable': 24, 'syn_maxfan': 1156, 'prevent': 14, 'Timing-4086:': 39, 'Timing-4087:': 85}
+
+device_map
+Action dev_map: Real time elapsed is 0h:0m:46s
+Action dev_map: CPU time elapsed is 0h:0m:8s
+Action dev_map: Process CPU time elapsed is 0h:0m:9s
+Action dev_map: Peak memory pool usage is 1,365 MB
+W/C/E line counts: {'W': 20}
+Message categories: {'Public-4008:': 11, 'DeviceMap-4011:': 8, 'Public-4010:': 1}
+
+place_route
+Action pnr: Real time elapsed is 0h:33m:14s
+Action pnr: CPU time elapsed is 0h:8m:23s
+Action pnr: Process CPU time elapsed is 0h:11m:28s
+Action pnr: Peak memory pool usage is 6,587 MB
+W/C/E line counts: {'C': 29}
+Message categories: {'ConstraintEditor-2002:': 21, 'ConstraintEditor-2009:': 8}
+
+report_timing
+Action report_timing: Real time elapsed is 0h:1m:16s
+Action report_timing: CPU time elapsed is 0h:0m:20s
+Action report_timing: Process CPU time elapsed is 0h:0m:23s
+Action report_timing: Peak memory pool usage is 4,600 MB
+W/C/E line counts: {'W': 124}
+Message categories: {'Timing-4086:': 39, 'Timing-4087:': 85}
+
+generate_bitstream
+Action gen_bit_stream: Real time elapsed is 0h:1m:22s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:28s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:28s
+Action gen_bit_stream: Peak memory pool usage is 3,514 MB
+W/C/E line counts: {'C': 1}
+Message categories: {'Bitstream-2001:': 1}

@@ -1,0 +1,358 @@
+S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+LVGL fps=4 rnd_tasks=34 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=5 rnd_tasks=32 sw_tasks=0
+LVGL fps=5 rnd_tasks=49 sw_tasks=0
+LVGL fps=5 rnd_tasks=69 sw_tasks=0
+LVGL fps=8 rnd_tasks=112 sw_tasks=0
+LVGL fps=6 rnd_tasks=69 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=32 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+GAME fps=60 rnd_ms=2.066 cpu_ms=0.221
+GAME fps=59 rnd_ms=2.076 cpu_ms=0.213
+GAME fps=60 rnd_ms=2.077 cpu_ms=0.221
+GAME fps=59 rnd_ms=2.077 cpu_ms=0.216
+GAME fps=60 rnd_ms=2.027 cpu_ms=0.216
+GAME fps=60 rnd_ms=1.966 cpu_ms=0.205
+GAME fps=59 rnd_ms=3.311 cpu_ms=0.264
+GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+GAME fps=60 rnd_ms=3.842 cpu_ms=0.282
+GAME fps=59 rnd_ms=3.842 cpu_ms=0.282
+GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+LVGL fps=0 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+GAME fps=60 rnd_ms=2.066 cpu_ms=0.222
+GAME fps=59 rnd_ms=2.077 cpu_ms=0.216
+GAME fps=59 rnd_ms=2.077 cpu_ms=0.219
+GAME fps=60 rnd_ms=2.015 cpu_ms=0.217
+GAME fps=59 rnd_ms=1.958 cpu_ms=0.205
+GAME fps=60 rnd_ms=1.958 cpu_ms=0.200
+GAME fps=60 rnd_ms=1.959 cpu_ms=0.202
+GAME fps=60 rnd_ms=1.959 cpu_ms=0.204
+GAME fps=59 rnd_ms=1.961 cpu_ms=0.200
+GAME fps=60 rnd_ms=1.960 cpu_ms=0.198
+GAME fps=59 rnd_ms=2.073 cpu_ms=0.207
+GAME fps=60 rnd_ms=4.094 cpu_ms=0.329
+GAME fps=60 rnd_ms=2.655 cpu_ms=0.239
+GAME fps=59 rnd_ms=4.029 cpu_ms=0.326
+GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+GAME fps=60 rnd_ms=2.520 cpu_ms=0.232
+GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+GAME fps=60 rnd_ms=4.095 cpu_ms=0.329
+GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+GAME fps=60 rnd_ms=4.095 cpu_ms=0.329
+GAME fps=60 rnd_ms=4.095 cpu_ms=0.329
+GAME fps=60 rnd_ms=2.270 cpu_ms=0.216
+GAME fps=59 rnd_ms=3.781 cpu_ms=0.311
+GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+LVGL fps=0 rnd_tasks=50 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=5 rnd_tasks=32 sw_tasks=0
+LVGL fps=1 rnd_tasks=68 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=3 rnd_tasks=18 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=4 rnd_tasks=49 sw_tasks=14
+LVGL fps=8 rnd_tasks=88 sw_tasks=21
+LVGL fps=4 rnd_tasks=25 sw_tasks=0
+LVGL fps=4 rnd_tasks=32 sw_tasks=0
+LVGL fps=7 rnd_tasks=108 sw_tasks=0
+LVGL fps=4 rnd_tasks=34 sw_tasks=0
+LVGL fps=1 rnd_tasks=68 sw_tasks=0
+LVGL fps=5 rnd_tasks=29 sw_tasks=0
+LVGL fps=4 rnd_tasks=31 sw_tasks=0
+LVGL fps=3 rnd_tasks=21 sw_tasks=0
+LVGL fps=4 rnd_tasks=38 sw_tasks=0
+LVGL fps=4 rnd_tasks=25 sw_tasks=0
+LVGL fps=4 rnd_tasks=23 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=4 rnd_tasks=23 sw_tasks=0
+LVGL fps=3 rnd_tasks=18 sw_tasks=0
+LVGL fps=6 rnd_tasks=112 sw_tasks=6
+LVGL fps=3 rnd_tasks=18 sw_tasks=0
+LVGL fps=3 rnd_tasks=18 sw_tasks=0
+LVGL fps=3 rnd_tasks=34 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=7 rnd_tasks=29 sw_tasks=0
+LVGL fps=30 rnd_tasks=150 sw_tasks=0
+LVGL fps=30 rnd_tasks=150 sw_tasks=0
+LVGL fps=29 rnd_tasks=152 sw_tasks=0
+LVGL fps=20 rnd_tasks=120 sw_tasks=0
+LVGL fps=20 rnd_tasks=120 sw_tasks=0
+LVGL fps=22 rnd_tasks=124 sw_tasks=0
+LVGL fps=57 rnd_tasks=78 sw_tasks=0
+LVGL fps=57 rnd_tasks=78 sw_tasks=0
+LVGL fps=52 rnd_tasks=103 sw_tasks=0
+LVGL fps=53 rnd_tasks=551 sw_tasks=0
+LVGL fps=54 rnd_tasks=561 sw_tasks=0
+LVGL fps=47 rnd_tasks=553 sw_tasks=0
+LVGL fps=19 rnd_tasks=520 sw_tasks=0
+LVGL fps=19 rnd_tasks=494 sw_tasks=0
+LVGL fps=18 rnd_tasks=494 sw_tasks=0
+LVGL fps=18 rnd_tasks=494 sw_tasks=0
+LVGL fps=19 rnd_tasks=520 sw_tasks=0
+LVGL fps=15 rnd_tasks=395 sw_tasks=10
+LVGL fps=4 rnd_tasks=62 sw_tasks=50
+LVGL fps=4 rnd_tasks=68 sw_tasks=50
+LVGL fps=5 rnd_tasks=186 sw_tasks=20
+LVGL fps=9 rnd_tasks=428 sw_tasks=0
+LVGL fps=7 rnd_tasks=394 sw_tasks=0
+LVGL fps=3 rnd_tasks=140 sw_tasks=0
+LVGL fps=3 rnd_tasks=24 sw_tasks=0
+LVGL fps=3 rnd_tasks=24 sw_tasks=0
+LVGL fps=3 rnd_tasks=24 sw_tasks=0
+LVGL fps=3 rnd_tasks=23 sw_tasks=0
+LVGL fps=9 rnd_tasks=50 sw_tasks=280
+LVGL fps=6 rnd_tasks=35 sw_tasks=196
+LVGL fps=5 rnd_tasks=103 sw_tasks=138
+LVGL fps=5 rnd_tasks=510 sw_tasks=0
+LVGL fps=5 rnd_tasks=510 sw_tasks=0
+LVGL fps=4 rnd_tasks=419 sw_tasks=0
+LVGL fps=4 rnd_tasks=479 sw_tasks=0
+LVGL fps=5 rnd_tasks=570 sw_tasks=0
+LVGL fps=5 rnd_tasks=464 sw_tasks=45
+LVGL fps=6 rnd_tasks=529 sw_tasks=63
+LVGL fps=4 rnd_tasks=734 sw_tasks=54
+LVGL fps=2 rnd_tasks=576 sw_tasks=0
+LVGL fps=2 rnd_tasks=576 sw_tasks=0
+LVGL fps=0 rnd_tasks=411 sw_tasks=0
+LVGL fps=3 rnd_tasks=517 sw_tasks=0
+LVGL fps=3 rnd_tasks=506 sw_tasks=0
+LVGL fps=2 rnd_tasks=455 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=6 rnd_tasks=383 sw_tasks=398
+LVGL fps=5 rnd_tasks=452 sw_tasks=696
+LVGL fps=4 rnd_tasks=324 sw_tasks=565
+LVGL fps=3 rnd_tasks=340 sw_tasks=460
+LVGL fps=3 rnd_tasks=289 sw_tasks=344
+LVGL fps=3 rnd_tasks=293 sw_tasks=356
+LVGL fps=4 rnd_tasks=323 sw_tasks=460
+LVGL fps=5 rnd_tasks=344 sw_tasks=609
+LVGL fps=6 rnd_tasks=514 sw_tasks=723
+LVGL fps=6 rnd_tasks=533 sw_tasks=449
+LVGL fps=6 rnd_tasks=314 sw_tasks=163
+LVGL fps=5 rnd_tasks=315 sw_tasks=317
+LVGL fps=5 rnd_tasks=450 sw_tasks=642
+LVGL fps=5 rnd_tasks=336 sw_tasks=609
+LVGL fps=4 rnd_tasks=331 sw_tasks=460
+LVGL fps=3 rnd_tasks=293 sw_tasks=356
+LVGL fps=3 rnd_tasks=294 sw_tasks=355
+LVGL benchmark scene=Empty screen fps=32
+LVGL benchmark scene=Moving wallpaper fps=20
+LVGL benchmark scene=Single rectangle fps=56
+LVGL benchmark scene=Multiple rectangles fps=52
+LVGL benchmark scene=Multiple RGB images fps=18
+LVGL benchmark scene=Multiple ARGB images fps=18
+LVGL benchmark scene=Rotated ARGB images fps=4
+LVGL benchmark scene=Multiple labels fps=10
+LVGL benchmark scene=Screen sized text fps=3
+LVGL benchmark scene=Multiple arcs fps=7
+LVGL benchmark scene=Containers fps=4
+LVGL benchmark scene=Containers with overlay fps=5
+LVGL benchmark scene=Containers with opa fps=5
+LVGL benchmark scene=Containers with opa_layer fps=1
+LVGL benchmark scene=Containers with scrolling fps=3
+LVGL benchmark scene=Widgets demo fps=12
+LVGL benchmark average fps=15
+RND type=1 claimed=9833 unclaimed=0
+RND type=2 claimed=1676 unclaimed=0
+RND type=3 claimed=659 unclaimed=197
+RND type=4 claimed=0 unclaimed=0
+RND type=5 claimed=8560 unclaimed=0
+RND type=6 claimed=3328 unclaimed=172
+RND type=7 claimed=270 unclaimed=0
+RND type=8 claimed=0 unclaimed=7108
+RND type=9 claimed=0 unclaimed=1212
+RND type=10 claimed=0 unclaimed=220
+RND type=11 claimed=0 unclaimed=0
+RND type=12 claimed=0 unclaimed=0
+RND type=13 claimed=0 unclaimed=0
+RND type=14 claimed=0 unclaimed=0
+RND type=15 claimed=0 unclaimed=0
+RND batch=32 commands=140390 doorbells=30413
+LV_DRAW_LAYER_SIMPLE_BUF_SIZE is small making opa_layered slow. Consider 1/20 screen size for it (> 90kB)
+Benchmark Summary (9.6.0 )
+Name, Avg. CPU, Avg. FPS, Avg. time, render time, flush time
+Empty screen, 92%, 32, 29, 15, 14
+Moving wallpaper, 99%, 20, 47, 41, 6
+Single rectangle, 99%, 56, 15, 2, 13
+Multiple rectangles, 99%, 52, 15, 13, 2
+Multiple RGB images, 99%, 18, 40, 36, 4
+Multiple ARGB images, 99%, 18, 40, 36, 4
+Rotated ARGB images, 99%, 4, 228, 215, 13
+Multiple labels, 99%, 10, 104, 98, 6
+Screen sized text, 99%, 3, 283, 274, 9
+Multiple arcs, 99%, 7, 121, 114, 7
+Containers, 99%, 4, 173, 166, 7
+Containers with overlay, 99%, 5, 179, 170, 9
+Containers with opa, 99%, 5, 140, 133, 7
+Containers with opa_layer, 99%, 1, 474, 465, 9
+Containers with scrolling, 99%, 3, 275, 264, 11
+Widgets demo, 97%, 12, 169, 161, 8
+All scenes avg.,98%, 15, 145, 137, 8
+LVGL fps=2 rnd_tasks=152 sw_tasks=0
+LVGL fps=3 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=4 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=4 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=4 rnd_tasks=312 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=4 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=42 sw_tasks=0
+LVGL fps=4 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=6 rnd_tasks=52 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=5 rnd_tasks=49 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+RN-17 full_max_lsb=0 edge_max_lsb=17 over1=1029 pixels=921600 over1_ppm=1116 bins_0_1_2_3to4_5plus=905387,15184,937,56,36 rnd_tasks=25 sw_tasks=0 PASS
+RND type=1 claimed=10629 unclaimed=6
+RND type=2 claimed=2272 unclaimed=4
+RND type=3 claimed=659 unclaimed=197
+RND type=4 claimed=0 unclaimed=0
+RND type=5 claimed=9002 unclaimed=15
+RND type=6 claimed=3328 unclaimed=172
+RND type=7 claimed=270 unclaimed=0
+RND type=8 claimed=0 unclaimed=7108
+RND type=9 claimed=0 unclaimed=1212
+RND type=10 claimed=0 unclaimed=220
+RND type=11 claimed=0 unclaimed=0
+RND type=12 claimed=0 unclaimed=0
+RND type=13 claimed=0 unclaimed=0
+RND type=14 claimed=0 unclaimed=0
+RND type=15 claimed=0 unclaimed=0
+RND batch=32 commands=152068 doorbells=31799
+RN-17 type=1 claimed=6 unclaimed=0
+RN-17 type=2 claimed=4 unclaimed=0
+RN-17 type=5 claimed=15 unclaimed=0
+LVGL fps=5 rnd_tasks=37 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+
+S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+LVGL fps=4 rnd_tasks=34 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0

@@ -1,0 +1,18 @@
+PASS fill_rgb565 actual=0xe9358c29 expected=0xe9358c29
+PASS border_rgb565 actual=0x1658f064 expected=0x1658f064
+PASS glyph_rgb565 actual=0x26bf7139 expected=0x26bf7139
+PASS blit_rgb565 actual=0x87b4c9d9 expected=0x87b4c9d9
+PASS copy_rgb565 actual=0xd330519b expected=0xd330519b
+PASS box_shadow_rgb565 actual=0xaddb98ac expected=0xaddb98ac
+PASS blur_rgb565 actual=0x9dc67871 expected=0x9dc67871
+PASS tilemap_rgb565 actual=0x763bdd5f expected=0x763bdd5f
+PASS fill_argb8888 actual=0x0bda4f5e expected=0x0bda4f5e
+PASS border_argb8888 actual=0x2230a20f expected=0x2230a20f
+PASS glyph_argb8888 actual=0x004b61a5 expected=0x004b61a5
+PASS blit_argb8888 actual=0xaa15e883 expected=0xaa15e883
+PASS copy_argb8888 actual=0x6d1538f5 expected=0x6d1538f5
+PASS box_shadow_argb8888 actual=0x5ca6e649 expected=0x5ca6e649
+PASS blur_argb8888 actual=0x3f13597a expected=0x3f13597a
+PASS tilemap_argb8888 actual=0xeecd1aac expected=0xeecd1aac
+PASS
+

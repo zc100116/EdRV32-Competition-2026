@@ -1,0 +1,17 @@
+GUI idle flush split CRC prefix/value into adjacent RX records. Only exact matching adjacent pairs joined; originals remain in gui_buffer.json and rx_hex.tsv.
+223+224
+226+227
+229+230
+232+233
+235+236
+238+239
+241+242
+244+245
+247+248
+250+251
+253+254
+256+257
+259+260
+262+263
+265+266
+268+269

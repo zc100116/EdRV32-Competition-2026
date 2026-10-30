@@ -1,0 +1,94 @@
+Device-map capacity table:
+Device Utilization Summary:
++-------------------------------------------------------------------------+
+| Logic Utilization     | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------+
+| APM                   | 102       | 740           | 14
+| FF                    | 41122     | 319600        | 13
+| LUT                   | 51663     | 159800        | 33
+| Distributed RAM       | 233       | 39500         | 1
+| DRM                   | 110       | 415           | 27
+| IO                    | 94        | 400           | 24
+| RCKB                  | 2         | 40            | 5
+| SCANCHAIN             | 0         | 1             | 0
+| USCM                  | 5         | 32            | 16
+| CCS                   | 1         | 1             | 100
+| ADC                   | 0         | 1             | 0
+| DDR_PHY               | 7         | 40            | 18
+| HSSTLP                | 0         | 2             | 0
+| GPLL                  | 4         | 10            | 40
+| PPLL                  | 2         | 10            | 20
+| DDRPHY_CPD            | 1         | 20            | 5
+| HCKB                  | 0         | 120           | 0
+| IOCKB                 | 0         | 40            | 0
+| MRCKB                 | 1         | 20            | 5
+| PCIE                  | 0         | 1             | 0
+| DDRPHY_IOCLK_DIV      | 2         | 10            | 20
+| ANALOG                | 0         | 1             | 0
+| TSERDES               | 14        | 80            | 18
+| KEYRAM                | 0         | 1             | 0
++-------------------------------------------------------------------------+
+
+Post-route primitive counts:
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0
+| Use of ANALOG                     | 0         | 1             | 0
+| Use of APM                        | 102       | 740           | 14
+| Use of BKCL                       | 4         | 10            | 40
+| Use of CCS                        | 1         | 1             | 100
+| Use of CLMA                       | 13276     | 30075         | 45
+|   FF                              | 31003     | 240600        | 13
+|   LUT                             | 42357     | 120300        | 36
+|   LUT-FF pairs                    | 16808     | 120300        | 14
+| Use of CLMS                       | 4095      | 9875          | 42
+|   FF                              | 10184     | 79000         | 13
+|   LUT                             | 13060     | 39500         | 34
+|   LUT-FF pairs                    | 5490      | 39500         | 14
+|   Distributed RAM                 | 233       | 39500         | 1
+| Use of DDRPHY_CPD                 | 1         | 20            | 5
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20
+| Use of DDR_PHY                    | 7         | 40            | 18
+| Use of DRM                        | 110       | 415           | 27
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0
+| Use of GPLL                       | 4         | 10            | 40
+| Use of GSEB                       | 0         | 512           | 0
+| Use of HARD0                      | 4952      | 25050         | 20
+| Use of HCKB                       | 20        | 120           | 17
+|  HCKB dataused                    | 0         | 120           | 0
+| Use of HCKMUX_TEST                | 0         | 10            | 0
+| Use of HSSTLP                     | 0         | 2             | 0
+| Use of IO                         | 94        | 400           | 24
+|   IOBD                            | 48        | 192           | 25
+|   IOBS                            | 46        | 208           | 23
+| Use of IOCKB                      | 0         | 40            | 0
+| Use of IOCKMUX_TEST               | 0         | 10            | 0
+| Use of IOLHR                      | 93        | 500           | 19
+| Use of KEYRAM                     | 0         | 1             | 0
+| Use of MFG_TEST                   | 0         | 1             | 0
+| Use of MRCKB                      | 1         | 20            | 5
+| Use of MRCKMUX_TEST               | 0         | 10            | 0
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0
+| Use of PCIE                       | 0         | 1             | 0
+| Use of PCKMUX_TEST                | 0         | 20            | 0
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0
+| Use of PPLL                       | 2         | 10            | 20
+| Use of PREGMUXC_TEST              | 0         | 3             | 0
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0
+| Use of RCKB                       | 2         | 40            | 5
+|  RCKB dataused                    | 2         | 40            | 5
+| Use of RCKMUX_TEST                | 0         | 10            | 0
+| Use of SCANCHAIN                  | 0         | 1             | 0
+| Use of SCKMUX_TEST                | 0         | 20            | 0
+| Use of SFB                        | 0         | 5075          | 0
+| Use of SPAD                       | 0         | 8             | 0
+| Use of TSERDES                    | 14        | 80            | 18
+| Use of USCM                       | 5         | 32            | 16
+|  USCM dataused                    | 0         | 32            | 0
+| Use of USCMMUX_TEST               | 0         | 32            | 0
++-------------------------------------------------------------------------------------+

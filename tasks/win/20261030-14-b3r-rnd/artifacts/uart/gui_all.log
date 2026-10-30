@@ -1,0 +1,827 @@
+[22:52:33.769][RX] 
+[22:52:33.769][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[22:52:33.769][RX]   E         D   D   R   R   V   V      3      2 
+[22:52:33.769][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[22:52:33.769][RX]   E         D   D   R  R     V V       3   2    
+[22:52:33.769][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[22:52:33.769][RX] 
+[22:52:33.769][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[22:52:33.769][RX] CHIP_ID: 0xed320001
+[22:52:33.769][RX] CLK_SYS_HZ: 100000000
+[22:52:33.769][RX] ROM bytes: 16384
+[22:52:33.769][RX] SRAM bytes: 65536
+[22:52:33.769][RX] I-cache bytes: 8192
+[22:52:33.769][RX] D-cache bytes: 8192
+[22:52:33.769][RX] MEM_READY: 1
+[22:52:33.769][RX] Build commit: 9510c64
+[22:52:33.769][RX] Compiler version: GCC 15.2.0
+[22:52:33.873][RX] BIOS: EdRV32
+[22:52:33.873][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:52:38.513][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[22:52:38.521][RX] Input error: type 1-4 then Enter
+[22:52:38.521][SYS] Input error: type 1-4 then Enter
+[22:52:38.521][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:52:38.523][RX] UART load ready
+[22:52:40.787][RX] Load bytes: 25980 at 0x90000000
+[22:52:40.787][RX] Load result: PASS
+[22:52:40.787][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:52:40.789][RX] Run address:
+[22:52:40.791][RX] Run: 0x90000000
+[22:52:41.022][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[22:52:41.375][RX] RND fill_rgb565 crc=
+[22:52:41.735][RX] 0xe9358c29
+[22:52:41.735][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[22:52:42.087][RX] RND border_rgb565 crc=
+[22:52:42.448][RX] 0x1658f064
+[22:52:42.448][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[22:52:42.799][RX] RND glyph_rgb565 crc=
+[22:52:43.161][RX] 0x26bf7139
+[22:52:43.161][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+[22:52:43.514][RX] RND blit_rgb565 crc=
+[22:52:43.874][RX] 0x87b4c9d9
+[22:52:43.874][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+[22:52:44.229][RX] RND copy_rgb565 crc=
+[22:52:44.582][RX] 0xd330519b
+[22:52:44.629][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[22:52:44.989][RX] RND box_shadow_rgb565 crc=
+[22:52:45.337][RX] 0xaddb98ac
+[22:52:45.382][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+[22:52:45.735][RX] RND blur_rgb565 crc=
+[22:52:46.095][RX] 0x9dc67871
+[22:52:46.095][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[22:52:46.455][RX] RND tilemap_rgb565 crc=
+[22:52:46.808][RX] 0x763bdd5f
+[22:52:46.808][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[22:52:47.172][RX] RND fill_argb8888 crc=
+[22:52:48.229][RX] 0x0bda4f5e
+[22:52:48.229][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[22:52:48.580][RX] RND border_argb8888 crc=
+[22:52:49.650][RX] 0x2230a20f
+[22:52:49.650][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[22:52:50.009][RX] RND glyph_argb8888 crc=
+[22:52:51.071][RX] 0x004b61a5
+[22:52:51.071][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+[22:52:51.423][RX] RND blit_argb8888 crc=
+[22:52:52.492][RX] 0xaa15e883
+[22:52:52.492][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+[22:52:52.852][RX] RND copy_argb8888 crc=
+[22:52:53.907][RX] 0x6d1538f5
+[22:52:53.955][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[22:52:54.314][RX] RND box_shadow_argb8888 crc=
+[22:52:55.369][RX] 0x5ca6e649
+[22:52:55.419][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+[22:52:55.774][RX] RND blur_argb8888 crc=
+[22:52:56.839][RX] 0x3f13597a
+[22:52:56.839][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[22:52:57.189][RX] RND tilemap_argb8888 crc=
+[22:52:58.256][RX] 0xeecd1aac
+[22:52:58.256][RX] RND display ready
+[22:53:14.409][RX] 
+[22:53:14.409][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[22:53:14.409][RX]   E         D   D   R   R   V   V      3      2 
+[22:53:14.409][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[22:53:14.409][RX]   E         D   D   R  R     V V       3   2    
+[22:53:14.409][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[22:53:14.409][RX] 
+[22:53:14.409][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[22:53:14.409][RX] CHIP_ID: 0xed320001
+[22:53:14.409][RX] CLK_SYS_HZ: 100000000
+[22:53:14.409][RX] ROM bytes: 16384
+[22:53:14.409][RX] SRAM bytes: 65536
+[22:53:14.409][RX] I-cache bytes: 8192
+[22:53:14.409][RX] D-cache bytes: 8192
+[22:53:14.409][RX] MEM_READY: 1
+[22:53:14.409][RX] Build commit: 9510c64
+[22:53:14.409][RX] Compiler version: GCC 15.2.0
+[22:53:14.502][RX] BIOS: EdRV32
+[22:53:14.502][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:53:16.838][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[22:53:16.858][RX] Input error: type 1-4 then Enter
+[22:53:16.858][SYS] Input error: type 1-4 then Enter
+[22:53:16.858][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:53:16.860][RX] UART load ready
+[22:54:53.959][RX] Load bytes: 1119392 at 0x90000000
+[22:54:53.959][RX] Load result: PASS
+[22:54:53.959][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:54:53.961][RX] UART load ready
+[22:54:54.093][RX] Load bytes: 1408 at 0x901114a0
+[22:54:54.094][RX] Load result: PASS
+[22:54:54.094][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:54:54.095][RX] Run address:
+[22:54:54.098][RX] Run: 0x90000000
+[22:54:55.975][RX] S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+[22:54:55.977][RX] LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+[22:54:56.976][RX] LVGL fps=4 rnd_tasks=34 sw_tasks=0
+[22:54:57.983][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:54:58.979][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:54:59.976][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:00.976][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:01.993][RX] LVGL fps=3 rnd_tasks=12 sw_tasks=0
+[22:55:02.998][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:03.993][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:04.993][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:05.994][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:06.995][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:07.993][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:08.998][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:09.993][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:10.993][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:55:11.994][RX] LVGL fps=5 rnd_tasks=32 sw_tasks=0
+[22:55:12.993][RX] LVGL fps=5 rnd_tasks=49 sw_tasks=0
+[22:55:13.997][RX] LVGL fps=5 rnd_tasks=69 sw_tasks=0
+[22:55:14.993][RX] LVGL fps=8 rnd_tasks=112 sw_tasks=0
+[22:55:15.993][RX] LVGL fps=6 rnd_tasks=69 sw_tasks=0
+[22:55:17.002][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:18.010][RX] LVGL fps=4 rnd_tasks=32 sw_tasks=0
+[22:55:19.013][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:55:20.010][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:21.010][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:22.011][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:55:23.010][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:24.010][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:25.010][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:26.876][RX] GAME fps=60 rnd_ms=2.066 cpu_ms=0.221
+[22:55:27.893][RX] GAME fps=59 rnd_ms=2.076 cpu_ms=0.213
+[22:55:28.910][RX] GAME fps=60 rnd_ms=2.077 cpu_ms=0.221
+[22:55:29.910][RX] GAME fps=59 rnd_ms=2.077 cpu_ms=0.216
+[22:55:30.926][RX] GAME fps=60 rnd_ms=2.027 cpu_ms=0.216
+[22:55:31.943][RX] GAME fps=60 rnd_ms=1.966 cpu_ms=0.205
+[22:55:32.943][RX] GAME fps=59 rnd_ms=3.311 cpu_ms=0.264
+[22:55:33.960][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[22:55:34.976][RX] GAME fps=60 rnd_ms=3.842 cpu_ms=0.282
+[22:55:35.993][RX] GAME fps=59 rnd_ms=3.842 cpu_ms=0.282
+[22:55:37.010][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[22:55:37.393][RX] LVGL fps=0 rnd_tasks=56 sw_tasks=0
+[22:55:38.393][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:39.397][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:40.393][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:41.393][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:42.395][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:43.393][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:44.393][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:45.393][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:55:46.393][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:55:47.526][RX] GAME fps=60 rnd_ms=2.066 cpu_ms=0.222
+[22:55:48.536][RX] GAME fps=59 rnd_ms=2.077 cpu_ms=0.216
+[22:55:49.543][RX] GAME fps=59 rnd_ms=2.077 cpu_ms=0.219
+[22:55:50.560][RX] GAME fps=60 rnd_ms=2.015 cpu_ms=0.217
+[22:55:51.576][RX] GAME fps=59 rnd_ms=1.958 cpu_ms=0.205
+[22:55:52.593][RX] GAME fps=60 rnd_ms=1.958 cpu_ms=0.200
+[22:55:53.593][RX] GAME fps=60 rnd_ms=1.959 cpu_ms=0.202
+[22:55:54.610][RX] GAME fps=60 rnd_ms=1.959 cpu_ms=0.204
+[22:55:55.626][RX] GAME fps=59 rnd_ms=1.961 cpu_ms=0.200
+[22:55:56.643][RX] GAME fps=60 rnd_ms=1.960 cpu_ms=0.198
+[22:55:57.643][RX] GAME fps=59 rnd_ms=2.073 cpu_ms=0.207
+[22:55:58.660][RX] GAME fps=60 rnd_ms=4.094 cpu_ms=0.329
+[22:55:59.676][RX] GAME fps=60 rnd_ms=2.655 cpu_ms=0.239
+[22:56:00.679][RX] GAME fps=59 rnd_ms=4.029 cpu_ms=0.326
+[22:56:01.676][RX] GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+[22:56:02.693][RX] GAME fps=60 rnd_ms=2.520 cpu_ms=0.232
+[22:56:03.693][RX] GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+[22:56:04.710][RX] GAME fps=60 rnd_ms=4.095 cpu_ms=0.329
+[22:56:05.710][RX] GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+[22:56:06.726][RX] GAME fps=60 rnd_ms=4.095 cpu_ms=0.329
+[22:56:07.743][RX] GAME fps=60 rnd_ms=4.095 cpu_ms=0.329
+[22:56:08.760][RX] GAME fps=60 rnd_ms=2.270 cpu_ms=0.216
+[22:56:09.760][RX] GAME fps=59 rnd_ms=3.781 cpu_ms=0.311
+[22:56:10.760][RX] GAME fps=59 rnd_ms=4.095 cpu_ms=0.329
+[22:56:11.193][RX] LVGL fps=0 rnd_tasks=50 sw_tasks=0
+[22:56:12.193][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:56:13.201][RX] LVGL fps=5 rnd_tasks=32 sw_tasks=0
+[22:56:14.727][RX] LVGL fps=1 rnd_tasks=68 sw_tasks=0
+[22:56:15.744][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:56:16.750][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[22:56:17.746][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:56:18.766][RX] LVGL fps=4 rnd_tasks=49 sw_tasks=14
+[22:56:19.766][RX] LVGL fps=8 rnd_tasks=88 sw_tasks=21
+[22:56:20.766][RX] LVGL fps=4 rnd_tasks=25 sw_tasks=0
+[22:56:21.777][RX] LVGL fps=4 rnd_tasks=32 sw_tasks=0
+[22:56:22.779][RX] LVGL fps=7 rnd_tasks=108 sw_tasks=0
+[22:56:23.779][RX] LVGL fps=4 rnd_tasks=34 sw_tasks=0
+[22:56:25.427][RX] LVGL fps=1 rnd_tasks=68 sw_tasks=0
+[22:56:26.427][RX] LVGL fps=5 rnd_tasks=29 sw_tasks=0
+[22:56:27.427][RX] LVGL fps=4 rnd_tasks=31 sw_tasks=0
+[22:56:28.427][RX] LVGL fps=3 rnd_tasks=21 sw_tasks=0
+[22:56:29.444][RX] LVGL fps=4 rnd_tasks=38 sw_tasks=0
+[22:56:30.447][RX] LVGL fps=4 rnd_tasks=25 sw_tasks=0
+[22:56:31.443][RX] LVGL fps=4 rnd_tasks=23 sw_tasks=0
+[22:56:32.460][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:56:33.460][RX] LVGL fps=4 rnd_tasks=23 sw_tasks=0
+[22:56:34.460][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[22:56:35.460][RX] LVGL fps=6 rnd_tasks=112 sw_tasks=6
+[22:56:36.459][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[22:56:37.460][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[22:56:38.461][RX] LVGL fps=3 rnd_tasks=34 sw_tasks=0
+[22:56:39.459][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:56:40.460][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:56:41.460][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:56:42.460][RX] LVGL fps=7 rnd_tasks=29 sw_tasks=0
+[22:56:43.460][RX] LVGL fps=30 rnd_tasks=150 sw_tasks=0
+[22:56:44.460][RX] LVGL fps=30 rnd_tasks=150 sw_tasks=0
+[22:56:45.493][RX] LVGL fps=29 rnd_tasks=152 sw_tasks=0
+[22:56:46.493][RX] LVGL fps=20 rnd_tasks=120 sw_tasks=0
+[22:56:47.493][RX] LVGL fps=20 rnd_tasks=120 sw_tasks=0
+[22:56:48.494][RX] LVGL fps=22 rnd_tasks=124 sw_tasks=0
+[22:56:49.493][RX] LVGL fps=57 rnd_tasks=78 sw_tasks=0
+[22:56:50.493][RX] LVGL fps=57 rnd_tasks=78 sw_tasks=0
+[22:56:51.495][RX] LVGL fps=52 rnd_tasks=103 sw_tasks=0
+[22:56:52.495][RX] LVGL fps=53 rnd_tasks=551 sw_tasks=0
+[22:56:53.495][RX] LVGL fps=54 rnd_tasks=561 sw_tasks=0
+[22:56:54.547][RX] LVGL fps=47 rnd_tasks=553 sw_tasks=0
+[22:56:55.580][RX] LVGL fps=19 rnd_tasks=520 sw_tasks=0
+[22:56:56.580][RX] LVGL fps=19 rnd_tasks=494 sw_tasks=0
+[22:56:57.597][RX] LVGL fps=18 rnd_tasks=494 sw_tasks=0
+[22:56:58.614][RX] LVGL fps=18 rnd_tasks=494 sw_tasks=0
+[22:56:59.647][RX] LVGL fps=19 rnd_tasks=520 sw_tasks=0
+[22:57:00.679][RX] LVGL fps=15 rnd_tasks=395 sw_tasks=10
+[22:57:01.879][RX] LVGL fps=4 rnd_tasks=62 sw_tasks=50
+[22:57:03.096][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=50
+[22:57:04.177][RX] LVGL fps=5 rnd_tasks=186 sw_tasks=20
+[22:57:05.278][RX] LVGL fps=9 rnd_tasks=428 sw_tasks=0
+[22:57:06.282][RX] LVGL fps=7 rnd_tasks=394 sw_tasks=0
+[22:57:07.577][RX] LVGL fps=3 rnd_tasks=140 sw_tasks=0
+[22:57:08.677][RX] LVGL fps=3 rnd_tasks=24 sw_tasks=0
+[22:57:09.826][RX] LVGL fps=3 rnd_tasks=24 sw_tasks=0
+[22:57:10.960][RX] LVGL fps=3 rnd_tasks=24 sw_tasks=0
+[22:57:12.019][RX] LVGL fps=3 rnd_tasks=23 sw_tasks=0
+[22:57:13.035][RX] LVGL fps=9 rnd_tasks=50 sw_tasks=280
+[22:57:14.158][RX] LVGL fps=6 rnd_tasks=35 sw_tasks=196
+[22:57:15.228][RX] LVGL fps=5 rnd_tasks=103 sw_tasks=138
+[22:57:16.378][RX] LVGL fps=5 rnd_tasks=510 sw_tasks=0
+[22:57:17.528][RX] LVGL fps=5 rnd_tasks=510 sw_tasks=0
+[22:57:18.661][RX] LVGL fps=4 rnd_tasks=419 sw_tasks=0
+[22:57:19.678][RX] LVGL fps=4 rnd_tasks=479 sw_tasks=0
+[22:57:20.878][RX] LVGL fps=5 rnd_tasks=570 sw_tasks=0
+[22:57:22.028][RX] LVGL fps=5 rnd_tasks=464 sw_tasks=45
+[22:57:23.144][RX] LVGL fps=6 rnd_tasks=529 sw_tasks=63
+[22:57:24.728][RX] LVGL fps=4 rnd_tasks=734 sw_tasks=54
+[22:57:25.728][RX] LVGL fps=2 rnd_tasks=576 sw_tasks=0
+[22:57:26.728][RX] LVGL fps=2 rnd_tasks=576 sw_tasks=0
+[22:57:29.346][RX] LVGL fps=0 rnd_tasks=411 sw_tasks=0
+[22:57:30.466][RX] LVGL fps=3 rnd_tasks=517 sw_tasks=0
+[22:57:31.581][RX] LVGL fps=3 rnd_tasks=506 sw_tasks=0
+[22:57:33.328][RX] LVGL fps=2 rnd_tasks=455 sw_tasks=0
+[22:57:34.328][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:57:35.346][RX] LVGL fps=6 rnd_tasks=383 sw_tasks=398
+[22:57:36.397][RX] LVGL fps=5 rnd_tasks=452 sw_tasks=696
+[22:57:37.414][RX] LVGL fps=4 rnd_tasks=324 sw_tasks=565
+[22:57:38.664][RX] LVGL fps=3 rnd_tasks=340 sw_tasks=460
+[22:57:39.746][RX] LVGL fps=3 rnd_tasks=289 sw_tasks=344
+[22:57:40.814][RX] LVGL fps=3 rnd_tasks=293 sw_tasks=356
+[22:57:42.014][RX] LVGL fps=4 rnd_tasks=323 sw_tasks=460
+[22:57:43.013][RX] LVGL fps=5 rnd_tasks=344 sw_tasks=609
+[22:57:44.146][RX] LVGL fps=6 rnd_tasks=514 sw_tasks=723
+[22:57:45.148][RX] LVGL fps=6 rnd_tasks=533 sw_tasks=449
+[22:57:46.154][RX] LVGL fps=6 rnd_tasks=314 sw_tasks=163
+[22:57:47.179][RX] LVGL fps=5 rnd_tasks=315 sw_tasks=317
+[22:57:48.180][RX] LVGL fps=5 rnd_tasks=450 sw_tasks=642
+[22:57:49.181][RX] LVGL fps=5 rnd_tasks=336 sw_tasks=609
+[22:57:50.416][RX] LVGL fps=4 rnd_tasks=331 sw_tasks=460
+[22:57:51.532][RX] LVGL fps=3 rnd_tasks=293 sw_tasks=356
+[22:57:52.651][RX] LVGL fps=3 rnd_tasks=294 sw_tasks=355
+[22:57:52.720][RX] LVGL benchmark scene=Empty screen fps=32
+[22:57:52.720][RX] LVGL benchmark scene=Moving wallpaper fps=20
+[22:57:52.720][RX] LVGL benchmark scene=Single rectangle fps=56
+[22:57:52.720][RX] LVGL benchmark scene=Multiple rectangles fps=52
+[22:57:52.720][RX] LVGL benchmark scene=Multiple RGB images fps=18
+[22:57:52.720][RX] LVGL benchmark scene=Multiple ARGB images fps=18
+[22:57:52.720][RX] LVGL benchmark scene=Rotated ARGB images fps=4
+[22:57:52.720][RX] LVGL benchmark scene=Multiple labels fps=10
+[22:57:52.720][RX] LVGL benchmark scene=Screen sized text fps=3
+[22:57:52.720][RX] LVGL benchmark scene=Multiple arcs fps=7
+[22:57:52.720][RX] LVGL benchmark scene=Containers fps=4
+[22:57:52.765][RX] LVGL benchmark scene=Containers with overlay fps=5
+[22:57:52.765][RX] LVGL benchmark scene=Containers with opa fps=5
+[22:57:52.765][RX] LVGL benchmark scene=Containers with opa_layer fps=1
+[22:57:52.765][RX] LVGL benchmark scene=Containers with scrolling fps=3
+[22:57:52.765][RX] LVGL benchmark scene=Widgets demo fps=12
+[22:57:52.765][RX] LVGL benchmark average fps=15
+[22:57:52.765][RX] RND type=1 claimed=9833 unclaimed=0
+[22:57:52.765][RX] RND type=2 claimed=1676 unclaimed=0
+[22:57:52.765][RX] RND type=3 claimed=659 unclaimed=197
+[22:57:52.765][RX] RND type=4 claimed=0 unclaimed=0
+[22:57:52.765][RX] RND type=5 claimed=8560 unclaimed=0
+[22:57:52.765][RX] RND type=6 claimed=3328 unclaimed=172
+[22:57:52.804][RX] RND type=7 claimed=270 unclaimed=0
+[22:57:52.804][RX] RND type=8 claimed=0 unclaimed=7108
+[22:57:52.804][RX] RND type=9 claimed=0 unclaimed=1212
+[22:57:52.804][RX] RND type=10 claimed=0 unclaimed=220
+[22:57:52.804][RX] RND type=11 claimed=0 unclaimed=0
+[22:57:52.804][RX] RND type=12 claimed=0 unclaimed=0
+[22:57:52.804][RX] RND type=13 claimed=0 unclaimed=0
+[22:57:52.804][RX] RND type=14 claimed=0 unclaimed=0
+[22:57:52.804][RX] RND type=15 claimed=0 unclaimed=0
+[22:57:52.804][RX] RND batch=32 commands=140390 doorbells=30413
+[22:57:52.804][RX] LV_DRAW_LAYER_SIMPLE_BUF_SIZE is small making opa_layered slow. Consider 1/20 screen size for it (> 90kB)
+[22:57:52.971][RX] Benchmark Summary (9.6.0 )
+[22:57:52.971][RX] Name, Avg. CPU, Avg. FPS, Avg. time, render time, flush time
+[22:57:52.986][RX] Empty screen, 92%, 32, 29, 15, 14
+[22:57:52.991][RX] Moving wallpaper, 99%, 20, 47, 41, 6
+[22:57:52.997][RX] Single rectangle, 99%, 56, 15, 2, 13
+[22:57:53.003][RX] Multiple rectangles, 99%, 52, 15, 13, 2
+[22:57:53.010][RX] Multiple RGB images, 99%, 18, 40, 36, 4
+[22:57:53.017][RX] Multiple ARGB images, 99%, 18, 40, 36, 4
+[22:57:53.025][RX] Rotated ARGB images, 99%, 4, 228, 215, 13
+[22:57:53.032][RX] Multiple labels, 99%, 10, 104, 98, 6
+[22:57:53.064][RX] Screen sized text, 99%, 3, 283, 274, 9
+[22:57:53.064][RX] Multiple arcs, 99%, 7, 121, 114, 7
+[22:57:53.064][RX] Containers, 99%, 4, 173, 166, 7
+[22:57:53.068][RX] Containers with overlay, 99%, 5, 179, 170, 9
+[22:57:53.079][RX] Containers with opa, 99%, 5, 140, 133, 7
+[22:57:53.090][RX] Containers with opa_layer, 99%, 1, 474, 465, 9
+[22:57:53.103][RX] Containers with scrolling, 99%, 3, 275, 264, 11
+[22:57:53.114][RX] Widgets demo, 97%, 12, 169, 161, 8
+[22:57:53.118][RX] All scenes avg.,98%, 15, 145, 137, 8
+[22:57:53.647][RX] LVGL fps=2 rnd_tasks=152 sw_tasks=0
+[22:57:54.676][RX] LVGL fps=3 rnd_tasks=56 sw_tasks=0
+[22:57:55.675][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:57:56.676][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:57:57.676][RX] LVGL fps=4 rnd_tasks=56 sw_tasks=0
+[22:57:58.677][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:57:59.675][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:58:00.676][RX] LVGL fps=4 rnd_tasks=56 sw_tasks=0
+[22:58:01.675][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:58:02.693][RX] LVGL fps=4 rnd_tasks=312 sw_tasks=0
+[22:58:03.692][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:58:04.693][RX] LVGL fps=4 rnd_tasks=56 sw_tasks=0
+[22:58:05.693][RX] LVGL fps=3 rnd_tasks=42 sw_tasks=0
+[22:58:06.695][RX] LVGL fps=4 rnd_tasks=56 sw_tasks=0
+[22:58:07.694][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:08.693][RX] LVGL fps=6 rnd_tasks=52 sw_tasks=0
+[22:58:09.699][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:58:10.693][RX] LVGL fps=5 rnd_tasks=49 sw_tasks=0
+[22:58:11.699][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:15.003][RX] RN-17 full_max_lsb=0 edge_max_lsb=17 over1=1029 pixels=921600 over1_ppm=1116 bins_0_1_2_3to4_5plus=905387,15184,937,56,36 rnd_tasks=25 sw_tasks=0 PASS
+[22:58:15.003][RX] RND type=1 claimed=10629 unclaimed=6
+[22:58:15.003][RX] RND type=2 claimed=2272 unclaimed=4
+[22:58:15.003][RX] RND type=3 claimed=659 unclaimed=197
+[22:58:15.003][RX] RND type=4 claimed=0 unclaimed=0
+[22:58:15.003][RX] RND type=5 claimed=9002 unclaimed=15
+[22:58:15.003][RX] RND type=6 claimed=3328 unclaimed=172
+[22:58:15.003][RX] RND type=7 claimed=270 unclaimed=0
+[22:58:15.003][RX] RND type=8 claimed=0 unclaimed=7108
+[22:58:15.003][RX] RND type=9 claimed=0 unclaimed=1212
+[22:58:15.032][RX] RND type=10 claimed=0 unclaimed=220
+[22:58:15.032][RX] RND type=11 claimed=0 unclaimed=0
+[22:58:15.032][RX] RND type=12 claimed=0 unclaimed=0
+[22:58:15.032][RX] RND type=13 claimed=0 unclaimed=0
+[22:58:15.032][RX] RND type=14 claimed=0 unclaimed=0
+[22:58:15.032][RX] RND type=15 claimed=0 unclaimed=0
+[22:58:15.032][RX] RND batch=32 commands=152068 doorbells=31799
+[22:58:15.032][RX] RN-17 type=1 claimed=6 unclaimed=0
+[22:58:15.032][RX] RN-17 type=2 claimed=4 unclaimed=0
+[22:58:15.032][RX] RN-17 type=5 claimed=15 unclaimed=0
+[22:58:16.043][RX] LVGL fps=5 rnd_tasks=37 sw_tasks=0
+[22:58:17.056][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:18.050][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:19.043][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:20.043][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:21.049][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:22.043][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:23.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:24.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:25.043][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:26.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:27.044][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:28.043][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:29.050][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:30.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:31.043][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:32.047][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:33.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:34.043][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:35.048][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:36.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:37.050][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[22:58:38.042][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[22:58:39.042][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[22:58:40.098][RX] 
+[22:58:40.098][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[22:58:40.098][RX]   E         D   D   R   R   V   V      3      2 
+[22:58:40.098][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[22:58:40.098][RX]   E         D   D   R  R     V V       3   2    
+[22:58:40.098][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[22:58:40.098][RX] 
+[22:58:40.098][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[22:58:40.098][RX] CHIP_ID: 0xed320001
+[22:58:40.098][RX] CLK_SYS_HZ: 100000000
+[22:58:40.098][RX] ROM bytes: 16384
+[22:58:40.098][RX] SRAM bytes: 65536
+[22:58:40.098][RX] I-cache bytes: 8192
+[22:58:40.098][RX] D-cache bytes: 8192
+[22:58:40.098][RX] MEM_READY: 1
+[22:58:40.098][RX] Build commit: 9510c64
+[22:58:40.098][RX] Compiler version: GCC 15.2.0
+[22:58:40.202][RX] BIOS: EdRV32
+[22:58:40.202][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:58:44.123][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[22:58:44.131][RX] Input error: type 1-4 then Enter
+[22:58:44.131][SYS] Input error: type 1-4 then Enter
+[22:58:44.131][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:58:44.133][RX] UART load ready
+[22:59:03.115][RX] Load bytes: 218748 at 0x90000000
+[22:59:03.115][RX] Load result: PASS
+[22:59:03.115][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:59:03.117][RX] UART load ready
+[22:59:03.507][RX] Load bytes: 4384 at 0x90035680
+[22:59:03.507][RX] Load result: PASS
+[22:59:03.507][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:59:03.509][RX] Run address:
+[22:59:03.512][RX] Run: 0x90000000
+[22:59:03.865][RX] Head: 0x9002e930 (4e 45 53 1a)
+[22:59:03.865][RX] ROM loaded:  [0] 16k/8k H
+[22:59:03.865][RX] created memory mapper: None
+[22:59:03.865][RX] setting up mapper 0
+[22:59:03.865][RX] reset memory mapper
+[22:59:03.865][RX] NES powered on
+[22:59:05.119][RX] NES fps=47.8 shown=15.1 cpu=24% ppu=55%
+[22:59:06.408][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:07.697][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:08.988][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:10.279][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:11.569][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:12.859][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:14.147][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:15.435][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:16.723][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:18.013][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:19.304][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:20.594][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:21.885][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:23.175][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[22:59:24.463][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:25.459][RX] 
+[22:59:25.459][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[22:59:25.459][RX]   E         D   D   R   R   V   V      3      2 
+[22:59:25.459][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[22:59:25.459][RX]   E         D   D   R  R     V V       3   2    
+[22:59:25.459][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[22:59:25.459][RX] 
+[22:59:25.459][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[22:59:25.459][RX] CHIP_ID: 0xed320001
+[22:59:25.459][RX] CLK_SYS_HZ: 100000000
+[22:59:25.459][RX] ROM bytes: 16384
+[22:59:25.459][RX] SRAM bytes: 65536
+[22:59:25.459][RX] I-cache bytes: 8192
+[22:59:25.459][RX] D-cache bytes: 8192
+[22:59:25.459][RX] MEM_READY: 1
+[22:59:25.459][RX] Build commit: 9510c64
+[22:59:25.459][RX] Compiler version: GCC 15.2.0
+[22:59:25.555][RX] Boot SRAM
+[22:59:25.555][RX] Monitor: EdRV32
+[22:59:25.555][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[22:59:32.266][RX] 
+[22:59:32.266][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[22:59:32.266][RX]   E         D   D   R   R   V   V      3      2 
+[22:59:32.266][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[22:59:32.266][RX]   E         D   D   R  R     V V       3   2    
+[22:59:32.266][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[22:59:32.266][RX] 
+[22:59:32.266][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[22:59:32.266][RX] CHIP_ID: 0xed320001
+[22:59:32.266][RX] CLK_SYS_HZ: 100000000
+[22:59:32.266][RX] ROM bytes: 16384
+[22:59:32.266][RX] SRAM bytes: 65536
+[22:59:32.266][RX] I-cache bytes: 8192
+[22:59:32.266][RX] D-cache bytes: 8192
+[22:59:32.266][RX] MEM_READY: 1
+[22:59:32.266][RX] Build commit: 9510c64
+[22:59:32.266][RX] Compiler version: GCC 15.2.0
+[22:59:32.370][RX] BIOS: EdRV32
+[22:59:32.370][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:59:35.141][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[22:59:35.149][RX] Input error: type 1-4 then Enter
+[22:59:35.149][SYS] Input error: type 1-4 then Enter
+[22:59:35.149][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:59:35.151][RX] UART load ready
+[22:59:54.134][RX] Load bytes: 218748 at 0x90000000
+[22:59:54.134][RX] Load result: PASS
+[22:59:54.134][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:59:54.136][RX] UART load ready
+[22:59:54.526][RX] Load bytes: 4384 at 0x90035680
+[22:59:54.526][RX] Load result: PASS
+[22:59:54.526][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[22:59:54.528][RX] Run address:
+[22:59:54.531][RX] Run: 0x90000000
+[22:59:54.903][RX] Head: 0x9002e930 (4e 45 53 1a)
+[22:59:54.903][RX] ROM loaded:  [0] 16k/8k H
+[22:59:54.903][RX] created memory mapper: None
+[22:59:54.903][RX] setting up mapper 0
+[22:59:54.903][RX] reset memory mapper
+[22:59:54.903][RX] NES powered on
+[22:59:56.146][RX] NES fps=47.8 shown=15.1 cpu=24% ppu=55%
+[22:59:57.428][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[22:59:58.717][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:00.007][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:01.296][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:02.586][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:03.874][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:05.162][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:06.450][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:07.738][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:09.028][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:10.317][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:11.607][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:12.897][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:14.187][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:15.475][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:16.763][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:18.051][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:19.341][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:20.633][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:21.925][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:23.216][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:24.507][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:25.795][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:27.083][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:28.374][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:29.665][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:30.956][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:32.246][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:33.537][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:34.828][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:36.119][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:37.409][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:38.698][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:39.988][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:41.281][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:42.573][RX] NES fps=46.4 shown=15.4 cpu=23% ppu=56%
+[23:00:43.864][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:45.155][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:46.444][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:47.733][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:49.022][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:50.314][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:51.606][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:52.897][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:54.188][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:55.479][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:00:56.769][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:58.057][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:00:59.346][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:00.637][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:01.930][RX] NES fps=46.4 shown=15.4 cpu=23% ppu=56%
+[23:01:03.222][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:04.513][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:05.803][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:07.093][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:08.383][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:09.672][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:10.962][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:12.253][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:13.543][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:14.834][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:16.125][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:17.415][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:18.704][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:19.993][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:21.283][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:22.573][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:23.864][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:25.155][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:26.446][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:27.736][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:29.025][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:30.314][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:31.603][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:32.894][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:34.185][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:35.476][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:36.766][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:38.057][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:39.346][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:40.635][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:41.924][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:43.215][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:44.505][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:45.796][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:47.087][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:48.378][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:49.667][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:50.956][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:52.245][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:01:53.535][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:54.826][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:56.117][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:57.408][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:58.698][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:01:59.988][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:01.277][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:02.565][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:03.855][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:05.146][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:06.437][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:07.728][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:09.018][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:10.308][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:11.597][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:12.886][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:14.176][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:15.467][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:16.758][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:18.048][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:19.339][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:20.629][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:21.918][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:23.207][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:24.496][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:25.787][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:27.078][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:28.369][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:29.659][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:30.950][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:32.239][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:33.528][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:34.817][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:36.107][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:37.399][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:38.689][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:39.980][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:41.271][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:42.559][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:43.848][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:45.137][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:46.428][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:47.719][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:49.010][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:50.300][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:51.591][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:52.880][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:54.169][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:55.458][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:02:56.749][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:58.039][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:02:59.330][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:00.621][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:01.912][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:03.201][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:04.490][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:05.779][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:07.069][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:08.360][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:09.651][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:10.942][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:12.233][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:13.522][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:14.811][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:16.100][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:17.390][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:18.681][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:19.972][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:21.263][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:22.553][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:23.843][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:25.132][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:26.421][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:27.711][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:29.002][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:30.293][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:31.583][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:32.874][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:34.165][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:35.453][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:36.742][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:38.032][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:39.323][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:40.614][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:41.904][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:43.195][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:44.486][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:45.775][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:47.063][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:48.353][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:49.643][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:50.934][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:52.225][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:53.516][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:54.806][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:03:56.095][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:57.384][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:58.672][RX] NES fps=46.6 shown=15.5 cpu=23% ppu=56%
+[23:03:59.963][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:04:01.254][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:04:02.546][RX] NES fps=46.5 shown=15.5 cpu=23% ppu=56%
+[23:04:03.151][RX] 
+[23:04:03.151][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:04:03.151][RX]   E         D   D   R   R   V   V      3      2 
+[23:04:03.151][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:04:03.151][RX]   E         D   D   R  R     V V       3   2    
+[23:04:03.151][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:04:03.151][RX] 
+[23:04:03.151][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:04:03.151][RX] CHIP_ID: 0xed320001
+[23:04:03.151][RX] CLK_SYS_HZ: 100000000
+[23:04:03.151][RX] ROM bytes: 16384
+[23:04:03.151][RX] SRAM bytes: 65536
+[23:04:03.151][RX] I-cache bytes: 8192
+[23:04:03.151][RX] D-cache bytes: 8192
+[23:04:03.151][RX] MEM_READY: 1
+[23:04:03.151][RX] Build commit: 9510c64
+[23:04:03.151][RX] Compiler version: GCC 15.2.0
+[23:04:03.273][RX] BIOS: EdRV32
+[23:04:03.273][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:04:17.536][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[23:04:17.544][RX] Input error: type 1-4 then Enter
+[23:04:17.544][SYS] Input error: type 1-4 then Enter
+[23:04:17.544][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:04:17.546][RX] UART load ready
+[23:05:54.648][RX] Load bytes: 1119392 at 0x90000000
+[23:05:54.648][RX] Load result: PASS
+[23:05:54.648][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:05:54.650][RX] UART load ready
+[23:05:54.782][RX] Load bytes: 1408 at 0x901114a0
+[23:05:54.782][RX] Load result: PASS
+[23:05:54.782][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:05:54.784][RX] Run address:
+[23:05:54.787][RX] Run: 0x90000000
+[23:05:56.656][RX] S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+[23:05:56.663][RX] LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+[23:05:57.664][RX] LVGL fps=4 rnd_tasks=34 sw_tasks=0
+[23:05:58.661][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:05:59.679][RX] LVGL fps=3 rnd_tasks=12 sw_tasks=0
+[23:06:00.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:01.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:02.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:03.688][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:04.686][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:05.685][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:06.684][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:07.679][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:08.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:09.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:10.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:11.686][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:12.679][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:13.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:14.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:15.683][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:16.684][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:17.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:18.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:19.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:20.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:21.687][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:22.683][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:23.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:24.684][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:25.678][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:26.679][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:27.693][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:28.693][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:29.695][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:30.694][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:31.691][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:32.696][RX] LVGL fps=3 rnd_tasks=12 sw_tasks=0
+[23:06:33.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:34.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:35.707][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:36.704][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:37.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:38.695][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:39.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:40.701][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:41.698][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:42.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:43.704][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:44.699][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:45.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:46.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:47.695][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:48.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:49.701][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:50.699][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:51.701][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:52.700][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:53.697][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:54.699][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:55.697][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:56.695][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:06:57.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:58.701][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:06:59.698][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:07:00.697][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:07:01.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:07:02.695][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:07:03.696][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:07:04.695][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:07:05.696][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:07:06.949][RX] 
+[23:07:06.949][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:07:06.949][RX]   E         D   D   R   R   V   V      3      2 
+[23:07:06.949][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:07:06.949][RX]   E         D   D   R  R     V V       3   2    
+[23:07:06.949][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:07:06.949][RX] 
+[23:07:06.949][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:07:06.949][RX] CHIP_ID: 0xed320001
+[23:07:06.949][RX] CLK_SYS_HZ: 100000000
+[23:07:06.949][RX] ROM bytes: 16384
+[23:07:06.949][RX] SRAM bytes: 65536
+[23:07:06.949][RX] I-cache bytes: 8192
+[23:07:06.949][RX] D-cache bytes: 8192
+[23:07:06.949][RX] MEM_READY: 1
+[23:07:06.949][RX] Build commit: 9510c64
+[23:07:06.949][RX] Compiler version: GCC 15.2.0
+[23:07:07.054][RX] Boot SRAM
+[23:07:07.054][RX] Monitor: EdRV32
+[23:07:07.054][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info

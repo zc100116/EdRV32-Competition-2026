@@ -1,0 +1,1104 @@
+Expanded routed report; actual counts can be lower where fewer paths exist.
+Startpoint  : u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_678/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_678/OSHIFTOUT0           tco                   0.380       5.228 r       u_tmds/g_channel[0].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       5.228         u_tmds/cascade0_w [0]
+ IOLHR_16_684/OSHIFTIN0                                                    r       u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   5.228         Logic Levels: 0
+                                                                                   Logic: 0.380ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_684/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.413       6.934
+
+ Data required time                                                  6.934
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.934
+ Data arrival time                                                   5.228
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.706
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_702/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_702/OSHIFTOUT0           tco                   0.380       5.228 r       u_tmds/g_channel[1].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       5.228         u_tmds/cascade0_w [1]
+ IOLHR_16_708/OSHIFTIN0                                                    r       u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   5.228         Logic Levels: 0
+                                                                                   Logic: 0.380ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_708/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.413       6.934
+
+ Data required time                                                  6.934
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.934
+ Data arrival time                                                   5.228
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.706
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_726/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_726/OSHIFTOUT0           tco                   0.380       5.228 r       u_tmds/g_channel[2].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       5.228         u_tmds/cascade0_w [2]
+ IOLHR_16_732/OSHIFTIN0                                                    r       u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   5.228         Logic Levels: 0
+                                                                                   Logic: 0.380ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_732/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.413       6.934
+
+ Data required time                                                  6.934
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.934
+ Data arrival time                                                   5.228
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.706
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_750/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_750/OSHIFTOUT0           tco                   0.380       5.228 r       u_tmds/g_channel[3].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       5.228         u_tmds/cascade0_w [3]
+ IOLHR_16_756/OSHIFTIN0                                                    r       u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   5.228         Logic Levels: 0
+                                                                                   Logic: 0.380ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_756/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.413       6.934
+
+ Data required time                                                  6.934
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.934
+ Data arrival time                                                   5.228
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.706
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_678/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_678/OSHIFTOUT1           tco                   0.377       5.225 r       u_tmds/g_channel[0].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       5.225         u_tmds/cascade1_w [0]
+ IOLHR_16_684/OSHIFTIN1                                                    r       u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   5.225         Logic Levels: 0
+                                                                                   Logic: 0.377ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_684/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.348       6.999
+
+ Data required time                                                  6.999
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.999
+ Data arrival time                                                   5.225
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.774
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_702/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_702/OSHIFTOUT1           tco                   0.377       5.225 r       u_tmds/g_channel[1].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       5.225         u_tmds/cascade1_w [1]
+ IOLHR_16_708/OSHIFTIN1                                                    r       u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   5.225         Logic Levels: 0
+                                                                                   Logic: 0.377ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_708/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.348       6.999
+
+ Data required time                                                  6.999
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.999
+ Data arrival time                                                   5.225
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.774
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_726/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_726/OSHIFTOUT1           tco                   0.377       5.225 r       u_tmds/g_channel[2].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       5.225         u_tmds/cascade1_w [2]
+ IOLHR_16_732/OSHIFTIN1                                                    r       u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   5.225         Logic Levels: 0
+                                                                                   Logic: 0.377ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_732/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.348       6.999
+
+ Data required time                                                  6.999
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.999
+ Data arrival time                                                   5.225
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.774
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.044  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.117
+  Launch Clock Delay      :  4.848
+  Clock Pessimism Removal :  0.687
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.897       0.943 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.943         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.110       1.053 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        1.092       2.145         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.069       2.214 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.776       2.990         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.177       3.167 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.681       4.848         ntclkbufg_2
+ IOLHR_16_750/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_750/OSHIFTOUT1           tco                   0.377       5.225 r       u_tmds/g_channel[3].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       5.225         u_tmds/cascade1_w [3]
+ IOLHR_16_756/OSHIFTIN1                                                    r       u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   5.225         Logic Levels: 0
+                                                                                   Logic: 0.377ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.766       3.505 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.505         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.095       3.600 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.929       4.529         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.033       4.562 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.661       5.223         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.150       5.373 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.437       6.810         ntclkbufg_2
+ IOLHR_16_756/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2/OCLK
+ clock pessimism                                         0.687       7.497
+ clock uncertainty                                      -0.150       7.347
+
+ Setup time                                             -0.348       6.999
+
+ Data required time                                                  6.999
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  6.999
+ Data arrival time                                                   5.225
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         1.774
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_678/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_678/OSHIFTOUT0           tco                   0.238       3.423 r       u_tmds/g_channel[0].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       3.423         u_tmds/cascade0_w [0]
+ IOLHR_16_684/OSHIFTIN0                                                    r       u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   3.423         Logic Levels: 0
+                                                                                   Logic: 0.238ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_684/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.195       5.507
+
+ Data required time                                                  5.507
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.507
+ Data arrival time                                                   3.423
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.084
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_702/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_702/OSHIFTOUT0           tco                   0.238       3.423 r       u_tmds/g_channel[1].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       3.423         u_tmds/cascade0_w [1]
+ IOLHR_16_708/OSHIFTIN0                                                    r       u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   3.423         Logic Levels: 0
+                                                                                   Logic: 0.238ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_708/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.195       5.507
+
+ Data required time                                                  5.507
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.507
+ Data arrival time                                                   3.423
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.084
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_726/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_726/OSHIFTOUT0           tco                   0.238       3.423 r       u_tmds/g_channel[2].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       3.423         u_tmds/cascade0_w [2]
+ IOLHR_16_732/OSHIFTIN0                                                    r       u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   3.423         Logic Levels: 0
+                                                                                   Logic: 0.238ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_732/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.195       5.507
+
+ Data required time                                                  5.507
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.507
+ Data arrival time                                                   3.423
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.084
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_750/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_750/OSHIFTOUT0           tco                   0.238       3.423 r       u_tmds/g_channel[3].u_pair/opit_2_com/OSHIFTOUT0
+                                   net (fanout=1)        0.000       3.423         u_tmds/cascade0_w [3]
+ IOLHR_16_756/OSHIFTIN0                                                    r       u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+
+ Data arrival time                                                   3.423         Logic Levels: 0
+                                                                                   Logic: 0.238ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_756/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.195       5.507
+
+ Data required time                                                  5.507
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.507
+ Data arrival time                                                   3.423
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.084
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_678/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_678/OSHIFTOUT1           tco                   0.235       3.420 r       u_tmds/g_channel[0].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       3.420         u_tmds/cascade1_w [0]
+ IOLHR_16_684/OSHIFTIN1                                                    r       u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   3.420         Logic Levels: 0
+                                                                                   Logic: 0.235ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_684/OCLK                                                         r       u_tmds/g_channel[0].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.168       5.534
+
+ Data required time                                                  5.534
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.534
+ Data arrival time                                                   3.420
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.114
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_702/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_702/OSHIFTOUT1           tco                   0.235       3.420 r       u_tmds/g_channel[1].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       3.420         u_tmds/cascade1_w [1]
+ IOLHR_16_708/OSHIFTIN1                                                    r       u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   3.420         Logic Levels: 0
+                                                                                   Logic: 0.235ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_708/OCLK                                                         r       u_tmds/g_channel[1].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.168       5.534
+
+ Data required time                                                  5.534
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.534
+ Data arrival time                                                   3.420
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.114
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_726/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_726/OSHIFTOUT1           tco                   0.235       3.420 r       u_tmds/g_channel[2].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       3.420         u_tmds/cascade1_w [2]
+ IOLHR_16_732/OSHIFTIN1                                                    r       u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   3.420         Logic Levels: 0
+                                                                                   Logic: 0.235ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_732/OCLK                                                         r       u_tmds/g_channel[2].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.168       5.534
+
+ Data required time                                                  5.534
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.534
+ Data arrival time                                                   3.420
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.114
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+Endpoint    : u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1
+Path Group  : clk_serial
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.026  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.659
+  Launch Clock Delay      :  3.185
+  Clock Pessimism Removal :  0.500
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          0.000       0.000 r
+ D18                                                     0.000       0.000 r       clk_i (port)
+                                   net (fanout=1)        0.046       0.046         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.521       0.567 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.567         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.087       0.654 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.812       1.466         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.065       1.531 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.501       2.032         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.115       2.147 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       1.038       3.185         ntclkbufg_2
+ IOLHR_16_750/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2_com/OCLK
+
+ IOLHR_16_750/OSHIFTOUT1           tco                   0.235       3.420 r       u_tmds/g_channel[3].u_pair/opit_2_com/OSHIFTOUT1
+                                   net (fanout=1)        0.000       3.420         u_tmds/cascade1_w [3]
+ IOLHR_16_756/OSHIFTIN1                                                    r       u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1
+
+ Data arrival time                                                   3.420         Logic Levels: 0
+                                                                                   Logic: 0.235ns(100.000%), Route: 0.000ns(0.000%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_serial (rising edge)                          2.693       2.693 r
+ D18                                                     0.000       2.693 r       clk_i (port)
+                                   net (fanout=1)        0.046       2.739         clk_i
+ IOBD_0_1386/PAD                                                                   clk_i_ibuf/opit_0/I
+ IOBD_0_1386/DIN                   td                    0.445       3.184 r       clk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       3.184         clk_i_ibuf/ntD
+ IOLHR_16_1386/DI                                                                  clk_i_ibuf/opit_1/DI
+ IOLHR_16_1386/DI_TO_CLK           td                    0.073       3.257 r       clk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=2)        0.668       3.925         nt_clk_i
+ GPLL_7_769/CLK_IN0                                                                u_pll_video/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_769/CLKOUT1                td                    0.031       3.956 r       u_pll_video/u_gpll/gpll_inst/CLKOUT1
+                                   net (fanout=1)        0.420       4.376         clk_serial_w
+ USCM_383_888/CLKIN0                                                               clkbufg_2/gopclkbufg/CLK
+ USCM_383_888/CLKOUT               td                    0.097       4.473 r       clkbufg_2/gopclkbufg/CLKOUT
+                                   net (fanout=16)       0.879       5.352         ntclkbufg_2
+ IOLHR_16_756/OCLK                                                         r       u_tmds/g_channel[3].u_pair/opit_2/OCLK
+ clock pessimism                                         0.500       5.852
+ clock uncertainty                                      -0.150       5.702
+
+ Setup time                                             -0.168       5.534
+
+ Data required time                                                  5.534
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.534
+ Data arrival time                                                   3.420
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         2.114
+====================================================================================================
+
+====================================================================================================
