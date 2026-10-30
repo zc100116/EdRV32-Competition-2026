@@ -14,11 +14,13 @@ class ProgramPanel(QFrame):
         self.toast = toast
         self.setObjectName("card")
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(8, 6, 8, 6)
+        layout.setSpacing(4)
         title = QLabel("BIOS · 烧录 / 加载运行")
         title.setObjectName("cardTitle")
         layout.addWidget(title)
-        hint = QLabel("以 115200 连接串口，选择镜像并开始。\n"
-                      "已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位。ELF 加载后立即运行。")
+        hint = QLabel("115200 串口 · .bin 复位运行\n"
+                      "BIOS 中直接开始；否则 KEY1 + 复位")
         hint.setWordWrap(True)
         layout.addWidget(hint)
         self.mode = QComboBox()
@@ -51,7 +53,6 @@ class ProgramPanel(QFrame):
         self.result = QLabel("等待选择文件")
         self.result.setWordWrap(True)
         layout.addWidget(self.result)
-        layout.addStretch(1)
 
     def _mode_changed(self):
         elf = self.mode.currentData()

@@ -246,6 +246,11 @@ ICON_TERMINAL = ('<polyline points="4 17 10 11 4 5"/>'
 ICON_FILTER = ('<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 '
                '22 3"/>')
 
+ICON_NETWORK = ('<rect x="3" y="3" width="18" height="10" rx="2"/>'
+                '<path d="M12 13v4M4 21v-4h16v4M4 21h0M12 17v4M20 21h0"/>')
+ICON_DASHBOARD = ('<rect x="3" y="3" width="18" height="18" rx="2"/>'
+                  '<path d="M3 9h18M9 9v12M13 13h5M13 17h3"/>')
+
 
 # ------------------------------------------------------------------ toast --
 class Toast(QLabel):
@@ -1155,8 +1160,9 @@ class MainWindow(QMainWindow):
         h.addStretch(1)
         self.chip = QWidget()
         self.chip.setObjectName("chip")
+        self.chip.setFixedHeight(30)
         chip_layout = QHBoxLayout(self.chip)
-        chip_layout.setContentsMargins(12, 6, 14, 6)
+        chip_layout.setContentsMargins(10, 0, 10, 0)
         chip_layout.setSpacing(8)
         self.chip_dot = QLabel()
         self.chip_dot.setObjectName("chipDot")
@@ -1193,8 +1199,8 @@ class MainWindow(QMainWindow):
                 ("连接", "串口连接与参数", ICON_PLUG),
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
                 ("规则", "数据匹配规则", ICON_FILTER),
-                ("网口", "UDP 文件收发", ICON_PLUG),
-                ("中控台", "SoC 程序、图像与 DDR", ICON_FILTER))):
+                ("网口", "UDP 文件收发", ICON_NETWORK),
+                ("中控台", "SoC 程序、图像与 DDR", ICON_DASHBOARD))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)

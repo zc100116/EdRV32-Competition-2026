@@ -193,7 +193,8 @@ class ConsoleLayoutTest(unittest.TestCase):
         cls.app = QApplication.instance() or QApplication([])
 
     def test_two_window_sizes_and_capabilities(self):
-        from PySide6.QtWidgets import QLabel
+        from PySide6.QtGui import QIcon
+        from PySide6.QtWidgets import QLabel, QLineEdit, QPlainTextEdit
         from gui.app import MainWindow
         engine = SerialEngine()
         window = MainWindow(engine)
@@ -205,7 +206,7 @@ class ConsoleLayoutTest(unittest.TestCase):
             self.app.processEvents()
         self.addCleanup(cleanup)
         window.show()
-        for width, height in ((1366, 768), (1920, 1080)):
+        for width, height in ((1366, 768), (1920, 1080), (1366, 768)):
             window.resize(width, height)
             self.app.processEvents()
             self.assertEqual((window.width(), window.height()), (width, height))
@@ -220,6 +221,41 @@ class ConsoleLayoutTest(unittest.TestCase):
                 if not caps['detection']:
                     self.assertIn(name, console.model_note.text())
                     self.assertIn(name, console.image_note.text())
+                self.assertIsInstance(console.fps, QLineEdit)
+                self.assertEqual(console.fps.text(), '30')
+                self.assertEqual(console.rate.text(), '100')
+                self.assertEqual(console.log.lineWrapMode(), QPlainTextEdit.NoWrap)
+                self.assertGreaterEqual(console.view.height() * 2,
+                                        console.workspace.height() + console.lower.height() + 8)
+                self.assertEqual(console.table.horizontalHeaderItem(1).text(), '平均等待')
+                last_row = console.table.visualItemRect(console.table.item(6, 3))
+                self.assertLess(last_row.bottom(), console.table.viewport().height())
+                self.assertEqual(console.table.verticalScrollBar().maximum(), 0)
+                sidebar_controls = (
+                    (console.left_sidebar, [console.program.mode, console.image_path,
+                                            console.model_path, console.progress]),
+                    (console.right_sidebar, [console.scene, console.output,
+                                             console.summary['Scene'], console.quant]),
+                )
+                for sidebar, controls in sidebar_controls:
+                    self.assertEqual(sidebar.compact, height == 768)
+                    self.assertEqual(sidebar.active, 0)
+                    # Default and expanded groups must stay entirely inside the sidebar.
+                    for active in range(len(sidebar.groups)) if sidebar.compact else [0]:
+                        sidebar.activate(active)
+                        self.app.processEvents()
+                        for index, (frame, button, body, _) in enumerate(sidebar.groups):
+                            self.assertGreaterEqual(frame.y(), 0)
+                            self.assertLess(frame.geometry().bottom(), sidebar.height())
+                            expected_visible = not sidebar.compact or index == active
+                            self.assertEqual(body.isVisible(), expected_visible)
+                            self.assertEqual(controls[index].isVisible(), expected_visible)
+                            self.assertGreaterEqual(
+                                button.width(),
+                                button.fontMetrics().horizontalAdvance(button.text()))
+                    sidebar.activate(0)
+                    self.app.processEvents()
+                self.assertTrue(console.left_sidebar.groups[0][2].isVisible())
                 # Titles and single-line status fields must fit their complete text.
                 for widget in console.findChildren(QLabel):
                     if widget.property('role') == 'title':
@@ -228,3 +264,13 @@ class ConsoleLayoutTest(unittest.TestCase):
                                                     widget.text()))
         self.assertEqual(len(window.rail_group.buttons()), 5)
         self.assertFalse(hasattr(window, 'video'))
+        self.assertLessEqual(window.chip.height(), 32)
+        icons = [button.icon().pixmap(20, 20, QIcon.Normal, QIcon.Off).toImage()
+                 for button in window.rail_group.buttons()]
+        for index, icon in enumerate(icons):
+            for other in icons[index + 1:]:
+                self.assertNotEqual(icon, other)
+        console.log.appendPlainText('Switch: frames=2 mtime_ticks=6742100 · 3 个框 ' * 8)
+        self.app.processEvents()
+        self.assertEqual(console.log.document().lastBlock().lineCount(), 1)
+        self.assertGreater(console.log.horizontalScrollBar().maximum(), 0)

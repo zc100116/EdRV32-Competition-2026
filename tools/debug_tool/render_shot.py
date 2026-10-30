@@ -81,7 +81,7 @@ def seed(engine, console, state):
                 records.append(encode(record))
             send_block(source, ('127.0.0.1', 6000), b''.join(records), 3)
     if state == 'detection':
-        path = Path(__file__).resolve().parents[2] / 'build/debug_tool/render-input.png'
+        path = Path(__file__).resolve().parents[2] / 'build/debug_tool/input.png'
         path.parent.mkdir(parents=True, exist_ok=True)
         QImage(demo_pixels(), 1280, 720, 2560, QImage.Format_RGB16).copy().save(str(path))
         console.image_path.setText(os.path.relpath(path))
@@ -129,11 +129,6 @@ def main():
             raise RuntimeError('Simulator produced no EDTM data')
         if (window.width(), window.height()) != (args.width, args.height):
             raise RuntimeError(f'Layout expanded window to {window.size()}')
-        if args.state == 'vision' and args.height == 768:
-            # Show unsupported transfers and their reasons in the evidence viewport.
-            window.soc.left_scroll.verticalScrollBar().setValue(
-                window.soc.image_card.y())
-            app.processEvents()
         if not window.grab().save(args.out):
             raise RuntimeError(f'Cannot save screenshot: {args.out}')
         print(f'Saved {args.out} ({args.width} × {args.height}, {args.state})')

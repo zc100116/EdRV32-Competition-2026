@@ -1,7 +1,7 @@
 """soc_console.py — SoC console design 4.1–4.5; host Qt thread.
 
 One canvas and one board session join programming, scene controls and monitoring.
-Fixed side columns scroll vertically while the central canvas yields space.
+Large windows show every side group; small windows use whole, expandable groups.
 """
 
 import json
@@ -11,11 +11,11 @@ import threading
 import time
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QImage
+from PySide6.QtGui import QColor, QImage, QIntValidator
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QPushButton,
-    QScrollArea, QSizePolicy, QSpinBox, QSplitter, QStackedWidget, QTableWidget,
+    QSizePolicy, QStackedWidget, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget,
 )
 from core.engine import fmt_ts
@@ -32,12 +32,19 @@ QWidget#socConsole QLabel[role="title"] {
     font-size: 14px; font-weight: 700; color: #2f6bff; letter-spacing: 0px;
 }
 QWidget#socConsole QLabel[role="note"] { font-size: 11px; color: #7a8b9d; }
-QWidget#socConsole QLabel[role="number"] {
+QWidget#socConsole QLabel[role="number"],
+QWidget#socConsole QLineEdit[role="number"] {
     font-family: "DejaVu Sans Mono", "Consolas", monospace; font-size: 12px;
 }
-QWidget#socConsole QPushButton { font-size: 12px; padding: 5px 8px; }
-QWidget#socConsole QLineEdit, QWidget#socConsole QComboBox,
-QWidget#socConsole QSpinBox { font-size: 12px; min-height: 23px; padding: 3px 6px; }
+QWidget#socConsole QPushButton { font-size: 12px; padding: 3px 8px; }
+QWidget#socConsole QPushButton#sectionToggle {
+    font-size: 14px; font-weight: 700; color: #2f6bff; text-align: left;
+    border: 0; background: transparent; padding: 0; min-height: 20px;
+}
+QWidget#socConsole QPushButton#sectionToggle:disabled { color: #2f6bff; }
+QWidget#socConsole QLineEdit, QWidget#socConsole QComboBox {
+    font-size: 12px; min-height: 20px; padding: 2px 6px;
+}
 QWidget#socConsole QProgressBar { min-height: 7px; max-height: 7px; }
 QWidget#socConsole QTabWidget::pane { border: 0; }
 QWidget#socConsole QTabBar::tab {
@@ -67,9 +74,11 @@ def card(title):
     frame = QFrame()
     frame.setObjectName('card')
     box = QVBoxLayout(frame)
-    box.setContentsMargins(12, 10, 12, 10)
-    box.setSpacing(8)
-    box.addWidget(label(title, 'title'))
+    box.setContentsMargins(8, 6, 8, 6)
+    box.setSpacing(4)
+    heading = label(title, 'title')
+    heading.setWordWrap(False)
+    box.addWidget(heading)
     return frame, box
 
 
@@ -83,14 +92,76 @@ def form():
     return box
 
 
-def scroll(widget, width):
-    area = QScrollArea()
-    area.setFrameShape(QFrame.NoFrame)
-    area.setWidgetResizable(True)
-    area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-    area.setFixedWidth(width)
-    area.setWidget(widget)
-    return area
+class Sidebar(QWidget):
+    """At small sizes, opening a group closes the previous group as a whole."""
+
+    def __init__(self, width):
+        super().__init__()
+        self.setFixedWidth(width)
+        self.column = QVBoxLayout(self)
+        self.column.setContentsMargins(0, 0, 0, 0)
+        self.column.setSpacing(6)
+        self.groups = []
+        self.compact = None
+        self.active = 0
+
+    def prepare(self, notes, actions):
+        for index in range(self.column.count()):
+            frame = self.column.itemAt(index).widget()
+            outer = frame.layout()
+            title = outer.takeAt(0).widget()
+            caption = title.text()
+            title.hide()
+            title.deleteLater()
+            body = QWidget()
+            body_layout = QVBoxLayout(body)
+            body_layout.setContentsMargins(0, 0, 0, 0)
+            body_layout.setSpacing(4)
+            while outer.count():
+                item = outer.takeAt(0)
+                if item.widget() is not None:
+                    body_layout.addWidget(item.widget())
+                elif item.layout() is not None:
+                    nested = item.layout()
+                    nested.setParent(None)
+                    body_layout.addLayout(nested)
+                else:
+                    body_layout.addItem(item)
+            button = QPushButton(caption)
+            button.setObjectName('sectionToggle')
+            frame.section_toggle = button
+            button.clicked.connect(lambda checked=False, group=index: self.activate(group))
+            header = QHBoxLayout()
+            header.addWidget(button, 1)
+            if frame in actions:
+                action = actions[frame]
+                body_layout.removeWidget(action)
+                header.addWidget(action)
+            outer.addLayout(header)
+            if frame in notes:
+                note = notes[frame]
+                body_layout.removeWidget(note)
+                outer.addWidget(note)
+            outer.addWidget(body)
+            self.groups.append((frame, button, body, caption))
+        self.column.addStretch()
+
+    def activate(self, index):
+        self.active = index
+        self._arrange()
+
+    def set_compact(self, compact):
+        if compact != self.compact:
+            self.compact = compact
+            self.active = 0
+            self._arrange()
+
+    def _arrange(self):
+        for index, (frame, button, body, caption) in enumerate(self.groups):
+            expanded = not self.compact or index == self.active
+            body.setVisible(expanded)
+            button.setEnabled(self.compact)
+            button.setText((('▾ ' if expanded else '▸ ') if self.compact else '') + caption)
 
 
 class SocConsole(QWidget):
@@ -117,45 +188,43 @@ class SocConsole(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(8)
         self._top(layout)
-        main = QSplitter(Qt.Vertical)
-        main.setChildrenCollapsible(False)
-        workspace = QWidget()
-        row = QHBoxLayout(workspace)
+        self.workspace = QWidget()
+        row = QHBoxLayout(self.workspace)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(8)
-        left = QWidget()
-        left_box = QVBoxLayout(left)
-        left_box.setContentsMargins(0, 0, 0, 0)
-        left_box.setSpacing(8)
+        self.left_sidebar = Sidebar(282)
+        left_box = self.left_sidebar.column
         self.program = ProgramPanel(engine, toast)
         self.program.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        self.program.findChild(QLabel, 'cardTitle').setProperty('role', 'title')
         left_box.addWidget(self.program)
         self._transfers(left_box)
-        left_box.addStretch()
-        self.left_scroll = scroll(left, 282)
-        row.addWidget(self.left_scroll)
+        self.left_sidebar.prepare({self.image_card: self.image_note,
+                                   self.model_card: self.model_note}, {})
+        row.addWidget(self.left_sidebar)
         self._canvas(row)
-        right = QWidget()
-        right_box = QVBoxLayout(right)
-        right_box.setContentsMargins(0, 0, 0, 0)
-        right_box.setSpacing(8)
-        self._controls(right_box)
-        right_box.addStretch()
-        row.addWidget(scroll(right, 264))
-        main.addWidget(workspace)
-        lower = QWidget()
-        lower_box = QHBoxLayout(lower)
+        self.right_sidebar = Sidebar(282)
+        self._controls(self.right_sidebar.column)
+        self.right_sidebar.prepare({self.scene_card: self.scene_note,
+                                    self.output_card: self.output_note,
+                                    self.check_card: self.check_note},
+                                   {self.status_card: self.status_query})
+        row.addWidget(self.right_sidebar)
+        layout.addWidget(self.workspace, 1)
+        self.lower = QWidget()
+        self.lower.setFixedHeight(190)
+        lower_box = QHBoxLayout(self.lower)
         lower_box.setContentsMargins(0, 0, 0, 0)
         lower_box.setSpacing(8)
         self._monitor(lower_box)
         self._log(lower_box)
-        main.addWidget(lower)
-        main.setStretchFactor(0, 3)
-        main.setStretchFactor(1, 2)
-        main.setSizes([460, 224])
-        layout.addWidget(main, 1)
+        layout.addWidget(self.lower)
         self._project()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        compact = self.height() < 940
+        self.left_sidebar.set_compact(compact)
+        self.right_sidebar.set_compact(compact)
 
     def button(self, text, callback, primary=False):
         result = QPushButton(text)
@@ -212,23 +281,28 @@ class SocConsole(QWidget):
         self.image_card, box = card('图片发送 · WIN0 / WIN1')
         self.image_path = QLineEdit()
         self.image_path.setPlaceholderText('选择测试图片')
-        box.addWidget(self.image_path)
-        box.addWidget(self.button('选择图片并预览', self._choose_image))
+        path_row = QHBoxLayout()
+        path_row.addWidget(self.image_path, 1)
+        path_row.addWidget(self.button('选择', self._choose_image))
+        box.addLayout(path_row)
         self.window = QComboBox()
         self.window.addItems(['WIN0', 'WIN1'])
-        fields = form()
-        fields.addRow('目标窗口', self.window)
-        box.addLayout(fields)
-        self.send_image = self.button('转换并发送图像', self._send_image)
-        box.addWidget(self.send_image)
+        send_row = QHBoxLayout()
+        send_row.addWidget(label('目标窗口'))
+        send_row.addWidget(self.window)
+        self.send_image = self.button('发送图像', self._send_image)
+        send_row.addWidget(self.send_image)
+        box.addLayout(send_row)
         self.image_note = label('', 'note')
         box.insertWidget(1, self.image_note)
         layout.addWidget(self.image_card)
         self.model_card, box = card('模型发送 · WIN2')
         self.model_path = QLineEdit()
         self.model_path.setPlaceholderText('compile_yolo.py 输出目录')
-        box.addWidget(self.model_path)
-        box.addWidget(self.button('选择模型目录', self._choose_model))
+        path_row = QHBoxLayout()
+        path_row.addWidget(self.model_path, 1)
+        path_row.addWidget(self.button('目录', self._choose_model))
+        box.addLayout(path_row)
         self.send_model = self.button('发送描述符与模型', self._send_model)
         box.addWidget(self.send_model)
         self.model_note = label('', 'note')
@@ -246,6 +320,7 @@ class SocConsole(QWidget):
 
     def _canvas(self, row):
         frame, box = card('统一显示区')
+        box.setSpacing(2)
         frame.setMinimumWidth(160)
         frame.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
         self.display = QComboBox()
@@ -261,7 +336,7 @@ class SocConsole(QWidget):
         self.view.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
         box.addWidget(self.view, 1)
         self.caption = label('来源 · 板端视频\n等待 EDVF 视频帧', 'note')
-        self.caption.setMinimumHeight(34)
+        self.caption.setWordWrap(False)
         box.addWidget(self.caption)
         self.video_stats = label('完整帧 0 · 缺包丢帧 0 · 网口跳帧 0', 'note')
         box.addWidget(self.video_stats)
@@ -289,33 +364,40 @@ class SocConsole(QWidget):
         fields = form()
         self.output = QComboBox()
         self.output.addItems(['HDMI', 'ETH', 'HDMI + ETH'])
-        self.fps = QSpinBox()
-        self.fps.setRange(1, 60)
-        self.fps.setValue(30)
-        self.fps.setSuffix(' fps')
-        self.rate = QSpinBox()
-        self.rate.setRange(10, 1000)
-        self.rate.setValue(100)
-        self.rate.setSuffix(' Hz')
-        for name, widget in [('输出', self.output), ('视频帧率', self.fps), ('采样率', self.rate)]:
-            fields.addRow(name, widget)
+        self.fps = QLineEdit('30')
+        self.fps.setValidator(QIntValidator(1, 60, self.fps))
+        self.rate = QLineEdit('100')
+        self.rate.setValidator(QIntValidator(10, 1000, self.rate))
+        fields.addRow('输出', self.output)
+        for name, widget, unit in [('视频帧率', self.fps, 'fps'),
+                                   ('采样率', self.rate, 'Hz')]:
+            widget.setAlignment(Qt.AlignRight)
+            widget.setProperty('role', 'number')
+            field_row = QHBoxLayout()
+            field_row.addWidget(widget, 1)
+            field_row.addWidget(label(unit))
+            fields.addRow(name, field_row)
         box.addLayout(fields)
         self.apply_output = self.button('下发输出与采样', self._apply_output)
         box.addWidget(self.apply_output)
         self.output_note = label('', 'note')
         box.addWidget(self.output_note)
         layout.addWidget(self.output_card)
-        frame, box = card('板端 status 摘要')
-        box.addWidget(self.button('查询 status', lambda: self.run(
-            lambda: self.engine.send('status', 'cr'))))
-        fields = form()
+        self.status_card, box = card('板端 status 摘要')
+        fields = QGridLayout()
+        fields.setHorizontalSpacing(6)
+        fields.setVerticalSpacing(3)
         self.summary = {}
-        for key, title in [('Scene', '场景'), ('PIX mode', 'PIX'), ('GEO mode', 'GEO'),
-                           ('Output mode', '输出'), ('Requested video fps', 'fps'),
-                           ('Monitor Hz', '采样 Hz')]:
+        for index, (key, title) in enumerate([
+                ('Scene', '场景'), ('PIX mode', 'PIX'), ('GEO mode', 'GEO'),
+                ('Output mode', '输出'), ('Requested video fps', 'fps'),
+                ('Monitor Hz', '采样 Hz')]):
             value = label('—', 'number')
             value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            fields.addRow(title, value)
+            name = label(title)
+            name.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            fields.addWidget(name, index // 2, index % 2 * 2)
+            fields.addWidget(value, index // 2, index % 2 * 2 + 1)
             self.summary[key] = value
         box.addLayout(fields)
         self.peer = label('Peer · —', 'note')
@@ -324,14 +406,19 @@ class SocConsole(QWidget):
         box.addWidget(self.switch)
         self.message = label('等待串口启动行', 'note')
         box.addWidget(self.message)
-        layout.addWidget(frame)
+        self.status_query = self.button('查询', lambda: self.run(
+            lambda: self.engine.send('status', 'cr')))
+        box.addWidget(self.status_query)
+        layout.addWidget(self.status_card)
         self.check_card, box = card('YOLO 图像检查')
         self.capture_status = label('等待 CH2 / OUTPUT / EDDT 回传', 'note')
         box.addWidget(self.capture_status)
         self.quant = QLineEdit(str(Path(__file__).resolve().parents[3] /
                                    'build/npu/quantized/quantization.json'))
-        box.addWidget(self.quant)
-        box.addWidget(self.button('选择量化 JSON', self._choose_quant))
+        quant_row = QHBoxLayout()
+        quant_row.addWidget(self.quant, 1)
+        quant_row.addWidget(self.button('JSON', self._choose_quant))
+        box.addLayout(quant_row)
         self.compare = self.button('运行参考模型并比对', self._compare)
         box.addWidget(self.compare)
         self.comparison_result = label('选择原图、模型与量化参数', 'note')
@@ -341,7 +428,7 @@ class SocConsole(QWidget):
         layout.addWidget(self.check_card)
 
     def _monitor(self, row):
-        self.monitor_card, box = card('DDR 监控')
+        self.monitor_card, box = card('DDR 监控 · 等待：clk_mem 周期')
         box.setSpacing(4)
         header = QHBoxLayout()
         header.addWidget(box.takeAt(0).widget())
@@ -373,16 +460,22 @@ class SocConsole(QWidget):
                               ('读延迟', self.histogram)]:
             widget.setMinimumHeight(90)
             charts.addWidget(widget)
-        content.addWidget(charts, 1)
+        plot_column = QVBoxLayout()
+        plot_column.setSpacing(0)
+        plot_column.addWidget(charts, 1)
+        content.addLayout(plot_column, 1)
         self.table = QTableWidget(7, 4)
-        self.table.setMinimumWidth(272)
-        self.table.setMaximumWidth(360)
-        self.table.setHorizontalHeaderLabels(['端口', '均等候', '最长', '紧急'])
+        self.table.setFixedWidth(294)
+        self.table.setHorizontalHeaderLabels(['端口', '平均等待', '最长', '紧急'])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.verticalHeader().hide()
-        self.table.verticalHeader().setDefaultSectionSize(19)
+        self.table.verticalHeader().setMinimumSectionSize(16)
+        self.table.verticalHeader().setDefaultSectionSize(16)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.table.setMinimumHeight(120)
+        self.table.horizontalHeader().setFixedHeight(18)
+        self.table.setFixedHeight(130)
+        self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         for index, name in enumerate(['DISP', 'VIN', 'CPU', 'NPU', 'RND', 'GEO', 'ETH']):
             for column, value in enumerate((name, '—', '—', '0')):
                 item = QTableWidgetItem(value)
@@ -395,27 +488,29 @@ class SocConsole(QWidget):
             text = label('● ' + name, 'note')
             text.setStyleSheet(f'color:{color};')
             legend.addWidget(text)
-        box.addLayout(legend)
+        plot_column.addLayout(legend)
         metrics = QHBoxLayout()
         metrics.addWidget(self.monitor_summary)
         self.realtime = label('DISP 读空 0 · VIN CH0 / CH2 溢出 0 / 0', 'note')
         metrics.addWidget(self.realtime, 1)
-        box.addLayout(metrics)
         self.monitor_note = label('60 s · 读深色 / 写浅色 · 等候单位 clk_mem 周期', 'note')
-        box.addWidget(self.monitor_note)
+        metrics.addWidget(self.monitor_note)
+        for value in (self.monitor_summary, self.realtime, self.monitor_note):
+            value.setWordWrap(False)
+        box.addLayout(metrics)
         row.addWidget(self.monitor_card, 1)
 
     def _log(self, row):
         frame, box = card('会话日志')
         frame.setFixedWidth(300)
         header = QHBoxLayout()
-        header.addWidget(label('UART · 传输 · 回传', 'note'), 1)
+        header.addWidget(box.takeAt(0).widget(), 1)
         header.addWidget(self.button('保存', lambda: self.run(self.engine.save_log)))
         box.addLayout(header)
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(500)
-        self.log.setLineWrapMode(QPlainTextEdit.WidgetWidth)
+        self.log.setLineWrapMode(QPlainTextEdit.NoWrap)
         box.addWidget(self.log, 1)
         row.addWidget(frame)
 
@@ -425,14 +520,18 @@ class SocConsole(QWidget):
         caps = PROJECTS[project]
         reason = caps['reason']
         for widget in (self.image_card, self.model_card, self.check_card):
+            widget.section_toggle.setStyleSheet(
+                'color:#2f6bff;' if caps['detection'] else 'color:#9aa6b5;')
             for control in widget.findChildren(QWidget):
-                if isinstance(control, (QPushButton, QLineEdit, QComboBox)):
+                if (isinstance(control, (QPushButton, QLineEdit, QComboBox))
+                        and control.objectName() != 'sectionToggle'):
                     control.setEnabled(caps['detection'])
         for note in (self.image_note, self.model_note, self.check_note):
-            note.setText(reason if not caps['detection'] else
+            note.setText(('B3V 无 NPU' if project == 'B3V' else 'B3R 无摄像头与网口')
+                         if not caps['detection'] else
                          '1280 × 720 RGB565' if note is self.image_note else
                          'EDNM · 板端结果见日志' if note is self.model_note else
-                         '逐字节比较输入与输出；按序比较检测框')
+                         '输入 / 输出逐字节比对；检测框按序比对')
         for widget in (self.scene, self.pix, self.geo, self.apply_scene):
             widget.setEnabled(caps['processing'])
         self.display.setEnabled(caps['network'])
@@ -521,10 +620,14 @@ class SocConsole(QWidget):
 
     def _apply_output(self):
         def send():
+            if not self.fps.hasAcceptableInput():
+                raise ValueError('视频帧率必须为 1–60 fps')
+            if not self.rate.hasAcceptableInput():
+                raise ValueError('采样率必须为 10–1000 Hz')
             self.engine.scenes.send(['output_hdmi', 'output_eth', 'output_both'][
                 self.output.currentIndex()])
-            self.engine.scenes.send('video_fps', self.fps.value())
-            self.engine.scenes.send('sample_rate', self.rate.value())
+            self.engine.scenes.send('video_fps', int(self.fps.text()))
+            self.engine.scenes.send('sample_rate', int(self.rate.text()))
             self.engine.send('status', 'cr')
         self.run(send)
 
@@ -575,7 +678,7 @@ class SocConsole(QWidget):
         self.view.set_image(image, boxes)
         if not PROJECTS[self.project.currentText()]['network']:
             caption = PROJECTS[self.project.currentText()]['reason']
-        self.caption.setText(caption)
+        self.caption.setText(caption.replace('\n', ' · '))
         self.last_display = key
 
     def _pause(self):
@@ -715,10 +818,9 @@ class SocConsole(QWidget):
                 first = result['output']['first']
                 first_text = '无' if first is None else f'{first} / 0x{first:x}'
                 self.comparison_result.setText(
-                    f"CH2 差异 {result['input']['count']} B\n"
-                    f"OUTPUT 差异 {result['output']['count']} B\n"
-                    f"首个差异 {first_text}\n"
-                    f"检测差异 {result['detections']['count']} 个框\n"
+                    f"CH2 {result['input']['count']} B · OUTPUT {result['output']['count']} B\n"
+                    f"首差异 {first_text}\n"
+                    f"框差异 {result['detections']['count']} · "
                     f"参考 {result['detections']['expected']} / "
                     f"板端 {result['detections']['actual']}")
                 self.board.log(self.comparison_result.text())
