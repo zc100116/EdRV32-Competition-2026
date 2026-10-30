@@ -98,12 +98,15 @@ static void __attribute__((interrupt("machine"), aligned(4))) demo_interrupt(voi
 
 static void menu(void)
 {
-    info_text("Demo commands", "s1 | s2 | status | help");
+    info_text("Demo commands", demo_scene_allowed(1) ?
+              "s1 | s2 | status | help" : "s2 | status | help");
     info_text("PIX", "pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel");
     info_text("GEO", "geo off | geo rotate | geo scale");
     info_text("Output", "output hdmi | output eth | output both | fps 1..60");
     info_text("Monitor", "sample 10..1000 (Hz), default 100");
-    info_text("KEY", "KEY2 scene; KEY3 PIX; KEY4 GEO (PIX/GEO require S2)");
+    info_text("KEY", demo_scene_allowed(1) ?
+              "KEY2 scene; KEY3 PIX; KEY4 GEO (PIX/GEO require S2)" :
+              "KEY2 requires s2; KEY3 PIX; KEY4 GEO");
 }
 
 void demo_status(void)
@@ -121,10 +124,8 @@ void demo_status(void)
     info_number("VIN CH2 frames", engine_perf(ENGINE_VIN, 5));
     info_number("VIN CH0 overflow", engine_perf(ENGINE_VIN, 6));
     info_number("VIN CH2 overflow", engine_perf(ENGINE_VIN, 8));
-    info_number("NPU inferences", demo.inference_count);
-    info_number("NPU cycles", demo.inference_cycles);
-    info_number("Post cycles", demo.post_cycles);
-    info_number("Detection count", demo.detection_count);
+    demo_scene_status();
+    demo_overlay_status();
     info_hex("ETH peer IP", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_IP_OFFSET));
     info_number("ETH peer port", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_PORT_OFFSET));
     info_hex("ETH STATUS", engine_poll(ENGINE_ETH).status);
@@ -140,6 +141,9 @@ void demo_command_apply(struct demo_command command)
         menu();
     } else if (command.kind == DEMO_STATUS) {
         demo_status();
+    } else if (command.kind == DEMO_SCENE && !demo_scene_allowed(command.value)) {
+        info_text("Input error", "this board requires s2");
+        return;
     } else if ((command.kind == DEMO_PIX || command.kind == DEMO_GEO) && demo.scene != 2u) {
         info_text("Input error", "PIX/GEO controls require s2");
         return;
@@ -223,7 +227,8 @@ static void engine_ids(void)
     info_hex("PIX ID", mmio_read32(EDRV32_PIX_BASE + EDRV32_PIX_ID_OFFSET));
     info_hex("GEO ID", mmio_read32(EDRV32_GEO_BASE + EDRV32_GEO_ID_OFFSET));
     info_hex("DISP ID", mmio_read32(EDRV32_DISP_BASE + EDRV32_DISP_ID_OFFSET));
-    info_hex("NPU ID", mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_ID_OFFSET));
+    demo_scene_ids();
+    demo_overlay_ids();
     info_hex("ETH ID", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_ID_OFFSET));
     info_hex("MEM_XBAR ID", mmio_read32(EDRV32_MEM_XBAR_BASE + EDRV32_MEM_XBAR_ID_OFFSET));
     info_hex("PERF_MON ID", mmio_read32(EDRV32_PERF_MON_BASE + EDRV32_PERF_MON_ID_OFFSET));
@@ -249,7 +254,7 @@ int main(void)
     demo.tx_check_buffer = -1;
     uart_init();
     uart_set_baud(demo.clock_hz, 115200);
-    info_text("Demo", "EdRV32 B2 v1");
+    info_text("Demo", demo_version);
     system_info();
     engine_ids();
     for (unsigned int camera = 0; camera < 2; ++camera) {
@@ -269,9 +274,7 @@ int main(void)
     plic_set_threshold(0);
     demo_pipeline_init();
     demo_network_init();
-    struct npu_config npu = {DEMO_MODEL_BASE, DEMO_WORK_BASE, DEMO_INPUT_BASE,
-                            DEMO_OUTPUT_BASE, DEMO_DESC_BASE, 68};
-    npu_configure(&npu);
+    demo_model_init();
     gpio_set_debounce(demo.clock_hz / 50u);
     gpio_set_edges(0, 0x0e);
     gpio_irq_clear(0x0e);

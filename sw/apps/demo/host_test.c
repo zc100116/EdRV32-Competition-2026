@@ -4,6 +4,9 @@
  * Clock domain: none (host-only pure logic).
  */
 #include "demo.h"
+#include "overlay.h"
+#include "cache.h"
+#include "font8x16.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -216,6 +219,106 @@ static void test_model(void)
     assert(strcmp(demo_model_header(header, bytes), "EDNM descriptor/model length") == 0);
 }
 
+static uint32_t overlay_pixels[2][DEMO_WIDTH * DEMO_HEIGHT];
+static uint32_t overlay_visible[2][DEMO_WIDTH * DEMO_HEIGHT];
+static unsigned int overlay_clean_slot;
+static unsigned int overlay_cleans;
+
+/* Emulate the BSP clean boundary: DISP sees only bytes already written back. */
+void cache_clean(uintptr_t address, uint32_t size)
+{
+    uintptr_t base = (uintptr_t)overlay_pixels[overlay_clean_slot];
+    assert(address >= base && address + size <= base + DEMO_OVERLAY_BYTES);
+    memcpy((uint8_t *)overlay_visible[overlay_clean_slot] + address - base,
+           (const void *)address, size);
+    ++overlay_cleans;
+}
+
+static void check_overlay(unsigned int slot, const yolo_detection *boxes,
+                          const char *const *labels, unsigned int count)
+{
+    /* Independent per-pixel evaluation of overlay.c's RND command parameters:
+     * BORDER radius=0/width=1/sides=15; FILL green OPA=255; A1 white MSB-first.
+     * The label rectangle, like RND's CLIP, intersects the 1280x720 Surface.
+     */
+    for (unsigned int y = 0; y < DEMO_HEIGHT; ++y) {
+        for (unsigned int x = 0; x < DEMO_WIDTH; ++x) {
+            uint32_t expected = x == 800u && y == 300u ? 0x12345678u : 0;
+            for (unsigned int i = 0; i < count; ++i) {
+                const yolo_detection *b = &boxes[i];
+                if (x >= (unsigned int)b->x0 && x < (unsigned int)b->x1 &&
+                    y >= (unsigned int)b->y0 && y < (unsigned int)b->y1 &&
+                    (x == (unsigned int)b->x0 || x + 1u == (unsigned int)b->x1 ||
+                     y == (unsigned int)b->y0 || y + 1u == (unsigned int)b->y1)) {
+                    expected = 0xff00ff00u;
+                }
+                unsigned int top = b->y0 >= 16 ? (unsigned int)b->y0 - 16u :
+                                                (unsigned int)b->y0;
+                unsigned int width = (unsigned int)strlen(labels[i]) * 8u;
+                if (x >= (unsigned int)b->x0 && x < (unsigned int)b->x0 + width &&
+                    y >= top && y < top + 16u) {
+                    expected = 0xff00ff00u;
+                    unsigned int local = x - (unsigned int)b->x0;
+                    unsigned int ch = (uint8_t)labels[i][local / 8u] - 32u;
+                    if (font8x16[ch][y - top] & (0x80u >> (local % 8u))) {
+                        expected = 0xffffffffu;
+                    }
+                }
+            }
+            unsigned int at = y * DEMO_WIDTH + x;
+            assert(overlay_pixels[slot][at] == expected);
+            assert(overlay_visible[slot][at] == expected);
+        }
+    }
+}
+
+static void test_overlay(void)
+{
+    struct demo_dirty dirty[2] = {0};
+    const yolo_detection first[] = {
+        {40, 60, 180, 130, 0, 875},
+        {1264, 4, 1280, 30, 2, 1000},
+        {400, 700, 450, 720, 79, 250}
+    };
+    const char *const first_labels[] = {"person 0.875", "car 1.000", "toothbrush 0.250"};
+    const yolo_detection second[] = {
+        {100, 100, 220, 180, 15, 900}, {108, 110, 109, 111, 2, 500}
+    };
+    const char *const second_labels[] = {"cat 0.900", "car 0.500"};
+    for (unsigned int slot = 0; slot < 2; ++slot) {
+        overlay_pixels[slot][300u * DEMO_WIDTH + 800u] = 0x12345678u;
+        overlay_visible[slot][300u * DEMO_WIDTH + 800u] = 0x12345678u;
+    }
+    overlay_clean_slot = 0;
+    demo_overlay_cpu_draw(overlay_pixels[0], &dirty[0], first, 3);
+    assert(dirty[0].count == 6 && overlay_cleans == 6);
+    assert(dirty[0].rect[0].x1 == 179 && dirty[0].rect[0].y1 == 129);
+    assert(dirty[0].rect[1].x1 == 135 && dirty[0].rect[1].y0 == 44);
+    check_overlay(0, first, first_labels, 3);
+    check_overlay(1, NULL, NULL, 0);
+    overlay_clean_slot = 1;
+    demo_overlay_cpu_draw(overlay_pixels[1], &dirty[1], second, 2);
+    check_overlay(1, second, second_labels, 2);
+    check_overlay(0, first, first_labels, 3);
+    overlay_clean_slot = 0;
+    demo_overlay_cpu_draw(overlay_pixels[0], &dirty[0], second, 2);
+    check_overlay(0, second, second_labels, 2);
+    check_overlay(1, second, second_labels, 2);
+    /* YOLO's display clipping can collapse a box at an image boundary. */
+    const yolo_detection edges[] = {
+        {1280, 0, 1280, 20, 0, 0}, {50, 0, 70, 0, 0, 0}, {300, 720, 320, 720, 2, 500}
+    };
+    const char *const edge_labels[] = {"person 0.000", "person 0.000", "car 0.500"};
+    demo_overlay_cpu_draw(overlay_pixels[0], &dirty[0], edges, 3);
+    check_overlay(0, edges, edge_labels, 3);
+    for (unsigned int slot = 0; slot < 2; ++slot) {
+        overlay_clean_slot = slot;
+        demo_overlay_cpu_draw(overlay_pixels[slot], &dirty[slot], NULL, 0);
+        assert(dirty[slot].count == 0);
+        check_overlay(slot, NULL, NULL, 0);
+    }
+}
+
 int main(void)
 {
     test_monitor();
@@ -225,6 +328,8 @@ int main(void)
     test_frame_division();
     test_layout();
     test_model();
-    puts("PASS demo: EDTM, EDVF, EDDT, menu, frame division, DDR layout, EDNM");
+    test_overlay();
+    puts("PASS demo: EDTM, EDVF, EDDT, menu, frame division, DDR layout, EDNM, "
+         "CPU L1 pixels/dirty/cache");
     return 0;
 }

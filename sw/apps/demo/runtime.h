@@ -19,7 +19,6 @@
 #include "plic.h"
 #include "sysctrl.h"
 #include "uart.h"
-#include "rnd.h"
 
 enum demo_reference { REF_READY = 1, REF_PAIR = 2, REF_NPU = 4,
     REF_GEO = 8, REF_DISPLAY = 16, REF_ETH = 32, REF_POST = 64 };
@@ -105,6 +104,26 @@ static inline void demo_irq_unlock(uint32_t old)
         __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
     }
 }
+extern const char demo_version[];
+extern const unsigned int demo_vin_channels;
+extern const uint32_t demo_vin_frame_mask;
+extern const uint32_t demo_network_rx_mask;
+int demo_scene_allowed(unsigned int scene);
+void demo_scene_ids(void);
+void demo_scene_status(void);
+void demo_scene_init(void);
+void demo_model_init(void);
+void demo_scene_frame(unsigned int channel, unsigned int slot, uint32_t frame_id);
+void demo_scene_pair(void);
+void demo_scene_configure(enum vin_source source);
+void demo_scene_stop(void);
+void demo_scene_service(void);
+void demo_network_windows_init(void);
+void demo_network_check_complete(void);
+unsigned int demo_network_detections(struct eth_tx_descriptor *tx,
+                                     unsigned int detection_bytes, int check_buffer);
+void demo_overlay_ids(void);
+void demo_overlay_status(void);
 uint32_t demo_surface_address(unsigned int slot);
 void demo_reference(unsigned int slot, unsigned int add, unsigned int remove);
 _Noreturn void demo_fail(const char *reason, enum engine_id engine);

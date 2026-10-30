@@ -9,9 +9,10 @@ OBJCOPY := riscv-none-elf-objcopy
 OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32im_zicsr
 SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
-PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
+PROGRAM_DIR := $(if $(filter demo_vision demo_vnpu,$(PROGRAM)),sw/apps/demo/$(PROGRAM),$(if \
+               $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
                $(filter monitor demo nes s3,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
-               $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM))))
+               $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM)))))
 -include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
 CFLAGS := $(ISA_FLAGS) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
@@ -41,7 +42,7 @@ FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
-ifneq ($(filter bootloader monitor demo nes rnd_board $(SYS_PROGRAMS),$(PROGRAM)),)
+ifneq ($(filter bootloader monitor demo demo_vision demo_vnpu nes rnd_board $(SYS_PROGRAMS),$(PROGRAM)),)
 	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
 endif
 

@@ -2,7 +2,63 @@
 
 依据：`docs/design/2026-10-29-b2-software.md` 全文、SoC 7.3–7.5，
 驱动调用契约见 `sw/drivers/README.md`。默认 S2、PIX 旁路、GEO 关闭、HDMI、
-视频目标 30 fps、DDR 监控 100 Hz；使用完整 SoC，不运行 SoC 仿真。
+视频目标 30 fps、DDR 监控 100 Hz；`demo` 使用完整 SoC，另有下述裁剪版本，不运行 SoC 仿真。
+
+## 按板级工程选择版本（B3-11）
+
+三份 `program.mk` 位于本目录、`demo_vision/`、`demo_vnpu/`，通过源文件列表
+选择功能；没有运行时引擎探测。UART、S2、视频和 DDR 监控共用源文件，S1 与模型/
+检测回传由 `scene_npu.c`、`network_npu.c` 提供，L1 的交接由 `overlay_surface.c` 共用。
+
+| 程序 | FPGA 工程/顶层 | 场景 | HDMI 检测框与标签 | 网口功能 | 不访问的引擎 |
+|---|---|---|---|---|---|
+| `demo` | B3F 全部，`edrv32_fpga_board_b2_top`（完整 SoC） | S1、S2 | `overlay.c`，RND 写 L1 | S2 视频、DDR 监控、EDNM、图像检查、EDDT | 无 |
+| `demo_vision` | B3V 图像，`edrv32_fpga_board_vision_top` | 仅 S2 | 关闭 L1 | S2 视频、DDR 监控、WIN3 建立对端 | NPU、RND |
+| `demo_vnpu` | B3VN 图像 + NPU，`edrv32_fpga_board_vnpu_top` | S1、S2 | `overlay_cpu.c`，CPU 写 L1 | 与 `demo` 相同 | RND |
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+make -C sw PROGRAM=demo MEMORY=sram -j1
+make -C sw PROGRAM=demo_vision MEMORY=sram -j1
+make -C sw PROGRAM=demo_vnpu MEMORY=sram -j1
+```
+
+各版本生成 `build/sw/<程序>/<程序>.elf`、`.dis`、`.bin` 和存储 hex，均可用下面的
+BIOS SRAM 烧录步骤。B3R 渲染器工程继续使用自己的程序，不使用这三种演示镜像。
+
+`demo_vision` 的 `s1` 和 KEY2 均打印 `Input error: this board requires s2`，保留 S2，
+不停止或重配流水线；`help` 只列出 S2。WIN0/1/2 不配置、不注册通知，不编入
+模型加载、图像推理检查、检测回传和 YOLO 后处理；PC 应发 WIN3 短包建立对端。
+EDTM 布局保持兼容，其中四个 NPU 统计字段为零，偏移 288 的协议频率常数保持 150 MHz。
+
+三个版本启动均打印 VIN、PIX、GEO、DISP、ETH、MEM_XBAR、PERF_MON 的实际 ID；
+`demo`、`demo_vnpu` 另打印 NPU，`demo` 另打印 RND。ID 只打印、不比较；
+裁剪版本不会尝试读取不存在的 APB 槽。
+
+B3VN 的 CPU 绘制沿用 RND 参数：绿色 `0xff00ff00`、向框内一像素的四边边框，
+矩形为 `[x0,x1-1]×[y0,y1-1]`；标签底条同色、OPA=255，高 16 像素，宽为
+标签长度×8，位置在框上方 16 像素（y0<16 时从 y0 开始）；同一 `font8x16.h`
+字库按 MSB 在左画白色字形，未置位的字形像素保留底条。两种实现共用 COCO 名称和
+千分比标签格式。裁剪范围均为 1280×720，空矩形按 RND 2.5 不访问目标。
+每份 L1 缓冲分别保留框/标签脏矩形，复用时清成全透明再画下一帧；零检测也清旧框。
+CPU 写缓存别名 `EDRV32_DDR_BASE + 0x07400000/0x07800000`，通过 BSP `cache_clean`
+写回清除和新画的矩形范围，完成后才发布给 `disp_submit(DISP_L1,...)`。
+L1 仍等 SWITCH1/REL_BASE 释放，绝不修改当前扫描或 shadow-next 缓冲。
+
+### B3VN 上板测量画框 CPU 时间
+
+烧录 `demo_vnpu`，先加载模型再发 `s1`，选择 `output hdmi` 或 `output both`。
+等待检测帧出现后发已有的 `status`，记录 `Detection count`、`Overlay CPU cycles`
+和启动时的 `CLK_SYS_HZ`。`Overlay CPU cycles` 每次实际画 L1 后更新为本帧的
+`mcycle` 差值：包含该槽上一帧脏矩形的清除、新框/标签/字形绘制和 BSP cache clean；
+不包含后处理、等待 L1 空闲、DISP 提交及扫描，计时区间内的中断时间会计入。
+毫秒数 = `Overlay CPU cycles × 1000 / CLK_SYS_HZ`，例如 100 MHz 时周期数除以
+100000 即为毫秒。这里只提供测量方法，尚无实板周期数据。
+
+保持场景，移动目标改变框数，重复 `status` 并保存 UART 日志，连同构建 commit、
+输出模式、检测框数和时钟频率记录，便于比较；脏矩形来自该槽的前次使用，时间也受
+旧框数影响。零检测帧可测清旧框耗时。`output eth` 不画 L1，该计数保留最后一次
+实际绘制值；启动后首次绘制前为零。没有新增测量命令，也没有逐帧串口打印干扰绘制。
 
 ## 构建和烧录
 
@@ -22,8 +78,8 @@ BIOS 不自动执行刚烧录的镜像。也可用同一 ELF 生成的 SRAM hex 
 程序、量化表、字库初值、100 项检测结果和状态在 SRAM；图像、候选工作区、
 RND 命令及绘制时使用的字体副本在 DDR。
 
-启动打印 `Demo: EdRV32 B2 v1`、构建 commit/编译器、CHIP_ID/CLK_SYS_HZ、
-全部八个引擎的实际 ID，以及两路摄像头的 chip ID 原始读值。
+启动打印所选版本名、构建 commit/编译器、CHIP_ID/CLK_SYS_HZ、
+本版本实际访问的引擎 ID，以及两路摄像头的 chip ID 原始读值。
 ID 只打印，不比较期望值，不设“自检通过才运行”的门禁。
 SCCB NACK、引擎错误、帧 INCOMPLETE/BUS_ERR、错误 EDNM/图像长度会直接打印
 相关原始寄存器并停止，保留场景，按复位重启；无重试或备用数据流。
@@ -145,7 +201,7 @@ EDDT `+0x200`（最多 1216 B），GEO 描述符 `+0x700`，
 VIN 中断及时锁住同 frame_id 的 CH0/CH2；NPU 忙则跳过摄像头帧。
 NPU DONE 后释放普通推理的 CH2 输入，当前 OUTPUT 交 CPU，另一 OUTPUT 可供下一帧。
 真实 `yolo_post_process(output,yolo_default_heads,workspace,detections,&stats)` 接口
-接在 `pipeline.c`。CPU 访问前只对 NPU OUTPUT 作废 cache；不再读写摄像头像素。
+接在 `scene_npu.c`。CPU 访问前只对 NPU OUTPUT 作废 cache；不再读写摄像头像素。
 L0 显示摄像头帧；`overlay.c` 用 RND 的 BORDER/FILL/GLYPH 在 L1 画框及原有 COCO 标签。
 L1 两块 ARGB8888 缓冲分别保留上次的框/标签脏矩形；复用时先 COPY 全透明源的对应
 矩形，再重画，其他像素保持透明。OPA=0 的 FILL 不会清像素，因此不用于清除。
@@ -246,3 +302,55 @@ python3 sw/tests/rnd_board/expect.py
 RND 独立的 16 组 CRC、屏幕图案及 BIOS DDR 加载流程见
 [`rnd_board/README.md`](../../tests/rnd_board/README.md)。
 本次仍未执行实板检查或 SoC 仿真，上板按本节之前的清单记录真实结果。
+
+## B3-11 Linux 验收
+
+本节对应 `demo: build full, vision and vnpu board variants` 实现提交。
+使用 xPack GCC 15.2.0、RV32IM+Zicsr、`-O2 -Wall -Wextra -Werror`，
+以上三个 SRAM 构建全部通过，0 warning / 0 error。
+
+| 程序 | text (B) | data (B) | bss (B) | size 合计 (B) | `__bss_end` | 至 SRAM 栈顶余量 (B) |
+|---|---:|---:|---:|---:|---|---:|
+| `demo` | 43524 | 0 | 5244 | 48768 | `0x1000bebc` | 16708 |
+| `demo_vision` | 24692 | 0 | 796 | 25488 | `0x1000639c` | 40036 |
+| `demo_vnpu` | 43312 | 0 | 5224 | 48536 | `0x1000bda8` | 16984 |
+
+余量含未使用 SRAM，栈顶均为 `0x10010000`，不是实板栈高水位。
+`make -C sw/apps/demo test` 通过，C11 / `-Wall -Wextra -Werror` / UBSan，
+原有纯逻辑测试保留，新增 CPU L1 测试按 RND 参数逐像素检查已知框、标签底条、
+字形、相互覆盖、右边裁剪、退化框、双缓冲独立清除及零检测帧；BSP clean 的主机替身
+只将已写回范围复制到模拟可见图像，并核对 DISP 可见像素与 CPU 结果一致。
+`python3 tools/check/verilog_style.py sw/apps/demo` 为 0 文件/0 warning（无 RTL），
+`git diff --check` 通过。
+
+构建日志在各版本的 `build/sw/<程序>/rv32-build.log`；主机测试在
+`build/sw/demo/host-test.log`。大小和 SRAM 余量可用以下命令复测：
+
+```sh
+riscv-none-elf-size build/sw/demo/demo.elf build/sw/demo_vision/demo_vision.elf \
+    build/sw/demo_vnpu/demo_vnpu.elf
+riscv-none-elf-nm -n build/sw/demo/demo.elf build/sw/demo_vision/demo_vision.elf \
+    build/sw/demo_vnpu/demo_vnpu.elf | rg 'elf:|__bss_end|__stack_top'
+```
+
+缺失 APB 访问检查（无匹配是预期结果）：
+
+```sh
+riscv-none-elf-objdump -d build/sw/demo_vision/demo_vision.elf \
+    > build/sw/demo_vision/apb-check.dis
+riscv-none-elf-objdump -d build/sw/demo_vnpu/demo_vnpu.elf \
+    > build/sw/demo_vnpu/apb-check.dis
+rg -n '4100[46]|<(npu|rnd)_' build/sw/demo_vision/apb-check.dis
+rg -n '41004|<rnd_' build/sw/demo_vnpu/apb-check.dis
+riscv-none-elf-nm build/sw/demo_vision/demo_vision.elf \
+    | rg 'yolo|demo_(model_header|detection_pack)|npu_|rnd_'
+rg -B 12 '<engine_(control|poll|perf|irq_register|irq_handle)>' \
+    build/sw/demo_vision/apb-check.dis
+```
+
+前三个匹配检查均无输出：vision 无 NPU `0x41006000`/RND `0x41004000` 直接访问、
+vnpu 无 RND 直接访问，vision 无模型/检测/YOLO 链接符号。另核对 vision 的公共
+`engine_*` 调用参数及注册回调：只选择 VIN=0、PIX=1、GEO=2、DISP=3、ETH=5、
+MEM_XBAR=6，错误/等待路径来自这些调用者；未注册 NPU 中断，不选择 NPU=4。
+公共驱动只读表中仍有 NPU 的地址常量，它不是执行中的 APB 访问；驱动按 Task 约束未改。
+未运行 SoC 仿真，HDMI 视觉效果、实板 CPU 周期和功能仍按上板方法验收。

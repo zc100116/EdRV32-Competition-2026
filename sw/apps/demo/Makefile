@@ -11,5 +11,5 @@ CFLAGS := -std=c11 -Wall -Wextra -Werror -O2 -fsanitize=undefined \
 .PHONY: test
 test:
 	mkdir -p $(OUT)
-	$(CC) $(CFLAGS) logic.c host_test.c -o $(OUT)/host_test
+	$(CC) $(CFLAGS) logic.c overlay_label.c overlay_cpu.c host_test.c -o $(OUT)/host_test
 	$(OUT)/host_test
