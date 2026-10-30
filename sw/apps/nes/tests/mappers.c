@@ -11,6 +11,7 @@
 #include <nes_ppu.h>
 #include "mapper_chr.h"
 extern mapintf_t map74_intf;
+extern mapintf_t map192_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[8];
@@ -71,9 +72,24 @@ static void test74(void)
     assert(nes_chr_write(0x1000, 0xff));
     assert(pages[4][0x1000] == 0); /* CHR-ROM is never writable. */
 }
+static void test192(void)
+{
+    cart.mapper_number = 192;
+    map192_intf.init();
+    chr_bank(&map192_intf, 10);
+    nes_chr_write(0x1000, 0x42);
+    chr_bank(&map192_intf, 11);
+    assert(pages[4][0x1000] == 0);
+    chr_bank(&map192_intf, 10);
+    assert(pages[4][0x1000] == 0x42);
+    chr_bank(&map192_intf, 12);
+    nes_chr_write(0x1000, 0x99);
+    assert(pages[4][0x1000] == 0);
+}
 int main(void)
 {
     test74();
+    test192();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }

@@ -18,9 +18,11 @@ static uint8 chr_ram[8192];
 static int chr_banks[8];
 static bool chr_writable[8];
 
-static bool ram_bank(int bank)
+static int ram_index(int bank)
 {
-    return bank == 8 || bank == 9;
+    /* https://www.nesdev.org/wiki/INES_Mapper_192 */
+    int count = mmc_getinfo()->mapper_number == 192 ? 4 : 2;
+    return bank >= 8 && bank < 8 + count ? bank - 8 : -1;
 }
 
 static void sync_banks(void)
@@ -37,9 +39,9 @@ static void sync_banks(void)
         int page = i ^ base;
         int bank = selected[i];
         chr_banks[page] = bank;
-        chr_writable[page] = ram_bank(bank);
+        chr_writable[page] = ram_index(bank) >= 0;
         if (chr_writable[page])
-            ppu_setpage(1, page, chr_ram + (bank & 1) * 1024 - page * 1024);
+            ppu_setpage(1, page, chr_ram + ram_index(bank) * 1024 - page * 1024);
         else
             mmc_bankvrom(1, page * 1024, bank);
     }
@@ -49,7 +51,7 @@ static bool chr_write(uint32 address, uint8 value)
 {
     int page = address >> 10;
     if (chr_writable[page])
-        chr_ram[(chr_banks[page] & 1) * 1024 + (address & 1023)] = value;
+        chr_ram[ram_index(chr_banks[page]) * 1024 + (address & 1023)] = value;
     return true;
 }
 
