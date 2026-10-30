@@ -19,6 +19,11 @@ module edrv32_cpu_csr #(
     input wire [31:0] write_data_i,
     output reg [31:0] read_data_o,
     output wire illegal_o,
+    // C-F1 path 1: D checks permissions independently of the M-stage read/write address.
+    input wire decode_valid_i,
+    input wire [11:0] decode_addr_i,
+    input wire decode_write_i,
+    output wire decode_illegal_o,
     // Retirement and HPM counts: two bits per event, code 1 in [1:0].
     input wire [1:0] retire_count_i,
     input wire [31:0] event_count_i,
@@ -53,8 +58,6 @@ module edrv32_cpu_csr #(
     reg [63:0] instret_r;
     reg [63:0] counter_r [0:7];
     reg [31:0] event_count_r;
-    reg implemented_w;
-    reg readonly_w;
     reg [31:0] write_data_w;
     wire write_enable_w;
     integer read_idx;
@@ -63,12 +66,45 @@ module edrv32_cpu_csr #(
     assign mie_o = mie_r;
     assign mtvec_o = mtvec_r;
     assign mepc_o = mepc_r;
-    assign illegal_o = access_valid_i && (!implemented_w || (write_i && readonly_w));
+    function access_illegal;
+        input [11:0] address_i;
+        input write_access_i;
+        reg implemented;
+        reg readonly;
+        integer index;
+        begin
+            implemented = 1'b1;
+            readonly = 1'b0;
+            case (address_i)
+                12'h300, 12'h301, 12'h304, 12'h305, 12'h320,
+                12'h340, 12'h341, 12'h342, 12'h343,
+                12'hb00, 12'hb80, 12'hb02, 12'hb82: begin end
+                12'h344, 12'hc00, 12'hc80, 12'hc02, 12'hc82,
+                12'hc01, 12'hc81, 12'hf11, 12'hf12, 12'hf13, 12'hf14:
+                    readonly = 1'b1;
+                default: implemented = 1'b0;
+            endcase
+            begin
+                for (index = 0; index < 8; index = index + 1) begin
+                    if (address_i == 12'h323 + index[11:0])
+                        implemented = 1'b1;
+                    if (address_i == 12'hb03 + index[11:0] ||
+                        address_i == 12'hc03 + index[11:0] ||
+                        address_i == 12'hb83 + index[11:0] ||
+                        address_i == 12'hc83 + index[11:0]) begin
+                        implemented = 1'b1;
+                        readonly = address_i[10];
+                    end
+                end
+            end
+            access_illegal = !implemented || (write_access_i && readonly);
+        end
+    endfunction
+    assign illegal_o = access_valid_i && access_illegal(addr_i, write_i);
+    assign decode_illegal_o = decode_valid_i && access_illegal(decode_addr_i, decode_write_i);
     assign write_enable_w = access_valid_i && write_i && commit_i && !illegal_o;
     always @(*) begin
         read_data_o = 0;
-        implemented_w = 1'b1;
-        readonly_w = 1'b0;
         case (addr_i)
             12'h300: read_data_o = mstatus_r;
             12'h301: read_data_o = MISA; // WARL: writes ignored, coordinator clarification.
@@ -81,23 +117,21 @@ module edrv32_cpu_csr #(
             12'h343: read_data_o = mtval_r;
             12'h344: begin
                 read_data_o = {20'b0, irq_meip_i, 3'b0, irq_mtip_i, 3'b0, irq_msip_i, 3'b0};
-                readonly_w = 1'b1;
             end
             12'hb00: read_data_o = cycle_r[31:0];
             12'hb80: read_data_o = cycle_r[63:32];
             12'hb02: read_data_o = instret_r[31:0];
             12'hb82: read_data_o = instret_r[63:32];
-            12'hc00: begin read_data_o = cycle_r[31:0]; readonly_w = 1'b1; end
-            12'hc80: begin read_data_o = cycle_r[63:32]; readonly_w = 1'b1; end
-            12'hc02: begin read_data_o = instret_r[31:0]; readonly_w = 1'b1; end
-            12'hc82: begin read_data_o = instret_r[63:32]; readonly_w = 1'b1; end
-            12'hc01: begin read_data_o = mtime_i[31:0]; readonly_w = 1'b1; end
-            12'hc81: begin read_data_o = mtime_i[63:32]; readonly_w = 1'b1; end
+            12'hc00: begin read_data_o = cycle_r[31:0]; end
+            12'hc80: begin read_data_o = cycle_r[63:32]; end
+            12'hc02: begin read_data_o = instret_r[31:0]; end
+            12'hc82: begin read_data_o = instret_r[63:32]; end
+            12'hc01: begin read_data_o = mtime_i[31:0]; end
+            12'hc81: begin read_data_o = mtime_i[63:32]; end
             12'hf11, 12'hf12, 12'hf13, 12'hf14: begin
                 read_data_o = 0;
-                readonly_w = 1'b1;
             end
-            default: implemented_w = 1'b0;
+            default: begin end
         endcase
         begin
             for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
@@ -109,19 +143,7 @@ module edrv32_cpu_csr #(
                     addr_i == 12'hc03 + read_idx[11:0]}} & counter_r[read_idx][31:0]) |
                     ({32{addr_i == 12'hb83 + read_idx[11:0] ||
                     addr_i == 12'hc83 + read_idx[11:0]}} & counter_r[read_idx][63:32]);
-                if (addr_i == 12'h323 + read_idx[11:0]) begin
-                    implemented_w = 1'b1;
-                end
-                if (addr_i == 12'hb03 + read_idx[11:0] ||
-                    addr_i == 12'hc03 + read_idx[11:0]) begin
-                    implemented_w = 1'b1;
-                    readonly_w = addr_i[10];
-                end
-                if (addr_i == 12'hb83 + read_idx[11:0] ||
-                    addr_i == 12'hc83 + read_idx[11:0]) begin
-                    implemented_w = 1'b1;
-                    readonly_w = addr_i[10];
-                end
+
             end
         end
     end

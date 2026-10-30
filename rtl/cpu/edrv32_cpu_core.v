@@ -142,6 +142,7 @@ module edrv32_cpu_core #(
     wire [31:0] w_result_w [0:1];
     reg [31:0] m_store_r;
     reg [31:0] m_csr_data_r;
+    reg m_wait_dc_r;
     reg [31:0] m_instr_r;
     wire [31:0] e_instr_w;
     wire [31:0] e_next_pc_w;
@@ -165,6 +166,8 @@ module edrv32_cpu_core #(
     wire e_jump_misaligned_w;
     wire e_target_match_w;
     wire e_advance_w;
+    wire e_operand_load_w;
+    wire m_wait_other_w;
     wire e_resolve_w;
     reg e_resolved_r;
     wire m_advance_w;
@@ -208,7 +211,8 @@ module edrv32_cpu_core #(
     wire [31:0] csr_mtvec_w;
     wire [31:0] csr_mepc_w;
     wire [31:0] csr_read_w;
-    wire csr_illegal_w;
+    wire csr_decode_illegal_w;
+    wire unused_csr_illegal_w;
     wire csr_m_access_w;
     wire csr_d_access_w;
     wire csr_write_w;
@@ -369,7 +373,7 @@ module edrv32_cpu_core #(
     edrv32_cpu_csr #(.RVC_EN(RVC_EN)) u_csr (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .access_valid_i(csr_m_access_w || csr_d_access_w),
+        .access_valid_i(csr_m_access_w),
         .addr_i(csr_addr_w),
         .write_i(csr_write_w),
         // CSR is ready immediately in M, with the same exception/interrupt priority.
@@ -377,7 +381,11 @@ module edrv32_cpu_core #(
         .command_i(csr_command_w),
         .write_data_i(csr_operand_w),
         .read_data_o(csr_read_w),
-        .illegal_o(csr_illegal_w),
+        .illegal_o(unused_csr_illegal_w),
+        .decode_valid_i(csr_d_access_w),
+        .decode_addr_i(d_instr_w[0][31:20]),
+        .decode_write_i(d_instr_w[0][13:12] == 1 || d_instr_w[0][19:15] != 0),
+        .decode_illegal_o(csr_decode_illegal_w),
         .retire_count_i(csr_retire_count_w),
         .event_count_i(event_count_w),
         .trap_i(m_trap_w),
@@ -468,8 +476,10 @@ module edrv32_cpu_core #(
         !d_illegal_w[1] && !d_record_w[1][REC_FETCH_ERR] && !d_record_w[1][REC_ILLEGAL];
     assign d_serial_w = d_class_w[0] >= C_CSR;
     assign d_csr_wait_w = d_class_w[0] == C_CSR && (e_valid_r != 0 || m_valid_r != 0);
-    assign d_available_w = (!e_valid_r[0] || e_advance_w) && !m_wait_w &&
-        !backend_redirect_w && !sleep_r;
+    // C-F1 path 3: test E ownership before applying the shared M backpressure.
+    assign d_available_w = !m_wait_w && !backend_redirect_w && !sleep_r &&
+        (!e_valid_r[0] || (!div_wait_w &&
+        (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i)));
     always @(*) begin
         d_issue_w = 0;
         d_pair_reason_w = 0;
@@ -555,6 +565,16 @@ module edrv32_cpu_core #(
     assign div_wait_w = e_valid_r[0] && e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
     assign e_advance_w = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
         (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
+    // C-F1 path 3: M's memory-wait class is prepared in E. Apply the two
+    // late D-cache handshakes directly to the operand load, before valid issue.
+    // Redirects may replace invalid payload, while any live stalled E holds it.
+    assign m_wait_other_w = m_valid_r[0] && !m_exception_r &&
+        ((m_class_r[0] == C_FENCE && !dc_fence_done_i) ||
+        (m_class_r[0] == C_FENCE_I && !(m_fence_phase_r && ic_inv_done_i)));
+    assign e_operand_load_w = !e_valid_r[0] ||
+        (!div_wait_w && !m_wait_other_w &&
+        (!m_valid_r[0] || !m_wait_dc_r || dc_resp_valid_i) &&
+        (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i));
     // spec 3.3: valid is independent of ready; acceptance advances E into M.
     assign dc_req_valid_o = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
         e_memory_w && !e_exception_r && !e_misaligned_w;
@@ -618,10 +638,10 @@ module edrv32_cpu_core #(
         e_redirect0_w ? e_record_r[0][REC_RAS_LSB +: 37] : e_record_r[1][REC_RAS_LSB +: 37];
     assign csr_m_access_w = m_valid_r[0] && m_class_r[0] == C_CSR;
     assign csr_d_access_w = d_count_w != 0 && d_class_w[0] == C_CSR && !csr_m_access_w;
-    assign csr_addr_w = csr_m_access_w ? m_instr_r[31:20] : d_instr_w[0][31:20];
-    assign csr_command_w = csr_m_access_w ? m_instr_r[13:12] : d_instr_w[0][13:12];
-    assign csr_write_w = csr_m_access_w ? (m_instr_r[13:12] == 1 || m_instr_r[19:15] != 0) :
-        (d_instr_w[0][13:12] == 1 || d_instr_w[0][19:15] != 0);
+    // C-F1 path 1: M owns the CSR data port; D has a separate permission decoder.
+    assign csr_addr_w = m_instr_r[31:20];
+    assign csr_command_w = m_instr_r[13:12];
+    assign csr_write_w = m_instr_r[13:12] == 1 || m_instr_r[19:15] != 0;
     // D only checks address/permission; only M can commit a CSR write (cpu-spec 4.6).
     assign csr_operand_w = m_csr_data_r;
     always @(*) begin
@@ -730,7 +750,9 @@ module edrv32_cpu_core #(
     end
     always @(posedge clk_i) begin
         for (stage_idx = 0; stage_idx < 2; stage_idx = stage_idx + 1) begin
-            if (m_commit_w[stage_idx]) begin
+            // C-F1 path 4: W validity is replaced every cycle, so its payload
+            // can follow M unconditionally without the D-cache-hit CE cone.
+            begin
                 w_record_r[stage_idx] <= m_record_r[stage_idx];
                 w_result_r[stage_idx] <= m_result_w[stage_idx];
                 w_rd_r[stage_idx] <= m_rd_r[stage_idx];
@@ -760,6 +782,12 @@ module edrv32_cpu_core #(
                     end
                 end
             end
+            // C-F1 path 3: load operands whenever E is free; e_valid_r alone
+            // decides whether the D instruction was actually issued.
+            if (e_operand_load_w) begin
+                e_operand_a_r[stage_idx] <= d_operand_w[stage_idx * 2];
+                e_operand_b_r[stage_idx] <= d_operand_w[stage_idx * 2 + 1];
+            end
             if (d_issue_w != 0) begin
                 e_record_r[stage_idx] <= d_record_w[stage_idx];
                 if (stage_idx == 0 && (d_redirect_w || d_redirected_r)) begin
@@ -770,14 +798,12 @@ module edrv32_cpu_core #(
                 e_operation_r[stage_idx] <= d_operation_w[stage_idx];
                 e_immediate_r[stage_idx] <= d_immediate_w[stage_idx];
                 e_imm_r[stage_idx] <= d_imm_w[stage_idx];
-                e_operand_a_r[stage_idx] <= d_operand_w[stage_idx * 2];
-                e_operand_b_r[stage_idx] <= d_operand_w[stage_idx * 2 + 1];
                 e_rd_r[stage_idx] <= d_rd_w[stage_idx];
                 e_write_r[stage_idx] <= d_write_w[stage_idx];
                 if (stage_idx == 0) begin
                     e_exception_r <= d_record_w[stage_idx][REC_FETCH_ERR] ||
                         d_record_w[stage_idx][REC_ILLEGAL] || d_illegal_w[stage_idx] ||
-                        (csr_d_access_w && csr_illegal_w) ||
+                        (csr_d_access_w && csr_decode_illegal_w) ||
                         d_instr_w[stage_idx] == 32'h00000073 ||
                         d_instr_w[stage_idx] == 32'h00100073;
                     e_cause_r <= d_record_w[stage_idx][REC_FETCH_ERR] ? 32'd1 :
@@ -794,6 +820,7 @@ module edrv32_cpu_core #(
             end
         end
         if (e_advance_w) begin
+            m_wait_dc_r <= e_memory_w && !e_exception_r && !e_misaligned_w;
             m_store_r <= e_operand_b_r[0];
             m_instr_r <= e_instr_w;
             m_csr_data_r <= e_instr_w[14] ? {27'b0, e_instr_w[19:15]} : e_operand_a_r[0];
@@ -818,7 +845,9 @@ module edrv32_cpu_core #(
         committed_ras_data_w = committed_ras_data_r;
         committed_ras_ptr_w = committed_ras_ptr_r;
         committed_ras_count_w = committed_ras_count_r;
-        if (m_commit_w[0]) begin
+        // C-F1 path 2: calls/returns are ready without D-cache lookup.
+        // Use their specialized commit predicate before the RAS pointer mux.
+        if (m_system_commit_w) begin
             if (m_return_w && committed_ras_count_w != 0) begin
                 committed_ras_ptr_w = committed_ras_ptr_w - 1'b1;
                 committed_ras_count_w = committed_ras_count_w - 1'b1;
@@ -844,7 +873,7 @@ module edrv32_cpu_core #(
         end
     end
     always @(posedge clk_i) begin
-        if (m_commit_w[0] && (m_call_w || m_return_w))
+        if (m_system_commit_w && (m_call_w || m_return_w))
             committed_ras_data_r <= committed_ras_data_w;
     end
     assign retire_count_w = {1'b0, w_valid_r[0]} + {1'b0, w_valid_r[1]};

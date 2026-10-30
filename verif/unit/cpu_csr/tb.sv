@@ -16,6 +16,9 @@ module tb;
     reg [31:0] write_data_i=0;
     wire [31:0] read_data_o;
     wire illegal_o;
+    wire decode_illegal_o;
+    reg decode_override_r=0;
+    reg [11:0] decode_addr_r=0;
     reg [1:0] retire_count_i=0;
     reg [31:0] event_count_i=0;
     reg trap_i=0;
@@ -53,6 +56,10 @@ module tb;
         .write_data_i(write_data_i),
         .read_data_o(read_data_o),
         .illegal_o(illegal_o),
+        .decode_valid_i(access_valid_i),
+        .decode_addr_i(decode_override_r ? decode_addr_r : addr_i),
+        .decode_write_i(write_i),
+        .decode_illegal_o(decode_illegal_o),
         .retire_count_i(retire_count_i),
         .event_count_i(event_count_i),
         .trap_i(trap_i),
@@ -81,6 +88,10 @@ module tb;
         .write_data_i(write_data_i),
         .read_data_o(no_c_read),
         .illegal_o(no_c_illegal),
+        .decode_valid_i(1'b0),
+        .decode_addr_i(12'b0),
+        .decode_write_i(1'b0),
+        .decode_illegal_o(),
         .retire_count_i(retire_count_i),
         .event_count_i(event_count_i),
         .trap_i(trap_i),
@@ -146,13 +157,23 @@ module tb;
                 (i>='hb83 && i<='hb8a) || (i>='hc03 && i<='hc0a) ||
                 (i>='hc83 && i<='hc8a);
             ro=(i=='h344 || (i>='hc00 && i<='hcff) || i>='hf00);
-            #1;if(illegal_o!==!exists || no_c_illegal!==!exists)
+            #1;if(illegal_o!==!exists || no_c_illegal!==!exists || decode_illegal_o!==!exists)
                 $fatal(1,"FAIL CSR read legality %h",addr_i);
             // Avoid a rising edge while probing writes: no commit is intended.
             @(negedge clk_i);write_i=1;
-            #1;if(illegal_o!==(!exists || ro))$fatal(1,"FAIL CSR write legality %h",addr_i);
+            #1;if(illegal_o!==(!exists || ro) || decode_illegal_o!==(!exists || ro))$fatal(1,"FAIL CSR write legality %h",addr_i);
             write_i=0;
         end
+        // C-F1 path 1: D permission probing cannot change the simultaneous M data access.
+        @(negedge clk_i);decode_override_r=1;decode_addr_r=12'hfff;
+        addr_i='h340;access_valid_i=1;write_i=1;command_i=1;write_data_i=32'h13579bdf;
+        #1;if(!decode_illegal_o || illegal_o)$fatal(1,"FAIL independent D/M legality");
+        @(posedge clk_i);#1;
+        if(read_data_o!==32'h13579bdf)$fatal(1,"FAIL D address changed M CSR write");
+        @(negedge clk_i);write_i=0;decode_addr_r=12'hb03;
+        #1;if(decode_illegal_o || read_data_o!==32'h13579bdf)
+            $fatal(1,"FAIL D address changed M CSR read");
+        decode_override_r=0;
         csr_write('h301,0);read_check('h301,'h40001104);
         csr_write('h300,32'hffffffff);read_check('h300,'h1888);
         csr_write('h300,0);read_check('h300,'h1800);
