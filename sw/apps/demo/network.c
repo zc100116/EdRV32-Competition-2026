@@ -117,6 +117,9 @@ void demo_present(unsigned int slot, uint32_t frame_id, unsigned int detection_b
 {
     uint32_t lock = demo_irq_lock();
     uint32_t surface = demo_surface_address(slot);
+    if (demo.output == DEMO_ETHERNET) {
+        demo_switch_complete(slot);
+    }
     if (demo.output != DEMO_ETHERNET) {
         demo_reference(slot, REF_DISPLAY, 0);
         if (demo.scene == 1u) {

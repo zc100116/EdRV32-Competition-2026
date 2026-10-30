@@ -90,6 +90,15 @@ SCCB NACK、引擎错误、帧 INCOMPLETE/BUS_ERR、错误 EDNM/图像长度会�
 命令区分大小写，不带首尾空格。成功后打印 `Demo command: OK`，
 非法输入打印 `Input error`，保留当前场景。PC 每次等应答后再发下一条命令。
 
+PIX/GEO、场景和输出命令在新模式首帧完成交接后应答；紧接 `Demo command: OK`
+的一行是 `Switch: frames=N mtime_ticks=T HDMI FRAME`。计时从接受命令开始，
+到 DISP FRAME 确认新模式 Surface 为 CUR_BASE 为止；N 是期间的 DISP FRAME 次数，
+T 是 64 位 `mtime` 差值，秒数为 `T / CLK_SYS_HZ`。包含等待 VIN 帧边界、
+GEO/NPU/后处理和 DISP 提交的时间，没有新增命令。
+ETH-only 没有上屏事件，按协调者确认的口径改为首张新模式完整输出 Surface 就绪，
+同一行标注 `HDMI off (Surface ready)`；此时 N 是期间的 VIN CH0 完成帧数，
+不以未知对端或 UDP 发送完成作为终点。
+
 | 命令文本 | 行为 | 调试工具场景键 |
 |---|---|---|
 | `s1` | 摄像头目标检测，PIX 强制旁路 | `s1` |
@@ -219,7 +228,15 @@ MODEL、NPU 描述符、EDDT/EDVF 和监控记录继续使用非缓存别名。
 当前扫描状态分别维护。FRAME 中断提交下一张，SWITCH/REL_BASE 释放旧张；
 停止 HDMI 后等 IDLE，再释放最后一张。ETH 必须完成整个描述符列表的 DONE_COUNT，
 才能解除其引用；只有全部消费者释放后才清 VIN SLOT_BUSY。
-配置变化先停新帧、排空当前 VIN/NPU/GEO/ETH/DISP，再重设所选场景。
+PIX/GEO 切换不关闭 VIN 或 DISP：命令先排队，在 VIN CH0 帧完成事件中提交，
+下一帧 SOF 开始使用新配置。PIX 的 BC/THRESH/CFG 影子组在同一事件中一次写完。
+每张底图和 GEO 输出带配置代号，旧代号的在途 GEO 完成帧不作为新模式输出；
+DISP 继续扫描旧完整帧，新代号首帧仍按提交、FRAME/SWITCH、释放的顺序接管。
+S1/S2 切换只停止 VIN 并排空 NPU/GEO/ETH，保留 L0 当前扫描和 shadow-next 引用，
+重配 VIN 环时保留相应 SLOT_BUSY。VIN 全局重启按规格重新丢弃两帧，计入切换耗时。
+L1 在 FRAME 事件后写关闭，下一 FRAME 等待 SWITCH1 释放，S2 不再显示旧检测框；
+返回 S1 后才画新结果。HDMI/both 互切也保持 DISP；涉及 ETH-only 的输出切换
+沿用关闭 DISP、等 IDLE 后释放的流程。模型/测试图像接收仍沿用完整停机重配流程。
 
 ## DDR 监控
 
@@ -245,17 +262,17 @@ seq 每次采样仍递增，`status` 的 `Monitor dropped records` 计本地丢�
 | BIOS 烧录后复位 | UART 出现 Demo 版本、实际引擎 ID、两路 camera chip ID（OV5640 通常 0x5640）；无 ERROR；菜单可接受 Enter 命令 |
 | `s2`、`pix bypass`、`geo off` | HDMI 稳定 1280×720 摄像头画面，无错位、撕裂；VIN CH0 帧数持续增长 |
 | `status` 两次 | 用 `ΔPERF0×CLK_SYS_HZ/Δmtime` 算 cam0 帧率；CH0 用 PERF3，S1 CH2 用 PERF5；测量时间段至少一秒，确认实际摄像头帧率，不拿 HDMI 60 Hz 当摄像头帧率 |
-| 5 种 PIX 逐一切换 | 旁路原图、亮度/对比度增强、Gamma 提亮、高斯模糊、灰度 Sobel 边缘；无引擎错误，CH0 计数继续增长 |
-| `geo rotate` / `geo scale` / `geo off` | 图像转 180° / 中心放大 2 倍 / 恢复；换帧完整，DISP 读空计数为零 |
-| KEY2–4 | KEY2 S1/S2 切换；S2 下 KEY3/4 各循环 PIX/GEO；一次按下只有一次操作；S1 下后两键打印要求 S2 |
+| 5 种 PIX 逐一切换 | 旁路原图、亮度/对比度增强、Gamma 提亮、高斯模糊、灰度 Sobel 边缘；无黑帧、闪烁、失锁或撕裂，无引擎错误，CH0 计数继续增长；记录每次 Switch 帧数和 mtime_ticks，保存连续切换视频 |
+| `geo rotate` / `geo scale` / `geo off` | 图像转 180° / 中心放大 2 倍 / 恢复；旧完整帧保持至新完整帧接管，无黑帧或撕裂，DISP 读空计数为零；记录每次 Switch 耗时并保存视频 |
+| KEY2–4 | KEY2 S1/S2 切换；S2 下 KEY3/4 各循环 PIX/GEO；一次按下只有一次操作，无黑帧；记录 Switch 耗时；S1 下后两键打印要求 S2 |
 | PC 监听 6000 后发 WIN3 短包 | status 出现 PC peer IP/6000；调试工具 DDR 监控页出现 EDTM；无 peer 前本地 dropped 递增且画面照常 |
 | 加载模型到 WIN2 | UART 打印准确 WIN2_BYTES、`EDNM: loaded`；不存在 hash/self-test 成功门禁；不正确 EDNM 显示头字/寄存器后停止 |
 | 模型加载后 `s1` | HDMI 的 L0 摄像头加 L1 目标框、COCO 类名和千分比置信度标签；NPU 推理次数增长；调试工具检测帧率、NPU/后处理耗时有值；CH0/CH2 同帧，无错误 |
 | S1 移动/移走目标 | L1 框及标签更新，旧位置恢复透明，无前两帧残影；L0 摄像头帧不被写框；分别观察 SWITCH/SWITCH1 和 REL_BASE/L1_REL_BASE，复用只在释放后 |
-| S1 连续检测、`s1`/`s2` 切换 | 双层翻页无撕裂/错配，S2 无旧框；返回 S1 后新检测出现；零检测时旧框全部清除 |
+| S1 连续检测、`s1`/`s2` 切换 | L0 持续扫描，无黑帧、撕裂或错配，S2 无旧框；返回 S1 后新检测出现；零检测时旧框全部清除；记录每次 Switch 耗时，保存 UART 和切换视频 |
 | S1 `output both` | HDMI 有框，PC 收到的原始 L0 视频无板端框，EDDT 可在 PC 按 frame_id 叠加；不要求两端视频像素含相同 UI |
 | YOLO 页发 WIN0 图像，再发 WIN1 图像 | 自动内存源；依次收齐 CH2 983040 B、OUTPUT 725760 B、EDDT；与工具 input_pack、NPU 参考、Python 后处理逐字节/逐项相同；两窗口可重复使用，收到最终 NOTIFY 后再发下一图 |
-| `output hdmi` / `output eth` / `output both` | HDMI 正常/黑色但时序保留/正常；视频无/有/有；ETH-only 时监控 P0 读带宽停止；both 下底图与 S1 frame_id 对应；L1 框仅 HDMI，PC 使用 EDDT |
+| `output hdmi` / `output eth` / `output both` | HDMI 正常/黑色但时序保留/正常；hdmi/both 互切无黑帧；视频无/有/有；ETH-only 时监控 P0 读带宽停止；both 下底图与 S1 frame_id 对应；L1 框仅 HDMI，PC 使用 EDDT；记录 Switch 耗时及 HDMI off 标注 |
 | `fps 1` / `fps 15` / `fps 30` / `fps 60` | 30 fps 源分别名义 1/15/30/30 fps；S1 不超过推理率；核对收到帧号分频；带宽压力下 vid_skip 增长，显示 Surface 不被提前覆写；真实 60 fps 源另配置后验证约 111 MB/s 极限档 |
 | `sample 10` / `sample 100` / `sample 1000` | EDTM WINDOW_CYC 随采样周期变化，帧率/带宽按实际窗口换算；vid_skip 在偏移 292；保留尾 24 B 全零；场景切换有尾批，seq 间隔显示丢记录 |
 | DDR 监控页运行 S1/S2 | 端口读写堆叠图、利用率、等待、VIN 溢出/DISP 读空、NPU/后处理耗时符合页面字段；实时性异常计数正常应为零；保存 UART/CSV/必要视频截图作为实板证据 |
@@ -354,3 +371,41 @@ vnpu 无 RND 直接访问，vision 无模型/检测/YOLO 链接符号。另核�
 MEM_XBAR=6，错误/等待路径来自这些调用者；未注册 NPU 中断，不选择 NPU=4。
 公共驱动只读表中仍有 NPU 的地址常量，它不是执行中的 APB 访问；驱动按 Task 约束未改。
 未运行 SoC 仿真，HDMI 视觉效果、实板 CPU 周期和功能仍按上板方法验收。
+
+### B3-12 平滑切换验证（2026-10-30）
+
+实现及本记录在同一提交，开发基线为 `4ef3320`；复现时检出包含本节的提交。
+使用 xPack GCC 15.2.0，C11、`-Wall -Wextra -Werror`，以下三次构建全部通过、0 告警：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+make -C sw PROGRAM=demo MEMORY=sram -j1
+make -C sw PROGRAM=demo_vision MEMORY=sram -j1
+make -C sw PROGRAM=demo_vnpu MEMORY=sram -j1
+make -C sw/apps/demo test
+python3 tools/check/verilog_style.py sw/apps/demo
+git diff --check
+```
+
+| 程序 | text (B) | data (B) | bss (B) | size 合计 (B) | `__bss_end` | 至 SRAM 栈顶余量 (B) |
+|---|---:|---:|---:|---:|---|---:|
+| `demo` | 45584 | 0 | 5328 | 50912 | `0x1000c710` | 14576 |
+| `demo_vision` | 26556 | 0 | 876 | 27432 | `0x10006b2c` | 38100 |
+| `demo_vnpu` | 45356 | 0 | 5308 | 50664 | `0x1000c5fc` | 14852 |
+
+三者均放进 64 KiB SRAM；余量不是实板栈高水位。原始构建日志位于各版本的
+`build/sw/<程序>/rv32-build.log`，主机日志为 `build/sw/demo/host-test.log`。
+上述 size/nm 命令可以重新取得表中数据。
+
+host_test 在 UBSan 下通过，保留原有协议/菜单/CPU 绘制测试，并实际链接
+`pipeline.c`、`switch.c`、`network.c`、`scene_npu.c`、`overlay_surface.c`
+及原 VIN/PIX/GEO/DISP 驱动。替换 MMIO、IRQ 锁和硬件完成事件，不运行 RTL。
+事件序列检查五档 PIX 的影子组仅在 VIN CH0 完成事件中一次写完、PIX/GEO 不停
+VIN/DISP、DISP 提交无空档且旧 Surface 等 SWITCH 后释放、ETH 引用独立保留、
+在途旧 GEO 输出不完成新模式切换、S1/S2 保留扫描和 shadow-next 的 SLOT_BUSY、
+在途 NPU 排空后的 POST 引用释放、L1 待提交时关闭及返回 S1 重画、hdmi/both
+互切不停 DISP、ETH-only 的 Surface 就绪口径，以及帧计数/mtime 回绕和耗时行。
+风格检查为 0 文件/0 告警（目录无 RTL），`git diff --check` 通过。
+
+未运行 SoC 仿真或上板；无黑帧、闪烁、失锁、撕裂及实际切换耗时，仍须按上板
+检查清单保存连续切换视频和 UART 原始打印，不能由上述软件事件测试代替。

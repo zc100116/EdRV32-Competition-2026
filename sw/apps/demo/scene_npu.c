@@ -171,6 +171,11 @@ void demo_scene_stop(void)
     pair_release();
     demo.input_busy = 0;
     vin_slots_busy(2, 0);
+    for (unsigned int i = 0; i < 2; ++i) {
+        if (demo.inference[i].state != BUFFER_FREE) {
+            demo_reference(demo.inference[i].image_slot, 0, REF_POST);
+        }
+    }
     demo.inference[0].state = BUFFER_FREE;
     demo.inference[1].state = BUFFER_FREE;
     demo.checking = 0;

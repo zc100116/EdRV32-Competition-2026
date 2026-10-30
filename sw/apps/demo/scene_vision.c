@@ -111,6 +111,11 @@ void demo_overlay_stop(void)
     disp_layer_enable(DISP_L1, 0);
 }
 
+void demo_overlay_hide(void)
+{
+    disp_layer_enable(DISP_L1, 0);
+}
+
 void demo_overlay_frame(uint32_t irq)
 {
     (void)irq;

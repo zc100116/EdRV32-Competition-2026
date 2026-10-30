@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 
+void demo_test_switching(void);
+
 static uint32_t word(const uint8_t *p)
 {
     return (uint32_t)p[0] + 256u * p[1] + 65536u * p[2] + 16777216u * p[3];
@@ -329,7 +331,8 @@ int main(void)
     test_layout();
     test_model();
     test_overlay();
+    demo_test_switching();
     puts("PASS demo: EDTM, EDVF, EDDT, menu, frame division, DDR layout, EDNM, "
-         "CPU L1 pixels/dirty/cache");
+         "CPU L1 pixels/dirty/cache, PIX/GEO/scene/output event sequences");
     return 0;
 }

@@ -48,9 +48,31 @@ static void vin_event(const struct engine_event *event, void *context)
             continue;
         }
         unsigned int slot = vin_frame_slot(frame.info);
+        if (channels[i] == 0u) {
+            demo.surface_epoch[slot] = demo.epoch;
+        }
         demo_scene_frame(channels[i], slot, frame.frame_id);
     }
     demo_scene_pair();
+    if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) {
+        ++demo.vin_frames;
+        /* PIX 2.6: write the whole shadow group in blanking, after the old frame.
+         * The next SOF starts the new epoch; no old Surface can finish the switch.
+         */
+        if (demo.switch_pending) {
+            enum demo_command_kind kind = (enum demo_command_kind)(demo.switch_pending - 1u);
+            if (kind == DEMO_PIX) {
+                demo.pix = demo.switch_value;
+                demo_pix_configure();
+            } else if (kind == DEMO_GEO) {
+                demo.geo = demo.switch_value;
+            } else {
+                demo.output = demo.switch_value;
+            }
+            ++demo.epoch;
+            demo.switch_pending = 0;
+        }
+    }
 }
 
 static void display_event(const struct engine_event *event, void *context)
@@ -69,10 +91,12 @@ static void display_event(const struct engine_event *event, void *context)
         }
     }
     if (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) {
+        ++demo.display_frames;
         if (demo.display_next >= 0 &&
             disp_current(DISP_L0) == demo_surface_address((unsigned int)demo.display_next)) {
             demo.display_current = demo.display_next;
             demo.display_next = -1;
+            demo_switch_complete((unsigned int)demo.display_current);
         }
         if (!demo.transitioning && demo.display_next < 0 && demo.display_queue >= 0) {
             demo.display_next = demo.display_queue;
@@ -187,32 +211,56 @@ void demo_pipeline_configure(enum vin_source source)
         image.base[i] = DEMO_IMAGE_BASE + i * DEMO_IMAGE_SPACING;
     }
     uint32_t lock = demo_irq_lock();
-    demo_pix_configure();
-    demo.transitioning = 0;
+    for (unsigned int i = 0; i < 4; ++i) {
+        if (demo.references[i]) {
+            image.busy_slots |= 1u << i;
+        }
+    }
     /* Global VIN disable keeps CH0/CH2 source selection together at the next SOF. */
     engine_control(ENGINE_VIN, 0);
+    demo_pix_configure();
+    ++demo.epoch;
+    demo.transitioning = 0;
     vin_channel_configure(0, &image);
     demo_scene_configure(source);
     engine_control(ENGINE_VIN, EDRV32_VIN_CTRL_ENABLE_MASK);
     demo_irq_unlock(lock);
 }
 
-void demo_pipeline_stop(void)
+void demo_pipeline_pause(void)
 {
     uint32_t lock = demo_irq_lock();
     demo.transitioning = 1;
     vin_channel_enable(0, 0);
     vin_channel_enable(2, 0);
+    engine_control(ENGINE_VIN, 0);
     demo_irq_unlock(lock);
     demo_wait_idle(ENGINE_VIN);
     while (demo.active_npu >= 0 || demo.active_geo >= 0) {
         __asm__ volatile ("nop");
     }
     demo_network_wait();
-    engine_control(ENGINE_DISP, 0);
-    demo_wait_idle(ENGINE_DISP);
     lock = demo_irq_lock();
     demo_scene_stop();
+    demo_overlay_hide();
+    if (demo.ready_surface >= 0) {
+        demo_reference((unsigned int)demo.ready_surface, 0, REF_READY);
+        demo.ready_surface = -1;
+    }
+    if (demo.display_queue >= 0) {
+        demo_reference((unsigned int)demo.display_queue, 0, REF_DISPLAY);
+        demo.display_queue = -1;
+    }
+    /* Current and shadow-next retain REF_DISPLAY until SWITCH, per SoC 7.3 R3. */
+    demo_irq_unlock(lock);
+}
+
+void demo_pipeline_stop(void)
+{
+    demo_pipeline_pause();
+    engine_control(ENGINE_DISP, 0);
+    demo_wait_idle(ENGINE_DISP);
+    uint32_t lock = demo_irq_lock();
     demo_overlay_stop();
     for (unsigned int i = 0; i < 6; ++i) {
         demo.references[i] = 0;
@@ -269,6 +317,7 @@ static void start_geo(unsigned int source)
     demo_reference(source, REF_GEO, REF_READY);
     demo_reference((unsigned int)target, REF_GEO, 0);
     demo.surface_frame[target] = demo.surface_frame[source];
+    demo.surface_epoch[target] = demo.surface_epoch[source];
     demo.geo_source = source;
     demo.active_geo = target;
     geo_submit(DEMO_GEO_DESCRIPTOR, 1);
@@ -281,15 +330,15 @@ void demo_pipeline_service(void)
     uint32_t lock = demo_irq_lock();
     int ready = demo.ready_surface;
     demo.ready_surface = -1;
-    demo_irq_unlock(lock);
     if (ready >= 0) {
-        if (demo.geo && ready < 4) {
+        if (demo.surface_epoch[ready] != demo.epoch) {
+            demo_reference((unsigned int)ready, 0, REF_READY);
+        } else if (demo.scene == 2u && demo.geo && ready < 4) {
             start_geo((unsigned int)ready);
         } else {
             demo_present((unsigned int)ready, demo.surface_frame[ready], 0, -1);
-            lock = demo_irq_lock();
             demo_reference((unsigned int)ready, 0, REF_READY);
-            demo_irq_unlock(lock);
         }
     }
+    demo_irq_unlock(lock);
 }

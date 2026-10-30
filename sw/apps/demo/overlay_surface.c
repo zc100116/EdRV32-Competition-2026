@@ -10,6 +10,7 @@ static volatile int current;
 static volatile int next;
 static volatile int queued;
 static int rendered;
+static unsigned int hidden;
 
 uint32_t demo_overlay_address(unsigned int slot)
 {
@@ -31,6 +32,17 @@ void demo_overlay_stop(void)
     next = -1;
     queued = -1;
     rendered = -1;
+    hidden = 0;
+}
+
+void demo_overlay_hide(void)
+{
+    /* Write disable in FRAME, then wait for its following latch/release.
+     * A FRAME already pending when the command arrives still belongs to S1.
+     */
+    queued = -1;
+    rendered = -1;
+    hidden = 1;
 }
 
 void demo_overlay_present(unsigned int initial)
@@ -59,6 +71,16 @@ void demo_overlay_frame(uint32_t irq)
         current = next;
         next = -1;
     }
+    if (hidden == 1u) {
+        disp_layer_enable(DISP_L1, 0);
+        hidden = 2;
+        return;
+    }
+    if (hidden == 2u) {
+        next = -1;
+        hidden = 0;
+        return;
+    }
     if (!demo.transitioning && next < 0 && queued >= 0) {
         next = queued;
         queued = -1;
@@ -75,7 +97,7 @@ void demo_overlay_draw(const yolo_detection *detections, unsigned int count)
         uint32_t lock = demo_irq_lock();
         buffer = -1;
         for (int i = 0; i < 2; ++i) {
-            if (current != i && next != i && queued != i) {
+            if (!hidden && current != i && next != i && queued != i) {
                 buffer = i;
                 break;
             }

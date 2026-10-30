@@ -39,6 +39,19 @@ struct demo_state {
     unsigned int fps;
     volatile unsigned int sample_hz;
     volatile unsigned int transitioning;
+    volatile unsigned int switch_pending;
+    unsigned int switch_value;
+    volatile uint32_t epoch;
+    uint32_t switch_epoch;
+    uint32_t surface_epoch[6];
+    volatile unsigned int switch_waiting;
+    volatile unsigned int switch_done;
+    volatile uint32_t display_frames;
+    volatile uint32_t vin_frames;
+    uint32_t switch_start_frames;
+    uint32_t switch_frames;
+    uint64_t switch_start;
+    uint64_t switch_ticks;
     volatile unsigned int checking;
     unsigned int image_window;
     volatile uint32_t references[6];
@@ -92,6 +105,10 @@ static inline uintptr_t demo_cached(uint32_t physical)
 {
     return (uintptr_t)(EDRV32_DDR_BASE + physical);
 }
+#ifdef DEMO_HOST_TEST
+uint32_t demo_irq_lock(void);
+void demo_irq_unlock(uint32_t old);
+#else
 static inline uint32_t demo_irq_lock(void)
 {
     uint32_t old;
@@ -104,6 +121,7 @@ static inline void demo_irq_unlock(uint32_t old)
         __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
     }
 }
+#endif
 extern const char demo_version[];
 extern const unsigned int demo_vin_channels;
 extern const uint32_t demo_vin_frame_mask;
@@ -135,11 +153,17 @@ void demo_overlay_draw(const yolo_detection *detections, unsigned int count);
 void demo_overlay_present(unsigned int initial);
 void demo_overlay_frame(uint32_t irq);
 void demo_overlay_stop(void);
+void demo_overlay_hide(void);
 void demo_pipeline_init(void);
 void demo_pipeline_stop(void);
+void demo_pipeline_pause(void);
 void demo_pipeline_configure(enum vin_source source);
 void demo_pipeline_service(void);
 void demo_pix_configure(void);
+void demo_switch_begin(struct demo_command command);
+void demo_switch_complete(unsigned int slot);
+void demo_switch_wait(void);
+void demo_switch_report(void);
 void demo_try_inference(void);
 void demo_network_init(void);
 uint32_t demo_network_bytes(void);

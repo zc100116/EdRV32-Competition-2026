@@ -7,9 +7,13 @@ OUT := $(ROOT)/build/sw/demo
 CC := gcc
 CFLAGS := -std=c11 -Wall -Wextra -Werror -O2 -fsanitize=undefined \
     -fno-sanitize-recover=all -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include \
-    -I$(ROOT)/sw/lib
+    -I$(ROOT)/sw/lib -I$(ROOT)/sw/boot -DDEMO_HOST_TEST -include host_mmio.h \
+    -ffunction-sections -fdata-sections
+DRIVERS := $(addprefix $(ROOT)/sw/drivers/,vin.c pix.c geo.c disp.c eth.c npu.c)
 .PHONY: test
 test:
 	mkdir -p $(OUT)
-	$(CC) $(CFLAGS) logic.c overlay_label.c overlay_cpu.c host_test.c -o $(OUT)/host_test
+	$(CC) $(CFLAGS) logic.c overlay_label.c overlay_cpu.c host_test.c switch_host_test.c \
+	    pipeline.c switch.c network.c scene_npu.c overlay_surface.c $(DRIVERS) \
+	    -Wl,--gc-sections -o $(OUT)/host_test
 	$(OUT)/host_test

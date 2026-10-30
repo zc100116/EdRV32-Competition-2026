@@ -160,20 +160,14 @@ void demo_command_apply(struct demo_command command)
         /* P6 rate units are beat/cycle / 256; 60 fps video needs >111 MB/s payload. */
         mem_xbar_rate(6, demo.fps == 60u ? 32u : EDRV32_MEM_XBAR_RATE_RESET_6);
     } else {
-        demo_pipeline_stop();
-        demo_monitor_flush();
-        if (command.kind == DEMO_SCENE) {
-            demo.scene = command.value;
-        } else if (command.kind == DEMO_PIX) {
-            demo.pix = command.value;
-        } else if (command.kind == DEMO_GEO) {
-            demo.geo = command.value;
-        } else if (command.kind == DEMO_OUTPUT) {
-            demo.output = command.value;
-        }
-        demo_pipeline_configure(VIN_CAM0);
+        demo_switch_begin(command);
+        demo_switch_wait();
     }
     info_text("Demo command", "OK");
+    if (command.kind == DEMO_SCENE || command.kind == DEMO_PIX ||
+        command.kind == DEMO_GEO || command.kind == DEMO_OUTPUT) {
+        demo_switch_report();
+    }
 }
 
 static void uart_service(void)
