@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # File: vectors.py
-# Spec: rnd-testplan RN-01–16, RN-18–19; rnd 2–7.
+# Spec: rnd-testplan RN-01–16, RN-18–20; rnd 2–7.
 # Description: Directed boundary cases and ten deterministic random command-list seeds.
 # Clock domain: host.
 from dataclasses import replace
@@ -288,6 +288,10 @@ def configure(number, variant, seed):
         metadata.update(latency=rng.randrange(0, 41), stalls=rng.randrange(15, 60),
                         bdelay=rng.randrange(1, 41))
     memory = pattern_memory(mem_size, rng)
+    if number == 20:
+        # Address high bits must remain observable; a repeated 4 KiB block aliases them.
+        for address in range(SRC, mem_size):
+            memory[address] = (address * 13 + address // 257) & 255
     # RN-01/09: destination alpha planes explicitly hit all straight-alpha branches.
     if alpha is not None and commands[0].dst_fmt == 1:
         for y in range(24):
