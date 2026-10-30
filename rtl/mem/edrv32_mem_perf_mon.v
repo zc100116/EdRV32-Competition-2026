@@ -106,6 +106,8 @@ module edrv32_mem_perf_mon (
     reg check_valid_r;
     reg [7:0] check_mismatch_r;
     reg [31:0] check_addr_r;
+    reg latency_valid_r;
+    reg [31:0] latency_r;
     reg [31:0] hist_r [0:15];
     wire apb_write_w;
     wire [31:0] write_mask_w;
@@ -220,7 +222,7 @@ module edrv32_mem_perf_mon (
     assign finished_w = busy_r && !cmd_valid_r && !offset_valid_r &&
         rd_count_r == 0 && wr_count_r == 0 && !hist_sample_valid_r &&
         !hist_latency_valid_r && !hist_compare_valid_r && !hist_valid_r &&
-        !check_valid_r &&
+        !check_valid_r && !latency_valid_r &&
         (abort_r || launched_r == txn_count_r);
     assign check_error_w = check_valid_r && (|check_mismatch_r);
 
@@ -293,6 +295,20 @@ module edrv32_mem_perf_mon (
     always @(posedge clk_i) begin
         if (r_fire_w)
             check_addr_r <= rd_byte_addr_w;
+    end
+
+    // spec 2.3: separate age selection/increment from public latency accumulation.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            latency_valid_r <= 1'b0;
+        else if (start_w || soft_reset_w)
+            latency_valid_r <= 1'b0;
+        else
+            latency_valid_r <= r_fire_w && rd_beat_r == 0;
+    end
+    always @(posedge clk_i) begin
+        if (r_fire_w && rd_beat_r == 0)
+            latency_r <= latency_w;
     end
 
     // spec 4.2: config stays stable while BUSY. Three arithmetic stages settle
@@ -612,12 +628,12 @@ module edrv32_mem_perf_mon (
             beats_r <= sat_add(beats_r, {31'b0, w_fire_w} + {31'b0, r_fire_w});
             if (r_last_w)
                 read_cnt_r <= sat_add(read_cnt_r, 32'd1);
-            if (r_fire_w && rd_beat_r == 0) begin
-                if (latency_w < lat_min_r)
-                    lat_min_r <= latency_w;
-                if (latency_w > lat_max_r)
-                    lat_max_r <= latency_w;
-                lat_sum_r <= sat_add(lat_sum_r, latency_w);
+            if (latency_valid_r) begin
+                if (latency_r < lat_min_r)
+                    lat_min_r <= latency_r;
+                if (latency_r > lat_max_r)
+                    lat_max_r <= latency_r;
+                lat_sum_r <= sat_add(lat_sum_r, latency_r);
             end
             if (check_error_w) begin
                 err_beats_r <= sat_add(err_beats_r, 32'd1);
