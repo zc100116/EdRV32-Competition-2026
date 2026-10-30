@@ -1,6 +1,6 @@
 --- a/nes/mmclist.c
 +++ b/nes/mmclist.c
-@@ -27,6 +27,18 @@
+@@ -27,6 +27,19 @@
  #include <nes_mmc.h>
  
  /* mapper interfaces */
@@ -10,6 +10,7 @@
 +extern mapintf_t map71_intf;
 +extern mapintf_t map74_intf;
 +extern mapintf_t map87_intf;
++extern mapintf_t map88_intf;
 +extern mapintf_t map140_intf;
 +extern mapintf_t map191_intf;
 +extern mapintf_t map192_intf;
@@ -19,7 +20,7 @@
  extern mapintf_t map0_intf;
  extern mapintf_t map1_intf;
  extern mapintf_t map2_intf;
-@@ -65,6 +77,18 @@
+@@ -65,6 +78,19 @@
  /* implemented mapper interfaces */
  const mapintf_t *mappers[] =
  {
@@ -29,6 +30,7 @@
 +   &map71_intf,
 +   &map74_intf,
 +   &map87_intf,
++   &map88_intf,
 +   &map140_intf,
 +   &map191_intf,
 +   &map192_intf,
