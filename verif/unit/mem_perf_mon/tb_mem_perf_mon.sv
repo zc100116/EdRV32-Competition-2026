@@ -240,6 +240,19 @@ module tb_mem_perf_mon;
                 if (prdata !== first_error_addr)
                     $fatal(1, "FAIL FIRST_ERR_ADDR at DONE expected=%h actual=%h time=%0t",
                         first_error_addr, prdata, $time);
+            end else if (seen_ar != 0) begin
+                paddr = 'h20c; #1;
+                if (prdata !== 32'(observed_min))
+                    $fatal(1, "FAIL LAT_MIN at DONE expected=%0d actual=%0d time=%0t",
+                        observed_min, prdata, $time);
+                paddr = 'h210; #1;
+                if (prdata !== 32'(observed_max))
+                    $fatal(1, "FAIL LAT_MAX at DONE expected=%0d actual=%0d time=%0t",
+                        observed_max, prdata, $time);
+                paddr = 'h214; #1;
+                if (prdata !== 32'(observed_sum))
+                    $fatal(1, "FAIL LAT_SUM at DONE expected=%0d actual=%0d time=%0t",
+                        observed_sum, prdata, $time);
             end
             eq_reg('h010, 1);
             eq_reg('h208, elapsed_cycles);
