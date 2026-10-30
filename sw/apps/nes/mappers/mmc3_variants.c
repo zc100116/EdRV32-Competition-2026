@@ -25,7 +25,8 @@ static uint8 outer;
 static int ram_index(int bank)
 {
     /* https://www.nesdev.org/wiki/INES_Mapper_191 */
-    if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->vrom_banks == 0)
+    if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->mapper_number == 198 ||
+        mmc_getinfo()->vrom_banks == 0)
         return bank & 7;
     if (mmc_getinfo()->mapper_number == 191)
         return outer == 3 && (bank & 0x80) ? bank & 1 : -1;
@@ -46,6 +47,13 @@ static void sync_banks(void)
     int prg6 = banks[6];
     int prg7 = banks[7];
     int last = multicart ? fixed + 1 : MMC_LASTBANK;
+    /* https://www.nesdev.org/wiki/INES_Mapper_198: separate 512/128 KiB chips. */
+    if (mmc_getinfo()->mapper_number == 198) {
+        fixed = 0x4e;
+        last = 0x4f;
+        prg6 = prg6 & 0x40 ? 0x40 | (prg6 & 15) : prg6 & 0x3f;
+        prg7 = prg7 & 0x40 ? 0x40 | (prg7 & 15) : prg7 & 0x3f;
+    }
     /* https://www.nesdev.org/wiki/INES_Mapper_245: CHR A11 becomes PRG A19. */
     if (mmc_getinfo()->mapper_number == 245) {
         int high = (banks[command & 0x80 ? 2 : 0] & 2) << 5;
@@ -65,7 +73,8 @@ static void sync_banks(void)
         int page = i ^ base;
         int bank = selected[i];
         /* https://www.nesdev.org/wiki/INES_Mapper_199: unbanked CHR-RAM. */
-        if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->mapper_number == 245)
+        if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->mapper_number == 198 ||
+            mmc_getinfo()->mapper_number == 245)
             bank = page;
         chr_banks[page] = bank;
         chr_writable[page] = ram_index(bank) >= 0;
