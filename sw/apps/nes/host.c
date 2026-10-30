@@ -9,6 +9,8 @@
 #include <string.h>
 #include <noftypes.h>
 #include <nesinput.h>
+#include <nes6502.h>
+#include <nes_ppu.h>
 #undef malloc
 #undef free
 #include <time.h>
@@ -48,9 +50,13 @@ void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned fr
         exit(1);
     }
     fprintf(file, "P6\n256 240\n255\n");
+    int uniform = 1;
+    const struct nes_rgb first = palette[pixels[0]];
     for (unsigned i = 0; i < 256 * 240; ++i) {
         const struct nes_rgb color = palette[pixels[i]];
         const uint8_t rgb[3] = { color.r, color.g, color.b };
+        if (color.r != first.r || color.g != first.g || color.b != first.b)
+            uniform = 0;
         if (fwrite(rgb, 1, 3, file) != 3) {
             perror(path);
             exit(1);
@@ -59,6 +65,15 @@ void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned fr
     if (fclose(file) != 0) {
         perror(path);
         exit(1);
+    }
+    if (uniform && frame == nes_frame_limit) {
+        nes6502_context cpu;
+        ppu_t ppu;
+        nes6502_getcontext(&cpu);
+        ppu_getcontext(&ppu);
+        printf("NES state pc=%04x sp=%02x jam=%d pending=%d irq=%d ppu=%02x/%02x\n",
+               cpu.pc_reg, cpu.s_reg, cpu.jammed, cpu.int_pending, cpu.irq_lines,
+               ppu.ctrl0, ppu.ctrl1);
     }
 }
 

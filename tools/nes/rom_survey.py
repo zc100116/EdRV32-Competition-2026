@@ -61,7 +61,9 @@ def host_run(rom, work, start=False):
     if run.returncode != 0:
         return f'exit {run.returncode}', tail[0]
     colors = max(picture(f) for f in sorted(frames.glob('frame-*.ppm'))[-5:])
-    return ('picture' if colors > 1 else 'uniform'), f'colors={colors}'
+    detail = f'colors={colors}' + ''.join(
+        f'; {line}' for line in run.stdout.splitlines() if line.startswith('NES state '))
+    return ('picture' if colors > 1 else 'uniform'), detail
 
 
 def main():

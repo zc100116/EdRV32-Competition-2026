@@ -12,7 +12,9 @@ spec = importlib.util.spec_from_file_location('rom_survey', root / 'tools/nes/ro
 survey = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(survey)
 count = 0
-with tempfile.TemporaryDirectory(dir=root / 'build/nes') as temp:
+output = root / 'build/nes/mapper19-check'
+output.mkdir(parents=True, exist_ok=True)
+with tempfile.TemporaryDirectory(dir=output) as temp:
     for rom in sorted((root / 'third_party/nes').rglob('*')):
         if not rom.is_file():
             continue
