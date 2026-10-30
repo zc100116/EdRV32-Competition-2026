@@ -10,6 +10,8 @@ NES_CORE := $(addprefix $(NOF)/,cpu/nes6502.c nes/nes.c nes/nes_ppu.c \
     nes/nes_mmc.c nes/nes_rom.c nes/nes_pal.c nes/nesinput.c nes/mmclist.c) \
     $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/$(NOF)/mappers/*.c)) \
     $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/$(NOF)/sndhrdw/*.c))
+# Our J87 implements both bank bits; the unregistered upstream version only has D1.
+NES_CORE := $(filter-out $(NOF)/mappers/map087.c,$(NES_CORE))
 NES_CORE += $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/nes/mappers/*.c))
 NES_COMMON := sw/apps/nes/port.c sw/apps/nes/profile.c
 NES_INCLUDES := -I$(OUT)/core/cpu

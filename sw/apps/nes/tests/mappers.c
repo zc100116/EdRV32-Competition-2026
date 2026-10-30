@@ -20,6 +20,7 @@ extern mapintf_t map245_intf;
 extern mapintf_t map69_intf;
 extern mapintf_t map30_intf;
 extern mapintf_t map140_intf;
+extern mapintf_t map87_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[16];
@@ -233,6 +234,14 @@ static void test140(void)
     assert(prg[0] == 8 && prg[3] == 11);
     assert(pages[0] == vrom + 11 * 8192);
 }
+static void test87(void)
+{
+    for (unsigned value = 0; value < 4; ++value) {
+        write_reg(&map87_intf, 0x6000, value);
+        unsigned bank = ((value & 1) << 1) | (value >> 1);
+        assert(pages[0] == vrom + bank * 8192);
+    }
+}
 int main(void)
 {
     test74();
@@ -244,6 +253,7 @@ int main(void)
     test69();
     test30();
     test140();
+    test87();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }
