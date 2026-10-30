@@ -25,7 +25,8 @@ def build():
                      for p in (ROOT / directory).rglob("*.c"))
     sources += ["sw/apps/s3/lvgl/draw_rnd.c", "sw/apps/s3/lvgl/s3_lvgl.c",
                 "sw/apps/s3/lvgl/rn17_compare.c",
-                "sw/drivers/rnd.c", "tools/s3/lvgl_host.c", "build/s3/lvgl_assets.c"]
+                "sw/drivers/rnd.c", "sw/drivers/mem_xbar.c", "tools/s3/lvgl_host.c",
+                "build/s3/lvgl_assets.c"]
     objects = []
     sources.append("third_party/lvgl/demos/lv_demos.c")
     config_time = max((ROOT / "sw/apps/s3/lvgl/lv_conf.h").stat().st_mtime,
@@ -43,6 +44,9 @@ def build():
                        cwd=ROOT, check=True)
     library = OUT / "lvgl_rn17.so"
     subprocess.run(["cc", "-shared", "-Wl,--no-undefined", "-Wl,--wrap=lv_draw_sw_blend",
+                    "-Wl,--wrap=lv_draw_sw_init", "-Wl,--wrap=lv_draw_create_unit",
+                    "-Wl,--wrap=lv_timer_create", "-Wl,--wrap=rnd_read_perf",
+                    "-Wl,--wrap=mem_xbar_snapshot",
                     *objects, "-lm", "-o", str(library)],
                    cwd=ROOT, check=True)
     print(f"PASS C11 -Wall -Wextra -Werror host build: {len(sources)} sources; {library}")

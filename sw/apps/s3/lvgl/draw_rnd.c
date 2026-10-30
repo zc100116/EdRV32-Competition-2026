@@ -25,6 +25,59 @@ static unsigned source_count;
 static uint32_t glyph_bytes;
 static bool enabled = true;
 static struct s3_draw_rnd_stats stats;
+static bool initializing_sw;
+static lv_draw_unit_t *sw_unit;
+static int32_t (*sw_dispatch)(lv_draw_unit_t *, lv_layer_t *);
+
+void *__real_lv_draw_create_unit(size_t size);
+void __real_lv_draw_sw_init(void);
+
+void *__wrap_lv_draw_create_unit(size_t size)
+{
+    void *unit = __real_lv_draw_create_unit(size);
+    if (initializing_sw) sw_unit = unit;
+    return unit;
+}
+
+static int32_t timed_sw_dispatch(lv_draw_unit_t *unit, lv_layer_t *layer)
+{
+    uint64_t start = s3_ticks();
+    int32_t count = sw_dispatch(unit, layer);
+    uint64_t elapsed = s3_ticks() - start;
+    /* LV_OS_NONE dispatch executes the complete SW task synchronously. */
+    if (count > 0) {
+        stats.software += (uint32_t)count;
+        stats.sw_ticks += elapsed;
+    }
+    return count;
+}
+
+void __wrap_lv_draw_sw_init(void)
+{
+    initializing_sw = true;
+    __real_lv_draw_sw_init();
+    initializing_sw = false;
+    sw_dispatch = sw_unit->dispatch_cb;
+    sw_unit->dispatch_cb = timed_sw_dispatch;
+}
+
+static void run_batch(const struct rnd_batch *batch, bool copy)
+{
+    uint32_t perf[6];
+    s3_rnd_run(batch);
+    rnd_read_perf(perf);
+    if (copy) {
+        stats.copy.ticks += s3_rnd_elapsed_ticks();
+        stats.copy.commands += batch->count;
+        stats.copy.doorbells++;
+        for (unsigned i = 0; i < 6; ++i) stats.copy.perf[i] += perf[i];
+    } else {
+        stats.rnd_ticks += s3_rnd_elapsed_ticks();
+        stats.commands += batch->count;
+        stats.doorbells++;
+        for (unsigned i = 0; i < 6; ++i) stats.perf[i] += perf[i];
+    }
+}
 
 static uint32_t rgb(lv_color_t color)
 {
@@ -92,9 +145,7 @@ static void submit(void)
     /* RND 5.4: destination is a source too, for CPU-written RMW pixels. The
      * shared driver cleans every source, waits DONE IRQ and invalidates target.
      */
-    s3_rnd_run(&batch);
-    stats.commands += command_count;
-    stats.doorbells++;
+    run_batch(&batch, false);
     command_count = 0;
     source_count = 1;
     glyph_bytes = 0;
@@ -327,7 +378,6 @@ static int32_t evaluate(lv_draw_unit_t *unit, lv_draw_task_t *t)
         t->preferred_draw_unit_id = RND_UNIT;
     } else {
         stats.unclaimed[t->type]++;
-        stats.software++;
     }
     return 0;
 }
@@ -465,5 +515,5 @@ void s3_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const lv_area
         { dst, (uint32_t)stride * (area->y2 + 1) }
     };
     struct rnd_batch batch = { &copy, 1, ranges, 2, &ranges[1], 1 };
-    s3_rnd_run(&batch);
+    run_batch(&batch, true);
 }

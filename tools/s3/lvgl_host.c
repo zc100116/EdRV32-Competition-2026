@@ -5,6 +5,7 @@
  */
 #include "s3_lvgl.h"
 #include "s3_platform.h"
+#include "mem_xbar.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,6 +38,16 @@ void s3_rnd_run(const struct rnd_batch *batch)
         }
     }
     execute_batch(batch);
+}
+uint64_t s3_rnd_elapsed_ticks(void) { return 0; }
+/* No hardware counters or advancing tick inside a synchronous host dispatch. */
+void __wrap_rnd_read_perf(uint32_t perf[6])
+{
+    for (unsigned i = 0; i < 6; ++i) perf[i] = 0;
+}
+void __wrap_mem_xbar_snapshot(struct mem_xbar_stats *stats)
+{
+    *stats = (struct mem_xbar_stats) {0};
 }
 void s3_display_begin(const void *l0, uint32_t stride, const void *l1, uint32_t stride1)
 {

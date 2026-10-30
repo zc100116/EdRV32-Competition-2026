@@ -11,7 +11,8 @@
 调用方提供 `s3_platform.h` 的实现和 `sw/drivers/rnd.c`，包含驱动/BSP 头目录。
 构建入口为 `make -C sw PROGRAM=s3 MEMORY=ddr_app -j1`，由项目经理完成最终集成。
 本片段自行加入 LVGL、widgets/benchmark、绘制单元、RN-17、生成图像和 freestanding 支持。
-`PROGRAM_LDLIBS` 必须保留 `--wrap=lv_draw_sw_blend`；这个包装只观察 RN-17 的 AA mask，
+`PROGRAM_LDLIBS` 必须保留本目录 `program.mk` 的全部 `--wrap` 链接参数。
+`--wrap=lv_draw_sw_blend` 只观察 RN-17 的 AA mask，
 正常绘制仍直接调用 LVGL 原始 blend。`freestanding.c` 提供目标构建实际缺少的 `memset`，
 不需要 libc 堆或 libm；libgcc 由统一软件 Makefile 链接。
 
@@ -22,10 +23,10 @@
 | `s3_lvgl_init()` | 平台初始化后调用一次；建立显示、按键设备、默认 group 和绘制单元 |
 | `s3_lvgl_display()` | 给 C 的主界面使用的 LVGL display；主界面直接用 LVGL 建立 |
 | `s3_lvgl_input(keys)` | 主循环每轮唯一一次 `s3_input()` 的结果；LVGL 不再次消费 UART |
-| `s3_lvgl_step()` | 主循环持续调用；`lv_timer_handler`，每秒输出 fps/rnd_tasks/sw_tasks |
+| `s3_lvgl_step()` | 主循环持续调用；`lv_timer_handler`，非 benchmark 时每秒输出 fps/rnd_tasks/sw_tasks |
 | `s3_lvgl_restore_display()` | 从游戏返回时重新接管 L0、关闭 L1、整屏失效并立即重画 |
 | `s3_lvgl_start_widgets()` | 清理当前内容，启动真正的 `lv_demo_widgets` |
-| `s3_lvgl_start_benchmark()` | 启动真正的 `lv_demo_benchmark`；结束打印每场景/平均 FPS |
+| `s3_lvgl_start_benchmark()` | 启动真正的 `lv_demo_benchmark`；逐场景打印 split，结束保留 FPS 和 Summary |
 | `s3_lvgl_stop_demo()` | 返回菜单前调用，清理 screen/top、演示定时器和动画 |
 | `s3_lvgl_self_compare()` | 当前界面同一时刻先 SW、后 RND，CPU 比较并打印 RN-17 统计 |
 | `s3_lvgl_set_rnd(bool)` | RN-17/测量切换；不是错误后的软件回退 |
@@ -106,8 +107,58 @@ v9.6 LABEL 使用 `lv_draw_label_iterate_characters`，回调收到 glyph descri
 不能把字体 glyph_data 当作持久源。LETTER 使用同一回调和 `lv_draw_unit_draw_letter`。
 `lv_color_to_u32` 带 FF alpha，进入 RND 的 COLOR/RC_COLOR 前显式截成 RGB888，OPA 单独编码。
 
-`s3_draw_rnd_print_stats` 输出累计每类型 claimed/unclaimed 和 commands/doorbells。
+`s3_draw_rnd_print_stats` 输出累计每类型 claimed/unclaimed 和绘制任务的 commands/doorbells
+（保持原口径，不含 DIRECT 同步 COPY）；新 split 行的总数包含 COPY。
 RN-17 另输出该帧 RND 渲染的增量，SW 参考渲染的任务数不混入该帧 RND/SW 统计。
+
+
+## Benchmark 场景耗时拆分
+
+每个场景的原始 scene timer 回调执行前打印一条 `LVGL split`；最后另打印
+`scene="ALL"`。各场景名称/顺序对应锁定的 v9.6.0 描述表，边界来自
+`--wrap=lv_timer_create` 捕获的 benchmark 场景 timer，不使用复制的场景时长。
+结束仍输出原有逐场景/平均 FPS 和 `lv_demo_benchmark_summary_display` 的 Benchmark Summary。
+benchmark 运行期间暂停原有每秒 fps 行，避免在场景窗口内打印。
+
+```text
+LVGL split scene="Empty screen" frames=N render_ms=... rnd_ms=... sw_ms=... other_ms=... doorbells=... commands=... sw_tasks=... perf0_cycles=... perf1_pixels=... perf2_rd_beats=... perf3_wr_beats=... perf4_rd_wait_cycles=... perf5_wr_wait_cycles=... perf0_ms=... draw_rnd_ms=... draw_doorbells=... draw_perf0_cycles=... copy_rnd_ms=... copy_doorbells=... copy_perf0_cycles=... copy_perf0_ms=... xbar_window_cycles=... xbar_rnd_p4_rd_txn_total=... xbar_rnd_p4_wr_txn_total=... xbar_rnd_p4_rd_beats_total=... xbar_rnd_p4_wr_beats_total=... xbar_rnd_p4_wait_sum_cycles_total=... xbar_disp_p0_rd_txn_total=... xbar_disp_p0_wr_txn_total=... xbar_disp_p0_rd_beats_total=... xbar_disp_p0_wr_beats_total=... xbar_disp_p0_wait_sum_cycles_total=...
+```
+
+除 `frames`、`xbar_*` 外，所有数字都是**同窗口累计值 / 实际渲染帧数**，保留三位小数
+（截断）；`ALL` 按所有场景的帧数加权，不是各场景平均值的等权平均。
+
+| 字段 | 单位和含义 |
+|---|---|
+| `scene` / `frames` | 场景名 / 发生 RENDER_READY 的帧数 |
+| `render_ms` | 各次 REFR_START→REFR_READY 墙钟时间减去 FLUSH、FLUSH_WAIT 时间，再求每帧 ms；包括布局、DIRECT 同步 COPY |
+| `rnd_ms` | 每帧所有 RND 门铃的墙钟 ms，含 submit 的 cache clean、等待 DONE IRQ 及 target invalidate |
+| `sw_ms` / `sw_tasks` | 每帧 SW 实际 dispatch 执行 ms / 任务数；不再用 evaluate 的未认领次数代替 SW 任务数 |
+| `other_ms` | `render_ms − rnd_ms − sw_ms`，在累计 clk_sys tick 上相减后换算；保留符号，不钳零 |
+| `doorbells` / `commands` | 每帧所有 RND 门铃数 / 描述符数，包括 DIRECT 同步 COPY |
+| `perf0_cycles` / `perf0_ms` | 每帧各门铃 PERF0 周期和 / 125 MHz 换算的 ms，即周期数 / 125000 |
+| `perf1_pixels` | 每帧处理的目标像素数，包含多次覆盖同一像素 |
+| `perf2_rd_beats` / `perf3_wr_beats` | 每帧 AXI256 读 / 写 beat 数，包含描述符、源、目标和临时数据流量 |
+| `perf4_rd_wait_cycles` / `perf5_wr_wait_cycles` | 每帧 alpha 通路等待读数据 / 写出侧接收的 clk_mem 周期 |
+| `draw_rnd_ms` / `draw_doorbells` / `draw_perf0_cycles` | 每帧绘制任务的 RND 墙钟 ms / 门铃数 / PERF0 周期；不含同步 COPY |
+| `copy_rnd_ms` / `copy_doorbells` / `copy_perf0_cycles` / `copy_perf0_ms` | 每帧 DIRECT 同步 COPY 的墙钟 ms / 门铃数 / PERF0 周期及其 125 MHz 换算 ms |
+| `xbar_window_cycles` | mem_xbar 窗口总 clk_mem 周期数；场景首尾用已有 SNAPSHOT\|CLEAR 接口分窗 |
+| `xbar_rnd_p4_*_total` / `xbar_disp_p0_*_total` | 同窗口 RND P4 / DISP P0 的总 RD/WR_TXN、RD/WR_BEAT、WAIT_SUM；单位为事务、256-bit beat、仲裁等待周期；不是每帧均值 |
+
+`rnd_ms = draw_rnd_ms + copy_rnd_ms`（打印截断可能相差 0.001 ms）。每次同步
+`s3_rnd_run` 返回后、下一次门铃前读 PERF0–5 六个寄存器，并用 64 位软件累计，
+分别保存绘制和 COPY。SW 通过 `--wrap=lv_draw_sw_init/lv_draw_create_unit` 安装 dispatch
+计时包装，`LV_OS_NONE` 下包含该任务的完整同步执行，不改变认领或绘制实现。
+`other_ms` 也包含门铃后的 PERF 读取、软件累计等测量开销；场景之间的 UART 输出不进入下一 mem_xbar 窗口。
+mem_xbar 单窗口计数器按规格为饱和计数，原值直接输出；ALL 累加各场景快照。
+
+新行的 render **包含布局和同步 COPY**；LVGL 原生 Benchmark Summary 的 render 从
+RENDER_START 开始，**不包含**此前的 DIRECT 同步 COPY/布局，两者口径有意不同。
+原生 CPU 百分比仍按 `lv_timer_handler` 时间计算，包含 RND/SWITCH 空转，不代表纯 CPU 工作量。
+主机 tick 由调用者推进，同步 dispatch 内不推进时间，故主机墙钟/PERF/mem_xbar 数字为零，
+只用于检查输出、分窗和任务/门铃计数，不能作为板上性能。
+
+`LV_DRAW_LAYER_SIMPLE_BUF_SIZE = 96 * 1024 = 98304 B`，大于 RGB565
+1280×720 一屏的 1/20（92160 B），依据 benchmark 的 opa_layer 运行时警告；其他 lv_conf 不变。
 
 ## RN-17 复现和上板
 

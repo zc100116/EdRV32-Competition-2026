@@ -8,6 +8,7 @@
 #include "rn17_compare.h"
 #include "../s3_platform.h"
 #include "cache.h"
+#include "mem_xbar.h"
 #include "demos/lv_demos.h"
 
 enum { WIDTH = 1280, HEIGHT = 720, STRIDE = WIDTH * 2, PIXELS = WIDTH * HEIGHT };
@@ -27,6 +28,215 @@ static bool demo_running;
 static lv_timer_t *framework_timers[32];
 static unsigned framework_timer_count;
 static struct s3_lvgl_comparison comparison;
+
+/* Scene order is the descriptor order in the locked LVGL v9.6.0 benchmark.
+ * Its public API exposes names only in the final summary, so keep labels here;
+ * boundaries come from wrapping the benchmark's own scene timer callback.
+ */
+static const char *const benchmark_names[] = {
+    "Empty screen", "Moving wallpaper", "Single rectangle", "Multiple rectangles",
+    "Multiple RGB images", "Multiple ARGB images", "Rotated ARGB images", "Multiple labels",
+    "Screen sized text", "Multiple arcs", "Containers", "Containers with overlay",
+    "Containers with opa", "Containers with opa_layer", "Containers with scrolling", "Widgets demo"
+};
+struct benchmark_window {
+    uint32_t frames;
+    uint64_t render_ticks;
+    uint64_t sw_ticks;
+    uint64_t software;
+    struct s3_rnd_measurement draw;
+    struct s3_rnd_measurement copy;
+    uint64_t xbar_cycles;
+    uint64_t xbar[2][5];
+};
+static bool benchmark_running;
+static bool capturing_scene_timer;
+static unsigned benchmark_scene;
+static lv_timer_cb_t scene_timer_cb;
+static struct s3_draw_rnd_stats benchmark_before;
+static struct benchmark_window benchmark_window;
+static struct benchmark_window benchmark_total;
+static uint64_t refresh_start;
+static uint64_t flush_start;
+static uint64_t flush_ticks;
+static bool frame_rendered;
+
+static void put_u64(uint64_t value)
+{
+    char digits[21];
+    unsigned first = sizeof(digits) - 1;
+    digits[first] = 0;
+    do {
+        digits[--first] = (char)('0' + value % 10u);
+        value /= 10u;
+    } while (value);
+    s3_puts(&digits[first]);
+}
+
+/* Three decimal places retain sub-millisecond RND and small per-frame counts. */
+static void print_average(const char *name, int64_t value, uint64_t divisor)
+{
+    s3_puts(" "); s3_puts(name); s3_puts("=");
+    if (value < 0) s3_puts("-");
+    uint64_t magnitude = value < 0 ? (uint64_t)-value : (uint64_t)value;
+    uint64_t fraction = magnitude % divisor * 1000u / divisor;
+    put_u64(magnitude / divisor); s3_puts(".");
+    if (fraction < 100) s3_puts("0");
+    if (fraction < 10) s3_puts("0");
+    put_u64(fraction);
+}
+
+static void benchmark_print(const char *name, const struct benchmark_window *window)
+{
+    static const char *const perf_names[] = {
+        "perf0_cycles", "perf1_pixels", "perf2_rd_beats", "perf3_wr_beats",
+        "perf4_rd_wait_cycles", "perf5_wr_wait_cycles"
+    };
+    static const char *const xbar_names[] = {
+        "rd_txn", "wr_txn", "rd_beats", "wr_beats", "wait_sum_cycles"
+    };
+    uint32_t frames = window->frames;
+    uint64_t divisor = (uint64_t)frames * (s3_clock_hz() / 1000u);
+    uint64_t rnd_ticks = window->draw.ticks + window->copy.ticks;
+    int64_t other = (int64_t)window->render_ticks - (int64_t)rnd_ticks -
+                    (int64_t)window->sw_ticks;
+    s3_puts("LVGL split scene=\""); s3_puts(name); s3_puts("\" frames=");
+    s3_put_u32(frames);
+    print_average("render_ms", window->render_ticks, divisor);
+    print_average("rnd_ms", rnd_ticks, divisor);
+    print_average("sw_ms", window->sw_ticks, divisor);
+    print_average("other_ms", other, divisor);
+    print_average("doorbells", (uint64_t)window->draw.doorbells + window->copy.doorbells,
+                  frames);
+    print_average("commands", (uint64_t)window->draw.commands + window->copy.commands,
+                  frames);
+    print_average("sw_tasks", window->software, frames);
+    for (unsigned i = 0; i < 6; ++i)
+        print_average(perf_names[i], window->draw.perf[i] + window->copy.perf[i], frames);
+    print_average("perf0_ms", window->draw.perf[0] + window->copy.perf[0],
+                  (uint64_t)frames * 125000u);
+    print_average("draw_rnd_ms", window->draw.ticks, divisor);
+    print_average("draw_doorbells", window->draw.doorbells, frames);
+    print_average("draw_perf0_cycles", window->draw.perf[0], frames);
+    print_average("copy_rnd_ms", window->copy.ticks, divisor);
+    print_average("copy_doorbells", window->copy.doorbells, frames);
+    print_average("copy_perf0_cycles", window->copy.perf[0], frames);
+    print_average("copy_perf0_ms", window->copy.perf[0], (uint64_t)frames * 125000u);
+    s3_puts(" xbar_window_cycles="); put_u64(window->xbar_cycles);
+    for (unsigned p = 0; p < 2; ++p) {
+        for (unsigned i = 0; i < 5; ++i) {
+            s3_puts(p == 0 ? " xbar_rnd_p4_" : " xbar_disp_p0_");
+            s3_puts(xbar_names[i]); s3_puts("_total=");
+            put_u64(window->xbar[p][i]);
+        }
+    }
+    s3_puts("\r\n");
+}
+
+static void benchmark_begin_window(void)
+{
+    struct mem_xbar_stats discarded;
+    benchmark_window = (struct benchmark_window) {0};
+    benchmark_before = *s3_draw_rnd_stats();
+    /* Exclude UART output between scenes from the next fabric window. */
+    mem_xbar_snapshot(&discarded);
+}
+
+static void benchmark_finish_window(void)
+{
+    struct mem_xbar_stats fabric;
+    mem_xbar_snapshot(&fabric);
+    const struct s3_draw_rnd_stats *now = s3_draw_rnd_stats();
+    struct benchmark_window *w = &benchmark_window;
+    w->draw.ticks = now->rnd_ticks - benchmark_before.rnd_ticks;
+    w->draw.commands = now->commands - benchmark_before.commands;
+    w->draw.doorbells = now->doorbells - benchmark_before.doorbells;
+    w->copy.ticks = now->copy.ticks - benchmark_before.copy.ticks;
+    w->copy.commands = now->copy.commands - benchmark_before.copy.commands;
+    w->copy.doorbells = now->copy.doorbells - benchmark_before.copy.doorbells;
+    w->sw_ticks = now->sw_ticks - benchmark_before.sw_ticks;
+    w->software = now->software - benchmark_before.software;
+    w->xbar_cycles = fabric.window_cycles;
+    for (unsigned i = 0; i < 6; ++i) {
+        w->draw.perf[i] = now->perf[i] - benchmark_before.perf[i];
+        w->copy.perf[i] = now->copy.perf[i] - benchmark_before.copy.perf[i];
+        benchmark_total.draw.perf[i] += w->draw.perf[i];
+        benchmark_total.copy.perf[i] += w->copy.perf[i];
+    }
+    /* SoC 6.4.1: RND P4, DISP P0; physical DDR addresses carry no port number. */
+    for (unsigned p = 0; p < 2; ++p) {
+        const struct mem_xbar_port_stats *port = &fabric.port[p == 0 ? 4 : 0];
+        w->xbar[p][0] = port->rd_txn;
+        w->xbar[p][1] = port->wr_txn;
+        w->xbar[p][2] = port->rd_beat;
+        w->xbar[p][3] = port->wr_beat;
+        w->xbar[p][4] = port->wait_sum;
+        for (unsigned i = 0; i < 5; ++i) benchmark_total.xbar[p][i] += w->xbar[p][i];
+    }
+    benchmark_total.frames += w->frames;
+    benchmark_total.render_ticks += w->render_ticks;
+    benchmark_total.sw_ticks += w->sw_ticks;
+    benchmark_total.software += w->software;
+    benchmark_total.draw.ticks += w->draw.ticks;
+    benchmark_total.draw.commands += w->draw.commands;
+    benchmark_total.draw.doorbells += w->draw.doorbells;
+    benchmark_total.copy.ticks += w->copy.ticks;
+    benchmark_total.copy.commands += w->copy.commands;
+    benchmark_total.copy.doorbells += w->copy.doorbells;
+    benchmark_total.xbar_cycles += w->xbar_cycles;
+    benchmark_print(benchmark_names[benchmark_scene], w);
+}
+
+static void benchmark_next_scene(lv_timer_t *timer)
+{
+    benchmark_finish_window();
+    benchmark_scene++;
+    benchmark_begin_window();
+    scene_timer_cb(timer);
+}
+
+lv_timer_t *__real_lv_timer_create(lv_timer_cb_t cb, uint32_t period, void *user_data);
+
+lv_timer_t *__wrap_lv_timer_create(lv_timer_cb_t cb, uint32_t period, void *user_data)
+{
+    /* During initial Empty screen creation the benchmark creates exactly one
+     * timer with the active screen as user_data: next_scene_timer_cb.
+     */
+    if (capturing_scene_timer && user_data == lv_screen_active()) {
+        scene_timer_cb = cb;
+        cb = benchmark_next_scene;
+        capturing_scene_timer = false;
+    }
+    return __real_lv_timer_create(cb, period, user_data);
+}
+
+static void benchmark_refresh_event(lv_event_t *event)
+{
+    if (!benchmark_running) return;
+    switch (lv_event_get_code(event)) {
+    case LV_EVENT_REFR_START:
+        refresh_start = s3_ticks();
+        flush_ticks = 0;
+        frame_rendered = false;
+        break;
+    case LV_EVENT_RENDER_READY:
+        frame_rendered = true;
+        break;
+    case LV_EVENT_FLUSH_START:
+    case LV_EVENT_FLUSH_WAIT_START:
+        flush_start = s3_ticks();
+        break;
+    case LV_EVENT_FLUSH_FINISH:
+    case LV_EVENT_FLUSH_WAIT_FINISH:
+        flush_ticks += s3_ticks() - flush_start;
+        break;
+    case LV_EVENT_REFR_READY:
+        benchmark_window.render_ticks += s3_ticks() - refresh_start - flush_ticks;
+        if (frame_rendered) benchmark_window.frames++;
+        break;
+    default: break;
+    }
+}
 
 static uint32_t tick(void)
 {
@@ -81,6 +291,7 @@ void s3_lvgl_init(void)
                            LV_DISPLAY_RENDER_MODE_DIRECT);
     lv_display_set_flush_cb(display, flush);
     lv_display_set_sync_cb(display, sync_buffers);
+    lv_display_add_event_cb(display, benchmark_refresh_event, LV_EVENT_ALL, NULL);
     lv_group_t *group = lv_group_create();
     lv_group_set_default(group);
     lv_indev_t *keys = lv_indev_create();
@@ -98,7 +309,7 @@ void s3_lvgl_step(void)
     lv_timer_handler();
     uint32_t now = tick();
     uint32_t elapsed = now - report_tick;
-    if (elapsed >= 1000) {
+    if (!benchmark_running && elapsed >= 1000) {
         const struct s3_draw_rnd_stats *s = s3_draw_rnd_stats();
         s3_puts("LVGL fps=");
         s3_put_u32((flush_count - report_frames) * 1000u / elapsed);
@@ -138,6 +349,7 @@ static void begin_demo(void)
 
 void s3_lvgl_stop_demo(void)
 {
+    benchmark_running = false;
     /* Widget destructors delete their own timers. Delete the object tree first,
      * then remove remaining demo timers such as benchmark's scene timer.
      */
@@ -167,6 +379,8 @@ void s3_lvgl_start_widgets(void)
 
 static void benchmark_end(const lv_demo_benchmark_summary_t *summary)
 {
+    benchmark_running = false;
+    benchmark_print("ALL", &benchmark_total);
     for (unsigned i = 0; summary->scenes[i].create_cb; ++i) {
         const lv_demo_benchmark_scene_dsc_t *s = &summary->scenes[i];
         s3_puts("LVGL benchmark scene="); s3_puts(s->name);
@@ -186,7 +400,12 @@ void s3_lvgl_start_benchmark(void)
 {
     begin_demo();
     lv_demo_benchmark_set_end_cb(benchmark_end);
+    benchmark_scene = 0;
+    benchmark_total = (struct benchmark_window) {0};
+    capturing_scene_timer = true;
     lv_demo_benchmark();
+    benchmark_begin_window();
+    benchmark_running = true;
 }
 
 void s3_lvgl_self_compare(void)

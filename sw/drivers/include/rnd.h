@@ -107,4 +107,6 @@ void rnd_irq_register(unsigned int priority, rnd_callback callback, void *contex
 void rnd_irq_handle(void);
 /* rnd 5.3: request ABORT, wait IDLE, invalidate targets; return captured error detail. */
 struct rnd_result rnd_abort(void);
+/* rnd 4.3: caller serializes this six-register read with DOORBELL submission. */
+void rnd_read_perf(uint32_t perf[6]);
 #endif

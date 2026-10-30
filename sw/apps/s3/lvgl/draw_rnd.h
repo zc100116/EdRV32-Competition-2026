@@ -9,6 +9,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 enum { S3_RND_BATCH_COMMANDS = 32, S3_RND_TASK_TYPES = 16 };
+struct s3_rnd_measurement {
+    uint64_t ticks;
+    uint64_t perf[6];
+    uint32_t commands;
+    uint32_t doorbells;
+};
 struct s3_draw_rnd_stats {
     uint32_t claimed[S3_RND_TASK_TYPES];
     uint32_t unclaimed[S3_RND_TASK_TYPES];
@@ -16,6 +22,10 @@ struct s3_draw_rnd_stats {
     uint32_t software;
     uint32_t commands;
     uint32_t doorbells;
+    uint64_t rnd_ticks;
+    uint64_t sw_ticks;
+    uint64_t perf[6];
+    struct s3_rnd_measurement copy;
 };
 void s3_draw_rnd_init(void);
 void s3_draw_rnd_enable(bool enabled);

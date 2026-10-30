@@ -183,3 +183,11 @@ struct rnd_result rnd_abort(void)
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_CTRL_OFFSET, EDRV32_RND_CTRL_ABORT_MASK);
     return finish();
 }
+
+void rnd_read_perf(uint32_t perf[6])
+{
+    /* rnd 4.3: read after completion, before the next DOORBELL clears PERF. */
+    for (unsigned int i = 0; i < 6; ++i) {
+        perf[i] = mmio_read32(EDRV32_RND_BASE + EDRV32_RND_PERF_OFFSET(i));
+    }
+}

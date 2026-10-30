@@ -16,6 +16,7 @@ static volatile uint32_t rnd_complete;
 static uint32_t submitted_frame;
 static uint16_t scroll_x;
 static uint16_t scroll_y;
+static uint64_t rnd_elapsed_ticks;
 
 void s3_puts(const char *text)
 {
@@ -178,11 +179,15 @@ void s3_wait_frame(void)
 
 void s3_rnd_run(const struct rnd_batch *batch)
 {
+    uint64_t start = s3_ticks();
     rnd_complete = 0;
     rnd_submit(batch);
     while (!rnd_complete) {
     }
+    rnd_elapsed_ticks = s3_ticks() - start;
 }
+
+uint64_t s3_rnd_elapsed_ticks(void) { return rnd_elapsed_ticks; }
 
 void s3_display_stop(void)
 {

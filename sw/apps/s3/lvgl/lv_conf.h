@@ -14,6 +14,8 @@
 #define LV_DEF_REFR_PERIOD 16
 #define LV_DRAW_BUF_ALIGN 64
 #define LV_DRAW_BUF_STRIDE_ALIGN 32
+/* 96 KiB > 1280 * 720 * 2 / 20 = 92160 B, as benchmark recommends for opa_layer. */
+#define LV_DRAW_LAYER_SIMPLE_BUF_SIZE (96 * 1024)
 #define LV_USE_DRAW_SW 1
 #define LV_DRAW_SW_DRAW_UNIT_CNT 1
 #define LV_DRAW_SW_COMPLEX 1

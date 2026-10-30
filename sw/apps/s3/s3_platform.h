@@ -28,6 +28,8 @@ void s3_wait_frame(void);
  * On ERROR print ERR_CODE/CUR_DESC and stop. No polling completion or fallback.
  */
 void s3_rnd_run(const struct rnd_batch *batch);
+/* Last synchronous run, including submit/cache maintenance and DONE IRQ service. */
+uint64_t s3_rnd_elapsed_ticks(void);
 /* Stop and await IDLE before changing ownership; NULL L1 keeps L1 disabled. */
 void s3_display_begin(const void *l0, uint32_t l0_stride,
                       const void *l1, uint32_t l1_stride);
