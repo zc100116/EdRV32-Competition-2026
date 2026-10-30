@@ -638,7 +638,8 @@ module tb;
                 put(5,0); put(6,32'h00020024); put(8,BASE+32'h401f);
                 put(9,103); put(10,0); execute(1,1);
                 setup(4,source_format,1,3);
-                put(1,BASE+32'h8004); put(2,80); put(3,0); put(4,32'h00010012);
+                // rnd 2.5: sparse samples include 0x801f; keep the target disjoint.
+                put(1,BASE+32'h1004); put(2,80); put(3,0); put(4,32'h00010012);
                 put(5,0); put(6,32'h00010012); put(8,BASE+32'h401f);
                 put(9,257); put(10,0);
                 put(11,source_format==0 ? 32'h04000000 : 32'h02000000);
@@ -681,7 +682,9 @@ module tb;
         // A second command observes the first command's B-fenced output.
         setup(1,0,1,0); put(8,0); put(7,32'hff123456);
         for(int n=0;n<16;n++) for(int z=0;z<4;z++) memory[64+n*4+z]=memory[n*4+z];
-        put(16,32'h00001104); put(24,BASE+32'h8004); put(25,100); put(26,0);
+        // rnd 2.5: read the first command's result into a distinct second target.
+        put(16,32'h00001104); put(17,BASE+32'h9004);
+        put(24,BASE+32'h8004); put(25,100); put(26,0);
         put(27,32'h00010000); put(28,32'h00010000); execute(2,1);
         // Three specified error codes and explicit software clearing.
         for(int error_value=1;error_value<=3;error_value++) begin
