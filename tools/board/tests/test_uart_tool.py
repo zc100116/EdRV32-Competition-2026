@@ -43,6 +43,7 @@ class UartToolTest(unittest.TestCase):
         switches = []
         transfer = BiosTransfer(writes.append, lambda value: switches.append((value, len(writes))))
         transfer.start(self.path, elf=True, baud=baud)
+        self.assertEqual(writes, [b'\r'])
         transfer.feed_line('BIOS: EdRV32')
         steps = expected_steps(baud)
         for index, (expected, response) in enumerate(steps):
@@ -64,8 +65,8 @@ class UartToolTest(unittest.TestCase):
         self.assertEqual(state['result'], f'Run: 0x{ENTRY:08x}')
         self.assertEqual(state['programmedBytes'], sum(len(data) for _, data in SEGMENTS))
         self.assertEqual(state['sent'], state['total'])
-        self.assertEqual(switches, [] if baud == 115200 else [(baud, 2)])
-        self.assert_bytes(b''.join(writes), b''.join(data for data, _ in steps))
+        self.assertEqual(switches, [] if baud == 115200 else [(baud, 3)])
+        self.assert_bytes(b''.join(writes), b'\r' + b''.join(data for data, _ in steps))
 
     def test_default_fast_elf_transfer(self):
         self.exercise_transfer(2000000)
@@ -113,12 +114,13 @@ class UartToolTest(unittest.TestCase):
 
     def test_capture_fragmented_uart_switches_baud_and_logs(self):
         test = self
-        steps = expected_steps()
         menu = (BIOS_MENU + '\r\n').encode()
+        probe_reply = b'Input error: type 1-4 then Enter\r\n' + menu
+        steps = [(b'\r', probe_reply)] + expected_steps()
 
         class Peer:
             def __init__(self):
-                self.pending = bytearray(b'BIOS: EdRV32\r\n' + menu)
+                self.pending = bytearray()
                 self.writes = bytearray()
                 self.step = 0
                 self.offset = 0
@@ -158,7 +160,7 @@ class UartToolTest(unittest.TestCase):
                     self.step += 1
                     self.offset = 0
                     self.pending.extend(reply)
-                    if self.step % 2 == 0 and self.step < len(steps):
+                    if self.step > 1 and self.step % 2 and self.step < len(steps):
                         self.pending.extend(menu)
 
             def flush(self):
@@ -172,10 +174,10 @@ class UartToolTest(unittest.TestCase):
             with self.assertRaises(KeyboardInterrupt):
                 capture('fake', self.path, log, None, None, elf=True)
         self.assertEqual(peer.step, len(steps))
-        self.assertEqual(peer.switches, [(2000000, 2)])
+        self.assertEqual(peer.switches, [(2000000, 3)])
         self.assert_bytes(peer.writes, b''.join(data for data, _ in steps))
-        expected_log = b'BIOS: EdRV32\r\n' + menu + b''.join(
-            reply + (menu if index % 2 and index != len(steps) - 1 else b'')
-            for index, (_, reply) in enumerate(steps))
+        expected_log = probe_reply + b''.join(
+            reply + (menu if index % 2 and index != len(steps) - 2 else b'')
+            for index, (_, reply) in enumerate(steps[1:]))
         self.assert_bytes(log.read_bytes(), expected_log)
         self.assert_bytes(console.getvalue(), expected_log)

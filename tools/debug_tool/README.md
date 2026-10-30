@@ -162,7 +162,9 @@ scale 0.001 得到 CPI）。
 ## BIOS 烧录 SRAM
 
 在“连接”页打开串口（115200、8N1），切到“烧录”页，选择
-`build/sw/<程序>/<程序>.bin` 并点击“烧录 SRAM”。按住 KEY1 按复位，
+`build/sw/<程序>/<程序>.bin` 并点击“烧录 SRAM”。
+已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位。
+每次开始先发送一次 CR，BIOS 对空行打印 `Input error: type 1-4 then Enter` 并重印菜单；
 工具收到 `BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud` 后发送 `1` + CR，收到
 `UART download ready` 后用 `tools/board/uart_tool.py:wire_bytes()` 发送
 4 字节小端长度和镜像。进度包含 4 字节长度头，结果显示 BIOS 原始
@@ -176,7 +178,8 @@ python tools/debug_tool/cli.py program build/sw/monitor/monitor.bin
 CLI 启动传输后等待结果，失败退出码为 1；文件路径由运行工具的主机读取。
 REST：`POST /api/program {"path":"绝对路径.bin"}` 启动，
 `GET /api/program/status` 观察 `active/phase/sent/total/programmedBytes/result/error`。
-先启动烧录再按住 KEY1 按复位；等待提示或结果时不会自动超时、重试。
+同一次 BIOS 会话中可再次烧录，每次都发送一次 CR 等待新菜单，不依赖历史菜单行；
+等待提示或结果时不会自动超时、重试。
 
 ## 网口文件收发
 
@@ -506,7 +509,8 @@ Windows 串口菜单和真实板端网口仍需上板验证。
 
 烧录页现在可选两种模式：原有“烧录 SRAM（.bin，复位后运行）”，以及
 “加载 ELF 并运行（SRAM / DDR）”。先以 115200 连接串口，选择模式和相应文件，
-点击开始，再按住 KEY1 按复位。ELF 模式默认先用 BIOS `4` 提速至 2000000，
+点击开始；已在 BIOS 菜单时直接开始，否则按住 KEY1 并复位。
+ELF 模式同样先发送一次 CR 询问菜单，默认先用 BIOS `4` 提速至 2000000，
 也可选 921600 或 115200（不切换）；主机收到完整 `Baud result` 后同步切换串口。
 程序串口输出继续显示在同一个控制台。
 

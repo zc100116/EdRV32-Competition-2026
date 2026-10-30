@@ -55,7 +55,7 @@ class ApiCliTest(unittest.TestCase):
         state = self.request("/api/program/status")
         self.assertEqual(state["programmedBytes"], path.stat().st_size)
         self.assertEqual(state["result"], "Program SRAM result: PASS, press reset to run")
-        self.assertEqual(b"".join(self.serial.writes[1:]), wire_bytes(path))
+        self.assertEqual(b"".join(self.serial.writes), b"\r1\r" + wire_bytes(path))
         entries = self.request("/api/buffer")["entries"]
         self.assertIn(state["result"], [e["text"] for e in entries if e["dir"] == "rx"])
 
@@ -70,13 +70,13 @@ class ApiCliTest(unittest.TestCase):
         self.boot()
         stdout, stderr = process.communicate(timeout=5)
         self.assertEqual(stderr, "")
-        self.assertEqual(b"".join(self.serial.writes[1:]), wire_bytes(path))
+        self.assertEqual(b"".join(self.serial.writes), b"\r1\r" + wire_bytes(path))
         return process.returncode, stdout
 
     def test_cli_program_success(self):
         code, stdout = self.run_cli(b"CLI BIOS payload")
         self.assertEqual(code, 0)
-        self.assertIn("按住 KEY1 按复位", stdout)
+        self.assertIn("已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位", stdout)
         self.assertIn("Program SRAM result: PASS, press reset to run", stdout)
         self.assertIn('"programmedBytes": 16', stdout)
 
@@ -98,7 +98,7 @@ class ApiCliTest(unittest.TestCase):
 
     def assert_elf_wire(self, baud):
         actual = b"".join(self.serial.writes)
-        expected = b"".join(data for data, _ in expected_steps(baud))
+        expected = b"\r" + b"".join(data for data, _ in expected_steps(baud))
         self.assertEqual(len(actual), len(expected))
         for index, (got, want) in enumerate(zip(actual, expected)):
             self.assertEqual(got, want, f"byte {index}")

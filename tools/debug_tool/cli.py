@@ -245,7 +245,7 @@ def main():
     elif args.cmd == "program":
         request("POST", "/api/program", {"path": os.path.abspath(args.path),
                                           "elf": args.elf, "baud": args.baud})
-        print("按住 KEY1 按复位；等待 BIOS menu", flush=True)
+        print("已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位", flush=True)
         while True:
             st = request("GET", "/api/program/status")
             print(f"\r{st['phase']}: {st['sent']}/{st['total']} B", end="", flush=True)

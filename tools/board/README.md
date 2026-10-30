@@ -10,7 +10,11 @@ bootloader 顶部 4 KiB 栈空间。下载协议见 `sw/boot/README.md`：4 字�
 py tools/board/uart_tool.py build/sw/monitor/monitor.bin --port COM3 --log build/board/coremark.log --menu 1
 ```
 
-先运行工具，再按住启动键（C23）并按复位键（C22），等下载开始后可松开启动键。
+已在 BIOS 菜单时直接开始；否则按住 KEY1（C23）并复位（C22），
+等下载开始后可松开 KEY1。每次开始烧录或加载时，工具先发送一次 CR：
+BIOS 收到空行后打印 `Input error: type 1-4 then Enter` 并重新打印菜单；
+若应用仍在运行，则继续等待进入 BIOS 后的新菜单，不使用历史菜单行。
+同一次 BIOS 会话中再次烧录也会重新发送一次 CR。
 工具等待 `BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`，发送 `1` 和 CR，再等到完整的
 `UART download ready` 行后发送长度和镜像。收到 `Program SRAM result:` 后显示结果；
 PASS 后松开 KEY1 并再按复位键运行程序。工具持续显示串口输出并保存原始 CRLF 日志，
@@ -47,7 +51,8 @@ py tools/board/uart_tool.py build/sw/<程序>/<程序>.elf --elf --baud 921600 -
 py tools/board/uart_tool.py build/sw/<程序>/<程序>.elf --elf --baud 115200 --port COM3
 ```
 
-串口初始仍为 115200 8N1。先启动工具，然后按住 KEY1 按复位。默认先执行 BIOS
+串口初始仍为 115200 8N1。启动时同样先发送一次 CR 询问菜单：
+已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位。默认先执行 BIOS
 `4` 切换到 2000000；可选 921600，或选 115200 跳过切换。工具收到旧波特率的完整
 `Baud result: <值>` 行后才切换主机串口，并等新波特率菜单。每个文件长度非零的
 PT_LOAD 段依次执行一次 `2`，以 `p_paddr` 为目标地址，只传 `p_filesz` 字节；
@@ -59,9 +64,9 @@ PT_LOAD 段依次执行一次 `2`，以 `p_paddr` 为目标地址，只传 `p_fi
 不得复位；复位仍从 SRAM 启动。下载后持续记录应用串口输出，保持所选波特率。
 原 `.bin` 烧录命令与 115200 行为不变。
 
-`--elf --emit` 输出完整会话的发送字节（菜单选择、波特率文本、每段地址/长度/数据、
+`--elf --emit` 输出协议操作的发送字节（菜单选择、波特率文本、每段地址/长度/数据、
 入口文本），供测试逐字节比对；执行时仍须按协议等待各提示，不能把文件无等待地直接写入串口。
-原 `.bin --emit` 仍只输出长度和镜像。
+两种 `--emit` 均不含开始时询问菜单的 CR；原 `.bin --emit` 仍只输出长度和镜像。
 
 ```sh
 python3 -m unittest discover -s tools/board/tests -v

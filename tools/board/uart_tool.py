@@ -91,6 +91,8 @@ class BiosTransfer:
             self.state = {'active': True, 'phase': 'wait_menu', 'path': str(path),
                           'sent': 0, 'total': sum(len(op.payload) for op in plan), 'bios': False,
                           'programmedBytes': None, 'result': None, 'error': None}
+        # An empty command makes an already-open BIOS menu print its prompt again.
+        self.write(b'\r')
         return self.status()
 
     def fail(self, error):

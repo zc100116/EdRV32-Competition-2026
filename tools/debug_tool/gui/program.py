@@ -15,7 +15,8 @@ class ProgramPanel(QFrame):
         title = QLabel("BIOS · 烧录 / 加载运行")
         title.setObjectName("cardTitle")
         layout.addWidget(title)
-        hint = QLabel("以 115200 连接串口，选择镜像并开始，\n然后按住 KEY1 按复位。ELF 加载后立即运行。")
+        hint = QLabel("以 115200 连接串口，选择镜像并开始。\n"
+                      "已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位。ELF 加载后立即运行。")
         hint.setWordWrap(True)
         layout.addWidget(hint)
         self.mode = QComboBox()
@@ -72,7 +73,8 @@ class ProgramPanel(QFrame):
         self.start.setEnabled(self.engine.status()["connected"] and not state["active"])
         self.progress.setMaximum(max(1, state["total"]))
         self.progress.setValue(state["sent"])
-        phases = {"idle": "等待选择文件", "wait_menu": "按住 KEY1 按复位；等待 BIOS menu",
+        phases = {"idle": "等待选择文件",
+                  "wait_menu": "已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位",
                   "wait_ready": "已发送菜单选择；等待 BIOS 提示",
                   "wait_result": "正在传输 / 等待 BIOS 结果",
                   "done": state["result"], "error": state["error"]}

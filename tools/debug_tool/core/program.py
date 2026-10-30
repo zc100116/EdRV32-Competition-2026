@@ -16,7 +16,7 @@ class BiosProgrammer(BiosTransfer):
 
     def start(self, path, elf=False, baud=2000000):
         state = super().start(path, elf, baud)
-        self.log('按住 KEY1 按复位；等待 BIOS menu')
+        self.log('已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位')
         return state
 
     def fail(self, error):
