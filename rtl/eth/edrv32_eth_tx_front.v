@@ -19,7 +19,7 @@ module edrv32_eth_tx_front (
     output wire error_o,
 
     // Frame completion in this clock domain.
-    output wire done_o
+    output reg done_o
 );
     localparam [2:0] S_IDLE = 3'd0;
     localparam [2:0] S_PREAMBLE = 3'd1;
@@ -40,7 +40,14 @@ module edrv32_eth_tx_front (
     assign ready_o = state_r == S_DATA;
     assign valid_o = state_r != S_IDLE && state_r != S_GAP;
     assign error_o = 1'b0;
-    assign done_o = state_r == S_FCS && idx_r == 4'd3;
+    // Match the board RGMII fabric stage: done accompanies the final FCS at ODDR input.
+    // The clk_mem completion moves one eth_tx_clk cycle plus the CDC sampling phase.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            done_o <= 1'b0;
+        else
+            done_o <= state_r == S_FCS && idx_r == 4'd3;
+    end
     always @(*) begin
         data_o = 8'd0;
         case (state_r)

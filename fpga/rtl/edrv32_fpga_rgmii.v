@@ -2,6 +2,7 @@
 // Spec: eth-spec 3; edrv32-soc-spec 3.4, 5.2 X7.
 // Description: Vendor SAME_PIPELINED RX and SAME_EDGE TX with fixed IO delays.
 //              Both MAC clocks use the vendor RX PLL output; ETH owns the async FIFOs.
+//              One fabric stage on each MAC direction separates IO from FIFO RAM.
 // Clock domains: eth RX/TX (125 MHz).
 module edrv32_fpga_rgmii (
     // PHY source clock and DDR receive pins.
@@ -29,6 +30,12 @@ module edrv32_fpga_rgmii (
     wire [4:0] rx_delay_w;
     wire [4:0] rx_rise_w;
     wire [4:0] rx_fall_w;
+    reg [7:0] rx_data_r;
+    reg rx_dv_r;
+    reg rx_er_r;
+    reg [7:0] tx_data_r;
+    reg tx_en_r;
+    reg tx_er_r;
     wire [5:0] tx_rise_w;
     wire [5:0] tx_fall_w;
     wire [5:0] tx_ddr_w;
@@ -51,11 +58,23 @@ module edrv32_fpga_rgmii (
     );
 
     assign rx_pin_w = {rgmii_rx_ctl_i, rgmii_rxd_i};
-    assign eth_rxd_o = {rx_fall_w[3:0], rx_rise_w[3:0]};
-    assign eth_rx_dv_o = rx_rise_w[4];
-    assign eth_rx_er_o = rx_rise_w[4] ^ rx_fall_w[4];
-    assign tx_rise_w = {1'b1, eth_tx_en_i, eth_txd_i[3:0]};
-    assign tx_fall_w = {1'b0, eth_tx_en_i ^ eth_tx_er_i, eth_txd_i[7:4]};
+    assign eth_rxd_o = rx_data_r;
+    assign eth_rx_dv_o = rx_dv_r;
+    assign eth_rx_er_o = rx_er_r;
+    assign tx_rise_w = {1'b1, tx_en_r, tx_data_r[3:0]};
+    assign tx_fall_w = {1'b0, tx_en_r ^ tx_er_r, tx_data_r[7:4]};
+
+    // Keep each byte aligned with its control across the IO-adjacent fabric stage.
+    always @(posedge clk_eth_o) begin
+        rx_data_r <= {rx_fall_w[3:0], rx_rise_w[3:0]};
+        tx_data_r <= eth_txd_i;
+    end
+    always @(posedge clk_eth_o) begin
+        rx_dv_r <= rx_rise_w[4];
+        rx_er_r <= rx_rise_w[4] ^ rx_fall_w[4];
+        tx_en_r <= eth_tx_en_i;
+        tx_er_r <= eth_tx_er_i;
+    end
 
     genvar pin_idx;
     generate
