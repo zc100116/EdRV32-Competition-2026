@@ -1071,9 +1071,9 @@ module edrv32_rnd_draw (
             bounds_ready_r <= 1'b0;
         end else begin
             bounds_valid_r <= {bounds_valid_r[5:0],
-                load_state_r == S_CHUNK && !busy_r[load_bank_r] && !loaded_all_r &&
-                    !fill_w && !tile_w};
-            if (load_state_r == S_CHUNK)
+                load_state_r == S_CHUNK && !loaded_all_r && !fill_w && !tile_w &&
+                    !bounds_ready_r && bounds_valid_r == 0};
+            if (load_state_r == S_LOADED)
                 bounds_ready_r <= 1'b0;
             if (bounds_valid_r[6])
                 bounds_ready_r <= 1'b1;
@@ -1284,7 +1284,10 @@ module edrv32_rnd_draw (
         end
         if (load_state_r == S_TILE_MAP && map_hit_w)
             tile_entry_r <= map_shift_w[15:0];
-        if (bounds_valid_r[6]) begin
+        // Prepare while the next bank is busy, then publish only after CHUNK acquires it.
+        // The existing arithmetic registers hold this chunk until LOADED advances its geometry.
+        if ((load_state_r == S_BOUNDS && bounds_ready_r) ||
+            (bounds_valid_r[6] && load_state_r != S_CHUNK)) begin
             bank_source_r[load_bank_r] <= bounds_first_r;
             bank_source_row_r[load_bank_r] <= bounds_row_base_r;
             bank_sparse_r[load_bank_r] <= bounds_sparse_result_w;
