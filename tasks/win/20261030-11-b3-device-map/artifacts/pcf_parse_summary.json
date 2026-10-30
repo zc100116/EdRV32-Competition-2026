@@ -1,0 +1,24 @@
+{
+  "b3v-apm.pcf": {
+    "instances": 155,
+    "distinct_sites": 91,
+    "matches_full_export": true
+  },
+  "b3v-drm.pcf": {
+    "instances": 115,
+    "distinct_sites": 109,
+    "matches_full_export": true
+  },
+  "drm": {
+    "36k_instances": 103,
+    "18k_instances": 12,
+    "36k_equivalent_from_instance_names": 109.0,
+    "unclassified_instances": 0
+  },
+  "apm_resource_report_comparison": {
+    "device_map_report_APM": 161,
+    "exported_APM_constraints": 155,
+    "difference": 6,
+    "explanation": "Unresolved. Placement constraints and device-map utilization differ; no missing constraints invented."
+  }
+}
