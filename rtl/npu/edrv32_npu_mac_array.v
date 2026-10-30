@@ -83,10 +83,11 @@ module edrv32_npu_mac_array (
             reg [9:0] valid_r;
             reg [9:0] first_r;
             reg [9:0] last_r;
-            wire [47:0] cascade_w [0:8];
+            wire [47:0] cascade_w [0:7];
+            wire [47:0] sum_w;
             wire [9:0] unused_sum_w;
             assign cascade_w[0] = 48'd0;
-            assign unused_sum_w = {cascade_w[8][47:43], cascade_w[8][23:19]};
+            assign unused_sum_w = {sum_w[47:43], sum_w[23:19]};
             wire [1:0] unused_control_w;
 
             // The scalar interface exports copy 0; other local copies remain identical.
@@ -111,22 +112,45 @@ module edrv32_npu_mac_array (
             assign channel_busy_w[channel] = |valid_r;
 
             for (lane = 0; lane < 8; lane = lane + 1) begin : g_lane
-                edrv32_mac_npu_int8_chain u_mac (
-                    // M1/M2/Ck are inside the APM; each next CPO adds one edge.
-                    .clk_i(clk_i),
+                wire [15:0] lane_activation_w;
+                wire [7:0] lane_weight_w;
+                assign lane_activation_w = activation_w[channel/8][16*lane +: 16];
+                assign lane_weight_w = term_weight_i[8*(8*channel+lane) +: 8];
+                if (lane < 7) begin : g_cascade
+                    wire [47:0] unused_p_w;
+                    edrv32_mac_npu_int8_chain u_mac (
+                        // M1/M2/Ck are inside the APM; each next CPO adds one edge.
+                        .clk_i(clk_i),
 
-                    .a0_i(activation_w[channel/8][16*lane +: 8]),
-                    .b0_i(term_weight_i[8*(8*channel+lane) +: 8]),
-                    .a1_i(activation_w[channel/8][16*lane+8 +: 8]),
-                    .b1_i(term_weight_i[8*(8*channel+lane) +: 8]),
+                        .a0_i(lane_activation_w[7:0]),
+                        .b0_i(lane_weight_w),
+                        .a1_i(lane_activation_w[15:8]),
+                        .b1_i(lane_weight_w),
 
-                    .cpi_i(cascade_w[lane]),
-                    .cpo_o(cascade_w[lane+1])
-                );
+                        .cpi_i(cascade_w[lane]),
+                        .cpo_o(cascade_w[lane+1]),
+                        .p_o(unused_p_w)
+                    );
+                end else begin : g_result
+                    wire [47:0] unused_cpo_w;
+                    edrv32_mac_npu_int8_chain u_mac (
+                        .clk_i(clk_i),
+
+                        .a0_i(lane_activation_w[7:0]),
+                        .b0_i(lane_weight_w),
+                        .a1_i(lane_activation_w[15:8]),
+                        .b1_i(lane_weight_w),
+
+                        // The last P drives logic; CPO only connects APMs.
+                        .cpi_i(cascade_w[lane]),
+                        .cpo_o(unused_cpo_w),
+                        .p_o(sum_w)
+                    );
+                end
             end
 
-            assign sum_data_o[19*channel +: 19] = cascade_w[8][18:0];
-            assign sum_data_o[19*(32+channel) +: 19] = cascade_w[8][42:24];
+            assign sum_data_o[19*channel +: 19] = sum_w[18:0];
+            assign sum_data_o[19*(32+channel) +: 19] = sum_w[42:24];
         end
     endgenerate
 

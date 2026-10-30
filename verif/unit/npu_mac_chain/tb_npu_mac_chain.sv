@@ -16,8 +16,12 @@ module tb_npu_mac_chain;
     wire [31:0] input_w [0:7];
     wire [47:0] sim_chain [0:8];
     wire [47:0] fpga_chain [0:8];
+    wire [47:0] sim_p [0:7];
+    wire [47:0] fpga_p [0:7];
     wire [47:0] sim_single;
     wire [47:0] fpga_single;
+    wire [47:0] sim_single_p;
+    wire [47:0] fpga_single_p;
     reg [47:0] cpi = 0;
     reg [47:0] expected_single [0:2];
     reg [47:0] expected_chain [0:9];
@@ -38,7 +42,8 @@ module tb_npu_mac_chain;
         .a1_i(operands[0][23:16]),
         .b1_i(operands[0][31:24]),
         .cpi_i(cpi),
-        .cpo_o(sim_single)
+        .cpo_o(sim_single),
+        .p_o(sim_single_p)
     );
     edrv32_mac_npu_int8_chain_fpga u_single_fpga (
         .clk_i(clk),
@@ -47,7 +52,8 @@ module tb_npu_mac_chain;
         .a1_i(operands[0][23:16]),
         .b1_i(operands[0][31:24]),
         .cpi_i(cpi),
-        .cpo_o(fpga_single)
+        .cpo_o(fpga_single),
+        .p_o(fpga_single_p)
     );
     genvar k;
     generate
@@ -64,7 +70,8 @@ module tb_npu_mac_chain;
                 .a1_i(input_w[k][23:16]),
                 .b1_i(input_w[k][31:24]),
                 .cpi_i(sim_chain[k]),
-                .cpo_o(sim_chain[k+1])
+                .cpo_o(sim_chain[k+1]),
+                .p_o(sim_p[k])
             );
             edrv32_mac_npu_int8_chain_fpga u_fpga (
                 .clk_i(clk),
@@ -73,7 +80,8 @@ module tb_npu_mac_chain;
                 .a1_i(input_w[k][23:16]),
                 .b1_i(input_w[k][31:24]),
                 .cpi_i(fpga_chain[k]),
-                .cpo_o(fpga_chain[k+1])
+                .cpo_o(fpga_chain[k+1]),
+                .p_o(fpga_p[k])
             );
             always @(posedge clk) begin
                 skew[k][0] <= operands[k];
@@ -83,9 +91,11 @@ module tb_npu_mac_chain;
             always @(posedge clk) begin
                 #2;
                 if (sim_chain[k+1] !== fpga_chain[k+1] ||
-                    sim_chain[k+1] !== u_fpga.u_apm.P)
-                    $fatal(1, "FAIL EQ chain stage=%0d cycle=%0d SIM=%h CPO=%h P=%h",
-                        k, cycle, sim_chain[k+1], fpga_chain[k+1], u_fpga.u_apm.P);
+                    sim_p[k] !== u_fpga.u_apm.P || fpga_p[k] !== u_fpga.u_apm.P ||
+                    sim_p[k] !== sim_chain[k+1])
+                    $fatal(1, {"FAIL EQ chain stage=%0d cycle=%0d SIM_CPO=%h CPO=%h ",
+                        "SIM_P=%h FPGA_P=%h P=%h"}, k, cycle, sim_chain[k+1],
+                        fpga_chain[k+1], sim_p[k], fpga_p[k], u_fpga.u_apm.P);
             end
         end
     endgenerate
@@ -123,9 +133,11 @@ module tb_npu_mac_chain;
                 24'($signed(operands[0][23:16]) * $signed(operands[0][31:24])),
                 24'($signed(operands[0][7:0]) * $signed(operands[0][15:8]))};
             #1;
-            if (sim_single !== fpga_single || sim_single !== u_single_fpga.u_apm.P)
-                $fatal(1, "FAIL EQ single cycle=%0d SIM=%h CPO=%h P=%h",
-                    cycle, sim_single, fpga_single, u_single_fpga.u_apm.P);
+            if (sim_single !== fpga_single || sim_single_p !== u_single_fpga.u_apm.P ||
+                fpga_single_p !== u_single_fpga.u_apm.P || sim_single_p !== sim_single)
+                $fatal(1, {"FAIL EQ single cycle=%0d SIM_CPO=%h CPO=%h ",
+                    "SIM_P=%h FPGA_P=%h P=%h"}, cycle, sim_single, fpga_single,
+                    sim_single_p, fpga_single_p, u_single_fpga.u_apm.P);
             if (cycle >= 2 && sim_single !== {
                     24'(expected_single[2][47:24]+cpi[47:24]),
                     24'(expected_single[2][23:0]+cpi[23:0])})
@@ -133,9 +145,9 @@ module tb_npu_mac_chain;
                     cycle, sim_single, fpga_single, u_single_fpga.u_apm.P,
                     expected_single[2], cpi);
             if (cycle >= 9) begin
-                if (sim_chain[8] !== expected_chain[9])
+                if (sim_p[7] !== expected_chain[9])
                     $fatal(1, "FAIL EQ dot cycle=%0d expected=%h actual=%h",
-                        cycle, expected_chain[9], sim_chain[8]);
+                        cycle, expected_chain[9], sim_p[7]);
                 checks = checks + 1;
             end
             @(negedge clk);

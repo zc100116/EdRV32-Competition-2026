@@ -16,7 +16,10 @@ module edrv32_mac_npu_int8_chain (
 
     // SIMD cascade: low/high 24-bit lanes wrap independently.
     input wire [47:0] cpi_i,
-    output wire [47:0] cpo_o
+    output wire [47:0] cpo_o,
+
+    // Registered result for logic; CPO is reserved for the next APM's CPI.
+    output wire [47:0] p_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     // SIMD lanes: 12-bit X and 9-bit Y sub-words, each sign-extended from INT8.
@@ -36,7 +39,7 @@ module edrv32_mac_npu_int8_chain (
         .USE_SIMD(1),
         .ASYNC_RST(0)
     ) u_apm (
-        .P(),
+        .P(p_o),
         .CPO(cpo_o),
         .COUT(),
         .CXO(),
@@ -94,5 +97,6 @@ module edrv32_mac_npu_int8_chain (
         sum1_r <= {{8{product1_r[15]}}, product1_r} + cpi_i[47:24];
     end
     assign cpo_o = {sum1_r, sum0_r};
+    assign p_o = {sum1_r, sum0_r};
 `endif
 endmodule

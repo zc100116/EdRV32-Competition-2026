@@ -16,6 +16,8 @@
 数据通路 LUT6 代理资源 **40454→29206（−11248）**，fabric FF **31505→24817（−6688）**；
 MAC APM 保持 256，数据通路合计保持 288。APM→逻辑的有效结果位数 **8192→1216**。
 
+T-NPU2b（本条所在提交，父提交 `f125c689`）：末级结果改取 `P`，`CPO` 仅用于链内级联，固定配置及十沿延迟不变，EQ-01 同时比较包装与厂商 `P/CPO`；主机不可用于本次风格/lint、`npu_mac_chain`、`npu_mac_array`、OP-01 和 `board_npu`，改在本机 flock 队列仅重跑下文风格/lint 及这四项对应的 smoke 命令，全部 PASS（风格 48 文件、两套 filelist 及 board_npu top/testbench lint 均 0 warnings，EQ-01 1003 点积、MAC 1305 term、OP-01 9 变体），日志为 `build/npu2b/validation.log` 及 `build/regress/smoke/` 下对应目录。
+
 ## 实现与延迟
 
 256 个 APM 保持 32 物理输出通道 × 8 输入项，每个 APM 仍处理两个像素。
