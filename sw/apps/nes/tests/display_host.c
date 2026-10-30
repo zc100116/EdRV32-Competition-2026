@@ -24,6 +24,9 @@ uint32_t mmio_read32(uintptr_t address)
 {
     if (address >= EDRV32_RND_BASE && address < EDRV32_RND_BASE + sizeof(rnd_regs))
         return rnd_regs[(address - EDRV32_RND_BASE) / 4];
+    /* The RND driver timestamps submit/finish from CLINT mtime; time stays 0 here. */
+    if (address >= EDRV32_CLINT_BASE && address < EDRV32_CLINT_BASE + EDRV32_CLINT_SIZE)
+        return 0;
     assert(address >= EDRV32_DISP_BASE && address < EDRV32_DISP_BASE + sizeof(disp_regs));
     return disp_regs[(address - EDRV32_DISP_BASE) / 4];
 }
