@@ -1,0 +1,8 @@
+Load bytes: 5177412 at 0x80000000
+Load result: PASS
+Run: 0x80000000
+NPU A-ID PASS
+NPU A-empty PASS
+NPU A-reset PASS
+NPU B-OP-01-c16_32 FAIL desc=0 addr=1102000d expected=00000002 actual=00000001 mismatches=160 PERF0=522 MAC=32 passed=3
+NPU board: FAIL 1/39
