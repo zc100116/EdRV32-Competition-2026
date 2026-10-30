@@ -71,3 +71,24 @@ PT_LOAD 段依次执行一次 `2`，以 `p_paddr` 为目标地址，只传 `p_fi
 ```sh
 python3 -m unittest discover -s tools/board/tests -v
 ```
+
+## NES 外部 ROM
+
+```sh
+py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom sw/apps/nes/roms/nrom-template.nes --baud 115200 --port COM3 --log build/board/nes.log
+py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom D:\roms\smb.nes --baud 115200 --port COM3 --log build/board/nes.log
+```
+
+`--rom <file.nes>` 必须与 `--elf` 一起使用。工具从 ELF 符号表查找 `nes_rom_slot` /
+`nes_rom_slot_end`，用所属 PT_LOAD 的 `p_paddr + (symbol - p_vaddr)` 换算目标地址；
+缺少槽符号或文件大于槽时明确报错。全部 ELF 文件段加载后、`3=Run` 之前，再执行
+一次 `2=Load` 原样发送完整 `.nes` 文件；`--elf --rom ... --emit <wire>` 同样包含该操作。
+ELF 和 ROM 都走 BIOS 现有 CPU 写入及 BSP `cache_clean_all()` 路径，无需额外 cache 维护。
+
+模拟器 ELF 不带游戏，用户自备 ROM 留在仓库外，不下载、不生成、不提交商业 ROM。
+公开测试 ROM 的许可与模拟器用法见 [NES README](../../sw/apps/nes/README.md)。
+板上 KEY1 左、KEY2 右、KEY3 A、KEY4 Start，B 只能用 UART `k`。
+
+仓库外 GUI 可继续 import `BiosTransfer` / `operations`，原有参数与默认行为不变；
+可选新参数为 `operations(image, elf=False, baud=2000000, rom=None)`、
+`BiosTransfer.start(path, elf=False, baud=2000000, rom=None)`。

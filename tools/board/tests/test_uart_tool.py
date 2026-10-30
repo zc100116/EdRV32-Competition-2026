@@ -12,8 +12,10 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from tools.board.uart_tool import BIOS_MENU, BiosTransfer, capture, elf_segments, wire_bytes
-from tools.board.tests.elf_fixture import ENTRY, SEGMENTS, elf_fixture, expected_steps
+from tools.board.uart_tool import (BIOS_MENU, BiosTransfer, capture, elf_segments, operations,
+                                   wire_bytes)
+from tools.board.tests.elf_fixture import (ENTRY, SEGMENTS, ROM_SLOT_PHYSICAL, ROM_SLOT_SIZE,
+                                          elf_fixture, expected_steps)
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -38,14 +40,15 @@ class UartToolTest(unittest.TestCase):
             self.assertEqual(address, want_address)
             self.assert_bytes(data, want_data)
 
-    def exercise_transfer(self, baud):
+    def exercise_transfer(self, baud, rom=None):
         writes = []
         switches = []
         transfer = BiosTransfer(writes.append, lambda value: switches.append((value, len(writes))))
-        transfer.start(self.path, elf=True, baud=baud)
+        transfer.start(self.path, elf=True, baud=baud, rom=rom)
         self.assertEqual(writes, [b'\r'])
         transfer.feed_line('BIOS: EdRV32')
-        steps = expected_steps(baud)
+        rom_data = rom.read_bytes() if rom is not None else None
+        steps = expected_steps(baud, rom_data)
         for index, (expected, response) in enumerate(steps):
             if index % 2 == 0:
                 transfer.feed_line(BIOS_MENU)
@@ -63,7 +66,8 @@ class UartToolTest(unittest.TestCase):
         state = transfer.status()
         self.assertFalse(state['active'])
         self.assertEqual(state['result'], f'Run: 0x{ENTRY:08x}')
-        self.assertEqual(state['programmedBytes'], sum(len(data) for _, data in SEGMENTS))
+        self.assertEqual(state['programmedBytes'], sum(len(data) for _, data in SEGMENTS) +
+                         (len(rom_data) if rom_data is not None else 0))
         self.assertEqual(state['sent'], state['total'])
         self.assertEqual(switches, [] if baud == 115200 else [(baud, 3)])
         self.assert_bytes(b''.join(writes), b'\r' + b''.join(data for data, _ in steps))
@@ -76,6 +80,45 @@ class UartToolTest(unittest.TestCase):
 
     def test_115200_skips_baud_switch(self):
         self.exercise_transfer(115200)
+
+    def test_rom_load_after_elf_before_run_uses_physical_slot(self):
+        self.path.write_bytes(elf_fixture(rom_slot=True))
+        rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
+        plan = operations(self.path, True, 115200, rom)
+        self.assertEqual([op.selection for op in plan], [b'2\r'] * 3 + [b'3\r'])
+        self.assertEqual(plan[-2].payload, struct.pack('<II', ROM_SLOT_PHYSICAL,
+                                                     rom.stat().st_size) + rom.read_bytes())
+        self.exercise_transfer(2000000, rom)
+
+    def test_rom_larger_than_slot_fails_before_transfer(self):
+        self.path.write_bytes(elf_fixture(rom_slot=True))
+        rom = Path(self.temp.name) / 'oversize.nes'
+        rom.write_bytes(bytes(ROM_SLOT_SIZE + 1))
+        writes = []
+        transfer = BiosTransfer(writes.append, lambda value: None)
+        with self.assertRaisesRegex(ValueError, r'1048577 bytes, exceeds ROM slot size 1048576'):
+            transfer.start(self.path, elf=True, rom=rom)
+        self.assertEqual(writes, [])
+
+    def test_rom_requires_slot_symbols_and_elf(self):
+        rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
+        with self.assertRaisesRegex(ValueError, 'missing ROM slot symbol.*nes_rom_slot'):
+            operations(self.path, elf=True, rom=rom)
+        with self.assertRaisesRegex(ValueError, '--rom requires --elf'):
+            operations(self.path, rom=rom)
+
+    def test_cli_emit_rom_and_requires_elf(self):
+        self.path.write_bytes(elf_fixture(rom_slot=True))
+        rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
+        output = Path(self.temp.name) / 'wire'
+        command = [sys.executable, str(ROOT / 'tools/board/uart_tool.py'), str(self.path),
+                   '--rom', str(rom), '--emit', str(output)]
+        subprocess.run(command + ['--elf'], check=True)
+        self.assert_bytes(output.read_bytes(),
+                          b''.join(data for data, _ in expected_steps(rom=rom.read_bytes())))
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('--rom requires --elf', result.stderr)
 
     def test_fail_results_stop_transfer(self):
         for ready, response in [('Baud:', 'Baud result: FAIL'),

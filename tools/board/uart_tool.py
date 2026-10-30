@@ -41,6 +41,41 @@ def load_wire_bytes(address, payload):
     return struct.pack('<II', address, len(payload)) + payload
 
 
+def rom_segment(image, rom):
+    """Resolve the named ROM slot through its PT_LOAD VMA-to-physical mapping."""
+    blob = image.read_bytes()
+    header = struct.unpack_from('<16sHHIIIIIHHHHHH', blob)
+    sections = [struct.unpack_from('<IIIIIIIIII', blob, header[6] + index * header[11])
+                for index in range(header[12])]
+    symbols = {}
+    for section in sections:
+        if section[1] != 2:  # SHT_SYMTAB
+            continue
+        strings = sections[section[6]]
+        names = blob[strings[4]:strings[4] + strings[5]]
+        for offset in range(section[4], section[4] + section[5], section[9]):
+            name, value, _size, _info, _other, _shndx = struct.unpack_from('<IIIBBH', blob,
+                                                                         offset)
+            name = names[name:names.index(b'\0', name)].decode()
+            if name in ('nes_rom_slot', 'nes_rom_slot_end'):
+                symbols[name] = value
+    missing = {'nes_rom_slot', 'nes_rom_slot_end'} - symbols.keys()
+    if missing:
+        raise ValueError(f'{image}: missing ROM slot symbol(s): {", ".join(sorted(missing))}')
+    start = symbols['nes_rom_slot']
+    end = symbols['nes_rom_slot_end']
+    payload = Path(rom).read_bytes()
+    if len(payload) > end - start:
+        raise ValueError(f'{rom}: ROM is {len(payload)} bytes, exceeds ROM slot '
+                         f'size {end - start} bytes')
+    for index in range(header[10]):
+        kind, _offset, vaddr, address, _size, memsz, _flags, _align = struct.unpack_from(
+            '<IIIIIIII', blob, header[5] + index * header[9])
+        if kind == 1 and vaddr <= start < end <= vaddr + memsz:
+            return address + start - vaddr, payload
+    raise ValueError(f'{image}: ROM slot is not covered by a PT_LOAD segment')
+
+
 @dataclass(frozen=True)
 class BiosOperation:
     selection: bytes
@@ -50,11 +85,15 @@ class BiosOperation:
     baud: int = 0
 
 
-def operations(image, elf=False, baud=2000000):
+def operations(image, elf=False, baud=2000000, rom=None):
+    if rom is not None and not elf:
+        raise ValueError('--rom requires --elf')
     if not elf:
         return [BiosOperation(b'1\r', 'UART download ready', wire_bytes(image),
                               'Program SRAM result: PASS, press reset to run')]
     entry, segments = elf_segments(image)
+    if rom is not None:
+        segments.append(rom_segment(image, rom))
     result = []
     if baud not in BAUDS:
         raise ValueError(f'baud must be one of {BAUDS}')
@@ -81,8 +120,8 @@ class BiosTransfer:
         with self.lock:
             return dict(self.state)
 
-    def start(self, path, elf=False, baud=2000000):
-        plan = operations(Path(path), elf, baud)
+    def start(self, path, elf=False, baud=2000000, rom=None):
+        plan = operations(Path(path), elf, baud, rom)
         with self.lock:
             if self.state['active']:
                 raise RuntimeError('BIOS programming is already active')
@@ -145,7 +184,7 @@ class BiosTransfer:
                     self.state['sent'] += len(chunk)
 
 
-def capture(port, image, log, menu, iterations, elf=False, baud=2000000):
+def capture(port, image, log, menu, iterations, elf=False, baud=2000000, rom=None):
     import serial
 
     prompt = 'Menu: 1=CoreMark 2=Peripheral tests 3=System info'
@@ -160,7 +199,7 @@ def capture(port, image, log, menu, iterations, elf=False, baud=2000000):
 
         transfer = BiosTransfer(write, lambda value: setattr(uart, 'baudrate', value))
         if image:
-            transfer.start(image, elf, baud)
+            transfer.start(image, elf, baud, rom)
         while True:
             data = uart.read(max(1, uart.in_waiting))
             output.write(data)
@@ -190,6 +229,8 @@ def main():
                         help='make-generated SRAM .bin, or ELF with --elf; omit to only log')
     parser.add_argument('--elf', action='store_true',
                         help='load PT_LOAD segments, then run ELF entry')
+    parser.add_argument('--rom', type=Path,
+                        help='load an external .nes file into the ELF ROM slot before run')
     parser.add_argument('--baud', type=int, choices=BAUDS, default=2000000,
                         help='ELF transfer baud (default 2000000; 115200 skips the switch)')
     destination = parser.add_mutually_exclusive_group(required=True)
@@ -202,18 +243,20 @@ def main():
     args = parser.parse_args()
     if args.iterations and args.menu != '1':
         parser.error('--iterations requires --menu 1')
+    if args.rom is not None and not args.elf:
+        parser.error('--rom requires --elf')
     if (args.emit or args.elf) and not args.image:
         parser.error('--emit and --elf require an image')
     if args.emit:
         args.emit.parent.mkdir(parents=True, exist_ok=True)
         stream = (b''.join(op.selection + op.payload for op in
-                           operations(args.image, True, args.baud)) if args.elf
+                           operations(args.image, True, args.baud, args.rom)) if args.elf
                   else wire_bytes(args.image))
         args.emit.write_bytes(stream)
     else:
         try:
             capture(args.port, args.image, args.log, args.menu, args.iterations,
-                    args.elf, args.baud)
+                    args.elf, args.baud, args.rom)
         except KeyboardInterrupt:
             pass
 
