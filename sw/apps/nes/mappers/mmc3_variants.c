@@ -20,9 +20,15 @@ static bool chr_writable[8];
 static uint8 extra_ram[4096];
 static int ram_first;
 static int ram_mask;
+static uint8 outer;
 
 static int ram_index(int bank)
 {
+    /* https://www.nesdev.org/wiki/INES_Mapper_191 */
+    if (mmc_getinfo()->vrom_banks == 0)
+        return bank & 7;
+    if (mmc_getinfo()->mapper_number == 191)
+        return outer == 3 && (bank & 0x80) ? bank & 1 : -1;
     /* https://www.nesdev.org/wiki/INES_Mapper_195: GAL-selected RAM window. */
     if (mmc_getinfo()->mapper_number == 195)
         return (bank & ram_mask) == ram_first ? bank & 7 : -1;
@@ -34,10 +40,13 @@ static int ram_index(int bank)
 static void sync_banks(void)
 {
     int fixed = mmc_getinfo()->rom_banks * 2 - 2;
+    bool multicart = mmc_getinfo()->mapper_number == 191 && mmc_getinfo()->vrom_banks == 32;
+    if (multicart)
+        fixed = 0x18 + outer * 2;
     mmc_bankrom(8, 0x8000, command & 0x40 ? fixed : banks[6]);
     mmc_bankrom(8, 0xa000, banks[7]);
     mmc_bankrom(8, 0xc000, command & 0x40 ? banks[6] : fixed);
-    mmc_bankrom(8, 0xe000, MMC_LASTBANK);
+    mmc_bankrom(8, 0xe000, multicart ? fixed + 1 : MMC_LASTBANK);
     int base = command & 0x80 ? 4 : 0;
     int selected[8] = {banks[0] & 0xfe, banks[0] | 1, banks[1] & 0xfe,
                        banks[1] | 1, banks[2], banks[3], banks[4], banks[5]};
@@ -48,8 +57,11 @@ static void sync_banks(void)
         chr_writable[page] = ram_index(bank) >= 0;
         if (chr_writable[page])
             ppu_setpage(1, page, chr_ram + ram_index(bank) * 1024 - page * 1024);
-        else
+        else {
+            if (mmc_getinfo()->mapper_number == 191)
+                bank = (bank & 0x7f) | (outer != 3 ? 0x80 : 0);
             mmc_bankvrom(1, page * 1024, bank);
+        }
     }
 }
 
@@ -81,6 +93,12 @@ static void write_reg(uint32 address, uint8 value)
 {
     if (address < 0x6000) {
         extra_ram[address & 0xfff] = value;
+        return;
+    }
+    if (mmc_getinfo()->mapper_number == 191 && mmc_getinfo()->vrom_banks == 32 &&
+        (address & 0xf0ff) == 0x90aa) {
+        outer = value & 3;
+        sync_banks();
         return;
     }
     switch (address & 0xe001) {
@@ -115,6 +133,7 @@ void nes_mmc3_variant_init(void)
     memcpy(banks, initial, sizeof(banks));
     memset(chr_ram, 0, sizeof(chr_ram));
     memset(extra_ram, 0, sizeof(extra_ram));
+    outer = mmc_getinfo()->vrom_banks == 32 ? 0 : 3;
     ram_first = 0x28;
     ram_mask = 0xfc;
     nes_chr_write_hook = chr_write;
