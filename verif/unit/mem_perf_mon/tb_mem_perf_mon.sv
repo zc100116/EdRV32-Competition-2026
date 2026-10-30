@@ -222,10 +222,25 @@ module tb_mem_perf_mon;
             end
         end
     endtask
-    task finish_check(input integer count);
+    task finish_check(input integer count, input integer error_count = -1,
+        input [31:0] first_error_addr = 0);
         begin
             wait_idle();
             elapsed_cycles = tick - start_tick;
+            // Sample all results in the first idle cycle, before another clock edge.
+            if (error_count >= 0) begin
+                paddr = 'h010; #1;
+                if (prdata !== 32'd1)
+                    $fatal(1, "FAIL DONE expected=1 actual=%h time=%0t", prdata, $time);
+                paddr = 'h21c; #1;
+                if (prdata !== 32'(error_count))
+                    $fatal(1, "FAIL ERR_BEATS at DONE expected=%0d actual=%0d time=%0t",
+                        error_count, prdata, $time);
+                paddr = 'h220; #1;
+                if (prdata !== first_error_addr)
+                    $fatal(1, "FAIL FIRST_ERR_ADDR at DONE expected=%h actual=%h time=%0t",
+                        first_error_addr, prdata, $time);
+            end
             eq_reg('h010, 1);
             eq_reg('h208, elapsed_cycles);
             eq_reg('h200, count);
@@ -343,12 +358,23 @@ module tb_mem_perf_mon;
         configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16, 'h1000);
         wr('h004, 2); finish_check(8); eq_reg('h21c, 0);
         $display("PASS PM-01 sequential pattern and readback");
-        // PM-02: a bad byte reports the containing beat, once.
+        // PM-02: multiple bad lanes count once; consecutive and final beats count too.
         storage.memory[1024+27] = storage.memory[1024+27] ^ 32'h0000_0100;
+        storage.memory[1024+24] = storage.memory[1024+24] ^ 32'h0000_0001;
+        storage.memory[1024+32] = storage.memory[1024+32] ^ 32'h8000_0000;
+        storage.memory[1024+1023] = storage.memory[1024+1023] ^ 32'h0000_0080;
         configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16, 'h1000);
-        wr('h004, 2); finish_check(8); eq_reg('h21c, 1); eq_reg('h220, 'h1060);
+        wr('h004, 2); finish_check(8, 3, 'h1060);
+        eq_reg('h21c, 3); eq_reg('h220, 'h1060);
+        // With only the last R beat corrupt, both results must settle before DONE.
+        storage.memory[1024+27] = storage.memory[1024+27] ^ 32'h0000_0100;
+        storage.memory[1024+24] = storage.memory[1024+24] ^ 32'h0000_0001;
+        storage.memory[1024+32] = storage.memory[1024+32] ^ 32'h8000_0000;
+        configure(0, 0, 8, 16, 8, 4096, 4, mem_seed, 1, 16, 'h1000);
+        wr('h004, 2); finish_check(8, 1, 'h1fe0);
+        eq_reg('h21c, 1); eq_reg('h220, 'h1fe0);
         eq_reg('h010, 1);
-        $display("PASS PM-02 corrupt byte");
+        $display("PASS PM-02 corrupt lanes/consecutive/final beats and final results at DONE");
         // PM-04: exact bin boundaries, all sixteen bins, overflow to last bin.
         for (i = 1; i < 16; i = i + 1) begin
             for (j = -1; j <= 1; j = j + 1) begin
