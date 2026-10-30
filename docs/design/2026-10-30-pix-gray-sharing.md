@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 日期 | 2026-10-30 |
-| 状态 | 讨论中 |
+| 状态 | 已决定（用户 2026-10-30 确认 A+B） |
 | 关联 | `docs/spec/pix-spec.md` v0.1 2.1、2.4、2.5、7；`rtl/media/pix/edrv32_pix_kernel.v`、`edrv32_pix_filter.v`、`edrv32_pix_point2.v`；卡 10 `origin/win/20261030-10-b3-timing-rerun` B3F `resource_hier.txt`（RTL 05088f4b）；`docs/plan/board-plan.md` B3-17 |
 
 ## 1. 背景和问题
@@ -60,7 +60,7 @@ B3F 的 APM 总数从 569 降到约 455，占 61%，与 B3VN 当前的密度相�
 
 ## 5. 决策
 
-待用户确认。
+采用 A+B（用户 2026-10-30 确认）：窗口入口共享灰度，77/150/29 常数乘法在 RTL 中写成移位加，point2 灰度同样改写；均值 3641 与 point1 对比度乘法保留 APM。
 
 ## 6. 影响
 
@@ -71,4 +71,4 @@ B3F 的 APM 总数从 569 降到约 455，占 61%，与 B3VN 当前的密度相�
 
 ## 7. 状态
 
-讨论中。
+已决定，实现任务 T-PIX1。
