@@ -1,14 +1,14 @@
 # 20261030-16-b3r-lvgl-nes 结果
 
-S3分场景性能和NES外部演示ROM测试已完成；用户确认演示画面、人物移动和板上按键正常。用户暂无SMB ROM，明确要求结束测试并上传，SMB项记为未执行。本卡不是全部三项验收完成。
+S3分场景性能及NES演示ROM测试已完成。之后用户提供自备SMB ROM，已加载并识别mapper 0，但用户观察HDMI“画面全是灰色”，显示测试失败，不能判本卡全部通过。演示ROM此前画面和按键正常。
 
 | 项 | 内容 |
 |---|---|
-| 当前任务检出commit | b32f589c93206a0f8a84f4cd5c907410343ba220 |
+| 当前任务检出commit | 788064d557b3eb02665efe9527b013b275c4e04e |
 | bitstream | 复用卡14 B3R，G:/codex_project/EdRV32-FPGA/EdRV32-B3R；未重新实现 |
 | S3加载方式 | GUI，COM7，115200、8N1 |
 | NES加载方式 | 后台uart_tool.py，COM7，115200；--elf和--rom |
-| 完成情况 | 步骤2、3完成；步骤4因用户暂无SMB ROM未执行，按用户要求结束 |
+| 完成情况 | 步骤2、3完成；步骤4加载成功但HDMI全灰，记录失败后结束采集 |
 
 ## LVGL benchmark
 
@@ -90,10 +90,40 @@ NES ROM prg=16 chr=8 mapper=0
 
 用户试玩反馈：“正常的”（针对演示ROM画面、人物移动和板上按键）。已记录超过30秒，随后仅停止PC端日志采集并释放COM7；未向板端发送复位，板端NES继续运行。
 
-## 用户自备SMB ROM
+## 用户自备SMB ROM（补测）
 
-未执行。用户回复“我现在没有，结束测试吧，整理报告上传”。没有查找、下载、复制或上传用户自备SMB ROM，也没有写入其文件路径。SMB的NES ROM行、帧率、画面/按键、主观速度均未取得。
+用户此前暂无ROM而暂停该项，之后提供本地文件并指定了一个mapper 0版本重试。原文件已是iNES格式，仅在仓库外解压，未修改头或转换mapper。文档中按任务卡仅称“用户自备SMB ROM”，不记录文件路径，不提交ROM。
 
+串口加载及运行关键原文：
+
+```text
+Load bytes: 194356 at 0x90000000
+Load result: PASS
+Load bytes: 4384 at 0x9002f738
+Load result: PASS
+Load bytes: 41488 at 0x905e91c0
+Load result: PASS
+Run: 0x90000000
+Head: 0x905e91c0 (4e 45 53 1a)
+Read in trainer at $7000
+ROM loaded:  [0] 32k/8k VT
+NES ROM prg=32 chr=8 mapper=0
+```
+
+用户反馈：“画面全是灰色”。因此本项为加载成功、HDMI显示失败；左右移动、跳跃、Start和游戏速度未获得有效验证，不因串口有FPS/shown计数而判显示正常。
+
+标识ROM之后取得165个帧率窗口，全部保留到nes_smb_fps.tsv；日志开头有旧演示程序残留FPS，分析本次游戏只使用NES ROM prg=32 chr=8 mapper=0之后的窗口。
+
+| 窗口 | fps | shown | cpu% | ppu% |
+|---|---|---|---|---|
+| 1 | 84.5 | 22.5 | 30 | 35 |
+| 2 | 84.0 | 22.4 | 30 | 35 |
+| 3 | 84.0 | 22.4 | 30 | 35 |
+| 4 | 84.0 | 22.4 | 30 | 35 |
+
+可确认事实：ELF和ROM各段Load result均PASS，ROM识别为PRG32KiB、CHR8KiB、mapper0，日志包含Read in trainer at $7000，程序持续报告FPS。当前不能确定灰屏来自该改版ROM/Trainer兼容性、模拟核心还是图像输出链路；没有擅自改ROM、模拟器或RTL，不把猜测写成根因。
+
+测试后只停止本次PC串口辅助进程，释放COM7；板端未被复位。用户提供的ROM和扫描清单不入artifacts，原始串口日志uart/nes-smb.log已保留。
 ## 文件及范围
 
 - uart/s3.log：GUI整个保留缓冲的原始导出，覆盖本次S3到benchmark结束；可能含同会话前后记录，不冒充逐字节串口抓包。

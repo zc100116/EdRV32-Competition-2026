@@ -84,5 +84,36 @@ report += ['',
     '- uart/nes-template.log：后台工具直接写出的原始串口字节；nes_template_fps.tsv：全部帧率窗口。',
     '- checklist.md：已完成项、用户观察及SMB未执行说明。', '',
     '没有提交ROM、bitstream或额外二进制。本卡只换软件，没有运行综合、布局布线或STA。未对源码版本或报告时间作额外核验。']
+smb_path=OUT/'uart/nes-smb.log'
+if smb_path.exists():
+    smb_lines=smb_path.read_bytes().decode('utf-8',errors='replace').splitlines()
+    marker=next((i for i,l in enumerate(smb_lines) if l=='NES ROM prg=32 chr=8 mapper=0'),None)
+    assert marker is not None,'SMB ROM identification missing'
+    windows=[]
+    for line in smb_lines[marker+1:]:
+        m=re.fullmatch(r'NES fps=([\d.]+) shown=([\d.]+) cpu=(\d+)% ppu=(\d+)%',line)
+        if m:windows.append(dict(window=len(windows)+1,fps=m[1],shown=m[2],cpu_percent=m[3],ppu_percent=m[4]))
+    table('nes_smb_fps.tsv',['window','fps','shown','cpu_percent','ppu_percent'],windows)
+    text='\n'.join(report)
+    text=text.replace('S3分场景性能和NES外部演示ROM测试已完成；用户确认演示画面、人物移动和板上按键正常。用户暂无SMB ROM，明确要求结束测试并上传，SMB项记为未执行。本卡不是全部三项验收完成。',
+        'S3分场景性能及NES演示ROM测试已完成。之后用户提供自备SMB ROM，已加载并识别mapper 0，但用户观察HDMI“画面全是灰色”，显示测试失败，不能判本卡全部通过。演示ROM此前画面和按键正常。')
+    text=text.replace('步骤2、3完成；步骤4因用户暂无SMB ROM未执行，按用户要求结束','步骤2、3完成；步骤4加载成功但HDMI全灰，记录失败后结束采集')
+    start=text.index('## 用户自备SMB ROM')
+    end=text.index('## 文件及范围',start)
+    extra=['## 用户自备SMB ROM（补测）','',
+        '用户此前暂无ROM而暂停该项，之后提供本地文件并指定了一个mapper 0版本重试。原文件已是iNES格式，仅在仓库外解压，未修改头或转换mapper。文档中按任务卡仅称“用户自备SMB ROM”，不记录文件路径，不提交ROM。', '',
+        '串口加载及运行关键原文：','', '```text',*[l for l in smb_lines if l.startswith(('Load bytes:','Load result:','Run:','Head:','Read in trainer','ROM loaded:','NES ROM'))],'```','',
+        '用户反馈：“画面全是灰色”。因此本项为加载成功、HDMI显示失败；左右移动、跳跃、Start和游戏速度未获得有效验证，不因串口有FPS/shown计数而判显示正常。', '',
+        f'标识ROM之后取得{len(windows)}个帧率窗口，全部保留到nes_smb_fps.tsv；日志开头有旧演示程序残留FPS，分析本次游戏只使用NES ROM prg=32 chr=8 mapper=0之后的窗口。','',
+        '| 窗口 | fps | shown | cpu% | ppu% |','|---|---|---|---|---|']
+    for row in windows[:4]:extra.append('| '+' | '.join(str(row[k]) for k in ['window','fps','shown','cpu_percent','ppu_percent'])+' |')
+    extra += ['',
+        '可确认事实：ELF和ROM各段Load result均PASS，ROM识别为PRG32KiB、CHR8KiB、mapper0，日志包含Read in trainer at $7000，程序持续报告FPS。当前不能确定灰屏来自该改版ROM/Trainer兼容性、模拟核心还是图像输出链路；没有擅自改ROM、模拟器或RTL，不把猜测写成根因。', '',
+        '测试后只停止本次PC串口辅助进程，释放COM7；板端未被复位。用户提供的ROM和扫描清单不入artifacts，原始串口日志uart/nes-smb.log已保留。','']
+    text=text[:start]+'\n'.join(extra)+text[end:]
+    report=text.splitlines()
+    check=[l.replace('| 用户自备SMB ROM | 未执行 | 用户暂无ROM，要求结束测试并上传 |',
+        '| 用户自备SMB ROM | 已加载，显示失败 | 用户反馈画面全灰；nes-smb.log |') for l in check]
+    write(OUT/'checklist.md','\n'.join(check))
 write(TASK/'result.md','\n'.join(report))
 print('S3 split:',len(splits),'fields:',len(keys),'NES windows:',len(fps),'SMB: not run per user')

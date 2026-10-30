@@ -9,5 +9,5 @@
 | 外部演示ROM加载 | PASS | 三段Load result: PASS，ROM mapper=0 |
 | 演示画面、人物移动、板上按键 | 用户确认正常 | 用户回复“正常的” |
 | NES帧率 | 已取得51行 | nes_template_fps.tsv |
-| 用户自备SMB ROM | 未执行 | 用户暂无ROM，要求结束测试并上传 |
+| 用户自备SMB ROM | 已加载，显示失败 | 用户反馈画面全灰；nes-smb.log |
 | 结束采集 | 已停止本次UART辅助进程，释放COM7 | 板端程序未复位或停止 |
