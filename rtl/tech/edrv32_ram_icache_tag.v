@@ -11,32 +11,31 @@ module edrv32_ram_icache_tag (
 
     // Write port.
     input wire  wr_en_i,
-    input wire [6:0] wr_addr_i,
-    input wire [19:0] wr_data_i,
+    input wire [8:0] wr_addr_i,
+    input wire [17:0] wr_data_i,
 
     // Read port.
     input wire rd_en_i,
-    input wire [6:0] rd_addr_i,
-    output wire [19:0] rd_data_o
+    input wire [8:0] rd_addr_i,
+    output wire [17:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_icache_tag u_ip (
         .wr_clk(clk_i),
         .wr_en(wr_en_i),
-        // Use the first 128 entries of the 512-entry physical IP.
-        .wr_addr({2'b00, wr_addr_i}),
+        .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
         // Generated IP resets are active-high; storage stays unreset.
         .wr_rst(1'b0),
         .rd_clk(clk_i),
         .rd_clk_en(rd_en_i),
         .rd_rst(1'b0),
-        .rd_addr({2'b00, rd_addr_i}),
+        .rd_addr(rd_addr_i),
         .rd_data(rd_data_o)
     );
 `else
-    reg [19:0] memory_r [0:127];
-    reg [19:0] rd_data_r;
+    reg [17:0] memory_r [0:511];
+    reg [17:0] rd_data_r;
     assign rd_data_o = rd_data_r;
     always @(posedge clk_i) begin
         if (wr_en_i) begin

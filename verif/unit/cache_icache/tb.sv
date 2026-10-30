@@ -61,7 +61,7 @@ module tb;
         @(negedge clk_i); #1;
     endtask
     initial begin
-        #200000;
+        #600000;
         $fatal(1, "FAIL timeout");
     end
     logic [63:0] memory [0:8191];
@@ -105,20 +105,20 @@ module tb;
         tick(); step(); rst_n_i = 1;
         fetch(32'h10000000, memory[0], 1);
         if (dut.lru_r[0] != 1) $fatal(1, "FAIL I fill LRU way0");
-        fetch(32'h10001000, memory[512], 2);
+        fetch(32'h10004000, memory[2048], 2);
         if (dut.lru_r[0] != 0) $fatal(1, "FAIL I fill LRU way1");
         fetch(32'h10000008, memory[1], 2);
         if (dut.lru_r[0] != 1) $fatal(1, "FAIL I hit LRU way0");
-        fetch(32'h10002000, memory[1024], 3);
+        fetch(32'h10008000, memory[4096], 3);
         fetch(32'h10000000, memory[0], 3);
-        fetch(32'h10001000, memory[512], 4);
+        fetch(32'h10004000, memory[2048], 4);
         // Pipelined hits: one response for each accepted request, every cycle.
         step(); ic_req_valid_i = 1;
         for (int i = 0; i < 4; i++) begin
-            ic_req_addr_i = 32'h10001000 + 32'(i*8);
+            ic_req_addr_i = 32'h10004000 + 32'(i*8);
             if (!ic_req_ready_o) $fatal(1, "FAIL I hit throughput ready");
             tick();
-            if (!ic_resp_valid_o || ic_resp_data_o != memory[512+i])
+            if (!ic_resp_valid_o || ic_resp_data_o != memory[2048+i])
                 $fatal(1, "FAIL I hit throughput response");
             step();
         end
@@ -126,45 +126,60 @@ module tb;
         tick(); step(); ic_inv_i = 1; tick();
         if (!ic_inv_done_o) $fatal(1, "FAIL inv done");
         step(); ic_inv_i = 0;
-        fetch(32'h10001000, memory[512], 5);
+        fetch(32'h10004000, memory[2048], 5);
         fetch(32'h00000000, memory[0], 6);
         fetch(32'h00000000, memory[0], 7);
         // Invalidate overlaps an active refill: data returns, line remains invalid.
-        step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10003000;
+        step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h1000c000;
         tick(); step(); ic_req_valid_i = 0;
         while (!axi_rready_o) tick();
         step(); ic_inv_i = 1; tick();
         if (!ic_inv_done_o) $fatal(1, "FAIL in-flight invalidate done");
         step(); ic_inv_i = 0;
         while (!ic_resp_valid_o) tick();
-        if (ic_resp_data_o != memory[1536]) $fatal(1, "FAIL invalidated fill data");
+        if (ic_resp_data_o != memory[6144]) $fatal(1, "FAIL invalidated fill data");
         tick();
-        fetch(32'h10003000, memory[1536], 9);
+        fetch(32'h1000c000, memory[6144], 9);
         // C-F1 path 5: a hit updating LRU and a following same-set miss are
         // accepted on adjacent edges; the miss must evict the other way.
         step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
         reads_before = reads;
         fetch(32'h10000000, memory[0], reads_before + 1);
-        fetch(32'h10001000, memory[512], reads_before + 2);
+        fetch(32'h10004000, memory[2048], reads_before + 2);
         step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10000000;
         tick();
         if (!ic_resp_valid_o || ic_resp_data_o != memory[0])
             $fatal(1, "FAIL I LRU bypass hit");
-        step(); ic_req_addr_i = 32'h10002000;
+        step(); ic_req_addr_i = 32'h10008000;
         if (!ic_req_ready_o) $fatal(1, "FAIL I LRU bypass acceptance");
         tick(); step(); ic_req_valid_i = 0;
         while (!ic_resp_valid_o) tick();
-        if (ic_resp_data_o != memory[1024] || reads != reads_before + 3)
+        if (ic_resp_data_o != memory[4096] || reads != reads_before + 3)
             $fatal(1, "FAIL I LRU bypass miss");
         tick();
         fetch(32'h10000000, memory[0], reads_before + 3);
-        fetch(32'h10001000, memory[512], reads_before + 4);
+        fetch(32'h10004000, memory[2048], reads_before + 4);
         // Invalidate at request acceptance must be reflected by its metadata snapshot.
-        step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10001000; ic_inv_i = 1;
+        step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10004000; ic_inv_i = 1;
         tick(); step(); ic_req_valid_i = 0; ic_inv_i = 0;
         while (!ic_resp_valid_o) tick();
-        if (ic_resp_data_o != memory[512] || reads != reads_before + 5)
+        if (ic_resp_data_o != memory[2048] || reads != reads_before + 5)
             $fatal(1, "FAIL I acceptance invalidate");
+        tick();
+        // T-IC1 / IC-01, IC-02, IC-06: retain both ways in every one of 512 sets.
+        step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
+        reads_before = reads;
+        for (int i = 0; i < 1024; i++)
+            fetch(32'h10000000 + 32'(i*32), memory[i*4], reads_before + i + 1);
+        for (int i = 0; i < 1024; i++)
+            fetch(32'h10000000 + 32'(i*32+24), memory[i*4+3], reads_before + 1024);
+        step(); ic_inv_i = 1; tick();
+        if (!ic_inv_done_o || dut.valid0_r != 0 || dut.valid1_r != 0)
+            $fatal(1, "FAIL I all 512 sets invalidate in one cycle");
+        step(); ic_inv_i = 0;
+        reads_before = reads;
+        for (int i = 0; i < 1024; i++)
+            fetch(32'h10000000 + 32'(i*32), memory[i*4], reads_before + i + 1);
         $display("PASS cache_icache"); $finish;
     end
 endmodule

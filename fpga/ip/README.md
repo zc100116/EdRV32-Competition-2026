@@ -4,8 +4,8 @@
 
 | IP 模块名 | 类型 | 规格 | 包装模块 | 使用者 | 创建说明 | 状态 |
 |---|---|---|---|---|---|---|
-| `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 20（用 128 项） | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 已生成（20261025-01） |
-| `ip_ram_icache_data` | DRM 简单双口 RAM | 512 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 已生成（20261025-01） |
+| `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 18 | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 32 KiB 评估版，需重新生成（模块名不变） |
+| `ip_ram_icache_data` | DRM 简单双口 RAM | 2048 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 32 KiB 评估版，需重新生成（模块名不变） |
 | `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20（用 128 项） | `edrv32_ram_dcache_tag` | D$ ×2 | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 已生成（20261025-01） |
 | `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 512 × 64 | `edrv32_ram_dcache_data` | D$ ×2 | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 已生成（20261025-01） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
