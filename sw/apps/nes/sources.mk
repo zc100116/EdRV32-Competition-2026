@@ -24,7 +24,7 @@ $(OUT)/obj/$(NOF)/nes/nes_rom.o: NES_WARNINGS := -Wno-unused-parameter \
 $(OUT)/obj/$(NOF)/mappers/map005.o: NES_WARNINGS := -Wno-unused-but-set-variable
 
 # Core changes are applied only to build-local copies; the submodule stays untouched.
-NES_PATCHED := cpu/nes6502.c nes/nes_ppu.c nes/nes_rom.c nes/mmclist.c mappers/map019.c
+NES_PATCHED := cpu/nes6502.c nes/nes_ppu.c nes/nes_rom.c nes/mmclist.c mappers/map019.c mappers/map004.c
 $(OUT)/core/.patched: $(ROOT)/sw/apps/nes/sources.mk $(addprefix $(ROOT)/$(NOF)/,$(NES_PATCHED)) \
     $(wildcard $(ROOT)/sw/apps/nes/patches/*.patch)
 	$(foreach file,$(NES_PATCHED),mkdir -p $(OUT)/core/$(dir $(file)); \
