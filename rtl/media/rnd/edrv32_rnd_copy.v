@@ -35,16 +35,40 @@ module edrv32_rnd_copy (
     output reg [31:0] wr_strb_o,
     input wire wr_done_i
 );
-    localparam [3:0] S_IDLE = 4'd0;
-    localparam [3:0] S_READ = 4'd1;
-    localparam [3:0] S_CAPTURE = 4'd2;
-    localparam [3:0] S_TAIL = 4'd3;
-    localparam [3:0] S_WRITE = 4'd4;
-    localparam [3:0] S_STREAM = 4'd5;
-    localparam [3:0] S_RESPONSE = 4'd6;
-    localparam [3:0] S_DONE = 4'd7;
-    localparam [3:0] S_SETUP = 4'd8;
-    reg [3:0] state_r;
+    localparam [4:0] S_IDLE = 5'd0;
+    localparam [4:0] S_READ = 5'd1;
+    localparam [4:0] S_CAPTURE = 5'd2;
+    localparam [4:0] S_TAIL = 5'd3;
+    localparam [4:0] S_WRITE = 5'd4;
+    localparam [4:0] S_STREAM = 5'd5;
+    localparam [4:0] S_RESPONSE = 5'd6;
+    localparam [4:0] S_DONE = 5'd7;
+    localparam [4:0] S_SETUP = 5'd8;
+    localparam [4:0] S_COORD = 5'd9;
+    localparam [4:0] S_SOURCE = 5'd10;
+    localparam [4:0] S_MULT = 5'd11;
+    localparam [4:0] S_BASE = 5'd12;
+    localparam [4:0] S_SPAN = 5'd13;
+    localparam [4:0] S_COUNTS = 5'd14;
+    localparam [4:0] S_OFFSET1 = 5'd15;
+    localparam [4:0] S_OFFSET2 = 5'd16;
+    localparam [4:0] S_OFFSET3 = 5'd17;
+    localparam [4:0] S_BASE2 = 5'd18;
+    localparam [4:0] S_BASE3 = 5'd19;
+    localparam [4:0] S_INITIAL_ROW = 5'd20;
+    reg [4:0] state_r;
+    reg [11:0] top_r;
+    reg [11:0] bottom_r;
+    reg [19:0] src_bytes_r;
+    reg [13:0] dst_bytes_r;
+    reg [31:0] src_offset_r;
+    reg [31:0] dst_offset_r;
+    reg signed [16:0] src_step_r;
+    reg signed [16:0] dst_step_r;
+    reg signed [16:0] src_neg_step_r;
+    reg signed [16:0] dst_neg_step_r;
+    reg [31:0] src_next_r;
+    reg [31:0] dst_next_r;
     reg reverse_r;
     reg [11:0] y_r;
     reg [9:0] received_r;
@@ -65,23 +89,63 @@ module edrv32_rnd_copy (
     wire unused_illegal_w;
     wire unused_empty_w;
     wire unused_fast_w;
-    wire [31:0] dst_addr_w;
-    wire [31:0] src_addr_w;
-    wire [31:0] unused_map_w;
-    wire [2:0] unused_shift_w;
-    wire [7:0] unused_mask_w;
-    wire [31:0] unused_x_w;
-    wire [31:0] unused_y_w;
-    wire [17:0] row_pixels_w;
-    wire [17:0] row_bytes_w;
-    wire [17:0] source_bytes_w;
-    wire [17:0] target_bytes_w;
-    wire [17:0] rounded_bytes_w;
-    wire [9:0] normalized_beats_w;
-    wire [17:0] source_rounded_w;
-    wire [17:0] target_rounded_w;
-    wire [9:0] source_beats_w;
-    wire [9:0] target_beats_w;
+    reg [31:0] dst_addr_r;
+    reg [31:0] src_addr_r;
+    reg [15:0] source_kx_r;
+    reg [15:0] source_ky_r;
+    reg [16:0] source_x_r;
+    reg [16:0] source_y_r;
+    reg [27:0] dst_product_r;
+    reg [31:0] src_product_r;
+    reg [12:0] row_pixels_r;
+    reg [14:0] row_bytes_r;
+    reg [15:0] source_bytes_r;
+    reg [15:0] target_bytes_r;
+    reg [5:0] src_span_low_r;
+    reg [5:0] dst_span_low_r;
+    reg [9:0] normalized_beats_r;
+    reg [9:0] source_beats_r;
+    reg [9:0] target_last_r;
+    reg [9:0] normalized_last_r;
+    reg [11:0] left_r;
+    reg [11:0] right_r;
+    wire [31:0] src_init_a_w;
+    wire [31:0] src_init_b_w;
+    reg [12:0] src_init_low_r;
+    reg [12:0] src_init_mid_r;
+    reg [7:0] src_init_high_r;
+    reg [11:0] src_init_low_delay_r;
+    reg [12:0] src_init_mid_carry_r;
+    reg [7:0] src_init_high_delay_r;
+    wire [31:0] src_row_a_w;
+    wire [31:0] src_row_b_w;
+    reg [12:0] src_row_low_r;
+    reg [12:0] src_row_mid_r;
+    reg [7:0] src_row_high_r;
+    reg [11:0] src_row_low_delay_r;
+    reg [12:0] src_row_mid_carry_r;
+    reg [7:0] src_row_high_delay_r;
+    wire [31:0] dst_init_a_w;
+    wire [31:0] dst_init_b_w;
+    reg [12:0] dst_init_low_r;
+    reg [12:0] dst_init_mid_r;
+    reg [7:0] dst_init_high_r;
+    reg [11:0] dst_init_low_delay_r;
+    reg [12:0] dst_init_mid_carry_r;
+    reg [7:0] dst_init_high_delay_r;
+    wire [31:0] dst_row_a_w;
+    wire [31:0] dst_row_b_w;
+    reg [12:0] dst_row_low_r;
+    reg [12:0] dst_row_mid_r;
+    reg [7:0] dst_row_high_r;
+    reg [11:0] dst_row_low_delay_r;
+    reg [12:0] dst_row_mid_carry_r;
+    reg [7:0] dst_row_high_delay_r;
+    wire [19:0] source_x_bytes_w;
+    wire [15:0] rounded_bytes_w;
+    wire [15:0] source_rounded_w;
+    wire [15:0] target_last_bytes_w;
+    wire [14:0] row_last_bytes_w;
     wire [511:0] source_join_w;
     wire [511:0] source_shift_w;
     wire [255:0] source_word_w;
@@ -96,15 +160,19 @@ module edrv32_rnd_copy (
     wire [8:0] ram_rd_addr_w;
     wire data_fire_w;
     wire unused_geometry_w;
-    reg [5:0] enabled_bytes_w;
+    reg [4:0] head_pixels_r;
+    reg [4:0] tail_pixels_r;
+    reg [4:0] single_pixels_r;
+    wire [5:0] head_bytes_w;
+    wire [5:0] tail_bytes_w;
+    wire [4:0] beat_pixels_w;
     wire [4:0] tail_invalid_w;
-    wire [5:0] head_invalid_w;
-    wire [5:0] last_invalid_w;
     wire first_beat_w;
     wire last_beat_w;
 
+    // Parent dispatch owns the opcode; this engine receives only opcode 05.
     edrv32_rnd_decode u_decode (
-        .command_i(command_i),
+        .command_i({command_i[511:8], 8'h05}),
         .illegal_o(unused_illegal_w),
         .empty_o(unused_empty_w),
         .op_o(unused_op_w),
@@ -119,53 +187,44 @@ module edrv32_rnd_copy (
         .height_o(unused_height_w),
         .fast_fill_o(unused_fast_w)
     );
-    edrv32_rnd_address u_address (
-        .command_i(command_i),
-        .x_i(left_w[11:0]),
-        .y_i(y_r),
-        .map_entry_i(16'd0),
-        .dst_addr_o(dst_addr_w),
-        .src_addr_o(src_addr_w),
-        .map_addr_o(unused_map_w),
-        .sub_shift_o(unused_shift_w),
-        .sub_mask_o(unused_mask_w),
-        .sample_x_o(unused_x_w),
-        .sample_y_o(unused_y_w)
-    );
-    assign row_pixels_w = right_w - left_w + 18'd1;
-    assign row_bytes_w = row_pixels_w << (argb_w ? 2 : 1);
-    assign source_bytes_w = row_bytes_w + {13'd0, src_addr_w[4:0]};
-    assign target_bytes_w = row_bytes_w + {13'd0, dst_addr_w[4:0]};
-    assign rounded_bytes_w = row_bytes_w + 18'd31;
-    assign source_rounded_w = source_bytes_w + 18'd31;
-    assign target_rounded_w = target_bytes_w + 18'd31;
-    assign normalized_beats_w = rounded_bytes_w[14:5];
-    assign source_beats_w = source_rounded_w[14:5];
-    assign target_beats_w = target_rounded_w[14:5];
+    assign src_init_a_w = state_r == S_OFFSET1 ? src_product_r : command_i[287:256];
+    assign src_init_b_w = state_r == S_OFFSET1 ? {12'd0, src_bytes_r} : src_offset_r;
+    assign src_row_a_w = src_addr_r;
+    assign src_row_b_w = {{15{src_step_r[16]}}, src_step_r};
+    assign dst_init_a_w = state_r == S_OFFSET1 ? {4'd0, dst_product_r} : command_i[63:32];
+    assign dst_init_b_w = state_r == S_OFFSET1 ? {18'd0, dst_bytes_r} : dst_offset_r;
+    assign dst_row_a_w = dst_addr_r;
+    assign dst_row_b_w = {{15{dst_step_r[16]}}, dst_step_r};
+    assign source_x_bytes_w = {3'd0, source_x_r} << (argb_w ? 2 : 1);
+    assign rounded_bytes_w = {1'b0, row_bytes_r} + 16'd31;
+    assign source_rounded_w = source_bytes_r + 16'd31;
+    assign target_last_bytes_w = target_bytes_r - 16'd1;
+    assign row_last_bytes_w = row_bytes_r - 15'd1;
     assign source_join_w = {rd_data_i, previous_read_r};
-    assign source_shift_w = source_join_w >> {src_addr_w[4:0], 3'd0};
+    assign source_shift_w = source_join_w >> {src_addr_r[4:0], 3'd0};
     assign source_word_w = state_r == S_TAIL ?
-        previous_read_r >> {src_addr_w[4:0], 3'd0} :
-        src_addr_w[4:0] == 0 ? rd_data_i : source_shift_w[255:0];
+        previous_read_r >> {src_addr_r[4:0], 3'd0} :
+        src_addr_r[4:0] == 0 ? rd_data_i : source_shift_w[255:0];
     assign ram_wr_en_w = !cancel_i && (state_r == S_TAIL ||
         (state_r == S_CAPTURE && rd_data_valid_i &&
-            (src_addr_w[4:0] == 0 || received_r != 0)));
-    assign ram_wr_addr_w = state_r == S_TAIL ? normalized_beats_w[8:0] - 9'd1 :
-        received_r[8:0] - (src_addr_w[4:0] == 0 ? 9'd0 : 9'd1);
+            (src_addr_r[4:0] == 0 || received_r != 0)));
+    assign ram_wr_addr_w = state_r == S_TAIL ? normalized_last_r[8:0] :
+        received_r[8:0] - (src_addr_r[4:0] == 0 ? 9'd0 : 9'd1);
     assign current_write_w = zero_r ? 256'd0 : ram_data_w;
     assign target_join_w = {current_write_w, previous_write_r};
-    assign target_shift_w = target_join_w << {dst_addr_w[4:0], 3'd0};
-    assign wr_data_o = dst_addr_w[4:0] == 0 ? current_write_w : target_shift_w[511:256];
+    assign target_shift_w = target_join_w << {dst_addr_r[4:0], 3'd0};
+    assign wr_data_o = dst_addr_r[4:0] == 0 ? current_write_w : target_shift_w[511:256];
     assign write_next_w = write_index_r + 10'd1;
     assign data_fire_w = wr_data_valid_o && wr_data_ready_i;
     assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i) ||
-        (data_fire_w && write_next_w < normalized_beats_w));
+        (data_fire_w && write_index_r < normalized_last_r));
     assign ram_rd_addr_w = state_r == S_WRITE ? 9'd0 : write_next_w[8:0];
-    assign unused_geometry_w = ^{enabled_bytes_w[0], left_w[17:12], top_w[17:12], right_w[17:12],
-        bottom_w[17:12], row_bytes_w[17:15], source_bytes_w[17:16],
-        target_bytes_w[17:16], source_shift_w[511:256], target_shift_w[255:0],
-        source_rounded_w[17:15], source_rounded_w[4:0], target_rounded_w[17:15],
-        target_rounded_w[4:0], rounded_bytes_w[17:15], rounded_bytes_w[4:0]};
+    assign unused_geometry_w = ^{command_i[7:0], head_bytes_w[0], tail_bytes_w[0],
+        left_w[17:12], top_w[17:12], right_w[17:12],
+        bottom_w[17:12], source_x_bytes_w[19:18],
+        source_shift_w[511:256], target_shift_w[255:0],
+        source_rounded_w[15], source_rounded_w[4:0], target_last_bytes_w[15],
+        target_last_bytes_w[4:0], row_last_bytes_w[4:0], rounded_bytes_w[15], rounded_bytes_w[4:0]};
     edrv32_ram_rnd_line u_row (
         .clk_i(clk_i),
         .wr_en_i(ram_wr_en_w),
@@ -178,24 +237,24 @@ module edrv32_rnd_copy (
     );
     assign done_o = state_r == S_DONE;
     assign rd_valid_o = state_r == S_READ && !cancel_i;
-    assign rd_addr_o = {src_addr_w[31:5], 5'd0};
-    assign rd_bytes_o = source_bytes_w[15:0];
+    assign rd_addr_o = {src_addr_r[31:5], 5'd0};
+    assign rd_bytes_o = source_bytes_r[15:0];
     assign wr_valid_o = state_r == S_WRITE && !cancel_i;
-    assign wr_addr_o = {dst_addr_w[31:5], 5'd0};
-    assign wr_bytes_o = target_bytes_w[15:0];
+    assign wr_addr_o = {dst_addr_r[31:5], 5'd0};
+    assign wr_bytes_o = target_bytes_r[15:0];
     assign wr_data_valid_o = state_r == S_STREAM && !cancel_i;
-    assign pixel_count_o = data_fire_w ?
-        (argb_w ? {1'd0, enabled_bytes_w[5:2]} : enabled_bytes_w[5:1]) : 5'd0;
+    assign head_bytes_w = 6'd32 - {1'b0, dst_addr_r[4:0]};
+    assign tail_bytes_w = target_bytes_r[4:0] == 0 ? 6'd32 : {1'b0, target_bytes_r[4:0]};
+    assign beat_pixels_w = first_beat_w && last_beat_w ? single_pixels_r :
+        first_beat_w ? head_pixels_r : last_beat_w ? tail_pixels_r : argb_w ? 5'd8 : 5'd16;
+    assign pixel_count_o = data_fire_w ? beat_pixels_w : 5'd0;
     // Only boundary beats need masking; the interior is a full 256-bit transfer.
     assign first_beat_w = write_index_r == 0;
-    assign last_beat_w = write_index_r + 10'd1 == target_beats_w;
-    assign tail_invalid_w = 5'd0 - target_bytes_w[4:0];
-    assign head_invalid_w = first_beat_w ? {1'd0, dst_addr_w[4:0]} : 6'd0;
-    assign last_invalid_w = last_beat_w ? {1'd0, tail_invalid_w} : 6'd0;
+    assign last_beat_w = write_index_r == target_last_r;
+    assign tail_invalid_w = 5'd0 - target_bytes_r[4:0];
     always @(*) begin
-        wr_strb_o = (first_beat_w ? 32'hffff_ffff << dst_addr_w[4:0] : 32'hffff_ffff) &
+        wr_strb_o = (first_beat_w ? 32'hffff_ffff << dst_addr_r[4:0] : 32'hffff_ffff) &
             (last_beat_w ? 32'hffff_ffff >> tail_invalid_w : 32'hffff_ffff);
-        enabled_bytes_w = 6'd32 - head_invalid_w - last_invalid_w;
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -210,16 +269,32 @@ module edrv32_rnd_copy (
         end else begin
             case (state_r)
                 S_IDLE: if (start_i) begin
-                    y_r <= top_w[11:0];
-                    state_r <= S_SETUP;
+                    state_r <= S_INITIAL_ROW;
                     received_r <= 10'd0;
                     reverse_r <= 1'b0;
                 end
+                S_INITIAL_ROW: begin
+                    y_r <= top_r;
+                    state_r <= S_COORD;
+                end
+                S_COORD: state_r <= S_SOURCE;
+                S_SOURCE: state_r <= S_MULT;
+                S_MULT: state_r <= S_OFFSET1;
+                S_OFFSET1: state_r <= S_OFFSET2;
+                S_OFFSET2: state_r <= S_OFFSET3;
+                S_OFFSET3: state_r <= S_BASE;
+                S_BASE: state_r <= S_BASE2;
+                S_BASE2: state_r <= S_BASE3;
+                S_BASE3: state_r <= reverse_r ? S_SPAN : S_SETUP;
+                S_SPAN: state_r <= S_COUNTS;
+                S_COUNTS: state_r <= S_READ;
                 S_SETUP: begin
-                    reverse_r <= dst_addr_w > src_addr_w;
-                    if (dst_addr_w > src_addr_w)
-                        y_r <= bottom_w[11:0];
-                    state_r <= S_READ;
+                    reverse_r <= dst_addr_r > src_addr_r;
+                    if (dst_addr_r > src_addr_r) begin
+                        y_r <= bottom_r;
+                        state_r <= S_COORD;
+                    end else
+                        state_r <= S_SPAN;
                 end
                 S_READ: if (rd_ready_i) begin
                     state_r <= S_CAPTURE;
@@ -229,8 +304,8 @@ module edrv32_rnd_copy (
                     if (rd_data_valid_i)
                         received_r <= received_r + 10'd1;
                     if (rd_done_i)
-                        state_r <= src_addr_w[4:0] != 0 &&
-                            source_beats_w == normalized_beats_w ? S_TAIL : S_WRITE;
+                        state_r <= src_addr_r[4:0] != 0 &&
+                            source_beats_r == normalized_beats_r ? S_TAIL : S_WRITE;
                 end
                 S_TAIL: state_r <= S_WRITE;
                 S_WRITE: if (wr_ready_i) begin
@@ -240,22 +315,149 @@ module edrv32_rnd_copy (
                 end
                 S_STREAM: if (wr_data_ready_i) begin
                     write_index_r <= write_next_w;
-                    zero_r <= write_next_w >= normalized_beats_w;
-                    if (write_next_w == target_beats_w)
+                    zero_r <= write_index_r >= normalized_last_r;
+                    if (write_index_r == target_last_r)
                         state_r <= S_RESPONSE;
                 end
                 S_RESPONSE: if (wr_done_i) begin
-                    if ((reverse_r && y_r == top_w[11:0]) ||
-                        (!reverse_r && y_r == bottom_w[11:0]))
+                    if ((reverse_r && y_r == top_r) ||
+                        (!reverse_r && y_r == bottom_r))
                         state_r <= S_DONE;
                     else begin
                         y_r <= reverse_r ? y_r - 12'd1 : y_r + 12'd1;
-                        state_r <= S_READ;
+                        state_r <= S_SPAN;
                     end
                 end
                 S_DONE: state_r <= S_IDLE;
                 default: state_r <= state_r;
             endcase
+        end
+    end
+    // Descriptor setup prepares boundary counts before the streaming datapath starts.
+    always @(posedge clk_i) begin
+        if (state_r == S_WRITE && wr_ready_i) begin
+            head_pixels_r <= argb_w ? {1'b0, head_bytes_w[5:2]} : head_bytes_w[5:1];
+            tail_pixels_r <= argb_w ? {1'b0, tail_bytes_w[5:2]} : tail_bytes_w[5:1];
+            single_pixels_r <= argb_w ? row_bytes_r[6:2] : row_bytes_r[5:1];
+        end
+    end
+    // spec rnd 5.2: reuse registered 12/12/8-bit sums for row offsets and initial bases.
+    always @(posedge clk_i) begin
+        if (state_r == S_OFFSET1 || state_r == S_BASE) begin
+            src_init_low_r <= {1'b0, src_init_a_w[11:0]} + {1'b0, src_init_b_w[11:0]};
+            src_init_mid_r <= {1'b0, src_init_a_w[23:12]} + {1'b0, src_init_b_w[23:12]};
+            src_init_high_r <= src_init_a_w[31:24] + src_init_b_w[31:24];
+        end
+        if (state_r == S_OFFSET2 || state_r == S_BASE2) begin
+            src_init_low_delay_r <= src_init_low_r[11:0];
+            src_init_mid_carry_r <= src_init_mid_r + {12'd0, src_init_low_r[12]};
+            src_init_high_delay_r <= src_init_high_r;
+        end
+        if (state_r == S_BASE3) begin
+            src_addr_r <= {src_init_high_delay_r + {7'd0, src_init_mid_carry_r[12]},
+                src_init_mid_carry_r[11:0], src_init_low_delay_r};
+        end
+        if (state_r == S_OFFSET3)
+            src_offset_r <= {src_init_high_delay_r + {7'd0, src_init_mid_carry_r[12]},
+                src_init_mid_carry_r[11:0], src_init_low_delay_r};
+        if (state_r == S_RESPONSE && wr_done_i)
+            src_addr_r <= src_next_r;
+    end
+    always @(posedge clk_i) begin
+        src_row_low_r <= {1'b0, src_row_a_w[11:0]} + {1'b0, src_row_b_w[11:0]};
+        src_row_mid_r <= {1'b0, src_row_a_w[23:12]} + {1'b0, src_row_b_w[23:12]};
+        src_row_high_r <= src_row_a_w[31:24] + src_row_b_w[31:24];
+        src_row_low_delay_r <= src_row_low_r[11:0];
+        src_row_mid_carry_r <= src_row_mid_r + {12'd0, src_row_low_r[12]};
+        src_row_high_delay_r <= src_row_high_r;
+        src_next_r <= {src_row_high_delay_r + {7'd0, src_row_mid_carry_r[12]},
+            src_row_mid_carry_r[11:0], src_row_low_delay_r};
+    end
+    always @(posedge clk_i) begin
+        if (state_r == S_OFFSET1 || state_r == S_BASE) begin
+            dst_init_low_r <= {1'b0, dst_init_a_w[11:0]} + {1'b0, dst_init_b_w[11:0]};
+            dst_init_mid_r <= {1'b0, dst_init_a_w[23:12]} + {1'b0, dst_init_b_w[23:12]};
+            dst_init_high_r <= dst_init_a_w[31:24] + dst_init_b_w[31:24];
+        end
+        if (state_r == S_OFFSET2 || state_r == S_BASE2) begin
+            dst_init_low_delay_r <= dst_init_low_r[11:0];
+            dst_init_mid_carry_r <= dst_init_mid_r + {12'd0, dst_init_low_r[12]};
+            dst_init_high_delay_r <= dst_init_high_r;
+        end
+        if (state_r == S_BASE3) begin
+            dst_addr_r <= {dst_init_high_delay_r + {7'd0, dst_init_mid_carry_r[12]},
+                dst_init_mid_carry_r[11:0], dst_init_low_delay_r};
+        end
+        if (state_r == S_OFFSET3)
+            dst_offset_r <= {dst_init_high_delay_r + {7'd0, dst_init_mid_carry_r[12]},
+                dst_init_mid_carry_r[11:0], dst_init_low_delay_r};
+        if (state_r == S_RESPONSE && wr_done_i)
+            dst_addr_r <= dst_next_r;
+    end
+    always @(posedge clk_i) begin
+        dst_row_low_r <= {1'b0, dst_row_a_w[11:0]} + {1'b0, dst_row_b_w[11:0]};
+        dst_row_mid_r <= {1'b0, dst_row_a_w[23:12]} + {1'b0, dst_row_b_w[23:12]};
+        dst_row_high_r <= dst_row_a_w[31:24] + dst_row_b_w[31:24];
+        dst_row_low_delay_r <= dst_row_low_r[11:0];
+        dst_row_mid_carry_r <= dst_row_mid_r + {12'd0, dst_row_low_r[12]};
+        dst_row_high_delay_r <= dst_row_high_r;
+        dst_next_r <= {dst_row_high_delay_r + {7'd0, dst_row_mid_carry_r[12]},
+            dst_row_mid_carry_r[11:0], dst_row_low_delay_r};
+    end
+    // spec rnd 2.5/2.6 COPY: 12-bit CLIP, 16-bit unsigned SRC_X/Y and stride,
+    // Valid clipping gives 0<=x-X0,y-Y0<=36863 (16 bits); adding SRC_X/Y fits 17 bits.
+    // COPY has no scaling; each row advances the registered addresses by one stride.
+    always @(posedge clk_i) begin
+        if (state_r == S_IDLE && start_i) begin
+            top_r <= top_w[11:0];
+            bottom_r <= bottom_w[11:0];
+            left_r <= left_w[11:0];
+            right_r <= right_w[11:0];
+            src_neg_step_r <= -$signed({1'b0, command_i[303:288]});
+            dst_neg_step_r <= -$signed({1'b0, command_i[79:64]});
+        end
+        if (state_r == S_COORD) begin
+            source_kx_r <= {4'd0, left_r} - command_i[175:160];
+            source_ky_r <= {4'd0, y_r} - command_i[191:176];
+        end
+        if (state_r == S_SOURCE) begin
+            source_x_r <= {1'b0, command_i[335:320]} + {1'b0, source_kx_r};
+            source_y_r <= {1'b0, command_i[351:336]} + {1'b0, source_ky_r};
+            row_pixels_r <= {1'b0, right_r} - {1'b0, left_r} + 13'd1;
+        end
+        if (state_r == S_MULT) begin
+            dst_product_r <= y_r * command_i[79:64];
+            src_product_r <= source_y_r * command_i[303:288];
+            src_bytes_r <= source_x_bytes_w;
+            dst_bytes_r <= {2'd0, left_r} << (argb_w ? 2 : 1);
+            row_bytes_r <= {2'd0, row_pixels_r} << (argb_w ? 2 : 1);
+        end
+        if (state_r == S_BASE3)
+            normalized_beats_r <= rounded_bytes_w[14:5];
+        if (state_r == S_SETUP) begin
+            src_step_r <= dst_addr_r > src_addr_r ? src_neg_step_r :
+                $signed({1'b0, command_i[303:288]});
+            dst_step_r <= dst_addr_r > src_addr_r ? dst_neg_step_r :
+                $signed({1'b0, command_i[79:64]});
+        end
+        if (state_r == S_BASE3) begin
+            src_span_low_r <= {1'b0, row_bytes_r[4:0]} + {1'b0, src_init_low_delay_r[4:0]};
+            dst_span_low_r <= {1'b0, row_bytes_r[4:0]} + {1'b0, dst_init_low_delay_r[4:0]};
+        end
+        if (state_r == S_RESPONSE && wr_done_i) begin
+            src_span_low_r <= {1'b0, row_bytes_r[4:0]} + {1'b0, src_next_r[4:0]};
+            dst_span_low_r <= {1'b0, row_bytes_r[4:0]} + {1'b0, dst_next_r[4:0]};
+        end
+        if (state_r == S_SPAN) begin
+            source_bytes_r <= {{1'b0, row_bytes_r[14:5]} + {10'd0, src_span_low_r[5]},
+                src_span_low_r[4:0]};
+            target_bytes_r <= {{1'b0, row_bytes_r[14:5]} + {10'd0, dst_span_low_r[5]},
+                dst_span_low_r[4:0]};
+        end
+        if (state_r == S_COUNTS) begin
+            source_beats_r <= source_rounded_w[14:5];
+            target_last_r <= target_last_bytes_w[14:5];
+            normalized_last_r <= row_last_bytes_w[14:5];
         end
     end
     always @(posedge clk_i) begin
