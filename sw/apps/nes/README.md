@@ -49,7 +49,7 @@ Pillow 仅在重建此公开 ROM 时需要，编译/运行本移植不需要它�
 模拟器 ELF 一律不含游戏 ROM，构建时不选择游戏。主机从命令行指定的 `.nes`
 文件读取；板上由 `uart_tool.py --elf --rom <file.nes>` 原样加载，再由同一个上游
 nofrendo iNES 解析器取得 PRG/CHR 大小和 mapper。测试只用仓库的 nrom-template。
-用户自备 ROM（包括商业游戏）留在仓库外，不下载、不生成、不提交，也不打进上板 ELF。
+用户提供的游戏合集按用户决定（2026-10-31）存放在 `third_party/nes/`（私有仓库），版权归原权利人，仅供本项目上板测试；agent 不下载、不生成 ROM，也不打进上板 ELF，上板时用 `--rom` 加载。兼容性清点见 `tools/nes/rom_survey.py` 和对应测量报告。
 
 RV32 的 `rom.S` 仅保留 1 MiB `.nes_rom_slot`，导出 `nes_rom_slot` /
 `nes_rom_slot_end`；`ddr_app.ld` 将其作为独立 NOLOAD 段置于 `.bss` 后，按 64 字节
