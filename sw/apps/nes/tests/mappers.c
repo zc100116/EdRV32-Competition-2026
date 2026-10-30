@@ -9,6 +9,7 @@
 #include <noftypes.h>
 #include <nes_mmc.h>
 #include <nes_ppu.h>
+#include <nes6502.h>
 #include "mapper_chr.h"
 extern mapintf_t map74_intf;
 extern mapintf_t map192_intf;
@@ -16,11 +17,17 @@ extern mapintf_t map195_intf;
 extern mapintf_t map191_intf;
 extern mapintf_t map199_intf;
 extern mapintf_t map245_intf;
+extern mapintf_t map69_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[8];
 static int prg[4];
 static int mirror[4];
+static uint32 cycles;
+static bool mapper_irq;
+static uint8 sram[8192];
+static uint8 rom[1024 * 1024];
+uint32 nes6502_getcycles(bool reset) { (void)reset; return cycles; }
 rominfo_t *mmc_getinfo(void) { return &cart; }
 void mmc_bankrom(int size, uint32 address, int bank)
 {
@@ -42,7 +49,8 @@ void mmc_bankvrom(int size, uint32 address, int bank)
 void ppu_mirror(int a, int b, int c, int d)
 { mirror[0] = a; mirror[1] = b; mirror[2] = c; mirror[3] = d; }
 bool ppu_enabled(void) { return true; }
-void nes6502_setirq(uint8 source, bool asserted) { (void)source; (void)asserted; }
+void nes6502_setirq(uint8 source, bool asserted)
+{ assert(source == NES6502_IRQ_MAPPER); mapper_irq = asserted; }
 static void write_reg(mapintf_t *mapper, uint32 address, uint8 value)
 {
     for (map_memwrite *entry = mapper->mem_write; entry->write_func; ++entry) {
@@ -158,6 +166,40 @@ static void test245(void)
     assert(prg[0] == 0 && prg[2] == 0x3e && prg[3] == 0x3f);
     assert(pages[4][0x1000] == 0x66);
 }
+static void command69(uint8 command, uint8 value)
+{
+    write_reg(&map69_intf, 0x8000, command);
+    write_reg(&map69_intf, 0xa000, value);
+}
+static void test69(void)
+{
+    cart.sram = sram;
+    cart.rom = rom;
+    cart.rom_banks = 64;
+    map69_intf.init();
+    command69(9, 7);
+    assert(prg[0] == 7);
+    command69(8, 0xc0);
+    write_reg(&map69_intf, 0x6123, 0x69);
+    assert(map69_intf.mem_read[0].read_func(0x6123) == 0x69);
+    rom[3 * 8192 + 0x123] = 0x43;
+    command69(8, 3);
+    assert(map69_intf.mem_read[0].read_func(0x6123) == 0x43);
+    command69(14, 2);
+    command69(15, 0);
+    command69(13, 0x81);
+    cycles += 2;
+    map69_intf.hblank(0);
+    assert(!mapper_irq);
+    ++cycles;
+    map69_intf.hblank(0);
+    assert(mapper_irq);
+    command69(13, 0x80);
+    assert(!mapper_irq);
+    cycles += 65536;
+    map69_intf.hblank(1);
+    assert(!mapper_irq); /* count continues with output disabled */
+}
 int main(void)
 {
     test74();
@@ -166,6 +208,7 @@ int main(void)
     test191();
     test199();
     test245();
+    test69();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }
