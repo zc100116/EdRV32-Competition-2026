@@ -10,6 +10,11 @@ python3 verif/soc/board_npu/program/run.py
 `--mac sim` / `--mac vendor` 分别运行行为 MAC / FPGA 包装加厂商 `GTP_APM_E2.v`，
 默认依次运行两者。`--lint-only` 只运行相应变体的 `--lint-only -Wall`。
 
+`--ddr-latency N` 设置命令到数据阶段的等待周期数（`clk_mem`，默认 3）；
+`--ddr-read-gaps` 在每个读 beat 后额外等待 0–31 个 `clk_mem` 周期，
+取现有 LFSR 的 `[7:3]`，复位种子固定为 `0x1234abcd`。
+两者仅修改入口在 `build/` 生成的 DDR shell/稀疏模型；默认保留原有 LFSR 空拍。
+
 不重编译卡 13 的 ELF 或 ROM。`tools/elf2mem.py` 将 PT_LOAD 的物理地址内容装入 DDR；
 采用同一卡的 `src/ip_rom_boot.dat`，经真实 BIOS `3=Run` 跳转至 `0x80000000`。
 DDR shell 仅在 `build/board_npu_program/ip_ddr3.sv` 中扩展 `MEMORY_BYTES` 至 1 GiB：

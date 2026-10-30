@@ -64,6 +64,23 @@ UART 由入口写入 `build/board_npu_program/{sim,vendor}/simulation.log`，
 两种仿真 MAC 结果和计数相同；相对板端，PERF0 少 83 个 NPU 周期，MAC 相同。
 这些结果尚不能确认板端差异的根因。
 
+T-NPU4b：经协调者确认，使用 `d3b83117` RTL（与卡 13 一致，未含 T-NPU3 链头修复），
+覆盖本记录同次提交的 `verif/soc/board_npu/program/` 入口；行为 MAC、原 ELF/ROM 不变。
+Verilator 5.020；命令为 `python3 verif/soc/board_npu/program/run.py --mac sim --ddr-latency N`，
+依次取 `N=20,40,80`；第四点取 `N=40` 并加 `--ddr-read-gaps`，四点串行运行。
+时延单位为 `clk_mem` 周期；保留原模型 LFSR 空拍，随机点额外按 `[7:3]` 插入 0–31 周期读 beat 间隔；种子 `0x1234abcd`。
+
+| COMMAND_LATENCY | 额外随机读间隔 | B-OP-01 | PERF0 | MAC |
+|---|---|---|---|---|
+| 20 | 无 | PASS | 786 | 32 |
+| 40 | 无 | PASS | 1168 | 32 |
+| 80 | 无 | PASS | 1896 | 32 |
+| 40 | 0–31 周期 | PASS | 1683 | 32 |
+
+四个采样点在 20–80 周期命令时延下不复现，PERF0 均大于板上 522；此结果尚不能确定板端根因。
+各点仅收到一条 B 类结果便结束，退出码均 0，`--lint-only -Wall` 和构建均 0 告警；Python 语法和 `git diff --check` 通过。
+仅入口生成的 DDR shell/稀疏模型改变时序，公共模型及仓库 RTL/程序未改；日志原在 `build/board_npu_program/sim/`，运行后已清理进程和工作目录，未回传主机文件。
+
 - `edrv32_mac_npu_int8_chain` 的 8 级都配置 `MODEZ=4'b0011`（后加器 Z 取 CPI），第 0 级把 `cpi_i` 接常数 0（设计记录 `2026-10-30-npu-apm-cascade.md` 第 5 节的决定）。
 - 厂商 IP 源码（卡 12 `artifacts/ip_rtl/ipm2l_mult_v1_3.v.xml`、`ipm2l_multadd_v1_3.v.xml`）的第一级一律 `modez_in[0] = 3'd0`（加零），CPI 只接上一级的 CPO。
 - 卡 13 的 APM 布局（`artifacts/apm_placement.pcf`）中，32 条链里至少 12 条的第 0 级与同列另一条链的末级相邻。

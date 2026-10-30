@@ -50,6 +50,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--mac', choices=('sim', 'vendor', 'both'), default='both')
     parser.add_argument('--lint-only', action='store_true')
+    parser.add_argument('--ddr-latency', type=int, default=3,
+                        help='DDR command latency in clk_mem cycles (default: 3)')
+    parser.add_argument('--ddr-read-gaps', action='store_true',
+                        help='insert 0-31 extra clk_mem cycles between read beats')
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     # Preserve the common board IP shell. Cover the ELF's stack at physical 0x3fffffff,
@@ -57,18 +61,28 @@ def main():
     shell = OUT / 'ip_ddr3.sv'
     shell.write_text((ROOT / 'verif/soc/board_render/ip_ddr3.sv').read_text().replace(
         'pango_ddr3_ip_model u_user (',
-        "pango_ddr3_ip_model #(.MEMORY_BYTES(1073741824)) u_user ("))
+        'pango_ddr3_ip_model #(\n'
+        '        .MEMORY_BYTES(1073741824),\n'
+        f'        .COMMAND_LATENCY({args.ddr_latency})\n'
+        '    ) u_user ('))
     # A dense 1 GiB array exceeds Verilator's single-dimension limit. Keep the
     # byte-addressed storage contract, with sparse keys sized by MEMORY_BYTES.
     original_ddr = ROOT / 'verif/models/pango_ddr3_ip_model.sv'
     sparse_ddr = OUT / original_ddr.name
-    sparse_ddr.write_text(original_ddr.read_text().replace(
+    model = original_ddr.read_text().replace(
         'reg [7:0] memory_r [0:MEMORY_BYTES-1];',
         'reg [7:0] memory_r [bit [$clog2(MEMORY_BYTES)-1:0]];').replace(
         "memory_r[{2'b00, addr_r, 2'b00} + g]",
         "memory_r[$clog2(MEMORY_BYTES)'({2'b00, addr_r, 2'b00} + g)]").replace(
         "memory_r[{2'b00, addr_r, 2'b00} + lane]",
-        "memory_r[$clog2(MEMORY_BYTES)'({2'b00, addr_r, 2'b00} + lane)]"))
+        "memory_r[$clog2(MEMORY_BYTES)'({2'b00, addr_r, 2'b00} + lane)]")
+    if args.ddr_read_gaps:
+        # Use the model's existing LFSR, seeded with 0x1234abcd at reset.
+        # Delay the next beat after delivery; data/address advance together as before.
+        model = model.replace('                        if (axi_rlast_o)',
+                              "                        delay_r <= {27'b0, lfsr_r[7:3]};\n"
+                              '                        if (axi_rlast_o)')
+    sparse_ddr.write_text(model)
     sources = [str(sparse_ddr) if source == str(original_ddr) else source
                for source in expand_files(HERE / 'files.f')] + [str(shell)]
     if not args.lint_only:
