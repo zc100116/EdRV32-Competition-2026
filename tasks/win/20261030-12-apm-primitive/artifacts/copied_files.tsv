@@ -1,0 +1,7 @@
+file	source	description
+model/GTP_APM_E2.v	G:/Program/pango/PDS_2022.2-SP6.1/arch/vendor/pango/verilog/simulation/GTP_APM_E2.v	仿真模型
+ip_rtl/ipm2l_acc_v1_2.v.xml	G:/Program/pango/PDS_2022.2-SP6.1/ip/module_ip/ipm2l_flex_apm/ipm2l_flex_apm_eval/ipm2l_acc/rtl/ipm2l_acc_v1_2.v.xml	IP 生成器 RTL XML 模板
+ip_rtl/ipm2l_mult_v1_3.v.xml	G:/Program/pango/PDS_2022.2-SP6.1/ip/module_ip/ipm2l_flex_apm/ipm2l_flex_apm_eval/ipm2l_mult/rtl/ipm2l_mult_v1_3.v.xml	IP 生成器 RTL XML 模板
+ip_rtl/ipm2l_multacc_v1_2.v.xml	G:/Program/pango/PDS_2022.2-SP6.1/ip/module_ip/ipm2l_flex_apm/ipm2l_flex_apm_eval/ipm2l_multacc/rtl/ipm2l_multacc_v1_2.v.xml	IP 生成器 RTL XML 模板
+ip_rtl/ipm2l_multadd_v1_3.v.xml	G:/Program/pango/PDS_2022.2-SP6.1/ip/module_ip/ipm2l_flex_apm/ipm2l_flex_apm_eval/ipm2l_multadd/rtl/ipm2l_multadd_v1_3.v.xml	IP 生成器 RTL XML 模板
+manuals/fpga_reference.pdf	G:/Program/pango/PDS_2022.2-SP6.1/syn/doc/fpga_reference.pdf	文档正文包含 GTP_APM_E2

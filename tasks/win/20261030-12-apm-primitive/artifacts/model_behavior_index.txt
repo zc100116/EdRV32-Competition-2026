@@ -1,0 +1,29 @@
+Source: model/GTP_APM_E2.v; line-number index, not a hardware feasibility proof.
+31:     parameter USE_POSTADD = 0, //enable postadder 0/1
+50:     parameter USE_SIMD = 0,   // single addsub25_mult25_add48 / dual addsub12_mult12_add24
+55:     parameter CPO_REG = 0, // CPO,COUT use register output
+61:     output [47:0] CPO, //p cascade output
+72:     input [47:0] CPI, //p cascade input
+266:     wire [3:0] modezi; //registered (optional) MODEZ internal
+294:     assign modezi = (MODEZ_REG == 1'b1) ? modezr : MODEZ;
+334:     assign prec = (USE_SIMD == 1'b1) ? {preadd_s_h[11],preadd_s_h,preadd_s_l} : preadd_s;
+364:     assign mc = (USE_SIMD == 1'b1) ? {mult_out_h,mult_out_l}: mult_out_s;
+384:     reg  [47:0] pzi; // post adder input b before inverter
+385:     wire [47:0] pz = modezi[3] ? ~pzi : pzi; // post adder input b after inverter
+400:         case(modezi[2:0])
+401:             3'b000 : pzi = 48'b0;
+402:             3'b001 : pzi = pri;
+403:             3'b010 : pzi = zi;
+404:             3'b011 : pzi = $signed(CPI); //both branch need $signed
+405:             3'b100 : pzi = $signed(CPI) >>> 17; //both branch need $signed
+406:             3'b101 : pzi = $signed(CPI) >>> 24; //both branch need $signed
+407:             3'b110 : pzi = $signed(CPI) >>> 16; //both branch need $signed
+408:             3'b111 : pzi = $signed(CPI) >>> 8; //both branch need $signed
+413:     assign cinv = CIN_SEL ? CIN : modeyi[2] | modezi[3];
+419:     wire cin_inter;
+423:     assign post_select = ((modeyi[1:0] == 2'b00) && (modezi[2:0] == 3'b000));
+425:     assign cin_inter = USE_SIMD ? cinv : cout_inter0;
+426:     assign {cout_inter1,alu_out[47:24]} = py[47:24] + pz[47:24] + cin_inter;
+446:     assign P = USE_POSTADD ? pi : mi;
+447:     assign CPO = USE_POSTADD ? (CPO_REG ? pr[47:0] : pc[47:0]) : mi;
+449:     assign COUT = CPO_REG ? pr[48] : pc[48];
