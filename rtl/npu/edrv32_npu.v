@@ -84,6 +84,7 @@ module edrv32_npu (
     wire [2:0] decode_error_w;
     wire conv_start_w;
     wire stop_w;
+    reg stop_r;
     wire conv_read_req_valid_w;
     wire conv_read_req_ready_w;
     wire [31:0] conv_read_req_addr_w;
@@ -208,6 +209,15 @@ module edrv32_npu (
     assign error_code_w = read_error_w ? 3'd1 : write_error_w ? 3'd2 : decode_error_w;
     assign stop_w = (state_r == S_STOP) || (state_r == S_CANCEL)
         || (busy_w && (abort_w || descriptor_error_w));
+    // Register the execution stop before the conv/DMA request-enable cone.
+    // The top-level request and DONE masks below still use the immediate stop.
+    always @(posedge clk_npu_i or negedge rst_npu_n_i) begin
+        if (!rst_npu_n_i) begin
+            stop_r <= 1'b0;
+        end else begin
+            stop_r <= stop_w;
+        end
+    end
     assign cancel_w = (state_r == S_CANCEL) || soft_reset_w;
     assign done_w = (state_r == S_COMPLETE) && !stop_w;
     assign decode_w = (state_r == S_DECODE);
@@ -411,7 +421,7 @@ module edrv32_npu (
 
         // Execution lifetime.
         .start_i(conv_start_w),
-        .stop_i(stop_w),
+        .stop_i(stop_r),
         .cancel_i(cancel_w),
 
         // Descriptor configuration and execution status.
@@ -509,7 +519,7 @@ module edrv32_npu (
         .rst_n_i(rst_npu_n_i),
 
         // Execution lifetime.
-        .stop_i(stop_w),
+        .stop_i(stop_r),
 
         // Descriptor configuration and execution status.
         .req_valid_i(read_req_valid_w),

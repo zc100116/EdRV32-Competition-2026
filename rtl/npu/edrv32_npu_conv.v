@@ -152,7 +152,6 @@ module edrv32_npu_conv (
     reg [1:0] model_state_r;
     reg [2:0] model_block_r;
     reg [31:0] model_addr_r;
-    reg [31:0] model_weight_base_r;
     reg [14:0] model_remaining_r;
     reg [13:0] weight_index_r;
     reg [3:0] record_index_r;
@@ -248,9 +247,39 @@ module edrv32_npu_conv (
     wire [4:0] response_record_w;
     wire [4:0] response_line_pair_w;
     wire [4:0] unused_response_residual_pair_w;
-    wire [4:0] model_beats_w;
+    reg [4:0] model_beats_r;
+    reg model_burst_last_r;
+    reg [31:0] model_boundary_addr_r;
+    reg [31:0] model_next_weight_addr_r;
+    reg [31:0] model_weight_base_r;
+    reg [31:0] model_quant_addr_r;
+    reg [31:0] model_quant_boundary_r;
+    reg [4:0] model_quant_beats_r;
+    reg [14:0] model_quant_remaining_r;
+    reg model_quant_last_r;
+    reg [31:0] model_lut_addr_r;
+    reg [31:0] model_lut_boundary_r;
+    reg [4:0] model_lut_beats_r;
+    reg [14:0] model_lut_remaining_r;
+    reg model_lut_last_r;
+    wire [14:0] model_first_count_w;
+    reg [14:0] model_first_count_r;
+    reg [4:0] model_first_boundary_beats_r;
+    reg [4:0] model_next_weight_boundary_beats_r;
+    wire [3:0] model_next_weight_offset_w;
+    reg [14:0] model_next_weight_count_r;
+    wire [14:0] model_future_weight_count_w;
     wire [4:0] line_beats_w;
-    wire [4:0] residual_beats_w;
+    reg [4:0] residual_beats_r;
+    reg [4:0] residual_remaining_r;
+    reg residual_burst_last_r;
+    reg [31:0] residual_boundary_addr_r;
+    reg [31:0] residual_second_addr_r;
+    reg [31:0] residual_next_row_addr_r;
+    reg [31:0] residual_next_block_addr_r;
+    reg [31:0] residual_next_chunk_addr_r;
+    wire [31:0] residual_second_addr_w;
+    wire residual_begin_w;
     wire line_candidate_w;
     wire model_candidate_w;
     wire residual_candidate_w;
@@ -264,6 +293,8 @@ module edrv32_npu_conv (
     wire line_take_w;
     wire cmd_prepare_w;
     wire residual_finish_block_w;
+    reg residual_finish_block_r;
+    reg [10:0] residual_chunk_end_pair_r;
     wire residual_next_half_w;
     wire [10:0] residual_next_pairs_w;
     reg request_valid_r;
@@ -282,10 +313,51 @@ module edrv32_npu_conv (
     function [4:0] burst_beats;
         input [31:0] unused_addr_i;
         input [14:0] remaining_i;
-        reg [4:0] boundary;
         begin
-            boundary = 5'd16 - {1'b0, unused_addr_i[8:5]};
-            burst_beats = (remaining_i < {10'd0, boundary}) ? remaining_i[4:0] : boundary;
+            burst_beats = (remaining_i < {10'd0, 5'd16 - {1'b0, unused_addr_i[8:5]}})
+                ? remaining_i[4:0] : 5'd16 - {1'b0, unused_addr_i[8:5]};
+        end
+    endfunction
+    // Compare and subtract in parallel rather than subtracting the selected beat count.
+    function [14:0] burst_remaining;
+        input [31:0] unused_addr_i;
+        input [14:0] remaining_i;
+        begin
+            burst_remaining = (remaining_i <= {10'd0, 5'd16 - {1'b0, unused_addr_i[8:5]}})
+                ? 15'd0 : remaining_i - {10'd0, 5'd16 - {1'b0, unused_addr_i[8:5]}};
+        end
+    endfunction
+    // Model boundary arithmetic is a preceding register stage, so the 15-bit
+    // comparison/subtraction below cannot absorb the address-to-boundary carry.
+    function [14:0] model_burst_remaining;
+        input [4:0] boundary_beats_i;
+        input [14:0] remaining_i;
+        begin
+            model_burst_remaining = (remaining_i <= {10'd0, boundary_beats_i})
+                ? 15'd0 : remaining_i - {10'd0, boundary_beats_i};
+        end
+    endfunction
+    function [4:0] residual_burst_remaining;
+        input [31:0] unused_addr_i;
+        input [4:0] remaining_i;
+        begin
+            residual_burst_remaining = (remaining_i <= 5'd16 - {1'b0, unused_addr_i[8:5]})
+                ? 5'd0 : remaining_i - (5'd16 - {1'b0, unused_addr_i[8:5]});
+        end
+    endfunction
+    function burst_last;
+        input [31:0] unused_addr_i;
+        input [14:0] remaining_i;
+        begin
+            burst_last = remaining_i <= {10'd0, 5'd16 - {1'b0, unused_addr_i[8:5]}};
+        end
+    endfunction
+    // A nonfinal burst ends at a 512-byte boundary. The next burst can therefore
+    // use at most 16 beats without another address-dependent burst calculation.
+    function [31:0] burst_boundary;
+        input [31:0] unused_addr_i;
+        begin
+            burst_boundary = {unused_addr_i[31:9] + 23'd1, 9'd0};
         end
     endfunction
     assign unused_flags_w = desc_i[31:0];
@@ -301,11 +373,14 @@ module edrv32_npu_conv (
     assign output_row_pairs_w = out_w_w[11:1];
     assign input_row_bytes_w = {16'd0, input_row_beats_w, 5'd0};
     assign output_row_bytes_w = {16'd0, output_row_pairs_w, 5'd0};
-    assign model_beats_w = burst_beats(model_addr_r, model_remaining_r);
+    assign model_first_count_w = (unused_flags_w[9] && !unused_flags_w[8]
+        && (cout_blocks_w == 4'd1))
+        ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
+    assign model_future_weight_count_w = unused_flags_w[9] && !unused_flags_w[8]
+        && ({1'b0, model_block_r} == cout_blocks_w - 4'd3)
+        ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
     assign line_beats_w = burst_beats(load_addr_r,
         {4'd0, input_row_beats_w - load_pair_r});
-    assign residual_beats_w = burst_beats(residual_addr_r,
-        {10'd0, residual_pairs_r - residual_sent_r});
     assign line_candidate_w = active_r && (load_row_r < {1'b0, in_h_w})
         && (!slot_used_r[load_slot_r] || (load_plane_r != 6'd0) || (load_pair_r != 11'd0));
     assign model_candidate_w = active_r && (model_state_r != S_MODEL_DONE);
@@ -329,21 +404,25 @@ module edrv32_npu_conv (
         if (request_prepare_w) begin
             request_addr_r <= (select_w == 2'd0) ? residual_addr_r
                 : (select_w == 2'd1) ? load_addr_r : model_addr_r;
-            request_beats_r <= (select_w == 2'd0) ? residual_beats_w
-                : (select_w == 2'd1) ? line_beats_w : model_beats_w;
+            request_beats_r <= (select_w == 2'd0) ? residual_beats_r
+                : (select_w == 2'd1) ? line_beats_w : model_beats_r;
             request_tag_r <= read_tag_w;
         end
     end
-    assign line_accept_w = request_prepare_w && (select_w == 2'd1);
-    assign model_accept_w = request_prepare_w && (select_w == 2'd2);
-    assign residual_accept_w = request_prepare_w && (select_w == 2'd0);
+    // Qualify each priority winner directly; do not decode the shared request mux
+    // back into counter enables on the APB ABORT-to-request path.
+    assign line_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
+        && !residual_candidate_w && line_candidate_w;
+    assign model_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
+        && !residual_candidate_w && !line_candidate_w && model_candidate_w;
+    assign residual_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
+        && residual_candidate_w;
     assign line_row_last_w = (load_pair_r + {6'd0, line_beats_w} == input_row_beats_w)
         && (load_plane_r == cin_blocks_w - 6'd1);
-    assign model_record_last_w = (model_remaining_r == {10'd0, model_beats_w})
+    assign model_record_last_w = model_burst_last_r
         && ((model_state_r == S_MODEL_LUT) ||
         ((model_state_r == S_MODEL_QUANT) && !unused_flags_w[6]));
-    assign residual_read_last_w =
-        (residual_sent_r + residual_beats_w == residual_pairs_r)
+    assign residual_read_last_w = residual_burst_last_r
         && (residual_half_r || residual_plane_r);
     always @(*) begin
         select_w = 2'd2;
@@ -444,7 +523,6 @@ module edrv32_npu_conv (
             active_r <= 1'b0;
             model_state_r <= S_MODEL_DONE;
             model_block_r <= 3'd0;
-            model_remaining_r <= 15'd0;
             weight_index_r <= 14'd0;
             record_index_r <= 4'd0;
             block_ready_r <= 8'd0;
@@ -473,9 +551,6 @@ module edrv32_npu_conv (
                 model_block_r <= 3'd0;
                 weight_index_r <= 14'd0;
                 record_index_r <= 4'd0;
-                model_remaining_r <= (unused_flags_w[9] && !unused_flags_w[8]
-                    && (cout_blocks_w == 4'd1))
-                    ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
                 model_state_r <= S_MODEL_WEIGHT;
                 block_ready_r <= 8'd0;
             end
@@ -487,20 +562,17 @@ module edrv32_npu_conv (
                 active_r <= 1'b0;
             end
             if (model_accept_w) begin
-                model_remaining_r <= model_remaining_r - {10'd0, model_beats_w};
                 if (model_state_r == S_MODEL_WEIGHT) begin
-                    weight_index_r <= weight_index_r + {9'd0, model_beats_w};
-                    if (model_remaining_r == {10'd0, model_beats_w}) begin
+                    weight_index_r <= weight_index_r + {9'd0, model_beats_r};
+                    if (model_burst_last_r) begin
                         model_state_r <= S_MODEL_QUANT;
-                        model_remaining_r <= 15'd8;
                         record_index_r <= 4'd0;
                     end
                 end else begin
-                    record_index_r <= record_index_r + model_beats_w[3:0];
-                    if (model_remaining_r == {10'd0, model_beats_w}) begin
+                    record_index_r <= record_index_r + model_beats_r[3:0];
+                    if (model_burst_last_r) begin
                         if ((model_state_r == S_MODEL_QUANT) && unused_flags_w[6]) begin
                             model_state_r <= S_MODEL_LUT;
-                            model_remaining_r <= 15'd8;
                             record_index_r <= 4'd8;
                         end else if ({1'b0, model_block_r} == cout_blocks_w - 4'd1) begin
                             model_state_r <= S_MODEL_DONE;
@@ -508,10 +580,6 @@ module edrv32_npu_conv (
                             model_block_r <= model_block_r + 3'd1;
                             model_state_r <= S_MODEL_WEIGHT;
                             weight_index_r <= weight_index_r;
-                            model_remaining_r <= unused_flags_w[9] && !unused_flags_w[8]
-                                && ({1'b0, model_block_r} == cout_blocks_w - 4'd2)
-                                ? {1'b0, weight_block_bytes_w[19:6]}
-                                : weight_block_bytes_w[19:5];
                         end
                     end
                 end
@@ -543,15 +611,16 @@ module edrv32_npu_conv (
     always @(posedge clk_i) begin
         if (start_i) begin
             model_addr_r <= weight_addr_i;
-            model_weight_base_r <= weight_addr_i;
         end else if (model_accept_w) begin
-            model_addr_r <= model_addr_r + {22'd0, model_beats_w, 5'd0};
+            model_addr_r <= model_boundary_addr_r;
             if ((model_state_r == S_MODEL_WEIGHT)
-                && (model_remaining_r == {10'd0, model_beats_w})) begin
-                model_addr_r <= quant_addr_i + {20'd0, model_block_r, 9'd0};
+                && model_burst_last_r) begin
+                model_addr_r <= model_quant_addr_r;
+            end else if ((model_state_r == S_MODEL_QUANT) && model_burst_last_r
+                && unused_flags_w[6]) begin
+                model_addr_r <= model_lut_addr_r;
             end else if (model_record_last_w) begin
-                model_addr_r <= model_weight_base_r + {12'd0, weight_block_bytes_w};
-                model_weight_base_r <= model_weight_base_r + {12'd0, weight_block_bytes_w};
+                model_addr_r <= model_next_weight_addr_r;
             end
         end
         if (response_accept_w) begin
@@ -582,6 +651,95 @@ module edrv32_npu_conv (
             lut_block_r <= serial_block_r;
             lut_addr_r <= serial_base_r + {3'd0, serial_phase_r};
             lut_data_r <= serial_data_r[7:0];
+        end
+    end
+
+    // Remaining is request payload. START captures the initial count separately;
+    // the registered configuration handshake initializes the live counter before
+    // requests become valid. Cancellation only controls valid/state.
+    always @(posedge clk_i) begin
+        if (cfg_valid_r && dp_cfg_ready_w) begin
+            model_remaining_r <= model_burst_remaining(model_first_boundary_beats_r,
+                model_first_count_r);
+        end else if (model_accept_w) begin
+            model_remaining_r <= (model_remaining_r > 15'd16)
+                ? model_remaining_r - 15'd16 : 15'd0;
+            if (model_burst_last_r) begin
+                if (model_state_r == S_MODEL_WEIGHT) begin
+                    model_remaining_r <= model_quant_remaining_r;
+                end else if ((model_state_r == S_MODEL_QUANT) && unused_flags_w[6]) begin
+                    model_remaining_r <= model_lut_remaining_r;
+                end else if ({1'b0, model_block_r} != cout_blocks_w - 4'd1) begin
+                    model_remaining_r <= model_burst_remaining(model_next_weight_boundary_beats_r,
+                        model_next_weight_count_r);
+                end
+            end
+        end
+    end
+
+    // Only bits [8:5] affect the next burst boundary. Compute their modular
+    // address sum alongside the full pointer, then register the boundary count.
+    assign model_next_weight_offset_w = model_weight_base_r[8:5]
+        + weight_block_bytes_w[8:5];
+    // Spec 5.4: prepare model segment transitions independently of arbitration/ABORT.
+    // These plans settle during the preceding weight/parameter segment.
+    always @(posedge clk_i) begin
+        // Keep the complete address addition independent of request/START selection.
+        model_next_weight_addr_r <= model_weight_base_r + {12'd0, weight_block_bytes_w};
+        model_next_weight_boundary_beats_r <= 5'd16 - {1'b0, model_next_weight_offset_w};
+        model_quant_beats_r <= burst_beats(model_quant_addr_r, 15'd8);
+        model_quant_remaining_r <= burst_remaining(model_quant_addr_r, 15'd8);
+        model_quant_last_r <= burst_last(model_quant_addr_r, 15'd8);
+        model_lut_beats_r <= burst_beats(model_lut_addr_r, 15'd8);
+        model_lut_remaining_r <= burst_remaining(model_lut_addr_r, 15'd8);
+        model_lut_last_r <= burst_last(model_lut_addr_r, 15'd8);
+        if (start_i) begin
+            model_first_count_r <= model_first_count_w;
+            model_first_boundary_beats_r <= 5'd16 - {1'b0, weight_addr_i[8:5]};
+            model_quant_addr_r <= quant_addr_i;
+            model_quant_boundary_r <= burst_boundary(quant_addr_i);
+            model_lut_addr_r <= quant_addr_i + 32'd256;
+            model_weight_base_r <= weight_addr_i;
+            model_next_weight_count_r <= (unused_flags_w[9] && !unused_flags_w[8]
+                && (cout_blocks_w == 4'd2))
+                ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
+        end
+        if (cfg_valid_r && dp_cfg_ready_w) begin
+            model_lut_boundary_r <= burst_boundary(model_lut_addr_r);
+            model_beats_r <= (model_first_count_r < {10'd0, model_first_boundary_beats_r})
+                ? model_first_count_r[4:0] : model_first_boundary_beats_r;
+            model_burst_last_r <= model_first_count_r <= {10'd0, model_first_boundary_beats_r};
+            model_boundary_addr_r <= burst_boundary(model_addr_r);
+        end else if (model_accept_w) begin
+            model_beats_r <= (model_remaining_r < 15'd16)
+                ? model_remaining_r[4:0] : 5'd16;
+            model_burst_last_r <= model_remaining_r <= 15'd16;
+            model_boundary_addr_r <= model_boundary_addr_r + 32'd512;
+            if (model_burst_last_r) begin
+                if (model_state_r == S_MODEL_WEIGHT) begin
+                    model_beats_r <= model_quant_beats_r;
+                    model_burst_last_r <= model_quant_last_r;
+                    model_boundary_addr_r <= model_quant_boundary_r;
+                end else if ((model_state_r == S_MODEL_QUANT) && unused_flags_w[6]) begin
+                    model_beats_r <= model_lut_beats_r;
+                    model_burst_last_r <= model_lut_last_r;
+                    model_boundary_addr_r <= model_lut_boundary_r;
+                end else begin
+                    model_quant_addr_r <= model_quant_addr_r + 32'd512;
+                    model_quant_boundary_r <= model_quant_boundary_r + 32'd512;
+                    model_lut_addr_r <= model_lut_addr_r + 32'd512;
+                    model_lut_boundary_r <= model_lut_boundary_r + 32'd512;
+                    model_weight_base_r <= model_next_weight_addr_r;
+                    // Advance the count one block ahead of the burst planner.
+                    model_next_weight_count_r <= model_future_weight_count_w;
+                    model_beats_r <= (model_next_weight_count_r
+                        < {10'd0, model_next_weight_boundary_beats_r})
+                        ? model_next_weight_count_r[4:0] : model_next_weight_boundary_beats_r;
+                    model_burst_last_r <= model_next_weight_count_r
+                        <= {10'd0, model_next_weight_boundary_beats_r};
+                    model_boundary_addr_r <= burst_boundary(model_next_weight_addr_r);
+                end
+            end
         end
     end
 
@@ -782,8 +940,7 @@ module edrv32_npu_conv (
     assign dp_residual_wr_index_w = residual_wr_index_r;
     assign dp_residual_wr_data_w = residual_wr_data_r;
     assign dp_residual_commit_w = residual_commit_r;
-    assign residual_finish_block_w = residual_pair_r + {6'd0, residual_pairs_r}
-        == output_row_pairs_w;
+    assign residual_finish_block_w = residual_finish_block_r;
     assign residual_next_half_w = unused_flags_w[9]
         && ({1'b0, residual_block_r} == cout_blocks_w - 4'd2);
     assign residual_next_pairs_w = residual_finish_block_w ? output_row_pairs_w
@@ -821,12 +978,12 @@ module edrv32_npu_conv (
                     ? output_row_pairs_w[4:0]
                     : ((unused_flags_w[9] && (cout_blocks_w == 4'd1)) ? 5'd16 : 5'd8);
             end
-            if (dp_residual_begin_valid_w && dp_residual_begin_ready_w) begin
+            if (residual_begin_w) begin
                 residual_state_r <= S_RES_READ;
             end
             if (residual_accept_w) begin
-                residual_sent_r <= residual_sent_r + residual_beats_w;
-                if (residual_sent_r + residual_beats_w == residual_pairs_r) begin
+                residual_sent_r <= residual_sent_r + residual_beats_r;
+                if (residual_burst_last_r) begin
                     residual_sent_r <= 5'd0;
                     if (residual_half_r || residual_plane_r) begin
                         residual_state_r <= S_RES_WAIT;
@@ -873,28 +1030,25 @@ module edrv32_npu_conv (
             residual_block_addr_r <= residual_addr_i;
             residual_addr_r <= residual_addr_i;
         end else if (residual_accept_w) begin
-            residual_addr_r <= residual_addr_r + {22'd0, residual_beats_w, 5'd0};
-            if ((residual_sent_r + residual_beats_w == residual_pairs_r)
-                && !residual_half_r && !residual_plane_r) begin
-                residual_addr_r <= residual_block_addr_r + desc_i[159:128]
-                    + {16'd0, residual_pair_r, 5'd0};
+            residual_addr_r <= residual_boundary_addr_r;
+            if (residual_burst_last_r && !residual_half_r && !residual_plane_r) begin
+                residual_addr_r <= residual_second_addr_r;
             end
         end
         if (residual_commit_r) begin
             if (residual_finish_block_w) begin
                 if ({1'b0, residual_block_r} == cout_blocks_w - 4'd1) begin
-                    residual_row_addr_r <= residual_row_addr_r + output_row_bytes_w;
-                    residual_block_addr_r <= residual_row_addr_r + output_row_bytes_w;
-                    residual_addr_r <= residual_row_addr_r + output_row_bytes_w;
+                    residual_row_addr_r <= residual_next_row_addr_r;
+                    residual_block_addr_r <= residual_next_row_addr_r;
+                    residual_addr_r <= residual_next_row_addr_r;
                     residual_half_r <= unused_flags_w[9] && (cout_blocks_w == 4'd1);
                 end else begin
-                    residual_block_addr_r <= residual_block_addr_r + (desc_i[159:128] << 1);
-                    residual_addr_r <= residual_block_addr_r + (desc_i[159:128] << 1);
+                    residual_block_addr_r <= residual_next_block_addr_r;
+                    residual_addr_r <= residual_next_block_addr_r;
                     residual_half_r <= residual_next_half_w;
                 end
             end else begin
-                residual_addr_r <= residual_block_addr_r
-                    + {16'd0, residual_pair_r + {6'd0, residual_pairs_r}, 5'd0};
+                residual_addr_r <= residual_next_chunk_addr_r;
             end
         end
         if (response_accept_w && (response_role_w == ROLE_RESIDUAL)) begin
@@ -902,6 +1056,42 @@ module edrv32_npu_conv (
             residual_wr_bank_r <= read_data_tag_i[0];
             residual_wr_index_r <= read_data_tag_i[1] ? unused_response_residual_pair_w[3:0]
                 : {unused_response_residual_pair_w[2:0], read_data_tag_i[2]};
+        end
+    end
+
+    assign residual_begin_w = dp_residual_begin_valid_w && dp_residual_begin_ready_w;
+    assign residual_second_addr_w = residual_addr_r + desc_i[159:128];
+    // A half-region has at most 16 pairs, so each C16 plane needs at most two bursts.
+    // BEGIN prepares plane zero and registers the plane-one address. The last
+    // plane-zero acceptance prepares plane one's burst, keeping its address sum
+    // out of the burst-length/remaining path without inserting request bubbles.
+    always @(posedge clk_i) begin
+        residual_next_row_addr_r <= residual_row_addr_r + output_row_bytes_w;
+        residual_next_block_addr_r <= residual_block_addr_r + (desc_i[159:128] << 1);
+        // The registered response cannot commit a half-region until after BEGIN.
+        residual_finish_block_r <= residual_chunk_end_pair_r == output_row_pairs_w;
+        if (residual_begin_w) begin
+            residual_chunk_end_pair_r <= residual_pair_r + {6'd0, residual_pairs_r};
+            residual_beats_r <= burst_beats(residual_addr_r, {10'd0, residual_pairs_r});
+            residual_remaining_r <= residual_burst_remaining(residual_addr_r,
+                residual_pairs_r);
+            residual_burst_last_r <= burst_last(residual_addr_r, {10'd0, residual_pairs_r});
+            residual_boundary_addr_r <= burst_boundary(residual_addr_r);
+            residual_second_addr_r <= residual_second_addr_w;
+            residual_next_chunk_addr_r <= residual_addr_r + {22'd0, residual_pairs_r, 5'd0};
+        end else if (residual_accept_w) begin
+            residual_beats_r <= residual_remaining_r;
+            residual_remaining_r <= 5'd0;
+            residual_burst_last_r <= 1'b1;
+            if (residual_burst_last_r && !residual_half_r && !residual_plane_r) begin
+                residual_beats_r <= burst_beats(residual_second_addr_r,
+                    {10'd0, residual_pairs_r});
+                residual_remaining_r <= residual_burst_remaining(residual_second_addr_r,
+                    residual_pairs_r);
+                residual_burst_last_r <= burst_last(residual_second_addr_r,
+                    {10'd0, residual_pairs_r});
+                residual_boundary_addr_r <= burst_boundary(residual_second_addr_r);
+            end
         end
     end
 
