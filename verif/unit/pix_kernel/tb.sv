@@ -9,6 +9,7 @@ module tb;
     bit advance=1;
     bit source_valid=0;
     logic [215:0] window_data='0;
+    logic [71:0] shared_delay[0:3];
     logic [2:0] op=0;
     wire [23:0] result;
     bit [7:0] valid_pipe=0;
@@ -23,13 +24,18 @@ module tb;
     edrv32_pix_kernel dut (
         .clk_i(clk),
         .advance_i({21{advance}}),
-        .window_i(window_data),
+        .early_rgb_i(window_data),
+        .window_i(shared_delay[3]),
         .data_o(result),
         .op_i(op)
     );
 
     always @(posedge clk) begin
         if (advance) begin
+            // Pack the accepted RGB window into the four-advance shared-Y input.
+            for (int pixel=0; pixel<9; pixel++)
+                shared_delay[0][pixel*8 +: 8] <= 8'(gray_ref(window_data[pixel*24 +: 24]));
+            for (int stage=1; stage<4; stage++) shared_delay[stage] <= shared_delay[stage-1];
             if (valid_pipe[7]) begin
                 want=expected.pop_front();
                 if (result!==want)

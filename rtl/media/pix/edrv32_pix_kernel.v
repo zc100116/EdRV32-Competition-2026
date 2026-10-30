@@ -1,17 +1,18 @@
 // File: edrv32_pix_kernel.v
 // Spec: pix-spec 2.1, 2.4, 7.
-// Description: Eight advancing stages for one RGB888 zero-padded window.
-// Registered multiplier operands/results and balanced arithmetic preserve exact rounding.
+// Description: Overlapped RGB and shared-Y arithmetic for one zero-padded window.
+// Registered arithmetic operands/results and balanced arithmetic preserve exact rounding.
 // Clock: clk_mem.
 module edrv32_pix_kernel (
     // Clock and pipeline enable; validity and frame tags belong to the filter.
     input wire clk_i,
     input wire [20:0] advance_i,
 
-    // Window, in row-major order, p00 in the low 24 bits.
-    input wire [215:0] window_i,
+    // Row-major windows, p00 low: RGB888 first, Y four advances later.
+    input wire [215:0] early_rgb_i,
+    input wire [71:0] window_i,
 
-    // Result after eight advances.
+    // Result after eight advances from early RGB, four from the shared Y window.
     output reg [23:0] data_o,
 
     // Configuration is constant until the frame drains.
@@ -25,12 +26,7 @@ module edrv32_pix_kernel (
     end
     reg [215:0] s1_window_r;
     reg [23:0] center_r [0:6];
-    reg [15:0] s2_red_r [0:8];
-    reg [15:0] s2_green_r [0:8];
-    reg [15:0] s2_blue_r [0:8];
-    reg [15:0] s3_rg_r [0:8];
-    reg [15:0] s3_blue_r [0:8];
-    reg [15:0] s4_gray_r [0:8];
+    wire [8:0] unused_advance_w;
     wire [7:0] gray_w [0:8];
     reg [8:0] s5_lobe_r [0:3];
     reg [7:0] s5_middle_r [0:3];
@@ -54,6 +50,7 @@ module edrv32_pix_kernel (
     genvar pixel;
     genvar channel;
 
+    assign unused_advance_w = advance_i[10:2];
     assign magnitude_w = {1'b0, s7_abs_x_r} + {1'b0, s7_abs_y_r};
     assign minimum_w = s7_min_r[0] < s7_min_r[1] ? s7_min_r[0] : s7_min_r[1];
     assign maximum_w = s7_max_r[0] > s7_max_r[1] ? s7_max_r[0] : s7_max_r[1];
@@ -62,18 +59,7 @@ module edrv32_pix_kernel (
 
     generate
         for (pixel = 0; pixel < 9; pixel = pixel + 1) begin : g_gray
-            assign gray_w[pixel] = s4_gray_r[pixel][15:8];
-            always @(posedge clk_i) begin
-                if (advance_i[2+pixel]) begin
-                    // S1 is the dedicated APM input register; S2 is its output.
-                    s2_red_r[pixel] <= 16'd77 * {8'd0, s1_window_r[pixel*24+16 +: 8]};
-                    s2_green_r[pixel] <= 16'd150 * {8'd0, s1_window_r[pixel*24+8 +: 8]};
-                    s2_blue_r[pixel] <= 16'd29 * {8'd0, s1_window_r[pixel*24 +: 8]};
-                    s3_rg_r[pixel] <= s2_red_r[pixel] + s2_green_r[pixel];
-                    s3_blue_r[pixel] <= s2_blue_r[pixel] + 16'd128;
-                    s4_gray_r[pixel] <= s3_rg_r[pixel] + s3_blue_r[pixel];
-                end
-            end
+            assign gray_w[pixel] = window_i[pixel*8 +: 8];
         end
         for (channel = 0; channel < 3; channel = channel + 1) begin : g_color
             reg [2:0] op_color_r /* synthesis syn_preserve=1 */;
@@ -149,10 +135,10 @@ module edrv32_pix_kernel (
 
     always @(posedge clk_i) begin
         if (advance_i[0]) begin
-            s1_window_r <= window_i;
+            s1_window_r <= early_rgb_i;
         end
         if (advance_i[1]) begin
-            center_r[0] <= window_i[96 +: 24];
+            center_r[0] <= early_rgb_i[96 +: 24];
             for (idx_r = 1; idx_r < 7; idx_r = idx_r + 1) begin
                 center_r[idx_r] <= center_r[idx_r-1];
             end

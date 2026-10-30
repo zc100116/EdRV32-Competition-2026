@@ -83,6 +83,19 @@ module edrv32_pix_point2 (
 
     generate
         for (lane = 0; lane < 2; lane = lane + 1) begin : g_lane
+            reg [15:0] s1_red_hi_r;
+            reg [15:0] s1_red_lo_r;
+            reg [15:0] s1_green_hi_r;
+            reg [15:0] s1_green_lo_r;
+            reg [15:0] s1_blue_hi_r;
+            reg [15:0] s1_blue_lo_r;
+            wire [15:0] red_w;
+            wire [15:0] green_w;
+            wire [15:0] blue_w;
+            // The filter output registers feed the first shift-add level directly.
+            assign red_w = {8'd0, data_i[lane*24+16 +: 8]};
+            assign green_w = {8'd0, data_i[lane*24+8 +: 8]};
+            assign blue_w = {8'd0, data_i[lane*24 +: 8]};
             reg [15:0] s2_red_r;
             reg [15:0] s2_green_r;
             reg [15:0] s2_blue_r;
@@ -105,9 +118,15 @@ module edrv32_pix_point2 (
                 unused_result_w[15:10], unused_result_w[7:3]};
             always @(posedge clk_i) begin
                 if (advance_i[lane+1]) begin
-                    s2_red_r <= 16'd77 * {8'd0, rgb_r[0][lane*24+16 +: 8]};
-                    s2_green_r <= 16'd150 * {8'd0, rgb_r[0][lane*24+8 +: 8]};
-                    s2_blue_r <= 16'd29 * {8'd0, rgb_r[0][lane*24 +: 8]};
+                    s1_red_hi_r <= (red_w << 6) + (red_w << 3);
+                    s1_red_lo_r <= (red_w << 2) + red_w;
+                    s1_green_hi_r <= (green_w << 7) + (green_w << 4);
+                    s1_green_lo_r <= (green_w << 2) + (green_w << 1);
+                    s1_blue_hi_r <= blue_w << 5;
+                    s1_blue_lo_r <= (blue_w << 1) + blue_w;
+                    s2_red_r <= s1_red_hi_r + s1_red_lo_r;
+                    s2_green_r <= s1_green_hi_r + s1_green_lo_r;
+                    s2_blue_r <= s1_blue_hi_r - s1_blue_lo_r;
                     s3_rg_r <= s2_red_r + s2_green_r;
                     s3_blue_r <= s2_blue_r + 16'd128;
                     s4_unused_gray_r <= s3_rg_r + s3_blue_r;
