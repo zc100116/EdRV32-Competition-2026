@@ -13,14 +13,19 @@
 本移植层按 GPL-2.0-only 分发，完整 GPLv2 文本见 `COPYING`。
 子模块保持原样；未引入 ESP-IDF、FreeRTOS 或 ESP32 外设代码。
 
-协调者批准的两个 RV32 移植补丁保存在 `patches/`：
+协调者批准的三个补丁保存在 `patches/`（前两个为 RV32 移植，第三个修上游缺陷）：
 
 - `6502-byte-reads.patch`：6502 两个 16 位读取函数改成字节组合，避免 RV32
   非对齐半字异常；零页地址及 16 位 CPU 地址按 NES 地址宽度环绕。
 - `ppu-byte-storage.patch`：PPU 的 8 像素清除/保存/恢复使用 memset/memcpy，
   避免对字节缓冲直接作 uint32 指针解引用。
+- `rom-trainer-cursor.patch`：上游 `rom_loadtrainer()` 只把局部的二级指针加了 512，
+  调用者的 ROM 游标没有跳过 trainer，PRG 从 trainer 内部开始读，带 trainer 的 ROM
+  （头字节 6 bit2）上电即跑飞、全屏背景灰色。改为 `*rom += TRAINER_LENGTH`。
+  防回归：`python3 sw/apps/nes/check_trainer.py`，给仓库 NROM 演示 ROM 插入 512 字节
+  trainer 后，主机 180 帧必须与原 ROM 逐字节相同（未打补丁时 FAIL）。
 
-构建把这两个文件复制到对应输出目录的 `core/`，然后 `git apply`；应用失败立即退出。
+构建把这三个文件复制到对应输出目录的 `core/`，然后 `git apply`；应用失败立即退出。
 其余核心文件直接从子模块编译。原版 `bitmap.c` 不编译：其中地址对齐把指针截成
 uint32，不适合 Linux 64 位主机；`port.c` 自己提供静态位图和行指针。
 原版 GUI、OSD、视频驱动、memguard 和应用主循环入口不编译，其必要回调由 `port.c`

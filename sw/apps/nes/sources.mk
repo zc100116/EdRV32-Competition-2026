@@ -23,14 +23,16 @@ $(OUT)/obj/$(NOF)/nes/nes_rom.o: NES_WARNINGS := -Wno-unused-parameter \
 
 $(OUT)/obj/$(NOF)/mappers/map005.o: NES_WARNINGS := -Wno-unused-but-set-variable
 
-# Compile only these two approved source copies; all other core files stay upstream.
-$(OUT)/core/.patched: $(addprefix $(ROOT)/$(NOF)/,cpu/nes6502.c nes/nes_ppu.c) \
+# Compile only these three approved source copies; all other core files stay upstream.
+$(OUT)/core/.patched: $(addprefix $(ROOT)/$(NOF)/,cpu/nes6502.c nes/nes_ppu.c nes/nes_rom.c) \
     $(wildcard $(ROOT)/sw/apps/nes/patches/*.patch)
 	mkdir -p $(OUT)/core/cpu $(OUT)/core/nes
 	cp $(ROOT)/$(NOF)/cpu/nes6502.c $(OUT)/core/cpu/
 	cp $(ROOT)/$(NOF)/nes/nes_ppu.c $(OUT)/core/nes/
+	cp $(ROOT)/$(NOF)/nes/nes_rom.c $(OUT)/core/nes/
 	cd $(OUT)/core && git apply $(ROOT)/sw/apps/nes/patches/6502-byte-reads.patch
 	cd $(OUT)/core && git apply $(ROOT)/sw/apps/nes/patches/ppu-byte-storage.patch
+	cd $(OUT)/core && git apply $(ROOT)/sw/apps/nes/patches/rom-trainer-cursor.patch
 	touch $@
 
 $(OUT)/obj/$(NOF)/cpu/nes6502.o: $(OUT)/core/.patched FORCE
@@ -40,6 +42,10 @@ $(OUT)/obj/$(NOF)/cpu/nes6502.o: $(OUT)/core/.patched FORCE
 $(OUT)/obj/$(NOF)/nes/nes_ppu.o: $(OUT)/core/.patched FORCE
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(NES_WARNINGS) -c $(OUT)/core/nes/nes_ppu.c -o $@
+
+$(OUT)/obj/$(NOF)/nes/nes_rom.o: $(OUT)/core/.patched FORCE
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(NES_WARNINGS) -c $(OUT)/core/nes/nes_rom.c -o $@
 
 $(OUT)/obj/$(NOF)/%.o: $(ROOT)/$(NOF)/%.c FORCE
 	mkdir -p $(@D)
