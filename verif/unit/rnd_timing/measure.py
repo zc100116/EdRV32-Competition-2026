@@ -21,6 +21,10 @@ def retain_multipliers(out):
       nets[port]={'hide_name':0,'bits':bits,'attributes':{}}
      d['modules'][typ]={'attributes':{'blackbox':'1'},'parameter_default_values':{},'ports':ports,'cells':{},'netnames':nets}
      rows.append({'cell':n,'type':typ,'parameters':c['parameters'],'widths':{k:len(v) for k,v in c['connections'].items()},'src':c.get('attributes',{}).get('src','')});c['type']=typ;c['parameters']={}
+    # Reimporting auto-generated IDs must not collide with the next techmap pass.
+    top['cells'] = {'timing_cell_'+str(i): c for i,c in enumerate(top['cells'].values())}
+    top['netnames'] = {('timing_net_'+str(i) if '$' in n else n): v
+                       for i,(n,v) in enumerate(top['netnames'].items())}
     (p/'hardmul.json').write_text(json.dumps(d));(p/'multipliers.json').write_text(json.dumps(rows,indent=2))
     (p/'hardmul.ys').write_text(f'read_json {p}/hardmul.json\nsynth -top edrv32_rnd -flatten -noabc\nabc -lut 6 -dress\nopt_clean\nwrite_json {p}/hardnet.json\nstat\n')
     print('hard multipliers:',len(rows))
