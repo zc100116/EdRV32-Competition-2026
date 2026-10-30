@@ -273,12 +273,14 @@ module edrv32_rnd_draw (
     wire edge_valid_w;
     wire [15:0] edge_w;
     wire [11:0] unused_radius_w;
+    reg signed [17:0] coverage_outer_x0_r;
+    reg signed [17:0] coverage_inner_x0_r;
     wire [15:0] outer_cov_w;
     wire [15:0] inner_cov_w;
     wire [31:0] load_dst_w;
-    wire [31:0] end_dst_w;
     wire [31:0] palette_addr_w;
     wire [31:0] tile_row_bytes_w;
+    reg [12:0] chunk_right_r;
     wire [12:0] chunk_right_w;
     wire [12:0] next_tile_x_w;
     wire [255:0] map_shift_w;
@@ -327,7 +329,18 @@ module edrv32_rnd_draw (
     wire [511:0] lane_cache_w [0:1];
     wire lane_cross_w [0:1];
     wire [31:0] lane_next_w [0:1];
-    wire [31:0] target_bytes_w;
+    reg [31:0] load_dst_r;
+    reg [31:0] row_start_r;
+    reg [13:0] clip_left_bytes_r;
+    reg [13:0] clip_right_bytes_r;
+    reg [10:0] clip_end_r;
+    reg load_last_r;
+    wire [26:0] next_target_word_w;
+    wire [31:0] clip_end_w;
+    wire [5:0] target_word_difference_w;
+    wire [6:0] target_word_count_w;
+    wire [4:0] target_last_start_w;
+    wire [15:0] target_bytes_w;
     wire [31:0] tile_bytes_w;
     wire unused_geometry_w;
     integer stage;
@@ -425,23 +438,29 @@ module edrv32_rnd_draw (
         .radius_o(unused_radius_w)
     );
     edrv32_rnd_coverage u_outer_coverage (
-        .x_i($signed({6'd0, issue_x_r}) - rect_left_r),
+        .x_i(coverage_outer_x0_r),
         .width_i(width_r),
-        .edge_q4_i(bank_outer_edge_r[render_bank_r]),
+        .edge_q4_i(bank_outer_edge_r[pipe_tag_r[0][31]]),
         .row_inside_i(1'b1),
         .coverage_o(outer_cov_w)
     );
     edrv32_rnd_coverage u_inner_coverage (
-        .x_i($signed({6'd0, issue_x_r}) - inner_left_r),
+        .x_i(coverage_inner_x0_r),
         .width_i(inner_width_r[16:0]),
-        .edge_q4_i(bank_inner_edge_r[render_bank_r]),
-        .row_inside_i(bank_inner_inside_r[render_bank_r]),
+        .edge_q4_i(bank_inner_edge_r[pipe_tag_r[0][31]]),
+        .row_inside_i(bank_inner_inside_r[pipe_tag_r[0][31]]),
         .coverage_o(inner_cov_w)
     );
-    assign load_dst_w = dst_row_base_r + ({20'd0, load_left_r} << (argb_w ? 2 : 1));
-    assign end_dst_w = dst_row_base_r + ({20'd0, load_right_r} << (argb_w ? 2 : 1));
-    assign target_bytes_w = {end_dst_w[31:5], 5'd0} -
-        {load_dst_w[31:5], 5'd0} + 32'd32;
+    assign load_dst_w = load_dst_r;
+    assign clip_end_w = dst_row_base_r + {18'd0, clip_right_bytes_r};
+    assign next_target_word_w = load_dst_r[31:5] + (argb_w ? 27'd64 : 27'd32);
+    // A chunk owns at most 64 target beats, so six bits retain the complete word difference.
+    assign target_word_difference_w = clip_end_r[10:5] - load_dst_r[10:5];
+    assign target_word_count_w = {1'b0, target_word_difference_w} + 7'd1;
+    assign target_bytes_w = load_last_r ? {4'd0, target_word_count_w, 5'd0} :
+        (argb_w ? 16'd2048 : 16'd1024);
+    assign target_last_start_w = load_last_r ? clip_end_r[4:0] :
+        (argb_w ? {3'b111, load_dst_r[1:0]} : {4'b1111, load_dst_r[0]});
     assign tile_row_base_w = command_i[287:256] + tile_row_bits_w[34:3];
     assign tile_last_offset_w = tile_row_bytes_w - 32'd1;
     assign tile_end_offset_w = {2'd0, tile_row_base_w[4:0]} + {1'b0, tile_last_offset_r};
@@ -452,8 +471,7 @@ module edrv32_rnd_draw (
     assign tile_row_bits_w = {3'd0, tile_row_pixel_r} << bits_log2_w;
     assign tile_row_bytes_w = ((tile_mask_w + 32'd1) << bits_log2_w) >> 3;
     // End chunks on a target beat so concurrent banks never own the same bytes.
-    assign chunk_right_w = {1'b0, load_left_r} + 13'd511 -
-        (argb_w ? {10'd0, load_dst_w[4:2]} : {9'd0, load_dst_w[4:1]});
+    assign chunk_right_w = chunk_right_r;
     // Alignment makes the low five address bits irrelevant to the lower bound.
     assign bounds_min_word_w = bounds_addr_r[0][31:5] < bounds_addr_r[1][31:5] ?
         bounds_addr_r[0][31:5] : bounds_addr_r[1][31:5];
@@ -598,8 +616,8 @@ module edrv32_rnd_draw (
         reg gradient_negative2_r [0:3];
         wire [7:0] gradient_value_w [0:3];
         reg [23:0] fill_color_r [3:6];
-        reg [7:0] fill_coverage_r [0:4];
-        reg [7:0] fill_inner_r [0:2];
+        reg [7:0] fill_coverage_r [1:4];
+        reg [7:0] fill_inner_r [1:2];
         reg [7:0] fill_operand_a3_r;
         reg [7:0] fill_operand_b3_r;
         reg [15:0] fill_product4_r;
@@ -703,10 +721,10 @@ module edrv32_rnd_draw (
                     map_x0_r <= coordinate_w[3:0] + map_x_offset_r[3:0];
                     map_y0_r <= bank_y_r[render_bank_r][3:0] + map_y_offset_r[3:0];
                     tile_slot_r[0] <= issue_map_index_w[pixel];
-                    fill_coverage_r[0] <= outer_cov_w[pixel*8 +: 8];
-                    fill_inner_r[0] <= 8'd255 - inner_cov_w[pixel*8 +: 8];
                 end
                 if (pipe_valid_r[0]) begin
+                    fill_coverage_r[1] <= outer_cov_w[pixel*8 +: 8];
+                    fill_inner_r[1] <= 8'd255 - inner_cov_w[pixel*8 +: 8];
                     scaled_x1_r <= kx0_r * command_i[383:352];
                     kx1_r <= kx0_r;
                     tile_pixel1_r <= flags_w[0] ?
@@ -792,11 +810,11 @@ module edrv32_rnd_draw (
                         source_mask_r[arithmetic_stage][pixel] <=
                             source_mask_r[arithmetic_stage-1][pixel];
                     end
-                for (arithmetic_stage = 1; arithmetic_stage < 5;
+                for (arithmetic_stage = 2; arithmetic_stage < 5;
                     arithmetic_stage = arithmetic_stage + 1)
                     if (pipe_valid_r[arithmetic_stage-1])
                         fill_coverage_r[arithmetic_stage] <= fill_coverage_r[arithmetic_stage-1];
-                for (arithmetic_stage = 1; arithmetic_stage < 3;
+                for (arithmetic_stage = 2; arithmetic_stage < 3;
                     arithmetic_stage = arithmetic_stage + 1)
                     if (pipe_valid_r[arithmetic_stage-1])
                         fill_inner_r[arithmetic_stage] <= fill_inner_r[arithmetic_stage-1];
@@ -955,6 +973,10 @@ module edrv32_rnd_draw (
     always @(posedge clk_i) begin
         if (start_i) begin
             dst_y_r <= top_w[11:0];
+            clip_left_bytes_r <= argb_w ? {left_w[11:0], 2'd0} :
+                {1'b0, left_w[11:0], 1'b0};
+            clip_right_bytes_r <= argb_w ? {right_w[11:0], 2'd0} :
+                {1'b0, right_w[11:0], 1'b0};
             recolor_inverse_r <= 8'd255 - command_i[511:504];
             for (lane = 0; lane < 3; lane = lane + 1)
                 recolor_product_r[lane] <= command_i[511:504] *
@@ -979,9 +1001,28 @@ module edrv32_rnd_draw (
         end
         // Target descriptors own their captured address; prepare the following row now.
         if (load_state_r == S_BOUNDS)
-            dst_y_r <= load_right_r == clip_right_r ? load_y_r + 12'd1 : load_y_r;
+            dst_y_r <= load_last_r ? load_y_r + 12'd1 : load_y_r;
         dst_row_product_r <= dst_y_r * command_i[79:64];
         dst_row_base_r <= command_i[63:32] + dst_row_product_r;
+        row_start_r <= dst_row_base_r + {18'd0, clip_left_bytes_r};
+        clip_end_r <= clip_end_w[10:0];
+        if (load_state_r == S_ROW) begin
+            load_dst_r <= row_start_r;
+            chunk_right_r <= {1'b0, clip_left_r} + 13'd511 -
+                (argb_w ? {10'd0, row_start_r[4:2]} : {9'd0, row_start_r[4:1]});
+        end
+        if (load_state_r == S_LOADED) begin
+            if (load_last_r)
+                load_dst_r <= row_start_r;
+            else begin
+                load_dst_r <= {next_target_word_w,
+                    argb_w ? {3'd0, load_dst_r[1:0]} : {4'd0, load_dst_r[0]}};
+                // Following chunks begin at a beat, retaining only the pixel-byte remainder.
+                chunk_right_r <= {1'b0, load_right_r} + 13'd512;
+            end
+        end
+        if (load_state_r == S_CHUNK && !busy_r[load_bank_r] && !loaded_all_r)
+            load_last_r <= chunk_right_w >= {1'b0, clip_right_r};
         bounds_ky_r <= bounds_ky_w[15:0];
         bounds_scaled_y_r <= bounds_ky_r * command_i[415:384];
         bounds_y_r <= bounds_ky_r;
@@ -1162,7 +1203,7 @@ module edrv32_rnd_draw (
                 end
                 S_LOADED: begin
                     load_bank_r <= !load_bank_r;
-                    if (load_right_r == clip_right_r) begin
+                    if (load_last_r) begin
                         if (load_y_r == clip_bottom_r) begin
                             loaded_all_r <= 1'b1;
                             load_state_r <= S_IDLE;
@@ -1234,7 +1275,7 @@ module edrv32_rnd_draw (
             bank_target_r[load_bank_r] <= {load_dst_w[31:5], 5'd0};
             bank_bytes_r[load_bank_r] <= target_bytes_w[15:0];
             bank_first_byte_r[load_bank_r] <= load_dst_w[4:0];
-            bank_last_byte_r[load_bank_r] <= end_dst_w[4:0] + (argb_w ? 5'd3 : 5'd1);
+            bank_last_byte_r[load_bank_r] <= target_last_start_w + (argb_w ? 5'd3 : 5'd1);
             bank_tile_first_r[load_bank_r] <=
                 (({20'd0, load_left_r} + map_x_offset_r) >> tile_log2_w);
             bank_outer_edge_r[load_bank_r] <= outer_edge_r;
@@ -1296,9 +1337,12 @@ module edrv32_rnd_draw (
     end
     always @(posedge clk_i) begin
         if (pipeline_step_w) begin
-            if (issue_w)
+            if (issue_w) begin
                 pipe_tag_r[0] <= {render_bank_r, issue_last_w, issue_pair_w,
                     15'd0, issue_offset_w[13:0]};
+                coverage_outer_x0_r <= $signed({6'd0, issue_x_r}) - rect_left_r;
+                coverage_inner_x0_r <= $signed({6'd0, issue_x_r}) - inner_left_r;
+            end
             for (stage = 1; stage < 10; stage = stage + 1)
                 if (pipe_valid_r[stage-1])
                     pipe_tag_r[stage] <= pipe_tag_r[stage-1];
@@ -1347,7 +1391,7 @@ module edrv32_rnd_draw (
         inner_height_r[17], target_shift_w[255:64],
         blend_tag_i[28:14], flags_w[15:4],
         map_shift_w[255:16], palette_shift_w[255:32],
-        target_offset_w[31:5], issue_offset_w[31:14], target_bytes_w[31:16],
+        target_offset_w[31:5], issue_offset_w[31:14], clip_end_w[31:11],
         tile_bytes_w[31:16], tile_last_offset_w[31:6], tile_end_offset_w[4:0],
         bounds_last_r[4:0],
         bounds_kx_w[0][31:16], bounds_scaled_x_r[0][15:0],

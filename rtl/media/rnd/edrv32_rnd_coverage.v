@@ -15,21 +15,23 @@ module edrv32_rnd_coverage (
         input signed [17:0] local_x_i;
         input [16:0] local_width_i;
         input [15:0] local_edge_q4_i;
-        reg signed [22:0] left_room;
-        reg signed [22:0] right_room;
-        reg signed [22:0] room;
+        reg signed [17:0] left_limit;
+        reg signed [17:0] right_limit;
+        reg signed [17:0] next_x;
+        reg [3:0] fractional;
         begin
-            left_room = ($signed({{5{local_x_i[17]}}, local_x_i}) << 4) + 23'sd16 -
-                $signed({7'd0, local_edge_q4_i});
-            right_room = $signed({2'd0, local_width_i, 4'd0}) -
-                $signed({7'd0, local_edge_q4_i}) - ($signed({{5{local_x_i[17]}}, local_x_i}) << 4);
-            room = left_room < right_room ? left_room : right_room;
-            if (local_x_i < 0 || local_x_i >= $signed({1'd0, local_width_i}) || room <= 0)
+            // room = 16*min(x+1,width-x)-edge. Only the two boundary pixels are partial.
+            left_limit = $signed({6'd0, local_edge_q4_i[15:4]});
+            right_limit = $signed({1'b0, local_width_i}) - left_limit;
+            next_x = local_x_i + 18'sd1;
+            fractional = 4'd0 - local_edge_q4_i[3:0];
+            if (local_x_i < left_limit || local_x_i >= right_limit)
                 coverage = 8'd0;
-            else if (room >= 16)
-                coverage = 8'd255;
+            else if (local_edge_q4_i[3:0] != 0 &&
+                (local_x_i == left_limit || next_x == right_limit))
+                coverage = {fractional, 4'd0};
             else
-                coverage = {room[3:0], 4'd0};
+                coverage = 8'd255;
         end
     endfunction
     assign coverage_o = row_inside_i ? {

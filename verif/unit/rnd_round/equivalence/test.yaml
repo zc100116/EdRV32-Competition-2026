@@ -1,0 +1,10 @@
+top: tb_round_equivalence
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 7200
+pass: PASS
+tier: full
+simulator: verilator
+plusargs:
