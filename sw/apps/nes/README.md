@@ -13,7 +13,7 @@
 本移植层按 GPL-2.0-only 分发，完整 GPLv2 文本见 `COPYING`。
 子模块保持原样；未引入 ESP-IDF、FreeRTOS 或 ESP32 外设代码。
 
-协调者批准的三个补丁保存在 `patches/`（前两个为 RV32 移植，第三个修上游缺陷）：
+核心补丁保存在 `patches/`（构建时按文件名顺序应用）：
 
 - `6502-byte-reads.patch`：6502 两个 16 位读取函数改成字节组合，避免 RV32
   非对齐半字异常；零页地址及 16 位 CPU 地址按 NES 地址宽度环绕。
@@ -25,7 +25,23 @@
   防回归：`python3 sw/apps/nes/check_trainer.py`，给仓库 NROM 演示 ROM 插入 512 字节
   trainer 后，主机 180 帧必须与原 ROM 逐字节相同（未打补丁时 FAIL）。
 
-构建把这三个文件复制到对应输出目录的 `core/`，然后 `git apply`；应用失败立即退出。
+- `mapper19-ciram.patch`：Namco 163 名称表的 $E0–$FF 选择 PPU 内部 2 KiB
+  CIRAM（低一位选页），与卡带 CHR-RAM 是否存在无关；`check_mapper19.py` 覆盖合集全部 15 个。
+- `mmc3-irq-counter.patch`：IRQ 禁用期间仍递减和自动重载；$C001 请求下一个时钟重载，
+  $C000 只改锁存值，计数到 0 时触发 MMC3B/C IRQ。`mmc3-bank-modes.patch` 保存
+  8 个 bank 寄存器，切换 $8000 的 PRG/CHR 模式位时立即重映射两侧窗口。
+  `mmc3-chr-ram.patch` 对 TGROM/TNROM 的 8 KiB CHR-RAM 也按 1 KiB 分页，
+  修复上游 `mmc_bankvrom()` 在没有 CHR-ROM 时直接返回造成的银行寄存器无效。
+- `cpu-irq-lines*.patch`、`apu-frame-irq-ack.patch`、`mmc3-irq-lines.patch`：
+  APU 帧 IRQ 和 mapper IRQ 分开保持到各自确认；$4015 读/$4017 bit6 写清 APU，
+  $E000 写清 MMC3。修复 SEI 期间旧请求在之后 CLI 错误进入未初始化 IRQ 处理器的问题。
+  IRQ 确认修复后，原 42 个单色 ROM 中 32 个恢复（29 个 mapper 4、2 个 mapper 1、1 个 mapper 85）。
+- `ppu-mapper-chr-write.patch`：混合 CHR-ROM/RAM 的写入交给 mapper 解码，保护 ROM，
+  并让 mapper 195 的 GAL 观察写入时的 CHR bank 地址。
+- `register-mappers.patch`：注册自有 mapper，未注册编号仍由上游明确报错退出。
+
+构建按 `sources.mk` 的 `NES_PATCHED` 列表把核心源文件及 CPU 头复制到输出目录的
+`core/`，然后 `git apply`；应用失败立即退出。
 其余核心文件直接从子模块编译。原版 `bitmap.c` 不编译：其中地址对齐把指针截成
 uint32，不适合 Linux 64 位主机；`port.c` 自己提供静态位图和行指针。
 原版 GUI、OSD、视频驱动、memguard 和应用主循环入口不编译，其必要回调由 `port.c`
@@ -33,6 +49,28 @@ uint32，不适合 Linux 64 位主机；`port.c` 自己提供静态位图和行�
 未注册 mapper 由上游 `mmc_peek()` 检测，GUI_RED 回调打印 mapper 号后退出。
 不提供存档文件系统；ROM 在整个模拟期间保留，随应用退出一起回收，避免上游
 rom_free 对直接指向外部映像的 PRG/CHR 指针调用 free。
+
+## 自有 mapper（T-NES3）
+
+自有源文件在 `mappers/`，只依据 NESdev Wiki 的电路和寄存器说明编写，参考链接见文件头。
+74（2 KiB 混合 CHR-RAM）、192（4 KiB）、195（GAL 动态选 RAM）、191（2 KiB/外层银行）、
+199（不分页 CHR-RAM、额外 4 KiB WRAM）、245（CHR A11 接 PRG A19）共用 MMC3 IRQ。
+69 实现 FME-7 银行、$6000 ROM/RAM 窗口和 CPU 周期计数器，无扩展音频；
+30 实现 UNROM 512 的 32 KiB CHR-RAM、总线冲突和名称表选择，不实现闪存编程。
+140、87、71 是简单银行锁存器；10 实现 MMC4 的 PRG/CHR latch；88 实现 Namco 118
+的 CHR A16 接线；198 实现 512+128 KiB 双 PRG 芯片与 MMC3 分页 CHR-RAM；91 实现 JY
+板的银行和扫描行 IRQ。自有 87 取代上游未注册且缺少 CHR 高位的实现。
+IRQ 仍受 nofrendo 扫描行执行粒度限制：MMC3 没有逐 PPU A12 边沿过滤，FME-7 在
+寄存器访问和 hblank 同步真实已执行的 CPU 周期，IRQ 交付最迟到下个 CPU slice。
+91 只实现合集所用的 JY/submapper 0，并按通常的每行 8 次未过滤 A12 上升近似计数；
+没有实现原始 Super Fighter III 的 M2 型 submapper 1。10 沿用核心的逐 tile latch 回调，
+没有添加逐 PPU 总线周期模拟。
+不增加 ROM 哈希数据库或根据游戏名称切换 mapper；头错误、转换/修改版与未实现功能
+导致的问题保留在清点中，不改 ROM。
+
+回归：先构建主机，再执行 `check_mapper19.py`、`check_mmc3.py`、`check_irq.py`、
+`check_mappers.py`（均在 `sw/apps/nes/`，用 Python 3）。真实 ROM 分类及余项见
+`docs/reports/2026-10-31-compat-nes-roms.md` 和 TSV。
 
 ## ROM
 
@@ -48,10 +86,10 @@ Pillow 仅在重建此公开 ROM 时需要，编译/运行本移植不需要它�
 
 模拟器 ELF 一律不含游戏 ROM，构建时不选择游戏。主机从命令行指定的 `.nes`
 文件读取；板上由 `uart_tool.py --elf --rom <file.nes>` 原样加载，再由同一个上游
-nofrendo iNES 解析器取得 PRG/CHR 大小和 mapper。测试只用仓库的 nrom-template。
+nofrendo iNES 解析器取得 PRG/CHR 大小和 mapper。基准使用仓库的 nrom-template；兼容性检查使用用户入库的合集。
 用户提供的游戏合集按用户决定（2026-10-31）存放在 `third_party/nes/`（私有仓库），版权归原权利人，仅供本项目上板测试；agent 不下载、不生成 ROM，也不打进上板 ELF，上板时用 `--rom` 加载。兼容性清点见 `tools/nes/rom_survey.py` 和对应测量报告。
 
-RV32 的 `rom.S` 仅保留 1 MiB `.nes_rom_slot`，导出 `nes_rom_slot` /
+RV32 的 `rom.S` 保留 2097168 B（2 MiB + 16 字节 iNES 头）`.nes_rom_slot`，导出 `nes_rom_slot` /
 `nes_rom_slot_end`；`ddr_app.ld` 将其作为独立 NOLOAD 段置于 `.bss` 后，按 64 字节
 对齐。地址由链接器决定，位于同一个 64 MiB DDR 应用窗口内；启动代码清零范围止于
 `__bss_end`，不会清掉槽。没有 NES 输入段的其他 DDR 应用不产生此段。
@@ -73,10 +111,14 @@ build/sw/nes-host/nes-host sw/apps/nes/roms/nrom-template.nes 180 build/nes/fram
 build/sw/nes-host/nes-host sw/apps/nes/roms/nrom-template.nes 180 build/nes/frames skip > build/nes/host-skip.log
 ```
 
-主机只需 Linux gcc、GNU make 和 git；调用格式为 `nes-host <rom> <frames> <dir> [skip]`。
+主机只需 Linux gcc、GNU make 和 git；调用格式为 `nes-host <rom> <frames> <dir> [skip|start=N]`。
 Linux/RV32 共用 `port.c`、`profile.c` 和核心。每 60 帧及最后一帧写一个 P6 PPM，
 尺寸 256×240；skip 模式不输出图像。
-主机无交互控制，用于画面和性能参考；板上有下面的键盘/按键输入。
+`start=N` 在第 N 帧结束后按住 Start 一个模拟帧，再释放，例如 `start=120`。
+`rom_survey.py` 先无输入跑 600 帧，单色时再用 `start=120` 重跑；TSV 分别保留
+`no_input` / `start` 结果，最终分类取复测结果。最后一帧单色时主机打印 CPU PC/SP、
+JAM、IRQ 与 PPU $2000/$2001，清点把它们保存在 `detail`，用于区分 CPU 停机与显示关闭。
+主机用于画面和性能参考；板上输入见下文。
 帧数必须大于零，输出目录须事先创建。
 
 ```sh

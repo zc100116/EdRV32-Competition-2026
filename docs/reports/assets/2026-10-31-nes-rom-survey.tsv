@@ -1,927 +1,927 @@
-rom	bytes	mapper	prg_kib	chr_kib	trainer	battery	nes2	dirty	verdict	detail
-FC改版hack 390款 含封面/1943可视化.nes	262160	4	256	0	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/1943无敌无限点汉化版.nes	262672	2	256	0	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/1944.nes	131088	2	128	0	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/1945.nes	196624	1	64	128	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/B计划.nes	40976	185	32	8	False	False	False	False	mapper 185 unsupported	
-FC改版hack 390款 含封面/FC原人.nes	393232	4	256	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/JUJU传说.nes	393744	4	128	256	True	False	False	False	host picture	colors=16
-FC改版hack 390款 含封面/JUMP天国.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/MD超级忍2.nes	524304	4	256	256	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/Q版沙罗曼蛇.nes	262672	4	128	128	True	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/SD英雄总决战.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/七宝奇谋1.nes	49168	87	32	16	False	False	False	False	mapper 87 unsupported	
-FC改版hack 390款 含封面/七宝奇谋2.nes	131088	2	128	0	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/三只小猪.nes	24592	0	16	8	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/三国志2 霸王的大陆.nes	524304	19	256	256	False	True	False	False	host exit -11	
-FC改版hack 390款 含封面/三国志2 霸王的大陆超级版.nes	524304	19	256	256	False	True	False	False	host exit -11	
-FC改版hack 390款 含封面/三目童子无敌全武器不掉汉化版.nes	393232	4	128	256	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/三目童子无限命无敌可视汉化版.nes	393232	4	128	256	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/三目童子超级版.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/三目童子速射版.nes	786464	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/上尉密令.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/世嘉忍者.nes	262160	64	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/丛林王子.nes	262672	4	128	128	True	False	False	False	host picture	colors=15
-FC改版hack 390款 含封面/中东战争.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/中东战争无敌满火力汉化版.nes	393232	4	128	256	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/中华大仙.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/中国象棋.nes	40976	0	32	8	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/中国象棋Select切棋子版.nes	40976	0	32	8	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/义龟报恩.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/九人街霸降龙.nes	655888	91	128	512	True	False	False	False	mapper 91 unsupported	
-FC改版hack 390款 含封面/亚当斯一家.nes	262672	1	128	128	True	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/人间兵器.nes	303632	4	128	168	True	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/人间兵器无限血子弹汉化版.nes	303120	4	128	168	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/企鹅先生.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/侏罗纪公园.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/假面忍者花丸.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/假面忍者赤影.nes	131088	2	128	0	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/兔宝宝1.nes	262672	4	128	128	True	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/兔宝宝1无敌POW不减汉化版.nes	344080	4	128	208	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/兔宝宝2.nes	262160	4	128	128	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/兔宝宝2无限血时间POW不减汉化版.nes	524304	85	256	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/六三四之剑.nes	65552	3	32	32	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/兵蜂1.nes	49168	3	32	16	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/兵蜂2.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/兵蜂3.nes	262160	22	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/兽王记.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/冒险岛1无敌无限跳汉化版.nes	106512	140	64	40	False	False	False	False	mapper 140 unsupported	
-FC改版hack 390款 含封面/冒险岛1无敌版.nes	65680	3	32	32	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/冒险岛2换龙版.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/冒险岛2无敌无限时汉化版.nes	278544	4	128	144	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/冒险岛2无敌版.nes	278544	4	128	144	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/冒险岛3START关无敌无限时汉化版.nes	286736	4	128	152	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/冒险岛3可视化.nes	426000	4	256	160	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/冒险岛4可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/冒险岛4无敌水果7个汉化版.nes	524304	4	256	256	False	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/凯蒂猫冒险.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/列车寻宝.nes	40976	0	32	8	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/前线.nes	25104	0	16	8	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/剑王.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/力量小子.nes	262160	33	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/加州葡萄干.nes	131600	2	128	0	True	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/加纳战机.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/加纳战机无敌无限炸汉化版.nes	393232	4	128	256	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/勇士们.nes	131088	7	128	0	False	False	False	False	host picture	colors=17
-FC改版hack 390款 含封面/北斗神拳2.nes	131216	2	128	0	False	False	False	True	host picture	colors=8
-FC改版hack 390款 含封面/双截龙1.nes	262160	1	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/双截龙2BOSS版.nes	786464	4	128	128	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/双截龙2可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/双截龙2无敌无限命汉化版.nes	327696	4	128	192	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/双截龙3BOSS版.nes	393232	4	256	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/双截龙3刀魂剑魄无限血.nes	393232	4	256	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/双截龙3可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/双截龙3无敌无限血武器汉化版.nes	393232	191	256	128	False	False	False	False	mapper 191 unsupported	
-FC改版hack 390款 含封面/双鹰.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/古巴战士无敌无限坦克汉化版.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/古巴英雄.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/吃豆人.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/合金装备1.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/合金装备2.nes	262287	1	128	128	False	True	False	True	host picture	colors=2
-FC改版hack 390款 含封面/合金风暴.nes	393232	4	128	256	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/吉米克.nes	393232	69	256	128	False	False	False	False	mapper 69 unsupported	
-FC改版hack 390款 含封面/哆啦A梦.nes	163856	66	128	32	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/唐老鸭大冒险1.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/唐老鸭大冒险2.nes	131088	2	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/嘉蒂外传.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/圣斗士.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/圣铃传说.nes	393232	4	256	128	False	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/圣魔术师.nes	262160	78	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/地底探险.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/地狱极乐丸.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/地球超人.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/坦克大战半屏.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/坦克大战可视化.nes	49168	4	32	16	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/塞尔达传说.nes	131088	245	128	0	False	True	False	False	mapper 245 unsupported	
-FC改版hack 390款 含封面/壮志凌云.nes	131088	2	128	0	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/外星战将换人.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/外星战将无敌.nes	262672	4	128	128	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/大力工头阿源君1.nes	262672	4	128	128	True	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/大力水手.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/大坦克.nes	262160	1	128	128	False	False	False	True	host picture	colors=6
-FC改版hack 390款 含封面/大蜜蜂.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/大蜜蜂无限命汉化版.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/大蜜蜂汉化无敌.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/大金刚.nes	24592	0	16	8	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/大金刚1无敌无限命汉化版.nes	24592	0	16	8	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/大金刚2无敌无限命汉化版.nes	24592	0	16	8	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/大金刚3.nes	24592	0	16	8	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/大金刚3无敌红子弹汉化版.nes	24592	0	16	8	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/大金刚Jr.nes	24592	0	16	8	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/天使之翼2无限体力经验共享汉化版.nes	786448	195	512	256	False	False	False	False	mapper 195 unsupported	
-FC改版hack 390款 含封面/天才小厨师.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/宇宙巡航机1.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/宇宙巡航机2.nes	262160	25	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/宇宙巡航机2无敌无限命MAX汉化版.nes	262160	25	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/封神榜.nes	1048592	246	512	512	False	True	False	False	mapper 246 unsupported	
-FC改版hack 390款 含封面/小美人鱼.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/小蜜蜂.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/小蜜蜂无限命.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/小魔女皮皮.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/小魔怪2.nes	393232	69	128	256	False	False	False	False	mapper 69 unsupported	
-FC改版hack 390款 含封面/少年印第安纳琼斯.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/工人战记.nes	393232	33	128	256	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/帝国战机.nes	262160	23	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/帝国战机无敌无限炸汉化版.nes	262160	23	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/平成天才.nes	262672	19	128	128	True	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/彩虹岛.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/影子传说.nes	49168	3	32	16	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/影子传说无敌散弹镖汉化版.nes	106512	140	64	40	False	False	False	False	mapper 140 unsupported	
-FC改版hack 390款 含封面/忍者刑警.nes	786464	1	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/忍者猫.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/忍者猫无敌全无限汉化版.nes	524304	195	256	256	False	False	False	False	mapper 195 unsupported	
-FC改版hack 390款 含封面/忍者神龟1.nes	262160	1	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/忍者神龟1无敌道具时间不减汉化版.nes	393232	5	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/忍者神龟2.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/忍者神龟2无敌.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/忍者神龟2无敌无限血汉化版.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/忍者神龟3.nes	524304	4	256	256	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/忍者神龟3无敌无限血必杀汉化版.nes	786960	25	256	512	True	True	True	True	host uniform	colors=1
-FC改版hack 390款 含封面/忍者神龟格斗可视化.nes	393232	4	128	256	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/忍者神龟格斗锁血时珠汉化版.nes	294928	4	128	160	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/忍者茶茶丸.nes	32784	87	16	16	False	False	False	False	mapper 87 unsupported	
-FC改版hack 390款 含封面/忍者蛙.nes	262672	7	256	0	True	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/忍者蛙和双截龙.nes	262160	7	256	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/忍者龙剑传1可视化.nes	393232	4	128	256	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/忍者龙剑传2可视化.nes	393232	4	128	256	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/忍者龙剑传2无敌无限命分身汉化版.nes	335888	4	128	200	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/忍者龙剑传3可视化.nes	393232	4	128	256	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/忍者龙剑传3无敌无限命魔大刀汉化版.nes	344080	4	128	208	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/快打旋风可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/快打旋风无敌满经验汉化版.nes	393232	191	256	128	False	False	False	False	mapper 191 unsupported	
-FC改版hack 390款 含封面/快杰洋枪2.nes	262672	32	128	128	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/快杰洋枪3.nes	262672	65	128	128	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/怒1.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/怒2.nes	393232	1	256	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/怒3.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/怪鸭历险记.nes	262672	1	128	128	True	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/怪鸭历险记改版.nes	524304	4	256	256	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/恐龙战队.nes	393232	195	256	128	False	False	False	False	mapper 195 unsupported	
-FC改版hack 390款 含封面/恶魔城1.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/恶魔城1可视化.nes	131600	2	128	0	True	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/恶魔城2.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/恶魔城3.nes	393232	24	256	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/恶魔城外传 王子传奇.nes	262160	23	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/惑星戒严令无敌无限命雷汉化版.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/惩罚者.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/成龙之龙.nes	262672	4	128	128	True	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/成龙之龙HPMP不减汉化版.nes	262160	4	128	128	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/成龙踢馆1.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/成龙踢馆2.nes	786464	17	128	128	False	False	False	False	mapper 17 unsupported	
-FC改版hack 390款 含封面/战场之狼.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/战斗原始人.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/打砖块.nes	81936	140	32	48	False	False	False	False	mapper 140 unsupported	
-FC改版hack 390款 含封面/打砖块命不减强化汉化版.nes	81936	140	32	48	False	False	False	False	mapper 140 unsupported	
-FC改版hack 390款 含封面/打空气.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/拉格朗日点汉化版.nes	1048592	85	1024	0	False	True	False	False	larger than 1 MiB slot	
-FC改版hack 390款 含封面/挑战巨龙.nes	131600	11	64	64	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/摩登原始人1.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/摩登原始人1无敌无限跳汉化版.nes	655376	115	128	512	False	False	False	False	mapper 115 unsupported	
-FC改版hack 390款 含封面/摩登原始人2.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/摩登原始人2无敌无限命汉化版.nes	655376	115	128	512	False	False	False	False	mapper 115 unsupported	
-FC改版hack 390款 含封面/摩艾君.nes	65552	3	32	32	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/救火英雄.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/敲冰块.nes	25104	0	16	8	True	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/斗者挽歌.nes	131088	2	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/斧王.nes	262160	4	128	128	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/斧王无敌.nes	524304	4	256	256	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/新人类.nes	65552	3	32	32	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/无赖战士.nes	65552	4	32	32	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/星之卡比.nes	786448	4	512	256	False	True	False	False	host picture	colors=4
-FC改版hack 390款 含封面/星际魂斗罗可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/暴坊天狗.nes	262160	4	128	128	False	False	False	False	host picture	colors=16
-FC改版hack 390款 含封面/月风魔传中文hack.nes	393232	23	128	256	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/月风魔传可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/机器人战争.nes	393232	4	256	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/机械战警1.nes	393232	195	256	128	False	False	False	False	mapper 195 unsupported	
-FC改版hack 390款 含封面/机械战警2.nes	262160	1	128	128	False	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/机械战警3.nes	262160	1	128	128	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/杀戮战场.nes	40976	0	32	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/杀虫战记.nes	262160	33	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/松鼠大战1.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/松鼠大战1改版.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/松鼠大战1无敌汉化版.nes	393232	192	256	128	False	False	False	False	mapper 192 unsupported	
-FC改版hack 390款 含封面/松鼠大战2.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/松鼠大战2无限血汉化版.nes	393232	192	256	128	False	False	False	False	mapper 192 unsupported	
-FC改版hack 390款 含封面/柯纳米世界1.nes	524816	23	256	256	True	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/柯纳米世界2.nes	393232	21	256	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/梦之勇士无敌无限道具无限飞汉化版.nes	327696	4	128	192	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/梦幻战机.nes	262160	32	128	128	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/梦游.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/欢乐碰碰车.nes	32784	87	16	16	False	False	False	False	mapper 87 unsupported	
-FC改版hack 390款 含封面/气球大战.nes	24592	0	16	8	False	False	False	False	host picture	colors=17
-FC改版hack 390款 含封面/沙罗曼蛇.nes	131088	73	128	0	False	False	False	False	mapper 73 unsupported	
-FC改版hack 390款 含封面/沙罗曼蛇无敌全能力汉化版.nes	393232	19	128	256	False	True	False	False	host exit -11	
-FC改版hack 390款 含封面/沼泽怪物.nes	262160	1	128	128	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/泡泡龙1.nes	163856	1	128	32	False	False	False	False	host picture	colors=15
-FC改版hack 390款 含封面/泡泡龙1无敌无限跳满火力汉化版.nes	188432	1	128	56	False	False	False	False	host picture	colors=15
-FC改版hack 390款 含封面/泡泡龙2.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/泡泡龙2无敌无限心火力汉化版.nes	278544	48	128	144	False	False	False	False	mapper 48 unsupported	
-FC改版hack 390款 含封面/洛克人1.nes	262160	4	256	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/洛克人2.nes	262160	4	256	0	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/洛克人3.nes	393232	4	256	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/洛克人4可视化.nes	524304	4	512	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/洛克人5可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/洛克人6可视化.nes	524304	4	512	0	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/淘金者.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/溜溜球大师.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/火之鸟.nes	655392	2	128	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/火凤凰.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/火炮.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/火焰纹章1.nes	393232	10	256	128	False	True	False	False	mapper 10 unsupported	
-FC改版hack 390款 含封面/火焰纹章外传.nes	393232	10	256	128	False	True	False	False	mapper 10 unsupported	
-FC改版hack 390款 含封面/火箭车无敌.nes	65552	0	32	32	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/火箭车无敌选择换车汉化版.nes	66064	0	32	32	True	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/火箭车暴走卡车.nes	24592	0	16	8	False	False	False	True	host picture	colors=8
-FC改版hack 390款 含封面/灵幻道士.nes	262160	1	256	0	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/炸弹之王.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/炸弹人1不死.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/炸弹人1强化1.nes	49680	3	32	16	True	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/炸弹人1强化2.nes	49680	3	32	16	True	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/炸弹人1无敌全能力穿墙汉化版.nes	40976	3	16	24	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/炸弹人2可视化.nes	131088	4	128	0	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/炸弹人2无敌威力满炸弹满汉化版.nes	131088	1	128	0	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/烈火92.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/热血曲棍球.nes	786464	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/热血格斗.nes	786464	4	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/热血物语无限血能力钱汉化版.nes	393232	191	256	128	False	False	False	False	mapper 191 unsupported	
-FC改版hack 390款 含封面/热血硬派.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/热血篮球.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/热血足球.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/热血足球联盟全员全能力汉化版.nes	393232	4	128	256	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/热血进行曲.nes	786464	4	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/热血高校躲避球.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/特救指令变身.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/特救指令无敌僚机无限血无限变身汉化版.nes	524304	4	256	256	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/特救指令美日综合.nes	524304	4	256	256	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/特救指令美版.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/特殊部队.nes	131088	2	128	0	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/猫和老鼠.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/猫抓老鼠.nes	25104	0	16	8	True	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/盗帅.nes	65552	0	32	32	False	False	False	False	host picture	colors=15
-FC改版hack 390款 含封面/眼镜蛇特种部队1.nes	393232	4	128	256	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/眼镜蛇特种部队2.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/禁毒卫士.nes	262160	4	128	128	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/究极虎.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/空中魂斗罗可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/空狼.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/突然君.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/第一滴血.nes	131088	2	128	0	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/筋肉人.nes	24592	0	16	8	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/纽约大拳猫.nes	786464	4	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/终结者2.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/绿色兵团强化.nes	131088	2	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/绿色兵团改版.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/绿色兵团无敌无限弹金身汉化版.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/绿色兵团金身.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/网球.nes	25104	0	16	8	True	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/罗宾汉.nes	65552	71	64	0	False	False	False	False	mapper 71 unsupported	
-FC改版hack 390款 含封面/翼人.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/老虎直升机.nes	65552	3	32	32	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/能源战士1 (CHS-HACK).nes	393232	4	128	256	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/能源战士2.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/脱狱1换枪.nes	262160	1	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/脱狱1无敌.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/脱狱1无限血全装备匕首不减汉化版.nes	262160	1	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/脱狱2.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/航空小英雄1.nes	262160	1	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/航空小英雄2.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/花式撞球无限杆.nes	131088	2	128	0	False	False	False	False	host picture	colors=16
-FC改版hack 390款 含封面/花式撞球无限杆汉化版.nes	188432	4	128	56	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/花式撞球随意摆球.nes	131088	2	128	0	False	True	False	False	host picture	colors=16
-FC改版hack 390款 含封面/荆珂新传.nes	262160	240	128	128	False	True	False	False	mapper 240 unsupported	
-FC改版hack 390款 含封面/荒野大镖客无敌.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/荒野大镖客无敌全能力汉化版.nes	163856	119	128	32	False	False	False	False	mapper 119 unsupported	
-FC改版hack 390款 含封面/荒野大镖客无限弹.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/菲力克斯猫.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/蕾拉.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/虎胆妙算.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/蜘蛛侠.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/蝙蝠侠1超级版.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/蝙蝠侠2.nes	393232	69	128	256	False	False	False	False	mapper 69 unsupported	
-FC改版hack 390款 含封面/蝙蝠侠3.nes	393232	4	128	256	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/街头战士2010.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/西游记1.nes	131088	2	128	0	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/西游记1全道具汉化版.nes	262160	4	256	0	False	True	False	False	host picture	colors=11
-FC改版hack 390款 含封面/西游记1可视化.nes	262160	4	256	0	False	True	False	False	host picture	colors=11
-FC改版hack 390款 含封面/西游记2.nes	262160	18	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/西游记2无敌无限血全道具汉化版.nes	262160	18	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/贪吃蛇.nes	262160	1	128	128	False	False	False	False	host picture	colors=15
-FC改版hack 390款 含封面/赤影战士可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/赤色要塞ex.nes	262160	73	256	0	False	False	False	False	mapper 73 unsupported	
-FC改版hack 390款 含封面/赤色要塞可视化.nes	131088	4	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/赤色要塞坦克版.NES	131088	2	128	0	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/赤色要塞士兵.nes	131088	4	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/赤色要塞无敌MAX汉化版.nes	262160	19	128	128	False	False	False	False	host exit -11	
-FC改版hack 390款 含封面/超惑星战记.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/超时空要塞.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/超狼人战记.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/超级婴儿.nes	262160	25	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/超级战斗坦克.nes	65552	3	32	32	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/超级战魂.nes	262160	4	128	128	False	False	False	True	host uniform	colors=1
-FC改版hack 390款 含封面/超级间谍猎人.nes	262160	4	128	128	False	False	False	False	host picture	colors=17
-FC改版hack 390款 含封面/超级阿拉伯人.nes	25104	0	16	8	True	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/超级马里奥1 闪光无敌.nes	40976	0	32	8	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/超级马里奥1超级版.nes	41488	0	32	8	True	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/超级马里奥1锁状态汉化版.nes	98320	140	64	32	False	False	False	False	mapper 140 unsupported	
-FC改版hack 390款 含封面/超级马里奥2 美版强化1.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/超级马里奥2 美版强化2.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/超级马里奥3 可视化调宝.nes	729104	192	512	200	False	False	False	False	mapper 192 unsupported	
-FC改版hack 390款 含封面/超级马里奥3 换装超级版.nes	450576	4	256	184	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/超级马里奥3调宝锁状态无限飞汉化版.nes	458768	4	256	192	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/超级马里奥水管工.nes	40976	0	32	8	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/超级马里奥水管工命时间POW不减.nes	49168	3	32	16	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/越野摩托.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/跳跳虫.nes	24592	0	16	8	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/踢王无敌.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/踢王无限.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/转转乐园.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/迷糊蛋.nes	262160	69	128	128	False	False	False	False	mapper 69 unsupported	
-FC改版hack 390款 含封面/追击HQ.nes	786464	4	128	128	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/重装机兵 稀有物品版.nes	786448	74	512	256	False	True	False	False	mapper 74 unsupported	
-FC改版hack 390款 含封面/重装机兵 超级加强版.nes	786448	74	512	256	False	True	False	False	mapper 74 unsupported	
-FC改版hack 390款 含封面/重装机兵superhack.nes	786448	74	512	256	False	True	False	False	mapper 74 unsupported	
-FC改版hack 390款 含封面/野狼特工队.nes	262287	1	128	128	False	False	False	True	host picture	colors=7
-FC改版hack 390款 含封面/金刚2代.nes	262160	75	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/铁臂阿童木.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC改版hack 390款 含封面/银河号.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/银河武士.nes	524304	4	256	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/锡鲁巴船长.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/阿尔戈斯战士.nes	131088	2	128	0	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/阿拉丁.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/阿贝道X.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/雅典娜.nes	131088	2	128	0	False	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/雪人兄弟可视化.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/雪人兄弟无敌全能力汉化版.nes	393232	192	128	256	False	False	False	False	mapper 192 unsupported	
-FC改版hack 390款 含封面/雷鸟号1.nes	24592	0	16	8	False	False	False	False	host picture	colors=4
-FC改版hack 390款 含封面/雷鸟号2.nes	49168	3	32	16	False	False	False	False	host picture	colors=5
-FC改版hack 390款 含封面/霹雳神兵.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/霹雳神兵无敌无限道具火力汉化版.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/音乐欣赏50合1.nes	1310736	5	1024	256	False	False	False	False	larger than 1 MiB slot	
-FC改版hack 390款 含封面/顽皮狗.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/香蕉王子大冒险.nes	262160	4	128	128	False	False	False	False	host picture	colors=14
-FC改版hack 390款 含封面/马戏团.nes	49168	3	32	16	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/骷髅13第2章-迷宫组曲.nes	262672	4	128	128	True	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/鬼屋冒险.nes	262160	19	128	128	False	False	False	False	host exit -11	
-FC改版hack 390款 含封面/魁!男塾.nes	262160	16	128	128	False	False	False	False	host uniform	colors=1
-FC改版hack 390款 含封面/魂斗罗1可视化.nes	393232	4	128	256	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/魂斗罗1红隼的复仇.nes	262160	2	256	0	False	False	False	False	host picture	colors=10
-FC改版hack 390款 含封面/魂斗罗2可视化.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/魂斗罗3力量.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/魂斗罗3力量无敌无限命全火力汉化版.nes	524304	4	256	256	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/魔天童子.nes	262672	4	128	128	True	False	False	False	host picture	colors=12
-FC改版hack 390款 含封面/魔天童子可视化.nes	524304	4	256	256	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/魔天童子超强汉化版.nes	524304	4	256	256	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/魔法总动员.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/魔界村.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC改版hack 390款 含封面/魔神英雄传.nes	524304	4	512	0	False	True	False	False	host picture	colors=7
-FC改版hack 390款 含封面/魔鬼总动员.nes	262160	4	128	128	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/魔鬼总动员透明无敌汉化版.nes	393232	4	128	256	False	False	False	False	host picture	colors=3
-FC改版hack 390款 含封面/鲁邦三世.nes	720928	4	128	64	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/鲁邦三世无敌汉化版.nes	524304	4	256	256	False	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/鳄鱼先生.nes	262160	1	128	128	False	False	False	False	host picture	colors=2
-FC改版hack 390款 含封面/鸟人战队.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC改版hack 390款 含封面/麦当劳世界.nes	262672	1	128	128	True	False	False	False	host picture	colors=6
-FC改版hack 390款 含封面/龙之忍者.nes	786464	19	128	128	False	False	False	False	host exit -11	
-FC改版hack 390款 含封面/龙战士.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC改版hack 390款 含封面/龙牙不死.nes	131088	4	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/龙牙变龙.nes	131088	4	128	0	False	False	False	False	host picture	colors=13
-FC改版hack 390款 含封面/龙珠Z2.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC改版hack 390款 含封面/龙珠Z外传.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC改版hack 390款 含封面/龙魂.nes	786464	88	128	128	False	False	False	False	mapper 88 unsupported	
-FC游戏 536款 含封面/1943/1943.nes	262672	2	256	0	True	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/1944/1944.nes	131088	2	128	0	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/8只眼/8只眼.nes	262160	4	128	128	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/AV麻将/AV麻将.nes	262160	66	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/B计划/B计划.nes	40976	0	32	8	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/F1赛车/F-1 Race (J) [T+ChS_Gaowei].nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/F1赛车 科乐美版/Formula 1 Sensation (E) [!].nes	262160	4	128	128	False	True	False	False	host picture	colors=10
-FC游戏 536款 含封面/FC原人/FC原人.nes	393232	4	256	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/JuJu传说/JuJu传说.nes	393232	4	128	256	False	False	False	False	host picture	colors=16
-FC游戏 536款 含封面/Q版沙罗曼蛇/Parodius (E) [T+ChS_Yuliangmax].nes	262160	4	128	128	False	False	False	False	host picture	colors=14
-FC游戏 536款 含封面/SD英雄总决战/SD英雄总决战.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/七宝奇谋1/七宝奇谋.nes	49168	87	32	16	False	False	False	False	mapper 87 unsupported	
-FC游戏 536款 含封面/七宝奇谋2/七宝奇谋2.nes	131088	2	128	0	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/三只小猪/三只小猪.nes	24592	0	16	8	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/三国志 曹操传/San Guo Zhi - Cao Cao Zhuan (NJ018) (ChS).nes	2097168	163	2048	0	False	True	False	False	mapper 163 unsupported	
-FC游戏 536款 含封面/三国志1 中原之霸者/三国志1 中原之霸者.nes	524304	19	256	256	False	True	False	False	host exit -11	
-FC游戏 536款 含封面/三国志2 霸王的大陆/三国志2 霸王的大陆.nes	524304	19	256	256	False	True	False	False	host exit -11	
-FC游戏 536款 含封面/三目童子/三目童子.nes	786464	4	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/上尉密令汉化版/上尉密令汉化版.nes	393232	192	256	128	False	False	False	False	mapper 192 unsupported	
-FC游戏 536款 含封面/不动明王传/不动明王传.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/世界之梦1/Esper Dream (v1.01) (J) [T+Eng1.0_Mute].fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/世界之梦2/世界之梦2.nes	393232	26	256	128	False	True	False	False	mapper 26 unsupported	
-FC游戏 536款 含封面/东家推落麻将/Ochin ni Toshi Puzzle Tonjan! (J) [!].nes	262160	1	128	128	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/中东战争/中东战争.nes	393232	4	128	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/中华大仙/中华大仙.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/中国象棋/中国象棋.nes	40976	0	32	8	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/义龟报恩/义龟报恩.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/乒乓球/Smash Ping Pong (J).fds	65516								not iNES (FDS or other)	
-FC游戏 536款 含封面/五子棋/五子棋.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/亚当斯一家-法斯特叔叔的探索/亚当斯一家-法斯特叔叔的探索.nes	262160	1	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/人间兵器/人间兵器.nes	294944	4	128	160	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/任天堂战争/任天堂战争.nes	262160	10	128	128	False	True	False	False	mapper 10 unsupported	
-FC游戏 536款 含封面/企鹅先生/企鹅先生.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/伊苏3/伊苏3.nes	393232	118	256	128	False	True	False	False	mapper 118 unsupported	
-FC游戏 536款 含封面/伐木工之战/伐木工之战.nes	393232	4	128	256	False	True	False	False	host picture	colors=14
-FC游戏 536款 含封面/侏罗纪公园/侏罗纪公园.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/俄罗斯方块1/俄罗斯方块1.nes	65552	3	32	32	False	False	False	True	host picture	colors=13
-FC游戏 536款 含封面/俄罗斯方块2/俄罗斯方块2.nes	131088	1	128	0	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/假面忍者花丸/假面忍者花丸.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/假面忍者赤影/假面忍者赤影.nes	131088	2	128	0	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/偶像八犬传/偶像八犬传.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/光之神话/光之神话.nes	131088	1	128	0	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/兔八哥生日快乐/兔八哥生日快乐.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/兔八哥疯狂城堡/兔八哥2疯狂城堡.nes	98320	1	64	32	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/兔宝宝1/兔宝宝1.nes	262160	23	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/兔宝宝2/兔宝宝2.nes	262160	85	128	128	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/兔宝宝6/Tiny Toon Adventures 6 (Unl) [!].nes	524304	211	256	256	False	False	False	False	mapper 211 unsupported	
-FC游戏 536款 含封面/八位版节奏大陆/八位版节奏大陆.nes	786448	4	512	256	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/八位音乐力量最终版/八位音乐力量最终版.nes	786448	4	512	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/公路之星1/公路之星.nes	131088	1	128	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/公路之星2/公路之星2.nes	131088	4	64	64	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/兵蜂1/兵蜂1.nes	49168	3	32	16	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/兵蜂2/兵蜂2.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/兵蜂3/兵蜂3.nes	262160	22	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/内部之光/内部之光.nes	524304	30	512	0	False	True	False	False	mapper 30 unsupported	
-FC游戏 536款 含封面/冒险家迪兹/Dizzy the Adventurer (Camerica) (Aladdin) [!].nes	131088	71	128	0	False	False	False	False	mapper 71 unsupported	
-FC游戏 536款 含封面/冒险岛1/冒险岛1.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/冒险岛2/冒险岛2.nes	786464	4	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/冒险岛3/冒险岛3.nes	286736	4	128	152	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/冒险岛4/冒险岛4.nes	393232	4	256	128	False	False	False	False	host picture	colors=14
-FC游戏 536款 含封面/农夫忍者/农夫忍者.nes	24592	0	16	8	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/刀锋战机/刀锋战机.nes	393232	4	256	128	False	True	False	False	host picture	colors=15
-FC游戏 536款 含封面/创世纪4圣者传奇/创世纪4圣者传奇.nes	262160	1	256	0	False	True	False	False	host picture	colors=10
-FC游戏 536款 含封面/前线/前线.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/剑王/剑王.nes	786464	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/力量小子/力量小子.nes	262160	33	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/功夫/功夫.nes	24592	0	16	8	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/加其夫天国与地狱/加其夫天国与地狱.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/加纳战机/加纳战机.nes	393232	4	128	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/动荡之塔/动荡之塔.nes	524304	30	512	0	False	True	False	False	mapper 30 unsupported	
-FC游戏 536款 含封面/勇士们/勇士们.nes	131088	7	128	0	False	False	False	False	host picture	colors=17
-FC游戏 536款 含封面/勇者斗恶龙1/勇者斗恶龙1.nes	262160	245	256	0	False	True	False	False	mapper 245 unsupported	
-FC游戏 536款 含封面/勇者斗恶龙2/勇者斗恶龙2.nes	262160	245	256	0	False	True	False	False	mapper 245 unsupported	
-FC游戏 536款 含封面/勇者斗恶龙3/勇者斗恶龙3.nes	524304	4	512	0	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/勇者斗恶龙4/勇者斗恶龙4.nes	1048592	245	1024	0	False	True	False	False	mapper 245 unsupported	
-FC游戏 536款 含封面/北野武之挑战书/北野武之挑战书.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/半熟英雄/半熟英雄.nes	262160	4	256	0	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/南北战争/南北战争.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/南极大冒险/南极大冒险.nes	24720	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/卡林之剑/Kalin no Tsurugi (J) [T+Eng_KingMike].fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/卡诺夫/卡诺夫.nes	196624	4	128	64	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/双截龙1/双截龙1.nes	262288	1	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/双截龙2/双截龙2.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/双截龙3/双截龙3.nes	262288	4	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/双月传说/双月传说.nes	1048592	176	1024	0	False	True	False	False	mapper 176 unsupported	
-FC游戏 536款 含封面/双蛇城/双蛇城.nes	65552	1	32	32	False	False	False	False	host picture	colors=15
-FC游戏 536款 含封面/反重力战士/反重力战士.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/口袋妖怪 皮卡丘/Lei Dian Huang - Pi Ka Qiu Chuan Shuo by ZZP (ChS) (Hack).nes	2097168	163	2048	0	False	True	False	False	mapper 163 unsupported	
-FC游戏 536款 含封面/古巴英雄/古巴英雄.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/史克威尔的汤姆历险记/史克威尔的汤姆历险记.nes	524304	4	512	0	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/吃豆小精灵/吃豆小精灵.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/合金装备1/合金装备1.nes	262160	4	256	0	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/合金装备2/合金装备2.nes	262287	1	128	128	False	True	False	True	host picture	colors=2
-FC游戏 536款 含封面/吉姆力量-迷失维度/吉姆力量-迷失维度.nes	524304	4	256	256	False	False	True	True	host uniform	colors=1
-FC游戏 536款 含封面/吉米克/吉米克.nes	393232	69	256	128	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/吞食天地1 三国英杰传/吞食天地1 三国英杰传.nes	524304	4	512	0	False	True	False	False	host picture	colors=6
-FC游戏 536款 含封面/吞食天地2 曹魏的野望/吞食天地2 曹魏的野望.nes	655376	198	640	0	False	True	False	False	mapper 198 unsupported	
-FC游戏 536款 含封面/吞食天地2 秋风五丈原/吞食天地2 秋风五丈原.nes	655376	198	640	0	False	True	False	False	mapper 198 unsupported	
-FC游戏 536款 含封面/吞食天地2 诸葛孔明传/吞食天地2 诸葛孔明传.nes	655376	198	640	0	False	True	False	False	mapper 198 unsupported	
-FC游戏 536款 含封面/吞食天地2 诸葛孔明传复刻版/吞食天地2 诸葛孔明传复刻版.nes	655392	198	640	0	False	True	False	False	mapper 198 unsupported	
-FC游戏 536款 含封面/哆啦A梦/哆啦A梦.nes	180240	140	128	48	False	False	False	False	mapper 140 unsupported	
-FC游戏 536款 含封面/哆啦A梦之时空机器大冒险/哆啦A梦之时空机器大冒险.nes	524304	4	512	0	False	True	False	False	host picture	colors=5
-FC游戏 536款 含封面/哥斯拉2 怪兽大战/哥斯拉2 怪兽大战.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/唐老鸭大冒险1/唐老鸭大冒险1.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/唐老鸭大冒险2/唐老鸭大冒险2.nes	262160	4	256	0	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/嘉蒂外传/嘉蒂外传.nes	262160	1	256	0	False	True	False	False	host picture	colors=9
-FC游戏 536款 含封面/四川麻将 海滩篇/四川麻将 海滩篇.nes	98320	3	32	64	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/国王骑士/国王骑士.nes	65552	3	32	32	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/圣剑除魔/Seiken Saikokaribaa - Majuu no Mori Densetsu (J) [T+Eng_SpoonyBard][1.0].fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/圣斗士星矢 黄金传说/圣斗士星矢 黄金传说.nes	1310736	5	1024	256	False	True	True	True	larger than 1 MiB slot	
-FC游戏 536款 含封面/圣斗士星矢 黄金传说完结篇/圣斗士星矢 黄金传说完结篇.nes	524304	67	128	384	False	False	False	False	mapper 67 unsupported	
-FC游戏 536款 含封面/圣铃传说/圣铃传说.nes	393232	4	256	128	False	False	False	False	host picture	colors=14
-FC游戏 536款 含封面/地底大作战/地底大作战.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/地底探险1/地底探险1.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/地底探险2/地底探险2.nes	131088	2	128	0	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/地狱极乐丸/地狱极乐丸.nes	393232	4	128	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/地道战/地道战.nes	524304	4	256	256	False	True	False	False	host picture	colors=5
-FC游戏 536款 含封面/坦克大战/坦克大战.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/坦克大战 烟山1990/坦克大战 烟山1990.nes	40976	0	32	8	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/埃及历险记/埃及历险记.nes	65552	3	32	32	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/塞尔达传说1 幻想大陆海拉尔/塞尔达传说1 幻想大陆海拉尔.nes	131088	1	128	0	False	True	False	False	host picture	colors=12
-FC游戏 536款 含封面/塞尔达传说2 林克的冒险/塞尔达传说2 林克的冒险.nes	262160	19	128	128	False	True	False	False	host exit -11	
-FC游戏 536款 含封面/塞尔达传说改版/塞尔达传说改版.nes	2097168	5	1024	1024	False	True	True	True	larger than 1 MiB slot	
-FC游戏 536款 含封面/壮志凌云1/壮志凌云.nes	131088	2	128	0	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/壮志凌云2/壮志凌云2.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/外星战将/外星战将.nes	426000	4	128	216	False	True	False	False	host picture	colors=7
-FC游戏 536款 含封面/大使馆任务/大使馆任务.nes	786464	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/大力工头1/大力工头1.nes	393232	4	128	256	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/大力工头2/大力工头2.nes	524304	65	256	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/大力水手/大力水手.nes	24592	0	16	8	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/大坦克/大坦克.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/大混战/大混战.nes	245776	4	128	112	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/大盗伍佑卫门1/大盗伍佑卫门.nes	262160	75	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/大盗伍佑卫门2/大盗伍佑卫门2.nes	262160	23	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/大眼蛙冒险1/大眼蛙冒险1.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/大眼蛙冒险2/大眼蛙冒险2.nes	524304	4	256	256	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/大蜜蜂/大蜜蜂.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/大金刚/大金刚.nes	24592	0	16	8	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/天使之翼2/天使之翼2.nes	786448	195	512	256	False	True	False	False	mapper 195 unsupported	
-FC游戏 536款 含封面/天堂鸟/天堂鸟.nes	65552	4	32	32	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/天才小厨师/天才小厨师.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/天神之剑/天神之剑.nes	786448	74	512	256	False	True	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/太东篮球/太东篮球.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/太空忍者/太空忍者.nes	786448	4	512	256	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/太空海鸥/Space Gulls (v1.1) (Unl).nes	65552	2	64	0	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/太阳勇者/太阳勇者.nes	262160	4	128	128	False	False	False	True	host picture	colors=5
-FC游戏 536款 含封面/太阳系战机/太阳系战机.nes	180240	140	64	112	False	False	False	False	mapper 140 unsupported	
-FC游戏 536款 含封面/奇幻射击/奇幻射击.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/奇才女巫/奇才女巫.nes	65552	28	64	0	False	False	True	True	mapper 28 unsupported	
-FC游戏 536款 含封面/奖杯/奖杯.nes	786448	4	512	256	False	False	False	True	host picture	colors=2
-FC游戏 536款 含封面/奥利匹斯之战/奥利匹斯之战.nes	131088	1	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/奥特曼俱乐部/奥特曼俱乐部.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/奥运会1/奥运会.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/奥运会2/奥运会2.nes	262160	1	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/威洛之旅/威洛之旅.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/孤独战士 惑星戒严令/孤独战士 惑星戒严令.nes	786464	4	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/宇宙巡航机1/宇宙巡航机1.nes	73744	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/宇宙巡航机2/宇宙巡航机2.nes	262160	25	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/守护骑士亚马逊减肥大作战/守护骑士亚马逊减肥大作战.nes	524304	4	256	256	False	True	False	False	host picture	colors=5
-FC游戏 536款 含封面/宝石方块/宝石方块.nes	24592	0	16	8	False	False	False	True	host picture	colors=8
-FC游戏 536款 含封面/家庭拳击/家庭拳击.nes	131088	206	64	64	False	False	False	False	mapper 206 unsupported	
-FC游戏 536款 含封面/家庭赛马/家庭赛马.nes	65552	4	32	32	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/家庭麻将2上海之道/家庭麻将2上海之道.nes	196624	4	128	64	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/密不可分/密不可分.nes	262160	4	128	128	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/寻宝大进击/寻宝大进击.nes	65552	1	32	32	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/封神榜/封神榜.nes	1048592	246	512	512	False	True	False	False	mapper 246 unsupported	
-FC游戏 536款 含封面/射击方块/射击方块.nes	65552	3	32	32	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/小兔大迷路/小兔大迷路.nes	262160	69	128	128	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/小美人鱼/小美人鱼.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/小蜜蜂/小蜜蜂.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/小超人帕门/小超人帕门.nes	262160	32	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/小超人帕门2/小超人帕门2.nes	393232	32	256	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/小鬼Q太郎/小鬼Q太郎.nes	40976	0	32	8	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/小魔怪2新种诞生/小魔怪2新种诞生.nes	393232	4	128	256	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/小魔星达鲁鲁/小魔星达鲁鲁.nes	262160	16	128	128	False	True	False	False	host picture	colors=13
-FC游戏 536款 含封面/小魔星达鲁鲁2/小魔星达鲁鲁2.nes	262160	16	128	128	False	True	False	False	host picture	colors=6
-FC游戏 536款 含封面/少年印第安纳琼斯/少年印第安纳琼斯.nes	393744	4	128	256	True	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/尸体/尸体.nes	40976	0	32	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/尼布斯与德布斯/尼布斯与德布斯.nes	40976	0	32	8	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/屠龙剑4/屠龙剑4.nes	196624	4	128	64	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/屠龙战记/屠龙战记.nes	163856	95	128	32	False	False	False	False	mapper 95 unsupported	
-FC游戏 536款 含封面/屠龙战记2暗之封印/屠龙战记2暗之封印.nes	196624	88	128	64	False	False	False	False	mapper 88 unsupported	
-FC游戏 536款 含封面/川钓太郎/川钓太郎.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/工人战记1/工人战记.nes	393232	33	128	256	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/工人战记2/工人战记2.nes	393232	48	128	256	False	False	False	False	mapper 48 unsupported	
-FC游戏 536款 含封面/巴塞罗那奥运会92/巴塞罗那奥运会92.nes	262160	4	128	128	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/巴斯德夫历险记/巴斯德夫历险记.nes	524304	30	512	0	False	False	False	False	mapper 30 unsupported	
-FC游戏 536款 含封面/希魔复活/希魔复活.nes	262160	1	256	0	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/帕拉米狄斯方块/帕拉米狄斯方块.nes	65552	1	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/帝国战机/帝国战机.nes	262160	23	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/幽灵列车/幽灵列车.nes	524304	4	512	0	False	True	False	False	host picture	colors=10
-FC游戏 536款 含封面/异域诛魂/异域诛魂.nes	65680	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/异形3/异形3.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/弹珠台/弹珠台.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/彩虹岛/彩虹岛.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/影子传说/影子传说.nes	81936	3	32	48	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/微型法师/微型法师.nes	40976	0	32	8	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/忍者剑豪传/忍者剑豪传.nes	393232	4	256	128	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/忍者君-阿修罗之章/忍者君-阿修罗之章.nes	131088	2	128	0	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/忍者哈利特/忍者哈利特.nes	40976	0	32	8	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/忍者猫/忍者猫.nes	524304	195	256	256	False	False	False	False	mapper 195 unsupported	
-FC游戏 536款 含封面/忍者神龟1/忍者神龟1.nes	262160	1	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/忍者神龟2/忍者神龟2.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/忍者神龟3/忍者神龟3汉化版1.2.nes	786960	25	256	512	True	True	True	True	host uniform	colors=1
-FC游戏 536款 含封面/忍者神龟4/忍者神龟4.nes	294928	4	128	160	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/忍者茶茶丸/忍者茶茶丸.nes	32784	3	16	16	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/忍者茶茶丸之银河大作战/忍者茶茶丸.nes	262160	18	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/忍者茶茶丸击魔传幻之金魔城/忍者茶茶丸击魔传幻之金魔城.nes	262160	18	128	128	False	True	False	False	host picture	colors=10
-FC游戏 536款 含封面/忍者蛙/忍者蛙.nes	262160	7	256	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/忍者蛙和双截龙/忍者蛙和双截龙.nes	262160	7	256	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/忍者警察/忍者警察.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/忍者龙剑传1/忍者龙剑传1.nes	262160	1	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/忍者龙剑传2/忍者龙剑传2.nes	335888	4	128	200	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/忍者龙剑传3/忍者龙剑传3.nes	344080	4	128	208	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/快乐机器人格斗/快乐机器人格斗.nes	524304	4	256	256	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/快打旋风3/快打旋风3.nes	786448	90	256	512	False	False	False	True	mapper 90 unsupported	
-FC游戏 536款 含封面/快打旋风SD/快打旋风SD.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/快杰洋枪1/快杰洋枪1.nes	262160	97	256	0	False	False	False	False	mapper 97 unsupported	
-FC游戏 536款 含封面/快杰洋枪2/快杰洋枪2.nes	262160	32	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/快杰洋枪3/快杰洋枪3.nes	262160	65	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/怒1/怒1.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/怒2/怒2.nes	262160	2	256	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/怒3/怒3.nes	262287	1	128	128	False	False	False	True	host picture	colors=8
-FC游戏 536款 含封面/怪物聚会/怪物聚会.nes	262160	1	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/怪鸭历险记/怪鸭历险记.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/恐龙战队兽连者/恐龙战队兽连者.nes	393232	195	256	128	False	False	False	False	mapper 195 unsupported	
-FC游戏 536款 含封面/恶魔城1/恶魔城[佛易汉化组 吸血男爵汉化](JP)[ACT](1Mb).nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/恶魔城2/恶魔城2.nes	393232	10	128	256	False	False	False	False	mapper 10 unsupported	
-FC游戏 536款 含封面/恶魔城3/恶魔城1.nes	524304	26	256	256	False	True	False	False	mapper 26 unsupported	
-FC游戏 536款 含封面/恶魔城外传 王子传奇/恶魔城外传 王子传奇.nes	786464	23	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/恶魔招待状/恶魔招待状.nes	262160	4	128	128	False	True	False	False	host picture	colors=4
-FC游戏 536款 含封面/惩罚者/惩罚者.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/成龙之龙/成龙之龙.nes	262160	4	128	128	False	False	False	False	host picture	colors=15
-FC游戏 536款 含封面/成龙踢馆1/成龙踢馆.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/成龙踢馆2/成龙踢馆2.nes	262160	65	128	128	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/战地小子1/战地小子1.nes	262160	4	256	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/战地小子2/战地小子2.nes	524304	4	512	0	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/战场之狼/战场之狼.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/战斗之星/战斗之星.nes	524304	4	256	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/战斗原始人/战斗原始人.nes	262288	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/战斗坦克/战斗坦克.nes	65552	3	32	32	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/所罗门之钥1/所罗门之钥.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/所罗门之钥2/所罗门之钥2.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/扑扇的小鸟/扑扇的小鸟.nes	40976	0	32	8	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/打砖块/打砖块.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/打空气1/打空气1.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/打空气2/打空气2.nes	40976	0	32	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/打鸭子/打鸭子.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/抢险特攻队/抢险特攻队.nes	131088	2	128	0	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/披萨大战/披萨大战.nes	262160	18	128	128	False	False	False	False	host picture	colors=15
-FC游戏 536款 含封面/拉格朗日点/拉格朗日点.nes	1048592	85	1024	0	False	True	False	False	larger than 1 MiB slot	
-FC游戏 536款 含封面/拉迪亚战记/拉迪亚战记.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC游戏 536款 含封面/拳无虚发/拳无虚发.nes	262160	9	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/排球/排球.nes	40976	0	32	8	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/摩登原始人1/摩登原始人1.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/摩登原始人2/摩登原始人2.nes	655376	115	128	512	False	False	False	False	mapper 115 unsupported	
-FC游戏 536款 含封面/摩艾君/摩艾君.nes	65552	3	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/攻击动物学园/攻击动物学园.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/救火英雄/救火英雄.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/敲冰块/敲冰块.nes	24592	0	16	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/斗者挽歌/斗者挽歌.nes	131088	2	128	0	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/斧王/斧王.nes	262160	4	128	128	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/斯坦利-寻找利文斯敦博士/斯坦利-寻找利文斯敦博士.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/新人类/新人类.nes	65552	3	32	32	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/时空地带/时空地带.nes	262160	4	128	128	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/时空小子/时空小子.nes	131216	2	128	0	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/时间旅行者/时间旅行者.nes	262160	250	128	128	False	False	False	False	mapper 250 unsupported	
-FC游戏 536款 含封面/星之卡比 梦之泉物语/星之卡比 梦之泉物语.nes	786448	4	512	256	False	True	False	False	host picture	colors=4
-FC游戏 536款 含封面/星际咖啡馆/星际咖啡馆.nes	131088	2	128	0	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/星际魂斗罗/星际魂斗罗.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/暴力溜冰/暴力溜冰.nes	262160	4	128	128	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/暴坊天狗/暴坊天狗.nes	262160	4	128	128	False	False	False	False	host picture	colors=16
-FC游戏 536款 含封面/最终幻想1+2/最终幻想1+2.nes	1048592	245	1024	0	False	True	False	False	mapper 245 unsupported	
-FC游戏 536款 含封面/最终幻想3/最终幻想3.nes	1048592	4	1024	0	False	False	False	False	larger than 1 MiB slot	
-FC游戏 536款 含封面/月光宝石/月光宝石.nes	524304	4	256	256	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/月宫桌球/月宫桌球.nes	24592	0	16	8	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/月风魔传/月风魔传.nes	393232	23	128	256	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/机器子战记/机器子战记.nes	671760	4	512	144	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/机械战警1/机械战警1.nes	393232	195	256	128	False	False	False	False	mapper 195 unsupported	
-FC游戏 536款 含封面/机械战警2/机械战警2.nes	262160	1	128	128	False	False	False	False	host picture	colors=14
-FC游戏 536款 含封面/机械战警3/机械战警3.nes	262160	1	128	128	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/机车大赛/机车大赛.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/杀虫战记/杀虫战记.nes	393232	33	128	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/杰森一家/杰森一家.nes	393232	4	128	256	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/松鼠大战1/松鼠大战1.nes	393232	192	256	128	False	False	False	False	mapper 192 unsupported	
-FC游戏 536款 含封面/松鼠大战2/松鼠大战2.nes	393232	192	256	128	False	False	False	False	mapper 192 unsupported	
-FC游戏 536款 含封面/柯纳米世界1/柯纳米世界1.nes	524304	23	256	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/柯纳米世界2/柯纳米世界2.nes	393232	21	256	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/梦之企鹅物语/梦之企鹅物语.nes	393232	191	256	128	False	True	False	False	mapper 191 unsupported	
-FC游戏 536款 含封面/梦之勇士/梦游.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/梦境之王/梦境之王.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC游戏 536款 含封面/梦工场惊魂/梦工场惊魂.nes	131088	103	128	0	False	False	False	False	mapper 103 unsupported	
-FC游戏 536款 含封面/死神修道院/死神修道院.nes	131088	2	128	0	False	False	True	True	host picture	colors=5
-FC游戏 536款 含封面/气球大战/气球大战.nes	24592	0	16	8	False	False	False	False	host picture	colors=17
-FC游戏 536款 含封面/沙罗曼蛇/沙罗曼蛇.nes	393232	19	128	256	False	True	False	False	host exit -11	
-FC游戏 536款 含封面/沙那多/沙那多.nes	262160	1	256	0	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/泡泡龙1/泡泡龙1.nes	188432	1	128	56	False	False	False	False	host picture	colors=15
-FC游戏 536款 含封面/泡泡龙2/泡泡龙2.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/泪之仓库番 特别版/Namida no Soukoban Special (J) [T+Eng_KingMike][1.0].fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/洛克人1/洛克人1.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/洛克人2/洛克人2.nes	262160	1	256	0	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/洛克人3/洛克人3.nes	393232	4	256	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/洛克人4/洛克人4.nes	524304	4	512	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/洛克人5/洛克人5.nes	524304	4	256	256	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/洛克人6/洛克人6.nes	1048608	4	512	0	False	False	False	False	larger than 1 MiB slot	
-FC游戏 536款 含封面/海底两万里/海底两万里.nes	262160	4	128	128	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/海格力斯的荣光2/海格力斯的荣光2.nes	262160	1	256	0	False	True	False	False	host picture	colors=9
-FC游戏 536款 含封面/淘金者/淘金者.nes	40976	0	32	8	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/混沌世界/混沌世界.nes	786448	195	512	256	False	True	False	False	mapper 195 unsupported	
-FC游戏 536款 含封面/游园地/游园地.nes	786464	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/滚球乐园/滚球乐园.nes	40976	0	32	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/滚雷行动/滚雷行动.nes	262160	4	128	128	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/潘克/潘克.nes	65552	1	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/潘泽尔的冒险2/The Adventures of Panzer II (Demo) (v0.6).nes	524304	30	512	0	False	True	False	False	mapper 30 unsupported	
-FC游戏 536款 含封面/激光入侵/激光入侵.nes	262160	5	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/激斗四驱车/激斗四驱车.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/火之鸟/火之鸟.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/火炮/火炮.nes	393232	4	128	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/火焰之纹章 暗黑龙与光之剑/火焰之纹章 暗黑龙与光之剑.nes	786449	165	512	128	False	True	False	False	mapper 165 unsupported	
-FC游戏 536款 含封面/火焰之纹章外传/火焰之纹章外传.nes	655376	165	512	128	False	True	False	False	mapper 165 unsupported	
-FC游戏 536款 含封面/火箭人/火箭人.nes	262160	1	256	0	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/火箭车/火箭车.nes	24592	0	16	8	False	False	False	True	host picture	colors=9
-FC游戏 536款 含封面/灵幻道士/灵幻道士.nes	262160	1	256	0	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/炎之斗球儿弹平/炎之斗球儿弹平.nes	393232	69	128	256	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/炎之斗球儿弹平2/炎之斗球儿弹平2.nes	524304	69	256	256	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/炸弹人1/炸弹人.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/炸弹人2/炸弹人2.nes	131088	1	128	0	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/炸弹人2002/Bomberman 2002 (Unl).nes	40976	0	32	8	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/烈火92/烈火92.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/热带之星1/热带之星.nes	524304	4	256	256	False	True	False	False	host picture	colors=7
-FC游戏 536款 含封面/热带之星2/热带之星2.nes	524304	4	256	256	False	True	False	False	host picture	colors=14
-FC游戏 536款 含封面/热血新记录/热血新记录.nes	524304	74	256	256	False	False	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/热血时代剧/热血时代剧.nes	393232	191	256	128	False	True	False	False	mapper 191 unsupported	
-FC游戏 536款 含封面/热血曲棍球/热血曲棍球.nes	524304	74	256	256	False	False	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/热血格斗传说/热血格斗传说.nes	408768	74	256	136	False	False	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/热血物语/热血物语.nes	327696	191	192	128	False	False	False	False	mapper 191 unsupported	
-FC游戏 536款 含封面/热血硬派/热血硬派.nes	147472	2	144	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/热血篮球/热血篮球.nes	524304	4	256	256	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/热血足球联盟/热血足球联盟.nes	393232	4	128	256	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/热血进行曲/热血进行曲.nes	483344	4	256	216	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/热血高校躲避球/热血高校躲避球.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/热血高校躲避球部 足球篇/热血高校躲避球部 足球篇.nes	917536	74	256	256	False	False	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/爆击战士87/爆击战士87.nes	131088	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/爱战士尼科鲁/爱战士尼科鲁.nes	262160	42	128	128	False	False	False	False	mapper 42 unsupported	
-FC游戏 536款 含封面/爱的小屋/爱的小屋.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/特救指令/特救指令.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/猫和老鼠/猫和老鼠.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/猫抓老鼠1/猫抓老鼠.nes	24592	0	16	8	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/猫抓老鼠2/猫抓老鼠2.nes	688160	4	128	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/猫里奥1/猫里奥.nes	40976	0	32	8	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/猫里奥2/猫里奥2.nes	40976	0	32	8	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/猫里奥3/猫里奥3.nes	40976	0	32	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/瓦强世界3/瓦强世界3.nes	524304	19	256	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/瓦里奥之森/瓦里奥之森.nes	524304	4	256	256	False	True	False	False	host picture	colors=12
-FC游戏 536款 含封面/生化战士丹/生化战士丹.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/电击作战/电击作战.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/男孩和他的软泥/男孩和他的软泥.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/疯狂豪宅/疯狂豪宅.nes	262160	1	256	0	False	True	False	False	host picture	colors=5
-FC游戏 536款 含封面/白烂贱客之逃出商场/白烂贱客之逃出商场.nes	393232	1	256	128	False	True	True	True	host picture	colors=5
-FC游戏 536款 含封面/真田十勇士/真田十勇士.nes	524304	165	256	256	False	True	False	False	mapper 165 unsupported	
-FC游戏 536款 含封面/眼镜蛇特种部队1/眼镜蛇特种部队1.nes	393232	4	128	256	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/眼镜蛇特种部队2/眼镜蛇特种部队2.nes	393232	4	128	256	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/碰碰车/碰碰车.nes	32784	87	16	16	False	False	False	False	mapper 87 unsupported	
-FC游戏 536款 含封面/磁片之城/Famimaga Disk 6 - Janken Disk Jou (J).fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/神圣战记/神圣战记.nes	262160	78	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/神气精灵/Q Boy (Sachen) [!].nes	262160	191	256	0	False	False	False	False	mapper 191 unsupported	
-FC游戏 536款 含封面/神秘之结/神秘之结.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/神秘起源/神秘起源.nes	524304	30	512	0	False	False	False	False	mapper 30 unsupported	
-FC游戏 536款 含封面/究极虎/究极虎.nes	262160	4	128	128	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/空中要塞/空中要塞.nes	262160	1	128	128	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/空中魂斗罗 最终任务/空中魂斗罗 最终任务.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/突然君/突然君.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/笨蛋王子大冒险/笨蛋王子大冒险.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/第二次超级机器人大战/第二次超级机器人大战.nes	524304	194	256	256	False	True	False	False	mapper 194 unsupported	
-FC游戏 536款 含封面/筋肉人摔角/筋肉人摔角.nes	24592	0	16	8	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/米奇3梦幻气球/米奇3梦幻气球.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/米格29战斗机/米格29战斗机.nes	131088	71	128	0	False	False	False	False	mapper 71 unsupported	
-FC游戏 536款 含封面/米老鼠1代/米老鼠1代.nes	65552	3	32	32	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/粉碎坦克/粉碎坦克.nes	40976	0	32	8	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/糖果屋/糖果屋.nes	262160	1	256	0	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/红巾特攻队/红巾特攻队.nes	24592	0	16	8	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/红白机Jump1英雄列传/红白机Jump英雄列传.nes	393232	16	256	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/红白机Jump2最强的七人/红白机Jump2最强的七人.nes	524304	16	512	0	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/纽约大拳猫/纽约大拳猫.nes	262160	4	128	128	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/终极特技人/终极特技人.nes	262160	71	256	0	False	False	False	False	mapper 71 unsupported	
-FC游戏 536款 含封面/终结者2审判日/终结者2审判日.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/绿色兵团/绿色兵团.nes	131088	2	128	0	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/网球/网球.nes	24592	0	16	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/罗纽传说/Roniu's Tale (Demo).nes	262160	2	256	0	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/罗罗大冒险1/罗罗大冒险1.nes	65552	1	32	32	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/罗罗大冒险2/罗罗大冒险2.nes	65552	4	32	32	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/罗罗大冒险3/罗罗大冒险3.nes	262160	1	128	128	False	False	False	True	host picture	colors=9
-FC游戏 536款 含封面/美丽新世界/美丽新世界.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/翼人/翼人.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/耀西的饼干/耀西的饼干.nes	196624	4	128	64	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/职业高尔夫球手 猿/Pro Golfer Saru - Kage no Tournament (J).fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/能源战士1/能源战士1.nes	393232	4	128	256	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/能源战士2/能源战士2.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/脱狱1/脱狱1.nes	262160	1	128	128	False	False	False	True	host picture	colors=4
-FC游戏 536款 含封面/脱狱2/脱狱2.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/腐尸之屋：顽皮的涂鸦/腐尸之屋：顽皮的涂鸦.nes	262160	19	128	128	False	False	False	False	host exit -11	
-FC游戏 536款 含封面/至日-三次元迷宫的狂兽/至日-三次元迷宫的狂兽.nes	131088	7	128	0	False	False	False	False	host picture	colors=19
-FC游戏 536款 含封面/航空小英雄/航空小英雄.nes	262160	1	128	128	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/花式撞球/花式撞球.nes	188432	4	128	56	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/荆轲新传/荆轲新传.nes	262160	240	128	128	False	False	False	False	mapper 240 unsupported	
-FC游戏 536款 含封面/荒野大镖客/荒野大镖客.nes	163856	119	128	32	False	False	False	False	mapper 119 unsupported	
-FC游戏 536款 含封面/菲力克斯猫/菲力克斯猫.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/蓝色计划/蓝色计划.nes	49168	3	32	16	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/虎克船长/虎克船长.nes	262160	1	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/虎胆妙算汉化版/虎胆妙算汉化版.nes	524304	192	256	256	False	False	False	False	mapper 192 unsupported	
-FC游戏 536款 含封面/蝙蝠侠1/蝙蝠侠1.nes	393232	69	128	256	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/蝙蝠侠2/蝙蝠侠2.nes	393232	69	128	256	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/蝙蝠侠3/蝙蝠侠3.nes	393232	4	128	256	False	True	False	False	host picture	colors=3
-FC游戏 536款 含封面/街头格斗小子/街头格斗小子.nes	24592	0	16	8	False	False	False	False	host picture	colors=18
-FC游戏 536款 含封面/街霸 12人街霸/街霸 12人街霸.nes	262160	4	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/街霸 16人街霸/街霸 16人街霸.nes	393232	4	128	256	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/街霸 20人街霸/街霸 20人街霸.nes	393232	4	128	256	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/街霸 20人街霸CONY/街霸 20人街霸CONY.nes	524304	45	256	256	False	False	False	False	mapper 45 unsupported	
-FC游戏 536款 含封面/街霸 4人街霸/街霸 4人街霸.nes	262160	189	128	128	False	False	False	False	mapper 189 unsupported	
-FC游戏 536款 含封面/街霸 56人街霸/街霸 56人街霸.nes	655376	91	128	512	False	False	False	False	mapper 91 unsupported	
-FC游戏 536款 含封面/街霸 5人街霸/街霸 5人街霸.nes	262160	189	128	128	False	False	False	False	mapper 189 unsupported	
-FC游戏 536款 含封面/街霸 60人街霸/街霸 60人街霸(10人CONY).nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/街霸 8人街霸/街霸 8人街霸.nes	393232	83	128	256	False	False	False	False	mapper 83 unsupported	
-FC游戏 536款 含封面/街霸 9人街霸/街霸 9人街霸.nes	655376	91	128	512	False	False	False	False	mapper 91 unsupported	
-FC游戏 536款 含封面/街霸 9人街霸汉化版/街霸 9人街霸汉化版.nes	655376	91	128	512	False	False	False	False	mapper 91 unsupported	
-FC游戏 536款 含封面/街霸 少年街霸2/街霸 少年街霸2.nes	393232	187	128	256	False	False	False	False	mapper 187 unsupported	
-FC游戏 536款 含封面/街霸 少年街霸2 97/街霸 少年街霸2 97.nes	786448	187	256	512	False	False	False	False	mapper 187 unsupported	
-FC游戏 536款 含封面/街霸2010/街霸2010.nes	262160	4	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/西游记1/西游记1.nes	262160	4	256	0	False	True	False	False	host picture	colors=11
-FC游戏 536款 含封面/西游记2/西游记2.nes	262160	18	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/西部小子/西部小子.nes	524304	4	256	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/解谜大作战/解谜大作战.nes	262160	88	128	128	False	False	False	False	mapper 88 unsupported	
-FC游戏 536款 含封面/詹姆斯邦德007/詹姆斯邦德007.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/谜之村雨城英译版/谜之村雨城英译版.fds	131016								not iNES (FDS or other)	
-FC游戏 536款 含封面/赌神/赌神.nes	393232	74	256	128	False	True	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/赤影战士/赤影战士.nes	262160	4	128	128	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/赤色要塞/赤色要塞.nes	262160	19	128	128	False	False	False	False	host exit -11	
-FC游戏 536款 含封面/超惑星战记/超惑星战记.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/超时空要塞/超时空要塞.nes	24592	0	16	8	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/超级中国人2/超级中国人2.nes	524304	5	256	256	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/超级中国人3/超级中国人3.nes	262160	1	128	128	False	True	False	False	host picture	colors=8
-FC游戏 536款 含封面/超级宝宝/超级宝宝.nes	262160	25	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/超级间谍猎人/超级间谍猎人.nes	262160	4	128	128	False	False	False	False	host picture	colors=17
-FC游戏 536款 含封面/超级马里奥1/超级马里奥1.nes	40976	0	32	8	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/超级马里奥2/超级马里奥2.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/超级马里奥2 失落的关卡/超级马里奥2 失落的关卡.nes	131088	50	128	0	False	False	False	False	mapper 50 unsupported	
-FC游戏 536款 含封面/超级马里奥3/超级马里奥3.nes	458768	4	256	192	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/超级马里奥世界/超级马里奥世界.nes	786448	90	512	256	False	False	False	False	mapper 90 unsupported	
-FC游戏 536款 含封面/超级马里奥医生/超级马里奥医生.nes	65552	1	32	32	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/超级马里奥拆屋工/超级马里奥拆屋工.nes	98320	140	64	32	False	False	False	False	mapper 140 unsupported	
-FC游戏 536款 含封面/超级马里奥无限-豪华版/超级马里奥无限-豪华版.nes	196624	1	128	64	False	True	False	False	host uniform	colors=1
-FC游戏 536款 含封面/超级马里奥格斗/超级马里奥格斗.nes	393232	4	128	256	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/超级马里奥水管工/超级马里奥水管工.nes	49168	3	32	16	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/超越地平线/超越地平线.nes	262160	4	128	128	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/越野战车/越野战车.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/越野摩托/越野摩托.nes	41104	0	32	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/趣味方块/趣味方块.nes	65552	3	32	32	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/足球/足球.nes	40976	0	32	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/跌落地带/跌落地带.nes	65552	3	32	32	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/跳蚤/Flea! (Demo) (2020) (Mapper 30).nes	524304	30	512	0	False	True	False	False	mapper 30 unsupported	
-FC游戏 536款 含封面/踢王/踢王.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/迷宫寺院/迷宫寺院.nes	131088	108	128	0	False	False	False	False	mapper 108 unsupported	
-FC游戏 536款 含封面/迷宫岛/迷宫岛.nes	262160	32	128	128	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/迷糊蛋/迷糊蛋.nes	393232	69	128	256	False	False	False	False	mapper 69 unsupported	
-FC游戏 536款 含封面/追赶跑跳蹦/追赶跑跳蹦.nes	65552	4	32	32	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/遗迹惑星之野望/遗迹惑星之野望.nes	262160	1	128	128	False	True	False	False	host picture	colors=6
-FC游戏 536款 含封面/遥控赛车2/遥控赛车2.nes	262160	7	256	0	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/重力装甲/重力装甲.nes	393232	4	128	256	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/重装机兵/重装机兵.nes	786448	74	512	256	False	True	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/野狼特工队/野狼特工队.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/金属之光/金属之光.nes	1572880	5	1024	512	False	True	False	False	larger than 1 MiB slot	
-FC游戏 536款 含封面/铁拳对钢拳/铁拳对钢拳.nes	524304	16	256	256	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/铁板阵/铁板阵.nes	40976	0	32	8	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/铁面无私/铁面无私.nes	262160	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/银河号/银河号.nes	131216	2	128	0	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/银河战士/银河战士.nes	131088	1	128	0	False	False	False	True	host picture	colors=11
-FC游戏 536款 含封面/银河战士之盗贼多恩/银河战士之盗贼多恩.nes	786448	4	512	256	False	True	False	False	host picture	colors=17
-FC游戏 536款 含封面/银河武士/银河武士.nes	524304	4	256	256	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/银白色沙加/银白色沙加.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC游戏 536款 含封面/长枪手传奇/长枪手传奇.nes	393232	4	256	128	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/长毛狗3/长毛狗3.nes	65552	2	64	0	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/闪亮亮星星之夜DX/闪亮亮星星之夜DX.nes	524304	4	256	256	False	True	False	False	host picture	colors=12
-FC游戏 536款 含封面/阿基拉/阿基拉.nes	524304	33	256	256	False	False	False	False	host picture	colors=5
-FC游戏 536款 含封面/阿尔戈斯战士/阿尔戈斯战士.nes	262160	4	256	0	False	True	False	False	host picture	colors=7
-FC游戏 536款 含封面/阿尔瓦的觉醒/阿尔瓦的觉醒.nes	524304	2	512	0	False	True	True	True	host picture	colors=8
-FC游戏 536款 含封面/阿拉丁/阿拉丁.nes	524304	4	256	256	False	False	False	False	host picture	colors=12
-FC游戏 536款 含封面/阿贝道X/阿贝道X.nes	786464	1	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/雪人兄弟/雪人兄弟.nes	393232	192	128	256	False	False	False	False	mapper 192 unsupported	
-FC游戏 536款 含封面/雷电节奏/雷电节奏.nes	131088	2	128	0	False	False	False	False	host picture	colors=4
-FC游戏 536款 含封面/霹雳神兵/霹雳神兵.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/音速小子5代/音速小子5代.nes	786448	4	512	256	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/音速小子5代马里奥版/音速小子5代马里奥版.nes	524304	4	256	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/顽皮狗/顽皮狗.nes	262160	4	128	128	False	False	False	False	host uniform	colors=1
-FC游戏 536款 含封面/领土之战/Rampart (J) [T+Eng][0.90].nes	131088	2	128	0	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/飞翔鲛/飞翔鲛.nes	262160	1	128	128	False	False	False	True	host picture	colors=13
-FC游戏 536款 含封面/飞行勇士/飞行勇士.nes	262160	1	128	128	False	False	False	False	host picture	colors=3
-FC游戏 536款 含封面/香蕉王子大冒险/香蕉王子大冒险.nes	262160	4	128	128	False	False	False	False	host picture	colors=14
-FC游戏 536款 含封面/马戏团/马戏团.nes	24592	0	16	8	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/骷髅13/骷髅13.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/骷髅13第二章/骷髅13第二章.nes	262160	4	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/鬼太郎-妖怪大魔境/鬼太郎-妖怪大魔境.nes	65552	3	32	32	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/魂斗罗1/魂斗罗1.nes	393232	4	128	256	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/魂斗罗2/魂斗罗2.nes	393232	4	128	256	False	False	False	False	host picture	colors=10
-FC游戏 536款 含封面/魂斗罗3 力量/魂斗罗3 力量.nes	278544	4	128	144	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/魂斗罗7 超级战魂/魂斗罗7 超级战魂.nes	262160	4	128	128	False	False	False	True	host uniform	colors=1
-FC游戏 536款 含封面/魅影智慧/魅影智慧.nes	524304	4	256	256	False	True	False	False	host picture	colors=7
-FC游戏 536款 含封面/魍魉战记/魍魉战记.nes	786448	74	512	256	False	True	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/魔城传说2 大魔司教/魔城传说2 大魔司教.nes	262160	4	256	0	False	True	False	False	host picture	colors=6
-FC游戏 536款 含封面/魔境铁人/魔境铁人.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/魔天童子/魔天童子.nes	524304	4	256	256	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/魔女小红帽/魔女小红帽.nes	278544	74	144	128	False	False	False	False	mapper 74 unsupported	
-FC游戏 536款 含封面/魔法世界/魔法世界.nes	262160	1	256	0	False	True	False	False	host picture	colors=5
-FC游戏 536款 含封面/魔法总动员/魔法总动员.nes	262160	4	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/魔法王国大冒险/魔法王国大冒险.nes	262160	1	128	128	False	False	False	False	host picture	colors=11
-FC游戏 536款 含封面/魔烛/魔烛.nes	655376	4	512	128	False	True	False	False	host picture	colors=10
-FC游戏 536款 含封面/魔界岛/魔界岛.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/魔界村/魔界村.nes	131088	2	128	0	False	False	False	False	host picture	colors=9
-FC游戏 536款 含封面/魔界村外传2/魔界村外传2.nes	262160	4	128	128	False	False	False	False	host picture	colors=17
-FC游戏 536款 含封面/魔神英雄传外传/魔神英雄传外传.nes	524304	4	512	0	False	True	False	False	host picture	colors=7
-FC游戏 536款 含封面/魔道士的阴谋/魔道士的阴谋.nes	524304	4	256	256	False	True	False	False	host picture	colors=10
-FC游戏 536款 含封面/魔鬼总动员/魔鬼总动员.nes	262160	4	128	128	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/鲁邦三世/鲁邦三世.nes	524304	4	256	256	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/鳄鱼先生/鳄鱼先生.nes	393232	4	128	256	False	False	False	False	host picture	colors=2
-FC游戏 536款 含封面/鸟人战队/鸟人战队.nes	262160	1	128	128	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/麦当劳世界/麦当劳世界.nes	262160	1	128	128	False	False	False	False	host picture	colors=6
-FC游戏 536款 含封面/黑白棋/黑白棋.nes	40976	0	32	8	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/龙之忍者/龙之忍者.nes	262160	19	128	128	False	False	False	False	host exit -11	
-FC游戏 536款 含封面/龙战士/龙战士.nes	262288	1	128	128	False	False	False	False	host picture	colors=7
-FC游戏 536款 含封面/龙牙/龙牙.nes	131088	4	128	0	False	False	False	False	host picture	colors=13
-FC游戏 536款 含封面/龙珠 神龙之谜/龙珠神龙之谜.nes	164368	34	128	32	True	False	False	False	host picture	colors=14
-FC游戏 536款 含封面/龙珠 超武斗传2/龙珠-超武斗传2.nes	393232	91	128	256	False	False	False	False	mapper 91 unsupported	
-FC游戏 536款 含封面/龙珠Z1 赛亚人灭绝计划/龙珠Z外传 - 赛亚人灭绝计划.nes	786448	253	256	512	False	True	False	False	mapper 253 unsupported	
-FC游戏 536款 含封面/龙珠Z2 激神弗利萨/龙珠Z2 激神弗利萨.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC游戏 536款 含封面/龙珠Z3 烈战人造人间/龙珠Z3 烈战人造人间.nes	786448	199	512	256	False	True	False	False	mapper 199 unsupported	
-FC游戏 536款 含封面/龙穴历险记/龙穴历险记.nes	131088	2	128	0	False	False	False	False	host picture	colors=8
-FC游戏 536款 含封面/龙魂 新的传说/龙魂 新的传说.nes	262160	88	128	128	False	False	False	False	mapper 88 unsupported	
+rom	bytes	mapper	prg_kib	chr_kib	trainer	battery	nes2	dirty	no_input	start	verdict	detail
+FC改版hack 390款 含封面/1943可视化.nes	262160	4	256	0	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/1943无敌无限点汉化版.nes	262672	2	256	0	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/1944.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/1945.nes	196624	1	64	128	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/B计划.nes	40976	185	32	8	False	False	False	False			mapper 185 unsupported	
+FC改版hack 390款 含封面/FC原人.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/JUJU传说.nes	393744	4	128	256	True	False	False	False	picture		host picture	colors=16
+FC改版hack 390款 含封面/JUMP天国.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/MD超级忍2.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/Q版沙罗曼蛇.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/SD英雄总决战.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/七宝奇谋1.nes	49168	87	32	16	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/七宝奇谋2.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/三只小猪.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/三国志2 霸王的大陆.nes	524304	19	256	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=fb2a sp=9f jam=0 pending=0 irq=0 ppu=90/1e
+FC改版hack 390款 含封面/三国志2 霸王的大陆超级版.nes	524304	19	256	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=fb2a sp=9f jam=0 pending=0 irq=0 ppu=90/1e
+FC改版hack 390款 含封面/三目童子无敌全武器不掉汉化版.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/三目童子无限命无敌可视汉化版.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/三目童子超级版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/三目童子速射版.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/上尉密令.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/世嘉忍者.nes	262160	64	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/丛林王子.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=15
+FC改版hack 390款 含封面/中东战争.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/中东战争无敌满火力汉化版.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/中华大仙.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/中国象棋.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/中国象棋Select切棋子版.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/义龟报恩.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/九人街霸降龙.nes	655888	91	128	512	True	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/亚当斯一家.nes	262672	1	128	128	True	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/人间兵器.nes	303632	4	128	168	True	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/人间兵器无限血子弹汉化版.nes	303120	4	128	168	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/企鹅先生.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6; NES state pc=c76f sp=f7 jam=0 pending=0 irq=1 ppu=90/00
+FC改版hack 390款 含封面/侏罗纪公园.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/假面忍者花丸.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/假面忍者赤影.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/兔宝宝1.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/兔宝宝1无敌POW不减汉化版.nes	344080	4	128	208	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/兔宝宝2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=2; NES state pc=ff9e sp=f5 jam=0 pending=0 irq=0 ppu=a8/1e
+FC改版hack 390款 含封面/兔宝宝2无限血时间POW不减汉化版.nes	524304	85	256	256	False	False	False	False	picture		host picture	colors=2; NES state pc=ffd8 sp=f5 jam=0 pending=0 irq=0 ppu=a8/1e
+FC改版hack 390款 含封面/六三四之剑.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=6; NES state pc=869b sp=f8 jam=0 pending=0 irq=1 ppu=08/00
+FC改版hack 390款 含封面/兵蜂1.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/兵蜂2.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/兵蜂3.nes	262160	22	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/兽王记.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/冒险岛1无敌无限跳汉化版.nes	106512	140	64	40	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/冒险岛1无敌版.nes	65680	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/冒险岛2换龙版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/冒险岛2无敌无限时汉化版.nes	278544	4	128	144	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/冒险岛2无敌版.nes	278544	4	128	144	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/冒险岛3START关无敌无限时汉化版.nes	286736	4	128	152	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/冒险岛3可视化.nes	426000	4	256	160	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/冒险岛4可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/冒险岛4无敌水果7个汉化版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/凯蒂猫冒险.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/列车寻宝.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/前线.nes	25104	0	16	8	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/剑王.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/力量小子.nes	262160	33	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/加州葡萄干.nes	131600	2	128	0	True	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/加纳战机.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/加纳战机无敌无限炸汉化版.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/勇士们.nes	131088	7	128	0	False	False	False	False	picture		host picture	colors=17
+FC改版hack 390款 含封面/北斗神拳2.nes	131216	2	128	0	False	False	False	True	picture		host picture	colors=8
+FC改版hack 390款 含封面/双截龙1.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/双截龙2BOSS版.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/双截龙2可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/双截龙2无敌无限命汉化版.nes	327696	4	128	192	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/双截龙3BOSS版.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/双截龙3刀魂剑魄无限血.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/双截龙3可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/双截龙3无敌无限血武器汉化版.nes	393232	191	256	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/双鹰.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/古巴战士无敌无限坦克汉化版.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/古巴英雄.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/吃豆人.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/合金装备1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/合金装备2.nes	262287	1	128	128	False	True	False	True	picture		host picture	colors=2
+FC改版hack 390款 含封面/合金风暴.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=2; NES state pc=fd48 sp=fb jam=0 pending=0 irq=0 ppu=a8/1e
+FC改版hack 390款 含封面/吉米克.nes	393232	69	256	128	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/哆啦A梦.nes	163856	66	128	32	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/唐老鸭大冒险1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/唐老鸭大冒险2.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/嘉蒂外传.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/圣斗士.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/圣铃传说.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/圣魔术师.nes	262160	78	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/地底探险.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/地狱极乐丸.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/地球超人.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/坦克大战半屏.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/坦克大战可视化.nes	49168	4	32	16	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/塞尔达传说.nes	131088	245	128	0	False	True	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/壮志凌云.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/外星战将换人.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/外星战将无敌.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/大力工头阿源君1.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/大力水手.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/大坦克.nes	262160	1	128	128	False	False	False	True	picture		host picture	colors=6
+FC改版hack 390款 含封面/大蜜蜂.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/大蜜蜂无限命汉化版.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/大蜜蜂汉化无敌.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/大金刚.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/大金刚1无敌无限命汉化版.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/大金刚2无敌无限命汉化版.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/大金刚3.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/大金刚3无敌红子弹汉化版.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/大金刚Jr.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/天使之翼2无限体力经验共享汉化版.nes	786448	195	512	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/天才小厨师.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/宇宙巡航机1.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/宇宙巡航机2.nes	262160	25	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/宇宙巡航机2无敌无限命MAX汉化版.nes	262160	25	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/封神榜.nes	1048592	246	512	512	False	True	False	False			mapper 246 unsupported	
+FC改版hack 390款 含封面/小美人鱼.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/小蜜蜂.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/小蜜蜂无限命.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/小魔女皮皮.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/小魔怪2.nes	393232	69	128	256	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/少年印第安纳琼斯.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/工人战记.nes	393232	33	128	256	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/帝国战机.nes	262160	23	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/帝国战机无敌无限炸汉化版.nes	262160	23	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/平成天才.nes	262672	19	128	128	True	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/彩虹岛.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/影子传说.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/影子传说无敌散弹镖汉化版.nes	106512	140	64	40	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/忍者刑警.nes	786464	1	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/忍者猫.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/忍者猫无敌全无限汉化版.nes	524304	195	256	256	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/忍者神龟1.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/忍者神龟1无敌道具时间不减汉化版.nes	393232	5	128	256	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=c31b sp=fe jam=1 pending=0 irq=1 ppu=00/18
+FC改版hack 390款 含封面/忍者神龟2.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/忍者神龟2无敌.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/忍者神龟2无敌无限血汉化版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/忍者神龟3.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/忍者神龟3无敌无限血必杀汉化版.nes	786960	25	256	512	True	True	True	True	uniform	uniform	host uniform	colors=1; NES state pc=a266 sp=f6 jam=1 pending=0 irq=0 ppu=28/00
+FC改版hack 390款 含封面/忍者神龟格斗可视化.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/忍者神龟格斗锁血时珠汉化版.nes	294928	4	128	160	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/忍者茶茶丸.nes	32784	87	16	16	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/忍者蛙.nes	262672	7	256	0	True	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/忍者蛙和双截龙.nes	262160	7	256	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/忍者龙剑传1可视化.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/忍者龙剑传2可视化.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/忍者龙剑传2无敌无限命分身汉化版.nes	335888	4	128	200	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/忍者龙剑传3可视化.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/忍者龙剑传3无敌无限命魔大刀汉化版.nes	344080	4	128	208	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/快打旋风可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/快打旋风无敌满经验汉化版.nes	393232	191	256	128	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/快杰洋枪2.nes	262672	32	128	128	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/快杰洋枪3.nes	262672	65	128	128	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/怒1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/怒2.nes	393232	1	256	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/怒3.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/怪鸭历险记.nes	262672	1	128	128	True	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/怪鸭历险记改版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/恐龙战队.nes	393232	195	256	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/恶魔城1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/恶魔城1可视化.nes	131600	2	128	0	True	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/恶魔城2.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/恶魔城3.nes	393232	24	256	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/恶魔城外传 王子传奇.nes	262160	23	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/惑星戒严令无敌无限命雷汉化版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/惩罚者.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/成龙之龙.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/成龙之龙HPMP不减汉化版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/成龙踢馆1.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/成龙踢馆2.nes	786464	17	128	128	False	False	False	False			mapper 17 unsupported	
+FC改版hack 390款 含封面/战场之狼.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/战斗原始人.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/打砖块.nes	81936	140	32	48	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/打砖块命不减强化汉化版.nes	81936	140	32	48	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/打空气.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/拉格朗日点汉化版.nes	1048592	85	1024	0	False	True	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/挑战巨龙.nes	131600	11	64	64	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/摩登原始人1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/摩登原始人1无敌无限跳汉化版.nes	655376	115	128	512	False	False	False	False			mapper 115 unsupported	
+FC改版hack 390款 含封面/摩登原始人2.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/摩登原始人2无敌无限命汉化版.nes	655376	115	128	512	False	False	False	False			mapper 115 unsupported	
+FC改版hack 390款 含封面/摩艾君.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/救火英雄.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/敲冰块.nes	25104	0	16	8	True	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/斗者挽歌.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/斧王.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/斧王无敌.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/新人类.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/无赖战士.nes	65552	4	32	32	False	False	False	False	picture		host picture	colors=2; NES state pc=f5fa sp=f7 jam=0 pending=0 irq=0 ppu=88/18
+FC改版hack 390款 含封面/星之卡比.nes	786448	4	512	256	False	True	False	False	picture		host picture	colors=4; NES state pc=c306 sp=f0 jam=0 pending=0 irq=0 ppu=aa/1e
+FC改版hack 390款 含封面/星际魂斗罗可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/暴坊天狗.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=16
+FC改版hack 390款 含封面/月风魔传中文hack.nes	393232	23	128	256	False	False	False	False	picture		host picture	colors=3
+FC改版hack 390款 含封面/月风魔传可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=3
+FC改版hack 390款 含封面/机器人战争.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/机械战警1.nes	393232	195	256	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/机械战警2.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/机械战警3.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/杀戮战场.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/杀虫战记.nes	262160	33	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/松鼠大战1.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/松鼠大战1改版.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/松鼠大战1无敌汉化版.nes	393232	192	256	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/松鼠大战2.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/松鼠大战2无限血汉化版.nes	393232	192	256	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/柯纳米世界1.nes	524816	23	256	256	True	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/柯纳米世界2.nes	393232	21	256	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/梦之勇士无敌无限道具无限飞汉化版.nes	327696	4	128	192	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/梦幻战机.nes	262160	32	128	128	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/梦游.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/欢乐碰碰车.nes	32784	87	16	16	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/气球大战.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=17
+FC改版hack 390款 含封面/沙罗曼蛇.nes	131088	73	128	0	False	False	False	False			mapper 73 unsupported	
+FC改版hack 390款 含封面/沙罗曼蛇无敌全能力汉化版.nes	393232	19	128	256	False	True	False	False	uniform	picture	host picture	colors=8
+FC改版hack 390款 含封面/沼泽怪物.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=3
+FC改版hack 390款 含封面/泡泡龙1.nes	163856	1	128	32	False	False	False	False	picture		host picture	colors=15
+FC改版hack 390款 含封面/泡泡龙1无敌无限跳满火力汉化版.nes	188432	1	128	56	False	False	False	False	picture		host picture	colors=15
+FC改版hack 390款 含封面/泡泡龙2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/泡泡龙2无敌无限心火力汉化版.nes	278544	48	128	144	False	False	False	False			mapper 48 unsupported	
+FC改版hack 390款 含封面/洛克人1.nes	262160	4	256	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/洛克人2.nes	262160	4	256	0	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/洛克人3.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/洛克人4可视化.nes	524304	4	512	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/洛克人5可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/洛克人6可视化.nes	524304	4	512	0	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/淘金者.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/溜溜球大师.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/火之鸟.nes	655392	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/火凤凰.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/火炮.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/火焰纹章1.nes	393232	10	256	128	False	True	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/火焰纹章外传.nes	393232	10	256	128	False	True	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/火箭车无敌.nes	65552	0	32	32	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/火箭车无敌选择换车汉化版.nes	66064	0	32	32	True	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/火箭车暴走卡车.nes	24592	0	16	8	False	False	False	True	picture		host picture	colors=8
+FC改版hack 390款 含封面/灵幻道士.nes	262160	1	256	0	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/炸弹之王.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/炸弹人1不死.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/炸弹人1强化1.nes	49680	3	32	16	True	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/炸弹人1强化2.nes	49680	3	32	16	True	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/炸弹人1无敌全能力穿墙汉化版.nes	40976	3	16	24	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/炸弹人2可视化.nes	131088	4	128	0	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/炸弹人2无敌威力满炸弹满汉化版.nes	131088	1	128	0	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/烈火92.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/热血曲棍球.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=6; NES state pc=e70f sp=f5 jam=0 pending=0 irq=2 ppu=08/06
+FC改版hack 390款 含封面/热血格斗.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/热血物语无限血能力钱汉化版.nes	393232	191	256	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/热血硬派.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/热血篮球.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/热血足球.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/热血足球联盟全员全能力汉化版.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/热血进行曲.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/热血高校躲避球.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/特救指令变身.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/特救指令无敌僚机无限血无限变身汉化版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/特救指令美日综合.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/特救指令美版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/特殊部队.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/猫和老鼠.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/猫抓老鼠.nes	25104	0	16	8	True	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/盗帅.nes	65552	0	32	32	False	False	False	False	picture		host picture	colors=15
+FC改版hack 390款 含封面/眼镜蛇特种部队1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/眼镜蛇特种部队2.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/禁毒卫士.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=3
+FC改版hack 390款 含封面/究极虎.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11; NES state pc=f610 sp=fb jam=0 pending=0 irq=0 ppu=28/06
+FC改版hack 390款 含封面/空中魂斗罗可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/空狼.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/突然君.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/第一滴血.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/筋肉人.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/纽约大拳猫.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/终结者2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/绿色兵团强化.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/绿色兵团改版.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/绿色兵团无敌无限弹金身汉化版.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/绿色兵团金身.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/网球.nes	25104	0	16	8	True	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/罗宾汉.nes	65552	71	64	0	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/翼人.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/老虎直升机.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/能源战士1 (CHS-HACK).nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/能源战士2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/脱狱1换枪.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/脱狱1无敌.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/脱狱1无限血全装备匕首不减汉化版.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/脱狱2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/航空小英雄1.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/航空小英雄2.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/花式撞球无限杆.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=16
+FC改版hack 390款 含封面/花式撞球无限杆汉化版.nes	188432	4	128	56	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/花式撞球随意摆球.nes	131088	2	128	0	False	True	False	False	picture		host picture	colors=16
+FC改版hack 390款 含封面/荆珂新传.nes	262160	240	128	128	False	True	False	False			mapper 240 unsupported	
+FC改版hack 390款 含封面/荒野大镖客无敌.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/荒野大镖客无敌全能力汉化版.nes	163856	119	128	32	False	False	False	False			mapper 119 unsupported	
+FC改版hack 390款 含封面/荒野大镖客无限弹.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/菲力克斯猫.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/蕾拉.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/虎胆妙算.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/蜘蛛侠.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/蝙蝠侠1超级版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/蝙蝠侠2.nes	393232	69	128	256	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/蝙蝠侠3.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=3
+FC改版hack 390款 含封面/街头战士2010.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/西游记1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/西游记1全道具汉化版.nes	262160	4	256	0	False	True	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/西游记1可视化.nes	262160	4	256	0	False	True	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/西游记2.nes	262160	18	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/西游记2无敌无限血全道具汉化版.nes	262160	18	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/贪吃蛇.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=15
+FC改版hack 390款 含封面/赤影战士可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/赤色要塞ex.nes	262160	73	256	0	False	False	False	False			mapper 73 unsupported	
+FC改版hack 390款 含封面/赤色要塞可视化.nes	131088	4	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/赤色要塞坦克版.NES	131088	2	128	0	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/赤色要塞士兵.nes	131088	4	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/赤色要塞无敌MAX汉化版.nes	262160	19	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/超惑星战记.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/超时空要塞.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/超狼人战记.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10; NES state pc=c088 sp=f4 jam=0 pending=0 irq=0 ppu=a9/1e
+FC改版hack 390款 含封面/超级婴儿.nes	262160	25	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/超级战斗坦克.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=3
+FC改版hack 390款 含封面/超级战魂.nes	262160	4	128	128	False	False	False	True	picture		host picture	colors=14
+FC改版hack 390款 含封面/超级间谍猎人.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=17
+FC改版hack 390款 含封面/超级阿拉伯人.nes	25104	0	16	8	True	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/超级马里奥1 闪光无敌.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/超级马里奥1超级版.nes	41488	0	32	8	True	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/超级马里奥1锁状态汉化版.nes	98320	140	64	32	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/超级马里奥2 美版强化1.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/超级马里奥2 美版强化2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/超级马里奥3 可视化调宝.nes	729104	192	512	200	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/超级马里奥3 换装超级版.nes	450576	4	256	184	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/超级马里奥3调宝锁状态无限飞汉化版.nes	458768	4	256	192	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/超级马里奥水管工.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/超级马里奥水管工命时间POW不减.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/越野摩托.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/跳跳虫.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/踢王无敌.nes	393232	4	128	256	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=f7b5 sp=65 jam=0 pending=0 irq=0 ppu=00/00
+FC改版hack 390款 含封面/踢王无限.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/转转乐园.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/迷糊蛋.nes	262160	69	128	128	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/追击HQ.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/重装机兵 稀有物品版.nes	786448	74	512	256	False	True	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/重装机兵 超级加强版.nes	786448	74	512	256	False	True	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/重装机兵superhack.nes	786448	74	512	256	False	True	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/野狼特工队.nes	262287	1	128	128	False	False	False	True	picture		host picture	colors=7
+FC改版hack 390款 含封面/金刚2代.nes	262160	75	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/铁臂阿童木.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC改版hack 390款 含封面/银河号.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/银河武士.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/锡鲁巴船长.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/阿尔戈斯战士.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/阿拉丁.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/阿贝道X.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/雅典娜.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/雪人兄弟可视化.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/雪人兄弟无敌全能力汉化版.nes	393232	192	128	256	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/雷鸟号1.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=4
+FC改版hack 390款 含封面/雷鸟号2.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=5
+FC改版hack 390款 含封面/霹雳神兵.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/霹雳神兵无敌无限道具火力汉化版.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/音乐欣赏50合1.nes	1310736	5	1024	256	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=87bd sp=f9 jam=0 pending=0 irq=0 ppu=00/00
+FC改版hack 390款 含封面/顽皮狗.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/香蕉王子大冒险.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=14
+FC改版hack 390款 含封面/马戏团.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/骷髅13第2章-迷宫组曲.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/鬼屋冒险.nes	262160	19	128	128	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/魁!男塾.nes	262160	16	128	128	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=8164 sp=fa jam=1 pending=0 irq=0 ppu=00/00
+FC改版hack 390款 含封面/魂斗罗1可视化.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/魂斗罗1红隼的复仇.nes	262160	2	256	0	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/魂斗罗2可视化.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/魂斗罗3力量.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/魂斗罗3力量无敌无限命全火力汉化版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/魔天童子.nes	262672	4	128	128	True	False	False	False	picture		host picture	colors=12
+FC改版hack 390款 含封面/魔天童子可视化.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/魔天童子超强汉化版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/魔法总动员.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/魔界村.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC改版hack 390款 含封面/魔神英雄传.nes	524304	4	512	0	False	True	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/魔鬼总动员.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=2; NES state pc=fe59 sp=f7 jam=0 pending=0 irq=0 ppu=a8/18
+FC改版hack 390款 含封面/魔鬼总动员透明无敌汉化版.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=3; NES state pc=fe5b sp=f3 jam=0 pending=0 irq=0 ppu=a8/18
+FC改版hack 390款 含封面/鲁邦三世.nes	720928	4	128	64	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/鲁邦三世无敌汉化版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/鳄鱼先生.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=2
+FC改版hack 390款 含封面/鸟人战队.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC改版hack 390款 含封面/麦当劳世界.nes	262672	1	128	128	True	False	False	False	picture		host picture	colors=6
+FC改版hack 390款 含封面/龙之忍者.nes	786464	19	128	128	False	False	False	False	picture		host picture	colors=10
+FC改版hack 390款 含封面/龙战士.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/龙牙不死.nes	131088	4	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/龙牙变龙.nes	131088	4	128	0	False	False	False	False	picture		host picture	colors=13
+FC改版hack 390款 含封面/龙珠Z2.nes	786448	199	512	256	False	True	False	False	picture		host picture	colors=7
+FC改版hack 390款 含封面/龙珠Z外传.nes	786448	199	512	256	False	True	False	False	picture		host picture	colors=12; NES state pc=c4dc sp=f1 jam=0 pending=0 irq=0 ppu=90/00
+FC改版hack 390款 含封面/龙魂.nes	786464	88	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/1943/1943.nes	262672	2	256	0	True	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/1944/1944.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/8只眼/8只眼.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/AV麻将/AV麻将.nes	262160	66	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/B计划/B计划.nes	40976	0	32	8	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=e54c sp=f5 jam=0 pending=0 irq=1 ppu=92/1a
+FC游戏 536款 含封面/F1赛车/F-1 Race (J) [T+ChS_Gaowei].nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/F1赛车 科乐美版/Formula 1 Sensation (E) [!].nes	262160	4	128	128	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/FC原人/FC原人.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/JuJu传说/JuJu传说.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=16
+FC游戏 536款 含封面/Q版沙罗曼蛇/Parodius (E) [T+ChS_Yuliangmax].nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/SD英雄总决战/SD英雄总决战.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/七宝奇谋1/七宝奇谋.nes	49168	87	32	16	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/七宝奇谋2/七宝奇谋2.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/三只小猪/三只小猪.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/三国志 曹操传/San Guo Zhi - Cao Cao Zhuan (NJ018) (ChS).nes	2097168	163	2048	0	False	True	False	False			mapper 163 unsupported	
+FC游戏 536款 含封面/三国志1 中原之霸者/三国志1 中原之霸者.nes	524304	19	256	256	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/三国志2 霸王的大陆/三国志2 霸王的大陆.nes	524304	19	256	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=fb2a sp=9f jam=0 pending=0 irq=0 ppu=90/1e
+FC游戏 536款 含封面/三目童子/三目童子.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/上尉密令汉化版/上尉密令汉化版.nes	393232	192	256	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/不动明王传/不动明王传.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/世界之梦1/Esper Dream (v1.01) (J) [T+Eng1.0_Mute].fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/世界之梦2/世界之梦2.nes	393232	26	256	128	False	True	False	False			mapper 26 unsupported	
+FC游戏 536款 含封面/东家推落麻将/Ochin ni Toshi Puzzle Tonjan! (J) [!].nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/中东战争/中东战争.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/中华大仙/中华大仙.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/中国象棋/中国象棋.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/义龟报恩/义龟报恩.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/乒乓球/Smash Ping Pong (J).fds	65516										not iNES (FDS or other)	
+FC游戏 536款 含封面/五子棋/五子棋.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/亚当斯一家-法斯特叔叔的探索/亚当斯一家-法斯特叔叔的探索.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/人间兵器/人间兵器.nes	294944	4	128	160	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/任天堂战争/任天堂战争.nes	262160	10	128	128	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/企鹅先生/企鹅先生.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6; NES state pc=c76f sp=f7 jam=0 pending=0 irq=1 ppu=90/00
+FC游戏 536款 含封面/伊苏3/伊苏3.nes	393232	118	256	128	False	True	False	False			mapper 118 unsupported	
+FC游戏 536款 含封面/伐木工之战/伐木工之战.nes	393232	4	128	256	False	True	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/侏罗纪公园/侏罗纪公园.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/俄罗斯方块1/俄罗斯方块1.nes	65552	3	32	32	False	False	False	True	picture		host picture	colors=13
+FC游戏 536款 含封面/俄罗斯方块2/俄罗斯方块2.nes	131088	1	128	0	False	True	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/假面忍者花丸/假面忍者花丸.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/假面忍者赤影/假面忍者赤影.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/偶像八犬传/偶像八犬传.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/光之神话/光之神话.nes	131088	1	128	0	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/兔八哥生日快乐/兔八哥生日快乐.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/兔八哥疯狂城堡/兔八哥2疯狂城堡.nes	98320	1	64	32	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/兔宝宝1/兔宝宝1.nes	262160	23	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/兔宝宝2/兔宝宝2.nes	262160	85	128	128	False	False	False	False	picture		host picture	colors=2; NES state pc=ffd8 sp=f5 jam=0 pending=0 irq=0 ppu=a8/1e
+FC游戏 536款 含封面/兔宝宝6/Tiny Toon Adventures 6 (Unl) [!].nes	524304	211	256	256	False	False	False	False			mapper 211 unsupported	
+FC游戏 536款 含封面/八位版节奏大陆/八位版节奏大陆.nes	786448	4	512	256	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/八位音乐力量最终版/八位音乐力量最终版.nes	786448	4	512	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/公路之星1/公路之星.nes	131088	1	128	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/公路之星2/公路之星2.nes	131088	4	64	64	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/兵蜂1/兵蜂1.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/兵蜂2/兵蜂2.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/兵蜂3/兵蜂3.nes	262160	22	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/内部之光/内部之光.nes	524304	30	512	0	False	True	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/冒险家迪兹/Dizzy the Adventurer (Camerica) (Aladdin) [!].nes	131088	71	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/冒险岛1/冒险岛1.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/冒险岛2/冒险岛2.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/冒险岛3/冒险岛3.nes	286736	4	128	152	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/冒险岛4/冒险岛4.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/农夫忍者/农夫忍者.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=8; NES state pc=87da sp=f8 jam=0 pending=0 irq=0 ppu=10/00
+FC游戏 536款 含封面/刀锋战机/刀锋战机.nes	393232	4	256	128	False	True	False	False	picture		host picture	colors=15
+FC游戏 536款 含封面/创世纪4圣者传奇/创世纪4圣者传奇.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/前线/前线.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/剑王/剑王.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/力量小子/力量小子.nes	262160	33	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/功夫/功夫.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/加其夫天国与地狱/加其夫天国与地狱.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/加纳战机/加纳战机.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/动荡之塔/动荡之塔.nes	524304	30	512	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/勇士们/勇士们.nes	131088	7	128	0	False	False	False	False	picture		host picture	colors=17
+FC游戏 536款 含封面/勇者斗恶龙1/勇者斗恶龙1.nes	262160	245	256	0	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=6023 sp=fa jam=1 pending=0 irq=0 ppu=88/00
+FC游戏 536款 含封面/勇者斗恶龙2/勇者斗恶龙2.nes	262160	245	256	0	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/勇者斗恶龙3/勇者斗恶龙3.nes	524304	4	512	0	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/勇者斗恶龙4/勇者斗恶龙4.nes	1048592	245	1024	0	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/北野武之挑战书/北野武之挑战书.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/半熟英雄/半熟英雄.nes	262160	4	256	0	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/南北战争/南北战争.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/南极大冒险/南极大冒险.nes	24720	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/卡林之剑/Kalin no Tsurugi (J) [T+Eng_KingMike].fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/卡诺夫/卡诺夫.nes	196624	4	128	64	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/双截龙1/双截龙1.nes	262288	1	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/双截龙2/双截龙2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/双截龙3/双截龙3.nes	262288	4	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/双月传说/双月传说.nes	1048592	176	1024	0	False	True	False	False			mapper 176 unsupported	
+FC游戏 536款 含封面/双蛇城/双蛇城.nes	65552	1	32	32	False	False	False	False	picture		host picture	colors=15
+FC游戏 536款 含封面/反重力战士/反重力战士.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/口袋妖怪 皮卡丘/Lei Dian Huang - Pi Ka Qiu Chuan Shuo by ZZP (ChS) (Hack).nes	2097168	163	2048	0	False	True	False	False			mapper 163 unsupported	
+FC游戏 536款 含封面/古巴英雄/古巴英雄.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/史克威尔的汤姆历险记/史克威尔的汤姆历险记.nes	524304	4	512	0	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=dc10 sp=a9 jam=0 pending=0 irq=0 ppu=90/00
+FC游戏 536款 含封面/吃豆小精灵/吃豆小精灵.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/合金装备1/合金装备1.nes	262160	4	256	0	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/合金装备2/合金装备2.nes	262287	1	128	128	False	True	False	True	picture		host picture	colors=2
+FC游戏 536款 含封面/吉姆力量-迷失维度/吉姆力量-迷失维度.nes	524304	4	256	256	False	False	True	True	picture		host picture	colors=11
+FC游戏 536款 含封面/吉米克/吉米克.nes	393232	69	256	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/吞食天地1 三国英杰传/吞食天地1 三国英杰传.nes	524304	4	512	0	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/吞食天地2 曹魏的野望/吞食天地2 曹魏的野望.nes	655376	198	640	0	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=f0d9 sp=d6 jam=0 pending=0 irq=0 ppu=10/00
+FC游戏 536款 含封面/吞食天地2 秋风五丈原/吞食天地2 秋风五丈原.nes	655376	198	640	0	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=f0eb sp=0e jam=0 pending=0 irq=1 ppu=10/18
+FC游戏 536款 含封面/吞食天地2 诸葛孔明传/吞食天地2 诸葛孔明传.nes	655376	198	640	0	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=f0eb sp=cb jam=0 pending=0 irq=0 ppu=10/00
+FC游戏 536款 含封面/吞食天地2 诸葛孔明传复刻版/吞食天地2 诸葛孔明传复刻版.nes	655392	198	640	0	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/哆啦A梦/哆啦A梦.nes	180240	140	128	48	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/哆啦A梦之时空机器大冒险/哆啦A梦之时空机器大冒险.nes	524304	4	512	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/哥斯拉2 怪兽大战/哥斯拉2 怪兽大战.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/唐老鸭大冒险1/唐老鸭大冒险1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/唐老鸭大冒险2/唐老鸭大冒险2.nes	262160	4	256	0	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/嘉蒂外传/嘉蒂外传.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/四川麻将 海滩篇/四川麻将 海滩篇.nes	98320	3	32	64	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/国王骑士/国王骑士.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/圣剑除魔/Seiken Saikokaribaa - Majuu no Mori Densetsu (J) [T+Eng_SpoonyBard][1.0].fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/圣斗士星矢 黄金传说/圣斗士星矢 黄金传说.nes	1310736	5	1024	256	False	True	True	True	uniform	uniform	host uniform	colors=1; NES state pc=8166 sp=a3 jam=0 pending=0 irq=0 ppu=00/00
+FC游戏 536款 含封面/圣斗士星矢 黄金传说完结篇/圣斗士星矢 黄金传说完结篇.nes	524304	67	128	384	False	False	False	False			mapper 67 unsupported	
+FC游戏 536款 含封面/圣铃传说/圣铃传说.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/地底大作战/地底大作战.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/地底探险1/地底探险1.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/地底探险2/地底探险2.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/地狱极乐丸/地狱极乐丸.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/地道战/地道战.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/坦克大战/坦克大战.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/坦克大战 烟山1990/坦克大战 烟山1990.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/埃及历险记/埃及历险记.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/塞尔达传说1 幻想大陆海拉尔/塞尔达传说1 幻想大陆海拉尔.nes	131088	1	128	0	False	True	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/塞尔达传说2 林克的冒险/塞尔达传说2 林克的冒险.nes	262160	19	128	128	False	True	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/塞尔达传说改版/塞尔达传说改版.nes	2097168	5	1024	1024	False	True	True	True	uniform	uniform	host uniform	colors=1; NES state pc=ffae sp=d0 jam=0 pending=0 irq=1 ppu=00/18
+FC游戏 536款 含封面/壮志凌云1/壮志凌云.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/壮志凌云2/壮志凌云2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/外星战将/外星战将.nes	426000	4	128	216	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/大使馆任务/大使馆任务.nes	786464	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/大力工头1/大力工头1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/大力工头2/大力工头2.nes	524304	65	256	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/大力水手/大力水手.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/大坦克/大坦克.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/大混战/大混战.nes	245776	4	128	112	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/大盗伍佑卫门1/大盗伍佑卫门.nes	262160	75	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/大盗伍佑卫门2/大盗伍佑卫门2.nes	262160	23	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/大眼蛙冒险1/大眼蛙冒险1.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/大眼蛙冒险2/大眼蛙冒险2.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/大蜜蜂/大蜜蜂.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/大金刚/大金刚.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/天使之翼2/天使之翼2.nes	786448	195	512	256	False	True	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/天堂鸟/天堂鸟.nes	65552	4	32	32	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/天才小厨师/天才小厨师.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/天神之剑/天神之剑.nes	786448	74	512	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=2000 sp=7f jam=0 pending=0 irq=0 ppu=08/00
+FC游戏 536款 含封面/太东篮球/太东篮球.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/太空忍者/太空忍者.nes	786448	4	512	256	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/太空海鸥/Space Gulls (v1.1) (Unl).nes	65552	2	64	0	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/太阳勇者/太阳勇者.nes	262160	4	128	128	False	False	False	True	picture		host picture	colors=5
+FC游戏 536款 含封面/太阳系战机/太阳系战机.nes	180240	140	64	112	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/奇幻射击/奇幻射击.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/奇才女巫/奇才女巫.nes	65552	28	64	0	False	False	True	True			mapper 28 unsupported	
+FC游戏 536款 含封面/奖杯/奖杯.nes	786448	4	512	256	False	False	False	True	picture		host picture	colors=2; NES state pc=83ef sp=ea jam=0 pending=0 irq=0 ppu=a8/18
+FC游戏 536款 含封面/奥利匹斯之战/奥利匹斯之战.nes	131088	1	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/奥特曼俱乐部/奥特曼俱乐部.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/奥运会1/奥运会.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/奥运会2/奥运会2.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/威洛之旅/威洛之旅.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/孤独战士 惑星戒严令/孤独战士 惑星戒严令.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/宇宙巡航机1/宇宙巡航机1.nes	73744	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/宇宙巡航机2/宇宙巡航机2.nes	262160	25	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/守护骑士亚马逊减肥大作战/守护骑士亚马逊减肥大作战.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/宝石方块/宝石方块.nes	24592	0	16	8	False	False	False	True	picture		host picture	colors=8
+FC游戏 536款 含封面/家庭拳击/家庭拳击.nes	131088	206	64	64	False	False	False	False			mapper 206 unsupported	
+FC游戏 536款 含封面/家庭赛马/家庭赛马.nes	65552	4	32	32	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/家庭麻将2上海之道/家庭麻将2上海之道.nes	196624	4	128	64	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/密不可分/密不可分.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/寻宝大进击/寻宝大进击.nes	65552	1	32	32	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/封神榜/封神榜.nes	1048592	246	512	512	False	True	False	False			mapper 246 unsupported	
+FC游戏 536款 含封面/射击方块/射击方块.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/小兔大迷路/小兔大迷路.nes	262160	69	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/小美人鱼/小美人鱼.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/小蜜蜂/小蜜蜂.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/小超人帕门/小超人帕门.nes	262160	32	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/小超人帕门2/小超人帕门2.nes	393232	32	256	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/小鬼Q太郎/小鬼Q太郎.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/小魔怪2新种诞生/小魔怪2新种诞生.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/小魔星达鲁鲁/小魔星达鲁鲁.nes	262160	16	128	128	False	True	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/小魔星达鲁鲁2/小魔星达鲁鲁2.nes	262160	16	128	128	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/少年印第安纳琼斯/少年印第安纳琼斯.nes	393744	4	128	256	True	False	False	False	picture		host picture	colors=4; NES state pc=c05c sp=f0 jam=0 pending=0 irq=0 ppu=a8/1e
+FC游戏 536款 含封面/尸体/尸体.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/尼布斯与德布斯/尼布斯与德布斯.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/屠龙剑4/屠龙剑4.nes	196624	4	128	64	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/屠龙战记/屠龙战记.nes	163856	95	128	32	False	False	False	False			mapper 95 unsupported	
+FC游戏 536款 含封面/屠龙战记2暗之封印/屠龙战记2暗之封印.nes	196624	88	128	64	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/川钓太郎/川钓太郎.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/工人战记1/工人战记.nes	393232	33	128	256	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/工人战记2/工人战记2.nes	393232	48	128	256	False	False	False	False			mapper 48 unsupported	
+FC游戏 536款 含封面/巴塞罗那奥运会92/巴塞罗那奥运会92.nes	262160	4	128	128	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/巴斯德夫历险记/巴斯德夫历险记.nes	524304	30	512	0	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/希魔复活/希魔复活.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/帕拉米狄斯方块/帕拉米狄斯方块.nes	65552	1	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/帝国战机/帝国战机.nes	262160	23	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/幽灵列车/幽灵列车.nes	524304	4	512	0	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/异域诛魂/异域诛魂.nes	65680	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/异形3/异形3.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/弹珠台/弹珠台.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/彩虹岛/彩虹岛.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/影子传说/影子传说.nes	81936	3	32	48	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/微型法师/微型法师.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/忍者剑豪传/忍者剑豪传.nes	393232	4	256	128	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/忍者君-阿修罗之章/忍者君-阿修罗之章.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/忍者哈利特/忍者哈利特.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/忍者猫/忍者猫.nes	524304	195	256	256	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/忍者神龟1/忍者神龟1.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/忍者神龟2/忍者神龟2.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/忍者神龟3/忍者神龟3汉化版1.2.nes	786960	25	256	512	True	True	True	True	uniform	uniform	host uniform	colors=1; NES state pc=a266 sp=f6 jam=1 pending=0 irq=0 ppu=28/00
+FC游戏 536款 含封面/忍者神龟4/忍者神龟4.nes	294928	4	128	160	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/忍者茶茶丸/忍者茶茶丸.nes	32784	3	16	16	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/忍者茶茶丸之银河大作战/忍者茶茶丸.nes	262160	18	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/忍者茶茶丸击魔传幻之金魔城/忍者茶茶丸击魔传幻之金魔城.nes	262160	18	128	128	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/忍者蛙/忍者蛙.nes	262160	7	256	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/忍者蛙和双截龙/忍者蛙和双截龙.nes	262160	7	256	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/忍者警察/忍者警察.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/忍者龙剑传1/忍者龙剑传1.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/忍者龙剑传2/忍者龙剑传2.nes	335888	4	128	200	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/忍者龙剑传3/忍者龙剑传3.nes	344080	4	128	208	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/快乐机器人格斗/快乐机器人格斗.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/快打旋风3/快打旋风3.nes	786448	90	256	512	False	False	False	True			mapper 90 unsupported	
+FC游戏 536款 含封面/快打旋风SD/快打旋风SD.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/快杰洋枪1/快杰洋枪1.nes	262160	97	256	0	False	False	False	False			mapper 97 unsupported	
+FC游戏 536款 含封面/快杰洋枪2/快杰洋枪2.nes	262160	32	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/快杰洋枪3/快杰洋枪3.nes	262160	65	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/怒1/怒1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/怒2/怒2.nes	262160	2	256	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/怒3/怒3.nes	262287	1	128	128	False	False	False	True	picture		host picture	colors=8
+FC游戏 536款 含封面/怪物聚会/怪物聚会.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/怪鸭历险记/怪鸭历险记.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/恐龙战队兽连者/恐龙战队兽连者.nes	393232	195	256	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/恶魔城1/恶魔城[佛易汉化组 吸血男爵汉化](JP)[ACT](1Mb).nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/恶魔城2/恶魔城2.nes	393232	10	128	256	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/恶魔城3/恶魔城1.nes	524304	26	256	256	False	True	False	False			mapper 26 unsupported	
+FC游戏 536款 含封面/恶魔城外传 王子传奇/恶魔城外传 王子传奇.nes	786464	23	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/恶魔招待状/恶魔招待状.nes	262160	4	128	128	False	True	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/惩罚者/惩罚者.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/成龙之龙/成龙之龙.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=15
+FC游戏 536款 含封面/成龙踢馆1/成龙踢馆.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/成龙踢馆2/成龙踢馆2.nes	262160	65	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/战地小子1/战地小子1.nes	262160	4	256	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/战地小子2/战地小子2.nes	524304	4	512	0	False	False	False	False	picture		host picture	colors=13; NES state pc=dac4 sp=f7 jam=0 pending=0 irq=0 ppu=8a/00
+FC游戏 536款 含封面/战场之狼/战场之狼.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/战斗之星/战斗之星.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/战斗原始人/战斗原始人.nes	262288	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/战斗坦克/战斗坦克.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/所罗门之钥1/所罗门之钥.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/所罗门之钥2/所罗门之钥2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/扑扇的小鸟/扑扇的小鸟.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/打砖块/打砖块.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/打空气1/打空气1.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/打空气2/打空气2.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/打鸭子/打鸭子.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/抢险特攻队/抢险特攻队.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/披萨大战/披萨大战.nes	262160	18	128	128	False	False	False	False	picture		host picture	colors=15
+FC游戏 536款 含封面/拉格朗日点/拉格朗日点.nes	1048592	85	1024	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/拉迪亚战记/拉迪亚战记.nes	786448	199	512	256	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/拳无虚发/拳无虚发.nes	262160	9	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/排球/排球.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/摩登原始人1/摩登原始人1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/摩登原始人2/摩登原始人2.nes	655376	115	128	512	False	False	False	False			mapper 115 unsupported	
+FC游戏 536款 含封面/摩艾君/摩艾君.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/攻击动物学园/攻击动物学园.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/救火英雄/救火英雄.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/敲冰块/敲冰块.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/斗者挽歌/斗者挽歌.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/斧王/斧王.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/斯坦利-寻找利文斯敦博士/斯坦利-寻找利文斯敦博士.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/新人类/新人类.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/时空地带/时空地带.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/时空小子/时空小子.nes	131216	2	128	0	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/时间旅行者/时间旅行者.nes	262160	250	128	128	False	False	False	False			mapper 250 unsupported	
+FC游戏 536款 含封面/星之卡比 梦之泉物语/星之卡比 梦之泉物语.nes	786448	4	512	256	False	True	False	False	picture		host picture	colors=4; NES state pc=c306 sp=f0 jam=0 pending=0 irq=0 ppu=aa/1e
+FC游戏 536款 含封面/星际咖啡馆/星际咖啡馆.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/星际魂斗罗/星际魂斗罗.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/暴力溜冰/暴力溜冰.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/暴坊天狗/暴坊天狗.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=16; NES state pc=d687 sp=68 jam=0 pending=0 irq=0 ppu=a8/18
+FC游戏 536款 含封面/最终幻想1+2/最终幻想1+2.nes	1048592	245	1024	0	False	True	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/最终幻想3/最终幻想3.nes	1048592	4	1024	0	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/月光宝石/月光宝石.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/月宫桌球/月宫桌球.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/月风魔传/月风魔传.nes	393232	23	128	256	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/机器子战记/机器子战记.nes	671760	4	512	144	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/机械战警1/机械战警1.nes	393232	195	256	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/机械战警2/机械战警2.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/机械战警3/机械战警3.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/机车大赛/机车大赛.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/杀虫战记/杀虫战记.nes	393232	33	128	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/杰森一家/杰森一家.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/松鼠大战1/松鼠大战1.nes	393232	192	256	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/松鼠大战2/松鼠大战2.nes	393232	192	256	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/柯纳米世界1/柯纳米世界1.nes	524304	23	256	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/柯纳米世界2/柯纳米世界2.nes	393232	21	256	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/梦之企鹅物语/梦之企鹅物语.nes	393232	191	256	128	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/梦之勇士/梦游.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/梦境之王/梦境之王.nes	786448	199	512	256	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/梦工场惊魂/梦工场惊魂.nes	131088	103	128	0	False	False	False	False			mapper 103 unsupported	
+FC游戏 536款 含封面/死神修道院/死神修道院.nes	131088	2	128	0	False	False	True	True	picture		host picture	colors=5
+FC游戏 536款 含封面/气球大战/气球大战.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=17
+FC游戏 536款 含封面/沙罗曼蛇/沙罗曼蛇.nes	393232	19	128	256	False	True	False	False	uniform	picture	host picture	colors=8
+FC游戏 536款 含封面/沙那多/沙那多.nes	262160	1	256	0	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/泡泡龙1/泡泡龙1.nes	188432	1	128	56	False	False	False	False	picture		host picture	colors=15
+FC游戏 536款 含封面/泡泡龙2/泡泡龙2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/泪之仓库番 特别版/Namida no Soukoban Special (J) [T+Eng_KingMike][1.0].fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/洛克人1/洛克人1.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/洛克人2/洛克人2.nes	262160	1	256	0	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/洛克人3/洛克人3.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/洛克人4/洛克人4.nes	524304	4	512	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/洛克人5/洛克人5.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/洛克人6/洛克人6.nes	1048608	4	512	0	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/海底两万里/海底两万里.nes	262160	4	128	128	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/海格力斯的荣光2/海格力斯的荣光2.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/淘金者/淘金者.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/混沌世界/混沌世界.nes	786448	195	512	256	False	True	False	False	picture		host picture	colors=15
+FC游戏 536款 含封面/游园地/游园地.nes	786464	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/滚球乐园/滚球乐园.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/滚雷行动/滚雷行动.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/潘克/潘克.nes	65552	1	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/潘泽尔的冒险2/The Adventures of Panzer II (Demo) (v0.6).nes	524304	30	512	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/激光入侵/激光入侵.nes	262160	5	128	128	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=8029 sp=ff jam=0 pending=0 irq=0 ppu=28/00
+FC游戏 536款 含封面/激斗四驱车/激斗四驱车.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/火之鸟/火之鸟.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/火炮/火炮.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/火焰之纹章 暗黑龙与光之剑/火焰之纹章 暗黑龙与光之剑.nes	786449	165	512	128	False	True	False	False			mapper 165 unsupported	
+FC游戏 536款 含封面/火焰之纹章外传/火焰之纹章外传.nes	655376	165	512	128	False	True	False	False			mapper 165 unsupported	
+FC游戏 536款 含封面/火箭人/火箭人.nes	262160	1	256	0	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/火箭车/火箭车.nes	24592	0	16	8	False	False	False	True	picture		host picture	colors=9
+FC游戏 536款 含封面/灵幻道士/灵幻道士.nes	262160	1	256	0	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/炎之斗球儿弹平/炎之斗球儿弹平.nes	393232	69	128	256	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=e84e sp=df jam=0 pending=0 irq=0 ppu=a8/00
+FC游戏 536款 含封面/炎之斗球儿弹平2/炎之斗球儿弹平2.nes	524304	69	256	256	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/炸弹人1/炸弹人.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/炸弹人2/炸弹人2.nes	131088	1	128	0	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/炸弹人2002/Bomberman 2002 (Unl).nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/烈火92/烈火92.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/热带之星1/热带之星.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/热带之星2/热带之星2.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/热血新记录/热血新记录.nes	524304	74	256	256	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/热血时代剧/热血时代剧.nes	393232	191	256	128	False	True	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/热血曲棍球/热血曲棍球.nes	524304	74	256	256	False	False	False	False	picture		host picture	colors=6; NES state pc=e6e5 sp=f5 jam=0 pending=0 irq=0 ppu=08/06
+FC游戏 536款 含封面/热血格斗传说/热血格斗传说.nes	408768	74	256	136	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/热血物语/热血物语.nes	327696	191	192	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/热血硬派/热血硬派.nes	147472	2	144	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/热血篮球/热血篮球.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/热血足球联盟/热血足球联盟.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/热血进行曲/热血进行曲.nes	483344	4	256	216	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/热血高校躲避球/热血高校躲避球.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/热血高校躲避球部 足球篇/热血高校躲避球部 足球篇.nes	917536	74	256	256	False	False	False	False	picture		host picture	colors=3; NES state pc=fd61 sp=f3 jam=0 pending=0 irq=2 ppu=88/00
+FC游戏 536款 含封面/爆击战士87/爆击战士87.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/爱战士尼科鲁/爱战士尼科鲁.nes	262160	42	128	128	False	False	False	False			mapper 42 unsupported	
+FC游戏 536款 含封面/爱的小屋/爱的小屋.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/特救指令/特救指令.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/猫和老鼠/猫和老鼠.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/猫抓老鼠1/猫抓老鼠.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/猫抓老鼠2/猫抓老鼠2.nes	688160	4	128	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/猫里奥1/猫里奥.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/猫里奥2/猫里奥2.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/猫里奥3/猫里奥3.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/瓦强世界3/瓦强世界3.nes	524304	19	256	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/瓦里奥之森/瓦里奥之森.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/生化战士丹/生化战士丹.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/电击作战/电击作战.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/男孩和他的软泥/男孩和他的软泥.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/疯狂豪宅/疯狂豪宅.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/白烂贱客之逃出商场/白烂贱客之逃出商场.nes	393232	1	256	128	False	True	True	True	picture		host picture	colors=5
+FC游戏 536款 含封面/真田十勇士/真田十勇士.nes	524304	165	256	256	False	True	False	False			mapper 165 unsupported	
+FC游戏 536款 含封面/眼镜蛇特种部队1/眼镜蛇特种部队1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/眼镜蛇特种部队2/眼镜蛇特种部队2.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/碰碰车/碰碰车.nes	32784	87	16	16	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/磁片之城/Famimaga Disk 6 - Janken Disk Jou (J).fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/神圣战记/神圣战记.nes	262160	78	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/神气精灵/Q Boy (Sachen) [!].nes	262160	191	256	0	False	False	False	False	uniform	uniform	host uniform	colors=1; NES state pc=fd5b sp=00 jam=0 pending=0 irq=1 ppu=80/00
+FC游戏 536款 含封面/神秘之结/神秘之结.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/神秘起源/神秘起源.nes	524304	30	512	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/究极虎/究极虎.nes	262160	4	128	128	False	True	False	False	picture		host picture	colors=11; NES state pc=f610 sp=fb jam=0 pending=0 irq=0 ppu=28/06
+FC游戏 536款 含封面/空中要塞/空中要塞.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/空中魂斗罗 最终任务/空中魂斗罗 最终任务.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/突然君/突然君.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/笨蛋王子大冒险/笨蛋王子大冒险.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/第二次超级机器人大战/第二次超级机器人大战.nes	524304	194	256	256	False	True	False	False			mapper 194 unsupported	
+FC游戏 536款 含封面/筋肉人摔角/筋肉人摔角.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/米奇3梦幻气球/米奇3梦幻气球.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/米格29战斗机/米格29战斗机.nes	131088	71	128	0	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/米老鼠1代/米老鼠1代.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/粉碎坦克/粉碎坦克.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/糖果屋/糖果屋.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/红巾特攻队/红巾特攻队.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/红白机Jump1英雄列传/红白机Jump英雄列传.nes	393232	16	256	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/红白机Jump2最强的七人/红白机Jump2最强的七人.nes	524304	16	512	0	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=8021 sp=ee jam=1 pending=0 irq=0 ppu=90/1e
+FC游戏 536款 含封面/纽约大拳猫/纽约大拳猫.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/终极特技人/终极特技人.nes	262160	71	256	0	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/终结者2审判日/终结者2审判日.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/绿色兵团/绿色兵团.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/网球/网球.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/罗纽传说/Roniu's Tale (Demo).nes	262160	2	256	0	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/罗罗大冒险1/罗罗大冒险1.nes	65552	1	32	32	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/罗罗大冒险2/罗罗大冒险2.nes	65552	4	32	32	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/罗罗大冒险3/罗罗大冒险3.nes	262160	1	128	128	False	False	False	True	picture		host picture	colors=9
+FC游戏 536款 含封面/美丽新世界/美丽新世界.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/翼人/翼人.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/耀西的饼干/耀西的饼干.nes	196624	4	128	64	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/职业高尔夫球手 猿/Pro Golfer Saru - Kage no Tournament (J).fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/能源战士1/能源战士1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/能源战士2/能源战士2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/脱狱1/脱狱1.nes	262160	1	128	128	False	False	False	True	picture		host picture	colors=4
+FC游戏 536款 含封面/脱狱2/脱狱2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/腐尸之屋：顽皮的涂鸦/腐尸之屋：顽皮的涂鸦.nes	262160	19	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/至日-三次元迷宫的狂兽/至日-三次元迷宫的狂兽.nes	131088	7	128	0	False	False	False	False	picture		host picture	colors=19
+FC游戏 536款 含封面/航空小英雄/航空小英雄.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/花式撞球/花式撞球.nes	188432	4	128	56	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/荆轲新传/荆轲新传.nes	262160	240	128	128	False	False	False	False			mapper 240 unsupported	
+FC游戏 536款 含封面/荒野大镖客/荒野大镖客.nes	163856	119	128	32	False	False	False	False			mapper 119 unsupported	
+FC游戏 536款 含封面/菲力克斯猫/菲力克斯猫.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/蓝色计划/蓝色计划.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/虎克船长/虎克船长.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/虎胆妙算汉化版/虎胆妙算汉化版.nes	524304	192	256	256	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/蝙蝠侠1/蝙蝠侠1.nes	393232	69	128	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/蝙蝠侠2/蝙蝠侠2.nes	393232	69	128	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/蝙蝠侠3/蝙蝠侠3.nes	393232	4	128	256	False	True	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/街头格斗小子/街头格斗小子.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=18
+FC游戏 536款 含封面/街霸 12人街霸/街霸 12人街霸.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/街霸 16人街霸/街霸 16人街霸.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/街霸 20人街霸/街霸 20人街霸.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/街霸 20人街霸CONY/街霸 20人街霸CONY.nes	524304	45	256	256	False	False	False	False			mapper 45 unsupported	
+FC游戏 536款 含封面/街霸 4人街霸/街霸 4人街霸.nes	262160	189	128	128	False	False	False	False			mapper 189 unsupported	
+FC游戏 536款 含封面/街霸 56人街霸/街霸 56人街霸.nes	655376	91	128	512	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/街霸 5人街霸/街霸 5人街霸.nes	262160	189	128	128	False	False	False	False			mapper 189 unsupported	
+FC游戏 536款 含封面/街霸 60人街霸/街霸 60人街霸(10人CONY).nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/街霸 8人街霸/街霸 8人街霸.nes	393232	83	128	256	False	False	False	False			mapper 83 unsupported	
+FC游戏 536款 含封面/街霸 9人街霸/街霸 9人街霸.nes	655376	91	128	512	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/街霸 9人街霸汉化版/街霸 9人街霸汉化版.nes	655376	91	128	512	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/街霸 少年街霸2/街霸 少年街霸2.nes	393232	187	128	256	False	False	False	False			mapper 187 unsupported	
+FC游戏 536款 含封面/街霸 少年街霸2 97/街霸 少年街霸2 97.nes	786448	187	256	512	False	False	False	False			mapper 187 unsupported	
+FC游戏 536款 含封面/街霸2010/街霸2010.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/西游记1/西游记1.nes	262160	4	256	0	False	True	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/西游记2/西游记2.nes	262160	18	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/西部小子/西部小子.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/解谜大作战/解谜大作战.nes	262160	88	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/詹姆斯邦德007/詹姆斯邦德007.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/谜之村雨城英译版/谜之村雨城英译版.fds	131016										not iNES (FDS or other)	
+FC游戏 536款 含封面/赌神/赌神.nes	393232	74	256	128	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/赤影战士/赤影战士.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/赤色要塞/赤色要塞.nes	262160	19	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/超惑星战记/超惑星战记.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/超时空要塞/超时空要塞.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/超级中国人2/超级中国人2.nes	524304	5	256	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=8070 sp=f9 jam=1 pending=0 irq=1 ppu=00/18
+FC游戏 536款 含封面/超级中国人3/超级中国人3.nes	262160	1	128	128	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/超级宝宝/超级宝宝.nes	262160	25	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/超级间谍猎人/超级间谍猎人.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=17
+FC游戏 536款 含封面/超级马里奥1/超级马里奥1.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/超级马里奥2/超级马里奥2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/超级马里奥2 失落的关卡/超级马里奥2 失落的关卡.nes	131088	50	128	0	False	False	False	False			mapper 50 unsupported	
+FC游戏 536款 含封面/超级马里奥3/超级马里奥3.nes	458768	4	256	192	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/超级马里奥世界/超级马里奥世界.nes	786448	90	512	256	False	False	False	False			mapper 90 unsupported	
+FC游戏 536款 含封面/超级马里奥医生/超级马里奥医生.nes	65552	1	32	32	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/超级马里奥拆屋工/超级马里奥拆屋工.nes	98320	140	64	32	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/超级马里奥无限-豪华版/超级马里奥无限-豪华版.nes	196624	1	128	64	False	True	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/超级马里奥格斗/超级马里奥格斗.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/超级马里奥水管工/超级马里奥水管工.nes	49168	3	32	16	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/超越地平线/超越地平线.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/越野战车/越野战车.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/越野摩托/越野摩托.nes	41104	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/趣味方块/趣味方块.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/足球/足球.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/跌落地带/跌落地带.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/跳蚤/Flea! (Demo) (2020) (Mapper 30).nes	524304	30	512	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/踢王/踢王.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/迷宫寺院/迷宫寺院.nes	131088	108	128	0	False	False	False	False			mapper 108 unsupported	
+FC游戏 536款 含封面/迷宫岛/迷宫岛.nes	262160	32	128	128	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/迷糊蛋/迷糊蛋.nes	393232	69	128	256	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/追赶跑跳蹦/追赶跑跳蹦.nes	65552	4	32	32	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/遗迹惑星之野望/遗迹惑星之野望.nes	262160	1	128	128	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/遥控赛车2/遥控赛车2.nes	262160	7	256	0	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/重力装甲/重力装甲.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/重装机兵/重装机兵.nes	786448	74	512	256	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/野狼特工队/野狼特工队.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/金属之光/金属之光.nes	1572880	5	1024	512	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=fe7a sp=fa jam=0 pending=0 irq=0 ppu=80/1e
+FC游戏 536款 含封面/铁拳对钢拳/铁拳对钢拳.nes	524304	16	256	256	False	False	False	False	picture		host picture	colors=4; NES state pc=f8bf sp=ee jam=0 pending=0 irq=0 ppu=88/1e
+FC游戏 536款 含封面/铁板阵/铁板阵.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/铁面无私/铁面无私.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/银河号/银河号.nes	131216	2	128	0	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/银河战士/银河战士.nes	131088	1	128	0	False	False	False	True	picture		host picture	colors=11
+FC游戏 536款 含封面/银河战士之盗贼多恩/银河战士之盗贼多恩.nes	786448	4	512	256	False	True	False	False	picture		host picture	colors=17
+FC游戏 536款 含封面/银河武士/银河武士.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/银白色沙加/银白色沙加.nes	786448	199	512	256	False	True	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/长枪手传奇/长枪手传奇.nes	393232	4	256	128	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/长毛狗3/长毛狗3.nes	65552	2	64	0	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/闪亮亮星星之夜DX/闪亮亮星星之夜DX.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/阿基拉/阿基拉.nes	524304	33	256	256	False	False	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/阿尔戈斯战士/阿尔戈斯战士.nes	262160	4	256	0	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/阿尔瓦的觉醒/阿尔瓦的觉醒.nes	524304	2	512	0	False	True	True	True	picture		host picture	colors=8
+FC游戏 536款 含封面/阿拉丁/阿拉丁.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=12
+FC游戏 536款 含封面/阿贝道X/阿贝道X.nes	786464	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/雪人兄弟/雪人兄弟.nes	393232	192	128	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/雷电节奏/雷电节奏.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=4
+FC游戏 536款 含封面/霹雳神兵/霹雳神兵.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/音速小子5代/音速小子5代.nes	786448	4	512	256	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/音速小子5代马里奥版/音速小子5代马里奥版.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/顽皮狗/顽皮狗.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/领土之战/Rampart (J) [T+Eng][0.90].nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/飞翔鲛/飞翔鲛.nes	262160	1	128	128	False	False	False	True	picture		host picture	colors=13
+FC游戏 536款 含封面/飞行勇士/飞行勇士.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=3
+FC游戏 536款 含封面/香蕉王子大冒险/香蕉王子大冒险.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/马戏团/马戏团.nes	24592	0	16	8	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/骷髅13/骷髅13.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/骷髅13第二章/骷髅13第二章.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/鬼太郎-妖怪大魔境/鬼太郎-妖怪大魔境.nes	65552	3	32	32	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/魂斗罗1/魂斗罗1.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/魂斗罗2/魂斗罗2.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/魂斗罗3 力量/魂斗罗3 力量.nes	278544	4	128	144	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/魂斗罗7 超级战魂/魂斗罗7 超级战魂.nes	262160	4	128	128	False	False	False	True	picture		host picture	colors=14
+FC游戏 536款 含封面/魅影智慧/魅影智慧.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/魍魉战记/魍魉战记.nes	786448	74	512	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=eacc sp=68 jam=0 pending=0 irq=1 ppu=00/00
+FC游戏 536款 含封面/魔城传说2 大魔司教/魔城传说2 大魔司教.nes	262160	4	256	0	False	True	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/魔境铁人/魔境铁人.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/魔天童子/魔天童子.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/魔女小红帽/魔女小红帽.nes	278544	74	144	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/魔法世界/魔法世界.nes	262160	1	256	0	False	True	False	False	picture		host picture	colors=5
+FC游戏 536款 含封面/魔法总动员/魔法总动员.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/魔法王国大冒险/魔法王国大冒险.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/魔烛/魔烛.nes	655376	4	512	128	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/魔界岛/魔界岛.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/魔界村/魔界村.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=9
+FC游戏 536款 含封面/魔界村外传2/魔界村外传2.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=17
+FC游戏 536款 含封面/魔神英雄传外传/魔神英雄传外传.nes	524304	4	512	0	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/魔道士的阴谋/魔道士的阴谋.nes	524304	4	256	256	False	True	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/魔鬼总动员/魔鬼总动员.nes	262160	4	128	128	False	False	False	False	picture		host picture	colors=2; NES state pc=fe59 sp=f7 jam=0 pending=0 irq=0 ppu=a8/18
+FC游戏 536款 含封面/鲁邦三世/鲁邦三世.nes	524304	4	256	256	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/鳄鱼先生/鳄鱼先生.nes	393232	4	128	256	False	False	False	False	picture		host picture	colors=2
+FC游戏 536款 含封面/鸟人战队/鸟人战队.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/麦当劳世界/麦当劳世界.nes	262160	1	128	128	False	False	False	False	picture		host picture	colors=6
+FC游戏 536款 含封面/黑白棋/黑白棋.nes	40976	0	32	8	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/龙之忍者/龙之忍者.nes	262160	19	128	128	False	False	False	False	picture		host picture	colors=10
+FC游戏 536款 含封面/龙战士/龙战士.nes	262288	1	128	128	False	False	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/龙牙/龙牙.nes	131088	4	128	0	False	False	False	False	picture		host picture	colors=13
+FC游戏 536款 含封面/龙珠 神龙之谜/龙珠神龙之谜.nes	164368	34	128	32	True	False	False	False	picture		host picture	colors=14
+FC游戏 536款 含封面/龙珠 超武斗传2/龙珠-超武斗传2.nes	393232	91	128	256	False	False	False	False	picture		host picture	colors=11
+FC游戏 536款 含封面/龙珠Z1 赛亚人灭绝计划/龙珠Z外传 - 赛亚人灭绝计划.nes	786448	253	256	512	False	True	False	False			mapper 253 unsupported	
+FC游戏 536款 含封面/龙珠Z2 激神弗利萨/龙珠Z2 激神弗利萨.nes	786448	199	512	256	False	True	False	False	picture		host picture	colors=7
+FC游戏 536款 含封面/龙珠Z3 烈战人造人间/龙珠Z3 烈战人造人间.nes	786448	199	512	256	False	True	False	False	uniform	uniform	host uniform	colors=1; NES state pc=ce1d sp=f8 jam=0 pending=0 irq=0 ppu=00/00
+FC游戏 536款 含封面/龙穴历险记/龙穴历险记.nes	131088	2	128	0	False	False	False	False	picture		host picture	colors=8
+FC游戏 536款 含封面/龙魂 新的传说/龙魂 新的传说.nes	262160	88	128	128	False	False	False	False	picture		host picture	colors=8
