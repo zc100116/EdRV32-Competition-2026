@@ -248,6 +248,64 @@ DRM/APM 列尚不能画到精确 x；中心未列入这些区域的坐标不擅�
   DDR bank R4/R5; L6/L7 and other banks: exact region boundaries not found.
 ```
 
+### 1.6 硬块列、站点名与区域坐标的换算（卡 11 实测，2026-10-30）
+
+来源：`origin/win/20261030-11-b3-device-map`（9ccde944）。全器件站点清单取自 PDS 安装目录
+`arch/vendor/pango/logos2/pg2l200h/db/clk_region_info.txt`（`artifacts/pg2l200h_sites.tsv`），
+坐标样点来自 PCE Properties 截图（`artifacts/pce_devices.tsv`）。
+
+**区域坐标就是 PCE Properties 中的 `site(x,y)`**（Properties 的另一对 x/y 是像素）。
+依据：`region -create cr_x1y2 -value (124,238,100,149)` 的 Statistics 为 DRM 50、APM 50 站点、
+CLMA+CLMS 4600，与安装清单 CLOCK_REGION_6 一致。
+
+| 器件 | 站点名 | site(x,y) |
+|---|---|---|
+| CLMA | CLMA_21_486 | (4,79) |
+| CLMA | CLMA_717_1225 | (235,200) |
+| DRM | DRM_226_366 | (70,62) |
+| DRM | DRM_694_732 | (226,122) |
+| APM | APM_65_120 | (18,22) |
+| APM | APM_587_1008 | (190,167) |
+
+**纵向（精确）**：APM/DRM 每列自下而上排 50 个站点（名称 y 为 0、30、…、1500，跨时钟行时步长 36），
+第 k 个站点（k = 0..49）的 y ≈ 5k + 2；时钟区域行 Yr 对应 k = 10r..10r+9，即 y = 50r..50r+49。
+4 个样点（k = 4、12、24、33 → y = 22、62、122、167）全部符合。
+
+**横向（估算，±2）**：按两端样点线性插值，APM：`x ≈ 18 + (n − 65) × 172/522`；
+DRM：`x ≈ 70 + (n − 226) × 156/468`（n 为站点名中的第一个数）。用时钟区域边界核对
+（X0 ≤ 121、X1 ≥ 124；Y0/Y4 行 X0 ≤ 91、X1 ≥ 157），19 列的归属与安装清单逐列一致。
+区域边界放在两列之间即可，不依赖 ±2 的精度。
+
+| 类型 | 名称 x | x（估算） | 所在列 | 覆盖的时钟行 | 站点数 |
+|---|---:|---:|---|---|---:|
+| DRM | 40 | 8 | X0 | Y0–Y4 | 50 |
+| APM | 65 | 18 | X0 | Y0–Y4 | 50 |
+| APM | 161 | 50 | X0 | Y0–Y4 | 50 |
+| DRM | 190 | 58 | X0 | Y0–Y4 | 50 |
+| DRM | 226 | 70 | X0 | Y0–Y3，Y4 只有 5 个 | 45 |
+| DRM | 280 | 88 | X0 | Y1–Y3 | 30 |
+| APM | 311 | 99 | X0 | Y1–Y3 | 30 |
+| DRM | 334 | 106 | X0 | Y1–Y3 | 30 |
+| APM | 359 | 115 | X0 | Y1–Y3 | 30 |
+| APM | 413 | 133 | X1 | Y1–Y3 | 30 |
+| DRM | 436 | 140 | X1 | Y1–Y3 | 30 |
+| APM | 461 | 148 | X1 | Y1–Y3 | 30 |
+| DRM | 490 | 158 | X1 | Y1–Y3 | 30 |
+| APM | 527 | 170 | X1 | Y0–Y4 | 50 |
+| DRM | 550 | 178 | X1 | Y0–Y4 | 50 |
+| APM | 587 | 190 | X1 | Y0–Y4 | 50 |
+| DRM | 622 | 202 | X1 | Y0–Y4 | 50 |
+| APM | 659 | 214 | X1 | Y0–Y4 | 50 |
+| DRM | 694 | 226 | X1 | Y0–Y4 | 50 |
+
+合计 APM 370 站点、DRM 415 站点。**计数口径**：PCE/安装清单按 APM 站点计，资源报告按运算子单元计
+（每站点 `XAPM_CORE_U/D` 两个），所以资源报告的 APM 740 = 370 站点 × 2；本项目资源报告中的
+APM 数（例如 B3F 569）要除以 2 才是站点数。DRM 两者都按 36K 块计。
+
+**IO 与 DDR**：IOLHR 只在左缘（名称 x = 16，x ≈ 2）和右缘（名称 x = 724，x ≈ 236）各 250 个。
+B3V 中 DDR3 的 DDR_PHY/TSERDES/PPLL 在右缘名称 y = 613–1077，即 y ≈ 100–178（X1 的 Y2–Y3）；
+DDR 的 GPLL 在右缘 y ≈ 126；时钟缓冲 USCM 在芯片中央（名称 x = 383）。
+
 ## 2. PDS 支持哪些手动布局手段
 
 ### 2.1 区域约束 PAP_REGION 与分组 PAP_GROUP
@@ -662,3 +720,4 @@ CongestionNetInfo；这项默认关闭、Tcl 名本版未取得，可在需要�
 |---|---|---|
 | 2026-10-28 | 第一版 | 基于本项目 P1/P2/P3 结果、厂商 demo/器件数据手册整理内部排布与手动布局证据；任务引用提交 `05a6f67`，本次读取的分支文档基线为 `358246b` |
 | 2026-10-28 | 第二版 | 依据 `Pango_Design_Suite_User_Guide` V1.5、`User_Constraint_Editor_User_Guide` V1.7、`Physical_Constraint_Editor_User_Guide` V1.3 逐项补充语法、坐标、资源与阶段边界，修正 PG2L200H hold 选项适用性，增加布局导出、可用 FDC/Tcl 与 P1 实验；Windows 未决项由 12 项重写为 6 项 |
+| 2026-10-30 | 第三版 | 新增 1.6 节：卡 11（`win/20261030-11-b3-device-map` 9ccde944）的全器件 APM/DRM 站点清单、6 个 PCE 样点和 cr_x1y2 统计，确定区域坐标即 `site(x,y)`、19 条硬块列的 x 和覆盖行、APM 站点/子单元计数口径、DDR PHY 位置；6.1 节 R-W01 由此解决 |
