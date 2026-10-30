@@ -273,6 +273,9 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
     localparam bit [31:0] A = 32'h10000000;
     localparam bit [31:0] B = 32'h10001000;
     localparam bit [31:0] C = 32'h10002000;
+    // I$ same-set aliases: 32 KiB, 2 ways -> 512 sets x 32 B, so sets repeat every 16 KiB.
+    localparam bit [31:0] IC_B = 32'h10004000;
+    localparam bit [31:0] IC_C = 32'h10008000;
     localparam bit [31:0] DEV = 32'h20000000;
     localparam bit [31:0] STATUS = 32'h40005008;
 
@@ -778,12 +781,12 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
             end
             102: begin
                 expect_fetch_bus(A, 1);
-                expect_fetch_bus(B, 1);
+                expect_fetch_bus(IC_B, 1);
                 expect_fetch_bus(A, 0);
-                expect_fetch_bus(C, 1);
+                expect_fetch_bus(IC_C, 1);
                 expect_fetch_bus(A, 0);
-                expect_fetch_bus(B, 1);
-                expect_fetch_bus(C, 1);
+                expect_fetch_bus(IC_B, 1);
+                expect_fetch_bus(IC_C, 1);
             end
             103: begin
                 expect_fetch_bus(0, 1);
