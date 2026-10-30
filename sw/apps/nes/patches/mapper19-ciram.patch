@@ -1,0 +1,31 @@
+--- a/mappers/map019.c
++++ b/mappers/map019.c
+@@ -29,13 +29,18 @@
+ 
+ /* TODO: shouldn't there be an h-blank IRQ handler??? */
+ 
++/* CIRAM is console RAM, independent of cartridge CHR-ROM/CHR-RAM.
++ * Reference: https://www.nesdev.org/wiki/Namco_163#Nametable_banks
++ */
++static uint8 *ciram;
++
+ /* Special mirroring macro for mapper 19 */
+ #define N_BANK1(table, value) \
+ { \
+    if ((value) < 0xE0) \
+       ppu_setpage(1, (table) + 8, &mmc_getinfo()->vrom[((value) % (mmc_getinfo()->vrom_banks * 8)) << 10] - (0x2000 + ((table) << 10))); \
+    else \
+-      ppu_setpage(1, (table) + 8, &mmc_getinfo()->vram[((value) & 7) << 10] - (0x2000 + ((table) << 10))); \
++      ppu_setpage(1, (table) + 8, &ciram[((value) & 1) << 10] - (0x2000 + ((table) << 10))); \
+    ppu_mirrorhipages(); \
+ }
+ 
+@@ -46,6 +51,8 @@
+ 
+ static void map19_init(void)
+ {
++   /* mmc_setpages initially maps nametable zero to CIRAM page zero. */
++   ciram = ppu_getpage(8) + 0x2000;
+    irq.counter = irq.enabled = 0;
+ }
+ 
