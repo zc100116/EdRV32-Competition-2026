@@ -43,10 +43,21 @@ static void sync_banks(void)
     bool multicart = mmc_getinfo()->mapper_number == 191 && mmc_getinfo()->vrom_banks == 32;
     if (multicart)
         fixed = 0x18 + outer * 2;
-    mmc_bankrom(8, 0x8000, command & 0x40 ? fixed : banks[6]);
-    mmc_bankrom(8, 0xa000, banks[7]);
-    mmc_bankrom(8, 0xc000, command & 0x40 ? banks[6] : fixed);
-    mmc_bankrom(8, 0xe000, multicart ? fixed + 1 : MMC_LASTBANK);
+    int prg6 = banks[6];
+    int prg7 = banks[7];
+    int last = multicart ? fixed + 1 : MMC_LASTBANK;
+    /* https://www.nesdev.org/wiki/INES_Mapper_245: CHR A11 becomes PRG A19. */
+    if (mmc_getinfo()->mapper_number == 245) {
+        int high = (banks[command & 0x80 ? 2 : 0] & 2) << 5;
+        fixed = 0x3e | high;
+        last = 0x3f | high;
+        prg6 = (prg6 & 0x3f) | high;
+        prg7 = (prg7 & 0x3f) | high;
+    }
+    mmc_bankrom(8, 0x8000, command & 0x40 ? fixed : prg6);
+    mmc_bankrom(8, 0xa000, prg7);
+    mmc_bankrom(8, 0xc000, command & 0x40 ? prg6 : fixed);
+    mmc_bankrom(8, 0xe000, last);
     int base = command & 0x80 ? 4 : 0;
     int selected[8] = {banks[0] & 0xfe, banks[0] | 1, banks[1] & 0xfe,
                        banks[1] | 1, banks[2], banks[3], banks[4], banks[5]};
@@ -54,7 +65,7 @@ static void sync_banks(void)
         int page = i ^ base;
         int bank = selected[i];
         /* https://www.nesdev.org/wiki/INES_Mapper_199: unbanked CHR-RAM. */
-        if (mmc_getinfo()->mapper_number == 199)
+        if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->mapper_number == 245)
             bank = page;
         chr_banks[page] = bank;
         chr_writable[page] = ram_index(bank) >= 0;
