@@ -92,7 +92,7 @@ NES ROM prg=16 chr=8 mapper=0
 
 ## 用户自备SMB ROM（补测）
 
-用户此前暂无ROM而暂停该项，之后提供本地文件并指定了一个mapper 0版本重试。原文件已是iNES格式，仅在仓库外解压，未修改头或转换mapper。文档中按任务卡仅称“用户自备SMB ROM”，不记录文件路径，不提交ROM。
+用户此前暂无ROM而暂停该项，之后提供本地文件并指定了一个mapper 0版本重试。原文件已是iNES格式，仅在仓库外解压，未修改头或转换mapper。此前按任务卡未提交ROM；用户随后明确要求上传third_party/nes目录，本轮按用户最新指令一并提交，见末尾补充。
 
 串口加载及运行关键原文：
 
@@ -123,13 +123,20 @@ NES ROM prg=32 chr=8 mapper=0
 
 可确认事实：ELF和ROM各段Load result均PASS，ROM识别为PRG32KiB、CHR8KiB、mapper0，日志包含Read in trainer at $7000，程序持续报告FPS。当前不能确定灰屏来自该改版ROM/Trainer兼容性、模拟核心还是图像输出链路；没有擅自改ROM、模拟器或RTL，不把猜测写成根因。
 
-测试后只停止本次PC串口辅助进程，释放COM7；板端未被复位。用户提供的ROM和扫描清单不入artifacts，原始串口日志uart/nes-smb.log已保留。
+测试后只停止本次PC串口辅助进程，释放COM7；板端未被复位。用户ROM目录按最新指令提交到third_party/nes，ROM不重复放入artifacts，原始串口日志uart/nes-smb.log已保留。
 ## 文件及范围
 
 - uart/s3.log：GUI整个保留缓冲的原始导出，覆盖本次S3到benchmark结束；可能含同会话前后记录，不冒充逐字节串口抓包。
 - uart/s3_gui_buffer.json、uart/s3_gui_status.json、s3_rx_hex.tsv：原始条目、状态快照及RX字节证据。
 - lvgl_split.tsv：17行、全部字段；benchmark_summary.txt、rnd_type_statistics.txt：相应原文。
 - uart/nes-template.log：后台工具直接写出的原始串口字节；nes_template_fps.tsv：全部帧率窗口。
-- checklist.md：已完成项、用户观察及SMB未执行说明。
+- checklist.md：已完成项、用户观察及SMB灰屏失败说明。
 
-没有提交ROM、bitstream或额外二进制。本卡只换软件，没有运行综合、布局布线或STA。未对源码版本或报告时间作额外核验。
+本轮按用户最新指令提交third_party/nes目录；没有提交bitstream。本卡只换软件，没有运行综合、布局布线或STA。未对源码版本或报告时间作额外核验。
+
+
+## 用户追加要求：上传本地NES目录（2026-10-31）
+
+用户明确要求将灰屏现象与third_party/nes一起上传，覆盖原任务卡不提交ROM的限制。此次提交该目录当前全部926个文件（918个.nes、8个.fds，合计266.27MiB），没有擅自删除或转换文件。目录已由用户整理为两个子目录：FC改版hack 390款 含封面、FC游戏 536款 含封面。
+
+复现入口：使用任务16的nes.elf，以115200、COM7加载“超级马里奥1超级版”ROM，进入Run后ROM识别为mapper0、PRG32KiB、CHR8KiB，含trainer；用户观察HDMI全灰。串口完整原文及fps窗口已在本任务artifacts/uart/nes-smb.log和nes_smb_fps.tsv保存。mapper头与加载成功不等于画面兼容通过。
