@@ -1,0 +1,256 @@
+Existing default report contains 232 path records across all clocks/corners/classes. Per-clock 200 paths have NOT been exported. No extra STA process was launched while three PnR jobs consume memory. Supplement after routing jobs finish.
+Startpoint  : u_eth/u_mdio/idx_r[2]/opit_0_inv_L6Q_perm/CLK
+Endpoint    : eth_mdio_o (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r
+ N3                                                      0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.040       0.040         ddr_ref_clk_p_i
+ IOBD_732_774/DIN                  td                    1.019       1.059 r       u_ddr_ref_clk/opit_0/O
+                                   net (fanout=1)        0.000       1.059         u_ddr_ref_clk/ntD
+ IOLHR_724_774/DI_TO_CLK           td                    0.110       1.169 r       u_ddr_ref_clk/opit_2/DI_TO_CLK
+                                   net (fanout=3)        0.304       1.473         ddr_ref_clk_w
+ MRCKB_721_762/CLKOUT_U_P          td                    0.155       1.628 r       u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst/CLKOUT_P
+                                   net (fanout=2)        0.447       2.075         u_ddr3/u_ddrphy_top/pll_refclk
+ RCKB_723_762/CLKOUT               td                    0.186       2.261 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk/CLKOUT
+                                   net (fanout=1)        0.464       2.725         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+ PPLL_727_613/CLKOUTPHY            td                    0.039       2.764 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY
+                                   net (fanout=36)       0.000       2.764         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+ DDRPHY_IOCLK_DIV_728_616/CLKOUT   td                    0.130       2.894 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT
+                                   net (fanout=35)       0.000       2.894         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+ GPLL_727_769/CLKOUT0                                    0.218       3.112 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.776       3.888         u_ddr3/u_ddrphy_top/gpll_clkout0
+ USCM_383_882/CLKOUT               td                    0.177       4.065 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg/CLKOUT
+                                   net (fanout=33833)
+                                                         1.627       5.692         clk_mem_w
+ CLMS_531_505/CLK                                                          r       u_eth/u_mdio/idx_r[2]/opit_0_inv_L6Q_perm/CLK
+
+ CLMS_531_505/Q1                   tco                   0.213       5.905 r       u_eth/u_mdio/idx_r[2]/opit_0_inv_L6Q_perm/L6Q
+                                   net (fanout=6)        0.128       6.033         u_eth/u_mdio/idx_r [2]
+ CLMA_531_504/Y1                   td                    0.235       6.268 r       u_eth/u_mdio/N77_2/gateop_LUT6DL5_perm/L6
+                                   net (fanout=1)        0.591       6.859         u_eth/u_mdio/_N203346
+ CLMA_519_511/Y1                   td                    0.206       7.065 f       u_eth/u_mdio/N5_inv/LUT6_inst_perm/L6
+                                   net (fanout=1)        5.623      12.688         eth_mdio_oe_w_inv
+ IOLHR_16_1308/DO_N                td                    0.445      13.133 f       eth_mdio_o_tri/opit_1/DO_N
+                                   net (fanout=1)        0.000      13.133         eth_mdio_o_tri/ntT
+ IOBD_0_1308/PAD                   tse                   2.500      15.633 r       eth_mdio_o_tri/opit_0/IO
+                                   net (fanout=1)        0.041      15.674         nt_eth_mdio_o
+ E21                                                                       r       eth_mdio_o (port)
+
+ Data arrival time                                                  15.674         Logic Levels: 4
+                                                                                   Logic: 3.599ns(36.055%), Route: 6.383ns(63.945%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_eth/u_mdio/divider_r[5]/opit_0_inv_L5Q_perm/CLK
+Endpoint    : eth_mdc_o (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r
+ N3                                                      0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.040       0.040         ddr_ref_clk_p_i
+ IOBD_732_774/DIN                  td                    1.019       1.059 r       u_ddr_ref_clk/opit_0/O
+                                   net (fanout=1)        0.000       1.059         u_ddr_ref_clk/ntD
+ IOLHR_724_774/DI_TO_CLK           td                    0.110       1.169 r       u_ddr_ref_clk/opit_2/DI_TO_CLK
+                                   net (fanout=3)        0.304       1.473         ddr_ref_clk_w
+ MRCKB_721_762/CLKOUT_U_P          td                    0.155       1.628 r       u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst/CLKOUT_P
+                                   net (fanout=2)        0.447       2.075         u_ddr3/u_ddrphy_top/pll_refclk
+ RCKB_723_762/CLKOUT               td                    0.186       2.261 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk/CLKOUT
+                                   net (fanout=1)        0.464       2.725         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+ PPLL_727_613/CLKOUTPHY            td                    0.039       2.764 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY
+                                   net (fanout=36)       0.000       2.764         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+ DDRPHY_IOCLK_DIV_728_616/CLKOUT   td                    0.130       2.894 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT
+                                   net (fanout=35)       0.000       2.894         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+ GPLL_727_769/CLKOUT0                                    0.218       3.112 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.776       3.888         u_ddr3/u_ddrphy_top/gpll_clkout0
+ USCM_383_882/CLKOUT               td                    0.177       4.065 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg/CLKOUT
+                                   net (fanout=33833)
+                                                         1.630       5.695         clk_mem_w
+ CLMS_531_523/CLK                                                          r       u_eth/u_mdio/divider_r[5]/opit_0_inv_L5Q_perm/CLK
+
+ CLMS_531_523/CR3                  tco                   0.211       5.906 f       u_eth/u_mdio/divider_r[5]/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=6)        5.983      11.889         nt_eth_mdc_o
+ IOLHR_16_1278/DO_P                td                    0.641      12.530 f       eth_mdc_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000      12.530         eth_mdc_o_obuf/ntO
+ IOBS_0_1278/PAD                   td                    2.266      14.796 f       eth_mdc_o_obuf/opit_0/O
+                                   net (fanout=1)        0.073      14.869         eth_mdc_o
+ A25                                                                       f       eth_mdc_o (port)
+
+ Data arrival time                                                  14.869         Logic Levels: 2
+                                                                                   Logic: 3.118ns(33.987%), Route: 6.056ns(66.013%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_rgmii/u_tx_clk_output/opit_1/OCLK
+Endpoint    : rgmii_txc_o (port)
+Path Group  : **default**
+Path Type   : max (slow corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             0.000       0.000 r
+ D19                                                     0.000       0.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       0.050         rgmii_rxc_i
+ IOBD_0_1368/DIN                   td                    0.897       0.947 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.947         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI_TO_CLK           td                    0.110       1.057 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        4.754       5.811         nt_rgmii_rxc_i
+ GPLL_727_463/CLKOUT0              td                    0.067       5.878 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.145       7.023         u_rgmii/clk_eth_pll_w
+ USCM_383_897/CLKOUT               td                    0.177       7.200 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=191)      1.783       8.983         clk_eth_w
+ IOLHR_16_1452/OCLK                                                        r       u_rgmii/u_tx_clk_output/opit_1/OCLK
+
+ IOLHR_16_1452/DO_P                tco                   2.923      11.906 r       u_rgmii/u_tx_clk_output/opit_1/DO_P
+                                   net (fanout=1)        0.000      11.906         u_rgmii/u_tx_clk_output/ntO
+ IOBS_0_1452/PAD                   td                    2.504      14.410 r       u_rgmii/u_tx_clk_output/opit_0/O
+                                   net (fanout=1)        0.030      14.440         rgmii_txc_o
+ G16                                                                       r       rgmii_txc_o (port)
+
+ Data arrival time                                                  14.440         Logic Levels: 1
+                                                                                   Logic: 5.427ns(99.450%), Route: 0.030ns(0.550%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_eth/u_mdio/idx_r[3]/opit_0_inv_L6Q_perm/CLK
+Endpoint    : eth_mdio_o (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r
+ N3                                                      0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.040       0.040         ddr_ref_clk_p_i
+ IOBD_732_774/DIN                  td                    0.562       0.602 r       u_ddr_ref_clk/opit_0/O
+                                   net (fanout=1)        0.000       0.602         u_ddr_ref_clk/ntD
+ IOLHR_724_774/DI_TO_CLK           td                    0.087       0.689 r       u_ddr_ref_clk/opit_2/DI_TO_CLK
+                                   net (fanout=3)        0.197       0.886         ddr_ref_clk_w
+ MRCKB_721_762/CLKOUT_U_P          td                    0.095       0.981 r       u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst/CLKOUT_P
+                                   net (fanout=2)        0.267       1.248         u_ddr3/u_ddrphy_top/pll_refclk
+ RCKB_723_762/CLKOUT               td                    0.115       1.363 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk/CLKOUT
+                                   net (fanout=1)        0.300       1.663         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+ PPLL_727_613/CLKOUTPHY            td                    0.039       1.702 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY
+                                   net (fanout=36)       0.000       1.702         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+ DDRPHY_IOCLK_DIV_728_616/CLKOUT   td                    0.088       1.790 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT
+                                   net (fanout=35)       0.000       1.790         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+ GPLL_727_769/CLKOUT0                                    0.948       2.738 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.501       3.239         u_ddr3/u_ddrphy_top/gpll_clkout0
+ USCM_383_882/CLKOUT               td                    0.115       3.354 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg/CLKOUT
+                                   net (fanout=33833)
+                                                         1.018       4.372         clk_mem_w
+ CLMS_531_505/CLK                                                          r       u_eth/u_mdio/idx_r[3]/opit_0_inv_L6Q_perm/CLK
+
+ CLMS_531_505/Q2                   tco                   0.125       4.497 f       u_eth/u_mdio/idx_r[3]/opit_0_inv_L6Q_perm/L6Q
+                                   net (fanout=5)        0.148       4.645         u_eth/u_mdio/idx_r [3]
+ CLMA_531_504/Y1                   td                    0.066       4.711 f       u_eth/u_mdio/N77_2/gateop_LUT6DL5_perm/L6
+                                   net (fanout=1)        0.327       5.038         u_eth/u_mdio/_N203346
+ CLMA_519_511/Y1                   td                    0.125       5.163 f       u_eth/u_mdio/N5_inv/LUT6_inst_perm/L6
+                                   net (fanout=1)        3.405       8.568         eth_mdio_oe_w_inv
+ IOLHR_16_1308/DO_N                td                    0.229       8.797 f       eth_mdio_o_tri/opit_1/DO_N
+                                   net (fanout=1)        0.000       8.797         eth_mdio_o_tri/ntT
+ IOBD_0_1308/PAD                   tse                   2.007      10.804 f       eth_mdio_o_tri/opit_0/IO
+                                   net (fanout=1)        0.041      10.845         nt_eth_mdio_o
+ E21                                                                       f       eth_mdio_o (port)
+
+ Data arrival time                                                  10.845         Logic Levels: 4
+                                                                                   Logic: 2.552ns(39.425%), Route: 3.921ns(60.575%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_eth/u_mdio/divider_r[5]/opit_0_inv_L5Q_perm/CLK
+Endpoint    : eth_mdc_o (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r
+ N3                                                      0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.040       0.040         ddr_ref_clk_p_i
+ IOBD_732_774/DIN                  td                    0.562       0.602 r       u_ddr_ref_clk/opit_0/O
+                                   net (fanout=1)        0.000       0.602         u_ddr_ref_clk/ntD
+ IOLHR_724_774/DI_TO_CLK           td                    0.087       0.689 r       u_ddr_ref_clk/opit_2/DI_TO_CLK
+                                   net (fanout=3)        0.197       0.886         ddr_ref_clk_w
+ MRCKB_721_762/CLKOUT_U_P          td                    0.095       0.981 r       u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst/CLKOUT_P
+                                   net (fanout=2)        0.267       1.248         u_ddr3/u_ddrphy_top/pll_refclk
+ RCKB_723_762/CLKOUT               td                    0.115       1.363 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk/CLKOUT
+                                   net (fanout=1)        0.300       1.663         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+ PPLL_727_613/CLKOUTPHY            td                    0.039       1.702 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY
+                                   net (fanout=36)       0.000       1.702         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+ DDRPHY_IOCLK_DIV_728_616/CLKOUT   td                    0.088       1.790 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT
+                                   net (fanout=35)       0.000       1.790         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+ GPLL_727_769/CLKOUT0                                    0.948       2.738 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.501       3.239         u_ddr3/u_ddrphy_top/gpll_clkout0
+ USCM_383_882/CLKOUT               td                    0.115       3.354 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg/CLKOUT
+                                   net (fanout=33833)
+                                                         1.021       4.375         clk_mem_w
+ CLMS_531_523/CLK                                                          r       u_eth/u_mdio/divider_r[5]/opit_0_inv_L5Q_perm/CLK
+
+ CLMS_531_523/CR3                  tco                   0.140       4.515 f       u_eth/u_mdio/divider_r[5]/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=6)        3.655       8.170         nt_eth_mdc_o
+ IOLHR_16_1278/DO_P                td                    0.353       8.523 f       eth_mdc_o_obuf/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.523         eth_mdc_o_obuf/ntO
+ IOBS_0_1278/PAD                   td                    2.022      10.545 f       eth_mdc_o_obuf/opit_0/O
+                                   net (fanout=1)        0.073      10.618         eth_mdc_o
+ A25                                                                       f       eth_mdc_o (port)
+
+ Data arrival time                                                  10.618         Logic Levels: 2
+                                                                                   Logic: 2.515ns(40.285%), Route: 3.728ns(59.715%)
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_rgmii/u_tx_clk_output/opit_1/OCLK
+Endpoint    : rgmii_txc_o (port)
+Path Group  : **default**
+Path Type   : max (fast corner)
+Path Class  : combinational timing path
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             0.000       0.000 r
+ D19                                                     0.000       0.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       0.050         rgmii_rxc_i
+ IOBD_0_1368/DIN                   td                    0.521       0.571 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.571         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI_TO_CLK           td                    0.087       0.658 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        3.181       3.839         nt_rgmii_rxc_i
+ GPLL_727_463/CLKOUT0              td                    0.063       3.902 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.758       4.660         u_rgmii/clk_eth_pll_w
+ USCM_383_897/CLKOUT               td                    0.115       4.775 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=191)      1.069       5.844         clk_eth_w
+ IOLHR_16_1452/OCLK                                                        r       u_rgmii/u_tx_clk_output/opit_1/OCLK
+
+ IOLHR_16_1452/DO_P                tco                   2.509       8.353 f       u_rgmii/u_tx_clk_output/opit_1/DO_P
+                                   net (fanout=1)        0.000       8.353         u_rgmii/u_tx_clk_output/ntO
+ IOBS_0_1452/PAD                   td                    2.022      10.375 f       u_rgmii/u_tx_clk_output/opit_0/O
+                                   net (fanout=1)        0.030      10.405         rgmii_txc_o
+ G16                                                                       f       rgmii_txc_o (port)
+
+ Data arrival time                                                  10.405         Logic Levels: 1
+                                                                                   Logic: 4.531ns(99.342%), Route: 0.030ns(0.658%)
+====================================================================================================
+
+====================================================================================================

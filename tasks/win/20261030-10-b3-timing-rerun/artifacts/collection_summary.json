@@ -1,0 +1,728 @@
+[
+  {
+    "name": "B3V",
+    "root": "G:\\codex_project\\EdRV32-FPGA\\EdRV32-B3V",
+    "routed": true,
+    "stages": {
+      "compile": {
+        "actions": [
+          "Action compile: Real time elapsed is 0h:1m:45s",
+          "Action compile: CPU time elapsed is 0h:0m:10s",
+          "Action compile: Process CPU time elapsed is 0h:0m:10s",
+          "Action compile: Peak memory pool usage is 499 MB"
+        ],
+        "counts": {
+          "W": 2951
+        }
+      },
+      "synthesize": {
+        "actions": [
+          "Action synthesize: Real time elapsed is 0h:4m:43s",
+          "Action synthesize: CPU time elapsed is 0h:0m:35s",
+          "Action synthesize: Process CPU time elapsed is 0h:0m:39s",
+          "Action synthesize: Peak memory pool usage is 2,574 MB"
+        ],
+        "counts": {
+          "C": 62,
+          "W": 8383
+        }
+      },
+      "device_map": {
+        "actions": [
+          "Action dev_map: Real time elapsed is 0h:1m:11s",
+          "Action dev_map: CPU time elapsed is 0h:0m:18s",
+          "Action dev_map: Process CPU time elapsed is 0h:0m:20s",
+          "Action dev_map: Peak memory pool usage is 1,472 MB"
+        ],
+        "counts": {
+          "W": 20
+        }
+      },
+      "place_route": {
+        "actions": [
+          "Action pnr: Real time elapsed is 0h:24m:45s",
+          "Action pnr: CPU time elapsed is 0h:3m:49s",
+          "Action pnr: Process CPU time elapsed is 0h:6m:19s",
+          "Action pnr: Peak memory pool usage is 5,935 MB"
+        ],
+        "counts": {
+          "C": 61
+        }
+      },
+      "report_timing": {
+        "actions": [
+          "Action report_timing: Real time elapsed is 0h:1m:24s",
+          "Action report_timing: CPU time elapsed is 0h:0m:2s",
+          "Action report_timing: Process CPU time elapsed is 0h:0m:3s",
+          "Action report_timing: Peak memory pool usage is 4,880 MB"
+        ],
+        "counts": {
+          "W": 166
+        }
+      },
+      "generate_bitstream": {
+        "actions": [
+          "Action gen_bit_stream: Real time elapsed is 0h:2m:3s",
+          "Action gen_bit_stream: CPU time elapsed is 0h:0m:23s",
+          "Action gen_bit_stream: Process CPU time elapsed is 0h:0m:23s",
+          "Action gen_bit_stream: Peak memory pool usage is 3,550 MB"
+        ],
+        "counts": {}
+      }
+    },
+    "usage": "Device Utilization Summary:\n+-------------------------------------------------------------------------+\n| Logic Utilization     | Used      | Available     | Utilization(%)     \n+-------------------------------------------------------------------------+\n| APM                   | 161       | 740           | 22                 \n| FF                    | 49713     | 319600        | 16                 \n| LUT                   | 52760     | 159800        | 34                 \n| Distributed RAM       | 346       | 39500         | 1                  \n| DRM                   | 109       | 415           | 27                 \n| IO                    | 137       | 400           | 35                 \n| RCKB                  | 2         | 40            | 5                  \n| SCANCHAIN             | 0         | 1             | 0                  \n| USCM                  | 8         | 32            | 25                 \n| CCS                   | 1         | 1             | 100                \n| ADC                   | 0         | 1             | 0                  \n| DDR_PHY               | 7         | 40            | 18                 \n| HSSTLP                | 0         | 2             | 0                  \n| GPLL                  | 5         | 10            | 50                 \n| PPLL                  | 2         | 10            | 20                 \n| DDRPHY_CPD            | 1         | 20            | 5                  \n| HCKB                  | 0         | 120           | 0                  \n| IOCKB                 | 0         | 40            | 0                  \n| MRCKB                 | 1         | 20            | 5                  \n| PCIE                  | 0         | 1             | 0                  \n| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 \n| ANALOG                | 0         | 1             | 0                  \n| TSERDES               | 14        | 80            | 18                 \n| KEYRAM                | 0         | 1             | 0                  \n+-------------------------------------------------------------------------+\n",
+    "synth_totals": {
+      "depth": 0,
+      "path": "edrv32_fpga_board_vision_top",
+      "name": "edrv32_fpga_board_vision_top",
+      "values": [
+        52764,
+        49724,
+        346,
+        161,
+        109
+      ]
+    },
+    "last_route_iteration": [
+      "128",
+      "0.328",
+      "0",
+      "0"
+    ],
+    "synth_worst": [
+      {
+        "start": "u_vin/u_cam0/active_r/CLK (GTP_DFF_C)",
+        "end": "u_vin/u_cam0/u_items/full_r/D (GTP_DFF_C)",
+        "group": "clk_cam0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.046,
+        "levels": 6,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_vin/u_cam1/active_r/CLK (GTP_DFF_C)",
+        "end": "u_vin/u_cam1/u_items/full_r/D (GTP_DFF_C)",
+        "group": "clk_cam1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.048,
+        "levels": 6,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_sys/u_plic/priority_r[2][1]/CLK (GTP_DFF_CE)",
+        "end": "u_sys/u_plic/claimed_r[15]/D (GTP_DFF_C)",
+        "group": "clk_sys",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -0.074,
+        "levels": 17,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_disp/u_fifo1_ram/u_ip/U_ipm2l_sdpram_ip_ram_disp_scan/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/CLKB (GTP_DRM36K_E1)",
+        "end": "u_disp/u_scan/N217/X[0] (GTP_APM_E2)",
+        "group": "clk_pix",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 8.761,
+        "levels": 1,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_tmds/g_channel[0].u_slave/OCLK (GTP_OSERDES_E2)",
+        "end": "u_tmds/g_channel[0].u_master/OSHIFTIN0 (GTP_OSERDES_E2)",
+        "group": "clk_serial",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.484,
+        "levels": 0,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/D (GTP_DFF_CE)",
+        "group": "rst_clk",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 4.884,
+        "levels": 4,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_mem/u_xbar/u_rbuf/u_ram/u_ip/U_ipm2l_sdpram_ip_ram_mem_xbar_r/ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM36K_E1/CLKB (GTP_DRM36K_E1)",
+        "end": "u_mem/u_perf_mon/N106/CEY1 (GTP_APM_E2)",
+        "group": "clk_mem",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.122,
+        "levels": 8,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/this_group_ca_dly/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[11].u_oserdes_addr/DI[0] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.043,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/ck_dqs_diff[1]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_tserdes0_dqs/DI[2] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.216,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_eth/u_tx_fifo/u_memory/u_ip/U_ipm2l_sdpram_ip_ram_eth_fifo/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/CLKB (GTP_DRM18K_E1)",
+        "end": "u_eth/u_tx_front/crc_r[19]/D (GTP_DFF_SE)",
+        "group": "clk_eth",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 3.334,
+        "levels": 3,
+        "source": "synthesis_estimate"
+      }
+    ]
+  },
+  {
+    "name": "B3VN",
+    "root": "G:\\codex_project\\EdRV32-FPGA\\EdRV32-B3VN",
+    "routed": false,
+    "stages": {
+      "compile": {
+        "actions": [
+          "Action compile: Real time elapsed is 0h:2m:34s",
+          "Action compile: CPU time elapsed is 0h:0m:3s",
+          "Action compile: Process CPU time elapsed is 0h:0m:3s",
+          "Action compile: Peak memory pool usage is 695 MB"
+        ],
+        "counts": {
+          "W": 4650
+        }
+      },
+      "synthesize": {
+        "actions": [
+          "Action synthesize: Real time elapsed is 0h:8m:24s",
+          "Action synthesize: CPU time elapsed is 0h:0m:21s",
+          "Action synthesize: Process CPU time elapsed is 0h:0m:26s",
+          "Action synthesize: Peak memory pool usage is 3,499 MB"
+        ],
+        "counts": {
+          "C": 62,
+          "W": 15300
+        }
+      },
+      "device_map": {
+        "actions": [
+          "Action dev_map: Real time elapsed is 0h:2m:14s",
+          "Action dev_map: CPU time elapsed is 0h:0m:51s",
+          "Action dev_map: Process CPU time elapsed is 0h:0m:58s",
+          "Action dev_map: Peak memory pool usage is 2,228 MB"
+        ],
+        "counts": {
+          "W": 275
+        }
+      },
+      "place_route": {
+        "actions": [],
+        "counts": {
+          "C": 61
+        }
+      }
+    },
+    "usage": "Device Utilization Summary:\n+-------------------------------------------------------------------------+\n| Logic Utilization     | Used      | Available     | Utilization(%)     \n+-------------------------------------------------------------------------+\n| APM                   | 451       | 740           | 61                 \n| FF                    | 85970     | 319600        | 27                 \n| LUT                   | 80508     | 159800        | 51                 \n| Distributed RAM       | 794       | 39500         | 3                  \n| DRM                   | 265       | 415           | 64                 \n| IO                    | 137       | 400           | 35                 \n| RCKB                  | 2         | 40            | 5                  \n| SCANCHAIN             | 0         | 1             | 0                  \n| USCM                  | 9         | 32            | 29                 \n| CCS                   | 1         | 1             | 100                \n| ADC                   | 0         | 1             | 0                  \n| DDR_PHY               | 7         | 40            | 18                 \n| HSSTLP                | 0         | 2             | 0                  \n| GPLL                  | 6         | 10            | 60                 \n| PPLL                  | 2         | 10            | 20                 \n| DDRPHY_CPD            | 1         | 20            | 5                  \n| HCKB                  | 0         | 120           | 0                  \n| IOCKB                 | 0         | 40            | 0                  \n| MRCKB                 | 1         | 20            | 5                  \n| PCIE                  | 0         | 1             | 0                  \n| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 \n| ANALOG                | 0         | 1             | 0                  \n| TSERDES               | 14        | 80            | 18                 \n| KEYRAM                | 0         | 1             | 0                  \n+-------------------------------------------------------------------------+\n",
+    "synth_totals": {
+      "depth": 0,
+      "path": "edrv32_fpga_board_vnpu_top",
+      "name": "edrv32_fpga_board_vnpu_top",
+      "values": [
+        80512,
+        86237,
+        794,
+        451,
+        265
+      ]
+    },
+    "last_route_iteration": [
+      "14",
+      "1212.188",
+      "58938",
+      "251169"
+    ],
+    "synth_worst": [
+      {
+        "start": "u_vin/u_cam0/active_r/CLK (GTP_DFF_C)",
+        "end": "u_vin/u_cam0/u_items/full_r/D (GTP_DFF_C)",
+        "group": "clk_cam0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 5.602,
+        "levels": 7,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_vin/u_cam1/active_r/CLK (GTP_DFF_C)",
+        "end": "u_vin/u_cam1/u_items/full_r/D (GTP_DFF_C)",
+        "group": "clk_cam1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 5.602,
+        "levels": 7,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_sys/u_plic/pending_r[1]/CLK (GTP_DFF_C)",
+        "end": "u_sys/u_plic/claimed_r[15]/D (GTP_DFF_C)",
+        "group": "clk_sys",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -1.02,
+        "levels": 19,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_npu/u_conv/residual_pairs_r[0]/CLK (GTP_DFF_CE)",
+        "end": "u_npu/u_conv/residual_addr_r[31]/D (GTP_DFF_E)",
+        "group": "clk_npu",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.006,
+        "levels": 15,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_disp/u_fifo1_ram/u_ip/U_ipm2l_sdpram_ip_ram_disp_scan/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/CLKB (GTP_DRM36K_E1)",
+        "end": "u_disp/u_scan/N217/X[0] (GTP_APM_E2)",
+        "group": "clk_pix",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 8.761,
+        "levels": 1,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_tmds/g_channel[0].u_slave/OCLK (GTP_OSERDES_E2)",
+        "end": "u_tmds/g_channel[0].u_master/OSHIFTIN0 (GTP_OSERDES_E2)",
+        "group": "clk_serial",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.484,
+        "levels": 0,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/D (GTP_DFF_CE)",
+        "group": "rst_clk",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 4.9,
+        "levels": 4,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_mem/u_xbar/u_sched/funded_r[0]/CLK (GTP_DFF_CE)",
+        "end": "u_mem/u_xbar/u_rbuf/port_addr_r[2][1]/D (GTP_DFF_E)",
+        "group": "clk_mem",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.206,
+        "levels": 12,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/this_group_ca_dly/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[11].u_oserdes_addr/DI[5] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.055,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/ck_dqs_diff[1]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_tserdes0_dqs/DI[2] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.28,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_eth/u_tx_fifo/u_memory/u_ip/U_ipm2l_sdpram_ip_ram_eth_fifo/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/CLKB (GTP_DRM18K_E1)",
+        "end": "u_eth/u_tx_front/crc_r[19]/D (GTP_DFF_SE)",
+        "group": "clk_eth",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 3.307,
+        "levels": 3,
+        "source": "synthesis_estimate"
+      }
+    ]
+  },
+  {
+    "name": "B3R",
+    "root": "G:\\codex_project\\EdRV32-FPGA\\EdRV32-B3R",
+    "routed": false,
+    "stages": {
+      "compile": {
+        "actions": [
+          "Action compile: Real time elapsed is 0h:2m:5s",
+          "Action compile: CPU time elapsed is 0h:0m:2s",
+          "Action compile: Process CPU time elapsed is 0h:0m:2s",
+          "Action compile: Peak memory pool usage is 496 MB"
+        ],
+        "counts": {
+          "W": 2607
+        }
+      },
+      "synthesize": {
+        "actions": [
+          "Action synthesize: Real time elapsed is 0h:5m:14s",
+          "Action synthesize: CPU time elapsed is 0h:0m:13s",
+          "Action synthesize: Process CPU time elapsed is 0h:0m:16s",
+          "Action synthesize: Peak memory pool usage is 2,724 MB"
+        ],
+        "counts": {
+          "C": 29,
+          "W": 7024
+        }
+      },
+      "device_map": {
+        "actions": [
+          "Action dev_map: Real time elapsed is 0h:0m:55s",
+          "Action dev_map: CPU time elapsed is 0h:0m:3s",
+          "Action dev_map: Process CPU time elapsed is 0h:0m:3s",
+          "Action dev_map: Peak memory pool usage is 1,440 MB"
+        ],
+        "counts": {
+          "W": 20
+        }
+      },
+      "place_route": {
+        "actions": [],
+        "counts": {
+          "C": 29
+        }
+      }
+    },
+    "usage": "Device Utilization Summary:\n+-------------------------------------------------------------------------+\n| Logic Utilization     | Used      | Available     | Utilization(%)     \n+-------------------------------------------------------------------------+\n| APM                   | 138       | 740           | 19                 \n| FF                    | 35062     | 319600        | 11                 \n| LUT                   | 51928     | 159800        | 33                 \n| Distributed RAM       | 233       | 39500         | 1                  \n| DRM                   | 110       | 415           | 27                 \n| IO                    | 94        | 400           | 24                 \n| RCKB                  | 2         | 40            | 5                  \n| SCANCHAIN             | 0         | 1             | 0                  \n| USCM                  | 5         | 32            | 16                 \n| CCS                   | 1         | 1             | 100                \n| ADC                   | 0         | 1             | 0                  \n| DDR_PHY               | 7         | 40            | 18                 \n| HSSTLP                | 0         | 2             | 0                  \n| GPLL                  | 4         | 10            | 40                 \n| PPLL                  | 2         | 10            | 20                 \n| DDRPHY_CPD            | 1         | 20            | 5                  \n| HCKB                  | 0         | 120           | 0                  \n| IOCKB                 | 0         | 40            | 0                  \n| MRCKB                 | 1         | 20            | 5                  \n| PCIE                  | 0         | 1             | 0                  \n| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 \n| ANALOG                | 0         | 1             | 0                  \n| TSERDES               | 14        | 80            | 18                 \n| KEYRAM                | 0         | 1             | 0                  \n+-------------------------------------------------------------------------+\n",
+    "synth_totals": {
+      "depth": 0,
+      "path": "edrv32_fpga_board_render_top",
+      "name": "edrv32_fpga_board_render_top",
+      "values": [
+        51932,
+        35073,
+        233,
+        138,
+        110
+      ]
+    },
+    "last_route_iteration": [
+      "36",
+      "213.029",
+      "8071",
+      "26324"
+    ],
+    "synth_worst": [
+      {
+        "start": "u_sys/u_plic/priority_r[1][2]/CLK (GTP_DFF_CE)",
+        "end": "u_sys/u_plic/pending_r[15]/D (GTP_DFF_C)",
+        "group": "clk_sys",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -1.077,
+        "levels": 18,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_disp/u_fifo1_ram/u_ip/U_ipm2l_sdpram_ip_ram_disp_scan/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/CLKB (GTP_DRM36K_E1)",
+        "end": "u_disp/u_scan/N217/X[0] (GTP_APM_E2)",
+        "group": "clk_pix",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 8.761,
+        "levels": 1,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_tmds/g_channel[0].u_slave/OCLK (GTP_OSERDES_E2)",
+        "end": "u_tmds/g_channel[0].u_master/OSHIFTIN0 (GTP_OSERDES_E2)",
+        "group": "clk_serial",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.484,
+        "levels": 0,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/D (GTP_DFF_CE)",
+        "group": "rst_clk",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 4.9,
+        "levels": 4,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_rnd/command_r[176]/CLK (GTP_DFF_E)",
+        "end": "u_rnd/u_draw/bank_sparse_r[0]/D (GTP_DFF_E)",
+        "group": "clk_mem",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -18.535,
+        "levels": 25,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/this_group_ca_dly/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[11].u_oserdes_addr/DI[5] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 5.183,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/ck_dqs_diff[1]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_tserdes0_dqs/DI[2] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 5.408,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      }
+    ]
+  },
+  {
+    "name": "B3F",
+    "root": "G:\\codex_project\\EdRV32-FPGA\\EdRV32-B3F",
+    "routed": false,
+    "stages": {
+      "compile": {
+        "actions": [
+          "Action compile: Real time elapsed is 0h:3m:47s",
+          "Action compile: CPU time elapsed is 0h:0m:53s",
+          "Action compile: Process CPU time elapsed is 0h:0m:53s",
+          "Action compile: Peak memory pool usage is 766 MB"
+        ],
+        "counts": {
+          "W": 5126
+        }
+      },
+      "synthesize": {
+        "actions": [
+          "Action synthesize: Real time elapsed is 0h:16m:0s",
+          "Action synthesize: CPU time elapsed is 0h:4m:32s",
+          "Action synthesize: Process CPU time elapsed is 0h:5m:2s",
+          "Action synthesize: Peak memory pool usage is 3,562 MB"
+        ],
+        "counts": {
+          "C": 62,
+          "W": 16658
+        }
+      },
+      "device_map": {
+        "actions": [
+          "Action dev_map: Real time elapsed is 0h:2m:1s",
+          "Action dev_map: CPU time elapsed is 0h:0m:11s",
+          "Action dev_map: Process CPU time elapsed is 0h:0m:12s",
+          "Action dev_map: Peak memory pool usage is 2,674 MB"
+        ],
+        "counts": {
+          "W": 276
+        }
+      },
+      "place_route": {
+        "actions": [],
+        "counts": {
+          "C": 61
+        }
+      }
+    },
+    "usage": "Device Utilization Summary:\n+-------------------------------------------------------------------------+\n| Logic Utilization     | Used      | Available     | Utilization(%)     \n+-------------------------------------------------------------------------+\n| APM                   | 569       | 740           | 77                 \n| FF                    | 94809     | 319600        | 30                 \n| LUT                   | 99201     | 159800        | 63                 \n| Distributed RAM       | 794       | 39500         | 3                  \n| DRM                   | 325       | 415           | 79                 \n| IO                    | 137       | 400           | 35                 \n| RCKB                  | 2         | 40            | 5                  \n| SCANCHAIN             | 0         | 1             | 0                  \n| USCM                  | 9         | 32            | 29                 \n| CCS                   | 1         | 1             | 100                \n| ADC                   | 0         | 1             | 0                  \n| DDR_PHY               | 7         | 40            | 18                 \n| HSSTLP                | 0         | 2             | 0                  \n| GPLL                  | 6         | 10            | 60                 \n| PPLL                  | 2         | 10            | 20                 \n| DDRPHY_CPD            | 1         | 20            | 5                  \n| HCKB                  | 0         | 120           | 0                  \n| IOCKB                 | 0         | 40            | 0                  \n| MRCKB                 | 1         | 20            | 5                  \n| PCIE                  | 0         | 1             | 0                  \n| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 \n| ANALOG                | 0         | 1             | 0                  \n| TSERDES               | 14        | 80            | 18                 \n| KEYRAM                | 0         | 1             | 0                  \n+-------------------------------------------------------------------------+\n",
+    "synth_totals": {
+      "depth": 0,
+      "path": "edrv32_fpga_board_b2_top",
+      "name": "edrv32_fpga_board_b2_top",
+      "values": [
+        99205,
+        95076,
+        794,
+        569,
+        325
+      ]
+    },
+    "last_route_iteration": [
+      "13",
+      "1141.626",
+      "91963",
+      "509292"
+    ],
+    "synth_worst": [
+      {
+        "start": "u_soc/u_vin/u_cam0/active_r/CLK (GTP_DFF_C)",
+        "end": "u_soc/u_vin/u_cam0/u_items/full_r/D (GTP_DFF_C)",
+        "group": "clk_cam0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.048,
+        "levels": 6,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_soc/u_vin/u_cam1/active_r/CLK (GTP_DFF_C)",
+        "end": "u_soc/u_vin/u_cam1/u_items/full_r/D (GTP_DFF_C)",
+        "group": "clk_cam1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 5.602,
+        "levels": 7,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_soc/u_sys/u_plic/pending_r[1]/CLK (GTP_DFF_C)",
+        "end": "u_soc/u_sys/u_plic/axi_rdata_o[35]/D (GTP_DFF_E)",
+        "group": "clk_sys",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -1.785,
+        "levels": 20,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_soc/u_npu/u_apb_bridge/request_r[36]/CLK (GTP_DFF_E)",
+        "end": "u_soc/u_npu/u_conv/residual_addr_r[31]/D (GTP_DFF_E)",
+        "group": "clk_npu",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -0.77,
+        "levels": 15,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_soc/u_disp/u_fifo1_ram/u_ip/U_ipm2l_sdpram_ip_ram_disp_scan/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM36K_E1/CLKB (GTP_DRM36K_E1)",
+        "end": "u_soc/u_disp/u_scan/N217/X[0] (GTP_APM_E2)",
+        "group": "clk_pix",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 8.761,
+        "levels": 1,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_tmds/g_channel[0].u_slave/OCLK (GTP_OSERDES_E2)",
+        "end": "u_tmds/g_channel[0].u_master/OSHIFTIN0 (GTP_OSERDES_E2)",
+        "group": "clk_serial",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 0.484,
+        "levels": 0,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/D (GTP_DFF_CE)",
+        "group": "rst_clk",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 4.9,
+        "levels": 4,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_soc/u_rnd/command_r[3]/CLK (GTP_DFF_E)",
+        "end": "u_soc/u_rnd/u_draw/bank_sparse_r[0]/D (GTP_DFF_E)",
+        "group": "clk_mem",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": -18.7,
+        "levels": 22,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/this_group_ca_dly/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[11].u_oserdes_addr/DI[0] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_0",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.643,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_dqs_rddata_align/ck_dqs_diff[1]/CLK (GTP_DFF_CE)",
+        "end": "u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_tserdes0_dqs/DI[2] (GTP_OSERDES_E2)",
+        "group": "phy_dq_sysclk_1",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 6.816,
+        "levels": 2,
+        "source": "synthesis_estimate"
+      },
+      {
+        "start": "u_soc/u_eth/u_tx_fifo/u_memory/u_ip/U_ipm2l_sdpram_ip_ram_eth_fifo/ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K_E1/CLKB (GTP_DRM18K_E1)",
+        "end": "u_soc/u_eth/u_tx_front/crc_r[31]/D (GTP_DFF_SE)",
+        "group": "clk_eth",
+        "type": "max (slow corner)",
+        "corner": "slow",
+        "class": "sequential timing path",
+        "slack": 3.46,
+        "levels": 3,
+        "source": "synthesis_estimate"
+      }
+    ]
+  }
+]

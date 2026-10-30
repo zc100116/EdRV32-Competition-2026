@@ -1,0 +1,34 @@
+Device-map capacity usage (not post-route).
+Device Utilization Summary:
++-------------------------------------------------------------------------+
+| Logic Utilization     | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------+
+| APM                   | 161       | 740           | 22
+| FF                    | 49713     | 319600        | 16
+| LUT                   | 52760     | 159800        | 34
+| Distributed RAM       | 346       | 39500         | 1
+| DRM                   | 109       | 415           | 27
+| IO                    | 137       | 400           | 35
+| RCKB                  | 2         | 40            | 5
+| SCANCHAIN             | 0         | 1             | 0
+| USCM                  | 8         | 32            | 25
+| CCS                   | 1         | 1             | 100
+| ADC                   | 0         | 1             | 0
+| DDR_PHY               | 7         | 40            | 18
+| HSSTLP                | 0         | 2             | 0
+| GPLL                  | 5         | 10            | 50
+| PPLL                  | 2         | 10            | 20
+| DDRPHY_CPD            | 1         | 20            | 5
+| HCKB                  | 0         | 120           | 0
+| IOCKB                 | 0         | 40            | 0
+| MRCKB                 | 1         | 20            | 5
+| PCIE                  | 0         | 1             | 0
+| DDRPHY_IOCLK_DIV      | 2         | 10            | 20
+| ANALOG                | 0         | 1             | 0
+| TSERDES               | 14        | 80            | 18
+| KEYRAM                | 0         | 1             | 0
++-------------------------------------------------------------------------+
+
+
+Synthesis hierarchy units: LUT, FF, distributed RAM, APM, DRM36K equivalent.
+{'depth': 0, 'path': 'edrv32_fpga_board_vision_top', 'name': 'edrv32_fpga_board_vision_top', 'values': [52764, 49724, 346, 161, 109]}

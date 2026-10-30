@@ -1,0 +1,21 @@
+Project: G:\codex_project\EdRV32-FPGA\EdRV32-B3F
+Read-only snapshot; no jobs started/stopped.
+compile: {'W': 5126}
+Action compile: Real time elapsed is 0h:3m:47s
+Action compile: CPU time elapsed is 0h:0m:53s
+Action compile: Process CPU time elapsed is 0h:0m:53s
+Action compile: Peak memory pool usage is 766 MB
+
+synthesize: {'C': 62, 'W': 16658}
+Action synthesize: Real time elapsed is 0h:16m:0s
+Action synthesize: CPU time elapsed is 0h:4m:32s
+Action synthesize: Process CPU time elapsed is 0h:5m:2s
+Action synthesize: Peak memory pool usage is 3,562 MB
+
+device_map: {'W': 276}
+Action dev_map: Real time elapsed is 0h:2m:1s
+Action dev_map: CPU time elapsed is 0h:0m:11s
+Action dev_map: Process CPU time elapsed is 0h:0m:12s
+Action dev_map: Peak memory pool usage is 2,674 MB
+
+place_route: {'C': 61}

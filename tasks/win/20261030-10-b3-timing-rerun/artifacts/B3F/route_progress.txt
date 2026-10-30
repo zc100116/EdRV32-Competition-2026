@@ -1,0 +1,43 @@
+Completed route: False
+MT total route time is copied verbatim; not summed as wall time.
+	Initial slack -28350.
+	Final slack -22113.
+Worst slack after global placement is -16281
+Worst slack after post global placement is -18555
+Worst slack before Replication Place is -18899.
+Worst slack before detailed placement is -18899, TNS before detailed placement is -108723565.
+Worst slack after detailed placement is -17708, TNS after detailed placement is -108811615.
+Worst slack is -17717, TNS after placement is -108811314.
+Worst slack is -17717, TNS before route is -108811314.
+
+Last 30 lines of the read snapshot:
+Build SRB system takes 0.06 sec.
+Setup STE netlist take 12311 msec.
+Dispose control chain take 3419 msec.
+Collect const net info take 1069 msec.
+Worst slack is -17717, TNS before route is -108811314.
+Total nets for routing: 173134.
+Total loads for routing: 739108.
+Direct connect net size: 14801
+Build all design net take 9279 msec.
+Processing design graph takes 26.13 sec.
+Delay table total memory: 72.78639603 MB
+Route graph total memory: 403.42743397 MB
+Route design total memory: 236.26905060 MB
+Global routing takes 0.00 sec.
+Total 173132 subnets.
+Unrouted clock nets at iteration 0 (0.457 sec): 15
+Unrouted clock nets at iteration 1 (0.389 sec): 8
+Unrouted clock nets at iteration 2 (0.283 sec): 6
+Unrouted clock nets at iteration 3 (0.167 sec): 3
+Unrouted clock nets at iteration 4 (0.115 sec): 2
+Unrouted clock nets at iteration 5 (0.093 sec): 0
+Total route nets size: 173090
+Pre route takes 87.762 sec
+Unrouted general nets at iteration 7 (MT total route time: 22.031 sec): 155989(overused: 1176828)
+Unrouted general nets at iteration 8 (MT total route time: 30.214 sec): 145626(overused: 1001931)
+Unrouted general nets at iteration 9 (MT total route time: 57.656 sec): 137303(overused: 841841)
+Unrouted general nets at iteration 10 (MT total route time: 175.000 sec): 129523(overused: 722801)
+Unrouted general nets at iteration 11 (MT total route time: 412.023 sec): 123266(overused: 642543)
+Unrouted general nets at iteration 12 (MT total route time: 707.750 sec): 103332(overused: 588011)
+Unrouted general nets at iteration 13 (MT total route time: 1141.626 sec): 91963(overused: 509292)

@@ -1,0 +1,748 @@
+Existing default report contains 232 path records across all clocks/corners/classes. Per-clock 200 paths have NOT been exported. No extra STA process was launched while three PnR jobs consume memory. Supplement after routing jobs finish.
+Startpoint  : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+Endpoint    : u_vin/u_cam0/u_items/memory_r_6/ram32x2d/DIH
+Path Group  : clk_cam0
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.222  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.150
+  Launch Clock Delay      :  3.680
+  Clock Pessimism Removal :  0.308
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.897       0.934 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.934         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.110       1.044 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.947         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.177       2.124 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.556       3.680         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+
+ CLMA_369_811/CR0                  tco                   0.261       3.941 r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=12)       0.415       4.356         u_vin/u_cam0/active_r
+ CLMA_369_817/Y0                   td                    0.188       4.544 r       u_vin/u_cam0/N14/LUT6D_inst_perm/L6
+                                   net (fanout=33)       0.420       4.964         u_vin/u_cam0/word_w
+ CLMA_375_810/Y1                   td                    0.078       5.042 r       u_vin/u_cam0/N23/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.442       5.484         u_vin/u_cam0/N23
+ CLMA_369_817/Y3                   td                    0.078       5.562 r       u_vin/u_cam0/N24_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.447       6.009         u_vin/u_cam0/pixel_item_w
+ CLMA_375_810/CR2                  td                    0.231       6.240 r       u_vin/u_cam0/N34/LUT6D_inst_perm/L5
+                                   net (fanout=17)       0.756       6.996         u_vin/u_cam0/_N198596
+ CLMA_375_840/CR0                  td                    0.304       7.300 r       u_vin/u_cam0/N48_14[12]/LUT6D_inst_perm/L5
+                                   net (fanout=1)        0.774       8.074         u_vin/u_cam0/fifo_data_w [13]
+ CLMS_405_847/AD                                                           r       u_vin/u_cam0/u_items/memory_r_6/ram32x2d/DIH
+
+ Data arrival time                                                   8.074         Logic Levels: 5
+                                                                                   Logic: 1.140ns(25.944%), Route: 3.254ns(74.056%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.766      10.803 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.803         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.095      10.898 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768      11.666         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.150      11.816 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.334      13.150         ntclkbufg_3
+ CLMS_405_847/CLK                                                          r       u_vin/u_cam0/u_items/memory_r_6/ram32x2d/CLK
+ clock pessimism                                         0.308      13.458
+ clock uncertainty                                      -0.050      13.408
+
+ Setup time                                              0.202      13.610
+
+ Data required time                                                 13.610
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 13.610
+ Data arrival time                                                   8.074
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         5.536
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+Endpoint    : u_vin/u_cam0/u_items/memory_r_11/ram32x2d/WE
+Path Group  : clk_cam0
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.227  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.145
+  Launch Clock Delay      :  3.680
+  Clock Pessimism Removal :  0.308
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.897       0.934 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.934         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.110       1.044 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.947         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.177       2.124 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.556       3.680         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+
+ CLMA_369_811/CR0                  tco                   0.261       3.941 r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=12)       0.415       4.356         u_vin/u_cam0/active_r
+ CLMA_369_817/Y0                   td                    0.188       4.544 r       u_vin/u_cam0/N14/LUT6D_inst_perm/L6
+                                   net (fanout=33)       0.420       4.964         u_vin/u_cam0/word_w
+ CLMA_375_810/Y1                   td                    0.078       5.042 r       u_vin/u_cam0/N23/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.442       5.484         u_vin/u_cam0/N23
+ CLMA_369_817/Y3                   td                    0.078       5.562 r       u_vin/u_cam0/N24_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.447       6.009         u_vin/u_cam0/pixel_item_w
+ CLMS_363_811/Y0                   td                    0.101       6.110 r       u_vin/u_cam0/N47_5/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.726       6.836         u_vin/u_cam0/fifo_valid_w
+ CLMS_393_805/CR2                  td                    0.349       7.185 r       u_vin/u_cam0/u_items/write_gray_r[1]/opit_0_inv_L6QL5_perm/L5
+                                   net (fanout=18)       0.834       8.019         u_vin/u_cam0/u_items/write_w
+ CLMS_393_853/WE                                                           r       u_vin/u_cam0/u_items/memory_r_11/ram32x2d/WE
+
+ Data arrival time                                                   8.019         Logic Levels: 5
+                                                                                   Logic: 1.055ns(24.314%), Route: 3.284ns(75.686%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.766      10.803 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.803         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.095      10.898 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768      11.666         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.150      11.816 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.329      13.145         ntclkbufg_3
+ CLMS_393_853/CLK                                                          r       u_vin/u_cam0/u_items/memory_r_11/ram32x2d/CLK
+ clock pessimism                                         0.308      13.453
+ clock uncertainty                                      -0.050      13.403
+
+ Setup time                                              0.202      13.605
+
+ Data required time                                                 13.605
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 13.605
+ Data arrival time                                                   8.019
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         5.586
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+Endpoint    : u_vin/u_cam0/u_items/memory_r_14/ram32x2d/WE
+Path Group  : clk_cam0
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.227  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.145
+  Launch Clock Delay      :  3.680
+  Clock Pessimism Removal :  0.308
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.897       0.934 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.934         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.110       1.044 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.947         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.177       2.124 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.556       3.680         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+
+ CLMA_369_811/CR0                  tco                   0.261       3.941 r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=12)       0.415       4.356         u_vin/u_cam0/active_r
+ CLMA_369_817/Y0                   td                    0.188       4.544 r       u_vin/u_cam0/N14/LUT6D_inst_perm/L6
+                                   net (fanout=33)       0.420       4.964         u_vin/u_cam0/word_w
+ CLMA_375_810/Y1                   td                    0.078       5.042 r       u_vin/u_cam0/N23/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.442       5.484         u_vin/u_cam0/N23
+ CLMA_369_817/Y3                   td                    0.078       5.562 r       u_vin/u_cam0/N24_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.447       6.009         u_vin/u_cam0/pixel_item_w
+ CLMS_363_811/Y0                   td                    0.101       6.110 r       u_vin/u_cam0/N47_5/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.726       6.836         u_vin/u_cam0/fifo_valid_w
+ CLMS_393_805/CR2                  td                    0.349       7.185 r       u_vin/u_cam0/u_items/write_gray_r[1]/opit_0_inv_L6QL5_perm/L5
+                                   net (fanout=18)       0.834       8.019         u_vin/u_cam0/u_items/write_w
+ CLMS_393_853/WE                                                           r       u_vin/u_cam0/u_items/memory_r_14/ram32x2d/WE
+
+ Data arrival time                                                   8.019         Logic Levels: 5
+                                                                                   Logic: 1.055ns(24.314%), Route: 3.284ns(75.686%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.766      10.803 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.803         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.095      10.898 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768      11.666         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.150      11.816 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.329      13.145         ntclkbufg_3
+ CLMS_393_853/CLK                                                          r       u_vin/u_cam0/u_items/memory_r_14/ram32x2d/CLK
+ clock pessimism                                         0.308      13.453
+ clock uncertainty                                      -0.050      13.403
+
+ Setup time                                              0.202      13.605
+
+ Data required time                                                 13.605
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 13.605
+ Data arrival time                                                   8.019
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         5.586
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+Endpoint    : u_vin/u_cam0/sof_pending_r/opit_0_inv_L5Q_perm/RS
+Path Group  : clk_cam0
+Path Type   : max (slow corner)
+Path Class  : async timing path
+Clock Skew  :    -0.227  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.137
+  Launch Clock Delay      :  3.672
+  Clock Pessimism Removal :  0.308
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.897       0.934 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.934         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.110       1.044 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.947         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.177       2.124 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.548       3.672         ntclkbufg_3
+ CLMA_387_804/CLK                                                          r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+
+ CLMA_387_804/CR0                  tco                   0.261       3.933 r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CR0
+                                   net (fanout=17)       0.573       4.506         rst_cam0_n_w
+ CLMA_375_810/RS                                                           r       u_vin/u_cam0/sof_pending_r/opit_0_inv_L5Q_perm/RS
+
+ Data arrival time                                                   4.506         Logic Levels: 0
+                                                                                   Logic: 0.261ns(31.295%), Route: 0.573ns(68.705%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.766      10.803 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.803         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.095      10.898 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768      11.666         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.150      11.816 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.321      13.137         ntclkbufg_3
+ CLMA_375_810/CLK                                                          r       u_vin/u_cam0/sof_pending_r/opit_0_inv_L5Q_perm/CLK
+ clock pessimism                                         0.308      13.445
+ clock uncertainty                                      -0.050      13.395
+
+ Recovery time                                          -0.238      13.157
+
+ Data required time                                                 13.157
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 13.157
+ Data arrival time                                                   4.506
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         8.651
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+Endpoint    : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/RS
+Path Group  : clk_cam0
+Path Type   : max (slow corner)
+Path Class  : async timing path
+Clock Skew  :    -0.224  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.140
+  Launch Clock Delay      :  3.672
+  Clock Pessimism Removal :  0.308
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.897       0.934 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.934         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.110       1.044 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.947         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.177       2.124 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.548       3.672         ntclkbufg_3
+ CLMA_387_804/CLK                                                          r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+
+ CLMA_387_804/CR0                  tco                   0.261       3.933 r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CR0
+                                   net (fanout=17)       0.454       4.387         rst_cam0_n_w
+ CLMA_369_811/RS                                                           r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/RS
+
+ Data arrival time                                                   4.387         Logic Levels: 0
+                                                                                   Logic: 0.261ns(36.503%), Route: 0.454ns(63.497%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.766      10.803 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.803         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.095      10.898 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768      11.666         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.150      11.816 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.324      13.140         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+ clock pessimism                                         0.308      13.448
+ clock uncertainty                                      -0.050      13.398
+
+ Recovery time                                          -0.238      13.160
+
+ Data required time                                                 13.160
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 13.160
+ Data arrival time                                                   4.387
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         8.773
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+Endpoint    : u_vin/u_cam0/byte_phase_r/opit_0_inv_L6Q_perm/RS
+Path Group  : clk_cam0
+Path Type   : max (slow corner)
+Path Class  : async timing path
+Clock Skew  :    -0.224  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.140
+  Launch Clock Delay      :  3.672
+  Clock Pessimism Removal :  0.308
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.897       0.934 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.934         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.110       1.044 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.903       1.947         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.177       2.124 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.548       3.672         ntclkbufg_3
+ CLMA_387_804/CLK                                                          r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+
+ CLMA_387_804/CR0                  tco                   0.261       3.933 r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CR0
+                                   net (fanout=17)       0.454       4.387         rst_cam0_n_w
+ CLMA_369_811/RS                                                           r       u_vin/u_cam0/byte_phase_r/opit_0_inv_L6Q_perm/RS
+
+ Data arrival time                                                   4.387         Logic Levels: 0
+                                                                                   Logic: 0.261ns(36.503%), Route: 0.454ns(63.497%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.766      10.803 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.803         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.095      10.898 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.768      11.666         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.150      11.816 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       1.324      13.140         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/byte_phase_r/opit_0_inv_L6Q_perm/CLK
+ clock pessimism                                         0.308      13.448
+ clock uncertainty                                      -0.050      13.398
+
+ Recovery time                                          -0.238      13.160
+
+ Data required time                                                 13.160
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 13.160
+ Data arrival time                                                   4.387
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         8.773
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+Endpoint    : u_vin/u_cam0/u_items/memory_r_6/ram32x2d/DIH
+Path Group  : clk_cam0
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.143  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.972
+  Launch Clock Delay      :  2.318
+  Clock Pessimism Removal :  0.203
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.521       0.558 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.558         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.087       0.645 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.233         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.115       1.348 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.970       2.318         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+
+ CLMA_369_811/CR0                  tco                   0.141       2.459 f       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=12)       0.228       2.687         u_vin/u_cam0/active_r
+ CLMA_369_817/Y0                   td                    0.100       2.787 f       u_vin/u_cam0/N14/LUT6D_inst_perm/L6
+                                   net (fanout=33)       0.236       3.023         u_vin/u_cam0/word_w
+ CLMA_375_810/Y1                   td                    0.039       3.062 f       u_vin/u_cam0/N23/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.240       3.302         u_vin/u_cam0/N23
+ CLMA_369_817/Y3                   td                    0.039       3.341 f       u_vin/u_cam0/N24_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.240       3.581         u_vin/u_cam0/pixel_item_w
+ CLMA_375_810/CR2                  td                    0.133       3.714 f       u_vin/u_cam0/N34/LUT6D_inst_perm/L5
+                                   net (fanout=17)       0.436       4.150         u_vin/u_cam0/_N198596
+ CLMA_375_840/CR0                  td                    0.165       4.315 f       u_vin/u_cam0/N48_14[12]/LUT6D_inst_perm/L5
+                                   net (fanout=1)        0.434       4.749         u_vin/u_cam0/fifo_data_w [13]
+ CLMS_405_847/AD                                                           f       u_vin/u_cam0/u_items/memory_r_6/ram32x2d/DIH
+
+ Data arrival time                                                   4.749         Logic Levels: 5
+                                                                                   Logic: 0.617ns(25.381%), Route: 1.814ns(74.619%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.445      10.482 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.482         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.073      10.555 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493      11.048         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.097      11.145 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.827      11.972         ntclkbufg_3
+ CLMS_405_847/CLK                                                          r       u_vin/u_cam0/u_items/memory_r_6/ram32x2d/CLK
+ clock pessimism                                         0.203      12.175
+ clock uncertainty                                      -0.050      12.125
+
+ Setup time                                              0.126      12.251
+
+ Data required time                                                 12.251
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.251
+ Data arrival time                                                   4.749
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         7.502
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+Endpoint    : u_vin/u_cam0/u_items/memory_r_11/ram32x2d/WE
+Path Group  : clk_cam0
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.146  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.969
+  Launch Clock Delay      :  2.318
+  Clock Pessimism Removal :  0.203
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.521       0.558 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.558         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.087       0.645 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.233         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.115       1.348 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.970       2.318         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+
+ CLMA_369_811/CR0                  tco                   0.141       2.459 f       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=12)       0.228       2.687         u_vin/u_cam0/active_r
+ CLMA_369_817/Y0                   td                    0.100       2.787 f       u_vin/u_cam0/N14/LUT6D_inst_perm/L6
+                                   net (fanout=33)       0.236       3.023         u_vin/u_cam0/word_w
+ CLMA_375_810/Y1                   td                    0.039       3.062 f       u_vin/u_cam0/N23/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.240       3.302         u_vin/u_cam0/N23
+ CLMA_369_817/Y3                   td                    0.039       3.341 f       u_vin/u_cam0/N24_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.240       3.581         u_vin/u_cam0/pixel_item_w
+ CLMS_363_811/Y0                   td                    0.066       3.647 f       u_vin/u_cam0/N47_5/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.404       4.051         u_vin/u_cam0/fifo_valid_w
+ CLMS_393_805/CR2                  td                    0.185       4.236 f       u_vin/u_cam0/u_items/write_gray_r[1]/opit_0_inv_L6QL5_perm/L5
+                                   net (fanout=18)       0.498       4.734         u_vin/u_cam0/u_items/write_w
+ CLMS_393_853/WE                                                           f       u_vin/u_cam0/u_items/memory_r_11/ram32x2d/WE
+
+ Data arrival time                                                   4.734         Logic Levels: 5
+                                                                                   Logic: 0.570ns(23.593%), Route: 1.846ns(76.407%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.445      10.482 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.482         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.073      10.555 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493      11.048         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.097      11.145 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.824      11.969         ntclkbufg_3
+ CLMS_393_853/CLK                                                          r       u_vin/u_cam0/u_items/memory_r_11/ram32x2d/CLK
+ clock pessimism                                         0.203      12.172
+ clock uncertainty                                      -0.050      12.122
+
+ Setup time                                              0.126      12.248
+
+ Data required time                                                 12.248
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.248
+ Data arrival time                                                   4.734
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         7.514
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+Endpoint    : u_vin/u_cam0/u_items/memory_r_14/ram32x2d/WE
+Path Group  : clk_cam0
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    -0.146  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.969
+  Launch Clock Delay      :  2.318
+  Clock Pessimism Removal :  0.203
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.521       0.558 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.558         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.087       0.645 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.233         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.115       1.348 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.970       2.318         ntclkbufg_3
+ CLMA_369_811/CLK                                                          r       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/CLK
+
+ CLMA_369_811/CR0                  tco                   0.141       2.459 f       u_vin/u_cam0/active_r/opit_0_inv_L5Q_perm/L5Q
+                                   net (fanout=12)       0.228       2.687         u_vin/u_cam0/active_r
+ CLMA_369_817/Y0                   td                    0.100       2.787 f       u_vin/u_cam0/N14/LUT6D_inst_perm/L6
+                                   net (fanout=33)       0.236       3.023         u_vin/u_cam0/word_w
+ CLMA_375_810/Y1                   td                    0.039       3.062 f       u_vin/u_cam0/N23/LUT6D_inst_perm/L6
+                                   net (fanout=1)        0.240       3.302         u_vin/u_cam0/N23
+ CLMA_369_817/Y3                   td                    0.039       3.341 f       u_vin/u_cam0/N24_3/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.240       3.581         u_vin/u_cam0/pixel_item_w
+ CLMS_363_811/Y0                   td                    0.066       3.647 f       u_vin/u_cam0/N47_5/LUT6_inst_perm/L6
+                                   net (fanout=8)        0.404       4.051         u_vin/u_cam0/fifo_valid_w
+ CLMS_393_805/CR2                  td                    0.185       4.236 f       u_vin/u_cam0/u_items/write_gray_r[1]/opit_0_inv_L6QL5_perm/L5
+                                   net (fanout=18)       0.498       4.734         u_vin/u_cam0/u_items/write_w
+ CLMS_393_853/WE                                                           f       u_vin/u_cam0/u_items/memory_r_14/ram32x2d/WE
+
+ Data arrival time                                                   4.734         Logic Levels: 5
+                                                                                   Logic: 0.570ns(23.593%), Route: 1.846ns(76.407%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.445      10.482 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.482         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.073      10.555 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493      11.048         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.097      11.145 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.824      11.969         ntclkbufg_3
+ CLMS_393_853/CLK                                                          r       u_vin/u_cam0/u_items/memory_r_14/ram32x2d/CLK
+ clock pessimism                                         0.203      12.172
+ clock uncertainty                                      -0.050      12.122
+
+ Setup time                                              0.126      12.248
+
+ Data required time                                                 12.248
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.248
+ Data arrival time                                                   4.734
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         7.514
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+Endpoint    : u_vin/u_cam0/sof_pending_r/opit_0_inv_L5Q_perm/RS
+Path Group  : clk_cam0
+Path Type   : max (fast corner)
+Path Class  : async timing path
+Clock Skew  :    -0.148  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.962
+  Launch Clock Delay      :  2.313
+  Clock Pessimism Removal :  0.203
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.521       0.558 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.558         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.087       0.645 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.233         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.115       1.348 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.965       2.313         ntclkbufg_3
+ CLMA_387_804/CLK                                                          r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+
+ CLMA_387_804/CR0                  tco                   0.140       2.453 r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CR0
+                                   net (fanout=17)       0.307       2.760         rst_cam0_n_w
+ CLMA_375_810/RS                                                           r       u_vin/u_cam0/sof_pending_r/opit_0_inv_L5Q_perm/RS
+
+ Data arrival time                                                   2.760         Logic Levels: 0
+                                                                                   Logic: 0.140ns(31.320%), Route: 0.307ns(68.680%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.445      10.482 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.482         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.073      10.555 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493      11.048         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.097      11.145 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.817      11.962         ntclkbufg_3
+ CLMA_375_810/CLK                                                          r       u_vin/u_cam0/sof_pending_r/opit_0_inv_L5Q_perm/CLK
+ clock pessimism                                         0.203      12.165
+ clock uncertainty                                      -0.050      12.115
+
+ Recovery time                                          -0.116      11.999
+
+ Data required time                                                 11.999
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.999
+ Data arrival time                                                   2.760
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         9.239
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+Endpoint    : u_vin/u_cam0/u_items/full_r/opit_0_inv_L6Q_perm/RS
+Path Group  : clk_cam0
+Path Type   : max (fast corner)
+Path Class  : async timing path
+Clock Skew  :    -0.046  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.961
+  Launch Clock Delay      :  2.313
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.521       0.558 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.558         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.087       0.645 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.233         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.115       1.348 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.965       2.313         ntclkbufg_3
+ CLMA_387_804/CLK                                                          r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+
+ CLMA_387_804/CR0                  tco                   0.141       2.454 f       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CR0
+                                   net (fanout=17)       0.315       2.769         rst_cam0_n_w
+ CLMA_393_798/RSCO                 td                    0.052       2.821 r       u_vin/u_cam0/u_items/read_meta_r[4]/opit_0_inv_srl/RSCO
+                                   net (fanout=4)        0.000       2.821         ntR0
+ CLMA_393_804/RSCI                                                         r       u_vin/u_cam0/u_items/full_r/opit_0_inv_L6Q_perm/RS
+
+ Data arrival time                                                   2.821         Logic Levels: 1
+                                                                                   Logic: 0.193ns(37.992%), Route: 0.315ns(62.008%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.445      10.482 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.482         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.073      10.555 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493      11.048         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.097      11.145 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.816      11.961         ntclkbufg_3
+ CLMA_393_804/CLK                                                          r       u_vin/u_cam0/u_items/full_r/opit_0_inv_L6Q_perm/CLK
+ clock pessimism                                         0.306      12.267
+ clock uncertainty                                      -0.050      12.217
+
+ Recovery time                                          -0.116      12.101
+
+ Data required time                                                 12.101
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.101
+ Data arrival time                                                   2.821
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         9.280
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+Endpoint    : u_vin/u_cam0/u_items/read_meta_r[0]/opit_0_inv_srl/RS
+Path Group  : clk_cam0
+Path Type   : max (fast corner)
+Path Class  : async timing path
+Clock Skew  :    -0.046  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  1.961
+  Launch Clock Delay      :  2.313
+  Clock Pessimism Removal :  0.306
+
+ Location                          Delay Type             Incr        Path         Logical Resource
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r
+ L22                                                     0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037       0.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.521       0.558 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.558         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.087       0.645 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.588       1.233         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.115       1.348 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.965       2.313         ntclkbufg_3
+ CLMA_387_804/CLK                                                          r       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CLK
+
+ CLMA_387_804/CR0                  tco                   0.141       2.454 f       u_sys/u_reset_ctrl/u_cam0/release_meta_r/opit_0_srl/CR0
+                                   net (fanout=17)       0.315       2.769         rst_cam0_n_w
+ CLMA_393_798/RSCO                 td                    0.052       2.821 r       u_vin/u_cam0/u_items/read_meta_r[4]/opit_0_inv_srl/RSCO
+                                   net (fanout=4)        0.000       2.821         ntR0
+ CLMA_393_804/RSCI                                                         r       u_vin/u_cam0/u_items/read_meta_r[0]/opit_0_inv_srl/RS
+
+ Data arrival time                                                   2.821         Logic Levels: 1
+                                                                                   Logic: 0.193ns(37.992%), Route: 0.315ns(62.008%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                           10.000      10.000 r
+ L22                                                     0.000      10.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.037      10.037         cam0_pclk_i
+ IOBD_0_786/DIN                    td                    0.445      10.482 r       cam0_pclk_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      10.482         cam0_pclk_i_ibuf/ntD
+ IOLHR_16_786/DI_TO_CLK            td                    0.073      10.555 r       cam0_pclk_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.493      11.048         nt_cam0_pclk_i
+ USCM_383_888/CLKOUT               td                    0.097      11.145 r       clkbufg_3/gopclkbufg/CLKOUT
+                                   net (fanout=99)       0.816      11.961         ntclkbufg_3
+ CLMA_393_804/CLK                                                          r       u_vin/u_cam0/u_items/read_meta_r[0]/opit_0_inv_srl/CLK
+ clock pessimism                                         0.306      12.267
+ clock uncertainty                                      -0.050      12.217
+
+ Recovery time                                          -0.116      12.101
+
+ Data required time                                                 12.101
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.101
+ Data arrival time                                                   2.821
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         9.280
+====================================================================================================
+
+====================================================================================================

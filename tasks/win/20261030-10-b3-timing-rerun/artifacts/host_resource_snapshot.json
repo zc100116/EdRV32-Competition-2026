@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-10-30T14:41:46.5939407+08:00",
+  "physicalMemoryKiB": 33204736,
+  "freePhysicalMemoryKiB": 4288012,
+  "committedBytes": 72204156928,
+  "commitLimitBytes": 81803595776,
+  "pagesInputPerSecond": 0,
+  "pageReadsPerSecond": 0,
+  "pnrProcesses": [
+    {
+      "project": "B3R",
+      "pid": 50628,
+      "elapsedMinutes": 102.84,
+      "cpuSeconds": 391.828125,
+      "workingSetBytes": 3285012480,
+      "privateCommitBytes": 6061944832
+    },
+    {
+      "project": "B3VN",
+      "pid": 5656,
+      "elapsedMinutes": 98.13,
+      "cpuSeconds": 649.515625,
+      "workingSetBytes": 1727467520,
+      "privateCommitBytes": 8635371520
+    },
+    {
+      "project": "B3F",
+      "pid": 2388,
+      "elapsedMinutes": 78.98,
+      "cpuSeconds": 237.984375,
+      "workingSetBytes": 1989521408,
+      "privateCommitBytes": 9820581888
+    }
+  ],
+  "note": "Single host sample. Private commit is not pagefile residency. Paging counters are system-wide."
+}

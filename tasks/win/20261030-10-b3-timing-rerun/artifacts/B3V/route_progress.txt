@@ -1,0 +1,43 @@
+Completed route: True
+MT total route time is copied verbatim; not summed as wall time.
+	Initial slack -14189.
+	Final slack -4345.
+Worst slack after global placement is 563
+Worst slack after post global placement is 232
+Worst slack before Replication Place is -274.
+Worst slack before detailed placement is -215, TNS before detailed placement is -457.
+Worst slack after detailed placement is 936, TNS after detailed placement is 0.
+Worst slack is 926, TNS after placement is 0.
+Worst slack is 926, TNS before route is 0.
+
+Last 30 lines of the read snapshot:
+| Use of PCKMUX_TEST                | 0         | 20            | 0
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0
+| Use of PPLL                       | 2         | 10            | 20
+| Use of PREGMUXC_TEST              | 0         | 3             | 0
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0
+| Use of RCKB                       | 4         | 40            | 10
+|  RCKB dataused                    | 2         | 40            | 5
+| Use of RCKMUX_TEST                | 0         | 10            | 0
+| Use of SCANCHAIN                  | 0         | 1             | 0
+| Use of SCKMUX_TEST                | 0         | 20            | 0
+| Use of SFB                        | 0         | 5075          | 0
+| Use of SPAD                       | 0         | 8             | 0
+| Use of TSERDES                    | 14        | 80            | 18
+| Use of USCM                       | 10        | 32            | 32
+|  USCM dataused                    | 0         | 32            | 0
+| Use of USCMMUX_TEST               | 0         | 32            | 0
++-------------------------------------------------------------------------------------+
+
+Finished routing.
+Design 'edrv32_fpga_board_vision_top' has been placed and routed successfully.
+Saving design to DB.
+Finished placement and routing.
+Action pnr: Real time elapsed is 0h:24m:45s
+Action pnr: CPU time elapsed is 0h:3m:49s
+Action pnr: Process CPU time elapsed is 0h:6m:19s
+Current time: Fri Oct 30 13:13:27 2026
+Action pnr: Peak memory pool usage is 5,935 MB

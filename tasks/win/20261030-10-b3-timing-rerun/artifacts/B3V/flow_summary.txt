@@ -1,0 +1,37 @@
+Project: G:\codex_project\EdRV32-FPGA\EdRV32-B3V
+Read-only snapshot; no jobs started/stopped.
+compile: {'W': 2951}
+Action compile: Real time elapsed is 0h:1m:45s
+Action compile: CPU time elapsed is 0h:0m:10s
+Action compile: Process CPU time elapsed is 0h:0m:10s
+Action compile: Peak memory pool usage is 499 MB
+
+synthesize: {'C': 62, 'W': 8383}
+Action synthesize: Real time elapsed is 0h:4m:43s
+Action synthesize: CPU time elapsed is 0h:0m:35s
+Action synthesize: Process CPU time elapsed is 0h:0m:39s
+Action synthesize: Peak memory pool usage is 2,574 MB
+
+device_map: {'W': 20}
+Action dev_map: Real time elapsed is 0h:1m:11s
+Action dev_map: CPU time elapsed is 0h:0m:18s
+Action dev_map: Process CPU time elapsed is 0h:0m:20s
+Action dev_map: Peak memory pool usage is 1,472 MB
+
+place_route: {'C': 61}
+Action pnr: Real time elapsed is 0h:24m:45s
+Action pnr: CPU time elapsed is 0h:3m:49s
+Action pnr: Process CPU time elapsed is 0h:6m:19s
+Action pnr: Peak memory pool usage is 5,935 MB
+
+report_timing: {'W': 166}
+Action report_timing: Real time elapsed is 0h:1m:24s
+Action report_timing: CPU time elapsed is 0h:0m:2s
+Action report_timing: Process CPU time elapsed is 0h:0m:3s
+Action report_timing: Peak memory pool usage is 4,880 MB
+
+generate_bitstream: {}
+Action gen_bit_stream: Real time elapsed is 0h:2m:3s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:23s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:23s
+Action gen_bit_stream: Peak memory pool usage is 3,550 MB

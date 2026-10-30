@@ -1,0 +1,117 @@
+##### Written on 2026/10/30 12:52:58 ###############################
+
+
+##### INFO ##################################################
+
+Current device : 
+	PG2L200H-6FBB676
+
+Top Module : 
+	edrv32_fpga_board_render_top
+
+Constraint File(s) : 
+	G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc
+
+##### SUMMARY ######################################################
+
+Found 0 error(s), 29 critical warning(s), 0 warning(s), out of 644 constraint(s)
+
+
+Inapplicable constraints(except overwritten constraints):
+********************************************
+
+define_attribute {p:tmds_data_p_o[0]} {PAP_IO_LOC} {R25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 160)] | Port tmds_data_p_o[0] has been placed at location R25, whose type is share pin.
+
+define_attribute {p:tmds_data_p_o[1]} {PAP_IO_LOC} {P23}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 166)] | Port tmds_data_p_o[1] has been placed at location P23, whose type is share pin.
+
+define_attribute {p:tmds_data_p_o[2]} {PAP_IO_LOC} {N23}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 172)] | Port tmds_data_p_o[2] has been placed at location N23, whose type is share pin.
+
+define_attribute {p:tmds_data_n_o[0]} {PAP_IO_LOC} {P25}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 178)] | Port tmds_data_n_o[0] has been placed at location P25, whose type is share pin.
+
+define_attribute {p:tmds_data_n_o[1]} {PAP_IO_LOC} {P24}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 184)] | Port tmds_data_n_o[1] has been placed at location P24, whose type is share pin.
+
+define_attribute {p:tmds_data_n_o[2]} {PAP_IO_LOC} {N24}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 190)] | Port tmds_data_n_o[2] has been placed at location N24, whose type is share pin.
+
+define_attribute {p:mem_dqs_o[0]} {PAP_IO_LOC} {J4}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 451)] | Port mem_dqs_o[0] has been placed at location J4, whose type is share pin.
+
+define_attribute {p:mem_dqs_o[1]} {PAP_IO_LOC} {H7}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 460)] | Port mem_dqs_o[1] has been placed at location H7, whose type is share pin.
+
+define_attribute {p:mem_dqs_n_o[0]} {PAP_IO_LOC} {H4}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 487)] | Port mem_dqs_n_o[0] has been placed at location H4, whose type is share pin.
+
+define_attribute {p:mem_dqs_n_o[1]} {PAP_IO_LOC} {G7}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 496)] | Port mem_dqs_n_o[1] has been placed at location G7, whose type is share pin.
+
+define_attribute {p:mem_dq_o[1]} {PAP_IO_LOC} {J6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 532)] | Port mem_dq_o[1] has been placed at location J6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[3]} {PAP_IO_LOC} {L8}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 550)] | Port mem_dq_o[3] has been placed at location L8, whose type is share pin.
+
+define_attribute {p:mem_dq_o[5]} {PAP_IO_LOC} {K7}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 568)] | Port mem_dq_o[5] has been placed at location K7, whose type is share pin.
+
+define_attribute {p:mem_dq_o[7]} {PAP_IO_LOC} {J5}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 586)] | Port mem_dq_o[7] has been placed at location J5, whose type is share pin.
+
+define_attribute {p:mem_dq_o[8]} {PAP_IO_LOC} {H6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 595)] | Port mem_dq_o[8] has been placed at location H6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[10]} {PAP_IO_LOC} {H8}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 613)] | Port mem_dq_o[10] has been placed at location H8, whose type is share pin.
+
+define_attribute {p:mem_dq_o[11]} {PAP_IO_LOC} {D6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 622)] | Port mem_dq_o[11] has been placed at location D6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[12]} {PAP_IO_LOC} {G8}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 631)] | Port mem_dq_o[12] has been placed at location G8, whose type is share pin.
+
+define_attribute {p:mem_dq_o[13]} {PAP_IO_LOC} {E6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 640)] | Port mem_dq_o[13] has been placed at location E6, whose type is share pin.
+
+define_attribute {p:mem_dq_o[15]} {PAP_IO_LOC} {G6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 658)] | Port mem_dq_o[15] has been placed at location G6, whose type is share pin.
+
+define_attribute {p:mem_dm_o[0]} {PAP_IO_LOC} {K6}
+	C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 811)] | Port mem_dm_o[0] has been placed at location K6, whose type is share pin.
+
+
+Constraints with issues:
+********************************************
+
+
+Issues without commands:
+********************************************
+
+C: ConstraintEditor-2009: p:tmds_data_p_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_p_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_p_o[2] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_n_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_n_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_data_n_o[2] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_clk_p_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_clk_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+
+Unconstrained ports:
+********************************************
+
+
+Constraints with matching wildcard expressions:
+********************************************
+
+set_false_path -from [get_ports {key_n_i[*] uart_rx_i}]
+	I: The pattern 'key_n_i[*]' in command 'get_ports {key_n_i[*] uart_rx_i}' match 4 objects below:
+	I: port key_n_i[0]
+	I: port key_n_i[1]
+	I: port key_n_i[2]
+	I: port key_n_i[3]
+
+
