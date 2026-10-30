@@ -20,7 +20,7 @@ FRAMES = 600
 
 
 def supported_mappers():
-    text = (NOF / 'nes/mmclist.c').read_text()
+    text = (ROOT / 'build/sw/nes-host/core/nes/mmclist.c').read_text()
     return {int(n) for n in re.findall(r'&map(\d+)_intf', text)}
 
 
@@ -45,12 +45,15 @@ def picture(frame):
     return len({pixels[i:i + 3] for i in range(0, len(pixels), 3)})
 
 
-def host_run(rom, work):
+def host_run(rom, work, start=False):
     frames = work / 'frames'
     shutil.rmtree(frames, ignore_errors=True)
     frames.mkdir()
+    command = [str(HOST), str(rom), str(FRAMES), str(frames)]
+    if start:
+        command.append('start=120')
     try:
-        run = subprocess.run([str(HOST), str(rom), str(FRAMES), str(frames)],
+        run = subprocess.run(command,
                              capture_output=True, text=True, errors='replace', timeout=60)
     except subprocess.TimeoutExpired:
         return 'timeout', ''
@@ -88,10 +91,14 @@ def main():
                 row['verdict'] = 'file shorter than header sizes'
             else:
                 result, detail = host_run(rom, work)
+                row['no_input'] = result
+                if result == 'uniform':
+                    result, detail = host_run(rom, work, start=True)
+                    row['start'] = result
                 row.update(verdict=f'host {result}', detail=detail)
             rows.append(row)
     keys = ['rom', 'bytes', 'mapper', 'prg_kib', 'chr_kib', 'trainer', 'battery', 'nes2',
-            'dirty', 'verdict', 'detail']
+            'dirty', 'no_input', 'start', 'verdict', 'detail']
     with args.output.open('w') as out:
         out.write('\t'.join(keys) + '\n')
         for row in rows:

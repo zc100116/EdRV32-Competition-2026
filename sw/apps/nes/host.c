@@ -6,10 +6,16 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <noftypes.h>
+#include <nesinput.h>
+#undef malloc
+#undef free
 #include <time.h>
 #include "nes_port.h"
 static const char *output_directory;
 static char *rom_data;
+static unsigned start_frame;
 
 char *osd_getromdata(void) { return rom_data; }
 
@@ -24,7 +30,11 @@ uint64_t nes_ticks(void)
 }
 uint64_t nes_tick_hz(void) { return 1000000000; }
 uint64_t nes_instructions(void) { return 0; }
-unsigned nes_buttons(void) { return 0; }
+/* osd_getinput samples after frame N; hold Start for the following frame. */
+unsigned nes_buttons(void)
+{
+    return start_frame && nes_frames == start_frame ? INP_PAD_START : 0;
+}
 
 void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned frame)
 {
@@ -55,7 +65,7 @@ void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned fr
 int main(int argc, char **argv)
 {
     if (argc != 4 && argc != 5) {
-        fprintf(stderr, "usage: %s ROM FRAMES OUTPUT_DIRECTORY [skip]\n", argv[0]);
+        fprintf(stderr, "usage: %s ROM FRAMES OUTPUT_DIRECTORY [skip|start=N]\n", argv[0]);
         return 1;
     }
     nes_frame_limit = (unsigned)strtoul(argv[2], NULL, 10);
@@ -80,7 +90,17 @@ int main(int argc, char **argv)
         return 1;
     }
     output_directory = argv[3];
-    nes_skip_render = argc == 5;
+    if (argc == 5) {
+        if (strcmp(argv[4], "skip") == 0)
+            nes_skip_render = 1;
+        else if (strncmp(argv[4], "start=", 6) == 0 &&
+                 (start_frame = (unsigned)strtoul(argv[4] + 6, NULL, 10)) != 0) {
+            /* One scripted Start press, sufficient for the compatibility survey. */
+        } else {
+            fputs("expected skip or start=N (N > 0)\n", stderr);
+            return 1;
+        }
+    }
     nes_run();
     free(rom_data);
     return 0;
