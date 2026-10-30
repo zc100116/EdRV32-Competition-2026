@@ -1,0 +1,53 @@
+# File: edrv32_fpga_board_b2_top_regions.fdc
+# Design: docs/design/2026-10-31-b3f-floorplan.md, sections 2-4; discussion draft.
+# Function: Candidate B regions for edrv32_fpga_board_b2_top; not imported.
+# Clocks: clk_sys 100, clk_mem 125, clk_npu 150, clk_pix 74.25 MHz.
+# Syntax: UCE V1.7 PDF pp.89-90,95-96; card 11 b3v-placement.fdc instance syntax.
+# Coordinates: card 11 clock-region/site tables; partial CLM capacities are estimates.
+# Pending user confirmation: LUT/FF <=80%, DRM/APM <=90%, not 80% for all resources.
+# Both I$ sizes use fp_cpu; +8 DRM for 32 KiB is provisional, LUT/FF delta unknown.
+# PAP_REGION filters only the listed resources; PLL/DDR PHY/IO retain existing rules.
+
+define_global_attribute {PAP_REGION} {
+    fp_cpu(0,76,175,249)[CLMA,CLMS,APM,DRM];
+    fp_disp(77,121,175,249)[CLMA,CLMS,APM,DRM];
+    fp_rnd(0,121,100,174)[CLMA,CLMS,APM,DRM];
+    fp_sysio(0,121,70,99)[CLMA,CLMS,APM,DRM];
+    fp_media(0,121,0,69)[CLMA,CLMS,APM,DRM];
+    fp_npu_ddr(124,238,0,199)[CLMA,CLMS,APM,DRM];
+    fp_mem(157,238,200,249)[CLMA,CLMS,APM,DRM];
+}
+
+# Isolated CPU region, including both caches and cache control.
+define_attribute {i:u_soc.u_cpu} {PAP_REGION} {fp_cpu}
+
+# Left-side video, rendering and network modules.
+define_attribute {i:u_soc.u_disp} {PAP_REGION} {fp_disp}
+define_attribute {i:u_tmds} {PAP_REGION} {fp_disp}
+define_attribute {i:u_soc.u_rnd} {PAP_REGION} {fp_rnd}
+define_attribute {i:u_soc.u_sys} {PAP_REGION} {fp_sysio}
+define_attribute {i:u_soc.u_eth} {PAP_REGION} {fp_sysio}
+define_attribute {i:u_rgmii} {PAP_REGION} {fp_sysio}
+define_attribute {i:u_soc.u_vin} {PAP_REGION} {fp_media}
+define_attribute {i:u_soc.u_pix} {PAP_REGION} {fp_media}
+define_attribute {i:u_soc.u_geo} {PAP_REGION} {fp_media}
+
+# Preserve room for complete eight-APM chains in individual right-side columns.
+# No site lock: chain direction and packing require PDS verification.
+define_attribute {i:u_soc.u_npu} {PAP_REGION} {fp_npu_ddr}
+define_attribute {i:u_ddr3} {PAP_REGION} {fp_npu_ddr}
+
+# Split mem at existing sibling modules; never constrain their parents as well.
+# Direct logic in u_mem/u_xbar remains unbound; its budget is charged to fp_mem.
+define_attribute {i:u_soc.u_mem.u_perf_mon} {PAP_REGION} {fp_media}
+define_attribute {i:u_soc.u_mem.u_xbar.u_rbuf} {PAP_REGION} {fp_sysio}
+define_attribute {i:u_soc.u_mem.u_gw} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_p6_arb} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.u_regs} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.u_sched} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.g_port[1].g_w_ram.u_ram} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.g_port[2].g_w_ram.u_ram} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.g_port[3].g_w_ram.u_ram} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.g_port[4].g_w_ram.u_ram} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.g_port[5].g_w_ram.u_ram} {PAP_REGION} {fp_mem}
+define_attribute {i:u_soc.u_mem.u_xbar.g_port[6].g_w_ram.u_ram} {PAP_REGION} {fp_mem}
