@@ -1,6 +1,6 @@
 # B3N 上板 board_npu 首个卷积用例失败
 
-状态：定位中（根因为推测，待第二次上板确认）
+状态：定位中（T-NPU4 两个 SoC 仿真变体均不复现，物理级联根因仍为推测）
 
 ## 1. 现象
 
@@ -21,9 +21,49 @@ NPU board: FAIL 1/39
 - RTL `b5dc9469`（b3），工程 B3N，PDS 2022.2-SP6.1，PG2L200H-6 FBB676。
 - 程序 `tasks/win/20261030-13-b3n-npu/src/board_npu.elf`（Linux 端由 `b5dc9469` 构建）。
 
+T-NPU4：仿真源基线 `d3b83117`，新增入口及结果见本记录同次提交；
+Verilator 5.020，确定性 DDR stall 序列（初值 `0x1234abcd`），无外部随机种子。
+以下命令均在指定仿真主机串行执行，厂商模型目录由 `EDRV32_PANGO_SIM_DIR` 指定：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+python3 verif/soc/board_npu/program/run.py --mac sim
+python3 verif/soc/board_npu/program/run.py --mac vendor
+```
+
+不重编译 ELF 或 ROM；PT_LOAD 后门装入 DDR，采用卡 13 的 `src/ip_rom_boot.dat`，
+经真实 BIOS `3=Run` 进入 `0x80000000`。CPU 执行原程序的数据复制、clean/invalidate、比较。
+测试侧生成稀疏字节 DDR，`MEMORY_BYTES=1073741824`，覆盖 NPU 区和原 ELF 栈顶
+`0xc0000000` 对应的物理区末端 `0x3fffffff`。公共 DDR 模型和 RTL 均未修改。
+沿用已有 board_npu 的 UART 6.25 Mbaud 和 CLINT 按键窗口加速。
+厂商变体仅将 MAC 链 tech 包装切至 FPGA 分支，使用外部 `GTP_APM_E2.v` 及 EQ-01
+相同的 GRS 常量引用，其余均为 SIM_MODE。
+
+两个变体的 `--lint-only -Wall`、构建均为 0 告警；厂商源文件按文件豁免编码告警，
+MAC 包装仅豁免三个有意悬空输出的 `PINCONNECTEMPTY`。新增 SV 格式检查为 0 告警，
+`python3 -m py_compile verif/soc/board_npu/program/run.py`、`git diff --check` 通过。
+UART 由入口写入 `build/board_npu_program/{sim,vendor}/simulation.log`，
+运行器逐字段对照本记录原样引用的板端日志。按任务要求，未回传主机文件，运行后清理工作目录及厂商模型。
+
 ## 3. 观察
 
-- 失败只出现在硬件上，仿真（行为模型）和 EQ-01（包装模块对照厂商仿真模型）都通过，说明差异来自仿真模型没有体现的物理行为。
+- **SoC 级仿真不复现**：原 ELF 在行为 MAC 和 FPGA MAC 包装加厂商模型两变体均 PASS，
+  A-ID、A-empty、A-reset 均 PASS；每个变体只输出一条 B 类结果，收到该行即结束，未执行后续用例、整网或连续帧。
+
+| 字段 | 卡 13 上板 | SoC 行为 MAC | SoC 厂商 MAC |
+|---|---|---|---|
+| B-OP-01-c16_32 | FAIL | PASS | PASS |
+| desc | 0 | 未打印（PASS） | 未打印（PASS） |
+| 首错地址 | `1102000d` | 无 | 无 |
+| expected / actual | `00000002` / `00000001` | 未打印（PASS） | 未打印（PASS） |
+| mismatches | 160 | 未打印（PASS） | 未打印（PASS） |
+| PERF0 | 522 | 439 | 439 |
+| MAC | 32 | 32 | 32 |
+| 结束时刻 | — | 1,870,875 ns | 1,870,875 ns |
+
+两种仿真 MAC 结果和计数相同；相对板端，PERF0 少 83 个 NPU 周期，MAC 相同。
+这些结果尚不能确认板端差异的根因。
+
 - `edrv32_mac_npu_int8_chain` 的 8 级都配置 `MODEZ=4'b0011`（后加器 Z 取 CPI），第 0 级把 `cpi_i` 接常数 0（设计记录 `2026-10-30-npu-apm-cascade.md` 第 5 节的决定）。
 - 厂商 IP 源码（卡 12 `artifacts/ip_rtl/ipm2l_mult_v1_3.v.xml`、`ipm2l_multadd_v1_3.v.xml`）的第一级一律 `modez_in[0] = 3'd0`（加零），CPI 只接上一级的 CPO。
 - 卡 13 的 APM 布局（`artifacts/apm_placement.pcf`）中，32 条链里至少 12 条的第 0 级与同列另一条链的末级相邻。
@@ -32,6 +72,8 @@ NPU board: FAIL 1/39
 
 CPI 是专用级联走线，"选 CPI 并把 CPI 接常数 0"在硬件上可能没有生效，第 0 级把相邻 APM 的 CPO 加进了累加结果。仿真模型按端口值计算，看不到这一点。
 
+T-NPU4 未复现失败，未取得支持或否定上述物理级联推测的直接信号证据；未定位到已确认的 RTL 根因，未修改 RTL 或 board_npu 程序。
+
 ## 5. 修复（进行中）
 
 T-NPU3：新增链头包装 `edrv32_mac_npu_int8_head`（`MODEZ=4'b0000`，不用 CPI），每条链第 0 级用它；EQ-01 改为给厂商模型第 0 级的 CPI 驱动随机非零值，证明链头忽略 CPI。`board_npu` 改为 B 类失败不停止，并打印出错的输出通道，便于对照 APM 布局判断。
@@ -39,6 +81,10 @@ T-NPU3：新增链头包装 `edrv32_mac_npu_int8_head`（`MODEZ=4'b0000`，不�
 ## 6. 防回归
 
 EQ-01 第 0 级 CPI 随机非零的比对。
+
+T-NPU4 新增 `verif/soc/board_npu/program/test.yaml`（tier=`directed`，不进 smoke），
+复用原始 ELF、CPU/cache/mem_xbar/DDR 网关和板级顶层，收到首个 B-OP-01 完整结果行后立即退出；
+用例 FAIL 返回非零退出码，PASS 返回 0。
 
 ## 7. 同类排查
 

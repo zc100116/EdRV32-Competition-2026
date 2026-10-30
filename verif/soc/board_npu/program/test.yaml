@@ -1,0 +1,10 @@
+top: edrv32_board_npu_program_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software: tasks/win/20261030-13-b3n-npu/src/board_npu.elf (unchanged)
+timeout: 3600
+pass: PASS board_npu_program
+tier: directed
+simulator: verilator
+runner: python3 verif/soc/board_npu/program/run.py
