@@ -12,6 +12,7 @@
 #include "mapper_chr.h"
 extern mapintf_t map74_intf;
 extern mapintf_t map192_intf;
+extern mapintf_t map195_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[8];
@@ -86,10 +87,34 @@ static void test192(void)
     nes_chr_write(0x1000, 0x99);
     assert(pages[4][0x1000] == 0);
 }
+static void test195(void)
+{
+    cart.mapper_number = 195;
+    map195_intf.init();
+    chr_bank(&map195_intf, 0x28);
+    nes_chr_write(0x1000, 0x55);
+    assert(pages[4][0x1000] == 0x55);
+    chr_bank(&map195_intf, 0x82); /* GAL selects RAM at banks 0-3. */
+    nes_chr_write(0x1000, 0);
+    chr_bank(&map195_intf, 0);
+    assert(pages[4][0x1000] == 0x55); /* $28 and $00 share physical RAM. */
+    chr_bank(&map195_intf, 0x88); /* Select RAM at banks $4C-$4F. */
+    nes_chr_write(0x1000, 0);
+    chr_bank(&map195_intf, 0x4c);
+    assert(pages[4][0x1000] == 0);
+    nes_chr_write(0x1000, 0xaa);
+    chr_bank(&map195_intf, 0xca); /* Disable all RAM. */
+    nes_chr_write(0x1000, 0);
+    chr_bank(&map195_intf, 0x4c);
+    assert(pages[4][0x1000] == 0);
+    write_reg(&map195_intf, 0x5123, 0x42);
+    assert(map195_intf.mem_read[0].read_func(0x5123) == 0x42);
+}
 int main(void)
 {
     test74();
     test192();
+    test195();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }

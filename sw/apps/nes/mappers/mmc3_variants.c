@@ -17,9 +17,15 @@ static uint8 banks[8];
 static uint8 chr_ram[8192];
 static int chr_banks[8];
 static bool chr_writable[8];
+static uint8 extra_ram[4096];
+static int ram_first;
+static int ram_mask;
 
 static int ram_index(int bank)
 {
+    /* https://www.nesdev.org/wiki/INES_Mapper_195: GAL-selected RAM window. */
+    if (mmc_getinfo()->mapper_number == 195)
+        return (bank & ram_mask) == ram_first ? bank & 7 : -1;
     /* https://www.nesdev.org/wiki/INES_Mapper_192 */
     int count = mmc_getinfo()->mapper_number == 192 ? 4 : 2;
     return bank >= 8 && bank < 8 + count ? bank - 8 : -1;
@@ -50,13 +56,33 @@ static void sync_banks(void)
 static bool chr_write(uint32 address, uint8 value)
 {
     int page = address >> 10;
+    int bank = chr_banks[page];
+    if (mmc_getinfo()->mapper_number == 195 && (bank & 0x80)) {
+        /* The GAL observes the CHR bank address on PPU writes, not data. */
+        ram_mask = bank & 0x40 ? 0xfe : 0xfc;
+        switch (bank & 0xda) {
+        case 0x80: ram_first = 0x28; break;
+        case 0x82: ram_first = 0x00; break;
+        case 0x88: ram_first = 0x4c; break;
+        case 0x8a: ram_first = 0x64; break;
+        case 0xc0: ram_first = 0x46; break;
+        case 0xc2: ram_first = 0x7c; break;
+        case 0xc8: ram_first = 0x0a; break;
+        default: ram_first = -1; break; /* ROM only (D bit or $CA). */
+        }
+        sync_banks();
+    }
     if (chr_writable[page])
-        chr_ram[ram_index(chr_banks[page]) * 1024 + (address & 1023)] = value;
+        chr_ram[ram_index(bank) * 1024 + (address & 1023)] = value;
     return true;
 }
 
 static void write_reg(uint32 address, uint8 value)
 {
+    if (address < 0x6000) {
+        extra_ram[address & 0xfff] = value;
+        return;
+    }
     switch (address & 0xe001) {
     case 0x8000:
         command = value;
@@ -88,12 +114,26 @@ void nes_mmc3_variant_init(void)
     command = 0;
     memcpy(banks, initial, sizeof(banks));
     memset(chr_ram, 0, sizeof(chr_ram));
+    memset(extra_ram, 0, sizeof(extra_ram));
+    ram_first = 0x28;
+    ram_mask = 0xfc;
     nes_chr_write_hook = chr_write;
     sync_banks();
 }
 
 void nes_mmc3_variant_hblank(int vblank) { map4_intf.hblank(vblank); }
 map_memwrite nes_mmc3_variant_writes[] = {
+    {0x8000, 0xffff, write_reg},
+    {(uint32)-1, (uint32)-1, NULL}
+};
+
+static uint8 read_ram(uint32 address) { return extra_ram[address & 0xfff]; }
+map_memread nes_mmc3_ram_reads[] = {
+    {0x5000, 0x5fff, read_ram},
+    {(uint32)-1, (uint32)-1, NULL}
+};
+map_memwrite nes_mmc3_ram_writes[] = {
+    {0x5000, 0x5fff, write_reg},
     {0x8000, 0xffff, write_reg},
     {(uint32)-1, (uint32)-1, NULL}
 };

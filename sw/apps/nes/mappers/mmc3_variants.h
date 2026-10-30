@@ -8,4 +8,6 @@
 void nes_mmc3_variant_init(void);
 void nes_mmc3_variant_hblank(int vblank);
 extern map_memwrite nes_mmc3_variant_writes[];
+extern map_memread nes_mmc3_ram_reads[];
+extern map_memwrite nes_mmc3_ram_writes[];
 #endif
