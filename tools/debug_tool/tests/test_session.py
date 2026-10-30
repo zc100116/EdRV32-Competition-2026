@@ -192,6 +192,19 @@ class ConsoleLayoutTest(unittest.TestCase):
         from PySide6.QtWidgets import QApplication
         cls.app = QApplication.instance() or QApplication([])
 
+    def assert_label_heights(self, frame, context):
+        from PySide6.QtCore import Qt, QRect
+        from PySide6.QtWidgets import QLabel
+        for text in frame.findChildren(QLabel):
+            if not text.isVisible() or not text.text():
+                continue
+            flags = Qt.TextWordWrap if text.wordWrap() else Qt.TextFlag(0)
+            needed = text.fontMetrics().boundingRect(
+                QRect(0, 0, text.width(), 10000), flags, text.text()).height()
+            self.assertGreaterEqual(
+                text.height(), needed,
+                f'{context}: {text.text()!r} needs {needed} px, got {text.height()} px')
+
     def test_two_window_sizes_and_capabilities(self):
         from PySide6.QtGui import QIcon
         from PySide6.QtWidgets import QLabel, QLineEdit, QPlainTextEdit
@@ -244,6 +257,11 @@ class ConsoleLayoutTest(unittest.TestCase):
                     for active in range(len(sidebar.groups)) if sidebar.compact else [0]:
                         sidebar.activate(active)
                         self.app.processEvents()
+                        # Both columns must remain readable when either column changes groups.
+                        for checked in (console.left_sidebar, console.right_sidebar):
+                            for frame, _, _, caption in checked.groups:
+                                self.assert_label_heights(
+                                    frame, f'{width}×{height} {name} {caption}')
                         for index, (frame, button, body, _) in enumerate(sidebar.groups):
                             self.assertGreaterEqual(frame.y(), 0)
                             self.assertLess(frame.geometry().bottom(), sidebar.height())

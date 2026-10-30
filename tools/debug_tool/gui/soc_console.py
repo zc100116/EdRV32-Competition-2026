@@ -162,6 +162,10 @@ class Sidebar(QWidget):
             body.setVisible(expanded)
             button.setEnabled(self.compact)
             button.setText((('▾ ' if expanded else '▸ ') if self.compact else '') + caption)
+            frame.updateGeometry()
+        # Expanded groups need their current content hints before the next paint.
+        self.column.invalidate()
+        self.column.activate()
 
 
 class SocConsole(QWidget):
@@ -294,6 +298,7 @@ class SocConsole(QWidget):
         send_row.addWidget(self.send_image)
         box.addLayout(send_row)
         self.image_note = label('', 'note')
+        self.image_note.setWordWrap(False)
         box.insertWidget(1, self.image_note)
         layout.addWidget(self.image_card)
         self.model_card, box = card('模型发送 · WIN2')
@@ -306,6 +311,7 @@ class SocConsole(QWidget):
         self.send_model = self.button('发送描述符与模型', self._send_model)
         box.addWidget(self.send_model)
         self.model_note = label('', 'note')
+        self.model_note.setWordWrap(False)
         box.insertWidget(1, self.model_note)
         layout.addWidget(self.model_card)
         frame, box = card('传输状态')
@@ -358,6 +364,7 @@ class SocConsole(QWidget):
         self.apply_scene = self.button('下发场景与 PIX / GEO', self._apply_scene)
         box.addWidget(self.apply_scene)
         self.scene_note = label('', 'note')
+        self.scene_note.setWordWrap(False)
         box.addWidget(self.scene_note)
         layout.addWidget(self.scene_card)
         self.output_card, box = card('输出与采样')
@@ -381,6 +388,7 @@ class SocConsole(QWidget):
         self.apply_output = self.button('下发输出与采样', self._apply_output)
         box.addWidget(self.apply_output)
         self.output_note = label('', 'note')
+        self.output_note.setWordWrap(False)
         box.addWidget(self.output_note)
         layout.addWidget(self.output_card)
         self.status_card, box = card('板端 status 摘要')
@@ -424,6 +432,7 @@ class SocConsole(QWidget):
         self.comparison_result = label('选择原图、模型与量化参数', 'note')
         box.addWidget(self.comparison_result)
         self.check_note = label('', 'note')
+        self.check_note.setWordWrap(False)
         box.addWidget(self.check_note)
         layout.addWidget(self.check_card)
 

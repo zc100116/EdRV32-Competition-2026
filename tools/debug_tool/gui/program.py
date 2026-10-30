@@ -3,7 +3,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit,
-    QProgressBar, QPushButton, QVBoxLayout,
+    QProgressBar, QPushButton, QSizePolicy, QVBoxLayout,
 )
 
 
@@ -19,9 +19,11 @@ class ProgramPanel(QFrame):
         title = QLabel("BIOS · 烧录 / 加载运行")
         title.setObjectName("cardTitle")
         layout.addWidget(title)
-        hint = QLabel("115200 串口 · .bin 复位运行\n"
-                      "BIOS 中直接开始；否则 KEY1 + 复位")
-        hint.setWordWrap(True)
+        hint = QLabel("115200 串口 · BIOS 中可直接开始")
+        hint.setWordWrap(False)
+        hint.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        hint.setToolTip(".bin 烧录成功后复位运行；ELF 加载后立即运行。\n"
+                        "已在 BIOS 时直接开始；否则按住 KEY1 并复位。")
         layout.addWidget(hint)
         self.mode = QComboBox()
         self.mode.addItem("烧录 SRAM（.bin，复位后运行）", False)
