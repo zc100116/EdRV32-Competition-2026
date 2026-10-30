@@ -19,6 +19,7 @@ extern mapintf_t map199_intf;
 extern mapintf_t map245_intf;
 extern mapintf_t map69_intf;
 extern mapintf_t map30_intf;
+extern mapintf_t map140_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[16];
@@ -34,7 +35,7 @@ uint32 nes6502_getcycles(bool reset) { (void)reset; return cycles; }
 rominfo_t *mmc_getinfo(void) { return &cart; }
 void mmc_bankrom(int size, uint32 address, int bank)
 {
-    assert(size == 8 || size == 16);
+    assert(size == 8 || size == 16 || size == 32);
     for (int i = 0; i < size / 8; ++i)
         prg[(address - 0x8000) / 0x2000 + i] = bank < 0 ? bank : bank * (size / 8) + i;
 }
@@ -45,10 +46,10 @@ void ppu_setpage(int size, int page, uint8 *location)
 }
 void mmc_bankvrom(int size, uint32 address, int bank)
 {
-    assert(size == 1);
+    assert(size == 1 || size == 2 || size == 4 || size == 8);
     if (cart.vrom_banks)
-        ppu_setpage(1, address >> 10,
-                    vrom + (bank % (cart.vrom_banks * 8)) * 1024 - address);
+        ppu_setpage(size, address >> 10,
+                    vrom + (bank % (cart.vrom_banks * 8 / size)) * size * 1024 - address);
 }
 void ppu_mirror(int a, int b, int c, int d)
 { mirror[0] = a; mirror[1] = b; mirror[2] = c; mirror[3] = d; }
@@ -224,6 +225,14 @@ static void test30(void)
     assert(prg[0] == 2);
     bus = 0xff;
 }
+static void test140(void)
+{
+    cart.vrom_banks = 32;
+    map140_intf.init();
+    write_reg(&map140_intf, 0x6000, 0x2b);
+    assert(prg[0] == 8 && prg[3] == 11);
+    assert(pages[0] == vrom + 11 * 8192);
+}
 int main(void)
 {
     test74();
@@ -234,6 +243,7 @@ int main(void)
     test245();
     test69();
     test30();
+    test140();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }
