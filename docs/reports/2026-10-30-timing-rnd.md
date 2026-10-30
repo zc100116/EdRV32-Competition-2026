@@ -61,7 +61,7 @@ coverage 写成 `edge=16E+f`：仅 `E≤x<width-E` 有覆盖；当 `f≠0` 且 `
 
 ## 测量口径与资源
 
-脚本为 `verif/unit/rnd_timing/measure.py OUTPUT [TOP]`。先 `proc; flatten; opt; wreduce; opt_clean`，在 alumacc / techmap 前把每个变量乘变量 `$mul` 替换为同端口宽度的独立硬块黑盒，原参数 / 符号 / 源位置保存到 `multipliers.json`；固定端口实例清空 parameters。再 `synth -flatten -noabc; abc -lut 6 -dress; opt_clean`。RAM IP 为端口黑盒。
+脚本为 `tools/rnd/timing_measure.py OUTPUT [TOP]`。先 `proc; flatten; opt; wreduce; opt_clean`，在 alumacc / techmap 前把每个变量乘变量 `$mul` 替换为同端口宽度的独立硬块黑盒，原参数 / 符号 / 源位置保存到 `multipliers.json`；固定端口实例清空 parameters。再 `synth -flatten -noabc; abc -lut 6 -dress; opt_clean`。RAM IP 为端口黑盒。
 
 重新导入前仅重命名工具生成的内部标识符，避免 techmap 编号碰撞；命名寄存器和位连接保留。`netlist_paths.py` 以 FF / RAM / 硬乘法边界切开前后组合段，D 和 CE 均计入。乘法自身延迟不纳入 LUT6 级数，硬节点数不能换算为 PDS 物理 APM 数。
 
@@ -115,7 +115,7 @@ PDS B3R 的 DRM 为 60，改后未取得。通用网表保持 17 个 line RAM、
 
 ## 最终性能
 
-以下全部逐字节 PASS。COPY / BLUR / SHADOW 为现有 block harness：seed=1、读延迟 3、随机背压 30、B 延迟 3；测量脚本 `verif/unit/rnd_timing/perf.py` 只开启负 telemetry kind 的计数打印，保留原字节模型及通用计数器检查，不套用 RN-18 固定尺寸阈值。GLYPH 沿用 2026-10-29 RN-18 场景。圆角 FILL 复用 unit/rnd_engine 原性能项，目标 1024×512，R=16，无随机背压、B 延迟 5。
+以下全部逐字节 PASS。COPY / BLUR / SHADOW 为现有 block harness：seed=1、读延迟 3、随机背压 30、B 延迟 3；测量脚本 `tools/rnd/timing_perf.py` 只开启负 telemetry kind 的计数打印，保留原字节模型及通用计数器检查，不套用 RN-18 固定尺寸阈值。GLYPH 沿用 2026-10-29 RN-18 场景。圆角 FILL 复用 unit/rnd_engine 原性能项，目标 1024×512，R=16，无随机背压、B 延迟 5。
 
 | 场景 | 改前 PERF0 | 改后 PERF0 | 增幅 | PERF1 | 判定 |
 |---|---:|---:|---:|---:|---|
@@ -185,10 +185,10 @@ flock /tmp/edrv32-sim.lock python3 tools/regress.py smoke --path verif/unit/rnd_
 flock /tmp/edrv32-sim.lock python3 tools/regress.py smoke --path verif/unit/rnd_address -j 1
 flock /tmp/edrv32-sim.lock python3 tools/regress.py smoke --path verif/unit/rnd_engine -j 1
 flock /tmp/edrv32-sim.lock python3 tools/regress.py perf --path verif/unit/rnd_engine/round_perf -j 1
-flock /tmp/edrv32-sim.lock python3 verif/unit/rnd_timing/perf.py build/rnd/obj/sim build/rnd-timing/perf-final
+flock /tmp/edrv32-sim.lock python3 tools/rnd/timing_perf.py build/rnd/obj/sim build/rnd-timing/perf-final
 flock /tmp/edrv32-sim.lock python3 tools/regress.py smoke --path verif/soc/board_render -j 1
-PYTHONPATH=$PWD python3 verif/unit/rnd_timing/measure.py build/rnd-timing/hard-final
-PYTHONPATH=$PWD python3 verif/unit/rnd_timing/measure.py build/rnd-timing/blur-final edrv32_rnd_blur
+PYTHONPATH=$PWD python3 tools/rnd/timing_measure.py build/rnd-timing/hard-final
+PYTHONPATH=$PWD python3 tools/rnd/timing_measure.py build/rnd-timing/blur-final edrv32_rnd_blur
 ```
 
 测量脚本内部逐条给 Yosys 加 flock，不要再在脚本外套同一把锁。GLYPH 单项（先由 block smoke 构建 `build/rnd/obj/sim`）：
@@ -210,9 +210,9 @@ PY_GLYPH
 
 ```sh
 git worktree add --detach build/rnd-timing/reference 05088f4b
-git archive e7121fc7 verif/block/rnd verif/unit/rnd_engine verif/unit/rnd_timing | tar -x -C build/rnd-timing/reference
-(cd build/rnd-timing/reference && PYTHONPATH=$PWD python3 verif/unit/rnd_timing/measure.py build/timing)
-(cd build/rnd-timing/reference && PYTHONPATH=$PWD python3 verif/unit/rnd_timing/measure.py build/blur-timing edrv32_rnd_blur)
+git archive e7121fc7 verif/block/rnd verif/unit/rnd_engine tools/rnd | tar -x -C build/rnd-timing/reference
+(cd build/rnd-timing/reference && PYTHONPATH=$PWD python3 tools/rnd/timing_measure.py build/timing)
+(cd build/rnd-timing/reference && PYTHONPATH=$PWD python3 tools/rnd/timing_measure.py build/blur-timing edrv32_rnd_blur)
 ```
 
 RN-20 对照只取该 checkout 的 `SMOKE_CASES` 中 RN-20 两项执行，生成、编译和比较仍用同一个 runner；集成版已由26项 smoke 执行这两项，不再重复。

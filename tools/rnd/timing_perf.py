@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# File: perf.py
+# File: timing_perf.py
 # Spec: T-RND1/T-RND2 focused acceptance; rnd-spec 7.
 # Description: Measure the existing COPY/BLUR/SHADOW cases with the same byte oracle.
 #              A negative telemetry kind prints counters without RN-18 size thresholds.
@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'verif/block/rnd'))
 from vectors import generate
 

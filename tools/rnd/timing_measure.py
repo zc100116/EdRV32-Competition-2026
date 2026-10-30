@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# File: measure.py
+# File: timing_measure.py
 # Spec: T-RND1/T-RND2; rnd-spec 5/7.
 # Description: Preserve variable multipliers as hard boundaries before LUT6 mapping;
 #              inspect their immediate register connections in the pre-techmap netlist.
