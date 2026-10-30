@@ -15,6 +15,10 @@ static unsigned interrupts;
 static bool rendering = true;
 static int prg[4];
 static int chr[8];
+static uint8 ram[8192];
+static uint8 *chr_pages[8];
+void ppu_setpage(int size, int page, uint8 *location)
+{ assert(size == 1); chr_pages[page] = location; }
 rominfo_t *mmc_getinfo(void) { return &cart; }
 void mmc_bankrom(int size, uint32 address, int bank)
 { assert(size == 8); prg[(address - 0x8000) / 0x2000] = bank; }
@@ -30,6 +34,7 @@ static void clock_line(void) { map4_intf.hblank(0); }
 int main(void)
 {
     cart.rom_banks = 16;
+    cart.vrom_banks = 16;
     map4_intf.init();
     write_reg(0x8000, 6);
     write_reg(0x8001, 9);
@@ -70,6 +75,14 @@ int main(void)
     rendering = true;
     map4_intf.hblank(1);
     assert(interrupts == 4);
-    puts("PASS MMC3 bank mode changes, IRQ reload and disabled counter");
+    cart.vrom_banks = 0;
+    cart.vram = ram;
+    map4_intf.init();
+    write_reg(0x8000, 2);
+    write_reg(0x8001, 7);
+    assert(chr_pages[4] + 0x1000 == ram + 7 * 1024);
+    write_reg(0x8000, 0x82);
+    assert(chr_pages[0] == ram + 7 * 1024);
+    puts("PASS MMC3 bank modes, CHR-RAM, IRQ reload and disabled counter");
     return 0;
 }
