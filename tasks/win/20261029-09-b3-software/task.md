@@ -16,7 +16,7 @@
 - 本卡 `src/`：
   - 三个演示程序在 Linux 端从 30f6464 构建，GCC 15.2.0，`make -C sw PROGRAM=<demo|demo_vision|demo_vnpu> MEMORY=sram -j1`，0 告警；
   - `npu/`：YOLO 模型编译输出（`regs.txt`、`mem_desc.hex`、`mem_model.hex`、`quantization.json`），与 20261029-02 相同。
-- 三个版本的功能差异、构建方法：`sw/apps/demo/README.md`“板级版本”一节。
+- 三个版本的功能差异、构建方法：`sw/apps/demo/README.md`“按板级工程选择版本（B3-11）”一节。
 - 串口命令、KEY、网口约定、上板检查清单：`sw/apps/demo/README.md`。
 - 烧录工具：`tools/board/uart_tool.py`（SRAM 烧录用法见 `tools/board/README.md` 开头）。
 - 调试工具：`tools/debug_tool/`（建立网口对端、加载模型、YOLO 图像检查、DDR 监控）。
