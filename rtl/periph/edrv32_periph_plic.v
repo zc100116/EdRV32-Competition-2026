@@ -58,7 +58,7 @@ module edrv32_periph_plic (
     reg [7:0] write_left_r;
     reg [7:0] read_left_r;
     reg [31:0] read_data_w;
-    wire [31:0] read_offset_w;
+    wire [21:0] read_offset_w;
     wire [31:0] write_data_w;
     wire read_error_w;
     wire read_accept_w;
@@ -67,7 +67,8 @@ module edrv32_periph_plic (
     wire unused_w;
 
     // SIZE=2 writes from D$ select the complete addressed 32-bit half.
-    assign unused_w = &{1'b0, axi_awburst_i, axi_arburst_i, axi_wlast_i, axi_wstrb_i};
+    assign unused_w = &{1'b0, axi_awburst_i, axi_arburst_i, axi_wlast_i, axi_wstrb_i,
+                        axi_araddr_i[31:22]};
     assign axi_awready_o = !write_active_r && !axi_bvalid_o;
     assign axi_wready_o = write_active_r;
     assign axi_arready_o = !axi_rvalid_o;
@@ -75,7 +76,8 @@ module edrv32_periph_plic (
     assign read_accept_w = axi_arvalid_i && axi_arready_o;
     assign write_accept_w = axi_wvalid_i && axi_wready_o;
     assign register_write_w = write_accept_w && !write_error_r;
-    assign read_offset_w = axi_araddr_i - EDRV32_PLIC_BASE;
+    // sys_xbar routes only the aligned 4 MiB PLIC window (soc_map PLIC_SIZE).
+    assign read_offset_w = axi_araddr_i[21:0];
     assign write_data_w = write_offset_r[2] ? axi_wdata_i[63:32] : axi_wdata_i[31:0];
     assign read_error_w = axi_arlen_i != 8'd0 || axi_arsize_i != 3'd2;
 
@@ -140,13 +142,17 @@ module edrv32_periph_plic (
     reg [15:1] pending_r;
     reg [15:1] claimed_r;
     wire [15:1] irq_sync_w;
-    reg [3:0] winner_w;
-    reg [2:0] winner_priority_w;
+    wire [3:0] winner_w;
+    reg [3:0] winner_r;
+    wire [6:0] candidate_w [0:15];
+    wire [6:0] pair_w [0:7];
+    wire [6:0] quad_w [0:3];
+    wire [6:0] half_w [0:1];
+    wire [6:0] best_w;
     wire claim_w;
-    integer select_idx;
     integer source_idx;
-    integer read_idx;
     genvar source;
+    genvar node;
 
     generate
         for (source = 1; source <= 15; source = source + 1) begin : g_source
@@ -158,33 +164,69 @@ module edrv32_periph_plic (
             );
         end
     endgenerate
-    // Ascending traversal keeps the smallest source number on equal priority.
-    always @(*) begin
-        winner_w = 4'd0;
-        winner_priority_w = threshold_r;
-        for (select_idx = 1; select_idx <= 15; select_idx = select_idx + 1) begin
-            if (pending_r[select_idx] && enable_r[select_idx] &&
-                priority_r[select_idx] > winner_priority_w) begin
-                winner_w = select_idx[3:0];
-                winner_priority_w = priority_r[select_idx];
-            end
+    // Each candidate carries {priority, source}; left owns lower IDs and wins ties.
+    function [6:0] select_candidate;
+        input [6:0] left_i;
+        input [6:0] right_i;
+        begin
+            select_candidate = left_i[6:4] >= right_i[6:4] ? left_i : right_i;
+        end
+    endfunction
+    assign candidate_w[0] = 7'd0;
+    generate
+        for (source = 1; source <= 15; source = source + 1) begin : g_candidate
+            wire [2:0] priority_w;
+            assign priority_w = pending_r[source] && enable_r[source] ? priority_r[source] :
+                                                                        3'd0;
+            assign candidate_w[source] = {priority_w, source[3:0]};
+        end
+        // Separate arrays make the four acyclic comparison levels explicit.
+        for (node = 0; node < 8; node = node + 1) begin : g_pair
+            assign pair_w[node] = select_candidate(candidate_w[2 * node],
+                                                    candidate_w[2 * node + 1]);
+        end
+        for (node = 0; node < 4; node = node + 1) begin : g_quad
+            assign quad_w[node] = select_candidate(pair_w[2 * node], pair_w[2 * node + 1]);
+        end
+        for (node = 0; node < 2; node = node + 1) begin : g_half
+            assign half_w[node] = select_candidate(quad_w[2 * node], quad_w[2 * node + 1]);
+        end
+    endgenerate
+    assign best_w = select_candidate(half_w[0], half_w[1]);
+    assign winner_w = best_w[6:4] > threshold_r ? best_w[3:0] : 4'd0;
+    // spec 5: both claim side effects and returned data use this same snapshot.
+    // ARREADY stays low through RVALID, leaving a refresh edge between claims.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            winner_r <= 4'd0;
+        end else begin
+            winner_r <= winner_w;
         end
     end
-    assign claim_w = read_accept_w && !read_error_w && read_offset_w == 32'h00200004;
+    assign claim_w = read_accept_w && !read_error_w && read_offset_w == 22'h200004;
     always @(*) begin
         read_data_w = 32'd0;
         case (read_offset_w)
-            32'h00001000: read_data_w = {16'd0, pending_r, 1'b0};
-            32'h00002000: read_data_w = {16'd0, enable_r, 1'b0};
-            32'h00200000: read_data_w = {29'd0, threshold_r};
-            32'h00200004: read_data_w = {28'd0, winner_w};
-            default: begin
-                for (read_idx = 1; read_idx <= 15; read_idx = read_idx + 1) begin
-                    if (read_offset_w == (32'd4 * read_idx)) begin
-                        read_data_w = {29'd0, priority_r[read_idx]};
-                    end
-                end
-            end
+            22'h001000: read_data_w = {16'd0, pending_r, 1'b0};
+            22'h002000: read_data_w = {16'd0, enable_r, 1'b0};
+            22'h200000: read_data_w = {29'd0, threshold_r};
+            22'h200004: read_data_w = {28'd0, winner_r};
+            22'h000004: read_data_w = {29'd0, priority_r[1]};
+            22'h000008: read_data_w = {29'd0, priority_r[2]};
+            22'h00000c: read_data_w = {29'd0, priority_r[3]};
+            22'h000010: read_data_w = {29'd0, priority_r[4]};
+            22'h000014: read_data_w = {29'd0, priority_r[5]};
+            22'h000018: read_data_w = {29'd0, priority_r[6]};
+            22'h00001c: read_data_w = {29'd0, priority_r[7]};
+            22'h000020: read_data_w = {29'd0, priority_r[8]};
+            22'h000024: read_data_w = {29'd0, priority_r[9]};
+            22'h000028: read_data_w = {29'd0, priority_r[10]};
+            22'h00002c: read_data_w = {29'd0, priority_r[11]};
+            22'h000030: read_data_w = {29'd0, priority_r[12]};
+            22'h000034: read_data_w = {29'd0, priority_r[13]};
+            22'h000038: read_data_w = {29'd0, priority_r[14]};
+            22'h00003c: read_data_w = {29'd0, priority_r[15]};
+            default: read_data_w = 32'd0;
         endcase
     end
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -198,13 +240,14 @@ module edrv32_periph_plic (
                 priority_r[source_idx] <= 3'd0;
             end
         end else begin
+            // spec 2.5: MEIP is the nonzero flag of the same registered result.
             irq_meip_o <= winner_w != 4'd0;
             for (source_idx = 1; source_idx <= 15; source_idx = source_idx + 1) begin
                 if (irq_sync_w[source_idx] && !claimed_r[source_idx]) begin
                     pending_r[source_idx] <= 1'b1;
                 end
                 // spec 5: claim at AR acceptance, independently of RREADY.
-                if (claim_w && winner_w == source_idx[3:0]) begin
+                if (claim_w && winner_r == source_idx[3:0]) begin
                     pending_r[source_idx] <= 1'b0;
                     claimed_r[source_idx] <= 1'b1;
                 end
