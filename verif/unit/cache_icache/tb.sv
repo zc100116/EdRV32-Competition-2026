@@ -69,6 +69,7 @@ module tb;
     logic [12:0] read_idx;
     logic [7:0] read_left;
     integer reads = 0;
+    integer reads_before;
     integer writes = 0;
     assign axi_arready_i = !read_active;
     assign axi_rvalid_i = read_active;
@@ -139,6 +140,31 @@ module tb;
         if (ic_resp_data_o != memory[1536]) $fatal(1, "FAIL invalidated fill data");
         tick();
         fetch(32'h10003000, memory[1536], 9);
+        // C-F1 path 5: a hit updating LRU and a following same-set miss are
+        // accepted on adjacent edges; the miss must evict the other way.
+        step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
+        reads_before = reads;
+        fetch(32'h10000000, memory[0], reads_before + 1);
+        fetch(32'h10001000, memory[512], reads_before + 2);
+        step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10000000;
+        tick();
+        if (!ic_resp_valid_o || ic_resp_data_o != memory[0])
+            $fatal(1, "FAIL I LRU bypass hit");
+        step(); ic_req_addr_i = 32'h10002000;
+        if (!ic_req_ready_o) $fatal(1, "FAIL I LRU bypass acceptance");
+        tick(); step(); ic_req_valid_i = 0;
+        while (!ic_resp_valid_o) tick();
+        if (ic_resp_data_o != memory[1024] || reads != reads_before + 3)
+            $fatal(1, "FAIL I LRU bypass miss");
+        tick();
+        fetch(32'h10000000, memory[0], reads_before + 3);
+        fetch(32'h10001000, memory[512], reads_before + 4);
+        // Invalidate at request acceptance must be reflected by its metadata snapshot.
+        step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10001000; ic_inv_i = 1;
+        tick(); step(); ic_req_valid_i = 0; ic_inv_i = 0;
+        while (!ic_resp_valid_o) tick();
+        if (ic_resp_data_o != memory[512] || reads != reads_before + 5)
+            $fatal(1, "FAIL I acceptance invalidate");
         $display("PASS cache_icache"); $finish;
     end
 endmodule

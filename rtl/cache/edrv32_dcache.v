@@ -97,6 +97,10 @@ module edrv32_dcache (
     reg [127:0] dirty1_r;
     reg [127:0] lru_r;
     reg lookup_valid_r;
+    reg lookup_hit_enable_r;
+    reg lookup_valid0_r;
+    reg lookup_valid1_r;
+    reg [39:0] lookup_tag_r;
     reg [31:0] addr_r;
     reg store_r;
     reg [1:0] size_r;
@@ -129,8 +133,11 @@ module edrv32_dcache (
     reg fence_clean_r;
     reg clean_seen_r;
     reg [2:0] maint_cmd_r;
-    reg [31:0] maint_addr_r;
-    reg [32:0] maint_end_r;
+    reg [26:0] maint_first_line_r;
+    reg [27:0] maint_last_line_r;
+    reg scan_first_index_r;
+    reg scan_last_index_r;
+    reg scan_invalidate_r;
     reg [7:0] maint_scan_r;
     reg fence_done_r;
     wire cacheable_w;
@@ -141,6 +148,8 @@ module edrv32_dcache (
     wire request_device_w;
     wire request_pma_err_w;
     wire device_accept_w;
+    wire [9:0] tag0_match_w;
+    wire [9:0] tag1_match_w;
     wire hit0_w;
     wire hit1_w;
     wire hit_w;
@@ -171,21 +180,33 @@ module edrv32_dcache (
     wire scan_dirty_w;
     wire [31:0] scan_addr_w;
     wire scan_match_w;
+    wire scan_first_w;
+    wire scan_last_w;
+    wire [32:0] maint_last_byte_w;
     wire maintenance_start_w;
     wire maintenance_array_start_w;
     wire device_bus_free_w;
     wire device_bus_active_w;
-    wire [31:0] raw_load_w;
-    reg [31:0] merged_load_w;
+    wire [31:0] raw_load0_w;
+    wire [31:0] raw_load1_w;
+    wire [31:0] raw_return_w;
+    reg [31:0] merged_load0_w;
+    reg [31:0] merged_load1_w;
+    reg [31:0] merged_return_w;
+    wire [31:0] shifted_load0_w;
+    wire [31:0] shifted_load1_w;
+    wire [31:0] shifted_return_w;
     wire [63:0] device_shifted_w;
     wire unused_axi_w;
     integer byte_idx_w;
+    genvar tag_idx;
 
     assign device_shifted_w = axi_rdata_i >> {device_addr_r[2:0], 3'b0};
     assign unused_axi_w = &{1'b0, axi_rid_i, axi_bid_i, device_shifted_w[63:32],
-                                buffer_addr_r[1:0], request_cacheable_w, request_pma_err_w};
-    // cache-spec 5.2/5.3: this early decode only suppresses device RAM reads.
-    // Acceptance and request control use the registered address's M-stage PMA.
+                                buffer_addr_r[1:0], request_cacheable_w,
+                                maint_last_byte_w[4:0]};
+    // C-F1 paths 2-4: prepare cached-hit eligibility with the E-stage address.
+    // Request acceptance stays independent of this PMA classification (cpu-spec 3.3).
     edrv32_cache_pma u_request_pma (
         .addr_i(dc_req_addr_i),
         .execute_i(1'b0),
@@ -202,45 +223,70 @@ module edrv32_dcache (
         .device_o(device_w),
         .err_o(pma_err_w)
     );
-    assign hit0_w = valid0_r[addr_r[11:5]] && tag0_w == addr_r[31:12];
-    assign hit1_w = valid1_r[addr_r[11:5]] && tag1_w == addr_r[31:12];
+    // C-F1 paths 2-4: decode request-tag pairs before the synchronous read.
+    // Each returned pair then selects a four-bit table in a single LUT6.
+    generate
+        for (tag_idx = 0; tag_idx < 10; tag_idx = tag_idx + 1) begin : g_tag_match
+            wire [3:0] select_w;
+            assign select_w = lookup_tag_r[tag_idx*4 +: 4];
+            assign tag0_match_w[tag_idx] = select_w[tag0_w[tag_idx*2 +: 2]];
+            assign tag1_match_w[tag_idx] = select_w[tag1_w[tag_idx*2 +: 2]];
+            always @(posedge clk_i) begin
+                if (accept_w)
+                    lookup_tag_r[tag_idx*4 +: 4] <=
+                        4'b1 << dc_req_addr_i[12 + tag_idx*2 +: 2];
+            end
+        end
+    endgenerate
+    assign hit0_w = lookup_valid0_r && (&tag0_match_w);
+    assign hit1_w = lookup_valid1_r && (&tag1_match_w);
     assign hit_w = hit0_w || hit1_w;
     // cache-spec 2.3/5.4: M-stage PMA errors return even while arrays are maintained.
     assign pma_result_w = lookup_valid_r && pma_err_w;
-    assign lookup_done_w = lookup_valid_r && !device_w &&
-                            (pma_err_w || (!deferred_lookup_r && hit_w));
-    assign dc_req_ready_o = device_state_r == D_IDLE &&
-        (maintenance_r ? !lookup_valid_r :
-            (state_r == S_IDLE && (!lookup_valid_r || lookup_done_w)));
+    assign lookup_done_w = pma_result_w || (lookup_hit_enable_r && hit_w);
+    // Hit eligibility already owns IDLE and excludes maintenance/device requests.
+    assign dc_req_ready_o = (lookup_hit_enable_r && hit_w) ||
+        (device_state_r == D_IDLE && (maintenance_r ? !lookup_valid_r :
+            (state_r == S_IDLE && (!lookup_valid_r || pma_result_w))));
     assign accept_w = dc_req_valid_i && dc_req_ready_o;
     assign device_accept_w = lookup_valid_r && device_w;
     // PMA classification occurs after the E/M acceptance edge (cache-spec 5.3).
     assign dc_resp_device_o = device_state_r != D_IDLE || device_accept_w;
     assign dc_resp_valid_o =
-        (pma_result_w || (state_r == S_IDLE && lookup_done_w) ||
+        (pma_result_w || (lookup_hit_enable_r && hit_w) ||
             (state_r == S_RETURN && !killed_r) || device_state_r == D_RETURN);
     // cache-spec 6: qualify errors with registered response state, never tag hit.
     assign dc_resp_err_o = device_state_r == D_RETURN ? device_err_r :
         (state_r == S_RETURN ? (!killed_r && fill_err_r) :
         pma_result_w);
-    assign raw_load_w = state_r == S_RETURN ?
-                        (addr_r[2] ? result_r[63:32] : result_r[31:0]) :
-                        (addr_r[2] ? (hit0_w ? data0_w[63:32] : data1_w[63:32]) :
-                                        (hit0_w ? data0_w[31:0] : data1_w[31:0]));
+    // C-F1 paths 3-4: shift and merge each way before the late tag selection.
+    assign raw_load0_w = addr_r[2] ? data0_w[63:32] : data0_w[31:0];
+    assign raw_load1_w = addr_r[2] ? data1_w[63:32] : data1_w[31:0];
+    assign raw_return_w = addr_r[2] ? result_r[63:32] : result_r[31:0];
     always @(*) begin
-        merged_load_w = raw_load_w;
+        merged_load0_w = raw_load0_w;
+        merged_load1_w = raw_load1_w;
+        merged_return_w = raw_return_w;
         for (byte_idx_w = 0; byte_idx_w < 4; byte_idx_w = byte_idx_w + 1) begin
             if (forward_mask_r[byte_idx_w]) begin
-                merged_load_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
+                merged_load0_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
+                merged_load1_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
+                merged_return_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
             end
             if (buffer_valid_r && buffer_addr_r[31:2] == addr_r[31:2] &&
                 buffer_mask_r[byte_idx_w]) begin
-                merged_load_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
+                merged_load0_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
+                merged_load1_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
+                merged_return_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
             end
         end
     end
+    assign shifted_load0_w = merged_load0_w >> {addr_r[1:0], 3'b0};
+    assign shifted_load1_w = merged_load1_w >> {addr_r[1:0], 3'b0};
+    assign shifted_return_w = merged_return_w >> {addr_r[1:0], 3'b0};
     assign dc_resp_data_o = device_state_r == D_RETURN ? device_result_r :
-                            merged_load_w >> {addr_r[1:0], 3'b0};
+        state_r == S_RETURN ? shifted_return_w :
+        hit0_w ? shifted_load0_w : shifted_load1_w;
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
     assign store_result_w = (state_r == S_IDLE && lookup_done_w && !pma_err_w && store_r) ||
                             return_store_w;
@@ -273,9 +319,15 @@ module edrv32_dcache (
     assign scan_dirty_w = maint_scan_r[0] ? dirty1_r[maint_scan_r[7:1]] :
                                             dirty0_r[maint_scan_r[7:1]];
     assign scan_addr_w = {scan_tag_w, maint_scan_r[7:1], 5'b0};
-    assign scan_match_w = scan_valid_w && (maint_cmd_r == 4 ||
-        ({1'b0, scan_addr_w} < maint_end_r &&
-            {1'b0, scan_addr_w} + 33'd32 > {1'b0, maint_addr_r}));
+    // C-F1 path 6: prepare range endpoints when accepting maintenance, then
+    // compare the scan index in S_MREAD alongside the synchronous tag read.
+    assign maint_last_byte_w = {1'b0, maint_addr_i} + {1'b0, maint_size_i} - 1'b1;
+    assign scan_first_w = scan_tag_w > maint_first_line_r[26:7] ||
+        (scan_tag_w == maint_first_line_r[26:7] && scan_first_index_r);
+    assign scan_last_w = {1'b0, scan_tag_w} < maint_last_line_r[27:7] ||
+        ({1'b0, scan_tag_w} == maint_last_line_r[27:7] && scan_last_index_r);
+    assign scan_match_w = scan_valid_w &&
+        (maint_cmd_r == 4 || (scan_first_w && scan_last_w));
     assign maint_busy_o = maintenance_r;
     assign maint_req_ready_o = state_r == S_IDLE && device_state_r == D_IDLE &&
                                 !lookup_valid_r && !store_pending_r && !buffer_valid_r &&
@@ -286,8 +338,9 @@ module edrv32_dcache (
     // cache-spec 5.4: zero-length range commands finish without array ownership.
     assign maintenance_array_start_w = maintenance_start_w &&
         (dc_clean_all_i || maint_cmd_i == 4 || maint_size_i != 0);
-    assign dc_fence_done_o = fence_done_r ||
-        (dc_fence_i && !buffer_valid_r && !buffer_push_w);
+    // C-F1 paths 2-4: FENCE and memory commit are mutually exclusive in M
+    // (cpu-spec 4.3/4.7). A FENCE cannot push the store buffer on this edge.
+    assign dc_fence_done_o = fence_done_r || (dc_fence_i && !buffer_valid_r);
     // cache-spec v0.3, 5.2: one HPM event for each accepted dirty-line AW.
     assign dc_wb_event_o = state_r == S_WB_AW && axi_awready_i;
     assign wb_err_o = state_r == S_WB_B && axi_bvalid_i && axi_bresp_i != 0;
@@ -361,6 +414,10 @@ module edrv32_dcache (
     );
     // Payload registers deliberately have no reset (cache-spec 5.5).
     always @(posedge clk_i) begin
+        if (ram_read_w) begin
+            lookup_valid0_r <= valid0_r[read_addr_w[8:2]];
+            lookup_valid1_r <= valid1_r[read_addr_w[8:2]];
+        end
         if (accept_w) begin
             addr_r <= dc_req_addr_i;
             size_r <= dc_req_size_i;
@@ -400,10 +457,14 @@ module edrv32_dcache (
         if (state_r == S_MCHECK && device_state_r == D_IDLE && !device_accept_w) begin
             wb_addr_r <= scan_addr_w;
         end
+        if (state_r == S_MREAD) begin
+            scan_first_index_r <= maint_scan_r[7:1] >= maint_first_line_r[6:0];
+            scan_last_index_r <= maint_scan_r[7:1] <= maint_last_line_r[6:0];
+        end
         if (maintenance_start_w) begin
             maint_cmd_r <= dc_clean_all_i ? 3'd4 : maint_cmd_i;
-            maint_addr_r <= maint_addr_i;
-            maint_end_r <= {1'b0, maint_addr_i} + {1'b0, maint_size_i};
+            maint_first_line_r <= maint_addr_i[31:5];
+            maint_last_line_r <= maint_last_byte_w[32:5];
         end
     end
 
@@ -456,9 +517,19 @@ module edrv32_dcache (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             lookup_valid_r <= 1'b0;
+            lookup_hit_enable_r <= 1'b0;
             deferred_lookup_r <= 1'b0;
         end else begin
+            // This predicate belongs to the accepted lookup, before RAM outputs.
+            if (state_r == S_IDLE)
+                lookup_hit_enable_r <= 1'b0;
+            if (state_r == S_REPLAY)
+                lookup_hit_enable_r <= 1'b1;
+            if (dc_kill_i)
+                lookup_hit_enable_r <= 1'b0;
             if (accept_w) begin
+                lookup_hit_enable_r <= !maintenance_r && !maintenance_array_start_w &&
+                    !request_device_w && !request_pma_err_w;
                 lookup_valid_r <= 1'b1;
                 deferred_lookup_r <= maintenance_r || maintenance_array_start_w;
             end else if (device_accept_w || pma_result_w || dc_kill_i ||
@@ -487,6 +558,7 @@ module edrv32_dcache (
             clean_seen_r <= 1'b0;
             maint_scan_r <= 8'b0;
             fence_done_r <= 1'b0;
+            scan_invalidate_r <= 1'b0;
         end else begin
             fence_done_r <= 1'b0;
             if (!dc_clean_all_i) clean_seen_r <= 1'b0;
@@ -571,16 +643,12 @@ module edrv32_dcache (
                 end
                 S_MCHECK: if (device_state_r == D_IDLE && !device_accept_w) begin
                     state_r <= S_MNEXT;
+                    // C-F1 path 6: apply invalidation in the existing MNEXT
+                    // cycle; the array is unavailable until maintenance ends.
+                    scan_invalidate_r <= scan_match_w &&
+                        (maint_cmd_r == 2 || (maint_cmd_r == 3 && !scan_dirty_w));
                     if (scan_match_w) begin
-                        if (maint_cmd_r == 2 || (maint_cmd_r == 3 && !scan_dirty_w)) begin
-                            if (maint_scan_r[0]) begin
-                                valid1_r[maint_scan_r[7:1]] <= 1'b0;
-                                dirty1_r[maint_scan_r[7:1]] <= 1'b0;
-                            end else begin
-                                valid0_r[maint_scan_r[7:1]] <= 1'b0;
-                                dirty0_r[maint_scan_r[7:1]] <= 1'b0;
-                            end
-                        end else if (scan_dirty_w) begin
+                        if (maint_cmd_r != 2 && scan_dirty_w) begin
                             victim_r <= maint_scan_r[0];
                             victim_idx_r <= maint_scan_r[7:1];
                             state_r <= S_WB_AW;
@@ -588,6 +656,15 @@ module edrv32_dcache (
                     end
                 end
                 S_MNEXT: if (device_state_r == D_IDLE && !device_accept_w) begin
+                    if (scan_invalidate_r) begin
+                        if (maint_scan_r[0]) begin
+                            valid1_r[maint_scan_r[7:1]] <= 1'b0;
+                            dirty1_r[maint_scan_r[7:1]] <= 1'b0;
+                        end else begin
+                            valid0_r[maint_scan_r[7:1]] <= 1'b0;
+                            dirty0_r[maint_scan_r[7:1]] <= 1'b0;
+                        end
+                    end
                     maint_scan_r <= maint_scan_r + 1'b1;
                     state_r <= S_MREAD;
                     if (maint_scan_r == 8'hff) begin

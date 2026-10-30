@@ -170,6 +170,7 @@ module tb;
             if (read_left == 0) read_active <= 0;
         end
     end
+    integer reads_before;
     logic write_active = 0;
     logic allow_aw = 1;
     logic [12:0] write_idx;
@@ -324,6 +325,23 @@ module tb;
         if (!dc_resp_valid_o || !dc_resp_err_o) $fatal(1, "FAIL D PMA response");
         step(); dc_req_valid_i = 0; tick();
         if (dc_resp_valid_o || dc_resp_err_o) $fatal(1, "FAIL D stale PMA error");
+        // C-F1 path 6: an unaligned two-byte range crosses a tag/set boundary;
+        // an aligned exclusive end must leave the following line cached.
+        access_word(32'h10003fe0, 0, 2, 32'(4096 + 2044));
+        access_word(32'h10004000, 0, 2, 32'(4096 + 2048));
+        access_word(32'h10004020, 0, 2, 32'(4096 + 2052));
+        reads_before = reads;
+        maintenance(2, 32'h10003fff, 2);
+        access_word(32'h10004020, 0, 2, 32'(4096 + 2052));
+        if (reads != reads_before) $fatal(1, "FAIL range invalidated following line");
+        access_word(32'h10003fe0, 0, 2, 32'(4096 + 2044));
+        access_word(32'h10004000, 0, 2, 32'(4096 + 2048));
+        if (reads != reads_before + 2) $fatal(1, "FAIL range missed boundary lines");
+        maintenance(2, 32'h10004000, 32);
+        access_word(32'h10004020, 0, 2, 32'(4096 + 2052));
+        if (reads != reads_before + 2) $fatal(1, "FAIL range end was not exclusive");
+        access_word(32'h10004000, 0, 2, 32'(4096 + 2048));
+        if (reads != reads_before + 3) $fatal(1, "FAIL range did not invalidate first line");
         $display("PASS cache_dcache WB events=%0d", wb_events); $finish;
     end
 endmodule

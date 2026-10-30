@@ -46,6 +46,10 @@ module edrv32_icache (
     reg lookup_valid_r;
     reg [31:0] addr_r;
     reg cacheable_r;
+    reg lookup_valid0_r;
+    reg lookup_valid1_r;
+    reg lookup_lru_r;
+    reg [127:0] lookup_index_r;
     reg pma_err_r;
     reg victim_r;
     reg killed_r;
@@ -61,6 +65,12 @@ module edrv32_icache (
     wire hit1_w;
     wire hit_w;
     wire accept_w;
+    wire lookup_hit_w;
+    wire lookup_miss_w;
+    wire [127:0] evict0_w;
+    wire [127:0] evict1_w;
+    wire [127:0] fill0_w;
+    wire [127:0] fill1_w;
     wire fill_write_w;
     wire tag_write_w;
     wire [19:0] tag0_w;
@@ -78,9 +88,18 @@ module edrv32_icache (
         .device_o(device_unused_w),
         .err_o(pma_err_w)
     );
-    assign hit0_w = valid0_r[addr_r[11:5]] && tag0_w == addr_r[31:12];
-    assign hit1_w = valid1_r[addr_r[11:5]] && tag1_w == addr_r[31:12];
+    assign hit0_w = lookup_valid0_r && tag0_w == addr_r[31:12];
+    assign hit1_w = lookup_valid1_r && tag1_w == addr_r[31:12];
     assign hit_w = hit0_w || hit1_w;
+    assign lookup_hit_w = state_r == S_IDLE && lookup_valid_r &&
+        !pma_err_r && cacheable_r && hit_w;
+    assign lookup_miss_w = state_r == S_IDLE && lookup_valid_r &&
+        !pma_err_r && cacheable_r && !hit_w;
+    // C-F1 path 5: decode the set and read its metadata alongside the tag RAM.
+    assign evict0_w = {128{lookup_miss_w && !lookup_lru_r}} & lookup_index_r;
+    assign evict1_w = {128{lookup_miss_w && lookup_lru_r}} & lookup_index_r;
+    assign fill0_w = {128{tag_write_w && !victim_r}} & lookup_index_r;
+    assign fill1_w = {128{tag_write_w && victim_r}} & lookup_index_r;
     assign ic_req_ready_o = state_r == S_IDLE &&
                             (!lookup_valid_r || pma_err_r || (cacheable_r && hit_w));
     assign accept_w = ic_req_valid_i && ic_req_ready_o;
@@ -141,6 +160,12 @@ module edrv32_icache (
             addr_r <= ic_req_addr_i;
             cacheable_r <= cacheable_w;
             pma_err_r <= pma_err_w;
+            lookup_index_r <= 128'b1 << ic_req_addr_i[11:5];
+            lookup_valid0_r <= !ic_inv_i && valid0_r[ic_req_addr_i[11:5]];
+            lookup_valid1_r <= !ic_inv_i && valid1_r[ic_req_addr_i[11:5]];
+            // A preceding hit may update the same set on this acceptance edge.
+            lookup_lru_r <= lookup_hit_w && addr_r[11:5] == ic_req_addr_i[11:5] ?
+                hit0_w : lru_r[ic_req_addr_i[11:5]];
         end
         if (state_r == S_FILL && axi_rvalid_i &&
             (!cacheable_r || beat_r == addr_r[4:3])) begin
@@ -165,10 +190,8 @@ module edrv32_icache (
             inv_done_r <= ic_inv_i;
             if (ic_kill_i && state_r != S_IDLE) killed_r <= 1'b1;
             if (ic_inv_i && state_r != S_IDLE) fill_invalidated_r <= 1'b1;
-            if (ic_inv_i) begin
-                valid0_r <= 128'b0;
-                valid1_r <= 128'b0;
-            end
+            valid0_r <= ic_inv_i ? 128'b0 : (valid0_r & ~evict0_w) | fill0_w;
+            valid1_r <= ic_inv_i ? 128'b0 : (valid1_r & ~evict1_w) | fill1_w;
             case (state_r)
                 S_IDLE: begin
                     lookup_valid_r <= accept_w;
@@ -177,15 +200,11 @@ module edrv32_icache (
                             lru_r[addr_r[11:5]] <= hit0_w;
                         end else begin
                             state_r <= S_AR;
-                            victim_r <= lru_r[addr_r[11:5]];
+                            victim_r <= lookup_lru_r;
                             killed_r <= ic_kill_i;
                             fill_invalidated_r <= ic_inv_i;
                             fill_err_r <= 1'b0;
                             beat_r <= 2'b0;
-                            if (cacheable_r) begin
-                                if (lru_r[addr_r[11:5]]) valid1_r[addr_r[11:5]] <= 1'b0;
-                                else valid0_r[addr_r[11:5]] <= 1'b0;
-                            end
                         end
                     end
                 end
@@ -196,8 +215,6 @@ module edrv32_icache (
                     if (axi_rlast_i) begin
                         state_r <= S_RETURN;
                         if (tag_write_w) begin
-                            if (victim_r) valid1_r[addr_r[11:5]] <= 1'b1;
-                            else valid0_r[addr_r[11:5]] <= 1'b1;
                             lru_r[addr_r[11:5]] <= !victim_r;
                         end
                     end
