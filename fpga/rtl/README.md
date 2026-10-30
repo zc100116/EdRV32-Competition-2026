@@ -3,6 +3,8 @@
 
 `edrv32_fpga_board_b1_top.v`：B1 上板顶层，27 MHz PLL → 100 MHz CPU/cache/系统子系统，UART、启动按键与 LED。
 
+`edrv32_fpga_board_npu_top.v`：B3N CPU/SYS/MEM + NPU 上板顶层，保留 sys/NPU PLL、DDR 和 UART/KEY/LED；移除媒体/ETH 的主口、APB 槽和 PLIC 按 B3-10 接死，验证见 `verif/soc/board_npu/`。
+
 
 ## B2 完整 SoC 板级顶层
 

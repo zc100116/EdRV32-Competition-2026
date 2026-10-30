@@ -16,3 +16,5 @@ B2：在已按 `fpga/ip/README.md` 生成 IP 的 PG2L200H-6/FBB676 工程中执�
 上面的执行方式运行 `import_board_b2_top.tcl`（导入 162 个源文件）。
 递归展开 `rtl/filelists/soc.f`，源文件按首次出现去重，添加四个板级文件和 B2 FDC，
 使用 `FPGA_MODE` 编译 `edrv32_fpga_board_b2_top`；不启动仿真或布局布线。
+
+B3N：`import_board_npu_top.tcl` 导入 CPU/SYS/MEM/NPU 文件列表及板级适配器、顶层（87 个源文件），使用 `FPGA_MODE`、`edrv32_fpga_board_npu_top.fdc`（10 个时钟）和 21 种 IP；Linux 检查：`tclsh verif/soc/board_npu/check_import.tcl`。
