@@ -17,9 +17,9 @@ def constant_operand(cell, port):
     return all(isinstance(bit, str) for bit in cell['connections'][port])
 
 
-def retain_multipliers(output):
+def retain_multipliers(output, top_name):
     design = json.loads((output / 'coarse.json').read_text())
-    top = design['modules']['edrv32_rnd']
+    top = design['modules'][top_name]
     rows = []
     for name, cell in top['cells'].items():
         if cell['type'] != '$mul' or any(constant_operand(cell, p) for p in ['A', 'B']):
@@ -53,14 +53,14 @@ def retain_multipliers(output):
     (output / 'multipliers.json').write_text(json.dumps(rows, indent=2))
     (output / 'hardmul.ys').write_text(
         f'read_json {output}/hardmul.json\n'
-        'synth -top edrv32_rnd -flatten -noabc\nabc -lut 6 -dress\nopt_clean\n'
+        f'synth -top {top_name} -flatten -noabc\nabc -lut 6 -dress\nopt_clean\n'
         f'write_json {output}/hardnet.json\nstat\n')
     print('hard multipliers:', len(rows), flush=True)
 
 
-def check_registers(output):
+def check_registers(output, top_name):
     design = json.loads((output / 'coarse.json').read_text())
-    top = design['modules']['edrv32_rnd']
+    top = design['modules'][top_name]
     registers = {bit for cell in top['cells'].values() if 'dff' in cell['type'].lower()
                  for bit in cell['connections']['Q']}
     loads = collections.defaultdict(list)
@@ -101,6 +101,7 @@ def check_registers(output):
 
 def main():
     output = Path(sys.argv[1])
+    top_name = sys.argv[2] if len(sys.argv) > 2 else 'edrv32_rnd'
     output.mkdir(parents=True, exist_ok=True)
     files, includes = [], set()
     read_filelist(Path('rtl/filelists/rnd.f'), files, includes)
@@ -116,7 +117,7 @@ output [31:0] rd_data); endmodule
     read = 'read_verilog -D FPGA_MODE ' + ' '.join('-I' + v for v in sorted(includes))
     read += ' ' + ' '.join(files) + f' {output}/stubs.v'
     (output / 'coarse.ys').write_text(
-        read + '\nhierarchy -top edrv32_rnd\nproc\nflatten\nopt\nwreduce\nopt_clean\n'
+        read + f'\nhierarchy -top {top_name}\nproc\nflatten\nopt\nwreduce\nopt_clean\n'
         f'write_json {output}/coarse.json\n')
     for stage in ['coarse', 'hardmul']:
         with (output / (stage + '.stdout')).open('w') as log:
@@ -125,8 +126,8 @@ output [31:0] rd_data); endmodule
                 '-l', str(output / (stage + '.log')), '-s', str(output / (stage + '.ys')),
             ], stdout=log, check=True)
         if stage == 'coarse':
-            retain_multipliers(output)
-            check_registers(output)
+            retain_multipliers(output, top_name)
+            check_registers(output, top_name)
     subprocess.run([sys.executable, 'tools/synth/netlist_paths.py',
                     str(output / 'hardnet.json')], check=True)
 
