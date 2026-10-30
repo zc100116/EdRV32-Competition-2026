@@ -22,6 +22,7 @@ extern mapintf_t map30_intf;
 extern mapintf_t map140_intf;
 extern mapintf_t map87_intf;
 extern mapintf_t map71_intf;
+extern mapintf_t map10_intf;
 static rominfo_t cart;
 static uint8 vrom[512 * 1024];
 static uint8 *pages[16];
@@ -55,7 +56,8 @@ void mmc_bankvrom(int size, uint32 address, int bank)
 }
 void ppu_mirror(int a, int b, int c, int d)
 { mirror[0] = a; mirror[1] = b; mirror[2] = c; mirror[3] = d; }
-void ppu_setlatchfunc(ppulatchfunc_t callback) { (void)callback; }
+static ppulatchfunc_t latch_callback;
+void ppu_setlatchfunc(ppulatchfunc_t callback) { latch_callback = callback; }
 bool ppu_enabled(void) { return true; }
 void nes6502_setirq(uint8 source, bool asserted)
 { assert(source == NES6502_IRQ_MAPPER); mapper_irq = asserted; }
@@ -254,6 +256,23 @@ static void test71(void)
     write_reg(&map71_intf, 0x9000, 0x10);
     assert(mirror[0] == 1 && mirror[3] == 1);
 }
+static void test10(void)
+{
+    map10_intf.init();
+    write_reg(&map10_intf, 0xa000, 3);
+    assert(prg[0] == 6 && prg[1] == 7);
+    write_reg(&map10_intf, 0xb000, 4);
+    write_reg(&map10_intf, 0xc000, 7);
+    assert(pages[0] == vrom + 7 * 4096);
+    latch_callback(0, 0xfd);
+    assert(pages[0] == vrom + 4 * 4096);
+    write_reg(&map10_intf, 0xd000, 9);
+    write_reg(&map10_intf, 0xe000, 11);
+    latch_callback(0x1000, 0xfd);
+    assert(pages[4] + 0x1000 == vrom + 9 * 4096);
+    latch_callback(0x1000, 0xfe);
+    assert(pages[4] + 0x1000 == vrom + 11 * 4096);
+}
 int main(void)
 {
     test74();
@@ -267,6 +286,7 @@ int main(void)
     test140();
     test87();
     test71();
+    test10();
     puts("PASS mapper bank wiring and CHR memory");
     return 0;
 }
