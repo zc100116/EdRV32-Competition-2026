@@ -127,7 +127,7 @@ module edrv32_board_render_tb;
             if (data == 10) begin
                 $display("%s", line_text);
                 $fflush();
-                if (line_text == "BIOS menu: 1=Program SRAM") bios_menu = 1;
+                if (line_text == "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud") bios_menu = 1;
                 if (line_text == "board_render IDs and 256 pixels PASS") application_pass = 1;
                 line_text = "";
             end else if (data != 13) line_text = {line_text, string'(data)};
