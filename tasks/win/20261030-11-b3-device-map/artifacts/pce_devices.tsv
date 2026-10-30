@@ -1,0 +1,7 @@
+类型	位置(ll/ur)	name	site_x	site_y	fp_x	fp_y	截图文件
+CLMA	ll	CLMA_21_486	4	79	3840	8307	pce/pce-CLMA_21_486.png
+CLMA	ur	CLMA_717_1225	235	200	48976	8533	pce/pce-CLMA_717_1225.png
+DRM	ll	DRM_226_366	70	62	33568	8465	pce/pce-DRM_226_366.png
+DRM	ur	DRM_694_732	226	122	10768	8529	pce/pce-DRM_694_732.png
+APM	ll	APM_65_120	18	22	1968	8344	pce/pce-APM_65_120.png
+APM	ur	APM_587_1008	190	167	15552	8514	pce/pce-APM_587_1008.png

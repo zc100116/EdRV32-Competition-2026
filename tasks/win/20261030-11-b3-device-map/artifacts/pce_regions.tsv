@@ -1,0 +1,2 @@
+region	CLMA_CLMS_combined	APM	DRM	other_resources_verbatim	screenshot
+cr_x1y2	4600	50	50	BKCL (1); DDRPHY_IOCLK_DIV (1); GCLK_INBUF_SYN (4); GPLL (1); IOCKB (4); MRCKB (2); PPLL (1); RCKB (4); TSERDES (8)	pce/pce-region-cr_x1y2.png

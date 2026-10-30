@@ -1,0 +1,66 @@
+G:\codex_project\EdRV32-FPGA\EdRV32-B3VN\place_route\run.log
+Unrouted clock nets at iteration 1 (0.422 sec): 9
+Unrouted clock nets at iteration 2 (0.224 sec): 6
+Unrouted clock nets at iteration 3 (0.184 sec): 3
+Unrouted clock nets at iteration 4 (0.072 sec): 0
+Total route nets size: 143645
+Pre route takes 69.966 sec
+Unrouted general nets at iteration 6 (MT total route time: 17.669 sec): 127389(overused: 881259)
+Unrouted general nets at iteration 7 (MT total route time: 22.754 sec): 115697(overused: 720129)
+Unrouted general nets at iteration 8 (MT total route time: 39.435 sec): 105480(overused: 580541)
+Unrouted general nets at iteration 9 (MT total route time: 65.826 sec): 96612(overused: 477904)
+Unrouted general nets at iteration 10 (MT total route time: 140.914 sec): 89924(overused: 410278)
+Unrouted general nets at iteration 11 (MT total route time: 412.286 sec): 77846(overused: 382931)
+Unrouted general nets at iteration 12 (MT total route time: 785.613 sec): 70021(overused: 333149)
+Unrouted general nets at iteration 13 (MT total route time: 988.388 sec): 64020(overused: 290457)
+Unrouted general nets at iteration 14 (MT total route time: 1212.188 sec): 58938(overused: 251169)
+Unrouted general nets at iteration 15 (MT total route time: 1404.495 sec): 54814(overused: 223840)
+Unrouted general nets at iteration 16 (MT total route time: 1472.148 sec): 51591(overused: 201661)
+Unrouted general nets at iteration 17 (MT total route time: 833.341 sec): 53368(overused: 219526)
+Unrouted general nets at iteration 18 (MT total route time: 1069.777 sec): 51522(overused: 200392)
+Unrouted general nets at iteration 19 (MT total route time: 1145.725 sec): 49334(overused: 182864)
+
+G:\codex_project\EdRV32-FPGA\EdRV32-B3R\place_route\run.log
+Unrouted general nets at iteration 43 (MT total route time: 209.435 sec): 6303(overused: 18696)
+Unrouted general nets at iteration 44 (MT total route time: 195.853 sec): 6180(overused: 18125)
+Unrouted general nets at iteration 45 (MT total route time: 208.676 sec): 5874(overused: 17168)
+Unrouted general nets at iteration 46 (MT total route time: 215.883 sec): 5597(overused: 16303)
+Unrouted general nets at iteration 47 (MT total route time: 245.894 sec): 5582(overused: 15709)
+Unrouted general nets at iteration 48 (MT total route time: 186.051 sec): 5301(overused: 14922)
+Unrouted general nets at iteration 49 (MT total route time: 219.369 sec): 5127(overused: 14020)
+Unrouted general nets at iteration 50 (MT total route time: 203.234 sec): 4983(overused: 13694)
+Unrouted general nets at iteration 51 (MT total route time: 195.550 sec): 4913(overused: 13422)
+Unrouted general nets at iteration 52 (MT total route time: 242.763 sec): 4903(overused: 12994)
+Unrouted general nets at iteration 53 (MT total route time: 247.827 sec): 4799(overused: 13089)
+Unrouted general nets at iteration 54 (MT total route time: 207.592 sec): 4773(overused: 12878)
+Unrouted general nets at iteration 55 (MT total route time: 207.207 sec): 4767(overused: 13063)
+Unrouted general nets at iteration 56 (MT total route time: 192.252 sec): 4685(overused: 12184)
+Unrouted general nets at iteration 57 (MT total route time: 147.705 sec): 4460(overused: 11910)
+Unrouted general nets at iteration 58 (MT total route time: 181.688 sec): 4390(overused: 11468)
+Unrouted general nets at iteration 59 (MT total route time: 211.706 sec): 4309(overused: 11108)
+Unrouted general nets at iteration 60 (MT total route time: 182.509 sec): 4121(overused: 10316)
+Unrouted general nets at iteration 61 (MT total route time: 183.618 sec): 4032(overused: 10379)
+Unrouted general nets at iteration 62 (MT total route time: 180.164 sec): 3820(overused: 9887)
+
+G:\codex_project\EdRV32-FPGA\EdRV32-B3F\place_route\run.log
+Global routing takes 0.00 sec.
+Total 173132 subnets.
+Unrouted clock nets at iteration 0 (0.457 sec): 15
+Unrouted clock nets at iteration 1 (0.389 sec): 8
+Unrouted clock nets at iteration 2 (0.283 sec): 6
+Unrouted clock nets at iteration 3 (0.167 sec): 3
+Unrouted clock nets at iteration 4 (0.115 sec): 2
+Unrouted clock nets at iteration 5 (0.093 sec): 0
+Total route nets size: 173090
+Pre route takes 87.762 sec
+Unrouted general nets at iteration 7 (MT total route time: 22.031 sec): 155989(overused: 1176828)
+Unrouted general nets at iteration 8 (MT total route time: 30.214 sec): 145626(overused: 1001931)
+Unrouted general nets at iteration 9 (MT total route time: 57.656 sec): 137303(overused: 841841)
+Unrouted general nets at iteration 10 (MT total route time: 175.000 sec): 129523(overused: 722801)
+Unrouted general nets at iteration 11 (MT total route time: 412.023 sec): 123266(overused: 642543)
+Unrouted general nets at iteration 12 (MT total route time: 707.750 sec): 103332(overused: 588011)
+Unrouted general nets at iteration 13 (MT total route time: 1141.626 sec): 91963(overused: 509292)
+Unrouted general nets at iteration 14 (MT total route time: 1577.975 sec): 83574(overused: 437809)
+Unrouted general nets at iteration 15 (MT total route time: 1604.527 sec): 78006(overused: 384995)
+Unrouted general nets at iteration 16 (MT total route time: 1776.086 sec): 72543(overused: 337616)
+

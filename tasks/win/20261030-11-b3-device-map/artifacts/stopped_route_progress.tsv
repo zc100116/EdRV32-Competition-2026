@@ -1,0 +1,4 @@
+project	iteration	MT_total_route_time_raw_sec	unrouted_general_nets	overused	stop_time	source
+B3VN	19	1145.725	49334	182864	未取得（日志末尾无明确停止时间，不用文件修改时间代填）	G:/codex_project/EdRV32-FPGA/EdRV32-B3VN/place_route/run.log
+B3R	62	180.164	3820	9887	未取得（日志末尾无明确停止时间，不用文件修改时间代填）	G:/codex_project/EdRV32-FPGA/EdRV32-B3R/place_route/run.log
+B3F	16	1776.086	72543	337616	未取得（日志末尾无明确停止时间，不用文件修改时间代填）	G:/codex_project/EdRV32-FPGA/EdRV32-B3F/place_route/run.log
