@@ -36,6 +36,7 @@ static int mirror[4];
 static uint32 cycles;
 static bool mapper_irq;
 static uint8 sram[8192];
+static uint8 vram[8192];
 static uint8 rom[1024 * 1024];
 uint32 nes6502_getcycles(bool reset) { (void)reset; return cycles; }
 rominfo_t *mmc_getinfo(void) { return &cart; }
@@ -299,7 +300,9 @@ static void test198(void)
     write_reg(&map198_intf, 0x8001, 0x73);
     assert(prg[0] == 0x43);
     nes_chr_write(0x1000, 0x98);
-    chr_bank(&map198_intf, 0x20);
+    chr_bank(&map198_intf, 0x25);
+    assert(pages[4][0x1000] == 0);
+    chr_bank(&map198_intf, 4);
     assert(pages[4][0x1000] == 0x98);
 }
 static void test91(void)
@@ -324,6 +327,7 @@ static void test91(void)
 }
 int main(void)
 {
+    cart.vram = vram;
     test74();
     test192();
     test195();

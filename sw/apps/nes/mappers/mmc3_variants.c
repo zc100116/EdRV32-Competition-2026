@@ -73,8 +73,7 @@ static void sync_banks(void)
         int page = i ^ base;
         int bank = selected[i];
         /* https://www.nesdev.org/wiki/INES_Mapper_199: unbanked CHR-RAM. */
-        if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->mapper_number == 198 ||
-            mmc_getinfo()->mapper_number == 245)
+        if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->mapper_number == 245)
             bank = page;
         chr_banks[page] = bank;
         chr_writable[page] = ram_index(bank) >= 0;

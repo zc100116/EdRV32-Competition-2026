@@ -1,6 +1,6 @@
 /* File: map198.c
  * Spec: Task T-NES3; https://www.nesdev.org/wiki/INES_Mapper_198.
- * Description: MMC3 with 512+128 KiB PRG chips and 12 KiB WRAM.
+ * Description: MMC3 with 512+128 KiB PRG chips, banked CHR-RAM and 12 KiB WRAM.
  * Clock domain: emulated CPU writes and PPU scanlines.
  * SPDX-License-Identifier: GPL-2.0-only
  */
