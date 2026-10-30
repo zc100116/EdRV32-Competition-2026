@@ -1,6 +1,6 @@
 # B3N 上板 board_npu 首个卷积用例失败
 
-状态：定位中（T-NPU4 两个 SoC 仿真变体均不复现，物理级联根因仍为推测）
+状态：已修复（卡 15 上板 PASS 39/39）；根因由板上前后对比支持，没有直接的信号观测
 
 ## 1. 现象
 
@@ -85,15 +85,17 @@ Verilator 5.020；命令为 `python3 verif/soc/board_npu/program/run.py --mac si
 - 厂商 IP 源码（卡 12 `artifacts/ip_rtl/ipm2l_mult_v1_3.v.xml`、`ipm2l_multadd_v1_3.v.xml`）的第一级一律 `modez_in[0] = 3'd0`（加零），CPI 只接上一级的 CPO。
 - 卡 13 的 APM 布局（`artifacts/apm_placement.pcf`）中，32 条链里至少 12 条的第 0 级与同列另一条链的末级相邻。
 
-## 4. 根因（推测）
+## 4. 根因
 
 CPI 是专用级联走线，"选 CPI 并把 CPI 接常数 0"在硬件上可能没有生效，第 0 级把相邻 APM 的 CPO 加进了累加结果。仿真模型按端口值计算，看不到这一点。
 
 T-NPU4 未复现失败，未取得支持或否定上述物理级联推测的直接信号证据；未定位到已确认的 RTL 根因，未修改 RTL 或 board_npu 程序。
 
-## 5. 修复（进行中）
+卡 15（`origin/win/20261030-15-b3n-rerun`，RTL `3a344936`）的唯一 RTL 差异是链头改用 `MODEZ=4'b0000` 的 head 包装（综合层次 `g_lane[0].g_cascade` → `g_head`）。同一工程、同一个卡 13 ELF、同样 115200 加载，B-OP-01-c16_32 由 FAIL 变为 PASS，全部 39 项 PASS，资源和各时钟 WNS 与卡 13 一致。据此认定根因是第 0 级用 `MODEZ=4'b0011` 加 CPI、CPI 接常数 0 在硬件上不等于加 0。这是板上前后对比得出的结论，没有观测内部信号。
 
-T-NPU3：新增链头包装 `edrv32_mac_npu_int8_head`（`MODEZ=4'b0000`，不用 CPI），每条链第 0 级用它；EQ-01 改为给厂商模型第 0 级的 CPI 驱动随机非零值，证明链头忽略 CPI。`board_npu` 改为 B 类失败不停止，并打印出错的输出通道，便于对照 APM 布局判断。
+## 5. 修复
+
+T-NPU3：新增链头包装 `edrv32_mac_npu_int8_head`（`MODEZ=4'b0000`，不用 CPI），每条链第 0 级用它；EQ-01 改为给厂商模型第 0 级的 CPI 驱动随机非零值，证明链头忽略 CPI。`board_npu` 改为 B 类失败不停止，并打印出错的输出通道，便于对照 APM 布局判断。合入 b3 `2f7cc24b`；上板验证见 `docs/reports/2026-10-30-board-b3n.md`。
 
 ## 6. 防回归
 
