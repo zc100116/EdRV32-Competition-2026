@@ -1,0 +1,52 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Fri Oct 30 23:46:33 2026
+| Design       : edrv32_fpga_board_npu_top
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing -force_to_run -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-B3N/place_route/edrv32_fpga_board_npu_top_pnr.adf} -max_path 200 -input_pins true
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:
+*************************************************************************************************************************************************************************************************************
+                                                                                      Clock   Non-clock
+ Clock                    Period       Waveform            Type                       Loads       Loads  Sources
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ clk_board                37.0370      {0.0000 18.5180}    Declared                       0           2  {clk_i}
+   clk_sys                10.0000      {0.0000 4.9990}     Generated (clk_board)       7342         442  {u_pll_sys/u_gpll/gpll_inst/CLKOUT0}
+   clk_npu                6.6667       {0.0000 3.3330}     Generated (clk_board)      20867        5251  {u_pll_npu/u_gpll/gpll_inst/CLKOUT0}
+ clk_ddr_ref              8.0000       {0.0000 4.0000}     Declared                       0           4  {ddr_ref_clk_p_i}
+   rst_clk                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)      100          19  {u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst/CLKOUT0}
+   clk_mem                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)    10259        1614  {u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0}
+   phy_dq_clk_0           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)       35           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY}
+     phy_dq_sysclk_0      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_0)      35           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT}
+   phy_dq_clk_1           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)       84           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY}
+     phy_dq_sysclk_1      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_1)      84           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT}
+=============================================================================================================================================================================================================
+
+ Clock Groups:
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks
+----------------------------------------------------------------------------------------------------
+ rst_clk                       asynchronous               rst_clk
+ phy_dq_clk_0                  asynchronous               phy_dq_clk_0
+ phy_dq_clk_1                  asynchronous               phy_dq_clk_1
+ clock_group_0                 asynchronous
+     clock_group_0_0                                      clk_sys
+     clock_group_0_1                                      clk_mem
+ clock_group_1                 asynchronous
+     clock_group_1_0                                      clk_sys
+     clock_group_1_1                                      clk_npu
+ clock_group_2                 asynchronous
+     clock_group_2_0                                      clk_mem
+     clock_group_2_1                                      clk_npu
+====================================================================================================
+
+
