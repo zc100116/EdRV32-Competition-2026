@@ -398,6 +398,8 @@ module edrv32_mem_xbar (
     reg [2:0] ar_error_r [0:6];
     reg [15:0] aw_wait_r [0:6];
     reg [15:0] ar_wait_r [0:6];
+    reg [15:0] aw_wait_next_r [0:6];
+    reg [15:0] ar_wait_next_r [0:6];
     reg [6:0] w_complete_r;
     reg [4:0] w_count_r [0:6];
     wire [2015:0] w_ram_data_w;
@@ -465,6 +467,7 @@ module edrv32_mem_xbar (
     reg [2:0] err_type_w;
     reg busy_w;
     integer eligible_idx;
+    reg [13:0] ingress_error_r;
     integer error_idx;
     integer update_idx;
     integer payload_idx;
@@ -660,28 +663,36 @@ module edrv32_mem_xbar (
                         w_count_r[eligible_idx] != 0 || b_count_r[eligible_idx] != 0;
         end
     end
-    // Report violations at ingress; no additional protocol checks are implemented.
+    // X-F1 paths 2/3: report registered ingress detections one clk_mem later.
+    // Payload was captured at the same handshake; the original last-port/AW priority remains.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            ingress_error_r <= 14'b0;
+        end else begin
+            for (error_idx = 0; error_idx < 7; error_idx = error_idx + 1) begin
+                ingress_error_r[error_idx*2] <= arvalid_w[error_idx] && arready_w[error_idx] &&
+                    violation(araddr_w[error_idx*32 +: 12], arlen_w[error_idx*4 +: 4]) != 0;
+                ingress_error_r[error_idx*2+1] <= awvalid_w[error_idx] && awready_w[error_idx] &&
+                    violation(awaddr_w[error_idx*32 +: 12], awlen_w[error_idx*4 +: 4]) != 0;
+            end
+        end
+    end
+    integer report_idx;
     always @(*) begin
-        err_valid_w = 1'b0;
+        err_valid_w = |ingress_error_r;
         err_port_w = 3'b0;
         err_addr_w = 32'b0;
         err_type_w = 3'b0;
-        for (error_idx = 0; error_idx < 7; error_idx = error_idx + 1) begin
-            if (arvalid_w[error_idx] && arready_w[error_idx] &&
-                violation(araddr_w[error_idx*32 +: 12], arlen_w[error_idx*4 +: 4]) != 0)
-            begin
-                err_valid_w = 1'b1;
-                err_port_w = error_idx[2:0];
-                err_addr_w = araddr_w[error_idx*32 +: 32];
-                err_type_w = violation(araddr_w[error_idx*32 +: 12], arlen_w[error_idx*4 +: 4]);
+        for (report_idx = 0; report_idx < 7; report_idx = report_idx + 1) begin
+            if (ingress_error_r[report_idx*2]) begin
+                err_port_w = report_idx[2:0];
+                err_addr_w = araddr_r[report_idx];
+                err_type_w = ar_error_r[report_idx];
             end
-            if (awvalid_w[error_idx] && awready_w[error_idx] &&
-                violation(awaddr_w[error_idx*32 +: 12], awlen_w[error_idx*4 +: 4]) != 0)
-            begin
-                err_valid_w = 1'b1;
-                err_port_w = error_idx[2:0];
-                err_addr_w = awaddr_w[error_idx*32 +: 32];
-                err_type_w = violation(awaddr_w[error_idx*32 +: 12], awlen_w[error_idx*4 +: 4]);
+            if (ingress_error_r[report_idx*2+1]) begin
+                err_port_w = report_idx[2:0];
+                err_addr_w = awaddr_r[report_idx];
+                err_type_w = aw_error_r[report_idx];
             end
         end
     end
@@ -747,10 +758,8 @@ module edrv32_mem_xbar (
                 cmd_valid_r <= 1'b1;
                 cmd_write_r <= grant_write_w;
                 cmd_wait_r <= grant_write_w ?
-                    (aw_wait_r[grant_port_w] == 16'hffff ? 16'hffff :
-                        aw_wait_r[grant_port_w] + 16'd1) :
-                    (ar_wait_r[grant_port_w] == 16'hffff ? 16'hffff :
-                        ar_wait_r[grant_port_w] + 16'd1);
+                    aw_wait_next_r[grant_port_w] :
+                    ar_wait_next_r[grant_port_w];
             end
             for (update_idx = 0; update_idx < 7; update_idx = update_idx + 1) begin
                 ar_starved_r[update_idx] <= ar_wait_r[update_idx] > starve_cyc_w;
@@ -820,6 +829,29 @@ module edrv32_mem_xbar (
     // Transaction and response payloads are not reset.
     always @(posedge clk_i) begin
         for (payload_idx = 0; payload_idx < 7; payload_idx = payload_idx + 1) begin
+            // X-F1 path 5: prepare the next cycle's saturated WAIT+1 before selection.
+            // The predictions follow the same enqueue, retirement and W-complete edges as WAIT.
+            if ((arvalid_w[payload_idx] && arready_w[payload_idx]) ||
+                (reserve_w && reserve_port_w == payload_idx[2:0])) begin
+                ar_wait_next_r[payload_idx] <= 16'd1;
+            end else if (ar_pending_r[payload_idx]) begin
+                ar_wait_next_r[payload_idx] <= ar_wait_r[payload_idx] >= 16'hfffe ?
+                    16'hffff : ar_wait_r[payload_idx] + 16'd2;
+            end else begin
+                ar_wait_next_r[payload_idx] <= ar_wait_r[payload_idx] == 16'hffff ?
+                    16'hffff : ar_wait_r[payload_idx] + 16'd1;
+            end
+            if ((awvalid_w[payload_idx] && awready_w[payload_idx]) ||
+                (grant_w && grant_write_w && grant_port_w == payload_idx[2:0]) ||
+                (bad_write_w && bad_write_port_w == payload_idx[2:0])) begin
+                aw_wait_next_r[payload_idx] <= 16'd1;
+            end else if (aw_pending_r[payload_idx] && w_complete_r[payload_idx]) begin
+                aw_wait_next_r[payload_idx] <= aw_wait_r[payload_idx] >= 16'hfffe ?
+                    16'hffff : aw_wait_r[payload_idx] + 16'd2;
+            end else begin
+                aw_wait_next_r[payload_idx] <= aw_wait_r[payload_idx] == 16'hffff ?
+                    16'hffff : aw_wait_r[payload_idx] + 16'd1;
+            end
             if (awvalid_w[payload_idx] && awready_w[payload_idx]) begin
                 awid_r[payload_idx] <= awid_w[payload_idx];
                 awaddr_r[payload_idx] <= awaddr_w[payload_idx*32 +: 32];

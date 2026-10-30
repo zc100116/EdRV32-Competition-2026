@@ -47,11 +47,14 @@ module edrv32_mem_xbar_rbuf (
     reg [2:0] tail_r;
     reg [3:0] count_r;
     reg [6:0] write_ptr_r;
-    reg [2:0] read_turn_r;
+    reg [6:0] read_mask_r;
     reg [6:0] port_active_r;
     reg [2:0] port_head_r [0:6];
+    reg [4:0] port_available_r [0:6];
+    reg [6:0] port_addr_r [0:6];
     wire [6:0] last_take_w;
-    reg pending_r;
+    wire pending_r;
+    reg [6:0] pending_valid_r;
     reg [2:0] pending_slot_r;
     reg [2:0] pending_port_r;
     reg pending_id_r;
@@ -76,7 +79,9 @@ module edrv32_mem_xbar_rbuf (
     reg fetch_w;
     reg [2:0] fetch_port_w;
     reg [2:0] fetch_slot_w;
-    wire [6:0] fetch_addr_w;
+    reg [6:0] fetch_addr_w;
+    wire [6:0] preferred_ports_w;
+    wire [6:0] fetch_select_w;
     integer match_idx;
     integer match_port;
     integer state_idx;
@@ -86,29 +91,38 @@ module edrv32_mem_xbar_rbuf (
     function [2:0] first8;
         input [7:0] mask_i;
         input [2:0] turn_i;
-        reg [15:0] unused_doubled_w;
-        reg [7:0] rotated_w;
-        reg [2:0] offset_w;
+        reg [7:0] after_turn_w;
+        reg [7:0] choice_w;
         begin
-            unused_doubled_w = {mask_i, mask_i} >> turn_i;
-            rotated_w = unused_doubled_w[7:0];
-            if (rotated_w[0]) offset_w = 3'd0;
-            else if (rotated_w[1]) offset_w = 3'd1;
-            else if (rotated_w[2]) offset_w = 3'd2;
-            else if (rotated_w[3]) offset_w = 3'd3;
-            else if (rotated_w[4]) offset_w = 3'd4;
-            else if (rotated_w[5]) offset_w = 3'd5;
-            else if (rotated_w[6]) offset_w = 3'd6;
-            else offset_w = rotated_w[7] ? 3'd7 : 3'd0;
-            first8 = turn_i + offset_w;
+            after_turn_w = mask_i & (8'hff << turn_i);
+            choice_w = |after_turn_w ? after_turn_w : mask_i;
+            if (choice_w[0]) first8 = 3'd0;
+            else if (choice_w[1]) first8 = 3'd1;
+            else if (choice_w[2]) first8 = 3'd2;
+            else if (choice_w[3]) first8 = 3'd3;
+            else if (choice_w[4]) first8 = 3'd4;
+            else if (choice_w[5]) first8 = 3'd5;
+            else if (choice_w[6]) first8 = 3'd6;
+            else first8 = choice_w[7] ? 3'd7 : 3'd0;
         end
     endfunction
 
+    assign pending_r = |pending_valid_r;
     assign pending_data_w = pending_error_r ? {pending_last_r, 2'b10, 256'b0} : ram_data_w;
     assign slot_ready_o = count_r < 4'd8;
     assign release_w = valid_r[head_r] && sent_r[head_r] == length_r[head_r];
     assign return_addr_w = start_r[return_slot_w] + {2'b0, received_r[return_slot_w]};
-    assign fetch_addr_w = start_r[fetch_slot_w] + {2'b0, fetched_r[fetch_slot_w]};
+    // X-F1 path 1: advance each descriptor address before arbitration, not after it.
+    assign preferred_ports_w = ready_ports_w & read_mask_r;
+    assign fetch_select_w[0] = ready_ports_w[0] &&
+        (read_mask_r[0] || !(|preferred_ports_w));
+    generate
+        for (p = 1; p < 7; p = p + 1) begin : g_fetch_select
+            assign fetch_select_w[p] = ready_ports_w[p] &&
+                ((read_mask_r[p] && !(|preferred_ports_w[p-1:0])) ||
+                    (!(|preferred_ports_w) && !(|ready_ports_w[p-1:0])));
+        end
+    endgenerate
     assign take_w = rvalid_o & rready_i;
     assign last_take_w = take_w & rlast_o;
 
@@ -126,7 +140,7 @@ module edrv32_mem_xbar_rbuf (
         for (p = 0; p < 7; p = p + 1) begin : g_output
             wire [258:0] data_w;
             assign data_w = skid_valid_r[p] ? skid_data_r[p] : pending_data_w;
-            assign rvalid_o[p] = skid_valid_r[p] || (pending_r && pending_port_r == p);
+            assign rvalid_o[p] = skid_valid_r[p] || pending_valid_r[p];
             assign rid_o[p] = skid_valid_r[p] ? skid_id_r[p] : pending_id_r;
             assign rdata_o[p*256 +: 256] = data_w[255:0];
             assign rresp_o[p*2 +: 2] = data_w[257:256];
@@ -148,6 +162,7 @@ module edrv32_mem_xbar_rbuf (
         fetch_w = 1'b0;
         fetch_port_w = 3'b0;
         fetch_slot_w = 3'b0;
+        fetch_addr_w = 7'b0;
         for (match_port = 0; match_port < 7; match_port = match_port + 1) begin
             port_match_w[match_port] = 8'b0;
             port_slot_w[match_port] = 3'b0;
@@ -166,11 +181,16 @@ module edrv32_mem_xbar_rbuf (
         for (match_port = 0; match_port < 7; match_port = match_port + 1) begin
             port_slot_w[match_port] = first8(port_match_w[match_port], head_r);
             ready_ports_w[match_port] = port_active_r[match_port] &&
-                fetched_r[port_head_r[match_port]] < received_r[port_head_r[match_port]] &&
+                port_available_r[match_port] != 0 &&
                 (!rvalid_o[match_port] || rready_i[match_port]);
         end
         fetch_w = |ready_ports_w;
-        fetch_port_w = first8({1'b0, ready_ports_w}, read_turn_r);
+        // One-hot selection keeps the RAM address off the encoded port/descriptor mux chain.
+        for (match_port = 0; match_port < 7; match_port = match_port + 1) begin
+            fetch_port_w = fetch_port_w | (match_port[2:0] & {3{fetch_select_w[match_port]}});
+            fetch_addr_w = fetch_addr_w | (port_addr_r[match_port] &
+                {7{fetch_select_w[match_port]}});
+        end
         fetch_slot_w = port_head_r[fetch_port_w];
     end
 
@@ -182,12 +202,13 @@ module edrv32_mem_xbar_rbuf (
             count_r <= 4'b0;
             write_ptr_r <= 7'b0;
             free_cnt_o <= 8'd128;
-            read_turn_r <= 3'b0;
-            pending_r <= 1'b0;
+            read_mask_r <= 7'h7f;
+            pending_valid_r <= 7'b0;
             skid_valid_r <= 7'b0;
             port_active_r <= 7'b0;
             for (skid_idx = 0; skid_idx < 7; skid_idx = skid_idx + 1) begin
                 port_head_r[skid_idx] <= 3'b0;
+                port_available_r[skid_idx] <= 5'b0;
             end
         end else begin
             count_r <= count_r + (reserve_i ? 4'd1 : 4'd0) - (release_w ? 4'd1 : 4'd0);
@@ -202,25 +223,35 @@ module edrv32_mem_xbar_rbuf (
                 tail_r <= tail_r + 3'd1;
                 write_ptr_r <= write_ptr_r + {2'b0, reserve_beats_i};
             end
-            pending_r <= fetch_w;
-            if (fetch_w) begin
-                read_turn_r <= fetch_port_w == 3'd6 ? 3'd0 : fetch_port_w + 3'd1;
-            end
+            pending_valid_r <= fetch_select_w;
             for (skid_idx = 0; skid_idx < 7; skid_idx = skid_idx + 1) begin
+                if (fetch_select_w[skid_idx]) begin
+                    read_mask_r <= skid_idx == 6 ? 7'h7f : (7'h7f << (skid_idx + 1));
+                end
+                // X-F1 path 1: keep the head's available-beat count before arbitration.
+                port_available_r[skid_idx] <= port_available_r[skid_idx] +
+                    ((ddr_rvalid_i && ddr_rid_i[3:1] == skid_idx[2:0] &&
+                        return_slot_w == port_head_r[skid_idx]) ?
+                        5'd1 : 5'd0) -
+                    ((fetch_w && fetch_port_w == skid_idx[2:0]) ? 5'd1 : 5'd0);
                 if (last_take_w[skid_idx]) begin
                     port_active_r[skid_idx] <= |port_match_w[skid_idx];
                     port_head_r[skid_idx] <= port_slot_w[skid_idx];
+                    port_available_r[skid_idx] <= received_r[port_slot_w[skid_idx]] +
+                        ((ddr_rvalid_i && return_slot_w == port_slot_w[skid_idx]) ?
+                            5'd1 : 5'd0);
                 end
                 if (reserve_i && reserve_port_i == skid_idx[2:0] &&
                     (!port_active_r[skid_idx] ||
                         (last_take_w[skid_idx] && port_match_w[skid_idx] == 0))) begin
                     port_active_r[skid_idx] <= 1'b1;
                     port_head_r[skid_idx] <= tail_r;
+                    port_available_r[skid_idx] <= reserve_error_i ? reserve_beats_i : 5'b0;
                 end
                 if (take_w[skid_idx]) begin
                     skid_valid_r[skid_idx] <= 1'b0;
                 end
-                if (pending_r && {29'b0, pending_port_r} == skid_idx && !rready_i[skid_idx])
+                if (pending_valid_r[skid_idx] && !rready_i[skid_idx])
                 begin
                     skid_valid_r[skid_idx] <= 1'b1;
                 end
@@ -246,6 +277,19 @@ module edrv32_mem_xbar_rbuf (
                 received_r[state_idx] <= reserve_error_i ? reserve_beats_i : 5'b0;
                 fetched_r[state_idx] <= 5'b0;
                 sent_r[state_idx] <= 5'b0;
+            end
+        end
+        for (state_idx = 0; state_idx < 7; state_idx = state_idx + 1) begin
+            if (fetch_w && fetch_port_w == state_idx[2:0]) begin
+                port_addr_r[state_idx] <= port_addr_r[state_idx] + 7'd1;
+            end
+            if (last_take_w[state_idx]) begin
+                port_addr_r[state_idx] <= start_r[port_slot_w[state_idx]];
+            end
+            if (reserve_i && reserve_port_i == state_idx[2:0] &&
+                (!port_active_r[state_idx] ||
+                    (last_take_w[state_idx] && port_match_w[state_idx] == 0))) begin
+                port_addr_r[state_idx] <= write_ptr_r;
             end
         end
         if (fetch_w) begin

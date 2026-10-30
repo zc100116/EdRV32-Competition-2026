@@ -736,6 +736,45 @@ module tb;
             if (timeout_count > 5000) $fatal(1,"FAIL drain remaining=%0d",remaining);
         end
     endtask
+    task automatic error_pipeline;
+        $display("MX-09 X-F1 delayed error capture wins over same-cycle IRQ clear");
+        reset;
+        apb_write('h00c,2);
+        fork
+            begin
+                send_read(1,1,'h1fff,1,1);
+                if (irq_o) $fatal(1,"FAIL ingress IRQ was not delayed at %0t",$time);
+            end
+            apb_write('h010,2);
+        join
+        if (!irq_o) $fatal(1,"FAIL new violation lost to IRQ clear at %0t",$time);
+        apb_check('h120,1);
+        apb_check('h124,'h1fff);
+        apb_check('h128,5);
+        drain; // The existing scoreboard verifies LEN+1 SLVERR beats and ID.
+        apb_write('h110,3);
+        apb_check('h420,0);
+        apb_check('h424,0);
+        apb_check('h434,0);
+        apb_check('h438,0);
+        apb_write('h010,2);
+        if (irq_o) $fatal(1,"FAIL IRQ clear after delayed capture at %0t",$time);
+        apb_check('h128,0);
+        send_read(1,0,'h2000,3,0);
+        send_write(1,0,'h3000,1,0);
+        drain;
+        apb_write('h110,3);
+        apb_check('h420,1);
+        apb_check('h424,4);
+        apb_check('h434,1);
+        apb_check('h438,2);
+        apb_write('h110,1);
+        apb_check('h420,0);
+        apb_check('h424,0);
+        apb_check('h434,0);
+        apb_check('h438,0);
+    endtask
+
     // Independent scheduler instance for five-rule directed tests without FIFO traffic effects.
     reg s_rst_n = 0;
     reg s_enable = 0;
@@ -1260,6 +1299,45 @@ module tb;
         apb_check('h504,32'(snap_busy));
         apb_check('h508,32'(snap_window));
     endtask
+    task automatic statistics_carry;
+        $display("MX-10 X-F1 upper-half carry preserves same-edge counters and snapshots");
+        reset;
+        @(negedge clk);
+        dut.u_regs.rd_txn_r[0] = 32'h0000_fffe;
+        dut.u_regs.rd_beat_r[0] = 32'h0000_fffe;
+        dut.u_regs.wr_txn_r[1] = 32'h0000_fffe;
+        dut.u_regs.wr_beat_r[1] = 32'h0000_fffe;
+        dut.u_regs.wait_sum_r[0] = 32'h0000_fffe;
+        dut.u_regs.urg_cnt_r[0] = 32'h0000_fffe;
+        dut.u_regs.dir_switch_r = 32'h0000_fffe;
+        dut.u_regs.ds_busy_r = 32'h0000_fffe;
+        dut.u_regs.window_cyc_r = 32'h0000_fffe;
+        obs_rd_txn[0] = 'hfffe;
+        obs_rd_beats[0] = 'hfffe;
+        obs_wr_txn[1] = 'hfffe;
+        obs_wr_beats[1] = 'hfffe;
+        obs_wait_sum[0] = 'hfffe;
+        obs_urgent[0] = 'hfffe;
+        obs_switch = 'hfffe;
+        obs_busy = 'hfffe;
+        obs_window = 'hfffe;
+        urgent[0] = 1;
+        send_read(0,0,'h1000,3,0);
+        drain;
+        send_read(0,1,'h2000,3,0);
+        drain;
+        send_write(1,0,'h3000,0,0);
+        drain;
+        send_write(1,1,'h3800,1,0);
+        drain;
+        send_read(3,0,'h4000,0,0);
+        drain;
+        apb_write('h110,3);
+        compare_snapshot;
+        apb_write('h110,1);
+        compare_snapshot;
+    endtask
+
     task automatic statistics_full;
         $display("MX-10 handshake counters, wait timestamps, atomic snapshots and CLEAR");
         reset;
@@ -1394,8 +1472,10 @@ module tb;
         if (FULL != 0) begin
             reset;
             scheduler_full;
+            statistics_carry;
             statistics_full;
         end else begin
+            error_pipeline;
             scheduler_smoke;
             crossbar_smoke;
         end

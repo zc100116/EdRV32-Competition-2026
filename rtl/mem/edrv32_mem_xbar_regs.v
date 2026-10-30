@@ -77,6 +77,13 @@ module edrv32_mem_xbar_regs (
     reg [31:0] dir_snapshot_r;
     reg [31:0] busy_snapshot_r;
     reg [31:0] window_snapshot_r;
+    reg [3:0] rd_txn_carry_r [0:6];
+    reg [3:0] wr_txn_carry_r [0:6];
+    reg [3:0] urg_cnt_carry_r [0:6];
+    reg [3:0] dir_switch_carry_r;
+    reg [3:0] ds_busy_carry_r;
+    reg [3:0] window_cyc_carry_r;
+    integer carry_idx;
     wire unused_pwdata_w;
     assign unused_pwdata_w = &apb_pwdata_i[31:16];
     wire write_w;
@@ -93,6 +100,31 @@ module edrv32_mem_xbar_regs (
         begin
             sat_add = ({1'b0, value_i} + {1'b0, increment_i}) > 33'h0_ffff_ffff ?
                 32'hffff_ffff : value_i + increment_i;
+        end
+    endfunction
+
+    // X-F1 path 7: cache the carry predicates of each +1 counter on the prior edge.
+    // Parallel byte increments retain same-edge event counting and snapshot/CLEAR semantics.
+    function [31:0] count_inc;
+        input [31:0] value_i;
+        input [3:0] carry_i;
+        begin
+            count_inc = carry_i[3] ? value_i :
+                {(value_i[31:24] + {7'b0, carry_i[2]}),
+                    (value_i[23:16] + {7'b0, carry_i[1]}),
+                    (value_i[15:8] + {7'b0, carry_i[0]}), (value_i[7:0] + 8'd1)};
+        end
+    endfunction
+
+    function [3:0] count_carry;
+        input [31:0] value_i;
+        input update_i;
+        input full_i;
+        begin
+            count_carry = update_i && !full_i ?
+                {value_i == 32'hffff_fffe, value_i[23:0] == 24'hffff_fe,
+                    value_i[15:0] == 16'hfffe, value_i[7:0] == 8'hfe} :
+                {(&value_i), (&value_i[23:0]), (&value_i[15:0]), (&value_i[7:0])};
         end
     endfunction
 
@@ -115,6 +147,40 @@ module edrv32_mem_xbar_regs (
             assign rate_o[p*9 +: 9] = rate_r[p];
         end
     endgenerate
+
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            dir_switch_carry_r <= 4'b0;
+            ds_busy_carry_r <= 4'b0;
+            window_cyc_carry_r <= 4'b0;
+            for (carry_idx = 0; carry_idx < 7; carry_idx = carry_idx + 1) begin
+                rd_txn_carry_r[carry_idx] <= 4'b0;
+                wr_txn_carry_r[carry_idx] <= 4'b0;
+                urg_cnt_carry_r[carry_idx] <= 4'b0;
+            end
+        end else begin
+            dir_switch_carry_r <= clear_w ? 4'b0 :
+                count_carry(dir_switch_r, dir_switch_i, dir_switch_carry_r[3]);
+            ds_busy_carry_r <= clear_w ? 4'b0 :
+                count_carry(ds_busy_r, ds_busy_i, ds_busy_carry_r[3]);
+            window_cyc_carry_r <= clear_w ? 4'b0 :
+                count_carry(window_cyc_r, 1'b1, window_cyc_carry_r[3]);
+            for (carry_idx = 0; carry_idx < 7; carry_idx = carry_idx + 1) begin
+                rd_txn_carry_r[carry_idx] <= clear_w ? 4'b0 :
+                    count_carry(rd_txn_r[carry_idx],
+                        grant_i && grant_port_i == carry_idx[2:0] && !grant_write_i,
+                        rd_txn_carry_r[carry_idx][3]);
+                wr_txn_carry_r[carry_idx] <= clear_w ? 4'b0 :
+                    count_carry(wr_txn_r[carry_idx],
+                        grant_i && grant_port_i == carry_idx[2:0] && grant_write_i,
+                        wr_txn_carry_r[carry_idx][3]);
+                urg_cnt_carry_r[carry_idx] <= clear_w ? 4'b0 :
+                    count_carry(urg_cnt_r[carry_idx],
+                        grant_i && grant_port_i == carry_idx[2:0] && grant_urgent_i,
+                        urg_cnt_carry_r[carry_idx][3]);
+            end
+        end
+    end
 
     // Disjoint address cases infer a parallel read mux, without a priority chain.
     always @(*) begin
@@ -330,30 +396,36 @@ module edrv32_mem_xbar_regs (
                     urg_cnt_r[stat_idx] <= 32'b0;
                 end
             end else begin
-                window_cyc_r <= sat_add(window_cyc_r, 32'd1);
+                window_cyc_r <= count_inc(window_cyc_r, window_cyc_carry_r);
                 if (ds_busy_i) begin
-                    ds_busy_r <= sat_add(ds_busy_r, 32'd1);
+                    ds_busy_r <= count_inc(ds_busy_r, ds_busy_carry_r);
                 end
                 if (dir_switch_i) begin
-                    dir_switch_r <= sat_add(dir_switch_r, 32'd1);
+                    dir_switch_r <= count_inc(dir_switch_r, dir_switch_carry_r);
                 end
-                if (grant_i) begin
-                    if (grant_write_i) begin
-                        wr_txn_r[grant_port_i] <= sat_add(wr_txn_r[grant_port_i], 32'd1);
-                        wr_beat_r[grant_port_i] <=
-                            sat_add(wr_beat_r[grant_port_i], {27'b0, grant_beats_i});
-                    end else begin
-                        rd_txn_r[grant_port_i] <= sat_add(rd_txn_r[grant_port_i], 32'd1);
-                        rd_beat_r[grant_port_i] <=
-                            sat_add(rd_beat_r[grant_port_i], {27'b0, grant_beats_i});
-                    end
-                    wait_sum_r[grant_port_i] <=
-                        sat_add(wait_sum_r[grant_port_i], {16'b0, grant_wait_i});
-                    if (grant_wait_i > wait_max_r[grant_port_i]) begin
-                        wait_max_r[grant_port_i] <= grant_wait_i;
-                    end
-                    if (grant_urgent_i) begin
-                        urg_cnt_r[grant_port_i] <= sat_add(urg_cnt_r[grant_port_i], 32'd1);
+                // X-F1 path 7: arithmetic is local to each counter, before port selection.
+                for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
+                    if (grant_i && grant_port_i == stat_idx[2:0]) begin
+                        if (grant_write_i) begin
+                            wr_txn_r[stat_idx] <=
+                            count_inc(wr_txn_r[stat_idx], wr_txn_carry_r[stat_idx]);
+                            wr_beat_r[stat_idx] <=
+                                sat_add(wr_beat_r[stat_idx], {27'b0, grant_beats_i});
+                        end else begin
+                            rd_txn_r[stat_idx] <=
+                            count_inc(rd_txn_r[stat_idx], rd_txn_carry_r[stat_idx]);
+                            rd_beat_r[stat_idx] <=
+                                sat_add(rd_beat_r[stat_idx], {27'b0, grant_beats_i});
+                        end
+                        wait_sum_r[stat_idx] <=
+                            sat_add(wait_sum_r[stat_idx], {16'b0, grant_wait_i});
+                        if (grant_wait_i > wait_max_r[stat_idx]) begin
+                            wait_max_r[stat_idx] <= grant_wait_i;
+                        end
+                        if (grant_urgent_i) begin
+                            urg_cnt_r[stat_idx] <=
+                            count_inc(urg_cnt_r[stat_idx], urg_cnt_carry_r[stat_idx]);
+                        end
                     end
                 end
             end
