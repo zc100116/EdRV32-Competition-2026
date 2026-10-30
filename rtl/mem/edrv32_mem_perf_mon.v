@@ -103,6 +103,9 @@ module edrv32_mem_perf_mon (
     reg [31:0] read_cnt_r;
     reg [31:0] err_beats_r;
     reg [31:0] first_err_addr_r;
+    reg check_valid_r;
+    reg [7:0] check_mismatch_r;
+    reg [31:0] check_addr_r;
     reg [31:0] hist_r [0:15];
     wire apb_write_w;
     wire [31:0] write_mask_w;
@@ -217,8 +220,9 @@ module edrv32_mem_perf_mon (
     assign finished_w = busy_r && !cmd_valid_r && !offset_valid_r &&
         rd_count_r == 0 && wr_count_r == 0 && !hist_sample_valid_r &&
         !hist_latency_valid_r && !hist_compare_valid_r && !hist_valid_r &&
+        !check_valid_r &&
         (abort_r || launched_r == txn_count_r);
-    assign check_error_w = r_fire_w && (check_en_r != 0) && axi_rdata_i != expected_w;
+    assign check_error_w = check_valid_r && (|check_mismatch_r);
 
     assign axi_awid_o = 1'b0;
     assign axi_awaddr_o = cmd_addr_r;
@@ -264,6 +268,31 @@ module edrv32_mem_perf_mon (
         expected_w = 256'b0;
         for (word_idx_w = 0; word_idx_w < 8; word_idx_w = word_idx_w + 1)
             expected_w[word_idx_w*32 +: 32] = (rd_byte_addr_w + word_idx_w*4) ^ seed_r;
+    end
+
+    // spec 2.3, 6: compare each R beat before accumulating its measurement.
+    // Keep the beat address with the comparison; completion drains this stage.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            check_valid_r <= 1'b0;
+        else if (start_w || soft_reset_w)
+            check_valid_r <= 1'b0;
+        else
+            check_valid_r <= r_fire_w && (check_en_r != 0);
+    end
+    genvar check_lane;
+    generate
+        for (check_lane = 0; check_lane < 8; check_lane = check_lane + 1) begin : g_check
+            always @(posedge clk_i) begin
+                if (r_fire_w)
+                    check_mismatch_r[check_lane] <=
+                        axi_rdata_i[check_lane*32 +: 32] != expected_w[check_lane*32 +: 32];
+            end
+        end
+    endgenerate
+    always @(posedge clk_i) begin
+        if (r_fire_w)
+            check_addr_r <= rd_byte_addr_w;
     end
 
     // spec 4.2: config stays stable while BUSY. Three arithmetic stages settle
@@ -593,7 +622,7 @@ module edrv32_mem_perf_mon (
             if (check_error_w) begin
                 err_beats_r <= sat_add(err_beats_r, 32'd1);
                 if (err_beats_r == 0)
-                    first_err_addr_r <= rd_byte_addr_w;
+                    first_err_addr_r <= check_addr_r;
             end
         end
     end
