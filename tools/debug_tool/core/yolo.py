@@ -64,15 +64,22 @@ class YoloTool:
     def __init__(self, ethernet):
         self.ethernet = ethernet
         self.image_bytes = 0
+        self.source_image = None
+        self.return_view = False
         self.lock = threading.Lock()
         self.blocks = [Block() for _ in range(3)]
         self.capture = None
+        self.capture_pending = False
+        self.capture_started = False
         self.generation = 0
 
     def reset_capture(self):
         with self.lock:
             self.blocks = [Block() for _ in range(3)]
             self.capture = None
+            self.capture_pending = True
+            self.capture_started = False
+            self.return_view = True
 
     def receive(self, window, offset, data, notify):
         if window not in (0, 1, 2):
@@ -88,6 +95,7 @@ class YoloTool:
                                            for block, size in zip(self.blocks, sizes))
                 self.capture = (ch2, output, parse_detections(detections))
                 self.generation += 1
+                self.capture_pending = False
 
     def snapshot(self):
         with self.lock:
@@ -113,8 +121,10 @@ class YoloTool:
     def send_image(self, path, board_ip, board_port, local_port, window=0):
         if window not in (0, 1):
             raise ValueError('test image window must be 0 or 1 (B2 design 3.5a)')
+        pixels = image_rgb565(path)
+        self.source_image = str(path)
         self.reset_capture()
-        return self.ethernet.send_blocks([(window, 0, image_rgb565(path))],
+        return self.ethernet.send_blocks([(window, 0, pixels)],
                                          board_ip, board_port, local_port, name=str(path))
 
 

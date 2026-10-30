@@ -1,7 +1,9 @@
 """program.py — BIOS programming panel, SoC spec 7.5(3a); host, no clock domain."""
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QComboBox, QFileDialog, QFrame, QLabel, QLineEdit, QProgressBar, QPushButton, QVBoxLayout,
+    QComboBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit,
+    QProgressBar, QPushButton, QVBoxLayout,
 )
 
 
@@ -28,18 +30,23 @@ class ProgramPanel(QFrame):
         for value in (2000000, 921600, 115200):
             self.baud.addItem(f"{value}" + ("（不切换）" if value == 115200 else ""), value)
         self.baud.setEnabled(False)
-        layout.addWidget(QLabel("ELF 加载波特率"))
-        layout.addWidget(self.baud)
+        fields = QFormLayout()
+        fields.setLabelAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        fields.addRow("ELF 波特率", self.baud)
+        layout.addLayout(fields)
         self.path = QLineEdit()
-        self.path.setPlaceholderText("build/sw/<程序>/<程序>.bin")
-        layout.addWidget(self.path)
-        self.choose = QPushButton("选择 .bin 文件")
+        self.path.setPlaceholderText("程序镜像路径")
+        self.choose = QPushButton("选择 .bin")
         self.choose.clicked.connect(self._choose)
-        layout.addWidget(self.choose)
+        file_row = QHBoxLayout()
+        file_row.addWidget(self.path, 1)
+        file_row.addWidget(self.choose)
+        layout.addLayout(file_row)
         self.start = QPushButton("烧录 SRAM")
         self.start.clicked.connect(self._start)
         layout.addWidget(self.start)
         self.progress = QProgressBar()
+        self.progress.setTextVisible(False)
         layout.addWidget(self.progress)
         self.result = QLabel("等待选择文件")
         self.result.setWordWrap(True)
@@ -49,9 +56,9 @@ class ProgramPanel(QFrame):
     def _mode_changed(self):
         elf = self.mode.currentData()
         self.baud.setEnabled(elf)
-        self.choose.setText("选择 .elf 文件" if elf else "选择 .bin 文件")
+        self.choose.setText("选择 .elf" if elf else "选择 .bin")
         self.start.setText("加载 ELF 并运行" if elf else "烧录 SRAM")
-        self.path.setPlaceholderText("build/sw/<程序>/<程序>." + ("elf" if elf else "bin"))
+        self.path.setPlaceholderText("SRAM / DDR ELF 路径" if elf else "SRAM .bin 路径")
 
     def _choose(self):
         elf = self.mode.currentData()

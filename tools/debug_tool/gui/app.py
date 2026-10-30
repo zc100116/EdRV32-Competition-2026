@@ -4,6 +4,7 @@ VOFA-style three-column layout:
   left   -- icon rail switching 连接 / 命令 / 规则 panels
   center -- classic scrolling log console + composer
   right  -- live parameter panel fed by user-defined match rules
+A dedicated SoC console joins board controls, one canvas and DDR charts.
 All actions go through SerialEngine, so the REST API / CLI observe and
 control the exact same session. All three columns are splitter-resizable.
 """
@@ -23,11 +24,8 @@ from PySide6.QtWidgets import (
 )
 
 from core.engine import ENCODINGS, fmt_ts
-from gui.program import ProgramPanel
 from gui.ethernet import EthernetPanel
-from gui.telemetry import TelemetryPanel, ScenePanel
-from gui.yolo import YoloPanel
-from gui.video import VideoPanel
+from gui.soc_console import SocConsole
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1195,12 +1193,8 @@ class MainWindow(QMainWindow):
                 ("连接", "串口连接与参数", ICON_PLUG),
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
                 ("规则", "数据匹配规则", ICON_FILTER),
-                ("烧录", "BIOS SRAM 烧录", ICON_TERMINAL),
                 ("网口", "UDP 文件收发", ICON_PLUG),
-                ("DDR", "DDR 监控", ICON_FILTER),
-                ("场景", "场景控制", ICON_TERMINAL),
-                ("YOLO", "YOLO 数据发送", ICON_PLUG),
-                ("视频", "网口实时视频", ICON_PLUG))):
+                ("中控台", "SoC 程序、图像与 DDR", ICON_FILTER))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1214,7 +1208,6 @@ class MainWindow(QMainWindow):
         rail_layout.addStretch(1)
         self.rail_group.idClicked.connect(self._select_page)
         self.rail_group.button(0).setChecked(True)
-        left_layout.addWidget(rail)
 
         self.conn = ConnectionPanel(engine, self.toast)
         self.cmds = CommandsPanel(engine, self.toast)
@@ -1222,24 +1215,12 @@ class MainWindow(QMainWindow):
         self.left_stack.addWidget(self.conn)
         self.left_stack.addWidget(self.cmds)
         self.left_stack.addWidget(self.rules)
-        self.program = ProgramPanel(engine, self.toast)
-        self.left_stack.addWidget(self.program)
         self.ethernet = EthernetPanel(engine.ethernet, self.toast)
         ethernet_scroll = QScrollArea()
         ethernet_scroll.setWidgetResizable(True)
         ethernet_scroll.setFrameShape(QFrame.NoFrame)
         ethernet_scroll.setWidget(self.ethernet)
         self.left_stack.addWidget(ethernet_scroll)
-        self.telemetry = TelemetryPanel(engine, self.toast)
-        self.scene = ScenePanel(engine, self.toast)
-        self.yolo = YoloPanel(engine, self.toast)
-        self.video = VideoPanel(engine, self.toast)
-        for panel in (self.telemetry, self.scene, self.yolo, self.video):
-            scroll = QScrollArea()
-            scroll.setWidgetResizable(True)
-            scroll.setFrameShape(QFrame.NoFrame)
-            scroll.setWidget(panel)
-            self.left_stack.addWidget(scroll)
         left_layout.addWidget(self.left_stack, 1)
 
         # center: console
@@ -1366,7 +1347,13 @@ class MainWindow(QMainWindow):
         main_split.setSizes([330, 680, 300])
         self.main_split = main_split
         self.console_card = console_card
-        body.addWidget(main_split)
+        self.body_stack = QStackedWidget()
+        self.body_stack.addWidget(main_split)
+        self.soc = SocConsole(engine, self.toast)
+        self.body_stack.addWidget(self.soc)
+        body.addWidget(rail)
+        body.addSpacing(8)
+        body.addWidget(self.body_stack, 1)
 
         # ---- footer ----
         footer = QWidget()
@@ -1404,6 +1391,8 @@ class MainWindow(QMainWindow):
         self.cmd_timer.start(1500)
         self._poll_status()
         self.data_panel.refresh(force=True)
+        self.rail_group.button(4).setChecked(True)
+        self._select_page(4)
 
     # -- actions ----------------------------------------------------------
     def _send(self):
@@ -1467,12 +1456,13 @@ class MainWindow(QMainWindow):
         self.console.append_many(lines)
 
     def _select_page(self, index):
-        self.left_stack.setCurrentIndex(index)
-        wide = index >= 5
-        self.console_card.setVisible(not wide)
-        self.data_panel.setVisible(not wide)
-        if not wide:
-            self.main_split.setSizes([330, 680, 300])
+        console = index == 4
+        self.body_stack.setCurrentIndex(1 if console else 0)
+        if not console:
+            self.left_stack.setCurrentIndex(index)
+            self.main_split.setSizes([300, 680, 300])
+        else:
+            self.soc.refresh()
 
     def _poll_status(self):
         st = self.engine.status()
@@ -1488,11 +1478,8 @@ class MainWindow(QMainWindow):
         self.tx_input.setEnabled(connected)
         self.file_btn.setEnabled(connected)
         self._update_file_row()
-        self.program.refresh()
         self.ethernet.refresh()
-        self.telemetry.refresh()
-        self.yolo.refresh()
-        self.video.refresh()
+        self.soc.refresh()
         self.counters.setText(
             f"RX {fmt_bytes(st['rxBytes'])} / TX {fmt_bytes(st['txBytes'])}")
 

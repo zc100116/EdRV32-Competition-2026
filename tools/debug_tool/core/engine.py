@@ -16,11 +16,8 @@ import threading
 import time
 
 from .program import BiosProgrammer
-from .ethernet import EthernetTool
-from .telemetry import Telemetry
-from .yolo import YoloTool
+from .session import BoardSession
 from .scene import SceneControl
-from .video import VideoReceiver
 
 try:
     import serial
@@ -102,12 +99,11 @@ class SerialEngine:
         self.program = BiosProgrammer(self._program_write,
                                       lambda text: self.add_entry("sys", text),
                                       self._program_baud)
-        self.telemetry = Telemetry()
-        self.ethernet = EthernetTool(self.telemetry)
-        self.yolo = YoloTool(self.ethernet)
-        self.video = VideoReceiver()
-        self.ethernet.yolo = self.yolo
-        self.ethernet.video = self.video
+        self.board = BoardSession(self)
+        self.telemetry = self.board.telemetry
+        self.ethernet = self.board.ethernet
+        self.yolo = self.board.yolo
+        self.video = self.board.video
         self.scenes = SceneControl(self)
 
     # ---------------------------------------------------------- observer --
@@ -163,12 +159,14 @@ class SerialEngine:
     def status(self):
         with self._lock:
             connected = self._serial is not None and self._serial.is_open
-            return {"connected": connected, "config": dict(self._config),
+            state = {"connected": connected, "config": dict(self._config),
                     "encoding": self._config.get("encoding", "utf-8"),
                     "dtr": bool(self._config.get("dtr")),
                     "rts": bool(self._config.get("rts")),
                     "rxBytes": self._rx_bytes, "txBytes": self._tx_bytes,
                     "lastSeq": self._seq}
+        state["board"] = self.board.status()
+        return state
 
     def set_encoding(self, encoding):
         encoding = str(encoding).lower()
@@ -242,6 +240,7 @@ class SerialEngine:
         return self.status()
 
     def disconnect(self, silent=False):
+        self.board.disconnect()
         if self.program.status()["active"]:
             self.program.fail("serial port disconnected during BIOS programming")
         self._reader_running = False
@@ -281,6 +280,8 @@ class SerialEngine:
             shown = wire.replace("\r", "<CR>").replace("\n", "<LF>")
         ser.write(data)
         ser.flush()
+        if not hex_mode and text.strip() in ("s1", "s2"):
+            self.yolo.return_view = False
         with self._lock:
             self._tx_bytes += len(data)
         hex_data = " ".join(f"{b:02X}" for b in data)
@@ -300,7 +301,7 @@ class SerialEngine:
                 waiting = ser.in_waiting
                 data = ser.read(waiting if waiting else 1)
             except (serial.SerialException, OSError) as exc:
-                self.add_entry("sys", f"serial error: {exc}; link closed")
+                self.board.fail(f"serial error: {exc}; link closed")
                 self.disconnect(silent=True)
                 continue
             with self._lock:
@@ -640,6 +641,7 @@ class SerialEngine:
     # ------------------------------------------------------------ params --
     def _match_line(self, text):
         self.program.feed_line(text)
+        self.board.feed_line(text)
         with self._lock:
             compiled = list(self._compiled_rules)
         for rule, regex in compiled:

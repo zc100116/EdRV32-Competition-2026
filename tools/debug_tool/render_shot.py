@@ -1,133 +1,149 @@
-"""Offscreen render test: build the main window, seed demo data, dump a PNG.
+"""render_shot.py — SoC console design 4.4 visual evidence; host Qt thread.
 
-Run:  python render_shot.py [out.png]
+Render exact window sizes with explicit synthetic serial lines and real UDP data.
+Example: QT_QPA_PLATFORM=offscreen python render_shot.py out.png --state vision
 """
 
 import argparse
-import subprocess
 import os
+from pathlib import Path
+import socket
+from concurrent.futures import ThreadPoolExecutor
 import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication
 
 from core.engine import SerialEngine
+from core.telemetry import encode
 from gui.app import MainWindow
+from telemetry_sim import demo_pixels, periodic, send_block, run_video, run_yolo
+
+
+class SimulatedSerial:
+    """Only for rendering: the simulated board never touches a physical serial port."""
+    is_open = True
+    port = 'SIMULATED'
+
+    def write(self, data):
+        return len(data)
+
+    def flush(self):
+        pass
+
+    def close(self):
+        self.is_open = False
+
+
+def serial_line(engine, text):
+    engine.add_entry('rx', text)
+    engine._match_line(text)
+
+
+def seed(engine, console, state):
+    engine._serial = SimulatedSerial()
+    engine._config.update(port='SIMULATED', baud=115200)
+    project = 'B3V' if state == 'vision' else 'B3F'
+    console.project.setCurrentText(project)
+    serial_line(engine, 'BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud')
+    serial_line(engine, 'Demo: demo_vision' if state == 'vision' else 'Demo: demo')
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as board:
+        board.bind(('127.0.0.1', 0))
+        engine.board.establish_network('127.0.0.1', board.getsockname()[1])
+        board.settimeout(2)
+        board.recvfrom(1024)
+    for line in ('ETH peer IP: 0x7f000001', 'ETH peer port: 6000',
+                 f'Scene: {2 if state == "vision" else 1}', 'PIX mode: 0', 'GEO mode: 0',
+                 'Output mode: 2', 'Requested video fps: 30', 'Monitor Hz: 100',
+                 'Switch: frames=2 mtime_ticks=6742100'):
+        serial_line(engine, line)
+    console.output.setCurrentIndex(2)
+    console.scene.setCurrentIndex(1 if state == 'vision' else 0)
+    # Feed a 60 s timeline using the same encoder and real socket as telemetry_sim.py.
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
+        for batch in range(38):
+            records = []
+            for index in range(16):
+                tick = batch * 16 + index
+                record = periodic(tick, tick, 10)
+                record['scene'] = 2 if state == 'vision' else 1
+                if state == 'vision':
+                    for key in ('npu_completed', 'npu_cycles', 'post_cycles', 'boxes'):
+                        record[key] = 0
+                    for port in (3, 4):
+                        for key in ('rd_beat', 'wr_beat', 'rd_txn', 'wr_txn',
+                                    'wait_sum', 'wait_max', 'urg_cnt'):
+                            record[f'p{port}_{key}'] = 0
+                records.append(encode(record))
+            send_block(source, ('127.0.0.1', 6000), b''.join(records), 3)
+    if state == 'detection':
+        path = Path(__file__).resolve().parents[2] / 'build/debug_tool/render-input.png'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        QImage(demo_pixels(), 1280, 720, 2560, QImage.Format_RGB16).copy().save(str(path))
+        console.image_path.setText(os.path.relpath(path))
+        console._load_image()
+        engine.yolo.reset_capture()
+        console.display.setCurrentIndex(2)
+    engine.add_entry('sys', '截图模拟数据 · 非实板测量')
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('out', nargs='?', default='render.png')
-    parser.add_argument('--page', choices=['serial', 'ddr', 'scene', 'yolo', 'video'],
-                        default='serial')
-    parser.add_argument('--simulate-seconds', type=int, default=0)
+    parser.add_argument('out')
+    parser.add_argument('--state', choices=['disconnected', 'vision', 'detection'],
+                        default='disconnected')
+    parser.add_argument('--width', type=int, default=1366)
+    parser.add_argument('--height', type=int, default=768)
     args = parser.parse_args()
-    out = args.out
-    app = QApplication(sys.argv)
+    app = QApplication([])
     engine = SerialEngine()
-
-    # in-memory demo match rules (not persisted) driving the data panel
-    engine._rules = [
-        {"id": "temp", "name": "温度", "enabled": True,
-         "pattern": r"TEMP=(\d+)", "keyGroup": 0, "valueGroup": 1,
-         "base": 10, "scale": 0.1, "unit": "℃"},
-        {"id": "ch", "name": "ADC CH", "enabled": True,
-         "pattern": r"ch(\d+):0x([0-9a-fA-F]+)", "keyGroup": 1,
-         "valueGroup": 2, "base": 16, "scale": 1, "unit": ""},
-        {"id": "score", "name": "CoreMark/MHz", "enabled": True,
-         "pattern": r"CoreMark/MHz x1000:\s*(\d+)", "keyGroup": 0,
-         "valueGroup": 1, "base": 10, "scale": 0.001, "unit": ""},
-    ]
-    engine._compiled_rules = engine._compile_rules(engine._rules)
-
-    demo = [
-        ("sys", "connected COM7 @ 115200 8N1"),
-        ("rx",  "boot ok, streaming sensor frames"),
-        ("rx",  "TEMP=235"),
-        ("rx",  "ch1:0x3F8 ch2:0x12"),
-        ("tx",  "6<CR>"),
-        ("rx",  "TEMP=241"),
-        ("rx",  "CoreMark/MHz x1000: 3125"),
-        ("rx",  "ch1:0x400 ch2:0x18"),
-        ("tx",  "status<CR>"),
-        ("rx",  "TEMP=238"),
-    ]
-    base = int(time.time() * 1000) - 60_000
-    for i, (direction, text) in enumerate(demo):
-        engine.add_entry(direction, text)
-        engine._entries[-1]["ts"] = base + i * 1377  # spread timestamps
-        if direction == "rx":
-            engine._match_line(text)
-
-    # in-memory demo commands (not persisted) to preview the command grid
-    engine._commands = [
-        {"id": f"demo{i}", "label": label, "payload": payload,
-         "ending": "cr"}
-        for i, (label, payload) in enumerate([
-            ("UART 回环", "1"), ("GPIO / LED", "2"), ("SRAM / CACHE", "3"),
-            ("CLINT", "4"), ("PLIC", "5"), ("CoreMark + HPM", "6"),
-        ])
-    ]
-
     window = MainWindow(engine)
     window.setAttribute(Qt.WA_DeleteOnClose)
-    index = {'serial': 0, 'ddr': 5, 'scene': 6, 'yolo': 7, 'video': 8}[args.page]
-    window.rail_group.button(index).setChecked(True)
-    window._select_page(index)
+    window.resize(args.width, args.height)
     window.show()
+    app.processEvents()
     simulator = None
-    if args.simulate_seconds:
-        mode = args.page if args.page in ('video', 'yolo') else 'files'
-        rx = engine.ethernet.start_receive(0, mode=mode)
-        if args.page == 'yolo':
-            from PySide6.QtGui import QImage
-            from telemetry_sim import demo_pixels
-            from pathlib import Path
-            image = QImage(demo_pixels(), 1280, 720, 2560, QImage.Format_RGB16).copy()
-            image_path = Path(__file__).resolve().parents[2] / 'build/debug_tool/demo.png'
-            image_path.parent.mkdir(parents=True, exist_ok=True)
-            image.save(str(image_path))
-            window.yolo.image.setText(str(image_path))
-        simulator = subprocess.Popen([
-            sys.executable, os.path.join(os.path.dirname(__file__), 'telemetry_sim.py'),
-            '--seconds', str(args.simulate_seconds), '--port', str(rx['localPort']),
-            '--mode', args.page if args.page in ('video', 'yolo') else 'telemetry',
-            '--fps', '3'])
-
-    def shoot():
-        window.telemetry.refresh(force=True)
-        window.yolo.refresh()
-        window.video.refresh()
-        if args.page == 'video' and args.simulate_seconds:
-            if engine.video.snapshot()['received'] == 0:
-                raise RuntimeError('video simulator produced no complete video frames')
-        if args.page == 'yolo' and args.simulate_seconds:
-            if engine.yolo.snapshot()[1] is None:
-                raise RuntimeError('YOLO simulator produced no complete capture')
-        window.grab().save(out)
-        print(f"saved {out}")
-        finish_timer.start(100)
-
-    def finish():
-        if simulator and simulator.poll() is None:
-            return
-        if simulator and simulator.returncode:
-            raise RuntimeError(f'telemetry simulator exited {simulator.returncode}')
-        finish_timer.stop()
-        engine.ethernet.stop_receive()
+    executor = ThreadPoolExecutor(max_workers=1)
+    try:
+        if args.state != 'disconnected':
+            seed(engine, window.soc, args.state)
+            if args.state == 'vision':
+                simulator = executor.submit(run_video, '127.0.0.1', 6000, 3, 3, 2)
+            else:
+                simulator = executor.submit(run_yolo, '127.0.0.1', 6000)
+        deadline = time.monotonic() + (3 if simulator else .3)
+        while time.monotonic() < deadline:
+            app.processEvents()
+            time.sleep(.01)
+        window.soc.refresh()
+        app.processEvents()
+        if args.state == 'vision' and engine.video.snapshot()['received'] == 0:
+            raise RuntimeError('Simulator produced no complete EDVF frame')
+        if args.state == 'detection' and engine.yolo.snapshot()[1] is None:
+            raise RuntimeError('Simulator produced no complete YOLO return')
+        if args.state != 'disconnected' and not engine.telemetry.status()['latest']:
+            raise RuntimeError('Simulator produced no EDTM data')
+        if (window.width(), window.height()) != (args.width, args.height):
+            raise RuntimeError(f'Layout expanded window to {window.size()}')
+        if args.state == 'vision' and args.height == 768:
+            # Show unsupported transfers and their reasons in the evidence viewport.
+            window.soc.left_scroll.verticalScrollBar().setValue(
+                window.soc.image_card.y())
+            app.processEvents()
+        if not window.grab().save(args.out):
+            raise RuntimeError(f'Cannot save screenshot: {args.out}')
+        print(f'Saved {args.out} ({args.width} × {args.height}, {args.state})')
+        if simulator:
+            simulator.result(timeout=15)
+    finally:
+        executor.shutdown(wait=True)
         window.close()
-
-    finish_timer = QTimer()
-    finish_timer.timeout.connect(finish)
-
-    delay = (args.simulate_seconds * 1000 - 200 if args.page == 'video'
-             and args.simulate_seconds else args.simulate_seconds * 1000 + 800)
-    QTimer.singleShot(delay, shoot)
-    app.exec()
+        app.processEvents()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

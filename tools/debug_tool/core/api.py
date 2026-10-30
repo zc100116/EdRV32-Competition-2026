@@ -57,6 +57,8 @@ def make_handler(engine):
         def do_GET(self):
             path = urllib.parse.urlsplit(self.path).path
             try:
+                if path == "/api/board":
+                    return self._json(200, engine.board.status())
                 if path == "/api/telemetry":
                     return self._json(200, engine.telemetry.status())
                 if path == "/api/scenes":
@@ -101,6 +103,11 @@ def make_handler(engine):
             path = urllib.parse.urlsplit(self.path).path
             try:
                 body = self._body()
+                if path == "/api/board/project":
+                    return self._json(200, engine.board.select_project(body['project']))
+                if path == "/api/board/network":
+                    return self._json(200, engine.board.establish_network(
+                        body.get('boardIp', '192.168.1.10'), int(body.get('boardPort', 5000))))
                 if path == "/api/telemetry/export":
                     return self._json(200, engine.telemetry.export_csv(body["path"]))
                 if path == "/api/telemetry/replay":

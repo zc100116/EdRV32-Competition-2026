@@ -128,7 +128,7 @@ def send_block(sock, destination, data, window, offset=0, notify=True):
             time.sleep(.001)
 
 
-def run_video(host, port, seconds, fps):
+def run_video(host, port, seconds, fps, scene=1):
     pixels = demo_pixels()
     started = time.monotonic()
     destination = host, port
@@ -136,10 +136,14 @@ def run_video(host, port, seconds, fps):
         for frame_id in range(int(seconds * fps)):
             send_block(sock, destination, demo_detections(frame_id), 2)
             header = VIDEO_HEADER.pack(b'EDVF', 1, 1, 1280, 720, 2560,
-                                       frame_id, int(frame_id * 100e6 / fps), 1)
+                                       frame_id, int(frame_id * 100e6 / fps), scene)
             send_block(sock, destination, header, 0, notify=False)
             send_block(sock, destination, pixels, 0, offset=32)
             record = periodic(frame_id, frame_id, fps)
+            record['scene'] = scene
+            if scene == 2:
+                for field in ('npu_completed', 'npu_cycles', 'post_cycles', 'boxes'):
+                    record[field] = 0
             send_block(sock, destination, encode(record), 3)
             delay = started + (frame_id + 1) / fps - time.monotonic()
             if delay > 0:

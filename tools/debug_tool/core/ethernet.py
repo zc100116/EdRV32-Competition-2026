@@ -32,6 +32,7 @@ def unpack(packet):
 
 class EthernetTool:
     def __init__(self, telemetry=None):
+        self.session = None
         self.telemetry = telemetry
         self.video = None
         self.yolo = None
@@ -98,6 +99,12 @@ class EthernetTool:
                 sock.close()
             with self.lock:
                 self.tx["active"] = False
+            if self.session:
+                state = self.status()['tx']
+                if state['error']:
+                    self.session.fail(f"UDP 发送失败：{state['error']}")
+                else:
+                    self.session.log(f"UDP 发送完成：{state['sent']} B · {state['path']}")
 
     def start_receive(self, local_port, directory=None, mode="files"):
         if self.rx_socket is not None:
@@ -120,6 +127,9 @@ class EthernetTool:
             self.rx = {"active": True, "localPort": sock.getsockname()[1],
                        "directory": str(directory), "packets": 0, "bytes": 0,
                        "notifyCount": 0, "lastNotify": False, "files": {}, "error": None}
+        if self.session:
+            self.session.listening(sock.getsockname()[1])
+            self.session.log(f'UDP 已监听 {sock.getsockname()[1]} · {mode}')
         self.rx_thread = threading.Thread(target=self._receive, args=(sock, directory),
                                           name="udp-file-rx", daemon=True)
         self.rx_thread.start()
@@ -127,6 +137,7 @@ class EthernetTool:
 
     def _receive(self, sock, directory):
         files = {}
+        routes = {}
         try:
             while not self.stop_event.is_set():
                 try:
@@ -134,19 +145,47 @@ class EthernetTool:
                 except socket.timeout:
                     continue
                 window, notify, offset, data = unpack(packet)
-                if window == 3 and self.telemetry is not None:
+                video = self.mode == 'video' and window in (0, 2)
+                yolo = self.mode == 'yolo' and window in (0, 1, 2)
+                telemetry = window == 3 and self.telemetry is not None
+                save_file = not video
+                if self.mode == 'console':
+                    if offset == 0:
+                        if window == 0 and data.startswith(b'EDVF'):
+                            routes[window] = 'video'
+                        elif window == 2 and data.startswith(b'EDDT'):
+                            routes[window] = ('yolo' if self.yolo.capture_pending and
+                                              self.yolo.capture_started else 'video')
+                        elif window in (0, 1, 2) and self.yolo.capture_pending:
+                            routes[window] = 'yolo'
+                            self.yolo.capture_started = True
+                        elif window == 3 and data.startswith(b'EDTM'):
+                            routes[window] = 'telemetry'
+                        else:
+                            routes[window] = 'files'
+                    route = routes.get(window, 'files')
+                    video, yolo = route == 'video', route == 'yolo'
+                    telemetry = route == 'telemetry'
+                    save_file = route in ('files', 'yolo')
+                if telemetry:
                     self.telemetry.receive(offset, data, notify)
-                if self.mode == 'video' and window in (0, 2):
+                    if self.session:
+                        self.session.received('telemetry')
+                if video:
                     self.video.receive(window, offset, data, notify)
-                elif self.mode == 'yolo':
+                    if self.session and window == 0:
+                        self.session.received('video')
+                elif yolo:
                     self.yolo.receive(window, offset, data, notify)
-                if self.mode != 'video' or window not in (0, 2):
+                if save_file:
                     if window not in files:
                         path = directory / f"window{window}.bin"
                         files[window] = path.open("w+b")
                         with self.lock:
                             self.rx["files"][str(window)] = str(path)
                     output = files[window]
+                    if yolo and offset == 0:
+                        output.truncate(0)
                     output.seek(offset)
                     output.write(data)
                     output.flush()
@@ -159,8 +198,10 @@ class EthernetTool:
         except (OSError, struct.error, ValueError) as exc:
             with self.lock:
                 self.rx["error"] = str(exc)
+            if self.session:
+                self.session.fail(f"UDP 接收失败：{exc}")
         finally:
-            if self.mode == 'video':
+            if self.mode in ('video', 'console'):
                 self.video.finish()
             for output in files.values():
                 output.close()
