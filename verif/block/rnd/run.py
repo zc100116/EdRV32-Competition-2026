@@ -16,6 +16,21 @@ from regress import expand_files
 from vectors import generate, selections
 
 
+# T-RND1 acceptance subset approved by the coordinator; reuse existing vectors verbatim.
+SMOKE_CASES = [
+    (1, (0, 255, 255), 1), (1, (1, 255, 255), 1),
+    (3, (0, 7, 19, 16), 1), (3, (1, 7, 19, 16), 1),
+    (4, (1, 1, 1, 0), 1), (5, (1, 15, 7), 1),
+    (6, (0, 3, 1), 1), (6, (1, 3, 1), 1),
+    (6, (1, 2, 0), 1), (6, (1, 4, 0), 1), (6, (1, 5, 0), 1),
+    (7, (1, 0, 31), 1), (7, (0, 7, 1), 1), (7, (1, 9, 7), 1),
+    (8, (1, 16 * 65536, 3), 1), (9, (1, 1, 3, 128, 255), 1),
+    (10, (0, 'dr'), 1), (10, (1, 'dr'), 1),
+    (11, (1, 8, 0), 1), (12, (1, 8), 1), (13, (1, 7, 1), 1),
+    (14, 'chain', 1), (15, ('op', 255), 1), (16, 'registers', 1),
+    (20, 'horizontal', 1), (20, 'vertical', 1),
+]
+
 def compile_sim(stub):
     obj = ROOT / 'build/rnd' / ('stub_obj' if stub else 'obj')
     obj.mkdir(parents=True, exist_ok=True)
@@ -33,14 +48,14 @@ def compile_sim(stub):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('tier', choices=('smoke', 'full', 'perf', 'stub'))
+    parser.add_argument('tier', choices=('smoke', 'directed', 'full', 'perf', 'stub'))
     args = parser.parse_args()
     sim = compile_sim(args.tier == 'stub')
     if args.tier == 'stub':
         subprocess.run([str(sim), '+PORT_STUB'], cwd=ROOT, check=True)
         return 0
     out = ROOT / 'build/rnd' / args.tier
-    cases = selections(args.tier)
+    cases = SMOKE_CASES if args.tier == 'smoke' else selections(args.tier)
     for index, (number, variant, seed) in enumerate(cases):
         name = f'RN-{number:02d}-{index:04d}-seed{seed}'
         directory = out / name

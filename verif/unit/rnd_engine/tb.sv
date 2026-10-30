@@ -468,6 +468,28 @@ module tb;
             value[byte_index*8+:8]=memory[word_index*4+byte_index];
         return value;
     endfunction
+    task automatic sparse_case(input int source_format);
+        setup(4,source_format,1,3);
+        // rnd 2.5: sparse samples include 0x801f; keep the target disjoint.
+        put(1,BASE+32'h1004); put(2,80); put(3,0); put(4,32'h00010012);
+        put(5,0); put(6,32'h00010012); put(8,BASE+32'h401f);
+        put(9,257); put(10,0);
+        put(11,source_format==0 ? 32'h04000000 : 32'h02000000);
+        execute(1,1);
+    endtask
+    task automatic round_performance;
+        reg[31:0] cycles_value,pixel_value;
+        random_stalls=0;
+        compare_size=MEM_SIZE;
+        setup(1,0,1,0);
+        put(1,BASE+32'h400000); put(2,4096); put(3,0); put(4,32'h01ff03ff);
+        put(5,0); put(6,32'h01ff03ff); put(8,16);
+        execute(1,1);
+        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
+        if(pixel_value!=524288 || (!$test$plusargs("R1_BASELINE") && cycles_value>349525))
+            $fatal(1,"round FILL throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        $display("PERF round FILL cycles=%0d pixels=%0d",cycles_value,pixel_value);
+    endtask
     task automatic performance;
         reg[31:0] cycles_value,pixel_value;
         random_stalls=0;
@@ -549,14 +571,7 @@ module tb;
         if(pixel_value!=921600 || (!$test$plusargs("R1_BASELINE") && cycles_value>921600))
             $fatal(1,"TILEMAP throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
         $display("PERF TILEMAP cycles=%0d pixels=%0d",cycles_value,pixel_value);
-        setup(1,0,1,0);
-        put(1,BASE+32'h400000); put(2,4096); put(3,0); put(4,32'h01ff03ff);
-        put(5,0); put(6,32'h01ff03ff); put(8,16);
-        execute(1,1);
-        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
-        if(pixel_value!=524288 || (!$test$plusargs("R1_BASELINE") && cycles_value>349525))
-            $fatal(1,"round FILL throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
-        $display("PERF round FILL cycles=%0d pixels=%0d",cycles_value,pixel_value);
+        round_performance();
         $display("PASS RND throughput and pixel comparisons");
         $finish;
     endtask
@@ -568,6 +583,19 @@ module tb;
         if(value!==32'h00040001) $fatal(1,"ID %h",value);
         if($test$plusargs("PERF")) performance();
         apb_write(12'h00c,3);
+        if($test$plusargs("PERF_ROUND")) begin
+            round_performance();
+            $display("PASS RND round FILL performance and pixel comparison");
+            $finish;
+        end
+        if($test$plusargs("SPARSE_SMOKE")) begin
+            for(int source_format=0;source_format<2;source_format++) begin
+                $display("original full case %0d",137+2*source_format);
+                sparse_case(source_format);
+            end
+            $display("PASS RND sparse source cases 137/139");
+            $finish;
+        end
         for(int d=0;d<2;d++) begin
             setup(1,0,d,0); put(8,0); put(7,32'hff59b2f3); execute(1,1);
             setup(1,9,d,0); put(8,4); execute(1,1);
@@ -637,13 +665,7 @@ module tb;
                 put(1,BASE+32'h8004); put(2,160); put(3,0); put(4,32'h00020024);
                 put(5,0); put(6,32'h00020024); put(8,BASE+32'h401f);
                 put(9,103); put(10,0); execute(1,1);
-                setup(4,source_format,1,3);
-                // rnd 2.5: sparse samples include 0x801f; keep the target disjoint.
-                put(1,BASE+32'h1004); put(2,80); put(3,0); put(4,32'h00010012);
-                put(5,0); put(6,32'h00010012); put(8,BASE+32'h401f);
-                put(9,257); put(10,0);
-                put(11,source_format==0 ? 32'h04000000 : 32'h02000000);
-                execute(1,1);
+                sparse_case(source_format);
             end
             // Unaligned palette start and disjoint target chunks across a long row.
             setup(4,6,0,0);

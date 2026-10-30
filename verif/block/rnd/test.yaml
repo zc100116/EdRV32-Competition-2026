@@ -8,4 +8,4 @@ pass: PASS
 tier: full
 simulator: verilator
 group: verif/block/rnd
-runner: python3 verif/block/rnd/run.py smoke
+runner: python3 verif/block/rnd/run.py directed
