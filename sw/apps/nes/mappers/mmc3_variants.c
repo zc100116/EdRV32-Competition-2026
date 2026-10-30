@@ -25,7 +25,7 @@ static uint8 outer;
 static int ram_index(int bank)
 {
     /* https://www.nesdev.org/wiki/INES_Mapper_191 */
-    if (mmc_getinfo()->vrom_banks == 0)
+    if (mmc_getinfo()->mapper_number == 199 || mmc_getinfo()->vrom_banks == 0)
         return bank & 7;
     if (mmc_getinfo()->mapper_number == 191)
         return outer == 3 && (bank & 0x80) ? bank & 1 : -1;
@@ -53,6 +53,9 @@ static void sync_banks(void)
     for (int i = 0; i < 8; ++i) {
         int page = i ^ base;
         int bank = selected[i];
+        /* https://www.nesdev.org/wiki/INES_Mapper_199: unbanked CHR-RAM. */
+        if (mmc_getinfo()->mapper_number == 199)
+            bank = page;
         chr_banks[page] = bank;
         chr_writable[page] = ram_index(bank) >= 0;
         if (chr_writable[page])
