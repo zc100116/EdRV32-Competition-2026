@@ -1,0 +1,625 @@
+[23:47:51.499][RX] 
+[23:47:51.499][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:47:51.499][RX]   E         D   D   R   R   V   V      3      2 
+[23:47:51.499][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:47:51.499][RX]   E         D   D   R  R     V V       3   2    
+[23:47:51.499][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:47:51.499][RX] 
+[23:47:51.499][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:47:51.499][RX] CHIP_ID: 0xed320001
+[23:47:51.499][RX] CLK_SYS_HZ: 100000000
+[23:47:51.499][RX] ROM bytes: 16384
+[23:47:51.499][RX] SRAM bytes: 65536
+[23:47:51.499][RX] I-cache bytes: 8192
+[23:47:51.499][RX] D-cache bytes: 8192
+[23:47:51.499][RX] MEM_READY: 1
+[23:47:51.499][RX] Build commit: 9510c64
+[23:47:51.499][RX] Compiler version: GCC 15.2.0
+[23:47:51.620][RX] Boot SRAM
+[23:47:51.620][RX] Monitor: EdRV32
+[23:47:51.621][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[23:54:29.375][RX] 
+[23:54:29.375][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[23:54:29.375][RX]   E         D   D   R   R   V   V      3      2 
+[23:54:29.375][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[23:54:29.375][RX]   E         D   D   R  R     V V       3   2    
+[23:54:29.375][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[23:54:29.375][RX] 
+[23:54:29.375][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[23:54:29.375][RX] CHIP_ID: 0xed320001
+[23:54:29.375][RX] CLK_SYS_HZ: 100000000
+[23:54:29.375][RX] ROM bytes: 16384
+[23:54:29.375][RX] SRAM bytes: 65536
+[23:54:29.375][RX] I-cache bytes: 8192
+[23:54:29.375][RX] D-cache bytes: 8192
+[23:54:29.375][RX] MEM_READY: 1
+[23:54:29.375][RX] Build commit: 9510c64
+[23:54:29.375][RX] Compiler version: GCC 15.2.0
+[23:54:29.497][RX] BIOS: EdRV32
+[23:54:29.497][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:54:48.601][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[23:54:48.609][RX] Input error: type 1-4 then Enter
+[23:54:48.609][SYS] Input error: type 1-4 then Enter
+[23:54:48.609][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:54:48.611][RX] UART load ready
+[23:56:25.701][RX] Load bytes: 1119392 at 0x90000000
+[23:56:25.701][RX] Load result: PASS
+[23:56:25.701][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:56:25.703][RX] UART load ready
+[23:56:25.835][RX] Load bytes: 1408 at 0x901114a0
+[23:56:25.835][RX] Load result: PASS
+[23:56:25.836][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[23:56:25.837][RX] Run address:
+[23:56:25.840][RX] Run: 0x90000000
+[23:56:27.709][RX] S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+[23:56:27.720][RX] LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+[23:56:28.720][RX] LVGL fps=4 rnd_tasks=34 sw_tasks=0
+[23:56:29.719][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:30.719][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:31.722][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:32.719][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:33.736][RX] LVGL fps=3 rnd_tasks=12 sw_tasks=0
+[23:56:34.739][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:35.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:36.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:37.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:38.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:39.740][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:40.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:41.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:42.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:43.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:44.737][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:45.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:46.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:47.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:48.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:49.737][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:50.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:51.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:52.744][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:53.737][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:54.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:55.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:56.737][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:57.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:56:58.740][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:56:59.740][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:00.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:01.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:02.740][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:03.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:04.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:05.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:06.739][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:07.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:08.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:09.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:10.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:11.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:12.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:13.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:14.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:15.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:16.737][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:17.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:18.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:19.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:20.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:21.742][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:22.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:23.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:24.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:25.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:26.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:27.743][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:28.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:29.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:30.743][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:31.739][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:32.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:33.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:34.741][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:35.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:36.738][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:37.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:38.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:39.740][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:40.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:41.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:42.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:43.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:44.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:45.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:46.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:47.740][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:48.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:49.742][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:50.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:51.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:52.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:53.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:54.740][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:55.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:56.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:57.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:57:58.745][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:57:59.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:00.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:01.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:02.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:03.738][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:04.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:05.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:06.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:07.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:08.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:09.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:10.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:11.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:12.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:13.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:14.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:15.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:16.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:17.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:18.743][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:19.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:20.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:21.739][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:22.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:23.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:24.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:25.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:26.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:27.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:28.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:29.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:30.739][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:31.747][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:32.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:33.737][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:34.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:35.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:36.745][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:37.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:38.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:39.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:40.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:41.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:42.745][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:43.740][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:44.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:45.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:46.741][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:47.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:48.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:49.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:50.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:51.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:52.738][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:53.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:54.740][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:55.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:56.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:57.737][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:58:58.743][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:58:59.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:00.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:01.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:02.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:03.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:04.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:05.737][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:06.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:07.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:08.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:09.737][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:10.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:11.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:12.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:13.739][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:14.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:15.741][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:16.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:17.736][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[23:59:18.741][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:19.736][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:20.736][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:22.360][RX] LVGL fps=2 rnd_tasks=71 sw_tasks=0
+[23:59:23.370][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[23:59:24.370][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[23:59:25.370][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[23:59:26.370][RX] LVGL fps=4 rnd_tasks=40 sw_tasks=0
+[23:59:27.372][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[23:59:28.370][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[23:59:29.370][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:30.374][RX] LVGL fps=5 rnd_tasks=32 sw_tasks=0
+[23:59:31.372][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:32.369][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:33.370][RX] LVGL fps=5 rnd_tasks=32 sw_tasks=0
+[23:59:34.370][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[23:59:35.769][RX] GAME fps=60 rnd_ms=2.066 cpu_ms=0.222
+[23:59:36.771][RX] GAME fps=60 rnd_ms=2.060 cpu_ms=0.220
+[23:59:37.786][RX] GAME fps=60 rnd_ms=1.982 cpu_ms=0.211
+[23:59:38.803][RX] GAME fps=60 rnd_ms=1.963 cpu_ms=0.198
+[23:59:39.802][RX] GAME fps=59 rnd_ms=1.963 cpu_ms=0.202
+[23:59:40.819][RX] GAME fps=60 rnd_ms=1.963 cpu_ms=0.202
+[23:59:41.833][RX] GAME fps=60 rnd_ms=1.963 cpu_ms=0.198
+[23:59:42.830][RX] GAME fps=59 rnd_ms=1.962 cpu_ms=0.198
+[23:59:43.819][RX] GAME fps=59 rnd_ms=1.963 cpu_ms=0.201
+[23:59:44.819][RX] GAME fps=59 rnd_ms=3.058 cpu_ms=0.256
+[23:59:45.829][RX] GAME fps=59 rnd_ms=3.836 cpu_ms=0.282
+[23:59:46.840][RX] GAME fps=60 rnd_ms=3.837 cpu_ms=0.282
+[23:59:47.852][RX] GAME fps=59 rnd_ms=2.103 cpu_ms=0.213
+[23:59:48.869][RX] GAME fps=59 rnd_ms=2.044 cpu_ms=0.221
+[23:59:49.869][RX] GAME fps=59 rnd_ms=1.977 cpu_ms=0.217
+[23:59:50.886][RX] GAME fps=59 rnd_ms=1.977 cpu_ms=0.208
+[23:59:51.902][RX] GAME fps=60 rnd_ms=1.988 cpu_ms=0.211
+[23:59:52.905][RX] GAME fps=59 rnd_ms=1.936 cpu_ms=0.209
+[23:59:53.902][RX] GAME fps=59 rnd_ms=1.913 cpu_ms=0.195
+[23:59:54.904][RX] GAME fps=59 rnd_ms=1.929 cpu_ms=0.207
+[23:59:55.919][RX] GAME fps=59 rnd_ms=1.947 cpu_ms=0.209
+[23:59:56.936][RX] GAME fps=60 rnd_ms=1.932 cpu_ms=0.206
+[23:59:57.952][RX] GAME fps=60 rnd_ms=1.986 cpu_ms=0.212
+[23:59:58.969][RX] GAME fps=60 rnd_ms=1.989 cpu_ms=0.216
+[23:59:59.969][RX] GAME fps=59 rnd_ms=1.968 cpu_ms=0.211
+[00:00:00.969][RX] GAME fps=59 rnd_ms=2.603 cpu_ms=0.244
+[00:00:01.969][RX] GAME fps=59 rnd_ms=3.608 cpu_ms=0.270
+[00:00:02.969][RX] GAME fps=60 rnd_ms=2.075 cpu_ms=0.218
+[00:00:03.986][RX] GAME fps=60 rnd_ms=1.997 cpu_ms=0.215
+[00:00:04.992][RX] GAME fps=59 rnd_ms=3.311 cpu_ms=0.263
+[00:00:06.002][RX] GAME fps=59 rnd_ms=3.376 cpu_ms=0.263
+[00:00:07.019][RX] GAME fps=60 rnd_ms=2.063 cpu_ms=0.219
+[00:00:08.036][RX] GAME fps=60 rnd_ms=1.985 cpu_ms=0.218
+[00:00:09.036][RX] GAME fps=59 rnd_ms=3.154 cpu_ms=0.257
+[00:00:10.036][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:11.052][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:12.052][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:13.069][RX] GAME fps=60 rnd_ms=3.842 cpu_ms=0.282
+[00:00:14.086][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:15.089][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:16.102][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:17.102][RX] GAME fps=59 rnd_ms=3.842 cpu_ms=0.282
+[00:00:18.119][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:19.119][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:20.139][RX] GAME fps=60 rnd_ms=3.842 cpu_ms=0.282
+[00:00:21.138][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:22.136][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:23.152][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:24.152][RX] GAME fps=60 rnd_ms=3.842 cpu_ms=0.282
+[00:00:25.152][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:26.152][RX] GAME fps=59 rnd_ms=3.841 cpu_ms=0.282
+[00:00:27.169][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:28.186][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:29.186][RX] GAME fps=60 rnd_ms=3.841 cpu_ms=0.282
+[00:00:30.014][RX] 
+[00:00:30.014][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:00:30.014][RX]   E         D   D   R   R   V   V      3      2 
+[00:00:30.014][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:00:30.014][RX]   E         D   D   R  R     V V       3   2    
+[00:00:30.014][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:00:30.014][RX] 
+[00:00:30.014][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:00:30.014][RX] CHIP_ID: 0xed320001
+[00:00:30.014][RX] CLK_SYS_HZ: 100000000
+[00:00:30.014][RX] ROM bytes: 16384
+[00:00:30.014][RX] SRAM bytes: 65536
+[00:00:30.014][RX] I-cache bytes: 8192
+[00:00:30.014][RX] D-cache bytes: 8192
+[00:00:30.014][RX] MEM_READY: 1
+[00:00:30.014][RX] Build commit: 9510c64
+[00:00:30.014][RX] Compiler version: GCC 15.2.0
+[00:00:30.138][RX] BIOS: EdRV32
+[00:00:30.138][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:00:49.068][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[00:00:49.081][RX] Input error: type 1-4 then Enter
+[00:00:49.081][SYS] Input error: type 1-4 then Enter
+[00:00:49.081][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:00:49.083][RX] UART load ready
+[00:02:26.624][RX] Load bytes: 1124512 at 0x90000000
+[00:02:26.624][RX] Load result: PASS
+[00:02:26.624][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:02:26.626][RX] UART load ready
+[00:02:26.758][RX] Load bytes: 1408 at 0x901128a0
+[00:02:26.758][RX] Load result: PASS
+[00:02:26.758][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:02:26.760][RX] Run address:
+[00:02:26.763][RX] Run: 0x90000000
+[00:02:28.630][RX] S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+[00:02:28.642][RX] LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+[00:02:29.641][RX] LVGL fps=4 rnd_tasks=34 sw_tasks=0
+[00:02:30.641][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:31.641][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:32.648][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:33.641][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:34.659][RX] LVGL fps=3 rnd_tasks=12 sw_tasks=0
+[00:02:35.659][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:36.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:37.660][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:38.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:39.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:40.658][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:41.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:42.659][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:43.659][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:44.663][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:45.660][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:46.658][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:47.666][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:48.666][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:49.659][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:50.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:51.659][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:52.659][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:53.662][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:54.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:55.662][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:56.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:57.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:02:58.658][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:02:59.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:00.661][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:01.658][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:03:02.662][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:03.658][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:05.516][RX] GAME fps=59 rnd_ms=2.066 cpu_ms=0.216
+[00:03:06.509][RX] GAME fps=59 rnd_ms=2.054 cpu_ms=0.215
+[00:03:07.525][RX] GAME fps=60 rnd_ms=1.976 cpu_ms=0.204
+[00:03:08.525][RX] GAME fps=59 rnd_ms=1.979 cpu_ms=0.210
+[00:03:09.525][RX] GAME fps=59 rnd_ms=1.984 cpu_ms=0.207
+[00:03:10.542][RX] GAME fps=60 rnd_ms=1.948 cpu_ms=0.205
+[00:03:11.542][RX] GAME fps=59 rnd_ms=1.918 cpu_ms=0.191
+[00:03:12.542][RX] GAME fps=59 rnd_ms=1.923 cpu_ms=0.198
+[00:03:13.559][RX] GAME fps=60 rnd_ms=1.948 cpu_ms=0.201
+[00:03:14.575][RX] GAME fps=60 rnd_ms=1.934 cpu_ms=0.197
+[00:03:15.592][RX] GAME fps=60 rnd_ms=1.998 cpu_ms=0.206
+[00:03:16.608][RX] GAME fps=59 rnd_ms=2.002 cpu_ms=0.191
+[00:03:17.625][RX] GAME fps=60 rnd_ms=3.188 cpu_ms=0.263
+[00:03:18.628][RX] GAME fps=59 rnd_ms=4.003 cpu_ms=0.311
+[00:03:19.642][RX] GAME fps=60 rnd_ms=2.946 cpu_ms=0.247
+[00:03:20.658][RX] GAME fps=60 rnd_ms=4.079 cpu_ms=0.317
+[00:03:21.808][RX] LVGL fps=0 rnd_tasks=59 sw_tasks=0
+[00:03:22.809][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:24.025][RX] GAME fps=59 rnd_ms=2.107 cpu_ms=0.221
+[00:03:25.042][RX] GAME fps=60 rnd_ms=4.183 cpu_ms=0.339
+[00:03:26.059][RX] GAME fps=60 rnd_ms=3.146 cpu_ms=0.274
+[00:03:27.058][RX] GAME fps=60 rnd_ms=4.183 cpu_ms=0.339
+[00:03:27.875][RX] LVGL fps=0 rnd_tasks=53 sw_tasks=0
+[00:03:28.908][RX] LVGL fps=3 rnd_tasks=29 sw_tasks=0
+[00:03:29.910][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:03:30.908][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:32.076][RX] LVGL fps=1 rnd_tasks=65 sw_tasks=0
+[00:03:33.093][RX] LVGL fps=4 rnd_tasks=29 sw_tasks=0
+[00:03:34.092][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[00:03:35.092][RX] LVGL fps=3 rnd_tasks=18 sw_tasks=0
+[00:03:36.093][RX] LVGL fps=6 rnd_tasks=34 sw_tasks=0
+[00:03:37.092][RX] LVGL fps=5 rnd_tasks=28 sw_tasks=0
+[00:03:38.092][RX] LVGL fps=4 rnd_tasks=99 sw_tasks=120
+[00:03:39.110][RX] LVGL fps=5 rnd_tasks=122 sw_tasks=45
+[00:03:40.115][RX] LVGL fps=4 rnd_tasks=106 sw_tasks=58
+[00:03:41.109][RX] LVGL fps=5 rnd_tasks=220 sw_tasks=157
+[00:03:42.109][RX] LVGL fps=4 rnd_tasks=30 sw_tasks=0
+[00:03:43.110][RX] LVGL fps=6 rnd_tasks=34 sw_tasks=0
+[00:03:44.242][RX] LVGL fps=6 rnd_tasks=60 sw_tasks=0
+[00:03:45.309][RX] LVGL fps=3 rnd_tasks=32 sw_tasks=0
+[00:03:46.308][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:03:50.179][RX] LVGL split scene="Empty screen" frames=97 render_ms=17.073 rnd_ms=5.691 sw_ms=0.000 other_ms=11.381 doorbells=6.000 commands=79.979 sw_tasks=0.000 perf0_cycles=304664.206 perf1_pixels=997369.752 perf2_rd_beats=3258.474 perf3_wr_beats=63234.804 perf4_rd_wait_cycles=79159.948 perf5_wr_wait_cycles=28754.597 perf0_ms=2.437 draw_rnd_ms=5.691 draw_doorbells=6.000 draw_perf0_cycles=304664.206 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=377266489 xbar_rnd_p4_rd_txn_total=203711 xbar_rnd_p4_wr_txn_total=471073 xbar_rnd_p4_rd_beats_total=316072 xbar_rnd_p4_wr_beats_total=6133776 xbar_rnd_p4_wait_sum_cycles_total=2456940 xbar_disp_p0_rd_txn_total=651840 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10429440 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2315103
+[00:03:53.182][RX] LVGL split scene="Moving wallpaper" frames=58 render_ms=43.433 rnd_ms=27.702 sw_ms=0.000 other_ms=15.731 doorbells=112.689 commands=190.551 sw_tasks=0.000 perf0_cycles=1306223.724 perf1_pixels=1919823.172 perf2_rd_beats=132529.551 perf3_wr_beats=127429.448 perf4_rd_wait_cycles=604821.137 perf5_wr_wait_cycles=431423.586 perf0_ms=10.449 draw_rnd_ms=27.702 draw_doorbells=112.689 draw_perf0_cycles=1306223.724 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=365979268 xbar_rnd_p4_rd_txn_total=1241230 xbar_rnd_p4_wr_txn_total=848596 xbar_rnd_p4_rd_beats_total=7686714 xbar_rnd_p4_wr_beats_total=7390908 xbar_rnd_p4_wait_sum_cycles_total=7265209 xbar_disp_p0_rd_txn_total=632415 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10118640 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2259670
+[00:03:56.179][RX] LVGL split scene="Single rectangle" frames=165 render_ms=3.325 rnd_ms=0.611 sw_ms=0.000 other_ms=2.714 doorbells=1.715 commands=6.442 sw_tasks=0.000 perf0_cycles=31786.484 perf1_pixels=98724.593 perf2_rd_beats=781.321 perf3_wr_beats=6494.012 perf4_rd_wait_cycles=5083.236 perf5_wr_wait_cycles=1838.248 perf0_ms=0.254 draw_rnd_ms=0.552 draw_doorbells=1.472 draw_perf0_cycles=28455.466 copy_rnd_ms=0.059 copy_doorbells=0.242 copy_perf0_cycles=3331.018 copy_perf0_ms=0.026 xbar_window_cycles=365734776 xbar_rnd_p4_rd_txn_total=28666 xbar_rnd_p4_wr_txn_total=91391 xbar_rnd_p4_rd_beats_total=128918 xbar_rnd_p4_wr_beats_total=1071512 xbar_rnd_p4_wait_sum_cycles_total=531549 xbar_disp_p0_rd_txn_total=631980 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10111680 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2223134
+[00:03:59.182][RX] LVGL split scene="Multiple rectangles" frames=154 render_ms=14.604 rnd_ms=2.537 sw_ms=0.000 other_ms=12.067 doorbells=10.779 commands=16.038 sw_tasks=0.000 perf0_cycles=147177.493 perf1_pixels=494793.694 perf2_rd_beats=736.753 perf3_wr_beats=31388.077 perf4_rd_wait_cycles=5839.623 perf5_wr_wait_cycles=2136.980 perf0_ms=1.177 draw_rnd_ms=2.473 draw_doorbells=10.500 draw_perf0_cycles=143868.123 copy_rnd_ms=0.063 copy_doorbells=0.279 copy_perf0_cycles=3309.370 copy_perf0_ms=0.026 xbar_window_cycles=366250591 xbar_rnd_p4_rd_txn_total=30859 xbar_rnd_p4_wr_txn_total=505409 xbar_rnd_p4_rd_beats_total=113460 xbar_rnd_p4_wr_beats_total=4833764 xbar_rnd_p4_wait_sum_cycles_total=1988505 xbar_disp_p0_rd_txn_total=632848 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10125568 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2272892
+[00:04:02.202][RX] LVGL split scene="Multiple RGB images" frames=55 render_ms=43.740 rnd_ms=10.724 sw_ms=0.000 other_ms=33.016 doorbells=27.000 commands=106.309 sw_tasks=0.000 perf0_cycles=538553.709 perf1_pixels=1208045.290 perf2_rd_beats=32971.490 perf3_wr_beats=78113.545 perf4_rd_wait_cycles=204597.563 perf5_wr_wait_cycles=123748.545 perf0_ms=4.308 draw_rnd_ms=10.724 draw_doorbells=27.000 draw_perf0_cycles=538553.709 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=368255027 xbar_rnd_p4_rd_txn_total=365130 xbar_rnd_p4_wr_txn_total=395290 xbar_rnd_p4_rd_beats_total=1813432 xbar_rnd_p4_wr_beats_total=4296245 xbar_rnd_p4_wait_sum_cycles_total=2687041 xbar_disp_p0_rd_txn_total=636305 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10180880 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2288475
+[00:04:05.219][RX] LVGL split scene="Multiple ARGB images" frames=55 render_ms=43.336 rnd_ms=10.769 sw_ms=0.000 other_ms=32.566 doorbells=27.000 commands=106.818 sw_tasks=0.000 perf0_cycles=546040.381 perf1_pixels=1208043.763 perf2_rd_beats=45570.836 perf3_wr_beats=78104.745 perf4_rd_wait_cycles=211939.818 perf5_wr_wait_cycles=125480.290 perf0_ms=4.368 draw_rnd_ms=10.769 draw_doorbells=27.000 draw_perf0_cycles=546040.381 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=367869740 xbar_rnd_p4_rd_txn_total=377473 xbar_rnd_p4_wr_txn_total=395663 xbar_rnd_p4_rd_beats_total=2506396 xbar_rnd_p4_wr_beats_total=4295761 xbar_rnd_p4_wait_sum_cycles_total=2782705 xbar_disp_p0_rd_txn_total=635615 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10169840 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2284270
+[00:04:08.366][RX] LVGL split scene="Rotated ARGB images" frames=13 render_ms=223.403 rnd_ms=6.099 sw_ms=188.580 other_ms=28.723 doorbells=25.153 commands=68.846 sw_tasks=10.000 perf0_cycles=189497.307 perf1_pixels=416878.461 perf2_rd_beats=8042.846 perf3_wr_beats=27994.461 perf4_rd_wait_cycles=46826.461 perf5_wr_wait_cycles=17006.307 perf0_ms=1.515 draw_rnd_ms=4.117 draw_doorbells=12.923 draw_perf0_cycles=144588.615 copy_rnd_ms=1.981 copy_doorbells=12.230 copy_perf0_cycles=44908.692 copy_perf0_ms=0.359 xbar_window_cycles=384323925 xbar_rnd_p4_rd_txn_total=23011 xbar_rnd_p4_wr_txn_total=38618 xbar_rnd_p4_rd_beats_total=104557 xbar_rnd_p4_wr_beats_total=363928 xbar_rnd_p4_wait_sum_cycles_total=273432 xbar_disp_p0_rd_txn_total=664030 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10624480 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2371620
+[00:04:11.465][RX] LVGL split scene="Multiple labels" frames=28 render_ms=90.768 rnd_ms=21.919 sw_ms=0.000 other_ms=68.849 doorbells=58.000 commands=308.035 sw_tasks=0.000 perf0_cycles=655028.071 perf1_pixels=794779.142 perf2_rd_beats=32622.821 perf3_wr_beats=55211.214 perf4_rd_wait_cycles=363530.214 perf5_wr_wait_cycles=129127.785 perf0_ms=5.240 draw_rnd_ms=18.243 draw_doorbells=38.750 draw_perf0_cycles=513956.285 copy_rnd_ms=3.675 copy_doorbells=19.250 copy_perf0_cycles=141071.785 copy_perf0_ms=1.128 xbar_window_cycles=378144580 xbar_rnd_p4_rd_txn_total=314956 xbar_rnd_p4_wr_txn_total=229018 xbar_rnd_p4_rd_beats_total=913439 xbar_rnd_p4_wr_beats_total=1545914 xbar_rnd_p4_wait_sum_cycles_total=2199809 xbar_disp_p0_rd_txn_total=653360 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10453760 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2345017
+[00:04:16.765][RX] LVGL split scene="Screen sized text" frames=18 render_ms=272.805 rnd_ms=81.221 sw_ms=0.000 other_ms=191.583 doorbells=56.277 commands=1681.222 sw_tasks=0.000 perf0_cycles=2377220.722 perf1_pixels=1276684.500 perf2_rd_beats=69574.222 perf3_wr_beats=103002.333 perf4_rd_wait_cycles=1907308.722 perf5_wr_wait_cycles=668613.722 perf0_ms=19.017 draw_rnd_ms=81.221 draw_doorbells=56.277 draw_perf0_cycles=2377220.722 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=653172201 xbar_rnd_p4_rd_txn_total=908932 xbar_rnd_p4_wr_txn_total=509500 xbar_rnd_p4_rd_beats_total=1252336 xbar_rnd_p4_wr_beats_total=1854042 xbar_rnd_p4_wait_sum_cycles_total=4479808 xbar_disp_p0_rd_txn_total=1128655 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=18058480 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=4040881
+[00:04:19.828][RX] LVGL split scene="Multiple arcs" frames=22 render_ms=112.085 rnd_ms=5.820 sw_ms=78.025 other_ms=28.239 doorbells=6.000 commands=83.090 sw_tasks=26.681 perf0_cycles=308459.318 perf1_pixels=997092.818 perf2_rd_beats=3387.909 perf3_wr_beats=63309.454 perf4_rd_wait_cycles=83190.272 perf5_wr_wait_cycles=30136.863 perf0_ms=2.467 draw_rnd_ms=5.820 draw_doorbells=6.000 draw_perf0_cycles=308459.318 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=373158446 xbar_rnd_p4_rd_txn_total=48382 xbar_rnd_p4_wr_txn_total=107884 xbar_rnd_p4_rd_beats_total=74534 xbar_rnd_p4_wr_beats_total=1392808 xbar_rnd_p4_wait_sum_cycles_total=566562 xbar_disp_p0_rd_txn_total=644835 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10317360 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2317667
+[00:04:22.933][RX] LVGL split scene="Containers" frames=15 render_ms=185.656 rnd_ms=89.015 sw_ms=0.000 other_ms=96.641 doorbells=94.933 commands=377.933 sw_tasks=0.000 perf0_cycles=8408399.866 perf1_pixels=1268047.333 perf2_rd_beats=239314.533 perf3_wr_beats=94218.400 perf4_rd_wait_cycles=424649.933 perf5_wr_wait_cycles=356624.266 perf0_ms=67.267 draw_rnd_ms=87.435 draw_doorbells=85.066 draw_perf0_cycles=8374635.866 copy_rnd_ms=1.580 copy_doorbells=9.866 copy_perf0_cycles=33764.000 copy_perf0_ms=0.270 xbar_window_cycles=379551993 xbar_rnd_p4_rd_txn_total=2683205 xbar_rnd_p4_wr_txn_total=287152 xbar_rnd_p4_rd_beats_total=3589718 xbar_rnd_p4_wr_beats_total=1413276 xbar_rnd_p4_wait_sum_cycles_total=9423753 xbar_disp_p0_rd_txn_total=655740 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10491840 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2355806
+[00:04:25.967][RX] LVGL split scene="Containers with overlay" frames=14 render_ms=191.918 rnd_ms=92.401 sw_ms=0.000 other_ms=99.517 doorbells=103.714 commands=395.857 sw_tasks=0.000 perf0_cycles=8672102.500 perf1_pixels=1734449.857 perf2_rd_beats=266906.285 perf3_wr_beats=124472.000 perf4_rd_wait_cycles=464513.357 perf5_wr_wait_cycles=479028.785 perf0_ms=69.376 draw_rnd_ms=90.821 draw_doorbells=93.857 draw_perf0_cycles=8638142.142 copy_rnd_ms=1.579 copy_doorbells=9.857 copy_perf0_cycles=33960.357 copy_perf0_ms=0.271 xbar_window_cycles=369946291 xbar_rnd_p4_rd_txn_total=2544817 xbar_rnd_p4_wr_txn_total=307810 xbar_rnd_p4_rd_beats_total=3736688 xbar_rnd_p4_wr_beats_total=1742608 xbar_rnd_p4_wait_sum_cycles_total=9126421 xbar_disp_p0_rd_txn_total=639200 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10227200 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2297126
+[00:04:29.083][RX] LVGL split scene="Containers with opa" frames=18 render_ms=155.845 rnd_ms=28.558 sw_ms=29.913 other_ms=97.373 doorbells=85.888 commands=370.111 sw_tasks=9.000 perf0_cycles=944118.222 perf1_pixels=1205419.611 perf2_rd_beats=70270.333 perf3_wr_beats=83597.055 perf4_rd_wait_cycles=402821.944 perf5_wr_wait_cycles=337996.833 perf0_ms=7.552 draw_rnd_ms=26.988 draw_doorbells=75.944 draw_perf0_cycles=912762.777 copy_rnd_ms=1.570 copy_doorbells=9.944 copy_perf0_cycles=31355.444 copy_perf0_ms=0.250 xbar_window_cycles=380203837 xbar_rnd_p4_rd_txn_total=265556 xbar_rnd_p4_wr_txn_total=224473 xbar_rnd_p4_rd_beats_total=1264866 xbar_rnd_p4_wr_beats_total=1504747 xbar_rnd_p4_wait_sum_cycles_total=1832860 xbar_disp_p0_rd_txn_total=656915 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10510640 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2362564
+[00:04:32.152][RX] LVGL split scene="Containers with opa_layer" frames=8 render_ms=354.951 rnd_ms=166.457 sw_ms=0.000 other_ms=188.493 doorbells=171.375 commands=555.875 sw_tasks=0.000 perf0_cycles=16271457.375 perf1_pixels=1667483.125 perf2_rd_beats=507443.375 perf3_wr_beats=173617.625 perf4_rd_wait_cycles=682459.500 perf5_wr_wait_cycles=631406.375 perf0_ms=130.171 draw_rnd_ms=164.868 draw_doorbells=161.750 draw_perf0_cycles=16232684.875 copy_rnd_ms=1.589 copy_doorbells=9.625 copy_perf0_cycles=38772.500 copy_perf0_ms=0.310 xbar_window_cycles=374062009 xbar_rnd_p4_rd_txn_total=2816058 xbar_rnd_p4_wr_txn_total=251952 xbar_rnd_p4_rd_beats_total=4059547 xbar_rnd_p4_wr_beats_total=1388941 xbar_rnd_p4_wait_sum_cycles_total=10711595 xbar_disp_p0_rd_txn_total=646310 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=10340960 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2327256
+[00:04:37.318][RX] LVGL split scene="Containers with scrolling" frames=12 render_ms=265.324 rnd_ms=144.698 sw_ms=0.000 other_ms=120.626 doorbells=129.500 commands=612.000 sw_tasks=0.000 perf0_cycles=13928828.666 perf1_pixels=2214138.333 perf2_rd_beats=384542.000 perf3_wr_beats=160687.000 perf4_rd_wait_cycles=692955.833 perf5_wr_wait_cycles=566081.166 perf0_ms=111.430 draw_rnd_ms=144.698 draw_doorbells=129.500 draw_perf0_cycles=13928828.666 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=636293391 xbar_rnd_p4_rd_txn_total=3560713 xbar_rnd_p4_wr_txn_total=360433 xbar_rnd_p4_rd_beats_total=4614504 xbar_rnd_p4_wr_beats_total=1928244 xbar_rnd_p4_wait_sum_cycles_total=12358972 xbar_disp_p0_rd_txn_total=1099425 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=17590800 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=3951315
+[00:04:57.521][RX] LVGL split scene="Widgets demo" frames=93 render_ms=177.215 rnd_ms=24.587 sw_ms=63.167 other_ms=89.459 doorbells=66.741 commands=198.666 sw_tasks=84.548 perf0_cycles=1446952.311 perf1_pixels=2394723.408 perf2_rd_beats=100770.989 perf3_wr_beats=154771.763 perf4_rd_wait_cycles=305488.698 perf5_wr_wait_cycles=428678.096 perf0_ms=11.575 draw_rnd_ms=24.363 draw_doorbells=66.075 draw_perf0_cycles=1430447.989 copy_rnd_ms=0.224 copy_doorbells=0.666 copy_perf0_cycles=16504.322 copy_perf0_ms=0.132 xbar_window_cycles=2516100462 xbar_rnd_p4_rd_txn_total=1526665 xbar_rnd_p4_wr_txn_total=1265133 xbar_rnd_p4_rd_beats_total=9371702 xbar_rnd_p4_wr_beats_total=14393774 xbar_rnd_p4_wait_sum_cycles_total=11719117 xbar_disp_p0_rd_txn_total=4347765 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=69564240 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=15611720
+[00:04:57.637][RX] LVGL split scene="ALL" frames=825 render_ms=67.110 rnd_ms=17.713 sw_ms=12.825 other_ms=36.571 doorbells=34.764 commands=150.078 sw_tasks=10.596 perf0_cycles=1163236.655 perf1_pixels=1010516.675 perf2_rd_beats=50359.858 perf3_wr_beats=67333.633 perf4_rd_wait_cycles=214138.656 perf5_wr_wait_cycles=155802.996 perf0_ms=9.305 draw_rnd_ms=17.402 draw_doorbells=33.086 draw_perf0_cycles=1152346.390 copy_rnd_ms=0.310 copy_doorbells=1.678 copy_perf0_cycles=10890.265 copy_perf0_ms=0.087 xbar_window_cycles=8656313026 xbar_rnd_p4_rd_txn_total=16939364 xbar_rnd_p4_wr_txn_total=6289395 xbar_rnd_p4_rd_beats_total=41546883 xbar_rnd_p4_wr_beats_total=55550248 xbar_rnd_p4_wait_sum_cycles_total=80404278 xbar_disp_p0_rd_txn_total=14957238 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=239315808 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=53624516
+[00:04:57.637][RX] LVGL benchmark scene=Empty screen fps=32
+[00:04:57.637][RX] LVGL benchmark scene=Moving wallpaper fps=19
+[00:04:57.637][RX] LVGL benchmark scene=Single rectangle fps=55
+[00:04:57.681][RX] LVGL benchmark scene=Multiple rectangles fps=52
+[00:04:57.681][RX] LVGL benchmark scene=Multiple RGB images fps=18
+[00:04:57.681][RX] LVGL benchmark scene=Multiple ARGB images fps=18
+[00:04:57.681][RX] LVGL benchmark scene=Rotated ARGB images fps=4
+[00:04:57.681][RX] LVGL benchmark scene=Multiple labels fps=12
+[00:04:57.681][RX] LVGL benchmark scene=Screen sized text fps=3
+[00:04:57.681][RX] LVGL benchmark scene=Multiple arcs fps=7
+[00:04:57.681][RX] LVGL benchmark scene=Containers fps=4
+[00:04:57.681][RX] LVGL benchmark scene=Containers with overlay fps=4
+[00:04:57.681][RX] LVGL benchmark scene=Containers with opa fps=5
+[00:04:57.681][RX] LVGL benchmark scene=Containers with opa_layer fps=2
+[00:04:57.726][RX] LVGL benchmark scene=Containers with scrolling fps=3
+[00:04:57.726][RX] LVGL benchmark scene=Widgets demo fps=11
+[00:04:57.726][RX] LVGL benchmark average fps=15
+[00:04:57.726][RX] RND type=1 claimed=9352 unclaimed=0
+[00:04:57.726][RX] RND type=2 claimed=1459 unclaimed=0
+[00:04:57.726][RX] RND type=3 claimed=610 unclaimed=162
+[00:04:57.726][RX] RND type=4 claimed=0 unclaimed=0
+[00:04:57.726][RX] RND type=5 claimed=8414 unclaimed=0
+[00:04:57.726][RX] RND type=6 claimed=3154 unclaimed=170
+[00:04:57.726][RX] RND type=7 claimed=144 unclaimed=0
+[00:04:57.726][RX] RND type=8 claimed=0 unclaimed=7372
+[00:04:57.726][RX] RND type=9 claimed=0 unclaimed=1164
+[00:04:57.726][RX] RND type=10 claimed=0 unclaimed=254
+[00:04:57.742][RX] RND type=11 claimed=0 unclaimed=0
+[00:04:57.742][RX] RND type=12 claimed=0 unclaimed=0
+[00:04:57.742][RX] RND type=13 claimed=0 unclaimed=0
+[00:04:57.742][RX] RND type=14 claimed=0 unclaimed=0
+[00:04:57.742][RX] RND type=15 claimed=0 unclaimed=0
+[00:04:57.742][RX] RND batch=32 commands=132349 doorbells=28803
+[00:04:57.909][RX] Benchmark Summary (9.6.0 )
+[00:04:57.909][RX] Name, Avg. CPU, Avg. FPS, Avg. time, render time, flush time
+[00:04:57.917][RX] Empty screen, 96%, 32, 28, 15, 13
+[00:04:57.922][RX] Moving wallpaper, 100%, 19, 47, 42, 5
+[00:04:57.928][RX] Single rectangle, 100%, 55, 15, 2, 13
+[00:04:57.934][RX] Multiple rectangles, 100%, 52, 15, 13, 2
+[00:04:57.941][RX] Multiple RGB images, 99%, 18, 40, 36, 4
+[00:04:57.948][RX] Multiple ARGB images, 99%, 18, 40, 36, 4
+[00:04:57.956][RX] Rotated ARGB images, 99%, 4, 220, 214, 6
+[00:04:57.963][RX] Multiple labels, 99%, 12, 85, 80, 5
+[00:04:57.973][RX] Screen sized text, 99%, 3, 279, 271, 8
+[00:04:57.980][RX] Multiple arcs, 100%, 7, 125, 116, 9
+[00:04:57.989][RX] Containers, 100%, 4, 173, 165, 8
+[00:04:57.999][RX] Containers with overlay, 100%, 4, 180, 171, 9
+[00:04:58.010][RX] Containers with opa, 100%, 5, 141, 136, 5
+[00:04:58.022][RX] Containers with opa_layer, 100%, 2, 332, 328, 4
+[00:04:58.034][RX] Containers with scrolling, 100%, 3, 270, 263, 7
+[00:04:58.045][RX] Widgets demo, 98%, 11, 181, 172, 9
+[00:04:58.049][RX] All scenes avg.,99%, 15, 134, 128, 6
+[00:04:58.209][RX] LVGL fps=11 rnd_tasks=19964 sw_tasks=8742
+[00:04:59.209][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:00.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:01.210][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:02.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:03.212][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:04.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:05.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:06.212][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:07.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:08.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:09.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:10.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:11.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:12.210][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:13.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:14.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:15.209][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:16.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:17.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:18.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:19.211][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:20.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:21.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:22.214][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:23.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:24.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:25.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:26.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:27.212][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:28.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:29.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:30.213][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:31.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:32.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:33.211][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:34.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:35.211][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:36.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:37.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:38.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:39.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:40.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:41.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:42.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:43.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:44.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:45.208][RX] LVGL fps=4 rnd_tasks=68 sw_tasks=0
+[00:05:46.208][RX] LVGL fps=3 rnd_tasks=51 sw_tasks=0
+[00:05:47.208][RX] LVGL fps=4 rnd_tasks=48 sw_tasks=0
+[00:05:48.210][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:05:49.258][RX] LVGL fps=3 rnd_tasks=29 sw_tasks=0
+[00:05:50.261][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:05:54.119][RX] RN-17 full_max_lsb=0 edge_max_lsb=17 over1=1038 pixels=921600 over1_ppm=1126 bins_0_1_2_3to4_5plus=905385,15177,946,56,36 rnd_tasks=25 sw_tasks=0 PASS
+[00:05:54.119][RX] RND type=1 claimed=12029 unclaimed=6
+[00:05:54.119][RX] RND type=2 claimed=3449 unclaimed=4
+[00:05:54.119][RX] RND type=3 claimed=610 unclaimed=162
+[00:05:54.119][RX] RND type=4 claimed=0 unclaimed=0
+[00:05:54.119][RX] RND type=5 claimed=9158 unclaimed=15
+[00:05:54.119][RX] RND type=6 claimed=3154 unclaimed=170
+[00:05:54.119][RX] RND type=7 claimed=144 unclaimed=0
+[00:05:54.119][RX] RND type=8 claimed=0 unclaimed=7372
+[00:05:54.119][RX] RND type=9 claimed=0 unclaimed=1164
+[00:05:54.148][RX] RND type=10 claimed=0 unclaimed=254
+[00:05:54.148][RX] RND type=11 claimed=0 unclaimed=0
+[00:05:54.148][RX] RND type=12 claimed=0 unclaimed=0
+[00:05:54.148][RX] RND type=13 claimed=0 unclaimed=0
+[00:05:54.148][RX] RND type=14 claimed=0 unclaimed=0
+[00:05:54.148][RX] RND type=15 claimed=0 unclaimed=0
+[00:05:54.148][RX] RND batch=32 commands=147420 doorbells=31979
+[00:05:54.148][RX] RN-17 type=1 claimed=6 unclaimed=0
+[00:05:54.148][RX] RN-17 type=2 claimed=4 unclaimed=0
+[00:05:54.148][RX] RN-17 type=5 claimed=15 unclaimed=0
+[00:05:55.158][RX] LVGL fps=5 rnd_tasks=37 sw_tasks=0
+[00:05:56.158][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:05:57.161][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:05:58.158][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:05:59.158][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:06:00.158][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:06:01.164][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:06:02.158][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:06:03.158][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:06:04.168][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:06:04.914][SYS] disconnected COM7
+[00:06:12.429][SYS] connected COM7 @ 115200 8N1
+[00:06:13.175][RX] LVGL fps=4 rnd_tasks=12 sw_tasks=0
+[00:06:14.166][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:06:15.158][RX] LVGL fps=3 rnd_tasks=9 sw_tasks=0
+[00:06:16.158][RX] LVGL fps=5 rnd_tasks=32 sw_tasks=0
+[00:06:17.904][RX] 
+[00:06:17.904][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:06:17.904][RX]   E         D   D   R   R   V   V      3      2 
+[00:06:17.904][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:06:17.905][RX]   E         D   D   R  R     V V       3   2    
+[00:06:17.905][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:06:17.905][RX] 
+[00:06:18.104][RX]   EdRV32 Boot R�
+[00:06:18.105][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:06:18.105][RX]   E         D   D   R   R   V   V      3      2 
+[00:06:18.105][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:06:18.105][RX]   E         D   D   R  R     V V       3   2    
+[00:06:18.105][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:06:18.105][RX] 
+[00:06:18.105][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:06:18.105][RX] CHIP_ID: 0xed320001
+[00:06:18.105][RX] CLK_SYS_HZ: 100000000
+[00:06:18.105][RX] ROM bytes: 16384
+[00:06:18.105][RX] SRAM bytes: 65536
+[00:06:18.105][RX] I-cache bytes: 8192
+[00:06:18.105][RX] D-cache bytes: 8192
+[00:06:18.105][RX] MEM_READY: 1
+[00:06:18.105][RX] Build commit: 9510c64
+[00:06:18.105][RX] Compiler version: GCC 15.2.0
+[00:06:18.210][RX] Boot SRAM
+[00:06:18.210][RX] Monitor: EdRV32
+[00:06:18.210][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:06:25.720][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[00:06:25.729][RX] Input error: type 1, 2 or 3 then Enter
+[00:06:25.729][SYS] Input error: type 1, 2 or 3 then Enter
+[00:06:25.729][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:06:49.435][RX] 
+[00:06:49.435][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:06:49.435][RX]   E         D   D   R   R   V   V      3      2 
+[00:06:49.435][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:06:49.435][RX]   E         D   D   R  R     V V       3   2    
+[00:06:49.435][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:06:49.435][RX] 
+[00:06:49.435][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:06:49.435][RX] CHIP_ID: 0xed320001
+[00:06:49.435][RX] CLK_SYS_HZ: 100000000
+[00:06:49.435][RX] ROM bytes: 16384
+[00:06:49.435][RX] SRAM bytes: 65536
+[00:06:49.435][RX] I-cache bytes: 8192
+[00:06:49.435][RX] D-cache bytes: 8192
+[00:06:49.435][RX] MEM_READY: 1
+[00:06:49.435][RX] Build commit: 9510c64
+[00:06:49.435][RX] Compiler version: GCC 15.2.0
+[00:06:49.539][RX] BIOS: EdRV32
+[00:06:49.539][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:06:49.541][RX] UART load ready
+[00:07:06.407][RX] Load bytes: 194356 at 0x90000000
+[00:07:06.407][RX] Load result: PASS
+[00:07:06.407][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:07:06.409][RX] UART load ready
+[00:07:06.800][RX] Load bytes: 4384 at 0x9002f738
+[00:07:06.800][RX] Load result: PASS
+[00:07:06.800][RX] BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+[00:07:06.801][RX] Run address:
+[00:07:06.804][RX] Run: 0x90000000
+[00:07:07.130][RX] NES ROM slot empty or invalid: 00 00 00 00
