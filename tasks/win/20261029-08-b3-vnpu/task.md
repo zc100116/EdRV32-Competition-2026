@@ -52,7 +52,7 @@
 | 0 | Windows Codex（C） | 在 b3 检出中 `git fetch origin`，`git switch -c win/20261029-08-b3-vnpu origin/zc100116/b3`，`git submodule update --init`。阅读本卡和 `fpga/rtl/README.md` 的 B3 各节，把用户步骤整理成清单交给用户。 |
 | 1 | 用户（U） | 新建 B3VN 工程（PG2L200H-6 / FBB676），按第 4 节复制 IP，告诉 Codex IP 目录。 |
 | 2 | Windows Codex（C） | 检查 ROM/SRAM `.idf` 的初始化文件是新 BIOS 版本（与本卡 `src/` 一致）。不一致时停下，写进 `result.md`。 |
-| 3 | 用户（U），或 Codex 在 PDS 控制台 | `source <b3 检出>/fpga/scripts/import_board_vnpu_top.tcl`，把 N 告诉 Codex。编译报错就停下，把报错原文交给 Codex。 |
+| 3 | 用户（U），或 Codex 在 PDS 控制台 | 在 PDS Tcl 控制台，当前目录为工程目录（`G:\codex_project\EdRV32-FPGA\EdRV32-B3VN`），执行 `source ../../EdRV32-Competition-2026/fpga/scripts/import_board_vnpu_top.tcl`，把 N 告诉 Codex（预期 144）。脚本按工程目录定位仓库，不需要手动改脚本。编译报错就停下，把报错原文交给 Codex。 |
 | 4 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`，记录每一步的耗时。任何一步报错就停下，回传报错原文和第 6 节中已经取得的产物。 |
 | 5 | Windows Codex（C） | **确认约束生效**：clk_sys 10 ns、clk_mem 8 ns、clk_pix 13.468 ns、clk_serial、clk_npu 6.667 ns、cam0/1、clk_eth、DDR IP 内部时钟；时钟组中有 `rst_clk`、`phy_dq_clk_0`、`phy_dq_clk_1`。`create_generated_clock` 不能报找不到对象。setup 违例照常继续，写明即可。 |
 | 6 | 用户（U） | 接好 HDMI、串口、两路摄像头和网线，下载 bitstream，告诉 Codex COM 口号。 |

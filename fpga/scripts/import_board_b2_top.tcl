@@ -1,10 +1,14 @@
 # File: import_board_b2_top.tcl
 # Spec: board-plan B2-2; CLAUDE.md 8, 10.
 # In the open PG2L200H-6/FBB676 PDS project, generate the IPs from fpga/ip first.
-# Then source this script; checkout location comes from the script itself.
-set edrv32_repo [file normalize [file join [file dirname [info script]] ../..]]
+# Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
+# The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
+set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
+puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_board_b2_top
-set edrv32_include_dirs [list [file join $edrv32_repo rtl include] [file normalize .]]
+# PDS adds the project directory; pass only the repository header directory.
+set edrv32_include_dirs [file join $edrv32_repo rtl include]
+puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 
 # Filelists use -f, +incdir+ and source tokens, with # comments. Resolve each

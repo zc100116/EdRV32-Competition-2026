@@ -7,14 +7,14 @@
 # This imports sources/constraints and compiles with FPGA_MODE; run synthesis and
 # implementation afterwards in PDS to measure hierarchical resources and timing.
 
+# Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
+# The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_media_top
-# Match the include list used by the successful CPU project. Keep both the
-# source header directory and the current FPGA project directory explicit.
-set edrv32_include_dirs [list \
-    [file join $edrv32_repo rtl include] \
-    [file normalize .]]
+# PDS adds the project directory; pass only the repository header directory.
+set edrv32_include_dirs [file join $edrv32_repo rtl include]
+puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 
 # Source paths are relative to their filelist; include paths are set above.

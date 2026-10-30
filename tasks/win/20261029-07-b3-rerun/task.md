@@ -27,7 +27,7 @@
   |---|---|---|---|
   | B3V | `fpga/constraints/edrv32_fpga_board_vision_top.fdc` | `fpga/scripts/import_board_vision_top.tcl` | 112 |
   | B3R | `fpga/constraints/edrv32_fpga_board_render_top.fdc` | `fpga/scripts/import_board_render_top.tcl` | 86 |
-  | B3F | `fpga/constraints/edrv32_fpga_board_b2_top.fdc` | `fpga/scripts/import_board_b2_top.tcl` | 173 |
+  | B3F | `fpga/constraints/edrv32_fpga_board_b2_top.fdc` | `fpga/scripts/import_board_b2_top.tcl` | 162（原写 173 有误） |
 
 - 本卡 `src/`：在 Linux 端从 9510c64 构建，与 20261029-03/05 的 `src/` 相同（BIOS 和监控程序此后没有改动）。
 
@@ -69,7 +69,7 @@
 | 0 | Windows Codex（C） | 在 b3 检出中 `git fetch origin`，`git switch -c win/20261029-07-b3-rerun origin/zc100116/b3`，`git submodule update --init`。阅读本卡和 `fpga/rtl/README.md` 的 B3 各节，把用户步骤整理成清单交给用户。 |
 | 1 | 用户（U） | 新建三个工程（PG2L200H-6 / FBB676），按第 4 节复制 IP，告诉 Codex 三个工程的 IP 目录。 |
 | 2 | Windows Codex（C） | 检查三个工程 ROM/SRAM `.idf` 的初始化文件是新 BIOS 版本（与本卡 `src/` 一致）；RND 两个 IP 的端口与 `rtl/tech/edrv32_ram_rnd_line.v`、`edrv32_ram_rnd_palette.v` 一致。不一致时停下，写进 `result.md`。 |
-| 3 | 用户（U），或 Codex 在 PDS 控制台 | 在各工程 `source` 第 2 节对应的导入脚本，把 N 告诉 Codex。编译报错就停下，把报错原文交给 Codex。 |
+| 3 | 用户（U），或 Codex 在 PDS 控制台 | 在各工程的 PDS Tcl 控制台，当前目录为工程目录（`G:\codex_project\EdRV32-FPGA\<工程>`），执行 `source ../../EdRV32-Competition-2026/fpga/scripts/<第 2 节的脚本>`，把 N 告诉 Codex。脚本按工程目录定位仓库（2026-10-30 起全部导入脚本统一为 B3I/B3V 在 Windows 验证过的写法），不需要手动改脚本。编译报错就停下，把报错原文交给 Codex。 |
 | 4 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`，记录每一步的耗时。任何一步报错就停下，回传报错原文和第 6 节中已经取得的产物。 |
 | 5 | Windows Codex（C） | **确认约束生效**：<br>• B3V：clk_sys 10 ns、clk_mem 8 ns、clk_pix 13.468 ns、clk_serial、cam0/1、clk_eth、DDR IP 内部时钟，没有 clk_npu；<br>• B3R：clk_sys、clk_mem、clk_pix、clk_serial、DDR IP 内部时钟；<br>• B3F：另有 clk_npu 6.667 ns；<br>• 三个工程的时钟组中都有 `rst_clk`、`phy_dq_clk_0`、`phy_dq_clk_1`。<br>`create_generated_clock` 不能报找不到对象。setup 违例照常继续，写明即可。 |
 | 6 | 用户（U） | 接好 HDMI、串口（B3V/B3F 另接两路摄像头和网线），下载 bitstream，告诉 Codex COM 口号。 |

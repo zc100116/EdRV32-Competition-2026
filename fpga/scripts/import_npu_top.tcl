@@ -8,13 +8,14 @@
 # Run from EdRV32-FPGA/EdRV32-NPU in the PDS Tcl console:
 # source ../../EdRV32-Competition-2026/fpga/scripts/import_npu_top.tcl
 
-# The FPGA project and source checkout are siblings under codex_project.
+# Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
+# The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_npu_top
-# Pass the header directory as one path to the PDS Tcl command. PDS adds the
-# project directory itself; no extra directory list is needed here.
+# PDS adds the project directory; pass only the repository header directory.
 set edrv32_include_dirs [file join $edrv32_repo rtl include]
+puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 
 # Expand a filelist: "-f x.f" recurses, "+incdir+" lines are covered by

@@ -11,10 +11,14 @@
 # ip_ram_npu_residual, ip_ram_npu_result, ip_ram_npu_scratch,
 # ip_mul_npu_quant_low, ip_mul_npu_quant_high (INT8 MAC uses APM primitives).
 # No RND IP; ip_pll_eth is instantiated inside edrv32_fpga_rgmii.
-# Then source this script; checkout location comes from the script itself.
-set edrv32_repo [file normalize [file join [file dirname [info script]] ../..]]
+# Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
+# The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
+set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
+puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_board_vnpu_top
-set edrv32_include_dirs [list [file join $edrv32_repo rtl include] [file normalize .]]
+# PDS adds the project directory; pass only the repository header directory.
+set edrv32_include_dirs [file join $edrv32_repo rtl include]
+puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 
 # Filelists use -f, +incdir+ and source tokens, with # comments. Resolve each
