@@ -66,7 +66,7 @@
 ## Benchmark Summary 原文
 
 ## split 摘要（完整见 lvgl_split.tsv）
-| 场景 | render_ms | rnd_ms | sw_ms | other_ms | perf0_ms | clean_ms | wait_ms | finish_ms | cache_ops | glyph_cpu_ms | ipc | i_mpki | d_mpki |
+| 场景 | render_ms | rnd_ms | sw_ms | other_ms | perf0_ms | clean_ms | wait_ms | finish_ms | cache_ops | glyph_cpu_ms | ipc | icache_mpki | dcache_mpki |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 
 ## RN-17
