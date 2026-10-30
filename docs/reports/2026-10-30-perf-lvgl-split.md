@@ -53,3 +53,31 @@ l.s3_host_time(now + 20001); l.s3_lvgl_step()
 PY
 rg -c '^LVGL split ' build/s3/lvgl/split-smoke.log # 18
 ```
+
+## 板上结果（卡 16）
+
+- 结果：`origin/win/20261030-16-b3r-lvgl-nes`（`788064d5`），代码 `b32f589c`，程序为卡 16 `src/s3.elf`（由 `b64814aa` 构建）；bitstream 复用卡 14 B3R（RTL `1621a503` 起未变），GUI 115200 加载。
+- 原始数据：`tasks/win/20261030-16-b3r-lvgl-nes/artifacts/lvgl_split.tsv`（17 行 34 列）、`benchmark_summary.txt`、`uart/s3.log`。
+- 原生 Summary 全场景平均 15 fps，opa_layer 由卡 14 的 1 fps（474 ms）变为 2 fps（332 ms），其他场景与卡 14 相差在 ±2 fps 内。
+
+每帧 ms（split 口径）。"驱动"= `rnd_ms − perf0_ms`，即 cache 维护、提交和中断返回；"其余"= `other_ms`：
+
+| 场景 | render | RND 硬件（PERF0） | 驱动 | SW | 其余 | 门铃/帧 | 像素/周期 | 读等待 % | 写等待 % |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Empty screen | 17.1 | 2.4 | 3.3 | 0 | 11.4 | 6.0 | 3.27 | 26 | 9 |
+| Single rectangle | 3.3 | 0.3 | 0.4 | 0 | 2.7 | 1.7 | 3.11 | 16 | 6 |
+| Multiple RGB images | 43.7 | 4.3 | 6.4 | 0 | 33.0 | 27.0 | 2.24 | 38 | 23 |
+| Rotated ARGB images | 223.4 | 1.5 | 4.6 | 188.6 | 28.7 | 25.2 | 2.20 | 25 | 9 |
+| Screen sized text | 272.8 | 19.0 | 62.2 | 0 | 191.6 | 56.3 | 0.54 | 80 | 28 |
+| Multiple arcs | 112.1 | 2.5 | 3.4 | 78.0 | 28.2 | 6.0 | 3.23 | 27 | 10 |
+| Containers | 185.7 | 67.3 | 21.7 | 0 | 96.6 | 94.9 | 0.15 | 5 | 4 |
+| Containers with opa_layer | 355.0 | 130.2 | 36.3 | 0 | 188.5 | 171.4 | 0.10 | 4 | 4 |
+| Containers with scrolling | 265.3 | 111.4 | 33.3 | 0 | 120.6 | 129.5 | 0.16 | 5 | 4 |
+| Widgets demo | 177.2 | 11.6 | 13.0 | 63.2 | 89.5 | 66.7 | 1.66 | 21 | 30 |
+| **ALL（帧数加权，825 帧）** | **67.1** | **9.3（14%）** | **8.4（13%）** | **12.8（19%）** | **36.6（55%）** | 34.8 | 0.87 | 18 | 13 |
+
+- 驱动开销平均每次门铃 242 µs（126–1105 µs）。Screen sized text 每次门铃约 30 条 GLYPH，每条字形各登记一个 source，每次门铃约 32 次 cache 维护，开销 1105 µs。
+- Empty screen 每帧 RND 写 63235 beat（约 2.0 MB），用时 2.4 ms，约 830 MB/s，3.27 像素/周期。RN-18 仿真（B 延迟 0）为 14.5 像素/周期。
+- mem_xbar：RND 端口平均每个事务的仲裁等待 3.2–3.6 周期；DISP 读占 0.028 beat/周期。各场景窗口内 RND 的写 beat 都低于 0.02 beat/周期。
+- Container 系列 RND 内部计算受限：读、写等待各约 5%，0.10–0.16 像素/周期，每帧读 24–51 万 beat。
+- 文字类 GLYPH 受读延迟限制：读等待 80%，每个读事务约 1.4 beat。
