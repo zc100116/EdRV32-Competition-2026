@@ -10,8 +10,10 @@ NES_CORE := $(addprefix $(NOF)/,cpu/nes6502.c nes/nes.c nes/nes_ppu.c \
     nes/nes_mmc.c nes/nes_rom.c nes/nes_pal.c nes/nesinput.c nes/mmclist.c) \
     $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/$(NOF)/mappers/*.c)) \
     $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/$(NOF)/sndhrdw/*.c))
+NES_CORE += $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/nes/mappers/*.c))
 NES_COMMON := sw/apps/nes/port.c sw/apps/nes/profile.c
 NES_INCLUDES := $(addprefix -I$(ROOT)/$(NOF),/ /cpu /nes /sndhrdw /libsnss)
+NES_INCLUDES += -I$(ROOT)/sw/apps/nes/mappers
 NES_FLAGS := $(NES_OPT) -fno-strict-aliasing $(NES_INCLUDES)
 NES_WRAPS := -Wl,--wrap=nes6502_execute,--wrap=ppu_scanline,--wrap=ppu_endscanline
 

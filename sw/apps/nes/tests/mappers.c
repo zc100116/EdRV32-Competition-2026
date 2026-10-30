@@ -1,0 +1,79 @@
+/* File: mappers.c
+ * Spec: T-NES3; NESdev descriptions linked by each mapper source.
+ * Description: Check mapper bank wiring and writable CHR-RAM through mapintf_t.
+ * Clock domain: emulated register accesses.
+ */
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <noftypes.h>
+#include <nes_mmc.h>
+#include <nes_ppu.h>
+#include "mapper_chr.h"
+extern mapintf_t map74_intf;
+static rominfo_t cart;
+static uint8 vrom[512 * 1024];
+static uint8 *pages[8];
+static int prg[4];
+static int mirror[4];
+rominfo_t *mmc_getinfo(void) { return &cart; }
+void mmc_bankrom(int size, uint32 address, int bank)
+{
+    assert(size == 8);
+    prg[(address - 0x8000) / 0x2000] = bank;
+}
+void ppu_setpage(int size, int page, uint8 *location)
+{
+    for (int i = 0; i < size; ++i)
+        pages[page + i] = location;
+}
+void mmc_bankvrom(int size, uint32 address, int bank)
+{
+    assert(size == 1);
+    if (cart.vrom_banks)
+        ppu_setpage(1, address >> 10,
+                    vrom + (bank % (cart.vrom_banks * 8)) * 1024 - address);
+}
+void ppu_mirror(int a, int b, int c, int d)
+{ mirror[0] = a; mirror[1] = b; mirror[2] = c; mirror[3] = d; }
+bool ppu_enabled(void) { return true; }
+void nes_irq(void) {}
+static void write_reg(mapintf_t *mapper, uint32 address, uint8 value)
+{
+    for (map_memwrite *entry = mapper->mem_write; entry->write_func; ++entry) {
+        if (address >= entry->min_range && address <= entry->max_range) {
+            entry->write_func(address, value);
+            return;
+        }
+    }
+    assert(0 && "test wrote an unmapped register");
+}
+static void chr_bank(mapintf_t *mapper, unsigned bank)
+{
+    write_reg(mapper, 0x8000, 2);
+    write_reg(mapper, 0x8001, bank);
+}
+static void test74(void)
+{
+    cart.mapper_number = 74;
+    cart.rom_banks = 16;
+    cart.vrom_banks = 32;
+    map74_intf.init();
+    chr_bank(&map74_intf, 8);
+    assert(nes_chr_write(0x1000, 0xab));
+    assert(pages[4][0x1000] == 0xab);
+    chr_bank(&map74_intf, 9);
+    assert(pages[4][0x1000] == 0);
+    assert(nes_chr_write(0x1000, 0xcd));
+    chr_bank(&map74_intf, 8);
+    assert(pages[4][0x1000] == 0xab);
+    chr_bank(&map74_intf, 10);
+    assert(nes_chr_write(0x1000, 0xff));
+    assert(pages[4][0x1000] == 0); /* CHR-ROM is never writable. */
+}
+int main(void)
+{
+    test74();
+    puts("PASS mapper bank wiring and CHR memory");
+    return 0;
+}
