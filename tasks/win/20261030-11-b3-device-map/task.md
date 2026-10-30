@@ -84,3 +84,42 @@
 
 ## 备注
 ```
+
+## 9. 补充（2026-10-30，看过 87b5a6af 之后）
+
+布局导出已经足够，不用重做。还缺下面三项，其中用户只需做 A 和 B（都在 PCE 的 Tcl Console 里输入命令，不用在图上找器件）。
+
+**A. 坐标换算样点（用户，5 张截图）。** 已有 `APM_65_120 → site(18,22)` 一个样点。在 PCE Console 中逐条输入下面的命令，每条执行后 Properties 会切到该器件，截图（要看得到 name、site(x,y)、(x,y)）：
+
+```
+select -dev_instance CLMA_21_486
+select -dev_instance CLMA_717_1225
+select -dev_instance DRM_226_366
+select -dev_instance DRM_694_732
+select -dev_instance APM_587_1008
+```
+
+截图名 `pce-<器件名>.png`。
+
+**B. 未占用列探测（用户，不用截图）。** B3V 只占用了 7 条 APM 列（名称 x = 65、161、311、413、461、527、587）和 8 条 DRM 列（226、280、334、436、490、550、622、694）。CLMA 名称 x 序列在 33/39、135/141、357、657 附近有空缺，可能还有未被使用的 APM/DRM 列。逐条输入下面的命令，只记录每条是"选中了器件"还是"报错"（报错原文抄一条即可）：
+
+```
+select -dev_instance APM_33_582
+select -dev_instance APM_39_582
+select -dev_instance APM_135_582
+select -dev_instance APM_141_582
+select -dev_instance APM_357_582
+select -dev_instance APM_657_582
+select -dev_instance DRM_33_582
+select -dev_instance DRM_39_582
+select -dev_instance DRM_135_582
+select -dev_instance DRM_141_582
+select -dev_instance DRM_357_582
+select -dev_instance DRM_657_582
+```
+
+如果 Windows Codex 在 PDS 安装目录的器件架构数据中找到了 PG2L200H 的完整站点列表（含 APM/DRM 全部站点名），B 可以不做，改为提交该列表（只提交 APM、DRM、IO 和时钟区域相关部分）。
+
+**C. 原卡未完成的项目（Windows Codex）。** 第 5 步的 region 统计截图（用户 1 张）、第 6 步的手册查找、第 1 步的停止进度。
+
+APM 155 与 161 的差异不影响区域规划，在 `result.md` 中保留"未查明"即可，不需要追查。
