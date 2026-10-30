@@ -13,10 +13,11 @@ sys.dont_write_bytecode = True
 root = Path(__file__).resolve().parents[3]
 output = root / 'build/nes/blit-check'
 output.mkdir(parents=True, exist_ok=True)
-subprocess.run(['make', '-C', str(root / 'sw/apps/nes')], check=True,
+subprocess.run(['make', '-j1', '-C', str(root / 'sw/apps/nes')], check=True,
                stdout=(output / 'host-build.log').open('w'), stderr=subprocess.STDOUT)
 with (output / 'host-run.log').open('w') as log:
-    subprocess.run([str(root / 'build/sw/nes-host/nes-host'), '180', str(output)],
+    subprocess.run([str(root / 'build/sw/nes-host/nes-host'),
+                    str(root / 'sw/apps/nes/roms/nrom-template.nes'), '180', str(output)],
                    stdout=log, stderr=subprocess.STDOUT, check=True)
 command = ['gcc', '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror',
            '-ffunction-sections', '-fdata-sections',

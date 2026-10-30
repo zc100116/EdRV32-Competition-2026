@@ -26,12 +26,12 @@ uint32，不适合 Linux 64 位主机；`port.c` 自己提供静态位图和行�
 原版 GUI、OSD、视频驱动、memguard 和应用主循环入口不编译，其必要回调由 `port.c`
 提供；NES CPU、PPU、mapper、APU 寄存器处理和 `nes_emulate()` 仍来自上游。
 未注册 mapper 由上游 `mmc_peek()` 检测，GUI_RED 回调打印 mapper 号后退出。
-不提供存档文件系统；嵌入 ROM 不销毁，随应用退出一起回收，避免上游 rom_free
-对直接指向嵌入映像的 PRG/CHR 指针调用 free。
+不提供存档文件系统；ROM 在整个模拟期间保留，随应用退出一起回收，避免上游
+rom_free 对直接指向外部映像的 PRG/CHR 指针调用 free。
 
 ## ROM
 
-默认嵌入 `roms/nrom-template.nes`（NROM-128，mapper 0，16 KiB PRG + 8 KiB CHR）。
+仓库提供测试用 `roms/nrom-template.nes`（NROM-128，mapper 0，16 KiB PRG + 8 KiB CHR）。
 它是 Damian Yerrick 的自制演示，有人物运动、草地和木箱；无商业游戏内容。
 源代码：<https://github.com/pinobatch/nrom-template>，使用提交
 `d5ce5d898a32b8ef8b20b2d417f1f32b0530faa8` 的 `nrom-template.nes` 构建结果。
@@ -41,29 +41,43 @@ uint32，不适合 Linux 64 位主机；`port.c` 自己提供静态位图和行�
 Pillow 仅在重建此公开 ROM 时需要，编译/运行本移植不需要它。
 可另选该仓库的 NROM-256 版本；用相同许可和源码重新构建。
 
-主机及板上都可通过 `NES_ROM=/绝对路径/公开授权.nes` 指定其他 ROM，`.incbin` 把
-ROM 嵌进 ELF；运行时不从文件系统加载 ROM。许可不明或商业 ROM 不入库。
+模拟器 ELF 一律不含游戏 ROM，构建时不选择游戏。主机从命令行指定的 `.nes`
+文件读取；板上由 `uart_tool.py --elf --rom <file.nes>` 原样加载，再由同一个上游
+nofrendo iNES 解析器取得 PRG/CHR 大小和 mapper。测试只用仓库的 nrom-template。
+用户自备 ROM（包括商业游戏）留在仓库外，不下载、不生成、不提交，也不打进上板 ELF。
+
+RV32 的 `rom.S` 仅保留 1 MiB `.nes_rom_slot`，导出 `nes_rom_slot` /
+`nes_rom_slot_end`；`ddr_app.ld` 将其作为独立 NOLOAD 段置于 `.bss` 后，按 64 字节
+对齐。地址由链接器决定，位于同一个 64 MiB DDR 应用窗口内；启动代码清零范围止于
+`__bss_end`，不会清掉槽。没有 NES 输入段的其他 DDR 应用不产生此段。
+加载工具从 ELF 符号表读取槽边界，经所属 PT_LOAD 的 `p_paddr + (symbol - p_vaddr)`
+求加载地址，拒绝缺少符号或超过槽大小的文件。
+
+启动检查前四字节，错误时打印 `NES ROM slot empty or invalid: xx xx xx xx` 并停止。
+正常启动打印例如 `NES ROM prg=16 chr=8 mapper=0`（大小单位 KiB）；
+不支持的 mapper 沿上游现有路径打印 `Mapper <n> not yet implemented` 后退出。
 
 ## 构建与主机验证
 
 在仓库根目录执行（首次需 `git submodule update --init third_party/nofrendo`）：
 
 ```sh
-make -C sw/apps/nes
+flock /tmp/edrv32-sim.lock make -C sw/apps/nes -j1
 mkdir -p build/nes/frames
-build/sw/nes-host/nes-host 180 build/nes/frames > build/nes/host-run.log
-build/sw/nes-host/nes-host 180 build/nes/frames skip > build/nes/host-skip.log
+build/sw/nes-host/nes-host sw/apps/nes/roms/nrom-template.nes 180 build/nes/frames > build/nes/host-run.log
+build/sw/nes-host/nes-host sw/apps/nes/roms/nrom-template.nes 180 build/nes/frames skip > build/nes/host-skip.log
 ```
 
-主机只需 Linux gcc、GNU make 和 git；同一份 `port.c`、`profile.c`、核心及 ROM
-用于 Linux/RV32。每 60 帧及最后一帧写一个 P6 PPM，尺寸 256×240；skip 模式不输出图像。
+主机只需 Linux gcc、GNU make 和 git；调用格式为 `nes-host <rom> <frames> <dir> [skip]`。
+Linux/RV32 共用 `port.c`、`profile.c` 和核心。每 60 帧及最后一帧写一个 P6 PPM，
+尺寸 256×240；skip 模式不输出图像。
 主机无交互控制，用于画面和性能参考；板上有下面的键盘/按键输入。
 帧数必须大于零，输出目录须事先创建。
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
-make -C sw PROGRAM=nes MEMORY=ddr_app
-make -C sw PROGRAM=nes MEMORY=ddr_app NES_DISPLAY=0 OUT=$PWD/build/sw/nes-nodisplay
+flock /tmp/edrv32-sim.lock make -C sw -j1 PROGRAM=nes MEMORY=ddr_app
+flock /tmp/edrv32-sim.lock make -C sw -j1 PROGRAM=nes MEMORY=ddr_app NES_DISPLAY=0 OUT=$PWD/build/sw/nes-nodisplay
 ```
 
 输出 `build/sw/nes/nes.elf`、`.bin`、`.map`、`.dis` 及地址分段 hex。
@@ -83,12 +97,14 @@ CPU `0x90000000`（DDR 物理偏移 `0x10000000`）起的 64 MiB 内。
 按 [`tools/board/README.md`](../../../tools/board/README.md) 的 ELF 加载用法执行：
 
 ```sh
-py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --port COM3 --log build/board/nes.log
-py tools/board/uart_tool.py build/sw/nes-nodisplay/nes.elf --elf --port COM3 --log build/board/nes-nodisplay.log
+py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom sw/apps/nes/roms/nrom-template.nes --baud 115200 --port COM3 --log build/board/nes.log
+py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom D:\roms\smb.nes --baud 115200 --port COM3 --log build/board/nes.log
+py tools/board/uart_tool.py build/sw/nes-nodisplay/nes.elf --elf --rom sw/apps/nes/roms/nrom-template.nes --port COM3 --log build/board/nes-nodisplay.log
 ```
 
-先启动工具，再按住 KEY1 并复位；默认自动从 115200 切到 2000000 baud，分段加载并
-立即运行，不需再次复位。可加 `--baud 921600` 或 `--baud 115200`。
+先启动工具，再按住 KEY1 并复位；上面前两条命令保持 115200，省略 `--baud` 则自动
+切到 2000000，也可选 921600。工具先加载全部 ELF 文件段，再用一次 `2=Load`
+将 `.nes` 文件（含 iNES 头）写到槽，最后 `3=Run`，不需再次复位。
 **BIOS 不解析 ELF，不能把 ELF 文件整体当作一个裸镜像发送。**
 UART 游戏输入使用相同波特率的串口终端发送小写字符；加载工具用于加载和日志捕获，
 要切换终端时先停止捕获并释放串口，或直接用板上 KEY1–4。
@@ -98,10 +114,17 @@ UART 游戏输入使用相同波特率的串口终端发送小写字符；加载
 1. 对 ELF 中每个 `p_filesz != 0` 的 PT_LOAD 段，发送 `2` 加 Enter，等待
    `UART load ready`；发 4 字节小端 `p_paddr`、4 字节小端 `p_filesz`，再发段数据。
    等 `Load bytes: <n> at 0x<addr>` 和 `Load result: PASS`，再处理下一段。
-2. 发送 `3` 加 Enter，等 `Run address:`，发 `0x90000000` 加 Enter（本 ELF 的
+2. 用相同 `2=Load` 协议，将整个 `.nes` 文件发送到 ELF 符号所指的槽地址。
+3. 发送 `3` 加 Enter，等 `Run address:`，发 `0x90000000` 加 Enter（本 ELF 的
    `e_entry`），BIOS 打印 `Run: 0x90000000` 后跳转。
-3. `.data` 必须加载到 `p_paddr` 指定的初始值副本地址；应用 startup 会复制到 VMA、
+4. `.data` 必须加载到 `p_paddr` 指定的初始值副本地址；应用 startup 会复制到 VMA、
    清零 bss 并建立栈，所以可重新选择 Run 重入。`p_filesz=0` 的 bss 不传输。
+
+缓存一致性复用 BIOS 的 ELF 加载路径：`sw/boot/main.c` 的 `receive_data()` 由 CPU
+逐字节写入目标可缓存地址，结束时通过 BSP `cache_clean_all()` 写回 D$；ROM 和 ELF
+文件段都由 `load()` 调用此函数。应用继续使用同一个 CPU 可缓存地址，已有 cache 行
+也是刚写入的新内容。`sw/boot/enter.S` 跳转前执行 `fence rw,rw` / `fence.i`。
+这不是 SoC 7.4 中“引擎写、CPU 读”的场景，因此无需新增 invalidate 或应用 cache 操作。
 
 板上每 60 帧打印一行：
 
@@ -138,6 +161,7 @@ UART 使用单个小写字符，不要发送 Enter。每次接收延长对应按
 | Left | a | KEY1（GPIO0 bit0） |
 | Right | d | KEY2（GPIO0 bit1） |
 
+板上 KEY1 左、KEY2 右、KEY3 A、KEY4 Start；B 只能用 UART `k`。
 物理按键按住即保持，UART/物理输入合并后交给上游 controller 0。
 
 ## 帧与声音接口
@@ -207,25 +231,28 @@ Spike `1.1.1-dev`，未开启时序/cache 模型。没有运行 SoC 仿真。
 ELF text/data/bss 为 214944 / 4376 / 2242724 字节，入口 `0x90000000`；
 所有三个 PT_LOAD 的地址均在 DDR 应用区内。真实上板帧率仍未取得。
 `build/nes/host-build.log` 是主机构建记录，编译/链接同样零告警。
-另用默认 ROM 的副本把 iNES mapper 改为 250，单独构建主机程序：
+历史检查另用测试 ROM 的副本把 iNES mapper 改为 250，运行主机程序：
 `build/nes/unsupported-run.log` 包含 `Mapper 250 not yet implemented`，退出状态 1。
 
 串行复现四组 Spike 测量：
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
-python3 sw/apps/nes/run_spike.py > build/nes/spike-comparison.log 2>&1
+flock /tmp/edrv32-sim.lock python3 sw/apps/nes/run_spike.py > build/nes/spike-comparison.log 2>&1
 ```
 
 脚本分别以 `NES_SPIKE=1 NES_FRAMES=180 NES_OPT=-O2/-O3 NES_SKIP=0/1`
 调用同一个 `make -C sw PROGRAM=nes MEMORY=ddr_app`，输出到
 `build/sw/nes-spike-O{2,3}-skip{0,1}/`，其中 `build.log`、`console.log` 为原始记录。
-运行命令为：
+脚本用 objcopy 在生成目录内复制 `nes.elf` 为 `nes-spike.elf`，仅在该临时 ELF 中
+把同一个 `.nes_rom_slot` 改为有内容，并写入 nrom-template 文件；Spike 仍从槽读取，
+没有第二条运行时 ROM 路径。正常 `nes.elf` 不变，两种 ELF 均为不入库的构建产物，
+上板必须使用 `nes.elf` 配合 `--rom`。运行命令为：
 
 ```sh
-spike --isa=rv32im_zicsr_zifencei_zicntr_zihpm --priv=m --pmpregions=0 \
+flock /tmp/edrv32-sim.lock spike --isa=rv32im_zicsr_zifencei_zicntr_zihpm --priv=m --pmpregions=0 \
   --no-dm --disable-dtb -m0x90000000:0x04000000 --pc=0x90000000 \
-  build/sw/nes-spike-O2-skip0/nes.elf
+  build/sw/nes-spike-O2-skip0/nes-spike.elf
 ```
 
 Spike 使用 RV32 `instret` 作为计量单位（不是周期），通过同一套 CPU/PPU 包装采样。
@@ -269,7 +296,7 @@ O2 禁画比完整绘制少约 61.81% 指令，理想吞吐比约 2.62 倍。
 ## 第 2 步显示路径验证
 
 ```sh
-python3 sw/apps/nes/check_blit.py > build/nes/blit-check.log 2>&1
+flock /tmp/edrv32-sim.lock python3 sw/apps/nes/check_blit.py > build/nes/blit-check.log 2>&1
 ```
 
 脚本构建并运行主机模拟器 180 帧，从最后一张 PPM 重建无损 I8/调色板；
@@ -299,14 +326,17 @@ Linux gcc 13.3.0 / xPack RV32 GCC 15.2.0；主机检查用 Python 标准库及�
 命令/I8 快照/调色板均 64 B 对齐，三个 PT_LOAD 都在 DDR 应用区内。
 只计时版没有链接 `nes_display*`、`rnd_submit` 或显示 DMA 缓冲。
 
-另作一次 60 帧的 Spike 非显示执行检查，退出状态 0：
+历史上另作一次 60 帧的 Spike 非显示执行检查，退出状态 0；外部 ROM 版本复现时先生成 Spike 专用副本：
 
 ```sh
-make -C sw PROGRAM=nes MEMORY=ddr_app NES_SPIKE=1 NES_DISPLAY=0 NES_FRAMES=60 \
+flock /tmp/edrv32-sim.lock make -C sw -j1 PROGRAM=nes MEMORY=ddr_app NES_SPIKE=1 NES_DISPLAY=0 NES_FRAMES=60 \
   OUT=$PWD/build/sw/nes-display-spike
-spike --isa=rv32im_zicsr_zifencei_zicntr_zihpm --priv=m --pmpregions=0 \
+riscv-none-elf-objcopy --set-section-flags .nes_rom_slot=alloc,load,contents,data \
+  --update-section .nes_rom_slot=sw/apps/nes/roms/nrom-template.nes \
+  build/sw/nes-display-spike/nes.elf build/sw/nes-display-spike/nes-spike.elf
+flock /tmp/edrv32-sim.lock spike --isa=rv32im_zicsr_zifencei_zicntr_zihpm --priv=m --pmpregions=0 \
   --no-dm --disable-dtb -m0x90000000:0x04000000 --pc=0x90000000 \
-  build/sw/nes-display-spike/nes.elf
+  build/sw/nes-display-spike/nes-spike.elf
 ```
 
 原始记录 `build/nes/display-spike-build.log`、`build/nes/display-spike.log`；
@@ -314,9 +344,49 @@ spike --isa=rv32im_zicsr_zifencei_zicntr_zihpm --priv=m --pmpregions=0 \
 未运行 SoC 仿真；真实板上的颜色、撕裂、按键和 fps/shown 仍待上板检查。
 
 
+## 外部 ROM 验证（T-NES2）
+
+基线提交 `1621a503`；实现为本节所在的 `nes: separate game ROM from emulator ELF`
+提交（`git log -1 -- sw/apps/nes/README.md` 可定位）。Linux gcc 13.3.0、xPack GCC
+15.2.0、Spike 1.1.1-dev；只使用仓库 nrom-template，未运行 SoC 仿真。
+所有构建与 Spike 检查由 `flock /tmp/edrv32-sim.lock` 串行执行，make 使用 `-j1`。
+本次只修改 C/汇编/链接脚本/Python/文档，无 RTL 变更；C 编译/链接零告警。
+
+| 检查 | 命令与结果 |
+|---|---|
+| 主机 180 帧 | 按“构建与主机验证”的命令运行；60/120/180 三张 PPM 各用一次 `cmp build/nes/ext-rom/before/frame-<帧号>.ppm build/nes/ext-rom/after/frame-<帧号>.ppm`，全部逐字节相同；before 为修改前 `1621a503` 构建 |
+| 主机 skip | 同命令追加 `skip`，180 帧退出 0，无 PPM |
+| RV32 显示/非显示 | 前述两条 `make -C sw -j1 PROGRAM=nes MEMORY=ddr_app` 命令均退出 0、零告警 |
+| ELF 槽与内容 | `riscv-none-elf-nm -S build/sw/nes/nes.elf` / `riscv-none-elf-readelf -lS build/sw/nes/nes.elf`；槽为独立 NOBITS，所属 PT_LOAD 的 FileSiz=0，模板 ROM 数据不在 ELF 中 |
+| Spike 四组 | 前述 `run_spike.py` 命令退出 0；均打印 `NES ROM prg=16 chr=8 mapper=0`；O2 绘制/skip、O3 绘制/skip 的末窗口指令/帧分别为 1325190 / 506077 / 1325758 / 506645，与历史基线相同 |
+| 空槽/mapper 错误 | Spike 直接运行无 ROM 的 `build/sw/nes-spike-O2-skip0/nes.elf`，打印 `NES ROM slot empty or invalid: 00 00 00 00` 并退出 1；仅将模板副本的 mapper 字段改为 250 后预置槽，沿上游路径打印 `Mapper 250 not yet implemented` 并退出 1 |
+| 工具 | `python3 -m unittest discover tools/board/tests`，11 项全部通过；覆盖 ROM 操作顺序、VMA 与物理地址不同的槽、超大文件、缺符号、`--rom` 与 `--elf` 约束、逐字节 emit，以及原有 GUI 协议默认行为 |
+| 显示回归 | 前述 `check_blit.py` 命令通过：921600 像素比较及原有交接检查均 PASS |
+| 非 NES 链接 | `PROGRAM=minimal MEMORY=ddr_app` 构建，再用 `git show 1621a503:sw/bsp/ld/ddr_app.ld` 的脚本重链相同对象；两份 ELF 用 `cmp` 比较逐字节相同 |
+
+本次 `nm -S` 结果（不同构建配置的地址可变，不得据此写死加载地址）：
+
+```text
+显示版：
+905e919c          B __bss_end
+905e91c0 00100000 B nes_rom_slot
+906e91c0          B nes_rom_slot_end
+非显示版：
+90254424          B __bss_end
+90254440 00100000 B nes_rom_slot
+90354440          B nes_rom_slot_end
+```
+
+原始记录在 `build/nes/ext-rom/`：`baseline-build.log`、`baseline-run.log`、
+`host-build.log`、`host-run.log`、`host-skip.log`、`board-build.log`、
+`nodisplay-build.log`、`spike-comparison.log`、`empty-slot.log`、
+`unsupported-spike.log`、`blit-check.log`、`minimal-build.log`；
+Spike 各组原始记录仍在对应 `build/sw/nes-spike-*/`。这些生成物均不入库。
+真实上板显示、按键及帧率仍需后续 Windows 上板确认。
+
 ## 上板检查清单
 
-- BIOS v1.10 的 `--elf` 加载成功，启动出现 ROM loaded / mapper 0 / NES powered on。
+- BIOS v1.10 的 `--elf` 加载成功，启动出现 ROM loaded / mapper 0 / NES powered on 及 `NES ROM prg=16 chr=8 mapper=0`。
 - 720p L0 画面为 768×720，水平居中，左右各 256 像素黑色，L1 关闭。
 - 人物、草地、木箱和背景颜色正确；移动时无撕裂、混合帧或局部旧像素。
 - UART 八键及 KEY1–4 响应正确，UART 字符约保持 100 ms；不带 Enter。

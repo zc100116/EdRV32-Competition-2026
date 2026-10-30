@@ -8,7 +8,7 @@ OUT ?= $(ROOT)/build/sw/nes-host
 CC := gcc
 include sources.mk
 SOURCES := $(NES_CORE) $(NES_COMMON) sw/apps/nes/host.c
-OBJECTS := $(addprefix $(OUT)/obj/,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
+OBJECTS := $(addprefix $(OUT)/obj/,$(SOURCES:.c=.o))
 CFLAGS := -std=c11 -Wall -Wextra -Werror -ffunction-sections -fdata-sections $(NES_FLAGS)
 .PHONY: all FORCE
 FORCE:
@@ -16,8 +16,5 @@ all: $(OUT)/nes-host
 $(OUT)/nes-host: $(OBJECTS)
 	$(CC) $(OBJECTS) -Wl,--gc-sections $(NES_WRAPS) -lm -o $@
 $(OUT)/obj/%.o: $(ROOT)/%.c FORCE
-	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
-$(OUT)/obj/%.o: $(ROOT)/%.S FORCE
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -3,7 +3,6 @@
 # Description: Shared nofrendo source selection and compiler/linker configuration.
 # Clock domain: none (build tool).
 NOF := third_party/nofrendo/components/nofrendo
-NES_ROM ?= $(ROOT)/sw/apps/nes/roms/nrom-template.nes
 NES_OPT ?= -O2
 NES_SKIP ?= 0
 NES_FRAMES ?= 0
@@ -11,10 +10,9 @@ NES_CORE := $(addprefix $(NOF)/,cpu/nes6502.c nes/nes.c nes/nes_ppu.c \
     nes/nes_mmc.c nes/nes_rom.c nes/nes_pal.c nes/nesinput.c nes/mmclist.c) \
     $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/$(NOF)/mappers/*.c)) \
     $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/$(NOF)/sndhrdw/*.c))
-NES_COMMON := sw/apps/nes/port.c sw/apps/nes/profile.c sw/apps/nes/rom.S
+NES_COMMON := sw/apps/nes/port.c sw/apps/nes/profile.c
 NES_INCLUDES := $(addprefix -I$(ROOT)/$(NOF),/ /cpu /nes /sndhrdw /libsnss)
-NES_FLAGS := $(NES_OPT) -fno-strict-aliasing $(NES_INCLUDES) \
-    -DNES_ROM_PATH='"$(abspath $(NES_ROM))"'
+NES_FLAGS := $(NES_OPT) -fno-strict-aliasing $(NES_INCLUDES)
 NES_WRAPS := -Wl,--wrap=nes6502_execute,--wrap=ppu_scanline,--wrap=ppu_endscanline
 
 $(OUT)/obj/$(NOF)/nes/nes_ppu.o: NES_WARNINGS := -Wno-implicit-fallthrough -Wno-maybe-uninitialized
@@ -46,5 +44,3 @@ $(OUT)/obj/$(NOF)/nes/nes_ppu.o: $(OUT)/core/.patched FORCE
 $(OUT)/obj/$(NOF)/%.o: $(ROOT)/$(NOF)/%.c FORCE
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(NES_WARNINGS) -c $< -o $@
-
-$(OUT)/obj/sw/apps/nes/rom.o: $(abspath $(NES_ROM))

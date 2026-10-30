@@ -19,6 +19,10 @@ static uint64_t release_at[8];
 #include "edrv32.h"
 #endif
 
+extern unsigned char nes_rom_slot[];
+
+char *osd_getromdata(void) { return (char *)nes_rom_slot; }
+
 uint64_t nes_instructions(void)
 {
 #ifndef NES_SPIKE

@@ -1,11 +1,15 @@
 /* File: rom.S
  * Spec: Task B3-4b; design 2026-10-29-rnd-disp 5.2.
- * Description: Embed the selected licensed iNES image in application DDR rodata.
+ * Description: Reserve the external iNES image slot without storing bytes in ELF.
  * Clock domain: none.
  */
-.section .rodata.nes_rom,"a"
-.balign 16
-.global nes_rom_start
-nes_rom_start:
-.incbin NES_ROM_PATH
+.section .nes_rom_slot,"aw",@nobits
+.balign 64
+.global nes_rom_slot
+.global nes_rom_slot_end
+.type nes_rom_slot,@object
+nes_rom_slot:
+.space 1024 * 1024
+nes_rom_slot_end:
+.size nes_rom_slot, nes_rom_slot_end - nes_rom_slot
 .section .note.GNU-stack,"",@progbits

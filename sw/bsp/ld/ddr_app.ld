@@ -45,6 +45,11 @@ SECTIONS
         . = ALIGN(4);
         __bss_end = .;
     } > DDR_APP :bss
+    /* Optional NES input only; startup clears through __bss_end, excluding this slot. */
+    .nes_rom_slot ALIGN(64) (NOLOAD) : AT(ADDR(.nes_rom_slot))
+    {
+        KEEP(*(.nes_rom_slot))
+    } > DDR_APP :bss
     __stack_top = ORIGIN(DDR_APP) + LENGTH(DDR_APP);
     /DISCARD/ : { *(.comment .eh_frame .riscv.attributes) }
 }

@@ -9,6 +9,9 @@
 #include <time.h>
 #include "nes_port.h"
 static const char *output_directory;
+static char *rom_data;
+
+char *osd_getromdata(void) { return rom_data; }
 
 uint64_t nes_ticks(void)
 {
@@ -51,17 +54,34 @@ void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned fr
 
 int main(int argc, char **argv)
 {
-    if (argc != 3 && argc != 4) {
-        fprintf(stderr, "usage: %s FRAMES OUTPUT_DIRECTORY [skip]\n", argv[0]);
+    if (argc != 4 && argc != 5) {
+        fprintf(stderr, "usage: %s ROM FRAMES OUTPUT_DIRECTORY [skip]\n", argv[0]);
         return 1;
     }
-    nes_frame_limit = (unsigned)strtoul(argv[1], NULL, 10);
+    nes_frame_limit = (unsigned)strtoul(argv[2], NULL, 10);
     if (nes_frame_limit == 0) {
         fputs("FRAMES must be positive\n", stderr);
         return 1;
     }
-    output_directory = argv[2];
-    nes_skip_render = argc == 4;
+    FILE *rom = fopen(argv[1], "rb");
+    if (rom == NULL || fseek(rom, 0, SEEK_END) != 0) {
+        perror(argv[1]);
+        return 1;
+    }
+    long size = ftell(rom);
+    if (size < 16) {
+        fprintf(stderr, "%s: cannot read 16-byte iNES header\n", argv[1]);
+        return 1;
+    }
+    rom_data = malloc((size_t)size);
+    if (rom_data == NULL || fseek(rom, 0, SEEK_SET) != 0 ||
+        fread(rom_data, 1, (size_t)size, rom) != (size_t)size || fclose(rom) != 0) {
+        perror(argv[1]);
+        return 1;
+    }
+    output_directory = argv[3];
+    nes_skip_render = argc == 5;
     nes_run();
+    free(rom_data);
     return 0;
 }

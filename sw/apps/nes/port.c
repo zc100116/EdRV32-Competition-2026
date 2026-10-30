@@ -19,7 +19,7 @@
 #undef malloc
 #undef free
 
-extern const unsigned char nes_rom_start[];
+extern char *osd_getromdata(void);
 volatile int nofrendo_ticks;
 rgb_t gui_pal[GUI_TOTALCOLORS];
 struct nes_stats nes_stats;
@@ -55,7 +55,6 @@ void _my_free(void **data)
     *data = NULL;
 }
 
-char *osd_getromdata(void) { return (char *)nes_rom_start; }
 bitmap_t *vid_getbuffer(void) { return (bitmap_t *)bitmap_storage.bytes; }
 
 void vid_setpalette(rgb_t *source)
@@ -154,6 +153,12 @@ void nes_report(uint64_t elapsed, uint64_t instructions)
 
 void nes_run(void)
 {
+    const unsigned char *rom = (const unsigned char *)osd_getromdata();
+    if (memcmp(rom, "NES\x1a", 4) != 0) {
+        fprintf(stderr, "NES ROM slot empty or invalid: %02x %02x %02x %02x\n",
+                rom[0], rom[1], rom[2], rom[3]);
+        exit(1);
+    }
     bitmap_t *bitmap = vid_getbuffer();
     bitmap->width = 256;
     bitmap->height = 240;
@@ -169,10 +174,12 @@ void nes_run(void)
         fputs("NES create failed\n", stderr);
         exit(1);
     }
-    if (nes_insertcart("embedded.nes", machine)) {
+    if (nes_insertcart("external.nes", machine)) {
         fputs("NES insert failed\n", stderr);
         exit(1);
     }
+    printf("NES ROM prg=%d chr=%d mapper=%d\n", machine->rominfo->rom_banks * 16,
+           machine->rominfo->vrom_banks * 8, machine->rominfo->mapper_number);
     nes_getcontextptr()->autoframeskip = false;
     report_start = nes_ticks();
     instruction_start = nes_instructions();
