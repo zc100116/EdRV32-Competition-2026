@@ -109,4 +109,14 @@ void rnd_irq_handle(void);
 struct rnd_result rnd_abort(void);
 /* rnd 4.3: caller serializes this six-register read with DOORBELL submission. */
 void rnd_read_perf(uint32_t perf[6]);
+/* CLINT ticks for the last batch: pre-submit clean, DOORBELL timestamp and
+ * finish() MMIO/target invalidation. cache_ops counts clean + invalidate calls.
+ */
+struct rnd_timing {
+    uint64_t clean_ticks;
+    uint64_t doorbell_tick;
+    uint64_t finish_ticks;
+    uint32_t cache_ops;
+};
+const struct rnd_timing *rnd_last_timing(void);
 #endif

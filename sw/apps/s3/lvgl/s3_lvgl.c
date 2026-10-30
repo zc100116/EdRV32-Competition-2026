@@ -48,6 +48,9 @@ struct benchmark_window {
     struct s3_rnd_measurement copy;
     uint64_t xbar_cycles;
     uint64_t xbar[2][5];
+    struct s3_rnd_timing timing;
+    uint64_t glyph_cpu_ticks;
+    struct s3_cpu_counters cpu;
 };
 static bool benchmark_running;
 static bool capturing_scene_timer;
@@ -95,6 +98,11 @@ static void benchmark_print(const char *name, const struct benchmark_window *win
     static const char *const xbar_names[] = {
         "rd_txn", "wr_txn", "rd_beats", "wr_beats", "wait_sum_cycles"
     };
+    static const char *const cpu_names[] = {
+        "cpu_load_use_cycles", "cpu_divide_cycles", "cpu_device_wait_cycles",
+        "cpu_frontend_empty_cycles", "cpu_icache_misses", "cpu_dcache_misses",
+        "cpu_dirty_writebacks", "cpu_branch_mispredicts"
+    };
     uint32_t frames = window->frames;
     uint64_t divisor = (uint64_t)frames * (s3_clock_hz() / 1000u);
     uint64_t rnd_ticks = window->draw.ticks + window->copy.ticks;
@@ -130,6 +138,22 @@ static void benchmark_print(const char *name, const struct benchmark_window *win
             put_u64(window->xbar[p][i]);
         }
     }
+    print_average("clean_ms", window->timing.clean_ticks, divisor);
+    print_average("wait_ms", window->timing.wait_ticks, divisor);
+    print_average("finish_ms", window->timing.finish_ticks, divisor);
+    print_average("cache_ops", window->timing.cache_ops, frames);
+    print_average("glyph_cpu_ms", window->glyph_cpu_ticks, divisor);
+    print_average("cpu_cycles", window->cpu.cycles, frames);
+    print_average("cpu_instructions", window->cpu.instructions, frames);
+    for (unsigned i = 0; i < 8; ++i)
+        print_average(cpu_names[i], window->cpu.events[i], frames);
+    /* Host hardware counters are zero; define its ratios as zero as well. */
+    print_average("cpu_ipc", window->cpu.instructions,
+                  window->cpu.cycles ? window->cpu.cycles : 1u);
+    print_average("icache_mpki", window->cpu.events[4] * 1000u,
+                  window->cpu.instructions ? window->cpu.instructions : 1u);
+    print_average("dcache_mpki", window->cpu.events[5] * 1000u,
+                  window->cpu.instructions ? window->cpu.instructions : 1u);
     s3_puts("\r\n");
 }
 
@@ -140,10 +164,12 @@ static void benchmark_begin_window(void)
     benchmark_before = *s3_draw_rnd_stats();
     /* Exclude UART output between scenes from the next fabric window. */
     mem_xbar_snapshot(&discarded);
+    s3_cpu_begin();
 }
 
 static void benchmark_finish_window(void)
 {
+    s3_cpu_end(&benchmark_window.cpu);
     struct mem_xbar_stats fabric;
     mem_xbar_snapshot(&fabric);
     const struct s3_draw_rnd_stats *now = s3_draw_rnd_stats();
@@ -157,6 +183,19 @@ static void benchmark_finish_window(void)
     w->sw_ticks = now->sw_ticks - benchmark_before.sw_ticks;
     w->software = now->software - benchmark_before.software;
     w->xbar_cycles = fabric.window_cycles;
+    w->timing.clean_ticks = now->timing.clean_ticks - benchmark_before.timing.clean_ticks;
+    w->timing.wait_ticks = now->timing.wait_ticks - benchmark_before.timing.wait_ticks;
+    w->timing.finish_ticks = now->timing.finish_ticks - benchmark_before.timing.finish_ticks;
+    w->timing.cache_ops = now->timing.cache_ops - benchmark_before.timing.cache_ops;
+    w->glyph_cpu_ticks = now->glyph_cpu_ticks - benchmark_before.glyph_cpu_ticks;
+    benchmark_total.timing.clean_ticks += w->timing.clean_ticks;
+    benchmark_total.timing.wait_ticks += w->timing.wait_ticks;
+    benchmark_total.timing.finish_ticks += w->timing.finish_ticks;
+    benchmark_total.timing.cache_ops += w->timing.cache_ops;
+    benchmark_total.glyph_cpu_ticks += w->glyph_cpu_ticks;
+    benchmark_total.cpu.cycles += w->cpu.cycles;
+    benchmark_total.cpu.instructions += w->cpu.instructions;
+    for (unsigned i = 0; i < 8; ++i) benchmark_total.cpu.events[i] += w->cpu.events[i];
     for (unsigned i = 0; i < 6; ++i) {
         w->draw.perf[i] = now->perf[i] - benchmark_before.perf[i];
         w->copy.perf[i] = now->copy.perf[i] - benchmark_before.copy.perf[i];
@@ -349,6 +388,10 @@ static void begin_demo(void)
 
 void s3_lvgl_stop_demo(void)
 {
+    if (benchmark_running) {
+        struct s3_cpu_counters discarded;
+        s3_cpu_end(&discarded);
+    }
     benchmark_running = false;
     /* Widget destructors delete their own timers. Delete the object tree first,
      * then remove remaining demo timers such as benchmark's scene timer.
@@ -379,6 +422,8 @@ void s3_lvgl_start_widgets(void)
 
 static void benchmark_end(const lv_demo_benchmark_summary_t *summary)
 {
+    struct s3_cpu_counters discarded;
+    s3_cpu_end(&discarded);
     benchmark_running = false;
     benchmark_print("ALL", &benchmark_total);
     for (unsigned i = 0; summary->scenes[i].create_cb; ++i) {

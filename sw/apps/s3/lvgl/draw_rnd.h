@@ -8,6 +8,7 @@
 #include "lvgl.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "../s3_platform.h"
 enum { S3_RND_BATCH_COMMANDS = 32, S3_RND_TASK_TYPES = 16 };
 struct s3_rnd_measurement {
     uint64_t ticks;
@@ -26,11 +27,15 @@ struct s3_draw_rnd_stats {
     uint64_t sw_ticks;
     uint64_t perf[6];
     struct s3_rnd_measurement copy;
+    struct s3_rnd_timing timing;
+    uint64_t glyph_cpu_ticks;
 };
 void s3_draw_rnd_init(void);
 void s3_draw_rnd_enable(bool enabled);
 bool s3_draw_rnd_enabled(void);
 const struct s3_draw_rnd_stats *s3_draw_rnd_stats(void);
 void s3_draw_rnd_print_stats(void);
+/* Immutable, already-clean DDR source, also exposed to the host pixel model. */
+struct rnd_range s3_draw_rnd_glyph_cache(void);
 void s3_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const lv_area_t *area);
 #endif

@@ -6,11 +6,29 @@
 #include "rnd.h"
 #include "cache.h"
 #include "plic.h"
+#include "clint.h"
 
 _Static_assert(sizeof(struct rnd_command) == 64, "RND descriptor size");
 static struct rnd_batch active;
 static rnd_callback completion;
 static void *completion_context;
+static struct rnd_timing timing;
+
+/* Keep the driver usable without linking the CLINT interrupt/timer service. */
+static uint64_t ticks(void)
+{
+    uint32_t high;
+    uint32_t low;
+    uint32_t again;
+    do {
+        high = mmio_read32(EDRV32_CLINT_BASE + CLINT_MTIME_HI);
+        low = mmio_read32(EDRV32_CLINT_BASE + CLINT_MTIME_LO);
+        again = mmio_read32(EDRV32_CLINT_BASE + CLINT_MTIME_HI);
+    } while (high != again);
+    return ((uint64_t)high << 32) | low;
+}
+
+const struct rnd_timing *rnd_last_timing(void) { return &timing; }
 
 static uint32_t xy(uint16_t x, uint16_t y)
 {
@@ -124,18 +142,23 @@ uint32_t rnd_physical(const void *cpu_address)
 void rnd_submit(const struct rnd_batch *batch)
 {
     active = *batch;
+    uint64_t start = ticks();
     cache_clean((uintptr_t)batch->commands, (uint32_t)batch->count * 64u);
     for (size_t i = 0; i < batch->source_count; ++i) {
         cache_clean((uintptr_t)batch->sources[i].address, batch->sources[i].bytes);
     }
+    timing.clean_ticks = ticks() - start;
+    timing.cache_ops = 1u + batch->source_count + batch->target_count;
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_DESC_BASE_OFFSET,
                  rnd_physical(batch->commands));
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_DESC_COUNT_OFFSET, batch->count);
+    timing.doorbell_tick = ticks();
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_DOORBELL_OFFSET, 1);
 }
 
 static struct rnd_result finish(void)
 {
+    uint64_t start = ticks();
     /* rnd 6: ERROR may precede completion of already-issued AXI transactions. */
     while (mmio_read32(EDRV32_RND_BASE + EDRV32_RND_STATUS_OFFSET) &
            EDRV32_RND_STATUS_BUSY_MASK) {
@@ -149,6 +172,7 @@ static struct rnd_result finish(void)
         cache_invalidate((uintptr_t)active.targets[i].address, active.targets[i].bytes);
     }
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_IRQ_STAT_OFFSET, result.irq);
+    timing.finish_ticks = ticks() - start;
     return result;
 }
 

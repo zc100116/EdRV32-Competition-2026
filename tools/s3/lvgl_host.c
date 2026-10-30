@@ -5,6 +5,7 @@
  */
 #include "s3_lvgl.h"
 #include "s3_platform.h"
+#include "draw_rnd.h"
 #include "mem_xbar.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@ static uint32_t frame_count;
 static const void *scan_surface;
 static uint32_t scan_bytes;
 static void (*execute_batch)(const struct rnd_batch *);
+static struct s3_rnd_timing timing;
 
 void s3_host_install(void (*execute)(const struct rnd_batch *)) { execute_batch = execute; }
 void s3_host_time(uint32_t value) { milliseconds = value; }
@@ -37,9 +39,26 @@ void s3_rnd_run(const struct rnd_batch *batch)
             abort();
         }
     }
-    execute_batch(batch);
+    timing = (struct s3_rnd_timing) {
+        .cache_ops = 1u + batch->source_count + batch->target_count
+    };
+    /* rnd_ref consumes batch sources as its address space. Cached A8 bytes
+     * are already clean and immutable on board; expose them only to the model,
+     * without counting them as another per-doorbell clean.
+     */
+    struct rnd_range sources[batch->source_count + 1u];
+    for (size_t i = 0; i < batch->source_count; ++i) sources[i] = batch->sources[i];
+    sources[batch->source_count] = s3_draw_rnd_glyph_cache();
+    struct rnd_batch model = *batch;
+    model.sources = sources;
+    model.source_count++;
+    execute_batch(&model);
 }
 uint64_t s3_rnd_elapsed_ticks(void) { return 0; }
+struct s3_rnd_timing s3_rnd_last_timing(void) { return timing; }
+void s3_cpu_begin(void) { }
+void s3_cpu_end(struct s3_cpu_counters *c) { *c = (struct s3_cpu_counters) {0}; }
+_Noreturn void s3_stop(void) { abort(); }
 /* No hardware counters or advancing tick inside a synchronous host dispatch. */
 void __wrap_rnd_read_perf(uint32_t perf[6])
 {

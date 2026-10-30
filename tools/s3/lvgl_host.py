@@ -29,8 +29,10 @@ def build():
                 "build/s3/lvgl_assets.c"]
     objects = []
     sources.append("third_party/lvgl/demos/lv_demos.c")
-    config_time = max((ROOT / "sw/apps/s3/lvgl/lv_conf.h").stat().st_mtime,
-                      Path(__file__).stat().st_mtime)
+    headers = [p for directory in ("sw/apps/s3/lvgl", "sw/drivers/include", "sw/bsp/include")
+               for p in (ROOT / directory).rglob("*.h")]
+    headers.append(ROOT / "sw/apps/s3/s3_platform.h")
+    config_time = max(Path(__file__).stat().st_mtime, *(p.stat().st_mtime for p in headers))
     for source in sources:
         obj = OUT / "obj" / (source + ".o")
         objects.append(str(obj))

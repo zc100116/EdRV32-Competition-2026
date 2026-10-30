@@ -17,6 +17,7 @@ static uint32_t submitted_frame;
 static uint16_t scroll_x;
 static uint16_t scroll_y;
 static uint64_t rnd_elapsed_ticks;
+static volatile uint64_t rnd_irq_tick;
 
 void s3_puts(const char *text)
 {
@@ -45,7 +46,7 @@ void s3_put_hex(uint32_t value)
     }
 }
 
-static _Noreturn void stop(void)
+_Noreturn void s3_stop(void)
 {
     __asm__ volatile ("csrci mstatus, 8" ::: "memory");
     for (;;) {
@@ -62,7 +63,7 @@ static void rnd_event(const struct rnd_result *result, void *context)
         s3_puts(" CUR_DESC=");
         s3_put_hex(result->cur_desc);
         s3_puts("\r\n");
-        stop();
+        s3_stop();
     }
     rnd_complete = 1;
 }
@@ -74,7 +75,7 @@ static void disp_event(const struct engine_event *event, void *context)
         s3_puts("DISP ERR_CODE=");
         s3_put_hex(event->error);
         s3_puts("\r\n");
-        stop();
+        s3_stop();
     }
     if (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) {
         ++frames;
@@ -89,11 +90,13 @@ static void disp_event(const struct engine_event *event, void *context)
 
 static void __attribute__((interrupt("machine"), aligned(4))) s3_interrupt(void)
 {
+    uint64_t entered = s3_ticks();
     uint32_t cause;
     __asm__ volatile ("csrr %0, mcause" : "=r"(cause));
     if (cause == 0x8000000bu) {
         unsigned int source = plic_claim();
         if (source == EDRV32_PLIC_SOURCE_RND) {
+            rnd_irq_tick = entered;
             rnd_irq_handle();
         } else if (source != EDRV32_PLIC_SOURCE_NONE) {
             /* Only DISP is enabled beside RND; registration is owned here. */
@@ -110,7 +113,7 @@ static void __attribute__((interrupt("machine"), aligned(4))) s3_interrupt(void)
         s3_puts(" mepc=");
         s3_put_hex(pc);
         s3_puts("\r\n");
-        stop();
+        s3_stop();
     }
 }
 
@@ -188,6 +191,64 @@ void s3_rnd_run(const struct rnd_batch *batch)
 }
 
 uint64_t s3_rnd_elapsed_ticks(void) { return rnd_elapsed_ticks; }
+
+struct s3_rnd_timing s3_rnd_last_timing(void)
+{
+    const struct rnd_timing *t = rnd_last_timing();
+    return (struct s3_rnd_timing) {
+        t->clean_ticks, rnd_irq_tick - t->doorbell_tick, t->finish_ticks, t->cache_ops
+    };
+}
+
+#define CSR_WRITE(csr, value) __asm__ volatile ("csrw " #csr ", %0" :: "r"(value) : "memory")
+#define CSR_READ(csr, value) __asm__ volatile ("csrr %0, " #csr : "=r"(value) :: "memory")
+#define SET_COUNTER(index, event) do { \
+    CSR_WRITE(mhpmevent##index, event); \
+    CSR_WRITE(mhpmcounter##index, 0u); \
+    CSR_WRITE(mhpmcounter##index##h, 0u); \
+} while (0)
+#define READ_COUNTER(low_csr, high_csr, destination) do { \
+    uint32_t low; \
+    uint32_t high; \
+    CSR_READ(low_csr, low); \
+    CSR_READ(high_csr, high); \
+    destination = ((uint64_t)high << 32) | low; \
+} while (0)
+
+void s3_cpu_begin(void)
+{
+    CSR_WRITE(mcountinhibit, 0x7fdu);
+    SET_COUNTER(3, 9u);
+    SET_COUNTER(4, 10u);
+    SET_COUNTER(5, 11u);
+    SET_COUNTER(6, 12u);
+    SET_COUNTER(7, 13u);
+    SET_COUNTER(8, 14u);
+    SET_COUNTER(9, 15u);
+    SET_COUNTER(10, 16u);
+    CSR_WRITE(mcycle, 0u);
+    CSR_WRITE(mcycleh, 0u);
+    CSR_WRITE(minstret, 0u);
+    CSR_WRITE(minstreth, 0u);
+    CSR_WRITE(mcountinhibit, 0u);
+}
+
+void s3_cpu_end(struct s3_cpu_counters *c)
+{
+    /* Freeze CY/IR/HPM together; no high/low retry is needed while frozen. */
+    CSR_WRITE(mcountinhibit, 0x7fdu);
+    READ_COUNTER(mcycle, mcycleh, c->cycles);
+    READ_COUNTER(minstret, minstreth, c->instructions);
+    READ_COUNTER(mhpmcounter3, mhpmcounter3h, c->events[0]);
+    READ_COUNTER(mhpmcounter4, mhpmcounter4h, c->events[1]);
+    READ_COUNTER(mhpmcounter5, mhpmcounter5h, c->events[2]);
+    READ_COUNTER(mhpmcounter6, mhpmcounter6h, c->events[3]);
+    READ_COUNTER(mhpmcounter7, mhpmcounter7h, c->events[4]);
+    READ_COUNTER(mhpmcounter8, mhpmcounter8h, c->events[5]);
+    READ_COUNTER(mhpmcounter9, mhpmcounter9h, c->events[6]);
+    READ_COUNTER(mhpmcounter10, mhpmcounter10h, c->events[7]);
+    CSR_WRITE(mcountinhibit, 0x7f8u);
+}
 
 void s3_display_stop(void)
 {

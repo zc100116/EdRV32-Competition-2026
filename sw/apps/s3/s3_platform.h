@@ -30,6 +30,22 @@ void s3_wait_frame(void);
 void s3_rnd_run(const struct rnd_batch *batch);
 /* Last synchronous run, including submit/cache maintenance and DONE IRQ service. */
 uint64_t s3_rnd_elapsed_ticks(void);
+struct s3_rnd_timing {
+    uint64_t clean_ticks;
+    uint64_t wait_ticks;
+    uint64_t finish_ticks;
+    uint32_t cache_ops;
+};
+struct s3_rnd_timing s3_rnd_last_timing(void);
+/* cpu-spec 5/7.1: cycle, instret and events 9--16 in one scene window. */
+struct s3_cpu_counters {
+    uint64_t cycles;
+    uint64_t instructions;
+    uint64_t events[8];
+};
+void s3_cpu_begin(void);
+void s3_cpu_end(struct s3_cpu_counters *counters);
+_Noreturn void s3_stop(void);
 /* Stop and await IDLE before changing ownership; NULL L1 keeps L1 disabled. */
 void s3_display_begin(const void *l0, uint32_t l0_stride,
                       const void *l1, uint32_t l1_stride);

@@ -62,19 +62,22 @@ DDR app 链接窗口：CPU `0x90000000` / 物理 `0x10000000`，64 MiB。
 | `reference` | 1843200 | 64 B；RN-17 保存 SW 图像 |
 | `edges` | 921600 | 每像素 1 B；RN-17 coverage 并集 |
 | `temporary` | 6291456 | 64 B；仅 RND 阴影/模糊暂存 |
-| `glyphs` | 524288 | 64 B；逐字形的批内 A8 数据副本 |
+| `glyph_cache` | 1046976 | 64 B；启用字体的持久 A8 字形，逐字形 64 B 对齐 |
+| `glyph_entries` | 13904 | 11 × 158 项；按字体指针、glyph index 索引的 offset/stride |
 | `commands` | 2048 | 64 B；32 条 × 64 B |
 | COPY descriptor | 64 | 64 B；脏区同步 |
 | 原创 mark 像素 | 8192 | 64 B；DDR 常量 |
 
-上述主缓冲/池合计约 36.66 MiB，另加 LVGL 的小状态、字体/图像常量、程序和栈。
+上述主缓冲/池合计约 37.17 MiB，另加 LVGL 的小状态、字体/图像常量、程序和栈。
 LVGL 的临时 draw buffers、解码结果均从这一个 DDR 静态池分配。
 RND 专用 scratch 初始化时通过 BSP `cache_clean_invalidate` 交给硬件，之后 CPU 不访问其内容。
 
 cache 交替规则（rnd 5.4 / SoC 7.4）：
 
 1. CPU 对目标的写入在 RND RMW 前 clean：目标涉及的完整行作为 batch source。
-2. 命令、CPU 准备的 glyph/image/palette source 交给统一驱动 clean，然后 `s3_rnd_run(batch)`。
+2. 相邻/重叠的 image/palette/目标 source 合并后，命令和 source 由统一驱动 clean，
+   然后 `s3_rnd_run(batch)`；目标作为 source 的 clean 始终保留。
+   新 glyph 首次转为 A8 后单独 clean 一次，后续直接引用不再登记 source。
 3. 共享 DONE IRQ 确认所有写响应结束，统一驱动 invalidate batch target，返回后通知 LVGL 任务完成。
 4. CPU 软件绘制单元随后可读写这些 cache 行；下一次 RND 再执行第 1 步。
 5. 目标范围按整行交接，避免部分 cache 行 invalidate 丢弃邻近 CPU 脏像素。
@@ -103,8 +106,12 @@ LINE、ARC、TRIANGLE、MASK、VECTOR、3D、径向/锥形/任意方向复杂渐
 
 v9.6 LABEL 使用 `lv_draw_label_iterate_characters`，回调收到 glyph descriptor 后还需调用
 `lv_font_get_glyph_bitmap_internal(g, _draw_buf)` 取得 A8 draw buffer。
-这个 buffer 会被下一 glyph 改写并在 iterator 结束时释放，因此先复制到静态批次 staging；
-不能把字体 glyph_data 当作持久源。LETTER 使用同一回调和 `lv_draw_unit_draw_letter`。
+这个 buffer 会被下一 glyph 改写并在 iterator 结束时释放，因此首次转换后复制到静态 DDR
+A8 缓存；后续以（resolved font 指针、glyph index）查表直接生成 GLYPH，不再转换/复制。
+11 个启用字体各含 158 个 descriptor；容量为所有字形
+`sum(align64(align32(box_w) * box_h)) = 1046976 B`，各字体分项见 `draw_rnd.c` 注释。
+缓存跨场景/演示保留，不驱逐；容量满打印 `S3 glyph cache full` 并停止。旧 `glyphs[]` 暂存区删除。
+LETTER 使用同一回调和 `lv_draw_unit_draw_letter`。
 `lv_color_to_u32` 带 FF alpha，进入 RND 的 COLOR/RC_COLOR 前显式截成 RGB888，OPA 单独编码。
 
 `s3_draw_rnd_print_stats` 输出累计每类型 claimed/unclaimed 和绘制任务的 commands/doorbells
@@ -121,10 +128,10 @@ RN-17 另输出该帧 RND 渲染的增量，SW 参考渲染的任务数不混入
 benchmark 运行期间暂停原有每秒 fps 行，避免在场景窗口内打印。
 
 ```text
-LVGL split scene="Empty screen" frames=N render_ms=... rnd_ms=... sw_ms=... other_ms=... doorbells=... commands=... sw_tasks=... perf0_cycles=... perf1_pixels=... perf2_rd_beats=... perf3_wr_beats=... perf4_rd_wait_cycles=... perf5_wr_wait_cycles=... perf0_ms=... draw_rnd_ms=... draw_doorbells=... draw_perf0_cycles=... copy_rnd_ms=... copy_doorbells=... copy_perf0_cycles=... copy_perf0_ms=... xbar_window_cycles=... xbar_rnd_p4_rd_txn_total=... xbar_rnd_p4_wr_txn_total=... xbar_rnd_p4_rd_beats_total=... xbar_rnd_p4_wr_beats_total=... xbar_rnd_p4_wait_sum_cycles_total=... xbar_disp_p0_rd_txn_total=... xbar_disp_p0_wr_txn_total=... xbar_disp_p0_rd_beats_total=... xbar_disp_p0_wr_beats_total=... xbar_disp_p0_wait_sum_cycles_total=...
+LVGL split scene="Empty screen" frames=N render_ms=... rnd_ms=... sw_ms=... other_ms=... doorbells=... commands=... sw_tasks=... perf0_cycles=... perf1_pixels=... perf2_rd_beats=... perf3_wr_beats=... perf4_rd_wait_cycles=... perf5_wr_wait_cycles=... perf0_ms=... draw_rnd_ms=... draw_doorbells=... draw_perf0_cycles=... copy_rnd_ms=... copy_doorbells=... copy_perf0_cycles=... copy_perf0_ms=... xbar_window_cycles=... xbar_rnd_p4_rd_txn_total=... xbar_rnd_p4_wr_txn_total=... xbar_rnd_p4_rd_beats_total=... xbar_rnd_p4_wr_beats_total=... xbar_rnd_p4_wait_sum_cycles_total=... xbar_disp_p0_rd_txn_total=... xbar_disp_p0_wr_txn_total=... xbar_disp_p0_rd_beats_total=... xbar_disp_p0_wr_beats_total=... xbar_disp_p0_wait_sum_cycles_total=... clean_ms=... wait_ms=... finish_ms=... cache_ops=... glyph_cpu_ms=... cpu_cycles=... cpu_instructions=... cpu_load_use_cycles=... cpu_divide_cycles=... cpu_device_wait_cycles=... cpu_frontend_empty_cycles=... cpu_icache_misses=... cpu_dcache_misses=... cpu_dirty_writebacks=... cpu_branch_mispredicts=... cpu_ipc=... icache_mpki=... dcache_mpki=...
 ```
 
-除 `frames`、`xbar_*` 外，所有数字都是**同窗口累计值 / 实际渲染帧数**，保留三位小数
+除 `frames`、`xbar_*`、IPC 和 MPKI 比率外，所有数字都是**同窗口累计值 / 实际渲染帧数**，保留三位小数
 （截断）；`ALL` 按所有场景的帧数加权，不是各场景平均值的等权平均。
 
 | 字段 | 单位和含义 |
@@ -143,6 +150,17 @@ LVGL split scene="Empty screen" frames=N render_ms=... rnd_ms=... sw_ms=... othe
 | `copy_rnd_ms` / `copy_doorbells` / `copy_perf0_cycles` / `copy_perf0_ms` | 每帧 DIRECT 同步 COPY 的墙钟 ms / 门铃数 / PERF0 周期及其 125 MHz 换算 ms |
 | `xbar_window_cycles` | mem_xbar 窗口总 clk_mem 周期数；场景首尾用已有 SNAPSHOT\|CLEAR 接口分窗 |
 | `xbar_rnd_p4_*_total` / `xbar_disp_p0_*_total` | 同窗口 RND P4 / DISP P0 的总 RD/WR_TXN、RD/WR_BEAT、WAIT_SUM；单位为事务、256-bit beat、仲裁等待周期；不是每帧均值 |
+| `clean_ms` | 每帧 RND 提交前的命令/source clean，加首次字形缓存 clean 的 ms；后者仍属原 `other_ms` |
+| `wait_ms` | 每帧 DOORBELL 写前到共享中断函数入口时间戳的 ms；减 `perf0_ms` 得中断延迟（含时间戳/MMIO 边界成本） |
+| `finish_ms` | 每帧驱动 `finish()` 的 BUSY/状态 MMIO、target invalidate、IRQ 清位时间 |
+| `cache_ops` | 每帧上述 RND clean/invalidate 调用次数，含 COPY 和首次字形 clean；不含 DISP 展示前 clean、初始化 scratch 维护 |
+| `glyph_cpu_ms` | 每帧字形回调的转换/复制或查表、比较 mask、命令生成 ms；减去回调内同步提交时间和首次 clean |
+| `cpu_cycles` / `cpu_instructions` | 场景完整窗口的周期 / 退休指令数，均除以渲染帧数；包含 IRQ 和等待 DISP/RND 的空转 |
+| `cpu_load_use_cycles` / `cpu_divide_cycles` | HPM 9 / 10：每帧 load-use / 除法停顿周期 |
+| `cpu_device_wait_cycles` / `cpu_frontend_empty_cycles` | HPM 11 / 12：每帧设备等待 / 前端断流周期 |
+| `cpu_icache_misses` / `cpu_dcache_misses` | HPM 13 / 14：每帧 I$ / D$ 缺失次数 |
+| `cpu_dirty_writebacks` / `cpu_branch_mispredicts` | HPM 15 / 16：每帧 D$ 脏写回 / 分支误预测次数 |
+| `cpu_ipc` / `icache_mpki` / `dcache_mpki` | 窗口退休指令/周期、I$/D$ 缺失 × 1000 / 退休指令；ALL 用总计数重算比率 |
 
 `rnd_ms = draw_rnd_ms + copy_rnd_ms`（打印截断可能相差 0.001 ms）。每次同步
 `s3_rnd_run` 返回后、下一次门铃前读 PERF0–5 六个寄存器，并用 64 位软件累计，
@@ -150,11 +168,16 @@ LVGL split scene="Empty screen" frames=N render_ms=... rnd_ms=... sw_ms=... othe
 计时包装，`LV_OS_NONE` 下包含该任务的完整同步执行，不改变认领或绘制实现。
 `other_ms` 也包含门铃后的 PERF 读取、软件累计等测量开销；场景之间的 UART 输出不进入下一 mem_xbar 窗口。
 mem_xbar 单窗口计数器按规格为饱和计数，原值直接输出；ALL 累加各场景快照。
+CPU 用 cpu-spec 5/7.1 的 mcycle/minstret、HPM3–10（事件 9–16），以
+`mcountinhibit=0x7fd` 同时冻结后清零，写 0 启用，结束再同时冻结读取；UART 场景输出不计入 CPU 窗口。
+事件按规格延迟一周期；结束/退出 benchmark 后恢复 CY/IR 运行并冻结 HPM。
+新增字段全部追加在原行末尾，原字段口径不变；`clean_ms+wait_ms+finish_ms`
+不包含部分提交/中断返回/计数开销，且首次 glyph clean 位于原 `other_ms`，不要求三者等于 `rnd_ms`。
 
 新行的 render **包含布局和同步 COPY**；LVGL 原生 Benchmark Summary 的 render 从
 RENDER_START 开始，**不包含**此前的 DIRECT 同步 COPY/布局，两者口径有意不同。
 原生 CPU 百分比仍按 `lv_timer_handler` 时间计算，包含 RND/SWITCH 空转，不代表纯 CPU 工作量。
-主机 tick 由调用者推进，同步 dispatch 内不推进时间，故主机墙钟/PERF/mem_xbar 数字为零，
+主机 tick 由调用者推进，同步 dispatch 内不推进时间，故主机墙钟/PERF/mem_xbar/HPM 数字及 IPC/MPKI 为零；cache_ops 仍按真实调用计数，
 只用于检查输出、分窗和任务/门铃计数，不能作为板上性能。
 
 `LV_DRAW_LAYER_SIMPLE_BUF_SIZE = 96 * 1024 = 98304 B`，大于 RGB565
@@ -164,8 +187,8 @@ RENDER_START 开始，**不包含**此前的 DIRECT 同步 COPY/布局，两者�
 
 ```sh
 git submodule update --init third_party/lvgl
-python3 tools/s3/lvgl_host.py
-python3 tools/s3/rn17.py --no-build > build/s3/lvgl/rn17.log 2>&1
+flock /tmp/edrv32-sim.lock python3 tools/s3/lvgl_host.py
+flock /tmp/edrv32-sim.lock python3 tools/s3/rn17.py --no-build > build/s3/lvgl/rn17.log 2>&1
 . ~/.local/opt/edrv32/env.sh
 python3 tools/s3/lvgl_target.py > build/s3/lvgl/target-build.log 2>&1
 git diff --check

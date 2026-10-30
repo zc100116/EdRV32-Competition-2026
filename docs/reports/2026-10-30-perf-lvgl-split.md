@@ -81,3 +81,55 @@ rg -c '^LVGL split ' build/s3/lvgl/split-smoke.log # 18
 - mem_xbar：RND 端口平均每个事务的仲裁等待 3.2–3.6 周期；DISP 读占 0.028 beat/周期。各场景窗口内 RND 的写 beat 都低于 0.02 beat/周期。
 - Container 系列 RND 内部计算受限：读、写等待各约 5%，0.10–0.16 像素/周期，每帧读 24–51 万 beat。
 - 文字类 GLYPH 受读延迟限制：读等待 80%，每个读事务约 1.4 beat。
+
+
+## T-LVP2
+
+- 实现：本节所在提交，基线 `e98d739c`；配置、工具和 B3R bitstream 与上文相同，无 RTL 改动。
+- 静态 DDR A8 缓存以（resolved font 指针、glyph index）索引，首次转换/复制后 clean 一次，后续直接引用。
+- lv_conf 启用 Montserrat 12/14/16/18/20/22/24/26/28/32/40，各 158 个 descriptor。
+- 容量 `sum(align64(align32(box_w)*box_h)) = 1046976 B`，索引 13904 B；替代原 524288 B 暂存区。
+- 缓存跨场景保留；满时打印 `S3 glyph cache full` 并停止，无暂存回退。
+- 非缓存 source 的相邻/重叠范围合并（含 COPY），目标作为 source 的 clean 保留；batch 仍为 32，同步逐任务提交。
+- 原 split 字段不变，行尾新增 clean/wait/finish、cache_ops、glyph_cpu_ms，以及周期/指令/HPM/IPC/MPKI。
+- clean 包括首次 glyph clean；glyph_cpu 减去其 clean 和回调内同步提交；其他旧字段口径不变。
+- wait 从 DOORBELL 写前计至共享中断函数入口时间戳，减 PERF0 ms 得中断延迟（含时间戳边界成本）。
+- HPM3–10 配置事件 9–16，和 CY/IR 同时冻结/清零/启用；完整场景窗口含 IRQ/等待，排除场景输出。
+- 主机 PERF/mem_xbar/HPM、时间和 IPC/MPKI 均为 0；cache_ops 按调用计数，不代表板上速度。
+- 板上计时、HPM 和提速结果留给卡片；本节不填写未经测量的板上数字。
+- RV32 严格构建 0 warning / 0 error；ELF **1235372 B**；size：text **1128324**、data **1408**、bss **53742912 B**。
+- 主机严格构建 **511** 个源文件通过；本次无 RTL lint 对象；`git diff --check` 通过。
+- split 冒烟 **18 行 × 52 字段**，原 34 字段名称/顺序保留；16 场景 + ALL + 重启首场景均正常。
+- 首轮 **28 帧 / 1329 门铃 / 8716 命令 / 24 SW 任务**；门铃/SW 与 T-LVP1 相同，命令少 18。
+- ALL 每帧门铃 **47.464**、命令 **311.285**、cache_ops **161.750**；所有硬件计数和时间为 0。
+- Screen sized text 每帧门铃 **54.500**、命令 **1585.500**、cache_ops **180.000**，即 **3.303 次/门铃**（含冷填充）。
+- 该场景冒烟回调中纯 GLYPH 批次 **54 门铃 / 1654 字形 / 162 维护**，即 **3.000 维护/门铃**，约 30.63 字形/门铃。
+- 日志：`target-build.log`、`host-build.log`、`split-smoke.log`、`rn17.log`；RN-17 表为 `rn17-results.md`。
+- RN-17 **11/11 PASS**，两次 benchmark→menu 生命周期检查通过；最大 >1 LSB 比例 **0.462348%**。
+- 改前对照取 `e98d739c` 的 draw/service/host 三个原文件重链，lv_conf/第三方对象相同；也为 **11/11 PASS**。
+- 两版每帧 full/edge 最大 LSB、RND/SW 任务数全部一致；**8 帧 SW/RND 图像逐像素相同**。
+- 另 3 帧差异均限顶部监控标题（y<48）和右下角 sysmon（x≥1024、y≥656），其余像素完全相同。
+- Linux 原生 sysmon 采样主机 CPU；benchmark 标题也显示该值，三帧统计差如下（新−旧；未列帧全相同）：
+
+| 帧 | 改前 >1 像素 | 改后 >1 像素 | Δ bins（0 / 1 / 2 / 3–4 / ≥5） |
+|---|---:|---:|---|
+| benchmark-02-rectangle | 151 | 128 | +993 / −970 / −23 / 0 / 0 |
+| benchmark-05-argb-images | 872 | 885 | −52 / +39 / +13 / 0 / 0 |
+| benchmark-06-rotated-images | 135 | 139 | +60 / −64 / +4 / 0 / 0 |
+
+- 实际 rnd_ref 总量：改前 **541 / 2682 / 21164283**、改后 **541 / 2678 / 21162779**（门铃/命令/像素）。
+- README 历史表早于 T-LVP1 的 96 KiB layer buffer 调整；opa_layer 的 278/0 任务在改前 e98 已为 **151/0**。
+- 对照原始表/图：`build/s3/lvgl-before/`；逐像素检查：`build/s3/lvgl/compare-before.py` / `.log`。
+
+复现（单线程，生成物均在本 worktree 的 `build/s3/lvgl/`）：
+```sh
+. ~/.local/opt/edrv32/env.sh
+flock /tmp/edrv32-sim.lock make -C sw PROGRAM=s3 MEMORY=ddr_app -j1
+riscv-none-elf-size build/sw/s3/s3.elf
+flock /tmp/edrv32-sim.lock python3 tools/s3/lvgl_host.py
+flock /tmp/edrv32-sim.lock python3 tools/s3/rn17.py --no-build
+```
+冒烟使用上文相同的 16 场景/重启/退出序列；另在 batch 回调解码 opcode=3 统计 GLYPH，
+从 `s3_rnd_last_timing()` 读取 driver cache_ops（主机桩按 batch source/target 数计数）。
+冒烟/像素对照命令：`flock /tmp/edrv32-sim.lock python3 build/s3/lvgl/split-smoke.py`、
+`python3 build/s3/lvgl/compare-before.py`；改前可在 `e98d739c` 检出上用上述 host/RN-17 命令复现。

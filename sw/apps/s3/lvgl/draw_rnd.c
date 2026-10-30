@@ -14,15 +14,30 @@
 #include "src/font/lv_font_private.h"
 #include "src/misc/lv_area_private.h"
 
-enum { RND_UNIT = 2, GLYPH_BYTES = 512 * 1024, TEMP_BYTES = 6 * 1024 * 1024 };
+enum { RND_UNIT = 2, GLYPH_CACHE_BYTES = 1046976, TEMP_BYTES = 6 * 1024 * 1024 };
 static _Alignas(64) struct rnd_command commands[S3_RND_BATCH_COMMANDS];
-static _Alignas(64) uint8_t glyphs[GLYPH_BYTES];
+/* lv_conf enables Montserrat 12/14/16/18/20/22/24/26/28/32/40, each 158
+ * descriptors (including reserved/empty). Sum align64(align32(box_w)*box_h):
+ * 51264+55808+61504+70848+77248+84416+90752+102720+113024+133312+206080
+ * = 1046976 B. Per-glyph 64 B alignment keeps a newly written glyph from
+ * dirtying an already-clean glyph's cache line. No eviction or staging path.
+ */
+static _Alignas(64) uint8_t glyph_cache[GLYPH_CACHE_BYTES];
+/* Populate font slots on first use, so unused enabled font data can still be
+ * removed by the linker. All configured fonts have 158 glyph descriptors.
+ */
+static const lv_font_t *fonts[11];
+static struct glyph_entry {
+    uint32_t offset_plus_one;
+    uint16_t stride;
+} glyph_entries[sizeof(fonts) / sizeof(fonts[0])][158];
 static _Alignas(64) uint8_t temporary[TEMP_BYTES];
-static struct rnd_range sources[S3_RND_BATCH_COMMANDS + 2];
+static struct rnd_range sources[2]; /* Target plus the current image/decoded layer. */
 static struct rnd_range target;
 static uint16_t command_count;
 static unsigned source_count;
-static uint32_t glyph_bytes;
+static uint32_t glyph_cache_bytes;
+static uint64_t glyph_clean_ticks;
 static bool enabled = true;
 static struct s3_draw_rnd_stats stats;
 static bool initializing_sw;
@@ -65,6 +80,11 @@ static void run_batch(const struct rnd_batch *batch, bool copy)
 {
     uint32_t perf[6];
     s3_rnd_run(batch);
+    struct s3_rnd_timing timing = s3_rnd_last_timing();
+    stats.timing.clean_ticks += timing.clean_ticks;
+    stats.timing.wait_ticks += timing.wait_ticks;
+    stats.timing.finish_ticks += timing.finish_ticks;
+    stats.timing.cache_ops += timing.cache_ops;
     rnd_read_perf(perf);
     if (copy) {
         stats.copy.ticks += s3_rnd_elapsed_ticks();
@@ -147,8 +167,8 @@ static void submit(void)
      */
     run_batch(&batch, false);
     command_count = 0;
+    sources[0] = target;
     source_count = 1;
-    glyph_bytes = 0;
 }
 
 static struct rnd_command *next_command(void)
@@ -157,9 +177,32 @@ static struct rnd_command *next_command(void)
     return &commands[command_count++];
 }
 
+static void merge_source(struct rnd_range *ranges, unsigned *count,
+                         const void *address, uint32_t bytes)
+{
+    uintptr_t begin = (uintptr_t)address;
+    uintptr_t end = begin + bytes;
+    /* Collapse every overlap/adjacency, including a new range bridging two
+     * earlier ones. Target remains among the sources and is always cleaned.
+     */
+    for (unsigned i = 0; i < *count;) {
+        uintptr_t other = (uintptr_t)ranges[i].address;
+        uintptr_t stop = other + ranges[i].bytes;
+        if (begin <= stop && other <= end) {
+            begin = LV_MIN(begin, other);
+            end = LV_MAX(end, stop);
+            ranges[i] = ranges[--(*count)];
+            i = 0;
+        } else {
+            ++i;
+        }
+    }
+    ranges[(*count)++] = (struct rnd_range) { (const void *)begin, end - begin };
+}
+
 static void add_source(const void *address, uint32_t bytes)
 {
-    sources[source_count++] = (struct rnd_range) { address, bytes };
+    merge_source(sources, &source_count, address, bytes);
 }
 
 static void fill(lv_draw_task_t *t, const lv_draw_fill_dsc_t *d, const lv_area_t *a)
@@ -217,8 +260,8 @@ static void fill(lv_draw_task_t *t, const lv_draw_fill_dsc_t *d, const lv_area_t
     }
 }
 
-static void glyph(lv_draw_task_t *t, lv_draw_glyph_dsc_t *g,
-                  lv_draw_fill_dsc_t *f, const lv_area_t *fill_area)
+static void glyph_core(lv_draw_task_t *t, lv_draw_glyph_dsc_t *g,
+                       lv_draw_fill_dsc_t *f, const lv_area_t *fill_area)
 {
     if (f && fill_area) fill(t, f, fill_area);
     if (g == NULL) return;
@@ -229,23 +272,53 @@ static void glyph(lv_draw_task_t *t, lv_draw_glyph_dsc_t *g,
         }
         return;
     }
-    /* v9.6 does not fetch raster glyph_data before this callback. The returned
-     * A8 draw buffer is reused by the next glyph and released by the iterator.
-     * Copy it to DDR batch staging before returning from the callback.
-     */
-    const lv_draw_buf_t *bitmap = lv_font_get_glyph_bitmap_internal(g->g, g->_draw_buf);
-    s3_compare_mask(t, g->letter_coords, bitmap->data, bitmap->header.stride);
-    uint32_t bytes = bitmap->header.stride * bitmap->header.h;
-    if (command_count == S3_RND_BATCH_COMMANDS || glyph_bytes + bytes > GLYPH_BYTES)
-        submit();
-    uint8_t *data = glyphs + glyph_bytes;
-    lv_memcpy(data, bitmap->data, bytes);
-    glyph_bytes += LV_ROUND_UP(bytes, 64);
+    unsigned font = 0;
+    while (fonts[font] != NULL && fonts[font] != g->g->resolved_font) ++font;
+    if (fonts[font] == NULL) fonts[font] = g->g->resolved_font;
+    struct glyph_entry *entry = &glyph_entries[font][g->g->gid.index];
+    if (entry->offset_plus_one == 0) {
+        /* LVGL's iterator owns the reusable A8 buffer. Convert/copy only once
+         * and hand the immutable cache entry to RND (rnd 5.4 / SoC 7.4).
+         */
+        const lv_draw_buf_t *bitmap = lv_font_get_glyph_bitmap_internal(g->g, g->_draw_buf);
+        uint32_t bytes = bitmap->header.stride * bitmap->header.h;
+        uint32_t allocated = LV_ROUND_UP(bytes, 64);
+        if (glyph_cache_bytes + allocated > sizeof(glyph_cache)) {
+            s3_puts("S3 glyph cache full\r\n");
+            s3_stop();
+        }
+        uint8_t *data = glyph_cache + glyph_cache_bytes;
+        lv_memcpy(data, bitmap->data, bytes);
+        uint64_t clean_start = s3_ticks();
+        cache_clean((uintptr_t)data, bytes);
+        uint64_t elapsed = s3_ticks() - clean_start;
+        glyph_clean_ticks += elapsed;
+        stats.timing.clean_ticks += elapsed;
+        stats.timing.cache_ops++;
+        entry->offset_plus_one = glyph_cache_bytes + 1u;
+        entry->stride = bitmap->header.stride;
+        glyph_cache_bytes += allocated;
+    }
+    const uint8_t *data = glyph_cache + entry->offset_plus_one - 1u;
+    s3_compare_mask(t, g->letter_coords, data, entry->stride);
     struct rnd_common c = common(t, g->letter_coords, g->color, g->opa);
     c.src_fmt = RND_A8;
-    struct rnd_source src = { rnd_physical(data), bitmap->header.stride, 0, 0 };
+    struct rnd_source src = { rnd_physical(data), entry->stride, 0, 0 };
     rnd_glyph(next_command(), &c, &src);
-    add_source(data, bytes);
+}
+
+static void glyph(lv_draw_task_t *t, lv_draw_glyph_dsc_t *g,
+                  lv_draw_fill_dsc_t *f, const lv_area_t *fill_area)
+{
+    uint64_t start = s3_ticks();
+    uint64_t rnd_before = stats.rnd_ticks;
+    uint64_t clean_before = glyph_clean_ticks;
+    glyph_core(t, g, f, fill_area);
+    /* A full batch may submit inside next_command; keep its wait/clean outside
+     * the callback's CPU conversion/lookup/command measurement.
+     */
+    stats.glyph_cpu_ticks += s3_ticks() - start - (stats.rnd_ticks - rnd_before) -
+                            (glyph_clean_ticks - clean_before);
 }
 
 static uint16_t blend_mode(lv_blend_mode_t mode)
@@ -483,6 +556,10 @@ void s3_draw_rnd_init(void)
 void s3_draw_rnd_enable(bool value) { enabled = value; }
 bool s3_draw_rnd_enabled(void) { return enabled; }
 const struct s3_draw_rnd_stats *s3_draw_rnd_stats(void) { return &stats; }
+struct rnd_range s3_draw_rnd_glyph_cache(void)
+{
+    return (struct rnd_range) { glyph_cache, glyph_cache_bytes };
+}
 
 void s3_draw_rnd_print_stats(void)
 {
@@ -514,6 +591,9 @@ void s3_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const lv_area
         { src, (uint32_t)stride * (area->y2 + 1) },
         { dst, (uint32_t)stride * (area->y2 + 1) }
     };
-    struct rnd_batch batch = { &copy, 1, ranges, 2, &ranges[1], 1 };
+    struct rnd_range copy_target = ranges[1];
+    unsigned count = 1;
+    merge_source(ranges, &count, copy_target.address, copy_target.bytes);
+    struct rnd_batch batch = { &copy, 1, ranges, count, &copy_target, 1 };
     run_batch(&batch, true);
 }
