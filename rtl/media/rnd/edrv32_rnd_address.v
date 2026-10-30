@@ -60,7 +60,7 @@ module edrv32_rnd_address (
         mx_w & tile_mask_w);
     assign tile_y_w = (map_entry_i[13] ? tile_mask_w - (my_w & tile_mask_w) :
         my_w & tile_mask_w);
-    assign tile_pixel_w = ({20'd0, map_entry_i[11:0]} << (2 * tile_log2_w)) +
+    assign tile_pixel_w = ({20'd0, map_entry_i[11:0]} << (tile_log2_w << 1)) +
         (tile_y_w << tile_log2_w) + tile_x_w;
     assign pixel_bits_w = {3'd0, (op_w == 8'h08 ? tile_pixel_w : u_w)} << bits_log2_w;
     assign source_base_w = command_i[287:256];

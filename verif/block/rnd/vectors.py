@@ -31,7 +31,8 @@ def selections(tier):
                    for radius in (1, 31) for corner in (0, 4095)]
                 + [(12, (fmt, radius), 1) for fmt in (0, 1) for radius in (0, 31)]
                 + [(15, ('abort', phase), 1) for phase in (1, 2, 3)]
-                + [(19, 'random', seed) for seed in range(1, 11)])
+                + [(19, 'random', seed) for seed in range(1, 11)]
+                + [(20, axis, 1) for axis in ('horizontal', 'vertical')])
     cases = [(1, (fmt, opa, alpha), 1) for fmt in (0, 1)
              for opa in (0, 1, 128, 254, 255) for alpha in (0, 1, 128, 255)]
     cases += [(2, (fmt, name), 1) for fmt in (0, 1)
@@ -227,6 +228,17 @@ def configure(number, variant, seed):
             metadata['perf'] = 4
         if read_latency == 40:
             metadata['perf'] = -metadata['perf']
+    elif number == 20:
+        if variant == 'horizontal':
+            commands = [glyph(dst_stride=16384, src_fmt=3, src_base=SRC + 1,
+                              src_stride=65535, src_x=65535,
+                              rect=(-32768, 0, 4095, 1), clip=(4094, 0, 4095, 1))]
+        else:
+            # HFLIP retains the large vertical displacement while exercising flipped X.
+            mem_size = 0x100000
+            commands = [blit(dst_stride=8, src_fmt=1, src_base=SRC + 1,
+                             src_stride=8, src_y=65535, flags=1,
+                             rect=(0, -32768, 1, 4095), clip=(0, 4094, 1, 4095))]
     elif number == 19:
         mem_size = TILE + 4096 * 256 * 4 + 4096
         commands = []

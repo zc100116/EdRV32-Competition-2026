@@ -52,6 +52,9 @@ module edrv32_rnd_blit (
     localparam [2:0] S_SOURCE_DATA = 3'd2;
     localparam [2:0] S_LOAD_TARGET = 3'd3;
     localparam [2:0] S_TARGET_DATA = 3'd4;
+    localparam [2:0] S_LOAD_COORD = 3'd5;
+    localparam [2:0] S_LOAD_PRODUCT = 3'd6;
+    localparam [2:0] S_LOAD_ADDR = 3'd7;
     localparam [1:0] S_RENDER_IDLE = 2'd0;
     localparam [1:0] S_RENDER_STREAM = 2'd1;
     localparam [1:0] S_RENDER_DRAIN = 2'd2;
@@ -76,6 +79,31 @@ module edrv32_rnd_blit (
     reg [8:0] load_beat_r;
     reg [11:0] issue_pair_r;
     reg memory_valid_r;
+    reg source_valid_r;
+    reg opacity_valid_r;
+    reg [63:0] source_pixel1_r;
+    reg [63:0] source_pixel2_r;
+    reg [63:0] target_pixel1_r;
+    reg [63:0] target_pixel2_r;
+    reg [31:0] source_tag1_r;
+    reg [31:0] source_tag2_r;
+    reg [15:0] opacity_product_r [0:1];
+    reg [11:0] clip_left_r;
+    reg [11:0] clip_right_r;
+    reg [11:0] clip_bottom_r;
+    reg [16:0] source_x_offset_r;
+    reg [16:0] source_y_offset_r;
+    reg [16:0] source_x_r;
+    reg [16:0] source_y_r;
+    reg [31:0] source_product_r;
+    reg [31:0] target_product_r;
+    reg [31:0] source_base_r;
+    reg [31:0] target_base_r;
+    reg [31:0] source_addr_r;
+    reg [31:0] bank_target_r [0:1];
+    reg [12:0] row_pixels_r;
+    reg [11:0] row_pairs_r;
+    reg [9:0] row_beats_r;
     reg [10:0] memory_pair_r;
     reg [8:0] write_beat_r;
     wire [7:0] unused_op_w;
@@ -94,9 +122,6 @@ module edrv32_rnd_blit (
     wire [17:0] row_pixels_w;
     wire [11:0] row_pairs_w;
     wire [9:0] row_beats_w;
-    wire [31:0] source_x_w;
-    wire [31:0] source_y_w;
-    wire [31:0] target_y_w;
     wire [255:0] src_data_w [0:1];
     wire [255:0] dst_data_w [0:1];
     wire [255:0] render_src_shift_w;
@@ -115,20 +140,20 @@ module edrv32_rnd_blit (
     wire unused_geometry_w;
 
     function automatic [7:0] opacity;
-        input [7:0] alpha_i;
-        input [7:0] opa_i;
+        input [15:0] product_i;
         reg [15:0] biased;
         reg [15:0] rounded;
         reg [7:0] unused_low;
         begin
-            biased = alpha_i * opa_i + 16'd128;
+            biased = product_i + 16'd128;
             rounded = biased + (biased >> 8);
             opacity = rounded[15:8];
             unused_low = rounded[7:0];
         end
     endfunction
+    // The parent's eligibility check owns opcode validation; only opcode 04 reaches here.
     edrv32_rnd_decode u_decode (
-        .command_i(command_i),
+        .command_i({command_i[511:8], 8'h04}),
         .illegal_o(unused_illegal_w),
         .empty_o(unused_empty_w),
         .op_o(unused_op_w),
@@ -143,14 +168,9 @@ module edrv32_rnd_blit (
         .height_o(unused_height_w),
         .fast_fill_o(unused_fast_w)
     );
-    assign row_pixels_w = right_w - left_w + 18'd1;
-    assign row_pairs_w = row_pixels_w[12:1];
-    assign row_beats_w = row_pixels_w[12:3];
-    assign source_x_w = {16'd0, command_i[335:320]} +
-        {20'd0, left_w[11:0]} - {{16{command_i[175]}}, command_i[175:160]};
-    assign source_y_w = {16'd0, command_i[351:336]} +
-        {20'd0, load_y_r} - {{16{command_i[191]}}, command_i[191:176]};
-    assign target_y_w = {20'd0, bank_y_r[write_bank_r]};
+    assign row_pixels_w = {5'd0, row_pixels_r};
+    assign row_pairs_w = row_pairs_r;
+    assign row_beats_w = row_beats_r;
     assign load_start_w = active_r && load_state_r == S_LOAD_IDLE &&
         !loaded_all_r && !busy_r[load_bank_r];
     assign load_finish_w = load_state_r == S_TARGET_DATA && rd_done_i;
@@ -165,24 +185,21 @@ module edrv32_rnd_blit (
     assign render_src_shift_w = src_data_w[render_bank_r] >> {memory_pair_r[1:0], 6'd0};
     assign render_dst_shift_w = dst_data_w[render_bank_r] >> {memory_pair_r[1:0], 6'd0};
     assign raw_src_w = render_src_shift_w[63:0];
-    assign blend_src_o = {opacity(raw_src_w[63:56], command_i[255:248]), raw_src_w[55:32],
-        opacity(raw_src_w[31:24], command_i[255:248]), raw_src_w[23:0]};
-    assign blend_dst_o = render_dst_shift_w[63:0];
-    assign blend_valid_o = memory_valid_r;
-    assign blend_tag_o = {render_bank_r, 20'd0, memory_pair_r};
+    assign blend_src_o = {opacity(opacity_product_r[1]), source_pixel2_r[55:32],
+        opacity(opacity_product_r[0]), source_pixel2_r[23:0]};
+    assign blend_dst_o = target_pixel2_r;
+    assign blend_valid_o = opacity_valid_r;
+    assign blend_tag_o = source_tag2_r;
     assign result_w = {192'd0, blend_pixel_i} << {blend_tag_i[1:0], 6'd0};
     assign result_strb_w = 32'h0000_00ff << {blend_tag_i[1:0], 3'd0};
     assign next_write_w = {1'd0, write_beat_r} + 10'd1;
     assign rd_valid_o = !cancel_i &&
         (load_state_r == S_LOAD_SOURCE || load_state_r == S_LOAD_TARGET);
-    assign rd_addr_o = load_state_r == S_LOAD_SOURCE ? command_i[287:256] +
-        source_y_w * {16'd0, command_i[303:288]} + (source_x_w << 2) :
-        command_i[63:32] + {20'd0, load_y_r} * {16'd0, command_i[79:64]} +
-            {18'd0, left_w[11:0], 2'd0};
+    assign rd_addr_o = load_state_r == S_LOAD_SOURCE ?
+        source_addr_r : bank_target_r[load_bank_r];
     assign rd_bytes_o = {row_pixels_w[13:0], 2'd0};
     assign wr_valid_o = write_state_r == S_WRITE_DESC && !cancel_i;
-    assign wr_addr_o = command_i[63:32] + target_y_w *
-        {16'd0, command_i[79:64]} + {18'd0, left_w[11:0], 2'd0};
+    assign wr_addr_o = bank_target_r[write_bank_r];
     assign wr_bytes_o = rd_bytes_o;
     assign wr_data_valid_o = write_state_r == S_WRITE_DATA && !cancel_i;
     assign wr_data_o = dst_data_w[write_bank_r];
@@ -193,9 +210,10 @@ module edrv32_rnd_blit (
         !loaded_r[render_bank_r] && !rendered_r[render_bank_r];
     assign write_wait_o = active_r && load_state_r == S_LOAD_IDLE &&
         busy_r[load_bank_r] && write_state_r != S_WRITE_IDLE;
-    assign unused_geometry_w = ^{left_w[17:12], top_w[17:12], right_w[17:12],
+    assign unused_geometry_w = ^{command_i[7:0],left_w[17:12], top_w[17:12], right_w[17:12],
         bottom_w[17:12], row_pixels_w[17:14], row_pixels_w[0], render_src_shift_w[255:64],
-        render_dst_shift_w[255:64], blend_tag_i[30:11]};
+        render_dst_shift_w[255:64], blend_tag_i[30:11],
+        source_pixel2_r[63:56], source_pixel2_r[31:24]};
 
     genvar bank;
     generate for (bank = 0; bank < 2; bank = bank + 1) begin : g_bank
@@ -266,7 +284,7 @@ module edrv32_rnd_blit (
                 rendered_r[write_bank_r] <= 1'b0;
             if (write_finish_w) begin
                 busy_r[write_bank_r] <= 1'b0;
-                if (bank_y_r[write_bank_r] == bottom_w[11:0]) begin
+                if (bank_y_r[write_bank_r] == clip_bottom_r) begin
                     active_r <= 1'b0;
                     done_r <= 1'b1;
                 end
@@ -288,7 +306,10 @@ module edrv32_rnd_blit (
         end else begin
             case (load_state_r)
                 S_LOAD_IDLE: if (load_start_w)
-                    load_state_r <= S_LOAD_SOURCE;
+                    load_state_r <= S_LOAD_COORD;
+                S_LOAD_COORD: load_state_r <= S_LOAD_PRODUCT;
+                S_LOAD_PRODUCT: load_state_r <= S_LOAD_ADDR;
+                S_LOAD_ADDR: load_state_r <= S_LOAD_SOURCE;
                 S_LOAD_SOURCE: if (rd_ready_i) begin
                     load_state_r <= S_SOURCE_DATA;
                     load_beat_r <= 9'd0;
@@ -310,7 +331,7 @@ module edrv32_rnd_blit (
                         load_state_r <= S_LOAD_IDLE;
                         load_bank_r <= !load_bank_r;
                         load_y_r <= load_y_r + 12'd1;
-                        if (load_y_r == bottom_w[11:0])
+                        if (load_y_r == clip_bottom_r)
                             loaded_all_r <= 1'b1;
                     end
                 end
@@ -318,9 +339,36 @@ module edrv32_rnd_blit (
             endcase
         end
     end
+    // Coordinates, products and final descriptors have independent register boundaries.
     always @(posedge clk_i) begin
+        if (start_i) begin
+            clip_left_r <= left_w[11:0];
+            clip_right_r <= right_w[11:0];
+            clip_bottom_r <= bottom_w[11:0];
+            source_x_offset_r <= {1'b0, command_i[335:320]} -
+                {command_i[175], command_i[175:160]};
+            source_y_offset_r <= {1'b0, command_i[351:336]} -
+                {command_i[191], command_i[191:176]};
+        end
         if (load_start_w)
             bank_y_r[load_bank_r] <= load_y_r;
+        if (load_state_r == S_LOAD_COORD) begin
+            source_x_r <= source_x_offset_r + {5'd0, clip_left_r};
+            source_y_r <= source_y_offset_r + {5'd0, load_y_r};
+            row_pixels_r <= {1'b0, clip_right_r} - {1'b0, clip_left_r} + 13'd1;
+        end
+        if (load_state_r == S_LOAD_PRODUCT) begin
+            source_product_r <= source_y_r * command_i[303:288];
+            target_product_r <= load_y_r * command_i[79:64];
+            source_base_r <= command_i[287:256] + {13'd0, source_x_r, 2'd0};
+            target_base_r <= command_i[63:32] + {18'd0, clip_left_r, 2'd0};
+            row_pairs_r <= row_pixels_r[12:1];
+            row_beats_r <= row_pixels_r[12:3];
+        end
+        if (load_state_r == S_LOAD_ADDR) begin
+            source_addr_r <= source_base_r + source_product_r;
+            bank_target_r[load_bank_r] <= target_base_r + target_product_r;
+        end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -328,13 +376,20 @@ module edrv32_rnd_blit (
             render_bank_r <= 1'b0;
             issue_pair_r <= 12'd0;
             memory_valid_r <= 1'b0;
+            source_valid_r <= 1'b0;
+            opacity_valid_r <= 1'b0;
         end else if (cancel_i || start_i) begin
             render_state_r <= S_RENDER_IDLE;
             render_bank_r <= 1'b0;
             memory_valid_r <= 1'b0;
+            source_valid_r <= 1'b0;
+            opacity_valid_r <= 1'b0;
         end else begin
-            if (blend_ready_i)
+            if (blend_ready_i) begin
                 memory_valid_r <= issue_w;
+                source_valid_r <= memory_valid_r;
+                opacity_valid_r <= source_valid_r;
+            end
             case (render_state_r)
                 S_RENDER_IDLE: if (render_start_w) begin
                     render_state_r <= S_RENDER_STREAM;
@@ -354,8 +409,22 @@ module edrv32_rnd_blit (
         end
     end
     always @(posedge clk_i) begin
-        if (issue_w && blend_ready_i)
-            memory_pair_r <= issue_pair_r[10:0];
+        if (blend_ready_i) begin
+            if (issue_w)
+                memory_pair_r <= issue_pair_r[10:0];
+            if (memory_valid_r) begin
+                source_pixel1_r <= raw_src_w;
+                target_pixel1_r <= render_dst_shift_w[63:0];
+                source_tag1_r <= {render_bank_r, 20'd0, memory_pair_r};
+            end
+            if (source_valid_r) begin
+                source_pixel2_r <= source_pixel1_r;
+                target_pixel2_r <= target_pixel1_r;
+                source_tag2_r <= source_tag1_r;
+                opacity_product_r[0] <= source_pixel1_r[31:24] * command_i[255:248];
+                opacity_product_r[1] <= source_pixel1_r[63:56] * command_i[255:248];
+            end
+        end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

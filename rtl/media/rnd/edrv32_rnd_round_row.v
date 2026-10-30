@@ -21,17 +21,20 @@ module edrv32_rnd_round_row (
     output wire [15:0] edge_q4_o,
     output wire [11:0] radius_o
 );
-    localparam [1:0] S_IDLE = 2'd0;
-    localparam [1:0] S_PRODUCT = 2'd1;
-    localparam [1:0] S_ROOT = 2'd2;
-    localparam [1:0] S_RESULT = 2'd3;
-    reg [1:0] state_r;
+    localparam [2:0] S_IDLE = 3'd0;
+    localparam [2:0] S_PRODUCT = 3'd1;
+    localparam [2:0] S_ROOT = 3'd2;
+    localparam [2:0] S_RESULT = 3'd3;
+    localparam [2:0] S_DIFFERENCE = 3'd4;
+    reg [2:0] state_r;
     reg [4:0] step_r;
     reg [15:0] radius_q4_r;
     reg [15:0] dy_r;
     reg [15:0] root_r;
     reg [31:0] remainder_r;
     reg [31:0] radicand_r;
+    reg [31:0] radius_square_r;
+    reg [31:0] dy_square_r;
     reg [15:0] edge_r;
     wire [16:0] half_min_w;
     wire [11:0] radius_w;
@@ -71,7 +74,8 @@ module edrv32_rnd_round_row (
                     else
                         state_r <= S_RESULT;
                 end
-                S_PRODUCT: begin
+                S_PRODUCT: state_r <= S_DIFFERENCE;
+                S_DIFFERENCE: begin
                     step_r <= 5'd16;
                     state_r <= S_ROOT;
                 end
@@ -94,7 +98,12 @@ module edrv32_rnd_round_row (
             edge_r <= 16'd0;
         end
         if (state_r == S_PRODUCT) begin
-            radicand_r <= radius_q4_r * radius_q4_r - dy_r * dy_r;
+            radius_square_r <= radius_q4_r * radius_q4_r;
+            dy_square_r <= dy_r * dy_r;
+        end
+        // spec rnd 2.3: handshake absorbs one cycle between square and square-root stages.
+        if (state_r == S_DIFFERENCE) begin
+            radicand_r <= radius_square_r - dy_square_r;
             root_r <= 16'd0;
             remainder_r <= 32'd0;
         end

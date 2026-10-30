@@ -72,6 +72,7 @@ module edrv32_rnd_draw (
     localparam [4:0] S_PALETTE_REQ = 5'd19;
     localparam [4:0] S_PALETTE_DATA = 5'd20;
     localparam [4:0] S_PALETTE_WRITE = 5'd21;
+    localparam [4:0] S_TARGET_END = 5'd22;
     localparam [1:0] S_RENDER_IDLE = 2'd0;
     localparam [1:0] S_RENDER_STREAM = 2'd1;
     localparam [1:0] S_WRITE_IDLE = 2'd0;
@@ -118,6 +119,7 @@ module edrv32_rnd_draw (
     reg [31:0] bank_target_r [0:1];
     reg [15:0] bank_bytes_r [0:1];
     reg [31:0] bank_source_r [0:1];
+    reg [31:0] bank_source_row_r [0:1];
     reg bank_sparse_r [0:1];
     reg [31:0] bank_tile_first_r [0:1];
     reg [15:0] bank_outer_edge_r [0:1];
@@ -132,6 +134,9 @@ module edrv32_rnd_draw (
     reg [15:0] outer_edge_r;
     reg [15:0] inner_edge_r;
     reg inner_inside_r;
+    reg [11:0] clip_left_r;
+    reg [11:0] clip_right_r;
+    reg [11:0] clip_bottom_r;
     reg [16:0] width_r;
     reg [16:0] height_r;
     reg signed [17:0] rect_left_r;
@@ -147,25 +152,83 @@ module edrv32_rnd_draw (
     reg signed [17:0] inner_width_r;
     reg signed [17:0] inner_height_r;
 
-    // Pipeline: coordinate/map+target, address, source RAM, palette, converted alpha input.
-    reg [4:0] pipe_valid_r;
-    reg [11:0] sample_x_r;
-    reg [31:0] pipe_tag_r [0:4];
-    reg [63:0] pipe_dst_r [1:4];
-    reg [4:0] source_offset_r [1:2][0:1];
+    // spec rnd 5.2: bounds arithmetic overlaps the target DMA, without stalling shading.
+    reg [6:0] bounds_valid_r;
+    reg bounds_ready_r;
+    // Command SRC_STRIDE is 16 bits; blur.shadow_stride_o only drives its low 18 bits.
+    reg [17:0] source_stride_r;
+    reg [31:0] source_last_base_r;
+    reg [11:0] dst_y_r;
+    reg [31:0] dst_row_product_r;
+    reg [31:0] dst_row_base_r;
+    wire [31:0] bounds_kx_w [0:1];
+    wire [31:0] bounds_ky_w;
+    reg [15:0] bounds_kx_r [0:1];
+    reg [15:0] bounds_ky_r;
+    reg [47:0] bounds_scaled_x_r [0:1];
+    reg [47:0] bounds_scaled_y_r;
+    reg [15:0] bounds_x_r [0:1];
+    reg [15:0] bounds_y_r;
+    reg [31:0] bounds_u_r [0:1];
+    reg [31:0] bounds_v_r;
+    reg [31:0] bounds_row_product_r;
+    reg [31:0] bounds_byte_r [0:1];
+    reg [31:0] bounds_byte_delay_r [0:1];
+    reg [31:0] bounds_row_base_r;
+    reg [31:0] bounds_row_last_base_r;
+    reg [31:0] bounds_addr_r [0:1];
+    reg [31:0] bounds_last_addr_r [0:1];
+    reg [31:0] bounds_first_r;
+    reg [31:0] bounds_last_r;
+    wire [26:0] bounds_min_word_w;
+    wire [26:0] bounds_word_span_w;
+    wire bounds_sparse_result_w;
+    wire [15:0] bounds_span_w;
+    wire bounds_sparse_w;
+    wire bounds_available_w;
+    reg [31:0] map_x_offset_r;
+    reg [31:0] map_y_offset_r;
+    wire [31:0] map_x_w;
+    wire [31:0] map_y_w;
+    reg [16:0] map_x_r;
+    reg [16:0] map_y_r;
+    reg [13:0] map_row_r;
+    reg [31:0] map_row_product_r;
+    reg [31:0] map_column_r;
+    reg [31:0] map_row_base_r;
+    reg [31:0] load_map_r;
+    reg [31:0] tile_row_pixel_r;
+    wire [31:0] tile_pixel_y_w;
+    wire [34:0] tile_row_bits_w;
+    wire [31:0] tile_row_base_w;
+    wire [31:0] tile_last_offset_w;
+    reg [5:0] tile_last_offset_r;
+    wire [6:0] tile_end_offset_w;
+    wire [1:0] tile_beats_w;
+    reg [12:0] tile_next_x_r;
+    wire [11:0] tile_query_x_w;
+    wire [11:0] chunk_end_w;
+    wire [11:0] bounds_coordinate_w [0:1];
+    wire [34:0] bounds_bits_w [0:1];
+    integer bounds_lane;
+
+    // Elastic sampling: coordinate, multiply, sample, address, index, RAM, palette,
+    // expansion, opacity/recolor products, normalization. Every stage advances together.
+    reg [9:0] pipe_valid_r;
+    reg [31:0] pipe_tag_r [0:9];
+    reg [63:0] pipe_dst_r [1:9];
+    reg [4:0] source_offset_r [4:5][0:1];
     reg [31:0] sample_addr_r [0:1];
     reg [8:0] source_index_r [0:1];
-    reg [31:0] fill_pixel_r [0:1];
-    reg [2:0] source_shift_r [1:3][0:1];
-    reg [7:0] source_mask_r [1:3][0:1];
+    reg [2:0] source_shift_r [3:6][0:1];
+    reg [7:0] source_mask_r [3:6][0:1];
     reg [31:0] raw_r [0:1];
     reg [63:0] pipe_src_r;
-    reg [23:0] fill_color_r [0:2][0:1];
-    reg [7:0] fill_coverage_r [0:1][0:1];
-    reg [7:0] fill_alpha_r [0:1];
-    reg [7:0] fill_inner_r [0:1];
-    reg [15:0] fill_product_r [0:1];
-    reg [15:0] fill_opacity_r [0:1];
+    reg [31:0] sample_base2_r;
+    reg [23:0] gradient_bias_r [0:3];
+    reg [7:0] recolor_inverse_r;
+    reg [15:0] recolor_product_r [0:2];
+    reg [15:0] recolor_bias_r [0:2];
     reg [511:0] sparse_data_r [0:1];
     reg [255:0] lane_cache_low_w [0:1];
     reg [255:0] lane_cache_high_w [0:1];
@@ -186,6 +249,7 @@ module edrv32_rnd_draw (
     wire signed [17:0] bottom_w;
     wire [16:0] width_w;
     wire [16:0] height_w;
+    wire [7:0] unused_decode_op_w;
     wire unused_decode_w;
     wire unused_empty_w;
     wire unused_fast_w;
@@ -212,23 +276,8 @@ module edrv32_rnd_draw (
     wire [15:0] outer_cov_w;
     wire [15:0] inner_cov_w;
     wire [31:0] load_dst_w;
-    wire [31:0] load_src_w;
-    wire [31:0] load_map_w;
-    wire [31:0] load_sample_x_w;
-    wire [31:0] load_sample_y_w;
-    wire [31:0] load_adjusted_w;
     wire [31:0] end_dst_w;
-    wire [31:0] end_src_w;
-    wire [31:0] end_sample_y_w;
-    wire [31:0] end_adjusted_w;
-    wire [31:0] source_min_w;
-    wire [31:0] source_max_w;
-    wire [31:0] source_last_w;
     wire [31:0] palette_addr_w;
-    wire [31:0] source_span_w;
-    wire [31:0] tile_pixel_x_w;
-    wire [31:0] tile_row_base_w;
-    wire [31:0] tile_row_last_w;
     wire [31:0] tile_row_bytes_w;
     wire [12:0] chunk_right_w;
     wire [12:0] next_tile_x_w;
@@ -266,17 +315,7 @@ module edrv32_rnd_draw (
     wire [255:0] result_write_data_w;
     wire [31:0] result_write_strb_w;
     wire [63:0] result_pixels_w;
-    wire [31:0] lane_src_w [0:1];
-    wire [31:0] lane_adjusted_w [0:1];
-    wire [31:0] lane_sample_x_w [0:1];
-    wire [31:0] lane_sample_y_w [0:1];
-    wire [2:0] lane_shift_w [0:1];
-    wire [7:0] lane_mask_w [0:1];
-    wire [31:0] lane_tile_pixel_w [0:1];
-    wire [31:0] lane_tile_base_w [0:1];
-    wire [31:0] lane_source_index_w [0:1];
-    wire [31:0] lane_tile_index_w [0:1];
-    wire [31:0] issue_map_index_w [0:1];
+    wire [7:0] issue_map_index_w [0:1];
     wire [31:0] map_entry_w [0:1][0:1];
     wire [255:0] source_data_w [0:1][0:1];
     wire [255:0] source_next_w [0:1][0:1];
@@ -288,18 +327,8 @@ module edrv32_rnd_draw (
     wire [511:0] lane_cache_w [0:1];
     wire lane_cross_w [0:1];
     wire [31:0] lane_next_w [0:1];
-    wire [31:0] gradient_k_w [0:1];
-    wire [23:0] gradient_color_w [0:1];
-    wire [7:0] gradient_alpha_w [0:1];
-    wire unused_load_w;
     wire [31:0] target_bytes_w;
     wire [31:0] tile_bytes_w;
-    wire [31:0] unused_end_w;
-    wire [2:0] unused_load_shift_w;
-    wire [7:0] unused_load_mask_w;
-    wire [2:0] unused_end_shift_w;
-    wire [7:0] unused_end_mask_w;
-    wire [31:0] unused_end_sample_x_w;
     wire unused_geometry_w;
     integer stage;
     integer lane;
@@ -315,28 +344,40 @@ module edrv32_rnd_draw (
             unused_low = rounded[7:0];
         end
     endfunction
-    function automatic [7:0] gradient;
-        input [7:0] channel_start_i;
-        input [15:0] k_i;
-        input signed [31:0] step_i;
-        reg signed [48:0] value;
+    function automatic [7:0] gradient_channel;
+        input [24:0] low_sum_i;
+        input high_zero_i;
+        input high_minus_one_i;
+        input negative_i;
+        reg [15:0] unused_fraction;
         begin
-            value = $signed({1'd0, k_i}) * step_i +
-                $signed({25'd0, channel_start_i, 16'd0}) + 49'sd32768;
-            if (value < 0)
-                gradient = 8'd0;
-            else if (value >= 49'sd16777216)
-                gradient = 8'd255;
+            unused_fraction = low_sum_i[15:0];
+            if (high_zero_i)
+                gradient_channel = low_sum_i[24] ? 8'd255 : low_sum_i[23:16];
+            else if (high_minus_one_i)
+                gradient_channel = low_sum_i[24] ? low_sum_i[23:16] : 8'd0;
             else
-                gradient = value[23:16];
+                gradient_channel = negative_i ? 8'd0 : 8'd255;
+        end
+    endfunction
+    function automatic [7:0] normalize_biased;
+        input [15:0] biased_i;
+        reg [15:0] rounded;
+        reg [7:0] unused_low;
+        begin
+            rounded = biased_i + (biased_i >> 8);
+            normalize_biased = rounded[15:8];
+            unused_low = rounded[7:0];
         end
     endfunction
 
+    // Parent retags BOX_SHADOW as GLYPH; draw never receives the expanding opcode 06.
+    assign op_w = command_i[7:0];
     edrv32_rnd_decode u_decode (
-        .command_i(command_i),
+        .command_i({command_i[511:8], 8'h04}),
         .illegal_o(unused_decode_w),
         .empty_o(unused_empty_w),
-        .op_o(op_w),
+        .op_o(unused_decode_op_w),
         .argb_o(argb_w),
         .src_fmt_o(format_w),
         .flags_o(flags_w),
@@ -397,60 +438,55 @@ module edrv32_rnd_draw (
         .row_inside_i(bank_inner_inside_r[render_bank_r]),
         .coverage_o(inner_cov_w)
     );
-    edrv32_rnd_address u_load_address (
-        .command_i(command_i),
-        .x_i(tile_w ? tile_x_r : load_left_r),
-        .y_i(load_y_r),
-        .map_entry_i(tile_entry_r),
-        .dst_addr_o(load_dst_w),
-        .src_addr_o(load_src_w),
-        .map_addr_o(load_map_w),
-        .sub_shift_o(unused_load_shift_w),
-        .sub_mask_o(unused_load_mask_w),
-        .sample_x_o(load_sample_x_w),
-        .sample_y_o(load_sample_y_w)
-    );
-    edrv32_rnd_address u_end_address (
-        .command_i(command_i),
-        .x_i(load_right_r),
-        .y_i(load_y_r),
-        .map_entry_i(16'd0),
-        .dst_addr_o(end_dst_w),
-        .src_addr_o(end_src_w),
-        .map_addr_o(unused_end_w),
-        .sub_shift_o(unused_end_shift_w),
-        .sub_mask_o(unused_end_mask_w),
-        .sample_x_o(unused_end_sample_x_w),
-        .sample_y_o(end_sample_y_w)
-    );
-    assign load_adjusted_w = load_src_w + load_sample_y_w *
-        (source_stride_i - {16'd0, command_i[303:288]});
-    assign end_adjusted_w = end_src_w + end_sample_y_w *
-        (source_stride_i - {16'd0, command_i[303:288]});
+    assign load_dst_w = dst_row_base_r + ({20'd0, load_left_r} << (argb_w ? 2 : 1));
+    assign end_dst_w = dst_row_base_r + ({20'd0, load_right_r} << (argb_w ? 2 : 1));
     assign target_bytes_w = {end_dst_w[31:5], 5'd0} -
         {load_dst_w[31:5], 5'd0} + 32'd32;
-    assign tile_bytes_w = {tile_row_last_w[31:5], 5'd0} -
-        {tile_row_base_w[31:5], 5'd0} + 32'd32;
-    assign source_min_w = load_adjusted_w < end_adjusted_w ?
-        load_adjusted_w : end_adjusted_w;
-    assign source_max_w = load_adjusted_w > end_adjusted_w ?
-        load_adjusted_w : end_adjusted_w;
-    assign source_last_w = source_max_w + (format_w == 4'd1 ? 32'd3 :
-        format_w == 4'd0 ? 32'd1 : 32'd0);
-    assign source_span_w = {source_last_w[31:5], 5'd0} -
-        {source_min_w[31:5], 5'd0} + 32'd32;
-    assign tile_pixel_x_w = tile_entry_r[12] ?
-        tile_mask_w - (load_sample_x_w & tile_mask_w) : load_sample_x_w & tile_mask_w;
-    assign tile_row_base_w = load_src_w - ((tile_pixel_x_w << bits_log2_w) >> 3);
+    assign tile_row_base_w = command_i[287:256] + tile_row_bits_w[34:3];
+    assign tile_last_offset_w = tile_row_bytes_w - 32'd1;
+    assign tile_end_offset_w = {2'd0, tile_row_base_w[4:0]} + {1'b0, tile_last_offset_r};
+    assign tile_beats_w = tile_end_offset_w[6:5] + 2'd1;
+    assign tile_bytes_w = {25'd0, tile_beats_w, 5'd0};
+    assign tile_pixel_y_w = map_shift_w[13] ?
+        tile_mask_w - ({15'd0, map_y_r} & tile_mask_w) : {15'd0, map_y_r} & tile_mask_w;
+    assign tile_row_bits_w = {3'd0, tile_row_pixel_r} << bits_log2_w;
     assign tile_row_bytes_w = ((tile_mask_w + 32'd1) << bits_log2_w) >> 3;
-    assign tile_row_last_w = tile_row_base_w + tile_row_bytes_w - 32'd1;
     // End chunks on a target beat so concurrent banks never own the same bytes.
     assign chunk_right_w = {1'b0, load_left_r} + 13'd511 -
         (argb_w ? {10'd0, load_dst_w[4:2]} : {9'd0, load_dst_w[4:1]});
+    // Alignment makes the low five address bits irrelevant to the lower bound.
+    assign bounds_min_word_w = bounds_addr_r[0][31:5] < bounds_addr_r[1][31:5] ?
+        bounds_addr_r[0][31:5] : bounds_addr_r[1][31:5];
+    assign bounds_word_span_w = bounds_last_r[31:5] - bounds_first_r[31:5] + 27'd1;
+    assign bounds_span_w = {bounds_word_span_w[10:0], 5'd0};
+    assign bounds_sparse_result_w = bounds_word_span_w > 27'd512;
+    assign bounds_available_w = bounds_ready_r || bounds_valid_r[6];
+    assign bounds_sparse_w = bounds_ready_r ? bank_sparse_r[load_bank_r] :
+        bounds_sparse_result_w;
+    assign chunk_end_w = chunk_right_w < {1'b0, clip_right_r} ?
+        chunk_right_w[11:0] : clip_right_r;
+    assign bounds_ky_w = op_w == 8'h04 && flags_w[1] ?
+        {{16{command_i[223]}}, command_i[223:208]} - {20'd0, load_y_r} :
+        {20'd0, load_y_r} - {{16{command_i[191]}}, command_i[191:176]};
+    assign bounds_kx_w[0] = op_w == 8'h04 && flags_w[0] ?
+        {{16{command_i[207]}}, command_i[207:192]} - {20'd0, bounds_coordinate_w[0]} :
+        {20'd0, bounds_coordinate_w[0]} - {{16{command_i[175]}}, command_i[175:160]};
+    assign bounds_kx_w[1] = op_w == 8'h04 && flags_w[0] ?
+        {{16{command_i[207]}}, command_i[207:192]} - {20'd0, bounds_coordinate_w[1]} :
+        {20'd0, bounds_coordinate_w[1]} - {{16{command_i[175]}}, command_i[175:160]};
+    assign bounds_coordinate_w[0] = load_left_r;
+    assign bounds_coordinate_w[1] = chunk_end_w;
+    assign bounds_bits_w[0] = {3'd0, bounds_u_r[0]} << bits_log2_w;
+    assign bounds_bits_w[1] = {3'd0, bounds_u_r[1]} << bits_log2_w;
     assign next_tile_x_w = {1'b0, tile_x_r} +
-        (flags_w[0] ? 13'd16 : 13'd8) - {9'd0, load_sample_x_w[3:0] & tile_mask_w[3:0]};
-    assign map_hit_w = map_valid_r && map_addr_r == {load_map_w[31:5], 5'd0};
-    assign map_shift_w = map_data_r >> {load_map_w[4:0], 3'd0};
+        (flags_w[0] ? 13'd16 : 13'd8) - {9'd0, map_x_r[3:0] & tile_mask_w[3:0]};
+    // The next map lookup runs during this tile's source DMA; no per-tile setup bubbles.
+    assign tile_query_x_w = load_state_r == S_SOURCE_REQ || load_state_r == S_SOURCE_DATA ||
+        load_state_r == S_TILE_NEXT ? tile_next_x_r[11:0] : tile_x_r;
+    assign map_x_w = {20'd0, tile_query_x_w} + map_x_offset_r;
+    assign map_y_w = {20'd0, load_y_r} + map_y_offset_r;
+    assign map_hit_w = map_valid_r && map_addr_r == {load_map_r[31:5], 5'd0};
+    assign map_shift_w = map_data_r >> {load_map_r[4:0], 3'd0};
     assign palette_last_w = format_w == 4'd6 ? 8'd255 : format_w == 4'd7 ? 8'd15 :
         format_w == 4'd8 ? 8'd3 : 8'd1;
     assign palette_addr_w = command_i[447:416] + {22'd0, palette_index_r, 2'd0};
@@ -459,7 +495,7 @@ module edrv32_rnd_draw (
     assign load_request_w = load_state_r == S_TARGET_REQ || load_state_r == S_SOURCE_REQ ||
         load_state_r == S_MAP_REQ || load_state_r == S_PALETTE_REQ;
     assign load_addr_w = load_state_r == S_TARGET_REQ ? bank_target_r[load_bank_r] :
-        load_state_r == S_MAP_REQ ? {load_map_w[31:5], 5'd0} :
+        load_state_r == S_MAP_REQ ? {load_map_r[31:5], 5'd0} :
         load_state_r == S_PALETTE_REQ ? {palette_addr_w[31:5], 5'd0} : load_source_base_r;
     assign load_bytes_w = load_state_r == S_TARGET_REQ ? bank_bytes_r[load_bank_r] :
         load_state_r == S_SOURCE_REQ ? load_source_bytes_r : 16'd32;
@@ -471,8 +507,8 @@ module edrv32_rnd_draw (
     assign load_done_w = rd_done_i && read_busy_r && !read_render_r;
 
     assign sample_bank_w = pipe_tag_r[0][31];
-    assign source_bank_w = pipe_tag_r[1][31];
-    assign palette_bank_w = pipe_tag_r[2][31];
+    assign source_bank_w = pipe_tag_r[4][31];
+    assign palette_bank_w = pipe_tag_r[5][31];
     assign render_start_w = active_r && render_state_r == S_RENDER_IDLE &&
         loaded_r[render_bank_r];
     assign render_finish_w = blend_valid_i && blend_tag_i[30];
@@ -487,18 +523,18 @@ module edrv32_rnd_draw (
     assign issue_offset_w = {18'd0, issue_byte_r};
     assign target_offset_w = {18'd0, pipe_tag_r[0][13:0]};
     assign target_shift_w = target_data_w[sample_bank_w] >> {target_offset_w[4:0], 3'd0};
-    assign source_ready_w = !pipe_valid_r[1] || fill_w || !bank_sparse_r[source_bank_w] ||
-        (lane_hit_w[0] && (!pipe_tag_r[1][29] || lane_hit_w[1]));
-    assign pipeline_step_w = (!pipe_valid_r[4] || blend_ready_i) && source_ready_w;
+    assign source_ready_w = !pipe_valid_r[4] || fill_w || !bank_sparse_r[source_bank_w] ||
+        (lane_hit_w[0] && (!pipe_tag_r[4][29] || lane_hit_w[1]));
+    assign pipeline_step_w = (!pipe_valid_r[9] || blend_ready_i) && source_ready_w;
     assign issue_w = render_state_r == S_RENDER_STREAM && pipeline_step_w;
-    assign miss_request_w = pipe_valid_r[1] && !source_ready_w;
+    assign miss_request_w = pipe_valid_r[4] && !source_ready_w;
     assign miss_query_w = !lane_low_hit_w[0] ? {sample_addr_r[0][31:5], 5'd0} :
         lane_cross_w[0] && !lane_high_hit_w[0] ? lane_next_w[0] :
         !lane_low_hit_w[1] ? {sample_addr_r[1][31:5], 5'd0} : lane_next_w[1];
-    assign blend_valid_o = pipe_valid_r[4] && source_ready_w;
+    assign blend_valid_o = pipe_valid_r[9] && source_ready_w;
     assign blend_src_o = pipe_src_r;
-    assign blend_dst_o = pipe_dst_r[4];
-    assign blend_tag_o = pipe_tag_r[4];
+    assign blend_dst_o = pipe_dst_r[9];
+    assign blend_tag_o = pipe_tag_r[9];
     assign result_pixels_w = argb_w ? blend_pixel_i :
         {32'd0, blend_pixel_i[47:32], blend_pixel_i[15:0]};
     assign result_write_data_w = {192'd0, result_pixels_w} << {blend_tag_i[4:0], 3'd0};
@@ -525,42 +561,82 @@ module edrv32_rnd_draw (
     genvar pixel;
     generate for (pixel = 0; pixel < 2; pixel = pixel + 1) begin : g_pixel
         localparam [11:0] PIXEL = pixel;
-        wire [31:0] unused_dst_w;
-        wire [31:0] unused_map_w;
-        wire [7:0] unused_source_index_w;
         wire [11:0] coordinate_w;
-        wire [31:0] issue_map_x_w;
-        assign coordinate_w = sample_x_r + PIXEL;
-        edrv32_rnd_address u_address (
-            .command_i(command_i),
-            .x_i(coordinate_w),
-            .y_i(bank_y_r[sample_bank_w]),
-            .map_entry_i(map_entry_w[sample_bank_w][pixel][15:0]),
-            .dst_addr_o(unused_dst_w),
-            .src_addr_o(lane_src_w[pixel]),
-            .map_addr_o(unused_map_w),
-            .sub_shift_o(lane_shift_w[pixel]),
-            .sub_mask_o(lane_mask_w[pixel]),
-            .sample_x_o(lane_sample_x_w[pixel]),
-            .sample_y_o(lane_sample_y_w[pixel])
-        );
-        assign lane_adjusted_w[pixel] = lane_src_w[pixel] + lane_sample_y_w[pixel] *
-            (source_stride_i - {16'd0, command_i[303:288]});
-        assign lane_tile_pixel_w[pixel] = map_entry_w[sample_bank_w][pixel][12] ?
-            tile_mask_w - (lane_sample_x_w[pixel] & tile_mask_w) :
-            lane_sample_x_w[pixel] & tile_mask_w;
-        assign lane_tile_base_w[pixel] = lane_src_w[pixel] -
-            ((lane_tile_pixel_w[pixel] << bits_log2_w) >> 3);
-        assign lane_tile_index_w[pixel] = (lane_sample_x_w[pixel] >> tile_log2_w) -
-            bank_tile_first_r[sample_bank_w];
-        assign lane_source_index_w[pixel] = tile_w ? lane_tile_index_w[pixel] * 32'd3 +
-            (({lane_src_w[pixel][31:5], 5'd0} -
-                {lane_tile_base_w[pixel][31:5], 5'd0}) >> 5) :
-            (lane_adjusted_w[pixel] - bank_source_r[sample_bank_w]) >> 5;
-        assign issue_map_x_w = {16'd0, command_i[367:352]} +
-            {20'd0, issue_x_r} + pixel - {{16{command_i[175]}}, command_i[175:160]};
-        assign issue_map_index_w[pixel] = (issue_map_x_w >> tile_log2_w) -
-            bank_tile_first_r[render_bank_r];
+        wire [31:0] kx_w;
+        wire [31:0] gradient_k_w;
+        wire [11:0] issue_map_x_w;
+        wire [11:0] issue_map_column_w;
+        wire [3:0] tile_x_w;
+        wire [3:0] tile_y_w;
+        wire [34:0] pixel_bits_w;
+        wire [8:0] tile_slot_base_w;
+        wire [1:0] tile_beat_w;
+        wire [31:0] map_entry_read_w;
+        wire unused_coordinate_w;
+        reg [15:0] kx0_r;
+        reg [15:0] kx1_r;
+        reg [47:0] scaled_x1_r;
+        reg [31:0] sample_u2_r;
+        reg [3:0] map_x0_r;
+        reg [3:0] map_y0_r;
+        reg [19:0] tile_pixel1_r;
+        reg [19:0] tile_pixel2_r;
+        reg [7:0] tile_slot_r [0:3];
+        reg [6:0] tile_base_r [1:3];
+        reg [31:0] address3_r;
+        reg [31:0] expanded7_r;
+        reg [23:0] expanded8_r;
+        reg [15:0] alpha_product8_r;
+        reg [15:0] recolor_back8_r [0:2];
+        reg [31:0] expanded_w;
+        wire [7:0] sample_w;
+        reg [16:0] gradient_k0_r;
+        reg signed [48:0] gradient_product1_r [0:3];
+        reg [24:0] gradient_low2_r [0:3];
+        reg gradient_zero2_r [0:3];
+        reg gradient_minus_one2_r [0:3];
+        reg gradient_negative2_r [0:3];
+        wire [7:0] gradient_value_w [0:3];
+        reg [23:0] fill_color_r [3:6];
+        reg [7:0] fill_coverage_r [0:4];
+        reg [7:0] fill_inner_r [0:2];
+        reg [7:0] fill_operand_a3_r;
+        reg [7:0] fill_operand_b3_r;
+        reg [15:0] fill_product4_r;
+        reg [7:0] fill_alpha5_r;
+        reg [7:0] fill_factor5_r;
+        reg [15:0] fill_product6_r;
+        reg [31:0] fill_pixel7_r;
+        reg [31:0] fill_pixel8_r;
+        integer arithmetic_stage;
+        integer channel;
+
+        // RECT is signed 16 bits, CLIP is 12 bits; accepted drawing samples have 0<=k<65536.
+        assign coordinate_w = issue_x_r + PIXEL;
+        assign kx_w = op_w == 8'h04 && flags_w[0] ?
+            {{16{command_i[207]}}, command_i[207:192]} - {20'd0, coordinate_w} :
+            {20'd0, coordinate_w} - {{16{command_i[175]}}, command_i[175:160]};
+        assign gradient_k_w = flags_w[1] ? {20'd0, bank_y_r[render_bank_r]} -
+            {{16{command_i[191]}}, command_i[191:176]} : {20'd0, coordinate_w} -
+            {{16{command_i[175]}}, command_i[175:160]};
+        assign issue_map_x_w = coordinate_w + map_x_offset_r[11:0];
+        assign issue_map_column_w = issue_map_x_w >> tile_log2_w;
+        assign issue_map_index_w[pixel] = issue_map_column_w[7:0] -
+            bank_tile_first_r[render_bank_r][7:0];
+        assign map_entry_read_w = map_entry_w[sample_bank_w][pixel];
+        assign tile_x_w = map_entry_read_w[12] ?
+            tile_mask_w[3:0] - (map_x0_r & tile_mask_w[3:0]) :
+            map_x0_r & tile_mask_w[3:0];
+        assign tile_y_w = map_entry_read_w[13] ?
+            tile_mask_w[3:0] - (map_y0_r & tile_mask_w[3:0]) :
+            map_y0_r & tile_mask_w[3:0];
+        assign pixel_bits_w = (tile_w ? {15'd0, tile_pixel2_r} :
+            {3'd0, sample_u2_r}) << bits_log2_w;
+        assign tile_slot_base_w = {1'b0, tile_slot_r[3]} + {tile_slot_r[3], 1'b0};
+        assign tile_beat_w = address3_r[6:5] - tile_base_r[3][6:5];
+        assign unused_coordinate_w = ^{kx_w[31:16], gradient_k_w[31:16],
+            scaled_x1_r[15:0], issue_map_column_w[11:8], map_entry_read_w[31:23],
+            map_entry_read_w[15:14], tile_base_r[3][4:0], sample_w[7:4]};
         assign lane_cross_w[pixel] = format_w == 4'd1 ? sample_addr_r[pixel][4:0] > 5'd28 :
             format_w == 4'd0 && sample_addr_r[pixel][4:0] == 5'd31;
         assign lane_next_w[pixel] = {sample_addr_r[pixel][31:5], 5'd0} + 32'd32;
@@ -569,44 +645,167 @@ module edrv32_rnd_draw (
         assign lane_cache_w[pixel] = {lane_cache_high_w[pixel], lane_cache_low_w[pixel]};
         assign raw_shift_w[pixel] = (bank_sparse_r[palette_bank_w] ? sparse_data_r[pixel] :
             {source_next_w[palette_bank_w][pixel], source_data_w[palette_bank_w][pixel]}) >>
-                {source_offset_r[2][pixel], 3'd0};
+                {source_offset_r[5][pixel], 3'd0};
         assign palette_index_w[pixel] =
-            (raw_shift_w[pixel][7:0] >> source_shift_r[2][pixel]) & source_mask_r[2][pixel];
+            (raw_shift_w[pixel][7:0] >> source_shift_r[5][pixel]) & source_mask_r[5][pixel];
         edrv32_ram_rnd_palette u_palette (
             .clk_i(clk_i),
             .wr_en_i(palette_write_w),
             .wr_addr_i(palette_index_r),
             .wr_data_i(palette_shift_w[31:0]),
-            .rd_en_i(pipe_valid_r[2] && pipeline_step_w && !cancel_i),
+            .rd_en_i(pipe_valid_r[5] && pipeline_step_w && !cancel_i),
             .rd_addr_i(palette_index_w[pixel]),
             .rd_data_o(palette_data_w[pixel])
         );
-        edrv32_rnd_source u_source (
-            .format_i(format_w),
-            .glyph_i(op_w == 8'h03),
-            .raw_i(raw_r[pixel]),
-            .sub_shift_i(source_shift_r[3][pixel]),
-            .sub_mask_i(source_mask_r[3][pixel]),
-            .palette_i(palette_data_w[pixel]),
-            .color_i(command_i[247:224]),
-            .opacity_i(command_i[255:248]),
-            .colorkey_i(flags_w[2]),
-            .key_i(command_i[463:448]),
-            .recolor_i(op_w == 8'h04 && flags_w[3]),
-            .recolor_value_i(command_i[511:480]),
-            .index_o(unused_source_index_w),
-            .pixel_o(converted_w[pixel])
-        );
-        assign gradient_k_w[pixel] = flags_w[1] ? {20'd0, bank_y_r[render_bank_r]} -
-            {{16{command_i[191]}}, command_i[191:176]} : {20'd0, issue_x_r} + pixel -
-            {{16{command_i[175]}}, command_i[175:160]};
-        assign gradient_alpha_w[pixel] = flags_w[0] ?
-            gradient(command_i[319:312], gradient_k_w[pixel][15:0], command_i[351:320]) :
-            8'd255;
-        assign gradient_color_w[pixel] = {
-            gradient(command_i[311:304], gradient_k_w[pixel][15:0], command_i[383:352]),
-            gradient(command_i[303:296], gradient_k_w[pixel][15:0], command_i[415:384]),
-            gradient(command_i[295:288], gradient_k_w[pixel][15:0], command_i[447:416])};
+        assign sample_w = (raw_r[pixel][7:0] >> source_shift_r[6][pixel]) &
+            source_mask_r[6][pixel];
+        always @(*) begin
+            expanded_w = 32'd0;
+            case (format_w)
+                4'd0: expanded_w = {
+                    flags_w[2] && raw_r[pixel][15:0] == command_i[463:448] ? 8'd0 : 8'd255,
+                    raw_r[pixel][15:11], raw_r[pixel][15:13],
+                    raw_r[pixel][10:5], raw_r[pixel][10:9],
+                    raw_r[pixel][4:0], raw_r[pixel][4:2]};
+                4'd1: expanded_w = raw_r[pixel];
+                4'd2: expanded_w = {raw_r[pixel][7:0], command_i[247:224]};
+                4'd3: expanded_w = {sample_w[3:0], sample_w[3:0], command_i[247:224]};
+                4'd4: expanded_w = {sample_w[1:0], sample_w[1:0],
+                    sample_w[1:0], sample_w[1:0], command_i[247:224]};
+                4'd5: expanded_w = {{8{sample_w[0]}}, command_i[247:224]};
+                4'd6, 4'd7, 4'd8, 4'd9: expanded_w = palette_data_w[pixel];
+                default: expanded_w = 32'd0;
+            endcase
+        end
+        assign converted_w[pixel][31:24] = divide255(alpha_product8_r);
+        genvar gradient_component;
+        for (gradient_component = 0; gradient_component < 4;
+            gradient_component = gradient_component + 1) begin : g_gradient
+            assign gradient_value_w[gradient_component] = gradient_channel(
+                gradient_low2_r[gradient_component], gradient_zero2_r[gradient_component],
+                gradient_minus_one2_r[gradient_component],
+                gradient_negative2_r[gradient_component]);
+        end
+        genvar color_channel;
+        for (color_channel = 0; color_channel < 3; color_channel = color_channel + 1) begin
+            : g_color
+            assign converted_w[pixel][color_channel*8 +: 8] = op_w == 8'h03 ?
+                command_i[224+color_channel*8 +: 8] :
+                op_w == 8'h04 && flags_w[3] ?
+                    normalize_biased(recolor_back8_r[color_channel] +
+                        recolor_bias_r[color_channel]) : expanded8_r[color_channel*8 +: 8];
+        end
+        always @(posedge clk_i) begin
+            if (pipeline_step_w) begin
+                if (issue_w) begin
+                    kx0_r <= kx_w[15:0];
+                    gradient_k0_r <= {1'b0, gradient_k_w[15:0]};
+                    map_x0_r <= coordinate_w[3:0] + map_x_offset_r[3:0];
+                    map_y0_r <= bank_y_r[render_bank_r][3:0] + map_y_offset_r[3:0];
+                    tile_slot_r[0] <= issue_map_index_w[pixel];
+                    fill_coverage_r[0] <= outer_cov_w[pixel*8 +: 8];
+                    fill_inner_r[0] <= 8'd255 - inner_cov_w[pixel*8 +: 8];
+                end
+                if (pipe_valid_r[0]) begin
+                    scaled_x1_r <= kx0_r * command_i[383:352];
+                    kx1_r <= kx0_r;
+                    tile_pixel1_r <= flags_w[0] ?
+                        {map_entry_read_w[11:0], tile_y_w, tile_x_w} :
+                        {2'd0, map_entry_read_w[11:0], tile_y_w[2:0], tile_x_w[2:0]};
+                    tile_base_r[1] <= map_entry_read_w[22:16];
+                    for (channel = 0; channel < 4; channel = channel + 1)
+                        gradient_product1_r[channel] <= $signed(gradient_k0_r) *
+                            $signed(command_i[320+channel*32 +: 32]);
+                end
+                if (pipe_valid_r[1]) begin
+                    sample_u2_r <= {16'd0, command_i[335:320]} +
+                        (op_w == 8'h04 ? scaled_x1_r[47:16] : {16'd0, kx1_r});
+                    tile_pixel2_r <= tile_pixel1_r;
+                    // Only a carry from the low 24 bits can change the saturation class.
+                    for (channel = 0; channel < 4; channel = channel + 1) begin
+                        gradient_low2_r[channel] <= {1'b0, gradient_product1_r[channel][23:0]} +
+                            {1'b0, gradient_bias_r[channel]};
+                        gradient_zero2_r[channel] <= gradient_product1_r[channel][48:24] == 0;
+                        gradient_minus_one2_r[channel] <= &gradient_product1_r[channel][48:24];
+                        gradient_negative2_r[channel] <= gradient_product1_r[channel][48];
+                    end
+                end
+                if (pipe_valid_r[2]) begin
+                    address3_r <= sample_base2_r + pixel_bits_w[34:3];
+                    source_shift_r[3][pixel] <= (3'd0 - (3'd1 << bits_log2_w)) -
+                        pixel_bits_w[2:0];
+                    source_mask_r[3][pixel] <= bits_log2_w >= 3'd3 ? 8'hff :
+                        8'hff >> (8 - (1 << bits_log2_w));
+                    fill_color_r[3] <= op_w == 8'h01 && flags_w[0] ?
+                        {gradient_value_w[1],
+                            gradient_value_w[2],
+                            gradient_value_w[3]} : command_i[247:224];
+                    fill_operand_a3_r <= op_w == 8'h01 ?
+                        command_i[255:248] : fill_coverage_r[2];
+                    fill_operand_b3_r <= op_w == 8'h01 ? (flags_w[0] ?
+                        gradient_value_w[0] : 8'd255) : fill_inner_r[2];
+                end
+                if (pipe_valid_r[3]) begin
+                    sample_addr_r[pixel] <= address3_r;
+                    source_index_r[pixel] <= tile_w ? tile_slot_base_w + {7'd0, tile_beat_w} :
+                        address3_r[13:5] - bank_source_r[pipe_tag_r[3][31]][13:5];
+                    source_offset_r[4][pixel] <= address3_r[4:0];
+                    fill_product4_r <= fill_operand_a3_r * fill_operand_b3_r;
+                end
+                if (pipe_valid_r[4]) begin
+                    sparse_data_r[pixel] <= lane_cache_w[pixel];
+                    source_offset_r[5][pixel] <= source_offset_r[4][pixel];
+                    fill_alpha5_r <= divide255(fill_product4_r);
+                    fill_factor5_r <= op_w == 8'h01 ? fill_coverage_r[4] : command_i[255:248];
+                end
+                if (pipe_valid_r[5]) begin
+                    raw_r[pixel] <= raw_shift_w[pixel][31:0];
+                    fill_product6_r <= fill_alpha5_r * fill_factor5_r;
+                end
+                if (pipe_valid_r[6]) begin
+                    expanded7_r <= expanded_w;
+                    fill_pixel7_r <= {divide255(fill_product6_r), fill_color_r[6]};
+                end
+                if (pipe_valid_r[7]) begin
+                    expanded8_r <= expanded7_r[23:0];
+                    alpha_product8_r <= expanded7_r[31:24] * command_i[255:248];
+                    for (channel = 0; channel < 3; channel = channel + 1)
+                        recolor_back8_r[channel] <= recolor_inverse_r *
+                            expanded7_r[channel*8 +: 8];
+                    fill_pixel8_r <= fill_pixel7_r;
+                end
+                if (pipe_valid_r[8])
+                    pipe_src_r[pixel*32 +: 32] <= fill_w ? fill_pixel8_r : converted_w[pixel];
+                for (arithmetic_stage = 1; arithmetic_stage < 4;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1])
+                        tile_slot_r[arithmetic_stage] <= tile_slot_r[arithmetic_stage-1];
+                for (arithmetic_stage = 2; arithmetic_stage < 4;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1])
+                        tile_base_r[arithmetic_stage] <= tile_base_r[arithmetic_stage-1];
+                for (arithmetic_stage = 4; arithmetic_stage < 7;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1]) begin
+                        source_shift_r[arithmetic_stage][pixel] <=
+                            source_shift_r[arithmetic_stage-1][pixel];
+                        source_mask_r[arithmetic_stage][pixel] <=
+                            source_mask_r[arithmetic_stage-1][pixel];
+                    end
+                for (arithmetic_stage = 1; arithmetic_stage < 5;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1])
+                        fill_coverage_r[arithmetic_stage] <= fill_coverage_r[arithmetic_stage-1];
+                for (arithmetic_stage = 1; arithmetic_stage < 3;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1])
+                        fill_inner_r[arithmetic_stage] <= fill_inner_r[arithmetic_stage-1];
+                for (arithmetic_stage = 4; arithmetic_stage < 7;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1])
+                        fill_color_r[arithmetic_stage] <= fill_color_r[arithmetic_stage-1];
+            end
+        end
     end endgenerate
     always @(*) begin
         cache_victim_w = 2'd0;
@@ -624,14 +823,14 @@ module edrv32_rnd_draw (
                     {sample_addr_r[cache_lane][31:5], 5'd0}) begin
                     lane_low_hit_w[cache_lane] = 1'b1;
                     lane_cache_low_w[cache_lane] = cache_data_r[cache_entry];
-                    if (cache_lane == 0 || pipe_tag_r[1][29])
+                    if (cache_lane == 0 || pipe_tag_r[4][29])
                         cache_needed_w = 1'b1;
                 end
                 if (cache_valid_r[cache_entry] &&
                     cache_addr_r[cache_entry] == lane_next_w[cache_lane]) begin
                     lane_high_hit_w[cache_lane] = 1'b1;
                     lane_cache_high_w[cache_lane] = cache_data_r[cache_entry];
-                    if (lane_cross_w[cache_lane] && (cache_lane == 0 || pipe_tag_r[1][29]))
+                    if (lane_cross_w[cache_lane] && (cache_lane == 0 || pipe_tag_r[4][29]))
                         cache_needed_w = 1'b1;
                 end
             end
@@ -689,7 +888,7 @@ module edrv32_rnd_draw (
                 .wr_addr_i(source_write_addr_w),
                 .wr_data_i(rd_data_i),
                 .wr_strb_i(32'hffff_ffff),
-                .rd_en_i(source_bank_w == bank && pipe_valid_r[1] &&
+                .rd_en_i(source_bank_w == bank && pipe_valid_r[4] &&
                     pipeline_step_w && !cancel_i),
                 .rd_addr_i(source_index_r[pixel]),
                 .rd_data_o(source_data_w[bank][pixel])
@@ -700,7 +899,7 @@ module edrv32_rnd_draw (
                 .wr_addr_i(source_write_addr_w),
                 .wr_data_i(rd_data_i),
                 .wr_strb_i(32'hffff_ffff),
-                .rd_en_i(source_bank_w == bank && pipe_valid_r[1] &&
+                .rd_en_i(source_bank_w == bank && pipe_valid_r[4] &&
                     pipeline_step_w && !cancel_i),
                 .rd_addr_i(source_index_r[pixel] + 9'd1),
                 .rd_data_o(source_next_w[bank][pixel])
@@ -709,9 +908,9 @@ module edrv32_rnd_draw (
                 .clk_i(clk_i),
                 .wr_en_i(load_bank_r == bank && load_state_r == S_TILE_ADDR && !cancel_i),
                 .wr_addr_i(tile_index_r),
-                .wr_data_i({16'd0, tile_entry_r}),
+                .wr_data_i({9'd0, tile_row_base_w[6:0], tile_entry_r}),
                 .rd_en_i(render_read_w),
-                .rd_addr_i(issue_map_index_w[pixel][7:0]),
+                .rd_addr_i(issue_map_index_w[pixel]),
                 .rd_data_o(map_entry_w[bank][pixel])
             );
         end
@@ -744,12 +943,99 @@ module edrv32_rnd_draw (
                 rendered_r[write_bank_r] <= 1'b0;
             if (write_finish_w) begin
                 busy_r[write_bank_r] <= 1'b0;
-                if (bank_y_r[write_bank_r] == bottom_w[11:0] &&
-                    bank_right_r[write_bank_r] == right_w[11:0]) begin
+                if (bank_y_r[write_bank_r] == clip_bottom_r &&
+                    bank_right_r[write_bank_r] == clip_right_r) begin
                     active_r <= 1'b0;
                     done_r <= 1'b1;
                 end
             end
+        end
+    end
+    // Multipliers have explicit input/output registers; payload never needs reset.
+    always @(posedge clk_i) begin
+        if (start_i) begin
+            dst_y_r <= top_w[11:0];
+            recolor_inverse_r <= 8'd255 - command_i[511:504];
+            for (lane = 0; lane < 3; lane = lane + 1)
+                recolor_product_r[lane] <= command_i[511:504] *
+                    command_i[480+lane*8 +: 8];
+            gradient_bias_r[0] <= {command_i[319:312], 1'b1, 15'd0};
+            gradient_bias_r[1] <= {command_i[311:304], 1'b1, 15'd0};
+            gradient_bias_r[2] <= {command_i[303:296], 1'b1, 15'd0};
+            gradient_bias_r[3] <= {command_i[295:288], 1'b1, 15'd0};
+            source_last_base_r <= command_i[287:256] + (format_w == 4'd1 ? 32'd3 :
+                format_w == 4'd0 ? 32'd1 : 32'd0);
+            map_x_offset_r <= {16'd0, command_i[367:352]} -
+                {{16{command_i[175]}}, command_i[175:160]};
+            map_y_offset_r <= {16'd0, command_i[383:368]} -
+                {{16{command_i[191]}}, command_i[191:176]};
+        end
+        // The parent publishes effective stride on the start edge (rnd 5.2).
+        if (load_state_r == S_RADIUS) begin
+            source_stride_r <= source_stride_i[17:0];
+            tile_last_offset_r <= tile_last_offset_w[5:0];
+            for (lane = 0; lane < 3; lane = lane + 1)
+                recolor_bias_r[lane] <= recolor_product_r[lane] + 16'd128;
+        end
+        // Target descriptors own their captured address; prepare the following row now.
+        if (load_state_r == S_BOUNDS)
+            dst_y_r <= load_right_r == clip_right_r ? load_y_r + 12'd1 : load_y_r;
+        dst_row_product_r <= dst_y_r * command_i[79:64];
+        dst_row_base_r <= command_i[63:32] + dst_row_product_r;
+        bounds_ky_r <= bounds_ky_w[15:0];
+        bounds_scaled_y_r <= bounds_ky_r * command_i[415:384];
+        bounds_y_r <= bounds_ky_r;
+        bounds_v_r <= {16'd0, command_i[351:336]} +
+            (op_w == 8'h04 ? bounds_scaled_y_r[47:16] : {16'd0, bounds_y_r});
+        // v*SRC_STRIDE + v*(effective_stride-SRC_STRIDE) is v*effective_stride modulo 2^32.
+        bounds_row_product_r <= bounds_v_r * source_stride_r;
+        bounds_row_base_r <= command_i[287:256] + bounds_row_product_r;
+        bounds_row_last_base_r <= source_last_base_r + bounds_row_product_r;
+        for (bounds_lane = 0; bounds_lane < 2; bounds_lane = bounds_lane + 1) begin
+            bounds_kx_r[bounds_lane] <= bounds_kx_w[bounds_lane][15:0];
+            bounds_scaled_x_r[bounds_lane] <= bounds_kx_r[bounds_lane] * command_i[383:352];
+            bounds_x_r[bounds_lane] <= bounds_kx_r[bounds_lane];
+            bounds_u_r[bounds_lane] <= {16'd0, command_i[335:320]} +
+                (op_w == 8'h04 ? bounds_scaled_x_r[bounds_lane][47:16] :
+                    {16'd0, bounds_x_r[bounds_lane]});
+            bounds_byte_r[bounds_lane] <= bounds_bits_w[bounds_lane][34:3];
+            bounds_byte_delay_r[bounds_lane] <= bounds_byte_r[bounds_lane];
+            bounds_addr_r[bounds_lane] <= bounds_row_base_r + bounds_byte_delay_r[bounds_lane];
+            bounds_last_addr_r[bounds_lane] <= bounds_row_last_base_r +
+                bounds_byte_delay_r[bounds_lane];
+        end
+        bounds_first_r <= {bounds_min_word_w, 5'd0};
+        // Compare the original addresses, preserving wrap at the last pixel byte.
+        bounds_last_r <= bounds_addr_r[0] > bounds_addr_r[1] ?
+            bounds_last_addr_r[0] : bounds_last_addr_r[1];
+        map_x_r <= map_x_w[16:0];
+        map_y_r <= map_y_w[16:0];
+        map_row_r <= flags_w[0] ? {1'b0, map_y_r[16:4]} : map_y_r[16:3];
+        map_column_r <= ({15'd0, map_x_r} >> tile_log2_w) << 1;
+        map_row_product_r <= map_row_r * command_i[335:320];
+        map_row_base_r <= command_i[319:288] + map_row_product_r;
+        load_map_r <= map_row_base_r + map_column_r;
+        if (load_state_r == S_TILE_MAP && map_hit_w) begin
+            tile_row_pixel_r <= ({20'd0, map_shift_w[11:0]} << (tile_log2_w << 1)) |
+                (tile_pixel_y_w << tile_log2_w);
+            tile_next_x_r <= next_tile_x_w;
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            bounds_valid_r <= 7'd0;
+            bounds_ready_r <= 1'b0;
+        end else if (cancel_i || start_i) begin
+            bounds_valid_r <= 7'd0;
+            bounds_ready_r <= 1'b0;
+        end else begin
+            bounds_valid_r <= {bounds_valid_r[5:0],
+                load_state_r == S_CHUNK && !busy_r[load_bank_r] && !loaded_all_r &&
+                    !fill_w && !tile_w};
+            if (load_state_r == S_CHUNK)
+                bounds_ready_r <= 1'b0;
+            if (bounds_valid_r[6])
+                bounds_ready_r <= 1'b1;
         end
     end
     // Descriptor ownership follows the DMA completion, independent of rendering.
@@ -834,8 +1120,7 @@ module edrv32_rnd_draw (
                         load_state_r <= S_CHUNK;
                 end
                 S_CHUNK: if (!busy_r[load_bank_r] && !loaded_all_r) begin
-                    load_right_r <= chunk_right_w < {1'b0, right_w[11:0]} ?
-                        chunk_right_w[11:0] : right_w[11:0];
+                    load_right_r <= chunk_end_w;
                     tile_x_r <= load_left_r;
                     tile_index_r <= 8'd0;
                     load_state_r <= S_BOUNDS;
@@ -846,8 +1131,11 @@ module edrv32_rnd_draw (
                     load_state_r <= S_TARGET_DATA;
                 end
                 S_TARGET_DATA: if (load_done_w)
-                    load_state_r <= fill_w || bank_sparse_r[load_bank_r] ? S_LOADED :
-                        tile_w ? S_TILE_MAP : S_SOURCE_REQ;
+                    load_state_r <= fill_w ? S_LOADED : tile_w ? S_TILE_MAP :
+                        bounds_available_w ? (bounds_sparse_w ? S_LOADED : S_SOURCE_REQ) :
+                            S_TARGET_END;
+                S_TARGET_END: if (bounds_available_w)
+                    load_state_r <= bounds_sparse_w ? S_LOADED : S_SOURCE_REQ;
                 S_SOURCE_REQ: if (load_accept_w) begin
                     load_beat_r <= 9'd0;
                     load_state_r <= S_SOURCE_DATA;
@@ -865,22 +1153,22 @@ module edrv32_rnd_draw (
                     load_state_r <= S_TILE_MAP;
                 end
                 S_TILE_ADDR: load_state_r <= S_SOURCE_REQ;
-                S_TILE_NEXT: if (next_tile_x_w > {1'b0, load_right_r})
+                S_TILE_NEXT: if (tile_next_x_r > {1'b0, load_right_r})
                     load_state_r <= S_LOADED;
                 else begin
-                    tile_x_r <= next_tile_x_w[11:0];
+                    tile_x_r <= tile_next_x_r[11:0];
                     tile_index_r <= tile_index_r + 8'd1;
                     load_state_r <= S_TILE_MAP;
                 end
                 S_LOADED: begin
                     load_bank_r <= !load_bank_r;
-                    if (load_right_r == right_w[11:0]) begin
-                        if (load_y_r == bottom_w[11:0]) begin
+                    if (load_right_r == clip_right_r) begin
+                        if (load_y_r == clip_bottom_r) begin
                             loaded_all_r <= 1'b1;
                             load_state_r <= S_IDLE;
                         end else begin
-                            load_left_r <= left_w[11:0];
-                            tile_x_r <= left_w[11:0];
+                            load_left_r <= clip_left_r;
+                            tile_x_r <= clip_left_r;
                             load_y_r <= load_y_r + 12'd1;
                             load_state_r <= S_ROW;
                         end
@@ -907,6 +1195,9 @@ module edrv32_rnd_draw (
     end
     always @(posedge clk_i) begin
         if (start_i) begin
+            clip_left_r <= left_w[11:0];
+            clip_right_r <= right_w[11:0];
+            clip_bottom_r <= bottom_w[11:0];
             width_r <= width_w;
             height_r <= height_w;
             rect_left_r <= {{2{command_i[175]}}, command_i[175:160]};
@@ -938,27 +1229,33 @@ module edrv32_rnd_draw (
             bank_left_r[load_bank_r] <= load_left_r;
             bank_right_r[load_bank_r] <= load_right_r;
             bank_y_r[load_bank_r] <= load_y_r;
+            if (fill_w || tile_w)
+                bank_sparse_r[load_bank_r] <= 1'b0;
             bank_target_r[load_bank_r] <= {load_dst_w[31:5], 5'd0};
             bank_bytes_r[load_bank_r] <= target_bytes_w[15:0];
             bank_first_byte_r[load_bank_r] <= load_dst_w[4:0];
             bank_last_byte_r[load_bank_r] <= end_dst_w[4:0] + (argb_w ? 5'd3 : 5'd1);
-            bank_source_r[load_bank_r] <= {source_min_w[31:5], 5'd0};
-            bank_sparse_r[load_bank_r] <= !tile_w && !fill_w && source_span_w > 32'd16384;
-            bank_tile_first_r[load_bank_r] <= load_sample_x_w >> tile_log2_w;
+            bank_tile_first_r[load_bank_r] <=
+                (({20'd0, load_left_r} + map_x_offset_r) >> tile_log2_w);
             bank_outer_edge_r[load_bank_r] <= outer_edge_r;
             bank_inner_edge_r[load_bank_r] <= inner_edge_r;
             bank_inner_inside_r[load_bank_r] <= inner_inside_r;
-            load_source_base_r <= {source_min_w[31:5], 5'd0};
-            load_source_bytes_r <= source_span_w[15:0];
         end
         if (load_state_r == S_TILE_MAP && map_hit_w)
             tile_entry_r <= map_shift_w[15:0];
+        if (bounds_valid_r[6]) begin
+            bank_source_r[load_bank_r] <= bounds_first_r;
+            bank_source_row_r[load_bank_r] <= bounds_row_base_r;
+            bank_sparse_r[load_bank_r] <= bounds_sparse_result_w;
+            load_source_base_r <= bounds_first_r;
+            load_source_bytes_r <= bounds_span_w[15:0];
+        end
         if (load_state_r == S_TILE_ADDR) begin
             load_source_base_r <= {tile_row_base_w[31:5], 5'd0};
             load_source_bytes_r <= tile_bytes_w[15:0];
         end
         if (load_accept_w && load_state_r == S_MAP_REQ)
-            map_addr_r <= {load_map_w[31:5], 5'd0};
+            map_addr_r <= {load_map_r[31:5], 5'd0};
         if (load_data_w && load_state_r == S_MAP_DATA)
             map_data_r <= rd_data_i;
         if (load_data_w && load_state_r == S_PALETTE_DATA)
@@ -970,14 +1267,14 @@ module edrv32_rnd_draw (
             render_bank_r <= 1'b0;
             issue_x_r <= 12'd0;
             issue_byte_r <= 14'd0;
-            pipe_valid_r <= 5'd0;
+            pipe_valid_r <= 10'd0;
         end else if (cancel_i || start_i) begin
             render_state_r <= S_RENDER_IDLE;
             render_bank_r <= 1'b0;
-            pipe_valid_r <= 5'd0;
+            pipe_valid_r <= 10'd0;
         end else begin
             if (pipeline_step_w)
-                pipe_valid_r <= {pipe_valid_r[3:0], issue_w};
+                pipe_valid_r <= {pipe_valid_r[8:0], issue_w};
             case (render_state_r)
                 S_RENDER_IDLE: if (render_start_w) begin
                     issue_x_r <= bank_left_r[render_bank_r];
@@ -999,63 +1296,21 @@ module edrv32_rnd_draw (
     end
     always @(posedge clk_i) begin
         if (pipeline_step_w) begin
-            if (issue_w) begin
-                sample_x_r <= issue_x_r;
+            if (issue_w)
                 pipe_tag_r[0] <= {render_bank_r, issue_last_w, issue_pair_w,
                     15'd0, issue_offset_w[13:0]};
-            end
-            for (stage = 1; stage < 5; stage = stage + 1)
+            for (stage = 1; stage < 10; stage = stage + 1)
                 if (pipe_valid_r[stage-1])
                     pipe_tag_r[stage] <= pipe_tag_r[stage-1];
+            if (pipe_valid_r[1])
+                sample_base2_r <= tile_w ? command_i[287:256] :
+                    bank_source_row_r[pipe_tag_r[1][31]];
             if (pipe_valid_r[0])
                 pipe_dst_r[1] <= argb_w ? target_shift_w[63:0] :
                     {16'd0, target_shift_w[31:16], 16'd0, target_shift_w[15:0]};
-            if (pipe_valid_r[1])
-                pipe_dst_r[2] <= pipe_dst_r[1];
-            if (pipe_valid_r[2])
-                pipe_dst_r[3] <= pipe_dst_r[2];
-            if (pipe_valid_r[3])
-                pipe_dst_r[4] <= pipe_dst_r[3];
-            for (lane = 0; lane < 2; lane = lane + 1) begin
-                if (issue_w) begin
-                    fill_color_r[0][lane] <= op_w == 8'h01 && flags_w[0] ?
-                        gradient_color_w[lane] : command_i[247:224];
-                    fill_alpha_r[lane] <= gradient_alpha_w[lane];
-                    fill_coverage_r[0][lane] <= outer_cov_w[lane*8 +: 8];
-                    fill_inner_r[lane] <= 8'd255 - inner_cov_w[lane*8 +: 8];
-                end
-                if (pipe_valid_r[0]) begin
-                    sample_addr_r[lane] <= lane_adjusted_w[lane];
-                    source_index_r[lane] <= lane_source_index_w[lane][8:0];
-                    source_offset_r[1][lane] <= lane_adjusted_w[lane][4:0];
-                    source_shift_r[1][lane] <= lane_shift_w[lane];
-                    source_mask_r[1][lane] <= lane_mask_w[lane];
-                    fill_color_r[1][lane] <= fill_color_r[0][lane];
-                    fill_coverage_r[1][lane] <= fill_coverage_r[0][lane];
-                    fill_product_r[lane] <= op_w == 8'h01 ?
-                        command_i[255:248] * fill_alpha_r[lane] :
-                        fill_coverage_r[0][lane] * fill_inner_r[lane];
-                end
-                if (pipe_valid_r[1]) begin
-                    sparse_data_r[lane] <= lane_cache_w[lane];
-                    source_offset_r[2][lane] <= source_offset_r[1][lane];
-                    source_shift_r[2][lane] <= source_shift_r[1][lane];
-                    source_mask_r[2][lane] <= source_mask_r[1][lane];
-                    fill_color_r[2][lane] <= fill_color_r[1][lane];
-                    fill_opacity_r[lane] <= divide255(fill_product_r[lane]) *
-                        (op_w == 8'h01 ? {8'd0, fill_coverage_r[1][lane]} :
-                            {8'd0, command_i[255:248]});
-                end
-                if (pipe_valid_r[2]) begin
-                    raw_r[lane] <= raw_shift_w[lane][31:0];
-                    source_shift_r[3][lane] <= source_shift_r[2][lane];
-                    source_mask_r[3][lane] <= source_mask_r[2][lane];
-                    fill_pixel_r[lane] <=
-                        {divide255(fill_opacity_r[lane]), fill_color_r[2][lane]};
-                end
-                if (pipe_valid_r[3])
-                    pipe_src_r[lane*32 +: 32] <= fill_w ? fill_pixel_r[lane] : converted_w[lane];
-            end
+            for (stage = 2; stage < 10; stage = stage + 1)
+                if (pipe_valid_r[stage-1])
+                    pipe_dst_r[stage] <= pipe_dst_r[stage-1];
         end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -1087,12 +1342,18 @@ module edrv32_rnd_draw (
             endcase
         end
     end
-    assign unused_load_w = ^{unused_load_shift_w, unused_load_mask_w};
     assign unused_geometry_w = ^{left_w[17:12], right_w[17:12], top_w[17:12], bottom_w[17:12],
         row_local_w[17], row_width_w[17], row_height_w[17], inner_width_r[17],
-        inner_height_r[17], source_span_w[4:0], target_shift_w[255:64],
-        blend_tag_i[28:14], unused_load_w, flags_w[15:4], source_min_w[4:0],
-        source_max_w[4:0], map_shift_w[255:16], palette_shift_w[255:32],
+        inner_height_r[17], target_shift_w[255:64],
+        blend_tag_i[28:14], flags_w[15:4],
+        map_shift_w[255:16], palette_shift_w[255:32],
         target_offset_w[31:5], issue_offset_w[31:14], target_bytes_w[31:16],
-        tile_bytes_w[31:16], tile_row_last_w[4:0], source_last_w[4:0]};
+        tile_bytes_w[31:16], tile_last_offset_w[31:6], tile_end_offset_w[4:0],
+        bounds_last_r[4:0],
+        bounds_kx_w[0][31:16], bounds_scaled_x_r[0][15:0],
+        bounds_kx_w[1][31:16], bounds_scaled_x_r[1][15:0],
+        bounds_ky_w[31:16], bounds_scaled_y_r[15:0], bounds_bits_w[0][2:0],
+        bounds_bits_w[1][2:0], bounds_span_w[4:0],
+        tile_row_bits_w[2:0], tile_entry_r[15:14], tile_entry_r[12],
+        source_stride_i[31:18], map_x_w[31:17], map_y_w[31:17]};
 endmodule

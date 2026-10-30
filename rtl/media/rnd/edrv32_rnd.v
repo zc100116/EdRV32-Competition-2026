@@ -65,7 +65,19 @@ module edrv32_rnd (
     localparam [3:0] S_FINISH = 4'd11;
     localparam [3:0] S_DRAIN = 4'd12;
     localparam [3:0] S_BLIT = 4'd13;
+    localparam [3:0] S_CLIP = 4'd14;
     reg [3:0] state_r;
+    reg signed [17:0] rect_left_r;
+    reg signed [17:0] rect_top_r;
+    reg signed [17:0] rect_right_r;
+    reg signed [17:0] rect_bottom_r;
+    reg signed [17:0] clip_left_r;
+    reg signed [17:0] clip_top_r;
+    reg signed [17:0] clip_right_r;
+    reg signed [17:0] clip_bottom_r;
+    reg inverted_r;
+    wire signed [17:0] expansion_w;
+    wire unused_empty_w;
     reg fetch_half_r;
     reg [511:0] command_r;
     reg [31:0] list_base_r;
@@ -199,16 +211,18 @@ module edrv32_rnd (
     wire [31:0] blend_tag_w;
     wire unused_geometry_w;
 
-    assign row_pixels_w = unused_right_w - unused_left_w + 18'd1;
-    assign source_offset_w = command_r[322:320] + unused_left_w[2:0] - command_r[162:160];
+    assign row_pixels_w = clip_right_r - clip_left_r + 18'd1;
+    assign source_offset_w = command_r[322:320] + clip_left_r[2:0] - command_r[162:160];
     assign source_low_w = command_r[260:256] + {source_offset_w, 2'd0};
-    assign target_low_w = command_r[36:32] + {unused_left_w[2:0], 2'd0};
+    assign target_low_w = command_r[36:32] + {clip_left_r[2:0], 2'd0};
     assign blit_eligible_w = op_w == 8'h04 && command_r[8] && command_r[15:12] == 4'd1 &&
         command_r[22:16] == 0 && command_r[383:352] == 32'h0001_0000 &&
         command_r[415:384] == 32'h0001_0000 && command_r[68:64] == 0 &&
         command_r[292:288] == 0 && row_pixels_w[2:0] == 0 &&
         target_low_w == 0 && source_low_w == 0;
     assign unused_geometry_w = ^row_pixels_w[17:3];
+    assign expansion_w = op_w == 8'h06 ? $signed({13'd0, command_r[292:288]}) : 18'sd0;
+    assign empty_w = inverted_r || clip_right_r < clip_left_r || clip_bottom_r < clip_top_r;
     assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w;
     assign read_fault_w = p4_rvalid_i && p4_rready_o && p4_rresp_i != 0;
     assign write_fault_w = p4_bvalid_i && p4_bready_o && p4_bresp_i != 0;
@@ -252,7 +266,7 @@ module edrv32_rnd (
     edrv32_rnd_decode u_decode (
         .command_i(command_r),
         .illegal_o(illegal_w),
-        .empty_o(empty_w),
+        .empty_o(unused_empty_w),
         .op_o(op_w),
         .argb_o(unused_argb_w),
         .src_fmt_o(unused_format_w),
@@ -545,8 +559,9 @@ module edrv32_rnd (
                     if (rd_data_valid_w)
                         fetch_half_r <= 1'b1;
                     if (rd_done_w)
-                        state_r <= S_CHECK;
+                        state_r <= S_CLIP;
                 end
+                S_CLIP: state_r <= S_CHECK;
                 S_CHECK: begin
                     if (illegal_w)
                         state_r <= S_DRAIN;
@@ -594,6 +609,25 @@ module edrv32_rnd (
         end
         if (state_r == S_FETCH_WAIT && rd_data_valid_w)
             command_r[fetch_half_r*256 +: 256] <= rd_data_w;
+        // The final DMA beat is already in command_r when rd_done_w rises.
+        if (state_r == S_FETCH_WAIT && rd_done_w) begin
+            rect_left_r <= $signed({{2{command_r[175]}}, command_r[175:160]}) - expansion_w;
+            rect_top_r <= $signed({{2{command_r[191]}}, command_r[191:176]}) - expansion_w;
+            rect_right_r <= $signed({{2{command_r[207]}}, command_r[207:192]}) + expansion_w;
+            rect_bottom_r <= $signed({{2{command_r[223]}}, command_r[223:208]}) + expansion_w;
+            inverted_r <= $signed(command_r[207:192]) < $signed(command_r[175:160]) ||
+                $signed(command_r[223:208]) < $signed(command_r[191:176]);
+        end
+        if (state_r == S_CLIP) begin
+            clip_left_r <= rect_left_r > $signed({6'd0, command_r[107:96]}) ?
+                rect_left_r : $signed({6'd0, command_r[107:96]});
+            clip_top_r <= rect_top_r > $signed({6'd0, command_r[123:112]}) ?
+                rect_top_r : $signed({6'd0, command_r[123:112]});
+            clip_right_r <= rect_right_r < $signed({6'd0, command_r[139:128]}) ?
+                rect_right_r : $signed({6'd0, command_r[139:128]});
+            clip_bottom_r <= rect_bottom_r < $signed({6'd0, command_r[155:144]}) ?
+                rect_bottom_r : $signed({6'd0, command_r[155:144]});
+        end
         if (state_r == S_BEGIN)
             source_stride_r <= {16'd0, command_r[303:288]};
         if (state_r == S_BLUR && blur_done_w && op_w == 8'h06) begin

@@ -1,7 +1,7 @@
 // File: edrv32_rnd_alpha_pipe.v
 // Spec: rnd-spec 2.2, 5.2.
 // Description: Two-lane non-premultiplied over, four BLIT modes and synchronous Q lookup.
-//              Seven arithmetic stages plus the ROM stage share an elastic clock enable.
+//              Registered multiplier operands/products and the ROM share an elastic enable.
 // Clock domain: clk_mem (clk_i).
 module edrv32_rnd_alpha_pipe (
     // Clock and reset.
@@ -46,16 +46,16 @@ module edrv32_rnd_alpha_pipe (
     endfunction
 
     wire advance_w;
-    reg [7:0] valid_r;
-    reg [31:0] tag_r [0:7];
+    reg [8:0] valid_r;
+    reg [31:0] tag_r [0:8];
     wire [15:0] oa_w;
     reg [47:0] q_r;
     `include "edrv32_rnd_q.vh"
     integer stage;
-    assign advance_w = !valid_r[7] || out_ready_i;
+    assign advance_w = !valid_r[8] || out_ready_i;
     assign in_ready_o = advance_w && !clear_i;
-    assign out_valid_o = valid_r[7];
-    assign out_tag_o = tag_r[7];
+    assign out_valid_o = valid_r[8];
+    assign out_tag_o = tag_r[8];
 
     always @(posedge clk_i) begin
         if (advance_w) begin
@@ -66,16 +66,16 @@ module edrv32_rnd_alpha_pipe (
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i)
-            valid_r <= 8'd0;
+            valid_r <= 9'd0;
         else if (clear_i)
-            valid_r <= 8'd0;
+            valid_r <= 9'd0;
         else if (advance_w)
-            valid_r <= {valid_r[6:0], in_valid_i};
+            valid_r <= {valid_r[7:0], in_valid_i};
     end
     always @(posedge clk_i) begin
         if (advance_w) begin
             tag_r[0] <= in_tag_i;
-            for (stage = 1; stage < 8; stage = stage + 1)
+            for (stage = 1; stage < 9; stage = stage + 1)
                 tag_r[stage] <= tag_r[stage-1];
         end
     end
@@ -83,8 +83,20 @@ module edrv32_rnd_alpha_pipe (
     genvar lane;
     generate for (lane = 0; lane < 2; lane = lane + 1) begin : g_lane
         wire [31:0] dst_w;
-        wire [7:0] inverse_input_w;
-        wire [7:0] inverse_ratio_w;
+        reg [31:0] dst_input_r;
+        reg [31:0] src_input_r;
+        reg [31:0] raw_input_r;
+        reg [7:0] inverse_input_r;
+        reg argb_input_r;
+        reg [1:0] mode_input_r;
+        reg [7:0] inverse_ratio4_r;
+        reg [47:0] foreground_product5_r;
+        reg [47:0] background_product5_r;
+        reg [31:0] raw6_r;
+        reg [7:0] oa6_r;
+        reg argb6_r;
+        reg zero6_r;
+        reg [47:0] mix6_r;
         reg [31:0] dst0_r;
         reg [31:0] src0_r;
         reg [31:0] raw0_r;
@@ -120,42 +132,45 @@ module edrv32_rnd_alpha_pipe (
         reg [7:0] oa5_r;
         reg argb5_r;
         reg zero5_r;
-        reg [47:0] mix5_r;
-        reg [31:0] pixel6_r;
         reg [31:0] pixel7_r;
         wire [31:0] rounded_ratio_w;
         wire [23:0] color_w;
         wire unused_ratio_w;
         integer channel;
-        assign inverse_input_w = 8'd255 - in_src_i[lane*32+24 +: 8];
-        assign inverse_ratio_w = 8'd255 - ratio4_r;
         assign dst_w = in_argb_i ? in_dst_i[lane*32 +: 32] :
             expand565(in_dst_i[lane*32 +: 16]);
         assign oa_w[lane*8 +: 8] = oa1_r;
         assign rounded_ratio_w = (ratio_product3_r + 32'd32768) >> 16;
         assign unused_ratio_w = ^rounded_ratio_w[31:8];
-        assign color_w = {divide255(mix5_r[47:32]), divide255(mix5_r[31:16]),
-            divide255(mix5_r[15:0])};
+        assign color_w = {divide255(mix6_r[47:32]), divide255(mix6_r[31:16]),
+            divide255(mix6_r[15:0])};
         assign out_pixel_o[lane*32 +: 32] = pixel7_r;
 
         always @(posedge clk_i) begin
             if (advance_w) begin
-                // Stage 0: separate APM products from normalization and mode selection.
-                dst0_r <= dst_w;
-                src0_r <= in_src_i[lane*32 +: 32];
-                raw0_r <= in_dst_i[lane*32 +: 32];
-                argb0_r <= in_argb_i;
-                mode0_r <= in_mode_i;
-                alpha_product0_r <= inverse_input_w * dst_w[31:24];
+                // Input stage: expand destination format and prepare multiplier operands.
+                dst_input_r <= dst_w;
+                src_input_r <= in_src_i[lane*32 +: 32];
+                raw_input_r <= in_dst_i[lane*32 +: 32];
+                inverse_input_r <= 8'd255 - in_src_i[lane*32+24 +: 8];
+                argb_input_r <= in_argb_i;
+                mode_input_r <= in_mode_i;
+                // Stage 0: products go directly to registers.
+                dst0_r <= dst_input_r;
+                src0_r <= src_input_r;
+                raw0_r <= raw_input_r;
+                argb0_r <= argb_input_r;
+                mode0_r <= mode_input_r;
+                alpha_product0_r <= inverse_input_r * dst_input_r[31:24];
                 for (channel = 0; channel < 3; channel = channel + 1) begin
                     mode_product0_r[channel*16 +: 16] <=
-                        in_src_i[lane*32+channel*8 +: 8] * dst_w[channel*8 +: 8];
+                        src_input_r[channel*8 +: 8] * dst_input_r[channel*8 +: 8];
                     add0_r[channel*9 +: 9] <=
-                        {1'b0, in_src_i[lane*32+channel*8 +: 8]} +
-                        {1'b0, dst_w[channel*8 +: 8]};
+                        {1'b0, src_input_r[channel*8 +: 8]} +
+                        {1'b0, dst_input_r[channel*8 +: 8]};
                     subtract0_r[channel*8 +: 8] <=
-                        dst_w[channel*8 +: 8] < in_src_i[lane*32+channel*8 +: 8] ?
-                        8'd0 : dst_w[channel*8 +: 8] - in_src_i[lane*32+channel*8 +: 8];
+                        dst_input_r[channel*8 +: 8] < src_input_r[channel*8 +: 8] ?
+                        8'd0 : dst_input_r[channel*8 +: 8] - src_input_r[channel*8 +: 8];
                 end
                 // Stage 1: over alpha and the four mode colors (spec 2.2).
                 dst1_r <= dst0_r;
@@ -195,23 +210,34 @@ module edrv32_rnd_alpha_pipe (
                 argb4_r <= argb3_r;
                 ratio4_r <= (!argb3_r || dst3_r[31:24] == 8'd255) ?
                     src3_r[31:24] : rounded_ratio_w[7:0];
-                // Stage 5: channel products and their bounded 16-bit sum.
+                inverse_ratio4_r <= 8'd255 - ((!argb3_r || dst3_r[31:24] == 8'd255) ?
+                    src3_r[31:24] : rounded_ratio_w[7:0]);
+                // Stage 5: foreground/background products have separate registers.
                 raw5_r <= raw4_r;
                 oa5_r <= oa4_r;
                 argb5_r <= argb4_r;
                 zero5_r <= src4_r[31:24] == 0;
+                for (channel = 0; channel < 3; channel = channel + 1) begin
+                    foreground_product5_r[channel*16 +: 16] <=
+                        ratio4_r * src4_r[channel*8 +: 8];
+                    background_product5_r[channel*16 +: 16] <=
+                        inverse_ratio4_r * dst4_r[channel*8 +: 8];
+                end
+                // Stage 6: complementary weights bound the sum to 16 bits.
+                raw6_r <= raw5_r;
+                oa6_r <= oa5_r;
+                argb6_r <= argb5_r;
+                zero6_r <= zero5_r;
                 for (channel = 0; channel < 3; channel = channel + 1)
-                    mix5_r[channel*16 +: 16] <= ratio4_r * src4_r[channel*8 +: 8] +
-                        inverse_ratio_w * dst4_r[channel*8 +: 8];
-                // Stage 6: normalize and pack. sa=0 preserves all original bits.
-                if (zero5_r)
-                    pixel6_r <= raw5_r;
-                else if (argb5_r)
-                    pixel6_r <= oa5_r == 0 ? 32'd0 : {oa5_r, color_w};
+                    mix6_r[channel*16 +: 16] <= foreground_product5_r[channel*16 +: 16] +
+                        background_product5_r[channel*16 +: 16];
+                // Stage 7: normalize and pack; the output remains registered.
+                if (zero6_r)
+                    pixel7_r <= raw6_r;
+                else if (argb6_r)
+                    pixel7_r <= oa6_r == 0 ? 32'd0 : {oa6_r, color_w};
                 else
-                    pixel6_r <= {16'd0, color_w[23:19], color_w[15:10], color_w[7:3]};
-                // Stage 7: isolate output packing from the downstream byte-lane mux.
-                pixel7_r <= pixel6_r;
+                    pixel7_r <= {16'd0, color_w[23:19], color_w[15:10], color_w[7:3]};
             end
         end
     end endgenerate
