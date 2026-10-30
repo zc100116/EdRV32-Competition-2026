@@ -14,7 +14,7 @@
 
 - 代码分支 `origin/zc100116/b3`（包含本卡的提交）。Windows Codex 从这里拉出 `win/20261029-09-b3-software`，在 `result.md` 中记录完整哈希。
 - 本卡 `src/`：
-  - 三个演示程序在 Linux 端从 30f6464 构建，GCC 15.2.0，`make -C sw PROGRAM=<demo|demo_vision|demo_vnpu> MEMORY=sram -j1`，0 告警；
+  - 三个演示程序在 Linux 端从 50eb3b4 构建（B3-12：切换 PIX/GEO/场景时 DISP 不停，打印 `Switch: frames=... mtime_ticks=...`），GCC 15.2.0，`make -C sw PROGRAM=<demo|demo_vision|demo_vnpu> MEMORY=sram -j1`，0 告警；
   - `npu/`：YOLO 模型编译输出（`regs.txt`、`mem_desc.hex`、`mem_model.hex`、`quantization.json`），与 20261029-02 相同。
 - 三个版本的功能差异、构建方法：`sw/apps/demo/README.md`“按板级工程选择版本（B3-11）”一节。
 - 串口命令、KEY、网口约定、上板检查清单：`sw/apps/demo/README.md`。
