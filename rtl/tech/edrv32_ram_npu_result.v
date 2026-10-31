@@ -1,6 +1,6 @@
 // File: edrv32_ram_npu_result.v
 // Spec: npu-spec 5.2; docs/design/2026-10-27-npu-datapath.md 4.5, 4.9; CLAUDE.md 8.
-// Description: Fixed 32x512 distributed RAM simple dual-port storage.
+// Description: Fixed 32x512 distributed RAM simple dual-port storage (2 x 32x256 IP).
 // Enabled reads have two-cycle latency; rd_en_i gates the first register only.
 // The wrapper samples the combinational read before the write edge updates memory,
 // so same-address reads return old data. Contents and output data are not initialized or reset.
@@ -26,16 +26,29 @@ module edrv32_ram_npu_result (
     assign rd_data_o = rd_data_r;
 
 `ifdef EDRV32_FPGA_MEMORY_MODE
-    ip_lutram_npu_result u_ip (
+    // The distributed RAM IP is at most 256 bits wide; two side-by-side
+    // 256-bit instances share the address and write enable.
+    ip_lutram_npu_result u_ip_lo (
         // Synchronous write port.
         .wr_clk(clk_i),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
-        .wr_data(wr_data_i),
+        .wr_data(wr_data_i[255:0]),
 
         // Unregistered combinational read port.
         .rd_addr(rd_addr_i),
-        .rd_data(memory_data_w)
+        .rd_data(memory_data_w[255:0])
+    );
+    ip_lutram_npu_result u_ip_hi (
+        // Synchronous write port.
+        .wr_clk(clk_i),
+        .wr_en(wr_en_i),
+        .wr_addr(wr_addr_i),
+        .wr_data(wr_data_i[511:256]),
+
+        // Unregistered combinational read port.
+        .rd_addr(rd_addr_i),
+        .rd_data(memory_data_w[511:256])
     );
 `else
     reg [511:0] memory_r [0:31];

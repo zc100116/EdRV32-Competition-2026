@@ -1,6 +1,6 @@
 // File: edrv32_ram_mem_xbar_w.v
 // Spec: mem-subsys-spec 2.2, 7; CLAUDE.md 8.
-// Description: Fixed 16x288 distributed RAM simple dual-port storage.
+// Description: Fixed 16x288 distributed RAM simple dual-port storage (2 x 16x144 IP).
 // Enabled reads have one-cycle latency; rd_en_i low holds the output.
 // The wrapper samples the combinational read before the write edge updates memory,
 // so same-address reads return old data. Contents and output data are not initialized or reset.
@@ -25,16 +25,29 @@ module edrv32_ram_mem_xbar_w (
     assign rd_data_o = rd_data_r;
 
 `ifdef EDRV32_FPGA_MEMORY_MODE
-    ip_lutram_mem_xbar_w u_ip (
+    // The distributed RAM IP is at most 256 bits wide; two side-by-side
+    // 144-bit instances share the address and write enable.
+    ip_lutram_mem_xbar_w u_ip_lo (
         // Synchronous write port.
         .wr_clk(clk_i),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
-        .wr_data(wr_data_i),
+        .wr_data(wr_data_i[143:0]),
 
         // Unregistered combinational read port.
         .rd_addr(rd_addr_i),
-        .rd_data(memory_data_w)
+        .rd_data(memory_data_w[143:0])
+    );
+    ip_lutram_mem_xbar_w u_ip_hi (
+        // Synchronous write port.
+        .wr_clk(clk_i),
+        .wr_en(wr_en_i),
+        .wr_addr(wr_addr_i),
+        .wr_data(wr_data_i[287:144]),
+
+        // Unregistered combinational read port.
+        .rd_addr(rd_addr_i),
+        .rd_data(memory_data_w[287:144])
     );
 `else
     reg [287:0] memory_r [0:15];
