@@ -11,7 +11,7 @@ module tb;
     logic [63:0] data = 0;
     logic [7:0] mask = 8'hff;
     wire [17:0] it;
-    wire [17:0] dt;
+    wire [19:0] dt;
     wire [63:0] id;
     wire [63:0] dd;
     edrv32_ram_icache_tag u_it (
@@ -27,7 +27,7 @@ module tb;
         .clk_i(clk),
         .wr_en_i(wr),
         .wr_addr_i(addr[8:0]),
-        .wr_data_i(data[17:0]),
+        .wr_data_i(data[19:0]),
         .rd_en_i(rd),
         .rd_addr_i(addr[8:0]),
         .rd_data_o(dt)
@@ -61,20 +61,20 @@ module tb;
         step(); wr = 1; addr = 11'd2047; data = 64'h123456789abcdef0;
         tick(); step(); wr = 0; rd = 1;
         tick();
-        if ({it, dt, id, dd} !== {18'h0def0, 18'h0def0,
+        if ({it, dt, id, dd} !== {18'h0def0, 20'hcdef0,
             64'h123456789abcdef0, 64'h123456789abcdef0}) $fatal(1, "FAIL RAM read");
         step(); wr = 1; data = 64'hfedcba9876543210; mask = 8'h05;
         tick();
         if (dd !== 64'h123456789abcdef0 || id !== 64'h123456789abcdef0 ||
-            it !== 18'h0def0 || dt !== 18'h0def0) $fatal(1, "FAIL old-data collision");
+            it !== 18'h0def0 || dt !== 20'hcdef0) $fatal(1, "FAIL old-data collision");
         step(); wr = 0;
         tick();
         if (dd !== 64'h123456789a54de10 || id !== 64'hfedcba9876543210 ||
-            it !== 18'h03210 || dt !== 18'h03210) $fatal(1, "FAIL byte enable");
+            it !== 18'h03210 || dt !== 20'h43210) $fatal(1, "FAIL byte enable");
         step(); rd = 0; addr = 0;
         tick(); tick();
         if (dd !== 64'h123456789a54de10 || id !== 64'hfedcba9876543210 ||
-            it !== 18'h03210 || dt !== 18'h03210) $fatal(1, "FAIL read hold");
+            it !== 18'h03210 || dt !== 20'h43210) $fatal(1, "FAIL read hold");
         // Exercise every cache address bit with distinct data across the old depth.
         mask = 8'hff;
         for (int i = 0; i < 16; i++) begin
@@ -85,7 +85,7 @@ module tb;
             step(); wr = 0; rd = 1; addr = 11'(127 + i*128);
             tick();
             if (id !== 64'(i) || dd !== 64'(i) ||
-                it !== 18'(12 + i%4) || dt !== 18'(12 + i%4))
+                it !== 18'(12 + i%4) || dt !== 20'(12 + i%4))
                 $fatal(1, "FAIL I RAM expanded address=%0d tag=%h data=%h", addr, it, id);
         end
         $display("PASS cache_ram"); $finish;

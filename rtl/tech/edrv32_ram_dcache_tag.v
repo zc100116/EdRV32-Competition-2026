@@ -1,5 +1,5 @@
 // File: edrv32_ram_dcache_tag.v
-// Spec: cache-spec 2.2, 5.5.
+// Spec: cache-spec 2.2, 5.5; entries are {valid, dirty, tag[17:0]}.
 // Description: Fixed synchronous RAM with old-data read/write collision behavior.
 // Fixed simple dual-port RAM in clk_sys. Enabled reads update at the next edge;
 // disabled reads hold their output. Same-edge same-address reads see old data.
@@ -12,12 +12,12 @@ module edrv32_ram_dcache_tag (
     // Write port.
     input wire  wr_en_i,
     input wire [8:0] wr_addr_i,
-    input wire [17:0] wr_data_i,
+    input wire [19:0] wr_data_i,
 
     // Read port.
     input wire rd_en_i,
     input wire [8:0] rd_addr_i,
-    output wire [17:0] rd_data_o
+    output wire [19:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_dcache_tag u_ip (
@@ -34,8 +34,8 @@ module edrv32_ram_dcache_tag (
         .rd_data(rd_data_o)
     );
 `else
-    reg [17:0] memory_r [0:511];
-    reg [17:0] rd_data_r;
+    reg [19:0] memory_r [0:511];
+    reg [19:0] rd_data_r;
     assign rd_data_o = rd_data_r;
     always @(posedge clk_i) begin
         if (wr_en_i) begin

@@ -508,6 +508,8 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
             dc_commit = 0;
         end
         do @(posedge clk); while (!dc_resp_valid);
+        $display("PERF access addr=%h store=%0b response_cycles=%0d", addr, store,
+                 int'(($time-accepted)/10));
         eq("data error", 64'(error_expected), 64'(dc_resp_err));
         if (!error_expected && !store)
             eq("load data", read_data(addr, 1 << size, 1) & mask,
@@ -557,6 +559,8 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
         put(12'h028, 32'(cmd));
         command_count[cmd-1]++;
         while (maint_req_valid || maint_busy) idle();
+        // Sample after the completion-edge measurement monitor has updated.
+        #1;
     endtask
 
     task automatic compare_memory;
@@ -767,9 +771,34 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
         if ($value$plusargs("KILL_PERCENT=%d", kill_percent)) begin end
         count = int'($urandom(seed));
         $display("RANDOM seed=%0d first_draw=%h", seed, count);
+        if (TEST == 216) begin
+            for (int i = 0; i < 512; i++) begin
+                u_dcache.u_tag0.memory_r[i] = 20'hc0000 | 20'($urandom_range(0, 262143));
+                u_dcache.u_tag1.memory_r[i] = 20'hc0000 | 20'($urandom_range(0, 262143));
+            end
+        end
         repeat (4) @(negedge clk);
         rst_n = 1;
         idle(2);
+        if (TEST == 216) begin
+            for (int i = 0; i < 129; i++) begin
+                eq("initialization blocks core", 0, 64'(dc_req_ready));
+                eq("initialization blocks maintenance", 0, 64'(maint_req_ready));
+                idle();
+            end
+            rst_n = 0;
+            idle(4);
+            rst_n = 1;
+            for (int i = 0; i < 512; i++) begin
+                eq("restarted initialization blocks core", 0, 64'(dc_req_ready));
+                eq("restarted initialization blocks maintenance", 0, 64'(maint_req_ready));
+                eq("initialization has no writeback", 0, 64'(da.awvalid));
+                idle();
+            end
+            eq("initialization ready after 512 cycles", 1, 64'(dc_req_ready));
+        end else begin
+            while (!dc_req_ready) idle();
+        end
         case (TEST)
             0: begin
                 if ($test$plusargs("BAD_AXI_LEN")) fetch(A);
@@ -897,6 +926,28 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                 data_access(A, 0, 2, 0, 0, 0, 1);
                 data_access(B);
                 expect_data_bus(C, 1, 1, 1, 32'h17181920);
+                fence(1);
+                compare_memory();
+            end
+            216: begin
+                for (int i = 0; i < 512; i++) begin
+                    eq("reset way0 metadata", 0, 64'(u_dcache.u_tag0.memory_r[i][19:18]));
+                    eq("reset way1 metadata", 0, 64'(u_dcache.u_tag1.memory_r[i][19:18]));
+                end
+                for (int i = 0; i < 1024; i++)
+                    expect_data_bus(A + 32'(i*32), 1, 0);
+            end
+            217: begin
+                random_stalls = 0;
+                delay_max = 0;
+                data_access(A, 1, 2, 32'h12345678);
+                hit_stream(0, 1);
+                hit_stream(0);
+                bypass(0);
+                bypass(1);
+                data_access(B, 1, 2, 32'habcd9876);
+                expect_data_bus(C, 1, 1, 1, 32'h1234abcd);
+                data_access(C, 0, 2, 0, 0, 0, 1);
                 fence(1);
                 compare_memory();
             end
@@ -1192,7 +1243,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                     count = u_dmem.writes;
                     maintain(4);
                     eq("one dirty writeback", (64'(count)+64'd1), 64'(u_dmem.writes));
-                    eq("one dirty group read", 1, 64'(measured_reads));
+                    eq("dirty segment groups read", 16, 64'(measured_reads));
                     $display("PERF clean dirty=1 group=%0d cycles=%0d", n*511, measured_cycles);
                     compare_memory();
                 end
@@ -1201,7 +1252,8 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                 count = u_dmem.writes;
                 maintain(4);
                 eq("all segments written", (64'(count)+64'd32), 64'(u_dmem.writes));
-                eq("clean groups skipped within segments", 32, 64'(measured_reads));
+                eq("dirty segments scanned", 512, 64'(measured_reads));
+                $display("PERF clean dirty=32 segments=32 cycles=%0d", measured_cycles);
                 compare_memory();
                 for (int n = 0; n < 1024; n++)
                     data_access(A + 32'(n*32), 1, 2, 32'hfeed0000 + 32'(n));
@@ -1210,6 +1262,30 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                 eq("full dirty capacity written", (64'(count)+64'd1024), 64'(u_dmem.writes));
                 eq("full dirty groups", 512, 64'(measured_reads));
                 $display("PERF clean dirty=1024 cycles=%0d", measured_cycles);
+                compare_memory();
+            end
+            313: begin
+                data_access(A, 1, 2, 32'h12345678);
+                data_access(A+32'h1e0, 1, 2, 32'h87654321);
+                data_access(A+32'h3fe0, 1, 2, 32'habcdef01);
+                idle(2);
+                eq("first segment dirty", 1, 64'(u_dcache.segment_dirty_r[0]));
+                eq("last segment dirty", 1, 64'(u_dcache.segment_dirty_r[31]));
+                maintain(1, A, 32);
+                eq("range clean retains other dirty line", 1,
+                   64'(u_dcache.segment_dirty_r[0]));
+                maintain(1, A+32'h1e0, 32);
+                maintain(2, A+32'h1e0, 32);
+                eq("range invalidate leaves conservative flag", 1,
+                   64'(u_dcache.segment_dirty_r[0]));
+                maintain(4);
+                eq("whole clean clears flags", 0, 64'(u_dcache.segment_dirty_r));
+                compare_memory();
+                data_access(A+32'h200, 1, 2, 32'h11223344);
+                idle(2);
+                eq("store sets next segment", 2, 64'(u_dcache.segment_dirty_r));
+                maintain(4);
+                eq("second clean clears flags", 0, 64'(u_dcache.segment_dirty_r));
                 compare_memory();
             end
             312: begin : interleaved_writeback
@@ -1289,7 +1365,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                             TEST, $time);
         endcase
         coverage_report();
-        $display("PASS cache TEST=%0d seed=%0d", TEST, seed);
+        $display("PASS cache TEST=%0d seed=%0d cycles=%0d", TEST, seed, cycles);
         $finish;
     end
 endmodule

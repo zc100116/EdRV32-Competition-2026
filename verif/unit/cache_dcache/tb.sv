@@ -251,7 +251,34 @@ module tb;
     endtask
     initial begin
         for (int i = 0; i < 8192; i++) memory[i] = {32'(i+8192), 32'(i+4096)};
+        // DC-16, cache-spec 5.5: arbitrary metadata, interrupted scan and restart.
+        for (int i = 0; i < 512; i++) begin
+            dut.u_tag0.memory_r[i] = 20'hc0000 | 20'($urandom_range(0, 262143));
+            dut.u_tag1.memory_r[i] = 20'hc0000 | 20'($urandom_range(0, 262143));
+        end
         tick(); step(); rst_n_i = 1;
+        repeat (129) begin
+            if (dc_req_ready_o || maint_req_ready_o) $fatal(1, "FAIL early init ready");
+            tick();
+        end
+        step(); rst_n_i = 0; tick(); step(); rst_n_i = 1;
+        dc_req_valid_i = 1; dc_req_addr_i = 32'h10000000;
+        maint_req_valid_i = 1; maint_cmd_i = 4;
+        for (int i = 0; i < 512; i++) begin
+            if (dc_req_ready_o || maint_req_ready_o || maint_busy_o)
+                $fatal(1, "FAIL initialization accepted request cycle=%0d", i);
+            tick();
+        end
+        if (!dc_req_ready_o || !maint_req_ready_o)
+            $fatal(1, "FAIL initialization exceeds 512 cycles");
+        step(); dc_req_valid_i = 0; maint_req_valid_i = 0;
+        for (int i = 0; i < 512; i++) begin
+            if (dut.u_tag0.memory_r[i][19:18] != 0 ||
+                dut.u_tag1.memory_r[i][19:18] != 0)
+                $fatal(1, "FAIL initialization metadata group=%0d", i);
+        end
+        if (reads != 0 || writes != 0) $fatal(1, "FAIL initialization bus activity");
+        $display("PASS DC-16 initialization=512 restart=512");
         if ($test$plusargs("MAINT_PERF")) begin
             int capacity;
             int lengths[5] = '{1,16,128,512,2048};
