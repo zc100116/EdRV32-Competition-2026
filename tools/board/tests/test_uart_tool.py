@@ -15,6 +15,7 @@ from unittest.mock import Mock, patch
 from tools.board.uart_tool import (
     BIOS_MENU, BiosTransfer, capture, descriptor_bytes, elf_segments, eth_packets,
     operations, wire_bytes,
+    resolve_arp,
 )
 from tools.board.tests.elf_fixture import ENTRY, SEGMENTS, elf_fixture, expected_steps
 
@@ -93,7 +94,9 @@ class BiosToolTest(unittest.TestCase):
 
     def test_eth_bind_and_exactly_one_resend(self):
         udp = Mock()
-        with patch('tools.board.uart_tool.socket.socket', return_value=udp) as factory:
+        udp.getsockname.return_value = ('192.168.1.9', 12345)
+        with patch('tools.board.uart_tool.socket.socket', return_value=udp) as factory, \
+                patch('tools.board.uart_tool.resolve_arp') as arp:
             writes = []
             transfer = BiosTransfer(writes.append, Mock())
             transfer.start(self.path, elf=True, baud=115200, eth=True, local_ip='192.168.1.9')
@@ -103,6 +106,7 @@ class BiosToolTest(unittest.TestCase):
             self.assertEqual(writes, [b'\r', b'2\r'])
             self.assertEqual(udp.sendto.call_count, 0)
             transfer.feed_line('ETH load ready 192.168.1.10:5000')
+            arp.assert_called_once_with('192.168.1.9')
             first = list(udp.sendto.call_args_list)
             failure = 'ETH load result: FAIL bytes win2=1 expect=8451 win3=37 expect=37'
             transfer.feed_line(failure)
@@ -112,6 +116,71 @@ class BiosToolTest(unittest.TestCase):
             self.assertFalse(transfer.status()['active'])
             self.assertEqual(transfer.status()['result'], failure)
             udp.close.assert_called_once()
+
+    def test_eth_no_arp_reply_stops_before_any_image_packet(self):
+        udp = Mock()
+        udp.getsockname.return_value = ('192.168.1.2', 12345)
+        transfer = BiosTransfer(Mock(), Mock())
+        with patch('tools.board.uart_tool.socket.socket', return_value=udp):
+            transfer.start(self.path, elf=True, baud=115200, eth=True)
+        transfer.feed_line(BIOS_MENU)
+        with patch('tools.board.uart_tool.resolve_arp', side_effect=OSError('ARP no reply')):
+            with self.assertRaisesRegex(OSError, 'ARP no reply'):
+                transfer.feed_line('ETH load ready 192.168.1.10:5000')
+        udp.sendto.assert_not_called()
+        udp.close.assert_called_once()
+        self.assertEqual(transfer.status()['phase'], 'error')
+        self.assertEqual(transfer.status()['sent'], 0)
+        self.assertFalse(transfer.status()['active'])
+
+    def test_eth_does_not_bind_wildcard(self):
+        for address in ('', '0.0.0.0'):
+            transfer = BiosTransfer(Mock(), Mock())
+            with self.assertRaisesRegex(ValueError, 'explicit local IPv4'):
+                transfer.start(self.path, elf=True, eth=True, local_ip=address)
+
+    def test_windows_sendarp_uses_explicit_source_and_reports_failure(self):
+        api = Mock(return_value=0)
+        dll = SimpleNamespace(iphlpapi=SimpleNamespace(SendARP=api))
+        with patch('tools.board.uart_tool.sys.platform', 'win32'), \
+                patch('tools.board.uart_tool.ctypes.windll', dll, create=True):
+            resolve_arp('192.168.1.2')
+            destination, source, _, _ = api.call_args.args
+            self.assertEqual(destination.value,
+                             int.from_bytes(socket.inet_aton('192.168.1.10'), sys.byteorder))
+            self.assertEqual(source.value,
+                             int.from_bytes(socket.inet_aton('192.168.1.2'), sys.byteorder))
+            api.return_value = 67
+            with self.assertRaisesRegex(OSError, 'SendARP error 67'):
+                resolve_arp('192.168.1.2')
+
+    @unittest.skipUnless(sys.platform == 'linux', 'Linux raw ARP interface')
+    def test_linux_arp_request_and_reply_on_selected_interface(self):
+        source = bytes((192, 168, 1, 2))
+        target = bytes((192, 168, 1, 10))
+        mac = bytes.fromhex('020000000002')
+        board = bytes.fromhex('024544525632')
+        raw = Mock()
+        raw.getsockname.return_value = ('eth0', 0x0806, 0, 1, mac)
+        reply = mac + board + bytes.fromhex('08060001080006040002')
+        raw.recv.side_effect = [bytes(60), reply + board + target + mac + source + bytes(18)]
+        control = Mock()
+        contexts = []
+        for sock in (control, raw):
+            context = Mock()
+            context.__enter__ = Mock(return_value=sock)
+            context.__exit__ = Mock(return_value=False)
+            contexts.append(context)
+        with patch('tools.board.uart_tool.sys.platform', 'linux'), \
+                patch('tools.board.uart_tool.socket.socket', side_effect=contexts), \
+                patch('tools.board.uart_tool.socket.if_nameindex', return_value=[(2, 'eth0')]), \
+                patch('fcntl.ioctl', return_value=bytes(20) + source + bytes(232)), \
+                patch('tools.board.uart_tool.select.select', return_value=([raw], [], [])):
+            resolve_arp('192.168.1.2')
+        raw.bind.assert_called_once_with(('eth0', 0x0806))
+        expected = b'\xff' * 6 + mac + bytes.fromhex('08060001080006040001')
+        expected += mac + source + bytes(6) + target + bytes(18)
+        raw.send.assert_called_once_with(expected)
 
     def test_rom_is_part_of_same_session(self):
         self.path.write_bytes(elf_fixture(rom_slot=True))

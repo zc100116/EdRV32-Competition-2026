@@ -6,16 +6,79 @@
 # Clock domain: none (host tool).
 """Load and run a .bin or RV32 ELF through UART/UDP BIOS, then capture UART."""
 import argparse
+import ctypes
 from dataclasses import dataclass
+import errno
 from pathlib import Path
 import re
+import select
 import struct
 import socket
 import sys
 import threading
+import time
 
 BIOS_MENU = 'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud'
 BAUDS = (115200, 921600, 2000000)
+
+
+def resolve_arp(local_ip, board_ip='192.168.1.10'):
+    """Resolve on the selected wired interface before submitting any image bytes.
+
+    Windows uses source-bound SendARP; Linux sends one raw ARP request (CAP_NET_RAW).
+    BIOS does not answer ICMP or UDP probes, so neither can acknowledge this check.
+    """
+    source = socket.inet_aton(local_ip)
+    target = socket.inet_aton(board_ip)
+    if sys.platform == 'win32':
+        address = ctypes.c_uint32 * 2
+        mac = address()
+        length = ctypes.c_ulong(6)
+        result = ctypes.windll.iphlpapi.SendARP(
+            ctypes.c_uint32(int.from_bytes(target, sys.byteorder)),
+            ctypes.c_uint32(int.from_bytes(source, sys.byteorder)),
+            ctypes.byref(mac), ctypes.byref(length))
+        if result:
+            raise OSError(f'ARP {local_ip} -> {board_ip}: SendARP error {result}')
+        return
+    if sys.platform != 'linux':
+        raise OSError(f'BIOS ARP resolution unsupported on {sys.platform}')
+    import fcntl
+
+    # SIOCGIFADDR selects the interface owning the explicitly requested source IP.
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as control:
+        interface = None
+        for _, name in socket.if_nameindex():
+            request = struct.pack('256s', name.encode())
+            try:
+                assigned = fcntl.ioctl(control, 0x8915, request)[20:24]
+            except OSError as exc:
+                if exc.errno == errno.EADDRNOTAVAIL:
+                    continue  # Interfaces without IPv4 cannot own this source address.
+                raise
+            if assigned == source:
+                interface = name
+                break
+        if interface is None:
+            raise OSError(f'ARP source {local_ip}: no local interface')
+    with socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0806)) as raw:
+        raw.bind((interface, 0x0806))
+        mac = raw.getsockname()[4]
+        header = struct.pack('!HHBBH', 1, 0x0800, 6, 4, 1)
+        request = b'\xff' * 6 + mac + b'\x08\x06' + header + mac + source
+        request += b'\0' * 6 + target
+        raw.send(request + bytes(60 - len(request)))
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            ready, _, _ = select.select([raw], [], [], max(0, deadline - time.monotonic()))
+            if not ready:
+                break
+            reply = raw.recv(2048)
+            if (len(reply) >= 42 and reply[12:22] == b'\x08\x06\0\x01\x08\0\x06\x04\0\x02'
+                    and reply[28:32] == target and reply[32:38] == mac
+                    and reply[38:42] == source):
+                return
+        raise OSError(f'ARP {local_ip} -> {board_ip}: no reply on {interface}')
 
 
 def descriptor_bytes(entry, segments):
@@ -153,6 +216,8 @@ class BiosTransfer:
             if self.state['active']:
                 raise RuntimeError('BIOS programming is already active')
             if eth:
+                if local_ip in ('', '0.0.0.0'):
+                    raise ValueError('ETH requires an explicit local IPv4 address')
                 self.udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 self.udp.bind((local_ip, 0))
             self.attempt = 0
@@ -218,6 +283,12 @@ class BiosTransfer:
                         self.close_udp()
                     else:
                         self.state['phase'] = 'wait_menu'
+        if packets:
+            try:
+                resolve_arp(self.udp.getsockname()[0])
+            except OSError as exc:
+                self.fail(exc)
+                raise
         for packet in packets:
             self.udp.sendto(packet, ('192.168.1.10', 5000))
             with self.lock:

@@ -202,7 +202,7 @@ class ProgramTest(unittest.TestCase):
 
 class ElfSerial(FakeSerial):
     """Independent scripted ELF peer, including fragmented input and baud changes."""
-    def __init__(self, baud):
+    def __init__(self, baud, menu_delay=0):
         super().__init__()
         from tools.board.tests.elf_fixture import expected_steps
         self.steps = expected_steps(baud)
@@ -210,6 +210,8 @@ class ElfSerial(FakeSerial):
         self.step_bytes = bytearray()
         self.switches = []
         self._baudrate = 115200
+        self.menu_delay = menu_delay
+        self.target_baud = baud
 
     @property
     def baudrate(self):
@@ -234,21 +236,41 @@ class ElfSerial(FakeSerial):
             self.step += 1
             self.step_bytes.clear()
             if self.step % 2 == 0 and self.step < len(self.steps):
-                reply += b'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r\n'
+                if self.menu_delay:
+                    def new_rate_menu():
+                        # Bytes transmitted before the host switches are unreadable.
+                        if self.baudrate == self.target_baud:
+                            self.inject((BIOS_MENU + '\r\n').encode())
+                        else:
+                            self.inject(b'\0\xff\0\n')
+
+                    timer = threading.Timer(self.menu_delay, new_rate_menu)
+                    timer.daemon = True
+                    timer.start()
+                else:
+                    reply += (BIOS_MENU + '\r\n').encode()
             self.inject(reply)
         return len(data)
 
 
 class ElfProgramTest(unittest.TestCase):
-    def exercise(self, baud, bios_first=False):
+    def exercise(self, baud, bios_first=False, switch_delay=0):
         from tools.board.tests.elf_fixture import ENTRY, SEGMENTS, elf_fixture, expected_steps
         with TemporaryDirectory() as directory:
             path = Path(directory) / 'app.elf'
             path.write_bytes(elf_fixture())
             engine = SerialEngine()
             self.addCleanup(engine.disconnect, silent=True)
-            peer = ElfSerial(baud)
+            peer = ElfSerial(baud, menu_delay=0.1 if switch_delay else 0)
             engine._serial = peer
+            if switch_delay:
+                original_switch = engine.program.set_baud
+
+                def delayed_switch(value):
+                    time.sleep(switch_delay)
+                    original_switch(value)
+
+                engine.program.set_baud = delayed_switch
             engine._reader_running = True
             engine._reader = threading.Thread(target=engine._reader_loop)
             engine._reader.start()
@@ -292,6 +314,36 @@ class ElfProgramTest(unittest.TestCase):
     def test_load_elf_and_run_without_baud_switch(self):
         self.exercise(115200)
 
+    def test_2000000_host_takes_80ms_to_reconfigure(self):
+        self.exercise(2000000, switch_delay=0.08)
+
+    def test_menu_before_host_switch_is_lost(self):
+        from tools.board.tests.elf_fixture import elf_fixture
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'app.elf'
+            path.write_bytes(elf_fixture())
+            engine = SerialEngine()
+            self.addCleanup(engine.disconnect, silent=True)
+            peer = ElfSerial(2000000, menu_delay=0.001)
+            engine._serial = peer
+            original_switch = engine.program.set_baud
+
+            def delayed_switch(value):
+                time.sleep(0.08)
+                original_switch(value)
+
+            engine.program.set_baud = delayed_switch
+            engine._reader_running = True
+            engine._reader = threading.Thread(target=engine._reader_loop)
+            engine._reader.start()
+            peer.in_bios = True
+            engine.start_program(path, elf=True)
+            wait_for(self, lambda: bool(peer.switches))
+            wait_for(self, lambda: any(
+                item['text'] == '\0�\0' for item in engine.get_entries()[0]))
+            self.assertEqual(engine.program.status()['phase'], 'wait_menu')
+            self.assertEqual(peer.writes, [b'\r', b'4\r', b'2000000\r'])
+
 
 class EthProgramTest(unittest.TestCase):
     def test_transport_addresses_and_retry_use_shared_bios(self):
@@ -301,6 +353,7 @@ class EthProgramTest(unittest.TestCase):
             path = Path(directory) / 'app.bin'
             path.write_bytes(b'ethernet image')
             udp = Mock()
+            udp.getsockname.return_value = ('192.168.1.8', 12345)
             writes = []
             programmer = BiosProgrammer(writes.append, Mock(), Mock())
             with patch('tools.board.uart_tool.socket.socket', return_value=udp):
@@ -308,13 +361,17 @@ class EthProgramTest(unittest.TestCase):
                                  eth=True, local_ip='192.168.1.8')
             udp.bind.assert_called_once_with(('192.168.1.8', 0))
             programmer.feed_line(BIOS_MENU)
-            programmer.feed_line('ETH load ready 192.168.1.10:5000')
+            with patch('tools.board.uart_tool.resolve_arp') as arp:
+                programmer.feed_line('ETH load ready 192.168.1.10:5000')
+            arp.assert_called_once_with('192.168.1.8')
             self.assertEqual(writes, [b'\r', b'2\r'])
             calls = list(udp.sendto.call_args_list)
             self.assertEqual(len(calls), 2)
             self.assertEqual(calls[-1].args[0][8:],
                              struct.pack('<IIII', 1, 0x80000104, 0x80000100, 14))
-            programmer.feed_line('ETH load result: FAIL bytes win2=0 expect=14 win3=16 expect=16')
+            with patch('tools.board.uart_tool.resolve_arp'):
+                programmer.feed_line('ETH load result: FAIL bytes '
+                                     'win2=0 expect=14 win3=16 expect=16')
             self.assertEqual(udp.sendto.call_args_list, calls + calls)
             programmer.feed_line('Load bytes: 14 segments: 1')
             programmer.feed_line('Load result: PASS')

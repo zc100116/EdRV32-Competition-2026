@@ -13,6 +13,10 @@ ETH 完整会话、ETH 少发首包后整份重发三条路径加载，均自动
 PC 参考帧复用 SC-06 的 IPv4 校验计算，UDP 使用真实 uart_tool.eth_packets()，
 包含 8 B 应用头；先段数据、后描述块，最后置 NOTIFY。缺包必须产生 FAIL bytes，
 完整重发后必须 PASS。日志位于 build/sc_bios_eth/{uart,eth,eth_retry}.log。
+ETH 完整会话在第一包 UDP 前先发送来自 192.168.1.2 的广播 ARP 请求；
+common/eth_stimulus.svh 比对 60 B 应答（含补零），eth_peer_model 校验前导码、FCS 和 IFG，
+run.py 要求 `CHECK ETH ARP reply` 与加载/运行 PASS 同时出现。
+缺首包场景保持原 UDP 输入，避免把“缺首包”变为“缺 ARP”。
 场景 full 档，Verilator -j 1、-Wall，独立构建目录。
 
 仅 CASE18 使用协调者批准的仿真加速：force BAUD_DIV=256，UART 对端 6.25 Mbaud；

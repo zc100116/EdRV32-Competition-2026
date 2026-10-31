@@ -65,7 +65,8 @@ SRAM 镜像在复位后仍可从 SRAM 启动；DDR 程序每次复位后必须�
 选择 3 仍提示 `Run address:`，接收 `0x` 开头的入口；非法时输出
 `Run result: FAIL address`，合法时打印 Run 行并跳转。
 选择 4 仍提示 `Baud:`，支持 115200、921600、2000000，合法时用旧波特率打印
-`Baud result: <值>`，等发送完成再切换；非法时打印 `Baud result: FAIL`。
+`Baud result: <值>`，等发送完成再切换；切换后等 100 ms 再发送新速率菜单
+（SoC v0.22 7.5(3a)），供主机重配 USB 串口；非法时打印 `Baud result: FAIL`。
 其他输入打印 `Input error: type 1-4 then Enter`。未跳转的操作结束后重新打印菜单。
 
 PC 使用说明见 [tools/board/README.md](../../tools/board/README.md)。

@@ -213,6 +213,11 @@ static void baud(struct uart_input *input)
     info_number("Baud result", value);
     uart_drain();
     uart_set_baud(sysctrl_read(SYSCTRL_CLK_SYS_HZ), value);
+    /* SoC 7.5(3a): allow 100 ms for the host to reconfigure after the old-rate result. */
+    uint64_t start = clint_time();
+    uint32_t settle = sysctrl_read(SYSCTRL_CLK_SYS_HZ) / 10u;
+    while (clint_time() - start < settle) {
+    }
 }
 
 static _Noreturn void bios(void)

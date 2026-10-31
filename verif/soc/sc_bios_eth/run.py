@@ -29,6 +29,10 @@ def main():
     segments.append((0x10000000, struct.pack('<I', 0xdecaf123)))
     descriptor = descriptor_bytes(entry, segments)
     (OUT / 'bios_uart.bin').write_bytes(descriptor + b''.join(p for _, p in segments))
+    arp_reply = bytes.fromhex('02000000000202454452563208060001080006040002'
+                              '024544525632c0a8010a020000000002c0a80102')
+    # common/eth_stimulus.svh checks all reply bytes; eth_peer_model checks its FCS.
+    (OUT / 'arp.bin').write_bytes(arp_reply + bytes(60 - len(arp_reply)))
     with (OUT / 'bios_rx.bin').open('wb') as stream:
         for packet in eth_packets(entry, segments):
             udp = struct.pack('!HHHH', 6000, 5000, len(packet) + 8, 0) + packet
@@ -50,6 +54,15 @@ def main():
     for name, extra in [('uart', ['+BIOS_UART=1']), ('eth', []),
                         ('eth_retry', ['+BIOS_RETRY=1'])]:
         log = OUT / f'{name}.log'
+        # Keep retry's omit-first-UDP test unchanged; prepend ARP for the full session.
+        if name == 'eth':
+            image_frames = (OUT / 'bios_rx.bin').read_bytes()
+            arp = bytes.fromhex('ffffffffffff02000000000208060001080006040001'
+                                '020000000002c0a80102000000000000c0a8010a')
+            arp += bytes(60 - len(arp))
+            (OUT / 'bios_rx.bin').write_bytes(struct.pack('<I', len(arp)) + arp + image_frames)
+        elif name == 'eth_retry':
+            (OUT / 'bios_rx.bin').write_bytes(image_frames)
         command([str(obj / 'sim'), '+CASE=18', '+DATA_DIR=' + str(OUT),
                  '+ROM_HEX=' + str(OUT / 'rom.hex')] + extra, log)
         text = log.read_text()
@@ -63,6 +76,8 @@ def main():
                        f' expect={ddr_bytes} win3={stage_bytes} expect={stage_bytes}')
             if failure not in text:
                 raise RuntimeError(f'retry: expected {failure}')
+        if name == 'eth' and 'CHECK ETH ARP reply' not in text:
+            raise RuntimeError(f'{name}: missing checked BIOS ARP reply')
         print(f'PASS BIOS {name}: automatic DDR entry and SRAM segment', flush=True)
 
 
