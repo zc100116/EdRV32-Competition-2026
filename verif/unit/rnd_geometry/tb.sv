@@ -210,7 +210,10 @@ module tb;
                 command[175:160] = 16'(-1);
                 e0 = 2147483647; ex = 1431655765; ey = 2;
             end
-            if (kind == 1) begin e0 = -e0; ex = -ex; ey = -ey; end
+            if (kind == 1) begin
+                if (aa != 0) begin e0 = -e0; ex = -ex; ey = -ey; end
+                else begin e0 = -64'sd2147483648; ex = -1431655765; ey = -1; end
+            end
             for (int k = 0; k < 3; k++)
                 edge_parameters(k*3, int'(e0), int'(ex), int'(ey));
         end else begin

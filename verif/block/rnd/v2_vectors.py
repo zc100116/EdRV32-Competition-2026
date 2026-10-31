@@ -188,6 +188,8 @@ def build(number, variant, rng, memory, metadata, common=None, param=PARAM):
                 e0, ex, ey = 2147483647, 1431655765, 2
             sign = -1 if name == 'range-' else 1
             p = [sign * e0, sign * ex, sign * ey] * 3
+            if not aa and sign < 0:
+                p = [-2147483648, -1431655765, -1] * 3
         if name == 'tiny':
             # Exact coefficients include nonzero samples below the Q16 LSB.
             p = [0, 1, -1, 65536, 0, 0, 65536, 0, 0]
