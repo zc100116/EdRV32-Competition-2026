@@ -441,7 +441,10 @@ module edrv32_cpu_frontend #(
         if (f2_pending_r && ic_resp_valid_i)
             blocks_r[block_write_ptr_r] <= {f2_compressed_r, f2_ras_r, f2_history_r,
                 f2_target_r, f2_taken_r, f2_hit_r, f2_position_r, f2_pc_r[31:3]};
-        if (request_accept_w) begin
+        // cpu-spec 4.1: without a pending response owner, F2 payload may follow F1.
+        // A simultaneous response/reissue replaces the owner at this edge.
+        // Keep E redirect cancellation in f2_pending_r, outside these payload enables.
+        if (!f2_pending_r || ic_resp_valid_i) begin
             f2_count_r <= (request_end_w > 4 ? 3'd4 : request_end_w) -
                 {1'b0, f1_pc_r[2:1]};
             f2_start_r <= 4'b0001 << f1_pc_r[2:1];

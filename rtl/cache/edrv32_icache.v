@@ -172,6 +172,11 @@ module edrv32_icache (
             addr_r <= ic_req_addr_i;
             cacheable_r <= cacheable_w;
             pma_err_r <= pma_err_w;
+        end
+        // cache-spec 5.1: snapshot the next set whenever the lookup slot is free.
+        // Only accept_w gives it an owner; misses retain the set through refill.
+        // Removing request-valid from this enable cuts E JALR resolution -> I$ set decode.
+        if (ic_req_ready_o) begin
             lookup_bank_r <= 32'b1 << ic_req_addr_i[13:9];
             lookup_slot_r <= request_slot_w;
         end

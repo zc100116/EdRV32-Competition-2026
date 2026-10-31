@@ -20,7 +20,7 @@
 | `edrv32_cpu_mul` | enable/valid、两个32位操作数、2位operation=funct3[1:0] | valid/32位结果；两个使能时钟沿后输出，enable=0同时保持数据与valid |
 | `edrv32_mul_s33x33` | enable、两个33位有符号数 | 66位乘积；两个使能时钟沿后输出，无数据复位；位于rtl/tech |
 | `edrv32_cpu_div` | start、两个32位操作数、2位operation=funct3[1:0] | busy/valid/32位结果；busy=0时接收start；特殊情况1个沿，普通情况33个沿；valid单拍 |
-| `edrv32_cpu_csr` | 12位addr、access_valid、write/commit、2位command、32位write_data；retire_count[1:0]、event_count[31:0]；trap与MRET；IRQ和mtime | 组合read_data/illegal，以及mstatus/mie/mtvec/mepc；提交沿更新；参数RVC_EN默认1 |
+| `edrv32_cpu_csr` | 42位select、access_valid、write/commit、2位command、32位write_data；D级12位decode_addr译码为42位decode_select并检查权限；retire_count[1:0]、event_count[31:0]；trap与MRET；IRQ和mtime | 组合read_data/illegal，以及mstatus/mie/mtvec/mepc；提交沿更新；参数RVC_EN默认1 |
 
 ALU operation 为 `{SUB/SRA选择, funct3}`：0 ADD、8 SUB、1 SLL、2 SLT、3 SLTU、
 4 XOR、5 SRL、13 SRA、6 OR、7 AND。LUI/AUIPC 在流水控制中使用独立 class。

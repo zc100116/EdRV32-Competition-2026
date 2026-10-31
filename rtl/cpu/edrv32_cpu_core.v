@@ -167,6 +167,8 @@ module edrv32_cpu_core #(
     wire e_target_match_w;
     wire e_advance_w;
     wire e_operand_load_w;
+    wire e_payload_hold_w;
+    wire e_payload_wait_dc_w;
     wire m_wait_other_w;
     wire e_resolve_w;
     reg e_resolved_r;
@@ -216,7 +218,9 @@ module edrv32_cpu_core #(
     wire csr_m_access_w;
     wire csr_d_access_w;
     wire csr_write_w;
-    wire [11:0] csr_addr_w;
+    wire [41:0] d_csr_select_w;
+    reg [41:0] e_csr_select_r;
+    reg [41:0] m_csr_select_r;
     wire [1:0] csr_command_w;
     wire [31:0] csr_operand_w;
     wire [1:0] retire_count_w;
@@ -374,7 +378,7 @@ module edrv32_cpu_core #(
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .access_valid_i(csr_m_access_w),
-        .addr_i(csr_addr_w),
+        .select_i(m_csr_select_r),
         .write_i(csr_write_w),
         // CSR is ready immediately in M, with the same exception/interrupt priority.
         .commit_i(m_system_commit_w && csr_m_access_w),
@@ -386,6 +390,7 @@ module edrv32_cpu_core #(
         .decode_addr_i(d_instr_w[0][31:20]),
         .decode_write_i(d_instr_w[0][13:12] == 1 || d_instr_w[0][19:15] != 0),
         .decode_illegal_o(csr_decode_illegal_w),
+        .decode_select_o(d_csr_select_w),
         .retire_count_i(csr_retire_count_w),
         .event_count_i(event_count_w),
         .trap_i(m_trap_w),
@@ -571,10 +576,11 @@ module edrv32_cpu_core #(
     assign m_wait_other_w = m_valid_r[0] && !m_exception_r &&
         ((m_class_r[0] == C_FENCE && !dc_fence_done_i) ||
         (m_class_r[0] == C_FENCE_I && !(m_fence_phase_r && ic_inv_done_i)));
-    assign e_operand_load_w = !e_valid_r[0] ||
-        (!div_wait_w && !m_wait_other_w &&
-        (!m_valid_r[0] || !m_wait_dc_r || dc_resp_valid_i) &&
-        (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i));
+    // Prepare early hold reasons in parallel; the late hit only releases one mux.
+    assign e_payload_hold_w = e_valid_r[0] && (div_wait_w || m_wait_other_w ||
+        (e_memory_w && !e_exception_r && !e_misaligned_w && !dc_req_ready_i));
+    assign e_payload_wait_dc_w = e_valid_r[0] && m_valid_r[0] && m_wait_dc_r;
+    assign e_operand_load_w = !e_payload_hold_w && (!e_payload_wait_dc_w || dc_resp_valid_i);
     // spec 3.3: valid is independent of ready; acceptance advances E into M.
     assign dc_req_valid_o = e_valid_r[0] && !m_wait_w && !m_redirect_w && !div_wait_w &&
         e_memory_w && !e_exception_r && !e_misaligned_w;
@@ -639,7 +645,6 @@ module edrv32_cpu_core #(
     assign csr_m_access_w = m_valid_r[0] && m_class_r[0] == C_CSR;
     assign csr_d_access_w = d_count_w != 0 && d_class_w[0] == C_CSR && !csr_m_access_w;
     // C-F1 path 1: M owns the CSR data port; D has a separate permission decoder.
-    assign csr_addr_w = m_instr_r[31:20];
     assign csr_command_w = m_instr_r[13:12];
     assign csr_write_w = m_instr_r[13:12] == 1 || m_instr_r[19:15] != 0;
     // D only checks address/permission; only M can commit a CSR write (cpu-spec 4.6).
@@ -788,7 +793,9 @@ module edrv32_cpu_core #(
                 e_operand_a_r[stage_idx] <= d_operand_w[stage_idx * 2];
                 e_operand_b_r[stage_idx] <= d_operand_w[stage_idx * 2 + 1];
             end
-            if (d_issue_w != 0) begin
+            // A live stalled E holds all payload; otherwise validity owns its use.
+            // Keep the late D$ handshake out of issue/hazard/redirect selection.
+            if (e_operand_load_w) begin
                 e_record_r[stage_idx] <= d_record_w[stage_idx];
                 if (stage_idx == 0 && (d_redirect_w || d_redirected_r)) begin
                     e_record_r[stage_idx][REC_PRED_TAKEN] <= 1;
@@ -823,10 +830,12 @@ module edrv32_cpu_core #(
             m_wait_dc_r <= e_memory_w && !e_exception_r && !e_misaligned_w;
             m_store_r <= e_operand_b_r[0];
             m_instr_r <= e_instr_w;
+            m_csr_select_r <= e_csr_select_r;
             m_csr_data_r <= e_instr_w[14] ? {27'b0, e_instr_w[19:15]} : e_operand_a_r[0];
         end
-        // Same D->E edge and enable as the instruction/operands; no extra resolve cycle.
-        if (d_issue_w != 0) begin
+        // Speculative D payload uses the same free-E enable as operands; no extra cycle.
+        if (e_operand_load_w) begin
+            e_csr_select_r <= d_csr_select_w;
             e_pc_target_r <= d_target_w;
             e_pc_target_match_r <= d_redirect_w || d_redirected_r ||
                 d_target_w == d_record_w[0][REC_PRED_TARGET_LSB +: 32];

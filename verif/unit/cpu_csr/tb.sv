@@ -44,12 +44,13 @@ module tb;
     reg [31:0] data;
     wire [31:0] no_c_read;
     wire no_c_illegal;
+    wire [41:0] access_select_w;
 
     edrv32_cpu_csr dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .access_valid_i(access_valid_i),
-        .addr_i(addr_i),
+        .select_i(access_select_w),
         .write_i(write_i),
         .commit_i(commit_i),
         .command_i(command_i),
@@ -60,6 +61,7 @@ module tb;
         .decode_addr_i(decode_override_r ? decode_addr_r : addr_i),
         .decode_write_i(write_i),
         .decode_illegal_o(decode_illegal_o),
+        .decode_select_o(),
         .retire_count_i(retire_count_i),
         .event_count_i(event_count_i),
         .trap_i(trap_i),
@@ -81,7 +83,7 @@ module tb;
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .access_valid_i(access_valid_i),
-        .addr_i(addr_i),
+        .select_i(access_select_w),
         .write_i(write_i),
         .commit_i(commit_i),
         .command_i(command_i),
@@ -89,9 +91,10 @@ module tb;
         .read_data_o(no_c_read),
         .illegal_o(no_c_illegal),
         .decode_valid_i(1'b0),
-        .decode_addr_i(12'b0),
+        .decode_addr_i(addr_i),
         .decode_write_i(1'b0),
         .decode_illegal_o(),
+        .decode_select_o(access_select_w),
         .retire_count_i(retire_count_i),
         .event_count_i(event_count_i),
         .trap_i(trap_i),

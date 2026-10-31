@@ -12,17 +12,18 @@ module edrv32_cpu_csr #(
     // M-stage access: write_i denotes an actual, committed CSR write.
     // command: 1=write, 2=set, 3=clear; zero=read only.
     input wire access_valid_i,
-    input wire [11:0] addr_i,
+    input wire [41:0] select_i,
     input wire write_i,
     input wire commit_i,
     input wire [1:0] command_i,
     input wire [31:0] write_data_i,
     output reg [31:0] read_data_o,
     output wire illegal_o,
-    // C-F1 path 1: D checks permissions independently of the M-stage read/write address.
+    // D owns address decode/permissions; M consumes its registered selection.
     input wire decode_valid_i,
     input wire [11:0] decode_addr_i,
     input wire decode_write_i,
+    output wire [41:0] decode_select_o,
     output wire decode_illegal_o,
     // Retirement and HPM counts: two bits per event, code 1 in [1:0].
     input wire [1:0] retire_count_i,
@@ -66,85 +67,75 @@ module edrv32_cpu_csr #(
     assign mie_o = mie_r;
     assign mtvec_o = mtvec_r;
     assign mepc_o = mepc_r;
-    function access_illegal;
+    // cpu-spec 4.6: D decodes once; E/M carry this selection without moving CSR access.
+    // [15:0]: status/misa/mie/mtvec/inhibit/scratch/epc/cause/tval/ip,
+    // cycle lo/hi, instret lo/hi, time lo/hi; [39:16]: event, HPM lo, HPM hi.
+    // [40] implemented, [41] read-only. Counter aliases share their read selection.
+    function [41:0] decode_select;
         input [11:0] address_i;
-        input write_access_i;
-        reg implemented;
-        reg readonly;
+        reg [41:0] select_w;
         integer index;
         begin
-            implemented = 1'b1;
-            readonly = 1'b0;
-            case (address_i)
-                12'h300, 12'h301, 12'h304, 12'h305, 12'h320,
-                12'h340, 12'h341, 12'h342, 12'h343,
-                12'hb00, 12'hb80, 12'hb02, 12'hb82: begin end
-                12'h344, 12'hc00, 12'hc80, 12'hc02, 12'hc82,
-                12'hc01, 12'hc81, 12'hf11, 12'hf12, 12'hf13, 12'hf14:
-                    readonly = 1'b1;
-                default: implemented = 1'b0;
-            endcase
-            begin
-                for (index = 0; index < 8; index = index + 1) begin
-                    if (address_i == 12'h323 + index[11:0])
-                        implemented = 1'b1;
-                    if (address_i == 12'hb03 + index[11:0] ||
-                        address_i == 12'hc03 + index[11:0] ||
-                        address_i == 12'hb83 + index[11:0] ||
-                        address_i == 12'hc83 + index[11:0]) begin
-                        implemented = 1'b1;
-                        readonly = address_i[10];
-                    end
-                end
+            select_w = 0;
+            select_w[0] = address_i == 12'h300;
+            select_w[1] = address_i == 12'h301;
+            select_w[2] = address_i == 12'h304;
+            select_w[3] = address_i == 12'h305;
+            select_w[4] = address_i == 12'h320;
+            select_w[5] = address_i == 12'h340;
+            select_w[6] = address_i == 12'h341;
+            select_w[7] = address_i == 12'h342;
+            select_w[8] = address_i == 12'h343;
+            select_w[9] = address_i == 12'h344;
+            select_w[10] = address_i == 12'hb00 || address_i == 12'hc00;
+            select_w[11] = address_i == 12'hb80 || address_i == 12'hc80;
+            select_w[12] = address_i == 12'hb02 || address_i == 12'hc02;
+            select_w[13] = address_i == 12'hb82 || address_i == 12'hc82;
+            select_w[14] = address_i == 12'hc01;
+            select_w[15] = address_i == 12'hc81;
+            for (index = 0; index < 8; index = index + 1) begin
+                select_w[16 + index] = address_i == 12'h323 + index[11:0];
+                select_w[24 + index] = address_i == 12'hb03 + index[11:0] ||
+                    address_i == 12'hc03 + index[11:0];
+                select_w[32 + index] = address_i == 12'hb83 + index[11:0] ||
+                    address_i == 12'hc83 + index[11:0];
             end
-            access_illegal = !implemented || (write_access_i && readonly);
+            select_w[40] = |select_w[39:0] || address_i == 12'hf11 ||
+                address_i == 12'hf12 || address_i == 12'hf13 || address_i == 12'hf14;
+            select_w[41] = address_i == 12'h344 || address_i[11:8] == 4'hc ||
+                address_i[11:8] == 4'hf;
+            decode_select = select_w;
         end
     endfunction
-    assign illegal_o = access_valid_i && access_illegal(addr_i, write_i);
-    assign decode_illegal_o = decode_valid_i && access_illegal(decode_addr_i, decode_write_i);
+    assign decode_select_o = decode_select(decode_addr_i);
+    assign illegal_o = access_valid_i && (!select_i[40] || (write_i && select_i[41]));
+    assign decode_illegal_o = decode_valid_i &&
+        (!decode_select_o[40] || (decode_write_i && decode_select_o[41]));
     assign write_enable_w = access_valid_i && write_i && commit_i && !illegal_o;
+    // Disjoint registered selects form a parallel read mux, before CSR set/clear.
     always @(*) begin
-        read_data_o = 0;
-        case (addr_i)
-            12'h300: read_data_o = mstatus_r;
-            12'h301: read_data_o = MISA; // WARL: writes ignored, coordinator clarification.
-            12'h304: read_data_o = mie_r;
-            12'h305: read_data_o = mtvec_r;
-            12'h320: read_data_o = inhibit_r;
-            12'h340: read_data_o = mscratch_r;
-            12'h341: read_data_o = mepc_r;
-            12'h342: read_data_o = mcause_r;
-            12'h343: read_data_o = mtval_r;
-            12'h344: begin
-                read_data_o = {20'b0, irq_meip_i, 3'b0, irq_mtip_i, 3'b0, irq_msip_i, 3'b0};
-            end
-            12'hb00: read_data_o = cycle_r[31:0];
-            12'hb80: read_data_o = cycle_r[63:32];
-            12'hb02: read_data_o = instret_r[31:0];
-            12'hb82: read_data_o = instret_r[63:32];
-            12'hc00: begin read_data_o = cycle_r[31:0]; end
-            12'hc80: begin read_data_o = cycle_r[63:32]; end
-            12'hc02: begin read_data_o = instret_r[31:0]; end
-            12'hc82: begin read_data_o = instret_r[63:32]; end
-            12'hc01: begin read_data_o = mtime_i[31:0]; end
-            12'hc81: begin read_data_o = mtime_i[63:32]; end
-            12'hf11, 12'hf12, 12'hf13, 12'hf14: begin
-                read_data_o = 0;
-            end
-            default: begin end
-        endcase
-        begin
-            for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
-                // All CSR addresses are disjoint. OR decoded banks rather than
-                // serially overriding the base read mux for every HPM register.
-                read_data_o = read_data_o |
-                    ({32{addr_i == 12'h323 + read_idx[11:0]}} & {27'b0, event_r[read_idx]}) |
-                    ({32{addr_i == 12'hb03 + read_idx[11:0] ||
-                    addr_i == 12'hc03 + read_idx[11:0]}} & counter_r[read_idx][31:0]) |
-                    ({32{addr_i == 12'hb83 + read_idx[11:0] ||
-                    addr_i == 12'hc83 + read_idx[11:0]}} & counter_r[read_idx][63:32]);
-
-            end
+        read_data_o =
+            ({32{select_i[0]}} & mstatus_r) |
+            ({32{select_i[1]}} & MISA) |
+            ({32{select_i[2]}} & mie_r) |
+            ({32{select_i[3]}} & mtvec_r) |
+            ({32{select_i[4]}} & inhibit_r) |
+            ({32{select_i[5]}} & mscratch_r) |
+            ({32{select_i[6]}} & mepc_r) |
+            ({32{select_i[7]}} & mcause_r) |
+            ({32{select_i[8]}} & mtval_r) |
+            ({32{select_i[9]}} & {20'b0, irq_meip_i, 3'b0, irq_mtip_i, 3'b0, irq_msip_i, 3'b0}) |
+            ({32{select_i[10]}} & cycle_r[31:0]) |
+            ({32{select_i[11]}} & cycle_r[63:32]) |
+            ({32{select_i[12]}} & instret_r[31:0]) |
+            ({32{select_i[13]}} & instret_r[63:32]) |
+            ({32{select_i[14]}} & mtime_i[31:0]) |
+            ({32{select_i[15]}} & mtime_i[63:32]);
+        for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
+            read_data_o = read_data_o |
+                ({32{select_i[16 + read_idx]}} & {27'b0, event_r[read_idx]}) |
+                ({32{select_i[24 + read_idx]}} & counter_r[read_idx][31:0]) |
+                ({32{select_i[32 + read_idx]}} & counter_r[read_idx][63:32]);
         end
     end
     always @(*) begin
@@ -191,31 +182,38 @@ module edrv32_cpu_csr #(
                         {62'b0, event_count_r[(event_r[update_idx] - 1'b1) * 2 +: 2]};
             end
             if (write_enable_w && !trap_i) begin
-                case (addr_i)
-                    12'h300: mstatus_r <= (write_data_w & 32'h88) | 32'h1800;
-                    12'h304: mie_r <= write_data_w & 32'h888;
-                    12'h305: mtvec_r <= {write_data_w[31:2], 1'b0,
+                if (select_i[0])
+                    mstatus_r <= (write_data_w & 32'h88) | 32'h1800;
+                if (select_i[2])
+                    mie_r <= write_data_w & 32'h888;
+                if (select_i[3])
+                    mtvec_r <= {write_data_w[31:2], 1'b0,
                         write_data_w[1:0] == 1};
-                    12'h320: inhibit_r <= write_data_w & 32'h7fd;
-                    12'h340: mscratch_r <= write_data_w;
-                    12'h341: mepc_r <= write_data_w & EPC_MASK;
-                    12'h342: mcause_r <= write_data_w;
-                    12'h343: mtval_r <= write_data_w;
-                    12'hb00: cycle_r <= {cycle_r[63:32], write_data_w};
-                    12'hb80: cycle_r <= {write_data_w, cycle_r[31:0]};
-                    12'hb02: instret_r <= {instret_r[63:32], write_data_w};
-                    12'hb82: instret_r <= {write_data_w, instret_r[31:0]};
-                    default: begin end
-                endcase
-                begin
-                    for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
-                        if (addr_i == 12'h323 + update_idx[11:0])
-                            event_r[update_idx] <= write_data_w[4:0];
-                        if (addr_i == 12'hb03 + update_idx[11:0])
-                            counter_r[update_idx] <= {counter_r[update_idx][63:32], write_data_w};
-                        if (addr_i == 12'hb83 + update_idx[11:0])
-                            counter_r[update_idx] <= {write_data_w, counter_r[update_idx][31:0]};
-                    end
+                if (select_i[4])
+                    inhibit_r <= write_data_w & 32'h7fd;
+                if (select_i[5])
+                    mscratch_r <= write_data_w;
+                if (select_i[6])
+                    mepc_r <= write_data_w & EPC_MASK;
+                if (select_i[7])
+                    mcause_r <= write_data_w;
+                if (select_i[8])
+                    mtval_r <= write_data_w;
+                if (select_i[10])
+                    cycle_r <= {cycle_r[63:32], write_data_w};
+                if (select_i[11])
+                    cycle_r <= {write_data_w, cycle_r[31:0]};
+                if (select_i[12])
+                    instret_r <= {instret_r[63:32], write_data_w};
+                if (select_i[13])
+                    instret_r <= {write_data_w, instret_r[31:0]};
+                for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
+                    if (select_i[16 + update_idx])
+                        event_r[update_idx] <= write_data_w[4:0];
+                    if (select_i[24 + update_idx])
+                        counter_r[update_idx] <= {counter_r[update_idx][63:32], write_data_w};
+                    if (select_i[32 + update_idx])
+                        counter_r[update_idx] <= {write_data_w, counter_r[update_idx][31:0]};
                 end
             end
             if (trap_i) begin
