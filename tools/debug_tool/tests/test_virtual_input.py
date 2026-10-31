@@ -110,6 +110,7 @@ class VirtualInputTest(unittest.TestCase):
         window.setAttribute(Qt.WA_DeleteOnClose)
         try:
             window.show()
+            window.soc.toggle_panel(window.soc.monitor_card)
             window._select_page(5)
             panel = window.virtual_input
             # A focus elsewhere in the window must not require a panel click.
@@ -168,6 +169,12 @@ class VirtualInputTest(unittest.TestCase):
             QTest.keyPress(panel, Qt.Key_J)
             self.assertEqual(FRAME.unpack(frames[-1])[0], 16)
             QTest.keyRelease(panel, Qt.Key_J)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
+            QTest.keyPress(panel, Qt.Key_Escape)
+            self.assertTrue(panel.buttons['esc'].isDown())
+            self.assertIs(window.soc.expanded_panel, window.soc.monitor_card)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 1 << 9)
+            QTest.keyRelease(panel, Qt.Key_Escape)
             self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
             QTest.keyPress(panel, Qt.Key_Tab)
             self.assertEqual(FRAME.unpack(frames[-1])[0], 1 << 10)

@@ -53,6 +53,14 @@ numpy、torch 等依赖和 `third_party/ultralytics` 子模块。
    拖动或缩放后显示“已暂停跟随，双击恢复”，新数据继续采样，但窗口停在所选时间段；
    保留期外的数据移出后，窗口相应限制在仍保留的范围内。双击图内恢复最近 60 s 并跟随最新数据。
    带宽图和利用率图共用时间窗口，切换图表后保持对齐；CSV 和统计不受图例及时间窗口影响。
+   带宽纵轴默认自动缩放，按当前时间窗口内可见曲线的最大值取 1、2、5 × 10ⁿ 的整齐上限；
+   隐藏曲线不参与计算。“满量程”切到 0–4.4 GB/s，“自动”恢复自动缩放。
+   Ctrl + 滚轮单独缩放带宽纵轴；双击图内同时恢复自动纵轴和时间跟随。
+   理论 4.0 GB/s、规划有效 2.6 GB/s 参考线超出纵轴范围时，在图右上角标明数值。
+   利用率纵轴始终为 0–100%。
+6. 统一显示区、DDR 监控、会话日志和板端 status 摘要的标题右侧提供“放大”按钮。
+   点击后面板占满中控台区域，点击“复原”或按 Esc 恢复原布局；双击标题也可切换。
+   放大期间数据与视频继续刷新。输入页面中的 Esc 仍发送虚拟返回键。
 
 DDR 交互截图（模拟数据，生成物位于 `build/`）：
 [高亮 DISP、隐藏 VIN（1366×768）](../../build/debug_tool/ddrplot/highlight-1366.png)、
@@ -64,6 +72,20 @@ QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/ren
   build/debug_tool/ddrplot/highlight-1366.png --state vision --ddr-view highlight
 QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py \
   build/debug_tool/ddrplot/paused-1920.png --state vision --ddr-view paused --width 1920 --height 1080
+```
+
+面板放大与自动纵轴截图（模拟数据，非实板测量）：
+[1366×768 自动缩放](../../build/debug_tool/uimax/auto-1366.png)、
+[1920×1080 DDR 放大](../../build/debug_tool/uimax/ddr-1920.png)。复现命令：
+
+```sh
+mkdir -p build/debug_tool/uimax
+flock /tmp/edrv32-debugtool.lock env QT_QPA_PLATFORM=offscreen \
+  ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py \
+  build/debug_tool/uimax/auto-1366.png --state vision
+flock /tmp/edrv32-debugtool.lock env QT_QPA_PLATFORM=offscreen \
+  ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py \
+  build/debug_tool/uimax/ddr-1920.png --state vision --maximize ddr --width 1920 --height 1080
 ```
 
 ## 图像处理

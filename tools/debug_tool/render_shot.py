@@ -100,6 +100,7 @@ def main():
     parser.add_argument('--page', type=int, default=0)
     parser.add_argument('--main-page', type=int, default=4)
     parser.add_argument('--ddr-view', choices=['highlight', 'paused'])
+    parser.add_argument('--maximize', choices=['display', 'ddr', 'log', 'status'])
     parser.add_argument('--width', type=int, default=1366)
     parser.add_argument('--height', type=int, default=768)
     args = parser.parse_args()
@@ -143,6 +144,11 @@ def main():
             raise RuntimeError('Simulator produced no EDTM data')
         if (window.width(), window.height()) != (args.width, args.height):
             raise RuntimeError(f'Layout expanded window to {window.size()}')
+        if args.maximize:
+            panel = {'display': window.soc.canvas_card, 'ddr': window.soc.monitor_card,
+                     'log': window.soc.log_card, 'status': window.soc.status_card}[args.maximize]
+            window.soc.toggle_panel(panel)
+            app.processEvents()
         if args.ddr_view:
             chart = window.soc.bandwidth
             if args.ddr_view == 'highlight':

@@ -40,12 +40,75 @@ class TimelineTest(unittest.TestCase):
         QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
         self.app.processEvents()
 
-    def wheel(self, delta):
+    def wheel(self, delta, modifiers=Qt.NoModifier):
         center = self.chart.plot_bounds().center()
         event = QWheelEvent(center, QPointF(self.chart.mapToGlobal(center.toPoint())),
-                            QPoint(), QPoint(0, delta), Qt.NoButton, Qt.NoModifier,
+                            QPoint(), QPoint(0, delta), Qt.NoButton, modifiers,
                             Qt.NoScrollPhase, False)
         self.app.sendEvent(self.chart, event)
+
+    def test_auto_scale_uses_visible_curves_and_current_time_window(self):
+        for row in self.chart.rows:
+            for port in row['ports'][:6]:
+                port['read_Bps'] = 30_000_000
+            row['ports'][6]['read_Bps'] = 900_000_000
+        self.assertEqual(self.chart.y_top(), 1)
+        QTest.mouseClick(self.chart, Qt.LeftButton,
+                         pos=self.chart.legend_rects()[6].center().toPoint())
+        self.assertEqual(self.chart.y_top(), .05)
+        self.chart.rows[0]['ports'][0]['read_Bps'] = 180_000_000
+        self.assertEqual(self.chart.y_top(), .2)
+        self.chart.axis.span = 5
+        self.assertEqual(self.chart.y_top(), .05)
+        self.chart.mode = 1
+        self.assertEqual(self.chart.y_top(), 1)
+
+    def test_full_scale_ctrl_wheel_and_double_click_restore(self):
+        button = self.chart.scale_button()
+        self.addCleanup(button.deleteLater)
+        self.assertEqual(button.text(), '满量程')
+        button.click()
+        self.assertEqual(self.chart.y_top(), 4.4)
+        self.assertEqual(button.text(), '自动')
+        button.click()
+        self.assertEqual(self.chart.y_top(), 1)
+        self.wheel(120, Qt.ControlModifier)
+        self.assertAlmostEqual(self.chart.y_top(), 1 / 1.2)
+        self.assertEqual(self.chart.axis.span, 60)
+        self.wheel(120)
+        QTest.mouseDClick(self.chart, Qt.LeftButton,
+                          pos=self.chart.plot_bounds().center().toPoint())
+        self.assertIsNone(self.chart.manual_top)
+        self.assertEqual(self.chart.axis.span, 60)
+        self.assertEqual(button.text(), '满量程')
+
+    def test_utilization_stays_at_one_and_offscale_references_are_annotated(self):
+        other = Timeline(True)
+        self.addCleanup(other.deleteLater)
+        other.set_y_top(.2)
+        self.assertEqual(other.y_top(), 1)
+        texts, lines = [], []
+
+        class RecordingPainter(QPainter):
+            def drawText(self, *args):
+                texts.append(args[-1])
+                return super().drawText(*args)
+
+            def drawLine(self, *args):
+                lines.append(args)
+                return super().drawLine(*args)
+
+        with patch('gui.telemetry.QPainter', RecordingPainter):
+            self.chart.grab()
+        self.assertIn('理论 4.0 · 规划有效 2.6 GB/s', texts)
+        self.assertNotIn('4.0 理论', texts)
+        self.assertNotIn('2.6 规划有效', texts)
+        self.chart.set_y_top(4.4)
+        texts.clear()
+        with patch('gui.telemetry.QPainter', RecordingPainter):
+            self.chart.grab()
+        self.assertIn('4.0 理论', texts)
+        self.assertIn('2.6 规划有效', texts)
 
     def test_click_legend_excludes_curve_from_painter(self):
         QTest.mouseClick(self.chart, Qt.LeftButton,

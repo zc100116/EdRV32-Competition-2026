@@ -5,10 +5,11 @@ Serial commands and UDP reception use the shared engine.
 """
 
 from bisect import bisect_left, bisect_right
+from math import ceil, log10
 
 from PySide6.QtCore import QObject, Signal, Qt, QPointF, QRectF
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QPushButton, QWidget
 
 COLORS = ['#4085ed', '#24b5a3', '#9c7ce5', '#e9a24b', '#e47a9e', '#67a6bc', '#718096']
 
@@ -35,25 +36,60 @@ class TimeAxis(QObject):
 
 
 class Timeline(QWidget):
+    scale_changed = Signal()
+
     def __init__(self, utilization=False, axis=None):
         super().__init__()
         self.setMinimumHeight(110 if utilization else 220)
         self.setMouseTracking(True)
         self.setToolTip('单击图例显示或隐藏，双击图例只看该端口或恢复全部；'
-                        '悬停查看读数，左右拖动平移，滚轮缩放，双击图内恢复跟随。')
+                        '悬停查看读数，左右拖动平移，滚轮缩放时间，Ctrl + 滚轮缩放带宽；'
+                        '双击图内恢复时间跟随和自动纵轴。')
         self.utilization = utilization
         self.axis = axis if axis is not None else TimeAxis()
         self.axis.changed.connect(self.update)
         self.rows = []
         self.mode = 2
+        self.manual_top = None
         self.visible = [True] * (1 if utilization else 7)
         self.highlight = None
         self.solo = None
         self.hover = None
         self.drag = None
 
+    def y_top(self):
+        if self.utilization:
+            return 1.0
+        if self.manual_top is not None:
+            return self.manual_top
+        start, end = self.axis.window(self.rows)
+        peak = max((self.value(row, port) for row in self.rows
+                    if start <= row['time_s'] <= end
+                    for port, visible in enumerate(self.visible) if visible), default=0)
+        if peak == 0:
+            return 1.0
+        power = 10 ** (ceil(log10(peak)) - 1)
+        return next(factor * power for factor in (1, 2, 5, 10) if factor * power >= peak)
+
+    def set_y_top(self, top):
+        self.manual_top = top
+        self.scale_changed.emit()
+        self.update()
+
+    def scale_button(self):
+        button = QPushButton()
+
+        def refresh():
+            button.setText('满量程' if self.manual_top is None else '自动')
+        button.clicked.connect(lambda: self.set_y_top(
+            4.4 if self.manual_top is None else None))
+        self.scale_changed.connect(refresh)
+        refresh()
+        button.setToolTip('切换带宽纵轴：自动缩放 / 满量程 0–4.4 GB/s')
+        return button
+
     def plot_bounds(self):
-        return QRectF(40, 52, self.width() - 58, self.height() - 76)
+        return QRectF(48, 56, self.width() - 66, self.height() - 80)
 
     def legend_rects(self):
         columns = 4
@@ -72,12 +108,12 @@ class Timeline(QWidget):
         return ((data['read_Bps'] if self.mode != 1 else 0) +
                 (data['write_Bps'] if self.mode != 0 else 0)) / 1e9
 
-    def point(self, row, port):
+    def point(self, row, port, top=None):
         bounds = self.plot_bounds()
         start, end = self.axis.window(self.rows)
         return QPointF(bounds.left() + (row['time_s'] - start) / (end - start) *
                        bounds.width(), bounds.bottom() - self.value(row, port) /
-                       (1 if self.utilization else 4.4) * bounds.height())
+                       (self.y_top() if top is None else top) * bounds.height())
 
     def plot_rows(self):
         start, end = self.axis.window(self.rows)
@@ -91,13 +127,14 @@ class Timeline(QWidget):
             sampled.append(rows[-1])
         return sampled
 
-    def curve_path(self, port):
+    def curve_path(self, port, top=None):
         path = QPainterPath()
         rows = self.plot_rows()
+        top = self.y_top() if top is None else top
         if rows:
-            path.moveTo(self.point(rows[0], port))
+            path.moveTo(self.point(rows[0], port, top))
             for row in rows[1:]:
-                path.lineTo(self.point(row, port))
+                path.lineTo(self.point(row, port, top))
         return path
 
     def pen(self, port):
@@ -111,9 +148,10 @@ class Timeline(QWidget):
         if self.highlight in order:
             order.remove(self.highlight)
             order.append(self.highlight)
+        top = self.y_top()
         for port in order:
             painter.setPen(self.pen(port))
-            painter.drawPath(self.curve_path(port))
+            painter.drawPath(self.curve_path(port, top))
 
     def mousePressEvent(self, event):
         if event.button() != Qt.LeftButton:
@@ -139,10 +177,11 @@ class Timeline(QWidget):
         if self.hover is not None and self.rows:
             nearest = None
             distance = 7.0
+            top = self.y_top()
             for port, visible in enumerate(self.visible):
                 if not visible:
                     continue
-                points = [self.point(row, port) for row in self.plot_rows()]
+                points = [self.point(row, port, top) for row in self.plot_rows()]
                 for a, b in zip(points, points[1:]):
                     dx, dy = b.x() - a.x(), b.y() - a.y()
                     length = dx * dx + dy * dy
@@ -173,10 +212,16 @@ class Timeline(QWidget):
             self.update()
         elif self.plot_bounds().contains(event.position()):
             self.drag = None
+            self.set_y_top(None)
             self.axis.restore()
 
     def wheelEvent(self, event):
         if not self.plot_bounds().contains(event.position()) or not self.rows:
+            return
+        if event.modifiers() & Qt.ControlModifier:
+            if not self.utilization:
+                self.set_y_top(self.y_top() * 1.2 ** (-event.angleDelta().y() / 120))
+            event.accept()
             return
         start, end = self.axis.window(self.rows)
         fraction = (event.position().x() - self.plot_bounds().left()) / self.plot_bounds().width()
@@ -203,7 +248,7 @@ class Timeline(QWidget):
         bounds = self.plot_bounds()
         start, end = self.axis.window(self.rows)
         latest = self.rows[-1]['time_s'] if self.rows else end
-        top = 1 if self.utilization else 4.4
+        top = self.y_top()
         readout = self.rows[-1] if self.rows else None
         if self.hover is not None and self.rows:
             time = start + (self.hover.x() - bounds.left()) / bounds.width() * (end - start)
@@ -225,13 +270,19 @@ class Timeline(QWidget):
         painter.setFont(font)
         painter.setPen(QColor('#8a98aa'))
         painter.drawText(QPointF(0, 49), '%' if self.utilization else 'GB/s')
-        for value in ([0, .5, 1] if self.utilization else [0, 1, 2, 3, 4]):
+        for value in ([0, .5, 1] if self.utilization else [top * i / 4 for i in range(5)]):
             y = bounds.bottom() - value / top * bounds.height()
             painter.setPen(QPen(QColor('#edf0f5'), 1))
             painter.drawLine(QPointF(bounds.left(), y), QPointF(bounds.right(), y))
             painter.setPen(QColor('#8a98aa'))
-            label = f'{value * 100:.0f}' if self.utilization else str(value)
-            painter.drawText(QRectF(0, y - 8, 33, 16), Qt.AlignRight, label)
+            label = f'{value * 100:.0f}' if self.utilization else f'{value:.3g}'
+            painter.drawText(QRectF(0, y - 8, 43, 16), Qt.AlignRight, label)
+        if not self.utilization:
+            references = ' · '.join(text for value, text in
+                                    [(4.0, '理论 4.0'), (2.6, '规划有效 2.6')]
+                                    if value > top)
+            painter.drawText(QRectF(bounds.left(), 40, bounds.width(), 14),
+                             Qt.AlignRight, references + (' GB/s' if references else ''))
         for tick in range(5):
             x = bounds.left() + tick / 4 * bounds.width()
             second = start + tick / 4 * (end - start) - latest
@@ -243,6 +294,8 @@ class Timeline(QWidget):
             if not self.utilization:
                 for value, text, color in [(4.0, '4.0 理论', '#9aa6b5'),
                                             (2.6, '2.6 规划有效', '#d4963c')]:
+                    if value > top:
+                        continue
                     y = bounds.bottom() - value / top * bounds.height()
                     painter.setPen(QPen(QColor(color), 1, Qt.DashLine))
                     painter.drawLine(QPointF(bounds.left(), y), QPointF(bounds.right(), y))

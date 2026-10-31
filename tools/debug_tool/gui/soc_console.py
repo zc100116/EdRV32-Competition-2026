@@ -10,12 +10,12 @@ import struct
 import threading
 import time
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QColor, QImage, QIntValidator
+from PySide6.QtCore import QEvent, Qt, QTimer
+from PySide6.QtGui import QColor, QImage, QIntValidator, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QPushButton,
-    QSizePolicy, QStackedWidget, QTableWidget, QTabWidget, QScrollArea,
+    QSizePolicy, QStackedLayout, QStackedWidget, QTableWidget, QTabWidget, QScrollArea,
     QTableWidgetItem, QVBoxLayout, QWidget,
 )
 from core.engine import fmt_ts
@@ -113,7 +113,21 @@ class SocConsole(QWidget):
         self.replay = []
         self.replay_time = 0
         self.last_tick = time.monotonic()
-        layout = QVBoxLayout(self)
+        self.expanded_panel = None
+        self.panel_buttons = {}
+        self.panel_titles = {}
+        self.panel_stack = QStackedLayout(self)
+        self.panel_stack.setContentsMargins(0, 0, 0, 0)
+        self.normal = QWidget()
+        self.expanded = QWidget()
+        self.expanded_layout = QVBoxLayout(self.expanded)
+        self.expanded_layout.setContentsMargins(0, 0, 0, 0)
+        self.panel_stack.addWidget(self.normal)
+        self.panel_stack.addWidget(self.expanded)
+        self.restore_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        self.restore_shortcut.setContext(Qt.WindowShortcut)
+        self.restore_shortcut.activated.connect(self.restore_panel)
+        layout = QVBoxLayout(self.normal)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(8)
         self._top(layout)
@@ -140,7 +154,7 @@ class SocConsole(QWidget):
         self._canvas(row)
         layout.addWidget(self.workspace, 1)
         self.lower = QWidget()
-        self.lower.setFixedHeight(226)
+        self.lower.setFixedHeight(278)
         lower_box = QHBoxLayout(self.lower)
         lower_box.setContentsMargins(0, 0, 0, 0)
         lower_box.setSpacing(8)
@@ -156,6 +170,59 @@ class SocConsole(QWidget):
         self.video_timer.setTimerType(Qt.PreciseTimer)
         self.video_timer.timeout.connect(self._video_tick)
         self.video_timer.start(16)
+
+    def panel_header(self, panel, box):
+        heading = box.takeAt(0).widget()
+        heading.installEventFilter(self)
+        self.panel_titles[heading] = panel
+        header = QHBoxLayout()
+        header.addWidget(heading, 1)
+        button = self.button('放大', lambda: self.toggle_panel(panel))
+        button.setToolTip('放大此面板；再次点击或按 Esc 复原')
+        self.panel_buttons[panel] = button
+        header.addWidget(button)
+        box.addLayout(header)
+        return header
+
+    def eventFilter(self, watched, event):
+        if (watched in self.panel_titles and event.type() == QEvent.MouseButtonDblClick
+                and event.button() == Qt.LeftButton):
+            self.toggle_panel(self.panel_titles[watched])
+            return True
+        return super().eventFilter(watched, event)
+
+    def toggle_panel(self, panel):
+        if self.expanded_panel is panel:
+            self.restore_panel()
+            return
+        self.restore_panel()
+        self.panel_origin = panel.parentWidget().layout()
+        self.panel_placeholder = QWidget()
+        self.panel_origin.replaceWidget(panel, self.panel_placeholder)
+        self.panel_constraints = (panel.minimumSize(), panel.maximumSize())
+        panel.setMinimumSize(0, 0)
+        panel.setMaximumSize(16777215, 16777215)
+        self.expanded_layout.addWidget(panel)
+        self.expanded_panel = panel
+        self.panel_buttons[panel].setText('复原')
+        self.panel_stack.setCurrentWidget(self.expanded)
+        panel.show()
+        self.panel_buttons[panel].setFocus()
+
+    def restore_panel(self):
+        panel = self.expanded_panel
+        if panel is None:
+            return
+        self.expanded_layout.removeWidget(panel)
+        panel.setParent(self.panel_placeholder.parentWidget())
+        self.panel_origin.replaceWidget(self.panel_placeholder, panel)
+        self.panel_placeholder.deleteLater()
+        panel.setMinimumSize(self.panel_constraints[0])
+        panel.setMaximumSize(self.panel_constraints[1])
+        self.panel_buttons[panel].setText('放大')
+        self.expanded_panel = None
+        self.panel_stack.setCurrentWidget(self.normal)
+        panel.show()
 
     def page(self, title):
         scroll = QScrollArea()
@@ -263,17 +330,15 @@ class SocConsole(QWidget):
 
     def _canvas(self, row):
         frame, box = card('统一显示区')
+        self.canvas_card = frame
         box.setSpacing(2)
         frame.setMinimumWidth(160)
         frame.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
         self.display = QComboBox()
         self.display.addItems(['视频', '静态图片', '检测叠加'])
         self.display.currentIndexChanged.connect(self._display)
-        title = box.takeAt(0).widget()
-        header = QHBoxLayout()
-        header.addWidget(title, 1)
-        header.addWidget(self.display)
-        box.addLayout(header)
+        header = self.panel_header(frame, box)
+        header.insertWidget(1, self.display)
         self.view = DetectionView()
         self.view.setMinimumSize(100, 100)
         self.view.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
@@ -319,6 +384,7 @@ class SocConsole(QWidget):
         box.addWidget(self.output_note)
         layout.addWidget(self.output_card)
         self.status_card, box = card('板端 status 摘要')
+        self.panel_header(self.status_card, box)
         fields = QGridLayout()
         fields.setHorizontalSpacing(6)
         fields.setVerticalSpacing(3)
@@ -366,30 +432,34 @@ class SocConsole(QWidget):
     def _monitor(self, row):
         self.monitor_card, box = card('DDR 监控')
         box.setSpacing(4)
-        header = QHBoxLayout()
-        header.addWidget(box.takeAt(0).widget())
+        self.panel_header(self.monitor_card, box)
+        controls = QHBoxLayout()
         self.chart_mode = QComboBox()
         self.chart_mode.addItems(['带宽 GB/s', '利用率 %', '读延迟'])
-        header.addWidget(self.chart_mode)
+        controls.addWidget(self.chart_mode)
         self.monitor_summary = label('利用率 — · 丢失 0', 'number')
-        header.addStretch()
+        controls.addStretch()
         self.mode = QComboBox()
         self.mode.addItems(['只看读', '只看写', '读写合计'])
         self.mode.setCurrentIndex(2)
-        header.addWidget(self.mode)
+        controls.addWidget(self.mode)
         self.pause_button = self.button('暂停', self._pause)
-        header.addWidget(self.pause_button)
+        controls.addWidget(self.pause_button)
         self.monitor_buttons = [self.pause_button]
         for title, action in [('CSV 导出', self._export), ('回放', self._open),
                               ('清空', self._clear)]:
             button = self.button(title, action)
-            header.addWidget(button)
+            controls.addWidget(button)
             self.monitor_buttons.append(button)
-        box.addLayout(header)
+        box.addLayout(controls)
         content = QHBoxLayout()
         charts = QStackedWidget()
         self.chart_mode.currentIndexChanged.connect(charts.setCurrentIndex)
         self.bandwidth = Timeline()
+        self.scale_button = self.bandwidth.scale_button()
+        controls.insertWidget(1, self.scale_button)
+        self.chart_mode.currentIndexChanged.connect(
+            lambda index: self.scale_button.setVisible(index == 0))
         self.utilization = Timeline(True, axis=self.bandwidth.axis)
         self.histogram = Histogram()
         for title, widget in [('带宽 GB/s', self.bandwidth), ('利用率 %', self.utilization),
@@ -433,11 +503,10 @@ class SocConsole(QWidget):
 
     def _log(self, row):
         frame, box = card('会话日志')
+        self.log_card = frame
         frame.setFixedWidth(280)
-        header = QHBoxLayout()
-        header.addWidget(box.takeAt(0).widget(), 1)
-        header.addWidget(self.button('保存', lambda: self.run(self.engine.save_log)))
-        box.addLayout(header)
+        header = self.panel_header(frame, box)
+        header.insertWidget(1, self.button('保存', lambda: self.run(self.engine.save_log)))
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(500)
