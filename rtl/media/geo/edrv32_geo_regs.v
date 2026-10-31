@@ -27,14 +27,29 @@ module edrv32_geo_regs (
     input wire write_beat_i,
     input wire source_wait_i,
     input wire writer_wait_i,
-    output wire start_o,
-    output wire abort_o,
-    output wire soft_reset_o,
+    output reg start_o,
+    output reg abort_o,
+    output reg soft_reset_o,
     output reg [31:0] desc_base_o,
     output reg [15:0] desc_count_o,
     // Interrupt.
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the shared APB payload terminates at the setup-phase registers.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     wire write_w;
     wire unused_w;
     reg enable_r;
@@ -46,18 +61,15 @@ module edrv32_geo_regs (
     integer counter;
     reg [4:0] pixel_r;
     reg [4:0] perf_event_r;
-    assign unused_w = &apb_pstrb_i;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign start_o = write_w && apb_paddr_i == 12'h028 && !busy_i;
-    assign abort_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[2];
-    assign soft_reset_o = write_w && apb_paddr_i == 12'h004 &&
-        apb_pwdata_i[3] && !busy_i;
+    assign unused_w = &apb_pstrb_r;
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
     assign irq_o = |(irq_stat_r & irq_en_r);
     always @(*) begin
         apb_prdata_o = 32'd0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h00030001;
             12'h004: apb_prdata_o = {31'd0, enable_r};
             12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_i, busy_i};
@@ -112,16 +124,16 @@ module edrv32_geo_regs (
             if (perf_event_r[4])
                 perf_r[5] <= perf_r[5] + 32'd1;
             if (write_w) begin
-                case (apb_paddr_i)
-                    12'h004: enable_r <= apb_pwdata_i[0];
-                    12'h00c: irq_en_r <= apb_pwdata_i[1:0];
+                case (apb_paddr_r)
+                    12'h004: enable_r <= apb_pwdata_r[0];
+                    12'h00c: irq_en_r <= apb_pwdata_r[1:0];
                     12'h010: begin
-                        irq_stat_r <= irq_stat_r & ~apb_pwdata_i[1:0];
-                        if (apb_pwdata_i[1])
+                        irq_stat_r <= irq_stat_r & ~apb_pwdata_r[1:0];
+                        if (apb_pwdata_r[1])
                             err_code_r <= 2'd0;
                     end
-                    12'h020: desc_base_o <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h024: desc_count_o <= apb_pwdata_i[15:0];
+                    12'h020: desc_base_o <= {apb_pwdata_r[31:5], 5'd0};
+                    12'h024: desc_count_o <= apb_pwdata_r[15:0];
                     default: begin end
                 endcase
             end
@@ -152,6 +164,19 @@ module edrv32_geo_regs (
         end else begin
             pixel_r <= pixel_i;
             perf_event_r <= {writer_wait_i, source_wait_i, write_beat_i, read_beat_i, busy_i};
+        end
+    end
+    // SoC 7.1: APB command decode ends at this register stage.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            start_o <= 1'b0;
+            abort_o <= 1'b0;
+            soft_reset_o <= 1'b0;
+        end else begin
+            start_o <= write_w && apb_paddr_r == 12'h028 && !busy_i;
+            abort_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[2];
+            soft_reset_o <= write_w && apb_paddr_r == 12'h004 &&
+                apb_pwdata_r[3] && !busy_i;
         end
     end
 endmodule

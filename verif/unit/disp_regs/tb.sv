@@ -66,9 +66,17 @@ module tb;
     endtask
     task automatic check_reg(input [11:0] addr, input [31:0] expected);
         paddr = addr;
+        psel = 1;
+        penable = 0;
+        pwrite = 0;
+        tick();
+        penable = 1;
         #1;
         if (!pready || pslverr || prdata !== expected)
             $fatal(1, "FAIL reg %h = %h expected=%h", addr, prdata, expected);
+        tick();
+        psel = 0;
+        penable = 0;
     endtask
     task automatic start_frame;
         frame_start = 1;
@@ -136,9 +144,11 @@ module tb;
         // A new error wins over simultaneous RW1C.
         paddr = 'h010;
         psel = 1;
-        penable = 1;
+        penable = 0;
         pwrite = 1;
         pwdata = 2;
+        tick();
+        penable = 1;
         underflow = 1;
         tick();
         psel = 0;

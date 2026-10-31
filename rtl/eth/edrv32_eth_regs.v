@@ -56,12 +56,28 @@ module edrv32_eth_regs (
     output wire [127:0] bases_o,
     output wire [127:0] sizes_o,
     output wire clear_o,
-    output wire start_o,
-    output wire abort_o,
-    output wire mdio_start_o,
+    output reg start_o,
+    output reg abort_o,
+    output reg mdio_start_o,
+    output wire [31:0] mdio_command_o,
     output wire error_o,
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the shared APB payload terminates at the setup-phase registers.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     reg [11:0] irq_stat_r;
     reg [1:0] err_code_r;
     reg [31:0] done_count_r;
@@ -82,25 +98,24 @@ module edrv32_eth_regs (
     reg [8:0] perf_event_r;
     reg [10:0] perf_length_r;
     reg perf_rx_complete_r;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign clear_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[3] && !busy_i;
-    // Preserve the command boundary at the parser; only the register bank's
-    // high-fanout reset enable is delayed. New events settle after that clear.
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+    assign mdio_command_o = apb_pwdata_r;
+    assign clear_o = clear_regs_r;
+    // Apply the same registered SOFT_RST command to the parser and register bank.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i)
             clear_regs_r <= 1'b0;
         else
-            clear_regs_r <= clear_o;
+            clear_regs_r <= write_w && apb_paddr_r == 12'h004 &&
+                apb_pwdata_r[3] && !busy_i;
     end
-    assign start_o = write_w && apb_paddr_i == 12'h028 && !busy_i;
-    assign abort_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[2];
-    assign mdio_start_o = write_w && apb_paddr_i == 12'h180;
+
     assign error_o = irq_stat_r[1];
     assign irq_o = |(irq_stat_r & irq_en_o);
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
-    assign unused_w = &{1'b0, apb_pstrb_i};
-    assign irq_clear_w = write_w && apb_paddr_i == 12'h010 ? apb_pwdata_i[11:0] : 12'd0;
+    assign unused_w = &{1'b0, apb_pstrb_r};
+    assign irq_clear_w = write_w && apb_paddr_r == 12'h010 ? apb_pwdata_r[11:0] : 12'd0;
     assign irq_set_w = {rx_complete_i && rx_notify_i ? (4'b0001 << rx_window_i) : 4'd0,
         6'd0, read_error_i || write_error_i, done_i};
     genvar window_idx;
@@ -219,31 +234,31 @@ module edrv32_eth_regs (
                 perf_r[10] <= 32'd0;
             end
             if (write_w) begin
-                case (apb_paddr_i)
-                    12'h004: enable_o <= apb_pwdata_i[0];
-                    12'h00c: irq_en_o <= apb_pwdata_i[11:0] & 12'hf03;
-                    12'h020: desc_base_o <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h024: desc_count_o <= apb_pwdata_i[15:0];
-                    12'h100: mac_lo_o <= apb_pwdata_i[31:0];
-                    12'h104: mac_hi_o <= apb_pwdata_i[15:0];
-                    12'h108: ip_o <= apb_pwdata_i[31:0];
-                    12'h10c: rx_port_o <= apb_pwdata_i[15:0];
-                    12'h110: dst_mac_lo_o <= apb_pwdata_i[31:0];
-                    12'h114: dst_mac_hi_o <= apb_pwdata_i[15:0];
-                    12'h118: dst_ip_o <= apb_pwdata_i[31:0];
-                    12'h11c: ports_o <= apb_pwdata_i[31:0];
-                    12'h188: phy_o <= apb_pwdata_i[0];
-                    12'h140: base_r[0] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h144: size_r[0] <= apb_pwdata_i;
+                case (apb_paddr_r)
+                    12'h004: enable_o <= apb_pwdata_r[0];
+                    12'h00c: irq_en_o <= apb_pwdata_r[11:0] & 12'hf03;
+                    12'h020: desc_base_o <= {apb_pwdata_r[31:5], 5'd0};
+                    12'h024: desc_count_o <= apb_pwdata_r[15:0];
+                    12'h100: mac_lo_o <= apb_pwdata_r[31:0];
+                    12'h104: mac_hi_o <= apb_pwdata_r[15:0];
+                    12'h108: ip_o <= apb_pwdata_r[31:0];
+                    12'h10c: rx_port_o <= apb_pwdata_r[15:0];
+                    12'h110: dst_mac_lo_o <= apb_pwdata_r[31:0];
+                    12'h114: dst_mac_hi_o <= apb_pwdata_r[15:0];
+                    12'h118: dst_ip_o <= apb_pwdata_r[31:0];
+                    12'h11c: ports_o <= apb_pwdata_r[31:0];
+                    12'h188: phy_o <= apb_pwdata_r[0];
+                    12'h140: base_r[0] <= {apb_pwdata_r[31:5], 5'd0};
+                    12'h144: size_r[0] <= apb_pwdata_r;
                     12'h148: bytes_r[0] <= 32'd0;
-                    12'h150: base_r[1] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h154: size_r[1] <= apb_pwdata_i;
+                    12'h150: base_r[1] <= {apb_pwdata_r[31:5], 5'd0};
+                    12'h154: size_r[1] <= apb_pwdata_r;
                     12'h158: bytes_r[1] <= 32'd0;
-                    12'h160: base_r[2] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h164: size_r[2] <= apb_pwdata_i;
+                    12'h160: base_r[2] <= {apb_pwdata_r[31:5], 5'd0};
+                    12'h164: size_r[2] <= apb_pwdata_r;
                     12'h168: bytes_r[2] <= 32'd0;
-                    12'h170: base_r[3] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h174: size_r[3] <= apb_pwdata_i;
+                    12'h170: base_r[3] <= {apb_pwdata_r[31:5], 5'd0};
+                    12'h174: size_r[3] <= apb_pwdata_r;
                     12'h178: bytes_r[3] <= 32'd0;
                     default: begin end
                 endcase
@@ -252,7 +267,7 @@ module edrv32_eth_regs (
     end
     always @(*) begin
         apb_prdata_o = 32'd0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h00070001;
             12'h008: apb_prdata_o = {29'd0, error_o, !busy_i, busy_i};
             12'h010: apb_prdata_o = {20'd0, irq_stat_r};
@@ -318,6 +333,18 @@ module edrv32_eth_regs (
                 drop_i == 4'd3, frame_i};
             perf_length_r <= rx_complete_i ? rx_length_i : 11'd0;
             perf_rx_complete_r <= rx_complete_i;
+        end
+    end
+    // SoC 7.1: APB command decode ends at this register stage.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            start_o <= 1'b0;
+            abort_o <= 1'b0;
+            mdio_start_o <= 1'b0;
+        end else begin
+            start_o <= write_w && apb_paddr_r == 12'h028 && !busy_i;
+            abort_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[2];
+            mdio_start_o <= write_w && apb_paddr_r == 12'h180;
         end
     end
 endmodule

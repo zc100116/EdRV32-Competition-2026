@@ -21,14 +21,14 @@ module edrv32_vin_regs (
 
     // Engine configuration.
     output reg enable_o,
-    output wire abort_o,
-    output wire soft_rst_o,
+    output reg abort_o,
+    output reg soft_rst_o,
     output reg [31:0] cam0_size_o,
     output reg [31:0] cam1_size_o,
     output reg [31:0] msrc_base_o,
     output reg [15:0] msrc_stride_o,
     output reg [31:0] msrc_size_o,
-    output wire msrc_start_o,
+    output reg msrc_start_o,
     output wire [23:0] ch_ctrl_o,
     output wire [47:0] ch_stride_o,
     output wire [383:0] ch_bases_o,
@@ -46,6 +46,21 @@ module edrv32_vin_regs (
     input wire [3:0] cfg_errors_i,
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the shared APB payload terminates at the setup-phase registers.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     reg [31:0] irq_en_r;
     reg [31:0] irq_stat_r;
     reg [3:0] error_code_r;
@@ -69,15 +84,13 @@ module edrv32_vin_regs (
     reg [14:0] perf_event_r;
     reg [3:0] cfg_errors_r;
     genvar counter;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign clear_w = write_w && apb_paddr_i == 12'h010 ? apb_pwdata_i : 32'd0;
-    assign abort_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[2];
-    assign soft_rst_o = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[3];
-    assign msrc_start_o = write_w && apb_paddr_i == 12'h11c && apb_pwdata_i[0];
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+    assign clear_w = write_w && apb_paddr_r == 12'h010 ? apb_pwdata_r : 32'd0;
+
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
     assign unused_perf_w = perf_event_i[15];
-    assign unused_strb_w = |apb_pstrb_i;
+    assign unused_strb_w = |apb_pstrb_r;
     assign irq_o = |(irq_stat_r & irq_en_r);
     assign ch_ctrl_o = {ch2_ctrl_r, ch1_ctrl_r, ch0_ctrl_r};
     assign ch_stride_o = {ch2_stride_r, ch1_stride_r, ch0_stride_r};
@@ -86,7 +99,7 @@ module edrv32_vin_regs (
 
     always @(*) begin
         apb_prdata_o = 32'd0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h0001_0001;
             12'h004: apb_prdata_o = {31'd0, enable_o};
             12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_i, busy_i};
@@ -131,9 +144,9 @@ module edrv32_vin_regs (
             12'h324: apb_prdata_o = ch_done_frame_id_i[95:64];
             12'h328: apb_prdata_o = {29'd0, ch_wr_stat_i[8:6]};
             default: begin
-                if (apb_paddr_i >= 12'h040 && apb_paddr_i <= 12'h07c &&
-                    apb_paddr_i[1:0] == 0)
-                    apb_prdata_o = perf_r[apb_paddr_i[5:2]];
+                if (apb_paddr_r >= 12'h040 && apb_paddr_r <= 12'h07c &&
+                    apb_paddr_r[1:0] == 0)
+                    apb_prdata_o = perf_r[apb_paddr_r[5:2]];
             end
         endcase
     end
@@ -170,35 +183,35 @@ module edrv32_vin_regs (
                 error_code_r <= error_code_i;
 
             if (write_w) begin
-                case (apb_paddr_i)
-                    12'h004: enable_o <= apb_pwdata_i[0];
-                    12'h00c: irq_en_r <= apb_pwdata_i & 32'h0000_0307;
-                    12'h100: cam0_size_o <= apb_pwdata_i & 32'h0fff_07fe;
-                    12'h104: cam1_size_o <= apb_pwdata_i & 32'h0fff_07fe;
-                    12'h110: msrc_base_o <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h114: msrc_stride_o <= {apb_pwdata_i[15:5], 5'd0};
-                    12'h118: msrc_size_o <= apb_pwdata_i & 32'h0fff_07fe;
-                    12'h200: ch0_ctrl_r <= apb_pwdata_i[7:0] & 8'h77;
-                    12'h204: ch0_stride_r <= {apb_pwdata_i[15:5], 5'd0};
-                    12'h208: ch0_bases_r[31:0] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h20c: ch0_bases_r[63:32] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h210: ch0_bases_r[95:64] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h214: ch0_bases_r[127:96] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h218: ch0_slot_busy_r <= apb_pwdata_i[3:0];
-                    12'h280: ch1_ctrl_r <= apb_pwdata_i[7:0] & 8'h77;
-                    12'h284: ch1_stride_r <= {apb_pwdata_i[15:5], 5'd0};
-                    12'h288: ch1_bases_r[31:0] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h28c: ch1_bases_r[63:32] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h290: ch1_bases_r[95:64] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h294: ch1_bases_r[127:96] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h298: ch1_slot_busy_r <= apb_pwdata_i[3:0];
-                    12'h300: ch2_ctrl_r <= apb_pwdata_i[7:0] & 8'h77;
-                    12'h304: ch2_stride_r <= {apb_pwdata_i[15:5], 5'd0};
-                    12'h308: ch2_bases_r[31:0] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h30c: ch2_bases_r[63:32] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h310: ch2_bases_r[95:64] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h314: ch2_bases_r[127:96] <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h318: ch2_slot_busy_r <= apb_pwdata_i[3:0];
+                case (apb_paddr_r)
+                    12'h004: enable_o <= apb_pwdata_r[0];
+                    12'h00c: irq_en_r <= apb_pwdata_r & 32'h0000_0307;
+                    12'h100: cam0_size_o <= apb_pwdata_r & 32'h0fff_07fe;
+                    12'h104: cam1_size_o <= apb_pwdata_r & 32'h0fff_07fe;
+                    12'h110: msrc_base_o <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h114: msrc_stride_o <= {apb_pwdata_r[15:5], 5'd0};
+                    12'h118: msrc_size_o <= apb_pwdata_r & 32'h0fff_07fe;
+                    12'h200: ch0_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
+                    12'h204: ch0_stride_r <= {apb_pwdata_r[15:5], 5'd0};
+                    12'h208: ch0_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h20c: ch0_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h210: ch0_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h214: ch0_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h218: ch0_slot_busy_r <= apb_pwdata_r[3:0];
+                    12'h280: ch1_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
+                    12'h284: ch1_stride_r <= {apb_pwdata_r[15:5], 5'd0};
+                    12'h288: ch1_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h28c: ch1_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h290: ch1_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h294: ch1_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h298: ch1_slot_busy_r <= apb_pwdata_r[3:0];
+                    12'h300: ch2_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
+                    12'h304: ch2_stride_r <= {apb_pwdata_r[15:5], 5'd0};
+                    12'h308: ch2_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h30c: ch2_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h310: ch2_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h314: ch2_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h318: ch2_slot_busy_r <= apb_pwdata_r[3:0];
                     default: begin end
                 endcase
             end
@@ -230,4 +243,16 @@ module edrv32_vin_regs (
             end
         end
     endgenerate
+    // SoC 7.1: APB command decode ends at this register stage.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            abort_o <= 1'b0;
+            soft_rst_o <= 1'b0;
+            msrc_start_o <= 1'b0;
+        end else begin
+            abort_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[2];
+            soft_rst_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[3];
+            msrc_start_o <= write_w && apb_paddr_r == 12'h11c && apb_pwdata_r[0];
+        end
+    end
 endmodule

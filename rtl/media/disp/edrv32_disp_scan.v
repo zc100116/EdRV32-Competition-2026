@@ -54,6 +54,7 @@ module edrv32_disp_scan (
     reg [31:0] debt1_r;
     reg [9:0] read_cnt_r;
     reg [9:0] read1_cnt_r;
+    reg [4:0] perf_event_r;
     reg [31:0] perf0_r;
     reg [31:0] perf1_r;
     reg [31:0] perf2_r;
@@ -287,19 +288,19 @@ module edrv32_disp_scan (
             if (fifo1_valid_i && fifo1_ready_o) begin
                 read1_cnt_r <= read1_cnt_r + 10'd1;
             end
-            if (frame_last_pipe_r[8]) begin
+            if (perf_event_r[0]) begin
                 perf0_r <= perf0_r + 32'd1;
             end
-            if (underflow_o) begin
+            if (perf_event_r[1]) begin
                 perf1_r <= perf1_r + 32'd1;
             end
-            if (underflow1_o) begin
+            if (perf_event_r[2]) begin
                 perf5_r <= perf5_r + 32'd1;
             end
-            if (missing_w) begin
+            if (perf_event_r[3]) begin
                 perf2_r <= perf2_r + 32'd1;
             end
-            if (missing1_w) begin
+            if (perf_event_r[4]) begin
                 perf6_r <= perf6_r + 32'd1;
             end
             if (missing_w != discard_w) begin
@@ -352,5 +353,13 @@ module edrv32_disp_scan (
         end else if (l1_active_r) begin
             pixels1_r <= {32'd0, pixels1_r[223:32]};
         end
+    end
+    // SoC 7.1: terminate scan events before the performance adders.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            perf_event_r <= 5'd0;
+        else
+            perf_event_r <= {missing1_w, missing_w, underflow1_o, underflow_o,
+                frame_last_pipe_r[8]};
     end
 endmodule

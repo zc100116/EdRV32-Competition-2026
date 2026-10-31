@@ -1,7 +1,7 @@
 // File: edrv32_mem_xbar_regs.v
 // Spec: mem-subsys-spec 4.1, 6; edrv32-soc-spec 7.1.
 // Description: APB parameters, sticky violation interrupt and atomic statistics snapshots.
-// Statistics use downstream AW/AR handshakes. Snapshot captures before the write edge.
+// Statistics use downstream AW/AR handshakes. Snapshot captures before the registered command takes effect.
 // Event counters saturate; simultaneous SNAPSHOT/CLEAR captures before clearing.
 // APB writes ignore PSTRB and update complete words (coordinator clarification).
 // CTRL and unused common registers read zero; ERR_CODE aliases ERR_TYPE.
@@ -18,6 +18,7 @@ module edrv32_mem_xbar_regs (
     input wire apb_penable_i,
     input wire apb_pwrite_i,
     input wire [31:0] apb_pwdata_i,
+    input wire [3:0] apb_pstrb_i,
     output wire apb_pready_o,
     output reg [31:0] apb_prdata_o,
     output wire apb_pslverr_o,
@@ -45,9 +46,27 @@ module edrv32_mem_xbar_regs (
     input wire [31:0] err_addr_i,
     input wire [2:0] err_type_i,
 
+    // Configuration write invalidates uncommitted scheduler eligibility.
+    output wire cfg_write_o,
+
     // Interrupt.
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the shared APB payload terminates at the setup-phase registers.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     reg [3:0] outst_rd_r [0:6];
     reg [3:0] outst_wr_r [0:6];
     reg [3:0] weight_r [0:6];
@@ -84,8 +103,22 @@ module edrv32_mem_xbar_regs (
     reg [3:0] ds_busy_carry_r;
     reg [3:0] window_cyc_carry_r;
     integer carry_idx;
+    wire unused_pstrb_w;
+    assign unused_pstrb_w = &apb_pstrb_r;
     wire unused_pwdata_w;
-    assign unused_pwdata_w = &apb_pwdata_i[31:16];
+    assign unused_pwdata_w = &apb_pwdata_r[31:16];
+    // SoC 7.1: statistics consume only the preceding cycle event.
+    reg grant_event_r;
+    reg grant_write_event_r;
+    reg [2:0] grant_port_event_r;
+    reg [4:0] grant_beats_event_r;
+    reg [15:0] grant_wait_event_r;
+    reg grant_urgent_event_r;
+    reg dir_switch_event_r;
+    reg ds_busy_event_r;
+    reg window_event_r;
+    wire [7:0] snapshot_cmd_w;
+    wire [7:0] clear_cmd_w;
     wire write_w;
     wire snapshot_w;
     wire clear_w;
@@ -104,7 +137,7 @@ module edrv32_mem_xbar_regs (
     endfunction
 
     // X-F1 path 7: cache the carry predicates of each +1 counter on the prior edge.
-    // Parallel byte increments retain same-edge event counting and snapshot/CLEAR semantics.
+    // Parallel byte increments retain registered event counting and snapshot/CLEAR semantics.
     function [31:0] count_inc;
         input [31:0] value_i;
         input [3:0] carry_i;
@@ -130,13 +163,16 @@ module edrv32_mem_xbar_regs (
 
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign snapshot_w = write_w && apb_paddr_i == 12'h110 &&
-                        apb_pwdata_i[0];
-    assign clear_w = write_w && apb_paddr_i == 12'h110 &&
-                        apb_pwdata_i[1];
-    assign irq_clear_w = write_w && apb_paddr_i == 12'h010 &&
-                            apb_pwdata_i[1];
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+    assign snapshot_w = write_w && apb_paddr_r == 12'h110 &&
+                        apb_pwdata_r[0];
+    assign clear_w = write_w && apb_paddr_r == 12'h110 &&
+                        apb_pwdata_r[1];
+    assign irq_clear_w = write_w && apb_paddr_r == 12'h010 &&
+                            apb_pwdata_r[1];
+    assign cfg_write_o = write_w && apb_paddr_r[1:0] == 0 &&
+        ((apb_paddr_r[11:4] == 8'h10) ||
+            (apb_paddr_r[11:8] == 4'h2 && apb_paddr_r[7:5] != 3'd7 && !apb_paddr_r[4]));
     assign irq_o = irq_en_r && irq_stat_r;
 
     generate
@@ -159,24 +195,27 @@ module edrv32_mem_xbar_regs (
                 urg_cnt_carry_r[carry_idx] <= 4'b0;
             end
         end else begin
-            dir_switch_carry_r <= clear_w ? 4'b0 :
-                count_carry(dir_switch_r, dir_switch_i, dir_switch_carry_r[3]);
-            ds_busy_carry_r <= clear_w ? 4'b0 :
-                count_carry(ds_busy_r, ds_busy_i, ds_busy_carry_r[3]);
-            window_cyc_carry_r <= clear_w ? 4'b0 :
-                count_carry(window_cyc_r, 1'b1, window_cyc_carry_r[3]);
+            dir_switch_carry_r <= clear_cmd_w[7] ? 4'b0 :
+                count_carry(dir_switch_r, dir_switch_event_r, dir_switch_carry_r[3]);
+            ds_busy_carry_r <= clear_cmd_w[7] ? 4'b0 :
+                count_carry(ds_busy_r, ds_busy_event_r, ds_busy_carry_r[3]);
+            window_cyc_carry_r <= clear_cmd_w[7] ? 4'b0 :
+                count_carry(window_cyc_r, window_event_r, window_cyc_carry_r[3]);
             for (carry_idx = 0; carry_idx < 7; carry_idx = carry_idx + 1) begin
-                rd_txn_carry_r[carry_idx] <= clear_w ? 4'b0 :
+                rd_txn_carry_r[carry_idx] <= clear_cmd_w[carry_idx] ? 4'b0 :
                     count_carry(rd_txn_r[carry_idx],
-                        grant_i && grant_port_i == carry_idx[2:0] && !grant_write_i,
+                        grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                        !grant_write_event_r,
                         rd_txn_carry_r[carry_idx][3]);
-                wr_txn_carry_r[carry_idx] <= clear_w ? 4'b0 :
+                wr_txn_carry_r[carry_idx] <= clear_cmd_w[carry_idx] ? 4'b0 :
                     count_carry(wr_txn_r[carry_idx],
-                        grant_i && grant_port_i == carry_idx[2:0] && grant_write_i,
+                        grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                        grant_write_event_r,
                         wr_txn_carry_r[carry_idx][3]);
-                urg_cnt_carry_r[carry_idx] <= clear_w ? 4'b0 :
+                urg_cnt_carry_r[carry_idx] <= clear_cmd_w[carry_idx] ? 4'b0 :
                     count_carry(urg_cnt_r[carry_idx],
-                        grant_i && grant_port_i == carry_idx[2:0] && grant_urgent_i,
+                        grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                        grant_urgent_event_r,
                         urg_cnt_carry_r[carry_idx][3]);
             end
         end
@@ -185,7 +224,7 @@ module edrv32_mem_xbar_regs (
     // Disjoint address cases infer a parallel read mux, without a priority chain.
     always @(*) begin
         apb_prdata_o = 32'b0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h0008_0001;
             12'h008: apb_prdata_o = {29'b0, irq_stat_r, !busy_i, busy_i};
             12'h00c: apb_prdata_o = {30'b0, irq_en_r, 1'b0};
@@ -305,25 +344,25 @@ module edrv32_mem_xbar_regs (
         end else begin
             if (write_w) begin
                 for (idx = 0; idx < 7; idx = idx + 1) begin
-                    if ({20'b0, apb_paddr_i} == 32'h200 + 32*idx) begin
-                        outst_rd_r[idx] <= apb_pwdata_i[3:0];
+                    if ({20'b0, apb_paddr_r} == 32'h200 + 32*idx) begin
+                        outst_rd_r[idx] <= apb_pwdata_r[3:0];
                     end
-                    if ({20'b0, apb_paddr_i} == 32'h204 + 32*idx) begin
-                        outst_wr_r[idx] <= apb_pwdata_i[3:0];
+                    if ({20'b0, apb_paddr_r} == 32'h204 + 32*idx) begin
+                        outst_wr_r[idx] <= apb_pwdata_r[3:0];
                     end
-                    if ({20'b0, apb_paddr_i} == 32'h208 + 32*idx) begin
-                        weight_r[idx] <= apb_pwdata_i[3:0];
+                    if ({20'b0, apb_paddr_r} == 32'h208 + 32*idx) begin
+                        weight_r[idx] <= apb_pwdata_r[3:0];
                     end
-                    if ({20'b0, apb_paddr_i} == 32'h20c + 32*idx) begin
-                        rate_r[idx] <= apb_pwdata_i[8:0];
+                    if ({20'b0, apb_paddr_r} == 32'h20c + 32*idx) begin
+                        rate_r[idx] <= apb_pwdata_r[8:0];
                     end
                 end
-                case (apb_paddr_i)
-                    12'h00c: irq_en_r <= apb_pwdata_i[1];
-                    12'h100: outst_total_o <= apb_pwdata_i[3:0];
-                    12'h104: urg_max_o <= apb_pwdata_i[7:0];
-                    12'h108: starve_cyc_o <= apb_pwdata_i[15:0];
-                    12'h10c: dir_batch_o <= apb_pwdata_i[7:0];
+                case (apb_paddr_r)
+                    12'h00c: irq_en_r <= apb_pwdata_r[1];
+                    12'h100: outst_total_o <= apb_pwdata_r[3:0];
+                    12'h104: urg_max_o <= apb_pwdata_r[7:0];
+                    12'h108: starve_cyc_o <= apb_pwdata_r[15:0];
+                    12'h10c: dir_batch_o <= apb_pwdata_r[7:0];
                     default: begin end
                 endcase
             end
@@ -368,11 +407,25 @@ module edrv32_mem_xbar_regs (
                 urg_snapshot_r[stat_idx] <= 32'b0;
             end
         end else begin
-            if (snapshot_w) begin
+            if (snapshot_cmd_w[7]) begin
                 dir_snapshot_r <= dir_switch_r;
                 busy_snapshot_r <= ds_busy_r;
                 window_snapshot_r <= window_cyc_r;
-                for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
+            end
+            if (clear_cmd_w[7]) begin
+                dir_switch_r <= 32'b0;
+                ds_busy_r <= 32'b0;
+                window_cyc_r <= 32'b0;
+            end else begin
+                if (window_event_r)
+                    window_cyc_r <= count_inc(window_cyc_r, window_cyc_carry_r);
+                if (ds_busy_event_r)
+                    ds_busy_r <= count_inc(ds_busy_r, ds_busy_carry_r);
+                if (dir_switch_event_r)
+                    dir_switch_r <= count_inc(dir_switch_r, dir_switch_carry_r);
+            end
+            for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
+                if (snapshot_cmd_w[stat_idx]) begin
                     rd_txn_snapshot_r[stat_idx] <= rd_txn_r[stat_idx];
                     wr_txn_snapshot_r[stat_idx] <= wr_txn_r[stat_idx];
                     rd_beat_snapshot_r[stat_idx] <= rd_beat_r[stat_idx];
@@ -381,12 +434,7 @@ module edrv32_mem_xbar_regs (
                     sum_snapshot_r[stat_idx] <= wait_sum_r[stat_idx];
                     urg_snapshot_r[stat_idx] <= urg_cnt_r[stat_idx];
                 end
-            end
-            if (clear_w) begin
-                dir_switch_r <= 32'b0;
-                ds_busy_r <= 32'b0;
-                window_cyc_r <= 32'b0;
-                for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
+                if (clear_cmd_w[stat_idx]) begin
                     rd_txn_r[stat_idx] <= 32'b0;
                     wr_txn_r[stat_idx] <= 32'b0;
                     rd_beat_r[stat_idx] <= 32'b0;
@@ -394,35 +442,25 @@ module edrv32_mem_xbar_regs (
                     wait_max_r[stat_idx] <= 16'b0;
                     wait_sum_r[stat_idx] <= 32'b0;
                     urg_cnt_r[stat_idx] <= 32'b0;
-                end
-            end else begin
-                window_cyc_r <= count_inc(window_cyc_r, window_cyc_carry_r);
-                if (ds_busy_i) begin
-                    ds_busy_r <= count_inc(ds_busy_r, ds_busy_carry_r);
-                end
-                if (dir_switch_i) begin
-                    dir_switch_r <= count_inc(dir_switch_r, dir_switch_carry_r);
-                end
-                // X-F1 path 7: arithmetic is local to each counter, before port selection.
-                for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
-                    if (grant_i && grant_port_i == stat_idx[2:0]) begin
-                        if (grant_write_i) begin
+                end else begin
+                    if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
+                        if (grant_write_event_r) begin
                             wr_txn_r[stat_idx] <=
                             count_inc(wr_txn_r[stat_idx], wr_txn_carry_r[stat_idx]);
                             wr_beat_r[stat_idx] <=
-                                sat_add(wr_beat_r[stat_idx], {27'b0, grant_beats_i});
+                                sat_add(wr_beat_r[stat_idx], {27'b0, grant_beats_event_r});
                         end else begin
                             rd_txn_r[stat_idx] <=
                             count_inc(rd_txn_r[stat_idx], rd_txn_carry_r[stat_idx]);
                             rd_beat_r[stat_idx] <=
-                                sat_add(rd_beat_r[stat_idx], {27'b0, grant_beats_i});
+                                sat_add(rd_beat_r[stat_idx], {27'b0, grant_beats_event_r});
                         end
                         wait_sum_r[stat_idx] <=
-                            sat_add(wait_sum_r[stat_idx], {16'b0, grant_wait_i});
-                        if (grant_wait_i > wait_max_r[stat_idx]) begin
-                            wait_max_r[stat_idx] <= grant_wait_i;
+                            sat_add(wait_sum_r[stat_idx], {16'b0, grant_wait_event_r});
+                        if (grant_wait_event_r > wait_max_r[stat_idx]) begin
+                            wait_max_r[stat_idx] <= grant_wait_event_r;
                         end
-                        if (grant_urgent_i) begin
+                        if (grant_urgent_event_r) begin
                             urg_cnt_r[stat_idx] <=
                             count_inc(urg_cnt_r[stat_idx], urg_cnt_carry_r[stat_idx]);
                         end
@@ -431,4 +469,43 @@ module edrv32_mem_xbar_regs (
             end
         end
     end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            grant_event_r <= 1'b0;
+            dir_switch_event_r <= 1'b0;
+            ds_busy_event_r <= 1'b0;
+            window_event_r <= 1'b0;
+        end else begin
+            grant_event_r <= grant_i;
+            dir_switch_event_r <= dir_switch_i;
+            ds_busy_event_r <= ds_busy_i;
+            window_event_r <= 1'b1;
+        end
+    end
+    always @(posedge clk_i) begin
+        grant_write_event_r <= grant_write_i;
+        grant_port_event_r <= grant_port_i;
+        grant_beats_event_r <= grant_beats_i;
+        grant_wait_event_r <= grant_wait_i;
+        grant_urgent_event_r <= grant_urgent_i;
+    end
+    // Keep one command register per counter bank through synthesis merging.
+    genvar bank;
+    generate
+        for (bank = 0; bank < 8; bank = bank + 1) begin : g_stat_command
+            reg snapshot_r;
+            reg clear_r;
+            assign snapshot_cmd_w[bank] = snapshot_r;
+            assign clear_cmd_w[bank] = clear_r;
+            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    snapshot_r <= 1'b0;
+                    clear_r <= 1'b0;
+                end else begin
+                    snapshot_r <= snapshot_w;
+                    clear_r <= clear_w;
+                end
+            end
+        end
+    endgenerate
 endmodule

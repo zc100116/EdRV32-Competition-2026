@@ -384,8 +384,6 @@ module edrv32_mem_xbar (
         p0_rready_i};
     wire unused_no_w_port_w;
     assign unused_no_w_port_w = &{wdata_w[255:0], wstrb_w[31:0]};
-    wire unused_pstrb_w;
-    assign unused_pstrb_w = &apb_pstrb_i;
     reg [6:0] aw_pending_r;
     reg [6:0] ar_pending_r;
     reg [6:0] awid_r;
@@ -480,11 +478,6 @@ module edrv32_mem_xbar (
                 ({1'b0, addr_i} + ({9'b0, len_i} + 13'd1)*13'd32) > 13'd4096};
         end
     endfunction
-    // A parameter write invalidates only the uncommitted eligibility stage.
-    assign cfg_write_w = apb_psel_i && apb_penable_i && apb_pwrite_i &&
-        apb_paddr_i[1:0] == 0 &&
-        ((apb_paddr_i[11:4] == 8'h10) ||
-            (apb_paddr_i[11:8] == 4'h2 && apb_paddr_i[7:5] != 3'd7 && !apb_paddr_i[4]));
     assign bad_read_do_w = bad_read_r && !cmd_valid_r && !cfg_write_w;
     assign stat_wait_w = cmd_wait_r == 16'hffff ? cmd_wait_r : cmd_wait_r + 16'd1;
     assign cmd_take_w = cmd_valid_r &&
@@ -592,6 +585,8 @@ module edrv32_mem_xbar (
         .apb_penable_i(apb_penable_i),
         .apb_pwrite_i(apb_pwrite_i),
         .apb_pwdata_i(apb_pwdata_i),
+        .apb_pstrb_i(apb_pstrb_i),
+        .cfg_write_o(cfg_write_w),
         .apb_pready_o(apb_pready_o),
         .apb_prdata_o(apb_prdata_o),
         .apb_pslverr_o(apb_pslverr_o),

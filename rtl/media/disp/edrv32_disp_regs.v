@@ -50,6 +50,21 @@ module edrv32_disp_regs (
     // Interrupt output.
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the shared APB payload terminates at the setup-phase registers.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     localparam [31:0] IRQ_MASK = 32'h0000_0306;
     reg enable_r;
     reg busy_r;
@@ -139,11 +154,11 @@ module edrv32_disp_regs (
         end
     endfunction
 
-    assign unused_pstrb_w = apb_pstrb_i;
+    assign unused_pstrb_w = apb_pstrb_r;
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign ctrl_write_w = write_w && apb_paddr_i == 12'h004;
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+    assign ctrl_write_w = write_w && apb_paddr_r == 12'h004;
     assign enable_o = enable_r;
     assign next_base_o = next_base_r;
     assign stride_o = stride_r;
@@ -255,12 +270,12 @@ module edrv32_disp_regs (
         (!layer_ctrl_r[1] || l1_next_base_r != l1_cur_base_r);
     assign irq_set_w = {22'd0, switch1_w, switch_w, 5'd0, frame_start_i,
                         (underflow_i || underflow1_i || dma_err_i), 1'b0};
-    assign irq_clear_w = write_w && apb_paddr_i == 12'h010 ? apb_pwdata_i : 32'd0;
+    assign irq_clear_w = write_w && apb_paddr_r == 12'h010 ? apb_pwdata_r : 32'd0;
     assign irq_o = |(irq_en_r & irq_stat_r);
 
     always @(*) begin
         apb_prdata_o = 32'd0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h0005_0002;
             12'h004: apb_prdata_o = {31'd0, enable_r};
             12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_r, busy_r};
@@ -352,16 +367,16 @@ module edrv32_disp_regs (
             perf4_r <= 32'd0;
         end else begin
             if (ctrl_write_w) begin
-                enable_r <= apb_pwdata_i[0] && !apb_pwdata_i[2] && !apb_pwdata_i[3];
-                if (apb_pwdata_i[3]) begin
+                enable_r <= apb_pwdata_r[0] && !apb_pwdata_r[2] && !apb_pwdata_r[3];
+                if (apb_pwdata_r[3]) begin
                     soft_pending_r <= 1'b1;
                 end
             end
             if (soft_pending_r) begin
                 enable_r <= 1'b0;
             end
-            if (write_w && apb_paddr_i == 12'h00c) begin
-                irq_en_r <= apb_pwdata_i & IRQ_MASK;
+            if (write_w && apb_paddr_r == 12'h00c) begin
+                irq_en_r <= apb_pwdata_r & IRQ_MASK;
             end
             irq_stat_r <= (irq_stat_r & ~irq_clear_w) | irq_set_w;
             if (irq_clear_w[1]) begin
@@ -376,21 +391,21 @@ module edrv32_disp_regs (
             if (dma_err_i) begin
                 err_code_r <= 2'd2;
             end
-            if (write_w && apb_paddr_i == 12'h100) begin
-                next_base_r <= {apb_pwdata_i[31:12], 12'd0};
+            if (write_w && apb_paddr_r == 12'h100) begin
+                next_base_r <= {apb_pwdata_r[31:12], 12'd0};
             end
-            if (write_w && apb_paddr_i == 12'h104) begin
-                stride_r <= {16'd0, apb_pwdata_i[15:5], 5'd0};
+            if (write_w && apb_paddr_r == 12'h104) begin
+                stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
             end
             if (write_w) begin
-                case (apb_paddr_i)
-                    12'h114: l0_scroll_r <= apb_pwdata_i & 32'h0fff_7fff;
-                    12'h118: layer_ctrl_r <= apb_pwdata_i[1:0];
-                    12'h120: l1_next_base_r <= {apb_pwdata_i[31:12], 12'd0};
-                    12'h124: l1_stride_r <= {16'd0, apb_pwdata_i[15:5], 5'd0};
-                    12'h128: l1_pos_r <= apb_pwdata_i & 32'h03ff_07f8;
-                    12'h12c: l1_size_r <= apb_pwdata_i & 32'h03ff_07f8;
-                    12'h130: l1_opa_r <= apb_pwdata_i[7:0];
+                case (apb_paddr_r)
+                    12'h114: l0_scroll_r <= apb_pwdata_r & 32'h0fff_7fff;
+                    12'h118: layer_ctrl_r <= apb_pwdata_r[1:0];
+                    12'h120: l1_next_base_r <= {apb_pwdata_r[31:12], 12'd0};
+                    12'h124: l1_stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
+                    12'h128: l1_pos_r <= apb_pwdata_r & 32'h03ff_07f8;
+                    12'h12c: l1_size_r <= apb_pwdata_r & 32'h03ff_07f8;
+                    12'h130: l1_opa_r <= apb_pwdata_r[7:0];
                     default: begin end
                 endcase
             end

@@ -1300,7 +1300,7 @@ module tb;
         apb_check('h508,32'(snap_window));
     endtask
     task automatic statistics_carry;
-        $display("MX-10 X-F1 upper-half carry preserves same-edge counters and snapshots");
+        $display("MX-10 X-F1 upper-half carry preserves registered counters and snapshots");
         reset;
         @(negedge clk);
         dut.u_regs.rd_txn_r[0] = 32'h0000_fffe;
@@ -1320,7 +1320,8 @@ module tb;
         obs_urgent[0] = 'hfffe;
         obs_switch = 'hfffe;
         obs_busy = 'hfffe;
-        obs_window = 'hfffe;
+        // Injection sets the live counter; the reference remains one event ahead.
+        obs_window = 'hffff;
         urgent[0] = 1;
         send_read(0,0,'h1000,3,0);
         drain;

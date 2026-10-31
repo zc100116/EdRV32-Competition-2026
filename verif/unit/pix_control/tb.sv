@@ -339,7 +339,15 @@ module tb;
         read_check(12'h02c,0); read_check(12'h040,0); read_check(12'h04c,0);
         // Pending reset plus an incomplete frame: discard, reset, then new SOF.
         configure(1,32'h00000110); prepare(8,3); partial_frame=1;
-        send_beat(0,0,1); stop_input(); write_reg(12'h004,9);
+        // SOF accepted on the SOFT_RST access edge belongs to the current frame.
+        @(negedge clk);paddr=12'h004;pwdata=9;psel=1;pwrite=1;penable=0;
+        @(negedge clk);penable=1;
+        in_valid=1;in_sof=1;in_eol=0;in_eof=0;in_data={raw[1],raw[0]};
+        @(posedge clk);#1;
+        if (!accepted) $fatal(1,"FAIL SOF on reset access edge was not accepted");
+        @(negedge clk);psel=0;penable=0;pwrite=0;in_valid=0;in_sof=0;
+        repeat(2) @(negedge clk);
+        read_check(12'h008,1);
         @(negedge clk); in_valid=1; in_sof=1; in_eol=0; in_eof=0;
         repeat(2) begin
             @(posedge clk); #1;

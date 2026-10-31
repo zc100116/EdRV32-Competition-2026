@@ -40,6 +40,21 @@ module edrv32_pix_regs (
     // Interrupt.
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the shared APB payload terminates at the setup-phase registers.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     wire write_w;
     wire soft_request_w;
     wire unused_pstrb_w;
@@ -47,37 +62,40 @@ module edrv32_pix_regs (
     reg irq_en_r;
     reg irq_stat_r;
     reg [31:0] done_count_r;
+    reg discard_event_r;
     reg input_stall_event_r;
     reg output_stall_event_r;
     reg [31:0] input_stalls_r;
     reg [31:0] output_stalls_r;
     reg [31:0] discarded_r;
 
-    assign unused_pstrb_w = &apb_pstrb_i;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign soft_request_w = write_w && apb_paddr_i == 12'h004 && apb_pwdata_i[3];
-    assign soft_pending_o = soft_pending_r || soft_request_w;
+    assign unused_pstrb_w = &apb_pstrb_r;
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+    assign soft_request_w = write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[3];
+    assign soft_pending_o = soft_pending_r;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             soft_reset_o <= 1'b0;
+            discard_event_r <= 1'b0;
             input_stall_event_r <= 1'b0;
             output_stall_event_r <= 1'b0;
         end else begin
-            soft_reset_o <= soft_pending_o && !busy_i && !soft_reset_o;
+            soft_reset_o <= soft_pending_r && !busy_i && !soft_reset_o;
+            discard_event_r <= discard_i && !soft_reset_o;
             input_stall_event_r <= input_stall_i && !soft_reset_o;
             output_stall_event_r <= output_stall_i && !soft_reset_o;
         end
     end
-    assign gamma_wr_o = write_w && apb_paddr_i == 12'h10c;
-    assign gamma_addr_o = apb_pwdata_i[8:0];
-    assign gamma_data_o = apb_pwdata_i[23:16];
+    assign gamma_wr_o = write_w && apb_paddr_r == 12'h10c;
+    assign gamma_addr_o = apb_pwdata_r[8:0];
+    assign gamma_data_o = apb_pwdata_r[23:16];
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
     assign irq_o = irq_en_r && irq_stat_r;
 
     always @(*) begin
         apb_prdata_o = 32'd0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h00020001;
             12'h004: apb_prdata_o = {31'd0, enable_o};
             12'h008: apb_prdata_o = {30'd0, !busy_i, busy_i};
@@ -129,17 +147,17 @@ module edrv32_pix_regs (
             if (output_stall_event_r) begin
                 output_stalls_r <= output_stalls_r + 32'd1;
             end
-            if (discard_i) begin
+            if (discard_event_r) begin
                 discarded_r <= discarded_r + 32'd1;
             end
             if (write_w) begin
-                case (apb_paddr_i)
-                    12'h004: enable_o <= apb_pwdata_i[0];
-                    12'h00c: irq_en_r <= apb_pwdata_i[2];
-                    12'h010: irq_stat_r <= irq_stat_r && !apb_pwdata_i[2];
-                    12'h100: cfg_o <= apb_pwdata_i & 32'h00070777;
-                    12'h104: bc_o <= apb_pwdata_i & 32'h01ff01ff;
-                    12'h108: thresh_o <= apb_pwdata_i[7:0];
+                case (apb_paddr_r)
+                    12'h004: enable_o <= apb_pwdata_r[0];
+                    12'h00c: irq_en_r <= apb_pwdata_r[2];
+                    12'h010: irq_stat_r <= irq_stat_r && !apb_pwdata_r[2];
+                    12'h100: cfg_o <= apb_pwdata_r & 32'h00070777;
+                    12'h104: bc_o <= apb_pwdata_r & 32'h01ff01ff;
+                    12'h108: thresh_o <= apb_pwdata_r[7:0];
                     default: begin end
                 endcase
             end

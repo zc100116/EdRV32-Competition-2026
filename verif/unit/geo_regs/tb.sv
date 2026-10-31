@@ -64,10 +64,13 @@ module tb;
     integer address;
     task read_check(input reg [11:0] addr,input reg [31:0] expected);
         begin
-            r_apb_paddr_i=addr;#1;
+            @(negedge clk);r_apb_paddr_i=addr;r_apb_psel_i=1;
+            r_apb_pwrite_i=0;r_apb_penable_i=0;
+            @(negedge clk);r_apb_penable_i=1;#1;
             if(r_apb_prdata_o!==expected)
                 $fatal(1,"FAIL reg %h expected %h got %h at %t",
                     addr,expected,r_apb_prdata_o,$time);
+            @(negedge clk);r_apb_psel_i=0;r_apb_penable_i=0;
         end
     endtask
     task write_reg(input reg [11:0] addr,input reg [31:0] value);
@@ -77,6 +80,7 @@ module tb;
             r_apb_psel_i=1;r_apb_pwrite_i=1;r_apb_penable_i=0;
             @(negedge clk);r_apb_penable_i=1;
             @(negedge clk);r_apb_psel_i=0;r_apb_penable_i=0;r_apb_pwrite_i=0;
+            if (addr==12'h028 || (addr==4 && value[3])) @(negedge clk);
         end
     endtask
     initial begin
@@ -111,8 +115,10 @@ module tb;
         r_apb_paddr_i=12'h004;r_apb_pwdata_i=4;r_apb_penable_i=0;#1;
         if(r_abort_o) $fatal(1,"FAIL ABORT fired in APB setup");
         @(negedge clk);r_apb_penable_i=1;#1;
-        if(!r_abort_o) $fatal(1,"FAIL ABORT pulse missing");
+        if(r_abort_o) $fatal(1,"FAIL ABORT bypassed command register");
         @(negedge clk);r_apb_psel_i=0;r_apb_penable_i=0;r_apb_pwrite_i=0;#1;
+        if(!r_abort_o) $fatal(1,"FAIL registered ABORT pulse missing");
+        @(negedge clk);#1;
         if(r_abort_o) $fatal(1,"FAIL ABORT pulse did not end");
         write_reg(12'h020,32'h1234567f);read_check(12'h020,32'h12345660);
         write_reg(12'h024,32'hffff0000);read_check(12'h024,0);
@@ -123,8 +129,9 @@ module tb;
         write_reg(12'h024,5);
         @(negedge clk);r_busy_i=1;r_cur_desc_i=2;
         read_check(12'h008,1);read_check(12'h100,2);
-        @(negedge clk);r_apb_psel_i=1;r_apb_penable_i=1;r_apb_pwrite_i=1;
-        r_apb_paddr_i=12'h028;#1;
+        @(negedge clk);r_apb_psel_i=1;r_apb_penable_i=0;r_apb_pwrite_i=1;
+        r_apb_paddr_i=12'h028;
+        @(negedge clk);r_apb_penable_i=1;#1;
         if(r_start_o) $fatal(1,"FAIL busy doorbell was accepted");
         @(negedge clk);r_apb_psel_i=0;
         write_reg(12'h004,8);read_check(12'h024,5);

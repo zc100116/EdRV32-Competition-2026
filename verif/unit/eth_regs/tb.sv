@@ -105,10 +105,12 @@ module tb;
         .start_o(start_o),
         .abort_o(abort_o),
         .mdio_start_o(mdio_start_o),
+        .mdio_command_o(unused_mdio_command),
         .error_o(error_o),
         .irq_o(irq_o)
     );
-    wire unused = &{1'b0, enable_o, irq_en_o, desc_base_o, desc_count_o, mac_lo_o, mac_hi_o, ip_o, rx_port_o, dst_mac_lo_o, dst_mac_hi_o, dst_ip_o, ports_o, phy_o, bases_o, sizes_o, mdio_start_o};
+    wire unused = &{1'b0, unused_mdio_command, enable_o, irq_en_o, desc_base_o, desc_count_o, mac_lo_o, mac_hi_o, ip_o, rx_port_o, dst_mac_lo_o, dst_mac_hi_o, dst_ip_o, ports_o, phy_o, bases_o, sizes_o, mdio_start_o};
+    wire [31:0] unused_mdio_command;
     integer starts=0;
     integer aborts=0;
     integer clears=0;
@@ -118,14 +120,25 @@ module tb;
         if(clear_o) clears++;
     end
     task automatic write_reg(input integer unused_addr,input logic [31:0] data);
-        @(negedge clk_i);apb_psel_i=1;apb_penable_i=1;apb_pwrite_i=1;
+        @(negedge clk_i);apb_psel_i=1;apb_penable_i=0;apb_pwrite_i=1;
         apb_paddr_i=12'(unused_addr);apb_pwdata_i=data;apb_pstrb_i=0;
+        @(negedge clk_i);apb_penable_i=1;
+        if (unused_addr==4 && data[2]) begin
+            #1;if(abort_o) $fatal(1,"FAIL ABORT bypassed command register");
+        end
         @(negedge clk_i);apb_psel_i=0;apb_penable_i=0;apb_pwrite_i=0;
+        if (unused_addr==4 && data[2] && !abort_o)
+            $fatal(1,"FAIL registered ABORT missing");
+        if (unused_addr==32'h28 || (unused_addr==4 && (data[2] || data[3])))
+            @(negedge clk_i);
     endtask
     task automatic check(input integer addr,input logic [31:0] expected);
-        apb_paddr_i=12'(addr);#1;
+        @(negedge clk_i);apb_paddr_i=12'(addr);apb_psel_i=1;
+        apb_pwrite_i=0;apb_penable_i=0;
+        @(negedge clk_i);apb_penable_i=1;#1;
         if(apb_prdata_o!==expected || !apb_pready_o || apb_pslverr_o)
             $fatal(1,"FAIL register %h expected=%h actual=%h",addr,expected,apb_prdata_o);
+        @(negedge clk_i);apb_psel_i=0;apb_penable_i=0;
     endtask
     initial begin
         repeat(3) @(negedge clk_i);rst_n_i=1;

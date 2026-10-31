@@ -142,6 +142,7 @@ module edrv32_eth (
     wire [15:0] dst_mac_hi_w;
     wire phy_w;
     wire mdio_start_w;
+    wire [31:0] mdio_command_w;
     reg arp_pending_r;
     reg [47:0] arp_mac_r;
     reg [31:0] arp_ip_r;
@@ -424,6 +425,7 @@ module edrv32_eth (
         .start_o(start_w),
         .abort_o(abort_w),
         .mdio_start_o(mdio_start_w),
+        .mdio_command_o(mdio_command_w),
         .error_o(error_w),
         .irq_o(irq_o)
     );
@@ -432,7 +434,7 @@ module edrv32_eth (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_mem_n_i),
         .start_i(mdio_start_w),
-        .command_i(apb_pwdata_i),
+        .command_i(mdio_command_w),
         .busy_o(mdio_busy_w),
         .data_o(mdio_data_w),
         .mdc_o(eth_mdc_o),

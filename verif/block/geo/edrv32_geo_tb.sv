@@ -238,7 +238,8 @@ module edrv32_geo_tb;
         write_reg(12'h020, 32'h101f);
         write_reg(12'h024, 32'habcd0000 | 32'(descriptor_count));
         write_reg(12'h028, 32'hfeed1234);
-        doorbell_time = $time - 4;
+        // Registered DOORBELL takes effect one clk_mem after the APB write edge.
+        doorbell_time = $time + 4;
         perf_busy_lower = 0;
         perf_idle_upper = 0;
     endtask
