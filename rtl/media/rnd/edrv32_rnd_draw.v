@@ -291,10 +291,11 @@ module edrv32_rnd_draw (
     wire affine_skip_write_w;
     wire [31:0] final_tag_w;
     wire geometry_w;
+    wire geometry_advance_w;
     wire geometry_ready_w;
     wire geometry_valid_w;
     wire [15:0] geometry_cov_w;
-    reg [15:0] geometry_cov_r [7:9];
+    reg [15:0] geometry_cov_r [8:9];
     wire gradient_w;
     wire gradient_vertical_w;
     wire plain_fill_w;
@@ -658,6 +659,7 @@ module edrv32_rnd_draw (
         (lane_hit_w[0] && (!pipe_tag_r[4][29] || lane_hit_w[1]));
     assign pipeline_step_w = (!(post_w ? post_valid_r[1] : pipe_valid_r[9]) ||
         blend_ready_i) && source_ready_w;
+    assign geometry_advance_w = geometry_w && (!post_valid_r[1] || blend_ready_i);
     assign issue_w = render_state_r == S_RENDER_STREAM &&
         (affine_w ? affine_input_step_w : pipeline_step_w) &&
         (!geometry_w || geometry_ready_w);
@@ -1673,12 +1675,13 @@ module edrv32_rnd_draw (
         .rst_n_i(rst_n_i),
         .clear_i(cancel_i),
         .start_i(start_i && geometry_w),
-        .advance_i(pipeline_step_w),
+        .advance_i(geometry_advance_w),
         .command_i(command_i),
         .parameters_i(parameters_i),
         .left_i(left_w[11:0]),
         .top_i(top_w[11:0]),
-        .request_i(issue_w && geometry_w),
+        .request_i(render_state_r == S_RENDER_STREAM &&
+            geometry_advance_w && geometry_ready_w),
         .ready_o(geometry_ready_w),
         .pair_i(issue_pair_w),
         .row_end_i({1'b0, issue_x_r} + (issue_pair_w ? 13'd1 : 13'd0) >=
@@ -1688,8 +1691,7 @@ module edrv32_rnd_draw (
     );
     always @(posedge clk_i) begin
         if (pipeline_step_w) begin
-            geometry_cov_r[7] <= geometry_cov_w;
-            geometry_cov_r[8] <= geometry_cov_r[7];
+            geometry_cov_r[8] <= geometry_cov_w;
             geometry_cov_r[9] <= geometry_cov_r[8];
         end
     end

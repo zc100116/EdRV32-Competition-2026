@@ -48,6 +48,9 @@ module edrv32_rnd_regs (
     reg [31:0] cur_desc_r;
     reg [31:0] done_count_r;
     reg [31:0] perf_r [0:5];
+    wire [5:0] pixel_sum_w;
+    // A five-bit increment carries at most once into the high counter segment.
+    assign pixel_sum_w = {1'b0, perf_r[1][4:0]} + {1'b0, pixel_count_i};
     wire write_w;
     wire unused_pstrb_w;
     integer count;
@@ -144,7 +147,9 @@ module edrv32_rnd_regs (
         end else begin
             if (busy_i)
                 perf_r[0] <= perf_r[0] + 32'd1;
-            perf_r[1] <= perf_r[1] + {27'd0, pixel_count_i};
+            perf_r[1][4:0] <= pixel_sum_w[4:0];
+            if (pixel_sum_w[5])
+                perf_r[1][31:5] <= perf_r[1][31:5] + 27'd1;
             perf_r[2] <= perf_r[2] + {31'd0, read_beat_i};
             perf_r[3] <= perf_r[3] + {31'd0, write_beat_i};
             perf_r[4] <= perf_r[4] + {31'd0, read_wait_i};

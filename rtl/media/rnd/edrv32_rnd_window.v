@@ -59,6 +59,12 @@ module edrv32_rnd_window (
     reg [31:0] cache_valid_r;
     reg [25:0] cache_tag_r [0:31];
     reg [4:0] replace_r;
+    // Separate affine center selection from tap bounds and associative lookup.
+    reg coordinate_valid_r;
+    reg signed [31:0] coordinate_x_r;
+    reg signed [31:0] coordinate_y_r;
+    reg [15:0] coordinate_fraction_r;
+    reg [71:0] coordinate_payload_r;
     reg sample_valid_r;
     reg [15:0] sample_x_r [0:3];
     reg [15:0] sample_y_r [0:3];
@@ -77,7 +83,6 @@ module edrv32_rnd_window (
     reg missing_w;
     reg [25:0] missing_tag_w;
     reg [4:0] victim_w;
-    reg victim_found_w;
     reg [4:0] fill_slot_r;
     reg [25:0] fill_tag_r;
     reg [2:0] fill_row_r;
@@ -95,7 +100,7 @@ module edrv32_rnd_window (
     wire [15:0] source_width_w;
     wire [15:0] source_height_w;
     wire [15:0] fill_x_w;
-    wire [15:0] fill_y_w;
+    reg [15:0] fill_y_r;
     wire [15:0] remaining_w;
     wire [3:0] columns_w;
     wire [8:0] row_bits_w;
@@ -106,6 +111,7 @@ module edrv32_rnd_window (
     wire row_last_w;
     wire [511:0] aligned_w;
     wire forward_w;
+    wire sample_ready_w;
     wire bank_ready_w;
     wire [31:0] decoded_w [0:7];
     wire [63:0] bank_data_w [0:3];
@@ -118,8 +124,6 @@ module edrv32_rnd_window (
     wire signed [32:0] tap_y_w [0:3];
     integer tap;
     integer entry;
-    integer offset;
-    integer candidate;
     integer bank;
     wire unused_bits_w;
     assign format_w = command_i[15:12];
@@ -128,7 +132,6 @@ module edrv32_rnd_window (
     assign source_width_w = command_i[335:320];
     assign source_height_w = command_i[351:336];
     assign fill_x_w = {fill_tag_r[12:0], 3'd0};
-    assign fill_y_w = {fill_tag_r[25:13], 3'd0} + {13'd0, fill_row_r};
     assign remaining_w = source_width_w - fill_x_w;
     assign columns_w = remaining_w >= 16'd8 ? 4'd8 : remaining_w[3:0];
     assign row_bits_w = {5'd0, columns_w} << bits_log2_w;
@@ -136,7 +139,7 @@ module edrv32_rnd_window (
     assign row_bytes_w = row_byte_count_w[5:0];
     assign row_x_bytes_w = ({16'd0, fill_x_w} << bits_log2_w) >> 3;
     assign row_end_w = {2'd0, row_addr_r[4:0]} + {1'b0, row_bytes_w};
-    assign row_last_w = fill_row_r == 7 || fill_y_w + 16'd1 >= source_height_w;
+    assign row_last_w = fill_row_r == 7 || fill_y_r + 16'd1 >= source_height_w;
     assign aligned_w = data_r >> {row_addr_r[4:0], 3'd0};
     assign rd_valid_o = state_r == S_READ && !clear_i;
     assign rd_addr_o = {row_addr_r[31:5], 5'd0};
@@ -147,7 +150,8 @@ module edrv32_rnd_window (
     assign palette_index_o = {palette_raw_w[1][7:0], palette_raw_w[0][7:0]};
     assign bank_ready_w = !bank_valid_r || out_ready_i;
     assign forward_w = sample_valid_r && !missing_w && bank_ready_w;
-    assign in_ready_o = (!sample_valid_r || forward_w) && !clear_i;
+    assign sample_ready_w = (!sample_valid_r || forward_w) && !clear_i;
+    assign in_ready_o = (!coordinate_valid_r || sample_ready_w) && !clear_i;
     assign out_valid_o = bank_valid_r;
     assign read_wait_o = sample_valid_r && missing_w;
     assign fraction_x_o = bank_fraction_r[7:0];
@@ -158,40 +162,23 @@ module edrv32_rnd_window (
     assign unused_bits_w = ^{aligned_w[511:256], palette_raw_w[0][31:8],
         palette_raw_w[1][31:8], command_i[511:464], command_i[447:352],
         command_i[319:304], command_i[255:24], command_i[23:19], command_i[17],
-        command_i[11:0], row_bits_w[2:0], row_byte_count_w[8:6], candidate[31:5]};
+        command_i[11:0], row_bits_w[2:0], row_byte_count_w[8:6]};
 
     function automatic [31:0] raw_pixel;
         input [255:0] row_i;
         input [2:0] column_i;
         input [3:0] format_i;
-        reg [255:0] shifted;
-        reg [7:0] bit_offset;
-        reg [223:0] unused_bits;
         begin
-            bit_offset = 8'd0;
             raw_pixel = 32'd0;
             case (format_i)
-                4'd0: bit_offset = {1'd0, column_i, 4'd0};
-                4'd1: bit_offset = {column_i, 5'd0};
-                4'd6: bit_offset = {2'd0, column_i, 3'd0};
-                4'd7: bit_offset = {3'd0, column_i[2:1], 3'd0} +
-                    {5'd0, !column_i[0], 2'd0};
-                4'd8: bit_offset = {4'd0, column_i[2], 3'd0} +
-                    {5'd0, ~column_i[1:0], 1'd0};
-                4'd9: bit_offset = {5'd0, ~column_i};
-                default: bit_offset = 8'd0;
-            endcase
-            shifted = row_i >> bit_offset;
-            case (format_i)
-                4'd0: raw_pixel = {16'd0, shifted[15:0]};
-                4'd1: raw_pixel = shifted[31:0];
-                4'd6: raw_pixel = {24'd0, shifted[7:0]};
-                4'd7: raw_pixel = {28'd0, shifted[3:0]};
-                4'd8: raw_pixel = {30'd0, shifted[1:0]};
-                4'd9: raw_pixel = {31'd0, shifted[0]};
+                4'd0: raw_pixel = {16'd0, row_i[{1'd0, column_i, 4'd0} +: 16]};
+                4'd1: raw_pixel = row_i[{column_i, 5'd0} +: 32];
+                4'd6: raw_pixel = {24'd0, row_i[{2'd0, column_i, 3'd0} +: 8]};
+                4'd7: raw_pixel = {28'd0, row_i[{3'd0, column_i ^ 3'd1, 2'd0} +: 4]};
+                4'd8: raw_pixel = {30'd0, row_i[{4'd0, column_i ^ 3'd3, 1'd0} +: 2]};
+                4'd9: raw_pixel = {31'd0, row_i[8'd7 - {5'd0, column_i}]};
                 default: raw_pixel = 32'd0;
             endcase
-            unused_bits = shifted[255:32];
         end
     endfunction
     always @(*) begin
@@ -200,14 +187,12 @@ module edrv32_rnd_window (
         missing_w = 1'b0;
         missing_tag_w = 26'd0;
         victim_w = replace_r;
-        victim_found_w = 1'b0;
-        candidate = 0;
         for (tap = 0; tap < 4; tap = tap + 1) begin
             slot_w[tap] = 5'd0;
             for (entry = 0; entry < 32; entry = entry + 1) begin
                 if (cache_valid_r[entry] && cache_tag_r[entry] ==
                     {sample_y_r[tap][15:3], sample_x_r[tap][15:3]}) begin
-                    slot_w[tap] = entry[4:0];
+                    slot_w[tap] = slot_w[tap] | entry[4:0];
                     hit_w[tap] = 1'b1;
                     if (sample_inside_r[tap])
                         locked_w[entry] = 1'b1;
@@ -218,12 +203,14 @@ module edrv32_rnd_window (
                 missing_tag_w = {sample_y_r[tap][15:3], sample_x_r[tap][15:3]};
             end
         end
-        for (offset = 0; offset < 32; offset = offset + 1) begin
-            candidate = ({27'd0, replace_r} + offset) & 31;
-            if (!victim_found_w && !locked_w[candidate]) begin
-                victim_w = candidate[4:0];
-                victim_found_w = 1'b1;
-            end
+        // Two fixed priority scans implement round-robin without a rotated vector.
+        for (entry = 31; entry >= 0; entry = entry - 1) begin
+            if (!locked_w[entry] && entry[4:0] < replace_r)
+                victim_w = entry[4:0];
+        end
+        for (entry = 31; entry >= 0; entry = entry - 1) begin
+            if (!locked_w[entry] && entry[4:0] >= replace_r)
+                victim_w = entry[4:0];
         end
         bank_read_w = 4'd0;
         for (bank = 0; bank < 4; bank = bank + 1) begin
@@ -245,14 +232,14 @@ module edrv32_rnd_window (
         wire [63:0] selected_w;
         wire [63:0] shifted_w;
         wire unused_selected_w;
-        assign tap_x_w[pixel] = $signed({x_i[31], x_i}) + X_ADD;
-        assign tap_y_w[pixel] = $signed({y_i[31], y_i}) + Y_ADD;
+        assign tap_x_w[pixel] = $signed({coordinate_x_r[31], coordinate_x_r}) + X_ADD;
+        assign tap_y_w[pixel] = $signed({coordinate_y_r[31], coordinate_y_r}) + Y_ADD;
         assign selected_w = bank_data_w[bank_select_r[pixel]];
         assign shifted_w = selected_w >> {bank_half_r[pixel], 5'd0};
         assign taps_o[pixel*32 +: 32] = bank_inside_r[pixel] ? shifted_w[31:0] : 32'd0;
         assign unused_selected_w = ^shifted_w[63:32];
         always @(posedge clk_i) begin
-            if (in_valid_i && in_ready_o) begin
+            if (coordinate_valid_r && sample_ready_w) begin
                 sample_x_r[pixel] <= tap_x_w[pixel][15:0];
                 sample_y_r[pixel] <= tap_y_w[pixel][15:0];
                 sample_inside_r[pixel] <= (pixel == 0 || command_i[16]) &&
@@ -303,6 +290,7 @@ module edrv32_rnd_window (
             state_r <= S_IDLE;
             cache_valid_r <= 32'd0;
             replace_r <= 5'd0;
+            coordinate_valid_r <= 1'b0;
             sample_valid_r <= 1'b0;
             bank_valid_r <= 1'b0;
             fill_row_r <= 3'd0;
@@ -313,12 +301,15 @@ module edrv32_rnd_window (
             state_r <= S_IDLE;
             cache_valid_r <= 32'd0;
             replace_r <= 5'd0;
+            coordinate_valid_r <= 1'b0;
             sample_valid_r <= 1'b0;
             bank_valid_r <= 1'b0;
             palette_pending_r <= 1'b0;
         end else begin
             if (in_ready_o)
-                sample_valid_r <= in_valid_i;
+                coordinate_valid_r <= in_valid_i;
+            if (sample_ready_w)
+                sample_valid_r <= coordinate_valid_r;
             if (bank_ready_w)
                 bank_valid_r <= forward_w;
             palette_pending_r <= state_r == S_INDEX;
@@ -365,8 +356,14 @@ module edrv32_rnd_window (
     end
     always @(posedge clk_i) begin
         if (in_valid_i && in_ready_o) begin
-            fraction_r <= {fraction_y_i, fraction_x_i};
-            payload_r <= {coverage_i, tag_i, destination_i};
+            coordinate_x_r <= x_i;
+            coordinate_y_r <= y_i;
+            coordinate_fraction_r <= {fraction_y_i, fraction_x_i};
+            coordinate_payload_r <= {coverage_i, tag_i, destination_i};
+        end
+        if (coordinate_valid_r && sample_ready_w) begin
+            fraction_r <= coordinate_fraction_r;
+            payload_r <= coordinate_payload_r;
         end
         if (forward_w) begin
             bank_fraction_r <= fraction_r;
@@ -376,9 +373,12 @@ module edrv32_rnd_window (
         if (state_r == S_IDLE && sample_valid_r && missing_w) begin
             fill_slot_r <= victim_w;
             fill_tag_r <= missing_tag_w;
+            fill_y_r <= {missing_tag_w[25:13], 3'd0};
         end
+        if (state_r == S_WRITE1 && !row_last_w)
+            fill_y_r <= fill_y_r + 16'd1;
         if (state_r == S_ROW) begin
-            row_product_r <= fill_y_w * command_i[303:288];
+            row_product_r <= fill_y_r * command_i[303:288];
         end
         if (state_r == S_ADDRESS)
             row_addr_r <= command_i[287:256] + row_product_r + row_x_bytes_w;

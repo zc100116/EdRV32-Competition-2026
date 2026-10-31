@@ -236,9 +236,12 @@ module edrv32_rnd (
     assign cancel_w = abort_w || soft_reset_w || read_fault_w || write_fault_w;
     assign error_w = write_fault_w ? 2'd2 : read_fault_w ? 2'd1 :
         state_r == S_CHECK && illegal_w && !abort_w ? 2'd3 : 2'd0;
-    assign pixels_w = state_r == S_DRAW ? draw_pixels_w : state_r == S_COPY ?
-        copy_pixels_w : state_r == S_FILL ? fill_pixels_w :
-        state_r == S_BLUR ? blur_pixels_w : state_r == S_BLIT ? blit_pixels_w : 5'd0;
+    // Engine states are exclusive; parallel selection keeps PERF1 off a priority chain.
+    assign pixels_w = ({5{state_r == S_DRAW}} & draw_pixels_w) |
+        ({5{state_r == S_COPY}} & copy_pixels_w) |
+        ({5{state_r == S_FILL}} & fill_pixels_w) |
+        ({5{state_r == S_BLUR}} & blur_pixels_w) |
+        ({5{state_r == S_BLIT}} & blit_pixels_w);
     edrv32_rnd_regs u_regs (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_mem_n_i),
