@@ -1,8 +1,8 @@
 // File: edrv32_fpga_board_npu_top.v
 // Spec: Task T-BN1; edrv32-soc-spec 3, 5.2 X1-X10, 5.3, 6.1, 6.4, 7.1, 8.8.
-// Description: CPU + DDR + NPU; omitted media/ETH engines use the B3-10 tie-offs.
+// Description: CPU + DDR + NPU + ETH; omitted media engines use the B3-10 tie-offs.
 //              DDR core_clk owns clk_mem; sys_subsys reset_ctrl owns domain resets.
-// Clock domains: sys, mem, npu.
+// Clock domains: sys, mem, npu, eth RX/TX.
 module edrv32_fpga_board_npu_top (
     // Board oscillator, reset key and DDR reference clock.
     input wire clk_i,
@@ -15,6 +15,17 @@ module edrv32_fpga_board_npu_top (
     output wire uart_tx_o,
     input wire [3:0] key_n_i,
     output wire [4:0] led_o,
+
+    // Gigabit PHY data and management.
+    input wire rgmii_rxc_i,
+    input wire [3:0] rgmii_rxd_i,
+    input wire rgmii_rx_ctl_i,
+    output wire rgmii_txc_o,
+    output wire [3:0] rgmii_txd_o,
+    output wire rgmii_tx_ctl_o,
+    output wire eth_mdc_o,
+    inout wire eth_mdio_o,
+    output wire eth_phy_rst_n_o,
 
     // DDR3 physical bus; inout ports use the repository-required _o suffix.
     output wire mem_cs_n_o,
@@ -39,6 +50,7 @@ module edrv32_fpga_board_npu_top (
     wire clk_npu_w;
     wire clk_mem_w;
     wire ddr_ref_clk_w;
+    wire clk_eth_w;
     wire pll_sys_lock_w;
     wire pll_npu_lock_w;
     wire rst_board_n_w;
@@ -61,6 +73,15 @@ module edrv32_fpga_board_npu_top (
         .O(ddr_ref_clk_w)
     );
     assign rst_board_n_w = rst_n_i & pll_sys_lock_w & pll_npu_lock_w;
+
+    wire [7:0] eth_rxd_w;
+    wire eth_rx_dv_w;
+    wire eth_rx_er_w;
+    wire [7:0] eth_txd_w;
+    wire eth_tx_en_w;
+    wire eth_tx_er_w;
+    wire eth_mdio_w;
+    wire eth_mdio_oe_w;
 
     // AXI256 connection between SoC and the combinational DDR adapter.
     wire [3:0] ddr_awid_w;
@@ -178,6 +199,8 @@ module edrv32_fpga_board_npu_top (
     /* verilator lint_off SYNCASYNCNET */
     wire rst_mem_n_w;
     /* verilator lint_on SYNCASYNCNET */
+    wire rst_eth_rx_n_w;
+    wire rst_eth_tx_n_w;
     wire rst_npu_n_w;
     wire [3:0] gw_awid_w;
     wire [31:0] gw_awaddr_w;
@@ -246,6 +269,32 @@ module edrv32_fpga_board_npu_top (
     wire p3_rvalid_w;
     wire p3_rready_w;
 
+    wire eth_awid_w;
+    wire [31:0] eth_awaddr_w;
+    wire [3:0] eth_awlen_w;
+    wire eth_awvalid_w;
+    wire eth_awready_w;
+    wire [255:0] eth_wdata_w;
+    wire [31:0] eth_wstrb_w;
+    wire eth_wlast_w;
+    wire eth_wvalid_w;
+    wire eth_wready_w;
+    wire eth_bid_w;
+    wire [1:0] eth_bresp_w;
+    wire eth_bvalid_w;
+    wire eth_bready_w;
+    wire eth_arid_w;
+    wire [31:0] eth_araddr_w;
+    wire [3:0] eth_arlen_w;
+    wire eth_arvalid_w;
+    wire eth_arready_w;
+    wire eth_rid_w;
+    wire [255:0] eth_rdata_w;
+    wire [1:0] eth_rresp_w;
+    wire eth_rlast_w;
+    wire eth_rvalid_w;
+    wire eth_rready_w;
+
     // SoC 6.1 / sys-subsys 2.3: B3-10 empty-slot convention for omitted engines.
     assign media_apb_prdata_w[0 +: 32] = 32'b0;
     assign media_apb_pready_w[0] = 1'b1;
@@ -265,9 +314,6 @@ module edrv32_fpga_board_npu_top (
     assign media_apb_prdata_w[160 +: 32] = 32'b0;
     assign media_apb_pready_w[5] = 1'b1;
     assign media_apb_pslverr_w[5] = 1'b1;
-    assign media_apb_prdata_w[224 +: 32] = 32'b0;
-    assign media_apb_pready_w[7] = 1'b1;
-    assign media_apb_pslverr_w[7] = 1'b1;
     assign media_apb_prdata_w[320 +: 32] = 32'b0;
     assign media_apb_pready_w[10] = 1'b1;
     assign media_apb_pslverr_w[10] = 1'b1;
@@ -286,13 +332,12 @@ module edrv32_fpga_board_npu_top (
     assign media_apb_prdata_w[480 +: 32] = 32'b0;
     assign media_apb_pready_w[15] = 1'b1;
     assign media_apb_pslverr_w[15] = 1'b1;
-    // SoC 6.1: removed VIN/PIX/GEO/RND/DISP/ETH have no interrupt source.
+    // SoC 6.1: removed VIN/PIX/GEO/RND/DISP have no interrupt source.
     assign irq_src_w[12:8] = 5'b0;
-    assign irq_src_w[14] = 1'b0;
 
     wire unused_media_psel_w;
     assign unused_media_psel_w = |{media_apb_psel_w[15:10],
-        media_apb_psel_w[7], media_apb_psel_w[5:0]};
+        media_apb_psel_w[5:0]};
 
     // Unbonded reset outputs and inactive master responses are intentionally open.
     /* verilator lint_off PINCONNECTEMPTY */
@@ -385,8 +430,8 @@ module edrv32_fpga_board_npu_top (
         .clk_npu_i(clk_npu_w),
         .cam0_pclk_i(clk_mem_w),
         .cam1_pclk_i(clk_mem_w),
-        .eth_rx_clk_i(clk_mem_w),
-        .eth_tx_clk_i(clk_mem_w),
+        .eth_rx_clk_i(clk_eth_w),
+        .eth_tx_clk_i(clk_eth_w),
         .rst_n_i(rst_board_n_w),
         .mem_ready_i(mem_ready_w),
         .rst_sys_por_n_o(unused_rst_sys_por_n_w),
@@ -397,8 +442,8 @@ module edrv32_fpga_board_npu_top (
         .rst_npu_n_o(rst_npu_n_w),
         .rst_cam0_n_o(),
         .rst_cam1_n_o(),
-        .rst_eth_rx_n_o(),
-        .rst_eth_tx_n_o(),
+        .rst_eth_rx_n_o(rst_eth_rx_n_w),
+        .rst_eth_tx_n_o(rst_eth_tx_n_w),
 
         // m0 interface.
         .m0_arid_i(iaxi_arid_w),
@@ -696,32 +741,32 @@ module edrv32_fpga_board_npu_top (
         .p5_rvalid_o(),
         .p5_rready_i(1'b0),
 
-        // SoC 4.2 / 6.4.1: omitted ETH, all inputs zero and responses open.
-        .eth_awid_i(1'b0),
-        .eth_awaddr_i(32'b0),
-        .eth_awlen_i(4'b0),
-        .eth_awvalid_i(1'b0),
-        .eth_awready_o(),
-        .eth_wdata_i(256'b0),
-        .eth_wstrb_i(32'b0),
-        .eth_wlast_i(1'b0),
-        .eth_wvalid_i(1'b0),
-        .eth_wready_o(),
-        .eth_bid_o(),
-        .eth_bresp_o(),
-        .eth_bvalid_o(),
-        .eth_bready_i(1'b0),
-        .eth_arid_i(1'b0),
-        .eth_araddr_i(32'b0),
-        .eth_arlen_i(4'b0),
-        .eth_arvalid_i(1'b0),
-        .eth_arready_o(),
-        .eth_rid_o(),
-        .eth_rdata_o(),
-        .eth_rresp_o(),
-        .eth_rlast_o(),
-        .eth_rvalid_o(),
-        .eth_rready_i(1'b0),
+        // SoC 6.4.1: ETH shares P6 with PERF_MON.
+        .eth_awid_i(eth_awid_w),
+        .eth_awaddr_i(eth_awaddr_w),
+        .eth_awlen_i(eth_awlen_w),
+        .eth_awvalid_i(eth_awvalid_w),
+        .eth_awready_o(eth_awready_w),
+        .eth_wdata_i(eth_wdata_w),
+        .eth_wstrb_i(eth_wstrb_w),
+        .eth_wlast_i(eth_wlast_w),
+        .eth_wvalid_i(eth_wvalid_w),
+        .eth_wready_o(eth_wready_w),
+        .eth_bid_o(eth_bid_w),
+        .eth_bresp_o(eth_bresp_w),
+        .eth_bvalid_o(eth_bvalid_w),
+        .eth_bready_i(eth_bready_w),
+        .eth_arid_i(eth_arid_w),
+        .eth_araddr_i(eth_araddr_w),
+        .eth_arlen_i(eth_arlen_w),
+        .eth_arvalid_i(eth_arvalid_w),
+        .eth_arready_o(eth_arready_w),
+        .eth_rid_o(eth_rid_w),
+        .eth_rdata_o(eth_rdata_w),
+        .eth_rresp_o(eth_rresp_w),
+        .eth_rlast_o(eth_rlast_w),
+        .eth_rvalid_o(eth_rvalid_w),
+        .eth_rready_i(eth_rready_w),
 
         // ddr interface.
         .ddr_awid_o(ddr_awid_w),
@@ -823,6 +868,72 @@ module edrv32_fpga_board_npu_top (
 
         // irq interface.
         .irq_o(irq_src_w[13])
+    );
+
+    // ETH interfaces retain their owning subsystem and engine signal stems.
+    edrv32_eth u_eth (
+
+        // Clock and reset domains.
+        .clk_mem_i(clk_mem_w),
+        .rst_mem_n_i(rst_mem_n_w),
+        .clk_eth_rx_i(clk_eth_w),
+        .rst_eth_rx_n_i(rst_eth_rx_n_w),
+        .clk_eth_tx_i(clk_eth_w),
+        .rst_eth_tx_n_i(rst_eth_tx_n_w),
+
+        // eth interface.
+        .eth_rxd_i(eth_rxd_w),
+        .eth_rx_dv_i(eth_rx_dv_w),
+        .eth_rx_er_i(eth_rx_er_w),
+        .eth_txd_o(eth_txd_w),
+        .eth_tx_en_o(eth_tx_en_w),
+        .eth_tx_er_o(eth_tx_er_w),
+        .eth_mdc_o(eth_mdc_o),
+        .eth_mdio_o(eth_mdio_w),
+        .eth_mdio_oe(eth_mdio_oe_w),
+        .eth_mdio_i(eth_mdio_o),
+        .eth_phy_rst_n_o(eth_phy_rst_n_o),
+
+        // APB engine control.
+        .apb_paddr_i(media_apb_paddr_w),
+        .apb_psel_i(media_apb_psel_w[7]),
+        .apb_penable_i(media_apb_penable_w),
+        .apb_pwrite_i(media_apb_pwrite_w),
+        .apb_pwdata_i(media_apb_pwdata_w),
+        .apb_pstrb_i(media_apb_pstrb_w),
+        .apb_pready_o(media_apb_pready_w[7]),
+        .apb_prdata_o(media_apb_prdata_w[224 +: 32]),
+        .apb_pslverr_o(media_apb_pslverr_w[7]),
+
+        // axi interface.
+        .axi_arid_o(eth_arid_w),
+        .axi_araddr_o(eth_araddr_w),
+        .axi_arlen_o(eth_arlen_w),
+        .axi_arvalid_o(eth_arvalid_w),
+        .axi_arready_i(eth_arready_w),
+        .axi_rid_i(eth_rid_w),
+        .axi_rdata_i(eth_rdata_w),
+        .axi_rresp_i(eth_rresp_w),
+        .axi_rlast_i(eth_rlast_w),
+        .axi_rvalid_i(eth_rvalid_w),
+        .axi_rready_o(eth_rready_w),
+        .axi_awid_o(eth_awid_w),
+        .axi_awaddr_o(eth_awaddr_w),
+        .axi_awlen_o(eth_awlen_w),
+        .axi_awvalid_o(eth_awvalid_w),
+        .axi_awready_i(eth_awready_w),
+        .axi_wdata_o(eth_wdata_w),
+        .axi_wstrb_o(eth_wstrb_w),
+        .axi_wlast_o(eth_wlast_w),
+        .axi_wvalid_o(eth_wvalid_w),
+        .axi_wready_i(eth_wready_w),
+        .axi_bid_i(eth_bid_w),
+        .axi_bresp_i(eth_bresp_w),
+        .axi_bvalid_i(eth_bvalid_w),
+        .axi_bready_o(eth_bready_w),
+
+        // irq interface.
+        .irq_o(irq_src_w[14])
     );
 
     /* verilator lint_on PINCONNECTEMPTY */
@@ -982,5 +1093,23 @@ module edrv32_fpga_board_npu_top (
         .debug_cpd_state()
     );
     /* verilator lint_on PINCONNECTEMPTY */
+
+    assign eth_mdio_o = eth_mdio_oe_w ? eth_mdio_w : 1'bz;
+
+    edrv32_fpga_rgmii u_rgmii (
+        .rgmii_rxc_i(rgmii_rxc_i),
+        .rgmii_rxd_i(rgmii_rxd_i),
+        .rgmii_rx_ctl_i(rgmii_rx_ctl_i),
+        .rgmii_txc_o(rgmii_txc_o),
+        .rgmii_txd_o(rgmii_txd_o),
+        .rgmii_tx_ctl_o(rgmii_tx_ctl_o),
+        .clk_eth_o(clk_eth_w),
+        .eth_rxd_o(eth_rxd_w),
+        .eth_rx_dv_o(eth_rx_dv_w),
+        .eth_rx_er_o(eth_rx_er_w),
+        .eth_txd_i(eth_txd_w),
+        .eth_tx_en_i(eth_tx_en_w),
+        .eth_tx_er_i(eth_tx_er_w)
+    );
 
 endmodule

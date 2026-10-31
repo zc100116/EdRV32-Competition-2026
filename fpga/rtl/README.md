@@ -3,7 +3,9 @@
 
 `edrv32_fpga_board_b1_top.v`：B1 上板顶层，27 MHz PLL → 100 MHz CPU/cache/系统子系统，UART、启动按键与 LED。
 
-`edrv32_fpga_board_npu_top.v`：B3N CPU/SYS/MEM + NPU 上板顶层，保留 sys/NPU PLL、DDR 和 UART/KEY/LED；移除媒体/ETH 的主口、APB 槽和 PLIC 按 B3-10 接死，验证见 `verif/soc/board_npu/`。
+`edrv32_fpga_board_npu_top.v`：B3N CPU/SYS/MEM + NPU + ETH 上板顶层，保留 sys/NPU PLL、DDR、RGMII 和 UART/KEY/LED；ETH 接 P6/槽 7/PLIC14，移除媒体的主口、APB 槽和 PLIC 按 B3-10 接死，验证见 `verif/soc/board_npu/`。
+导入共 106 个源文件、24 种 IP，FDC 共 13 个时钟；RGMII 时钟和引脚沿用 B3VN，
+新增 `ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`，已有 SYS/NPU PLL 无需增加输出。
 
 
 ## B2 完整 SoC 板级顶层
@@ -210,17 +212,18 @@ FDC Tcl 语法通过（17 个时钟定义）。137 个物理引脚逐位覆盖�
 
 ## B3 渲染验证板级顶层
 
-`edrv32_fpga_board_render_top.v` 直接例化 CPU、系统、存储子系统、RND 和 DISP v0.3
+`edrv32_fpga_board_render_top.v` 直接例化 CPU、系统、存储子系统、RND、ETH 和 DISP v0.3
 （L0/L1 两层），用于在板上运行 LVGL、游戏和验证 RND。RND 接 mem_xbar P4、媒体
 APB 槽 4、PLIC 源 11；DISP 接 P0、槽 5、源 12；CPU DDR 网关接 P2。存储子系统保留
-MEM_XBAR（槽 8、源 15）和 PERF_MON（槽 9）。VIN、PIX、GEO、NPU、ETH 不例化。
+MEM_XBAR（槽 8、源 15）和 PERF_MON（槽 9）。ETH 接 P6、槽 7、源 14；VIN、PIX、GEO、NPU 不例化。
 
 板级 DDR 适配器、DDR IP、TMDS 串化与 B2 相同。`ip_pll_sys` 输出 100 MHz 系统时钟；
 DDR `core_clk` 输出 125 MHz `clk_mem`；`ip_pll_video` 同相输出 74.25 MHz 像素时钟和
-371.25 MHz 串化时钟。只例化 sys/video PLL，未使用的 NPU、摄像头和 ETH 域时钟输入
-在系统子系统处同 B1 接 `clk_sys`。板级复位为 `rst_n_i & sys_lock & video_lock`，DDR
+371.25 MHz 串化时钟。RGMII 内的 `ip_pll_eth` 由 PHY 的 125 MHz RXC 驱动，输出 125 MHz、30° 时钟，
+MAC RX/TX 共用；reset_ctrl 在该域同步释放 ETH 复位，PLL lock 不参与全局复位。
+未使用的 NPU、摄像头域时钟输入在系统子系统处同 B1 接 `clk_sys`。板级复位为 `rst_n_i & sys_lock & video_lock`，DDR
 控制器直接使用该复位；系统子系统中的 reset_ctrl 同步 `mem_ready` 并按 SoC 5.3 释放
-各域，CPU 不会阻塞 DDR 初始化。CDC 沿用 SoC 5.2 X1/X2/X3/X5/X6/X8。
+各域，CPU 不会阻塞 DDR 初始化。CDC 沿用 SoC 5.2 X1/X2/X3/X5/X6/X7/X8。
 
 ### 裁剪端口接法
 
@@ -229,9 +232,9 @@ DDR `core_clk` 输出 125 MHz `clk_mem`；`ip_pll_video` 同相输出 74.25 MHz 
 
 | 端口 | 接值 | 依据 |
 |---|---|---|
-| mem_subsys P1/P3/P5/ETH 的 AWVALID/WVALID/ARVALID、负载、BREADY/RREADY；P1 urgent | 全 0，响应输出不接 | SoC 6.4.1、4.2；B3-6 裁剪及协调者确认 |
-| 媒体 APB 槽 0/1/2/3/6/7/10–15 | PRDATA=0、PREADY=1、PSLVERR=1 | SoC 6.1、sys-subsys 2.3 空槽约定 |
-| PLIC 源 8/9/10/13/14 | 0 | SoC 6.1 中断源表、B3-6 裁剪 |
+| mem_subsys P1/P3/P5 的 AWVALID/WVALID/ARVALID、负载、BREADY/RREADY；P1 urgent | 全 0，响应输出不接 | SoC 6.4.1、4.2；B3-6 裁剪及协调者确认 |
+| 媒体 APB 槽 0/1/2/3/6/10–15 | PRDATA=0、PREADY=1、PSLVERR=1 | SoC 6.1、sys-subsys 2.3 空槽约定 |
+| PLIC 源 8/9/10/13 | 0 | SoC 6.1 中断源表、B3-6 裁剪 |
 | GPIO 输入 [15:4] / [3:0]，LED 输出 | 0 / KEY[3:0]，GPIO[8:4] | SoC 3.5，与 B1/B2 相同 |
 | I2C SCL/SDA 输入，输出及 OE | 2'b11，输出不接 | 同 B1，无板级 I2C 引脚 |
 | DDR APB、诊断控制 | APB 输入全 0；dbg_ddrphy_rst_n=1，其余控制为 0 | fpga/ip/ip_ddr3.md，与 B2 相同 |
@@ -239,8 +242,9 @@ DDR `core_clk` 输出 125 MHz `clk_mem`；`ip_pll_video` 同相输出 74.25 MHz 
 ### 渲染顶层端口表
 
 引脚和 IO 标准逐位沿用上面的 B2 表，约束文件为
-`fpga/constraints/edrv32_fpga_board_render_top.fdc`。只保留 sys/mem/video 三组的异步关系，
-pix/serial 相关时钟及 DDR PHY 内部时序约束保留。
+`fpga/constraints/edrv32_fpga_board_render_top.fdc`。保留 sys/mem/video/ETH 各组的异步关系，
+pix/serial 相关时钟及 DDR PHY 内部时序约束保留。RGMII、MDIO/MDC 和 PHY 复位
+引脚逐位沿用 B3VN（上面 B2 端口表中的同名端口），共 14 个时钟定义。
 
 | 顶层端口（逐位） | FPGA 引脚 | IO 标准 | 来源 |
 |---|---|---|---|
@@ -343,12 +347,12 @@ pix/serial 相关时钟及 DDR PHY 内部时序约束保留。
 
 在已按 `fpga/ip/README.md` 生成 IP 的 PDS 工程中执行
 `source <仓库路径>/fpga/scripts/import_board_render_top.tcl`。脚本从
-`cpu_subsys.f`、`sys_subsys.f`、`mem_subsys.f`、`rnd.f`、`disp.f` 展开源文件并去重，
-设置 `FPGA_MODE`。需要的 15 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
+`cpu_subsys.f`、`sys_subsys.f`、`mem_subsys.f`、`rnd.f`、`disp.f`、`eth.f` 展开源文件并去重，
+加入四个板级源后共 98 个源文件，设置 `FPGA_MODE`。需要的 18 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
 `ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、`ip_ram_dcache_data`、
-`ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`、`ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w`、
-`ip_ram_rnd_line`（5 实例）、`ip_ram_rnd_palette`（2 实例）、`ip_ram_disp_scan`（2 实例）。
-TMDS 和 DDR 参考差分时钟使用器件原语，无需 GUI 生成串化 IP。
+`ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`、`ip_ram_mem_xbar_r`、`ip_lutram_mem_xbar_w`、
+`ip_ram_rnd_line`（5 实例）、`ip_ram_rnd_palette`（2 实例）、`ip_ram_disp_scan`（2 实例）、`ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
+RGMII IO、TMDS 和 DDR 参考差分时钟使用器件原语，无需 GUI 生成串化 IP。
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
@@ -363,7 +367,7 @@ python3 tools/regress.py smoke --path verif/soc/board_render -j 1
 `tools.regress.expand_files` 展开 `verif/soc/board_render/files.f`）。日志在
 `build/board_render/{lint,compile,simulation}.log`。同一仿真先按住 KEY1 检查 BIOS 菜单，
 再释放 KEY1 复位、从 Boot ROM 跳到预加载的 SRAM 程序；B1 的 CLINT 测试窗口加速器
-用于两次启动。软件检查 RND/DISP ID、64×4 ARGB8888 FILL、PLIC 源 11 DONE、非缓存
+用于两次启动。软件检查 RND/DISP/ETH ID、64×4 ARGB8888 FILL、PLIC 源 11 DONE、非缓存
 DDR 别名逐字读回，最后写 SIM_EXIT。DDR 用户口复用已有带停顿的行为模型；PHY/诊断
 引脚保持空闲，视频只建模串化连线，不运行显示帧，画面留给板上验收。
 

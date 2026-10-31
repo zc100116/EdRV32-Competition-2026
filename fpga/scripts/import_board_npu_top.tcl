@@ -1,13 +1,15 @@
 # File: import_board_npu_top.tcl
 # Spec: Task T-BN1; CLAUDE.md 8, 10.
 # In the open PG2L200H-6/FBB676 PDS project, generate the IPs from fpga/ip first.
+# T-BE1: 106 sources, 24 generated IP kinds.
 # Required generated IP (fpga/ip/README.md): ip_pll_sys, ip_pll_npu, ip_ddr3;
 # ip_ram_icache_tag, ip_ram_icache_data, ip_ram_dcache_tag, ip_ram_dcache_data,
-# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_ram_mem_xbar_w,
-# ip_ram_npu_line, ip_ram_npu_weight, ip_ram_npu_quant, ip_ram_npu_lut,
-# ip_ram_npu_residual, ip_ram_npu_result, ip_ram_npu_scratch,
+# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_lutram_mem_xbar_w,
+# ip_ram_npu_line, ip_ram_npu_weight, ip_lutram_npu_quant, ip_ram_npu_lut,
+# ip_lutram_npu_residual, ip_lutram_npu_result, ip_ram_npu_scratch,
 # ip_mul_npu_quant_low, ip_mul_npu_quant_high (INT8 MAC uses APM primitives).
-# DDR differential reference uses GTP_INBUFDS; no video/RGMII/media IP.
+# DDR differential reference uses GTP_INBUFDS; RGMII IO uses device primitives; no video IP.
+# ETH also requires ip_pll_eth, ip_ram_eth_buf and ip_ram_eth_fifo (fpga/ip/README.md).
 # Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
 # The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
@@ -51,7 +53,7 @@ proc edrv32_npu_filelist {path} {
 }
 
 set edrv32_sources {}
-foreach list {cpu_subsys sys_subsys mem_subsys npu} {
+foreach list {cpu_subsys sys_subsys mem_subsys npu eth} {
     foreach f [edrv32_npu_filelist [file join $edrv32_repo rtl filelists $list.f]] {
         if {[lsearch -exact $edrv32_sources $f] < 0} {
             lappend edrv32_sources $f
@@ -59,6 +61,7 @@ foreach list {cpu_subsys sys_subsys mem_subsys npu} {
     }
 }
 foreach name {
+    edrv32_fpga_rgmii.v
     edrv32_fpga_ddr_adapter.v
     edrv32_fpga_board_npu_top.v
 } {

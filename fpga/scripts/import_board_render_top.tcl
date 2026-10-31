@@ -1,11 +1,13 @@
 # File: import_board_render_top.tcl
 # Spec: Task B3-6; CLAUDE.md 8, 10.
 # In the open PG2L200H-6/FBB676 PDS project, generate the IPs from fpga/ip first.
+# T-BE1: 98 sources, 18 generated IP kinds.
 # Required generated IP (fpga/ip/README.md): ip_pll_sys, ip_pll_video, ip_ddr3;
 # ip_ram_icache_tag, ip_ram_icache_data, ip_ram_dcache_tag, ip_ram_dcache_data,
-# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_ram_mem_xbar_w,
+# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_lutram_mem_xbar_w,
 # ip_ram_rnd_line (five instances), ip_ram_rnd_palette (two instances),
 # ip_ram_disp_scan (two instances, DISP v0.3 L0/L1).
+# ETH also requires ip_pll_eth, ip_ram_eth_buf and ip_ram_eth_fifo (fpga/ip/README.md).
 # TMDS uses GTP_OSERDES_E2/GTP_OUTBUFDS; DDR reference uses GTP_INBUFDS.
 # Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
 # The source checkout is its sibling under codex_project (Windows builds B3I, B3V).
@@ -50,7 +52,7 @@ proc edrv32_render_filelist {path} {
 }
 
 set edrv32_sources {}
-foreach list {cpu_subsys sys_subsys mem_subsys rnd disp} {
+foreach list {cpu_subsys sys_subsys mem_subsys rnd disp eth} {
     foreach f [edrv32_render_filelist [file join $edrv32_repo rtl filelists $list.f]] {
         if {[lsearch -exact $edrv32_sources $f] < 0} {
             lappend edrv32_sources $f
@@ -58,6 +60,7 @@ foreach list {cpu_subsys sys_subsys mem_subsys rnd disp} {
     }
 }
 foreach name {
+    edrv32_fpga_rgmii.v
     edrv32_fpga_ddr_adapter.v
     edrv32_fpga_tmds.v
     edrv32_fpga_board_render_top.v

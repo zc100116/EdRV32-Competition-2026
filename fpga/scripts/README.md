@@ -17,4 +17,10 @@ B2：在已按 `fpga/ip/README.md` 生成 IP 的 PG2L200H-6/FBB676 工程中执�
 递归展开 `rtl/filelists/soc.f`，源文件按首次出现去重，添加四个板级文件和 B2 FDC，
 使用 `FPGA_MODE` 编译 `edrv32_fpga_board_b2_top`；不启动仿真或布局布线。
 
-B3N：`import_board_npu_top.tcl` 导入 CPU/SYS/MEM/NPU 文件列表及板级适配器、顶层（87 个源文件），使用 `FPGA_MODE`、`edrv32_fpga_board_npu_top.fdc`（10 个时钟）和 21 种 IP；Linux 检查：`tclsh verif/soc/board_npu/check_import.tcl`。
+B3N：`import_board_npu_top.tcl` 导入 CPU/SYS/MEM/NPU/ETH 文件列表及板级适配器、顶层（106 个源文件），使用 `FPGA_MODE`、`edrv32_fpga_board_npu_top.fdc`（13 个时钟）和 24 种 IP；Linux 检查：`tclsh verif/soc/board_npu/check_import.tcl`。
+
+B3R：`import_board_render_top.tcl` 导入 CPU/SYS/MEM/RND/DISP/ETH，共 98 个源文件、18 种 IP、14 个时钟。
+B3VN：`import_board_vnpu_top.tcl` 保持 145 个源文件、29 种 IP、17 个时钟。
+三者 ETH 均经 `edrv32_fpga_rgmii` 内的 `ip_pll_eth`（125 MHz、30°），不增加 SYS/VIDEO/NPU PLL 输出；
+B3R/B3N 需新增生成 `ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`，配置见 `fpga/ip/README.md`。
+浅存储使用方案 B 的 `ip_lutram_mem_xbar_w`；NPU 另用 `ip_lutram_npu_quant/residual/result`。

@@ -4,6 +4,7 @@
 # from core_clk. Vendor PHY clocks/placement are reproduced below for u_ddr3.
 create_clock -name {clk_board} [get_ports {clk_i}] -period {37.037037} -waveform {0 18.518519}
 create_clock -name {clk_ddr_ref} [get_ports {ddr_ref_clk_p_i}] -period {8} -waveform {0 4}
+create_clock -name {clk_rgmii_ref} [get_ports {rgmii_rxc_i}] -period {8} -waveform {0 4}
 create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -multiply_by {100} -divide_by {27}
 create_generated_clock -name {clk_npu} -source [get_ports {clk_i}] [get_pins {u_pll_npu/clkout0}] -multiply_by {50} -divide_by {9}
 # DDR PHY clocks, timing and physical placement from vendor pnr/ddr_test.fdc.
@@ -28,15 +29,22 @@ define_attribute {i:u_ddr3.u_ddrphy_top.u_ddrphy_cpd} {PAP_LOC} {DDRPHY_CPD_729_
 define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[0]} {PAP_LOC} {CLMA_717_672:FF3}
 define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[1]} {PAP_LOC} {CLMA_717_978:FF3}
 
-# X1/X2 sys<->mem, X3 IRQ and X9/X10 NPU; removed domains have no clocks.
+# X1/X2 sys<->mem, X3 IRQ, X7 ETH and X9/X10 NPU; removed domains have no clocks.
 # Pairwise groups list only SoC-facing clocks; DDR PHY groups follow the vendor example above.
+# Vendor ref_clock.idf: CLKOUT0 phase 30 deg = 2/3 ns at 125 MHz.
+create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pins {u_rgmii/u_pll_eth/clkout0}] -edges {1 2 3} -edge_shift {0.666667 0.666667 0.666667}
+create_generated_clock -name {clk_rgmii_tx} -source [get_pins {u_rgmii/u_pll_eth/clkout0}] [get_ports {rgmii_txc_o}] -edges {1 2 3} -edge_shift {1 1 1}
+
+set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_eth clk_rgmii_tx}]
+set_clock_groups -asynchronous -group [get_clocks {clk_mem}] -group [get_clocks {clk_eth clk_rgmii_tx}]
+set_clock_groups -asynchronous -group [get_clocks {clk_npu}] -group [get_clocks {clk_eth clk_rgmii_tx}]
 set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_mem}]
 set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_npu}]
 set_clock_groups -asynchronous -group [get_clocks {clk_mem}] -group [get_clocks {clk_npu}]
 # X8 asynchronous assertion; reset_ctrl owns synchronized release and mem_ready CDC.
 set_false_path -from [get_ports {rst_n_i}]
 # External asynchronous peripheral inputs enter SoC synchronizers.
-set_false_path -from [get_ports {key_n_i[*] uart_rx_i}]
+set_false_path -from [get_ports {key_n_i[*] uart_rx_i eth_mdio_o}]
 
 # edrv32_fpga_board_b1_top.fdc: clk_i
 define_attribute {p:clk_i} {PAP_IO_DIRECTION} {INPUT}
@@ -793,3 +801,119 @@ define_attribute {p:mem_dm_o[3]} {PAP_IO_STANDARD} {HSTL15_I}
 define_attribute {p:mem_dm_o[3]} {PAP_IO_DRIVE} {8}
 define_attribute {p:mem_dm_o[3]} {PAP_IO_NONE} {TRUE}
 define_attribute {p:mem_dm_o[3]} {PAP_IO_SLEW} {SLOW}
+# ethernet_test.fdc: rgmii_rxc
+define_attribute {p:rgmii_rxc_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rgmii_rxc_i} {PAP_IO_LOC} {D19}
+define_attribute {p:rgmii_rxc_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_rxc_i} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_rxc_i} {PAP_IO_NONE} {TRUE}
+
+# ethernet_test.fdc: rgmii_rxd[0]
+define_attribute {p:rgmii_rxd_i[0]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rgmii_rxd_i[0]} {PAP_IO_LOC} {D16}
+define_attribute {p:rgmii_rxd_i[0]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_rxd_i[0]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_rxd_i[0]} {PAP_IO_NONE} {TRUE}
+
+# ethernet_test.fdc: rgmii_rxd[1]
+define_attribute {p:rgmii_rxd_i[1]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rgmii_rxd_i[1]} {PAP_IO_LOC} {E16}
+define_attribute {p:rgmii_rxd_i[1]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_rxd_i[1]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_rxd_i[1]} {PAP_IO_NONE} {TRUE}
+
+# ethernet_test.fdc: rgmii_rxd[2]
+define_attribute {p:rgmii_rxd_i[2]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rgmii_rxd_i[2]} {PAP_IO_LOC} {A19}
+define_attribute {p:rgmii_rxd_i[2]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_rxd_i[2]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_rxd_i[2]} {PAP_IO_NONE} {TRUE}
+
+# ethernet_test.fdc: rgmii_rxd[3]
+define_attribute {p:rgmii_rxd_i[3]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rgmii_rxd_i[3]} {PAP_IO_LOC} {B19}
+define_attribute {p:rgmii_rxd_i[3]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_rxd_i[3]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_rxd_i[3]} {PAP_IO_NONE} {TRUE}
+
+# ethernet_test.fdc: rgmii_rx_ctl
+define_attribute {p:rgmii_rx_ctl_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:rgmii_rx_ctl_i} {PAP_IO_LOC} {H16}
+define_attribute {p:rgmii_rx_ctl_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_rx_ctl_i} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_rx_ctl_i} {PAP_IO_NONE} {TRUE}
+
+# ethernet_test.fdc: rgmii_txc
+define_attribute {p:rgmii_txc_o} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:rgmii_txc_o} {PAP_IO_LOC} {G16}
+define_attribute {p:rgmii_txc_o} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_txc_o} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_txc_o} {PAP_IO_DRIVE} {8}
+define_attribute {p:rgmii_txc_o} {PAP_IO_NONE} {TRUE}
+define_attribute {p:rgmii_txc_o} {PAP_IO_SLEW} {SLOW}
+
+# ethernet_test.fdc: rgmii_txd[0]
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_LOC} {E20}
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_DRIVE} {8}
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:rgmii_txd_o[0]} {PAP_IO_SLEW} {SLOW}
+
+# ethernet_test.fdc: rgmii_txd[1]
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_LOC} {B21}
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_DRIVE} {8}
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:rgmii_txd_o[1]} {PAP_IO_SLEW} {SLOW}
+
+# ethernet_test.fdc: rgmii_txd[2]
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_LOC} {C21}
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_DRIVE} {8}
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:rgmii_txd_o[2]} {PAP_IO_SLEW} {SLOW}
+
+# ethernet_test.fdc: rgmii_txd[3]
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_LOC} {D21}
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_DRIVE} {8}
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:rgmii_txd_o[3]} {PAP_IO_SLEW} {SLOW}
+
+# ethernet_test.fdc: rgmii_tx_ctl
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_LOC} {D20}
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_DRIVE} {8}
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_NONE} {TRUE}
+define_attribute {p:rgmii_tx_ctl_o} {PAP_IO_SLEW} {SLOW}
+
+# mini-base管脚映射.xlsx sheet1 行101 PHY0_MDC: eth_mdc_o
+define_attribute {p:eth_mdc_o} {PAP_IO_LOC} {A25}
+define_attribute {p:eth_mdc_o} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:eth_mdc_o} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:eth_mdc_o} {PAP_IO_DIRECTION} {OUTPUT}
+
+# mini-base管脚映射.xlsx sheet1 行102 PHY0_MDIO: eth_mdio_o
+define_attribute {p:eth_mdio_o} {PAP_IO_LOC} {E21}
+define_attribute {p:eth_mdio_o} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:eth_mdio_o} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:eth_mdio_o} {PAP_IO_DIRECTION} {INOUT}
+
+# ethernet_test.fdc: phy_rstn
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_DIRECTION} {OUTPUT}
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_LOC} {G25}
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_STANDARD} {LVCMOS33}
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_DRIVE} {8}
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_NONE} {TRUE}
+define_attribute {p:eth_phy_rst_n_o} {PAP_IO_SLEW} {SLOW}
