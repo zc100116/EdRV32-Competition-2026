@@ -15,14 +15,15 @@
 3. **功能**：
    - 本轮的 RTL 改动没有做仿真回归（用户决定上板验证），所以三个工程都按卡 22 的上板项目完整重测一遍；
    - 新增 S3 “LAYERS” 图层画面（DS-20、RN-30）。
-4. **B3V 网口**：卡 22 中 B3V 网口不通，本卡执行网口诊断（5E）。
+4. **B3V 网口**：卡 22 中 B3V 网口诊断已经连通（原因是工具的本机地址选到了 Wi-Fi）。本卡确认 demo_vision 的网口视频，不再做延迟组合诊断。
+5. **摄像头 30 fps**：卡 22 实测摄像头只有 15.7 fps，原因是 OV5640 寄存器表。本卡的 `demo_vision.bin`、`demo_npu.bin` 改用 720p30 表（b3 28b4386d，按寄存器计算 PCLK 84 MHz、29.998 fps；视场改为 16:9 中央裁剪，上下比以前窄）。
 
 三个工程可以并行实现，上板逐个进行。B3VN 不在本卡，布局规划之后另出卡。
 
 ## 2. 输入
 
 - **代码**：`origin/zc100116/b3`（包含本卡的提交）。从这里拉出 `win/20261031-23-b3-converged`，在 `result.md` 中记录完整哈希。
-- **本卡 `src/`**：Linux 端从 b3 `506f07e4` 构建（之后的提交只改 RTL，不影响程序），GCC 15.2.0。程序本身 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized` 警告。
+- **本卡 `src/`**：Linux 端从 b3 `506f07e4` 构建（之后的提交只改 RTL，不影响程序）；`demo_vision.bin`、`demo_npu.bin` 从 b3 `28b4386d` 重新构建（OV5640 720p30），GCC 15.2.0。程序本身 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized` 警告。
 
 | 文件 | 用途 |
 |---|---|
@@ -38,6 +39,7 @@
 
 - **NPU 模型**：`tasks/win/20261029-09-b3-software/src/npu/`。
 - **NES ROM**：同卡 18、21，ROM 不进仓库。
+- **调试工具**：上板前 `git pull` 并重启调试工具。虚拟输入面板已更新（b3 3900e833）：面板打开即可用键盘，方向键与 WASD 等价，按钮标出对应按键，按下时按钮变深蓝。
 
 ## 3. 环境
 
@@ -93,7 +95,10 @@
    - 画面 5 的串口行 `LAYERS 5 LAYER claimed=… unclaimed=…` 原文照记；预期 claimed 非零、unclaimed 为 0。
 4. **NES**：同卡 21 的 5R 第 4 步，演示 ROM 和两个 SMB ROM。
 5. **网口与 EDTM**：S3 benchmark 期间导出 `edtm_s3.csv`，NES 运行约 30 秒导出 `edtm_nes.csv`。
-6. **虚拟输入**：同卡 22 5R 第 5 步。
+6. **虚拟输入**：同卡 22 5R 第 5 步。另外检查：
+   - 打开“输入”面板后不点击面板，直接按 WASD 和方向键，S3 和 NES 都有响应；
+   - 键盘按下时对应按钮变深蓝，松开恢复；鼠标点击按钮也一样；
+   - 在设备地址框里打字时，不会触发按键。
 
 ### 5N：B3N
 
@@ -104,19 +109,19 @@
 
 ### 5V：B3V
 
-同卡 22 第 5V 节：
+同卡 22 第 5V 节，另加摄像头帧率检查：
+- **帧率**：程序运行后，隔约 10 秒发两次 `status`，记录两次的 `VIN camera0 frames`、`VIN camera1 frames` 和时间，算出每秒增量，应约为 30（卡 22 为 15.7）。同时记录调试工具视频窗口显示的帧率，输出分别设为 ETH 和 both；
+- 画面没有撕裂、错位，`VIN CH0 overflow` 保持 0；
 - `demo_vision.bin` 按 `sw/apps/demo/README.md` 的检查清单逐行执行；
 - S2 各模式各保持约 10 秒，逐项拍照；
 - 导出 `edtm_vision.csv`，并记下各模式的起止时间。
 
-### 5E：B3V 网口诊断
+### 5E：B3V 网口视频
 
-同卡 22 第 5E 节：
-- 先 `git pull` 并重启调试工具；
-- 串口烧录 `src/eth_diag.bin`，保存全部串口输出（MDIO 扫描、BMCR/BMSR/PHYSR、RGMII 延迟位）；
-- PC 运行 `py tools/board/eth_probe.py --local-ip 192.168.1.2`，同时做 ping、`arp -a`；
-- 串口按 `d` 依次试 4 种延迟组合，每种记录 link/speed、PERF0、PERF3、PERF5、PEER、PC 是否收到 `EDRV32 DIAG` 广播；
-- 如有 Wireshark，抓有线网卡的包并截图。
+卡 22 的网口诊断已经连通，本卡不再逐组试延迟。demo_vision 运行时：
+- 调试工具填本机地址 192.168.1.2，建立网口连接；
+- 输出设为 ETH，记录工具显示的视频帧率、板端 `Video skips`，以及工具的丢失计数；
+- 不通时再按卡 22 第 5E 节用 `src/eth_diag.bin` 诊断。
 
 ## 6. 产物
 
@@ -148,7 +153,7 @@
 |---|---|
 | B3R | RND 29/29 PASS；benchmark 跑完；RN-17 除“opa 容器”外 PASS；LAYERS 5 个画面与串口预期一致，画面 5 claimed 非零、unclaimed 为 0；NES 演示 ROM 正常；虚拟输入可用 |
 | B3N | 39/39 PASS；单张识别比对一致；连续识别取得 fps |
-| B3V | 检查清单逐行通过；网口诊断 4 种组合都有记录 |
+| B3V | 检查清单逐行通过；摄像头约 30 fps；网口视频可见，并记录工具显示的帧率 |
 
 - BIOS：三个工程的串口和网口烧录都自动运行（B3V 网口不通时如实记录）。
 - 所有数字取自报告和日志原文，找不到的写“未取得”。
@@ -203,7 +208,7 @@ recovery/removal 最差裕量：
 
 ## B3V
 - 检查清单逐行结果；各模式起止时间；EDTM 文件
-- 网口诊断：每种延迟组合一行（组合、link/speed、PERF0、PERF3、PERF5、PEER、PC 是否收到广播）
+- 摄像头帧率：两次 status 的 camera0/1 frames 与时间、每秒增量；工具显示的视频帧率（ETH / both）；Video skips；丢失计数
 
 ## 问题与偏离
 ```
