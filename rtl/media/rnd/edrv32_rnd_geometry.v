@@ -203,7 +203,8 @@ module edrv32_rnd_geometry (
                     {{12{circle_dx_r[item][23]}}, circle_dx_r[item]};
         assign step_result_w = step_base_w + step_delta_w;
         assign step_dx_w = circle_dx_r[item] + 24'sd128;
-        assign step_dy_w = (state_r == S_READY ? circle_row_dy_r[item] : circle_dy_r[item]) + 24'sd128;
+        assign step_dy_w =
+            (state_r == S_READY ? circle_row_dy_r[item] : circle_dy_r[item]) + 24'sd128;
         assign sample_delta_w = group_start_w ? (aa_w ? subrow_delta_w : 36'sd0) :
             {{12{circle_sample_dy_r[item][23]}}, circle_sample_dy_r[item]};
         always @(posedge clk_i) begin
