@@ -1,6 +1,6 @@
 # B3N SRAM 连线冒烟程序
 
-T-BN1 的仿真程序，配套 `verif/soc/board_npu/`。读 NPU ID、验证一次已移除 VIN
+T-BN1 的仿真程序，配套 `verif/soc/board_npu/`。读 NPU/ETH ID、验证一次已移除 VIN
 槽的 load access fault，启动 DDR 后门预加载的单条 CONV，经 PLIC13 收到 DONE
 后比较 64 个输出字节。寄存器访问使用生成的寄存器头，DDR 读取使用非缓存别名。
 

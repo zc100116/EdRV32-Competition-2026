@@ -1,5 +1,7 @@
 # RND 上板自检
 
+B3R 顶层包含 CPU/DDR/RND/DISP/ETH；本程序使用 RND/DISP，ETH 连通检查由独立软件任务提供。
+
 本程序在 DDR 应用区运行（`MEMORY=ddr_app`，CPU 入口 0x90000000），
 用实际 RND 驱动绘制，再把 RGB565 L0 和非预乘 ARGB8888 L1 交给 DISP。
 Linux 验收为编译和主机测试；没有运行 SoC 仿真，也没有宣称已通过上板。

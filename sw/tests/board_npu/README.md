@@ -1,5 +1,7 @@
 # board_npu：B3N 上板功能测试
 
+B3N 顶层包含 CPU/DDR/NPU/ETH；本程序检查 NPU，ETH 连通检查由独立软件任务提供。
+
 依据 `docs/design/2026-10-30-board-npu-test.md` 第 4 节、NPU v0.5 第 2–5、7 节，
 运行 A 寄存器检查、15 个 B 小用例、C YOLOv8n 整网和 20 个 D 连续整网，共 39 项。
 程序使用 `sw/bsp/ld/ddr.ld`，从 `0x80000000` 执行；由 BIOS 的 `2=Load`

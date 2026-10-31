@@ -1,6 +1,6 @@
 # File: program.mk
 # Spec: Task B3-6; CLAUDE.md 9.2.
-# Description: SRAM application for the render-only board connectivity test.
+# Description: SRAM application for the RND/DISP/ETH board connectivity test.
 # Clock domain: none (build tool).
 ARCH := rv32im_zicsr_zifencei
 MEMORY := sram

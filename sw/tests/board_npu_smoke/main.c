@@ -1,6 +1,6 @@
 /* File: main.c
  * Spec: Task T-BN1; edrv32-soc-spec 6.1/7.1/7.4; npu-spec 3/4.
- * Description: Read NPU ID and removed VIN slot, start one preloaded CONV,
+ * Description: Read NPU/ETH IDs and removed VIN slot, start one preloaded CONV,
  *              service PLIC13 DONE and compare every output byte via uncached DDR.
  * Clock domain: clk_sys (CPU), clk_mem/clk_npu (MMIO and DDR).
  */
@@ -9,6 +9,7 @@
 #include "plic.h"
 #include "sysctrl.h"
 #include "uart.h"
+#include "regs/eth_regs.h"
 #include "regs/vin_regs.h"
 #include "regs/npu_regs.h"
 #include "npu_case.h"
@@ -72,6 +73,9 @@ static void __attribute__((interrupt("machine"), aligned(4))) trap_handler(void)
 
 int main(void)
 {
+    if (mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_ID_OFFSET) != EDRV32_ETH_ID_RESET) {
+        finish(8u);
+    }
     uintptr_t handler = (uintptr_t)trap_handler;
     __asm__ volatile ("csrw mtvec, %0" :: "r"(handler) : "memory");
     uint32_t id = mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_ID_OFFSET);

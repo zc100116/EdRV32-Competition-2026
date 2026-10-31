@@ -1,5 +1,7 @@
 # nofrendo DDR 移植（B3-4b）
 
+B3R 顶层包含 CPU/DDR/RND/DISP/ETH；NES 使用 RND/DISP，ETH 连通检查由独立软件任务提供。
+
 实现依据：`docs/design/2026-10-29-rnd-disp.md` 5.2。
 已实现 CPU/PPU 软件模拟、I8 帧接口、主机 PPM、UART/KEY 输入、板上计时，
 以及 RND I8 BLIT → DISP L0 双缓冲显示；模拟不限速，无声音。

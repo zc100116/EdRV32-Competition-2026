@@ -1,6 +1,6 @@
 /* File: main.c
  * Spec: edrv32-soc-spec 6.1, 7.1, 7.4; rnd-spec 2.5/2.6 FILL, 4; Task B3-6.
- * Description: Check RND/DISP IDs, render 64x4 ARGB8888 pixels through DDR,
+ * Description: Check RND/DISP/ETH IDs, render 64x4 ARGB8888 pixels through DDR,
  *              service PLIC source 11 and compare all pixels via the uncached alias.
  * Clock domain: clk_sys (CPU), clk_mem (MMIO and DDR).
  */
@@ -9,6 +9,7 @@
 #include "plic.h"
 #include "sysctrl.h"
 #include "uart.h"
+#include "regs/eth_regs.h"
 #include "regs/disp_regs.h"
 #include "regs/rnd_regs.h"
 
@@ -52,6 +53,9 @@ static void __attribute__((interrupt("machine"), aligned(4))) rnd_handler(void)
 
 int main(void)
 {
+    if (mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_ID_OFFSET) != EDRV32_ETH_ID_RESET) {
+        finish(8u);
+    }
     if (mmio_read32(EDRV32_RND_BASE + EDRV32_RND_ID_OFFSET) != EDRV32_RND_ID_RESET) {
         finish(1u);
     }
