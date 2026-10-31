@@ -138,7 +138,7 @@ _Static_assert(EDRV32_ETH_WIN_BASE_OFFSET(0) == 0x140, "ETH WIN0_BASE offset");
 _Static_assert(EDRV32_ETH_WIN_BASE_OFFSET(3) == 0x170, "ETH WIN3_BASE offset");
 _Static_assert(EDRV32_ETH_WIN_BASE_VALUE_MASK == 0xFFFFFFE0, "ETH window base mask");
 _Static_assert(EDRV32_ETH_WIN_SIZE_OFFSET(3) == 0x174, "ETH WIN3_SIZE offset");
-_Static_assert(EDRV32_ETH_WIN_SIZE_VALUE_WIDTH == 28, "ETH window size width");
+_Static_assert(EDRV32_ETH_WIN_SIZE_VALUE_WIDTH == 32, "ETH window size width");
 _Static_assert(EDRV32_ETH_MDIO_CMD_OFFSET == 0x180, "ETH MDIO_CMD offset");
 _Static_assert(EDRV32_ETH_MDIO_CMD_PHY_POS == 5, "ETH PHY position");
 _Static_assert(EDRV32_ETH_MDIO_CMD_WDATA_MASK == 0xFFFF0000, "ETH WDATA mask");
