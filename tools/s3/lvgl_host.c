@@ -114,3 +114,21 @@ void s3_host_menu(void)
     lv_label_set_text(label, "S3 host lifecycle check");
     lv_obj_center(label);
 }
+
+/* RN-17's ARGB mask check uses the locked native renderer before composition. */
+#include "src/draw/lv_draw_private.h"
+#include "src/draw/sw/lv_draw_sw.h"
+void s3_host_mask_reference(uint32_t *pixels, int32_t width, int32_t height,
+                             int32_t x0, int32_t y0, int32_t x1, int32_t y1,
+                             int32_t radius, bool keep_outside)
+{
+    lv_draw_buf_t buffer;
+    lv_draw_buf_init(&buffer, (uint32_t)width, (uint32_t)height, LV_COLOR_FORMAT_ARGB8888,
+                     (uint32_t)width * 4u, pixels, (uint32_t)(width * height) * 4u);
+    lv_layer_t layer = { .draw_buf = &buffer, .color_format = LV_COLOR_FORMAT_ARGB8888,
+                         .buf_area = { 0, 0, width - 1, height - 1 } };
+    lv_draw_task_t task = { .target_layer = &layer, .clip_area = layer.buf_area };
+    lv_draw_mask_rect_dsc_t dsc = { .area = { x0, y0, x1, y1 }, .radius = radius,
+                                  .keep_outside = keep_outside };
+    lv_draw_sw_mask_rect(&task, &dsc);
+}

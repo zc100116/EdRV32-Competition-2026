@@ -1,5 +1,5 @@
 /* File: rnd.h
- * Spec: rnd-spec v0.2 2.1–2.6, 4–6; SoC 7.3–7.4.
+ * Spec: rnd-spec v0.3 2.1–2.6, 4–6; SoC 7.3–7.4.
  * Description: DDR command encoders and one in-flight rendering batch.
  * Clock domain: clk_sys CPU; RND registers in clk_mem.
  */
@@ -17,7 +17,12 @@ enum rnd_format {
 enum rnd_flags {
     RND_GRAD = 1, RND_GRAD_V = 2, RND_HFLIP = 1, RND_VFLIP = 2,
     RND_COLORKEY = 4, RND_RECOLOR = 8, RND_NORMAL = 0,
-    RND_ADD = 16, RND_SUBTRACT = 32, RND_MULTIPLY = 48, RND_TILE16 = 1
+    RND_ADD = 16, RND_SUBTRACT = 32, RND_MULTIPLY = 48, RND_TILE16 = 1,
+    RND_AA = 1, RND_CAP_START = 2, RND_CAP_END = 4, RND_LARGE_ARC = 8,
+    RND_FULL_CIRCLE = 16, RND_INNER_EMPTY = 32,
+    RND_EDGE0_INCL = 2, RND_EDGE1_INCL = 4, RND_EDGE2_INCL = 8,
+    RND_TRI_GRAD = 64, RND_TRI_GRAD_V = 128,
+    RND_KEEP_OUTSIDE = 1, RND_CUTOUT = 1, RND_ROUND_CLIP = 128, RND_BILINEAR = 1
 };
 struct rnd_command { uint32_t word[16]; };
 struct rnd_rect { int16_t x0, y0, x1, y1; };
@@ -44,6 +49,20 @@ struct rnd_blit {
     uint32_t scale_y;
     uint32_t palette;
     uint16_t key;
+    uint32_t rc_color;
+    uint8_t rc_opa;
+    uint32_t round_parameters;        /* 64-byte block when ROUND_CLIP is set. */
+    uint16_t clip_radius;
+};
+struct rnd_affine {
+    uint32_t base;
+    uint16_t stride;
+    uint16_t width;
+    uint16_t height;
+    uint32_t parameters;              /* 64-byte inverse-map/image-area block. */
+    uint32_t palette;
+    uint16_t key;
+    uint16_t clip_radius;
     uint32_t rc_color;
     uint8_t rc_opa;
 };
@@ -76,6 +95,19 @@ void rnd_blur(struct rnd_command *out, const struct rnd_common *c,
               uint8_t radius, uint32_t temp_base);
 void rnd_tilemap(struct rnd_command *out, const struct rnd_common *c,
                  const struct rnd_tilemap *tilemap);
+/* Parameters are DDR blocks aligned to 64 bytes. Geometry reads 128 bytes,
+ * affine/round BLIT read 64 bytes. Include CPU-written blocks in batch.sources.
+ */
+void rnd_triangle(struct rnd_command *out, const struct rnd_common *c, uint32_t parameters);
+void rnd_line(struct rnd_command *out, const struct rnd_common *c, uint32_t parameters);
+void rnd_arc(struct rnd_command *out, const struct rnd_common *c, uint32_t parameters);
+void rnd_mask_rect(struct rnd_command *out, const struct rnd_common *c,
+                   const struct rnd_rect *mask, uint16_t radius);
+void rnd_affine_blit(struct rnd_command *out, const struct rnd_common *c,
+                     const struct rnd_affine *affine);
+void rnd_box_shadow_cutout(struct rnd_command *out, const struct rnd_common *c,
+                           uint16_t radius, uint8_t blur, uint32_t temp_base,
+                           const struct rnd_rect *background, uint16_t background_radius);
 /* CPU address must be in either generated DDR alias; no validation is performed. */
 uint32_t rnd_physical(const void *cpu_address);
 struct rnd_range { const void *address; uint32_t bytes; };

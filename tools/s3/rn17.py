@@ -85,6 +85,51 @@ def ppm(path, pixels):
     path.write_bytes(b"P6\n1280 720\n255\n" + image)
 
 
+
+def mask_alpha_check(lib):
+    width, height = 33, 23
+    count = width * height
+    lib.s3_host_mask_reference.argtypes = [C.POINTER(C.c_uint32), *([C.c_int32] * 7), C.c_bool]
+    cases = 0
+    worst = 0
+    for left in (-2, 3):
+        mask = (left, 2, 29, 20)
+        for radius in (0, 1, 7, 30):
+            opaque = (C.c_uint32 * count)(*([0xff113355] * count))
+            lib.s3_host_mask_reference(opaque, width, height, *mask, radius, False)
+            sw_cov = [value >> 24 for value in opaque]
+            hw_cov = [REF.rectangle_coverage(mask, radius, x, y)
+                      for y in range(height) for x in range(width)]
+            edge = set()
+            for y in range(height):
+                for x in range(width):
+                    index = y * width + x
+                    for cov in (sw_cov, hw_cov):
+                        if 0 < cov[index] < 255 or any(
+                                bool(cov[index]) != bool(cov[ny * width + nx])
+                                for ny in range(max(0, y - 1), min(height, y + 2))
+                                for nx in range(max(0, x - 1), min(width, x + 2))):
+                            edge.add(index)
+            for keep in (False, True):
+                initial = [((0, 1, 128, 255)[i % 4] << 24) | (i * 7919 & 0xffffff)
+                           for i in range(count)]
+                native = (C.c_uint32 * count)(*initial)
+                lib.s3_host_mask_reference(native, width, height, *mask, radius, keep)
+                memory = bytearray(struct.pack('<' + 'I' * count, *initial))
+                command = REF.Command(12, dst_fmt=1, dst_base=0, dst_stride=width * 4,
+                    clip=(0, 0, width - 1, height - 1), rect=(0, 0, width - 1, height - 1),
+                    flags=int(keep), args=(radius, REF.xy(*mask[:2]), REF.xy(*mask[2:]), 0, 0, 0, 0, 0))
+                REF.execute(memory, [command])
+                actual = struct.unpack('<' + 'I' * count, memory)
+                maximum = max((abs((a >> 24) - (b >> 24))
+                               for i, (a, b) in enumerate(zip(actual, native)) if i not in edge),
+                              default=0)
+                assert maximum <= 1, (mask, radius, keep, maximum)
+                worst = max(worst, maximum)
+                cases += 1
+    print(f"PASS MASK_RECT native LVGL alpha: {cases} cases, outside-band max={worst}/255")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--no-build", action="store_true")
@@ -142,6 +187,7 @@ def main():
     lib.s3_host_install.argtypes = [callback_type]
     lib.s3_host_install(callback)
     lib.s3_lvgl_init()
+    mask_alpha_check(lib)
     lib.s3_lvgl_set_rnd(False)
     lib.s3_lvgl_input(0)
     rows = ["frame|full max LSB|edge max LSB|>1 LSB pixels|>1 LSB %|RND/SW tasks|bins|result",
@@ -170,14 +216,15 @@ def main():
 
     now = 0
     lib.s3_lvgl_start_widgets()
-    for now in (16, 176, 656):
+    for now in (16, 176, 656, 1136):
         lib.s3_host_time(now)
         lib.s3_lvgl_step()
         compare(f"widgets-{now}")
     lib.s3_lvgl_stop_demo()
     lib.s3_lvgl_start_benchmark()
     selected = {0: "empty", 2: "rectangle", 4: "rgb-images", 5: "argb-images",
-                6: "rotated-images", 7: "labels", 10: "containers", 13: "opa-layer"}
+                6: "rotated-images", 7: "labels", 9: "arcs", 10: "containers",
+                12: "opa-containers", 13: "opa-layer"}
     # Actual lv_demo_benchmark scene timer advances its own scene list. The
     # runner does not synthesize or replace any scene's objects/draw tasks.
     for scene in range(14):
@@ -186,12 +233,19 @@ def main():
         lib.s3_lvgl_step()
         if scene in selected:
             compare(f"benchmark-{scene:02d}-{selected[scene]}")
+            if scene == 6:
+                now += 160
+                lib.s3_host_time(now)
+                lib.s3_lvgl_step()
+                compare("benchmark-06-rotated-images-later")
     # Finish the original scrolling/widgets scenes and exercise the real end
     # callback. These synthetic host-clock FPS values are not board measurements.
-    for duration in (3032, 5032, 20032):
+    for index, duration in enumerate((3032, 5032, 20032)):
         now += duration
         lib.s3_host_time(now)
         lib.s3_lvgl_step()
+        if index == 1:
+            compare("benchmark-15-widgets")
     for repeat in range(2):
         lib.s3_lvgl_stop_demo()
         lib.s3_host_menu()
