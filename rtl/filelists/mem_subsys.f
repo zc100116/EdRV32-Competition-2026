@@ -8,6 +8,4 @@
 ../mem/edrv32_mem_xbar_sched.v
 ../mem/edrv32_mem_xbar_rbuf.v
 ../mem/edrv32_mem_xbar.v
-../mem/edrv32_mem_perf_mon.v
-../mem/edrv32_mem_p6_arb.v
 ../soc/edrv32_mem_subsys.v

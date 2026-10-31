@@ -13,7 +13,7 @@ python3 tools/gen/regs.py
 输入文件按文件名排序，文件内按描述顺序输出；重复执行得到相同内容，不含时间戳。
 JSON 和生成的 C 头文件一起入库，修改描述后重新生成，不手改头文件。
 
-覆盖 VIN、PIX、GEO、DISP、NPU、ETH、MEM_XBAR、PERF_MON 的公共与私有寄存器；
+覆盖 VIN、PIX、GEO、DISP、NPU、ETH、MEM_XBAR 的公共与私有寄存器；
 另含 NPU 描述符、ETH 发送描述符和 ETH 应用头的字段表。
 规格依据为各模块第 4 节、SoC 第 7.1 节，描述符和应用头另见 NPU 4.1、ETH 2.6/2.3。
 MEM_XBAR 端口复位值另引用 SoC 6.4.5。

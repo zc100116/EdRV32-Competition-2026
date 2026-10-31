@@ -1,7 +1,7 @@
 // File: edrv32_mem_subsys.v
 // Spec: mem-subsys-spec 1, 3.1, 5, 6; edrv32-soc-spec 4.2.
-// Description: Connect the DDR gateway, seven-port crossbar and PERF_MON.
-//              ETH and PERF_MON share P6 through transaction arbitration.
+// Description: Connect the DDR gateway and seven-port crossbar.
+//              ETH exclusively owns P6 with its one-bit local ID.
 // Clock domains: clk_sys and clk_mem; resets are supplied by reset_ctrl.
 module edrv32_mem_subsys (
     // Clocks.
@@ -166,7 +166,7 @@ module edrv32_mem_subsys (
     output wire p5_rvalid_o,
     input wire p5_rready_i,
 
-    // ETH shares crossbar P6 with PERF_MON.
+    // ETH exclusively owns crossbar P6.
     input wire eth_awid_i,
     input wire [31:0] eth_awaddr_i,
     input wire [3:0] eth_awlen_i,
@@ -229,17 +229,6 @@ module edrv32_mem_subsys (
     output wire [31:0] xbar_apb_prdata_o,
     output wire xbar_apb_pslverr_o,
 
-    // PERF_MON media APB slot 9.
-    input wire [11:0] pmon_apb_paddr_i,
-    input wire pmon_apb_psel_i,
-    input wire pmon_apb_penable_i,
-    input wire pmon_apb_pwrite_i,
-    input wire [31:0] pmon_apb_pwdata_i,
-    input wire [3:0] pmon_apb_pstrb_i,
-    output wire pmon_apb_pready_o,
-    output wire [31:0] pmon_apb_prdata_o,
-    output wire pmon_apb_pslverr_o,
-
     // Interrupt.
     output wire irq_mem_xbar_o
 );
@@ -270,60 +259,6 @@ module edrv32_mem_subsys (
     wire p2_rlast_w;
     wire p2_rvalid_w;
     wire p2_rready_w;
-
-    // p6 internal AXI256 connections.
-    wire p6_awid_w;
-    wire [31:0] p6_awaddr_w;
-    wire [3:0] p6_awlen_w;
-    wire p6_awvalid_w;
-    wire p6_awready_w;
-    wire [255:0] p6_wdata_w;
-    wire [31:0] p6_wstrb_w;
-    wire p6_wlast_w;
-    wire p6_wvalid_w;
-    wire p6_wready_w;
-    wire p6_bid_w;
-    wire [1:0] p6_bresp_w;
-    wire p6_bvalid_w;
-    wire p6_bready_w;
-    wire p6_arid_w;
-    wire [31:0] p6_araddr_w;
-    wire [3:0] p6_arlen_w;
-    wire p6_arvalid_w;
-    wire p6_arready_w;
-    wire p6_rid_w;
-    wire [255:0] p6_rdata_w;
-    wire [1:0] p6_rresp_w;
-    wire p6_rlast_w;
-    wire p6_rvalid_w;
-    wire p6_rready_w;
-
-    // pmon internal AXI256 connections.
-    wire pmon_awid_w;
-    wire [31:0] pmon_awaddr_w;
-    wire [3:0] pmon_awlen_w;
-    wire pmon_awvalid_w;
-    wire pmon_awready_w;
-    wire [255:0] pmon_wdata_w;
-    wire [31:0] pmon_wstrb_w;
-    wire pmon_wlast_w;
-    wire pmon_wvalid_w;
-    wire pmon_wready_w;
-    wire pmon_bid_w;
-    wire [1:0] pmon_bresp_w;
-    wire pmon_bvalid_w;
-    wire pmon_bready_w;
-    wire pmon_arid_w;
-    wire [31:0] pmon_araddr_w;
-    wire [3:0] pmon_arlen_w;
-    wire pmon_arvalid_w;
-    wire pmon_arready_w;
-    wire pmon_rid_w;
-    wire [255:0] pmon_rdata_w;
-    wire [1:0] pmon_rresp_w;
-    wire pmon_rlast_w;
-    wire pmon_rvalid_w;
-    wire pmon_rready_w;
 
     edrv32_mem_ddr_gw u_gw (
         // Clocks and resets.
@@ -546,32 +481,32 @@ module edrv32_mem_subsys (
         .p5_rvalid_o(p5_rvalid_o),
         .p5_rready_i(p5_rready_i),
 
-        // Shared crossbar P6.
-        .p6_awid_i(p6_awid_w),
-        .p6_awaddr_i(p6_awaddr_w),
-        .p6_awlen_i(p6_awlen_w),
-        .p6_awvalid_i(p6_awvalid_w),
-        .p6_awready_o(p6_awready_w),
-        .p6_wdata_i(p6_wdata_w),
-        .p6_wstrb_i(p6_wstrb_w),
-        .p6_wlast_i(p6_wlast_w),
-        .p6_wvalid_i(p6_wvalid_w),
-        .p6_wready_o(p6_wready_w),
-        .p6_bid_o(p6_bid_w),
-        .p6_bresp_o(p6_bresp_w),
-        .p6_bvalid_o(p6_bvalid_w),
-        .p6_bready_i(p6_bready_w),
-        .p6_arid_i(p6_arid_w),
-        .p6_araddr_i(p6_araddr_w),
-        .p6_arlen_i(p6_arlen_w),
-        .p6_arvalid_i(p6_arvalid_w),
-        .p6_arready_o(p6_arready_w),
-        .p6_rid_o(p6_rid_w),
-        .p6_rdata_o(p6_rdata_w),
-        .p6_rresp_o(p6_rresp_w),
-        .p6_rlast_o(p6_rlast_w),
-        .p6_rvalid_o(p6_rvalid_w),
-        .p6_rready_i(p6_rready_w),
+        // ETH crossbar P6.
+        .p6_awid_i(eth_awid_i),
+        .p6_awaddr_i(eth_awaddr_i),
+        .p6_awlen_i(eth_awlen_i),
+        .p6_awvalid_i(eth_awvalid_i),
+        .p6_awready_o(eth_awready_o),
+        .p6_wdata_i(eth_wdata_i),
+        .p6_wstrb_i(eth_wstrb_i),
+        .p6_wlast_i(eth_wlast_i),
+        .p6_wvalid_i(eth_wvalid_i),
+        .p6_wready_o(eth_wready_o),
+        .p6_bid_o(eth_bid_o),
+        .p6_bresp_o(eth_bresp_o),
+        .p6_bvalid_o(eth_bvalid_o),
+        .p6_bready_i(eth_bready_i),
+        .p6_arid_i(eth_arid_i),
+        .p6_araddr_i(eth_araddr_i),
+        .p6_arlen_i(eth_arlen_i),
+        .p6_arvalid_i(eth_arvalid_i),
+        .p6_arready_o(eth_arready_o),
+        .p6_rid_o(eth_rid_o),
+        .p6_rdata_o(eth_rdata_o),
+        .p6_rresp_o(eth_rresp_o),
+        .p6_rlast_o(eth_rlast_o),
+        .p6_rvalid_o(eth_rvalid_o),
+        .p6_rready_i(eth_rready_i),
 
         // DDR controller AXI256 port without response backpressure.
         .ddr_awid_o(ddr_awid_o),
@@ -613,134 +548,4 @@ module edrv32_mem_subsys (
         .irq_o(irq_mem_xbar_o)
     );
 
-    edrv32_mem_perf_mon u_perf_mon (
-        // Clock and reset.
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-
-        // PERF_MON AXI256 source to the P6 arbiter.
-        .axi_awid_o(pmon_awid_w),
-        .axi_awaddr_o(pmon_awaddr_w),
-        .axi_awlen_o(pmon_awlen_w),
-        .axi_awvalid_o(pmon_awvalid_w),
-        .axi_awready_i(pmon_awready_w),
-        .axi_wdata_o(pmon_wdata_w),
-        .axi_wstrb_o(pmon_wstrb_w),
-        .axi_wlast_o(pmon_wlast_w),
-        .axi_wvalid_o(pmon_wvalid_w),
-        .axi_wready_i(pmon_wready_w),
-        .axi_bid_i(pmon_bid_w),
-        .axi_bresp_i(pmon_bresp_w),
-        .axi_bvalid_i(pmon_bvalid_w),
-        .axi_bready_o(pmon_bready_w),
-        .axi_arid_o(pmon_arid_w),
-        .axi_araddr_o(pmon_araddr_w),
-        .axi_arlen_o(pmon_arlen_w),
-        .axi_arvalid_o(pmon_arvalid_w),
-        .axi_arready_i(pmon_arready_w),
-        .axi_rid_i(pmon_rid_w),
-        .axi_rdata_i(pmon_rdata_w),
-        .axi_rresp_i(pmon_rresp_w),
-        .axi_rlast_i(pmon_rlast_w),
-        .axi_rvalid_i(pmon_rvalid_w),
-        .axi_rready_o(pmon_rready_w),
-
-        // Media APB control registers.
-        .apb_paddr_i(pmon_apb_paddr_i),
-        .apb_psel_i(pmon_apb_psel_i),
-        .apb_penable_i(pmon_apb_penable_i),
-        .apb_pwrite_i(pmon_apb_pwrite_i),
-        .apb_pwdata_i(pmon_apb_pwdata_i),
-        .apb_pstrb_i(pmon_apb_pstrb_i),
-        .apb_pready_o(pmon_apb_pready_o),
-        .apb_prdata_o(pmon_apb_prdata_o),
-        .apb_pslverr_o(pmon_apb_pslverr_o)
-    );
-
-    edrv32_mem_p6_arb u_p6_arb (
-        // Clock and reset.
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-
-        // PERF_MON AXI256 source.
-        .pmon_awid_i(pmon_awid_w),
-        .pmon_awaddr_i(pmon_awaddr_w),
-        .pmon_awlen_i(pmon_awlen_w),
-        .pmon_awvalid_i(pmon_awvalid_w),
-        .pmon_awready_o(pmon_awready_w),
-        .pmon_wdata_i(pmon_wdata_w),
-        .pmon_wstrb_i(pmon_wstrb_w),
-        .pmon_wlast_i(pmon_wlast_w),
-        .pmon_wvalid_i(pmon_wvalid_w),
-        .pmon_wready_o(pmon_wready_w),
-        .pmon_bid_o(pmon_bid_w),
-        .pmon_bresp_o(pmon_bresp_w),
-        .pmon_bvalid_o(pmon_bvalid_w),
-        .pmon_bready_i(pmon_bready_w),
-        .pmon_arid_i(pmon_arid_w),
-        .pmon_araddr_i(pmon_araddr_w),
-        .pmon_arlen_i(pmon_arlen_w),
-        .pmon_arvalid_i(pmon_arvalid_w),
-        .pmon_arready_o(pmon_arready_w),
-        .pmon_rid_o(pmon_rid_w),
-        .pmon_rdata_o(pmon_rdata_w),
-        .pmon_rresp_o(pmon_rresp_w),
-        .pmon_rlast_o(pmon_rlast_w),
-        .pmon_rvalid_o(pmon_rvalid_w),
-        .pmon_rready_i(pmon_rready_w),
-
-        // ETH shares crossbar P6 with PERF_MON.
-        .eth_awid_i(eth_awid_i),
-        .eth_awaddr_i(eth_awaddr_i),
-        .eth_awlen_i(eth_awlen_i),
-        .eth_awvalid_i(eth_awvalid_i),
-        .eth_awready_o(eth_awready_o),
-        .eth_wdata_i(eth_wdata_i),
-        .eth_wstrb_i(eth_wstrb_i),
-        .eth_wlast_i(eth_wlast_i),
-        .eth_wvalid_i(eth_wvalid_i),
-        .eth_wready_o(eth_wready_o),
-        .eth_bid_o(eth_bid_o),
-        .eth_bresp_o(eth_bresp_o),
-        .eth_bvalid_o(eth_bvalid_o),
-        .eth_bready_i(eth_bready_i),
-        .eth_arid_i(eth_arid_i),
-        .eth_araddr_i(eth_araddr_i),
-        .eth_arlen_i(eth_arlen_i),
-        .eth_arvalid_i(eth_arvalid_i),
-        .eth_arready_o(eth_arready_o),
-        .eth_rid_o(eth_rid_o),
-        .eth_rdata_o(eth_rdata_o),
-        .eth_rresp_o(eth_rresp_o),
-        .eth_rlast_o(eth_rlast_o),
-        .eth_rvalid_o(eth_rvalid_o),
-        .eth_rready_i(eth_rready_i),
-
-        // Shared crossbar P6.
-        .p6_awid_o(p6_awid_w),
-        .p6_awaddr_o(p6_awaddr_w),
-        .p6_awlen_o(p6_awlen_w),
-        .p6_awvalid_o(p6_awvalid_w),
-        .p6_awready_i(p6_awready_w),
-        .p6_wdata_o(p6_wdata_w),
-        .p6_wstrb_o(p6_wstrb_w),
-        .p6_wlast_o(p6_wlast_w),
-        .p6_wvalid_o(p6_wvalid_w),
-        .p6_wready_i(p6_wready_w),
-        .p6_bid_i(p6_bid_w),
-        .p6_bresp_i(p6_bresp_w),
-        .p6_bvalid_i(p6_bvalid_w),
-        .p6_bready_o(p6_bready_w),
-        .p6_arid_o(p6_arid_w),
-        .p6_araddr_o(p6_araddr_w),
-        .p6_arlen_o(p6_arlen_w),
-        .p6_arvalid_o(p6_arvalid_w),
-        .p6_arready_i(p6_arready_w),
-        .p6_rid_i(p6_rid_w),
-        .p6_rdata_i(p6_rdata_w),
-        .p6_rresp_i(p6_rresp_w),
-        .p6_rlast_i(p6_rlast_w),
-        .p6_rvalid_i(p6_rvalid_w),
-        .p6_rready_o(p6_rready_w)
-    );
 endmodule

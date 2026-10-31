@@ -232,7 +232,6 @@ static void engine_ids(void)
     demo_overlay_ids();
     info_hex("ETH ID", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_ID_OFFSET));
     info_hex("MEM_XBAR ID", mmio_read32(EDRV32_MEM_XBAR_BASE + EDRV32_MEM_XBAR_ID_OFFSET));
-    info_hex("PERF_MON ID", mmio_read32(EDRV32_PERF_MON_BASE + EDRV32_PERF_MON_ID_OFFSET));
 }
 
 int main(void)

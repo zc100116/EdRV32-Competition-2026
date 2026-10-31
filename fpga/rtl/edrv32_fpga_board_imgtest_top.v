@@ -248,7 +248,7 @@ module edrv32_fpga_board_imgtest_top (
     wire frame_w;
     wire error_w;
     wire unused_key4_w = key_n_i[3];
-    wire unused_media_psel_w = |{media_apb_psel_w[15:10], media_apb_psel_w[7:6],
+    wire unused_media_psel_w = |{media_apb_psel_w[15:9], media_apb_psel_w[7:6],
         media_apb_psel_w[4], media_apb_psel_w[0]};
 
     edrv32_fpga_imgtest_cam_init u_cam_init (
@@ -321,6 +321,8 @@ module edrv32_fpga_board_imgtest_top (
     assign media_apb_pready_w[6] = 1'b1;
     assign media_apb_prdata_w[224 +: 32] = 32'b0;
     assign media_apb_pready_w[7] = 1'b1;
+    assign media_apb_prdata_w[288 +: 32] = 32'b0;
+    assign media_apb_pready_w[9] = 1'b1;
     assign media_apb_prdata_w[320 +: 32] = 32'b0;
     assign media_apb_pready_w[10] = 1'b1;
     assign media_apb_prdata_w[352 +: 32] = 32'b0;
@@ -571,17 +573,6 @@ module edrv32_fpga_board_imgtest_top (
         .xbar_apb_pready_o(media_apb_pready_w[8]),
         .xbar_apb_prdata_o(media_apb_prdata_w[256 +: 32]),
         .xbar_apb_pslverr_o(),
-
-        // APB performance monitor control.
-        .pmon_apb_paddr_i(media_apb_paddr_w),
-        .pmon_apb_psel_i(media_apb_psel_w[9]),
-        .pmon_apb_penable_i(media_apb_penable_w),
-        .pmon_apb_pwrite_i(media_apb_pwrite_w),
-        .pmon_apb_pwdata_i(media_apb_pwdata_w),
-        .pmon_apb_pstrb_i(media_apb_pstrb_w),
-        .pmon_apb_pready_o(media_apb_pready_w[9]),
-        .pmon_apb_prdata_o(media_apb_prdata_w[288 +: 32]),
-        .pmon_apb_pslverr_o(),
 
         // irq interface.
         .irq_mem_xbar_o()

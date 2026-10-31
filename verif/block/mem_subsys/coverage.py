@@ -41,7 +41,7 @@ def main():
                     hits.add('credit_full')
                 if 'global_peak' in pairs:
                     peaks['global'] = max(peaks.get('global', 0), int(pairs['global_peak']))
-            elif words[1] in ('violation', 'PM', 'histogram') and pairs['hit'] == '1':
+            elif words[1] == 'violation' and pairs['hit'] == '1':
                 hits.add(' '.join(word for word in words[1:] if not word.startswith('hit=')))
             elif words[1] == 'statistics':
                 for name in ('snapshot', 'clear'):
@@ -64,11 +64,6 @@ def main():
     for kind in range(2):
         for direction in range(2):
             expected.add(f'violation kind={kind} dir={direction}')
-    for mode in range(3):
-        for address in range(2):
-            expected.add(f'PM mode={mode} address_mode={address}')
-    for index in range(16):
-        expected.add(f'histogram bin={index}')
     caps = {'global': 8}
     for port, (read, write) in enumerate(zip((4, 2, 1, 4, 2, 2, 2),
                                             (0, 4, 1, 2, 2, 2, 2))):
@@ -83,7 +78,7 @@ def main():
           f'{sum(peaks.get(k, 0) >= v for k, v in caps.items())}/{len(caps)} limits')
     for key in missing:
         print('MISS ' + key)
-    print('Counter saturation: verify the mem_xbar/PERF_MON unit regression evidence separately.')
+    print('Counter saturation: verify the mem_xbar unit regression evidence separately.')
     return int(bool(missing))
 
 

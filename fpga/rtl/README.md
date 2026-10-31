@@ -4,7 +4,7 @@
 `edrv32_fpga_board_b1_top.v`：B1 上板顶层，27 MHz PLL → 100 MHz CPU/cache/系统子系统，UART、启动按键与 LED。
 
 `edrv32_fpga_board_npu_top.v`：B3N CPU/SYS/MEM + NPU + ETH 上板顶层，保留 sys/NPU PLL、DDR、RGMII 和 UART/KEY/LED；ETH 接 P6/槽 7/PLIC14，移除媒体的主口、APB 槽和 PLIC 按 B3-10 接死，验证见 `verif/soc/board_npu/`。
-导入共 106 个源文件、24 种 IP，FDC 共 13 个时钟；RGMII 时钟和引脚沿用 B3VN，
+导入共 105 个源文件、24 种 IP，FDC 共 13 个时钟；RGMII 时钟和引脚沿用 B3VN，
 新增 `ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`，已有 SYS/NPU PLL 无需增加输出。
 
 
@@ -215,7 +215,7 @@ FDC Tcl 语法通过（17 个时钟定义）。137 个物理引脚逐位覆盖�
 `edrv32_fpga_board_render_top.v` 直接例化 CPU、系统、存储子系统、RND、ETH 和 DISP v0.3
 （L0/L1 两层），用于在板上运行 LVGL、游戏和验证 RND。RND 接 mem_xbar P4、媒体
 APB 槽 4、PLIC 源 11；DISP 接 P0、槽 5、源 12；CPU DDR 网关接 P2。存储子系统保留
-MEM_XBAR（槽 8、源 15）和 PERF_MON（槽 9）。ETH 接 P6、槽 7、源 14；VIN、PIX、GEO、NPU 不例化。
+MEM_XBAR（槽 8、源 15）；槽 9 预留。ETH 接 P6、槽 7、源 14；VIN、PIX、GEO、NPU 不例化。
 
 板级 DDR 适配器、DDR IP、TMDS 串化与 B2 相同。`ip_pll_sys` 输出 100 MHz 系统时钟；
 DDR `core_clk` 输出 125 MHz `clk_mem`；`ip_pll_video` 同相输出 74.25 MHz 像素时钟和
@@ -348,7 +348,7 @@ pix/serial 相关时钟及 DDR PHY 内部时序约束保留。RGMII、MDIO/MDC �
 在已按 `fpga/ip/README.md` 生成 IP 的 PDS 工程中执行
 `source <仓库路径>/fpga/scripts/import_board_render_top.tcl`。脚本从
 `cpu_subsys.f`、`sys_subsys.f`、`mem_subsys.f`、`rnd.f`、`disp.f`、`eth.f` 展开源文件并去重，
-加入四个板级源后共 103 个源文件，设置 `FPGA_MODE`。需要的 19 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
+加入四个板级源后共 102 个源文件，设置 `FPGA_MODE`。需要的 19 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
 `ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、`ip_ram_dcache_data`、
 `ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`、`ip_ram_mem_xbar_r`、`ip_lutram_mem_xbar_w`、
 `ip_ram_rnd_line`（5 实例）、`ip_ram_rnd_palette`（2 实例）、`ip_ram_rnd_window`（4 实例）、`ip_ram_disp_scan`（2 实例）、`ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
@@ -387,7 +387,7 @@ DISP 使用当前 v0.3 的 L0/L1 两层。保留全部 B2 板级端口、引脚�
 DVP、I2C、DDR、HDMI、ETH/RGMII。VIN CH2 仍写 DDR，只是没有 NPU 消费它的数据。
 CPU DDR 网关接 P2，VIN 接 P1、APB 槽 1、PLIC8，PIX 接槽 2、PLIC9，GEO 接 P5、
 槽 3、PLIC10，DISP 接 P0、槽 5、PLIC12，ETH 接 P6 的 ETH 口、槽 7、PLIC14；
-MEM_XBAR（槽 8、PLIC15）和 PERF_MON（槽 9，P6 内部仲裁）照常保留。
+MEM_XBAR（槽 8、PLIC15）照常保留；ETH 独占 P6，槽 9 预留。
 
 ### 时钟与复位
 
@@ -503,7 +503,7 @@ NPU CDC X9/X10，启用 P3、媒体 APB 槽 6、PLIC 源 13，NPU 域复位由 r
 CPU DDR 网关接 P2，VIN 接 P1、APB 槽 1、PLIC8，PIX 接槽 2、PLIC9，GEO 接 P5、
 槽 3、PLIC10，DISP 接 P0、槽 5、PLIC12，ETH 接 P6 的 ETH 口、槽 7、PLIC14；
 NPU 接 P3、槽 6、PLIC13；
-MEM_XBAR（槽 8、PLIC15）和 PERF_MON（槽 9，P6 内部仲裁）照常保留。
+MEM_XBAR（槽 8、PLIC15）照常保留；ETH 独占 P6，槽 9 预留。
 
 ### 时钟与复位
 
@@ -621,7 +621,7 @@ L1 关闭。无程序镜像、UART 或网络操作，复位后自动开始。
 
 | 例化 | 用途 / 连接 |
 |---|---|
-| `edrv32_mem_subsys` | P0=DISP、P1=VIN、P5=GEO、网关=配置器；保留内部网关、mem_xbar、PERF_MON、P6 仲裁 |
+| `edrv32_mem_subsys` | P0=DISP、P1=VIN、P5=GEO、网关=配置器；保留内部网关、mem_xbar；P6 由 ETH 独占 |
 | `edrv32_vin`、`edrv32_pix` | 两路 DVP 输入；只使能 CH0，CH1/CH2 保持复位配置的关闭状态；PIX 流接法与 SoC 相同 |
 | `edrv32_geo`、`edrv32_disp` | GEO P5 读写独立输出；DISP P0 只读，保留两层 RTL、关闭 L1 |
 | `edrv32_soc_reset_ctrl` | POR/DDR ready 和各域同步释放；软件复位输入=0；未用域时钟接 clk_mem，未用复位输出开路 |

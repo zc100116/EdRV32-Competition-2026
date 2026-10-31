@@ -15,11 +15,10 @@
 #include "regs/npu_regs.h"
 #include "regs/eth_regs.h"
 #include "regs/mem_xbar_regs.h"
-#include "regs/perf_mon_regs.h"
 
 enum engine_id {
     ENGINE_VIN, ENGINE_PIX, ENGINE_GEO, ENGINE_DISP, ENGINE_NPU,
-    ENGINE_ETH, ENGINE_MEM_XBAR, ENGINE_PERF_MON
+    ENGINE_ETH, ENGINE_MEM_XBAR
 };
 struct engine_event {
     uint32_t irq;

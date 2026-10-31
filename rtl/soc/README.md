@@ -10,13 +10,13 @@ the subsequent v0.3 two-layer specification belongs to B3.
 |---|---|---|---|---|---|
 | `u_cpu` / `edrv32_cpu_subsys` | P2 through sys S6 / DDR gateway | system 5 (CACHE_CTRL) | 6 to PLIC; receives MEIP/MSIP/MTIP | `rst_sys_n` | sys |
 | `u_sys` / `edrv32_sys_subsys` | S6 to memory subsystem | system peripherals; exports media decoder | owns 1–7 and synchronizes 8–15 | external `rst_n_i`; produces domain resets | sys; media bridge/decoder in mem; domain clocks to reset_ctrl |
-| `u_mem` / `edrv32_mem_subsys` | owns xbar, gateway P2, P6 arbiter/PERF_MON | media 8 MEM_XBAR, 9 PERF_MON | 15 MEM_XBAR | `rst_sys_n`, `rst_mem_core_n` | sys, mem |
+| `u_mem` / `edrv32_mem_subsys` | owns xbar, gateway P2; ETH exclusively owns P6 | media 8 MEM_XBAR; 9 reserved | 15 MEM_XBAR | `rst_sys_n`, `rst_mem_core_n` | sys, mem |
 | `u_vin` / `edrv32_vin` | P1 read/write, urgent | media 1 | 8 | `rst_mem_n`, `rst_cam0_n`, `rst_cam1_n` | mem, cam0/1 pclk |
 | `u_pix` / `edrv32_pix` | VIN pixel stream, no DDR port | media 2 | 9 | `rst_mem_n` | mem |
 | `u_geo` / `edrv32_geo` | P5 read/write | media 3 | 10 | `rst_mem_n` | mem |
 | `u_disp` / `edrv32_disp` | P0 read, urgent | media 5 | 12 | `rst_mem_n`, `rst_pix_n` | mem, pix |
 | `u_npu` / `edrv32_npu` | P3 read/write, internal X9 bridge | media 6, internal X10 bridge | 13 (npu domain) | `rst_mem_n`, `rst_npu_n` | mem, npu |
-| `u_eth` / `edrv32_eth` | P6 through memory subsystem arbiter | media 7 | 14 | `rst_mem_n`, `rst_eth_rx_n`, `rst_eth_tx_n` | mem, eth RX/TX |
+| `u_eth` / `edrv32_eth` | P6 directly through memory subsystem | media 7 | 14 | `rst_mem_n`, `rst_eth_rx_n`, `rst_eth_tx_n` | mem, eth RX/TX |
 | RND absent | P4 requests valid=0; B/R ready=1 | media 4 reserved | 11=0 | — | — |
 
 P4 payloads are zero. Only P0/P1 have urgent signals in the memory subsystem

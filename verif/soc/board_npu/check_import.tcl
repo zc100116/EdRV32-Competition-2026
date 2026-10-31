@@ -21,6 +21,9 @@ proc compile {args} {
     puts "compile $args"
 }
 source ../../EdRV32-Competition-2026/fpga/scripts/import_board_npu_top.tcl
+if {[llength $sources] != 105} {
+    error "source count: expected 105, actual [llength $sources]"
+}
 puts "PASS: all [llength $sources] imported RTL files and constraint exist"
 # These command mocks check Tcl syntax; they do not replace PDS timing analysis.
 proc get_ports {args} {return $args}

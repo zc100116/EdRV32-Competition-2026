@@ -11,7 +11,6 @@
 #include "npu.h"
 #include "eth.h"
 #include "mem_xbar.h"
-#include "perf_mon.h"
 #include "ov5640.h"
 #include "uart.h"
 #include "uart_input.h"
@@ -66,8 +65,6 @@ static const uintptr_t driver_symbols[] = {
     (uintptr_t)&mem_xbar_snapshot,
     (uintptr_t)&mem_xbar_rate,
     (uintptr_t)&mem_xbar_error,
-    (uintptr_t)&perf_mon_start,
-    (uintptr_t)&perf_mon_read,
     (uintptr_t)&ov5640_table,
     (uintptr_t)&ov5640_init,
     (uintptr_t)&ov5640_chip_id,

@@ -63,7 +63,6 @@ int main(void)
     system_info();
     info_hex("SYS ID", sysctrl_read(SYSCTRL_ID));
     info_hex("MEM_XBAR ID", mmio_read32(EDRV32_MEM_XBAR_BASE + EDRV32_MEM_XBAR_ID_OFFSET));
-    info_hex("PERF_MON ID", mmio_read32(EDRV32_PERF_MON_BASE + EDRV32_PERF_MON_ID_OFFSET));
     info_hex("NPU ID", mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_ID_OFFSET));
     info_hex("ETH ID", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_ID_OFFSET));
     uintptr_t handler = (uintptr_t)demo_interrupt;

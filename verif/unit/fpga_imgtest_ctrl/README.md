@@ -1,7 +1,7 @@
 # B3-9 Linux 验证结果
 
 RTL 提交：`11ed34f`（已 rebase 到 B3 `fd6b265`，包含 TMDS `7947278`、
-DISP clk_pix 流水化 `5e9e6ee` 和 PERF_MON `fd6b265`）。
+DISP clk_pix 流水化 `5e9e6ee`）。
 rebase 后已重新执行实际顶层 lint（0 告警）和 check_import（67 源文件、12 时钟）。
 Verilator 5.020，Linux；所有构建使用 `-j 1`，各仿真串行执行。
 本目录测试和 `../fpga_imgtest_cam/` 的测试随本报告所在的 `verif:` 提交交付。
@@ -78,7 +78,7 @@ Linux 不声称已证明板级时序或画面正确。
 - `fpga/constraints/edrv32_fpga_board_imgtest_top.fdc`
 - `fpga/scripts/import_board_imgtest_top.tcl`
 - `tools/gen/regs.py`
-- `rtl/include/regs/edrv32_{vin,pix,geo,disp,rnd,npu,eth,mem_xbar,perf_mon}_regs.vh`
+- `rtl/include/regs/edrv32_{vin,pix,geo,disp,rnd,npu,eth,mem_xbar}_regs.vh`
 - `verif/unit/fpga_imgtest_ctrl/{README.md,files.f,top_files.f,test.yaml,run.py,check_import.tcl,edrv32_fpga_imgtest_ctrl_tb.sv}`
 - `verif/unit/fpga_imgtest_cam/{files.f,test.yaml,edrv32_fpga_imgtest_cam_tb.sv}`
 

@@ -7,7 +7,7 @@ Every directory below has `test.yaml` and `files.f`, with the shared self-checki
 
 | Test | Directory | CASE | Tier |
 |---|---|---:|---|
-| GW-01 | `gw_01` | 101 | S |
+| GW-01 | `gw_01` | 101 | F |
 | GW-02 | `gw_02` | 102 | S |
 | GW-03 | `gw_03` | 103 | S |
 | GW-04 | `gw_04` | 104 | F |
@@ -25,17 +25,10 @@ Every directory below has `test.yaml` and `files.f`, with the shared self-checki
 | MX-11 | `mx_11` | 211 | S |
 | MX-12 | `mx_12/seed_01` … `seed_20` | 212 | F |
 | MX-13 | `mx_13` | 213 | S |
-| PM-01 | `pm_01` | 301 | S |
-| PM-02 | `pm_02` | 302 | S |
-| PM-03 | `pm_03` | 303 | F |
-| PM-04 | `pm_04` | 304 | S |
-| PM-05 | `pm_05` | 305 | F |
-| PM-06 | `pm_06` | 306 | F |
-| PM-07 | `pm_07` | 307 | F |
-| P6-01 | `p6_01` | 401 | S |
+| BW-01 | `bw_01` | 601 | F |
 | TOP-01 | `top_01` | 501 | S |
 
-There are 27 functional items / 46 MB regression entries and three environment
+There are 20 functional items / 39 MB regression entries and three environment
 self-test entries:
 
 - `model_selftest`: row hit/miss latency, bank selection, masked byte writes,

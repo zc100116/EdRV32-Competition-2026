@@ -1,9 +1,0 @@
-top: tb_mem_p6_arb
-files: files.f
-defines:
-parameters:
-software:
-timeout: 180
-pass: PASS
-tier: smoke
-simulator: verilator iverilog

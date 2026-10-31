@@ -7,7 +7,7 @@ SoC 规格 4、5、6.1、7 和 NPU 规格 3、4。测试使用真实 CPU/SYS/MEM
 顶层保留 sys/NPU PLL、DDR IP/适配器、RGMII、UART、四个按键和五个 LED。
 CPU 通过网关连接 P2，NPU 接 P3、媒体 APB 槽 6、PLIC13；
 ETH 接 P6、槽 7、PLIC14；MAC RX/TX 共用 RGMII 内 125 MHz、30° PLL 输出，
-reset_ctrl 生成 ETH 域复位，PLL lock 不参与全局复位。MEM_XBAR 槽 8/PLIC15 和 PERF_MON 槽 9 照常连接。
+reset_ctrl 生成 ETH 域复位，PLL lock 不参与全局复位。MEM_XBAR 槽 8/PLIC15 照常连接，槽 9 预留。
 移除的 P0/P1/P4/P5 主口全部输入接 0、输出开路；APB 槽 0–5、10–15
 返回 PRDATA=0/PREADY=1/PSLVERR=1，PLIC8–12 接 0，沿用 B3-10 空槽契约。
 SYS 中只用于已移除域的复位同步器时钟接 clk_mem，相应复位输出开路；
@@ -49,7 +49,7 @@ runner 对板级顶层和 TB 分别运行 Verilator 5.020 的
 
 导入检查在 `build/board_npu/import_check/tmp/EdRV32-FPGA/P` 中执行，
 其 `tmp/EdRV32-Competition-2026` 符号链接指回当前仓库，验证与 Windows 相同的相对路径。
-实际导入 106 个源文件，FDC 保留 13 个时钟：clk_board、clk_ddr_ref、clk_sys、clk_npu、
+实际导入 105 个源文件，FDC 保留 13 个时钟：clk_board、clk_ddr_ref、clk_sys、clk_npu、
 rst_clk、clk_mem、phy_dq_clk_0/1、phy_dq_sysclk_0/1、clk_rgmii_ref、clk_eth、clk_rgmii_tx；DDR PHY 的 multicycle、
 uncertainty、异步组和布局约束均沿用 B2，仅删去不存在的时钟、引脚及相关组。
 Tcl mocks 只检查导入和约束语法，PDS 放置布线和板上功能由后续 Windows 任务验收。

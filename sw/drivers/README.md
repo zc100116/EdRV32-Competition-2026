@@ -70,7 +70,6 @@ host must wait for that line before sending binary bytes.
 | `eth.h` | `eth_tx_descriptor_pack`, `eth_header_pack`, `eth_send` | 32 B TX 描述符、8 B 网络序应用头、提交 |
 | `eth.h` | `eth_phy_reset`, `eth_mdio_write`, `eth_mdio_read` | PHY 复位电平、阻塞 Clause 22 访问 |
 | `mem_xbar.h` | `mem_xbar_snapshot`, `mem_xbar_rate`, `mem_xbar_error` | SNAPSHOT\|CLEAR 后读七端口统计、RATE、错误详情 |
-| `perf_mon.h` | `perf_mon_start`, `perf_mon_read` | 配置并 START、读取计数/校验错误/16 格直方图 |
 | `ov5640.h` | `ov5640_table`, `ov5640_init`, `ov5640_chip_id` | 双端口初始化、244 项表及长度、读取芯片 ID |
 
 `geo_q16(n,d)` 用有符号 64 位中间数计算 `n*65536/d`，向零截断；分母非零、结果
@@ -91,7 +90,6 @@ GEO 的源/目标、ETH 的载荷/描述符、NPU 的模型/描述符等分别�
 `cache_clean_invalidate()` 放弃 CPU 所有权；完成后再 invalidate。
 
 PLIC 源号按生成头：VIN=8、PIX=9、GEO=10、DISP=12、NPU=13、ETH=14、MEM_XBAR=15。
-PERF_MON 没有 PLIC 源，使用 `engine_poll(ENGINE_PERF_MON)` 轮询。
 `engine_irq_register(engine, irq_mask, priority, callback, context)` 只用于上述七个有源引擎，
 在 CPU MEIE/MIE 开启前调用；它保留其他 PLIC enable 位，不修改 threshold。
 应用设置 `plic_set_threshold(0)` 并启用 CPU 中断。
@@ -143,9 +141,6 @@ HDMI/网口/同时由应用控制 DISP ENABLE 和是否提交 ETH；关闭 HDMI 
 SNAPSHOT|CLEAR 后读出冻结值；读取 `engine_perf(ENGINE_VIN,3/5/6/8)` 等求回绕增量，
 拼设计记录规定的 320 B 小端 EDTM，应用每 16 条经 WIN3 描述符发送。
 `mem_xbar_rate(6, rate)` 的单位为 1/256 beat/cycle。
-可选延迟探针使用 `perf_mon_start()`（MODE=0、ADDR_MODE=0、合法区域/有限事务数），
-轮询 DONE/ERROR 后 `perf_mon_read()`，由应用拼 type=2 记录；再次运行前清已处理 IRQ。
-PERF_MON START 清测量结果；不在 BUSY 时改其配置。ERR_BEATS 是读校验结果，另行上报。
 
 OV5640 移植依据与差异：
 

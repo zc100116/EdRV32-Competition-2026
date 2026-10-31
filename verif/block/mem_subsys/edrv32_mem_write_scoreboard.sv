@@ -7,7 +7,6 @@ module edrv32_mem_write_scoreboard (
     input logic clk_i,
     input logic rst_n_i,
     edrv32_axi256_if masters[7],
-    edrv32_axi256_if pmon,
     edrv32_axi256_if downstream
 );
     typedef struct packed {
@@ -25,18 +24,19 @@ module edrv32_mem_write_scoreboard (
         bit [15:0][255:0] data;
         bit [15:0][31:0] strb;
     } write_t;
+    // A power-of-two bound avoids a Verilator 5.020 variable-index queue lowering bug.
     address_t addresses[8][$];
     beat_t data[8][$];
     write_t completed[8][$];
     write_t granted[$];
     int current_beat;
-    bit [7:0] aw_take;
-    bit [7:0] w_take;
-    bit [7:0] aw_id;
-    bit [255:0] aw_addr;
-    bit [31:0] aw_len;
-    bit [2047:0] w_data;
-    bit [255:0] w_strb;
+    bit [6:0] aw_take;
+    bit [6:0] w_take;
+    bit [6:0] aw_id;
+    bit [223:0] aw_addr;
+    bit [27:0] aw_len;
+    bit [1791:0] w_data;
+    bit [223:0] w_strb;
     for (genvar p = 0; p < 7; p++) begin : g_source
         assign aw_take[p] = masters[p].awvalid && masters[p].awready;
         assign w_take[p] = masters[p].wvalid && masters[p].wready;
@@ -46,14 +46,6 @@ module edrv32_mem_write_scoreboard (
         assign w_data[p*256 +: 256] = masters[p].wdata;
         assign w_strb[p*32 +: 32] = masters[p].wstrb;
     end
-    assign aw_take[7] = pmon.awvalid && pmon.awready;
-    assign w_take[7] = pmon.wvalid && pmon.wready;
-    assign aw_id[7] = pmon.awid;
-    assign aw_addr[224 +: 32] = pmon.awaddr;
-    assign aw_len[28 +: 4] = pmon.awlen;
-    assign w_data[1792 +: 256] = pmon.wdata;
-    assign w_strb[224 +: 32] = pmon.wstrb;
-
     always @(posedge clk_i) begin : compare_write_intent
         address_t address;
         beat_t source_beat;
@@ -61,7 +53,7 @@ module edrv32_mem_write_scoreboard (
         int port;
         int source;
         if (!rst_n_i) begin
-            for (int p = 0; p < 8; p++) begin
+            for (int p = 0; p < 7; p++) begin
                 addresses[p].delete();
                 data[p].delete();
                 completed[p].delete();
@@ -69,7 +61,7 @@ module edrv32_mem_write_scoreboard (
             granted.delete();
             current_beat = 0;
         end else begin
-            for (int p = 0; p < 8; p++) begin
+            for (int p = 0; p < 7; p++) begin
                 if (aw_take[p]) begin
                     address.addr = aw_addr[p*32 +: 32];
                     address.beats = int'(aw_len[p*4 +: 4])+1;
@@ -104,7 +96,7 @@ module edrv32_mem_write_scoreboard (
                     transaction.address.beats = int'(downstream.awlen)+1;
                 end
                 else begin
-                    source = port == 6 && !downstream.awid[0] ? 7 : port;
+                    source = port;
                     if (completed[source].size() == 0)
                         $fatal(1, "FAIL write intent expected=source%0d actual=none time=%0t",
                                source, $time);

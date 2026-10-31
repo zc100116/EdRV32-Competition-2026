@@ -39,10 +39,8 @@ define_attribute {i:u_ddr3} {PAP_REGION} {fp_npu_ddr}
 
 # Split mem at existing sibling modules; never constrain their parents as well.
 # Direct logic in u_mem/u_xbar remains unbound; its budget is charged to fp_mem.
-define_attribute {i:u_soc.u_mem.u_perf_mon} {PAP_REGION} {fp_media}
 define_attribute {i:u_soc.u_mem.u_xbar.u_rbuf} {PAP_REGION} {fp_sysio}
 define_attribute {i:u_soc.u_mem.u_gw} {PAP_REGION} {fp_mem}
-define_attribute {i:u_soc.u_mem.u_p6_arb} {PAP_REGION} {fp_mem}
 define_attribute {i:u_soc.u_mem.u_xbar.u_regs} {PAP_REGION} {fp_mem}
 define_attribute {i:u_soc.u_mem.u_xbar.u_sched} {PAP_REGION} {fp_mem}
 define_attribute {i:u_soc.u_mem.u_xbar.g_port[1].g_w_ram.u_ram} {PAP_REGION} {fp_mem}

@@ -1,7 +1,7 @@
 # File: import_board_npu_top.tcl
 # Spec: Task T-BN1; CLAUDE.md 8, 10.
 # In the open PG2L200H-6/FBB676 PDS project, generate the IPs from fpga/ip first.
-# T-BE1: 106 sources, 24 generated IP kinds.
+# T-BE1: 105 sources, 24 generated IP kinds.
 # Required generated IP (fpga/ip/README.md): ip_pll_sys, ip_pll_npu, ip_ddr3;
 # ip_ram_icache_tag, ip_ram_icache_data, ip_ram_dcache_tag, ip_ram_dcache_data,
 # ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_lutram_mem_xbar_w,

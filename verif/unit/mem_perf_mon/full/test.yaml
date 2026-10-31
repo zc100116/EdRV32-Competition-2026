@@ -1,9 +1,0 @@
-top: tb_mem_perf_mon
-files: files.f
-defines:
-parameters: FULL=1
-software:
-timeout: 180
-pass: PASS
-tier: full
-simulator: verilator

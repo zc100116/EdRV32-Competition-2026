@@ -13,7 +13,6 @@
 #include "regs/npu_regs.h"
 #include "regs/eth_regs.h"
 #include "regs/mem_xbar_regs.h"
-#include "regs/perf_mon_regs.h"
 
 /* vin-spec 4.1: IRQ_STAT.CH2_FRAME. */
 _Static_assert(EDRV32_VIN_IRQ_STAT_OFFSET == 0x010, "VIN IRQ_STAT offset");
@@ -177,22 +176,6 @@ _Static_assert(EDRV32_MEM_XBAR_RD_TXN_OFFSET(0) == 0x400, "XBAR P0 RD_TXN offset
 _Static_assert(EDRV32_MEM_XBAR_RD_TXN_OFFSET(6) == 0x4C0, "XBAR P6 RD_TXN offset");
 _Static_assert(EDRV32_MEM_XBAR_WR_BEAT_OFFSET(0) == 0x418, "XBAR P0 WR_BEAT offset");
 _Static_assert(EDRV32_MEM_XBAR_WR_BEAT_OFFSET(6) == 0x4D8, "XBAR P6 WR_BEAT offset");
-
-/* mem-subsys-spec 4.2: BASE, SIZE, LAT_MIN, READ_CNT and HIST. */
-_Static_assert(EDRV32_PERF_MON_BASE_OFFSET == 0x104, "PERF_MON BASE offset");
-_Static_assert(EDRV32_PERF_MON_BASE_VALUE_POS == 12, "PERF_MON BASE position");
-_Static_assert(EDRV32_PERF_MON_BASE_VALUE_WIDTH == 18, "PERF_MON BASE width");
-_Static_assert(EDRV32_PERF_MON_BASE_VALUE_MASK == 0x3FFFF000, "PERF_MON BASE mask");
-_Static_assert(EDRV32_PERF_MON_SIZE_OFFSET == 0x108, "PERF_MON SIZE offset");
-_Static_assert(EDRV32_PERF_MON_SIZE_VALUE_POS == 9, "PERF_MON SIZE position");
-_Static_assert(EDRV32_PERF_MON_SIZE_VALUE_WIDTH == 21, "PERF_MON SIZE width");
-_Static_assert(EDRV32_PERF_MON_SIZE_VALUE_MASK == 0x3FFFFE00, "PERF_MON SIZE mask");
-_Static_assert(EDRV32_PERF_MON_SIZE_RESET == 0x1000, "PERF_MON SIZE reset");
-_Static_assert(EDRV32_PERF_MON_LAT_MIN_OFFSET == 0x20C, "PERF_MON LAT_MIN offset");
-_Static_assert(EDRV32_PERF_MON_LAT_MIN_RESET == 0xFFFFFFFF, "PERF_MON LAT_MIN reset");
-_Static_assert(EDRV32_PERF_MON_READ_CNT_OFFSET == 0x218, "PERF_MON READ_CNT offset");
-_Static_assert(EDRV32_PERF_MON_HIST_OFFSET(0) == 0x300, "PERF_MON HIST0 offset");
-_Static_assert(EDRV32_PERF_MON_HIST_OFFSET(15) == 0x33C, "PERF_MON HIST15 offset");
 
 int main(void)
 {

@@ -2,7 +2,7 @@ top: edrv32_mem_subsys_tb
 files: files.f
 defines: SIM_MODE
 parameters: CASE=0
-plusargs: +CASE=305 +SEED=1
+plusargs: +CASE=601 +SEED=1
 software:
 timeout: 600
 pass: PASS

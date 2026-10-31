@@ -351,6 +351,9 @@ module edrv32_soc_top (
     assign media_apb_prdata_w[0 +: 32] = 32'b0;
     assign media_apb_pready_w[0] = 1'b1;
     assign media_apb_pslverr_w[0] = 1'b1;
+    assign media_apb_prdata_w[288 +: 32] = 32'b0;
+    assign media_apb_pready_w[9] = 1'b1;
+    assign media_apb_pslverr_w[9] = 1'b1;
     assign media_apb_prdata_w[320 +: 32] = 32'b0;
     assign media_apb_pready_w[10] = 1'b1;
     assign media_apb_pslverr_w[10] = 1'b1;
@@ -371,7 +374,7 @@ module edrv32_soc_top (
     assign media_apb_pslverr_w[15] = 1'b1;
 
     wire unused_media_psel_w;
-    assign unused_media_psel_w = |{media_apb_psel_w[15:10], media_apb_psel_w[0]};
+    assign unused_media_psel_w = |{media_apb_psel_w[15:9], media_apb_psel_w[0]};
 
     // SoC 3.5: the board camera control pins mirror GPIO0 outputs 12 through 15.
     assign cam0_pwdn_o = gpio_o[12];
@@ -841,17 +844,6 @@ module edrv32_soc_top (
         .xbar_apb_pready_o(media_apb_pready_w[8]),
         .xbar_apb_prdata_o(media_apb_prdata_w[256 +: 32]),
         .xbar_apb_pslverr_o(media_apb_pslverr_w[8]),
-
-        // APB performance monitor control.
-        .pmon_apb_paddr_i(media_apb_paddr_w),
-        .pmon_apb_psel_i(media_apb_psel_w[9]),
-        .pmon_apb_penable_i(media_apb_penable_w),
-        .pmon_apb_pwrite_i(media_apb_pwrite_w),
-        .pmon_apb_pwdata_i(media_apb_pwdata_w),
-        .pmon_apb_pstrb_i(media_apb_pstrb_w),
-        .pmon_apb_pready_o(media_apb_pready_w[9]),
-        .pmon_apb_prdata_o(media_apb_prdata_w[288 +: 32]),
-        .pmon_apb_pslverr_o(media_apb_pslverr_w[9]),
 
         // irq interface.
         .irq_mem_xbar_o(irq_src_w[15])

@@ -12,7 +12,7 @@ import struct
 import threading
 
 RECORD_BYTES = 320
-PORTS = ('P0 DISP', 'P1 VIN', 'P2 CPU', 'P3 NPU', 'P4 RND', 'P5 GEO', 'P6 ETH+PERF_MON')
+PORTS = ('P0 DISP', 'P1 VIN', 'P2 CPU', 'P3 NPU', 'P4 RND', 'P5 GEO', 'P6 ETH')
 PORT_FIELDS = ('rd_txn', 'rd_beat', 'wr_txn', 'wr_beat', 'wait_sum', 'wait_max', 'urg_cnt')
 TAIL_FIELDS = ('vin_ch0_frames', 'vin_ch2_frames', 'vin_ch0_overflow',
                'vin_ch2_overflow', 'disp_underflow', 'disp_frames', 'npu_completed',

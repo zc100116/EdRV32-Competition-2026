@@ -1,5 +1,5 @@
 // File: edrv32_mem_subsys_tb.sv
-// Spec: mem-subsys v0.1; testplan 3.1-3.4, 4-6.
+// Spec: mem-subsys v0.6; testplan 3.1-3.4, 4-6.
 // Description: Independent top-level stimulus, byte scoreboard, scheduling and register checks.
 // Clock domains: asynchronous clk_sys and clk_mem.
 module edrv32_mem_subsys_tb;
@@ -23,15 +23,15 @@ module edrv32_mem_subsys_tb;
     edrv32_axi256_if p[7]();
     edrv32_axi256_if #(.ID_WIDTH(4)) ddr();
     logic [6:0] urgent;
-    logic [1:0][11:0] apb_paddr;
-    logic [1:0] apb_psel;
-    logic [1:0] apb_penable;
-    logic [1:0] apb_pwrite;
-    logic [1:0][31:0] apb_pwdata;
-    logic [1:0][3:0] apb_pstrb;
-    logic [1:0] apb_pready;
-    logic [1:0][31:0] apb_prdata;
-    logic [1:0] apb_pslverr;
+    logic [0:0][11:0] apb_paddr;
+    logic [0:0] apb_psel;
+    logic [0:0] apb_penable;
+    logic [0:0] apb_pwrite;
+    logic [0:0][31:0] apb_pwdata;
+    logic [0:0][3:0] apb_pstrb;
+    logic [0:0] apb_pready;
+    logic [0:0][31:0] apb_prdata;
+    logic [0:0] apb_pslverr;
     logic irq;
     int checker_errors;
     int checked_beats;
@@ -58,26 +58,8 @@ module edrv32_mem_subsys_tb;
     int coverage_illegal_gw[10];
     bit coverage_credit;
     bit coverage_violation[2][2];
-    bit coverage_pm[3][2];
-    bit coverage_hist[16];
     bit coverage_snapshot;
     bit coverage_clear;
-    int pmon_latency[16][$];
-    int observed_latencies[$];
-    int observed_hist[16];
-    int hist_width = 16;
-    int pmon_read_count;
-    int pmon_transactions;
-    int pmon_beats;
-    int pmon_first_ar;
-    int pmon_last_response;
-    bit pmon_sequence_check;
-    bit [31:0] pmon_base;
-    int pmon_size;
-    int pmon_addr_mode;
-    int pmon_mode;
-    bit [31:0] pmon_pattern_seed;
-    int pmon_burst;
     bit [31:0] random_state;
 
     edrv32_axi64_master u_gateway (
@@ -192,9 +174,6 @@ module edrv32_mem_subsys_tb;
     `include "ddr_connection.svh"
 
     `include "xbar_observation.svh"
-    `include "pmon_bus.svh"
-    `include "pmon_observation.svh"
-    `include "p6_observation.svh"
     `include "gateway_observation.svh"
     `include "gateway_overlap.svh"
     // Two-stage grant pipeline sampling times, see M-R2b (coordinator-approved observation).
@@ -217,7 +196,6 @@ module edrv32_mem_subsys_tb;
         .clk_i(clk_mem),
         .rst_n_i(rst_mem_n),
         .masters(p),
-        .pmon(pmon_bus),
         .downstream(ddr)
     );
 
@@ -246,19 +224,19 @@ module edrv32_mem_subsys_tb;
                        input bit [31:0] data, output bit [31:0] result);
         @(negedge clk_mem);
         // Whole-vector writes keep timed driver changes visible to Verilator 5.020.
-        apb_psel = slot == 0 ? 2'b01 : 2'b10;
-        apb_paddr = slot == 0 ? {12'b0, addr} : {addr, 12'b0};
-        apb_pwrite = write ? apb_psel : 2'b00;
-        apb_pwdata = slot == 0 ? {32'b0, data} : {data, 32'b0};
-        apb_pstrb = slot == 0 ? 8'h0f : 8'hf0;
+        apb_psel = 1'b1;
+        apb_paddr = addr;
+        apb_pwrite = write;
+        apb_pwdata = data;
+        apb_pstrb = 4'hf;
         @(negedge clk_mem);
         apb_penable = apb_psel;
         do @(posedge clk_mem); while (!apb_pready[slot]);
         eq("APB PSLVERR", 0, int'(apb_pslverr[slot]));
         result = apb_prdata[slot];
         @(negedge clk_mem);
-        apb_psel = 2'b00;
-        apb_penable = 2'b00;
+        apb_psel = 1'b0;
+        apb_penable = 1'b0;
     endtask
 
     task automatic wr(input int slot,
@@ -304,7 +282,7 @@ module edrv32_mem_subsys_tb;
             3: g_port[3].u_master.enqueue_read(addr, len, id);
             4: g_port[4].u_master.enqueue_read(addr, len, id);
             5: g_port[5].u_master.enqueue_read(addr, len, id);
-            6: g_port[6].u_master.enqueue_read(addr, len, 1'b1);
+            6: g_port[6].u_master.enqueue_read(addr, len, id);
             default: $fatal(1, "FAIL send_read expected=P0/P1/P3/P4/P5/P6 actual=%0d time=%0t",
                             port, $time);
         endcase
@@ -327,7 +305,7 @@ module edrv32_mem_subsys_tb;
             3: g_port[3].u_master.enqueue_write(addr, len, data, strb, id);
             4: g_port[4].u_master.enqueue_write(addr, len, data, strb, id);
             5: g_port[5].u_master.enqueue_write(addr, len, data, strb, id);
-            6: g_port[6].u_master.enqueue_write(addr, len, data, strb, 1'b1);
+            6: g_port[6].u_master.enqueue_write(addr, len, data, strb, id);
             default: $fatal(1, "FAIL send_write expected=P1/P3/P4/P5/P6 actual=%0d time=%0t",
                             port, $time);
         endcase
@@ -420,35 +398,10 @@ module edrv32_mem_subsys_tb;
         end
     endtask
 
-    typedef struct packed {
-        bit [31:0] addr;
-        int beats;
-    } pmon_expected_t;
-    pmon_expected_t expected_pmon_reads[$];
-    pmon_expected_t expected_pmon_writes[$];
-    bit pmon_read_started[16];
     bit [6:0] upstream_take;
     for (genvar n = 0; n < 7; n++) begin : g_take
         assign upstream_take[n] = n != 2 && p[n].rvalid && p[n].rready;
     end
-
-    task automatic check_pmon_request(input bit write,
-        input bit [31:0] addr,
-                                      input int beats);
-        pmon_expected_t exp;
-        if (pmon_sequence_check) begin
-            if ((write ? expected_pmon_writes.size() : expected_pmon_reads.size()) == 0)
-                $fatal(1, "FAIL PM sequence expected=no more %s actual=%h time=%0t",
-                       write ? "writes" : "reads", addr, $time);
-            if (write) exp = expected_pmon_writes.pop_front();
-            else exp = expected_pmon_reads.pop_front();
-            eq("PM address sequence", int'(exp.addr), int'(addr));
-            eq("PM burst boundary", exp.beats, beats);
-        end
-        truth("PM region lower", addr >= pmon_base);
-        truth("PM region upper", addr+32'(beats*32) <= pmon_base+32'(pmon_size));
-        truth("PM 4KiB boundary", int'(addr[11:0])+beats*32 <= 4096);
-    endtask
 
     int ddr_read_stamp[16][$];
     bit ddr_read_started[16];
@@ -475,20 +428,9 @@ module edrv32_mem_subsys_tb;
             credit_reserved = 0;
             max_credit = 0;
             upstream_read_beats = 0;
-            pmon_transactions = 0;
-            pmon_beats = 0;
-            pmon_read_count = 0;
-            pmon_first_ar = 0;
-            pmon_last_response = 0;
             w_remaining = 0;
             direction_run = 0;
             last_direction = -1;
-            observed_latencies.delete();
-            for (int j = 0; j < 16; j++) begin
-                pmon_latency[j].delete();
-                pmon_read_started[j] = 0;
-                observed_hist[j] = 0;
-            end
         end else begin
             cycle++;
             if (check_w_contiguous && w_remaining > 0)
@@ -505,17 +447,6 @@ module edrv32_mem_subsys_tb;
                     truth("credit capacity", credit_reserved <= 128);
                     if (credit_reserved == 128) coverage_credit = 1;
                 end
-                if (id == 12) begin
-                    pmon_transactions++;
-                    pmon_beats += length;
-                    check_pmon_request(0, ddr.araddr, length);
-                    if (pmon_first_ar == 0) pmon_first_ar = cycle;
-                end
-            end
-            if (ddr.awvalid && ddr.awready && ddr.awid == 12) begin
-                pmon_transactions++;
-                pmon_beats += int'(ddr.awlen)+1;
-                check_pmon_request(1, ddr.awaddr, int'(ddr.awlen)+1);
             end
             if (selected_case == 207) begin
                 for (int j = 0; j < 7; j++)
@@ -539,7 +470,6 @@ module edrv32_mem_subsys_tb;
                     ddr_read_started[id] = 0;
                 end
             end
-            if (ddr.bvalid && ddr.bid == 12) pmon_last_response = cycle;
             if (ddr.arvalid && ddr.arready || ddr.awvalid && ddr.awready) begin
                 direction = ddr.awvalid && ddr.awready ? 1 : 0;
                 if (direction == last_direction) direction_run++;
@@ -548,88 +478,6 @@ module edrv32_mem_subsys_tb;
             end
         end
     end
-
-    task automatic pmon_config(input int mode,
-        input int addr_mode,
-                               input int count,
-        input int burst = 16,
-                               input int ratio = 8,
-        input bit check = 0,
-                               input bit [31:0] pattern_seed = 32'h129a34bc,
-                               input bit [31:0] base = 32'h10000,
-                               input int size = 4096);
-        pmon_expected_t exp;
-        bit [31:0] lfsr;
-        bit [31:0] next_addr;
-        bit write;
-        int accumulator;
-        int length;
-        pmon_mode = mode;
-        pmon_pattern_seed = pattern_seed;
-        pmon_addr_mode = addr_mode;
-        pmon_base = base;
-        pmon_size = size;
-        pmon_burst = burst;
-        expected_pmon_reads.delete();
-        expected_pmon_writes.delete();
-        lfsr = pattern_seed;
-        next_addr = base;
-        accumulator = 0;
-        for (int t = 0; t < count; t++) begin
-            if (addr_mode == 1)
-                next_addr = base+32'(((64'(lfsr[31:16])*(64'(size)/64'd512)) >> 16)*512);
-            length = burst;
-            if (length*32 > 4096-int'(next_addr[11:0]))
-                length = (4096-int'(next_addr[11:0]))/32;
-            exp.addr = next_addr;
-            exp.beats = length;
-            write = mode == 1;
-            if (mode == 2) begin
-                accumulator += ratio;
-                if (accumulator >= 16) begin
-                    write = 0;
-                    accumulator -= 16;
-                end else write = 1;
-            end
-            if (write) expected_pmon_writes.push_back(exp);
-            else expected_pmon_reads.push_back(exp);
-            if (addr_mode == 0) begin
-                next_addr += 32'(length*32);
-                if (next_addr >= base+32'(size)) next_addr = base;
-            end
-            lfsr = {lfsr[30:0], lfsr[31]^lfsr[21]^lfsr[1]^lfsr[0]};
-        end
-        wr(1, 'h010, 3);
-        wr(1, 'h100, 32'(mode));
-        wr(1, 'h104, base);
-        wr(1, 'h108, 32'(size));
-        wr(1, 'h10c, 32'(burst));
-        wr(1, 'h110, 32'(addr_mode));
-        wr(1, 'h114, 32'(ratio));
-        wr(1, 'h118, 32'(count));
-        wr(1, 'h11c, 4);
-        wr(1, 'h120, pattern_seed);
-        wr(1, 'h124, 32'(check));
-        wr(1, 'h128, 32'(hist_width));
-    endtask
-
-    task automatic pmon_start();
-        pmon_sequence_check = 1;
-        wr(1, 'h004, 3);
-    endtask
-
-    task automatic pmon_done(input int count);
-        bit [31:0] status;
-        do rd(1, 'h010, status); while (!(status[0] || status[1]));
-        eq("PM IRQ.ERROR", 0, int'(status[1]));
-        rd_eq(1, 'h200, 32'(count));
-        rd(1, 'h008, status);
-        eq("PM STATUS.IDLE", 2, int'(status & 3));
-        eq("PM remaining read sequence", 0, expected_pmon_reads.size());
-        eq("PM remaining write sequence", 0, expected_pmon_writes.size());
-        coverage_pm[pmon_mode][pmon_addr_mode] = 1;
-        pmon_sequence_check = 0;
-    endtask
 
     task automatic drain(input int clocks = 20);
         repeat (clocks) @(negedge clk_mem);
@@ -1326,220 +1174,26 @@ module edrv32_mem_subsys_tb;
         endcase
     endtask
 
-    task automatic check_pmon_latency();
-        bit [31:0] value;
-        int sum;
-        int minimum;
-        int maximum;
-        sum = 0;
-        minimum = 'h7fffffff;
-        maximum = 0;
-        for (int n = 0; n < observed_latencies.size(); n++) begin
-            sum += observed_latencies[n];
-            if (observed_latencies[n] < minimum) minimum = observed_latencies[n];
-            if (observed_latencies[n] > maximum) maximum = observed_latencies[n];
-        end
-        rd(1, 'h20c, value);
-        eq("PM LAT_MIN", minimum, int'(value));
-        rd_eq(1, 'h210, 32'(maximum));
-        rd_eq(1, 'h214, 32'(sum));
-        rd_eq(1, 'h218, 32'(observed_latencies.size()));
-        for (int h = 0; h < 16; h++) begin
-            rd_eq(1, 12'('h300+h*4), 32'(observed_hist[h]));
-            if (observed_hist[h] != 0) coverage_hist[h] = 1;
-        end
-    endtask
-
-    task automatic test_pmon(input int test);
-        bit [31:0] value;
-        bit [31:0] beats_value;
-        bit [31:0] cycles_value;
-        int before_txn;
-        int before_beats;
-        int start;
-        int abort_done;
-        int latency_offset;
-        int latency_target;
-        case (test)
-            301: begin
-                pmon_config(1, 0, 16);
-                pmon_start();
-                pmon_done(16);
-                for (int b = 0; b < 4096; b++) begin
-                    value = (32'h10000+32'(b & ~3)) ^ 32'h129a34bc;
-                    eq("PM DDR write pattern", int'(value[(b%4)*8 +: 8]),
-                       int'(u_ddr.peek('h10000+32'(b))));
-                end
-                pmon_config(0, 0, 16, 16, 8, 1);
-                pmon_start();
-                pmon_done(16);
-                rd_eq(1, 'h21c, 0);
-                rd_eq(1, 'h204, 256);
-                require_grants(32);
-            end
-            302: begin
-                preload('h10000, 4096, 'h129a34bc);
-                u_ddr.poke('h10203, u_ddr.peek('h10203) ^ 8'h80);
-                // The byte scoreboard intentionally models the injected DDR content.
-                u_reference.poke('h10203, u_ddr.peek('h10203));
-                pmon_config(0, 0, 8, 16, 8, 1);
-                pmon_start();
-                pmon_done(8);
-                rd_eq(1, 'h21c, 1);
-                rd_eq(1, 'h220, 'h10200);
-                rd_eq(1, 'h010, 1);
-                require_grants(8);
-            end
-            303: begin
-                for (int mode = 0; mode < 3; mode++)
-                    for (int address_mode = 0; address_mode < 2; address_mode++)
-                        for (int ratio = 0; ratio <= 16; ratio += 8) begin
-                            if (mode != 2 && ratio != 8) continue;
-                            before_txn = pmon_transactions;
-                            before_beats = pmon_beats;
-                            pmon_config(mode, address_mode, 97, 13, ratio, 0,
-                                        'h9ae12837, 'h10000, 12288);
-                            pmon_start();
-                            pmon_done(97);
-                            eq("PM generated transaction count", 97, pmon_transactions-before_txn);
-                            rd_eq(1, 'h204, 32'(pmon_beats-before_beats));
-                        end
-                truth("PM mixed/random traffic present", pmon_transactions > 0);
-                pmon_config(2, 1, 32, 16, 8, 0, 0);
-                pmon_start();
-                pmon_done(32);
-            end
-            304: begin
-                // Isolate fixed transport latency from DRR's first-round refill delay.
-                wr(0, 'h108, 0);
-                hist_width = 16;
-                // Determine only the fixed transport offset; all comparisons below use
-                // independently observed PERF_MON port handshakes.
-                u_ddr.t_miss = 0;
-                u_ddr.t_turn = 0;
-                u_ddr.t_hit = 8;
-                u_ddr.refresh_next = 10000000;
-                pmon_config(0, 0, 1, 1);
-                wr(1, 'h11c, 1);
-                pmon_start();
-                pmon_done(1);
-                latency_offset = observed_latencies[0]-8;
-                for (int h = 0; h < 16; h++)
-                    for (int edge_index = 0; edge_index < 2; edge_index++) begin
-                        latency_target = h == 0 ? hist_width-1 :
-                                         h*hist_width+(edge_index == 0 ? 0 : hist_width-1);
-                        if (h == 15 && edge_index == 1) latency_target += 3*hist_width;
-                        u_ddr.t_hit = latency_target-latency_offset;
-                        u_ddr.t_miss = 0;
-                        u_ddr.t_turn = 0;
-                        u_ddr.t_refi = 10000000;
-                        u_ddr.refresh_next = 10000000;
-                        observed_latencies.delete();
-                        for (int j = 0; j < 16; j++) observed_hist[j] = 0;
-                        pmon_config(0, 0, 1, 1);
-                        wr(1, 'h11c, 1);
-                        pmon_start();
-                        pmon_done(1);
-                        eq("fixed latency boundary", latency_target, observed_latencies[0]);
-                        check_pmon_latency();
-                    end
-                for (int h = 0; h < 16; h++) truth("histogram bin hit", coverage_hist[h]);
-            end
-            305: begin
-                for (int invalid = 0; invalid < 9; invalid++) begin
-                    pmon_config(1, 0, 4);
-                    case (invalid)
-                        0: wr(1, 'h10c, 0);
-                        1: wr(1, 'h10c, 17);
-                        2: wr(1, 'h11c, 0);
-                        3: wr(1, 'h11c, 5);
-                        4: wr(1, 'h108, 0);
-                        5: wr(1, 'h118, 0);
-                        6: wr(1, 'h128, 0);
-                        // Recheck zero after masked writes to SIZE and BASE.
-                        7: begin
-                            wr(1, 'h108, 511);
-                            rd_eq(1, 'h108, 0);
-                        end
-                        8: begin
-                            wr(1, 'h104, 'h10fff);
-                            rd_eq(1, 'h104, 'h10000);
-                            wr(1, 'h10c, 0);
-                        end
-                        default: $fatal(1, "FAIL illegal configuration index time=%0t", $time);
-                    endcase
-                    start = u_schedule.grants.size();
-                    wr(1, 'h004, 3);
-                    drain(30);
-                    rd_eq(1, 'h010, 2);
-                    rd_eq(1, 'h014, 1);
-                    eq("illegal PM no AXI", start, u_schedule.grants.size());
-                    wr(1, 'h010, 2);
-                    rd_eq(1, 'h014, 0);
-                end
-                wr(1, 'h12c, 'hffffffff);
-                rd_eq(1, 'h12c, 0);
-                pmon_config(1, 0, 4);
-                pmon_start();
-                pmon_done(4);
-            end
-            306: begin
-                pmon_config(2, 0, 1000);
-                pmon_start();
-                wait (pmon_transactions >= 3);
-                wr(1, 'h004, 5);
-                rd(1, 'h008, value);
-                while (!value[1]) rd(1, 'h008, value);
-                abort_done = pmon_transactions;
-                truth("ABORT stops before count", abort_done < 1000);
-                drain(1000);
-                eq("ABORT no residual requests", abort_done, pmon_transactions);
-                eq("ABORT downstream drained", 0, u_schedule.outstanding);
-                eq("ABORT PERF_MON drained", 0, pmon_outstanding);
-                pmon_sequence_check = 0;
-                pmon_config(1, 0, 4);
-                pmon_start();
-                pmon_done(4);
-            end
-            307: begin
-                wr(0, 'h2cc, 256);
-                pmon_config(0, 0, 4096);
-                pmon_start();
-                pmon_done(4096);
-                rd(1, 'h204, beats_value);
-                rd(1, 'h208, cycles_value);
-                eq("PM bandwidth beats", 4096*16, int'(beats_value));
-                truth("PM bandwidth >=90%", 64'(beats_value)*100 >= 64'(cycles_value)*90);
-            end
-            default: $fatal(1, "FAIL unimplemented PM test=%0d time=%0t", test, $time);
-        endcase
-    endtask
-
-    task automatic test_p6();
-        pmon_config(1, 0, 64);
-        for (int k = 0; k < 64; k++) begin
-            send_write(6, 'h20000+32'((k%8)*512), 15, 1);
-            send_read(6, 'h30000+32'((k%8)*512), 15, 1);
-        end
-        pmon_start();
-        pmon_done(64);
-        wait_port(6, 64, 64);
-        require_grants(192);
-        // Both local IDs must make progress in each contested direction.
-        truth("P6 arbitration writes", u_schedule.transactions[6] == 192);
-        pmon_config(0, 0, 64);
-        pmon_start();
-        for (int k = 0; k < 64; k++) send_read(6, 'h30000+32'((k%8)*512), 15, 1);
-        pmon_done(64);
-        wait_port(6, 128, 64);
-        require_grants(128);
-        truth("P6 read contention covered", p6_read_contests != 0);
-        truth("P6 write contention covered", p6_write_contests != 0);
+    // BW-01: one testbench master keeps same-row sequential read bursts queued.
+    task automatic test_bandwidth();
+        int start_cycle;
+        int elapsed_cycles;
+        int beats;
+        start_cycle = cycle;
+        for (int k = 0; k < 4096; k++)
+            send_read(0, 32'((k%8)*512), 15, 1'(k));
+        wait_port(0, 4096, 0);
+        elapsed_cycles = cycle-start_cycle;
+        beats = g_port[0].u_master.r_beats;
+        eq("BW-01 returned beats", 4096*16, beats);
+        truth("BW-01 bandwidth >=90%", 64'(beats)*100 >= 64'(elapsed_cycles)*90);
+        $display("BW-01 beats=%0d cycles=%0d utilization=%0.3f%%",
+                 beats, elapsed_cycles, 100.0*real'(beats)/real'(elapsed_cycles));
+        require_grants(4096);
     endtask
 
     task automatic test_top();
         rd_eq(0, 0, 'h00080001);
-        rd_eq(1, 0, 'h00090001);
         send_read(0, 0);
         send_write(1, 'h10000);
         for (int port = 3; port < 7; port++) begin
@@ -1588,12 +1242,6 @@ module edrv32_mem_subsys_tb;
             for (int direction = 0; direction < 2; direction++)
                 $display("COVER violation kind=%0d dir=%0d hit=%0b", kind,
                          direction, coverage_violation[kind][direction]);
-        for (int mode = 0; mode < 3; mode++)
-            for (int address_mode = 0; address_mode < 2; address_mode++)
-                $display("COVER PM mode=%0d address_mode=%0d hit=%0b", mode,
-                         address_mode, coverage_pm[mode][address_mode]);
-        for (int h = 0; h < 16; h++)
-            $display("COVER histogram bin=%0d hit=%0b", h, coverage_hist[h]);
         $display("COVER statistics snapshot=%0b clear=%0b saturation=unit_test",
                  coverage_snapshot, coverage_clear);
     endtask
@@ -1613,7 +1261,6 @@ module edrv32_mem_subsys_tb;
         random_state = 32'(seed);
         u_gateway.idle();
         gw_count = 0;
-        pmon_sequence_check = 0;
         apb_paddr = '0;
         apb_psel = '0;
         apb_penable = '0;
@@ -1636,14 +1283,12 @@ module edrv32_mem_subsys_tb;
         if (CASE == 0) begin
             if (selected_case >= 101 && selected_case <= 105) test_gateway(selected_case);
             else if (selected_case >= 201 && selected_case <= 213) test_xbar(selected_case);
-            else if (selected_case >= 301 && selected_case <= 307) test_pmon(selected_case);
-            else if (selected_case == 401) test_p6();
+            else if (selected_case == 601) test_bandwidth();
             else if (selected_case == 501) test_top();
             else $fatal(1, "FAIL unknown CASE=%0d time=%0t", selected_case, $time);
         end else if (CASE >= 101 && CASE <= 105) test_gateway(CASE);
         else if (CASE >= 201 && CASE <= 213) test_xbar(CASE);
-        else if (CASE >= 301 && CASE <= 307) test_pmon(CASE);
-        else if (CASE == 401) test_p6();
+        else if (CASE == 601) test_bandwidth();
         else if (CASE == 501) test_top();
         else $fatal(1, "FAIL unknown CASE=%0d time=%0t", CASE, $time);
         eq("DDR protocol errors", 0, checker_errors);

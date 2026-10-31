@@ -314,6 +314,9 @@ module edrv32_fpga_board_npu_top (
     assign media_apb_prdata_w[160 +: 32] = 32'b0;
     assign media_apb_pready_w[5] = 1'b1;
     assign media_apb_pslverr_w[5] = 1'b1;
+    assign media_apb_prdata_w[288 +: 32] = 32'b0;
+    assign media_apb_pready_w[9] = 1'b1;
+    assign media_apb_pslverr_w[9] = 1'b1;
     assign media_apb_prdata_w[320 +: 32] = 32'b0;
     assign media_apb_pready_w[10] = 1'b1;
     assign media_apb_pslverr_w[10] = 1'b1;
@@ -336,7 +339,7 @@ module edrv32_fpga_board_npu_top (
     assign irq_src_w[12:8] = 5'b0;
 
     wire unused_media_psel_w;
-    assign unused_media_psel_w = |{media_apb_psel_w[15:10],
+    assign unused_media_psel_w = |{media_apb_psel_w[15:9],
         media_apb_psel_w[5:0]};
 
     // Unbonded reset outputs and inactive master responses are intentionally open.
@@ -741,7 +744,7 @@ module edrv32_fpga_board_npu_top (
         .p5_rvalid_o(),
         .p5_rready_i(1'b0),
 
-        // SoC 6.4.1: ETH shares P6 with PERF_MON.
+        // SoC 6.4.1: ETH exclusively owns P6.
         .eth_awid_i(eth_awid_w),
         .eth_awaddr_i(eth_awaddr_w),
         .eth_awlen_i(eth_awlen_w),
@@ -803,17 +806,6 @@ module edrv32_fpga_board_npu_top (
         .xbar_apb_pready_o(media_apb_pready_w[8]),
         .xbar_apb_prdata_o(media_apb_prdata_w[256 +: 32]),
         .xbar_apb_pslverr_o(media_apb_pslverr_w[8]),
-
-        // APB performance monitor control.
-        .pmon_apb_paddr_i(media_apb_paddr_w),
-        .pmon_apb_psel_i(media_apb_psel_w[9]),
-        .pmon_apb_penable_i(media_apb_penable_w),
-        .pmon_apb_pwrite_i(media_apb_pwrite_w),
-        .pmon_apb_pwdata_i(media_apb_pwdata_w),
-        .pmon_apb_pstrb_i(media_apb_pstrb_w),
-        .pmon_apb_pready_o(media_apb_pready_w[9]),
-        .pmon_apb_prdata_o(media_apb_prdata_w[288 +: 32]),
-        .pmon_apb_pslverr_o(media_apb_pslverr_w[9]),
 
         // irq interface.
         .irq_mem_xbar_o(irq_src_w[15])

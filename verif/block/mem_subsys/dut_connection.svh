@@ -206,14 +206,5 @@
         .xbar_apb_pready_o(apb_pready[0]),
         .xbar_apb_prdata_o(apb_prdata[0]),
         .xbar_apb_pslverr_o(apb_pslverr[0]),
-        .pmon_apb_paddr_i(apb_paddr[1]),
-        .pmon_apb_psel_i(apb_psel[1]),
-        .pmon_apb_penable_i(apb_penable[1]),
-        .pmon_apb_pwrite_i(apb_pwrite[1]),
-        .pmon_apb_pwdata_i(apb_pwdata[1]),
-        .pmon_apb_pstrb_i(apb_pstrb[1]),
-        .pmon_apb_pready_o(apb_pready[1]),
-        .pmon_apb_prdata_o(apb_prdata[1]),
-        .pmon_apb_pslverr_o(apb_pslverr[1]),
         .irq_mem_xbar_o(irq)
     );
