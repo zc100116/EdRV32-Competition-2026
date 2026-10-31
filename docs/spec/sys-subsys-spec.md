@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.4（草案） |
-| 日期 | 2026-10-28 |
+| 版本 | v0.5（草案） |
+| 日期 | 2026-10-31 |
 | 状态 | 已确认（2026-10-25）。标 **[待定]** 的条目给出了开发初值 |
 | 范围 | sys_xbar、Boot ROM、SRAM、系统 APB 桥、媒体 APB 桥、CLINT、PLIC、UART0、GPIO0、I2C0、SYSCTRL、复位控制 `reset_ctrl` |
 | 关联文档 | SoC 规格 3.1、3.5、4.1、4.3、4.4、5.3、6.1、6.2、7.5、8.3；`docs/spec/cache-spec.md`（CACHE_CTRL）；`docs/testplan/sys-subsys-testplan.md`；`docs/plan/sys-subsys-plan.md` |
@@ -146,7 +146,13 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 - 释放顺序（SoC 规格 5.3）：
   1. `rst_n_i` 释放后，`rst_mem_n` 等 `mem_ready`（同步到 clk_mem）有效后释放；
   2. `rst_pix_n`、`rst_cam*_n`、`rst_eth_*_n`、`rst_npu_n` 随 `rst_mem_n` 一起请求释放，各自在本域同步；
-  3. `rst_sys_n` 在 `rst_mem_n` 释放（同步回 clk_sys）之后释放。
+  3. `rst_sys_n` 在 `rst_mem_n` 的副本释放（同步回 clk_sys）之后释放：reset_ctrl 内部用一个 `edrv32_reset_copy` 产生 `rst_mem_n` 的副本，再把它同步回 clk_sys，保证 clk_mem 域所有副本都先于 `rst_sys_n` 释放。
+- 复位副本（SoC 规格 5.3 第 5 条）：除 `rst_sys_por_n` 外，reset_ctrl 输出的每一路复位，在使用方的子系统顶层（`edrv32_soc_top` 直接例化的模块：`edrv32_cpu_subsys`、`edrv32_sys_subsys`、`edrv32_mem_subsys`、`edrv32_vin`、`edrv32_pix`、`edrv32_geo`、`edrv32_rnd`、`edrv32_disp`、`edrv32_npu`、`edrv32_eth`）各经过**恰好一级** `edrv32_reset_copy`（`rtl/common/`）后才使用。
+  - `edrv32_reset_copy`：一个触发器，以输入复位异步清零，释放后每拍写 1。进入复位与输入同时（异步），释放比输入晚 1 拍。
+  - 子系统顶层按内部区域各例化一个副本，内部模块只用分到的副本，不直接使用 reset_ctrl 的输出，也不再串接第二级副本。所有使用方同为一级，因此同一路复位的全部副本在同一个时钟沿释放。
+  - 区域划分（开发初值）：`edrv32_cpu_subsys` 的 rst_sys 分为 core、I$、D$ 与 CACHE_CTRL 三份；`edrv32_sys_subsys` 的 rst_sys 为 sys_xbar 与存储、APB 桥与外设两份，rst_mem_core 一份；`edrv32_mem_subsys` 的 rst_sys、rst_mem_core 各按 mem_xbar、DDR 网关分为两份；`edrv32_npu` 的 rst_npu 分为卷积数据通路、非卷积单元、描述符与 DMA 三份，rst_mem 一份；其余模块每路输入复位一份。**[待定]** 定版划分：每个副本的负载数应不超过 1000，开发时用 Yosys 综合结果估计，由上板卡的 PDS 扇出报告确认；超过的再拆分。
+  - 每个域只有 reset_ctrl 中的一个同步点（`reset_sync`）。禁止在区域内另设同步器对 `rst_n_i` 或其他复位重新同步，否则不同区域的释放可能相差一拍。
+  - 综合时副本不得被合并：由 `fpga/constraints/` 中的约束保留各副本寄存器，综合后的扇出报告中每个副本单独出现。
 - 媒体软复位（`SOFT_RESET.MEDIA`）：拉低 clk_mem、clk_pix、cam、eth、clk_npu 各域的引擎复位 16 个 clk_sys 周期后释放；mem_xbar 和 DDR 网关不受影响（使用独立的 `rst_mem_core_n`，只由 `rst_n_i` 和 `mem_ready` 控制）。
 - SoC 软复位（`SOFT_RESET.SOC`）：除 `rst_mem_core_n` 外所有复位（含 `rst_sys_n`）拉低 16 个 clk_sys 周期后按上面的顺序释放；SYSCTRL 的 scratch 寄存器不受影响。
 - 触发 MEDIA 软复位的写照常完成并返回 B；触发 SOC 软复位的写事务允许被复位取消，不保证返回 B（发起它的 CPU 同时被复位）。
@@ -368,3 +374,4 @@ SRAM 同一端口上的读和写不重叠：从接口按通道仲裁结果一次
 | 2026-10-25 | v0.2 | 开发中澄清：APB 路径拆为 bridge（AXI→单个 APB 口）+ decoder（槽译码、预留、超时），媒体路径 decoder 在 clk_mem；增加 3.4 系统子系统顶层端口；CLINT/PLIC 合法写的 WSTRB 恒为全 1、整字写入；UART EN/CLR 不打断进行中的帧 |
 | 2026-10-26 | v0.3 | SRAM 由 256 KiB 改为 64 KiB（8192 × 64 位）。用户确认：旧工程 FPGA 实际只用 32 KiB SRAM；现有 DDR 承担大块数据，SRAM 只放监控程序、CoreMark 和栈，省下的 DRM 留给 NPU 片上缓存 |
 | 2026-10-28 | v0.4 | 2.10：reset_ctrl 增加 clk_npu 输入和 `rst_npu_n` 输出（与 `rst_mem_n` 一起请求释放，媒体软复位和 SoC 软复位覆盖），对应 npu-spec 3 节 `rst_npu_n_i` 和 SoC 5.3 第 2 条（用户确认 2026-10-28，B2-1 准备时发现遗漏） |
+| 2026-10-31 | v0.5 | 2.10：新增复位副本：除 `rst_sys_por_n` 外各路复位在子系统顶层经一级 `edrv32_reset_copy` 按区域复制后使用，同一路复位的副本同拍释放、比原来晚 1 拍；`rst_sys_n` 改为在 `rst_mem_n` 副本释放后释放；区域划分为开发初值，定版按每个副本负载数不超过 1000。原因：B3N 中 clk_sys 复位扇出 7098、rst_mem_core 4799，B3VN 布线失败时复位网络占未布通负载的大头（设计记录 2026-10-31-b3f-area-timing）（用户确认 2026-10-31） |
