@@ -1,0 +1,1 @@
+{"tx": {"active": false, "sent": 0, "total": 0, "packets": 0, "error": null}, "rx": {"active": true, "localPort": 6000, "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx", "packets": 0, "bytes": 0, "notifyCount": 0, "lastNotify": false, "files": {}, "error": null}}

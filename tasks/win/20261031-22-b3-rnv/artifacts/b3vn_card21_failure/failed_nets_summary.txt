@@ -1,0 +1,8 @@
+Local raw source: G:\codex_project\EdRV32-FPGA\EdRV32-B3VN\place_route\fail_route_nets.txt
+Raw file bytes: 136343442
+Network blocks: 26615
+Sum of listed loads: 334540
+Sum of listed un-routed loads: 182661
+Max un-routed loads in one listed net: 34330
+Counts describe dump contents; do not equate them with router iteration counts without vendor documentation.
+Physical routing net names and sites cannot identify owning RTL modules directly.

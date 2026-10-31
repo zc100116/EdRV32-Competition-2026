@@ -3251,7 +3251,6 @@ W: Loop was found during constant probe.
 W: Loop was found during constant probe.
 W: Loop was found during constant probe.
 W: Loop was found during constant probe.
-Saving design to DB.
 Action compile: Real time elapsed is 0h:2m:16s
 Action compile: CPU time elapsed is 0h:0m:2s
 Action compile: Process CPU time elapsed is 0h:0m:2s

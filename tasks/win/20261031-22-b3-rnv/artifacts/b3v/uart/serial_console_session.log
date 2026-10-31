@@ -1,0 +1,601 @@
+[20:06:19.859][RX] 
+[20:06:19.859][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[20:06:19.859][RX]   E         D   D   R   R   V   V      3      2 
+[20:06:19.859][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[20:06:19.859][RX]   E         D   D   R  R     V V       3   2    
+[20:06:19.859][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[20:06:19.859][RX] 
+[20:06:19.859][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[20:06:19.859][RX] CHIP_ID: 0xed320001
+[20:06:19.859][RX] CLK_SYS_HZ: 100000000
+[20:06:19.859][RX] ROM bytes: 16384
+[20:06:19.860][RX] SRAM bytes: 65536
+[20:06:19.860][RX] I-cache bytes: 8192
+[20:06:19.860][RX] D-cache bytes: 8192
+[20:06:19.860][RX] MEM_READY: 1
+[20:06:19.860][RX] Build commit: 5000fe71
+[20:06:19.860][RX] Compiler version: GCC 15.2.0
+[20:06:19.965][RX] Boot SRAM
+[20:06:19.965][RX] Monitor: EdRV32
+[20:06:19.965][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[20:06:24.099][RX] 
+[20:06:24.099][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[20:06:24.099][RX]   E         D   D   R   R   V   V      3      2 
+[20:06:24.099][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[20:06:24.099][RX]   E         D   D   R  R     V V       3   2    
+[20:06:24.099][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[20:06:24.099][RX] 
+[20:06:24.099][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[20:06:24.099][RX] CHIP_ID: 0xed320001
+[20:06:24.099][RX] CLK_SYS_HZ: 100000000
+[20:06:24.099][RX] ROM bytes: 16384
+[20:06:24.099][RX] SRAM bytes: 65536
+[20:06:24.099][RX] I-cache bytes: 8192
+[20:06:24.099][RX] D-cache bytes: 8192
+[20:06:24.099][RX] MEM_READY: 1
+[20:06:24.099][RX] Build commit: 5000fe71
+[20:06:24.099][RX] Compiler version: GCC 15.2.0
+[20:06:24.203][RX] BIOS: EdRV32
+[20:06:24.203][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:06:29.444][TX] pix set 0 256 0 0 1000 0 1 0 0 128 0<CR>
+[20:06:29.455][RX] Input error: type 1-4 then Enter
+[20:06:29.455][SYS] Input error: type 1-4 then Enter
+[20:06:29.455][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:06:30.216][TX] pix set 0 256 0 0 1000 0 2 0 0 128 0<CR>
+[20:06:30.227][RX] Input error: type 1-4 then Enter
+[20:06:30.227][SYS] Input error: type 1-4 then Enter
+[20:06:30.227][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:06:30.847][TX] pix set 0 256 0 0 1000 0 4 0 0 128 0<CR>
+[20:06:30.858][RX] Input error: type 1-4 then Enter
+[20:06:30.858][SYS] Input error: type 1-4 then Enter
+[20:06:30.858][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:06:31.549][TX] pix set 0 256 0 0 1000 0 5 0 0 128 0<CR>
+[20:06:31.560][RX] Input error: type 1-4 then Enter
+[20:06:31.560][SYS] Input error: type 1-4 then Enter
+[20:06:31.560][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:06:32.138][TX] pix set 0 256 0 0 1000 0 6 0 0 128 0<CR>
+[20:06:32.149][RX] Input error: type 1-4 then Enter
+[20:06:32.149][SYS] Input error: type 1-4 then Enter
+[20:06:32.149][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:06:33.800][TX] pix set 0 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:06:33.811][RX] Input error: type 1-4 then Enter
+[20:06:33.811][SYS] Input error: type 1-4 then Enter
+[20:06:33.811][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:09:51.324][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[20:09:51.331][RX] Input error: type 1-4 then Enter
+[20:09:51.331][SYS] Input error: type 1-4 then Enter
+[20:09:51.331][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[20:09:51.333][RX] UART load ready
+[20:09:53.974][RX] Load bytes: 29988 segments: 1
+[20:09:53.976][RX] Load result: PASS
+[20:09:53.976][RX] Run: 0x10000000
+[20:09:53.976][RX] Demo: demo_vision
+[20:09:53.976][RX] CHIP_ID: 0xed320001
+[20:09:53.976][RX] CLK_SYS_HZ: 100000000
+[20:09:53.976][RX] ROM bytes: 16384
+[20:09:53.976][RX] SRAM bytes: 65536
+[20:09:53.976][RX] I-cache bytes: 8192
+[20:09:53.976][RX] D-cache bytes: 8192
+[20:09:53.976][RX] MEM_READY: 1
+[20:09:53.976][RX] Build commit: c6d5ce84
+[20:09:53.976][RX] Compiler version: GCC 15.2.0
+[20:09:53.976][RX] VIN ID: 0x00010001
+[20:09:53.976][RX] PIX ID: 0x00020001
+[20:09:53.976][RX] GEO ID: 0x00030001
+[20:09:53.976][RX] DISP ID: 0x00050002
+[20:09:53.976][RX] ETH ID: 0x00070001
+[20:09:53.976][RX] MEM_XBAR ID: 0x00080001
+[20:09:53.976][RX] PERF_MON ID: 0x00090001
+[20:09:54.110][RX] Camera: 0
+[20:09:54.110][RX] Camera chip ID: 0x00005640
+[20:09:54.234][RX] Camera: 1
+[20:09:54.234][RX] Camera chip ID: 0x00005640
+[20:09:54.373][RX] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[20:09:54.373][RX] Demo commands: s2 | status | help
+[20:09:54.373][RX] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[20:09:54.378][RX] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[20:09:54.378][RX] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[20:09:54.378][RX] GEO: geo off | geo rotate | geo scale
+[20:09:54.378][RX] Output: output hdmi | output eth | output both | fps 1..60
+[20:09:54.378][RX] Monitor: sample 10..1000 (Hz), default 100
+[20:09:54.379][RX] KEY: KEY2 requires s2; KEY3 PIX; KEY4 GEO
+[20:10:11.958][TX] geo set 0 -20 1000 1000 0 0 0 0<CR>
+[20:10:11.994][RX] Demo command: OK
+[20:10:13.953][TX] geo set 0 -40 1000 1000 0 0 0 0<CR>
+[20:10:13.973][RX] Demo command: OK
+[20:10:14.710][TX] geo set 0 -50 1000 1000 0 0 0 0<CR>
+[20:10:14.715][RX] Demo command: OK
+[20:10:19.152][TX] geo set 0 -60 1000 1000 0 0 0 0<CR>
+[20:10:19.172][RX] Demo command: OK
+[20:10:19.415][TX] geo set 0 -70 1000 1000 0 0 0 0<CR>
+[20:10:19.423][RX] Demo command: OK
+[20:10:21.811][TX] geo set 0 -80 1000 1000 0 0 0 0<CR>
+[20:10:21.842][RX] Demo command: OK
+[20:10:22.944][TX] geo set 0 -60 1000 1000 0 0 0 0<CR>
+[20:10:22.987][RX] Demo command: OK
+[20:10:23.425][TX] geo set 0 -50 1000 1000 0 0 0 0<CR>
+[20:10:23.433][RX] Demo command: OK
+[20:10:23.830][TX] geo set 0 -30 1000 1000 0 0 0 0<CR>
+[20:10:23.878][RX] Demo command: OK
+[20:10:24.279][TX] geo set 0 -20 1000 1000 0 0 0 0<CR>
+[20:10:24.324][RX] Demo command: OK
+[20:10:24.852][TX] geo set 0 10 1000 1000 0 0 0 0<CR>
+[20:10:24.897][RX] Demo command: OK
+[20:10:25.427][TX] geo set 0 0 1000 1000 0 0 0 0<CR>
+[20:10:25.470][RX] Demo command: OK
+[20:10:26.191][TX] geo set 1 0 1000 1000 0 0 0 0<CR>
+[20:10:26.233][RX] Demo command: OK
+[20:10:26.963][TX] geo set 1 10 1000 1000 0 0 0 0<CR>
+[20:10:26.997][RX] Demo command: OK
+[20:10:27.226][TX] geo set 1 20 1000 1000 0 0 0 0<CR>
+[20:10:27.252][RX] Demo command: OK
+[20:10:28.139][TX] geo set 1 50 1000 1000 0 0 0 0<CR>
+[20:10:28.143][RX] Demo command: OK
+[20:10:29.654][TX] geo set 1 60 1000 1000 0 0 0 0<CR>
+[20:10:29.670][RX] Demo command: OK
+[20:10:30.680][TX] geo set 1 70 1000 1000 0 0 0 0<CR>
+[20:10:30.689][RX] Demo command: OK
+[20:10:31.503][TX] geo set 1 80 1000 1000 0 0 0 0<CR>
+[20:10:31.516][RX] Demo command: OK
+[20:10:32.325][TX] geo set 1 90 1000 1000 0 0 0 0<CR>
+[20:10:32.344][RX] Demo command: OK
+[20:10:35.118][TX] geo set 1 100 1000 1000 0 0 0 0<CR>
+[20:10:35.145][RX] Demo command: OK
+[20:10:38.581][TX] geo set 1 130 1000 1000 0 0 0 0<CR>
+[20:10:38.592][RX] Demo command: OK
+[20:10:39.307][TX] geo set 1 170 1000 1000 0 0 0 0<CR>
+[20:10:39.345][RX] Demo command: OK
+[20:10:40.255][TX] geo set 1 220 1000 1000 0 0 0 0<CR>
+[20:10:40.300][RX] Demo command: OK
+[20:10:41.248][TX] geo set 1 260 1000 1000 0 0 0 0<CR>
+[20:10:41.255][RX] Demo command: OK
+[20:10:42.163][TX] geo set 1 300 1000 1000 0 0 0 0<CR>
+[20:10:42.210][RX] Demo command: OK
+[20:10:43.067][TX] geo set 1 340 1000 1000 0 0 0 0<CR>
+[20:10:43.101][RX] Demo command: OK
+[20:10:43.923][TX] geo set 1 380 1000 1000 0 0 0 0<CR>
+[20:10:43.928][RX] Demo command: OK
+[20:10:44.766][RX] Demo command: OK
+[20:10:44.811][TX] geo set 1 420 1000 1000 0 0 0 0<CR>
+[20:10:45.489][TX] geo set 1 460 1000 1000 0 0 0 0<CR>
+[20:10:45.520][RX] Demo command: OK
+[20:10:46.236][TX] geo set 1 510 1000 1000 0 0 0 0<CR>
+[20:10:46.283][RX] Demo command: OK
+[20:10:46.783][TX] geo set 1 560 1000 1000 0 0 0 0<CR>
+[20:10:46.792][RX] Demo command: OK
+[20:10:47.222][TX] geo set 1 580 1000 1000 0 0 0 0<CR>
+[20:10:47.238][RX] Demo command: OK
+[20:10:50.859][TX] geo set 1 580 1 1 0 0 0 0<CR>
+[20:10:50.868][RX] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:50.868][SYS] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:58.931][TX] geo set 1 580 3001 1 0 0 0 0<CR>
+[20:10:58.940][RX] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:58.940][SYS] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:59.350][TX] geo set 1 580 7001 1 0 0 0 0<CR>
+[20:10:59.359][RX] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:59.359][SYS] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:59.739][TX] geo set 1 580 11001 1 0 0 0 0<CR>
+[20:10:59.748][RX] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:10:59.748][SYS] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:11:01.569][TX] geo set 1 580 11001 5001 0 0 0 0<CR>
+[20:11:01.623][RX] Demo command: OK
+[20:11:04.973][TX] geo set 1 580 11001 2001 0 0 0 0<CR>
+[20:11:04.997][RX] Demo command: OK
+[20:11:05.489][RX] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:11:05.489][SYS] Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+[20:11:05.529][TX] geo set 1 580 11001 1 0 0 0 0<CR>
+[20:11:06.199][TX] geo set 1 580 11001 1001 0 0 0 0<CR>
+[20:11:06.206][RX] Demo command: OK
+[20:11:07.983][TX] geo set 1 580 12001 1001 0 0 0 0<CR>
+[20:11:07.988][RX] Demo command: OK
+[20:11:08.351][TX] geo set 1 580 14001 1001 0 0 0 0<CR>
+[20:11:08.370][RX] Demo command: OK
+[20:11:09.079][TX] geo set 1 580 11001 1001 0 0 0 0<CR>
+[20:11:09.134][RX] Demo command: OK
+[20:11:09.576][TX] geo set 1 580 7001 1001 0 0 0 0<CR>
+[20:11:09.590][RX] Demo command: OK
+[20:11:10.136][TX] geo set 1 580 4001 1001 0 0 0 0<CR>
+[20:11:10.152][RX] Demo command: OK
+[20:11:10.478][TX] geo set 1 580 3001 1001 0 0 0 0<CR>
+[20:11:10.487][RX] Demo command: OK
+[20:11:11.224][TX] geo set 1 580 2001 1001 0 0 0 0<CR>
+[20:11:11.243][RX] Demo command: OK
+[20:11:12.484][TX] geo set 1 580 1001 1001 0 0 0 0<CR>
+[20:11:12.507][RX] Demo command: OK
+[20:11:16.164][TX] geo set 1 0 1001 1001 0 0 0 0<CR>
+[20:11:16.199][RX] Demo command: OK
+[20:11:18.850][TX] geo set 1 0 1000 1001 0 0 0 0<CR>
+[20:11:18.872][RX] Demo command: OK
+[20:11:19.922][TX] geo set 1 0 1000 1000 0 0 0 0<CR>
+[20:11:19.954][RX] Demo command: OK
+[20:11:23.064][TX] geo set 1 0 10000 1000 0 0 0 0<CR>
+[20:11:23.073][RX] Demo command: OK
+[20:11:23.717][TX] geo set 1 0 10500 1000 0 0 0 0<CR>
+[20:11:23.722][RX] Demo command: OK
+[20:11:25.715][TX] geo set 1 0 500 1000 0 0 0 0<CR>
+[20:11:25.746][RX] Demo command: OK
+[20:11:27.623][TX] geo set 1 0 500 500 0 0 0 0<CR>
+[20:11:27.656][RX] Demo command: OK
+[20:11:32.904][TX] geo set 1 0 500 500 0 0 1 0<CR>
+[20:11:32.939][RX] Demo command: OK
+[20:11:33.900][TX] geo set 1 0 500 500 0 0 0 0<CR>
+[20:11:33.904][RX] Demo command: OK
+[20:11:34.789][TX] geo set 1 0 500 500 0 0 0 1<CR>
+[20:11:34.795][RX] Demo command: OK
+[20:11:35.505][TX] geo set 1 0 500 500 0 0 0 0<CR>
+[20:11:35.549][RX] Demo command: OK
+[20:11:40.250][TX] pix set 0 256 0 0 1000 0 0 1 0 128 0<CR>
+[20:11:40.270][RX] Demo command: OK
+[20:11:41.617][TX] pix set 0 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:11:41.659][RX] Demo command: OK
+[20:11:43.651][TX] pix set 0 256 0 0 1000 0 0 1 0 128 0<CR>
+[20:11:43.696][RX] Demo command: OK
+[20:11:44.616][TX] pix set 0 256 0 0 1000 0 0 1 0 128 1<CR>
+[20:11:44.651][RX] Demo command: OK
+[20:11:45.731][TX] pix set 0 256 0 0 1000 0 0 1 0 128 0<CR>
+[20:11:45.743][RX] Demo command: OK
+[20:11:46.975][TX] pix set 0 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:11:47.006][RX] Demo command: OK
+[20:11:48.030][TX] pix set 0 256 0 0 1000 0 0 0 0 128 1<CR>
+[20:11:48.037][RX] Demo command: OK
+[20:11:48.948][TX] pix set 0 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:11:48.979][RX] Demo command: OK
+[20:11:50.188][TX] pix set 0 256 0 0 1000 0 0 0 1 128 0<CR>
+[20:11:50.198][RX] Demo command: OK
+[20:11:51.334][RX] Demo command: OK
+[20:11:51.343][TX] pix set 0 256 0 0 1000 0 0 0 1 128 1<CR>
+[20:11:52.272][TX] pix set 0 256 0 0 1000 0 0 0 1 128 0<CR>
+[20:11:52.289][RX] Demo command: OK
+[20:11:53.721][TX] pix set 0 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:11:53.753][RX] Demo command: OK
+[20:12:05.349][TX] pix set 1 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:05.401][RX] Demo command: OK
+[20:12:06.858][TX] pix set 0 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:06.865][RX] Demo command: OK
+[20:12:07.306][TX] pix set 1 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:07.320][RX] Demo command: OK
+[20:12:09.066][TX] pix set 1 255 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:09.093][RX] Demo command: OK
+[20:12:09.906][TX] pix set 1 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:09.920][RX] Demo command: OK
+[20:12:10.452][TX] pix set 1 257 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:10.493][RX] Demo command: OK
+[20:12:10.701][TX] pix set 1 258 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:10.752][RX] Demo command: OK
+[20:12:10.919][TX] pix set 1 259 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:10.938][RX] Demo command: OK
+[20:12:11.167][TX] pix set 1 260 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:11.193][RX] Demo command: OK
+[20:12:11.554][TX] pix set 1 262 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:11.575][RX] Demo command: OK
+[20:12:13.151][TX] pix set 1 270 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:13.186][RX] Demo command: OK
+[20:12:14.054][TX] pix set 1 275 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:14.067][RX] Demo command: OK
+[20:12:14.549][TX] pix set 1 348 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:14.569][RX] Demo command: OK
+[20:12:15.076][TX] pix set 1 464 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:15.086][RX] Demo command: OK
+[20:12:17.507][TX] pix set 1 253 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:17.558][RX] Demo command: OK
+[20:12:17.770][TX] pix set 1 240 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:17.813][RX] Demo command: OK
+[20:12:18.065][TX] pix set 1 215 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:18.077][RX] Demo command: OK
+[20:12:20.719][TX] pix set 1 25 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:20.741][RX] Demo command: OK
+[20:12:20.920][TX] pix set 1 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:20.931][RX] Demo command: OK
+[20:12:23.702][TX] pix set 1 256 255 0 1000 0 0 0 0 128 0<CR>
+[20:12:23.732][RX] Demo command: OK
+[20:12:25.132][TX] pix set 1 256 113 0 1000 0 0 0 0 128 0<CR>
+[20:12:25.142][RX] Demo command: OK
+[20:12:26.109][TX] pix set 1 256 -24 0 1000 0 0 0 0 128 0<CR>
+[20:12:26.151][RX] Demo command: OK
+[20:12:26.884][TX] pix set 1 256 -84 0 1000 0 0 0 0 128 0<CR>
+[20:12:26.915][RX] Demo command: OK
+[20:12:27.882][TX] pix set 1 256 -84 0 1000 0 0 0 0 128 0<CR>
+[20:12:27.933][RX] Demo command: OK
+[20:12:29.088][TX] pix set 1 256 0 0 1000 0 0 0 0 128 0<CR>
+[20:12:29.142][RX] Demo command: OK
+[20:12:30.536][TX] pix set 1 256 0 1 1000 0 0 0 0 128 0<CR>
+[20:12:30.543][RX] Demo command: OK
+[20:12:32.882][TX] pix set 1 256 0 1 2000 0 0 0 0 128 0<CR>
+[20:12:32.904][RX] Demo command: OK
+[20:12:35.072][TX] pix set 1 256 0 0 2000 0 0 0 0 128 0<CR>
+[20:12:35.138][RX] Demo command: OK
+[20:12:55.634][SYS] UDP 已监听 6000 · console
+[20:12:55.635][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[20:12:55.636][TX] status<CR>
+[20:12:55.675][RX] Scene: 2
+[20:12:55.675][RX] PIX mode: 0
+[20:12:55.675][RX] GEO mode: 1
+[20:12:55.675][RX] Output mode: 0
+[20:12:55.675][RX] Requested video fps: 30
+[20:12:55.675][RX] Video divisor: 1
+[20:12:55.675][RX] Monitor Hz: 100
+[20:12:55.675][RX] VIN camera0 frames: 2657
+[20:12:55.675][RX] VIN camera1 frames: 2588
+[20:12:55.675][RX] VIN CH0 frames: 2656
+[20:12:55.675][RX] VIN CH2 frames: 0
+[20:12:55.675][RX] VIN CH0 overflow: 0
+[20:12:55.676][RX] VIN CH2 overflow: 0
+[20:12:55.676][RX] ETH peer IP: 0x00000000
+[20:12:55.676][RX] ETH peer port: 0
+[20:12:55.676][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.1.2', 6000]
+[20:12:55.676][RX] ETH STATUS: 0x00000002
+[20:12:55.676][RX] Video skips (current window): 0
+[20:12:55.676][RX] Monitor sequence: 18130
+[20:12:55.676][RX] Monitor dropped records: 18130
+[20:12:55.676][RX] mtime: 39159340947
+[20:12:55.676][RX] Demo command: OK
+[20:14:44.733][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:14:44.733][TX] status<CR>
+[20:14:44.773][RX] Scene: 2
+[20:14:44.773][RX] PIX mode: 0
+[20:14:44.773][RX] GEO mode: 1
+[20:14:44.773][RX] Output mode: 0
+[20:14:44.773][RX] Requested video fps: 30
+[20:14:44.773][RX] Video divisor: 1
+[20:14:44.773][RX] Monitor Hz: 100
+[20:14:44.773][RX] VIN camera0 frames: 4371
+[20:14:44.773][RX] VIN camera1 frames: 4302
+[20:14:44.773][RX] VIN CH0 frames: 4370
+[20:14:44.773][RX] VIN CH2 frames: 0
+[20:14:44.773][RX] VIN CH0 overflow: 0
+[20:14:44.773][RX] VIN CH2 overflow: 0
+[20:14:44.773][RX] ETH peer IP: 0x00000000
+[20:14:44.773][RX] ETH peer port: 0
+[20:14:44.773][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:14:44.773][RX] ETH STATUS: 0x00000002
+[20:14:44.773][RX] Video skips (current window): 0
+[20:14:44.773][RX] Monitor sequence: 29038
+[20:14:44.773][RX] Monitor dropped records: 29038
+[20:14:44.773][RX] mtime: 50068585890
+[20:14:44.773][RX] Demo command: OK
+[20:14:47.581][SYS] UDP 已监听 6000 · console
+[20:14:47.582][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:14:47.624][RX] Scene: 2
+[20:14:47.624][RX] PIX mode: 0
+[20:14:47.624][RX] GEO mode: 1
+[20:14:47.624][RX] Output mode: 0
+[20:14:47.624][RX] Requested video fps: 30
+[20:14:47.624][RX] Video divisor: 1
+[20:14:47.624][RX] Monitor Hz: 100
+[20:14:47.624][RX] VIN camera0 frames: 4416
+[20:14:47.624][RX] VIN camera1 frames: 4347
+[20:14:47.624][RX] VIN CH0 frames: 4415
+[20:14:47.624][RX] VIN CH2 frames: 0
+[20:14:47.624][RX] VIN CH0 overflow: 0
+[20:14:47.624][RX] VIN CH2 overflow: 0
+[20:14:47.624][RX] ETH peer IP: 0x00000000
+[20:14:47.624][RX] ETH peer port: 0
+[20:14:47.624][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:14:47.624][RX] ETH STATUS: 0x00000002
+[20:14:47.624][RX] Video skips (current window): 0
+[20:14:47.624][RX] Monitor sequence: 29322
+[20:14:47.624][RX] Monitor dropped records: 29323
+[20:14:47.624][RX] mtime: 50353450977
+[20:14:47.624][RX] Demo command: OK
+[20:14:47.633][TX] status<CR>
+[20:14:49.292][SYS] UDP 已监听 6000 · console
+[20:14:49.293][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:14:49.293][TX] status<CR>
+[20:14:49.333][RX] Scene: 2
+[20:14:49.333][RX] PIX mode: 0
+[20:14:49.333][RX] GEO mode: 1
+[20:14:49.333][RX] Output mode: 0
+[20:14:49.333][RX] Requested video fps: 30
+[20:14:49.333][RX] Video divisor: 1
+[20:14:49.333][RX] Monitor Hz: 100
+[20:14:49.333][RX] VIN camera0 frames: 4443
+[20:14:49.333][RX] VIN camera1 frames: 4374
+[20:14:49.333][RX] VIN CH0 frames: 4442
+[20:14:49.333][RX] VIN CH2 frames: 0
+[20:14:49.333][RX] VIN CH0 overflow: 0
+[20:14:49.333][RX] VIN CH2 overflow: 0
+[20:14:49.333][RX] ETH peer IP: 0x00000000
+[20:14:49.333][RX] ETH peer port: 0
+[20:14:49.333][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:14:49.333][RX] ETH STATUS: 0x00000002
+[20:14:49.333][RX] Video skips (current window): 0
+[20:14:49.333][RX] Monitor sequence: 29493
+[20:14:49.333][RX] Monitor dropped records: 29494
+[20:14:49.333][RX] mtime: 50524549738
+[20:14:49.333][RX] Demo command: OK
+[20:14:51.369][SYS] UDP 已监听 6000 · console
+[20:14:51.370][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:14:51.370][TX] status<CR>
+[20:14:51.409][RX] Scene: 2
+[20:14:51.409][RX] PIX mode: 0
+[20:14:51.409][RX] GEO mode: 1
+[20:14:51.409][RX] Output mode: 0
+[20:14:51.409][RX] Requested video fps: 30
+[20:14:51.409][RX] Video divisor: 1
+[20:14:51.409][RX] Monitor Hz: 100
+[20:14:51.409][RX] VIN camera0 frames: 4475
+[20:14:51.409][RX] VIN camera1 frames: 4406
+[20:14:51.409][RX] VIN CH0 frames: 4474
+[20:14:51.409][RX] VIN CH2 frames: 0
+[20:14:51.409][RX] VIN CH0 overflow: 0
+[20:14:51.409][RX] VIN CH2 overflow: 0
+[20:14:51.409][RX] ETH peer IP: 0x00000000
+[20:14:51.409][RX] ETH peer port: 0
+[20:14:51.409][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:14:51.409][RX] ETH STATUS: 0x00000002
+[20:14:51.409][RX] Video skips (current window): 0
+[20:14:51.409][RX] Monitor sequence: 29701
+[20:14:51.409][RX] Monitor dropped records: 29701
+[20:14:51.409][RX] mtime: 50732204058
+[20:14:51.409][RX] Demo command: OK
+[20:16:09.692][RX] Demo command: OK
+[20:16:09.708][TX] geo set 0 0 500 500 0 0 0 0<CR>
+[20:18:40.648][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:18:40.648][TX] status<CR>
+[20:18:40.687][RX] Scene: 2
+[20:18:40.687][RX] PIX mode: 0
+[20:18:40.687][RX] GEO mode: 0
+[20:18:40.687][RX] Output mode: 0
+[20:18:40.687][RX] Requested video fps: 30
+[20:18:40.687][RX] Video divisor: 1
+[20:18:40.687][RX] Monitor Hz: 100
+[20:18:40.687][RX] VIN camera0 frames: 8075
+[20:18:40.687][RX] VIN camera1 frames: 8005
+[20:18:40.688][RX] VIN CH0 frames: 8074
+[20:18:40.688][RX] VIN CH2 frames: 0
+[20:18:40.688][RX] VIN CH0 overflow: 0
+[20:18:40.688][RX] VIN CH2 overflow: 0
+[20:18:40.688][RX] ETH peer IP: 0x00000000
+[20:18:40.688][RX] ETH peer port: 0
+[20:18:40.688][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:18:40.688][RX] ETH STATUS: 0x00000002
+[20:18:40.688][RX] Video skips (current window): 0
+[20:18:40.688][RX] Monitor sequence: 52625
+[20:18:40.688][RX] Monitor dropped records: 52625
+[20:18:40.688][RX] mtime: 73658891504
+[20:18:40.688][RX] Demo command: OK
+[20:19:36.710][SYS] UDP 已监听 6000 · console
+[20:19:36.711][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:19:36.711][TX] status<CR>
+[20:19:36.751][RX] Scene: 2
+[20:19:36.751][RX] PIX mode: 0
+[20:19:36.751][RX] GEO mode: 0
+[20:19:36.751][RX] Output mode: 0
+[20:19:36.751][RX] Requested video fps: 30
+[20:19:36.751][RX] Video divisor: 1
+[20:19:36.751][RX] Monitor Hz: 100
+[20:19:36.751][RX] VIN camera0 frames: 8956
+[20:19:36.751][RX] VIN camera1 frames: 8886
+[20:19:36.751][RX] VIN CH0 frames: 8955
+[20:19:36.751][RX] VIN CH2 frames: 0
+[20:19:36.751][RX] VIN CH0 overflow: 0
+[20:19:36.751][RX] VIN CH2 overflow: 0
+[20:19:36.751][RX] ETH peer IP: 0x00000000
+[20:19:36.751][RX] ETH peer port: 0
+[20:19:36.751][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:19:36.751][RX] ETH STATUS: 0x00000002
+[20:19:36.751][RX] Video skips (current window): 0
+[20:19:36.751][RX] Monitor sequence: 58230
+[20:19:36.751][RX] Monitor dropped records: 58231
+[20:19:36.751][RX] mtime: 79264962920
+[20:19:36.751][RX] Demo command: OK
+[20:19:37.288][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:19:37.288][TX] status<CR>
+[20:19:37.327][RX] Scene: 2
+[20:19:37.327][RX] PIX mode: 0
+[20:19:37.327][RX] GEO mode: 0
+[20:19:37.327][RX] Output mode: 0
+[20:19:37.327][RX] Requested video fps: 30
+[20:19:37.327][RX] Video divisor: 1
+[20:19:37.327][RX] Monitor Hz: 100
+[20:19:37.327][RX] VIN camera0 frames: 8965
+[20:19:37.327][RX] VIN camera1 frames: 8895
+[20:19:37.327][RX] VIN CH0 frames: 8964
+[20:19:37.327][RX] VIN CH2 frames: 0
+[20:19:37.327][RX] VIN CH0 overflow: 0
+[20:19:37.327][RX] VIN CH2 overflow: 0
+[20:19:37.327][RX] ETH peer IP: 0x00000000
+[20:19:37.327][RX] ETH peer port: 0
+[20:19:37.327][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:19:37.327][RX] ETH STATUS: 0x00000002
+[20:19:37.327][RX] Video skips (current window): 0
+[20:19:37.327][RX] Monitor sequence: 58288
+[20:19:37.327][RX] Monitor dropped records: 58288
+[20:19:37.327][RX] mtime: 79322623875
+[20:19:37.327][RX] Demo command: OK
+[20:19:37.527][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:19:37.527][TX] status<CR>
+[20:19:37.574][RX] Scene: 2
+[20:19:37.574][RX] PIX mode: 0
+[20:19:37.574][RX] GEO mode: 0
+[20:19:37.574][RX] Output mode: 0
+[20:19:37.574][RX] Requested video fps: 30
+[20:19:37.574][RX] Video divisor: 1
+[20:19:37.574][RX] Monitor Hz: 100
+[20:19:37.574][RX] VIN camera0 frames: 8969
+[20:19:37.574][RX] VIN camera1 frames: 8899
+[20:19:37.574][RX] VIN CH0 frames: 8968
+[20:19:37.574][RX] VIN CH2 frames: 0
+[20:19:37.574][RX] VIN CH0 overflow: 0
+[20:19:37.574][RX] VIN CH2 overflow: 0
+[20:19:37.574][RX] ETH peer IP: 0x00000000
+[20:19:37.574][RX] ETH peer port: 0
+[20:19:37.574][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:19:37.574][RX] ETH STATUS: 0x00000002
+[20:19:37.574][RX] Video skips (current window): 0
+[20:19:37.574][RX] Monitor sequence: 58312
+[20:19:37.574][RX] Monitor dropped records: 58312
+[20:19:37.574][RX] mtime: 79346565881
+[20:19:37.574][RX] Demo command: OK
+[20:19:37.723][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:19:37.723][TX] status<CR>
+[20:19:37.762][RX] Scene: 2
+[20:19:37.762][RX] PIX mode: 0
+[20:19:37.762][RX] GEO mode: 0
+[20:19:37.762][RX] Output mode: 0
+[20:19:37.763][RX] Requested video fps: 30
+[20:19:37.763][RX] Video divisor: 1
+[20:19:37.763][RX] Monitor Hz: 100
+[20:19:37.763][RX] VIN camera0 frames: 8972
+[20:19:37.763][RX] VIN camera1 frames: 8902
+[20:19:37.763][RX] VIN CH0 frames: 8971
+[20:19:37.763][RX] VIN CH2 frames: 0
+[20:19:37.763][RX] VIN CH0 overflow: 0
+[20:19:37.763][RX] VIN CH2 overflow: 0
+[20:19:37.763][RX] ETH peer IP: 0x00000000
+[20:19:37.763][RX] ETH peer port: 0
+[20:19:37.763][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:19:37.763][RX] ETH STATUS: 0x00000002
+[20:19:37.763][RX] Video skips (current window): 0
+[20:19:37.763][RX] Monitor sequence: 58331
+[20:19:37.763][RX] Monitor dropped records: 58332
+[20:19:37.763][RX] mtime: 79366138006
+[20:19:37.763][RX] Demo command: OK
+[20:19:37.910][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:19:37.911][TX] status<CR>
+[20:19:37.950][RX] Scene: 2
+[20:19:37.950][RX] PIX mode: 0
+[20:19:37.950][RX] GEO mode: 0
+[20:19:37.950][RX] Output mode: 0
+[20:19:37.950][RX] Requested video fps: 30
+[20:19:37.950][RX] Video divisor: 1
+[20:19:37.950][RX] Monitor Hz: 100
+[20:19:37.950][RX] VIN camera0 frames: 8975
+[20:19:37.950][RX] VIN camera1 frames: 8905
+[20:19:37.950][RX] VIN CH0 frames: 8974
+[20:19:37.950][RX] VIN CH2 frames: 0
+[20:19:37.950][RX] VIN CH0 overflow: 0
+[20:19:37.950][RX] VIN CH2 overflow: 0
+[20:19:37.950][RX] ETH peer IP: 0x00000000
+[20:19:37.950][RX] ETH peer port: 0
+[20:19:37.950][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:19:37.950][RX] ETH STATUS: 0x00000002
+[20:19:37.950][RX] Video skips (current window): 0
+[20:19:37.950][RX] Monitor sequence: 58350
+[20:19:37.950][RX] Monitor dropped records: 58350
+[20:19:37.950][RX] mtime: 79384897251
+[20:19:37.950][RX] Demo command: OK
+[20:19:38.938][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.5.31', 6000]
+[20:19:38.938][TX] status<CR>
+[20:19:38.977][RX] Scene: 2
+[20:19:38.977][RX] PIX mode: 0
+[20:19:38.977][RX] GEO mode: 0
+[20:19:38.977][RX] Output mode: 0
+[20:19:38.977][RX] Requested video fps: 30
+[20:19:38.977][RX] Video divisor: 1
+[20:19:38.977][RX] Monitor Hz: 100
+[20:19:38.977][RX] VIN camera0 frames: 8991
+[20:19:38.977][RX] VIN camera1 frames: 8921
+[20:19:38.977][RX] VIN CH0 frames: 8990
+[20:19:38.977][RX] VIN CH2 frames: 0
+[20:19:38.977][RX] VIN CH0 overflow: 0
+[20:19:38.977][RX] VIN CH2 overflow: 0
+[20:19:38.977][RX] ETH peer IP: 0x00000000
+[20:19:38.977][RX] ETH peer port: 0
+[20:19:38.977][SYS] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.5.31', 6000]
+[20:19:38.977][RX] ETH STATUS: 0x00000002
+[20:19:38.977][RX] Video skips (current window): 0
+[20:19:38.977][RX] Monitor sequence: 58453
+[20:19:38.977][RX] Monitor dropped records: 58453
+[20:19:38.977][RX] mtime: 79487599953
+[20:19:38.977][RX] Demo command: OK

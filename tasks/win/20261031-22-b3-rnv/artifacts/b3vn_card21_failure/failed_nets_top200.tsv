@@ -1,0 +1,201 @@
+net	driver (vendor TX/TY coordinates)	loads	unrouted_loads
+_$$_GND_$$_		34330	34330
+_$$_VCC_$$_		22108	22108
+u_npu/u_conv/u_datapath/u_accum/g_channel[0].r4_first_r	CLMA_213_1045:Q3 TX: 35 TY: 174	2048	1497
+media_apb_paddr_w[2]	CLMA_417_649:Q3 TX: 69 TY: 108	1851	1229
+rst_mem_core_n_w	CLMA_519_655:CR0 TX: 86 TY: 109	1700	1070
+u_npu/u_conv/u_datapath/accum_valid_w	CLMA_393_1026:CR0 TX: 65 TY: 171	1141	1011
+u_cpu/u_dcache/buffer_addr_r [13]	CLMA_327_378:Q1 TX: 54 TY: 63	1344	1000
+u_npu/u_conv/u_datapath/sum_tag_w [48]	CLMA_399_877:CR3 TX: 66 TY: 146	1070	966
+media_apb_paddr_w[3]	CLMA_417_649:Q2 TX: 69 TY: 108	1446	889
+rst_sys_n_w	CLMA_429_619:CR0 TX: 71 TY: 103	4392	867
+rst_mem_n_w	CLMS_711_505:CR0 TX: 118 TY: 84	1336	722
+u_mem/u_perf_mon/soft_reset_w	CLMA_477_720:Y2 TX: 79 TY: 120	727	694
+media_apb_paddr_w[5]	CLMA_429_708:Q0 TX: 71 TY: 118	936	667
+u_npu/u_conv/u_datapath/quant_tag_w [28]	CLMA_219_1062:Q3 TX: 36 TY: 177	640	640
+u_mem/u_perf_mon/start_w	CLMS_447_859:Y2 TX: 74 TY: 143	763	606
+u_mem/u_xbar/w_port_r [0]	CLMA_447_648:Q0 TX: 74 TY: 108	598	593
+u_mem/u_xbar/w_port_r [2]	CLMA_423_582:Q0 TX: 70 TY: 97	598	583
+u_cpu/u_dcache/buffer_addr_r [12]	CLMA_327_373:CR2 TX: 54 TY: 62	1344	547
+u_ddr3/ddrc_rstn	CLMA_429_588:CR0 TX: 71 TY: 98	862	545
+u_npu/u_conv/u_datapath/quant_valid_w	CLMA_423_1026:Y2 TX: 70 TY: 171	546	544
+u_npu/u_conv/u_datapath/u_window/a4_valid_r	CLMA_369_996:CR2 TX: 61 TY: 166	734	518
+u_cpu/u_dcache/N1076	CLMA_387_420:Y1 TX: 64 TY: 70	512	512
+media_apb_paddr_w[4]	CLMA_405_696:Q3 TX: 67 TY: 116	718	506
+u_cpu/u_dcache/N1000	CLMA_231_414:Y0 TX: 38 TY: 69	1024	498
+u_cpu/u_dcache/_N268554	CLMA_267_408:CR2 TX: 44 TY: 68	768	495
+u_mem/u_xbar/u_regs/snapshot_w	CLMA_339_631:Y1 TX: 56 TY: 105	953	494
+u_cpu/u_dcache/_N268555	CLMA_267_408:Y2 TX: 44 TY: 68	768	494
+u_npu/u_write_dma/data_accept_w_1	CLMA_447_942:Q3 TX: 74 TY: 157	488	488
+rst_npu_n_w	CLMS_207_931:CR0 TX: 34 TY: 155	536	477
+u_cpu/u_dcache/N658	CLMA_321_384:CR0 TX: 53 TY: 64	673	476
+u_npu/u_conv/u_datapath/u_result_quant/prepare_phase_r[1] [0]	CLMS_207_1057:Q2 TX: 34 TY: 176	548	457
+u_mem/u_xbar/g_port[6].w_addr_w [1]	CLMA_423_630:Y3 TX: 70 TY: 105	705	440
+u_mem/u_xbar/u_rbuf/skid_valid_r [6]	CLMA_543_612:CR3 TX: 90 TY: 102	456	422
+u_mem/u_xbar/g_port[6].w_addr_w [0]	CLMA_423_630:CR3 TX: 70 TY: 105	705	415
+u_cpu/u_dcache/buffer_addr_r [11]	CLMA_327_373:Q2 TX: 54 TY: 62	1050	410
+u_mem/u_xbar/g_port[6].w_addr_w [3]	CLMA_417_631:Y0 TX: 69 TY: 105	705	409
+u_disp/u_regs/N649	CLMA_423_618:Y3 TX: 70 TY: 103	402	390
+u_cpu/u_dcache/N996	CLMA_201_427:Y1 TX: 33 TY: 71	1024	389
+u_mem/u_xbar/g_port[6].w_addr_w [2]	CLMA_417_631:CR0 TX: 69 TY: 105	705	375
+u_cpu/u_dcache/lookup_miss_w	CLMA_351_385:Y0 TX: 58 TY: 64	1038	339
+u_npu/u_conv/u_datapath/u_result_quant/prepare_phase_r[1] [1]	CLMS_195_1051:Q3 TX: 32 TY: 175	548	336
+u_cpu/u_dcache/lookup_lru_w	CLMS_93_421:Y1 TX: 15 TY: 70	1026	335
+u_npu/u_conv/u_datapath/quant_tag_w [26]	CLMA_249_1080:CR0 TX: 41 TY: 180	321	321
+u_cpu/u_dcache/N651	CLMS_291_391:CR3 TX: 48 TY: 65	514	297
+u_cpu/u_dcache/N1062	CLMA_387_420:CR1 TX: 64 TY: 70	512	293
+u_mem/u_p6_arb/w_owner_r	CLMA_453_649:CR0 TX: 75 TY: 108	293	292
+u_mem/u_xbar/w_port_r [1]	CLMA_417_642:Q0 TX: 69 TY: 107	310	290
+u_ddr3/u_ips_ddrc_top/mcdq_wdatapath/data_out [0]	CLMS_573_619:CR0 TX: 95 TY: 103	290	290
+u_npu/u_conv/serial_valid_r	CLMA_477_978:CR0 TX: 79 TY: 163	318	285
+u_mem/u_xbar/N4755	CLMS_363_601:Y1 TX: 60 TY: 100	284	283
+u_vin/g_channel[0].u_channel/fifo_read_slot_r	CLMS_321_685:CR2 TX: 53 TY: 114	417	267
+u_cpu/u_core/d_data_w [49]	CLMA_471_354:Y0 TX: 78 TY: 59	271	266
+u_npu/u_conv/u_datapath/writeback_valid_w	CLMA_441_1050:CR2 TX: 73 TY: 175	258	258
+u_cpu/u_dcache/N1100	CLMA_315_396:Y0 TX: 52 TY: 66	512	257
+u_npu/u_conv/dp_result_rd_index_w [0]	CLMA_393_948:Q0 TX: 65 TY: 158	256	256
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [1]	CLMA_399_924:Q3 TX: 66 TY: 154	256	256
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].rd_segment_output_r [0]	CLMS_405_961:Q3 TX: 67 TY: 160	256	256
+u_npu/u_conv/u_datapath/u_writeback/rd_en_w	CLMA_399_1092:Y0 TX: 66 TY: 182	256	256
+u_npu/u_write_dma/_N515	CLMA_417_1153:CR0 TX: 69 TY: 192	256	256
+u_npu/u_conv/N1388	CLMA_465_973:CR3 TX: 77 TY: 162	259	255
+u_npu/u_conv/u_datapath/u_weight_store/N13	CLMA_465_966:Y0 TX: 77 TY: 161	256	250
+u_npu/u_conv/u_datapath/u_accum/g_channel[0].r4_valid_r	CLMS_363_1027:CR2 TX: 60 TY: 171	258	249
+u_npu/u_conv/u_datapath/u_weight_store/N37	CLMA_465_966:Y1 TX: 77 TY: 161	256	246
+u_geo/pixel_fire_w	CLMA_597_702:Y1 TX: 99 TY: 117	256	245
+u_npu/u_conv/u_datapath/u_weight_store/N85	CLMA_465_966:Y2 TX: 77 TY: 161	254	240
+u_npu/u_conv/u_datapath/u_weight_store/N25	CLMA_465_966:CR1 TX: 77 TY: 161	256	237
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r [0]	CLMA_387_942:Q3 TX: 64 TY: 157	256	233
+u_cpu/u_core/d_data_w [50]	CLMA_441_361:Y2 TX: 73 TY: 60	271	231
+u_cpu/u_icache/N33	CLMS_561_415:Y3 TX: 93 TY: 69	512	230
+u_npu/u_descriptor/N223	CLMA_399_1002:Y2 TX: 66 TY: 167	238	230
+u_npu/u_conv/N2336	CLMA_465_973:Y3 TX: 77 TY: 162	257	227
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [0]	CLMA_399_936:Q2 TX: 66 TY: 156	256	226
+u_eth/u_write_dma/N61	CLMA_591_637:Y1 TX: 98 TY: 106	266	225
+u_npu/u_conv/N793	CLMA_453_991:Y2 TX: 75 TY: 165	251	224
+u_mem/u_xbar/u_rbuf/N6413	CLMS_513_619:CR1 TX: 85 TY: 103	252	222
+u_npu/u_axi_bridge/u_r_fifo/read_w	CLMA_441_1014:Y3 TX: 73 TY: 169	273	221
+u_npu/u_conv/u_datapath/u_weight_store/N73	CLMA_465_966:CR2 TX: 77 TY: 161	254	219
+u_npu/u_conv/u_datapath/residual_rd_valid_w	CLMA_375_1020:CR3 TX: 62 TY: 170	219	219
+u_eth/u_tx/N1528	CLMA_663_642:CR0 TX: 110 TY: 107	258	215
+u_npu/u_conv/u_datapath/u_weight_store/N61	CLMA_465_966:Y3 TX: 77 TY: 161	256	212
+u_mem/u_xbar/u_regs/clear_w_inv	CLMA_369_667:Y2 TX: 61 TY: 111	665	211
+u_npu/soft_reset_w	CLMA_393_1014:Y1 TX: 65 TY: 169	341	205
+media_apb_paddr_w[10]	CLMA_441_642:Q3 TX: 73 TY: 107	232	205
+u_npu/u_conv/u_datapath/u_weight_store/N3	CLMA_465_966:CR0 TX: 77 TY: 161	255	203
+u_mem/u_xbar/u_rbuf/pending_error_r	CLMA_537_612:Q3 TX: 89 TY: 102	270	200
+u_npu/u_conv/u_datapath/u_weight_store/N49	CLMA_465_966:CR3 TX: 77 TY: 161	254	198
+u_npu/u_nonconv/N1189	CLMA_453_1044:Y0 TX: 75 TY: 174	249	194
+u_npu/u_conv/u_datapath/quant_tag_w [36]	CLMA_273_1135:CR0 TX: 45 TY: 189	192	192
+u_npu/u_nonconv/upsample_r	CLMA_537_1057:Q3 TX: 89 TY: 176	293	190
+u_mem/u_xbar/u_regs/clear_w	CLMA_339_631:Y2 TX: 56 TY: 105	693	189
+u_cpu/u_dcache/N671	CLMA_321_384:Y0 TX: 53 TY: 64	669	187
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [0]	CLMA_399_924:Q0 TX: 66 TY: 154	256	187
+u_vin/u_msrc/u_buffer/head_load_w	CLMS_231_613:Y3 TX: 38 TY: 102	257	186
+u_npu/u_conv/dp_result_rd_index_w [4]	CLMA_393_954:Q0 TX: 65 TY: 159	256	182
+u_mem/u_xbar/u_rbuf/N6409	CLMA_543_612:Y0 TX: 90 TY: 102	242	179
+u_eth/u_write_dma/write_hold_r	CLMA_591_636:CR0 TX: 98 TY: 106	288	177
+media_apb_paddr_w[6]	CLMA_441_654:Q0 TX: 73 TY: 109	364	176
+media_apb_paddr_w[7]	CLMA_441_654:Q3 TX: 73 TY: 109	247	173
+u_disp/u_scan_fifo/head_load_w	CLMA_285_876:Y0 TX: 47 TY: 146	173	173
+u_vin/g_channel[1].u_channel/fifo_read_slot_r	CLMA_297_660:CR2 TX: 49 TY: 110	417	172
+u_npu/u_conv/u_datapath/writeback_tag_w [38]	CLMA_531_1038:Q0 TX: 88 TY: 173	258	168
+u_vin/u_p1/selected_w [0]	CLMA_351_648:Q0 TX: 58 TY: 108	336	166
+u_vin/g_channel[1].u_channel/u_write/write_hold_r	CLMA_297_660:CR3 TX: 49 TY: 110	290	164
+u_npu/cancel_w	CLMA_387_1026:Y1 TX: 64 TY: 171	186	163
+u_geo/u_wr/N61	CLMA_591_685:Y1 TX: 98 TY: 114	270	160
+u_cpu/u_dcache/read_slot_w [2]	CLMA_237_409:Y3 TX: 39 TY: 68	224	160
+u_cpu/u_icache/hit0_w	CLMA_603_271:Y0 TX: 100 TY: 45	614	157
+u_npu/u_conv/u_datapath/u_window/a3_valid_r	CLMA_369_996:CR3 TX: 61 TY: 166	235	157
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].rd_segment_output_r [1]	CLMS_393_967:Q0 TX: 65 TY: 161	256	155
+_N331	CLMS_531_637:CR0 TX: 88 TY: 106	349	151
+u_cpu/u_core/d_data_w [234]	CLMA_441_373:Y0 TX: 73 TY: 62	269	151
+u_mem/u_xbar/u_rbuf/N5961	CLMA_543_612:CR0 TX: 90 TY: 102	245	151
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].rd_segment_output_r [1]	CLMA_417_942:Q2 TX: 69 TY: 157	256	149
+u_npu/unused_apb_addr_w [2]	CLMA_405_960:Q2 TX: 67 TY: 160	206	148
+u_mem/u_xbar/w_count_r[2] [0]	CLMA_441_637:CR0 TX: 73 TY: 106	149	146
+u_cpu/u_dcache/read_slot_w [15]	CLMA_237_409:Y1 TX: 39 TY: 68	224	144
+u_mem/u_xbar/w_count_r[2] [1]	CLMA_483_643:Q3 TX: 80 TY: 107	148	144
+u_npu/unused_apb_addr_w [8]	CLMA_417_972:Q1 TX: 69 TY: 162	178	143
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].rd_segment_output_r [0]	CLMA_399_955:Q2 TX: 66 TY: 159	256	140
+u_cpu/u_dcache/scan_read_w	CLMA_285_426:Y3 TX: 47 TY: 71	176	140
+u_npu/u_conv/N2350	CLMA_465_990:Y1 TX: 77 TY: 165	223	139
+u_npu/conv_start_w	CLMA_423_1020:Y1 TX: 70 TY: 170	191	139
+u_npu/u_conv/u_datapath/u_result_quant/q_tag_r[7] [36]	CLMA_183_1026:CR2 TX: 30 TY: 171	689	138
+u_npu/u_conv/N2097	CLMS_375_1039:Y1 TX: 62 TY: 173	182	138
+u_npu/u_conv/u_datapath/writeback_tag_w [42]	CLMA_555_1081:Q0 TX: 92 TY: 180	258	136
+u_npu/u_conv/u_datapath/residual_rd_addr_w [4]	CLMA_237_1092:Y1 TX: 39 TY: 182	137	136
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [1]	CLMA_399_924:Q1 TX: 66 TY: 154	256	135
+u_npu/u_conv/u_datapath/u_result_quant/N7777	CLMA_213_1080:Y0 TX: 35 TY: 180	230	135
+u_cpu/u_dcache/read_slot_w [8]	CLMA_237_409:Y2 TX: 39 TY: 68	224	135
+u_mem/u_xbar/w_count_r[5] [3]	CLMA_537_673:CR1 TX: 89 TY: 112	147	135
+u_mem/u_xbar/u_rbuf/take_w [3]	CLMA_555_630:Y1 TX: 92 TY: 105	144	134
+u_npu/u_axi_bridge/u_r_fifo/read_bin_r [1]	CLMS_477_991:Q1 TX: 79 TY: 165	137	134
+u_cpu/u_dcache/N664	CLMS_291_391:Y3 TX: 48 TY: 65	513	133
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [0]	CLMA_399_936:Q3 TX: 66 TY: 156	256	133
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [1]	CLMS_393_961:Q2 TX: 65 TY: 160	256	133
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r [1]	CLMA_369_955:Q3 TX: 61 TY: 159	256	133
+u_mem/u_xbar/N634	CLMA_561_648:Y3 TX: 93 TY: 108	147	133
+u_mem/u_xbar/w_count_r[5] [2]	CLMA_537_673:Q1 TX: 89 TY: 112	147	132
+u_npu/u_conv/u_datapath/residual_rd_en_w	CLMA_375_1020:Y2 TX: 62 TY: 170	134	131
+u_vin/u_msrc/u_buffer/head_valid_r	CLMS_243_601:Q2 TX: 40 TY: 100	134	131
+u_cpu/u_icache/tag_write_w	CLMA_543_432:Y0 TX: 90 TY: 72	530	130
+u_npu/u_axi_bridge/u_w_fifo/read_bin_r [0]	CLMA_447_936:CR0 TX: 74 TY: 156	134	130
+u_mem/u_xbar/w_count_r[3] [3]	CLMS_477_661:Q3 TX: 79 TY: 110	132	130
+u_npu/start_w	CLMA_423_1008:Y1 TX: 70 TY: 168	324	129
+u_npu/u_conv/u_datapath/u_window/promote_w	CLMS_393_1033:Y1 TX: 65 TY: 172	152	129
+u_npu/u_axi_bridge/u_w_fifo/read_bin_r [1]	CLMS_447_919:CR0 TX: 74 TY: 153	134	129
+u_npu/u_conv/dp_result_rd_valid_w	CLMA_363_1050:CR1 TX: 60 TY: 175	133	129
+u_disp/soft_clear_w	CLMA_465_720:Q1 TX: 77 TY: 120	449	128
+u_npu/u_conv/u_conv_write/read_ptr_r [1]	CLMA_393_1140:Q0 TX: 65 TY: 190	129	128
+u_npu/u_conv/u_datapath/residual_rd_addr_w [0]	CLMA_219_1134:Y0 TX: 36 TY: 189	128	128
+u_npu/u_conv/u_datapath/residual_rd_addr_w [1]	CLMA_219_1146:Y2 TX: 36 TY: 191	128	128
+u_npu/u_conv/u_datapath/residual_rd_addr_w [2]	CLMA_219_1146:CR2 TX: 36 TY: 191	128	128
+u_npu/u_conv/u_datapath/residual_rd_addr_w [3]	CLMA_219_1134:CR0 TX: 36 TY: 189	128	128
+u_npu/u_conv/u_datapath/u_residual_buffer/N209	CLMA_375_1020:Y3 TX: 62 TY: 170	128	128
+u_npu/u_conv/u_datapath/u_writeback/rd_plane_r [1]	CLMS_405_961:CR2 TX: 67 TY: 160	128	128
+u_vin/u_ch2/fifo_read_slot_r	CLMA_267_582:Q2 TX: 44 TY: 97	321	127
+u_cpu/u_icache/N36	CLMA_561_414:Y1 TX: 93 TY: 69	512	126
+u_npu/u_conv/u_datapath/u_result_quant/N32443	CLMA_315_1062:Y0 TX: 52 TY: 177	128	126
+u_mem/u_xbar/w_count_r[1] [3]	CLMS_423_649:Q3 TX: 70 TY: 108	147	125
+u_npu/u_conv/u_conv_write/read_ptr_r [0]	CLMA_393_1140:CR0 TX: 65 TY: 190	129	125
+u_npu/u_conv/u_datapath/u_window/a3_pixel_r [0]	CLMA_393_978:Q1 TX: 65 TY: 163	128	125
+u_geo/N161	CLMS_579_697:Y3 TX: 96 TY: 116	147	124
+u_mem/u_xbar/w_count_r[2] [2]	CLMA_483_643:Q1 TX: 80 TY: 107	147	124
+u_mem/u_xbar/w_count_r[3] [1]	CLMA_477_654:Q0 TX: 79 TY: 109	134	123
+u_cpu/u_core/u_frontend/push_count_w [1]	CLMA_513_324:Y2 TX: 85 TY: 54	685	122
+u_cpu/u_core/d_data_w [55]	CLMS_447_379:Y2 TX: 74 TY: 63	277	122
+u_mem/u_xbar/w_count_r[6] [0]	CLMA_537_655:Q0 TX: 89 TY: 109	148	121
+u_mem/u_perf_mon/N2836	CLMA_477_888:CR0 TX: 79 TY: 148	357	120
+u_npu/u_axi_bridge/u_r_fifo/read_bin_r [0]	CLMA_393_996:CR2 TX: 65 TY: 166	138	120
+u_vin/u_p1/selected_w [1]	CLMA_351_648:CR0 TX: 58 TY: 108	336	119
+u_cpu/u_dcache/read_slot_w [13]	CLMA_219_415:Y1 TX: 36 TY: 69	224	119
+u_npu/u_axi_bridge/u_r_fifo/write_bin_r [2]	CLMA_495_822:CR1 TX: 82 TY: 137	133	119
+u_mem/u_gw/N179	CLMA_429_570:CR2 TX: 71 TY: 95	121	119
+u_npu/unused_apb_addr_w [3]	CLMA_417_961:Q0 TX: 69 TY: 160	174	118
+u_cpu/u_core/m_instr_r [20]	CLMA_477_438:Q2 TX: 79 TY: 73	164	118
+u_mem/u_xbar/w_count_r[6] [1]	CLMA_537_655:Q1 TX: 89 TY: 109	148	117
+u_mem/u_xbar/u_rbuf/skid_valid_r [3]	CLMA_555_625:CR2 TX: 92 TY: 104	143	117
+u_ddr3/u_ddrphy_top/calib_done	CLMA_681_894:Q3 TX: 113 TY: 149	535	116
+u_cpu/u_core/d_data_w [54]	CLMA_441_361:Y1 TX: 73 TY: 60	280	116
+u_mem/u_xbar/w_count_r[3] [2]	CLMS_477_661:Q2 TX: 79 TY: 110	133	116
+u_npu/u_nonconv/N1152	CLMA_465_1032:CR0 TX: 77 TY: 172	128	116
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].rd_segment_output_r [1]	CLMA_387_942:Q0 TX: 64 TY: 157	256	115
+u_mem/u_xbar/N427	CLMS_477_649:Y2 TX: 79 TY: 108	136	115
+u_npu/u_axi_bridge/u_r_fifo/read_bin_r [2]	CLMS_477_991:Q2 TX: 79 TY: 165	135	115
+u_npu/u_conv/dp_result_rd_index_w [3]	CLMA_393_948:Q3 TX: 65 TY: 158	256	114
+u_cpu/u_dcache/read_slot_w [14]	CLMA_237_402:Y0 TX: 39 TY: 67	224	114
+u_mem/u_xbar/g_port[3].w_read_w	CLMA_453_666:Y0 TX: 75 TY: 111	129	114
+u_ddr3/u_ddrphy_top/ddrphy_rst_n	CLMS_639_1147:CR0 TX: 106 TY: 191	1014	112
+u_cpu/u_dcache/victim_idx_r [4]	CLMA_261_414:Q1 TX: 43 TY: 69	258	112
+u_geo/coord_start_w	CLMA_567_702:Y0 TX: 94 TY: 117	217	112
+u_npu/u_conv/u_datapath/u_window/a3_d2_r	CLMA_417_948:Q2 TX: 69 TY: 158	192	112
+u_vin/g_channel[0].u_channel/u_write/write_hold_r	CLMA_201_654:CR1 TX: 33 TY: 109	291	111
+u_npu/u_conv/u_datapath/writeback_tag_w [39]	CLMA_531_1038:Q1 TX: 88 TY: 173	258	111
+u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].rd_segment_output_r [0]	CLMA_495_930:Q3 TX: 82 TY: 155	256	111
+u_npu/is_conv_r	CLMA_423_1026:Q3 TX: 70 TY: 171	151	111
+u_eth/u_regs/write_w	CLMA_495_666:Y0 TX: 82 TY: 111	120	111
+media_apb_paddr_w[9]	CLMA_441_654:Q1 TX: 73 TY: 109	218	110
+u_geo/N449	CLMS_597_685:Y1 TX: 99 TY: 114	192	110
+u_cpu/u_core/u_frontend/u_ib/read_ptr_r [1]	CLMS_507_361:Q0 TX: 84 TY: 60	287	109
+u_mem/u_xbar/u_rbuf/skid_valid_r [2]	CLMS_531_601:Q3 TX: 88 TY: 100	144	109

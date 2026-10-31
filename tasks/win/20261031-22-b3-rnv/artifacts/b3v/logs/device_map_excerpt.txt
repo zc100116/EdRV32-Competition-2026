@@ -53,9 +53,7 @@ W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit
 W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2) has been disconnected.
 W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2) has been disconnected.
 W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2_com) has been disconnected.
-Total device mapping takes 0.55 sec.
 Design 'edrv32_fpga_board_vision_top' has been successfully mapped to architecture-specific objects.
-Saving design to DB.
 W: Public-4010: Pcf file G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf has been covered.
 Action dev_map: Real time elapsed is 0h:1m:6s
 Action dev_map: CPU time elapsed is 0h:0m:1s

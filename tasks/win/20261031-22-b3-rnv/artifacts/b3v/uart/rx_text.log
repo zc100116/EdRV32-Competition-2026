@@ -1,0 +1,440 @@
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 5000fe71
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 5000fe71
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 29988 segments: 1
+Load result: PASS
+Run: 0x10000000
+Demo: demo_vision
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: c6d5ce84
+Compiler version: GCC 15.2.0
+VIN ID: 0x00010001
+PIX ID: 0x00020001
+GEO ID: 0x00030001
+DISP ID: 0x00050002
+ETH ID: 0x00070001
+MEM_XBAR ID: 0x00080001
+PERF_MON ID: 0x00090001
+Camera: 0
+Camera chip ID: 0x00005640
+Camera: 1
+Camera chip ID: 0x00005640
+Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+Demo commands: s2 | status | help
+PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+GEO: geo off | geo rotate | geo scale
+Output: output hdmi | output eth | output both | fps 1..60
+Monitor: sample 10..1000 (Hz), default 100
+KEY: KEY2 requires s2; KEY3 PIX; KEY4 GEO
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+Demo command: OK
+Demo command: OK
+Input error: GEO transform exceeds geo-spec 2.4 source tile coverage
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 1
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 2657
+VIN camera1 frames: 2588
+VIN CH0 frames: 2656
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 18130
+Monitor dropped records: 18130
+mtime: 39159340947
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 1
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 4371
+VIN camera1 frames: 4302
+VIN CH0 frames: 4370
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 29038
+Monitor dropped records: 29038
+mtime: 50068585890
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 1
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 4416
+VIN camera1 frames: 4347
+VIN CH0 frames: 4415
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 29322
+Monitor dropped records: 29323
+mtime: 50353450977
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 1
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 4443
+VIN camera1 frames: 4374
+VIN CH0 frames: 4442
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 29493
+Monitor dropped records: 29494
+mtime: 50524549738
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 1
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 4475
+VIN camera1 frames: 4406
+VIN CH0 frames: 4474
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 29701
+Monitor dropped records: 29701
+mtime: 50732204058
+Demo command: OK
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8075
+VIN camera1 frames: 8005
+VIN CH0 frames: 8074
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 52625
+Monitor dropped records: 52625
+mtime: 73658891504
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8956
+VIN camera1 frames: 8886
+VIN CH0 frames: 8955
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 58230
+Monitor dropped records: 58231
+mtime: 79264962920
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8965
+VIN camera1 frames: 8895
+VIN CH0 frames: 8964
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 58288
+Monitor dropped records: 58288
+mtime: 79322623875
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8969
+VIN camera1 frames: 8899
+VIN CH0 frames: 8968
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 58312
+Monitor dropped records: 58312
+mtime: 79346565881
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8972
+VIN camera1 frames: 8902
+VIN CH0 frames: 8971
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 58331
+Monitor dropped records: 58332
+mtime: 79366138006
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8975
+VIN camera1 frames: 8905
+VIN CH0 frames: 8974
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 58350
+Monitor dropped records: 58350
+mtime: 79384897251
+Demo command: OK
+Scene: 2
+PIX mode: 0
+GEO mode: 0
+Output mode: 0
+Requested video fps: 30
+Video divisor: 1
+Monitor Hz: 100
+VIN camera0 frames: 8991
+VIN camera1 frames: 8921
+VIN CH0 frames: 8990
+VIN CH2 frames: 0
+VIN CH0 overflow: 0
+VIN CH2 overflow: 0
+ETH peer IP: 0x00000000
+ETH peer port: 0
+ETH STATUS: 0x00000002
+Video skips (current window): 0
+Monitor sequence: 58453
+Monitor dropped records: 58453
+mtime: 79487599953
+Demo command: OK

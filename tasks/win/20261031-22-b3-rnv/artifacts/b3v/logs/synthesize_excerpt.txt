@@ -9198,8 +9198,6 @@ W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_
 W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N312 to u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N312_rnmt
 W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N823 to u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N823_rnmt
 Design 'edrv32_fpga_board_vision_top' has been successfully synthesized to architecture-specific objects.
-Saving design to DB.
-Saving design to edrv32_fpga_board_vision_top_syn.vm
 W: Timing-4086: Port 'eth_mdio_o' is not constrained, it is treated as combinational input.
 W: Timing-4087: Port 'eth_mdio_o' is not constrained, it is treated as combinational output.
 W: Timing-4087: Port 'i2c0_scl_o[0]' is not constrained, it is treated as combinational output.

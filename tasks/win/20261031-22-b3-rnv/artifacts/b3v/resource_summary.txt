@@ -1,36 +1,67 @@
-Device Map resources:
-Device Utilization Summary:
-+-------------------------------------------------------------------------+
-| Logic Utilization     | Used      | Available     | Utilization(%)     
-+-------------------------------------------------------------------------+
-| APM                   | 47        | 740           | 7                  
-| FF                    | 56372     | 319600        | 18                 
-| LUT                   | 62877     | 159800        | 40                 
-| Distributed RAM       | 922       | 39500         | 3                  
-| DRM                   | 97        | 415           | 24                 
-| IO                    | 137       | 400           | 35                 
-| RCKB                  | 2         | 40            | 5                  
-| SCANCHAIN             | 0         | 1             | 0                  
-| USCM                  | 8         | 32            | 25                 
-| CCS                   | 1         | 1             | 100                
-| ADC                   | 0         | 1             | 0                  
-| DDR_PHY               | 7         | 40            | 18                 
-| HSSTLP                | 0         | 2             | 0                  
-| GPLL                  | 5         | 10            | 50                 
-| PPLL                  | 2         | 10            | 20                 
-| DDRPHY_CPD            | 1         | 20            | 5                  
-| HCKB                  | 0         | 120           | 0                  
-| IOCKB                 | 0         | 40            | 0                  
-| MRCKB                 | 1         | 20            | 5                  
-| PCIE                  | 0         | 1             | 0                  
-| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 
-| ANALOG                | 0         | 1             | 0                  
-| TSERDES               | 14        | 80            | 18                 
-| KEYRAM                | 0         | 1             | 0                  
-+-------------------------------------------------------------------------+
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0                  
+| Use of ANALOG                     | 0         | 1             | 0                  
+| Use of APM                        | 47        | 740           | 7                  
+| Use of BKCL                       | 6         | 10            | 60                 
+| Use of CCS                        | 1         | 1             | 100                
+| Use of CLMA                       | 15929     | 30075         | 53                 
+|   FF                              | 42719     | 240600        | 18                 
+|   LUT                             | 51659     | 120300        | 43                 
+|   LUT-FF pairs                    | 23732     | 120300        | 20                 
+| Use of CLMS                       | 4845      | 9875          | 50                 
+|   FF                              | 13709     | 79000         | 18                 
+|   LUT                             | 15770     | 39500         | 40                 
+|   LUT-FF pairs                    | 7582      | 39500         | 20                 
+|   Distributed RAM                 | 922       | 39500         | 3                  
+| Use of DDRPHY_CPD                 | 1         | 20            | 5                  
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20                 
+| Use of DDR_PHY                    | 7         | 40            | 18                 
+| Use of DRM                        | 97        | 415           | 24                 
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0                  
+| Use of GPLL                       | 5         | 10            | 50                 
+| Use of GSEB                       | 0         | 512           | 0                  
+| Use of HARD0                      | 5543      | 25050         | 23                 
+| Use of HCKB                       | 25        | 120           | 21                 
+|  HCKB dataused                    | 0         | 120           | 0                  
+| Use of HCKMUX_TEST                | 0         | 10            | 0                  
+| Use of HSSTLP                     | 0         | 2             | 0                  
+| Use of IO                         | 137       | 400           | 35                 
+|   IOBD                            | 69        | 192           | 36                 
+|   IOBS                            | 68        | 208           | 33                 
+| Use of IOCKB                      | 0         | 40            | 0                  
+| Use of IOCKMUX_TEST               | 0         | 10            | 0                  
+| Use of IOLHR                      | 136       | 500           | 28                 
+| Use of KEYRAM                     | 0         | 1             | 0                  
+| Use of MFG_TEST                   | 0         | 1             | 0                  
+| Use of MRCKB                      | 1         | 20            | 5                  
+| Use of MRCKMUX_TEST               | 0         | 10            | 0                  
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0                  
+| Use of PCIE                       | 0         | 1             | 0                  
+| Use of PCKMUX_TEST                | 0         | 20            | 0                  
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0                  
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0                  
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0                  
+| Use of PPLL                       | 2         | 10            | 20                 
+| Use of PREGMUXC_TEST              | 0         | 3             | 0                  
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0                  
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0                  
+| Use of RCKB                       | 4         | 40            | 10                 
+|  RCKB dataused                    | 2         | 40            | 5                  
+| Use of RCKMUX_TEST                | 0         | 10            | 0                  
+| Use of SCANCHAIN                  | 0         | 1             | 0                  
+| Use of SCKMUX_TEST                | 0         | 20            | 0                  
+| Use of SFB                        | 0         | 5075          | 0                  
+| Use of SPAD                       | 0         | 8             | 0                  
+| Use of TSERDES                    | 14        | 80            | 18                 
+| Use of USCM                       | 10        | 32            | 32                 
+|  USCM dataused                    | 0         | 32            | 0                  
+| Use of USCMMUX_TEST               | 0         | 32            | 0                  
++-------------------------------------------------------------------------------------+
 
 
-Synthesis primitive usage:
 Cell Usage:
 GTP_APM_E2                   47 uses
 GTP_CLKBUFG                   3 uses
@@ -98,3 +129,110 @@ APMs:
 Total APMs = 47.00 of 740 (6.35%)
 
 Total I/O ports = 137 of 400 (34.25%)
+
+
+
+Hierarchy units [LUT, FF, distributed RAM, APM, DRM36K-equivalent]:
+{'depth': 0, 'path': 'edrv32_fpga_board_vision_top', 'name': 'edrv32_fpga_board_vision_top', 'values': [62631, 56428, 922, 47, 97]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_cpu', 'name': 'u_cpu', 'values': [22117, 10993, 143, 4, 18]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_cache_ctrl', 'name': 'u_cache_ctrl', 'values': [45, 161, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_core', 'name': 'u_core', 'values': [9693, 5400, 143, 4, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_dcache', 'name': 'u_dcache', 'values': [9465, 3613, 0, 0, 9]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_icache', 'name': 'u_icache', 'values': [2914, 1819, 0, 0, 9]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_ddr3', 'name': 'u_ddr3', 'values': [4774, 5222, 48, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_ddr3/u_ddrc_rstn_sync', 'name': 'u_ddrc_rstn_sync', 'values': [0, 2, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_ddr3/u_ddrphy_top', 'name': 'u_ddrphy_top', 'values': [3396, 3208, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_ddr3/u_ips_ddrc_top', 'name': 'u_ips_ddrc_top', 'values': [1378, 2012, 48, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_disp', 'name': 'u_disp', 'values': [2908, 3886, 0, 7, 8]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_blue', 'name': 'u_blue', 'values': [46, 60, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_control', 'name': 'u_control', 'values': [6, 19, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_dma', 'name': 'u_dma', 'values': [187, 139, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_fifo1_ram', 'name': 'u_fifo1_ram', 'values': [0, 0, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_fifo_ram', 'name': 'u_fifo_ram', 'values': [0, 0, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_green', 'name': 'u_green', 'values': [42, 53, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_params', 'name': 'u_params', 'values': [2, 56, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_perf0', 'name': 'u_perf0', 'values': [16, 96, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_perf1', 'name': 'u_perf1', 'values': [16, 96, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_perf2', 'name': 'u_perf2', 'values': [15, 95, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_perf5', 'name': 'u_perf5', 'values': [16, 97, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_perf6', 'name': 'u_perf6', 'values': [16, 96, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_read1_cnt', 'name': 'u_read1_cnt', 'values': [7, 30, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_read_cnt', 'name': 'u_read_cnt', 'values': [7, 30, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_reader', 'name': 'u_reader', 'values': [323, 396, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_red', 'name': 'u_red', 'values': [43, 53, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_regs', 'name': 'u_regs', 'values': [905, 706, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_scan', 'name': 'u_scan', 'values': [1092, 1102, 0, 7, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_scan1_fifo', 'name': 'u_scan1_fifo', 'values': [53, 346, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_scan_fifo', 'name': 'u_scan_fifo', 'values': [55, 347, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_timing', 'name': 'u_timing', 'values': [36, 22, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_underflow', 'name': 'u_underflow', 'values': [1, 4, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_underflow1', 'name': 'u_underflow1', 'values': [1, 4, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_eth', 'name': 'u_eth', 'values': [4082, 4482, 76, 0, 3]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_mdio', 'name': 'u_mdio', 'values': [60, 110, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_regs', 'name': 'u_regs', 'values': [1131, 1133, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_rx', 'name': 'u_rx', 'values': [739, 983, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_rx_buffer', 'name': 'u_rx_buffer', 'values': [0, 0, 0, 0, 1]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_rx_fifo', 'name': 'u_rx_fifo', 'values': [50, 90, 0, 0, 0.5]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_rx_front', 'name': 'u_rx_front', 'values': [45, 34, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_rx_packets', 'name': 'u_rx_packets', 'values': [23, 7, 18, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_rx_write', 'name': 'u_rx_write', 'values': [559, 489, 58, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_tx', 'name': 'u_tx', 'values': [1191, 1008, 0, 0, 1]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_tx_done', 'name': 'u_tx_done', 'values': [1, 4, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_tx_fifo', 'name': 'u_tx_fifo', 'values': [53, 100, 0, 0, 0.5]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_tx_front', 'name': 'u_tx_front', 'values': [71, 54, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_write_dma', 'name': 'u_write_dma', 'values': [155, 389, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_geo', 'name': 'u_geo', 'values': [3461, 3306, 0, 9, 16]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_bilinear', 'name': 'u_bilinear', 'values': [189, 79, 0, 9, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_bounds', 'name': 'u_bounds', 'values': [566, 487, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_coords', 'name': 'u_coords', 'values': [279, 140, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_range', 'name': 'u_range', 'values': [286, 275, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_rd', 'name': 'u_rd', 'values': [204, 130, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_read_address', 'name': 'u_read_address', 'values': [58, 70, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_regs', 'name': 'u_regs', 'values': [426, 283, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_source', 'name': 'u_source', 'values': [185, 7, 0, 0, 16]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_tiles', 'name': 'u_tiles', 'values': [226, 144, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_wr', 'name': 'u_wr', 'values': [290, 379, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_write_address', 'name': 'u_write_address', 'values': [58, 71, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_mem', 'name': 'u_mem', 'values': [11941, 10172, 610, 9, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_gw', 'name': 'u_gw', 'values': [941, 1116, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_p6_arb', 'name': 'u_p6_arb', 'values': [298, 7, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_perf_mon', 'name': 'u_perf_mon', 'values': [3845, 2552, 34, 9, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_xbar', 'name': 'u_xbar', 'values': [6857, 6497, 576, 0, 4]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_pix', 'name': 'u_pix', 'values': [5983, 9692, 0, 18, 11]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_pix/u_point1', 'name': 'u_point1', 'values': [148, 323, 0, 6, 3]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_pix/u_point2', 'name': 'u_point2', 'values': [284, 470, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_pix/u_regs', 'name': 'u_regs', 'values': [259, 173, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_pix/u_stage1', 'name': 'u_stage1', 'values': [2588, 4247, 0, 6, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_pix/u_stage2', 'name': 'u_stage2', 'values': [2590, 4247, 0, 6, 4]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_pll_sys', 'name': 'u_pll_sys', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_pll_video', 'name': 'u_pll_video', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_rgmii', 'name': 'u_rgmii', 'values': [10, 19, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_rgmii/u_pll_eth', 'name': 'u_pll_eth', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_sys', 'name': 'u_sys', 'values': [1916, 1661, 8, 0, 20]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_clint', 'name': 'u_clint', 'values': [345, 242, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_gpio', 'name': 'u_gpio', 'values': [226, 204, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_i2c', 'name': 'u_i2c', 'values': [54, 78, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_media_apb_async', 'name': 'u_media_apb_async', 'values': [59, 265, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_media_apb_bridge', 'name': 'u_media_apb_bridge', 'values': [87, 127, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_media_apb_decoder', 'name': 'u_media_apb_decoder', 'values': [137, 0, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_plic', 'name': 'u_plic', 'values': [202, 177, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_reset_ctrl', 'name': 'u_reset_ctrl', 'values': [10, 25, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_rom', 'name': 'u_rom', 'values': [63, 30, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_sram', 'name': 'u_sram', 'values': [140, 37, 0, 0, 16]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_sys_apb_bridge', 'name': 'u_sys_apb_bridge', 'values': [96, 127, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_sys_apb_decoder', 'name': 'u_sys_apb_decoder', 'values': [71, 0, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_sys_xbar', 'name': 'u_sys_xbar', 'values': [220, 138, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_sysctrl', 'name': 'u_sysctrl', 'values': [24, 68, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_uart', 'name': 'u_uart', 'values': [182, 143, 8, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_tmds', 'name': 'u_tmds', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_vision_top/u_vin', 'name': 'u_vin', 'values': [5433, 6995, 37, 0, 17]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/g_channel[0].u_channel', 'name': 'g_channel[0].u_channel', 'values': [799, 1491, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/g_channel[1].u_channel', 'name': 'g_channel[1].u_channel', 'values': [800, 1490, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_cam0', 'name': 'u_cam0', 'values': [74, 107, 18, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_cam1', 'name': 'u_cam1', 'values': [74, 107, 18, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_ch2', 'name': 'u_ch2', 'values': [787, 1925, 0, 0, 5]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_fmt0', 'name': 'u_fmt0', 'values': [155, 156, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_fmt1', 'name': 'u_fmt1', 'values': [160, 154, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_msrc', 'name': 'u_msrc', 'values': [539, 594, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_p1', 'name': 'u_p1', 'values': [861, 19, 1, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_regs', 'name': 'u_regs', 'values': [1078, 949, 0, 0, 0]}

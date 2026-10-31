@@ -1,0 +1,4 @@
+Old card21 VN routing FAILED: Route-0039 congestion / iteration time exceeds 2000 sec; Route-0008 cannot route.
+PnR wall time 3h26m11s; CPU 17m41s; process CPU 19m27s; peak memory pool 6618 MB.
+No successful routed DB or final timing/bitstream from this attempt. Do not use older report_timing/generate_bitstream leftovers.
+Large fail_route_nets.txt and *_fail_pnr.adf / partial_route.adf remain in the local project.
