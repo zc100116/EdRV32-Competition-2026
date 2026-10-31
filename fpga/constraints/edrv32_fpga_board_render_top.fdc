@@ -968,3 +968,9 @@ define_attribute {p:eth_phy_rst_n_o} {PAP_IO_DRIVE} {8}
 define_attribute {p:eth_phy_rst_n_o} {PAP_IO_NONE} {TRUE}
 define_attribute {p:eth_phy_rst_n_o} {PAP_IO_SLEW} {SLOW}
 
+# Card 21 B3R: rx_data_r was placed at CLMA_579_552, 7.0 ns route from the
+# RGMII RX IDDR at IOLHR_16_1428 (BANKL3, left edge), clk_eth WNS -0.106 ns.
+# Keep the adapter's fabric registers beside BANKL3 (site y ~228-238,
+# docs/guides/pds-floorplan.md 1.6, 2.1); IO and PLL keep their own rules.
+define_global_attribute {PAP_REGION} {fp_rgmii(0,15,220,249)[CLMA,CLMS];}
+define_attribute {i:u_rgmii} {PAP_REGION} {fp_rgmii}

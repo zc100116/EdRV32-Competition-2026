@@ -32,6 +32,7 @@ proc create_generated_clock {args} {incr ::clocks}
 proc set_multicycle_path {args} {}
 proc set_clock_uncertainty {args} {}
 proc define_attribute {args} {}
+proc define_global_attribute {args} {}
 proc set_clock_groups {args} {}
 proc set_false_path {args} {}
 source $constraint
