@@ -15,7 +15,8 @@
 #include "src/misc/lv_area_private.h"
 
 enum { RND_UNIT = 2, GLYPH_CACHE_BYTES = 1046976, TEMP_BYTES = 6 * 1024 * 1024 };
-static _Alignas(64) struct rnd_command commands[S3_RND_BATCH_COMMANDS];
+static _Alignas(64) struct rnd_command command_storage[S3_RND_BATCH_COMMANDS + 1];
+static struct rnd_command *commands;
 /* lv_conf enables Montserrat 12/14/16/18/20/22/24/26/28/32/40, each 158
  * descriptors (including reserved/empty). Sum align64(align32(box_w)*box_h):
  * 51264+55808+61504+70848+77248+84416+90752+102720+113024+133312+206080
@@ -545,6 +546,11 @@ static int32_t dispatch(lv_draw_unit_t *unit, lv_layer_t *layer)
 
 void s3_draw_rnd_init(void)
 {
+    /* Startup zeroed the cached BSS alias; discard it before uncached writes.
+     * Afterwards only RND reads descriptors (SoC 7.4).
+     */
+    cache_clean_invalidate((uintptr_t)command_storage, sizeof(command_storage));
+    commands = s3_uncached(command_storage);
     /* The hardware-only scratch must not retain dirty startup BSS cache lines. */
     cache_clean_invalidate((uintptr_t)temporary, sizeof(temporary));
     lv_draw_unit_t *unit = lv_draw_create_unit(sizeof(*unit));
@@ -576,7 +582,7 @@ void s3_draw_rnd_print_stats(void)
 
 void s3_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const lv_area_t *area)
 {
-    static _Alignas(64) struct rnd_command copy;
+    struct rnd_command *copy = &commands[S3_RND_BATCH_COMMANDS];
     struct rnd_common c = {
         .dst_base = rnd_physical(dst), .dst_stride = stride,
         .dst_fmt = RND_RGB565, .src_fmt = RND_RGB565,
@@ -584,7 +590,7 @@ void s3_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const lv_area
         .rect = { area->x1, area->y1, area->x2, area->y2 }
     };
     struct rnd_source source = { rnd_physical(src), stride, area->x1, area->y1 };
-    rnd_copy(&copy, &c, &source);
+    rnd_copy(copy, &c, &source);
     /* Range includes whole rows so invalidating a partial cache line never
      * discards CPU pixels beside the copied rectangle. */
     struct rnd_range ranges[2] = {
@@ -594,6 +600,6 @@ void s3_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const lv_area
     struct rnd_range copy_target = ranges[1];
     unsigned count = 1;
     merge_source(ranges, &count, copy_target.address, copy_target.bytes);
-    struct rnd_batch batch = { &copy, 1, ranges, count, &copy_target, 1 };
+    struct rnd_batch batch = { copy, 1, ranges, count, &copy_target, 1 };
     run_batch(&batch, true);
 }

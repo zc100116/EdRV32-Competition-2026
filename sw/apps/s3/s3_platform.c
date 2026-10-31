@@ -315,3 +315,9 @@ void s3_display_present(const void *l0, uint32_t l0_stride,
            (l1 != NULL && switches[DISP_L1] == previous_l1)) {
     }
 }
+
+/* SoC 6.1/7.4: caller stops using the cached DDR alias before this transfer. */
+void *s3_uncached(void *storage)
+{
+    return (void *)((uintptr_t)storage - EDRV32_DDR_BASE + EDRV32_DDR_UNCACHED_BASE);
+}

@@ -37,6 +37,26 @@ class Comparison(C.Structure):
                  ("sw_tasks", C.c_uint32)]
 
 
+# Mirrors draw_rnd.h and s3_platform.h for the per-frame maintenance delta.
+class Timing(C.Structure):
+    _fields_ = [("clean_ticks", C.c_uint64), ("wait_ticks", C.c_uint64),
+                ("finish_ticks", C.c_uint64), ("cache_ops", C.c_uint32)]
+
+
+class Measurement(C.Structure):
+    _fields_ = [("ticks", C.c_uint64), ("perf", C.c_uint64 * 6),
+                ("commands", C.c_uint32), ("doorbells", C.c_uint32)]
+
+
+class DrawStats(C.Structure):
+    _fields_ = [("claimed", C.c_uint32 * 16), ("unclaimed", C.c_uint32 * 16),
+                ("executed", C.c_uint32), ("software", C.c_uint32),
+                ("commands", C.c_uint32), ("doorbells", C.c_uint32),
+                ("rnd_ticks", C.c_uint64), ("sw_ticks", C.c_uint64),
+                ("perf", C.c_uint64 * 6), ("copy", Measurement),
+                ("timing", Timing), ("glyph_cpu_ticks", C.c_uint64)]
+
+
 class Memory:
     """Sparse byte slices preserve the real 32-bit descriptor addresses."""
     def __init__(self, ranges):
@@ -71,6 +91,7 @@ def main():
     args = parser.parse_args()
     library = OUT / "lvgl_rn17.so" if args.no_build else build()
     lib = C.CDLL(str(library))
+    lib.s3_draw_rnd_stats.restype = C.POINTER(DrawStats)
     lib.s3_host_time.argtypes = [C.c_uint32]
     lib.s3_lvgl_input.argtypes = [C.c_uint32]
     lib.s3_lvgl_set_rnd.argtypes = [C.c_bool]
@@ -129,7 +150,12 @@ def main():
     def compare(name):
         print(f"RN-17 frame={name}", flush=True)
         start = len(descriptors)
+        previous = lib.s3_draw_rnd_stats().contents.timing.cache_ops
+        commands_before = totals["commands"]
         lib.s3_lvgl_self_compare()
+        cache_ops = lib.s3_draw_rnd_stats().contents.timing.cache_ops - previous
+        commands = totals["commands"] - commands_before
+        print(f"CACHE frame={name} ops={cache_ops} commands={commands}", flush=True)
         result = lib.s3_lvgl_comparison().contents
         good = lib.s3_compare_passes(C.byref(result))
         rows.append(f"{name}|{result.full_max_lsb}|{result.edge_max_lsb}|{result.over1}|"

@@ -28,7 +28,11 @@ command = ['gcc', '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror',
            '-Wl,--gc-sections', '-o', str(output / 'encode-host')]
 subprocess.run(command, check=True)
 state_command = command[:command.index(str(root / 'sw/apps/nes/tests/encode_host.c'))]
-state_command += ['-include', str(root / 'sw/apps/nes/tests/fake_mmio.h'),
+# Put host BSS in the generated cached DDR window; the test maps the command
+# page in the uncached alias, so the real driver's alias policy is exercised.
+state_command += ['-no-pie', '-mcmodel=large', '-Wl,-Ttext-segment=0x10000000',
+                  '-Wl,--section-start=.bss=0x90000000',
+                  '-include', str(root / 'sw/apps/nes/tests/fake_mmio.h'),
                   str(root / 'sw/apps/nes/tests/display_host.c'),
                   str(root / 'sw/apps/nes/display.c'),
                   str(root / 'sw/apps/nes/display_command.c'),

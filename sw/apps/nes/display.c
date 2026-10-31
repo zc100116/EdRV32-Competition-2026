@@ -13,7 +13,8 @@
 _Alignas(4096) static uint8_t surfaces[2][NES_SCREEN_BYTES];
 _Alignas(64) static uint8_t dma_pixels[256 * 240];
 _Alignas(64) static uint32_t dma_palette[256];
-_Alignas(64) static struct rnd_command command;
+_Alignas(64) static struct rnd_command command_storage;
+static struct rnd_command *command;
 static struct rnd_range sources[2];
 static unsigned back = 1;
 static enum { DISPLAY_FREE, DISPLAY_RENDERING, DISPLAY_READY, DISPLAY_SWITCH } phase;
@@ -71,6 +72,9 @@ void nes_display_init(void)
     disp_submit(DISP_L0, rnd_physical(surfaces[0]), NES_SCREEN_STRIDE);
     disp_layer_enable(DISP_L0, 1);
     engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
+    cache_clean_invalidate((uintptr_t)&command_storage, sizeof(command_storage));
+    command = (struct rnd_command *)((uintptr_t)&command_storage - EDRV32_DDR_BASE +
+                                     EDRV32_DDR_UNCACHED_BASE);
     sources[0] = (struct rnd_range){dma_pixels, sizeof(dma_pixels)};
     sources[1] = (struct rnd_range){dma_palette, sizeof(dma_palette)};
 }
@@ -83,12 +87,12 @@ void nes_display_frame(const uint8_t *pixels, const struct nes_rgb *palette)
     /* RND owns these snapshots until DONE; the next emulated frame may change its inputs. */
     memcpy(dma_pixels, pixels, sizeof(dma_pixels));
     int changed = nes_palette_update(dma_palette, palette);
-    nes_blit_encode(&command, rnd_physical(surfaces[back]), rnd_physical(dma_pixels),
+    nes_blit_encode(command, rnd_physical(surfaces[back]), rnd_physical(dma_pixels),
                     rnd_physical(dma_palette));
     /* No CPU access to RND targets: ownership goes straight to DISP after DONE.
      * Initial CPU zeros were cleaned/invalidated above; targets stay outside CPU cache.
      */
-    struct rnd_batch batch = {&command, 1, sources, changed ? 2u : 1u, NULL, 0};
+    struct rnd_batch batch = {command, 1, sources, changed ? 2u : 1u, NULL, 0};
     rnd_submit(&batch);
     phase = DISPLAY_RENDERING;
 }

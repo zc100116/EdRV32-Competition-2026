@@ -16,6 +16,16 @@ static const void *scan_surface;
 static uint32_t scan_bytes;
 static void (*execute_batch)(const struct rnd_batch *);
 static struct s3_rnd_timing timing;
+static const void *uncached_commands;
+static const void *uncached_copy;
+
+/* Host storage has one address; retain its board alias ownership for timing. */
+void *s3_uncached(void *storage)
+{
+    uncached_commands = storage;
+    uncached_copy = (struct rnd_command *)storage + S3_RND_BATCH_COMMANDS;
+    return storage;
+}
 
 void s3_host_install(void (*execute)(const struct rnd_batch *)) { execute_batch = execute; }
 void s3_host_time(uint32_t value) { milliseconds = value; }
@@ -40,7 +50,9 @@ void s3_rnd_run(const struct rnd_batch *batch)
         }
     }
     timing = (struct s3_rnd_timing) {
-        .cache_ops = 1u + batch->source_count + batch->target_count
+        .cache_ops = (batch->commands != uncached_commands &&
+                      batch->commands != uncached_copy) +
+                     batch->source_count + batch->target_count
     };
     /* rnd_ref consumes batch sources as its address space. Cached A8 bytes
      * are already clean and immutable on board; expose them only to the model,

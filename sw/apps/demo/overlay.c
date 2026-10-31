@@ -25,6 +25,9 @@ static unsigned int dirty_count[2];
 
 void demo_overlay_backend_init(void)
 {
+    /* Release any cached command alias before the first uncached encoding. */
+    cache_clean_invalidate(demo_cached(DEMO_OVERLAY_COMMANDS),
+                           DEMO_OVERLAY_COMMAND_COUNT * sizeof(struct rnd_command));
     /* DISP is stopped; initialization is the only full-Surface CPU write. */
     for (unsigned int buffer = 0; buffer < 3; ++buffer) {
         uint32_t base = buffer < 2u ? demo_overlay_address(buffer) : DEMO_OVERLAY_ZERO;
@@ -45,7 +48,7 @@ void demo_overlay_backend_init(void)
 void demo_overlay_render(unsigned int buffer, const yolo_detection *detections,
                          unsigned int count)
 {
-    struct rnd_command *commands = (struct rnd_command *)demo_cached(DEMO_OVERLAY_COMMANDS);
+    struct rnd_command *commands = (struct rnd_command *)demo_uncached(DEMO_OVERLAY_COMMANDS);
     unsigned int n = 0;
     struct rnd_common c;
     c.dst_base = demo_overlay_address((unsigned int)buffer);
@@ -89,12 +92,11 @@ void demo_overlay_render(unsigned int buffer, const yolo_detection *detections,
             rnd_glyph(&commands[n++], &c, &glyph);
         }
     }
-    const struct rnd_range sources[] = {
-        {(void *)demo_cached(DEMO_OVERLAY_ZERO), DEMO_OVERLAY_BYTES},
-        {(void *)demo_cached(DEMO_OVERLAY_FONT), sizeof(font8x16)}
-    };
+    /* The zero Surface and font were cleaned once in backend_init and remain
+     * immutable, so they need no per-frame ownership transfer (SoC 7.4).
+     */
     const struct rnd_range target = {(void *)demo_cached(c.dst_base), DEMO_OVERLAY_BYTES};
-    const struct rnd_batch batch = {commands, (uint16_t)n, sources, 2, &target, 1};
+    const struct rnd_batch batch = {commands, (uint16_t)n, NULL, 0, &target, 1};
     rnd_submit(&batch);
     struct rnd_result result = rnd_wait();
     if (result.error) {

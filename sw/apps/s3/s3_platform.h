@@ -17,6 +17,8 @@ enum s3_key {
     S3_KEY_PAUSE = 8
 };
 
+/* DDR storage: discard the cached alias before transferring to this alias. */
+void *s3_uncached(void *storage);
 void s3_platform_init(void);
 uint64_t s3_ticks(void);
 uint32_t s3_clock_hz(void);

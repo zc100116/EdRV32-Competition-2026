@@ -143,12 +143,21 @@ void rnd_submit(const struct rnd_batch *batch)
 {
     active = *batch;
     uint64_t start = ticks();
-    cache_clean((uintptr_t)batch->commands, (uint32_t)batch->count * 64u);
+    timing.cache_ops = 0;
+    /* SoC 7.4 and rnd.h: both DDR aliases are valid CPU addresses. Noncached
+     * stores complete before DOORBELL (cpu-spec 4.7); no clean is needed.
+     */
+    if ((uintptr_t)batch->commands < EDRV32_DDR_UNCACHED_BASE) {
+        cache_clean((uintptr_t)batch->commands, (uint32_t)batch->count * 64u);
+        timing.cache_ops++;
+    }
     for (size_t i = 0; i < batch->source_count; ++i) {
-        cache_clean((uintptr_t)batch->sources[i].address, batch->sources[i].bytes);
+        if ((uintptr_t)batch->sources[i].address < EDRV32_DDR_UNCACHED_BASE) {
+            cache_clean((uintptr_t)batch->sources[i].address, batch->sources[i].bytes);
+            timing.cache_ops++;
+        }
     }
     timing.clean_ticks = ticks() - start;
-    timing.cache_ops = 1u + batch->source_count + batch->target_count;
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_DESC_BASE_OFFSET,
                  rnd_physical(batch->commands));
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_DESC_COUNT_OFFSET, batch->count);
@@ -169,7 +178,10 @@ static struct rnd_result finish(void)
         mmio_read32(EDRV32_RND_BASE + EDRV32_RND_CUR_DESC_OFFSET)
     };
     for (size_t i = 0; i < active.target_count; ++i) {
-        cache_invalidate((uintptr_t)active.targets[i].address, active.targets[i].bytes);
+        if ((uintptr_t)active.targets[i].address < EDRV32_DDR_UNCACHED_BASE) {
+            cache_invalidate((uintptr_t)active.targets[i].address, active.targets[i].bytes);
+            timing.cache_ops++;
+        }
     }
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_IRQ_STAT_OFFSET, result.irq);
     timing.finish_ticks = ticks() - start;

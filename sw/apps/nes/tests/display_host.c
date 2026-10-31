@@ -3,7 +3,9 @@
  * Description: Exercise real drivers with delayed DONE/FRAME/SWITCH and DMA snapshots.
  * Clock domain: host test events.
  */
+#define _GNU_SOURCE
 #include <assert.h>
+#include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
 #include "display.h"
@@ -57,9 +59,8 @@ void mmio_write32(uintptr_t address, uint32_t value)
 void cache_clean(uintptr_t address, uint32_t bytes)
 {
     assert(address % 64 == 0);
-    if (bytes == sizeof(struct rnd_command))
-        last_command = (const struct rnd_command *)address;
-    else if (bytes == sizeof(pixels))
+    assert(bytes != sizeof(struct rnd_command));
+    if (bytes == sizeof(pixels))
         dma_snapshot = (const uint8_t *)address;
     else {
         assert(bytes == 256 * sizeof(uint32_t));
@@ -70,6 +71,16 @@ void cache_clean(uintptr_t address, uint32_t bytes)
 
 void cache_clean_invalidate(uintptr_t address, uint32_t bytes)
 {
+    if (bytes == sizeof(struct rnd_command)) {
+        assert(address % 64 == 0);
+        uintptr_t alias = address - EDRV32_DDR_BASE + EDRV32_DDR_UNCACHED_BASE;
+        uintptr_t page = alias & ~(uintptr_t)4095;
+        void *mapped = mmap((void *)page, 4096, PROT_READ | PROT_WRITE,
+                            MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE, -1, 0);
+        assert(mapped == (void *)page);
+        last_command = (const struct rnd_command *)alias;
+        return;
+    }
     assert(address % 4096 == 0 && bytes == 2 * NES_SCREEN_BYTES);
     const uint8_t *surfaces = (const uint8_t *)address;
     for (unsigned i = 0; i < bytes; ++i)

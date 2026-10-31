@@ -89,7 +89,8 @@ struct rnd_batch {
 };
 struct rnd_result { uint32_t irq; uint32_t error; uint32_t cur_desc; };
 typedef void (*rnd_callback)(const struct rnd_result *result, void *context);
-/* rnd 5.4: clean commands and declared CPU-written sources, then ring DOORBELL.
+/* rnd 5.4 / SoC 7.4: clean cached commands and CPU-written sources, then ring DOORBELL.
+ * Noncached DDR aliases skip maintenance for commands, sources and targets.
  * Single batch at a time; range arrays remain alive through completion/abort.
  * CPU-written destination pixels needed by read/modify/write must also be sources.
  */
