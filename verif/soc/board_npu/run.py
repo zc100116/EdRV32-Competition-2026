@@ -3,7 +3,7 @@
 # Spec: Task T-BN1; npu-spec 3/4; CLAUDE.md 9.2.
 # Description: Generate a minimal CONV/reference, build BIOS/SRAM and run B3N.
 # Clock domain: none (host tool).
-"""Run the NPU-only board connectivity simulation."""
+"""Run the NPU plus ETH board connectivity simulation."""
 import argparse
 from pathlib import Path
 import subprocess

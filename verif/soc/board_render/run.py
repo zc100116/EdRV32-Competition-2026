@@ -3,7 +3,7 @@
 # Spec: Task B3-6; CLAUDE.md 9.2.
 # Description: Build actual BIOS and SRAM test images, lint, and run the board test.
 # Clock domain: none (host tool).
-"""Run the render-only board connectivity simulation."""
+"""Run the render plus ETH board connectivity simulation."""
 from pathlib import Path
 import subprocess
 import sys

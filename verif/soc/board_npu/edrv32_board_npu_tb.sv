@@ -24,6 +24,14 @@ module edrv32_board_npu_tb;
     wire unused_released;
     always #18.5185 clk <= ~clk;
     always #4 ddr_clk <= ~ddr_clk;
+    reg eth_clk = 0;
+    always #4 eth_clk <= ~eth_clk;
+    tri eth_mdio;
+    wire rgmii_txc;
+    wire [3:0] rgmii_txd;
+    wire rgmii_tx_ctl;
+    wire eth_mdc;
+    wire eth_phy_rst_n;
     wire [4:0] led_o;
     wire mem_cs_n_o;
     wire mem_rst_n_o;
@@ -50,6 +58,15 @@ module edrv32_board_npu_tb;
         .uart_tx_o(uart_tx),
         .key_n_i({3'b111, key_n}),
         .led_o(led_o),
+        .rgmii_rxc_i(eth_clk),
+        .rgmii_rxd_i(4'b0),
+        .rgmii_rx_ctl_i(1'b0),
+        .rgmii_txc_o(rgmii_txc),
+        .rgmii_txd_o(rgmii_txd),
+        .rgmii_tx_ctl_o(rgmii_tx_ctl),
+        .eth_mdc_o(eth_mdc),
+        .eth_mdio_o(eth_mdio),
+        .eth_phy_rst_n_o(eth_phy_rst_n),
         .mem_cs_n_o(mem_cs_n_o),
         .mem_rst_n_o(mem_rst_n_o),
         .mem_ck_o(mem_ck_o),
@@ -174,7 +191,8 @@ module edrv32_board_npu_tb;
         #200000000;
         $fatal(1, "FAIL board_npu timeout time=%0t", $time);
     end
-    wire unused_pins = ^{led_o,
+    wire unused_pins = ^{rgmii_txc, rgmii_txd, rgmii_tx_ctl,
+        eth_mdc, eth_mdio, eth_phy_rst_n, led_o,
         mem_cs_n_o, mem_rst_n_o, mem_ck_o, mem_ck_n_o, mem_cke_o, mem_ras_n_o, mem_cas_n_o,
         mem_we_n_o, mem_odt_o, mem_a_o, mem_ba_o, mem_dqs_o, mem_dqs_n_o, mem_dq_o, mem_dm_o};
 endmodule
