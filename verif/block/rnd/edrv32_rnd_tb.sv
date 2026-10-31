@@ -27,6 +27,26 @@ module edrv32_rnd_tb;
     int seed;
     int perf_kind;
     int zero_writes;
+    int hit_run = 0;
+    int hit_cycles = 0;
+    int hit_pixels = 0;
+
+    // RN-29 observes the window/filter public stream after twelve hit cycles.
+    // This interval excludes DMA misses and pipeline filling, per rnd-spec 5.2.
+    always @(posedge clk_mem) begin
+        if (perf_kind == 7 && rst_mem_n &&
+            u_rnd.u_draw.u_affine.u_filter.in_valid_i &&
+            u_rnd.u_draw.u_affine.u_filter.in_ready_o &&
+            !u_rnd.u_draw.u_affine.read_wait_o) begin
+            hit_run = hit_run + 1;
+            if (hit_run > 12) begin
+                hit_cycles = hit_cycles + 1;
+                if (u_rnd.u_draw.u_affine.u_filter.out_valid_o &&
+                    u_rnd.u_draw.u_affine.u_filter.out_ready_i)
+                    hit_pixels = hit_pixels + 1;
+            end
+        end else hit_run = 0;
+    end
     int memory_size;
     int pixels;
     int expected_done;
@@ -332,9 +352,13 @@ module edrv32_rnd_tb;
             if (perf_kind == 5)
                 equal("G1 AA black-box throughput >=0.45", 1,
                     32'(pixels * 100 >= int'(cycles) * 45));
-            if (perf_kind == 7)
-                equal("bilinear identity throughput >=0.7", 1,
-                    32'(pixels * 10 >= int'(cycles) * 7));
+            if (perf_kind == 7) begin
+                equal("bilinear steady hit interval >=100 cycles", 1, 32'(hit_cycles >= 100));
+                equal("bilinear steady hit throughput >=0.9", 1,
+                    32'(hit_pixels * 10 >= hit_cycles * 9));
+                $display("RN-29 hit_cycles=%0d hit_pixels=%0d hit_pixels_per_cycle=%0.6f",
+                    hit_cycles, hit_pixels, real'(hit_pixels) / real'(hit_cycles));
+            end
             $display("RN-29 PERF0=%0d PERF1=%0d PERF2=%0d PERF3=%0d source_beats=%0d",
                 cycles, pixels, u_memory.r_beats - r_start, u_memory.w_beats - w_start,
                 u_memory.image_beats);

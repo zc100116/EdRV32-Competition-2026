@@ -175,7 +175,13 @@ reproduction and classification.
 - Perf: unchanged 8 RN-18 + 25 RN-29 scenes (G1 AA; NN/bilinear identity/rotation/skew/scale,
   RGB565/ARGB8888/I4). Output PERF0–3, parameter/source beats and raw-format read amplification.
 - RN-29 black-box limits approved by coordinator: G1 AA ≥0.45 pixel/cycle;
-  bilinear identity ≥0.7 pixel/cycle; other transforms record numbers without threshold.
+  bilinear identity checks ≥0.9 pixel/cycle in steady source-window hit intervals;
+  end-to-end cycles and amplification are recorded without a bilinear threshold.
+  Measurement uses the window/filter public ready/valid stream: after twelve consecutive
+  accepted window outputs with no source read-wait, count filter output handshakes on
+  each remaining cycle of that contiguous hit interval (at least 100 measured cycles).
+  Target-row boundaries, cache misses and pipeline filling are excluded (rnd-spec 5.2).
+  Other transforms record numbers without threshold.
 - Formula checks: 1,200 Cartesian circle points, 192 exact fractional edges, 64 shared-edge
   samples, MASK alpha 0/1/128/255, 48 bilinear f/g/alpha cases, signed48, empty parameters,
   ROUND_CLIP and CUTOUT hand examples; all 1,794 functional vectors generate successfully.
