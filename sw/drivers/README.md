@@ -70,7 +70,7 @@ host must wait for that line before sending binary bytes.
 | `eth.h` | `eth_tx_descriptor_pack`, `eth_header_pack`, `eth_send` | 32 B TX 描述符、8 B 网络序应用头、提交 |
 | `eth.h` | `eth_phy_reset`, `eth_mdio_write`, `eth_mdio_read` | PHY 复位电平、阻塞 Clause 22 访问 |
 | `mem_xbar.h` | `mem_xbar_snapshot`, `mem_xbar_rate`, `mem_xbar_error` | SNAPSHOT\|CLEAR 后读七端口统计、RATE、错误详情 |
-| `ov5640.h` | `ov5640_table`, `ov5640_init`, `ov5640_chip_id` | 双端口初始化、244 项表及长度、读取芯片 ID |
+| `ov5640.h` | `ov5640_table`, `ov5640_init`, `ov5640_chip_id` | 双端口初始化、252 项 720p30 表及长度、读取芯片 ID |
 
 `geo_q16(n,d)` 用有符号 64 位中间数计算 `n*65536/d`，向零截断；分母非零、结果
 适合 int32 是调用者契约。矩阵顺序是 **A, B, TX, C, D, TY**，描述符由
@@ -142,19 +142,19 @@ SNAPSHOT|CLEAR 后读出冻结值；读取 `engine_perf(ENGINE_VIN,3/5/6/8)` 等
 拼设计记录规定的 320 B 小端 EDTM，应用每 16 条经 WIN3 描述符发送。
 `mem_xbar_rate(6, rate)` 的单位为 1/256 beat/cycle。
 
-OV5640 移植依据与差异：
+OV5640 移植依据与差异（T-CAM30 更新默认时序）：
 
 - 来源：本机厂商 `SOC系统设计/doc/fpga/pago_200/2_Demo/5_1 双目摄像头例程/`
   `ov5640_200k/rtl/camera/data_init.v` 的 **0–243，共 244 项**。
   经协调者确认删除 244–247 四项占位（向只读 ID 寄存器 `0x300a` 写 0）。
-- 与 `legacy/rtl/vision/camera/ov5640_720p.hex` 的前 244 项逐项比较，**0 处差异**。
+- B2 初版与 `legacy/rtl/vision/camera/ov5640_720p.hex` 的前 244 项逐项比较，0 处差异；
+  T-CAM30 在此基础上按下表修改，当前共 252 项。
   旧 hex 共 512 行，其 244–247 同为上述占位，248–511 为零填充；均未移植。
   `legacy/sw/hal/drivers/cam.c` 没有初始化表；核对其芯片 ID 高/低字节位置为
   0x300a/0x300b、镜像/翻转寄存器为 0x3821/0x3820、测试图寄存器为 0x503d。
 - `0x4300=0x61`、`0x501f=0x01` 选择 RGB565/RGB；
   `0x3808..0x380b=05 00 02 d0`，尺寸 1280×720。
-  PLL `0x3035=0x11`、`0x3036=0x3c`，HTS=`0x09c0`，VTS=`0x04c8` 原样保留。
-  **实际帧率待上板用 VIN PERF0/1 的计数增量测量，本交付不宣称已验证 30 fps。**
+  当前默认表为标称 30 fps，时钟/时序计算见下文；实际帧率仍须上板测量。
 - 表不写 `0x4740`，沿用复位值 `0x20`。极性沿用默认，与 legacy 板上结果一致，
   上板再确认一次。配套 legacy 采集模块按 HREF 高有效、VSYNC 下降沿帧开始、PCLK
   上升沿采样，与 vin-spec 2.1 一致；厂商采集模块也按 VSYNC 下降沿开始。
@@ -168,7 +168,106 @@ OV5640 移植依据与差异：
   这些是器件复位时序，不是超时兜底；首个 NACK 立即返回 -1。
   上电先调用 init，再 chip_id；后者只选端口读 ID，不重复复位，也不判断芯片型号。
 
-验收命令（仓库根目录，禁止运行 Verilator 的本 Task 只验 C 编译和纯逻辑）：
+### T-CAM30：默认 1280×720 RGB565 DVP，标称 30 fps
+
+依据：
+
+- **D**：[OmniVision OV5640 datasheet v2.03, 2011-05-26](https://cdn.sparkfun.com/datasheets/Sensors/LightImaging/OV5640_datasheet.pdf)，
+  §2.5（VCO 上限 800 MHz）、§7.1 `0x3034..0x3037`（PLL 分频/倍频）、
+  §7.2 `0x3108`（根分频）、§7.7（窗口/时序）、§7.8（AEC）、
+  §7.17 `0x460c[1]`（DVP PCLK 自动/手动分频）、§5.9（缩放开关）。
+- **L**：[Linux v6.12 drivers/media/i2c/ov5640.c](https://github.com/torvalds/linux/blob/v6.12/drivers/media/i2c/ov5640.c)，
+  `ov5640_mode_data[OV5640_MODE_720P_1280_720].dvp_timings`、
+  `ov5640_setting_720P_1280_720`、`ov5640_set_timings` 为裁剪/时序与模式寄存器来源；
+  时钟树注释、`ov5640_calc_pclk`、`ov5640_set_dvp_pclk`、`ov5640_get_sysclk`
+  补充 bit divider 与 DVP PCLK/SCLK 关系；`ov5640_set_bandingfilter` 给出消闪计算。
+  数据手册未完整说明 bit divider 和自动 DVP 分频链，因此这部分按 Linux 驱动推导，
+  不是已经取得的硬件测量值。
+
+每个修改/新增寄存器如下（十六进制；“未写”指旧表依赖复位值）：
+
+| 寄存器 | 旧值 → 新值 | 来源与用途 |
+|---|---|---|
+| `3034` | 未写（复位 `1a`）→ `18` | D §7.1 + L DVP：8-bit bit divider=2，保留 charge pump |
+| `3035` | `11` → `20` | D §7.1 + L `set_dvp_pclk`：system divider=2，DVP P_DIV bypass=0 |
+| `3036` | `3c` → `54` | D §7.1 + 下列计算：multiplier=84，VCO=672 MHz |
+| `3c07`（后一次写） | `08` → `07` | L 720P 表的光频检测设置；前一次写 `08` 保留 |
+| `3803` | `00` → `fa` | L DVP analog crop：top=250（`3802=00` 不变） |
+| `3806`, `3807` | `07 9f` → `06 a9` | L：bottom=250+1456−1=1705 |
+| `380c`, `380d` | `09 c0` → `07 64` | L：HTS=1892 |
+| `380e`, `380f` | `04 c8` → `02 e4` | L：VTS=720+20=740 |
+| `3a02`, `3a03` | `17 10` → `02 e4` | L 720P 表：60 Hz 最大曝光限制为 VTS |
+| `3a14`, `3a15` | `17 10` → `02 e4` | L 720P 表：50 Hz 最大曝光限制为 VTS |
+| `3a08`, `3a09` | 未写（复位 `01 27`）→ `00 dd` | D §7.8 + L banding 公式：50 Hz step=221 行 |
+| `3a0a`, `3a0b` | 未写（复位 `00 f6`）→ `00 b8` | 同上：60 Hz step=184 行 |
+| `3a0d` | 未写（复位 `08`）→ `04` | L：floor((740−4)/184)=4 个 60 Hz band |
+| `3a0e` | 未写（复位 `06`）→ `03` | L：floor((740−4)/221)=3 个 50 Hz band |
+| `460b` | 未写（手册未给复位值）→ `37` | L 720P VFIFO 模式设置（手册列为 debug） |
+| `460c` | `22` → `20` | D §7.17 + L 720P：清 manual bit，使用自动 DVP PCLK 分频 |
+| `5001` | `a3` → `83` | D §5.9 + L 720P：关闭 scaler，保留 AWB/色彩矩阵/SDE |
+
+Linux 720P 表也写 `3824=04`，但 `460c[1]=0` 时手动分频值不生效，
+本表不新增该无效写入；不移植 Linux 的 MIPI 配置。
+`3037=13`、`3108=01` 保留：pre-divider=3、PLL root divider=2、
+SCLK root divider=2、PCLK root divider=1。`3034[3:0]=8` 的 bit divider=2；
+原来未写的 `3034` 复位为 `1a`（bit divider=2.5）。
+
+以传感器 **XCLK=24 MHz** 为计算输入（上板需确认实际晶振频率）：
+
+```text
+VCO      = XCLK / pre-divider × multiplier = 24 / 3 × 84 = 672 MHz
+pll_clki = VCO / system divider / PLL root divider / bit divider
+         = 672 / 2 / 2 / 2 = 84 MHz
+PCLK     = pll_clki / PCLK root divider = 84 / 1 = 84 MHz
+SCLK     = pll_clki / SCLK root divider = 84 / 2 = 42 MHz
+HTS×VTS  = 1892 × 740 = 1,400,080 SCLK cycles/frame
+fps      = 42,000,000 / 1,400,080 = 29.998286 fps
+line     = 1892 / 42,000,000 = 45.047619 us
+50Hz step = floor(42,000,000 / 1892 / 100) = 221 lines
+60Hz step = floor(42,000,000 / 1892 / 120) = 184 lines
+```
+
+RGB565 在 8-bit DVP 上每像素传两字节，PCLK 是字节传输时钟，
+HTS/VTS 使用 SCLK；不能直接用 84 MHz 除以 HTS×VTS 算帧率。
+PCLK=84 MHz，周期约 11.905 ns，低于 `fpga/constraints/*` 中
+`clk_cam0/1` 的 10 ns（100 MHz）约束上限；VCO 低于 D 的 800 MHz 上限。
+旧配置按相同公式（bit divider=2.5、system divider=1、multiplier=60）得
+VCO=480 MHz、PCLK=96 MHz、SCLK=48 MHz，48,000,000/(2496×1224)=15.711413 fps，
+与任务背景约 15.7 fps 相符，仍只是时序公式对照。
+
+视场从原 4:3 全阵列缩放变为 **16:9 中央裁剪**：模拟窗口从
+`(0,0)..(2623,1951)` 变成 `(0,250)..(2623,1705)`，
+按 L 保留 `3814/3815=31` 的行列子采样以及 ISP offset `(16,4)`，
+输出 1280×720，关闭缩放；上下视场减少，水平视场基本保留。
+`31` 表示奇/偶采样步进 3/1，并非隔行扫描视频。
+保持 `4300=61` 的 RGB565 高字节先传、`501f=01` 的 RGB 输出、
+`3820/3821` 翻转/镜像、`4740` 复位极性、`503d=00` 测试图关闭及原 DVP 接口；VIN 无需修改。
+AEC night mode 仍保持 `3a00` 复位 `78`（bit2=0），不启用降帧曝光。
+不增加 60 fps 表、帧率参数、重试或回退路径。
+
+Linux 验收仅包括构建和 host 检查；host 按最终寄存器值解码 PLL、根分频、
+HTS/VTS，要求 PCLK≤100 MHz、fps∈[29.5,30.5]，并检查裁剪、格式及消闪设置。
+**30 fps 的实际结论只由上板验证**：两路 `VIN camera0/1 frames` 每秒约增加 30，
+HDMI/网口画面无撕裂、无错位，VIN 溢出计数为 0；同时确认实际 PCLK/XCLK。
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+make -C sw PROGRAM=demo_vision MEMORY=sram -j1
+make -C sw PROGRAM=demo_npu MEMORY=sram -j1
+make -C sw PROGRAM=demo_vnpu MEMORY=sram -j1
+make -C sw PROGRAM=demo MEMORY=sram -j1
+make -C sw PROGRAM=drivers_build MEMORY=sram -j1
+make -C sw/tests/drivers_build test
+git diff --check
+```
+
+2026-10-31，基于 `2a3ee2e0` 加 T-CAM30 改动，以上五个 SRAM 程序均构建通过，
+0 warning、0 error，构建日志为 `build/ov5640-30fps/<PROGRAM>.log`；
+GCC host 检查 PASS，报告 VCO=672000000 Hz、PCLK=84000000 Hz、SCLK=42000000 Hz、
+HTS=1892、VTS=740、29.998286 fps；`git diff --check` 通过。
+未运行 RTL 仿真或上板测试，硬件验收待 Windows 端完成。
+
+B2 初版验收命令（仓库根目录，只验 C 编译和纯逻辑）：
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
@@ -182,7 +281,7 @@ git diff --check
 删掉未用驱动，确保所有驱动和 BSP cache 真正链接；不执行 MMIO。
 主机测试链接实际驱动 C，BSP cache 仅提供调用即终止的链接符号；测试不碰硬件，
 覆盖 GEO 描述符和 Q16.16、ETH 描述符/网络序头/IP、CH0/CH2 Surface 槽映射、
-VIN DONE_INFO 槽提取、PIX Gaussian+Sobel CFG、OV5640 表长度/关键寄存器。
+VIN DONE_INFO 槽提取、PIX Gaussian+Sobel CFG、OV5640 表长度/关键寄存器/时钟与帧率。
 期望值是规格布局的独立字面值，没有使用被测打包函数构造期望。
 
 2026-10-29 在实现提交 `9fa9bcf` 上的结果：xPack RISC-V GCC 15.2.0 的全部驱动

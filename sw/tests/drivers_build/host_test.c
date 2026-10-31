@@ -72,23 +72,80 @@ static void test_eth(void)
     equal("IPv4 register", eth_ipv4_pack(ip), 0xc0a8010au);
 }
 
-/* Task B2-3b: accepted 244-entry vendor table, with literal format and geometry values. */
+/* T-CAM30: use the final write to each sensor register, as SCCB initialization does. */
+static uint8_t sensor_register(uint16_t address)
+{
+    size_t count;
+    const struct ov5640_register *table = ov5640_table(&count);
+    while (count != 0u) {
+        --count;
+        if (table[count].address == address) {
+            return table[count].value;
+        }
+    }
+    fprintf(stderr, "FAIL OV5640 register 0x%04x missing from table\n", address);
+    exit(1);
+}
+
+static uint32_t sensor_register16(uint16_t address)
+{
+    return ((uint32_t)sensor_register(address) << 8) | sensor_register(address + 1u);
+}
+
+/* T-CAM30: geometry/format and datasheet + Linux DVP clock equations; no sensor MMIO. */
 static void test_sensor(void)
 {
     size_t count;
     const struct ov5640_register *table = ov5640_table(&count);
-    equal("OV5640 table length", (uint32_t)count, 244u);
+    equal("OV5640 table length", (uint32_t)count, 252u);
     equal("sensor software reset address", table[0].address, 0x3008u);
     equal("sensor software reset value", table[0].value, 0x82u);
-    equal("RGB565 format address", table[52].address, 0x4300u);
-    equal("RGB565 format value", table[52].value, 0x61u);
-    equal("RGB format selector", table[53].value, 1u);
-    equal("720p width high", table[217].value, 5u);
-    equal("720p width low", table[218].value, 0u);
-    equal("720p height high", table[219].value, 2u);
-    equal("720p height low", table[220].value, 0xd0u);
+    equal("RGB565 format/byte order", sensor_register(0x4300u), 0x61u);
+    equal("RGB format selector", sensor_register(0x501fu), 1u);
+    equal("720p width", sensor_register16(0x3808u), 1280u);
+    equal("720p height", sensor_register16(0x380au), 720u);
+    equal("crop left", sensor_register16(0x3800u), 0u);
+    equal("crop top", sensor_register16(0x3802u), 250u);
+    equal("crop right", sensor_register16(0x3804u), 2623u);
+    equal("crop bottom", sensor_register16(0x3806u), 1705u);
+    equal("horizontal subsampling", sensor_register(0x3814u), 0x31u);
+    equal("vertical subsampling", sensor_register(0x3815u), 0x31u);
+    equal("scaler bypass", sensor_register(0x5001u), 0x83u);
+    equal("DVP auto PCLK divider", sensor_register(0x460cu), 0x20u);
+    equal("sensor test pattern off", sensor_register(0x503du), 0u);
     equal("last register", table[count - 1].address, 0x3019u);
     equal("last value", table[count - 1].value, 0u);
+
+    uint32_t pll0 = sensor_register(0x3034u);
+    uint32_t pll1 = sensor_register(0x3035u);
+    uint32_t pll3 = sensor_register(0x3037u);
+    uint32_t roots = sensor_register(0x3108u);
+    uint32_t sysdiv = pll1 >> 4;
+    uint32_t p_div = pll1 & 0x0fu;
+    double vco = 24000000.0 / (pll3 & 0x0fu) * sensor_register(0x3036u);
+    double pll_clock = vco / (sysdiv == 0u ? 16u : sysdiv)
+        / (((pll3 >> 4) & 1u) + 1u) / ((pll0 & 0x0fu) / 4.0);
+    double sclk = pll_clock / (1u << (roots & 3u));
+    double pclk = pll_clock / (1u << ((roots >> 4) & 3u))
+        / (p_div == 0u ? 1u : p_div);
+    uint32_t hts = sensor_register16(0x380cu);
+    uint32_t vts = sensor_register16(0x380eu);
+    double fps = sclk / hts / vts;
+    if (!(pclk <= 100000000.0 && fps >= 29.5 && fps <= 30.5)) {
+        fprintf(stderr, "FAIL OV5640: PCLK %.0f Hz (max 100000000), "
+                "fps %.6f (expected 29.5..30.5)\n", pclk, fps);
+        exit(1);
+    }
+    equal("60Hz exposure ceiling", sensor_register16(0x3a02u), vts);
+    equal("50Hz exposure ceiling", sensor_register16(0x3a14u), vts);
+    equal("50Hz band step", sensor_register16(0x3a08u), (uint32_t)(sclk / hts / 100));
+    equal("60Hz band step", sensor_register16(0x3a0au), (uint32_t)(sclk / hts / 120));
+    equal("50Hz max bands", sensor_register(0x3a0eu),
+          (vts - 4u) / sensor_register16(0x3a08u));
+    equal("60Hz max bands", sensor_register(0x3a0du),
+          (vts - 4u) / sensor_register16(0x3a0au));
+    printf("OV5640: VCO %.0f Hz, PCLK %.0f Hz, SCLK %.0f Hz, "
+           "HTS %u x VTS %u, %.6f fps\n", vco, pclk, sclk, hts, vts, fps);
 }
 
 /* Task B2-3b: exercise design-record ring spacing and PIX Gaussian/Sobel configuration. */
