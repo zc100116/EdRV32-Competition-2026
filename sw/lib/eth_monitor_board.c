@@ -16,6 +16,13 @@
 #define MONITOR_RING 0x0a102000u
 #define MONITOR_CAPACITY 1024u
 
+static void (*receive_callback)(uint32_t irq);
+
+void eth_monitor_board_set_receive(void (*receive)(uint32_t irq))
+{
+    receive_callback = receive;
+}
+
 static uint32_t clock_hz;
 static uint32_t sequence;
 static uint32_t produced;
@@ -53,6 +60,7 @@ uint32_t eth_monitor_board_tick(void)
         info_number("ETH peer port", mmio_read32(EDRV32_ETH_BASE +
                                                EDRV32_ETH_PEER_PORT_OFFSET));
     }
+    if (receive_callback) receive_callback(event.irq);
     engine_irq_clear(ENGINE_ETH, event.irq);
     if (tx_active && event.done_count - tx_done == 1u) {
         sent_bytes += 16u * ETH_MONITOR_BYTES;

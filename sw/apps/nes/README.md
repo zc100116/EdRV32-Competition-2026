@@ -442,3 +442,16 @@ Spike 各组原始记录仍在对应 `build/sw/nes-spike-*/`。这些生成物�
   日志，记录真实频率、cache 配置、ROM、编译选项、提交和 BIOS 版本。
 - 如需区分 PPU 成本，再用 `NES_DISPLAY=0 NES_SKIP=1`，然后恢复默认显示构建。
 - 真实板上帧率、无撕裂和按键响应目前未取得硬件验证；由后续 Windows 上板完成。
+
+## 虚拟输入（T-VIN1）
+
+调试工具「输入」面板提供方向键、A、B、Select、Start。
+面板获得焦点后可用方向键 / WASD、J=A、K=B、U=Select、I=Start。
+虚拟八键与板上按键和 UART `j/k/u/i/w/s/a/d` 的原有 100 ms 脉冲取或；
+松开虚拟键发送完整释放状态，板端一直保留最后收到的状态。
+
+NES 只复用 `eth_monitor_local_init()` 的 PHY 复位、延时和本机端点设置，
+不启动 DDR 监控、CLINT 中断或发送环，因为本功能只需接收输入。
+`nes_buttons()` 每帧轮询 ETH，窗口 3 用于建立对端，窗口 2 接收最新输入；
+端点是 `192.168.1.10:5000`，无需改模拟器核心。Spike 测量路径保持原样。
+协议与调试工具操作见 [调试工具 README](../../../tools/debug_tool/README.md#虚拟输入t-vin1)。

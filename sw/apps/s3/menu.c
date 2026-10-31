@@ -9,6 +9,7 @@
 
 static lv_obj_t *cards[S3_APP_COUNT];
 static unsigned int selected;
+static enum s3_application requested = S3_APP_NONE;
 
 static lv_obj_t *label(lv_obj_t *parent, const char *text, int32_t x, int32_t y,
                        uint32_t color)
@@ -31,6 +32,14 @@ static void select_card(void)
     }
 }
 
+static void card_event(lv_event_t *event)
+{
+    unsigned int index = (unsigned int)(uintptr_t)lv_event_get_user_data(event);
+    selected = index;
+    select_card();
+    if (lv_event_get_code(event) == LV_EVENT_CLICKED) requested = (enum s3_application)index;
+}
+
 void s3_menu_show(void)
 {
     static const char *titles[] = {
@@ -42,6 +51,7 @@ void s3_menu_show(void)
         "Run the LVGL benchmark scenes.\nScene and average frame rates on UART.",
         "Render one frame with both engines.\nPixel difference statistics on UART."
     };
+    requested = S3_APP_NONE;
     lv_obj_t *screen = lv_screen_active();
     lv_obj_clean(screen);
     lv_obj_remove_style_all(screen);
@@ -56,6 +66,10 @@ void s3_menu_show(void)
     for (unsigned int i = 0; i < S3_APP_COUNT; ++i) {
         lv_obj_t *card = lv_obj_create(screen);
         cards[i] = card;
+        lv_obj_set_clickable(card, true);
+        lv_group_add_obj(lv_group_get_default(), card);
+        lv_obj_add_event_cb(card, card_event, LV_EVENT_CLICKED, (void *)(uintptr_t)i);
+        lv_obj_add_event_cb(card, card_event, LV_EVENT_FOCUSED, (void *)(uintptr_t)i);
         lv_obj_remove_style_all(card);
         lv_obj_set_pos(card, 64 + (int32_t)(i % 2u) * 588,
                         190 + (int32_t)(i / 2u) * 177);
@@ -67,6 +81,7 @@ void s3_menu_show(void)
         label(card, descriptions[i], 26, 65, 0xb3c7d8);
     }
     select_card();
+    lv_group_focus_obj(cards[selected]);
     label(screen, "KEY1  previous     KEY2  next     KEY3  launch     KEY4  back / pause",
           64, 591, 0xe6edf4);
     label(screen, "UART: a / d / w / p     |     In game: left / right / jump / pause",
@@ -87,5 +102,7 @@ enum s3_application s3_menu_input(uint32_t pressed)
     if (pressed & S3_KEY_JUMP) {
         return (enum s3_application)selected;
     }
-    return S3_APP_NONE;
+    enum s3_application result = requested;
+    requested = S3_APP_NONE;
+    return result;
 }

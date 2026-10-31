@@ -28,6 +28,8 @@ void eth_monitor_peer_configure(void);
 /* Capture the shared timestamp, DDR snapshot and CPU clock fields. */
 void eth_monitor_snapshot(struct eth_monitor *record, uint32_t clock_hz);
 /* B3R/B3N: caller owns CLINT, invokes tick at 100 Hz and reports nonzero ETH errors. */
+/* One application callback runs before the monitor acknowledges RX notifications. */
+void eth_monitor_board_set_receive(void (*receive)(uint32_t irq));
 void eth_monitor_board_init(uint32_t clock_hz);
 uint32_t eth_monitor_board_tick(void);
 #endif

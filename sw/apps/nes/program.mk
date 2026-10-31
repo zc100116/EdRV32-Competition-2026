@@ -6,13 +6,17 @@ include $(ROOT)/sw/apps/nes/sources.mk
 NES_DISPLAY ?= $(if $(filter 1,$(NES_SPIKE)),0,1)
 PROGRAM_SOURCES := $(NES_CORE) $(NES_COMMON) sw/apps/nes/rom.S \
     sw/apps/nes/main.c sw/apps/nes/syscalls.c
-CFLAGS_EXTRA := $(NES_FLAGS) -I$(ROOT)/sw/drivers/include \
+CFLAGS_EXTRA := $(NES_FLAGS) -I$(ROOT)/sw/lib -I$(ROOT)/sw/drivers/include \
     -DNES_SKIP=$(NES_SKIP) -DNES_FRAMES=$(NES_FRAMES) -DNES_DISPLAY=$(NES_DISPLAY)
 PROGRAM_LDLIBS := $(NES_WRAPS) -Wl,--start-group -lc -lm -lgcc -Wl,--end-group
 ifeq ($(NES_SPIKE),1)
 CFLAGS_EXTRA += -DNES_SPIKE
 else
-PROGRAM_SOURCES += sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c
+PROGRAM_SOURCES += sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c \
+    sw/lib/virtual_input.c sw/lib/eth_monitor.c sw/drivers/eth.c
+ifneq ($(NES_DISPLAY),1)
+PROGRAM_SOURCES += sw/drivers/engine.c sw/drivers/plic.c
+endif
 endif
 
 ifeq ($(NES_DISPLAY),1)

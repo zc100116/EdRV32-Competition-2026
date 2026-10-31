@@ -6,6 +6,8 @@
 #include "s3_platform.h"
 #include "clint.h"
 #include "eth_monitor.h"
+#include "eth.h"
+#include "virtual_input.h"
 #include "gpio.h"
 #include "plic.h"
 #include "sysctrl.h"
@@ -122,6 +124,14 @@ static void __attribute__((interrupt("machine"), aligned(4))) s3_interrupt(void)
     }
 }
 
+static void virtual_receive(uint32_t irq)
+{
+    if (irq & EDRV32_ETH_IRQ_STAT_RX_NOTIFY2_MASK) {
+        virtual_input_network((const volatile uint8_t *)(uintptr_t)
+            (EDRV32_DDR_UNCACHED_BASE + VIRTUAL_INPUT_BASE));
+    }
+}
+
 void s3_platform_init(void)
 {
     __asm__ volatile ("csrci mstatus, 8" ::: "memory");
@@ -137,6 +147,8 @@ void s3_platform_init(void)
         EDRV32_DISP_IRQ_EN_SWITCH_MASK | EDRV32_DISP_IRQ_EN_SWITCH1_MASK,
         1, disp_event, NULL);
     eth_monitor_board_init(s3_clock_hz());
+    eth_window_configure(VIRTUAL_INPUT_WINDOW, VIRTUAL_INPUT_BASE, VIRTUAL_INPUT_BYTES);
+    eth_monitor_board_set_receive(virtual_receive);
     uintptr_t handler = (uintptr_t)s3_interrupt;
     __asm__ volatile ("csrw mtvec, %0" :: "r"(handler) : "memory");
     __asm__ volatile ("csrw mie, %0" :: "r"(0x880u) : "memory");
@@ -162,7 +174,7 @@ uint32_t s3_input(void)
 {
     uint32_t keys = (~gpio_read()) & 15u;
     while (!(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
-        switch (uart_getc()) {
+        switch (virtual_input_serial(uart_getc())) {
         case 'a': keys |= S3_KEY_LEFT; break;
         case 'd': keys |= S3_KEY_RIGHT; break;
         case 'w': keys |= S3_KEY_JUMP; break;
@@ -170,6 +182,11 @@ uint32_t s3_input(void)
         default: break;
         }
     }
+    uint16_t virtual_keys = virtual_input_get().keys;
+    if (virtual_keys & VI_LEFT) keys |= S3_KEY_LEFT;
+    if (virtual_keys & VI_RIGHT) keys |= S3_KEY_RIGHT;
+    if (virtual_keys & VI_A) keys |= S3_KEY_JUMP;
+    if (virtual_keys & VI_START) keys |= S3_KEY_PAUSE;
     return keys;
 }
 

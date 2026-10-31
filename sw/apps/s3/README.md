@@ -264,3 +264,16 @@ C 由项目经理依协调者回复实现，审核 A/B 后在本分支 cherry-pi
 `lvgl/` 的配置、绘制单元、服务、freestanding 支持、RN-17 统计、构建片段和报告；
 `tools/s3/` 的游戏资源/检查/host C 桩、LVGL 资源/host/target/RN-17 工具和生产菜单捕获。
 没有修改 `third_party/`、驱动、BSP、BIOS、NES、RTL、规格、testplan、FPGA 或 verif。
+
+## 虚拟输入（T-VIN1）
+
+调试工具选择「输入」面板，点击面板后可按键或在空白触控板上移动、点击。
+看 HDMI 上的小箭头操作；工具不接收 S3 屏幕图像。
+触控板绝对坐标覆盖 1280×720，左键用于点击 LVGL 控件。
+方向键、Enter、Esc、Tab / Shift+Tab 分别输入 LVGL 的方向、确认、返回、
+Next / Prev；菜单支持触控点击、Tab 切换与 Enter 启动，Esc 返回应用菜单。
+小游戏合并虚拟左 / 右 / A / Start 到移动 / 跳跃 / 暂停，板上按键与 UART
+`a/d/w/p` 继续有效。首次收到虚拟输入后才显示箭头；未收到时不改变 RN-17 画面。
+
+串口和 UDP 完整状态协议见 [调试工具 README](../../../tools/debug_tool/README.md#虚拟输入t-vin1)。
+S3 保留现有 ETH 初始化、100 Hz 轮询及监控；输入用接收窗口 2，建立对端仍用窗口 3。

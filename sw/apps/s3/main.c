@@ -4,6 +4,7 @@
  * Clock domain: clk_sys CPU.
  */
 #include "menu.h"
+#include "virtual_input.h"
 #include "s3_platform.h"
 #include "lvgl/s3_lvgl.h"
 #include "game/game.h"
@@ -16,11 +17,15 @@ int main(void)
     s3_menu_show();
     enum s3_application active = S3_APP_NONE;
     uint32_t previous = 0;
+    uint16_t previous_virtual = 0;
     for (;;) {
         uint32_t keys = s3_input();
         s3_lvgl_input(keys);
         uint32_t pressed = keys & ~previous;
         previous = keys;
+        uint16_t virtual_keys = virtual_input_get().keys;
+        uint16_t virtual_pressed = virtual_keys & ~previous_virtual;
+        previous_virtual = virtual_keys;
         if (active == S3_APP_NONE) {
             enum s3_application application = s3_menu_input(pressed);
             switch (application) {
@@ -49,7 +54,7 @@ int main(void)
             case S3_APP_COUNT:
                 break;
             }
-        } else if (pressed & S3_KEY_PAUSE) {
+        } else if ((pressed & S3_KEY_PAUSE) || (virtual_pressed & VI_ESC)) {
             s3_lvgl_stop_demo();
             s3_menu_show();
             active = S3_APP_NONE;

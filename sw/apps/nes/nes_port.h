@@ -22,6 +22,11 @@ uint64_t nes_ticks(void);
 uint64_t nes_tick_hz(void);
 uint64_t nes_instructions(void);
 unsigned nes_buttons(void);
+/* T-VIN1: protocol U D L R A B Select Start -> NES A B Select Start U D L R. */
+static inline unsigned nes_merge_virtual(unsigned buttons, uint16_t keys)
+{
+    return buttons | ((keys >> 4) & 15u) | ((keys & 15u) << 4);
+}
 /* Pixels: 240 rows, 256 bytes/row. Palette: 256 RGB888 entries.
  * Both pointers remain valid until the next frame; sink returns synchronously.
  */

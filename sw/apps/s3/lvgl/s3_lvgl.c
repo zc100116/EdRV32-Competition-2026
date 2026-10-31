@@ -4,6 +4,7 @@
  * Clock domain: clk_sys; CLINT tick, shared RND/DISP interrupt services.
  */
 #include "s3_lvgl.h"
+#include "virtual_input.h"
 #include "draw_rnd.h"
 #include "rn17_compare.h"
 #include "../s3_platform.h"
@@ -311,11 +312,38 @@ static void read_keys(lv_indev_t *indev, lv_indev_data_t *data)
 {
     (void)indev;
     uint32_t keys = input_snapshot;
+    uint16_t virtual_keys = virtual_input_get().keys;
+    static const uint32_t lv_keys[] = {
+        LV_KEY_UP, LV_KEY_DOWN, LV_KEY_LEFT, LV_KEY_RIGHT,
+        LV_KEY_ENTER, LV_KEY_ESC, LV_KEY_NEXT, LV_KEY_PREV
+    };
+    static const uint16_t bits[] = {
+        VI_UP, VI_DOWN, VI_LEFT, VI_RIGHT, VI_ENTER, VI_ESC, VI_NEXT, VI_PREV
+    };
+    data->state = LV_INDEV_STATE_PRESSED;
+    for (unsigned i = 0; i < 8; ++i) {
+        if (virtual_keys & bits[i]) {
+            data->key = lv_keys[i];
+            return;
+        }
+    }
     data->state = keys ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
     if (keys & S3_KEY_LEFT) data->key = LV_KEY_PREV;
     else if (keys & S3_KEY_RIGHT) data->key = LV_KEY_NEXT;
     else if (keys & S3_KEY_JUMP) data->key = LV_KEY_ENTER;
     else if (keys & S3_KEY_PAUSE) data->key = LV_KEY_ESC;
+}
+
+static lv_obj_t *pointer_cursor;
+
+static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
+{
+    (void)indev;
+    struct virtual_input_state input = virtual_input_get();
+    data->point.x = input.x;
+    data->point.y = input.y;
+    data->state = (input.mouse & 1) ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+    if (input.active) lv_obj_set_hidden(pointer_cursor, false);
 }
 
 void s3_lvgl_init(void)
@@ -337,6 +365,19 @@ void s3_lvgl_init(void)
     lv_indev_set_type(keys, LV_INDEV_TYPE_KEYPAD);
     lv_indev_set_read_cb(keys, read_keys);
     lv_indev_set_group(keys, group);
+    lv_indev_t *pointer = lv_indev_create();
+    lv_indev_set_type(pointer, LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(pointer, read_pointer);
+    static const lv_point_precise_t arrow[] = {
+        {0, 0}, {0, 18}, {5, 13}, {10, 23}, {14, 21}, {9, 11}, {17, 11}, {0, 0}
+    };
+    pointer_cursor = lv_line_create(lv_layer_sys());
+    lv_line_set_points(pointer_cursor, arrow, sizeof(arrow) / sizeof(arrow[0]));
+    lv_obj_set_style_line_color(pointer_cursor, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_line_width(pointer_cursor, 2, 0);
+    lv_obj_set_clickable(pointer_cursor, false);
+    lv_obj_set_hidden(pointer_cursor, true);
+    lv_indev_set_cursor(pointer, pointer_cursor);
     cache_clean((uintptr_t)front, sizeof(buffers[0]));
     s3_display_begin(front, STRIDE, NULL, 0);
     report_tick = tick();
