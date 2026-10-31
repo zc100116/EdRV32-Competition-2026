@@ -350,8 +350,8 @@ module edrv32_rnd_tb;
                 source_fmt, u_memory.image_beats * 32,
                 real'(u_memory.image_beats * 32) / (real'(pixels * source_bits) / 8.0));
             if (perf_kind == 5)
-                equal("G1 AA black-box throughput >=0.45", 1,
-                    32'(pixels * 100 >= int'(cycles) * 45));
+                equal("G1 AA black-box throughput >=0.24", 1,
+                    32'(pixels * 100 >= int'(cycles) * 24));
             if (perf_kind == 7) begin
                 equal("bilinear steady hit interval >=100 cycles", 1, 32'(hit_cycles >= 100));
                 equal("bilinear steady hit throughput >=0.9", 1,
@@ -362,9 +362,9 @@ module edrv32_rnd_tb;
             $display("RN-29 PERF0=%0d PERF1=%0d PERF2=%0d PERF3=%0d source_beats=%0d",
                 cycles, pixels, u_memory.r_beats - r_start, u_memory.w_beats - w_start,
                 u_memory.image_beats);
-            $display("RN-29 parameter_beats=%0d pixels_per_cycle=%0.6f peak=%0.1f",
+            $display("RN-29 parameter_beats=%0d pixels_per_cycle=%0.6f peak=%0.2f",
                 u_memory.parameter_beats, real'(pixels) / real'(cycles),
-                perf_kind == 5 ? 0.5 : 1.0);
+                perf_kind == 5 ? 0.25 : 1.0);
         end
         if (perf_kind != 0 && test_case != 29) begin
             read_reg(12'h050, source_wait);

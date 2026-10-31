@@ -1,5 +1,5 @@
 /* File: rnd_profile.c
- * Task T-RND2D: host-only observations of the unchanged supported() predicate.
+ * Task T-RND2D: host-only observations of the current supported() predicate.
  * Both implementation files are included to observe their private scene/state;
  * this translation unit replaces them only in the profiling shared library.
  * Clock domain: deterministic host milliseconds.
@@ -95,9 +95,9 @@ static void profile_geometry(lv_draw_task_t *t)
     lv_draw_layer_alloc_buf(t->target_layer);
     command_count = 0;
     source_count = 0;
-    if (t->type == LV_DRAW_TASK_TYPE_LINE) line(t, t->draw_dsc);
-    else if (t->type == LV_DRAW_TASK_TYPE_ARC) arc(t, t->draw_dsc);
-    else triangle(t, t->draw_dsc);
+    if (t->type == LV_DRAW_TASK_TYPE_LINE) line(t, t->draw_dsc, true);
+    else if (t->type == LV_DRAW_TASK_TYPE_ARC) arc(t, t->draw_dsc, true);
+    else triangle(t, t->draw_dsc, true);
 }
 
 static int32_t profile_evaluate(lv_draw_unit_t *unit, lv_draw_task_t *t)

@@ -122,7 +122,10 @@ def selections(tier):
             for name in ('identity', 'rotate', 'skew+', 'scale')
             for fmt in (0, 1, 7) for bilinear in (0, 1)]
     if tier == 'smoke':
-        return [(21, ('shared', 1), 1), (21, ('shared', 0), 1),
+        return ([(21, (name, aa), 1) for name in ('range+', 'range-') for aa in (0, 1)]
+                + [(23, (name, aa, 0), 1) for name in
+                   ('qmax', 'qmin', 'dxmax', 'dxmin') for aa in (0, 1)]
+                + [(21, ('shared', 1), 1), (21, ('shared', 0), 1),
                 (22, ('diagonal', 1, 3), 1), (22, ('zero', 1, 3), 1),
                 (23, ('cross0', 1, 3), 1), (23, ('large', 1, 3), 1),
                 (23, ('full', 1, 3), 1), (24, (1, 0, 128), 1),
@@ -130,14 +133,16 @@ def selections(tier):
                 (26, ('rotate90', 0, 1, 1, 0), 1),
                 (26, ('skew-', 1, 1, 1, 0), 1),
                 (27, (127, 255, 1), 1), (27, (0, 0, 0), 1),
-                (28, ('boundary',), 1), (28, ('rewrite',), 1)]
+                (28, ('boundary',), 1), (28, ('rewrite',), 1)])
     return ([(21, (name, aa), 1) for name in
-             ('shared', 'reverse', 'tiny', 'empty', 'gradientH', 'gradientV', 'split', 'tail')
+             ('shared', 'reverse', 'tiny', 'empty', 'gradientH', 'gradientV', 'split', 'tail',
+              'range+', 'range-')
              for aa in (0, 1)]
             + [(22, (name, aa, caps), 1) for name in ('horizontal', 'vertical', 'diagonal',
                  'zero', 'half') for aa in (0, 1) for caps in range(4)]
             + [(23, (name, aa, caps), 1) for name in
-                 ('cross0', 'half', 'small', 'large', 'full', 'wide', 'empty', 'overlap')
+                 ('cross0', 'half', 'small', 'large', 'full', 'wide', 'empty', 'overlap',
+                  'qmax', 'qmin', 'dxmax', 'dxmin')
                  for aa in (0, 1) for caps in range(4)]
             + [(24, (radius, keep, alpha), 1) for radius in (0, 1, 4095)
                  for keep in (0, 1) for alpha in (0, 1, 128, 255)]
@@ -170,6 +175,19 @@ def build(number, variant, rng, memory, metadata, common=None, param=PARAM):
         if name == 'reverse':
             vertices = tuple(reversed(vertices))
         c, p = triangle(rect, vertices, aa, **common)
+        if name.startswith('range'):
+            rect = (0, 0, 0, 0)
+            c = replace(c, rect=rect, clip=rect)
+            # AA maximum at (7,7) reaches 2^35-1 exactly; center samples are multiples of 4.
+            if aa:
+                e0 = 2147483647 - (2147483647 - ((1 << 35) - 1) % 7) % 7
+                ex = 2147483647
+                ey = (((1 << 35) - 1 - 8 * e0) // 7) - ex
+            else:
+                c = replace(c, rect=(0, 0, 1, 0), clip=(1, 0, 1, 0))
+                e0, ex, ey = 2147483647, 1431655765, 2
+            sign = -1 if name == 'range-' else 1
+            p = [sign * e0, sign * ex, sign * ey] * 3
         if name == 'tiny':
             # Exact coefficients include nonzero samples below the Q16 LSB.
             p = [0, 1, -1, 65536, 0, 0, 65536, 0, 0]
@@ -208,6 +226,19 @@ def build(number, variant, rng, memory, metadata, common=None, param=PARAM):
         if angles and angles[0] == angles[1]:
             rect = (1, 1, 0, 0)
         c, p = arc(rect, name, aa, caps, angles, **common)
+        if name in ('qmax', 'qmin', 'dxmax', 'dxmin'):
+            rect = (0, 0, 0, 0)
+            endpoint = 6 if aa else 3
+            x, y, radius = {
+                'qmax': (131072, 131072, 1),
+                'qmin': (-65536, -1, 196608),
+                'dxmax': (524283, 0, 524283),
+                'dxmin': (-524292 + endpoint, 0, 524292),
+            }[name]
+            # Move the final sample to the chosen extremum; -24 endpoint is at the first.
+            p = list(circle(rect, 1 - x + endpoint, 1 - y + endpoint, radius)) * 4
+            p += [0] * 6
+            c = replace(c, rect=rect, clip=rect, flags=aa | 16 | 32)
         commands = [replace(c, args=(param,) + (0,) * 7)]
         blocks = [(param, p)]
     elif number == 24:
@@ -252,6 +283,9 @@ def build(number, variant, rng, memory, metadata, common=None, param=PARAM):
                 c, p = triangle(rect, ((-1000, -1000), (4000, -1000), (-1000, 4000)),
                                 1, dst_stride=1024, clip=rect, opa=128)
                 commands = [replace(c, args=(param,) + (0,) * 7)]
+                # Normalize the enclosing triangle so E0 remains signed32.
+                p = [1000*65536, 0, 65536, 3000*46340, -46340, -46340,
+                     1000*65536, 65536, 0]
                 blocks = [(param, p)]
             else:
                 name, sf, flags = variant

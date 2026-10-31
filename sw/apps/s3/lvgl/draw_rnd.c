@@ -1,5 +1,5 @@
 /* File: draw_rnd.c
- * Spec: RND v0.3 2.1–2.6/5.4; design rnd-disp 4.2/4.3.
+ * Spec: RND v0.4 2.1–2.6/5.4; design rnd-disp 4.2/4.3.
  * Description: LVGL v9.6 draw-task translation; synchronous shared IRQ completion.
  * Clock domain: clk_sys, descriptor execution in clk_mem.
  */
@@ -244,12 +244,15 @@ static void circle_parameters(uint32_t *p, const struct rnd_common *c,
     p[3] = (uint32_t)(16 * y + 64);
 }
 
-static void edge_parameters(uint32_t *p, int32_t ex, int32_t ey,
+static bool edge_parameters(uint32_t *p, int32_t ex, int32_t ey,
                              int32_t x, int32_t y)
 {
-    p[0] = (uint32_t)((int64_t)x * ex + (int64_t)y * ey);
+    int64_t initial = (int64_t)x * ex + (int64_t)y * ey;
+    if (initial < INT32_MIN || initial > INT32_MAX) return false;
+    p[0] = (uint32_t)initial;
     p[1] = (uint32_t)ex;
     p[2] = (uint32_t)ey;
+    return true;
 }
 
 static uint32_t parameter_block(unsigned words, const uint32_t *value)
@@ -261,20 +264,86 @@ static uint32_t parameter_block(unsigned words, const uint32_t *value)
     return rnd_physical(p);
 }
 
-static void geometry_command(lv_draw_task_t *t, struct rnd_common *c,
-                              uint32_t *p, uint8_t op)
+/* rnd-spec 2.3/5.4: extrema over the clipped sample rectangle. */
+static bool geometry_range(const struct rnd_common *c, const uint32_t *p, uint8_t op)
 {
+    int32_t left = LV_MAX(c->rect.x0, c->clip.x0);
+    int32_t right = LV_MIN(c->rect.x1, c->clip.x1);
+    int32_t top = LV_MAX(c->rect.y0, c->clip.y0);
+    int32_t bottom = LV_MIN(c->rect.y1, c->clip.y1);
+    if (left > right || top > bottom) return true;
+    const int64_t minimum = -INT64_C(34359738368), maximum = INT64_C(34359738367);
+    int32_t first = c->flags & RND_AA ? 1 : 4;
+    int32_t last = c->flags & RND_AA ? 7 : 4;
+    int64_t xs[2] = {8 * ((int64_t)left - c->rect.x0) + first,
+                     8 * ((int64_t)right - c->rect.x0) + last};
+    int64_t ys[2] = {8 * ((int64_t)top - c->rect.y0) + first,
+                     8 * ((int64_t)bottom - c->rect.y0) + last};
+    unsigned edges = op == 9 ? 3 : 2, edge_base = op == 11 ? 16 : 0;
+    for (unsigned k = 0; k < edges; ++k) {
+        const uint32_t *e = p + edge_base + 3 * k;
+        for (unsigned j = 0; j < 2; ++j)
+            for (unsigned i = 0; i < 2; ++i) {
+                int64_t value = 8 * (int64_t)(int32_t)e[0] +
+                                xs[i] * (int32_t)e[1] + ys[j] * (int32_t)e[2];
+                if (value < minimum || value > maximum) return false;
+            }
+    }
+    unsigned circles = op == 9 ? 0 : op == 10 ? 2 : 4;
+    for (unsigned k = 0; k < circles; ++k) {
+        const uint32_t *q = p + (op == 10 ? 8 : 0) + 4 * k;
+        int64_t initial = (int64_t)(int32_t)q[1] * INT64_C(4294967296) + q[0];
+        int64_t dx = (int32_t)q[2], dy = (int32_t)q[3];
+        int64_t x = (dx - 64) / 16, y = (dy - 64) / 16;
+        int64_t radius_squared = x * x + y * y - initial;
+        if (initial < minimum || initial > maximum || -radius_squared < minimum ||
+            dx < -8388608 || dx > 8388607 || dy < -8388608 || dy > 8388607)
+            return false;
+        for (unsigned j = 0; j < 2; ++j)
+            for (unsigned i = 0; i < 2; ++i) {
+                int64_t vx = x + xs[i] - 1, vy = y + ys[j] - 1;
+                int64_t value = vx * vx + vy * vy - radius_squared;
+                int64_t step_x = 16 * vx + 64, step_y = 16 * vy + 64;
+                if (value > maximum || step_x < -8388608 || step_x > 8388607 ||
+                    step_y < -8388608 || step_y > 8388607) return false;
+            }
+    }
+    return true;
+}
+
+/* Evaluation precedes target allocation; geometry uses only coordinates and color. */
+static struct rnd_common geometry_common(lv_draw_task_t *t, const lv_area_t *area,
+                                          lv_color_t color, uint8_t opa)
+{
+    lv_layer_t *layer = t->target_layer;
+    lv_area_t clip;
+    lv_area_intersect(&clip, &t->clip_area, &layer->buf_area);
+    return (struct rnd_common) {
+        .rect = rect(area, layer), .clip = rect(&clip, layer),
+        .color = rgb(color), .opa = opa
+    };
+}
+
+static bool geometry_command(lv_draw_task_t *t, struct rnd_common *c,
+                              uint32_t *p, uint8_t op, bool emit)
+{
+    if (!emit) return geometry_range(c, p, op);
+    lv_layer_t *layer = t->target_layer;
+    c->dst_base = rnd_physical(layer->draw_buf->data);
+    c->dst_stride = layer->draw_buf->header.stride;
+    c->dst_fmt = format(layer->color_format);
     struct rnd_command *cmd = next_command();
     uint32_t physical = parameter_block(32, p);
     if (op == 9) rnd_triangle(cmd, c, physical);
     else if (op == 10) rnd_line(cmd, c, physical);
     else rnd_arc(cmd, c, physical);
     s3_compare_geometry(t, c, p, op);
+    return true;
 }
 
-static void triangle(lv_draw_task_t *t, const lv_draw_triangle_dsc_t *d)
+static bool triangle(lv_draw_task_t *t, const lv_draw_triangle_dsc_t *d, bool emit)
 {
-    struct rnd_common c = common(t, &t->area, d->color, d->opa);
+    struct rnd_common c = geometry_common(t, &t->area, d->color, d->opa);
     c.flags = geometry_aa();
     uint32_t p[32] = {0};
     lv_point_t v[3];
@@ -283,8 +352,7 @@ static void triangle(lv_draw_task_t *t, const lv_draw_triangle_dsc_t *d)
                       (int64_t)(v[1].y - v[0].y) * (v[2].x - v[0].x);
     if (winding == 0) {
         c.rect.x1 = c.rect.x0 - 1;
-        geometry_command(t, &c, p, 9);
-        return;
+        return geometry_command(t, &c, p, 9, emit);
     }
     if (winding < 0) {
         lv_point_t swap = v[1]; v[1] = v[2]; v[2] = swap;
@@ -297,12 +365,12 @@ static void triangle(lv_draw_task_t *t, const lv_draw_triangle_dsc_t *d)
         int32_t ey = (int32_t)((int64_t)dx * 65536 / length);
         /* Canonical origin keeps the quantized shared edge exactly opposite on both sides. */
         const lv_point_t *anchor = a->x < b->x || (a->x == b->x && a->y < b->y) ? a : b;
-        edge_parameters(p + i * 3u, ex, ey, t->area.x1 - anchor->x, t->area.y1 - anchor->y);
+        if (!edge_parameters(p + i * 3u, ex, ey,
+                             t->area.x1 - anchor->x, t->area.y1 - anchor->y)) return false;
         if (dy < 0 || (dy == 0 && dx > 0)) c.flags |= (uint16_t)(2u << i);
     }
     if (d->grad.dir == LV_GRAD_DIR_NONE || d->grad.stops_count < 2) {
-        geometry_command(t, &c, p, 9);
-        return;
+        return geometry_command(t, &c, p, 9, emit);
     }
     bool vertical = d->grad.dir == LV_GRAD_DIR_VER;
     int32_t length = vertical ? lv_area_get_height(&t->area) : lv_area_get_width(&t->area);
@@ -316,8 +384,7 @@ static void triangle(lv_draw_task_t *t, const lv_draw_triangle_dsc_t *d)
         p[11] = (uint32_t)(((int32_t)two->color.red - one->color.red) * 65536 / end);
         p[12] = (uint32_t)(((int32_t)two->color.green - one->color.green) * 65536 / end);
         p[13] = (uint32_t)(((int32_t)two->color.blue - one->color.blue) * 65536 / end);
-        geometry_command(t, &c, p, 9);
-        return;
+        return geometry_command(t, &c, p, 9, emit);
     }
     for (int32_t k = 0; k < length; ++k) {
         unsigned i = 1;
@@ -336,13 +403,14 @@ static void triangle(lv_draw_task_t *t, const lv_draw_triangle_dsc_t *d)
             stripe.clip.x1 = LV_MIN(c.clip.x1, c.rect.x0 + k);
         }
         if (stripe.clip.x0 <= stripe.clip.x1 && stripe.clip.y0 <= stripe.clip.y1)
-            geometry_command(t, &stripe, p, 9);
+            if (!geometry_command(t, &stripe, p, 9, emit)) return false;
     }
+    return true;
 }
 
-static void line(lv_draw_task_t *t, const lv_draw_line_dsc_t *d)
+static bool line(lv_draw_task_t *t, const lv_draw_line_dsc_t *d, bool emit)
 {
-    struct rnd_common c = common(t, &t->_real_area, d->color, d->opa);
+    struct rnd_common c = geometry_common(t, &t->_real_area, d->color, d->opa);
     c.flags = geometry_aa() | (d->round_start ? RND_CAP_START : 0) |
               (d->round_end ? RND_CAP_END : 0);
     uint32_t p[32] = {0};
@@ -356,9 +424,13 @@ static void line(lv_draw_task_t *t, const lv_draw_line_dsc_t *d)
     if (length) {
         int32_t tx = (int32_t)((int64_t)dx * INT64_C(4294967296) / length);
         int32_t ty = (int32_t)((int64_t)dy * INT64_C(4294967296) / length);
-        p[0] = (uint32_t)nearest_divide((int64_t)x * tx + (int64_t)y * ty, 8);
+        int64_t along = nearest_divide((int64_t)x * tx + (int64_t)y * ty, 8);
+        int64_t normal = nearest_divide(-(int64_t)x * ty + (int64_t)y * tx, 8);
+        if (along < INT32_MIN || along > INT32_MAX ||
+            normal < INT32_MIN || normal > INT32_MAX) return false;
+        p[0] = (uint32_t)along;
         p[1] = (uint32_t)tx; p[2] = (uint32_t)ty;
-        p[3] = (uint32_t)nearest_divide(-(int64_t)x * ty + (int64_t)y * tx, 8);
+        p[3] = (uint32_t)normal;
         p[4] = (uint32_t)-ty; p[5] = (uint32_t)tx;
     } else {
         p[0] = (uint32_t)-65536;
@@ -371,12 +443,12 @@ static void line(lv_draw_task_t *t, const lv_draw_line_dsc_t *d)
                       ((int32_t)d->p1.y - oy) * 8 + phase, d->width * 4);
     circle_parameters(p + 12, &c, ((int32_t)d->p2.x - ox) * 8 + phase,
                       ((int32_t)d->p2.y - oy) * 8 + phase, d->width * 4);
-    geometry_command(t, &c, p, 10);
+    return geometry_command(t, &c, p, 10, emit);
 }
 
-static void arc(lv_draw_task_t *t, const lv_draw_arc_dsc_t *d)
+static bool arc(lv_draw_task_t *t, const lv_draw_arc_dsc_t *d, bool emit)
 {
-    struct rnd_common c = common(t, &t->_real_area, d->color, d->opa);
+    struct rnd_common c = geometry_common(t, &t->_real_area, d->color, d->opa);
     int32_t start = (int32_t)d->start_angle, end = (int32_t)d->end_angle;
     int32_t sweep = ((end - start) % 360 + 360) % 360;
     bool full = LV_ABS(end - start) >= 360;
@@ -397,13 +469,14 @@ static void arc(lv_draw_task_t *t, const lv_draw_arc_dsc_t *d)
         int32_t middle = d->radius * 8 - width * 4;
         int32_t ex = i == 0 ? -sine * 2 : sine * 2;
         int32_t ey = i == 0 ? cosine * 2 : -cosine * 2;
-        edge_parameters(p + 16 + i * 3, ex, ey,
-                        t->_real_area.x1 - d->center.x, t->_real_area.y1 - d->center.y);
+        if (!edge_parameters(p + 16 + i * 3, ex, ey,
+                             t->_real_area.x1 - d->center.x,
+                             t->_real_area.y1 - d->center.y)) return false;
         circle_parameters(p + 8 + i * 4, &c,
             cx * 8 + (int32_t)nearest_divide((int64_t)middle * cosine, 1 << LV_TRIGO_SHIFT),
             cy * 8 + (int32_t)nearest_divide((int64_t)middle * sine, 1 << LV_TRIGO_SHIFT), width * 4);
     }
-    geometry_command(t, &c, p, 11);
+    return geometry_command(t, &c, p, 11, emit);
 }
 
 static void fill(lv_draw_task_t *t, const lv_draw_fill_dsc_t *d, const lv_area_t *a)
@@ -717,14 +790,16 @@ static bool supported(lv_draw_task_t *t)
     case LV_DRAW_TASK_TYPE_BORDER: return true;
     case LV_DRAW_TASK_TYPE_LINE: {
         const lv_draw_line_dsc_t *d = t->draw_dsc;
-        return d->dash_width == 0 && d->dash_gap == 0 && d->points == NULL;
+        return d->dash_width == 0 && d->dash_gap == 0 && d->points == NULL &&
+               line(t, d, false);
     }
     case LV_DRAW_TASK_TYPE_ARC:
-        return ((const lv_draw_arc_dsc_t *)t->draw_dsc)->img_src == NULL;
+        return ((const lv_draw_arc_dsc_t *)t->draw_dsc)->img_src == NULL &&
+               arc(t, t->draw_dsc, false);
     case LV_DRAW_TASK_TYPE_TRIANGLE: {
         const lv_draw_triangle_dsc_t *d = t->draw_dsc;
-        return d->grad.dir == LV_GRAD_DIR_NONE || d->grad.dir == LV_GRAD_DIR_HOR ||
-               d->grad.dir == LV_GRAD_DIR_VER;
+        return (d->grad.dir == LV_GRAD_DIR_NONE || d->grad.dir == LV_GRAD_DIR_HOR ||
+                d->grad.dir == LV_GRAD_DIR_VER) && triangle(t, d, false);
     }
     case LV_DRAW_TASK_TYPE_MASK_RECTANGLE:
         return t->target_layer->color_format == LV_COLOR_FORMAT_ARGB8888;
@@ -801,9 +876,9 @@ static int32_t dispatch(lv_draw_unit_t *unit, lv_layer_t *layer)
     t->state = LV_DRAW_TASK_STATE_IN_PROGRESS;
     switch (t->type) {
     case LV_DRAW_TASK_TYPE_FILL: fill(t, t->draw_dsc, &t->area); break;
-    case LV_DRAW_TASK_TYPE_LINE: line(t, t->draw_dsc); break;
-    case LV_DRAW_TASK_TYPE_ARC: arc(t, t->draw_dsc); break;
-    case LV_DRAW_TASK_TYPE_TRIANGLE: triangle(t, t->draw_dsc); break;
+    case LV_DRAW_TASK_TYPE_LINE: line(t, t->draw_dsc, true); break;
+    case LV_DRAW_TASK_TYPE_ARC: arc(t, t->draw_dsc, true); break;
+    case LV_DRAW_TASK_TYPE_TRIANGLE: triangle(t, t->draw_dsc, true); break;
     case LV_DRAW_TASK_TYPE_MASK_RECTANGLE: {
         const lv_draw_mask_rect_dsc_t *d = t->draw_dsc;
         struct rnd_common c = common(t, &t->_real_area, lv_color_black(), 255);

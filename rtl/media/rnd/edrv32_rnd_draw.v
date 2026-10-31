@@ -295,8 +295,8 @@ module edrv32_rnd_draw (
     wire geometry_w;
     wire geometry_ready_w;
     wire geometry_valid_w;
-    wire [15:0] geometry_cov_w;
-    reg [15:0] geometry_cov_r [8:9];
+    wire [7:0] geometry_cov_w;
+    reg [7:0] geometry_cov_r [8:9];
     wire gradient_w;
     wire gradient_vertical_w;
     wire plain_fill_w;
@@ -649,7 +649,7 @@ module edrv32_rnd_draw (
     assign write_finish_w = (write_state_r == S_WRITE_RESPONSE && wr_done_i) ||
         affine_skip_write_w;
     assign next_write_w = {1'b0, write_beat_r} + 10'd1;
-    assign issue_pair_w = !affine_w && issue_x_r < bank_right_r[render_bank_r] &&
+    assign issue_pair_w = !affine_w && !geometry_w && issue_x_r < bank_right_r[render_bank_r] &&
         issue_offset_w[4:0] <= (argb_w ? 5'd24 : 5'd28);
     assign issue_last_w = {1'b0, issue_x_r} + (issue_pair_w ? 13'd1 : 13'd0) >=
         {1'b0, bank_right_r[render_bank_r]};
@@ -749,7 +749,7 @@ module edrv32_rnd_draw (
         wire [7:0] mask_alpha_w;
         wire [7:0] post_factor_w;
         wire [7:0] source_factor_w;
-        assign post_factor_w = geometry_w ? geometry_cov_r[9][pixel*8 +: 8] :
+        assign post_factor_w = geometry_w ? (pixel == 0 ? geometry_cov_r[9] : 8'd0) :
             cutout_w ? command_i[255:248] : shape_coverage_r[9];
         assign source_factor_w = cutout_w ?
             8'd255 - shape_coverage_r[7] : command_i[255:248];
@@ -1685,9 +1685,7 @@ module edrv32_rnd_draw (
         .top_i(top_w[11:0]),
         .request_i(issue_w && geometry_w),
         .ready_o(geometry_ready_w),
-        .pair_i(issue_pair_w),
-        .row_end_i({1'b0, issue_x_r} + (issue_pair_w ? 13'd1 : 13'd0) >=
-            {1'b0, clip_right_r}),
+        .row_end_i(issue_x_r >= clip_right_r),
         .valid_o(geometry_valid_w),
         .coverage_o(geometry_cov_w)
     );

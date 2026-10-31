@@ -42,7 +42,7 @@ module edrv32_rnd_util_tb;
                     u_rnd.u_draw.pipeline_step_w && !u_rnd.u_draw.geometry_ready_w)
                     stall++;
                 if (u_rnd.u_draw.u_geometry.request_i &&
-                    u_rnd.u_draw.u_geometry.pair_i)
+                    u_rnd.u_draw.issue_pair_w)
                     extra += u_rnd.u_draw.u_geometry.aa_w ? 4 : 1;
             end
             if (u_rnd.u_regs.read_wait_i) rd_wait++;
