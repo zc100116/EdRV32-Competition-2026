@@ -19,6 +19,7 @@ module edrv32_eth_tx (
     input wire [47:0] dst_mac_i,
     input wire [31:0] dst_ip_i,
     input wire [31:0] ports_i,
+    input wire [23:0] tx_gap_i,
 
     // Pending ARP reply, owned by the register side until accepted.
     input wire arp_valid_i,
@@ -68,6 +69,8 @@ module edrv32_eth_tx (
     localparam [2:0] S_HEADER = 3'd1;
     localparam [2:0] S_PAYLOAD = 3'd2;
     localparam [2:0] S_FRAME_WAIT = 3'd3;
+    reg [23:0] tx_gap_cnt_r;
+    wire tx_gap_ready_w;
     reg [3:0] state_r;
     reg [2:0] frame_state_r;
     reg active_r;
@@ -143,8 +146,10 @@ module edrv32_eth_tx (
     assign reserved_w = state_r == S_PLAN && !abort_r && !error_r && !occupied_r[bank_r];
     assign packet_data_w = {bank_r, final_r, flags_r[2] && final_r,
         flags_r[1:0], offset_r, 1'b0, length_r};
+    // eth 2.6: IDLE selection precedes the first FIFO byte by one cycle.
+    assign tx_gap_ready_w = tx_gap_cnt_r <= 24'd1;
     assign packet_take_w = frame_state_r == S_FRAME_IDLE &&
-        (abort_r || abort_i || !arp_valid_i);
+        (abort_r || abort_i || (!arp_valid_i && tx_gap_ready_w));
     assign packet_drop_w = packet_valid_w && packet_take_w && (abort_r || abort_i);
     assign queue_empty_w = !packet_valid_w;
     edrv32_sync_fifo #(
@@ -235,6 +240,18 @@ module edrv32_eth_tx (
     assign udp_done_o = frame_complete_w && !arp_r;
     assign arp_done_o = frame_complete_w && arp_r;
     assign unused_w = &{1'b0, rd_done_w, rd_error_w, rd_sol_w, rd_eol_w, frame_r[11]};
+
+    // eth 2.6: only accepted UDP first bytes restart the interval; ARP just lets it run.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            tx_gap_cnt_r <= 24'd0;
+        else if (clear_i || start_i)
+            tx_gap_cnt_r <= 24'd0;
+        else if (valid_o && ready_i && !arp_r && byte_idx_r == 0)
+            tx_gap_cnt_r <= tx_gap_i == 0 ? 24'd0 : tx_gap_i - 24'd1;
+        else if (tx_gap_cnt_r != 0)
+            tx_gap_cnt_r <= tx_gap_cnt_r - 24'd1;
+    end
 
     always @(*) begin
         header_w = 8'd0;
@@ -497,7 +514,8 @@ module edrv32_eth_tx (
                         byte_idx_r <= 11'd0;
                         frame_state_r <= S_HEADER;
                         frame_busy_r <= 1'b1;
-                    end else if (packet_valid_w && !abort_r && !abort_i) begin
+                    end else if (packet_valid_w && !abort_r && !abort_i &&
+                        tx_gap_ready_w) begin
                         arp_r <= 1'b0;
                         byte_idx_r <= 11'd0;
                         frame_state_r <= S_HEADER;

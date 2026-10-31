@@ -54,6 +54,7 @@ module edrv32_eth_regs (
     output reg [15:0] dst_mac_hi_o,
     output reg [31:0] dst_ip_o,
     output reg [31:0] ports_o,
+    output reg [23:0] tx_gap_o,
     output reg phy_o,
     output wire [127:0] bases_o,
     output wire [127:0] sizes_o,
@@ -142,6 +143,7 @@ module edrv32_eth_regs (
             dst_mac_hi_o <= 16'd0;
             dst_ip_o <= 32'd0;
             ports_o <= 32'd0;
+            tx_gap_o <= 24'd0;
             phy_o <= 1'd1;
             irq_stat_r <= 12'd0;
             err_code_r <= 2'd0;
@@ -168,6 +170,7 @@ module edrv32_eth_regs (
             dst_mac_hi_o <= 16'd0;
             dst_ip_o <= 32'd0;
             ports_o <= 32'd0;
+            tx_gap_o <= 24'd0;
             phy_o <= 1'd1;
             irq_stat_r <= 12'd0;
             err_code_r <= 2'd0;
@@ -220,6 +223,7 @@ module edrv32_eth_regs (
                     12'h114: dst_mac_hi_o <= apb_pwdata_r[15:0];
                     12'h118: dst_ip_o <= apb_pwdata_r[31:0];
                     12'h11c: ports_o <= apb_pwdata_r[31:0];
+                    12'h134: tx_gap_o <= apb_pwdata_r[23:0];
                     12'h188: phy_o <= apb_pwdata_r[0];
                     12'h140: base_r[0] <= {apb_pwdata_r[31:5], 5'd0};
                     12'h144: size_r[0] <= apb_pwdata_r;
@@ -301,6 +305,7 @@ module edrv32_eth_regs (
             12'h114: apb_prdata_o = {16'd0, dst_mac_hi_o};
             12'h118: apb_prdata_o = dst_ip_o;
             12'h11c: apb_prdata_o = ports_o;
+            12'h134: apb_prdata_o = {8'd0, tx_gap_o};
             12'h188: apb_prdata_o = {31'd0, phy_o};
             12'h140: apb_prdata_o = base_r[0];
             12'h144: apb_prdata_o = size_r[0];

@@ -148,6 +148,7 @@ module edrv32_eth (
     wire [15:0] desc_count_w;
     wire [31:0] dst_ip_w;
     wire [31:0] ports_w;
+    wire [23:0] tx_gap_w;
     wire arp_ready_w;
     wire tx_valid_w;
     wire tx_ready_w;
@@ -350,6 +351,7 @@ module edrv32_eth (
         .dst_mac_i({dst_mac_hi_w, dst_mac_lo_w}),
         .dst_ip_i(dst_ip_w),
         .ports_i(ports_w),
+        .tx_gap_i(tx_gap_w),
         .arp_valid_i(arp_valid_w),
         .arp_ready_o(arp_ready_w),
         .arp_mac_i(arp_pending_r ? arp_mac_r : arp_rx_mac_w),
@@ -452,6 +454,7 @@ module edrv32_eth (
         .dst_mac_hi_o(dst_mac_hi_w),
         .dst_ip_o(dst_ip_w),
         .ports_o(ports_w),
+        .tx_gap_o(tx_gap_w),
         .phy_o(phy_w),
         .bases_o(bases_w),
         .sizes_o(sizes_w),

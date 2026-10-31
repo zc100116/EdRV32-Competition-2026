@@ -12,6 +12,7 @@ module tb #(parameter realtime TX_HALF = 4.0004);
     always #(TX_HALF) tx_clk=!tx_clk;
     logic rst=0;
     logic clear=0;
+    logic [23:0] tx_gap=0;
     logic start=0;
     logic abort_cmd=0;
     logic [15:0] desc_count=1;
@@ -44,6 +45,7 @@ module tb #(parameter realtime TX_HALF = 4.0004);
         .clk_i(clk), .rst_n_i(rst), .clear_i(clear), .start_i(start), .abort_i(abort_cmd),
         .desc_base_i(32'h100), .desc_count_i(desc_count), .mac_i(48'h020304050607),
         .ip_i(32'hc0a80102), .dst_mac_i(48'h002233445566), .dst_ip_i(32'hc0a80103),
+        .tx_gap_i(tx_gap),
         .ports_i({16'd5678,16'd1234}), .arp_valid_i(arp_valid), .arp_ready_o(arp_ready),
         .arp_mac_i(48'h102030405060), .arp_ip_i(32'h0a000001),
         .valid_o(valid), .ready_i(ready), .data_o(data), .frame_done_i(frame_done),
@@ -88,6 +90,13 @@ module tb #(parameter realtime TX_HALF = 4.0004);
     integer rd_addr=0;
     integer bad_addr=-1;
     integer outstanding=0;
+    integer cycles=0;
+    integer frame_finished=0;
+    integer first_byte=0;
+    integer natural_start=0;
+    integer previous_udp=-1;
+    integer gap_checks=0;
+    logic check_gap=0;
     integer frames=0;
     integer descriptor_completions=0;
     integer dones=0;
@@ -106,6 +115,8 @@ module tb #(parameter realtime TX_HALF = 4.0004);
     byte unsigned expected[$];
     always @(negedge clk) axi_arready_i=!stall_ar && ($urandom_range(0,3)!=0);
     always @(posedge clk) begin
+        cycles++;
+        if(frame_done) frame_finished=cycles;
         if(axi_arvalid_o && axi_arready_i) begin
             requests.push_back({axi_araddr_o,axi_arlen_o});outstanding++;
         end
@@ -129,6 +140,10 @@ module tb #(parameter realtime TX_HALF = 4.0004);
         if(error) errors++;
         if(arp_done) arp_frames++;
         if(valid && ready) begin
+            if(captured.size()==0) begin
+                first_byte=cycles;
+                natural_start=frame_finished+2;
+            end
             captured.push_back(data[7:0]);
             if(data[8]) begin
                 check_frame();captured.delete();frames++;seen_in_command++;
@@ -152,6 +167,19 @@ module tb #(parameter realtime TX_HALF = 4.0004);
         integer n;
         integer sum;
         expected.delete();
+        if(check_gap && captured[13]!=6) begin
+            if(previous_udp>=0) begin
+                if(previous_udp+int'(tx_gap)>natural_start)
+                    natural_start=previous_udp+int'(tx_gap);
+                if(first_byte!=natural_start)
+                    $fatal(1,"FAIL TX_GAP=%0d expected start=%0d actual=%0d time=%0t",
+                        tx_gap,natural_start,first_byte,$time);
+                gap_checks++;
+            end
+            previous_udp=first_byte;
+        end
+        if(check_gap && captured[13]==6 && first_byte!=natural_start)
+            $fatal(1,"FAIL ARP delayed expected=%0d actual=%0d",natural_start,first_byte);
         if(captured.size()>13 && captured[13]==6) begin
             for(integer i=0;i<42;i++) expected.push_back(0);
             putmac(0,48'h102030405060);putmac(6,48'h020304050607);
@@ -190,7 +218,7 @@ module tb #(parameter realtime TX_HALF = 4.0004);
         for(integer i=0;i<4;i++) memory[addr+i]=val[i*8+:8];
     endtask
     task automatic command(input integer len);
-        total=len;sent_data=0;seen_in_command=0;
+        total=len;sent_data=0;seen_in_command=0;previous_udp=-1;
         store32(256,32'h1003);store32(260,32'(len));store32(264,32'h102);
         store32(268,32'(offset_base));
         for(integer i=272;i<288;i++) memory[i]=8'($urandom);
@@ -225,6 +253,25 @@ module tb #(parameter realtime TX_HALF = 4.0004);
         @(negedge clk);arp_valid=0;
         wait(!busy);repeat(5) @(negedge clk);
         if(arp_frames!=1 || expect_arp) $fatal(1,"FAIL ARP completion");
+        // ET-16: exact start spacing at line rate and while the timer dominates.
+        check_gap=1;
+        tx_gap=0;normal(3000);
+        tx_gap=1;normal(3000);
+        tx_gap=100;normal(3000);
+        tx_gap=2125;normal(3000);
+        multi_mode=1;desc_count=3;
+        command(33);wait(!busy);repeat(5) @(negedge clk);
+        if(current!=3 || seen_in_command!=3) $fatal(1,"FAIL paced descriptor sequence");
+        multi_mode=0;desc_count=1;
+        command(3000);wait(valid);repeat(100) @(negedge clk);
+        arp_expected_frame=frames+1;expect_arp=1;arp_valid=1;
+        do @(posedge clk); while(!arp_ready);
+        @(negedge clk);arp_valid=0;
+        wait(!busy);repeat(5) @(negedge clk);
+        if(arp_frames!=2 || expect_arp || gap_checks!=12)
+            $fatal(1,"FAIL ET-16 coverage checks=%0d ARP=%0d",gap_checks,arp_frames);
+        $display("PASS ET-16 exact UDP intervals checks=%0d gaps=0,1,100,2125 ARP=1",gap_checks);
+        check_gap=0;tx_gap=0;
         // ABORT preserves the frame already committed to the FIFO and drops prefetched work.
         command(3000);wait(valid);repeat(50) @(negedge clk);
         abort_cmd=1;@(negedge clk);abort_cmd=0;

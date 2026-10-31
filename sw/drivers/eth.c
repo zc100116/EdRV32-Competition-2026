@@ -83,6 +83,12 @@ void eth_header_pack(uint8_t header[8], unsigned int window, unsigned int notify
     }
 }
 
+/* ETH 2.6: minimum UDP packet start interval in clk_mem cycles. */
+void eth_set_tx_gap(uint32_t cycles)
+{
+    mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_TX_GAP_OFFSET, cycles);
+}
+
 /* ETH 2.6: hardware performs packetization, UDP/IP headers, FCS and terminal NOTIFY. */
 void eth_send(uint32_t descriptors, uint32_t count)
 {

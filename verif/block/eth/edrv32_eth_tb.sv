@@ -1,5 +1,5 @@
 // File: edrv32_eth_tb.sv
-// Spec: eth 2-7; eth-testplan ET-01 through ET-15.
+// Spec: eth 2-7; eth-testplan ET-01 through ET-16.
 // Description: Scripted independent scoreboard with asynchronous MAC, APB, AXI and PHY models.
 // Clock domain: three unrelated 125 MHz clocks; rx +100 ppm, tx -100 ppm.
 `timescale 1ns/1fs
@@ -90,6 +90,51 @@ module edrv32_eth_tb;
         .mdio_o(mdio_in)
     );
     `include "dut_connections.svh"
+
+    // ET-16 observes accepted bytes at the asynchronous FIFO write interface.
+    bit gap_enabled = 0;
+    int gap_cycles = 0;
+    int gap_value = 0;
+    int gap_exact_pairs = 0;
+    int gap_last_done = 0;
+    int gap_first_byte = 0;
+    int gap_natural_start = 0;
+    int gap_previous_udp = -1;
+    int gap_byte_index = 0;
+    int gap_pairs = 0;
+    int gap_arps = 0;
+    always @(posedge clk_mem) begin
+        gap_cycles++;
+        if (u_eth.tx_done_w) gap_last_done = gap_cycles;
+        if (gap_enabled && u_eth.tx_valid_w && u_eth.tx_ready_w) begin
+            if (gap_byte_index == 0) begin
+                gap_first_byte = gap_cycles;
+                gap_natural_start = gap_last_done + 2;
+            end
+            if (gap_byte_index == 13) begin
+                if (u_eth.tx_data_w[7:0] == 8'h06) begin
+                    compare("ET-16 ARP unrestricted start", 32'(gap_natural_start),
+                        32'(gap_first_byte));
+                    gap_arps++;
+                end else begin
+                    if (gap_previous_udp >= 0) begin
+                        if (gap_previous_udp + gap_value > gap_natural_start)
+                            gap_natural_start = gap_previous_udp + gap_value;
+                        if (gap_first_byte < gap_natural_start)
+                            $fatal(1, "FAIL ET-16 interval min=%0d actual=%0d time=%0t",
+                                gap_natural_start, gap_first_byte, $time);
+                        // Small gaps: only the first descriptor has prefetched data.
+                        if (gap_pairs < gap_exact_pairs)
+                            compare("ET-16 exact UDP start", 32'(gap_natural_start),
+                                32'(gap_first_byte));
+                        gap_pairs++;
+                    end
+                    gap_previous_udp = gap_first_byte;
+                end
+            end
+            gap_byte_index = u_eth.tx_data_w[8] ? 0 : gap_byte_index + 1;
+        end
+    end
 
     task automatic apb_access(input bit write_i,
         input bit [11:0] addr_i,
@@ -264,6 +309,21 @@ module edrv32_eth_tb;
                 $fatal(1, "FAIL script fields expected=5 actual=%0d time=%0t", scan, $time);
             if (scan == 5) begin
                 case (op)
+                    "M": begin
+                        gap_enabled = 1;
+                        gap_value = int'(a);
+                        gap_exact_pairs = int'(b);
+                        gap_previous_udp = -1;
+                        gap_pairs = 0;
+                        gap_arps = 0;
+                    end
+                    "Z": begin
+                        compare("ET-16 UDP interval checks", a, 32'(gap_pairs));
+                        compare("ET-16 unrestricted ARP checks", b, 32'(gap_arps));
+                        $display("PASS ET-16 gap=%0d UDP intervals=%0d ARP=%0d",
+                            gap_value, gap_pairs, gap_arps);
+                        gap_enabled = 0;
+                    end
                     "W": apb_access(1, a[11:0], b, value);
                     "R": begin
                         apb_access(0, a[11:0], 0, value);

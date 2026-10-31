@@ -53,6 +53,8 @@ void demo_network_wait(void)
 void demo_network_init(void)
 {
     eth_monitor_local_init(demo.clock_hz);
+    /* 125 MHz * 17 us = 2125 cycles; 1800 packets * 17 us = 30.6 ms < 33.3 ms. */
+    eth_set_tx_gap(2125u);
     demo_network_windows_init();
     engine_irq_register(ENGINE_ETH, EDRV32_ETH_IRQ_EN_ERROR_MASK |
         EDRV32_ETH_IRQ_EN_DONE_MASK | demo_network_rx_mask, 3, demo_network_event, NULL);

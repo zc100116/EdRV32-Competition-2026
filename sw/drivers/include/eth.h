@@ -31,6 +31,8 @@ void eth_header_pack(uint8_t header[8], unsigned int window, unsigned int notify
                      uint32_t offset);
 /* ETH 2.6: submit an already coherent physical descriptor list; keep source until DONE. */
 void eth_send(uint32_t descriptors, uint32_t count);
+/* Minimum UDP packet start interval in clk_mem cycles; zero selects line rate. */
+void eth_set_tx_gap(uint32_t cycles);
 /* ETH 2.7: assert (1) or release (0) PHY reset; caller supplies PHY manual timing. */
 void eth_phy_reset(unsigned int asserted);
 /* ETH 2.7: issue a blocking Clause 22 register write; no retry or timeout. */

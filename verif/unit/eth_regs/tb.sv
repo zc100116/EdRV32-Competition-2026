@@ -46,6 +46,7 @@ module tb;
     wire [15:0] dst_mac_hi_o;
     wire [31:0] dst_ip_o;
     wire [31:0] ports_o;
+    wire [23:0] tx_gap_o;
     wire phy_o;
     wire [127:0] bases_o;
     wire [127:0] sizes_o;
@@ -99,6 +100,7 @@ module tb;
         .dst_mac_hi_o(dst_mac_hi_o),
         .dst_ip_o(dst_ip_o),
         .ports_o(ports_o),
+        .tx_gap_o(tx_gap_o),
         .phy_o(phy_o),
         .bases_o(bases_o),
         .sizes_o(sizes_o),
@@ -110,7 +112,7 @@ module tb;
         .error_o(error_o),
         .irq_o(irq_o)
     );
-    wire unused = &{1'b0, unused_mdio_command, enable_o, irq_en_o, desc_base_o, desc_count_o, mac_lo_o, mac_hi_o, ip_o, rx_port_o, dst_mac_lo_o, dst_mac_hi_o, dst_ip_o, ports_o, phy_o, bases_o, sizes_o, mdio_start_o};
+    wire unused = &{1'b0, unused_mdio_command, enable_o, irq_en_o, desc_base_o, desc_count_o, mac_lo_o, mac_hi_o, ip_o, rx_port_o, dst_mac_lo_o, dst_mac_hi_o, dst_ip_o, ports_o, tx_gap_o, phy_o, bases_o, sizes_o, mdio_start_o};
     wire [31:0] unused_mdio_command;
     integer starts=0;
     integer aborts=0;
@@ -154,6 +156,7 @@ module tb;
         write_reg(32'h114,32'h12345678);check(32'h114,32'h5678);
         write_reg(32'h118,32'h0a020304);check(32'h118,32'h0a020304);
         write_reg(32'h11c,32'h12345678);check(32'h11c,32'h12345678);
+        write_reg(32'h134,32'hff123456);check(32'h134,32'h00123456);
         write_reg(32'h20,32'h876543ff);check(32'h20,32'h876543e0);
         write_reg(32'h24,32'hffff0003);check(32'h24,3);
         for(integer i=0;i<4;i++) begin

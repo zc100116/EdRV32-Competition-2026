@@ -1,5 +1,5 @@
 # File: cases.py
-# Spec: eth-testplan ET-01-15 and sections 4, 6.
+# Spec: eth-testplan ET-01-16 and sections 4, 6.
 # Description: Generates directed and seeded stimuli plus independent exact scoreboards.
 # Clock domain: none (host vector generation).
 from pathlib import Path
@@ -490,10 +490,11 @@ def et12(root):
     case.configure()
     for addr, value in [(0x104, 0xffff1234), (0x10c, 0xffff5678),
                         (0x114, 0xffff4321), (0x20, 0x101f), (0x24, 0xabcd0000),
-                        (0x144, 0xf0000100)]:
+                        (0x134, 0xff123456), (0x144, 0xf0000100)]:
         case.w(addr, value)
         case.r(addr, value & (0xffff if addr in [0x104, 0x10c, 0x114, 0x24]
-                             else 0xffffffe0 if addr == 0x20 else 0xffffffff))
+                             else 0xffffffe0 if addr == 0x20
+                             else 0x00ffffff if addr == 0x134 else 0xffffffff))
     case.w(4, 8)
     reset_registers(case)
     case.ref = Reference()
@@ -632,6 +633,40 @@ def et14(root):
     return results
 
 
+def et16(root):
+    results = []
+    for gap in [0, 1, 100, 2125]:
+        case = Case(root, f'ET-16-gap-{gap}')
+        case.configure()
+        case.w(0x134, 0xff000000 | gap)
+        case.r(0x134, gap)
+        # One multi-packet descriptor followed by a second descriptor.
+        packets = case.descriptors([3072, 1024])
+        case.cmd('M', gap, 3 if gap == 2125 else 2)
+        case.start(packets)
+        case.finish_tx(2)
+        case.cmd('Z', 3)
+        case.snapshot()
+        results.append(case.save())
+    case = Case(root, 'ET-16-arp')
+    case.configure()
+    case.w(0x134, 2125)
+    packets = case.descriptors([3072, 1024])
+    case.cmd('M', 2125, 3)
+    case.w(0x28, 1)
+    case.cmd('H', 2)
+    case.tx.append(packets[0][:-4])
+    case.send(arp())
+    case.wait_rx(0)
+    case.tx.extend(packet[:-4] for packet in packets[1:])
+    case.ref.arp_sent()
+    case.finish_tx(2)
+    case.cmd('Z', 3, 1)
+    case.snapshot()
+    results.append(case.save())
+    return results
+
+
 def et15(root):
     results = []
     for seed in range(10):
@@ -714,5 +749,5 @@ def et15(root):
 
 def generate(tier, root):
     selected = [et15] if tier == 'random' else [et14] if tier == 'perf' else [
-        et01, et02, et03, et04, et05, et06, et07, et08, et09, et10, et11, et12, et13]
+        et01, et02, et03, et04, et05, et06, et07, et08, et09, et10, et11, et12, et13, et16]
     return [item for function in selected for item in function(Path(root))]
