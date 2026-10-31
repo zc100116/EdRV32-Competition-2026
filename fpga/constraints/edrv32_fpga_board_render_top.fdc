@@ -972,5 +972,10 @@ define_attribute {p:eth_phy_rst_n_o} {PAP_IO_SLEW} {SLOW}
 # RGMII RX IDDR at IOLHR_16_1428 (BANKL3, left edge), clk_eth WNS -0.106 ns.
 # Keep the adapter's fabric registers beside BANKL3 (site y ~228-238,
 # docs/guides/pds-floorplan.md 1.6, 2.1); IO and PLL keep their own rules.
-define_global_attribute {PAP_REGION} {fp_rgmii(0,15,220,249)[CLMA,CLMS];}
+# Card 21 B3N: u_ddrphy_top ck_dqs_diff -> DQ IOB TX_DATA had 5.95 ns of route
+# (clk_mem -> phy_dq_sysclk_1 WNS -0.103 ns). Keep the PHY fabric logic beside
+# the right-edge DDR banks (DDR_PHY/TSERDES site y ~100-178, pds-floorplan 1.6);
+# the vendor PAP_LOC cells above are inside this rectangle.
+define_global_attribute {PAP_REGION} {fp_rgmii(0,15,220,249)[CLMA,CLMS];fp_ddrphy(200,238,95,185)[CLMA,CLMS];}
 define_attribute {i:u_rgmii} {PAP_REGION} {fp_rgmii}
+define_attribute {i:u_ddr3.u_ddrphy_top} {PAP_REGION} {fp_ddrphy}
