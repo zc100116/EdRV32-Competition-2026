@@ -5,8 +5,11 @@
 ARCH := rv32im_zicsr_zifencei
 MEMORY := ddr
 PROGRAM_SOURCES := sw/tests/board_npu/main.c sw/drivers/npu.c sw/drivers/uart.c \
-    sw/drivers/gpio.c sw/bsp/cache.c
-CFLAGS_EXTRA := -I$(ROOT)/sw/drivers/include -I$(OUT)/data
+    sw/drivers/gpio.c sw/bsp/cache.c sw/drivers/clint.c sw/drivers/engine.c \
+    sw/drivers/plic.c
+PROGRAM_SOURCES += sw/lib/eth_monitor.c sw/lib/eth_monitor_pack.c \
+    sw/lib/eth_monitor_board.c sw/drivers/eth.c sw/drivers/mem_xbar.c sw/boot/info.c
+CFLAGS_EXTRA := -I$(ROOT)/sw/lib -I$(ROOT)/sw/boot -I$(ROOT)/sw/drivers/include -I$(OUT)/data
 PROGRAM_LDLIBS := $(OUT)/data/cases.o
 BOARD_PYTHON := $(HOME)/.local/opt/edrv32-py/bin/python
 BOARD_GENERATORS := $(wildcard $(ROOT)/tools/npu/*.py $(ROOT)/tools/npu/ref/*.py) \

@@ -5,35 +5,16 @@
  */
 #include "runtime.h"
 
-static int peer_known(void)
-{
-    return mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_PORT_OFFSET) != 0u;
-}
-
 int demo_network_available(void)
 {
-    return !demo.tx_active && peer_known() &&
+    return !demo.tx_active && eth_monitor_peer_known() &&
         (engine_poll(ENGINE_ETH).status & EDRV32_ETH_STATUS_IDLE_MASK);
-}
-
-static void peer_configure(void)
-{
-    uint32_t high = mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_MAC_HI_OFFSET);
-    uint32_t low = mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_MAC_LO_OFFSET);
-    uint32_t ip = mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_IP_OFFSET);
-    struct eth_endpoint peer = {
-        {(uint8_t)(high >> 8), (uint8_t)high, (uint8_t)(low >> 24),
-         (uint8_t)(low >> 16), (uint8_t)(low >> 8), (uint8_t)low},
-        {(uint8_t)(ip >> 24), (uint8_t)(ip >> 16), (uint8_t)(ip >> 8), (uint8_t)ip},
-        (uint16_t)mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_PORT_OFFSET)
-    };
-    eth_peer_configure(&peer, 5000);
 }
 
 void demo_network_submit(unsigned int count, int surface, int check_buffer)
 {
     struct eth_tx_descriptor *descriptors = demo_uncached(DEMO_TX_DESCRIPTORS);
-    peer_configure();
+    eth_monitor_peer_configure();
     demo.tx_count = count;
     for (unsigned int i = 0; i < count; ++i) {
         demo.tx_lengths[i] = descriptors[i].word[
@@ -164,19 +145,7 @@ void demo_present(unsigned int slot, uint32_t frame_id, unsigned int detection_b
 
 void demo_network_init(void)
 {
-    const struct eth_endpoint local = {{0x02, 0x45, 0x44, 0x52, 0x56, 0x32},
-                                      {192, 168, 1, 10}, 5000};
-    eth_phy_reset(1);
-    uint64_t until = clint_time() + demo.clock_hz / 100u;
-    while (clint_time() < until) {
-        __asm__ volatile ("nop");
-    }
-    eth_phy_reset(0);
-    until = clint_time() + demo.clock_hz / 10u;
-    while (clint_time() < until) {
-        __asm__ volatile ("nop");
-    }
-    eth_local_configure(&local);
+    eth_monitor_local_init(demo.clock_hz);
     demo_network_windows_init();
     engine_irq_register(ENGINE_ETH, EDRV32_ETH_IRQ_EN_ERROR_MASK |
         EDRV32_ETH_IRQ_EN_DONE_MASK | demo_network_rx_mask, 3, demo_network_event, NULL);

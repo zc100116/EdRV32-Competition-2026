@@ -7,6 +7,8 @@
 #include "cache.h"
 #include "edrv32.h"
 #include "gpio.h"
+#include "eth_monitor.h"
+#include "sysctrl.h"
 #include "npu.h"
 #include "uart.h"
 #include "board_data.h"
@@ -333,11 +335,32 @@ static void milli(uint32_t value)
     uart_putc((uint8_t)('0' + value % 10u));
 }
 
+static void __attribute__((interrupt("machine"), aligned(4))) board_interrupt(void)
+{
+    uint32_t cause;
+    __asm__ volatile ("csrr %0, mcause" : "=r"(cause));
+    if (cause == 0x80000007u) {
+        if (eth_monitor_board_tick()) {
+            edrv32_exit(1);
+        }
+    } else {
+        hex_field("NPU CPU mcause=", cause);
+        uart_puts("\r\n");
+        edrv32_exit(1);
+    }
+}
+
 int main(void)
 {
     /* BIOS has already selected the 2 Mbaud UART; keep its baud setting. */
     gpio_set_output_enable(LED_PASS | LED_FAIL);
     gpio_write(0u);
+    __asm__ volatile ("csrci mstatus, 8" ::: "memory");
+    eth_monitor_board_init(sysctrl_read(SYSCTRL_CLK_SYS_HZ));
+    uintptr_t handler = (uintptr_t)board_interrupt;
+    __asm__ volatile ("csrw mtvec, %0" :: "r"(handler) : "memory");
+    __asm__ volatile ("csrw mie, %0" :: "r"(0x80u) : "memory");
+    __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
     registers();
     for (unsigned int i = 0u; i + 1u < ARRAY_SIZE(board_cases); ++i) {
         const struct board_case *test = &board_cases[i];

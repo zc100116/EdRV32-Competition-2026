@@ -5,6 +5,7 @@
  */
 #include "s3_platform.h"
 #include "clint.h"
+#include "eth_monitor.h"
 #include "gpio.h"
 #include "plic.h"
 #include "sysctrl.h"
@@ -93,7 +94,11 @@ static void __attribute__((interrupt("machine"), aligned(4))) s3_interrupt(void)
     uint64_t entered = s3_ticks();
     uint32_t cause;
     __asm__ volatile ("csrr %0, mcause" : "=r"(cause));
-    if (cause == 0x8000000bu) {
+    if (cause == 0x80000007u) {
+        if (eth_monitor_board_tick()) {
+            s3_stop();
+        }
+    } else if (cause == 0x8000000bu) {
         unsigned int source = plic_claim();
         if (source == EDRV32_PLIC_SOURCE_RND) {
             rnd_irq_tick = entered;
@@ -131,9 +136,10 @@ void s3_platform_init(void)
         EDRV32_DISP_IRQ_EN_FRAME_MASK | EDRV32_DISP_IRQ_EN_ERROR_MASK |
         EDRV32_DISP_IRQ_EN_SWITCH_MASK | EDRV32_DISP_IRQ_EN_SWITCH1_MASK,
         1, disp_event, NULL);
+    eth_monitor_board_init(s3_clock_hz());
     uintptr_t handler = (uintptr_t)s3_interrupt;
     __asm__ volatile ("csrw mtvec, %0" :: "r"(handler) : "memory");
-    __asm__ volatile ("csrw mie, %0" :: "r"(0x800u) : "memory");
+    __asm__ volatile ("csrw mie, %0" :: "r"(0x880u) : "memory");
     __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
 }
 

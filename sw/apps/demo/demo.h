@@ -7,7 +7,7 @@
 #define EDRV32_DEMO_H
 #include <stddef.h>
 #include <stdint.h>
-#include "mem_xbar.h"
+#include "eth_monitor.h"
 #include "yolo_post.h"
 
 #define DEMO_DESC_BASE 0x00080000u
@@ -51,7 +51,7 @@
 #define DEMO_HEIGHT 720u
 #define DEMO_STRIDE 2560u
 #define DEMO_IMAGE_BYTES 1843200u
-#define DEMO_MONITOR_BYTES 320u
+#define DEMO_MONITOR_BYTES ETH_MONITOR_BYTES
 #define DEMO_VIDEO_BYTES 32u
 #define DEMO_MAX_BOXES 100u
 #define DEMO_DETECTION_BYTES (16u + 12u * DEMO_MAX_BOXES)
@@ -69,19 +69,6 @@
 #define DEMO_MONITOR_CAPACITY 1024u
 #define DEMO_GEO_DESCRIPTOR (DEMO_SEND_BASE + 0x700u)
 
-struct demo_monitor {
-    uint32_t sequence;
-    uint32_t scene;
-    uint64_t time;
-    struct mem_xbar_stats memory;
-    uint32_t vin[4];
-    uint32_t disp[2];
-    uint32_t npu[4];
-    uint32_t eth[2];
-    uint32_t idle_cycles;
-    uint32_t system_hz;
-    uint32_t video_skips;
-};
 enum demo_command_kind {
     DEMO_HELP, DEMO_SCENE, DEMO_PIX, DEMO_GEO, DEMO_OUTPUT,
     DEMO_FPS, DEMO_SAMPLE, DEMO_STATUS
@@ -96,7 +83,6 @@ enum demo_output { DEMO_HDMI, DEMO_ETHERNET, DEMO_BOTH };
 int demo_parse(const char *line, struct demo_command *command);
 unsigned int demo_frame_divisor(unsigned int source_fps, unsigned int requested_fps);
 int demo_frame_due(uint32_t frame_id, unsigned int divisor);
-void demo_monitor_pack(uint8_t out[DEMO_MONITOR_BYTES], const struct demo_monitor *record);
 void demo_video_pack(uint8_t out[DEMO_VIDEO_BYTES], uint32_t frame_id,
                      uint64_t time, uint32_t scene);
 size_t demo_detection_pack(uint8_t *out, const yolo_detection *boxes,

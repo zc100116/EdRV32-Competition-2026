@@ -20,7 +20,7 @@ static uint32_t word(const uint8_t *p)
 
 static void test_monitor(void)
 {
-    struct demo_monitor r = {0};
+    struct eth_monitor r = {0};
     uint8_t out[320];
     r.sequence = 0x12345678;
     r.scene = 1;
@@ -45,7 +45,7 @@ static void test_monitor(void)
     r.system_hz = 100000000;
     r.video_skips = 0xfedcba98;
     memset(out, 0xff, sizeof out);
-    demo_monitor_pack(out, &r);
+    eth_monitor_pack(out, &r);
     const uint8_t header[] = {'E','D','T','M', 1,0,1,0, 0x78,0x56,0x34,0x12,
         1,0,0,0, 0x88,0x77,0x66,0x55,0x44,0x33,0x22,0x11};
     assert(memcmp(out, header, sizeof header) == 0);

@@ -14,11 +14,10 @@ static uint32_t previous_sent;
 
 void demo_monitor_tick(void)
 {
-    struct demo_monitor record;
+    struct eth_monitor record;
     record.sequence = demo.monitor_sequence++;
     record.scene = demo.scene;
-    record.time = clint_time();
-    mem_xbar_snapshot(&record.memory);
+    eth_monitor_snapshot(&record, demo.clock_hz);
     const unsigned int vin_counters[] = {3, 5, 6, 8};
     for (unsigned int i = 0; i < 4; ++i) {
         uint32_t value = engine_perf(ENGINE_VIN, vin_counters[i]);
@@ -43,7 +42,6 @@ void demo_monitor_tick(void)
     previous_sent = sent;
     record.idle_cycles = demo.idle_cycles;
     demo.idle_cycles = 0;
-    record.system_hz = demo.clock_hz;
     record.video_skips = demo.video_skips;
     demo.video_skips = 0;
     /* Coordinator decision: discard newest if no peer or ring full; seq still advances. */
@@ -51,7 +49,7 @@ void demo_monitor_tick(void)
         demo.monitor_produced - demo.monitor_consumed == DEMO_MONITOR_CAPACITY) {
         ++demo.monitor_dropped;
     } else {
-        demo_monitor_pack(demo_uncached(DEMO_MONITOR_RING +
+        eth_monitor_pack(demo_uncached(DEMO_MONITOR_RING +
             (demo.monitor_produced % DEMO_MONITOR_CAPACITY) * DEMO_MONITOR_BYTES), &record);
         ++demo.monitor_produced;
     }

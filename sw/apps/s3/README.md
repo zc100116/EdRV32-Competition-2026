@@ -20,7 +20,8 @@ LVGL 从固定在 v9.6.0 的 `third_party/lvgl` 子模块直接编译，不修�
 应用源码为 C11，使用 `-Wall -Wextra -Werror`。
 
 在渲染板级顶层 `fpga/rtl/edrv32_fpga_board_render_top.v` 的 bitstream 上运行，
-该 B3R 顶层包含 CPU、DDR、RND、DISP 和 ETH；S3 使用 RND/DISP，ETH 连通检查由独立软件任务提供。
+该 B3R 顶层包含 CPU、DDR、RND、DISP 和 ETH；S3 使用 RND/DISP，并在平台层初始化 ETH；WIN3 建立对端后以 100 Hz 采样 DDR，
+每 16 条发送一批 EDTM，调试工具选择 B3R。
 Windows 使用 BIOS 的 ELF 加载协议：
 
 ```sh

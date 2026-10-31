@@ -173,3 +173,10 @@ UART 工具实际取出的 ELF 段已与 `cases.bin` 逐字节比较一致。
 两份独立生成目录 `diff -r` 无差异，编译 0 告警，`git diff --check` 通过。
 未运行 RTL 仿真（本分支尚未合入 T-BN1 的 `verif/soc/board_npu`），未上板。
 本改动没有 Verilog，风格检查扫描 0 文件、0 告警，Verilator lint 不适用。
+
+## ETH 与 DDR 监控
+
+启动时按 demo 网口约定初始化 ETH（192.168.1.10:5000）。调试工具选择 B3N，
+点击“建立网口连接”，WIN3 更新对端并打印 PEER；DDR 页接收固定 100 Hz、
+每批 16 条的 EDTM。原有 NPU 测试流程、结果和结束输出保持，结束后 CLINT 监控继续运行。
+网口窗口与发送区沿用 demo 的 0x0a000000 / 0x0a100000 区域，与 NPU 测试存储分离。
