@@ -505,7 +505,7 @@ module edrv32_npu_window (
 
     // Design 4.3.2: retain four physical activation copies, as in the legacy APM layout.
     genvar copy;
-    genvar channel;
+    genvar lane;
     generate
         for (copy = 0; copy < 4; copy = copy + 1) begin : g_activation_copy
             (* syn_preserve = 1 *) reg [255:0] activation_r;
@@ -516,11 +516,12 @@ module edrv32_npu_window (
                 activation_r <= a4_activation_r;
             end
         end
-        for (channel = 0; channel < 32; channel = channel + 1) begin : g_weight_channel
-            reg [63:0] weight_r;
-            assign term_weight_o[64*channel+:64] = weight_r;
+        // Each weight byte feeds one APM; a preserved per-byte register lets PDS place it there.
+        for (lane = 0; lane < 256; lane = lane + 1) begin : g_weight_byte
+            reg [7:0] weight_r /* synthesis syn_preserve=1 */;
+            assign term_weight_o[8*lane+:8] = weight_r;
             always @(posedge clk_i) begin
-                weight_r <= a4_weight_r[64*channel+:64];
+                weight_r <= a4_weight_r[8*lane+:8];
             end
         end
     endgenerate
