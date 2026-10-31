@@ -9,9 +9,8 @@ module edrv32_rnd_geometry (
     input wire rst_n_i,
     input wire clear_i,
     input wire start_i,
-    input wire advance_i,
 
-    // Command/parameters remain stable through the complete draw.
+    // Command/parameters are captured at command start.
     input wire [511:0] command_i,
     input wire [1023:0] parameters_i,
     input wire [11:0] left_i,
@@ -23,6 +22,7 @@ module edrv32_rnd_geometry (
     input wire pair_i,
     input wire row_end_i,
     output wire valid_o,
+    input wire out_ready_i,
     output wire [15:0] coverage_o
 );
     localparam [2:0] S_IDLE = 3'd0;
@@ -48,6 +48,19 @@ module edrv32_rnd_geometry (
     reg [1:0] q_phase_r;
     reg [1:0] inside_phase_r;
     reg [1:0] count_phase_r;
+    reg aa_r;
+    reg triangle_r;
+    reg line_r;
+    reg [34:0] length_r;
+    reg signed [35:0] half_width_r;
+    reg [15:0] output_r [0:7];
+    reg [2:0] read_r;
+    reg [2:0] write_r;
+    reg [3:0] queued_r;
+    reg [3:0] reserved_r;
+    wire consume_w;
+    wire enqueue_w;
+    wire [15:0] result_w;
     wire aa_w;
     wire triangle_w;
     wire line_w;
@@ -73,8 +86,8 @@ module edrv32_rnd_geometry (
     reg signed [50:0] edge_r [0:2];
     reg signed [50:0] edge_row_r [0:2];
     reg signed [50:0] edge_sample_r [0:2];
-    wire signed [50:0] edge_dx_w [0:2];
-    wire signed [50:0] edge_dy_w [0:2];
+    reg signed [50:0] edge_dx_r [0:2];
+    reg signed [50:0] edge_dy_r [0:2];
     wire signed [47:0] circle_base_w [0:3];
     wire signed [31:0] circle_delta_w [0:3];
     wire signed [50:0] edge_base_w [0:2];
@@ -90,10 +103,10 @@ module edrv32_rnd_geometry (
     reg [4:0] total_r [0:1];
     reg [4:0] result_r [0:1];
     wire unused_parameters_w;
-    assign aa_w = command_i[16];
-    assign triangle_w = command_i[7:0] == 8'h09;
-    assign line_w = command_i[7:0] == 8'h0a;
-    assign ready_o = state_r == S_READY && phase_r == 0;
+    assign aa_w = aa_r;
+    assign triangle_w = triangle_r;
+    assign line_w = line_r;
+    assign ready_o = state_r == S_READY && phase_r == 0 && reserved_r < 8;
     assign group_start_w = state_r == S_READY && phase_r == 0;
     assign accept_w = ready_o && request_i;
     assign sample_w = accept_w || phase_r != 0;
@@ -102,13 +115,48 @@ module edrv32_rnd_geometry (
         $signed({{2{command_i[175]}}, command_i[175:160]});
     assign offset_y_w = $signed({6'd0, top_i}) -
         $signed({{2{command_i[191]}}, command_i[191:176]});
-    assign length_w = {parameters_i[223:192], 3'd0};
-    assign half_width_w = $signed({1'b0, parameters_i[255:224], 3'd0});
-    assign valid_o = output_valid_r;
+    assign length_w = length_r;
+    assign half_width_w = half_width_r;
+    assign valid_o = queued_r != 0 || output_valid_r;
+    assign coverage_o = queued_r != 0 ? output_r[read_r] : result_w;
+    assign consume_w = valid_o && out_ready_i;
+    assign enqueue_w = output_valid_r && (queued_r != 0 || !out_ready_i);
+    always @(posedge clk_i) begin
+        if (start_i) begin
+            aa_r <= command_i[16];
+            triangle_r <= command_i[7:0] == 8'h09;
+            line_r <= command_i[7:0] == 8'h0a;
+            length_r <= {parameters_i[223:192], 3'd0};
+            half_width_r <= $signed({1'b0, parameters_i[255:224], 3'd0});
+        end
+        if (enqueue_w)
+            output_r[write_r] <= result_w;
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            read_r <= 3'd0;
+            write_r <= 3'd0;
+            queued_r <= 4'd0;
+            reserved_r <= 4'd0;
+        end else if (clear_i || start_i) begin
+            read_r <= 3'd0;
+            write_r <= 3'd0;
+            queued_r <= 4'd0;
+            reserved_r <= 4'd0;
+        end else begin
+            reserved_r <= reserved_r + {3'd0, accept_w} - {3'd0, consume_w};
+            queued_r <= queued_r + {3'd0, enqueue_w} -
+                {3'd0, consume_w && queued_r != 0};
+            if (enqueue_w)
+                write_r <= write_r + 3'd1;
+            if (consume_w && queued_r != 0)
+                read_r <= read_r + 3'd1;
+        end
+    end
     assign unused_parameters_w = ^{parameters_i[1023:704], parameters_i[495:480],
         parameters_i[367:352], parameters_i[239:224], parameters_i[111:96],
         offset_x_w[17], offset_y_w[17], command_i[511:192], command_i[159:22],
-        command_i[15:8]};
+        command_i[15:8], command_i[21:17]};
 
     genvar item;
     generate for (item = 0; item < 4; item = item + 1) begin : g_circle
@@ -120,7 +168,7 @@ module edrv32_rnd_geometry (
         wire signed [47:0] center_y_w;
         wire signed [47:0] center_offset_w;
         wire signed [47:0] subrow_delta_w;
-        assign block_w = line_w ? parameters_i[256+item*128 +: 128] :
+        assign block_w = command_i[7:0] == 8'h0a ? parameters_i[256+item*128 +: 128] :
             parameters_i[item*128 +: 128];
         assign initial_w = $signed(block_w[47:0]);
         assign dx_w = $signed(block_w[95:64]);
@@ -161,9 +209,9 @@ module edrv32_rnd_geometry (
         always @(posedge clk_i) begin
             if (start_i) begin
                 circle_r[item] <= initial_w;
-                circle_dx_r[item] <= dx_w + (aa_w ? 32'sd0 : 32'sd48);
-                circle_dy_r[item] <= dy_w + (aa_w ? 32'sd0 : 32'sd48);
-            end else if (advance_i) begin
+                circle_dx_r[item] <= dx_w + (command_i[16] ? 32'sd0 : 32'sd48);
+                circle_dy_r[item] <= dy_w + (command_i[16] ? 32'sd0 : 32'sd48);
+            end else begin
                 // Decode, center adjustment and seeding occupy separate setup cycles.
                 if (state_r == S_CENTER)
                     center_offset_r[item] <= center_offset_w;
@@ -203,10 +251,12 @@ module edrv32_rnd_geometry (
     generate for (item = 0; item < 3; item = item + 1) begin : g_edge
         wire [95:0] block_w;
         wire signed [50:0] initial_w;
-        assign block_w = !triangle_w && !line_w ?
+        assign block_w = command_i[7:0] != 8'h09 && command_i[7:0] != 8'h0a ?
             parameters_i[512+item*96 +: 96] : parameters_i[item*96 +: 96];
-        assign edge_dx_w[item] = {{19{block_w[63]}}, block_w[63:32]};
-        assign edge_dy_w[item] = {{19{block_w[95]}}, block_w[95:64]};
+        wire signed [50:0] dx_w;
+        wire signed [50:0] dy_w;
+        assign dx_w = {{19{block_w[63]}}, block_w[63:32]};
+        assign dy_w = {{19{block_w[95]}}, block_w[95:64]};
         assign initial_w = $signed({{19{block_w[31]}}, block_w[31:0]}) <<< 3;
         assign edge_base_w[item] = group_start_w ? edge_r[item] : edge_sample_r[item];
         wire signed [50:0] step_base_w;
@@ -214,14 +264,16 @@ module edrv32_rnd_geometry (
         wire signed [50:0] step_result_w;
         assign step_base_w = pending_r && row_end_r ? edge_row_r[item] : edge_r[item];
         assign step_delta_w = state_r == S_Y || (pending_r && row_end_r) ?
-            edge_dy_w[item] <<< 3 : pending_r && pair_r ?
-                edge_dx_w[item] <<< 4 : edge_dx_w[item] <<< 3;
+            edge_dy_r[item] <<< 3 : pending_r && pair_r ?
+                edge_dx_r[item] <<< 4 : edge_dx_r[item] <<< 3;
         assign step_result_w = step_base_w + step_delta_w;
         always @(posedge clk_i) begin
-            if (start_i)
-                edge_r[item] <= initial_w + (aa_w ? edge_dx_w[item] :
-                    edge_dx_w[item] <<< 2) + (aa_w ? edge_dy_w[item] : edge_dy_w[item] <<< 2);
-            else if (advance_i) begin
+            if (start_i) begin
+                edge_dx_r[item] <= dx_w;
+                edge_dy_r[item] <= dy_w;
+                edge_r[item] <= initial_w + (command_i[16] ? dx_w : dx_w <<< 2) +
+                    (command_i[16] ? dy_w : dy_w <<< 2);
+            end else begin
                 if ((state_r == S_X && skip_x_r != 0) ||
                     (state_r == S_Y && skip_y_r != 0) || pending_r)
                     edge_r[item] <= step_result_w;
@@ -231,14 +283,14 @@ module edrv32_rnd_geometry (
                     edge_row_r[item] <= step_result_w;
                 if (sample_w)
                     edge_sample_r[item] <= (group_start_w ? edge_r[item] : edge_sample_r[item]) +
-                        (aa_w ? edge_dy_w[item] <<< 1 : 51'sd0);
+                        (aa_w ? edge_dy_r[item] <<< 1 : 51'sd0);
             end
         end
     end endgenerate
 
     // Commit the next group position after registering row-end/pair selection.
     always @(posedge clk_i) begin
-        if (advance_i && accept_w) begin
+        if (accept_w) begin
             pair_r <= pair_i;
             row_end_r <= row_end_i;
         end
@@ -246,7 +298,7 @@ module edrv32_rnd_geometry (
     // Select operands before the parallel constant offsets and full-width sums.
     integer sample_element;
     always @(posedge clk_i) begin
-        if (advance_i && sample_w) begin
+        if (sample_w) begin
             for (sample_element = 0; sample_element < 4; sample_element = sample_element + 1) begin
                 circle_base_r[sample_element] <= circle_base_w[sample_element];
                 circle_delta_r[sample_element] <= circle_delta_w[sample_element];
@@ -254,7 +306,7 @@ module edrv32_rnd_geometry (
             end
             for (sample_element = 0; sample_element < 3; sample_element = sample_element + 1) begin
                 edge_base_r[sample_element] <= edge_base_w[sample_element];
-                edge_dx_sample_r[sample_element] <= edge_dx_w[sample_element][31:0];
+                edge_dx_sample_r[sample_element] <= edge_dx_r[sample_element][31:0];
             end
         end
     end
@@ -265,10 +317,24 @@ module edrv32_rnd_geometry (
         wire [12:0] coverage_scaled_w;
         assign coverage_scaled_w = {result_r[pixel], 8'd0} -
             {8'd0, result_r[pixel]} + 13'd8;
-        assign coverage_o[pixel*8 +: 8] = coverage_scaled_w[11:4];
+        assign result_w[pixel*8 +: 8] = coverage_scaled_w[11:4];
         wire unused_coverage_w;
         assign unused_coverage_w = ^{coverage_scaled_w[12], coverage_scaled_w[3:0]};
         for (subcolumn = 0; subcolumn < 4; subcolumn = subcolumn + 1) begin : g_column
+            (* keep = "true", syn_preserve = 1 *) reg [5:0] column_mode_r;
+            // Distinct setup enables retain physical copies through register merging.
+            localparam integer COLUMN = pixel * 4 + subcolumn;
+            wire mode_load_w;
+            assign mode_load_w = COLUMN == 0 ? start_i :
+                COLUMN == 1 ? state_r == S_CENTER : COLUMN == 2 ? state_r == S_SETUP :
+                COLUMN == 3 ? state_r == S_X : COLUMN == 4 ? state_r == S_Y :
+                COLUMN == 5 ? state_r == S_SEED :
+                COLUMN == 6 ? state_r == S_X && skip_x_r == 0 :
+                    state_r == S_Y && skip_y_r == 0;
+            always @(posedge clk_i) begin
+                if (mode_load_w)
+                    column_mode_r <= command_i[21:16];
+            end
             localparam integer STEP = pixel * 4 + subcolumn;
             localparam integer OFFSET = 4 * STEP * (STEP - 1);
             localparam signed [34:0] BIAS = {{3{OFFSET[31]}}, OFFSET};
@@ -282,27 +348,32 @@ module edrv32_rnd_geometry (
                 wire signed [34:0] delta_w;
                 wire signed [34:0] offset_w;
                 assign delta_w = {{3{circle_delta_r[element][31]}}, circle_delta_r[element]};
-                assign offset_w = aa_w ? delta_w * STEP + BIAS : pixel == 0 ? 35'sd0 :
+                assign offset_w = column_mode_r[0] ?
+                    ((STEP & 1) != 0 ? delta_w : 35'sd0) +
+                    ((STEP & 2) != 0 ? delta_w <<< 1 : 35'sd0) +
+                    ((STEP & 4) != 0 ? delta_w <<< 2 : 35'sd0) + BIAS : pixel == 0 ? 35'sd0 :
                     {{3{circle_dx_sample_r[element][31]}}, circle_dx_sample_r[element]};
                 assign circle_inside_w[element] = q_r[pixel][subcolumn][element] <= 0;
                 always @(posedge clk_i) begin
-                    if (advance_i && sample_valid_r)
-                        q_r[pixel][subcolumn][element] <= circle_base_r[element] +
-                            {{13{offset_w[34]}}, offset_w};
+                    q_r[pixel][subcolumn][element] <= circle_base_r[element] +
+                        {{13{offset_w[34]}}, offset_w};
                 end
             end
             for (element = 0; element < 3; element = element + 1) begin : g_e
                 wire signed [35:0] offset_w;
                 wire signed [35:0] dx_w;
                 assign dx_w = {{4{edge_dx_sample_r[element][31]}}, edge_dx_sample_r[element]};
-                assign offset_w = aa_w ? dx_w * (8*pixel+2*subcolumn) : dx_w * (8*pixel);
-                assign edge_inside_w[element] = triangle_w && !command_i[17+element] ?
+                assign offset_w = column_mode_r[0] ?
+                    (pixel != 0 ? dx_w <<< 3 : 36'sd0) +
+                    ((subcolumn & 1) != 0 ? dx_w <<< 1 : 36'sd0) +
+                    ((subcolumn & 2) != 0 ? dx_w <<< 2 : 36'sd0) :
+                    (pixel != 0 ? dx_w <<< 3 : 36'sd0);
+                assign edge_inside_w[element] = triangle_w && !column_mode_r[1+element] ?
                     e_r[pixel][subcolumn][element] > 0 :
                     e_r[pixel][subcolumn][element] >= 0;
                 always @(posedge clk_i) begin
-                    if (advance_i && sample_valid_r)
-                        e_r[pixel][subcolumn][element] <= edge_base_r[element] +
-                            {{15{offset_w[35]}}, offset_w};
+                    e_r[pixel][subcolumn][element] <= edge_base_r[element] +
+                        {{15{offset_w[35]}}, offset_w};
                 end
             end
             // L/h occupy 35 bits; factor extension bits before the bounded compares.
@@ -312,33 +383,31 @@ module edrv32_rnd_geometry (
                 $signed(e_r[pixel][subcolumn][1][35:0]) >= -half_width_w &&
                 $signed(e_r[pixel][subcolumn][1][35:0]) <= half_width_w;
             assign ring_inside_w = circle_inside_w[0] &&
-                (command_i[21] || !circle_inside_w[1]);
-            assign angle_inside_w = command_i[20] || (command_i[19] ?
+                (column_mode_r[5] || !circle_inside_w[1]);
+            assign angle_inside_w = column_mode_r[4] || (column_mode_r[3] ?
                 (edge_inside_w[0] || edge_inside_w[1]) :
                 (edge_inside_w[0] && edge_inside_w[1]));
             assign sample_inside_w = triangle_w ? &edge_inside_w : line_w ?
-                line_inside_w || (command_i[17] && circle_inside_w[0]) ||
-                (command_i[18] && circle_inside_w[1]) :
-                (ring_inside_w && angle_inside_w) || (!command_i[20] &&
-                ((command_i[17] && circle_inside_w[2]) ||
-                    (command_i[18] && circle_inside_w[3])));
+                line_inside_w || (column_mode_r[1] && circle_inside_w[0]) ||
+                (column_mode_r[2] && circle_inside_w[1]) :
+                (ring_inside_w && angle_inside_w) || (!column_mode_r[4] &&
+                ((column_mode_r[1] && circle_inside_w[2]) ||
+                    (column_mode_r[2] && circle_inside_w[3])));
             always @(posedge clk_i) begin
-                if (advance_i && q_valid_r)
+                if (q_valid_r)
                     inside_r[pixel][subcolumn] <= sample_inside_w;
             end
         end
         always @(posedge clk_i) begin
-            if (advance_i) begin
-                if (inside_valid_r)
-                    count_r[pixel] <= {2'd0, inside_r[pixel][0]} +
-                        {2'd0, inside_r[pixel][1]} + {2'd0, inside_r[pixel][2]} +
-                        {2'd0, inside_r[pixel][3]};
-                if (count_valid_r) begin
-                    total_r[pixel] <= count_phase_r == 0 ? {2'd0, count_r[pixel]} :
-                        total_r[pixel] + {2'd0, count_r[pixel]};
-                    if (count_phase_r == 3)
-                        result_r[pixel] <= total_r[pixel] + {2'd0, count_r[pixel]};
-                end
+            if (inside_valid_r)
+                count_r[pixel] <= {2'd0, inside_r[pixel][0]} +
+                    {2'd0, inside_r[pixel][1]} + {2'd0, inside_r[pixel][2]} +
+                    {2'd0, inside_r[pixel][3]};
+            if (count_valid_r) begin
+                total_r[pixel] <= count_phase_r == 0 ? {2'd0, count_r[pixel]} :
+                    total_r[pixel] + {2'd0, count_r[pixel]};
+                if (count_phase_r == 3)
+                    result_r[pixel] <= total_r[pixel] + {2'd0, count_r[pixel]};
             end
         end
     end endgenerate
@@ -366,7 +435,7 @@ module edrv32_rnd_geometry (
             inside_valid_r <= 1'b0;
             count_valid_r <= 1'b0;
             output_valid_r <= 1'b0;
-        end else if (advance_i) begin
+        end else begin
             if (sample_w)
                 phase_r <= phase_r + 2'd1;
             case (state_r)
@@ -392,11 +461,9 @@ module edrv32_rnd_geometry (
         end
     end
     always @(posedge clk_i) begin
-        if (advance_i) begin
-            sample_phase_r <= sample_phase_w;
-            q_phase_r <= sample_phase_r;
-            inside_phase_r <= q_phase_r;
-            count_phase_r <= inside_phase_r;
-        end
+        sample_phase_r <= sample_phase_w;
+        q_phase_r <= sample_phase_r;
+        inside_phase_r <= q_phase_r;
+        count_phase_r <= inside_phase_r;
     end
 endmodule

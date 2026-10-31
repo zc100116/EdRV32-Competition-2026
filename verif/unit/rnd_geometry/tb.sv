@@ -19,7 +19,7 @@ module tb;
     wire [15:0] coverage;
     integer cycle = 0;
     reg stalls = 1;
-    wire advance = !stalls || cycle % 11 != 0;
+    wire advance = !stalls || cycle % 97 < 24;
     integer x = 0;
     integer y = 0;
     integer head = 0;
@@ -33,7 +33,7 @@ module tb;
         .rst_n_i(rst_n),
         .clear_i(clear),
         .start_i(start),
-        .advance_i(advance),
+        .out_ready_i(advance),
         .command_i(command),
         .parameters_i(parameters),
         .left_i(12'd0),
@@ -99,7 +99,7 @@ module tb;
     endfunction
     always @(posedge clk) begin
         cycle <= cycle + 1;
-        if (request && ready && advance) begin
+        if (request && ready) begin
             expected[tail] = {8'(reference_cov(x+1, y)), 8'(reference_cov(x, y))};
             tail++;
             if (measure && last_issue != 0 && cycle-last_issue != 4)
@@ -172,7 +172,7 @@ module tb;
                 row_end = x + (pair ? 1 : 0) >= 8;
                 request = 1;
                 @(posedge clk);
-                while (!ready || !advance) @(posedge clk);
+                while (!ready) @(posedge clk);
                 @(negedge clk);
                 request = 0;
                 x += pair ? 2 : 1;

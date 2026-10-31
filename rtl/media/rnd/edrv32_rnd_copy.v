@@ -56,7 +56,18 @@ module edrv32_rnd_copy (
     localparam [4:0] S_BASE2 = 5'd18;
     localparam [4:0] S_BASE3 = 5'd19;
     localparam [4:0] S_INITIAL_ROW = 5'd20;
+    localparam [4:0] S_DRAIN = 5'd21;
+    localparam [4:0] S_PRIME = 5'd22;
     reg [4:0] state_r;
+    reg [2:0] source_words_r;
+    reg [2:0] target_words_r;
+    reg source_aligned_r;
+    reg source_valid_r;
+    reg [8:0] source_index_r;
+    reg [279:0] source_word_r;
+    reg [279:0] target_word_r;
+    wire [511:0] source_words_w;
+    wire source_write_w;
     reg [11:0] top_r;
     reg [11:0] bottom_r;
     reg [19:0] src_bytes_r;
@@ -147,7 +158,6 @@ module edrv32_rnd_copy (
     wire [15:0] target_last_bytes_w;
     wire [14:0] row_last_bytes_w;
     wire [511:0] source_join_w;
-    wire [511:0] source_shift_w;
     wire [255:0] source_word_w;
     wire [255:0] ram_data_w;
     wire [255:0] current_write_w;
@@ -200,29 +210,28 @@ module edrv32_rnd_copy (
     assign source_rounded_w = source_bytes_r + 16'd31;
     assign target_last_bytes_w = target_bytes_r - 16'd1;
     assign row_last_bytes_w = row_bytes_r - 15'd1;
-    assign source_join_w = {rd_data_i, previous_read_r};
-    assign source_shift_w = source_join_w >> {src_addr_r[4:0], 3'd0};
-    assign source_word_w = state_r == S_TAIL ?
-        previous_read_r >> {src_addr_r[4:0], 3'd0} :
-        src_addr_r[4:0] == 0 ? rd_data_i : source_shift_w[255:0];
-    assign ram_wr_en_w = !cancel_i && (state_r == S_TAIL ||
+    assign source_join_w = state_r == S_TAIL ? {256'd0, previous_read_r} :
+        source_aligned_r ? {256'd0, rd_data_i} : {rd_data_i, previous_read_r};
+    assign source_words_w = source_join_w >> {source_words_r, 5'd0};
+    assign source_write_w = !cancel_i && (state_r == S_TAIL ||
         (state_r == S_CAPTURE && rd_data_valid_i &&
-            (src_addr_r[4:0] == 0 || received_r != 0)));
-    assign ram_wr_addr_w = state_r == S_TAIL ? normalized_last_r[8:0] :
-        received_r[8:0] - (src_addr_r[4:0] == 0 ? 9'd0 : 9'd1);
+            (source_aligned_r || received_r != 0)));
+    assign ram_wr_en_w = source_valid_r && !cancel_i;
+    assign ram_wr_addr_w = source_index_r;
     assign current_write_w = zero_r ? 256'd0 : ram_data_w;
     assign target_join_w = {current_write_w, previous_write_r};
-    assign target_shift_w = target_join_w << {dst_addr_r[4:0], 3'd0};
-    assign wr_data_o = dst_addr_r[4:0] == 0 ? current_write_w : target_shift_w[511:256];
+    assign target_shift_w = target_join_w << {target_words_r, 5'd0};
     assign write_next_w = write_index_r + 10'd1;
     assign data_fire_w = wr_data_valid_o && wr_data_ready_i;
     assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i) ||
-        (data_fire_w && write_index_r < normalized_last_r));
-    assign ram_rd_addr_w = state_r == S_WRITE ? 9'd0 : write_next_w[8:0];
+        ((state_r == S_PRIME || data_fire_w) && (state_r == S_PRIME ? normalized_last_r != 0 :
+            write_next_w < normalized_last_r)));
+    assign ram_rd_addr_w = state_r == S_WRITE ? 9'd0 :
+        state_r == S_PRIME ? 9'd1 : write_index_r[8:0] + 9'd2;
     assign unused_geometry_w = ^{command_i[7:0], head_bytes_w[0], tail_bytes_w[0],
         left_w[17:12], top_w[17:12], right_w[17:12],
         bottom_w[17:12], source_x_bytes_w[19:18],
-        source_shift_w[511:256], target_shift_w[255:0],
+        source_words_w[511:280], target_shift_w[231:0],
         source_rounded_w[15], source_rounded_w[4:0], target_last_bytes_w[15],
         target_last_bytes_w[4:0], row_last_bytes_w[4:0], rounded_bytes_w[15], rounded_bytes_w[4:0]};
     edrv32_ram_rnd_line u_row (
@@ -305,17 +314,22 @@ module edrv32_rnd_copy (
                         received_r <= received_r + 10'd1;
                     if (rd_done_i)
                         state_r <= src_addr_r[4:0] != 0 &&
-                            source_beats_r == normalized_beats_r ? S_TAIL : S_WRITE;
+                            source_beats_r == normalized_beats_r ? S_TAIL : S_DRAIN;
                 end
-                S_TAIL: state_r <= S_WRITE;
+                S_TAIL: state_r <= S_DRAIN;
+                S_DRAIN: state_r <= S_WRITE;
                 S_WRITE: if (wr_ready_i) begin
                     write_index_r <= 10'd0;
                     zero_r <= 1'b0;
+                    state_r <= S_PRIME;
+                end
+                S_PRIME: begin
+                    zero_r <= normalized_last_r == 0;
                     state_r <= S_STREAM;
                 end
                 S_STREAM: if (wr_data_ready_i) begin
                     write_index_r <= write_next_w;
-                    zero_r <= write_index_r >= normalized_last_r;
+                    zero_r <= write_next_w >= normalized_last_r;
                     if (write_index_r == target_last_r)
                         state_r <= S_RESPONSE;
                 end
@@ -332,6 +346,51 @@ module edrv32_rnd_copy (
                 default: state_r <= state_r;
             endcase
         end
+    end
+    // Each 64-bit slice owns the residual byte selection after the word register.
+    genvar slice;
+    generate for (slice = 0; slice < 4; slice = slice + 1) begin : g_align
+        (* keep = "true", syn_preserve = 1 *) reg [1:0] source_byte_r;
+        (* keep = "true", syn_preserve = 1 *) reg [1:0] target_byte_r;
+        wire [87:0] source_shift_w;
+        wire [87:0] target_slice_w;
+        wire unused_shift_w;
+        assign source_shift_w = source_word_r[slice*64 +: 88] >> {source_byte_r, 3'd0};
+        assign target_slice_w = target_word_r[slice*64 +: 88] << {target_byte_r, 3'd0};
+        assign source_word_w[slice*64 +: 64] = source_shift_w[63:0];
+        assign wr_data_o[slice*64 +: 64] = target_slice_w[87:24];
+        assign unused_shift_w = ^{source_shift_w[87:64], target_slice_w[23:0]};
+        localparam [4:0] SELECT_STATE = slice == 0 ? S_SPAN : slice == 1 ? S_COUNTS :
+            slice == 2 ? S_READ : S_CAPTURE;
+        always @(posedge clk_i) begin
+            if (state_r == SELECT_STATE) begin
+                source_byte_r <= src_addr_r[1:0];
+                target_byte_r <= dst_addr_r[1:0];
+            end
+        end
+    end endgenerate
+    // Word selection is registered before the residual 0..3 byte shift.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            source_valid_r <= 1'b0;
+        else if (cancel_i)
+            source_valid_r <= 1'b0;
+        else
+            source_valid_r <= source_write_w;
+    end
+    always @(posedge clk_i) begin
+        if (state_r == S_COUNTS) begin
+            source_words_r <= src_addr_r[4:2];
+            source_aligned_r <= src_addr_r[4:0] == 0;
+            target_words_r <= dst_addr_r[4:2];
+        end
+        if (source_write_w) begin
+            source_word_r <= source_words_w[279:0];
+            source_index_r <= state_r == S_TAIL ? normalized_last_r[8:0] :
+                received_r[8:0] - (source_aligned_r ? 9'd0 : 9'd1);
+        end
+        if (state_r == S_PRIME || data_fire_w)
+            target_word_r <= target_shift_w[511:232];
     end
     // Descriptor setup prepares boundary counts before the streaming datapath starts.
     always @(posedge clk_i) begin
@@ -465,7 +524,7 @@ module edrv32_rnd_copy (
             previous_read_r <= rd_data_i;
         if (state_r == S_WRITE && wr_ready_i)
             previous_write_r <= 256'd0;
-        else if (data_fire_w)
+        else if (state_r == S_PRIME || data_fire_w)
             previous_write_r <= current_write_w;
     end
 endmodule

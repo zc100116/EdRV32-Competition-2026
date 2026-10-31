@@ -61,7 +61,15 @@ module edrv32_rnd_filter (
             unused_bits = biased[15:0];
         end
     endfunction
-    wire advance_w;
+    reg [103:0] output_r [0:15];
+    reg [3:0] read_r;
+    reg [3:0] write_r;
+    reg [4:0] queued_r;
+    reg [4:0] reserved_r;
+    wire accept_w;
+    wire consume_w;
+    wire enqueue_w;
+    wire [103:0] result_w;
     reg [9:0] valid_r;
     reg [71:0] payload_r [0:9];
     reg [31:0] nearest_r [0:8];
@@ -88,70 +96,89 @@ module edrv32_rnd_filter (
     integer stage;
     integer tap;
     integer channel;
-    assign advance_w = !valid_r[9] || out_ready_i;
-    assign in_ready_o = advance_w && !clear_i;
-    assign out_valid_o = valid_r[9];
-    assign pixel_o = pixel9_r;
-    assign destination_o = payload_r[9][31:0];
-    assign tag_o = payload_r[9][63:32];
-    assign coverage_o = payload_r[9][71:64];
+    // Reserve one output slot for every accepted sample, including in-flight stages.
+    assign in_ready_o = reserved_r < 16 && !clear_i;
+    assign accept_w = in_valid_i && in_ready_o;
+    assign out_valid_o = queued_r != 0 || valid_r[9];
+    assign consume_w = out_valid_o && out_ready_i;
+    assign enqueue_w = valid_r[9] && (queued_r != 0 || !out_ready_i);
+    assign result_w = queued_r != 0 ? output_r[read_r] : {payload_r[9], pixel9_r};
+    assign {coverage_o, tag_o, destination_o, pixel_o} = result_w;
     always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i)
+        if (!rst_n_i) begin
             valid_r <= 10'd0;
-        else if (clear_i)
+            read_r <= 4'd0;
+            write_r <= 4'd0;
+            queued_r <= 5'd0;
+            reserved_r <= 5'd0;
+        end else if (clear_i) begin
             valid_r <= 10'd0;
-        else if (advance_w)
-            valid_r <= {valid_r[8:0], in_valid_i};
+            read_r <= 4'd0;
+            write_r <= 4'd0;
+            queued_r <= 5'd0;
+            reserved_r <= 5'd0;
+        end else begin
+            valid_r <= {valid_r[8:0], accept_w};
+            reserved_r <= reserved_r + {4'd0, accept_w} - {4'd0, consume_w};
+            queued_r <= queued_r + {4'd0, enqueue_w} -
+                {4'd0, consume_w && queued_r != 0};
+            if (enqueue_w)
+                write_r <= write_r + 4'd1;
+            if (consume_w && queued_r != 0)
+                read_r <= read_r + 4'd1;
+        end
     end
     always @(posedge clk_i) begin
-        if (advance_w) begin
-            // Input operands: all multiplier inputs below are complete registers.
-            taps0_r <= taps_i;
-            fx0_r <= {1'b0, fraction_x_i};
-            fy0_r <= {1'b0, fraction_y_i};
-            inverse_x0_r <= 9'd256 - {1'b0, fraction_x_i};
-            inverse_y0_r <= 9'd256 - {1'b0, fraction_y_i};
-            payload_r[0] <= {coverage_i, tag_i, destination_i};
-            nearest_r[0] <= taps_i[31:0];
-            for (stage = 1; stage < 10; stage = stage + 1)
-                payload_r[stage] <= payload_r[stage-1];
-            for (stage = 1; stage < 9; stage = stage + 1)
-                nearest_r[stage] <= nearest_r[stage-1];
-            weight1_r[0] <= inverse_x0_r * inverse_y0_r;
-            weight1_r[1] <= fx0_r * inverse_y0_r;
-            weight1_r[2] <= inverse_x0_r * fy0_r;
-            weight1_r[3] <= fx0_r * fy0_r;
-            for (tap = 0; tap < 4; tap = tap + 1) begin
-                alpha1_r[tap] <= taps0_r[tap*32+24 +: 8];
-                weight2_r[tap] <= weight1_r[tap];
-                premult2_r[tap][3] <= alpha1_r[tap];
-                for (channel = 0; channel < 3; channel = channel + 1) begin
-                    premult1_r[tap][channel] <= taps0_r[tap*32+24 +: 8] *
-                        taps0_r[tap*32+channel*8 +: 8];
-                    premult2_r[tap][channel] <= divide255(premult1_r[tap][channel]);
-                end
-                for (channel = 0; channel < 4; channel = channel + 1)
-                    product3_r[tap][channel] <= weight2_r[tap] * premult2_r[tap][channel];
-            end
-            for (channel = 0; channel < 4; channel = channel + 1) begin
-                pair4_r[channel][0] <= {1'b0, product3_r[0][channel]} +
-                    {1'b0, product3_r[1][channel]};
-                pair4_r[channel][1] <= {1'b0, product3_r[2][channel]} +
-                    {1'b0, product3_r[3][channel]};
-                sum5_r[channel] <= {1'b0, pair4_r[channel][0]} +
-                    {1'b0, pair4_r[channel][1]};
-                interpolated6_r[channel] <= interpolate_round(sum5_r[channel]);
-            end
-            reciprocal7_r <= edrv32_rnd_q(interpolated6_r[3]);
-            alpha7_r <= interpolated6_r[3];
-            alpha8_r <= alpha7_r;
+        if (enqueue_w)
+            output_r[write_r] <= {payload_r[9], pixel9_r};
+    end
+    always @(posedge clk_i) begin
+        // Input operands: all multiplier inputs below are complete registers.
+        taps0_r <= taps_i;
+        fx0_r <= {1'b0, fraction_x_i};
+        fy0_r <= {1'b0, fraction_y_i};
+        inverse_x0_r <= 9'd256 - {1'b0, fraction_x_i};
+        inverse_y0_r <= 9'd256 - {1'b0, fraction_y_i};
+        payload_r[0] <= {coverage_i, tag_i, destination_i};
+        nearest_r[0] <= taps_i[31:0];
+        for (stage = 1; stage < 10; stage = stage + 1)
+            payload_r[stage] <= payload_r[stage-1];
+        for (stage = 1; stage < 9; stage = stage + 1)
+            nearest_r[stage] <= nearest_r[stage-1];
+        weight1_r[0] <= inverse_x0_r * inverse_y0_r;
+        weight1_r[1] <= fx0_r * inverse_y0_r;
+        weight1_r[2] <= inverse_x0_r * fy0_r;
+        weight1_r[3] <= fx0_r * fy0_r;
+        for (tap = 0; tap < 4; tap = tap + 1) begin
+            alpha1_r[tap] <= taps0_r[tap*32+24 +: 8];
+            weight2_r[tap] <= weight1_r[tap];
+            premult2_r[tap][3] <= alpha1_r[tap];
             for (channel = 0; channel < 3; channel = channel + 1) begin
-                color7_r[channel] <= interpolated6_r[channel];
-                restored8_r[channel] <= color7_r[channel] * reciprocal7_r;
+                premult1_r[tap][channel] <= taps0_r[tap*32+24 +: 8] *
+                    taps0_r[tap*32+channel*8 +: 8];
+                premult2_r[tap][channel] <= divide255(premult1_r[tap][channel]);
             end
-            pixel9_r <= bilinear_i ? (alpha8_r == 0 ? 32'd0 : {alpha8_r,
-                restore_round(restored8_r[2]), restore_round(restored8_r[1]),
-                restore_round(restored8_r[0])}) : nearest_r[8];
+            for (channel = 0; channel < 4; channel = channel + 1)
+                product3_r[tap][channel] <= weight2_r[tap] * premult2_r[tap][channel];
         end
+        for (channel = 0; channel < 4; channel = channel + 1) begin
+            pair4_r[channel][0] <= {1'b0, product3_r[0][channel]} +
+                {1'b0, product3_r[1][channel]};
+            pair4_r[channel][1] <= {1'b0, product3_r[2][channel]} +
+                {1'b0, product3_r[3][channel]};
+            sum5_r[channel] <= {1'b0, pair4_r[channel][0]} +
+                {1'b0, pair4_r[channel][1]};
+            interpolated6_r[channel] <= interpolate_round(sum5_r[channel]);
+        end
+        reciprocal7_r <= edrv32_rnd_q(interpolated6_r[3]);
+        alpha7_r <= interpolated6_r[3];
+        alpha8_r <= alpha7_r;
+        for (channel = 0; channel < 3; channel = channel + 1) begin
+            color7_r[channel] <= interpolated6_r[channel];
+            restored8_r[channel] <= color7_r[channel] * reciprocal7_r;
+        end
+        pixel9_r <= bilinear_i ? (alpha8_r == 0 ? 32'd0 : {alpha8_r,
+            restore_round(restored8_r[2]), restore_round(restored8_r[1]),
+            restore_round(restored8_r[0])}) : nearest_r[8];
     end
 endmodule

@@ -69,6 +69,7 @@ module edrv32_rnd_window (
     reg [15:0] sample_x_r [0:3];
     reg [15:0] sample_y_r [0:3];
     reg [3:0] sample_inside_r;
+    reg [31:0] match_r [0:3];
     reg [15:0] fraction_r;
     reg [71:0] payload_r;
     reg bank_valid_r;
@@ -190,8 +191,7 @@ module edrv32_rnd_window (
         for (tap = 0; tap < 4; tap = tap + 1) begin
             slot_w[tap] = 5'd0;
             for (entry = 0; entry < 32; entry = entry + 1) begin
-                if (cache_valid_r[entry] && cache_tag_r[entry] ==
-                    {sample_y_r[tap][15:3], sample_x_r[tap][15:3]}) begin
+                if (cache_valid_r[entry] && match_r[tap][entry]) begin
                     slot_w[tap] = slot_w[tap] | entry[4:0];
                     hit_w[tap] = 1'b1;
                     if (sample_inside_r[tap])
@@ -221,6 +221,23 @@ module edrv32_rnd_window (
                     bank_addr_w[bank] = {slot_w[tap], sample_y_r[tap][2:1], sample_x_r[tap][2]};
                     bank_read_w[bank] = forward_w;
                 end
+            end
+        end
+    end
+    // Tag equality is registered alongside tap bounds; reduction/replacement follows.
+    integer match_tap;
+    integer match_entry;
+    always @(posedge clk_i) begin
+        for (match_tap = 0; match_tap < 4; match_tap = match_tap + 1) begin
+            for (match_entry = 0; match_entry < 32; match_entry = match_entry + 1) begin
+                if (coordinate_valid_r && sample_ready_w)
+                    match_r[match_tap][match_entry] <= cache_tag_r[match_entry] ==
+                        {tap_y_w[match_tap][15:3], tap_x_w[match_tap][15:3]};
+                // The retained sample observes a completed fill on the following cycle.
+                else if (state_r == S_WRITE1 && row_last_w &&
+                    fill_slot_r == match_entry[4:0])
+                    match_r[match_tap][match_entry] <= fill_tag_r ==
+                        {sample_y_r[match_tap][15:3], sample_x_r[match_tap][15:3]};
             end
         end
     end
