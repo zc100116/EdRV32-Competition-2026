@@ -200,6 +200,17 @@ module edrv32_npu (
     wire response_error_w;
     wire descriptor_error_w;
     wire local_done_w;
+    reg [127:0] command_bases_r;
+    reg [31:0] command_desc_count_r;
+
+    // APB configuration is sampled once for the complete doorbell command.
+    always @(posedge clk_npu_i) begin
+        if (start_w) begin
+            command_bases_r <= bases_w;
+            command_desc_count_r <= desc_count_w;
+        end
+    end
+
     wire local_writer_idle_w;
     assign busy_w = (state_r != S_IDLE);
     assign response_error_w = read_error_w || write_error_w;
@@ -308,7 +319,7 @@ module edrv32_npu (
                 end
                 S_FENCE: begin
                     if (read_idle_w && write_idle_w) begin
-                        if (cur_desc_r == desc_count_w - 32'd1) begin
+                        if (cur_desc_r == command_desc_count_r - 32'd1) begin
                             state_r <= S_COMPLETE;
                         end else begin
                             cur_desc_r <= cur_desc_r + 32'd1;
@@ -393,7 +404,7 @@ module edrv32_npu (
         .data_index_i(read_data_index_w[0]),
         .data_i(read_data_w),
         .decode_i(decode_w),
-        .bases_i(bases_w),
+        .bases_i(command_bases_r),
         .desc_o(desc_w),
         .in_addr_o(in_addr_w),
         .out_addr_o(out_addr_w),

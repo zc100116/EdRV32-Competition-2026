@@ -30,6 +30,9 @@ module edrv32_npu_descriptor (
     reg [31:0] residual_addr_r;
     reg [31:0] weight_addr_r;
     reg [31:0] quant_addr_r;
+    reg [31:0] in_base_r;
+    reg [31:0] out_base_r;
+    reg [31:0] residual_base_r;
     reg pending_r;
     reg done_r;
     reg [2:0] error_r;
@@ -84,10 +87,16 @@ module edrv32_npu_descriptor (
                 desc_r[255:0] <= data_i;
             end
         end
+        // Base selection and address addition occupy the two existing decode edges.
+        if (pending_r) begin
+            in_addr_r <= in_base_r + desc_r[63:32];
+            out_addr_r <= out_base_r + desc_r[127:96];
+            residual_addr_r <= residual_base_r + desc_r[191:160];
+        end
         if (decode_i) begin
-            in_addr_r <= bases_i[32*unused_flags_w[13:12]+:32] + desc_r[63:32];
-            out_addr_r <= bases_i[32*unused_flags_w[15:14]+:32] + desc_r[127:96];
-            residual_addr_r <= bases_i[32*unused_flags_w[17:16]+:32] + desc_r[191:160];
+            in_base_r <= bases_i[32*unused_flags_w[13:12]+:32];
+            out_base_r <= bases_i[32*unused_flags_w[15:14]+:32];
+            residual_base_r <= bases_i[32*unused_flags_w[17:16]+:32];
             weight_addr_r <= bases_i[31:0] + desc_r[223:192];
             quant_addr_r <= bases_i[31:0] + desc_r[255:224];
             row_capacity_r <= {3'd0, unused_row_w[10:0]} * (unused_flags_w[4] ? 14'd5 : 14'd2);

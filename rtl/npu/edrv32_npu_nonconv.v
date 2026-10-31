@@ -61,9 +61,10 @@ module edrv32_npu_nonconv (
     localparam [4:0] S_NEXT_ROW = 5'd16;
     localparam [4:0] S_DONE = 5'd17;
     localparam [4:0] S_HALT = 5'd18;
+    reg [511:0] desc_r;
     wire [511:0] unused_desc_w;
     wire [31:0] unused_tag_w;
-    assign unused_desc_w = desc_i;
+    assign unused_desc_w = desc_r;
     assign unused_tag_w = read_data_tag_i;
     reg [4:0] state_r;
     reg upsample_r;
@@ -129,10 +130,10 @@ module edrv32_npu_nonconv (
     wire [255:0] row_rd_data_w;
     integer channel_idx;
 
-    assign in_w_w = desc_i[267:256];
-    assign in_h_w = desc_i[283:272];
-    assign unused_out_w_w = desc_i[299:288];
-    assign out_h_w = desc_i[315:304];
+    assign in_w_w = desc_r[267:256];
+    assign in_h_w = desc_r[283:272];
+    assign unused_out_w_w = desc_r[299:288];
+    assign out_h_w = desc_r[315:304];
     assign in_row_pairs_w = in_w_w[11:1];
     assign out_row_pairs_w = unused_out_w_w[11:1];
     assign in_row_bytes_w = {16'd0, in_row_pairs_w, 5'd0};
@@ -324,7 +325,7 @@ module edrv32_npu_nonconv (
                             vertical_r <= 1'b1;
                             state_r <= S_WRITE_INIT;
                         end else if (row_r == (upsample_r ? in_h_w : out_h_w) - 12'd1) begin
-                            if (plane_r == desc_i[325:320] - 6'd1) begin
+                            if (plane_r == desc_r[325:320] - 6'd1) begin
                                 state_r <= S_DONE;
                             end else begin
                                 plane_r <= plane_r + 6'd1;
@@ -346,6 +347,7 @@ module edrv32_npu_nonconv (
     end
     always @(posedge clk_i) begin
         if (start_i) begin
+            desc_r <= desc_i;
             upsample_r <= (desc_i[3:0] == 4'd2);
             in_plane_addr_r <= in_addr_i;
             in_row_addr_r <= in_addr_i;
@@ -405,10 +407,10 @@ module edrv32_npu_nonconv (
             out_row_addr_r <= out_row_addr_r + out_row_bytes_w;
             if (!upsample_r || vertical_r) begin
                 if (row_r == (upsample_r ? in_h_w : out_h_w) - 12'd1) begin
-                    in_plane_addr_r <= in_plane_addr_r + desc_i[95:64];
-                    in_row_addr_r <= in_plane_addr_r + desc_i[95:64];
-                    out_plane_addr_r <= out_plane_addr_r + desc_i[159:128];
-                    out_row_addr_r <= out_plane_addr_r + desc_i[159:128];
+                    in_plane_addr_r <= in_plane_addr_r + desc_r[95:64];
+                    in_row_addr_r <= in_plane_addr_r + desc_r[95:64];
+                    out_plane_addr_r <= out_plane_addr_r + desc_r[159:128];
+                    out_row_addr_r <= out_plane_addr_r + desc_r[159:128];
                     center_row_base_r <= 32'sd0;
                 end else begin
                     in_row_addr_r <= in_row_addr_r + in_row_bytes_w;

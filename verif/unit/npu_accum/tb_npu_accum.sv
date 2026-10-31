@@ -44,6 +44,7 @@ module tb_npu_accum;
         .sum_first_i(sum_first_i),
         .sum_last_i(sum_last_i),
         .sum_tag_i(sum_tag_i),
+        .sum_fold_i({32{sum_tag_i[48]}}),
         .sum_data_i(sum_data_i),
 
         .quant_prepare_valid_o(quant_prepare_valid_o),

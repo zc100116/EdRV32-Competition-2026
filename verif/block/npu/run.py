@@ -25,8 +25,8 @@ def build(selftest):
     target = BUILD / ('sim_selftest' if selftest else 'sim_dut')
     target.mkdir(parents=True, exist_ok=True)
     sources = expand_files(HERE / 'sources.f')
-    if not selftest:
-        sources += expand_files(HERE / 'dut.f')
+    # The per-layer observer resolves DUT hierarchy even when SELFTEST prunes its branch.
+    sources += expand_files(HERE / 'dut.f')
     args = ['verilator', '--binary', '--timing', '-Wall', '--top-module', 'tb_npu',
             '-j', '1', '+define+SIM_MODE', '--Mdir', str(target), '-o', 'sim',
             "-GSELFTEST=1'b"+str(int(selftest))] + sources

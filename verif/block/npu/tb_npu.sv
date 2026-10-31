@@ -120,6 +120,63 @@ module tb_npu #(
                 end
             end
         end else begin : g_dut
+            longint layer_cycles;
+            longint layer_values;
+            longint quant_groups;
+            longint quant_busy;
+            longint burst_cycles;
+            longint finish8;
+            longint finish4;
+            longint baseline_finish;
+            longint groups;
+            longint delay8;
+            longint delay4;
+            longint first_result;
+            longint last_result;
+            longint result_values;
+            always @(posedge clk_npu) begin
+                if (u_dut.conv_start_w || u_dut.nonconv_start_w) begin
+                    layer_cycles = 0;
+                    layer_values = 0;
+                    quant_groups = 0;
+                    quant_busy = 0;
+                    first_result = 0;
+                    last_result = 0;
+                    finish8 = 0;
+                    finish4 = 0;
+                    baseline_finish = 0;
+                end
+                if (u_dut.busy_w) begin
+                    layer_cycles++;
+                    if (u_dut.u_conv.u_datapath.quant_prepare_valid_w) begin
+                        groups = u_dut.u_conv.u_datapath.quant_prepare_tag_w[26] ? 2 : 4;
+                        quant_groups += groups;
+                        // Two APMs implement one quant lane: 32 -> 8/4 APM is 4x/8x service.
+                        baseline_finish = layer_cycles+groups;
+                        finish8 = ((finish8 > layer_cycles) ? finish8 : layer_cycles)+groups*4;
+                        finish4 = ((finish4 > layer_cycles) ? finish4 : layer_cycles)+groups*8;
+                    end
+                    if (u_dut.u_conv.u_datapath.u_result_quant.q_valid_r[0]) quant_busy++;
+                    if (u_dut.is_conv_r && u_dut.u_conv.u_datapath.quant_valid_w) begin
+                        result_values = u_dut.u_conv.u_datapath.quant_tag_w[26] ? 32 : 64;
+                        layer_values += result_values;
+                        if (first_result == 0) first_result = layer_cycles;
+                        last_result = layer_cycles;
+                    end else if (!u_dut.is_conv_r && u_dut.nonconv_write_data_valid_w
+                        && u_dut.nonconv_write_data_ready_w) layer_values += 32;
+                    if (u_dut.local_done_w) begin
+                        burst_cycles = last_result-first_result+1;
+                        $display("LAYER desc=%0d conv=%0d cycles=%0d values=%0d groups=%0d "
+                            , u_dut.cur_desc_r, u_dut.is_conv_r, layer_cycles,
+                            layer_values, quant_groups);
+                        delay8 = (finish8 > baseline_finish) ? finish8-baseline_finish : 0;
+                        delay4 = (finish4 > baseline_finish) ? finish4-baseline_finish : 0;
+                        $display("QUANT busy=%0d span=%0d delay8=%0d delay4=%0d",
+                            quant_busy, burst_cycles, delay8, delay4);
+                    end
+                end
+            end
+
             edrv32_npu u_dut (
                 .clk_npu_i(clk_npu),
                 .rst_npu_n_i(rst_npu_n),

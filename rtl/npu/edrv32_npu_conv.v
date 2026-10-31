@@ -143,9 +143,10 @@ module edrv32_npu_conv (
     localparam [1:0] S_RES_READ = 2'd1;
     localparam [1:0] S_RES_WAIT = 2'd2;
     localparam [1:0] S_RES_DONE = 2'd3;
+    reg [511:0] desc_r;
     wire [511:0] unused_desc_w;
     wire [31:0] unused_read_tag_w;
-    assign unused_desc_w = desc_i;
+    assign unused_desc_w = desc_r;
     assign unused_read_tag_w = read_data_tag_i;
     reg cfg_valid_r;
     reg active_r;
@@ -195,6 +196,9 @@ module edrv32_npu_conv (
     reg [9:0] load_plane_base_r;
     reg [31:0] load_row_addr_r;
     reg [31:0] load_addr_r;
+    reg [31:0] load_plane_addr_r;
+    wire [31:0] load_next_plane_addr_w;
+    wire [31:0] load_next_row_addr_w;
     reg [12:0] retire_min_r;
     reg cmd_valid_r;
     reg [11:0] cmd_row_r;
@@ -262,7 +266,6 @@ module edrv32_npu_conv (
     reg [4:0] model_lut_beats_r;
     reg [14:0] model_lut_remaining_r;
     reg model_lut_last_r;
-    wire [14:0] model_first_count_w;
     reg [14:0] model_first_count_r;
     reg [4:0] model_first_boundary_beats_r;
     reg [4:0] model_next_weight_boundary_beats_r;
@@ -308,6 +311,13 @@ module edrv32_npu_conv (
     integer slot_idx;
     integer row_idx;
     integer scan_idx;
+
+    // Capture only at layer entry; live scheduler and datapath fields stay local.
+    always @(posedge clk_i) begin
+        if (start_i) begin
+            desc_r <= desc_i;
+        end
+    end
 
     // Burst boundaries are prepared outside the A1 address path.
     function [4:0] burst_beats;
@@ -360,22 +370,19 @@ module edrv32_npu_conv (
             burst_boundary = {unused_addr_i[31:9] + 23'd1, 9'd0};
         end
     endfunction
-    assign unused_flags_w = desc_i[31:0];
-    assign in_w_w = desc_i[267:256];
-    assign in_h_w = desc_i[283:272];
-    assign out_w_w = desc_i[299:288];
-    assign out_h_w = desc_i[315:304];
-    assign cin_blocks_w = desc_i[325:320];
-    assign cout_blocks_w = desc_i[331:328];
-    assign unused_row_slot_beats_w = desc_i[362:352];
-    assign weight_block_bytes_w = desc_i[403:384];
+    assign unused_flags_w = desc_r[31:0];
+    assign in_w_w = desc_r[267:256];
+    assign in_h_w = desc_r[283:272];
+    assign out_w_w = desc_r[299:288];
+    assign out_h_w = desc_r[315:304];
+    assign cin_blocks_w = desc_r[325:320];
+    assign cout_blocks_w = desc_r[331:328];
+    assign unused_row_slot_beats_w = desc_r[362:352];
+    assign weight_block_bytes_w = desc_r[403:384];
     assign input_row_beats_w = unused_flags_w[8] ? {2'd0, in_w_w[11:3]} : in_w_w[11:1];
     assign output_row_pairs_w = out_w_w[11:1];
     assign input_row_bytes_w = {16'd0, input_row_beats_w, 5'd0};
     assign output_row_bytes_w = {16'd0, output_row_pairs_w, 5'd0};
-    assign model_first_count_w = (unused_flags_w[9] && !unused_flags_w[8]
-        && (cout_blocks_w == 4'd1))
-        ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
     assign model_future_weight_count_w = unused_flags_w[9] && !unused_flags_w[8]
         && ({1'b0, model_block_r} == cout_blocks_w - 4'd3)
         ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
@@ -464,12 +471,12 @@ module edrv32_npu_conv (
     assign dp_cfg_half_tail_w = unused_flags_w[9];
     assign dp_cfg_lut_en_w = unused_flags_w[6];
     assign dp_cfg_res_en_w = unused_flags_w[7];
-    assign dp_cfg_out_zp_w = desc_i[343:336];
+    assign dp_cfg_out_zp_w = desc_r[343:336];
     assign dp_cfg_in_w_w = in_w_w;
     assign dp_cfg_out_w_w = out_w_w;
     assign dp_cfg_cin_blocks_w = cin_blocks_w;
     assign dp_cfg_cout_blocks_w = cout_blocks_w;
-    assign dp_cfg_k_count_w = desc_i[378:368];
+    assign dp_cfg_k_count_w = desc_r[378:368];
     assign dp_issue_enable_w = active_r && !stop_i;
     assign dp_quant_wr_valid_w = quant_valid_r;
     assign dp_quant_wr_block_w = quant_block_r;
@@ -694,15 +701,17 @@ module edrv32_npu_conv (
         model_lut_remaining_r <= burst_remaining(model_lut_addr_r, 15'd8);
         model_lut_last_r <= burst_last(model_lut_addr_r, 15'd8);
         if (start_i) begin
-            model_first_count_r <= model_first_count_w;
+            model_first_count_r <= (desc_i[9] && !desc_i[8]
+                && (desc_i[331:328] == 4'd1))
+                ? {1'b0, desc_i[403:390]} : desc_i[403:389];
             model_first_boundary_beats_r <= 5'd16 - {1'b0, weight_addr_i[8:5]};
             model_quant_addr_r <= quant_addr_i;
             model_quant_boundary_r <= burst_boundary(quant_addr_i);
             model_lut_addr_r <= quant_addr_i + 32'd256;
             model_weight_base_r <= weight_addr_i;
-            model_next_weight_count_r <= (unused_flags_w[9] && !unused_flags_w[8]
-                && (cout_blocks_w == 4'd2))
-                ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
+            model_next_weight_count_r <= (desc_i[9] && !desc_i[8]
+                && (desc_i[331:328] == 4'd2))
+                ? {1'b0, desc_i[403:390]} : desc_i[403:389];
         end
         if (cfg_valid_r && dp_cfg_ready_w) begin
             model_lut_boundary_r <= burst_boundary(model_lut_addr_r);
@@ -812,13 +821,19 @@ module edrv32_npu_conv (
             end
         end
     end
+    // Descriptor shadow -> plane base -> load pointer: one addition per stage.
+    // Independent plane/row bases also permit consecutive single-burst rows.
+    assign load_next_plane_addr_w = load_plane_addr_r + desc_r[95:64];
+    assign load_next_row_addr_w = load_row_addr_r
+        + (input_row_bytes_w << (!unused_flags_w[4] && unused_flags_w[5]));
     always @(posedge clk_i) begin
         if (start_i) begin
             for (slot_base_idx = 0; slot_base_idx < 5; slot_base_idx = slot_base_idx + 1) begin
-                slot_base_r[slot_base_idx] <= slot_base_idx[9:0] * unused_row_slot_beats_w[9:0];
+                slot_base_r[slot_base_idx] <= slot_base_idx[9:0] * desc_i[361:352];
             end
             load_row_addr_r <= in_addr_i;
             load_addr_r <= in_addr_i;
+            load_plane_addr_r <= in_addr_i;
             load_plane_base_r <= 10'd0;
         end
         if (line_accept_w) begin
@@ -826,14 +841,13 @@ module edrv32_npu_conv (
             load_addr_r <= load_addr_r + {22'd0, line_beats_w, 5'd0};
             if (load_pair_r + {6'd0, line_beats_w} == input_row_beats_w) begin
                 if (load_plane_r == cin_blocks_w - 6'd1) begin
-                    load_row_addr_r <= load_row_addr_r
-                        + (input_row_bytes_w << (!unused_flags_w[4] && unused_flags_w[5]));
-                    load_addr_r <= load_row_addr_r
-                        + (input_row_bytes_w << (!unused_flags_w[4] && unused_flags_w[5]));
+                    load_row_addr_r <= load_next_row_addr_w;
+                    load_addr_r <= load_next_row_addr_w;
+                    load_plane_addr_r <= load_next_row_addr_w;
                     load_plane_base_r <= 10'd0;
                 end else begin
-                    load_addr_r <= load_addr_r
-                        - {16'd0, load_pair_r, 5'd0} + desc_i[95:64];
+                    load_addr_r <= load_next_plane_addr_w;
+                    load_plane_addr_r <= load_next_plane_addr_w;
                     load_plane_base_r <= load_plane_base_r + in_w_w[11:2];
                 end
             end
@@ -966,17 +980,17 @@ module edrv32_npu_conv (
             residual_commit_r <= response_accept_w && (response_role_w == ROLE_RESIDUAL)
                 && read_data_tag_i[28] && read_data_last_i;
             if (start_i) begin
-                residual_state_r <= unused_flags_w[7] ? S_RES_BEGIN : S_RES_DONE;
+                residual_state_r <= desc_i[7] ? S_RES_BEGIN : S_RES_DONE;
                 residual_bank_r <= 1'b0;
                 residual_row_r <= 12'd0;
                 residual_block_r <= 3'd0;
                 residual_pair_r <= 11'd0;
                 residual_plane_r <= 1'b0;
                 residual_sent_r <= 5'd0;
-                residual_pairs_r <= (output_row_pairs_w <
-                    ((unused_flags_w[9] && (cout_blocks_w == 4'd1)) ? 11'd16 : 11'd8))
-                    ? output_row_pairs_w[4:0]
-                    : ((unused_flags_w[9] && (cout_blocks_w == 4'd1)) ? 5'd16 : 5'd8);
+                residual_pairs_r <= (desc_i[299:289] <
+                    ((desc_i[9] && (desc_i[331:328] == 4'd1)) ? 11'd16 : 11'd8))
+                    ? desc_i[293:289]
+                    : ((desc_i[9] && (desc_i[331:328] == 4'd1)) ? 5'd16 : 5'd8);
             end
             if (residual_begin_w) begin
                 residual_state_r <= S_RES_READ;
@@ -1025,7 +1039,7 @@ module edrv32_npu_conv (
     end
     always @(posedge clk_i) begin
         if (start_i) begin
-            residual_half_r <= unused_flags_w[9] && (cout_blocks_w == 4'd1);
+            residual_half_r <= desc_i[9] && (desc_i[331:328] == 4'd1);
             residual_row_addr_r <= residual_addr_i;
             residual_block_addr_r <= residual_addr_i;
             residual_addr_r <= residual_addr_i;
@@ -1060,14 +1074,14 @@ module edrv32_npu_conv (
     end
 
     assign residual_begin_w = dp_residual_begin_valid_w && dp_residual_begin_ready_w;
-    assign residual_second_addr_w = residual_addr_r + desc_i[159:128];
+    assign residual_second_addr_w = residual_addr_r + desc_r[159:128];
     // A half-region has at most 16 pairs, so each C16 plane needs at most two bursts.
     // BEGIN prepares plane zero and registers the plane-one address. The last
     // plane-zero acceptance prepares plane one's burst, keeping its address sum
     // out of the burst-length/remaining path without inserting request bubbles.
     always @(posedge clk_i) begin
         residual_next_row_addr_r <= residual_row_addr_r + output_row_bytes_w;
-        residual_next_block_addr_r <= residual_block_addr_r + (desc_i[159:128] << 1);
+        residual_next_block_addr_r <= residual_block_addr_r + (desc_r[159:128] << 1);
         // The registered response cannot commit a half-region until after BEGIN.
         residual_finish_block_r <= residual_chunk_end_pair_r == output_row_pairs_w;
         if (residual_begin_w) begin
@@ -1108,7 +1122,7 @@ module edrv32_npu_conv (
 
         // Descriptor configuration and execution status.
         .out_addr_i(out_addr_i),
-        .out_plane_stride_i(desc_i[159:128]),
+        .out_plane_stride_i(desc_r[159:128]),
         .out_w_i(out_w_w),
         .cout_blocks_i(cout_blocks_w),
 

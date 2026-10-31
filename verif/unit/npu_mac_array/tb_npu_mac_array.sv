@@ -17,6 +17,7 @@ module tb_npu_mac_array;
     wire sum_first_o;
     wire sum_last_o;
     wire [48:0] sum_tag_o;
+    wire [31:0] sum_fold_o;
     wire [1215:0] sum_data_o;
     wire mac_beat_o;
     wire idle_o;
@@ -68,6 +69,7 @@ module tb_npu_mac_array;
         .sum_first_o(sum_first_o),
         .sum_last_o(sum_last_o),
         .sum_tag_o(sum_tag_o),
+        .sum_fold_o(sum_fold_o),
         .sum_data_o(sum_data_o),
 
         .mac_beat_o(mac_beat_o),
@@ -111,7 +113,8 @@ module tb_npu_mac_array;
                 cycle, expected_valid, sum_valid_o, mac_beat_o, idle_o, $time);
         if (sum_valid_o) begin
             if (sum_first_o !== expected_first[9] || sum_last_o !== expected_last[9] ||
-                sum_tag_o !== expected_tag[9])
+                sum_tag_o !== expected_tag[9] ||
+                sum_fold_o !== {32{expected_tag[9][48]}})
                 $fatal(1, "FAIL MAC control cycle=%0d tag exp=%h actual=%h t=%0t",
                     cycle, expected_tag[9], sum_tag_o, $time);
             for (int item = 0; item < 64; item++) begin

@@ -149,6 +149,7 @@ module edrv32_npu_datapath (
     wire sum_first_w;
     wire sum_last_w;
     wire [48:0] sum_tag_w;
+    wire [31:0] sum_fold_w;
     wire [1215:0] sum_data_w;
     wire mac_array_idle_w;
     wire quant_prepare_valid_w;
@@ -384,6 +385,7 @@ module edrv32_npu_datapath (
         .sum_first_o(sum_first_w),
         .sum_last_o(sum_last_w),
         .sum_tag_o(sum_tag_w),
+        .sum_fold_o(sum_fold_w),
         .sum_data_o(sum_data_w),
 
         // Activity and pipeline occupancy.
@@ -403,6 +405,7 @@ module edrv32_npu_datapath (
         .sum_first_i(sum_first_w),
         .sum_last_i(sum_last_w),
         .sum_tag_i(sum_tag_w),
+        .sum_fold_i(sum_fold_w),
         .sum_data_i(sum_data_w),
 
         // Combinational R4 preparation and registered final ACC vector.

@@ -36,6 +36,21 @@ module edrv32_npu_regs (
     // Level interrupt in clk_npu.
     output wire irq_o
 );
+    reg [11:0] apb_paddr_r;
+    reg apb_pwrite_r;
+    reg [31:0] apb_pwdata_r;
+    reg [3:0] apb_pstrb_r;
+
+    // SoC 4.3: the bridge's setup edge owns the complete local request payload.
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            apb_paddr_r <= apb_paddr_i;
+            apb_pwrite_r <= apb_pwrite_i;
+            apb_pwdata_r <= apb_pwdata_i;
+            apb_pstrb_r <= apb_pstrb_i;
+        end
+    end
+
     reg enable_r;
     reg [31:0] irq_en_r;
     reg [1:0] irq_stat_r;
@@ -45,17 +60,19 @@ module edrv32_npu_regs (
     reg [31:0] done_count_r;
     reg [31:0] bases_r [0:3];
     reg [31:0] perf_r [0:7];
+    reg [7:0] perf_event_r;
+    reg perf_clear_r;
     wire write_w;
     wire irq_clear_w;
     wire unused_pstrb_w;
     integer counter_idx;
-    assign unused_pstrb_w = |apb_pstrb_i;
-    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_i;
-    assign irq_clear_w = write_w && (apb_paddr_i == 12'h010);
-    assign start_o = write_w && (apb_paddr_i == 12'h028) && !busy_i;
-    assign abort_o = write_w && (apb_paddr_i == 12'h004) && apb_pwdata_i[2];
-    assign soft_reset_o = write_w && (apb_paddr_i == 12'h004)
-        && apb_pwdata_i[3] && !busy_i;
+    assign unused_pstrb_w = |apb_pstrb_r;
+    assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
+    assign irq_clear_w = write_w && (apb_paddr_r == 12'h010);
+    assign start_o = write_w && (apb_paddr_r == 12'h028) && !busy_i;
+    assign abort_o = write_w && (apb_paddr_r == 12'h004) && apb_pwdata_r[2];
+    assign soft_reset_o = write_w && (apb_paddr_r == 12'h004)
+        && apb_pwdata_r[3] && !busy_i;
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
     assign irq_o = |(irq_en_r[1:0] & irq_stat_r);
@@ -63,9 +80,23 @@ module edrv32_npu_regs (
     assign desc_count_o = desc_count_r;
     assign bases_o = {bases_r[3], bases_r[2], bases_r[1], bases_r[0]};
 
+    // SoC 7.1: events and DOORBELL clear take effect together one edge later.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            perf_event_r <= 8'd0;
+            perf_clear_r <= 1'b0;
+        end else if (soft_reset_o) begin
+            perf_event_r <= 8'd0;
+            perf_clear_r <= 1'b0;
+        end else begin
+            perf_event_r <= perf_event_i;
+            perf_clear_r <= start_o;
+        end
+    end
+
     always @(*) begin
         apb_prdata_o = 32'd0;
-        case (apb_paddr_i)
+        case (apb_paddr_r)
             12'h000: apb_prdata_o = 32'h00060001;
             12'h004: apb_prdata_o = {31'd0, enable_r};
             12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_i, busy_i};
@@ -81,9 +112,9 @@ module edrv32_npu_regs (
             12'h10c: apb_prdata_o = bases_r[3];
             12'h110: apb_prdata_o = cur_desc_i;
             default: begin
-                if ((apb_paddr_i >= 12'h040) && (apb_paddr_i < 12'h060)
-                    && (apb_paddr_i[1:0] == 2'd0)) begin
-                    apb_prdata_o = perf_r[apb_paddr_i[4:2]];
+                if ((apb_paddr_r >= 12'h040) && (apb_paddr_r < 12'h060)
+                    && (apb_paddr_r[1:0] == 2'd0)) begin
+                    apb_prdata_o = perf_r[apb_paddr_r[4:2]];
                 end
             end
         endcase
@@ -120,21 +151,21 @@ module edrv32_npu_regs (
             end
         end else begin
             if (write_w) begin
-                case (apb_paddr_i)
-                    12'h004: enable_r <= apb_pwdata_i[0];
-                    12'h00c: irq_en_r <= apb_pwdata_i;
-                    12'h020: desc_base_r <= apb_pwdata_i;
-                    12'h024: desc_count_r <= apb_pwdata_i;
-                    12'h100: bases_r[0] <= apb_pwdata_i;
-                    12'h104: bases_r[1] <= apb_pwdata_i;
-                    12'h108: bases_r[2] <= apb_pwdata_i;
-                    12'h10c: bases_r[3] <= apb_pwdata_i;
+                case (apb_paddr_r)
+                    12'h004: enable_r <= apb_pwdata_r[0];
+                    12'h00c: irq_en_r <= apb_pwdata_r;
+                    12'h020: desc_base_r <= apb_pwdata_r;
+                    12'h024: desc_count_r <= apb_pwdata_r;
+                    12'h100: bases_r[0] <= apb_pwdata_r;
+                    12'h104: bases_r[1] <= apb_pwdata_r;
+                    12'h108: bases_r[2] <= apb_pwdata_r;
+                    12'h10c: bases_r[3] <= apb_pwdata_r;
                     default: begin end
                 endcase
             end
             if (irq_clear_w) begin
-                irq_stat_r <= irq_stat_r & ~apb_pwdata_i[1:0];
-                if (apb_pwdata_i[1]) begin
+                irq_stat_r <= irq_stat_r & ~apb_pwdata_r[1:0];
+                if (apb_pwdata_r[1]) begin
                     error_code_r <= 3'd0;
                 end
             end
@@ -147,9 +178,9 @@ module edrv32_npu_regs (
                 error_code_r <= error_code_i;
             end
             for (counter_idx = 0; counter_idx < 8; counter_idx = counter_idx + 1) begin
-                if (start_o) begin
+                if (perf_clear_r) begin
                     perf_r[counter_idx] <= 32'd0;
-                end else if (perf_event_i[counter_idx]) begin
+                end else if (perf_event_r[counter_idx]) begin
                     perf_r[counter_idx] <= perf_r[counter_idx] + 32'd1;
                 end
             end

@@ -468,43 +468,36 @@ module edrv32_npu_window (
             a1_d2_r <= current_d2_r;
             a1_in_c4_r <= current_in_c4_r;
         end
-        if (a1_valid_r) begin
-            a2_first_r <= a1_first_r;
-            a2_last_r <= a1_last_r;
-            a2_command_last_r <= a1_command_last_r;
-            a2_tag_r <= a1_tag_r;
-            a2_pixel_valid_r <= a1_pixel_valid_r;
-            a2_bank_r <= a1_bank_r;
-            a2_pixel_r <= a1_pixel_r;
-            a2_c8_half_r <= a1_c8_half_r;
-            a2_d2_r <= a1_d2_r;
-            a2_in_c4_r <= a1_in_c4_r;
-        end
-        if (a2_valid_r) begin
-            a3_first_r <= a2_first_r;
-            a3_last_r <= a2_last_r;
-            a3_command_last_r <= a2_command_last_r;
-            a3_tag_r <= a2_tag_r;
-            a3_pixel_valid_r <= a2_pixel_valid_r;
-            a3_bank_r <= a2_bank_r;
-            a3_pixel_r <= a2_pixel_r;
-            a3_c8_half_r <= a2_c8_half_r;
-            a3_d2_r <= a2_d2_r;
-            a3_in_c4_r <= a2_in_c4_r;
-        end
-        if (a3_valid_r) begin
-            a4_first_r <= a3_first_r;
-            a4_last_r <= a3_last_r;
-            a4_tag_r <= a3_tag_r;
-            a4_activation_r <= {pixel1_activation_w, pixel0_activation_w};
-        end
-        if (a4_valid_r) begin
-            a5_first_r <= a4_first_r;
-            a5_last_r <= a4_last_r;
-            a5_tag_r <= a4_tag_r;
-        end
+        a2_first_r <= a1_first_r;
+        a2_last_r <= a1_last_r;
+        a2_command_last_r <= a1_command_last_r;
+        a2_tag_r <= a1_tag_r;
+        a2_pixel_valid_r <= a1_pixel_valid_r;
+        a2_bank_r <= a1_bank_r;
+        a2_pixel_r <= a1_pixel_r;
+        a2_c8_half_r <= a1_c8_half_r;
+        a2_d2_r <= a1_d2_r;
+        a2_in_c4_r <= a1_in_c4_r;
+        a3_first_r <= a2_first_r;
+        a3_last_r <= a2_last_r;
+        a3_command_last_r <= a2_command_last_r;
+        a3_tag_r <= a2_tag_r;
+        a3_pixel_valid_r <= a2_pixel_valid_r;
+        a3_bank_r <= a2_bank_r;
+        a3_pixel_r <= a2_pixel_r;
+        a3_c8_half_r <= a2_c8_half_r;
+        a3_d2_r <= a2_d2_r;
+        a3_in_c4_r <= a2_in_c4_r;
+        a4_first_r <= a3_first_r;
+        a4_last_r <= a3_last_r;
+        a4_tag_r <= a3_tag_r;
+        a4_activation_r <= {pixel1_activation_w, pixel0_activation_w};
+        a5_first_r <= a4_first_r;
+        a5_last_r <= a4_last_r;
+        a5_tag_r <= a4_tag_r;
     end
 
+    // Payload advances on every edge; valid alone owns bubbles.
     // Each weight item has its own read skew; A3/A4 valid only describes item zero.
     always @(posedge clk_i) begin
         a4_weight_r <= weight_rd_data_i;
@@ -520,9 +513,7 @@ module edrv32_npu_window (
             assign activation_w = activation_r;
             assign term_activation_o[256*copy+:256] = activation_w;
             always @(posedge clk_i) begin
-                if (a4_valid_r) begin
-                    activation_r <= a4_activation_r;
-                end
+                activation_r <= a4_activation_r;
             end
         end
         for (channel = 0; channel < 32; channel = channel + 1) begin : g_weight_channel

@@ -14,6 +14,7 @@ module edrv32_npu_accum (
     input wire sum_first_i,
     input wire sum_last_i,
     input wire [48:0] sum_tag_i,
+    input wire [31:0] sum_fold_i,
     input wire [1215:0] sum_data_i,
 
     // Combinational R4 preparation and registered final ACC vector.
@@ -39,11 +40,13 @@ module edrv32_npu_accum (
     genvar pixel;
     generate
         for (channel = 0; channel < 32; channel = channel + 1) begin : g_channel
-            reg r4_valid_r;
-            reg r4_first_r;
+            // Keep physical channel controls separate through synthesis.
+            (* keep = "true", syn_preserve = 1 *) reg r4_valid_r;
+            (* keep = "true", syn_preserve = 1 *) reg r4_first_r;
             reg r4_last_r;
             reg accum_valid_r;
 
+            (* keep = "true" *)
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
                     r4_valid_r <= 1'b0;
@@ -57,6 +60,7 @@ module edrv32_npu_accum (
                 end
             end
 
+            (* keep = "true" *)
             always @(posedge clk_i) begin
                 r4_first_r <= sum_first_i;
                 r4_last_r <= sum_last_i;
@@ -76,14 +80,14 @@ module edrv32_npu_accum (
                     assign high_sum_w = sum_data_i[19*(32*pixel+channel+16) +: 19];
 
                     always @(posedge clk_i) begin
-                        r4_data_r <= sum_tag_i[48] ?
+                        r4_data_r <= sum_fold_i[channel] ?
                             ({sum_w[18], sum_w} + {high_sum_w[18], high_sum_w}) :
                             {sum_w[18], sum_w};
                     end
                 end else begin : g_high
                     // Folded channels are explicitly zero in the output vector.
                     always @(posedge clk_i) begin
-                        r4_data_r <= sum_tag_i[48] ? 20'sd0 : {sum_w[18], sum_w};
+                        r4_data_r <= sum_fold_i[channel] ? 20'sd0 : {sum_w[18], sum_w};
                     end
                 end
 

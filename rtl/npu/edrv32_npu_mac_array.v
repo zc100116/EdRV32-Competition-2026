@@ -23,6 +23,7 @@ module edrv32_npu_mac_array (
     output wire sum_first_o,
     output wire sum_last_o,
     output wire [48:0] sum_tag_o,
+    output wire [31:0] sum_fold_o,
     output wire [1215:0] sum_data_o,
 
     // Activity and pipeline occupancy.
@@ -80,6 +81,7 @@ module edrv32_npu_mac_array (
             end
         end
         for (channel = 0; channel < 32; channel = channel + 1) begin : g_channel
+            (* keep = "true", syn_preserve = 1 *) reg fold_r;
             reg [9:0] valid_r;
             reg [9:0] first_r;
             reg [9:0] last_r;
@@ -103,12 +105,19 @@ module edrv32_npu_mac_array (
                 end
             end
 
+            // Preserve the physical final-edge fold copies in generic synthesis too.
+            (* keep = "true" *)
+            always @(posedge clk_i) begin
+                fold_r <= tag_r[8][48];
+            end
+
             always @(posedge clk_i) begin
                 first_r <= {first_r[8:0], term_first_i};
                 last_r <= {last_r[8:0], term_last_i};
             end
 
             assign channel_busy_w[channel] = |valid_r;
+            assign sum_fold_o[channel] = fold_r;
 
             for (lane = 0; lane < 8; lane = lane + 1) begin : g_lane
                 wire [15:0] lane_activation_w;

@@ -42,20 +42,17 @@ module edrv32_npu_result_quant (
     reg request_half_r;
     reg [1:0] prepare_valid_r;
     reg [1:0] prepare_phase_r [0:1];
-    reg [2047:0] hold_data_r;
     reg [48:0] hold_tag_r;
     reg [12:0] q_valid_r;
     reg [48:0] q_tag_r [0:12];
     reg [1:0] q_phase_r [0:12];
-    reg [511:0] pair_data_r;
-    wire [127:0] q11_bypass_w;
+    wire [511:0] pair_data_w;
     reg residual_high_valid_r;
     reg [4:0] residual_high_addr_r;
     wire residual_low_w;
     wire q9_last_w;
     wire [44:0] unused_prepare_tag_w;
     integer stage;
-    integer lane;
 
     assign unused_prepare_tag_w = {quant_prepare_tag_i[48:27],
         quant_prepare_tag_i[25:15], quant_prepare_tag_i[11:0]};
@@ -71,7 +68,7 @@ module edrv32_npu_result_quant (
     assign residual_rd_addr_o = residual_low_w ? q_tag_r[9][47:43] : residual_high_addr_r;
     assign quant_valid_o = q_valid_r[12] && !cancel_i;
     assign quant_tag_o = q_tag_r[12];
-    assign quant_data_o = pair_data_r;
+    assign quant_data_o = pair_data_w;
     assign idle_o = !(request_active_r || (|prepare_valid_r) || (|q_valid_r)
         || residual_high_valid_r);
 
@@ -114,7 +111,6 @@ module edrv32_npu_result_quant (
         prepare_phase_r[0] <= param_rd_phase_o;
         prepare_phase_r[1] <= prepare_phase_r[0];
         if (accum_valid_i) begin
-            hold_data_r <= accum_data_i;
             hold_tag_r <= accum_tag_i;
         end
         // ACC and the first parameter group are visible before the Q0 edge.
@@ -127,23 +123,23 @@ module edrv32_npu_result_quant (
         if (residual_low_w) begin
             residual_high_addr_r <= q_tag_r[9][47:43] + 5'd1;
         end
-        // One assembly register suffices: group calendars never overlap pairs.
-        if (q_valid_r[11]) begin
-            if (q_tag_r[11][26] && q_phase_r[11] == 2'd0) begin
-                pair_data_r[511:256] <= 256'd0;
-            end
-            for (lane = 0; lane < 16; lane = lane + 1) begin
-                pair_data_r[8*(32*{30'd0,q_phase_r[11][1]} + 16*(lane/8)
-                    + 8*{30'd0,q_phase_r[11][0]} + lane%8) +: 8]
-                    <= q_tag_r[11][27] ? lut_rd_data_i[8*lane +: 8]
-                        : q11_bypass_w[8*lane +: 8];
-            end
-        end
     end
 
     genvar index;
     generate
         for (index = 0; index < 16; index = index + 1) begin : g_lane
+            // Local Q0 controls also capture this lane's four channel groups.
+            (* keep = "true", syn_preserve = 1 *) reg q0_valid_r;
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] q0_phase_r;
+            reg [31:0] hold_acc_r [0:3];
+            (* keep = "true", syn_preserve = 1 *) reg [7:0] q_zp_r [0:7];
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] q11_phase_r;
+            (* keep = "true", syn_preserve = 1 *) reg q11_half_r;
+            (* keep = "true", syn_preserve = 1 *) reg q11_lut_r;
+            reg [31:0] pair_data_r;
+            integer group_idx;
+            integer zp_stage;
+
             reg signed [31:0] q0_acc_r;
             reg signed [31:0] q0_bias_r;
             reg [15:0] q0_mult_r;
@@ -163,6 +159,22 @@ module edrv32_npu_result_quant (
             wire [9:0] unused_param_reserved_w;
             integer shift_stage;
 
+            (* keep = "true" *)
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    q0_valid_r <= 1'b0;
+                end else if (cancel_i) begin
+                    q0_valid_r <= 1'b0;
+                end else begin
+                    q0_valid_r <= prepare_valid_r[0];
+                end
+            end
+
+            assign pair_data_w[8*(16*(index/8) + index%8) +: 8] = pair_data_r[7:0];
+            assign pair_data_w[8*(8 + 16*(index/8) + index%8) +: 8] = pair_data_r[15:8];
+            assign pair_data_w[8*(32 + 16*(index/8) + index%8) +: 8] = pair_data_r[23:16];
+            assign pair_data_w[8*(40 + 16*(index/8) + index%8) +: 8] = pair_data_r[31:24];
+
             edrv32_mul_npu_quant_low u_low (
                 .clk_i(clk_i),
                 .operand_a_i({1'b0, q1_bias_sum_r[16:0]}),
@@ -177,15 +189,39 @@ module edrv32_npu_result_quant (
             );
             assign unused_param_reserved_w = param_rd_data_i[64*(index%8)+54 +: 10];
             assign lut_rd_addr_o[8*index +: 8] = q9_clamp_r;
-            assign q11_bypass_w[8*index +: 8] = q11_bypass_r;
+
+            // Preserve independent final-edge controls rather than a shared wide CE.
+            (* keep = "true" *)
+            always @(posedge clk_i) begin
+                q0_phase_r <= prepare_phase_r[0];
+                q_zp_r[0] <= (q0_phase_r == 2'd0)
+                    ? accum_tag_i[36:29] : hold_tag_r[36:29];
+                for (zp_stage = 1; zp_stage < 8; zp_stage = zp_stage + 1) begin
+                    q_zp_r[zp_stage] <= q_zp_r[zp_stage-1];
+                end
+                q11_phase_r <= q_phase_r[10];
+                q11_half_r <= q_tag_r[10][26];
+                q11_lut_r <= q_tag_r[10][27];
+            end
 
             always @(posedge clk_i) begin
-                if (prepare_phase_r[1] == 2'd0) begin
+                if (q0_valid_r && q0_phase_r == 2'd0) begin
+                    for (group_idx = 0; group_idx < 4; group_idx = group_idx + 1) begin
+                        hold_acc_r[group_idx] <= accum_data_i[32*((index/8)*32
+                            + 8*group_idx + index%8) +: 32];
+                    end
+                end
+                if (q0_phase_r == 2'd0) begin
                     q0_acc_r <= accum_data_i[32*((index/8)*32 + index%8) +: 32];
                 end else begin
-                    q0_acc_r <= hold_data_r[32*((index/8)*32
-                        + 8*{30'd0,prepare_phase_r[1]} + index%8) +: 32];
+                    q0_acc_r <= hold_acc_r[q0_phase_r];
                 end
+                // Assembly advances freely; only the Q12 valid exposes the complete pair.
+                if (q11_half_r && q11_phase_r == 2'd0) begin
+                    pair_data_r[31:16] <= 16'd0;
+                end
+                pair_data_r[8*q11_phase_r +: 8]
+                    <= q11_lut_r ? lut_rd_data_i[8*index +: 8] : q11_bypass_r;
                 q0_bias_r <= param_rd_data_i[64*(index%8) +: 32];
                 q0_mult_r <= param_rd_data_i[64*(index%8)+32 +: 16];
                 q_shift_r[0] <= param_rd_data_i[64*(index%8)+48 +: 6];
@@ -202,7 +238,7 @@ module edrv32_npu_result_quant (
                 q6_q_shift_r <= q5_round_r >>> q_shift_r[5][2:0];
                 q7_q_shift_r <= q6_q_shift_r >>> {q_shift_r[6][5:3], 3'd0};
                 q8_zero_point_r <= $signed({q7_q_shift_r[48], q7_q_shift_r})
-                    + $signed({{42{q_tag_r[7][36]}}, q_tag_r[7][36:29]});
+                    + $signed({{42{q_zp_r[7][7]}}, q_zp_r[7]});
                 if (q8_zero_point_r > 50'sd127) begin
                     q9_clamp_r <= 8'h7f;
                 end else if (q8_zero_point_r < -50'sd128) begin
