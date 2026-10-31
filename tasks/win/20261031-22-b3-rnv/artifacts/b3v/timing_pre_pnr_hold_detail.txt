@@ -1,0 +1,1380 @@
+PRE-PnR estimates, worst available 20 per corner.
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[0]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/DQS_GATE_CTRL[0] (GTP_DDC_E2)
+Path Group  : phy_dq_sysclk_1
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.797  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.654
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+Timing Exception  :  MultiCycle Path Setup -end 2
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[0]/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       8.042 f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[0]/Q (GTP_DFF_C)
+                                   net (fanout=2)        0.437       8.479         u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dqs_gate_ctrl [0]
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/DQS_GATE_CTRL[0] (GTP_DDC_E2)
+
+ Data arrival time                                                   8.479         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(29.743%), Route: 0.437ns(70.257%)
+----------------------------------------------------------------------------------------------------
+
+ Clock phy_dq_sysclk_1 (rising edge)
+                                                         2.000       2.000 r                        
+ ddr_ref_clk_p_i                                         0.000       2.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       2.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       3.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       4.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       4.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       6.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       6.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       7.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [1]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       7.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=89)       0.769       8.111         u_ddr3/u_ddrphy_top/ddrphy_slice_top/phy_clk_p [1]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       8.234 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=88)       2.420      10.654         u_ddr3/u_ddrphy_top/ddrphy_slice_top/phy_sysclk_p [1]
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/CLKB (GTP_DDC_E2)
+ clock pessimism                                         0.000      10.654                          
+ clock uncertainty                                       0.550      11.204                          
+
+ Hold time                                               0.164      11.368                          
+
+ Data required time                                                 11.368                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.368                          
+ Data arrival time                                                   8.479                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -2.889                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[1]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/DQS_GATE_CTRL[1] (GTP_DDC_E2)
+Path Group  : phy_dq_sysclk_1
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.797  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.654
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+Timing Exception  :  MultiCycle Path Setup -end 2
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[1]/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       8.042 f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[1]/Q (GTP_DFF_C)
+                                   net (fanout=2)        0.437       8.479         u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dqs_gate_ctrl [1]
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/DQS_GATE_CTRL[1] (GTP_DDC_E2)
+
+ Data arrival time                                                   8.479         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(29.743%), Route: 0.437ns(70.257%)
+----------------------------------------------------------------------------------------------------
+
+ Clock phy_dq_sysclk_1 (rising edge)
+                                                         2.000       2.000 r                        
+ ddr_ref_clk_p_i                                         0.000       2.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       2.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       3.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       4.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       4.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       6.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       6.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       7.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [1]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       7.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=89)       0.769       8.111         u_ddr3/u_ddrphy_top/ddrphy_slice_top/phy_clk_p [1]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       8.234 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=88)       2.420      10.654         u_ddr3/u_ddrphy_top/ddrphy_slice_top/phy_sysclk_p [1]
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/CLKB (GTP_DDC_E2)
+ clock pessimism                                         0.000      10.654                          
+ clock uncertainty                                       0.550      11.204                          
+
+ Hold time                                               0.164      11.368                          
+
+ Data required time                                                 11.368                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.368                          
+ Data arrival time                                                   8.479                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -2.889                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[2]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/DQS_GATE_CTRL[2] (GTP_DDC_E2)
+Path Group  : phy_dq_sysclk_1
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.797  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.654
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+Timing Exception  :  MultiCycle Path Setup -end 2
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[2]/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       8.042 f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/ddrphy_data_slice_dqs_gate_cal/ddrphy_dqs_gate_coarse_cal/dqs_gate_ctrl_pos[2]/Q (GTP_DFF_C)
+                                   net (fanout=2)        0.437       8.479         u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dqs_gate_ctrl [2]
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/DQS_GATE_CTRL[2] (GTP_DDC_E2)
+
+ Data arrival time                                                   8.479         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(29.743%), Route: 0.437ns(70.257%)
+----------------------------------------------------------------------------------------------------
+
+ Clock phy_dq_sysclk_1 (rising edge)
+                                                         2.000       2.000 r                        
+ ddr_ref_clk_p_i                                         0.000       2.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       2.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       3.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       4.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       4.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       6.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       6.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       7.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [1]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       7.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=89)       0.769       8.111         u_ddr3/u_ddrphy_top/ddrphy_slice_top/phy_clk_p [1]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       8.234 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=88)       2.420      10.654         u_ddr3/u_ddrphy_top/ddrphy_slice_top/phy_sysclk_p [1]
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/CLKB (GTP_DDC_E2)
+ clock pessimism                                         0.000      10.654                          
+ clock uncertainty                                       0.550      11.204                          
+
+ Hold time                                               0.164      11.368                          
+
+ Data required time                                                 11.368                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.368                          
+ Data arrival time                                                   8.479                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -2.889                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_cke_r[1]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_cke/DI[0] (GTP_OSERDES_E2)
+Path Group  : phy_dq_sysclk_0
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.681  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.538
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+Timing Exception  :  MultiCycle Path Setup -end 2
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_cke_r[1]/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       8.042 f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_cke_r[1]/Q (GTP_DFF_C)
+                                   net (fanout=2)        1.372       9.414         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_cke_r [1]
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_cke/DI[0] (GTP_OSERDES_E2)
+
+ Data arrival time                                                   9.414         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(11.882%), Route: 1.372ns(88.118%)
+----------------------------------------------------------------------------------------------------
+
+ Clock phy_dq_sysclk_0 (rising edge)
+                                                         2.000       2.000 r                        
+ ddr_ref_clk_p_i                                         0.000       2.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       2.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       3.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       4.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       4.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       6.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       6.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       7.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       7.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       7.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       8.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420      10.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_cke/OCLKDIV (GTP_OSERDES_E2)
+ clock pessimism                                         0.000      10.538                          
+ clock uncertainty                                       0.550      11.088                          
+
+ Hold time                                              -0.021      11.067                          
+
+ Data required time                                                 11.067                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.067                          
+ Data arrival time                                                   9.414                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.653                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_odt_r[2]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_odt/DI[0] (GTP_OSERDES_E2)
+Path Group  : phy_dq_sysclk_0
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.681  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.538
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+Timing Exception  :  MultiCycle Path Setup -end 2
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_odt_r[2]/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       8.042 f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_odt_r[2]/Q (GTP_DFF_C)
+                                   net (fanout=2)        1.372       9.414         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ddrphy_control_path_adj/phy_odt_r [2]
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_odt/DI[0] (GTP_OSERDES_E2)
+
+ Data arrival time                                                   9.414         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(11.882%), Route: 1.372ns(88.118%)
+----------------------------------------------------------------------------------------------------
+
+ Clock phy_dq_sysclk_0 (rising edge)
+                                                         2.000       2.000 r                        
+ ddr_ref_clk_p_i                                         0.000       2.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       2.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       3.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       4.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       4.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       6.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       6.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       7.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       7.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       7.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       8.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420      10.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_odt/OCLKDIV (GTP_OSERDES_E2)
+ clock pessimism                                         0.000      10.538                          
+ clock uncertainty                                       0.550      11.088                          
+
+ Hold time                                              -0.021      11.067                          
+
+ Data required time                                                 11.067                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.067                          
+ Data arrival time                                                   9.414                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.653                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_dfi/phy_odt_d[0]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_odt/DI[3] (GTP_OSERDES_E2)
+Path Group  : phy_dq_sysclk_0
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.681  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.538
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+Timing Exception  :  MultiCycle Path Setup -end 2
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_dfi/phy_odt_d[0]/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       8.042 f       u_ddr3/u_ddrphy_top/ddrphy_dfi/phy_odt_d[0]/Q (GTP_DFF_C)
+                                   net (fanout=3)        1.402       9.444         u_ddr3/u_ddrphy_top/phy_odt [0]
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_odt/DI[3] (GTP_OSERDES_E2)
+
+ Data arrival time                                                   9.444         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(11.657%), Route: 1.402ns(88.343%)
+----------------------------------------------------------------------------------------------------
+
+ Clock phy_dq_sysclk_0 (rising edge)
+                                                         2.000       2.000 r                        
+ ddr_ref_clk_p_i                                         0.000       2.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       2.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       3.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       4.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       4.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       6.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       6.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       7.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       7.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       7.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       8.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420      10.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_oserdes_odt/OCLKDIV (GTP_OSERDES_E2)
+ clock pessimism                                         0.000      10.538                          
+ clock uncertainty                                       0.550      11.088                          
+
+ Hold time                                              -0.021      11.067                          
+
+ Data required time                                                 11.067                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 11.067                          
+ Data arrival time                                                   9.444                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -1.623                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[0]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_0/DI[0] (GTP_RAM32X2DP)
+Path Group  : clk_mem
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.330  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.187
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[0]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       8.060 r       u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[0]/Q (GTP_DFF_C)
+                                   net (fanout=1)        0.385       8.445         u_ddr3/u_ips_ddrc_top/rid [0]
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_0/DI[0] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   8.445         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(34.524%), Route: 0.385ns(65.476%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -2.939       5.599 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.919         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       7.087 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       8.187         clk_mem_w        
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_0/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       8.187                          
+ clock uncertainty                                       0.000       8.187                          
+
+ Hold time                                               0.264       8.451                          
+
+ Data required time                                                  8.451                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.451                          
+ Data arrival time                                                   8.445                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.006                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[1]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_0/DI[1] (GTP_RAM32X2DP)
+Path Group  : clk_mem
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.330  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.187
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[1]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       8.060 r       u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[1]/Q (GTP_DFF_C)
+                                   net (fanout=1)        0.385       8.445         u_ddr3/u_ips_ddrc_top/rid [1]
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_0/DI[1] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   8.445         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(34.524%), Route: 0.385ns(65.476%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -2.939       5.599 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.919         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       7.087 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       8.187         clk_mem_w        
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_0/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       8.187                          
+ clock uncertainty                                       0.000       8.187                          
+
+ Hold time                                               0.264       8.451                          
+
+ Data required time                                                  8.451                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.451                          
+ Data arrival time                                                   8.445                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.006                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[2]/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_1_0/DI[0] (GTP_RAM32X2DP)
+Path Group  : clk_mem
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.330  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  8.187
+  Launch Clock Delay      :  7.857
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -3.269       5.269 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.589         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       6.757 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       7.857         clk_mem_w        
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[2]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       8.060 r       u_ddr3/u_ips_ddrc_top/mcdq_dcp_top/mcdq_dcp_out/o_rid[2]/Q (GTP_DFF_C)
+                                   net (fanout=1)        0.385       8.445         u_ddr3/u_ips_ddrc_top/rid [2]
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_1_0/DI[0] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   8.445         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(34.524%), Route: 0.385ns(65.476%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_mem (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.320       2.395         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/u_clkbufm/CLKIN (GTP_CLKBUFM)
+                                   td                    0.148       2.543 r       u_ddr3/u_ddrphy_top/u_clkbufm/CLKOUT (GTP_CLKBUFM)
+                                   net (fanout=2)        2.200       4.743         u_ddr3/u_ddrphy_top/pll_refclk
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKIN (GTP_CLKBUFR)
+                                   td                    0.177       4.920 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/CLKOUT (GTP_CLKBUFR)
+                                   net (fanout=1)        0.385       5.305         u_ddr3/u_ddrphy_top/ddrphy_slice_top/ppll_clkin [0]
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKIN1 (GTP_PPLL)
+                                   td                    0.037       5.342 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/CLKOUTPHY (GTP_PPLL)
+                                   net (fanout=36)       0.653       5.995         u_ddr3/u_ddrphy_top/phy_ioclk_fb
+                                                                                   u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKIN (GTP_IOCLKDIV_E3)
+                                   td                    0.123       6.118 r       u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT (GTP_IOCLKDIV_E3)
+                                   net (fanout=35)       2.420       8.538         u_ddr3/u_ddrphy_top/phy_sysclk_fb
+                                                                           r       u_ddr3/u_ddrphy_top/u_ddrphy_cpd/CLK_PHY (GTP_CLKPD)
+                                                        -2.939       5.599 r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       6.919         u_ddr3/u_ddrphy_top/gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       7.087 r       u_ddr3/u_ddrphy_top/u_sysclk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=41843)
+                                                         1.100       8.187         clk_mem_w        
+                                                                           r       u_ddr3/u_ips_ddrc_top/mcdq_rdatapath/mcdq_prefetch_fifo/ips2l_distributed_fifo/u_ips2l_distributed_fifo_distributed_fifo_v1_0/ips2l_distributed_sdpram_distributed_fifo_v1_0/mem_1_0/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       8.187                          
+ clock uncertainty                                       0.000       8.187                          
+
+ Hold time                                               0.264       8.451                          
+
+ Data required time                                                  8.451                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.451                          
+ Data arrival time                                                   8.445                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.006                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_sys/u_uart/rx_shift_r[0]/CLK (GTP_DFF_E)
+Endpoint    : u_sys/u_uart/rx_fifo_r_0/DI[0] (GTP_RAM32X2DP)
+Path Group  : clk_sys
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.816
+  Launch Clock Delay      :  4.816
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ clk_i                                                   0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.000       0.000         clk_i            
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=2)        1.372       2.332         nt_clk_i         
+                                                                                   u_pll_sys/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.396 r       u_pll_sys/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=13016)
+                                                         2.420       4.816         clk_sys_w        
+                                                                           r       u_sys/u_uart/rx_shift_r[0]/CLK (GTP_DFF_E)
+
+                                   tco                   0.203       5.019 r       u_sys/u_uart/rx_shift_r[0]/Q (GTP_DFF_E)
+                                   net (fanout=1)        0.385       5.404         u_sys/u_uart/rx_shift_r [0]
+                                                                           r       u_sys/u_uart/rx_fifo_r_0/DI[0] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   5.404         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(34.524%), Route: 0.385ns(65.476%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ clk_i                                                   0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.000       0.000         clk_i            
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=2)        1.372       2.332         nt_clk_i         
+                                                                                   u_pll_sys/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.396 r       u_pll_sys/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=13016)
+                                                         2.420       4.816         clk_sys_w        
+                                                                           r       u_sys/u_uart/rx_fifo_r_0/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       4.816                          
+ clock uncertainty                                       0.000       4.816                          
+
+ Hold time                                               0.264       5.080                          
+
+ Data required time                                                  5.080                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.080                          
+ Data arrival time                                                   5.404                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.324                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu/u_core/u_frontend/f2_compressed_r/CLK (GTP_DFF_E)
+Endpoint    : u_cpu/u_core/u_frontend/blocks_r_3_55/DI[1] (GTP_RAM32X2DP)
+Path Group  : clk_sys
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.816
+  Launch Clock Delay      :  4.816
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ clk_i                                                   0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.000       0.000         clk_i            
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=2)        1.372       2.332         nt_clk_i         
+                                                                                   u_pll_sys/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.396 r       u_pll_sys/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=13016)
+                                                         2.420       4.816         clk_sys_w        
+                                                                           r       u_cpu/u_core/u_frontend/f2_compressed_r/CLK (GTP_DFF_E)
+
+                                   tco                   0.203       5.019 r       u_cpu/u_core/u_frontend/f2_compressed_r/Q (GTP_DFF_E)
+                                   net (fanout=2)        0.437       5.456         u_cpu/u_core/u_frontend/f2_compressed_r
+                                                                           r       u_cpu/u_core/u_frontend/blocks_r_3_55/DI[1] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   5.456         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(31.719%), Route: 0.437ns(68.281%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ clk_i                                                   0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.000       0.000         clk_i            
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=2)        1.372       2.332         nt_clk_i         
+                                                                                   u_pll_sys/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.396 r       u_pll_sys/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=13016)
+                                                         2.420       4.816         clk_sys_w        
+                                                                           r       u_cpu/u_core/u_frontend/blocks_r_3_55/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       4.816                          
+ clock uncertainty                                       0.000       4.816                          
+
+ Hold time                                               0.264       5.080                          
+
+ Data required time                                                  5.080                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.080                          
+ Data arrival time                                                   5.456                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.376                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_cpu/u_core/u_frontend/f2_compressed_r/CLK (GTP_DFF_E)
+Endpoint    : u_cpu/u_core/u_frontend/blocks_r_58/DI[1] (GTP_RAM32X2DP)
+Path Group  : clk_sys
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  4.816
+  Launch Clock Delay      :  4.816
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ clk_i                                                   0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.000       0.000         clk_i            
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=2)        1.372       2.332         nt_clk_i         
+                                                                                   u_pll_sys/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.396 r       u_pll_sys/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=13016)
+                                                         2.420       4.816         clk_sys_w        
+                                                                           r       u_cpu/u_core/u_frontend/f2_compressed_r/CLK (GTP_DFF_E)
+
+                                   tco                   0.203       5.019 r       u_cpu/u_core/u_frontend/f2_compressed_r/Q (GTP_DFF_E)
+                                   net (fanout=2)        0.437       5.456         u_cpu/u_core/u_frontend/f2_compressed_r
+                                                                           r       u_cpu/u_core/u_frontend/blocks_r_58/DI[1] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   5.456         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(31.719%), Route: 0.437ns(68.281%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_sys (rising edge)                             0.000       0.000 r                        
+ clk_i                                                   0.000       0.000 r       clk_i (port)     
+                                   net (fanout=1)        0.000       0.000         clk_i            
+                                                                                   clk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       clk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=2)        1.372       2.332         nt_clk_i         
+                                                                                   u_pll_sys/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.396 r       u_pll_sys/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=13016)
+                                                         2.420       4.816         clk_sys_w        
+                                                                           r       u_cpu/u_core/u_frontend/blocks_r_58/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       4.816                          
+ clock uncertainty                                       0.000       4.816                          
+
+ Hold time                                               0.264       5.080                          
+
+ Data required time                                                  5.080                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.080                          
+ Data arrival time                                                   5.456                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.376                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_en/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_EN (GTP_GPLL)
+Path Group  : rst_clk
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  5.129
+  Launch Clock Delay      :  5.129
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock rst_clk (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.402       2.477         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.541 r       u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       3.861         u_ddr3/u_ddrphy_top/rst_gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       4.029 r       u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=164)      1.100       5.129         u_ddr3/u_ddrphy_top/rst_clk
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_en/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       5.314 f       u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_en/Q (GTP_DFF_C)
+                                   net (fanout=1)        0.385       5.699         u_ddr3/u_ddrphy_top/gpll_dps_en
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_EN (GTP_GPLL)
+
+ Data arrival time                                                   5.699         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(32.456%), Route: 0.385ns(67.544%)
+----------------------------------------------------------------------------------------------------
+
+ Clock rst_clk (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.402       2.477         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.541 r       u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       3.861         u_ddr3/u_ddrphy_top/rst_gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       4.029 r       u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=164)      1.100       5.129         u_ddr3/u_ddrphy_top/rst_clk
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_CLK (GTP_GPLL)
+ clock pessimism                                         0.000       5.129                          
+ clock uncertainty                                       0.000       5.129                          
+
+ Hold time                                               0.063       5.192                          
+
+ Data required time                                                  5.192                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.192                          
+ Data arrival time                                                   5.699                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.507                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+Endpoint    : u_vin/u_cam0/u_items/memory_r_0/WADDR[3] (GTP_RAM32X2DP)
+Path Group  : clk_cam0
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.380
+  Launch Clock Delay      :  3.380
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r                        
+ cam0_pclk_i                                             0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam0_pclk_i      
+                                                                                   cam0_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam0_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam0_pclk_i   
+                                                                           r       u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       3.583 r       u_vin/u_cam0/u_items/write_bin_r[3]/Q (GTP_DFF_C)
+                                   net (fanout=22)       0.616       4.199         u_vin/u_cam0/u_items/write_bin_r [3]
+                                                                           r       u_vin/u_cam0/u_items/memory_r_0/WADDR[3] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   4.199         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(24.786%), Route: 0.616ns(75.214%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r                        
+ cam0_pclk_i                                             0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam0_pclk_i      
+                                                                                   cam0_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam0_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam0_pclk_i   
+                                                                           r       u_vin/u_cam0/u_items/memory_r_0/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       3.380                          
+ clock uncertainty                                       0.000       3.380                          
+
+ Hold time                                               0.264       3.644                          
+
+ Data required time                                                  3.644                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.644                          
+ Data arrival time                                                   4.199                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.555                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+Endpoint    : u_vin/u_cam0/u_items/memory_r_1/WADDR[3] (GTP_RAM32X2DP)
+Path Group  : clk_cam0
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.380
+  Launch Clock Delay      :  3.380
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r                        
+ cam0_pclk_i                                             0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam0_pclk_i      
+                                                                                   cam0_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam0_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam0_pclk_i   
+                                                                           r       u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       3.583 r       u_vin/u_cam0/u_items/write_bin_r[3]/Q (GTP_DFF_C)
+                                   net (fanout=22)       0.616       4.199         u_vin/u_cam0/u_items/write_bin_r [3]
+                                                                           r       u_vin/u_cam0/u_items/memory_r_1/WADDR[3] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   4.199         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(24.786%), Route: 0.616ns(75.214%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r                        
+ cam0_pclk_i                                             0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam0_pclk_i      
+                                                                                   cam0_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam0_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam0_pclk_i   
+                                                                           r       u_vin/u_cam0/u_items/memory_r_1/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       3.380                          
+ clock uncertainty                                       0.000       3.380                          
+
+ Hold time                                               0.264       3.644                          
+
+ Data required time                                                  3.644                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.644                          
+ Data arrival time                                                   4.199                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.555                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+Endpoint    : u_vin/u_cam0/u_items/memory_r_2/WADDR[3] (GTP_RAM32X2DP)
+Path Group  : clk_cam0
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.380
+  Launch Clock Delay      :  3.380
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r                        
+ cam0_pclk_i                                             0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam0_pclk_i      
+                                                                                   cam0_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam0_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam0_pclk_i   
+                                                                           r       u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       3.583 r       u_vin/u_cam0/u_items/write_bin_r[3]/Q (GTP_DFF_C)
+                                   net (fanout=22)       0.616       4.199         u_vin/u_cam0/u_items/write_bin_r [3]
+                                                                           r       u_vin/u_cam0/u_items/memory_r_2/WADDR[3] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   4.199         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(24.786%), Route: 0.616ns(75.214%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam0 (rising edge)                            0.000       0.000 r                        
+ cam0_pclk_i                                             0.000       0.000 r       cam0_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam0_pclk_i      
+                                                                                   cam0_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam0_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam0_pclk_i   
+                                                                           r       u_vin/u_cam0/u_items/memory_r_2/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       3.380                          
+ clock uncertainty                                       0.000       3.380                          
+
+ Hold time                                               0.264       3.644                          
+
+ Data required time                                                  3.644                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.644                          
+ Data arrival time                                                   4.199                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.555                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam1/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+Endpoint    : u_vin/u_cam1/u_items/memory_r_0/WADDR[3] (GTP_RAM32X2DP)
+Path Group  : clk_cam1
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.380
+  Launch Clock Delay      :  3.380
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam1 (rising edge)                            0.000       0.000 r                        
+ cam1_pclk_i                                             0.000       0.000 r       cam1_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam1_pclk_i      
+                                                                                   cam1_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam1_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam1_pclk_i   
+                                                                           r       u_vin/u_cam1/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       3.583 r       u_vin/u_cam1/u_items/write_bin_r[3]/Q (GTP_DFF_C)
+                                   net (fanout=22)       0.616       4.199         u_vin/u_cam1/u_items/write_bin_r [3]
+                                                                           r       u_vin/u_cam1/u_items/memory_r_0/WADDR[3] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   4.199         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(24.786%), Route: 0.616ns(75.214%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam1 (rising edge)                            0.000       0.000 r                        
+ cam1_pclk_i                                             0.000       0.000 r       cam1_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam1_pclk_i      
+                                                                                   cam1_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam1_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam1_pclk_i   
+                                                                           r       u_vin/u_cam1/u_items/memory_r_0/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       3.380                          
+ clock uncertainty                                       0.000       3.380                          
+
+ Hold time                                               0.264       3.644                          
+
+ Data required time                                                  3.644                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.644                          
+ Data arrival time                                                   4.199                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.555                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam1/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+Endpoint    : u_vin/u_cam1/u_items/memory_r_1/WADDR[3] (GTP_RAM32X2DP)
+Path Group  : clk_cam1
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.380
+  Launch Clock Delay      :  3.380
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam1 (rising edge)                            0.000       0.000 r                        
+ cam1_pclk_i                                             0.000       0.000 r       cam1_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam1_pclk_i      
+                                                                                   cam1_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam1_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam1_pclk_i   
+                                                                           r       u_vin/u_cam1/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       3.583 r       u_vin/u_cam1/u_items/write_bin_r[3]/Q (GTP_DFF_C)
+                                   net (fanout=22)       0.616       4.199         u_vin/u_cam1/u_items/write_bin_r [3]
+                                                                           r       u_vin/u_cam1/u_items/memory_r_1/WADDR[3] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   4.199         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(24.786%), Route: 0.616ns(75.214%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam1 (rising edge)                            0.000       0.000 r                        
+ cam1_pclk_i                                             0.000       0.000 r       cam1_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam1_pclk_i      
+                                                                                   cam1_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam1_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam1_pclk_i   
+                                                                           r       u_vin/u_cam1/u_items/memory_r_1/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       3.380                          
+ clock uncertainty                                       0.000       3.380                          
+
+ Hold time                                               0.264       3.644                          
+
+ Data required time                                                  3.644                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.644                          
+ Data arrival time                                                   4.199                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.555                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_vin/u_cam1/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+Endpoint    : u_vin/u_cam1/u_items/memory_r_2/WADDR[3] (GTP_RAM32X2DP)
+Path Group  : clk_cam1
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  3.380
+  Launch Clock Delay      :  3.380
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam1 (rising edge)                            0.000       0.000 r                        
+ cam1_pclk_i                                             0.000       0.000 r       cam1_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam1_pclk_i      
+                                                                                   cam1_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam1_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam1_pclk_i   
+                                                                           r       u_vin/u_cam1/u_items/write_bin_r[3]/CLK (GTP_DFF_C)
+
+                                   tco                   0.203       3.583 r       u_vin/u_cam1/u_items/write_bin_r[3]/Q (GTP_DFF_C)
+                                   net (fanout=22)       0.616       4.199         u_vin/u_cam1/u_items/write_bin_r [3]
+                                                                           r       u_vin/u_cam1/u_items/memory_r_2/WADDR[3] (GTP_RAM32X2DP)
+
+ Data arrival time                                                   4.199         Logic Levels: 0  
+                                                                                   Logic: 0.203ns(24.786%), Route: 0.616ns(75.214%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_cam1 (rising edge)                            0.000       0.000 r                        
+ cam1_pclk_i                                             0.000       0.000 r       cam1_pclk_i (port)
+                                   net (fanout=1)        0.000       0.000         cam1_pclk_i      
+                                                                                   cam1_pclk_i_ibuf/I (GTP_INBUF)
+                                   td                    0.960       0.960 r       cam1_pclk_i_ibuf/O (GTP_INBUF)
+                                   net (fanout=107)      2.420       3.380         nt_cam1_pclk_i   
+                                                                           r       u_vin/u_cam1/u_items/memory_r_2/WCLK (GTP_RAM32X2DP)
+ clock pessimism                                         0.000       3.380                          
+ clock uncertainty                                       0.000       3.380                          
+
+ Hold time                                               0.264       3.644                          
+
+ Data required time                                                  3.644                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  3.644                          
+ Data arrival time                                                   4.199                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.555                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_dir/CLK (GTP_DFF_C)
+Endpoint    : u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_DIR (GTP_GPLL)
+Path Group  : rst_clk
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.000  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  5.129
+  Launch Clock Delay      :  5.129
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock rst_clk (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.402       2.477         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.541 r       u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       3.861         u_ddr3/u_ddrphy_top/rst_gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       4.029 r       u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=164)      1.100       5.129         u_ddr3/u_ddrphy_top/rst_clk
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_dir/CLK (GTP_DFF_C)
+
+                                   tco                   0.185       5.314 f       u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_dir/Q (GTP_DFF_C)
+                                   net (fanout=2)        0.437       5.751         u_ddr3/u_ddrphy_top/gpll_dps_dir
+                                                                           f       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_DIR (GTP_GPLL)
+
+ Data arrival time                                                   5.751         Logic Levels: 0  
+                                                                                   Logic: 0.185ns(29.743%), Route: 0.437ns(70.257%)
+----------------------------------------------------------------------------------------------------
+
+ Clock rst_clk (rising edge)                             0.000       0.000 r                        
+ ddr_ref_clk_p_i                                         0.000       0.000 r       ddr_ref_clk_p_i (port)
+                                   net (fanout=1)        0.000       0.000         ddr_ref_clk_p_i  
+                                                                                   u_ddr_ref_clk/I (GTP_INBUFDS)
+                                   td                    1.075       1.075 r       u_ddr_ref_clk/O (GTP_INBUFDS)
+                                   net (fanout=3)        1.402       2.477         ddr_ref_clk_w    
+                                                                                   u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKIN1 (GTP_GPLL)
+                                   td                    0.064       2.541 r       u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/CLKOUT0 (GTP_GPLL)
+                                   net (fanout=1)        1.320       3.861         u_ddr3/u_ddrphy_top/rst_gpll_clkout0
+                                                                                   u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKIN (GTP_CLKBUFG)
+                                   td                    0.168       4.029 r       u_ddr3/u_ddrphy_top/u_rst_clk_bufg/CLKOUT (GTP_CLKBUFG)
+                                   net (fanout=164)      1.100       5.129         u_ddr3/u_ddrphy_top/rst_clk
+                                                                           r       u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_CLK (GTP_GPLL)
+ clock pessimism                                         0.000       5.129                          
+ clock uncertainty                                       0.000       5.129                          
+
+ Hold time                                               0.063       5.192                          
+
+ Data required time                                                  5.192                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  5.192                          
+ Data arrival time                                                   5.751                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.559                          
+====================================================================================================
+
+====================================================================================================

@@ -1,0 +1,7 @@
+Preparation: existing 106 RTL, expected 106.
+ADD: none
+REMOVE: none
+Import paths expanded from B3N directory; all sources exist.
+Include path ../../EdRV32-Competition-2026/rtl/include with PDS TAB separator; FPGA_MODE.
+New FDC includes fp_rgmii and fp_ddrphy region bindings.
+Copy card22 ROM/SRAM from B3R; remaining 22 IP types retained.

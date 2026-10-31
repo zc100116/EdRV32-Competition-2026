@@ -1,0 +1,12 @@
+Preparation before import
+Existing=98 Expected=103
+ADD
+rtl\media\rnd\edrv32_rnd_affine.v
+rtl\media\rnd\edrv32_rnd_filter.v
+rtl\media\rnd\edrv32_rnd_geometry.v
+rtl\media\rnd\edrv32_rnd_window.v
+rtl\tech\edrv32_ram_rnd_window.v
+REMOVE
+None
+Include: ../../EdRV32-Competition-2026/rtl/include (PDS TAB delimiter)
+Top: edrv32_fpga_board_render_top; macro FPGA_MODE

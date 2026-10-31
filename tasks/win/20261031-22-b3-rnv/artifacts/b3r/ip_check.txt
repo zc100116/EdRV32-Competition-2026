@@ -1,0 +1,6 @@
+R card22 generated-IP check:
+ip_rom_boot: 64 data bits, 11 address bits, clock enable on, output register off, HEX init on; INIT_FILE points to card22 src/ip_rom_boot.dat.
+ip_ram_sram: 64 data bits, 13 address bits, 8 byte enables (8 bits each), clock enable on, output register off, HEX init on; INIT_FILE points to card22 src/ip_ram_sram.dat.
+ip_ram_rnd_window: DRM 36K SDPRAM; 64-bit write/read data, 9-bit write/read addresses; byte enable off; read clock enable on; output register off; init off. Generated port names match wrapper; resets tied 0; addresses zero-extended.
+ROM and SRAM references exist in saved project. Window files exist, but saved project has no window IDF reference; add_design is included in the user import commands.
+Import Tcl dry-run: 103 sources, all source files present; relative include directory and both public headers present. PDS compile was not started by this check.

@@ -1,0 +1,7 @@
+Preparation: saved project 112 RTL; import script expands 112 RTL.
+ADD: none
+REMOVE: none
+All source files and both common headers exist. Include uses ../../EdRV32-Competition-2026/rtl/include with PDS TAB separator. Define FPGA_MODE.
+FDC includes fp_rgmii and fp_ddrphy region bindings.
+Copy script updates seven IP types from R; old ip_ram_mem_xbar_w project reference is removed, new ip_lutram_mem_xbar_w is added.
+The script was dry-run only; actual project import is left to the user in PDS.
