@@ -3,7 +3,8 @@
 # Description: One program containing LVGL, the shared runtime and the game.
 # Clock domain: none (build tool).
 MEMORY := ddr_app
-PROGRAM_SOURCES := sw/apps/s3/main.c sw/apps/s3/menu.c sw/apps/s3/s3_platform.c \
+PROGRAM_SOURCES := sw/apps/s3/main.c sw/apps/s3/layers.c sw/apps/s3/menu.c \
+    sw/apps/s3/s3_platform.c \
     sw/drivers/rnd.c sw/drivers/disp.c sw/drivers/engine.c sw/drivers/plic.c \
     sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c sw/bsp/cache.c
 PROGRAM_SOURCES += sw/lib/virtual_input.c sw/lib/eth_monitor.c sw/lib/eth_monitor_pack.c \

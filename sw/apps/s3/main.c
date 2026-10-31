@@ -4,6 +4,7 @@
  * Clock domain: clk_sys CPU.
  */
 #include "menu.h"
+#include "layers.h"
 #include "virtual_input.h"
 #include "s3_platform.h"
 #include "lvgl/s3_lvgl.h"
@@ -33,6 +34,11 @@ int main(void)
                 /* No LVGL timer handling while the game owns both display layers. */
                 s3_game_run();
                 s3_lvgl_restore_display();
+                s3_menu_show();
+                previous = s3_input();
+                break;
+            case S3_APP_LAYERS:
+                s3_layers_run();
                 s3_menu_show();
                 previous = s3_input();
                 break;

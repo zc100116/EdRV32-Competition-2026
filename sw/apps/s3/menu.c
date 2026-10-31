@@ -1,6 +1,6 @@
 /* File: menu.c
  * Spec: Task B3-3b C; SoC 1.2 S3.
- * Description: Four applications, keyboard selection and a persistent control legend.
+ * Description: Five applications, keyboard selection and a persistent control legend.
  * Clock domain: clk_sys CPU.
  */
 #include "menu.h"
@@ -43,13 +43,15 @@ static void card_event(lv_event_t *event)
 void s3_menu_show(void)
 {
     static const char *titles[] = {
-        "01   AMBER RUN", "02   LVGL WIDGETS", "03   BENCHMARK", "04   RN-17 COMPARE"
+        "01   AMBER RUN", "02   LVGL WIDGETS", "03   BENCHMARK", "04   RN-17 COMPARE",
+        "05   LAYERS"
     };
     static const char *descriptions[] = {
         "Run, jump and collect.\nA four-screen platform adventure.",
         "Explore the LVGL widget gallery.\nControls, charts and typography.",
         "Run the LVGL benchmark scenes.\nScene and average frame rates on UART.",
-        "Render one frame with both engines.\nPixel difference statistics on UART."
+        "Render one frame with both engines.\nPixel difference statistics on UART.",
+        "DISP overlays and LVGL layers.\nFive visual checks with UART guidance."
     };
     requested = S3_APP_NONE;
     lv_obj_t *screen = lv_screen_active();
@@ -72,13 +74,13 @@ void s3_menu_show(void)
         lv_obj_add_event_cb(card, card_event, LV_EVENT_FOCUSED, (void *)(uintptr_t)i);
         lv_obj_remove_style_all(card);
         lv_obj_set_pos(card, 64 + (int32_t)(i % 2u) * 588,
-                        190 + (int32_t)(i / 2u) * 177);
-        lv_obj_set_size(card, 564, 154);
+                        184 + (int32_t)(i / 2u) * 128);
+        lv_obj_set_size(card, 564, 118);
         lv_obj_set_style_bg_opa(card, LV_OPA_COVER, 0);
         lv_obj_set_style_radius(card, 12, 0);
         lv_obj_set_scrollable(card, false);
-        label(card, titles[i], 26, 24, 0xf2f7fc);
-        label(card, descriptions[i], 26, 65, 0xb3c7d8);
+        label(card, titles[i], 26, 14, 0xf2f7fc);
+        label(card, descriptions[i], 26, 48, 0xb3c7d8);
     }
     select_card();
     lv_group_focus_obj(cards[selected]);

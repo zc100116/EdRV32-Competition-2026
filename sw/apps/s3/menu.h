@@ -14,6 +14,7 @@ enum s3_application {
     S3_APP_WIDGETS,
     S3_APP_BENCHMARK,
     S3_APP_COMPARE,
+    S3_APP_LAYERS,
     S3_APP_COUNT
 };
 

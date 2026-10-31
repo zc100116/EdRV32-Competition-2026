@@ -65,7 +65,7 @@ def main():
     lib.s3_lvgl_init()
     menu.s3_menu_show()
     assert menu.s3_menu_input(1) == -1
-    assert menu.s3_menu_input(4) == 3  # Previous wraps from game to RN-17.
+    assert menu.s3_menu_input(4) == 4  # Previous wraps from game to LAYERS.
     assert menu.s3_menu_input(2) == -1
     assert menu.s3_menu_input(4) == 0
     assert menu.s3_menu_input(2) == -1
