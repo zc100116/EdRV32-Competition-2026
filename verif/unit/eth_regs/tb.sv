@@ -48,7 +48,7 @@ module tb;
     wire [31:0] ports_o;
     wire phy_o;
     wire [127:0] bases_o;
-    wire [111:0] sizes_o;
+    wire [127:0] sizes_o;
     wire clear_o;
     wire start_o;
     wire abort_o;
@@ -145,7 +145,7 @@ module tb;
         for(integer i=0;i<4;i++) begin
             write_reg(32'h140+i*16,32'h1003+32'(i*8192));
             check(32'h140+i*16,32'h1000+32'(i*8192));
-            write_reg(32'h144+i*16,32'hffffffff);check(32'h144+i*16,32'h0fffffff);
+            write_reg(32'h144+i*16,32'hffffffff);check(32'h144+i*16,32'hffffffff);
         end
         write_reg(4,7);check(4,1);
         if(aborts!=1) $fatal(1,"FAIL abort command");

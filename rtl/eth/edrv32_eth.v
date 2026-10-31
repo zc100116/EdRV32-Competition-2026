@@ -68,7 +68,7 @@ module edrv32_eth (
     wire error_w;
     wire [31:0] ip_w;
     wire [15:0] rx_port_w;
-    wire [111:0] sizes_w;
+    wire [127:0] sizes_w;
     wire [10:0] release_w;
     wire packet_valid_w;
     wire [151:0] metadata_w;

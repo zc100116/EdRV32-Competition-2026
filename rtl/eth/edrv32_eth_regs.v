@@ -54,7 +54,7 @@ module edrv32_eth_regs (
     output reg [31:0] ports_o,
     output reg phy_o,
     output wire [127:0] bases_o,
-    output wire [111:0] sizes_o,
+    output wire [127:0] sizes_o,
     output wire clear_o,
     output wire start_o,
     output wire abort_o,
@@ -70,7 +70,7 @@ module edrv32_eth_regs (
     reg [31:0] peer_ip_r;
     reg [15:0] peer_port_r;
     reg [31:0] base_r [0:3];
-    reg [27:0] size_r [0:3];
+    reg [31:0] size_r [0:3];
     reg [31:0] bytes_r [0:3];
     reg [31:0] perf_r [0:10];
     wire write_w;
@@ -107,7 +107,7 @@ module edrv32_eth_regs (
     generate
         for (window_idx = 0; window_idx < 4; window_idx = window_idx + 1) begin : g_windows
             assign bases_o[window_idx * 32 +: 32] = base_r[window_idx];
-            assign sizes_o[window_idx * 28 +: 28] = size_r[window_idx];
+            assign sizes_o[window_idx * 32 +: 32] = size_r[window_idx];
         end
     endgenerate
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -134,7 +134,7 @@ module edrv32_eth_regs (
             peer_port_r <= 16'd0;
             for (idx = 0; idx < 4; idx = idx + 1) begin
                 base_r[idx] <= 32'd0;
-                size_r[idx] <= 28'd0;
+                size_r[idx] <= 32'd0;
                 bytes_r[idx] <= 32'd0;
             end
             for (idx = 0; idx < 11; idx = idx + 1)
@@ -162,7 +162,7 @@ module edrv32_eth_regs (
             peer_port_r <= 16'd0;
             for (idx = 0; idx < 4; idx = idx + 1) begin
                 base_r[idx] <= 32'd0;
-                size_r[idx] <= 28'd0;
+                size_r[idx] <= 32'd0;
                 bytes_r[idx] <= 32'd0;
             end
             for (idx = 0; idx < 11; idx = idx + 1)
@@ -234,16 +234,16 @@ module edrv32_eth_regs (
                     12'h11c: ports_o <= apb_pwdata_i[31:0];
                     12'h188: phy_o <= apb_pwdata_i[0];
                     12'h140: base_r[0] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h144: size_r[0] <= apb_pwdata_i[27:0];
+                    12'h144: size_r[0] <= apb_pwdata_i;
                     12'h148: bytes_r[0] <= 32'd0;
                     12'h150: base_r[1] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h154: size_r[1] <= apb_pwdata_i[27:0];
+                    12'h154: size_r[1] <= apb_pwdata_i;
                     12'h158: bytes_r[1] <= 32'd0;
                     12'h160: base_r[2] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h164: size_r[2] <= apb_pwdata_i[27:0];
+                    12'h164: size_r[2] <= apb_pwdata_i;
                     12'h168: bytes_r[2] <= 32'd0;
                     12'h170: base_r[3] <= {apb_pwdata_i[31:5], 5'd0};
-                    12'h174: size_r[3] <= apb_pwdata_i[27:0];
+                    12'h174: size_r[3] <= apb_pwdata_i;
                     12'h178: bytes_r[3] <= 32'd0;
                     default: begin end
                 endcase
@@ -278,16 +278,16 @@ module edrv32_eth_regs (
             12'h11c: apb_prdata_o = ports_o;
             12'h188: apb_prdata_o = {31'd0, phy_o};
             12'h140: apb_prdata_o = base_r[0];
-            12'h144: apb_prdata_o = {4'd0, size_r[0]};
+            12'h144: apb_prdata_o = size_r[0];
             12'h148: apb_prdata_o = bytes_r[0];
             12'h150: apb_prdata_o = base_r[1];
-            12'h154: apb_prdata_o = {4'd0, size_r[1]};
+            12'h154: apb_prdata_o = size_r[1];
             12'h158: apb_prdata_o = bytes_r[1];
             12'h160: apb_prdata_o = base_r[2];
-            12'h164: apb_prdata_o = {4'd0, size_r[2]};
+            12'h164: apb_prdata_o = size_r[2];
             12'h168: apb_prdata_o = bytes_r[2];
             12'h170: apb_prdata_o = base_r[3];
-            12'h174: apb_prdata_o = {4'd0, size_r[3]};
+            12'h174: apb_prdata_o = size_r[3];
             12'h178: apb_prdata_o = bytes_r[3];
             12'h040: apb_prdata_o = perf_r[0];
             12'h044: apb_prdata_o = perf_r[1];

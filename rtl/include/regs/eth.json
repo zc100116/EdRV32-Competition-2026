@@ -498,7 +498,7 @@
                 {
                     "name": "VALUE",
                     "lsb": 0,
-                    "width": 28,
+                    "width": 32,
                     "spec": "eth-spec.md 4.2"
                 }
             ]

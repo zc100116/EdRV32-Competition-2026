@@ -56,7 +56,7 @@ class Case:
         self.w(4, 1)
 
     def window(self, index, base, size):
-        self.ref.windows[index] = Window(base & ~31, size & 0xfffffff,
+        self.ref.windows[index] = Window(base & ~31, size & 0xffffffff,
                                          self.ref.windows[index].count)
         self.w(0x140 + 16 * index, base)
         self.w(0x144 + 16 * index, size)
@@ -493,7 +493,7 @@ def et12(root):
                         (0x144, 0xf0000100)]:
         case.w(addr, value)
         case.r(addr, value & (0xffff if addr in [0x104, 0x10c, 0x114, 0x24]
-                             else 0xffffffe0 if addr == 0x20 else 0xfffffff))
+                             else 0xffffffe0 if addr == 0x20 else 0xffffffff))
     case.w(4, 8)
     reset_registers(case)
     case.ref = Reference()

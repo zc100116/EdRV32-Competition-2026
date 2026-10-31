@@ -17,7 +17,7 @@ module edrv32_eth_rx (
     input wire [47:0] mac_i,
     input wire [31:0] ip_i,
     input wire [15:0] port_i,
-    input wire [111:0] sizes_i,
+    input wire [127:0] sizes_i,
     input wire [10:0] release_i,
 
     // Packet metadata queue and RAM write port.
@@ -68,7 +68,7 @@ module edrv32_eth_rx (
     reg [16:0] udp_fold_r;
     reg ip_good_r;
     reg udp_good_r;
-    wire [27:0] size_w;
+    wire [31:0] size_w;
     wire [16:0] ip_fold_w;
     wire payload_byte_w;
     wire store_word_w;
@@ -116,7 +116,7 @@ module edrv32_eth_rx (
     assign udp_length_w = header_r[95:80];
     assign offset_w = header_r[31:0];
     assign window_w = header_r[57:56];
-    assign size_w = sizes_i[window_w * 28 +: 28];
+    assign size_w = sizes_i[window_w * 32 +: 32];
     assign ip_fold_w = {1'b0, ip_sum_r[15:0]} + {1'b0, ip_sum_r[31:16]};
     // Header-derived arithmetic settles during reception, before the FCS tail.
     // The final UDP sum has four FCS byte clocks to cross these three stages.
@@ -177,7 +177,7 @@ module edrv32_eth_rx (
         else if (dst_port_w != port_i || udp_length_w != ip_udp_length_r ||
             udp_length_w < 16'd16)
             action_w = 4'd5;
-        else if (size_w == 0 || limit_r > {5'd0, size_w})
+        else if (size_w == 0 || limit_r > {1'b0, size_w})
             action_w = 4'd6;
         else if (overflow_r || (end_r - release_i) > 11'd1024 || !metadata_ready_i)
             action_w = 4'd7;
