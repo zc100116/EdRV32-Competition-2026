@@ -22,7 +22,9 @@ void demo_network_check_complete(void)
     if (demo.tx_check_buffer >= 0) {
         struct demo_inference *job = &demo.inference[demo.tx_check_buffer];
         demo.input_busy &= ~(1u << job->input_slot);
+#ifndef DEMO_NPU_NET
         vin_slots_busy(2, demo.input_busy);
+#endif
         job->state = BUFFER_FREE;
         eth_window_configure(demo.image_window,
             DEMO_WINDOW_BASE + demo.image_window * DEMO_WINDOW_SIZE, DEMO_WINDOW_SIZE);
@@ -35,10 +37,12 @@ unsigned int demo_network_detections(struct eth_tx_descriptor *tx,
 {
     unsigned int count = 0;
     if (check_buffer >= 0) {
+#ifndef DEMO_NPU_NET
         struct demo_inference *job = &demo.inference[check_buffer];
         eth_tx_descriptor_pack(&tx[count++],
             DEMO_INPUT_BASE + job->input_slot * DEMO_INPUT_SPACING,
             DEMO_INPUT_BYTES, 0, 0, 0);
+#endif
         eth_tx_descriptor_pack(&tx[count++],
             DEMO_OUTPUT_BASE + (unsigned int)check_buffer * DEMO_OUTPUT_SPACING,
             DEMO_OUTPUT_BYTES, 1, 0, 0);
@@ -81,7 +85,11 @@ void demo_network_receive(void)
             }
             demo_fail(error, ENGINE_ETH);
         }
+#ifndef DEMO_NPU_NET
         demo_pipeline_stop();
+#else
+        demo_network_wait();
+#endif
         copy_bytes(DEMO_DESC_BASE, DEMO_MODEL_WINDOW + 0x1000u, demo_read32(header + 12));
         copy_bytes(DEMO_MODEL_BASE, DEMO_MODEL_WINDOW + 0x100000u, demo_read32(header + 16));
         struct npu_config config = {DEMO_MODEL_BASE, DEMO_WORK_BASE, DEMO_INPUT_BASE,
@@ -89,7 +97,9 @@ void demo_network_receive(void)
         npu_configure(&config);
         eth_window_configure(2, DEMO_MODEL_WINDOW, DEMO_MODEL_WINDOW_SIZE);
         info_text("EDNM", "loaded");
+#ifndef DEMO_NPU_NET
         demo_pipeline_configure(VIN_CAM0);
+#endif
     }
     const uint32_t masks[] = {EDRV32_ETH_IRQ_STAT_RX_NOTIFY0_MASK,
                               EDRV32_ETH_IRQ_STAT_RX_NOTIFY1_MASK};
@@ -97,6 +107,9 @@ void demo_network_receive(void)
         if (!(received & masks[window])) {
             continue;
         }
+#ifdef DEMO_NPU_NET
+        demo_npu_receive(window);
+#else
         uint32_t bytes = eth_window_bytes(window);
         if (bytes != DEMO_IMAGE_BYTES) {
             info_number("WIN image bytes", bytes);
@@ -112,8 +125,13 @@ void demo_network_receive(void)
                          DEMO_STRIDE, DEMO_WIDTH, DEMO_HEIGHT);
         info_number("YOLO image window", window);
         /* Only one image check is active; the host waits for final WIN2 NOTIFY. */
+#endif
     }
     if (received & EDRV32_ETH_IRQ_STAT_RX_NOTIFY3_MASK) {
         eth_window_configure(3, DEMO_COMMAND_WINDOW, DEMO_COMMAND_WINDOW_SIZE);
+#ifdef DEMO_NPU_NET
+        info_hex("ETH peer IP", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_IP_OFFSET));
+        info_number("ETH peer port", mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_PORT_OFFSET));
+#endif
     }
 }

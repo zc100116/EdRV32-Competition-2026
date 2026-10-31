@@ -179,6 +179,9 @@ class SocConsole(QWidget):
         self.last_seq = 0
         self.last_display = None
         self.generation = -1
+        self.folder_images = []
+        self.folder_started = None
+        self.folder_completed = 0
         self.loaded_image = None
         self.comparing = False
         self.comparison = None
@@ -288,6 +291,8 @@ class SocConsole(QWidget):
         path_row = QHBoxLayout()
         path_row.addWidget(self.image_path, 1)
         path_row.addWidget(self.button('选择', self._choose_image))
+        self.choose_folder = self.button('文件夹', self._choose_folder)
+        path_row.addWidget(self.choose_folder)
         box.addLayout(path_row)
         self.window = QComboBox()
         self.window.addItems(['WIN0', 'WIN1'])
@@ -538,12 +543,14 @@ class SocConsole(QWidget):
         for note in (self.image_note, self.model_note, self.check_note):
             note.setText(reason
                          if not caps['detection'] else
-                         '1280 × 720 RGB565' if note is self.image_note else
+                         ('CH2 · 983,040 B · demo_npu' if project == 'B3N'
+                          else '1280 × 720 RGB565') if note is self.image_note else
                          'EDNM · 板端结果见日志' if note is self.model_note else
                          '输入 / 输出逐字节比对；检测框按序比对')
         for widget in (self.scene, self.pix, self.geo, self.apply_scene):
             widget.setEnabled(caps['processing'])
-        self.display.setEnabled(caps['processing'])
+        self.choose_folder.setEnabled(project == 'B3N')
+        self.display.setEnabled(caps['processing'] or caps['detection'])
         self.scene.model().item(0).setEnabled(caps['detection'])
         if not caps['detection']:
             self.scene.setCurrentIndex(1)
@@ -564,7 +571,7 @@ class SocConsole(QWidget):
         for button in self.monitor_buttons:
             button.setEnabled(caps['network'])
         self.histogram.setEnabled(caps['network'])
-        self.view.setEnabled(caps['processing'])
+        self.view.setEnabled(caps['processing'] or caps['detection'])
         self.bandwidth.setEnabled(caps['network'])
         self.utilization.setEnabled(caps['network'])
         self.table.setEnabled(caps['network'])
@@ -590,14 +597,33 @@ class SocConsole(QWidget):
             self.run(self._load_image)
             self.display.setCurrentIndex(1)
 
+    def _choose_folder(self):
+        path = QFileDialog.getExistingDirectory(self, '选择连续识别图片文件夹')
+        if path:
+            self.folder_images = sorted(item for item in Path(path).iterdir()
+                                        if item.suffix.lower() in
+                                        ('.png', '.jpg', '.jpeg', '.bmp'))
+            if not self.folder_images:
+                self.toast('文件夹没有图片')
+                return
+            self.folder_started = time.monotonic()
+            self.folder_completed = 0
+            self._next_image()
+
+    def _next_image(self):
+        self.image_path.setText(str(self.folder_images.pop(0)))
+        self._send_image()
+        self.window.setCurrentIndex(1 - self.window.currentIndex())
+
     def _load_image(self):
         from PySide6.QtGui import QImageReader
         reader = QImageReader(self.image_path.text())
         image = reader.read()
         if image.isNull():
             raise ValueError(f'无法读取图片：{reader.errorString()}')
-        self.static_image = image.scaled(1280, 720, Qt.IgnoreAspectRatio,
-                                         Qt.SmoothTransformation)
+        self.static_image = (image if self.project.currentText() == 'B3N' else
+                             image.scaled(1280, 720, Qt.IgnoreAspectRatio,
+                                          Qt.SmoothTransformation))
         self.loaded_image = self.image_path.text()
         self.last_display = None
         self._display()
@@ -671,7 +697,8 @@ class SocConsole(QWidget):
                       '回传图像检查' if capture is not None else '等待图像检查回传')
             number = capture[2].frame_id if mode == 2 and capture is not None else '—'
             key = (mode, self.static_image.cacheKey(), self.generation)
-            caption = f'来源 · {source} · FRAME {number}\n1280 × 720 · {len(boxes)} 个检测框'
+            caption = (f'来源 · {source} · FRAME {number}\n'
+                       f'{image.width()} × {image.height()} · {len(boxes)} 个检测框')
         elif frame is not None:
             boxes = detections.boxes if mode == 2 and detections is not None else ()
             key = (mode, frame.frame_id, boxes, round(state["fps"], 1))
@@ -684,10 +711,12 @@ class SocConsole(QWidget):
         else:
             image, boxes, key = QImage(), (), None
             caption = '来源 · 板端视频\n等待 EDVF 视频帧'
-        if not PROJECTS[self.project.currentText()]['processing']:
+        if not (PROJECTS[self.project.currentText()]['processing'] or
+                PROJECTS[self.project.currentText()]['detection']):
             image, boxes = QImage(), ()
         self.view.set_image(image, boxes)
-        if not PROJECTS[self.project.currentText()]['processing']:
+        if not (PROJECTS[self.project.currentText()]['processing'] or
+                PROJECTS[self.project.currentText()]['detection']):
             caption = PROJECTS[self.project.currentText()]['reason']
         self.caption.setText(caption.replace('\n', ' · '))
         self.last_display = key
@@ -804,8 +833,11 @@ class SocConsole(QWidget):
         self.transfer.setText(f"{tx['sent']:,} / {tx['total']:,} B\n" +
                                (tx['error'] or ('发送中' if tx['active'] else '就绪')))
         caps = PROJECTS[self.project.currentText()]
-        self.send_image.setEnabled(caps['detection'] and not tx['active'])
-        self.send_model.setEnabled(caps['detection'] and not tx['active'])
+        b3n = self.project.currentText() == 'B3N'
+        waiting = b3n and (self.engine.yolo.capture_pending or self.comparing)
+        self.send_image.setEnabled(caps['detection'] and not tx['active'] and not waiting)
+        self.send_model.setEnabled(caps['detection'] and not tx['active'] and not waiting)
+        self.choose_folder.setEnabled(b3n and not tx['active'] and not waiting)
         source_image = self.engine.yolo.source_image
         if source_image is not None and source_image != self.loaded_image:
             self.image_path.setText(source_image)
@@ -817,13 +849,19 @@ class SocConsole(QWidget):
             self.board.log(f'YOLO 回传完整：FRAME {capture[2].frame_id} · '
                            f'{len(capture[2].boxes)} 个框')
             self.capture_status.setText(f'FRAME {capture[2].frame_id} · '
-                                        f'{len(capture[2].boxes)} 个检测框；三块回传完整')
+                                        f'{len(capture[2].boxes)} 个检测框；回传完整')
+            if self.project.currentText() == 'B3N':
+                timing = self.engine.yolo.timings[-1]
+                self.board.log(f"{timing['path']} · 往返 {timing['seconds'] * 1000:.2f} ms")
+                self._compare()
         self.compare.setEnabled(caps['detection'] and not self.comparing)
         if self.comparison is not None and self.comparison is not self.reported_comparison:
             self.reported_comparison = self.comparison
             if isinstance(self.comparison, str):
                 self.comparison_result.setText('参考比对失败：' + self.comparison)
                 self.board.fail(self.comparison_result.text())
+                self.folder_images = []
+                self.folder_started = None
             else:
                 result = self.comparison
                 first = result['output']['first']
@@ -835,6 +873,15 @@ class SocConsole(QWidget):
                     f"参考 {result['detections']['expected']} / "
                     f"板端 {result['detections']['actual']}")
                 self.board.log(self.comparison_result.text())
+                if self.folder_started is not None:
+                    self.folder_completed += 1
+                    elapsed = time.monotonic() - self.folder_started
+                    self.board.log(f'连续 {self.folder_completed} 张 · '
+                                   f'平均 {self.folder_completed / elapsed:.3f} fps（含比对）')
+                    if self.folder_images:
+                        self._next_image()
+                    else:
+                        self.folder_started = None
         self._display()
         video = self.engine.video.snapshot()
         self.video_stats.setText(f"完整帧 {video['received']} · 缺包丢帧 {video['dropped']} · "

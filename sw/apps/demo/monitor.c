@@ -5,9 +5,11 @@
  */
 #include "runtime.h"
 
+#ifndef DEMO_NPU_NET
 static uint32_t previous_vin[4];
 static uint32_t previous_underruns;
 static uint32_t previous_submitted;
+#endif
 static uint32_t previous_inferences;
 static uint32_t previous_received;
 static uint32_t previous_sent;
@@ -18,6 +20,7 @@ void demo_monitor_tick(void)
     record.sequence = demo.monitor_sequence++;
     record.scene = demo.scene;
     eth_monitor_snapshot(&record, demo.clock_hz);
+#ifndef DEMO_NPU_NET
     const unsigned int vin_counters[] = {3, 5, 6, 8};
     for (unsigned int i = 0; i < 4; ++i) {
         uint32_t value = engine_perf(ENGINE_VIN, vin_counters[i]);
@@ -29,6 +32,13 @@ void demo_monitor_tick(void)
     previous_underruns = underruns;
     record.disp[1] = demo.submitted - previous_submitted;
     previous_submitted = demo.submitted;
+#else
+    for (unsigned int i = 0; i < 4; ++i) {
+        record.vin[i] = 0;
+    }
+    record.disp[0] = 0;
+    record.disp[1] = 0;
+#endif
     record.npu[0] = demo.inference_count - previous_inferences;
     previous_inferences = demo.inference_count;
     record.npu[1] = demo.inference_cycles;

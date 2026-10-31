@@ -21,8 +21,8 @@ PROJECTS = {
     'B3VN': dict(program=True, processing=True, detection=True, network=True, reason=''),
     'B3R': dict(program=True, processing=False, detection=False, network=True,
                 reason='B3R 无摄像头和 NPU；支持 ETH 对端与 DDR 监控'),
-    'B3N': dict(program=True, processing=False, detection=False, network=True,
-                reason='B3N 无摄像头；board_npu 支持 ETH 对端与 DDR 监控'),
+    'B3N': dict(program=True, processing=False, detection=True, network=True,
+                reason='B3N 使用 demo_npu：网口送 CH2，返回 OUTPUT / EDDT；DDR 100 Hz'),
     'B3F': dict(program=True, processing=True, detection=True, network=True, reason=''),
 }
 STATUS_KEYS = ('Scene', 'PIX mode', 'GEO mode', 'Output mode', 'Requested video fps',
@@ -57,6 +57,7 @@ class BoardSession:
         PROJECTS[project]
         with self.lock:
             self.project = project
+            self.yolo.mode = project
         return self.status()
 
     def mark(self, name, done=True):

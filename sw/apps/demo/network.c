@@ -23,9 +23,11 @@ void demo_network_submit(unsigned int count, int surface, int check_buffer)
     demo.tx_done = engine_poll(ENGINE_ETH).done_count;
     demo.tx_surface = surface;
     demo.tx_check_buffer = check_buffer;
+#ifndef DEMO_NPU_NET
     if (surface >= 0) {
         demo_reference((unsigned int)surface, REF_ETH, 0);
     }
+#endif
     demo.tx_active = 1;
     eth_send(DEMO_TX_DESCRIPTORS, count);
 }
@@ -64,14 +66,18 @@ void demo_network_event(const struct engine_event *event, void *context)
         for (unsigned int i = 0; i < demo.tx_count; ++i) {
             demo.sent_bytes += demo.tx_lengths[i];
         }
+#ifndef DEMO_NPU_NET
         if (demo.tx_surface >= 0) {
             demo_reference((unsigned int)demo.tx_surface, 0, REF_ETH);
         }
+#endif
         demo_network_check_complete();
         demo.tx_surface = -1;
         demo.tx_check_buffer = -1;
         demo.tx_active = 0;
+#ifndef DEMO_NPU_NET
         demo_try_inference();
+#endif
     }
 }
 
@@ -93,6 +99,7 @@ void demo_network_wait(void)
     }
 }
 
+#ifndef DEMO_NPU_NET
 void demo_present(unsigned int slot, uint32_t frame_id, unsigned int detection_bytes,
                   int check_buffer)
 {
@@ -142,6 +149,8 @@ void demo_present(unsigned int slot, uint32_t frame_id, unsigned int detection_b
     }
     demo_irq_unlock(lock);
 }
+
+#endif
 
 void demo_network_init(void)
 {

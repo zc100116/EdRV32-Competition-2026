@@ -22,3 +22,10 @@ test:
 	    $(ROOT)/sw/lib/eth_monitor_pack.c $(ROOT)/sw/lib/eth_monitor_board.c \
 	    $(ROOT)/sw/drivers/eth.c -Wl,--gc-sections -o $(OUT)/eth_monitor_test
 	$(OUT)/eth_monitor_test
+	$(CC) $(CFLAGS) -I. -DDEMO_NPU_NET demo_npu/host_test.c demo_npu/inference.c \
+	    logic.c network.c network_npu.c monitor.c \
+	    $(ROOT)/sw/lib/yolo_post.c $(ROOT)/sw/lib/yolo_tables.c \
+	    $(ROOT)/sw/lib/eth_monitor.c $(ROOT)/sw/lib/eth_monitor_pack.c \
+	    $(addprefix $(ROOT)/sw/drivers/,engine.c eth.c npu.c plic.c mem_xbar.c) \
+	    -Wl,--gc-sections -o $(OUT)/npu_host_test
+	$(OUT)/npu_host_test

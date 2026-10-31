@@ -48,7 +48,7 @@ class SessionTest(unittest.TestCase):
         expected = {'B3V': (True, True, False, True),
                     'B3VN': (True, True, True, True),
                     'B3R': (True, False, False, True),
-                    'B3N': (True, False, False, True),
+                    'B3N': (True, False, True, True),
                     'B3F': (True, True, True, True)}
         for name, values in expected.items():
             with self.subTest(project=name):
@@ -256,7 +256,8 @@ class ConsoleLayoutTest(unittest.TestCase):
                 self.assertEqual(console.establish.isEnabled(), caps['network'])
                 self.assertEqual(console.apply_output.isEnabled(), caps['processing'])
                 self.assertEqual(console.status_query.isEnabled(), caps['processing'])
-                self.assertEqual(console.display.isEnabled(), caps['processing'])
+                self.assertEqual(console.display.isEnabled(),
+                                 caps['processing'] or caps['detection'])
                 if not caps['detection']:
                     self.assertIn(name, console.model_note.text())
                     self.assertIn(name, console.image_note.text())

@@ -136,6 +136,10 @@ void demo_scene_pair(void);
 void demo_scene_configure(enum vin_source source);
 void demo_scene_stop(void);
 void demo_scene_service(void);
+void demo_npu_receive(unsigned int window);
+void demo_npu_init(void);
+void demo_npu_service(void);
+uint32_t demo_npu_cpu_cycles(void);
 void demo_network_windows_init(void);
 void demo_network_check_complete(void);
 unsigned int demo_network_detections(struct eth_tx_descriptor *tx,

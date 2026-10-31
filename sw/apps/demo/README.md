@@ -6,7 +6,7 @@
 
 ## 按板级工程选择版本（B3-11）
 
-三份 `program.mk` 位于本目录、`demo_vision/`、`demo_vnpu/`，通过源文件列表
+四份 `program.mk` 位于本目录、`demo_vision/`、`demo_vnpu/`、`demo_npu/`，通过源文件列表
 选择功能；没有运行时引擎探测。UART、S2、视频和 DDR 监控共用源文件，S1 与模型/
 检测回传由 `scene_npu.c`、`network_npu.c` 提供，L1 的交接由 `overlay_surface.c` 共用。
 
@@ -15,16 +15,18 @@
 | `demo` | B3F 全部，`edrv32_fpga_board_b2_top`（完整 SoC） | S1、S2 | `overlay.c`，RND 写 L1 | S2 视频、DDR 监控、EDNM、图像检查、EDDT | 无 |
 | `demo_vision` | B3V 图像，`edrv32_fpga_board_vision_top` | 仅 S2 | 关闭 L1 | S2 视频、DDR 监控、WIN3 建立对端 | NPU、RND |
 | `demo_vnpu` | B3VN 图像 + NPU，`edrv32_fpga_board_vnpu_top` | S1、S2 | `overlay_cpu.c`，CPU 写 L1 | 与 `demo` 相同 | RND |
+| `demo_npu` | B3N，`edrv32_fpga_board_npu_top` | PC 送张量识别 | 上位机原图叠框 | EDNM、CH2 输入、OUTPUT/EDDT、EDTM 100 Hz | VIN、PIX、GEO、DISP、RND |
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
 make -C sw PROGRAM=demo MEMORY=sram -j1
 make -C sw PROGRAM=demo_vision MEMORY=sram -j1
 make -C sw PROGRAM=demo_vnpu MEMORY=sram -j1
+make -C sw PROGRAM=demo_npu MEMORY=sram -j1
 ```
 
 各版本生成 `build/sw/<程序>/<程序>.elf`、`.dis`、`.bin` 和存储 hex，均可用下面的
-BIOS SRAM 烧录步骤。B3R 渲染器工程继续使用自己的程序，不使用这三种演示镜像。
+BIOS SRAM 烧录步骤。B3R 渲染器工程继续使用自己的程序，不使用这四种演示镜像。
 
 `demo_vision` 的 `s1` 和 KEY2 均打印 `Input error: this board requires s2`，保留 S2，
 不停止或重配流水线；`help` 只列出 S2。WIN0/1/2 不配置、不注册通知，不编入
@@ -59,6 +61,27 @@ L1 仍等 SWITCH1/REL_BASE 释放，绝不修改当前扫描或 shadow-next 缓�
 输出模式、检测框数和时钟频率记录，便于比较；脏矩形来自该槽的前次使用，时间也受
 旧框数影响。零检测帧可测清旧框耗时。`output eth` 不画 L1，该计数保留最后一次
 实际绘制值；启动后首次绘制前为零。没有新增测量命令，也没有逐帧串口打印干扰绘制。
+
+### B3N 上板检查清单（卡 22）
+
+B3N 烧录 `build/sw/demo_npu/demo_npu.bin`，启动默认等待 PC 网口输入，
+无摄像头、HDMI、KEY 场景切换或串口菜单；打印 SYS/MEM_XBAR/PERF_MON/NPU/ETH ID。
+仍使用上述 MAC/IP/端口、EDNM 和 EDTM 格式，监控固定 100 Hz。
+
+- 调试工具板型选择 **B3N**，烧录 `demo_npu`；建立网口连接后核对 PEER，查看 EDTM 曲线。
+- 选择编译模型目录和对应的量化 JSON，发送模型，串口须打印 `EDNM: loaded`。
+- 选择任意尺寸图片并发送；工具先缩放到 1280×720，再调用现有 `input_pack` 生成
+  983,040 B CH2（INT8_C4），发 WIN0 或 WIN1，末包 NOTIFY；板端直接以该窗口为 NPU 输入。
+- 返回顺序为 WIN1 OUTPUT（725,760 B）、WIN2 EDDT；只有 EDDT 末包 NOTIFY，
+  不回传 CH2、不发 EDVF。窗口地址沿用原分配，计数在最终发送完成后清零。
+- 工具自动运行 NPU 参考和 Python 后处理，OUTPUT 字节差异和检测项差异应为零。
+  CH2 比较的是本地重打包与发送张量；B3N 无输入回读。框从 1280×720 坐标映射到原图显示。
+- 串口每张一行 `frame_id=N NPU_PERF0=C post_cpu_cycles=P detections=D`；
+  frame_id 从 0 自增，P 是 CPU mcycle 差值（含期间中断），C 是 NPU PERF0。
+- 文件夹按钮按文件名顺序逐张发送，WIN0/1 交替；收到最终通知并比对后才发下一张。
+  日志记录每张从开始发送到最终 EDDT 通知的往返 ms，及包含打包/参考比对的平均 fps。
+- 连续 N 张保存串口/会话日志、每张比对结果、平均 fps 和 EDTM 曲线；
+  EDTM 的 VIN/DISP 字段为零，NPU/ETH/CPU/DDR 字段保持原定义。
 
 ## 构建和烧录
 
@@ -409,3 +432,41 @@ VIN/DISP、DISP 提交无空档且旧 Surface 等 SWITCH 后释放、ETH 引用�
 
 未运行 SoC 仿真或上板；无黑帧、闪烁、失锁、撕裂及实际切换耗时，仍须按上板
 检查清单保存连续切换视频和 UART 原始打印，不能由上述软件事件测试代替。
+
+### demo_npu 验收记录（2026-10-31，T-NETN）
+
+基线 `ddd39075`，实现和本记录位于同一提交；xPack GCC 15.2.0，C11，
+`-Wall -Wextra -Werror`。四版本构建均通过，0 warning，均装入 64 KiB SRAM：
+
+| 程序 | text B | data B | bss B | 合计 B |
+|---|---:|---:|---:|---:|
+| demo_npu | 22124 | 0 | 1856 | 23980 |
+| demo_vnpu | 45328 | 0 | 5308 | 50636 |
+| demo | 45988 | 0 | 5360 | 51348 |
+| demo_vision | 26584 | 0 | 876 | 27460 |
+
+B3N `__bss_end=0x10005dc0`，至栈顶余量 41,536 B（非实板高水位）。复现：
+
+```sh
+. ~/.local/opt/edrv32/env.sh
+for p in demo_npu demo_vnpu demo demo_vision; do make -C sw PROGRAM=$p MEMORY=sram -j 1; done
+make -C sw/apps/demo test
+QT_QPA_PLATFORM=offscreen OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests -v
+python3 tools/check/verilog_style.py sw/apps/demo
+git diff --check
+```
+
+UBSan 主机测试通过：实际链接 B3N 网络/推理/监控和 NPU/ETH 驱动、CPU 后处理，
+检查 EDNM、双窗口、OUTPUT→EDDT、最终 DONE 前保留缓冲、EDTM 零 VIN/DISP 字段、
+长度/模型/引擎错误报停；MMIO 模型拒绝访问不存在的媒体引擎。
+工具 69 项测试通过；`test_b3n` 用 `telemetry_sim.run_b3n` 及合法 NPU 描述符，
+真实执行 input_pack、NPU 参考和 Python 后处理，localhost UDP 两张分别发 WIN0/1，
+每张 CH2=983040 B、OUTPUT=725760 B、EDDT=1 框，字节/检测项差异均 0。
+主机激励使用现有 send_blocks 的包间隔模拟线速；另测试缺失 OUTPUT 报错、文件夹队列、
+完成计数/平均 fps 及保留原图尺寸；未把主机时间当实板性能。风格 0 文件/0 warning。
+公共改动为 `network.c`、`network_npu.c`、`monitor.c` 的 B3N 编译分支及 `runtime.h` 声明；
+原三版本保持原分支。经协调者授权，另在 `sw/Makefile` 两处程序列表加入 demo_npu。
+日志：`build/sw/<程序>/rv32-build.log`、`build/sw/demo/host-test.log`、
+`build/sw/demo_npu/tool-test.log`；ELF 无 vin_/pix_/geo_/disp_/rnd_ 链接符号。
+未改规格/RTL，未跑 SoC 仿真；实际识别、连续 N 张性能及 EDTM 曲线留卡 22 验收。

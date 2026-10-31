@@ -7,6 +7,7 @@ Image decoding uses the existing PySide6 dependency, imported only when needed.
 from pathlib import Path
 import struct
 import threading
+import time
 
 from .video import Block, parse_detections
 
@@ -63,6 +64,10 @@ def image_rgb565(path):
 class YoloTool:
     def __init__(self, ethernet):
         self.ethernet = ethernet
+        self.mode = 'B3VN'
+        self.input_tensor = None
+        self.sent_at = None
+        self.timings = []
         self.image_bytes = 0
         self.source_image = None
         self.return_view = False
@@ -87,13 +92,20 @@ class YoloTool:
         with self.lock:
             self.blocks[window].receive(offset, data, notify)
             if window == 2 and notify:
-                sizes = (INPUT_BYTES, OUTPUT_BYTES, offset + len(data))
+                sizes = (0 if self.mode == 'B3N' else INPUT_BYTES,
+                         OUTPUT_BYTES, offset + len(data))
                 for index, size in enumerate(sizes):
-                    if not self.blocks[index].complete(size):
+                    if size and not self.blocks[index].complete(size):
                         raise ValueError(f'YOLO WIN {index}: incomplete return ({size} B expected)')
                 ch2, output, detections = (block.data(size)
                                            for block, size in zip(self.blocks, sizes))
+                if self.mode == 'B3N':
+                    ch2 = self.input_tensor
                 self.capture = (ch2, output, parse_detections(detections))
+                if self.sent_at is not None:
+                    self.timings.append(dict(path=self.source_image,
+                                             seconds=time.monotonic() - self.sent_at))
+                    self.sent_at = None
                 self.generation += 1
                 self.capture_pending = False
 
@@ -108,7 +120,9 @@ class YoloTool:
         ch2, output, detections = capture
         reference = reference_output(directory, ch2)
         boxes = reference_detections(reference, quant_params)
-        return dict(input=byte_difference(reference_input(image), ch2),
+        expected_input = (reference_b3n_input(image) if self.mode == 'B3N'
+                          else reference_input(image))
+        return dict(input=byte_difference(expected_input, ch2),
                     output=byte_difference(reference, output),
                     detections=detection_difference(boxes, detections.boxes))
 
@@ -121,9 +135,11 @@ class YoloTool:
     def send_image(self, path, board_ip, board_port, local_port, window=0):
         if window not in (0, 1):
             raise ValueError('test image window must be 0 or 1 (B2 design 3.5a)')
-        pixels = image_rgb565(path)
+        pixels = reference_b3n_input(path) if self.mode == 'B3N' else image_rgb565(path)
+        self.input_tensor = pixels if self.mode == 'B3N' else None
         self.source_image = str(path)
         self.reset_capture()
+        self.sent_at = time.monotonic()
         return self.ethernet.send_blocks([(window, 0, pixels)],
                                          board_ip, board_port, local_port, name=str(path))
 
@@ -184,3 +200,20 @@ def detection_difference(expected, actual):
     count = sum(left != right for left, right in zip(expected, actual))
     count += abs(len(expected) - len(actual))
     return dict(count=count, expected=len(expected), actual=len(actual))
+
+
+def reference_b3n_input(path):
+    """T-NETN: resize arbitrary sources to display geometry, then use input_pack."""
+    import cv2
+    from tempfile import TemporaryDirectory
+    image = cv2.imread(str(path), cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError(f'Cannot read image {path}')
+    image = cv2.resize(image, (1280, 720), interpolation=cv2.INTER_LINEAR)
+    scratch = Path(__file__).resolve().parents[3] / 'build/debug_tool'
+    scratch.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(dir=scratch) as directory:
+        resized = Path(directory) / 'input.png'
+        if not cv2.imwrite(str(resized), image):
+            raise ValueError(f'Cannot write resized image {resized}')
+        return reference_input(resized)

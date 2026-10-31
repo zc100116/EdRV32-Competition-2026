@@ -246,3 +246,29 @@ B3-14b 进一步检查全分组边界和展开后的控件可见性、画布高�
 五个导航图标各异、数字输入可见、日志不折行和紧凑连接状态卡片。
 Python / Qt 改动不涉及 RTL，`tools/check/verilog_style.py` 和 Verilator lint 不适用。
 真实板端的视频、DDR 数据和三种输出切换仍需按上述上电步骤验收；合成截图不代表上板通过。
+
+### B3N 网口送图（demo_npu）
+
+在 SoC 控制台选择 B3N，烧录 `build/sw/demo_npu/demo_npu.bin`，建立网口连接。
+选择模型编译目录及配套量化 JSON，发送 EDNM，等待 UART 的 `EDNM: loaded`。
+单张图片可为任意尺寸；发送前缩放到 1280×720，再由 `tools/npu/input_pack.py`
+生成 983,040 B CH2。板端返回 WIN1 OUTPUT 和 WIN2 EDDT，最后 EDDT 通知结束。
+工具自动执行 NPU 参考与 Python 后处理比对，并在原始尺寸图片上按比例叠框。
+B3VN/B3F 仍发送 RGB565，保留 CH2/OUTPUT/EDDT 三块回传路径。
+
+“文件夹”按钮选择 `.png/.jpg/.jpeg/.bmp`，按名称逐张、交替窗口发送，等返回并比对
+后发下一张。会话日志含每张往返毫秒及平均 fps（从首张开始，包含参考比对）；
+比对失败会明确显示错误。B3N 不提供摄像头、PIX/GEO、HDMI 或视频帧率控制，EDTM 固定 100 Hz。
+运行参考需安装 `tools/requirements.txt` 的 NPU 依赖，并初始化 `third_party/ultralytics`。
+
+主机模拟板可使用实际编译模型和量化表，在一个终端运行：
+
+```sh
+python tools/debug_tool/telemetry_sim.py --mode b3n --host 127.0.0.1 --port 5000 \
+    --model tasks/win/20261029-09-b3-software/src/npu \
+    --quant tasks/win/20261029-09-b3-software/src/npu/quantization.json --frames 2
+```
+
+另一端用 B3N 模式发送两张图片到 127.0.0.1:5000，接收复用同一 UDP socket。
+`tests/test_b3n.py` 自动创建合法 NPU 描述符，真实执行 input_pack、NPU 参考和后处理，
+通过 localhost UDP 验证不同尺寸图片、窗口交替、两块回传、逐项比对和往返统计。

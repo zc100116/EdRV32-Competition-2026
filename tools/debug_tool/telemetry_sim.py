@@ -10,8 +10,8 @@ import math
 import socket
 import struct
 import time
-from core.ethernet import packets, HEADER
-from core.video import VIDEO_HEADER, DETECTION_HEADER, DETECTION
+from core.ethernet import packets, HEADER, unpack
+from core.video import VIDEO_HEADER, DETECTION_HEADER, DETECTION, Block
 from core.yolo import INPUT_BYTES, OUTPUT_BYTES
 from core.telemetry import FIELDS, encode
 
@@ -161,23 +161,59 @@ def run_yolo(host, port, ch2=None, output=None):
         send_block(sock, destination, outputs, 1, notify=False)
         send_block(sock, destination, demo_detections(42), 2)
 
+
+def run_b3n(sock, model, quant_params, frames):
+    """T-NETN host board: receive CH2 and return reference OUTPUT/EDDT over real UDP."""
+    from core.yolo import reference_output, reference_detections
+    for frame_id in range(frames):
+        block = Block()
+        while True:
+            packet, peer = sock.recvfrom(65535)
+            window, notify, offset, data = unpack(packet)
+            if window not in (0, 1):
+                continue
+            block.receive(offset, data, notify)
+            if notify:
+                if not block.complete(INPUT_BYTES):
+                    raise ValueError('B3N simulator: incomplete CH2 tensor')
+                break
+        output = reference_output(model, block.data(INPUT_BYTES))
+        boxes = reference_detections(output, quant_params)
+        detections = DETECTION_HEADER.pack(b'EDDT', 1, len(boxes), frame_id, 0)
+        detections += b''.join(DETECTION.pack(*box) for box in boxes)
+        send_block(sock, peer, output, 1, notify=False)
+        send_block(sock, peer, detections, 2)
+        print(f'B3N frame_id={frame_id} WIN{window} CH2={INPUT_BYTES} '
+              f'OUTPUT={len(output)} detections={len(boxes)}', flush=True)
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=6000)
     parser.add_argument('--seconds', type=float, default=60)
     parser.add_argument('--hz', type=int, choices=range(10, 1001), default=100, metavar='10..1000')
-    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo'], default='telemetry')
+    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo', 'b3n'], default='telemetry')
     parser.add_argument('--fps', type=int, choices=range(1, 61), default=10, metavar='1..60')
     parser.add_argument('--ch2', help='YOLO mode: raw CH2 input file')
     parser.add_argument('--output', help='YOLO mode: raw NPU OUTPUT file')
+    parser.add_argument('--model', help='B3N: compiled NPU model directory')
+    parser.add_argument('--quant', help='B3N: quantization JSON')
+    parser.add_argument('--frames', type=int, default=1, help='B3N: image count')
     args = parser.parse_args()
     if args.mode == 'telemetry':
         run(args.host, args.port, args.seconds, args.hz)
     elif args.mode == 'video':
         run_video(args.host, args.port, args.seconds, args.fps)
-    else:
+    elif args.mode == 'yolo':
         run_yolo(args.host, args.port, args.ch2, args.output)
+    else:
+        import json
+        from pathlib import Path
+        parameters = json.loads(Path(args.quant).read_text())
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.bind((args.host, args.port))
+            print(f'B3N listening {sock.getsockname()}', flush=True)
+            run_b3n(sock, args.model, parameters, args.frames)
 
 
 if __name__ == '__main__':
