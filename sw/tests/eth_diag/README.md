@@ -74,4 +74,17 @@ UDP 载荷为硬件生成的 8 字节应用头，加 ASCII `EDRV32 DIAG <序号>
 
 ## 验收记录
 
-待本地构建、工具测试和截图检查完成后填写；实际链路与延迟组合需上板验证。
+- 日期：2026-10-31；代码提交：`316a410c001188c77e2de4f2c852b355fd107584`。
+- `. ~/.local/opt/edrv32/env.sh && make -C sw PROGRAM=eth_diag -j1`：通过，0 warning。
+- GCC 15.2.0；C11 `-Wall -Wextra -Werror -O2`；ELF 入口 `0x10000000`。
+- `riscv-none-elf-size build/sw/eth_diag/eth_diag.elf`：text=4157 B，data=0 B，bss=84 B。
+- ELF：`build/sw/eth_diag/eth_diag.elf`；BIN：`build/sw/eth_diag/eth_diag.bin`。
+- 构建日志：`build/eth_diag_build.log`。
+- `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests`：85 项通过。
+- `python3 -m unittest discover tools/board/tests`：13 项通过。
+- 测试日志：`build/eth_diag_debug_tests.log`、`build/eth_diag_board_tests.log`。
+- 新增覆盖：显式接收/发送绑定、指定源 IP、绑定失败可见且不换地址、PEER 地址一致、探测包格式与周期。
+- 截图：按 `render_shot.py` 现有方式刷新 20 张，1366×768 / 1920×1080；日志 `build/eth_diag_shots.log`。
+- 人工查看两种尺寸网口栏及虚拟输入；Python 语法检查、`git diff --check` 通过。
+- 无 RTL 修改，RTL lint 不适用；按任务要求未跑 SoC 仿真。
+- 未执行实板测试；PHY/RGMII/PLL 根因及四组延迟组合的实测结果待上板确认。
