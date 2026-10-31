@@ -267,17 +267,43 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
     int unsigned conflict_lines = 6;
     int unsigned store_percent = 50;
     int unsigned kill_percent = 15;
-    bit [31:0] random_base = 32'h10000000;
+    bit [31:0] random_base = 32'h80000000;
     bit expect_ic_hit;
     bit expect_dc_hit;
     localparam bit [31:0] A = 32'h10000000;
-    localparam bit [31:0] B = 32'h10001000;
-    localparam bit [31:0] C = 32'h10002000;
+    localparam bit [31:0] B = 32'h10004000;
+    localparam bit [31:0] C = 32'h10008000;
     // I$ same-set aliases: 32 KiB, 2 ways -> 512 sets x 32 B, so sets repeat every 16 KiB.
     localparam bit [31:0] IC_B = 32'h10004000;
     localparam bit [31:0] IC_C = 32'h10008000;
     localparam bit [31:0] DEV = 32'h20000000;
     localparam bit [31:0] STATUS = 32'h40005008;
+
+    int measured_cycles = 0;
+    int measured_reads = 0;
+    time maintenance_accepted;
+    bit [511:0] measured_groups = 0;
+    bit measuring = 0;
+    always @(posedge clk) begin
+        if (maint_req_valid && maint_req_ready) begin
+            maintenance_accepted = $time;
+            measured_reads = 0;
+            measured_groups = 0;
+            measuring = 1;
+        end
+        if (maint_busy && u_dcache.scan_read_w) begin
+            if (u_dcache.maint_cmd_r != 4 && measured_groups[u_dcache.scan_read_idx_w])
+                $fatal(1, "FAIL repeated range group index=%0d", u_dcache.scan_read_idx_w);
+            measured_groups[u_dcache.scan_read_idx_w] = 1;
+            measured_reads++;
+        end
+    end
+    always @(negedge clk) begin
+        if (measuring && !maint_busy) begin
+            measured_cycles = int'(($time - maintenance_accepted) / 10);
+            measuring = 0;
+        end
+    end
 
     always @(posedge clk) cycles <= cycles + 1;
     initial begin
@@ -572,7 +598,8 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
         int size;
         for (int n = 0; n < int'(random_count); n++) begin
             size = int'($urandom_range(0, 2));
-            addr = random_base + $urandom_range(0, conflict_lines-1) * 4096 +
+            addr = random_base + $urandom_range(0, conflict_lines-1) *
+                   ((pma(random_base) == 1 || pma(random_base) == 6) ? 16384 : 4096) +
                    ($urandom_range(0, 7) * 4);
             store = $urandom_range(0, 99) < store_percent;
             killed = $urandom_range(0, 99) < kill_percent;
@@ -1014,7 +1041,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                     eq("zero size writes", 64'(count), 64'(u_dmem.writes));
                 end
                 put(12'h020, A);
-                put(12'h024, 64);
+                put(12'h024, TEST == 307 ? 16384 : 64);
                 put(12'h028, 1);
                 command_count[0]++;
                 // APB completion queues the mailbox; D$ acceptance is a later edge.
@@ -1065,6 +1092,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                         if (u_dcache.ram_read_w)
                             eq("PMA does not take arrays", 1,
                                64'(u_dcache.state_r == u_dcache.S_MREAD ||
+                                   u_dcache.state_r == u_dcache.S_MCHECK ||
                                    u_dcache.state_r == u_dcache.S_WB_READ));
                         @(negedge clk);
                         eq("PMA response clears", 0, 64'(dc_resp_valid));
@@ -1087,6 +1115,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                                 if (u_dcache.ram_read_w) begin
                                     eq("maintenance owns array reads", 1,
                                        64'(u_dcache.state_r == u_dcache.S_MREAD ||
+                                   u_dcache.state_r == u_dcache.S_MCHECK ||
                                            u_dcache.state_r == u_dcache.S_WB_READ));
                                 end
                                 @(negedge clk);
@@ -1115,6 +1144,103 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
                 put(12'h010, 2);
                 reg_eq(12'h010, 0);
                 eq("writeback IRQ cleared", 0, 64'(irq));
+            end
+            310: begin : covered_groups
+                int lengths[8] = '{1, 2, 16, 128, 511, 512, 513, 2048};
+                random_stalls = 0;
+                delay_max = 0;
+                for (int n = 0; n < 8; n++) begin
+                    maintain(1, A + 511*32 + 3, 32'(lengths[n]*32-3));
+                    eq("range tag reads", (lengths[n] < 512 ? 64'(lengths[n]) : 64'd512),
+                       64'(measured_reads));
+                    if (measured_cycles > (lengths[n] < 512 ? lengths[n] : 512)+8)
+                        $fatal(1, "FAIL range cycle bound N=%0d cycles=%0d",
+                               lengths[n], measured_cycles);
+                    $display("PERF range lines=%0d cycles=%0d reads=%0d",
+                             lengths[n], measured_cycles, measured_reads);
+                end
+                // Identical groups with different tags must retain the outside line.
+                data_access(A);
+                data_access(B);
+                maintain(2, A+3, 1);
+                expect_data_bus(B, 0, 0);
+                expect_data_bus(A, 1, 0);
+                // Unaligned crossing of group 511 -> 0 and an exclusive range end.
+                for (int n = 510; n < 514; n++) data_access(A + 32'(n*32));
+                maintain(2, A+16383, 2);
+                eq("wrap visits two groups", 2, 64'(measured_reads));
+                expect_data_bus(A+510*32, 0, 0);
+                expect_data_bus(A+513*32, 0, 0);
+                expect_data_bus(A+511*32, 1, 0);
+                expect_data_bus(A+512*32, 1, 0);
+                // Full 32 KiB capacity: every group and both ways remain resident.
+                for (int n = 0; n < 1024; n++) data_access(A + 32'(n*32));
+                for (int n = 0; n < 1024; n++) expect_data_bus(A + 32'(n*32), 0, 0);
+                maintain(2, A, 2048*32);
+                eq("large range reads each group once", 512, 64'(measured_reads));
+                for (int n = 0; n < 1024; n++) expect_data_bus(A + 32'(n*32), 1, 0);
+            end
+            311: begin : dirty_segments
+                random_stalls = 0;
+                delay_max = 0;
+                maintain(4);
+                eq("empty clean tag reads", 0, 64'(measured_reads));
+                if (measured_cycles > 40) $fatal(1, "FAIL empty clean cycles=%0d", measured_cycles);
+                $display("PERF clean dirty=0 cycles=%0d", measured_cycles);
+                for (int n = 0; n < 2; n++) begin
+                    data_access(A + 32'(n*511*32), 1, 2, 32'h45670000 + 32'(n));
+                    count = u_dmem.writes;
+                    maintain(4);
+                    eq("one dirty writeback", (64'(count)+64'd1), 64'(u_dmem.writes));
+                    eq("one dirty group read", 1, 64'(measured_reads));
+                    $display("PERF clean dirty=1 group=%0d cycles=%0d", n*511, measured_cycles);
+                    compare_memory();
+                end
+                for (int n = 0; n < 32; n++)
+                    data_access(A + 32'(n*16*32), 1, 2, 32'h12340000 + 32'(n));
+                count = u_dmem.writes;
+                maintain(4);
+                eq("all segments written", (64'(count)+64'd32), 64'(u_dmem.writes));
+                eq("clean groups skipped within segments", 32, 64'(measured_reads));
+                compare_memory();
+                for (int n = 0; n < 1024; n++)
+                    data_access(A + 32'(n*32), 1, 2, 32'hfeed0000 + 32'(n));
+                count = u_dmem.writes;
+                maintain(4);
+                eq("full dirty capacity written", (64'(count)+64'd1024), 64'(u_dmem.writes));
+                eq("full dirty groups", 512, 64'(measured_reads));
+                $display("PERF clean dirty=1024 cycles=%0d", measured_cycles);
+                compare_memory();
+            end
+            312: begin : interleaved_writeback
+                for (int mode = 0; mode < 2; mode++) begin
+                    for (int way = 0; way < 2; way++)
+                        for (int n = 0; n < 8; n++)
+                            data_access(A + 32'(way*16384+n*32), 1, 2,
+                                        32'h76540000 + 32'(mode*32+way*8+n));
+                    count = u_dmem.writes;
+                    put(12'h020, A);
+                    put(12'h024, 520*32);
+                    put(12'h028, 3);
+                    while (maint_req_valid) idle();
+                    if (mode == 0) begin
+                        while (maint_busy) data_access(STATUS);
+                    end else data_access(A);
+                    while (maint_busy) idle();
+                    eq("interleaved dirty writes", (64'(count)+64'd16), 64'(u_dmem.writes));
+                    eq("interleaved unique group reads", 512, 64'(measured_reads));
+                    compare_memory();
+                end
+                random_stalls = 0;
+                delay_max = 0;
+                put(12'h020, A);
+                put(12'h024, 512*32);
+                put(12'h028, 1);
+                while (maint_req_valid) idle();
+                while (maint_busy) data_access(STATUS);
+                if (measured_cycles > 520)
+                    $fatal(1, "FAIL polling stalls traversal cycles=%0d", measured_cycles);
+                $display("PERF polling range lines=512 cycles=%0d", measured_cycles);
             end
             401: begin
                 fetch(A);

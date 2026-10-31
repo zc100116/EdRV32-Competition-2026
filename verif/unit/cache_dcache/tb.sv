@@ -23,6 +23,15 @@ module tb;
     logic dc_wb_event_o;
     integer wb_events = 0;
     integer wb_bursts = 0;
+    integer clock_cycles = 0;
+    integer wb_begin_cycle = 0;
+    integer wb_bus_cycles = 0;
+    always @(posedge clk_i) begin
+        clock_cycles <= clock_cycles + 1;
+        if (dc_wb_event_o) wb_begin_cycle <= clock_cycles;
+        if (dut.state_r == dut.S_WB_B && axi_bvalid_i)
+            wb_bus_cycles <= wb_bus_cycles + clock_cycles - wb_begin_cycle + 1;
+    end
     logic [3:0] axi_awid_o;
     logic [31:0] axi_awaddr_o;
     logic [7:0] axi_awlen_o;
@@ -142,7 +151,7 @@ module tb;
         @(negedge clk_i); #1;
     endtask
     initial begin
-        #200000;
+        #2000000;
         $fatal(1, "FAIL timeout");
     end
     logic [63:0] memory [0:8191];
@@ -225,23 +234,52 @@ module tb;
         step(); maint_cmd_i = cmd; maint_addr_i = addr; maint_size_i = size;
         maint_req_valid_i = 1;
         while (!maint_req_ready_o) tick();
-        tick(); step(); maint_req_valid_i = 0;
-        while (maint_busy_o) tick();
+        begin
+            time started;
+            int before_bursts;
+            int before_bus_cycles;
+            started = $time;
+            before_bursts = wb_bursts;
+            before_bus_cycles = wb_bus_cycles;
+            tick(); step(); maint_req_valid_i = 0;
+            while (maint_busy_o) tick();
+            if ($test$plusargs("MAINT_PERF"))
+                $display("PERF cmd=%0d addr=%h size=%0d cycles=%0d writes=%0d wb_cycles=%0d",
+                         cmd, addr, size, int'(($time-started-4)/10),
+                         wb_bursts-before_bursts, wb_bus_cycles-before_bus_cycles);
+        end
     endtask
     initial begin
         for (int i = 0; i < 8192; i++) memory[i] = {32'(i+8192), 32'(i+4096)};
         tick(); step(); rst_n_i = 1;
+        if ($test$plusargs("MAINT_PERF")) begin
+            int capacity;
+            int lengths[5] = '{1,16,128,512,2048};
+            capacity = 1024;
+            if ($value$plusargs("CACHE_LINES=%d", capacity)) begin end
+            for (int n = 0; n < 5; n++) maintenance(1, 32'h10000000, 32'(lengths[n]*32));
+            maintenance(4, 0, 0);
+            access_word(32'h10000000, 1, 2, 32'h12345678);
+            maintenance(4, 0, 0);
+            access_word(32'h10003fe0, 1, 2, 32'h87654321);
+            maintenance(4, 0, 0);
+            for (int n = 0; n < capacity; n++)
+                access_word(32'h10000000 + 32'(n*32), 1, 2, 32'habcdef00 + 32'(n));
+            maintenance(4, 0, 0);
+            $display("PASS maintenance_perf capacity=%0d", capacity);
+            $finish;
+        end
         access_word(32'h10000000, 0, 2, 4096);
         if (reads != 1 || dut.lru_r[0] != 1) $fatal(1, "FAIL D cold fill LRU");
-        access_word(32'h10001000, 0, 2, 4608);
+        access_word(32'h10004000, 0, 2, 6144);
         if (reads != 2 || dut.lru_r[0] != 0) $fatal(1, "FAIL D second fill LRU");
         access_word(32'h10000000, 1, 2, 32'hdeadbeef);
         access_word(32'h10000000, 0, 2, 32'hdeadbeef);
         if (reads != 2 || dut.lru_r[0] != 1) $fatal(1, "FAIL D hit LRU");
-        access_word(32'h10001000, 0, 2, 4608);
+        access_word(32'h10004000, 0, 2, 6144);
         allow_aw = 0;
         fork
-            access_word(32'h10002000, 0, 2, 5120);
+            access_word(32'h10008000, 0, 2, 8192);
             begin
                 wait (axi_awvalid_o);
                 repeat (3) tick();
@@ -251,38 +289,38 @@ module tb;
         join
         if (reads != 3 || writes != 1 || memory[0][31:0] != 32'hdeadbeef)
             $fatal(1, "FAIL D dirty victim writes=%0d memory=%h", writes, memory[0]);
-        access_word(32'h10002005, 1, 0, 32'haa);
-        access_word(32'h10002004, 0, 2, 32'h0000aa00);
-        maintenance(3, 32'h10002001, 1);
-        if (writes != 2 || memory[1024][63:32] != (32'h0000aa00))
+        access_word(32'h10008005, 1, 0, 32'haa);
+        access_word(32'h10008004, 0, 2, 32'h0000aa00);
+        maintenance(3, 32'h10008001, 1);
+        if (writes != 2 || memory[4096][63:32] != (32'h0000aa00))
             $fatal(1, "FAIL maintenance clean/invalidate");
-        access_word(32'h10002000, 0, 2, 5120);
+        access_word(32'h10008000, 0, 2, 8192);
         if (reads != 4) $fatal(1, "FAIL invalidate miss");
         access_word(32'h40000003, 1, 0, 32'h5a);
         access_word(32'h40000000, 0, 2, 32'h5aadbeef);
         // Four successive stores retire without a gap; the final write forwards
         // across a simultaneous RAM read/write collision.
         step(); dc_req_valid_i = 1; dc_req_store_i = 1; dc_req_size_i = 2;
-        dc_req_addr_i = 32'h10002000;
+        dc_req_addr_i = 32'h10008000;
         tick();
         for (int n = 0; n < 4; n++) begin
             if (!dc_resp_valid_o || !dc_req_ready_o) $fatal(1, "FAIL store throughput");
             step(); dc_commit_i = 1; dc_store_data_i = 32'h11223300 + 32'(n);
-            dc_req_addr_i = 32'h10002000 + 32'((n+1)*4);
+            dc_req_addr_i = 32'h10008000 + 32'((n+1)*4);
             if (n == 3) dc_req_valid_i = 0;
             tick();
         end
         step(); dc_commit_i = 0; dc_req_valid_i = 1; dc_req_store_i = 0;
-        dc_req_addr_i = 32'h1000200c;
+        dc_req_addr_i = 32'h1000800c;
         tick();
         if (!dc_resp_valid_o || dc_resp_data_o != 32'h11223303)
             $fatal(1, "FAIL buffer drain forwarding got=%h", dc_resp_data_o);
         step(); dc_req_valid_i = 0; tick();
         // A byte store committed with a same-word load must merge into RAM data.
         step(); dc_req_valid_i = 1; dc_req_store_i = 1; dc_req_size_i = 0;
-        dc_req_addr_i = 32'h1000200d; tick();
+        dc_req_addr_i = 32'h1000800d; tick();
         step(); dc_commit_i = 1; dc_store_data_i = 32'haa;
-        dc_req_addr_i = 32'h1000200c; dc_req_store_i = 0; dc_req_size_i = 2;
+        dc_req_addr_i = 32'h1000800c; dc_req_store_i = 0; dc_req_size_i = 2;
         tick();
         if (!dc_resp_valid_o || dc_resp_data_o != 32'h1122aa03)
             $fatal(1, "FAIL partial buffer forwarding got=%h", dc_resp_data_o);
@@ -291,16 +329,16 @@ module tb;
         step(); maint_cmd_i = 4; maint_req_valid_i = 1;
         while (!maint_req_ready_o) tick();
         tick(); step(); maint_req_valid_i = 0;
-        dc_req_addr_i = 32'h10002000; #1;
+        dc_req_addr_i = 32'h10008000; #1;
         if (!dc_req_ready_o || !maint_busy_o) $fatal(1, "FAIL maintenance request ready");
         access_word(32'h40000000, 0, 2, 32'h5aadbeef);
         while (maint_busy_o) tick();
-        if (memory[1025] != 64'h1122aa0311223302)
-            $fatal(1, "FAIL clean data %h", memory[1025]);
+        if (memory[4097] != 64'h1122aa0311223302)
+            $fatal(1, "FAIL clean data %h", memory[4097]);
         // cache-spec 5.4: an empty range finishes immediately. A simultaneous
         // accepted cached hit retains the next-cycle latency from 5.2.
         step(); maint_cmd_i = 1; maint_size_i = 0; maint_req_valid_i = 1;
-        dc_req_valid_i = 1; dc_req_addr_i = 32'h1000200c;
+        dc_req_valid_i = 1; dc_req_addr_i = 32'h1000800c;
         dc_req_store_i = 0; dc_req_size_i = 2;
         #1;
         if (!dc_req_ready_o || !maint_req_ready_o)
@@ -310,7 +348,7 @@ module tb;
             $fatal(1, "FAIL empty maintenance hit latency/data got=%h", dc_resp_data_o);
         step(); maint_req_valid_i = 0; dc_req_valid_i = 0; tick();
         // FENCE.I is a held request and completes once.
-        access_word(32'h10002000, 1, 2, 32'h12345678);
+        access_word(32'h10008000, 1, 2, 32'h12345678);
         step(); dc_clean_all_i = 1;
         while (!dc_fence_done_o) tick();
         tick();
@@ -342,6 +380,35 @@ module tb;
         if (reads != reads_before + 2) $fatal(1, "FAIL range end was not exclusive");
         access_word(32'h10004000, 0, 2, 32'(4096 + 2048));
         if (reads != reads_before + 3) $fatal(1, "FAIL range did not invalidate first line");
+        // A store drains on the same acceptance edge as a conflicting miss.
+        // The dirty snapshot must include that drain, while LRU bypass selects A.
+        begin : dirty_drain_snapshot
+            int before_writes;
+            logic [31:0] expected_c;
+            maintenance(2, 32'h10000000, 65536);
+            access_word(32'h10000000, 0, 2, memory[0][31:0]);
+            access_word(32'h10004000, 0, 2, memory[2048][31:0]);
+            before_writes = writes;
+            expected_c = memory[4096][31:0];
+            step(); dc_req_valid_i = 1; dc_req_addr_i = 32'h10000000;
+            dc_req_store_i = 1; dc_req_size_i = 2;
+            tick();
+            if (!dc_resp_valid_o) $fatal(1, "FAIL drain store hit");
+            step(); dc_commit_i = 1; dc_store_data_i = 32'hf00d1234;
+            dc_req_addr_i = 32'h10004000; dc_req_store_i = 0;
+            tick();
+            if (!dc_resp_valid_o) $fatal(1, "FAIL drain LRU hit");
+            step(); dc_commit_i = 0; dc_req_addr_i = 32'h10008000;
+            tick();
+            if (dc_resp_valid_o) $fatal(1, "FAIL drain conflict expected miss");
+            step(); dc_req_valid_i = 0;
+            while (!dc_resp_valid_o) tick();
+            if (dc_resp_data_o != expected_c || writes != before_writes + 1 ||
+                memory[0][31:0] != 32'hf00d1234)
+                $fatal(1, "FAIL drained store lost on miss writes=%0d expected=%0d data=%h",
+                       writes, before_writes+1, memory[0][31:0]);
+            tick();
+        end
         $display("PASS cache_dcache WB events=%0d", wb_events); $finish;
     end
 endmodule

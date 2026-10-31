@@ -48,7 +48,7 @@ build/cache/ic_01/sim
 `ic_08_smoke` / `dc_15_smoke` 各运行种子 1–2；`ic_08` / `dc_15` 的 full
 清单各运行种子 1–50。每个种子重新复位 DUT、清空物理和架构内存，并输出
 `RANDOM` 与 `PASS seed`。顶层参数 `SEEDS` 选择种子数；单种子调试仍可用
-`+SEED=17 +COUNT=300 +BASE=10000000 +CONFLICT_LINES=6`，以及
+`+SEED=17 +COUNT=300 +BASE=80000000 +CONFLICT_LINES=6`，以及
 `+STORE_PERCENT=50 +KILL_PERCENT=15`。PF-01/02 保持 perf 档位。
 
 `stub/` 保留初版验证环境的桩自测产物；正式 smoke/full 不使用桩。
