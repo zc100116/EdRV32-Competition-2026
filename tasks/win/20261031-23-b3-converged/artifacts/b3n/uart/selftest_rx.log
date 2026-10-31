@@ -1,0 +1,133 @@
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+ETH link: up
+ETH load ready 192.168.1.10:5000
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 5184584 segments: 1
+Load result: PASS
+Run: 0x80000000
+NPU A-ID PASS
+NPU A-empty PASS
+NPU A-reset PASS
+NPU B-OP-01-c16_32 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=516 MAC=32
+NPU B-OP-01-c48_96 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1215 MAC=288
+NPU B-OP-02-w12 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1207 MAC=648
+NPU B-OP-03-h5 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=719 MAC=162
+NPU B-OP-04-c4_cout32_lut0_res0 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=478 MAC=36
+NPU B-OP-04-c4_cout16_lut1_res1 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=709 MAC=36
+NPU B-OP-05-lut1 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1142 MAC=32
+NPU B-OP-06-work PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=559 MAC=32
+NPU B-OP-06-output PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=556 MAC=32
+NPU B-OP-07-cout80 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=3592 MAC=2160
+NPU B-OP-09-negative_c48 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=56512 MAC=0
+NPU B-OP-10-w2 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=561 MAC=0
+NPU B-OP-10-w40 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=3105 MAC=0
+NPU B-OP-11-concat PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1327 MAC=96
+NPU B-OP-12-seed00 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=17677 MAC=11736
+NPU C-YOLO PASS PERF0=6249568 MAC=5347440 ms/frame=41.663 fps=24.001 CRC32=0738f96e
+NPU D-01 PASS CRC32=0738f96e PERF0=6250453 MAC=5347440
+NPU D-02 PASS CRC32=0738f96e PERF0=6250638 MAC=5347440
+NPU D-03 PASS CRC32=0738f96e PERF0=6250957 MAC=5347440
+NPU D-04 PASS CRC32=0738f96e PERF0=6251009 MAC=5347440
+NPU D-05 PASS CRC32=0738f96e PERF0=6250722 MAC=5347440
+NPU D-06 PASS CRC32=0738f96e PERF0=6250212 MAC=5347440
+NPU D-07 PASS CRC32=0738f96e PERF0=6250704 MAC=5347440
+NPU D-08 PASS CRC32=0738f96e PERF0=6251317 MAC=5347440
+NPU D-09 PASS CRC32=0738f96e PERF0=6251003 MAC=5347440
+NPU D-10 PASS CRC32=0738f96e PERF0=6251067 MAC=5347440
+NPU D-11 PASS CRC32=0738f96e PERF0=6250022 MAC=5347440
+NPU D-12 PASS CRC32=0738f96e PERF0=6250691 MAC=5347440
+NPU D-13 PASS CRC32=0738f96e PERF0=6248874 MAC=5347440
+NPU D-14 PASS CRC32=0738f96e PERF0=6250117 MAC=5347440
+NPU D-15 PASS CRC32=0738f96e PERF0=6251215 MAC=5347440
+NPU D-16 PASS CRC32=0738f96e PERF0=6250785 MAC=5347440
+NPU D-17 PASS CRC32=0738f96e PERF0=6250655 MAC=5347440
+NPU D-18 PASS CRC32=0738f96e PERF0=6250969 MAC=5347440
+NPU D-19 PASS CRC32=0738f96e PERF0=6251967 MAC=5347440
+NPU D-20 PASS CRC32=0738f96e PERF0=6250303 MAC=5347440
+NPU board: PASS 39/39
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 22444 segments: 1
+Load result: PASS
+Run: 0x10000000
+Demo: demo_npu network image inference
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 28b4386d
+Compiler version: GCC 15.2.0
+SYS ID: 0x00060001
+MEM_XBAR ID: 0x00080001
+NPU ID: 0x00060001
+ETH ID: 0x00070001
+Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+ETH peer IP: 0xc0a80102
+ETH peer port: 6000
+Model bytes: 3247136
+EDNM: loaded
+frame_id=0 NPU_PERF0=6287132 post_cpu_cycles=2629701 detections=2

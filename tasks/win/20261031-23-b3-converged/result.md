@@ -1,9 +1,9 @@
-# 任务23：V实现与上板记录，卡22网口异常更正
+# 任务23：V实现与上板、N自检与图片回传异常
 
 - 分支 win/20261031-23-b3-converged；本轮RTL输入2a3ee2e0，软件与工具同步至9b54c704（摄像头720p30）。
 - PDS 2022.2-SP6.1，PG2L200H-6 FBB676；工程 G:/codex_project/EdRV32-FPGA/EdRV32-B3V。
 - 用户确认本次已下载卡23新V比特流并运行新版demo_vision；不把先前卡22异常归到本卡。
-- V最终源码111；ROM/SRAM采用卡23DAT、Dcache tag为20位。R/N配置准备文件保留，本版未收集R/N最终流程与上板结论。
+- V最终源码111；ROM/SRAM采用卡23DAT、Dcache tag为20位。R/N配置准备文件保留；本版尚未收集R/N最终流程报告，N上板结果补充如下。
 
 ## V流程
 
@@ -102,3 +102,13 @@ artifacts/b3v 包含完整原厂阶段报告、警告/错误/耗时节选、资�
 较大产物保留原因：原厂DMR包含完整约束与映射信息，EDTM CSV保留本次全部已导出数据，便于复核时序/区域及DDR带宽，不上传实现数据库。
 - artifacts\b3v\tool_snapshot\edtm.csv：2911505 字节
 - artifacts\b3v\native_reports\device_map\edrv32_fpga_board_vision_top.dmr：2141600 字节
+
+## N 自检与图片批量测试补充
+
+串口自检结果：`NPU board: PASS 39/39`；`NPU C-YOLO PASS PERF0=6249568 MAC=5347440 ms/frame=41.663 fps=24.001 CRC32=0738f96e`。这是自检测量，不等于图片批量测试端到端吞吐率。原始串口与摘要在 artifacts/b3n/uart/selftest_*。
+
+此前网口加载 ELF 时，115200 波特率下 BIOS 已打印 ETH link: up / ETH load ready，主机 sent=total=5212944，但停在 wait_result，没有收到 Load result: PASS 或 Run。满进度条不能当作板端加载成功。另一次切换至 2000000 后出现乱码/零字节。随后取消网口加载并回到 BIOS，用户以串口完成自检；相关状态和日志在 artifacts/b3n/uart/eth_load_*，未确认网口加载失败根因。
+
+图片测试中模型 3247136 B 上传并获 `EDNM: loaded`。文件夹首张 000000000285.jpg 发送后，板端报告 `frame_id=1 NPU_PERF0=6290069 post_cpu_cycles=2641589 detections=1`；PC 随后报 `YOLO return 0: incomplete return (983040 B expected)`，退出共享 UDP 接收线程。GUI 需要完整 capture 才显示检测框、推进下一张，因此用户看到首张停住且无框。不是“板端检出0个目标”；检测框内容和正确性尚未核对。
+
+详细故障链、重启监听后的统计限制、完整工具日志、EDTM及两个原始窗口文件在 [图片测试报告](artifacts/b3n/image_batch/result.md)。窗口文件合计1708800 B，保留用于定位回传问题；逻辑长度不证明覆盖完整。本轮只整理输出和代码行为，未修改 RTL、工具或发起新的测试。

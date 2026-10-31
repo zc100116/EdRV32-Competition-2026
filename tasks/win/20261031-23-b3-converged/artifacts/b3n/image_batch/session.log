@@ -1,0 +1,10 @@
+[00:51:33.531][SYS] UDP 发送完成：3247136 B · G:/codex_project/EdRV32-Competition-2026/tasks/win/20261029-09-b3-software/src/npu
+[00:51:33.535][RX] Model bytes: 3247136
+[00:51:34.161][RX] EDNM: loaded
+[00:51:48.023][SYS] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000000285.jpg
+[00:51:51.506][RX] frame_id=1 NPU_PERF0=6290069 post_cpu_cycles=2641589 detections=1
+[00:51:51.514][SYS] UDP 接收失败：YOLO return 0: incomplete return (983040 B expected)
+[00:53:03.235][SYS] UDP 已监听 192.168.1.2:6000 · console
+[00:53:03.236][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[00:53:03.240][RX] ETH peer IP: 0xc0a80102
+[00:53:03.240][RX] ETH peer port: 6000

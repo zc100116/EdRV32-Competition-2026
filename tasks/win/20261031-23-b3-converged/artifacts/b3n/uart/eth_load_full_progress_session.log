@@ -1,0 +1,41 @@
+[00:34:56.914][RX] 
+[00:34:56.914][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:34:56.914][RX]   E         D   D   R   R   V   V      3      2 
+[00:34:56.914][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:34:56.914][RX]   E         D   D   R  R     V V       3   2    
+[00:34:56.914][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:34:56.914][RX] 
+[00:34:56.914][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:34:56.914][RX] CHIP_ID: 0xed320001
+[00:34:56.914][RX] CLK_SYS_HZ: 100000000
+[00:34:56.914][RX] ROM bytes: 16384
+[00:34:56.914][RX] SRAM bytes: 65536
+[00:34:56.914][RX] I-cache bytes: 8192
+[00:34:56.914][RX] D-cache bytes: 8192
+[00:34:56.914][RX] MEM_READY: 1
+[00:34:56.914][RX] Build commit: 506f07e4
+[00:34:56.914][RX] Compiler version: GCC 15.2.0
+[00:34:57.020][RX] Boot SRAM
+[00:34:57.020][RX] Monitor: EdRV32
+[00:34:57.020][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:35:22.015][RX] 
+[00:35:22.015][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:35:22.015][RX]   E         D   D   R   R   V   V      3      2 
+[00:35:22.016][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:35:22.016][RX]   E         D   D   R  R     V V       3   2    
+[00:35:22.016][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:35:22.016][RX] 
+[00:35:22.016][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:35:22.016][RX] CHIP_ID: 0xed320001
+[00:35:22.016][RX] CLK_SYS_HZ: 100000000
+[00:35:22.016][RX] ROM bytes: 16384
+[00:35:22.016][RX] SRAM bytes: 65536
+[00:35:22.016][RX] I-cache bytes: 8192
+[00:35:22.016][RX] D-cache bytes: 8192
+[00:35:22.016][RX] MEM_READY: 1
+[00:35:22.016][RX] Build commit: 506f07e4
+[00:35:22.016][RX] Compiler version: GCC 15.2.0
+[00:35:22.119][RX] BIOS: EdRV32
+[00:35:22.120][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[00:35:25.258][RX] ETH link: up
+[00:35:25.258][RX] ETH load ready 192.168.1.10:5000

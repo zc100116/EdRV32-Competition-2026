@@ -1,0 +1,3 @@
+NPU board: PASS 39/39
+NPU C-YOLO PASS PERF0=6249568 MAC=5347440 ms/frame=41.663 fps=24.001 CRC32=0738f96e
+Subsequent live console: model loaded,3247136 bytes; frame_id=0 NPU_PERF0=6287132 post_cpu_cycles=2629701 detections=2. Reference image comparison not yet established.

@@ -1,0 +1,12 @@
+[
+  {
+    "file": "000000000285.jpg",
+    "annotated_classes": "bear",
+    "objects": "1",
+    "width": "586",
+    "height": "640",
+    "coco_url": "http://images.cocodataset.org/val2017/000000000285.jpg",
+    "flickr_url": "http://farm8.staticflickr.com/7434/9138147604_c6225224b8_z.jpg",
+    "license_id": "4"
+  }
+]

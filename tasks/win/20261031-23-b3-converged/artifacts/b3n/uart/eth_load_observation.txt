@@ -1,0 +1,7 @@
+N ETH ELF loading failure:
+First attempt: UART switched to2000000, followed by garbled characters/zero bytes; wait_menu stalled. Captured logs.
+Second attempt at115200: BIOS printed ETH link: up and ETH load ready192.168.1.10:5000.
+Host status sent=total=5212944, phase=wait_result, active=true, programmedBytes/result/error=null.
+No Load result: PASS, Run, or FAIL bytes received. PC neighbor for192.168.1.10 remained zero/Unreachable.
+The full progress bar reflects bytes submitted by PC, not bytes acknowledged by board. Cannot distinguish ARP failure, RX path loss, missing final notification or other board receive failure from these observations alone.
+Cancelled host transfer via serial disconnect, reconnected115200 and sent one CR to cancel BIOS ETH load and return to menu. No automatic payload resend and no automatic UART fallback.
