@@ -173,3 +173,15 @@ PnR 实际耗时3h26m11s，CPU17m41s，Process CPU19m27s，峰值内存池6618MB
 V 补导出成功退出（exit 0），总计 12036 条各类型/各角路径，其中已导出的负裕量路径为0。区域物理Location抽样 100 行；不据此宣称所有寄存器均受region限制。
 
 旧VN的 logs/synthesize_excerpt.txt 约2.15MB，保留大量综合警告原文供Claude定位资源与优化问题；没有上传完整run.log。
+
+
+## B3V 网口诊断追加结果
+
+现有V比特流运行eth_diag.bin，PC明确绑定192.168.1.2；TX/RX延迟0/0、0/1、1/0、1/1四组均为千兆全双工，合法接收计数增长，PEER=192.168.1.2:6000，ARP出现板子MAC，PC收到诊断广播，共39个，各组约10秒。当前条件下双向链路可用，原demo应用仍需回归。分组计数、MDIO/寄存器、串口与PC输出见 artifacts/b3v/eth_diag/result.md。
+
+
+### V 网口最终复测：通过
+
+重启新版工具并显式绑定192.168.1.2后，原demo_vision四步网口状态全部完成，PEER一致，已接收视频和EDTM。完整新/旧工具会话、四组PHY诊断、程序状态、网口状态及 19166 条EDTM数据已保存在 artifacts/b3v/eth_diag/。本次未修改RTL或FPGA比特流。该结论覆盖网口连通，不替代全部图像处理功能项目验收。
+
+EDTM 工具统计 lost=149、errors=0，保留全部原始数据，不将收到数据等同于长期零丢失。edtm_after_restart.csv 5010035 字节，按用户要求保存全部当前DDR记录，便于分析各端口带宽与缺口。

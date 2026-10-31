@@ -1,0 +1,42 @@
+[
+  {
+    "combination_requested": 0,
+    "start": "2026-10-31T23:23:29.771867+08:00",
+    "startSeq": 1922,
+    "link1000_observed": true,
+    "observationStartSeq": 1987,
+    "observationStart": "2026-10-31T23:23:33.866014+08:00",
+    "endSeq": 2137,
+    "end": "2026-10-31T23:23:44.256827+08:00"
+  },
+  {
+    "combination_requested": 1,
+    "start": "2026-10-31T23:23:44.338219+08:00",
+    "startSeq": 2137,
+    "link1000_observed": true,
+    "observationStartSeq": 2217,
+    "observationStart": "2026-10-31T23:23:48.917990+08:00",
+    "endSeq": 2367,
+    "end": "2026-10-31T23:23:59.007223+08:00"
+  },
+  {
+    "combination_requested": 2,
+    "start": "2026-10-31T23:23:59.101134+08:00",
+    "startSeq": 2367,
+    "link1000_observed": true,
+    "observationStartSeq": 2432,
+    "observationStart": "2026-10-31T23:24:02.647575+08:00",
+    "endSeq": 2582,
+    "end": "2026-10-31T23:24:12.902510+08:00"
+  },
+  {
+    "combination_requested": 3,
+    "start": "2026-10-31T23:24:12.964515+08:00",
+    "startSeq": 2582,
+    "link1000_observed": true,
+    "observationStartSeq": 2662,
+    "observationStart": "2026-10-31T23:24:18.027816+08:00",
+    "endSeq": 2812,
+    "end": "2026-10-31T23:24:28.323100+08:00"
+  }
+]
