@@ -19,8 +19,10 @@ PROJECTS = {
     'B3V': dict(program=True, processing=True, detection=False, network=True,
                 reason='B3V 没有 NPU；不支持模型与图像检查'),
     'B3VN': dict(program=True, processing=True, detection=True, network=True, reason=''),
-    'B3R': dict(program=True, processing=False, detection=False, network=False,
-                reason='B3R 仅渲染；没有摄像头和网口'),
+    'B3R': dict(program=True, processing=False, detection=False, network=True,
+                reason='B3R 无摄像头和 NPU；支持 ETH 对端与 DDR 监控'),
+    'B3N': dict(program=True, processing=False, detection=False, network=True,
+                reason='B3N 无摄像头；board_npu 支持 ETH 对端与 DDR 监控'),
     'B3F': dict(program=True, processing=True, detection=True, network=True, reason=''),
 }
 STATUS_KEYS = ('Scene', 'PIX mode', 'GEO mode', 'Output mode', 'Requested video fps',
@@ -95,7 +97,7 @@ class BoardSession:
                 self.phase = 'bios'
                 self.steps['peer']['done'] = False
             if (re.match(r'(Demo|Render(?:er)?):', line)
-                    or line.startswith(('RND display ready', 'board_render IDs'))):
+                    or line.startswith(('RND display ready', 'board_render IDs', 'S3:', 'NPU '))):
                 self.phase = 'application'
             key, separator, value = line.partition(':')
             key, value = key.strip(), value.strip()
@@ -135,7 +137,8 @@ class BoardSession:
             with self.lock:
                 self.mark('win3')
             self.log(f'WIN3 已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
-            self.engine.send('status', 'cr')
+            if PROJECTS[self.project]['processing']:
+                self.engine.send('status', 'cr')
         except (OSError, ValueError, RuntimeError) as exc:
             self.fail(f'建立网口连接失败：{exc}')
             raise

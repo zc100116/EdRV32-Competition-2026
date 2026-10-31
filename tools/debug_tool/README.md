@@ -39,16 +39,20 @@ build/debug-tool-venv/bin/python -m pip install PySide6 pyserial
 
 ## 工程能力
 
-| 功能 | B3V | B3VN | B3R | B3F |
-|---|---|---|---|---|
-| SRAM `.bin` 烧录 / SRAM、DDR `.elf` 加载运行 | ✓ | ✓ | ✓ | ✓ |
-| S2、PIX 五档、GEO 三档 | ✓ | ✓ | — | ✓ |
-| S1、模型发送、YOLO 图像检查 / 参考比对 | — | ✓ | — | ✓ |
-| 网口视频、DDR EDTM | ✓ | ✓ | — | ✓ |
-| 对应程序 | `demo_vision` | `demo_vnpu` | 渲染器程序 | `demo` |
+| 功能 | B3V | B3VN | B3R | B3N | B3F |
+|---|---|---|---|---|---|
+| SRAM `.bin` 烧录 / SRAM、DDR `.elf` 加载运行 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| S2、PIX 五档、GEO 三档 | ✓ | ✓ | — | — | ✓ |
+| S1、模型发送、YOLO 图像检查 / 参考比对 | — | ✓ | — | — | ✓ |
+| 网口视频 | ✓ | ✓ | — | — | ✓ |
+| ETH 建立对端、DDR EDTM | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 对应程序 | `demo_vision` | `demo_vnpu` | `s3` | `board_npu` | `demo` |
 
 B3V 没有 NPU / RND，图像检查和模型控件灰显，原位置写明原因；S1 选项不可选。
-B3R 只有渲染器，没有摄像头和网口，相关控件灰显并标明原因，烧录 / 加载仍可用。
+B3R 有 RND、DISP、ETH，B3N 有 NPU、ETH；两者没有摄像头。
+B3R/B3N 支持建立对端和固定 100 Hz DDR 监控，不支持 demo 的场景、视频、模型和图像检查菜单。
+加载对应 ELF 后点击“建立网口连接”；WIN3 收到后主动打印 PEER，DDR 页约每 160 ms 收到一批 EDTM。
+`board_npu` 保留原有测试输出和结束行为；成功结束后定时监控继续运行。
 B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都使用 EDDT。
 工程选择用于界面能力说明，镜像由用户选择，不探测硬件、不添加镜像校验门禁。
 
@@ -174,7 +178,7 @@ curl -X POST http://127.0.0.1:8765/api/board/network \
 |---|---|---|
 | GET | `/api/status` | 原连接 / 配置 / RX、TX / lastSeq，增加 `board` |
 | GET | `/api/board` | project、capabilities、phase、network 四步 done/time、counts、dataTimes、expectedPeer、peer、summary、error |
-| POST | `/api/board/project` | `{project}`，B3V / B3VN / B3R / B3F |
+| POST | `/api/board/project` | `{project}`，B3V / B3VN / B3R / B3N / B3F |
 | POST | `/api/board/network` | `{boardIp?, boardPort?}`，默认 192.168.1.10:5000；监听 6000 → WIN3 → status |
 | GET | `/api/ports` | 枚举串口 |
 | POST | `/api/connect`、`/api/disconnect` | `{port, baud, dataBits?, parity?, stopBits?, dtr?, rts?}` / `{}` |

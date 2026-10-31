@@ -44,10 +44,11 @@ class SessionTest(unittest.TestCase):
         self.engine.disconnect()
         self.assertEqual(self.engine.board.status()['phase'], 'disconnected')
 
-    def test_four_project_capability_tables(self):
+    def test_project_capability_tables(self):
         expected = {'B3V': (True, True, False, True),
                     'B3VN': (True, True, True, True),
-                    'B3R': (True, False, False, False),
+                    'B3R': (True, False, False, True),
+                    'B3N': (True, False, False, True),
                     'B3F': (True, True, True, True)}
         for name, values in expected.items():
             with self.subTest(project=name):
@@ -94,6 +95,28 @@ class SessionTest(unittest.TestCase):
             self.assertTrue(all(step['time'] for step in state['network'].values()))
             self.engine.ethernet.stop_receive()
             self.assertFalse(board.status()['network']['listen']['done'])
+
+    def test_render_and_npu_peer_setup_preserves_application_uart(self):
+        for project in ('B3R', 'B3N'):
+            with self.subTest(project=project), TemporaryDirectory() as directory:
+                self.engine.board.select_project(project)
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as peer:
+                    peer.bind(('127.0.0.1', 0))
+                    peer.settimeout(2)
+                    self.engine.ethernet.start_receive(6000, directory, mode='console')
+                    with patch.object(self.engine, 'send') as send:
+                        self.engine.board.establish_network('127.0.0.1', peer.getsockname()[1])
+                        send.assert_not_called()
+                    packet, source = peer.recvfrom(1024)
+                    self.assertEqual(packet, HEADER.pack(3, 1, 0, 0) + b'\0')
+                    self.assertEqual(source, ('127.0.0.1', 6000))
+                    self.engine._match_line('ETH peer IP: 0x7f000001')
+                    self.engine._match_line('ETH peer port: 6000')
+                    peer.sendto(next(packets(wire(1), 3, 0)), source)
+                    wait_for(self, lambda: self.engine.board.status()['counts']['telemetry'] == 1)
+                    self.assertTrue(all(step['done'] for step in
+                                        self.engine.board.status()['network'].values()))
+                    self.engine.ethernet.stop_receive()
 
     def test_video_monitor_yolo_and_files_bind_6000_once(self):
         binds = []
@@ -231,6 +254,9 @@ class ConsoleLayoutTest(unittest.TestCase):
                 self.assertEqual(console.send_model.isEnabled(), caps['detection'])
                 self.assertEqual(console.apply_scene.isEnabled(), caps['processing'])
                 self.assertEqual(console.establish.isEnabled(), caps['network'])
+                self.assertEqual(console.apply_output.isEnabled(), caps['processing'])
+                self.assertEqual(console.status_query.isEnabled(), caps['processing'])
+                self.assertEqual(console.display.isEnabled(), caps['processing'])
                 if not caps['detection']:
                     self.assertIn(name, console.model_note.text())
                     self.assertIn(name, console.image_note.text())

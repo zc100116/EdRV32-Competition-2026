@@ -272,7 +272,7 @@ class SocConsole(QWidget):
         steps.setSpacing(8)
         self.step_labels = []
         for title in ('01 · 监听 UDP 6000', '02 · WIN3 已发送',
-                      '03 · status 对端一致', '04 · 视频 / EDTM 数据'):
+                      '03 · PEER 对端一致', '04 · 视频 / EDTM 数据'):
             value = label(title + '\n未完成 · —', 'note')
             value.setMinimumHeight(36)
             value.setStyleSheet('background:#f4f6fa;border-radius:6px;padding:5px 8px;')
@@ -536,14 +536,14 @@ class SocConsole(QWidget):
                         and control.objectName() != 'sectionToggle'):
                     control.setEnabled(caps['detection'])
         for note in (self.image_note, self.model_note, self.check_note):
-            note.setText(('B3V 无 NPU' if project == 'B3V' else 'B3R 无摄像头与网口')
+            note.setText(reason
                          if not caps['detection'] else
                          '1280 × 720 RGB565' if note is self.image_note else
                          'EDNM · 板端结果见日志' if note is self.model_note else
                          '输入 / 输出逐字节比对；检测框按序比对')
         for widget in (self.scene, self.pix, self.geo, self.apply_scene):
             widget.setEnabled(caps['processing'])
-        self.display.setEnabled(caps['network'])
+        self.display.setEnabled(caps['processing'])
         self.scene.model().item(0).setEnabled(caps['detection'])
         if not caps['detection']:
             self.scene.setCurrentIndex(1)
@@ -553,16 +553,18 @@ class SocConsole(QWidget):
         self.scene_note.setText(reason if not caps['processing'] else
                                 'B3V 没有 NPU；仅 S2' if not caps['detection'] else
                                 'PIX / GEO 仅在 S2 生效')
-        for widget in (self.output, self.fps, self.rate, self.apply_output,
-                       self.establish, self.ip, self.mode, self.chart_mode, self.pause_button):
+        for widget in (self.output, self.fps, self.rate, self.apply_output, self.status_query):
+            widget.setEnabled(caps['processing'])
+        for widget in (self.establish, self.ip, self.mode, self.chart_mode, self.pause_button):
             widget.setEnabled(caps['network'])
-        self.output_note.setText('UDP 5000 → PC 6000' if caps['network'] else reason)
+        self.output_note.setText('UDP 5000 → PC 6000' if caps['processing'] else
+                                 'DDR 固定 100 Hz · 无视频输出')
         self.monitor_note.setText('60 s · 读深色 / 写浅色 · 等候单位 clk_mem 周期'
                                   if caps['network'] else reason)
         for button in self.monitor_buttons:
             button.setEnabled(caps['network'])
         self.histogram.setEnabled(caps['network'])
-        self.view.setEnabled(caps['network'])
+        self.view.setEnabled(caps['processing'])
         self.bandwidth.setEnabled(caps['network'])
         self.utilization.setEnabled(caps['network'])
         self.table.setEnabled(caps['network'])
@@ -682,10 +684,10 @@ class SocConsole(QWidget):
         else:
             image, boxes, key = QImage(), (), None
             caption = '来源 · 板端视频\n等待 EDVF 视频帧'
-        if not PROJECTS[self.project.currentText()]['network']:
+        if not PROJECTS[self.project.currentText()]['processing']:
             image, boxes = QImage(), ()
         self.view.set_image(image, boxes)
-        if not PROJECTS[self.project.currentText()]['network']:
+        if not PROJECTS[self.project.currentText()]['processing']:
             caption = PROJECTS[self.project.currentText()]['reason']
         self.caption.setText(caption.replace('\n', ' · '))
         self.last_display = key
@@ -773,7 +775,7 @@ class SocConsole(QWidget):
         self.phase.setText('阶段 · ' + {'disconnected': '未连接', 'bios': 'BIOS',
                                       'application': '应用'}[state['phase']])
         for index, (key, title) in enumerate(zip(('listen', 'win3', 'peer', 'data'),
-                ('01 · 监听 UDP 6000', '02 · WIN3 已发送', '03 · status 对端一致',
+                ('01 · 监听 UDP 6000', '02 · WIN3 已发送', '03 · PEER 对端一致',
                  '04 · 视频 / EDTM 数据'))):
             step = state['network'][key]
             stamp = fmt_ts(step['time'])[:8] if step['time'] else '—'
