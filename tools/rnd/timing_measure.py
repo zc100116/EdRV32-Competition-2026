@@ -113,6 +113,10 @@ input [8:0] rd_addr,output [255:0] rd_data); endmodule
 input wr_clk,wr_en,input [8:0] wr_addr,input [31:0] wr_data,
 input wr_rst,rd_clk,rd_clk_en,rd_rst,input [8:0] rd_addr,
 output [31:0] rd_data); endmodule
+(* blackbox *) module ip_ram_rnd_window (
+input wr_clk,wr_en,input [8:0] wr_addr,input [63:0] wr_data,
+input wr_rst,rd_clk,rd_clk_en,rd_rst,input [8:0] rd_addr,
+output [63:0] rd_data); endmodule
 ''')
     read = 'read_verilog -D FPGA_MODE ' + ' '.join('-I' + v for v in sorted(includes))
     read += ' ' + ' '.join(files) + f' {output}/stubs.v'
