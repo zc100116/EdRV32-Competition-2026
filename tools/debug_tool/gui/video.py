@@ -8,6 +8,12 @@ from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QColor, QImage, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
+from core.labels import COCO_NAMES
+
+
+def detection_label(class_id, score):
+    return f'{COCO_NAMES[class_id]} · {score / 1000:.3f}'
+
 
 class DetectionView(QWidget):
     def __init__(self):
@@ -43,7 +49,7 @@ class DetectionView(QWidget):
             y = top + y0 * size.height() / 720
             painter.drawRect(QRectF(x, y, (x1 - x0) * size.width() / 1280,
                                    (y1 - y0) * size.height() / 720))
-            text = f'COCO {class_id} · {score / 1000:.3f}'
+            text = detection_label(class_id, score)
             width = painter.fontMetrics().horizontalAdvance(text) + 10
             height = painter.fontMetrics().height() + 6
             bounds = QRectF(min(x, self.width() - width), max(0, y - height), width, height)

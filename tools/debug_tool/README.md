@@ -12,7 +12,7 @@ PySide6 桌面工具，GUI、CLI 和 REST 共用串口、UDP 接收端和会话�
 
 右侧统一显示视频、原图或检测结果；底部显示 DDR 监控和会话日志。
 控件过多时按页垂直滚动，每个分组保持完整；文件路径可编辑并悬停查看全文，
-长日志使用横向滚动，规则正则可悬停查看全文。表头完整显示，长数值提供全文提示。
+会话日志按可用宽度自动换行，规则正则可悬停查看全文。表头完整显示，长数值提供全文提示。
 
 ![图像处理，1366×768](assets/processing-1366x768.png)
 <!-- 截图：QT_QPA_PLATFORM=offscreen python tools/debug_tool/render_shot.py tools/debug_tool/assets/processing-1366x768.png --state vision --page 1 --width 1366 --height 768；telemetry_sim 合成数据，非实板测量。 -->
@@ -67,7 +67,7 @@ Gamma 开关和任意正 Gamma 值。固件计算 Gamma 表，写入未使用的
 选择任意尺寸图片后点击发送，工具统一缩放到 1280×720、小端 RGB565；
 所有演示检测程序采用相同图像协议，图像缓冲自动交替。
 回传顺序统一为 CH2（983040 B）、OUTPUT（725760 B）、EDDT；最后的检测通知结束该图。
-接收完成后在原图尺寸上叠框，记录从开始发送到最终通知的往返 ms 和平均检测 fps。
+接收完成后在原图尺寸上叠框并显示与板端共用的 COCO 类名，记录从开始发送到最终通知的往返 ms 和平均检测 fps。
 
 “文件夹”按文件名排序处理 png/jpg/jpeg/bmp，收到本张完整回传后才发下一张，
 显示包含主机转换和传输开销的文件夹平均 fps。检测不要求安装参考模型依赖。
@@ -165,29 +165,30 @@ REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY �
 
 ## T-UI1 验收记录
 
-- 基线 `5000fe71`；实现为本提交，可用 `git log -1 --format=%H -- tools/debug_tool/README.md` 定位。
+- T-UI1 提交 `8587c47e`、`248b96c2`；T-UI1-R 为本修订提交（`git log -1 --format=%H -- tools/debug_tool/README.md`）。
 - 环境：xPack GCC 15.2.0，主机 GCC 13.3，Python 3.12，PySide6 6.12.0、pyserial 3.5。
-- 四程序：`. ~/.local/opt/edrv32/env.sh` 后逐个 `make -C sw PROGRAM=<程序> MEMORY=sram -j1`。
-- 编译均采用 C11、`-Wall -Wextra -Werror`，0 warning；摄像头程序额外 `-Os`，NPU 程序 `-O2`。
-- `riscv-none-elf-size`，单位 B：
+- `. ~/.local/opt/edrv32/env.sh` 后逐个 `make -C sw PROGRAM=<程序> MEMORY=sram -j1`，四程序均 0 warning。
+- C11、`-Wall -Wextra -Werror`；摄像头程序 `-Os`，NPU 程序 `-O2`；data 均为 0 B。
+- `riscv-none-elf-size` 的 text/bss，栈余量=`0x10010000-__bss_end`（来自 `nm`），单位 B：
 
-| 程序 | text | data | bss | 合计 |
-|---|---:|---:|---:|---:|
-| demo | 57440 | 0 | 5568 | 63008 |
-| demo_vision | 39352 | 0 | 1084 | 40436 |
-| demo_vnpu | 56432 | 0 | 5516 | 61948 |
-| demo_npu | 22572 | 0 | 1920 | 24492 |
+| 程序 | text | bss | __bss_end | 栈余量 | text 相对评审基线增量 |
+|---|---:|---:|---|---:|---:|
+| demo | 48076 | 5568 | 0x1000d1c0 | 11840 | +1948 |
+| demo_vision | 29988 | 1084 | 0x1000797c | 34436 | +3360 |
+| demo_vnpu | 47060 | 5516 | 0x1000cd8c | 12916 | +1608 |
+| demo_npu | 22572 | 1920 | 0x10005fc0 | 41024 | — |
 
-- `make -C sw/apps/demo test`：原主机测试、监控、NPU 实际网络/推理、参数应用及 Python 3 项全部通过，UBSan 无错误。
-- 新增覆盖：PIX 字段/完整 Gamma 表、两个 bank 交替；GEO 全角度/两轴比例/镜像/平移、覆盖与 Q16.16 超限，不下发错误配置。
-- CPU CH2：固定种子 20261031 的完整 1280×720 随机 RGB565，983040 B 与独立 Python VIN 2.8 参考逐字节一致。
-- `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests -v`：71 项通过，无跳过。
-- 同环境 `python -m unittest discover -s tools/board/tests -v`：全部 10 项通过。
-- 参数 E2E：真实 REST / CLI / PTY，经 telemetry_sim 收到完整 PIX 和 GEO 命令并返回状态；Qt 验证 200 ms 合并和比例锁定。
-- 检测 E2E：telemetry_sim 接收两张不同尺寸图片、自动交替缓冲，真实 NPU 参考；CH2/OUTPUT/EDDT 三块和逐项比对全部一致。
-- 24 张截图：1366×768、1920×1080 的全部页面及几何区域，数据来自模拟 UDP。
-- 布局检查：逐页检查 QLabel 换行高度、按钮文字宽度、数字内部编辑区宽度、滚动控件可达性、规则编辑按钮与七行表格可视范围；长正则/路径/数值用全文提示，日志横向滚动。
-- 人工逐张查看截图，核对标签、按钮、表头、数值和滚动后的几何控件，无裁字。
-- `python -m compileall -q tools/debug_tool`、`git diff --check`、`python tools/check/verilog_style.py sw/apps/demo sw/lib tools/debug_tool` 通过；无 RTL 文件，Verilator lint 不适用。
-- 日志：`build/t-ui1-{demo,demo_vision,demo_vnpu,demo_npu,host,tools,board,shots}.log`，大小 `build/t-ui1-size.txt`。
-- 未运行 RTL 仿真或实板测试；截图与 fps 为合成环境数据，实板摄像头、HDMI、PHY 效果待上板确认。
+- 三个 text 增量相对 46128/26628/45452 B，均 ≤4096 B；栈余量不是实板栈高水位测量。
+- Gamma：整数 Q24 log2、Q30 exp2 单调线性插值；相对双精度公式最大误差 1 个灰度值。
+- Gamma 完整范围 1..INT_MAX：枚举每个输入/输出量化转折，检查 27496 个边界 gamma 的完整表；单调性保证转折之间及饱和尾部全部整数也在误差范围内。
+- 仿射：Q30 CORDIC 额外保留小数保护位，直至 Q16.16 量化；96 位整数乘积按 32 位 limb 计算，无浮点运行库。
+- 扫描全部 3600 个 0.1° 角度 ×5 组比例/镜像/平移（含 INT_MAX 平移），另测大平移抵消，六系数相对双精度量化最大误差 1 LSB。
+- 四 ELF 的 `nm | grep -E '__.*(df[23]|sf[23]|float|fixdf|fixsf|extend.*df|truncdf)'` 无匹配；未引入软件浮点符号。
+- `make -C sw/apps/demo test`：原主机测试、参数应用、完整随机帧 CH2 及 Python 4 项通过，UBSan 无错误。
+- `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests -v`：73 项通过，无跳过。
+- T-UI1 的板级工具 10 项、参数 REST/CLI/PTY 和检测 RGB565/CH2/OUTPUT/EDDT UDP 端到端用例保留通过。
+- GUI 新回归：读取板端同一张 80 类名称表，person/car/bus 标签；长日志自动换行且横向滚动范围为 0；两种尺寸下 NPU 页脚整行、位置和完整宽度检查。
+- 24 张截图已刷新：1366×768 与 1920×1080 的所有页面及滚动区域；DDR/NPU 指标分行对齐，人工核对检测类名、长日志和完整页脚。
+- 布局测试继续检查标签高度、按钮/数字宽度、滚动可达性、规则编辑按钮、完整七行端口表；长正则/路径/数值提供全文提示。
+- `python -m compileall -q tools/debug_tool`、`git diff --check` 和 `python tools/check/verilog_style.py sw/apps/demo sw/lib tools/debug_tool` 通过；无 RTL 改动，Verilator lint 不适用。
+- 日志：`build/t-ui1-r-{demo,demo_vision,demo_vnpu,demo_npu,host,tools,shots}.log`；未运行 RTL 仿真或实板测试。
