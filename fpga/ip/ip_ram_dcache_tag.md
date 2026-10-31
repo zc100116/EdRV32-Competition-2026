@@ -8,13 +8,13 @@
 | 使用者 | D$ 每路一块，共 2 块 |
 | 器件 | PG2L200H，速度等级以工程为准 |
 
-D$ 32 KiB（cache-spec v0.8，用户 2026-10-31 采用）；用户需在 PDS 中重新生成，模块名保持不变。
+D$ 32 KiB；cache-spec v0.9 起每项为 {valid, dirty, tag[17:0]} 共 20 位（用户 2026-10-31 确认）。用户需在 PDS 中按本页重新生成，模块名保持不变。
 
 ## 选项
 
 | 选项 | 取值 |
 |---|---|
-| 数据位宽 | 写端口和读端口都为 18 |
+| 数据位宽 | 写端口和读端口都为 20 |
 | 深度 | 512（地址 9 位），使用全部 512 项 |
 | 字节写使能 | 不勾选 |
 | 读时钟使能（读使能） | 勾选。读使能为 0 的周期，读数据输出保持不变 |
@@ -30,12 +30,12 @@ D$ 32 KiB（cache-spec v0.8，用户 2026-10-31 采用）；用户需在 PDS 中
 | `wr_clk` | in | 1 | `clk_i` |
 | `wr_en` | in | 1 | `wr_en_i` |
 | `wr_addr` | in | 9 | `wr_addr_i` |
-| `wr_data` | in | 18 | `wr_data_i` |
+| `wr_data` | in | 20 | `wr_data_i` |
 | `wr_rst` | in | 1 | `1'b0`（高有效，存储不复位） |
 | `rd_clk` | in | 1 | `clk_i` |
 | `rd_clk_en` | in | 1 | `rd_en_i` |
 | `rd_addr` | in | 9 | `rd_addr_i` |
-| `rd_data` | out | 18 | `rd_data_o` |
+| `rd_data` | out | 20 | `rd_data_o` |
 | `rd_rst` | in | 1 | `1'b0` |
 
 ## 生成后需要回传的信息
