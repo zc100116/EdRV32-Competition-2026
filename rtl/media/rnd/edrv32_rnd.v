@@ -436,7 +436,7 @@ module edrv32_rnd (
         .in_src_i(state_r == S_BLIT ? blit_blend_src_w : draw_blend_src_w),
         .in_dst_i(state_r == S_BLIT ? blit_blend_dst_w : draw_blend_dst_w),
         .in_argb_i(command_r[8]),
-        .in_mode_i(op_w == 8'h04 ? command_r[21:20] : 2'd0),
+        .in_mode_i(op_w == 8'h04 || op_w == 8'h0d ? command_r[21:20] : 2'd0),
         .in_tag_i(state_r == S_BLIT ? blit_blend_tag_w : draw_blend_tag_w),
         .out_valid_o(blend_valid_w),
         .out_ready_i(1'b1),
@@ -452,7 +452,8 @@ module edrv32_rnd (
         (state_r == S_BLUR && blur_rd_valid_w) ||
         (state_r == S_BLIT && blit_rd_valid_w));
     assign rd_addr_w = state_r == S_FETCH ? list_base_r + (cur_desc_w << 6) :
-        state_r == S_PARAM ? (geometry_w ? command_r[287:256] : command_r[447:416]) :
+        state_r == S_PARAM ? (geometry_w ? command_r[287:256] :
+            op_w == 8'h0d ? command_r[383:352] : command_r[447:416]) :
         state_r == S_DRAW ? draw_rd_addr_w : state_r == S_COPY ? copy_rd_addr_w :
         state_r == S_BLIT ? blit_rd_addr_w : blur_rd_addr_w;
     assign rd_bytes_w = state_r == S_PARAM && geometry_w ? 16'd128 :
@@ -581,7 +582,7 @@ module edrv32_rnd (
                     else if (empty_w)
                         state_r <= S_COMPLETE;
                     else
-                        state_r <= geometry_w || (op_w == 8'h04 && command_r[23]) ?
+                        state_r <= geometry_w || op_w == 8'h0d || (op_w == 8'h04 && command_r[23]) ?
                             S_PARAM : S_BEGIN;
                 end
                 S_PARAM: if (rd_desc_ready_w) begin
@@ -637,7 +638,7 @@ module edrv32_rnd (
         if (state_r == S_FETCH_WAIT && rd_data_valid_w)
             command_r[fetch_half_r*256 +: 256] <= rd_data_w;
         if (state_r == S_PARAM_WAIT && rd_data_valid_w) begin
-            if (geometry_w)
+            if (geometry_w || op_w == 8'h0d)
                 parameters_r[parameter_beat_r*256 +: 256] <= rd_data_w;
             else if (!fetch_half_r) begin
                 command_r[447:416] <= rd_data_w[31:0];

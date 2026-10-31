@@ -53,6 +53,7 @@ module tb;
     reg rd_end = 0;
     reg wr_end = 0;
     integer tested = 0;
+    reg check_transparent_row = 0;
     assign rd_ready = rd_left == 0 && !rd_end && !rd_done && cycle % 3 != 0;
     assign wr_ready = wr_left == 0 && !wr_end && !wr_done && cycle % 5 != 0;
     assign wr_data_ready = wr_left != 0 && cycle % 4 != 0;
@@ -131,6 +132,8 @@ module tb;
             if (rd_left == 1) rd_end <= 1;
         end
         if (wr_valid && wr_ready) begin
+            if (check_transparent_row && wr_addr == 32'h1000)
+                $fatal(1,"fully transparent affine row issued a write");
             write_addr <= int'(wr_addr);
             wr_left <= int'(wr_bytes) / 32;
         end
@@ -192,25 +195,49 @@ module tb;
     task automatic run_case(input int kind, radius, input bit keep, argb);
         reg [31:0] dest, value;
         int addr, cov, a, x0, y0, x1, y1, bpp, hits, sx, sy, channel;
+        int width, height, target_stride, source_stride;
         reg [23:0] color;
+        width = kind == 4 ? 41 : 19;
+        height = kind == 4 ? 19 : 7;
+        target_stride = kind == 4 ? 256 : 128;
+        source_stride = kind == 4 ? 197 : 89;
+        check_transparent_row = kind == 4;
         for (int i = 0; i < 65536; i++) memory[i] = 8'(i*17+29);
         command = 0;
         parameters = 0;
         command[7:0] = kind == 0 ? 8'h0c : kind == 1 ? 8'h04 :
-            kind == 3 ? 8'h09 : 8'h06;
+            kind == 3 ? 8'h09 : kind == 4 ? 8'h0d : 8'h06;
         command[8] = argb;
-        command[15:12] = kind == 1 ? 4'd1 : 4'd2;
+        command[15:12] = kind == 1 || kind == 4 ? 4'd1 : 4'd2;
         command[23:16] = kind == 1 ? 8'h80 : {7'd0, keep};
         command[63:32] = 32'h1000;
-        command[79:64] = 16'd128;
+        command[79:64] = 16'(target_stride);
         command[127:96] = 0;
-        command[159:128] = {4'd0, 12'd6, 4'd0, 12'd18};
+        command[159:128] = {4'd0, 12'(height-1), 4'd0, 12'(width-1)};
         command[191:160] = 0;
-        command[223:192] = {16'd6, 16'd18};
+        command[223:192] = {16'(height-1), 16'(width-1)};
         command[255:224] = 32'h7974aa31;
         x0 = -2; y0 = 1; x1 = 12; y1 = 5;
         round_area = {16'(y1), 16'(x1), 16'(y0), 16'(x0)};
-        if (kind == 3) begin
+        if (kind == 4) begin
+            command[31:16] = keep ? 16'h81 : 16'h01;
+            command[287:256] = 32'h4001;
+            command[303:288] = 16'(source_stride);
+            command[351:320] = {16'(height), 16'(width)};
+            command[395:384] = 12'(radius);
+            parameters[31:0] = 32768;
+            parameters[63:32] = 32768;
+            parameters[95:64] = 65536;
+            parameters[191:160] = 65536;
+            parameters[223:192] = round_area[31:0];
+            parameters[255:224] = round_area[63:32];
+            for (int py = 0; py < height; py++)
+                for (int px = 0; px < width; px++) begin
+                    addr = 'h4001+py*source_stride+px*4;
+                    value = py == 0 ? 32'd0 : 32'h937fc12b;
+                    for (int b = 0; b < 4; b++) memory[addr+b] = value[b*8 +: 8];
+                end
+        end else if (kind == 3) begin
             command[31:16] = keep ? 16'h004f : 16'h000e;
             parameters[31:0] = 32'(-65536);
             parameters[63:32] = 65536;
@@ -241,8 +268,8 @@ module tb;
                 command[415:384] = round_area[63:32];
                 command[427:416] = 12'(radius);
             end
-            for (int y = 0; y < 7; y++)
-                for (int x = 0; x < 19; x++) begin
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++) begin
                     addr = 'h4001+y*89+x*(kind == 1 ? 4 : 1);
                     value = kind == 1 ? 32'h937fc12b : 32'h99;
                     for (int b = 0; b < (kind == 1 ? 4 : 1); b++)
@@ -250,19 +277,19 @@ module tb;
                 end
         end
         if (argb)
-            for (int y = 0; y < 7; y++)
-                for (int x = 0; x < 19; x++)
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
                     case (x % 4)
-                        0: memory['h1000+y*128+x*4+3] = 0;
-                        1: memory['h1000+y*128+x*4+3] = 1;
-                        2: memory['h1000+y*128+x*4+3] = 128;
-                        default: memory['h1000+y*128+x*4+3] = 255;
+                        0: memory['h1000+y*target_stride+x*4+3] = 0;
+                        1: memory['h1000+y*target_stride+x*4+3] = 1;
+                        2: memory['h1000+y*target_stride+x*4+3] = 128;
+                        default: memory['h1000+y*target_stride+x*4+3] = 255;
                     endcase
         for (int i = 0; i < 65536; i++) expected[i] = memory[i];
         bpp = argb ? 4 : 2;
-        for (int y = 0; y < 7; y++)
-            for (int x = 0; x < 19; x++) begin
-                addr = 'h1000+y*128+x*bpp;
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) begin
+                addr = 'h1000+y*target_stride+x*bpp;
                 dest = 0;
                 for (int b = 0; b < bpp; b++) dest[b*8 +: 8] = memory[addr+b];
                 cov = shape_cov(x, y, x0, y0, x1, y1, radius);
@@ -273,6 +300,10 @@ module tb;
                 end else if (kind == 1) begin
                     if (radius == 0) cov = 255;
                     a = div255(div255(121*147)*cov);
+                    value = over(24'h7fc12b, a, dest, argb);
+                end else if (kind == 4) begin
+                    if (!keep || radius == 0) cov = 255;
+                    a = y == 0 ? 0 : div255(div255(121*147)*cov);
                     value = over(24'h7fc12b, a, dest, argb);
                 end else if (kind == 3) begin
                     hits = 0;
@@ -328,6 +359,9 @@ module tb;
         run_case(2, 0, 0, 1);
         run_case(3, 0, 0, 0);
         run_case(3, 0, 1, 1);
+        run_case(4, 0, 0, 1);
+        run_case(4, 3, 1, 1);
+        run_case(4, 0, 0, 0);
         $display("PASS rnd_mask %0d cases", tested);
         $finish;
     end
