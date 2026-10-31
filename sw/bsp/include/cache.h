@@ -22,6 +22,7 @@
 #define CACHE_CTRL_CMD_CLEAN_INVALIDATE 3u
 #define CACHE_CTRL_CMD_CLEAN_ALL 4u
 
+/* cache-spec 5.4: return after a cacheable SRAM read observes completion. */
 void cache_clean(uintptr_t address, uint32_t size);
 void cache_invalidate(uintptr_t address, uint32_t size);
 void cache_clean_invalidate(uintptr_t address, uint32_t size);

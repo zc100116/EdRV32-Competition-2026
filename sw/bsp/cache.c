@@ -8,15 +8,17 @@
 
 static void cache_wait(void)
 {
-    while ((*(volatile uint32_t *)(EDRV32_CACHE_CTRL_BASE + CACHE_CTRL_STATUS) &
-            CACHE_CTRL_STATUS_BUSY) != 0u) {
-    }
+    /* SoC 6.1: SRAM_BASE is readable and cacheable, independent of the caller's
+     * DDR alias. cache-spec 5.4 delays this load's response until maintenance ends.
+     * cpu-spec 4.7 orders all memory accesses; the non-posted OP_CMD store has
+     * completed before this load, so no intervening hardware fence is needed.
+     */
+    (void)*(volatile uint32_t *)EDRV32_SRAM_BASE;
 }
 
 static void cache_operation(uintptr_t address, uint32_t size, uint32_t command)
 {
     __asm__ volatile ("fence iorw, iorw" ::: "memory");
-    cache_wait();
     *(volatile uint32_t *)(EDRV32_CACHE_CTRL_BASE + CACHE_CTRL_OP_ADDR) = address;
     *(volatile uint32_t *)(EDRV32_CACHE_CTRL_BASE + CACHE_CTRL_OP_SIZE) = size;
     *(volatile uint32_t *)(EDRV32_CACHE_CTRL_BASE + CACHE_CTRL_OP_CMD) = command;
