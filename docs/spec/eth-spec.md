@@ -18,7 +18,7 @@ ETH 让 PC 通过千兆网口和板子交换大块数据：下载图像（作为
 - 发送（命令式，SoC 7.2）：软件在 DDR 中准备发送描述符表，写 `DESC_BASE`、`DESC_COUNT`、`DOORBELL`；每条描述符指定 DDR 中一块任意长度的数据，ETH 把它切成多个 UDP 包，每包带与接收相同格式的应用头，发给软件配置的对端。
 - ARP：ETH 自动应答询问本机 IP 的 ARP 请求。其他帧（ICMP 等）不处理，只计数。
 - 只支持 1000 Mbps 全双工。不支持 IP 分片、IP 选项、VLAN 和巨型帧。
-- DDR 端口为 mem_xbar P6（与 PERF_MON 共用，在 P6 内部仲裁，SoC 6.4.1）；寄存器在媒体 APB 槽 7；中断为 PLIC 源 14。
+- DDR 端口为 mem_xbar P6（ETH 独占，SoC 6.4.1）；寄存器在媒体 APB 槽 7；中断为 PLIC 源 14。
 - 时钟域：接收前端在 `eth_rx_clk`，发送前端在 `eth_tx_clk`，到异步 FIFO 为止（SoC 5.2 X7）；其余（寄存器、协议处理、DMA、MDIO）在 clk_mem。
 
 ## 2. 功能描述

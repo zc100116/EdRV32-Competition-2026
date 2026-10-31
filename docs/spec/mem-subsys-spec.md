@@ -2,10 +2,10 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.5 |
+| 版本 | v0.6 |
 | 日期 | 2026-10-31 |
 | 状态 | 已确认（v0.4，2026-10-29） |
-| 范围 | DDR 网关、mem_xbar（含 MEM_XBAR 寄存器）、PERF_MON、P6 口内部仲裁、存储子系统顶层 `rtl/soc/edrv32_mem_subsys.v`；附录 A 为板级 DDR 适配器契约 |
+| 范围 | DDR 网关、mem_xbar（含 MEM_XBAR 寄存器）、存储子系统顶层 `rtl/soc/edrv32_mem_subsys.v`；附录 A 为板级 DDR 适配器契约 |
 | 关联文档 | SoC 规格 `edrv32-soc-spec.md` 3.2、4.2、5、6.3–6.5、7.1、8.4、9.1；系统子系统规格 `sys-subsys-spec.md`（S6）；DDR 带宽分析 `docs/design/2026-10-25-ddr-bandwidth-analysis.md` |
 
 本文中"必须"表示强制要求，"应"表示推荐要求，"可"表示允许。SoC 规格已规定的条款本文只引用不重复；两者冲突时以 SoC 规格为准并提出修订。
@@ -19,11 +19,9 @@
 | DDR 网关 | `rtl/mem/edrv32_mem_ddr_gw.v` | clk_sys（64 位侧）、clk_mem（256 位侧） | sys_xbar S6 的 AXI64 从口转换为 mem_xbar P2 的 AXI256 主口 |
 | AXI64 异步桥 | `rtl/common/edrv32_axi_async_bridge.v` | clk_sys ↔ clk_mem | 网关 64 位侧的跨时钟域（SoC 5.2 X2），公共原语 |
 | mem_xbar | `rtl/mem/edrv32_mem_xbar.v` | clk_mem | 7 主 × 1 从 AXI256 交叉开关，调度和流量控制按 SoC 6.4；MEM_XBAR 寄存器（媒体 APB 槽 8） |
-| PERF_MON | `rtl/mem/edrv32_mem_perf_mon.v` | clk_mem | DDR 流量发生、读回校验、带宽和延迟测量（媒体 APB 槽 9） |
-| P6 仲裁 | `rtl/mem/edrv32_mem_p6_arb.v` | clk_mem | ETH 与 PERF_MON 共用 P6 的 2:1 仲裁 |
-| 存储子系统顶层 | `rtl/soc/edrv32_mem_subsys.v` | clk_sys、clk_mem | 连线顶层，供 SoC 顶层例化；子模块实例名必须为 `u_gw`、`u_xbar`、`u_perf_mon`、`u_p6_arb`（模块级测试按层次观察） |
+| 存储子系统顶层 | `rtl/soc/edrv32_mem_subsys.v` | clk_sys、clk_mem | 连线顶层，供 SoC 顶层例化；子模块实例名必须为 `u_gw`、`u_xbar`（模块级测试按层次观察） |
 
-clk_mem 直接使用 DDR3 IP 输出的 125 MHz 用户时钟 core_clk（板级提供），mem_xbar 到 DDR IP 之间不跨时钟域；`mem_ready_i` 取 DDR IP 的初始化完成信号（SoC 5.3）。mem_xbar、DDR 网关和 PERF_MON 使用 `rst_mem_core_n`，媒体软复位不影响它们（系统子系统规格 2.10）。
+clk_mem 直接使用 DDR3 IP 输出的 125 MHz 用户时钟 core_clk（板级提供），mem_xbar 到 DDR IP 之间不跨时钟域；`mem_ready_i` 取 DDR IP 的初始化完成信号（SoC 5.3）。mem_xbar 和 DDR 网关使用 `rst_mem_core_n`，媒体软复位不影响它们（系统子系统规格 2.10）。
 
 ## 2. 功能描述
 
@@ -60,27 +58,6 @@ clk_mem 直接使用 DDR3 IP 输出的 125 MHz 用户时钟 core_clk（板级提
 | 违规检测 | 跨 4 KiB、地址非 32 B 对齐：丢弃事务，读返回 LEN+1 拍 SLVERR、写收齐 W 后返回 SLVERR，记录错误寄存器并置 IRQ_STAT.ERROR（SoC 6.4.3）。AXI256 的 LEN 只有 4 位，不存在 LEN > 15 的情况 |
 | 统计 | 每端口和全局计数器见 4.1；32 位饱和计数（计满停在 0xFFFF_FFFF），WAIT_MAX 为 16 位饱和。事务数和拍数按读、写分别计数，在下游 AR/AW 握手时计数；等待周期从事务成为可仲裁队首起，到下游握手为止，含容量不足和选中到握手之间的周期 |
 
-### 2.3 PERF_MON
-
-PERF_MON 是命令式引擎：软件配置寄存器后写 CTRL.START，运行完 `TXN_COUNT` 笔事务后置 IRQ_STAT.DONE 回到 IDLE；CTRL.ABORT 按 SoC 7.1 规则停止。没有分配 PLIC 中断源，软件轮询 STATUS/IRQ_STAT。
-
-| 功能 | 规定 |
-|---|---|
-| 模式 | 0 顺序读；1 顺序写；2 读写混合：每 16 笔中读 `RW_RATIO` 笔。用 5 位累加器决定：START 时清零；每发出一笔，`sum = 累加器 + RW_RATIO`，`sum ≥ 16` 时这一笔为读、累加器 = `sum − 16`，否则为写、累加器 = `sum` |
-| 区域 | `BASE`（4 KiB 对齐的 DDR 物理地址）起 `SIZE` 字节（512 B 的倍数）；地址走到区域末尾回到 `BASE` |
-| 突发 | 长度 `BURST_LEN`（1–16 拍）；每笔不跨 4 KiB（遇边界时截短该笔） |
-| 地址模式 | 0 顺序；1 伪随机：每笔起始地址 = `BASE` + `((LFSR[31:16] × NBLK) >> 16)` × 512 B，`NBLK` = `SIZE` / 512。LFSR 为 32 位、多项式 x^32 + x^22 + x^2 + x + 1（左移，反馈位 = bit31 ⊕ bit21 ⊕ bit1 ⊕ bit0），START 时装入 `SEED`，每发出一笔前进一步，第 0 笔用 `SEED` 本身；`SEED` = 0 时 LFSR 恒为 0，所有事务都从 `BASE` 开始 |
-| 在途数 | 读、写各至多 `OUTSTANDING` 笔（1–4），同时受 mem_xbar `OUTST_RD/WR[6]` 约束 |
-| 写数据图样 | 每拍第 i 个 32 位字 = （该字的字节地址）XOR `SEED` |
-| 读校验 | `CHECK_EN`=1 时逐拍比较读数据与上述图样（模式 0 用于校验模式 1 写入的数据）；记录错误拍数和第一个错误拍的字节地址 |
-| 测量 | 完成事务数、拍数、运行周期数（START 到 DONE）；读延迟 = AR 握手到首个 R 拍的 clk_mem 周期数，记录 min、max、累计和 16 格直方图（格宽 `HIST_WIDTH` 周期，最后一格收纳所有更大值） |
-
-所有结果计数器为 32 位饱和计数，START 时清零。
-
-### 2.4 P6 仲裁
-
-ETH 和 PERF_MON 共用 P6：AR、AW 各自按事务轮询仲裁（本地 ID：PERF_MON 为 0，ETH 为 1，作为 P6 的本地 ID 位），B、R 按本地 ID 路由。W 跟随 AW 授权顺序。
-
 ## 3. 接口
 
 ### 3.1 存储子系统顶层 `edrv32_mem_subsys`
@@ -93,7 +70,7 @@ ETH 和 PERF_MON 共用 P6：AR、AW 各自按事务轮询仲裁（本地 ID：P
 | `p0_*`、`p0_urgent_i` | 从侧，AXI256 读 | clk_mem | DISP |
 | `p1_*`、`p1_urgent_i` | 从侧，AXI256 读写 | clk_mem | VIN（写：摄像头和 NPU 输入通道；读：内存源） |
 | `p3_*`、`p4_*`、`p5_*` | 从侧，AXI256 读写 | clk_mem | NPU、RND、GEO |
-| `eth_*` | 从侧，AXI256 读写 | clk_mem | ETH（经 P6 仲裁） |
+| `eth_*` | 从侧，AXI256 读写 | clk_mem | ETH（独占 P6） |
 | `ddr_*` | 主侧 | clk_mem | SoC 顶层 DDR 主口（SoC 3.2），信号名不变 |
 | `xbar_apb_*`、`pmon_apb_*` | 从侧，APB | clk_mem | 媒体 APB 槽 8、9（系统子系统 media_apb 的对应 psel 位） |
 | `irq_mem_xbar_o` | 输出 | clk_mem | PLIC 源 15（经系统子系统的电平同步，SoC 5.2 X3） |
@@ -135,42 +112,11 @@ ID = 0x0008_0001。公共寄存器：CTRL 读为 0、写忽略；STATUS 由内�
 
 参数寄存器在运行中可写，新值从下一次授权判定起生效。
 
-### 4.2 PERF_MON（媒体 APB 槽 9）
-
-ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF 读为 0、写忽略；DONE_COUNT 为完成的运行次数；CTRL.ENABLE 不门控 START；CTRL.SOFT_RST 只在 IDLE 时生效；BUSY 时写 START 被忽略；START 不另外锁存配置，BUSY 期间软件不得修改配置寄存器；ABORT 结束的运行不置 DONE、不增加 DONE_COUNT。
-
-| 偏移 | 名称 | 访问 | 复位值 | 说明 |
-|---|---|---|---|---|
-| 0x100 | MODE | RW | 0 | 2.3 模式 |
-| 0x104 | BASE | RW | 0 | 只实现 [29:12]，其余位读为 0 |
-| 0x108 | SIZE | RW | 0x1000 | 只实现 [29:9]，其余位读为 0 |
-| 0x10C | BURST_LEN | RW | 16 | 1–16 |
-| 0x110 | ADDR_MODE | RW | 0 | 0 顺序，1 伪随机 |
-| 0x114 | RW_RATIO | RW | 8 | 0–16 |
-| 0x118 | TXN_COUNT | RW | 0 | 本次运行的事务数 |
-| 0x11C | OUTSTANDING | RW | 4 | 1–4 |
-| 0x120 | SEED | RW | 0 | |
-| 0x124 | CHECK_EN | RW | 0 | |
-| 0x128 | HIST_WIDTH | RW | 16 | 直方图格宽（周期），≥ 1 |
-| 0x200 | TXN_DONE | RO | 0 | |
-| 0x204 | BEATS | RO | 0 | |
-| 0x208 | CYCLES | RO | 0 | |
-| 0x20C | LAT_MIN | RO | 0xFFFF_FFFF | |
-| 0x210 | LAT_MAX | RO | 0 | |
-| 0x214 | LAT_SUM | RO | 0 | |
-| 0x218 | READ_CNT | RO | 0 | 已完成读事务数（延迟平均值 = LAT_SUM / READ_CNT） |
-| 0x21C | ERR_BEATS | RO | 0 | 校验错误拍数 |
-| 0x220 | FIRST_ERR_ADDR | RO | 0 | |
-| 0x300–0x33C | HIST[0..15] | RO | 0 | |
-
-配置寄存器的非法值（BURST_LEN 为 0 或大于 16、OUTSTANDING 为 0 或大于 4、SIZE 为 0、TXN_COUNT 为 0、HIST_WIDTH 为 0）在 START 时检测：不发出事务，置 IRQ_STAT.ERROR，ERR_CODE = 1。
-
 ## 5. 行为与时序
 
-1. **复位**：`rst_mem_core_n` 有效期间，mem_xbar 和 PERF_MON 不发出任何下游事务；DDR 网关 256 位侧同样保持空闲（SoC 5.3）。
+1. **复位**：`rst_mem_core_n` 有效期间，mem_xbar 不发出任何下游事务；DDR 网关 256 位侧同样保持空闲（SoC 5.3）。
 2. **写完成**：上游端口的 B 响应在下游 B 返回后发出；下游 B 表示数据已被 DDR 控制器接收，其后发出的读一定读到该数据（SoC 4.2）。
 3. **事务边界**：mem_xbar 以事务为仲裁粒度；一笔写事务的 W 拍在下游连续发出。
-4. **ABORT（PERF_MON）**：停止发出新事务，等待所有在途事务的 B/R 全部返回后回到 IDLE。
 
 ## 6. 错误处理
 
@@ -179,35 +125,33 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | DDR 网关收到不支持的事务 | 网关 64 位侧 | 该事务返回 SLVERR | 无需恢复 |
 | mem_xbar 上游违规 | 端口入口 | SLVERR、ERR_* 寄存器、IRQ_STAT.ERROR、PLIC 源 15 | 软件写 IRQ_STAT 清除 |
 | 下游返回 SLVERR/DECERR | R/B 通道 | 原样转回上游 | 由上游处理 |
-| PERF_MON 配置非法 | START 时 | IRQ_STAT.ERROR、ERR_CODE = 1 | 改配置后重新 START |
-| PERF_MON 读校验不符 | 每个 R 拍 | ERR_BEATS、FIRST_ERR_ADDR（不是错误中断，属于测量结果） | — |
 
 ## 7. 性能与资源指标
 
 | 项 | 要求 |
 |---|---|
 | clk_mem | 125 MHz 时序收敛 |
-| mem_xbar 下游利用 | 在仿真 DDR 模型的同行顺序读流量下，PERF_MON 测得的有效带宽 ≥ 模型数据线带宽的 90% |
+| mem_xbar 下游利用 | 在仿真 DDR 模型的同行顺序读流量下（模块级测试激励），有效带宽 ≥ 模型数据线带宽的 90% |
 | 网关延迟 | 在下游零等待时，CPU cache 行读从 S6 AR 到最后一个 R 拍不超过 [待定] 个 clk_sys 周期（开发初值：由实现报告，C-W2 之后定稿） |
-| 资源 | DDR 网关 + mem_xbar ≤ 8K LUT（SoC 9.3）；PERF_MON ≤ 2K LUT [待定]；读返回缓冲使用 DRM，W 缓冲使用分布式 RAM |
+| 资源 | DDR 网关 + mem_xbar ≤ 8K LUT（SoC 9.3）；读返回缓冲使用 DRM，W 缓冲使用分布式 RAM |
 
 ## 8. 验证要点
 
-见 `docs/testplan/mem-subsys-testplan.md`。必须覆盖：网关两类合法事务和非法事务；mem_xbar 每条调度规则、令牌桶、饿死保护、读写分组、在途上限、读返回缓冲在 R 反压下不丢数据、违规检测；PERF_MON 三种模式、伪随机地址、读校验发现错误、直方图边界；统计计数器的快照、清零和饱和。
+见 `docs/testplan/mem-subsys-testplan.md`。必须覆盖：网关两类合法事务和非法事务；mem_xbar 每条调度规则、令牌桶、饿死保护、读写分组、在途上限、读返回缓冲在 R 反压下不丢数据、违规检测；统计计数器的快照、清零和饱和。
 
 ## 9. 待定事项
 
 | # | 项 | 开发初值 | 定稿依据 |
 |---|---|---|---|
 | 1 | 网关延迟指标 | 实现报告值 | C-W2 后的系统级综合 |
-| 2 | PERF_MON LUT 上限 | 2K（M-A1 用通用 LUT 映射估得约 5.2K、24 级，最长路径 size_r → seq_offset_r；BASE/SIZE 已按 4.2 窄化） | PDS 综合结果 |
 | 3 | 板级适配器地址单位、控制器读写顺序 | 见附录 A | DDR IP 文档 + 上板实验 |
-| 4 | 仿真 DDR 模型时序参数 | testplan 2.3 | 上板 PERF_MON 实测后校准 |
+| 4 | 仿真 DDR 模型时序参数 | testplan 2.3 | 上板 EDTM 带宽实测后校准 |
 
 ## 10. 变更记录
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
+| 2026-10-31 | v0.6 | 删除 PERF_MON（原 2.3、4.2、错误处理两行、待定 2）和 P6 仲裁（原 2.4）：ETH 独占 P6；DDR 带宽由 xbar 统计计数器/EDTM 观测。原因：正式构建不需要 DDR 压测，省约 3.8K LUT/9 APM，并去掉其控制信号的高扇出（设计记录 2026-10-31-b3f-area-timing A；用户确认 2026-10-31） |
 | 2026-10-26 | v0.1 | 初稿。用户确认：一份规格；板级适配器契约写附录并做 Linux 单元测试 + 上板验证；统计计数器 32 位饱和、快照 + 清零；PERF_MON 含流量发生、读校验、延迟直方图；仿真 DDR 模型为简化时序模型；clk_mem 直接使用 DDR IP core_clk |
 | 2026-10-26 | v0.1 | 用户确认，状态改为已确认 |
 | 2026-10-27 | v0.2 | 汇总开发中经问答确认的事项（M-R1–M-R4、M-V1、M-A1、M-T1、M-I1，DRR 两项由用户 2026-10-26 确认）：1 节子模块实例名；2.1 BURST 只接受 INCR；2.2 B FIFO、在途计数释放时点与 0–8 范围、读返回缓冲按序释放、令牌桶复位为满、URG_MAX 连续计数规则、饿死端口轮转、DRR 补额度规则与份额近似说明、删除 LEN > 15 违规、统计时点；2.3 混合模式累加器、LFSR 多项式与 SEED = 0、伪随机地址改为乘法缩放；4.1 寄存器位宽、公共寄存器语义、SNAPSHOT/CLEAR 时点、ERR_TYPE bit1 预留；4.2 公共寄存器语义、BASE/SIZE 实现位；附录 A 地址位、W 连续契约、B/R 响应 |
@@ -231,4 +175,4 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | B 合成 | BVALID = IP 的 `axi_wusero_last`，按其 `wusero_id` 生成一个 B 响应（BRESP = OKAY）；RRESP 固定为 OKAY。前提：IP 内部按序执行读写，使"B 之后的读能读到该写"成立 **[待定]**（DDR IP 文档 + 上板实验确认） |
 | R | IP 读数据直通 SoC 的 R 通道（两侧都无反压） |
 | 初始化 | IP 初始化完成信号作为 `mem_ready_i` 送 SoC |
-| 验证 | Linux：按 IP 端口模板写 IP 端口行为模型 `verif/models/` 中，对适配器做单元测试；上板：PERF_MON 写入后读回校验、带宽和延迟测量（Windows 任务卡） |
+| 验证 | Linux：按 IP 端口模板写 IP 端口行为模型 `verif/models/` 中，对适配器做单元测试；上板：DDR 写读校验（板级程序）和 EDTM 带宽统计（Windows 任务卡） |
