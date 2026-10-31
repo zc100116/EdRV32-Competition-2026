@@ -59,6 +59,7 @@ module tb;
     edrv32_eth_regs dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_mem_perf_n_i(rst_n_i),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),

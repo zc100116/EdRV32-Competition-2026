@@ -49,6 +49,15 @@ module edrv32_geo (
     // Interrupt.
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_mem_ctrl_n_w;
+    edrv32_reset_copy u_reset_mem_ctrl_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_ctrl_n_w)
+    );
+
     localparam [2:0] S_IDLE = 3'd0;
     localparam [2:0] S_DESC_REQ = 3'd1;
     localparam [2:0] S_DESC_DATA = 3'd2;
@@ -232,8 +241,8 @@ module edrv32_geo (
     // PERF1 counts pixels that actually cross the DDR write channel, including ABORT tails.
     // Count four independent groups before the counter event stage. The AXI
     // handshake is registered alongside the byte enables, outside the sum tree.
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i)
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w)
             write_fire_r <= 1'b0;
         else
             write_fire_r <= p5_wvalid_o && p5_wready_i;
@@ -258,8 +267,8 @@ module edrv32_geo (
         pack_next_w = accumulator_r;
         pack_next_w[{pack_lane_r, 4'd0} +: 16] = pixel_w;
     end
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
             state_r <= S_IDLE;
             prepare_r <= 2'd0;
             fill_state_r <= 3'd0;
@@ -410,8 +419,8 @@ module edrv32_geo (
             sample_eol_r <= coord_eol_w;
         end
     end
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
             sample_valid_r <= 1'b0;
             pack_valid_r <= 1'b0;
             pack_lane_r <= 4'd0;
@@ -445,7 +454,7 @@ module edrv32_geo (
     end
     edrv32_geo_address u_read_address (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(tile_valid_w && tile_ready_w && !bounds_empty_w),
         .clear_i(clear_w),
         .base_i(src_base_w),
@@ -457,7 +466,7 @@ module edrv32_geo (
     );
     edrv32_geo_address u_write_address (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(state_r == S_RUN && compute_state_r == 0 &&
             source_ready_r[compute_group_r]),
         .clear_i(clear_w),
@@ -470,7 +479,7 @@ module edrv32_geo (
     );
     edrv32_geo_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
@@ -528,7 +537,7 @@ module edrv32_geo (
     );
     edrv32_geo_tiles u_tiles (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(tiles_start_w),
         .clear_i(clear_w),
         .width_i(rect_w_w),
@@ -551,7 +560,7 @@ module edrv32_geo (
     );
     edrv32_geo_bounds u_bounds (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(bounds_start_w),
         .clear_i(clear_w),
         .done_o(bounds_done_w),
@@ -573,7 +582,7 @@ module edrv32_geo (
     );
     edrv32_geo_coords u_coords (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(coord_start_w),
         .clear_i(clear_w),
         .width_i(group_width_r[compute_group_r]),
@@ -614,7 +623,7 @@ module edrv32_geo (
     );
     edrv32_geo_bilinear u_bilinear (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .advance_i(advance_w),
         .clear_i(clear_w || coord_start_w),
         .valid_i(sample_valid_r),
@@ -633,7 +642,7 @@ module edrv32_geo (
         .OUTSTANDING(4)
     ) u_rd (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .desc_valid_i(rd_desc_valid_w),
         .desc_ready_o(rd_desc_ready_w),
         .desc_base_i(rd_base_w),
@@ -666,7 +675,7 @@ module edrv32_geo (
         .OUTSTANDING(4)
     ) u_wr (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .desc_valid_i(wr_desc_valid_w),
         .desc_ready_o(wr_desc_ready_w),
         .desc_base_i(wr_base_w),

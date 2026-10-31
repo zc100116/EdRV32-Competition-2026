@@ -1,3 +1,4 @@
+../common/edrv32_reset_copy.v
 +incdir+../include
 ../common/edrv32_cdc_sync_bit.v
 ../common/edrv32_cdc_pulse.v

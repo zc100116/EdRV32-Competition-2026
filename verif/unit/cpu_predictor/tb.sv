@@ -61,6 +61,8 @@ module tb;
     edrv32_cpu_predictor dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_sys_direction0_n_i(rst_n_i),
+        .rst_sys_direction1_n_i(rst_n_i),
         .query_pc_i(query_pc_i),
         .query_accept_i(query_accept_i),
         .predict_hit_o(predict_hit_o),

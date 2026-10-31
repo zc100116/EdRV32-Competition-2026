@@ -77,7 +77,35 @@ module edrv32_vin (
     // Interrupt.
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_mem_ctrl_n_w;
+    wire rst_cam0_front_n_w;
+    wire rst_cam1_front_n_w;
+    wire rst_mem_regs_n_w;
+    edrv32_reset_copy u_reset_mem_ctrl_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_ctrl_n_w)
+    );
+    edrv32_reset_copy u_reset_cam0_front_n (
+        .clk_i(cam0_pclk_i),
+        .rst_n_i(rst_cam0_n_i),
+        .rst_n_o(rst_cam0_front_n_w)
+    );
+    edrv32_reset_copy u_reset_cam1_front_n (
+        .clk_i(cam1_pclk_i),
+        .rst_n_i(rst_cam1_n_i),
+        .rst_n_o(rst_cam1_front_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_regs_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_regs_n_w)
+    );
+
     wire rst_vin_n_w;
+    wire rst_mem_regs_clear_n_w;
     wire enable_w;
     wire abort_w;
     wire soft_rst_w;
@@ -152,9 +180,10 @@ module edrv32_vin (
     genvar channel_idx;
 
     // Soft reset first drains committed AXI traffic; CDC FIFOs keep their external resets.
-    assign rst_vin_n_w = rst_mem_n_i && !clear_r;
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i)
+    assign rst_mem_regs_clear_n_w = rst_mem_regs_n_w && !clear_r;
+    assign rst_vin_n_w = rst_mem_ctrl_n_w && !clear_r;
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w)
             abort_all_r <= 1'b0;
         else
             abort_all_r <= abort_w || soft_rst_w;
@@ -188,8 +217,8 @@ module edrv32_vin (
         if (msrc_error_w) error_code_w = 4'd10;
     end
 
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
             soft_pending_r <= 1'b0;
             clear_r <= 1'b0;
         end else begin
@@ -202,7 +231,7 @@ module edrv32_vin (
     end
     edrv32_vin_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_vin_n_w),
+        .rst_n_i(rst_mem_regs_clear_n_w),
 
         // Media APB slave.
         .apb_paddr_i(apb_paddr_i),
@@ -259,9 +288,9 @@ module edrv32_vin (
     wire [35:0] item0_data_w;
     edrv32_vin_dvp u_cam0 (
         .clk_cam_i(cam0_pclk_i),
-        .rst_cam_n_i(rst_cam0_n_i),
+        .rst_cam_n_i(rst_cam0_front_n_w),
         .clk_mem_i(clk_mem_i),
-        .rst_mem_n_i(rst_mem_n_i),
+        .rst_mem_n_i(rst_mem_ctrl_n_w),
 
         // DVP sensor input.
         .vsync_i(cam0_vsync_i),
@@ -309,9 +338,9 @@ module edrv32_vin (
     wire [35:0] item1_data_w;
     edrv32_vin_dvp u_cam1 (
         .clk_cam_i(cam1_pclk_i),
-        .rst_cam_n_i(rst_cam1_n_i),
+        .rst_cam_n_i(rst_cam1_front_n_w),
         .clk_mem_i(clk_mem_i),
-        .rst_mem_n_i(rst_mem_n_i),
+        .rst_mem_n_i(rst_mem_ctrl_n_w),
 
         // DVP sensor input.
         .vsync_i(cam1_vsync_i),

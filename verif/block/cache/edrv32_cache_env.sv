@@ -66,6 +66,9 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
         // Clock and reset
         .clk_i(clk),
         .rst_n_i(rst_n),
+        .rst_sys_ivalid0_n_i(rst_n),
+        .rst_sys_ivalid1_n_i(rst_n),
+        .rst_sys_ilru_n_i(rst_n),
 
         // Core interface
         .ic_req_valid_i(ic_req_valid),

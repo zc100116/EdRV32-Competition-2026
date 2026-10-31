@@ -38,6 +38,15 @@ module edrv32_pix (
     // Frame interrupt.
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_mem_ctrl_n_w;
+    edrv32_reset_copy u_reset_mem_ctrl_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_ctrl_n_w)
+    );
+
     wire enable_w;
     wire [31:0] cfg_w;
     wire [31:0] bc_w;
@@ -132,8 +141,8 @@ module edrv32_pix (
     assign unused_config_w = &{frame_cfg_r[31:19], frame_cfg_r[15:11],
         frame_cfg_r[7], frame_cfg_r[3], bc_w[31:25], bc_w[15:9]};
 
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
             advance_input_r <= 1'b1;
             advance_point1_r <= 7'h7f;
             advance_point2_r <= 3'h7;
@@ -196,21 +205,13 @@ module edrv32_pix (
             output_data_r[output_write_r] <= {tail_eof_w, tail_eol_w, tail_sof_w, tail_data_w};
     end
 
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
             busy_r <= 1'b0;
             input_eof_r <= 1'b0;
-            frame_cfg_r <= 32'd0;
-            frame_contrast_r <= 9'd256;
-            frame_bias_r <= 10'd128;
-            frame_thresh_r <= 8'd128;
         end else if (soft_reset_w) begin
             busy_r <= 1'b0;
             input_eof_r <= 1'b0;
-            frame_cfg_r <= 32'd0;
-            frame_contrast_r <= 9'd256;
-            frame_bias_r <= 10'd128;
-            frame_thresh_r <= 8'd128;
         end else begin
             if (frame_done_w || discard_w) begin
                 busy_r <= 1'b0;
@@ -219,19 +220,25 @@ module edrv32_pix (
             if (input_fire_w) begin
                 if (pix_in_sof_i) begin
                     busy_r <= 1'b1;
-                    frame_cfg_r <= enable_w ? cfg_w : 32'd0;
-                    frame_contrast_r <= bc_w[8:0];
-                    frame_bias_r <= $signed({bc_w[24], bc_w[24:16]}) + 10'sd128;
-                    frame_thresh_r <= thresh_w;
                 end
                 input_eof_r <= pix_in_eof_i;
             end
         end
     end
 
+    // SOF captures configuration before any valid pipeline sample uses it.
+    always @(posedge clk_mem_i) begin
+        if (!soft_reset_w && input_fire_w && pix_in_sof_i) begin
+            frame_cfg_r <= enable_w ? cfg_w : 32'd0;
+            frame_contrast_r <= bc_w[8:0];
+            frame_bias_r <= $signed({bc_w[24], bc_w[24:16]}) + 10'sd128;
+            frame_thresh_r <= thresh_w;
+        end
+    end
+
     edrv32_pix_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
 
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
@@ -264,7 +271,7 @@ module edrv32_pix (
 
     edrv32_pix_point1 u_point1 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
 
         .valid_i(accept_w),
         .data_i(input_data_r),
@@ -292,7 +299,7 @@ module edrv32_pix (
 
     edrv32_pix_filter u_stage1 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
 
         .valid_i(point1_valid_w),
         .data_i(point1_data_w),
@@ -315,7 +322,7 @@ module edrv32_pix (
 
     edrv32_pix_filter u_stage2 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
 
         .valid_i(stage1_valid_w),
         .data_i(stage1_data_w),
@@ -338,7 +345,7 @@ module edrv32_pix (
 
     edrv32_pix_point2 u_point2 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
 
         .valid_i(stage2_valid_w),
         .data_i(stage2_data_w),

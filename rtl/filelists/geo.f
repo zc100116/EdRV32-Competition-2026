@@ -1,3 +1,4 @@
+../common/edrv32_reset_copy.v
 +incdir+../include
 ../common/edrv32_dma2d_rd.v
 ../common/edrv32_dma2d_wr.v

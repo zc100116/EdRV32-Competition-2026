@@ -7,6 +7,8 @@ module edrv32_eth_regs (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire rst_mem_perf_n_i,
+
 
     // APB slave.
     input wire [11:0] apb_paddr_i,
@@ -88,6 +90,7 @@ module edrv32_eth_regs (
     reg [31:0] base_r [0:3];
     reg [31:0] size_r [0:3];
     reg [31:0] bytes_r [0:3];
+    integer perf_idx;
     reg [31:0] perf_r [0:10];
     wire write_w;
     wire [11:0] irq_clear_w;
@@ -152,8 +155,6 @@ module edrv32_eth_regs (
                 size_r[idx] <= 32'd0;
                 bytes_r[idx] <= 32'd0;
             end
-            for (idx = 0; idx < 11; idx = idx + 1)
-                perf_r[idx] <= 32'd0;
         end else if (clear_regs_r) begin
             enable_o <= 1'd0;
             irq_en_o <= 12'd0;
@@ -180,8 +181,6 @@ module edrv32_eth_regs (
                 size_r[idx] <= 32'd0;
                 bytes_r[idx] <= 32'd0;
             end
-            for (idx = 0; idx < 11; idx = idx + 1)
-                perf_r[idx] <= 32'd0;
         end else begin
             irq_stat_r <= (irq_stat_r & ~irq_clear_w) | irq_set_w;
             if (irq_clear_w[1])
@@ -192,18 +191,6 @@ module edrv32_eth_regs (
                 err_code_r <= 2'd2;
             if (desc_done_i)
                 done_count_r <= done_count_r + 32'd1;
-            if (perf_event_r[0])
-                perf_r[0] <= perf_r[0] + 32'd1;
-            if (perf_event_r[1])
-                perf_r[3] <= perf_r[3] + 32'd1;
-            if (perf_event_r[2])
-                perf_r[4] <= perf_r[4] + 32'd1;
-            if (perf_event_r[3])
-                perf_r[5] <= perf_r[5] + 32'd1;
-            if (perf_event_r[4])
-                perf_r[6] <= perf_r[6] + 32'd1;
-            if (perf_event_r[5])
-                perf_r[7] <= perf_r[7] + 32'd1;
             if (rx_complete_i) begin
 
                 if (rx_window_i == 2'd0)
@@ -218,20 +205,6 @@ module edrv32_eth_regs (
                 peer_mac_hi_r <= peer_i[95:80];
                 peer_ip_r <= peer_i[47:16];
                 peer_port_r <= peer_i[15:0];
-            end
-            if (perf_length_r != 0)
-                perf_r[2] <= perf_r[2] + {21'd0, perf_length_r};
-            if (perf_rx_complete_r)
-                perf_r[1] <= perf_r[1] + 32'd1;
-            if (perf_event_r[6])
-                perf_r[8] <= perf_r[8] + 32'd1;
-            if (perf_event_r[7])
-                perf_r[9] <= perf_r[9] + 32'd1;
-            if (perf_event_r[8])
-                perf_r[10] <= perf_r[10] + 32'd1;
-            if (start_o) begin
-                perf_r[9] <= 32'd0;
-                perf_r[10] <= 32'd0;
             end
             if (write_w) begin
                 case (apb_paddr_r)
@@ -265,6 +238,43 @@ module edrv32_eth_regs (
             end
         end
     end
+    always @(posedge clk_i or negedge rst_mem_perf_n_i) begin
+        if (!rst_mem_perf_n_i) begin
+            for (perf_idx = 0; perf_idx < 11; perf_idx = perf_idx + 1)
+                perf_r[perf_idx] <= 32'd0;
+        end else if (clear_regs_r) begin
+            for (perf_idx = 0; perf_idx < 11; perf_idx = perf_idx + 1)
+                perf_r[perf_idx] <= 32'd0;
+        end else begin
+            if (perf_event_r[0])
+                perf_r[0] <= perf_r[0] + 32'd1;
+            if (perf_event_r[1])
+                perf_r[3] <= perf_r[3] + 32'd1;
+            if (perf_event_r[2])
+                perf_r[4] <= perf_r[4] + 32'd1;
+            if (perf_event_r[3])
+                perf_r[5] <= perf_r[5] + 32'd1;
+            if (perf_event_r[4])
+                perf_r[6] <= perf_r[6] + 32'd1;
+            if (perf_event_r[5])
+                perf_r[7] <= perf_r[7] + 32'd1;
+            if (perf_length_r != 0)
+                perf_r[2] <= perf_r[2] + {21'd0, perf_length_r};
+            if (perf_rx_complete_r)
+                perf_r[1] <= perf_r[1] + 32'd1;
+            if (perf_event_r[6])
+                perf_r[8] <= perf_r[8] + 32'd1;
+            if (perf_event_r[7])
+                perf_r[9] <= perf_r[9] + 32'd1;
+            if (perf_event_r[8])
+                perf_r[10] <= perf_r[10] + 32'd1;
+            if (start_o) begin
+                perf_r[9] <= 32'd0;
+                perf_r[10] <= 32'd0;
+            end
+        end
+    end
+
     always @(*) begin
         apb_prdata_o = 32'd0;
         case (apb_paddr_r)

@@ -1,3 +1,4 @@
+../common/edrv32_reset_copy.v
 +incdir+../include
 ../tech/edrv32_ram_pix_line.v
 ../media/pix/edrv32_pix_kernel.v

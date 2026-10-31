@@ -130,18 +130,25 @@ module edrv32_disp_reader (
     assign desc_valid_o = state_r == S_DESC;
     assign desc_height_o = 12'd1;
 
+    // S_IDLE captures the frame shadow before S_LOAD/S_INIT use it.
+    always @(posedge clk_i) begin
+        if (state_r == S_IDLE && frame_start_o) begin
+            layer_ctrl_r <= layer_ctrl_i;
+            l1_y_end_r <= {1'b0, l1_pos_i[25:16]} +
+                {1'b0, l1_size_i[25:16]};
+            l1_beats_r <= l1_size_i[10:3];
+            l0_beats_r <= l0_scroll_i[3:0] == 4'd0 ? 7'd80 : 7'd81;
+            l0_limit_r <= l0_scroll_i[3:0] == 4'd0 ? 10'd432 : 10'd431;
+            l1_limit_r <= 10'd512 - {2'd0, l1_size_i[10:3]};
+        end
+    end
+
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
             line_r <= 10'd0;
             scroll_rows_r <= 12'd0;
-            layer_ctrl_r <= 2'd0;
             l1_y_r <= 10'd0;
-            l1_y_end_r <= 11'd0;
-            l1_beats_r <= 8'd0;
-            l0_beats_r <= 7'd80;
-            l0_limit_r <= 10'd432;
-            l1_limit_r <= 10'd512;
             pending_cnt_r <= 32'd0;
             pending_nonzero_r <= 1'b0;
             req_cnt_r <= 32'd0;
@@ -186,14 +193,7 @@ module edrv32_disp_reader (
                         state_r <= S_LOAD;
                         line_r <= 10'd0;
                         scroll_rows_r <= layer_ctrl_i[0] ? l0_scroll_i[27:16] : 12'd0;
-                        layer_ctrl_r <= layer_ctrl_i;
                         l1_y_r <= l1_pos_i[25:16];
-                        l1_y_end_r <= {1'b0, l1_pos_i[25:16]} +
-                            {1'b0, l1_size_i[25:16]};
-                        l1_beats_r <= l1_size_i[10:3];
-                        l0_beats_r <= l0_scroll_i[3:0] == 4'd0 ? 7'd80 : 7'd81;
-                        l0_limit_r <= l0_scroll_i[3:0] == 4'd0 ? 10'd432 : 10'd431;
-                        l1_limit_r <= 10'd512 - {2'd0, l1_size_i[10:3]};
                         write_layer_o <= 1'b0;
                     end
                 end

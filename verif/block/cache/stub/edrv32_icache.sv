@@ -5,6 +5,10 @@ module edrv32_icache (
     // Clock and reset
     input logic clk_i,
     input logic rst_n_i,
+    input logic rst_sys_ivalid0_n_i,
+    input logic rst_sys_ivalid1_n_i,
+    input logic rst_sys_ilru_n_i,
+
 
     // Core interface
     input logic ic_req_valid_i,

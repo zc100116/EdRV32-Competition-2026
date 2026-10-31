@@ -1,3 +1,4 @@
+../common/edrv32_reset_copy.v
 +incdir+../include
 ../common/edrv32_async_fifo.v
 ../common/edrv32_axi_async_bridge.v

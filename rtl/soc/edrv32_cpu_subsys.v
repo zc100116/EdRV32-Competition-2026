@@ -75,6 +75,69 @@ module edrv32_cpu_subsys #(
     output wire [63:0] debug_o,
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_sys_core_n_w;
+    wire rst_sys_direction0_n_w;
+    wire rst_sys_direction1_n_w;
+    wire rst_sys_csr_n_w;
+    wire rst_sys_icache_n_w;
+    wire rst_sys_ivalid0_n_w;
+    wire rst_sys_ivalid1_n_w;
+    wire rst_sys_ilru_n_w;
+    wire rst_sys_dcache_n_w;
+    wire rst_sys_cache_ctrl_n_w;
+    edrv32_reset_copy u_reset_sys_core_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_core_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_direction0_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction0_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_direction1_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction1_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_csr_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_csr_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_icache_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_icache_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_ivalid0_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_ivalid0_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_ivalid1_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_ivalid1_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_ilru_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_ilru_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_dcache_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_dcache_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_cache_ctrl_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_cache_ctrl_n_w)
+    );
+
     wire ic_req_valid_w;
     wire [31:0] ic_req_addr_w;
     wire ic_req_ready_w;
@@ -117,7 +180,11 @@ module edrv32_cpu_subsys #(
         .clk_i(clk_i),
 
         // Reset.
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_sys_core_n_w),
+        .rst_sys_direction0_n_i(rst_sys_direction0_n_w),
+        .rst_sys_direction1_n_i(rst_sys_direction1_n_w),
+        .rst_sys_csr_n_i(rst_sys_csr_n_w),
+
 
         // Core instruction interface.
         .ic_req_valid_o(ic_req_valid_w),
@@ -166,7 +233,11 @@ module edrv32_cpu_subsys #(
         .clk_i(clk_i),
 
         // Reset.
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_sys_icache_n_w),
+        .rst_sys_ivalid0_n_i(rst_sys_ivalid0_n_w),
+        .rst_sys_ivalid1_n_i(rst_sys_ivalid1_n_w),
+        .rst_sys_ilru_n_i(rst_sys_ilru_n_w),
+
 
         // Core instruction interface.
         .ic_req_valid_i(ic_req_valid_w),
@@ -201,7 +272,7 @@ module edrv32_cpu_subsys #(
         .clk_i(clk_i),
 
         // Reset.
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_sys_dcache_n_w),
 
         // Core data interface.
         .dc_req_valid_i(dc_req_valid_w),
@@ -271,7 +342,7 @@ module edrv32_cpu_subsys #(
         .clk_i(clk_i),
 
         // Reset.
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_sys_cache_ctrl_n_w),
 
         // APB slave.
         .apb_paddr_i(apb_paddr_i),

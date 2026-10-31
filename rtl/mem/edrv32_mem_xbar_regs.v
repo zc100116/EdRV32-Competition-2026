@@ -11,6 +11,7 @@ module edrv32_mem_xbar_regs (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire [6:0] rst_mem_stat_n_i,
 
     // APB control interface.
     input wire [11:0] apb_paddr_i,
@@ -76,33 +77,28 @@ module edrv32_mem_xbar_regs (
     reg [2:0] err_port_r;
     reg [31:0] err_addr_r;
     reg [2:0] err_type_r;
-    reg [31:0] rd_txn_r [0:6];
-    reg [31:0] wr_txn_r [0:6];
-    reg [31:0] rd_beat_r [0:6];
-    reg [31:0] wr_beat_r [0:6];
-    reg [15:0] wait_max_r [0:6];
-    reg [31:0] wait_sum_r [0:6];
-    reg [31:0] urg_cnt_r [0:6];
-    reg [31:0] rd_txn_snapshot_r [0:6];
-    reg [31:0] wr_txn_snapshot_r [0:6];
-    reg [31:0] rd_beat_snapshot_r [0:6];
-    reg [31:0] wr_beat_snapshot_r [0:6];
-    reg [15:0] max_snapshot_r [0:6];
-    reg [31:0] sum_snapshot_r [0:6];
-    reg [31:0] urg_snapshot_r [0:6];
+    wire [31:0] rd_txn_r [0:6];
+    wire [31:0] wr_txn_r [0:6];
+    wire [31:0] urg_cnt_r [0:6];
+    wire [31:0] rd_txn_snapshot_r [0:6];
+    wire [31:0] wr_txn_snapshot_r [0:6];
+    wire [31:0] rd_beat_snapshot_r [0:6];
+    wire [31:0] wr_beat_snapshot_r [0:6];
+    wire [15:0] max_snapshot_r [0:6];
+    wire [31:0] sum_snapshot_r [0:6];
+    wire [31:0] urg_snapshot_r [0:6];
     reg [31:0] dir_switch_r;
     reg [31:0] ds_busy_r;
     reg [31:0] window_cyc_r;
     reg [31:0] dir_snapshot_r;
     reg [31:0] busy_snapshot_r;
     reg [31:0] window_snapshot_r;
-    reg [3:0] rd_txn_carry_r [0:6];
-    reg [3:0] wr_txn_carry_r [0:6];
-    reg [3:0] urg_cnt_carry_r [0:6];
+    wire [3:0] rd_txn_carry_r [0:6];
+    wire [3:0] wr_txn_carry_r [0:6];
+    wire [3:0] urg_cnt_carry_r [0:6];
     reg [3:0] dir_switch_carry_r;
     reg [3:0] ds_busy_carry_r;
     reg [3:0] window_cyc_carry_r;
-    integer carry_idx;
     wire unused_pstrb_w;
     assign unused_pstrb_w = &apb_pstrb_r;
     wire unused_pwdata_w;
@@ -124,7 +120,6 @@ module edrv32_mem_xbar_regs (
     wire clear_w;
     wire irq_clear_w;
     integer idx;
-    integer stat_idx;
     genvar p;
 
     function [31:0] sat_add;
@@ -189,11 +184,6 @@ module edrv32_mem_xbar_regs (
             dir_switch_carry_r <= 4'b0;
             ds_busy_carry_r <= 4'b0;
             window_cyc_carry_r <= 4'b0;
-            for (carry_idx = 0; carry_idx < 7; carry_idx = carry_idx + 1) begin
-                rd_txn_carry_r[carry_idx] <= 4'b0;
-                wr_txn_carry_r[carry_idx] <= 4'b0;
-                urg_cnt_carry_r[carry_idx] <= 4'b0;
-            end
         end else begin
             dir_switch_carry_r <= clear_cmd_w[7] ? 4'b0 :
                 count_carry(dir_switch_r, dir_switch_event_r, dir_switch_carry_r[3]);
@@ -201,25 +191,42 @@ module edrv32_mem_xbar_regs (
                 count_carry(ds_busy_r, ds_busy_event_r, ds_busy_carry_r[3]);
             window_cyc_carry_r <= clear_cmd_w[7] ? 4'b0 :
                 count_carry(window_cyc_r, window_event_r, window_cyc_carry_r[3]);
-            for (carry_idx = 0; carry_idx < 7; carry_idx = carry_idx + 1) begin
-                rd_txn_carry_r[carry_idx] <= clear_cmd_w[carry_idx] ? 4'b0 :
-                    count_carry(rd_txn_r[carry_idx],
-                        grant_event_r && grant_port_event_r == carry_idx[2:0] &&
-                        !grant_write_event_r,
-                        rd_txn_carry_r[carry_idx][3]);
-                wr_txn_carry_r[carry_idx] <= clear_cmd_w[carry_idx] ? 4'b0 :
-                    count_carry(wr_txn_r[carry_idx],
-                        grant_event_r && grant_port_event_r == carry_idx[2:0] &&
-                        grant_write_event_r,
-                        wr_txn_carry_r[carry_idx][3]);
-                urg_cnt_carry_r[carry_idx] <= clear_cmd_w[carry_idx] ? 4'b0 :
-                    count_carry(urg_cnt_r[carry_idx],
-                        grant_event_r && grant_port_event_r == carry_idx[2:0] &&
-                        grant_urgent_event_r,
-                        urg_cnt_carry_r[carry_idx][3]);
-            end
         end
     end
+    genvar carry_idx;
+    generate
+        for (carry_idx = 0; carry_idx < 7; carry_idx = carry_idx + 1) begin : g_carry_idx
+            reg [3:0] bank_rd_txn_carry_r;
+            reg [3:0] bank_wr_txn_carry_r;
+            reg [3:0] bank_urg_cnt_carry_r;
+            assign rd_txn_carry_r[carry_idx] = bank_rd_txn_carry_r;
+            assign wr_txn_carry_r[carry_idx] = bank_wr_txn_carry_r;
+            assign urg_cnt_carry_r[carry_idx] = bank_urg_cnt_carry_r;
+            always @(posedge clk_i or negedge rst_mem_stat_n_i[carry_idx]) begin
+                if (!rst_mem_stat_n_i[carry_idx]) begin
+                    bank_rd_txn_carry_r <= 4'b0;
+                    bank_wr_txn_carry_r <= 4'b0;
+                    bank_urg_cnt_carry_r <= 4'b0;
+                end else begin
+                    bank_rd_txn_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
+                        count_carry(rd_txn_r[carry_idx],
+                            grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                            !grant_write_event_r,
+                            bank_rd_txn_carry_r[3]);
+                    bank_wr_txn_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
+                        count_carry(wr_txn_r[carry_idx],
+                            grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                            grant_write_event_r,
+                            bank_wr_txn_carry_r[3]);
+                    bank_urg_cnt_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
+                        count_carry(urg_cnt_r[carry_idx],
+                            grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                            grant_urgent_event_r,
+                            bank_urg_cnt_carry_r[3]);
+                end
+            end
+        end
+    endgenerate
 
     // Disjoint address cases infer a parallel read mux, without a priority chain.
     always @(*) begin
@@ -390,22 +397,6 @@ module edrv32_mem_xbar_regs (
             dir_snapshot_r <= 32'b0;
             busy_snapshot_r <= 32'b0;
             window_snapshot_r <= 32'b0;
-            for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
-                rd_txn_r[stat_idx] <= 32'b0;
-                wr_txn_r[stat_idx] <= 32'b0;
-                rd_beat_r[stat_idx] <= 32'b0;
-                wr_beat_r[stat_idx] <= 32'b0;
-                wait_max_r[stat_idx] <= 16'b0;
-                wait_sum_r[stat_idx] <= 32'b0;
-                urg_cnt_r[stat_idx] <= 32'b0;
-                rd_txn_snapshot_r[stat_idx] <= 32'b0;
-                wr_txn_snapshot_r[stat_idx] <= 32'b0;
-                rd_beat_snapshot_r[stat_idx] <= 32'b0;
-                wr_beat_snapshot_r[stat_idx] <= 32'b0;
-                max_snapshot_r[stat_idx] <= 16'b0;
-                sum_snapshot_r[stat_idx] <= 32'b0;
-                urg_snapshot_r[stat_idx] <= 32'b0;
-            end
         end else begin
             if (snapshot_cmd_w[7]) begin
                 dir_snapshot_r <= dir_switch_r;
@@ -424,51 +415,97 @@ module edrv32_mem_xbar_regs (
                 if (dir_switch_event_r)
                     dir_switch_r <= count_inc(dir_switch_r, dir_switch_carry_r);
             end
-            for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin
-                if (snapshot_cmd_w[stat_idx]) begin
-                    rd_txn_snapshot_r[stat_idx] <= rd_txn_r[stat_idx];
-                    wr_txn_snapshot_r[stat_idx] <= wr_txn_r[stat_idx];
-                    rd_beat_snapshot_r[stat_idx] <= rd_beat_r[stat_idx];
-                    wr_beat_snapshot_r[stat_idx] <= wr_beat_r[stat_idx];
-                    max_snapshot_r[stat_idx] <= wait_max_r[stat_idx];
-                    sum_snapshot_r[stat_idx] <= wait_sum_r[stat_idx];
-                    urg_snapshot_r[stat_idx] <= urg_cnt_r[stat_idx];
-                end
-                if (clear_cmd_w[stat_idx]) begin
-                    rd_txn_r[stat_idx] <= 32'b0;
-                    wr_txn_r[stat_idx] <= 32'b0;
-                    rd_beat_r[stat_idx] <= 32'b0;
-                    wr_beat_r[stat_idx] <= 32'b0;
-                    wait_max_r[stat_idx] <= 16'b0;
-                    wait_sum_r[stat_idx] <= 32'b0;
-                    urg_cnt_r[stat_idx] <= 32'b0;
+        end
+    end
+    genvar stat_idx;
+    generate
+        for (stat_idx = 0; stat_idx < 7; stat_idx = stat_idx + 1) begin : g_stat_idx
+            reg [31:0] bank_rd_txn_r;
+            reg [31:0] bank_wr_txn_r;
+            reg [31:0] bank_rd_beat_r;
+            reg [31:0] bank_wr_beat_r;
+            reg [15:0] bank_wait_max_r;
+            reg [31:0] bank_wait_sum_r;
+            reg [31:0] bank_urg_cnt_r;
+            reg [31:0] bank_rd_txn_snapshot_r;
+            reg [31:0] bank_wr_txn_snapshot_r;
+            reg [31:0] bank_rd_beat_snapshot_r;
+            reg [31:0] bank_wr_beat_snapshot_r;
+            reg [15:0] bank_max_snapshot_r;
+            reg [31:0] bank_sum_snapshot_r;
+            reg [31:0] bank_urg_snapshot_r;
+            assign rd_txn_r[stat_idx] = bank_rd_txn_r;
+            assign wr_txn_r[stat_idx] = bank_wr_txn_r;
+            assign urg_cnt_r[stat_idx] = bank_urg_cnt_r;
+            assign rd_txn_snapshot_r[stat_idx] = bank_rd_txn_snapshot_r;
+            assign wr_txn_snapshot_r[stat_idx] = bank_wr_txn_snapshot_r;
+            assign rd_beat_snapshot_r[stat_idx] = bank_rd_beat_snapshot_r;
+            assign wr_beat_snapshot_r[stat_idx] = bank_wr_beat_snapshot_r;
+            assign max_snapshot_r[stat_idx] = bank_max_snapshot_r;
+            assign sum_snapshot_r[stat_idx] = bank_sum_snapshot_r;
+            assign urg_snapshot_r[stat_idx] = bank_urg_snapshot_r;
+            always @(posedge clk_i or negedge rst_mem_stat_n_i[stat_idx]) begin
+                if (!rst_mem_stat_n_i[stat_idx]) begin
+                    bank_rd_txn_r <= 32'b0;
+                    bank_wr_txn_r <= 32'b0;
+                    bank_rd_beat_r <= 32'b0;
+                    bank_wr_beat_r <= 32'b0;
+                    bank_wait_max_r <= 16'b0;
+                    bank_wait_sum_r <= 32'b0;
+                    bank_urg_cnt_r <= 32'b0;
+                    bank_rd_txn_snapshot_r <= 32'b0;
+                    bank_wr_txn_snapshot_r <= 32'b0;
+                    bank_rd_beat_snapshot_r <= 32'b0;
+                    bank_wr_beat_snapshot_r <= 32'b0;
+                    bank_max_snapshot_r <= 16'b0;
+                    bank_sum_snapshot_r <= 32'b0;
+                    bank_urg_snapshot_r <= 32'b0;
                 end else begin
-                    if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
-                        if (grant_write_event_r) begin
-                            wr_txn_r[stat_idx] <=
-                            count_inc(wr_txn_r[stat_idx], wr_txn_carry_r[stat_idx]);
-                            wr_beat_r[stat_idx] <=
-                                sat_add(wr_beat_r[stat_idx], {27'b0, grant_beats_event_r});
-                        end else begin
-                            rd_txn_r[stat_idx] <=
-                            count_inc(rd_txn_r[stat_idx], rd_txn_carry_r[stat_idx]);
-                            rd_beat_r[stat_idx] <=
-                                sat_add(rd_beat_r[stat_idx], {27'b0, grant_beats_event_r});
-                        end
-                        wait_sum_r[stat_idx] <=
-                            sat_add(wait_sum_r[stat_idx], {16'b0, grant_wait_event_r});
-                        if (grant_wait_event_r > wait_max_r[stat_idx]) begin
-                            wait_max_r[stat_idx] <= grant_wait_event_r;
-                        end
-                        if (grant_urgent_event_r) begin
-                            urg_cnt_r[stat_idx] <=
-                            count_inc(urg_cnt_r[stat_idx], urg_cnt_carry_r[stat_idx]);
+                    if (snapshot_cmd_w[stat_idx]) begin
+                        bank_rd_txn_snapshot_r <= bank_rd_txn_r;
+                        bank_wr_txn_snapshot_r <= bank_wr_txn_r;
+                        bank_rd_beat_snapshot_r <= bank_rd_beat_r;
+                        bank_wr_beat_snapshot_r <= bank_wr_beat_r;
+                        bank_max_snapshot_r <= bank_wait_max_r;
+                        bank_sum_snapshot_r <= bank_wait_sum_r;
+                        bank_urg_snapshot_r <= bank_urg_cnt_r;
+                    end
+                    if (clear_cmd_w[stat_idx]) begin
+                        bank_rd_txn_r <= 32'b0;
+                        bank_wr_txn_r <= 32'b0;
+                        bank_rd_beat_r <= 32'b0;
+                        bank_wr_beat_r <= 32'b0;
+                        bank_wait_max_r <= 16'b0;
+                        bank_wait_sum_r <= 32'b0;
+                        bank_urg_cnt_r <= 32'b0;
+                    end else begin
+                        if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
+                            if (grant_write_event_r) begin
+                                bank_wr_txn_r <=
+                                count_inc(bank_wr_txn_r, wr_txn_carry_r[stat_idx]);
+                                bank_wr_beat_r <=
+                                    sat_add(bank_wr_beat_r, {27'b0, grant_beats_event_r});
+                            end else begin
+                                bank_rd_txn_r <=
+                                count_inc(bank_rd_txn_r, rd_txn_carry_r[stat_idx]);
+                                bank_rd_beat_r <=
+                                    sat_add(bank_rd_beat_r, {27'b0, grant_beats_event_r});
+                            end
+                            bank_wait_sum_r <=
+                                sat_add(bank_wait_sum_r, {16'b0, grant_wait_event_r});
+                            if (grant_wait_event_r > bank_wait_max_r) begin
+                                bank_wait_max_r <= grant_wait_event_r;
+                            end
+                            if (grant_urgent_event_r) begin
+                                bank_urg_cnt_r <=
+                                count_inc(bank_urg_cnt_r, urg_cnt_carry_r[stat_idx]);
+                            end
                         end
                     end
                 end
             end
         end
-    end
+    endgenerate
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             grant_event_r <= 1'b0;
@@ -493,11 +530,11 @@ module edrv32_mem_xbar_regs (
     genvar bank;
     generate
         for (bank = 0; bank < 8; bank = bank + 1) begin : g_stat_command
-            reg snapshot_r;
-            reg clear_r;
+            reg snapshot_r /* synthesis syn_preserve=1 */;
+            reg clear_r /* synthesis syn_preserve=1 */;
             assign snapshot_cmd_w[bank] = snapshot_r;
             assign clear_cmd_w[bank] = clear_r;
-            (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+            always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
                     snapshot_r <= 1'b0;
                     clear_r <= 1'b0;

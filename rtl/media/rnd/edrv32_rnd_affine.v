@@ -174,22 +174,18 @@ module edrv32_rnd_affine (
         if (!rst_n_i) begin
             state_r <= S_IDLE;
             bit_r <= 4'd0;
-            initial_mask_r <= 16'd0;
         end else if (clear_i || start_i) begin
             state_r <= clear_i ? S_IDLE : S_X;
             bit_r <= 4'd0;
-            initial_mask_r <= offset_x_w[15:0];
         end else begin
             case (state_r)
                 S_X: begin
                     bit_r <= bit_r + 4'd1;
-                    initial_mask_r <= bit_r == 15 ? offset_y_w[15:0] : initial_mask_r >> 1;
                     if (bit_r == 15)
                         state_r <= S_Y;
                 end
                 S_Y: begin
                     bit_r <= bit_r + 4'd1;
-                    initial_mask_r <= initial_mask_r >> 1;
                     if (bit_r == 15)
                         state_r <= S_SEED;
                 end
@@ -197,6 +193,15 @@ module edrv32_rnd_affine (
                 default: state_r <= state_r;
             endcase
         end
+    end
+    // Start seeds the offset before S_X/S_Y serially consume its bits.
+    always @(posedge clk_i) begin
+        if (clear_i || start_i)
+            initial_mask_r <= offset_x_w[15:0];
+        else if (state_r == S_X)
+            initial_mask_r <= bit_r == 15 ? offset_y_w[15:0] : initial_mask_r >> 1;
+        else if (state_r == S_Y)
+            initial_mask_r <= initial_mask_r >> 1;
     end
     always @(posedge clk_i) begin
         if (start_i) begin

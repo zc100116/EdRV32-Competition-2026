@@ -26,9 +26,9 @@ module edrv32_npu_regs (
     input wire [2:0] error_code_i,
     input wire [31:0] cur_desc_i,
     input wire [7:0] perf_event_i,
-    output wire start_o,
-    output wire abort_o,
-    output wire soft_reset_o,
+    output reg start_o,
+    output reg abort_o,
+    output reg soft_reset_o,
     output wire [31:0] desc_base_o,
     output wire [31:0] desc_count_o,
     output wire [127:0] bases_o,
@@ -62,6 +62,9 @@ module edrv32_npu_regs (
     reg [31:0] perf_r [0:7];
     reg [7:0] perf_event_r;
     reg perf_clear_r;
+    wire start_w;
+    wire abort_w;
+    wire soft_reset_w;
     wire write_w;
     wire irq_clear_w;
     wire unused_pstrb_w;
@@ -69,10 +72,22 @@ module edrv32_npu_regs (
     assign unused_pstrb_w = |apb_pstrb_r;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
     assign irq_clear_w = write_w && (apb_paddr_r == 12'h010);
-    assign start_o = write_w && (apb_paddr_r == 12'h028) && !busy_i;
-    assign abort_o = write_w && (apb_paddr_r == 12'h004) && apb_pwdata_r[2];
-    assign soft_reset_o = write_w && (apb_paddr_r == 12'h004)
+    assign start_w = write_w && (apb_paddr_r == 12'h028) && !busy_i;
+    assign abort_w = write_w && (apb_paddr_r == 12'h004) && apb_pwdata_r[2];
+    assign soft_reset_w = write_w && (apb_paddr_r == 12'h004)
         && apb_pwdata_r[3] && !busy_i;
+    // SoC 7.1: register write side effects before the engine consumes them.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            start_o <= 1'b0;
+            abort_o <= 1'b0;
+            soft_reset_o <= 1'b0;
+        end else begin
+            start_o <= start_w;
+            abort_o <= abort_w;
+            soft_reset_o <= soft_reset_w;
+        end
+    end
     assign apb_pready_o = 1'b1;
     assign apb_pslverr_o = 1'b0;
     assign irq_o = |(irq_en_r[1:0] & irq_stat_r);
@@ -85,12 +100,12 @@ module edrv32_npu_regs (
         if (!rst_n_i) begin
             perf_event_r <= 8'd0;
             perf_clear_r <= 1'b0;
-        end else if (soft_reset_o) begin
+        end else if (soft_reset_w) begin
             perf_event_r <= 8'd0;
             perf_clear_r <= 1'b0;
         end else begin
             perf_event_r <= perf_event_i;
-            perf_clear_r <= start_o;
+            perf_clear_r <= start_w;
         end
     end
 
@@ -135,7 +150,7 @@ module edrv32_npu_regs (
             for (counter_idx = 0; counter_idx < 8; counter_idx = counter_idx + 1) begin
                 perf_r[counter_idx] <= 32'd0;
             end
-        end else if (soft_reset_o) begin
+        end else if (soft_reset_w) begin
             enable_r <= 1'b0;
             irq_en_r <= 32'd0;
             irq_stat_r <= 2'd0;

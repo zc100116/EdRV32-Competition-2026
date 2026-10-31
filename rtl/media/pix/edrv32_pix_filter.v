@@ -267,7 +267,6 @@ module edrv32_pix_filter (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             column_r <= 10'd0;
-            width_r <= 10'd0;
             row_kind_r <= 2'd0;
             bank_r <= 1'b0;
             flush_r <= 1'b0;
@@ -280,7 +279,6 @@ module edrv32_pix_filter (
             bypass_valid_r <= 1'b0;
         end else if (clear_i) begin
             column_r <= 10'd0;
-            width_r <= 10'd0;
             row_kind_r <= 2'd0;
             bank_r <= 1'b0;
             flush_r <= 1'b0;
@@ -313,9 +311,6 @@ module edrv32_pix_filter (
                 end else if (!flush_r) begin
                     column_r <= column_r + 10'd1;
                 end
-                if (!flush_r && eol_i && row_kind_r == 2'd0) begin
-                    width_r <= column_r;
-                end
                 if (!flush_r && eof_i) begin
                     flush_r <= 1'b1;
                     flush_column_r <= 10'd0;
@@ -333,6 +328,12 @@ module edrv32_pix_filter (
                 bank_r <= 1'b0;
             end
         end
+    end
+
+    // First-row EOL records width before the tail-row flush can read it.
+    always @(posedge clk_i) begin
+        if (!clear_i && advance_i[0] && request_w && !flush_r && eol_i && row_kind_r == 0)
+            width_r <= column_r;
     end
 
     always @(posedge clk_i) begin

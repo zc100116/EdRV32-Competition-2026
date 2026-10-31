@@ -51,6 +51,27 @@ module edrv32_npu (
     // Level interrupt, clk_npu.
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_npu_ctrl_n_w;
+    wire rst_mem_bridge_n_w;
+    wire rst_npu_conv_n_w;
+    edrv32_reset_copy u_reset_npu_ctrl_n (
+        .clk_i(clk_npu_i),
+        .rst_n_i(rst_npu_n_i),
+        .rst_n_o(rst_npu_ctrl_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_bridge_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_bridge_n_w)
+    );
+    edrv32_reset_copy u_reset_npu_conv_n (
+        .clk_i(clk_npu_i),
+        .rst_n_i(rst_npu_n_i),
+        .rst_n_o(rst_npu_conv_n_w)
+    );
+
     wire local_apb_psel_w;
     wire local_apb_penable_w;
     wire local_apb_pwrite_w;
@@ -222,8 +243,8 @@ module edrv32_npu (
         || (busy_w && (abort_w || descriptor_error_w));
     // Register the execution stop before the conv/DMA request-enable cone.
     // The top-level request and DONE masks below still use the immediate stop.
-    always @(posedge clk_npu_i or negedge rst_npu_n_i) begin
-        if (!rst_npu_n_i) begin
+    always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
+        if (!rst_npu_ctrl_n_w) begin
             stop_r <= 1'b0;
         end else begin
             stop_r <= stop_w;
@@ -273,8 +294,8 @@ module edrv32_npu (
     assign perf_event_w = {nonconv_active_w, write_response_wait_w, conv_model_wait_w,
         conv_input_wait_w, write_beat_w, read_beat_w, conv_mac_beat_w, busy_w};
 
-    always @(posedge clk_npu_i or negedge rst_npu_n_i) begin
-        if (!rst_npu_n_i) begin
+    always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
+        if (!rst_npu_ctrl_n_w) begin
             state_r <= S_IDLE;
             cur_desc_r <= 32'd0;
             is_conv_r <= 1'b0;
@@ -348,7 +369,7 @@ module edrv32_npu (
     edrv32_npu_regs u_regs (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
+        .rst_n_i(rst_npu_ctrl_n_w),
 
         // APB register interface.
         .apb_paddr_i(unused_apb_addr_w[11:0]),
@@ -394,7 +415,7 @@ module edrv32_npu (
     edrv32_npu_descriptor u_descriptor (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
+        .rst_n_i(rst_npu_ctrl_n_w),
 
         // Execution lifetime.
         .cancel_i(cancel_w),
@@ -428,7 +449,7 @@ module edrv32_npu (
     edrv32_npu_conv u_conv (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
+        .rst_n_i(rst_npu_conv_n_w),
 
         // Execution lifetime.
         .start_i(conv_start_w),
@@ -483,7 +504,7 @@ module edrv32_npu (
     edrv32_npu_nonconv u_nonconv (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
+        .rst_n_i(rst_npu_ctrl_n_w),
 
         // Execution lifetime.
         .start_i(nonconv_start_w),
@@ -527,7 +548,7 @@ module edrv32_npu (
     edrv32_npu_read_dma u_read_dma (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
+        .rst_n_i(rst_npu_ctrl_n_w),
 
         // Execution lifetime.
         .stop_i(stop_r),
@@ -571,7 +592,7 @@ module edrv32_npu (
     edrv32_npu_write_dma u_write_dma (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
+        .rst_n_i(rst_npu_ctrl_n_w),
 
         // Execution lifetime.
         .stop_i(stop_w),
@@ -617,9 +638,9 @@ module edrv32_npu (
     edrv32_apb_async_bridge u_apb_bridge (
         // Clocks and domain-local resets.
         .clk_s_i(clk_mem_i),
-        .rst_s_n_i(rst_mem_n_i),
+        .rst_s_n_i(rst_mem_bridge_n_w),
         .clk_m_i(clk_npu_i),
-        .rst_m_n_i(rst_npu_n_i),
+        .rst_m_n_i(rst_npu_ctrl_n_w),
 
         // APB register interface.
         .s_apb_paddr_i({4'd0, apb_paddr_i}),
@@ -645,9 +666,9 @@ module edrv32_npu (
     edrv32_axi256_async_bridge u_axi_bridge (
         // Clocks and domain-local resets.
         .clk_npu_i(clk_npu_i),
-        .rst_npu_n_i(rst_npu_n_i),
+        .rst_npu_n_i(rst_npu_ctrl_n_w),
         .clk_mem_i(clk_mem_i),
-        .rst_mem_n_i(rst_mem_n_i),
+        .rst_mem_n_i(rst_mem_bridge_n_w),
 
         // AXI256 channels.
         .s_axi_awid_i(local_axi_awid_w),

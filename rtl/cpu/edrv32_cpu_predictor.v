@@ -7,6 +7,9 @@ module edrv32_cpu_predictor (
     // Clock and control reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire rst_sys_direction0_n_i,
+    input wire rst_sys_direction1_n_i,
+
     // F1 query; accept advances speculative RAS only for an accepted prediction.
     input wire [31:1] query_pc_i,
     input wire query_accept_i,
@@ -47,7 +50,7 @@ module edrv32_cpu_predictor (
     reg [1:0] btb_position_r [0:BTB_ENTRIES-1];
     reg [2:0] btb_type_r [0:BTB_ENTRIES-1];
     reg btb_compressed_r [0:BTB_ENTRIES-1];
-    reg [DIRECTION_ENTRIES*2-1:0] direction_r;
+    wire [DIRECTION_ENTRIES*2-1:0] direction_r;
     reg [8:0] history_r;
     reg [127:0] ras_data_r;
     reg [1:0] ras_ptr_r;
@@ -87,18 +90,12 @@ module edrv32_cpu_predictor (
             history_r <= 0;
             ras_ptr_r <= 0;
             ras_count_r <= 0;
-            direction_r <= {DIRECTION_ENTRIES{2'b01}};
         end else begin
             if (update_valid_i) begin
                 btb_valid_r[update_pc_i[7:3]] <= 1'b1;
                 if (update_type_i == 0) begin
                     history_r <= {history_r[7:0], update_taken_i};
-                    if (update_taken_i && direction_r[update_index_i * 2 +: 2] != 3)
-                        direction_r[update_index_i * 2 +: 2] <=
-                            direction_r[update_index_i * 2 +: 2] + 1'b1;
-                    else if (!update_taken_i && direction_r[update_index_i * 2 +: 2] != 0)
-                        direction_r[update_index_i * 2 +: 2] <=
-                            direction_r[update_index_i * 2 +: 2] - 1'b1;
+
                 end
             end
             if (clear_valid_i)
@@ -140,6 +137,30 @@ module edrv32_cpu_predictor (
             btb_compressed_r[update_pc_i[7:3]] <= update_compressed_i;
         end
     end
+    genvar direction_bank;
+    generate
+        for (direction_bank = 0; direction_bank < 2;
+            direction_bank = direction_bank + 1) begin : g_direction
+            reg [511:0] counters_r;
+            wire rst_direction_n_w;
+            assign direction_r[direction_bank*512 +: 512] = counters_r;
+            assign rst_direction_n_w = direction_bank == 0 ?
+                rst_sys_direction0_n_i : rst_sys_direction1_n_i;
+            always @(posedge clk_i or negedge rst_direction_n_w) begin
+                if (!rst_direction_n_w) begin
+                    counters_r <= {256{2'b01}};
+                end else if (update_valid_i && update_type_i == 0 &&
+                    update_index_i[8] == direction_bank[0]) begin
+                    if (update_taken_i && direction_r[update_index_i * 2 +: 2] != 3)
+                        counters_r[update_index_i[7:0]*2 +: 2] <=
+                            direction_r[update_index_i * 2 +: 2] + 1'b1;
+                    else if (!update_taken_i && direction_r[update_index_i * 2 +: 2] != 0)
+                        counters_r[update_index_i[7:0]*2 +: 2] <=
+                            direction_r[update_index_i * 2 +: 2] - 1'b1;
+                end
+            end
+        end
+    endgenerate
     // Decode each destination before the late redirect/recovery enable arrives.
     // A push still overrides a restored top when both select the same entry.
     generate

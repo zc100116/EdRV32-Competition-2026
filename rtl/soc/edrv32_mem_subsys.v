@@ -233,6 +233,69 @@ module edrv32_mem_subsys (
     output wire irq_mem_xbar_o
 );
 
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_mem_regs_n_w;
+    wire rst_sys_gateway_n_w;
+    wire rst_mem_core_ctrl_n_w;
+    wire rst_mem_stat0_n_w;
+    wire rst_mem_stat1_n_w;
+    wire rst_mem_stat2_n_w;
+    wire rst_mem_stat3_n_w;
+    wire rst_mem_stat4_n_w;
+    wire rst_mem_stat5_n_w;
+    wire rst_mem_stat6_n_w;
+    edrv32_reset_copy u_reset_mem_regs_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_regs_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_gateway_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_i),
+        .rst_n_o(rst_sys_gateway_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_core_ctrl_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_core_ctrl_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat0_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat0_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat1_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat1_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat2_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat2_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat3_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat3_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat4_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat4_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat5_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat5_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_stat6_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_o(rst_mem_stat6_n_w)
+    );
+
+
     // p2 internal AXI256 connections.
     wire p2_awid_w;
     wire [31:0] p2_awaddr_w;
@@ -264,8 +327,8 @@ module edrv32_mem_subsys (
         // Clocks and resets.
         .clk_sys_i(clk_sys_i),
         .clk_mem_i(clk_mem_i),
-        .rst_sys_n_i(rst_sys_n_i),
-        .rst_mem_n_i(rst_mem_core_n_i),
+        .rst_sys_n_i(rst_sys_gateway_n_w),
+        .rst_mem_n_i(rst_mem_core_ctrl_n_w),
 
         // System crossbar AXI64.
         .s_axi_awid_i(gw_awid_i),
@@ -329,7 +392,10 @@ module edrv32_mem_subsys (
     edrv32_mem_xbar u_xbar (
         // Clock and reset.
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
+        .rst_n_i(rst_mem_core_ctrl_n_w),
+        .rst_mem_regs_n_i(rst_mem_regs_n_w),
+        .rst_mem_stat_n_i({rst_mem_stat6_n_w, rst_mem_stat5_n_w, rst_mem_stat4_n_w,
+            rst_mem_stat3_n_w, rst_mem_stat2_n_w, rst_mem_stat1_n_w, rst_mem_stat0_n_w}),
 
         // DISP read port P0.
         .p0_arid_i(p0_arid_i),

@@ -58,6 +58,39 @@ module edrv32_eth (
     output wire axi_bready_o,
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_mem_ctrl_n_w;
+    wire rst_eth_rx_front_n_w;
+    wire rst_eth_tx_front_n_w;
+    wire rst_mem_regs_n_w;
+    wire rst_mem_perf_n_w;
+    edrv32_reset_copy u_reset_mem_ctrl_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_ctrl_n_w)
+    );
+    edrv32_reset_copy u_reset_eth_rx_front_n (
+        .clk_i(clk_eth_rx_i),
+        .rst_n_i(rst_eth_rx_n_i),
+        .rst_n_o(rst_eth_rx_front_n_w)
+    );
+    edrv32_reset_copy u_reset_eth_tx_front_n (
+        .clk_i(clk_eth_tx_i),
+        .rst_n_i(rst_eth_tx_n_i),
+        .rst_n_o(rst_eth_tx_front_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_regs_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_regs_n_w)
+    );
+    edrv32_reset_copy u_reset_mem_perf_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_perf_n_w)
+    );
+
     wire rx_front_valid_w;
     wire [9:0] rx_front_data_w;
     wire rx_front_ready_w;
@@ -154,8 +187,8 @@ module edrv32_eth (
     assign arp_valid_w = arp_pending_r || arp_event_w;
     assign eth_phy_rst_n_o = !phy_w;
     assign unused_w = &{1'b0, rx_front_ready_w, tx_front_data_w[9], irq_en_w, write_retire_error_w};
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i)
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w)
             arp_pending_r <= 1'b0;
         else if (clear_w)
             arp_pending_r <= 1'b0;
@@ -172,7 +205,7 @@ module edrv32_eth (
     end
     edrv32_eth_rx_front u_rx_front (
         .clk_i(clk_eth_rx_i),
-        .rst_n_i(rst_eth_rx_n_i),
+        .rst_n_i(rst_eth_rx_front_n_w),
         .data_i(eth_rxd_i),
         .valid_i(eth_rx_dv_i),
         .error_i(eth_rx_er_i),
@@ -181,9 +214,9 @@ module edrv32_eth (
     );
     edrv32_eth_fifo u_rx_fifo (
         .clk_write_i(clk_eth_rx_i),
-        .rst_write_n_i(rst_eth_rx_n_i),
+        .rst_write_n_i(rst_eth_rx_front_n_w),
         .clk_read_i(clk_mem_i),
-        .rst_read_n_i(rst_mem_n_i),
+        .rst_read_n_i(rst_mem_ctrl_n_w),
         .valid_i(rx_front_valid_w),
         .ready_o(rx_front_ready_w),
         .data_i(rx_front_data_w),
@@ -193,7 +226,7 @@ module edrv32_eth (
     );
     edrv32_eth_rx u_rx (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .clear_i(clear_w),
         .valid_i(rx_valid_w),
         .data_i(rx_data_w),
@@ -223,7 +256,7 @@ module edrv32_eth (
         .DEPTH(4)
     ) u_rx_packets (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .valid_i(packet_valid_w),
         .ready_o(metadata_ready_w),
         .data_i(metadata_w),
@@ -233,7 +266,7 @@ module edrv32_eth (
     );
     edrv32_eth_rx_write u_rx_write (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .clear_i(clear_w),
         .valid_i(write_packet_w),
         .ready_o(write_ready_w),
@@ -274,7 +307,7 @@ module edrv32_eth (
         .OUTSTANDING(4)
     ) u_write_dma (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .desc_valid_i(write_desc_valid_w),
         .desc_ready_o(write_desc_ready_w),
         .desc_base_i(write_base_w),
@@ -306,7 +339,7 @@ module edrv32_eth (
     );
     edrv32_eth_tx u_tx (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .clear_i(clear_w),
         .start_i(start_w),
         .abort_i(abort_w),
@@ -347,9 +380,9 @@ module edrv32_eth (
     );
     edrv32_eth_fifo u_tx_fifo (
         .clk_write_i(clk_mem_i),
-        .rst_write_n_i(rst_mem_n_i),
+        .rst_write_n_i(rst_mem_ctrl_n_w),
         .clk_read_i(clk_eth_tx_i),
-        .rst_read_n_i(rst_eth_tx_n_i),
+        .rst_read_n_i(rst_eth_tx_front_n_w),
         .valid_i(tx_valid_w),
         .ready_o(tx_ready_w),
         .data_i(tx_data_w),
@@ -359,7 +392,7 @@ module edrv32_eth (
     );
     edrv32_eth_tx_front u_tx_front (
         .clk_i(clk_eth_tx_i),
-        .rst_n_i(rst_eth_tx_n_i),
+        .rst_n_i(rst_eth_tx_front_n_w),
         .valid_i(tx_front_valid_w),
         .ready_o(tx_front_ready_w),
         .data_i(tx_front_data_w[8:0]),
@@ -370,15 +403,16 @@ module edrv32_eth (
     );
     edrv32_cdc_pulse u_tx_done (
         .clk_src_i(clk_eth_tx_i),
-        .rst_src_n_i(rst_eth_tx_n_i),
+        .rst_src_n_i(rst_eth_tx_front_n_w),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_n_i),
+        .rst_dst_n_i(rst_mem_ctrl_n_w),
         .pulse_i(tx_front_done_w),
         .pulse_o(tx_done_w)
     );
     edrv32_eth_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_regs_n_w),
+        .rst_mem_perf_n_i(rst_mem_perf_n_w),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
@@ -432,7 +466,7 @@ module edrv32_eth (
     edrv32_eth_mdio u_mdio (
         .clear_i(clear_w),
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(mdio_start_w),
         .command_i(mdio_command_w),
         .busy_o(mdio_busy_w),

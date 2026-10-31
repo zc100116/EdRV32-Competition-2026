@@ -9,6 +9,10 @@ module edrv32_cpu_core #(
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire rst_sys_direction0_n_i,
+    input wire rst_sys_direction1_n_i,
+    input wire rst_sys_csr_n_i,
+
     // Instruction cache.
     output wire ic_req_valid_o,
     output wire [31:0] ic_req_addr_o,
@@ -314,6 +318,8 @@ module edrv32_cpu_core #(
     edrv32_cpu_frontend #(.RVC_EN(RVC_EN)) u_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_sys_direction0_n_i(rst_sys_direction0_n_i),
+        .rst_sys_direction1_n_i(rst_sys_direction1_n_i),
         .redirect_valid_i(backend_redirect_w),
         .redirect_pc_i(backend_redirect_pc_w),
         .redirect_ras_i(backend_redirect_ras_w),
@@ -376,7 +382,7 @@ module edrv32_cpu_core #(
     );
     edrv32_cpu_csr #(.RVC_EN(RVC_EN)) u_csr (
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_sys_csr_n_i),
         .access_valid_i(csr_m_access_w),
         .select_i(m_csr_select_r),
         .write_i(csr_write_w),

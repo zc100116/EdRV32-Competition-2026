@@ -9,7 +9,7 @@ module edrv32_reset_copy (
     input wire rst_n_i,
 
     // Regional reset released on the next domain clock.
-    output reg rst_n_o
+    output reg rst_n_o /* synthesis syn_preserve=1 */
 );
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

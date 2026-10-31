@@ -51,6 +51,15 @@ module edrv32_rnd (
     // PLIC source 11.
     output wire irq_o
 );
+
+    // SoC 5.3: one preserved reset copy per destination region.
+    wire rst_mem_ctrl_n_w;
+    edrv32_reset_copy u_reset_mem_ctrl_n (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_i),
+        .rst_n_o(rst_mem_ctrl_n_w)
+    );
+
     localparam [4:0] S_IDLE = 5'd0;
     localparam [4:0] S_FETCH = 5'd1;
     localparam [4:0] S_FETCH_WAIT = 5'd2;
@@ -244,7 +253,7 @@ module edrv32_rnd (
         ({5{state_r == S_BLIT}} & blit_pixels_w);
     edrv32_rnd_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
@@ -291,7 +300,7 @@ module edrv32_rnd (
     );
     edrv32_rnd_draw u_draw (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(state_r == S_SHADOW || (state_r == S_BEGIN &&
             !fast_fill_w && !blit_eligible_w && op_w != 8'h05 && op_w != 8'h06 && op_w != 8'h07)),
         .command_i(command_r),
@@ -331,7 +340,7 @@ module edrv32_rnd (
     );
     edrv32_rnd_copy u_copy (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(state_r == S_BEGIN && op_w == 8'h05),
         .cancel_i(cancel_w),
         .command_i(command_r),
@@ -356,7 +365,7 @@ module edrv32_rnd (
     );
     edrv32_rnd_fill u_fill (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(state_r == S_BEGIN && fast_fill_w),
         .cancel_i(cancel_w),
         .command_i(command_r),
@@ -374,7 +383,7 @@ module edrv32_rnd (
     );
     edrv32_rnd_blur u_blur (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(state_r == S_BEGIN && (op_w == 8'h06 || op_w == 8'h07)),
         .cancel_i(cancel_w),
         .command_i(command_r),
@@ -397,7 +406,7 @@ module edrv32_rnd (
 
     edrv32_rnd_blit u_blit (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .start_i(state_r == S_BEGIN && blit_eligible_w),
         .cancel_i(cancel_w),
         .command_i(command_r),
@@ -432,7 +441,7 @@ module edrv32_rnd (
     );
     edrv32_rnd_alpha_pipe u_alpha (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .in_valid_i((state_r == S_DRAW && draw_blend_valid_w) ||
             (state_r == S_BLIT && blit_blend_valid_w)),
         .in_ready_o(blend_ready_w),
@@ -467,7 +476,7 @@ module edrv32_rnd (
         .OUTSTANDING(8)
     ) u_read (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .desc_valid_i(rd_desc_valid_w),
         .desc_ready_o(rd_desc_ready_w),
         .desc_base_i(rd_addr_w),
@@ -519,7 +528,7 @@ module edrv32_rnd (
         .OUTSTANDING(8)
     ) u_write (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
+        .rst_n_i(rst_mem_ctrl_n_w),
         .desc_valid_i(wr_desc_valid_w),
         .desc_ready_o(wr_desc_ready_w),
         .desc_base_i(wr_addr_w),
@@ -549,8 +558,8 @@ module edrv32_rnd (
         .done_o(wr_done_w),
         .err_o(unused_wr_error_w)
     );
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
             state_r <= S_IDLE;
             fetch_half_r <= 1'b0;
             parameter_beat_r <= 2'd0;

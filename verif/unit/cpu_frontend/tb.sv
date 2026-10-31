@@ -77,6 +77,8 @@ module tb #(parameter RVC_EN=1);
     edrv32_cpu_frontend #(.RVC_EN(RVC_EN)) dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_sys_direction0_n_i(rst_n_i),
+        .rst_sys_direction1_n_i(rst_n_i),
         .redirect_valid_i(redirect_valid_i),
         .redirect_pc_i(redirect_pc_i),
         .redirect_ras_i(redirect_ras_i),

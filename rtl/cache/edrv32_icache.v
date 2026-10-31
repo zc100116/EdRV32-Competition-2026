@@ -8,6 +8,10 @@ module edrv32_icache (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire rst_sys_ivalid0_n_i,
+    input wire rst_sys_ivalid1_n_i,
+    input wire rst_sys_ilru_n_i,
+
 
     // Core instruction interface.
     input wire ic_req_valid_i,
@@ -204,28 +208,38 @@ module edrv32_icache (
                     hit0_w : (|(lru_r[bank*16 +: 16] & request_slot_w));
             end
             always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i) begin
+                if (!rst_n_i)
                     invalidate_bank_r[bank] <= 1'b0;
-                    valid0_r[bank*16 +: 16] <= 16'b0;
-                    valid1_r[bank*16 +: 16] <= 16'b0;
-                    lru_r[bank*16 +: 16] <= 16'b0;
-                end else begin
+                else
                     invalidate_bank_r[bank] <= ic_inv_i &&
                         (|valid0_r[bank*16 +: 16] || |valid1_r[bank*16 +: 16]);
+            end
+            always @(posedge clk_i or negedge rst_sys_ivalid0_n_i) begin
+                if (!rst_sys_ivalid0_n_i)
+                    valid0_r[bank*16 +: 16] <= 16'b0;
+                else
                     valid0_r[bank*16 +: 16] <= invalidate_bank_r[bank] ? 16'b0 :
                         (valid0_r[bank*16 +: 16] & ~evict0_w[bank*16 +: 16]) |
                         fill0_w[bank*16 +: 16];
+            end
+            always @(posedge clk_i or negedge rst_sys_ivalid1_n_i) begin
+                if (!rst_sys_ivalid1_n_i)
+                    valid1_r[bank*16 +: 16] <= 16'b0;
+                else
                     valid1_r[bank*16 +: 16] <= invalidate_bank_r[bank] ? 16'b0 :
                         (valid1_r[bank*16 +: 16] & ~evict1_w[bank*16 +: 16]) |
                         fill1_w[bank*16 +: 16];
-                    if (lookup_bank_r[bank]) begin
-                        if (lookup_hit_w) lru_r[bank*16 +: 16] <=
-                            (lru_r[bank*16 +: 16] & ~lookup_slot_r) |
-                            (lookup_slot_r & {16{hit0_w}});
-                        if (tag_write_w) lru_r[bank*16 +: 16] <=
-                            (lru_r[bank*16 +: 16] & ~lookup_slot_r) |
-                            (lookup_slot_r & {16{!victim_r}});
-                    end
+            end
+            always @(posedge clk_i or negedge rst_sys_ilru_n_i) begin
+                if (!rst_sys_ilru_n_i) begin
+                    lru_r[bank*16 +: 16] <= 16'b0;
+                end else if (lookup_bank_r[bank]) begin
+                    if (lookup_hit_w) lru_r[bank*16 +: 16] <=
+                        (lru_r[bank*16 +: 16] & ~lookup_slot_r) |
+                        (lookup_slot_r & {16{hit0_w}});
+                    if (tag_write_w) lru_r[bank*16 +: 16] <=
+                        (lru_r[bank*16 +: 16] & ~lookup_slot_r) |
+                        (lookup_slot_r & {16{!victim_r}});
                 end
             end
         end

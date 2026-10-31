@@ -1,3 +1,4 @@
+../common/edrv32_reset_copy.v
 +incdir+../include
 ../npu/edrv32_npu_accum.v
 ../npu/edrv32_npu_activation_lut.v
