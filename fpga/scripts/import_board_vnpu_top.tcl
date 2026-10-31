@@ -3,12 +3,12 @@
 # In the open PG2L200H-6/FBB676 PDS project, generate the IPs from fpga/ip first.
 # Required generated IP (fpga/ip/README.md): ip_pll_sys, ip_pll_video, ip_pll_eth, ip_pll_npu, ip_ddr3;
 # ip_ram_icache_tag, ip_ram_icache_data, ip_ram_dcache_tag, ip_ram_dcache_data,
-# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_ram_mem_xbar_w,
+# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_lutram_mem_xbar_w,
 # ip_ram_vin_wfifo, ip_ram_pix_line, ip_ram_geo_src, ip_ram_eth_buf, ip_ram_eth_fifo,
 # ip_ram_disp_scan (two instances, DISP v0.3 L0/L1).
 # TMDS/RGMII and DDR reference use device primitives listed in fpga/ip/README.md.
-# ip_ram_npu_line, ip_ram_npu_weight, ip_ram_npu_quant, ip_ram_npu_lut,
-# ip_ram_npu_residual, ip_ram_npu_result, ip_ram_npu_scratch,
+# ip_ram_npu_line, ip_ram_npu_weight, ip_lutram_npu_quant, ip_ram_npu_lut,
+# ip_lutram_npu_residual, ip_lutram_npu_result, ip_ram_npu_scratch,
 # ip_mul_npu_quant_low, ip_mul_npu_quant_high (INT8 MAC uses APM primitives).
 # No RND IP; ip_pll_eth is instantiated inside edrv32_fpga_rgmii.
 # Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
@@ -16,8 +16,8 @@
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_board_vnpu_top
-# PDS adds the project directory; pass only the repository header directory.
-set edrv32_include_dirs [file join $edrv32_repo rtl include]
+# Use the same project-relative include-path format as B3N.
+set edrv32_include_dirs "../../EdRV32-Competition-2026/rtl/include\t"
 puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 

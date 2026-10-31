@@ -29,6 +29,8 @@ module edrv32_ram_npu_residual (
     ip_lutram_npu_residual u_ip (
         // Synchronous write port.
         .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
