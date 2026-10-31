@@ -11,13 +11,13 @@ module edrv32_ram_dcache_data (
 
     // Write port.
     input wire  wr_en_i,
-    input wire [8:0] wr_addr_i,
+    input wire [10:0] wr_addr_i,
     input wire [63:0] wr_data_i,
     input wire [7:0] wr_byte_en_i,
 
     // Read port.
     input wire rd_en_i,
-    input wire [8:0] rd_addr_i,
+    input wire [10:0] rd_addr_i,
     output wire [63:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
@@ -36,7 +36,7 @@ module edrv32_ram_dcache_data (
         .rd_data(rd_data_o)
     );
 `else
-    reg [63:0] memory_r [0:511];
+    reg [63:0] memory_r [0:2047];
     reg [63:0] rd_data_r;
     integer byte_idx_r;
     assign rd_data_o = rd_data_r;

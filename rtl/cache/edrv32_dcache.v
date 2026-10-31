@@ -78,8 +78,11 @@ module edrv32_dcache (
     localparam [3:0] S_WB_B = 4'd7;
     localparam [3:0] S_MREAD = 4'd8;
     localparam [3:0] S_MCHECK = 4'd9;
-    localparam [3:0] S_MNEXT = 4'd10;
+    localparam [3:0] S_MSEG = 4'd10;
     localparam [3:0] S_REPLAY = 4'd11;
+    localparam [3:0] S_MWAIT = 4'd12;
+    localparam [3:0] S_MINIT = 4'd13;
+    localparam [3:0] S_MPREP = 4'd14;
     localparam [3:0] D_IDLE = 4'd0;
     localparam [3:0] D_COMMIT = 4'd1;
     localparam [3:0] D_BUS = 4'd2;
@@ -91,22 +94,24 @@ module edrv32_dcache (
     localparam [3:0] D_RETURN = 4'd8;
     reg [3:0] state_r;
     reg [3:0] device_state_r;
-    reg [127:0] valid0_r;
-    reg [127:0] valid1_r;
-    reg [127:0] dirty0_r;
-    reg [127:0] dirty1_r;
-    reg [127:0] lru_r;
+    reg [511:0] valid0_r;
+    reg [511:0] valid1_r;
+    reg [511:0] dirty0_r;
+    reg [511:0] dirty1_r;
+    reg [511:0] lru_r;
     reg lookup_valid_r;
     reg lookup_hit_enable_r;
-    reg lookup_valid0_r;
-    reg lookup_valid1_r;
-    reg [39:0] lookup_tag_r;
+    wire lookup_valid0_w;
+    reg [31:0] lookup_valid0_bank_r;
+    wire lookup_valid1_w;
+    reg [31:0] lookup_valid1_bank_r;
+    reg [35:0] lookup_tag_r;
     reg [31:0] addr_r;
     reg store_r;
     reg [1:0] size_r;
     reg deferred_lookup_r;
     reg victim_r;
-    reg [6:0] victim_idx_r;
+    reg [8:0] victim_idx_r;
     reg [31:0] wb_addr_r;
     reg killed_r;
     reg fill_err_r;
@@ -133,12 +138,37 @@ module edrv32_dcache (
     reg fence_clean_r;
     reg clean_seen_r;
     reg [2:0] maint_cmd_r;
-    reg [26:0] maint_first_line_r;
-    reg [27:0] maint_last_line_r;
-    reg scan_first_index_r;
-    reg scan_last_index_r;
-    reg scan_invalidate_r;
-    reg [7:0] maint_scan_r;
+    reg [17:0] maint_first_tag_r;
+    reg [18:0] maint_last_tag_r;
+    reg [18:0] maint_first_after_tag_r;
+    reg [18:0] maint_last_before_tag_r;
+    reg [14:0] maint_low_sum_r;
+    reg [18:0] maint_upper_sum_r;
+    reg [8:0] maint_first_idx_r;
+    reg [8:0] maint_last_idx_r;
+    reg [8:0] maint_next_idx_r;
+    reg [9:0] maint_left_r;
+    reg [8:0] scan_idx_r;
+    reg [18:0] scan_first_tag_r;
+    reg [18:0] scan_last_tag_r;
+    wire [1:0] scan_dirty_w;
+    wire [1:0] scan_valid_w;
+    reg [31:0] scan_bank_r;
+    reg [31:0] scan_valid0_bank_r;
+    reg [31:0] scan_valid1_bank_r;
+    reg [31:0] scan_dirty0_bank_r;
+    reg [31:0] scan_dirty1_bank_r;
+    reg [1:0] maint_pending_r;
+    reg scan_prefetched_r;
+    reg [17:0] maint_tag1_r;
+    reg [4:0] segment_r;
+    reg [15:0] segment_mask_r;
+    wire lookup_dirty0_w;
+    reg [31:0] lookup_dirty0_bank_r;
+    wire lookup_dirty1_w;
+    reg [31:0] lookup_dirty1_bank_r;
+    wire lookup_lru_w;
+    reg [31:0] lookup_lru_bank_r;
     reg fence_done_r;
     wire cacheable_w;
     wire device_w;
@@ -148,8 +178,8 @@ module edrv32_dcache (
     wire request_device_w;
     wire request_pma_err_w;
     wire device_accept_w;
-    wire [9:0] tag0_match_w;
-    wire [9:0] tag1_match_w;
+    wire [8:0] tag0_match_w;
+    wire [8:0] tag1_match_w;
     wire hit0_w;
     wire hit1_w;
     wire hit_w;
@@ -159,30 +189,36 @@ module edrv32_dcache (
     wire store_result_w;
     wire buffer_push_w;
     wire [31:0] push_addr_w;
-    wire [1:0] push_size_w;
+    wire [31:0] push_data_w;
+    wire [31:0] lookup_store_data_w;
+    wire [31:0] pending_store_data_w;
+    wire [3:0] lookup_store_mask_w;
+    wire [3:0] pending_store_mask_w;
     wire push_way_w;
     wire [3:0] push_mask_w;
     wire [63:0] buffer_data64_w;
     wire [7:0] buffer_mask64_w;
     wire fill_write_w;
     wire tag_write_w;
-    wire [8:0] read_addr_w;
+    wire [10:0] read_addr_w;
     wire ram_read_w;
-    wire [8:0] write_addr_w;
+    wire [10:0] write_addr_w;
     wire [63:0] write_data_w;
     wire [7:0] write_mask_w;
-    wire [19:0] tag0_w;
-    wire [19:0] tag1_w;
+    wire [17:0] tag0_w;
+    wire [17:0] tag1_w;
     wire [63:0] data0_w;
     wire [63:0] data1_w;
-    wire [19:0] scan_tag_w;
-    wire scan_valid_w;
-    wire scan_dirty_w;
-    wire [31:0] scan_addr_w;
-    wire scan_match_w;
-    wire scan_first_w;
-    wire scan_last_w;
-    wire [32:0] maint_last_byte_w;
+    wire [1:0] scan_match_w;
+    wire [1:0] scan_writeback_w;
+    wire [1:0] scan_invalidate_w;
+    wire [6:0] maint_offset_sum_w;
+    wire [9:0] maint_lines_w;
+    wire scan_read_w;
+    wire [8:0] scan_read_idx_w;
+    wire [15:0] segment_dirty_w;
+    reg [3:0] segment_index_w;
+    integer segment_bit_w;
     wire maintenance_start_w;
     wire maintenance_array_start_w;
     wire device_bus_free_w;
@@ -200,11 +236,29 @@ module edrv32_dcache (
     wire unused_axi_w;
     integer byte_idx_w;
     genvar tag_idx;
+    genvar bank;
+    wire [511:0] lookup_index_w;
+    reg [31:0] lookup_bank_r;
+    reg [15:0] lookup_slot_r;
+    wire [15:0] read_slot_w;
+    assign read_slot_w = 16'b1 << read_addr_w[5:2];
+    assign scan_valid_w = {|(scan_valid1_bank_r & scan_bank_r),
+                            |(scan_valid0_bank_r & scan_bank_r)};
+    assign scan_dirty_w = {|(scan_dirty1_bank_r & scan_bank_r),
+                            |(scan_dirty0_bank_r & scan_bank_r)};
+    wire lookup_miss_w;
+    assign lookup_miss_w = state_r == S_IDLE && lookup_valid_r && !deferred_lookup_r &&
+        !device_w && !pma_err_w && !hit_w;
 
+    assign lookup_valid0_w = |(lookup_valid0_bank_r & lookup_bank_r);
+    assign lookup_valid1_w = |(lookup_valid1_bank_r & lookup_bank_r);
+    assign lookup_dirty0_w = |(lookup_dirty0_bank_r & lookup_bank_r);
+    assign lookup_dirty1_w = |(lookup_dirty1_bank_r & lookup_bank_r);
+    assign lookup_lru_w = |(lookup_lru_bank_r & lookup_bank_r);
     assign device_shifted_w = axi_rdata_i >> {device_addr_r[2:0], 3'b0};
     assign unused_axi_w = &{1'b0, axi_rid_i, axi_bid_i, device_shifted_w[63:32],
                                 buffer_addr_r[1:0], request_cacheable_w,
-                                maint_last_byte_w[4:0]};
+                                maint_offset_sum_w[4:0]};
     // C-F1 paths 2-4: prepare cached-hit eligibility with the E-stage address.
     // Request acceptance stays independent of this PMA classification (cpu-spec 3.3).
     edrv32_cache_pma u_request_pma (
@@ -226,7 +280,7 @@ module edrv32_dcache (
     // C-F1 paths 2-4: decode request-tag pairs before the synchronous read.
     // Each returned pair then selects a four-bit table in a single LUT6.
     generate
-        for (tag_idx = 0; tag_idx < 10; tag_idx = tag_idx + 1) begin : g_tag_match
+        for (tag_idx = 0; tag_idx < 9; tag_idx = tag_idx + 1) begin : g_tag_match
             wire [3:0] select_w;
             assign select_w = lookup_tag_r[tag_idx*4 +: 4];
             assign tag0_match_w[tag_idx] = select_w[tag0_w[tag_idx*2 +: 2]];
@@ -234,12 +288,12 @@ module edrv32_dcache (
             always @(posedge clk_i) begin
                 if (accept_w)
                     lookup_tag_r[tag_idx*4 +: 4] <=
-                        4'b1 << dc_req_addr_i[12 + tag_idx*2 +: 2];
+                        4'b1 << dc_req_addr_i[14 + tag_idx*2 +: 2];
             end
         end
     endgenerate
-    assign hit0_w = lookup_valid0_r && (&tag0_match_w);
-    assign hit1_w = lookup_valid1_r && (&tag1_match_w);
+    assign hit0_w = lookup_valid0_w && (&tag0_match_w);
+    assign hit1_w = lookup_valid1_w && (&tag1_match_w);
     assign hit_w = hit0_w || hit1_w;
     // cache-spec 2.3/5.4: M-stage PMA errors return even while arrays are maintained.
     assign pma_result_w = lookup_valid_r && pma_err_w;
@@ -293,41 +347,58 @@ module edrv32_dcache (
     assign buffer_push_w = dc_commit_i && device_state_r == D_IDLE &&
                             (store_pending_r || store_result_w);
     assign push_addr_w = store_result_w ? addr_r : store_addr_r;
-    assign push_size_w = store_result_w ? size_r : store_size_r;
     assign push_way_w = return_store_w ? victim_r :
                         (store_result_w ? hit1_w : store_way_r);
-    assign push_mask_w = (push_size_w == 0 ? 4'b0001 :
-                            push_size_w == 1 ? 4'b0011 : 4'b1111) << push_addr_w[1:0];
+    // Byte placement precedes the current-hit/pending-store selection, keeping
+    // tag comparison out of the barrel shifter and size decoder.
+    assign lookup_store_data_w = dc_store_data_i << {addr_r[1:0], 3'b0};
+    assign pending_store_data_w = dc_store_data_i << {store_addr_r[1:0], 3'b0};
+    assign lookup_store_mask_w = (size_r == 0 ? 4'b0001 :
+        size_r == 1 ? 4'b0011 : 4'b1111) << addr_r[1:0];
+    assign pending_store_mask_w = (store_size_r == 0 ? 4'b0001 :
+        store_size_r == 1 ? 4'b0011 : 4'b1111) << store_addr_r[1:0];
+    assign push_data_w = store_result_w ? lookup_store_data_w : pending_store_data_w;
+    assign push_mask_w = store_result_w ? lookup_store_mask_w : pending_store_mask_w;
     assign buffer_data64_w = buffer_addr_r[2] ? {buffer_data_r, 32'b0} :
                                                                 {32'b0, buffer_data_r};
     assign buffer_mask64_w = buffer_addr_r[2] ? {buffer_mask_r, 4'b0} :
                                                                 {4'b0, buffer_mask_r};
     assign fill_write_w = state_r == S_FILL && axi_rvalid_i;
     assign tag_write_w = fill_write_w && axi_rlast_i && !fill_err_r && axi_rresp_i == 0;
-    assign write_addr_w = buffer_valid_r ? buffer_addr_r[11:3] : {addr_r[11:5], beat_r};
+    assign write_addr_w = buffer_valid_r ? buffer_addr_r[13:3] : {addr_r[13:5], beat_r};
     assign write_data_w = buffer_valid_r ? buffer_data64_w : axi_rdata_i;
     assign write_mask_w = buffer_valid_r ? buffer_mask64_w : 8'hff;
     assign read_addr_w = state_r == S_WB_READ ? {victim_idx_r, beat_r} :
-                            (state_r == S_MREAD ? {maint_scan_r[7:1], 2'b0} :
-                                (state_r == S_REPLAY ? addr_r[11:3] : dc_req_addr_i[11:3]));
+        scan_read_w ? {scan_read_idx_w, 2'b0} :
+        state_r == S_REPLAY ? addr_r[13:3] : dc_req_addr_i[13:3];
     assign ram_read_w = (accept_w && !maintenance_r && !maintenance_array_start_w &&
                         !request_device_w) || state_r == S_REPLAY ||
-                        state_r == S_WB_READ || state_r == S_MREAD;
-    assign scan_tag_w = maint_scan_r[0] ? tag1_w : tag0_w;
-    assign scan_valid_w = maint_scan_r[0] ? valid1_r[maint_scan_r[7:1]] :
-                                            valid0_r[maint_scan_r[7:1]];
-    assign scan_dirty_w = maint_scan_r[0] ? dirty1_r[maint_scan_r[7:1]] :
-                                            dirty0_r[maint_scan_r[7:1]];
-    assign scan_addr_w = {scan_tag_w, maint_scan_r[7:1], 5'b0};
-    // C-F1 path 6: prepare range endpoints when accepting maintenance, then
-    // compare the scan index in S_MREAD alongside the synchronous tag read.
-    assign maint_last_byte_w = {1'b0, maint_addr_i} + {1'b0, maint_size_i} - 1'b1;
-    assign scan_first_w = scan_tag_w > maint_first_line_r[26:7] ||
-        (scan_tag_w == maint_first_line_r[26:7] && scan_first_index_r);
-    assign scan_last_w = {1'b0, scan_tag_w} < maint_last_line_r[27:7] ||
-        ({1'b0, scan_tag_w} == maint_last_line_r[27:7] && scan_last_index_r);
-    assign scan_match_w = scan_valid_w &&
-        (maint_cmd_r == 4 || (scan_first_w && scan_last_w));
+                        state_r == S_WB_READ || scan_read_w;
+    // cache-spec 5.4: prefetch the next group while checking both current tags.
+    // Tag RAM holds a prefetched group during writeback; only data RAM reads then.
+    assign scan_read_w = state_r == S_MREAD ||
+        (state_r == S_MCHECK && maint_cmd_r != 4 && maint_left_r != 0);
+    assign scan_read_idx_w = maint_cmd_r == 4 ?
+        {segment_r, segment_index_w} : maint_next_idx_r;
+    // Saturate the line count before wide address arithmetic; upper size bits
+    // already imply at least 512 groups. Endpoint addition has its own stage.
+    assign maint_offset_sum_w = {2'b0, maint_addr_i[4:0]} +
+        {2'b0, maint_size_i[4:0]} + 7'd31;
+    assign maint_lines_w = {1'b0, maint_size_i[13:5]} + {8'b0, maint_offset_sum_w[6:5]};
+    // Per-group inclusive tag bounds are ready with the synchronous RAM result.
+    assign scan_match_w[0] = scan_valid_w[0] && (maint_cmd_r == 4 ||
+        ({1'b0, tag0_w} >= scan_first_tag_r && {1'b0, tag0_w} <= scan_last_tag_r));
+    assign scan_match_w[1] = scan_valid_w[1] && (maint_cmd_r == 4 ||
+        ({1'b0, tag1_w} >= scan_first_tag_r && {1'b0, tag1_w} <= scan_last_tag_r));
+    assign scan_writeback_w = scan_match_w & scan_dirty_w & {2{maint_cmd_r != 2}};
+    assign scan_invalidate_w = scan_match_w & {2{maint_cmd_r == 2 || maint_cmd_r == 3}};
+    assign segment_dirty_w = dirty0_r[{segment_r, 4'b0} +: 16] |
+                                dirty1_r[{segment_r, 4'b0} +: 16];
+    always @(*) begin
+        segment_index_w = 4'b0;
+        for (segment_bit_w = 15; segment_bit_w >= 0; segment_bit_w = segment_bit_w - 1)
+            if (segment_mask_r[segment_bit_w]) segment_index_w = segment_bit_w[3:0];
+    end
     assign maint_busy_o = maintenance_r;
     assign maint_req_ready_o = state_r == S_IDLE && device_state_r == D_IDLE &&
                                 !lookup_valid_r && !store_pending_r && !buffer_valid_r &&
@@ -348,7 +419,8 @@ module edrv32_dcache (
 
     // Only the maintenance scan yields the shared bus to device transactions.
     assign device_bus_free_w = state_r == S_IDLE || state_r == S_MREAD ||
-                                state_r == S_MCHECK || state_r == S_MNEXT;
+                                state_r == S_MCHECK || state_r == S_MSEG ||
+                                state_r == S_MWAIT || state_r == S_MINIT || state_r == S_MPREP;
     assign device_bus_active_w = device_state_r >= D_AR && device_state_r <= D_B;
     assign axi_arid_o = 4'b0;
     assign axi_araddr_o = device_bus_active_w ? device_addr_r : {addr_r[31:5], 5'b0};
@@ -375,10 +447,10 @@ module edrv32_dcache (
     edrv32_ram_dcache_tag u_tag0 (
         .clk_i(clk_i),
         .wr_en_i(tag_write_w && victim_r == 1'b0),
-        .wr_addr_i(addr_r[11:5]),
-        .wr_data_i(addr_r[31:12]),
-        .rd_en_i(ram_read_w),
-        .rd_addr_i(read_addr_w[8:2]),
+        .wr_addr_i(addr_r[13:5]),
+        .wr_data_i(addr_r[31:14]),
+        .rd_en_i(ram_read_w && state_r != S_WB_READ),
+        .rd_addr_i(read_addr_w[10:2]),
         .rd_data_o(tag0_w)
     );
     edrv32_ram_dcache_data u_data0 (
@@ -395,10 +467,10 @@ module edrv32_dcache (
     edrv32_ram_dcache_tag u_tag1 (
         .clk_i(clk_i),
         .wr_en_i(tag_write_w && victim_r == 1'b1),
-        .wr_addr_i(addr_r[11:5]),
-        .wr_data_i(addr_r[31:12]),
-        .rd_en_i(ram_read_w),
-        .rd_addr_i(read_addr_w[8:2]),
+        .wr_addr_i(addr_r[13:5]),
+        .wr_data_i(addr_r[31:14]),
+        .rd_en_i(ram_read_w && state_r != S_WB_READ),
+        .rd_addr_i(read_addr_w[10:2]),
         .rd_data_o(tag1_w)
     );
     edrv32_ram_dcache_data u_data1 (
@@ -415,8 +487,8 @@ module edrv32_dcache (
     // Payload registers deliberately have no reset (cache-spec 5.5).
     always @(posedge clk_i) begin
         if (ram_read_w) begin
-            lookup_valid0_r <= valid0_r[read_addr_w[8:2]];
-            lookup_valid1_r <= valid1_r[read_addr_w[8:2]];
+            lookup_bank_r <= 32'b1 << read_addr_w[10:6];
+            lookup_slot_r <= read_slot_w;
         end
         if (accept_w) begin
             addr_r <= dc_req_addr_i;
@@ -437,7 +509,7 @@ module edrv32_dcache (
         if (buffer_push_w) begin
             buffer_addr_r <= push_addr_w;
             buffer_way_r <= push_way_w;
-            buffer_data_r <= dc_store_data_i << {push_addr_w[1:0], 3'b0};
+            buffer_data_r <= push_data_w;
             buffer_mask_r <= push_mask_w;
         end
         if (device_accept_w) begin
@@ -452,19 +524,40 @@ module edrv32_dcache (
         end
         if (state_r == S_IDLE && lookup_valid_r && !deferred_lookup_r &&
             !device_w && !pma_err_w && !hit_w) begin
-            wb_addr_r <= {lru_r[addr_r[11:5]] ? tag1_w : tag0_w, addr_r[11:5], 5'b0};
+            wb_addr_r <= {lookup_lru_w ? tag1_w : tag0_w, addr_r[13:5], 5'b0};
         end
-        if (state_r == S_MCHECK && device_state_r == D_IDLE && !device_accept_w) begin
-            wb_addr_r <= scan_addr_w;
+        if (scan_read_w) begin
+            scan_idx_r <= scan_read_idx_w;
+            if (maint_cmd_r != 4) begin
+                scan_first_tag_r <= maint_next_idx_r < maint_first_idx_r ?
+                    maint_first_after_tag_r : {1'b0, maint_first_tag_r};
+                scan_last_tag_r <= maint_next_idx_r > maint_last_idx_r ?
+                    maint_last_before_tag_r : maint_last_tag_r;
+            end
+            scan_bank_r <= 32'b1 << scan_read_idx_w[8:4];
         end
-        if (state_r == S_MREAD) begin
-            scan_first_index_r <= maint_scan_r[7:1] >= maint_first_line_r[6:0];
-            scan_last_index_r <= maint_scan_r[7:1] <= maint_last_line_r[6:0];
+        if (state_r == S_MCHECK && |scan_writeback_w) begin
+            wb_addr_r <= {scan_writeback_w[0] ? tag0_w : tag1_w, scan_idx_r, 5'b0};
+            maint_tag1_r <= tag1_w;
         end
+        if (state_r == S_WB_B && axi_bvalid_i && maintenance_r &&
+            !victim_r && maint_pending_r[1])
+            wb_addr_r <= {maint_tag1_r, victim_idx_r, 5'b0};
         if (maintenance_start_w) begin
             maint_cmd_r <= dc_clean_all_i ? 3'd4 : maint_cmd_i;
-            maint_first_line_r <= maint_addr_i[31:5];
-            maint_last_line_r <= maint_last_byte_w[32:5];
+            maint_first_tag_r <= maint_addr_i[31:14];
+            maint_first_after_tag_r <= {1'b0, maint_addr_i[31:14]} + 1'b1;
+            maint_low_sum_r <= {1'b0, maint_addr_i[13:0]} + {1'b0, maint_size_i[13:0]};
+            maint_upper_sum_r <= {1'b0, maint_addr_i[31:14]} + {1'b0, maint_size_i[31:14]};
+            maint_first_idx_r <= maint_addr_i[13:5];
+        end
+        if (state_r == S_MPREP) maint_last_before_tag_r <= maint_last_tag_r - 1'b1;
+        if (state_r == S_MINIT) begin
+            maint_last_tag_r <= maint_upper_sum_r +
+                (maint_low_sum_r > 16384 ? 19'd1 :
+                    maint_low_sum_r == 0 ? 19'h7ffff : 19'd0);
+            maint_last_idx_r <= maint_low_sum_r[13:5] -
+                {8'b0, maint_low_sum_r[4:0] == 0};
         end
     end
 
@@ -540,53 +633,129 @@ module edrv32_dcache (
         end
     end
 
+    wire [511:0] buffer_index_w;
+    wire [511:0] scan_index_w;
+    wire [511:0] wb_index_w;
+    wire metadata_fill_w;
+    wire metadata_wb_w;
+    assign buffer_index_w = 512'b1 << buffer_addr_r[13:5];
+    assign scan_index_w = 512'b1 << scan_idx_r;
+    assign wb_index_w = 512'b1 << victim_idx_r;
+    assign metadata_fill_w = state_r == S_FILL && axi_rvalid_i && axi_rlast_i;
+    assign metadata_wb_w = state_r == S_WB_B && axi_bvalid_i;
+    // Vector updates use decoded set masks, keeping the 512-way metadata
+    // selection before tag comparison and the write logic local to each bank.
+    generate
+        for (bank = 0; bank < 32; bank = bank + 1) begin : g_metadata
+            wire [15:0] lookup_w;
+            wire [15:0] scan_w;
+            wire [15:0] wb_w;
+            wire [15:0] buffer_w;
+            wire [15:0] invalidate0_w;
+            wire [15:0] invalidate1_w;
+            assign lookup_index_w[bank*16 +: 16] = lookup_slot_r & {16{lookup_bank_r[bank]}};
+            assign lookup_w = lookup_index_w[bank*16 +: 16];
+            always @(posedge clk_i) begin
+                lookup_valid0_bank_r[bank] <= (|(valid0_r[bank*16 +: 16] & read_slot_w));
+                lookup_valid1_bank_r[bank] <= (|(valid1_r[bank*16 +: 16] & read_slot_w));
+                // The old buffer drains on this edge, before a new miss uses
+                // its dirty snapshot; a simultaneous push is handled at miss time.
+                lookup_dirty0_bank_r[bank] <= |((dirty0_r[bank*16 +: 16] |
+                    (buffer_index_w[bank*16 +: 16] & {16{buffer_valid_r && !buffer_way_r}})) &
+                    read_slot_w);
+                lookup_dirty1_bank_r[bank] <= |((dirty1_r[bank*16 +: 16] |
+                    (buffer_index_w[bank*16 +: 16] & {16{buffer_valid_r && buffer_way_r}})) &
+                    read_slot_w);
+                lookup_lru_bank_r[bank] <= state_r == S_IDLE && lookup_done_w && hit_w &&
+                    lookup_bank_r[bank] && addr_r[8:5] == read_addr_w[5:2] ?
+                    hit0_w : (|(lru_r[bank*16 +: 16] & read_slot_w));
+                if (scan_read_w) begin
+                    scan_valid0_bank_r[bank] <= |(valid0_r[bank*16 +: 16] & read_slot_w);
+                    scan_valid1_bank_r[bank] <= |(valid1_r[bank*16 +: 16] & read_slot_w);
+                    scan_dirty0_bank_r[bank] <= |(dirty0_r[bank*16 +: 16] & read_slot_w);
+                    scan_dirty1_bank_r[bank] <= |(dirty1_r[bank*16 +: 16] & read_slot_w);
+                end
+            end
+            assign scan_w = scan_index_w[bank*16 +: 16] & {16{state_r == S_MCHECK}};
+            assign wb_w = wb_index_w[bank*16 +: 16] & {16{metadata_wb_w}};
+            assign buffer_w = buffer_index_w[bank*16 +: 16] & {16{buffer_valid_r}};
+            assign invalidate0_w = scan_w & {16{scan_invalidate_w[0] && !scan_writeback_w[0]}};
+            assign invalidate1_w = scan_w & {16{scan_invalidate_w[1] && !scan_writeback_w[1]}};
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    valid0_r[bank*16 +: 16] <= 16'b0;
+                    valid1_r[bank*16 +: 16] <= 16'b0;
+                    dirty0_r[bank*16 +: 16] <= 16'b0;
+                    dirty1_r[bank*16 +: 16] <= 16'b0;
+                    lru_r[bank*16 +: 16] <= 16'b0;
+                end else begin
+                    valid0_r[bank*16 +: 16] <=
+                        (valid0_r[bank*16 +: 16] & ~invalidate0_w &
+                            ~(lookup_w & {16{lookup_miss_w && !lookup_lru_w}}) &
+                            ~(wb_w & {16{maintenance_r && maint_cmd_r == 3 && !victim_r}})) |
+                        (lookup_w & {16{tag_write_w && !victim_r}});
+                    valid1_r[bank*16 +: 16] <=
+                        (valid1_r[bank*16 +: 16] & ~invalidate1_w &
+                            ~(lookup_w & {16{lookup_miss_w && lookup_lru_w}}) &
+                            ~(wb_w & {16{maintenance_r && maint_cmd_r == 3 && victim_r}})) |
+                        (lookup_w & {16{tag_write_w && victim_r}});
+                    dirty0_r[bank*16 +: 16] <=
+                        (dirty0_r[bank*16 +: 16] | (buffer_w & {16{!buffer_way_r}})) &
+                        ~invalidate0_w & ~(lookup_w & {16{metadata_fill_w && !victim_r}}) &
+                        ~(wb_w & {16{!victim_r}});
+                    dirty1_r[bank*16 +: 16] <=
+                        (dirty1_r[bank*16 +: 16] | (buffer_w & {16{buffer_way_r}})) &
+                        ~invalidate1_w & ~(lookup_w & {16{metadata_fill_w && victim_r}}) &
+                        ~(wb_w & {16{victim_r}});
+                    lru_r[bank*16 +: 16] <=
+                        (lru_r[bank*16 +: 16] &
+                            ~(lookup_w & {16{(state_r == S_IDLE && lookup_done_w && hit_w) ||
+                                tag_write_w}})) |
+                        (lookup_w & {16{(state_r == S_IDLE && lookup_done_w && hit0_w) ||
+                            (tag_write_w && !victim_r)}});
+                end
+            end
+        end
+    endgenerate
+
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
-            valid0_r <= 128'b0;
-            valid1_r <= 128'b0;
-            dirty0_r <= 128'b0;
-            dirty1_r <= 128'b0;
-            lru_r <= 128'b0;
             victim_r <= 1'b0;
-            victim_idx_r <= 7'b0;
+            victim_idx_r <= 9'b0;
             killed_r <= 1'b0;
             fill_err_r <= 1'b0;
             beat_r <= 2'b0;
             maintenance_r <= 1'b0;
             fence_clean_r <= 1'b0;
             clean_seen_r <= 1'b0;
-            maint_scan_r <= 8'b0;
+            maint_next_idx_r <= 9'b0;
+            maint_left_r <= 10'b0;
+            segment_r <= 5'b0;
+            segment_mask_r <= 16'b0;
+            maint_pending_r <= 2'b0;
+            scan_prefetched_r <= 1'b0;
             fence_done_r <= 1'b0;
-            scan_invalidate_r <= 1'b0;
         end else begin
             fence_done_r <= 1'b0;
             if (!dc_clean_all_i) clean_seen_r <= 1'b0;
             if (maintenance_start_w && dc_clean_all_i) clean_seen_r <= 1'b1;
-            if (buffer_valid_r) begin
-                if (buffer_way_r) dirty1_r[buffer_addr_r[11:5]] <= 1'b1;
-                else dirty0_r[buffer_addr_r[11:5]] <= 1'b1;
-            end
             if (dc_kill_i && !maintenance_r && state_r != S_IDLE) killed_r <= 1'b1;
             case (state_r)
                 S_IDLE: begin
                     if (lookup_valid_r && !deferred_lookup_r && !device_w && !pma_err_w) begin
-                        if (hit_w) lru_r[addr_r[11:5]] <= hit0_w;
-                        else begin
-                            victim_r <= lru_r[addr_r[11:5]];
-                            victim_idx_r <= addr_r[11:5];
+                        if (!hit_w) begin
+                            victim_r <= lookup_lru_w;
+                            victim_idx_r <= addr_r[13:5];
                             killed_r <= dc_kill_i;
                             fill_err_r <= 1'b0;
                             beat_r <= 2'b0;
                             state_r <= S_AR;
-                            if ((lru_r[addr_r[11:5]] ? dirty1_r[addr_r[11:5]] :
-                                                                        dirty0_r[addr_r[11:5]]) ||
-                                (buffer_valid_r && buffer_addr_r[11:5] == addr_r[11:5] &&
-                                    buffer_way_r == lru_r[addr_r[11:5]])) begin
+                            if ((lookup_lru_w ? lookup_dirty1_w : lookup_dirty0_w) ||
+                                (buffer_valid_r && buffer_addr_r[13:5] == addr_r[13:5] &&
+                                    buffer_way_r == lookup_lru_w)) begin
                                 state_r <= S_WB_AW;
                             end
-                            if (lru_r[addr_r[11:5]]) valid1_r[addr_r[11:5]] <= 1'b0;
-                            else valid0_r[addr_r[11:5]] <= 1'b0;
                         end
                     end
                     if (lookup_valid_r && deferred_lookup_r && cacheable_w && !dc_kill_i)
@@ -594,8 +763,11 @@ module edrv32_dcache (
                     if (maintenance_start_w) begin
                         maintenance_r <= 1'b1;
                         fence_clean_r <= dc_clean_all_i;
-                        maint_scan_r <= 8'b0;
-                        state_r <= S_MREAD;
+                        maint_next_idx_r <= maint_addr_i[13:5];
+                        maint_left_r <= |maint_size_i[31:14] || maint_lines_w[9] ?
+                            10'd512 : maint_lines_w;
+                        segment_r <= 5'b0;
+                        state_r <= dc_clean_all_i || maint_cmd_i == 4 ? S_MSEG : S_MINIT;
                         if (!dc_clean_all_i && maint_cmd_i != 4 && maint_size_i == 0) begin
                             maintenance_r <= 1'b0;
                             state_r <= S_IDLE;
@@ -609,13 +781,6 @@ module edrv32_dcache (
                     beat_r <= beat_r + 1'b1;
                     if (axi_rlast_i) begin
                         state_r <= S_RETURN;
-                        if (victim_r) dirty1_r[addr_r[11:5]] <= 1'b0;
-                        else dirty0_r[addr_r[11:5]] <= 1'b0;
-                        if (tag_write_w) begin
-                            if (victim_r) valid1_r[addr_r[11:5]] <= 1'b1;
-                            else valid0_r[addr_r[11:5]] <= 1'b1;
-                            lru_r[addr_r[11:5]] <= !victim_r;
-                        end
                     end
                 end
                 S_RETURN: state_r <= S_IDLE;
@@ -629,45 +794,75 @@ module edrv32_dcache (
                     state_r <= beat_r == 3 ? S_WB_B : S_WB_READ;
                 end
                 S_WB_B: if (axi_bvalid_i) begin
-                    if (victim_r) dirty1_r[victim_idx_r] <= 1'b0;
-                    else dirty0_r[victim_idx_r] <= 1'b0;
                     beat_r <= 2'b0;
-                    state_r <= maintenance_r ? S_MNEXT : S_AR;
-                    if (maintenance_r && maint_cmd_r == 3) begin
-                        if (victim_r) valid1_r[victim_idx_r] <= 1'b0;
-                        else valid0_r[victim_idx_r] <= 1'b0;
+                    state_r <= maintenance_r ? S_MWAIT : S_AR;
+                    if (maintenance_r) begin
+                        maint_pending_r[victim_r] <= 1'b0;
+                        if (!victim_r && maint_pending_r[1]) victim_r <= 1'b1;
                     end
                 end
-                S_MREAD: if (device_state_r == D_IDLE && !device_accept_w) begin
+                S_MINIT: state_r <= S_MPREP;
+                S_MPREP: state_r <= S_MREAD;
+                S_MREAD: begin
                     state_r <= S_MCHECK;
+                    if (maint_cmd_r != 4) begin
+                        maint_next_idx_r <= maint_next_idx_r + 1'b1;
+                        maint_left_r <= maint_left_r - 1'b1;
+                    end
                 end
-                S_MCHECK: if (device_state_r == D_IDLE && !device_accept_w) begin
-                    state_r <= S_MNEXT;
-                    // C-F1 path 6: apply invalidation in the existing MNEXT
-                    // cycle; the array is unavailable until maintenance ends.
-                    scan_invalidate_r <= scan_match_w &&
-                        (maint_cmd_r == 2 || (maint_cmd_r == 3 && !scan_dirty_w));
-                    if (scan_match_w) begin
-                        if (maint_cmd_r != 2 && scan_dirty_w) begin
-                            victim_r <= maint_scan_r[0];
-                            victim_idx_r <= maint_scan_r[7:1];
+                S_MCHECK: begin
+                    scan_prefetched_r <= scan_read_w;
+                    if (scan_read_w) begin
+                        maint_next_idx_r <= maint_next_idx_r + 1'b1;
+                        maint_left_r <= maint_left_r - 1'b1;
+                    end
+                    if (|scan_writeback_w) begin
+                        maint_pending_r <= scan_writeback_w;
+                        victim_r <= !scan_writeback_w[0];
+                        victim_idx_r <= scan_idx_r;
+                        state_r <= S_MWAIT;
+                    end else if (maint_cmd_r == 4) begin
+                        state_r <= S_MWAIT;
+                        maint_pending_r <= 2'b0;
+                    end else if (maint_left_r == 0) begin
+                        maintenance_r <= 1'b0;
+                        fence_done_r <= fence_clean_r;
+                        state_r <= S_IDLE;
+                    end
+                end
+                S_MWAIT: begin
+                    if (|maint_pending_r) begin
+                        // Device transactions already granted run to completion.
+                        // D_BUS wins a simultaneous request; a granted writeback
+                        // holds AXI ownership through B, so neither can starve.
+                        if (!device_bus_active_w && device_state_r != D_BUS)
                             state_r <= S_WB_AW;
+                    end else if (maint_cmd_r != 4) begin
+                        if (scan_prefetched_r) state_r <= S_MCHECK;
+                        else begin
+                            maintenance_r <= 1'b0;
+                            fence_done_r <= fence_clean_r;
+                            state_r <= S_IDLE;
+                        end
+                    end else begin
+                        segment_mask_r[scan_idx_r[3:0]] <= 1'b0;
+                        if ((segment_mask_r & ~(16'b1 << scan_idx_r[3:0])) != 0)
+                            state_r <= S_MREAD;
+                        else if (segment_r != 31) begin
+                            segment_r <= segment_r + 1'b1;
+                            state_r <= S_MSEG;
+                        end else begin
+                            maintenance_r <= 1'b0;
+                            fence_done_r <= fence_clean_r;
+                            state_r <= S_IDLE;
                         end
                     end
                 end
-                S_MNEXT: if (device_state_r == D_IDLE && !device_accept_w) begin
-                    if (scan_invalidate_r) begin
-                        if (maint_scan_r[0]) begin
-                            valid1_r[maint_scan_r[7:1]] <= 1'b0;
-                            dirty1_r[maint_scan_r[7:1]] <= 1'b0;
-                        end else begin
-                            valid0_r[maint_scan_r[7:1]] <= 1'b0;
-                            dirty0_r[maint_scan_r[7:1]] <= 1'b0;
-                        end
-                    end
-                    maint_scan_r <= maint_scan_r + 1'b1;
-                    state_r <= S_MREAD;
-                    if (maint_scan_r == 8'hff) begin
+                S_MSEG: begin
+                    segment_mask_r <= segment_dirty_w;
+                    if (|segment_dirty_w) state_r <= S_MREAD;
+                    else if (segment_r != 31) segment_r <= segment_r + 1'b1;
+                    else begin
                         maintenance_r <= 1'b0;
                         fence_done_r <= fence_clean_r;
                         state_r <= S_IDLE;
