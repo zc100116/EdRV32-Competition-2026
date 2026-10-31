@@ -13,16 +13,16 @@
 | `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（8192 深，20261027-02） |
 | `ip_ram_npu_line` | DRM 简单双口 RAM，输出寄存 | 1024 × 256 | `edrv32_ram_npu_line` | NPU 行缓存 ×2 | [ip_ram_npu_line.md](ip_ram_npu_line.md) | 已生成（20261027-02） |
 | `ip_ram_npu_weight` | DRM 简单双口 RAM，输出寄存 | 512 × 256 | `edrv32_ram_npu_weight` | NPU 常驻权重 ×24 | [ip_ram_npu_weight.md](ip_ram_npu_weight.md) | 已生成（20261027-02） |
-| `ip_ram_npu_quant` | DRM 简单双口 RAM，输出寄存 | 512 × 64（用 32 项） | `edrv32_ram_npu_quant` | NPU 量化参数 ×8 | [ip_ram_npu_quant.md](ip_ram_npu_quant.md) | 已生成（20261027-02） |
-| `ip_ram_npu_lut` | DRM 简单双口 RAM，输出寄存 | 4096 × 8（用 2048 项） | `edrv32_ram_npu_lut` | NPU 激活表 ×16 | [ip_ram_npu_lut.md](ip_ram_npu_lut.md) | 已生成（20261027-02） |
-| `ip_ram_npu_residual` | DRM 简单双口 RAM，输出寄存 | 512 × 256（用 32 项） | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_ram_npu_residual.md](ip_ram_npu_residual.md) | 已生成（20261027-02） |
-| `ip_ram_npu_result` | DRM 简单双口 RAM，输出寄存 | 512 × 512（用 32 项） | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_ram_npu_result.md](ip_ram_npu_result.md) | 已生成（20261027-02） |
+| `ip_lutram_npu_quant` | 分布式 RAM，组合读 | 32 × 64 | `edrv32_ram_npu_quant` | NPU 量化参数 ×8 | [ip_lutram_npu_quant.md](ip_lutram_npu_quant.md) | 评估版，待卡 21 生成 |
+| `ip_ram_npu_lut` | DRM 简单双口 RAM，输出寄存 | 2048 × 8 | `edrv32_ram_npu_lut` | NPU 激活表 ×16 | [ip_ram_npu_lut.md](ip_ram_npu_lut.md) | 评估版，待卡 21 生成 |
+| `ip_lutram_npu_residual` | 分布式 RAM，组合读 | 32 × 256 | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_lutram_npu_residual.md](ip_lutram_npu_residual.md) | 评估版，待卡 21 生成 |
+| `ip_lutram_npu_result` | 分布式 RAM，组合读 | 32 × 512 | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_lutram_npu_result.md](ip_lutram_npu_result.md) | 评估版，待卡 21 生成 |
 | `ip_ram_npu_scratch` | DRM 简单双口 RAM | 512 × 256 | `edrv32_ram_npu_scratch` | NPU 非卷积暂存 ×2 | [ip_ram_npu_scratch.md](ip_ram_npu_scratch.md) | 已生成（20261027-02） |
 | （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 级联乘加，不经 IP Compiler | 2 × INT8 乘法 + 独立 24 位后加，单元 3 沿、八级链 10 沿 | `edrv32_mac_npu_int8_head` / `edrv32_mac_npu_int8_chain` | NPU MAC 阵列 head ×32 / chain ×224 | [ip_mac_npu_int8_chain.md](ip_mac_npu_int8_chain.md) | 无需生成；EQ-01 厂商模型对比 PASS |
 | `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 已生成（20261027-02） |
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
 | `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读缓冲 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | B2 待生成 |
-| `ip_ram_mem_xbar_w` | DRM 简单双口 RAM | 512 × 288（用 16 项） | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_ram_mem_xbar_w.md](ip_ram_mem_xbar_w.md) | B2 待生成 |
+| `ip_lutram_mem_xbar_w` | 分布式 RAM，组合读 | 16 × 288 | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_lutram_mem_xbar_w.md](ip_lutram_mem_xbar_w.md) | 评估版，待卡 21 生成 |
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 已生成（20261028-04） |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1（B3 起 ×2：L0、L1，disp-spec v0.3） | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 已生成（20261028-04） |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 已生成（20261028-04） |
@@ -45,13 +45,18 @@ TMDS 及 RGMII 使用器件原语，无需另生成 GUI IP：
 原语配置固定在 `fpga/rtl/edrv32_fpga_tmds.v` 和 `edrv32_fpga_rgmii.v`；
 SERDES 数据寄存器不使用本地复位，持续发送 SoC 的 TMDS 符号（CLAUDE 5.2）。
 
+本分支是 B3F 方案 B 评估版，不代表已采用。四种浅存储改用分布式 RAM，激活表 DRM 改为 2048 深，均待卡 21 生成。
+旧的 `ip_ram_npu_result.md`、`ip_ram_npu_quant.md`、`ip_ram_npu_residual.md`、
+`ip_ram_mem_xbar_w.md` 在本分支删除；`zc100116/b3` 分支仍保留它们，供方案 A（卡 20）使用。
+分布式 RAM 的读使能、保持和 1/2 拍延迟由包装模块寄存器实现，IP 本身为组合读。
+
 ### B2 Windows 用户 IP 生成顺序
 
 1. 新建独立 B2 工程（PG2L200H-6/FBB676），保留 B1 工程供对照。
 2. 按 `ip_pll_sys.md` 复用或生成 100 MHz PLL；按新说明生成 NPU、video、ETH PLL。
 3. 按 `ip_ddr3.md` 导入 `ip_ddr3.idf` 生成 DDR3（导入失败时用 GUI 步骤），确认 `ref_clk`、`core_clk` 及全部用户口/物理端口。
 4. 在 B2 工程加入 soc.f 所用存储/乘法 IP（见下表），ROM/SRAM 用 B2 BIOS/监控
-   程序重新生成的初始化文件。尤其 `ip_ram_mem_xbar_r`/`ip_ram_mem_xbar_w`
+   程序重新生成的初始化文件。尤其 `ip_ram_mem_xbar_r`/`ip_lutram_mem_xbar_w`
    是 B2 DDR fabric 所需，不能只复制 B1 的七种 IP。
 5. 执行 `fpga/scripts/import_board_b2_top.tcl`，随后综合、实现和上板；
    在 PDS 确认时钟约束命中真实 IP 层级，回传实际 IP 版本/端口、频率及参数截图。
@@ -61,11 +66,11 @@ B2 soc.f 的 24 种生成 IP（不含上面 5 种板级 IP，APM 原语另计）
 
 - CPU/SYS：`ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、
   `ip_ram_dcache_data`、`ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`。
-- MEM：`ip_ram_mem_xbar_r`、`ip_ram_mem_xbar_w`。
+- MEM：`ip_ram_mem_xbar_r`、`ip_lutram_mem_xbar_w`。
 - VIN/PIX/GEO/DISP：`ip_ram_vin_wfifo`、`ip_ram_pix_line`、`ip_ram_geo_src`、
   `ip_ram_disp_scan`。
-- NPU：`ip_ram_npu_line`、`ip_ram_npu_weight`、`ip_ram_npu_quant`、`ip_ram_npu_lut`、
-  `ip_ram_npu_residual`、`ip_ram_npu_result`、`ip_ram_npu_scratch`、
+- NPU：`ip_ram_npu_line`、`ip_ram_npu_weight`、`ip_lutram_npu_quant`、`ip_ram_npu_lut`、
+  `ip_lutram_npu_residual`、`ip_lutram_npu_result`、`ip_ram_npu_scratch`、
   `ip_mul_npu_quant_low`、`ip_mul_npu_quant_high`。
 - ETH：`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
 
@@ -73,10 +78,11 @@ RND 的两种 RAM 不在 B2 soc.f 依赖内。
 
 ## 通用约定
 
-- 读延迟默认 1 个周期（不勾选输出寄存器），读使能为 0 时读数据保持。例外：NPU 数据通路的 RAM（`ip_ram_npu_*`，scratch 除外）勾选输出寄存器，读延迟 2 个周期（NPU 规格 5.4 时序设计）。PDS 生成的读使能端口名为 `clk_en` / `rd_clk_en`。
-- PDS 存储和乘法 IP 都强制带高有效复位端口，只作用于读出或流水通路，不清存储阵列；包装模块一律接 `1'b0`（CLAUDE.md 5.2：数据通路不复位）。
+- DRM 读延迟默认 1 个周期（不勾选输出寄存器），读使能为 0 时读数据保持。例外：NPU 数据通路的 RAM（`ip_ram_npu_*`，scratch 除外）勾选输出寄存器，读延迟 2 个周期（NPU 规格 5.4 时序设计）。PDS 生成的读使能端口名为 `clk_en` / `rd_clk_en`。
+- 现有 PDS DRM 和乘法 IP 都强制带高有效复位端口，只作用于读出或流水通路，不清存储阵列；包装模块一律接 `1'b0`（CLAUDE.md 5.2：数据通路不复位）。
 - 18K DRM 的地址最少 9 位（512 深），更浅的存储按 512 深生成，包装模块高位补 0。
-- 简单双口 RAM 的写端口和读端口同一时钟；同一时钟沿对同一地址读写时，读端口得到旧数据（CPU 侧 IP 的定向检查结果）。NPU 的 `ip_ram_npu_*` 没有冲突模式选项，同址读写的读出值不确定，使用方不得依赖（见各创建说明）。
+- DRM 简单双口 RAM 的写端口和读端口同一时钟；同一时钟沿对同一地址读写时，读端口得到旧数据（CPU 侧 IP 的定向检查结果）。NPU 的 `ip_ram_npu_*` 没有冲突模式选项，同址读写的读出值不确定，使用方不得依赖（见各创建说明）。
+- 分布式 RAM 只有同步写时钟，组合读；包装模块沿前采样读值，同址读写返回旧值。NPU 两级读寄存器第一级受读使能控制、第二级一直使能；mem_xbar 写缓冲一级受读使能控制。
 - 端口名以 PDS 实际生成的为准；每个说明末尾列出了包装模块期望的端口名，生成后请回传实际端口列表，不一致由协调者修改包装模块。
 - 第一次生成时建议先只生成 `ip_ram_icache_tag` 和 `ip_rom_boot` 两个，确认端口和选项后再生成其余的。
 
