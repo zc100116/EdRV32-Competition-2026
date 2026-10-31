@@ -1,0 +1,27 @@
+Final saved project: 98 RTL files. Top: edrv32_fpga_board_render_top. FPGA_MODE.
+Include: ../../EdRV32-Competition-2026/rtl/include
+
+Original import change list:
+Pre-import source plan
+Current=84 Expected=98
+
+ADD
+rtl/tech/edrv32_ram_eth_buf.v
+rtl/tech/edrv32_ram_eth_fifo.v
+rtl/common/edrv32_sync_fifo.v
+rtl/eth/edrv32_eth_crc.v
+rtl/eth/edrv32_eth_fifo.v
+rtl/eth/edrv32_eth_mdio.v
+rtl/eth/edrv32_eth_regs.v
+rtl/eth/edrv32_eth_rx.v
+rtl/eth/edrv32_eth_rx_front.v
+rtl/eth/edrv32_eth_rx_write.v
+rtl/eth/edrv32_eth_tx.v
+rtl/eth/edrv32_eth_tx_front.v
+rtl/eth/edrv32_eth.v
+fpga/rtl/edrv32_fpga_rgmii.v
+
+REMOVE
+
+
+Repo and rtl/include paths checked from EdRV32-B3R. Final PDS list pending user import.

@@ -31,6 +31,8 @@ module edrv32_ram_npu_result (
     ip_lutram_npu_result u_ip_lo (
         // Synchronous write port.
         .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i[255:0]),
@@ -42,6 +44,8 @@ module edrv32_ram_npu_result (
     ip_lutram_npu_result u_ip_hi (
         // Synchronous write port.
         .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i[511:256]),

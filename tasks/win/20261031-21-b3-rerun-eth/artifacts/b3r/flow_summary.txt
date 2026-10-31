@@ -1,0 +1,47 @@
+compile
+Warnings=3087 Errors=0
+Action compile: Real time elapsed is 0h:1m:58s
+Action compile: CPU time elapsed is 0h:0m:8s
+Action compile: Process CPU time elapsed is 0h:0m:8s
+Action compile: Peak memory pool usage is 559 MB
+Counter({'ConstantProbeLoop': 879, 'Verilog-2020': 788, 'Verilog-2008': 577, 'Verilog-2038': 306, 'Sdm-2000': 188, 'Sdm-2003': 119, 'Verilog-2023': 118, 'Verilog-2039': 38, 'Verilog-2019': 25, 'Public-4030': 20, 'Verilog-2006': 10, 'Verilog-2021': 9, 'Verilog-2036': 4, 'Sdm-2010': 4, 'Sdm-2014': 2})
+
+synthesize
+Warnings=9385 Errors=0
+Action synthesize: Real time elapsed is 0h:6m:3s
+Action synthesize: CPU time elapsed is 0h:1m:8s
+Action synthesize: Process CPU time elapsed is 0h:1m:12s
+Action synthesize: Peak memory pool usage is 3,303 MB
+Counter({'Public-4008': 5414, 'Uncoded warning': 3808, 'Timing-4087': 93, 'Timing-4086': 45, 'Uncoded fanout warning': 24, 'Adm-4019': 1})
+
+device_map
+Warnings=20 Errors=0
+Action dev_map: Real time elapsed is 0h:0m:53s
+Action dev_map: CPU time elapsed is 0h:0m:9s
+Action dev_map: Process CPU time elapsed is 0h:0m:9s
+Action dev_map: Peak memory pool usage is 1,552 MB
+Counter({'Public-4008': 11, 'DeviceMap-4011': 8, 'Public-4010': 1})
+
+place_route
+Warnings=0 Errors=0
+Action pnr: Real time elapsed is 0h:39m:58s
+Action pnr: CPU time elapsed is 0h:4m:52s
+Action pnr: Process CPU time elapsed is 0h:8m:28s
+Action pnr: Peak memory pool usage is 6,376 MB
+Counter()
+
+report_timing
+Warnings=138 Errors=0
+Action report_timing: Real time elapsed is 0h:1m:30s
+Action report_timing: CPU time elapsed is 0h:0m:10s
+Action report_timing: Process CPU time elapsed is 0h:0m:13s
+Action report_timing: Peak memory pool usage is 5,230 MB
+Counter({'Timing-4087': 93, 'Timing-4086': 45})
+
+generate_bitstream
+Warnings=0 Errors=0
+Action gen_bit_stream: Real time elapsed is 0h:2m:22s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:23s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:23s
+Action gen_bit_stream: Peak memory pool usage is 3,526 MB
+Counter()

@@ -1,0 +1,267 @@
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 9510c64
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 9510c64
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+UART load ready
+Load bytes: 26336 at 0x90000000
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+Run address:
+Run: 0x90000000
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND fill_rgb565 crc=0xe9358c29
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND border_rgb565 crc=0x1658f064
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND glyph_rgb565 crc=0x26bf7139
+RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+RND blit_rgb565 crc=0x87b4c9d9
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+RND copy_rgb565 crc=0xd330519b
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND box_shadow_rgb565 crc=0xaddb98ac
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+RND blur_rgb565 crc=0x9dc67871
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND tilemap_rgb565 crc=0x763bdd5f
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND fill_argb8888 crc=0x0bda4f5e
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND border_argb8888 crc=0x2230a20f
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND glyph_argb8888 crc=0x004b61a5
+RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+RND blit_argb8888 crc=0xaa15e883
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+RND copy_argb8888 crc=0x6d1538f5
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND box_shadow_argb8888 crc=0x5ca6e649
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+RND blur_argb8888 crc=0x3f13597a
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND tilemap_argb8888 crc=0xeecd1aac
+RND display ready
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 9510c64
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+UART load ready
+Load bytes: 1131072 at 0x90000000
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+UART load ready
+Load bytes: 1408 at 0x90114240
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+Run address:
+Run: 0x90000000
+S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+LVGL fps=4 rnd_tasks=34 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+GAME fps=60 rnd_ms=1.782 cpu_ms=0.191
+GAME fps=59 rnd_ms=1.792 cpu_ms=0.186
+GAME fps=60 rnd_ms=1.792 cpu_ms=0.186
+GAME fps=59 rnd_ms=1.790 cpu_ms=0.185
+GAME fps=60 rnd_ms=1.712 cpu_ms=0.184
+GAME fps=59 rnd_ms=3.045 cpu_ms=0.241
+GAME fps=60 rnd_ms=3.538 cpu_ms=0.260
+GAME fps=59 rnd_ms=2.953 cpu_ms=0.233
+GAME fps=60 rnd_ms=1.792 cpu_ms=0.181
+GAME fps=59 rnd_ms=1.793 cpu_ms=0.191
+GAME fps=60 rnd_ms=1.754 cpu_ms=0.188
+GAME fps=59 rnd_ms=2.301 cpu_ms=0.212
+GAME fps=60 rnd_ms=3.539 cpu_ms=0.261
+GAME fps=59 rnd_ms=3.538 cpu_ms=0.260
+GAME fps=60 rnd_ms=3.538 cpu_ms=0.260
+GAME fps=59 rnd_ms=2.877 cpu_ms=0.229
+GAME fps=60 rnd_ms=1.792 cpu_ms=0.181
+GAME fps=59 rnd_ms=3.879 cpu_ms=0.311
+GAME fps=59 rnd_ms=3.908 cpu_ms=0.311
+GAME fps=59 rnd_ms=3.908 cpu_ms=0.312
+LVGL fps=0 rnd_tasks=56 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=73 sw_tasks=0
+LVGL fps=5 rnd_tasks=31 sw_tasks=0
+LVGL fps=3 rnd_tasks=18 sw_tasks=0
+LVGL fps=4 rnd_tasks=25 sw_tasks=0
+LVGL fps=4 rnd_tasks=31 sw_tasks=0
+LVGL fps=3 rnd_tasks=18 sw_tasks=0
+LVGL fps=5 rnd_tasks=93 sw_tasks=81
+LVGL fps=4 rnd_tasks=36 sw_tasks=52
+LVGL fps=4 rnd_tasks=34 sw_tasks=39
+LVGL fps=3 rnd_tasks=27 sw_tasks=39
+LVGL fps=6 rnd_tasks=121 sw_tasks=45
+LVGL fps=4 rnd_tasks=40 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=5 rnd_tasks=32 sw_tasks=0
+LVGL split scene="Empty screen" frames=180 render_ms=6.599 rnd_ms=2.543 sw_ms=0.000 other_ms=4.056 doorbells=6.000 commands=77.488 sw_tasks=0.000 perf0_cycles=301344.611 perf1_pixels=997287.622 perf2_rd_beats=3178.466 perf3_wr_beats=63194.644 perf4_rd_wait_cycles=76318.438 perf5_wr_wait_cycles=27861.566 perf0_ms=2.410 draw_rnd_ms=2.543 draw_doorbells=6.000 draw_perf0_cycles=301344.611 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=119857 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=165 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=2640 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=579 clean_ms=0.039 wait_ms=2.415 finish_ms=0.049 cache_ops=12.011 glyph_cpu_ms=1.197 cpu_cycles=1672770.216 cpu_instructions=1035938.938 cpu_load_use_cycles=418662.688 cpu_divide_cycles=7058.000 cpu_device_wait_cycles=74414.122 cpu_frontend_empty_cycles=163303.322 cpu_icache_misses=2174.383 cpu_dcache_misses=37.727 cpu_dirty_writebacks=11.161 cpu_branch_mispredicts=19578.094 cpu_ipc=0.619 icache_mpki=2.098 dcache_mpki=0.036
+LVGL split scene="Moving wallpaper" frames=87 render_ms=21.562 rnd_ms=13.114 sw_ms=0.000 other_ms=8.448 doorbells=112.540 commands=192.080 sw_tasks=0.000 perf0_cycles=1306213.264 perf1_pixels=1919637.678 perf2_rd_beats=132597.011 perf3_wr_beats=127470.287 perf4_rd_wait_cycles=604534.528 perf5_wr_wait_cycles=429268.241 perf0_ms=10.449 draw_rnd_ms=13.114 draw_doorbells=112.540 draw_perf0_cycles=1306213.264 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=1100602 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=1920 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=30720 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=6717 clean_ms=1.300 wait_ms=10.536 finish_ms=0.798 cache_ops=331.620 glyph_cpu_ms=1.320 cpu_cycles=3327198.793 cpu_instructions=1882783.183 cpu_load_use_cycles=749592.862 cpu_divide_cycles=34354.390 cpu_device_wait_cycles=236614.206 cpu_frontend_empty_cycles=319653.620 cpu_icache_misses=4462.862 cpu_dcache_misses=367.068 cpu_dirty_writebacks=16.931 cpu_branch_mispredicts=35224.448 cpu_ipc=0.565 icache_mpki=2.370 dcache_mpki=0.194
+LVGL split scene="Single rectangle" frames=173 render_ms=1.541 rnd_ms=0.294 sw_ms=0.000 other_ms=1.246 doorbells=1.751 commands=6.734 sw_tasks=0.000 perf0_cycles=31763.057 perf1_pixels=98519.815 perf2_rd_beats=767.219 perf3_wr_beats=6485.242 perf4_rd_wait_cycles=5365.994 perf5_wr_wait_cycles=1941.317 perf0_ms=0.254 draw_rnd_ms=0.263 draw_doorbells=1.497 draw_perf0_cycles=28592.346 copy_rnd_ms=0.031 copy_doorbells=0.254 copy_perf0_cycles=3170.710 copy_perf0_ms=0.025 xbar_window_cycles=871001 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=1520 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=24320 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=5316 clean_ms=0.012 wait_ms=0.255 finish_ms=0.014 cache_ops=3.693 glyph_cpu_ms=0.083 cpu_cycles=1671707.196 cpu_instructions=1086330.809 cpu_load_use_cycles=508535.508 cpu_divide_cycles=4294.433 cpu_device_wait_cycles=9699.456 cpu_frontend_empty_cycles=70513.179 cpu_icache_misses=1023.491 cpu_dcache_misses=23.052 cpu_dirty_writebacks=7.982 cpu_branch_mispredicts=7673.323 cpu_ipc=0.649 icache_mpki=0.942 dcache_mpki=0.021
+LVGL split scene="Multiple rectangles" frames=166 render_ms=6.838 rnd_ms=1.400 sw_ms=0.000 other_ms=5.437 doorbells=10.789 commands=16.078 sw_tasks=0.000 perf0_cycles=146773.012 perf1_pixels=494104.240 perf2_rd_beats=705.885 perf3_wr_beats=31342.765 perf4_rd_wait_cycles=5846.307 perf5_wr_wait_cycles=2138.638 perf0_ms=1.174 draw_rnd_ms=1.369 draw_doorbells=10.512 draw_perf0_cycles=143684.421 copy_rnd_ms=0.030 copy_doorbells=0.277 copy_perf0_cycles=3088.590 copy_perf0_ms=0.024 xbar_window_cycles=661128 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=1040 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=16640 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=3642 clean_ms=0.069 wait_ms=1.182 finish_ms=0.087 cache_ops=21.789 glyph_cpu_ms=0.087 cpu_cycles=1744369.253 cpu_instructions=1082503.548 cpu_load_use_cycles=373751.746 cpu_divide_cycles=11756.638 cpu_device_wait_cycles=24803.644 cpu_frontend_empty_cycles=291336.903 cpu_icache_misses=4034.114 cpu_dcache_misses=82.084 cpu_dirty_writebacks=25.361 cpu_branch_mispredicts=38522.566 cpu_ipc=0.620 icache_mpki=3.726 dcache_mpki=0.075
+LVGL split scene="Multiple RGB images" frames=87 render_ms=19.327 rnd_ms=5.021 sw_ms=0.000 other_ms=14.306 doorbells=27.000 commands=108.758 sw_tasks=0.000 perf0_cycles=541587.436 perf1_pixels=1208454.666 perf2_rd_beats=33070.988 perf3_wr_beats=78173.954 perf4_rd_wait_cycles=206841.137 perf5_wr_wait_cycles=124172.195 perf0_ms=4.332 draw_rnd_ms=5.021 draw_doorbells=27.000 draw_perf0_cycles=541587.436 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=37860 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=70 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=1120 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=245 clean_ms=0.291 wait_ms=4.353 finish_ms=0.241 cache_ops=75.000 glyph_cpu_ms=1.353 cpu_cycles=3346129.517 cpu_instructions=1910549.310 cpu_load_use_cycles=590673.436 cpu_divide_cycles=16759.057 cpu_device_wait_cycles=117089.609 cpu_frontend_empty_cycles=769471.620 cpu_icache_misses=11328.287 cpu_dcache_misses=321.321 cpu_dirty_writebacks=113.827 cpu_branch_mispredicts=83383.068 cpu_ipc=0.570 icache_mpki=5.929 dcache_mpki=0.168
+LVGL split scene="Multiple ARGB images" frames=87 render_ms=19.448 rnd_ms=5.093 sw_ms=0.000 other_ms=14.355 doorbells=27.000 commands=109.988 sw_tasks=0.000 perf0_cycles=550437.298 perf1_pixels=1208626.448 perf2_rd_beats=45692.091 perf3_wr_beats=78175.275 perf4_rd_wait_cycles=215582.701 perf5_wr_wait_cycles=126688.954 perf0_ms=4.403 draw_rnd_ms=5.093 draw_doorbells=27.000 draw_perf0_cycles=550437.298 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=531066 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=806 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=12896 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2827 clean_ms=0.292 wait_ms=4.424 finish_ms=0.241 cache_ops=75.000 glyph_cpu_ms=1.374 cpu_cycles=3344481.287 cpu_instructions=1906335.609 cpu_load_use_cycles=588171.275 cpu_divide_cycles=16762.264 cpu_device_wait_cycles=118261.517 cpu_frontend_empty_cycles=772241.356 cpu_icache_misses=11358.367 cpu_dcache_misses=330.183 cpu_dirty_writebacks=138.172 cpu_branch_mispredicts=83541.551 cpu_ipc=0.569 icache_mpki=5.958 dcache_mpki=0.173
+LVGL split scene="Rotated ARGB images" frames=17 render_ms=165.503 rnd_ms=2.556 sw_ms=147.465 other_ms=15.481 doorbells=25.294 commands=68.529 sw_tasks=10.000 perf0_cycles=178071.294 perf1_pixels=387357.294 perf2_rd_beats=7158.588 perf3_wr_beats=26106.705 perf4_rd_wait_cycles=46347.823 perf5_wr_wait_cycles=16793.705 perf0_ms=1.424 draw_rnd_ms=1.963 draw_doorbells=13.058 draw_perf0_cycles=140110.588 copy_rnd_ms=0.593 copy_doorbells=12.235 copy_perf0_cycles=37960.705 copy_perf0_ms=0.303 xbar_window_cycles=32002 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=60 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=960 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=210 clean_ms=0.755 wait_ms=1.443 finish_ms=0.203 cache_ops=62.294 glyph_cpu_ms=0.726 cpu_cycles=17600681.176 cpu_instructions=12649566.058 cpu_load_use_cycles=1410708.705 cpu_divide_cycles=807740.352 cpu_device_wait_cycles=95204.588 cpu_frontend_empty_cycles=1255575.823 cpu_icache_misses=14745.294 cpu_dcache_misses=61935.882 cpu_dirty_writebacks=33575.882 cpu_branch_mispredicts=255878.470 cpu_ipc=0.718 icache_mpki=1.165 dcache_mpki=4.896
+LVGL split scene="Multiple labels" frames=57 render_ms=34.435 rnd_ms=7.751 sw_ms=0.000 other_ms=26.683 doorbells=41.000 commands=434.789 sw_tasks=0.000 perf0_cycles=846287.982 perf1_pixels=1070823.578 perf2_rd_beats=20628.000 perf3_wr_beats=73726.368 perf4_rd_wait_cycles=559118.473 perf5_wr_wait_cycles=198937.719 perf0_ms=6.770 draw_rnd_ms=7.751 draw_doorbells=41.000 draw_perf0_cycles=846287.982 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=839256 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=1360 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=21760 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=4778 clean_ms=0.274 wait_ms=6.801 finish_ms=0.341 cache_ops=82.140 glyph_cpu_ms=7.162 cpu_cycles=5107422.438 cpu_instructions=2754602.228 cpu_load_use_cycles=720213.421 cpu_divide_cycles=14843.403 cpu_device_wait_cycles=408595.508 cpu_frontend_empty_cycles=1361459.263 cpu_icache_misses=20132.701 cpu_dcache_misses=537.877 cpu_dirty_writebacks=197.491 cpu_branch_mispredicts=133052.701 cpu_ipc=0.539 icache_mpki=7.308 dcache_mpki=0.195
+LVGL split scene="Screen sized text" frames=54 render_ms=82.383 rnd_ms=20.130 sw_ms=0.000 other_ms=62.252 doorbells=56.129 commands=1673.851 sw_tasks=0.000 perf0_cycles=2376214.203 perf1_pixels=1276768.185 perf2_rd_beats=69557.055 perf3_wr_beats=103017.074 perf4_rd_wait_cycles=1906520.703 perf5_wr_wait_cycles=668844.555 perf0_ms=19.009 draw_rnd_ms=20.130 draw_doorbells=56.129 draw_perf0_cycles=2376214.203 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=91136 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=105 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=1680 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=366 clean_ms=0.364 wait_ms=19.051 finish_ms=0.431 cache_ops=112.870 glyph_cpu_ms=26.630 cpu_cycles=9238980.203 cpu_instructions=5817005.981 cpu_load_use_cycles=1100759.000 cpu_divide_cycles=5027.944 cpu_device_wait_cycles=1503225.314 cpu_frontend_empty_cycles=1422905.203 cpu_icache_misses=10406.611 cpu_dcache_misses=249.277 cpu_dirty_writebacks=50.166 cpu_branch_mispredicts=317818.222 cpu_ipc=0.629 icache_mpki=1.788 dcache_mpki=0.042
+LVGL split scene="Multiple arcs" frames=47 render_ms=47.447 rnd_ms=2.599 sw_ms=32.983 other_ms=11.864 doorbells=6.000 commands=81.553 sw_tasks=27.340 perf0_cycles=306944.382 perf1_pixels=997371.914 perf2_rd_beats=3340.489 perf3_wr_beats=63286.638 perf4_rd_wait_cycles=81297.808 perf5_wr_wait_cycles=29370.510 perf0_ms=2.455 draw_rnd_ms=2.599 draw_doorbells=6.000 draw_perf0_cycles=306944.382 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=327744 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=590 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=9440 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=2089 clean_ms=0.041 wait_ms=2.460 finish_ms=0.050 cache_ops=12.000 glyph_cpu_ms=1.271 cpu_cycles=6270063.531 cpu_instructions=4084106.531 cpu_load_use_cycles=633603.957 cpu_divide_cycles=16987.595 cpu_device_wait_cycles=84816.617 cpu_frontend_empty_cycles=1319143.170 cpu_icache_misses=11177.702 cpu_dcache_misses=6295.510 cpu_dirty_writebacks=5473.148 cpu_branch_mispredicts=355350.893 cpu_ipc=0.651 icache_mpki=2.736 dcache_mpki=1.541
+LVGL split scene="Containers" frames=25 render_ms=109.469 rnd_ms=69.006 sw_ms=0.000 other_ms=40.463 doorbells=93.560 commands=363.240 sw_tasks=0.000 perf0_cycles=8364851.080 perf1_pixels=1197698.120 perf2_rd_beats=236992.560 perf3_wr_beats=89625.280 perf4_rd_wait_cycles=410009.600 perf5_wr_wait_cycles=351674.960 perf0_ms=66.918 draw_rnd_ms=68.608 draw_doorbells=84.120 draw_perf0_cycles=8343122.840 copy_rnd_ms=0.398 copy_doorbells=9.440 copy_perf0_cycles=21728.240 copy_perf0_ms=0.173 xbar_window_cycles=705588 xbar_rnd_p4_rd_txn_total=1376 xbar_rnd_p4_wr_txn_total=662 xbar_rnd_p4_rd_beats_total=1824 xbar_rnd_p4_wr_beats_total=1056 xbar_rnd_p4_wait_sum_cycles_total=6318 xbar_disp_p0_rd_txn_total=1120 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=17920 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=3966 clean_ms=0.704 wait_ms=66.990 finish_ms=0.765 cache_ops=205.720 glyph_cpu_ms=5.030 cpu_cycles=11957857.400 cpu_instructions=7153308.040 cpu_load_use_cycles=2598740.560 cpu_divide_cycles=17582.560 cpu_device_wait_cycles=380186.640 cpu_frontend_empty_cycles=1970897.440 cpu_icache_misses=29055.920 cpu_dcache_misses=1209.960 cpu_dirty_writebacks=304.800 cpu_branch_mispredicts=208028.120 cpu_ipc=0.598 icache_mpki=4.061 dcache_mpki=0.169
+LVGL split scene="Containers with overlay" frames=23 render_ms=112.415 rnd_ms=71.047 sw_ms=0.000 other_ms=41.368 doorbells=102.565 commands=378.913 sw_tasks=0.000 perf0_cycles=8595895.434 perf1_pixels=1602285.695 perf2_rd_beats=261756.130 perf3_wr_beats=116092.086 perf4_rd_wait_cycles=445211.956 perf5_wr_wait_cycles=464406.478 perf0_ms=68.767 draw_rnd_ms=70.645 draw_doorbells=93.130 draw_perf0_cycles=8573730.956 copy_rnd_ms=0.401 copy_doorbells=9.434 copy_perf0_cycles=22164.478 copy_perf0_ms=0.177 xbar_window_cycles=361358 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=501 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=8016 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=1758 clean_ms=0.761 wait_ms=68.845 finish_ms=0.843 cache_ops=223.260 glyph_cpu_ms=5.138 cpu_cycles=12567874.869 cpu_instructions=7518017.826 cpu_load_use_cycles=2755708.608 cpu_divide_cycles=17881.782 cpu_device_wait_cycles=399771.347 cpu_frontend_empty_cycles=2041626.434 cpu_icache_misses=30262.130 cpu_dcache_misses=1195.956 cpu_dirty_writebacks=272.260 cpu_branch_mispredicts=213579.826 cpu_ipc=0.598 icache_mpki=4.025 dcache_mpki=0.159
+LVGL split scene="Containers with opa" frames=43 render_ms=56.512 rnd_ms=8.340 sw_ms=13.465 other_ms=34.706 doorbells=72.000 commands=298.790 sw_tasks=7.697 perf0_cycles=789739.372 perf1_pixels=998032.209 perf2_rd_beats=60298.465 perf3_wr_beats=69389.674 perf4_rd_wait_cycles=328197.069 perf5_wr_wait_cycles=283840.162 perf0_ms=6.317 draw_rnd_ms=7.858 draw_doorbells=63.953 draw_perf0_cycles=753489.395 copy_rnd_ms=0.481 copy_doorbells=8.046 copy_perf0_cycles=36249.976 copy_perf0_ms=0.289 xbar_window_cycles=1236761 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=2080 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=33280 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=7287 clean_ms=0.886 wait_ms=6.387 finish_ms=0.598 cache_ops=159.511 glyph_cpu_ms=4.250 cpu_cycles=6838367.697 cpu_instructions=3923965.651 cpu_load_use_cycles=704566.046 cpu_divide_cycles=26328.255 cpu_device_wait_cycles=307742.069 cpu_frontend_empty_cycles=1948535.558 cpu_icache_misses=27262.604 cpu_dcache_misses=2504.186 cpu_dirty_writebacks=1384.976 cpu_branch_mispredicts=247827.000 cpu_ipc=0.573 icache_mpki=6.947 dcache_mpki=0.638
+LVGL split scene="Containers with opa_layer" frames=12 render_ms=238.246 rnd_ms=140.395 sw_ms=0.000 other_ms=97.850 doorbells=168.833 commands=516.166 sw_tasks=0.000 perf0_cycles=16191959.583 perf1_pixels=1585149.250 perf2_rd_beats=506227.750 perf3_wr_beats=167980.500 perf4_rd_wait_cycles=643900.166 perf5_wr_wait_cycles=616619.750 perf0_ms=129.535 draw_rnd_ms=139.856 draw_doorbells=158.750 draw_perf0_cycles=16154421.083 copy_rnd_ms=0.539 copy_doorbells=10.083 copy_perf0_cycles=37538.500 copy_perf0_ms=0.300 xbar_window_cycles=600648 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=930 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=14880 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=3257 clean_ms=8.364 wait_ms=129.688 finish_ms=1.319 cache_ops=383.333 glyph_cpu_ms=6.677 cpu_cycles=24933087.583 cpu_instructions=12749410.833 cpu_load_use_cycles=4718587.250 cpu_divide_cycles=28430.083 cpu_device_wait_cycles=570398.166 cpu_frontend_empty_cycles=3326526.916 cpu_icache_misses=51261.916 cpu_dcache_misses=45629.166 cpu_dirty_writebacks=40800.583 cpu_branch_mispredicts=321348.750 cpu_ipc=0.511 icache_mpki=4.020 dcache_mpki=3.578
+LVGL split scene="Containers with scrolling" frames=23 render_ms=165.194 rnd_ms=114.224 sw_ms=0.000 other_ms=50.970 doorbells=130.043 commands=612.869 sw_tasks=0.000 perf0_cycles=13915589.260 perf1_pixels=2212988.521 perf2_rd_beats=384444.652 perf3_wr_beats=160601.478 perf4_rd_wait_cycles=694519.739 perf5_wr_wait_cycles=566723.652 perf0_ms=111.324 draw_rnd_ms=114.224 draw_doorbells=130.043 draw_perf0_cycles=13915589.260 copy_rnd_ms=0.000 copy_doorbells=0.000 copy_perf0_cycles=0.000 copy_perf0_ms=0.000 xbar_window_cycles=9398 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=15 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=240 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=53 clean_ms=0.924 wait_ms=111.426 finish_ms=1.072 cache_ops=275.869 glyph_cpu_ms=8.936 cpu_cycles=21258472.913 cpu_instructions=13005610.347 cpu_load_use_cycles=4452054.434 cpu_divide_cycles=23673.304 cpu_device_wait_cycles=626667.000 cpu_frontend_empty_cycles=3301406.434 cpu_icache_misses=47957.652 cpu_dcache_misses=6348.434 cpu_dirty_writebacks=1307.695 cpu_branch_mispredicts=351308.086 cpu_ipc=0.611 icache_mpki=3.687 dcache_mpki=0.488
+LVGL split scene="Widgets demo" frames=177 render_ms=89.957 rnd_ms=13.968 sw_ms=35.738 other_ms=40.250 doorbells=67.209 commands=188.067 sw_tasks=90.096 perf0_cycles=1455725.163 perf1_pixels=2458271.932 perf2_rd_beats=103483.180 perf3_wr_beats=158825.700 perf4_rd_wait_cycles=303666.598 perf5_wr_wait_cycles=445478.960 perf0_ms=11.645 draw_rnd_ms=13.869 draw_doorbells=66.802 draw_perf0_cycles=1445255.016 copy_rnd_ms=0.098 copy_doorbells=0.406 copy_perf0_cycles=10470.146 copy_perf0_ms=0.083 xbar_window_cycles=185485 xbar_rnd_p4_rd_txn_total=0 xbar_rnd_p4_wr_txn_total=0 xbar_rnd_p4_rd_beats_total=0 xbar_rnd_p4_wr_beats_total=0 xbar_rnd_p4_wait_sum_cycles_total=0 xbar_disp_p0_rd_txn_total=335 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=5360 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=1181 clean_ms=1.222 wait_ms=11.701 finish_ms=0.556 cache_ops=135.011 glyph_cpu_ms=2.877 cpu_cycles=11295117.971 cpu_instructions=6602263.531 cpu_load_use_cycles=1029846.276 cpu_divide_cycles=566118.819 cpu_device_wait_cycles=314079.785 cpu_frontend_empty_cycles=2730676.706 cpu_icache_misses=35007.248 cpu_dcache_misses=9306.350 cpu_dirty_writebacks=6743.525 cpu_branch_mispredicts=451961.327 cpu_ipc=0.584 icache_mpki=5.302 dcache_mpki=1.409
+LVGL split scene="ALL" frames=1258 render_ms=39.449 rnd_ms=11.890 sw_ms=8.713 other_ms=18.844 doorbells=38.513 commands=205.019 sw_tasks=14.096 perf0_cycles=1351006.941 perf1_pixels=1155851.023 perf2_rd_beats=57386.689 perf3_wr_beats=77338.669 perf4_rd_wait_cycles=283358.199 perf5_wr_wait_cycles=194723.665 perf0_ms=10.808 draw_rnd_ms=11.823 draw_doorbells=37.488 draw_perf0_cycles=1345743.040 copy_rnd_ms=0.067 copy_doorbells=1.025 copy_perf0_cycles=5263.900 copy_perf0_ms=0.042 xbar_window_cycles=7710890 xbar_rnd_p4_rd_txn_total=1376 xbar_rnd_p4_wr_txn_total=662 xbar_rnd_p4_rd_beats_total=1824 xbar_rnd_p4_wr_beats_total=1056 xbar_rnd_p4_wait_sum_cycles_total=6318 xbar_disp_p0_rd_txn_total=12617 xbar_disp_p0_wr_txn_total=0 xbar_disp_p0_rd_beats_total=201872 xbar_disp_p0_wr_beats_total=0 xbar_disp_p0_wait_sum_cycles_total=44271 clean_ms=0.513 wait_ms=10.838 finish_ms=0.309 cache_ops=89.585 glyph_cpu_ms=2.970 cpu_cycles=5409210.228 cpu_instructions=3234735.675 cpu_load_use_cycles=832556.926 cpu_divide_cycles=102217.321 cpu_device_wait_cycles=221862.054 cpu_frontend_empty_cycles=1008645.545 cpu_icache_misses=13191.445 cpu_dcache_misses=3189.319 cpu_dirty_writebacks=2114.240 cpu_branch_mispredicts=148914.067 cpu_ipc=0.598 icache_mpki=4.078 dcache_mpki=0.985
+LVGL benchmark scene=Empty screen fps=59
+LVGL benchmark scene=Moving wallpaper fps=30
+LVGL benchmark scene=Single rectangle fps=60
+LVGL benchmark scene=Multiple rectangles fps=57
+LVGL benchmark scene=Multiple RGB images fps=30
+LVGL benchmark scene=Multiple ARGB images fps=30
+LVGL benchmark scene=Rotated ARGB images fps=5
+LVGL benchmark scene=Multiple labels fps=19
+LVGL benchmark scene=Screen sized text fps=10
+LVGL benchmark scene=Multiple arcs fps=16
+LVGL benchmark scene=Containers fps=7
+LVGL benchmark scene=Containers with overlay fps=8
+LVGL benchmark scene=Containers with opa fps=15
+LVGL benchmark scene=Containers with opa_layer fps=4
+LVGL benchmark scene=Containers with scrolling fps=5
+LVGL benchmark scene=Widgets demo fps=16
+LVGL benchmark average fps=23
+RND type=1 claimed=14024 unclaimed=0
+RND type=2 claimed=2441 unclaimed=0
+RND type=3 claimed=1022 unclaimed=331
+RND type=4 claimed=0 unclaimed=0
+RND type=5 claimed=15924 unclaimed=0
+RND type=6 claimed=5125 unclaimed=258
+RND type=7 claimed=216 unclaimed=0
+RND type=8 claimed=0 unclaimed=14428
+RND type=9 claimed=0 unclaimed=2518
+RND type=10 claimed=0 unclaimed=454
+RND type=11 claimed=0 unclaimed=0
+RND type=12 claimed=0 unclaimed=0
+RND type=13 claimed=0 unclaimed=0
+RND type=14 claimed=0 unclaimed=0
+RND type=15 claimed=0 unclaimed=0
+RND batch=32 commands=262446 doorbells=48036
+Benchmark Summary (9.6.0 )
+Name, Avg. CPU, Avg. FPS, Avg. time, render time, flush time
+Empty screen, 94%, 59, 13, 5, 8
+Moving wallpaper, 100%, 30, 30, 20, 10
+Single rectangle, 100%, 60, 15, 1, 14
+Multiple rectangles, 100%, 57, 14, 5, 9
+Multiple RGB images, 100%, 30, 27, 16, 11
+Multiple ARGB images, 100%, 30, 27, 16, 11
+Rotated ARGB images, 99%, 5, 167, 160, 7
+Multiple labels, 100%, 19, 45, 33, 12
+Screen sized text, 100%, 10, 88, 81, 7
+Multiple arcs, 100%, 16, 58, 49, 9
+Containers, 99%, 7, 107, 100, 7
+Containers with overlay, 100%, 8, 112, 103, 9
+Containers with opa, 100%, 15, 57, 48, 9
+Containers with opa_layer, 100%, 4, 230, 226, 4
+Containers with scrolling, 100%, 5, 171, 163, 8
+Widgets demo, 97%, 16, 90, 83, 7
+All scenes avg.,99%, 23, 77, 69, 8
+LVGL fps=17 rnd_tasks=34694 sw_tasks=17733
+LVGL fps=3 rnd_tasks=51 sw_tasks=0
+LVGL fps=3 rnd_tasks=51 sw_tasks=0
+LVGL fps=4 rnd_tasks=68 sw_tasks=0
+LVGL fps=3 rnd_tasks=51 sw_tasks=0
+LVGL fps=3 rnd_tasks=51 sw_tasks=0
+LVGL fps=4 rnd_tasks=68 sw_tasks=0
+LVGL fps=4 rnd_tasks=48 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=29 sw_tasks=0
+RN-17 full_max_lsb=0 edge_max_lsb=17 over1=1024 pixels=921600 over1_ppm=1111 bins_0_1_2_3to4_5plus=905398,15178,932,56,36 rnd_tasks=25 sw_tasks=0 PASS
+RND type=1 claimed=14451 unclaimed=6
+RND type=2 claimed=2751 unclaimed=4
+RND type=3 claimed=1022 unclaimed=331
+RND type=4 claimed=0 unclaimed=0
+RND type=5 claimed=16103 unclaimed=15
+RND type=6 claimed=5125 unclaimed=258
+RND type=7 claimed=216 unclaimed=0
+RND type=8 claimed=0 unclaimed=14428
+RND type=9 claimed=0 unclaimed=2518
+RND type=10 claimed=0 unclaimed=454
+RND type=11 claimed=0 unclaimed=0
+RND type=12 claimed=0 unclaimed=0
+RND type=13 claimed=0 unclaimed=0
+RND type=14 claimed=0 unclaimed=0
+RND type=15 claimed=0 unclaimed=0
+RND batch=32 commands=266175 doorbells=48677
+RN-17 type=1 claimed=6 unclaimed=0
+RN-17 type=2 claimed=4 unclaimed=0
+RN-17 type=5 claimed=15 unclaimed=0
+LVGL fps=5 rnd_tasks=37 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0
+LVGL fps=4 rnd_tasks=12 sw_tasks=0
+LVGL fps=3 rnd_tasks=9 sw_tasks=0

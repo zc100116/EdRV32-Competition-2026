@@ -35,6 +35,8 @@ module edrv32_ram_mem_xbar_w (
         .wr_data(wr_data_i[143:0]),
 
         // Unregistered combinational read port.
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .rd_addr(rd_addr_i),
         .rd_data(memory_data_w[143:0])
     );
@@ -46,6 +48,8 @@ module edrv32_ram_mem_xbar_w (
         .wr_data(wr_data_i[287:144]),
 
         // Unregistered combinational read port.
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .rd_addr(rd_addr_i),
         .rd_data(memory_data_w[287:144])
     );
