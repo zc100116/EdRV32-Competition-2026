@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include "rnd.h"
+#include "clint.h"
 #include "disp.h"
 #include "plic.h"
 
@@ -73,6 +74,8 @@ static void submit(void)
 int main(void)
 {
     map_registers(EDRV32_RND_BASE, 0x2000);
+    /* The v2 driver samples CLINT around cache maintenance and DOORBELL. */
+    map_registers(EDRV32_CLINT_BASE, CLINT_MTIME_HI + 0x1000);
     map_registers(EDRV32_PLIC_BASE, PLIC_CLAIM + 0x1000);
     assert(rnd_physical((void *)0x91234560) == 0x11234560);
     assert(rnd_physical((void *)0xd1234560) == 0x11234560);
