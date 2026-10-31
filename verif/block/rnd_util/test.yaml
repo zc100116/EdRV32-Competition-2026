@@ -1,0 +1,11 @@
+top: edrv32_rnd_util_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software:
+timeout: 14400
+pass: PASS
+tier: perf
+simulator: verilator
+group: verif/block/rnd_util
+runner: python3 verif/block/rnd_util/run.py

@@ -4,9 +4,11 @@
  * this translation unit replaces them only in the profiling shared library.
  * Clock domain: deterministic host milliseconds.
  */
+#define s3_compare_geometry profile_observe_geometry
 #define s3_draw_rnd_init original_rnd_init
 #include "../lvgl/draw_rnd.c"
 #undef s3_draw_rnd_init
+#undef s3_compare_geometry
 void s3_draw_rnd_init(void);
 #include "../lvgl/s3_lvgl.c"
 #include <stdio.h>
@@ -66,6 +68,38 @@ static unsigned reasons(lv_draw_task_t *t)
     }
 }
 
+/* Emit the exact driver parameter blocks without submitting work to RND.
+ * The normal census and native SW task preference remain unchanged.
+ */
+void profile_observe_geometry(lv_draw_task_t *t, const struct rnd_common *c,
+                               const uint32_t *p, uint8_t op)
+{
+    (void)t;
+    printf("GEOMETRY,%u,%u,%u,%d,%d,%d,%d,%d,%d,%d,%d", benchmark_scene, op,
+           c->flags, c->rect.x0, c->rect.y0, c->rect.x1, c->rect.y1,
+           c->clip.x0, c->clip.y0, c->clip.x1, c->clip.y1);
+    for (unsigned k = 0; k < 32; ++k) printf(",%08x", p[k]);
+    putchar('\n');
+    command_count = 0;
+    source_count = 0;
+}
+
+static void profile_geometry(lv_draw_task_t *t)
+{
+    if (!supported(t)) return;
+    if (t->type != LV_DRAW_TASK_TYPE_LINE && t->type != LV_DRAW_TASK_TYPE_ARC &&
+        t->type != LV_DRAW_TASK_TYPE_TRIANGLE) return;
+    lv_area_t written;
+    if (!lv_area_intersect(&written, &t->_real_area, &t->clip_area) ||
+        !lv_area_intersect(&written, &written, &t->target_layer->buf_area)) return;
+    lv_draw_layer_alloc_buf(t->target_layer);
+    command_count = 0;
+    source_count = 0;
+    if (t->type == LV_DRAW_TASK_TYPE_LINE) line(t, t->draw_dsc);
+    else if (t->type == LV_DRAW_TASK_TYPE_ARC) arc(t, t->draw_dsc);
+    else triangle(t, t->draw_dsc);
+}
+
 static int32_t profile_evaluate(lv_draw_unit_t *unit, lv_draw_task_t *t)
 {
     (void)unit;
@@ -74,6 +108,7 @@ static int32_t profile_evaluate(lv_draw_unit_t *unit, lv_draw_task_t *t)
         lv_area_t a;
         uint64_t n = lv_area_intersect(&a, &t->_real_area, &t->clip_area) ?
             (uint64_t)lv_area_get_width(&a) * lv_area_get_height(&a) : 0;
+        profile_geometry(t);
         counts[benchmark_scene][t->type][r]++;
         pixels[benchmark_scene][t->type][r] += n;
     }
@@ -85,6 +120,7 @@ static int32_t profile_evaluate(lv_draw_unit_t *unit, lv_draw_task_t *t)
 
 void s3_draw_rnd_init(void)
 {
+    commands = command_storage;
     lv_draw_unit_t *unit = lv_draw_create_unit(sizeof(*unit));
     unit->name = "RND profile";
     unit->evaluate_cb = profile_evaluate;

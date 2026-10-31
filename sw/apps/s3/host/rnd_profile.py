@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT / 'tools/s3'))
 from lvgl_host import build, FLAGS, OUT
 
 build()
+sys.stdout.flush()
 obj = OUT / 'rnd_profile.o'
 subprocess.run(['cc', *FLAGS, '-c', 'sw/apps/s3/host/rnd_profile.c', '-o', str(obj)],
                cwd=ROOT, check=True)

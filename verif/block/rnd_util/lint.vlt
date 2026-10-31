@@ -1,0 +1,3 @@
+`verilator_config
+// The synchronous measurement BFM also samples the asynchronous DUT reset.
+lint_off -rule SYNCASYNCNET -file "*/rnd_util/edrv32_rnd_util_tb.sv"
