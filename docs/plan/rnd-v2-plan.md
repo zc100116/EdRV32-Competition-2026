@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 版本 / 日期 | v0.1 / 2026-10-31 |
-| 状态 | [~] 规格/验证方案草案待协调者审核，开发尚未派发 |
+| 状态 | [~] 阶段一已批准，进入V2-REF |
 | 依据 | rnd-spec v0.3、rnd-testplan v0.2、设计记录2026-10-31-rnd-v2的D1–D8 |
 | 工作包 / 分支 | T-RND2 / zc100116/task-rnd-v2（基线7732a05b，zc100116/b3） |
 
@@ -30,7 +30,7 @@ clk_mem 125MHz、RND≤32K LUT/130APM/66DRM、G4≤40APM、AFFINE窗口/填充�
 
 | 编号 | 内容 | 执行者（角色/模型） | 依赖 | 验收 | 分支/任务卡 | 状态 |
 |---|---|---|---|---|---|---|
-| V2-DOC | v0.3规格、验证方案和本计划；提交后ask审核 | 项目经理本人/Codex | D1–D8 | 三文档diff无空白错误；协调者批准 | task-rnd-v2 | [~] |
+| V2-DOC | v0.3规格、验证方案和本计划；提交后ask审核 | 项目经理本人/Codex | D1–D8 | 三文档diff无空白错误；协调者批准 | task-rnd-v2 | [x] |
 | V2-REF | 扩展独立整数oracle、命令/参数编码、手算/算术自测 | 独立参考员工/gpt-6.1-sol medium | DOC批准 | rnd_ref.py --selftest及自身参考自测通过；不读RTL、不跑整体回归 | task-rnd2-ref | [ ] |
 | V2-MASK | G2 RTL、参数读取、MASK直写/阴影挖空/BLIT圆角；自写单元测试、技术RAM说明（需要时）；列出共享接口 | RTL员工/gpt-6.1-sol medium | REF | 自身单元检查/风格/lint零告警；旧字段保留；接口评审冻结 | task-rnd2-mask | [ ] |
 | V2-VERIFY | 按RN-21–29及RN-14/15/17/19扩展模块/SoC激励、向量和计数检查 | 独立验证员工/gpt-6.1-sol medium | MASK及接口冻结、REF | 不读被测RTL；自测向量/模型和harness；不跑被测RTL整体回归；提交可执行测试 | task-rnd2-verify | [ ] |
@@ -69,7 +69,7 @@ INTEG拥有sw/drivers/rnd.c、include/rnd.h、sw/apps/s3/lvgl/draw_rnd.c、tools
 
 ## 5. 风险和阻塞
 
-- [!] 阶段二等待协调者审核，不派开发。
+- 阶段一已获协调者批准（35abfa9f及EDGE_INCL修订），可按依赖派发。
 - G1与LVGL AA不同、G4相位/预乘可能无法通过RN-17；出现失败明确上报，不静默回软件或放宽阈值。
 - 源读放大依赖变换局部性；32块不能保证带宽上限，按实际beat报告。
 - APM/DRM端口组织与旧blend关键路径风险：只做已规定流水与资源；任何估算超D8先ask，不自行裁减。
@@ -79,4 +79,5 @@ INTEG拥有sw/drivers/rnd.c、include/rnd.h、sw/apps/s3/lvgl/draw_rnd.c、tools
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
-| 2026-10-31 | v0.1 | 依据D1–D8，制定REF→MASK→GEO/AFF→INTEG及独立验证分工；草案待协调者审核 |
+| 2026-10-31 | v0.1 | 依据D1–D8，制定REF→MASK→GEO/AFF→INTEG及独立验证分工；协调者审核批准 |
+| 2026-10-31 | v0.1 | 协调者批准35abfa9f，要求TRIANGLE改为FLAGS[3:1] EDGE_INCL精确比较；改完直接开工，无需复审 |
