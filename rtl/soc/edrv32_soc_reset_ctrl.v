@@ -35,6 +35,7 @@ module edrv32_soc_reset_ctrl (
     wire rst_mem_por_n_w;
     wire mem_ready_w;
     wire mem_released_w;
+    wire rst_mem_copy_n_w;
     wire media_release_n_w;
     wire sys_release_n_w;
     wire soft_active_w;
@@ -119,10 +120,16 @@ module edrv32_soc_reset_ctrl (
         .rst_n_o(rst_eth_tx_n_o)
     );
 
+    // spec 2.10 release order: all one-stage memory copies release first.
+    edrv32_reset_copy u_mem_copy (
+        .clk_i(clk_mem_i),
+        .rst_n_i(rst_mem_n_o),
+        .rst_n_o(rst_mem_copy_n_w)
+    );
     edrv32_cdc_sync_bit u_mem_released (
         .clk_i(clk_sys_i),
         .rst_n_i(rst_sys_por_n_o && !soft_soc_r),
-        .bit_i(rst_mem_n_o),
+        .bit_i(rst_mem_copy_n_w),
         .bit_o(mem_released_w)
     );
     // A media-only reset must not revoke a previously released system reset.

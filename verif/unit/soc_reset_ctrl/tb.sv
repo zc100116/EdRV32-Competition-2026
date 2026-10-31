@@ -1,8 +1,8 @@
 // File: tb.sv
-// Spec: sys-subsys-testplan SY-01--SY-06.
+// Spec: sys-subsys-testplan SY-01--SY-07.
 // Description: Self-checking APB and multi-clock reset sequencing tests.
 // Clock: clk_sys and seven asynchronous engine domains.
-module tb;
+module tb #(parameter MEM_HALF_PERIOD = 7);
     reg clk = 0;
     reg rst_n = 0;
     reg mem_ready = 0;
@@ -81,7 +81,7 @@ module tb;
         @(negedge clk); apb_psel = 0; apb_penable = 0;
     endtask
     reg clk_mem = 0;
-    always #7 clk_mem = ~clk_mem;
+    always #(MEM_HALF_PERIOD) clk_mem = ~clk_mem;
     reg clk_npu = 0;
     always #23 clk_npu = ~clk_npu;
     reg clk_pix = 0;
@@ -128,6 +128,34 @@ module tb;
         .rst_eth_rx_n_o(rst_eth_rx_n),
         .rst_eth_tx_n_o(rst_eth_tx_n)
     );
+    // Model two separate clk_mem regions fed by the same raw reset.
+    wire [1:0] mem_copies_n;
+    edrv32_reset_copy u_copy_a (
+        .clk_i(clk_mem),
+        .rst_n_i(rst_mem_n),
+        .rst_n_o(mem_copies_n[0])
+    );
+    edrv32_reset_copy u_copy_b (
+        .clk_i(clk_mem),
+        .rst_n_i(rst_mem_n),
+        .rst_n_o(mem_copies_n[1])
+    );
+    time mem_input_release = 0;
+    time mem_copy_release = 0;
+    integer copy_releases = 0;
+    always @(posedge rst_mem_n) mem_input_release = $time;
+    always @(posedge mem_copies_n[0]) if (rst_n) begin
+        mem_copy_release = $time;
+        copy_releases = copy_releases + 1;
+        #1;
+        check(mem_copies_n === 2'b11, "SY-07 copies release together");
+        check(mem_copy_release == mem_input_release + 2 * MEM_HALF_PERIOD,
+              "SY-07 copy releases exactly one memory clock later");
+    end
+    always @(negedge rst_mem_n) begin
+        #1;
+        check(mem_copies_n === 2'b00, "SY-07 copies assert asynchronously");
+    end
     time soft_end = 0;
     bit monitor_soft = 0;
     bit media_only = 0;
@@ -150,7 +178,8 @@ module tb;
     always @(posedge rst_sys_n) begin
         check(clk === 1'b1 && last_sys == $time, "sys synchronous release");
         if (monitor_soft) check($time >= soft_end, "sys sixteen-cycle hold");
-        check(rst_mem_n, "SY-04/05 system released after memory engine");
+        check(mem_copies_n === 2'b11 && mem_copy_release < $time,
+              "SY-07 memory copies release before system on POR and SOC reset");
     end
     time last_mem_core = 0;
     always @(posedge clk_mem) last_mem_core = $time;
@@ -161,7 +190,8 @@ module tb;
     always @(posedge clk_mem) last_mem = $time;
     always @(posedge rst_mem_n) begin
         check(rst_mem_core_n, "mem release follows memory core");
-        check($time == second_edge(monitor_soft ? soft_end : media_request_time, 7),
+        check($time == second_edge(monitor_soft ? soft_end : media_request_time,
+            time'(MEM_HALF_PERIOD)),
               "mem releases after exactly two destination clocks");
         check(clk_mem === 1'b1 && last_mem == $time, "mem synchronous release");
         if (monitor_soft) check($time >= soft_end, "mem sixteen-cycle hold");
@@ -222,6 +252,8 @@ module tb;
     end
     always @(posedge clk) begin
         #1;
+        check(u_reset.u_mem_released.bit_i === mem_copies_n[0],
+              "SY-07 memory-release CDC samples the memory copy");
         if (monitor_soft) begin
             check(rst_sys_por_n && rst_mem_core_n, "power-on and memory core survive soft reset");
             if (media_only) check(rst_sys_n, "SY-03 media reset leaves system running");
@@ -267,7 +299,8 @@ module tb;
         software_reset(0);
         software_reset(1);
         // SY-02 scratch is retained by both software resets, cleared by reset input.
-        #2; rst_n = 0;
+        @(negedge clk_mem);
+        #1; rst_n = 0;
         #1; check(all_resets === 10'd0, "asynchronous reset assertion between clocks");
         mem_ready = 0;
         repeat (4) tick();
@@ -276,7 +309,9 @@ module tb;
         check(!rst_sys_n && !rst_mem_core_n, "second power-on waits for memory");
         #2; mem_ready = 1;
         wait_release(); rd('h010, 0); rd('h014, 0);
-        $display("PASS SY-02 SY-03 SY-04 SY-05"); $finish;
+        check(copy_releases == 4, "SY-07 two POR, MEDIA and SOC releases checked");
+        $display("PASS SY-02 SY-03 SY-04 SY-05 SY-07 MEM_HALF_PERIOD=%0d", MEM_HALF_PERIOD);
+        $finish;
     end
     initial begin
         #200000; $fatal(1, "FAIL timeout");

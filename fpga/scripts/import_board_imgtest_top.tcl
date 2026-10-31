@@ -56,7 +56,7 @@ foreach list {mem_subsys vin pix geo disp} {
         }
     }
 }
-foreach name {edrv32_reset_sync.v} {
+foreach name {edrv32_reset_sync.v edrv32_reset_copy.v} {
     set f [file join $edrv32_repo rtl common $name]
     if {[lsearch -exact $edrv32_sources $f] < 0} {
         lappend edrv32_sources $f

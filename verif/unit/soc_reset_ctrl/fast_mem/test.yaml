@@ -1,0 +1,9 @@
+top: tb
+files: files.f
+defines:
+parameters: MEM_HALF_PERIOD=3
+software:
+timeout: 120
+pass: PASS
+tier: smoke full
+simulator: verilator iverilog

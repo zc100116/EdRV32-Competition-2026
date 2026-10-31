@@ -2,6 +2,7 @@
 ../../../rtl/common/edrv32_cdc_sync_bit.v
 ../../../rtl/common/edrv32_cdc_handshake.v
 ../../../rtl/common/edrv32_reset_sync.v
+../../../rtl/common/edrv32_reset_copy.v
 ../../../rtl/common/edrv32_apb_async_bridge.v
 ../../../rtl/tech/edrv32_rom_boot.v
 ../../../rtl/tech/edrv32_ram_sram.v

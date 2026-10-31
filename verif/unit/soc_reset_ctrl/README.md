@@ -1,7 +1,7 @@
 # S-R2 interrupt, system-control and reset tests
 
 The four smoke manifests cover sys-subsys-testplan CL-01–CL-05, PL-01–PL-05,
-and SY-01–SY-06. Each runs on Verilator and Icarus through `tools/regress.py`.
+and SY-01–SY-07. Each runs on Verilator and Icarus through `tools/regress.py`.
 
 | Directory | Checks |
 |---|---|
@@ -28,7 +28,7 @@ verilator --lint-only -Wall -Irtl/include --top-module edrv32_periph_sysctrl \
     rtl/periph/edrv32_periph_sysctrl.v rtl/common/edrv32_cdc_sync_bit.v
 verilator --lint-only -Wall -Irtl/include --top-module edrv32_soc_reset_ctrl \
     rtl/soc/edrv32_soc_reset_ctrl.v rtl/common/edrv32_cdc_sync_bit.v \
-    rtl/common/edrv32_reset_sync.v
+    rtl/common/edrv32_reset_sync.v rtl/common/edrv32_reset_copy.v
 ```
 
 The coordinator revised acceptance during execution because simultaneous full
@@ -112,4 +112,16 @@ verif/unit/soc_reset_ctrl/files.f
 verif/unit/soc_reset_ctrl/tb.sv
 verif/unit/soc_reset_ctrl/test.yaml
 verif/unit/soc_reset_ctrl/README.md
+```
+
+## SY-07 reset copies (2026-10-31)
+
+The default manifest uses clk_mem/clk_sys periods 14/10; `fast_mem` uses 6/10.
+Both run SY-03/04/05 and check two memory reset copies, one-clock release delay,
+asynchronous assertion between memory edges, and copy-before-system ordering
+for both power-on sequences and SOC software reset. The CDC input is checked
+against the external copies, so sampling the raw memory reset fails this test.
+
+```sh
+flock /tmp/edrv32-sim.lock python3 tools/regress.py smoke -j 1 --path verif/unit/soc_reset_ctrl
 ```

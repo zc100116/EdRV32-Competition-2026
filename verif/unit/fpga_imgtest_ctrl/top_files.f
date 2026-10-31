@@ -1,5 +1,6 @@
 ../../block/sys_cpu/edrv32_sys_cpu_timescale.sv
 ../../../rtl/common/edrv32_reset_sync.v
+../../../rtl/common/edrv32_reset_copy.v
 -f ../../../rtl/filelists/mem_subsys.f
 -f ../../../rtl/filelists/vin.f
 -f ../../../rtl/filelists/pix.f
