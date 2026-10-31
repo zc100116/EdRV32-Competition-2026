@@ -1,0 +1,33 @@
+{
+  "window_count": 157,
+  "excluded_windows": [
+    1
+  ],
+  "statistics": {
+    "fps": {
+      "min": 32.6,
+      "max": 51.4,
+      "window_arithmetic_mean": 39.069,
+      "median": 39.5
+    },
+    "shown": {
+      "min": 10.8,
+      "max": 17.1,
+      "window_arithmetic_mean": 12.994,
+      "median": 13.1
+    },
+    "cpu_percent": {
+      "min": 27.0,
+      "max": 43.0,
+      "window_arithmetic_mean": 38.109,
+      "median": 38.0
+    },
+    "ppu_percent": {
+      "min": 39.0,
+      "max": 57.0,
+      "window_arithmetic_mean": 44.712,
+      "median": 45.0
+    }
+  },
+  "scope": "Final stopped capture. Arithmetic mean of reported windows; not duration-weighted aggregate."
+}

@@ -1,0 +1,181 @@
+Input error: type 1-4 then Enter
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+UART load ready
+Load bytes: 194660 at 0x90000000
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+UART load ready
+Load bytes: 4384 at 0x9002f868
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+UART load ready
+Load bytes: 41488 at 0x905e91c0
+Load result: PASS
+BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud
+Run address:
+Run: 0x90000000
+Head: 0x905e91c0 (4e 45 53 1a)
+Read in trainer at $7000
+ROM loaded:  [0] 32k/8k VT
+created memory mapper: None
+setting up mapper 0
+reset memory mapper
+NES powered on
+NES ROM prg=32 chr=8 mapper=0
+NES fps=47.7 shown=15.1 cpu=45% ppu=37%
+NES fps=40.3 shown=13.4 cpu=37% ppu=46%
+NES fps=40.3 shown=13.4 cpu=37% ppu=46%
+NES fps=40.3 shown=13.4 cpu=37% ppu=46%
+NES fps=40.2 shown=13.4 cpu=37% ppu=46%
+NES fps=40.3 shown=13.4 cpu=37% ppu=46%
+NES fps=40.3 shown=13.4 cpu=37% ppu=46%
+NES fps=40.8 shown=13.6 cpu=37% ppu=46%
+NES fps=51.4 shown=17.1 cpu=29% ppu=56%
+NES fps=50.2 shown=16.7 cpu=28% ppu=57%
+NES fps=44.6 shown=14.8 cpu=40% ppu=43%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.5 shown=13.1 cpu=38% ppu=45%
+NES fps=37.0 shown=12.3 cpu=40% ppu=43%
+NES fps=37.0 shown=12.3 cpu=40% ppu=43%
+NES fps=36.9 shown=12.3 cpu=39% ppu=43%
+NES fps=37.8 shown=12.6 cpu=39% ppu=44%
+NES fps=37.8 shown=12.6 cpu=39% ppu=44%
+NES fps=37.8 shown=12.6 cpu=39% ppu=44%
+NES fps=37.6 shown=12.5 cpu=39% ppu=43%
+NES fps=37.8 shown=12.6 cpu=39% ppu=43%
+NES fps=38.4 shown=12.8 cpu=39% ppu=44%
+NES fps=40.2 shown=13.4 cpu=37% ppu=46%
+NES fps=40.2 shown=13.4 cpu=37% ppu=46%
+NES fps=40.1 shown=13.3 cpu=37% ppu=46%
+NES fps=39.8 shown=13.2 cpu=38% ppu=45%
+NES fps=40.0 shown=13.3 cpu=37% ppu=45%
+NES fps=39.8 shown=13.2 cpu=38% ppu=45%
+NES fps=39.0 shown=13.0 cpu=38% ppu=45%
+NES fps=37.7 shown=12.5 cpu=39% ppu=43%
+NES fps=36.8 shown=12.2 cpu=40% ppu=43%
+NES fps=36.0 shown=12.0 cpu=41% ppu=42%
+NES fps=35.7 shown=11.9 cpu=41% ppu=41%
+NES fps=37.0 shown=12.3 cpu=40% ppu=42%
+NES fps=37.8 shown=12.6 cpu=39% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.8 shown=12.6 cpu=40% ppu=43%
+NES fps=38.0 shown=12.6 cpu=39% ppu=43%
+NES fps=37.9 shown=12.6 cpu=39% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.9 shown=12.6 cpu=39% ppu=43%
+NES fps=37.9 shown=12.6 cpu=39% ppu=43%
+NES fps=37.8 shown=12.6 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.8 shown=12.6 cpu=39% ppu=43%
+NES fps=37.8 shown=12.6 cpu=39% ppu=43%
+NES fps=37.8 shown=12.6 cpu=39% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.7 shown=12.5 cpu=40% ppu=43%
+NES fps=38.0 shown=12.6 cpu=39% ppu=43%
+NES fps=37.9 shown=12.6 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.6 shown=12.5 cpu=40% ppu=43%
+NES fps=37.9 shown=12.6 cpu=39% ppu=43%
+NES fps=37.9 shown=12.6 cpu=39% ppu=43%
+NES fps=37.8 shown=12.6 cpu=39% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.3 shown=12.4 cpu=40% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.1 shown=12.3 cpu=40% ppu=43%
+NES fps=37.3 shown=12.4 cpu=39% ppu=43%
+NES fps=37.1 shown=12.3 cpu=40% ppu=43%
+NES fps=37.3 shown=12.4 cpu=39% ppu=43%
+NES fps=38.8 shown=12.9 cpu=38% ppu=45%
+NES fps=39.6 shown=13.2 cpu=38% ppu=46%
+NES fps=39.8 shown=13.2 cpu=38% ppu=45%
+NES fps=42.4 shown=13.4 cpu=38% ppu=45%
+NES fps=50.2 shown=16.7 cpu=27% ppu=57%
+NES fps=50.2 shown=16.7 cpu=27% ppu=57%
+NES fps=46.3 shown=15.4 cpu=38% ppu=44%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.0 shown=13.0 cpu=38% ppu=45%
+NES fps=36.7 shown=12.2 cpu=40% ppu=43%
+NES fps=37.4 shown=12.4 cpu=39% ppu=43%
+NES fps=37.5 shown=12.5 cpu=39% ppu=44%
+NES fps=37.7 shown=12.5 cpu=39% ppu=44%
+NES fps=37.9 shown=12.6 cpu=39% ppu=44%
+NES fps=37.5 shown=12.5 cpu=39% ppu=43%
+NES fps=37.2 shown=12.4 cpu=40% ppu=43%
+NES fps=39.9 shown=13.3 cpu=38% ppu=45%
+NES fps=39.8 shown=13.2 cpu=38% ppu=45%
+NES fps=38.4 shown=12.8 cpu=39% ppu=44%
+NES fps=37.7 shown=12.5 cpu=39% ppu=43%
+NES fps=38.1 shown=12.7 cpu=39% ppu=44%
+NES fps=42.3 shown=14.1 cpu=35% ppu=49%
+NES fps=39.7 shown=13.2 cpu=37% ppu=45%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=38.7 shown=12.9 cpu=38% ppu=45%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=38.8 shown=12.9 cpu=38% ppu=45%
+NES fps=39.5 shown=13.1 cpu=38% ppu=45%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=37.6 shown=12.5 cpu=39% ppu=43%
+NES fps=37.0 shown=12.3 cpu=40% ppu=43%
+NES fps=36.6 shown=12.2 cpu=40% ppu=43%
+NES fps=33.2 shown=11.0 cpu=43% ppu=39%
+NES fps=32.9 shown=10.9 cpu=43% ppu=39%
+NES fps=32.6 shown=10.8 cpu=43% ppu=39%
+NES fps=35.4 shown=11.8 cpu=41% ppu=41%
+NES fps=36.6 shown=12.2 cpu=40% ppu=42%
+NES fps=37.7 shown=12.5 cpu=39% ppu=43%
+NES fps=37.5 shown=12.5 cpu=40% ppu=43%
+NES fps=37.7 shown=12.5 cpu=39% ppu=43%
+NES fps=37.7 shown=12.5 cpu=39% ppu=43%
+NES fps=39.6 shown=13.2 cpu=37% ppu=45%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=39.9 shown=13.3 cpu=37% ppu=46%
+NES fps=40.0 shown=13.3 cpu=37% ppu=46%
