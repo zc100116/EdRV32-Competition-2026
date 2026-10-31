@@ -140,6 +140,8 @@ void demo_npu_receive(unsigned int window);
 void demo_npu_init(void);
 void demo_npu_service(void);
 uint32_t demo_npu_cpu_cycles(void);
+const uint8_t *demo_network_model_header(void);
+void demo_network_model_load(const uint8_t *header);
 void demo_network_windows_init(void);
 void demo_network_check_complete(void);
 unsigned int demo_network_detections(struct eth_tx_descriptor *tx,
@@ -177,6 +179,7 @@ void demo_network_service(void);
 void demo_network_wait(void);
 void demo_network_receive(void);
 void demo_network_event(const struct engine_event *event, void *context);
+void demo_monitor_media(struct eth_monitor *record);
 void demo_monitor_tick(void);
 void demo_monitor_send(void);
 void demo_monitor_flush(void);

@@ -5,7 +5,7 @@
 ARCH := rv32im_zicsr
 MEMORY := sram
 PROGRAM_SOURCES := $(addprefix sw/apps/demo/,main.c logic.c pipeline.c switch.c network.c \
-    monitor.c) \
+    network_video.c monitor.c monitor_video.c) \
     sw/lib/eth_monitor.c sw/lib/eth_monitor_pack.c sw/boot/info.c sw/bsp/cache.c \
     $(addprefix sw/drivers/,uart.c gpio.c clint.c i2c.c plic.c engine.c vin.c pix.c \
     geo.c disp.c eth.c mem_xbar.c ov5640.c)

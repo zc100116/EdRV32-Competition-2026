@@ -7,8 +7,9 @@
 ## 按板级工程选择版本（B3-11）
 
 四份 `program.mk` 位于本目录、`demo_vision/`、`demo_vnpu/`、`demo_npu/`，通过源文件列表
-选择功能；没有运行时引擎探测。UART、S2、视频和 DDR 监控共用源文件，S1 与模型/
-检测回传由 `scene_npu.c`、`network_npu.c` 提供，L1 的交接由 `overlay_surface.c` 共用。
+选择功能；没有运行时引擎探测或版本条件编译。UART、S2、视频和 DDR 监控共用源文件，
+S1 由 `scene_npu.c` 提供，EDNM 由 `network_npu.c` 共用，摄像头检查/CH2 回传由
+`network_video_npu.c` 提供，L1 的交接由 `overlay_surface.c` 共用。
 
 | 程序 | FPGA 工程/顶层 | 场景 | HDMI 检测框与标签 | 网口功能 | 不访问的引擎 |
 |---|---|---|---|---|---|
@@ -433,19 +434,20 @@ VIN/DISP、DISP 提交无空档且旧 Surface 等 SWITCH 后释放、ETH 引用�
 未运行 SoC 仿真或上板；无黑帧、闪烁、失锁、撕裂及实际切换耗时，仍须按上板
 检查清单保存连续切换视频和 UART 原始打印，不能由上述软件事件测试代替。
 
-### demo_npu 验收记录（2026-10-31，T-NETN）
+### demo_npu 验收记录（2026-10-31，T-NETN / T-NETN-R）
 
-基线 `ddd39075`，实现和本记录位于同一提交；xPack GCC 15.2.0，C11，
+原实现 `7b3306d5`（基线 `ddd39075`），源文件拆分及本记录位于同一提交；GCC 15.2.0，C11，
 `-Wall -Wextra -Werror`。四版本构建均通过，0 warning，均装入 64 KiB SRAM：
 
-| 程序 | text B | data B | bss B | 合计 B |
-|---|---:|---:|---:|---:|
-| demo_npu | 22124 | 0 | 1856 | 23980 |
-| demo_vnpu | 45328 | 0 | 5308 | 50636 |
-| demo | 45988 | 0 | 5360 | 51348 |
-| demo_vision | 26584 | 0 | 876 | 27460 |
+| 程序 | 改前 .bin B | 改后 .bin/text B | data B | bss B | 合计 B |
+|---|---:|---:|---:|---:|---:|
+| demo_npu | 22124 | 22056 | 0 | 1856 | 23912 |
+| demo_vnpu | 45328 | 45452 | 0 | 5308 | 50760 |
+| demo | 45988 | 46128 | 0 | 5360 | 51488 |
+| demo_vision | 26584 | 26628 | 0 | 876 | 27504 |
 
-B3N `__bss_end=0x10005dc0`，至栈顶余量 41,536 B（非实板高水位）。复现：
+原三版本 .bin 分别变化 +140/+44/+124 B（demo/vision/vnpu），行为保持原样。
+B3N `__bss_end=0x10005d80`，至栈顶余量 41,600 B（非实板高水位）。复现：
 
 ```sh
 . ~/.local/opt/edrv32/env.sh
@@ -465,8 +467,11 @@ UBSan 主机测试通过：实际链接 B3N 网络/推理/监控和 NPU/ETH 驱�
 每张 CH2=983040 B、OUTPUT=725760 B、EDDT=1 框，字节/检测项差异均 0。
 主机激励使用现有 send_blocks 的包间隔模拟线速；另测试缺失 OUTPUT 报错、文件夹队列、
 完成计数/平均 fps 及保留原图尺寸；未把主机时间当实板性能。风格 0 文件/0 warning。
-公共改动为 `network.c`、`network_npu.c`、`monitor.c` 的 B3N 编译分支及 `runtime.h` 声明；
-原三版本保持原分支。经协调者授权，另在 `sw/Makefile` 两处程序列表加入 demo_npu。
-日志：`build/sw/<程序>/rv32-build.log`、`build/sw/demo/host-test.log`、
-`build/sw/demo_npu/tool-test.log`；ELF 无 vin_/pix_/geo_/disp_/rnd_ 链接符号。
+已删除全部版本条件宏：`network.c`/`network_npu.c`/`monitor.c` 保留公共逻辑，
+视频 Surface/呈现、CH2/VIN 检查及媒体计数分别选 `network_video.c`、`network_video_npu.c`、
+`monitor_video.c`；B3N 选 `demo_npu/network.c`、`demo_npu/monitor.c`，无空回调或运行时探测。
+主机测试同步选择实际版本源文件；原三版本的搬移函数及展开后的 EDNM 操作序列与原提交一致。
+日志：`build/sw/<程序>/rv32-refactor-build.log`、`build/sw/demo/host-refactor-test.log`、
+`build/sw/demo_npu/tool-refactor-test.log`；大小前后记录在 `build/sw/demo_npu/refactor/`。
+B3N ELF 无 vin_/pix_/geo_/disp_/rnd_ 链接符号；原获授权的 `sw/Makefile` 本次未改。
 未改规格/RTL，未跑 SoC 仿真；实际识别、连续 N 张性能及 EDTM 曲线留卡 22 验收。
