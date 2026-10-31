@@ -13,6 +13,7 @@ module edrv32_rnd_draw (
     input wire [511:0] command_i,
     input wire [31:0] source_stride_i,
     input wire [63:0] round_area_i,
+    input wire [1023:0] parameters_i,
     input wire cancel_i,
     output wire idle_o,
     output wire done_o,
@@ -255,6 +256,15 @@ module edrv32_rnd_draw (
     wire unused_empty_w;
     wire unused_fast_w;
     wire fill_w;
+    wire geometry_w;
+    wire geometry_ready_w;
+    wire geometry_valid_w;
+    wire [15:0] geometry_cov_w;
+    reg [15:0] geometry_cov_r [7:9];
+    wire gradient_w;
+    wire gradient_vertical_w;
+    wire plain_fill_w;
+    wire round_fill_w;
     wire mask_w;
     wire cutout_w;
     wire round_clip_w;
@@ -422,13 +432,18 @@ module edrv32_rnd_draw (
         .height_o(height_w),
         .fast_fill_o(unused_fast_w)
     );
-    assign fill_w = op_w == 8'h01 || op_w == 8'h02;
+    assign geometry_w = op_w >= 8'h09 && op_w <= 8'h0b;
+    assign round_fill_w = op_w == 8'h01 || op_w == 8'h02;
+    assign plain_fill_w = op_w == 8'h01 || geometry_w;
+    assign fill_w = round_fill_w || geometry_w;
+    assign gradient_w = op_w == 8'h09 ? flags_w[6] : op_w == 8'h01 && flags_w[0];
+    assign gradient_vertical_w = op_w == 8'h09 ? flags_w[7] : flags_w[1];
     assign tile_w = op_w == 8'h08;
     assign mask_w = op_w == 8'h0c;
     assign cutout_w = op_w == 8'h06 && flags_w[0];
     assign round_clip_w = op_w == 8'h04 && flags_w[7];
     assign shape_w = mask_w || cutout_w || round_clip_w;
-    assign post_w = cutout_w || round_clip_w;
+    assign post_w = cutout_w || round_clip_w || geometry_w;
     assign solid_w = fill_w || mask_w;
     assign shape_start_w = mask_w ? command_i[319:288] :
         cutout_w ? command_i[383:352] : round_area_i[31:0];
@@ -581,7 +596,8 @@ module edrv32_rnd_draw (
         (lane_hit_w[0] && (!pipe_tag_r[4][29] || lane_hit_w[1]));
     assign pipeline_step_w = (!(post_w ? post_valid_r[1] : pipe_valid_r[9]) ||
         blend_ready_i) && source_ready_w;
-    assign issue_w = render_state_r == S_RENDER_STREAM && pipeline_step_w;
+    assign issue_w = render_state_r == S_RENDER_STREAM && pipeline_step_w &&
+        (!geometry_w || geometry_ready_w);
     assign miss_request_w = pipe_valid_r[4] && !source_ready_w;
     assign miss_query_w = !lane_low_hit_w[0] ? {sample_addr_r[0][31:5], 5'd0} :
         lane_cross_w[0] && !lane_high_hit_w[0] ? lane_next_w[0] :
@@ -661,7 +677,8 @@ module edrv32_rnd_draw (
         wire [7:0] mask_alpha_w;
         wire [7:0] post_factor_w;
         wire [7:0] source_factor_w;
-        assign post_factor_w = cutout_w ? command_i[255:248] : shape_coverage_r[9];
+        assign post_factor_w = geometry_w ? geometry_cov_r[9][pixel*8 +: 8] :
+            cutout_w ? command_i[255:248] : shape_coverage_r[9];
         assign source_factor_w = cutout_w ?
             8'd255 - shape_coverage_r[7] : command_i[255:248];
         assign shape_x_inside_w = $signed(coverage_inner_x0_r) >= 0 &&
@@ -690,7 +707,7 @@ module edrv32_rnd_draw (
         assign kx_w = op_w == 8'h04 && flags_w[0] ?
             {{16{command_i[207]}}, command_i[207:192]} - {20'd0, coordinate_w} :
             {20'd0, coordinate_w} - {{16{command_i[175]}}, command_i[175:160]};
-        assign gradient_k_w = flags_w[1] ? {20'd0, bank_y_r[render_bank_r]} -
+        assign gradient_k_w = gradient_vertical_w ? {20'd0, bank_y_r[render_bank_r]} -
             {{16{command_i[191]}}, command_i[191:176]} : {20'd0, coordinate_w} -
             {{16{command_i[175]}}, command_i[175:160]};
         assign issue_map_x_w = coordinate_w + map_x_offset_r[11:0];
@@ -783,7 +800,7 @@ module edrv32_rnd_draw (
                     tile_slot_r[0] <= issue_map_index_w[pixel];
                 end
                 if (pipe_valid_r[0]) begin
-                    fill_coverage_r[1] <= outer_cov_w[pixel*8 +: 8];
+                    fill_coverage_r[1] <= geometry_w ? 8'd255 : outer_cov_w[pixel*8 +: 8];
                     shape_coverage_r[1] <= shape_factor_w;
                     fill_inner_r[1] <= 8'd255 - inner_cov_w[pixel*8 +: 8];
                     scaled_x1_r <= kx0_r * command_i[383:352];
@@ -815,13 +832,13 @@ module edrv32_rnd_draw (
                         pixel_bits_w[2:0];
                     source_mask_r[3][pixel] <= bits_log2_w >= 3'd3 ? 8'hff :
                         8'hff >> (8 - (1 << bits_log2_w));
-                    fill_color_r[3] <= op_w == 8'h01 && flags_w[0] ?
+                    fill_color_r[3] <= gradient_w ?
                         {gradient_value_w[1],
                             gradient_value_w[2],
                             gradient_value_w[3]} : command_i[247:224];
-                    fill_operand_a3_r <= op_w == 8'h01 ?
+                    fill_operand_a3_r <= plain_fill_w ?
                         command_i[255:248] : fill_coverage_r[2];
-                    fill_operand_b3_r <= op_w == 8'h01 ? (flags_w[0] ?
+                    fill_operand_b3_r <= plain_fill_w ? (gradient_w ?
                         gradient_value_w[0] : 8'd255) : fill_inner_r[2];
                 end
                 if (pipe_valid_r[3]) begin
@@ -835,7 +852,7 @@ module edrv32_rnd_draw (
                     sparse_data_r[pixel] <= lane_cache_w[pixel];
                     source_offset_r[5][pixel] <= source_offset_r[4][pixel];
                     fill_alpha5_r <= divide255(fill_product4_r);
-                    fill_factor5_r <= op_w == 8'h01 ? fill_coverage_r[4] : command_i[255:248];
+                    fill_factor5_r <= plain_fill_w ? fill_coverage_r[4] : command_i[255:248];
                 end
                 if (pipe_valid_r[5]) begin
                     raw_r[pixel] <= raw_shift_w[pixel][31:0];
@@ -1222,7 +1239,7 @@ module edrv32_rnd_draw (
                     inner_inside_r <= shape_w &&
                         $signed({6'd0, load_y_r}) >= inner_top_r &&
                         $signed({6'd0, load_y_r}) <= inner_bottom_r;
-                    load_state_r <= fill_w || shape_w ? S_EDGE_REQ : S_CHUNK;
+                    load_state_r <= round_fill_w || shape_w ? S_EDGE_REQ : S_CHUNK;
                 end
                 S_EDGE_REQ: if (row_ready_w)
                     load_state_r <= S_EDGE_WAIT;
@@ -1465,6 +1482,31 @@ module edrv32_rnd_draw (
             endcase
         end
     end
+    edrv32_rnd_geometry u_geometry (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .clear_i(cancel_i),
+        .start_i(start_i && geometry_w),
+        .advance_i(pipeline_step_w),
+        .command_i(command_i),
+        .parameters_i(parameters_i),
+        .left_i(left_w[11:0]),
+        .top_i(top_w[11:0]),
+        .request_i(issue_w && geometry_w),
+        .ready_o(geometry_ready_w),
+        .pair_i(issue_pair_w),
+        .row_end_i({1'b0, issue_x_r} + (issue_pair_w ? 13'd1 : 13'd0) >=
+            {1'b0, clip_right_r}),
+        .valid_o(geometry_valid_w),
+        .coverage_o(geometry_cov_w)
+    );
+    always @(posedge clk_i) begin
+        if (pipeline_step_w) begin
+            geometry_cov_r[7] <= geometry_cov_w;
+            geometry_cov_r[8] <= geometry_cov_r[7];
+            geometry_cov_r[9] <= geometry_cov_r[8];
+        end
+    end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i)
             post_valid_r <= 2'd0;
@@ -1485,7 +1527,7 @@ module edrv32_rnd_draw (
     assign unused_geometry_w = ^{left_w[17:12], right_w[17:12], top_w[17:12], bottom_w[17:12],
         row_local_w[17], row_width_w[17], row_height_w[17], inner_width_r[17],
         inner_height_r[17], target_shift_w[255:64],
-        blend_tag_i[28:14], flags_w[15:4], post_src0_r[63:56], post_src0_r[31:24],
+        blend_tag_i[28:14], flags_w[15:4], geometry_valid_w, post_src0_r[63:56], post_src0_r[31:24],
         map_shift_w[255:16], palette_shift_w[255:32],
         target_offset_w[31:5], issue_offset_w[31:14], clip_end_w[31:11],
         tile_bytes_w[31:16], tile_last_offset_w[31:6], tile_end_offset_w[4:0],

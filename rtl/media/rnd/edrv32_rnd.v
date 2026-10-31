@@ -70,6 +70,10 @@ module edrv32_rnd (
     localparam [4:0] S_PARAM_WAIT = 5'd16;
     reg [4:0] state_r;
     reg [63:0] round_area_r;
+    reg [1023:0] parameters_r;
+    reg [1:0] parameter_beat_r;
+    wire geometry_w;
+    assign geometry_w = op_w >= 8'h09 && op_w <= 8'h0b;
     reg signed [17:0] rect_left_r;
     reg signed [17:0] rect_top_r;
     reg signed [17:0] rect_right_r;
@@ -290,6 +294,7 @@ module edrv32_rnd (
         .command_i(command_r),
         .source_stride_i(source_stride_r),
         .round_area_i(round_area_r),
+        .parameters_i(parameters_r),
         .cancel_i(cancel_w),
         .idle_o(unused_draw_idle_w),
         .done_o(draw_done_w),
@@ -447,10 +452,11 @@ module edrv32_rnd (
         (state_r == S_BLUR && blur_rd_valid_w) ||
         (state_r == S_BLIT && blit_rd_valid_w));
     assign rd_addr_w = state_r == S_FETCH ? list_base_r + (cur_desc_w << 6) :
-        state_r == S_PARAM ? command_r[447:416] :
+        state_r == S_PARAM ? (geometry_w ? command_r[287:256] : command_r[447:416]) :
         state_r == S_DRAW ? draw_rd_addr_w : state_r == S_COPY ? copy_rd_addr_w :
         state_r == S_BLIT ? blit_rd_addr_w : blur_rd_addr_w;
-    assign rd_bytes_w = state_r == S_FETCH || state_r == S_PARAM ? 16'd64 :
+    assign rd_bytes_w = state_r == S_PARAM && geometry_w ? 16'd128 :
+        state_r == S_FETCH || state_r == S_PARAM ? 16'd64 :
         state_r == S_DRAW ? draw_rd_bytes_w : state_r == S_COPY ? copy_rd_bytes_w :
         state_r == S_BLIT ? blit_rd_bytes_w : 16'd32;
     edrv32_dma2d_rd #(
@@ -543,10 +549,12 @@ module edrv32_rnd (
         if (!rst_mem_n_i) begin
             state_r <= S_IDLE;
             fetch_half_r <= 1'b0;
+            parameter_beat_r <= 2'd0;
             simple_valid_r <= 1'b0;
         end else if (cancel_w) begin
             state_r <= busy_w ? S_DRAIN : S_IDLE;
             fetch_half_r <= 1'b0;
+            parameter_beat_r <= 2'd0;
             simple_valid_r <= 1'b0;
         end else begin
             if (scalar_write_w && wr_desc_valid_w && wr_desc_ready_w)
@@ -573,15 +581,19 @@ module edrv32_rnd (
                     else if (empty_w)
                         state_r <= S_COMPLETE;
                     else
-                        state_r <= op_w == 8'h04 && command_r[23] ? S_PARAM : S_BEGIN;
+                        state_r <= geometry_w || (op_w == 8'h04 && command_r[23]) ?
+                            S_PARAM : S_BEGIN;
                 end
                 S_PARAM: if (rd_desc_ready_w) begin
+                    parameter_beat_r <= 2'd0;
                     fetch_half_r <= 1'b0;
                     state_r <= S_PARAM_WAIT;
                 end
                 S_PARAM_WAIT: begin
-                    if (rd_data_valid_w)
+                    if (rd_data_valid_w) begin
                         fetch_half_r <= 1'b1;
+                        parameter_beat_r <= parameter_beat_r + 2'd1;
+                    end
                     if (rd_done_w)
                         state_r <= S_BEGIN;
                 end
@@ -624,9 +636,17 @@ module edrv32_rnd (
         end
         if (state_r == S_FETCH_WAIT && rd_data_valid_w)
             command_r[fetch_half_r*256 +: 256] <= rd_data_w;
-        if (state_r == S_PARAM_WAIT && rd_data_valid_w && !fetch_half_r) begin
-            command_r[447:416] <= rd_data_w[31:0];
-            round_area_r <= rd_data_w[95:32];
+        if (state_r == S_PARAM_WAIT && rd_data_valid_w) begin
+            if (geometry_w)
+                parameters_r[parameter_beat_r*256 +: 256] <= rd_data_w;
+            else if (!fetch_half_r) begin
+                command_r[447:416] <= rd_data_w[31:0];
+                round_area_r <= rd_data_w[95:32];
+            end
+        end
+        if (state_r == S_PARAM_WAIT && rd_done_w && op_w == 8'h09) begin
+            command_r[319:288] <= parameters_r[319:288];
+            command_r[447:320] <= parameters_r[447:320];
         end
         // The final DMA beat is already in command_r when rd_done_w rises.
         if (state_r == S_FETCH_WAIT && rd_done_w) begin

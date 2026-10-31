@@ -11,6 +11,7 @@
 ../media/rnd/edrv32_rnd_copy.v
 ../media/rnd/edrv32_rnd_coverage.v
 ../media/rnd/edrv32_rnd_decode.v
+../media/rnd/edrv32_rnd_geometry.v
 ../media/rnd/edrv32_rnd_draw.v
 ../media/rnd/edrv32_rnd_fill.v
 ../media/rnd/edrv32_rnd_regs.v

@@ -11,6 +11,7 @@ module tb;
     reg cancel = 0;
     reg [511:0] command;
     reg [63:0] round_area;
+    reg [1023:0] parameters;
     wire done;
     wire idle;
     wire [4:0] pixels;
@@ -63,6 +64,7 @@ module tb;
         .command_i(command),
         .source_stride_i({16'd0, command[303:288]}),
         .round_area_i(round_area),
+        .parameters_i(parameters),
         .cancel_i(cancel),
         .idle_o(idle),
         .done_o(done),
@@ -189,10 +191,13 @@ module tb;
     endfunction
     task automatic run_case(input int kind, radius, input bit keep, argb);
         reg [31:0] dest, value;
-        int addr, cov, a, x0, y0, x1, y1, bpp;
+        int addr, cov, a, x0, y0, x1, y1, bpp, hits, sx, sy, channel;
+        reg [23:0] color;
         for (int i = 0; i < 65536; i++) memory[i] = 8'(i*17+29);
         command = 0;
-        command[7:0] = kind == 0 ? 8'h0c : kind == 1 ? 8'h04 : 8'h06;
+        parameters = 0;
+        command[7:0] = kind == 0 ? 8'h0c : kind == 1 ? 8'h04 :
+            kind == 3 ? 8'h09 : 8'h06;
         command[8] = argb;
         command[15:12] = kind == 1 ? 4'd1 : 4'd2;
         command[23:16] = kind == 1 ? 8'h80 : {7'd0, keep};
@@ -205,7 +210,21 @@ module tb;
         command[255:224] = 32'h7974aa31;
         x0 = -2; y0 = 1; x1 = 12; y1 = 5;
         round_area = {16'(y1), 16'(x1), 16'(y0), 16'(x0)};
-        if (kind == 0) begin
+        if (kind == 3) begin
+            command[31:16] = keep ? 16'h004f : 16'h000e;
+            parameters[31:0] = 32'(-65536);
+            parameters[63:32] = 65536;
+            parameters[127:96] = 32'(-65536);
+            parameters[191:160] = 65536;
+            parameters[223:192] = 13*65536;
+            parameters[255:224] = 32'(-65536);
+            parameters[287:256] = 32'(-65536);
+            command[319:288] = 32'h80102030;
+            command[351:320] = 7*65536;
+            command[383:352] = 5*65536;
+            command[415:384] = 32'(-3*65536);
+            command[447:416] = 9*65536;
+        end else if (kind == 0) begin
             command[267:256] = 12'(radius);
             command[319:288] = round_area[31:0];
             command[351:320] = round_area[63:32];
@@ -255,6 +274,29 @@ module tb;
                     if (radius == 0) cov = 255;
                     a = div255(div255(121*147)*cov);
                     value = over(24'h7fc12b, a, dest, argb);
+                end else if (kind == 3) begin
+                    hits = 0;
+                    for (int j = 0; j < 4; j++)
+                        for (int i = 0; i < 4; i++) begin
+                            sx = 8*x+(keep ? 2*i+1 : 4);
+                            sy = 8*y+(keep ? 2*j+1 : 4);
+                            if (sx >= 8 && sy >= 8 && sx+sy <= 13*8) hits++;
+                        end
+                    cov = (255*hits+8)/16;
+                    color = 24'h74aa31;
+                    a = 255;
+                    if (keep) begin
+                        a = 128+7*x;
+                        if (a > 255) a = 255;
+                        for (int c = 0; c < 3; c++) begin
+                            channel = c == 2 ? 16+5*x : c == 1 ? 32-3*x : 48+9*x;
+                            if (channel < 0) channel = 0;
+                            if (channel > 255) channel = 255;
+                            color[c*8 +: 8] = 8'(channel);
+                        end
+                    end
+                    a = div255(div255(121*a)*cov);
+                    value = over(color, a, dest, argb);
                 end else begin
                     a = keep ? div255(121*div255(153*(255-cov))) : div255(121*153);
                     value = over(24'h74aa31, a, dest, argb);
@@ -284,6 +326,8 @@ module tb;
         run_case(2, 2, 1, 0);
         run_case(2, 7, 1, 1);
         run_case(2, 0, 0, 1);
+        run_case(3, 0, 0, 0);
+        run_case(3, 0, 1, 1);
         $display("PASS rnd_mask %0d cases", tested);
         $finish;
     end

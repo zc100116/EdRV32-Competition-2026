@@ -34,8 +34,8 @@ clk_mem 125MHz、RND≤32K LUT/130APM/66DRM、G4≤40APM、AFFINE窗口/填充�
 | V2-REF | 扩展独立整数oracle、命令/参数编码、手算/算术自测 | 协调者直派独立验证员工/gpt-6.1-sol medium | DOC批准 | rnd_ref.py --selftest及自身参考自测通过；不读RTL、不跑整体回归 | task-rnd2-ref | [ ] |
 | V2-MASK | G2 RTL、参数读取、MASK直写/阴影挖空/BLIT圆角；自写单元测试、技术RAM说明（需要时）；列出共享接口 | 项目经理本人/Codex | DOC批准，REF由独立员工并行准备 | 自身单元检查/风格/lint零告警；旧字段保留；接口评审冻结 | task-rnd-v2 | [x] |
 | V2-VERIFY | 按RN-21–29及RN-14/15/17/19扩展模块/SoC激励、向量和计数检查 | 协调者直派独立验证员工/gpt-6.1-sol medium | MASK及接口冻结、REF | 不读被测RTL；自测向量/模型和harness；不跑被测RTL整体回归；提交可执行测试 | task-rnd2-verify | [ ] |
-| V2-GEO | G1发生器/译码接入、AA/渐变、差分/并集；自写单元测试 | 项目经理本人/Codex | MASK、接口冻结、REF | RN-21–23对应单元检查，背压冻结，62.5Mpx/s计算峰值；风格/lint零告警 | task-rnd-v2 | [~] |
-| V2-AFF | G3+G4同时交付，32×16遍历、32源块、NN与单lane双线性、技术RAM及说明；自写单元测试 | 项目经理本人/Codex | MASK、接口冻结、REF | NN/四tap边界和Q还原单元检查；窗口≤4DRM、G4≤40APM估算；风格/lint零告警 | task-rnd-v2 | [ ] |
+| V2-GEO | G1发生器/译码接入、AA/渐变、差分/并集；自写单元测试 | 项目经理本人/Codex | MASK、接口冻结、REF | RN-21–23对应单元检查，背压冻结，62.5Mpx/s计算峰值；风格/lint零告警 | task-rnd-v2 | [x] |
+| V2-AFF | G3+G4同时交付，32×16遍历、32源块、NN与单lane双线性、技术RAM及说明；自写单元测试 | 项目经理本人/Codex | MASK、接口冻结、REF | NN/四tap边界和Q还原单元检查；窗口≤4DRM、G4≤40APM估算；风格/lint零告警 | task-rnd-v2 | [~] |
 | V2-INTEG | 驱动编码/参数clean、LVGL supported与翻译、RN-17新增帧/coverage，统一联调和测量 | 项目经理本人/Codex | VERIFY、GEO、AFF合并 | 下列统一验收全部完成，失败归类后修复，不放宽判据；提交及≤80行报告 | task-rnd-v2 | [ ] |
 | V2-REVIEW | 审核提交、预算对比及汇总；最终worker_done交协调者 | 项目经理本人/Codex | INTEG | 验收证据齐全，最后一项通过立即提交/worker_done；PDS项明确待单独上板 | task-rnd-v2 | [ ] |
 
@@ -83,3 +83,4 @@ INTEG拥有sw/drivers/rnd.c、include/rnd.h、sw/apps/s3/lvgl/draw_rnd.c、tools
 | 2026-10-31 | v0.1 | 协调者批准35abfa9f，要求TRIANGLE改为FLAGS[3:1] EDGE_INCL精确比较；改完直接开工，无需复审 |
 | 2026-10-31 | v0.1 | Orca拒绝depth2/max1；协调者决定直派独立REF/VERIFY，本人顺序MASK→GEO→AFF及单元测试，最后合入验证提交再INTEG；未创建子员工 |
 | 2026-10-31 | v0.1 | G2 draw单元10用例通过（Da=0/1/128/255、负形状、半径截断、KEEP、RGB565/ARGB及背压）；RND风格/lint零告警；新增filelist/RN-17相关文件修改获协调者授权 |
+| 2026-10-31 | v0.1 | GEO独立单元350组逐位通过，峰值2像素/4拍；draw单元新增纯色/渐变后12例通过，RND顶层lint/风格零告警；参数DDR读取128B，geometry advance随draw整组冻结，进入AFF |
