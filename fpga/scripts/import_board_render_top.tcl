@@ -15,8 +15,9 @@
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
 puts "edrv32: repo $edrv32_repo"
 set edrv32_top edrv32_fpga_board_render_top
-# PDS adds the project directory; pass only the repository header directory.
-set edrv32_include_dirs [file join $edrv32_repo rtl include]
+# Same project-relative, tab-delimited include-path format as B3N/B3VN
+# (card 21: the format PDS persists in the working B3R project).
+set edrv32_include_dirs "../../EdRV32-Competition-2026/rtl/include\t"
 puts "edrv32: include $edrv32_include_dirs"
 set edrv32_defines [list FPGA_MODE]
 
