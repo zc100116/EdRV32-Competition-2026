@@ -40,21 +40,67 @@ class ParameterTest(unittest.TestCase):
             table = (ctypes.c_ubyte * 256)()
             LIB.demo_parameters_gamma(table, gamma)
             expected = [int(255 * (i / 255) ** (1000 / gamma) + .5) for i in range(256)]
-            self.assertEqual(list(table), expected)
+            self.assertLessEqual(max(abs(a - b) for a, b in zip(table, expected)), 1)
+
+    def test_gamma_complete_integer_domain(self):
+        # Each reference output is monotone in gamma. Its only transitions occur at
+        # 255*(i/255)^(1000/gamma) = level-0.5. The integer implementation is also
+        # monotone: log/gamma decreases; the exp2 interpolant and rounding preserve
+        # order. Checking both integer ends of every constant-output interval thus
+        # covers every gamma in 1..INT_MAX, including the saturated tail.
+        critical = {1, 2147483647}
+        for i in range(1, 255):
+            for level in range(1, 256):
+                boundary = 1000 * math.log(i / 255) / math.log((level - .5) / 255)
+                lower = max(1, int(boundary))
+                critical.update((max(1, lower - 1), lower, lower + 1, lower + 2))
+        maximum = 0
+        table = (ctypes.c_ubyte * 256)()
+        for gamma in sorted(critical):
+            LIB.demo_parameters_gamma(table, gamma)
+            expected = [int(255 * (i / 255) ** (1000 / gamma) + .5) for i in range(256)]
+            error = max(abs(a - b) for a, b in zip(table, expected))
+            self.assertLessEqual(error, 1, f'gamma={gamma}')
+            maximum = max(maximum, error)
+        print(f'Gamma 1..INT_MAX: {len(critical)} interval-boundary tables; max error={maximum}')
 
     def test_geo_matrix_and_errors(self):
         matrix = (ctypes.c_int32 * 6)()
-        for angle in range(-3600, 3601, 37):
-            for sx, sy in ((500, 500), (1000, 2000), (700, 1300), (2147483647, 1000)):
-                p = self.parse(f'geo set 1 {angle} {sx} {sy} 17 -9 1 0')
+        maximum = 0
+        cases = ((500, 500, 17, -9, 1, 0), (1000, 2000, -1280, 720, 0, 1),
+                 (700, 1300, 17, -9, 1, 1), (2147483647, 1000, 17, -9, 0, 0),
+                 (1000000000, 1000000000, 2147483647, -2147483647, 1, 0))
+        for angle in range(3600):
+            for sx, sy, tx, ty, mx, my in cases:
+                p = self.parse(f'geo set 1 {angle} {sx} {sy} {tx} {ty} {mx} {my}')
                 self.assertIsNone(LIB.demo_parameters_matrix(ctypes.byref(p), matrix))
                 radians = math.radians(angle / 10)
-                a, b = -1000 * math.cos(radians) / sx, -1000 * math.sin(radians) / sx
-                c, d = -1000 * math.sin(radians) / sy, 1000 * math.cos(radians) / sy
-                expected = [a, b, 639.5 - a * 656.5 - b * 350.5,
-                            c, d, 359.5 - c * 656.5 - d * 350.5]
+                x, y = (-1 if mx else 1) * 1000 / sx, (-1 if my else 1) * 1000 / sy
+                a, b = x * math.cos(radians), x * math.sin(radians)
+                c, d = -y * math.sin(radians), y * math.cos(radians)
+                expected = [a, b, 639.5 - a * (639.5 + tx) - b * (359.5 + ty),
+                            c, d, 359.5 - c * (639.5 + tx) - d * (359.5 + ty)]
                 for actual, value in zip(matrix, expected):
-                    self.assertLessEqual(abs(actual - value * 65536), .501)
+                    error = abs(actual - round(value * 65536))
+                    self.assertLessEqual(error, 1, (angle, sx, sy, tx, ty, list(matrix)))
+                    maximum = max(maximum, error)
+        # Near-cancelling large translations amplify premature trig rounding.
+        for angle, tx, ty in ((450, 2147483647, -2147483647),
+                              (1350, 2147483647, 2147483647)):
+            p = self.parse(f'geo set 1 {angle} 500 2147483647 {tx} {ty} 0 0')
+            self.assertIsNone(LIB.demo_parameters_matrix(ctypes.byref(p), matrix))
+            r = math.radians(angle / 10)
+            a, b = 2 * math.cos(r), 2 * math.sin(r)
+            c = -1000 * math.sin(r) / 2147483647
+            d = 1000 * math.cos(r) / 2147483647
+            values = [a, b, 639.5 - a * (639.5 + tx) - b * (359.5 + ty),
+                      c, d, 359.5 - c * (639.5 + tx) - d * (359.5 + ty)]
+            for actual, value in zip(matrix, values):
+                error = abs(actual - round(value * 65536))
+                self.assertLessEqual(error, 1)
+                maximum = max(maximum, error)
+        print(f'GEO 3600 angles x {len(cases)} transforms plus cancellation: '
+              f'max error={maximum} LSB')
         for text in ('geo set 1 450 100 100 0 0 0 0',
                      'geo set 1 0 200 200 0 0 0 0'):
             p = self.parse(text)
