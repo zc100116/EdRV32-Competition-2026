@@ -1,0 +1,47 @@
+compile
+Warnings=3764 Errors=0
+Action compile: Real time elapsed is 0h:1m:48s
+Action compile: CPU time elapsed is 0h:0m:14s
+Action compile: Process CPU time elapsed is 0h:0m:14s
+Action compile: Peak memory pool usage is 590 MB
+Counter({'Verilog-2020': 1092, 'ConstantProbeLoop': 735, 'Verilog-2008': 633, 'Verilog-2038': 361, 'Uncoded warning': 320, 'Sdm-2003': 319, 'Verilog-2023': 134, 'Sdm-2000': 48, 'Verilog-2039': 46, 'Public-4030': 28, 'Verilog-2019': 17, 'Verilog-2036': 16, 'Verilog-2006': 10, 'Sdm-2010': 3, 'Sdm-2014': 2})
+
+synthesize
+Warnings=13711 Errors=0
+Action synthesize: Real time elapsed is 0h:6m:14s
+Action synthesize: CPU time elapsed is 0h:1m:9s
+Action synthesize: Process CPU time elapsed is 0h:1m:14s
+Action synthesize: Peak memory pool usage is 2,675 MB
+Counter({'Public-4008': 10490, 'Uncoded warning': 3052, 'Timing-4087': 85, 'Timing-4086': 45, 'Uncoded fanout warning': 36, 'UserConstraintEditor-4009': 2, 'Adm-4019': 1})
+
+device_map
+Warnings=268 Errors=0
+Action dev_map: Real time elapsed is 0h:1m:8s
+Action dev_map: CPU time elapsed is 0h:0m:8s
+Action dev_map: Process CPU time elapsed is 0h:0m:9s
+Action dev_map: Peak memory pool usage is 1,663 MB
+Counter({'Public-4008': 267, 'Public-4010': 1})
+
+place_route
+Warnings=694 Errors=0
+Action pnr: Real time elapsed is 0h:33m:50s
+Action pnr: CPU time elapsed is 0h:5m:42s
+Action pnr: Process CPU time elapsed is 0h:9m:54s
+Action pnr: Peak memory pool usage is 5,059 MB
+Counter({'PhysicalConstraintEditor-4048': 344, 'ConstraintEditor-4032': 192, 'PhysicalConstraintEditor-4049': 158})
+
+report_timing
+Warnings=130 Errors=0
+Action report_timing: Real time elapsed is 0h:1m:21s
+Action report_timing: CPU time elapsed is 0h:0m:17s
+Action report_timing: Process CPU time elapsed is 0h:0m:22s
+Action report_timing: Peak memory pool usage is 5,010 MB
+Counter({'Timing-4087': 85, 'Timing-4086': 45})
+
+generate_bitstream
+Warnings=0 Errors=0
+Action gen_bit_stream: Real time elapsed is 0h:1m:35s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:23s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:23s
+Action gen_bit_stream: Peak memory pool usage is 3,557 MB
+Counter()

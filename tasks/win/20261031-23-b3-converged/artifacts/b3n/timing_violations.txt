@@ -1,0 +1,2 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+G:\codex_project\EdRV32-Competition-2026\build\win\20261031-23-b3-converged\exports\b3n_top200\report_timing\edrv32_fpga_board_npu_top.rtr	slow	clk_npu	max (slow corner)	sequential timing path	-0.078	0	u_npu/u_conv/u_datapath/u_window/g_weight_channel[25].weight_r[43]/opit_0_L6QQ_perm/CLK	u_npu/u_conv/u_datapath/u_mac_array/g_channel[25].g_lane[5].g_cascade.u_mac/u_apm/gopapm/Y[3]

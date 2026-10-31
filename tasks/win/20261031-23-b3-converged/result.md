@@ -1,9 +1,9 @@
-# 任务23：V实现与上板、N自检与图片回传异常
+# 任务23：V/N实现与上板测试记录
 
 - 分支 win/20261031-23-b3-converged；本轮RTL输入2a3ee2e0，软件与工具同步至9b54c704（摄像头720p30）。
 - PDS 2022.2-SP6.1，PG2L200H-6 FBB676；工程 G:/codex_project/EdRV32-FPGA/EdRV32-B3V。
 - 用户确认本次已下载卡23新V比特流并运行新版demo_vision；不把先前卡22异常归到本卡。
-- V最终源码111；ROM/SRAM采用卡23DAT、Dcache tag为20位。R/N配置准备文件保留；本版尚未收集R/N最终流程报告，N上板结果补充如下。
+- V最终源码111；ROM/SRAM采用卡23DAT、Dcache tag为20位。R/N配置准备文件保留；本版已补充N最终流程与上板结果；R最终报告尚未收集。
 
 ## V流程
 
@@ -112,3 +112,42 @@ artifacts/b3v 包含完整原厂阶段报告、警告/错误/耗时节选、资�
 图片测试中模型 3247136 B 上传并获 `EDNM: loaded`。文件夹首张 000000000285.jpg 发送后，板端报告 `frame_id=1 NPU_PERF0=6290069 post_cpu_cycles=2641589 detections=1`；PC 随后报 `YOLO return 0: incomplete return (983040 B expected)`，退出共享 UDP 接收线程。GUI 需要完整 capture 才显示检测框、推进下一张，因此用户看到首张停住且无框。不是“板端检出0个目标”；检测框内容和正确性尚未核对。
 
 详细故障链、重启监听后的统计限制、完整工具日志、EDTM及两个原始窗口文件在 [图片测试报告](artifacts/b3n/image_batch/result.md)。窗口文件合计1708800 B，保留用于定位回传问题；逻辑长度不证明覆盖完整。本轮只整理输出和代码行为，未修改 RTL、工具或发起新的测试。
+
+## N 综合、布局布线与最终时序
+
+工程 `G:/codex_project/EdRV32-FPGA/EdRV32-B3N`，顶层 edrv32_fpga_board_npu_top；PDS 2022.2-SP6.1，PG2L200H-6 FBB676。综合、映射、布局布线、时序报告及比特流生成均结束，各阶段错误行数为0；最终时序有违例，不能记为时序通过。
+
+| 阶段 | 实际耗时 | CPU时间 | Process CPU时间 | 峰值内存池 | W:行 | E:行 |
+|---|---|---|---|---|---|---|
+| compile | 1m48s | 14s | 14s | 590 MB | 3764 | 0 |
+| synthesize | 6m14s | 1m9s | 1m14s | 2675 MB | 13711 | 0 |
+| device_map | 1m8s | 8s | 9s | 1663 MB | 268 | 0 |
+| place_route | 33m50s | 5m42s | 9m54s | 5059 MB | 694 | 0 |
+| report_timing | 1m21s | 17s | 22s | 5010 MB | 130 | 0 |
+| generate_bitstream | 1m35s | 23s | 23s | 3557 MB | 0 | 0 |
+
+最终PnR资源：LUT 57937（CLMA 44036 + CLMS 13901）、FF 62278（47293 + 14985）、分布式RAM 1737、APM 294、DRM 173、IO 101、GPLL 5、PPLL 2。原厂CMR/SNR/DMR/PRR、资源层次与汇总保存于 artifacts/b3n/native_reports、resource_hier.txt、resource_summary.txt。当前本地未取得卡22的N结果产物，因此本轮不填造卡22资源与耗时差值。
+
+原厂最终报告：clk_npu 请求150.0002 MHz，估算148.2653 MHz；slow setup WNS=-0.078 ns、TNS=-0.078 ns、1个失败端点。slow clk_sys setup=0.698 ns、clk_mem=0.349 ns、clk_eth=0.738 ns，也保留为低裕量重点。不能因为上板自检通过就忽略该违例；目前没有证据证明图片回传失败是时序违例造成的。
+
+警告按原文保留：编译 ConstantProbeLoop 735行；综合 Public-4008 10490行；时序有85行Timing-4087和45行Timing-4086未约束输入/输出警告，结论受约束覆盖限制。PnR区域警告694行（4048:344、4032:192、4049:158），包括重复/站点优先、区域硬资源类型不匹配、IO区域约束被忽略；详细原文与高扇出/时钟/复位/CE表一并保存。警告数是日志行数，不等于独立缺陷数。
+
+N自检39/39通过；图片端到端识别未通过（回传不完整，无叠框，批量停止）；网口ELF加载未确认成功（进度满但等不到板端完成），均按实际记录，不归并为整体PASS。未修改RTL、工具或重新跑实现流程；时序补导出只读取现有routed DB。完整PDS原始run.log、IP、工程数据库和比特流留在本机，不上传。
+
+### N 时序补导出与复位证据
+
+从现有routed DB执行 `report_timing -delay_type min_max -max_path 200 -input_pins TRUE -nworst 1`，原厂输出 Report timing is finished successfully，耗时3m4s。解析得到9552条各角/各类型路径，其中1条负裕量；setup/hold分别保存每组上限200条索引、每角最差20条逐级明细，以及<1ns低裕量路径（setup 505条、hold 3170条）。这不是全芯片所有路径穷举，数量与分组见 timing_path_counts.txt。
+
+| 检查 | Slow最差/ns | Fast最差/ns |
+|---|---|---|
+| Setup | -0.078 | 2.408 |
+| Hold | 0.129 | 0.099 |
+| Recovery | 1.401 | 3.474 |
+| Removal | 0.359 | 0.247 |
+| Minimum pulse width | 0.035 | 0.035 |
+
+最差setup起点为 `u_npu/u_conv/u_datapath/u_window/g_weight_channel[25].weight_r[43]/opit_0_L6QQ_perm/CLK`，终点为 `u_npu/u_conv/u_datapath/u_mac_array/g_channel[25].g_lane[5].g_cascade.u_mac/u_apm/gopapm/Y[3]`。详细路径与时钟偏斜原文见 timing_setup_top20_detail.txt、timing_violations.txt。DDR PHY最小脉宽只有0.035ns，也作为危险裕量保留。
+
+SNR中识别出32个u_reset_*层次项（FF及资源见reset_copies.txt）；同文件保存最终PnR网表中仍存在的匹配标识符。DMR中的复位网络有重命名，未建立每个副本到最终fanout的完整映射，不能宣称已验证所有副本负载≤1000；高扇出、时钟、复位、CE原表与实际PCF均已保存。
+
+完整扩展RTR约78MB留在 `build/win/20261031-23-b3-converged/exports/b3n_top200/`；上传原工程RTR、路径索引和逐级明细，避免提交重复的超大扩展文件。较大产物（DMR约2.1MB、综合警告节选约1.8MB、EDTM约1.7MB）用于保留映射/警告/遥测证据。

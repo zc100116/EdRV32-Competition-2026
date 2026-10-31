@@ -1,0 +1,221 @@
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0                  
+| Use of ANALOG                     | 0         | 1             | 0                  
+| Use of APM                        | 294       | 740           | 40                 
+| Use of BKCL                       | 4         | 10            | 40                 
+| Use of CCS                        | 1         | 1             | 100                
+| Use of CLMA                       | 15163     | 30075         | 51                 
+|   FF                              | 47293     | 240600        | 20                 
+|   LUT                             | 44036     | 120300        | 37                 
+|   LUT-FF pairs                    | 21343     | 120300        | 18                 
+| Use of CLMS                       | 4532      | 9875          | 46                 
+|   FF                              | 14985     | 79000         | 19                 
+|   LUT                             | 13901     | 39500         | 36                 
+|   LUT-FF pairs                    | 7208      | 39500         | 19                 
+|   Distributed RAM                 | 1737      | 39500         | 5                  
+| Use of DDRPHY_CPD                 | 1         | 20            | 5                  
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20                 
+| Use of DDR_PHY                    | 7         | 40            | 18                 
+| Use of DRM                        | 173       | 415           | 42                 
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0                  
+| Use of GPLL                       | 5         | 10            | 50                 
+| Use of GSEB                       | 0         | 512           | 0                  
+| Use of HARD0                      | 6005      | 25050         | 24                 
+| Use of HCKB                       | 29        | 120           | 25                 
+|  HCKB dataused                    | 0         | 120           | 0                  
+| Use of HCKMUX_TEST                | 0         | 10            | 0                  
+| Use of HSSTLP                     | 0         | 2             | 0                  
+| Use of IO                         | 101       | 400           | 26                 
+|   IOBD                            | 52        | 192           | 28                 
+|   IOBS                            | 49        | 208           | 24                 
+| Use of IOCKB                      | 0         | 40            | 0                  
+| Use of IOCKMUX_TEST               | 0         | 10            | 0                  
+| Use of IOLHR                      | 100       | 500           | 20                 
+| Use of KEYRAM                     | 0         | 1             | 0                  
+| Use of MFG_TEST                   | 0         | 1             | 0                  
+| Use of MRCKB                      | 1         | 20            | 5                  
+| Use of MRCKMUX_TEST               | 0         | 10            | 0                  
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0                  
+| Use of PCIE                       | 0         | 1             | 0                  
+| Use of PCKMUX_TEST                | 0         | 20            | 0                  
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0                  
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0                  
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0                  
+| Use of PPLL                       | 2         | 10            | 20                 
+| Use of PREGMUXC_TEST              | 0         | 3             | 0                  
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0                  
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0                  
+| Use of RCKB                       | 4         | 40            | 10                 
+|  RCKB dataused                    | 2         | 40            | 5                  
+| Use of RCKMUX_TEST                | 0         | 10            | 0                  
+| Use of SCANCHAIN                  | 0         | 1             | 0                  
+| Use of SCKMUX_TEST                | 0         | 20            | 0                  
+| Use of SFB                        | 0         | 5075          | 0                  
+| Use of SPAD                       | 0         | 8             | 0                  
+| Use of TSERDES                    | 14        | 80            | 18                 
+| Use of USCM                       | 7         | 32            | 22                 
+|  USCM dataused                    | 0         | 32            | 0                  
+| Use of USCMMUX_TEST               | 0         | 32            | 0                  
++-------------------------------------------------------------------------------------+
+
+
+Cell Usage:
+GTP_APM_E2                  294 uses
+GTP_CLKBUFG                   3 uses
+GTP_CLKBUFM                   1 use
+GTP_CLKBUFR                   2 uses
+GTP_CLKPD                     1 use
+GTP_DDC_E2                    7 uses
+GTP_DFF                   19838 uses
+GTP_DFF_C                  6279 uses
+GTP_DFF_CE                 9761 uses
+GTP_DFF_E                 23743 uses
+GTP_DFF_P                   139 uses
+GTP_DFF_PE                  727 uses
+GTP_DFF_R                  1050 uses
+GTP_DFF_RE                  732 uses
+GTP_DFF_S                   120 uses
+GTP_DFF_SE                  113 uses
+GTP_DLL_E2                    4 uses
+GTP_DRM18K_E1                22 uses
+GTP_DRM36K_E1               162 uses
+GTP_GPLL                      5 uses
+GTP_GRS                       1 use
+GTP_IDDR_E1                   5 uses
+GTP_INV                      61 uses
+GTP_IOCLKDIV_E3               2 uses
+GTP_IODELAY_E2               63 uses
+GTP_ISERDES_E2               32 uses
+GTP_LUT1                     65 uses
+GTP_LUT2                    424 uses
+GTP_LUT3                    731 uses
+GTP_LUT4                   3344 uses
+GTP_LUT5                   8758 uses
+GTP_LUT6                  16020 uses
+GTP_LUT6CARRY             15347 uses
+GTP_LUT6D                  6940 uses
+GTP_MUX2LUT7               1579 uses
+GTP_MUX2LUT8                478 uses
+GTP_ODDR_E1                   6 uses
+GTP_OSERDES_E2               79 uses
+GTP_PPLL                      2 uses
+GTP_RAM32X1DP                 3 uses
+GTP_RAM32X2DP              1734 uses
+
+I/O ports: 95
+GTP_INBUF                  13 uses
+GTP_INBUFDS                 1 use
+GTP_IOBUF                  33 uses
+GTP_IOBUFCO                 4 uses
+GTP_OUTBUF                 15 uses
+GTP_OUTBUFT                28 uses
+GTP_OUTBUFTCO               1 use
+
+Mapping Summary:
+Total LUTs: 53366 of 159800 (33.40%)
+	LUTs as dram: 1737 of 39500 (4.40%)
+	LUTs as logic: 51629
+Total Registers: 62502 of 319600 (19.56%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 173.0 of 415 (41.69%)
+
+APMs:
+Total APMs = 294.00 of 740 (39.73%)
+
+Total I/O ports = 101 of 400 (25.25%)
+
+
+
+Hierarchy units [LUT, FF, distributed RAM, APM, DRM36K-equivalent]:
+{'depth': 0, 'path': 'edrv32_fpga_board_npu_top', 'name': 'edrv32_fpga_board_npu_top', 'values': [53059, 62278, 1737, 294, 173]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_cpu', 'name': 'u_cpu', 'values': [14820, 8796, 143, 4, 18]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_cache_ctrl', 'name': 'u_cache_ctrl', 'values': [50, 161, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_core', 'name': 'u_core', 'values': [9757, 5484, 143, 4, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_dcache', 'name': 'u_dcache', 'values': [2097, 1322, 0, 0, 9]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_icache', 'name': 'u_icache', 'values': [2916, 1819, 0, 0, 9]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_cache_ctrl_n', 'name': 'u_reset_sys_cache_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_core_n', 'name': 'u_reset_sys_core_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_csr_n', 'name': 'u_reset_sys_csr_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_dcache_n', 'name': 'u_reset_sys_dcache_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_direction0_n', 'name': 'u_reset_sys_direction0_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_direction1_n', 'name': 'u_reset_sys_direction1_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_icache_n', 'name': 'u_reset_sys_icache_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_ilru_n', 'name': 'u_reset_sys_ilru_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_ivalid0_n', 'name': 'u_reset_sys_ivalid0_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_cpu/u_reset_sys_ivalid1_n', 'name': 'u_reset_sys_ivalid1_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_ddr3', 'name': 'u_ddr3', 'values': [4767, 5195, 45, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_ddr3/u_ddrc_rstn_sync', 'name': 'u_ddrc_rstn_sync', 'values': [0, 2, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_ddr3/u_ddrphy_top', 'name': 'u_ddrphy_top', 'values': [3399, 3203, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_ddr3/u_ips_ddrc_top', 'name': 'u_ips_ddrc_top', 'values': [1368, 1990, 45, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_eth', 'name': 'u_eth', 'values': [3834, 4552, 76, 0, 3]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_mdio', 'name': 'u_mdio', 'values': [60, 110, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_regs', 'name': 'u_regs', 'values': [684, 1200, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_reset_eth_rx_front_n', 'name': 'u_reset_eth_rx_front_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_reset_eth_tx_front_n', 'name': 'u_reset_eth_tx_front_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_reset_mem_ctrl_n', 'name': 'u_reset_mem_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_reset_mem_perf_n', 'name': 'u_reset_mem_perf_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_reset_mem_regs_n', 'name': 'u_reset_mem_regs_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_rx', 'name': 'u_rx', 'values': [743, 984, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_rx_buffer', 'name': 'u_rx_buffer', 'values': [0, 0, 0, 0, 1]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_rx_fifo', 'name': 'u_rx_fifo', 'values': [49, 89, 0, 0, 0.5]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_rx_front', 'name': 'u_rx_front', 'values': [45, 34, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_rx_packets', 'name': 'u_rx_packets', 'values': [23, 7, 18, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_rx_write', 'name': 'u_rx_write', 'values': [562, 488, 58, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_tx', 'name': 'u_tx', 'values': [1215, 1007, 0, 0, 1]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_tx_done', 'name': 'u_tx_done', 'values': [0, 3, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_tx_fifo', 'name': 'u_tx_fifo', 'values': [53, 101, 0, 0, 0.5]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_tx_front', 'name': 'u_tx_front', 'values': [69, 54, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_eth/u_write_dma', 'name': 'u_write_dma', 'values': [328, 389, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_mem', 'name': 'u_mem', 'values': [6722, 6848, 417, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_gw', 'name': 'u_gw', 'values': [1052, 1116, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_core_ctrl_n', 'name': 'u_reset_mem_core_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_regs_n', 'name': 'u_reset_mem_regs_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat0_n', 'name': 'u_reset_mem_stat0_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat1_n', 'name': 'u_reset_mem_stat1_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat2_n', 'name': 'u_reset_mem_stat2_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat3_n', 'name': 'u_reset_mem_stat3_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat4_n', 'name': 'u_reset_mem_stat4_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat5_n', 'name': 'u_reset_mem_stat5_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_mem_stat6_n', 'name': 'u_reset_mem_stat6_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_reset_sys_gateway_n', 'name': 'u_reset_sys_gateway_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_mem/u_xbar', 'name': 'u_xbar', 'values': [5670, 5722, 417, 0, 4]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_npu', 'name': 'u_npu', 'values': [20722, 35275, 1048, 290, 128]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_apb_bridge', 'name': 'u_apb_bridge', 'values': [38, 205, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_axi_bridge', 'name': 'u_axi_bridge', 'values': [357, 160, 296, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_conv', 'name': 'u_conv', 'values': [17666, 31244, 743, 288, 120]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_descriptor', 'name': 'u_descriptor', 'values': [274, 608, 0, 2, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_nonconv', 'name': 'u_nonconv', 'values': [1303, 1353, 0, 0, 8]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_read_dma', 'name': 'u_read_dma', 'values': [59, 328, 9, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_regs', 'name': 'u_regs', 'values': [574, 574, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_reset_mem_bridge_n', 'name': 'u_reset_mem_bridge_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_reset_npu_conv_n', 'name': 'u_reset_npu_conv_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_reset_npu_ctrl_n', 'name': 'u_reset_npu_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_npu/u_write_dma', 'name': 'u_write_dma', 'values': [294, 563, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_pll_npu', 'name': 'u_pll_npu', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_pll_sys', 'name': 'u_pll_sys', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_rgmii', 'name': 'u_rgmii', 'values': [10, 19, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_rgmii/u_pll_eth', 'name': 'u_pll_eth', 'values': [0, 0, 0, 0, 0]}
+{'depth': 1, 'path': 'edrv32_fpga_board_npu_top/u_sys', 'name': 'u_sys', 'values': [2178, 1593, 8, 0, 20]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_clint', 'name': 'u_clint', 'values': [340, 242, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_gpio', 'name': 'u_gpio', 'values': [224, 204, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_i2c', 'name': 'u_i2c', 'values': [47, 67, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_media_apb_async', 'name': 'u_media_apb_async', 'values': [42, 216, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_media_apb_bridge', 'name': 'u_media_apb_bridge', 'values': [86, 123, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_media_apb_decoder', 'name': 'u_media_apb_decoder', 'values': [464, 8, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_plic', 'name': 'u_plic', 'values': [178, 165, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_reset_ctrl', 'name': 'u_reset_ctrl', 'values': [11, 22, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_reset_mem_core_bus_n', 'name': 'u_reset_mem_core_bus_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_reset_sys_bus_n', 'name': 'u_reset_sys_bus_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_reset_sys_periph_n', 'name': 'u_reset_sys_periph_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_rom', 'name': 'u_rom', 'values': [62, 30, 0, 0, 4]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_sram', 'name': 'u_sram', 'values': [141, 37, 0, 0, 16]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_sys_apb_bridge', 'name': 'u_sys_apb_bridge', 'values': [94, 127, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_sys_apb_decoder', 'name': 'u_sys_apb_decoder', 'values': [66, 0, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_sys_xbar', 'name': 'u_sys_xbar', 'values': [214, 138, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_sysctrl', 'name': 'u_sysctrl', 'values': [26, 68, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_npu_top/u_sys/u_uart', 'name': 'u_uart', 'values': [183, 143, 8, 0, 0]}
