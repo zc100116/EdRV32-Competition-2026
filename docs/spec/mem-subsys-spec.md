@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.4 |
-| 日期 | 2026-10-29 |
+| 版本 | v0.5 |
+| 日期 | 2026-10-31 |
 | 状态 | 已确认（v0.4，2026-10-29） |
 | 范围 | DDR 网关、mem_xbar（含 MEM_XBAR 寄存器）、PERF_MON、P6 口内部仲裁、存储子系统顶层 `rtl/soc/edrv32_mem_subsys.v`；附录 A 为板级 DDR 适配器契约 |
 | 关联文档 | SoC 规格 `edrv32-soc-spec.md` 3.2、4.2、5、6.3–6.5、7.1、8.4、9.1；系统子系统规格 `sys-subsys-spec.md`（S6）；DDR 带宽分析 `docs/design/2026-10-25-ddr-bandwidth-analysis.md` |
@@ -189,7 +189,7 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | clk_mem | 125 MHz 时序收敛 |
 | mem_xbar 下游利用 | 在仿真 DDR 模型的同行顺序读流量下，PERF_MON 测得的有效带宽 ≥ 模型数据线带宽的 90% |
 | 网关延迟 | 在下游零等待时，CPU cache 行读从 S6 AR 到最后一个 R 拍不超过 [待定] 个 clk_sys 周期（开发初值：由实现报告，C-W2 之后定稿） |
-| 资源 | DDR 网关 + mem_xbar ≤ 8K LUT（SoC 9.3）；PERF_MON ≤ 2K LUT [待定]；读返回缓冲和 W 缓冲使用 DRM |
+| 资源 | DDR 网关 + mem_xbar ≤ 8K LUT（SoC 9.3）；PERF_MON ≤ 2K LUT [待定]；读返回缓冲使用 DRM，W 缓冲使用分布式 RAM |
 
 ## 8. 验证要点
 
@@ -214,6 +214,7 @@ ID = 0x0009_0001。公共寄存器：DESC_BASE、DESC_COUNT、DOORBELL、PERF �
 | 2026-10-27 | v0.2 | 用户确认，状态改为已确认 |
 | 2026-10-27 | v0.3 | 随 SoC 规格 v0.9（用户确认）：P1 增加读通道（VIN 内存源，设计记录 `2026-10-27-image-path.md` Q7），`OUTST_RD[1]` 复位值 2（SoC 6.4.5） |
 | 2026-10-29 | v0.4 | 4.1、2.2：每端口统计的事务数和拍数拆成读、写两组（RD_TXN/RD_BEAT 取代 TXN_CNT/BEAT_CNT，新增 WR_TXN 0x414、WR_BEAT 0x418），供 B2 调试工具实时显示各端口读写带宽（用户确认 2026-10-29） |
+| 2026-10-31 | v0.5 | 7：W 缓冲（每口 16 × 288）改用分布式 RAM，读返回缓冲仍用 DRM；读延迟和保持语义不变。依据设计记录 `docs/design/2026-10-31-drm-lutram.md` 方案 B（每个 W 缓冲由 4 DRM 降为 0）；用户确认 |
 | 2026-10-29 | v0.4 | 寄存器回填（B2-1f 调查，与 RTL 一致，用户确认 2026-10-29）：4.1 WEIGHT[P2] 复位 0、RATE 除 P2/P6 外复位 0；ERR_TYPE 位域命名 CROSS_4K、MISALIGN |
 
 ---

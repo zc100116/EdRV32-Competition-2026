@@ -4,8 +4,8 @@
 
 | IP 模块名 | 类型 | 规格 | 包装模块 | 使用者 | 创建说明 | 状态 |
 |---|---|---|---|---|---|---|
-| `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 18 | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 32 KiB 评估版，需重新生成（模块名不变） |
-| `ip_ram_icache_data` | DRM 简单双口 RAM | 2048 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 32 KiB 评估版，需重新生成（模块名不变） |
+| `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 18 | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
+| `ip_ram_icache_data` | DRM 简单双口 RAM | 2048 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
 | `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20（用 128 项） | `edrv32_ram_dcache_tag` | D$ ×2 | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 已生成（20261025-01） |
 | `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 512 × 64 | `edrv32_ram_dcache_data` | D$ ×2 | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 已生成（20261025-01） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
@@ -13,16 +13,16 @@
 | `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（8192 深，20261027-02） |
 | `ip_ram_npu_line` | DRM 简单双口 RAM，输出寄存 | 1024 × 256 | `edrv32_ram_npu_line` | NPU 行缓存 ×2 | [ip_ram_npu_line.md](ip_ram_npu_line.md) | 已生成（20261027-02） |
 | `ip_ram_npu_weight` | DRM 简单双口 RAM，输出寄存 | 512 × 256 | `edrv32_ram_npu_weight` | NPU 常驻权重 ×24 | [ip_ram_npu_weight.md](ip_ram_npu_weight.md) | 已生成（20261027-02） |
-| `ip_lutram_npu_quant` | 分布式 RAM，组合读 | 32 × 64 | `edrv32_ram_npu_quant` | NPU 量化参数 ×8 | [ip_lutram_npu_quant.md](ip_lutram_npu_quant.md) | 评估版，待卡 21 生成 |
-| `ip_ram_npu_lut` | DRM 简单双口 RAM，输出寄存 | 2048 × 8 | `edrv32_ram_npu_lut` | NPU 激活表 ×16 | [ip_ram_npu_lut.md](ip_ram_npu_lut.md) | 评估版，待卡 21 生成 |
-| `ip_lutram_npu_residual` | 分布式 RAM，组合读 | 32 × 256 | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_lutram_npu_residual.md](ip_lutram_npu_residual.md) | 评估版，待卡 21 生成 |
-| `ip_lutram_npu_result` | 分布式 RAM，组合读 | 32 × 512 | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_lutram_npu_result.md](ip_lutram_npu_result.md) | 评估版，待卡 21 生成 |
+| `ip_lutram_npu_quant` | 分布式 RAM，组合读 | 32 × 64 | `edrv32_ram_npu_quant` | NPU 量化参数 ×8 | [ip_lutram_npu_quant.md](ip_lutram_npu_quant.md) | 已采用（用户 2026-10-31），待卡 21 生成 |
+| `ip_ram_npu_lut` | DRM 简单双口 RAM，输出寄存 | 2048 × 8 | `edrv32_ram_npu_lut` | NPU 激活表 ×16 | [ip_ram_npu_lut.md](ip_ram_npu_lut.md) | 已采用（用户 2026-10-31），待卡 21 生成 |
+| `ip_lutram_npu_residual` | 分布式 RAM，组合读 | 32 × 256 | `edrv32_ram_npu_residual` | NPU 残差缓冲 ×1 | [ip_lutram_npu_residual.md](ip_lutram_npu_residual.md) | 已采用（用户 2026-10-31），待卡 21 生成 |
+| `ip_lutram_npu_result` | 分布式 RAM，组合读 | 32 × 512 | `edrv32_ram_npu_result` | NPU 结果环 ×1 | [ip_lutram_npu_result.md](ip_lutram_npu_result.md) | 已采用（用户 2026-10-31），待卡 21 生成 |
 | `ip_ram_npu_scratch` | DRM 简单双口 RAM | 512 × 256 | `edrv32_ram_npu_scratch` | NPU 非卷积暂存 ×2 | [ip_ram_npu_scratch.md](ip_ram_npu_scratch.md) | 已生成（20261027-02） |
 | （原语 `GTP_APM_E2`） | APM SIMD 两路 INT8 级联乘加，不经 IP Compiler | 2 × INT8 乘法 + 独立 24 位后加，单元 3 沿、八级链 10 沿 | `edrv32_mac_npu_int8_head` / `edrv32_mac_npu_int8_chain` | NPU MAC 阵列 head ×32 / chain ×224 | [ip_mac_npu_int8_chain.md](ip_mac_npu_int8_chain.md) | 无需生成；EQ-01 厂商模型对比 PASS |
 | `ip_mul_npu_quant_low` | APM 乘法器 | 18 × 16 有符号，2 级 | `edrv32_mul_npu_quant_low` | NPU 量化 ×16 | [ip_mul_npu_quant_low.md](ip_mul_npu_quant_low.md) | 已生成（20261027-02） |
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
 | `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读缓冲 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | B2 待生成 |
-| `ip_lutram_mem_xbar_w` | 分布式 RAM，组合读 | 16 × 288 | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_lutram_mem_xbar_w.md](ip_lutram_mem_xbar_w.md) | 评估版，待卡 21 生成 |
+| `ip_lutram_mem_xbar_w` | 分布式 RAM，组合读 | 16 × 288 | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_lutram_mem_xbar_w.md](ip_lutram_mem_xbar_w.md) | 已采用（用户 2026-10-31），待卡 21 生成 |
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 已生成（20261028-04） |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1（B3 起 ×2：L0、L1，disp-spec v0.3） | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 已生成（20261028-04） |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 已生成（20261028-04） |
@@ -45,9 +45,9 @@ TMDS 及 RGMII 使用器件原语，无需另生成 GUI IP：
 原语配置固定在 `fpga/rtl/edrv32_fpga_tmds.v` 和 `edrv32_fpga_rgmii.v`；
 SERDES 数据寄存器不使用本地复位，持续发送 SoC 的 TMDS 符号（CLAUDE 5.2）。
 
-本分支是 B3F 方案 B 评估版，不代表已采用。四种浅存储改用分布式 RAM，激活表 DRM 改为 2048 深，均待卡 21 生成。
-旧的 `ip_ram_npu_result.md`、`ip_ram_npu_quant.md`、`ip_ram_npu_residual.md`、
-`ip_ram_mem_xbar_w.md` 在本分支删除；`zc100116/b3` 分支仍保留它们，供方案 A（卡 20）使用。
+浅存储改用分布式 RAM（设计记录 `docs/design/2026-10-31-drm-lutram.md` 方案 B，用户 2026-10-31 采用）：
+四种浅存储改用分布式 RAM，激活表 DRM 改为 2048 深，由卡 21 生成。原 DRM 版 `ip_ram_npu_result`、
+`ip_ram_npu_quant`、`ip_ram_npu_residual`、`ip_ram_mem_xbar_w` 不再使用，工程中应移除。
 分布式 RAM 的读使能、保持和 1/2 拍延迟由包装模块寄存器实现，IP 本身为组合读。
 
 ### B2 Windows 用户 IP 生成顺序

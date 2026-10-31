@@ -1,7 +1,7 @@
 // File: edrv32_icache.v
 // Spec: cache-spec 2, 3.1, 5.1, 6.
 // Description: Pipelined instruction lookup and blocking AXI64 refill.
-// Evaluation: 32 KiB, 512 sets, two ways, 32-byte lines, synchronous tag/data RAM.
+// Organization: 32 KiB, 512 sets, two ways, 32-byte lines, synchronous tag/data RAM.
 // Hit lookup is pipelined; an outstanding refill survives a core kill.
 // Clock domain: clk_sys.
 module edrv32_icache (
