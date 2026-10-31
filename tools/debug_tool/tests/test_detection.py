@@ -116,7 +116,7 @@ class ImageDetectionTest(unittest.TestCase):
             state = engine.ethernet.start_receive(0, directory, mode='console')
             destination = '127.0.0.1', state['localPort']
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
-                def send_return(missing):
+                def send_return(missing, end=True):
                     engine.yolo.reset_capture()
                     for window, size in enumerate((INPUT_BYTES, OUTPUT_BYTES)):
                         for index, packet in enumerate(packets(bytes(size), window, 0)):
@@ -125,7 +125,8 @@ class ImageDetectionTest(unittest.TestCase):
                             source.sendto(packet[:1] + b'\0' + packet[2:], destination)
                             time.sleep(.0002)
                     detections = struct.pack('<4sHHII', b'EDDT', 1, 0, 7, 0)
-                    source.sendto(next(packets(detections, 2, 0)), destination)
+                    if end:
+                        source.sendto(next(packets(detections, 2, 0)), destination)
 
                 send_return(True)
                 wait_for(self, lambda: engine.yolo.failed == 1)
@@ -140,6 +141,17 @@ class ImageDetectionTest(unittest.TestCase):
                 self.assertEqual(engine.yolo.failed, 1)
                 self.assertIsNone(engine.yolo.error)
                 self.assertEqual(engine.yolo.snapshot()[1][2].frame_id, 7)
+                self.assertTrue(engine.ethernet.status()['rx']['active'])
+                send_return(False, end=False)
+                # Other windows must not postpone the missing-EDDT deadline.
+                for seq in range(2, 25):
+                    source.sendto(next(packets(wire(seq), 3, 0)), destination)
+                    time.sleep(.05)
+                wait_for(self, lambda: engine.yolo.failed == 2)
+                self.assertEqual(engine.yolo.error, '回传未结束（超时 1 s）')
+                send_return(False)
+                wait_for(self, lambda: engine.yolo.snapshot()[1] is not None)
+                self.assertEqual(engine.yolo.failed, 2)
                 self.assertTrue(engine.ethernet.status()['rx']['active'])
             engine.ethernet.stop_receive()
             self.assertIsNone(engine.ethernet.status()['rx']['error'])
@@ -183,6 +195,33 @@ class ImageDetectionTest(unittest.TestCase):
             self.assertEqual(engine.yolo.failed, 0)
             engine.ethernet.stop_receive()
             self.assertIsNone(engine.ethernet.rx_memory)
+
+    def test_return_timeout_uses_last_packet_or_send_completion(self):
+        from tools.debug_tool.core.yolo import YoloTool
+        yolo = YoloTool(None)
+        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=10):
+            yolo.reset_capture()
+            yolo.image_sent(None)
+        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=10.9):
+            yolo.check_timeout()
+            self.assertEqual(yolo.failed, 0)
+            yolo.receive(0, 0, bytes(1024), False)
+        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=11.5):
+            yolo.check_timeout()
+            self.assertEqual(yolo.failed, 0)
+        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=11.9):
+            yolo.check_timeout()
+            self.assertEqual(yolo.failed, 1)
+            self.assertEqual(yolo.error, '回传未结束（超时 1 s）')
+            yolo.check_timeout()
+            self.assertEqual(yolo.failed, 1)
+            yolo.reset_capture()
+            yolo.check_timeout()
+            self.assertEqual(yolo.failed, 1)  # Upload has not finished yet.
+            yolo.image_sent(None)
+        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=12.9):
+            yolo.check_timeout()
+            self.assertEqual(yolo.failed, 2)
 
     def test_folder_order_completion_stats_and_original_image(self):
         from PySide6.QtGui import QImage

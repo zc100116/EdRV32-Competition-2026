@@ -11,6 +11,8 @@ import time
 
 from .video import Block, parse_detections
 
+RETURN_TIMEOUT = 1.0
+
 
 def read_hex(path, base):
     data = bytearray()
@@ -78,6 +80,8 @@ class YoloTool:
         self.generation = 0
         self.failed = 0
         self.error = None
+        self.last_return_at = None
+        self.send_finished_at = None
 
     def reset_capture(self):
         with self.lock:
@@ -87,15 +91,19 @@ class YoloTool:
             self.capture_started = False
             self.return_view = True
             self.error = None
+            self.last_return_at = None
+            self.send_finished_at = None
             if self.ethernet is not None and self.ethernet.rx_capture_event is not None:
                 self.ethernet.rx_capture_event.set()
                 with self.ethernet.rx_capture_epoch.get_lock():
                     self.ethernet.rx_capture_epoch.value += 1
+                self.ethernet.rx_return_time.value = 0
 
     def receive(self, window, offset, data, notify):
         if window not in (0, 1, 2):
             return
         with self.lock:
+            self.last_return_at = time.monotonic()
             self.blocks[window].receive(offset, data, notify)
             if window == 2 and notify:
                 # A malformed EDDT is a protocol error even when image bytes are missing.
@@ -130,8 +138,30 @@ class YoloTool:
         self.capture_pending = False
         self.capture_started = False
         self.sent_at = None
+        if self.ethernet is not None and self.ethernet.rx_capture_event is not None:
+            self.ethernet.rx_capture_event.clear()
+            with self.ethernet.rx_capture_epoch.get_lock():
+                self.ethernet.rx_capture_epoch.value += 1
         if self.ethernet is not None and self.ethernet.session:
             self.ethernet.session.log(f'{self.source_image}: {error}')
+
+    def image_sent(self, path):
+        with self.lock:
+            if self.capture_pending and path == self.source_image:
+                self.send_finished_at = time.monotonic()
+
+    def check_timeout(self):
+        with self.lock:
+            if not self.capture_pending:
+                return
+            last = self.last_return_at
+            if self.ethernet is not None and self.ethernet.rx_return_time is not None:
+                if not self.ethernet.rx_capture_event.is_set():
+                    return  # The process has EDDT; its completed result is in transit.
+                last = self.ethernet.rx_return_time.value or None
+            started = self.send_finished_at if last is None else last
+            if started is not None and time.monotonic() - started >= RETURN_TIMEOUT:
+                self._fail_capture('回传未结束（超时 1 s）')
 
     def snapshot(self):
         with self.lock:

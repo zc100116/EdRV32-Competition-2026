@@ -83,6 +83,7 @@ def serial_stress():
 
 
 def udp_sender(port, pattern='line'):
+    import json
     from core.ethernet import packets
     from core.video import VIDEO_HEADER
     height = 160 if pattern == 'short' else 720
@@ -90,8 +91,11 @@ def udp_sender(port, pattern='line'):
     interval = 1 / (30 * len(payloads)) if pattern == 'uniform' else 1024 / 116_000_000
     start = time.monotonic()
     next_packet = time.perf_counter()
+    sent_frames = 0
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         for frame_id in range(900):
+            if time.monotonic() - start >= 30:
+                break
             header = VIDEO_HEADER.pack(b'EDVF', 1, 1, 1280, height, 2560,
                                        frame_id, frame_id * 3333333, 1)
             wire_header = next(packets(header, 0, 0))
@@ -103,10 +107,12 @@ def udp_sender(port, pattern='line'):
                     pass
                 next_packet = time.perf_counter() + interval
                 sock.sendto(packet, ('127.0.0.1', port))
+            sent_frames += 1
             delay = start + (frame_id + 1) / 30 - time.monotonic()
             if delay > 0:
                 time.sleep(delay)
-    print(f'sender_seconds={time.monotonic() - start:.6f}', flush=True)
+    print(json.dumps(dict(sender_seconds=time.monotonic() - start,
+                          sent_frames=sent_frames)), flush=True)
 
 
 def udp_stress(pattern='line', gui=False):
@@ -140,8 +146,9 @@ def udp_stress(pattern='line', gui=False):
         stdout, _ = sender.communicate()
         if sender.returncode:
             raise subprocess.CalledProcessError(sender.returncode, sender.args)
-        sender_seconds = float(stdout.strip().split('=')[1])
-        print(stdout, end='')
+        sent = json.loads(stdout)
+        sender_seconds = sent['sender_seconds']
+        sent_frames = sent['sent_frames']
         time.sleep(.2)
         ethernet.stop_receive()
         elapsed = time.monotonic() - started
@@ -149,15 +156,16 @@ def udp_stress(pattern='line', gui=False):
         rx = ethernet.status()['rx']
         cpu_seconds = rx['receiveCpuSeconds']
         print(json.dumps(dict(pattern=pattern, gui=gui,
-                              sent_frames=900, received_frames=video['received'],
-                              sender_fps=900 / sender_seconds,
+                              sent_frames=sent_frames, received_frames=video['received'],
+                              sender_seconds=sender_seconds,
+                              sender_fps=sent_frames / sender_seconds,
                               received_fps=video['received'] / sender_seconds,
                               dropped_frames=video['dropped'],
-                              missing_frames=900 - video['received'],
+                              missing_frames=sent_frames - video['received'],
                               receive_cpu_seconds=cpu_seconds,
                               receive_cpu_percent=100 * cpu_seconds / sender_seconds,
                               elapsed_seconds=elapsed, socket_buffer_bytes=actual_buffer,
-                              dropped_packets=900 * (401 if pattern == 'short' else 1801)
+                              dropped_packets=sent_frames * (401 if pattern == 'short' else 1801)
                                               - rx['packets'],
                               packets=rx['packets'], error=rx['error']), indent=2))
         if rx['error']:
@@ -207,7 +215,11 @@ def udp_yolo_stress():
             sender.stdin.flush()
             if sender.stdout.readline() != 'sent\n':
                 raise RuntimeError('YOLO sender exited before completing the return')
-            time.sleep(.2)
+            engine.yolo.image_sent(None)
+            while engine.yolo.capture_pending:
+                if engine.ethernet.status()['rx']['error']:
+                    raise RuntimeError(engine.ethernet.status()['rx']['error'])
+                time.sleep(.005)
             complete += engine.yolo.snapshot()[1] is not None
         sender.stdin.close()
         sender.wait()
