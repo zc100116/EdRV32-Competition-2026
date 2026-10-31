@@ -52,8 +52,8 @@ def upsample_case(directory):
 def feed_frame(video, frame_id=9, missing=None, reverse=False):
     video.receive(0, 0, frame_header(frame_id), False)
     pixels = bytes(range(256)) * 5
-    parts = [(32 + i, pixels[i:i + 400], i + 400 >= len(pixels))
-             for i in range(0, len(pixels), 400)]
+    parts = [(32 + i, pixels[i:i + 1024], i + 1024 >= len(pixels))
+             for i in range(0, len(pixels), 1024)]
     if missing is not None:
         parts.pop(missing)
     for offset, data, notify in reversed(parts) if reverse else parts:
@@ -92,6 +92,32 @@ class VideoTest(unittest.TestCase):
         video.receive(0, 32, b'x' * 100, True)
         self.assertEqual(video.snapshot()['dropped'], 2)
         self.assertEqual(video.snapshot()['frame'].frame_id, 11)
+
+    def test_duplicate_packets_do_not_complete_a_frame_with_a_hole(self):
+        video = VideoReceiver()
+        video.receive(0, 0, frame_header(), False)
+        first = bytes(range(256)) * 4
+        video.receive(0, 32, first, False)
+        video.receive(0, 32, first, False)
+        self.assertIsNone(video.snapshot()['frame'])
+        video.receive(0, 1056, b'z' * 256, True)
+        frame = video.snapshot()['frame']
+        self.assertEqual(frame.pixels, first + b'z' * 256)
+        video.receive(0, 1056, b'z' * 256, True)
+        self.assertEqual(video.snapshot()['received'], 1)
+        self.assertEqual(video.snapshot()['dropped'], 0)
+        feed_frame(video, 10)
+        self.assertEqual(frame.pixels, first + b'z' * 256)
+        self.assertTrue(frame.pixels.readonly)
+
+    def test_missing_packet_with_duplicates_is_dropped(self):
+        video = VideoReceiver()
+        video.receive(0, 0, frame_header(), False)
+        for _ in range(3):
+            video.receive(0, 1056, b'z' * 256, True)
+        video.finish()
+        self.assertEqual(video.snapshot()['received'], 0)
+        self.assertEqual(video.snapshot()['dropped'], 1)
 
     def test_frame_id_gap_is_not_network_skip_counter(self):
         video = VideoReceiver()

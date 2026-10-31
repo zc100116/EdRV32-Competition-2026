@@ -55,9 +55,9 @@ class BoardSession:
             self.peer_ip = self.peer_port = None
             self.error = None
 
-    def received(self, kind):
+    def received(self, kind, count=1):
         with self.lock:
-            self.counts[kind] += 1
+            self.counts[kind] += count
             self.data_times[kind] = int(time.time() * 1000)
             self.mark('data')
 

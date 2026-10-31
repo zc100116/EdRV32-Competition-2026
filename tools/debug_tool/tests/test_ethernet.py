@@ -67,6 +67,8 @@ class LoopbackTest(unittest.TestCase):
 
     def test_file_loopback_all_windows_and_nonzero_offset(self):
         rx = self.receiver.start_receive(0, Path(self.temp.name) / "rx")
+        self.assertEqual(rx["socketBufferBytes"], self.receiver.rx_socket.getsockopt(
+            socket.SOL_SOCKET, socket.SO_RCVBUF))
         expected_packets = 0
         total_bytes = 0
         for window, length in enumerate((0, 1024, 1025, 5317)):

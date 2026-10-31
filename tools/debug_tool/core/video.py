@@ -78,7 +78,7 @@ class VideoFrame:
     frame_id: int
     mtime: int
     scene: int
-    pixels: bytes
+    pixels: memoryview
 
 
 class FrameRate:
@@ -104,10 +104,13 @@ class VideoReceiver:
     def __init__(self, clock=time.monotonic):
         self.lock = threading.Lock()
         self.clock = clock
-        self.block = Block()
+        self.pixels = None
+        self.seen = None
+        self.remaining = 0
         self.detection_block = Block()
         self.header = None
         self.finished = False
+        self.orphan = True
         self.frame = None
         self.detections = None
         self.frame_detections = None
@@ -116,47 +119,75 @@ class VideoReceiver:
         self.rate = FrameRate()
 
     def receive(self, window, offset, data, notify):
-        with self.lock:
-            if window == 2:
-                if offset == 0:
-                    self.detection_block = Block()
-                self.detection_block.receive(offset, data, notify)
-                if self.detection_block.complete():
-                    self.detections = parse_detections(self.detection_block.data())
-                return
-            if window != 0:
-                return
+        # The UDP thread owns assembly; only completed frames cross the GUI lock.
+        if window == 2:
             if offset == 0:
-                header = VIDEO_HEADER.unpack_from(data)
-                if header[0] != b'EDVF' or header[1:3] != (1, 1):
-                    raise ValueError(f'EDVF magic/version/format: {header[:3]}')
-                if self.header is not None and not self.finished:
-                    self.dropped += 1
-                self.block = Block()
-                self.header = header
-                self.finished = False
-            if self.header is None or self.finished:
-                if notify:
-                    self.dropped += 1  # A pixel batch without its EDVF header.
+                self.detection_block = Block()
+            self.detection_block.receive(offset, data, notify)
+            if self.detection_block.complete():
+                detections = parse_detections(self.detection_block.data())
+                with self.lock:
+                    self.detections = detections
+            return
+        if window != 0:
+            return
+        if offset == 0:
+            header = VIDEO_HEADER.unpack_from(data)
+            if header[0] != b'EDVF' or header[1:3] != (1, 1):
+                raise ValueError(f'EDVF magic/version/format: {header[:3]}')
+            if header == self.header:
                 return
-            self.block.receive(offset, data, notify)
-            if self.header is not None:
-                _, _, _, width, height, stride, frame_id, mtime, scene = self.header
-                size = VIDEO_HEADER.size + height * stride
-                if self.block.complete(size):
-                    self.frame = VideoFrame(width, height, stride, frame_id, mtime, scene,
-                                            self.block.data(size)[VIDEO_HEADER.size:])
-                    self.frame_detections = (self.detections if self.detections is not None
-                                             and self.detections.frame_id == frame_id else None)
-                    self.received += 1
-                    self.rate.add(self.clock())
-                    self.finished = True
+            if self.header is not None and not self.finished:
+                with self.lock:
+                    self.dropped += 1
+            self.header = header
+            self.finished = False
+            self.orphan = False
+            size = header[4] * header[5]
+            self.pixels = bytearray(size)
+            self.pixel_view = memoryview(self.pixels)
+            self.payload_origin = 0 if len(data) > VIDEO_HEADER.size else VIDEO_HEADER.size
+            record_size = size + VIDEO_HEADER.size - self.payload_origin
+            self.remaining = (record_size + 1023) // 1024
+            self.seen = bytearray(self.remaining)
+            self.packet_sizes = [1024] * self.remaining
+            self.packet_sizes[-1] = record_size - (self.remaining - 1) * 1024
+            self.packet_sizes[0] -= VIDEO_HEADER.size - self.payload_origin
+            if len(data) == VIDEO_HEADER.size:
+                return
+            data = data[VIDEO_HEADER.size:]
+            offset = VIDEO_HEADER.size
+        if self.header is None or self.finished:
+            if offset == VIDEO_HEADER.size:
+                self.orphan = True
+            if notify and self.orphan:
+                with self.lock:
+                    self.dropped += 1  # A pixel batch without its EDVF header.
+                self.orphan = False
+            return
+        start = offset - VIDEO_HEADER.size
+        index = (offset - self.payload_origin) // 1024
+        if not self.seen[index] and len(data) == self.packet_sizes[index]:
+            self.pixel_view[start:start + len(data)] = data
+            self.seen[index] = 1
+            self.remaining -= 1
+        if self.remaining == 0:
+            _, _, _, width, height, stride, frame_id, mtime, scene = self.header
+            frame = VideoFrame(width, height, stride, frame_id, mtime, scene,
+                               self.pixel_view.toreadonly())
+            with self.lock:
+                self.frame = frame
+                self.frame_detections = (self.detections if self.detections is not None
+                                         and self.detections.frame_id == frame_id else None)
+                self.received += 1
+                self.rate.add(self.clock())
+            self.finished = True
 
     def finish(self):
-        with self.lock:
-            if not self.finished and (self.header is not None or self.block.chunks):
+        if not self.finished and self.header is not None:
+            with self.lock:
                 self.dropped += 1
-                self.finished = True
+            self.finished = True
 
     def snapshot(self):
         with self.lock:

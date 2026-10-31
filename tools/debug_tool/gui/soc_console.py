@@ -10,7 +10,7 @@ import struct
 import threading
 import time
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QImage, QIntValidator
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from core.engine import fmt_ts
 from gui.processing import ProcessingPanel
 from core.telemetry import encode
+from core.video import FrameRate
 from gui.program import ProgramPanel
 from gui.telemetry import Histogram, Timeline
 from gui.video import DetectionView
@@ -97,6 +98,8 @@ class SocConsole(QWidget):
         self.toast = toast
         self.last_seq = 0
         self.last_display = None
+        self.display_rate = FrameRate()
+        self.displayed_frame = None
         self.generation = -1
         self.folder_images = []
         self.folder_started = None
@@ -148,6 +151,11 @@ class SocConsole(QWidget):
         self.model_note.setText('选择模型编译目录，然后发送')
         self.check_note.setText('输入 / 输出逐字节比对；检测框按序比对')
         self.output_note.setText('UDP 5000 → PC 6000')
+        # Video needs its own cadence; the shared status panel refreshes at 2 Hz.
+        self.video_timer = QTimer(self)
+        self.video_timer.setTimerType(Qt.PreciseTimer)
+        self.video_timer.timeout.connect(self._video_tick)
+        self.video_timer.start(16)
 
     def page(self, title):
         scroll = QScrollArea()
@@ -273,7 +281,7 @@ class SocConsole(QWidget):
         self.caption = label('来源 · 板端视频\n等待 EDVF 视频帧', 'note')
         self.caption.setWordWrap(True)
         box.addWidget(self.caption)
-        self.video_stats = label('完整帧 0 · 缺包丢帧 0 · 网口跳帧 0', 'note')
+        self.video_stats = label('接收帧率 0.0 fps · 显示帧率 0.0 fps · 丢弃帧数 0 · 接收缓冲 0 MiB', 'note')
         box.addWidget(self.video_stats)
         row.addWidget(frame, 1)
 
@@ -540,6 +548,10 @@ class SocConsole(QWidget):
                 self.comparing = False
         threading.Thread(target=run, name='yolo-reference', daemon=True).start()
 
+    def _video_tick(self):
+        if self.isVisible():
+            self._display()
+
     def _display(self, *_):
         state = self.engine.video.snapshot()
         frame, detections = state['frame'], state['detections']
@@ -557,11 +569,14 @@ class SocConsole(QWidget):
                        f'{image.width()} × {image.height()} · {len(boxes)} 个检测框')
         elif frame is not None:
             boxes = detections.boxes if mode == 2 and detections is not None else ()
-            key = (mode, frame.frame_id, boxes, round(state["fps"], 1))
+            key = (mode, frame.frame_id, boxes)
             if key == self.last_display:
                 return
             image = QImage(frame.pixels, frame.width, frame.height, frame.stride,
                            QImage.Format_RGB16).copy()
+            if frame is not self.displayed_frame:
+                self.display_rate.add(time.monotonic())
+                self.displayed_frame = frame
             caption = (f'来源 · 板端视频 · FRAME {frame.frame_id} · {state["fps"]:.1f} fps\n'
                        f'{frame.width} × {frame.height} · {len(boxes)} 个检测框')
         else:
@@ -732,8 +747,13 @@ class SocConsole(QWidget):
                 self.board.log(self.comparison_result.text())
         self._display()
         video = self.engine.video.snapshot()
-        self.video_stats.setText(f"完整帧 {video['received']} · 缺包丢帧 {video['dropped']} · "
-                                 f"网口跳帧 {self.engine.telemetry.status()['video_skipped']}")
+        buffer_bytes = self.engine.ethernet.status()['rx']['socketBufferBytes']
+        self.video_stats.setText(
+            f"接收帧率 {video['fps']:.1f} fps · "
+            f"显示帧率 {self.display_rate.fps(time.monotonic()):.1f} fps · "
+            f"丢弃帧数 {video['dropped']} · "
+            f"接收缓冲 {buffer_bytes / 1024 / 1024:.2f} MiB · "
+            f"网口跳帧 {self.engine.telemetry.status()['video_skipped']}")
         self._refresh_monitor()
         entries, _ = self.engine.get_entries(self.last_seq, 500)
         for entry in entries:

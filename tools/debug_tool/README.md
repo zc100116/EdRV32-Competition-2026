@@ -301,3 +301,34 @@ QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/ren
 QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --state vision --main-page 5 --width 1366 --height 768
 QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/device-1366x768.png --state vision --page 0 --width 1366 --height 768
 ```
+
+### 视频接收与压力测量
+
+接收 socket 固定请求 64 MiB `SO_RCVBUF`，状态 `rx.socketBufferBytes` 和视频页
+显示系统实际授予的大小；Linux 会受 `net.core.rmem_max` 限制，读回值包含内核倍增。
+Windows 上板时也须记录读回值，不能用请求值代替。
+视频画面用独立 16 ms 定时器刷新，摆脱原状态轮询 500 ms（2 fps）的显示限制。
+视频页分别显示完整帧接收帧率、送到画面的显示帧率、丢弃帧数和接收缓冲大小。
+帧率按最近一秒的帧间隔计算，停止更新超过一秒显示为零。
+
+WIN 0 按 EDVF 尺寸预分配 RGB565 缓冲，收到的数据通过 memoryview 按 OFFSET 写入；
+按 eth-spec 的 1024 B 分包序号位图计数，末包长度由帧尺寸决定。
+像素包在帧头之后可乱序，重复包不补齐缺失包，也不重复提交完整帧。
+支持板端的独立 32 B 帧头描述符，也保留帧头与像素同描述符的接收行为。
+仅完整帧交给画面，缺包帧在下一帧头或停止接收时丢弃并计数。
+NOTIFY 标记批次末尾；若帧头丢失，看到像素起点 OFFSET=32 后在 NOTIFY 计一次丢弃。
+已完成帧的重复末包不重复计帧；协议像素包不含 frame_id，孤立的相同末包无法区分
+“重复”与“下一批只剩末包”，此时不额外推算丢帧。EDDT、EDTM 和文件窗口用途不变。
+接收线程按可读事件排空非阻塞 socket，避免每个像素包都先等待一次可读事件。
+接收统计和会话包数每 256 包、NOTIFY 或接收空闲时更新，停止时发布剩余计数。
+
+本机千兆节奏回环（固定 1280×720 RGB565、30 fps、900 帧、30 s）：
+
+```bash
+~/.local/opt/edrv32-py/bin/python tools/debug_tool/stress_test.py --udp-video
+```
+
+每帧独立发送帧头和 1800 个像素包；像素包按 116 MB/s 的千兆有效负载速率间隔发送，
+帧间按 30 fps 定时，无重试。发送进程与接收线程分离，输出完整帧数、接收帧率、
+丢弃帧数、未收完整帧数、接收线程 CPU 秒数/单核占用和缓冲读回值。
+Linux 回环结果不能替代 Windows 实际网卡上板结果。

@@ -20,6 +20,24 @@ class UiRevisionTest(unittest.TestCase):
         from PySide6.QtWidgets import QApplication
         cls.app = QApplication.instance() or QApplication([])
 
+    def test_video_refresh_runs_between_status_polls_and_shows_rates(self):
+        from unittest.mock import Mock, patch
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        from gui.soc_console import SocConsole
+        console = SocConsole(SerialEngine(), Mock())
+        console.setAttribute(Qt.WA_DeleteOnClose)
+        self.addCleanup(self.dispose, console)
+        console.show()
+        self.app.processEvents()
+        with patch.object(console, '_display') as display:
+            QTest.qWait(80)
+            self.assertGreaterEqual(display.call_count, 2)
+        console.refresh()
+        for text in ('接收帧率', '显示帧率', '丢弃帧数', '接收缓冲'):
+            self.assertIn(text, console.video_stats.text())
+        self.assertTrue(console.video_stats.wordWrap())
+
     def test_bin_program_uses_displayed_sram_addresses(self):
         from unittest.mock import Mock
         from gui.program import ProgramPanel

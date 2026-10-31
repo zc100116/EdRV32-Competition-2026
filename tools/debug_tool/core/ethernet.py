@@ -6,6 +6,7 @@ Receive each window into its own file at the exact application OFFSET.
 
 from pathlib import Path
 import socket
+import selectors
 import struct
 import threading
 import time
@@ -44,7 +45,7 @@ class EthernetTool:
         self.stop_event = threading.Event()
         self.tx = {"active": False, "sent": 0, "total": 0, "packets": 0, "error": None}
         self.rx = {"active": False, "packets": 0, "bytes": 0, "notifyCount": 0,
-                   "lastNotify": False, "files": {}, "error": None}
+                   "lastNotify": False, "files": {}, "error": None, "socketBufferBytes": 0}
 
     def status(self):
         with self.lock:
@@ -120,8 +121,10 @@ class EthernetTool:
         directory.mkdir(parents=True, exist_ok=True)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64 * 1024 * 1024)
+            buffer_bytes = sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
             sock.bind((self.local_ip, local_port))
-            sock.settimeout(0.1)  # Poll only to let the user stop the listener.
+            sock.setblocking(False)
         except OSError as exc:
             sock.close()
             raise OSError(f"UDP bind {self.local_ip}:{local_port}: {exc}") from exc
@@ -129,7 +132,7 @@ class EthernetTool:
         with self.lock:
             self.rx_socket = sock
             self.rx = {"active": True, "localIp": sock.getsockname()[0],
-                       "localPort": sock.getsockname()[1],
+                       "localPort": sock.getsockname()[1], "socketBufferBytes": buffer_bytes,
                        "directory": str(directory), "packets": 0, "bytes": 0,
                        "notifyCount": 0, "lastNotify": False, "files": {}, "error": None}
         if self.session:
@@ -143,73 +146,112 @@ class EthernetTool:
     def _receive(self, sock, directory):
         files = {}
         routes = {}
+        selector = selectors.DefaultSelector()
+        selector.register(sock, selectors.EVENT_READ)
+        storage = bytearray(65535)
+        view = memoryview(storage)
+        count = byte_count = notifications = video_count = 0
+        last = None
+
+        def publish():
+            nonlocal count, byte_count, notifications, video_count
+            if not count:
+                return
+            with self.lock:
+                self.rx["packets"] += count
+                self.rx["bytes"] += byte_count
+                self.rx["notifyCount"] += notifications
+                self.rx.update(lastWindow=last[0], lastOffset=last[1], lastNotify=last[2],
+                               peer=[last[3][0], last[3][1]])
+            if self.session and video_count:
+                self.session.received('video', video_count)
+            count = byte_count = notifications = video_count = 0
+
+        readable = False
         try:
             while not self.stop_event.is_set():
+                if not readable:
+                    readable = bool(selector.select(0.1))
+                    if not readable:
+                        publish()
+                        continue
                 try:
-                    packet, peer = sock.recvfrom(65535)
-                except socket.timeout:
+                    length, peer = sock.recvfrom_into(storage)
+                except BlockingIOError:
+                    readable = False
                     continue
-                window, notify, offset, data = unpack(packet)
-                video = self.mode == 'video' and window in (0, 2)
-                yolo = self.mode == 'yolo' and window in (0, 1, 2)
-                telemetry = window == 3 and self.telemetry is not None
-                save_file = not video
-                if self.mode == 'console':
-                    if offset == 0:
-                        if window == 0 and data.startswith(b'EDVF'):
-                            routes[window] = 'video'
-                        elif window == 2 and data.startswith(b'EDDT'):
-                            routes[window] = ('yolo' if self.yolo.capture_pending and
-                                              self.yolo.capture_started else 'video')
-                        elif window in (0, 1, 2) and self.yolo.capture_pending:
-                            routes[window] = 'yolo'
-                            self.yolo.capture_started = True
-                        elif window == 3 and data.startswith(b'EDTM'):
-                            routes[window] = 'telemetry'
-                        else:
-                            routes[window] = 'files'
-                    route = routes.get(window, 'files')
-                    video, yolo = route == 'video', route == 'yolo'
-                    telemetry = route == 'telemetry'
-                    save_file = route in ('files', 'yolo')
-                if telemetry:
-                    self.telemetry.receive(offset, data, notify)
-                    if self.session:
-                        self.session.received('telemetry')
-                if video:
-                    self.video.receive(window, offset, data, notify)
-                    if self.session and window == 0:
-                        self.session.received('video')
-                elif yolo:
-                    self.yolo.receive(window, offset, data, notify)
-                if save_file:
-                    if window not in files:
-                        path = directory / f"window{window}.bin"
-                        files[window] = path.open("w+b")
-                        with self.lock:
-                            self.rx["files"][str(window)] = str(path)
-                    output = files[window]
-                    if yolo and offset == 0:
-                        output.truncate(0)
-                    output.seek(offset)
-                    output.write(data)
-                    output.flush()
-                with self.lock:
-                    self.rx["packets"] += 1
-                    self.rx["bytes"] += len(data)
-                    self.rx["notifyCount"] += int(notify)
-                    self.rx.update(lastWindow=window, lastOffset=offset, lastNotify=notify,
-                                   peer=[peer[0], peer[1]])
+                window, flags, _, offset = HEADER.unpack_from(view[:length])
+                window &= 3
+                notify = bool(flags & 1)
+                data = view[HEADER.size:length]
+                fast_video = (window == 0 and offset != 0 and
+                              (self.mode == 'video' or
+                               (self.mode == 'console' and routes.get(0) == 'video')))
+                if fast_video:
+                    self.video.receive(0, offset, data, notify)
+                else:
+                    video = self.mode == 'video' and window in (0, 2)
+                    yolo = self.mode == 'yolo' and window in (0, 1, 2)
+                    telemetry = window == 3 and self.telemetry is not None
+                    save_file = not video
+                    if self.mode == 'console':
+                        if offset == 0:
+                            if window == 0 and data[:4] == b'EDVF':
+                                routes[window] = 'video'
+                            elif window == 2 and data[:4] == b'EDDT':
+                                routes[window] = ('yolo' if self.yolo.capture_pending and
+                                                  self.yolo.capture_started else 'video')
+                            elif window in (0, 1, 2) and self.yolo.capture_pending:
+                                routes[window] = 'yolo'
+                                self.yolo.capture_started = True
+                            elif window == 3 and data[:4] == b'EDTM':
+                                routes[window] = 'telemetry'
+                            else:
+                                routes[window] = 'files'
+                        route = routes.get(window, 'files')
+                        video, yolo = route == 'video', route == 'yolo'
+                        telemetry = route == 'telemetry'
+                        save_file = route in ('files', 'yolo')
+                    if telemetry:
+                        self.telemetry.receive(offset, data, notify)
+                        if self.session:
+                            self.session.received('telemetry')
+                    if video:
+                        self.video.receive(window, offset, data, notify)
+                    elif yolo:
+                        self.yolo.receive(window, offset, data, notify)
+                    if save_file:
+                        if window not in files:
+                            path = directory / f"window{window}.bin"
+                            files[window] = path.open("w+b")
+                            with self.lock:
+                                self.rx["files"][str(window)] = str(path)
+                        output = files[window]
+                        if yolo and offset == 0:
+                            output.truncate(0)
+                        output.seek(offset)
+                        output.write(data)
+                        output.flush()
+                    fast_video = video and window == 0
+                count += 1
+                video_count += int(fast_video)
+                byte_count += len(data)
+                notifications += int(notify)
+                last = window, offset, notify, peer
+                if not fast_video or notify or count >= 256:
+                    publish()
         except (OSError, struct.error, ValueError) as exc:
             with self.lock:
                 self.rx["error"] = str(exc)
             if self.session:
                 self.session.fail(f"UDP 接收失败：{exc}")
         finally:
+            publish()
             if self.mode in ('video', 'console'):
                 self.video.finish()
             for output in files.values():
                 output.close()
+            selector.close()
             sock.close()
             with self.lock:
                 self.rx_socket = None
