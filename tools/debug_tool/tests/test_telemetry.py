@@ -126,7 +126,7 @@ class TelemetryTest(unittest.TestCase):
 
     def test_udp_batch_fragmentation_and_dropped_datagram(self):
         telemetry = Telemetry()
-        receiver = EthernetTool(telemetry)
+        receiver = EthernetTool(telemetry, local_ip="127.0.0.1")
         self.addCleanup(receiver.stop_receive)
         with TemporaryDirectory() as directory:
             rx = receiver.start_receive(0, directory)
@@ -146,7 +146,7 @@ class TelemetryTest(unittest.TestCase):
 
     def test_udp_bad_magic_stops_and_reports_error(self):
         telemetry = Telemetry()
-        receiver = EthernetTool(telemetry)
+        receiver = EthernetTool(telemetry, local_ip="127.0.0.1")
         self.addCleanup(receiver.stop_receive)
         with TemporaryDirectory() as directory:
             rx = receiver.start_receive(0, directory)

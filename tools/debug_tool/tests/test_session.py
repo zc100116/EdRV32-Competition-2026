@@ -27,6 +27,7 @@ from test_video import detection_wire, frame_header
 class SessionTest(unittest.TestCase):
     def setUp(self):
         self.engine = SerialEngine()
+        self.engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(self.engine.ethernet.stop_receive)
 
     def test_phase_follows_serial_lines_and_disconnect(self):
@@ -126,7 +127,7 @@ class SessionTest(unittest.TestCase):
                 wait_for(self, lambda: self.engine.video.snapshot()['received'] == 3)
                 wait_for(self, lambda: self.engine.telemetry.status()['records'] == 3)
             self.engine.ethernet.stop_receive()
-            self.assertEqual(binds, [('', 6000)])
+            self.assertEqual(binds, [('127.0.0.1', 6000)])
             self.assertEqual(self.engine.video.snapshot()['frame'].frame_id, 11)
             self.assertEqual(self.engine.yolo.snapshot()[1][2].frame_id, 9)
             self.assertEqual(self.engine.telemetry.status()['records'], 3)
@@ -134,6 +135,30 @@ class SessionTest(unittest.TestCase):
             self.assertEqual((Path(directory) / 'window1.bin').read_bytes()[:12], b'file receive')
             self.assertEqual((Path(directory) / 'window0.bin').read_bytes()[:17],
                              b'generic WIN0 file')
+
+    def test_configured_address_is_expected_peer_and_source(self):
+        with (TemporaryDirectory() as directory,
+              socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as peer):
+            peer.bind(('127.0.0.1', 0))
+            peer.settimeout(2)
+            self.engine.ethernet.start_receive(6000, directory, mode='console')
+            state = self.engine.board.establish_network(
+                '127.0.0.1', peer.getsockname()[1], '127.0.0.2')
+            _, source = peer.recvfrom(1024)
+            self.assertEqual(source, ('127.0.0.2', 6000))
+            self.assertEqual(state['expectedPeer'], ['127.0.0.2', 6000])
+            self.assertEqual(self.engine.ethernet.status()['rx']['localIp'], '127.0.0.2')
+
+    def test_real_bind_failure_is_visible_without_fallback(self):
+        with (socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as occupied,
+              patch('tools.debug_tool.core.ethernet.socket.socket', wraps=socket.socket)
+              as factory):
+            occupied.bind(('127.0.0.1', 6000))
+            with self.assertRaisesRegex(OSError, 'UDP bind 127.0.0.1:6000'):
+                self.engine.board.establish_network(local_ip='127.0.0.1')
+            self.assertEqual(factory.call_count, 1)
+            self.assertIn('UDP bind 127.0.0.1:6000', self.engine.board.status()['error'])
+            self.assertFalse(self.engine.ethernet.status()['rx']['active'])
 
     def test_network_failure_is_visible_and_logged(self):
         with patch.object(self.engine.ethernet, 'start_receive', side_effect=OSError('busy 6000')):
@@ -166,9 +191,11 @@ class SessionTest(unittest.TestCase):
             peer.bind(('127.0.0.1', 0))
             self.engine.ethernet.start_receive(0, mode='files')
             state = request('/api/board/network', {'boardIp': '127.0.0.1',
-                                                  'boardPort': peer.getsockname()[1]})
+                                                  'boardPort': peer.getsockname()[1],
+                                                  'localIp': '127.0.0.2'})
             send.assert_not_called()
             self.assertTrue(state['network']['win3']['done'])
+            self.assertEqual(state['expectedPeer'], ['127.0.0.2', 6000])
             self.assertEqual(request('/api/ethernet/status')['rx']['localPort'], 6000)
 
 
@@ -185,6 +212,8 @@ class ConsoleLayoutTest(unittest.TestCase):
         from PySide6.QtWidgets import QLabel, QPushButton, QCheckBox, QGroupBox, QAbstractSpinBox, QComboBox, QWidget
         from gui.app import MainWindow
         window = MainWindow(SerialEngine())
+        for panel in (window.soc, window.ethernet, window.virtual_input):
+            self.assertEqual(panel.local_ip.text(), "192.168.1.2")
         self.addCleanup(window.close)
         window.show()
         for width, height in ((1366, 768), (1920, 1080)):

@@ -190,6 +190,10 @@ class SocConsole(QWidget):
         self.ip = QLineEdit('192.168.1.10')
         self.ip.setFixedWidth(130)
         row.addWidget(self.ip)
+        row.addWidget(QLabel('本机地址'))
+        self.local_ip = QLineEdit(self.engine.ethernet.local_ip)
+        self.local_ip.setFixedWidth(130)
+        row.addWidget(self.local_ip)
         self.establish = self.button('建立网口连接', self._network, True)
         row.addWidget(self.establish)
         self.stop = self.button('停止监听', lambda: self.run(self.engine.ethernet.stop_receive))
@@ -440,7 +444,7 @@ class SocConsole(QWidget):
         row.addWidget(frame)
 
     def _network(self):
-        self.run(lambda: self.board.establish_network(self.ip.text(), 5000))
+        self.run(lambda: self.board.establish_network(self.ip.text(), 5000, self.local_ip.text()))
         self.refresh()
 
     def _choose_model(self):
@@ -492,6 +496,7 @@ class SocConsole(QWidget):
     def _send_image(self):
         def send():
             self._load_image()
+            self.engine.ethernet.local_ip = self.local_ip.text()
             if not self.engine.ethernet.status()['rx']['active']:
                 self.engine.ethernet.start_receive(6000, mode='console')
             self.engine.yolo.send_image(self.image_path.text(), self.ip.text(), 5000,
@@ -502,6 +507,7 @@ class SocConsole(QWidget):
         self.run(send)
 
     def _send_model(self):
+        self.engine.ethernet.local_ip = self.local_ip.text()
         self.run(lambda: self.engine.yolo.send_model(
             self.model_path.text(), self.ip.text(), 5000, 6000))
         self.model_result.setText(f'模型字节数 期望 {self.engine.yolo.image_bytes:,} B')

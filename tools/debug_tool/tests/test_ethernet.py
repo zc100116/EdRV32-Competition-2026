@@ -4,6 +4,7 @@ from pathlib import Path
 import socket
 import unittest
 from tempfile import TemporaryDirectory
+from unittest.mock import Mock, patch
 
 from tools.debug_tool.core.ethernet import EthernetTool, packets, unpack
 from verif.block.eth import eth_ref
@@ -59,8 +60,8 @@ class LoopbackTest(unittest.TestCase):
     def setUp(self):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.receiver = EthernetTool()
-        self.sender = EthernetTool()
+        self.receiver = EthernetTool(local_ip="127.0.0.1")
+        self.sender = EthernetTool(local_ip="127.0.0.1")
         self.addCleanup(self.receiver.stop_receive)
         self.addCleanup(self.sender.stop_receive)
 
@@ -115,3 +116,62 @@ class LoopbackTest(unittest.TestCase):
         rx = self.receiver.stop_receive()
         self.assertEqual(rx["peer"], ["127.0.0.1", sender_rx["localPort"]])
         self.assertEqual(Path(rx["files"]["0"]).read_bytes(), path.read_bytes())
+
+
+class BindingTest(unittest.TestCase):
+    def test_default_local_address(self):
+        self.assertEqual(EthernetTool().local_ip, '192.168.1.2')
+
+    def test_receiver_bind_failure_is_explicit(self):
+        tool = EthernetTool(local_ip='192.0.2.2')
+        with (TemporaryDirectory() as directory,
+              patch('tools.debug_tool.core.ethernet.socket.socket') as factory):
+            sock = factory.return_value
+            sock.bind.side_effect = OSError('address unavailable')
+            with self.assertRaisesRegex(OSError, 'address unavailable'):
+                tool.start_receive(6000, directory)
+            sock.bind.assert_called_once_with(('192.0.2.2', 6000))
+            sock.close.assert_called_once()
+            self.assertFalse(tool.status()['rx']['active'])
+
+    def test_sender_binds_requested_address_and_reports_failure(self):
+        tool = EthernetTool(local_ip='192.0.2.2')
+        tool.session = Mock()
+        with patch('tools.debug_tool.core.ethernet.socket.socket') as factory:
+            sock = factory.return_value
+            sock.bind.side_effect = OSError('address unavailable')
+            tool._send([next(packets(b'probe', 3, 0))], '192.168.1.10', 5000,
+                       6000, 0, None, tool.local_ip)
+            sock.bind.assert_called_once_with(('192.0.2.2', 6000))
+            sock.sendto.assert_not_called()
+            self.assertIn('address unavailable', tool.status()['tx']['error'])
+            self.assertIn('address unavailable', tool.session.fail.call_args.args[0])
+
+    def test_send_uses_new_address_when_listener_has_other_address(self):
+        tool = EthernetTool(local_ip='127.0.0.1')
+        self.addCleanup(tool.stop_receive)
+        with (TemporaryDirectory() as directory,
+              socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver):
+            tool.start_receive(0, directory)
+            tool.local_ip = '127.0.0.2'
+            receiver.bind(('127.0.0.1', 0))
+            receiver.settimeout(2)
+            path = Path(directory) / 'probe.bin'
+            path.write_bytes(b'probe')
+            tool.send_file(path, '127.0.0.1', receiver.getsockname()[1], 0)
+            packet, source = receiver.recvfrom(1024)
+            wait_for(self, lambda: not tool.status()['tx']['active'])
+            self.assertEqual(packet, next(packets(b'probe', 0, 0)))
+            self.assertEqual(source[0], '127.0.0.2')
+
+    def test_sender_source_address_without_listener(self):
+        tool = EthernetTool(local_ip='127.0.0.2')
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver:
+            receiver.bind(('127.0.0.1', 0))
+            receiver.settimeout(2)
+            packet = next(packets(b'probe', 3, 0))
+            tool._send([packet], '127.0.0.1', receiver.getsockname()[1],
+                       0, 0, None, tool.local_ip)
+            data, source = receiver.recvfrom(1024)
+            self.assertEqual(data, packet)
+            self.assertEqual(source[0], '127.0.0.2')

@@ -6,7 +6,6 @@ Serial status lines confirm the phase and the peer learned by the FPGA.
 
 import ipaddress
 import re
-import socket
 import threading
 import time
 
@@ -98,20 +97,20 @@ class BoardSession:
                 if self.expected_peer is not None and actual != self.expected_peer:
                     self.fail(f'ETH peer 不一致：板端 {actual}，本机 {self.expected_peer}')
 
-    def establish_network(self, board_ip='192.168.1.10', board_port=5000):
+    def establish_network(self, board_ip='192.168.1.10', board_port=5000,
+                          local_ip=None):
         self.network_endpoint = (board_ip, board_port)
+        if local_ip is not None:
+            self.ethernet.local_ip = local_ip
+        local_ip = self.ethernet.local_ip
         try:
             rx = self.ethernet.status()['rx']
-            if rx['active'] and rx['localPort'] != 6000:
+            if rx['active'] and (rx['localPort'] != 6000 or rx['localIp'] != local_ip):
                 self.ethernet.stop_receive()
                 rx = self.ethernet.status()['rx']
             if not rx['active']:
                 self.ethernet.start_receive(6000, mode='console')
             self.ethernet.mode = 'console'
-            # Route selection gives the exact local address used by this host for the board.
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as route:
-                route.connect((board_ip, board_port))
-                local_ip = route.getsockname()[0]
             with self.lock:
                 self.expected_peer = [local_ip, self.ethernet.status()['rx']['localPort']]
                 self.peer_ip = self.peer_port = None

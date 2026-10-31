@@ -105,6 +105,10 @@ def make_handler(engine):
             path = urllib.parse.urlsplit(self.path).path
             try:
                 body = self._body()
+                if path in ("/api/board/network", "/api/ethernet/send",
+                            "/api/ethernet/receive/start", "/api/yolo/model",
+                            "/api/yolo/image") and "localIp" in body:
+                    engine.ethernet.local_ip = body["localIp"]
                 if path == "/api/board/network":
                     return self._json(200, engine.board.establish_network(
                         body.get('boardIp', '192.168.1.10'), int(body.get('boardPort', 5000))))

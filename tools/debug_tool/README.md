@@ -35,7 +35,7 @@ numpy、torch 等依赖和 `third_party/ultralytics` 子模块。
 ## 连接、烧录与监控
 
 1. PC 有线网卡设为同网段地址，例如 `192.168.1.2/24`；板子固定 `192.168.1.10`。
-   允许 PC UDP 6000，板端 UDP 5000。串口页选择端口、115200、8N1 并连接。
+   允许 PC UDP 6000，板端 UDP 5000。网口连接区域填写“本机地址”（默认 `192.168.1.2`，须为有线网卡地址）；监听和发送均显式绑定该地址，PEER 检查也使用该地址。绑定失败显示错误，不改用其他地址。串口页选择端口、115200、8N1 并连接。
 2. KEY1 + 复位进入 BIOS。“设备与输出”选择 ELF 或 `.bin`，选择串口 / 网口传输。
    `.bin` 显式填写烧录和运行地址，SRAM 通常均为 `0x10000000`；ELF 按 PT_LOAD
    加载并跳转 e_entry。网口传输填写本机 IP。烧录后自动运行，状态 / 失败原因见原位置和日志。
@@ -100,7 +100,7 @@ python tools/debug_tool/cli.py tail -f
 | 方法 | 路径 | 参数 / 结果 |
 |---|---|---|
 | GET | `/api/status`、`/api/board` | 串口 / 烧录状态；阶段、四步连接、数据计数、peer、摘要、错误 |
-| POST | `/api/board/network` | `{boardIp?,boardPort?}`；建立网口连接 |
+| POST | `/api/board/network` | `{boardIp?,boardPort?,localIp?}`；建立网口连接 |
 | GET / POST | `/api/processing`、`/api/processing/pix`、`/api/processing/geo` | 读取两组设置 / 修改一组；省略项沿用该组当前值 |
 | GET | `/api/ports` | 串口枚举 |
 | POST | `/api/connect`、`/api/disconnect` | `{port,baud,dataBits?,parity?,stopBits?,dtr?,rts?}` / `{}` |
@@ -113,12 +113,12 @@ python tools/debug_tool/cli.py tail -f
 | POST / GET | `/api/file/send`、`/api/file/status` | `{path,echo?}` / 串口文件状态，取消 `/api/file/cancel` |
 | POST / GET | `/api/program`、`/api/program/status` | `{path,elf?,baud?,addr?,entry?,eth?,localIp?}` / BIOS 状态 |
 | GET | `/api/ethernet/status` | 共用 UDP 传输状态 |
-| POST | `/api/ethernet/send` | `{path,boardIp,boardPort,localPort,window?,offset?,interval?}`；底层数据用途编号见 demo 协议表 |
-| POST | `/api/ethernet/receive/start`、`/api/ethernet/receive/stop` | `{localPort,directory?,mode?}` / `{}`；mode=files/video/yolo/console |
+| POST | `/api/ethernet/send` | `{path,boardIp,boardPort,localPort,localIp?,window?,offset?,interval?}`；底层数据用途编号见 demo 协议表 |
+| POST | `/api/ethernet/receive/start`、`/api/ethernet/receive/stop` | `{localPort,localIp?,directory?,mode?}` / `{}`；mode=files/video/yolo/console |
 | GET | `/api/telemetry`、`/api/telemetry/csv` | 监控最新值 / 原始 CSV |
 | POST | `/api/telemetry/export`、`/api/telemetry/replay`、`/api/telemetry/clear` | `{path}` / `{path}` / `{}` |
 | GET / POST | `/api/scenes`、`/api/scenes/send` | 预设映射 / `{name,rate?}` |
-| POST | `/api/yolo/model`、`/api/yolo/image` | `{path,boardIp,boardPort,localPort}`；图像缓冲自动交替 |
+| POST | `/api/yolo/model`、`/api/yolo/image` | `{path,boardIp,boardPort,localPort,localIp?}`；图像缓冲自动交替 |
 
 PIX 键：`bc,contrast,brightness,gamma_en,gamma,stage1,stage2,gray,binary,threshold,invert`。
 GEO 键：`enabled,angle,scale_x,scale_y,translate_x,translate_y,mirror_x,mirror_y`。
@@ -159,7 +159,7 @@ REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY �
 | 几何区域 | [截图](assets/geometry-1366x768.png) | [截图](assets/geometry-1920x1080.png) |
 | 目标检测 | [截图](assets/detection-1366x768.png) | [截图](assets/detection-1920x1080.png) |
 
-截图统一由 `render_shot.py` 生成，使用 `--width/--height`、`--main-page 0..4`、
+截图统一由 `render_shot.py` 生成，使用 `--width/--height`、`--main-page 0..5`、
 `--page 0..2`；`--state vision/detection` 注入模拟串口并通过 telemetry_sim 真实 UDP
 回环生成数据，`--scroll-bottom` 显示几何区域。工具实际核对窗口尺寸、完整视频/检测与 EDTM。
 
@@ -262,3 +262,21 @@ REST `POST /api/virtual-input` 接受 `keys,x,y,mouse` 四个整数，共用 GUI
 - 协调者确认：连接网口不再自动发送 `status`；原设备页查询按钮改为「读取状态」，输入面板复用相同纯 UDP 握手；相关 REST/会话/GUI 测试覆盖。
 - `python3 tools/s3/rn17.py`：原判据，16 帧中 15 PASS；仅既知 `benchmark-12-opa-containers` 为 20756 像素 / 2.252170%，runner 如实返回 1；无新增失败，未修改阈值或 runner。
 - RN-17 真实参考执行 776 批 / 3895 命令 / 32683485 像素；benchmark 停止后菜单保留的两次检查均通过。
+
+
+网口 API 的 `localIp` 默认为当前配置（初始 `192.168.1.2`）；更改地址后重新建立网口
+连接会重新绑定监听 socket。`expectedPeer` 使用指定本机地址与实际监听端口，不再
+通过系统路由猜测地址。CLI `listen` 和 `yolo` 支持 `--local-ip 192.168.1.2`，
+回环模拟时显式使用 `--local-ip 127.0.0.1`。板端未连通时先使用
+[eth_diag 与 eth_probe](../../sw/tests/eth_diag/README.md) 定位。
+
+
+T-ETHDIAG 的网口/虚拟输入截图使用 `--main-page 3/5`；设备、处理、点运算、几何、
+输出、接收、检测和参考页的共享网口栏也已更新，共 20 张，两种分辨率均核对窗口尺寸。
+重现示例（另一分辨率将参数和文件名替换为 1920×1080）：
+
+```sh
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/network-1366x768.png --main-page 3 --width 1366 --height 768
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --main-page 5 --width 1366 --height 768
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/device-1366x768.png --state vision --page 0 --width 1366 --height 768
+```

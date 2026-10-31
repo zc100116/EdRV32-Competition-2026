@@ -151,6 +151,7 @@ class VideoTest(unittest.TestCase):
 
     def test_real_udp_video_and_detection_without_raw_frame_file(self):
         engine = SerialEngine()
+        engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(engine.ethernet.stop_receive)
         with TemporaryDirectory() as directory:
             rx = engine.ethernet.start_receive(0, directory, mode='video')
@@ -168,6 +169,7 @@ class VideoTest(unittest.TestCase):
 
     def test_simulator_udp_yolo_return(self):
         engine = SerialEngine()
+        engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(engine.ethernet.stop_receive)
         tool = Path(__file__).resolve().parents[1]
         with TemporaryDirectory() as directory:

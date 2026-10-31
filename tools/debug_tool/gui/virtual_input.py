@@ -74,6 +74,10 @@ class VirtualInputPanel(QWidget):
         self.ip = QLineEdit(engine.board.network_endpoint[0])
         self.ip.setFixedWidth(150)
         connection.addWidget(self.ip)
+        connection.addWidget(QLabel('本机地址'))
+        self.local_ip = QLineEdit(self.engine.ethernet.local_ip)
+        self.local_ip.setFixedWidth(130)
+        connection.addWidget(self.local_ip)
         self.connect_button = QPushButton('建立网口连接')
         self.connect_button.clicked.connect(self.connect_network)
         connection.addWidget(self.connect_button)
@@ -114,7 +118,7 @@ class VirtualInputPanel(QWidget):
 
     def connect_network(self):
         try:
-            self.engine.board.establish_network(self.ip.text(), 5000)
+            self.engine.board.establish_network(self.ip.text(), 5000, self.local_ip.text())
         except (OSError, ValueError, RuntimeError) as exc:
             self.toast.show_message(str(exc), error=True)
         self.setFocus()

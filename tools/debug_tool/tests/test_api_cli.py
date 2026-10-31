@@ -23,6 +23,7 @@ class ApiCliTest(unittest.TestCase):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.engine = SerialEngine()
+        self.engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(self.engine.ethernet.stop_receive)
         self.serial = FakeSerial()
         self.engine._serial = self.serial

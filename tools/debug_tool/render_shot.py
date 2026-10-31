@@ -51,7 +51,7 @@ def seed(engine, console, state):
     serial_line(engine, 'Demo: demo_vision' if state == 'vision' else 'Demo: demo')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as board:
         board.bind(('127.0.0.1', 0))
-        engine.board.establish_network('127.0.0.1', board.getsockname()[1])
+        engine.board.establish_network('127.0.0.1', board.getsockname()[1], '127.0.0.1')
         board.settimeout(2)
         board.recvfrom(1024)
     for line in ('ETH peer IP: 0x7f000001', 'ETH peer port: 6000',

@@ -46,7 +46,7 @@ class YoloTest(unittest.TestCase):
         self.assertEqual(blocks[2][2], model)
 
     def test_model_udp_exact_byte_count_and_only_final_notify(self):
-        ethernet = EthernetTool()
+        ethernet = EthernetTool(local_ip="127.0.0.1")
         with (TemporaryDirectory() as directory,
               socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock):
             compiler_fixture(directory)

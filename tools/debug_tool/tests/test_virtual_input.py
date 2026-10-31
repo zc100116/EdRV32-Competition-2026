@@ -60,6 +60,7 @@ class VirtualInputTest(unittest.TestCase):
         from tools.debug_tool.core.engine import SerialEngine
         from tools.debug_tool.core.virtual_input import channel, send_frame
         engine = SerialEngine()
+        engine.ethernet.local_ip = "127.0.0.1"
         serial = []
         engine.send = lambda text, ending, hex_mode: serial.append(bytes.fromhex(text))
         frame = FRAME.pack(0, 1, 2, 0, 0)
@@ -101,6 +102,7 @@ class VirtualInputTest(unittest.TestCase):
         from gui.app import MainWindow
         app = QApplication.instance() or QApplication([])
         engine = SerialEngine()
+        engine.ethernet.local_ip = "127.0.0.1"
         frames = []
         engine.virtual_input.close()
         engine.virtual_input = VirtualInput(frames.append)
@@ -122,7 +124,7 @@ class VirtualInputTest(unittest.TestCase):
                 self.assertAlmostEqual(area.width() / area.height(), 16 / 9)
             with patch.object(engine.board, 'establish_network') as establish:
                 panel.connect_button.click()
-                establish.assert_called_once_with('192.168.1.10', 5000)
+                establish.assert_called_once_with('192.168.1.10', 5000, '127.0.0.1')
             with patch.object(engine, 'send') as send:
                 window.soc.status_query.click()
                 send.assert_called_once_with('status', 'cr')

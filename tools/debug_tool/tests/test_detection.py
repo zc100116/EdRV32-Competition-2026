@@ -27,6 +27,7 @@ class ImageDetectionTest(unittest.TestCase):
         import cv2
         import numpy as np
         engine = SerialEngine()
+        engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(engine.ethernet.stop_receive)
         quant = json.loads((ROOT / 'tasks/win/20261029-09-b3-software/src/npu/'
                             'quantization.json').read_text())

@@ -31,7 +31,8 @@ def unpack(packet):
 
 
 class EthernetTool:
-    def __init__(self, telemetry=None):
+    def __init__(self, telemetry=None, local_ip="192.168.1.2"):
+        self.local_ip = local_ip
         self.session = None
         self.telemetry = telemetry
         self.video = None
@@ -73,17 +74,20 @@ class EthernetTool:
             self.tx = {"active": True, "sent": 0, "total": total, "packets": 0,
                        "path": name, "error": None}
             receiver = self.rx_socket
+            if receiver is not None and receiver.getsockname()[0] != self.local_ip:
+                receiver = None
         threading.Thread(target=self._send, args=(datagrams, board_ip, board_port,
-                                                  local_port, interval, receiver),
+                                                  local_port, interval, receiver, self.local_ip),
                          name="udp-file-tx", daemon=True).start()
         return self.status()["tx"]
 
-    def _send(self, datagrams, board_ip, board_port, local_port, interval, receiver):
+    def _send(self, datagrams, board_ip, board_port, local_port, interval, receiver,
+              local_ip):
         sock = (receiver if receiver is not None
                 else socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
         try:
             if receiver is None:
-                sock.bind(("", local_port))
+                sock.bind((local_ip, local_port))
             for index, packet in enumerate(datagrams):
                 if index and interval:
                     time.sleep(interval)
@@ -93,7 +97,7 @@ class EthernetTool:
                     self.tx["packets"] += 1
         except OSError as exc:
             with self.lock:
-                self.tx["error"] = str(exc)
+                self.tx["error"] = f"UDP {local_ip}:{local_port}: {exc}"
         finally:
             if receiver is None:
                 sock.close()
@@ -116,20 +120,21 @@ class EthernetTool:
         directory.mkdir(parents=True, exist_ok=True)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
-            sock.bind(("", local_port))
+            sock.bind((self.local_ip, local_port))
             sock.settimeout(0.1)  # Poll only to let the user stop the listener.
-        except OSError:
+        except OSError as exc:
             sock.close()
-            raise
+            raise OSError(f"UDP bind {self.local_ip}:{local_port}: {exc}") from exc
         self.stop_event.clear()
         with self.lock:
             self.rx_socket = sock
-            self.rx = {"active": True, "localPort": sock.getsockname()[1],
+            self.rx = {"active": True, "localIp": sock.getsockname()[0],
+                       "localPort": sock.getsockname()[1],
                        "directory": str(directory), "packets": 0, "bytes": 0,
                        "notifyCount": 0, "lastNotify": False, "files": {}, "error": None}
         if self.session:
             self.session.listening(sock.getsockname()[1])
-            self.session.log(f'UDP 已监听 {sock.getsockname()[1]} · {mode}')
+            self.session.log(f'UDP 已监听 {self.local_ip}:{sock.getsockname()[1]} · {mode}')
         self.rx_thread = threading.Thread(target=self._receive, args=(sock, directory),
                                           name="udp-file-rx", daemon=True)
         self.rx_thread.start()

@@ -42,7 +42,7 @@ FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
-ifneq ($(filter bootloader monitor demo demo_vision demo_vnpu demo_npu nes rnd_board $(SYS_PROGRAMS),$(PROGRAM)),)
+ifneq ($(filter bootloader monitor demo demo_vision demo_vnpu demo_npu nes rnd_board eth_diag $(SYS_PROGRAMS),$(PROGRAM)),)
 	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
 endif
 

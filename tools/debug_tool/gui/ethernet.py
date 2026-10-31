@@ -26,6 +26,8 @@ class EthernetPanel(QFrame):
         self.board_port.setRange(1, 65535)
         self.board_port.setValue(5000)
         form.addRow("板子 RX_PORT", self.board_port)
+        self.local_ip = QLineEdit(ethernet.local_ip)
+        form.addRow("本机地址", self.local_ip)
         self.local_port = QSpinBox()
         self.local_port.setRange(1, 65535)
         self.local_port.setValue(6000)
@@ -88,6 +90,7 @@ class EthernetPanel(QFrame):
 
     def _send(self):
         try:
+            self.ethernet.local_ip = self.local_ip.text()
             self.ethernet.send_file(
                 self.path.text(), self.ip.text(), self.board_port.value(),
                 self.local_port.value(), self.window.currentIndex(),
@@ -101,6 +104,7 @@ class EthernetPanel(QFrame):
             if self.ethernet.status()["rx"]["active"]:
                 self.ethernet.stop_receive()
             else:
+                self.ethernet.local_ip = self.local_ip.text()
                 self.ethernet.start_receive(self.local_port.value(), self.directory.text())
         except (OSError, RuntimeError) as exc:
             self.toast.show_message(str(exc), error=True)
@@ -110,6 +114,7 @@ class EthernetPanel(QFrame):
         state = self.ethernet.status()
         tx, rx = state["tx"], state["rx"]
         self.send.setEnabled(not tx["active"])
+        self.local_ip.setEnabled(not (tx["active"] or rx["active"]))
         self.local_port.setEnabled(not (tx["active"] or rx["active"]))
         self.directory.setEnabled(not rx["active"])
         self.progress.setValue(int(100 * tx["sent"] / tx["total"]) if tx["total"] else 0)

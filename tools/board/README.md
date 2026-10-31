@@ -54,3 +54,16 @@ VMA/LMA 映射得出物理槽地址；缺符号或文件超槽直接报错。ROM
 调试工具烧录页复用 `BiosTransfer`，可选串口或网口、输入本机 IP，以及 .bin 的烧录和
 运行地址。脚本也可复用 `BiosTransfer.start(path, elf=False, baud=2000000, rom=None,
 addr=None, entry=None, eth=False, local_ip='192.168.1.2')`。
+
+## 网口链路探测
+
+板端运行 SRAM 诊断程序后，在有线网卡配置 192.168.1.2/24，并运行：
+
+```sh
+python3 tools/board/eth_probe.py --local-ip 192.168.1.2 --board-ip 192.168.1.10 --port 5000 --listen 6000
+```
+
+脚本显式绑定本机地址与监听端口，每秒发送合法的控制窗口对端建立包，逐包打印
+收到的来源及原始内容（包括应用头）。绑定失败直接报错退出；Ctrl-C 结束。
+配合 `ping 192.168.1.10`、`arp -a` 与串口 `d` 命令，判读方法见
+[诊断程序说明](../../sw/tests/eth_diag/README.md)。只探测，不更改系统路由或网卡配置。

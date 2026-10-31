@@ -22,6 +22,7 @@ TOOL = Path(__file__).resolve().parents[1]
 class TelemetryApiTest(unittest.TestCase):
     def setUp(self):
         self.engine = SerialEngine()
+        self.engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(self.engine.ethernet.stop_receive)
         self.api = ApiServer(self.engine, port=0)
         self.api.start()
@@ -64,7 +65,8 @@ class TelemetryApiTest(unittest.TestCase):
         with TemporaryDirectory() as directory:
             compiler_fixture(directory)
             rx = self.request('/api/ethernet/receive/start',
-                              {'localPort': 0, 'directory': str(Path(directory) / 'rx')})
+                              {'localIp': '127.0.0.1', 'localPort': 0,
+                               'directory': str(Path(directory) / 'rx')})
             self.request('/api/yolo/model', {'path': directory, 'boardIp': '127.0.0.1',
                                              'boardPort': rx['localPort'], 'localPort': 0})
             wait_for(self, lambda: self.engine.ethernet.status()['rx']['packets'] == 4)
@@ -102,7 +104,7 @@ class TelemetryApiTest(unittest.TestCase):
         wait_for(self, ready)
         with TemporaryDirectory() as directory:
             rx = self.request('/api/ethernet/receive/start',
-                              {'localPort': 0, 'directory': directory})
+                              {'localIp': '127.0.0.1', 'localPort': 0, 'directory': directory})
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
                 sock.sendto(next(packets(wire(42), 3, 0)), ('127.0.0.1', rx['localPort']))
             wait_for(self, lambda: self.request('/api/telemetry')['records'] == 1)
