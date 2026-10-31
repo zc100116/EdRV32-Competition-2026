@@ -112,6 +112,38 @@ class VirtualInputTest(unittest.TestCase):
             window.show()
             window._select_page(5)
             panel = window.virtual_input
+            # A focus elsewhere in the window must not require a panel click.
+            window.rail_group.button(5).setFocus()
+            app.processEvents()
+            QTest.keyPress(window, Qt.Key_W)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 1)
+            self.assertTrue(panel.buttons['up'].isDown())
+            QTest.keyPress(window, Qt.Key_Up)
+            QTest.keyRelease(window, Qt.Key_W)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 1)
+            self.assertTrue(panel.buttons['up'].isDown())
+            QTest.keyRelease(window, Qt.Key_Up)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
+            self.assertFalse(panel.buttons['up'].isDown())
+            for field in (panel.ip, panel.local_ip):
+                field.setFocus()
+                with patch.object(engine.virtual_input, 'update') as update:
+                    QTest.keyClick(field, Qt.Key_W)
+                    update.assert_not_called()
+                self.assertIn('w', field.text().lower())
+            panel.ip.setText('192.168.1.10')
+            panel.local_ip.setText('127.0.0.1')
+            QTest.mousePress(panel.buttons['a'], Qt.LeftButton)
+            self.assertTrue(panel.buttons['a'].isDown())
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 16)
+            QTest.mouseRelease(panel.buttons['a'], Qt.LeftButton)
+            self.assertFalse(panel.buttons['a'].isDown())
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
+            QTest.keyPress(panel, Qt.Key_Tab, Qt.ShiftModifier)
+            self.assertTrue(panel.buttons['prev'].isDown())
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 1 << 11)
+            QTest.keyRelease(panel, Qt.Key_Tab, Qt.ShiftModifier)
+            self.assertFalse(panel.buttons['prev'].isDown())
             for width, height in ((1366, 768), (1920, 1080)):
                 window.resize(width, height)
                 app.processEvents()
@@ -120,6 +152,10 @@ class VirtualInputTest(unittest.TestCase):
                     if not label.wordWrap():
                         self.assertGreaterEqual(label.width(),
                                                 label.fontMetrics().horizontalAdvance(label.text()))
+                for button in panel.buttons.values():
+                    self.assertGreaterEqual(button.width(),
+                                            button.fontMetrics().horizontalAdvance(button.text())
+                                            + 24)
                 area = panel.pad.area()
                 self.assertAlmostEqual(area.width() / area.height(), 16 / 9)
             with patch.object(engine.board, 'establish_network') as establish:
@@ -143,6 +179,18 @@ class VirtualInputTest(unittest.TestCase):
             self.assertEqual((x, y, mouse), (1279, 719, 1))
             QTest.mouseRelease(panel.pad, Qt.LeftButton)
             self.assertEqual(FRAME.unpack(frames[-1])[3], 0)
+            QTest.keyPress(panel, Qt.Key_W)
+            from PySide6.QtCore import QEvent
+            app.sendEvent(window, QEvent(QEvent.WindowDeactivate))
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
+            self.assertFalse(panel.buttons['up'].isDown())
+            QTest.keyPress(panel, Qt.Key_W)
+            window._select_page(4)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
+            self.assertFalse(panel.buttons['up'].isDown())
+            with patch.object(engine.virtual_input, 'update') as update:
+                QTest.keyClick(window, Qt.Key_W)
+                update.assert_not_called()
         finally:
             from PySide6.QtCore import QCoreApplication, QEvent
             window.close()

@@ -195,8 +195,10 @@ REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY �
 
 ## 虚拟输入（T-VIN1）
 
-左侧「输入」打开虚拟输入面板，点击面板后启用键盘快捷键。
-屏幕按钮按住为按下、松开为释放；方向键 / WASD、J=A、K=B、U=Select、
+左侧「输入」打开虚拟输入面板，面板可见时键盘快捷键立即生效，无需先点击。
+焦点在设备 IP、本机地址等文本输入框时，按键交给输入框，不发送虚拟输入。
+按钮显示完整按键提示，键盘和鼠标按住时均以深蓝底白字显示，松开后恢复；
+W 与 ↑ 等同一按钮的多个映射全部松开后才释放。方向键 / WASD、J=A、K=B、U=Select、
 I=Start、Enter、Esc、Tab=Next、Shift+Tab=Prev。鼠标在白色 16:9 触控板内
 移动即为绝对位置，左 / 右键分别发送对应按钮；坐标显示在下方。
 触控板映射 1280×720，使用时看 HDMI 光标，**不回传屏幕画面**。
@@ -211,7 +213,7 @@ I=Start、Enter、Esc、Tab=Next、Shift+Tab=Prev。鼠标在白色 16:9 触控�
 
 ![虚拟输入 1366×768](assets/virtual-input-1366x768.png)
 ![虚拟输入 1920×1080](assets/virtual-input-1920x1080.png)
-<!-- 截图：QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --main-page 5 --width 1366 --height 768；另一张使用 1920/1080；空白触控板，无实板画面。 -->
+<!-- 截图：QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --state vision --main-page 5 --width 1366 --height 768；另一张使用 1920/1080；截图自动按住 W，深蓝色上按钮为按下状态；空白触控板，模拟数据，无实板画面。 -->
 
 每帧为 8 字节小端完整状态（Python `<HhhBB`），每次覆盖全部状态：
 
@@ -277,6 +279,6 @@ T-ETHDIAG 的网口/虚拟输入截图使用 `--main-page 3/5`；设备、处理
 
 ```sh
 QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/network-1366x768.png --main-page 3 --width 1366 --height 768
-QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --main-page 5 --width 1366 --height 768
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --state vision --main-page 5 --width 1366 --height 768
 QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/device-1366x768.png --state vision --page 0 --width 1366 --height 768
 ```

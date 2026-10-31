@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
 from core.engine import SerialEngine
@@ -141,6 +142,9 @@ def main():
             raise RuntimeError('Simulator produced no EDTM data')
         if (window.width(), window.height()) != (args.width, args.height):
             raise RuntimeError(f'Layout expanded window to {window.size()}')
+        if args.main_page == 5:
+            QTest.keyPress(window, Qt.Key_W)
+            app.processEvents()
         if not window.grab().save(args.out):
             raise RuntimeError(f'Cannot save screenshot: {args.out}')
         print(f'Saved {args.out} ({args.width} × {args.height}, {args.state})')

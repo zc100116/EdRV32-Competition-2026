@@ -2,7 +2,8 @@
 from PySide6.QtCore import QEvent, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (
-    QApplication, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget,
+    QApplication, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
+    QPushButton, QTextEdit, QVBoxLayout, QWidget,
 )
 from core.virtual_input import KEYS, channel
 
@@ -82,18 +83,25 @@ class VirtualInputPanel(QWidget):
         self.connect_button.clicked.connect(self.connect_network)
         connection.addWidget(self.connect_button)
         layout.addLayout(connection)
-        note = QLabel('点击面板启用快捷键。看着 HDMI 上的光标操作，下方触控板对应完整画面。')
+        note = QLabel('面板打开即可使用快捷键；填写地址时交给输入框。看着 HDMI 光标操作触控板。')
         note.setWordWrap(True)
         layout.addWidget(note)
         controls = QHBoxLayout()
         grid = QGridLayout()
-        positions = [('up', '↑', 0, 1), ('left', '←', 1, 0), ('down', '↓', 1, 1),
-                     ('right', '→', 1, 2), ('a', 'A · J', 0, 4), ('b', 'B · K', 1, 4),
-                     ('select', 'Select · U', 0, 5), ('start', 'Start · I', 1, 5),
-                     ('enter', 'Enter', 0, 6), ('esc', 'Esc / 返回', 1, 6)]
+        self.buttons = {}
+        positions = [('up', '↑  W/↑', 0, 1), ('left', '←  A/←', 1, 0),
+                     ('down', '↓  S/↓', 1, 1), ('right', '→  D/→', 1, 2),
+                     ('a', 'A  J', 0, 3), ('b', 'B  K', 1, 3),
+                     ('select', 'Select  U', 0, 4), ('start', 'Start  I', 1, 4),
+                     ('enter', '确认  Enter', 0, 5), ('esc', '返回  Esc', 1, 5),
+                     ('next', 'Next  Tab', 0, 6), ('prev', 'Prev  Shift+Tab', 1, 6)]
         for key, text, row, column in positions:
             button = QPushButton(text)
-            button.setMinimumWidth(80)
+            self.buttons[key] = button
+            button.setMinimumWidth(button.fontMetrics().horizontalAdvance(text) + 32)
+            button.setStyleSheet(
+                'QPushButton:pressed { background: #2458cc; color: #ffffff; '
+                'border: 2px solid #173c94; }')
             button.setMinimumHeight(36)
             button.setFocusPolicy(Qt.NoFocus)
             button.pressed.connect(lambda key=key: self.button(key, True))
@@ -137,7 +145,10 @@ class VirtualInputPanel(QWidget):
         self.send()
 
     def send(self):
-        keys = sum(1 << KEYS.index(key) for key in {item[1] for item in self.pressed})
+        names = {item[1] for item in self.pressed}
+        for name, button in self.buttons.items():
+            button.setDown(name in names)
+        keys = sum(1 << KEYS.index(key) for key in names)
         self.coordinates.setText(f'X {self.x} / 1279     Y {self.y} / 719     '
                                  f'左键 {"●" if self.mouse & 1 else "○"}     '
                                  f'右键 {"●" if self.mouse & 2 else "○"}')
@@ -156,19 +167,27 @@ class VirtualInputPanel(QWidget):
 
     def eventFilter(self, obj, event):
         focus = QApplication.focusWidget()
-        inside = focus is self or (focus is not None and self.isAncestorOf(focus))
+        in_window = focus is not None and focus.window() is self.window()
+        editing = isinstance(focus, (QLineEdit, QPlainTextEdit, QTextEdit))
         if event.type() == QEvent.WindowDeactivate and obj is self.window():
             if self.pressed or self.mouse:
                 self.pressed.clear()
                 self.mouse = 0
                 self.send()
-        if (self.isVisible() and inside and focus is not self.ip and
+        if (self.isVisible() and in_window and
                 event.type() in (QEvent.KeyPress, QEvent.KeyRelease)):
             key = event.key()
             if key in KEY_MAP or key == Qt.Key_Backtab:
+                code = Qt.Key_Tab if key == Qt.Key_Backtab else key
+                releasing = event.type() == QEvent.KeyRelease
+                held = any(item[0] == code for item in self.pressed)
+                if editing and not (releasing and held):
+                    return super().eventFilter(obj, event)
                 if not event.isAutoRepeat():
-                    name = ('prev' if key == Qt.Key_Backtab else KEY_MAP[key])
-                    token = (Qt.Key_Tab if key == Qt.Key_Backtab else key, name)
+                    previous = (key == Qt.Key_Backtab or
+                                (key == Qt.Key_Tab and event.modifiers() & Qt.ShiftModifier))
+                    name = 'prev' if previous else KEY_MAP[key]
+                    token = (code, name)
                     if event.type() == QEvent.KeyPress:
                         self.pressed.add(token)
                     else:
