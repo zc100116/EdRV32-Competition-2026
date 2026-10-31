@@ -19,7 +19,7 @@
 
 ## 2. 输入
 
-- **代码分支**：`origin/zc100116/b3`（包含本卡的提交）。从这里拉出 `win/20261031-21-b3-rerun-eth`，在 `result.md` 中记录完整哈希。
+- **代码 commit**：固定为 b3 `99f453b1`（含本卡和分布式 RAM 拆宽修正）。之后 b3 合入了 RND v2（B3R 变为 103 个源文件、多一个 IP），**本卡不用**。已从 `e1ebfedf` 拉出分支的，执行 `git merge --ff-only 99f453b1`。
 - **本卡 `src/`**：Linux 端从 b3 `6890ac7e` 构建，GCC 15.2.0，0 warning。
 
 | 文件 | 工程 | 说明 |
@@ -75,7 +75,7 @@
 
 | 步骤 | 执行者 | 内容 |
 |---|---|---|
-| 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261031-21-b3-rerun-eth origin/zc100116/b3`。阅读本卡和 `docs/reports/2026-10-31-board-eth-sw.md` 的“卡 21 实板 ETH 检查步骤”。把用户步骤整理成清单交给用户。 |
+| 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261031-21-b3-rerun-eth 99f453b1`。阅读本卡和 `docs/reports/2026-10-31-board-eth-sw.md` 的“卡 21 实板 ETH 检查步骤”。把用户步骤整理成清单交给用户。 |
 | 1 | 用户（U） | 复制旧工程目录为新工程（第 3 节），打开新工程，按第 4 节生成、删除 IP。 |
 | 2 | Windows Codex（C） + 用户（U） | **源文件核对**：<br>1. Codex 列出新工程 Designs 中的源文件，与导入脚本展开的文件列表比较（展开方法同脚本本身：按 `rtl/filelists/` 递归、去重，再加板级文件），给出“需要添加”“需要移除”两张清单；<br>2. 用户照清单在 GUI 中增删，或在 PDS Tcl 控制台中、当前目录为工程目录时执行 `source ../../EdRV32-Competition-2026/fpga/scripts/<导入脚本>`；<br>3. 最终源文件数必须等于第 3 节的值，FDC 为对应顶层的 `.fdc`，宏为 `FPGA_MODE`，Designs 中没有游离的顶层模块。数目不符时停下，把两张清单原文交给协调者。 |
 | 3 | 用户（U），或 Codex 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`，记录各阶段耗时和峰值内存。报错就停下，回传原文。 |
