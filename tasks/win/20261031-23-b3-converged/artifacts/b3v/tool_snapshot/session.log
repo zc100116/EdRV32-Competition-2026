@@ -1,0 +1,155 @@
+[00:13:00.824][RX] 
+[00:13:00.826][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:13:00.826][RX]   E         D   D   R   R   V   V      3      2 
+[00:13:00.826][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:13:00.826][RX]   E         D   D   R  R     V V       3   2    
+[00:13:00.826][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:13:00.826][RX] 
+[00:13:00.826][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:13:00.826][RX] CHIP_ID: 0xed320001
+[00:13:00.827][RX] CLK_SYS_HZ: 100000000
+[00:13:00.827][RX] ROM bytes: 16384
+[00:13:00.827][RX] SRAM bytes: 65536
+[00:13:00.827][RX] I-cache bytes: 8192
+[00:13:00.827][RX] D-cache bytes: 8192
+[00:13:00.827][RX] MEM_READY: 1
+[00:13:00.827][RX] Build commit: 506f07e4
+[00:13:00.827][RX] Compiler version: GCC 15.2.0
+[00:13:00.930][RX] Boot SRAM
+[00:13:00.930][RX] Monitor: EdRV32
+[00:13:00.930][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:13:06.302][RX] 
+[00:13:06.302][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:13:06.302][RX]   E         D   D   R   R   V   V      3      2 
+[00:13:06.302][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:13:06.302][RX]   E         D   D   R  R     V V       3   2    
+[00:13:06.303][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:13:06.303][RX] 
+[00:13:06.303][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:13:06.303][RX] CHIP_ID: 0xed320001
+[00:13:06.303][RX] CLK_SYS_HZ: 100000000
+[00:13:06.303][RX] ROM bytes: 16384
+[00:13:06.303][RX] SRAM bytes: 65536
+[00:13:06.303][RX] I-cache bytes: 8192
+[00:13:06.303][RX] D-cache bytes: 8192
+[00:13:06.303][RX] MEM_READY: 1
+[00:13:06.303][RX] Build commit: 506f07e4
+[00:13:06.303][RX] Compiler version: GCC 15.2.0
+[00:13:06.408][RX] Boot SRAM
+[00:13:06.408][RX] Monitor: EdRV32
+[00:13:06.408][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[00:13:09.846][RX] 
+[00:13:09.846][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[00:13:09.846][RX]   E         D   D   R   R   V   V      3      2 
+[00:13:09.846][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[00:13:09.846][RX]   E         D   D   R  R     V V       3   2    
+[00:13:09.846][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[00:13:09.846][RX] 
+[00:13:09.846][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[00:13:09.846][RX] CHIP_ID: 0xed320001
+[00:13:09.846][RX] CLK_SYS_HZ: 100000000
+[00:13:09.846][RX] ROM bytes: 16384
+[00:13:09.846][RX] SRAM bytes: 65536
+[00:13:09.846][RX] I-cache bytes: 8192
+[00:13:09.846][RX] D-cache bytes: 8192
+[00:13:09.846][RX] MEM_READY: 1
+[00:13:09.846][RX] Build commit: 506f07e4
+[00:13:09.846][RX] Compiler version: GCC 15.2.0
+[00:13:09.950][RX] BIOS: EdRV32
+[00:13:09.950][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[00:13:17.147][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[00:13:17.155][RX] Input error: type 1-4 then Enter
+[00:13:17.155][SYS] Input error: type 1-4 then Enter
+[00:13:17.155][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[00:13:17.157][RX] UART load ready
+[00:13:19.785][RX] Load bytes: 29884 segments: 1
+[00:13:19.791][RX] Load result: PASS
+[00:13:19.791][RX] Run: 0x10000000
+[00:13:19.791][RX] Demo: demo_vision
+[00:13:19.791][RX] CHIP_ID: 0xed320001
+[00:13:19.791][RX] CLK_SYS_HZ: 100000000
+[00:13:19.791][RX] ROM bytes: 16384
+[00:13:19.791][RX] SRAM bytes: 65536
+[00:13:19.791][RX] I-cache bytes: 8192
+[00:13:19.791][RX] D-cache bytes: 8192
+[00:13:19.791][RX] MEM_READY: 1
+[00:13:19.791][RX] Build commit: 28b4386d
+[00:13:19.791][RX] Compiler version: GCC 15.2.0
+[00:13:19.791][RX] VIN ID: 0x00010001
+[00:13:19.791][RX] PIX ID: 0x00020001
+[00:13:19.791][RX] GEO ID: 0x00030001
+[00:13:19.791][RX] DISP ID: 0x00050002
+[00:13:19.791][RX] ETH ID: 0x00070001
+[00:13:19.791][RX] MEM_XBAR ID: 0x00080001
+[00:13:19.926][RX] Camera: 0
+[00:13:19.926][RX] Camera chip ID: 0x00005640
+[00:13:20.050][RX] Camera: 1
+[00:13:20.050][RX] Camera chip ID: 0x00005640
+[00:13:20.192][RX] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[00:13:20.192][RX] Demo commands: s2 | status | help
+[00:13:20.192][RX] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[00:13:20.192][RX] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[00:13:20.192][RX] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[00:13:20.192][RX] GEO: geo off | geo rotate | geo scale
+[00:13:20.192][RX] Output: output hdmi | output eth | output both | fps 1..60
+[00:13:20.192][RX] Monitor: sample 10..1000 (Hz), default 100
+[00:13:20.192][RX] KEY: KEY2 requires s2; KEY3 PIX; KEY4 GEO
+[00:13:25.736][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[00:13:30.571][TX] output both<CR>
+[00:13:30.622][TX] fps 30<CR>
+[00:13:30.622][TX] sample 100<CR>
+[00:13:30.622][TX] status<CR>
+[00:13:30.699][RX] Demo command: OK
+[00:13:30.699][RX] Switch: frames=5 mtime_ticks=8137605 HDMI FRAME
+[00:13:30.699][RX] Demo command: OK
+[00:13:30.699][RX] Demo command: OK
+[00:13:30.699][RX] Scene: 2
+[00:13:30.699][RX] PIX mode: 0
+[00:13:30.699][RX] GEO mode: 0
+[00:13:30.699][RX] Output mode: 2
+[00:13:30.699][RX] Requested video fps: 30
+[00:13:30.699][RX] Video divisor: 1
+[00:13:30.699][RX] Monitor Hz: 100
+[00:13:30.699][RX] VIN camera0 frames: 315
+[00:13:30.699][RX] VIN camera1 frames: 314
+[00:13:30.699][RX] VIN CH0 frames: 313
+[00:13:30.699][RX] VIN CH2 frames: 0
+[00:13:30.699][RX] VIN CH0 overflow: 0
+[00:13:30.699][RX] VIN CH2 overflow: 0
+[00:13:30.699][RX] ETH peer IP: 0xc0a80102
+[00:13:30.699][RX] ETH peer port: 6000
+[00:13:30.699][RX] ETH STATUS: 0x00000002
+[00:13:30.699][RX] Video skips (current window): 0
+[00:13:30.699][RX] Monitor sequence: 1054
+[00:13:30.699][RX] Monitor dropped records: 558
+[00:13:30.701][RX] mtime: 2089217336
+[00:13:30.701][RX] Demo command: OK
+[00:13:47.503][TX] output hdmi<CR>
+[00:13:47.554][TX] fps 30<CR>
+[00:13:47.554][TX] sample 100<CR>
+[00:13:47.554][TX] status<CR>
+[00:13:47.632][RX] Demo command: OK
+[00:13:47.632][RX] Switch: frames=5 mtime_ticks=8226075 HDMI FRAME
+[00:13:47.632][RX] Demo command: OK
+[00:13:47.632][RX] Demo command: OK
+[00:13:47.632][RX] Scene: 2
+[00:13:47.632][RX] PIX mode: 0
+[00:13:47.632][RX] GEO mode: 0
+[00:13:47.632][RX] Output mode: 0
+[00:13:47.632][RX] Requested video fps: 30
+[00:13:47.632][RX] Video divisor: 1
+[00:13:47.632][RX] Monitor Hz: 100
+[00:13:47.632][RX] VIN camera0 frames: 823
+[00:13:47.632][RX] VIN camera1 frames: 822
+[00:13:47.632][RX] VIN CH0 frames: 821
+[00:13:47.632][RX] VIN CH2 frames: 0
+[00:13:47.632][RX] VIN CH0 overflow: 0
+[00:13:47.632][RX] VIN CH2 overflow: 0
+[00:13:47.632][RX] ETH peer IP: 0xc0a80102
+[00:13:47.632][RX] ETH peer port: 6000
+[00:13:47.632][RX] ETH STATUS: 0x00000002
+[00:13:47.632][RX] Video skips (current window): 0
+[00:13:47.632][RX] Monitor sequence: 2748
+[00:13:47.632][RX] Monitor dropped records: 558
+[00:13:47.634][RX] mtime: 3782550626
+[00:13:47.634][RX] Demo command: OK

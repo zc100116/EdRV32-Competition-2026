@@ -1,0 +1,7 @@
+Preparation: current saved R project 103 RTL; card23 expected 102.
+ADD
+rtl\common\edrv32_reset_copy.v
+REMOVE
+rtl\mem\edrv32_mem_p6_arb.v
+rtl\mem\edrv32_mem_perf_mon.v
+All expected source files exist. Relative include path and common headers are present; FPGA_MODE.

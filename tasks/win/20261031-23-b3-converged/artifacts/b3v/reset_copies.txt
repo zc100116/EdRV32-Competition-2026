@@ -1,0 +1,92 @@
+Synthesis hierarchy entries for reset copies; FF count is synthesis evidence, not proof of final fanout.
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_cache_ctrl_n', 'name': 'u_reset_sys_cache_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_core_n', 'name': 'u_reset_sys_core_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_csr_n', 'name': 'u_reset_sys_csr_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_dcache_n', 'name': 'u_reset_sys_dcache_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_direction0_n', 'name': 'u_reset_sys_direction0_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_direction1_n', 'name': 'u_reset_sys_direction1_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_icache_n', 'name': 'u_reset_sys_icache_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_ilru_n', 'name': 'u_reset_sys_ilru_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_ivalid0_n', 'name': 'u_reset_sys_ivalid0_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_cpu/u_reset_sys_ivalid1_n', 'name': 'u_reset_sys_ivalid1_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_reset_mem_ctrl_n', 'name': 'u_reset_mem_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_reset_mem_regs_n', 'name': 'u_reset_mem_regs_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_disp/u_reset_pix_scan_n', 'name': 'u_reset_pix_scan_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_reset_eth_rx_front_n', 'name': 'u_reset_eth_rx_front_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_reset_eth_tx_front_n', 'name': 'u_reset_eth_tx_front_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_reset_mem_ctrl_n', 'name': 'u_reset_mem_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_reset_mem_perf_n', 'name': 'u_reset_mem_perf_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_eth/u_reset_mem_regs_n', 'name': 'u_reset_mem_regs_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_geo/u_reset_mem_ctrl_n', 'name': 'u_reset_mem_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_core_ctrl_n', 'name': 'u_reset_mem_core_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_regs_n', 'name': 'u_reset_mem_regs_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat0_n', 'name': 'u_reset_mem_stat0_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat1_n', 'name': 'u_reset_mem_stat1_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat2_n', 'name': 'u_reset_mem_stat2_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat3_n', 'name': 'u_reset_mem_stat3_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat4_n', 'name': 'u_reset_mem_stat4_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat5_n', 'name': 'u_reset_mem_stat5_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_mem_stat6_n', 'name': 'u_reset_mem_stat6_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_mem/u_reset_sys_gateway_n', 'name': 'u_reset_sys_gateway_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_pix/u_reset_mem_ctrl_n', 'name': 'u_reset_mem_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_reset_mem_core_bus_n', 'name': 'u_reset_mem_core_bus_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_reset_sys_bus_n', 'name': 'u_reset_sys_bus_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_sys/u_reset_sys_periph_n', 'name': 'u_reset_sys_periph_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_reset_cam0_front_n', 'name': 'u_reset_cam0_front_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_reset_cam1_front_n', 'name': 'u_reset_cam1_front_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_reset_mem_ctrl_n', 'name': 'u_reset_mem_ctrl_n', 'values': [0, 1, 0, 0, 0]}
+{'depth': 2, 'path': 'edrv32_fpga_board_vision_top/u_vin/u_reset_mem_regs_n', 'name': 'u_reset_mem_regs_n', 'values': [0, 1, 0, 0, 0]}
+DMR explicit reset-instance mentions:
+| u_cpu/u_reset_sys_cache_ctrl_n/N0                               | u_cpu/u_reset_sys_cache_ctrl_n/N0                               | 13         
+| u_disp/u_reset_mem_ctrl_n/N0                                    | u_disp/u_reset_mem_ctrl_n/N0                                    | 10         
+| u_disp/u_reset_pix_scan_n/N0                                    | u_disp/u_reset_pix_scan_n/N0                                    | 1          
+| u_eth/u_reset_eth_rx_front_n/N0                                 | u_eth/u_reset_eth_rx_front_n/N0                                 | 2          
+| u_mem/u_reset_mem_core_ctrl_n/N0                                | u_mem/u_reset_mem_core_ctrl_n/N0                                | 10         
+| u_vin/u_reset_cam0_front_n/N0                                   | u_vin/u_reset_cam0_front_n/N0                                   | 1          
+| u_vin/u_reset_cam1_front_n/N0                                   | u_vin/u_reset_cam1_front_n/N0                                   | 1          
+| u_sys/u_reset_ctrl/u_cam0/N0                                    | u_sys/u_reset_ctrl/u_cam0/N0                                    | 10         
+| u_sys/u_reset_ctrl/u_mem_core/N0                                | u_sys/u_reset_ctrl/u_mem_core/N0                                | 2          
+| u_sys/u_reset_ctrl/u_mem_released/N0                            | u_sys/u_reset_ctrl/u_mem_released/N0                            | 2          
+| u_sys/u_reset_ctrl/u_sys/N0                                     | u_sys/u_reset_ctrl/u_sys/N0                                     | 2          
+| u_sys/u_reset_ctrl/N51                                                                                                                                        | u_sys/u_reset_ctrl/N51                                                                                                                                        | 5          
+Most reset-table signals have optimized Nxxx names. No full original-to-optimized mapping is inferred here; per-copy load <=1000 cannot be established from these fragments alone.
+
+Final PnR netlist reset instances (37 subsystem copies plus reset_ctrl memory copy):
+u_cpu/u_reset_sys_cache_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_core_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_csr_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_dcache_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_direction0_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_direction1_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_icache_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_ilru_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_ivalid0_n/rst_n_o/opit_0_inv;gopQ
+u_cpu/u_reset_sys_ivalid1_n/rst_n_o/opit_0_inv;gopQ
+u_disp/u_reset_mem_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_disp/u_reset_mem_regs_n/rst_n_o/opit_0_inv;gopQ
+u_disp/u_reset_pix_scan_n/rst_n_o/opit_0_inv;gopQ
+u_eth/u_reset_eth_rx_front_n/rst_n_o/opit_0_inv;gopQ
+u_eth/u_reset_eth_tx_front_n/rst_n_o/opit_0_inv;gopQ
+u_eth/u_reset_mem_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_eth/u_reset_mem_perf_n/rst_n_o/opit_0_inv;gopQ
+u_eth/u_reset_mem_regs_n/rst_n_o/opit_0_inv;gopQ
+u_geo/u_reset_mem_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_core_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_regs_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat0_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat1_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat2_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat3_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat4_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat5_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_mem_stat6_n/rst_n_o/opit_0_inv;gopQ
+u_mem/u_reset_sys_gateway_n/rst_n_o/opit_0_inv;gopQ
+u_pix/u_reset_mem_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_sys/u_reset_mem_core_bus_n/rst_n_o/opit_0_inv;gopQ
+u_sys/u_reset_sys_bus_n/rst_n_o/opit_0_inv;gopQ
+u_sys/u_reset_sys_periph_n/rst_n_o/opit_0_inv;gopQ
+u_vin/u_reset_cam0_front_n/rst_n_o/opit_0_inv;gopQ
+u_vin/u_reset_cam1_front_n/rst_n_o/opit_0_inv;gopQ
+u_vin/u_reset_mem_ctrl_n/rst_n_o/opit_0_inv;gopQ
+u_vin/u_reset_mem_regs_n/rst_n_o/opit_0_inv;gopQ
+u_sys/u_reset_ctrl/u_mem_copy/rst_n_o/opit_0_inv;gopQ

@@ -1,0 +1,7 @@
+Final saved V project RTL files: 111
+Preparation: saved project 112 RTL; expected 111.
+ADD rtl/common/edrv32_reset_copy.v
+REMOVE rtl/mem/edrv32_mem_perf_mon.v
+REMOVE rtl/mem/edrv32_mem_p6_arb.v
+All expected sources and common headers exist. Relative include path checked from V directory.
+prepare_b3v.tcl copies card23 ROM/SRAM/20-bit Dcache tag from R and imports V. Dry-run only; user executes in PDS.

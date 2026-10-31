@@ -1,0 +1,7 @@
+ip_rom_boot: ADDR_WIDTH=11 DATA_WIDTH=64 CLK_EN=1 OUTPUT_REG=0 INIT_EN=1 INIT_FILE="G:/codex_project/EdRV32-Competition-2026/tasks/win/20261031-23-b3-converged/src/ip_rom_boot.dat" INIT_FORMAT="HEX"
+ip_ram_sram: ADDR_WIDTH=13 DATA_WIDTH=64 CLK_EN=1 WR_BYTE_EN=1 OUTPUT_REG=0 INIT_EN=1 INIT_FILE="G:/codex_project/EdRV32-Competition-2026/tasks/win/20261031-22-b3-rnv/src/ip_ram_sram.dat" INIT_FORMAT="HEX"
+ip_ram_dcache_tag: WR_ADDR_WIDTH=9 WR_DATA_WIDTH=20 RD_ADDR_WIDTH=9 RD_DATA_WIDTH=20 RD_CLK_EN=1 WR_BYTE_EN=0 OUTPUT_REG=0 INIT_EN=0 INIT_FILE="NONE" INIT_FORMAT="BIN"
+All three generated port-name sets match RTL wrappers; all three IDFs are referenced in the saved project.
+Import helper dry-run removes the two retired memory modules and imports 102 existing sources. No PDS compile was started.
+
+SRAM rechecked after regeneration: "G:/codex_project/EdRV32-Competition-2026/tasks/win/20261031-23-b3-converged/src/ip_ram_sram.dat"; card23 initialization path now selected.
