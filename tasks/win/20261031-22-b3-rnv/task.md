@@ -27,8 +27,8 @@
 | `ip_rom_boot.dat` | 新 BIOS（8884 B），三个工程的 `ip_rom_boot` 都用它重新生成 |
 | `ip_ram_sram.dat` | SRAM 初始内容（monitor），三个工程的 `ip_ram_sram` 都用它重新生成 |
 | `rnd_board.elf`、`rnd_expected.log` | RND 自检，共 29 组（原 16 组加 2.0 新增 13 组），以及参考模型给出的期望 CRC |
-| `s3.elf` | LVGL S3（benchmark、RN-17、网口监控） |
-| `nes.elf` | NES，ROM 槽 `nes_rom_slot` 0x905f61c0 |
+| `s3.elf` | LVGL S3（benchmark、RN-17、网口监控、虚拟输入）；b3 `01dbd8cd` 重新构建 |
+| `nes.elf` | NES（含虚拟输入），ROM 槽 `nes_rom_slot` 0x905f61c0；b3 `01dbd8cd` 重新构建 |
 | `board_npu.elf` | NPU 39 项板级测试 |
 | `demo_npu.bin` | B3N 网口送图识别（SRAM 程序） |
 | `demo_vision.bin` | B3V 图像处理演示（SRAM 程序） |
@@ -106,6 +106,11 @@
 4. **网口与 EDTM**：
    - S3 benchmark 运行时，调试工具建立网口连接，从开始到结束导出 EDTM CSV（`edtm_s3.csv`）；
    - NES 运行时导出约 30 秒（`edtm_nes.csv`）。
+5. **虚拟输入**（调试工具“输入”面板，用法见 `tools/debug_tool/README.md` 的“虚拟输入”一节）：
+   - S3：先建立网口连接，在触控板上移动，HDMI 上应出现小箭头并跟随；点击菜单卡片能启动应用；方向键、Enter、Esc、Tab 能切换焦点、确认和返回。断开网口连接后用串口再试一次按键；
+   - NES：用面板的方向键、A、B、Select、Start 操作演示 ROM 和 SMB，按住时角色应持续动作，松开即停；串口和网口各试一次；
+   - 记录每项是否正常，以及操作到画面响应是否有明显延迟（主观描述即可）；
+   - 用了虚拟输入后，S3 benchmark 和 RN-17 仍按第 2 步的结果判断，不必重跑。
 
 ### 5N：B3N
 
@@ -155,7 +160,7 @@
 
 | 工程 | 判据 |
 |---|---|
-| B3R | RND 29/29 PASS；benchmark 跑完；RN-17 除“opa 容器”外 PASS；NES 演示 ROM 正常 |
+| B3R | RND 29/29 PASS；benchmark 跑完；RN-17 除“opa 容器”外 PASS；NES 演示 ROM 正常；S3、NES 虚拟输入可用 |
 | B3N | 39/39 PASS；单张识别比对一致；连续识别取得 fps |
 | B3V | 检查清单逐行通过 |
 
@@ -201,12 +206,14 @@
 - RN-17 原文
 - NES 表（同卡 21）
 - EDTM 文件
+- 虚拟输入：S3（箭头、点击、按键，网口/串口）、NES（八键，网口/串口）逐项是否正常、响应延迟描述
 
 ## B3N
 - 39/39 结果
 - 单张识别：图片、检测数、比对结果
 - 连续识别：张数、平均往返时间、fps、NPU 周期/后处理周期范围
 - EDTM 文件
+- 虚拟输入：S3（箭头、点击、按键，网口/串口）、NES（八键，网口/串口）逐项是否正常、响应延迟描述
 
 ## B3V
 - 检查清单逐行结果
