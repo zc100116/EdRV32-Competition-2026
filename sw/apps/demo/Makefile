@@ -22,7 +22,7 @@ test:
 	    $(ROOT)/sw/lib/eth_monitor_pack.c $(ROOT)/sw/lib/eth_monitor_board.c \
 	    $(ROOT)/sw/drivers/eth.c -Wl,--gc-sections -o $(OUT)/eth_monitor_test
 	$(OUT)/eth_monitor_test
-	$(CC) $(CFLAGS) -I. demo_npu/host_test.c demo_npu/inference.c \
+	$(CC) $(CFLAGS) -I. demo_npu/host_test.c demo_npu/inference.c ch2.c \
 	    demo_npu/network.c demo_npu/monitor.c \
 	    logic.c network.c network_npu.c monitor.c \
 	    $(ROOT)/sw/lib/yolo_post.c $(ROOT)/sw/lib/yolo_tables.c \
@@ -30,3 +30,11 @@ test:
 	    $(addprefix $(ROOT)/sw/drivers/,engine.c eth.c npu.c plic.c mem_xbar.c) \
 	    -Wl,--gc-sections -o $(OUT)/npu_host_test
 	$(OUT)/npu_host_test
+
+	$(CC) $(CFLAGS) -fPIC -shared parameters.c ch2.c $(ROOT)/sw/lib/affine.c \
+	    -o $(OUT)/parameters.so
+	python3 test_parameters.py -v
+	$(CC) $(CFLAGS) parameters_host_test.c parameters_runtime.c parameters.c \
+	    $(ROOT)/sw/lib/affine.c $(ROOT)/sw/drivers/pix.c \
+	    -Wl,--gc-sections -o $(OUT)/parameters_host_test
+	$(OUT)/parameters_host_test

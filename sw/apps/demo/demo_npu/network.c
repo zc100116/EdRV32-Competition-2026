@@ -1,6 +1,6 @@
 /* File: network.c
  * Spec: Task T-NETN-R; SoC 7.2/7.4; eth-spec 2.4/2.6.
- * Description: B3N CH2 reception and OUTPUT/EDDT transmission ownership.
+ * Description: RGB565 reception and CH2/OUTPUT/EDDT transmission ownership.
  * Clock domain: clk_sys; CPU-built DDR objects use the uncached alias.
  */
 #include "runtime.h"
@@ -58,6 +58,9 @@ unsigned int demo_network_detections(struct eth_tx_descriptor *tx,
 {
     unsigned int count = 0;
     if (check_buffer >= 0) {
+        eth_tx_descriptor_pack(&tx[count++],
+            DEMO_INPUT_BASE + (unsigned int)check_buffer * DEMO_INPUT_SPACING,
+            DEMO_INPUT_BYTES, 0, 0, 0);
         eth_tx_descriptor_pack(&tx[count++],
             DEMO_OUTPUT_BASE + (unsigned int)check_buffer * DEMO_OUTPUT_SPACING,
             DEMO_OUTPUT_BYTES, 1, 0, 0);

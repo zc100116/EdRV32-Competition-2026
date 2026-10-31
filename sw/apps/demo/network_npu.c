@@ -35,7 +35,7 @@ const uint8_t *demo_network_model_header(void)
 {
     const uint8_t *header = demo_uncached(DEMO_MODEL_WINDOW);
     uint32_t bytes = eth_window_bytes(2);
-    info_number("WIN2_BYTES", bytes);
+    info_number("Model bytes", bytes);
     const char *error = demo_model_header(header, bytes);
     if (error) {
         for (unsigned int i = 0; i < 8; ++i) {

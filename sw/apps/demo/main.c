@@ -4,13 +4,14 @@
  * Clock domain: clk_sys.
  */
 #include "runtime.h"
+#include "parameters.h"
 #include "i2c.h"
 
 struct demo_state demo;
 static volatile uint8_t uart_queue[128];
 static volatile uint32_t uart_written;
 static volatile uint32_t uart_read;
-static char line[48];
+static char line[192];
 static unsigned int line_length;
 static unsigned int line_invalid;
 static unsigned int previous_cr;
@@ -101,6 +102,8 @@ static void menu(void)
     info_text("Demo commands", demo_scene_allowed(1) ?
               "s1 | s2 | status | help" : "s2 | status | help");
     info_text("PIX", "pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel");
+    info_text("PIX parameters", "pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV");
+    info_text("GEO parameters", "geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)");
     info_text("GEO", "geo off | geo rotate | geo scale");
     info_text("Output", "output hdmi | output eth | output both | fps 1..60");
     info_text("Monitor", "sample 10..1000 (Hz), default 100");
@@ -182,8 +185,12 @@ static void uart_service(void)
         previous_cr = byte == '\r';
         if (byte == '\r' || byte == '\n') {
             line[line_length] = 0;
+            struct demo_parameters parameters;
+            int parsed = demo_parameters_parse(line, &parameters);
             struct demo_command command;
-            if (line_invalid || demo_parse(line, &command) != 0) {
+            if (!line_invalid && parsed == 0) {
+                demo_parameters_apply(&parameters);
+            } else if (line_invalid || parsed < 0 || demo_parse(line, &command) != 0) {
                 info_text("Input error", "unknown command or value; help lists commands");
             } else {
                 demo_command_apply(command);

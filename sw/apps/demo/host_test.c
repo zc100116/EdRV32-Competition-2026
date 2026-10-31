@@ -207,7 +207,7 @@ static void test_model(void)
         0,123,49,0, 0,0,0,1, 0,0,0,4, 0,0,0,5};
     uint32_t bytes = 32u + 4352u + 3242752u;
     assert(demo_model_header(header, bytes) == NULL);
-    assert(strcmp(demo_model_header(header, bytes - 1), "WIN2_BYTES") == 0);
+    assert(strcmp(demo_model_header(header, bytes - 1), "Model bytes") == 0);
     header[0] = 'X';
     assert(strcmp(demo_model_header(header, bytes), "EDNM magic/version") == 0);
     header[0] = 'E';

@@ -168,7 +168,7 @@ const char *demo_model_header(const uint8_t *h, uint32_t received_bytes)
         return "EDNM base layout";
     }
     if (received_bytes != 32u + descriptor_bytes + model_bytes) {
-        return "WIN2_BYTES";
+        return "Model bytes";
     }
     return NULL;
 }

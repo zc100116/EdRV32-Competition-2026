@@ -7,7 +7,7 @@
 #include "overlay.h"
 #include "cache.h"
 
-const char demo_version[] = "demo_vnpu (B3VN vision + NPU)";
+const char demo_version[] = "demo_vnpu";
 static struct demo_dirty dirty[2];
 static uint32_t draw_cycles;
 

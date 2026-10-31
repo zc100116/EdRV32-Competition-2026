@@ -69,6 +69,8 @@
 #define DEMO_MONITOR_CAPACITY 1024u
 #define DEMO_GEO_DESCRIPTOR (DEMO_SEND_BASE + 0x700u)
 
+void demo_ch2(const uint8_t *rgb565, uint8_t *output);
+
 enum demo_command_kind {
     DEMO_HELP, DEMO_SCENE, DEMO_PIX, DEMO_GEO, DEMO_OUTPUT,
     DEMO_FPS, DEMO_SAMPLE, DEMO_STATUS

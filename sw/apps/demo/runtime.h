@@ -34,6 +34,11 @@ struct demo_state {
     uint32_t clock_hz;
     volatile unsigned int scene;
     unsigned int pix;
+    unsigned int pix_custom;
+    struct pix_config pix_config;
+    unsigned int gamma_bank;
+    unsigned int geo_custom;
+    int32_t geo_matrix[6];
     unsigned int geo;
     unsigned int output;
     unsigned int fps;

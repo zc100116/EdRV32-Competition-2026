@@ -1,6 +1,6 @@
 /* File: inference.c
  * Spec: Task T-NETN; SoC 7.2/7.4; npu-spec 2.4; eth-spec 2.4/2.6.
- * Description: Receive CH2 tensors, run NPU and CPU YOLO, retain OUTPUT until TX DONE.
+ * Description: Adapt RGB565 to CH2, run NPU/YOLO and retain tensors until TX DONE.
  * Clock domain: clk_sys; input and transmission objects use the uncached DDR alias.
  */
 #include "runtime.h"
@@ -33,9 +33,9 @@ void demo_npu_init(void)
 void demo_npu_receive(unsigned int window)
 {
     uint32_t bytes = eth_window_bytes(window);
-    if (bytes != DEMO_INPUT_BYTES) {
-        info_number("WIN tensor bytes", bytes);
-        demo_fail("CH2 tensor length", ENGINE_ETH);
+    if (bytes != DEMO_IMAGE_BYTES) {
+        info_number("RGB565 image bytes", bytes);
+        demo_fail("RGB565 image length", ENGINE_ETH);
     }
     demo_network_wait();
     struct demo_inference *job = &demo.inference[window];
@@ -45,7 +45,10 @@ void demo_npu_receive(unsigned int window)
     demo.image_window = window;
     demo.checking = 1;
     demo.active_npu = (int)window;
-    npu_start(DEMO_WINDOW_BASE + window * DEMO_WINDOW_SIZE,
+    uint32_t input = DEMO_INPUT_BASE + window * DEMO_INPUT_SPACING;
+    demo_ch2(demo_uncached(DEMO_WINDOW_BASE + window * DEMO_WINDOW_SIZE),
+             demo_uncached(input));
+    npu_start(input,
               DEMO_OUTPUT_BASE + window * DEMO_OUTPUT_SPACING);
 }
 

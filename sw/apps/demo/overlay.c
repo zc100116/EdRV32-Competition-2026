@@ -9,7 +9,7 @@
 #include "font8x16.h"
 #include "overlay.h"
 
-const char demo_version[] = "demo (B3F full)";
+const char demo_version[] = "demo";
 
 void demo_overlay_ids(void)
 {

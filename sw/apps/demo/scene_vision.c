@@ -5,7 +5,7 @@
  */
 #include "runtime.h"
 
-const char demo_version[] = "demo_vision (B3V vision)";
+const char demo_version[] = "demo_vision";
 const unsigned int demo_vin_channels = 1;
 const uint32_t demo_vin_frame_mask = EDRV32_VIN_IRQ_EN_FRAME_MASK;
 const uint32_t demo_network_rx_mask = EDRV32_ETH_IRQ_EN_RX_NOTIFY3_MASK;

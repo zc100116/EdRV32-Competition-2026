@@ -550,6 +550,17 @@ void demo_test_switching(void)
     demo.tx_surface = -1;
     demo.tx_check_buffer = -1;
     demo_pipeline_init();
+    /* A retained Gamma preset must not rewrite a bank when custom controls apply. */
+    demo.pix = 2;
+    demo.pix_custom = 1;
+    demo.pix_config = (struct pix_config){0, PIX_MEAN, PIX_DILATE, 0, 256, 0, 128};
+    mmio_write32(EDRV32_PIX_BASE + EDRV32_PIX_GAMMA_WR_OFFSET, 0x12345678);
+    demo_pix_configure();
+    assert(mmio_read32(EDRV32_PIX_BASE + EDRV32_PIX_GAMMA_WR_OFFSET) == 0x12345678);
+    assert(mmio_read32(EDRV32_PIX_BASE + EDRV32_PIX_CFG_OFFSET) ==
+           pix_config_word(&demo.pix_config));
+    demo.pix_custom = 0;
+    demo.pix = 0;
     demo_pipeline_configure(VIN_CAM0);
     publish_camera();
     disp_stops = 0;

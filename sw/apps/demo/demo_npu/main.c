@@ -59,7 +59,7 @@ int main(void)
     demo.tx_check_buffer = -1;
     uart_init();
     uart_set_baud(demo.clock_hz, 115200);
-    info_text("Demo", "demo_npu B3N network inference");
+    info_text("Demo", "demo_npu network image inference");
     system_info();
     info_hex("SYS ID", sysctrl_read(SYSCTRL_ID));
     info_hex("MEM_XBAR ID", mmio_read32(EDRV32_MEM_XBAR_BASE + EDRV32_MEM_XBAR_ID_OFFSET));

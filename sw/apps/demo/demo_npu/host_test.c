@@ -117,7 +117,7 @@ static void model_test(void)
         notify(2, 127);
         assert(0);
     }
-    assert(strcmp(failed, "WIN2_BYTES") == 0);
+    assert(strcmp(failed, "Model bytes") == 0);
     header[0] = 0;
     memcpy(demo_uncached(DEMO_MODEL_WINDOW), header, sizeof header);
     if (!setjmp(failure)) {
@@ -129,10 +129,10 @@ static void model_test(void)
 
 static void frame_test(unsigned int window)
 {
-    notify(window, DEMO_INPUT_BYTES);
+    notify(window, DEMO_IMAGE_BYTES);
     assert(demo.active_npu == (int)window);
     assert(mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_INPUT_BASE_OFFSET) ==
-           DEMO_WINDOW_BASE + window * DEMO_WINDOW_SIZE);
+           DEMO_INPUT_BASE + window * DEMO_INPUT_SPACING);
     assert(mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_OUTPUT_BASE_OFFSET) ==
            DEMO_OUTPUT_BASE + window * DEMO_OUTPUT_SPACING);
     mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_IRQ_STAT_OFFSET,
@@ -142,20 +142,22 @@ static void frame_test(unsigned int window)
     assert(demo.inference_cycles == 789);
     demo_npu_service();
     assert(demo.post_cycles == 123 && demo.detection_count == 0);
-    assert(demo.tx_count == 2 && demo.tx_active);
+    assert(demo.tx_count == 3 && demo.tx_active);
     const struct eth_tx_descriptor *tx = demo_uncached(DEMO_TX_DESCRIPTORS);
-    assert(tx[0].word[0] == DEMO_OUTPUT_BASE + window * DEMO_OUTPUT_SPACING);
-    assert(tx[0].word[1] == DEMO_OUTPUT_BYTES && tx[0].word[2] == 1);
-    assert(tx[1].word[0] == DEMO_TX_DETECTIONS);
-    assert(tx[1].word[1] == 16 && tx[1].word[2] == 0x102);
+    assert(tx[0].word[0] == DEMO_INPUT_BASE + window * DEMO_INPUT_SPACING);
+    assert(tx[0].word[1] == DEMO_INPUT_BYTES && tx[0].word[2] == 0);
+    assert(tx[1].word[0] == DEMO_OUTPUT_BASE + window * DEMO_OUTPUT_SPACING);
+    assert(tx[1].word[1] == DEMO_OUTPUT_BYTES && tx[1].word[2] == 1);
+    assert(tx[2].word[0] == DEMO_TX_DETECTIONS);
+    assert(tx[2].word[1] == 16 && tx[2].word[2] == 0x102);
     assert(!memcmp(demo_uncached(DEMO_TX_DETECTIONS), "EDDT", 4));
     assert(demo_read32((uint8_t *)demo_uncached(DEMO_TX_DETECTIONS) + 8) == window);
-    assert(eth_window_bytes(window) == DEMO_INPUT_BYTES);
+    assert(eth_window_bytes(window) == DEMO_IMAGE_BYTES);
     assert(demo.inference[window].state == BUFFER_PROCESSING);
     struct engine_event partial = {0};
     partial.done_count = demo.tx_done + 1;
     demo_network_event(&partial, NULL);
-    assert(demo.tx_active && eth_window_bytes(window) == DEMO_INPUT_BYTES);
+    assert(demo.tx_active && eth_window_bytes(window) == DEMO_IMAGE_BYTES);
     tx_complete();
     assert(!demo.tx_active && !demo.checking);
     assert(demo.inference[window].state == BUFFER_FREE);
@@ -207,7 +209,7 @@ int main(void)
     assert(demo.tx_count == 1);
     tx_complete();
     if (!setjmp(failure)) { notify(0, DEMO_INPUT_BYTES - 1); assert(0); }
-    assert(!strcmp(failed, "CH2 tensor length"));
+    assert(!strcmp(failed, "RGB565 image length"));
     struct engine_event error = {0};
     error.error = 1;
     if (!setjmp(failure)) { demo_network_event(&error, NULL); assert(0); }
@@ -215,6 +217,6 @@ int main(void)
     mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_ERR_CODE_OFFSET, 1);
     if (!setjmp(failure)) { engine_irq_handle(EDRV32_PLIC_SOURCE_NPU); assert(0); }
     assert(!strcmp(failed, "NPU"));
-    puts("PASS demo_npu: EDNM, WIN0/1, OUTPUT then EDDT, ownership, EDTM, errors");
+    puts("PASS demo_npu: EDNM, WIN0/1, CH2 then OUTPUT then EDDT, ownership, EDTM, errors");
     return 0;
 }

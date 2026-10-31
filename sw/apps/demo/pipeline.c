@@ -62,9 +62,11 @@ static void vin_event(const struct engine_event *event, void *context)
         if (demo.switch_pending) {
             enum demo_command_kind kind = (enum demo_command_kind)(demo.switch_pending - 1u);
             if (kind == DEMO_PIX) {
+                demo.pix_custom = 0;
                 demo.pix = demo.switch_value;
                 demo_pix_configure();
             } else if (kind == DEMO_GEO) {
+                demo.geo_custom = 0;
                 demo.geo = demo.switch_value;
             } else {
                 demo.output = demo.switch_value;
@@ -175,10 +177,16 @@ void demo_pipeline_init(void)
         gamma[i] = (uint8_t)(2u * i - i * i / 255u);
     }
     pix_gamma_load(1, gamma);
+    demo.gamma_bank = 1;
 }
 
 void demo_pix_configure(void)
 {
+    if (demo.pix_custom) {
+        demo.gamma_bank = demo.pix_config.gamma_bank;
+        pix_configure(&demo.pix_config);
+        return;
+    }
     struct pix_config config = {0, PIX_BYPASS, PIX_BYPASS, 1, 256, 0, 128};
     if (demo.scene == 2u) {
         switch (demo.pix) {
@@ -187,9 +195,16 @@ void demo_pix_configure(void)
             config.contrast = 320;
             config.brightness = 24;
             break;
-        case 2:
+        case 2: {
+            uint8_t table[256];
+            for (unsigned int i = 0; i < 256; ++i) {
+                table[i] = (uint8_t)(2u * i - i * i / 255u);
+            }
+            config.gamma_bank = 1u - demo.gamma_bank;
+            pix_gamma_load(config.gamma_bank, table);
             config.flags = EDRV32_PIX_CFG_GAMMA_EN_MASK;
             break;
+        }
         case 3:
             config.stage1 = PIX_GAUSSIAN;
             break;
@@ -201,6 +216,7 @@ void demo_pix_configure(void)
             break;
         }
     }
+    demo.gamma_bank = config.gamma_bank;
     pix_configure(&config);
 }
 
@@ -300,7 +316,11 @@ static void start_geo(unsigned int source)
     config.dst_stride = DEMO_STRIDE;
     config.rect_width = DEMO_WIDTH;
     config.rect_height = DEMO_HEIGHT;
-    if (demo.geo == 1u) {
+    if (demo.geo_custom) {
+        for (unsigned int i = 0; i < 6; ++i) {
+            config.matrix[i] = demo.geo_matrix[i];
+        }
+    } else if (demo.geo == 1u) {
         /* Inverse 180-degree rotation keeps the 1280x720 output extent. */
         config.matrix[0] = geo_q16(-1, 1);
         config.matrix[2] = geo_q16(DEMO_WIDTH - 1u, 1);
