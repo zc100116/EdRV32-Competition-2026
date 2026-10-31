@@ -1,5 +1,5 @@
 // File: edrv32_rnd_blur.v
-// Spec: rnd-spec v0.2 2.3, 2.4, 2.6 BOX_SHADOW/BLUR.
+// Spec: rnd-spec v0.3 2.3, 2.4, 2.6 BOX_SHADOW/BLUR.
 // Description: Generate a shadow seed and execute separable fixed-point box-filter passes.
 //              DDR scratch preserves full 8-bit channels; each pass fences its writes.
 // Clock domain: clk_mem (clk_i).
@@ -411,7 +411,7 @@ module edrv32_rnd_blur (
         drawing_top_r[17:16], shadow_x1_w[17:16], shadow_y1_w[17:16]};
     always @(*) begin
         shadow_draw_w = command_i;
-        shadow_draw_w[31:0] = {16'd0, 4'd2, 3'd0, argb_w, 8'h03};
+        shadow_draw_w[31:0] = {15'd0, command_i[16], 4'd2, 3'd0, argb_w, 8'h06};
         shadow_draw_w[191:160] = {drawing_top_r[15:0], drawing_left_r[15:0]};
         shadow_draw_w[223:192] = {shadow_y1_w[15:0], shadow_x1_w[15:0]};
         shadow_draw_w[287:256] = temp0_w;

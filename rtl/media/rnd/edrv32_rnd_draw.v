@@ -12,6 +12,7 @@ module edrv32_rnd_draw (
     input wire start_i,
     input wire [511:0] command_i,
     input wire [31:0] source_stride_i,
+    input wire [63:0] round_area_i,
     input wire cancel_i,
     output wire idle_o,
     output wire done_o,
@@ -254,6 +255,25 @@ module edrv32_rnd_draw (
     wire unused_empty_w;
     wire unused_fast_w;
     wire fill_w;
+    wire mask_w;
+    wire cutout_w;
+    wire round_clip_w;
+    wire shape_w;
+    wire post_w;
+    wire solid_w;
+    wire [31:0] shape_start_w;
+    wire [31:0] shape_end_w;
+    wire [11:0] shape_radius_w;
+    wire signed [17:0] shape_left_w;
+    wire signed [17:0] shape_top_w;
+    wire signed [17:0] shape_right_w;
+    wire signed [17:0] shape_bottom_w;
+    reg [1:0] post_valid_r;
+    reg [63:0] post_src0_r;
+    reg [63:0] post_dst_r [0:1];
+    reg [31:0] post_tag_r [0:1];
+    reg [15:0] post_product_r [0:1];
+    reg [63:0] post_src1_r;
     wire tile_w;
     wire [2:0] bits_log2_w;
     wire [4:0] tile_log2_w;
@@ -384,7 +404,7 @@ module edrv32_rnd_draw (
         end
     endfunction
 
-    // Parent retags BOX_SHADOW as GLYPH; draw never receives the expanding opcode 06.
+    // Shadow shading keeps opcode 06 but uses its expanded GLYPH coordinates.
     assign op_w = command_i[7:0];
     edrv32_rnd_decode u_decode (
         .command_i({command_i[511:8], 8'h04}),
@@ -404,6 +424,22 @@ module edrv32_rnd_draw (
     );
     assign fill_w = op_w == 8'h01 || op_w == 8'h02;
     assign tile_w = op_w == 8'h08;
+    assign mask_w = op_w == 8'h0c;
+    assign cutout_w = op_w == 8'h06 && flags_w[0];
+    assign round_clip_w = op_w == 8'h04 && flags_w[7];
+    assign shape_w = mask_w || cutout_w || round_clip_w;
+    assign post_w = cutout_w || round_clip_w;
+    assign solid_w = fill_w || mask_w;
+    assign shape_start_w = mask_w ? command_i[319:288] :
+        cutout_w ? command_i[383:352] : round_area_i[31:0];
+    assign shape_end_w = mask_w ? command_i[351:320] :
+        cutout_w ? command_i[415:384] : round_area_i[63:32];
+    assign shape_radius_w = mask_w ? command_i[267:256] :
+        cutout_w ? command_i[427:416] : command_i[475:464];
+    assign shape_left_w = {{2{shape_start_w[15]}}, shape_start_w[15:0]};
+    assign shape_top_w = {{2{shape_start_w[31]}}, shape_start_w[31:16]};
+    assign shape_right_w = {{2{shape_end_w[15]}}, shape_end_w[15:0]};
+    assign shape_bottom_w = {{2{shape_end_w[31]}}, shape_end_w[31:16]};
     assign bits_log2_w = format_w == 4'd0 ? 3'd4 : format_w == 4'd1 ? 3'd5 :
         format_w == 4'd2 || format_w == 4'd6 ? 3'd3 :
         format_w == 4'd3 || format_w == 4'd7 ? 3'd2 :
@@ -541,18 +577,20 @@ module edrv32_rnd_draw (
     assign issue_offset_w = {18'd0, issue_byte_r};
     assign target_offset_w = {18'd0, pipe_tag_r[0][13:0]};
     assign target_shift_w = target_data_w[sample_bank_w] >> {target_offset_w[4:0], 3'd0};
-    assign source_ready_w = !pipe_valid_r[4] || fill_w || !bank_sparse_r[source_bank_w] ||
+    assign source_ready_w = !pipe_valid_r[4] || solid_w || !bank_sparse_r[source_bank_w] ||
         (lane_hit_w[0] && (!pipe_tag_r[4][29] || lane_hit_w[1]));
-    assign pipeline_step_w = (!pipe_valid_r[9] || blend_ready_i) && source_ready_w;
+    assign pipeline_step_w = (!(post_w ? post_valid_r[1] : pipe_valid_r[9]) ||
+        blend_ready_i) && source_ready_w;
     assign issue_w = render_state_r == S_RENDER_STREAM && pipeline_step_w;
     assign miss_request_w = pipe_valid_r[4] && !source_ready_w;
     assign miss_query_w = !lane_low_hit_w[0] ? {sample_addr_r[0][31:5], 5'd0} :
         lane_cross_w[0] && !lane_high_hit_w[0] ? lane_next_w[0] :
         !lane_low_hit_w[1] ? {sample_addr_r[1][31:5], 5'd0} : lane_next_w[1];
-    assign blend_valid_o = pipe_valid_r[9] && source_ready_w;
-    assign blend_src_o = pipe_src_r;
-    assign blend_dst_o = pipe_dst_r[9];
-    assign blend_tag_o = pipe_tag_r[9];
+    assign blend_valid_o = (post_w ? post_valid_r[1] : pipe_valid_r[9]) && source_ready_w;
+    // MASK bypasses over using the shared pipe's exact raw-destination preservation path.
+    assign blend_src_o = mask_w ? 64'd0 : post_w ? post_src1_r : pipe_src_r;
+    assign blend_dst_o = mask_w ? pipe_src_r : post_w ? post_dst_r[1] : pipe_dst_r[9];
+    assign blend_tag_o = post_w ? post_tag_r[1] : pipe_tag_r[9];
     assign result_pixels_w = argb_w ? blend_pixel_i :
         {32'd0, blend_pixel_i[47:32], blend_pixel_i[15:0]};
     assign result_write_data_w = {192'd0, result_pixels_w} << {blend_tag_i[4:0], 3'd0};
@@ -617,6 +655,24 @@ module edrv32_rnd_draw (
         wire [7:0] gradient_value_w [0:3];
         reg [23:0] fill_color_r [3:6];
         reg [7:0] fill_coverage_r [1:4];
+        reg [7:0] shape_coverage_r [1:9];
+        wire shape_x_inside_w;
+        wire [7:0] shape_factor_w;
+        wire [7:0] mask_alpha_w;
+        wire [7:0] post_factor_w;
+        wire [7:0] source_factor_w;
+        assign post_factor_w = cutout_w ? command_i[255:248] : shape_coverage_r[9];
+        assign source_factor_w = cutout_w ?
+            8'd255 - shape_coverage_r[7] : command_i[255:248];
+        assign shape_x_inside_w = $signed(coverage_inner_x0_r) >= 0 &&
+            $signed(coverage_inner_x0_r) < inner_width_r;
+        assign shape_factor_w = round_clip_w && shape_radius_w == 0 ? 8'd255 :
+            mask_w && flags_w[0] && (!bank_inner_inside_r[pipe_tag_r[0][31]] ||
+            !(pixel == 0 ? shape_x_inside_w :
+                ($signed(coverage_inner_x0_r) + 18'sd1 >= 0 &&
+                    $signed(coverage_inner_x0_r) + 18'sd1 < inner_width_r))) ? 8'd255 :
+            inner_cov_w[pixel*8 +: 8];
+        assign mask_alpha_w = divide255(alpha_product8_r);
         reg [7:0] fill_inner_r [1:2];
         reg [7:0] fill_operand_a3_r;
         reg [7:0] fill_operand_b3_r;
@@ -715,6 +771,10 @@ module edrv32_rnd_draw (
         end
         always @(posedge clk_i) begin
             if (pipeline_step_w) begin
+                post_product_r[pixel] <= pipe_src_r[pixel*32+24 +: 8] *
+                    post_factor_w;
+                post_src1_r[pixel*32 +: 32] <=
+                    {divide255(post_product_r[pixel]), post_src0_r[pixel*32 +: 24]};
                 if (issue_w) begin
                     kx0_r <= kx_w[15:0];
                     gradient_k0_r <= {1'b0, gradient_k_w[15:0]};
@@ -724,6 +784,7 @@ module edrv32_rnd_draw (
                 end
                 if (pipe_valid_r[0]) begin
                     fill_coverage_r[1] <= outer_cov_w[pixel*8 +: 8];
+                    shape_coverage_r[1] <= shape_factor_w;
                     fill_inner_r[1] <= 8'd255 - inner_cov_w[pixel*8 +: 8];
                     scaled_x1_r <= kx0_r * command_i[383:352];
                     kx1_r <= kx0_r;
@@ -786,14 +847,27 @@ module edrv32_rnd_draw (
                 end
                 if (pipe_valid_r[7]) begin
                     expanded8_r <= expanded7_r[23:0];
-                    alpha_product8_r <= expanded7_r[31:24] * command_i[255:248];
+                    alpha_product8_r <= mask_w ?
+                        pipe_dst_r[7][pixel*32+24 +: 8] * shape_coverage_r[7] :
+                        expanded7_r[31:24] * source_factor_w;
                     for (channel = 0; channel < 3; channel = channel + 1)
                         recolor_back8_r[channel] <= recolor_inverse_r *
                             expanded7_r[channel*8 +: 8];
                     fill_pixel8_r <= fill_pixel7_r;
                 end
-                if (pipe_valid_r[8])
-                    pipe_src_r[pixel*32 +: 32] <= fill_w ? fill_pixel8_r : converted_w[pixel];
+                if (pipe_valid_r[8]) begin
+                    if (mask_w)
+                        pipe_src_r[pixel*32 +: 32] <= mask_alpha_w == 0 ? 32'd0 :
+                            {mask_alpha_w, pipe_dst_r[8][pixel*32 +: 24]};
+                    else
+                        pipe_src_r[pixel*32 +: 32] <= fill_w ?
+                            fill_pixel8_r : converted_w[pixel];
+                end
+                for (arithmetic_stage = 2; arithmetic_stage < 10;
+                    arithmetic_stage = arithmetic_stage + 1)
+                    if (pipe_valid_r[arithmetic_stage-1])
+                        shape_coverage_r[arithmetic_stage] <=
+                            shape_coverage_r[arithmetic_stage-1];
                 for (arithmetic_stage = 1; arithmetic_stage < 4;
                     arithmetic_stage = arithmetic_stage + 1)
                     if (pipe_valid_r[arithmetic_stage-1])
@@ -1144,9 +1218,11 @@ module edrv32_rnd_draw (
                 S_INNER: load_state_r <= S_SIZE;
                 S_SIZE: load_state_r <= S_ROW;
                 S_ROW: begin
-                    inner_r <= 1'b0;
-                    inner_inside_r <= 1'b0;
-                    load_state_r <= fill_w ? S_EDGE_REQ : S_CHUNK;
+                    inner_r <= shape_w;
+                    inner_inside_r <= shape_w &&
+                        $signed({6'd0, load_y_r}) >= inner_top_r &&
+                        $signed({6'd0, load_y_r}) <= inner_bottom_r;
+                    load_state_r <= fill_w || shape_w ? S_EDGE_REQ : S_CHUNK;
                 end
                 S_EDGE_REQ: if (row_ready_w)
                     load_state_r <= S_EDGE_WAIT;
@@ -1172,7 +1248,7 @@ module edrv32_rnd_draw (
                     load_state_r <= S_TARGET_DATA;
                 end
                 S_TARGET_DATA: if (load_done_w)
-                    load_state_r <= fill_w ? S_LOADED : tile_w ? S_TILE_MAP :
+                    load_state_r <= solid_w ? S_LOADED : tile_w ? S_TILE_MAP :
                         bounds_available_w ? (bounds_sparse_w ? S_LOADED : S_SOURCE_REQ) :
                             S_TARGET_END;
                 S_TARGET_END: if (bounds_available_w)
@@ -1249,11 +1325,11 @@ module edrv32_rnd_draw (
         if (load_state_r == S_RADIUS)
             radius_r <= radius_w;
         if (load_state_r == S_INNER) begin
-            inner_left_r <= inner_left_w;
-            inner_top_r <= inner_top_w;
-            inner_right_r <= inner_right_w;
-            inner_bottom_r <= inner_bottom_w;
-            inner_radius_r <= radius_r > command_i[299:288] ?
+            inner_left_r <= shape_w ? shape_left_w : inner_left_w;
+            inner_top_r <= shape_w ? shape_top_w : inner_top_w;
+            inner_right_r <= shape_w ? shape_right_w : inner_right_w;
+            inner_bottom_r <= shape_w ? shape_bottom_w : inner_bottom_w;
+            inner_radius_r <= shape_w ? shape_radius_w : radius_r > command_i[299:288] ?
                 radius_r - command_i[299:288] : 12'd0;
         end
         if (load_state_r == S_SIZE) begin
@@ -1270,7 +1346,7 @@ module edrv32_rnd_draw (
             bank_left_r[load_bank_r] <= load_left_r;
             bank_right_r[load_bank_r] <= load_right_r;
             bank_y_r[load_bank_r] <= load_y_r;
-            if (fill_w || tile_w)
+            if (solid_w || tile_w)
                 bank_sparse_r[load_bank_r] <= 1'b0;
             bank_target_r[load_bank_r] <= {load_dst_w[31:5], 5'd0};
             bank_bytes_r[load_bank_r] <= target_bytes_w[15:0];
@@ -1389,10 +1465,27 @@ module edrv32_rnd_draw (
             endcase
         end
     end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            post_valid_r <= 2'd0;
+        else if (cancel_i || start_i)
+            post_valid_r <= 2'd0;
+        else if (pipeline_step_w)
+            post_valid_r <= {post_valid_r[0], pipe_valid_r[9] && post_w};
+    end
+    always @(posedge clk_i) begin
+        if (pipeline_step_w) begin
+            post_src0_r <= pipe_src_r;
+            post_dst_r[0] <= pipe_dst_r[9];
+            post_dst_r[1] <= post_dst_r[0];
+            post_tag_r[0] <= pipe_tag_r[9];
+            post_tag_r[1] <= post_tag_r[0];
+        end
+    end
     assign unused_geometry_w = ^{left_w[17:12], right_w[17:12], top_w[17:12], bottom_w[17:12],
         row_local_w[17], row_width_w[17], row_height_w[17], inner_width_r[17],
         inner_height_r[17], target_shift_w[255:64],
-        blend_tag_i[28:14], flags_w[15:4],
+        blend_tag_i[28:14], flags_w[15:4], post_src0_r[63:56], post_src0_r[31:24],
         map_shift_w[255:16], palette_shift_w[255:32],
         target_offset_w[31:5], issue_offset_w[31:14], clip_end_w[31:11],
         tile_bytes_w[31:16], tile_last_offset_w[31:6], tile_end_offset_w[4:0],

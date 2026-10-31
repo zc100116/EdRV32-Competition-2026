@@ -1,5 +1,5 @@
 // File: edrv32_rnd.v
-// Spec: rnd-spec v0.2 3-6; SoC 4.2, 4.3, 7.1, 7.2, 8.11.
+// Spec: rnd-spec v0.3 3-6; SoC 4.2, 4.3, 7.1, 7.2, 8.11.
 // Description: Ordered 64-byte command execution, APB control and shared P4 DMA arbitration.
 //              Commands start only after the preceding command's final write response.
 // Clock domain: clk_mem.
@@ -51,22 +51,25 @@ module edrv32_rnd (
     // PLIC source 11.
     output wire irq_o
 );
-    localparam [3:0] S_IDLE = 4'd0;
-    localparam [3:0] S_FETCH = 4'd1;
-    localparam [3:0] S_FETCH_WAIT = 4'd2;
-    localparam [3:0] S_CHECK = 4'd3;
-    localparam [3:0] S_BEGIN = 4'd4;
-    localparam [3:0] S_DRAW = 4'd5;
-    localparam [3:0] S_FILL = 4'd6;
-    localparam [3:0] S_COPY = 4'd7;
-    localparam [3:0] S_BLUR = 4'd8;
-    localparam [3:0] S_SHADOW = 4'd9;
-    localparam [3:0] S_COMPLETE = 4'd10;
-    localparam [3:0] S_FINISH = 4'd11;
-    localparam [3:0] S_DRAIN = 4'd12;
-    localparam [3:0] S_BLIT = 4'd13;
-    localparam [3:0] S_CLIP = 4'd14;
-    reg [3:0] state_r;
+    localparam [4:0] S_IDLE = 5'd0;
+    localparam [4:0] S_FETCH = 5'd1;
+    localparam [4:0] S_FETCH_WAIT = 5'd2;
+    localparam [4:0] S_CHECK = 5'd3;
+    localparam [4:0] S_BEGIN = 5'd4;
+    localparam [4:0] S_DRAW = 5'd5;
+    localparam [4:0] S_FILL = 5'd6;
+    localparam [4:0] S_COPY = 5'd7;
+    localparam [4:0] S_BLUR = 5'd8;
+    localparam [4:0] S_SHADOW = 5'd9;
+    localparam [4:0] S_COMPLETE = 5'd10;
+    localparam [4:0] S_FINISH = 5'd11;
+    localparam [4:0] S_DRAIN = 5'd12;
+    localparam [4:0] S_BLIT = 5'd13;
+    localparam [4:0] S_CLIP = 5'd14;
+    localparam [4:0] S_PARAM = 5'd15;
+    localparam [4:0] S_PARAM_WAIT = 5'd16;
+    reg [4:0] state_r;
+    reg [63:0] round_area_r;
     reg signed [17:0] rect_left_r;
     reg signed [17:0] rect_top_r;
     reg signed [17:0] rect_right_r;
@@ -216,7 +219,7 @@ module edrv32_rnd (
     assign source_low_w = command_r[260:256] + {source_offset_w, 2'd0};
     assign target_low_w = command_r[36:32] + {clip_left_r[2:0], 2'd0};
     assign blit_eligible_w = op_w == 8'h04 && command_r[8] && command_r[15:12] == 4'd1 &&
-        command_r[22:16] == 0 && command_r[383:352] == 32'h0001_0000 &&
+        command_r[23:16] == 0 && command_r[383:352] == 32'h0001_0000 &&
         command_r[415:384] == 32'h0001_0000 && command_r[68:64] == 0 &&
         command_r[292:288] == 0 && row_pixels_w[2:0] == 0 &&
         target_low_w == 0 && source_low_w == 0;
@@ -286,6 +289,7 @@ module edrv32_rnd (
             !fast_fill_w && !blit_eligible_w && op_w != 8'h05 && op_w != 8'h06 && op_w != 8'h07)),
         .command_i(command_r),
         .source_stride_i(source_stride_r),
+        .round_area_i(round_area_r),
         .cancel_i(cancel_w),
         .idle_o(unused_draw_idle_w),
         .done_o(draw_done_w),
@@ -437,15 +441,16 @@ module edrv32_rnd (
     );
 
     // The command scheduler grants one client for a descriptor; R remains ordered on ID 0.
-    assign rd_desc_valid_w = !cancel_w && (state_r == S_FETCH ||
+    assign rd_desc_valid_w = !cancel_w && (state_r == S_FETCH || state_r == S_PARAM ||
         (state_r == S_DRAW && draw_rd_valid_w) ||
         (state_r == S_COPY && copy_rd_valid_w) ||
         (state_r == S_BLUR && blur_rd_valid_w) ||
         (state_r == S_BLIT && blit_rd_valid_w));
     assign rd_addr_w = state_r == S_FETCH ? list_base_r + (cur_desc_w << 6) :
+        state_r == S_PARAM ? command_r[447:416] :
         state_r == S_DRAW ? draw_rd_addr_w : state_r == S_COPY ? copy_rd_addr_w :
         state_r == S_BLIT ? blit_rd_addr_w : blur_rd_addr_w;
-    assign rd_bytes_w = state_r == S_FETCH ? 16'd64 :
+    assign rd_bytes_w = state_r == S_FETCH || state_r == S_PARAM ? 16'd64 :
         state_r == S_DRAW ? draw_rd_bytes_w : state_r == S_COPY ? copy_rd_bytes_w :
         state_r == S_BLIT ? blit_rd_bytes_w : 16'd32;
     edrv32_dma2d_rd #(
@@ -568,6 +573,16 @@ module edrv32_rnd (
                     else if (empty_w)
                         state_r <= S_COMPLETE;
                     else
+                        state_r <= op_w == 8'h04 && command_r[23] ? S_PARAM : S_BEGIN;
+                end
+                S_PARAM: if (rd_desc_ready_w) begin
+                    fetch_half_r <= 1'b0;
+                    state_r <= S_PARAM_WAIT;
+                end
+                S_PARAM_WAIT: begin
+                    if (rd_data_valid_w)
+                        fetch_half_r <= 1'b1;
+                    if (rd_done_w)
                         state_r <= S_BEGIN;
                 end
                 S_BEGIN: begin
@@ -609,6 +624,10 @@ module edrv32_rnd (
         end
         if (state_r == S_FETCH_WAIT && rd_data_valid_w)
             command_r[fetch_half_r*256 +: 256] <= rd_data_w;
+        if (state_r == S_PARAM_WAIT && rd_data_valid_w && !fetch_half_r) begin
+            command_r[447:416] <= rd_data_w[31:0];
+            round_area_r <= rd_data_w[95:32];
+        end
         // The final DMA beat is already in command_r when rd_done_w rises.
         if (state_r == S_FETCH_WAIT && rd_done_w) begin
             rect_left_r <= $signed({{2{command_r[175]}}, command_r[175:160]}) - expansion_w;
