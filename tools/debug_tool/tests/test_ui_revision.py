@@ -20,6 +20,22 @@ class UiRevisionTest(unittest.TestCase):
         from PySide6.QtWidgets import QApplication
         cls.app = QApplication.instance() or QApplication([])
 
+    def test_bin_program_uses_displayed_sram_addresses(self):
+        from unittest.mock import Mock
+        from gui.program import ProgramPanel
+        engine = SerialEngine()
+        engine.start_program = Mock()
+        toast = Mock()
+        panel = ProgramPanel(engine, toast)
+        self.addCleanup(self.dispose, panel)
+        panel.path.setText('demo_vision.bin')
+        panel.baud.setCurrentIndex(panel.baud.findData(115200))
+        panel._start()
+        engine.start_program.assert_called_once_with(
+            'demo_vision.bin', False, 115200, 0x10000000, 0x10000000,
+            False, '192.168.1.2')
+        toast.show_message.assert_not_called()
+
     def test_names_are_firmware_table_and_painted(self):
         from PySide6.QtGui import QImage
         from PySide6.QtCore import Qt
