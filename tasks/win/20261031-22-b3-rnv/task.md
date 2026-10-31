@@ -32,6 +32,7 @@
 | `board_npu.elf` | NPU 39 项板级测试 |
 | `demo_npu.bin` | B3N 网口送图识别（SRAM 程序） |
 | `demo_vision.bin` | B3V 图像处理演示（SRAM 程序） |
+| `eth_diag.bin` | 网口诊断（SRAM 程序，b3 d1bb172e 构建，5E） |
 
 - **NPU 模型**：`tasks/win/20261029-09-b3-software/src/npu/`。
 - **NES ROM**：同卡 18 和卡 21，ROM 不进仓库。
@@ -131,6 +132,25 @@
    - 输出分别试 HDMI、ETH、both。
    画面与设置是否相符，用户逐项判断并拍照。
 3. **EDTM**：上述过程连续导出一份 EDTM CSV（`edtm_vision.csv`），并在 `result.md` 中写下每种模式的起止时间，用来对照曲线。
+
+### 5E：网口诊断（补充，用 B3V 已生成的 bitstream，只换程序）
+
+B3V 上网口不通（PEER 为 0，ARP 不通）。按 `sw/tests/eth_diag/README.md` 定位，步骤摘要如下：
+
+1. 先 `git pull`，**重启调试工具**。网口连接区域新增“本机地址”，填 192.168.1.2。
+2. 用户按住 KEY1 复位进入 BIOS，用串口烧录 `src/eth_diag.bin`：`--addr 0x10000000 --entry 0x10000000`。保存全部串口输出，开头会打印以下内容：
+   - MDIO 扫描结果（有响应的 PHY 地址和 ID）；
+   - BMCR/BMSR/PHYSR；
+   - RGMII 延迟位。
+3. PC 运行 `py tools/board/eth_probe.py --local-ip 192.168.1.2`，保持运行。另开窗口执行 `ping 192.168.1.10` 和 `arp -a`，记录结果。
+4. 观察串口每秒的状态行（link、speed、PERF0–PERF8、PEER）和 eth_probe 是否收到 `EDRV32 DIAG` 广播，各记录约 10 秒。
+5. 在串口按 `d` 切换到下一种延迟组合，共 4 种。每种组合重复第 3–4 步，记录 PERF0、PERF3 的变化、PEER 是否建立、PC 是否收到广播。
+6. 如果有 Wireshark，抓有线网卡的包：看 PC 发出的 ARP/UDP，以及板子发出的广播和 ARP 应答，截图保存。
+7. 回传：
+   - 串口全文；
+   - eth_probe 输出；
+   - ping/arp 输出；
+   - 每种延迟组合一行的表（组合、link/speed、PERF0、PERF3、PERF5、PEER、PC 是否收到广播）。
 
 ## 6. 产物
 
