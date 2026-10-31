@@ -174,11 +174,26 @@ module tb;
         for (int i = 0; i < 1024; i++)
             fetch(32'h10000000 + 32'(i*32+24), memory[i*4+3], reads_before + 1024);
         step(); ic_inv_i = 1; tick();
-        if (!ic_inv_done_o || dut.valid0_r != 0 || dut.valid1_r != 0)
-            $fatal(1, "FAIL I all 512 sets invalidate in one cycle");
+        if (!ic_inv_done_o) $fatal(1, "FAIL I invalidate completion latency");
+        for (int bank = 0; bank < 32; bank++) begin
+            if (!dut.invalidate_bank_r[bank] &&
+                (|dut.valid0_r[bank*16 +: 16] || |dut.valid1_r[bank*16 +: 16]))
+                $fatal(1, "FAIL I bank remains visible after invalidate bank=%0d", bank);
+        end
         step(); ic_inv_i = 0;
         reads_before = reads;
-        for (int i = 0; i < 1024; i++)
+        // Accept on the edge that retires the bank-local physical clear.
+        // The preceding invalidate must already hide every old valid bit.
+        ic_req_valid_i = 1;
+        ic_req_addr_i = 32'h10000000;
+        tick();
+        if (ic_resp_valid_o) $fatal(1, "FAIL I stale hit after invalidate completion");
+        step(); ic_req_valid_i = 0;
+        while (!ic_resp_valid_o) tick();
+        if (ic_resp_data_o != memory[0] || reads != reads_before + 1)
+            $fatal(1, "FAIL I immediate post-invalidate fill");
+        tick();
+        for (int i = 1; i < 1024; i++)
             fetch(32'h10000000 + 32'(i*32), memory[i*4], reads_before + i + 1);
         $display("PASS cache_icache"); $finish;
     end

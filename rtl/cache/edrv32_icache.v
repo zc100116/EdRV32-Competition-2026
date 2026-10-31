@@ -43,13 +43,22 @@ module edrv32_icache (
     reg [511:0] valid0_r;
     reg [511:0] valid1_r;
     reg [511:0] lru_r;
+    reg [31:0] invalidate_bank_r;
+    genvar bank;
     reg lookup_valid_r;
     reg [31:0] addr_r;
     reg cacheable_r;
-    reg lookup_valid0_r;
-    reg lookup_valid1_r;
-    reg lookup_lru_r;
-    reg [511:0] lookup_index_r;
+    wire lookup_valid0_w;
+    wire lookup_valid1_w;
+    wire lookup_lru_w;
+    wire [511:0] lookup_index_w;
+    reg [31:0] lookup_bank_r;
+    reg [15:0] lookup_slot_r;
+    wire [15:0] request_slot_w;
+    assign request_slot_w = 16'b1 << ic_req_addr_i[8:5];
+    reg [31:0] lookup_valid0_bank_r;
+    reg [31:0] lookup_valid1_bank_r;
+    reg [31:0] lookup_lru_bank_r;
     reg pma_err_r;
     reg victim_r;
     reg killed_r;
@@ -88,18 +97,21 @@ module edrv32_icache (
         .device_o(device_unused_w),
         .err_o(pma_err_w)
     );
-    assign hit0_w = lookup_valid0_r && tag0_w == addr_r[31:14];
-    assign hit1_w = lookup_valid1_r && tag1_w == addr_r[31:14];
+    assign lookup_valid0_w = |(lookup_valid0_bank_r & lookup_bank_r);
+    assign lookup_valid1_w = |(lookup_valid1_bank_r & lookup_bank_r);
+    assign lookup_lru_w = |(lookup_lru_bank_r & lookup_bank_r);
+    assign hit0_w = lookup_valid0_w && tag0_w == addr_r[31:14];
+    assign hit1_w = lookup_valid1_w && tag1_w == addr_r[31:14];
     assign hit_w = hit0_w || hit1_w;
     assign lookup_hit_w = state_r == S_IDLE && lookup_valid_r &&
         !pma_err_r && cacheable_r && hit_w;
     assign lookup_miss_w = state_r == S_IDLE && lookup_valid_r &&
         !pma_err_r && cacheable_r && !hit_w;
     // C-F1 path 5: decode the set and read its metadata alongside the tag RAM.
-    assign evict0_w = {512{lookup_miss_w && !lookup_lru_r}} & lookup_index_r;
-    assign evict1_w = {512{lookup_miss_w && lookup_lru_r}} & lookup_index_r;
-    assign fill0_w = {512{tag_write_w && !victim_r}} & lookup_index_r;
-    assign fill1_w = {512{tag_write_w && victim_r}} & lookup_index_r;
+    assign evict0_w = {512{lookup_miss_w && !lookup_lru_w}} & lookup_index_w;
+    assign evict1_w = {512{lookup_miss_w && lookup_lru_w}} & lookup_index_w;
+    assign fill0_w = {512{tag_write_w && !victim_r}} & lookup_index_w;
+    assign fill1_w = {512{tag_write_w && victim_r}} & lookup_index_w;
     assign ic_req_ready_o = state_r == S_IDLE &&
                             (!lookup_valid_r || pma_err_r || (cacheable_r && hit_w));
     assign accept_w = ic_req_valid_i && ic_req_ready_o;
@@ -160,12 +172,8 @@ module edrv32_icache (
             addr_r <= ic_req_addr_i;
             cacheable_r <= cacheable_w;
             pma_err_r <= pma_err_w;
-            lookup_index_r <= 512'b1 << ic_req_addr_i[13:5];
-            lookup_valid0_r <= !ic_inv_i && valid0_r[ic_req_addr_i[13:5]];
-            lookup_valid1_r <= !ic_inv_i && valid1_r[ic_req_addr_i[13:5]];
-            // A preceding hit may update the same set on this acceptance edge.
-            lookup_lru_r <= lookup_hit_w && addr_r[13:5] == ic_req_addr_i[13:5] ?
-                hit0_w : lru_r[ic_req_addr_i[13:5]];
+            lookup_bank_r <= 32'b1 << ic_req_addr_i[13:9];
+            lookup_slot_r <= request_slot_w;
         end
         if (state_r == S_FILL && axi_rvalid_i &&
             (!cacheable_r || beat_r == addr_r[4:3])) begin
@@ -173,12 +181,54 @@ module edrv32_icache (
         end
     end
 
+    // cache-spec 5.1: invalidate is visible immediately at the lookup boundary.
+    // Bank-local clear pulses retire the physical valid bits one edge later;
+    // banked lookup snapshots mask those pulses until the clear has retired.
+    // Each pulse depends on its own bank, preventing synthesis from merging
+    // replicas and returning a 1024-load invalidate net.
+    generate
+        for (bank = 0; bank < 32; bank = bank + 1) begin : g_valid_bank
+            assign lookup_index_w[bank*16 +: 16] = lookup_slot_r & {16{lookup_bank_r[bank]}};
+            always @(posedge clk_i) begin
+                lookup_valid0_bank_r[bank] <= !ic_inv_i && !invalidate_bank_r[bank] &&
+                    (|(valid0_r[bank*16 +: 16] & request_slot_w));
+                lookup_valid1_bank_r[bank] <= !ic_inv_i && !invalidate_bank_r[bank] &&
+                    (|(valid1_r[bank*16 +: 16] & request_slot_w));
+                lookup_lru_bank_r[bank] <= lookup_hit_w && lookup_bank_r[bank] &&
+                    addr_r[8:5] == ic_req_addr_i[8:5] ?
+                    hit0_w : (|(lru_r[bank*16 +: 16] & request_slot_w));
+            end
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    invalidate_bank_r[bank] <= 1'b0;
+                    valid0_r[bank*16 +: 16] <= 16'b0;
+                    valid1_r[bank*16 +: 16] <= 16'b0;
+                    lru_r[bank*16 +: 16] <= 16'b0;
+                end else begin
+                    invalidate_bank_r[bank] <= ic_inv_i &&
+                        (|valid0_r[bank*16 +: 16] || |valid1_r[bank*16 +: 16]);
+                    valid0_r[bank*16 +: 16] <= invalidate_bank_r[bank] ? 16'b0 :
+                        (valid0_r[bank*16 +: 16] & ~evict0_w[bank*16 +: 16]) |
+                        fill0_w[bank*16 +: 16];
+                    valid1_r[bank*16 +: 16] <= invalidate_bank_r[bank] ? 16'b0 :
+                        (valid1_r[bank*16 +: 16] & ~evict1_w[bank*16 +: 16]) |
+                        fill1_w[bank*16 +: 16];
+                    if (lookup_bank_r[bank]) begin
+                        if (lookup_hit_w) lru_r[bank*16 +: 16] <=
+                            (lru_r[bank*16 +: 16] & ~lookup_slot_r) |
+                            (lookup_slot_r & {16{hit0_w}});
+                        if (tag_write_w) lru_r[bank*16 +: 16] <=
+                            (lru_r[bank*16 +: 16] & ~lookup_slot_r) |
+                            (lookup_slot_r & {16{!victim_r}});
+                    end
+                end
+            end
+        end
+    endgenerate
+
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             state_r <= S_IDLE;
-            valid0_r <= 512'b0;
-            valid1_r <= 512'b0;
-            lru_r <= 512'b0;
             lookup_valid_r <= 1'b0;
             victim_r <= 1'b0;
             killed_r <= 1'b0;
@@ -190,17 +240,13 @@ module edrv32_icache (
             inv_done_r <= ic_inv_i;
             if (ic_kill_i && state_r != S_IDLE) killed_r <= 1'b1;
             if (ic_inv_i && state_r != S_IDLE) fill_invalidated_r <= 1'b1;
-            valid0_r <= ic_inv_i ? 512'b0 : (valid0_r & ~evict0_w) | fill0_w;
-            valid1_r <= ic_inv_i ? 512'b0 : (valid1_r & ~evict1_w) | fill1_w;
             case (state_r)
                 S_IDLE: begin
                     lookup_valid_r <= accept_w;
                     if (lookup_valid_r && !pma_err_r) begin
-                        if (cacheable_r && hit_w) begin
-                            lru_r[addr_r[13:5]] <= hit0_w;
-                        end else begin
+                        if (!cacheable_r || !hit_w) begin
                             state_r <= S_AR;
-                            victim_r <= lookup_lru_r;
+                            victim_r <= lookup_lru_w;
                             killed_r <= ic_kill_i;
                             fill_invalidated_r <= ic_inv_i;
                             fill_err_r <= 1'b0;
@@ -214,9 +260,6 @@ module edrv32_icache (
                     beat_r <= beat_r + 1'b1;
                     if (axi_rlast_i) begin
                         state_r <= S_RETURN;
-                        if (tag_write_w) begin
-                            lru_r[addr_r[13:5]] <= !victim_r;
-                        end
                     end
                 end
                 S_RETURN: state_r <= S_IDLE;
