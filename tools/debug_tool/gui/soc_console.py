@@ -773,7 +773,16 @@ class SocConsole(QWidget):
             self.image_path.setText(source_image)
             self.run(self._load_image)
         generation, capture = self.engine.yolo.snapshot()
-        if capture is not None and generation != self.generation:
+        if generation != self.generation and self.engine.yolo.error is not None:
+            self.generation = generation
+            self.capture_status.setText(self.engine.yolo.error +
+                                       f' · 失败 {self.engine.yolo.failed} 张')
+            if self.folder_started is not None:
+                if self.folder_images:
+                    self._next_image()
+                else:
+                    self.folder_started = None
+        elif capture is not None and generation != self.generation:
             self.generation = generation
             self.last_display = None
             self.board.log(f'YOLO 回传完整：FRAME {capture[2].frame_id} · '

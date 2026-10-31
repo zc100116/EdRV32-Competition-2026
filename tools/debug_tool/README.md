@@ -333,7 +333,10 @@ Windows 上板时也须记录读回值，不能用请求值代替。
 视频页分别显示完整帧接收帧率、送到画面的显示帧率、丢弃帧数和接收缓冲大小。
 帧率按最近一秒的帧间隔计算，停止更新超过一秒显示为零。
 
-WIN 0 按 EDVF 尺寸预分配 RGB565 缓冲，收到的数据通过 memoryview 按 OFFSET 写入；
+video / console / yolo 模式将 socket 接收和视频、YOLO 组帧移到独立的 spawn 进程，
+避免 Qt 和逐包接收争用 GIL；文件模式保留原接收线程。
+接收进程用 `recvfrom_into` 写共享内存接收区，WIN 0 按 EDVF 尺寸从三个共享帧槽中
+取一槽，通过 memoryview 按 OFFSET 写入；
 按 eth-spec 的 1024 B 分包序号位图计数，末包长度由帧尺寸决定。
 像素包在帧头之后可乱序，重复包不补齐缺失包，也不重复提交完整帧。
 支持板端的独立 32 B 帧头描述符，也保留帧头与像素同描述符的接收行为。
@@ -341,16 +344,34 @@ WIN 0 按 EDVF 尺寸预分配 RGB565 缓冲，收到的数据通过 memoryview 
 NOTIFY 标记批次末尾；若帧头丢失，看到像素起点 OFFSET=32 后在 NOTIFY 计一次丢弃。
 已完成帧的重复末包不重复计帧；协议像素包不含 frame_id，孤立的相同末包无法区分
 “重复”与“下一批只剩末包”，此时不额外推算丢帧。EDDT、EDTM 和文件窗口用途不变。
-接收线程按可读事件排空非阻塞 socket，避免每个像素包都先等待一次可读事件。
-接收统计和会话包数每 256 包、NOTIFY 或接收空闲时更新，停止时发布剩余计数。
+完整帧通过管道通知主进程；主进程每帧复制一次为独立只读快照，再归还帧槽，
+保证 Qt 和之前持有的帧不受槽重用影响。停止接收时唤醒阻塞 socket、等待进程退出并释放共享内存。
+EDDT 视频检测、EDTM 和普通文件数据转发到原处理路径；接收统计每 256 包、NOTIFY
+和停止时更新，完整帧计数随帧通知立即更新。文件模式仍按可读事件排空 socket。
+
+YOLO 的 WIN 0 / 1 / 2 同样在接收进程组装，完整 CH2 / OUTPUT 通过共享帧槽一次交付，
+主进程继续保存回传文件并更新原结果。收到 EDDT 结束通知时若有缺包，按图片记录失败，
+日志列出缺失窗口与字节数，文件夹队列继续下一张，socket 和 EDTM 接收保持运行；
+magic / 版本等协议错误仍报错并停止。失败次数为 `YoloTool.failed`，最后错误为 `error`。
 
 本机千兆节奏回环（固定 1280×720 RGB565、30 fps、900 帧、30 s）：
 
 ```bash
 ~/.local/opt/edrv32-py/bin/python tools/debug_tool/stress_test.py --udp-video
+~/.local/opt/edrv32-py/bin/python tools/debug_tool/stress_test.py --udp-video --pattern uniform
+~/.local/opt/edrv32-py/bin/python tools/debug_tool/stress_test.py --udp-video --pattern short
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/stress_test.py --udp-video --pattern uniform --gui
+~/.local/opt/edrv32-py/bin/python tools/debug_tool/stress_test.py --udp-yolo
 ```
 
 每帧独立发送帧头和 1800 个像素包；像素包按 116 MB/s 的千兆有效负载速率间隔发送，
 帧间按 30 fps 定时，无重试。发送进程与接收线程分离，输出完整帧数、接收帧率、
-丢弃帧数、未收完整帧数、接收线程 CPU 秒数/单核占用和缓冲读回值。
+丢弃帧数、未收完整帧数、丢失包数、接收进程 CPU 秒数/单核占用和缓冲读回值。
+uniform 将像素包起点至少间隔 18.518 µs，不追赶调度暂停期间积压的发送 deadline；
+若实际发送帧率低于 29.5 fps，该组不能证明 30 fps 接收能力。
+short 改用 1280×160 RGB565 的完整 400 包帧；Linux 缓冲还计 skb 开销，
+425984 B 不能直接解释为可容纳 400 个 1032 B 数据报。
+`--udp-yolo` 保留 telemetry_sim 的 CH2 / OUTPUT / EDDT 格式，将其慢速节奏替换为
+116 MB/s 包间隔，分进程连续回传 30 张，输出完整、失败和未见结束的张数。
+线速突发需要 ≥ 2 MiB 接收缓冲，上板时记录 Windows 读回值；Linux 还需留出 skb 开销。
 Linux 回环结果不能替代 Windows 实际网卡上板结果。

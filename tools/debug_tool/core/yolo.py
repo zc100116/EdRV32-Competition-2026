@@ -76,6 +76,8 @@ class YoloTool:
         self.capture_pending = False
         self.capture_started = False
         self.generation = 0
+        self.failed = 0
+        self.error = None
 
     def reset_capture(self):
         with self.lock:
@@ -84,6 +86,11 @@ class YoloTool:
             self.capture_pending = True
             self.capture_started = False
             self.return_view = True
+            self.error = None
+            if self.ethernet is not None and self.ethernet.rx_capture_event is not None:
+                self.ethernet.rx_capture_event.set()
+                with self.ethernet.rx_capture_epoch.get_lock():
+                    self.ethernet.rx_capture_epoch.value += 1
 
     def receive(self, window, offset, data, notify):
         if window not in (0, 1, 2):
@@ -91,11 +98,19 @@ class YoloTool:
         with self.lock:
             self.blocks[window].receive(offset, data, notify)
             if window == 2 and notify:
+                # A malformed EDDT is a protocol error even when image bytes are missing.
+                if self.blocks[2].complete(offset + len(data)):
+                    parse_detections(self.blocks[2].data(offset + len(data)))
                 sizes = (INPUT_BYTES,
                          OUTPUT_BYTES, offset + len(data))
+                missing = []
                 for index, size in enumerate(sizes):
                     if size and not self.blocks[index].complete(size):
-                        raise ValueError(f'YOLO return {index}: incomplete return ({size} B expected)')
+                        covered = sum(end - start for start, end in self.blocks[index].ranges)
+                        missing.append(f'window {index}: missing {size - covered} B / {size} B')
+                if missing:
+                    self._fail_capture('YOLO incomplete return: ' + '; '.join(missing))
+                    return
                 ch2, output, detections = (block.data(size)
                                            for block, size in zip(self.blocks, sizes))
                 self.capture = (ch2, output, parse_detections(detections))
@@ -105,6 +120,18 @@ class YoloTool:
                     self.sent_at = None
                 self.generation += 1
                 self.capture_pending = False
+
+    def _fail_capture(self, error):
+        """Called with the capture lock held; missing UDP bytes fail this image only."""
+        self.error = error
+        self.failed += 1
+        self.generation += 1
+        self.capture = None
+        self.capture_pending = False
+        self.capture_started = False
+        self.sent_at = None
+        if self.ethernet is not None and self.ethernet.session:
+            self.ethernet.session.log(f'{self.source_image}: {error}')
 
     def snapshot(self):
         with self.lock:

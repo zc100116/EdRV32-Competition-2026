@@ -101,8 +101,88 @@ class ImageDetectionTest(unittest.TestCase):
     def test_b3n_incomplete_output_is_reported(self):
         engine = SerialEngine()
         engine.yolo.reset_capture()
-        with self.assertRaisesRegex(ValueError, 'return 0: incomplete'):
-            engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
+        engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
+        self.assertIn('window 0: missing 983040 B', engine.yolo.error)
+        self.assertEqual(engine.yolo.failed, 1)
+
+    def test_missing_return_then_complete_preserves_receiver_and_telemetry(self):
+        from tools.debug_tool.core.ethernet import packets
+        from test_program import wait_for
+        from test_telemetry import wire
+        engine = SerialEngine()
+        engine.ethernet.local_ip = '127.0.0.1'
+        self.addCleanup(engine.ethernet.stop_receive)
+        with TemporaryDirectory() as directory:
+            state = engine.ethernet.start_receive(0, directory, mode='console')
+            destination = '127.0.0.1', state['localPort']
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
+                def send_return(missing):
+                    engine.yolo.reset_capture()
+                    for window, size in enumerate((INPUT_BYTES, OUTPUT_BYTES)):
+                        for index, packet in enumerate(packets(bytes(size), window, 0)):
+                            if missing and index == 5:
+                                continue
+                            source.sendto(packet[:1] + b'\0' + packet[2:], destination)
+                            time.sleep(.0002)
+                    detections = struct.pack('<4sHHII', b'EDDT', 1, 0, 7, 0)
+                    source.sendto(next(packets(detections, 2, 0)), destination)
+
+                send_return(True)
+                wait_for(self, lambda: engine.yolo.failed == 1)
+                self.assertIn('window 0: missing 1024 B', engine.yolo.error)
+                self.assertIn('window 1: missing 1024 B', engine.yolo.error)
+                self.assertTrue(engine.ethernet.status()['rx']['active'])
+                self.assertTrue(engine.ethernet.rx_process.is_alive())
+                source.sendto(next(packets(wire(1), 3, 0)), destination)
+                wait_for(self, lambda: engine.telemetry.status()['records'] == 1)
+                send_return(False)
+                wait_for(self, lambda: engine.yolo.snapshot()[1] is not None)
+                self.assertEqual(engine.yolo.failed, 1)
+                self.assertIsNone(engine.yolo.error)
+                self.assertEqual(engine.yolo.snapshot()[1][2].frame_id, 7)
+                self.assertTrue(engine.ethernet.status()['rx']['active'])
+            engine.ethernet.stop_receive()
+            self.assertIsNone(engine.ethernet.status()['rx']['error'])
+            self.assertIsNone(engine.ethernet.rx_memory)
+            self.assertIsNone(engine.ethernet.rx_process)
+
+    def test_folder_continues_after_failed_return(self):
+        from PySide6.QtWidgets import QApplication
+        from gui.soc_console import SocConsole
+        app = QApplication.instance() or QApplication([])
+        engine = SerialEngine()
+        console = SocConsole(engine, lambda text: None)
+        self.addCleanup(console.close)
+        console.folder_images = [Path('next.png')]
+        console.folder_started = time.monotonic()
+        engine.yolo.reset_capture()
+        engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
+        with patch.object(console, '_send_image') as send:
+            console.refresh()
+            send.assert_called_once()
+            self.assertEqual(console.image_path.text(), 'next.png')
+            self.assertEqual(engine.yolo.failed, 1)
+            self.assertIn('失败 1 张', console.capture_status.text())
+            console.refresh()
+            send.assert_called_once()
+        app.processEvents()
+
+    def test_malformed_return_is_still_a_fatal_protocol_error(self):
+        from tools.debug_tool.core.ethernet import packets
+        from test_program import wait_for
+        engine = SerialEngine()
+        engine.ethernet.local_ip = '127.0.0.1'
+        self.addCleanup(engine.ethernet.stop_receive)
+        with TemporaryDirectory() as directory:
+            state = engine.ethernet.start_receive(0, directory, mode='yolo')
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
+                data = struct.pack('<4sHHII', b'EDDT', 2, 0, 0, 0)
+                source.sendto(next(packets(data, 2, 0)), ('127.0.0.1', state['localPort']))
+            wait_for(self, lambda: not engine.ethernet.status()['rx']['active'])
+            self.assertIn('magic/version', engine.ethernet.status()['rx']['error'])
+            self.assertEqual(engine.yolo.failed, 0)
+            engine.ethernet.stop_receive()
+            self.assertIsNone(engine.ethernet.rx_memory)
 
     def test_folder_order_completion_stats_and_original_image(self):
         from PySide6.QtGui import QImage

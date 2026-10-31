@@ -101,9 +101,10 @@ class FrameRate:
 
 
 class VideoReceiver:
-    def __init__(self, clock=time.monotonic):
+    def __init__(self, clock=time.monotonic, buffer_factory=bytearray):
         self.lock = threading.Lock()
         self.clock = clock
+        self.buffer_factory = buffer_factory
         self.pixels = None
         self.seen = None
         self.remaining = 0
@@ -144,7 +145,7 @@ class VideoReceiver:
             self.finished = False
             self.orphan = False
             size = header[4] * header[5]
-            self.pixels = bytearray(size)
+            self.pixels = self.buffer_factory(size)
             self.pixel_view = memoryview(self.pixels)
             self.payload_origin = 0 if len(data) > VIDEO_HEADER.size else VIDEO_HEADER.size
             record_size = size + VIDEO_HEADER.size - self.payload_origin

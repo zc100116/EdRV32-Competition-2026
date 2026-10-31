@@ -87,14 +87,10 @@ class SessionTest(unittest.TestCase):
             self.assertFalse(board.status()['network']['listen']['done'])
 
     def test_video_monitor_yolo_and_files_bind_6000_once(self):
-        binds = []
         original_socket = socket.socket
-        class CountingSocket(original_socket):
-            def bind(self, address):
-                binds.append(address)
-                return super().bind(address)
         with (TemporaryDirectory() as directory,
-              patch('tools.debug_tool.core.ethernet.socket.socket', CountingSocket)):
+              patch('tools.debug_tool.core.ethernet.socket.socket',
+                    side_effect=original_socket) as factory):
             self.engine.ethernet.start_receive(6000, directory, mode='console')
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
                 destination = ('127.0.0.1', 6000)
@@ -127,7 +123,10 @@ class SessionTest(unittest.TestCase):
                 wait_for(self, lambda: self.engine.video.snapshot()['received'] == 3)
                 wait_for(self, lambda: self.engine.telemetry.status()['records'] == 3)
             self.engine.ethernet.stop_receive()
-            self.assertEqual(binds, [('127.0.0.1', 6000)])
+            datagram_sockets = [call for call in factory.call_args_list
+                                if call.args == (socket.AF_INET, socket.SOCK_DGRAM)]
+            # One shared listener and the test's sender; spawn must receive a real socket.
+            self.assertEqual(len(datagram_sockets), 2)
             self.assertEqual(self.engine.video.snapshot()['frame'].frame_id, 11)
             self.assertEqual(self.engine.yolo.snapshot()[1][2].frame_id, 9)
             self.assertEqual(self.engine.telemetry.status()['records'], 3)

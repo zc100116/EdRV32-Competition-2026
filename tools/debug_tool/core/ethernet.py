@@ -5,6 +5,8 @@ Receive each window into its own file at the exact application OFFSET.
 """
 
 from pathlib import Path
+import multiprocessing
+from multiprocessing import shared_memory
 import socket
 import selectors
 import struct
@@ -14,6 +16,140 @@ import time
 HEADER = struct.Struct("!BBHI")
 DATA_BYTES = 1024
 DEFAULT_SAVE_DIR = Path(__file__).resolve().parents[3] / "build/debug_tool/udp-rx"
+VIDEO_SLOT_BYTES = 1280 * 720 * 2
+VIDEO_SLOTS = 3
+
+
+def _video_process(sock, name, connection, stop, capture_event, capture_epoch, mode, counts):
+    """Own the socket and frame assembly outside Qt's Python interpreter."""
+    memory = shared_memory.SharedMemory(name=name)
+    started = time.process_time()
+    try:
+        _video_loop(sock, memory.buf, connection, stop, capture_event, capture_epoch, mode, counts)
+    except (OSError, struct.error, ValueError) as exc:
+        connection.send(('error', str(exc)))
+    finally:
+        memory.close()
+        sock.close()
+        connection.send(('done', time.process_time() - started))
+        connection.close()
+
+
+def _video_loop(sock, storage, connection, stop, capture_event, capture_epoch, mode, counts):
+    from .video import VideoReceiver
+    from .yolo import YoloTool, INPUT_BYTES, OUTPUT_BYTES
+
+    free = list(range(VIDEO_SLOTS))
+    active = None
+
+    def take_slot():
+        while connection.poll():
+            free.append(connection.recv())
+        if not free:
+            free.append(connection.recv())
+        return free.pop()
+
+    def allocate(size):
+        nonlocal active
+        if active is None:
+            active = take_slot()
+        start = active * VIDEO_SLOT_BYTES
+        return storage[start:start + size]
+
+    video = VideoReceiver(buffer_factory=allocate)
+    video.received, video.dropped = counts
+    yolo = YoloTool(None)
+    capture_started = False
+    epoch = 0
+    routes = {}
+    packet = storage[VIDEO_SLOTS * VIDEO_SLOT_BYTES:]
+    sock.setblocking(True)
+    connection.send(('ready',))
+    count = byte_count = notifications = video_count = 0
+    route_video = mode == 'video'
+    last = None
+
+    def publish():
+        nonlocal count, byte_count, notifications, video_count
+        if count:
+            connection.send(('stats', count, byte_count, notifications, video_count, last,
+                             video.received, video.dropped))
+            count = byte_count = notifications = video_count = 0
+
+    try:
+        while True:
+            length, peer = sock.recvfrom_into(packet)
+            if length == 0 and stop.is_set():
+                break
+            window, flags, _, offset = HEADER.unpack_from(packet[:length])
+            window &= 3
+            notify = bool(flags & 1)
+            data = packet[HEADER.size:length]
+            if offset == 0 and capture_epoch.value != epoch:
+                epoch = capture_epoch.value
+                yolo.reset_capture()
+                capture_started = False
+            if window == 0 and offset == 0 and mode == 'console':
+                route_video = data[:4] == b'EDVF'
+            if mode == 'yolo':
+                is_yolo = window in (0, 1, 2)
+            else:
+                if offset == 0:
+                    if window == 0 and route_video:
+                        routes[window] = False
+                    elif window == 2 and data[:4] == b'EDDT':
+                        routes[window] = capture_started
+                    else:
+                        routes[window] = window in (0, 1, 2) and capture_event.is_set()
+                is_yolo = routes.get(window, False)
+            if is_yolo:
+                if not capture_started:
+                    yolo.reset_capture()
+                    capture_started = True
+                yolo.receive(window, offset, data, notify)
+                if window == 2 and notify:
+                    capture_started = False
+                    capture_event.clear()
+                    if yolo.error is not None:
+                        connection.send(('yolo_failed', yolo.error))
+                    else:
+                        slot = take_slot()
+                        start = slot * VIDEO_SLOT_BYTES
+                        ch2, output, _ = yolo.capture
+                        storage[start:start + INPUT_BYTES] = ch2
+                        storage[start + INPUT_BYTES:start + INPUT_BYTES + OUTPUT_BYTES] = output
+                        connection.send(('yolo', slot, yolo.blocks[2].data()))
+                # These packets are accounted here, rather than again on bulk delivery.
+                count += 1
+                byte_count += len(data)
+                notifications += int(notify)
+                last = window, offset, notify, peer
+                if count >= 256 or notify:
+                    publish()
+                continue
+            if window != 0 or not route_video:
+                connection.send(('packet', bytes(packet[:length]), peer))
+                continue
+            before = video.received
+            video.receive(0, offset, data, notify)
+            if video.received != before:
+                frame = video.frame
+                connection.send(('frame', active, frame.width, frame.height,
+                                 frame.stride, frame.frame_id, frame.mtime, frame.scene,
+                                 video.received, video.dropped))
+                active = None
+            count += 1
+            video_count += 1
+            byte_count += len(data)
+            notifications += int(notify)
+            last = window, offset, notify, peer
+            if count >= 256 or notify:
+                publish()
+        video.finish()
+        publish()
+        connection.send(('video_counts', video.received, video.dropped))
+    finally:
+        sock.setblocking(False)
 
 
 def packets(data, window, offset):
@@ -42,6 +178,11 @@ class EthernetTool:
         self.lock = threading.Lock()
         self.rx_socket = None
         self.rx_thread = None
+        self.rx_process = None
+        self.rx_memory = None
+        self.rx_process_stop = None
+        self.rx_capture_event = None
+        self.rx_capture_epoch = None
         self.stop_event = threading.Event()
         self.tx = {"active": False, "sent": 0, "total": 0, "packets": 0, "error": None}
         self.rx = {"active": False, "packets": 0, "bytes": 0, "notifyCount": 0,
@@ -134,20 +275,46 @@ class EthernetTool:
             self.rx = {"active": True, "localIp": sock.getsockname()[0],
                        "localPort": sock.getsockname()[1], "socketBufferBytes": buffer_bytes,
                        "directory": str(directory), "packets": 0, "bytes": 0,
-                       "notifyCount": 0, "lastNotify": False, "files": {}, "error": None}
+                       "notifyCount": 0, "lastNotify": False, "files": {}, "error": None,
+                       "receiveCpuSeconds": 0.0}
         if self.session:
             self.session.listening(sock.getsockname()[1])
             self.session.log(f'UDP 已监听 {self.local_ip}:{sock.getsockname()[1]} · {mode}')
-        self.rx_thread = threading.Thread(target=self._receive, args=(sock, directory),
+        connection = None
+        if mode in ('video', 'console', 'yolo'):
+            context = multiprocessing.get_context('spawn')
+            self.rx_memory = shared_memory.SharedMemory(
+                create=True, size=VIDEO_SLOTS * VIDEO_SLOT_BYTES + 65535)
+            connection, child = context.Pipe()
+            self.rx_process_stop = context.Event()
+            self.rx_capture_event = context.Event()
+            self.rx_capture_epoch = context.Value('Q', 0)
+            if self.yolo.capture_pending:
+                self.rx_capture_event.set()
+            counts = self.video.snapshot()
+            self.rx_process = context.Process(
+                target=_video_process,
+                args=(sock, self.rx_memory.name, child, self.rx_process_stop,
+                      self.rx_capture_event, self.rx_capture_epoch, mode,
+                      (counts['received'], counts['dropped'])),
+                name='udp-video-rx', daemon=True)
+            self.rx_process.start()
+            child.close()
+            message = connection.recv()
+            if message != ('ready',):
+                raise RuntimeError(f'UDP receive process startup: {message}')
+        self.rx_thread = threading.Thread(target=self._receive,
+                                          args=(sock, directory, connection),
                                           name="udp-file-rx", daemon=True)
         self.rx_thread.start()
         return self.status()["rx"]
 
-    def _receive(self, sock, directory):
+    def _receive(self, sock, directory, connection=None):
         files = {}
         routes = {}
         selector = selectors.DefaultSelector()
-        selector.register(sock, selectors.EVENT_READ)
+        if connection is None:
+            selector.register(sock, selectors.EVENT_READ)
         storage = bytearray(65535)
         view = memoryview(storage)
         count = byte_count = notifications = video_count = 0
@@ -169,17 +336,84 @@ class EthernetTool:
 
         readable = False
         try:
-            while not self.stop_event.is_set():
-                if not readable:
-                    readable = bool(selector.select(0.1))
-                    if not readable:
-                        publish()
+            while connection is not None or not self.stop_event.is_set():
+                if connection is not None:
+                    message = connection.recv()
+                    if message[0] == 'done':
+                        with self.lock:
+                            self.rx['receiveCpuSeconds'] = message[1]
+                        break
+                    if message[0] == 'error':
+                        raise ValueError(message[1])
+                    if message[0] == 'video_counts':
+                        with self.video.lock:
+                            self.video.received, self.video.dropped = message[1:]
                         continue
-                try:
-                    length, peer = sock.recvfrom_into(storage)
-                except BlockingIOError:
-                    readable = False
-                    continue
+                    if message[0] == 'stats':
+                        _, n, size, notified, video_packets, latest, received, dropped = message
+                        with self.lock:
+                            self.rx['packets'] += n
+                            self.rx['bytes'] += size
+                            self.rx['notifyCount'] += notified
+                            self.rx.update(lastWindow=latest[0], lastOffset=latest[1],
+                                           lastNotify=latest[2], peer=list(latest[3]))
+                        with self.video.lock:
+                            self.video.received, self.video.dropped = received, dropped
+                        if self.session and video_packets:
+                            self.session.received('video', video_packets)
+                        continue
+                    if message[0] == 'frame':
+                        from .video import VideoFrame
+                        (_, slot, width, height, stride, frame_id, mtime, scene,
+                         received, dropped) = message
+                        start = slot * VIDEO_SLOT_BYTES
+                        pixels = bytes(self.rx_memory.buf[start:start + height * stride])
+                        connection.send(slot)
+                        frame = VideoFrame(width, height, stride, frame_id, mtime, scene,
+                                           memoryview(pixels))
+                        with self.video.lock:
+                            self.video.frame = frame
+                            self.video.received, self.video.dropped = received, dropped
+                            self.video.frame_detections = None
+                            self.video.rate.add(self.video.clock())
+                        continue
+                    if message[0] == 'yolo_failed':
+                        with self.yolo.lock:
+                            self.yolo._fail_capture(message[1])
+                        continue
+                    if message[0] == 'yolo':
+                        from .yolo import INPUT_BYTES, OUTPUT_BYTES
+                        _, slot, detections = message
+                        start = slot * VIDEO_SLOT_BYTES
+                        raw = bytes(self.rx_memory.buf[start:start + INPUT_BYTES + OUTPUT_BYTES])
+                        connection.send(slot)
+                        for window, block in enumerate((raw[:INPUT_BYTES], raw[INPUT_BYTES:],
+                                                        detections)):
+                            self.yolo.receive(window, 0, block, window == 2)
+                            if window not in files:
+                                path = directory / f'window{window}.bin'
+                                files[window] = path.open('w+b')
+                                with self.lock:
+                                    self.rx['files'][str(window)] = str(path)
+                            files[window].seek(0)
+                            files[window].truncate(0)
+                            files[window].write(block)
+                            files[window].flush()
+                        continue
+                    _, packet, peer = message
+                    length = len(packet)
+                    view = memoryview(packet)
+                else:
+                    if not readable:
+                        readable = bool(selector.select(0.1))
+                        if not readable:
+                            publish()
+                            continue
+                    try:
+                        length, peer = sock.recvfrom_into(storage)
+                    except BlockingIOError:
+                        readable = False
+                        continue
                 window, flags, _, offset = HEADER.unpack_from(view[:length])
                 window &= 3
                 notify = bool(flags & 1)
@@ -245,13 +479,18 @@ class EthernetTool:
                 self.rx["error"] = str(exc)
             if self.session:
                 self.session.fail(f"UDP 接收失败：{exc}")
+            if connection is not None:
+                self.rx_process_stop.set()
+                sock.sendto(b'', sock.getsockname())
         finally:
             publish()
-            if self.mode in ('video', 'console'):
+            if self.mode in ('video', 'console') and connection is None:
                 self.video.finish()
             for output in files.values():
                 output.close()
             selector.close()
+            if connection is not None:
+                connection.close()
             sock.close()
             with self.lock:
                 self.rx_socket = None
@@ -259,7 +498,24 @@ class EthernetTool:
 
     def stop_receive(self):
         self.stop_event.set()
+        if self.rx_process_stop is not None:
+            self.rx_process_stop.set()
+            if self.rx_socket is not None:
+                self.rx_socket.sendto(b'', self.rx_socket.getsockname())
         if self.rx_thread is not None:
             self.rx_thread.join()
             self.rx_thread = None
+        if self.rx_process is not None:
+            self.rx_process.join()
+            exitcode = self.rx_process.exitcode
+            self.rx_process.close()
+            self.rx_process = None
+            self.rx_process_stop = None
+            self.rx_capture_event = None
+            self.rx_capture_epoch = None
+            self.rx_memory.close()
+            self.rx_memory.unlink()
+            self.rx_memory = None
+            if exitcode:
+                raise RuntimeError(f'UDP receive process exit: {exitcode}')
         return self.status()["rx"]

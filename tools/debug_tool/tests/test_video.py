@@ -193,6 +193,34 @@ class VideoTest(unittest.TestCase):
             self.assertIsNone(engine.ethernet.status()['rx']['error'])
             self.assertEqual(engine.video.snapshot()['detections'].frame_id, 9)
 
+    def test_process_frame_survives_slot_reuse_and_restart(self):
+        engine = SerialEngine()
+        engine.ethernet.local_ip = '127.0.0.1'
+        self.addCleanup(engine.ethernet.stop_receive)
+        with TemporaryDirectory() as directory:
+            state = engine.ethernet.start_receive(0, directory, mode='video')
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
+                first = None
+                for frame_id in range(4):
+                    destination = '127.0.0.1', state['localPort']
+                    source.sendto(HEADER.pack(0, 0, 0, 0) + frame_header(frame_id), destination)
+                    for packet in packets(bytes([frame_id]) * 1280, 0, 32):
+                        source.sendto(packet, destination)
+                    wait_for(self, lambda: engine.video.snapshot()['received'] == frame_id + 1)
+                    if first is None:
+                        first = engine.video.snapshot()['frame']
+                self.assertEqual(bytes(first.pixels), bytes(1280))
+                self.assertTrue(first.pixels.readonly)
+                engine.ethernet.stop_receive()
+                self.assertIsNone(engine.ethernet.rx_memory)
+                state = engine.ethernet.start_receive(0, directory, mode='video')
+                destination = '127.0.0.1', state['localPort']
+                source.sendto(HEADER.pack(0, 0, 0, 0) + frame_header(4), destination)
+                for packet in packets(bytes([4]) * 1280, 0, 32):
+                    source.sendto(packet, destination)
+                wait_for(self, lambda: engine.video.snapshot()['received'] == 5)
+                self.assertEqual(bytes(first.pixels), bytes(1280))
+
     def test_simulator_udp_yolo_return(self):
         engine = SerialEngine()
         engine.ethernet.local_ip = "127.0.0.1"
@@ -250,8 +278,10 @@ class ComparisonTest(unittest.TestCase):
 
     def test_yolo_missing_return_fails_loudly(self):
         yolo = YoloTool(None)
-        with self.assertRaisesRegex(ValueError, 'incomplete return'):
-            yolo.receive(2, 0, detection_wire(), True)
+        yolo.receive(2, 0, detection_wire(), True)
+        self.assertIn('window 0: missing 983040 B', yolo.error)
+        self.assertEqual(yolo.failed, 1)
+        self.assertFalse(yolo.capture_pending)
 
     def test_real_npu_reference_small_upsample(self):
         import importlib.util
