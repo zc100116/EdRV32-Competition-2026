@@ -348,10 +348,10 @@ pix/serial 相关时钟及 DDR PHY 内部时序约束保留。RGMII、MDIO/MDC �
 在已按 `fpga/ip/README.md` 生成 IP 的 PDS 工程中执行
 `source <仓库路径>/fpga/scripts/import_board_render_top.tcl`。脚本从
 `cpu_subsys.f`、`sys_subsys.f`、`mem_subsys.f`、`rnd.f`、`disp.f`、`eth.f` 展开源文件并去重，
-加入四个板级源后共 98 个源文件，设置 `FPGA_MODE`。需要的 18 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
+加入四个板级源后共 103 个源文件，设置 `FPGA_MODE`。需要的 19 种 IP：`ip_pll_sys`、`ip_pll_video`、`ip_ddr3`、
 `ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、`ip_ram_dcache_data`、
 `ip_mul_s33x33`、`ip_rom_boot`、`ip_ram_sram`、`ip_ram_mem_xbar_r`、`ip_lutram_mem_xbar_w`、
-`ip_ram_rnd_line`（5 实例）、`ip_ram_rnd_palette`（2 实例）、`ip_ram_disp_scan`（2 实例）、`ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
+`ip_ram_rnd_line`（5 实例）、`ip_ram_rnd_palette`（2 实例）、`ip_ram_rnd_window`（4 实例）、`ip_ram_disp_scan`（2 实例）、`ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`。
 RGMII IO、TMDS 和 DDR 参考差分时钟使用器件原语，无需 GUI 生成串化 IP。
 
 ```sh
