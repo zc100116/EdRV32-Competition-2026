@@ -9,3 +9,4 @@ tb_npu_operator.sv
 ../../../rtl/npu/edrv32_npu_read_dma.v
 ../../../rtl/npu/edrv32_npu_write_dma.v
 ../../../rtl/npu/edrv32_npu_nonconv.v
+../../../rtl/tech/edrv32_mac_npu_int8_head.v
