@@ -1,0 +1,2 @@
+Final PnR timing, top200 routed paths, bitstream and board results: not obtained in this partial snapshot. Do not use reports remaining from an earlier run.
+The placement/router log's integer slack values retain vendor raw units; no ns conversion inferred.

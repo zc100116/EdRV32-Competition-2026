@@ -1,0 +1,101 @@
+Snapshot only; routing was not stopped.
+    CLMS_231_607(/devAL6_S) : u_vin/N429_6/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_561_426(/devDL6) replicated by the LUT instance CLMA_519_481(/devDL6).
+Origin u_cpu/u_core/u_csr/N842_16_17/LUT6_inst replicates:
+    CLMA_561_426(/devDL6) : u_cpu/u_core/u_csr/N842_16_17/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_399_1015(/FFAPP2/FF) replicated by the FF instance CLMA_429_991(/FFAPP3/FF) .
+Origin u_npu/u_conv/u_datapath/u_window/next_valid_r/opit_0_inv_L5Q replicates:
+    CLMA_399_1015(/FFAPP2/FF)  : u_npu/u_conv/u_datapath/u_window/next_valid_r/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new FF instances CLMA_219_600(/FF0/FF) replicated by the FF instance CLMA_213_612(/FF1/FF) .
+Origin u_vin/u_fmt0/height_r[0]/opit_0 replicates:
+    CLMA_219_600(/FF0/FF)  : u_vin/u_fmt0/height_r[0]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_453_390(/devCL6L5Q) replicated by the LUT instance CLMA_471_366(/devCL6L5Q).
+Origin u_cpu/u_core/N1270_8/LUT6D_inst replicates:
+    CLMA_453_390(/devCL6L5Q) : u_cpu/u_core/N1270_8/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_483_1063(/devCL6L5Q) CLMA_465_1111(/devCL6L5Q) replicated by the LUT instance CLMA_429_1104(/devAL6L5Q).
+Origin u_npu/u_conv/residual_state_r_fsm[1:0]_170/LUT6D_inst replicates:
+    CLMA_483_1063(/devCL6L5Q) : u_npu/u_conv/residual_state_r_fsm[1:0]_170/LUT6D_inst_1(gopLUT6L5)
+    CLMA_465_1111(/devCL6L5Q) : u_npu/u_conv/residual_state_r_fsm[1:0]_170/LUT6D_inst_2(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMS_261_655(/devCL6_S) replicated by the LUT instance CLMA_315_697(/devBL6).
+Origin u_vin/g_channel[0].u_channel/u_write/N45/LUT6_inst replicates:
+    CLMS_261_655(/devCL6_S) : u_vin/g_channel[0].u_channel/u_write/N45/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_375_403(/devCL6L5Q_S) CLMA_417_396(/devAL6L5Q) replicated by the LUT instance CLMS_447_415(/devAL6L5Q_S).
+Origin u_cpu/u_core/N1249/LUT6D_inst replicates:
+    CLMS_375_403(/devCL6L5Q_S) : u_cpu/u_core/N1249/LUT6D_inst_1(gopLUT6L5)
+    CLMA_417_396(/devAL6L5Q) : u_cpu/u_core/N1249/LUT6D_inst_2(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_417_384(/devDL6) CLMA_417_408(/devBL6) replicated by the LUT instance CLMS_447_415(/devDL6_S).
+Origin u_cpu/u_core/N1255_3/LUT6_inst replicates:
+    CLMA_417_384(/devDL6) : u_cpu/u_core/N1255_3/LUT6_inst_1(gopLUT6)
+    CLMA_417_408(/devBL6) : u_cpu/u_core/N1255_3/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_327_979(/FF0/FF) CLMA_465_1056(/FF0/FF) replicated by the FF instance CLMA_507_996(/FF3/FF) .
+Origin u_npu/u_descriptor/desc_r[289]/opit_0 replicates:
+    CLMA_327_979(/FF0/FF)  : u_npu/u_descriptor/desc_r[289]/opit_1(gopQ)
+    CLMA_465_1056(/FF0/FF)  : u_npu/u_descriptor/desc_r[289]/opit_2(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_267_342(/devDL6) replicated by the LUT instance CLMA_231_402(/devDL6).
+Origin u_cpu/u_dcache/read_addr_w_23[4]/LUT6_inst replicates:
+    CLMA_267_342(/devDL6) : u_cpu/u_dcache/read_addr_w_23[4]/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_495_438(/FFAPP0/FF) CLMA_507_444(/FF2/FF) CLMA_513_468(/FF3/FF) replicated by the FF instance CLMS_495_421(/FF2/FF) .
+Origin u_cpu/u_core/m_instr_r[21]/opit_0 replicates:
+    CLMA_495_438(/FFAPP0/FF)  : u_cpu/u_core/m_instr_r[21]/opit_1(gopQ)
+    CLMA_507_444(/FF2/FF)  : u_cpu/u_core/m_instr_r[21]/opit_2(gopQ)
+    CLMA_513_468(/FF3/FF)  : u_cpu/u_core/m_instr_r[21]/opit_3(gopQ)
+I: Place-6001: Add the new FF instances CLMA_423_618(/FF3/FF) CLMA_417_714(/FFAPP0/FF) CLMS_531_637(/FFAPP0/FF) replicated by the FF instance CLMA_675_720(/FF1/FF) .
+Origin u_sys/u_media_apb_async/request_r[44]/opit_0 replicates:
+    CLMA_423_618(/FF3/FF)  : u_sys/u_media_apb_async/request_r[44]/opit_1(gopQ)
+    CLMA_417_714(/FFAPP0/FF)  : u_sys/u_media_apb_async/request_r[44]/opit_2(gopQ)
+    CLMS_531_637(/FFAPP0/FF)  : u_sys/u_media_apb_async/request_r[44]/opit_3(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_429_618(/devDL6L5Q) replicated by the LUT instance CLMA_417_618(/devBL6L5Q).
+Origin u_vin/u_regs/N177_71[8]_1/LUT6D_inst replicates:
+    CLMA_429_618(/devDL6L5Q) : u_vin/u_regs/N177_71[8]_1/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_483_390(/devCL6L5Q) replicated by the LUT instance CLMA_453_367(/devAL6L5Q).
+Origin u_cpu/u_core/N943_4/LUT6D_inst replicates:
+    CLMA_483_390(/devCL6L5Q) : u_cpu/u_core/N943_4/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMS_267_343(/devAL6_S) replicated by the LUT instance CLMA_249_414(/devDL6).
+Origin u_cpu/u_dcache/read_addr_w_23[3]/LUT6_inst replicates:
+    CLMS_267_343(/devAL6_S) : u_cpu/u_dcache/read_addr_w_23[3]/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_573_702(/devCL6) replicated by the LUT instance CLMA_579_684(/devCL6).
+Origin u_geo/N80_0/LUT6_inst replicates:
+    CLMA_573_702(/devCL6) : u_geo/N80_0/LUT6_inst_1(gopLUT6)
+Wirelength after detailed placement is 2682213, detour is 1920 and checksum is B41EA7A00A7055A9.
+Timing-driven detailed placement takes 13.88 sec.
+
+Worst slack is 451, TNS after placement is 0.
+Placement done.
+Total placement takes 81.98 sec.
+Finished placement.
+
+Routing started.
+Build routing arch for double attribute device.
+Enter timing driven router mode.
+Route thread size: 5
+Building routing graph takes 11.21 sec.
+Init coarse delay table.
+Read place coarse delay table takes 0.34 sec.
+Build SRB system takes 0.86 sec.
+Setup STE netlist take 11348 msec.
+Dispose control chain take 3797 msec.
+Collect const net info take 1059 msec.
+Worst slack is 451, TNS before route is 0.
+Total nets for routing: 139500.
+Total loads for routing: 651424.
+Direct connect net size: 16843
+Build all design net take 8352 msec.
+Processing design graph takes 24.61 sec.
+Delay table total memory: 72.78639603 MB
+Route graph total memory: 392.03799534 MB
+Route design total memory: 213.67995453 MB
+Global routing takes 0.00 sec.
+Total 139498 subnets.
+Unrouted clock nets at iteration 0 (0.378 sec): 15
+Unrouted clock nets at iteration 1 (0.335 sec): 9
+Unrouted clock nets at iteration 2 (0.177 sec): 6
+Unrouted clock nets at iteration 3 (0.176 sec): 2
+Unrouted clock nets at iteration 4 (0.053 sec): 0
+Total route nets size: 139456
+Pre route takes 63.458 sec
+Unrouted general nets at iteration 6 (MT total route time: 18.386 sec): 123845(overused: 943565)
+Unrouted general nets at iteration 7 (MT total route time: 23.151 sec): 112293(overused: 776574)
+Unrouted general nets at iteration 8 (MT total route time: 66.974 sec): 102173(overused: 625871)
+Unrouted general nets at iteration 9 (MT total route time: 215.185 sec): 93395(overused: 516558)
+Unrouted general nets at iteration 10 (MT total route time: 533.242 sec): 86214(overused: 445617)
+Unrouted general nets at iteration 11 (MT total route time: 864.425 sec): 74177(overused: 419031)

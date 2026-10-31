@@ -1,0 +1,31 @@
+compile
+Completed
+Warnings=4514 Errors=0
+Counter({'ConstantProbeLoop': 1195, 'Verilog-2020': 1156, 'Verilog-2008': 849, 'Verilog-2038': 498, 'Sdm-2003': 319, 'Sdm-2000': 192, 'Verilog-2023': 158, 'Verilog-2039': 55, 'Public-4030': 32, 'Verilog-2019': 25, 'Verilog-2036': 16, 'Verilog-2006': 10, 'Verilog-2021': 3, 'Sdm-2010': 3, 'Sdm-2014': 2, 'Uncoded warning': 1})
+Action compile: Real time elapsed is 0h:2m:48s
+Action compile: CPU time elapsed is 0h:0m:14s
+Action compile: Process CPU time elapsed is 0h:0m:14s
+Action compile: Peak memory pool usage is 729 MB
+
+synthesize
+Completed
+Warnings=16347 Errors=0
+Counter({'Public-4008': 12709, 'Uncoded warning': 3440, 'Timing-4087': 99, 'Timing-4086': 67, 'Uncoded fanout warning': 30, 'Adm-4019': 2})
+Action synthesize: Real time elapsed is 0h:9m:21s
+Action synthesize: CPU time elapsed is 0h:1m:6s
+Action synthesize: Process CPU time elapsed is 0h:1m:12s
+Action synthesize: Peak memory pool usage is 3,718 MB
+
+device_map
+Completed
+Warnings=312 Errors=0
+Counter({'Public-4008': 303, 'DeviceMap-4011': 8, 'Public-4010': 1})
+Action dev_map: Real time elapsed is 0h:1m:32s
+Action dev_map: CPU time elapsed is 0h:0m:8s
+Action dev_map: Process CPU time elapsed is 0h:0m:8s
+Action dev_map: Peak memory pool usage is 2,208 MB
+
+place_route
+IN PROGRESS snapshot
+Warnings=0 Errors=0
+Counter()

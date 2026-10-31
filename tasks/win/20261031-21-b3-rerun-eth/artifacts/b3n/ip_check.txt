@@ -1,0 +1,23 @@
+B3N IP configuration check
+Project: G:/codex_project/EdRV32-FPGA/EdRV32-B3N
+24 IP references; all .idf files exist. No references to the four replaced DRM IPs.
+106 RTL files in the saved project.
+
+Changed IP settings read from generated Verilog:
+ip_ram_icache_tag: 18-bit data, 9-bit address; output register off; byte enable off.
+ip_ram_icache_data: 64-bit data, 11-bit address; output register off; byte enable off.
+ip_ram_dcache_tag: 18-bit data, 9-bit address; output register off; byte enable off.
+ip_ram_dcache_data: 64-bit data, 11-bit address; output register off; 8 byte enables.
+All four cache RAMs: read clock enable on; initialization off.
+ip_lutram_mem_xbar_w: 144-bit data, 4-bit address; output register off; initialization off.
+ip_lutram_npu_quant: 64-bit data, 5-bit address; output register off; initialization off.
+ip_lutram_npu_residual: 256-bit data, 5-bit address; output register off; initialization off.
+ip_lutram_npu_result: 256-bit data, 5-bit address; output register off; initialization off; wrapper uses two instances.
+ip_ram_npu_lut: 8-bit data, 11-bit address; output register on; read clock enable on; initialization off.
+
+Generated distributed RAM modules expose rd_clk and active-high rst.
+Adapted quant/residual/result FPGA wrapper instances: rd_clk=clk_i, rst=1'b0.
+mem_xbar_w had the same adaptation already. All six distributed RAM instance port-name sets match generated modules.
+Generated IP files were not edited.
+Saved project has relative include_path ../../EdRV32-Competition-2026/rtl/include and FPGA_MODE.
+This check did not start synthesis or place-and-route, and does not establish timing or simulation equivalence.

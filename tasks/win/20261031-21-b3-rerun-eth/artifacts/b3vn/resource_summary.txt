@@ -1,0 +1,100 @@
+DEVICE MAP, before placement/routing:
+Device Utilization Summary:
++-------------------------------------------------------------------------+
+| Logic Utilization     | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------+
+| APM                   | 337       | 740           | 46                 
+| FF                    | 89819     | 319600        | 29                 
+| LUT                   | 84428     | 159800        | 53                 
+| Distributed RAM       | 2099      | 39500         | 6                  
+| DRM                   | 225       | 415           | 55                 
+| IO                    | 137       | 400           | 35                 
+| RCKB                  | 2         | 40            | 5                  
+| SCANCHAIN             | 0         | 1             | 0                  
+| USCM                  | 9         | 32            | 29                 
+| CCS                   | 1         | 1             | 100                
+| ADC                   | 0         | 1             | 0                  
+| DDR_PHY               | 7         | 40            | 18                 
+| HSSTLP                | 0         | 2             | 0                  
+| GPLL                  | 6         | 10            | 60                 
+| PPLL                  | 2         | 10            | 20                 
+| DDRPHY_CPD            | 1         | 20            | 5                  
+| HCKB                  | 0         | 120           | 0                  
+| IOCKB                 | 0         | 40            | 0                  
+| MRCKB                 | 1         | 20            | 5                  
+| PCIE                  | 0         | 1             | 0                  
+| DDRPHY_IOCLK_DIV      | 2         | 10            | 20                 
+| ANALOG                | 0         | 1             | 0                  
+| TSERDES               | 14        | 80            | 18                 
+| KEYRAM                | 0         | 1             | 0                  
++-------------------------------------------------------------------------+
+
+
+SYNTHESIS:
+Cell Usage:
+GTP_APM_E2                  337 uses
+GTP_CLKBUFG                   3 uses
+GTP_CLKBUFM                   1 use
+GTP_CLKBUFR                   2 uses
+GTP_CLKPD                     1 use
+GTP_DDC_E2                    7 uses
+GTP_DFF                   17591 uses
+GTP_DFF_C                 10178 uses
+GTP_DFF_CE                14389 uses
+GTP_DFF_E                 43769 uses
+GTP_DFF_P                   275 uses
+GTP_DFF_PE                  891 uses
+GTP_DFF_R                  1036 uses
+GTP_DFF_RE                 1212 uses
+GTP_DFF_S                   668 uses
+GTP_DFF_SE                  113 uses
+GTP_DLL_E2                    4 uses
+GTP_DRM18K_E1                28 uses
+GTP_DRM36K_E1               211 uses
+GTP_GPLL                      6 uses
+GTP_GRS                       1 use
+GTP_IDDR_E1                   5 uses
+GTP_INV                      32 uses
+GTP_IOCLKDIV_E3               2 uses
+GTP_IODELAY_E2               63 uses
+GTP_ISERDES_E2               32 uses
+GTP_LUT1                    115 uses
+GTP_LUT2                    865 uses
+GTP_LUT3                   1508 uses
+GTP_LUT4                   4811 uses
+GTP_LUT5                  11755 uses
+GTP_LUT6                  25795 uses
+GTP_LUT6CARRY             26171 uses
+GTP_LUT6D                 11313 uses
+GTP_MUX2LUT7               2629 uses
+GTP_MUX2LUT8                659 uses
+GTP_ODDR_E1                   6 uses
+GTP_OSERDES_E2               87 uses
+GTP_PPLL                      2 uses
+GTP_RAM32X1DP                 8 uses
+GTP_RAM32X2DP              2091 uses
+
+I/O ports: 127
+GTP_INBUF                  35 uses
+GTP_INBUFDS                 1 use
+GTP_IOBUF                  35 uses
+GTP_IOBUFCO                 4 uses
+GTP_OUTBUF                 17 uses
+GTP_OUTBUFDS                4 uses
+GTP_OUTBUFT                30 uses
+GTP_OUTBUFTCO               1 use
+
+Mapping Summary:
+Total LUTs: 84432 of 159800 (52.84%)
+	LUTs as dram: 2099 of 39500 (5.31%)
+	LUTs as logic: 82333
+Total Registers: 90122 of 319600 (28.20%)
+Total Latches: 0
+
+DRM36K/FIFO:
+Total DRM = 225.0 of 415 (54.22%)
+
+APMs:
+Total APMs = 337.00 of 740 (45.54%)
+
+Total I/O ports = 137 of 400 (34.25%)

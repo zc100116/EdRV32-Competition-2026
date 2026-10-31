@@ -1,0 +1,33 @@
+Placement started.
+Total cost after SA planning is 7084193.339164.
+Worst slack after global placement is 68
+Worst slack after post global placement is -567
+Worst slack before Replication Place is -940.
+Worst slack before detailed placement is -940, TNS before detailed placement is -118188. 
+Worst slack after detailed placement is 453, TNS after detailed placement is 0. 
+Timing-driven detailed placement takes 13.88 sec.
+Worst slack is 451, TNS after placement is 0.
+Placement done.
+Total placement takes 81.98 sec.
+Finished placement.
+Routing started.
+Route thread size: 5
+Worst slack is 451, TNS before route is 0.
+Total nets for routing: 139500.
+Total loads for routing: 651424.
+Route graph total memory: 392.03799534 MB
+Route design total memory: 213.67995453 MB
+Total 139498 subnets.
+Unrouted clock nets at iteration 0 (0.378 sec): 15
+Unrouted clock nets at iteration 1 (0.335 sec): 9
+Unrouted clock nets at iteration 2 (0.177 sec): 6
+Unrouted clock nets at iteration 3 (0.176 sec): 2
+Unrouted clock nets at iteration 4 (0.053 sec): 0
+Total route nets size: 139456
+Pre route takes 63.458 sec
+Unrouted general nets at iteration 6 (MT total route time: 18.386 sec): 123845(overused: 943565)
+Unrouted general nets at iteration 7 (MT total route time: 23.151 sec): 112293(overused: 776574)
+Unrouted general nets at iteration 8 (MT total route time: 66.974 sec): 102173(overused: 625871)
+Unrouted general nets at iteration 9 (MT total route time: 215.185 sec): 93395(overused: 516558)
+Unrouted general nets at iteration 10 (MT total route time: 533.242 sec): 86214(overused: 445617)
+Unrouted general nets at iteration 11 (MT total route time: 864.425 sec): 74177(overused: 419031)
