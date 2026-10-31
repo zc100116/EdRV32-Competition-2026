@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 版本 / 日期 | v0.1 / 2026-10-31 |
-| 状态 | [~] 阶段一已批准；独立REF/VERIFY由协调者直接派发，本人顺序实施RTL |
+| 状态 | [!] 已完成实现和验证并交协调者评审；RN-17 opa帧FAIL，原生资源待PDS |
 | 依据 | rnd-spec v0.3、rnd-testplan v0.2、设计记录2026-10-31-rnd-v2的D1–D8 |
 | 工作包 / 分支 | T-RND2 / zc100116/task-rnd-v2（基线7732a05b，zc100116/b3） |
 
@@ -36,8 +36,8 @@ clk_mem 125MHz、RND≤32K LUT/130APM/66DRM、G4≤40APM、AFFINE窗口/填充�
 | V2-VERIFY | 按RN-21–29及RN-14/15/17/19扩展模块/SoC激励、向量和计数检查 | 协调者直派独立验证员工/gpt-6.1-sol medium | MASK及接口冻结、REF | 不读被测RTL；自测向量/模型和harness；不跑被测RTL整体回归；提交可执行测试 | task-rnd-v2-verify | [x] |
 | V2-GEO | G1发生器/译码接入、AA/渐变、差分/并集；自写单元测试 | 项目经理本人/Codex | MASK、接口冻结、REF | RN-21–23对应单元检查，背压冻结，62.5Mpx/s计算峰值；风格/lint零告警 | task-rnd-v2 | [x] |
 | V2-AFF | G3+G4同时交付，32×16遍历、32源块、NN与单lane双线性、技术RAM及说明；自写单元测试 | 项目经理本人/Codex | MASK、GEO、接口冻结、REF | NN/四tap边界和Q还原单元检查；窗口≤4DRM、G4≤40APM估算；风格/lint零告警 | task-rnd-v2 | [x] |
-| V2-INTEG | 驱动编码/参数clean、LVGL supported与翻译、RN-17新增帧/coverage，统一联调和测量 | 项目经理本人/Codex | VERIFY、GEO、AFF合并 | 下列统一验收全部完成，失败归类后修复，不放宽判据；提交及≤80行报告 | task-rnd-v2 | [~] |
-| V2-REVIEW | 审核提交、预算对比及汇总；最终worker_done交协调者 | 项目经理本人/Codex | INTEG | 验收证据齐全，最后一项通过立即提交/worker_done；PDS项明确待单独上板 | task-rnd-v2 | [ ] |
+| V2-INTEG | 驱动编码/参数clean、LVGL supported与翻译、RN-17新增帧/coverage，统一联调和测量 | 项目经理本人/Codex | VERIFY、GEO、AFF合并 | 下列统一验收全部完成，失败归类后修复，不放宽判据；提交及≤80行报告 | task-rnd-v2 | [!] 验证完成；opa帧FAIL按裁定保留 |
+| V2-REVIEW | 审核提交、预算对比及汇总；最终worker_done交协调者 | 项目经理本人/Codex | INTEG | 验收证据齐全，最后一项通过立即提交/worker_done；PDS项明确待单独上板 | task-rnd-v2 | [x] 已汇总并交付 |
 
 归属：REF仅verif/block/rnd/rnd_ref.py及其参考自测；VERIFY仅verif/block/rnd其他文件；board_render只运行现有smoke，需修改先向协调者确认。
 MASK负责当前共享descriptor/engine/draw接入和G2单元；GEO/AFF的具体RTL文件及单元目录在MASK后划分，禁止同时改同一文件，公共接入修改由项目经理串行应用。
@@ -72,7 +72,8 @@ INTEG拥有sw/drivers/rnd.c、include/rnd.h、sw/apps/s3/lvgl/draw_rnd.c、tools
 - 阶段一已获协调者批准（35abfa9f及EDGE_INCL修订），可按依赖派发。
 - G1与LVGL AA不同、G4相位/预乘可能无法通过RN-17；出现失败明确上报，不静默回软件或放宽阈值。
 - 源读放大依赖变换局部性；32块不能保证带宽上限，按实际beat报告。
-- APM/DRM端口组织与旧blend关键路径风险：只做已规定流水与资源；任何估算超D8先ask，不自行裁减。
+- RN-17 opa容器2.304688%>1LSB，根因为LVGL五位权重与规格2.2八位d()/E565混合不同；协调者裁定保持v0.3，阈值/参考/测试不设例外，调试记录已提交98499bfd。
+- D8保持不变；协调者裁定面积待单独PDS实测，Yosys比例估算超32K的风险如实报告，不加兼容位、不裁功能；逻辑级数必须≤27再交付。
 - 本机仅3核；本包不发心跳/进度给协调者，只在决策时ask、完成时worker_done；各检查点收取follow-up。
 
 ## 6. 变更记录
@@ -86,3 +87,7 @@ INTEG拥有sw/drivers/rnd.c、include/rnd.h、sw/apps/s3/lvgl/draw_rnd.c、tools
 | 2026-10-31 | v0.1 | GEO独立单元350组逐位通过，峰值2像素/4拍；draw单元新增纯色/渐变后12例通过，RND顶层lint/风格零告警；参数DDR读取128B，geometry advance随draw整组冻结，进入AFF |
 | 2026-10-31 | v0.1 | 协调者交付独立REF/VERIFY提交a77c37d6，42 smoke/1794 full/33 perf向量；待AFF完成后INTEG合入并运行真实RTL，尚未宣称模块测试通过 |
 | 2026-10-31 | v0.1 | AFF单元12672像素、窗口808组（六源格式）、滤波2100样本、draw15例通过；全RND lint/风格零告警；四个256×64窗口银行及FF填充、复用调色板/着色通路，G4算术估计38APM，待INTEG测量 |
+| 2026-10-31 | v0.1 | INTEG合入独立验证后完整模块回归4/4通过，perf33项通过、旧RN-18八项周期不变；协调者撤销规格外端到端0.7检查，改为命中稳态≥0.9，实测1.000；提交ac058e13 |
+| 2026-10-31 | v0.1 | 驱动/主机软件提交46dba507，16帧中15通过，opa容器FAIL不放宽；主机MASK alpha16例带外最大0/255，profile仅66个范围外LINE未认领；资源待PDS、路径继续流水收敛 |
+| 2026-10-31 | v0.1 | 最终RTL16ca820b：Yosys75590 LUT6/29366FF/26级，窗口译码/替换与几何/坐标流水、PERF1同拍分段；203受影响项（42 smoke/120 G1/8窗口控制/33 perf）通过，PERF1后另42 smoke+12 perf通过，board_render复验通过，原生资源待单独PDS |
+| 2026-10-31 | v0.1 | 正式RN-17最终15/16帧通过，opa帧21240/921600=2.304688% FAIL；保持v0.3和1%阈值，报告≤80行，按协调者裁定失败项与资源风险明确交付 |
