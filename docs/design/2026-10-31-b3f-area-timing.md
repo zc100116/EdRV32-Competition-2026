@@ -111,9 +111,30 @@ G1 收益（设计记录 rnd-v2，估算）：弧场景 260667 px/帧，两 lane
 
 B3F 布局：xbar 靠近 DDR PHY 区域居中，RND、NPU 各自划区贴近 xbar。
 
+## VN 布线失败（卡 21 工程，卡 22 补充回传 258cab83）
+
+- 工程：B3VN（卡 21 RTL），Device Map 84432 LUT（53%）、337 APM、225 DRM。
+- PnR 运行 3h26m，第 16 轮后报 `Route-0039 too congested`、`Route-0008 cannot be routed`；结束时未布通通用网络 49263 条，overused 221725。
+- 未布通负载最多的网络（`artifacts/b3vn_card21_failure/failed_nets_top200.tsv`）：
+
+| 类 | 网络（负载 / 未布通） | 对应优化项 |
+|---|---|---|
+| 常量 | `GND` 34330/34330、`VCC` 22108/22108 | 待查：需要 Windows 端从本地转储按负载引脚类型（LUT/APM/DRM）分类 |
+| NPU 数据通路广播 | `u_accum/r4_first_r` 2048/1497、`accum_valid_w` 1141/1011、`sum_tag_w[48]` 1070/966、`quant_valid_w`、`u_window/a4_valid_r` | 同 R1：去掉全局推进/有效位广播，改有效位流水和局部复制 |
+| 媒体 APB 地址 | `media_apb_paddr_w[2]` 1851/1229、`[3]` 1446/889、`[5]`、`[4]` | T1：各从设备在 APB setup 拍本地寄存 paddr，或按区域加 APB 寄存级 |
+| 复位 | `rst_sys_n_w` 4392/867、`rst_mem_core_n_w` 1700/1070、`rst_mem_n_w` 1336/722、`ddrc_rstn` 862、`rst_npu_n_w` 536 | 核查数据寄存器不带复位（CLAUDE.md 5.2）；按区域复制复位（由 reset_ctrl 产生，需改系统子系统规格 2.10） |
+| D$ 元数据 | `u_dcache/buffer_addr_r[13:11]` 1344/1000、`N1000`/`N996` 1024 | B |
+| 流量发生器 | `u_perf_mon/soft_reset_w` 727/694、`start_w` 763/606 | A |
+| xbar | `w_port_r[*]` 598、`g_port[6].w_addr_w[*]` 705（LUT RAM 写地址） | 写地址按 RAM 片复制寄存 |
+
+- 位置抽样（同表 driver 坐标）：NPU 在 TY 145–177，xbar/APB 在 TY 97–120，D$ 在 TY 55–70；NPU 与 xbar 相距最远。
+- 结论：只有 V+N（53% LUT）在没有区域规划、没有治理扇出时已无法布通。B3F（估算 75% LUT）必须先完成上述扇出治理和区域规划；已有区域规划草案 `2026-10-31-b3f-floorplan.md`（T-FP1，基于卡 10/14/15 数据）需要按卡 22 数据重做。
+
 ## 决策
 
-待用户确认：RND 第 1 档先做；R6–R8 和 A、B 逐项确认。
+- 2026-10-31 用户确认：RND 第 1 档开工（T-RNDOPT1）；第 3 档先测量（T-RNDMEAS，报告 2026-10-31-rnd-lane-util）。
+- 2026-10-31 用户确认：R6（几何范围 signed36/signed24）、R7（G1 单 lane），rnd-spec v0.4；R8 暂缓，待第 1 档 + R6 + R7 的 PnR 结果。
+- 待确认：A、B；VN 扇出治理各项。
 
 ## 影响
 
