@@ -460,6 +460,22 @@
             "fields": []
         },
         {
+            "name": "TX_GAP",
+            "offset": "0x134",
+            "access": "RW",
+            "reset": 0,
+            "spec": "eth-spec.md 4.2",
+            "dimensions": [],
+            "fields": [
+                {
+                    "name": "CYCLES",
+                    "lsb": 0,
+                    "width": 24,
+                    "spec": "eth-spec.md 2.6"
+                }
+            ]
+        },
+        {
             "name": "WIN_BASE",
             "offset": "0x140",
             "access": "RW",
