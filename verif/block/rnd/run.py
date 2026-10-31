@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'tools'))
 from regress import expand_files
 from vectors import generate, selections
+import v2_vectors
 
 
 # T-RND1 acceptance subset approved by the coordinator; reuse existing vectors verbatim.
@@ -55,7 +56,8 @@ def main():
         subprocess.run([str(sim), '+PORT_STUB'], cwd=ROOT, check=True)
         return 0
     out = ROOT / 'build/rnd' / args.tier
-    cases = SMOKE_CASES if args.tier == 'smoke' else selections(args.tier)
+    cases = (SMOKE_CASES + v2_vectors.selections('smoke')
+             if args.tier == 'smoke' else selections(args.tier))
     for index, (number, variant, seed) in enumerate(cases):
         name = f'RN-{number:02d}-{index:04d}-seed{seed}'
         directory = out / name
@@ -69,8 +71,9 @@ def main():
             print(f'FAIL {name} variant={variant!r}')
             return 1
         print(f'PASS {name} variant={variant!r}', flush=True)
-        if number == 18:
-            print('\n'.join(line for line in output.splitlines() if 'RN-18 kind=' in line))
+        if number in (18, 29):
+            print('\n'.join(line for line in output.splitlines()
+                            if 'RN-18 kind=' in line or 'RN-29 ' in line))
     print(f'PASS RND {args.tier}: {len(cases)} cases')
     return 0
 

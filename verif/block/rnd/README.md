@@ -1,8 +1,8 @@
 # RND independent block verification
 
-This environment implements `rnd-spec.md` v0.2 and `rnd-testplan.md` v0.1 without
+This environment implements `rnd-spec.md` v0.3 and `rnd-testplan.md` v0.2 without
 reading `rtl/media/rnd/` or `legacy/rtl/vision/render/`. All added files belong to
-`verif/block/rnd/`. RN-17 belongs to the later LVGL SoC task.
+`verif/block/rnd/`. RN-17 follows the LVGL software verification plan.
 
 ## Run
 
@@ -163,3 +163,41 @@ are unchanged. No RND RTL changes were required. See the
 cycle counts and specification comparisons, and the
 [debug record](../../../docs/debug/2026-10-29-rnd-regression-timeouts.md) for timeout
 reproduction and classification.
+
+## T-RND2V independent v2 verification
+
+- Base RTL: `ffb308aa`; verification commit: the commit containing this section.
+- Environment: 用户提供的仿真主机（环境不记录）; formula/stub checks also run locally.
+- Scope: no RTL read or edit; RN-17, new-RTL integration/resource/board lint remain V2-INTEG.
+- Smoke: 42 vectors = unchanged 26 + 16 RN-21–28 representatives.
+- Full: 545 directed + 1,249 supplement = 1,794 vectors; RN-19 is 10 seeds × 50 commands,
+  covering all 13 OP and random legal parameter blocks; no full DUT integration run here.
+- Perf: unchanged 8 RN-18 + 25 RN-29 scenes (G1 AA; NN/bilinear identity/rotation/skew/scale,
+  RGB565/ARGB8888/I4). Output PERF0–3, parameter/source beats and raw-format read amplification.
+- RN-29 black-box limits approved by coordinator: G1 AA ≥0.45 pixel/cycle;
+  bilinear identity ≥0.7 pixel/cycle; other transforms record numbers without threshold.
+- Formula checks: 1,200 Cartesian circle points, 192 exact fractional edges, 64 shared-edge
+  samples, MASK alpha 0/1/128/255, 48 bilinear f/g/alpha cases, signed48, empty parameters,
+  ROUND_CLIP and CUTOUT hand examples; all 1,794 functional vectors generate successfully.
+- RN-28: target tile tails, >32 source blocks, unaligned/4KiB reads, same-list source rewrite,
+  parameter/source errors and ABORT; restart changes source bytes to expose stale windows.
+- Whole-memory comparisons include descriptors/parameters/source/target/frame; only specified
+  temporary bytes are excluded; failures identify RN/descriptor/parameter address/pixel/values/time.
+- PASS: final selftest (1,794 vectors, parameter SLVERR included), style/lint 0 warnings;
+  old smoke 26/26 and perf 8/8 pass before/after; OP 09/0A/0B/0C/0D each rejects with ERROR=3.
+- RN-18 PERF0 before=after (ARGB fill/RGB565 fill/BLIT/glyph): no-wait
+  125297/64097/269217/502001; latency40 125336/64136/269334/1911001 (zero regression).
+- Local summaries: `build/rnd-v2-final-selftest.log`, `build/rnd-v2-baseline-summary.txt`.
+- Style uses existing `check.py` SV adapter per coordinator approval; direct RTL-only checker
+  is inapplicable to permitted testbench SV syntax; shared tools are unchanged.
+
+Reproduce (local Verilator commands require `. ~/.local/opt/edrv32/env.sh`):
+
+```sh
+flock /tmp/edrv32-sim.lock python3 verif/block/rnd/selftest.py
+flock /tmp/edrv32-sim.lock python3 verif/block/rnd/check.py
+flock /tmp/edrv32-sim.lock python3 verif/block/rnd/baseline.py smoke
+flock /tmp/edrv32-sim.lock python3 verif/block/rnd/baseline.py perf
+flock /tmp/edrv32-sim.lock python3 verif/block/rnd/baseline.py new
+# Integration: run.py smoke / full / perf (same flock prefix locally).
+```

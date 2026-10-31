@@ -150,10 +150,10 @@ class Command:
 
     def illegal(self):
         # rnd 6: these are the complete command-validation conditions.
-        return (self.op not in range(1, 9)
+        return (self.op not in range(1, 14)
                 or (self.op == 3 and self.src_fmt not in (2, 3, 4, 5))
-                or (self.op == 4 and self.src_fmt not in (0, 1, 6, 7, 8, 9))
-                or (self.op == 4 and ((self.flags >> 4) & 7) >= 4)
+                or (self.op in (4, 13) and self.src_fmt not in (0, 1, 6, 7, 8, 9))
+                or (self.op in (4, 13) and ((self.flags >> 4) & 7) >= 4)
                 or (self.op == 5 and self.src_fmt != self.dst_fmt)
                 or (self.op == 8 and self.src_fmt not in (0, 1, 6, 7)))
 
@@ -171,17 +171,19 @@ def glyph(*, src_base, src_stride, src_x=0, src_y=0, **common):
 
 
 def blit(*, src_base, src_stride, src_x=0, src_y=0, scale_x=65536, scale_y=65536,
-         palette=0, key=0, rc_color=0, rc_opa=0, **common):
+         palette=0, key=0, rc_color=0, rc_opa=0, clip_radius=0, **common):
     return Command(4, args=(src_base, src_stride, xy(src_x, src_y), scale_x, scale_y,
-                            palette, key, rc_color | (rc_opa << 24)), **common)
+                            palette, key | (clip_radius << 16),
+                            rc_color | (rc_opa << 24)), **common)
 
 
 def copy(*, src_base, src_stride, src_x=0, src_y=0, **common):
     return Command(5, args=(src_base, src_stride, xy(src_x, src_y), 0, 0, 0, 0, 0), **common)
 
 
-def box_shadow(*, radius=0, blur=0, temp_base, **common):
-    return Command(6, args=(radius, blur, temp_base, 0, 0, 0, 0, 0), **common)
+def box_shadow(*, radius=0, blur=0, temp_base, bg=(0, 0, 0, 0), bg_radius=0, **common):
+    return Command(6, args=(radius, blur, temp_base, xy(*bg[:2]), xy(*bg[2:]),
+                            bg_radius, 0, 0), **common)
 
 
 def blur(*, radius=0, temp_base, **common):
@@ -246,6 +248,88 @@ def temp_region(command):
     return (0, 0)
 
 
+def parameter_words(memory, base, count):
+    return tuple(load(memory, base + 4 * k, 4) for k in range(count))
+
+
+def rectangle_words(first, last):
+    return (signed(first, 16), signed(first >> 16, 16),
+            signed(last, 16), signed(last >> 16, 16))
+
+
+def rectangle_coverage(rect, radius, x, y):
+    x0, y0, x1, y1 = rect
+    return coverage(x1 - x0 + 1, y1 - y0 + 1, radius, x - x0, y - y0)
+
+
+def linear8(words, a, b):
+    """Exact edge value multiplied by eight; no Q16 sub-sample truncation."""
+    e0, ex, ey = (signed(v, 32) for v in words)
+    return 8 * e0 + a * ex + b * ey
+
+
+def circle_value(words, a, b):
+    q0 = signed(words[0] | ((words[1] & 65535) << 32), 48)
+    dx, dy = signed(words[2], 32), signed(words[3], 32)
+    return q0 + a * (dx - 64) // 8 + b * (dy - 64) // 8 + a * a + b * b
+
+
+def geometry_inside(c, p, a, b):
+    if c.op == 9:
+        values = [linear8(p[k:k + 3], a, b) for k in (0, 3, 6)]
+        return all(v >= 0 if c.flags & (2 << k) else v > 0
+                   for k, v in enumerate(values))
+    if c.op == 10:
+        t, n = linear8(p[:3], a, b), linear8(p[3:6], a, b)
+        body = 0 <= t <= 8 * p[6] and abs(n) <= 8 * p[7]
+        return (body or bool(c.flags & 2) and circle_value(p[8:12], a - 1, b - 1) <= 0
+                or bool(c.flags & 4) and circle_value(p[12:16], a - 1, b - 1) <= 0)
+    ring = (circle_value(p[:4], a - 1, b - 1) <= 0
+            and (bool(c.flags & 32) or circle_value(p[4:8], a - 1, b - 1) > 0))
+    if c.flags & 16:
+        return ring
+    b0, b1 = linear8(p[16:19], a, b) >= 0, linear8(p[19:22], a, b) >= 0
+    body = ring and ((b0 or b1) if c.flags & 8 else (b0 and b1))
+    return (body or bool(c.flags & 2) and circle_value(p[8:12], a - 1, b - 1) <= 0
+            or bool(c.flags & 4) and circle_value(p[12:16], a - 1, b - 1) <= 0)
+
+
+def geometry_coverage(c, p, x, y):
+    offsets = (1, 3, 5, 7) if c.flags & 1 else (4,)
+    count = sum(geometry_inside(c, p, 8 * (x - c.rect[0]) + i,
+                               8 * (y - c.rect[1]) + j)
+                for j in offsets for i in offsets)
+    return (255 * count + len(offsets) ** 2 // 2) // len(offsets) ** 2
+
+
+def affine_sample(memory, c, p, x, y):
+    w = c.args
+    u0, v0, ux, vx, uy, vy = (signed(v, 32) for v in p[:6])
+    u = u0 + (x - c.rect[0]) * ux + (y - c.rect[1]) * uy
+    v = v0 + (x - c.rect[0]) * vx + (y - c.rect[1]) * vy
+    sw, sh = w[2] & 65535, w[2] >> 16
+
+    def tap(i, j):
+        if not (0 <= i < sw and 0 <= j < sh):
+            return (0, 0, 0, 0)
+        return source_pixel(memory, w[0], w[1] & 65535, c.src_fmt, i, j,
+                            w[5], bool(c.flags & 4), w[6] & 65535)
+
+    if not c.flags & 1:
+        return tap(u // 65536, v // 65536)
+    s, t = u - 32768, v - 32768
+    i, j = s // 65536, t // 65536
+    f, g = (s % 65536) >> 8, (t % 65536) >> 8
+    weights = ((256 - f) * (256 - g), f * (256 - g), (256 - f) * g, f * g)
+    taps = [tap(i, j), tap(i + 1, j), tap(i, j + 1), tap(i + 1, j + 1)]
+    alpha = (sum(wt * color[0] for wt, color in zip(weights, taps)) + 32768) >> 16
+    if alpha == 0:
+        return (0, 0, 0, 0)
+    premul = tuple((sum(wt * d(color[0] * color[k]) for wt, color in zip(weights, taps))
+                    + 32768) >> 16 for k in (1, 2, 3))
+    return (alpha,) + tuple(min(255, (v * Q[alpha] + 32768) >> 16) for v in premul)
+
+
 def execute_command(memory, command):
     """Render one legal command. Temporary bytes deliberately have no oracle value."""
     c = command
@@ -256,6 +340,13 @@ def execute_command(memory, command):
     width, height = x1 - x0 + 1, y1 - y0 + 1
     w = c.args
     size = 2 << c.dst_fmt
+    p = ()
+    if c.op in (9, 10, 11):
+        p = parameter_words(memory, w[0], 32)
+    elif c.op == 13:
+        p = parameter_words(memory, w[3], 16)
+    elif c.op == 4 and c.flags & 128:
+        p = parameter_words(memory, w[5], 16)
     snapshot = {}
     shadow = None
     blurred = None
@@ -316,20 +407,27 @@ def execute_command(memory, command):
                 ky = y1 - y if c.flags & 2 else y - y0
                 pixel = source_pixel(memory, w[0], w[1] & 65535, c.src_fmt,
                                      (w[2] & 65535) + ((kx * w[3]) >> 16),
-                                     (w[2] >> 16) + ((ky * w[4]) >> 16), w[5],
+                                     (w[2] >> 16) + ((ky * w[4]) >> 16), p[0] if p else w[5],
                                      bool(c.flags & 4), w[6] & 65535)
                 alpha, *color = pixel
                 if c.flags & 8:
                     color = tuple(mix(w[7] >> 24, rc, s)
                                   for rc, s in zip(argb(w[7])[1:], color))
-                sa = d(c.opa * alpha)
+                cov = rectangle_coverage(rectangle_words(p[1], p[2]),
+                                         (w[6] >> 16) & 4095, x, y) if p and (
+                                             (w[6] >> 16) & 4095) else 255
+                sa = d(d(c.opa * alpha) * cov)
                 mode = (c.flags >> 4) & 7
             elif c.op == 5:
                 store(memory, address, size, snapshot[x, y])
                 continue
             elif c.op == 6:
                 radius = w[1] & 31
-                sa = d(c.opa * shadow[y - y0 + radius][x - x0 + radius])
+                mask = shadow[y - y0 + radius][x - x0 + radius]
+                if c.flags & 1:
+                    bg = rectangle_coverage(rectangle_words(w[3], w[4]), w[5] & 4095, x, y)
+                    mask = d(mask * (255 - bg))
+                sa = d(c.opa * mask)
             elif c.op == 7:
                 pixel = blurred[y - ay0][x - ax0]
                 store(memory, address, size, p565(pixel) if c.dst_fmt == 0 else pack_argb(pixel))
@@ -350,6 +448,32 @@ def execute_command(memory, command):
                                      bool(c.flags & 4), w[6] & 65535)
                 alpha, *color = pixel
                 sa = d(c.opa * alpha)
+            elif c.op in (9, 10, 11):
+                cov = geometry_coverage(c, p, x, y)
+                alpha = 255
+                if c.op == 9 and c.flags & 64:
+                    k = y - y0 if c.flags & 128 else x - x0
+                    alpha, *color = tuple(max(0, min(255, (start * 65536
+                        + k * signed(step, 32) + 32768) >> 16))
+                        for start, step in zip(argb(p[9]), p[10:14]))
+                sa = d(d(c.opa * alpha) * cov)
+            elif c.op == 12:
+                rect = rectangle_words(w[1], w[2])
+                inside = rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3]
+                cov = rectangle_coverage(rect, w[0] & 4095, x, y) if inside else (
+                    255 if c.flags & 1 else 0)
+                alpha = d((dest >> 24) * cov)
+                store(memory, address, size, (alpha << 24) | (dest & 0xffffff) if alpha else 0)
+                continue
+            elif c.op == 13:
+                alpha, *color = affine_sample(memory, c, p, x, y)
+                if c.flags & 8:
+                    color = tuple(mix(w[7] >> 24, rc, s)
+                                  for rc, s in zip(argb(w[7])[1:], color))
+                cov = rectangle_coverage(rectangle_words(p[6], p[7]), w[4] & 4095, x, y
+                                         ) if c.flags & 128 and w[4] & 4095 else 255
+                sa = d(d(c.opa * alpha) * cov)
+                mode = (c.flags >> 4) & 7
             store(memory, address, size, over(color, sa, dest, c.dst_fmt, mode))
     return (ax1 - ax0 + 1) * (ay1 - ay0 + 1)
 
@@ -443,9 +567,9 @@ def selftest():
             for mode in range(8):
                 cmd = Command(op, src_fmt=fmt, flags=mode << 4)
                 decoded = Command.decode(cmd.encode())
-                allowed = (op in (1, 2, 6, 7)
+                allowed = (op in (1, 2, 6, 7, 9, 10, 11, 12)
                            or op == 3 and fmt in (2, 3, 4, 5)
-                           or op == 4 and fmt in (0, 1, 6, 7, 8, 9) and mode < 4
+                           or op in (4, 13) and fmt in (0, 1, 6, 7, 8, 9) and mode < 4
                            or op == 5 and fmt == 1
                            or op == 8 and fmt in (0, 1, 6, 7))
                 assert decoded.illegal() != allowed

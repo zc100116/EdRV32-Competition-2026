@@ -196,10 +196,13 @@ module edrv32_rnd_tb;
         int stride;
         int pixel_bytes;
         int height;
+        int param;
+        int op;
         int x;
         int y;
         x = -1;
         y = -1;
+        param = 0;
         current_desc = -1;
         // Last matching destination identifies command and coordinates; sources use (-1,-1).
         for (int index = 0; index < descriptor_count; index++) begin
@@ -210,13 +213,21 @@ module edrv32_rnd_tb;
             if (stride != 0 && address_i >= base - stride
                 && address_i < base + stride * (height + 1)) begin
                 current_desc = index;
+                op = int'(memory_word(32'h1000 + index * 64) & 255);
+                if (op >= 9 && op <= 11)
+                    param = int'(memory_word(32'h1000 + index * 64 + 32));
+                else if (op == 4
+                    && (memory_word(32'h1000 + index * 64) & 32'h800000) != 0)
+                    param = int'(memory_word(32'h1000 + index * 64 + 52));
+                else if (op == 13)
+                    param = int'(memory_word(32'h1000 + index * 64 + 44));
                 x = (address_i - base) % stride / pixel_bytes;
                 y = (address_i - base) / stride;
             end
         end
         $fatal(1, "%s addr=%08h expected=%02h actual=%02h time=%0t",
-            $sformatf("FAIL RN-%02d memory desc=%0d coord=(%0d,%0d)",
-                test_case, current_desc, x, y), address_i, wanted_i, actual_i, $time);
+            $sformatf("FAIL RN-%02d memory desc=%0d param=%08h coord=(%0d,%0d)",
+                test_case, current_desc, param, x, y), address_i, wanted_i, actual_i, $time);
     endtask
 
     task automatic compare_memory(input bit incomplete_i);
@@ -294,6 +305,8 @@ module edrv32_rnd_tb;
         logic [31:0] cycles;
         logic [31:0] source_wait;
         logic [31:0] writer_wait;
+        int source_fmt;
+        int source_bits;
         read_reg(12'h040, cycles);
         equal("PERF0 within observed busy interval", 1,
             32'(cycles >= 32'(perf_lower) && cycles <= 32'(perf_upper)));
@@ -302,7 +315,34 @@ module edrv32_rnd_tb;
         expect_reg(12'h048, 32'(u_memory.r_beats - r_start));
         expect_reg(12'h04c, 32'(u_memory.w_beats - w_start));
         for (int index = 6; index < 16; index++) expect_reg(12'(64 + index * 4), 0);
-        if (perf_kind != 0) begin
+        if (test_case == 29) begin
+            source_fmt = int'((memory_word(32'h1000) >> 12) & 15);
+            case (source_fmt)
+                0: source_bits = 16;
+                1: source_bits = 32;
+                6: source_bits = 8;
+                7: source_bits = 4;
+                8: source_bits = 2;
+                9: source_bits = 1;
+                default: source_bits = 0;
+            endcase
+            $display("RN-29 source_format=%0d source_bytes=%0d raw_read_amplification=%0.6f",
+                source_fmt, u_memory.image_beats * 32,
+                real'(u_memory.image_beats * 32) / (real'(pixels * source_bits) / 8.0));
+            if (perf_kind == 5)
+                equal("G1 AA black-box throughput >=0.45", 1,
+                    32'(pixels * 100 >= int'(cycles) * 45));
+            if (perf_kind == 7)
+                equal("bilinear identity throughput >=0.7", 1,
+                    32'(pixels * 10 >= int'(cycles) * 7));
+            $display("RN-29 PERF0=%0d PERF1=%0d PERF2=%0d PERF3=%0d source_beats=%0d",
+                cycles, pixels, u_memory.r_beats - r_start, u_memory.w_beats - w_start,
+                u_memory.image_beats);
+            $display("RN-29 parameter_beats=%0d pixels_per_cycle=%0.6f peak=%0.1f",
+                u_memory.parameter_beats, real'(pixels) / real'(cycles),
+                perf_kind == 5 ? 0.5 : 1.0);
+        end
+        if (perf_kind != 0 && test_case != 29) begin
             read_reg(12'h050, source_wait);
             read_reg(12'h054, writer_wait);
             $write("RN-18 kind=%0d read_latency=%0d PERF0=%0d PERF1=%0d ",
@@ -330,7 +370,15 @@ module edrv32_rnd_tb;
         equal("DONE IRQ enabled", 1, 32'(irq));
         if (zero_writes != 0) equal("empty area produces no W", 32'(w_start),
             32'(u_memory.w_beats));
+        if (zero_writes == 2)
+            equal("transparent transform no source pixel AR", 0,
+                32'(u_memory.image_ar_count));
+        if (zero_writes == 1 && test_case >= 21)
+            equal("empty area no parameter/source/target AR", 0,
+                32'(u_memory.source_ar_count));
         check_perf();
+        if (test_case == 28 && u_memory.parameter_ar_count != 0)
+            equal("PERF2 includes parameter beats", 1, 32'(u_memory.parameter_beats >= 2));
         compare_memory(0);
         write_reg(12'h00c, 0);
         equal("DONE IRQ masked", 0, 32'(irq));
@@ -396,6 +444,8 @@ module edrv32_rnd_tb;
         logic [31:0] stopped_cycles;
         if (abort_phase == 1) wait (u_memory.descriptor_ar_count != 0);
         else if (abort_phase == 2) wait (u_memory.target_ar_count != 0);
+        else if (abort_phase == 4) wait (u_memory.parameter_ar_count != 0);
+        else if (abort_phase == 5) wait (u_memory.image_ar_count != 0);
         else wait (u_memory.w_beats != 0);
         if (abort_phase != 3) equal("ABORT with R pending", 1,
             32'(u_memory.ar_count > u_memory.r_count));
@@ -417,6 +467,16 @@ module edrv32_rnd_tb;
             32'(stopped_cycles >= 32'(perf_lower) && stopped_cycles <= 32'(perf_upper)));
         expect_reg(12'h040, stopped_cycles);
         compare_memory(1);
+        if (test_case == 28) begin
+            abort_accepted = 0;
+            abort_phase = 0;
+            @(negedge clk_mem);
+            foreach (recovery[i]) u_memory.mem[i] = recovery[i];
+            u_memory.written.delete();
+            u_memory.max_desc_read = -1;
+            start_table();
+            check_completion();
+        end
     endtask
 
     task automatic reset_registers;
@@ -557,7 +617,21 @@ module edrv32_rnd_tb;
             if (test_case == 16) register_test();
             else begin
                 start_table();
-                if (abort_phase != 0) check_abort();
+                if ($test$plusargs("BASELINE_ILLEGAL")) begin
+                    normal_execution = 0;
+                    wait_idle();
+                    expect_reg(12'h008, 6);
+                    expect_reg(12'h010, 2);
+                    expect_reg(12'h014, 3);
+                    expect_reg(12'h02c, 0);
+                    expect_reg(12'h100, 0);
+                    equal("illegal before parameter/source AR", 0,
+                        32'(u_memory.source_ar_count));
+                    equal("illegal has no AW", 0, 32'(u_memory.aw_count));
+                    compare_memory(1);
+                    $display("PASS baseline illegal OP=%02h ERR_CODE=3",
+                        memory_word(32'h1000) & 255);
+                end else if (abort_phase != 0) check_abort();
                 else if (expected_error != 0) check_error();
                 else check_completion();
             end

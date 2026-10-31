@@ -13,6 +13,7 @@ sys.dont_write_bytecode = True
 from rnd_ref import (Command, area, blit, blur, border, box_shadow, copy, execute, fill,
                      glyph, load, selftest, store, temp_region, tilemap)
 from vectors import configure, selections
+from v2_selftest import selftest as v2_selftest
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -115,7 +116,8 @@ def vector_selftest():
             meta, commands, initial, expected, partial, recovery, temps = configure(
                 number, variant, seed)
             equal('memory size conserved', len(initial), len(expected))
-            equal('expected error field', number == 15 and variant[0] != 'abort',
+            equal('expected error field', (number == 15 and variant[0] != 'abort')
+                  or (number == 28 and variant[0].endswith('error')),
                   meta['error'] != 0)
             if number == 19:
                 equal('random list length', 50, len(commands))
@@ -130,13 +132,14 @@ def vector_selftest():
             equal('recovery image size', len(initial), len(recovery))
             total += 1
     equal('random commands', 500, random_commands)
-    equal('all operations', set(range(1, 9)), op_seen)
+    equal('all operations', set(range(1, 14)), op_seen)
     equal('all pixel formats', set(range(10)), fmt_seen)
-    print(f'PASS RND vectors: {total} cases, 10 seeds x 50 commands, all 8 OP/all 10 formats')
+    print(f'PASS RND vectors: {total} cases, 10 seeds x 50 commands, all 13 OP/all 10 formats')
 
 
 def main():
     selftest()
+    v2_selftest()
     command_examples()
     vector_selftest()
     subprocess.run([sys.executable, str(HERE / 'check.py')], cwd=ROOT, check=True)

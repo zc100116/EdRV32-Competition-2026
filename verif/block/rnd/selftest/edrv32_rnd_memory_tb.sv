@@ -144,6 +144,13 @@ module edrv32_rnd_memory_tb;
             read_burst(32'h20000, 1, 0, 1);
         end
         @(negedge clk_mem);
+        u_memory.error_kind = 6;
+        u_memory.injected = 0;
+        read_burst(32'h48000, 4, 1, 1);
+        read_burst(32'h48000, 2, 0, 1);
+        equal("parameter AR count", 2, 32'(u_memory.parameter_ar_count));
+        equal("parameter read beats", 6, 32'(u_memory.parameter_beats));
+        @(negedge clk_mem);
         u_memory.error_kind = 5;
         u_memory.injected = 0;
         write_burst(32'h30000, 16, 1);
@@ -163,7 +170,7 @@ module edrv32_rnd_memory_tb;
         equal("write queue drained", 0, 32'(u_memory.writes.size()));
         equal("response queue drained", 0, 32'(u_memory.responses.size()));
         $display(string'({"PASS RND memory model: strobes, 1..16 beats, ",
-            "stalls, latency40, SLVERR kinds1..5"}));
+            "stalls, latency40, SLVERR kinds1..6"}));
         $finish;
     end
 

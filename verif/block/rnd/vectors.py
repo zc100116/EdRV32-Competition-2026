@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # File: vectors.py
-# Spec: rnd-testplan RN-01–16, RN-18–20; rnd 2–7.
+# Spec: rnd-testplan RN-01–16, RN-18–29; rnd 2–7.
 # Description: Directed boundary cases and ten deterministic random command-list seeds.
 # Clock domain: host.
 from dataclasses import replace
+import v2_vectors
 from pathlib import Path
 import random
 
@@ -22,7 +23,7 @@ TILE = 0x80000
 def selections(tier):
     if tier == 'perf':
         return [(18, (name, latency), 1) for latency in (0, 40)
-                for name in ('argb', 'rgb565', 'blit', 'glyph')]
+                for name in ('argb', 'rgb565', 'blit', 'glyph')] + v2_vectors.selections('perf')
     if tier == 'full':
         return ([(5, (fmt, sides, width), 1) for fmt in (0, 1)
                  for sides in range(16) if sides not in (0, 1, 2, 4, 8, 15)
@@ -32,7 +33,8 @@ def selections(tier):
                 + [(12, (fmt, radius), 1) for fmt in (0, 1) for radius in (0, 31)]
                 + [(15, ('abort', phase), 1) for phase in (1, 2, 3)]
                 + [(19, 'random', seed) for seed in range(1, 11)]
-                + [(20, axis, 1) for axis in ('horizontal', 'vertical')])
+                + [(20, axis, 1) for axis in ('horizontal', 'vertical')]
+                + v2_vectors.selections('full'))
     cases = [(1, (fmt, opa, alpha), 1) for fmt in (0, 1)
              for opa in (0, 1, 128, 254, 255) for alpha in (0, 1, 128, 255)]
     cases += [(2, (fmt, name), 1) for fmt in (0, 1)
@@ -64,12 +66,14 @@ def selections(tier):
               for srcfmt in (0, 1, 6, 7) for tile16 in (0, 1)]
     cases += [(14, 'chain', 1), (16, 'registers', 1)]
     cases += [(15, ('bus', kind), 1) for kind in range(1, 6)]
-    cases += [(15, ('op', op), 1) for op in (0, 9, 255)]
+    cases += [(15, ('op', op), 1) for op in (0, 14, 255)]
     cases += [(15, ('format', (op, fmt)), 1) for op, allowed in
-              ((3, (2, 3, 4, 5)), (4, (0, 1, 6, 7, 8, 9)), (8, (0, 1, 6, 7)))
+              ((3, (2, 3, 4, 5)), (4, (0, 1, 6, 7, 8, 9)), (13, (0, 1, 6, 7, 8, 9)),
+               (8, (0, 1, 6, 7)))
               for fmt in range(16) if fmt not in allowed]
     cases += [(15, ('copy', fmt), 1) for fmt in (0, 2, 15)]
-    cases += [(15, ('mode', mode), 1) for mode in range(4, 8)]
+    cases += [(15, (kind, mode), 1) for kind in ('mode', 'affine_mode')
+              for mode in range(4, 8)]
     return cases
 
 
@@ -199,8 +203,8 @@ def configure(number, variant, seed):
                 first = replace(first, op=op, src_fmt=fmt)
             elif kind == 'copy':
                 first = replace(first, op=5, src_fmt=value)
-            elif kind == 'mode':
-                first = replace(first, flags=value << 4)
+            elif kind in ('mode', 'affine_mode'):
+                first = replace(first, op=13 if kind == 'affine_mode' else 4, flags=value << 4)
         commands = [first, fill(dst_base=DST + 0x4000, opa=255, color=0x34fac1)]
     elif number == 16:
         commands = [fill(opa=255, rect=(0, 0, 31, 23))]
@@ -243,7 +247,7 @@ def configure(number, variant, seed):
         mem_size = TILE + 4096 * 256 * 4 + 4096
         commands = []
         for i in range(50):
-            op = i % 8 + 1 if i < 8 else rng.randrange(1, 9)
+            op = i % 13 + 1 if i < 13 else rng.randrange(1, 14)
             fmt = rng.randrange(2)
             rect = (rng.randrange(-5, 8), rng.randrange(-4, 5),
                     rng.randrange(9, 32), rng.randrange(6, 24))
@@ -284,10 +288,31 @@ def configure(number, variant, seed):
                               tile_base=TILE, map_base=MAP, map_stride=16,
                               map_x=rng.randrange(16), map_y=rng.randrange(16),
                               palette=PAL, key=0x1234, **common)
-            commands.append(cmd)
+            commands.append(replace(cmd, op=op) if op >= 9 else cmd)
         metadata.update(latency=rng.randrange(0, 41), stalls=rng.randrange(15, 60),
                         bdelay=rng.randrange(1, 41))
+    if number == 29:
+        mem_size = 0x200000
     memory = pattern_memory(mem_size, rng)
+    if number >= 21:
+        commands = v2_vectors.build(number, variant, rng, memory, metadata)
+        if number == 21 and variant[0] == 'split':
+            split_reference = replace(commands[0], clip=(0, 0, 31, 23))
+    if number == 19:
+        variants = {9: (21, ('reverse', rng.randrange(2))),
+                    10: (22, ('diagonal', rng.randrange(2), rng.randrange(4))),
+                    11: (23, ('large', rng.randrange(2), rng.randrange(4))),
+                    12: (24, (rng.randrange(10), rng.randrange(2), rng.randrange(256))),
+                    13: (26, (rng.choice(('rotate', 'skew+', 'negative')), rng.randrange(2),
+                              rng.choice((0, 1, 6, 7, 8, 9)), rng.randrange(2), rng.randrange(4)))}
+        for k, cmd in enumerate(commands):
+            if cmd.op >= 9:
+                rn, var = variants[cmd.op]
+                common = dict(dst_base=cmd.dst_base, dst_stride=cmd.dst_stride,
+                              dst_fmt=cmd.dst_fmt, rect=cmd.rect, clip=cmd.clip,
+                              opa=cmd.opa, color=cmd.color)
+                commands[k:k + 1] = v2_vectors.build(rn, var, rng, memory, metadata,
+                                                     common, v2_vectors.PARAM + k * 128)
     if number == 20:
         # Address high bits must remain observable; a repeated 4 KiB block aliases them.
         for address in range(SRC, mem_size):
@@ -343,6 +368,20 @@ def configure(number, variant, seed):
     for i in range(256):
         store(memory, PAL + 4 * i, 4, ((0, 1, 128, 255)[i % 4] << 24)
               | ((i * 73 % 256) << 16) | ((i * 37 % 256) << 8) | (i * 19 % 256))
+    for cmd in commands:
+        if cmd.op == 13:
+            base, stride = cmd.args[:2]
+            sw, sh = cmd.args[2] & 65535, cmd.args[2] >> 16
+            if cmd.src_fmt in (0, 1):
+                for y in range(sh):
+                    for x in range(sw):
+                        value = ((0, 1, 255)[(x + y) % 3] << 24) | (
+                            0xff0000 if x & 1 else 0x00ffff)
+                        if cmd.src_fmt == 0:
+                            value = 0x1234 if (x + y) % 3 == 0 else (
+                                0xf800 if (x + y) & 1 else 0x07ff)
+                        store(memory, base + y * stride + x * (2 << cmd.src_fmt),
+                              2 << cmd.src_fmt, value)
     for index, command in enumerate(commands):
         memory[DESC + index * 64:DESC + (index + 1) * 64] = command.encode()
     # Read errors do not specify how much of the current command writes before stopping.
@@ -351,6 +390,10 @@ def configure(number, variant, seed):
     if (metadata['error'] or metadata['abort']) and not commands[0].illegal():
         execute(partial, commands[:1])
     recovery = bytearray(memory)
+    if number == 28 and (metadata['error'] or metadata['abort']):
+        # Changed source bytes make stale valid window entries observable after restart.
+        for address in range(SRC, SRC + 49 * 277 + 264):
+            recovery[address] ^= 0xff
     repaired = list(commands)
     if metadata['error'] == 3:
         repaired[0] = fill(opa=255)
