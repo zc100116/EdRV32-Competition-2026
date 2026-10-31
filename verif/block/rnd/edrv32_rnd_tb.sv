@@ -290,7 +290,8 @@ module edrv32_rnd_tb;
         w_start = u_memory.w_beats;
         normal_execution = expected_error == 0 && abort_phase == 0;
         write_reg(12'h028, 32'hfeed1234);
-        doorbell_time = $time - 4;
+        // The registered DOORBELL reaches the engine one cycle after APB completion.
+        doorbell_time = $time - 4 + 8;
         perf_lower = 0;
         perf_upper = 0;
     endtask
@@ -476,6 +477,8 @@ module edrv32_rnd_tb;
         else equal("ABORT with B pending", 1,
             32'(u_memory.aw_count > u_memory.b_count));
         write_reg(12'h004, 4);
+        // Start the no-new-AR check after the registered ABORT reaches the engine.
+        @(negedge clk_mem);
         abort_accepted = 1;
         abort_ar_count = u_memory.ar_count;
         wait_idle();
