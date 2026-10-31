@@ -18,6 +18,7 @@ import time
 from .program import BiosProgrammer
 from .session import BoardSession
 from .scene import SceneControl
+from .processing import ProcessingControl
 
 try:
     import serial
@@ -105,6 +106,7 @@ class SerialEngine:
         self.yolo = self.board.yolo
         self.video = self.board.video
         self.scenes = SceneControl(self)
+        self.processing = ProcessingControl(self)
 
     # ---------------------------------------------------------- observer --
     def add_listener(self, callback):

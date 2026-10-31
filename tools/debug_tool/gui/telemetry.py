@@ -95,7 +95,7 @@ class Timeline(QWidget):
                 scene = row['scene']
         else:
             painter.setPen(QColor('#8a98aa'))
-            painter.drawText(bounds, Qt.AlignCenter, '等待 WIN 3 监控数据 · 或打开 CSV 回放')
+            painter.drawText(bounds, Qt.AlignCenter, '等待监控数据 · 或打开 CSV 回放')
 
 
 class Histogram(QWidget):

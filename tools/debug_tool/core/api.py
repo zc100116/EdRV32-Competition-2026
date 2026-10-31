@@ -61,6 +61,8 @@ def make_handler(engine):
                     return self._json(200, engine.board.status())
                 if path == "/api/telemetry":
                     return self._json(200, engine.telemetry.status())
+                if path == "/api/processing":
+                    return self._json(200, engine.processing.status())
                 if path == "/api/scenes":
                     return self._json(200, engine.scenes.mapping())
                 if path == "/api/telemetry/csv":
@@ -103,8 +105,6 @@ def make_handler(engine):
             path = urllib.parse.urlsplit(self.path).path
             try:
                 body = self._body()
-                if path == "/api/board/project":
-                    return self._json(200, engine.board.select_project(body['project']))
                 if path == "/api/board/network":
                     return self._json(200, engine.board.establish_network(
                         body.get('boardIp', '192.168.1.10'), int(body.get('boardPort', 5000))))
@@ -115,17 +115,17 @@ def make_handler(engine):
                 if path == "/api/telemetry/clear":
                     engine.telemetry.clear()
                     return self._json(200, engine.telemetry.status())
+                if path in ("/api/processing/pix", "/api/processing/geo"):
+                    return self._json(200, engine.processing.send(path.rsplit("/", 1)[1], body))
                 if path == "/api/scenes/send":
                     return self._json(200, engine.scenes.send(
                         body["name"], int(body.get("rate", 100))))
                 if path in ("/api/yolo/model", "/api/yolo/image"):
                     send = (engine.yolo.send_model if path.endswith("model")
                             else engine.yolo.send_image)
-                    options = {} if path.endswith("model") else {
-                        "window": int(body.get("window", 0))}
                     return self._json(200, send(
                         body["path"], body["boardIp"], int(body["boardPort"]),
-                        int(body["localPort"]), **options))
+                        int(body["localPort"])))
                 if path == "/api/connect":
                     return self._json(200, engine.connect(
                         port=body.get("port", ""),

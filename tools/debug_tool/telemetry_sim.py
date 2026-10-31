@@ -162,9 +162,9 @@ def run_yolo(host, port, ch2=None, output=None):
         send_block(sock, destination, demo_detections(42), 2)
 
 
-def run_b3n(sock, model, quant_params, frames):
-    """T-NETN host board: receive CH2 and return reference OUTPUT/EDDT over real UDP."""
-    from core.yolo import reference_output, reference_detections
+def run_detection(sock, model, quant_params, frames):
+    """T-NETN host board: receive RGB565 and return reference CH2/OUTPUT/EDDT over real UDP."""
+    from core.yolo import reference_output, reference_detections, rgb565_ch2
     for frame_id in range(frames):
         block = Block()
         while True:
@@ -174,17 +174,40 @@ def run_b3n(sock, model, quant_params, frames):
                 continue
             block.receive(offset, data, notify)
             if notify:
-                if not block.complete(INPUT_BYTES):
-                    raise ValueError('B3N simulator: incomplete CH2 tensor')
+                if not block.complete(1280 * 720 * 2):
+                    raise ValueError('Detection simulator: incomplete RGB565 image')
                 break
-        output = reference_output(model, block.data(INPUT_BYTES))
+        ch2 = rgb565_ch2(block.data(1280 * 720 * 2))
+        output = reference_output(model, ch2)
         boxes = reference_detections(output, quant_params)
         detections = DETECTION_HEADER.pack(b'EDDT', 1, len(boxes), frame_id, 0)
         detections += b''.join(DETECTION.pack(*box) for box in boxes)
+        send_block(sock, peer, ch2, 0, notify=False)
         send_block(sock, peer, output, 1, notify=False)
         send_block(sock, peer, detections, 2)
-        print(f'B3N frame_id={frame_id} WIN{window} CH2={INPUT_BYTES} '
+        print(f'Detection frame_id={frame_id} CH2={INPUT_BYTES} '
               f'OUTPUT={len(output)} detections={len(boxes)}', flush=True)
+
+def run_processing(stream, commands=2):
+    """UART peer for end-to-end parameter transport through a real serial engine."""
+    received = []
+    line = bytearray()
+    while len(received) < commands:
+        byte = stream.read(1)
+        if not byte:
+            raise EOFError('Processing serial stream closed')
+        if byte in (b'\r', b'\n'):
+            command = line.decode('ascii')
+            line.clear()
+            kind, action, values = command.split(' ', 2)
+            if kind not in ('pix', 'geo') or action != 'set':
+                raise ValueError(f'Unexpected processing command: {command}')
+            received.append(command)
+            stream.write(f'{kind.upper()} parameters: {values}\r\n'.encode())
+        else:
+            line.extend(byte)
+    return received
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -192,15 +215,21 @@ def main():
     parser.add_argument('--port', type=int, default=6000)
     parser.add_argument('--seconds', type=float, default=60)
     parser.add_argument('--hz', type=int, choices=range(10, 1001), default=100, metavar='10..1000')
-    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo', 'b3n'], default='telemetry')
+    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo', 'detection', 'processing'], default='telemetry')
     parser.add_argument('--fps', type=int, choices=range(1, 61), default=10, metavar='1..60')
     parser.add_argument('--ch2', help='YOLO mode: raw CH2 input file')
     parser.add_argument('--output', help='YOLO mode: raw NPU OUTPUT file')
-    parser.add_argument('--model', help='B3N: compiled NPU model directory')
-    parser.add_argument('--quant', help='B3N: quantization JSON')
-    parser.add_argument('--frames', type=int, default=1, help='B3N: image count')
+    parser.add_argument('--model', help='Detection: compiled NPU model directory')
+    parser.add_argument('--quant', help='Detection: quantization JSON')
+    parser.add_argument('--serial', help='Processing: serial port for a paired UART simulator')
+    parser.add_argument('--commands', type=int, default=2)
+    parser.add_argument('--frames', type=int, default=1, help='Detection: image count')
     args = parser.parse_args()
-    if args.mode == 'telemetry':
+    if args.mode == 'processing':
+        import serial
+        with serial.Serial(args.serial, 115200) as stream:
+            print(run_processing(stream, args.commands))
+    elif args.mode == 'telemetry':
         run(args.host, args.port, args.seconds, args.hz)
     elif args.mode == 'video':
         run_video(args.host, args.port, args.seconds, args.fps)
@@ -212,8 +241,8 @@ def main():
         parameters = json.loads(Path(args.quant).read_text())
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.bind((args.host, args.port))
-            print(f'B3N listening {sock.getsockname()}', flush=True)
-            run_b3n(sock, args.model, parameters, args.frames)
+            print(f'Detection listening {sock.getsockname()}', flush=True)
+            run_detection(sock, args.model, parameters, args.frames)
 
 
 if __name__ == '__main__':

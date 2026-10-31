@@ -1,288 +1,193 @@
-# EdRV32 调试工具 · SoC 中控台
+# EdRV32 调试工具
 
-PySide6 桌面工具，沿用浅色主题。启动后进入**中控台**：上方选择工程并查看板子阶段和
-网口四步状态；左侧烧录 / 加载、图片与模型传输；中间切换视频、静态图片、检测叠加；
-右侧控制场景、PIX、GEO、输出与采样并查看 `status`；底部查看 DDR 图表、端口等待和日志。
-1920 × 1080 下全部侧栏分组完整展开，无需滚动。1366 × 768 下点击分组标题整组展开，
-每栏一次展开一组，默认显示 BIOS 烧录与场景控制；标题和不适用原因始终可见。
-DDR 与日志占底部 190 px，端口表一次显示全部七个端口；中间画布保留至少一半中间列高度。
+PySide6 桌面工具，GUI、CLI 和 REST 共用串口、UDP 接收端和会话状态。
+全部功能始终提供，用户选择要烧录的镜像；工具不选择板型、不探测模块是否存在，
+也不判断某项操作在当前硬件上是否有效。
 
-![B3V 中控台，1366×768](soc-vision-1366x768.png)
-<!-- 截图命令：QT_QPA_PLATFORM=offscreen python tools/debug_tool/render_shot.py tools/debug_tool/soc-vision-1366x768.png --state vision --width 1366 --height 768；数据为 telemetry_sim 合成串口/UDP，不是实板测量。 -->
+“调试”导航中按功能分成三个页面：
 
-GUI、REST、CLI 共用一个 `SerialEngine.board` 板级会话：同一个串口、一个 UDP 接收端、
-同一套工程 / 阶段 / 网口状态。没有自动重连、重传、重试或心跳；错误写入状态区和日志。
-连接、命令、规则、通用串口控制台、数据面板和通用网口文件收发仍在原来的通用页面。
-原烧录、DDR、场景、YOLO 页和独立视频页已并入中控台。
+- **设备与输出**：BIOS 烧录、摄像头功能、HDMI / 网口输出、视频目标帧率与监控采样率。
+- **图像处理**：点运算、两级滤波和几何变换；修改后约 200 ms 自动下发。
+- **目标检测**：模型加载、单张图片或文件夹、原图叠框、实测往返时间与 fps、可选参考比对。
+
+右侧统一显示视频、原图或检测结果；底部显示 DDR 监控和会话日志。
+控件过多时按页垂直滚动，每个分组保持完整；文件路径可编辑并悬停查看全文，
+长日志使用横向滚动，规则正则可悬停查看全文。表头完整显示，长数值提供全文提示。
+
+![图像处理，1366×768](assets/processing-1366x768.png)
+<!-- 截图：QT_QPA_PLATFORM=offscreen python tools/debug_tool/render_shot.py tools/debug_tool/assets/processing-1366x768.png --state vision --page 1 --width 1366 --height 768；telemetry_sim 合成数据，非实板测量。 -->
 
 ## 安装与启动
 
-Windows 安装 `tools/requirements.txt` 中声明的 PySide6、pyserial，运行
-`tools/debug_tool/启动调试工具.bat`，或：
+Windows 安装 `tools/requirements.txt` 中的 PySide6、pyserial，双击
+`启动调试工具.bat`，或执行：
 
 ```sh
 python tools/debug_tool/main.py
 python tools/debug_tool/main.py --connect COM7 --baud 115200
-python tools/debug_tool/main.py --headless           # 只启动共享引擎和 REST
+python tools/debug_tool/main.py --headless
 ```
 
-Linux 开发与截图使用 `build/` 中的虚拟环境，依赖版本以 `tools/requirements.txt` 为准：
+Linux 使用已安装同一 requirements 的 Python 环境；本次验收使用
+`~/.local/opt/edrv32-py/bin/python`。NPU 参考执行另需 requirements 中已有的
+numpy、torch 等依赖和 `third_party/ultralytics` 子模块。
+
+## 连接、烧录与监控
+
+1. PC 有线网卡设为同网段地址，例如 `192.168.1.2/24`；板子固定 `192.168.1.10`。
+   允许 PC UDP 6000，板端 UDP 5000。串口页选择端口、115200、8N1 并连接。
+2. KEY1 + 复位进入 BIOS。“设备与输出”选择 ELF 或 `.bin`，选择串口 / 网口传输。
+   `.bin` 显式填写烧录和运行地址，SRAM 通常均为 `0x10000000`；ELF 按 PT_LOAD
+   加载并跳转 e_entry。网口传输填写本机 IP。烧录后自动运行，状态 / 失败原因见原位置和日志。
+3. 点击“建立网口连接”，依次监听、发送连接短包、核对板端 PEER、累计视频 / EDTM 数据。
+   四格分别记录时间；数据包数与完整视频帧数分开统计。同一个 socket 接收全部业务。
+4. 按功能设置摄像头输入、输出、视频 fps、采样 Hz。视频 fps 是实收完整帧计算值；
+   目标帧率受源帧率、推理和网口带宽限制。串口 `status` 摘要显示板端设置与计数。
+5. DDR 曲线保留 60 s，提供带宽 / 利用率 / 可选读延迟；七端口表列平均等待、最长等待、
+   紧急授权数，等待单位为 clk_mem 周期。暂停只暂停绘图，CSV 仍保留原始数据。
+   导出 / 回放 / 清空按钮用于记录和复现；溢出、读空计数非零标红。
+
+## 图像处理
+
+点运算 1：亮度 / 对比度开关、对比度 Q8（256 = 1 倍）、亮度 −256–255、
+Gamma 开关和任意正 Gamma 值。固件计算 Gamma 表，写入未使用的 bank 后切换。
+两个 3×3 级独立选择关闭、均值、高斯、锐化、Sobel、腐蚀或膨胀。
+点运算 2：灰度、二值化及 0–255 阈值、反色，各开关可同时启用。
+
+几何变换：总开关，任意角度（精度 0.1°），独立 X/Y 缩放（精度 0.001），
+“锁定比例”默认打开，关闭后两轴独立；X/Y 平移和水平 / 垂直镜像。
+比例 1.000 为原尺寸、0.500 为缩小一半、2.000 为放大两倍，正角度顺时针。
+放大没有人为倍率上限；固件按 GEO 2.4 检查实际 Q16.16 矩阵，超出范围明确报错且不下发。
+连续编辑同一组参数会合并，停顿约 200 ms 后通过串口发送一条完整参数命令。
+原有预设和 KEY 循环仍可使用；线格式及单位见[演示程序命令表](../../sw/apps/demo/README.md#串口命令)。
+
+## 目标检测
+
+选择 `compile_yolo.py` 输出目录并发送模型，等待串口 `EDNM: loaded`。
+选择任意尺寸图片后点击发送，工具统一缩放到 1280×720、小端 RGB565；
+所有演示检测程序采用相同图像协议，图像缓冲自动交替。
+回传顺序统一为 CH2（983040 B）、OUTPUT（725760 B）、EDDT；最后的检测通知结束该图。
+接收完成后在原图尺寸上叠框，记录从开始发送到最终通知的往返 ms 和平均检测 fps。
+
+“文件夹”按文件名排序处理 png/jpg/jpeg/bmp，收到本张完整回传后才发下一张，
+显示包含主机转换和传输开销的文件夹平均 fps。检测不要求安装参考模型依赖。
+需要核对数值时选择配套量化 JSON 并点击“运行参考模型并比对”：CH2 使用实际发送的
+RGB565 按 VIN 2.8 展开、平均、量化和 letterbox；OUTPUT 执行 NPU 参考模型；
+EDDT 使用 Python 后处理逐项比较，显示差异字节数、首差异和框差异。
+
+![目标检测，1366×768](assets/detection-1366x768.png)
+<!-- 截图：render_shot.py --state detection --page 2 --width 1366 --height 768；输入和检测结果由 telemetry_sim 通过真实 UDP 回环生成，非实板测量。 -->
+
+## CLI 与 REST
+
+CLI 使用同一个本机 REST 引擎，默认 `http://127.0.0.1:8765`。
+路径按工具所在主机解析，参数线单位为整数：角度 0.1°、比例/Gamma 千分值、平移像素。
 
 ```sh
-python3 -m venv --system-site-packages build/debug-tool-venv
-build/debug-tool-venv/bin/python -m pip install PySide6 pyserial
-. build/debug-tool-venv/bin/activate
-```
-
-参考模型比对还需要 requirements 中已有的 NPU 依赖（torch、numpy、OpenCV 等），以及
-`git submodule update --init third_party/ultralytics`。常规连接、视频、监控不需要执行参考模型。
-
-## 工程能力
-
-| 功能 | B3V | B3VN | B3R | B3N | B3F |
-|---|---|---|---|---|---|
-| SRAM `.bin` 烧录 / SRAM、DDR `.elf` 加载运行 | ✓ | ✓ | ✓ | ✓ | ✓ |
-| S2、PIX 五档、GEO 三档 | ✓ | ✓ | — | — | ✓ |
-| S1、模型发送、YOLO 图像检查 / 参考比对 | — | ✓ | — | — | ✓ |
-| 网口视频 | ✓ | ✓ | — | — | ✓ |
-| ETH 建立对端、DDR EDTM | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 对应程序 | `demo_vision` | `demo_vnpu` | `s3` | `board_npu` | `demo` |
-
-B3V 没有 NPU / RND，图像检查和模型控件灰显，原位置写明原因；S1 选项不可选。
-B3R 有 RND、DISP、ETH，B3N 有 NPU、ETH；两者没有摄像头。
-B3R/B3N 支持建立对端和固定 100 Hz DDR 监控，不支持 demo 的场景、视频、模型和图像检查菜单。
-加载对应 ELF 后点击“建立网口连接”；WIN3 收到后主动打印 PEER，DDR 页约每 160 ms 收到一批 EDTM。
-`board_npu` 保留原有测试输出和结束行为；成功结束后定时监控继续运行。
-B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都使用 EDDT。
-工程选择用于界面能力说明，镜像由用户选择，不探测硬件、不添加镜像校验门禁。
-
-## B3V：从上电到视频与 DDR
-
-1. 连接板子串口和网线，给板子上电；将 PC 有线网卡设为同网段地址，例如
-   `192.168.1.2/24`，板子固定 `192.168.1.10`。允许本机 UDP 6000 接收。
-2. 在“连接”页选择串口、115200、8N1，连接后回到“中控台”，工程选 **B3V**。
-3. 按住 KEY1 并复位，看到阶段 **BIOS**。左栏选择 .bin、串口或网口，填写烧录地址和运行地址 0x10000000，选择
-   `build/sw/demo_vision/demo_vision.bin`，点击烧录。已经在 BIOS 时可直接开始，
-   无须再次复位；也可先开始，再按 KEY1 + 复位进入 BIOS。
-4. 等待烧录后自动运行，串口出现 `Demo: demo_vision`，阶段变为**应用**。
-5. 点击上方**建立网口连接**。工具依次监听 UDP 6000、从同一端口向板子 UDP 5000
-   发 WIN3 短包、经串口发 `status`；前三格依次完成，第三格须有板端 peer 与本机一致的回应。
-6. 展开右侧“输出与采样”，选择 **HDMI + ETH**，视频 **30 fps**、采样 **100 Hz**，点击下发。
-   场景保持 **S2**。中间选“视频”；第四格分别累计视频块包与 EDTM 包，画布显示完整帧、
-   实际接收 fps，底部 DDR 显示带宽 / 利用率及端口等待。
-7. 点击 **CSV 导出**保存原始 EDTM 记录。分别下发 HDMI、ETH、HDMI + ETH 检查输出：
-   HDMI 时不发视频，DDR 仍可收到；ETH 时 HDMI 关闭；同时模式两端都输出。
-   PIX / GEO 在右侧选择并下发；切换耗时 `Switch: frames=... mtime_ticks=...` 在日志和摘要中查看。
-
-## B3VN：从上电到视频与 DDR
-
-1. 连接串口、网线并上电，PC 有线网卡设 `192.168.1.2/24`，允许 UDP 6000。
-2. 在“连接”页以 115200、8N1 打开串口；中控台工程选 **B3VN**。
-3. 按 KEY1 + 复位进入 BIOS，选择 `build/sw/demo_vnpu/demo_vnpu.bin` 烧录 SRAM。
-   填写烧录地址和运行地址 0x10000000，烧录后自动运行，等待 `Demo: demo_vnpu` 和阶段“应用”。
-4. 点击**建立网口连接**，核对监听、WIN3、peer 三格完成及各自时间。
-5. 保持 **S2**，展开右侧“输出与采样”，选择 HDMI + ETH、30 fps、100 Hz 并下发；中间选“视频”，
-   等待完整视频帧和 EDTM 计数，底部查看 DDR 曲线、端口等待、DISP / VIN 实时性计数。
-6. 点击 CSV 导出保存数据。目标检测另在左侧选择本次 `compile_yolo.py` 输出目录并发送模型，
-   日志出现 `EDNM: loaded` 后切到 **S1**。中间选“检测叠加”，摄像头视频按相同 frame_id
-   叠加 EDDT 框；HDMI 检测框由 CPU 绘制。
-7. 如需图像检查，选择原图，选 WIN0 或 WIN1 后转换发送。收齐 CH2 / OUTPUT / EDDT 后
-   统一画布显示原图与框；参考比对入口在右侧“YOLO 图像检查”分组，小窗口下点击标题展开。检查后下发 S1 或 S2 恢复摄像头。
-
-## B3F：从上电到视频与 DDR
-
-1. 连接串口和网线，上电；PC 设 `192.168.1.2/24` 并允许 UDP 6000。
-2. 在“连接”页以 115200、8N1 打开串口；中控台工程选 **B3F**。
-3. 按 KEY1 + 复位进入 BIOS，选择 `build/sw/demo/demo.bin` 烧录（烧录和运行地址均为 0x10000000）；成功后自动运行，等待 `Demo: demo` 和阶段“应用”。
-4. 点击**建立网口连接**，确认前三格完成，特别是串口 `ETH peer IP`、`ETH peer port`
-   与本机实际路由地址 / 接收端口一致。
-5. 保持 **S2**，展开右侧“输出与采样”，下发 HDMI + ETH、30 fps、100 Hz。中间选“视频”，确认视频完整帧数和
-   EDTM 包数都增加；切换底部带宽 / 利用率选项，检查端口等待，再导出 CSV。
-6. 要看目标检测，发送本次编译模型，等待串口 `EDNM: loaded`，再下发 S1；中间选
-   “检测叠加”。网口发送底图与对应 EDDT，由 PC 画框；HDMI 的 L1 框和标签由 RND 绘制。
-7. 要做静态检查，左侧选择原图并发送 WIN0 / WIN1，等三块回传完整，再在右侧选择同次
-   量化 JSON，运行参考比对。结果显示 CH2 / OUTPUT 差异字节数、首差异偏移和检测框差异；
-   下发 S1 / S2 后画布恢复摄像头来源。模型与固件量化表的配套要求见
-   [演示程序说明](../../sw/apps/demo/README.md)。
-
-## 状态与数据的含义
-
-- **阶段**由当前串口行判断：`BIOS menu:` → BIOS，`Demo:` / 渲染器启动行 → 应用；
-  断开串口 → 未连接。刚连接、尚未收到启动行时仍等待阶段信息；已在运行时可复位以看到启动行。
-- **四步网口**分别记录完成状态与最近时间。前三步完成后，若视频为 0、EDTM 增长，应检查
-  输出是否包含 ETH；两者都为 0，则工具还未收到板端数据。没有 peer 回应时第三格保持未完成，
-  不把“发送过 WIN3”当作板端确认；peer 不一致时状态和日志列出实际值与本机值。
-- 第四格的视频 / EDTM 是 **UDP 包数**，不是完整帧数或 EDTM 记录数；画布下方另列完整帧、
-  缺包丢帧、EDTM 中累计的 `vid_skip`。视频输出的实际 fps 由到达的完整帧计算，停流后归零。
-- EDVF / EDDT 按 frame_id 对应；帧头在前、帧内像素包可乱序，跨帧不交错。缺包帧丢弃并计数。
-  图片检查期间不发 EDVF，按主动发起的检查把 WIN0 / WIN1 / WIN2 分发给 YOLO；
-  EDTM、视频、YOLO 和文件共用同一个接收端，不为不同显示模式重新绑定端口。
-- DDR 的 60 s 图表保留读 / 写 / 合计、4.0 GB/s 理论与 2.6 GB/s 规划有效参考线、场景标记；
-  下拉选择利用率 / 可选读延迟直方图。表中列平均等待、最长等待（clk_mem 周期）、紧急授权数，
-  实时性计数非零标红；NPU 工程另列推理 / 后处理 ms、检测 fps 和框数。
-  当前固件不启用延迟探针，没有探针命令；直方图无记录时明确等待 type 2。
-- 暂停只暂停图表更新，CSV 仍保留所有原始字段；回放按钮停止监听并按记录时间回放 CSV。
-- 烧录直接调用 `tools/board/uart_tool.py` 的 `BiosTransfer`。`.bin` 显式填写地址，烧录后自动运行；
-  ELF 模式默认 2000000（可选 921600 / 115200），按 PT_LOAD 加载并跳转入口，DDR ELF 不以复位启动。
-  BIOS FAIL、传输错误、参考模型失败在原位置显示原因并写日志。
-- 图片缩放为 1280 × 720、小端 RGB565；EDNM 的 WIN2 偏移为头 `0`、描述符 `0x1000`、
-  模型 `0x100000`，只在镜像最后一包置 NOTIFY。显示 `WIN2_BYTES` 期望值，板端结果见日志。
-  图像检查回传按 OFFSET 保存到 `build/debug_tool/udp-rx/window0.bin`（983040 B CH2）、
-  `window1.bin`（725760 B OUTPUT）、`window2.bin`（EDDT）。视频帧只驻留内存。
-
-## 通用页面与 CLI
-
-通用串口控制台保留文本 / HEX、时间戳、方向过滤、保存 / 清空、行尾选择、原始文件发送 / 取消。
-“命令”页维护快捷按钮，“规则”页从正则捕获数值并在数据面板显示；“网口”页保留任意 WIN / OFFSET
-的原始文件收发。中控台已经监听时，通用网口发送复用该 socket；停止监听会停止整个会话的 UDP 接收。
-中控台日志不折行，长行使用横向滚动条，保留每条串口消息的一行结构。
-视频帧率与采样率使用数字输入框加独立 fps / Hz 单位，没有微调箭头。
-通用控制台截图见 [screenshot.png](screenshot.png)。
-
-现有 CLI 名称保持不变，`status` 包含新增 `board` 状态：
-
-```sh
-python tools/debug_tool/cli.py ports
 python tools/debug_tool/cli.py connect COM7 --baud 115200
-python tools/debug_tool/cli.py status
-python tools/debug_tool/cli.py program build/sw/demo_vision/demo_vision.bin --addr 0x10000000 --entry 0x10000000
-python tools/debug_tool/cli.py program build/sw/app/app.elf --elf --baud 2000000
+python tools/debug_tool/cli.py program app.bin --addr 0x10000000 --entry 0x10000000
+python tools/debug_tool/cli.py program app.elf --elf --eth --local-ip 192.168.1.2
 python tools/debug_tool/cli.py scene s2
-python tools/debug_tool/cli.py scene output_both
-python tools/debug_tool/cli.py scene video_fps --rate 30
-python tools/debug_tool/cli.py scene sample_rate --rate 100
-python tools/debug_tool/cli.py send status
-python tools/debug_tool/cli.py listen --port 6000 --mode video
+python tools/debug_tool/cli.py processing pix '{"bc":1,"contrast":320,"brightness":24,"stage1":2}'
+python tools/debug_tool/cli.py processing geo '{"enabled":1,"angle":123,"scale_x":1500,"scale_y":750}'
+python tools/debug_tool/cli.py yolo model build/npu/yolo
+python tools/debug_tool/cli.py yolo image image.png
 python tools/debug_tool/cli.py telemetry latest
 python tools/debug_tool/cli.py telemetry export build/debug_tool/capture.csv
-python tools/debug_tool/cli.py yolo model build/npu/yolo --board-ip 192.168.1.10
-python tools/debug_tool/cli.py yolo image image.png --window 0 --board-ip 192.168.1.10
 python tools/debug_tool/cli.py tail -f
 ```
 
-一键建立网口连接和工程选择也可经 REST 操作：
-
-```sh
-curl -X POST http://127.0.0.1:8765/api/board/project \
-  -H 'Content-Type: application/json' -d '{"project":"B3V"}'
-curl -X POST http://127.0.0.1:8765/api/board/network \
-  -H 'Content-Type: application/json' -d '{"boardIp":"192.168.1.10"}'
-```
-
-## REST API
-
-默认 `http://127.0.0.1:8765`，GUI 和 headless 均可用。路径和文件由工具所在主机解析。
-
-| 方法 | 路径 | 输入 / 输出 |
+| 方法 | 路径 | 参数 / 结果 |
 |---|---|---|
-| GET | `/api/status` | 原连接 / 配置 / RX、TX / lastSeq，增加 `board` |
-| GET | `/api/board` | project、capabilities、phase、network 四步 done/time、counts、dataTimes、expectedPeer、peer、summary、error |
-| POST | `/api/board/project` | `{project}`，B3V / B3VN / B3R / B3N / B3F |
-| POST | `/api/board/network` | `{boardIp?, boardPort?}`，默认 192.168.1.10:5000；监听 6000 → WIN3 → status |
-| GET | `/api/ports` | 枚举串口 |
-| POST | `/api/connect`、`/api/disconnect` | `{port, baud, dataBits?, parity?, stopBits?, dtr?, rts?}` / `{}` |
-| POST | `/api/send` | `{text, ending?, hex?}` |
-| POST | `/api/options`、`/api/modem` | `{encoding}` / `{dtr?, rts?}` |
-| GET | `/api/buffer`、`/api/buffer/download` | since / limit / dir 增量日志，或下载全部 |
+| GET | `/api/status`、`/api/board` | 串口 / 烧录状态；阶段、四步连接、数据计数、peer、摘要、错误 |
+| POST | `/api/board/network` | `{boardIp?,boardPort?}`；建立网口连接 |
+| GET / POST | `/api/processing`、`/api/processing/pix`、`/api/processing/geo` | 读取两组设置 / 修改一组；省略项沿用该组当前值 |
+| GET | `/api/ports` | 串口枚举 |
+| POST | `/api/connect`、`/api/disconnect` | `{port,baud,dataBits?,parity?,stopBits?,dtr?,rts?}` / `{}` |
+| POST | `/api/send`、`/api/options`、`/api/modem` | `{text,ending?,hex?}` / `{encoding}` / `{dtr?,rts?}` |
+| GET | `/api/buffer`、`/api/buffer/download` | 增量日志 / 全部日志 |
 | POST | `/api/clear`、`/api/save` | `{}` / `{path?}` |
-| GET / POST | `/api/commands`、`/api/rules` | 列表 / 创建；原 PUT、DELETE `/{id}` 和命令 `/{id}/send` 保留 |
+| GET / POST | `/api/commands`、`/api/rules` | 列表 / 创建；PUT、DELETE `/{id}` 与命令 `/{id}/send` 保留 |
 | POST | `/api/commands/replace` | `{commands}` |
-| GET / POST | `/api/params`、`/api/params/clear` | 参数 / 清空 |
-| POST / GET | `/api/file/send`、`/api/file/status` | `{path, echo?}` / 原始串口文件状态 |
-| POST | `/api/file/cancel` | `{}` |
-| POST / GET | `/api/program`、`/api/program/status` | `{path, elf?, baud?, addr?, entry?, eth?, localIp?}` / BIOS 阶段与进度 |
-| GET | `/api/ethernet/status` | 共享 UDP tx / rx 状态 |
-| POST | `/api/ethernet/send` | `{path, boardIp, boardPort, localPort, window?, offset?, interval?}` |
-| POST | `/api/ethernet/receive/start`、`/api/ethernet/receive/stop` | `{localPort, directory?, mode?}` / `{}` |
-| GET | `/api/telemetry`、`/api/telemetry/csv` | 最新值 / 下载全部原始记录 CSV |
+| GET / POST | `/api/params`、`/api/params/clear` | 规则提取值 / 清空 |
+| POST / GET | `/api/file/send`、`/api/file/status` | `{path,echo?}` / 串口文件状态，取消 `/api/file/cancel` |
+| POST / GET | `/api/program`、`/api/program/status` | `{path,elf?,baud?,addr?,entry?,eth?,localIp?}` / BIOS 状态 |
+| GET | `/api/ethernet/status` | 共用 UDP 传输状态 |
+| POST | `/api/ethernet/send` | `{path,boardIp,boardPort,localPort,window?,offset?,interval?}`；底层数据用途编号见 demo 协议表 |
+| POST | `/api/ethernet/receive/start`、`/api/ethernet/receive/stop` | `{localPort,directory?,mode?}` / `{}`；mode=files/video/yolo/console |
+| GET | `/api/telemetry`、`/api/telemetry/csv` | 监控最新值 / 原始 CSV |
 | POST | `/api/telemetry/export`、`/api/telemetry/replay`、`/api/telemetry/clear` | `{path}` / `{path}` / `{}` |
-| GET / POST | `/api/scenes`、`/api/scenes/send` | 映射 / `{name, rate?}` |
-| POST | `/api/yolo/model`、`/api/yolo/image` | `{path, boardIp, boardPort, localPort, window?}` |
+| GET / POST | `/api/scenes`、`/api/scenes/send` | 预设映射 / `{name,rate?}` |
+| POST | `/api/yolo/model`、`/api/yolo/image` | `{path,boardIp,boardPort,localPort}`；图像缓冲自动交替 |
 
-接收 mode 保留 `files`（通用原始文件）、`video`、`yolo`，新增 `console` 统一分发。
-`/api/board/network` 复用已监听 6000 的 socket 并切到统一分发；若通用页监听了其他端口，
-先停止它再绑定 6000。首次使用直接绑定 6000。
+PIX 键：`bc,contrast,brightness,gamma_en,gamma,stage1,stage2,gray,binary,threshold,invert`。
+GEO 键：`enabled,angle,scale_x,scale_y,translate_x,translate_y,mirror_x,mirror_y`。
+GUI 比例锁定只联动输入控件，线上始终发送两个独立比例。
+通用串口页保留文本 / HEX、行尾、保存、原始文件发送、快捷命令、规则和数据面板；
+通用网口页按“图像缓冲 A/B、模型、控制与监控”选择用途，保留原始偏移收发。
 
-## 测试与截图复现
-
-在已安装 PySide6、pyserial 和 NPU 测试依赖的环境内，串行运行：
+## 测试、模拟与截图
 
 ```sh
-git rev-parse HEAD
-python3 -m unittest discover -s tools/debug_tool/tests -v
-python3 -m unittest discover -s tools/board/tests -v
-python3 -m compileall -q tools/debug_tool
-git diff --check
-for size in 1366x768 1920x1080; do
-  for state in disconnected vision detection; do
-    QT_QPA_PLATFORM=offscreen python3 tools/debug_tool/render_shot.py \
-      tools/debug_tool/soc-$state-$size.png --state "$state" \
-      --width "${size%x*}" --height "${size#*x}"
-  done
-done
+python -m unittest discover -s tools/debug_tool/tests -v
+python -m unittest discover -s tools/board/tests -v
+make -C sw/apps/demo test
+python tools/debug_tool/telemetry_sim.py --mode detection --host 127.0.0.1 --port 5000 \
+  --model tasks/win/20261029-09-b3-software/src/npu \
+  --quant tasks/win/20261029-09-b3-software/src/npu/quantization.json --frames 2
 ```
 
-截图的串口启动行明确由 `render_shot.py` 合成，网络数据由现有 `telemetry_sim.py` 编码器、
-视频 / YOLO 发送函数通过真实 UDP 6000 回环接收；日志标明“截图模拟数据 · 非实板测量”。
-截图助手核对输出尺寸，并要求运行态收到完整 EDVF / YOLO 和 EDTM 后才保存。
+检测模拟板收到真实 RGB565，按 VIN 参考生成 CH2，执行真实 NPU / 后处理参考，
+经 UDP 按三块协议返回。串口参数端到端测试使用 `telemetry_sim.run_processing` 与真实 PTY，
+REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY 不支持的 DTR/RTS ioctl。
+`test_processing.py` 另测 200 ms 合并、比例锁定/解锁和同时启用全部 PIX 阶段。
 
-| 状态 | 1366 × 768 | 1920 × 1080 |
+全部页面截图如下；图像处理分顶端和几何区域，滚动可访问所有参数。
+
+| 页面 | 1366×768 | 1920×1080 |
 |---|---|---|
-| 未连接 | [截图](soc-disconnected-1366x768.png) | [截图](soc-disconnected-1920x1080.png) |
-| B3V 视频 + DDR | [截图](soc-vision-1366x768.png) | [截图](soc-vision-1920x1080.png) |
-| B3F 图像检查叠加 | [截图](soc-detection-1366x768.png) | [截图](soc-detection-1920x1080.png) |
+| 串口连接 | [截图](assets/connection-1366x768.png) | [截图](assets/connection-1920x1080.png) |
+| 快捷命令 | [截图](assets/commands-1366x768.png) | [截图](assets/commands-1920x1080.png) |
+| 规则与数据 | [截图](assets/rules-1366x768.png) | [截图](assets/rules-1920x1080.png) |
+| 通用网口 | [截图](assets/network-1366x768.png) | [截图](assets/network-1920x1080.png) |
+| 设备与输出 | [截图](assets/device-1366x768.png) | [截图](assets/device-1920x1080.png) |
+| 图像处理 | [截图](assets/processing-1366x768.png) | [截图](assets/processing-1920x1080.png) |
+| 点运算 2 | [截图](assets/point-1366x768.png) | [截图](assets/point-1920x1080.png) |
+| 输出与状态 | [截图](assets/output-1366x768.png) | [截图](assets/output-1920x1080.png) |
+| 检测参考比对 | [截图](assets/reference-1366x768.png) | [截图](assets/reference-1920x1080.png) |
+| 网口接收 | [截图](assets/receive-1366x768.png) | [截图](assets/receive-1920x1080.png) |
+| 几何区域 | [截图](assets/geometry-1366x768.png) | [截图](assets/geometry-1920x1080.png) |
+| 目标检测 | [截图](assets/detection-1366x768.png) | [截图](assets/detection-1920x1080.png) |
 
-![B3F 检测叠加，1366×768](soc-detection-1366x768.png)
-<!-- 截图命令同上，--state detection；原图为 telemetry_sim.demo_pixels 的确定性 RGB565 图案。 -->
+截图统一由 `render_shot.py` 生成，使用 `--width/--height`、`--main-page 0..4`、
+`--page 0..2`；`--state vision/detection` 注入模拟串口并通过 telemetry_sim 真实 UDP
+回环生成数据，`--scroll-bottom` 显示几何区域。工具实际核对窗口尺寸、完整视频/检测与 EDTM。
 
-2026-10-30 本提交的回归：调试工具 **65 项通过**、板级工具 **7 项通过**，无跳过；
-Python 3.12、PySide6 6.12.0、pyserial 3.5，虚拟环境位于 `build/debug-tool-venv/`，
-复用已有 `edrv32-py` 的 NPU 依赖，退出码均为 0；compileall 与 diff 检查通过。
+## T-UI1 验收记录
 
-新增回归覆盖：一次绑定 6000 同时服务视频 / EDTM / YOLO / 文件、阶段判断、四步顺序与时间、
-peer 比较、四工程能力表、错误日志、REST 新状态，以及两种尺寸下布局 / 灰显原因；
-B3-14b 进一步检查全分组边界和展开后的控件可见性、画布高度比例、七端口完整显示、
-五个导航图标各异、数字输入可见、日志不折行和紧凑连接状态卡片。
-Python / Qt 改动不涉及 RTL，`tools/check/verilog_style.py` 和 Verilator lint 不适用。
-真实板端的视频、DDR 数据和三种输出切换仍需按上述上电步骤验收；合成截图不代表上板通过。
+- 基线 `5000fe71`；实现为本提交，可用 `git log -1 --format=%H -- tools/debug_tool/README.md` 定位。
+- 环境：xPack GCC 15.2.0，主机 GCC 13.3，Python 3.12，PySide6 6.12.0、pyserial 3.5。
+- 四程序：`. ~/.local/opt/edrv32/env.sh` 后逐个 `make -C sw PROGRAM=<程序> MEMORY=sram -j1`。
+- 编译均采用 C11、`-Wall -Wextra -Werror`，0 warning；摄像头程序额外 `-Os`，NPU 程序 `-O2`。
+- `riscv-none-elf-size`，单位 B：
 
-### B3N 网口送图（demo_npu）
+| 程序 | text | data | bss | 合计 |
+|---|---:|---:|---:|---:|
+| demo | 57440 | 0 | 5568 | 63008 |
+| demo_vision | 39352 | 0 | 1084 | 40436 |
+| demo_vnpu | 56432 | 0 | 5516 | 61948 |
+| demo_npu | 22572 | 0 | 1920 | 24492 |
 
-在 SoC 控制台选择 B3N，烧录 `build/sw/demo_npu/demo_npu.bin`，建立网口连接。
-选择模型编译目录及配套量化 JSON，发送 EDNM，等待 UART 的 `EDNM: loaded`。
-单张图片可为任意尺寸；发送前缩放到 1280×720，再由 `tools/npu/input_pack.py`
-生成 983,040 B CH2。板端返回 WIN1 OUTPUT 和 WIN2 EDDT，最后 EDDT 通知结束。
-工具自动执行 NPU 参考与 Python 后处理比对，并在原始尺寸图片上按比例叠框。
-B3VN/B3F 仍发送 RGB565，保留 CH2/OUTPUT/EDDT 三块回传路径。
-
-“文件夹”按钮选择 `.png/.jpg/.jpeg/.bmp`，按名称逐张、交替窗口发送，等返回并比对
-后发下一张。会话日志含每张往返毫秒及平均 fps（从首张开始，包含参考比对）；
-比对失败会明确显示错误。B3N 不提供摄像头、PIX/GEO、HDMI 或视频帧率控制，EDTM 固定 100 Hz。
-运行参考需安装 `tools/requirements.txt` 的 NPU 依赖，并初始化 `third_party/ultralytics`。
-
-主机模拟板可使用实际编译模型和量化表，在一个终端运行：
-
-```sh
-python tools/debug_tool/telemetry_sim.py --mode b3n --host 127.0.0.1 --port 5000 \
-    --model tasks/win/20261029-09-b3-software/src/npu \
-    --quant tasks/win/20261029-09-b3-software/src/npu/quantization.json --frames 2
-```
-
-另一端用 B3N 模式发送两张图片到 127.0.0.1:5000，接收复用同一 UDP socket。
-`tests/test_b3n.py` 自动创建合法 NPU 描述符，真实执行 input_pack、NPU 参考和后处理，
-通过 localhost UDP 验证不同尺寸图片、窗口交替、两块回传、逐项比对和往返统计。
-
-## BIOS v0.18 烧录
-
-烧录页可选串口或网口，支持 ELF 和 .bin；.bin 必须填写烧录地址和运行地址。
-网口的菜单、状态和结果仍走串口，数据走 UDP，填本机 IP（默认 192.168.1.2）。
-ELF 使用 p_paddr/p_filesz 和 e_entry，所有段完成后自动运行。网口 FAIL bytes 时
-整份重发一次，第二次失败报错。协议实现复用 tools/board/uart_tool.py。
-
-```sh
-python tools/debug_tool/cli.py program app.bin --addr 0x10000000 --entry 0x10000000
-python tools/debug_tool/cli.py program app.elf --elf --eth --local-ip 192.168.1.2
-```
-
-REST POST /api/program 接收 path、elf、baud、addr、entry、eth、localIp，地址为 JSON
-整数；.bin 必须同时提供 addr/entry。状态通过 /api/program/status 查询。
+- `make -C sw/apps/demo test`：原主机测试、监控、NPU 实际网络/推理、参数应用及 Python 3 项全部通过，UBSan 无错误。
+- 新增覆盖：PIX 字段/完整 Gamma 表、两个 bank 交替；GEO 全角度/两轴比例/镜像/平移、覆盖与 Q16.16 超限，不下发错误配置。
+- CPU CH2：固定种子 20261031 的完整 1280×720 随机 RGB565，983040 B 与独立 Python VIN 2.8 参考逐字节一致。
+- `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests -v`：71 项通过，无跳过。
+- 同环境 `python -m unittest discover -s tools/board/tests -v`：全部 10 项通过。
+- 参数 E2E：真实 REST / CLI / PTY，经 telemetry_sim 收到完整 PIX 和 GEO 命令并返回状态；Qt 验证 200 ms 合并和比例锁定。
+- 检测 E2E：telemetry_sim 接收两张不同尺寸图片、自动交替缓冲，真实 NPU 参考；CH2/OUTPUT/EDDT 三块和逐项比对全部一致。
+- 24 张截图：1366×768、1920×1080 的全部页面及几何区域，数据来自模拟 UDP。
+- 布局检查：逐页检查 QLabel 换行高度、按钮文字宽度、数字内部编辑区宽度、滚动控件可达性、规则编辑按钮与七行表格可视范围；长正则/路径/数值用全文提示，日志横向滚动。
+- 人工逐张查看截图，核对标签、按钮、表头、数值和滚动后的几何控件，无裁字。
+- `python -m compileall -q tools/debug_tool`、`git diff --check`、`python tools/check/verilog_style.py sw/apps/demo sw/lib tools/debug_tool` 通过；无 RTL 文件，Verilator lint 不适用。
+- 日志：`build/t-ui1-{demo,demo_vision,demo_vnpu,demo_npu,host,tools,board,shots}.log`，大小 `build/t-ui1-size.txt`。
+- 未运行 RTL 仿真或实板测试；截图与 fps 为合成环境数据，实板摄像头、HDMI、PHY 效果待上板确认。

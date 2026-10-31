@@ -15,26 +15,15 @@ from .telemetry import Telemetry
 from .video import VideoReceiver
 from .yolo import YoloTool
 
-PROJECTS = {
-    'B3V': dict(program=True, processing=True, detection=False, network=True,
-                reason='B3V 没有 NPU；不支持模型与图像检查'),
-    'B3VN': dict(program=True, processing=True, detection=True, network=True, reason=''),
-    'B3R': dict(program=True, processing=False, detection=False, network=True,
-                reason='B3R 无摄像头和 NPU；支持 ETH 对端与 DDR 监控'),
-    'B3N': dict(program=True, processing=False, detection=True, network=True,
-                reason='B3N 使用 demo_npu：网口送 CH2，返回 OUTPUT / EDDT；DDR 100 Hz'),
-    'B3F': dict(program=True, processing=True, detection=True, network=True, reason=''),
-}
 STATUS_KEYS = ('Scene', 'PIX mode', 'GEO mode', 'Output mode', 'Requested video fps',
                'Monitor Hz', 'Detection count', 'Overlay CPU cycles',
-               'Monitor dropped records', 'Switch')
+               'Monitor dropped records', 'Switch', 'PIX parameters', 'GEO parameters')
 
 
 class BoardSession:
     def __init__(self, engine):
         self.engine = engine
         self.lock = threading.RLock()
-        self.project = 'B3V'
         self.phase = 'disconnected'
         self.error = None
         self.summary = {}
@@ -52,13 +41,6 @@ class BoardSession:
         self.ethernet.video = self.video
         self.ethernet.yolo = self.yolo
         self.ethernet.session = self
-
-    def select_project(self, project):
-        PROJECTS[project]
-        with self.lock:
-            self.project = project
-            self.yolo.mode = project
-        return self.status()
 
     def mark(self, name, done=True):
         self.steps[name] = dict(done=done, time=int(time.time() * 1000))
@@ -137,9 +119,8 @@ class BoardSession:
                                            (board_ip, board_port))
             with self.lock:
                 self.mark('win3')
-            self.log(f'WIN3 已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
-            if PROJECTS[self.project]['processing']:
-                self.engine.send('status', 'cr')
+            self.log(f'连接请求已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
+            self.engine.send('status', 'cr')
         except (OSError, ValueError, RuntimeError) as exc:
             self.fail(f'建立网口连接失败：{exc}')
             raise
@@ -150,8 +131,7 @@ class BoardSession:
         with self.lock:
             steps = {key: dict(value) for key, value in self.steps.items()}
             steps['listen']['done'] = rx['active']
-            return dict(project=self.project, capabilities=dict(PROJECTS[self.project]),
-                        phase=self.phase, network=steps, counts=dict(self.counts),
+            return dict(phase=self.phase, network=steps, counts=dict(self.counts),
                         dataTimes=dict(self.data_times), expectedPeer=self.expected_peer,
                         peer=[self.peer_ip, self.peer_port], summary=dict(self.summary),
                         error=self.error or self.engine.program.status()['error'])

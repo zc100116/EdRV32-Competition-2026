@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QComboBox, QDialog, QDialogButtonBox,
     QDoubleSpinBox, QFileDialog, QFormLayout, QFrame, QGridLayout,
     QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMessageBox, QProgressBar,
-    QPushButton, QPlainTextEdit, QScrollArea, QSpinBox, QSplitter,
+    QPushButton, QPlainTextEdit, QSizePolicy, QScrollArea, QSpinBox, QSplitter,
     QStackedWidget, QToolButton, QVBoxLayout, QWidget,
 )
 
@@ -495,7 +495,7 @@ class CommandsPanel(QFrame):
         root.setContentsMargins(14, 12, 14, 12)
         root.setSpacing(10)
         head = QHBoxLayout()
-        title = QLabel("COMMANDS")
+        title = QLabel("快捷命令")
         title.setObjectName("cardTitle")
         head.addWidget(title)
         head.addStretch(1)
@@ -723,7 +723,7 @@ class RulesPanel(QFrame):
         root.setContentsMargins(14, 12, 14, 12)
         root.setSpacing(10)
         head = QHBoxLayout()
-        title = QLabel("RULES")
+        title = QLabel("数据规则")
         title.setObjectName("cardTitle")
         head.addWidget(title)
         head.addStretch(1)
@@ -783,8 +783,12 @@ class RulesPanel(QFrame):
         text_box.setSpacing(1)
         name = QLabel(rule["name"])
         name.setObjectName("ruleName")
+        name.setToolTip(name.text())
+        name.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         pattern = QLabel("/" + rule["pattern"] + "/")
         pattern.setObjectName("rulePattern")
+        pattern.setToolTip(pattern.text())
+        pattern.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         text_box.addWidget(name)
         text_box.addWidget(pattern)
         layout.addLayout(text_box, 1)
@@ -855,7 +859,7 @@ class DataPanel(QFrame):
         root.setContentsMargins(14, 12, 14, 12)
         root.setSpacing(10)
         head = QHBoxLayout()
-        title = QLabel("数据 DATA")
+        title = QLabel("提取数据")
         title.setObjectName("cardTitle")
         head.addWidget(title)
         head.addStretch(1)
@@ -953,7 +957,7 @@ class ConnectionPanel(QFrame):
         root.setContentsMargins(14, 12, 14, 14)
         root.setSpacing(10)
         head = QHBoxLayout()
-        title = QLabel("CONNECTION")
+        title = QLabel("串口连接")
         title.setObjectName("cardTitle")
         head.addWidget(title)
         head.addStretch(1)
@@ -1200,7 +1204,7 @@ class MainWindow(QMainWindow):
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
                 ("规则", "数据匹配规则", ICON_FILTER),
                 ("网口", "UDP 文件收发", ICON_NETWORK),
-                ("中控台", "SoC 程序、图像与 DDR", ICON_DASHBOARD))):
+                ("调试", "烧录、图像与检测", ICON_DASHBOARD))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1237,7 +1241,7 @@ class MainWindow(QMainWindow):
         cc.setContentsMargins(14, 12, 14, 12)
         cc.setSpacing(10)
         head = QHBoxLayout()
-        title = QLabel("LINK CONSOLE")
+        title = QLabel("串口控制台")
         title.setObjectName("cardTitle")
         head.addWidget(title)
         head.addStretch(1)
@@ -1395,6 +1399,9 @@ class MainWindow(QMainWindow):
         self.cmd_timer = QTimer(self)
         self.cmd_timer.timeout.connect(self._reload_panels)
         self.cmd_timer.start(1500)
+        for field in self.findChildren(QLineEdit):
+            field.setToolTip(field.text() or field.placeholderText())
+            field.textChanged.connect(lambda text, field=field: field.setToolTip(text))
         self._poll_status()
         self.data_panel.refresh(force=True)
         self.rail_group.button(4).setChecked(True)

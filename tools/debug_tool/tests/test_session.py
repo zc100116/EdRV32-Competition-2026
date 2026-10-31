@@ -1,7 +1,7 @@
 """test_session.py — SoC console design 4.2–4.3, shared UDP and REST; host only.
 
 Exercise real datagrams through one 6000 listener and serial status parsing.
-Qt checks cover both required sizes and each project's disabled controls.
+Qt checks cover every page and parameter text at both required sizes.
 """
 
 import json
@@ -18,7 +18,6 @@ import urllib.request
 from tools.debug_tool.core.api import ApiServer
 from tools.debug_tool.core.engine import SerialEngine
 from tools.debug_tool.core.ethernet import HEADER, packets
-from tools.debug_tool.core.session import PROJECTS
 from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES
 from test_program import wait_for
 from test_telemetry import wire
@@ -44,20 +43,11 @@ class SessionTest(unittest.TestCase):
         self.engine.disconnect()
         self.assertEqual(self.engine.board.status()['phase'], 'disconnected')
 
-    def test_project_capability_tables(self):
-        expected = {'B3V': (True, True, False, True),
-                    'B3VN': (True, True, True, True),
-                    'B3R': (True, False, False, True),
-                    'B3N': (True, False, True, True),
-                    'B3F': (True, True, True, True)}
-        for name, values in expected.items():
-            with self.subTest(project=name):
-                state = self.engine.board.select_project(name)
-                self.assertEqual(state['project'], name)
-                self.assertEqual(tuple(state['capabilities'][key] for key in
-                                       ('program', 'processing', 'detection', 'network')), values)
-                if not all(values):
-                    self.assertIn(name, state['capabilities']['reason'])
+    def test_no_project_selection_or_capability_filter(self):
+        state = self.engine.board.status()
+        self.assertNotIn('project', state)
+        self.assertNotIn('capabilities', state)
+        self.assertFalse(hasattr(self.engine.board, 'select_project'))
 
     def test_network_sequence_peer_match_and_independent_data_counts(self):
         board = self.engine.board
@@ -95,28 +85,6 @@ class SessionTest(unittest.TestCase):
             self.assertTrue(all(step['time'] for step in state['network'].values()))
             self.engine.ethernet.stop_receive()
             self.assertFalse(board.status()['network']['listen']['done'])
-
-    def test_render_and_npu_peer_setup_preserves_application_uart(self):
-        for project in ('B3R', 'B3N'):
-            with self.subTest(project=project), TemporaryDirectory() as directory:
-                self.engine.board.select_project(project)
-                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as peer:
-                    peer.bind(('127.0.0.1', 0))
-                    peer.settimeout(2)
-                    self.engine.ethernet.start_receive(6000, directory, mode='console')
-                    with patch.object(self.engine, 'send') as send:
-                        self.engine.board.establish_network('127.0.0.1', peer.getsockname()[1])
-                        send.assert_not_called()
-                    packet, source = peer.recvfrom(1024)
-                    self.assertEqual(packet, HEADER.pack(3, 1, 0, 0) + b'\0')
-                    self.assertEqual(source, ('127.0.0.1', 6000))
-                    self.engine._match_line('ETH peer IP: 0x7f000001')
-                    self.engine._match_line('ETH peer port: 6000')
-                    peer.sendto(next(packets(wire(1), 3, 0)), source)
-                    wait_for(self, lambda: self.engine.board.status()['counts']['telemetry'] == 1)
-                    self.assertTrue(all(step['done'] for step in
-                                        self.engine.board.status()['network'].values()))
-                    self.engine.ethernet.stop_receive()
 
     def test_video_monitor_yolo_and_files_bind_6000_once(self):
         binds = []
@@ -186,15 +154,13 @@ class SessionTest(unittest.TestCase):
                                          headers={'Content-Type': 'application/json'})
             with urllib.request.urlopen(req, timeout=3) as response:
                 return json.load(response)
-        self.assertEqual(request('/api/board')['project'], 'B3V')
-        request('/api/board/project', {'project': 'B3F'})
+        self.assertNotIn('project', request('/api/board'))
         self.engine._match_line('Demo: demo')
         self.engine._match_line('Scene: 1')
         self.engine._match_line('Monitor Hz: 100')
         board = request('/api/board')
         self.assertEqual(request('/api/status')['board'], board)
         self.assertEqual(board['phase'], 'application')
-        self.assertEqual(board['project'], 'B3F')
         self.assertEqual(board['summary'], {'Scene': '1', 'Monitor Hz': '100'})
         with (socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as peer,
               patch.object(self.engine, 'send') as send):
@@ -215,107 +181,66 @@ class ConsoleLayoutTest(unittest.TestCase):
         from PySide6.QtWidgets import QApplication
         cls.app = QApplication.instance() or QApplication([])
 
-    def assert_label_heights(self, frame, context):
-        from PySide6.QtCore import Qt, QRect
-        from PySide6.QtWidgets import QLabel
-        for text in frame.findChildren(QLabel):
-            if not text.isVisible() or not text.text():
-                continue
-            flags = Qt.TextWordWrap if text.wordWrap() else Qt.TextFlag(0)
-            needed = text.fontMetrics().boundingRect(
-                QRect(0, 0, text.width(), 10000), flags, text.text()).height()
-            self.assertGreaterEqual(
-                text.height(), needed,
-                f'{context}: {text.text()!r} needs {needed} px, got {text.height()} px')
-
-    def test_two_window_sizes_and_capabilities(self):
-        from PySide6.QtGui import QIcon
-        from PySide6.QtWidgets import QLabel, QLineEdit, QPlainTextEdit
+    def test_all_pages_at_both_sizes(self):
+        from PySide6.QtCore import QPoint, QRect
+        from PySide6.QtWidgets import QLabel, QPushButton, QCheckBox, QGroupBox, QAbstractSpinBox, QComboBox, QWidget
         from gui.app import MainWindow
-        engine = SerialEngine()
-        window = MainWindow(engine)
-        from PySide6.QtCore import Qt, QCoreApplication, QEvent
-        window.setAttribute(Qt.WA_DeleteOnClose)
-        def cleanup():
-            window.close()
-            QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
-            self.app.processEvents()
-        self.addCleanup(cleanup)
+        window = MainWindow(SerialEngine())
+        self.addCleanup(window.close)
         window.show()
-        for width, height in ((1366, 768), (1920, 1080), (1366, 768)):
+        for width, height in ((1366, 768), (1920, 1080)):
             window.resize(width, height)
-            self.app.processEvents()
-            self.assertEqual((window.width(), window.height()), (width, height))
-            console = window.soc
-            for name, caps in PROJECTS.items():
-                console.project.setCurrentText(name)
-                console.refresh()
-                self.app.processEvents()
-                self.assertEqual(console.send_model.isEnabled(), caps['detection'])
-                self.assertEqual(console.apply_scene.isEnabled(), caps['processing'])
-                self.assertEqual(console.establish.isEnabled(), caps['network'])
-                self.assertEqual(console.apply_output.isEnabled(), caps['processing'])
-                self.assertEqual(console.status_query.isEnabled(), caps['processing'])
-                self.assertEqual(console.display.isEnabled(),
-                                 caps['processing'] or caps['detection'])
-                if not caps['detection']:
-                    self.assertIn(name, console.model_note.text())
-                    self.assertIn(name, console.image_note.text())
-                self.assertIsInstance(console.fps, QLineEdit)
-                self.assertEqual(console.fps.text(), '30')
-                self.assertEqual(console.rate.text(), '100')
-                self.assertEqual(console.log.lineWrapMode(), QPlainTextEdit.NoWrap)
-                self.assertGreaterEqual(console.view.height() * 2,
-                                        console.workspace.height() + console.lower.height() + 8)
-                self.assertEqual(console.table.horizontalHeaderItem(1).text(), '平均等待')
-                last_row = console.table.visualItemRect(console.table.item(6, 3))
-                self.assertLess(last_row.bottom(), console.table.viewport().height())
-                self.assertEqual(console.table.verticalScrollBar().maximum(), 0)
-                sidebar_controls = (
-                    (console.left_sidebar, [console.program.mode, console.image_path,
-                                            console.model_path, console.progress]),
-                    (console.right_sidebar, [console.scene, console.output,
-                                             console.summary['Scene'], console.quant]),
-                )
-                for sidebar, controls in sidebar_controls:
-                    self.assertEqual(sidebar.compact, height == 768)
-                    self.assertEqual(sidebar.active, 0)
-                    # Default and expanded groups must stay entirely inside the sidebar.
-                    for active in range(len(sidebar.groups)) if sidebar.compact else [0]:
-                        sidebar.activate(active)
-                        self.app.processEvents()
-                        # Both columns must remain readable when either column changes groups.
-                        for checked in (console.left_sidebar, console.right_sidebar):
-                            for frame, _, _, caption in checked.groups:
-                                self.assert_label_heights(
-                                    frame, f'{width}×{height} {name} {caption}')
-                        for index, (frame, button, body, _) in enumerate(sidebar.groups):
-                            self.assertGreaterEqual(frame.y(), 0)
-                            self.assertLess(frame.geometry().bottom(), sidebar.height())
-                            expected_visible = not sidebar.compact or index == active
-                            self.assertEqual(body.isVisible(), expected_visible)
-                            self.assertEqual(controls[index].isVisible(), expected_visible)
-                            self.assertGreaterEqual(
-                                button.width(),
-                                button.fontMetrics().horizontalAdvance(button.text()))
-                    sidebar.activate(0)
+            for page in range(5):
+                window._select_page(page)
+                for subpage in range(3) if page == 4 else [0]:
+                    window.soc.pages.setCurrentIndex(subpage)
                     self.app.processEvents()
-                self.assertTrue(console.left_sidebar.groups[0][2].isVisible())
-                # Titles and single-line status fields must fit their complete text.
-                for widget in console.findChildren(QLabel):
-                    if widget.property('role') == 'title':
-                        self.assertGreaterEqual(widget.width(),
-                                                widget.fontMetrics().horizontalAdvance(
-                                                    widget.text()))
-        self.assertEqual(len(window.rail_group.buttons()), 5)
-        self.assertFalse(hasattr(window, 'video'))
-        self.assertLessEqual(window.chip.height(), 32)
-        icons = [button.icon().pixmap(20, 20, QIcon.Normal, QIcon.Off).toImage()
-                 for button in window.rail_group.buttons()]
-        for index, icon in enumerate(icons):
-            for other in icons[index + 1:]:
-                self.assertNotEqual(icon, other)
-        console.log.appendPlainText('Switch: frames=2 mtime_ticks=6742100 · 3 个框 ' * 8)
-        self.app.processEvents()
-        self.assertEqual(console.log.document().lastBlock().lineCount(), 1)
-        self.assertGreater(console.log.horizontalScrollBar().maximum(), 0)
+                    self.assertEqual((window.width(), window.height()), (width, height))
+                    for widget in window.findChildren(QLabel):
+                        if widget.isVisible() and widget.text() and '<' not in widget.text():
+                            if widget.wordWrap():
+                                needed = widget.heightForWidth(widget.width())
+                                self.assertGreaterEqual(widget.height(), needed,
+                                    f'{width}x{height}: {widget.text()!r}')
+                            else:
+                                self.assertTrue(widget.toolTip() or widget.width() >=
+                                    widget.fontMetrics().horizontalAdvance(widget.text()),
+                                    f'{width}x{height}: {widget.text()!r}')
+                    for widget in window.findChildren(QPushButton):
+                        if widget.isVisible():
+                            self.assertTrue(widget.toolTip() or widget.width() >=
+                                widget.fontMetrics().horizontalAdvance(widget.text()) + 8,
+                                widget.text())
+                    for widget in window.soc.findChildren(QLabel) + window.soc.findChildren(
+                            QCheckBox) + window.soc.findChildren(QGroupBox):
+                        text = widget.title() if isinstance(widget, QGroupBox) else widget.text()
+                        self.assertNotRegex(text, r'B3(?:R|N|V|VN|F)|WIN[0-3]|窗口号')
+                    self.assertFalse(hasattr(window.soc, 'project'))
+                    if page == 4:
+                        scroll = window.soc.pages.currentWidget()
+                        fields = scroll.widget().findChildren(QWidget)
+                        types = (QLabel, QPushButton, QCheckBox, QComboBox, QAbstractSpinBox)
+                        for field in fields:
+                            if isinstance(field, types) and field.isVisible():
+                                scroll.ensureWidgetVisible(field, 0, 0)
+                                self.app.processEvents()
+                                bounds = QRect(field.mapTo(scroll.viewport(), QPoint()), field.size())
+                                self.assertTrue(scroll.viewport().rect().contains(bounds),
+                                    f'{width}x{height}: inaccessible {field.objectName()}')
+                    if page == 2:
+                        for row in window.rules._rows:
+                            self.assertLessEqual(row.width(), row.parentWidget().width())
+                            for button in row.findChildren(QPushButton):
+                                self.assertTrue(row.rect().contains(button.geometry()))
+                    for spin in window.soc.processing.findChildren(QAbstractSpinBox):
+                        editor = spin.lineEdit()
+                        self.assertGreaterEqual(editor.width(),
+                            editor.fontMetrics().horizontalAdvance(editor.text()) + 4)
+            console = window.soc
+            self.assertTrue(console.processing.lock_scale.isChecked())
+            self.assertTrue(console.choose_folder.isEnabled())
+            self.assertTrue(console.apply_output.isEnabled())
+            self.assertTrue(console.status_query.isEnabled())
+            last = console.table.visualItemRect(console.table.item(6, 3))
+            self.assertLess(last.bottom(), console.table.viewport().height())
+            self.assertEqual(console.table.verticalScrollBar().maximum(), 0)

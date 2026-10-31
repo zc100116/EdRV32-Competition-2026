@@ -64,8 +64,7 @@ def image_rgb565(path):
 class YoloTool:
     def __init__(self, ethernet):
         self.ethernet = ethernet
-        self.mode = 'B3VN'
-        self.input_tensor = None
+        self.next_window = 0
         self.sent_at = None
         self.timings = []
         self.image_bytes = 0
@@ -92,15 +91,13 @@ class YoloTool:
         with self.lock:
             self.blocks[window].receive(offset, data, notify)
             if window == 2 and notify:
-                sizes = (0 if self.mode == 'B3N' else INPUT_BYTES,
+                sizes = (INPUT_BYTES,
                          OUTPUT_BYTES, offset + len(data))
                 for index, size in enumerate(sizes):
                     if size and not self.blocks[index].complete(size):
-                        raise ValueError(f'YOLO WIN {index}: incomplete return ({size} B expected)')
+                        raise ValueError(f'YOLO return {index}: incomplete return ({size} B expected)')
                 ch2, output, detections = (block.data(size)
                                            for block, size in zip(self.blocks, sizes))
-                if self.mode == 'B3N':
-                    ch2 = self.input_tensor
                 self.capture = (ch2, output, parse_detections(detections))
                 if self.sent_at is not None:
                     self.timings.append(dict(path=self.source_image,
@@ -120,8 +117,7 @@ class YoloTool:
         ch2, output, detections = capture
         reference = reference_output(directory, ch2)
         boxes = reference_detections(reference, quant_params)
-        expected_input = (reference_b3n_input(image) if self.mode == 'B3N'
-                          else reference_input(image))
+        expected_input = reference_input(image)
         return dict(input=byte_difference(expected_input, ch2),
                     output=byte_difference(reference, output),
                     detections=detection_difference(boxes, detections.boxes))
@@ -132,11 +128,10 @@ class YoloTool:
         return self.ethernet.send_blocks(blocks, board_ip, board_port, local_port,
                                          name=str(path))
 
-    def send_image(self, path, board_ip, board_port, local_port, window=0):
-        if window not in (0, 1):
-            raise ValueError('test image window must be 0 or 1 (B2 design 3.5a)')
-        pixels = reference_b3n_input(path) if self.mode == 'B3N' else image_rgb565(path)
-        self.input_tensor = pixels if self.mode == 'B3N' else None
+    def send_image(self, path, board_ip, board_port, local_port):
+        window = self.next_window
+        self.next_window = 1 - window
+        pixels = image_rgb565(path)
         self.source_image = str(path)
         self.reset_capture()
         self.sent_at = time.monotonic()
@@ -175,16 +170,25 @@ def reference_output(directory, ch2):
     return memory.read(registers['OUTPUT_BASE'], OUTPUT_BYTES)
 
 
+def rgb565_ch2(pixels):
+    """VIN 2.8 reference, including RGB565 expansion before the 2x2 average."""
+    import numpy as np
+    image = np.frombuffer(pixels, dtype='<u2').reshape(720, 1280)
+    channels = []
+    for shift, bits in ((11, 5), (5, 6), (0, 5)):
+        value = (image >> shift) & ((1 << bits) - 1)
+        expanded = (value << (8 - bits)) | (value >> (2 * bits - 8))
+        total = expanded.reshape(360, 2, 640, 2).sum(axis=(1, 3))
+        averaged = (total + 2) // 4
+        channels.append((254 * averaged + 255) // 510)
+    output = np.zeros((384, 640, 4), dtype=np.uint8)
+    output[:, :, :3] = 57
+    output[12:372, :, :3] = np.stack(channels, axis=-1)
+    return output.tobytes()
+
+
 def reference_input(path):
-    # The NPU scripts use sibling imports; the fixed repository path is shared with CLI.
-    import sys
-    root = Path(__file__).resolve().parents[3]
-    sys.path.insert(0, str(root / 'third_party/ultralytics'))
-    npu_path = str(root / 'tools/npu')
-    if npu_path not in sys.path:
-        sys.path.insert(0, npu_path)
-    from input_pack import pack
-    return pack(Path(path))
+    return rgb565_ch2(image_rgb565(path))
 
 
 def reference_detections(output, quant_params):
@@ -200,20 +204,3 @@ def detection_difference(expected, actual):
     count = sum(left != right for left, right in zip(expected, actual))
     count += abs(len(expected) - len(actual))
     return dict(count=count, expected=len(expected), actual=len(actual))
-
-
-def reference_b3n_input(path):
-    """T-NETN: resize arbitrary sources to display geometry, then use input_pack."""
-    import cv2
-    from tempfile import TemporaryDirectory
-    image = cv2.imread(str(path), cv2.IMREAD_COLOR)
-    if image is None:
-        raise ValueError(f'Cannot read image {path}')
-    image = cv2.resize(image, (1280, 720), interpolation=cv2.INTER_LINEAR)
-    scratch = Path(__file__).resolve().parents[3] / 'build/debug_tool'
-    scratch.mkdir(parents=True, exist_ok=True)
-    with TemporaryDirectory(dir=scratch) as directory:
-        resized = Path(directory) / 'input.png'
-        if not cv2.imwrite(str(resized), image):
-            raise ValueError(f'Cannot write resized image {resized}')
-        return reference_input(resized)

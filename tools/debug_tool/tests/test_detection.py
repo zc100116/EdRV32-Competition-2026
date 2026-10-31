@@ -1,6 +1,6 @@
 """test_b3n.py — T-NETN, SoC 7.2/7.4; actual CH2/OUTPUT/EDDT UDP; host clock.
 
-Exercise arbitrary input dimensions, input_pack, NPU/Python post references,
+Exercise arbitrary input dimensions, VIN adaptation, NPU/Python post references,
 alternating windows and the shared console receiver without RTL or board access.
 """
 import json
@@ -15,20 +15,19 @@ import unittest
 from unittest.mock import patch
 
 from tools.debug_tool.core.engine import SerialEngine
-from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES, reference_b3n_input
+from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES, reference_input
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'tools/debug_tool'))
-from telemetry_sim import run_b3n
+from telemetry_sim import run_detection
 
 
-class B3NTest(unittest.TestCase):
+class ImageDetectionTest(unittest.TestCase):
     def test_ch2_udp_reference_and_alternating_windows(self):
         import cv2
         import numpy as np
         engine = SerialEngine()
         self.addCleanup(engine.ethernet.stop_receive)
-        engine.board.select_project('B3N')
         quant = json.loads((ROOT / 'tasks/win/20261029-09-b3-software/src/npu/'
                             'quantization.json').read_text())
         with TemporaryDirectory(dir=ROOT / 'build') as directory:
@@ -62,7 +61,7 @@ class B3NTest(unittest.TestCase):
                 errors = []
                 def simulate():
                     try:
-                        run_b3n(board, directory, quant, 2)
+                        run_detection(board, directory, quant, 2)
                     except Exception as exc:
                         errors.append(exc)
                 worker = threading.Thread(target=simulate)
@@ -75,13 +74,13 @@ class B3NTest(unittest.TestCase):
                             return send_blocks(blocks, *args, interval=.0002, **kwargs)
                         with patch.object(engine.ethernet, 'send_blocks', side_effect=paced):
                             engine.yolo.send_image(path, '127.0.0.1', board.getsockname()[1],
-                                                   port, window)
+                                                   port)
                         deadline = time.monotonic() + 20
                         while engine.yolo.snapshot()[0] != window + 1:
                             self.assertLess(time.monotonic(), deadline, errors)
                             time.sleep(.01)
                         _, capture = engine.yolo.snapshot()
-                        self.assertEqual(capture[0], reference_b3n_input(path))
+                        self.assertEqual(capture[0], reference_input(path))
                         self.assertEqual(len(capture[0]), INPUT_BYTES)
                         self.assertEqual(len(capture[1]), OUTPUT_BYTES)
                         self.assertEqual(capture[2].frame_id, window)
@@ -100,9 +99,8 @@ class B3NTest(unittest.TestCase):
 
     def test_b3n_incomplete_output_is_reported(self):
         engine = SerialEngine()
-        engine.board.select_project('B3N')
         engine.yolo.reset_capture()
-        with self.assertRaisesRegex(ValueError, 'WIN 1: incomplete'):
+        with self.assertRaisesRegex(ValueError, 'return 0: incomplete'):
             engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
 
     def test_folder_order_completion_stats_and_original_image(self):
@@ -113,10 +111,9 @@ class B3NTest(unittest.TestCase):
         engine = SerialEngine()
         console = SocConsole(engine, lambda text: None)
         self.addCleanup(console.close)
-        console.project.setCurrentText('B3N')
         self.assertTrue(console.choose_folder.isEnabled())
         self.assertTrue(console.view.isEnabled())
-        self.assertFalse(console.apply_scene.isEnabled())
+        self.assertTrue(console.apply_scene.isEnabled())
         with TemporaryDirectory(dir=ROOT / 'build') as directory:
             directory = Path(directory)
             image = QImage(33, 17, QImage.Format_RGB888)
@@ -134,17 +131,17 @@ class B3NTest(unittest.TestCase):
                                side_effect=lambda: sent.append(console.image_path.text()))):
                 console._choose_folder()
                 self.assertEqual(sent, [str(directory / 'a.png')])
-                self.assertEqual(console.window.currentIndex(), 1)
-                def result():
-                    return dict(input=dict(count=0, first=None),
-                                output=dict(count=0, first=None),
-                                detections=dict(count=0, expected=0, actual=0))
-                console.comparison = result()
-                console.refresh()
+                self.assertEqual(engine.yolo.next_window, 0)
+                # Each complete capture advances the folder independently of reference setup.
+                from tools.debug_tool.core.video import parse_detections
+                from unittest.mock import patch as mock_patch
+                capture = (bytes(INPUT_BYTES), bytes(OUTPUT_BYTES),
+                           parse_detections(struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0)))
+                with mock_patch.object(engine.yolo, 'snapshot', return_value=(1, capture)):
+                    console.refresh()
                 self.assertEqual(sent, [str(directory / 'a.png'), str(directory / 'b.png')])
-                self.assertEqual(console.window.currentIndex(), 0)
-                console.comparison = result()
-                console.refresh()
+                with mock_patch.object(engine.yolo, 'snapshot', return_value=(2, capture)):
+                    console.refresh()
                 self.assertEqual(console.folder_completed, 2)
                 self.assertIsNone(console.folder_started)
         app.processEvents()

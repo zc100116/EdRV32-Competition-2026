@@ -47,8 +47,6 @@ def serial_line(engine, text):
 def seed(engine, console, state):
     engine._serial = SimulatedSerial()
     engine._config.update(port='SIMULATED', baud=115200)
-    project = 'B3V' if state == 'vision' else 'B3F'
-    console.project.setCurrentText(project)
     serial_line(engine, 'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud')
     serial_line(engine, 'Demo: demo_vision' if state == 'vision' else 'Demo: demo')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as board:
@@ -96,6 +94,10 @@ def main():
     parser.add_argument('out')
     parser.add_argument('--state', choices=['disconnected', 'vision', 'detection'],
                         default='disconnected')
+    parser.add_argument('--scroll-position', type=float, default=0)
+    parser.add_argument('--scroll-bottom', action='store_true')
+    parser.add_argument('--page', type=int, default=0)
+    parser.add_argument('--main-page', type=int, default=4)
     parser.add_argument('--width', type=int, default=1366)
     parser.add_argument('--height', type=int, default=768)
     args = parser.parse_args()
@@ -119,8 +121,18 @@ def main():
         while time.monotonic() < deadline:
             app.processEvents()
             time.sleep(.01)
+        window.soc.pages.setCurrentIndex(args.page)
+        window.rail_group.button(args.main_page).setChecked(True)
+        window._select_page(args.main_page)
         window.soc.refresh()
         app.processEvents()
+        if args.scroll_bottom or args.scroll_position:
+            scroll = (window.soc.pages.currentWidget() if args.main_page == 4 else
+                      window.left_stack.currentWidget())
+            fraction = 1 if args.scroll_bottom else args.scroll_position
+            bar = scroll.verticalScrollBar()
+            bar.setValue(round(bar.maximum() * fraction))
+            app.processEvents()
         if args.state == 'vision' and engine.video.snapshot()['received'] == 0:
             raise RuntimeError('Simulator produced no complete EDVF frame')
         if args.state == 'detection' and engine.yolo.snapshot()[1] is None:

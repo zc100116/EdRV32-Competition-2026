@@ -181,7 +181,9 @@ def main():
     p.add_argument("--board-ip", default="192.168.1.10")
     p.add_argument("--board-port", type=int, default=5000)
     p.add_argument("--local-port", type=int, default=6000)
-    p.add_argument("--window", type=int, choices=[0, 1], default=0)
+    p = sub.add_parser("processing", help="set PIX/GEO parameters in firmware wire units")
+    p.add_argument("kind", choices=["pix", "geo"])
+    p.add_argument("values", help='JSON object, e.g. {"angle":123,"scale_x":1500}')
     p = sub.add_parser("scene")
     p.add_argument("name")
     p.add_argument("--rate", type=int, default=100)
@@ -203,13 +205,13 @@ def main():
     elif args.cmd == "listen":
         print_json(request("POST", "/api/ethernet/receive/start",
                            {"localPort": args.port, "directory": args.directory, "mode": args.mode}))
+    elif args.cmd == "processing":
+        print_json(request("POST", "/api/processing/" + args.kind, json.loads(args.values)))
     elif args.cmd == "scene":
         print_json(request("POST", "/api/scenes/send", {"name": args.name, "rate": args.rate}))
     elif args.cmd == "yolo":
         body = {"path": os.path.abspath(args.path), "boardIp": args.board_ip,
                 "boardPort": args.board_port, "localPort": args.local_port}
-        if args.kind == "image":
-            body["window"] = args.window
         request("POST", "/api/yolo/" + args.kind, body)
         while True:
             state = request("GET", "/api/ethernet/status")["tx"]

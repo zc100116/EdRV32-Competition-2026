@@ -1,7 +1,7 @@
 """soc_console.py — SoC console design 4.1–4.5; host Qt thread.
 
-One canvas and one board session join programming, scene controls and monitoring.
-Large windows show every side group; small windows use whole, expandable groups.
+One shared canvas and UDP session serve device, processing and detection pages.
+Scrollable controls keep complete groups readable at both desktop sizes.
 """
 
 import json
@@ -15,11 +15,11 @@ from PySide6.QtGui import QColor, QImage, QIntValidator
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QPushButton,
-    QSizePolicy, QStackedWidget, QTableWidget,
+    QSizePolicy, QStackedWidget, QTableWidget, QTabWidget, QScrollArea,
     QTableWidgetItem, QVBoxLayout, QWidget,
 )
 from core.engine import fmt_ts
-from core.session import PROJECTS
+from gui.processing import ProcessingPanel
 from core.telemetry import encode
 from gui.program import ProgramPanel
 from gui.telemetry import COLORS, Histogram, Timeline
@@ -37,11 +37,6 @@ QWidget#socConsole QLineEdit[role="number"] {
     font-family: "DejaVu Sans Mono", "Consolas", monospace; font-size: 12px;
 }
 QWidget#socConsole QPushButton { font-size: 12px; padding: 3px 8px; }
-QWidget#socConsole QPushButton#sectionToggle {
-    font-size: 14px; font-weight: 700; color: #2f6bff; text-align: left;
-    border: 0; background: transparent; padding: 0; min-height: 20px;
-}
-QWidget#socConsole QPushButton#sectionToggle:disabled { color: #2f6bff; }
 QWidget#socConsole QLineEdit, QWidget#socConsole QComboBox {
     font-size: 12px; min-height: 20px; padding: 2px 6px;
 }
@@ -92,82 +87,6 @@ def form():
     return box
 
 
-class Sidebar(QWidget):
-    """At small sizes, opening a group closes the previous group as a whole."""
-
-    def __init__(self, width):
-        super().__init__()
-        self.setFixedWidth(width)
-        self.column = QVBoxLayout(self)
-        self.column.setContentsMargins(0, 0, 0, 0)
-        self.column.setSpacing(6)
-        self.groups = []
-        self.compact = None
-        self.active = 0
-
-    def prepare(self, notes, actions):
-        for index in range(self.column.count()):
-            frame = self.column.itemAt(index).widget()
-            outer = frame.layout()
-            title = outer.takeAt(0).widget()
-            caption = title.text()
-            title.hide()
-            title.deleteLater()
-            body = QWidget()
-            body_layout = QVBoxLayout(body)
-            body_layout.setContentsMargins(0, 0, 0, 0)
-            body_layout.setSpacing(4)
-            while outer.count():
-                item = outer.takeAt(0)
-                if item.widget() is not None:
-                    body_layout.addWidget(item.widget())
-                elif item.layout() is not None:
-                    nested = item.layout()
-                    nested.setParent(None)
-                    body_layout.addLayout(nested)
-                else:
-                    body_layout.addItem(item)
-            button = QPushButton(caption)
-            button.setObjectName('sectionToggle')
-            frame.section_toggle = button
-            button.clicked.connect(lambda checked=False, group=index: self.activate(group))
-            header = QHBoxLayout()
-            header.addWidget(button, 1)
-            if frame in actions:
-                action = actions[frame]
-                body_layout.removeWidget(action)
-                header.addWidget(action)
-            outer.addLayout(header)
-            if frame in notes:
-                note = notes[frame]
-                body_layout.removeWidget(note)
-                outer.addWidget(note)
-            outer.addWidget(body)
-            self.groups.append((frame, button, body, caption))
-        self.column.addStretch()
-
-    def activate(self, index):
-        self.active = index
-        self._arrange()
-
-    def set_compact(self, compact):
-        if compact != self.compact:
-            self.compact = compact
-            self.active = 0
-            self._arrange()
-
-    def _arrange(self):
-        for index, (frame, button, body, caption) in enumerate(self.groups):
-            expanded = not self.compact or index == self.active
-            body.setVisible(expanded)
-            button.setEnabled(self.compact)
-            button.setText((('▾ ' if expanded else '▸ ') if self.compact else '') + caption)
-            frame.updateGeometry()
-        # Expanded groups need their current content hints before the next paint.
-        self.column.invalidate()
-        self.column.activate()
-
-
 class SocConsole(QWidget):
     def __init__(self, engine, toast):
         super().__init__()
@@ -199,39 +118,49 @@ class SocConsole(QWidget):
         row = QHBoxLayout(self.workspace)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(8)
-        self.left_sidebar = Sidebar(282)
-        left_box = self.left_sidebar.column
+        self.pages = QTabWidget()
+        self.pages.setFixedWidth(430)
+        row.addWidget(self.pages)
+        self.device_box = self.page('设备与输出')
         self.program = ProgramPanel(engine, toast)
-        self.program.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        left_box.addWidget(self.program)
-        self._transfers(left_box)
-        self.left_sidebar.prepare({self.image_card: self.image_note,
-                                   self.model_card: self.model_note}, {})
-        row.addWidget(self.left_sidebar)
+        self.device_box.addWidget(self.program)
+        processing_box = self.page('图像处理')
+        self.processing = ProcessingPanel(engine.processing, self.run)
+        processing_box.addWidget(self.processing)
+        detection_box = self.page('目标检测')
+        self._transfers(detection_box)
+        self._controls(self.device_box)
+        self.device_box.removeWidget(self.check_card)
+        detection_box.addWidget(self.check_card)
+        for box in (self.device_box, processing_box, detection_box):
+            box.addStretch()
         self._canvas(row)
-        self.right_sidebar = Sidebar(282)
-        self._controls(self.right_sidebar.column)
-        self.right_sidebar.prepare({self.scene_card: self.scene_note,
-                                    self.output_card: self.output_note,
-                                    self.check_card: self.check_note},
-                                   {self.status_card: self.status_query})
-        row.addWidget(self.right_sidebar)
         layout.addWidget(self.workspace, 1)
         self.lower = QWidget()
-        self.lower.setFixedHeight(190)
+        self.lower.setFixedHeight(210)
         lower_box = QHBoxLayout(self.lower)
         lower_box.setContentsMargins(0, 0, 0, 0)
         lower_box.setSpacing(8)
         self._monitor(lower_box)
         self._log(lower_box)
         layout.addWidget(self.lower)
-        self._project()
+        self.image_note.setText('1280 × 720 RGB565 · 自动缩放')
+        self.model_note.setText('选择模型编译目录，然后发送')
+        self.check_note.setText('输入 / 输出逐字节比对；检测框按序比对')
+        self.output_note.setText('UDP 5000 → PC 6000')
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        compact = self.height() < 940
-        self.left_sidebar.set_compact(compact)
-        self.right_sidebar.set_compact(compact)
+    def page(self, title):
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        content = QWidget()
+        box = QVBoxLayout(content)
+        box.setContentsMargins(8, 8, 8, 8)
+        box.setSpacing(10)
+        scroll.setWidget(content)
+        self.pages.addTab(scroll, title)
+        return box
 
     def button(self, text, callback, primary=False):
         result = QPushButton(text)
@@ -249,16 +178,11 @@ class SocConsole(QWidget):
             self.message.setText(str(exc))
 
     def _top(self, layout):
-        frame, box = card('SoC 中控台')
+        frame, box = card('设备调试')
         heading = box.takeAt(0).widget()
         row = QHBoxLayout()
         row.setSpacing(10)
         row.addWidget(heading)
-        row.addWidget(label('工程'))
-        self.project = QComboBox()
-        self.project.addItems(PROJECTS)
-        self.project.currentTextChanged.connect(self._project)
-        row.addWidget(self.project)
         self.phase = label('阶段 · 未连接')
         row.addWidget(self.phase)
         row.addStretch()
@@ -274,7 +198,7 @@ class SocConsole(QWidget):
         steps = QHBoxLayout()
         steps.setSpacing(8)
         self.step_labels = []
-        for title in ('01 · 监听 UDP 6000', '02 · WIN3 已发送',
+        for title in ('01 · 监听 UDP 6000', '02 · 连接请求已发送',
                       '03 · PEER 对端一致', '04 · 视频 / EDTM 数据'):
             value = label(title + '\n未完成 · —', 'note')
             value.setMinimumHeight(36)
@@ -285,7 +209,7 @@ class SocConsole(QWidget):
         layout.addWidget(frame)
 
     def _transfers(self, layout):
-        self.image_card, box = card('图片发送 · WIN0 / WIN1')
+        self.image_card, box = card('图片或文件夹')
         self.image_path = QLineEdit()
         self.image_path.setPlaceholderText('选择测试图片')
         path_row = QHBoxLayout()
@@ -294,19 +218,15 @@ class SocConsole(QWidget):
         self.choose_folder = self.button('文件夹', self._choose_folder)
         path_row.addWidget(self.choose_folder)
         box.addLayout(path_row)
-        self.window = QComboBox()
-        self.window.addItems(['WIN0', 'WIN1'])
         send_row = QHBoxLayout()
-        send_row.addWidget(label('目标窗口'))
-        send_row.addWidget(self.window)
         self.send_image = self.button('发送图像', self._send_image)
         send_row.addWidget(self.send_image)
         box.addLayout(send_row)
         self.image_note = label('', 'note')
-        self.image_note.setWordWrap(False)
+        self.image_note.setWordWrap(True)
         box.insertWidget(1, self.image_note)
         layout.addWidget(self.image_card)
-        self.model_card, box = card('模型发送 · WIN2')
+        self.model_card, box = card('模型加载')
         self.model_path = QLineEdit()
         self.model_path.setPlaceholderText('compile_yolo.py 输出目录')
         path_row = QHBoxLayout()
@@ -316,14 +236,14 @@ class SocConsole(QWidget):
         self.send_model = self.button('发送描述符与模型', self._send_model)
         box.addWidget(self.send_model)
         self.model_note = label('', 'note')
-        self.model_note.setWordWrap(False)
+        self.model_note.setWordWrap(True)
         box.insertWidget(1, self.model_note)
         layout.addWidget(self.model_card)
         frame, box = card('传输状态')
         self.transfer = label('尚未发送', 'note')
         self.progress = QProgressBar()
         self.progress.setTextVisible(False)
-        self.model_result = label('WIN2_BYTES · —', 'note')
+        self.model_result = label('模型字节数 · —', 'note')
         box.addWidget(self.progress)
         box.addWidget(self.transfer)
         box.addWidget(self.model_result)
@@ -347,30 +267,20 @@ class SocConsole(QWidget):
         self.view.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
         box.addWidget(self.view, 1)
         self.caption = label('来源 · 板端视频\n等待 EDVF 视频帧', 'note')
-        self.caption.setWordWrap(False)
+        self.caption.setWordWrap(True)
         box.addWidget(self.caption)
         self.video_stats = label('完整帧 0 · 缺包丢帧 0 · 网口跳帧 0', 'note')
         box.addWidget(self.video_stats)
         row.addWidget(frame, 1)
 
     def _controls(self, layout):
-        self.scene_card, box = card('场景与流水线')
-        fields = form()
+        self.scene_card, box = card('摄像头输入')
         self.scene = QComboBox()
-        self.scene.addItems(['S1 · 目标检测', 'S2 · 图像处理'])
+        self.scene.addItems(['摄像头目标检测', '摄像头图像处理'])
         self.scene.setCurrentIndex(1)
-        self.pix = QComboBox()
-        self.pix.addItems(['旁路', '亮度 / 对比度', 'Gamma', '高斯', 'Sobel'])
-        self.geo = QComboBox()
-        self.geo.addItems(['关闭', '180° 旋转', '居中放大 2 倍'])
-        for name, widget in [('场景', self.scene), ('PIX', self.pix), ('GEO', self.geo)]:
-            fields.addRow(name, widget)
-        box.addLayout(fields)
-        self.apply_scene = self.button('下发场景与 PIX / GEO', self._apply_scene)
+        box.addWidget(self.scene)
+        self.apply_scene = self.button('切换摄像头功能', self._apply_scene)
         box.addWidget(self.apply_scene)
-        self.scene_note = label('', 'note')
-        self.scene_note.setWordWrap(False)
-        box.addWidget(self.scene_note)
         layout.addWidget(self.scene_card)
         self.output_card, box = card('输出与采样')
         fields = form()
@@ -437,12 +347,12 @@ class SocConsole(QWidget):
         self.comparison_result = label('选择原图、模型与量化参数', 'note')
         box.addWidget(self.comparison_result)
         self.check_note = label('', 'note')
-        self.check_note.setWordWrap(False)
+        self.check_note.setWordWrap(True)
         box.addWidget(self.check_note)
         layout.addWidget(self.check_card)
 
     def _monitor(self, row):
-        self.monitor_card, box = card('DDR 监控 · 等待：clk_mem 周期')
+        self.monitor_card, box = card('DDR 监控')
         box.setSpacing(4)
         header = QHBoxLayout()
         header.addWidget(box.takeAt(0).widget())
@@ -507,16 +417,16 @@ class SocConsole(QWidget):
         metrics.addWidget(self.monitor_summary)
         self.realtime = label('DISP 读空 0 · VIN CH0 / CH2 溢出 0 / 0', 'note')
         metrics.addWidget(self.realtime, 1)
-        self.monitor_note = label('60 s · 读深色 / 写浅色 · 等候单位 clk_mem 周期', 'note')
+        self.monitor_note = label('等待周期：clk_mem', 'note')
         metrics.addWidget(self.monitor_note)
         for value in (self.monitor_summary, self.realtime, self.monitor_note):
-            value.setWordWrap(False)
+            value.setWordWrap(True)
         box.addLayout(metrics)
         row.addWidget(self.monitor_card, 1)
 
     def _log(self, row):
         frame, box = card('会话日志')
-        frame.setFixedWidth(300)
+        frame.setFixedWidth(280)
         header = QHBoxLayout()
         header.addWidget(box.takeAt(0).widget(), 1)
         header.addWidget(self.button('保存', lambda: self.run(self.engine.save_log)))
@@ -527,54 +437,6 @@ class SocConsole(QWidget):
         self.log.setLineWrapMode(QPlainTextEdit.NoWrap)
         box.addWidget(self.log, 1)
         row.addWidget(frame)
-
-    def _project(self, *_):
-        project = self.project.currentText()
-        self.board.select_project(project)
-        caps = PROJECTS[project]
-        reason = caps['reason']
-        for widget in (self.image_card, self.model_card, self.check_card):
-            widget.section_toggle.setStyleSheet(
-                'color:#2f6bff;' if caps['detection'] else 'color:#9aa6b5;')
-            for control in widget.findChildren(QWidget):
-                if (isinstance(control, (QPushButton, QLineEdit, QComboBox))
-                        and control.objectName() != 'sectionToggle'):
-                    control.setEnabled(caps['detection'])
-        for note in (self.image_note, self.model_note, self.check_note):
-            note.setText(reason
-                         if not caps['detection'] else
-                         ('CH2 · 983,040 B · demo_npu' if project == 'B3N'
-                          else '1280 × 720 RGB565') if note is self.image_note else
-                         'EDNM · 板端结果见日志' if note is self.model_note else
-                         '输入 / 输出逐字节比对；检测框按序比对')
-        for widget in (self.scene, self.pix, self.geo, self.apply_scene):
-            widget.setEnabled(caps['processing'])
-        self.choose_folder.setEnabled(project == 'B3N')
-        self.display.setEnabled(caps['processing'] or caps['detection'])
-        self.scene.model().item(0).setEnabled(caps['detection'])
-        if not caps['detection']:
-            self.scene.setCurrentIndex(1)
-        self.display.model().item(2).setEnabled(caps['detection'])
-        if not caps['detection'] and self.display.currentIndex() == 2:
-            self.display.setCurrentIndex(0)
-        self.scene_note.setText(reason if not caps['processing'] else
-                                'B3V 没有 NPU；仅 S2' if not caps['detection'] else
-                                'PIX / GEO 仅在 S2 生效')
-        for widget in (self.output, self.fps, self.rate, self.apply_output, self.status_query):
-            widget.setEnabled(caps['processing'])
-        for widget in (self.establish, self.ip, self.mode, self.chart_mode, self.pause_button):
-            widget.setEnabled(caps['network'])
-        self.output_note.setText('UDP 5000 → PC 6000' if caps['processing'] else
-                                 'DDR 固定 100 Hz · 无视频输出')
-        self.monitor_note.setText('60 s · 读深色 / 写浅色 · 等候单位 clk_mem 周期'
-                                  if caps['network'] else reason)
-        for button in self.monitor_buttons:
-            button.setEnabled(caps['network'])
-        self.histogram.setEnabled(caps['network'])
-        self.view.setEnabled(caps['processing'] or caps['detection'])
-        self.bandwidth.setEnabled(caps['network'])
-        self.utilization.setEnabled(caps['network'])
-        self.table.setEnabled(caps['network'])
 
     def _network(self):
         self.run(lambda: self.board.establish_network(self.ip.text(), 5000))
@@ -604,7 +466,7 @@ class SocConsole(QWidget):
                                         if item.suffix.lower() in
                                         ('.png', '.jpg', '.jpeg', '.bmp'))
             if not self.folder_images:
-                self.toast('文件夹没有图片')
+                self.toast.show_message('文件夹没有图片', error=True)
                 return
             self.folder_started = time.monotonic()
             self.folder_completed = 0
@@ -613,7 +475,7 @@ class SocConsole(QWidget):
     def _next_image(self):
         self.image_path.setText(str(self.folder_images.pop(0)))
         self._send_image()
-        self.window.setCurrentIndex(1 - self.window.currentIndex())
+
 
     def _load_image(self):
         from PySide6.QtGui import QImageReader
@@ -621,9 +483,7 @@ class SocConsole(QWidget):
         image = reader.read()
         if image.isNull():
             raise ValueError(f'无法读取图片：{reader.errorString()}')
-        self.static_image = (image if self.project.currentText() == 'B3N' else
-                             image.scaled(1280, 720, Qt.IgnoreAspectRatio,
-                                          Qt.SmoothTransformation))
+        self.static_image = image
         self.loaded_image = self.image_path.text()
         self.last_display = None
         self._display()
@@ -634,7 +494,7 @@ class SocConsole(QWidget):
             if not self.engine.ethernet.status()['rx']['active']:
                 self.engine.ethernet.start_receive(6000, mode='console')
             self.engine.yolo.send_image(self.image_path.text(), self.ip.text(), 5000,
-                                        6000, self.window.currentIndex())
+                                        6000)
             self.display.setCurrentIndex(2)
             self.comparison = None
             self.comparison_result.setText('等待本次回传')
@@ -643,16 +503,11 @@ class SocConsole(QWidget):
     def _send_model(self):
         self.run(lambda: self.engine.yolo.send_model(
             self.model_path.text(), self.ip.text(), 5000, 6000))
-        self.model_result.setText(f'WIN2_BYTES 期望 {self.engine.yolo.image_bytes:,} B')
+        self.model_result.setText(f'模型字节数 期望 {self.engine.yolo.image_bytes:,} B')
 
     def _apply_scene(self):
         def send():
             self.engine.scenes.send(['s1', 's2'][self.scene.currentIndex()])
-            if self.scene.currentIndex() == 1:
-                self.engine.scenes.send(['pix_bypass', 'pix_brightness', 'pix_gamma',
-                                         'pix_gaussian', 'pix_sobel'][self.pix.currentIndex()])
-                self.engine.send(['geo off', 'geo rotate', 'geo scale'][
-                    self.geo.currentIndex()], 'cr')
         self.run(send)
 
     def _apply_output(self):
@@ -707,17 +562,11 @@ class SocConsole(QWidget):
             image = QImage(frame.pixels, frame.width, frame.height, frame.stride,
                            QImage.Format_RGB16).copy()
             caption = (f'来源 · 板端视频 · FRAME {frame.frame_id} · {state["fps"]:.1f} fps\n'
-                       f'{frame.width} × {frame.height} · S{frame.scene} · {len(boxes)} 个检测框')
+                       f'{frame.width} × {frame.height} · {len(boxes)} 个检测框')
         else:
             image, boxes, key = QImage(), (), None
             caption = '来源 · 板端视频\n等待 EDVF 视频帧'
-        if not (PROJECTS[self.project.currentText()]['processing'] or
-                PROJECTS[self.project.currentText()]['detection']):
-            image, boxes = QImage(), ()
         self.view.set_image(image, boxes)
-        if not (PROJECTS[self.project.currentText()]['processing'] or
-                PROJECTS[self.project.currentText()]['detection']):
-            caption = PROJECTS[self.project.currentText()]['reason']
         self.caption.setText(caption.replace('\n', ' · '))
         self.last_display = key
 
@@ -782,29 +631,27 @@ class SocConsole(QWidget):
                 for column, text in enumerate((f"{port['wait_avg']:.1f}",
                                                 str(port['wait_max']), str(port['urg_cnt'])), 1):
                     self.table.item(index, column).setText(text)
+                    self.table.item(index, column).setToolTip(text)
                     self.table.item(index, column).setForeground(QColor(
                         '#d24b5c' if column == 3 and port['urg_cnt'] else '#54637a'))
             values = (row['disp_underflow'], row['vin_ch0_overflow'], row['vin_ch2_overflow'])
             self.realtime.setText(f'DISP 读空 {values[0]} · VIN CH0 / CH2 溢出 '
                                   f'{values[1]} / {values[2]}')
             self.realtime.setStyleSheet(f'color:{"#d24b5c" if any(values) else "#7a8b9d"};')
-            if PROJECTS[self.project.currentText()]['detection']:
-                recent = [sample for sample in history
-                          if sample['time_s'] > row['time_s'] - 1]
-                detection_fps = sum(sample['npu_completed'] for sample in recent) * 125e6 / sum(
-                    sample['window_cyc'] for sample in recent)
-                self.monitor_note.setText(f"NPU {row['npu_ms']:.1f} ms · 后处理 "
-                                          f"{row['post_ms']:.1f} ms · 框 {row['boxes']} · "
-                                          f"{detection_fps:.1f} fps · 读深 / 写浅")
+            recent = [sample for sample in history
+                      if sample['time_s'] > row['time_s'] - 1]
+            detection_fps = sum(sample['npu_completed'] for sample in recent) * 125e6 / sum(
+                sample['window_cyc'] for sample in recent)
+            self.monitor_note.setText(f"NPU {row['npu_ms']:.1f} ms · 后处理 "
+                                      f"{row['post_ms']:.1f} ms · 框 {row['boxes']} · "
+                                      f"{detection_fps:.1f} fps · 读深 / 写浅")
 
     def refresh(self):
         state = self.board.status()
-        if self.project.currentText() != state['project']:
-            self.project.setCurrentText(state['project'])
         self.phase.setText('阶段 · ' + {'disconnected': '未连接', 'bios': 'BIOS',
                                       'application': '应用'}[state['phase']])
         for index, (key, title) in enumerate(zip(('listen', 'win3', 'peer', 'data'),
-                ('01 · 监听 UDP 6000', '02 · WIN3 已发送', '03 · PEER 对端一致',
+                ('01 · 监听 UDP 6000', '02 · 连接请求已发送', '03 · PEER 对端一致',
                  '04 · 视频 / EDTM 数据'))):
             step = state['network'][key]
             stamp = fmt_ts(step['time'])[:8] if step['time'] else '—'
@@ -832,12 +679,10 @@ class SocConsole(QWidget):
         self.progress.setValue(int(tx['sent'] / tx['total'] * 100) if tx['total'] else 0)
         self.transfer.setText(f"{tx['sent']:,} / {tx['total']:,} B\n" +
                                (tx['error'] or ('发送中' if tx['active'] else '就绪')))
-        caps = PROJECTS[self.project.currentText()]
-        b3n = self.project.currentText() == 'B3N'
-        waiting = b3n and (self.engine.yolo.capture_pending or self.comparing)
-        self.send_image.setEnabled(caps['detection'] and not tx['active'] and not waiting)
-        self.send_model.setEnabled(caps['detection'] and not tx['active'] and not waiting)
-        self.choose_folder.setEnabled(b3n and not tx['active'] and not waiting)
+        waiting = self.engine.yolo.capture_pending
+        self.send_image.setEnabled(not tx['active'] and not waiting)
+        self.send_model.setEnabled(not tx['active'] and not waiting)
+        self.choose_folder.setEnabled(not tx['active'] and not waiting)
         source_image = self.engine.yolo.source_image
         if source_image is not None and source_image != self.loaded_image:
             self.image_path.setText(source_image)
@@ -850,11 +695,22 @@ class SocConsole(QWidget):
                            f'{len(capture[2].boxes)} 个框')
             self.capture_status.setText(f'FRAME {capture[2].frame_id} · '
                                         f'{len(capture[2].boxes)} 个检测框；回传完整')
-            if self.project.currentText() == 'B3N':
+            if self.engine.yolo.timings:
                 timing = self.engine.yolo.timings[-1]
+                fps = len(self.engine.yolo.timings) / sum(t['seconds'] for t in
+                                                          self.engine.yolo.timings)
                 self.board.log(f"{timing['path']} · 往返 {timing['seconds'] * 1000:.2f} ms")
-                self._compare()
-        self.compare.setEnabled(caps['detection'] and not self.comparing)
+                self.capture_status.setText(self.capture_status.text() + f' · {fps:.2f} fps')
+            if self.folder_started is not None:
+                self.folder_completed += 1
+                elapsed = time.monotonic() - self.folder_started
+                self.capture_status.setText(self.capture_status.text() +
+                    f' · 文件夹 {self.folder_completed / elapsed:.2f} fps')
+                if self.folder_images:
+                    self._next_image()
+                else:
+                    self.folder_started = None
+        self.compare.setEnabled(not self.comparing)
         if self.comparison is not None and self.comparison is not self.reported_comparison:
             self.reported_comparison = self.comparison
             if isinstance(self.comparison, str):
@@ -873,15 +729,6 @@ class SocConsole(QWidget):
                     f"参考 {result['detections']['expected']} / "
                     f"板端 {result['detections']['actual']}")
                 self.board.log(self.comparison_result.text())
-                if self.folder_started is not None:
-                    self.folder_completed += 1
-                    elapsed = time.monotonic() - self.folder_started
-                    self.board.log(f'连续 {self.folder_completed} 张 · '
-                                   f'平均 {self.folder_completed / elapsed:.3f} fps（含比对）')
-                    if self.folder_images:
-                        self._next_image()
-                    else:
-                        self.folder_started = None
         self._display()
         video = self.engine.video.snapshot()
         self.video_stats.setText(f"完整帧 {video['received']} · 缺包丢帧 {video['dropped']} · "

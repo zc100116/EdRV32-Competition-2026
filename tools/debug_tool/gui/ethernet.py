@@ -1,7 +1,7 @@
 """ethernet.py — eth spec 2.1–2.6 UDP file panel; host, no clock domain."""
 
 from PySide6.QtWidgets import (
-    QDoubleSpinBox, QFileDialog, QFormLayout, QFrame, QLabel, QLineEdit,
+    QComboBox, QDoubleSpinBox, QFileDialog, QFormLayout, QFrame, QLabel, QLineEdit,
     QProgressBar, QPushButton, QSpinBox, QVBoxLayout,
 )
 import struct
@@ -38,9 +38,9 @@ class EthernetPanel(QFrame):
         choose.clicked.connect(self._choose_send)
         layout.addWidget(choose)
         fields = QFormLayout()
-        self.window = QSpinBox()
-        self.window.setRange(0, 3)
-        fields.addRow("窗口号", self.window)
+        self.window = QComboBox()
+        self.window.addItems(["图像缓冲 A", "图像缓冲 B", "模型", "控制与监控"])
+        fields.addRow("数据用途", self.window)
         self.offset = QLineEdit("0")
         self.offset.setPlaceholderText("十进制或 0x 十六进制")
         fields.addRow("起始偏移", self.offset)
@@ -64,8 +64,8 @@ class EthernetPanel(QFrame):
         choose_rx = QPushButton("选择接收保存目录")
         choose_rx.clicked.connect(self._choose_receive)
         layout.addWidget(choose_rx)
-        hint = QLabel("按窗口保存为 window0.bin … window3.bin，\n"
-                      "按 OFFSET 写入；每次监听首次收到该窗口时覆盖旧文件。")
+        hint = QLabel("按数据用途保存到所选目录，\n"
+                      "按 OFFSET 写入；每次监听首次收到该用途数据时覆盖旧文件。")
         hint.setWordWrap(True)
         layout.addWidget(hint)
         self.listen = QPushButton("开始监听")
@@ -90,7 +90,7 @@ class EthernetPanel(QFrame):
         try:
             self.ethernet.send_file(
                 self.path.text(), self.ip.text(), self.board_port.value(),
-                self.local_port.value(), self.window.value(),
+                self.local_port.value(), self.window.currentIndex(),
                 int(self.offset.text(), 0), self.interval.value() / 1000)
         except (OSError, ValueError, RuntimeError, struct.error) as exc:
             self.toast.show_message(str(exc), error=True)
@@ -121,7 +121,7 @@ class EthernetPanel(QFrame):
                 f"{rx['bytes']} B\nNOTIFY: {rx['notifyCount']} 次，"
                 f"最近一包: {int(rx['lastNotify'])}")
         if "lastWindow" in rx:
-            text += f"\nWIN={rx['lastWindow']} OFFSET={rx['lastOffset']}"
+            text += f"\n用途={self.window.itemText(rx['lastWindow'])} 偏移={rx['lastOffset']}"
         if rx["error"]:
             text += f"\n错误: {rx['error']}"
         self.rx_status.setText(text)
