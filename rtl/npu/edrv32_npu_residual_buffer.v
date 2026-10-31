@@ -147,10 +147,10 @@ module edrv32_npu_residual_buffer (
     edrv32_ram_npu_residual u_residual_ram (
         .clk_i(clk_i),
         .wr_en_i(residual_wr_valid_i && !cancel_i),
-        .wr_addr_i({4'b0000, residual_wr_bank_i, residual_wr_index_i}),
+        .wr_addr_i({residual_wr_bank_i, residual_wr_index_i}),
         .wr_data_i(residual_wr_data_i),
         .rd_en_i(rd_en_w),
-        .rd_addr_i({4'b0000, residual_rd_addr_i}),
+        .rd_addr_i(residual_rd_addr_i),
         .rd_data_o(residual_rd_data_o)
     );
 endmodule

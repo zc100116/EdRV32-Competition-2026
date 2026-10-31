@@ -1,8 +1,9 @@
 // File: edrv32_ram_mem_xbar_w.v
 // Spec: mem-subsys-spec 2.2, 7; CLAUDE.md 8.
-// Description: Fixed DRM simple dual-port storage for the mem_xbar buffers.
-// Enabled synchronous reads have one-cycle latency and read old data on collision.
-// Contents and output data are not initialized or reset.
+// Description: Fixed 16x288 distributed RAM simple dual-port storage.
+// Enabled reads have one-cycle latency; rd_en_i low holds the output.
+// The wrapper samples the combinational read before the write edge updates memory,
+// so same-address reads return old data. Contents and output data are not initialized or reset.
 // Clock: clk_mem.
 `include "edrv32_build_mode.vh"
 module edrv32_ram_mem_xbar_w (
@@ -19,31 +20,35 @@ module edrv32_ram_mem_xbar_w (
     input wire [3:0] rd_addr_i,
     output wire [287:0] rd_data_o
 );
+    wire [287:0] memory_data_w;
+    reg [287:0] rd_data_r;
+    assign rd_data_o = rd_data_r;
+
 `ifdef EDRV32_FPGA_MEMORY_MODE
-    // fpga/ip README: 18K DRM needs a 9-bit address; unused high bits are 0.
-    ip_ram_mem_xbar_w u_ip (
+    ip_lutram_mem_xbar_w u_ip (
+        // Synchronous write port.
         .wr_clk(clk_i),
-        .wr_rst(1'b0),
         .wr_en(wr_en_i),
-        .wr_addr({5'b0, wr_addr_i}),
+        .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
-        .rd_clk(clk_i),
-        .rd_rst(1'b0),
-        .rd_clk_en(rd_en_i),
-        .rd_addr({5'b0, rd_addr_i}),
-        .rd_data(rd_data_o)
+
+        // Unregistered combinational read port.
+        .rd_addr(rd_addr_i),
+        .rd_data(memory_data_w)
     );
 `else
     reg [287:0] memory_r [0:15];
-    reg [287:0] rd_data_r;
-    assign rd_data_o = rd_data_r;
+    assign memory_data_w = memory_r[rd_addr_i];
     always @(posedge clk_i) begin
         if (wr_en_i) begin
             memory_r[wr_addr_i] <= wr_data_i;
         end
-        if (rd_en_i) begin
-            rd_data_r <= memory_r[rd_addr_i];
-        end
     end
 `endif
+    // Capture the pre-write value; a disabled read holds this register.
+    always @(posedge clk_i) begin
+        if (rd_en_i) begin
+            rd_data_r <= memory_data_w;
+        end
+    end
 endmodule

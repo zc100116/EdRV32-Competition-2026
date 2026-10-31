@@ -51,10 +51,10 @@ module edrv32_npu_quant_param_store (
             edrv32_ram_npu_quant u_ram (
                 .clk_i(clk_i),
                 .wr_en_i(wr_valid_r),
-                .wr_addr_i({4'b0, wr_addr_r}),
+                .wr_addr_i(wr_addr_r),
                 .wr_data_i(wr_data_r),
                 .rd_en_i(param_rd_en_i),
-                .rd_addr_i({4'b0, param_rd_block_i, param_rd_phase_i}),
+                .rd_addr_i({param_rd_block_i, param_rd_phase_i}),
                 .rd_data_o(param_rd_data_o[64*bank +: 64])
             );
         end

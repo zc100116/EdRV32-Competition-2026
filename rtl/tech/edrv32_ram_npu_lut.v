@@ -1,6 +1,6 @@
 // File: edrv32_ram_npu_lut.v
 // Spec: npu-spec 5.2; docs/design/2026-10-27-npu-datapath.md 4.5, 4.9; CLAUDE.md 8.
-// Description: Fixed 4096x8 DRM simple dual-port RAM for the NPU (lut).
+// Description: Fixed 2048x8 DRM simple dual-port RAM for the NPU (lut).
 // Enabled reads have two-cycle latency (array read plus output register) and read old data on
 // collision. Contents and output data are not initialized or reset.
 // Clock: clk_npu.
@@ -11,12 +11,12 @@ module edrv32_ram_npu_lut (
 
     // Write port.
     input wire wr_en_i,
-    input wire [11:0] wr_addr_i,
+    input wire [10:0] wr_addr_i,
     input wire [7:0] wr_data_i,
 
     // Read port.
     input wire rd_en_i,
-    input wire [11:0] rd_addr_i,
+    input wire [10:0] rd_addr_i,
     output wire [7:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
@@ -33,7 +33,7 @@ module edrv32_ram_npu_lut (
         .rd_data(rd_data_o)
     );
 `else
-    reg [7:0] memory_r [0:4095];
+    reg [7:0] memory_r [0:2047];
     reg [7:0] rd_array_r;
     reg [7:0] rd_data_r;
     assign rd_data_o = rd_data_r;

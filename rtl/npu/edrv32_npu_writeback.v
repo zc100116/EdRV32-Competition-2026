@@ -150,10 +150,10 @@ module edrv32_npu_writeback (
     edrv32_ram_npu_result u_result_ram (
         .clk_i(clk_i),
         .wr_en_i(complete_w),
-        .wr_addr_i({4'b0000, writeback_tag_i[42:38]}),
+        .wr_addr_i(writeback_tag_i[42:38]),
         .wr_data_i(writeback_data_i),
         .rd_en_i(rd_en_w),
-        .rd_addr_i({4'b0000, result_rd_index_i}),
+        .rd_addr_i(result_rd_index_i),
         .rd_data_o(rd_data_w)
     );
 endmodule

@@ -48,10 +48,10 @@ module edrv32_npu_activation_lut (
             edrv32_ram_npu_lut u_ram (
                 .clk_i(clk_i),
                 .wr_en_i(wr_valid_r),
-                .wr_addr_i({1'b0, wr_addr_r}),
+                .wr_addr_i(wr_addr_r),
                 .wr_data_i(wr_data_r),
                 .rd_en_i(lut_rd_en_i),
-                .rd_addr_i({1'b0, lut_rd_block_i, lut_rd_addr_i[8*lane +: 8]}),
+                .rd_addr_i({lut_rd_block_i, lut_rd_addr_i[8*lane +: 8]}),
                 .rd_data_o(lut_rd_data_o[8*lane +: 8])
             );
         end
