@@ -5,7 +5,7 @@
 | IP 类型 | IP Compiler → Memory → 分布式 RAM（Distributed RAM）→ 简单双口 RAM（Simple Dual Port） |
 | 模块名 | `ip_lutram_npu_result` |
 | 包装模块 | `rtl/tech/edrv32_ram_npu_result.v` |
-| 使用者 | edrv32_npu_writeback 结果环 ×1 |
+| 使用者 | edrv32_npu_writeback 结果环 ×1；512 位由包装模块并排例化 2 个 256 位 IP（`u_ip_lo` 存 [255:0]，`u_ip_hi` 存 [511:256]） |
 | 依据 | npu-spec 5.2；CLAUDE.md 8；设计记录 `docs/design/2026-10-31-drm-lutram.md` |
 | 器件 | PG2L200H，速度等级以工程为准 |
 | 状态 | 已采用（用户 2026-10-31），待卡 21 生成 |
@@ -16,7 +16,7 @@
 |---|---|
 | 实现资源 | 分布式 RAM，不选 DRM |
 | 端口模式 | 简单双口：独立写地址、读地址，同宽读写 |
-| 数据位宽 | 写端口和读端口都为 512 |
+| 数据位宽 | 写端口和读端口都为 256（PDS 分布式 RAM 最宽 256，512 位拆成两个） |
 | 深度 | 32（地址 5 位） |
 | 写入方式 | 同步写；单一时钟 clk_npu，上升沿，写使能有效时写整项 |
 | 字节写使能 | 不勾选 |
@@ -38,8 +38,8 @@
 | `wr_clk` | in | 1（clk_npu；唯一时钟） |
 | `wr_en` | in | 1 |
 | `wr_addr`、`rd_addr` | in | 5 |
-| `wr_data` | in | 512 |
-| `rd_data` | out | 512（组合输出） |
+| `wr_data` | in | 256 |
+| `rd_data` | out | 256（组合输出） |
 
 ## 生成后需要回传的信息
 

@@ -57,6 +57,8 @@
 
 逐个按 `fpga/ip/<IP>.md` 的选项生成，模块名和端口名必须与说明一致。
 
+**注意**：PDS 分布式 RAM 最宽 256 位。`ip_lutram_mem_xbar_w` 按 16 × 144 生成，`ip_lutram_npu_result` 按 32 × 256 生成；包装模块各例化两份拼成 288 位、512 位（b3 当前提交起）。按 288、512 宽已经生成失败或生成过的，按新宽度重新生成。
+
 | 动作 | IP | B3R | B3N | B3VN |
 |---|---|---|---|---|
 | 重新生成（模块名不变） | `ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、`ip_ram_dcache_data` | ✓ | ✓ | ✓ |
