@@ -192,3 +192,73 @@ REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY �
 - 布局测试继续检查标签高度、按钮/数字宽度、滚动可达性、规则编辑按钮、完整七行端口表；长正则/路径/数值提供全文提示。
 - `python -m compileall -q tools/debug_tool`、`git diff --check` 和 `python tools/check/verilog_style.py sw/apps/demo sw/lib tools/debug_tool` 通过；无 RTL 改动，Verilator lint 不适用。
 - 日志：`build/t-ui1-r-{demo,demo_vision,demo_vnpu,demo_npu,host,tools,shots}.log`；未运行 RTL 仿真或实板测试。
+
+## 虚拟输入（T-VIN1）
+
+左侧「输入」打开虚拟输入面板，点击面板后启用键盘快捷键。
+屏幕按钮按住为按下、松开为释放；方向键 / WASD、J=A、K=B、U=Select、
+I=Start、Enter、Esc、Tab=Next、Shift+Tab=Prev。鼠标在白色 16:9 触控板内
+移动即为绝对位置，左 / 右键分别发送对应按钮；坐标显示在下方。
+触控板映射 1280×720，使用时看 HDMI 光标，**不回传屏幕画面**。
+离开面板或应用失去焦点时释放面板的按下状态。
+
+「输入」面板或「调试」页建立网口连接且对端确认后，面板自动走网口；否则走串口，
+当前通道显示在面板顶部。输入面板可填写设备 IP 并点击「建立网口连接」，
+端点默认 `192.168.1.10:5000`。无串口连接时操作会明确报错。
+所有入口建立网口时只发送 UDP 握手，不自动发送 UART 文本。
+「调试 → 设备与输出」的「读取状态」按钮由用户显式发送 `status`。
+向 S3/NES 发送文本会被当作原有单字符按键，使用这两个应用时不要点击读取状态。
+
+![虚拟输入 1366×768](assets/virtual-input-1366x768.png)
+![虚拟输入 1920×1080](assets/virtual-input-1920x1080.png)
+<!-- 截图：QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py tools/debug_tool/assets/virtual-input-1366x768.png --main-page 5 --width 1366 --height 768；另一张使用 1920/1080；空白触控板，无实板画面。 -->
+
+每帧为 8 字节小端完整状态（Python `<HhhBB`），每次覆盖全部状态：
+
+| 字节 | 类型 | 含义 |
+|---|---|---|
+| 0–1 | u16 | bit0 上、1 下、2 左、3 右、4 A、5 B、6 Select、7 Start；8 Enter、9 Esc、10 Next、11 Prev，其余 0 |
+| 2–3 | i16 | X：0–1279 |
+| 4–5 | i16 | Y：0–719 |
+| 6 | u8 | bit0 左键、bit1 右键，其余 0 |
+| 7 | u8 | 保留，0 |
+
+串口发送 `0x1B 'V'` 后跟状态帧。板端遇 ESC 进入帧读取，帧内字节（包括
+ESC 和原有按键字符）仅作数据，其余字节继续交给应用原有单字符输入。
+UDP 使用既有 8 字节大端应用头 `!BBHI`：window=2、NOTIFY=1、保留=0、
+offset=0，后跟 8 字节输入。接收窗口 2 物理地址 `0x0a010000`、大小 8 字节，
+位于既有网络保留区，与 S3/NES 的窗口 3 对端建立区 `0x0a000000` 分离。
+收到 NOTIFY 后从非缓存别名读取最新状态；S3 在既有 100 Hz ETH tick 回调读取，
+NES 每帧轮询。状态变化立即发一次；任何按键或鼠标键按下时每 20 ms 重发。
+板端只保留最后收到的完整状态，无校验、序号、输入超时、重试或释放推测。
+
+可复现发包（`--emit` 输出带串口前缀的原始二进制文件；末帧为释放）：
+
+```sh
+python tools/debug_tool/virtual_input.py --emit build/debug_tool/input.bin --keys up,a --x 100 --y 200 --hold .2
+python tools/debug_tool/virtual_input.py --udp 127.0.0.1:5000 --keys b,start --hold .2
+```
+
+REST `POST /api/virtual-input` 接受 `keys,x,y,mouse` 四个整数，共用 GUI 的
+发送器与自动重发。`keys` 是位图，`mouse` 是鼠标键位图。
+
+## T-VIN1 验收记录
+
+- 日期：2026-10-31；基线 `8edfca2d`，软件提交 `833a71ed`，工具复现版本为本节所在提交（`git rev-parse HEAD`）。
+- `make -C sw PROGRAM=s3 MEMORY=ddr_app -j 1`：通过，0 warning。
+- `make -C sw PROGRAM=nes MEMORY=ddr_app -j 1`：通过，0 warning。
+- `python3 tools/s3/virtual_input_host.py`：512 源文件 C11/Werror 构建通过；串口帧与字符混合、网络覆盖、NES 八键逐位与原状态取或通过。
+- 同一主机测试用真实 LVGL POINTER 左键点击按钮一次、KEYPAD Next 切换至第二按钮，并直接断言点击数与焦点对象。
+- `python3 tools/s3/menu_capture.py`：原菜单导航与真实 RND 描述符执行通过（484 命令）。
+- `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests -v`：78 项通过，无跳过。
+- 新增工具测试覆盖完整 UDP 应用头/状态、串口 `--emit` 前缀/状态/末帧释放、约 50 Hz、闲置不发、联网优先、键盘/指针与两种尺寸标签完整宽度。
+- 输入面板两张及设备页两张截图已刷新；`assets/virtual-input-{1366x768,1920x1080}.png` 使用 README 内命令刷新；实际窗口尺寸相符。
+- ETH 共用接口仅增加 `eth_monitor_board_set_receive()`，在原 tick 清 NOTIFY 前回调，不改变原监控发送策略。
+- 经协调者授权修改 `tools/s3/lvgl_host.py` 并新增 `tools/s3/virtual_input_host.{c,py}`；其余改动属于任务归属目录。
+- `python3 -m compileall -q tools/debug_tool tools/s3/virtual_input_host.py`、`git diff --check` 通过。
+- `python3 tools/check/verilog_style.py sw/apps/s3 sw/apps/nes sw/lib tools/debug_tool tools/s3`：0 warning；无 RTL，Verilator lint 不适用。
+- 日志位于 `build/t-vin1/{s3,nes,host,menu,tools,rn17}.log`；RN-17 逐帧输出为 `build/s3/lvgl/rn17-results.md`。
+- 未运行 SoC 仿真或实板测试；HDMI 光标、物理串口和网口板上验收留给后续任务卡。
+- 协调者确认：连接网口不再自动发送 `status`；原设备页查询按钮改为「读取状态」，输入面板复用相同纯 UDP 握手；相关 REST/会话/GUI 测试覆盖。
+- `python3 tools/s3/rn17.py`：原判据，16 帧中 15 PASS；仅既知 `benchmark-12-opa-containers` 为 20756 像素 / 2.252170%，runner 如实返回 1；无新增失败，未修改阈值或 runner。
+- RN-17 真实参考执行 776 批 / 3895 命令 / 32683485 像素；benchmark 停止后菜单保留的两次检查均通过。

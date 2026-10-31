@@ -17,6 +17,7 @@ import time
 
 from .program import BiosProgrammer
 from .session import BoardSession
+from .virtual_input import VirtualInput, send_frame
 from .scene import SceneControl
 from .processing import ProcessingControl
 
@@ -101,6 +102,7 @@ class SerialEngine:
                                       lambda text: self.add_entry("sys", text),
                                       self._program_baud)
         self.board = BoardSession(self)
+        self.virtual_input = VirtualInput(lambda frame: send_frame(self, frame))
         self.telemetry = self.board.telemetry
         self.ethernet = self.board.ethernet
         self.yolo = self.board.yolo

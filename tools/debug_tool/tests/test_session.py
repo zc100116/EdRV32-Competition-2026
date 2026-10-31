@@ -56,15 +56,12 @@ class SessionTest(unittest.TestCase):
             peer.bind(('127.0.0.1', 0))
             peer.settimeout(2)
             self.engine.ethernet.start_receive(6000, directory, mode='console')
-            def status_command(text, ending):
-                # The WIN3 must already be on the wire when UART status is sent.
-                self.assertEqual(text, 'status')
-                self.assertEqual(ending, 'cr')
-                packet, source = peer.recvfrom(1024)
-                self.assertEqual(packet, HEADER.pack(3, 1, 0, 0) + b'\0')
-                self.assertEqual(source, ('127.0.0.1', 6000))
-            with patch.object(self.engine, 'send', side_effect=status_command):
+            with patch.object(self.engine, 'send') as send:
                 state = board.establish_network('127.0.0.1', peer.getsockname()[1])
+                send.assert_not_called()
+            packet, source = peer.recvfrom(1024)
+            self.assertEqual(packet, HEADER.pack(3, 1, 0, 0) + b'\0')
+            self.assertEqual(source, ('127.0.0.1', 6000))
             self.assertEqual([state['network'][key]['done'] for key in
                               ('listen', 'win3', 'peer', 'data')], [True, True, False, False])
             self.assertEqual(state['expectedPeer'], ['127.0.0.1', 6000])
@@ -73,8 +70,10 @@ class SessionTest(unittest.TestCase):
             self.assertFalse(board.status()['network']['peer']['done'])
             self.assertIn('不一致', board.status()['error'])
             # A new explicit setup requires a fresh pair of status fields.
-            with patch.object(self.engine, 'send', side_effect=status_command):
+            with patch.object(self.engine, 'send') as send:
                 board.establish_network('127.0.0.1', peer.getsockname()[1])
+                send.assert_not_called()
+            self.assertEqual(peer.recvfrom(1024)[0], HEADER.pack(3, 1, 0, 0) + b'\0')
             self.engine._match_line('ETH peer IP: 0x7f000001')
             self.engine._match_line('ETH peer port: 6000')
             peer.sendto(next(packets(wire(1), 3, 0)), ('127.0.0.1', 6000))
@@ -168,7 +167,7 @@ class SessionTest(unittest.TestCase):
             self.engine.ethernet.start_receive(0, mode='files')
             state = request('/api/board/network', {'boardIp': '127.0.0.1',
                                                   'boardPort': peer.getsockname()[1]})
-            send.assert_called_once_with('status', 'cr')
+            send.assert_not_called()
             self.assertTrue(state['network']['win3']['done'])
             self.assertEqual(request('/api/ethernet/status')['rx']['localPort'], 6000)
 

@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
 from core.engine import ENCODINGS, fmt_ts
 from gui.ethernet import EthernetPanel
 from gui.soc_console import SocConsole
+from gui.virtual_input import VirtualInputPanel
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1156,7 +1157,7 @@ class MainWindow(QMainWindow):
             'EdRV32 <span style="color:#8b98a9; font-weight:400">'
             '调试工具</span>')
         title.setObjectName("appTitle")
-        sub = QLabel("PG2L200H · UART / ETH · REST API READY")
+        sub = QLabel("UART / ETH · REST API READY")
         sub.setObjectName("appSub")
         title_box.addWidget(title)
         title_box.addWidget(sub)
@@ -1204,7 +1205,8 @@ class MainWindow(QMainWindow):
                 ("命令", "快捷命令按钮", ICON_TERMINAL),
                 ("规则", "数据匹配规则", ICON_FILTER),
                 ("网口", "UDP 文件收发", ICON_NETWORK),
-                ("调试", "烧录、图像与检测", ICON_DASHBOARD))):
+                ("调试", "烧录、图像与检测", ICON_DASHBOARD),
+                ("输入", "虚拟按键与触控板", ICON_TERMINAL))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1361,6 +1363,8 @@ class MainWindow(QMainWindow):
         self.body_stack.addWidget(main_split)
         self.soc = SocConsole(engine, self.toast)
         self.body_stack.addWidget(self.soc)
+        self.virtual_input = VirtualInputPanel(engine, self.toast)
+        self.body_stack.addWidget(self.virtual_input)
         body.addWidget(rail)
         body.addSpacing(8)
         body.addWidget(self.body_stack, 1)
@@ -1373,7 +1377,7 @@ class MainWindow(QMainWindow):
         f.setContentsMargins(18, 0, 18, 0)
         self.counters = QLabel("RX 0 B / TX 0 B")
         self.counters.setObjectName("footText")
-        right = QLabel("RV32IM · clk_sys 100 MHz · clk_mem 125 MHz")
+        right = QLabel("串口 / 网口 · 会话共用")
         right.setObjectName("footText")
         f.addWidget(self.counters)
         f.addStretch(1)
@@ -1470,8 +1474,10 @@ class MainWindow(QMainWindow):
 
     def _select_page(self, index):
         console = index == 4
-        self.body_stack.setCurrentIndex(1 if console else 0)
-        if not console:
+        self.body_stack.setCurrentIndex(2 if index == 5 else 1 if console else 0)
+        if index == 5:
+            self.virtual_input.setFocus()
+        elif not console:
             self.left_stack.setCurrentIndex(index)
             self.main_split.setSizes([300, 680, 300])
         else:
@@ -1501,6 +1507,8 @@ class MainWindow(QMainWindow):
         self.rules.reload()
 
     def closeEvent(self, event):
+        self.virtual_input.hide()
+        self.engine.virtual_input.close()
         self.engine.ethernet.stop_receive()
         self.engine.disconnect(silent=True)
         super().closeEvent(event)

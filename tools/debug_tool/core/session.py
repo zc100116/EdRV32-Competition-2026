@@ -27,6 +27,7 @@ class BoardSession:
         self.phase = 'disconnected'
         self.error = None
         self.summary = {}
+        self.network_endpoint = ('192.168.1.10', 5000)
         self.expected_peer = None
         self.peer_ip = None
         self.peer_port = None
@@ -98,6 +99,7 @@ class BoardSession:
                     self.fail(f'ETH peer 不一致：板端 {actual}，本机 {self.expected_peer}')
 
     def establish_network(self, board_ip='192.168.1.10', board_port=5000):
+        self.network_endpoint = (board_ip, board_port)
         try:
             rx = self.ethernet.status()['rx']
             if rx['active'] and rx['localPort'] != 6000:
@@ -120,7 +122,6 @@ class BoardSession:
             with self.lock:
                 self.mark('win3')
             self.log(f'连接请求已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
-            self.engine.send('status', 'cr')
         except (OSError, ValueError, RuntimeError) as exc:
             self.fail(f'建立网口连接失败：{exc}')
             raise

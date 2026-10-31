@@ -329,7 +329,7 @@ class SocConsole(QWidget):
         box.addWidget(self.switch)
         self.message = label('等待串口启动行', 'note')
         box.addWidget(self.message)
-        self.status_query = self.button('查询', lambda: self.run(
+        self.status_query = self.button('读取状态', lambda: self.run(
             lambda: self.engine.send('status', 'cr')))
         box.addWidget(self.status_query)
         layout.addWidget(self.status_card)

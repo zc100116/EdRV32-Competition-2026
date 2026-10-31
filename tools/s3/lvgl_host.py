@@ -12,7 +12,7 @@ OUT = ROOT / "build/s3/lvgl"
 FLAGS = ["-std=c11", "-Wall", "-Wextra", "-Werror", "-O2", "-g", "-fPIC",
          "-ffreestanding", "-fno-builtin",
          "-DLV_CONF_INCLUDE_SIMPLE", "-Ithird_party/lvgl", "-Isw/apps/s3/lvgl",
-         "-Isw/apps/s3", "-Isw/drivers/include", "-Isw/bsp/include"]
+         "-Isw/apps/s3", "-Isw/lib", "-Isw/drivers/include", "-Isw/bsp/include"]
 
 
 def build():
@@ -23,7 +23,7 @@ def build():
                      ("third_party/lvgl/src", "third_party/lvgl/demos/widgets",
                       "third_party/lvgl/demos/benchmark")
                      for p in (ROOT / directory).rglob("*.c"))
-    sources += ["sw/apps/s3/lvgl/draw_rnd.c", "sw/apps/s3/lvgl/s3_lvgl.c",
+    sources += ["sw/lib/virtual_input.c","sw/apps/s3/lvgl/draw_rnd.c", "sw/apps/s3/lvgl/s3_lvgl.c",
                 "sw/apps/s3/lvgl/rn17_compare.c",
                 "sw/drivers/rnd.c", "sw/drivers/mem_xbar.c", "tools/s3/lvgl_host.c",
                 "build/s3/lvgl_assets.c"]
