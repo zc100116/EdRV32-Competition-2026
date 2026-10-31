@@ -19,9 +19,6 @@ module edrv32_board_b1_tb;
     int menus = 0;
     int bios_menus = 0;
     bit bios_seen = 0;
-    bit download_ready = 0;
-    bit download_complete = 0;
-    bit download_bytes = 0;
     int app_messages = 0;
     int app_values = 0;
     bit info_pass = 0;
@@ -32,14 +29,11 @@ module edrv32_board_b1_tb;
     bit baud_changed = 0;
     int load_ready = 0;
     int load_pass = 0;
-    int load_counts = 0;
     int load_fail = 0;
     int run_prompt = 0;
     int run_fail = 0;
     bit run_seen = 0;
     bit elf_message = 0;
-    int expected_load_length = 0;
-    int expected_load_address = 0;
     wire advance_time;
     wire [63:0] next_time;
     wire released_key;
@@ -121,9 +115,8 @@ module edrv32_board_b1_tb;
                     "  E         D   D   R  R     V V       3   2    ": logo_seen[3] = 1;
                     "  EEEEEEE   DDDD    R    R    V     3333   2222 ": logo_seen[4] = 1;
                     "Menu: 1=CoreMark 2=Peripheral tests 3=System info": menus++;
-                    "UART download ready": download_ready = 1;
                     "BIOS: EdRV32": bios_seen = 1;
-                    "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud": bios_menus++;
+                    "BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud": bios_menus++;
                     "Baud:": baud_prompt = 1;
                     "Baud result: 2000000": begin
                         baud_changed = 1;
@@ -135,7 +128,6 @@ module edrv32_board_b1_tb;
                     "Run address:": run_prompt++;
                     "Run result: FAIL address": run_fail++;
                     "B1 ELF application PASS": elf_message = 1;
-                    "Program SRAM result: PASS, press reset to run": download_complete = 1;
                     "B1 UART application PASS": app_messages++;
                     "B1 data hi/lo: 7/7 bss: 0": app_values++;
                     "System info result: PASS": info_pass = 1;
@@ -144,10 +136,6 @@ module edrv32_board_b1_tb;
                 endcase
                 if (line_text == $sformatf("CLK_SYS_HZ: %0d", EDRV32_CLK_SYS_HZ))
                     clock_seen = 1;
-                if (line_text == $sformatf("Program SRAM bytes: %0d", download_length))
-                    download_bytes = 1;
-                if (line_text == $sformatf("Load bytes: %0d at 0x%08x",
-                    expected_load_length, expected_load_address)) load_counts++;
                 if (line_text == $sformatf("Run: 0x%08x", EDRV32_SRAM_BASE)) run_seen = 1;
                 line_text = "";
             end else if (data != 13) line_text = {line_text, string'(data)};
@@ -161,7 +149,6 @@ module edrv32_board_b1_tb;
         rst_n = 1;
     endtask
 
-    int download_length = 0;
 
     task automatic send_text(input string text_value);
         for (int i = 0; i < text_value.len(); i++) u_uart.send(text_value[i]);
@@ -171,21 +158,10 @@ module edrv32_board_b1_tb;
         for (int i = 0; i < 4; i++) u_uart.send(8'(word_value >> (8*i)));
     endtask
 
-    task automatic file_word(input int handle, output int word_value);
-        int file_byte;
-        word_value = 0;
-        for (int i = 0; i < 4; i++) begin
-            file_byte = $fgetc(handle);
-            if (file_byte == -1) $fatal(1, "FAIL short load wire at time=%0t", $time);
-            word_value |= file_byte << (8*i);
-        end
-    endtask
-
     initial begin : stimulus
         string wire_path;
         int file_handle;
         int value;
-        int entry_address;
         wait (rst_n);
         if (case_id == 0) begin
             wait (menus == 1);
@@ -213,33 +189,16 @@ module edrv32_board_b1_tb;
             if (!baud_changed || u_board.u_sys_subsys.u_uart.baud_div_r !=
                 24'((EDRV32_CLK_SYS_HZ * 16 + 1000000) / 2000000))
                 $fatal(1, "FAIL baud switch time=%0t", $time);
-            for (int segment = 0; segment < 2; segment++) begin
-                send_text("2\r\n");
-                wait (load_ready == segment + 1);
-                file_word(file_handle, expected_load_address);
-                file_word(file_handle, expected_load_length);
-                send_word(expected_load_address);
-                send_word(expected_load_length);
-                for (int n = 0; n < expected_load_length; n++) begin
-                    value = $fgetc(file_handle);
-                    if (value == -1) $fatal(1, "FAIL short load payload time=%0t", $time);
-                    u_uart.send(8'(value));
-                end
-                wait (bios_menus == segment + 3);
-                if (load_pass != segment + 1 || load_counts != segment + 1)
-                    $fatal(1, "FAIL segment=%0d pass=%0d counts=%0d time=%0t",
-                        segment, load_pass, load_counts, $time);
-            end
-            file_word(file_handle, entry_address);
-            $fclose(file_handle);
-            // Error cases precede Run because the successful application ends simulation.
+            // Error cases precede the session, which automatically runs the application.
             for (int invalid = 0; invalid < 2; invalid++) begin
-                send_text("2\n");
-                wait (load_ready == invalid + 3);
+                send_text("1\n");
+                wait (load_ready == invalid + 1);
+                send_word(1);
+                send_word(EDRV32_SRAM_BASE);
                 send_word(invalid == 0 ? EDRV32_SYS_APB_BASE :
                     EDRV32_SRAM_BASE + EDRV32_SRAM_SIZE - 4096 - 4);
                 send_word(8);
-                wait (bios_menus == invalid + 5);
+                wait (bios_menus == invalid + 3);
                 if (load_fail != invalid + 1)
                     $fatal(1, "FAIL load range case=%0d time=%0t", invalid, $time);
             end
@@ -248,13 +207,18 @@ module edrv32_board_b1_tb;
                 wait (run_prompt == invalid + 1);
                 send_text($sformatf("0x%08x\n", invalid == 0 ? EDRV32_SYS_APB_BASE :
                     EDRV32_SRAM_BASE + 2));
-                wait (bios_menus == invalid + 7);
+                wait (bios_menus == invalid + 5);
                 if (run_fail != invalid + 1)
                     $fatal(1, "FAIL run address case=%0d time=%0t", invalid, $time);
             end
-            send_text("3\r\n");
-            wait (run_prompt == 3);
-            send_text($sformatf("0x%08x\r", entry_address));
+            send_text("1\r\n");
+            wait (load_ready == 3);
+            value = $fgetc(file_handle);
+            while (value != -1) begin
+                u_uart.send(8'(value));
+                value = $fgetc(file_handle);
+            end
+            $fclose(file_handle);
             wait (u_board.u_sys_subsys.sim_exit_valid_o);
             if (u_board.u_sys_subsys.sim_exit_code_o != 0 || !run_seen || !elf_message)
                 $fatal(1, "FAIL ELF exit=%h run=%b message=%b time=%0t",
@@ -266,28 +230,24 @@ module edrv32_board_b1_tb;
             if (file_handle == 0) $fatal(1, "FAIL open %s", wire_path);
             wait (bios_menus == 1);
             if (!bios_seen) $fatal(1, "FAIL missing BIOS banner time=%0t", $time);
-            u_uart.send("1");
-            u_uart.send(8'h0d);
-            u_uart.send(8'h0a);
-            wait (download_ready);
-            for (int n = 0; n < 4; n++) begin
+            // --emit includes menu selection; wait for ready before descriptor bytes.
+            for (int n = 0; n < 2; n++) begin
                 value = $fgetc(file_handle);
-                download_length |= value << (8*n);
                 u_uart.send(8'(value));
             end
+            wait (load_ready == 1);
             value = $fgetc(file_handle);
             while (value != -1) begin
                 u_uart.send(8'(value));
                 value = $fgetc(file_handle);
             end
             $fclose(file_handle);
-            wait (bios_menus == 2);
-            if (!download_complete || !download_bytes || app_messages != 0 ||
+            wait (u_board.u_sys_subsys.sim_exit_valid_o);
+            if (load_pass != 1 || app_messages != 1 || app_values != 1 ||
                 !clock_seen || logo_seen != 5'b11111)
-                $fatal(1, "FAIL programming bytes=%b result=%b app=%0d time=%0t",
-                    download_bytes, download_complete, app_messages, $time);
+                $fatal(1, "FAIL automatic SRAM run time=%0t", $time);
             key_n = 1;
-            for (int run = 1; run <= 2; run++) begin
+            for (int run = 2; run <= 3; run++) begin
                 reset_board();
                 wait (u_board.u_sys_subsys.sim_exit_valid_o);
                 if (u_board.u_sys_subsys.sim_exit_code_o != 0 || app_messages != run ||

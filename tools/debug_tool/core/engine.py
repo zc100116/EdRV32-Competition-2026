@@ -332,10 +332,11 @@ class SerialEngine:
                 time.sleep(0.02)
 
     # -------------------------------------------------------------- save --
-    def start_program(self, path, elf=False, baud=2000000):
+    def start_program(self, path, elf=False, baud=2000000, addr=None, entry=None,
+                      eth=False, local_ip='192.168.1.2'):
         if not self.status()["connected"]:
             raise RuntimeError("serial port is not connected")
-        return self.program.start(path, elf, baud)
+        return self.program.start(path, elf, baud, addr, entry, eth, local_ip)
 
     def _program_baud(self, baud):
         with self._lock:

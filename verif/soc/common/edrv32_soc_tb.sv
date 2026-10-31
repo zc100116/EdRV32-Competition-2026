@@ -251,6 +251,7 @@ module edrv32_soc_tb;
         forever begin
             wait (u_uart.received.size() != 0);
             while (u_uart.received.size() != 0) begin
+                if (case_number == 18) bios_observe(u_uart.received[0]);
                 uart_log = {uart_log, string'(u_uart.received.pop_front())};
                 $write("%c", uart_log[uart_log.len()-1]);
                 $fflush();
@@ -292,6 +293,7 @@ module edrv32_soc_tb;
         end
     end
 
+    `include "bios_stimulus.svh"
     `include "eth_stimulus.svh"
     `include "media_stimulus.svh"
     always @(posedge clk_sys_i) begin

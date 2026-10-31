@@ -61,10 +61,10 @@ B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都�
 1. 连接板子串口和网线，给板子上电；将 PC 有线网卡设为同网段地址，例如
    `192.168.1.2/24`，板子固定 `192.168.1.10`。允许本机 UDP 6000 接收。
 2. 在“连接”页选择串口、115200、8N1，连接后回到“中控台”，工程选 **B3V**。
-3. 按住 KEY1 并复位，看到阶段 **BIOS**。左栏选择“烧录 SRAM”，选择
+3. 按住 KEY1 并复位，看到阶段 **BIOS**。左栏选择 .bin、串口或网口，填写烧录地址和运行地址 0x10000000，选择
    `build/sw/demo_vision/demo_vision.bin`，点击烧录。已经在 BIOS 时可直接开始，
    无须再次复位；也可先开始，再按 KEY1 + 复位进入 BIOS。
-4. 等待成功结果，松开 KEY1 并复位运行，串口出现 `Demo: demo_vision`，阶段变为**应用**。
+4. 等待烧录后自动运行，串口出现 `Demo: demo_vision`，阶段变为**应用**。
 5. 点击上方**建立网口连接**。工具依次监听 UDP 6000、从同一端口向板子 UDP 5000
    发 WIN3 短包、经串口发 `status`；前三格依次完成，第三格须有板端 peer 与本机一致的回应。
 6. 展开右侧“输出与采样”，选择 **HDMI + ETH**，视频 **30 fps**、采样 **100 Hz**，点击下发。
@@ -79,7 +79,7 @@ B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都�
 1. 连接串口、网线并上电，PC 有线网卡设 `192.168.1.2/24`，允许 UDP 6000。
 2. 在“连接”页以 115200、8N1 打开串口；中控台工程选 **B3VN**。
 3. 按 KEY1 + 复位进入 BIOS，选择 `build/sw/demo_vnpu/demo_vnpu.bin` 烧录 SRAM。
-   看到成功结果后松开 KEY1 并复位，等待 `Demo: demo_vnpu` 和阶段“应用”。
+   填写烧录地址和运行地址 0x10000000，烧录后自动运行，等待 `Demo: demo_vnpu` 和阶段“应用”。
 4. 点击**建立网口连接**，核对监听、WIN3、peer 三格完成及各自时间。
 5. 保持 **S2**，展开右侧“输出与采样”，选择 HDMI + ETH、30 fps、100 Hz 并下发；中间选“视频”，
    等待完整视频帧和 EDTM 计数，底部查看 DDR 曲线、端口等待、DISP / VIN 实时性计数。
@@ -93,8 +93,7 @@ B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都�
 
 1. 连接串口和网线，上电；PC 设 `192.168.1.2/24` 并允许 UDP 6000。
 2. 在“连接”页以 115200、8N1 打开串口；中控台工程选 **B3F**。
-3. 按 KEY1 + 复位进入 BIOS，选择 `build/sw/demo/demo.bin` 烧录；成功后松开 KEY1
-   并复位运行，等待 `Demo: demo` 和阶段“应用”。
+3. 按 KEY1 + 复位进入 BIOS，选择 `build/sw/demo/demo.bin` 烧录（烧录和运行地址均为 0x10000000）；成功后自动运行，等待 `Demo: demo` 和阶段“应用”。
 4. 点击**建立网口连接**，确认前三格完成，特别是串口 `ETH peer IP`、`ETH peer port`
    与本机实际路由地址 / 接收端口一致。
 5. 保持 **S2**，展开右侧“输出与采样”，下发 HDMI + ETH、30 fps、100 Hz。中间选“视频”，确认视频完整帧数和
@@ -123,7 +122,7 @@ B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都�
   实时性计数非零标红；NPU 工程另列推理 / 后处理 ms、检测 fps 和框数。
   当前固件不启用延迟探针，没有探针命令；直方图无记录时明确等待 type 2。
 - 暂停只暂停图表更新，CSV 仍保留所有原始字段；回放按钮停止监听并按记录时间回放 CSV。
-- 烧录直接调用 `tools/board/uart_tool.py` 的 `BiosTransfer`。SRAM `.bin` 成功后复位运行；
+- 烧录直接调用 `tools/board/uart_tool.py` 的 `BiosTransfer`。`.bin` 显式填写地址，烧录后自动运行；
   ELF 模式默认 2000000（可选 921600 / 115200），按 PT_LOAD 加载并跳转入口，DDR ELF 不以复位启动。
   BIOS FAIL、传输错误、参考模型失败在原位置显示原因并写日志。
 - 图片缩放为 1280 × 720、小端 RGB565；EDNM 的 WIN2 偏移为头 `0`、描述符 `0x1000`、
@@ -146,7 +145,7 @@ B3VN 由 CPU 绘制 HDMI 检测框，B3F 由 RND 绘制；网口检测叠加都�
 python tools/debug_tool/cli.py ports
 python tools/debug_tool/cli.py connect COM7 --baud 115200
 python tools/debug_tool/cli.py status
-python tools/debug_tool/cli.py program build/sw/demo_vision/demo_vision.bin
+python tools/debug_tool/cli.py program build/sw/demo_vision/demo_vision.bin --addr 0x10000000 --entry 0x10000000
 python tools/debug_tool/cli.py program build/sw/app/app.elf --elf --baud 2000000
 python tools/debug_tool/cli.py scene s2
 python tools/debug_tool/cli.py scene output_both
@@ -191,7 +190,7 @@ curl -X POST http://127.0.0.1:8765/api/board/network \
 | GET / POST | `/api/params`、`/api/params/clear` | 参数 / 清空 |
 | POST / GET | `/api/file/send`、`/api/file/status` | `{path, echo?}` / 原始串口文件状态 |
 | POST | `/api/file/cancel` | `{}` |
-| POST / GET | `/api/program`、`/api/program/status` | `{path, elf?, baud?}` / BIOS 阶段与进度 |
+| POST / GET | `/api/program`、`/api/program/status` | `{path, elf?, baud?, addr?, entry?, eth?, localIp?}` / BIOS 阶段与进度 |
 | GET | `/api/ethernet/status` | 共享 UDP tx / rx 状态 |
 | POST | `/api/ethernet/send` | `{path, boardIp, boardPort, localPort, window?, offset?, interval?}` |
 | POST | `/api/ethernet/receive/start`、`/api/ethernet/receive/stop` | `{localPort, directory?, mode?}` / `{}` |
@@ -272,3 +271,18 @@ python tools/debug_tool/telemetry_sim.py --mode b3n --host 127.0.0.1 --port 5000
 另一端用 B3N 模式发送两张图片到 127.0.0.1:5000，接收复用同一 UDP socket。
 `tests/test_b3n.py` 自动创建合法 NPU 描述符，真实执行 input_pack、NPU 参考和后处理，
 通过 localhost UDP 验证不同尺寸图片、窗口交替、两块回传、逐项比对和往返统计。
+
+## BIOS v0.18 烧录
+
+烧录页可选串口或网口，支持 ELF 和 .bin；.bin 必须填写烧录地址和运行地址。
+网口的菜单、状态和结果仍走串口，数据走 UDP，填本机 IP（默认 192.168.1.2）。
+ELF 使用 p_paddr/p_filesz 和 e_entry，所有段完成后自动运行。网口 FAIL bytes 时
+整份重发一次，第二次失败报错。协议实现复用 tools/board/uart_tool.py。
+
+```sh
+python tools/debug_tool/cli.py program app.bin --addr 0x10000000 --entry 0x10000000
+python tools/debug_tool/cli.py program app.elf --elf --eth --local-ip 192.168.1.2
+```
+
+REST POST /api/program 接收 path、elf、baud、addr、entry、eth、localIp，地址为 JSON
+整数；.bin 必须同时提供 addr/entry。状态通过 /api/program/status 查询。

@@ -13,6 +13,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
+from tools.fpga.mem_init import pack_image
 from tools.elf2mem import convert  # noqa: E402
 from tools.regress import expand_files  # noqa: E402
 
@@ -86,6 +87,8 @@ def main():
     sources = [str(sparse_ddr) if source == str(original_ddr) else source
                for source in expand_files(HERE / 'files.f')] + [str(shell)]
     if not args.lint_only:
+        command(['make', '-C', 'sw', 'PROGRAM=bootloader', '-j', '1'], OUT / 'bootloader.log')
+        pack_image(ROOT / 'build/sw/bootloader/rom.hex', 2048, OUT / 'rom64.hex')
         convert(CARD / 'src/board_npu.elf', OUT / 'image')
     failed = False
     for mode in (('sim', 'vendor') if args.mac == 'both' else (args.mac,)):
@@ -120,12 +123,12 @@ def main():
         if args.lint_only:
             continue
         obj = directory / 'obj'
-        command(['verilator', '--binary', '-j', '4', '-CFLAGS', '-O1', '--Mdir', str(obj),
+        command(['verilator', '--binary', '-j', '1', '-CFLAGS', '-O1', '--Mdir', str(obj),
                  '-o', 'sim'] + common, directory / 'compile.log')
         log = directory / 'simulation.log'
         with log.open('w') as output:
             result = subprocess.run([str(obj / 'sim'),
-                                     '+ROM_HEX=' + str(CARD / 'src/ip_rom_boot.dat'),
+                                     '+ROM_HEX=' + str(OUT / 'rom64.hex'),
                                      '+DDR_HEX=' + str(OUT / 'image/ddr.hex')], cwd=ROOT,
                                     stdout=output, stderr=subprocess.STDOUT)
         print(f'{mode}: exit={result.returncode} UART={log}', flush=True)

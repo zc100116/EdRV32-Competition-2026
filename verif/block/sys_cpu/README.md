@@ -193,9 +193,9 @@ software `Total ticks`, separately from the retirement-boundary window):
 ## B1-8 BIOS programming
 
 SC-04 uses both KEY1 and SCRATCH0 requests to enter the ROM BIOS. Each run waits
-for `BIOS menu: 1=Program SRAM`, sends `1` CR, waits for the complete ready line,
-sends length/image, checks `Program SRAM bytes` and the exact PASS result, then
-releases KEY1 and resets before executing the application. The scratch case
+for `BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud`, sends `1` CR, waits for the complete ready line,
+sends one-segment descriptor/image, checks `Load bytes` and the exact PASS result, then
+automatically enters the application without resetting. The scratch case
 preloads an application that requests BIOS through SCRATCH0 and a soft reset;
 the bootloader clears that request so a later reset enters the programmed app.
 Startup and monitor system information no longer include a boot-mode field.

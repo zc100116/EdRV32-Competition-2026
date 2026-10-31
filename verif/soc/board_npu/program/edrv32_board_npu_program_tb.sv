@@ -11,6 +11,14 @@ module edrv32_board_npu_program_tb;
     /* verilator lint_on UNUSEDPARAM */
     reg clk = 0;
     reg ddr_clk = 0;
+    reg eth_clk = 0;
+    always #4 eth_clk <= ~eth_clk;
+    tri eth_mdio;
+    wire unused_rgmii_txc;
+    wire [3:0] unused_rgmii_txd;
+    wire unused_rgmii_tx_ctl;
+    wire unused_eth_mdc;
+    wire unused_eth_phy_rst_n;
     reg rst_n = 0;
     reg key_n = 0;
     wire uart_rx;
@@ -46,6 +54,15 @@ module edrv32_board_npu_program_tb;
         .uart_tx_o(uart_tx),
         .key_n_i({3'b111, key_n}),
         .led_o(led_o),
+        .rgmii_rxc_i(eth_clk),
+        .rgmii_rxd_i(4'b0),
+        .rgmii_rx_ctl_i(1'b0),
+        .rgmii_txc_o(unused_rgmii_txc),
+        .rgmii_txd_o(unused_rgmii_txd),
+        .rgmii_tx_ctl_o(unused_rgmii_tx_ctl),
+        .eth_mdc_o(unused_eth_mdc),
+        .eth_mdio_o(eth_mdio),
+        .eth_phy_rst_n_o(unused_eth_phy_rst_n),
         .mem_cs_n_o(mem_cs_n_o),
         .mem_rst_n_o(mem_rst_n_o),
         .mem_ck_o(mem_ck_o),
@@ -122,7 +139,7 @@ module edrv32_board_npu_program_tb;
             if (data == 10) begin
                 $display("%s", line_text);
                 $fflush();
-                if (line_text == "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud")
+                if (line_text == "BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud")
                     bios_menu = 1;
                 if (line_text == "Run address:") run_prompt = 1;
                 if (line_text.len() >= prefix.len() &&
@@ -156,7 +173,7 @@ module edrv32_board_npu_program_tb;
         #1000000000;
         $fatal(1, "FAIL board_npu_program timeout time=%0t", $time);
     end
-    wire unused_pins = ^{led_o,
+    wire unused_pins = ^{led_o, eth_mdio,
         mem_cs_n_o, mem_rst_n_o, mem_ck_o, mem_ck_n_o, mem_cke_o, mem_ras_n_o, mem_cas_n_o,
         mem_we_n_o, mem_odt_o, mem_a_o, mem_ba_o, mem_dqs_o, mem_dqs_n_o, mem_dq_o, mem_dm_o};
 endmodule

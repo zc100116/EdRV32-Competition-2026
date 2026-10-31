@@ -49,7 +49,7 @@ def seed(engine, console, state):
     engine._config.update(port='SIMULATED', baud=115200)
     project = 'B3V' if state == 'vision' else 'B3F'
     console.project.setCurrentText(project)
-    serial_line(engine, 'BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud')
+    serial_line(engine, 'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud')
     serial_line(engine, 'Demo: demo_vision' if state == 'vision' else 'Demo: demo')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as board:
         board.bind(('127.0.0.1', 0))

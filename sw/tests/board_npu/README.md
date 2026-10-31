@@ -4,7 +4,7 @@ B3N 顶层包含 CPU/DDR/NPU/ETH；本程序检查 NPU，ETH 连通检查由独�
 
 依据 `docs/design/2026-10-30-board-npu-test.md` 第 4 节、NPU v0.5 第 2–5、7 节，
 运行 A 寄存器检查、15 个 B 小用例、C YOLOv8n 整网和 20 个 D 连续整网，共 39 项。
-程序使用 `sw/bsp/ld/ddr.ld`，从 `0x80000000` 执行；由 BIOS 的 `2=Load`
+程序使用 `sw/bsp/ld/ddr.ld`，从 `0x80000000` 执行；由 BIOS 的 `1=UART load`
 加载 ELF 的 PT_LOAD 段，再跳转入口。保持 BIOS 切换后的 2 Mbaud 串口设置。
 
 ## 生成数据与构建
@@ -92,8 +92,8 @@ python tools/board/uart_tool.py build/sw/board_npu/board_npu.elf --elf \
     --baud 2000000 --port COM3 --log build/board/board_npu-uart.log
 ```
 
-先运行命令，再按住 KEY1 并按复位键进入 BIOS。工具选择 `2=Load`、从 115200
-切换到 2000000、分段加载 ELF，再运行入口；结束后 Ctrl-C 停止日志采集。
+先运行命令，再按住 KEY1 并按复位键进入 BIOS。工具选择 `1=UART load`、从 115200
+切换到 2000000、按会话描述块加载 ELF，完成后自动运行入口；结束后 Ctrl-C 停止日志采集。
 Linux 使用同一完整命令，把 `python` 改为 `~/.local/opt/edrv32-py/bin/python`，
 把 COM3 改为 `/dev/ttyUSB0`。串口依赖见 `tools/requirements.txt`。
 

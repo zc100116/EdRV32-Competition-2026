@@ -33,29 +33,17 @@ MASK_RECT 按规格只允许 ARGB8888，协调者已确认不下发 RGB565 组�
 
 ## BIOS 加载和运行
 
-需要包含 DDR Load/Run 的 BIOS。当前工作分支的旧 BIOS 及 UART 工具可能尚未升级；
-菜单只有 `1=Program SRAM` 时，先合入 SoC 规格 v0.17 7.5(3a) 对应的 BIOS/工具升级。
-**不能用菜单 1 把这个 DDR 程序当作 SRAM 镜像下载。**
+使用 SoC v0.18 BIOS，会话完成后自动运行 ELF 入口：
 
-使用 `tools/board/uart_tool.py` 的 **ELF 加载并运行**功能，文件选择
-`build/sw/rnd_board/rnd_board.elf`；具体命令行参数见
-[`tools/board/README.md`](../../../tools/board/README.md) 的 ELF 加载用法。
-工具应逐个加载 ELF 的非空 PT_LOAD 段，再以 ELF 入口运行，并保存串口日志。
-可先通过 BIOS 菜单 4 将波特率从 115200 提至 921600 或 2000000。
-本 Task 不修改 BIOS 或 UART 工具，不猜测尚未合入的参数名。
+```sh
+python3 tools/board/uart_tool.py build/sw/rnd_board/rnd_board.elf --elf --port COM3 --log build/board/rnd.log
+```
 
-手动协议（协调者确认的 v0.17 7.5(3a)）：
-
-1. 按住 KEY1 复位，出现 `BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`。
-2. 对 ELF 每个文件长度非零的 PT_LOAD 段发送 `2` 和 Enter；看到 `UART load ready` 后，
-   发送 **4 B 小端 CPU 目标地址 + 4 B 小端长度 + 该段数据**。
-   地址使用 ELF 的 CPU 虚拟地址（0x90000000 起）。每段应出现
-   `Load bytes: <n> at 0x<addr>` 和 `Load result: PASS`。
-3. 发送 `3` 和 Enter；看到 `Run address:` 后，发送 `0x90000000` 和 Enter
-   （一般情况下取 ELF 的入口）。BIOS 打印 `Run: 0x<addr>` 后跳转。
-4. 保存从第一条 `RND` 到 `RND display ready` 的日志。若只需记录运行中的输出，
-   当前工具可用 `python3 tools/board/uart_tool.py --port COM3 --log build/board/rnd.log`；
-   下载和记录应使用同一串口会话，避免漏掉最前面的 CRC。
+按住 KEY1 复位，菜单为 `1=UART load 2=ETH load 3=Run 4=Baud`。工具选 1，等
+`UART load ready` 后发送小端描述块（段数、入口、逐段 p_paddr/p_filesz）及全部
+非空 PT_LOAD 数据，BIOS 输出总字节数、段数、PASS 后自动跳转。
+加 `--eth --local-ip 192.168.1.2` 时选 2，数据通过 UDP 发送。
+保存第一条 RND 到 RND display ready 的日志，烧录和记录保持同一串口会话。
 
 ## 屏幕与上板检查清单
 

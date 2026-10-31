@@ -14,8 +14,10 @@ class BiosProgrammer(BiosTransfer):
         super().__init__(write, set_baud)
         self.log = log
 
-    def start(self, path, elf=False, baud=2000000):
-        state = super().start(path, elf, baud)
+    def start(self, path, elf=False, baud=2000000, addr=None, entry=None,
+              eth=False, local_ip='192.168.1.2'):
+        state = super().start(path, elf, baud, addr=addr, entry=entry,
+                              eth=eth, local_ip=local_ip)
         self.log('已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位')
         return state
 

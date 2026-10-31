@@ -8,7 +8,6 @@
 import argparse
 from pathlib import Path
 import subprocess
-import struct
 import sys
 import time
 
@@ -16,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 from tools.fpga.mem_init import pack_image  # noqa: E402
 from tools.regress import expand_files  # noqa: E402
-from tools.board.uart_tool import elf_segments, load_wire_bytes  # noqa: E402
+from tools.board.uart_tool import elf_segments, descriptor_bytes  # noqa: E402
 from verif.block.sys_cpu.uart_checks import (  # noqa: E402
     check_boot, check_system_info, check_build_fields, MENU)
 
@@ -53,7 +52,8 @@ def main():
                  'sw/bsp/cache.c'],
                 OUT / 'download_build.log')
         command(['python3', 'tools/board/uart_tool.py', str(payload / 'sc04.bin'),
-                 '--emit', str(wire)], OUT / 'emit.log')
+                 '--addr', '0x10000000', '--entry', '0x10000000',
+                 '--baud', '115200', '--emit', str(wire)], OUT / 'emit.log')
     elif case == 3:
         payload = OUT / 'load'
         command(['make', '-C', 'sw', 'PROGRAM=sc04', 'OUT=' + str(payload),
@@ -63,8 +63,8 @@ def main():
         if len(segments) != 2:
             raise RuntimeError(f'load test requires 2 file-backed PT_LOADs, got {len(segments)}')
         wire = OUT / 'load.wire'
-        wire.write_bytes(b''.join(load_wire_bytes(address, data) for address, data in segments)
-                         + struct.pack('<I', entry))
+        wire.write_bytes(descriptor_bytes(entry, segments) +
+                         b''.join(data for _, data in segments))
     obj = OUT / 'obj'
     command(['verilator', '--binary', '--timing', '-Wall', '-j', '1',
              '-CFLAGS', '-O3 -flto=1', '-LDFLAGS', '-flto=1',

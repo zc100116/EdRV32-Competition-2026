@@ -164,7 +164,7 @@ module edrv32_board_vnpu_tb;
             if (data == 10) begin
                 $display("%s", line_text);
                 $fflush();
-                if (line_text == "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud")
+                if (line_text == "BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud")
                     bios_menu = 1;
                 if (line_text == "board_vnpu IDs and 256 pixels PASS") application_pass = 1;
                 line_text = "";

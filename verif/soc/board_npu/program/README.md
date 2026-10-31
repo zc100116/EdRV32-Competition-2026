@@ -6,7 +6,7 @@ export EDRV32_PANGO_SIM_DIR=/path/to/private/vendor-model-directory
 python3 verif/soc/board_npu/program/run.py
 ```
 
-只在指定仿真主机运行；同一时刻一个仿真，Verilator 构建使用 `-j 4`。
+只在指定仿真主机运行；同一时刻一个仿真，Verilator 构建使用 `-j 1`。
 `--mac sim` / `--mac vendor` 分别运行行为 MAC / FPGA 包装加厂商 `GTP_APM_E2.v`，
 默认依次运行两者。`--lint-only` 只运行相应变体的 `--lint-only -Wall`。
 
@@ -15,8 +15,8 @@ python3 verif/soc/board_npu/program/run.py
 取现有 LFSR 的 `[7:3]`，复位种子固定为 `0x1234abcd`。
 两者仅修改入口在 `build/` 生成的 DDR shell/稀疏模型；默认保留原有 LFSR 空拍。
 
-不重编译卡 13 的 ELF 或 ROM。`tools/elf2mem.py` 将 PT_LOAD 的物理地址内容装入 DDR；
-采用同一卡的 `src/ip_rom_boot.dat`，经真实 BIOS `3=Run` 跳转至 `0x80000000`。
+不重编译卡 13 的 ELF；ROM 使用当前 v0.18 BIOS 重新构建。`tools/elf2mem.py` 将 PT_LOAD 的物理地址内容装入 DDR；
+采用新构建的 `rom64.hex`，经真实 BIOS `3=Run` 跳转至 `0x80000000`。
 DDR shell 仅在 `build/board_npu_program/ip_ddr3.sv` 中扩展 `MEMORY_BYTES` 至 1 GiB：
 除 NPU 物理区 `0x16000000`，原始 ELF 的栈顶 `0xc0000000` 还需要物理区末端
 `0x3fffffff`。CPU 执行数据复制、cache clean/invalidate 和比较。

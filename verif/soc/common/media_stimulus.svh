@@ -44,7 +44,7 @@
         bit [31:0] operation;
         bit [31:0] argument;
         #1;
-        if (case_number != 1) begin
+        if (case_number != 1 && case_number != 18) begin
             forever begin
                 repeat (10) @(negedge clk_sys_i);
                 operation = peek_word(MAILBOX);

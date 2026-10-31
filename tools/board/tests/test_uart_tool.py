@@ -1,159 +1,131 @@
 # File: test_uart_tool.py
-# Spec: edrv32-soc-spec 7.5(3a); Task B1-10.
-# Description: Check physical ELF segments and every byte of BIOS transfers and CLI emission.
-# Clock domain: none (host test).
+# Spec: edrv32-soc-spec 7.5(3a), eth-spec 2.3.
+# Description: Exercise real host session encoding, prompts and bounded ETH resend.
+# Clock domain: none (host).
 from pathlib import Path
+import socket
 import io
+from types import SimpleNamespace
 import struct
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
 import unittest
-from types import SimpleNamespace
-from unittest.mock import patch
-
-from tools.board.uart_tool import (BIOS_MENU, BiosTransfer, capture, elf_segments, operations,
-                                   wire_bytes)
-from tools.board.tests.elf_fixture import (ENTRY, SEGMENTS, ROM_SLOT_PHYSICAL, ROM_SLOT_SIZE,
-                                          elf_fixture, expected_steps)
+from unittest.mock import Mock, patch
+from tools.board.uart_tool import (
+    BIOS_MENU, BiosTransfer, capture, descriptor_bytes, elf_segments, eth_packets,
+    operations, wire_bytes,
+)
+from tools.board.tests.elf_fixture import ENTRY, SEGMENTS, elf_fixture, expected_steps
 
 ROOT = Path(__file__).resolve().parents[3]
 
 
-class UartToolTest(unittest.TestCase):
+class BiosToolTest(unittest.TestCase):
     def setUp(self):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name) / 'app.elf'
         self.path.write_bytes(elf_fixture())
 
-    def assert_bytes(self, actual, expected):
-        self.assertEqual(len(actual), len(expected))
-        for index, (got, want) in enumerate(zip(actual, expected)):
-            self.assertEqual(got, want, f'byte {index}')
+    def test_elf_physical_segments_filesz_and_entry(self):
+        self.assertEqual(elf_segments(self.path), (ENTRY, SEGMENTS))
+        plan = operations(self.path, elf=True, baud=115200)
+        self.assertEqual(len(plan), 1)
+        self.assertEqual(plan[0].selection, b'1\r')
+        self.assertEqual(plan[0].payload, expected_steps(115200)[1][0])
+        self.assertEqual(plan[0].success, f'Run: 0x{ENTRY:08x}')
 
-    def test_elf_segments_use_file_size_and_physical_address(self):
-        entry, segments = elf_segments(self.path)
-        self.assertEqual(entry, ENTRY)
-        self.assertEqual(len(segments), 2)
-        for (address, data), (want_address, want_data) in zip(segments, SEGMENTS):
-            self.assertEqual(address, want_address)
-            self.assert_bytes(data, want_data)
+    def test_bin_addresses_required(self):
+        for kwargs in ({}, {'addr': 0x10000000}, {'entry': 0x10000000}):
+            with self.assertRaisesRegex(ValueError, '.bin requires --addr and --entry'):
+                operations(self.path, **kwargs)
+        self.path.write_bytes(b'\x0a\x0d\0binary')
+        op = operations(self.path, baud=115200, addr=0x80001000, entry=0x80001004)[0]
+        self.assertEqual(op.payload, struct.pack('<IIII', 1, 0x80001004, 0x80001000, 9)
+                         + self.path.read_bytes())
+        self.assertEqual(op.payload, wire_bytes(self.path, 0x80001000, 0x80001004))
 
-    def exercise_transfer(self, baud, rom=None):
-        writes = []
-        switches = []
-        transfer = BiosTransfer(writes.append, lambda value: switches.append((value, len(writes))))
-        transfer.start(self.path, elf=True, baud=baud, rom=rom)
-        self.assertEqual(writes, [b'\r'])
-        transfer.feed_line('BIOS: EdRV32')
-        rom_data = rom.read_bytes() if rom is not None else None
-        steps = expected_steps(baud, rom_data)
-        for index, (expected, response) in enumerate(steps):
-            if index % 2 == 0:
-                transfer.feed_line(BIOS_MENU)
-            start = sum(len(data) for data in writes)
-            if index % 2:
-                # The preceding response is the ready prompt.
-                transfer.feed_line(steps[index - 1][1].decode().strip())
-            actual = b''.join(writes)[start:]
-            if index % 2 == 0:
-                actual = writes[-1]
-            self.assert_bytes(actual, expected)
-            if index % 2:
-                for line in response.decode().splitlines():
+    def test_uart_prompt_and_auto_run(self):
+        for baud in (115200, 921600, 2000000):
+            writes = []
+            switches = []
+            transfer = BiosTransfer(writes.append, switches.append)
+            transfer.start(self.path, elf=True, baud=baud)
+            self.assertEqual(writes, [b'\r'])
+            transfer.feed_line('BIOS: EdRV32')
+            for data, reply in expected_steps(baud):
+                if data in (b'4\r', b'1\r'):
+                    transfer.feed_line(BIOS_MENU + ' extra')
+                    transfer.feed_line(BIOS_MENU)
+                for line in reply.decode().splitlines():
                     transfer.feed_line(line)
-        state = transfer.status()
-        self.assertFalse(state['active'])
-        self.assertEqual(state['result'], f'Run: 0x{ENTRY:08x}')
-        self.assertEqual(state['programmedBytes'], sum(len(data) for _, data in SEGMENTS) +
-                         (len(rom_data) if rom_data is not None else 0))
-        self.assertEqual(state['sent'], state['total'])
-        self.assertEqual(switches, [] if baud == 115200 else [(baud, 3)])
-        self.assert_bytes(b''.join(writes), b'\r' + b''.join(data for data, _ in steps))
+            self.assertEqual(b''.join(writes), b'\r' + b''.join(
+                data for data, _ in expected_steps(baud)))
+            state = transfer.status()
+            self.assertEqual(state['programmedBytes'], sum(len(data) for _, data in SEGMENTS))
+            self.assertEqual(state['result'], f'Run: 0x{ENTRY:08x}')
+            self.assertEqual(state['sent'], state['total'])
+            self.assertFalse(state['active'])
+            self.assertEqual(switches, [] if baud == 115200 else [baud])
 
-    def test_default_fast_elf_transfer(self):
-        self.exercise_transfer(2000000)
+    def test_range_failure_stops(self):
+        transfer = BiosTransfer(Mock(), Mock())
+        transfer.start(self.path, elf=True, baud=115200)
+        transfer.feed_line(BIOS_MENU)
+        transfer.feed_line('UART load ready')
+        transfer.feed_line('Load result: FAIL range')
+        self.assertFalse(transfer.status()['active'])
+        self.assertEqual(transfer.status()['result'], 'Load result: FAIL range')
 
-    def test_921600_elf_transfer(self):
-        self.exercise_transfer(921600)
+    def test_eth_offsets_packet_size_and_notify(self):
+        packets = eth_packets(ENTRY, SEGMENTS)
+        for packet in packets:
+            self.assertLessEqual(len(packet), 1472)
+        ddr = [p for p in packets if p[0] == 2]
+        self.assertEqual(b''.join(p[8:] for p in ddr), SEGMENTS[0][1])
+        for index, packet in enumerate(ddr):
+            self.assertEqual(struct.unpack('!BBHI', packet[:8]), (2, 0, 0, 0x100 + 1464 * index))
+        self.assertEqual(struct.unpack('!BBHI', packets[-2][:8]), (3, 0, 0, 0x1203))
+        self.assertEqual(packets[-2][8:], SEGMENTS[1][1])
+        self.assertEqual(packets[-1][:8], b'\x03\x01\0\0\0\0\0\0')
+        self.assertEqual(packets[-1][8:], descriptor_bytes(ENTRY, SEGMENTS))
 
-    def test_115200_skips_baud_switch(self):
-        self.exercise_transfer(115200)
+    def test_eth_bind_and_exactly_one_resend(self):
+        udp = Mock()
+        with patch('tools.board.uart_tool.socket.socket', return_value=udp) as factory:
+            writes = []
+            transfer = BiosTransfer(writes.append, Mock())
+            transfer.start(self.path, elf=True, baud=115200, eth=True, local_ip='192.168.1.9')
+            factory.assert_called_once_with(socket.AF_INET, socket.SOCK_DGRAM)
+            udp.bind.assert_called_once_with(('192.168.1.9', 0))
+            transfer.feed_line(BIOS_MENU)
+            self.assertEqual(writes, [b'\r', b'2\r'])
+            self.assertEqual(udp.sendto.call_count, 0)
+            transfer.feed_line('ETH load ready 192.168.1.10:5000')
+            first = list(udp.sendto.call_args_list)
+            failure = 'ETH load result: FAIL bytes win2=1 expect=8451 win3=37 expect=37'
+            transfer.feed_line(failure)
+            self.assertEqual(udp.sendto.call_args_list, first + first)
+            transfer.feed_line(failure)
+            self.assertEqual(udp.sendto.call_args_list, first + first)
+            self.assertFalse(transfer.status()['active'])
+            self.assertEqual(transfer.status()['result'], failure)
+            udp.close.assert_called_once()
 
-    def test_rom_load_after_elf_before_run_uses_physical_slot(self):
+    def test_rom_is_part_of_same_session(self):
         self.path.write_bytes(elf_fixture(rom_slot=True))
         rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
-        plan = operations(self.path, True, 115200, rom)
-        self.assertEqual([op.selection for op in plan], [b'2\r'] * 3 + [b'3\r'])
-        self.assertEqual(plan[-2].payload, struct.pack('<II', ROM_SLOT_PHYSICAL,
-                                                     rom.stat().st_size) + rom.read_bytes())
-        self.exercise_transfer(2000000, rom)
-
-    def test_rom_larger_than_slot_fails_before_transfer(self):
-        self.path.write_bytes(elf_fixture(rom_slot=True))
-        rom = Path(self.temp.name) / 'oversize.nes'
-        rom.write_bytes(bytes(ROM_SLOT_SIZE + 1))
-        writes = []
-        transfer = BiosTransfer(writes.append, lambda value: None)
-        with self.assertRaisesRegex(ValueError, r'1048577 bytes, exceeds ROM slot size 1048576'):
-            transfer.start(self.path, elf=True, rom=rom)
-        self.assertEqual(writes, [])
-
-    def test_rom_requires_slot_symbols_and_elf(self):
-        rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
-        with self.assertRaisesRegex(ValueError, 'missing ROM slot symbol.*nes_rom_slot'):
-            operations(self.path, elf=True, rom=rom)
+        op = operations(self.path, True, 115200, rom)[0]
+        self.assertEqual(op.payload, expected_steps(115200, rom.read_bytes())[1][0])
         with self.assertRaisesRegex(ValueError, '--rom requires --elf'):
             operations(self.path, rom=rom)
 
-    def test_cli_emit_rom_and_requires_elf(self):
-        self.path.write_bytes(elf_fixture(rom_slot=True))
-        rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
-        output = Path(self.temp.name) / 'wire'
-        command = [sys.executable, str(ROOT / 'tools/board/uart_tool.py'), str(self.path),
-                   '--rom', str(rom), '--emit', str(output)]
-        subprocess.run(command + ['--elf'], check=True)
-        self.assert_bytes(output.read_bytes(),
-                          b''.join(data for data, _ in expected_steps(rom=rom.read_bytes())))
-        result = subprocess.run(command, capture_output=True, text=True)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('--rom requires --elf', result.stderr)
-
-    def test_fail_results_stop_transfer(self):
-        for ready, response in [('Baud:', 'Baud result: FAIL'),
-                                ('UART load ready', 'Load result: FAIL range'),
-                                ('Run address:', 'Run result: FAIL address')]:
-            writes = []
-            transfer = BiosTransfer(writes.append, lambda value: None)
-            transfer.start(self.path, elf=True)
-            for expected, reply in expected_steps():
-                if expected in (b'4\r', b'2\r', b'3\r'):
-                    transfer.feed_line(BIOS_MENU)
-                    transfer.feed_line(reply.decode().strip())
-                    if reply.decode().strip() == ready:
-                        transfer.feed_line(response)
-                        break
-                else:
-                    for line in reply.decode().splitlines():
-                        transfer.feed_line(line)
-            self.assertFalse(transfer.status()['active'])
-            self.assertEqual(transfer.status()['result'], response)
-            before = list(writes)
-            transfer.feed_line(BIOS_MENU)
-            self.assertEqual(writes, before)
-
-    def test_cli_emit_elf_and_unchanged_sram_stream(self):
+    def test_cli_emit(self):
         output = Path(self.temp.name) / 'wire'
         subprocess.run([sys.executable, str(ROOT / 'tools/board/uart_tool.py'), str(self.path),
                         '--elf', '--emit', str(output)], check=True)
-        self.assert_bytes(output.read_bytes(), b''.join(data for data, _ in expected_steps()))
-        data = bytes(range(256)) + b'\n\r\x00'
-        self.path.write_bytes(data)
-        subprocess.run([sys.executable, str(ROOT / 'tools/board/uart_tool.py'), str(self.path),
-                        '--emit', str(output)], check=True)
-        self.assert_bytes(output.read_bytes(), struct.pack('<I', len(data)) + data)
-        self.assert_bytes(wire_bytes(self.path), output.read_bytes())
+        self.assertEqual(output.read_bytes(), b''.join(d for d, _ in expected_steps()))
 
     def test_capture_fragmented_uart_switches_baud_and_logs(self):
         test = self
@@ -196,7 +168,7 @@ class UartToolTest(unittest.TestCase):
 
             def write(self, data):
                 expected, reply = steps[self.step]
-                test.assert_bytes(data, expected[self.offset:self.offset + len(data)])
+                test.assertEqual(data, expected[self.offset:self.offset + len(data)])
                 self.writes.extend(data)
                 self.offset += len(data)
                 if self.offset == len(expected):
@@ -218,9 +190,23 @@ class UartToolTest(unittest.TestCase):
                 capture('fake', self.path, log, None, None, elf=True)
         self.assertEqual(peer.step, len(steps))
         self.assertEqual(peer.switches, [(2000000, 3)])
-        self.assert_bytes(peer.writes, b''.join(data for data, _ in steps))
+        self.assertEqual(peer.writes, b''.join(data for data, _ in steps))
         expected_log = probe_reply + b''.join(
             reply + (menu if index % 2 and index != len(steps) - 2 else b'')
             for index, (_, reply) in enumerate(steps[1:]))
-        self.assert_bytes(log.read_bytes(), expected_log)
-        self.assert_bytes(console.getvalue(), expected_log)
+        self.assertEqual(log.read_bytes(), expected_log)
+        self.assertEqual(console.getvalue(), expected_log)
+
+    def test_rom_missing_symbols_and_oversize_stop_before_transfer(self):
+        rom = Path(self.temp.name) / 'game.nes'
+        rom.write_bytes(b'game')
+        with self.assertRaisesRegex(ValueError, 'missing ROM slot symbol'):
+            operations(self.path, elf=True, rom=rom)
+        self.path.write_bytes(elf_fixture(rom_slot=True))
+        from tools.board.tests.elf_fixture import ROM_SLOT_SIZE
+        rom.write_bytes(bytes(ROM_SLOT_SIZE + 1))
+        writes = []
+        transfer = BiosTransfer(writes.append, Mock())
+        with self.assertRaisesRegex(ValueError, 'exceeds ROM slot size'):
+            transfer.start(self.path, elf=True, rom=rom)
+        self.assertEqual(writes, [])

@@ -96,9 +96,8 @@ git diff --check
 ```
 
 输出在 `build/sw/demo/`：`demo.elf`、`demo.dis`、`demo.bin` 及
-`rom.hex` / `sram.hex` / `ddr.hex`。在调试工具“烧录 SRAM”页选择 `demo.bin`，
-按住 KEY1 再按复位；看到 BIOS 的烧录成功提示后，松开 KEY1 再按复位运行。
-BIOS 不自动执行刚烧录的镜像。也可用同一 ELF 生成的 SRAM hex 初始化 bitstream。
+`rom.hex` / `sram.hex` / `ddr.hex`。在调试工具烧录页选择 `demo.bin`，填写烧录和运行地址 0x10000000，
+选择串口或网口。按住 KEY1 再按复位；烧录成功后 BIOS 自动执行镜像。也可用同一 ELF 生成的 SRAM hex 初始化 bitstream。
 程序、量化表、字库初值、100 项检测结果和状态在 SRAM；图像、候选工作区、
 RND 命令及绘制时使用的字体副本在 DDR。
 
@@ -283,7 +282,7 @@ seq 每次采样仍递增，`status` 的 `Monitor dropped records` 计本地丢�
 
 | 操作 | 正常现象/判据 |
 |---|---|
-| BIOS 烧录后复位 | UART 出现 Demo 版本、实际引擎 ID、两路 camera chip ID（OV5640 通常 0x5640）；无 ERROR；菜单可接受 Enter 命令 |
+| BIOS 烧录后自动运行 | UART 出现 Demo 版本、实际引擎 ID、两路 camera chip ID（OV5640 通常 0x5640）；无 ERROR；菜单可接受 Enter 命令 |
 | `s2`、`pix bypass`、`geo off` | HDMI 稳定 1280×720 摄像头画面，无错位、撕裂；VIN CH0 帧数持续增长 |
 | `status` 两次 | 用 `ΔPERF0×CLK_SYS_HZ/Δmtime` 算 cam0 帧率；CH0 用 PERF3，S1 CH2 用 PERF5；测量时间段至少一秒，确认实际摄像头帧率，不拿 HDMI 60 Hz 当摄像头帧率 |
 | 5 种 PIX 逐一切换 | 旁路原图、亮度/对比度增强、Gamma 提亮、高斯模糊、灰度 Sobel 边缘；无黑帧、闪烁、失锁或撕裂，无引擎错误，CH0 计数继续增长；记录每次 Switch 帧数和 mtime_ticks，保存连续切换视频 |

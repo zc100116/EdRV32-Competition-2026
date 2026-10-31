@@ -140,9 +140,9 @@ CPU `0x90000000`（DDR 物理偏移 `0x10000000`）起的 64 MiB 内。
 `syscalls.c` 的固定堆为 2 MiB bss，通过 `_sbrk` 给 newlib malloc 使用；
 没有自定义分配器。状态由核心 malloc，帧缓冲和位图由移植层静态分配。
 
-## BIOS 2 Load / 3 Run
+## BIOS v0.18 烧录后自动运行
 
-当前已合入 BIOS v1.10，菜单为 `1=Program SRAM 2=Load 3=Run 4=Baud`。
+BIOS 菜单为 `1=UART load 2=ETH load 3=Run 4=Baud`。
 按 [`tools/board/README.md`](../../../tools/board/README.md) 的 ELF 加载用法执行：
 
 ```sh
@@ -152,22 +152,20 @@ py tools/board/uart_tool.py build/sw/nes-nodisplay/nes.elf --elf --rom sw/apps/n
 ```
 
 先启动工具，再按住 KEY1 并复位；上面前两条命令保持 115200，省略 `--baud` 则自动
-切到 2000000，也可选 921600。工具先加载全部 ELF 文件段，再用一次 `2=Load`
-将 `.nes` 文件（含 iNES 头）写到槽，最后 `3=Run`，不需再次复位。
+切到 2000000，也可选 921600。工具在一个会话中加载全部 ELF 文件段和 `.nes` 槽数据（含 iNES 头），
+完成后 BIOS 自动跳转入口，不需再次复位；加 `--eth` 可通过网口发送数据。
 **BIOS 不解析 ELF，不能把 ELF 文件整体当作一个裸镜像发送。**
 UART 游戏输入使用相同波特率的串口终端发送小写字符；加载工具用于加载和日志捕获，
 要切换终端时先停止捕获并释放串口，或直接用板上 KEY1–4。
 
-手动协议（由协调者提供，SoC v0.17 7.5 3a）：
+手动协议（SoC v0.18 7.5(3a)）：
 
-1. 对 ELF 中每个 `p_filesz != 0` 的 PT_LOAD 段，发送 `2` 加 Enter，等待
-   `UART load ready`；发 4 字节小端 `p_paddr`、4 字节小端 `p_filesz`，再发段数据。
-   等 `Load bytes: <n> at 0x<addr>` 和 `Load result: PASS`，再处理下一段。
-2. 用相同 `2=Load` 协议，将整个 `.nes` 文件发送到 ELF 符号所指的槽地址。
-3. 发送 `3` 加 Enter，等 `Run address:`，发 `0x90000000` 加 Enter（本 ELF 的
-   `e_entry`），BIOS 打印 `Run: 0x90000000` 后跳转。
-4. `.data` 必须加载到 `p_paddr` 指定的初始值副本地址；应用 startup 会复制到 VMA、
-   清零 bss 并建立栈，所以可重新选择 Run 重入。`p_filesz=0` 的 bss 不传输。
+1. 发送 `1` 加 Enter，等待完整 `UART load ready` 行。
+2. 发送小端 u32 总段数、u32 ELF 入口，然后发送所有 {u32 p_paddr, u32 p_filesz}。
+   仅包含非空 PT_LOAD；`.nes` 文件作为最后一段，地址为 ELF 符号对应的物理槽地址。
+3. 依序发送各段数据。BIOS 输出总字节数、段数、PASS 和 Run 行后自动运行。
+4. `.data` 加载到 p_paddr 的初始值副本，启动代码复制到 VMA、清 bss 并建立栈。
+   `p_filesz=0` 的 bss 不传输。
 
 缓存一致性复用 BIOS 的 ELF 加载路径：`sw/boot/main.c` 的 `receive_data()` 由 CPU
 逐字节写入目标可缓存地址，结束时通过 BSP `cache_clean_all()` 写回 D$；ROM 和 ELF

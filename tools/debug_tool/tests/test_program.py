@@ -64,22 +64,22 @@ class FakeSerial:
             self.selected = True
             self.image.clear()
             self.result_sent = False
-            self.inject(b"UART download ready\r\n")
+            self.inject(b"UART load ready\r\n")
         else:
             self.image.extend(data)
-            if len(self.image) >= 4 and not self.result_sent:
-                length = struct.unpack("<I", self.image[:4])[0]
+            if len(self.image) >= 16 and not self.result_sent:
+                length = struct.unpack("<I", self.image[12:16])[0]
                 if length == 0:
                     self.result_sent = True
                     self.selected = False
-                    self.inject(b"Program SRAM result: FAIL length\r\n"
-                                b"BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud\r\n")
-                elif len(self.image) == length + 4:
+                    self.inject(b"Load result: FAIL range\r\n"
+                                b"BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r\n")
+                elif len(self.image) == length + 16:
                     self.result_sent = True
                     self.selected = False
-                    self.inject(f"Program SRAM bytes: {length}\r\n".encode()
-                                + b"Program SRAM result: PASS, press reset to run\r\n"
-                                + b"BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud\r\n")
+                    self.inject(f"Load bytes: {length} segments: 1\r\n".encode()
+                                + b"Load result: PASS\r\nRun: 0x10000000\r\n"
+                                + b"BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r\n")
         return len(data)
 
     def close(self):
@@ -101,13 +101,13 @@ class ProgramTest(unittest.TestCase):
     def start_image(self, data):
         path = Path(self.temp.name) / "app.bin"
         path.write_bytes(data)
-        self.engine.start_program(path)
+        self.engine.start_program(path, baud=115200, addr=0x10000000, entry=0x10000000)
         return path
 
     def boot(self):
         self.serial.in_bios = True
         self.serial.inject(b"Boot ROM startup\r\nBIOS: EdRV32\r\n"
-                           b"BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud\r\n")
+                           b"BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r\n")
 
     def test_menu_ready_wire_and_result_keep_console_output(self):
         data = bytes(range(256)) * 41 + b"tail"
@@ -115,23 +115,23 @@ class ProgramTest(unittest.TestCase):
         self.assertEqual(self.serial.writes, [b"\r"])
         self.boot()
         wait_for(self, lambda: not self.engine.program.status()["active"]
-                 and self.engine.program.status()["sent"] == len(data) + 4)
+                 and self.engine.program.status()["sent"] == len(data) + 16)
         state = self.engine.program.status()
         self.assertTrue(state["bios"])
         self.assertEqual(self.serial.writes[:2], [b"\r", b"1\r"])
-        self.assertEqual(b"".join(self.serial.writes[2:]), wire_bytes(path))
-        self.assertEqual(state["sent"], len(data) + 4)
-        self.assertEqual(state["total"], len(data) + 4)
+        self.assertEqual(b"".join(self.serial.writes[2:]), wire_bytes(path, 0x10000000, 0x10000000))
+        self.assertEqual(state["sent"], len(data) + 16)
+        self.assertEqual(state["total"], len(data) + 16)
         self.assertEqual(state["programmedBytes"], len(data))
-        self.assertEqual(state["result"], "Program SRAM result: PASS, press reset to run")
+        self.assertEqual(state["result"], "Run: 0x10000000")
         self.assertIsNone(state["error"])
         entries, _ = self.engine.get_entries()
         rx = [entry["text"] for entry in entries if entry["dir"] == "rx"]
-        for text in ("BIOS: EdRV32", "BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud",
-                     "UART download ready",
-                     f"Program SRAM bytes: {len(data)}", state["result"]):
+        for text in ("BIOS: EdRV32", "BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud",
+                     "UART load ready",
+                     f"Load bytes: {len(data)} segments: 1", state["result"]):
             self.assertIn(text, rx)
-        self.assertEqual(self.engine.status()["txBytes"], len(data) + 7)
+        self.assertEqual(self.engine.status()["txBytes"], len(data) + 19)
 
     def wait_for_menu_output(self, count=1):
         wait_for(self, lambda: sum(
@@ -144,9 +144,10 @@ class ProgramTest(unittest.TestCase):
         self.assertEqual(self.serial.writes, [])
         path = self.start_image(b"already in BIOS")
         wait_for(self, lambda: not self.engine.program.status()["active"])
-        self.assertEqual(b"".join(self.serial.writes), b"\r1\r" + wire_bytes(path))
+        self.assertEqual(b"".join(self.serial.writes),
+                         b"\r1\r" + wire_bytes(path, 0x10000000, 0x10000000))
         self.assertEqual(self.engine.program.status()["result"],
-                         "Program SRAM result: PASS, press reset to run")
+                         "Run: 0x10000000")
         self.assertFalse(self.engine.program.status()["bios"])
         self.assertIn("已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位",
                       [entry["text"] for entry in self.engine.get_entries()[0]
@@ -160,24 +161,25 @@ class ProgramTest(unittest.TestCase):
             path = self.start_image(payload)
             wait_for(self, lambda: not self.engine.program.status()["active"])
             self.wait_for_menu_output(1 + 2 * index)
-            expected += b"\r1\r" + wire_bytes(path)
+            expected += b"\r1\r" + wire_bytes(path, 0x10000000, 0x10000000)
             self.assertEqual(b"".join(self.serial.writes), expected)
             self.assertEqual(self.engine.program.status()["programmedBytes"], len(payload))
             self.assertEqual(self.engine.program.status()["result"],
-                             "Program SRAM result: PASS, press reset to run")
+                             "Run: 0x10000000")
 
     def test_wait_for_menu_then_ready_exact_lines(self):
         self.engine.program.feed_line(BIOS_MENU)
         self.start_image(b"x")
-        self.engine.program.feed_line("UART download ready")
-        self.engine.program.feed_line("BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud extra")
+        self.engine.program.feed_line("UART load ready")
+        self.engine.program.feed_line("BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud extra")
         self.assertEqual(self.serial.writes, [b"\r"])
         self.assertEqual(self.engine.program.status()["phase"], "wait_menu")
         self.boot()
         wait_for(self, lambda: not self.engine.program.status()["active"])
-        self.assertEqual(b"".join(self.serial.writes), b"\r1\r\x01\0\0\0x")
+        self.assertEqual(b"".join(self.serial.writes), b"\r1\r" +
+                         struct.pack("<IIII", 1, 0x10000000, 0x10000000, 1) + b"x")
         # The menu reprinted after completion must not start a second download.
-        self.engine.program.feed_line("BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud")
+        self.engine.program.feed_line("BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud")
         self.assertEqual(len(self.serial.writes), 3)
 
     def test_fail_length_result(self):
@@ -185,8 +187,8 @@ class ProgramTest(unittest.TestCase):
         self.boot()
         wait_for(self, lambda: not self.engine.program.status()["active"])
         state = self.engine.program.status()
-        self.assertEqual(b"".join(self.serial.writes[2:]), wire_bytes(path))
-        self.assertEqual(state["result"], "Program SRAM result: FAIL length")
+        self.assertEqual(b"".join(self.serial.writes[2:]), wire_bytes(path, 0x10000000, 0x10000000))
+        self.assertEqual(state["result"], "Load result: FAIL range")
         self.assertIsNone(state["programmedBytes"])
 
     def test_disconnect_reports_error(self):
@@ -232,7 +234,7 @@ class ElfSerial(FakeSerial):
             self.step += 1
             self.step_bytes.clear()
             if self.step % 2 == 0 and self.step < len(self.steps):
-                reply += b'BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud\r\n'
+                reply += b'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r\n'
             self.inject(reply)
         return len(data)
 
@@ -289,3 +291,34 @@ class ElfProgramTest(unittest.TestCase):
 
     def test_load_elf_and_run_without_baud_switch(self):
         self.exercise(115200)
+
+
+class EthProgramTest(unittest.TestCase):
+    def test_transport_addresses_and_retry_use_shared_bios(self):
+        from unittest.mock import Mock, patch
+        from tools.debug_tool.core.program import BiosProgrammer
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'app.bin'
+            path.write_bytes(b'ethernet image')
+            udp = Mock()
+            writes = []
+            programmer = BiosProgrammer(writes.append, Mock(), Mock())
+            with patch('tools.board.uart_tool.socket.socket', return_value=udp):
+                programmer.start(path, baud=115200, addr=0x80000100, entry=0x80000104,
+                                 eth=True, local_ip='192.168.1.8')
+            udp.bind.assert_called_once_with(('192.168.1.8', 0))
+            programmer.feed_line(BIOS_MENU)
+            programmer.feed_line('ETH load ready 192.168.1.10:5000')
+            self.assertEqual(writes, [b'\r', b'2\r'])
+            calls = list(udp.sendto.call_args_list)
+            self.assertEqual(len(calls), 2)
+            self.assertEqual(calls[-1].args[0][8:],
+                             struct.pack('<IIII', 1, 0x80000104, 0x80000100, 14))
+            programmer.feed_line('ETH load result: FAIL bytes win2=0 expect=14 win3=16 expect=16')
+            self.assertEqual(udp.sendto.call_args_list, calls + calls)
+            programmer.feed_line('Load bytes: 14 segments: 1')
+            programmer.feed_line('Load result: PASS')
+            programmer.feed_line('Run: 0x80000104')
+            self.assertFalse(programmer.status()['active'])
+            self.assertEqual(programmer.status()['programmedBytes'], 14)
+            udp.close.assert_called_once()

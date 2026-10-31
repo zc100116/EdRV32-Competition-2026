@@ -390,9 +390,9 @@ module edrv32_sys_cpu_tb;
             data = u_uart.received.pop_front();
             if (data == 8'h0a) begin
                 if (uart_line == "BIOS: EdRV32\r") bios_seen = 1;
-                if (uart_line == "BIOS menu: 1=Program SRAM\r") bios_menus++;
-                if (uart_line == "UART download ready\r") download_ready = 1;
-                if (uart_line == "Program SRAM result: PASS, press reset to run\r")
+                if (uart_line == "BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r") bios_menus++;
+                if (uart_line == "UART load ready\r") download_ready = 1;
+                if (uart_line == "Load result: PASS\r")
                     program_pass = 1;
                 if (uart_line == "Menu: 1=CoreMark 2=Peripheral tests 3=System info\r")
                     menu_count++;
@@ -452,8 +452,17 @@ module edrv32_sys_cpu_tb;
             u_uart.send("1");
             u_uart.send(8'h0d);
             wait (download_ready);
-            // The ROM owns protocol parsing; the peer supplies the exact raw image contract.
-            for (int n = 0; n < 4; n++) u_uart.send(8'(length >> (8*n)));
+            // One SRAM segment and the entry precede all image bytes.
+            for (int word_index = 0; word_index < 4; word_index++) begin
+                for (int n = 0; n < 4; n++) begin
+                    case (word_index)
+                        0: u_uart.send(8'(32'd1 >> (8*n)));
+                        1, 2: u_uart.send(8'(32'h10000000 >> (8*n)));
+                        3: u_uart.send(8'(length >> (8*n)));
+                        default: begin end
+                    endcase
+                end
+            end
             fd = $fopen(path, "rb");
             if (fd == 0) $fatal(1, "FAIL cannot open download %s", path);
             value = $fgetc(fd);
@@ -462,13 +471,7 @@ module edrv32_sys_cpu_tb;
                 value = $fgetc(fd);
             end
             $fclose(fd);
-            wait (bios_menus == 2);
-            if (!program_pass) $fatal(1, "FAIL missing program PASS time=%0t", $time);
-            gpio[0] = 1;
-            @(negedge clk_sys);
-            rst_n = 0;
-            repeat (5) @(negedge clk_sys);
-            rst_n = 1;
+            wait (program_pass);
         end
     end
     initial begin : monitor_commands

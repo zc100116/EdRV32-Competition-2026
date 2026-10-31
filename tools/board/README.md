@@ -1,94 +1,56 @@
-# B1 BIOS UART 烧录
+# BIOS 串口 / 网口烧录（SoC v0.18）
 
-Windows 安装依赖：`py -m pip install pyserial==3.5`（同 `tools/requirements.txt`）。
-输入为 `make -C sw PROGRAM=monitor` 从 ELF 经 objcopy 生成的
-`build/sw/monitor/monitor.bin`，入口在 SRAM 基址，负载最多 61440 字节，留出
-bootloader 顶部 4 KiB 栈空间。下载协议见 `sw/boot/README.md`：4 字节小端长度，
-随后原始镜像，无校验和或逐字节应答。
+串口依赖：`py -m pip install pyserial==3.5`。工具初始连接 115200 8N1，默认经 BIOS
+菜单 4 切到 2000000，可用 `--baud 115200` 保持原波特率，或用 921600。
 
 ```sh
-py tools/board/uart_tool.py build/sw/monitor/monitor.bin --port COM3 --log build/board/coremark.log --menu 1
+py tools/board/uart_tool.py build/sw/monitor/monitor.bin --addr 0x10000000 --entry 0x10000000 --port COM3
+py tools/board/uart_tool.py build/sw/board_npu/board_npu.elf --elf --port COM3 --log build/board/npu.log
+py tools/board/uart_tool.py build/sw/board_npu/board_npu.elf --elf --eth --local-ip 192.168.1.2 --port COM3
 ```
 
-已在 BIOS 菜单时直接开始；否则按住 KEY1（C23）并复位（C22），
-等下载开始后可松开 KEY1。每次开始烧录或加载时，工具先发送一次 CR：
-BIOS 收到空行后打印 `Input error: type 1-4 then Enter` 并重新打印菜单；
-若应用仍在运行，则继续等待进入 BIOS 后的新菜单，不使用历史菜单行。
-同一次 BIOS 会话中再次烧录也会重新发送一次 CR。
-工具等待 `BIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud`，发送 `1` 和 CR，再等到完整的
-`UART download ready` 行后发送长度和镜像。收到 `Program SRAM result:` 后显示结果；
-PASS 后松开 KEY1 并再按复位键运行程序。工具持续显示串口输出并保存原始 CRLF 日志，
-Ctrl-C 停止。115200 波特、8N1，无流控。可选 `--menu 1` 在菜单出现后发送 `1` 和
-Enter，CoreMark 使用默认 10 次迭代；加 `--iterations 5000` 时只发送 `1`，在
-`Iterations input` 提示出现后输入迭代次数和 Enter（CoreMark 要求运行至少 10 秒，
-100 MHz 下约需 4000 次以上）；`--menu 3` 请求系统信息。省略镜像参数时不下载，
-只记录 SRAM 初始化程序的输出并按 `--menu` 操作菜单：
+已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位。每次开始先发一个 CR 获取新菜单，
+然后等待 `BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud`。串口模式选择 1，等待
+完整 `UART load ready` 行，发送会话描述块和所有段数据；网口模式选择 2，等待完整
+`ETH load ready 192.168.1.10:5000`，菜单与结果仍经串口，数据经 UDP。
+
+描述块为小端 u32 段数、u32 入口，以及逐段 {u32 地址, u32 长度}。
+ELF 取文件长度非零的 PT_LOAD 的 p_paddr/p_filesz 和 e_entry；`.bin` 必须同时指定
+`--addr` 和 `--entry`。BIOS 检查 SRAM（不含末尾 4 KiB 栈）和 DDR 可缓存区，不允许
+覆盖 DDR 物理 0x0a000000 起 68 KiB 暂存区。所有段到位后自动跳转，不需另发 Run。
+
+网口绑定 `--local-ip`（默认 192.168.1.2）的临时源端口，目标 192.168.1.10:5000。
+UDP 每包最多 1472 字节，其中 8 字节应用头为网络序 `{u8 窗口,u8 NOTIFY,u16 0,
+u32 偏移}`，其余最多 1464 字节为数据。DDR 段写窗口 2，偏移为地址减 0x80000000；
+SRAM 段写窗口 3，偏移为 0x1000 加地址减 0x10000000。所有数据发完再写窗口 3
+偏移 0 的描述块，最后一包置 NOTIFY。收到 `ETH load result: FAIL bytes ...` 后整份
+重发一次，第二次仍失败则报错退出。其他 BIOS FAIL 立即报错，不额外重试。
+ETH 等待期间可从串口发送任意一行取消。电脑网卡需配置指定本机 IP，并连接千兆网络。
+
+`--log` 保存原始串口输出，运行后继续捕获，Ctrl-C 停止。省略镜像只记录串口。
+`--menu 1 --iterations 5000` 可在应用监控菜单出现后启动 CoreMark，`--menu 3` 请求信息。
 
 ```sh
-py tools/board/uart_tool.py --port COM3 --log build/board/coremark_o2.log --menu 1 --iterations 5000
-```
-
-tuned 编译选项的监控程序：`make -C sw PROGRAM=monitor OUT=$PWD/build/sw/monitor_tuned
-MONITOR_OPT_FLAGS="-O3 -funroll-all-loops -finline-limit=600 -falign-functions=4
--falign-jumps=4 -falign-loops=4"`。要手动操作菜单时关闭
-该工具后再用串口终端打开同一端口。
-
-仿真生成完全相同的下载字节流（不需要 pyserial）：
-
-```sh
-python3 tools/board/uart_tool.py build/board_b1/download/sc04.bin --emit build/board_b1/download.wire
-python3 tools/regress.py smoke --path verif/soc/board_b1 -j 1
-```
-
-`--emit` 仍只包含长度和镜像，不含 BIOS 菜单选择；仿真在看到 BIOS 菜单后单独发送
-`1` 和 Enter，等 ready 后才发送这个字节流。烧录后不会自动运行，必须松开 KEY1 并复位。
-
-## 加载 ELF 并立即运行
-
-```sh
-py tools/board/uart_tool.py build/sw/<程序>/<程序>.elf --elf --port COM3 --log build/board/elf.log
-py tools/board/uart_tool.py build/sw/<程序>/<程序>.elf --elf --baud 921600 --port COM3
-py tools/board/uart_tool.py build/sw/<程序>/<程序>.elf --elf --baud 115200 --port COM3
-```
-
-串口初始仍为 115200 8N1。启动时同样先发送一次 CR 询问菜单：
-已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位。默认先执行 BIOS
-`4` 切换到 2000000；可选 921600，或选 115200 跳过切换。工具收到旧波特率的完整
-`Baud result: <值>` 行后才切换主机串口，并等新波特率菜单。每个文件长度非零的
-PT_LOAD 段依次执行一次 `2`，以 `p_paddr` 为目标地址，只传 `p_filesz` 字节；
-空 BSS 段与非 PT_LOAD 段跳过。各段收到 `Load result: PASS` 后才继续，最后执行
-`3` 并输入 ELF `e_entry`，无需复位。任一 BIOS FAIL 直接报错停止，无重试或校验和。
-程序启动代码负责恢复 `.data`、清零 `.bss` 和设置栈；ELF 的 LMA/VMA 布局由软件链接脚本决定。
-
-目标可为 SRAM（不含末尾 BIOS 栈）或 DDR 可缓存区。DDR 程序必须加载后直接运行，
-不得复位；复位仍从 SRAM 启动。下载后持续记录应用串口输出，保持所选波特率。
-原 `.bin` 烧录命令与 115200 行为不变。
-
-`--elf --emit` 输出协议操作的发送字节（菜单选择、波特率文本、每段地址/长度/数据、
-入口文本），供测试逐字节比对；执行时仍须按协议等待各提示，不能把文件无等待地直接写入串口。
-两种 `--emit` 均不含开始时询问菜单的 CR；原 `.bin --emit` 仍只输出长度和镜像。
-
-```sh
+py tools/board/uart_tool.py --port COM3 --log build/board/coremark.log --menu 1 --iterations 5000
+python3 tools/board/uart_tool.py build/sw/monitor/monitor.bin --addr 0x10000000 --entry 0x10000000 --baud 115200 --emit build/board/monitor.wire
 python3 -m unittest discover -s tools/board/tests -v
 ```
+
+`--emit` 输出串口操作的全部发送字节（菜单选择、波特率文本、描述块、各段数据），
+不含开始探测菜单的 CR。仿真仍必须等待各 ready 提示再发送相应部分，不能整份无等待
+灌入。网口模式使用 `--port`，不支持 `--emit`。
 
 ## NES 外部 ROM
 
 ```sh
-py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom sw/apps/nes/roms/nrom-template.nes --baud 115200 --port COM3 --log build/board/nes.log
-py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom D:\roms\smb.nes --baud 115200 --port COM3 --log build/board/nes.log
+py tools/board/uart_tool.py build/sw/nes/nes.elf --elf --rom D:\roms\smb.nes --port COM3
 ```
 
-`--rom <file.nes>` 必须与 `--elf` 一起使用。工具从 ELF 符号表查找 `nes_rom_slot` /
-`nes_rom_slot_end`，用所属 PT_LOAD 的 `p_paddr + (symbol - p_vaddr)` 换算目标地址；
-缺少槽符号或文件大于槽时明确报错。全部 ELF 文件段加载后、`3=Run` 之前，再执行
-一次 `2=Load` 原样发送完整 `.nes` 文件；`--elf --rom ... --emit <wire>` 同样包含该操作。
-ELF 和 ROM 都走 BIOS 现有 CPU 写入及 BSP `cache_clean_all()` 路径，无需额外 cache 维护。
+`--rom` 必须配合 `--elf`，从 nes_rom_slot / nes_rom_slot_end 符号及所属 PT_LOAD 的
+VMA/LMA 映射得出物理槽地址；缺符号或文件超槽直接报错。ROM 作为同一会话的最后一段
+发送，随后自动运行 ELF 入口；支持串口和网口。模拟器与 ROM 许可见
+[NES README](../../sw/apps/nes/README.md)。
 
-模拟器 ELF 不带游戏，用户自备 ROM 留在仓库外，不下载、不生成、不提交商业 ROM。
-公开测试 ROM 的许可与模拟器用法见 [NES README](../../sw/apps/nes/README.md)。
-板上 KEY1 左、KEY2 右、KEY3 A、KEY4 Start，B 只能用 UART `k`。
-
-仓库外 GUI 可继续 import `BiosTransfer` / `operations`，原有参数与默认行为不变；
-可选新参数为 `operations(image, elf=False, baud=2000000, rom=None)`、
-`BiosTransfer.start(path, elf=False, baud=2000000, rom=None)`。
+调试工具烧录页复用 `BiosTransfer`，可选串口或网口、输入本机 IP，以及 .bin 的烧录和
+运行地址。脚本也可复用 `BiosTransfer.start(path, elf=False, baud=2000000, rom=None,
+addr=None, entry=None, eth=False, local_ip='192.168.1.2')`。

@@ -155,7 +155,9 @@ def make_handler(engine):
                     return self._json(200, engine.cancel_file())
                 if path == "/api/program":
                     return self._json(200, engine.start_program(
-                        body["path"], bool(body.get("elf", False)), int(body.get("baud", 2000000))))
+                        body["path"], bool(body.get("elf", False)), int(body.get("baud", 2000000)),
+                        body.get("addr"), body.get("entry"), bool(body.get("eth", False)),
+                        body.get("localIp", "192.168.1.2")))
                 if path == "/api/ethernet/send":
                     return self._json(200, engine.ethernet.send_file(
                         body["path"], body["boardIp"], int(body["boardPort"]),

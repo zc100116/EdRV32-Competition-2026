@@ -85,9 +85,13 @@ def main():
     p.add_argument("--stop-bits", default="1", choices=["1", "1.5", "2"])
     sub.add_parser("disconnect")
 
-    p = sub.add_parser("program", help="program SRAM .bin or load and run ELF through BIOS")
+    p = sub.add_parser("program", help="load and run .bin or ELF through UART/UDP BIOS")
     p.add_argument("path")
     p.add_argument("--elf", action="store_true")
+    p.add_argument("--eth", action="store_true")
+    p.add_argument("--addr", type=lambda value: int(value, 0))
+    p.add_argument("--entry", type=lambda value: int(value, 0))
+    p.add_argument("--local-ip", default="192.168.1.2")
     p.add_argument("--baud", type=int, choices=(115200, 921600, 2000000), default=2000000)
 
     p = sub.add_parser("send")
@@ -244,7 +248,9 @@ def main():
         print_json(request("POST", "/api/disconnect", {}))
     elif args.cmd == "program":
         request("POST", "/api/program", {"path": os.path.abspath(args.path),
-                                          "elf": args.elf, "baud": args.baud})
+                                          "elf": args.elf, "baud": args.baud,
+                                          "addr": args.addr, "entry": args.entry,
+                                          "eth": args.eth, "localIp": args.local_ip})
         print("已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位", flush=True)
         while True:
             st = request("GET", "/api/program/status")

@@ -13,6 +13,10 @@
 #define BOOT_DOWNLOAD_MAGIC 0x55415254u
 #define BOOT_BUTTON_WINDOW_MS 100u
 #define BOOT_STACK_BYTES 4096u
+#define BOOT_ETH_STAGE_PHYSICAL 0x0a000000u
+#define BOOT_ETH_STAGE_BYTES (68u * 1024u)
+/* RTL8211F responds at broadcast PHYAD 0; coordinator confirmed board contract. */
+#define BOOT_PHY_ADDRESS 0u
 
 static inline int boot_download_requested(uint32_t gpio, uint32_t scratch)
 {
@@ -32,7 +36,10 @@ static inline int boot_load_range(uint32_t address, uint32_t length)
            ((address >= EDRV32_SRAM_BASE && address < sram_end &&
              length <= sram_end - address) ||
             (address >= EDRV32_DDR_BASE && address < ddr_end &&
-             length <= ddr_end - address));
+             length <= ddr_end - address &&
+             (address >= EDRV32_DDR_BASE + BOOT_ETH_STAGE_PHYSICAL + BOOT_ETH_STAGE_BYTES ||
+              (address < EDRV32_DDR_BASE + BOOT_ETH_STAGE_PHYSICAL &&
+               length <= EDRV32_DDR_BASE + BOOT_ETH_STAGE_PHYSICAL - address))));
 }
 
 static inline int boot_run_address(uint32_t address)

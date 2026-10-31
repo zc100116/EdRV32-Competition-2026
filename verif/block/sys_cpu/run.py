@@ -143,7 +143,7 @@ def execute(sim, case, boot, program, name, *, memory='sram', opt='o2', latency=
     output = (out / 'run.log').read_text()
     if f'PASS sys_cpu SC-{case:02}' not in output:
         raise RuntimeError(f'{out}/run.log: missing completion')
-    for text in ['EdRV32 Boot ROM', 'Boot SRAM']:
+    for text in (['EdRV32 Boot ROM'] if case == 4 else ['EdRV32 Boot ROM', 'Boot SRAM']):
         if text not in output:
             raise RuntimeError(f'{out}/run.log: missing UART {text!r}')
     if case in (1, 8):
@@ -155,9 +155,10 @@ def execute(sim, case, boot, program, name, *, memory='sram', opt='o2', latency=
         if case == 8:
             check_monitor(output, commit, compiler)
     if case == 4:
-        for text in ['BIOS: EdRV32', 'BIOS menu: 1=Program SRAM', 'UART download ready',
-                     f'Program SRAM bytes: {raw.stat().st_size}',
-                     'Program SRAM result: PASS, press reset to run']:
+        for text in ['BIOS: EdRV32', 'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud',
+                     'UART load ready',
+                     f'Load bytes: {raw.stat().st_size} segments: 1',
+                     'Load result: PASS']:
             if text not in output:
                 raise RuntimeError(f'{out}/run.log: missing UART {text!r}')
     metrics = {'name': name, 'memory': memory, 'opt': opt, 'latency': latency}

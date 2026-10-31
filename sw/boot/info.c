@@ -53,12 +53,26 @@ void info_hex(const char *key, uint32_t value)
     uart_puts("\r\n");
 }
 
-void info_load(uint32_t length, uint32_t address)
+void info_load(uint64_t length, uint32_t segments)
 {
     key_start("Load bytes");
     number(length, 10u, 0u);
-    uart_puts(" at 0x");
-    number(address, 16u, 8u);
+    uart_puts(" segments: ");
+    number(segments, 10u, 0u);
+    uart_puts("\r\n");
+}
+
+void info_eth_bytes(uint32_t ddr, uint32_t ddr_expected, uint32_t stage,
+                    uint32_t stage_expected)
+{
+    uart_puts("ETH load result: FAIL bytes win2=");
+    number(ddr, 10u, 0u);
+    uart_puts(" expect=");
+    number(ddr_expected, 10u, 0u);
+    uart_puts(" win3=");
+    number(stage, 10u, 0u);
+    uart_puts(" expect=");
+    number(stage_expected, 10u, 0u);
     uart_puts("\r\n");
 }
 

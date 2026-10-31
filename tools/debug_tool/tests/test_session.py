@@ -32,12 +32,12 @@ class SessionTest(unittest.TestCase):
 
     def test_phase_follows_serial_lines_and_disconnect(self):
         self.assertEqual(self.engine.board.status()['phase'], 'disconnected')
-        for line, phase in [('BIOS menu: 1=Program SRAM', 'bios'),
+        for line, phase in [('BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud', 'bios'),
                             ('Demo: demo_vision', 'application'),
                             ('Switch: frames=2 mtime_ticks=30', 'application'),
-                            ('BIOS menu: 1=Program SRAM', 'bios'),
+                            ('BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud', 'bios'),
                             ('Demo: demo_vnpu', 'application'),
-                            ('BIOS menu: 1=Program SRAM', 'bios'),
+                            ('BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud', 'bios'),
                             ('RND display ready', 'application')]:
             self.engine._match_line(line)
             self.assertEqual(self.engine.board.status()['phase'], phase)

@@ -54,11 +54,11 @@ def expected_steps(baud=2000000, rom=None):
         steps += [(b'4\r', b'Baud:\r\n'),
                   (f'{baud}\r'.encode(), f'Baud result: {baud}\r\n'.encode())]
     segments = SEGMENTS + ([(ROM_SLOT_PHYSICAL, rom)] if rom is not None else [])
-    for address, data in segments:
-        steps += [(b'2\r', b'UART load ready\r\n'),
-                  (struct.pack('<II', address, len(data)) + data,
-                   f'Load bytes: {len(data)} at 0x{address:08x}\r\n'
-                   'Load result: PASS\r\n'.encode())]
-    steps += [(b'3\r', b'Run address:\r\n'),
-              (f'0x{ENTRY:08x}\r'.encode(), f'Run: 0x{ENTRY:08x}\r\n'.encode())]
+    descriptor = struct.pack('<II', len(segments), ENTRY)
+    descriptor += b''.join(struct.pack('<II', address, len(data)) for address, data in segments)
+    payload = descriptor + b''.join(data for _, data in segments)
+    total = sum(len(data) for _, data in segments)
+    steps += [(b'1\r', b'UART load ready\r\n'),
+              (payload, f'Load bytes: {total} segments: {len(segments)}\r\n'
+               f'Load result: PASS\r\nRun: 0x{ENTRY:08x}\r\n'.encode())]
     return steps

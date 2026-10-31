@@ -4,7 +4,7 @@
  * Clock domain: none (host test).
  */
 #include <stdio.h>
-#include "boot.h"
+#include "session.h"
 
 int main(void)
 {
@@ -22,9 +22,9 @@ int main(void)
         {sram_end, 1u, 0},
         {EDRV32_SRAM_BASE - 1u, 2u, 0},
         {EDRV32_SRAM_BASE, 0u, 0},
-        {EDRV32_DDR_BASE, EDRV32_DDR_SIZE, 1},
+        {EDRV32_DDR_BASE, EDRV32_DDR_SIZE, 0},
         {EDRV32_DDR_BASE, 1u, 1},
-        {EDRV32_DDR_BASE + 1u, EDRV32_DDR_SIZE - 1u, 1},
+        {EDRV32_DDR_BASE + 1u, EDRV32_DDR_SIZE - 1u, 0},
         {ddr_end - 1u, 1u, 1},
         {ddr_end - 1u, 2u, 0},
         {EDRV32_DDR_BASE - 1u, 2u, 0},
@@ -35,6 +35,9 @@ int main(void)
         {EDRV32_SYS_APB_BASE, 1u, 0},
         {EDRV32_DDR_BASE, UINT32_MAX, 0},
         {UINT32_MAX, 2u, 0},
+        {0x8a000000u, 1u, 0}, {0x8a010fffu, 1u, 0},
+        {0x89ffffffu, 1u, 1}, {0x89ffffffu, 2u, 0},
+        {0x8a011000u, 1u, 1}, {0x89fff000u, 0x13000u, 0},
     };
     const struct {
         uint32_t address;
@@ -46,6 +49,7 @@ int main(void)
         {ddr_end - 4u, 1}, {ddr_end, 0},
         {EDRV32_DDR_UNCACHED_BASE, 0}, {EDRV32_ROM_BASE, 0},
         {EDRV32_SYS_APB_BASE, 0}, {UINT32_MAX, 0},
+        {0x8a000000u, 0}, {0x8a010ffcu, 0}, {0x8a011000u, 1},
     };
     for (unsigned int i = 0; i < sizeof(loads) / sizeof(loads[0]); ++i) {
         int actual = boot_load_range(loads[i].address, loads[i].length);
@@ -61,6 +65,41 @@ int main(void)
             return 1;
         }
     }
-    puts("PASS BIOS ranges: 20 load + 12 run cases (SRAM, DDR, boundaries, wrap)");
+    uint8_t bytes[136] = {2u, 0u, 0u, 0u, 0u, 1u, 0u, 0x80u,
+                         0u, 1u, 0u, 0x80u, 4u, 0u, 0u, 0u,
+                         3u, 0u, 0u, 0x10u, 5u, 0u, 0u, 0u};
+    struct boot_session session;
+    if (!boot_session_parse(&session, bytes) || session.count != 2u ||
+        session.entry != 0x80000100u || session.segments[1].address != 0x10000003u ||
+        !boot_session_complete(&session, 4u, 29u) ||
+        boot_session_complete(&session, 3u, 29u) ||
+        boot_session_complete(&session, 4u, 28u) ||
+        boot_session_complete(&session, 8u, 29u) ||
+        boot_session_complete(&session, 4u, 34u)) return 1;
+    bytes[0] = 1u;
+    if (!boot_session_parse(&session, bytes) ||
+        !boot_session_complete(&session, 4u, 16u)) return 1;
+    bytes[0] = 0u;
+    if (boot_session_parse(&session, bytes)) return 1;
+    bytes[0] = 17u;
+    if (boot_session_parse(&session, bytes)) return 1;
+    bytes[0] = 2u;
+    bytes[4] = 1u;
+    if (boot_session_parse(&session, bytes)) return 1;
+    bytes[4] = 0u;
+    bytes[12] = 0u;
+    if (boot_session_parse(&session, bytes)) return 1;
+    bytes[12] = 4u;
+    bytes[11] = 0x40u;
+    if (boot_session_parse(&session, bytes)) return 1;
+    /* Maximum segment count is valid; overlapping segments are permitted. */
+    for (unsigned int i = 0u; i < 16u; ++i) {
+        for (unsigned int j = 0u; j < 8u; ++j) bytes[8u + 8u * i + j] = 0u;
+        bytes[11u + 8u * i] = 0x80u;
+        bytes[12u + 8u * i] = 1u;
+    }
+    bytes[0] = 16u;
+    if (!boot_session_parse(&session, bytes)) return 1;
+    puts("PASS BIOS SRAM/DDR/staging boundaries, entry, descriptor and ETH byte counts");
     return 0;
 }

@@ -16,7 +16,9 @@
 void info_text(const char *key, const char *value);
 void info_number(const char *key, uint64_t value);
 void info_hex(const char *key, uint32_t value);
-void info_load(uint32_t length, uint32_t address);
+void info_load(uint64_t length, uint32_t segments);
+void info_eth_bytes(uint32_t ddr, uint32_t ddr_expected, uint32_t stage,
+                    uint32_t stage_expected);
 void info_ratio(const char *key, uint64_t numerator, uint64_t denominator);
 void system_info(void);
 #endif

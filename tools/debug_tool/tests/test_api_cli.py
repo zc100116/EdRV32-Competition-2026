@@ -43,19 +43,21 @@ class ApiCliTest(unittest.TestCase):
             return json.load(response)
 
     def boot(self):
-        self.serial.inject(b"BIOS: EdRV32\r\nBIOS menu: 1=Program SRAM 2=Load 3=Run 4=Baud\r\n")
+        self.serial.inject(b"BIOS: EdRV32\r\nBIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud\r\n")
 
     def test_rest_program_and_console(self):
         path = Path(self.temp.name) / "app.bin"
         path.write_bytes(b"REST BIOS payload")
-        state = self.request("/api/program", {"path": str(path)})
+        state = self.request("/api/program", {"path": str(path), "baud": 115200, "addr": 0x10000000,
+                                                 "entry": 0x10000000})
         self.assertEqual(state["phase"], "wait_menu")
         self.boot()
         wait_for(self, lambda: not self.engine.program.status()["active"])
         state = self.request("/api/program/status")
         self.assertEqual(state["programmedBytes"], path.stat().st_size)
-        self.assertEqual(state["result"], "Program SRAM result: PASS, press reset to run")
-        self.assertEqual(b"".join(self.serial.writes), b"\r1\r" + wire_bytes(path))
+        self.assertEqual(state["result"], "Run: 0x10000000")
+        self.assertEqual(b"".join(self.serial.writes),
+                         b"\r1\r" + wire_bytes(path, 0x10000000, 0x10000000))
         entries = self.request("/api/buffer")["entries"]
         self.assertIn(state["result"], [e["text"] for e in entries if e["dir"] == "rx"])
 
@@ -63,27 +65,29 @@ class ApiCliTest(unittest.TestCase):
         path = Path(self.temp.name) / "cli.bin"
         path.write_bytes(payload)
         process = subprocess.Popen(
-            [sys.executable, str(TOOL_DIR / "cli.py"), "--url", self.url, "program", str(path)],
+            [sys.executable, str(TOOL_DIR / "cli.py"), "--url", self.url, "program", str(path),
+             "--baud", "115200", "--addr", "0x10000000", "--entry", "0x10000000"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
         self.addCleanup(lambda: process.kill() if process.poll() is None else None)
         wait_for(self, lambda: self.engine.program.status()["active"])
         self.boot()
         stdout, stderr = process.communicate(timeout=5)
         self.assertEqual(stderr, "")
-        self.assertEqual(b"".join(self.serial.writes), b"\r1\r" + wire_bytes(path))
+        self.assertEqual(b"".join(self.serial.writes),
+                         b"\r1\r" + wire_bytes(path, 0x10000000, 0x10000000))
         return process.returncode, stdout
 
     def test_cli_program_success(self):
         code, stdout = self.run_cli(b"CLI BIOS payload")
         self.assertEqual(code, 0)
         self.assertIn("已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位", stdout)
-        self.assertIn("Program SRAM result: PASS, press reset to run", stdout)
+        self.assertIn("Run: 0x10000000", stdout)
         self.assertIn('"programmedBytes": 16', stdout)
 
     def test_cli_program_failure_exit_status(self):
         code, stdout = self.run_cli(b"")
         self.assertEqual(code, 1)
-        self.assertIn("Program SRAM result: FAIL length", stdout)
+        self.assertIn("Load result: FAIL range", stdout)
 
     def elf_peer(self, baud):
         self.engine.disconnect(silent=True)
