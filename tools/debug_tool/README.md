@@ -46,6 +46,25 @@ numpy、torch 等依赖和 `third_party/ultralytics` 子模块。
 5. DDR 曲线保留 60 s，提供带宽 / 利用率 / 可选读延迟；七端口表列平均等待、最长等待、
    紧急授权数，等待单位为 clk_mem 周期。暂停只暂停绘图，CSV 仍保留原始数据。
    导出 / 回放 / 清空按钮用于记录和复现；溢出、读空计数非零标红。
+   带宽图按端口分别绘制读、写或读写合计曲线；图例显示端口颜色、名称和当前值。
+   单击图例显示 / 隐藏曲线（隐藏项变灰并加删除线），悬停图例或曲线会加粗置顶并淡化其他曲线；
+   双击图例只显示该端口，再双击恢复全部。鼠标在图内时显示时间竖线，图例改为该时刻读数。
+   按住左键左右拖动平移时间轴，滚轮缩放到 5–60 s；范围始终受已保留数据限制。
+   拖动或缩放后显示“已暂停跟随，双击恢复”，新数据继续采样，但窗口停在所选时间段；
+   保留期外的数据移出后，窗口相应限制在仍保留的范围内。双击图内恢复最近 60 s 并跟随最新数据。
+   带宽图和利用率图共用时间窗口，切换图表后保持对齐；CSV 和统计不受图例及时间窗口影响。
+
+DDR 交互截图（模拟数据，生成物位于 `build/`）：
+[高亮 DISP、隐藏 VIN（1366×768）](../../build/debug_tool/ddrplot/highlight-1366.png)、
+[暂停跟随（1920×1080）](../../build/debug_tool/ddrplot/paused-1920.png)。复现命令：
+
+```sh
+mkdir -p build/debug_tool/ddrplot
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py \
+  build/debug_tool/ddrplot/highlight-1366.png --state vision --ddr-view highlight
+QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py \
+  build/debug_tool/ddrplot/paused-1920.png --state vision --ddr-view paused --width 1920 --height 1080
+```
 
 ## 图像处理
 

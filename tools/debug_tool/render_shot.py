@@ -14,8 +14,8 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QImage
+from PySide6.QtCore import Qt, QPoint, QPointF
+from PySide6.QtGui import QImage, QWheelEvent
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
@@ -99,6 +99,7 @@ def main():
     parser.add_argument('--scroll-bottom', action='store_true')
     parser.add_argument('--page', type=int, default=0)
     parser.add_argument('--main-page', type=int, default=4)
+    parser.add_argument('--ddr-view', choices=['highlight', 'paused'])
     parser.add_argument('--width', type=int, default=1366)
     parser.add_argument('--height', type=int, default=768)
     args = parser.parse_args()
@@ -142,6 +143,24 @@ def main():
             raise RuntimeError('Simulator produced no EDTM data')
         if (window.width(), window.height()) != (args.width, args.height):
             raise RuntimeError(f'Layout expanded window to {window.size()}')
+        if args.ddr_view:
+            chart = window.soc.bandwidth
+            if args.ddr_view == 'highlight':
+                QTest.mouseClick(chart, Qt.LeftButton,
+                                 pos=chart.legend_rects()[1].center().toPoint())
+                QTest.mouseMove(chart, chart.legend_rects()[0].center().toPoint())
+            else:
+                center = chart.plot_bounds().center()
+                wheel = QWheelEvent(center, QPointF(chart.mapToGlobal(center.toPoint())),
+                                    QPoint(), QPoint(0, 480), Qt.NoButton, Qt.NoModifier,
+                                    Qt.NoScrollPhase, False)
+                app.sendEvent(chart, wheel)
+                QTest.mousePress(chart, Qt.LeftButton, pos=center.toPoint())
+                QTest.mouseMove(chart, center.toPoint() + QPoint(70, 0))
+                QTest.mouseRelease(chart, Qt.LeftButton,
+                                   pos=center.toPoint() + QPoint(70, 0))
+                QTest.mouseMove(chart, QPoint(0, chart.height() - 1))
+            app.processEvents()
         if args.main_page == 5:
             QTest.keyPress(window, Qt.Key_W)
             app.processEvents()

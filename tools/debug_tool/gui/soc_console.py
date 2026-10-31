@@ -22,7 +22,7 @@ from core.engine import fmt_ts
 from gui.processing import ProcessingPanel
 from core.telemetry import encode
 from gui.program import ProgramPanel
-from gui.telemetry import COLORS, Histogram, Timeline
+from gui.telemetry import Histogram, Timeline
 from gui.video import DetectionView
 
 STYLE = """
@@ -382,7 +382,7 @@ class SocConsole(QWidget):
         charts = QStackedWidget()
         self.chart_mode.currentIndexChanged.connect(charts.setCurrentIndex)
         self.bandwidth = Timeline()
-        self.utilization = Timeline(True)
+        self.utilization = Timeline(True, axis=self.bandwidth.axis)
         self.histogram = Histogram()
         for title, widget in [('带宽 GB/s', self.bandwidth), ('利用率 %', self.utilization),
                               ('读延迟', self.histogram)]:
@@ -411,12 +411,6 @@ class SocConsole(QWidget):
                 self.table.setItem(index, column, item)
         content.addWidget(self.table)
         box.addLayout(content, 1)
-        legend = QHBoxLayout()
-        for name, color in zip(['DISP', 'VIN', 'CPU', 'NPU', 'RND', 'GEO', 'ETH'], COLORS):
-            text = label('● ' + name, 'note')
-            text.setStyleSheet(f'color:{color};')
-            legend.addWidget(text)
-        plot_column.addLayout(legend)
         metrics = QGridLayout()
         metrics.setVerticalSpacing(3)
         metrics.addWidget(self.monitor_summary, 0, 0)
