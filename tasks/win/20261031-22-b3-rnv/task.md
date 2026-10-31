@@ -35,7 +35,7 @@
 
 - **NPU 模型**：`tasks/win/20261029-09-b3-software/src/npu/`。
 - **NES ROM**：同卡 18 和卡 21，ROM 不进仓库。
-- **软件更新**：调试工具界面和 `demo_npu` 还在改，改完会更新到本卡 `src/` 和 b3。**每个工程上板前先 `git pull`**；`src/` 有新版本时用新版本，并在 `result.md` 中记下实际使用的文件和 commit。
+- **软件更新**：调试工具界面整理和 `demo_npu`/`demo_vision` 的参数化图像处理已更新（b3 c6d5ce84 起；本卡 `src/demo_npu.bin`、`demo_vision.bin` 为更新后的版本）。调试工具不再区分板型：目标检测页统一发送图片，图像处理页每项功能有开关和可调参数。**每个工程上板前先 `git pull`**，在 `result.md` 中记下实际使用的 commit。
 
 ## 3. 环境
 
@@ -111,7 +111,7 @@
 
 1. 烧录 `src/board_npu.elf`，应为 `NPU board: PASS 39/39`。
 2. **网口送图识别**：
-   - 烧录 `src/demo_npu.bin`；调试工具建立网口连接，用目标检测（B3N）页加载模型，等串口打印 `EDNM: loaded`；
+   - 烧录 `src/demo_npu.bin`；调试工具建立网口连接，在“目标检测”页加载模型，等串口打印 `EDNM: loaded`；
    - **单张**：选 3 张不同的图片，各识别一次，工具应显示比对一致，叠框截图；
    - **连续**：选一个文件夹（≥ 20 张），连续识别，记下工具统计的平均往返时间和 fps，以及串口每张的 NPU 周期和后处理周期。
 3. **EDTM**：连续识别期间导出 EDTM CSV（`edtm_npu.csv`）。
@@ -119,7 +119,12 @@
 ### 5V：B3V
 
 1. 烧录 `src/demo_vision.bin`。按 `sw/apps/demo/README.md` 的上板检查清单中 demo_vision 的部分逐行执行。
-2. **S2 各模式**：PIX 的 bypass、brightness、gamma、gaussian、sobel，GEO 的 off、rotate、scale，各保持约 10 秒；输出分别试 HDMI、ETH、both。
+2. **S2 各模式**：在调试工具“图像处理”页依次打开以下功能，每种保持约 10 秒：
+   - PIX：亮度/对比度；Gamma；3×3 第一级高斯、第二级 Sobel（两级同时）；灰度；二值化（改两次阈值）；反色；
+   - GEO：旋转 30°、旋转 −135°；X 1.5 / Y 0.75（不锁比例）；锁比例缩小到 0.5；平移加水平镜像；
+   - 再试一次超出缩小限制（如 0.4），应在串口看到明确的报错，画面保持上一个设置；
+   - 输出分别试 HDMI、ETH、both。
+   画面与设置是否相符，用户逐项判断并拍照。
 3. **EDTM**：上述过程连续导出一份 EDTM CSV（`edtm_vision.csv`），并在 `result.md` 中写下每种模式的起止时间，用来对照曲线。
 
 ## 6. 产物
