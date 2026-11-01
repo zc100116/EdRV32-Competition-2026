@@ -45,7 +45,8 @@ module edrv32_rnd_blit (
     output wire [31:0] blend_tag_o,
     input wire blend_valid_i,
     input wire [63:0] blend_pixel_i,
-    input wire [31:0] blend_tag_i
+    input wire [31:0] blend_tag_i,
+    input wire [7:0] blend_offset_i
 );
     localparam [2:0] S_LOAD_IDLE = 3'd0;
     localparam [2:0] S_LOAD_SOURCE = 3'd1;
@@ -190,7 +191,12 @@ module edrv32_rnd_blit (
     assign blend_dst_o = target_pixel2_r;
     assign blend_valid_o = opacity_valid_r;
     assign blend_tag_o = source_tag2_r;
-    assign result_w = {192'd0, blend_pixel_i} << {blend_tag_i[1:0], 6'd0};
+    genvar result_quadrant;
+    generate for (result_quadrant = 0; result_quadrant < 4;
+        result_quadrant = result_quadrant + 1) begin : g_result_shift
+        assign result_w[result_quadrant*64 +: 64] =
+            blend_offset_i[result_quadrant*2 +: 2] == result_quadrant ? blend_pixel_i : 64'd0;
+    end endgenerate
     assign result_strb_w = 32'h0000_00ff << {blend_tag_i[1:0], 3'd0};
     assign next_write_w = {1'd0, write_beat_r} + 10'd1;
     assign rd_valid_o = !cancel_i &&

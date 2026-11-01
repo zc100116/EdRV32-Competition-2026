@@ -48,6 +48,7 @@ module edrv32_rnd_draw (
     output wire [63:0] blend_dst_o,
     output wire [31:0] blend_tag_o,
     input wire [31:0] blend_tag_i,
+    input wire [19:0] blend_offset_i,
     input wire blend_valid_i,
     input wire [63:0] blend_pixel_i
 );
@@ -362,7 +363,6 @@ module edrv32_rnd_draw (
     wire [255:0] palette_shift_w;
     wire sample_bank_w;
     wire source_bank_w;
-    wire palette_bank_w;
     wire render_start_w;
     wire render_finish_w;
     wire write_start_w;
@@ -637,7 +637,6 @@ module edrv32_rnd_draw (
 
     assign sample_bank_w = pipe_tag_r[0][31];
     assign source_bank_w = pipe_tag_r[4][31];
-    assign palette_bank_w = pipe_tag_r[5][31];
     assign render_start_w = active_r && render_state_r == S_RENDER_IDLE &&
         loaded_r[render_bank_r];
     assign render_finish_w = blend_valid_i && blend_tag_i[30];
@@ -679,7 +678,17 @@ module edrv32_rnd_draw (
         final_tag_w[27:0]} : final_tag_w;
     assign result_pixels_w = argb_w ? blend_pixel_i :
         {32'd0, blend_pixel_i[47:32], blend_pixel_i[15:0]};
-    assign result_write_data_w = {192'd0, result_pixels_w} << {blend_tag_i[4:0], 3'd0};
+    genvar result_quadrant;
+    generate for (result_quadrant = 0; result_quadrant < 4;
+        result_quadrant = result_quadrant + 1) begin : g_result_shift
+        wire [255:0] shifted_w;
+        assign shifted_w = {192'd0, result_pixels_w} <<
+            {blend_offset_i[result_quadrant*5 +: 5], 3'd0};
+        assign result_write_data_w[result_quadrant*64 +: 64] =
+            shifted_w[result_quadrant*64 +: 64];
+        wire unused_shifted_w;
+        assign unused_shifted_w = ^shifted_w;
+    end endgenerate
     assign result_write_strb_w = (argb_w ? (blend_tag_i[29] ? 32'hff : 32'hf) :
         (blend_tag_i[29] ? 32'hf : 32'h3)) << blend_tag_i[4:0];
     assign wr_valid_o = write_state_r == S_WRITE_DESC && !cancel_i;
@@ -805,8 +814,24 @@ module edrv32_rnd_draw (
         assign lane_hit_w[pixel] = lane_low_hit_w[pixel] &&
             (!lane_cross_w[pixel] || lane_high_hit_w[pixel]);
         assign lane_cache_w[pixel] = {lane_cache_high_w[pixel], lane_cache_low_w[pixel]};
-        assign raw_shift_w[pixel] = (bank_sparse_r[palette_bank_w] ? sparse_data_r[pixel] :
-            {source_next_w[palette_bank_w][pixel], source_data_w[palette_bank_w][pixel]}) >>
+        wire [511:0] palette_source_w;
+        genvar palette_slice;
+        for (palette_slice = 0; palette_slice < 8; palette_slice = palette_slice + 1) begin
+            : g_palette_select
+            (* keep = 1 *) reg bank_r /* synthesis syn_preserve=1 */;
+            wire [511:0] bank_data_w;
+            (* keep = 1 *) always @(posedge clk_i) begin
+                if (pipeline_step_w && pipe_valid_r[4])
+                    bank_r <= pipe_tag_r[4][31];
+            end
+            assign bank_data_w = {source_next_w[bank_r][pixel], source_data_w[bank_r][pixel]};
+            assign palette_source_w[palette_slice*64 +: 64] =
+                bank_data_w[palette_slice*64 +: 64];
+            wire unused_bank_data_w;
+            assign unused_bank_data_w = ^bank_data_w;
+        end
+        assign raw_shift_w[pixel] = (bank_sparse_r[pipe_tag_r[5][31]] ? sparse_data_r[pixel] :
+            palette_source_w) >>
                 {source_offset_r[5][pixel], 3'd0};
         assign palette_index_w[pixel] =
             (raw_shift_w[pixel][7:0] >> source_shift_r[5][pixel]) & source_mask_r[5][pixel];

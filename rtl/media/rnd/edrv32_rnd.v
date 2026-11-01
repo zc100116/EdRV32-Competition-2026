@@ -80,7 +80,6 @@ module edrv32_rnd (
     reg [4:0] state_r;
     reg [63:0] round_area_r;
     reg [1023:0] parameters_r;
-    reg [1:0] parameter_beat_r;
     wire geometry_w;
     assign geometry_w = op_w >= 8'h09 && op_w <= 8'h0b;
     reg signed [17:0] rect_left_r;
@@ -138,6 +137,10 @@ module edrv32_rnd (
     reg [255:0] rd_data_r;
     reg rd_data_valid_r;
     reg rd_done_r;
+    reg [1:0] rd_beat_r;
+    wire [3:0] command_load_w;
+    wire [7:0] parameter_load_w;
+    integer payload_slice;
     wire [255:0] rd_data_w;
     wire rd_done_w;
     wire rd_idle_w;
@@ -231,6 +234,10 @@ module edrv32_rnd (
     wire blend_valid_w;
     wire [63:0] blend_pixel_w;
     wire [31:0] blend_tag_w;
+    wire [39:0] blend_offset_w;
+    wire unused_blend_offset_w;
+    assign unused_blend_offset_w = ^{blend_offset_w[39:37], blend_offset_w[34:32],
+        blend_offset_w[29:27], blend_offset_w[24:22]};
     wire unused_geometry_w;
 
     assign row_pixels_w = clip_right_r - clip_left_r + 18'd1;
@@ -342,6 +349,7 @@ module edrv32_rnd (
         .blend_dst_o(draw_blend_dst_w),
         .blend_tag_o(draw_blend_tag_w),
         .blend_tag_i(blend_tag_w),
+        .blend_offset_i(blend_offset_w[19:0]),
         .blend_valid_i(blend_valid_w && state_r == S_DRAW),
         .blend_pixel_i(blend_pixel_w)
     );
@@ -444,7 +452,9 @@ module edrv32_rnd (
         .blend_tag_o(blit_blend_tag_w),
         .blend_valid_i(blend_valid_w && state_r == S_BLIT),
         .blend_pixel_i(blend_pixel_w),
-        .blend_tag_i(blend_tag_w)
+        .blend_tag_i(blend_tag_w),
+        .blend_offset_i({blend_offset_w[36:35], blend_offset_w[31:30],
+            blend_offset_w[26:25], blend_offset_w[21:20]})
     );
     edrv32_rnd_alpha_pipe u_alpha (
         .clk_i(clk_mem_i),
@@ -461,6 +471,7 @@ module edrv32_rnd (
         .out_ready_i(1'b1),
         .out_pixel_o(blend_pixel_w),
         .out_tag_o(blend_tag_w),
+        .out_offset_o(blend_offset_w),
         .clear_i(cancel_w)
     );
 
@@ -529,6 +540,41 @@ module edrv32_rnd (
             rd_done_r <= rd_done_raw_w;
         end
     end
+    // Decode ownership alongside the read register, then give each 128-bit bank
+    // a local enable. The DMA beat counter refers to the undelayed stream.
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w)
+            rd_beat_r <= 2'd0;
+        else if (rd_desc_valid_w && rd_desc_ready_w)
+            rd_beat_r <= 2'd0;
+        else if (rd_data_valid_raw_w)
+            rd_beat_r <= rd_beat_r + 2'd1;
+    end
+    genvar capture_slice;
+    generate for (capture_slice = 0; capture_slice < 8;
+        capture_slice = capture_slice + 1) begin : g_read_capture
+        localparam integer BEAT = capture_slice/2;
+        (* keep = 1 *) reg parameter_load_r /* synthesis syn_preserve=1 */;
+        (* keep = 1 *) always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+            if (!rst_mem_ctrl_n_w)
+                parameter_load_r <= 1'b0;
+            else
+                parameter_load_r <= !cancel_w && rd_data_valid_raw_w &&
+                    state_r == S_PARAM_WAIT && {30'd0, rd_beat_r} == BEAT;
+        end
+        assign parameter_load_w[capture_slice] = parameter_load_r;
+        if (capture_slice < 4) begin : g_command
+            (* keep = 1 *) reg command_load_r /* synthesis syn_preserve=1 */;
+            (* keep = 1 *) always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+                if (!rst_mem_ctrl_n_w)
+                    command_load_r <= 1'b0;
+                else
+                    command_load_r <= !cancel_w && rd_data_valid_raw_w &&
+                        state_r == S_FETCH_WAIT && {30'd0, rd_beat_r} == BEAT;
+            end
+            assign command_load_w[capture_slice] = command_load_r;
+        end
+    end endgenerate
     assign rd_data_w = rd_data_r;
     assign rd_data_valid_w = rd_data_valid_r && !cancel_w;
     assign rd_done_w = rd_done_r && !cancel_w;
@@ -590,12 +636,10 @@ module edrv32_rnd (
         if (!rst_mem_ctrl_n_w) begin
             state_r <= S_IDLE;
             fetch_half_r <= 1'b0;
-            parameter_beat_r <= 2'd0;
             simple_valid_r <= 1'b0;
         end else if (cancel_w) begin
             state_r <= busy_w ? S_DRAIN : S_IDLE;
             fetch_half_r <= 1'b0;
-            parameter_beat_r <= 2'd0;
             simple_valid_r <= 1'b0;
         end else begin
             if (scalar_write_w && wr_desc_valid_w && wr_desc_ready_w)
@@ -626,15 +670,12 @@ module edrv32_rnd (
                             S_PARAM : S_BEGIN;
                 end
                 S_PARAM: if (rd_desc_ready_w) begin
-                    parameter_beat_r <= 2'd0;
                     fetch_half_r <= 1'b0;
                     state_r <= S_PARAM_WAIT;
                 end
                 S_PARAM_WAIT: begin
-                    if (rd_data_valid_w) begin
+                    if (rd_data_valid_w)
                         fetch_half_r <= 1'b1;
-                        parameter_beat_r <= parameter_beat_r + 2'd1;
-                    end
                     if (rd_done_w)
                         state_r <= S_BEGIN;
                 end
@@ -675,12 +716,15 @@ module edrv32_rnd (
             list_base_r <= desc_base_w;
             list_count_r <= desc_count_w;
         end
-        if (state_r == S_FETCH_WAIT && rd_data_valid_w)
-            command_r[fetch_half_r*256 +: 256] <= rd_data_w;
+        for (payload_slice = 0; payload_slice < 4; payload_slice = payload_slice + 1)
+            if (command_load_w[payload_slice] && !cancel_w)
+                command_r[payload_slice*128 +: 128] <= rd_data_w[(payload_slice%2)*128 +: 128];
+        for (payload_slice = 0; payload_slice < 8; payload_slice = payload_slice + 1)
+            if (parameter_load_w[payload_slice] && !cancel_w && (geometry_w || op_w == 8'h0d))
+                parameters_r[payload_slice*128 +: 128] <=
+                    rd_data_w[(payload_slice%2)*128 +: 128];
         if (state_r == S_PARAM_WAIT && rd_data_valid_w) begin
-            if (geometry_w || op_w == 8'h0d)
-                parameters_r[parameter_beat_r*256 +: 256] <= rd_data_w;
-            else if (!fetch_half_r) begin
+            if (!geometry_w && op_w != 8'h0d && !fetch_half_r) begin
                 command_r[447:416] <= rd_data_w[31:0];
                 round_area_r <= rd_data_w[95:32];
             end

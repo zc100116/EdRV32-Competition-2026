@@ -19,6 +19,7 @@ module tb;
     reg out_ready=0;
     wire [63:0] pixels;
     wire [31:0] out_tag;
+    wire [39:0] out_offset;
     reg [63:0] expected[$];
     reg [31:0] tags[$];
     int checked=0;
@@ -27,7 +28,7 @@ module tb;
         .clk_i(clk), .rst_n_i(rst_n), .in_valid_i(valid), .in_ready_o(ready),
         .in_src_i(src), .in_dst_i(dst), .in_argb_i(argb_value), .in_mode_i(mode_value),
         .in_tag_i(tag), .out_valid_o(out_valid), .out_ready_i(out_ready),
-        .out_pixel_o(pixels), .out_tag_o(out_tag), .clear_i(clear_value)
+        .out_pixel_o(pixels), .out_tag_o(out_tag), .out_offset_o(out_offset), .clear_i(clear_value)
     );
     function automatic int channel_expand(input int value,input int channel_value);
         case(channel_value)
@@ -72,6 +73,10 @@ module tb;
             if(pixels !== want || out_tag !== want_tag)
                 $fatal(1,"alpha tag=%0d want_tag=%0d want=%h got=%h t=%0t",
                     out_tag,want_tag,want,pixels,$time);
+            for (int quadrant=0;quadrant<8;quadrant++)
+                if(out_offset[quadrant*5+:5] !== want_tag[4:0])
+                    $fatal(1,"alpha offset quadrant=%0d tag=%h offset=%h t=%0t",
+                        quadrant,want_tag,out_offset,$time);
             checked++;
         end
     end

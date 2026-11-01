@@ -58,6 +58,7 @@ module tb;
     assign wr_ready = wr_left == 0 && !wr_end && !wr_done && cycle % 5 != 0;
     assign wr_data_ready = wr_left != 0 && cycle % 4 != 0;
     assign blend_ready = alpha_ready && gate;
+    wire [39:0] blend_offset;
     edrv32_rnd_draw u_draw (
         .clk_i(clk),
         .rst_n_i(rst_n),
@@ -93,6 +94,7 @@ module tb;
         .blend_src_o(blend_src),
         .blend_dst_o(blend_dst),
         .blend_tag_o(blend_tag),
+        .blend_offset_i(blend_offset[19:0]),
         .blend_tag_i(result_tag),
         .blend_valid_i(result_valid),
         .blend_pixel_i(result_pixel)
@@ -110,6 +112,7 @@ module tb;
         .out_valid_o(result_valid),
         .out_ready_i(1'b1),
         .out_pixel_o(result_pixel),
+        .out_offset_o(blend_offset),
         .out_tag_o(result_tag),
         .clear_i(cancel)
     );

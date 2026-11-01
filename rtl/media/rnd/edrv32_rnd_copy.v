@@ -210,8 +210,33 @@ module edrv32_rnd_copy (
     assign source_rounded_w = source_bytes_r + 16'd31;
     assign target_last_bytes_w = target_bytes_r - 16'd1;
     assign row_last_bytes_w = row_bytes_r - 15'd1;
-    assign source_join_w = state_r == S_TAIL ? {256'd0, previous_read_r} :
-        source_aligned_r ? {256'd0, rd_data_i} : {rd_data_i, previous_read_r};
+    // Local controls drive 128 data bits each without delaying the source stream.
+    genvar join_slice;
+    generate for (join_slice = 0; join_slice < 4; join_slice = join_slice + 1) begin
+        : g_source_join
+        (* keep = 1 *) reg aligned_r /* synthesis syn_preserve=1 */;
+        (* keep = 1 *) reg tail_r /* synthesis syn_preserve=1 */;
+        (* keep = 1 *) always @(posedge clk_i) begin
+            if (state_r == S_COUNTS)
+                aligned_r <= src_addr_r[4:0] == 0;
+        end
+        (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i)
+                tail_r <= 1'b0;
+            else if (cancel_i)
+                tail_r <= 1'b0;
+            else
+                tail_r <= state_r == S_CAPTURE && rd_done_i && src_addr_r[4:0] != 0 &&
+                    source_beats_r == normalized_beats_r;
+        end
+        if (join_slice < 2) begin : g_low
+            assign source_join_w[join_slice*128 +: 128] = !tail_r && aligned_r ?
+                rd_data_i[join_slice*128 +: 128] : previous_read_r[join_slice*128 +: 128];
+        end else begin : g_high
+            assign source_join_w[join_slice*128 +: 128] = tail_r || aligned_r ? 128'd0 :
+                rd_data_i[(join_slice-2)*128 +: 128];
+        end
+    end endgenerate
     assign source_words_w = source_join_w >> {source_words_r, 5'd0};
     assign source_write_w = !cancel_i && (state_r == S_TAIL ||
         (state_r == S_CAPTURE && rd_data_valid_i &&
@@ -384,11 +409,10 @@ module edrv32_rnd_copy (
             source_aligned_r <= src_addr_r[4:0] == 0;
             target_words_r <= dst_addr_r[4:2];
         end
-        if (source_write_w) begin
-            source_word_r <= source_words_w[279:0];
-            source_index_r <= state_r == S_TAIL ? normalized_last_r[8:0] :
-                received_r[8:0] - (source_aligned_r ? 9'd0 : 9'd1);
-        end
+        // source_valid_r qualifies this payload on the following RAM-write edge.
+        source_word_r <= source_words_w[279:0];
+        source_index_r <= state_r == S_TAIL ? normalized_last_r[8:0] :
+            received_r[8:0] - (source_aligned_r ? 9'd0 : 9'd1);
         if (state_r == S_PRIME || data_fire_w)
             target_word_r <= target_shift_w[511:232];
     end
