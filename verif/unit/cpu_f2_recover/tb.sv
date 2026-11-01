@@ -71,11 +71,11 @@ module tb;
     reg [178:0] entry;
     reg [36:0] expected_ras;
     reg [36:0] recovery_snapshot;
+    wire [79:0] unused_operand_addr_w;
     edrv32_cpu_frontend #(.RVC_EN(RVC_EN)) dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction0_n_i(rst_n_i),
-        .rst_sys_direction1_n_i(rst_n_i),
+        .rst_sys_direction_n_i({8{rst_n_i}}),
         .redirect_valid_i(redirect_valid_i),
         .redirect_pc_i(redirect_pc_i),
         .redirect_ras_i(redirect_ras_i),
@@ -97,9 +97,10 @@ module tb;
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
         .update_compressed_i(update_compressed_i),
-        .update_index_i(update_index_i),
+        .update_index_i({16{update_index_i}}),
         .decode_pop_count_i(decode_pop_count_i),
         .decode_data_o(decode_data_o),
+        .decode_operand_addr_o(unused_operand_addr_w),
         .decode_valid_count_o(decode_valid_count_o),
         .ib_count_o(ib_count_o),
         .ic_req_valid_o(ic_req_valid_o),

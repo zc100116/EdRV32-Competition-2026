@@ -9,8 +9,7 @@ module edrv32_cpu_frontend #(
     // Clock and reset to the SoC reset vector 0.
     input wire clk_i,
     input wire rst_n_i,
-    input wire rst_sys_direction0_n_i,
-    input wire rst_sys_direction1_n_i,
+    input wire [7:0] rst_sys_direction_n_i,
 
     // Backend: older M/E redirect wins over a D-stage JAL redirect.
     input wire redirect_valid_i,
@@ -35,10 +34,11 @@ module edrv32_cpu_frontend #(
     input wire [2:0] update_type_i,
     input wire update_taken_i,
     input wire update_compressed_i,
-    input wire [8:0] update_index_i,
+    input wire [143:0] update_index_i,
     // Decode consumes 0, 1 or 2 records; low record is oldest.
     input wire [1:0] decode_pop_count_i,
     output wire [357:0] decode_data_o,
+    output wire [79:0] decode_operand_addr_o,
     output wire [1:0] decode_valid_count_o,
     output wire [2:0] ib_count_o,
     // I-cache request/response contract, cpu-spec 3.2.
@@ -98,6 +98,12 @@ module edrv32_cpu_frontend #(
     reg [2:0] block_write_ptr_r;
     reg [3:0] halfword_count_r;
     wire redirect_w;
+    wire redirect_ib_w /* synthesis syn_preserve=1 */;
+    wire redirect_icache_w /* synthesis syn_preserve=1 */;
+    wire redirect_predict_w /* synthesis syn_preserve=1 */;
+    assign redirect_ib_w = redirect_valid_i || d_redirect_valid_i;
+    assign redirect_icache_w = redirect_valid_i || d_redirect_valid_i;
+    assign redirect_predict_w = redirect_valid_i || d_redirect_valid_i;
     wire [31:0] redirect_pc_w;
     wire [36:0] restore_ras_w;
     wire restore_push_w;
@@ -166,11 +172,11 @@ module edrv32_cpu_frontend #(
     assign response_count_w = f2_count_r;
     assign append_count_w = response_accept_w ? response_count_w : 3'd0;
     // Include the arriving response and this cycle's drain when reserving the next group.
-    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !recover_w &&
+    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_icache_w && !recover_w &&
         (!f2_pending_r || ic_resp_valid_i) && remaining_w <= 4;
     assign ic_req_addr_o = {f1_pc_r[31:3], 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
-    assign ic_kill_o = (redirect_w || recover_w) && f2_pending_r;
+    assign ic_kill_o = (redirect_icache_w || recover_w) && f2_pending_r;
     assign ic_inv_o = invalidate_i;
     assign invalidate_done_o = ic_inv_done_i;
     assign f1_valid_o = ic_req_valid_o;
@@ -179,8 +185,7 @@ module edrv32_cpu_frontend #(
     edrv32_cpu_predictor u_predictor (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction0_n_i(rst_sys_direction0_n_i),
-        .rst_sys_direction1_n_i(rst_sys_direction1_n_i),
+        .rst_sys_direction_n_i(rst_sys_direction_n_i),
         .query_pc_i(f1_pc_r[31:1]),
         .query_accept_i(request_accept_w && !f1_cross_r),
         .predict_hit_o(predict_hit_w),
@@ -199,7 +204,7 @@ module edrv32_cpu_frontend #(
         .update_index_i(update_index_i),
         .clear_valid_i(update_clear_i || recover_w),
         .clear_index_i(update_clear_i ? update_clear_index_i : recover_btb_index_w),
-        .restore_valid_i(redirect_w || recover_w),
+        .restore_valid_i(redirect_predict_w || recover_w),
         .restore_ras_i(restore_ras_w),
         .restore_push_i(restore_push_w),
         .restore_pop_i(restore_pop_w),
@@ -213,8 +218,9 @@ module edrv32_cpu_frontend #(
         .free_count_o(ib_free_count_w),
         .pop_count_i(decode_pop_count_i),
         .data_o(decode_data_o),
+        .operand_addr_o(decode_operand_addr_o),
         .valid_count_o(decode_valid_count_o),
-        .flush_i(redirect_w),
+        .flush_i(redirect_ib_w),
         .keep_head_i(d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0),
         .count_o(ib_count_o)
     );
@@ -233,6 +239,15 @@ module edrv32_cpu_frontend #(
     assign available_w = halfword_count_r + {1'b0, append_count_w};
     generate
         for (read_idx = 0; read_idx < 4; read_idx = read_idx + 1) begin : g_read
+            reg [3:0] halfword_count_r_copy /* synthesis syn_preserve=1 */;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    halfword_count_r_copy <= 0;
+                else if (redirect_w || recover_w)
+                    halfword_count_r_copy <= 0;
+                else
+                    halfword_count_r_copy <= remaining_w;
+            end
             wire [2:0] slot_w;
             wire [21:0] halfword_w;
             wire [BLOCK_BITS-1:0] block_w;
@@ -247,10 +262,10 @@ module edrv32_cpu_frontend #(
             assign halfword_w = halfwords_r[slot_w];
             assign block_w = blocks_r[halfword_w[21:19]];
             assign response_position_w = f2_pc_r[2:1] + read_idx[1:0] -
-                halfword_count_r[1:0];
+                halfword_count_r_copy[1:0];
             // F1 predecodes the response start. Rotate four selects locally instead
             // of broadcasting the binary F2 PC through the instruction-data muxes.
-            assign response_rotation_w = halfword_count_r[1:0] - read_idx[1:0];
+            assign response_rotation_w = halfword_count_r_copy[1:0] - read_idx[1:0];
             assign response_rotate_one_w = response_rotation_w[0] ?
                 {f2_start_r[0], f2_start_r[3:1]} : f2_start_r;
             assign response_select_w = response_rotation_w[1] ?
@@ -261,7 +276,7 @@ module edrv32_cpu_frontend #(
                 ({16{response_select_w[3]}} & ic_resp_data_i[63:48]);
             assign response_prediction_w = response_select_w[f2_position_r];
             assign pc_w = {block_w[28:0], halfword_w[18:17], 1'b0};
-            assign stream_w[read_idx] = halfword_count_r > read_idx ?
+            assign stream_w[read_idx] = halfword_count_r_copy > read_idx ?
                 {block_w[111:33], block_w[32] && halfword_w[18:17] == block_w[30:29],
                 block_w[31] && halfword_w[18:17] == block_w[30:29], halfword_w[16],
                 pc_w, halfword_w[15:0]} :
@@ -346,42 +361,46 @@ module edrv32_cpu_frontend #(
             assign recover_btb_index_w = 0;
         end
     endgenerate
+    // IB ownership already gates every write. Build record data before redirect/free-space
+    // selection so the late cancel only reaches the small write controls, not 358 payload muxes.
+    always @(*) begin
+        push_data_w = 0;
+        push_data_w[REC_RAS_LSB +: 37] = first_w[128:92];
+        push_data_w[REC_PRED_TARGET_LSB +: 32] = first_w[82:51];
+        push_data_w[REC_PRED_TAKEN] = first_w[50];
+        push_data_w[REC_PRED_HIT] = first_w[49];
+        push_data_w[REC_FETCH_ERR] = first_error_w;
+        push_data_w[REC_ILLEGAL] = first_compressed_w && first_illegal_w;
+        push_data_w[REC_COMPRESSED] = first_compressed_w;
+        push_data_w[REC_RAW_LSB +: 32] = first_raw_w;
+        push_data_w[REC_INSTR_LSB +: 32] = first_compressed_w ? first_expanded_w : first_raw_w;
+        push_data_w[REC_PC_LSB +: 32] = first_w[47:16];
+        // Each instruction combines F1 history with its own PC for training.
+        push_data_w[REC_GHR_LSB +: 9] = first_w[91:83] ^ first_w[25:17];
+        push_data_w[REC_BITS+REC_RAS_LSB +: 37] = second_w[128:92];
+        push_data_w[REC_BITS+REC_PRED_TARGET_LSB +: 32] = second_w[82:51];
+        push_data_w[REC_BITS+REC_PRED_TAKEN] = second_w[50];
+        push_data_w[REC_BITS+REC_PRED_HIT] = second_w[49];
+        push_data_w[REC_BITS+REC_FETCH_ERR] = second_error_w;
+        push_data_w[REC_BITS+REC_ILLEGAL] = second_compressed_w && second_illegal_w;
+        push_data_w[REC_BITS+REC_COMPRESSED] = second_compressed_w;
+        push_data_w[REC_BITS+REC_RAW_LSB +: 32] = second_raw_w;
+        push_data_w[REC_BITS+REC_INSTR_LSB +: 32] =
+            second_compressed_w ? second_expanded_w : second_raw_w;
+        push_data_w[REC_BITS+REC_PC_LSB +: 32] = second_w[47:16];
+        push_data_w[REC_BITS+REC_GHR_LSB +: 9] = second_w[91:83] ^ second_w[25:17];
+    end
     always @(*) begin
         push_count_w = 0;
-        push_data_w = 0;
         consume_w = 0;
-        if (!redirect_w && !first_recover_w &&
+        if (!redirect_ib_w && !first_recover_w &&
             available_w >= {1'b0, first_length_w} && ib_free_count_w != 0) begin
             push_count_w = 1;
             consume_w = first_length_w;
-            push_data_w[REC_RAS_LSB +: 37] = first_w[128:92];
-            push_data_w[REC_PRED_TARGET_LSB +: 32] = first_w[82:51];
-            push_data_w[REC_PRED_TAKEN] = first_w[50];
-            push_data_w[REC_PRED_HIT] = first_w[49];
-            push_data_w[REC_FETCH_ERR] = first_error_w;
-            push_data_w[REC_ILLEGAL] = first_compressed_w && first_illegal_w;
-            push_data_w[REC_COMPRESSED] = first_compressed_w;
-            push_data_w[REC_RAW_LSB +: 32] = first_raw_w;
-            push_data_w[REC_INSTR_LSB +: 32] = first_compressed_w ? first_expanded_w : first_raw_w;
-            push_data_w[REC_PC_LSB +: 32] = first_w[47:16];
-            // History is sampled at F1, but each instruction uses its own PC in gshare.
-            push_data_w[REC_GHR_LSB +: 9] = first_w[91:83] ^ first_w[25:17];
             if (available_w >= {1'b0, first_length_w} + {1'b0, second_length_w} &&
                 ib_free_count_w >= 2 && !second_recover_w) begin
                 push_count_w = 2;
                 consume_w = first_length_w + second_length_w;
-                push_data_w[REC_BITS+REC_RAS_LSB +: 37] = second_w[128:92];
-                push_data_w[REC_BITS+REC_PRED_TARGET_LSB +: 32] = second_w[82:51];
-                push_data_w[REC_BITS+REC_PRED_TAKEN] = second_w[50];
-                push_data_w[REC_BITS+REC_PRED_HIT] = second_w[49];
-                push_data_w[REC_BITS+REC_FETCH_ERR] = second_error_w;
-                push_data_w[REC_BITS+REC_ILLEGAL] = second_compressed_w && second_illegal_w;
-                push_data_w[REC_BITS+REC_COMPRESSED] = second_compressed_w;
-                push_data_w[REC_BITS+REC_RAW_LSB +: 32] = second_raw_w;
-                push_data_w[REC_BITS+REC_INSTR_LSB +: 32] =
-                    second_compressed_w ? second_expanded_w : second_raw_w;
-                push_data_w[REC_BITS+REC_PC_LSB +: 32] = second_w[47:16];
-                push_data_w[REC_BITS+REC_GHR_LSB +: 9] = second_w[91:83] ^ second_w[25:17];
             end
         end
         remaining_w = available_w - {1'b0, consume_w};
