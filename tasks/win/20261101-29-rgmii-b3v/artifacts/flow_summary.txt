@@ -6,8 +6,36 @@ Action compile: Process CPU time elapsed is 0h:0m:7s
 Action compile: Peak memory pool usage is 496 MB
 
 synthesize
-W lines=2; E lines=2
-Action synthesize: Real time elapsed is 0h:0m:12s
-Action synthesize: CPU time elapsed is 0h:0m:1s
-Action synthesize: Process CPU time elapsed is 0h:0m:1s
-Action synthesize: Peak memory pool usage is 567 MB
+W lines=9241; E lines=0
+Action synthesize: Real time elapsed is 0h:4m:48s
+Action synthesize: CPU time elapsed is 0h:0m:16s
+Action synthesize: Process CPU time elapsed is 0h:0m:18s
+Action synthesize: Peak memory pool usage is 2,508 MB
+
+device_map
+W lines=56; E lines=0
+Action dev_map: Real time elapsed is 0h:0m:52s
+Action dev_map: CPU time elapsed is 0h:0m:6s
+Action dev_map: Process CPU time elapsed is 0h:0m:6s
+Action dev_map: Peak memory pool usage is 1,375 MB
+
+place_route
+W lines=694; E lines=0
+Action pnr: Real time elapsed is 0h:17m:59s
+Action pnr: CPU time elapsed is 0h:2m:3s
+Action pnr: Process CPU time elapsed is 0h:3m:38s
+Action pnr: Peak memory pool usage is 5,032 MB
+
+report_timing
+W lines=161; E lines=0
+Action report_timing: Real time elapsed is 0h:1m:20s
+Action report_timing: CPU time elapsed is 0h:0m:4s
+Action report_timing: Process CPU time elapsed is 0h:0m:6s
+Action report_timing: Peak memory pool usage is 4,708 MB
+
+generate_bitstream
+W lines=0; E lines=0
+Action gen_bit_stream: Real time elapsed is 0h:1m:25s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:12s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:12s
+Action gen_bit_stream: Peak memory pool usage is 3,505 MB

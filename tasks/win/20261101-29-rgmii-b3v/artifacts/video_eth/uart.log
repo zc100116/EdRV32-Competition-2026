@@ -1,0 +1,93 @@
+seq=3117 ts=1793510431554 [rx] Scene: 2
+seq=3118 ts=1793510431554 [rx] PIX mode: 0
+seq=3119 ts=1793510431554 [rx] GEO mode: 0
+seq=3120 ts=1793510431554 [rx] Output mode: 1
+seq=3121 ts=1793510431554 [rx] Requested video fps: 30
+seq=3122 ts=1793510431554 [rx] Video divisor: 1
+seq=3123 ts=1793510431554 [rx] Monitor Hz: 100
+seq=3124 ts=1793510431554 [rx] VIN camera0 frames: 1945
+seq=3125 ts=1793510431554 [rx] VIN camera1 frames: 1944
+seq=3126 ts=1793510431554 [rx] VIN CH0 frames: 1943
+seq=3127 ts=1793510431554 [rx] VIN CH2 frames: 0
+seq=3128 ts=1793510431554 [rx] VIN CH0 overflow: 0
+seq=3129 ts=1793510431554 [rx] VIN CH2 overflow: 0
+seq=3130 ts=1793510431554 [rx] ETH peer IP: 0x00000000
+seq=3131 ts=1793510431554 [rx] ETH peer port: 0
+seq=3132 ts=1793510431554 [sys] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.1.2', 6000]
+seq=3133 ts=1793510431554 [rx] ETH STATUS: 0x00000002
+seq=3134 ts=1793510431554 [rx] Video skips (current window): 0
+seq=3135 ts=1793510431554 [rx] Monitor sequence: 6515
+seq=3136 ts=1793510431554 [rx] Monitor dropped records: 6515
+seq=3137 ts=1793510431554 [rx] mtime: 6829211228
+seq=3138 ts=1793510431554 [rx] Demo command: OK
+seq=3139 ts=1793510431564 [tx] status<CR>
+seq=3140 ts=1793510440144 [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+seq=3141 ts=1793510441530 [tx] status<CR>
+seq=3142 ts=1793510441581 [rx] Scene: 2
+seq=3143 ts=1793510441581 [rx] PIX mode: 0
+seq=3144 ts=1793510441581 [rx] GEO mode: 0
+seq=3145 ts=1793510441581 [rx] Output mode: 1
+seq=3146 ts=1793510441581 [rx] Requested video fps: 30
+seq=3147 ts=1793510441581 [rx] Video divisor: 1
+seq=3148 ts=1793510441581 [rx] Monitor Hz: 100
+seq=3149 ts=1793510441581 [rx] VIN camera0 frames: 2245
+seq=3150 ts=1793510441581 [rx] VIN camera1 frames: 2244
+seq=3151 ts=1793510441581 [rx] VIN CH0 frames: 2243
+seq=3152 ts=1793510441581 [rx] VIN CH2 frames: 0
+seq=3153 ts=1793510441581 [rx] VIN CH0 overflow: 0
+seq=3154 ts=1793510441581 [rx] VIN CH2 overflow: 0
+seq=3155 ts=1793510441581 [rx] ETH peer IP: 0x00000000
+seq=3156 ts=1793510441582 [rx] ETH peer port: 0
+seq=3157 ts=1793510441582 [sys] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.1.2', 6000]
+seq=3158 ts=1793510441582 [rx] ETH STATUS: 0x00000002
+seq=3159 ts=1793510441582 [rx] Video skips (current window): 0
+seq=3160 ts=1793510441582 [rx] Monitor sequence: 7517
+seq=3161 ts=1793510441582 [rx] Monitor dropped records: 7517
+seq=3162 ts=1793510441582 [rx] mtime: 7830835507
+seq=3163 ts=1793510441582 [rx] Demo command: OK
+seq=3164 ts=1793510461514 [tx] status<CR>
+seq=3165 ts=1793510461553 [rx] Scene: 2
+seq=3166 ts=1793510461553 [rx] PIX mode: 0
+seq=3167 ts=1793510461553 [rx] GEO mode: 0
+seq=3168 ts=1793510461553 [rx] Output mode: 1
+seq=3169 ts=1793510461553 [rx] Requested video fps: 30
+seq=3170 ts=1793510461553 [rx] Video divisor: 1
+seq=3171 ts=1793510461553 [rx] Monitor Hz: 100
+seq=3172 ts=1793510461553 [rx] VIN camera0 frames: 2845
+seq=3173 ts=1793510461553 [rx] VIN camera1 frames: 2844
+seq=3174 ts=1793510461553 [rx] VIN CH0 frames: 2843
+seq=3175 ts=1793510461553 [rx] VIN CH2 frames: 0
+seq=3176 ts=1793510461553 [rx] VIN CH0 overflow: 0
+seq=3177 ts=1793510461553 [rx] VIN CH2 overflow: 0
+seq=3178 ts=1793510461553 [rx] ETH peer IP: 0x00000000
+seq=3179 ts=1793510461553 [rx] ETH peer port: 0
+seq=3180 ts=1793510461553 [sys] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.1.2', 6000]
+seq=3181 ts=1793510461553 [rx] ETH STATUS: 0x00000002
+seq=3182 ts=1793510461553 [rx] Video skips (current window): 0
+seq=3183 ts=1793510461553 [rx] Monitor sequence: 9515
+seq=3184 ts=1793510461553 [rx] Monitor dropped records: 9515
+seq=3185 ts=1793510461553 [rx] mtime: 9829253052
+seq=3186 ts=1793510461553 [rx] Demo command: OK
+seq=3187 ts=1793510491538 [tx] status<CR>
+seq=3188 ts=1793510491577 [rx] Scene: 2
+seq=3189 ts=1793510491577 [rx] PIX mode: 0
+seq=3190 ts=1793510491577 [rx] GEO mode: 0
+seq=3191 ts=1793510491577 [rx] Output mode: 1
+seq=3192 ts=1793510491577 [rx] Requested video fps: 30
+seq=3193 ts=1793510491577 [rx] Video divisor: 1
+seq=3194 ts=1793510491577 [rx] Monitor Hz: 100
+seq=3195 ts=1793510491577 [rx] VIN camera0 frames: 3745
+seq=3196 ts=1793510491577 [rx] VIN camera1 frames: 3744
+seq=3197 ts=1793510491577 [rx] VIN CH0 frames: 3743
+seq=3198 ts=1793510491577 [rx] VIN CH2 frames: 0
+seq=3199 ts=1793510491577 [rx] VIN CH0 overflow: 0
+seq=3200 ts=1793510491577 [rx] VIN CH2 overflow: 0
+seq=3201 ts=1793510491577 [rx] ETH peer IP: 0x00000000
+seq=3202 ts=1793510491577 [rx] ETH peer port: 0
+seq=3203 ts=1793510491577 [sys] ETH peer 不一致：板端 ['0.0.0.0', 0]，本机 ['192.168.1.2', 6000]
+seq=3204 ts=1793510491577 [rx] ETH STATUS: 0x00000002
+seq=3205 ts=1793510491577 [rx] Video skips (current window): 0
+seq=3206 ts=1793510491577 [rx] Monitor sequence: 12517
+seq=3207 ts=1793510491577 [rx] Monitor dropped records: 12517
+seq=3208 ts=1793510491577 [rx] mtime: 12831624919
+seq=3209 ts=1793510491577 [rx] Demo command: OK
