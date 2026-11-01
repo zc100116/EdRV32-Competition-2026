@@ -98,9 +98,9 @@ module edrv32_cpu_frontend #(
     reg [2:0] block_write_ptr_r;
     reg [3:0] halfword_count_r;
     wire redirect_w;
-    wire redirect_ib_w /* synthesis syn_preserve=1 */;
-    wire redirect_icache_w /* synthesis syn_preserve=1 */;
-    wire redirect_predict_w /* synthesis syn_preserve=1 */;
+    wire redirect_ib_w /* synthesis syn_keep=1 */;
+    wire redirect_icache_w /* synthesis syn_keep=1 */;
+    wire redirect_predict_w /* synthesis syn_keep=1 */;
     assign redirect_ib_w = redirect_valid_i || d_redirect_valid_i;
     assign redirect_icache_w = redirect_valid_i || d_redirect_valid_i;
     assign redirect_predict_w = redirect_valid_i || d_redirect_valid_i;

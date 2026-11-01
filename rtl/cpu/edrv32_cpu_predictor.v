@@ -144,7 +144,7 @@ module edrv32_cpu_predictor (
             wire rst_direction_n_w;
             wire [8:0] update_index_w;
             wire [1:0] update_counter_w;
-            wire update_w /* synthesis syn_preserve=1 */;
+            wire update_w /* synthesis syn_keep=1 */;
             assign direction_r[direction_bank*64 +: 64] = counters_r;
             assign rst_direction_n_w = rst_sys_direction_n_i[direction_bank/2];
             assign update_index_w = update_index_i[direction_bank*9 +: 9];
