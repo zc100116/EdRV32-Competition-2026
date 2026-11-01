@@ -42,6 +42,8 @@ module edrv32_vin_p1_arb (
 );
     reg [1:0] turn_r;
     reg [1:0] grant_r;
+    reg [1:0] grant_data_r [0:3] /* synthesis syn_preserve=1 */;
+    integer grant_slice;
     reg hold_r;
     reg writing_r;
     wire [2:0] eligible_w;
@@ -77,7 +79,13 @@ module edrv32_vin_p1_arb (
     assign ch_awready_o = {3{p1_awvalid_o && p1_awready_i}} &
         (3'b001 << selected_w);
     assign address_w = p1_awvalid_o && p1_awready_i;
-    assign p1_wdata_o = ch_wdata_i[selected_w * 256 +: 256];
+    genvar data_slice;
+    generate
+        for (data_slice = 0; data_slice < 4; data_slice = data_slice + 1) begin : g_data_slice
+            assign p1_wdata_o[data_slice*64 +: 64] =
+                ch_wdata_i[grant_data_r[data_slice]*256 + data_slice*64 +: 64];
+        end
+    endgenerate
     assign p1_wstrb_o = ch_wstrb_i[selected_w * 32 +: 32];
     assign p1_wlast_o = ch_wlast_i[selected_w];
     assign p1_wvalid_o = (writing_r || address_w) && ch_wvalid_i[selected_w];
@@ -108,12 +116,16 @@ module edrv32_vin_p1_arb (
         if (!rst_n_i) begin
             turn_r <= 2'd0;
             grant_r <= 2'd0;
+            for (grant_slice = 0; grant_slice < 4; grant_slice = grant_slice + 1)
+                grant_data_r[grant_slice] <= 2'd0;
             hold_r <= 1'b0;
             writing_r <= 1'b0;
         end else begin
             // No client can consume FIFO beats before its registered grant is exposed.
             if (acquire_w) begin
                 grant_r <= candidate_w;
+                for (grant_slice = 0; grant_slice < 4; grant_slice = grant_slice + 1)
+                    grant_data_r[grant_slice] <= candidate_w;
                 hold_r <= 1'b1;
             end else if (address_w) begin
                 hold_r <= 1'b0;

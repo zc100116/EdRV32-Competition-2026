@@ -97,7 +97,7 @@ module tb;
 
     edrv32_vin_ch2 u_dut (
         .clk_i(clk),
-        .rst_n_i(rst_n),
+        .rst_n_i({4{rst_n}}),
         .source_valid_i(valid),
         .source_ready_o(ready),
         .source_data_i(data),

@@ -82,7 +82,7 @@ module edrv32_vin (
     wire rst_mem_ctrl_n_w;
     wire rst_cam0_front_n_w;
     wire rst_cam1_front_n_w;
-    wire rst_mem_regs_n_w;
+    wire [7:0] rst_mem_regs_n_w;
     edrv32_reset_copy u_reset_mem_ctrl_n (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_mem_n_i),
@@ -98,14 +98,20 @@ module edrv32_vin (
         .rst_n_i(rst_cam1_n_i),
         .rst_n_o(rst_cam1_front_n_w)
     );
-    edrv32_reset_copy u_reset_mem_regs_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_regs_n_w)
-    );
+    genvar rst_mem_regs_n_w_idx;
+    generate
+        for (rst_mem_regs_n_w_idx = 0; rst_mem_regs_n_w_idx < 8;
+            rst_mem_regs_n_w_idx = rst_mem_regs_n_w_idx + 1) begin : g_rst_mem_regs_n_w
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_n_i),
+                .rst_n_o(rst_mem_regs_n_w[rst_mem_regs_n_w_idx])
+            );
+        end
+    endgenerate
 
-    wire rst_vin_n_w;
-    wire rst_mem_regs_clear_n_w;
+    wire [3:0] rst_vin_n_w;
+    wire [7:0] rst_mem_regs_clear_n_w;
     wire enable_w;
     wire abort_w;
     wire soft_rst_w;
@@ -176,12 +182,19 @@ module edrv32_vin (
     wire [15:0] perf_event_w;
     reg soft_pending_r;
     reg clear_r;
+    reg [7:0] clear_regs_r /* synthesis syn_preserve=1 */;
+    reg [9:0] clear_channel_r /* synthesis syn_preserve=1 */;
+    wire [9:0] rst_channel_n_w;
+    assign rst_channel_n_w = {10{rst_mem_ctrl_n_w}} & ~clear_channel_r;
+    reg [3:0] clear_unit_r /* synthesis syn_preserve=1 */;
+    reg [1:0] source_cfg_errors_r;
+    reg [2:0] channel_cfg_errors_r;
     genvar source_idx;
     genvar channel_idx;
 
     // Soft reset first drains committed AXI traffic; CDC FIFOs keep their external resets.
-    assign rst_mem_regs_clear_n_w = rst_mem_regs_n_w && !clear_r;
-    assign rst_vin_n_w = rst_mem_ctrl_n_w && !clear_r;
+    assign rst_mem_regs_clear_n_w = rst_mem_regs_n_w & ~clear_regs_r;
+    assign rst_vin_n_w = {4{rst_mem_ctrl_n_w}} & ~clear_unit_r;
     always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
         if (!rst_mem_ctrl_n_w)
             abort_all_r <= 1'b0;
@@ -195,9 +208,19 @@ module edrv32_vin (
         cam1_size_w[31:28], cam1_size_w[15:11], msrc_size_w[31:28], msrc_size_w[15:11],
         ch_ctrl_w[23], ch_ctrl_w[19], ch_ctrl_w[15], ch_ctrl_w[11], ch_ctrl_w[7], ch_ctrl_w[3]};
     assign frame_boundary_w = source_valid_w & source_ready_w & source_sof_w;
-    assign cfg_errors_w = {3'd0, cam_cfg_error_w[0]} + {3'd0, cam_cfg_error_w[1]} +
-        {3'd0, msrc_cfg_error_w} + {2'd0, ch_cfg_errors_w[1:0]} +
-        {2'd0, ch_cfg_errors_w[3:2]} + {2'd0, ch_cfg_errors_w[5:4]};
+    // PERF15 alone gains one cycle; IRQ/ERR_CODE and frame admission keep their edge.
+    always @(posedge clk_mem_i or negedge rst_mem_regs_clear_n_w[0]) begin
+        if (!rst_mem_regs_clear_n_w[0]) begin
+            source_cfg_errors_r <= 2'd0;
+            channel_cfg_errors_r <= 3'd0;
+        end else begin
+            source_cfg_errors_r <= {1'b0, cam_cfg_error_w[0]} +
+                {1'b0, cam_cfg_error_w[1]} + {1'b0, msrc_cfg_error_w};
+            channel_cfg_errors_r <= {1'b0, ch_cfg_errors_w[1:0]} +
+                {1'b0, ch_cfg_errors_w[3:2]} + {1'b0, ch_cfg_errors_w[5:4]};
+        end
+    end
+    assign cfg_errors_w = {2'b0, source_cfg_errors_r} + {1'b0, channel_cfg_errors_r};
     assign irq_set_w = {22'd0, ch_done_w[2:1], 5'd0, ch_done_w[0],
         (error_code_w != 0), msrc_done_w};
     assign perf_event_w = {1'b0, p1_urgent_o, cam_incomplete_w, ch_skip_w,
@@ -221,8 +244,14 @@ module edrv32_vin (
         if (!rst_mem_ctrl_n_w) begin
             soft_pending_r <= 1'b0;
             clear_r <= 1'b0;
+            clear_regs_r <= 8'd0;
+            clear_channel_r <= 10'd0;
+            clear_unit_r <= 4'b0;
         end else begin
             clear_r <= soft_pending_r && !abort_all_r && !busy_w;
+            clear_regs_r <= {8{soft_pending_r && !abort_all_r && !busy_w}};
+            clear_channel_r <= {10{soft_pending_r && !abort_all_r && !busy_w}};
+            clear_unit_r <= {4{soft_pending_r && !abort_all_r && !busy_w}};
             if (soft_rst_w)
                 soft_pending_r <= 1'b1;
             else if (clear_r)
@@ -304,7 +333,7 @@ module edrv32_vin (
     );
     edrv32_vin_fmt u_fmt0 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_vin_n_w),
+        .rst_n_i(rst_vin_n_w[0]),
 
         // CDC item producer.
         .item_valid_i(item0_valid_w),
@@ -354,7 +383,7 @@ module edrv32_vin (
     );
     edrv32_vin_fmt u_fmt1 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_vin_n_w),
+        .rst_n_i(rst_vin_n_w[1]),
 
         // CDC item producer.
         .item_valid_i(item1_valid_w),
@@ -385,7 +414,7 @@ module edrv32_vin (
     );
     edrv32_vin_msrc u_msrc (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_vin_n_w),
+        .rst_n_i(rst_vin_n_w[2]),
 
         // Memory-source command and surface.
         .start_i(msrc_start_w && !soft_pending_r),
@@ -474,7 +503,7 @@ module edrv32_vin (
             end
             edrv32_vin_ch u_channel (
                 .clk_i(clk_mem_i),
-                .rst_n_i(rst_vin_n_w),
+                .rst_n_i(rst_channel_n_w[channel_idx*3 +: 3]),
 
                 // Selected source before the channel pipeline.
                 .source_valid_i(valid_w),
@@ -548,7 +577,7 @@ module edrv32_vin (
     assign ch2_source_w = ch_select_w[5:4] == 2'd3 ? 2'd0 : ch_select_w[5:4];
     edrv32_vin_ch2 u_ch2 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_vin_n_w),
+        .rst_n_i(rst_channel_n_w[9:6]),
 
         // Selected source before the channel pipeline.
         .source_valid_i(source_valid_w[ch2_source_w] && source_ready_w[ch2_source_w]),
@@ -602,7 +631,7 @@ module edrv32_vin (
     );
     edrv32_vin_p1_arb u_p1 (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_vin_n_w),
+        .rst_n_i(rst_vin_n_w[3]),
 
         // DMA write clients.
         .ch_awaddr_i(ch_awaddr_w),

@@ -89,7 +89,7 @@ module tb;
     int total_w;
     edrv32_vin_ch u_dut (
         .clk_i(clk),
-        .rst_n_i(rst_n),
+        .rst_n_i({3{rst_n}}),
         .source_valid_i(source_valid),
         .source_ready_o(source_ready),
         .source_data_i(source_data),

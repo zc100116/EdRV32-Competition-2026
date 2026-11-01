@@ -35,7 +35,7 @@ module tb;
     wire irq;
     edrv32_vin_regs u_dut (
         .clk_i(clk),
-        .rst_n_i(rst_n),
+        .rst_n_i({8{rst_n}}),
         .apb_paddr_i(addr),
         .apb_psel_i(sel),
         .apb_penable_i(access),

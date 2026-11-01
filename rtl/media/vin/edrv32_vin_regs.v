@@ -4,9 +4,9 @@
 //              Reserved offsets read zero and ignore writes.
 // Clock domain: clk_mem.
 module edrv32_vin_regs (
-    // Clock and reset.
+    // Equal-edge reset copies for common/CH0/CH1/CH2 and four PERF banks.
     input wire clk_i,
-    input wire rst_n_i,
+    input wire [7:0] rst_n_i,
 
     // Media APB slot.
     input wire [11:0] apb_paddr_i,
@@ -76,7 +76,7 @@ module edrv32_vin_regs (
     reg [3:0] ch0_slot_busy_r;
     reg [3:0] ch1_slot_busy_r;
     reg [3:0] ch2_slot_busy_r;
-    reg [31:0] perf_r [0:15];
+    wire [31:0] perf_r [0:15];
     wire write_w;
     wire [31:0] clear_w;
     wire unused_strb_w;
@@ -151,8 +151,9 @@ module edrv32_vin_regs (
         endcase
     end
 
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             enable_o <= 1'b0;
             irq_en_r <= 32'd0;
             irq_stat_r <= 32'd0;
@@ -162,64 +163,150 @@ module edrv32_vin_regs (
             msrc_base_o <= 32'd0;
             msrc_stride_o <= 16'h0a00;
             msrc_size_o <= 32'h02d0_0500;
-            ch0_ctrl_r <= 8'h30;
-            ch1_ctrl_r <= 8'h30;
-            ch2_ctrl_r <= 8'h30;
-            ch0_stride_r <= 16'h0a00;
-            ch1_stride_r <= 16'h0a00;
-            ch2_stride_r <= 16'h0a00;
-            ch0_bases_r <= 128'd0;
-            ch1_bases_r <= 128'd0;
-            ch2_bases_r <= 128'd0;
-            ch0_slot_busy_r <= 4'd0;
-            ch1_slot_busy_r <= 4'd0;
-            ch2_slot_busy_r <= 4'd0;
-
         end else begin
             irq_stat_r <= (irq_stat_r & ~clear_w) | irq_set_i;
-            if (clear_w[1])
+            if (clear_w[1]) begin
                 error_code_r <= 4'd0;
-            if (error_code_i != 0)
+            end
+            if (error_code_i != 0) begin
                 error_code_r <= error_code_i;
-
+            end
             if (write_w) begin
                 case (apb_paddr_r)
-                    12'h004: enable_o <= apb_pwdata_r[0];
-                    12'h00c: irq_en_r <= apb_pwdata_r & 32'h0000_0307;
-                    12'h100: cam0_size_o <= apb_pwdata_r & 32'h0fff_07fe;
-                    12'h104: cam1_size_o <= apb_pwdata_r & 32'h0fff_07fe;
-                    12'h110: msrc_base_o <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h114: msrc_stride_o <= {apb_pwdata_r[15:5], 5'd0};
-                    12'h118: msrc_size_o <= apb_pwdata_r & 32'h0fff_07fe;
-                    12'h200: ch0_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
-                    12'h204: ch0_stride_r <= {apb_pwdata_r[15:5], 5'd0};
-                    12'h208: ch0_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h20c: ch0_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h210: ch0_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h214: ch0_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h218: ch0_slot_busy_r <= apb_pwdata_r[3:0];
-                    12'h280: ch1_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
-                    12'h284: ch1_stride_r <= {apb_pwdata_r[15:5], 5'd0};
-                    12'h288: ch1_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h28c: ch1_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h290: ch1_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h294: ch1_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h298: ch1_slot_busy_r <= apb_pwdata_r[3:0];
-                    12'h300: ch2_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
-                    12'h304: ch2_stride_r <= {apb_pwdata_r[15:5], 5'd0};
-                    12'h308: ch2_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h30c: ch2_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h310: ch2_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h314: ch2_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h318: ch2_slot_busy_r <= apb_pwdata_r[3:0];
+                    12'h004: begin
+                        enable_o <= apb_pwdata_r[0];
+                    end
+                    12'h00c: begin
+                        irq_en_r <= apb_pwdata_r & 32'h0000_0307;
+                    end
+                    12'h100: begin
+                        cam0_size_o <= apb_pwdata_r & 32'h0fff_07fe;
+                    end
+                    12'h104: begin
+                        cam1_size_o <= apb_pwdata_r & 32'h0fff_07fe;
+                    end
+                    12'h110: begin
+                        msrc_base_o <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h114: begin
+                        msrc_stride_o <= {apb_pwdata_r[15:5], 5'd0};
+                    end
+                    12'h118: begin
+                        msrc_size_o <= apb_pwdata_r & 32'h0fff_07fe;
+                    end
+                    default: begin end
+                endcase
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
+            ch0_ctrl_r <= 8'h30;
+            ch0_stride_r <= 16'h0a00;
+            ch0_bases_r <= 128'd0;
+            ch0_slot_busy_r <= 4'd0;
+        end else begin
+            if (write_w) begin
+                case (apb_paddr_r)
+                    12'h200: begin
+                        ch0_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
+                    end
+                    12'h204: begin
+                        ch0_stride_r <= {apb_pwdata_r[15:5], 5'd0};
+                    end
+                    12'h208: begin
+                        ch0_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h20c: begin
+                        ch0_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h210: begin
+                        ch0_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h214: begin
+                        ch0_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h218: begin
+                        ch0_slot_busy_r <= apb_pwdata_r[3:0];
+                    end
+                    default: begin end
+                endcase
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[2]) begin
+        if (!rst_n_i[2]) begin
+            ch1_ctrl_r <= 8'h30;
+            ch1_stride_r <= 16'h0a00;
+            ch1_bases_r <= 128'd0;
+            ch1_slot_busy_r <= 4'd0;
+        end else begin
+            if (write_w) begin
+                case (apb_paddr_r)
+                    12'h280: begin
+                        ch1_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
+                    end
+                    12'h284: begin
+                        ch1_stride_r <= {apb_pwdata_r[15:5], 5'd0};
+                    end
+                    12'h288: begin
+                        ch1_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h28c: begin
+                        ch1_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h290: begin
+                        ch1_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h294: begin
+                        ch1_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h298: begin
+                        ch1_slot_busy_r <= apb_pwdata_r[3:0];
+                    end
+                    default: begin end
+                endcase
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[3]) begin
+        if (!rst_n_i[3]) begin
+            ch2_ctrl_r <= 8'h30;
+            ch2_stride_r <= 16'h0a00;
+            ch2_bases_r <= 128'd0;
+            ch2_slot_busy_r <= 4'd0;
+        end else begin
+            if (write_w) begin
+                case (apb_paddr_r)
+                    12'h300: begin
+                        ch2_ctrl_r <= apb_pwdata_r[7:0] & 8'h77;
+                    end
+                    12'h304: begin
+                        ch2_stride_r <= {apb_pwdata_r[15:5], 5'd0};
+                    end
+                    12'h308: begin
+                        ch2_bases_r[31:0] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h30c: begin
+                        ch2_bases_r[63:32] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h310: begin
+                        ch2_bases_r[95:64] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h314: begin
+                        ch2_bases_r[127:96] <= {apb_pwdata_r[31:12], 12'd0};
+                    end
+                    12'h318: begin
+                        ch2_slot_busy_r <= apb_pwdata_r[3:0];
+                    end
                     default: begin end
                 endcase
             end
         end
     end
     // Each elaborated counter owns its adder; event selection ends at a register.
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             perf_event_r <= 15'd0;
             cfg_errors_r <= 4'd0;
         end else begin
@@ -229,30 +316,39 @@ module edrv32_vin_regs (
     end
     generate
         for (counter = 0; counter < 16; counter = counter + 1) begin : g_perf
+            reg [31:0] count_r;
+            assign perf_r[counter] = count_r;
             wire [31:0] increment_w;
             if (counter == 15) begin : g_config
                 assign increment_w = {28'd0, cfg_errors_r};
             end else begin : g_event
                 assign increment_w = {31'd0, perf_event_r[counter]};
             end
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i)
-                    perf_r[counter] <= 32'd0;
+            always @(posedge clk_i or negedge rst_n_i[4+counter/4]) begin
+                if (!rst_n_i[4+counter/4])
+                    count_r <= 32'd0;
                 else
-                    perf_r[counter] <= perf_r[counter] + increment_w;
+                    count_r <= count_r + increment_w;
             end
         end
     endgenerate
     // SoC 7.1: APB command decode ends at this register stage.
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
-            abort_o <= 1'b0;
-            soft_rst_o <= 1'b0;
+    // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             msrc_start_o <= 1'b0;
         end else begin
-            abort_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[2];
-            soft_rst_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[3];
             msrc_start_o <= write_w && apb_paddr_r == 12'h11c && apb_pwdata_r[0];
         end
     end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
+            abort_o <= 1'b0;
+            soft_rst_o <= 1'b0;
+        end else begin
+            abort_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[2];
+            soft_rst_o <= write_w && apb_paddr_r == 12'h004 && apb_pwdata_r[3];
+        end
+    end
+
 endmodule

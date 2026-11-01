@@ -6,7 +6,7 @@
 module edrv32_vin_ch (
     // Clock and reset.
     input wire clk_i,
-    input wire rst_n_i,
+    input wire [2:0] rst_n_i,
 
     // Selected source before PIX (or the CH1 bypass).
     input wire source_valid_i,
@@ -107,7 +107,7 @@ module edrv32_vin_ch (
     reg [9:0] fifo_write_r;
     reg [9:0] fifo_fetch_r;
     reg [1:0] fifo_output_count_r;
-    reg fifo_read_slot_r;
+    reg [3:0] fifo_read_slot_r /* synthesis syn_preserve=1 */;
     reg fifo_fetch_slot_r;
     reg fifo_pending_r;
     reg fifo_capture0_r;
@@ -238,18 +238,26 @@ module edrv32_vin_ch (
     assign ram_wr_addr_w = fifo_write_r[8:0];
     assign ram_wr_data_w = {packed_strb_w, packed_data_w};
     assign fifo_valid_w = fifo_output_count_r != 0;
-    assign fifo_data_w = fifo_read_slot_r ? fifo_head1_r : fifo_head0_r;
+    assign fifo_data_w[287:256] = fifo_read_slot_r[3] ?
+        fifo_head1_r[287:256] : fifo_head0_r[287:256];
+    genvar read_slice;
+    generate
+        for (read_slice = 0; read_slice < 4; read_slice = read_slice + 1) begin : g_read_slice
+            assign fifo_data_w[read_slice*64 +: 64] = fifo_read_slot_r[read_slice] ?
+                fifo_head1_r[read_slice*64 +: 64] : fifo_head0_r[read_slice*64 +: 64];
+        end
+    endgenerate
     assign fifo_read_w = fifo_pop_w && fifo_valid_w;
     assign fifo_reserved_w = {1'b0, fifo_output_count_r} + {2'd0, fifo_pending_r}
         - {2'd0, fifo_read_w};
     assign ram_rd_en_w = fifo_fetch_r != fifo_write_r && fifo_reserved_w < 3'd2;
     assign ram_rd_addr_w = fifo_fetch_r[8:0];
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             fifo_write_r <= 10'd0;
             fifo_fetch_r <= 10'd0;
             fifo_output_count_r <= 2'd0;
-            fifo_read_slot_r <= 1'b0;
+            fifo_read_slot_r <= 4'b0;
             fifo_fetch_slot_r <= 1'b0;
             fifo_pending_r <= 1'b0;
             fifo_capture0_r <= 1'b0;
@@ -270,7 +278,7 @@ module edrv32_vin_ch (
             fifo_capture0_r <= ram_rd_en_w && !fifo_fetch_slot_r;
             fifo_capture1_r <= ram_rd_en_w && fifo_fetch_slot_r;
             if (fifo_read_w)
-                fifo_read_slot_r <= !fifo_read_slot_r;
+                fifo_read_slot_r <= ~fifo_read_slot_r;
             case ({fifo_pending_r, fifo_read_w})
                 2'b10: fifo_output_count_r <= fifo_output_count_r + 2'd1;
                 2'b01: fifo_output_count_r <= fifo_output_count_r - 2'd1;
@@ -305,7 +313,7 @@ module edrv32_vin_ch (
     ) u_write (
         // Descriptor and buffered beats.
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_n_i[2]),
         .desc_valid_i(pending_r && !dma_abort_o),
         .desc_ready_o(dma_ready_w),
         .desc_base_i(pending_base_r),
@@ -353,8 +361,8 @@ module edrv32_vin_ch (
             pack_r[pack_word_r * 32 +: 32] <= pack_data_r;
     end
 
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             route_r <= 1'b0;
             receiving_r <= 1'b0;
             dropping_r <= 1'b0;
