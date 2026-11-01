@@ -1,0 +1,27 @@
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_rnd/u_draw/u_geometry/g_lane[0].g_column[0].column_mode_r[0]' of 'GTP_DFF_E' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2) has been disconnected.
+Design 'edrv32_fpga_board_render_top' has been successfully mapped to architecture-specific objects.
+W: Public-4010: Pcf file G:/codex_project/EdRV32-FPGA/EdRV32-B3R/device_map/edrv32_fpga_board_render_top.pcf has been covered.
+Action dev_map: Real time elapsed is 0h:1m:3s
+Action dev_map: CPU time elapsed is 0h:0m:9s
+Action dev_map: Process CPU time elapsed is 0h:0m:10s
+Current time: Sat Oct 31 23:46:37 2026
+Action dev_map: Peak memory pool usage is 1,654 MB

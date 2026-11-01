@@ -1,9 +1,9 @@
-# 任务23：V/N实现与上板测试记录
+# 任务23：R/N/V实现与上板测试记录
 
 - 分支 win/20261031-23-b3-converged；本轮RTL输入2a3ee2e0，软件与工具同步至9b54c704（摄像头720p30）。
 - PDS 2022.2-SP6.1，PG2L200H-6 FBB676；工程 G:/codex_project/EdRV32-FPGA/EdRV32-B3V。
 - 用户确认本次已下载卡23新V比特流并运行新版demo_vision；不把先前卡22异常归到本卡。
-- V最终源码111；ROM/SRAM采用卡23DAT、Dcache tag为20位。R/N配置准备文件保留；本版已补充N最终流程与上板结果；R最终报告尚未收集。
+- V最终源码111；ROM/SRAM采用卡23DAT、Dcache tag为20位。R/N配置准备文件保留；本版已补充R/N最终流程与上板结果。
 
 ## V流程
 
@@ -151,3 +151,51 @@ N自检39/39通过；图片端到端识别未通过（回传不完整，无叠�
 SNR中识别出32个u_reset_*层次项（FF及资源见reset_copies.txt）；同文件保存最终PnR网表中仍存在的匹配标识符。DMR中的复位网络有重命名，未建立每个副本到最终fanout的完整映射，不能宣称已验证所有副本负载≤1000；高扇出、时钟、复位、CE原表与实际PCF均已保存。
 
 完整扩展RTR约78MB留在 `build/win/20261031-23-b3-converged/exports/b3n_top200/`；上传原工程RTR、路径索引和逐级明细，避免提交重复的超大扩展文件。较大产物（DMR约2.1MB、综合警告节选约1.8MB、EDTM约1.7MB）用于保留映射/警告/遥测证据。
+
+## R 综合、布局布线与上板问题
+
+工程 `G:/codex_project/EdRV32-FPGA/EdRV32-B3R`，顶层edrv32_fpga_board_render_top，PDS 2022.2-SP6.1、PG2L200H-6 FBB676。各阶段结束且错误行数为0；比特流已生成。原厂CMR/SNR/DMR/PRR/RTR、警告节选、资源层次、高扇出/复位/CE、实际PCF和扩展时序路径保存于artifacts/b3r/。
+
+| 阶段 | 实际耗时 | CPU时间 | Process CPU时间 | 峰值内存池 | W:行 | E:行 |
+|---|---|---|---|---|---|---|
+| compile | 1m51s | 16s | 16s | 562 MB | 3162 | 0 |
+| synthesize | 6m5s | 1m8s | 1m13s | 2291 MB | 10365 | 0 |
+| device_map | 1m3s | 9s | 10s | 1654 MB | 21 | 0 |
+| place_route | 4h21m16s | 1h0m51s | 1h14m32s | 5827 MB | 693 | 0 |
+| report_timing | 1m16s | 20s | 24s | 5466 MB | 138 | 0 |
+| generate_bitstream | 1m21s | 24s | 24s | 3776 MB | 0 | 0 |
+
+布局布线时间主要在Detailed routing 14695.27s（约4h4m55s），Total routing 14975.46s；Hold Violation Fix in router 175.06s。97462条route net均成功。原文见logs/pnr_execution_excerpt.txt。不仅凭耗时归因为拥塞或某个模块，当前日志不能证明上板软件异常由布线导致。
+
+最终PnR资源：LUT 70542（53748+16794）、FF 55795（42128+13667）、分布式RAM 750、APM 131、DRM 117.5（原厂报告单位）、GPLL 5。详细资源及层次见resource_summary.txt和resource_hier.txt。卡22本地未取得同工程结果产物，不填造资源/耗时差值。
+
+原厂报告All Constraints Met，但slow clk_mem setup仅0.003ns（目标125MHz，估算125.0469MHz），属于极低裕量；clk_sys为0.416ns、clk_eth为0.898ns。保留未约束输入/输出警告（Timing-4087 93行、Timing-4086 45行），结论受约束覆盖范围限制。PnR区域警告693行：4048为343、4032为192、4049为158。所有W:/E:原文和耗时均已保存，不将警告行数当作独立缺陷数。
+
+### R 上板结果与用户反馈
+
+- **RND CRC：29/29 PASS**。串口出现RND display ready，各组ERR_CODE均为0。对GUI分开的CRC标签/数值做明确拼接后执行 `C:/Python314/python.exe sw/tests/rnd_board/expect.py tasks/win/20261031-23-b3-converged/artifacts/b3r/uart/rnd_crc_joined.log`，退出码0。原始缓冲不变，比较输出和派生输入均保存。没有本轮照片，不代替图案目视验收。
+- **S3 LVGL：失败**。用户反馈“测试程序点开就卡死”；日志两次相同异常：`S3 CPU mcause=0x00000007 mepc=0x900663bc`，前面有`lv_obj_get_display: No screen found`及NULL display警告。该PC落在本卡s3.elf的`lv_event_send.part.0+0x40`范围；这是符号定位，不是根因。未取得Benchmark Summary、LVGL split及RN-17完整结果，不记为通过；具体哪个LVGL子菜单未明确。
+- **LAYERS：部分证据**。有画面1至5入口说明，画面5多次打印claimed=11 unclaimed=0；缺少五幅画面的照片及逐项目视结论。
+- **NES：能运行但虚拟输入验收失败**。最初空ROM槽报错，随后通过临时含ROM ELF加载本地超级马里奥1超级版，Load result: PASS、NES powered on、mapper=0。用户反馈键盘方向键松开后人物仍持续移动。原始串口TX记录有right=8→keys=0的释放帧（例如seq732→744），不能直接归因为GUI从不发松键；未取得板端消费该释放帧的证据。
+- **NES显示帧率偏低**：64条采样中shown为17.5–19.2fps，样本算术平均18.102fps；模拟fps为52.6–67.0，样本平均54.703。采样间隔不等，未将算术平均当作按时间加权吞吐率。完整数据在uart/nes_fps.tsv。
+- **网口/EDTM：未完成**。当前UART快照connected=true、COM7/115200；未建立PEER，telemetry records=0，未取得S3/NES EDTM带宽或R网口加载成功证据。工具board.phase的disconnected和旧Input error不等同于串口物理断开。
+
+详细软件报告见 [R串口及问题报告](artifacts/b3r/uart/result.md)，包括两次S3故障上下文、ELF符号范围、完整控制台、所有可取得的输入帧及工具状态。只收集报告和日志，未修改RTL、应用或调试工具。ROM、含ROM临时ELF、数据库、bitstream和完整PDS原始run.log不上传。当前R不能记为整体验收通过。
+
+### R 危险时序与复位补充
+
+只读现有routed DB补导出 `report_timing -delay_type min_max -max_path 200 -input_pins TRUE -nworst 1`，退出码0；共9620条各角/各类路径，已导出的负裕量路径0条。setup/hold各组上限200条，保留每角最差20条逐级明细，以及<1ns路径（setup 270条、hold 3205条）。不是全芯片全部路径穷举；分组计数见timing_path_counts.txt。
+
+| 检查 | Slow最差/ns | Fast最差/ns |
+|---|---|---|
+| Setup | 0.003 | 2.084 |
+| Hold | 0.100 | 0.086 |
+| Recovery | 1.851 | 4.048 |
+| Removal | 0.363 | 0.247 |
+| Minimum pulse width | 0.035 | 0.035 |
+
+除3ps setup外，DDR PHY最小脉宽35ps、最差hold86ps也已标为低裕量。各路径起终点、逻辑级数与逐级延迟见timing_setup_top200.txt、timing_setup_top20_detail.txt、timing_hold_top200.txt、timing_hold_top20.txt及timing_near_*。
+
+SNR记录33个u_reset_*副本层次项；最终网表匹配标识符和综合资源逐项保存在reset_copies.txt。DMR有信号重命名，尚未建立全部副本到最终fanout的映射，不能声称全部副本负载≤1000。原厂高扇出/复位表与PCF完整保存。
+
+完整扩展时序RTR约79MB留在build/win/20261031-23-b3-converged/exports/b3r_top200/；上传原工程RTR、路径索引及最差明细。较大DMR和综合警告节选保留用于Claude复核映射/约束/警告，不上传实现数据库。

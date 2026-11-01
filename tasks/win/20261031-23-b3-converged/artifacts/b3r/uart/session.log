@@ -1,0 +1,1602 @@
+[09:32:20.727][SYS] connected COM7 @ 115200 8N1
+[09:32:23.133][RX] 
+[09:32:23.133][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:32:23.133][RX]   E         D   D   R   R   V   V      3      2 
+[09:32:23.133][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:32:23.133][RX]   E         D   D   R  R     V V       3   2    
+[09:32:23.133][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:32:23.133][RX] 
+[09:32:23.133][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:32:23.133][RX] CHIP_ID: 0xed320001
+[09:32:23.133][RX] CLK_SYS_HZ: 100000000
+[09:32:23.133][RX] ROM bytes: 16384
+[09:32:23.133][RX] SRAM bytes: 65536
+[09:32:23.133][RX] I-cache bytes: 8192
+[09:32:23.133][RX] D-cache bytes: 8192
+[09:32:23.133][RX] MEM_READY: 1
+[09:32:23.133][RX] Build commit: 506f07e4
+[09:32:23.133][RX] Compiler version: GCC 15.2.0
+[09:32:23.237][RX] BIOS: EdRV32
+[09:32:23.237][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:32:53.409][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[09:32:53.417][RX] Input error: type 1-4 then Enter
+[09:32:53.417][SYS] Input error: type 1-4 then Enter
+[09:32:53.417][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:32:53.419][RX] UART load ready
+[09:32:56.537][RX] Load bytes: 35888 segments: 1
+[09:32:56.537][RX] Load result: PASS
+[09:32:56.537][RX] Run: 0x90000000
+[09:32:56.767][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:32:57.129][RX] RND fill_rgb565 crc=
+[09:32:57.480][RX] 0xe9358c29
+[09:32:57.480][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:32:57.842][RX] RND border_rgb565 crc=
+[09:32:58.193][RX] 0x1658f064
+[09:32:58.193][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:32:58.556][RX] RND glyph_rgb565 crc=
+[09:32:58.907][RX] 0x26bf7139
+[09:32:58.907][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+[09:32:59.254][RX] RND blit_rgb565 crc=
+[09:32:59.619][RX] 0x87b4c9d9
+[09:32:59.619][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+[09:32:59.971][RX] RND copy_rgb565 crc=
+[09:33:00.327][RX] 0xd330519b
+[09:33:00.375][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[09:33:00.730][RX] RND box_shadow_rgb565 crc=
+[09:33:01.081][RX] 0xaddb98ac
+[09:33:01.127][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+[09:33:01.476][RX] RND blur_rgb565 crc=
+[09:33:01.840][RX] 0x9dc67871
+[09:33:01.840][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:33:02.192][RX] RND tilemap_rgb565 crc=
+[09:33:02.553][RX] 0x763bdd5f
+[09:33:02.553][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:33:02.904][RX] RND fill_argb8888 crc=
+[09:33:03.974][RX] 0x0bda4f5e
+[09:33:03.974][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:33:04.335][RX] RND border_argb8888 crc=
+[09:33:05.395][RX] 0x2230a20f
+[09:33:05.395][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:33:05.742][RX] RND glyph_argb8888 crc=
+[09:33:06.816][RX] 0x004b61a5
+[09:33:06.816][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+[09:33:07.168][RX] RND blit_argb8888 crc=
+[09:33:08.237][RX] 0xaa15e883
+[09:33:08.237][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+[09:33:08.587][RX] RND copy_argb8888 crc=
+[09:33:09.652][RX] 0x6d1538f5
+[09:33:09.699][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[09:33:10.049][RX] RND box_shadow_argb8888 crc=
+[09:33:11.114][RX] 0x5ca6e649
+[09:33:11.164][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+[09:33:11.520][RX] RND blur_argb8888 crc=
+[09:33:12.584][RX] 0x3f13597a
+[09:33:12.584][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:33:12.945][RX] RND tilemap_argb8888 crc=
+[09:33:14.005][RX] 0xeecd1aac
+[09:33:14.005][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:33:14.369][RX] RND triangle_rgb565 crc=
+[09:33:14.718][RX] 0x2505e0b3
+[09:33:14.718][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:33:15.081][RX] RND line_rgb565 crc=
+[09:33:15.431][RX] 0x7b3dcb50
+[09:33:15.431][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[09:33:15.779][RX] RND arc_rgb565 crc=
+[09:33:16.145][RX] 0xa0b4a40e
+[09:33:16.145][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+[09:33:16.493][RX] RND affine_blit_rgb565 crc=
+[09:33:16.858][RX] 0x6dd3991a
+[09:33:16.858][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:33:17.206][RX] RND round_clip_rgb565 crc=
+[09:33:17.565][RX] 0xa4acf98e
+[09:33:17.620][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[09:33:17.982][RX] RND cutout_rgb565 crc=
+[09:33:18.334][RX] 0x391e8218
+[09:33:18.334][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:33:18.696][RX] RND triangle_argb8888 crc=
+[09:33:19.755][RX] 0x1d719162
+[09:33:19.755][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:33:20.108][RX] RND line_argb8888 crc=
+[09:33:21.175][RX] 0xd60297bc
+[09:33:21.175][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[09:33:21.535][RX] RND arc_argb8888 crc=
+[09:33:22.597][RX] 0x70b92fd6
+[09:33:22.597][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+[09:33:22.951][RX] RND mask_rect_argb8888 crc=
+[09:33:24.018][RX] 0xf99e4bfe
+[09:33:24.018][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+[09:33:24.378][RX] RND affine_blit_argb8888 crc=
+[09:33:25.439][RX] 0xcdf52fc0
+[09:33:25.439][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+[09:33:25.792][RX] RND round_clip_argb8888 crc=
+[09:33:26.854][RX] 0x6e4785b8
+[09:33:26.910][RX] RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+[09:33:27.258][RX] RND cutout_argb8888 crc=
+[09:33:28.326][RX] 0xcab70045
+[09:33:28.326][RX] RND display ready
+[09:33:49.977][RX] 
+[09:33:49.977][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:33:49.977][RX]   E         D   D   R   R   V   V      3      2 
+[09:33:49.977][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:33:49.977][RX]   E         D   D   R  R     V V       3   2    
+[09:33:49.977][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:33:49.977][RX] 
+[09:33:49.977][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:33:49.977][RX] CHIP_ID: 0xed320001
+[09:33:49.977][RX] CLK_SYS_HZ: 100000000
+[09:33:49.977][RX] ROM bytes: 16384
+[09:33:49.977][RX] SRAM bytes: 65536
+[09:33:49.977][RX] I-cache bytes: 8192
+[09:33:49.977][RX] D-cache bytes: 8192
+[09:33:49.977][RX] MEM_READY: 1
+[09:33:49.977][RX] Build commit: 506f07e4
+[09:33:49.977][RX] Compiler version: GCC 15.2.0
+[09:33:50.099][RX] Boot SRAM
+[09:33:50.099][RX] Monitor: EdRV32
+[09:33:50.099][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:33:53.819][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[09:33:53.828][RX] Input error: type 1, 2 or 3 then Enter
+[09:33:53.828][SYS] Input error: type 1, 2 or 3 then Enter
+[09:33:53.828][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:34:03.266][RX] 
+[09:34:03.266][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:34:03.266][RX]   E         D   D   R   R   V   V      3      2 
+[09:34:03.266][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:34:03.266][RX]   E         D   D   R  R     V V       3   2    
+[09:34:03.266][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:34:03.266][RX] 
+[09:34:03.266][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:34:03.266][RX] CHIP_ID: 0xed320001
+[09:34:03.266][RX] CLK_SYS_HZ: 100000000
+[09:34:03.266][RX] ROM bytes: 16384
+[09:34:03.266][RX] SRAM bytes: 65536
+[09:34:03.266][RX] I-cache bytes: 8192
+[09:34:03.266][RX] D-cache bytes: 8192
+[09:34:03.266][RX] MEM_READY: 1
+[09:34:03.266][RX] Build commit: 506f07e4
+[09:34:03.266][RX] Compiler version: GCC 15.2.0
+[09:34:03.371][RX] Boot SRAM
+[09:34:03.371][RX] Monitor: EdRV32
+[09:34:03.371][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:34:10.601][RX] 
+[09:34:10.601][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:34:10.601][RX]   E         D   D   R   R   V   V      3      2 
+[09:34:10.601][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:34:10.601][RX]   E         D   D   R  R     V V       3   2    
+[09:34:10.601][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:34:10.601][RX] 
+[09:34:10.601][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:34:10.601][RX] CHIP_ID: 0xed320001
+[09:34:10.601][RX] CLK_SYS_HZ: 100000000
+[09:34:10.601][RX] ROM bytes: 16384
+[09:34:10.601][RX] SRAM bytes: 65536
+[09:34:10.601][RX] I-cache bytes: 8192
+[09:34:10.601][RX] D-cache bytes: 8192
+[09:34:10.601][RX] MEM_READY: 1
+[09:34:10.601][RX] Build commit: 506f07e4
+[09:34:10.601][RX] Compiler version: GCC 15.2.0
+[09:34:10.725][RX] Boot SRAM
+[09:34:10.725][RX] Monitor: EdRV32
+[09:34:10.725][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:34:16.125][RX] 
+[09:34:16.125][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:34:16.125][RX]   E         D   D   R   R   V   V      3      2 
+[09:34:16.125][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:34:16.125][RX]   E         D   D   R  R     V V       3   2    
+[09:34:16.125][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:34:16.125][RX] 
+[09:34:16.463][RX]   EdRV32 Boot ROM - UAR
+[09:34:16.463][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:34:16.463][RX]   E         D   D   R   R   V   V      3      2 
+[09:34:16.463][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:34:16.463][RX]   E         D   D   R  R     V V       3   2    
+[09:34:16.463][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:34:16.463][RX] 
+[09:34:16.463][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:34:16.463][RX] CHIP_ID: 0xed320001
+[09:34:16.463][RX] CLK_SYS_HZ: 100000000
+[09:34:16.463][RX] ROM bytes: 16384
+[09:34:16.463][RX] SRAM bytes: 65536
+[09:34:16.464][RX] I-cache bytes: 8192
+[09:34:16.464][RX] D-cache bytes: 8192
+[09:34:16.464][RX] MEM_READY: 1
+[09:34:16.464][RX] Build commit: 506f07e4
+[09:34:16.464][RX] Compiler version: GCC 15.2.0
+[09:34:16.569][RX] Boot SRAM
+[09:34:16.569][RX] Monitor: EdRV32
+[09:34:16.569][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:34:26.906][RX] 
+[09:34:26.906][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:34:26.906][RX]   E         D   D   R   R   V   V      3      2 
+[09:34:26.906][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:34:26.906][RX]   E         D   D   R  R     V V       3   2    
+[09:34:26.906][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:34:26.906][RX] 
+[09:34:26.906][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:34:26.906][RX] CHIP_ID: 0xed320001
+[09:34:26.906][RX] CLK_SYS_HZ: 100000000
+[09:34:26.906][RX] ROM bytes: 16384
+[09:34:26.906][RX] SRAM bytes: 65536
+[09:34:26.906][RX] I-cache bytes: 8192
+[09:34:26.906][RX] D-cache bytes: 8192
+[09:34:26.906][RX] MEM_READY: 1
+[09:34:26.906][RX] Build commit: 506f07e4
+[09:34:26.906][RX] Compiler version: GCC 15.2.0
+[09:34:27.028][RX] BIOS: EdRV32
+[09:34:27.028][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:34:27.030][RX] UART load ready
+[09:36:07.030][RX] Load bytes: 1153604 segments: 2
+[09:36:07.030][RX] Load result: PASS
+[09:36:07.030][RX] Run: 0x90000000
+[09:36:09.272][RX] S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+[09:36:09.285][RX] LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+[09:36:10.284][RX] LVGL fps=1 rnd_tasks=27 sw_tasks=0
+[09:36:11.284][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:12.288][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:13.283][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:14.283][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:15.284][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:16.285][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:17.451][RX] GAME fps=60 rnd_ms=1.797 cpu_ms=0.191
+[09:36:18.468][RX] GAME fps=60 rnd_ms=1.808 cpu_ms=0.185
+[09:36:19.468][RX] GAME fps=59 rnd_ms=1.741 cpu_ms=0.186
+[09:36:20.484][RX] GAME fps=60 rnd_ms=1.692 cpu_ms=0.168
+[09:36:21.501][RX] GAME fps=60 rnd_ms=1.692 cpu_ms=0.167
+[09:36:22.518][RX] GAME fps=60 rnd_ms=1.692 cpu_ms=0.167
+[09:36:23.534][RX] GAME fps=59 rnd_ms=1.691 cpu_ms=0.169
+[09:36:24.534][RX] GAME fps=60 rnd_ms=1.690 cpu_ms=0.167
+[09:36:25.534][RX] GAME fps=59 rnd_ms=2.840 cpu_ms=0.239
+[09:36:26.551][RX] GAME fps=60 rnd_ms=3.836 cpu_ms=0.302
+[09:36:27.101][RX] LVGL fps=0 rnd_tasks=54 sw_tasks=0
+[09:36:27.211][RX] LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+[09:36:27.211][RX] Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.
+[09:36:35.277][RX] LAYERS 2: 256x128 checker moves to LEFT, RIGHT, TOP, BOTTOM; holds ~1 s.
+[09:36:35.277][RX] Each edge is flush; no L1 pixels remain outside the moving rectangle.
+[09:36:35.987][RX] LAYERS 3: Fixed checker fades 0 -> 255 -> 0 in ~4 s, without jumps.
+[09:36:36.677][RX] LAYERS 4: Color grid scrolls X +3 / Y +1 each frame; fixed L1 at top right.
+[09:36:36.677][RX] Grid stays aligned and tear-free, including non-16-aligned scroll.
+[09:36:39.427][RX] LAYERS 5: 50% opacity container, button, slider and checkbox over stripes.
+[09:36:39.427][RX] Uniform transparency, aligned control edges; RND claims LAYER blend.
+[09:36:39.571][RX] LVGL fps=0 rnd_tasks=102 sw_tasks=0
+[09:36:39.571][RX] LAYERS 5 LAYER claimed=11 unclaimed=0
+[09:36:40.534][RX] LAYERS 5 LAYER claimed=11 unclaimed=0
+[09:36:40.566][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:41.534][RX] LAYERS 5 LAYER claimed=11 unclaimed=0
+[09:36:41.567][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:42.534][RX] LAYERS 5 LAYER claimed=11 unclaimed=0
+[09:36:42.568][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:43.534][RX] LAYERS 5 LAYER claimed=11 unclaimed=0
+[09:36:43.566][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:44.210][RX] LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+[09:36:44.210][RX] Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.
+[09:36:45.327][RX] LAYERS 2: 256x128 checker moves to LEFT, RIGHT, TOP, BOTTOM; holds ~1 s.
+[09:36:45.327][RX] Each edge is flush; no L1 pixels remain outside the moving rectangle.
+[09:36:45.887][RX] LAYERS 3: Fixed checker fades 0 -> 255 -> 0 in ~4 s, without jumps.
+[09:36:47.256][RX] LVGL fps=0 rnd_tasks=84 sw_tasks=0
+[09:36:48.250][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:49.250][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:50.251][RX] LVGL fps=2 rnd_tasks=50 sw_tasks=0
+[09:36:51.250][RX] LVGL fps=2 rnd_tasks=50 sw_tasks=0
+[09:36:52.250][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:36:52.650][RX] [Warn]	(145.740, +145740)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.650][RX] [Warn]	(145.745, +5)	 lv_display_is_invalidation_enabled: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:1231
+[09:36:52.650][RX] [Warn]	(145.764, +19)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.694][RX] [Warn]	(145.770, +6)	 lv_display_get_screen_active: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:787
+[09:36:52.694][RX] [Warn]	(145.788, +18)	 lv_display_get_screen_prev: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:809
+[09:36:52.694][RX] [Warn]	(145.806, +18)	 lv_display_get_layer_bottom: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:842
+[09:36:52.739][RX] [Warn]	(145.824, +18)	 lv_display_get_layer_top: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:820
+[09:36:52.739][RX] [Warn]	(145.842, +18)	 lv_display_get_layer_sys: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:831
+[09:36:52.739][RX] [Warn]	(145.860, +18)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.782][RX] [Warn]	(145.866, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.782][RX] [Warn]	(145.873, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.783][RX] [Warn]	(145.880, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.783][RX] [Warn]	(145.886, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.783][RX] [Warn]	(145.893, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.783][RX] [Warn]	(145.899, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.783][RX] [Warn]	(145.906, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.789][RX] [Warn]	(145.913, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:36:52.789][RX] S3 CPU mcause=0x00000007 mepc=0x900663bc
+[09:37:25.483][TX] 1B 56 00 00 00 00 62 00 00 00
+[09:37:25.489][TX] 1B 56 00 00 00 00 5E 00 00 00
+[09:37:25.496][TX] 1B 56 00 00 00 00 5D 00 00 00
+[09:37:25.504][TX] 1B 56 00 00 00 00 59 00 00 00
+[09:37:25.511][TX] 1B 56 00 00 00 00 55 00 00 00
+[09:37:25.519][TX] 1B 56 00 00 00 00 51 00 00 00
+[09:37:25.526][TX] 1B 56 00 00 00 00 4E 00 00 00
+[09:37:25.534][TX] 1B 56 00 00 00 00 4A 00 00 00
+[09:37:25.542][TX] 1B 56 00 00 00 00 45 00 00 00
+[09:37:25.551][TX] 1B 56 00 00 00 00 41 00 00 00
+[09:37:25.557][TX] 1B 56 00 00 00 00 3C 00 00 00
+[09:37:25.564][TX] 1B 56 00 00 00 00 38 00 00 00
+[09:37:25.572][TX] 1B 56 00 00 00 00 34 00 00 00
+[09:37:25.579][TX] 1B 56 00 00 00 00 2F 00 00 00
+[09:37:25.587][TX] 1B 56 00 00 00 00 2A 00 00 00
+[09:37:25.594][TX] 1B 56 00 00 00 00 26 00 00 00
+[09:37:25.609][TX] 1B 56 00 00 00 00 24 00 00 00
+[09:37:25.610][TX] 1B 56 00 00 00 00 22 00 00 00
+[09:37:25.616][TX] 1B 56 00 00 00 00 20 00 00 00
+[09:37:25.632][TX] 1B 56 00 00 00 00 1F 00 00 00
+[09:37:25.647][TX] 1B 56 00 00 00 00 1D 00 00 00
+[09:37:25.930][TX] 1B 56 00 00 00 00 1E 00 00 00
+[09:37:25.934][TX] 1B 56 00 00 07 00 29 00 00 00
+[09:37:25.934][TX] 1B 56 00 00 10 00 2B 00 00 00
+[09:37:25.940][TX] 1B 56 00 00 1D 00 30 00 00 00
+[09:37:25.947][TX] 1B 56 00 00 2B 00 35 00 00 00
+[09:37:25.955][TX] 1B 56 00 00 32 00 37 00 00 00
+[09:37:25.961][TX] 1B 56 00 00 40 00 3D 00 00 00
+[09:37:25.969][TX] 1B 56 00 00 48 00 3F 00 00 00
+[09:37:25.976][TX] 1B 56 00 00 57 00 44 00 00 00
+[09:37:25.985][TX] 1B 56 00 00 5F 00 46 00 00 00
+[09:37:25.992][TX] 1B 56 00 00 6B 00 4D 00 00 00
+[09:37:25.999][TX] 1B 56 00 00 74 00 50 00 00 00
+[09:37:26.007][TX] 1B 56 00 00 7E 00 52 00 00 00
+[09:37:26.014][TX] 1B 56 00 00 86 00 56 00 00 00
+[09:37:26.021][TX] 1B 56 00 00 8F 00 5A 00 00 00
+[09:37:26.029][TX] 1B 56 00 00 93 00 5C 00 00 00
+[09:37:26.036][TX] 1B 56 00 00 9B 00 5E 00 00 00
+[09:37:26.044][TX] 1B 56 00 00 A1 00 61 00 00 00
+[09:37:26.051][TX] 1B 56 00 00 A5 00 61 00 00 00
+[09:37:26.059][TX] 1B 56 00 00 AB 00 63 00 00 00
+[09:37:26.066][TX] 1B 56 00 00 AD 00 65 00 00 00
+[09:37:26.074][TX] 1B 56 00 00 B2 00 68 00 00 00
+[09:37:26.082][TX] 1B 56 00 00 B4 00 68 00 00 00
+[09:37:26.089][TX] 1B 56 00 00 B6 00 6A 00 00 00
+[09:37:26.096][TX] 1B 56 00 00 B8 00 6A 00 00 00
+[09:37:26.104][TX] 1B 56 00 00 BA 00 6A 00 00 00
+[09:37:26.151][TX] 1B 56 00 00 BD 00 6A 00 00 00
+[09:37:26.207][TX] 1B 56 00 00 BD 00 6C 00 00 00
+[09:37:26.209][TX] 1B 56 00 00 C8 00 6E 00 00 00
+[09:37:26.216][TX] 1B 56 00 00 C8 00 6F 00 00 00
+[09:37:26.232][TX] 1B 56 00 00 CA 00 6F 00 00 00
+[09:37:26.262][TX] 1B 56 00 00 CC 00 6F 00 00 00
+[09:37:26.367][TX] 1B 56 00 00 CC 00 71 00 00 00
+[09:37:26.521][TX] 1B 56 00 00 CC 00 73 00 00 00
+[09:37:26.521][TX] 1B 56 00 00 CD 00 73 00 00 00
+[09:37:26.524][TX] 1B 56 00 00 CD 00 77 00 00 00
+[09:37:26.532][TX] 1B 56 00 00 CF 00 7B 00 00 00
+[09:37:26.547][TX] 1B 56 00 00 D1 00 7E 00 00 00
+[09:37:26.554][TX] 1B 56 00 00 D1 00 80 00 00 00
+[09:37:26.562][TX] 1B 56 00 00 D1 00 82 00 00 00
+[09:37:26.569][TX] 1B 56 00 00 D3 00 85 00 00 00
+[09:37:26.576][TX] 1B 56 00 00 D3 00 89 00 00 00
+[09:37:26.584][TX] 1B 56 00 00 D3 00 8B 00 00 00
+[09:37:26.599][TX] 1B 56 00 00 D5 00 8E 00 00 00
+[09:37:26.600][TX] 1B 56 00 00 D5 00 90 00 00 00
+[09:37:26.614][TX] 1B 56 00 00 D5 00 92 00 00 00
+[09:37:26.616][TX] 1B 56 00 00 D5 00 94 00 00 00
+[09:37:26.640][TX] 1B 56 00 00 D5 00 98 00 00 00
+[09:37:26.640][TX] 1B 56 00 00 D5 00 9A 00 00 00
+[09:37:26.644][TX] 1B 56 00 00 D5 00 9D 00 00 00
+[09:37:26.659][TX] 1B 56 00 00 D5 00 9F 00 00 00
+[09:37:26.675][TX] 1B 56 00 00 D5 00 A2 00 00 00
+[09:37:26.689][TX] 1B 56 00 00 D5 00 A4 00 00 00
+[09:37:26.705][TX] 1B 56 00 00 D5 00 A6 00 00 00
+[09:37:26.706][TX] 1B 56 00 00 D5 00 A8 00 00 00
+[09:37:26.727][TX] 1B 56 00 00 D5 00 AA 00 00 00
+[09:37:26.735][TX] 1B 56 00 00 D5 00 AC 00 00 00
+[09:37:26.750][TX] 1B 56 00 00 D5 00 AD 00 00 00
+[09:37:26.750][TX] 1B 56 00 00 D4 00 B1 00 00 00
+[09:37:26.765][TX] 1B 56 00 00 D2 00 B3 00 00 00
+[09:37:26.765][TX] 1B 56 00 00 D2 00 B5 00 00 00
+[09:37:26.779][TX] 1B 56 00 00 D0 00 B7 00 00 00
+[09:37:26.779][TX] 1B 56 00 00 CE 00 B9 00 00 00
+[09:37:26.795][TX] 1B 56 00 00 CC 00 BB 00 00 00
+[09:37:26.795][TX] 1B 56 00 00 CB 00 BC 00 00 00
+[09:37:26.810][TX] 1B 56 00 00 C9 00 BC 00 00 00
+[09:37:26.810][TX] 1B 56 00 00 C9 00 BE 00 00 00
+[09:37:26.824][TX] 1B 56 00 00 C7 00 BE 00 00 00
+[09:37:26.825][TX] 1B 56 00 00 C5 00 C1 00 00 00
+[09:37:26.840][TX] 1B 56 00 00 BF 00 C5 00 00 00
+[09:37:26.855][TX] 1B 56 00 00 BB 00 C7 00 00 00
+[09:37:26.856][TX] 1B 56 00 00 B9 00 C7 00 00 00
+[09:37:26.869][TX] 1B 56 00 00 B5 00 C7 00 00 00
+[09:37:26.883][TX] 1B 56 00 00 B3 00 C9 00 00 00
+[09:37:26.887][TX] 1B 56 00 00 B1 00 C9 00 00 00
+[09:37:26.901][TX] 1B 56 00 00 AF 00 C9 00 00 00
+[09:37:26.915][TX] 1B 56 00 00 AD 00 C9 00 00 00
+[09:37:29.270][TX] 1B 56 00 00 AD 00 CC 00 00 00
+[09:37:29.325][TX] 1B 56 00 00 AD 00 CE 00 00 00
+[09:37:29.428][TX] 1B 56 00 00 AD 00 D0 00 00 00
+[09:37:29.434][TX] 1B 56 00 00 AD 00 D2 00 00 00
+[09:37:29.464][TX] 1B 56 00 00 AD 00 D4 00 00 00
+[09:37:29.465][TX] 1B 56 00 00 AC 00 D4 00 00 00
+[09:37:29.472][TX] 1B 56 00 00 AC 00 D6 00 00 00
+[09:37:29.502][TX] 1B 56 00 00 AC 00 D8 00 00 00
+[09:37:30.148][TX] 1B 56 00 00 AD 00 DA 00 00 00
+[09:37:30.199][TX] 1B 56 00 00 AE 00 DA 00 00 00
+[09:37:30.201][TX] 1B 56 00 00 B6 00 DA 00 00 00
+[09:37:30.305][TX] 1B 56 00 00 B6 00 DB 00 00 00
+[09:37:30.889][TX] 1B 56 00 00 B8 00 DE 00 00 00
+[09:37:30.941][TX] 1B 56 00 00 B8 00 E0 00 00 00
+[09:37:30.943][TX] 1B 56 00 00 C4 00 EB 00 00 00
+[09:37:30.944][TX] 1B 56 00 00 C4 00 ED 00 00 00
+[09:37:31.009][TX] 1B 56 00 00 C6 00 ED 00 00 00
+[09:37:31.010][TX] 1B 56 00 00 C6 00 EF 00 00 00
+[09:37:31.025][TX] 1B 56 00 00 C8 00 F3 00 00 00
+[09:37:31.025][TX] 1B 56 00 00 C8 00 F5 00 00 00
+[09:37:31.031][TX] 1B 56 00 00 CA 00 F7 00 00 00
+[09:37:31.047][TX] 1B 56 00 00 CA 00 FA 00 00 00
+[09:37:31.047][TX] 1B 56 00 00 CC 00 FB 00 00 00
+[09:37:31.054][TX] 1B 56 00 00 CD 00 FF 00 00 00
+[09:37:31.077][TX] 1B 56 00 00 CF 00 03 01 00 00
+[09:37:31.084][TX] 1B 56 00 00 D1 00 07 01 00 00
+[09:37:31.092][TX] 1B 56 00 00 D3 00 09 01 00 00
+[09:37:31.106][TX] 1B 56 00 00 D5 00 0A 01 00 00
+[09:37:31.107][TX] 1B 56 00 00 D5 00 0C 01 00 00
+[09:37:31.121][TX] 1B 56 00 00 D7 00 0E 01 00 00
+[09:37:31.122][TX] 1B 56 00 00 DA 00 10 01 00 00
+[09:37:31.137][TX] 1B 56 00 00 DA 00 12 01 00 00
+[09:37:31.151][TX] 1B 56 00 00 DC 00 12 01 00 00
+[09:37:31.152][TX] 1B 56 00 00 DC 00 14 01 00 00
+[09:37:31.167][TX] 1B 56 00 00 DD 00 14 01 00 00
+[09:37:31.415][TX] 1B 56 00 00 DF 00 14 01 00 00
+[09:37:31.437][TX] 1B 56 00 00 E1 00 14 01 00 00
+[09:37:36.949][RX] 
+[09:37:36.949][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:37:36.949][RX]   E         D   D   R   R   V   V      3      2 
+[09:37:36.949][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:37:36.949][RX]   E         D   D   R  R     V V       3   2    
+[09:37:36.949][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:37:36.949][RX] 
+[09:37:36.949][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:37:36.949][RX] CHIP_ID: 0xed320001
+[09:37:36.949][RX] CLK_SYS_HZ: 100000000
+[09:37:36.949][RX] ROM bytes: 16384
+[09:37:36.949][RX] SRAM bytes: 65536
+[09:37:36.949][RX] I-cache bytes: 8192
+[09:37:36.949][RX] D-cache bytes: 8192
+[09:37:36.949][RX] MEM_READY: 1
+[09:37:36.949][RX] Build commit: 506f07e4
+[09:37:36.949][RX] Compiler version: GCC 15.2.0
+[09:37:37.053][RX] BIOS: EdRV32
+[09:37:37.053][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:37:37.249][TX] 1B 56 00 00 E1 00 13 01 00 00
+[09:37:37.301][TX] 1B 56 00 00 E0 00 11 01 00 00
+[09:37:37.309][TX] 1B 56 00 00 BB 00 EE 00 00 00
+[09:37:37.313][TX] 1B 56 00 00 B7 00 EA 00 00 00
+[09:37:37.322][TX] 1B 56 00 00 B3 00 E9 00 00 00
+[09:37:37.329][TX] 1B 56 00 00 AF 00 E5 00 00 00
+[09:37:37.334][TX] 1B 56 00 00 AC 00 E3 00 00 00
+[09:37:37.347][TX] 1B 56 00 00 A6 00 E1 00 00 00
+[09:37:37.349][TX] 1B 56 00 00 A0 00 DD 00 00 00
+[09:37:37.362][TX] 1B 56 00 00 98 00 D9 00 00 00
+[09:37:37.363][TX] 1B 56 00 00 90 00 D7 00 00 00
+[09:37:37.377][TX] 1B 56 00 00 87 00 D1 00 00 00
+[09:37:37.378][TX] 1B 56 00 00 7D 00 CD 00 00 00
+[09:37:37.392][TX] 1B 56 00 00 73 00 CA 00 00 00
+[09:37:37.393][TX] 1B 56 00 00 6F 00 C8 00 00 00
+[09:37:37.406][TX] 1B 56 00 00 66 00 C4 00 00 00
+[09:37:37.408][TX] 1B 56 00 00 5E 00 C0 00 00 00
+[09:37:37.422][TX] 1B 56 00 00 5A 00 BD 00 00 00
+[09:37:37.423][TX] 1B 56 00 00 52 00 BB 00 00 00
+[09:37:37.436][TX] 1B 56 00 00 50 00 BA 00 00 00
+[09:37:37.438][TX] 1B 56 00 00 4B 00 B8 00 00 00
+[09:37:37.451][TX] 1B 56 00 00 47 00 B6 00 00 00
+[09:37:37.453][TX] 1B 56 00 00 40 00 B4 00 00 00
+[09:37:37.466][TX] 1B 56 00 00 37 00 B0 00 00 00
+[09:37:37.518][TX] 1B 56 00 00 2C 00 AC 00 00 00
+[09:37:37.520][TX] 1B 56 00 00 00 00 91 00 00 00
+[09:37:37.521][TX] 1B 56 00 00 00 00 8A 00 00 00
+[09:37:37.532][TX] 1B 56 00 00 00 00 81 00 00 00
+[09:37:37.535][TX] 1B 56 00 00 00 00 78 00 00 00
+[09:37:37.544][TX] 1B 56 00 00 00 00 74 00 00 00
+[09:37:37.550][TX] 1B 56 00 00 00 00 6D 00 00 00
+[09:37:37.556][TX] 1B 56 00 00 00 00 69 00 00 00
+[09:37:37.564][TX] 1B 56 00 00 00 00 62 00 00 00
+[09:37:37.571][TX] 1B 56 00 00 00 00 60 00 00 00
+[09:37:37.579][TX] 1B 56 00 00 00 00 5B 00 00 00
+[09:37:37.586][TX] 1B 56 00 00 00 00 59 00 00 00
+[09:37:37.594][TX] 1B 56 00 00 00 00 57 00 00 00
+[09:37:37.601][TX] 1B 56 00 00 00 00 55 00 00 00
+[09:37:37.617][TX] 1B 56 00 00 00 00 53 00 00 00
+[09:37:37.624][TX] 1B 56 00 00 00 00 51 00 00 00
+[09:37:37.632][TX] 1B 56 00 00 00 00 4F 00 00 00
+[09:37:37.647][TX] 1B 56 00 00 00 00 4E 00 00 00
+[09:37:37.662][TX] 1B 56 00 00 00 00 4C 00 00 00
+[09:37:37.669][TX] 1B 56 00 00 00 00 4A 00 00 00
+[09:37:37.692][TX] 1B 56 00 00 00 00 47 00 00 00
+[09:37:37.699][TX] 1B 56 00 00 00 00 45 00 00 00
+[09:37:37.714][TX] 1B 56 00 00 00 00 43 00 00 00
+[09:37:37.721][TX] 1B 56 00 00 00 00 41 00 00 00
+[09:37:37.729][TX] 1B 56 00 00 00 00 3F 00 00 00
+[09:37:37.737][TX] 1B 56 00 00 00 00 3E 00 00 00
+[09:37:37.752][TX] 1B 56 00 00 00 00 3C 00 00 00
+[09:37:40.988][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[09:37:40.995][RX] Input error: type 1-4 then Enter
+[09:37:40.995][SYS] Input error: type 1-4 then Enter
+[09:37:40.995][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:37:40.997][RX] UART load ready
+[09:39:21.023][RX] Load bytes: 1153604 segments: 2
+[09:39:21.023][RX] Load result: PASS
+[09:39:21.023][RX] Run: 0x90000000
+[09:39:23.265][RX] S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+[09:39:23.278][RX] LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+[09:39:24.276][RX] LVGL fps=1 rnd_tasks=27 sw_tasks=0
+[09:39:25.276][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:39:26.277][RX] LVGL fps=4 rnd_tasks=100 sw_tasks=0
+[09:39:27.276][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:39:28.276][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:39:29.276][RX] LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[09:39:29.843][RX] [Warn]	(112.890, +112890)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.843][RX] [Warn]	(112.896, +6)	 lv_display_is_invalidation_enabled: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:1231
+[09:39:29.843][RX] [Warn]	(112.915, +19)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.888][RX] [Warn]	(112.921, +6)	 lv_display_get_screen_active: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:787
+[09:39:29.888][RX] [Warn]	(112.939, +18)	 lv_display_get_screen_prev: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:809
+[09:39:29.888][RX] [Warn]	(112.957, +18)	 lv_display_get_layer_bottom: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:842
+[09:39:29.932][RX] [Warn]	(112.975, +18)	 lv_display_get_layer_top: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:820
+[09:39:29.932][RX] [Warn]	(112.993, +18)	 lv_display_get_layer_sys: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:831
+[09:39:29.932][RX] [Warn]	(113.011, +18)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.017, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.024, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.030, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.037, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.044, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.050, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.977][RX] [Warn]	(113.057, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.983][RX] [Warn]	(113.063, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[09:39:29.983][RX] S3 CPU mcause=0x00000007 mepc=0x900663bc
+[09:40:02.998][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:03.021][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:03.052][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:03.083][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:03.115][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:03.125][TX] 1B 56 0C 00 00 00 3C 00 00 00
+[09:40:03.146][TX] 1B 56 0C 00 00 00 3C 00 00 00
+[09:40:03.178][TX] 1B 56 0C 00 00 00 3C 00 00 00
+[09:40:03.191][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:03.208][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:03.239][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:03.270][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:03.301][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:03.316][TX] 1B 56 00 00 00 00 3C 00 00 00
+[09:40:03.551][TX] 1B 56 01 00 00 00 3C 00 00 00
+[09:40:03.579][TX] 1B 56 01 00 00 00 3C 00 00 00
+[09:40:03.610][TX] 1B 56 01 00 00 00 3C 00 00 00
+[09:40:03.641][TX] 1B 56 01 00 00 00 3C 00 00 00
+[09:40:03.672][TX] 1B 56 01 00 00 00 3C 00 00 00
+[09:40:03.702][TX] 1B 56 01 00 00 00 3C 00 00 00
+[09:40:03.729][TX] 1B 56 00 00 00 00 3C 00 00 00
+[09:40:16.629][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:16.656][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:16.687][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:16.717][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:16.735][TX] 1B 56 09 00 00 00 3C 00 00 00
+[09:40:16.748][TX] 1B 56 09 00 00 00 3C 00 00 00
+[09:40:16.778][TX] 1B 56 09 00 00 00 3C 00 00 00
+[09:40:16.790][TX] 1B 56 0D 00 00 00 3C 00 00 00
+[09:40:16.807][TX] 1B 56 05 00 00 00 3C 00 00 00
+[09:40:16.808][TX] 1B 56 05 00 00 00 3C 00 00 00
+[09:40:16.838][TX] 1B 56 05 00 00 00 3C 00 00 00
+[09:40:16.868][TX] 1B 56 05 00 00 00 3C 00 00 00
+[09:40:16.899][TX] 1B 56 05 00 00 00 3C 00 00 00
+[09:40:16.930][TX] 1B 56 05 00 00 00 3C 00 00 00
+[09:40:16.956][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:16.961][TX] 1B 56 04 00 00 00 3C 00 00 00
+[09:40:16.968][TX] 1B 56 0C 00 00 00 3C 00 00 00
+[09:40:16.978][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:16.992][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:17.023][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:17.055][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:17.092][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:17.117][TX] 1B 56 08 00 00 00 3C 00 00 00
+[09:40:17.130][TX] 1B 56 0A 00 00 00 3C 00 00 00
+[09:40:17.140][TX] 1B 56 02 00 00 00 3C 00 00 00
+[09:40:17.147][TX] 1B 56 02 00 00 00 3C 00 00 00
+[09:40:17.178][TX] 1B 56 02 00 00 00 3C 00 00 00
+[09:40:17.209][TX] 1B 56 02 00 00 00 3C 00 00 00
+[09:40:17.240][TX] 1B 56 02 00 00 00 3C 00 00 00
+[09:40:17.271][TX] 1B 56 02 00 00 00 3C 00 00 00
+[09:40:17.288][TX] 1B 56 00 00 00 00 3C 00 00 00
+[09:44:50.243][RX] 
+[09:44:50.243][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:44:50.243][RX]   E         D   D   R   R   V   V      3      2 
+[09:44:50.243][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:44:50.243][RX]   E         D   D   R  R     V V       3   2    
+[09:44:50.243][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:44:50.243][RX] 
+[09:44:50.243][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:44:50.244][RX] CHIP_ID: 0xed320001
+[09:44:50.244][RX] CLK_SYS_HZ: 100000000
+[09:44:50.244][RX] ROM bytes: 16384
+[09:44:50.244][RX] SRAM bytes: 65536
+[09:44:50.244][RX] I-cache bytes: 8192
+[09:44:50.244][RX] D-cache bytes: 8192
+[09:44:50.244][RX] MEM_READY: 1
+[09:44:50.244][RX] Build commit: 506f07e4
+[09:44:50.244][RX] Compiler version: GCC 15.2.0
+[09:44:50.366][RX] Boot SRAM
+[09:44:50.366][RX] Monitor: EdRV32
+[09:44:50.366][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:45:19.221][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[09:45:19.250][RX] Input error: type 1, 2 or 3 then Enter
+[09:45:19.250][SYS] Input error: type 1, 2 or 3 then Enter
+[09:45:19.250][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:45:29.849][RX] 
+[09:45:29.849][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:45:29.849][RX]   E         D   D   R   R   V   V      3      2 
+[09:45:29.849][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:45:29.849][RX]   E         D   D   R  R     V V       3   2    
+[09:45:29.849][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:45:29.849][RX] 
+[09:45:29.849][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:45:29.849][RX] CHIP_ID: 0xed320001
+[09:45:29.849][RX] CLK_SYS_HZ: 100000000
+[09:45:29.849][RX] ROM bytes: 16384
+[09:45:29.849][RX] SRAM bytes: 65536
+[09:45:29.849][RX] I-cache bytes: 8192
+[09:45:29.849][RX] D-cache bytes: 8192
+[09:45:29.849][RX] MEM_READY: 1
+[09:45:29.849][RX] Build commit: 506f07e4
+[09:45:29.849][RX] Compiler version: GCC 15.2.0
+[09:45:29.954][RX] Boot SRAM
+[09:45:29.954][RX] Monitor: EdRV32
+[09:45:29.954][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:45:34.168][RX] 
+[09:45:34.168][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:45:34.168][RX]   E         D   D   R   R   V   V      3      2 
+[09:45:34.168][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:45:34.168][RX]   E         D   D   R  R     V V       3   2    
+[09:45:34.168][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:45:34.168][RX] 
+[09:45:34.168][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:45:34.168][RX] CHIP_ID: 0xed320001
+[09:45:34.168][RX] CLK_SYS_HZ: 100000000
+[09:45:34.168][RX] ROM bytes: 16384
+[09:45:34.168][RX] SRAM bytes: 65536
+[09:45:34.168][RX] I-cache bytes: 8192
+[09:45:34.168][RX] D-cache bytes: 8192
+[09:45:34.168][RX] MEM_READY: 1
+[09:45:34.168][RX] Build commit: 506f07e4
+[09:45:34.168][RX] Compiler version: GCC 15.2.0
+[09:45:34.253][RX] Boot SRAM
+[09:45:34.253][RX] Monitor: EdRV32
+[09:45:34.253][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[09:45:38.596][RX] 
+[09:45:38.596][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:45:38.596][RX]   E         D   D   R   R   V   V      3      2 
+[09:45:38.596][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:45:38.596][RX]   E         D   D   R  R     V V       3   2    
+[09:45:38.596][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:45:38.596][RX] 
+[09:45:38.596][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:45:38.596][RX] CHIP_ID: 0xed320001
+[09:45:38.596][RX] CLK_SYS_HZ: 100000000
+[09:45:38.596][RX] ROM bytes: 16384
+[09:45:38.596][RX] SRAM bytes: 65536
+[09:45:38.596][RX] I-cache bytes: 8192
+[09:45:38.596][RX] D-cache bytes: 8192
+[09:45:38.596][RX] MEM_READY: 1
+[09:45:38.596][RX] Build commit: 506f07e4
+[09:45:38.596][RX] Compiler version: GCC 15.2.0
+[09:45:38.698][RX] BIOS: EdRV32
+[09:45:38.698][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:45:38.700][RX] UART load ready
+[09:45:56.626][RX] Load bytes: 206572 segments: 2
+[09:45:56.626][RX] Load result: PASS
+[09:45:56.626][RX] Run: 0x90000000
+[09:45:57.063][RX] NES ROM slot empty or invalid: 00 00 00 00
+[09:46:50.299][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[09:47:17.050][RX] 
+[09:47:17.050][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[09:47:17.051][RX]   E         D   D   R   R   V   V      3      2 
+[09:47:17.051][RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[09:47:17.051][RX]   E         D   D   R  R     V V       3   2    
+[09:47:17.051][RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[09:47:17.051][RX] 
+[09:47:17.051][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[09:47:17.051][RX] CHIP_ID: 0xed320001
+[09:47:17.051][RX] CLK_SYS_HZ: 100000000
+[09:47:17.051][RX] ROM bytes: 16384
+[09:47:17.051][RX] SRAM bytes: 65536
+[09:47:17.051][RX] I-cache bytes: 8192
+[09:47:17.051][RX] D-cache bytes: 8192
+[09:47:17.051][RX] MEM_READY: 1
+[09:47:17.051][RX] Build commit: 506f07e4
+[09:47:17.051][RX] Compiler version: GCC 15.2.0
+[09:47:17.142][RX] BIOS: EdRV32
+[09:47:17.142][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[09:47:17.144][RX] UART load ready
+[09:47:38.668][RX] Load bytes: 248060 segments: 3
+[09:47:38.668][RX] Load result: PASS
+[09:47:38.668][RX] Run: 0x90000000
+[09:47:39.129][RX] Head: 0x905f61c0 (4e 45 53 1a)
+[09:47:39.129][RX] Read in trainer at $7000
+[09:47:39.129][RX] ROM loaded:  [0] 32k/8k VT
+[09:47:39.129][RX] created memory mapper: None
+[09:47:39.129][RX] setting up mapper 0
+[09:47:39.129][RX] reset memory mapper
+[09:47:39.129][RX] NES powered on
+[09:47:39.129][RX] NES ROM prg=32 chr=8 mapper=0
+[09:47:40.026][RX] NES fps=67.0 shown=18.9 cpu=40% ppu=47%
+[09:47:41.146][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:47:42.227][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:47:43.347][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:47:44.429][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:47:45.510][RX] NES fps=55.6 shown=18.5 cpu=31% ppu=58%
+[09:47:46.549][RX] NES fps=57.8 shown=19.2 cpu=29% ppu=60%
+[09:47:47.605][RX] NES fps=56.9 shown=18.9 cpu=28% ppu=61%
+[09:47:48.604][RX] NES fps=60.1 shown=19.0 cpu=34% ppu=54%
+[09:47:49.258][TX] 1B 56 00 00 00 00 2E 00 00 00
+[09:47:49.265][TX] 1B 56 00 00 00 00 28 00 00 00
+[09:47:49.273][TX] 1B 56 00 00 00 00 24 00 00 00
+[09:47:49.281][TX] 1B 56 00 00 00 00 22 00 00 00
+[09:47:49.288][TX] 1B 56 00 00 00 00 1C 00 00 00
+[09:47:49.296][TX] 1B 56 00 00 00 00 19 00 00 00
+[09:47:49.303][TX] 1B 56 00 00 00 00 17 00 00 00
+[09:47:49.311][TX] 1B 56 00 00 00 00 11 00 00 00
+[09:47:49.318][TX] 1B 56 00 00 00 00 0E 00 00 00
+[09:47:49.325][TX] 1B 56 00 00 00 00 0A 00 00 00
+[09:47:49.340][TX] 1B 56 00 00 00 00 05 00 00 00
+[09:47:49.348][TX] 1B 56 00 00 00 00 03 00 00 00
+[09:47:49.710][RX] NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+[09:47:50.407][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.436][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.466][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.497][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.528][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.559][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.591][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.622][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.652][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.683][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.714][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.744][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:50.745][TX] 1B 56 00 00 00 00 03 00 00 00
+[09:47:50.826][RX] NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+[09:47:51.937][RX] NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+[09:47:53.051][RX] NES fps=53.7 shown=17.9 cpu=31% ppu=58%
+[09:47:53.382][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.403][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.435][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.465][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.495][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.527][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.558][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.588][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.619][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.650][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.682][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.713][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.743][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.773][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.804][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.836][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.866][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.897][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.929][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.960][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:53.991][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.023][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.053][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.085][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.116][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.147][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.167][RX] NES fps=53.5 shown=17.8 cpu=31% ppu=58%
+[09:47:54.178][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.209][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:54.236][TX] 1B 56 00 00 00 00 03 00 00 00
+[09:47:54.901][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:54.948][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:54.978][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:55.009][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:55.040][TX] 1B 56 08 00 00 00 03 00 00 00
+[09:47:55.040][TX] 1B 56 00 00 00 00 03 00 00 00
+[09:47:55.286][RX] NES fps=53.5 shown=17.8 cpu=31% ppu=58%
+[09:47:55.835][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:55.858][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:55.889][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:55.920][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:55.950][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:55.981][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.012][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.044][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.075][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.106][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.137][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.168][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.198][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.229][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.260][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.291][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.321][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.351][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.383][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.403][RX] NES fps=53.9 shown=17.9 cpu=31% ppu=58%
+[09:47:56.413][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.445][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.475][TX] 1B 56 04 00 00 00 03 00 00 00
+[09:47:56.493][TX] 1B 56 00 00 00 00 03 00 00 00
+[09:47:57.522][RX] NES fps=53.9 shown=17.9 cpu=31% ppu=58%
+[09:47:58.640][RX] NES fps=54.0 shown=18.0 cpu=31% ppu=58%
+[09:47:59.751][RX] NES fps=54.1 shown=18.0 cpu=31% ppu=58%
+[09:48:00.850][RX] NES fps=54.1 shown=18.0 cpu=31% ppu=58%
+[09:48:01.971][RX] NES fps=54.1 shown=18.0 cpu=31% ppu=58%
+[09:48:03.060][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:48:03.180][TX] 1B 56 00 00 03 02 00 00 00 00
+[09:48:03.235][TX] 1B 56 00 00 14 02 02 00 00 00
+[09:48:03.239][TX] 1B 56 00 00 7C 02 16 00 00 00
+[09:48:03.290][TX] 1B 56 00 00 89 02 16 00 00 00
+[09:48:03.293][TX] 1B 56 00 00 D3 02 23 00 00 00
+[09:48:03.301][TX] 1B 56 00 00 D9 02 23 00 00 00
+[09:48:03.305][TX] 1B 56 00 00 DC 02 23 00 00 00
+[09:48:03.313][TX] 1B 56 00 00 DE 02 23 00 00 00
+[09:48:03.399][TX] 1B 56 01 00 DE 02 23 00 00 00
+[09:48:03.424][TX] 1B 56 01 00 DE 02 23 00 00 00
+[09:48:03.455][TX] 1B 56 01 00 DE 02 23 00 00 00
+[09:48:03.485][TX] 1B 56 01 00 DE 02 23 00 00 00
+[09:48:03.516][TX] 1B 56 01 00 DE 02 23 00 00 00
+[09:48:03.547][TX] 1B 56 01 00 DE 02 23 00 00 00
+[09:48:03.567][TX] 1B 56 00 00 DE 02 23 00 00 00
+[09:48:04.171][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:48:04.273][TX] 1B 56 00 00 E0 02 23 00 00 00
+[09:48:04.325][TX] 1B 56 00 00 E2 02 23 00 00 00
+[09:48:04.327][TX] 1B 56 00 00 FB 02 20 00 00 00
+[09:48:04.338][TX] 1B 56 00 00 FF 02 1E 00 00 00
+[09:48:04.342][TX] 1B 56 00 00 01 03 1E 00 00 00
+[09:48:04.347][TX] 1B 56 00 00 05 03 1E 00 00 00
+[09:48:04.356][TX] 1B 56 00 00 0A 03 1C 00 00 00
+[09:48:04.363][TX] 1B 56 00 00 0D 03 1A 00 00 00
+[09:48:04.370][TX] 1B 56 00 00 11 03 1A 00 00 00
+[09:48:04.378][TX] 1B 56 00 00 13 03 19 00 00 00
+[09:48:04.401][TX] 1B 56 00 00 15 03 19 00 00 00
+[09:48:04.483][TX] 1B 56 00 00 14 03 19 00 00 00
+[09:48:04.534][TX] 1B 56 00 00 12 03 19 00 00 00
+[09:48:04.536][TX] 1B 56 00 00 B9 02 07 00 00 00
+[09:48:04.543][TX] 1B 56 00 00 A3 02 03 00 00 00
+[09:48:04.543][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:05.281][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:48:05.895][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:05.922][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:05.952][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:05.983][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.014][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.046][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.076][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.108][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.139][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.170][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.201][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.231][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.263][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:06.267][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:06.363][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:06.717][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.743][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.774][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.804][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.834][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.865][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.895][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:06.909][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:07.475][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:07.667][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.689][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.720][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.750][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.781][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.811][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.843][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.874][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.906][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.937][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.968][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:07.999][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.031][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.062][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.093][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.124][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.155][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.186][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.217][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.248][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.280][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:08.280][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:08.567][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:09.110][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.146][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.177][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.209][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.240][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.271][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.302][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.332][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.364][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.395][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.426][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.457][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.487][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.518][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.549][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.580][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:09.604][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:09.678][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:10.641][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:10.667][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:10.699][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:10.730][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:10.738][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:10.769][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:48:11.870][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:48:12.986][RX] NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+[09:48:13.056][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.089][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.120][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.151][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.181][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.213][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.243][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.274][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.305][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.336][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.367][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.398][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.429][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.459][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.490][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.521][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.551][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.584][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.614][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.646][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:13.662][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:14.077][RX] NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+[09:48:14.244][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:14.282][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:14.313][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:14.343][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:14.375][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:14.394][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:14.850][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:14.882][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:14.912][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:14.943][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:14.974][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.005][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.036][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.068][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.098][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.128][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.159][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.191][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.195][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:15.222][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.254][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.285][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.316][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.347][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.379][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.411][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.442][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.472][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.502][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:15.511][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:16.107][TX] 1B 56 02 00 9A 02 01 00 00 00
+[09:48:16.148][TX] 1B 56 02 00 9A 02 01 00 00 00
+[09:48:16.179][TX] 1B 56 02 00 9A 02 01 00 00 00
+[09:48:16.211][TX] 1B 56 02 00 9A 02 01 00 00 00
+[09:48:16.242][TX] 1B 56 02 00 9A 02 01 00 00 00
+[09:48:16.257][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:16.282][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:17.396][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:18.314][TX] 1B 56 00 01 9A 02 01 00 00 00
+[09:48:18.351][TX] 1B 56 00 01 9A 02 01 00 00 00
+[09:48:18.382][TX] 1B 56 00 01 9A 02 01 00 00 00
+[09:48:18.414][TX] 1B 56 00 01 9A 02 01 00 00 00
+[09:48:18.444][TX] 1B 56 00 01 9A 02 01 00 00 00
+[09:48:18.465][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:18.486][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:19.588][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:19.687][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:19.714][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:19.745][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:19.776][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:19.785][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:20.338][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:20.382][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:20.413][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:20.444][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:20.475][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:20.477][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:20.691][RX] NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+[09:48:21.221][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.247][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.277][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.307][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.338][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.368][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.398][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:21.423][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:21.780][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:21.803][RX] NES fps=54.2 shown=18.0 cpu=31% ppu=58%
+[09:48:21.813][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:21.843][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:21.874][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:21.905][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:21.936][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:21.942][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:22.917][RX] NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+[09:48:23.734][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.762][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.793][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.823][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.854][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.885][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.915][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.946][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:23.977][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:24.005][RX] NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+[09:48:24.008][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:24.040][TX] 1B 56 20 00 9A 02 01 00 00 00
+[09:48:24.064][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:24.364][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:24.398][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:24.430][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:24.461][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:24.493][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:24.524][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:24.536][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:24.588][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.617][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.647][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.679][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.710][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.741][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.772][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.803][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.837][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.865][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.896][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.928][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.958][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:24.990][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.020][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.051][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.082][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.108][RX] NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+[09:48:25.113][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.144][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.175][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.205][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.236][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.267][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.298][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.329][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.360][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.391][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.423][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.447][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:25.523][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.548][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.579][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.609][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.640][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.670][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.700][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.731][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.762][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.793][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.823][TX] 1B 56 01 00 9A 02 01 00 00 00
+[09:48:25.831][TX] 1B 56 09 00 9A 02 01 00 00 00
+[09:48:25.859][TX] 1B 56 09 00 9A 02 01 00 00 00
+[09:48:25.862][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.884][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.916][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.947][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:25.977][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.008][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.039][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.070][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.088][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:26.098][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.100][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.132][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.163][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.195][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.226][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.230][RX] NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+[09:48:26.256][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.288][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.319][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.349][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:26.358][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:26.457][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.490][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.521][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.551][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.583][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.614][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.645][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.677][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.708][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.740][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.769][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.800][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.830][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.861][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.892][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.924][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.953][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:26.984][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.014][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.045][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.076][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.107][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.137][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.168][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.199][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.231][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.262][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.289][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.292][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.316][RX] NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+[09:48:27.324][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.355][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.385][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.415][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.447][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.477][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:27.481][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.507][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.538][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.569][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.600][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.632][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.663][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.693][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.724][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.755][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.787][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.818][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.849][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.879][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.910][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.941][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:27.973][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.005][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.035][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.065][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.096][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.127][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.159][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.191][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.223][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.253][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.285][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.315][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.344][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.401][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.422][RX] NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+[09:48:28.425][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.456][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.488][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.519][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.550][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.582][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.613][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.643][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.674][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:28.677][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.705][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.736][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.767][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.800][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.830][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.863][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.892][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.925][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.955][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:28.987][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.018][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.048][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.080][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.112][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.142][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.173][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.205][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.242][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.259][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.266][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.297][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.328][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.363][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.389][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.420][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:29.441][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.450][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.481][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.513][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.544][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.548][RX] NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+[09:48:29.575][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.606][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.638][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.669][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.699][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.731][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.761][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.792][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.824][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.854][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.884][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.914][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.945][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:29.975][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.009][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.038][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.069][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.101][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.131][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.161][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.192][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:30.207][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:30.273][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:30.273][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.299][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.329][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.365][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.391][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.421][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.452][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.484][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.514][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.546][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.577][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.607][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.639][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.659][RX] NES fps=53.2 shown=17.7 cpu=31% ppu=57%
+[09:48:30.671][TX] 1B 56 10 00 9A 02 01 00 00 00
+[09:48:30.674][TX] 1B 56 14 00 9A 02 01 00 00 00
+[09:48:30.702][TX] 1B 56 14 00 9A 02 01 00 00 00
+[09:48:30.734][TX] 1B 56 14 00 9A 02 01 00 00 00
+[09:48:30.737][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.765][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.796][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.828][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.859][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.890][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.921][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.952][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:30.984][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.014][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.046][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.077][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.109][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.139][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.171][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.202][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.233][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.263][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.295][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.326][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.357][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.387][TX] 1B 56 04 00 9A 02 01 00 00 00
+[09:48:31.396][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:31.513][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.543][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.573][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.604][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.637][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.668][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.699][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.731][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:31.738][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.761][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.791][RX] NES fps=53.0 shown=17.6 cpu=31% ppu=57%
+[09:48:31.791][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.822][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.854][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.884][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.916][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.948][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:31.979][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.010][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.041][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.072][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.103][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.134][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.166][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.197][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.228][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.259][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.290][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.321][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.352][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.383][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.415][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.445][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.476][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.506][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.537][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.568][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.571][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.599][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.630][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.661][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.692][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.723][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.754][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.785][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.816][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.847][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.878][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.909][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.926][RX] NES fps=52.9 shown=17.6 cpu=31% ppu=57%
+[09:48:32.940][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:32.947][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:32.971][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.001][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.031][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.062][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.093][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.123][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.157][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.186][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.219][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.248][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.279][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.311][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.342][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.373][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.404][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.434][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.466][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.497][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.528][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.559][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.590][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.622][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.653][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.684][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.715][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.746][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.777][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.807][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.838][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.870][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.900][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:33.922][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:33.930][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:33.962][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:33.992][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.023][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.053][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.063][RX] NES fps=52.8 shown=17.6 cpu=31% ppu=57%
+[09:48:34.084][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.092][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.114][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.146][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.176][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.207][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.238][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.269][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.280][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.300][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.330][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.360][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.391][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.421][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.452][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.481][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.484][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.515][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.545][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.576][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.606][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.637][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.668][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.699][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.730][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.760][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.791][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.822][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.852][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.882][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.913][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.943][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:34.963][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:34.975][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.005][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.036][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.066][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.098][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.129][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.160][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.191][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.201][RX] NES fps=52.8 shown=17.6 cpu=31% ppu=57%
+[09:48:35.223][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.253][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.276][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:35.368][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.392][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.421][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.452][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.483][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.514][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.545][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.572][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.575][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.606][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.637][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.668][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.699][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.729][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.761][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:35.763][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.791][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.821][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.852][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.882][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.913][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.943][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:35.974][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.005][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.036][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.067][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.098][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.129][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.159][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.190][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.221][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.252][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.283][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.314][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.342][RX] NES fps=52.6 shown=17.5 cpu=32% ppu=57%
+[09:48:36.345][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.380][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.380][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.406][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.437][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.467][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.498][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.530][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.561][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.591][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:36.617][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.622][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.653][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.684][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.716][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.747][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.777][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.808][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.839][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.871][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.902][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.933][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.965][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:36.996][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.027][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.059][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.091][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.121][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.152][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.183][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.215][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.245][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.275][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.306][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.336][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.368][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.399][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.430][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.461][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.477][RX] NES fps=52.9 shown=17.6 cpu=32% ppu=57%
+[09:48:37.491][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.523][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.552][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.583][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.613][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.643][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.674][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.705][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.736][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.768][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.799][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.830][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.862][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.892][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.923][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.953][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.984][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:37.999][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.065][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.093][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.123][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.154][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.185][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.214][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.245][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.276][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.306][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.337][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.373][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.400][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.430][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.461][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.491][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.522][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.552][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.583][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.591][RX] NES fps=53.9 shown=17.9 cpu=31% ppu=58%
+[09:48:38.614][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.644][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:38.662][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.675][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.707][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.736][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.767][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.797][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.829][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.860][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.891][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.921][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.952][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:38.984][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.014][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.044][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.074][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.105][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.137][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.168][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.199][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.230][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.261][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:39.263][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.292][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.323][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.353][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.384][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.416][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.446][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.478][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.509][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.539][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.570][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.601][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.633][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.663][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.695][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.726][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.728][RX] NES fps=52.8 shown=17.6 cpu=32% ppu=57%
+[09:48:39.757][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.788][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.819][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.850][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.881][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.912][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.944][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:39.976][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.005][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.036][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.045][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.066][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.097][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.128][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.159][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.190][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.222][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.223][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.252][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.281][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.313][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.343][TX] 1B 56 18 00 9A 02 01 00 00 00
+[09:48:40.365][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.374][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.405][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.436][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.467][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.498][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.530][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.562][TX] 1B 56 08 00 9A 02 01 00 00 00
+[09:48:40.570][TX] 1B 56 00 00 9A 02 01 00 00 00
+[09:48:40.860][RX] NES fps=53.1 shown=17.7 cpu=31% ppu=58%
+[09:48:41.987][RX] NES fps=53.3 shown=17.7 cpu=31% ppu=58%
+[09:48:43.111][RX] NES fps=53.5 shown=17.8 cpu=31% ppu=58%
+[09:48:44.167][RX] NES fps=56.7 shown=17.9 cpu=32% ppu=56%
+[09:48:45.224][RX] NES fps=56.9 shown=18.9 cpu=28% ppu=61%
+[09:48:46.280][RX] NES fps=56.9 shown=18.9 cpu=28% ppu=61%
+[09:48:47.282][RX] NES fps=60.5 shown=19.1 cpu=34% ppu=54%
+[09:48:48.389][RX] NES fps=54.2 shown=18.0 cpu=31% ppu=58%
+[09:48:49.499][RX] NES fps=53.7 shown=17.9 cpu=31% ppu=58%
+[09:48:50.491][SYS] disconnected COM7
+[09:50:56.351][SYS] connected COM7 @ 115200 8N1

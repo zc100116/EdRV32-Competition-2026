@@ -1,0 +1,525 @@
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 35888 segments: 1
+Load result: PASS
+Run: 0x90000000
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND fill_rgb565 crc=
+0xe9358c29
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND border_rgb565 crc=
+0x1658f064
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND glyph_rgb565 crc=
+0x26bf7139
+RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+RND blit_rgb565 crc=
+0x87b4c9d9
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+RND copy_rgb565 crc=
+0xd330519b
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND box_shadow_rgb565 crc=
+0xaddb98ac
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+RND blur_rgb565 crc=
+0x9dc67871
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND tilemap_rgb565 crc=
+0x763bdd5f
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND fill_argb8888 crc=
+0x0bda4f5e
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND border_argb8888 crc=
+0x2230a20f
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND glyph_argb8888 crc=
+0x004b61a5
+RND ERR_CODE=0x00000000 CUR_DESC=0x0000000c
+RND blit_argb8888 crc=
+0xaa15e883
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000005
+RND copy_argb8888 crc=
+0x6d1538f5
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND box_shadow_argb8888 crc=
+0x5ca6e649
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+RND blur_argb8888 crc=
+0x3f13597a
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND tilemap_argb8888 crc=
+0xeecd1aac
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND triangle_rgb565 crc=
+0x2505e0b3
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND line_rgb565 crc=
+0x7b3dcb50
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND arc_rgb565 crc=
+0xa0b4a40e
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+RND affine_blit_rgb565 crc=
+0x6dd3991a
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND round_clip_rgb565 crc=
+0xa4acf98e
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND cutout_rgb565 crc=
+0x391e8218
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND triangle_argb8888 crc=
+0x1d719162
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND line_argb8888 crc=
+0xd60297bc
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND arc_argb8888 crc=
+0x70b92fd6
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000004
+RND mask_rect_argb8888 crc=
+0xf99e4bfe
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000006
+RND affine_blit_argb8888 crc=
+0xcdf52fc0
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000002
+RND round_clip_argb8888 crc=
+0x6e4785b8
+RND ERR_CODE=0x00000000 CUR_DESC=0x00000001
+RND cutout_argb8888 crc=
+0xcab70045
+RND display ready
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+Input error: type 1, 2 or 3 then Enter
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UAR
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 1153604 segments: 2
+Load result: PASS
+Run: 0x90000000
+S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+LVGL fps=1 rnd_tasks=27 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+GAME fps=60 rnd_ms=1.797 cpu_ms=0.191
+GAME fps=60 rnd_ms=1.808 cpu_ms=0.185
+GAME fps=59 rnd_ms=1.741 cpu_ms=0.186
+GAME fps=60 rnd_ms=1.692 cpu_ms=0.168
+GAME fps=60 rnd_ms=1.692 cpu_ms=0.167
+GAME fps=60 rnd_ms=1.692 cpu_ms=0.167
+GAME fps=59 rnd_ms=1.691 cpu_ms=0.169
+GAME fps=60 rnd_ms=1.690 cpu_ms=0.167
+GAME fps=59 rnd_ms=2.840 cpu_ms=0.239
+GAME fps=60 rnd_ms=3.836 cpu_ms=0.302
+LVGL fps=0 rnd_tasks=54 sw_tasks=0
+LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.
+LAYERS 2: 256x128 checker moves to LEFT, RIGHT, TOP, BOTTOM; holds ~1 s.
+Each edge is flush; no L1 pixels remain outside the moving rectangle.
+LAYERS 3: Fixed checker fades 0 -> 255 -> 0 in ~4 s, without jumps.
+LAYERS 4: Color grid scrolls X +3 / Y +1 each frame; fixed L1 at top right.
+Grid stays aligned and tear-free, including non-16-aligned scroll.
+LAYERS 5: 50% opacity container, button, slider and checkbox over stripes.
+Uniform transparency, aligned control edges; RND claims LAYER blend.
+LVGL fps=0 rnd_tasks=102 sw_tasks=0
+LAYERS 5 LAYER claimed=11 unclaimed=0
+LAYERS 5 LAYER claimed=11 unclaimed=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LAYERS 5 LAYER claimed=11 unclaimed=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LAYERS 5 LAYER claimed=11 unclaimed=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LAYERS 5 LAYER claimed=11 unclaimed=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.
+LAYERS 2: 256x128 checker moves to LEFT, RIGHT, TOP, BOTTOM; holds ~1 s.
+Each edge is flush; no L1 pixels remain outside the moving rectangle.
+LAYERS 3: Fixed checker fades 0 -> 255 -> 0 in ~4 s, without jumps.
+LVGL fps=0 rnd_tasks=84 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=2 rnd_tasks=50 sw_tasks=0
+LVGL fps=2 rnd_tasks=50 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[Warn]	(145.740, +145740)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.745, +5)	 lv_display_is_invalidation_enabled: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:1231
+[Warn]	(145.764, +19)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.770, +6)	 lv_display_get_screen_active: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:787
+[Warn]	(145.788, +18)	 lv_display_get_screen_prev: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:809
+[Warn]	(145.806, +18)	 lv_display_get_layer_bottom: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:842
+[Warn]	(145.824, +18)	 lv_display_get_layer_top: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:820
+[Warn]	(145.842, +18)	 lv_display_get_layer_sys: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:831
+[Warn]	(145.860, +18)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.866, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.873, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.880, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.886, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.893, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.899, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.906, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(145.913, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+S3 CPU mcause=0x00000007 mepc=0x900663bc
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 1153604 segments: 2
+Load result: PASS
+Run: 0x90000000
+S3: KEY1/2 select, KEY3 launch, KEY4 back; UART a/d/w/p
+LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32
+LVGL fps=1 rnd_tasks=27 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=4 rnd_tasks=100 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+LVGL fps=0 rnd_tasks=0 sw_tasks=0
+[Warn]	(112.890, +112890)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(112.896, +6)	 lv_display_is_invalidation_enabled: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:1231
+[Warn]	(112.915, +19)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(112.921, +6)	 lv_display_get_screen_active: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:787
+[Warn]	(112.939, +18)	 lv_display_get_screen_prev: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:809
+[Warn]	(112.957, +18)	 lv_display_get_layer_bottom: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:842
+[Warn]	(112.975, +18)	 lv_display_get_layer_top: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:820
+[Warn]	(112.993, +18)	 lv_display_get_layer_sys: Deprecated: Calling this function with a NULL display is deprecated. You can retrieve the default display with `lv_display_get_default()` lv_display.c:831
+[Warn]	(113.011, +18)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.017, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.024, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.030, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.037, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.044, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.050, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.057, +7)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+[Warn]	(113.063, +6)	 lv_obj_get_display: No screen found lv_obj_tree.c:307
+S3 CPU mcause=0x00000007 mepc=0x900663bc
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+Input error: type 1, 2 or 3 then Enter
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+Boot SRAM
+Monitor: EdRV32
+Menu: 1=CoreMark 2=Peripheral tests 3=System info
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 206572 segments: 2
+Load result: PASS
+Run: 0x90000000
+NES ROM slot empty or invalid: 00 00 00 00
+
+  EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+  E         D   D   R   R   V   V      3      2 
+  EEEE      D   D   RRRRR    V V    3333   2222 
+  E         D   D   R  R     V V       3   2    
+  EEEEEEE   DDDD    R    R    V     3333   2222 
+
+  EdRV32 Boot ROM - UART 115200 8N1
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 506f07e4
+Compiler version: GCC 15.2.0
+BIOS: EdRV32
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+UART load ready
+Load bytes: 248060 segments: 3
+Load result: PASS
+Run: 0x90000000
+Head: 0x905f61c0 (4e 45 53 1a)
+Read in trainer at $7000
+ROM loaded:  [0] 32k/8k VT
+created memory mapper: None
+setting up mapper 0
+reset memory mapper
+NES powered on
+NES ROM prg=32 chr=8 mapper=0
+NES fps=67.0 shown=18.9 cpu=40% ppu=47%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=55.6 shown=18.5 cpu=31% ppu=58%
+NES fps=57.8 shown=19.2 cpu=29% ppu=60%
+NES fps=56.9 shown=18.9 cpu=28% ppu=61%
+NES fps=60.1 shown=19.0 cpu=34% ppu=54%
+NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+NES fps=53.7 shown=17.9 cpu=31% ppu=58%
+NES fps=53.5 shown=17.8 cpu=31% ppu=58%
+NES fps=53.5 shown=17.8 cpu=31% ppu=58%
+NES fps=53.9 shown=17.9 cpu=31% ppu=58%
+NES fps=53.9 shown=17.9 cpu=31% ppu=58%
+NES fps=54.0 shown=18.0 cpu=31% ppu=58%
+NES fps=54.1 shown=18.0 cpu=31% ppu=58%
+NES fps=54.1 shown=18.0 cpu=31% ppu=58%
+NES fps=54.1 shown=18.0 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+NES fps=54.2 shown=18.0 cpu=31% ppu=58%
+NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+NES fps=54.6 shown=18.2 cpu=31% ppu=58%
+NES fps=54.5 shown=18.1 cpu=31% ppu=58%
+NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+NES fps=54.4 shown=18.1 cpu=31% ppu=58%
+NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+NES fps=54.3 shown=18.1 cpu=31% ppu=58%
+NES fps=53.2 shown=17.7 cpu=31% ppu=57%
+NES fps=53.0 shown=17.6 cpu=31% ppu=57%
+NES fps=52.9 shown=17.6 cpu=31% ppu=57%
+NES fps=52.8 shown=17.6 cpu=31% ppu=57%
+NES fps=52.8 shown=17.6 cpu=31% ppu=57%
+NES fps=52.6 shown=17.5 cpu=32% ppu=57%
+NES fps=52.9 shown=17.6 cpu=32% ppu=57%
+NES fps=53.9 shown=17.9 cpu=31% ppu=58%
+NES fps=52.8 shown=17.6 cpu=32% ppu=57%
+NES fps=53.1 shown=17.7 cpu=31% ppu=58%
+NES fps=53.3 shown=17.7 cpu=31% ppu=58%
+NES fps=53.5 shown=17.8 cpu=31% ppu=58%
+NES fps=56.7 shown=17.9 cpu=32% ppu=56%
+NES fps=56.9 shown=18.9 cpu=28% ppu=61%
+NES fps=56.9 shown=18.9 cpu=28% ppu=61%
+NES fps=60.5 shown=19.1 cpu=34% ppu=54%
+NES fps=54.2 shown=18.0 cpu=31% ppu=58%
+NES fps=53.7 shown=17.9 cpu=31% ppu=58%
