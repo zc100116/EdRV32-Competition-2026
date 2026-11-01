@@ -1,0 +1,60 @@
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[3]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[4]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[5]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[6]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[7]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[8]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[9]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel10_r[10]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[3]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[4]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[5]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[6]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[7]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[8]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[9]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel11_r[10]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[3]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[4]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[5]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[6]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[7]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[8]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[9]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel20_r[10]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[3]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[4]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[5]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[6]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[7]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[8]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[9]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_pix/advance_kernel21_r[10]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[2]' of 'GTP_DFF_P' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/wrcal_move_en[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_wrcal/write_calibration[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2_com) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[1].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[2].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[3].u_pair/opit_2) has been disconnected.
+W: DeviceMap-4011: The net (pin T_BYTEIN of inst u_tmds/g_channel[0].u_pair/opit_2_com) has been disconnected.
+W: Public-4010: Pcf file G:/codex_project/EdRV32-FPGA/EdRV32-B3V/device_map/edrv32_fpga_board_vision_top.pcf has been covered.
+Action dev_map: Real time elapsed is 0h:0m:47s
+Action dev_map: CPU time elapsed is 0h:0m:6s
+Action dev_map: Process CPU time elapsed is 0h:0m:7s
+Action dev_map: Peak memory pool usage is 1,376 MB

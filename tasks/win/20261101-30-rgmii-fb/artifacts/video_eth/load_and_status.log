@@ -1,0 +1,231 @@
+seq=12661 ts=1793517451148 [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+seq=12662 ts=1793517451148 [rx]   E         D   D   R   R   V   V      3      2 
+seq=12663 ts=1793517451148 [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+seq=12664 ts=1793517451148 [rx]   E         D   D   R  R     V V       3   2    
+seq=12665 ts=1793517451148 [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+seq=12666 ts=1793517451148 [rx] 
+seq=12667 ts=1793517451148 [rx]   EdRV32 Boot ROM - UART 115200 8N1
+seq=12668 ts=1793517451148 [rx] CHIP_ID: 0xed320001
+seq=12669 ts=1793517451148 [rx] CLK_SYS_HZ: 100000000
+seq=12670 ts=1793517451148 [rx] ROM bytes: 16384
+seq=12671 ts=1793517451148 [rx] SRAM bytes: 65536
+seq=12672 ts=1793517451148 [rx] I-cache bytes: 8192
+seq=12673 ts=1793517451148 [rx] D-cache bytes: 8192
+seq=12674 ts=1793517451148 [rx] MEM_READY: 1
+seq=12675 ts=1793517451148 [rx] Build commit: d5d16c34
+seq=12676 ts=1793517451148 [rx] Compiler version: GCC 15.2.0
+seq=12677 ts=1793517451251 [rx] BIOS: EdRV32
+seq=12678 ts=1793517451251 [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+seq=12679 ts=1793517451254 [rx] UART load ready
+seq=12680 ts=1793517453884 [rx] Load bytes: 29916 segments: 1
+seq=12681 ts=1793517453884 [rx] Load result: PASS
+seq=12682 ts=1793517453884 [rx] Run: 0x10000000
+seq=12683 ts=1793517453884 [rx] Demo: demo_vision
+seq=12684 ts=1793517453884 [rx] CHIP_ID: 0xed320001
+seq=12685 ts=1793517453884 [rx] CLK_SYS_HZ: 100000000
+seq=12686 ts=1793517453884 [rx] ROM bytes: 16384
+seq=12687 ts=1793517453884 [rx] SRAM bytes: 65536
+seq=12688 ts=1793517453884 [rx] I-cache bytes: 8192
+seq=12689 ts=1793517453884 [rx] D-cache bytes: 8192
+seq=12690 ts=1793517453884 [rx] MEM_READY: 1
+seq=12691 ts=1793517453884 [rx] Build commit: d5d16c34
+seq=12692 ts=1793517453884 [rx] Compiler version: GCC 15.2.0
+seq=12693 ts=1793517453884 [rx] VIN ID: 0x00010001
+seq=12694 ts=1793517453884 [rx] PIX ID: 0x00020001
+seq=12695 ts=1793517453884 [rx] GEO ID: 0x00030001
+seq=12696 ts=1793517453884 [rx] DISP ID: 0x00050002
+seq=12697 ts=1793517453884 [rx] ETH ID: 0x00070001
+seq=12698 ts=1793517453885 [rx] MEM_XBAR ID: 0x00080001
+seq=12699 ts=1793517454011 [rx] Camera: 0
+seq=12700 ts=1793517454011 [rx] Camera chip ID: 0x00005640
+seq=12701 ts=1793517454144 [rx] Camera: 1
+seq=12702 ts=1793517454144 [rx] Camera chip ID: 0x00005640
+seq=12703 ts=1793517454291 [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+seq=12704 ts=1793517454291 [rx] Demo commands: s2 | status | help
+seq=12705 ts=1793517454291 [rx] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+seq=12706 ts=1793517454291 [rx] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+seq=12707 ts=1793517454291 [rx] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+seq=12708 ts=1793517454291 [rx] GEO: geo off | geo rotate | geo scale
+seq=12709 ts=1793517454291 [rx] Output: output hdmi | output eth | output both | fps 1..60
+seq=12710 ts=1793517454291 [rx] Monitor: sample 10..1000 (Hz), default 100
+seq=12711 ts=1793517454292 [rx] KEY: KEY2 requires s2; KEY3 PIX; KEY4 GEO
+seq=12712 ts=1793517477855 [sys] UDP 已监听 192.168.1.2:6000 · console
+seq=12713 ts=1793517478073 [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+seq=12714 ts=1793517478080 [tx] output eth<CR>
+seq=12715 ts=1793517478106 [tx] status<CR>
+seq=12716 ts=1793517478284 [rx] Demo command: OK
+seq=12717 ts=1793517478284 [rx] Switch: frames=2 mtime_ticks=15355186 HDMI off (Surface ready)
+seq=12718 ts=1793517478284 [rx] Scene: 2
+seq=12719 ts=1793517478284 [rx] PIX mode: 0
+seq=12720 ts=1793517478284 [rx] GEO mode: 0
+seq=12721 ts=1793517478284 [rx] Output mode: 1
+seq=12722 ts=1793517478284 [rx] Requested video fps: 30
+seq=12723 ts=1793517478284 [rx] Video divisor: 1
+seq=12724 ts=1793517478284 [rx] Monitor Hz: 100
+seq=12725 ts=1793517478284 [rx] VIN camera0 frames: 716
+seq=12726 ts=1793517478284 [rx] VIN camera1 frames: 715
+seq=12727 ts=1793517478284 [rx] VIN CH0 frames: 714
+seq=12728 ts=1793517478284 [rx] VIN CH2 frames: 0
+seq=12729 ts=1793517478284 [rx] VIN CH0 overflow: 0
+seq=12730 ts=1793517478284 [rx] VIN CH2 overflow: 0
+seq=12731 ts=1793517478284 [rx] ETH peer IP: 0xc0a80102
+seq=12732 ts=1793517478285 [rx] ETH peer port: 6000
+seq=12733 ts=1793517478285 [rx] ETH STATUS: 0x00000002
+seq=12734 ts=1793517478285 [rx] Video skips (current window): 0
+seq=12735 ts=1793517478285 [rx] Monitor sequence: 2402
+seq=12736 ts=1793517478285 [rx] Monitor dropped records: 2381
+seq=12737 ts=1793517478285 [rx] mtime: 2716914459
+seq=12738 ts=1793517478285 [rx] Demo command: OK
+seq=12739 ts=1793517479358 [tx] status<CR>
+seq=12740 ts=1793517479405 [rx] Scene: 2
+seq=12741 ts=1793517479405 [rx] PIX mode: 0
+seq=12742 ts=1793517479405 [rx] GEO mode: 0
+seq=12743 ts=1793517479405 [rx] Output mode: 1
+seq=12744 ts=1793517479405 [rx] Requested video fps: 30
+seq=12745 ts=1793517479405 [rx] Video divisor: 1
+seq=12746 ts=1793517479405 [rx] Monitor Hz: 100
+seq=12747 ts=1793517479405 [rx] VIN camera0 frames: 749
+seq=12748 ts=1793517479405 [rx] VIN camera1 frames: 749
+seq=12749 ts=1793517479405 [rx] VIN CH0 frames: 748
+seq=12750 ts=1793517479405 [rx] VIN CH2 frames: 0
+seq=12751 ts=1793517479405 [rx] VIN CH0 overflow: 0
+seq=12752 ts=1793517479405 [rx] VIN CH2 overflow: 0
+seq=12753 ts=1793517479405 [rx] ETH peer IP: 0xc0a80102
+seq=12754 ts=1793517479405 [rx] ETH peer port: 6000
+seq=12755 ts=1793517479405 [rx] ETH STATUS: 0x00000002
+seq=12756 ts=1793517479405 [rx] Video skips (current window): 0
+seq=12757 ts=1793517479405 [rx] Monitor sequence: 2514
+seq=12758 ts=1793517479405 [rx] Monitor dropped records: 2381
+seq=12759 ts=1793517479405 [rx] mtime: 2828686661
+seq=12760 ts=1793517479405 [rx] Demo command: OK
+seq=12761 ts=1793517489379 [tx] status<CR>
+seq=12762 ts=1793517489419 [rx] Scene: 2
+seq=12763 ts=1793517489419 [rx] PIX mode: 0
+seq=12764 ts=1793517489419 [rx] GEO mode: 0
+seq=12765 ts=1793517489419 [rx] Output mode: 1
+seq=12766 ts=1793517489419 [rx] Requested video fps: 30
+seq=12767 ts=1793517489419 [rx] Video divisor: 1
+seq=12768 ts=1793517489419 [rx] Monitor Hz: 100
+seq=12769 ts=1793517489419 [rx] VIN camera0 frames: 1050
+seq=12770 ts=1793517489419 [rx] VIN camera1 frames: 1049
+seq=12771 ts=1793517489419 [rx] VIN CH0 frames: 1048
+seq=12772 ts=1793517489419 [rx] VIN CH2 frames: 0
+seq=12773 ts=1793517489419 [rx] VIN CH0 overflow: 0
+seq=12774 ts=1793517489419 [rx] VIN CH2 overflow: 0
+seq=12775 ts=1793517489419 [rx] ETH peer IP: 0xc0a80102
+seq=12776 ts=1793517489419 [rx] ETH peer port: 6000
+seq=12777 ts=1793517489419 [rx] ETH STATUS: 0x00000002
+seq=12778 ts=1793517489419 [rx] Video skips (current window): 0
+seq=12779 ts=1793517489419 [rx] Monitor sequence: 3516
+seq=12780 ts=1793517489419 [rx] Monitor dropped records: 2381
+seq=12781 ts=1793517489419 [rx] mtime: 3830763833
+seq=12782 ts=1793517489419 [rx] Demo command: OK
+seq=12783 ts=1793517509360 [tx] status<CR>
+seq=12784 ts=1793517509399 [rx] Scene: 2
+seq=12785 ts=1793517509400 [rx] PIX mode: 0
+seq=12786 ts=1793517509400 [rx] GEO mode: 0
+seq=12787 ts=1793517509400 [rx] Output mode: 1
+seq=12788 ts=1793517509400 [rx] Requested video fps: 30
+seq=12789 ts=1793517509400 [rx] Video divisor: 1
+seq=12790 ts=1793517509400 [rx] Monitor Hz: 100
+seq=12791 ts=1793517509400 [rx] VIN camera0 frames: 1649
+seq=12792 ts=1793517509400 [rx] VIN camera1 frames: 1649
+seq=12793 ts=1793517509400 [rx] VIN CH0 frames: 1648
+seq=12794 ts=1793517509400 [rx] VIN CH2 frames: 0
+seq=12795 ts=1793517509400 [rx] VIN CH0 overflow: 0
+seq=12796 ts=1793517509400 [rx] VIN CH2 overflow: 0
+seq=12797 ts=1793517509400 [rx] ETH peer IP: 0xc0a80102
+seq=12798 ts=1793517509400 [rx] ETH peer port: 6000
+seq=12799 ts=1793517509400 [rx] ETH STATUS: 0x00000002
+seq=12800 ts=1793517509400 [rx] Video skips (current window): 0
+seq=12801 ts=1793517509400 [rx] Monitor sequence: 5513
+seq=12802 ts=1793517509400 [rx] Monitor dropped records: 2381
+seq=12803 ts=1793517509400 [rx] mtime: 5828779027
+seq=12804 ts=1793517509400 [rx] Demo command: OK
+seq=12805 ts=1793517539360 [tx] status<CR>
+seq=12806 ts=1793517539400 [rx] Scene: 2
+seq=12807 ts=1793517539400 [rx] PIX mode: 0
+seq=12808 ts=1793517539400 [rx] GEO mode: 0
+seq=12809 ts=1793517539400 [rx] Output mode: 1
+seq=12810 ts=1793517539400 [rx] Requested video fps: 30
+seq=12811 ts=1793517539400 [rx] Video divisor: 1
+seq=12812 ts=1793517539400 [rx] Monitor Hz: 100
+seq=12813 ts=1793517539400 [rx] VIN camera0 frames: 2549
+seq=12814 ts=1793517539400 [rx] VIN camera1 frames: 2549
+seq=12815 ts=1793517539400 [rx] VIN CH0 frames: 2548
+seq=12816 ts=1793517539400 [rx] VIN CH2 frames: 0
+seq=12817 ts=1793517539400 [rx] VIN CH0 overflow: 0
+seq=12818 ts=1793517539400 [rx] VIN CH2 overflow: 0
+seq=12819 ts=1793517539400 [rx] ETH peer IP: 0xc0a80102
+seq=12820 ts=1793517539400 [rx] ETH peer port: 6000
+seq=12821 ts=1793517539400 [rx] ETH STATUS: 0x00000002
+seq=12822 ts=1793517539400 [rx] Video skips (current window): 0
+seq=12823 ts=1793517539400 [rx] Monitor sequence: 8513
+seq=12824 ts=1793517539400 [rx] Monitor dropped records: 2381
+seq=12825 ts=1793517539400 [rx] mtime: 8828792036
+seq=12826 ts=1793517539400 [rx] Demo command: OK
+seq=12827 ts=1793517571360 [tx] output both<CR>
+seq=12828 ts=1793517571360 [tx] fps 30<CR>
+seq=12829 ts=1793517571361 [tx] sample 100<CR>
+seq=12830 ts=1793517571361 [tx] status<CR>
+seq=12831 ts=1793517571530 [rx] Demo command: OK
+seq=12832 ts=1793517571530 [rx] Switch: frames=1 mtime_ticks=16391278 HDMI FRAME
+seq=12833 ts=1793517571530 [rx] Demo command: OK
+seq=12834 ts=1793517571530 [rx] Demo command: OK
+seq=12835 ts=1793517571530 [rx] Scene: 2
+seq=12836 ts=1793517571530 [rx] PIX mode: 0
+seq=12837 ts=1793517571530 [rx] GEO mode: 0
+seq=12838 ts=1793517571530 [rx] Output mode: 2
+seq=12839 ts=1793517571530 [rx] Requested video fps: 30
+seq=12840 ts=1793517571530 [rx] Video divisor: 1
+seq=12841 ts=1793517571530 [rx] Monitor Hz: 100
+seq=12842 ts=1793517571530 [rx] VIN camera0 frames: 3510
+seq=12843 ts=1793517571530 [rx] VIN camera1 frames: 3509
+seq=12844 ts=1793517571530 [rx] VIN CH0 frames: 3508
+seq=12845 ts=1793517571530 [rx] VIN CH2 frames: 0
+seq=12846 ts=1793517571530 [rx] VIN CH0 overflow: 0
+seq=12847 ts=1793517571530 [rx] VIN CH2 overflow: 0
+seq=12848 ts=1793517571530 [rx] ETH peer IP: 0xc0a80102
+seq=12849 ts=1793517571530 [rx] ETH peer port: 6000
+seq=12850 ts=1793517571531 [rx] ETH STATUS: 0x00000002
+seq=12851 ts=1793517571531 [rx] Video skips (current window): 0
+seq=12852 ts=1793517571531 [rx] Monitor sequence: 11725
+seq=12853 ts=1793517571531 [rx] Monitor dropped records: 2381
+seq=12854 ts=1793517571531 [rx] mtime: 12040935967
+seq=12855 ts=1793517571531 [rx] Demo command: OK
+seq=12856 ts=1793517588828 [tx] geo set 0 -10 1000 1000 0 0 0 0<CR>
+seq=12857 ts=1793517588843 [rx] Demo command: OK
+seq=12858 ts=1793517590851 [rx] Demo command: OK
+seq=12859 ts=1793517590859 [tx] geo set 1 -10 1000 1000 0 0 0 0<CR>
+seq=12860 ts=1793517591897 [tx] geo set 1 -20 1000 1000 0 0 0 0<CR>
+seq=12861 ts=1793517591918 [rx] Demo command: OK
+seq=12862 ts=1793517593119 [tx] geo set 1 -30 1000 1000 0 0 0 0<CR>
+seq=12863 ts=1793517593152 [rx] Demo command: OK
+seq=12864 ts=1793517594827 [tx] geo set 1 -40 1000 1000 0 0 0 0<CR>
+seq=12865 ts=1793517594852 [rx] Demo command: OK
+seq=12866 ts=1793517600487 [tx] geo set 1 -50 1000 1000 0 0 0 0<CR>
+seq=12867 ts=1793517600522 [rx] Demo command: OK
+seq=12868 ts=1793517601303 [tx] geo set 1 -60 1000 1000 0 0 0 0<CR>
+seq=12869 ts=1793517601319 [rx] Demo command: OK
+seq=12870 ts=1793517602101 [tx] geo set 1 -70 1000 1000 0 0 0 0<CR>
+seq=12871 ts=1793517602119 [rx] Demo command: OK
+seq=12872 ts=1793517602927 [tx] geo set 1 -80 1000 1000 0 0 0 0<CR>
+seq=12873 ts=1793517602953 [rx] Demo command: OK
+seq=12874 ts=1793517603587 [tx] geo set 1 -90 1000 1000 0 0 0 0<CR>
+seq=12875 ts=1793517603619 [rx] Demo command: OK
+seq=12876 ts=1793517604327 [tx] geo set 1 -100 1000 1000 0 0 0 0<CR>
+seq=12877 ts=1793517604362 [rx] Demo command: OK
+seq=12878 ts=1793517604803 [tx] geo set 1 -110 1000 1000 0 0 0 0<CR>
+seq=12879 ts=1793517604819 [rx] Demo command: OK
+seq=12880 ts=1793517605385 [tx] geo set 1 -120 1000 1000 0 0 0 0<CR>
+seq=12881 ts=1793517605419 [rx] Demo command: OK
+seq=12882 ts=1793517606086 [tx] geo set 1 -130 1000 1000 0 0 0 0<CR>
+seq=12883 ts=1793517606119 [rx] Demo command: OK
+seq=12884 ts=1793517606808 [tx] geo set 1 -140 1000 1000 0 0 0 0<CR>
+seq=12885 ts=1793517606861 [rx] Demo command: OK
+seq=12886 ts=1793517607649 [tx] geo set 1 -150 1000 1000 0 0 0 0<CR>
+seq=12887 ts=1793517607678 [rx] Demo command: OK
+seq=12888 ts=1793517608302 [tx] geo set 1 -160 1000 1000 0 0 0 0<CR>
+seq=12889 ts=1793517608319 [rx] Demo command: OK
+seq=12890 ts=1793517608836 [tx] geo set 1 -170 1000 1000 0 0 0 0<CR>
+seq=12891 ts=1793517608853 [rx] Demo command: OK

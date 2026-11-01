@@ -1,0 +1,88 @@
+seq=12739 ts=1793517479358 [tx] status<CR>
+seq=12740 ts=1793517479405 [rx] Scene: 2
+seq=12741 ts=1793517479405 [rx] PIX mode: 0
+seq=12742 ts=1793517479405 [rx] GEO mode: 0
+seq=12743 ts=1793517479405 [rx] Output mode: 1
+seq=12744 ts=1793517479405 [rx] Requested video fps: 30
+seq=12745 ts=1793517479405 [rx] Video divisor: 1
+seq=12746 ts=1793517479405 [rx] Monitor Hz: 100
+seq=12747 ts=1793517479405 [rx] VIN camera0 frames: 749
+seq=12748 ts=1793517479405 [rx] VIN camera1 frames: 749
+seq=12749 ts=1793517479405 [rx] VIN CH0 frames: 748
+seq=12750 ts=1793517479405 [rx] VIN CH2 frames: 0
+seq=12751 ts=1793517479405 [rx] VIN CH0 overflow: 0
+seq=12752 ts=1793517479405 [rx] VIN CH2 overflow: 0
+seq=12753 ts=1793517479405 [rx] ETH peer IP: 0xc0a80102
+seq=12754 ts=1793517479405 [rx] ETH peer port: 6000
+seq=12755 ts=1793517479405 [rx] ETH STATUS: 0x00000002
+seq=12756 ts=1793517479405 [rx] Video skips (current window): 0
+seq=12757 ts=1793517479405 [rx] Monitor sequence: 2514
+seq=12758 ts=1793517479405 [rx] Monitor dropped records: 2381
+seq=12759 ts=1793517479405 [rx] mtime: 2828686661
+seq=12760 ts=1793517479405 [rx] Demo command: OK
+seq=12761 ts=1793517489379 [tx] status<CR>
+seq=12762 ts=1793517489419 [rx] Scene: 2
+seq=12763 ts=1793517489419 [rx] PIX mode: 0
+seq=12764 ts=1793517489419 [rx] GEO mode: 0
+seq=12765 ts=1793517489419 [rx] Output mode: 1
+seq=12766 ts=1793517489419 [rx] Requested video fps: 30
+seq=12767 ts=1793517489419 [rx] Video divisor: 1
+seq=12768 ts=1793517489419 [rx] Monitor Hz: 100
+seq=12769 ts=1793517489419 [rx] VIN camera0 frames: 1050
+seq=12770 ts=1793517489419 [rx] VIN camera1 frames: 1049
+seq=12771 ts=1793517489419 [rx] VIN CH0 frames: 1048
+seq=12772 ts=1793517489419 [rx] VIN CH2 frames: 0
+seq=12773 ts=1793517489419 [rx] VIN CH0 overflow: 0
+seq=12774 ts=1793517489419 [rx] VIN CH2 overflow: 0
+seq=12775 ts=1793517489419 [rx] ETH peer IP: 0xc0a80102
+seq=12776 ts=1793517489419 [rx] ETH peer port: 6000
+seq=12777 ts=1793517489419 [rx] ETH STATUS: 0x00000002
+seq=12778 ts=1793517489419 [rx] Video skips (current window): 0
+seq=12779 ts=1793517489419 [rx] Monitor sequence: 3516
+seq=12780 ts=1793517489419 [rx] Monitor dropped records: 2381
+seq=12781 ts=1793517489419 [rx] mtime: 3830763833
+seq=12782 ts=1793517489419 [rx] Demo command: OK
+seq=12783 ts=1793517509360 [tx] status<CR>
+seq=12784 ts=1793517509399 [rx] Scene: 2
+seq=12785 ts=1793517509400 [rx] PIX mode: 0
+seq=12786 ts=1793517509400 [rx] GEO mode: 0
+seq=12787 ts=1793517509400 [rx] Output mode: 1
+seq=12788 ts=1793517509400 [rx] Requested video fps: 30
+seq=12789 ts=1793517509400 [rx] Video divisor: 1
+seq=12790 ts=1793517509400 [rx] Monitor Hz: 100
+seq=12791 ts=1793517509400 [rx] VIN camera0 frames: 1649
+seq=12792 ts=1793517509400 [rx] VIN camera1 frames: 1649
+seq=12793 ts=1793517509400 [rx] VIN CH0 frames: 1648
+seq=12794 ts=1793517509400 [rx] VIN CH2 frames: 0
+seq=12795 ts=1793517509400 [rx] VIN CH0 overflow: 0
+seq=12796 ts=1793517509400 [rx] VIN CH2 overflow: 0
+seq=12797 ts=1793517509400 [rx] ETH peer IP: 0xc0a80102
+seq=12798 ts=1793517509400 [rx] ETH peer port: 6000
+seq=12799 ts=1793517509400 [rx] ETH STATUS: 0x00000002
+seq=12800 ts=1793517509400 [rx] Video skips (current window): 0
+seq=12801 ts=1793517509400 [rx] Monitor sequence: 5513
+seq=12802 ts=1793517509400 [rx] Monitor dropped records: 2381
+seq=12803 ts=1793517509400 [rx] mtime: 5828779027
+seq=12804 ts=1793517509400 [rx] Demo command: OK
+seq=12805 ts=1793517539360 [tx] status<CR>
+seq=12806 ts=1793517539400 [rx] Scene: 2
+seq=12807 ts=1793517539400 [rx] PIX mode: 0
+seq=12808 ts=1793517539400 [rx] GEO mode: 0
+seq=12809 ts=1793517539400 [rx] Output mode: 1
+seq=12810 ts=1793517539400 [rx] Requested video fps: 30
+seq=12811 ts=1793517539400 [rx] Video divisor: 1
+seq=12812 ts=1793517539400 [rx] Monitor Hz: 100
+seq=12813 ts=1793517539400 [rx] VIN camera0 frames: 2549
+seq=12814 ts=1793517539400 [rx] VIN camera1 frames: 2549
+seq=12815 ts=1793517539400 [rx] VIN CH0 frames: 2548
+seq=12816 ts=1793517539400 [rx] VIN CH2 frames: 0
+seq=12817 ts=1793517539400 [rx] VIN CH0 overflow: 0
+seq=12818 ts=1793517539400 [rx] VIN CH2 overflow: 0
+seq=12819 ts=1793517539400 [rx] ETH peer IP: 0xc0a80102
+seq=12820 ts=1793517539400 [rx] ETH peer port: 6000
+seq=12821 ts=1793517539400 [rx] ETH STATUS: 0x00000002
+seq=12822 ts=1793517539400 [rx] Video skips (current window): 0
+seq=12823 ts=1793517539400 [rx] Monitor sequence: 8513
+seq=12824 ts=1793517539400 [rx] Monitor dropped records: 2381
+seq=12825 ts=1793517539400 [rx] mtime: 8828792036
+seq=12826 ts=1793517539400 [rx] Demo command: OK

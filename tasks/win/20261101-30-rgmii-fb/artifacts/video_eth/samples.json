@@ -1,0 +1,138 @@
+[
+  {
+    "elapsed_seconds": 0.42608359998848755,
+    "target_seconds": 0,
+    "peer": [
+      "192.168.1.2",
+      6000
+    ],
+    "peer_done": true,
+    "counts": {
+      "video": 79500,
+      "telemetry": 52
+    },
+    "rx": {
+      "active": true,
+      "localIp": "192.168.1.2",
+      "localPort": 6000,
+      "socketBufferBytes": 67108864,
+      "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+      "packets": 79552,
+      "bytes": 81416160,
+      "notifyCount": 55,
+      "lastNotify": false,
+      "files": {},
+      "error": null,
+      "receiveCpuSeconds": 0.0,
+      "lastWindow": 0,
+      "lastOffset": 260128,
+      "peer": [
+        "192.168.1.10",
+        5000
+      ]
+    },
+    "telemetry_records": 165
+  },
+  {
+    "elapsed_seconds": 10.458010199989076,
+    "target_seconds": 10,
+    "peer": [
+      "192.168.1.2",
+      6000
+    ],
+    "peer_done": true,
+    "counts": {
+      "video": 600501,
+      "telemetry": 362
+    },
+    "rx": {
+      "active": true,
+      "localIp": "192.168.1.2",
+      "localPort": 6000,
+      "socketBufferBytes": 67108864,
+      "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+      "packets": 602413,
+      "bytes": 616538144,
+      "notifyCount": 408,
+      "lastNotify": false,
+      "files": {},
+      "error": null,
+      "receiveCpuSeconds": 0.0,
+      "lastWindow": 0,
+      "lastOffset": 522272,
+      "peer": [
+        "192.168.1.10",
+        5000
+      ]
+    },
+    "telemetry_records": 1173
+  },
+  {
+    "elapsed_seconds": 30.406598899993696,
+    "target_seconds": 30,
+    "peer": [
+      "192.168.1.2",
+      6000
+    ],
+    "peer_done": true,
+    "counts": {
+      "video": 1678011,
+      "telemetry": 987
+    },
+    "rx": {
+      "active": true,
+      "localIp": "192.168.1.2",
+      "localPort": 6000,
+      "socketBufferBytes": 67108864,
+      "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+      "packets": 1679254,
+      "bytes": 1718631104,
+      "notifyCount": 1129,
+      "lastNotify": false,
+      "files": {},
+      "error": null,
+      "receiveCpuSeconds": 0.0,
+      "lastWindow": 0,
+      "lastOffset": 1570848,
+      "peer": [
+        "192.168.1.10",
+        5000
+      ]
+    },
+    "telemetry_records": 3157
+  },
+  {
+    "elapsed_seconds": 60.4094594999915,
+    "target_seconds": 60,
+    "peer": [
+      "192.168.1.2",
+      6000
+    ],
+    "peer_done": true,
+    "counts": {
+      "video": 3282652,
+      "telemetry": 1922
+    },
+    "rx": {
+      "active": true,
+      "localIp": "192.168.1.2",
+      "localPort": 6000,
+      "socketBufferBytes": 67108864,
+      "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+      "packets": 3284830,
+      "bytes": 3361858048,
+      "notifyCount": 2206,
+      "lastNotify": false,
+      "files": {},
+      "error": null,
+      "receiveCpuSeconds": 0.0,
+      "lastWindow": 0,
+      "lastOffset": 1570848,
+      "peer": [
+        "192.168.1.10",
+        5000
+      ]
+    },
+    "telemetry_records": 6149
+  }
+]

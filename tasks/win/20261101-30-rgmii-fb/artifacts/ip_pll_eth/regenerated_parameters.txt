@@ -1,0 +1,29 @@
+Windows source: G:\codex_project\EdRV32-FPGA\EdRV32-B3V\ipcore\ip_pll_eth
+CLKIN_FREQ=125.00000000
+CLKOUT0_REQ_FREQ_basicPage=125.00000000
+CLKOUT0_REQ_PHASE_basicPage=0.000000
+CLKOUT0_REQ_DUTY_basicPage=50.000000
+FB_MODE=true
+INTERNAL_FB=DISABLE
+EXTERNAL_FB=CLKOUT0
+CLKOUT0_EN=true
+CLKOUT7_EN=false
+CLKIN1_SOURCE_basicPage=No Buffer
+CLKOUT0_BUFFER_OPTION_advancedPage=NO BUFFER
+RST_INNER_EN=false
+LOCK_MODE=0
+STATIC_RATIOI=1
+STATIC_RATIOM=1
+STATIC_RATIO0=8.0
+module ip_pll_eth (
+    
+    output wire clkout0,
+    
+    input wire clkin1,
+    
+    input wire clkfb,
+    
+    output wire lock           
+    );
+
+    

@@ -1,0 +1,722 @@
+[
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.232,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.232,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.25,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.251,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.268,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.319,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.319,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.337,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.338,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 0.355,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.232,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.232,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.25,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.251,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.268,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.319,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.319,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.337,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.338,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "max (slow corner)",
+    "slack_ns": 4.355,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.361,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.344,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.343,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.325,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.325,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.26,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.243,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.242,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.224,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": -0.224,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.639,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.656,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.657,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.675,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.675,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.74,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.757,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.758,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.776,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "slow",
+    "type": "min (slow corner)",
+    "slack_ns": 3.776,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.513,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.513,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.516,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.516,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.531,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.532,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.534,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.535,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.549,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 0.552,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.513,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.513,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.516,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.516,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.531,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.532,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.534,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.535,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.549,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "max (fast corner)",
+    "slack_ns": 4.552,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.136,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.141,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.153,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.154,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.158,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.159,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.172,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.172,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.177,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 0.177,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.136,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.141,
+    "start": "rgmii_rx_ctl_i (port)",
+    "end": "u_rgmii/g_rx[4].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.153,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.154,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.158,
+    "start": "rgmii_rxd_i[1] (port)",
+    "end": "u_rgmii/g_rx[1].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.159,
+    "start": "rgmii_rxd_i[0] (port)",
+    "end": "u_rgmii/g_rx[0].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.172,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.172,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "falling",
+    "capture_edge": "rising"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.177,
+    "start": "rgmii_rxd_i[2] (port)",
+    "end": "u_rgmii/g_rx[2].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  },
+  {
+    "corner": "fast",
+    "type": "min (fast corner)",
+    "slack_ns": 4.177,
+    "start": "rgmii_rxd_i[3] (port)",
+    "end": "u_rgmii/g_rx[3].u_input/opit_1/DI",
+    "launch_edge": "rising",
+    "capture_edge": "falling"
+  }
+]

@@ -1,0 +1,16 @@
+('slow', 'max (slow corner)', 'rising', 'falling') = 5
+('slow', 'max (slow corner)', 'falling', 'rising') = 5
+('slow', 'max (slow corner)', 'falling', 'falling') = 5
+('slow', 'max (slow corner)', 'rising', 'rising') = 5
+('slow', 'min (slow corner)', 'rising', 'rising') = 5
+('slow', 'min (slow corner)', 'falling', 'falling') = 5
+('slow', 'min (slow corner)', 'falling', 'rising') = 5
+('slow', 'min (slow corner)', 'rising', 'falling') = 5
+('fast', 'max (fast corner)', 'rising', 'falling') = 5
+('fast', 'max (fast corner)', 'falling', 'rising') = 5
+('fast', 'max (fast corner)', 'falling', 'falling') = 5
+('fast', 'max (fast corner)', 'rising', 'rising') = 5
+('fast', 'min (fast corner)', 'rising', 'rising') = 5
+('fast', 'min (fast corner)', 'falling', 'falling') = 5
+('fast', 'min (fast corner)', 'falling', 'rising') = 5
+('fast', 'min (fast corner)', 'rising', 'falling') = 5

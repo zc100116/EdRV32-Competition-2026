@@ -1,0 +1,1 @@
+Generated module has clkfb. Target PG2L200H-6/FBB676; input/output0=125MHz,phase0,duty50,FB_MODE=true,INTERNAL_FB=DISABLE,EXTERNAL_FB=CLKOUTF. Card30 requiresEXTERNAL_FB=CLKOUT0. Generated wrapper exposesclkoutf in addition toclkout0; IDF basic page CLKOUT7_EN=true. No RTL/constraint/IP edits made. User must change Feedback from toCLKOUT0 and regenerate before compilation.
