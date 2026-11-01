@@ -28,7 +28,7 @@
 ## 2. 输入
 
 - **代码**：`origin/zc100116/b3`（包含本卡的提交）。从这里拉出 `win/20261101-24-b3-rnv`，在 `result.md` 中记录完整哈希。
-- **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建（`s3.elf`、`nes.elf` 从 `0046345e` 重新构建），GCC 15.2.0。之后的 RND RTL 提交（47fa4499、dc8a3d1f、6c7cd7b6）不影响程序。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
+- **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建（`s3.elf`、`nes.elf` 从 `9cd8b729` 重新构建，含 S3/NES 串口中断接收），GCC 15.2.0。之后的 RND RTL 提交（47fa4499、dc8a3d1f、6c7cd7b6）不影响程序。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
 
 | 文件 | 用途 | 与卡 23 相比 |
 |---|---|---|
