@@ -31,9 +31,9 @@ module tb;
     edrv32_icache dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_ivalid0_n_i(rst_n_i),
-        .rst_sys_ivalid1_n_i(rst_n_i),
-        .rst_sys_ilru_n_i(rst_n_i),
+        .rst_sys_ivalid0_n_i({2{rst_n_i}}),
+        .rst_sys_ivalid1_n_i({2{rst_n_i}}),
+        .rst_sys_ilru_n_i({2{rst_n_i}}),
         .ic_req_valid_i(ic_req_valid_i),
         .ic_req_addr_i(ic_req_addr_i),
         .ic_req_ready_o(ic_req_ready_o),

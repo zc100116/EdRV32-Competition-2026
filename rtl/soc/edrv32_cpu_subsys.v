@@ -76,61 +76,167 @@ module edrv32_cpu_subsys #(
     output wire irq_o
 );
 
-    // SoC 5.3: one preserved reset copy per destination region.
+    // Parallel copies share the original reset and release on the same clock edge.
     wire rst_sys_core_n_w;
-    wire rst_sys_direction0_n_w;
-    wire rst_sys_direction1_n_w;
+    wire [7:0] rst_sys_direction_n_w;
     wire rst_sys_csr_n_w;
+    wire [9:0] rst_sys_counter_n_w;
     wire rst_sys_icache_n_w;
-    wire rst_sys_ivalid0_n_w;
-    wire rst_sys_ivalid1_n_w;
-    wire rst_sys_ilru_n_w;
+    wire [1:0] rst_sys_ivalid0_n_w;
+    wire [1:0] rst_sys_ivalid1_n_w;
+    wire [1:0] rst_sys_ilru_n_w;
     wire rst_sys_dcache_n_w;
+    wire [1:0] rst_sys_dlru_n_w;
     wire rst_sys_cache_ctrl_n_w;
     edrv32_reset_copy u_reset_sys_core_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_sys_core_n_w)
     );
-    edrv32_reset_copy u_reset_sys_direction0_n (
+    edrv32_reset_copy u_reset_sys_direction_0_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction0_n_w)
+        .rst_n_o(rst_sys_direction_n_w[0])
     );
-    edrv32_reset_copy u_reset_sys_direction1_n (
+    edrv32_reset_copy u_reset_sys_direction_1_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction1_n_w)
+        .rst_n_o(rst_sys_direction_n_w[1])
+    );
+    edrv32_reset_copy u_reset_sys_direction_2_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction_n_w[2])
+    );
+    edrv32_reset_copy u_reset_sys_direction_3_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction_n_w[3])
+    );
+    edrv32_reset_copy u_reset_sys_direction_4_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction_n_w[4])
+    );
+    edrv32_reset_copy u_reset_sys_direction_5_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction_n_w[5])
+    );
+    edrv32_reset_copy u_reset_sys_direction_6_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction_n_w[6])
+    );
+    edrv32_reset_copy u_reset_sys_direction_7_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_direction_n_w[7])
     );
     edrv32_reset_copy u_reset_sys_csr_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_sys_csr_n_w)
     );
+    edrv32_reset_copy u_reset_sys_counter_0_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[0])
+    );
+    edrv32_reset_copy u_reset_sys_counter_1_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[1])
+    );
+    edrv32_reset_copy u_reset_sys_counter_2_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[2])
+    );
+    edrv32_reset_copy u_reset_sys_counter_3_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[3])
+    );
+    edrv32_reset_copy u_reset_sys_counter_4_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[4])
+    );
+    edrv32_reset_copy u_reset_sys_counter_5_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[5])
+    );
+    edrv32_reset_copy u_reset_sys_counter_6_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[6])
+    );
+    edrv32_reset_copy u_reset_sys_counter_7_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[7])
+    );
+    edrv32_reset_copy u_reset_sys_counter_8_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[8])
+    );
+    edrv32_reset_copy u_reset_sys_counter_9_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_counter_n_w[9])
+    );
     edrv32_reset_copy u_reset_sys_icache_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_sys_icache_n_w)
     );
-    edrv32_reset_copy u_reset_sys_ivalid0_n (
+    edrv32_reset_copy u_reset_sys_ivalid0_0_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_ivalid0_n_w)
+        .rst_n_o(rst_sys_ivalid0_n_w[0])
     );
-    edrv32_reset_copy u_reset_sys_ivalid1_n (
+    edrv32_reset_copy u_reset_sys_ivalid0_1_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_ivalid1_n_w)
+        .rst_n_o(rst_sys_ivalid0_n_w[1])
     );
-    edrv32_reset_copy u_reset_sys_ilru_n (
+    edrv32_reset_copy u_reset_sys_ivalid1_0_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_ilru_n_w)
+        .rst_n_o(rst_sys_ivalid1_n_w[0])
+    );
+    edrv32_reset_copy u_reset_sys_ivalid1_1_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_ivalid1_n_w[1])
+    );
+    edrv32_reset_copy u_reset_sys_ilru_0_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_ilru_n_w[0])
+    );
+    edrv32_reset_copy u_reset_sys_ilru_1_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_ilru_n_w[1])
     );
     edrv32_reset_copy u_reset_sys_dcache_n (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_sys_dcache_n_w)
+    );
+    edrv32_reset_copy u_reset_sys_dlru_0_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_dlru_n_w[0])
+    );
+    edrv32_reset_copy u_reset_sys_dlru_1_n (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_sys_dlru_n_w[1])
     );
     edrv32_reset_copy u_reset_sys_cache_ctrl_n (
         .clk_i(clk_i),
@@ -181,9 +287,9 @@ module edrv32_cpu_subsys #(
 
         // Reset.
         .rst_n_i(rst_sys_core_n_w),
-        .rst_sys_direction0_n_i(rst_sys_direction0_n_w),
-        .rst_sys_direction1_n_i(rst_sys_direction1_n_w),
+        .rst_sys_direction_n_i(rst_sys_direction_n_w),
         .rst_sys_csr_n_i(rst_sys_csr_n_w),
+        .rst_sys_counter_n_i(rst_sys_counter_n_w),
 
 
         // Core instruction interface.
@@ -273,6 +379,7 @@ module edrv32_cpu_subsys #(
 
         // Reset.
         .rst_n_i(rst_sys_dcache_n_w),
+        .rst_sys_dlru_n_i(rst_sys_dlru_n_w),
 
         // Core data interface.
         .dc_req_valid_i(dc_req_valid_w),

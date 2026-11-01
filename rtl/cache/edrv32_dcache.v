@@ -8,6 +8,7 @@ module edrv32_dcache (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire [1:0] rst_sys_dlru_n_i,
 
     // Core data interface.
     input wire dc_req_valid_i,
@@ -95,7 +96,7 @@ module edrv32_dcache (
     localparam [3:0] D_RETURN = 4'd8;
     reg [3:0] state_r;
     reg [3:0] device_state_r;
-    reg [511:0] lru_r;
+    wire [511:0] lru_r;
     reg lookup_valid_r;
     reg lookup_hit_enable_r;
     wire lookup_valid0_w;
@@ -233,7 +234,6 @@ module edrv32_dcache (
     integer byte_idx_w;
     genvar tag_idx;
     genvar bank;
-    wire [511:0] lookup_index_w;
     reg [31:0] lookup_bank_r;
     reg [15:0] lookup_slot_r;
     wire [15:0] read_slot_w;
@@ -669,23 +669,26 @@ module edrv32_dcache (
     // LRU remains a register array (cache-spec 2.2); retain its banked read.
     generate
         for (bank = 0; bank < 32; bank = bank + 1) begin : g_metadata
-            wire [15:0] lookup_w;
-            assign lookup_index_w[bank*16 +: 16] = lookup_slot_r & {16{lookup_bank_r[bank]}};
-            assign lookup_w = lookup_index_w[bank*16 +: 16];
+            reg [15:0] lru_bank_r;
+            wire lru_update_w;
+            wire lru_set_w;
+            wire rst_dlru_n_w;
+            assign lru_r[bank*16 +: 16] = lru_bank_r;
+            assign lru_update_w = lookup_bank_r[bank] &&
+                ((state_r == S_IDLE && lookup_done_w && hit_w) || tag_write_w);
+            assign lru_set_w = lookup_bank_r[bank] &&
+                ((state_r == S_IDLE && lookup_done_w && hit0_w) || (tag_write_w && !victim_r));
+            assign rst_dlru_n_w = rst_sys_dlru_n_i[bank/16];
             always @(posedge clk_i) begin
                 lookup_lru_bank_r[bank] <= state_r == S_IDLE && lookup_done_w && hit_w &&
                     lookup_bank_r[bank] && addr_r[8:5] == read_addr_w[5:2] ?
                     hit0_w : (|(lru_r[bank*16 +: 16] & read_slot_w));
             end
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i) lru_r[bank*16 +: 16] <= 16'b0;
+            always @(posedge clk_i or negedge rst_dlru_n_w) begin
+                if (!rst_dlru_n_w) lru_bank_r <= 16'b0;
                 else begin
-                    lru_r[bank*16 +: 16] <=
-                        (lru_r[bank*16 +: 16] &
-                            ~(lookup_w & {16{(state_r == S_IDLE && lookup_done_w && hit_w) ||
-                                tag_write_w}})) |
-                        (lookup_w & {16{(state_r == S_IDLE && lookup_done_w && hit0_w) ||
-                            (tag_write_w && !victim_r)}});
+                    lru_bank_r <= (lru_bank_r & ~(lookup_slot_r & {16{lru_update_w}})) |
+                        (lookup_slot_r & {16{lru_set_w}});
                 end
             end
         end

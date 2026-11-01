@@ -73,6 +73,7 @@ module tb;
     edrv32_dcache dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_sys_dlru_n_i({2{rst_n_i}}),
         .dc_req_valid_i(dc_req_valid_i),
         .dc_req_addr_i(dc_req_addr_i),
         .dc_req_store_i(dc_req_store_i),
