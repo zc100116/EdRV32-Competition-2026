@@ -135,7 +135,7 @@ module tb_npu #(
             longint last_result;
             longint result_values;
             always @(posedge clk_npu) begin
-                if (u_dut.conv_start_w || u_dut.nonconv_start_w) begin
+                if ((|u_dut.conv_start_w) || u_dut.nonconv_start_w) begin
                     layer_cycles = 0;
                     layer_values = 0;
                     quant_groups = 0;
