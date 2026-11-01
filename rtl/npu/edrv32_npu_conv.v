@@ -828,7 +828,7 @@ module edrv32_npu_conv (
     assign load_next_row_addr_w = load_row_addr_r
         + (input_row_bytes_w << (!unused_flags_w[4] && unused_flags_w[5]));
     always @(posedge clk_i) begin
-        if (start_i[0]) begin
+        if (start_i[3]) begin
             for (slot_base_idx = 0; slot_base_idx < 5; slot_base_idx = slot_base_idx + 1) begin
                 slot_base_r[slot_base_idx] <= slot_base_idx[9:0] * desc_i[361:352];
             end
