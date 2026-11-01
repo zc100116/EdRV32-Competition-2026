@@ -31,8 +31,8 @@ define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[1]} 
 
 # X1/X2 sys<->mem, X3 IRQ, X7 ETH and X9/X10 NPU; removed domains have no clocks.
 # Pairwise groups list only SoC-facing clocks; DDR PHY groups follow the vendor example above.
-# Vendor ref_clock.idf: CLKOUT0 phase 30 deg = 2/3 ns at 125 MHz.
-create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pins {u_rgmii/u_pll_eth/clkout0}] -edges {1 2 3} -edge_shift {0.666667 0.666667 0.666667}
+# ip_pll_eth: external feedback from u_eth_clk, CLKOUT0 phase 0 deg.
+create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pins {u_rgmii/u_pll_eth/clkout0}] -edges {1 2 3} -edge_shift {0 0 0}
 create_generated_clock -name {clk_rgmii_tx} -source [get_pins {u_rgmii/u_pll_eth/clkout0}] [get_ports {rgmii_txc_o}] -edges {1 2 3} -edge_shift {1 1 1}
 
 set_clock_groups -asynchronous -group [get_clocks {clk_sys}] -group [get_clocks {clk_eth clk_rgmii_tx}]
@@ -928,9 +928,10 @@ define_attribute {p:eth_phy_rst_n_o} {PAP_IO_SLEW} {SLOW}
 define_global_attribute {PAP_REGION} {fp_rgmii(0,15,220,249)[CLMA,CLMS];fp_ddrphy(200,238,95,185)[CLMA,CLMS];}
 define_attribute {i:u_rgmii} {PAP_REGION} {fp_rgmii}
 
-# RGMII RX sampling (cards 26/28). PHY keeps strap RXDLY=1/TXDLY=1 (rgmii-id).
-# The ETH PLL sits beside the RXC pin (D19, IOLHR_16_1368); the system PLL has no
-# IO timing and takes the far-side site.
+# RGMII RX sampling (design 2026-11-01-rgmii-rx-clock). PHY keeps strap RXDLY=1/TXDLY=1
+# (rgmii-id). The PLL feedback cancels only the clock path after CLKOUT0, so the ETH PLL
+# sits beside the RXC pin (D19, IOLHR_16_1368) to keep the uncompensated RXC-to-PLL
+# input short; the system PLL has no IO timing and takes the far-side site.
 define_attribute {i:u_rgmii.u_pll_eth.u_gpll} {PAP_LOC} {GPLL_7_1381}
 define_attribute {i:u_pll_sys.u_gpll} {PAP_LOC} {GPLL_727_463}
 # RTL8211F Rev1.4 Table 60, delay integrated in the transmitter: data is valid at

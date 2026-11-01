@@ -20,8 +20,8 @@ HDMI 由 FPGA 直出 TMDS：`edrv32_fpga_tmds.v` 的每对输出使用两个级�
 `GTP_OSERDES_E2`（DDR10TO1）和一个 `GTP_OUTBUFDS`，时钟对也串化固定符号；
 无 HDMI 发送芯片初始化。依据 `2_10_hdmi_loop/source/outputserdes.v` 和
 `4_12_HDMI_IN_DDR3_HDMI_OUT/source/rtl/HDMI_IN_DDR3_OUT_top.v`。
-`edrv32_fpga_rgmii.v` 按 Ethernet demo 使用 PLL 125 MHz/30°、RX 247 步和 TXC
-100 步 IODELAY（每步 10 ps）；两路 MAC 时钟共享该时钟，无新增数据跨域。
+`edrv32_fpga_rgmii.v` 的 PLL 为 125 MHz/0°、外部反馈取自全局缓冲，RX 不经 IODELAY，TXC
+100 步 IODELAY（设计记录 2026-11-01-rgmii-rx-clock）；两路 MAC 时钟共享该时钟，无新增数据跨域。
 所有协议 CDC 仍在 SoC（5.2 X1–X10），串化相关时钟保持同步约束。
 
 I2C 和 MDIO 是双向引脚，因仓库风格检查要求 inout 使用 `_o` 后缀而这样命名；
@@ -219,7 +219,7 @@ MEM_XBAR（槽 8、源 15）；槽 9 预留。ETH 接 P6、槽 7、源 14；VIN�
 
 板级 DDR 适配器、DDR IP、TMDS 串化与 B2 相同。`ip_pll_sys` 输出 100 MHz 系统时钟；
 DDR `core_clk` 输出 125 MHz `clk_mem`；`ip_pll_video` 同相输出 74.25 MHz 像素时钟和
-371.25 MHz 串化时钟。RGMII 内的 `ip_pll_eth` 由 PHY 的 125 MHz RXC 驱动，输出 125 MHz、30° 时钟，
+371.25 MHz 串化时钟。RGMII 内的 `ip_pll_eth` 由 PHY 的 125 MHz RXC 驱动，输出 125 MHz、0° 时钟（外部反馈），
 MAC RX/TX 共用；reset_ctrl 在该域同步释放 ETH 复位，PLL lock 不参与全局复位。
 未使用的 NPU、摄像头域时钟输入在系统子系统处同 B1 接 `clk_sys`。板级复位为 `rst_n_i & sys_lock & video_lock`，DDR
 控制器直接使用该复位；系统子系统中的 reset_ctrl 同步 `mem_ready` 并按 SoC 5.3 释放
@@ -401,7 +401,7 @@ MEM_XBAR（槽 8、PLIC15）照常保留；ETH 独占 P6，槽 9 预留。
 | `clk_serial_w` | 同一 video PLL 的 clkout1 | 371.25 MHz，与像素时钟同相、5:1 |
 | `cam0_pclk_i`、`cam1_pclk_i` | 两路摄像头 | 独立 DVP 时钟，FDC 各按 100 MHz 约束 |
 | `rgmii_rxc_i` | PHY | 125 MHz，ETH PLL 输入 |
-| `clk_eth_w` | `u_rgmii.u_pll_eth`，经 GTP_CLKBUFG | 125 MHz、30° 相移，MAC RX/TX 共用 |
+| `clk_eth_w` | `u_rgmii.u_pll_eth`，经 GTP_CLKBUFG | 125 MHz、0°，外部反馈，MAC RX/TX 共用 |
 | `rgmii_txc_o` | ODDR 和固定 IO 延迟 | 125 MHz，延迟 1 ns 的发送时钟 |
 | 系统子系统 `clk_npu_i` | `clk_sys_w` | 同 B1，未使用的 NPU 域不生成 PLL |
 
@@ -517,7 +517,7 @@ MEM_XBAR（槽 8、PLIC15）照常保留；ETH 独占 P6，槽 9 预留。
 | `clk_serial_w` | 同一 video PLL 的 clkout1 | 371.25 MHz，与像素时钟同相、5:1 |
 | `cam0_pclk_i`、`cam1_pclk_i` | 两路摄像头 | 独立 DVP 时钟，FDC 各按 100 MHz 约束 |
 | `rgmii_rxc_i` | PHY | 125 MHz，ETH PLL 输入 |
-| `clk_eth_w` | `u_rgmii.u_pll_eth`，经 GTP_CLKBUFG | 125 MHz、30° 相移，MAC RX/TX 共用 |
+| `clk_eth_w` | `u_rgmii.u_pll_eth`，经 GTP_CLKBUFG | 125 MHz、0°，外部反馈，MAC RX/TX 共用 |
 | `rgmii_txc_o` | ODDR 和固定 IO 延迟 | 125 MHz，延迟 1 ns 的发送时钟 |
 | `clk_npu_w` | `ip_pll_npu.clkout0` | 150 MHz，NPU 计算、DMA 和寄存器，接系统子系统 `clk_npu_i` |
 

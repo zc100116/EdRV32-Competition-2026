@@ -21,6 +21,6 @@ B3N：`import_board_npu_top.tcl` 导入 CPU/SYS/MEM/NPU/ETH 文件列表及板�
 
 B3R：`import_board_render_top.tcl` 导入 CPU/SYS/MEM/RND/DISP/ETH，共 102 个源文件、19 种 IP、14 个时钟（RND v2 起；卡 21 用的 99f453b1 为 98 个、18 种）。
 B3VN：`import_board_vnpu_top.tcl` 保持 145 个源文件、29 种 IP、17 个时钟。
-三者 ETH 均经 `edrv32_fpga_rgmii` 内的 `ip_pll_eth`（125 MHz、30°），不增加 SYS/VIDEO/NPU PLL 输出；
+三者 ETH 均经 `edrv32_fpga_rgmii` 内的 `ip_pll_eth`（125 MHz、0°、外部反馈），不增加 SYS/VIDEO/NPU PLL 输出；
 B3R/B3N 需新增生成 `ip_pll_eth`、`ip_ram_eth_buf`、`ip_ram_eth_fifo`，配置见 `fpga/ip/README.md`。
 浅存储使用方案 B 的 `ip_lutram_mem_xbar_w`；NPU 另用 `ip_lutram_npu_quant/residual/result`。

@@ -20,7 +20,7 @@ for source in ['fpga/rtl/edrv32_fpga_rgmii.v', 'rtl/eth/edrv32_eth_tx_front.v']:
     (OUT / 'before' / Path(source).name).write_bytes(subprocess.check_output(
         ['git', 'show', sys.argv[1] + ':' + source], cwd=ROOT))
 (OUT / 'stubs.v').write_text('''
-(* blackbox *) module ip_pll_eth(input clkin1, output clkout0, output lock); endmodule
+(* blackbox *) module ip_pll_eth(input clkin1, clkfb, output clkout0, output lock); endmodule
 (* blackbox *) module GTP_CLKBUFG(input CLKIN, output CLKOUT); endmodule
 (* blackbox *) module GTP_INBUF #(parameter IOSTANDARD="LVCMOS33")
 (input I, output O); endmodule

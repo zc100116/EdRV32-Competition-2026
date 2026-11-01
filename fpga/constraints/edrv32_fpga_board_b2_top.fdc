@@ -32,8 +32,8 @@ set_clock_groups -name phy_dq_clk_1 -asynchronous -group [get_clocks {phy_dq_clk
 define_attribute {i:u_ddr3.u_ddrphy_top.u_ddrphy_cpd} {PAP_LOC} {DDRPHY_CPD_729_772}
 define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[0]} {PAP_LOC} {CLMA_717_672:FF3}
 define_attribute {i:u_ddr3.u_ddrphy_top.ddrphy_reset_ctrl.ddrphy_ioclk_gate[1]} {PAP_LOC} {CLMA_717_978:FF3}
-# Vendor ref_clock.idf: CLKOUT0 phase 30 deg = 2/3 ns at 125 MHz.
-create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pins {u_rgmii/u_pll_eth/clkout0}] -edges {1 2 3} -edge_shift {0.666667 0.666667 0.666667}
+# ip_pll_eth: external feedback from u_eth_clk, CLKOUT0 phase 0 deg.
+create_generated_clock -name {clk_eth} -source [get_ports {rgmii_rxc_i}] [get_pins {u_rgmii/u_pll_eth/clkout0}] -edges {1 2 3} -edge_shift {0 0 0}
 create_generated_clock -name {clk_rgmii_tx} -source [get_pins {u_rgmii/u_pll_eth/clkout0}] [get_ports {rgmii_txc_o}] -edges {1 2 3} -edge_shift {1 1 1}
 
 # X1/X2 sys<->mem, X3 IRQ, X4 cameras, X5/X6 display, X7 ETH, X9/X10 NPU.

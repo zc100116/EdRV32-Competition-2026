@@ -1,7 +1,8 @@
 // File: edrv32_fpga_rgmii.v
 // Spec: eth-spec 3; edrv32-soc-spec 3.4, 5.2 X7.
-// Description: Vendor SAME_PIPELINED RX and SAME_EDGE TX with fixed IO delays.
-//              Both MAC clocks use the vendor RX PLL output; ETH owns the async FIFOs.
+// Description: SAME_PIPELINED RX and SAME_EDGE TX. The RX PLL feeds back from the global
+//              buffer, so the IDDR clock follows RXC at the pin (design 2026-11-01-rgmii-rx-clock).
+//              Both MAC clocks use that output; ETH owns the async FIFOs.
 //              One fabric stage on each MAC direction separates IO from FIFO RAM.
 // Clock domains: eth RX/TX (125 MHz).
 module edrv32_fpga_rgmii (
@@ -27,7 +28,6 @@ module edrv32_fpga_rgmii (
     wire clk_eth_pll_w;
     wire [4:0] rx_pin_w;
     wire [4:0] rx_buf_w;
-    wire [4:0] rx_delay_w;
     wire [4:0] rx_rise_w;
     wire [4:0] rx_fall_w;
     reg [7:0] rx_data_r;
@@ -44,10 +44,12 @@ module edrv32_fpga_rgmii (
 
     assign {rgmii_tx_ctl_o, rgmii_txd_o} = tx_pin_w;
 
-    // ref_clock.idf requests 30 degrees despite the vendor wire name "90p".
+    // External feedback from the global buffer cancels the PLL-to-IDDR clock insertion;
+    // PHY strap rgmii-id already centres RXD/RX_CTL on RXC, so CLKOUT0 has 0 degrees.
     /* verilator lint_off PINCONNECTEMPTY */
     ip_pll_eth u_pll_eth (
         .clkin1(rgmii_rxc_i),
+        .clkfb(clk_eth_o),
         .clkout0(clk_eth_pll_w),
         .lock()
     );
@@ -85,24 +87,12 @@ module edrv32_fpga_rgmii (
                 .I(rx_pin_w[pin_idx]),
                 .O(rx_buf_w[pin_idx])
             );
-            // Vendor 247 x 10 ps; DELAY_STEP is Gray-coded (247 ^ (247 >> 1)).
-            GTP_IODELAY_E2 #(
-                .DELAY_STEP_SEL("PORT"),
-                .DELAY_STEP_VALUE(8'd0),
-                .TDELAY_EN("FALSE")
-            ) u_delay (
-                .DI(rx_buf_w[pin_idx]),
-                .DELAY_SEL(1'b1),
-                .DELAY_STEP(8'h8c),
-                .EN_N(1'b0),
-                .DO(rx_delay_w[pin_idx])
-            );
             GTP_IDDR_E1 #(
                 .GRS_EN("TRUE"),
                 .IDDR_MODE("SAME_PIPELINED"),
                 .RS_TYPE("ASYNC_RESET")
             ) u_ddr (
-                .D(rx_delay_w[pin_idx]),
+                .D(rx_buf_w[pin_idx]),
                 .CLK(clk_eth_o),
                 .CE(1'b1),
                 .RS(1'b0),

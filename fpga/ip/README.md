@@ -36,7 +36,7 @@
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
 | `ip_pll_npu` | PLL | 27 → 150 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
-| `ip_pll_eth` | PLL | 125 → 125 MHz，30° | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
+| `ip_pll_eth` | PLL | 125 → 125 MHz，0°，外部反馈 | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
 
 B2 保留 `ip_pll_sys` 的 B1 配置，新增上表四个 IP；不要把视频输出合入系统 PLL，
 74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。
