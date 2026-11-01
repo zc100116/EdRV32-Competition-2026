@@ -1,0 +1,20 @@
+LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.
+LAYERS 2: 256x128 checker moves to LEFT, RIGHT, TOP, BOTTOM; holds ~1 s.
+Each edge is flush; no L1 pixels remain outside the moving rectangle.
+LAYERS 3: Fixed checker fades 0 -> 255 -> 0 in ~4 s, without jumps.
+LAYERS 4: Color grid scrolls X +3 / Y +1 each frame; fixed L1 at top right.
+Grid stays aligned and tear-free, including non-16-aligned scroll.
+LAYERS 5: 50% opacity container, button, slider and checkbox over stripes.
+Uniform transparency, aligned control edges; RND claims LAYER blend.
+LAYERS 5 LAYER claimed=9 unclaimed=0
+LAYERS 5 LAYER claimed=9 unclaimed=0
+LAYERS 5 LAYER claimed=9 unclaimed=0
+LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.
+RN-17 full_max_lsb=0 edge_max_lsb=17 over1=1320 pixels=921600 over1_ppm=1432 bins_0_1_2_3to4_5plus=903312,16968,1224,60,36 rnd_tasks=29 sw_tasks=0 PASS
+RN-17 type=1 claimed=7 unclaimed=0
+RN-17 type=2 claimed=5 unclaimed=0
+RN-17 type=5 claimed=17 unclaimed=0
+LAYERS 1: Color bars under white L1; upper alpha rises left 0 -> right 255.
+Lower five blocks: alpha 0/64/128/192/255; smooth monotonic blending.

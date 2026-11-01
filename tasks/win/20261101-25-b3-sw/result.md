@@ -1,4 +1,4 @@
-# 卡25软件复测：当前N连接故障回传
+# 卡25软件复测：N连接故障与R的S3性能补测
 
 - 工作分支：win/20261101-25-b3-sw；任务输入78e5a3de。
 - 沿用卡23比特流，不重新综合或生成IP。
@@ -14,4 +14,4 @@
 
 ## 其他工程
 
-R的软件测试已进行，本次只上传现有缓冲中随N诊断一同取得的历史串口内容，尚未逐项整理卡25 R验收结果；V复测结果未收集。本报告不宣称卡25整体验收通过。
+2026-11-01补测R的S3：串口ELF加载PASS；取得完整16场景Benchmark Summary，全部fps非零，程序汇总平均25fps；Widgets demo 16fps，最慢Containers with opa_layer 3fps。保存17条LVGL split（含ALL）全部性能字段和完整239条工具日志。RN-17有一条汇总PASS，LAYERS 5 claimed=9/unclaimed=0；无EDTM样本及本轮照片，不据此宣称全部视觉和交互验收通过。详见[S3性能补测报告](artifacts/b3r/s3_supplement/result.md)。V复测结果未收集，本报告不宣称卡25整体验收通过。
