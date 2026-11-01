@@ -23,11 +23,14 @@
 
    需要确认布局布线时间、布线轮数和 clk_mem 裕量的变化，以及 PDS 高扇出表中原 RND 网络的负载。
 
+7. **网口接收时钟（卡 30）**：`ip_pll_eth` 改为外部反馈（反馈取自全局缓冲 `u_eth_clk`）、0°，RX 不再经过 IODELAY（`docs/design/2026-11-01-rgmii-rx-clock.md`）。卡 30 在 B3V 上 PHY 复位 10/10 无错，ETH 视频正常。本卡确认 B3R、B3N 同样正常。
+   - 已知残余：RGMII RX 慢角 hold 约 −0.36 ns（按 PHY 手册最坏 1.0 ns 窗口计算，平移无法闭合），**不计入**第 7 节的 WHS 判据，但必须照实回传。
+
 **实现顺序**：B3R **单独**跑，不与 B3N、B3V 并行，期间不在这台电脑上运行仿真虚拟机，以便与卡 23 比较布局布线时间。B3N、B3V 可以在 B3R 完成后一起跑。上板逐个进行。
 
 ## 2. 输入
 
-- **代码**：`origin/zc100116/b3`（包含本卡的提交）。从这里拉出 `win/20261101-24-b3-rnv`，在 `result.md` 中记录完整哈希。
+- **代码**：`origin/zc100116/b3`（包含本卡的提交，以及卡 30 的 RGMII 改动 31ef0617）。从这里拉出 `win/20261101-24-b3-rnv`，在 `result.md` 中记录完整哈希。
 - **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建（`s3.elf`、`nes.elf` 从 `9cd8b729` 重新构建，含 S3/NES 串口中断接收），GCC 15.2.0。之后的 RND RTL 提交（47fa4499、dc8a3d1f、6c7cd7b6）不影响程序。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
 
 | 文件 | 用途 | 与卡 23 相比 |
@@ -75,9 +78,10 @@
 |---|---|---|---|---|
 | 用本卡 `ip_rom_boot.dat` 重新生成 | `ip_rom_boot` | ✓ | ✓ | ✓ |
 | 用本卡 `ip_ram_sram.dat` 重新生成 | `ip_ram_sram` | ✓ | ✓ | ✓ |
+| 按 `fpga/ip/ip_pll_eth.md` 重新生成（External Feedback，Feedback from CLKOUT0，0°，有 `clkfb` 端口；不要多出 CLKOUTF 输出） | `ip_pll_eth` | ✓ | ✓ | 卡 30 已做 |
 | 宽度须为 20 位；卡 23 未在该工程重新生成时，本卡生成 | `ip_ram_dcache_tag` | ✓（卡 23 未完成 B3R，请核对） | 卡 23 已做 | 卡 23 已做 |
 
-其余 IP 沿用卡 23 的工程。
+B3V 的 `ip_rom_boot`、`ip_ram_sram` 卡 29 已用本卡的 dat 生成，核对一下即可。其余 IP 沿用卡 23 的工程。
 
 ## 5. 操作步骤
 
@@ -87,7 +91,7 @@
 | 1 | 用户（U） | 打开工程，按第 4 节重新生成 IP。 |
 | 2 | C + U | **源文件核对**，方法同卡 23：最终源文件数必须等于第 3 节，FDC 为对应顶层的 `.fdc`，宏为 `FPGA_MODE`。B3N 要确认 `edrv32_npu_window.v` 是本卡版本，文件中有 `g_weight_byte`。数目不符就停下，回传“需要添加 / 需要移除”两张清单原文。 |
 | 3 | U，或 C 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`。任何阶段报错就停下，回传报错原文。 |
-| 4 | C | 按第 6 节收集报告，重点如下：<br>0. **B3R**：布局布线实际耗时和 CPU 时间、`Unrouted general nets` 最后一轮的轮次、Detailed routing 耗时，与卡 23（4h21m、776 轮、14695 s）对比；clk_mem 最差 setup 路径的起终点；高扇出表中 `u_rnd` 各网络的负载；<br>1. 时序汇总和资源，与卡 23 对比；<br>2. **B3N 权重路径**：导出终点为 `u_npu` 下 `g_weight_byte[*].weight_r` 寄存器 D 端的最差 20 条 setup 路径（起点、起点单元位置、终点单元位置、裕量、逻辑级数），以及从这些寄存器出发的最差 20 条路径（含 APM 位置），在 PDS 时序控制台中用 `report_timing` 的起点/终点过滤选项导出；<br>3. 复位副本仍单独出现（同卡 23 第 4 步）；<br>4. 布局布线耗时与卡 23 对比。 |
+| 4 | C | 按第 6 节收集报告，重点如下：<br>0. **B3R**：布局布线实际耗时和 CPU 时间、`Unrouted general nets` 最后一轮的轮次、Detailed routing 耗时，与卡 23（4h21m、776 轮、14695 s）对比；clk_mem 最差 setup 路径的起终点；高扇出表中 `u_rnd` 各网络的负载；<br>1. 时序汇总和资源，与卡 23 对比；<br>2. **B3N 权重路径**：导出终点为 `u_npu` 下 `g_weight_byte[*].weight_r` 寄存器 D 端的最差 20 条 setup 路径（起点、起点单元位置、终点单元位置、裕量、逻辑级数），以及从这些寄存器出发的最差 20 条路径（含 APM 位置），在 PDS 时序控制台中用 `report_timing` 的起点/终点过滤选项导出；<br>3. 复位副本仍单独出现（同卡 23 第 4 步）；<br>4. 布局布线耗时与卡 23 对比；<br>5. **RGMII RX**（每个工程）：用卡 30 的定向命令 `report_timing -input_db_file {<工程>/place_route/<顶层>_pnr.adf} -delay_type min_max -max_path 200 -nworst 20 -from {rgmii_rxd_i* rgmii_rx_ctl_i} -input_pins TRUE -force_to_run`，回传 slow/fast 上升沿、下降沿的最差 setup/hold，以及 PRR 中 `u_rgmii/u_pll_eth`、`u_rgmii/u_eth_clk` 的站点和 PLL `CLKFB` 的驱动源。 |
 | 5 | U + C | 上板，见 5.0 和 5R / 5N / 5V / 5E。某项失败时保留日志和照片，继续下一项。 |
 
 ### 5.0 BIOS（每个工程都做；B3N 另做诊断采集）
@@ -101,6 +105,8 @@
    - 能抓包时附上有线网卡的抓包。
 
    注意：BIOS 不回 UDP 包，所以 probe 没有收到回包不能判定失败；probe 还可能使 BIOS 打印 FAIL，做完后要重新进入菜单 2。
+
+4. **网口接收**（每个工程都做，在 BIOS 之后、各自演示之前）：方法同卡 30 第 B4 节的第 1、2 步。用串口（115200）烧录 `eth_diag.bin`，另开终端运行 `eth_probe.py --local-ip 192.168.1.2 --listen 6000`，然后做 5 次：输入 `r`，等 `link=1 speed=1000`，输入 `s`，10 秒后再输入 `s`。PERF1 增加 ≥ 8 且 PERF3 不增加记为成功。
 
 ### 5R：B3R
 
@@ -177,7 +183,8 @@ demo_vision 运行时，调试工具填本机地址 192.168.1.2，建立网口�
 ## 7. 通过判据
 
 - 三个工程的源文件数分别等于第 3 节的值，全部完成综合、布局布线和 bitstream。
-- 每个工程全部时钟域 WNS ≥ 0、WHS ≥ 0（重点：B3N clk_npu）。不满足时照常上板，如实回传。
+- 每个工程全部时钟域 WNS ≥ 0、WHS ≥ 0（重点：B3N clk_npu）；唯一例外是 `clk_rgmii_ref → clk_eth` 慢角 hold（第 1 节第 7 项）。不满足时照常上板，如实回传。
+- 每个工程的网口接收 5/5 成功（5.0 第 4 步）。
 - 上板：
 
 | 工程 | 判据 |
@@ -217,6 +224,10 @@ recovery/removal 最差裕量：
 ## 实现耗时（与卡 23 对比）
 | 工程 | synth | map | pnr | timing | bitgen | 峰值内存 |
 |---|---|---|---|---|---|---|
+
+## RGMII RX（每工程）
+| 工程 | slow setup 上升/下降 | slow hold 上升/下降 | fast setup | fast hold | PLL/缓冲站点 | CLKFB 驱动源 | PHY 复位成功次数 |
+|---|---|---|---|---|---|---|---|
 
 ## BIOS
 | 工程 | 程序 | 串口 115200 耗时/结果 | 串口 2 Mbaud 结果 | 网口烧录 耗时/结果 | 备注 |
