@@ -818,9 +818,9 @@ module edrv32_rnd_draw (
         genvar palette_slice;
         for (palette_slice = 0; palette_slice < 8; palette_slice = palette_slice + 1) begin
             : g_palette_select
-            (* keep = 1 *) reg bank_r /* synthesis syn_preserve=1 */;
+            reg bank_r /* synthesis syn_preserve=1 */;
             wire [511:0] bank_data_w;
-            (* keep = 1 *) always @(posedge clk_i) begin
+            always @(posedge clk_i) begin
                 if (pipeline_step_w && pipe_valid_r[4])
                     bank_r <= pipe_tag_r[4][31];
             end

@@ -554,8 +554,8 @@ module edrv32_rnd (
     generate for (capture_slice = 0; capture_slice < 8;
         capture_slice = capture_slice + 1) begin : g_read_capture
         localparam integer BEAT = capture_slice/2;
-        (* keep = 1 *) reg parameter_load_r /* synthesis syn_preserve=1 */;
-        (* keep = 1 *) always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        reg parameter_load_r /* synthesis syn_preserve=1 */;
+        always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
             if (!rst_mem_ctrl_n_w)
                 parameter_load_r <= 1'b0;
             else
@@ -564,8 +564,8 @@ module edrv32_rnd (
         end
         assign parameter_load_w[capture_slice] = parameter_load_r;
         if (capture_slice < 4) begin : g_command
-            (* keep = 1 *) reg command_load_r /* synthesis syn_preserve=1 */;
-            (* keep = 1 *) always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+            reg command_load_r /* synthesis syn_preserve=1 */;
+            always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
                 if (!rst_mem_ctrl_n_w)
                     command_load_r <= 1'b0;
                 else

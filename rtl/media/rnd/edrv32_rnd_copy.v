@@ -214,13 +214,13 @@ module edrv32_rnd_copy (
     genvar join_slice;
     generate for (join_slice = 0; join_slice < 4; join_slice = join_slice + 1) begin
         : g_source_join
-        (* keep = 1 *) reg aligned_r /* synthesis syn_preserve=1 */;
-        (* keep = 1 *) reg tail_r /* synthesis syn_preserve=1 */;
-        (* keep = 1 *) always @(posedge clk_i) begin
+        reg aligned_r /* synthesis syn_preserve=1 */;
+        reg tail_r /* synthesis syn_preserve=1 */;
+        always @(posedge clk_i) begin
             if (state_r == S_COUNTS)
                 aligned_r <= src_addr_r[4:0] == 0;
         end
-        (* keep = 1 *) always @(posedge clk_i or negedge rst_n_i) begin
+        always @(posedge clk_i or negedge rst_n_i) begin
             if (!rst_n_i)
                 tail_r <= 1'b0;
             else if (cancel_i)

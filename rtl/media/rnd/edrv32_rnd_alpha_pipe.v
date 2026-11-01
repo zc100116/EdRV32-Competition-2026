@@ -84,8 +84,8 @@ module edrv32_rnd_alpha_pipe (
     // Each result-RAM quadrant owns a same-cycle copy of the final shift control.
     genvar quadrant;
     generate for (quadrant = 0; quadrant < 8; quadrant = quadrant + 1) begin : g_offset
-        (* keep = 1 *) reg [4:0] offset_r /* synthesis syn_preserve=1 */;
-        (* keep = 1 *) always @(posedge clk_i) begin
+        reg [4:0] offset_r /* synthesis syn_preserve=1 */;
+        always @(posedge clk_i) begin
             if (advance_w)
                 offset_r <= tag_r[7][4:0];
         end
