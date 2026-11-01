@@ -81,6 +81,10 @@ module edrv32_icache (
             reg fill_err_r_copy /* synthesis syn_preserve=1 */;
             reg fill_invalidated_r_copy /* synthesis syn_preserve=1 */;
             wire hit1_w_copy;
+            wire lookup_ready_w_copy;
+            assign lookup_ready_w_copy = state_r == S_IDLE &&
+                (!lookup_valid_r_copy || pma_err_r ||
+                (cacheable_r && (hit0_copy_w[victim_group] || hit1_w_copy)));
             assign hit0_copy_w[victim_group] = lookup_valid0_w && tag0_w == addr_tag_r_copy;
             assign hit1_w_copy = lookup_valid1_w && tag1_w == addr_tag_r_copy;
             assign lookup_hit_copy_w[victim_group] = state_r == S_IDLE &&
@@ -124,7 +128,7 @@ module edrv32_icache (
             end
             // Snapshot the same set and LRU data as the original lookup registers.
             always @(posedge clk_i) begin
-                if (ic_req_ready_o)
+                if (lookup_ready_w_copy)
                     lookup_bank_r_copy <= 32'b1 << ic_req_addr_i[13:9];
                 for (lookup_idx = 0; lookup_idx < 32; lookup_idx = lookup_idx + 1) begin
                     lookup_lru_bank_r_copy[lookup_idx] <=
