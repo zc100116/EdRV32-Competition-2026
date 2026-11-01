@@ -132,6 +132,12 @@ module edrv32_rnd (
     wire [31:0] rd_addr_w;
     wire [15:0] rd_bytes_w;
     wire rd_data_valid_w;
+    wire rd_data_valid_raw_w;
+    wire [255:0] rd_data_raw_w;
+    wire rd_done_raw_w;
+    reg [255:0] rd_data_r;
+    reg rd_data_valid_r;
+    reg rd_done_r;
     wire [255:0] rd_data_w;
     wire rd_done_w;
     wire rd_idle_w;
@@ -239,7 +245,8 @@ module edrv32_rnd (
     assign unused_geometry_w = ^row_pixels_w[17:3];
     assign expansion_w = op_w == 8'h06 ? $signed({13'd0, command_r[292:288]}) : 18'sd0;
     assign empty_w = inverted_r || clip_right_r < clip_left_r || clip_bottom_r < clip_top_r;
-    assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w;
+    assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w ||
+        rd_data_valid_r || rd_done_r;
     assign read_fault_w = p4_rvalid_i && p4_rready_o && p4_rresp_i != 0;
     assign write_fault_w = p4_bvalid_i && p4_bready_o && p4_bresp_i != 0;
     assign cancel_w = abort_w || soft_reset_w || read_fault_w || write_fault_w;
@@ -483,9 +490,9 @@ module edrv32_rnd (
         .desc_stride_i(32'd0),
         .desc_width_bytes_i(rd_bytes_w),
         .desc_height_i(12'd1),
-        .data_valid_o(rd_data_valid_w),
+        .data_valid_o(rd_data_valid_raw_w),
         .data_ready_i(1'b1),
-        .data_o(rd_data_w),
+        .data_o(rd_data_raw_w),
         .data_sol_o(unused_sol_w),
         .data_eol_o(unused_eol_w),
         .data_eof_o(unused_eof_w),
@@ -502,9 +509,30 @@ module edrv32_rnd (
         .axi_rready_o(p4_rready_o),
         .abort_i(cancel_w),
         .idle_o(rd_idle_w),
-        .done_o(rd_done_w),
+        .done_o(rd_done_raw_w),
         .err_o(unused_rd_error_w)
     );
+    // Retiming the data and completion together preserves the final-beat/done ordering.
+    // Cancellation discards the buffered beat; DMA still owns AXI drainage (spec 5.3).
+    always @(posedge clk_mem_i) begin
+        rd_data_r <= rd_data_raw_w;
+    end
+    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+        if (!rst_mem_ctrl_n_w) begin
+            rd_data_valid_r <= 1'b0;
+            rd_done_r <= 1'b0;
+        end else if (cancel_w) begin
+            rd_data_valid_r <= 1'b0;
+            rd_done_r <= 1'b0;
+        end else begin
+            rd_data_valid_r <= rd_data_valid_raw_w;
+            rd_done_r <= rd_done_raw_w;
+        end
+    end
+    assign rd_data_w = rd_data_r;
+    assign rd_data_valid_w = rd_data_valid_r && !cancel_w;
+    assign rd_done_w = rd_done_r && !cancel_w;
+
     assign scalar_write_w = state_r == S_BLUR;
     assign wr_desc_valid_w = !cancel_w && ((state_r == S_DRAW && draw_wr_valid_w) ||
         (state_r == S_COPY && copy_wr_valid_w) || (state_r == S_FILL && fill_wr_valid_w) ||
@@ -636,7 +664,7 @@ module edrv32_rnd (
                 S_COMPLETE: state_r <= cur_desc_w + 32'd1 == {16'd0, list_count_r} ?
                     S_FINISH : S_FETCH;
                 S_FINISH: state_r <= S_IDLE;
-                S_DRAIN: if (rd_idle_w && wr_idle_w)
+                S_DRAIN: if (rd_idle_w && wr_idle_w && !rd_data_valid_r && !rd_done_r)
                     state_r <= S_IDLE;
                 default: state_r <= state_r;
             endcase
