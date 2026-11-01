@@ -25,7 +25,7 @@ module edrv32_apb_observer #(parameter bit COUNT_USED = 0) (
     assign bus.prdata = prdata_i;
     assign bus.pready = pready_i;
     assign bus.pslverr = pslverr_i;
-    always @(posedge clk_i)
+    always @(posedge clk_i or negedge rst_n_i)
         if (rst_n_i && psel_i != 0 && !penable_i)
             edrv32_apb_observation_pkg::setup_seen(COUNT_USED);
     // Timing checks do not constrain the value of an APB read/error payload.
