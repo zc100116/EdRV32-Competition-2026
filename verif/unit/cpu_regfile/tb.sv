@@ -27,13 +27,13 @@ module tb;
 
     edrv32_cpu_regfile dut (
         .clk_i(clk_i),
-        .read_addr0_i(read_addr0_i),
+        .read_addr0_i({4{read_addr0_i}}),
         .read_data0_o(read_data0_o),
-        .read_addr1_i(read_addr1_i),
+        .read_addr1_i({4{read_addr1_i}}),
         .read_data1_o(read_data1_o),
-        .read_addr2_i(read_addr2_i),
+        .read_addr2_i({4{read_addr2_i}}),
         .read_data2_o(read_data2_o),
-        .read_addr3_i(read_addr3_i),
+        .read_addr3_i({4{read_addr3_i}}),
         .read_data3_o(read_data3_o),
         .write_valid0_i(write_valid0_i),
         .write_addr0_i(write_addr0_i),

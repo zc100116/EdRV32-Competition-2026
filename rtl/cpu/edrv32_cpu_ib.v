@@ -14,6 +14,8 @@ module edrv32_cpu_ib (
     // D observes the oldest two records and consumes 0, 1 or 2.
     input wire [1:0] pop_count_i,
     output wire [357:0] data_o,
+    // Four 8-bit register-file slices each get their own four source-register addresses.
+    output wire [79:0] operand_addr_o,
     output wire [1:0] valid_count_o,
     // A stalled D redirect retains its head; older redirects discard the whole queue.
     input wire flush_i,
@@ -27,10 +29,75 @@ module edrv32_cpu_ib (
     reg [1:0] write_ptr_r;
     reg [2:0] count_r;
     wire [1:0] read_next_w;
-    wire [1:0] write_next_w;
     assign read_next_w = read_ptr_r + 1'b1;
-    assign write_next_w = write_ptr_r + 1'b1;
-    assign data_o = {entries_r[read_next_w], entries_r[read_ptr_r]};
+    // Each output slice owns its read-select FFs; all copies take the same next pointer.
+    genvar read_slot;
+    genvar read_slice;
+    genvar write_entry;
+    genvar operand_slice;
+    generate
+        for (read_slot = 0; read_slot < 2; read_slot = read_slot + 1) begin : g_read_slot
+            localparam SLOT = read_slot;
+            for (read_slice = 0; read_slice < 6;
+                read_slice = read_slice + 1) begin : g_read_slice
+                localparam SLICE_BITS = read_slice == 5 ? 19 : 32;
+                reg [1:0] read_ptr_r_copy /* synthesis syn_preserve=1 */;
+                wire [1:0] slot_w;
+                assign slot_w = read_ptr_r_copy + SLOT[1:0];
+                assign data_o[read_slot*RECORD_BITS + read_slice*32 +: SLICE_BITS] =
+                    entries_r[slot_w][read_slice*32 +: SLICE_BITS];
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i)
+                        read_ptr_r_copy <= 0;
+                    else if (flush_i)
+                        read_ptr_r_copy <= keep_head_i ? read_ptr_r : 2'd0;
+                    else
+                        read_ptr_r_copy <= read_ptr_r + pop_count_i;
+                end
+            end
+        end
+        for (operand_slice = 0; operand_slice < 8;
+            operand_slice = operand_slice + 1) begin : g_operand_read
+            localparam SLOT = operand_slice % 2;
+            localparam SLICE = operand_slice / 2;
+            reg [1:0] read_ptr_r_copy /* synthesis syn_preserve=1 */;
+            wire [1:0] slot_w;
+            assign slot_w = read_ptr_r_copy + SLOT[1:0];
+            // Record[56:47] is {instruction.rs2, instruction.rs1}.
+            assign operand_addr_o[SLICE*20 + SLOT*10 +: 10] = entries_r[slot_w][56:47];
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    read_ptr_r_copy <= 0;
+                else if (flush_i)
+                    read_ptr_r_copy <= keep_head_i ? read_ptr_r : 2'd0;
+                else
+                    read_ptr_r_copy <= read_ptr_r + pop_count_i;
+            end
+        end
+        // Decode each destination locally instead of a dynamic 716-bit write mux.
+        for (write_entry = 0; write_entry < 4;
+            write_entry = write_entry + 1) begin : g_write_entry
+            reg [1:0] write_ptr_r_copy /* synthesis syn_preserve=1 */;
+            wire [1:0] write_next_w_copy;
+            assign write_next_w_copy = write_ptr_r_copy + 1'b1;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    write_ptr_r_copy <= 0;
+                else if (flush_i)
+                    write_ptr_r_copy <= keep_head_i ? read_next_w : 2'd0;
+                else
+                    write_ptr_r_copy <= write_ptr_r + push_count_i;
+            end
+            always @(posedge clk_i) begin
+                if (!flush_i) begin
+                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
+                        entries_r[write_entry] <= push_data_i[178:0];
+                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
+                        entries_r[write_entry] <= push_data_i[357:179];
+                end
+            end
+        end
+    endgenerate
     assign valid_count_o = count_r >= 2 ? 2'd2 : count_r[1:0];
     // cpu-spec 4.1: only slots empty at cycle start can accept F2 records.
     assign free_count_o = DEPTH - count_r;
@@ -48,14 +115,6 @@ module edrv32_cpu_ib (
             read_ptr_r <= read_ptr_r + pop_count_i;
             write_ptr_r <= write_ptr_r + push_count_i;
             count_r <= count_r + {1'b0, push_count_i} - {1'b0, pop_count_i};
-        end
-    end
-    always @(posedge clk_i) begin
-        if (!flush_i) begin
-            if (push_count_i != 0)
-                entries_r[write_ptr_r] <= push_data_i[178:0];
-            if (push_count_i == 2)
-                entries_r[write_next_w] <= push_data_i[357:179];
         end
     end
 endmodule

@@ -31,6 +31,7 @@ module tb;
     integer keep_seen=0;
     integer delayed_space_seen=0;
 
+    wire [79:0] operand_addr_w;
     edrv32_cpu_ib dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -39,12 +40,14 @@ module tb;
         .free_count_o(free_count_o),
         .pop_count_i(pop_count_i),
         .data_o(data_o),
+        .operand_addr_o(operand_addr_w),
         .valid_count_o(valid_count_o),
         .flush_i(flush_i),
         .keep_head_i(keep_head_i),
         .count_o(count_o)
     );
     task automatic check;
+        integer slice;
         begin
             if(count_o!==3'(count) || valid_count_o!==2'(count>=2?2:count))
                 $fatal(1,"FAIL IB count expected=%d actual=%d time=%t",count,count_o,$time);
@@ -54,6 +57,14 @@ module tb;
             if(count>0 && data_o[178:0]!==model[0])
                 $fatal(1,"FAIL IB head expected=%h actual=%h time=%t",
                     model[0],data_o[178:0],$time);
+            for (slice=0;slice<4;slice=slice+1) begin
+                if (count>0 && operand_addr_w[slice*20 +: 10]!==model[0][56:47])
+                    $fatal(1,"FAIL IB operand head slice=%0d expected=%h actual=%h time=%t",
+                        slice,model[0][56:47],operand_addr_w[slice*20 +: 10],$time);
+                if (count>1 && operand_addr_w[slice*20+10 +: 10]!==model[1][56:47])
+                    $fatal(1,"FAIL IB operand second slice=%0d expected=%h actual=%h time=%t",
+                        slice,model[1][56:47],operand_addr_w[slice*20+10 +: 10],$time);
+            end
             if(count>1 && data_o[357:179]!==model[1])
                 $fatal(1,"FAIL IB second expected=%h actual=%h time=%t",
                     model[1],data_o[357:179],$time);
