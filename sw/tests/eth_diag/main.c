@@ -163,10 +163,9 @@ static void status(void)
     line_hex("ERR_CODE", reg_read(EDRV32_ETH_ERR_CODE_OFFSET));
 }
 
-static void cycle_delays(void)
+/* Combination bit1 = PHY TXDLY, bit0 = PHY RXDLY (RTL8211F page 0xd08). */
+static void set_delays(unsigned int combination)
 {
-    unsigned int combination = delay_next;
-    delay_next = (delay_next + 1u) & 3u;
     eth_mdio_write(phy, 0x1f, 0xd08);
     uint16_t tx = eth_mdio_read(phy, 0x11);
     uint16_t rx = eth_mdio_read(phy, 0x15);
@@ -221,14 +220,15 @@ int main(void)
     eth_window_configure(3, COMMAND_BASE, COMMAND_SIZE);
     eth_peer_configure(&peer, 5000);
     mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_CTRL_OFFSET, EDRV32_ETH_CTRL_ENABLE_MASK);
-    uart_puts("Commands: d=delays r=PHY reset s=status\r\n");
+    uart_puts("Commands: d=next delays 0-3=set delays (TX<<1|RX) r=PHY reset s=status\r\n");
     uint32_t sequence = 0;
     uint64_t next = clint_time() + clock_hz;
     for (;;) {
         uint32_t command = mmio_read32(EDRV32_UART0_BASE + UART_RXDATA);
         if (command & UART_RXDATA_VALID) {
             switch ((uint8_t)command) {
-            case 'd': cycle_delays(); break;
+            case 'd': set_delays(delay_next); delay_next = (delay_next + 1u) & 3u; break;
+            case '0': case '1': case '2': case '3': set_delays((uint8_t)command - '0'); break;
             case 'r': phy_reset(); phy_dump(); break;
             case 's': status(); break;
             default: break;
