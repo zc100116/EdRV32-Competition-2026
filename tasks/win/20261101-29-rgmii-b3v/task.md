@@ -12,6 +12,10 @@
 
 要得到的是：PDS 是否接受这些约束、PLL 实际位置、RX 采样的 setup/hold 裕量。协调者据此确定 PLL 相位和 IODELAY 的最终固定值。
 
+## 1a. 第二次执行（2026-11-01 更新）
+
+第一次执行时综合报 `ConstraintEditor-0046`：找不到 `i:u_rgmii.u_pll_eth.u_gpll.gpll_inst` 和 `i:u_pll_sys.u_gpll.gpll_inst`。原因是 `gpll_inst` 是映射后才有的名字；IP 源码中的 `GTP_GPLL` 原语实例名是 `u_gpll`。约束已改为 `i:u_rgmii.u_pll_eth.u_gpll`、`i:u_pll_sys.u_gpll`，写法与厂商 DDR 约束 `i:u_ddr3.u_ddrphy_top.u_ddrphy_cpd` 一致。请在同一分支 `win/20261101-29-rgmii-b3v` 上合入最新的 `origin/zc100116/b3` 后，从第 5 节第 1 步重新执行，IP 不用再次生成。4 条 `set_input_delay` 第一次已被接受。
+
 ## 2. 输入
 
 - **代码**：`origin/zc100116/b3`（包含本卡的提交），拉出 `win/20261101-29-rgmii-b3v`，记录完整哈希。
