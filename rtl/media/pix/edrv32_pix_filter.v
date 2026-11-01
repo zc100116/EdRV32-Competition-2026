@@ -194,6 +194,7 @@ module edrv32_pix_filter (
     assign gray_input_w = {bottom_w, middle_w, top_w};
 
     // spec pix 2.1, 2.4: compute only the six incoming pixels, including zero padding.
+    // Copy 1 owns the wide RAM capture; gray units share copies 0/2/3, two per copy.
     generate
         for (pixel = 0; pixel < 6; pixel = pixel + 1) begin : g_gray
             reg [15:0] s1_red_hi_r;
@@ -216,7 +217,7 @@ module edrv32_pix_filter (
             assign blue_w = {8'd0, gray_input_w[pixel*24 +: 8]};
             assign gray_y_w[pixel*8 +: 8] = s4_unused_gray_r[15:8];
             always @(posedge clk_i) begin
-                if (advance_i[2]) begin
+                if (advance_i[pixel % 3 == 0 ? 0 : pixel % 3 == 1 ? 2 : 3]) begin
                     s1_red_hi_r <= (red_w << 6) + (red_w << 3);
                     s1_red_lo_r <= (red_w << 2) + red_w;
                     s1_green_hi_r <= (green_w << 7) + (green_w << 4);

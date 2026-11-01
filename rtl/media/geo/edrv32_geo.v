@@ -88,6 +88,7 @@ module edrv32_geo (
     wire busy_w;
     wire stop_w;
     wire clear_w;
+    wire [3:0] clear_units_w;
     reg [1:0] error_w;
     wire range_error_w;
     wire rd_idle_w;
@@ -454,9 +455,9 @@ module edrv32_geo (
     end
     edrv32_geo_address u_read_address (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[0]),
         .start_i(tile_valid_w && tile_ready_w && !bounds_empty_w),
-        .clear_i(clear_w),
+        .clear_i(clear_units_w[0]),
         .base_i(src_base_w),
         .stride_i(src_stride_w),
         .row_i({1'b0, bounds_y_w}),
@@ -466,10 +467,10 @@ module edrv32_geo (
     );
     edrv32_geo_address u_write_address (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[1]),
         .start_i(state_r == S_RUN && compute_state_r == 0 &&
             source_ready_r[compute_group_r]),
-        .clear_i(clear_w),
+        .clear_i(clear_units_w[1]),
         .base_i(dst_base_w),
         .stride_i(dst_stride_w),
         .row_i(wr_row_w),
@@ -479,7 +480,7 @@ module edrv32_geo (
     );
     edrv32_geo_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[2]),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
@@ -537,9 +538,9 @@ module edrv32_geo (
     );
     edrv32_geo_tiles u_tiles (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[3]),
         .start_i(tiles_start_w),
-        .clear_i(clear_w),
+        .clear_i(clear_units_w[2]),
         .width_i(rect_w_w),
         .height_i(rect_h_w),
         .a_i(a_w),
@@ -560,9 +561,9 @@ module edrv32_geo (
     );
     edrv32_geo_bounds u_bounds (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[4]),
         .start_i(bounds_start_w),
-        .clear_i(clear_w),
+        .clear_i(clear_units_w[3]),
         .done_o(bounds_done_w),
         .x_i(tile_x_w),
         .y_i(tile_y_w),
@@ -582,9 +583,9 @@ module edrv32_geo (
     );
     edrv32_geo_coords u_coords (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[5]),
         .start_i(coord_start_w),
-        .clear_i(clear_w),
+        .clear_i(clear_units_w[0]),
         .width_i(group_width_r[compute_group_r]),
         .height_i(group_height_r[compute_group_r]),
         .x_i(group_x_r[compute_group_r]),
@@ -623,7 +624,7 @@ module edrv32_geo (
     );
     edrv32_geo_bilinear u_bilinear (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[6]),
         .advance_i(advance_w),
         .clear_i(clear_w || coord_start_w),
         .valid_i(sample_valid_r),
@@ -642,7 +643,7 @@ module edrv32_geo (
         .OUTSTANDING(4)
     ) u_rd (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[7]),
         .desc_valid_i(rd_desc_valid_w),
         .desc_ready_o(rd_desc_ready_w),
         .desc_base_i(rd_base_w),
@@ -675,7 +676,7 @@ module edrv32_geo (
         .OUTSTANDING(4)
     ) u_wr (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[8]),
         .desc_valid_i(wr_desc_valid_w),
         .desc_ready_o(wr_desc_ready_w),
         .desc_base_i(wr_base_w),
@@ -705,4 +706,87 @@ module edrv32_geo (
         .done_o(wr_done_w),
         .err_o(wr_err_w)
     );
+    // Copies use the controller's original D/enable; stop and software reset stay immediate.
+    reg [2:0] state_clear_r [0:3] /* synthesis syn_preserve=1 */;
+    genvar clear_copy;
+    generate
+        for (clear_copy = 0; clear_copy < 4; clear_copy = clear_copy + 1) begin : g_clear_copy
+            assign clear_units_w[clear_copy] = stop_w ||
+                state_clear_r[clear_copy] == S_DRAIN || soft_reset_w;
+            always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
+                if (!rst_mem_ctrl_n_w) begin
+                    state_clear_r[clear_copy] <= S_IDLE;
+                end else begin
+                    if (soft_reset_w) begin
+                        state_clear_r[clear_copy] <= S_IDLE;
+                    end else begin
+                        if (stop_w) begin
+                            state_clear_r[clear_copy] <= S_DRAIN;
+                        end else begin
+                            case (state_r)
+                                S_IDLE: begin
+                                    if (start_w) begin
+                                        if (desc_count_w != 0) begin
+                                            state_clear_r[clear_copy] <= S_DESC_REQ;
+                                        end
+                                    end
+                                end
+                                S_DESC_REQ: begin
+                                    if (rd_desc_ready_w) begin
+                                        state_clear_r[clear_copy] <= S_DESC_DATA;
+                                    end
+                                end
+                                S_DESC_DATA: begin
+                                    if (rd_done_w) begin
+                                        state_clear_r[clear_copy] <= S_PREP;
+                                    end
+                                end
+                                S_PREP: begin
+                                    if (prepare_r == 2'd3) begin
+                                        state_clear_r[clear_copy] <= S_CHECK;
+                                    end
+                                end
+                                S_CHECK: begin
+                                    if (rect_w_w == 0 || rect_h_w == 0) begin
+                                        state_clear_r[clear_copy] <= S_NEXT;
+                                    end else begin
+                                        state_clear_r[clear_copy] <= S_RUN;
+                                    end
+                                end
+                                S_RUN: begin
+                                    if (compute_state_r == 3 && wr_done_w) begin
+                                        if (group_last_r[compute_group_r]) begin
+                                            state_clear_r[clear_copy] <= S_NEXT;
+                                        end
+                                    end
+                                end
+                                S_NEXT: begin
+                                    state_clear_r[clear_copy] <= table_done_w ? S_IDLE : S_DESC_REQ;
+                                end
+                                S_DRAIN: begin
+                                    if (rd_idle_w && wr_idle_w) begin
+                                        state_clear_r[clear_copy] <= S_IDLE;
+                                    end
+                                end
+                                default: begin end
+                            endcase
+                        end
+                    end
+                end
+            end
+        end
+    endgenerate
+    // Parallel copies of the existing regional reset, with identical D and release edge.
+    wire [8:0] rst_mem_ctrl_n_units_w;
+    genvar rst_mem_ctrl_n_w_unit;
+    generate
+        for (rst_mem_ctrl_n_w_unit = 0; rst_mem_ctrl_n_w_unit < 9;
+            rst_mem_ctrl_n_w_unit = rst_mem_ctrl_n_w_unit + 1) begin : g_rst_mem_ctrl_n_w_unit
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_n_i),
+                .rst_n_o(rst_mem_ctrl_n_units_w[rst_mem_ctrl_n_w_unit])
+            );
+        end
+    endgenerate
 endmodule
