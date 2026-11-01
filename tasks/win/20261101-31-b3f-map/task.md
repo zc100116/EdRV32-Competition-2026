@@ -24,7 +24,7 @@
 - PDS 2022.2-SP6.1；PG2L200H-6 FBB676。
 - **开始时间**：现在就可以开始，不用等卡 24（用户 2026-11-01）。本卡只跑综合和 Device Map。如果卡 24 的 B3R 布局布线还在运行，在两张卡的 result.md 中各记一笔两者重叠的起止时间，作为卡 24 耗时对比的备注。
 - 工程目录：`G:\codex_project\EdRV32-FPGA\EdRV32-B3F`（新建），顶层 `edrv32_fpga_board_full_top`。
-- 本地 Verilator lint 0 告警；导入脚本预计输出 `added 165 sources`。
+- 本地 Verilator lint 0 告警；导入脚本预计输出 `added 164 sources`。
 
 ## 4. 需要的 IP
 
