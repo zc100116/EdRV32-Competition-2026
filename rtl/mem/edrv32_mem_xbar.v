@@ -505,8 +505,6 @@ module edrv32_mem_xbar (
         for (p = 0; p < 7; p = p + 1) begin : g_port
             assign starved_w[p*2] = ar_starved_r[p];
             assign starved_w[p*2+1] = aw_starved_r[p];
-            wire w_read_w;
-            wire [3:0] w_addr_w;
             assign awready_w[p] = !aw_pending_r[p] &&
                 !(cmd_valid_r && cmd_write_r && cmd_id_r[3:1] == p) &&
                                     !(w_active_r && w_port_r == p) && p != 0;
@@ -516,22 +514,49 @@ module edrv32_mem_xbar (
             assign bvalid_w[p] = b_count_r[p] != 0;
             assign bid_w[p] = b_fifo_r[p*8+{29'b0, b_head_r[p]}][2];
             assign bresp_w[p*2 +: 2] = b_fifo_r[p*8+{29'b0, b_head_r[p]}][1:0];
-            assign w_read_w = (cmd_take_w && cmd_write_r && cmd_id_r[3:1] == p) ||
-                                (w_take_w && !ddr_wlast_o && w_port_r == p);
-            assign w_addr_w = w_active_r ? w_index_r + 4'd1 : 4'b0;
             if (p != 0) begin : g_w_ram
+                reg [3:0] read_addr_lo_r /* synthesis syn_preserve=1 */;
+                reg [3:0] read_addr_hi_r /* synthesis syn_preserve=1 */;
+                reg [1:0] read_active_r /* synthesis syn_preserve=1 */;
+                wire read_lo_w;
+                wire read_hi_w;
+                // Predict index+1 at the edge that updates ownership/index, before RAM read.
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) begin
+                        read_addr_lo_r <= 4'd0;
+                        read_addr_hi_r <= 4'd0;
+                        read_active_r <= 2'b0;
+                    end else begin
+                        if (cmd_take_w && cmd_write_r) begin
+                            read_addr_lo_r <= 4'd1;
+                            read_addr_hi_r <= 4'd1;
+                            read_active_r <= 2'b11;
+                        end
+                        if (w_take_w) begin
+                            read_addr_lo_r <= ddr_wlast_o ? 4'd0 : w_index_r + 4'd2;
+                            read_addr_hi_r <= ddr_wlast_o ? 4'd0 : w_index_r + 4'd2;
+                            if (ddr_wlast_o)
+                                read_active_r <= 2'b0;
+                        end
+                    end
+                end
+                // Ready remains combinational: registering it would change accepted beats.
+                assign read_lo_w = (cmd_take_w && cmd_write_r && cmd_id_r[3:1] == p) ||
+                    (read_active_r[0] && ddr_wready_i && !ddr_wlast_o && w_port_r == p);
+                assign read_hi_w = (cmd_take_w && cmd_write_r && cmd_id_r[3:1] == p) ||
+                    (read_active_r[1] && ddr_wready_i && !ddr_wlast_o && w_port_r == p);
                 edrv32_ram_mem_xbar_w u_ram (
                     .clk_i(clk_i),
                     .wr_en_i(wvalid_w[p] && wready_w[p]),
                     .wr_addr_i(w_count_r[p][3:0]),
                     .wr_data_i({wstrb_w[p*32 +: 32], wdata_w[p*256 +: 256]}),
-                    .rd_en_i(w_read_w),
-                    .rd_addr_i(w_addr_w),
+                    .rd_en_lo_i(read_lo_w),
+                    .rd_en_hi_i(read_hi_w),
+                    .rd_addr_lo_i(read_addr_lo_r),
+                    .rd_addr_hi_i(read_addr_hi_r),
                     .rd_data_o(w_ram_data_w[p*288 +: 288])
                 );
             end else begin : g_no_w_ram
-                wire unused_read_w;
-                assign unused_read_w = w_read_w ^ &w_addr_w;
                 assign w_ram_data_w[p*288 +: 288] = 288'b0;
             end
         end
