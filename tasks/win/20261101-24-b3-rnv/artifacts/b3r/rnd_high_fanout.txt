@@ -1,0 +1,34 @@
+RND entries in reported Other High Fanout Signal table (limited to report coverage):
+| u_rnd/N493_1                                                    | u_rnd/N493_1                                                         | 1050       
+| u_rnd/u_draw/N794                                               | u_rnd/u_blit/load_state_r_fsm[2:0]_8                                 | 737        
+| u_rnd/u_draw/N4175                                              | u_rnd/u_draw/N4175_1                                                 | 725        
+| u_rnd/u_draw/N866                                               | u_rnd/u_draw/N866_2                                                  | 608        
+| u_rnd/command_r [8]                                             | u_rnd/command_r[8]                                                   | 585        
+| u_rnd/u_copy/N182                                               | u_rnd/u_draw/u_affine/u_window/N7781_1                               | 528        
+| u_rnd/state_r_reg [13]                                          | u_rnd/state_r_reg[13]                                                | 528        
+| u_rnd/u_draw/u_affine/u_window/N6308                            | u_rnd/u_draw/u_affine/u_window/N6308_6                               | 505        
+| u_rnd/u_draw/u_affine/u_window/row_addr_r [1]                   | u_rnd/u_draw/u_affine/u_window/row_addr_r[1]                         | 490        
+| u_rnd/u_draw/u_affine/u_window/row_addr_r [0]                   | u_rnd/u_draw/u_affine/u_window/row_addr_r[0]                         | 478        
+| u_rnd/command_r [16]                                            | u_rnd/command_r[16]                                                  | 441        
+| u_rnd/u_draw/u_geometry/sample_w                                | u_rnd/u_draw/u_geometry/N25                                          | 441        
+| u_rnd/u_copy/source_words_r [0]                                 | u_rnd/u_copy/source_words_r[0]                                       | 440        
+| u_rnd/state_r_reg [5]                                           | u_rnd/state_r_reg[5]                                                 | 426        
+| u_rnd/u_copy/target_words_r [1]                                 | u_rnd/u_copy/target_words_r[1]                                       | 408        
+| u_rnd/u_copy/target_words_r [0]                                 | u_rnd/u_copy/target_words_r[0]                                       | 404        
+| u_rnd/u_decode/N169                                             | u_rnd/u_decode/N169                                                  | 379        
+| u_rnd/u_draw/u_geometry/aa_w                                    | u_rnd/u_draw/u_geometry/aa_r                                         | 374        
+| u_rnd/u_blur/shadow_r                                           | u_rnd/u_blur/shadow_r                                                | 373        
+| u_rnd/u_draw/u_geometry/group_start_w                           | u_rnd/u_draw/u_geometry/N6                                           | 367        
+| u_rnd/u_draw/pipe_tag_r[0] [31]                                 | u_rnd/u_draw/pipe_tag_r[0][31]                                       | 363        
+| u_rnd/u_draw/N7112                                              | u_rnd/u_draw/N7112                                                   | 363        
+| u_rnd/cancel_w_cpy                                              | u_rnd/N99_5_cpy                                                      | 354        
+| u_rnd/u_draw/u_geometry/N2198                                   | u_rnd/u_draw/u_geometry/N2198_1                                      | 348        
+| u_rnd/state_r_reg [7]                                           | u_rnd/state_r_reg[7]                                                 | 329        
+| u_rnd/u_draw/u_affine/u_window/row_addr_r [3]                   | u_rnd/u_draw/u_affine/u_window/row_addr_r[3]                         | 322        
+| u_rnd/N1106                                                     | u_rnd/N2022_26                                                       | 318        
+| u_rnd/u_blur/N913                                               | u_rnd/u_blur/N913                                                    | 315        
+| u_rnd/N205                                                      | u_rnd/N205_1                                                         | 311        
+| u_rnd/u_draw/N7229                                              | u_rnd/u_draw/N7229                                                   | 303        
+| u_rnd/u_blit/write_bank_r                                       | u_rnd/u_blit/write_bank_r                                            | 302        
+| u_rnd/u_draw/N7167                                              | u_rnd/u_draw/N7167                                                   | 301        
+| u_rnd/u_draw/pipeline_step_w                                    | u_rnd/u_draw/N562_6                                                  | 300        

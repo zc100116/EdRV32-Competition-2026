@@ -1,0 +1,32 @@
+## compile
+W: Verilog-2020: 796
+W: Verilog-2008: 631
+W: Verilog-2038: 324
+W: Sdm-2000: 143
+W: Verilog-2023: 120
+W: Sdm-2003: 119
+W: Verilog-2039: 41
+W: Verilog-2019: 25
+W: Public-4030: 22
+W: Verilog-2006: 10
+W: Sdm-2010: 5
+W: Verilog-2036: 4
+W: Verilog-2021: 3
+W: Sdm-2014: 2
+Loop was found during constant probe: 909
+
+## synthesize
+W: Public-4008: 5957
+W: Timing-4087: 93
+W: Timing-4086: 40
+C: ConstraintEditor-2002: 22
+C: ConstraintEditor-2009: 12
+W: UserConstraintEditor-4009: 2
+W: Adm-4019: 1
+Loop was found during constant probe: 0
+
+## device_map
+W: Public-4008: 31
+W: DeviceMap-4011: 8
+W: Public-4010: 1
+Loop was found during constant probe: 0

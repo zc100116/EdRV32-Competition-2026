@@ -1,0 +1,1 @@
+Device Map本轮报告没有独立的按模块LUT/FF资源汇总表；不把Logical Constraint表当作层次资源。APM/DRM/LUTRAM实例信息见resource_apm_drm_lutram.txt，完整SNR/DMR已保存。
