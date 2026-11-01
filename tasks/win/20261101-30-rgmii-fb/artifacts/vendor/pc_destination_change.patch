@@ -1,0 +1,5 @@
+--- source/ethernet_test.v (vendor original)
++++ source/ethernet_test.v (user-requested working copy)
+@@
+-    parameter       DEST_IP   = 32'hC0_A8_01_69,//192.168.1.105
++    parameter       DEST_IP   = 32'hC0_A8_01_02,//192.168.1.2

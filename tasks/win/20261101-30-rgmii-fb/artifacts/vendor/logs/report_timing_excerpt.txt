@@ -1,0 +1,16 @@
+W: Timing-4087: Port 'led' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'phy_rstn' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'rgmii_tx_ctl' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'rgmii_txd[0]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'rgmii_txd[1]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'rgmii_txd[2]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'rgmii_txd[3]' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rgmii_rx_ctl' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'rgmii_rxd[0]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'rgmii_rxd[1]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'rgmii_rxd[2]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'rgmii_rxd[3]' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:19s
+Action report_timing: CPU time elapsed is 0h:0m:4s
+Action report_timing: Process CPU time elapsed is 0h:0m:4s
+Action report_timing: Peak memory pool usage is 1,483 MB

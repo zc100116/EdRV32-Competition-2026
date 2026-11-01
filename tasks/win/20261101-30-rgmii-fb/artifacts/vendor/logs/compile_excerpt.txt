@@ -1,0 +1,147 @@
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 60)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 61)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 62)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 63)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 64)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 65)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 66)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 67)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 68)] Ansi_parameter force parameter in body to localparam
+W: Verilog-2006: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 69)] Ansi_parameter force parameter in body to localparam
+W: Public-4030: File 'G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/check_sum.vh' has been added. It is skipped.
+W: Public-4030: File 'G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/check_sum.vh' has been added. It is skipped.
+W: Public-4030: File 'G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/check_sum.vh' has been added. It is skipped.
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 290)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 291)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 294)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 298)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 302)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 306)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 314)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 315)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 318)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 319)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 322)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 323)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 326)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 327)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 330)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 331)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 334)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 335)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 338)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 339)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 342)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 343)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 346)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 347)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 350)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 351)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 354)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 355)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 358)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 359)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 362)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 363)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 366)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 367)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 371)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 372)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 375)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 376)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 380)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 381)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 386)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 387)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 390)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 391)] Ignore 'system task' $finish
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 396)] Ignore 'system task' $display
+W: Verilog-2008: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 397)] Ignore 'system task' $finish
+W: Verilog-2032: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/eth_udp_test.v(line number: 216)] Assigned initial value to variable test_data that is unassigned but has initial value
+W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 445)] Repeat multiplier in concatenation evaluates to 0
+W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 446)] Repeat multiplier in concatenation evaluates to 0
+W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 454)] Case condition never applies
+W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 455)] Case condition never applies
+W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 456)] Case condition never applies
+W: Verilog-2039: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 585)] Repeat multiplier in concatenation evaluates to 0
+W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 590)] Case condition never applies
+W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 591)] Case condition never applies
+W: Verilog-2038: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 592)] Case condition never applies
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[8] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[9] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[10] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[11] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[12] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[13] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[14] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[15] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[16] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 680)] Net DA_bus[17] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[8] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[9] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[10] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[11] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[12] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[13] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[14] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[15] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[16] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2020: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/ipcore/icmp_rx_ram_8_256/rtl/ipm2l_sdpram_v1_10_icmp_rx_ram_8_256.v(line number: 681)] Net DB_bus[17] in ipm2l_sdpram_v1_10_icmp_rx_ram_8_256(original module ipm2l_sdpram_v1_10_icmp_rx_ram_8_256) does not have a driver, tie it to 0
+W: Verilog-2024: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/icmp.v(line number: 23)] Give an initial value for the no drive output pin icmp_tx_end in graph of sdm module icmp
+W: Verilog-2019: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/ethernet_test.v(line number: 69)] Width mismatch between port udp_rec_rdata and signal bound to it for instantiated module eth_udp_test
+W: Verilog-2019: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/ethernet_test.v(line number: 69)] Width mismatch between port udp_rec_data_length and signal bound to it for instantiated module eth_udp_test
+W: Verilog-2023: [G:/codex_project/EdRV32-FPGA/EdRV32-ETH-VENDOR/source/ethernet_test.v(line number: 93)] Give initial value 0 for the no drive pin rgmii_clk_90p in module instance ethernet_test.rgmii_interface
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+W: Loop was found during constant probe.
+Action compile: Real time elapsed is 0h:0m:6s
+Action compile: CPU time elapsed is 0h:0m:0s
+Action compile: Process CPU time elapsed is 0h:0m:0s
+Action compile: Peak memory pool usage is 147 MB

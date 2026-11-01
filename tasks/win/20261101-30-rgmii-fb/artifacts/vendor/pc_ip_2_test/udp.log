@@ -1,0 +1,120 @@
+{"direction": "tx", "seconds": 1.7700003809295595e-05, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303030"}
+{"direction": "rx", "seconds": 0.667772500004503, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 1.0757887000072515, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303031"}
+{"direction": "rx", "seconds": 1.6677206000022124, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 2.0820335000025807, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303032"}
+{"direction": "rx", "seconds": 2.667729500011774, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 3.07241600000998, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303033"}
+{"direction": "rx", "seconds": 3.667874600010691, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 4.075372100007371, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303034"}
+{"direction": "rx", "seconds": 4.667753600006108, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 5.093968400004087, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303035"}
+{"direction": "rx", "seconds": 5.667744400008814, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 6.075372400009655, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303036"}
+{"direction": "rx", "seconds": 6.66772110000602, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 7.080882400012342, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303037"}
+{"direction": "rx", "seconds": 7.667734900009236, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 8.074759100010851, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303038"}
+{"direction": "rx", "seconds": 8.66783750000468, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 9.07930120000674, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303039"}
+{"direction": "rx", "seconds": 9.66776490000484, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 10.082587400000193, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303130"}
+{"direction": "rx", "seconds": 10.667789500002982, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 11.07654240001284, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303131"}
+{"direction": "rx", "seconds": 11.667828700010432, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 12.07082980000996, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303132"}
+{"direction": "rx", "seconds": 12.667750200009323, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 13.078070000003208, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303133"}
+{"direction": "rx", "seconds": 13.667680100013968, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 14.074675500000012, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303134"}
+{"direction": "rx", "seconds": 14.667856300002313, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 15.07996020000428, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303135"}
+{"direction": "rx", "seconds": 15.667675700009568, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 16.07028430000355, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303136"}
+{"direction": "rx", "seconds": 16.667690200003562, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 17.07868090001284, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303137"}
+{"direction": "rx", "seconds": 17.667722300000605, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 18.07165480000549, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303138"}
+{"direction": "rx", "seconds": 18.667861500012805, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 19.09041210000578, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303139"}
+{"direction": "rx", "seconds": 19.667766000013216, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 20.09271660000377, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303230"}
+{"direction": "rx", "seconds": 20.667656400008127, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 21.070684700011043, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303231"}
+{"direction": "rx", "seconds": 21.667705000014394, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 22.08030420000432, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303232"}
+{"direction": "rx", "seconds": 22.667774300003657, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 23.095796900001005, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303233"}
+{"direction": "rx", "seconds": 23.6677359000023, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 24.083486000003177, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303234"}
+{"direction": "rx", "seconds": 24.66771160000644, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 25.085084100006497, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303235"}
+{"direction": "rx", "seconds": 25.667902200002572, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 26.074553600003128, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303236"}
+{"direction": "rx", "seconds": 26.667729600012535, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 27.076439200012828, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303237"}
+{"direction": "rx", "seconds": 27.66778050000721, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 28.08410650001315, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303238"}
+{"direction": "rx", "seconds": 28.667742900011945, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 29.084335800012923, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303239"}
+{"direction": "rx", "seconds": 29.667879500004346, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 30.079910400003428, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303330"}
+{"direction": "rx", "seconds": 30.667778000002727, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 31.0707024000003, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303331"}
+{"direction": "rx", "seconds": 31.667840000009164, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 32.08091280001099, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303332"}
+{"direction": "rx", "seconds": 32.667725200008135, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 33.06977480000933, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303333"}
+{"direction": "rx", "seconds": 33.667695600001025, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 34.08009710001352, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303334"}
+{"direction": "rx", "seconds": 34.66768050000246, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 35.0836360000103, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303335"}
+{"direction": "rx", "seconds": 35.66768860000593, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 36.07324900000822, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303336"}
+{"direction": "rx", "seconds": 36.66773010000179, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 37.082776500014006, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303337"}
+{"direction": "rx", "seconds": 37.6676870000083, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 38.07734680001158, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303338"}
+{"direction": "rx", "seconds": 38.66784880000341, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 39.07296500001394, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303339"}
+{"direction": "rx", "seconds": 39.66781170001195, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 40.080748400010634, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303430"}
+{"direction": "rx", "seconds": 40.6678174000117, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 41.07474040001398, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303431"}
+{"direction": "rx", "seconds": 41.667704400009825, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 42.08362930000294, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303432"}
+{"direction": "rx", "seconds": 42.667822300005355, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 43.08002320000378, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303433"}
+{"direction": "rx", "seconds": 43.66782060000696, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 44.075572500005364, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303434"}
+{"direction": "rx", "seconds": 44.66778210000484, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 45.09566520000226, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303435"}
+{"direction": "rx", "seconds": 45.667679300007876, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 46.0717386000033, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303436"}
+{"direction": "rx", "seconds": 46.66770270001143, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 47.09085160000541, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303437"}
+{"direction": "rx", "seconds": 47.66774580000492, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 48.08247880000272, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303438"}
+{"direction": "rx", "seconds": 48.66786510001111, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 49.07436490000691, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303439"}
+{"direction": "rx", "seconds": 49.667787500002305, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 50.08553350000875, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303530"}
+{"direction": "rx", "seconds": 50.667807400008314, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 51.07761670000036, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303531"}
+{"direction": "rx", "seconds": 51.66789160000917, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 52.07474290000391, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303532"}
+{"direction": "rx", "seconds": 52.66771880000306, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 53.07599920000939, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303533"}
+{"direction": "rx", "seconds": 53.6679628000129, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 54.087046700005885, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303534"}
+{"direction": "rx", "seconds": 54.66771520000475, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 55.07557010000164, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303535"}
+{"direction": "rx", "seconds": 55.667698500008555, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 56.07055480001145, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303536"}
+{"direction": "rx", "seconds": 56.667779300012626, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 57.078638200007845, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303537"}
+{"direction": "rx", "seconds": 57.66770400000678, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 58.07472290001169, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303538"}
+{"direction": "rx", "seconds": 58.66784940000798, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}
+{"direction": "tx", "seconds": 59.070196500004386, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "6361726433302050432070726f62652030303539"}
+{"direction": "rx", "seconds": 59.66811100000632, "peer": ["192.168.1.11", 8080], "bytes": 20, "hex": "7777772e6d65796573656d692e636f6d2020200a", "text": "www.meyesemi.com   \n", "matches_fixed_payload": true}

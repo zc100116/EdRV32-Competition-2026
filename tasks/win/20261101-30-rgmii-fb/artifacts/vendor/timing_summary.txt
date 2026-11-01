@@ -1,0 +1,158 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Sun Nov  1 13:54:13 2026
+| Design       : ethernet_test
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing 
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:                                                                                                                                                              
+*****************************************************************************************************************************************************************************
+                                                                                                         Clock   Non-clock                                                   
+ Clock                                          Period       Waveform            Type                    Loads       Loads  Sources                                          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ rgmii_rxc                                      8.0000       {0.0000 4.0000}     Declared                    0           1  {rgmii_rxc}                                      
+   rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred  8.0000       {0.6250 4.6250}     Generated (rgmii_rxc)    2849         379  {ref_clock/u_gpll/gpll_inst/CLKOUT0}             
+ rgmii_txc                                      8.0000       {0.0000 4.0000}     Declared                    0           0  {rgmii_txc}                                      
+ DebugCore_JCLK                                 50.0000      {0.0000 25.0000}    Declared                  358          14  {u_CORES/u_GTP_SCANCHAIN_PG/scanchain/TCK1}      
+ DebugCore_CAPTURE                              100.0000     {25.0000 75.0000}   Declared                   11           0  {u_CORES/u_GTP_SCANCHAIN_PG/scanchain/CAPTUREDR} 
+=============================================================================================================================================================================
+
+ Clock Groups:                                                                                      
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks                                    
+----------------------------------------------------------------------------------------------------
+ DebugCoreClockGroup           asynchronous               DebugCore_JCLK  DebugCore_CAPTURE         
+====================================================================================================
+
+ Performance Summary:                                                                               
+****************************************************************************************************
+                              Requested       Estimated      Requested      Estimated               
+ Clock                        Frequency       Frequency      Period         Period             Slack
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                           125.0000 MHz    212.4044 MHz         8.0000         4.7080          3.292
+ DebugCore_JCLK             20.0000 MHz    117.9384 MHz        50.0000         8.4790         41.521
+====================================================================================================
+
+Design Summary : All Constraints Met.
+
+Setup Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     3.292       0.000              0           8399
+ DebugCore_JCLK         DebugCore_JCLK              22.751       0.000              0           1558
+ DebugCore_CAPTURE      DebugCore_JCLK              23.600       0.000              0            103
+ DebugCore_JCLK         DebugCore_CAPTURE           42.812       0.000              0             16
+====================================================================================================
+
+Hold Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     0.151       0.000              0           8399
+ DebugCore_JCLK         DebugCore_JCLK               0.201       0.000              0           1558
+ DebugCore_CAPTURE      DebugCore_JCLK              19.305       0.000              0            103
+ DebugCore_JCLK         DebugCore_CAPTURE            4.483       0.000              0             16
+====================================================================================================
+
+Recovery Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     5.547       0.000              0           1058
+====================================================================================================
+
+Removal Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     0.398       0.000              0           1058
+====================================================================================================
+
+Minimum Pulse Width Summary(Slow Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred         3.040       0.000              0           2849
+ DebugCore_JCLK                                     24.040       0.000              0            358
+ DebugCore_CAPTURE                                  49.800       0.000              0             11
+====================================================================================================
+
+Setup Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     5.231       0.000              0           8399
+ DebugCore_JCLK         DebugCore_JCLK              24.012       0.000              0           1558
+ DebugCore_CAPTURE      DebugCore_JCLK              24.290       0.000              0            103
+ DebugCore_JCLK         DebugCore_CAPTURE           45.632       0.000              0             16
+====================================================================================================
+
+Hold Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     0.105       0.000              0           8399
+ DebugCore_JCLK         DebugCore_JCLK               0.200       0.000              0           1558
+ DebugCore_CAPTURE      DebugCore_JCLK              21.755       0.000              0            103
+ DebugCore_JCLK         DebugCore_CAPTURE            2.990       0.000              0             16
+====================================================================================================
+
+Recovery Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     6.428       0.000              0           1058
+====================================================================================================
+
+Removal Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                        rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred
+                                                     0.268       0.000              0           1058
+====================================================================================================
+
+Minimum Pulse Width Summary(Fast Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ rgmii_rxc|ref_clock/u_gpll/CLKOUT0_Inferred         3.430       0.000              0           2849
+ DebugCore_JCLK                                     24.430       0.000              0            358
+ DebugCore_CAPTURE                                  49.800       0.000              0             11
+====================================================================================================

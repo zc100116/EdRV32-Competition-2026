@@ -1,0 +1,131 @@
+Source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程2 盘古100K MINI 通用实验指导手册-盘古676系列.pdf
+=== PDF page 174 ===
+- 167 -
+11.6.3.
+其他部分
+11.6.3.1.
+ICMP 应答
+在工程中，icmp_reply.v 实现ping 功能，首先接收其他设备发过来的icmp 数据，判断类型是否是回送
+请求（ECHO REQUEST），如果是，将数据存入RAM，并计算校验和，判断校验和是否正确，如果正确则进入发送
+状态，将数据发送出去。
+信号名称
+方向
+位宽
+说明
+clk
+input
+1
+系统时钟
+rst_n
+input
+1
+低电平复位
+mac_send_end
+input
+1
+Mac 发送结束信号
+ip_tx_ack
+input
+1
+IP 发送应答
+icmp_rx_data
+input
+8
+ICMP 接收数据
+icmp_rx_req
+input
+1
+ICMP 接收请求
+icmp_rev_error
+input
+1
+接收错误信号
+upper_layer_data_length
+input
+16
+上层协议长度
+icmp_data_req
+output
+1
+发送请求ICMP 数据
+icmp_tx_ready
+output
+1
+ICMP 发送准备好
+icmp_tx_data
+output
+8
+ICMP 发送数据
+icmp_tx_end
+output
+1
+ICMP 发送结束
+icmp_tx_req
+output
+1
+ICMP 发送请求
+11.6.3.2.
+ARP 缓存
+在工程中，arp_cache.v 为arp 缓存模块，将接收到的其他设备IP 地址和MAC 地址缓存，在发送数据之
+前，查询目的地址是否存在，如果不存在，则向目的地址发送ARP 请求，等待应答。在设计文件中，只做了一个缓
+存空间，如果有需要，可扩展。
+信号名称
+方向
+位宽
+说明
+clk
+input
+1
+系统时钟
+rst_n
+input
+1
+低电平复位
+arp_found
+input
+1
+ARP 接收到回复正确
+arp_rec_source_ip_addr
+input
+32
+ARP 接收的源IP 地址
+arp_rec_source_mac_addr
+input
+48
+ARP 接收的源MAC 地址
+destination_ip_addr
+input
+32
+目的IP 地址
+destination_mac_addr
+output
+48
+目的MAC 地址
+mac_not_exist
+output
+1
+目的地址对应的MAC 地址不存在
+
+=== PDF page 175 ===
+- 168 -
+11.6.3.3.
+CRC 校验模块(crc.v)
+CRC32 校验是在目标MAC 地址开始计算的，一直计算到一个包的最后一个数据为止。一些网站可以自动
+生成CRC 算法的verilog 文件：https://bues.ch/cms/hacking/crcgen.html
+11.6.4.
+实验现象
+用网线连接MES50HP 开发板网口1 和PC 端网口；
+设置接收端（PC 端）IP 地址为192.168.1.105，开发板的IP 地址为192.168.1.11 如下图：
+
+=== PDF page 176 ===
+- 169 -
+将程序下载到开发板后，便可以看到LED 灯规律性闪烁：
+LED 编号
+参考说明
+1
+闪烁
+通过命令提示符，输入arp -a，可以查到IP：192.168.1.11 MAC：e1_e1_e1_e1_e1_e1;
+通过Wireshark 软件抓包验证数据链路是否正常连接以及数据传输是否正常。资料包中
+Wireshark 安装包目录如下：
+MES50HP \5_Software\网络调试助手\Wireshark-win32-2.4.1.0.exe
+PC 端打开Wireshark 软件，烧录重新后进行捕获数据报可以看到如下所示的交互过程。

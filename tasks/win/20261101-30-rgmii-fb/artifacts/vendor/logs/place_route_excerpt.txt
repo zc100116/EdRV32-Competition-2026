@@ -1,0 +1,4 @@
+Action pnr: Real time elapsed is 0h:1m:19s
+Action pnr: CPU time elapsed is 0h:0m:8s
+Action pnr: Process CPU time elapsed is 0h:0m:9s
+Action pnr: Peak memory pool usage is 3,051 MB

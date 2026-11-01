@@ -1,0 +1,1 @@
+PC Ethernet if5: Up,1Gbps,192.168.1.2/24. No UDP8080 listener observed before baseline test. Vendor destination is192.168.1.105:8080. Attempted New-NetIPAddress -InterfaceIndex5 -IPAddress192.168.1.105 -PrefixLength24 -SkipAsSource true -PolicyStore ActiveStore; Windows returned Access denied. Address not added. No UDP60s result yet; awaiting user administrator GUI configuration.

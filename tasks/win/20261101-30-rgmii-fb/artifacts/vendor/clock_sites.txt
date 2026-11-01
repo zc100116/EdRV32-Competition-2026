@@ -1,0 +1,4 @@
+| rgmii_interface/GTP_CLKBUFG_RXSHFT/gopclkbufg     | USCM_383_930          | rgmii_clk           | 3222            | 0                   | ref_clock/u_gpll/gpll_inst               | CLKOUT0        | GPLL_7_1381             
+| ref_clock/u_gpll/gpll_inst     | GPLL_7_1381          | CLKIN1      | nt_rgmii_rxc      |  -              |  -                  | rgmii_rxc_ibuf/opit_1     | DI_TO_CLK            | IOLHR_16_1368                 
+| ref_clock/u_gpll/gpll_inst     | GPLL_7_1381          | CLKIN2      | _GND366           |  -              |  -                  | GND_366                   | Z                    | CLMA_21_1404                  
+| ref_clock/u_gpll/gpll_inst     | GPLL_7_1381          | CLKOUT0     | rgmii_clk_90p     | 3222            | 0                   |  ...                      |  ...                 |  ...                          

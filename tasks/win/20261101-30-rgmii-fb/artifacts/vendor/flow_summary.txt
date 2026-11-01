@@ -1,0 +1,41 @@
+compile
+Warnings=143 Errors=0
+Action compile: Real time elapsed is 0h:0m:6s
+Action compile: CPU time elapsed is 0h:0m:0s
+Action compile: Process CPU time elapsed is 0h:0m:0s
+Action compile: Peak memory pool usage is 147 MB
+
+synthesize
+Warnings=315 Errors=0
+Action synthesize: Real time elapsed is 0h:0m:15s
+Action synthesize: CPU time elapsed is 0h:0m:2s
+Action synthesize: Process CPU time elapsed is 0h:0m:2s
+Action synthesize: Peak memory pool usage is 480 MB
+
+device_map
+Warnings=36 Errors=0
+Action dev_map: Real time elapsed is 0h:0m:37s
+Action dev_map: CPU time elapsed is 0h:0m:1s
+Action dev_map: Process CPU time elapsed is 0h:0m:1s
+Action dev_map: Peak memory pool usage is 478 MB
+
+place_route
+Warnings=0 Errors=0
+Action pnr: Real time elapsed is 0h:1m:19s
+Action pnr: CPU time elapsed is 0h:0m:8s
+Action pnr: Process CPU time elapsed is 0h:0m:9s
+Action pnr: Peak memory pool usage is 3,051 MB
+
+report_timing
+Warnings=12 Errors=0
+Action report_timing: Real time elapsed is 0h:0m:19s
+Action report_timing: CPU time elapsed is 0h:0m:4s
+Action report_timing: Process CPU time elapsed is 0h:0m:4s
+Action report_timing: Peak memory pool usage is 1,483 MB
+
+generate_bitstream
+Warnings=0 Errors=0
+Action gen_bit_stream: Real time elapsed is 0h:0m:27s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:7s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:7s
+Action gen_bit_stream: Peak memory pool usage is 2,329 MB

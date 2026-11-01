@@ -1,0 +1,20 @@
+{
+  "duration_seconds": 60.07591970000067,
+  "local": [
+    "192.168.1.2",
+    8080
+  ],
+  "board": [
+    "192.168.1.11",
+    8080
+  ],
+  "tx_packets": 60,
+  "rx_packets": 60,
+  "rx_matching_fixed_20B": 60,
+  "rx_unexpected": 0,
+  "expected_payload_hex": "7777772e6d65796573656d692e636f6d2020200a",
+  "echo_test": false,
+  "arp": [
+    "Source-bound ARP192.168.1.2 ->192.168.1.11 succeeded"
+  ]
+}
