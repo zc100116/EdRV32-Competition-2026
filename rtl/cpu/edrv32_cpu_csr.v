@@ -9,6 +9,7 @@ module edrv32_cpu_csr #(
     // Clock and architectural reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire [9:0] rst_sys_counter_n_i,
     // M-stage access: write_i denotes an actual, committed CSR write.
     // command: 1=write, 2=set, 3=clear; zero=read only.
     input wire access_valid_i,
@@ -57,7 +58,7 @@ module edrv32_cpu_csr #(
     reg [4:0] event_r [0:7];
     reg [63:0] cycle_r;
     reg [63:0] instret_r;
-    reg [63:0] counter_r [0:7];
+    wire [63:0] counter_r [0:7];
     reg [31:0] event_count_r;
     reg [31:0] write_data_w;
     wire write_enable_w;
@@ -164,23 +165,10 @@ module edrv32_cpu_csr #(
             mcause_r <= 0;
             mtval_r <= 0;
             inhibit_r <= 0;
-            cycle_r <= 0;
-            instret_r <= 0;
             for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
                 event_r[update_idx] <= 0;
-                counter_r[update_idx] <= 0;
             end
         end else begin
-            if (!inhibit_r[0])
-                cycle_r <= cycle_r + 1'b1;
-            if (!inhibit_r[2])
-                instret_r <= instret_r + {62'b0, retire_count_i};
-            for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
-                if (!inhibit_r[update_idx + 3] && event_r[update_idx] >= 1 &&
-                    event_r[update_idx] <= 16)
-                    counter_r[update_idx] <= counter_r[update_idx] +
-                        {62'b0, event_count_r[(event_r[update_idx] - 1'b1) * 2 +: 2]};
-            end
             if (write_enable_w && !trap_i) begin
                 if (select_i[0])
                     mstatus_r <= (write_data_w & 32'h88) | 32'h1800;
@@ -199,21 +187,9 @@ module edrv32_cpu_csr #(
                     mcause_r <= write_data_w;
                 if (select_i[8])
                     mtval_r <= write_data_w;
-                if (select_i[10])
-                    cycle_r <= {cycle_r[63:32], write_data_w};
-                if (select_i[11])
-                    cycle_r <= {write_data_w, cycle_r[31:0]};
-                if (select_i[12])
-                    instret_r <= {instret_r[63:32], write_data_w};
-                if (select_i[13])
-                    instret_r <= {write_data_w, instret_r[31:0]};
                 for (update_idx = 0; update_idx < 8; update_idx = update_idx + 1) begin
                     if (select_i[16 + update_idx])
                         event_r[update_idx] <= write_data_w[4:0];
-                    if (select_i[24 + update_idx])
-                        counter_r[update_idx] <= {counter_r[update_idx][63:32], write_data_w};
-                    if (select_i[32 + update_idx])
-                        counter_r[update_idx] <= {write_data_w, counter_r[update_idx][31:0]};
                 end
             end
             if (trap_i) begin
@@ -226,4 +202,62 @@ module edrv32_cpu_csr #(
             end
         end
     end
+    // cpu-spec 5: CSR writes override the same cycle's automatic increment.
+    // Independent reset/control regions keep each 64-bit counter local.
+    genvar counter_group;
+    generate
+        for (counter_group = 0; counter_group < 10;
+            counter_group = counter_group + 1) begin : g_counter
+            wire rst_counter_n_w;
+            wire write_low_w;
+            wire write_high_w;
+            assign rst_counter_n_w = rst_sys_counter_n_i[counter_group];
+            if (counter_group < 2) begin : g_arch
+                localparam LOW_SELECT = counter_group == 0 ? 10 : 12;
+                assign write_low_w = write_enable_w && !trap_i && select_i[LOW_SELECT];
+                assign write_high_w = write_enable_w && !trap_i && select_i[LOW_SELECT+1];
+                if (counter_group == 0) begin : g_cycle
+                    always @(posedge clk_i or negedge rst_counter_n_w) begin
+                        if (!rst_counter_n_w)
+                            cycle_r <= 0;
+                        else begin
+                            if (!inhibit_r[0]) cycle_r <= cycle_r + 1'b1;
+                            if (write_low_w) cycle_r <= {cycle_r[63:32], write_data_w};
+                            if (write_high_w) cycle_r <= {write_data_w, cycle_r[31:0]};
+                        end
+                    end
+                end else begin : g_instret
+                    always @(posedge clk_i or negedge rst_counter_n_w) begin
+                        if (!rst_counter_n_w)
+                            instret_r <= 0;
+                        else begin
+                            if (!inhibit_r[2])
+                                instret_r <= instret_r + {62'b0, retire_count_i};
+                            if (write_low_w) instret_r <= {instret_r[63:32], write_data_w};
+                            if (write_high_w) instret_r <= {write_data_w, instret_r[31:0]};
+                        end
+                    end
+                end
+            end else begin : g_hpm
+                localparam INDEX = counter_group - 2;
+                reg [63:0] count_r;
+                assign counter_r[INDEX] = count_r;
+                assign write_low_w = write_enable_w && !trap_i && select_i[24+INDEX];
+                assign write_high_w = write_enable_w && !trap_i && select_i[32+INDEX];
+                always @(posedge clk_i or negedge rst_counter_n_w) begin
+                    if (!rst_counter_n_w)
+                        count_r <= 0;
+                    else begin
+                        if (!inhibit_r[INDEX+3] && event_r[INDEX] >= 1 && event_r[INDEX] <= 16)
+                            count_r <= count_r +
+                                {62'b0, event_count_r[(event_r[INDEX] - 1'b1) * 2 +: 2]};
+                        if (write_low_w)
+                            count_r <= {count_r[63:32], write_data_w};
+                        if (write_high_w)
+                            count_r <= {write_data_w, count_r[31:0]};
+                    end
+                end
+            end
+        end
+    endgenerate
 endmodule

@@ -61,8 +61,7 @@ module tb;
     edrv32_cpu_predictor dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction0_n_i(rst_n_i),
-        .rst_sys_direction1_n_i(rst_n_i),
+        .rst_sys_direction_n_i({8{rst_n_i}}),
         .query_pc_i(query_pc_i),
         .query_accept_i(query_accept_i),
         .predict_hit_o(predict_hit_o),
@@ -78,7 +77,7 @@ module tb;
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
         .update_compressed_i(update_compressed_i),
-        .update_index_i(update_index_i),
+        .update_index_i({16{update_index_i}}),
         .clear_valid_i(clear_valid_i),
         .clear_index_i(clear_index_i),
         .restore_valid_i(restore_valid_i),

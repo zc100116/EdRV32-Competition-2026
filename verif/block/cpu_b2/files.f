@@ -1,6 +1,4 @@
--f ../../../rtl/filelists/cpu.f
--f ../../../rtl/filelists/cache.f
-../../../rtl/soc/edrv32_cpu_subsys.v
+-f ../../../rtl/filelists/cpu_subsys.f
 ../../common/edrv32_axi64_memory_pkg.sv
 ../../common/edrv32_axi64_if.sv
 ../../common/edrv32_axi64_memory.sv

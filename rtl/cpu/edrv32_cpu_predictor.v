@@ -7,8 +7,7 @@ module edrv32_cpu_predictor (
     // Clock and control reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire rst_sys_direction0_n_i,
-    input wire rst_sys_direction1_n_i,
+    input wire [7:0] rst_sys_direction_n_i,
 
     // F1 query; accept advances speculative RAS only for an accepted prediction.
     input wire [31:1] query_pc_i,
@@ -28,7 +27,7 @@ module edrv32_cpu_predictor (
     input wire [2:0] update_type_i,
     input wire update_taken_i,
     input wire update_compressed_i,
-    input wire [8:0] update_index_i,
+    input wire [143:0] update_index_i,
 
     // F2 clears the stale fetch-group prediction after boundary or length mismatch.
     input wire clear_valid_i,
@@ -139,24 +138,29 @@ module edrv32_cpu_predictor (
     end
     genvar direction_bank;
     generate
-        for (direction_bank = 0; direction_bank < 2;
+        for (direction_bank = 0; direction_bank < 16;
             direction_bank = direction_bank + 1) begin : g_direction
-            reg [511:0] counters_r;
+            reg [63:0] counters_r;
             wire rst_direction_n_w;
-            assign direction_r[direction_bank*512 +: 512] = counters_r;
-            assign rst_direction_n_w = direction_bank == 0 ?
-                rst_sys_direction0_n_i : rst_sys_direction1_n_i;
+            wire [8:0] update_index_w;
+            wire [1:0] update_counter_w;
+            wire update_w /* synthesis syn_preserve=1 */;
+            assign direction_r[direction_bank*64 +: 64] = counters_r;
+            assign rst_direction_n_w = rst_sys_direction_n_i[direction_bank/2];
+            assign update_index_w = update_index_i[direction_bank*9 +: 9];
+            // Each bank reads and increments only its own selected counter.
+            // No global 512-entry update mux broadcasts its result back to every entry.
+            assign update_counter_w = counters_r[update_index_w[4:0]*2 +: 2];
+            assign update_w = update_valid_i && update_type_i == 0 &&
+                update_index_w[8:5] == direction_bank[3:0];
             always @(posedge clk_i or negedge rst_direction_n_w) begin
                 if (!rst_direction_n_w) begin
-                    counters_r <= {256{2'b01}};
-                end else if (update_valid_i && update_type_i == 0 &&
-                    update_index_i[8] == direction_bank[0]) begin
-                    if (update_taken_i && direction_r[update_index_i * 2 +: 2] != 3)
-                        counters_r[update_index_i[7:0]*2 +: 2] <=
-                            direction_r[update_index_i * 2 +: 2] + 1'b1;
-                    else if (!update_taken_i && direction_r[update_index_i * 2 +: 2] != 0)
-                        counters_r[update_index_i[7:0]*2 +: 2] <=
-                            direction_r[update_index_i * 2 +: 2] - 1'b1;
+                    counters_r <= {32{2'b01}};
+                end else if (update_w) begin
+                    if (update_taken_i && update_counter_w != 3)
+                        counters_r[update_index_w[4:0]*2 +: 2] <= update_counter_w + 1'b1;
+                    else if (!update_taken_i && update_counter_w != 0)
+                        counters_r[update_index_w[4:0]*2 +: 2] <= update_counter_w - 1'b1;
                 end
             end
         end

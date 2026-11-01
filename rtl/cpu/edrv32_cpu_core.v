@@ -9,9 +9,9 @@ module edrv32_cpu_core #(
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire rst_sys_direction0_n_i,
-    input wire rst_sys_direction1_n_i,
+    input wire [7:0] rst_sys_direction_n_i,
     input wire rst_sys_csr_n_i,
+    input wire [9:0] rst_sys_counter_n_i,
 
     // Instruction cache.
     output wire ic_req_valid_o,
@@ -92,6 +92,7 @@ module edrv32_cpu_core #(
     wire d_illegal_w [0:1];
     wire [31:0] d_register_w [0:3];
     wire [4:0] d_source_w [0:3];
+    wire [79:0] d_operand_addr_w;
     reg [31:0] d_operand_w [0:3];
     reg [3:0] d_hazard_w;
     reg [2:0] d_bypass_w [0:3];
@@ -111,6 +112,20 @@ module edrv32_cpu_core #(
     reg [1:0] m_valid_r;
     reg [1:0] w_valid_r;
     reg [REC_BITS-1:0] e_record_r [0:1];
+    wire [143:0] e_predict_index_w;
+    genvar predict_bank;
+    // cpu-spec 4.4: training uses the original F1 index, captured on the same E edge.
+    generate
+        for (predict_bank = 0; predict_bank < 16;
+            predict_bank = predict_bank + 1) begin : g_predict_index
+            reg [8:0] e_index_r /* synthesis syn_preserve=1 */;
+            assign e_predict_index_w[predict_bank*9 +: 9] = e_index_r;
+            always @(posedge clk_i) begin
+                if (e_operand_load_copy_w[4 + predict_bank/8])
+                    e_index_r <= d_record_w[0][REC_GHR_LSB +: 9];
+            end
+        end
+    endgenerate
     reg [REC_BITS-1:0] m_record_r [0:1];
     reg [REC_BITS-1:0] w_record_r [0:1];
     reg [3:0] e_class_r [0:1];
@@ -171,6 +186,39 @@ module edrv32_cpu_core #(
     wire e_target_match_w;
     wire e_advance_w;
     wire e_operand_load_w;
+    wire [5:0] e_operand_load_copy_w;
+    wire [1:0] e_advance_copy_w;
+    wire e_payload_block_w;
+    genvar enable_group;
+    // Replicate the existing E-valid state, not the late combinational handshakes.
+    // Each local enable still sees this cycle's D-cache response and redirects.
+    generate
+        for (enable_group = 0; enable_group < 8;
+            enable_group = enable_group + 1) begin : g_e_enable
+            reg e_valid_r_copy /* synthesis syn_preserve=1 */;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    e_valid_r_copy <= 0;
+                else begin
+                    if (e_advance_w)
+                        e_valid_r_copy <= 0;
+                    if (d_issue_w != 0)
+                        e_valid_r_copy <= 1;
+                    if (m_redirect_w)
+                        e_valid_r_copy <= 0;
+                end
+            end
+            if (enable_group < 6) begin : g_load
+                assign e_operand_load_copy_w[enable_group] =
+                    !(e_valid_r_copy && e_payload_block_w) &&
+                    (!(e_valid_r_copy && m_valid_r[0] && m_wait_dc_r) || dc_resp_valid_i);
+            end else begin : g_advance
+                assign e_advance_copy_w[enable_group-6] = e_valid_r_copy &&
+                    !m_wait_w && !m_redirect_w && !div_wait_w &&
+                    (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
+            end
+        end
+    endgenerate
     wire e_payload_hold_w;
     wire e_payload_wait_dc_w;
     wire m_wait_other_w;
@@ -318,8 +366,7 @@ module edrv32_cpu_core #(
     edrv32_cpu_frontend #(.RVC_EN(RVC_EN)) u_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction0_n_i(rst_sys_direction0_n_i),
-        .rst_sys_direction1_n_i(rst_sys_direction1_n_i),
+        .rst_sys_direction_n_i(rst_sys_direction_n_i),
         .redirect_valid_i(backend_redirect_w),
         .redirect_pc_i(backend_redirect_pc_w),
         .redirect_ras_i(backend_redirect_ras_w),
@@ -343,9 +390,10 @@ module edrv32_cpu_core #(
         .update_type_i(e_type_w),
         .update_taken_i(e_class_r[0] != C_BRANCH || e_branch_taken_w),
         .update_compressed_i(e_record_r[0][REC_COMPRESSED]),
-        .update_index_i(e_record_r[0][REC_GHR_LSB +: 9]),
+        .update_index_i(e_predict_index_w),
         .decode_pop_count_i(d_issue_w),
         .decode_data_o(d_data_w),
+        .decode_operand_addr_o(d_operand_addr_w),
         .decode_valid_count_o(d_count_w),
         .ib_count_o(ib_count_w),
         .ic_req_valid_o(ic_req_valid_o),
@@ -365,13 +413,17 @@ module edrv32_cpu_core #(
     );
     edrv32_cpu_regfile u_regfile (
         .clk_i(clk_i),
-        .read_addr0_i(d_source_w[0]),
+        .read_addr0_i({d_operand_addr_w[60 +: 5], d_operand_addr_w[40 +: 5],
+            d_operand_addr_w[20 +: 5], d_operand_addr_w[0 +: 5]}),
         .read_data0_o(d_register_w[0]),
-        .read_addr1_i(d_source_w[1]),
+        .read_addr1_i({d_operand_addr_w[65 +: 5], d_operand_addr_w[45 +: 5],
+            d_operand_addr_w[25 +: 5], d_operand_addr_w[5 +: 5]}),
         .read_data1_o(d_register_w[1]),
-        .read_addr2_i(d_source_w[2]),
+        .read_addr2_i({d_operand_addr_w[70 +: 5], d_operand_addr_w[50 +: 5],
+            d_operand_addr_w[30 +: 5], d_operand_addr_w[10 +: 5]}),
         .read_data2_o(d_register_w[2]),
-        .read_addr3_i(d_source_w[3]),
+        .read_addr3_i({d_operand_addr_w[75 +: 5], d_operand_addr_w[55 +: 5],
+            d_operand_addr_w[35 +: 5], d_operand_addr_w[15 +: 5]}),
         .read_data3_o(d_register_w[3]),
         .write_valid0_i(w_valid_r[0] && w_write_r[0]),
         .write_addr0_i(w_rd_r[0]),
@@ -383,6 +435,7 @@ module edrv32_cpu_core #(
     edrv32_cpu_csr #(.RVC_EN(RVC_EN)) u_csr (
         .clk_i(clk_i),
         .rst_n_i(rst_sys_csr_n_i),
+        .rst_sys_counter_n_i(rst_sys_counter_n_i),
         .access_valid_i(csr_m_access_w),
         .select_i(m_csr_select_r),
         .write_i(csr_write_w),
@@ -583,8 +636,9 @@ module edrv32_cpu_core #(
         ((m_class_r[0] == C_FENCE && !dc_fence_done_i) ||
         (m_class_r[0] == C_FENCE_I && !(m_fence_phase_r && ic_inv_done_i)));
     // Prepare early hold reasons in parallel; the late hit only releases one mux.
-    assign e_payload_hold_w = e_valid_r[0] && (div_wait_w || m_wait_other_w ||
-        (e_memory_w && !e_exception_r && !e_misaligned_w && !dc_req_ready_i));
+    assign e_payload_block_w = div_wait_w || m_wait_other_w ||
+        (e_memory_w && !e_exception_r && !e_misaligned_w && !dc_req_ready_i);
+    assign e_payload_hold_w = e_valid_r[0] && e_payload_block_w;
     assign e_payload_wait_dc_w = e_valid_r[0] && m_valid_r[0] && m_wait_dc_r;
     assign e_operand_load_w = !e_payload_hold_w && (!e_payload_wait_dc_w || dc_resp_valid_i);
     // spec 3.3: valid is independent of ready; acceptance advances E into M.
@@ -770,7 +824,7 @@ module edrv32_cpu_core #(
                 w_write_r[stage_idx] <= m_write_r[stage_idx];
                 w_class_r[stage_idx] <= m_class_r[stage_idx];
             end
-            if (e_advance_w) begin
+            if (e_advance_copy_w[stage_idx]) begin
                 m_record_r[stage_idx] <= e_record_r[stage_idx];
                 m_result_r[stage_idx] <= e_result_w[stage_idx];
                 m_rd_r[stage_idx] <= e_rd_r[stage_idx];
@@ -795,13 +849,13 @@ module edrv32_cpu_core #(
             end
             // C-F1 path 3: load operands whenever E is free; e_valid_r alone
             // decides whether the D instruction was actually issued.
-            if (e_operand_load_w) begin
+            if (e_operand_load_copy_w[stage_idx]) begin
                 e_operand_a_r[stage_idx] <= d_operand_w[stage_idx * 2];
                 e_operand_b_r[stage_idx] <= d_operand_w[stage_idx * 2 + 1];
             end
             // A live stalled E holds all payload; otherwise validity owns its use.
             // Keep the late D$ handshake out of issue/hazard/redirect selection.
-            if (e_operand_load_w) begin
+            if (e_operand_load_copy_w[stage_idx+2]) begin
                 e_record_r[stage_idx] <= d_record_w[stage_idx];
                 if (stage_idx == 0 && (d_redirect_w || d_redirected_r)) begin
                     e_record_r[stage_idx][REC_PRED_TAKEN] <= 1;

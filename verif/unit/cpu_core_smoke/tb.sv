@@ -74,9 +74,9 @@ module tb #(parameter RVC_EN=1);
     edrv32_cpu_core #(.RVC_EN(RVC_EN)) dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction0_n_i(rst_n_i),
-        .rst_sys_direction1_n_i(rst_n_i),
+        .rst_sys_direction_n_i({8{rst_n_i}}),
         .rst_sys_csr_n_i(rst_n_i),
+        .rst_sys_counter_n_i({10{rst_n_i}}),
         .ic_req_valid_o(ic_req_valid_o),
         .ic_req_addr_o(ic_req_addr_o),
         .ic_req_ready_i(ic_req_ready_i),

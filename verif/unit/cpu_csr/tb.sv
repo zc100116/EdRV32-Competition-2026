@@ -49,6 +49,7 @@ module tb;
     edrv32_cpu_csr dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_sys_counter_n_i({10{rst_n_i}}),
         .access_valid_i(access_valid_i),
         .select_i(access_select_w),
         .write_i(write_i),
@@ -82,6 +83,7 @@ module tb;
     edrv32_cpu_csr #(.RVC_EN(0)) no_c (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
+        .rst_sys_counter_n_i({10{rst_n_i}}),
         .access_valid_i(access_valid_i),
         .select_i(access_select_w),
         .write_i(write_i),

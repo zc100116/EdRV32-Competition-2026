@@ -6,9 +6,9 @@ module edrv32_cpu_core (
     // Clock and reset.
     input logic clk_i,
     input logic rst_n_i,
-    input logic rst_sys_direction0_n_i,
-    input logic rst_sys_direction1_n_i,
+    input logic [7:0] rst_sys_direction_n_i,
     input logic rst_sys_csr_n_i,
+    input logic [9:0] rst_sys_counter_n_i,
 
 
     // I$ interface.
