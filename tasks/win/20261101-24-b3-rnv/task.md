@@ -2,7 +2,7 @@
 
 ## 1. 目标
 
-用 b3 最新 RTL 和程序重做三个工程，确认下面五件事：
+用 b3 最新 RTL 和程序重做三个工程，确认下面六件事：
 
 1. **B3N 时序**：卡 23 的 clk_npu slow WNS 为 −0.078 ns，唯一终点是 `weight_r[43]` → APM，走线 5.863 ns。本卡把 A5 权重改成 256 个 8 位寄存器，各自 `syn_preserve`，FF 数和周期都不变。需要确认：
    - WNS 是否 ≥ 0；
@@ -17,12 +17,18 @@
    - S3 启动 LVGL WIDGETS 后 CPU store fault（`mepc=0x900663bc`）：菜单焦点回调访问已释放的卡片对象（调试记录 `docs/debug/2026-11-01-s3-widgets-fault.md`）；同时恢复 LVGL 软件帧率统计，benchmark 汇总的各场景 fps 不再是 0；
    - NES 键盘松开方向键后人物继续移动：NES 每帧才读一次串口，16 字节 FIFO 丢掉松键帧，已改为 UART 中断接收（调试记录 `docs/debug/2026-11-01-nes-key-release.md`）。
 
-三个工程可以并行实现，上板逐个进行。
+6. **B3R 布局布线时间**：卡 23 B3R 布局布线 4h21m、布线 776 轮（卡 21 为 40 min、184 轮），clk_mem 最差 +0.003 ns。RTL 做了两项改动（`docs/reports/2026-11-01-rnd-route.md`）：
+   - RND 读数据、有效、完成同拍寄存一拍，切断“xbar 读缓冲 DRM → 扇出约 42 → RND 各子单元”的路径；
+   - RND 部分高扇出控制网络按使用单元复制（`syn_preserve`）。
+
+   需要确认布局布线时间、布线轮数和 clk_mem 裕量的变化，以及 PDS 高扇出表中原 RND 网络的负载。
+
+**实现顺序**：B3R **单独**跑，不与 B3N、B3V 并行，期间不在这台电脑上运行仿真虚拟机，以便与卡 23 比较布局布线时间。B3N、B3V 可以在 B3R 完成后一起跑。上板逐个进行。
 
 ## 2. 输入
 
 - **代码**：`origin/zc100116/b3`（包含本卡的提交）。从这里拉出 `win/20261101-24-b3-rnv`，在 `result.md` 中记录完整哈希。
-- **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建（`s3.elf`、`nes.elf` 从 `0046345e` 重新构建），GCC 15.2.0。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
+- **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建（`s3.elf`、`nes.elf` 从 `0046345e` 重新构建），GCC 15.2.0。之后的 RND RTL 提交（47fa4499、dc8a3d1f、6c7cd7b6）不影响程序。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
 
 | 文件 | 用途 | 与卡 23 相比 |
 |---|---|---|
@@ -81,7 +87,7 @@
 | 1 | 用户（U） | 打开工程，按第 4 节重新生成 IP。 |
 | 2 | C + U | **源文件核对**，方法同卡 23：最终源文件数必须等于第 3 节，FDC 为对应顶层的 `.fdc`，宏为 `FPGA_MODE`。B3N 要确认 `edrv32_npu_window.v` 是本卡版本，文件中有 `g_weight_byte`。数目不符就停下，回传“需要添加 / 需要移除”两张清单原文。 |
 | 3 | U，或 C 在 PDS 控制台 | 依次执行 `synthesize -ads`、`dev_map`、`pnr`、`report_timing`、`gen_bit_stream`。任何阶段报错就停下，回传报错原文。 |
-| 4 | C | 按第 6 节收集报告，重点如下：<br>1. 时序汇总和资源，与卡 23 对比；<br>2. **B3N 权重路径**：导出终点为 `u_npu` 下 `g_weight_byte[*].weight_r` 寄存器 D 端的最差 20 条 setup 路径（起点、起点单元位置、终点单元位置、裕量、逻辑级数），以及从这些寄存器出发的最差 20 条路径（含 APM 位置），在 PDS 时序控制台中用 `report_timing` 的起点/终点过滤选项导出；<br>3. 复位副本仍单独出现（同卡 23 第 4 步）；<br>4. 布局布线耗时与卡 23 对比。 |
+| 4 | C | 按第 6 节收集报告，重点如下：<br>0. **B3R**：布局布线实际耗时和 CPU 时间、`Unrouted general nets` 最后一轮的轮次、Detailed routing 耗时，与卡 23（4h21m、776 轮、14695 s）对比；clk_mem 最差 setup 路径的起终点；高扇出表中 `u_rnd` 各网络的负载；<br>1. 时序汇总和资源，与卡 23 对比；<br>2. **B3N 权重路径**：导出终点为 `u_npu` 下 `g_weight_byte[*].weight_r` 寄存器 D 端的最差 20 条 setup 路径（起点、起点单元位置、终点单元位置、裕量、逻辑级数），以及从这些寄存器出发的最差 20 条路径（含 APM 位置），在 PDS 时序控制台中用 `report_timing` 的起点/终点过滤选项导出；<br>3. 复位副本仍单独出现（同卡 23 第 4 步）；<br>4. 布局布线耗时与卡 23 对比。 |
 | 5 | U + C | 上板，见 5.0 和 5R / 5N / 5V / 5E。某项失败时保留日志和照片，继续下一项。 |
 
 ### 5.0 BIOS（每个工程都做；B3N 另做诊断采集）
@@ -176,7 +182,7 @@ demo_vision 运行时，调试工具填本机地址 192.168.1.2，建立网口�
 
 | 工程 | 判据 |
 |---|---|
-| B3R | RND 29/29 PASS；S3 五项均可进入退出、无 CPU 异常；benchmark 跑完且各场景 fps 非 0；RN-17 除“opa 容器”外 PASS；NES 松键立即停止；LAYERS 5 个画面与串口预期一致，画面 5 claimed 非零、unclaimed 为 0；NES 演示 ROM 正常；虚拟输入可用 |
+| B3R | 布局布线时间和布线轮数与卡 23 对比（无门槛，如实记录）；RND 29/29 PASS；S3 五项均可进入退出、无 CPU 异常；benchmark 跑完且各场景 fps 非 0；RN-17 除“opa 容器”外 PASS；NES 松键立即停止；LAYERS 5 个画面与串口预期一致，画面 5 claimed 非零、unclaimed 为 0；NES 演示 ROM 正常；虚拟输入可用 |
 | B3N | 39/39 PASS；单张识别检测框正确；文件夹连续识别不会停在某一张，取得 fps 和失败张数 |
 | B3V | 检查清单逐行通过；摄像头约 30 fps；网口视频帧率接近 30、丢失计数与卡 23 对比明显下降 |
 
