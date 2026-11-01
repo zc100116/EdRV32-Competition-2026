@@ -37,7 +37,7 @@
 | `ip_pll_npu` | PLL | 27 → 150 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，0°，外部反馈 | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
-| `ila_cpu` | 调试核（Inserter 插入，非 IP Compiler） | 64 位 × 8192，clk_sys | 无（探针 `ila_cpu_r`） | B3F CPU 流水线观察 | [ila_cpu.md](ila_cpu.md) | 卡 31 首次插入 |
+| `ila_cpu` | 调试核（Inserter 插入，非 IP Compiler） | 464 位 × 1024，clk_sys | 无（探针：CSR 计数器 + `ila_cpu_r`） | B3F CPU 计数器核对与流水线观察 | [ila_cpu.md](ila_cpu.md) | 卡 31 首次插入 |
 
 B2 保留 `ip_pll_sys` 的 B1 配置，新增上表四个 IP；不要把视频输出合入系统 PLL，
 74.25/371.25 MHz 必须同 PLL 同相。摄像头模块自带时钟，板级不产生 XCLK。

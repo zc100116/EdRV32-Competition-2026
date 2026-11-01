@@ -2,7 +2,7 @@
 
 ## 1. 目标
 
-用最新 RTL 建立全系统顶层 `edrv32_fpga_board_full_top`（CPU + DDR + VIN/PIX/GEO + RND + 两层 DISP + NPU + ETH），按 `fpga/ip/ila_cpu.md` 插入 CPU 流水线观察 ILA，**只跑到 Device Map**。取得以下数据，用来评估整体优化方向（`docs/design/2026-11-01-fanout-audit.md`）：
+用最新 RTL 建立全系统顶层 `edrv32_fpga_board_full_top`（CPU + DDR + VIN/PIX/GEO + RND + 两层 DISP + NPU + ETH），按 `fpga/ip/ila_cpu.md` 插入 CPU ILA（A 组为性能计数器 mcycle/minstret/HPM3–10，B 组为流水线观察向量 `debug_o`），**只跑到 Device Map**。取得以下数据，用来评估整体优化方向（`docs/design/2026-11-01-fanout-audit.md`）：
 - 整个系统的资源，以及按模块的分布；
 - 高扇出网络；
 - 各时钟域的路径和逻辑级数。
@@ -45,8 +45,8 @@
 |---|---|---|
 | 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261101-31-b3f-map origin/zc100116/b3`。整理用户清单。在本机 PDS 安装目录的文档中，找到调试核插入工具（Inserter/Debugger）的用户指南，把插入 ILA 的 GUI 或 Tcl 步骤整理进清单，并在 result.md 中注明出处（文件名、页码）。找不到就停下告诉用户。 |
 | 1 | 用户（U） | 新建 B3F 工程，按第 4 节准备 IP，在工程目录的 Tcl 控制台中执行 `source ../../EdRV32-Competition-2026/fpga/scripts/import_board_full_top.tcl`。源文件数和 FDC 与第 3 节不符就停下。 |
-| 2 | U 或 C | `synthesize -ads`。完成后确认综合网表中存在 64 个 `ila_cpu_r` 寄存器：在综合报告或网表中搜索，记录找到的实例名。如果被优化掉了，就停下回传原文。 |
-| 3 | U（C 协助） | 按 `fpga/ip/ila_cpu.md` 插入 ILA：采样时钟为 clk_sys，探针 `ila_cpu_r[63:0]` 按说明中的组名分组，深度 8192，触发位置 10%。保存调试核配置文件，截图。 |
+| 2 | U 或 C | `synthesize -ads`。完成后在综合网表中确认两组探针都存在，并记录实际实例名：<br>1. B 组：64 个 `ila_cpu_r` 寄存器；<br>2. A 组：`u_cpu/u_core/u_csr` 下的 `cycle_r`、`instret_r`、`counter_r[0]`–`counter_r[7]` 的低 40 位寄存器。<br>任何一组找不到（被优化或改名后无法对应），就停下回传原文。 |
+| 3 | U（C 协助） | 按 `fpga/ip/ila_cpu.md` 插入 ILA：采样时钟 clk_sys，A 组 400 位加 B 组 64 位，按说明中的组名分组；触发探针为 `retire_pc` 和 `retire`；深度 1024，触发位置 10%。保存调试核配置文件并截图。 |
 | 4 | U 或 C | `dev_map`（包含插入的调试核）。到此为止：**不跑 pnr**。任何阶段报错就停下，回传原文。 |
 | 5 | C | 收集第 6 节的产物。 |
 
@@ -83,7 +83,7 @@
 
 ## 7. 通过判据
 
-- 综合和 Device Map 完成，0 错误；ILA 插入成功，探针为 `ila_cpu_r[63:0]`。
+- 综合和 Device Map 完成，0 错误；ILA 插入成功，探针为 A 组 400 位加 B 组 64 位。
 - 交齐第 6 节的产物。资源、扇出和级数只记录，不设门槛。所有数字取自报告原文，找不到的写"未取得"。
 
 ## 8. result.md 模板
@@ -96,7 +96,7 @@
 | 代码 commit | |
 | 源文件数 | |
 | 综合 / Device Map 耗时 | |
-| ILA | 插入方式、出处、探针数、深度、资源 |
+| ILA | 插入方式、出处、A/B 组探针的实际实例名、深度、资源 |
 
 ## 资源
 | 项 | LUT | FF | DRM | APM | 分布式 RAM | IO | PLL |

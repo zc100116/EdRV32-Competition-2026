@@ -1,7 +1,8 @@
 // File: edrv32_fpga_board_full_top.v
 // Spec: board-plan B3F; edrv32-soc-spec 3, 5.2 X1-X10, 5.3, 6.1, 6.4, 7.1, 8.8; cpu-spec 7.2.
 // Description: Full SoC: CPU + DDR + VIN/PIX/GEO + RND + two-layer DISP + NPU + ETH.
-//              cpu-spec 7.2 debug_o is registered in clk_sys for the PDS ILA (fpga/ip/ila_cpu.md).
+//              cpu-spec 7.2 debug_o is registered in clk_sys for the PDS ILA B group
+//              (fpga/ip/ila_cpu.md).
 //              DDR core_clk owns clk_mem; sys_subsys reset_ctrl owns domain resets.
 // Clock domains: sys, mem, pix/serial, npu, cam0/1, eth RX/TX.
 module edrv32_fpga_board_full_top (
