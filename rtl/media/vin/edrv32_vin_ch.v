@@ -278,7 +278,7 @@ module edrv32_vin_ch (
             fifo_capture0_r <= ram_rd_en_w && !fifo_fetch_slot_r;
             fifo_capture1_r <= ram_rd_en_w && fifo_fetch_slot_r;
             if (fifo_read_w)
-                fifo_read_slot_r <= ~fifo_read_slot_r;
+                fifo_read_slot_r <= {4{!fifo_read_slot_r[0]}};
             case ({fifo_pending_r, fifo_read_w})
                 2'b10: fifo_output_count_r <= fifo_output_count_r + 2'd1;
                 2'b01: fifo_output_count_r <= fifo_output_count_r - 2'd1;
