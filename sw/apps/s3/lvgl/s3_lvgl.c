@@ -312,7 +312,7 @@ static void read_keys(lv_indev_t *indev, lv_indev_data_t *data)
 {
     (void)indev;
     uint32_t keys = input_snapshot;
-    uint16_t virtual_keys = virtual_input_get().keys;
+    uint16_t virtual_keys = s3_virtual_input().keys;
     static const uint32_t lv_keys[] = {
         LV_KEY_UP, LV_KEY_DOWN, LV_KEY_LEFT, LV_KEY_RIGHT,
         LV_KEY_ENTER, LV_KEY_ESC, LV_KEY_NEXT, LV_KEY_PREV
@@ -339,7 +339,7 @@ static lv_obj_t *pointer_cursor;
 static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
 {
     (void)indev;
-    struct virtual_input_state input = virtual_input_get();
+    struct virtual_input_state input = s3_virtual_input();
     data->point.x = input.x;
     data->point.y = input.y;
     data->state = (input.mouse & 1) ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;

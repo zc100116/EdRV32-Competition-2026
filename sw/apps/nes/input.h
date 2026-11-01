@@ -5,10 +5,7 @@
  */
 #ifndef NES_INPUT_H
 #define NES_INPUT_H
-#include <stdint.h>
-void nes_uart_receive(void);
+#include "virtual_input_uart.h"
 void nes_uart_start(void);
 void nes_input_init(void);
-uint32_t nes_input_lock(void);
-void nes_input_unlock(uint32_t state);
 #endif

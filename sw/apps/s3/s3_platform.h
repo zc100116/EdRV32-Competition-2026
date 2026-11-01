@@ -23,6 +23,8 @@ void s3_platform_init(void);
 uint64_t s3_ticks(void);
 uint32_t s3_clock_hz(void);
 uint32_t s3_milliseconds(void);
+struct virtual_input_state;
+struct virtual_input_state s3_virtual_input(void);
 uint32_t s3_input(void); /* GPIO held bits; UART a/d/w/p supplies the same bits. */
 uint32_t s3_frame_count(void);
 void s3_wait_frame(void);

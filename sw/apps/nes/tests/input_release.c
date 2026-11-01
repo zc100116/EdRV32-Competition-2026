@@ -13,9 +13,8 @@
 #include "eth.h"
 #include "sysctrl.h"
 
-/* Baseline main.c has neither function; its polling path still runs unchanged. */
+/* Pre-interrupt baseline main.c keeps its polling path and never calls init. */
 extern void nes_uart_start(void) __attribute__((weak));
-extern void nes_uart_receive(void) __attribute__((weak));
 extern int nes_application_main(void);
 unsigned char nes_rom_slot[1];
 unsigned nes_frame_limit;
@@ -36,17 +35,17 @@ static void dispatch(void)
     if (interrupts_enabled && (plic_enable & (1u << EDRV32_PLIC_SOURCE_UART0)) &&
             (irq_enable & UART_IRQ_RX_THRESH) && threshold && count >= threshold) {
         ++receives;
-        nes_uart_receive();
+        virtual_input_uart_receive();
     }
 }
 
-uint32_t nes_input_lock(void)
+uint32_t virtual_input_lock(void)
 {
     uint32_t previous = interrupts_enabled ? 8u : 0;
     interrupts_enabled = 0;
     return previous;
 }
-void nes_input_unlock(uint32_t state)
+void virtual_input_unlock(uint32_t state)
 {
     interrupts_enabled = !!(state & 8u);
     dispatch();
@@ -59,6 +58,7 @@ void nes_input_init(void)
 }
 uint32_t mmio_read32(uintptr_t address)
 {
+    if (address == EDRV32_PLIC_BASE + PLIC_ENABLE) return plic_enable;
     if (address == EDRV32_UART0_BASE + UART_STATUS)
         return count ? 0 : UART_STATUS_RX_EMPTY;
     if (address == EDRV32_SYSCTRL_BASE + SYSCTRL_CLK_SYS_HZ)
@@ -152,9 +152,9 @@ void nes_run(void)
     frame(0);
     now = previous + 55556;
     expect(0, "18 fps polling gap with three input frames");
-    uint32_t saved = nes_input_lock();
+    uint32_t saved = virtual_input_lock();
     frame(VI_RIGHT); /* A complete frame buffered before the interrupt is serviced. */
-    nes_input_unlock(saved);
+    virtual_input_unlock(saved);
     expect(0x80, "drain buffered complete frame");
     frame(0);
     expect(0, "release after buffered press");

@@ -8,11 +8,13 @@
 #include "eth_monitor.h"
 #include "eth.h"
 #include "virtual_input.h"
+#include "virtual_input_uart.h"
 #include "gpio.h"
 #include "plic.h"
 #include "sysctrl.h"
 #include "uart.h"
 
+static volatile uint32_t serial_keys;
 static volatile uint32_t frames;
 static volatile uint32_t switches[2];
 static volatile uint32_t rnd_complete;
@@ -105,8 +107,10 @@ static void __attribute__((interrupt("machine"), aligned(4))) s3_interrupt(void)
         if (source == EDRV32_PLIC_SOURCE_RND) {
             rnd_irq_tick = entered;
             rnd_irq_handle();
+        } else if (source == EDRV32_PLIC_SOURCE_UART0) {
+            virtual_input_uart_receive();
         } else if (source != EDRV32_PLIC_SOURCE_NONE) {
-            /* Only DISP is enabled beside RND; registration is owned here. */
+            /* Remaining media source is DISP; registration is owned here. */
             engine_irq_handle(source);
         }
         if (source != EDRV32_PLIC_SOURCE_NONE) {
@@ -132,6 +136,25 @@ static void virtual_receive(uint32_t irq)
     }
 }
 
+static void s3_character(int character)
+{
+    switch (character) {
+    case 'a': serial_keys |= S3_KEY_LEFT; break;
+    case 'd': serial_keys |= S3_KEY_RIGHT; break;
+    case 'w': serial_keys |= S3_KEY_JUMP; break;
+    case 'p': serial_keys |= S3_KEY_PAUSE; break;
+    default: break;
+    }
+}
+
+struct virtual_input_state s3_virtual_input(void)
+{
+    uint32_t saved = virtual_input_lock();
+    struct virtual_input_state input = virtual_input_get();
+    virtual_input_unlock(saved);
+    return input;
+}
+
 void s3_platform_init(void)
 {
     __asm__ volatile ("csrci mstatus, 8" ::: "memory");
@@ -146,6 +169,7 @@ void s3_platform_init(void)
         EDRV32_DISP_IRQ_EN_FRAME_MASK | EDRV32_DISP_IRQ_EN_ERROR_MASK |
         EDRV32_DISP_IRQ_EN_SWITCH_MASK | EDRV32_DISP_IRQ_EN_SWITCH1_MASK,
         1, disp_event, NULL);
+    virtual_input_uart_start(s3_character);
     eth_monitor_board_init(s3_clock_hz());
     eth_window_configure(VIRTUAL_INPUT_WINDOW, VIRTUAL_INPUT_BASE, VIRTUAL_INPUT_BYTES);
     eth_monitor_board_set_receive(virtual_receive);
@@ -173,16 +197,11 @@ uint32_t s3_milliseconds(void)
 uint32_t s3_input(void)
 {
     uint32_t keys = (~gpio_read()) & 15u;
-    while (!(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
-        switch (virtual_input_serial(uart_getc())) {
-        case 'a': keys |= S3_KEY_LEFT; break;
-        case 'd': keys |= S3_KEY_RIGHT; break;
-        case 'w': keys |= S3_KEY_JUMP; break;
-        case 'p': keys |= S3_KEY_PAUSE; break;
-        default: break;
-        }
-    }
+    uint32_t saved = virtual_input_lock();
+    keys |= serial_keys;
+    serial_keys = 0;
     uint16_t virtual_keys = virtual_input_get().keys;
+    virtual_input_unlock(saved);
     if (virtual_keys & VI_LEFT) keys |= S3_KEY_LEFT;
     if (virtual_keys & VI_RIGHT) keys |= S3_KEY_RIGHT;
     if (virtual_keys & VI_A) keys |= S3_KEY_JUMP;
@@ -290,8 +309,7 @@ void s3_display_begin(const void *l0, uint32_t l0_stride,
                       const void *l1, uint32_t l1_stride)
 {
     s3_display_stop();
-    uint32_t interrupt_state;
-    __asm__ volatile ("csrrci %0, mstatus, 8" : "=r"(interrupt_state) :: "memory");
+    uint32_t interrupt_state = virtual_input_lock();
     /* The stopped scan can leave an unserviced last FRAME. It belongs to the
      * previous owner, rather than the first frame of this new configuration.
      */
@@ -309,9 +327,7 @@ void s3_display_begin(const void *l0, uint32_t l0_stride,
     }
     disp_layer_enable(DISP_L1, l1 != NULL);
     engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
-    if (interrupt_state & 8u) {
-        __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
-    }
+    virtual_input_unlock(interrupt_state);
     /* DISP v0.3: first enabled frame has FRAME, without a Surface release. */
     while (frames == initial_frame) {
     }

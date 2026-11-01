@@ -24,7 +24,7 @@ int main(void)
         s3_lvgl_input(keys);
         uint32_t pressed = keys & ~previous;
         previous = keys;
-        uint16_t virtual_keys = virtual_input_get().keys;
+        uint16_t virtual_keys = s3_virtual_input().keys;
         uint16_t virtual_pressed = virtual_keys & ~previous_virtual;
         previous_virtual = virtual_keys;
         if (active == S3_APP_NONE) {

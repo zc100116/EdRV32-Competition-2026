@@ -5,6 +5,7 @@
  */
 #include "s3_lvgl.h"
 #include "s3_platform.h"
+#include "virtual_input.h"
 #include "draw_rnd.h"
 #include "mem_xbar.h"
 #include <stdio.h>
@@ -132,3 +133,5 @@ void s3_host_mask_reference(uint32_t *pixels, int32_t width, int32_t height,
                                   .keep_outside = keep_outside };
     lv_draw_sw_mask_rect(&task, &dsc);
 }
+
+struct virtual_input_state s3_virtual_input(void) { return virtual_input_get(); }

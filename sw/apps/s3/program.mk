@@ -7,7 +7,8 @@ PROGRAM_SOURCES := sw/apps/s3/main.c sw/apps/s3/layers.c sw/apps/s3/menu.c \
     sw/apps/s3/s3_platform.c \
     sw/drivers/rnd.c sw/drivers/disp.c sw/drivers/engine.c sw/drivers/plic.c \
     sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c sw/bsp/cache.c
-PROGRAM_SOURCES += sw/lib/virtual_input.c sw/lib/eth_monitor.c sw/lib/eth_monitor_pack.c \
+PROGRAM_SOURCES += sw/lib/virtual_input.c sw/lib/virtual_input_uart.c sw/lib/virtual_input_irq.c \
+    sw/lib/eth_monitor.c sw/lib/eth_monitor_pack.c \
     sw/lib/eth_monitor_board.c sw/drivers/eth.c sw/boot/info.c
 CFLAGS_EXTRA := -I$(ROOT)/sw/lib -I$(ROOT)/sw/boot -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/apps/s3
 include $(ROOT)/sw/apps/s3/lvgl/program.mk

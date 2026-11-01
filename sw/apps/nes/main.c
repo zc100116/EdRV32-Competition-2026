@@ -64,25 +64,20 @@ uint64_t nes_tick_hz(void)
 
 #ifndef NES_SPIKE
 /* sys-subsys 2.6: service RX independently of the emulator/display frame rate. */
-void nes_uart_receive(void)
+static void nes_character(int character)
 {
     const char keys[8] = {'j', 'k', 'u', 'i', 'w', 's', 'a', 'd'};
     uint64_t now = clint_time();
-    while (!(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
-        int character = virtual_input_serial(uart_getc());
-        for (unsigned i = 0; i < 8; ++i)
-            if (character == (uint8_t)keys[i])
-                release_at[i] = now + clock_hz / 10;
-    }
+    for (unsigned i = 0; i < 8; ++i)
+        if (character == (uint8_t)keys[i])
+            release_at[i] = now + clock_hz / 10;
 }
 
 void nes_uart_start(void)
 {
     plic_set_threshold(0);
-    plic_set_priority(EDRV32_PLIC_SOURCE_UART0, 1);
-    plic_set_enable(1u << EDRV32_PLIC_SOURCE_UART0);
-    mmio_write32(EDRV32_UART0_BASE + UART_RX_THRESH, 1);
-    mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, UART_IRQ_RX_THRESH);
+    plic_set_enable(0);
+    virtual_input_uart_start(nes_character);
 }
 #endif
 
@@ -97,10 +92,10 @@ unsigned nes_buttons(void)
         exit(1);
     }
     if (event.irq & EDRV32_ETH_IRQ_STAT_RX_NOTIFY2_MASK) {
-        uint32_t interrupt_state = nes_input_lock();
+        uint32_t interrupt_state = virtual_input_lock();
         virtual_input_network((const volatile uint8_t *)(uintptr_t)
             (EDRV32_DDR_UNCACHED_BASE + VIRTUAL_INPUT_BASE));
-        nes_input_unlock(interrupt_state);
+        virtual_input_unlock(interrupt_state);
     }
     if (event.irq & EDRV32_ETH_IRQ_STAT_RX_NOTIFY3_MASK) {
         eth_window_configure(3, 0x0a000000u, 0x10000u);
@@ -109,14 +104,14 @@ unsigned nes_buttons(void)
             (unsigned long)mmio_read32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_PORT_OFFSET));
     }
     engine_irq_clear(ENGINE_ETH, event.irq);
-    uint32_t interrupt_state = nes_input_lock();
+    uint32_t interrupt_state = virtual_input_lock();
     uint64_t now = clint_time();
     unsigned buttons = 0;
     for (unsigned i = 0; i < 8; ++i)
         if (now < release_at[i])
             buttons |= 1u << i;
     uint16_t virtual_keys = virtual_input_get().keys;
-    nes_input_unlock(interrupt_state);
+    virtual_input_unlock(interrupt_state);
     unsigned physical = (unsigned)~gpio_read();
     if (physical & 1) buttons |= 1u << 6;
     if (physical & 2) buttons |= 1u << 7;
@@ -140,7 +135,7 @@ void nes_frame(const uint8_t *pixels, const struct nes_rgb *palette, unsigned fr
 int main(void)
 {
 #ifndef NES_SPIKE
-    (void)nes_input_lock();
+    (void)virtual_input_lock();
     uart_init();
     clock_hz = sysctrl_read(SYSCTRL_CLK_SYS_HZ);
     nes_input_init();

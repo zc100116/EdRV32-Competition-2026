@@ -20,6 +20,7 @@ subprocess.run(flags + ['-DNES_DISPLAY=0', '-DNES_FRAMES=0', '-DNES_SKIP=0',
                        '-Dmain=nes_application_main', '-c', str(source),
                        '-o', str(OUT / 'main.o')], cwd=ROOT, check=True)
 subprocess.run(flags + ['sw/apps/nes/tests/input_release.c', 'sw/lib/virtual_input.c',
+                       'sw/lib/virtual_input_uart.c',
                        str(OUT / 'main.o'), '-o', str(OUT / 'input-release')],
                cwd=ROOT, check=True)
 subprocess.run([str(OUT / 'input-release')], cwd=ROOT, check=True)

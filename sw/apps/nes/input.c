@@ -8,19 +8,6 @@
 #include "input.h"
 #include "plic.h"
 
-uint32_t nes_input_lock(void)
-{
-    uint32_t state;
-    __asm__ volatile ("csrrci %0, mstatus, 8" : "=r"(state) :: "memory");
-    return state;
-}
-
-void nes_input_unlock(uint32_t state)
-{
-    if (state & 8u)
-        __asm__ volatile ("csrsi mstatus, 8" ::: "memory");
-}
-
 static void __attribute__((interrupt("machine"), aligned(4))) nes_interrupt(void)
 {
     uint32_t cause;
@@ -28,7 +15,7 @@ static void __attribute__((interrupt("machine"), aligned(4))) nes_interrupt(void
     if (cause == 0x8000000bu) {
         unsigned source = plic_claim();
         if (source == EDRV32_PLIC_SOURCE_UART0)
-            nes_uart_receive();
+            virtual_input_uart_receive();
         if (source != EDRV32_PLIC_SOURCE_NONE)
             plic_complete(source);
     } else {
