@@ -1,0 +1,2 @@
+E: ConstraintEditor-0046: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1162)] Object 'i:u_rgmii.u_pll_eth.u_gpll.gpll_inst' can not be found in current view.
+E: ConstraintEditor-0046: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1163)] Object 'i:u_pll_sys.u_gpll.gpll_inst' can not be found in current view.

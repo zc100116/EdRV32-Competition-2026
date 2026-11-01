@@ -1,0 +1,13 @@
+compile
+W lines=3138; E lines=0
+Action compile: Real time elapsed is 0h:1m:38s
+Action compile: CPU time elapsed is 0h:0m:7s
+Action compile: Process CPU time elapsed is 0h:0m:7s
+Action compile: Peak memory pool usage is 496 MB
+
+synthesize
+W lines=2; E lines=2
+Action synthesize: Real time elapsed is 0h:0m:12s
+Action synthesize: CPU time elapsed is 0h:0m:1s
+Action synthesize: Process CPU time elapsed is 0h:0m:1s
+Action synthesize: Peak memory pool usage is 567 MB

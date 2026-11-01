@@ -1,0 +1,8 @@
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -min 1.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -min 1.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -max 3.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -max 3.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -min 1.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -min 1.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.

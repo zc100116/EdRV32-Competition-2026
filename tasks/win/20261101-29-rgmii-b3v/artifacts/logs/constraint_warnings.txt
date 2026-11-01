@@ -1,0 +1,63 @@
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 197)] | Port cam0_href_i has been placed at location T25, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 203)] | Port cam0_data_i[0] has been placed at location M24, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 209)] | Port cam0_data_i[1] has been placed at location R22, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 215)] | Port cam0_data_i[2] has been placed at location K26, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 221)] | Port cam0_data_i[3] has been placed at location K25, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 227)] | Port cam0_data_i[4] has been placed at location M25, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 233)] | Port cam0_data_i[5] has been placed at location N19, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 245)] | Port cam0_data_i[7] has been placed at location R21, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 269)] | Port cam1_data_i[1] has been placed at location R23, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 275)] | Port cam1_data_i[2] has been placed at location T23, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 287)] | Port cam1_data_i[4] has been placed at location P26, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 293)] | Port cam1_data_i[5] has been placed at location M26, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 311)] | Port cam0_rst_n_o has been placed at location T22, whose type is share pin.
+C: ConstraintEditor-2009: p:cam0_rst_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:cam0_rst_n_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:cam1_rst_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:cam1_rst_n_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 323)] | Port i2c0_scl_o[0] has been placed at location P19, whose type is share pin.
+C: ConstraintEditor-2009: p:i2c0_scl_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[0] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_scl_o[1] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 335)] | Port i2c0_sda_o[0] has been placed at location R20, whose type is share pin.
+C: ConstraintEditor-2009: p:i2c0_sda_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[0] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:i2c0_sda_o[1] is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 347)] | Port tmds_data_p_o[0] has been placed at location R25, whose type is share pin.
+C: ConstraintEditor-2009: p:tmds_data_p_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 353)] | Port tmds_data_p_o[1] has been placed at location P23, whose type is share pin.
+C: ConstraintEditor-2009: p:tmds_data_p_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 359)] | Port tmds_data_p_o[2] has been placed at location N23, whose type is share pin.
+C: ConstraintEditor-2009: p:tmds_data_p_o[2] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 365)] | Port tmds_data_n_o[0] has been placed at location P25, whose type is share pin.
+C: ConstraintEditor-2009: p:tmds_data_n_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 371)] | Port tmds_data_n_o[1] has been placed at location P24, whose type is share pin.
+C: ConstraintEditor-2009: p:tmds_data_n_o[1] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 377)] | Port tmds_data_n_o[2] has been placed at location N24, whose type is share pin.
+C: ConstraintEditor-2009: p:tmds_data_n_o[2] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_clk_p_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:tmds_clk_n_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
+C: ConstraintEditor-2009: p:eth_mdc_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:eth_mdc_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2009: p:eth_mdio_o is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {8, 4, 12, 16}.
+C: ConstraintEditor-2009: p:eth_mdio_o is lack of PAP_IO_SLEW, OUTPUT or INOUT PORT had better set PAP_IO_SLEW, the optional value is {SLOW, FAST}.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 503)] | Port eth_phy_rst_n_o has been placed at location G25, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 755)] | Port mem_dqs_o[0] has been placed at location J4, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 764)] | Port mem_dqs_o[1] has been placed at location H7, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 791)] | Port mem_dqs_n_o[0] has been placed at location H4, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 800)] | Port mem_dqs_n_o[1] has been placed at location G7, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 836)] | Port mem_dq_o[1] has been placed at location J6, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 854)] | Port mem_dq_o[3] has been placed at location L8, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 872)] | Port mem_dq_o[5] has been placed at location K7, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 890)] | Port mem_dq_o[7] has been placed at location J5, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 899)] | Port mem_dq_o[8] has been placed at location H6, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 917)] | Port mem_dq_o[10] has been placed at location H8, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 926)] | Port mem_dq_o[11] has been placed at location D6, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 935)] | Port mem_dq_o[12] has been placed at location G8, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 944)] | Port mem_dq_o[13] has been placed at location E6, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 962)] | Port mem_dq_o[15] has been placed at location G6, whose type is share pin.
+C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1115)] | Port mem_dm_o[0] has been placed at location K6, whose type is share pin.
+W: UserConstraintEditor-4009: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1157)] i:u_rgmii is not GTP instance, the LOC/REGION constraint maybe not work.
+W: UserConstraintEditor-4009: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1170)] i:u_ddr3/u_ddrphy_top is not GTP instance, the LOC/REGION constraint maybe not work.

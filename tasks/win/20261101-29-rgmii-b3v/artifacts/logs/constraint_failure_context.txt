@@ -1,0 +1,23 @@
+267: I: port i2c0_scl_o[0]
+268: I: port i2c0_scl_o[1]
+269: I: The pattern 'i2c0_sda_o[*]' in command 'get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}' match 2 objects below:
+270: I: port i2c0_sda_o[0]
+271: I: port i2c0_sda_o[1]
+272: Executing : get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o} successfully.
+273: Executing : set_false_path -from [get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}]
+274: Executing : set_false_path -from [get_ports {key_n_i[*] uart_rx_i i2c0_scl_o[*] i2c0_sda_o[*] eth_mdio_o}] successfully.
+275: E: ConstraintEditor-0046: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1162)] Object 'i:u_rgmii.u_pll_eth.u_gpll.gpll_inst' can not be found in current view.
+276: E: ConstraintEditor-0046: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_vision_top.fdc(line number: 1163)] Object 'i:u_pll_sys.u_gpll.gpll_inst' can not be found in current view.
+277: Executing : get_clocks clk_rgmii_ref
+278: Executing : get_clocks clk_rgmii_ref successfully.
+279: Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}
+280: I: The pattern 'rgmii_rxd_i[*]' in command 'get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}' match 4 objects below:
+281: I: port rgmii_rxd_i[0]
+282: I: port rgmii_rxd_i[1]
+283: I: port rgmii_rxd_i[2]
+284: I: port rgmii_rxd_i[3]
+285: Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i} successfully.
+286: Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+287: Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+288: Executing : get_clocks clk_rgmii_ref
+289: Executing : get_clocks clk_rgmii_ref successfully.
