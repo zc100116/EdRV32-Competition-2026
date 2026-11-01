@@ -1,0 +1,22 @@
+
+ifIndex IPAddress       PrefixLength PrefixOrigin SuffixOrigin AddressState PolicyStore
+------- ---------       ------------ ------------ ------------ ------------ -----------
+28      169.254.71.201            16 WellKnown    Link         Tentative    ActiveStore
+12      169.254.134.153           16 WellKnown    Link         Tentative    ActiveStore
+25      172.22.32.1               20 Manual       Manual       Preferred    ActiveStore
+9       192.168.84.1              24 Dhcp         Dhcp         Preferred    ActiveStore
+6       192.168.80.1              24 Dhcp         Dhcp         Preferred    ActiveStore
+19      169.254.210.205           16 WellKnown    Link         Tentative    ActiveStore
+10      169.254.75.12             16 WellKnown    Link         Tentative    ActiveStore
+22      198.18.0.1                30 Manual       Manual       Preferred    ActiveStore
+30      169.254.229.92            16 WellKnown    Link         Deprecated   ActiveStore
+26      169.254.218.160           16 WellKnown    Link         Tentative    ActiveStore
+27      169.254.242.159           16 WellKnown    Link         Tentative    ActiveStore
+23      169.254.172.187           16 WellKnown    Link         Tentative    ActiveStore
+83      100.67.119.122            32 Manual       Manual       Preferred    ActiveStore
+5       192.168.1.2               24 Manual       Manual       Preferred    ActiveStore
+18      192.168.5.31              24 Dhcp         Dhcp         Preferred    ActiveStore
+16      169.254.61.107            16 WellKnown    Link         Tentative    ActiveStore
+1       127.0.0.1                  8 WellKnown    WellKnown    Preferred    ActiveStore
+
+

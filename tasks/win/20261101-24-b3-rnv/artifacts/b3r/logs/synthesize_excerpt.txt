@@ -1,106 +1,208 @@
-Reading design from compile DB successfully.
+Executing : get_ports clk_i
 Executing : get_ports clk_i successfully.
+Executing : create_clock -name clk_board [get_ports clk_i] -period 37.037037 -waveform {0 18.518519}
 Executing : create_clock -name clk_board [get_ports clk_i] -period 37.037037 -waveform {0 18.518519} successfully.
+Executing : get_ports ddr_ref_clk_p_i
 Executing : get_ports ddr_ref_clk_p_i successfully.
+Executing : create_clock -name clk_ddr_ref [get_ports ddr_ref_clk_p_i] -period 8 -waveform {0 4}
 Executing : create_clock -name clk_ddr_ref [get_ports ddr_ref_clk_p_i] -period 8 -waveform {0 4} successfully.
+Executing : get_ports rgmii_rxc_i
 Executing : get_ports rgmii_rxc_i successfully.
+Executing : create_clock -name clk_rgmii_ref [get_ports rgmii_rxc_i] -period 8 -waveform {0 4}
 Executing : create_clock -name clk_rgmii_ref [get_ports rgmii_rxc_i] -period 8 -waveform {0 4} successfully.
+Executing : get_ports clk_i
 Executing : get_ports clk_i successfully.
+Executing : get_pins u_pll_sys/clkout0
 Executing : get_pins u_pll_sys/clkout0 successfully.
+Executing : create_generated_clock -name clk_sys -source [get_ports clk_i] [get_pins u_pll_sys/clkout0] -multiply_by 100 -divide_by 27
 Executing : create_generated_clock -name clk_sys -source [get_ports clk_i] [get_pins u_pll_sys/clkout0] -multiply_by 100 -divide_by 27 successfully.
+Executing : get_ports clk_i
 Executing : get_ports clk_i successfully.
+Executing : get_pins u_pll_video/clkout0
 Executing : get_pins u_pll_video/clkout0 successfully.
+Executing : create_generated_clock -name clk_pix -source [get_ports clk_i] [get_pins u_pll_video/clkout0] -multiply_by 11 -divide_by 4
 Executing : create_generated_clock -name clk_pix -source [get_ports clk_i] [get_pins u_pll_video/clkout0] -multiply_by 11 -divide_by 4 successfully.
+Executing : get_ports clk_i
 Executing : get_ports clk_i successfully.
+Executing : get_pins u_pll_video/clkout1
 Executing : get_pins u_pll_video/clkout1 successfully.
+Executing : create_generated_clock -name clk_serial -source [get_ports clk_i] [get_pins u_pll_video/clkout1] -multiply_by 55 -divide_by 4
 Executing : create_generated_clock -name clk_serial -source [get_ports clk_i] [get_pins u_pll_video/clkout1] -multiply_by 55 -divide_by 4 successfully.
+Executing : get_ports ddr_ref_clk_p_i
 Executing : get_ports ddr_ref_clk_p_i successfully.
+Executing : get_pins u_ddr3.u_ddrphy_top.rst_clk_gpll/clkout0
 Executing : get_pins u_ddr3.u_ddrphy_top.rst_clk_gpll/clkout0 successfully.
+Executing : get_clocks clk_ddr_ref
 Executing : get_clocks clk_ddr_ref successfully.
+Executing : create_generated_clock -name rst_clk -source [get_ports ddr_ref_clk_p_i] [get_pins u_ddr3.u_ddrphy_top.rst_clk_gpll/clkout0] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 16
 Executing : create_generated_clock -name rst_clk -source [get_ports ddr_ref_clk_p_i] [get_pins u_ddr3.u_ddrphy_top.rst_clk_gpll/clkout0] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 16 successfully.
+Executing : get_ports ddr_ref_clk_p_i
 Executing : get_ports ddr_ref_clk_p_i successfully.
+Executing : get_pins u_ddr3.u_ddrphy_top.ddrphy_gpll/clkout0
 Executing : get_pins u_ddr3.u_ddrphy_top.ddrphy_gpll/clkout0 successfully.
+Executing : get_clocks clk_ddr_ref
 Executing : get_clocks clk_ddr_ref successfully.
+Executing : create_generated_clock -name clk_mem -source [get_ports ddr_ref_clk_p_i] [get_pins u_ddr3.u_ddrphy_top.ddrphy_gpll/clkout0] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 16
 Executing : create_generated_clock -name clk_mem -source [get_ports ddr_ref_clk_p_i] [get_pins u_ddr3.u_ddrphy_top.ddrphy_gpll/clkout0] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 16 successfully.
+Executing : get_ports ddr_ref_clk_p_i
 Executing : get_ports ddr_ref_clk_p_i successfully.
+Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}
 Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy} successfully.
+Executing : get_clocks clk_ddr_ref
 Executing : get_clocks clk_ddr_ref successfully.
+Executing : create_generated_clock -name phy_dq_clk_0 -source [get_ports ddr_ref_clk_p_i] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 2
 Executing : create_generated_clock -name phy_dq_clk_0 -source [get_ports ddr_ref_clk_p_i] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 2 successfully.
+Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}
 Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy} successfully.
+Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT}
 Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT} successfully.
+Executing : get_clocks phy_dq_clk_0
 Executing : get_clocks phy_dq_clk_0 successfully.
+Executing : create_generated_clock -name phy_dq_sysclk_0 -source [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT}] -master_clock [get_clocks phy_dq_clk_0] -edges {5 13 21} -edge_shift {0 0 0}
 Executing : create_generated_clock -name phy_dq_sysclk_0 -source [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].ddrphy_ppll/clkoutphy}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[0].u_ddrphy_ioclkdiv/CLKDIVOUT}] -master_clock [get_clocks phy_dq_clk_0] -edges {5 13 21} -edge_shift {0 0 0} successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : get_clocks phy_dq_sysclk_0
 Executing : get_clocks phy_dq_sysclk_0 successfully.
+Executing : set_multicycle_path 2 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_0]
 Executing : set_multicycle_path 2 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_0] successfully.
+Executing : get_ports ddr_ref_clk_p_i
 Executing : get_ports ddr_ref_clk_p_i successfully.
+Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}
 Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy} successfully.
+Executing : get_clocks clk_ddr_ref
 Executing : get_clocks clk_ddr_ref successfully.
+Executing : create_generated_clock -name phy_dq_clk_1 -source [get_ports ddr_ref_clk_p_i] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 2
 Executing : create_generated_clock -name phy_dq_clk_1 -source [get_ports ddr_ref_clk_p_i] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}] -master_clock [get_clocks clk_ddr_ref] -multiply_by 16 -divide_by 2 successfully.
+Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}
 Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy} successfully.
+Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT}
 Executing : get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT} successfully.
+Executing : get_clocks phy_dq_clk_1
 Executing : get_clocks phy_dq_clk_1 successfully.
+Executing : create_generated_clock -name phy_dq_sysclk_1 -source [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT}] -master_clock [get_clocks phy_dq_clk_1] -edges {5 13 21} -edge_shift {0 0 0}
 Executing : create_generated_clock -name phy_dq_sysclk_1 -source [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].ddrphy_ppll/clkoutphy}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_slice_top.i_dqs_bank[1].u_ddrphy_ioclkdiv/CLKDIVOUT}] -master_clock [get_clocks phy_dq_clk_1] -edges {5 13 21} -edge_shift {0 0 0} successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : get_clocks phy_dq_sysclk_1
 Executing : get_clocks phy_dq_sysclk_1 successfully.
+Executing : set_multicycle_path 2 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_1]
 Executing : set_multicycle_path 2 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_1] successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : get_clocks phy_dq_sysclk_0
 Executing : get_clocks phy_dq_sysclk_0 successfully.
+Executing : set_clock_uncertainty 0.4 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_0] -setup -hold
 Executing : set_clock_uncertainty 0.4 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_0] -setup -hold successfully.
+Executing : get_clocks phy_dq_sysclk_0
 Executing : get_clocks phy_dq_sysclk_0 successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : set_clock_uncertainty 0.4 -from [get_clocks phy_dq_sysclk_0] -to [get_clocks clk_mem] -setup -hold
 Executing : set_clock_uncertainty 0.4 -from [get_clocks phy_dq_sysclk_0] -to [get_clocks clk_mem] -setup -hold successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : get_clocks phy_dq_sysclk_1
 Executing : get_clocks phy_dq_sysclk_1 successfully.
+Executing : set_clock_uncertainty 0.4 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_1] -setup -hold
 Executing : set_clock_uncertainty 0.4 -from [get_clocks clk_mem] -to [get_clocks phy_dq_sysclk_1] -setup -hold successfully.
+Executing : get_clocks phy_dq_sysclk_1
 Executing : get_clocks phy_dq_sysclk_1 successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : set_clock_uncertainty 0.4 -from [get_clocks phy_dq_sysclk_1] -to [get_clocks clk_mem] -setup -hold
 Executing : set_clock_uncertainty 0.4 -from [get_clocks phy_dq_sysclk_1] -to [get_clocks clk_mem] -setup -hold successfully.
+Executing : get_clocks rst_clk
 Executing : get_clocks rst_clk successfully.
+Executing : set_clock_groups -name rst_clk -asynchronous -group [get_clocks rst_clk]
 Executing : set_clock_groups -name rst_clk -asynchronous -group [get_clocks rst_clk] successfully.
+Executing : get_clocks phy_dq_clk_0
 Executing : get_clocks phy_dq_clk_0 successfully.
+Executing : set_clock_groups -name phy_dq_clk_0 -asynchronous -group [get_clocks phy_dq_clk_0]
 Executing : set_clock_groups -name phy_dq_clk_0 -asynchronous -group [get_clocks phy_dq_clk_0] successfully.
+Executing : get_clocks phy_dq_clk_1
 Executing : get_clocks phy_dq_clk_1 successfully.
+Executing : set_clock_groups -name phy_dq_clk_1 -asynchronous -group [get_clocks phy_dq_clk_1]
 Executing : set_clock_groups -name phy_dq_clk_1 -asynchronous -group [get_clocks phy_dq_clk_1] successfully.
+Executing : get_ports rgmii_rxc_i
 Executing : get_ports rgmii_rxc_i successfully.
+Executing : get_pins u_rgmii/u_pll_eth/clkout0
 Executing : get_pins u_rgmii/u_pll_eth/clkout0 successfully.
+Executing : create_generated_clock -name clk_eth -source [get_ports rgmii_rxc_i] [get_pins u_rgmii/u_pll_eth/clkout0] -edges {1 2 3} -edge_shift {0 0 0}
 Executing : create_generated_clock -name clk_eth -source [get_ports rgmii_rxc_i] [get_pins u_rgmii/u_pll_eth/clkout0] -edges {1 2 3} -edge_shift {0 0 0} successfully.
+Executing : get_pins u_rgmii/u_pll_eth/clkout0
 Executing : get_pins u_rgmii/u_pll_eth/clkout0 successfully.
+Executing : get_ports rgmii_txc_o
 Executing : get_ports rgmii_txc_o successfully.
+Executing : create_generated_clock -name clk_rgmii_tx -source [get_pins u_rgmii/u_pll_eth/clkout0] [get_ports rgmii_txc_o] -edges {1 2 3} -edge_shift {1 1 1}
 Executing : create_generated_clock -name clk_rgmii_tx -source [get_pins u_rgmii/u_pll_eth/clkout0] [get_ports rgmii_txc_o] -edges {1 2 3} -edge_shift {1 1 1} successfully.
+Executing : get_clocks clk_sys
 Executing : get_clocks clk_sys successfully.
+Executing : get_clocks {clk_eth clk_rgmii_tx}
 Executing : get_clocks {clk_eth clk_rgmii_tx} successfully.
+Executing : set_clock_groups -asynchronous -group [get_clocks clk_sys] -group [get_clocks {clk_eth clk_rgmii_tx}]
 Executing : set_clock_groups -asynchronous -group [get_clocks clk_sys] -group [get_clocks {clk_eth clk_rgmii_tx}] successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : get_clocks {clk_eth clk_rgmii_tx}
 Executing : get_clocks {clk_eth clk_rgmii_tx} successfully.
+Executing : set_clock_groups -asynchronous -group [get_clocks clk_mem] -group [get_clocks {clk_eth clk_rgmii_tx}]
 Executing : set_clock_groups -asynchronous -group [get_clocks clk_mem] -group [get_clocks {clk_eth clk_rgmii_tx}] successfully.
+Executing : get_clocks {clk_pix clk_serial}
 Executing : get_clocks {clk_pix clk_serial} successfully.
+Executing : get_clocks {clk_eth clk_rgmii_tx}
 Executing : get_clocks {clk_eth clk_rgmii_tx} successfully.
+Executing : set_clock_groups -asynchronous -group [get_clocks {clk_pix clk_serial}] -group [get_clocks {clk_eth clk_rgmii_tx}]
 Executing : set_clock_groups -asynchronous -group [get_clocks {clk_pix clk_serial}] -group [get_clocks {clk_eth clk_rgmii_tx}] successfully.
+Executing : get_clocks clk_sys
 Executing : get_clocks clk_sys successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : set_clock_groups -asynchronous -group [get_clocks clk_sys] -group [get_clocks clk_mem]
 Executing : set_clock_groups -asynchronous -group [get_clocks clk_sys] -group [get_clocks clk_mem] successfully.
+Executing : get_clocks clk_sys
 Executing : get_clocks clk_sys successfully.
+Executing : get_clocks {clk_pix clk_serial}
 Executing : get_clocks {clk_pix clk_serial} successfully.
+Executing : set_clock_groups -asynchronous -group [get_clocks clk_sys] -group [get_clocks {clk_pix clk_serial}]
 Executing : set_clock_groups -asynchronous -group [get_clocks clk_sys] -group [get_clocks {clk_pix clk_serial}] successfully.
+Executing : get_clocks clk_mem
 Executing : get_clocks clk_mem successfully.
+Executing : get_clocks {clk_pix clk_serial}
 Executing : get_clocks {clk_pix clk_serial} successfully.
+Executing : set_clock_groups -asynchronous -group [get_clocks clk_mem] -group [get_clocks {clk_pix clk_serial}]
 Executing : set_clock_groups -asynchronous -group [get_clocks clk_mem] -group [get_clocks {clk_pix clk_serial}] successfully.
+Executing : get_ports rst_n_i
 Executing : get_ports rst_n_i successfully.
+Executing : set_false_path -from [get_ports rst_n_i]
 Executing : set_false_path -from [get_ports rst_n_i] successfully.
+Executing : get_ports {key_n_i[*] uart_rx_i eth_mdio_o}
 Executing : get_ports {key_n_i[*] uart_rx_i eth_mdio_o} successfully.
+Executing : set_false_path -from [get_ports {key_n_i[*] uart_rx_i eth_mdio_o}]
 Executing : set_false_path -from [get_ports {key_n_i[*] uart_rx_i eth_mdio_o}] successfully.
+Executing : get_clocks clk_rgmii_ref
 Executing : get_clocks clk_rgmii_ref successfully.
+Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}
 Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i} successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
 Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+Executing : get_clocks clk_rgmii_ref
 Executing : get_clocks clk_rgmii_ref successfully.
+Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}
 Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i} successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -min 1.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
 Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -min 1.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+Executing : get_clocks clk_rgmii_ref
 Executing : get_clocks clk_rgmii_ref successfully.
+Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}
 Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i} successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -max 3.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
 Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -max 3.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
+Executing : get_clocks clk_rgmii_ref
 Executing : get_clocks clk_rgmii_ref successfully.
+Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}
 Executing : get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i} successfully.
+Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -min 1.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
 Executing : set_input_delay -clock [get_clocks clk_rgmii_ref] -clock_fall -min 1.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}] successfully.
 C: ConstraintEditor-2002: [G:/codex_project/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_render_top.fdc(line number: 168)] | Port tmds_data_p_o[0] has been placed at location R25, whose type is share pin.
 C: ConstraintEditor-2009: p:tmds_data_p_o[0] is lack of PAP_IO_DRIVE, OUTPUT or INOUT PORT had better set PAP_IO_DRIVE, the optional value is {5, 4.5}.
@@ -10250,8 +10352,6 @@ W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_
 W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N197 to u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N197_rnmt
 W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N312 to u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N312_rnmt
 W: prevent name conflict by renaming net u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N823 to u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/ddrphy_dqsi_rdel_cal/N823_rnmt
-Design 'edrv32_fpga_board_render_top' has been successfully synthesized to architecture-specific objects.
-Timing graph has been constructed successfully
 W: Timing-4086: Port 'eth_mdio_o' is not constrained, it is treated as combinational input.
 W: Timing-4087: Port 'eth_mdio_o' is not constrained, it is treated as combinational output.
 W: Timing-4086: Port 'mem_dq_o[0]' is not constrained, it is treated as combinational input.

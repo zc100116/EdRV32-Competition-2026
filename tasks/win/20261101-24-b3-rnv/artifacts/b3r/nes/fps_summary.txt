@@ -1,0 +1,4 @@
+Captured samples: 155
+NES fps min/mean/max: 51.9/54.53/67.1
+shown fps min/mean/max: 17.3/18.07/20.0
+Samples include current game/title phases; not a fixed gameplay-only benchmark. Key-release test outcome pending user observation.

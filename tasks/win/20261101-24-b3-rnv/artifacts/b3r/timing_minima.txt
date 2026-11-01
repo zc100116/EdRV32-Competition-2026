@@ -1,0 +1,8 @@
+('Setup', 'Slow', 0.122, 'clk_mem                clk_mem                      0.122       0.000              0         147283')
+('Hold', 'Slow', -0.361, 'clk_rgmii_ref          clk_eth                     -0.361      -1.698              5              5')
+('Recovery', 'Slow', 2.282, 'clk_mem                clk_mem                      2.282       0.000              0           9424')
+('Removal', 'Slow', 0.245, 'clk_mem                clk_mem                      0.245       0.000              0           9424')
+('Setup', 'Fast', 0.513, 'clk_rgmii_ref          clk_eth                      0.513       0.000              0              5')
+('Hold', 'Fast', 0.097, 'clk_mem                clk_mem                      0.097       0.000              0         147283')
+('Recovery', 'Fast', 4.469, 'clk_mem                clk_mem                      4.469       0.000              0           9424')
+('Removal', 'Fast', 0.169, 'clk_mem                clk_mem                      0.169       0.000              0           9424')

@@ -1,0 +1,212 @@
+[
+  {
+    "round": 1,
+    "before": {
+      "seq": 4440,
+      "timestamp_ms": 1793537077156,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 184,
+      "PERF1": 2,
+      "PERF2": 2,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 181,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 1,
+      "peer": "192.168.1.2:6000"
+    },
+    "after": {
+      "seq": 4605,
+      "timestamp_ms": 1793537087240,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 290,
+      "PERF1": 12,
+      "PERF2": 12,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 276,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 2,
+      "peer": "192.168.1.2:6000"
+    },
+    "elapsed_serial_seconds": 10.084,
+    "delta": {
+      "PERF0": 106,
+      "PERF1": 10,
+      "PERF3": 0,
+      "PERF5": 95,
+      "PERF8": 1
+    },
+    "success": true
+  },
+  {
+    "round": 2,
+    "before": {
+      "seq": 4692,
+      "timestamp_ms": 1793537091402,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 296,
+      "PERF1": 12,
+      "PERF2": 12,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 282,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 2,
+      "peer": "192.168.1.2:6000"
+    },
+    "after": {
+      "seq": 4857,
+      "timestamp_ms": 1793537101492,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 405,
+      "PERF1": 22,
+      "PERF2": 22,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 380,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 3,
+      "peer": "192.168.1.2:6000"
+    },
+    "elapsed_serial_seconds": 10.09,
+    "delta": {
+      "PERF0": 109,
+      "PERF1": 10,
+      "PERF3": 0,
+      "PERF5": 98,
+      "PERF8": 1
+    },
+    "success": true
+  },
+  {
+    "round": 3,
+    "before": {
+      "seq": 4959,
+      "timestamp_ms": 1793537105958,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 417,
+      "PERF1": 24,
+      "PERF2": 24,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 389,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 4,
+      "peer": "192.168.1.2:6000"
+    },
+    "after": {
+      "seq": 5124,
+      "timestamp_ms": 1793537116061,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 522,
+      "PERF1": 34,
+      "PERF2": 34,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 484,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 4,
+      "peer": "192.168.1.2:6000"
+    },
+    "elapsed_serial_seconds": 10.103,
+    "delta": {
+      "PERF0": 105,
+      "PERF1": 10,
+      "PERF3": 0,
+      "PERF5": 95,
+      "PERF8": 0
+    },
+    "success": true
+  },
+  {
+    "round": 4,
+    "before": {
+      "seq": 5226,
+      "timestamp_ms": 1793537120821,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 531,
+      "PERF1": 35,
+      "PERF2": 35,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 491,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 5,
+      "peer": "192.168.1.2:6000"
+    },
+    "after": {
+      "seq": 5391,
+      "timestamp_ms": 1793537130964,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 639,
+      "PERF1": 45,
+      "PERF2": 45,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 589,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 5,
+      "peer": "192.168.1.2:6000"
+    },
+    "elapsed_serial_seconds": 10.143,
+    "delta": {
+      "PERF0": 108,
+      "PERF1": 10,
+      "PERF3": 0,
+      "PERF5": 98,
+      "PERF8": 0
+    },
+    "success": true
+  },
+  {
+    "round": 5,
+    "before": {
+      "seq": 5478,
+      "timestamp_ms": 1793537134812,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 639,
+      "PERF1": 45,
+      "PERF2": 45,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 589,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 5,
+      "peer": "192.168.1.2:6000"
+    },
+    "after": {
+      "seq": 5643,
+      "timestamp_ms": 1793537144947,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 753,
+      "PERF1": 55,
+      "PERF2": 55,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 692,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 6,
+      "peer": "192.168.1.2:6000"
+    },
+    "elapsed_serial_seconds": 10.135,
+    "delta": {
+      "PERF0": 114,
+      "PERF1": 10,
+      "PERF3": 0,
+      "PERF5": 103,
+      "PERF8": 1
+    },
+    "success": true
+  }
+]

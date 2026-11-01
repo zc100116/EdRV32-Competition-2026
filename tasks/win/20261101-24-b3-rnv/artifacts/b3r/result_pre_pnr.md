@@ -16,7 +16,7 @@
 
 Device Map：LUT 66805（42%），FF 56157（18%），DRM 117.5（29%），APM 131（18%），Distributed RAM 750（2%），IO 109（28%），GPLL 5、PPLL 2。其余资源及PDS显示百分比原文见resource_summary.txt。
 
-保存完整时钟、复位、CE和Other High Fanout Signal表于high_fanout.txt，RND条目另见rnd_high_fanout.txt；这只是报告覆盖到的网络，不代表所有RND网络。综合controlsets和APM/DRM/LUTRAM实例信息一并保存。未取得独立的按模块LUT/FF资源表。
+保存完整时钟、复位、CE和Other High Fanout Signal表于high_fanout.txt，RND条目另见rnd_high_fanout.txt；这只是报告覆盖到的网络，不代表所有RND网络。综合controlsets和APM/DRM/LUTRAM实例信息一并保存。本次后续归档已从SNR补取完整按模块资源表，见resource_hier.txt。
 
 ## 警告与后续
 

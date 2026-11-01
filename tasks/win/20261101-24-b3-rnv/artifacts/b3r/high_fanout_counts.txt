@@ -1,0 +1,4 @@
+Clock Signal: rows=9 fanout>=300=3
+Reset Signal: rows=175 fanout>=300=27
+CE Signal: rows=1211 fanout>=300=12
+Other High Fanout Signal: rows=100 fanout>=300=99

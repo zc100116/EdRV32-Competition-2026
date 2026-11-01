@@ -1,0 +1,63 @@
+| u_rgmii/u_eth_clk/gopclkbufg                      | USCM_383_930          | clk_eth_w                       | 188             | 1                   | u_rgmii/u_pll_eth/u_gpll/gpll_inst                    | CLKOUT0        | GPLL_7_1381             
+| u_rgmii/u_pll_eth/u_gpll/gpll_inst                                                  | GPLL_7_1381          | CLKFB         | clk_eth_w                                               |  -              |  -                  | u_rgmii/u_eth_clk/gopclkbufg                                             | CLKOUT               | USCM_383_930                  
+| u_rgmii/u_pll_eth/u_gpll/gpll_inst                                                  | GPLL_7_1381          | CLKIN1        | nt_rgmii_rxc_i                                          |  -              |  -                  | rgmii_rxc_i_ibuf/opit_1                                                  | DI_TO_CLK            | IOLHR_16_1368                 
+| u_rgmii/u_pll_eth/u_gpll/gpll_inst                                                  | GPLL_7_1381          | CLKIN2        | _GND4750                                                |  -              |  -                  | GND_4750                                                                 | Z                    | HARD0_13_1405                 
+| u_rgmii/u_pll_eth/u_gpll/gpll_inst                                                  | GPLL_7_1381          | CLKOUT0       | u_rgmii/clk_eth_pll_w                                   | 188             | 1                   |  ...                                                                     |  ...                 |  ...                          
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : min (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    2.174  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  2.174
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    1.000       1.000 f                        
+
+ H16                                                     0.000       1.000 f       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       1.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.678       1.707 f       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       1.707         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          f       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   1.707         Logic Levels: 1  
+                                                                                   Logic: 0.678ns(95.898%), Route: 0.029ns(4.102%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             0.000       0.000 r                        
+ D19                                                     0.000       0.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       0.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.897       0.947 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       0.947         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.110       1.057 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.591       1.648         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -2.807      -1.159 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.387       0.228         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.177       0.405 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.769       2.174         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        r       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       2.174                          
+ clock uncertainty                                       0.150       2.324                          
+
+ Hold time                                              -0.256       2.068                          
+
+ Data required time                                                  2.068                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  2.068                          
+ Data arrival time                                                   1.707                          
+----------------------------------------------------------------------------------------------------
+ Slack (VIOLATED)                                                   -0.361                          
+====================================================================================================
+
+====================================================================================================

@@ -1,0 +1,8 @@
+Exit code: 1
+Get-NetNeighbor : 找不到任何“IPAddress”属性等于“192.168.1.10”的 MSFT_NetNeighbor 对象。请验证属性值，然后重试。
+At line:1 char:1
++ Get-NetNeighbor -IPAddress 192.168.1.10 | Format-List
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (192.168.1.10:String) [Get-NetNeighbor], CimJobException
+    + FullyQualifiedErrorId : CmdletizationQuery_NotFound_IPAddress,Get-NetNeighbor
+ 

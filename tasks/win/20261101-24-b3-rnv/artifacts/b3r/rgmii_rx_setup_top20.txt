@@ -1,0 +1,2342 @@
+Report: -delay_type min_max -max_path 200 -nworst 20 -from {rgmii_rxd_i* rgmii_rx_ctl_i} -input_pins TRUE
+Worst20 per corner, or all available if fewer.
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ A19                                                     0.000       3.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.897       3.962 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.962         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   3.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678       4.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       4.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504       5.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       1.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192       3.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       3.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508       4.848         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        f       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.848                          
+ clock uncertainty                                      -0.150       4.698                          
+
+ Setup time                                             -0.504       4.194                          
+
+ Data required time                                                  4.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.194                          
+ Data arrival time                                                   3.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.232                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ B19                                                     0.000       3.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.897       3.962 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.962         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   3.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678       4.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       4.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504       5.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       1.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192       3.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       3.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508       4.848         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        f       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.848                          
+ clock uncertainty                                      -0.150       4.698                          
+
+ Setup time                                             -0.504       4.194                          
+
+ Data required time                                                  4.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.194                          
+ Data arrival time                                                   3.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.232                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ D16                                                     0.000       3.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       3.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.897       3.944 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.944         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   3.944         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.021%), Route: 0.047ns(4.979%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678       4.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       4.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504       5.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       1.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192       3.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       3.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508       4.848         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        f       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.848                          
+ clock uncertainty                                      -0.150       4.698                          
+
+ Setup time                                             -0.504       4.194                          
+
+ Data required time                                                  4.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.194                          
+ Data arrival time                                                   3.944                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.250                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ E16                                                     0.000       3.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       3.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.897       3.943 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.943         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   3.943         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.122%), Route: 0.046ns(4.878%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678       4.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       4.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504       5.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       1.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192       3.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       3.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508       4.848         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        f       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.848                          
+ clock uncertainty                                      -0.150       4.698                          
+
+ Setup time                                             -0.504       4.194                          
+
+ Data required time                                                  4.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.194                          
+ Data arrival time                                                   3.943                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.251                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ H16                                                     0.000       3.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       3.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.897       3.926 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.926         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   3.926         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(96.868%), Route: 0.029ns(3.132%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678       4.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       4.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504       5.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       1.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192       3.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       3.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508       4.848         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        f       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.848                          
+ clock uncertainty                                      -0.150       4.698                          
+
+ Setup time                                             -0.504       4.194                          
+
+ Data required time                                                  4.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.194                          
+ Data arrival time                                                   3.926                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.268                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ A19                                                     0.000       7.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.897       7.962 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.962         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   7.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        r       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   7.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.319                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ B19                                                     0.000       7.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.897       7.962 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.962         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   7.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        r       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   7.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.319                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ D16                                                     0.000       7.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       7.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.897       7.944 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.944         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   7.944         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.021%), Route: 0.047ns(4.979%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        r       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   7.944                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.337                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ E16                                                     0.000       7.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       7.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.897       7.943 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.943         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   7.943         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.122%), Route: 0.046ns(4.878%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        r       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   7.943                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.338                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ H16                                                     0.000       7.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       7.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.897       7.926 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.926         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   7.926         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(96.868%), Route: 0.029ns(3.132%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        r       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   7.926                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.355                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ A19                                                     0.000       7.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.897       7.962 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.962         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   7.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678      12.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095      12.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504      13.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       9.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192      11.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150      11.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508      12.848         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        f       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.848                          
+ clock uncertainty                                      -0.150      12.698                          
+
+ Setup time                                             -0.504      12.194                          
+
+ Data required time                                                 12.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.194                          
+ Data arrival time                                                   7.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.232                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ B19                                                     0.000       7.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.897       7.962 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.962         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   7.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678      12.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095      12.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504      13.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       9.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192      11.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150      11.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508      12.848         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        f       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.848                          
+ clock uncertainty                                      -0.150      12.698                          
+
+ Setup time                                             -0.504      12.194                          
+
+ Data required time                                                 12.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.194                          
+ Data arrival time                                                   7.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.232                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ D16                                                     0.000       7.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       7.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.897       7.944 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.944         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   7.944         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.021%), Route: 0.047ns(4.979%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678      12.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095      12.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504      13.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       9.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192      11.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150      11.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508      12.848         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        f       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.848                          
+ clock uncertainty                                      -0.150      12.698                          
+
+ Setup time                                             -0.504      12.194                          
+
+ Data required time                                                 12.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.194                          
+ Data arrival time                                                   7.944                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.250                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ E16                                                     0.000       7.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       7.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.897       7.943 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.943         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   7.943         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.122%), Route: 0.046ns(4.878%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678      12.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095      12.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504      13.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       9.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192      11.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150      11.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508      12.848         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        f       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.848                          
+ clock uncertainty                                      -0.150      12.698                          
+
+ Setup time                                             -0.504      12.194                          
+
+ Data required time                                                 12.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.194                          
+ Data arrival time                                                   7.943                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.251                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.848  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.848
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ H16                                                     0.000       7.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       7.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.897       7.926 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.926         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   7.926         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(96.868%), Route: 0.029ns(3.132%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.678      12.728 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.728         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095      12.823 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.504      13.327         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.329       9.998 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.192      11.190         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150      11.340 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.508      12.848         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        f       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.848                          
+ clock uncertainty                                      -0.150      12.698                          
+
+ Setup time                                             -0.504      12.194                          
+
+ Data required time                                                 12.194                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.194                          
+ Data arrival time                                                   7.926                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.268                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ A19                                                     0.000       3.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.897       3.962 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.962         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   3.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        r       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   3.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.319                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ B19                                                     0.000       3.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.897       3.962 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.962         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   3.962         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(93.243%), Route: 0.065ns(6.757%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        r       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   3.962                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.319                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ D16                                                     0.000       3.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       3.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.897       3.944 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.944         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   3.944         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.021%), Route: 0.047ns(4.979%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        r       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   3.944                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.337                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ E16                                                     0.000       3.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       3.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.897       3.943 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.943         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   3.943         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(95.122%), Route: 0.046ns(4.878%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        r       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   3.943                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.338                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (slow corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.935  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.935
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ H16                                                     0.000       3.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       3.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.897       3.926 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.926         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   3.926         Logic Levels: 1  
+                                                                                   Logic: 0.897ns(96.868%), Route: 0.029ns(3.132%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.766       8.816 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.816         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.095       8.911 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.503       9.414         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -3.324       6.090 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        1.184       7.274         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.150       7.424 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      1.511       8.935         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        r       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.935                          
+ clock uncertainty                                      -0.150       8.785                          
+
+ Setup time                                             -0.504       8.281                          
+
+ Data required time                                                  8.281                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.281                          
+ Data arrival time                                                   3.926                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.355                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ A19                                                     0.000       3.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.521       3.586 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.586         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   3.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440       4.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       4.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321       4.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928       2.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616       3.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       3.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890       4.559         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        f       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.559                          
+ clock uncertainty                                      -0.150       4.409                          
+
+ Setup time                                             -0.310       4.099                          
+
+ Data required time                                                  4.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.099                          
+ Data arrival time                                                   3.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.513                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ B19                                                     0.000       3.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.521       3.586 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.586         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   3.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440       4.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       4.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321       4.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928       2.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616       3.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       3.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890       4.559         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        f       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.559                          
+ clock uncertainty                                      -0.150       4.409                          
+
+ Setup time                                             -0.310       4.099                          
+
+ Data required time                                                  4.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.099                          
+ Data arrival time                                                   3.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.513                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ A19                                                     0.000       7.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.521       7.586 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.586         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   7.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        r       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   7.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.516                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ B19                                                     0.000       7.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.521       7.586 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.586         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   7.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        r       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   7.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.516                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ D16                                                     0.000       3.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       3.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.521       3.568 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.568         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   3.568         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.725%), Route: 0.047ns(8.275%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440       4.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       4.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321       4.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928       2.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616       3.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       3.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890       4.559         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        f       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.559                          
+ clock uncertainty                                      -0.150       4.409                          
+
+ Setup time                                             -0.310       4.099                          
+
+ Data required time                                                  4.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.099                          
+ Data arrival time                                                   3.568                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.531                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ E16                                                     0.000       3.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       3.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.521       3.567 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.567         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   3.567         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.887%), Route: 0.046ns(8.113%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440       4.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       4.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321       4.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928       2.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616       3.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       3.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890       4.559         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        f       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.559                          
+ clock uncertainty                                      -0.150       4.409                          
+
+ Setup time                                             -0.310       4.099                          
+
+ Data required time                                                  4.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.099                          
+ Data arrival time                                                   3.567                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.532                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ D16                                                     0.000       7.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       7.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.521       7.568 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.568         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   7.568         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.725%), Route: 0.047ns(8.275%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        r       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   7.568                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.534                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ E16                                                     0.000       7.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       7.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.521       7.567 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.567         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   7.567         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.887%), Route: 0.046ns(8.113%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        r       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   7.567                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.535                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ H16                                                     0.000       3.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       3.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.521       3.550 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.550         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   3.550         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(94.727%), Route: 0.029ns(5.273%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                            4.000       4.000 f                        
+ D19                                                     0.000       4.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       4.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440       4.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       4.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       4.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321       4.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928       2.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616       3.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       3.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890       4.559         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        f       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       4.559                          
+ clock uncertainty                                      -0.150       4.409                          
+
+ Setup time                                             -0.310       4.099                          
+
+ Data required time                                                  4.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  4.099                          
+ Data arrival time                                                   3.550                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.549                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ H16                                                     0.000       7.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       7.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.521       7.550 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.550         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   7.550         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(94.727%), Route: 0.029ns(5.273%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        r       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   7.550                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         0.552                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ A19                                                     0.000       7.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.521       7.586 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.586         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   7.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440      12.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073      12.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321      12.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928      10.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616      11.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097      11.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890      12.559         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        f       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.559                          
+ clock uncertainty                                      -0.150      12.409                          
+
+ Setup time                                             -0.310      12.099                          
+
+ Data required time                                                 12.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.099                          
+ Data arrival time                                                   7.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.513                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ B19                                                     0.000       7.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       7.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.521       7.586 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.586         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   7.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440      12.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073      12.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321      12.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928      10.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616      11.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097      11.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890      12.559         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        f       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.559                          
+ clock uncertainty                                      -0.150      12.409                          
+
+ Setup time                                             -0.310      12.099                          
+
+ Data required time                                                 12.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.099                          
+ Data arrival time                                                   7.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.513                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[2] (port)
+Endpoint    : u_rgmii/g_rx[2].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ A19                                                     0.000       3.000 r       rgmii_rxd_i[2] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[2]
+ IOBS_0_1404/PAD                                                                   u_rgmii/g_rx[2].u_input/opit_0/I
+ IOBS_0_1404/DIN                   td                    0.521       3.586 r       u_rgmii/g_rx[2].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.586         u_rgmii/g_rx[2].u_input/ntD
+ IOLHR_16_1404/DI                                                          r       u_rgmii/g_rx[2].u_input/opit_1/DI
+
+ Data arrival time                                                   3.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1404/ICLK                                                        r       u_rgmii/g_rx[2].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   3.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.516                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[3] (port)
+Endpoint    : u_rgmii/g_rx[3].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ B19                                                     0.000       3.000 r       rgmii_rxd_i[3] (port)
+                                   net (fanout=1)        0.065       3.065         nt_rgmii_rxd_i[3]
+ IOBD_0_1410/PAD                                                                   u_rgmii/g_rx[3].u_input/opit_0/I
+ IOBD_0_1410/DIN                   td                    0.521       3.586 r       u_rgmii/g_rx[3].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.586         u_rgmii/g_rx[3].u_input/ntD
+ IOLHR_16_1410/DI                                                          r       u_rgmii/g_rx[3].u_input/opit_1/DI
+
+ Data arrival time                                                   3.586         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(88.908%), Route: 0.065ns(11.092%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1410/ICLK                                                        r       u_rgmii/g_rx[3].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   3.586                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.516                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ D16                                                     0.000       7.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       7.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.521       7.568 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.568         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   7.568         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.725%), Route: 0.047ns(8.275%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440      12.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073      12.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321      12.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928      10.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616      11.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097      11.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890      12.559         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        f       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.559                          
+ clock uncertainty                                      -0.150      12.409                          
+
+ Setup time                                             -0.310      12.099                          
+
+ Data required time                                                 12.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.099                          
+ Data arrival time                                                   7.568                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.531                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ E16                                                     0.000       7.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       7.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.521       7.567 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.567         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   7.567         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.887%), Route: 0.046ns(8.113%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440      12.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073      12.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321      12.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928      10.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616      11.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097      11.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890      12.559         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        f       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.559                          
+ clock uncertainty                                      -0.150      12.409                          
+
+ Setup time                                             -0.310      12.099                          
+
+ Data required time                                                 12.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.099                          
+ Data arrival time                                                   7.567                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.532                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[0] (port)
+Endpoint    : u_rgmii/g_rx[0].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ D16                                                     0.000       3.000 r       rgmii_rxd_i[0] (port)
+                                   net (fanout=1)        0.047       3.047         nt_rgmii_rxd_i[0]
+ IOBS_0_1428/PAD                                                                   u_rgmii/g_rx[0].u_input/opit_0/I
+ IOBS_0_1428/DIN                   td                    0.521       3.568 r       u_rgmii/g_rx[0].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.568         u_rgmii/g_rx[0].u_input/ntD
+ IOLHR_16_1428/DI                                                          r       u_rgmii/g_rx[0].u_input/opit_1/DI
+
+ Data arrival time                                                   3.568         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.725%), Route: 0.047ns(8.275%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1428/ICLK                                                        r       u_rgmii/g_rx[0].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   3.568                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.534                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rxd_i[1] (port)
+Endpoint    : u_rgmii/g_rx[1].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ E16                                                     0.000       3.000 r       rgmii_rxd_i[1] (port)
+                                   net (fanout=1)        0.046       3.046         nt_rgmii_rxd_i[1]
+ IOBD_0_1434/PAD                                                                   u_rgmii/g_rx[1].u_input/opit_0/I
+ IOBD_0_1434/DIN                   td                    0.521       3.567 r       u_rgmii/g_rx[1].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.567         u_rgmii/g_rx[1].u_input/ntD
+ IOLHR_16_1434/DI                                                          r       u_rgmii/g_rx[1].u_input/opit_1/DI
+
+ Data arrival time                                                   3.567         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(91.887%), Route: 0.046ns(8.113%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1434/ICLK                                                        r       u_rgmii/g_rx[1].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   3.567                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.535                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.559  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.559
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (falling edge)
+                                                         4.000       4.000 f                        
+ Input external delay                                    3.000       7.000 r                        
+
+ H16                                                     0.000       7.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       7.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.521       7.550 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       7.550         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   7.550         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(94.727%), Route: 0.029ns(5.273%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (falling edge)                           12.000      12.000 f                        
+ D19                                                     0.000      12.000 f       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050      12.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.440      12.490 f       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000      12.490         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073      12.563 f       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.321      12.884         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.928      10.956 f       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.616      11.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097      11.669 f       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.890      12.559         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        f       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000      12.559                          
+ clock uncertainty                                      -0.150      12.409                          
+
+ Setup time                                             -0.310      12.099                          
+
+ Data required time                                                 12.099                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                 12.099                          
+ Data arrival time                                                   7.550                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.549                          
+====================================================================================================
+
+====================================================================================================
+
+Startpoint  : rgmii_rx_ctl_i (port)
+Endpoint    : u_rgmii/g_rx[4].u_input/opit_1/DI
+Path Group  : clk_eth
+Path Type   : max (fast corner)
+Path Class  : sequential timing path
+Clock Skew  :    0.562  (Capture Clock Delay - Launch Clock Delay + Clock Pessimism Removal)
+  Capture Clock Delay     :  0.562
+  Launch Clock Delay      :  0.000
+  Clock Pessimism Removal :  0.000
+
+ Location                          Delay Type             Incr        Path         Logical Resource 
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_rgmii_ref (rising edge)                       0.000       0.000 r                        
+ Input external delay                                    3.000       3.000 r                        
+
+ H16                                                     0.000       3.000 r       rgmii_rx_ctl_i (port)
+                                   net (fanout=1)        0.029       3.029         rgmii_rx_ctl_i   
+ IOBD_0_1458/PAD                                                                   u_rgmii/g_rx[4].u_input/opit_0/I
+ IOBD_0_1458/DIN                   td                    0.521       3.550 r       u_rgmii/g_rx[4].u_input/opit_0/O
+                                   net (fanout=1)        0.000       3.550         u_rgmii/g_rx[4].u_input/ntD
+ IOLHR_16_1458/DI                                                          r       u_rgmii/g_rx[4].u_input/opit_1/DI
+
+ Data arrival time                                                   3.550         Logic Levels: 1  
+                                                                                   Logic: 0.521ns(94.727%), Route: 0.029ns(5.273%)
+----------------------------------------------------------------------------------------------------
+
+ Clock clk_eth (rising edge)                             8.000       8.000 r                        
+ D19                                                     0.000       8.000 r       rgmii_rxc_i (port)
+                                   net (fanout=1)        0.050       8.050         rgmii_rxc_i      
+ IOBD_0_1368/PAD                                                                   rgmii_rxc_i_ibuf/opit_0/I
+ IOBD_0_1368/DIN                   td                    0.445       8.495 r       rgmii_rxc_i_ibuf/opit_0/O
+                                   net (fanout=1)        0.000       8.495         rgmii_rxc_i_ibuf/ntD
+ IOLHR_16_1368/DI                                                                  rgmii_rxc_i_ibuf/opit_1/DI
+ IOLHR_16_1368/DI_TO_CLK           td                    0.073       8.568 r       rgmii_rxc_i_ibuf/opit_1/DI_TO_CLK
+                                   net (fanout=1)        0.320       8.888         nt_rgmii_rxc_i   
+ GPLL_7_1381/CLK_IN0                                                               u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKIN1
+ GPLL_7_1381/CLKOUT0               td                   -1.933       6.955 r       u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0
+                                   net (fanout=1)        0.617       7.572         u_rgmii/clk_eth_pll_w
+ USCM_383_930/CLKIN0                                                               u_rgmii/u_eth_clk/gopclkbufg/CLK
+ USCM_383_930/CLKOUT               td                    0.097       7.669 r       u_rgmii/u_eth_clk/gopclkbufg/CLKOUT
+                                   net (fanout=194)      0.893       8.562         clk_eth_w        
+ IOLHR_16_1458/ICLK                                                        r       u_rgmii/g_rx[4].u_input/opit_1/ICLK
+ clock pessimism                                         0.000       8.562                          
+ clock uncertainty                                      -0.150       8.412                          
+
+ Setup time                                             -0.310       8.102                          
+
+ Data required time                                                  8.102                          
+----------------------------------------------------------------------------------------------------
+ Data required time                                                  8.102                          
+ Data arrival time                                                   3.550                          
+----------------------------------------------------------------------------------------------------
+ Slack (MET)                                                         4.552                          
+====================================================================================================
+
+====================================================================================================
