@@ -12,7 +12,7 @@ module edrv32_apb_checker (
     int wait_cycles;
     logic [64:0] saved;
     wire [64:0] payload = {bus.psel, bus.paddr, bus.pwrite, bus.pwdata, bus.pstrb};
-    always @(posedge clk_i) begin
+    always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             setup <= 0;
             waiting <= 0;
