@@ -51,6 +51,7 @@ module tb;
     wire [127:0] bases_o;
     wire [127:0] sizes_o;
     wire clear_o;
+    wire [3:0] unused_clear_units_w;
     wire start_o;
     wire abort_o;
     wire mdio_start_o;
@@ -59,8 +60,8 @@ module tb;
     always #4 clk_i = !clk_i;
     edrv32_eth_regs dut (
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_mem_perf_n_i(rst_n_i),
+        .rst_n_i({4{rst_n_i}}),
+        .rst_mem_perf_n_i({4{rst_n_i}}),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
@@ -104,6 +105,7 @@ module tb;
         .phy_o(phy_o),
         .bases_o(bases_o),
         .sizes_o(sizes_o),
+        .clear_units_o(unused_clear_units_w),
         .clear_o(clear_o),
         .start_o(start_o),
         .abort_o(abort_o),
