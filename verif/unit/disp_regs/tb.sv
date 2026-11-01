@@ -34,7 +34,7 @@ module tb;
     wire [31:0] scan_cnt;
     wire irq;
     edrv32_disp_regs dut (
-        .clk_i(clk), .rst_n_i(rst_n), .apb_paddr_i(paddr), .apb_psel_i(psel),
+        .clk_i(clk), .rst_n_i({4{rst_n}}), .apb_paddr_i(paddr), .apb_psel_i(psel),
         .apb_penable_i(penable), .apb_pwrite_i(pwrite), .apb_pwdata_i(pwdata),
         .apb_pstrb_i(pstrb), .apb_pready_o(pready), .apb_prdata_o(prdata),
         .apb_pslverr_o(pslverr), .enable_o(enable), .next_base_o(next_base),

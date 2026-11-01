@@ -38,6 +38,7 @@ module edrv32_async_fifo_ram #(
     reg [PTR_WIDTH:0] read_bin_r;
     reg [PTR_WIDTH:0] fetch_bin_r;
     reg head_valid_r;
+    reg [3:0] head_select_r /* synthesis syn_preserve=1 */;
     reg pending_r;
     reg [WIDTH-1:0] head_data_r;
     wire write_w;
@@ -63,7 +64,14 @@ module edrv32_async_fifo_ram #(
     assign fetch_gray_w = fetch_bin_r ^ (fetch_bin_r >> 1);
     assign rd_en_o = (fetch_gray_w != write_sync_r) && !pending_hold_w;
     assign valid_o = head_valid_r || pending_r;
-    assign data_o = head_valid_r ? head_data_r : rd_data_i;
+    // Data selection is partitioned; FIFO ownership still uses the original valid bit.
+    genvar data_bit;
+    generate
+        for (data_bit = 0; data_bit < WIDTH; data_bit = data_bit + 1) begin : g_data_bit
+            assign data_o[data_bit] = head_select_r[data_bit*4/WIDTH] ?
+                head_data_r[data_bit] : rd_data_i[data_bit];
+        end
+    endgenerate
     assign write_w = valid_i && ready_o;
     assign read_w = valid_o && ready_i;
     assign write_next_w = write_bin_r + {{PTR_WIDTH{1'b0}}, write_w};
@@ -96,6 +104,7 @@ module edrv32_async_fifo_ram #(
             read_bin_r <= {(PTR_WIDTH+1){1'b0}};
             fetch_bin_r <= {(PTR_WIDTH+1){1'b0}};
             head_valid_r <= 1'b0;
+            head_select_r <= 4'd0;
             pending_r <= 1'b0;
             read_gray_r <= {(PTR_WIDTH+1){1'b0}};
         end else begin
@@ -105,6 +114,7 @@ module edrv32_async_fifo_ram #(
                 fetch_bin_r <= fetch_bin_r + 1'b1;
             end
             head_valid_r <= head_load_w || (head_valid_r && !read_w);
+            head_select_r <= {4{head_load_w || (head_valid_r && !read_w)}};
             pending_r <= rd_en_o || pending_hold_w;
         end
     end

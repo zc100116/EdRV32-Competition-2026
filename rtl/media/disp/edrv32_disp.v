@@ -43,7 +43,7 @@ module edrv32_disp (
     // SoC 5.3: one preserved reset copy per destination region.
     wire rst_mem_ctrl_n_w;
     wire rst_pix_scan_n_w;
-    wire rst_mem_regs_n_w;
+    wire [3:0] rst_mem_regs_n_w;
     edrv32_reset_copy u_reset_mem_ctrl_n (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_mem_n_i),
@@ -54,11 +54,17 @@ module edrv32_disp (
         .rst_n_i(rst_pix_n_i),
         .rst_n_o(rst_pix_scan_n_w)
     );
-    edrv32_reset_copy u_reset_mem_regs_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_regs_n_w)
-    );
+    genvar rst_mem_regs_n_w_idx;
+    generate
+        for (rst_mem_regs_n_w_idx = 0; rst_mem_regs_n_w_idx < 4;
+            rst_mem_regs_n_w_idx = rst_mem_regs_n_w_idx + 1) begin : g_rst_mem_regs_n_w
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_n_i),
+                .rst_n_o(rst_mem_regs_n_w[rst_mem_regs_n_w_idx])
+            );
+        end
+    endgenerate
 
     wire enable_w;
     wire enable_pix_w;
@@ -181,9 +187,9 @@ module edrv32_disp (
     ) u_params (
         // Clock domains and resets.
         .clk_src_i(clk_mem_i),
-        .rst_src_n_i(rst_mem_ctrl_n_w),
+        .rst_src_n_i(rst_mem_ctrl_n_units_w[0]),
         .clk_dst_i(clk_pix_i),
-        .rst_dst_n_i(rst_pix_scan_n_w),
+        .rst_dst_n_i(rst_pix_scan_n_units_w[0]),
 
         // One parameter message per frame latch, acknowledged on pixel receipt.
         .valid_i(frame_start_w),
@@ -245,9 +251,9 @@ module edrv32_disp (
     edrv32_disp_control u_control (
         // Clock domains and resets.
         .clk_mem_i(clk_mem_i),
-        .rst_mem_n_i(rst_mem_ctrl_n_w),
+        .rst_mem_n_i(rst_mem_ctrl_n_units_w[1]),
         .clk_pix_i(clk_pix_i),
-        .rst_pix_n_i(rst_pix_scan_n_w),
+        .rst_pix_n_i(rst_pix_scan_n_units_w[1]),
 
         // Scan enable and acknowledged frame request.
         .enable_i(enable_w),
@@ -260,9 +266,9 @@ module edrv32_disp (
     edrv32_cdc_pulse u_underflow (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[2]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[2]),
 
         // Domain-local interface.
         .pulse_i(underflow_pix_w),
@@ -272,9 +278,9 @@ module edrv32_disp (
     edrv32_cdc_pulse u_underflow1 (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[3]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[3]),
 
         // Domain-local interface.
         .pulse_i(underflow1_pix_w),
@@ -286,9 +292,9 @@ module edrv32_disp (
     ) u_read_cnt (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[4]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[4]),
 
         // Domain-local interface.
         .count_i(read_cnt_pix_w),
@@ -300,9 +306,9 @@ module edrv32_disp (
     ) u_read1_cnt (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[5]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[5]),
 
         // Domain-local interface.
         .count_i(read1_cnt_pix_w),
@@ -314,9 +320,9 @@ module edrv32_disp (
     ) u_perf0 (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[6]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[6]),
 
         // Domain-local interface.
         .count_i(perf0_pix_w),
@@ -328,9 +334,9 @@ module edrv32_disp (
     ) u_perf1 (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[7]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[7]),
 
         // Domain-local interface.
         .count_i(perf1_pix_w),
@@ -342,9 +348,9 @@ module edrv32_disp (
     ) u_perf2 (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[8]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[8]),
 
         // Domain-local interface.
         .count_i(perf2_pix_w),
@@ -356,9 +362,9 @@ module edrv32_disp (
     ) u_perf5 (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[9]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[9]),
 
         // Domain-local interface.
         .count_i(perf5_pix_w),
@@ -370,9 +376,9 @@ module edrv32_disp (
     ) u_perf6 (
         // Clock domains and resets.
         .clk_src_i(clk_pix_i),
-        .rst_src_n_i(rst_pix_scan_n_w),
+        .rst_src_n_i(rst_pix_scan_n_units_w[10]),
         .clk_dst_i(clk_mem_i),
-        .rst_dst_n_i(rst_mem_ctrl_n_w),
+        .rst_dst_n_i(rst_mem_ctrl_n_units_w[10]),
 
         // Domain-local interface.
         .count_i(perf6_pix_w),
@@ -382,7 +388,7 @@ module edrv32_disp (
     edrv32_disp_reader u_reader (
         // Clock domains and resets.
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[11]),
 
         // Frame requests, configuration and FIFO accounting.
         .frame_req_i(frame_req_mem_w),
@@ -423,7 +429,7 @@ module edrv32_disp (
     ) u_dma (
         // Clock domains and resets.
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
+        .rst_n_i(rst_mem_ctrl_n_units_w[12]),
 
         // Line descriptor and reserved-space stream.
         .desc_valid_i(desc_valid_w),
@@ -466,9 +472,9 @@ module edrv32_disp (
     ) u_scan_fifo (
         // Clock domains and resets.
         .clk_write_i(clk_mem_i),
-        .rst_write_n_i(rst_mem_ctrl_n_w),
+        .rst_write_n_i(rst_mem_ctrl_n_units_w[13]),
         .clk_read_i(clk_pix_i),
-        .rst_read_n_i(rst_pix_scan_n_w),
+        .rst_read_n_i(rst_pix_scan_n_units_w[11]),
 
         // Reserved whole-line writes.
         .valid_i(dma_valid_w && !write_layer_w),
@@ -507,9 +513,9 @@ module edrv32_disp (
     ) u_scan1_fifo (
         // Clock domains and resets.
         .clk_write_i(clk_mem_i),
-        .rst_write_n_i(rst_mem_ctrl_n_w),
+        .rst_write_n_i(rst_mem_ctrl_n_units_w[14]),
         .clk_read_i(clk_pix_i),
-        .rst_read_n_i(rst_pix_scan_n_w),
+        .rst_read_n_i(rst_pix_scan_n_units_w[12]),
 
         // Reserved whole-line writes.
         .valid_i(dma_valid_w && write_layer_w),
@@ -545,7 +551,7 @@ module edrv32_disp (
     edrv32_disp_timing u_timing (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_w),
+        .rst_n_i(rst_pix_scan_n_units_w[13]),
 
         // Domain-local interface.
         .hs_o(hs_w),
@@ -560,7 +566,7 @@ module edrv32_disp (
     edrv32_disp_scan u_scan (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_w),
+        .rst_n_i(rst_pix_scan_n_units_w[14]),
 
         // Raster and frame enable.
         .enable_i(enable_pix_w),
@@ -611,7 +617,7 @@ module edrv32_disp (
     edrv32_disp_tmds_enc u_blue (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_w),
+        .rst_n_i(rst_pix_scan_n_units_w[15]),
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[7:0]),
@@ -626,7 +632,7 @@ module edrv32_disp (
     edrv32_disp_tmds_enc u_green (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_w),
+        .rst_n_i(rst_pix_scan_n_units_w[16]),
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[15:8]),
@@ -641,7 +647,7 @@ module edrv32_disp (
     edrv32_disp_tmds_enc u_red (
         // Clock domains and resets.
         .clk_i(clk_pix_i),
-        .rst_n_i(rst_pix_scan_n_w),
+        .rst_n_i(rst_pix_scan_n_units_w[17]),
 
         // Pixel data and blanking controls.
         .data_i(rgb_w[23:16]),
@@ -653,4 +659,30 @@ module edrv32_disp (
         .symbol_o(tmds_sym_o[29:20])
     );
 
+    // Parallel copies of the existing regional reset, with identical D and release edge.
+    wire [14:0] rst_mem_ctrl_n_units_w;
+    genvar rst_mem_ctrl_n_w_unit;
+    generate
+        for (rst_mem_ctrl_n_w_unit = 0; rst_mem_ctrl_n_w_unit < 15;
+            rst_mem_ctrl_n_w_unit = rst_mem_ctrl_n_w_unit + 1) begin : g_rst_mem_ctrl_n_w_unit
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_n_i),
+                .rst_n_o(rst_mem_ctrl_n_units_w[rst_mem_ctrl_n_w_unit])
+            );
+        end
+    endgenerate
+    // Parallel copies of the existing regional reset, with identical D and release edge.
+    wire [17:0] rst_pix_scan_n_units_w;
+    genvar rst_pix_scan_n_w_unit;
+    generate
+        for (rst_pix_scan_n_w_unit = 0; rst_pix_scan_n_w_unit < 18;
+            rst_pix_scan_n_w_unit = rst_pix_scan_n_w_unit + 1) begin : g_rst_pix_scan_n_w_unit
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_pix_i),
+                .rst_n_i(rst_pix_n_i),
+                .rst_n_o(rst_pix_scan_n_units_w[rst_pix_scan_n_w_unit])
+            );
+        end
+    endgenerate
 endmodule

@@ -4,9 +4,9 @@
 //              Local software reset drains requested frames before clearing state.
 // Clock domain: clk_mem (clk_i).
 module edrv32_disp_regs (
-    // Clock and reset.
+    // Equal-edge reset copies for common, L0, L1 and performance register banks.
     input wire clk_i,
-    input wire rst_n_i,
+    input wire [3:0] rst_n_i,
 
     // Media APB slave; pstrb is ignored per spec 4.
     input wire [11:0] apb_paddr_i,
@@ -30,7 +30,7 @@ module edrv32_disp_regs (
     output wire [31:0] l1_pos_o,
     output wire [31:0] l1_size_o,
     output wire [7:0] l1_opa_o,
-    output reg soft_clear_o,
+    output reg soft_clear_o /* synthesis syn_preserve=1 */,
     input wire busy_i,
     input wire frame_start_i,
     input wire underflow_i,
@@ -173,8 +173,8 @@ module edrv32_disp_regs (
     // Delay the reset request alongside BUSY so an old IDLE cannot skip disable ACK.
     // The stop handshake makes IDLE stable before the registered clear pulse.
     // Capture the CDC gray-to-binary outputs before subtraction and stop logic.
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             soft_clear_o <= 1'b0;
             busy_r <= 1'b0;
             soft_pending_d_r <= 1'b0;
@@ -273,56 +273,221 @@ module edrv32_disp_regs (
     assign irq_clear_w = write_w && apb_paddr_r == 12'h010 ? apb_pwdata_r : 32'd0;
     assign irq_o = |(irq_en_r & irq_stat_r);
 
+    // SoC 4.3: setup captures group and local addresses together; no wait state.
+    reg [4:0] read_addr0_r /* synthesis syn_preserve=1 */;
+    reg read_select0_r;
+    reg [31:0] read_group0_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr0_r <= apb_paddr_i[4:0];
+            read_select0_r <= apb_paddr_i[11:5] == 7'd0;
+        end
+    end
     always @(*) begin
-        apb_prdata_o = 32'd0;
-        case (apb_paddr_r)
-            12'h000: apb_prdata_o = 32'h0005_0002;
-            12'h004: apb_prdata_o = {31'd0, enable_r};
-            12'h008: apb_prdata_o = {29'd0, irq_stat_r[1], !busy_r, busy_r};
-            12'h00c: apb_prdata_o = irq_en_r;
-            12'h010: apb_prdata_o = irq_stat_r;
-            12'h014: apb_prdata_o = {30'd0, err_code_r};
-            12'h02c: apb_prdata_o = frame_cnt_r;
-            12'h040: apb_prdata_o = scan_cnt_o;
-            12'h044: apb_prdata_o = count_delta(perf1_r, perf1_base_r, perf1_less_r, perf1_equal_r);
-            12'h048: apb_prdata_o = count_delta(perf2_r, perf2_base_r, perf2_less_r, perf2_equal_r);
-            12'h04c: apb_prdata_o = perf3_r;
-            12'h050: apb_prdata_o = perf4_r;
-            12'h054: apb_prdata_o = count_delta(perf5_r, perf5_base_r, perf5_less_r, perf5_equal_r);
-            12'h058: apb_prdata_o = count_delta(perf6_r, perf6_base_r, perf6_less_r, perf6_equal_r);
-            12'h100: apb_prdata_o = next_base_r;
-            12'h104: apb_prdata_o = stride_r;
-            12'h108: apb_prdata_o = cur_base_r;
-            12'h10c: apb_prdata_o = rel_base_r;
-            12'h110: apb_prdata_o = frame_cnt_r;
-            12'h114: apb_prdata_o = l0_scroll_r;
-            12'h118: apb_prdata_o = {30'd0, layer_ctrl_r};
-            12'h120: apb_prdata_o = l1_next_base_r;
-            12'h124: apb_prdata_o = l1_stride_r;
-            12'h128: apb_prdata_o = l1_pos_r;
-            12'h12c: apb_prdata_o = l1_size_r;
-            12'h130: apb_prdata_o = {24'd0, l1_opa_r};
-            12'h134: apb_prdata_o = l1_cur_base_r;
-            12'h138: apb_prdata_o = l1_rel_base_r;
+        read_group0_w = 32'd0;
+        case (read_addr0_r)
+            5'h00: read_group0_w = 32'h0005_0002;
+            5'h04: read_group0_w = {31'd0, enable_r};
+            5'h08: read_group0_w = {29'd0, irq_stat_r[1], !busy_r, busy_r};
+            5'h0c: read_group0_w = irq_en_r;
+            5'h10: read_group0_w = irq_stat_r;
+            5'h14: read_group0_w = {30'd0, err_code_r};
             default: begin end
         endcase
     end
+    reg [4:0] read_addr1_r /* synthesis syn_preserve=1 */;
+    reg read_select1_r;
+    reg [31:0] read_group1_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr1_r <= apb_paddr_i[4:0];
+            read_select1_r <= apb_paddr_i[11:5] == 7'd1;
+        end
+    end
+    always @(*) begin
+        read_group1_w = 32'd0;
+        case (read_addr1_r)
+            5'h0c: read_group1_w = frame_cnt_r;
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr2_r /* synthesis syn_preserve=1 */;
+    reg read_select2_r;
+    reg [31:0] read_group2_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr2_r <= apb_paddr_i[4:0];
+            read_select2_r <= apb_paddr_i[11:5] == 7'd2;
+        end
+    end
+    always @(*) begin
+        read_group2_w = 32'd0;
+        case (read_addr2_r)
+            5'h00: read_group2_w = scan_cnt_o;
+            5'h04: read_group2_w = count_delta(perf1_r, perf1_base_r, perf1_less_r, perf1_equal_r);
+            5'h08: read_group2_w = count_delta(perf2_r, perf2_base_r, perf2_less_r, perf2_equal_r);
+            5'h0c: read_group2_w = perf3_r;
+            5'h10: read_group2_w = perf4_r;
+            5'h14: read_group2_w = count_delta(perf5_r, perf5_base_r, perf5_less_r, perf5_equal_r);
+            5'h18: read_group2_w = count_delta(perf6_r, perf6_base_r, perf6_less_r, perf6_equal_r);
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr3_r /* synthesis syn_preserve=1 */;
+    reg read_select3_r;
+    reg [31:0] read_group3_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr3_r <= apb_paddr_i[4:0];
+            read_select3_r <= apb_paddr_i[11:5] == 7'd8;
+        end
+    end
+    always @(*) begin
+        read_group3_w = 32'd0;
+        case (read_addr3_r)
+            5'h00: read_group3_w = next_base_r;
+            5'h04: read_group3_w = stride_r;
+            5'h08: read_group3_w = cur_base_r;
+            5'h0c: read_group3_w = rel_base_r;
+            5'h10: read_group3_w = frame_cnt_r;
+            5'h14: read_group3_w = l0_scroll_r;
+            5'h18: read_group3_w = {30'd0, layer_ctrl_r};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr4_r /* synthesis syn_preserve=1 */;
+    reg read_select4_r;
+    reg [31:0] read_group4_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr4_r <= apb_paddr_i[4:0];
+            read_select4_r <= apb_paddr_i[11:5] == 7'd9;
+        end
+    end
+    always @(*) begin
+        read_group4_w = 32'd0;
+        case (read_addr4_r)
+            5'h00: read_group4_w = l1_next_base_r;
+            5'h04: read_group4_w = l1_stride_r;
+            5'h08: read_group4_w = l1_pos_r;
+            5'h0c: read_group4_w = l1_size_r;
+            5'h10: read_group4_w = {24'd0, l1_opa_r};
+            5'h14: read_group4_w = l1_cur_base_r;
+            5'h18: read_group4_w = l1_rel_base_r;
+            default: begin end
+        endcase
+    end
+    always @(*) begin
+        apb_prdata_o = 32'd0;
+        apb_prdata_o = apb_prdata_o | (read_group0_w & {32{read_select0_r}});
+        apb_prdata_o = apb_prdata_o | (read_group1_w & {32{read_select1_r}});
+        apb_prdata_o = apb_prdata_o | (read_group2_w & {32{read_select2_r}});
+        apb_prdata_o = apb_prdata_o | (read_group3_w & {32{read_select3_r}});
+        apb_prdata_o = apb_prdata_o | (read_group4_w & {32{read_select4_r}});
+    end
 
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             enable_r <= 1'b0;
             soft_pending_r <= 1'b0;
             irq_en_r <= 32'd0;
             irq_stat_r <= 32'd0;
             err_code_r <= 2'd0;
+            frame_cnt_r <= 32'd0;
+        end else begin
+            if (clear_local_r[0]) begin
+                enable_r <= 1'b0;
+                soft_pending_r <= 1'b0;
+                irq_en_r <= 32'd0;
+                irq_stat_r <= 32'd0;
+                err_code_r <= 2'd0;
+                frame_cnt_r <= 32'd0;
+            end else begin
+                if (ctrl_write_w) begin
+                    enable_r <= apb_pwdata_r[0] && !apb_pwdata_r[2] && !apb_pwdata_r[3];
+                    if (apb_pwdata_r[3]) begin
+                        soft_pending_r <= 1'b1;
+                    end
+                end
+                if (soft_pending_r) begin
+                    enable_r <= 1'b0;
+                end
+                if (write_w && apb_paddr_r == 12'h00c) begin
+                    irq_en_r <= apb_pwdata_r & IRQ_MASK;
+                end
+                irq_stat_r <= (irq_stat_r & ~irq_clear_w) | irq_set_w;
+                if (irq_clear_w[1]) begin
+                    err_code_r <= 2'd0;
+                end
+                if (underflow_i) begin
+                    err_code_r <= 2'd1;
+                end
+                if (underflow1_i) begin
+                    err_code_r <= 2'd3;
+                end
+                if (dma_err_i) begin
+                    err_code_r <= 2'd2;
+                end
+                if (frame_start_i) begin
+                    frame_cnt_r[15:0] <= frame_cnt_r[15:0] + 16'd1;
+                    if (frame_cnt_r[15:0] == 16'hffff) begin
+                        frame_cnt_r[31:16] <= frame_cnt_r[31:16] + 16'd1;
+                    end
+                end
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             next_base_r <= 32'd0;
             stride_r <= 32'h0000_0a00;
             cur_base_r <= 32'd0;
             rel_base_r <= 32'd0;
-            frame_cnt_r <= 32'd0;
             l0_scroll_r <= 32'd0;
             layer_ctrl_r <= 2'd1;
             cur_layer_ctrl_r <= 2'd0;
+        end else begin
+            if (clear_local_r[1]) begin
+                next_base_r <= 32'd0;
+                stride_r <= 32'h0000_0a00;
+                cur_base_r <= 32'd0;
+                rel_base_r <= 32'd0;
+                l0_scroll_r <= 32'd0;
+                layer_ctrl_r <= 2'd1;
+                cur_layer_ctrl_r <= 2'd0;
+            end else begin
+                if (write_w && apb_paddr_r == 12'h100) begin
+                    next_base_r <= {apb_pwdata_r[31:12], 12'd0};
+                end
+                if (write_w && apb_paddr_r == 12'h104) begin
+                    stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
+                end
+                if (write_w) begin
+                    case (apb_paddr_r)
+                        12'h114: begin
+                            l0_scroll_r <= apb_pwdata_r & 32'h0fff_7fff;
+                        end
+                        12'h118: begin
+                            layer_ctrl_r <= apb_pwdata_r[1:0];
+                        end
+                        default: begin end
+                    endcase
+                end
+                if (frame_start_i) begin
+                    cur_layer_ctrl_r <= layer_ctrl_r;
+                    if (layer_ctrl_r[0]) begin
+                        cur_base_r <= next_base_r;
+                    end
+                end
+                if (switch_w) begin
+                    rel_base_r <= cur_base_r;
+                end
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[2]) begin
+        if (!rst_n_i[2]) begin
             l1_next_base_r <= 32'd0;
             l1_stride_r <= 32'h0000_1400;
             l1_pos_r <= 32'd0;
@@ -330,6 +495,49 @@ module edrv32_disp_regs (
             l1_opa_r <= 8'd255;
             l1_cur_base_r <= 32'd0;
             l1_rel_base_r <= 32'd0;
+        end else begin
+            if (clear_local_r[2]) begin
+                l1_next_base_r <= 32'd0;
+                l1_stride_r <= 32'h0000_1400;
+                l1_pos_r <= 32'd0;
+                l1_size_r <= 32'h02d0_0500;
+                l1_opa_r <= 8'd255;
+                l1_cur_base_r <= 32'd0;
+                l1_rel_base_r <= 32'd0;
+            end else begin
+                if (write_w) begin
+                    case (apb_paddr_r)
+                        12'h120: begin
+                            l1_next_base_r <= {apb_pwdata_r[31:12], 12'd0};
+                        end
+                        12'h124: begin
+                            l1_stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
+                        end
+                        12'h128: begin
+                            l1_pos_r <= apb_pwdata_r & 32'h03ff_07f8;
+                        end
+                        12'h12c: begin
+                            l1_size_r <= apb_pwdata_r & 32'h03ff_07f8;
+                        end
+                        12'h130: begin
+                            l1_opa_r <= apb_pwdata_r[7:0];
+                        end
+                        default: begin end
+                    endcase
+                end
+                if (frame_start_i) begin
+                    if (layer_ctrl_r[1]) begin
+                        l1_cur_base_r <= l1_next_base_r;
+                    end
+                end
+                if (switch1_w) begin
+                    l1_rel_base_r <= l1_cur_base_r;
+                end
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[3]) begin
+        if (!rst_n_i[3]) begin
             perf0_base_r <= 32'd0;
             perf1_base_r <= 32'd0;
             perf2_base_r <= 32'd0;
@@ -337,109 +545,37 @@ module edrv32_disp_regs (
             perf6_base_r <= 32'd0;
             perf3_r <= 32'd0;
             perf4_r <= 32'd0;
-        end else if (soft_clear_o) begin
-            enable_r <= 1'b0;
-            soft_pending_r <= 1'b0;
-            irq_en_r <= 32'd0;
-            irq_stat_r <= 32'd0;
-            err_code_r <= 2'd0;
-            next_base_r <= 32'd0;
-            stride_r <= 32'h0000_0a00;
-            cur_base_r <= 32'd0;
-            rel_base_r <= 32'd0;
-            frame_cnt_r <= 32'd0;
-            l0_scroll_r <= 32'd0;
-            layer_ctrl_r <= 2'd1;
-            cur_layer_ctrl_r <= 2'd0;
-            l1_next_base_r <= 32'd0;
-            l1_stride_r <= 32'h0000_1400;
-            l1_pos_r <= 32'd0;
-            l1_size_r <= 32'h02d0_0500;
-            l1_opa_r <= 8'd255;
-            l1_cur_base_r <= 32'd0;
-            l1_rel_base_r <= 32'd0;
-            perf0_base_r <= perf0_r;
-            perf1_base_r <= perf1_r;
-            perf2_base_r <= perf2_r;
-            perf5_base_r <= perf5_r;
-            perf6_base_r <= perf6_r;
-            perf3_r <= 32'd0;
-            perf4_r <= 32'd0;
         end else begin
-            if (ctrl_write_w) begin
-                enable_r <= apb_pwdata_r[0] && !apb_pwdata_r[2] && !apb_pwdata_r[3];
-                if (apb_pwdata_r[3]) begin
-                    soft_pending_r <= 1'b1;
+            if (clear_local_r[3]) begin
+                perf0_base_r <= perf0_r;
+                perf1_base_r <= perf1_r;
+                perf2_base_r <= perf2_r;
+                perf5_base_r <= perf5_r;
+                perf6_base_r <= perf6_r;
+                perf3_r <= 32'd0;
+                perf4_r <= 32'd0;
+            end else begin
+                if (urgent_r) begin
+                    perf3_r[15:0] <= perf3_r[15:0] + 16'd1;
+                    if (perf3_r[15:0] == 16'hffff) begin
+                        perf3_r[31:16] <= perf3_r[31:16] + 16'd1;
+                    end
                 end
-            end
-            if (soft_pending_r) begin
-                enable_r <= 1'b0;
-            end
-            if (write_w && apb_paddr_r == 12'h00c) begin
-                irq_en_r <= apb_pwdata_r & IRQ_MASK;
-            end
-            irq_stat_r <= (irq_stat_r & ~irq_clear_w) | irq_set_w;
-            if (irq_clear_w[1]) begin
-                err_code_r <= 2'd0;
-            end
-            if (underflow_i) begin
-                err_code_r <= 2'd1;
-            end
-            if (underflow1_i) begin
-                err_code_r <= 2'd3;
-            end
-            if (dma_err_i) begin
-                err_code_r <= 2'd2;
-            end
-            if (write_w && apb_paddr_r == 12'h100) begin
-                next_base_r <= {apb_pwdata_r[31:12], 12'd0};
-            end
-            if (write_w && apb_paddr_r == 12'h104) begin
-                stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
-            end
-            if (write_w) begin
-                case (apb_paddr_r)
-                    12'h114: l0_scroll_r <= apb_pwdata_r & 32'h0fff_7fff;
-                    12'h118: layer_ctrl_r <= apb_pwdata_r[1:0];
-                    12'h120: l1_next_base_r <= {apb_pwdata_r[31:12], 12'd0};
-                    12'h124: l1_stride_r <= {16'd0, apb_pwdata_r[15:5], 5'd0};
-                    12'h128: l1_pos_r <= apb_pwdata_r & 32'h03ff_07f8;
-                    12'h12c: l1_size_r <= apb_pwdata_r & 32'h03ff_07f8;
-                    12'h130: l1_opa_r <= apb_pwdata_r[7:0];
-                    default: begin end
-                endcase
-            end
-            if (frame_start_i) begin
-                cur_layer_ctrl_r <= layer_ctrl_r;
-                if (layer_ctrl_r[0]) begin
-                    cur_base_r <= next_base_r;
-                end
-                if (layer_ctrl_r[1]) begin
-                    l1_cur_base_r <= l1_next_base_r;
-                end
-                frame_cnt_r[15:0] <= frame_cnt_r[15:0] + 16'd1;
-                if (frame_cnt_r[15:0] == 16'hffff) begin
-                    frame_cnt_r[31:16] <= frame_cnt_r[31:16] + 16'd1;
-                end
-            end
-            if (switch_w) begin
-                rel_base_r <= cur_base_r;
-            end
-            if (switch1_w) begin
-                l1_rel_base_r <= l1_cur_base_r;
-            end
-            if (urgent_r) begin
-                perf3_r[15:0] <= perf3_r[15:0] + 16'd1;
-                if (perf3_r[15:0] == 16'hffff) begin
-                    perf3_r[31:16] <= perf3_r[31:16] + 16'd1;
-                end
-            end
-            if (delayed_req_r) begin
-                perf4_r[15:0] <= perf4_r[15:0] + 16'd1;
-                if (perf4_r[15:0] == 16'hffff) begin
-                    perf4_r[31:16] <= perf4_r[31:16] + 16'd1;
+                if (delayed_req_r) begin
+                    perf4_r[15:0] <= perf4_r[15:0] + 16'd1;
+                    if (perf4_r[15:0] == 16'hffff) begin
+                        perf4_r[31:16] <= perf4_r[31:16] + 16'd1;
+                    end
                 end
             end
         end
+    end
+    reg [3:0] clear_local_r /* synthesis syn_preserve=1 */;
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0])
+            clear_local_r <= 4'd0;
+        else
+            clear_local_r <= {4{soft_pending_r && soft_pending_d_r && !busy_r &&
+                !soft_clear_o}};
     end
 endmodule
