@@ -1,0 +1,4 @@
+未找到当前pago_200/PG2L676开发板原理图，因此没有生成schematic_phy.png。
+已检查本地资料包G:/claude code/EdRV32-Competition-2026/docs/board/pago_200/3_Hardware：只找到FPGA管脚映射表、两份元件点位图及PCB结构DXF；没有PHY电路原理图。
+硬件手册PDF28/印刷26只有网口连接框图，已保存board_phy_block_diagram_pdf28.png；这不是原理图，不能确定RXDLY/TXDLY/PHYAD上下拉电阻、串联电阻或PCB时钟走线延迟。
+其他pango_50H目录有不同型号的原理图，本卡未用其替代PG2L676板。资料包原始标题同时出现100K MINI/PG2L100H与框图PG2L200H，未据此推测实物revision或电阻配置。

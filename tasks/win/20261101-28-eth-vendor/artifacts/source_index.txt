@@ -1,0 +1,86 @@
+demo_rtl\udp_2_11\source\ethernet_test.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\2_11_ethernet_test\2_11_ethernet_test\source\ethernet_test.v
+
+demo_rtl\udp_2_11\source\rgmii_interface.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\2_11_ethernet_test\2_11_ethernet_test\source\rgmii_interface.v
+
+demo_rtl\udp_2_11\ipcore\ref_clock\ref_clock.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\2_11_ethernet_test\2_11_ethernet_test\ipcore\ref_clock\ref_clock.v
+
+demo_rtl\udp_2_11\ipcore\ref_clock\ref_clock.idf
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\2_11_ethernet_test\2_11_ethernet_test\ipcore\ref_clock\ref_clock.idf
+
+demo_fdc\udp_2_11.fdc
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\2_11_ethernet_test\2_11_ethernet_test\ethernet_test.fdc
+
+demo_rtl\tri_4_13\source\ethernet_test.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\source\ethernet_test.v
+
+demo_rtl\tri_4_13\source\ethernet\mdio_ctrl.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\source\ethernet\mdio_ctrl.v
+
+demo_rtl\tri_4_13\source\ethernet\mdio_master_driver.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\source\ethernet\mdio_master_driver.v
+
+demo_rtl\tri_4_13\ipcore\pll_gen\pll_gen.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ipcore\pll_gen\pll_gen.v
+
+demo_rtl\tri_4_13\ipcore\pll_gen\pll_gen.idf
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ipcore\pll_gen\pll_gen.idf
+
+demo_rtl\tri_4_13\ipcore\ref_clock\ref_clock.v
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ipcore\ref_clock\ref_clock.v
+
+demo_rtl\tri_4_13\ipcore\ref_clock\ref_clock.idf
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ipcore\ref_clock\ref_clock.idf
+
+demo_fdc\tri_4_13.fdc
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ethernet_test.fdc
+
+rtl8211f_timing.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 67
+
+rtl8211f_txc_modes_pdf65.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 65
+
+rtl8211f_rxc_modes_pdf66.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 66
+
+rtl8211f_straps_pdf16.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 16
+
+rtl8211f_config_pdf23.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 23
+
+rtl8211f_config_pdf24.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 24
+
+rtl8211f_miicr_pdf55.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\Ethernet_PHY\C187932_以太网收发器_RTL8211F-CG_规格书_WJ14392.PDF; PDF page 55
+
+pg2l_iodelay_pll.png
+  Windows source: G:\Program\pango\PDS_2022.2-SP6.1\ip\module_ip\ipm2l_flex_pll\ipm2l_flex_pll_eval\ipm2l_pll\UG041001_PLL_IP.pdf; PDF page 19
+
+pg2l_pll_feedback_pdf20.png
+  Windows source: G:\Program\pango\PDS_2022.2-SP6.1\ip\module_ip\ipm2l_flex_pll\ipm2l_flex_pll_eval\ipm2l_pll\UG041001_PLL_IP.pdf; PDF page 20
+
+pg2l_pll_feedback_pdf45.png
+  Windows source: G:\Program\pango\PDS_2022.2-SP6.1\ip\module_ip\ipm2l_flex_pll\ipm2l_flex_pll_eval\ipm2l_pll\UG041001_PLL_IP.pdf; PDF page 45
+
+pg2l_io_overview_pdf12.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\4_IC_datasheet\FPGA\DS04001_Logos2系列FPGA器件数据手册.pdf; PDF page 12
+
+board_phy_block_diagram_pdf28.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程1 盘古100K MINI 硬件指导手册-盘古676系列.pdf; PDF page 28
+
+demo_mdio_guide_pdf157.png
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程4 《国产FPGA权威开发指南》教材配套实验指导手册-盘古676系列.pdf; PDF page 157
+
+demo_docs\hardware_network.txt
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程1 盘古100K MINI 硬件指导手册-盘古676系列.pdf; PDF pages [28, 29]
+
+demo_docs\udp_demo.txt
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程2 盘古100K MINI 通用实验指导手册-盘古676系列.pdf; PDF pages [158, 159, 160, 161, 162, 163, 164, 165]
+
+demo_docs\tri_mdio.txt
+  Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程4 《国产FPGA权威开发指南》教材配套实验指导手册-盘古676系列.pdf; PDF pages [156, 157, 158]

@@ -1,0 +1,439 @@
+=== PDF page 67; printed page 60 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+60 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+Table 60. RGMII Timing Parameters 
+Symbol 
+Description 
+Min 
+Typical 
+Max 
+Units 
+Tcyc * 
+Clock Cycle Duration (1000Mbps) 
+7.2 
+8 
+8.8 
+ns 
+ 
+Clock Cycle Duration (100Mbps) 
+36 
+40 
+44 
+ns 
+ 
+Clock Cycle Duration (10Mbps) 
+360 
+400 
+440 
+ns 
+Duty_G 
+Duty Cycle for 1000 
+45 
+50 
+55 
+% 
+Duty_T 
+Duty Cycle for 10/100 
+40 
+50 
+60 
+% 
+tR 
+TXC/RXC Rise Time (20%~80%) 
+- 
+- 
+0.75 
+ns 
+tF 
+TXC/RXC Fall Time (20%~80%) 
+- 
+- 
+0.75 
+ns 
+TsetupT 
+Data to Clock Output Setup Time at transmitter 
+(with delay integrated at transmitter) 
+1.2 
+2 
+- 
+ns 
+TholdT 
+Clock to Data Output Hold Time at transmitter 
+(with delay integrated at transmitter) 
+1.2 
+2 
+- 
+ns 
+TsetupR 
+Data to Clock Input Setup Time at receiver  
+(with delay integrated at transmitter) 
+1.0 
+2 
+- 
+ns 
+TholdR 
+Clock to Data Input Hold Time at receiver  
+(with delay integrated at transmitter) 
+1.0 
+2 
+- 
+ns 
+TskewT ** 
+Data to Clock Output Skew Time at transmitter 
+(without delay integrated) 
+-0.5 
+0 
+0.5 
+ns 
+TskewR ** 
+Data to Clock Input Skew Time at receiver 
+(with PCB delay integrated) 
+This implies that PC board design will require 
+clocks to be routed such that an additional trace 
+delay of greater than 1.5ns and less than 2.0ns 
+will be added to the associated clock signal. 
+1 
+1.8 
+2.6 
+ns 
+*Note: Duty cycle may be stretched/shrunk during speed changes or while transitioning to a received packet's clock domain 
+as long as minimum duty cycle is not violated and stretching occurs for no more than three Tcyc of the lowest speed 
+transitioned between. 
+**Note: For 10/100Mbps, the max value of Skew Time is unspecified. 
+ 
+
+
+=== PDF page 65; printed page 58 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+58 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+10.6.2. RGMII Timing Modes 
+Timing for this interface will be such that the clock and data are generated simultaneously by the source of 
+the signals and therefore skew between the clock and data is critical to proper operation. 
+Figure 14 shows the effect of adding an additional delay to TXC via the PC board (upper side) or by 
+transmitter internally (lower side) when in RGMII mode. 
+ 
+ 
+ 
+Figure 14. RGMII Timing Modes (For TXC) 
+ 
+
+
+=== PDF page 66; printed page 59 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+59 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+Figure 15 shows the effect of adding an additional delay to RXC via the PC board (upper side) or by 
+transmitter internally (lower side) when in RGMII mode. 
+ 
+ 
+ 
+Figure 15. RGMII Timing Modes (For RXC) 
+
+
+=== PDF page 16; printed page 9 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+9 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+6.5. Reset 
+Table 5.   Reset 
+Pin No. 
+Pin Name 
+Type 
+Description 
+12 
+PHYRSTB 
+I/PU 
+Hardware Reset. Active low. 
+For a complete PHY reset, this pin must be asserted low for at least 10ms. 
+All registers will be cleared after a hardware reset. 
+Note: See section 7.17, page 30 for more details. 
+ 
+6.6. Mode Selection (Hardware Configuration) 
+Table 6.   Mode Selection (Hardware Configuration) 
+Pin No. 
+Pin Name 
+Type 
+Description 
+22 
+PHYAD0 
+O/LI/PU 
+27 
+PHYAD1 
+O/LI/PD 
+26 
+PHYAD2 
+O/LI/PD 
+PHYAD[2:0]:  
+PHY Address Configuration. 
+23 
+PLLOFF 
+O/LI/PD ALDPS Mode PLL Off Configuration. 
+Pull up to stop PLL when entering ALDPS mode. 
+Note:  
+Whole system power consumption in typical ALDPS mode is 43.8mW for the 
+RTL8211F(I), and 90mW for the RTL8211FD(I). 
+Whole system power consumption in ALDPS low power mode (with PLL turned 
+off) is 13.6mW for the RTL8211F(I), and 26.8 mW for the RTL8211FD(I). 
+All with 1.8V RGMII. 
+24 
+TXDLY 
+O/LI/PD RGMII Transmit Clock Timing Control. 
+Pull up to add 2ns delay to TXC for TXD latching 
+25 
+RXDLY 
+O/LI/PU RGMII Receiver Clock Timing Control. 
+Pull up to add 2ns delay to RXC for RXD latching 
+32 
+CFG_EXT 
+ O/LI/PD I/O Pad External Power Source Mode Configuration. 
+Pull up to use the external power source for the I/O pad. 
+Pull down to use the integrated LDO to transform the desired voltage for the I/O 
+pad. 
+
+
+=== PDF page 23; printed page 16 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+16 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+7.8. Hardware Configuration 
+The I/O pad voltage, interface mode, and PHY address can be set by the CONFIG pins. The respective 
+value mapping of CONFIG with the configurable vector is listed in Table 10. To set the CONFIG pins, an 
+external pull-high or pull-low via resistor is required. 
+Table 10. CONFIG Pins vs. Configuration Register 
+CONFIG Pin 
+Configuration 
+RXD3 
+PHYAD[0] 
+RXC 
+PHYAD[1] 
+RXCTL 
+PHYAD[2] 
+RXD2 
+PLLOFF 
+RXD1 
+TXDLY 
+RXD0 
+RXDLY 
+LED0 
+CFG_EXT 
+LED1 
+CFG_LDO[0] 
+LED2 
+CFG_LDO[1] 
+ 
+Table 11. Configuration Register Definitions 
+Configuration 
+Description 
+PHYAD[2:0] 
+PHY Address. 
+PHYAD sets the PHY address for the device. The RTL8211F(I)/RTL8211FD(I)  supports PHY 
+addresses from 0x01 to 0x07.  
+Note 1: An MDIO command with PHY address=0 is a broadcast from the MAC; each PHY 
+device should respond. This function can be disabled by setting Page 0xa43, Reg24, bit[13]=0 
+(See section 8.3.16, page 44). 
+Note 2: The RTL8211F(I)/RTL8211FD(I)  with PHYAD[2:0]=000 can automatically 
+remember the first non-zero PHY address. This function can be enabled by setting Page 0xa43, 
+Reg24, bit[6] = 1 (See section 8.3.16, page 44). 
+PLLOFF 
+ALDPS Mode PLL Off Configuration. 
+1: Stop PLL when entering ALDPS mode (via 4.7k-ohm to DVDD_RG) 
+0: PLL continue toggling when entering ALDPS mode (via 4.7k-ohm to GND) 
+TXDLY 
+RGMII Transmit Clock Timing Control. 
+1: Add 2ns delay to TXC for TXD latching (via 4.7k-ohm to DVDD_RG) 
+0: No delay (via 4.7k-ohm to GND) 
+RXDLY 
+RGMII Receive Clock Timing Control. 
+1: Add 2ns delay to RXC for RXD latching (via 4.7k-ohm to DVDD_RG) 
+0: No delay (via 4.7k-ohm to GND) 
+CFG_EXT 
+RGMII I/O Pad External Power Source Mode Configuration. 
+1: Use the external power source for the RGMII I/O pad (via 4.7k-ohm to 3.3V) 
+0: Use the integrated LDO to transform the desired voltage for the RGMII I/O pad (via 
+4.7k-ohm to GND) 
+
+
+=== PDF page 24; printed page 17 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+17 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+Configuration 
+Description 
+CFG_LDO[1:0] 
+LDO Output Voltage Selection for the RGMII I/O pad/ 
+External Power Source Voltage Selection for the RGMII I/O pad. 
+When pulling down CFG_EXT pin, CFG_LDO[1:0] represent LDO output voltage setting for 
+the RGMII I/O pad: (via 4.7k-ohm to GND) 
+00: Reserved. 
+01: 2.5V 
+10: 1.8V 
+11: 1.5V 
+When pulling up CFG_EXT pin, CFG_LDO[1:0] stand for external power voltage selection for 
+the RGMII I/O pad: (via 4.7k-ohm to 3.3V) 
+00: 3.3V 
+01: 2.5V 
+10: 1.8V 
+11: 1.5V 
+ 
+7.9. LED and LDO Configuration 
+In order to reduce the pin count on the RTL8211F(I)/RTL8211FD(I), the LED pins are duplexed with the 
+CFG_EXT and CFG_LDO[1:0] pins. As the Hardware Configuration shares the LED output pins, the 
+external combinations required for strapping and LED usage must be considered in order to avoid 
+contention. Specifically, when the LED outputs are used to drive LEDs directly, the active state of each 
+output driver is dependent on the logic level sampled by the corresponding CFG_EXT/CFG_LDO[1:0] 
+inputs upon power-on/reset.  
+For example, as Figure 5 (left-side) shows, if a given CFG_EXT/CFG_LDO[1:0] inputs are resistively 
+pulled high then the corresponding LED outputs will be configured as an active low driver. On the right 
+side, we can see that if a given CFG_EXT/CFG_LDO[1:0] inputs are resistively pulled low then the 
+corresponding output will be configured as an active high driver. The Hardware Configuration pins should 
+not be connected to GND or VCC directly, but must be pulled high or low through a resistor (e.g., 4.7KΩ). 
+If no LED indications are needed, the components of the LED path (LED+510Ω) can be removed. 
+ 
+CFG_LDO[1:0] = Logical 1 
+CFG_LDO[1:0] = Logical 0 
+CFG_EXT = Logical 1 
+CFG_EXT = Logical 0 
+LED Indication=Active low 
+LED Indication=Active High 
+Figure 5.   LED and LDO Configuration 
+
+
+=== PDF page 55; printed page 48 ===
+RTL8211F(I)-CG/RTL8211FD(I)-CG 
+Datasheet 
+Integrated 10/100/1000M Ethernet Precision Transceiver 
+48 
+Track ID: JATR-8275-15   Rev. 1.4
+ 
+ 
+8.3.23. EEELCR (EEE LED Control Register, Page 0xd04, Address 0x11) 
+Table 44. EEELCR (EEE LED Control Register, Page 0xd04, Address 0x11) 
+Bit 
+Name 
+Type 
+Default
+Description 
+17.15:4 
+RSVD 
+RO 
+0 
+Reserved. 
+17.3 
+LED2 EEE Enable 
+RW 
+1 
+1: Enable EEE LED indication of LED2. 
+17.2 
+LED1 EEE Enable 
+RW 
+1 
+1: Enable EEE LED indication of LED1. 
+17.1 
+LED0 EEE Enable 
+RW 
+1 
+1: Enable EEE LED indication of LED0. 
+17.0 
+RSVD 
+RO 
+0 
+Reserved. 
+ 
+8.3.24. MIICR (MII Control Register, Page 0xd08, Address 0x15) 
+Table 45. MIICR (MII Control Register, Page 0xd08, Address 0x15) 
+Bit 
+Name 
+Type 
+Default
+Description 
+21.15:7 
+RSVD 
+RO 
+0 
+Reserved. 
+21.6 
+RGMII In-band CRS 
+Enable 
+RW 
+0 
+1: Enable in-band CRS Status in RGMII Rx flow. 
+21.5:0 
+RSVD 
+RO 
+0 
+Reserved. 
+ 
+8.3.25. INTBCR (INTB Pin Control Register, Page 0xd40, Address 0x16) 
+Table 46. INTBCR (INTB Pin Control Register, Page 0xd40, Address 0x16) 
+Bit 
+Name 
+Type 
+Default
+Description 
+22.15:6 
+RSVD 
+RO 
+0 
+Reserved. 
+22.5 
+INTB/PMEB Selection 
+RW 
+0 
+Pin 31 of the RTL8211F(D)(I) functions as: 
+1: PMEB 
+0: INTB 
+22.4:0 
+RSVD 
+RO 
+0 
+Reserved. 
+ 
+8.3.26. PC1R (PCS Control 1 Register, MMD Device 3, Address 0x00) 
+Table 47. PC1R (PCS Control 1 Register, MMD Device 3, Address 0x00) 
+Bit 
+Name 
+Type 
+Default 
+Description 
+3.0.15:11 RSVD 
+RW 
+0 
+Reserved. 
+3.0.10 
+Clock Stop Enable 
+RW 
+0 
+1: PHY stops RXC when receiving LPI 
+0: RXC not stoppable 
+3.0.9:0 
+RSVD 
+RW 
+0 
+Reserved. 
+ 

@@ -1,0 +1,191 @@
+=== PDF page 19 ===
+                             第2 章  IP 使用指南 
+19/52 
+ UG041001 
+www.pangomicro.com 
+2.3.4 参数描述 
+ 1. Basic Configurations 页配置说明 
+表 2-4 Basic Configurations 页面配置参数说明 
+选项名/参数名 
+参数说明 
+IP 配置界面
+默认值 
+PLL Mode Configurations 
+Mode Select 
+选择PLL： 
+GPLL：选择GPLL；PPLL：选择PPLL。 
+GPLL 
+Public Configurations 
+Enable Port rst 
+PLL 复位接口使能： 
+勾选时，使能rst 接口； 
+不勾选时，禁用rst 接口。 
+不勾选 
+Enable 
+clkin 
+Dynamic 
+Select 
+PLL 参考时钟输入动态切换使能： 
+勾选时，使能clkin2、clkin_sel 接口； 
+不勾选时，禁用clkin2、clkin_sel 接口。 
+不勾选 
+Enable Dynamic Phase Bus 
+(GPLL Only) 
+相位动态调整接口使能： 
+勾选时，使能dps_clk、dps_en、dps_dir、dps_done
+接口； 
+不勾选时，禁用dps_clk、dps_en、dps_dir、dps_done
+接口。 
+注：该端口需要在任意通道打开Enable clkout DPS 后
+有效，否则不可配置。 
+不勾选 
+Enable APB Bus 
+APB 接口数据总线使能： 
+勾选时，使能apb_clk、apb_rst_n、apb_addr[4:0]、
+apb_sel、apb_en、apb_write、apb_wdata[15:0]、
+apb_ready、apb_rdata[15:0]接口； 
+不勾选时，禁用apb_clk、apb_rst_n、apb_addr[4:0]、
+apb_sel、apb_en、apb_write、apb_wdata[15:0]、
+apb_ready、apb_rdata[15:0]接口。 
+不勾选 
+Enable Port pll_pwd 
+Power down 模式： 
+勾选时，使能pll_pwd 接口； 
+不勾选时，禁用pll_pwd 接口。 
+不勾选 
+Feedback Clock Mode 
+选择反馈模式： 
+Internal Feedback：内部反馈模式，同时禁用clkfb 接
+口； 
+External Feedback：外部反馈模式，同时使能clkfb 接
+口。 
+Internal 
+Feedback 
+
+
+=== PDF page 20 ===
+                             第2 章  IP 使用指南 
+20/52 
+ UG041001 
+www.pangomicro.com 
+选项名/参数名 
+参数说明 
+IP 配置界面
+默认值 
+Feedback from 
+选择反馈源： 
+CLKOUTF：反馈源为clkoutf； 
+CLKOUT0：反馈源为clkout0； 
+CLKOUT1：反馈源为clkout1； 
+CLKOUT2：反馈源为clkout2； 
+CLKOUT3：反馈源为clkout3； 
+CLKOUT4：反馈源为clkout4； 
+CLKOUT5：反馈源为clkout5 (GPLL Only)； 
+CLKOUT6：反馈源为clkout6 (GPLL Only)。 
+CLKOUTF 
+Input 
+Clock 
+clkin 
+Frequency 
+PLL 参考时钟clkin1/clkin2 频率配置； 
+配置范围：GPLL Mode：10MHz~800MHz； 
+PPLL Mode：19MHz~800MHz。 
+50.000000 
+SSC Mode 
+(GPLL Only) 
+选择SSC 模式： 
+DISABLE：关闭SSC 功能 
+DOWN_LOW：开启DOWN_LOW 工作模式； 
+DOWN_HIGH：开启DOWN_HIGH 工作模式； 
+CENTER_LOW：开启CENTER_LOW 工作模式； 
+CENTER_HIGH：开启CENTER_HIGH 工作模式。 
+当SSC_Mode 配置参数不是‘DISABLE’时，clkout2 和
+clkout3 将强制关闭。 
+DISABLE 
+SSC Frequency 
+(GPLL Only) 
+配置SSC 调制频率； 
+调制范围：25KHz~ 250KHz 
+25 
+Input Clock clkin1 Source 
+Option 
+(Titan2 Device Only) 
+PLL 参考时钟clkin1 时钟驱动配置： 
+Global Buffer:参考时钟clkin1 由CLKBUFG 驱动； 
+Single ended clk Pin: 参考时钟clkin1 由INBUF 驱动； 
+Differential ended clk Pin: 参考时钟clkin1 由
+INBUFDS 驱动； 
+No Buffer: 参考时钟clkin1 未增加时钟驱动。 
+No Buffer 
+Input Clock clkin2 Source 
+Option 
+(Titan2 Device Only) 
+PLL 参考时钟clkin2 时钟驱动配置： 
+Global Buffer:参考时钟clkin2 由CLKBUFG 驱动； 
+Single ended clk Pin: 参考时钟clkin2 由INBUF 驱动； 
+Differential ended clk Pin: 参考时钟clkin2 由
+INBUFDS 驱动； 
+No Buffer: 参考时钟clkin2 未增加时钟驱动。 
+No Buffer 
+Clockoutphy Configurations (PPLL 专有时钟，用于DDRPHY 专用，不可单独使用) 
+Enable clkoutphy 
+clkouthy 使能配置： 
+勾选时，使能clkoutphy，并显示Clockoutphy 
+Configurations 对应选项； 
+不勾选时，禁用clkoutphy，并隐藏Clockoutphy 
+Configurations 对应选项； 
+不勾选 
+
+
+=== PDF page 45 ===
+                             第2 章  IP 使用指南 
+45/52 
+ UG041001 
+www.pangomicro.com 
+表 2-9 Feedback from 对照表 
+Feedback from 
+对应ODIV 
+CLKOUTF 
+FDIV 
+CLKOUT0 
+ODIV0 
+CLKOUT1 
+ODIV1 
+CLKOUT2 
+ODIV2 
+CLKOUT3 
+ODIV3 
+CLKOUT4 
+ODIV4 
+CLKOUT5 
+ODIV5 
+CLKOUT6 
+ODIV6 
+ 
+(3) 计算示例 
+图 2-11 所示为典型应用场景下的频率计算示例。该场景中配置clkoutf 作为PLL
+内部反馈，并输出clkout0 和clkoutf 两路时钟，相关频率计算公式请参见图中标注。 
+IDIV
+MDIV
+PFD
+CP
+LPF
+VCO
+clkin
+ODIV0
+FDIV
+clkoutf
+clkout0
+pfd_freq= clkin/ IDIV
+vco_freq= clkin* FDIV* MDIV/ IDIV
+clkout0= clkin* FDIV* MDIV/ IDIV/ ODIV0
+clkoutf= clkin* FDIV* MDIV/ IDIV/ FDIV
+fb
+ 
+图 2-11 PLL IP 典型应用频率计算示例 
+ 
+ 2. 占空比计算 
+占空比计算公式如下： 
+Duty Cycle=(50%/ODIV)*STATIC_DUTY 
+式中，ODIV 为：ODIV(0~6)，ODIVPHY，FDIV； 
+STATIC_DUT 为：STATIC_DUTY(0~6)，STATIC_DUTYf，STATIC_DUTYphy。 

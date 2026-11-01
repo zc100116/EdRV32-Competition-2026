@@ -1,0 +1,54 @@
+=== udp_ref_clock ===
+Source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\2_11_ethernet_test\2_11_ethernet_test\ipcore\ref_clock\ref_clock.idf
+CLKOUT0_BUFFER_OPTION_advancedPage=NO BUFFER
+INTERNAL_FB=CLKOUTF
+STATIC_RATIOI=5
+EXTERNAL_FB=DISABLE
+STATIC_RATIOM=2
+CLKOUT0_REQ_DUTY_basicPage=50.000000
+CLKOUT0_REQ_PHASE_basicPage=30.000000
+STATIC_PHASE0=5
+CLKIN_FREQ=125.00000000
+CLKIN_FREQ_basicPage=125.00000000
+STATIC_CPHASE0=0
+CLKIN1_SOURCE_basicPage=No Buffer
+RST_INNER_EN=false
+CLKOUT0_REQ_FREQ_basicPage=125.00000000
+FB_MODE=false
+STATIC_RATIO0=8.0
+=== tri_pll_gen ===
+Source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ipcore\pll_gen\pll_gen.idf
+STATIC_PHASE0=0
+RST_INNER_EN=false
+EXTERNAL_FB=DISABLE
+STATIC_RATIO0=16.875
+CLKIN1_SOURCE_basicPage=No Buffer
+STATIC_RATIOM=2
+CLKOUT0_BUFFER_OPTION_advancedPage=NO BUFFER
+INTERNAL_FB=CLKOUTF
+CLKOUT0_REQ_PHASE_basicPage=0.000000
+CLKOUT0_REQ_FREQ_basicPage=50.00000000
+STATIC_RATIOI=1
+CLKOUT0_REQ_DUTY_basicPage=50.000000
+STATIC_CPHASE0=0
+CLKIN_FREQ=27.00000000
+CLKIN_FREQ_basicPage=27.00000000
+FB_MODE=false
+=== tri_ref_clock_unused ===
+Source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\2_Demo\4_13_tri_eth_test\4_13_tri_eth_test\ethernet_test\ipcore\ref_clock\ref_clock.idf
+STATIC_CPHASE0=6
+CLKOUT0_REQ_FREQ_basicPage=125.00000000
+INTERNAL_FB=CLKOUTF
+STATIC_RATIOM=2
+CLKOUT0_BUFFER_OPTION_advancedPage=NO BUFFER
+CLKIN1_SOURCE_basicPage=No Buffer
+CLKIN_FREQ_basicPage=125.00000000
+EXTERNAL_FB=DISABLE
+RST_INNER_EN=false
+FB_MODE=false
+STATIC_RATIO0=8.0
+CLKOUT0_REQ_DUTY_basicPage=50.000000
+STATIC_RATIOI=5
+STATIC_PHASE0=0
+CLKIN_FREQ=125.00000000
+CLKOUT0_REQ_PHASE_basicPage=270.000000

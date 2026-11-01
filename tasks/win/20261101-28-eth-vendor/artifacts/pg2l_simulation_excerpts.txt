@@ -1,0 +1,33 @@
+Windows source: G:\Program\pango\PDS_2022.2-SP6.1\arch\vendor\pango\verilog\simulation\GTP_IODELAY_E2.v
+Supplementary simulation model excerpts, not device timing guarantee.
+23: `timescale 1 ps / 1 ps
+28: parameter [7:0] DELAY_STEP_VALUE = 8'h00          // 8'h00 ~ 8'hF7
+34: input [7:0] DELAY_STEP                       // 8'h00 ~ 8'hF7 
+73:     if(DELAY_STEP_VALUE > 8'hF7 || DELAY_STEP_VALUE < 8'h00)    //  248 cases 
+75:       $display("Error: Illegal setting DELAY_STEP_VALUE of %b",DELAY_STEP_VALUE);
+269: //assign gray_code = (DELAY_STEP_SEL == "PORT") ? DELAY_STEP : DELAY_STEP_VALUE;
+271:                    (TDELAY_EN== "TRUE")? delay_step_reg : DELAY_STEP : DELAY_STEP_VALUE;
+Windows source: G:\Program\pango\PDS_2022.2-SP6.1\arch\vendor\pango\verilog\simulation\GTP_IDDR_E1.v
+Supplementary simulation model excerpts, not device timing guarantee.
+30:     parameter IDDR_MODE  = "OPPOSITE_EDGE", //"OPPOSITE_EDGE"; "SAME_EDGE"; "SAME_PIPELINED"
+61:     if(IDDR_MODE != "OPPOSITE_EDGE" && IDDR_MODE != "SAME_EDGE" && IDDR_MODE != "SAME_PIPELINED")
+82: always @(posedge CLK or negedge global_rstn or negedge lasync_rstn or negedge lasync_setn) begin
+85:         syn_pos <= 1'b0;
+86:         syn_neg <= 1'b0;
+90:         syn_pos <= 1'b0;
+91:         syn_neg <= 1'b0;
+95:         syn_pos <= 1'b1;
+96:         syn_neg <= 1'b1;
+100:         syn_pos <= 1'b0;
+101:         syn_neg <= 1'b0;
+105:         syn_pos <= 1'b1;
+106:         syn_neg <= 1'b1;
+110:         syn_pos <= di_pos;
+111:         syn_neg <= di_neg;
+115:         syn_pos <= syn_pos;
+116:         syn_neg <= syn_neg;
+120: always @(negedge CLK or negedge global_rstn or negedge lasync_rstn or negedge lasync_setn) begin
+139: always @(*) begin
+143:         "SAME_PIPELINED": q_mode = {syn_neg_w,syn_pos_w};
+148: assign Q0 = q_mode[0];      
+149: assign Q1 = q_mode[1];      

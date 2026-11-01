@@ -1,0 +1,9 @@
+厂商例程MDIO检查：
+
+1. 2_11_ethernet_test：source/下全部Verilog源码未找到MDIO/MDC控制模块或PHY寄存器写入；顶层无mdio/mdc端口。phy_rstn直接来自ref_clock.lock。没有找到page0xd08/reg0x11或0x15的写入，也没有找到page0xa43写入。
+
+2. 4_13_tri_eth_test：当前source/ethernet_test.v只实例化pll_gen和mdio_ctrl，显示协商速率，不含RGMII收发数据端口。mdio_ctrl.v中phy_addr=5'b00001；state0写opcode=2'b01、reg_addr=5'h1f、write_data=16'h0a43，切到page0xa43。随后读reg0x1f确认页号，周期性读reg0x1a，以read_data[5:4]输出速率。未找到向page0xd08或reg0x11、0x15写入的指令；该例程没有配置RXDLY/TXDLY。
+
+已复制两个MDIO模块原文；状态机写入见demo_rtl/tri_4_13/source/ethernet/mdio_ctrl.v:95–104，读取及页确认见后续状态。教程4 PDF157/印刷151、PDF158/印刷152也明确说明这一写页号/读取速率流程，截图demo_mdio_guide_pdf157.png，原文demo_docs/tri_mdio.txt。
+
+当前tri目录留有ref_clock.idf（请求270度）及ref_clock.v，但当前顶层只使用pll_gen；不能把目录里未例化的ref_clock相位当作正在使用的RGMII方案。

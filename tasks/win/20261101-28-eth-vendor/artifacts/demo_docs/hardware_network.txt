@@ -1,0 +1,93 @@
+Windows source: G:\claude code\EdRV32-Competition-2026\docs\board\pago_200\1_Demo_document\实验例程说明篇\教程1 盘古100K MINI 硬件指导手册-盘古676系列.pdf
+
+=== PDF page 28 ===
+微信公众号：小眼睛FPGA
+微信咨询：17665247134
+26
+1.1.3.2.
+外接通信接口
+1.1.3.2.1. 网口
+MES2L676-100HP-MINI 开发板使用Realtek RTL8211F-CG PHY 实现了一个
+10/100/1000 以太网端口，用于网络连接。该器件工作电压为支持2.5V、3.3V。PHY 连接到
+BANK L3，并通过RGMII 接口连接到MES2L676-100HP-MINI-MINI。RJ-45 连接器是
+HFJ11-1G01E-L12RL，具有集成的自动缠绕磁性元件，可提高性能、质量和可靠性。RJ-45 有
+两个状态指示灯LED，用于指示流量和有效链路状态。
+下图为MES2L676-100HP-MINI 开发板上的网口连接框图。
+网口连接框图
+具体的管脚分配如下所示：
+信号名称
+描述
+PG2L100H-676 管脚
+RTL8211F Pin
+PHY0_RXC
+接收时钟线
+D19
+27
+PHY0_RXCTRL
+接收控制线
+H16
+26
+PHY0_RXD[3]
+接收数据线3
+B19
+22
+
+
+=== PDF page 29 ===
+微信公众号：小眼睛FPGA
+微信咨询：17665247134
+27
+PHY0_RXD[2]
+接收数据线2
+A19
+23
+PHY0_RXD[1]
+接收数据线1
+E16
+24
+PHY0_RXD[0]
+接收数据线0
+D16
+25
+PHY0_TXC
+发送时钟线
+G16
+20
+PHY0_TXCTRL
+发送控制线
+D20
+19
+PHY0_TXD[3]
+发送数据线3
+D21
+15
+PHY0_TXD[2]
+发送数据线2
+C21
+16
+PHY0_TXD[1]
+发送数据线1
+B21
+17
+PHY0_TXD[0]
+发送数据线0
+E20
+18
+PHY0_MDC
+控制总线时钟
+A25
+13
+PHY0_MDIO
+控制总线数据
+E21
+14
+RSTN_OUT
+复位控制线，低有效
+G25
+12
+1.1.3.2.2. 串口
+MES2L676-100HP-MINI 扩展底板上集成了一路USB 转串口模块，采用的USB-UART
+芯片是CP2102 ,
+USB 接口采用USB Type C 接口，可用USB Type C 线连接到PC 端进
+行串口数据通信。
+USB Uart 电路设计的示意图如下图所示：

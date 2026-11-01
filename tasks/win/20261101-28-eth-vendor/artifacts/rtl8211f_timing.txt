@@ -1,0 +1,27 @@
+RTL8211F(I)-CG/RTL8211FD(I)-CG Datasheet, Track ID JATR-8275-15, Rev1.4.
+Windows原件路径见source_index.txt中rtl8211f_timing.png；PDF第67页/印刷第60页，Table60。截图已逐项目视核对。
+
+符号 | 条件（保留原表含义） | Min | Typical | Max | 单位
+Tcyc | 1000Mbps | 7.2 | 8 | 8.8 | ns
+Tcyc | 100Mbps | 36 | 40 | 44 | ns
+Tcyc | 10Mbps | 360 | 400 | 440 | ns
+Duty_G | 1000Mbps | 45 | 50 | 55 | %
+Duty_T | 10/100Mbps | 40 | 50 | 60 | %
+tR / tF | TXC/RXC,20%–80% | - | - | 0.75 | ns
+TsetupT | transmitter output, with delay integrated at transmitter | 1.2 | 2 | - | ns
+TholdT | transmitter output, with delay integrated at transmitter | 1.2 | 2 | - | ns
+TsetupR | receiver input, with delay integrated at transmitter | 1.0 | 2 | - | ns
+TholdR | receiver input, with delay integrated at transmitter | 1.0 | 2 | - | ns
+TskewT | transmitter output, without delay integrated | -0.5 | 0 | 0.5 | ns
+TskewR | receiver input, with PCB delay integrated | 1 | 1.8 | 2.6 | ns
+
+TskewR说明原文要求PCB关联时钟额外走线延迟 >1.5ns 且 <2.0ns。该段是规范条件，不是本板已有走线延迟的证据。
+脚注：10/100Mbps的最大Skew Time未规定；切速/接收包时钟域转换可以伸缩占空比，但不得违反最小占空比，且最多持续最低速率的3个Tcyc。
+PDF65/印刷58 Figure14为TXC延迟模式；PDF66/印刷59 Figure15为RXC延迟模式。不要把无内部延迟的TskewT与启用内部延迟后的setup/hold条件混用。
+
+配置脚：PDF16/印刷9 Table6，PHYAD0 pin22内部上拉，PHYAD1 pin27内部下拉，PHYAD2 pin26内部下拉；TXDLY pin24内部下拉，RXDLY pin25内部上拉。此为芯片默认，不代表本板外接电阻配置。
+PDF23/印刷16 Table10/11：RXD3→PHYAD0、RXC→PHYAD1、RXCTL→PHYAD2、RXD2→PLLOFF、RXD1→TXDLY、RXD0→RXDLY。TXDLY/RXDLY上拉经4.7k到DVDD_RG增加2ns，拉低经4.7k到GND不加延迟。
+PHYAD0地址0是MDIO广播响应的说明也在该页；不能把地址0/1均响应推断成板上有两片PHY。
+
+寄存器资料缺口：该Rev1.4没有找到page0xd08/reg0x11的TX delay寄存器说明。PDF55/印刷48 Table45记载page0xd08/reg0x15，bit6为RGMII In-band CRS Enable，bit5:0标为Reserved，未说明软件使用的RXDLY bit3。不能凭本版手册把这两个delay寄存器位写成已获文档证实。已附该页截图及原文。
+MODE/SELRGV：该RTL8211F版本的模式配置表未见这两个名称；不以其他PHY型号的配置脚代入。

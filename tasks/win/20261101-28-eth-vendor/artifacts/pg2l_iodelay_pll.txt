@@ -1,0 +1,16 @@
+PG2L/Logos2本地资料核实
+
+已找到：
+- DS04001_Logos2系列FPGA器件数据手册，PDF12/43的IOL段说明可动/静态调整输入/输出延迟，但没有步进/PVT范围或SAME_PIPELINED波形。该页明确引用UG040006 Logos2系列FPGA输入输出接口(IO)用户指南；本地资料包和已搜索PDS文档未找到此指南。
+- G:/Program/pango/PDS_2022.2-SP6.1/ip/module_ip/ipm2l_flex_pll/ipm2l_flex_pll_eval/ipm2l_pll/UG041001_PLL_IP.pdf。
+  PDF19/52：Internal Feedback禁用clkfb；External Feedback使能clkfb。
+  PDF20/52：反馈源CLKOUTF/CLKOUT0–6及输入/缓冲选项。
+  PDF45/52：反馈源分频对照及内部CLKOUTF反馈图/公式。
+  截图pg2l_iodelay_pll.png为PDF19，另附PDF20/45；原文pg2l_pll_source_pages.txt。
+
+未找到：
+- PG2L200H/Logos2正式IO指南中GTP_IODELAY_E2步进/范围的数值页；例程注释明确0~247、10ps/step，RX247步和TXC100步。按注释计算分别2.47ns/1.00ns，这只是按注释算术，不是已取得的PVT保证。
+- PG2L正式文档中GTP_IDDR_E1 SAME_PIPELINED采样波形/流水延迟说明页。
+- 输出相位相对外部输入引脚、经过实际BUFG/IO路径已被完整补偿的正式说明。已取得内部/外部反馈的定义，不能将其直接等同于板级采样时钟补偿。
+
+补充材料（不替代缺失指南）：PDS安装目录中的GTP_IODELAY_E2仿真模型标参数8'h00~8'hF7(248 cases)；IDDR模型的SAME_PIPELINED输出syn_neg_w/syn_pos_w，相关行见pg2l_simulation_excerpts.txt。本次未跑仿真，也不把仿真模型延迟当成芯片时序。
