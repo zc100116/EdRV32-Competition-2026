@@ -13,22 +13,24 @@
    - `uart_tool.py` 网口烧录前先做 ARP 检查，不通时直接报错；
    - 卡 23 B3N 网口烧录卡住的原因还没定，本卡按 5.0 一次采集诊断数据。
 4. **B3N 图片批量识别**：新版工具在回传缺包，或 1 s 内没收到结束包时，把该张记为失败，并继续下一张（卡 23 停在第一张）。
-5. **B3R**：卡 23 没有收集 B3R，本卡完整做一遍，包括新增的 LAYERS 画面。
+5. **B3R**：卡 23 的 B3R 上板发现两个软件问题，均已修复，本卡复测并完整做一遍：
+   - S3 启动 LVGL WIDGETS 后 CPU store fault（`mepc=0x900663bc`）：菜单焦点回调访问已释放的卡片对象（调试记录 `docs/debug/2026-11-01-s3-widgets-fault.md`）；同时恢复 LVGL 软件帧率统计，benchmark 汇总的各场景 fps 不再是 0；
+   - NES 键盘松开方向键后人物继续移动：NES 每帧才读一次串口，16 字节 FIFO 丢掉松键帧，已改为 UART 中断接收（调试记录 `docs/debug/2026-11-01-nes-key-release.md`）。
 
 三个工程可以并行实现，上板逐个进行。
 
 ## 2. 输入
 
 - **代码**：`origin/zc100116/b3`（包含本卡的提交）。从这里拉出 `win/20261101-24-b3-rnv`，在 `result.md` 中记录完整哈希。
-- **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建，GCC 15.2.0。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
+- **本卡 `src/`**：Linux 端从 b3 `d5d16c34` 构建（`s3.elf`、`nes.elf` 从 `0046345e` 重新构建），GCC 15.2.0。各程序 0 warning；monitor 构建时 third_party/coremark 有一条既有的 `-Wmaybe-uninitialized`。
 
 | 文件 | 用途 | 与卡 23 相比 |
 |---|---|---|
 | `ip_rom_boot.dat` | BIOS，三个工程的 `ip_rom_boot` 都用它重新生成 | **已更新**（100 ms 波特率等待） |
 | `ip_ram_sram.dat` | SRAM 初始内容（monitor），三个工程的 `ip_ram_sram` 都用它重新生成 | 已更新（重新构建） |
 | `rnd_board.elf`、`rnd_expected.log` | RND 自检 29 组和期望 CRC | 重新构建 |
-| `s3.elf` | LVGL S3：benchmark、RN-17、网口监控、虚拟输入、LAYERS | 重新构建 |
-| `nes.elf` | NES（含虚拟输入） | 重新构建 |
+| `s3.elf` | LVGL S3：WIDGETS、benchmark、RN-17、网口监控、虚拟输入、LAYERS | **修复 WIDGETS 崩溃；恢复 benchmark fps 统计** |
+| `nes.elf` | NES（含虚拟输入） | **UART 中断接收虚拟输入（松键修复）** |
 | `board_npu.elf` | NPU 39 项板级测试 | 重新构建 |
 | `demo_npu.bin` | B3N 网口送图识别（入口 0x10000000） | **TX_GAP = 2125** |
 | `demo_vision.bin` | B3V 图像处理演示，OV5640 720p30（入口 0x10000000） | **TX_GAP = 2125** |
@@ -96,7 +98,13 @@
 
 ### 5R：B3R
 
-同卡 23 第 5R 节全部 6 步：
+同卡 23 第 5R 节全部 6 步，另外：
+
+- S3 菜单 5 项逐个进入、按 KEY4 返回，各做两轮，不得出现 `S3 CPU mcause`；WIDGETS 停留约 30 秒并拍照；
+- benchmark 汇总表各场景 fps 应为非 0；RN-17 预期 15/16，“opa 容器”一帧 FAIL（约 2.25%，已知）；
+- NES：键盘按住方向键 1~2 秒后松开，人物应立即停下，左右各做 5 次，并用鼠标点击按钮重复一次；S3 中同样检查一次，记录结果（S3 的输入路径本卡未改）。
+
+卡 23 第 5R 节的 6 步：
 
 1. RND 自检；
 2. S3 benchmark 与 RN-17；
@@ -168,7 +176,7 @@ demo_vision 运行时，调试工具填本机地址 192.168.1.2，建立网口�
 
 | 工程 | 判据 |
 |---|---|
-| B3R | RND 29/29 PASS；benchmark 跑完；RN-17 除“opa 容器”外 PASS；LAYERS 5 个画面与串口预期一致，画面 5 claimed 非零、unclaimed 为 0；NES 演示 ROM 正常；虚拟输入可用 |
+| B3R | RND 29/29 PASS；S3 五项均可进入退出、无 CPU 异常；benchmark 跑完且各场景 fps 非 0；RN-17 除“opa 容器”外 PASS；NES 松键立即停止；LAYERS 5 个画面与串口预期一致，画面 5 claimed 非零、unclaimed 为 0；NES 演示 ROM 正常；虚拟输入可用 |
 | B3N | 39/39 PASS；单张识别检测框正确；文件夹连续识别不会停在某一张，取得 fps 和失败张数 |
 | B3V | 检查清单逐行通过；摄像头约 30 fps；网口视频帧率接近 30、丢失计数与卡 23 对比明显下降 |
 
