@@ -1,0 +1,1 @@
+Start seq 9818; final status before PC ping seq 9983; probe duration10s; TUN unchanged.

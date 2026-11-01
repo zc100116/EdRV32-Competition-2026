@@ -1,0 +1,27 @@
+The ARP entry deletion failed: The requested operation requires elevation.
+
+
+Pinging 192.168.1.10 from 192.168.1.2 with 32 bytes of data:
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+Ping statistics for 192.168.1.10:
+    Packets: Sent = 5, Received = 0, Lost = 5 (100% loss),
+
+Interface: 192.168.1.2 --- 0x5
+  Internet Address      Physical Address      Type
+  192.168.1.255         ff-ff-ff-ff-ff-ff     static    
+  224.0.0.22            01-00-5e-00-00-16     static    
+  224.0.0.251           01-00-5e-00-00-fb     static    
+  239.255.255.250       01-00-5e-7f-ff-fa     static    
+
+
+IPAddress        : 192.168.1.10
+LinkLayerAddress : 00-00-00-00-00-00
+State            : Incomplete
+
+
+

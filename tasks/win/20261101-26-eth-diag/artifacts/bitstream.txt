@@ -1,0 +1,11 @@
+B3N
+Path: G:\codex_project\EdRV32-FPGA\EdRV32-B3N\generate_bitstream\edrv32_fpga_board_npu_top.sbit
+Modified (Windows local): 2026-11-01 00:26:36
+
+B3R
+Path: G:\codex_project\EdRV32-FPGA\EdRV32-B3R\generate_bitstream\edrv32_fpga_board_render_top.sbit
+Modified (Windows local): 2026-11-01 04:10:35
+
+B3V
+Path: G:\codex_project\EdRV32-FPGA\EdRV32-B3V\generate_bitstream\edrv32_fpga_board_vision_top.sbit
+Modified (Windows local): 2026-11-01 00:12:34

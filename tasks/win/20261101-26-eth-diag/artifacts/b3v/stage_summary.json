@@ -1,0 +1,52 @@
+[
+  {
+    "stage": "initial",
+    "first": {
+      "seq": 11738,
+      "ts": 1793505423332,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 150,
+      "PERF1": 1,
+      "PERF2": 1,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 148,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 1,
+      "peer": "192.168.1.2:6000"
+    },
+    "before": {
+      "seq": 11903,
+      "ts": 1793505433346,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 173,
+      "PERF1": 10,
+      "PERF2": 10,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 162,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 1,
+      "peer": "192.168.1.2:6000"
+    },
+    "after": {
+      "seq": 12068,
+      "ts": 1793505443332,
+      "link": "link=1 speed=1000 duplex=full",
+      "PERF0": 191,
+      "PERF1": 10,
+      "PERF2": 10,
+      "PERF3": 0,
+      "PERF4": 0,
+      "PERF5": 180,
+      "PERF6": 0,
+      "PERF7": 0,
+      "PERF8": 1,
+      "peer": "192.168.1.2:6000"
+    },
+    "probe_rx": 10,
+    "pc_output_bytes": 831
+  }
+]
