@@ -15,8 +15,11 @@ FLAGS = ["-std=c11", "-Wall", "-Wextra", "-Werror", "-O2", "-g", "-fPIC",
          "-Isw/apps/s3", "-Isw/lib", "-Isw/drivers/include", "-Isw/bsp/include"]
 
 
-def build():
-    OUT.mkdir(parents=True, exist_ok=True)
+def build(sanitize=False):
+    output = OUT / "sanitized" if sanitize else OUT
+    flags = FLAGS + (["-fsanitize=address,undefined", "-fno-omit-frame-pointer"]
+                     if sanitize else [])
+    output.mkdir(parents=True, exist_ok=True)
     subprocess.run(["python3", "tools/s3/lvgl_assets.py", "build/s3/lvgl_assets.c"],
                    cwd=ROOT, check=True)
     sources = sorted(str(p.relative_to(ROOT)) for directory in
@@ -27,6 +30,8 @@ def build():
                 "sw/apps/s3/lvgl/rn17_compare.c",
                 "sw/drivers/rnd.c", "sw/drivers/mem_xbar.c", "tools/s3/lvgl_host.c",
                 "build/s3/lvgl_assets.c"]
+    if sanitize:
+        sources += ["sw/apps/s3/menu.c", "sw/apps/s3/host/layers_check.c"]
     objects = []
     sources.append("third_party/lvgl/demos/lv_demos.c")
     headers = [p for directory in ("sw/apps/s3/lvgl", "sw/drivers/include", "sw/bsp/include")
@@ -34,7 +39,7 @@ def build():
     headers.append(ROOT / "sw/apps/s3/s3_platform.h")
     config_time = max(Path(__file__).stat().st_mtime, *(p.stat().st_mtime for p in headers))
     for source in sources:
-        obj = OUT / "obj" / (source + ".o")
+        obj = output / "obj" / (source + ".o")
         objects.append(str(obj))
         if obj.exists() and obj.stat().st_mtime > max((ROOT / source).stat().st_mtime,
                                                      config_time):
@@ -42,10 +47,10 @@ def build():
         obj.parent.mkdir(parents=True, exist_ok=True)
         extra = (["-Drnd_physical=s3_host_unused_board_physical"]
                  if source == "sw/drivers/rnd.c" else [])
-        subprocess.run(["cc", *FLAGS, *extra, "-c", source, "-o", str(obj)],
+        subprocess.run(["cc", *flags, *extra, "-c", source, "-o", str(obj)],
                        cwd=ROOT, check=True)
-    library = OUT / "lvgl_rn17.so"
-    subprocess.run(["cc", "-shared", "-Wl,--no-undefined", "-Wl,--wrap=lv_draw_sw_blend",
+    library = output / "lvgl_rn17.so"
+    subprocess.run(["cc", *flags, "-shared", "-Wl,--no-undefined", "-Wl,--wrap=lv_draw_sw_blend",
                     "-Wl,--wrap=lv_draw_sw_init", "-Wl,--wrap=lv_draw_create_unit",
                     "-Wl,--wrap=lv_timer_create", "-Wl,--wrap=rnd_read_perf",
                     "-Wl,--wrap=mem_xbar_snapshot",

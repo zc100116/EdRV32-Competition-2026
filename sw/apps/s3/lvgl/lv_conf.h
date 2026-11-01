@@ -42,6 +42,8 @@
 #define LV_FONT_MONTSERRAT_40 1
 #define LV_FONT_DEFAULT &lv_font_montserrat_20
 #define LV_USE_SYSMON 1
+#define LV_USE_PERF_MONITOR 1
+#define LV_USE_PERF_MONITOR_LOG_MODE 0
 #define LV_USE_DEMO_WIDGETS 1
 #define LV_USE_DEMO_BENCHMARK 1
 #define LV_USE_FS_STDIO 0

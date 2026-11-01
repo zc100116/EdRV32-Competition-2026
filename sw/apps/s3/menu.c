@@ -21,23 +21,29 @@ static lv_obj_t *label(lv_obj_t *parent, const char *text, int32_t x, int32_t y,
     return object;
 }
 
+static void style_card(lv_obj_t *card, bool active)
+{
+    lv_obj_set_style_bg_color(card, lv_color_hex(active ? 0x193c47 : 0x142535), 0);
+    lv_obj_set_style_border_color(card, lv_color_hex(active ? 0x71e8bb : 0x294355), 0);
+    lv_obj_set_style_border_width(card, active ? 3 : 1, 0);
+}
+
 static void select_card(void)
 {
-    for (unsigned int i = 0; i < S3_APP_COUNT; ++i) {
-        lv_obj_set_style_bg_color(cards[i],
-            lv_color_hex(i == selected ? 0x193c47 : 0x142535), 0);
-        lv_obj_set_style_border_color(cards[i],
-            lv_color_hex(i == selected ? 0x71e8bb : 0x294355), 0);
-        lv_obj_set_style_border_width(cards[i], i == selected ? 3 : 1, 0);
-    }
+    for (unsigned int i = 0; i < S3_APP_COUNT; ++i) style_card(cards[i], i == selected);
 }
 
 static void card_event(lv_event_t *event)
 {
     unsigned int index = (unsigned int)(uintptr_t)lv_event_get_user_data(event);
+    lv_event_code_t code = lv_event_get_code(event);
+    /* Refocus during deletion runs after earlier cards have been freed.
+     * Update only the event's live target, never its siblings in cards[].
+     */
+    style_card(lv_event_get_current_target(event), code != LV_EVENT_DEFOCUSED);
+    if (code == LV_EVENT_DEFOCUSED) return;
     selected = index;
-    select_card();
-    if (lv_event_get_code(event) == LV_EVENT_CLICKED) requested = (enum s3_application)index;
+    if (code == LV_EVENT_CLICKED) requested = (enum s3_application)index;
 }
 
 void s3_menu_show(void)
@@ -72,6 +78,7 @@ void s3_menu_show(void)
         lv_group_add_obj(lv_group_get_default(), card);
         lv_obj_add_event_cb(card, card_event, LV_EVENT_CLICKED, (void *)(uintptr_t)i);
         lv_obj_add_event_cb(card, card_event, LV_EVENT_FOCUSED, (void *)(uintptr_t)i);
+        lv_obj_add_event_cb(card, card_event, LV_EVENT_DEFOCUSED, (void *)(uintptr_t)i);
         lv_obj_remove_style_all(card);
         lv_obj_set_pos(card, 64 + (int32_t)(i % 2u) * 588,
                         184 + (int32_t)(i / 2u) * 128);
