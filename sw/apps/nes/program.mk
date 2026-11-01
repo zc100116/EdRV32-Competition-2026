@@ -12,7 +12,7 @@ PROGRAM_LDLIBS := $(NES_WRAPS) -Wl,--start-group -lc -lm -lgcc -Wl,--end-group
 ifeq ($(NES_SPIKE),1)
 CFLAGS_EXTRA += -DNES_SPIKE
 else
-PROGRAM_SOURCES += sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c \
+PROGRAM_SOURCES += sw/apps/nes/input.c sw/drivers/uart.c sw/drivers/gpio.c sw/drivers/clint.c \
     sw/lib/virtual_input.c sw/lib/eth_monitor.c sw/drivers/eth.c
 ifneq ($(NES_DISPLAY),1)
 PROGRAM_SOURCES += sw/drivers/engine.c sw/drivers/plic.c

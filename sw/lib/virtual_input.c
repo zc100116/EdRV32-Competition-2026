@@ -4,7 +4,7 @@
  * Clock domain: clk_sys, or host test caller.
  */
 #include "virtual_input.h"
-static struct virtual_input_state state;
+static volatile struct virtual_input_state state;
 static uint8_t serial_frame[VIRTUAL_INPUT_BYTES];
 static unsigned serial_position;
 
