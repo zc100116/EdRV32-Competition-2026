@@ -1,0 +1,13 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	clk_sys	max (slow corner)	sequential timing path	0.605	12	u_cpu/u_core/u_frontend/u_ib/read_ptr_r[0]/CLK (GTP_DFF_CE)	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[0]/CE (GTP_DFF_E)
+native SNR	slow	clk_sys	max (slow corner)	sequential timing path	0.605	12	u_cpu/u_core/u_frontend/u_ib/read_ptr_r[0]/CLK (GTP_DFF_CE)	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[1]/CE (GTP_DFF_E)
+native SNR	slow	clk_sys	max (slow corner)	sequential timing path	0.605	12	u_cpu/u_core/u_frontend/u_ib/read_ptr_r[0]/CLK (GTP_DFF_CE)	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[2]/CE (GTP_DFF_E)
+native SNR	slow	clk_sys	min (slow corner)	sequential timing path	0.324	0	u_sys/u_uart/rx_shift_r[0]/CLK (GTP_DFF_E)	u_sys/u_uart/rx_fifo_r_0/DI[0] (GTP_RAM32X2DP)
+native SNR	slow	clk_sys	min (slow corner)	sequential timing path	0.376	0	u_cpu/u_core/u_frontend/f2_compressed_r/CLK (GTP_DFF_E)	u_cpu/u_core/u_frontend/blocks_r_3_55/DI[1] (GTP_RAM32X2DP)
+native SNR	slow	clk_sys	min (slow corner)	sequential timing path	0.376	0	u_cpu/u_core/u_frontend/f2_compressed_r/CLK (GTP_DFF_E)	u_cpu/u_core/u_frontend/blocks_r_58/DI[1] (GTP_RAM32X2DP)
+native SNR	slow	clk_sys	max (slow corner)	async timing path	8.195	1	u_sys/u_reset_ctrl/u_sys_por/release_sync_r/CLK (GTP_DFF_C)	u_sys/u_reset_ctrl/u_mem_released/meta_r/C (GTP_DFF_C)
+native SNR	slow	clk_sys	max (slow corner)	async timing path	8.195	1	u_sys/u_reset_ctrl/u_sys_por/release_sync_r/CLK (GTP_DFF_C)	u_sys/u_reset_ctrl/u_mem_released/sync_r/C (GTP_DFF_C)
+native SNR	slow	clk_sys	max (slow corner)	async timing path	8.387	1	u_cpu/u_reset_sys_csr_n/rst_n_o/CLK (GTP_DFF_C)	u_cpu/u_core/u_csr/counter_r[0][0]/C (GTP_DFF_CE)
+native SNR	slow	clk_sys	min (slow corner)	async timing path	0.756	1	u_sys/u_reset_ctrl/u_sys/release_sync_r/CLK (GTP_DFF_C)	u_cpu/u_reset_sys_cache_ctrl_n/rst_n_o/C (GTP_DFF_C)
+native SNR	slow	clk_sys	min (slow corner)	async timing path	0.756	1	u_sys/u_reset_ctrl/u_sys/release_sync_r/CLK (GTP_DFF_C)	u_cpu/u_reset_sys_core_n/rst_n_o/C (GTP_DFF_C)
+native SNR	slow	clk_sys	min (slow corner)	async timing path	0.756	1	u_sys/u_reset_ctrl/u_sys/release_sync_r/CLK (GTP_DFF_C)	u_cpu/u_reset_sys_csr_n/rst_n_o/C (GTP_DFF_C)

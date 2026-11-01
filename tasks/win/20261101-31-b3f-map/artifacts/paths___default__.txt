@@ -1,0 +1,7 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	**default**	max (slow corner)	combinational timing path	N/A (unconstrained)	2	u_ddr3/u_ddrphy_top/ddrphy_calib_top/ddrphy_main_ctrl/calib_done/CLK (GTP_DFF_C)	mem_rst_n_o (port)
+native SNR	slow	**default**	max (slow corner)	combinational timing path	N/A (unconstrained)	3	u_eth/u_mdio/idx_r[2]/CLK (GTP_DFF_CE)	eth_mdio_o (port)
+native SNR	slow	**default**	max (slow corner)	combinational timing path	N/A (unconstrained)	2	u_eth/u_regs/phy_o/CLK (GTP_DFF_P)	eth_phy_rst_n_o (port)
+native SNR	slow	**default**	min (slow corner)	combinational timing path	N/A (unconstrained)	1	cam0_data_i[0] (port)	u_vin/u_cam0/high_byte_r[0]/D (GTP_DFF_E)
+native SNR	slow	**default**	min (slow corner)	combinational timing path	N/A (unconstrained)	1	cam0_data_i[1] (port)	u_vin/u_cam0/high_byte_r[1]/D (GTP_DFF_E)
+native SNR	slow	**default**	min (slow corner)	combinational timing path	N/A (unconstrained)	1	cam0_data_i[2] (port)	u_vin/u_cam0/high_byte_r[2]/D (GTP_DFF_E)

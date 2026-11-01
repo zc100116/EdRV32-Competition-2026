@@ -1,0 +1,2 @@
+Literal-name occurrences in synthesized VM: {"ila_cpu_r": 0, "cycle_r": 322, "instret_r": 323, "counter_r": 2584}
+No .fic file acquired; ILA insertion not demonstrated. A/B probe names not confirmed. Do not declare card31 complete. No RTL or synthesis settings were changed to force retention.

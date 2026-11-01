@@ -1,0 +1,13 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	clk_cam0	max (slow corner)	sequential timing path	6.048	6	u_vin/u_cam0/active_r/CLK (GTP_DFF_C)	u_vin/u_cam0/u_items/full_r/D (GTP_DFF_C)
+native SNR	slow	clk_cam0	max (slow corner)	sequential timing path	6.222	5	u_vin/u_cam0/active_r/CLK (GTP_DFF_C)	u_vin/u_cam0/u_items/memory_r_0/WE (GTP_RAM32X2DP)
+native SNR	slow	clk_cam0	max (slow corner)	sequential timing path	6.222	5	u_vin/u_cam0/active_r/CLK (GTP_DFF_C)	u_vin/u_cam0/u_items/memory_r_1/WE (GTP_RAM32X2DP)
+native SNR	slow	clk_cam0	min (slow corner)	sequential timing path	0.555	0	u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)	u_vin/u_cam0/u_items/memory_r_0/WADDR[3] (GTP_RAM32X2DP)
+native SNR	slow	clk_cam0	min (slow corner)	sequential timing path	0.555	0	u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)	u_vin/u_cam0/u_items/memory_r_1/WADDR[3] (GTP_RAM32X2DP)
+native SNR	slow	clk_cam0	min (slow corner)	sequential timing path	0.555	0	u_vin/u_cam0/u_items/write_bin_r[3]/CLK (GTP_DFF_C)	u_vin/u_cam0/u_items/memory_r_2/WADDR[3] (GTP_RAM32X2DP)
+native SNR	slow	clk_cam0	max (slow corner)	async timing path	8.998	1	u_vin/u_reset_cam0_front_n/rst_n_o/CLK (GTP_DFF_C)	u_vin/u_cam0/active_r/C (GTP_DFF_C)
+native SNR	slow	clk_cam0	max (slow corner)	async timing path	8.998	1	u_vin/u_reset_cam0_front_n/rst_n_o/CLK (GTP_DFF_C)	u_vin/u_cam0/byte_phase_r/C (GTP_DFF_C)
+native SNR	slow	clk_cam0	max (slow corner)	async timing path	8.998	1	u_vin/u_reset_cam0_front_n/rst_n_o/CLK (GTP_DFF_C)	u_vin/u_cam0/drop_r/C (GTP_DFF_C)
+native SNR	slow	clk_cam0	min (slow corner)	async timing path	0.652	1	u_sys/u_reset_ctrl/u_cam0/release_sync_r/CLK (GTP_DFF_C)	u_vin/u_reset_cam0_front_n/rst_n_o/C (GTP_DFF_C)
+native SNR	slow	clk_cam0	min (slow corner)	async timing path	0.808	1	u_vin/u_reset_cam0_front_n/rst_n_o/CLK (GTP_DFF_C)	u_vin/u_cam0/active_r/C (GTP_DFF_C)
+native SNR	slow	clk_cam0	min (slow corner)	async timing path	0.808	1	u_vin/u_reset_cam0_front_n/rst_n_o/CLK (GTP_DFF_C)	u_vin/u_cam0/byte_phase_r/C (GTP_DFF_C)
