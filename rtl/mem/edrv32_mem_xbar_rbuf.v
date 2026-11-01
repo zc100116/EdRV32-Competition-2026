@@ -108,7 +108,9 @@ module edrv32_mem_xbar_rbuf (
     endfunction
 
     assign pending_r = |pending_valid_r;
-    assign pending_data_w = pending_error_r ? {pending_last_r, 2'b10, 256'b0} : ram_data_w;
+    // mem-subsys 6: illegal beats override response/last; payload is unspecified.
+    assign pending_data_w = {pending_error_r ? pending_last_r : ram_data_w[258],
+        pending_error_r ? 2'b10 : ram_data_w[257:256], ram_data_w[255:0]};
     assign slot_ready_o = count_r < 4'd8;
     assign release_w = valid_r[head_r] && sent_r[head_r] == length_r[head_r];
     assign return_addr_w = start_r[return_slot_w] + {2'b0, received_r[return_slot_w]};

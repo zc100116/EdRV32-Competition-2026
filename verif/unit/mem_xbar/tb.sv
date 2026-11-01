@@ -567,7 +567,8 @@ module tb;
                     monitor_i = expected_head[monitor_q] % 4096;
                     if (expected_head[monitor_q] >= expected_tail[monitor_q])
                         $fatal(1, "FAIL unexpected R p%0d", monitor_p);
-                    if (rdata[monitor_p*256 +: 256] !== expected_data[monitor_q][monitor_i] ||
+                    if ((expected_resp[monitor_q][monitor_i] == 0 &&
+                        rdata[monitor_p*256 +: 256] !== expected_data[monitor_q][monitor_i]) ||
                         rresp[monitor_p*2 +: 2] !== expected_resp[monitor_q][monitor_i] ||
                         rlast[monitor_p] !== expected_last[monitor_q][monitor_i])
                         $fatal(1, "FAIL R p%0d id%0d n%0d got %h/%b/%b want %h/%b/%b t%0t",
