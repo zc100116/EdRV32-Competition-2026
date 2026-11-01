@@ -41,6 +41,19 @@ def fixture():
 
 
 class PathsTest(unittest.TestCase):
+    def test_ram_clock_enable_is_a_control_endpoint(self):
+        design = fixture()
+        ram = design['modules']['test']['cells']['ip_test']
+        ram['connections'] = {'rd_clk': [3], 'rd_clk_en': [6], 'data': [8]}
+        ram['port_directions'] = {'rd_clk': 'input', 'rd_clk_en': 'input', 'data': 'output'}
+        result = analyze(design, starts=[r'^a$'], ends=[r'^ip_test\.'])
+        self.assertEqual(result['selected_endpoint_count'], 1)
+        self.assertEqual(result['max_levels'], 2)
+        self.assertEqual(result['paths'][0]['end']['pin'], 'ip_test.rd_clk_en[0]')
+        fanout = {net['signal']: net['fanout'] for net in result['fanout']}
+        self.assertEqual(fanout['l2_w'], 3)
+        self.assertNotIn('clk_i', fanout)
+
     def test_filtered_internal_interface_endpoint(self):
         result = analyze(fixture(), starts=[r'^a$'], end_nets=[r'^l1_w$'])
         self.assertEqual(result['max_levels'], 1)

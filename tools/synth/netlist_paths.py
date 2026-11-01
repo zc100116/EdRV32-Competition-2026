@@ -204,7 +204,8 @@ def analyze(design, starts=None, ends=None, end_nets=None):
             if cell['port_directions'][port] != 'input':
                 continue
             clock = ((ff and port == 'C') or
-                     ((blackbox or memory or kind == 'DSP48E1') and 'clk' in port.lower()))
+                     ((blackbox or memory or kind == 'DSP48E1') and
+                      port.lower() in {'clk', 'clk_i', 'rd_clk', 'wr_clk', 'wclk'}))
             if kind == 'DSP48E1' and (port.startswith('CE') or port.startswith('RST')):
                 continue
             for index, bit in enumerate(bits):
