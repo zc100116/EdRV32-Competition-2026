@@ -293,6 +293,7 @@ module tb;
     integer response_tail = 0;
     reg [255:0] expected_data [0:13][0:4095];
     reg [1:0] expected_resp [0:13][0:4095];
+    reg expected_data_valid [0:13][0:4095];
     reg expected_last [0:13][0:4095];
     integer expected_head [0:13];
     integer expected_tail [0:13];
@@ -567,7 +568,7 @@ module tb;
                     monitor_i = expected_head[monitor_q] % 4096;
                     if (expected_head[monitor_q] >= expected_tail[monitor_q])
                         $fatal(1, "FAIL unexpected R p%0d", monitor_p);
-                    if ((expected_resp[monitor_q][monitor_i] == 0 &&
+                    if ((expected_data_valid[monitor_q][monitor_i] &&
                         rdata[monitor_p*256 +: 256] !== expected_data[monitor_q][monitor_i]) ||
                         rresp[monitor_p*2 +: 2] !== expected_resp[monitor_q][monitor_i] ||
                         rlast[monitor_p] !== expected_last[monitor_q][monitor_i])
@@ -679,6 +680,7 @@ module tb;
             e = expected_tail[q] % 4096;
             expected_data[q][e] = error ? 256'b0 : pattern(addr+32*i);
             expected_resp[q][e] = error ? 2'b10 : 2'b00;
+            expected_data_valid[q][e] = !error;
             expected_last[q][e] = i == len;
             expected_tail[q] = expected_tail[q] + 1;
         end
