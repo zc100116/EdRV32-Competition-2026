@@ -162,19 +162,7 @@ module edrv32_sys_subsys (
 );
 
     // SoC 5.3: one preserved reset copy per destination region.
-    wire rst_sys_bus_n_w;
-    wire rst_sys_periph_n_w;
     wire rst_mem_core_bus_n_w;
-    edrv32_reset_copy u_reset_sys_bus_n (
-        .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_n_o),
-        .rst_n_o(rst_sys_bus_n_w)
-    );
-    edrv32_reset_copy u_reset_sys_periph_n (
-        .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_n_o),
-        .rst_n_o(rst_sys_periph_n_w)
-    );
     edrv32_reset_copy u_reset_mem_core_bus_n (
         .clk_i(clk_mem_i),
         .rst_n_i(rst_mem_core_n_o),
@@ -454,7 +442,7 @@ module edrv32_sys_subsys (
     edrv32_bus_sys_xbar u_sys_xbar (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_xbar_n_w),
 
         // m0 AR channel.
         .m0_arid_i(m0_arid_i),
@@ -789,7 +777,7 @@ module edrv32_sys_subsys (
     edrv32_bus_rom u_rom (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_rom_n_w),
 
         // axi AW channel.
         .axi_awid_i(s0_awid_w),
@@ -834,7 +822,7 @@ module edrv32_sys_subsys (
     edrv32_bus_sram u_sram (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_sram_n_w),
 
         // axi AW channel.
         .axi_awid_i(s1_awid_w),
@@ -879,7 +867,7 @@ module edrv32_sys_subsys (
     edrv32_periph_clint u_clint (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_periph_n_w),
+        .rst_n_i(rst_sys_clint_n_w),
 
         // AXI64 slave write address.
         .axi_awid_i(s2_awid_w),
@@ -925,7 +913,7 @@ module edrv32_sys_subsys (
     edrv32_periph_plic u_plic (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_plic_n_w),
 
         // AXI64 slave write address.
         .axi_awid_i(s3_awid_w),
@@ -970,7 +958,7 @@ module edrv32_sys_subsys (
     edrv32_bus_apb_bridge u_sys_apb_bridge (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_apb_bridge_n_w),
 
         // axi AW channel.
         .axi_awid_i(s4_awid_w),
@@ -1026,7 +1014,7 @@ module edrv32_sys_subsys (
     edrv32_bus_apb_bridge u_media_apb_bridge (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_media_apb_bridge_n_w),
 
         // axi AW channel.
         .axi_awid_i(s5_awid_w),
@@ -1113,7 +1101,7 @@ module edrv32_sys_subsys (
     edrv32_bus_apb_decoder u_sys_apb_decoder (
         // Local APB clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_apb_decoder_n_w),
 
         // Undecoded upstream APB.
         .apb_paddr_i(sys_apb_paddr_w),
@@ -1169,7 +1157,7 @@ module edrv32_sys_subsys (
     edrv32_periph_uart u_uart (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_uart_n_w),
 
         // APB slave.
         .apb_paddr_i(sys_slot_paddr_w),
@@ -1193,7 +1181,7 @@ module edrv32_sys_subsys (
     edrv32_periph_gpio u_gpio (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_periph_n_w),
+        .rst_n_i(rst_sys_gpio_n_w),
 
         // APB slave.
         .apb_paddr_i(sys_slot_paddr_w),
@@ -1218,7 +1206,7 @@ module edrv32_sys_subsys (
     edrv32_periph_i2c u_i2c (
         // Clock and reset.
         .clk_i(clk_sys_i),
-        .rst_n_i(rst_sys_bus_n_w),
+        .rst_n_i(rst_sys_i2c_n_w),
 
         // APB slave.
         .apb_paddr_i(sys_slot_paddr_w),
@@ -1297,4 +1285,71 @@ module edrv32_sys_subsys (
         .rst_eth_tx_n_o(rst_eth_tx_n_o)
     );
 
+    // Parallel replicas retain the existing sys-region reset release edge.
+    wire rst_sys_xbar_n_w;
+    edrv32_reset_copy u_reset_sys_xbar_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_xbar_n_w)
+    );
+    wire rst_sys_rom_n_w;
+    edrv32_reset_copy u_reset_sys_rom_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_rom_n_w)
+    );
+    wire rst_sys_sram_n_w;
+    edrv32_reset_copy u_reset_sys_sram_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_sram_n_w)
+    );
+    wire rst_sys_clint_n_w;
+    edrv32_reset_copy u_reset_sys_clint_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_clint_n_w)
+    );
+    wire rst_sys_plic_n_w;
+    edrv32_reset_copy u_reset_sys_plic_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_plic_n_w)
+    );
+    wire rst_sys_apb_bridge_n_w;
+    edrv32_reset_copy u_reset_sys_apb_bridge_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_apb_bridge_n_w)
+    );
+    wire rst_sys_media_apb_bridge_n_w;
+    edrv32_reset_copy u_reset_sys_media_apb_bridge_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_media_apb_bridge_n_w)
+    );
+    wire rst_sys_apb_decoder_n_w;
+    edrv32_reset_copy u_reset_sys_apb_decoder_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_apb_decoder_n_w)
+    );
+    wire rst_sys_uart_n_w;
+    edrv32_reset_copy u_reset_sys_uart_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_uart_n_w)
+    );
+    wire rst_sys_gpio_n_w;
+    edrv32_reset_copy u_reset_sys_gpio_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_gpio_n_w)
+    );
+    wire rst_sys_i2c_n_w;
+    edrv32_reset_copy u_reset_sys_i2c_n (
+        .clk_i(clk_sys_i),
+        .rst_n_i(rst_sys_n_o),
+        .rst_n_o(rst_sys_i2c_n_w)
+    );
 endmodule
