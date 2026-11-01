@@ -982,8 +982,8 @@ define_attribute {i:u_rgmii} {PAP_REGION} {fp_rgmii}
 # RGMII RX sampling (cards 26/28). PHY keeps strap RXDLY=1/TXDLY=1 (rgmii-id).
 # The ETH PLL sits beside the RXC pin (D19, IOLHR_16_1368); the system PLL has no
 # IO timing and takes the far-side site.
-define_attribute {i:u_rgmii.u_pll_eth.u_gpll.gpll_inst} {PAP_LOC} {GPLL_7_1381}
-define_attribute {i:u_pll_sys.u_gpll.gpll_inst} {PAP_LOC} {GPLL_727_463}
+define_attribute {i:u_rgmii.u_pll_eth.u_gpll} {PAP_LOC} {GPLL_7_1381}
+define_attribute {i:u_pll_sys.u_gpll} {PAP_LOC} {GPLL_727_463}
 # RTL8211F Rev1.4 Table 60, delay integrated in the transmitter: data is valid at
 # least 1.0 ns before and after each RXC edge (DDR, 8 ns period).
 set_input_delay -clock [get_clocks {clk_rgmii_ref}] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
