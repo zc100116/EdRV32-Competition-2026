@@ -72,7 +72,7 @@ module tb_mem_ddr_gw #(
         .clk_sys_i(clk_sys),
         .rst_sys_n_i(rst_sys_n),
         .clk_mem_i(clk_mem),
-        .rst_mem_n_i(rst_mem_n),
+        .rst_mem_n_i({3{rst_mem_n}}),
         .s_axi_awid_i(s_awid),
         .s_axi_awaddr_i(s_awaddr),
         .s_axi_awlen_i(s_awlen),

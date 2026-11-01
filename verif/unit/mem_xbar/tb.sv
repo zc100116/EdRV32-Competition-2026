@@ -70,7 +70,7 @@ module tb;
 
     edrv32_mem_xbar dut (
         .clk_i(clk),
-        .rst_n_i(rst_n),
+        .rst_n_i({4{rst_n}}),
         .rst_mem_regs_n_i({3{rst_n}}),
         .rst_mem_stat_n_i({21{rst_n}}),
         .p0_arid_i(arid[0 +: 1]),

@@ -10,7 +10,7 @@
 module edrv32_mem_xbar (
     // Clock and reset.
     input wire clk_i,
-    input wire rst_n_i,
+    input wire [3:0] rst_n_i,
     input wire [2:0] rst_mem_regs_n_i,
     input wire [20:0] rst_mem_stat_n_i,
     // p0 upstream.
@@ -521,8 +521,8 @@ module edrv32_mem_xbar (
                 wire read_lo_w;
                 wire read_hi_w;
                 // Predict index+1 at the edge that updates ownership/index, before RAM read.
-                always @(posedge clk_i or negedge rst_n_i) begin
-                    if (!rst_n_i) begin
+                always @(posedge clk_i or negedge rst_n_i[3]) begin
+                    if (!rst_n_i[3]) begin
                         read_addr_lo_r <= 4'd0;
                         read_addr_hi_r <= 4'd0;
                         read_active_r <= 2'b0;
@@ -563,7 +563,7 @@ module edrv32_mem_xbar (
     endgenerate
     edrv32_mem_xbar_rbuf u_rbuf (
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_n_i[1]),
         .reserve_i(reserve_w),
         .reserve_port_i(reserve_port_w),
         .reserve_id_i(reserve_id_w),
@@ -585,7 +585,7 @@ module edrv32_mem_xbar (
     );
     edrv32_mem_xbar_sched u_sched (
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_n_i[2]),
         .enable_i(!cmd_valid_r && !bad_read_r && !cfg_write_w),
         .prepare_o(prepare_w),
         .candidates_i(eligible_w),
@@ -688,8 +688,8 @@ module edrv32_mem_xbar (
     end
     // X-F1 paths 2/3: report registered ingress detections one clk_mem later.
     // Payload was captured at the same handshake; the original last-port/AW priority remains.
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             ingress_error_r <= 14'b0;
         end else begin
             for (error_idx = 0; error_idx < 7; error_idx = error_idx + 1) begin
@@ -719,8 +719,8 @@ module edrv32_mem_xbar (
             end
         end
     end
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             aw_pending_r <= 7'b0;
             ar_pending_r <= 7'b0;
             w_complete_r <= 7'b0;

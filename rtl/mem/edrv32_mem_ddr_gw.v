@@ -9,7 +9,7 @@ module edrv32_mem_ddr_gw (
     input wire clk_sys_i,
     input wire rst_sys_n_i,
     input wire clk_mem_i,
-    input wire rst_mem_n_i,
+    input wire [2:0] rst_mem_n_i,
 
     // s_axi interface (AXI64).
     input wire [3:0] s_axi_awid_i,
@@ -133,7 +133,7 @@ module edrv32_mem_ddr_gw (
         .clk_sys_i(clk_sys_i),
         .rst_sys_n_i(rst_sys_n_i),
         .clk_mem_i(clk_mem_i),
-        .rst_mem_n_i(rst_mem_n_i),
+        .rst_mem_n_i(rst_mem_n_i[2]),
         .s_axi_awid_i(s_axi_awid_i),
         .s_axi_awaddr_i(s_axi_awaddr_i),
         .s_axi_awlen_i(s_axi_awlen_i),
@@ -280,8 +280,8 @@ module edrv32_mem_ddr_gw (
     assign bridge_bid_w = write_id_r;
     assign bridge_bresp_w = write_resp_r;
 
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_n_i[0]) begin
+        if (!rst_mem_n_i[0]) begin
             read_state_r <= S_READ_IDLE;
             read_left_r <= 8'd0;
             read_lane_r <= 2'd0;
@@ -332,8 +332,8 @@ module edrv32_mem_ddr_gw (
         end
     end
 
-    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
-        if (!rst_mem_n_i) begin
+    always @(posedge clk_mem_i or negedge rst_mem_n_i[1]) begin
+        if (!rst_mem_n_i[1]) begin
             write_state_r <= S_WRITE_IDLE;
             write_left_r <= 8'd0;
             write_lane_r <= 2'd0;

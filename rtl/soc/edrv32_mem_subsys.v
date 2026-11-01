@@ -236,7 +236,7 @@ module edrv32_mem_subsys (
     // SoC 5.3: one preserved reset copy per destination region.
     wire [2:0] rst_mem_regs_n_w;
     wire rst_sys_gateway_n_w;
-    wire rst_mem_core_ctrl_n_w;
+    wire [3:0] rst_mem_core_ctrl_n_w;
     wire [2:0] rst_mem_stat0_n_w;
     wire [2:0] rst_mem_stat1_n_w;
     wire [2:0] rst_mem_stat2_n_w;
@@ -259,11 +259,17 @@ module edrv32_mem_subsys (
         .rst_n_i(rst_sys_n_i),
         .rst_n_o(rst_sys_gateway_n_w)
     );
-    edrv32_reset_copy u_reset_mem_core_ctrl_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_core_ctrl_n_w)
-    );
+    genvar rst_mem_core_ctrl_n_w_idx;
+    generate
+        for (rst_mem_core_ctrl_n_w_idx = 0; rst_mem_core_ctrl_n_w_idx < 4;
+            rst_mem_core_ctrl_n_w_idx = rst_mem_core_ctrl_n_w_idx + 1) begin : g_core_ctrl_reset
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_core_ctrl_n_w[rst_mem_core_ctrl_n_w_idx])
+            );
+        end
+    endgenerate
     genvar reset_stat0;
     generate
         for (reset_stat0 = 0; reset_stat0 < 3; reset_stat0 = reset_stat0 + 1) begin : g_reset_stat0
@@ -368,7 +374,7 @@ module edrv32_mem_subsys (
         .clk_sys_i(clk_sys_i),
         .clk_mem_i(clk_mem_i),
         .rst_sys_n_i(rst_sys_gateway_n_w),
-        .rst_mem_n_i(rst_mem_core_ctrl_n_w),
+        .rst_mem_n_i(rst_mem_gateway_n_w),
 
         // System crossbar AXI64.
         .s_axi_awid_i(gw_awid_i),
@@ -654,4 +660,17 @@ module edrv32_mem_subsys (
         .irq_o(irq_mem_xbar_o)
     );
 
+    // The gateway and fabric formerly shared the same regional reset FF output.
+    wire [2:0] rst_mem_gateway_n_w;
+    genvar gateway_reset;
+    generate
+        for (gateway_reset = 0; gateway_reset < 3;
+            gateway_reset = gateway_reset + 1) begin : g_gateway_reset
+            edrv32_reset_copy u_reset_mem_gateway_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_gateway_n_w[gateway_reset])
+            );
+        end
+    endgenerate
 endmodule
