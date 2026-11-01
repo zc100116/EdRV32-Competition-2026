@@ -61,7 +61,7 @@ module edrv32_npu_regs (
     reg [31:0] bases_r [0:3];
     reg [31:0] perf_r [0:7];
     reg [7:0] perf_event_r;
-    reg perf_clear_r;
+    reg [7:0] perf_clear_r /* synthesis syn_preserve=1 */;
     wire start_w;
     wire abort_w;
     wire soft_reset_w;
@@ -99,13 +99,13 @@ module edrv32_npu_regs (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             perf_event_r <= 8'd0;
-            perf_clear_r <= 1'b0;
+            perf_clear_r <= 8'd0;
         end else if (soft_reset_w) begin
             perf_event_r <= 8'd0;
-            perf_clear_r <= 1'b0;
+            perf_clear_r <= 8'd0;
         end else begin
             perf_event_r <= perf_event_i;
-            perf_clear_r <= start_w;
+            perf_clear_r <= {8{start_w}};
         end
     end
 
@@ -147,58 +147,87 @@ module edrv32_npu_regs (
             for (counter_idx = 0; counter_idx < 4; counter_idx = counter_idx + 1) begin
                 bases_r[counter_idx] <= 32'd0;
             end
-            for (counter_idx = 0; counter_idx < 8; counter_idx = counter_idx + 1) begin
-                perf_r[counter_idx] <= 32'd0;
-            end
-        end else if (soft_reset_w) begin
-            enable_r <= 1'b0;
-            irq_en_r <= 32'd0;
-            irq_stat_r <= 2'd0;
-            error_code_r <= 3'd0;
-            desc_base_r <= 32'd0;
-            desc_count_r <= 32'd0;
-            done_count_r <= 32'd0;
-            for (counter_idx = 0; counter_idx < 4; counter_idx = counter_idx + 1) begin
-                bases_r[counter_idx] <= 32'd0;
-            end
-            for (counter_idx = 0; counter_idx < 8; counter_idx = counter_idx + 1) begin
-                perf_r[counter_idx] <= 32'd0;
-            end
         end else begin
-            if (write_w) begin
-                case (apb_paddr_r)
-                    12'h004: enable_r <= apb_pwdata_r[0];
-                    12'h00c: irq_en_r <= apb_pwdata_r;
-                    12'h020: desc_base_r <= apb_pwdata_r;
-                    12'h024: desc_count_r <= apb_pwdata_r;
-                    12'h100: bases_r[0] <= apb_pwdata_r;
-                    12'h104: bases_r[1] <= apb_pwdata_r;
-                    12'h108: bases_r[2] <= apb_pwdata_r;
-                    12'h10c: bases_r[3] <= apb_pwdata_r;
-                    default: begin end
-                endcase
-            end
-            if (irq_clear_w) begin
-                irq_stat_r <= irq_stat_r & ~apb_pwdata_r[1:0];
-                if (apb_pwdata_r[1]) begin
-                    error_code_r <= 3'd0;
+            if (soft_reset_w) begin
+                enable_r <= 1'b0;
+                irq_en_r <= 32'd0;
+                irq_stat_r <= 2'd0;
+                error_code_r <= 3'd0;
+                desc_base_r <= 32'd0;
+                desc_count_r <= 32'd0;
+                done_count_r <= 32'd0;
+                for (counter_idx = 0; counter_idx < 4; counter_idx = counter_idx + 1) begin
+                    bases_r[counter_idx] <= 32'd0;
                 end
-            end
-            if (done_i) begin
-                irq_stat_r[0] <= 1'b1;
-                done_count_r <= done_count_r + 32'd1;
-            end
-            if (error_i) begin
-                irq_stat_r[1] <= 1'b1;
-                error_code_r <= error_code_i;
-            end
-            for (counter_idx = 0; counter_idx < 8; counter_idx = counter_idx + 1) begin
-                if (perf_clear_r) begin
-                    perf_r[counter_idx] <= 32'd0;
-                end else if (perf_event_r[counter_idx]) begin
-                    perf_r[counter_idx] <= perf_r[counter_idx] + 32'd1;
+            end else begin
+                if (write_w) begin
+                    case (apb_paddr_r)
+                        12'h004: begin
+                            enable_r <= apb_pwdata_r[0];
+                        end
+                        12'h00c: begin
+                            irq_en_r <= apb_pwdata_r;
+                        end
+                        12'h020: begin
+                            desc_base_r <= apb_pwdata_r;
+                        end
+                        12'h024: begin
+                            desc_count_r <= apb_pwdata_r;
+                        end
+                        12'h100: begin
+                            bases_r[0] <= apb_pwdata_r;
+                        end
+                        12'h104: begin
+                            bases_r[1] <= apb_pwdata_r;
+                        end
+                        12'h108: begin
+                            bases_r[2] <= apb_pwdata_r;
+                        end
+                        12'h10c: begin
+                            bases_r[3] <= apb_pwdata_r;
+                        end
+                        default: begin end
+                    endcase
+                end
+                if (irq_clear_w) begin
+                    irq_stat_r <= irq_stat_r & ~apb_pwdata_r[1:0];
+                    if (apb_pwdata_r[1]) begin
+                        error_code_r <= 3'd0;
+                    end
+                end
+                if (done_i) begin
+                    irq_stat_r[0] <= 1'b1;
+                    done_count_r <= done_count_r + 32'd1;
+                end
+                if (error_i) begin
+                    irq_stat_r[1] <= 1'b1;
+                    error_code_r <= error_code_i;
                 end
             end
         end
     end
+    // Capture identical APB payload copies at SETUP for each performance bank.
+    genvar perf_bank;
+    generate
+        for (perf_bank = 0; perf_bank < 8; perf_bank = perf_bank + 1) begin : g_perf_bank
+            reg [11:0] soft_addr_r /* synthesis syn_preserve=1 */;
+            reg soft_data_r /* synthesis syn_preserve=1 */;
+            wire soft_w;
+            always @(posedge clk_i) begin
+                if (apb_psel_i && !apb_penable_i) begin
+                    soft_addr_r <= apb_paddr_i;
+                    soft_data_r <= apb_pwdata_i[3];
+                end
+            end
+            assign soft_w = write_w && soft_addr_r == 12'h004 && soft_data_r && !busy_i;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    perf_r[perf_bank] <= 32'd0;
+                else if (soft_w || perf_clear_r[perf_bank])
+                    perf_r[perf_bank] <= 32'd0;
+                else if (perf_event_r[perf_bank])
+                    perf_r[perf_bank] <= perf_r[perf_bank] + 32'd1;
+            end
+        end
+    endgenerate
 endmodule

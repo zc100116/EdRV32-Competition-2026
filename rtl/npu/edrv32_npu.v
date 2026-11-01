@@ -55,7 +55,7 @@ module edrv32_npu (
     // SoC 5.3: one preserved reset copy per destination region.
     wire rst_npu_ctrl_n_w;
     wire rst_mem_bridge_n_w;
-    wire rst_npu_conv_n_w;
+    wire [3:0] rst_npu_conv_n_w;
     edrv32_reset_copy u_reset_npu_ctrl_n (
         .clk_i(clk_npu_i),
         .rst_n_i(rst_npu_n_i),
@@ -66,11 +66,17 @@ module edrv32_npu (
         .rst_n_i(rst_mem_n_i),
         .rst_n_o(rst_mem_bridge_n_w)
     );
-    edrv32_reset_copy u_reset_npu_conv_n (
-        .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_n_i),
-        .rst_n_o(rst_npu_conv_n_w)
-    );
+    genvar rst_npu_conv_n_w_idx;
+    generate
+        for (rst_npu_conv_n_w_idx = 0; rst_npu_conv_n_w_idx < 4;
+            rst_npu_conv_n_w_idx = rst_npu_conv_n_w_idx + 1) begin : g_rst_npu_conv_n_w
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_npu_i),
+                .rst_n_i(rst_npu_n_i),
+                .rst_n_o(rst_npu_conv_n_w[rst_npu_conv_n_w_idx])
+            );
+        end
+    endgenerate
 
     wire local_apb_psel_w;
     wire local_apb_penable_w;
@@ -92,6 +98,7 @@ module edrv32_npu (
     wire [31:0] desc_count_w;
     wire [127:0] bases_w;
     wire cancel_w;
+    wire [3:0] conv_cancel_w;
     wire desc_data_valid_w;
     wire [255:0] read_data_w;
     wire decode_w;
@@ -103,7 +110,7 @@ module edrv32_npu (
     wire [31:0] quant_addr_w;
     wire decode_done_w;
     wire [2:0] decode_error_w;
-    wire conv_start_w;
+    wire [3:0] conv_start_w;
     wire stop_w;
     reg stop_r;
     wire conv_read_req_valid_w;
@@ -253,7 +260,15 @@ module edrv32_npu (
     assign cancel_w = (state_r == S_CANCEL) || soft_reset_w;
     assign done_w = (state_r == S_COMPLETE) && !stop_w;
     assign decode_w = (state_r == S_DECODE);
-    assign conv_start_w = (state_r == S_START) && is_conv_r && !stop_w;
+    genvar start_copy;
+    generate
+        for (start_copy = 0; start_copy < 4; start_copy = start_copy + 1) begin : g_start_copy
+            assign conv_cancel_w[start_copy] =
+                (state_control_r[start_copy+4] == S_CANCEL) || soft_reset_w;
+            assign conv_start_w[start_copy] = (state_control_r[start_copy] == S_START) &&
+                is_conv_r && !stop_w;
+        end
+    endgenerate
     assign nonconv_start_w = (state_r == S_START) && !is_conv_r && !stop_w;
     assign local_done_w = is_conv_r ? conv_done_w : nonconv_done_w;
     assign local_writer_idle_w = conv_writer_idle_w && nonconv_writer_idle_w;
@@ -369,7 +384,7 @@ module edrv32_npu (
     edrv32_npu_regs u_regs (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_ctrl_n_w),
+        .rst_n_i(rst_npu_ctrl_n_units_w[0]),
 
         // APB register interface.
         .apb_paddr_i(unused_apb_addr_w[11:0]),
@@ -415,7 +430,7 @@ module edrv32_npu (
     edrv32_npu_descriptor u_descriptor (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_ctrl_n_w),
+        .rst_n_i(rst_npu_ctrl_n_units_w[1]),
 
         // Execution lifetime.
         .cancel_i(cancel_w),
@@ -454,7 +469,7 @@ module edrv32_npu (
         // Execution lifetime.
         .start_i(conv_start_w),
         .stop_i(stop_r),
-        .cancel_i(cancel_w),
+        .cancel_i(conv_cancel_w),
 
         // Descriptor configuration and execution status.
         .desc_i(desc_w),
@@ -504,7 +519,7 @@ module edrv32_npu (
     edrv32_npu_nonconv u_nonconv (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_ctrl_n_w),
+        .rst_n_i(rst_npu_ctrl_n_units_w[2]),
 
         // Execution lifetime.
         .start_i(nonconv_start_w),
@@ -548,7 +563,7 @@ module edrv32_npu (
     edrv32_npu_read_dma u_read_dma (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_ctrl_n_w),
+        .rst_n_i(rst_npu_ctrl_n_units_w[3]),
 
         // Execution lifetime.
         .stop_i(stop_r),
@@ -592,7 +607,7 @@ module edrv32_npu (
     edrv32_npu_write_dma u_write_dma (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
-        .rst_n_i(rst_npu_ctrl_n_w),
+        .rst_n_i(rst_npu_ctrl_n_units_w[4]),
 
         // Execution lifetime.
         .stop_i(stop_w),
@@ -640,7 +655,7 @@ module edrv32_npu (
         .clk_s_i(clk_mem_i),
         .rst_s_n_i(rst_mem_bridge_n_w),
         .clk_m_i(clk_npu_i),
-        .rst_m_n_i(rst_npu_ctrl_n_w),
+        .rst_m_n_i(rst_npu_ctrl_n_units_w[5]),
 
         // APB register interface.
         .s_apb_paddr_i({4'd0, apb_paddr_i}),
@@ -666,7 +681,7 @@ module edrv32_npu (
     edrv32_axi256_async_bridge u_axi_bridge (
         // Clocks and domain-local resets.
         .clk_npu_i(clk_npu_i),
-        .rst_npu_n_i(rst_npu_ctrl_n_w),
+        .rst_npu_n_i(rst_npu_ctrl_n_units_w[6]),
         .clk_mem_i(clk_mem_i),
         .rst_mem_n_i(rst_mem_bridge_n_w),
 
@@ -722,4 +737,95 @@ module edrv32_npu (
         .m_axi_rvalid_i(axi_rvalid_i),
         .m_axi_rready_o(axi_rready_o)
     );
+    // Original state feedback supplies every copy's identical D and enable.
+    reg [3:0] state_control_r [0:7] /* synthesis syn_preserve=1 */;
+    genvar control_copy;
+    generate
+        for (control_copy = 0; control_copy < 8;
+            control_copy = control_copy + 1) begin : g_control_copy
+            always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
+                if (!rst_npu_ctrl_n_w) begin
+                    state_control_r[control_copy] <= S_IDLE;
+                end else begin
+                    if (soft_reset_w) begin
+                        state_control_r[control_copy] <= S_IDLE;
+                    end else begin
+                        if (busy_w && (abort_w || response_error_w || descriptor_error_w)
+                        && (state_r != S_STOP) && (state_r != S_CANCEL)) begin
+                            state_control_r[control_copy] <= S_STOP;
+                        end else begin
+                            case (state_r)
+                                S_IDLE: begin
+                                    if (start_w) begin
+                                        state_control_r[control_copy] <=
+                                            (desc_count_w == 32'd0) ? S_COMPLETE : S_FETCH;
+                                    end
+                                end
+                                S_FETCH: begin
+                                    if (read_req_ready_w) begin
+                                        state_control_r[control_copy] <= S_FETCH_WAIT;
+                                    end
+                                end
+                                S_FETCH_WAIT: begin
+                                    if (desc_data_valid_w && read_data_last_w) begin
+                                        state_control_r[control_copy] <= S_DECODE;
+                                    end
+                                end
+                                S_DECODE: begin
+                                    state_control_r[control_copy] <= S_DECODE_WAIT;
+                                end
+                                S_DECODE_WAIT: begin
+                                    if (decode_done_w) begin
+                                        state_control_r[control_copy] <= S_START;
+                                    end
+                                end
+                                S_START: begin
+                                    state_control_r[control_copy] <= S_RUN;
+                                end
+                                S_RUN: begin
+                                    if (local_done_w) begin
+                                        state_control_r[control_copy] <= S_FENCE;
+                                    end
+                                end
+                                S_FENCE: begin
+                                    if (read_idle_w && write_idle_w) begin
+                                        if (cur_desc_r == command_desc_count_r - 32'd1) begin
+                                            state_control_r[control_copy] <= S_COMPLETE;
+                                        end else begin
+                                            state_control_r[control_copy] <= S_FETCH;
+                                        end
+                                    end
+                                end
+                                S_COMPLETE: begin
+                                    state_control_r[control_copy] <= S_IDLE;
+                                end
+                                S_STOP: begin
+                                    if (read_idle_w && write_idle_w && local_writer_idle_w) begin
+                                        state_control_r[control_copy] <= S_CANCEL;
+                                    end
+                                end
+                                S_CANCEL: begin
+                                    state_control_r[control_copy] <= S_IDLE;
+                                end
+                                default: begin end
+                            endcase
+                        end
+                    end
+                end
+            end
+        end
+    endgenerate
+    // Parallel copies of the existing regional reset, with identical D and release edge.
+    wire [6:0] rst_npu_ctrl_n_units_w;
+    genvar rst_npu_ctrl_n_w_unit;
+    generate
+        for (rst_npu_ctrl_n_w_unit = 0; rst_npu_ctrl_n_w_unit < 7;
+            rst_npu_ctrl_n_w_unit = rst_npu_ctrl_n_w_unit + 1) begin : g_rst_npu_ctrl_n_w_unit
+            edrv32_reset_copy u_reset (
+                .clk_i(clk_npu_i),
+                .rst_n_i(rst_npu_n_i),
+                .rst_n_o(rst_npu_ctrl_n_units_w[rst_npu_ctrl_n_w_unit])
+            );
+        end
+    endgenerate
 endmodule

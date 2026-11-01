@@ -4,12 +4,12 @@
 // Independent input/model/residual producers share ordered DMA burst requests.
 // Clock: clk_npu.
 module edrv32_npu_conv (
-    // Clock and execution lifetime.
+    // Clock and equal-edge reset/start/cancel copies for execution units.
     input wire clk_i,
-    input wire rst_n_i,
-    input wire start_i,
+    input wire [3:0] rst_n_i,
+    input wire [3:0] start_i,
     input wire stop_i,
-    input wire cancel_i,
+    input wire [3:0] cancel_i,
     input wire [511:0] desc_i,
     input wire [31:0] in_addr_i,
     input wire [31:0] out_addr_i,
@@ -314,9 +314,10 @@ module edrv32_npu_conv (
 
     // Capture only at layer entry; live scheduler and datapath fields stay local.
     always @(posedge clk_i) begin
-        if (start_i) begin
-            desc_r <= desc_i;
-        end
+        if (start_i[0]) desc_r[127:0] <= desc_i[127:0];
+        if (start_i[1]) desc_r[255:128] <= desc_i[255:128];
+        if (start_i[2]) desc_r[383:256] <= desc_i[383:256];
+        if (start_i[3]) desc_r[511:384] <= desc_i[511:384];
     end
 
     // Burst boundaries are prepared outside the A1 address path.
@@ -398,10 +399,10 @@ module edrv32_npu_conv (
     assign read_req_addr_o = request_addr_r;
     assign read_req_beats_o = request_beats_r;
     assign read_req_tag_o = request_tag_r;
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             request_valid_r <= 1'b0;
-        end else if (cancel_i || stop_i) begin
+        end else if (cancel_i[0] || stop_i) begin
             request_valid_r <= 1'b0;
         end else if (!request_valid_r || read_req_ready_i) begin
             request_valid_r <= request_prepare_w;
@@ -524,8 +525,8 @@ module edrv32_npu_conv (
     assign dp_weight_wr_valid_w = weight_valid_r;
     assign dp_weight_wr_addr_w = weight_addr_r;
     assign dp_weight_wr_data_w = weight_data_r;
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             cfg_valid_r <= 1'b0;
             active_r <= 1'b0;
             model_state_r <= S_MODEL_DONE;
@@ -539,7 +540,7 @@ module edrv32_npu_conv (
             quant_valid_r <= 1'b0;
             lut_valid_r <= 1'b0;
             weight_valid_r <= 1'b0;
-        end else if (cancel_i) begin
+        end else if (cancel_i[1]) begin
             cfg_valid_r <= 1'b0;
             active_r <= 1'b0;
             model_state_r <= S_MODEL_DONE;
@@ -553,7 +554,7 @@ module edrv32_npu_conv (
             quant_valid_r <= 1'b0;
             lut_valid_r <= 1'b0;
             weight_valid_r <= response_accept_w && (response_role_w == ROLE_WEIGHT);
-            if (start_i) begin
+            if (start_i[0]) begin
                 cfg_valid_r <= 1'b1;
                 model_block_r <= 3'd0;
                 weight_index_r <= 14'd0;
@@ -616,7 +617,7 @@ module edrv32_npu_conv (
         end
     end
     always @(posedge clk_i) begin
-        if (start_i) begin
+        if (start_i[1]) begin
             model_addr_r <= weight_addr_i;
         end else if (model_accept_w) begin
             model_addr_r <= model_boundary_addr_r;
@@ -700,7 +701,7 @@ module edrv32_npu_conv (
         model_lut_beats_r <= burst_beats(model_lut_addr_r, 15'd8);
         model_lut_remaining_r <= burst_remaining(model_lut_addr_r, 15'd8);
         model_lut_last_r <= burst_last(model_lut_addr_r, 15'd8);
-        if (start_i) begin
+        if (start_i[2]) begin
             model_first_count_r <= (desc_i[9] && !desc_i[8]
                 && (desc_i[331:328] == 4'd1))
                 ? {1'b0, desc_i[403:390]} : desc_i[403:389];
@@ -753,8 +754,8 @@ module edrv32_npu_conv (
     end
 
     // W1/W4b: a row occupies its slot until the last output block has passed A3.
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[2]) begin
+        if (!rst_n_i[2]) begin
             line_valid_r <= 1'b0;
             completed_write_ptr_r <= 3'd0;
             completed_read_ptr_r <= 3'd0;
@@ -765,7 +766,7 @@ module edrv32_npu_conv (
             load_plane_r <= 6'd0;
             load_pair_r <= 11'd0;
             retire_min_r <= 13'd0;
-        end else if (cancel_i) begin
+        end else if (cancel_i[2]) begin
             line_valid_r <= 1'b0;
             completed_write_ptr_r <= 3'd0;
             completed_read_ptr_r <= 3'd0;
@@ -775,7 +776,7 @@ module edrv32_npu_conv (
             if (!line_valid_r || dp_line_wr_ready_w) begin
                 line_valid_r <= response_accept_w && (response_role_w == ROLE_LINE);
             end
-            if (start_i) begin
+            if (start_i[3]) begin
                 slot_used_r <= 5'd0;
                 slot_ready_r <= 5'd0;
                 load_row_r <= 13'd0;
@@ -827,7 +828,7 @@ module edrv32_npu_conv (
     assign load_next_row_addr_w = load_row_addr_r
         + (input_row_bytes_w << (!unused_flags_w[4] && unused_flags_w[5]));
     always @(posedge clk_i) begin
-        if (start_i) begin
+        if (start_i[0]) begin
             for (slot_base_idx = 0; slot_base_idx < 5; slot_base_idx = slot_base_idx + 1) begin
                 slot_base_r[slot_base_idx] <= slot_base_idx[9:0] * desc_i[361:352];
             end
@@ -893,20 +894,20 @@ module edrv32_npu_conv (
     end
     assign cmd_prepare_w = active_r && !all_submitted_r && !stop_i
         && (!cmd_valid_r || dp_cmd_ready_w) && rows_ready_w && block_ready_r[schedule_block_r];
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[3]) begin
+        if (!rst_n_i[3]) begin
             cmd_valid_r <= 1'b0;
             schedule_row_r <= 12'd0;
             schedule_block_r <= 3'd0;
             all_submitted_r <= 1'b0;
-        end else if (cancel_i) begin
+        end else if (cancel_i[3]) begin
             cmd_valid_r <= 1'b0;
             all_submitted_r <= 1'b0;
         end else begin
             if (dp_cmd_ready_w) begin
                 cmd_valid_r <= 1'b0;
             end
-            if (start_i) begin
+            if (start_i[1]) begin
                 schedule_row_r <= 12'd0;
                 schedule_block_r <= 3'd0;
                 all_submitted_r <= 1'b0;
@@ -927,7 +928,7 @@ module edrv32_npu_conv (
         end
     end
     always @(posedge clk_i) begin
-        if (start_i) begin
+        if (start_i[2]) begin
             schedule_weight_base_r <= 11'd0;
         end
         if (cmd_prepare_w) begin
@@ -959,8 +960,8 @@ module edrv32_npu_conv (
         && ({1'b0, residual_block_r} == cout_blocks_w - 4'd2);
     assign residual_next_pairs_w = residual_finish_block_w ? output_row_pairs_w
         : output_row_pairs_w - residual_pair_r - {6'd0, residual_pairs_r};
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             residual_state_r <= S_RES_DONE;
             residual_bank_r <= 1'b0;
             residual_row_r <= 12'd0;
@@ -971,7 +972,7 @@ module edrv32_npu_conv (
             residual_sent_r <= 5'd0;
             residual_wr_valid_r <= 1'b0;
             residual_commit_r <= 1'b0;
-        end else if (cancel_i) begin
+        end else if (cancel_i[0]) begin
             residual_state_r <= S_RES_DONE;
             residual_wr_valid_r <= 1'b0;
             residual_commit_r <= 1'b0;
@@ -979,7 +980,7 @@ module edrv32_npu_conv (
             residual_wr_valid_r <= response_accept_w && (response_role_w == ROLE_RESIDUAL);
             residual_commit_r <= response_accept_w && (response_role_w == ROLE_RESIDUAL)
                 && read_data_tag_i[28] && read_data_last_i;
-            if (start_i) begin
+            if (start_i[3]) begin
                 residual_state_r <= desc_i[7] ? S_RES_BEGIN : S_RES_DONE;
                 residual_bank_r <= 1'b0;
                 residual_row_r <= 12'd0;
@@ -1038,7 +1039,7 @@ module edrv32_npu_conv (
         end
     end
     always @(posedge clk_i) begin
-        if (start_i) begin
+        if (start_i[0]) begin
             residual_half_r <= desc_i[9] && (desc_i[331:328] == 4'd1);
             residual_row_addr_r <= residual_addr_i;
             residual_block_addr_r <= residual_addr_i;
@@ -1113,12 +1114,12 @@ module edrv32_npu_conv (
     edrv32_npu_conv_write u_conv_write (
         // Clocks and domain-local resets.
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_n_i[2]),
 
         // Execution lifetime.
         .stop_i(stop_i),
-        .cancel_i(cancel_i),
-        .start_i(start_i),
+        .cancel_i(cancel_i[1]),
+        .start_i(start_i[1]),
 
         // Descriptor configuration and execution status.
         .out_addr_i(out_addr_i),
@@ -1158,10 +1159,10 @@ module edrv32_npu_conv (
     edrv32_npu_datapath u_datapath (
         // Clocks and domain-local resets.
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_n_i[3]),
 
         // Execution lifetime.
-        .cancel_i(cancel_i),
+        .cancel_i(cancel_i[2]),
 
         // Layer configuration.
         .cfg_k3_i(dp_cfg_k3_w),

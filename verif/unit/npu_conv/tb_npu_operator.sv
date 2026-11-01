@@ -64,10 +64,10 @@ module tb_npu_operator;
     generate if (!NONCONV) begin : g_conv
     edrv32_npu_conv u_conv (
         .clk_i(clk),
-        .rst_n_i(rst_n),
-        .start_i(start),
+        .rst_n_i({4{rst_n}}),
+        .start_i({4{start}}),
         .stop_i(stop),
-        .cancel_i(cancel),
+        .cancel_i({4{cancel}}),
         .desc_i(desc),
         .in_addr_i(in_addr),
         .out_addr_i(out_addr),
