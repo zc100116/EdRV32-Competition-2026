@@ -8,10 +8,10 @@
 // Private parameters retain only their specified low bits; readback zero-extends.
 // Clock: clk_mem.
 module edrv32_mem_xbar_regs (
-    // Clock and reset.
+    // Parallel regional resets: configuration/global counters/commands; 3 banks per port.
     input wire clk_i,
-    input wire rst_n_i,
-    input wire [6:0] rst_mem_stat_n_i,
+    input wire [2:0] rst_n_i,
+    input wire [20:0] rst_mem_stat_n_i,
 
     // APB control interface.
     input wire [11:0] apb_paddr_i,
@@ -114,7 +114,8 @@ module edrv32_mem_xbar_regs (
     reg ds_busy_event_r;
     reg window_event_r;
     wire [7:0] snapshot_cmd_w;
-    wire [7:0] clear_cmd_w;
+    wire [6:0] clear_cmd_w;
+    wire [23:0] clear_group_w;
     wire write_w;
     wire snapshot_w;
     wire clear_w;
@@ -179,17 +180,28 @@ module edrv32_mem_xbar_regs (
         end
     endgenerate
 
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             dir_switch_carry_r <= 4'b0;
+        end else begin
+            dir_switch_carry_r <= clear_group_w[21 + 0] ? 4'b0 :
+                count_carry(dir_switch_r, dir_switch_event_r, dir_switch_carry_r[3]);
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             ds_busy_carry_r <= 4'b0;
+        end else begin
+            ds_busy_carry_r <= clear_group_w[21 + 1] ? 4'b0 :
+                count_carry(ds_busy_r, ds_busy_event_r, ds_busy_carry_r[3]);
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             window_cyc_carry_r <= 4'b0;
         end else begin
-            dir_switch_carry_r <= clear_cmd_w[7] ? 4'b0 :
-                count_carry(dir_switch_r, dir_switch_event_r, dir_switch_carry_r[3]);
-            ds_busy_carry_r <= clear_cmd_w[7] ? 4'b0 :
-                count_carry(ds_busy_r, ds_busy_event_r, ds_busy_carry_r[3]);
-            window_cyc_carry_r <= clear_cmd_w[7] ? 4'b0 :
+            window_cyc_carry_r <= clear_group_w[21 + 2] ? 4'b0 :
                 count_carry(window_cyc_r, window_event_r, window_cyc_carry_r[3]);
         end
     end
@@ -202,134 +214,431 @@ module edrv32_mem_xbar_regs (
             assign rd_txn_carry_r[carry_idx] = bank_rd_txn_carry_r;
             assign wr_txn_carry_r[carry_idx] = bank_wr_txn_carry_r;
             assign urg_cnt_carry_r[carry_idx] = bank_urg_cnt_carry_r;
-            always @(posedge clk_i or negedge rst_mem_stat_n_i[carry_idx]) begin
-                if (!rst_mem_stat_n_i[carry_idx]) begin
-                    bank_rd_txn_carry_r <= 4'b0;
-                    bank_wr_txn_carry_r <= 4'b0;
-                    bank_urg_cnt_carry_r <= 4'b0;
-                end else begin
-                    bank_rd_txn_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
-                        count_carry(rd_txn_r[carry_idx],
-                            grant_event_r && grant_port_event_r == carry_idx[2:0] &&
-                            !grant_write_event_r,
-                            bank_rd_txn_carry_r[3]);
-                    bank_wr_txn_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
-                        count_carry(wr_txn_r[carry_idx],
-                            grant_event_r && grant_port_event_r == carry_idx[2:0] &&
-                            grant_write_event_r,
-                            bank_wr_txn_carry_r[3]);
-                    bank_urg_cnt_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
-                        count_carry(urg_cnt_r[carry_idx],
-                            grant_event_r && grant_port_event_r == carry_idx[2:0] &&
-                            grant_urgent_event_r,
-                            bank_urg_cnt_carry_r[3]);
-                end
-            end
+            // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_mem_stat_n_i[carry_idx*3 + 0]) begin
+        if (!rst_mem_stat_n_i[carry_idx*3 + 0]) begin
+            bank_rd_txn_carry_r <= 4'b0;
+        end else begin
+            bank_rd_txn_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
+                count_carry(rd_txn_r[carry_idx],
+                grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                !grant_write_event_r,
+                bank_rd_txn_carry_r[3]);
+        end
+    end
+    always @(posedge clk_i or negedge rst_mem_stat_n_i[carry_idx*3 + 1]) begin
+        if (!rst_mem_stat_n_i[carry_idx*3 + 1]) begin
+            bank_wr_txn_carry_r <= 4'b0;
+        end else begin
+            bank_wr_txn_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
+                count_carry(wr_txn_r[carry_idx],
+                grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                grant_write_event_r,
+                bank_wr_txn_carry_r[3]);
+        end
+    end
+    always @(posedge clk_i or negedge rst_mem_stat_n_i[carry_idx*3 + 2]) begin
+        if (!rst_mem_stat_n_i[carry_idx*3 + 2]) begin
+            bank_urg_cnt_carry_r <= 4'b0;
+        end else begin
+            bank_urg_cnt_carry_r <= clear_cmd_w[carry_idx] ? 4'b0 :
+                count_carry(urg_cnt_r[carry_idx],
+                grant_event_r && grant_port_event_r == carry_idx[2:0] &&
+                grant_urgent_event_r,
+                bank_urg_cnt_carry_r[3]);
+        end
+    end
         end
     endgenerate
 
     // Disjoint address cases infer a parallel read mux, without a priority chain.
+    // SoC 4.3: setup captures group and local addresses together; no wait state.
+    reg [4:0] read_addr0_r /* synthesis syn_preserve=1 */;
+    reg read_select0_r;
+    reg [31:0] read_group0_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr0_r <= apb_paddr_i[4:0];
+            read_select0_r <= apb_paddr_i[11:5] == 7'd0;
+        end
+    end
     always @(*) begin
-        apb_prdata_o = 32'b0;
-        case (apb_paddr_r)
-            12'h000: apb_prdata_o = 32'h0008_0001;
-            12'h008: apb_prdata_o = {29'b0, irq_stat_r, !busy_i, busy_i};
-            12'h00c: apb_prdata_o = {30'b0, irq_en_r, 1'b0};
-            12'h010: apb_prdata_o = {30'b0, irq_stat_r, 1'b0};
-            12'h014: apb_prdata_o = {29'b0, err_type_r};
-            12'h100: apb_prdata_o = {28'b0, outst_total_o};
-            12'h104: apb_prdata_o = {24'b0, urg_max_o};
-            12'h108: apb_prdata_o = {16'b0, starve_cyc_o};
-            12'h10c: apb_prdata_o = {24'b0, dir_batch_o};
-            12'h120: apb_prdata_o = {29'b0, err_port_r};
-            12'h124: apb_prdata_o = err_addr_r;
-            12'h128: apb_prdata_o = {29'b0, err_type_r};
-            12'h200: apb_prdata_o = {28'b0, outst_rd_r[0]};
-            12'h204: apb_prdata_o = {28'b0, outst_wr_r[0]};
-            12'h208: apb_prdata_o = {28'b0, weight_r[0]};
-            12'h20c: apb_prdata_o = {23'b0, rate_r[0]};
-            12'h220: apb_prdata_o = {28'b0, outst_rd_r[1]};
-            12'h224: apb_prdata_o = {28'b0, outst_wr_r[1]};
-            12'h228: apb_prdata_o = {28'b0, weight_r[1]};
-            12'h22c: apb_prdata_o = {23'b0, rate_r[1]};
-            12'h240: apb_prdata_o = {28'b0, outst_rd_r[2]};
-            12'h244: apb_prdata_o = {28'b0, outst_wr_r[2]};
-            12'h248: apb_prdata_o = {28'b0, weight_r[2]};
-            12'h24c: apb_prdata_o = {23'b0, rate_r[2]};
-            12'h260: apb_prdata_o = {28'b0, outst_rd_r[3]};
-            12'h264: apb_prdata_o = {28'b0, outst_wr_r[3]};
-            12'h268: apb_prdata_o = {28'b0, weight_r[3]};
-            12'h26c: apb_prdata_o = {23'b0, rate_r[3]};
-            12'h280: apb_prdata_o = {28'b0, outst_rd_r[4]};
-            12'h284: apb_prdata_o = {28'b0, outst_wr_r[4]};
-            12'h288: apb_prdata_o = {28'b0, weight_r[4]};
-            12'h28c: apb_prdata_o = {23'b0, rate_r[4]};
-            12'h2a0: apb_prdata_o = {28'b0, outst_rd_r[5]};
-            12'h2a4: apb_prdata_o = {28'b0, outst_wr_r[5]};
-            12'h2a8: apb_prdata_o = {28'b0, weight_r[5]};
-            12'h2ac: apb_prdata_o = {23'b0, rate_r[5]};
-            12'h2c0: apb_prdata_o = {28'b0, outst_rd_r[6]};
-            12'h2c4: apb_prdata_o = {28'b0, outst_wr_r[6]};
-            12'h2c8: apb_prdata_o = {28'b0, weight_r[6]};
-            12'h2cc: apb_prdata_o = {23'b0, rate_r[6]};
-            12'h400: apb_prdata_o = rd_txn_snapshot_r[0];
-            12'h414: apb_prdata_o = wr_txn_snapshot_r[0];
-            12'h404: apb_prdata_o = rd_beat_snapshot_r[0];
-            12'h418: apb_prdata_o = wr_beat_snapshot_r[0];
-            12'h408: apb_prdata_o = {16'b0, max_snapshot_r[0]};
-            12'h40c: apb_prdata_o = sum_snapshot_r[0];
-            12'h410: apb_prdata_o = urg_snapshot_r[0];
-            12'h420: apb_prdata_o = rd_txn_snapshot_r[1];
-            12'h434: apb_prdata_o = wr_txn_snapshot_r[1];
-            12'h424: apb_prdata_o = rd_beat_snapshot_r[1];
-            12'h438: apb_prdata_o = wr_beat_snapshot_r[1];
-            12'h428: apb_prdata_o = {16'b0, max_snapshot_r[1]};
-            12'h42c: apb_prdata_o = sum_snapshot_r[1];
-            12'h430: apb_prdata_o = urg_snapshot_r[1];
-            12'h440: apb_prdata_o = rd_txn_snapshot_r[2];
-            12'h454: apb_prdata_o = wr_txn_snapshot_r[2];
-            12'h444: apb_prdata_o = rd_beat_snapshot_r[2];
-            12'h458: apb_prdata_o = wr_beat_snapshot_r[2];
-            12'h448: apb_prdata_o = {16'b0, max_snapshot_r[2]};
-            12'h44c: apb_prdata_o = sum_snapshot_r[2];
-            12'h450: apb_prdata_o = urg_snapshot_r[2];
-            12'h460: apb_prdata_o = rd_txn_snapshot_r[3];
-            12'h474: apb_prdata_o = wr_txn_snapshot_r[3];
-            12'h464: apb_prdata_o = rd_beat_snapshot_r[3];
-            12'h478: apb_prdata_o = wr_beat_snapshot_r[3];
-            12'h468: apb_prdata_o = {16'b0, max_snapshot_r[3]};
-            12'h46c: apb_prdata_o = sum_snapshot_r[3];
-            12'h470: apb_prdata_o = urg_snapshot_r[3];
-            12'h480: apb_prdata_o = rd_txn_snapshot_r[4];
-            12'h494: apb_prdata_o = wr_txn_snapshot_r[4];
-            12'h484: apb_prdata_o = rd_beat_snapshot_r[4];
-            12'h498: apb_prdata_o = wr_beat_snapshot_r[4];
-            12'h488: apb_prdata_o = {16'b0, max_snapshot_r[4]};
-            12'h48c: apb_prdata_o = sum_snapshot_r[4];
-            12'h490: apb_prdata_o = urg_snapshot_r[4];
-            12'h4a0: apb_prdata_o = rd_txn_snapshot_r[5];
-            12'h4b4: apb_prdata_o = wr_txn_snapshot_r[5];
-            12'h4a4: apb_prdata_o = rd_beat_snapshot_r[5];
-            12'h4b8: apb_prdata_o = wr_beat_snapshot_r[5];
-            12'h4a8: apb_prdata_o = {16'b0, max_snapshot_r[5]};
-            12'h4ac: apb_prdata_o = sum_snapshot_r[5];
-            12'h4b0: apb_prdata_o = urg_snapshot_r[5];
-            12'h4c0: apb_prdata_o = rd_txn_snapshot_r[6];
-            12'h4d4: apb_prdata_o = wr_txn_snapshot_r[6];
-            12'h4c4: apb_prdata_o = rd_beat_snapshot_r[6];
-            12'h4d8: apb_prdata_o = wr_beat_snapshot_r[6];
-            12'h4c8: apb_prdata_o = {16'b0, max_snapshot_r[6]};
-            12'h4cc: apb_prdata_o = sum_snapshot_r[6];
-            12'h4d0: apb_prdata_o = urg_snapshot_r[6];
-            12'h500: apb_prdata_o = dir_snapshot_r;
-            12'h504: apb_prdata_o = busy_snapshot_r;
-            12'h508: apb_prdata_o = window_snapshot_r;
+        read_group0_w = 32'd0;
+        case (read_addr0_r)
+            5'h00: read_group0_w = 32'h0008_0001;
+            5'h08: read_group0_w = {29'b0, irq_stat_r, !busy_i, busy_i};
+            5'h0c: read_group0_w = {30'b0, irq_en_r, 1'b0};
+            5'h10: read_group0_w = {30'b0, irq_stat_r, 1'b0};
+            5'h14: read_group0_w = {29'b0, err_type_r};
             default: begin end
         endcase
     end
+    reg [4:0] read_addr1_r /* synthesis syn_preserve=1 */;
+    reg read_select1_r;
+    reg [31:0] read_group1_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr1_r <= apb_paddr_i[4:0];
+            read_select1_r <= apb_paddr_i[11:5] == 7'd8;
+        end
+    end
+    always @(*) begin
+        read_group1_w = 32'd0;
+        case (read_addr1_r)
+            5'h00: read_group1_w = {28'b0, outst_total_o};
+            5'h04: read_group1_w = {24'b0, urg_max_o};
+            5'h08: read_group1_w = {16'b0, starve_cyc_o};
+            5'h0c: read_group1_w = {24'b0, dir_batch_o};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr2_r /* synthesis syn_preserve=1 */;
+    reg read_select2_r;
+    reg [31:0] read_group2_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr2_r <= apb_paddr_i[4:0];
+            read_select2_r <= apb_paddr_i[11:5] == 7'd9;
+        end
+    end
+    always @(*) begin
+        read_group2_w = 32'd0;
+        case (read_addr2_r)
+            5'h00: read_group2_w = {29'b0, err_port_r};
+            5'h04: read_group2_w = err_addr_r;
+            5'h08: read_group2_w = {29'b0, err_type_r};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr3_r /* synthesis syn_preserve=1 */;
+    reg read_select3_r;
+    reg [31:0] read_group3_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr3_r <= apb_paddr_i[4:0];
+            read_select3_r <= apb_paddr_i[11:5] == 7'd16;
+        end
+    end
+    always @(*) begin
+        read_group3_w = 32'd0;
+        case (read_addr3_r)
+            5'h00: read_group3_w = {28'b0, outst_rd_r[0]};
+            5'h04: read_group3_w = {28'b0, outst_wr_r[0]};
+            5'h08: read_group3_w = {28'b0, weight_r[0]};
+            5'h0c: read_group3_w = {23'b0, rate_r[0]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr4_r /* synthesis syn_preserve=1 */;
+    reg read_select4_r;
+    reg [31:0] read_group4_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr4_r <= apb_paddr_i[4:0];
+            read_select4_r <= apb_paddr_i[11:5] == 7'd17;
+        end
+    end
+    always @(*) begin
+        read_group4_w = 32'd0;
+        case (read_addr4_r)
+            5'h00: read_group4_w = {28'b0, outst_rd_r[1]};
+            5'h04: read_group4_w = {28'b0, outst_wr_r[1]};
+            5'h08: read_group4_w = {28'b0, weight_r[1]};
+            5'h0c: read_group4_w = {23'b0, rate_r[1]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr5_r /* synthesis syn_preserve=1 */;
+    reg read_select5_r;
+    reg [31:0] read_group5_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr5_r <= apb_paddr_i[4:0];
+            read_select5_r <= apb_paddr_i[11:5] == 7'd18;
+        end
+    end
+    always @(*) begin
+        read_group5_w = 32'd0;
+        case (read_addr5_r)
+            5'h00: read_group5_w = {28'b0, outst_rd_r[2]};
+            5'h04: read_group5_w = {28'b0, outst_wr_r[2]};
+            5'h08: read_group5_w = {28'b0, weight_r[2]};
+            5'h0c: read_group5_w = {23'b0, rate_r[2]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr6_r /* synthesis syn_preserve=1 */;
+    reg read_select6_r;
+    reg [31:0] read_group6_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr6_r <= apb_paddr_i[4:0];
+            read_select6_r <= apb_paddr_i[11:5] == 7'd19;
+        end
+    end
+    always @(*) begin
+        read_group6_w = 32'd0;
+        case (read_addr6_r)
+            5'h00: read_group6_w = {28'b0, outst_rd_r[3]};
+            5'h04: read_group6_w = {28'b0, outst_wr_r[3]};
+            5'h08: read_group6_w = {28'b0, weight_r[3]};
+            5'h0c: read_group6_w = {23'b0, rate_r[3]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr7_r /* synthesis syn_preserve=1 */;
+    reg read_select7_r;
+    reg [31:0] read_group7_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr7_r <= apb_paddr_i[4:0];
+            read_select7_r <= apb_paddr_i[11:5] == 7'd20;
+        end
+    end
+    always @(*) begin
+        read_group7_w = 32'd0;
+        case (read_addr7_r)
+            5'h00: read_group7_w = {28'b0, outst_rd_r[4]};
+            5'h04: read_group7_w = {28'b0, outst_wr_r[4]};
+            5'h08: read_group7_w = {28'b0, weight_r[4]};
+            5'h0c: read_group7_w = {23'b0, rate_r[4]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr8_r /* synthesis syn_preserve=1 */;
+    reg read_select8_r;
+    reg [31:0] read_group8_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr8_r <= apb_paddr_i[4:0];
+            read_select8_r <= apb_paddr_i[11:5] == 7'd21;
+        end
+    end
+    always @(*) begin
+        read_group8_w = 32'd0;
+        case (read_addr8_r)
+            5'h00: read_group8_w = {28'b0, outst_rd_r[5]};
+            5'h04: read_group8_w = {28'b0, outst_wr_r[5]};
+            5'h08: read_group8_w = {28'b0, weight_r[5]};
+            5'h0c: read_group8_w = {23'b0, rate_r[5]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr9_r /* synthesis syn_preserve=1 */;
+    reg read_select9_r;
+    reg [31:0] read_group9_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr9_r <= apb_paddr_i[4:0];
+            read_select9_r <= apb_paddr_i[11:5] == 7'd22;
+        end
+    end
+    always @(*) begin
+        read_group9_w = 32'd0;
+        case (read_addr9_r)
+            5'h00: read_group9_w = {28'b0, outst_rd_r[6]};
+            5'h04: read_group9_w = {28'b0, outst_wr_r[6]};
+            5'h08: read_group9_w = {28'b0, weight_r[6]};
+            5'h0c: read_group9_w = {23'b0, rate_r[6]};
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr10_r /* synthesis syn_preserve=1 */;
+    reg read_select10_r;
+    reg [31:0] read_group10_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr10_r <= apb_paddr_i[4:0];
+            read_select10_r <= apb_paddr_i[11:5] == 7'd32;
+        end
+    end
+    always @(*) begin
+        read_group10_w = 32'd0;
+        case (read_addr10_r)
+            5'h00: read_group10_w = rd_txn_snapshot_r[0];
+            5'h14: read_group10_w = wr_txn_snapshot_r[0];
+            5'h04: read_group10_w = rd_beat_snapshot_r[0];
+            5'h18: read_group10_w = wr_beat_snapshot_r[0];
+            5'h08: read_group10_w = {16'b0, max_snapshot_r[0]};
+            5'h0c: read_group10_w = sum_snapshot_r[0];
+            5'h10: read_group10_w = urg_snapshot_r[0];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr11_r /* synthesis syn_preserve=1 */;
+    reg read_select11_r;
+    reg [31:0] read_group11_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr11_r <= apb_paddr_i[4:0];
+            read_select11_r <= apb_paddr_i[11:5] == 7'd33;
+        end
+    end
+    always @(*) begin
+        read_group11_w = 32'd0;
+        case (read_addr11_r)
+            5'h00: read_group11_w = rd_txn_snapshot_r[1];
+            5'h14: read_group11_w = wr_txn_snapshot_r[1];
+            5'h04: read_group11_w = rd_beat_snapshot_r[1];
+            5'h18: read_group11_w = wr_beat_snapshot_r[1];
+            5'h08: read_group11_w = {16'b0, max_snapshot_r[1]};
+            5'h0c: read_group11_w = sum_snapshot_r[1];
+            5'h10: read_group11_w = urg_snapshot_r[1];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr12_r /* synthesis syn_preserve=1 */;
+    reg read_select12_r;
+    reg [31:0] read_group12_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr12_r <= apb_paddr_i[4:0];
+            read_select12_r <= apb_paddr_i[11:5] == 7'd34;
+        end
+    end
+    always @(*) begin
+        read_group12_w = 32'd0;
+        case (read_addr12_r)
+            5'h00: read_group12_w = rd_txn_snapshot_r[2];
+            5'h14: read_group12_w = wr_txn_snapshot_r[2];
+            5'h04: read_group12_w = rd_beat_snapshot_r[2];
+            5'h18: read_group12_w = wr_beat_snapshot_r[2];
+            5'h08: read_group12_w = {16'b0, max_snapshot_r[2]};
+            5'h0c: read_group12_w = sum_snapshot_r[2];
+            5'h10: read_group12_w = urg_snapshot_r[2];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr13_r /* synthesis syn_preserve=1 */;
+    reg read_select13_r;
+    reg [31:0] read_group13_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr13_r <= apb_paddr_i[4:0];
+            read_select13_r <= apb_paddr_i[11:5] == 7'd35;
+        end
+    end
+    always @(*) begin
+        read_group13_w = 32'd0;
+        case (read_addr13_r)
+            5'h00: read_group13_w = rd_txn_snapshot_r[3];
+            5'h14: read_group13_w = wr_txn_snapshot_r[3];
+            5'h04: read_group13_w = rd_beat_snapshot_r[3];
+            5'h18: read_group13_w = wr_beat_snapshot_r[3];
+            5'h08: read_group13_w = {16'b0, max_snapshot_r[3]};
+            5'h0c: read_group13_w = sum_snapshot_r[3];
+            5'h10: read_group13_w = urg_snapshot_r[3];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr14_r /* synthesis syn_preserve=1 */;
+    reg read_select14_r;
+    reg [31:0] read_group14_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr14_r <= apb_paddr_i[4:0];
+            read_select14_r <= apb_paddr_i[11:5] == 7'd36;
+        end
+    end
+    always @(*) begin
+        read_group14_w = 32'd0;
+        case (read_addr14_r)
+            5'h00: read_group14_w = rd_txn_snapshot_r[4];
+            5'h14: read_group14_w = wr_txn_snapshot_r[4];
+            5'h04: read_group14_w = rd_beat_snapshot_r[4];
+            5'h18: read_group14_w = wr_beat_snapshot_r[4];
+            5'h08: read_group14_w = {16'b0, max_snapshot_r[4]};
+            5'h0c: read_group14_w = sum_snapshot_r[4];
+            5'h10: read_group14_w = urg_snapshot_r[4];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr15_r /* synthesis syn_preserve=1 */;
+    reg read_select15_r;
+    reg [31:0] read_group15_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr15_r <= apb_paddr_i[4:0];
+            read_select15_r <= apb_paddr_i[11:5] == 7'd37;
+        end
+    end
+    always @(*) begin
+        read_group15_w = 32'd0;
+        case (read_addr15_r)
+            5'h00: read_group15_w = rd_txn_snapshot_r[5];
+            5'h14: read_group15_w = wr_txn_snapshot_r[5];
+            5'h04: read_group15_w = rd_beat_snapshot_r[5];
+            5'h18: read_group15_w = wr_beat_snapshot_r[5];
+            5'h08: read_group15_w = {16'b0, max_snapshot_r[5]};
+            5'h0c: read_group15_w = sum_snapshot_r[5];
+            5'h10: read_group15_w = urg_snapshot_r[5];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr16_r /* synthesis syn_preserve=1 */;
+    reg read_select16_r;
+    reg [31:0] read_group16_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr16_r <= apb_paddr_i[4:0];
+            read_select16_r <= apb_paddr_i[11:5] == 7'd38;
+        end
+    end
+    always @(*) begin
+        read_group16_w = 32'd0;
+        case (read_addr16_r)
+            5'h00: read_group16_w = rd_txn_snapshot_r[6];
+            5'h14: read_group16_w = wr_txn_snapshot_r[6];
+            5'h04: read_group16_w = rd_beat_snapshot_r[6];
+            5'h18: read_group16_w = wr_beat_snapshot_r[6];
+            5'h08: read_group16_w = {16'b0, max_snapshot_r[6]};
+            5'h0c: read_group16_w = sum_snapshot_r[6];
+            5'h10: read_group16_w = urg_snapshot_r[6];
+            default: begin end
+        endcase
+    end
+    reg [4:0] read_addr17_r /* synthesis syn_preserve=1 */;
+    reg read_select17_r;
+    reg [31:0] read_group17_w;
+    always @(posedge clk_i) begin
+        if (apb_psel_i && !apb_penable_i) begin
+            read_addr17_r <= apb_paddr_i[4:0];
+            read_select17_r <= apb_paddr_i[11:5] == 7'd40;
+        end
+    end
+    always @(*) begin
+        read_group17_w = 32'd0;
+        case (read_addr17_r)
+            5'h00: read_group17_w = dir_snapshot_r;
+            5'h04: read_group17_w = busy_snapshot_r;
+            5'h08: read_group17_w = window_snapshot_r;
+            default: begin end
+        endcase
+    end
+    always @(*) begin
+        apb_prdata_o = 32'd0;
+        apb_prdata_o = apb_prdata_o | (read_group0_w & {32{read_select0_r}});
+        apb_prdata_o = apb_prdata_o | (read_group1_w & {32{read_select1_r}});
+        apb_prdata_o = apb_prdata_o | (read_group2_w & {32{read_select2_r}});
+        apb_prdata_o = apb_prdata_o | (read_group3_w & {32{read_select3_r}});
+        apb_prdata_o = apb_prdata_o | (read_group4_w & {32{read_select4_r}});
+        apb_prdata_o = apb_prdata_o | (read_group5_w & {32{read_select5_r}});
+        apb_prdata_o = apb_prdata_o | (read_group6_w & {32{read_select6_r}});
+        apb_prdata_o = apb_prdata_o | (read_group7_w & {32{read_select7_r}});
+        apb_prdata_o = apb_prdata_o | (read_group8_w & {32{read_select8_r}});
+        apb_prdata_o = apb_prdata_o | (read_group9_w & {32{read_select9_r}});
+        apb_prdata_o = apb_prdata_o | (read_group10_w & {32{read_select10_r}});
+        apb_prdata_o = apb_prdata_o | (read_group11_w & {32{read_select11_r}});
+        apb_prdata_o = apb_prdata_o | (read_group12_w & {32{read_select12_r}});
+        apb_prdata_o = apb_prdata_o | (read_group13_w & {32{read_select13_r}});
+        apb_prdata_o = apb_prdata_o | (read_group14_w & {32{read_select14_r}});
+        apb_prdata_o = apb_prdata_o | (read_group15_w & {32{read_select15_r}});
+        apb_prdata_o = apb_prdata_o | (read_group16_w & {32{read_select16_r}});
+        apb_prdata_o = apb_prdata_o | (read_group17_w & {32{read_select17_r}});
+    end
 
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
             outst_total_o <= 4'd8;
             urg_max_o <= 8'd8;
             starve_cyc_o <= 16'd256;
@@ -389,31 +698,55 @@ module edrv32_mem_xbar_regs (
         end
     end
 
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             dir_switch_r <= 32'b0;
-            ds_busy_r <= 32'b0;
-            window_cyc_r <= 32'b0;
             dir_snapshot_r <= 32'b0;
-            busy_snapshot_r <= 32'b0;
-            window_snapshot_r <= 32'b0;
         end else begin
             if (snapshot_cmd_w[7]) begin
                 dir_snapshot_r <= dir_switch_r;
+            end
+            if (clear_group_w[21 + 0]) begin
+                dir_switch_r <= 32'b0;
+            end else begin
+                if (dir_switch_event_r) begin
+                    dir_switch_r <= count_inc(dir_switch_r, dir_switch_carry_r);
+                end
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
+            ds_busy_r <= 32'b0;
+            busy_snapshot_r <= 32'b0;
+        end else begin
+            if (snapshot_cmd_w[7]) begin
                 busy_snapshot_r <= ds_busy_r;
+            end
+            if (clear_group_w[21 + 1]) begin
+                ds_busy_r <= 32'b0;
+            end else begin
+                if (ds_busy_event_r) begin
+                    ds_busy_r <= count_inc(ds_busy_r, ds_busy_carry_r);
+                end
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
+            window_cyc_r <= 32'b0;
+            window_snapshot_r <= 32'b0;
+        end else begin
+            if (snapshot_cmd_w[7]) begin
                 window_snapshot_r <= window_cyc_r;
             end
-            if (clear_cmd_w[7]) begin
-                dir_switch_r <= 32'b0;
-                ds_busy_r <= 32'b0;
+            if (clear_group_w[21 + 2]) begin
                 window_cyc_r <= 32'b0;
             end else begin
-                if (window_event_r)
+                if (window_event_r) begin
                     window_cyc_r <= count_inc(window_cyc_r, window_cyc_carry_r);
-                if (ds_busy_event_r)
-                    ds_busy_r <= count_inc(ds_busy_r, ds_busy_carry_r);
-                if (dir_switch_event_r)
-                    dir_switch_r <= count_inc(dir_switch_r, dir_switch_carry_r);
+                end
             end
         end
     end
@@ -444,70 +777,97 @@ module edrv32_mem_xbar_regs (
             assign max_snapshot_r[stat_idx] = bank_max_snapshot_r;
             assign sum_snapshot_r[stat_idx] = bank_sum_snapshot_r;
             assign urg_snapshot_r[stat_idx] = bank_urg_snapshot_r;
-            always @(posedge clk_i or negedge rst_mem_stat_n_i[stat_idx]) begin
-                if (!rst_mem_stat_n_i[stat_idx]) begin
-                    bank_rd_txn_r <= 32'b0;
-                    bank_wr_txn_r <= 32'b0;
-                    bank_rd_beat_r <= 32'b0;
-                    bank_wr_beat_r <= 32'b0;
-                    bank_wait_max_r <= 16'b0;
-                    bank_wait_sum_r <= 32'b0;
-                    bank_urg_cnt_r <= 32'b0;
-                    bank_rd_txn_snapshot_r <= 32'b0;
-                    bank_wr_txn_snapshot_r <= 32'b0;
-                    bank_rd_beat_snapshot_r <= 32'b0;
-                    bank_wr_beat_snapshot_r <= 32'b0;
-                    bank_max_snapshot_r <= 16'b0;
-                    bank_sum_snapshot_r <= 32'b0;
-                    bank_urg_snapshot_r <= 32'b0;
-                end else begin
-                    if (snapshot_cmd_w[stat_idx]) begin
-                        bank_rd_txn_snapshot_r <= bank_rd_txn_r;
-                        bank_wr_txn_snapshot_r <= bank_wr_txn_r;
-                        bank_rd_beat_snapshot_r <= bank_rd_beat_r;
-                        bank_wr_beat_snapshot_r <= bank_wr_beat_r;
-                        bank_max_snapshot_r <= bank_wait_max_r;
-                        bank_sum_snapshot_r <= bank_wait_sum_r;
-                        bank_urg_snapshot_r <= bank_urg_cnt_r;
-                    end
-                    if (clear_cmd_w[stat_idx]) begin
-                        bank_rd_txn_r <= 32'b0;
-                        bank_wr_txn_r <= 32'b0;
-                        bank_rd_beat_r <= 32'b0;
-                        bank_wr_beat_r <= 32'b0;
-                        bank_wait_max_r <= 16'b0;
-                        bank_wait_sum_r <= 32'b0;
-                        bank_urg_cnt_r <= 32'b0;
+            // Independent control copies preserve the original D, enable and effective edge.
+    always @(posedge clk_i or negedge rst_mem_stat_n_i[stat_idx*3+0]) begin
+        if (!rst_mem_stat_n_i[stat_idx*3+0]) begin
+            bank_rd_txn_r <= 32'b0;
+            bank_rd_beat_r <= 32'b0;
+            bank_rd_txn_snapshot_r <= 32'b0;
+            bank_rd_beat_snapshot_r <= 32'b0;
+        end else begin
+            if (snapshot_cmd_w[stat_idx]) begin
+                bank_rd_txn_snapshot_r <= bank_rd_txn_r;
+                bank_rd_beat_snapshot_r <= bank_rd_beat_r;
+            end
+            if (clear_group_w[stat_idx*3 + 0]) begin
+                bank_rd_txn_r <= 32'b0;
+                bank_rd_beat_r <= 32'b0;
+            end else begin
+                if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
+                    if (grant_write_event_r) begin
                     end else begin
-                        if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
-                            if (grant_write_event_r) begin
-                                bank_wr_txn_r <=
-                                count_inc(bank_wr_txn_r, wr_txn_carry_r[stat_idx]);
-                                bank_wr_beat_r <=
-                                    sat_add(bank_wr_beat_r, {27'b0, grant_beats_event_r});
-                            end else begin
-                                bank_rd_txn_r <=
-                                count_inc(bank_rd_txn_r, rd_txn_carry_r[stat_idx]);
-                                bank_rd_beat_r <=
-                                    sat_add(bank_rd_beat_r, {27'b0, grant_beats_event_r});
-                            end
-                            bank_wait_sum_r <=
-                                sat_add(bank_wait_sum_r, {16'b0, grant_wait_event_r});
-                            if (grant_wait_event_r > bank_wait_max_r) begin
-                                bank_wait_max_r <= grant_wait_event_r;
-                            end
-                            if (grant_urgent_event_r) begin
-                                bank_urg_cnt_r <=
-                                count_inc(bank_urg_cnt_r, urg_cnt_carry_r[stat_idx]);
-                            end
-                        end
+                        bank_rd_txn_r <=
+                            count_inc(bank_rd_txn_r, rd_txn_carry_r[stat_idx]);
+                        bank_rd_beat_r <=
+                            sat_add(bank_rd_beat_r, {27'b0, grant_beats_event_r});
                     end
                 end
             end
         end
+    end
+    always @(posedge clk_i or negedge rst_mem_stat_n_i[stat_idx*3+1]) begin
+        if (!rst_mem_stat_n_i[stat_idx*3+1]) begin
+            bank_wr_txn_r <= 32'b0;
+            bank_wr_beat_r <= 32'b0;
+            bank_wr_txn_snapshot_r <= 32'b0;
+            bank_wr_beat_snapshot_r <= 32'b0;
+        end else begin
+            if (snapshot_cmd_w[stat_idx]) begin
+                bank_wr_txn_snapshot_r <= bank_wr_txn_r;
+                bank_wr_beat_snapshot_r <= bank_wr_beat_r;
+            end
+            if (clear_group_w[stat_idx*3 + 1]) begin
+                bank_wr_txn_r <= 32'b0;
+                bank_wr_beat_r <= 32'b0;
+            end else begin
+                if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
+                    if (grant_write_event_r) begin
+                        bank_wr_txn_r <=
+                            count_inc(bank_wr_txn_r, wr_txn_carry_r[stat_idx]);
+                        bank_wr_beat_r <=
+                            sat_add(bank_wr_beat_r, {27'b0, grant_beats_event_r});
+                    end
+                end
+            end
+        end
+    end
+    always @(posedge clk_i or negedge rst_mem_stat_n_i[stat_idx*3+2]) begin
+        if (!rst_mem_stat_n_i[stat_idx*3+2]) begin
+            bank_wait_max_r <= 16'b0;
+            bank_wait_sum_r <= 32'b0;
+            bank_urg_cnt_r <= 32'b0;
+            bank_max_snapshot_r <= 16'b0;
+            bank_sum_snapshot_r <= 32'b0;
+            bank_urg_snapshot_r <= 32'b0;
+        end else begin
+            if (snapshot_cmd_w[stat_idx]) begin
+                bank_max_snapshot_r <= bank_wait_max_r;
+                bank_sum_snapshot_r <= bank_wait_sum_r;
+                bank_urg_snapshot_r <= bank_urg_cnt_r;
+            end
+            if (clear_group_w[stat_idx*3 + 2]) begin
+                bank_wait_max_r <= 16'b0;
+                bank_wait_sum_r <= 32'b0;
+                bank_urg_cnt_r <= 32'b0;
+            end else begin
+                if (grant_event_r && grant_port_event_r == stat_idx[2:0]) begin
+                    bank_wait_sum_r <=
+                        sat_add(bank_wait_sum_r, {16'b0, grant_wait_event_r});
+                    if (grant_wait_event_r > bank_wait_max_r) begin
+                        bank_wait_max_r <= grant_wait_event_r;
+                    end
+                    if (grant_urgent_event_r) begin
+                        bank_urg_cnt_r <=
+                            count_inc(bank_urg_cnt_r, urg_cnt_carry_r[stat_idx]);
+                    end
+                end
+            end
+        end
+    end
+        end
     endgenerate
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_n_i[1]) begin
+        if (!rst_n_i[1]) begin
             grant_event_r <= 1'b0;
             dir_switch_event_r <= 1'b0;
             ds_busy_event_r <= 1'b0;
@@ -532,17 +892,31 @@ module edrv32_mem_xbar_regs (
         for (bank = 0; bank < 8; bank = bank + 1) begin : g_stat_command
             reg snapshot_r /* synthesis syn_preserve=1 */;
             reg clear_r /* synthesis syn_preserve=1 */;
+            reg clear1_r /* synthesis syn_preserve=1 */;
+            reg clear2_r /* synthesis syn_preserve=1 */;
+            assign clear_group_w[bank*3+1] = clear1_r;
+            assign clear_group_w[bank*3+2] = clear2_r;
             assign snapshot_cmd_w[bank] = snapshot_r;
-            assign clear_cmd_w[bank] = clear_r;
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i) begin
+            if (bank < 7) begin : g_port_clear
+                assign clear_cmd_w[bank] = clear_group_w[bank*3];
+            end
+            assign clear_group_w[bank*3] = clear_r;
+            always @(posedge clk_i or negedge rst_n_i[2]) begin
+                if (!rst_n_i[2]) begin
                     snapshot_r <= 1'b0;
                     clear_r <= 1'b0;
+                    clear1_r <= 1'b0;
+                    clear2_r <= 1'b0;
                 end else begin
                     snapshot_r <= snapshot_w;
                     clear_r <= clear_w;
+                    clear1_r <= clear_w;
+                    clear2_r <= clear_w;
                 end
             end
         end
     endgenerate
+
+
+
 endmodule

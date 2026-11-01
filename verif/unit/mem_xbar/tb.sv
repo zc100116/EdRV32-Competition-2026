@@ -71,8 +71,8 @@ module tb;
     edrv32_mem_xbar dut (
         .clk_i(clk),
         .rst_n_i(rst_n),
-        .rst_mem_regs_n_i(rst_n),
-        .rst_mem_stat_n_i({7{rst_n}}),
+        .rst_mem_regs_n_i({3{rst_n}}),
+        .rst_mem_stat_n_i({21{rst_n}}),
         .p0_arid_i(arid[0 +: 1]),
         .p0_araddr_i(araddr[0 +: 32]),
         .p0_arlen_i(arlen[0 +: 4]),
@@ -1307,11 +1307,11 @@ module tb;
         reset;
         @(negedge clk);
         dut.u_regs.g_stat_idx[0].bank_rd_txn_r = 32'h0000_fffe;
-        dut.u_regs.rd_beat_r[0] = 32'h0000_fffe;
-        dut.u_regs.wr_txn_r[1] = 32'h0000_fffe;
-        dut.u_regs.wr_beat_r[1] = 32'h0000_fffe;
-        dut.u_regs.wait_sum_r[0] = 32'h0000_fffe;
-        dut.u_regs.urg_cnt_r[0] = 32'h0000_fffe;
+        dut.u_regs.g_stat_idx[0].bank_rd_beat_r = 32'h0000_fffe;
+        dut.u_regs.g_stat_idx[1].bank_wr_txn_r = 32'h0000_fffe;
+        dut.u_regs.g_stat_idx[1].bank_wr_beat_r = 32'h0000_fffe;
+        dut.u_regs.g_stat_idx[0].bank_wait_sum_r = 32'h0000_fffe;
+        dut.u_regs.g_stat_idx[0].bank_urg_cnt_r = 32'h0000_fffe;
         dut.u_regs.dir_switch_r = 32'h0000_fffe;
         dut.u_regs.ds_busy_r = 32'h0000_fffe;
         dut.u_regs.window_cyc_r = 32'h0000_fffe;
@@ -1408,12 +1408,12 @@ module tb;
         // No RTL test parameters: inject real counter state while the clock is low.
         @(negedge clk);
         dut.u_regs.g_stat_idx[0].bank_rd_txn_r = 32'hffff_fffe;
-        dut.u_regs.rd_beat_r[0] = 32'hffff_fffe;
-        dut.u_regs.wr_txn_r[1] = 32'hffff_fffe;
-        dut.u_regs.wr_beat_r[1] = 32'hffff_fffe;
-        dut.u_regs.wait_sum_r[0] = 32'hffff_fffe;
-        dut.u_regs.wait_max_r[0] = 16'hffff;
-        dut.u_regs.urg_cnt_r[0] = 32'hffff_fffe;
+        dut.u_regs.g_stat_idx[0].bank_rd_beat_r = 32'hffff_fffe;
+        dut.u_regs.g_stat_idx[1].bank_wr_txn_r = 32'hffff_fffe;
+        dut.u_regs.g_stat_idx[1].bank_wr_beat_r = 32'hffff_fffe;
+        dut.u_regs.g_stat_idx[0].bank_wait_sum_r = 32'hffff_fffe;
+        dut.u_regs.g_stat_idx[0].bank_wait_max_r = 16'hffff;
+        dut.u_regs.g_stat_idx[0].bank_urg_cnt_r = 32'hffff_fffe;
         dut.u_regs.dir_switch_r = 32'hffff_fffe;
         dut.u_regs.ds_busy_r = 32'hffff_fffe;
         dut.u_regs.window_cyc_r = 32'hffff_fffe;

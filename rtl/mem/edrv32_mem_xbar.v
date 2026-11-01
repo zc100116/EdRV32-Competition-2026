@@ -11,8 +11,8 @@ module edrv32_mem_xbar (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire rst_mem_regs_n_i,
-    input wire [6:0] rst_mem_stat_n_i,
+    input wire [2:0] rst_mem_regs_n_i,
+    input wire [20:0] rst_mem_stat_n_i,
     // p0 upstream.
     input wire p0_arid_i,
     input wire [31:0] p0_araddr_i,

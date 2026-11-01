@@ -234,21 +234,26 @@ module edrv32_mem_subsys (
 );
 
     // SoC 5.3: one preserved reset copy per destination region.
-    wire rst_mem_regs_n_w;
+    wire [2:0] rst_mem_regs_n_w;
     wire rst_sys_gateway_n_w;
     wire rst_mem_core_ctrl_n_w;
-    wire rst_mem_stat0_n_w;
-    wire rst_mem_stat1_n_w;
-    wire rst_mem_stat2_n_w;
-    wire rst_mem_stat3_n_w;
-    wire rst_mem_stat4_n_w;
-    wire rst_mem_stat5_n_w;
-    wire rst_mem_stat6_n_w;
-    edrv32_reset_copy u_reset_mem_regs_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_regs_n_w)
-    );
+    wire [2:0] rst_mem_stat0_n_w;
+    wire [2:0] rst_mem_stat1_n_w;
+    wire [2:0] rst_mem_stat2_n_w;
+    wire [2:0] rst_mem_stat3_n_w;
+    wire [2:0] rst_mem_stat4_n_w;
+    wire [2:0] rst_mem_stat5_n_w;
+    wire [2:0] rst_mem_stat6_n_w;
+    genvar reset_regs;
+    generate
+        for (reset_regs = 0; reset_regs < 3; reset_regs = reset_regs + 1) begin : g_reset_regs
+            edrv32_reset_copy u_reset_mem_regs_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_regs_n_w[reset_regs])
+            );
+        end
+    endgenerate
     edrv32_reset_copy u_reset_sys_gateway_n (
         .clk_i(clk_sys_i),
         .rst_n_i(rst_sys_n_i),
@@ -259,41 +264,76 @@ module edrv32_mem_subsys (
         .rst_n_i(rst_mem_core_n_i),
         .rst_n_o(rst_mem_core_ctrl_n_w)
     );
-    edrv32_reset_copy u_reset_mem_stat0_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat0_n_w)
-    );
-    edrv32_reset_copy u_reset_mem_stat1_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat1_n_w)
-    );
-    edrv32_reset_copy u_reset_mem_stat2_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat2_n_w)
-    );
-    edrv32_reset_copy u_reset_mem_stat3_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat3_n_w)
-    );
-    edrv32_reset_copy u_reset_mem_stat4_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat4_n_w)
-    );
-    edrv32_reset_copy u_reset_mem_stat5_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat5_n_w)
-    );
-    edrv32_reset_copy u_reset_mem_stat6_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_core_n_i),
-        .rst_n_o(rst_mem_stat6_n_w)
-    );
+    genvar reset_stat0;
+    generate
+        for (reset_stat0 = 0; reset_stat0 < 3; reset_stat0 = reset_stat0 + 1) begin : g_reset_stat0
+            edrv32_reset_copy u_reset_mem_stat0_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat0_n_w[reset_stat0])
+            );
+        end
+    endgenerate
+    genvar reset_stat1;
+    generate
+        for (reset_stat1 = 0; reset_stat1 < 3; reset_stat1 = reset_stat1 + 1) begin : g_reset_stat1
+            edrv32_reset_copy u_reset_mem_stat1_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat1_n_w[reset_stat1])
+            );
+        end
+    endgenerate
+    genvar reset_stat2;
+    generate
+        for (reset_stat2 = 0; reset_stat2 < 3; reset_stat2 = reset_stat2 + 1) begin : g_reset_stat2
+            edrv32_reset_copy u_reset_mem_stat2_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat2_n_w[reset_stat2])
+            );
+        end
+    endgenerate
+    genvar reset_stat3;
+    generate
+        for (reset_stat3 = 0; reset_stat3 < 3; reset_stat3 = reset_stat3 + 1) begin : g_reset_stat3
+            edrv32_reset_copy u_reset_mem_stat3_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat3_n_w[reset_stat3])
+            );
+        end
+    endgenerate
+    genvar reset_stat4;
+    generate
+        for (reset_stat4 = 0; reset_stat4 < 3; reset_stat4 = reset_stat4 + 1) begin : g_reset_stat4
+            edrv32_reset_copy u_reset_mem_stat4_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat4_n_w[reset_stat4])
+            );
+        end
+    endgenerate
+    genvar reset_stat5;
+    generate
+        for (reset_stat5 = 0; reset_stat5 < 3; reset_stat5 = reset_stat5 + 1) begin : g_reset_stat5
+            edrv32_reset_copy u_reset_mem_stat5_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat5_n_w[reset_stat5])
+            );
+        end
+    endgenerate
+    genvar reset_stat6;
+    generate
+        for (reset_stat6 = 0; reset_stat6 < 3; reset_stat6 = reset_stat6 + 1) begin : g_reset_stat6
+            edrv32_reset_copy u_reset_mem_stat6_n (
+                .clk_i(clk_mem_i),
+                .rst_n_i(rst_mem_core_n_i),
+                .rst_n_o(rst_mem_stat6_n_w[reset_stat6])
+            );
+        end
+    endgenerate
 
 
     // p2 internal AXI256 connections.
