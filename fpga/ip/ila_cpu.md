@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 用途 | 1. 用硬件计数器核对 CoreMark 的实际周期数、指令数和 HPM 事件，与串口打印对照；2. 竞赛要求"利用 ILA 抓取的波形图，分析 CPU 在执行 CoreMark 关键算法时的流水线效率"（`docs/reference/2026-ziguang-guide.md` 技术实现与文档 (2)） |
-| 观察对象 | A 组：cpu-spec 7.1 的现有计数器（CSR 内部寄存器）；B 组：cpu-spec 7.2 的 `debug_o[63:0]`，在 B3F 顶层寄存一拍，寄存器为 `ila_cpu_r[63:0]`。计数器方案和 CPU RTL 都不改 |
+| 观察对象 | A 组：cpu-spec 7.1 的现有计数器（CSR 内部寄存器；T-FANOUT-CPU 之后 HPM 计数器位于 `u_csr/g_counter[2..9].g_hpm.count_r`，mcycle/minstret 仍为 `cycle_r`/`instret_r`）；B 组：cpu-spec 7.2 的 `debug_o[63:0]`，在 B3F 顶层寄存一拍，寄存器为 `ila_cpu_r[63:0]`。计数器方案和 CPU RTL 都不改 |
 | 插入方式 | PDS 的调试核插入工具（Inserter），在综合之后、Device Map 之前从综合网表中选信号；不使用 IP Compiler |
 | 器件 | PG2L200H-6 FBB676，PDS 2022.2-SP6.1 |
 | 首次使用 | 卡 31。GUI 的具体菜单路径由 Windows Codex 按本机 PDS 自带的调试工具用户指南确认，写进 result.md 后回填到本说明 |
@@ -29,7 +29,7 @@
 |---|---|---|---|
 | `mcycle` | `cycle_r` | [39:0] | 周期数 |
 | `minstret` | `instret_r` | [39:0] | 退休指令数 |
-| `hpm3` … `hpm10` | `counter_r[0]` … `counter_r[7]` | [39:0] | mhpmcounter3–10，统计哪种事件由 mhpmevent3–10 决定 |
+| `hpm3` … `hpm10` | `g_counter[2].g_hpm.count_r` … `g_counter[9].g_hpm.count_r` | [39:0] | mhpmcounter3–10，统计哪种事件由 mhpmevent3–10 决定 |
 
 monitor 的 CoreMark 测量（`sw/apps/monitor/benchmark.c`、`hpm.c`）已经分两轮配置事件：第 1 轮事件 1–8，第 2 轮事件 9–16。每轮开始前把 mcycle、minstret 和 HPM 清零，用 `mcountinhibit` 只在 `iterate()` 期间计数，结束后把每个计数器从串口打印出来。软件不需要修改。
 
