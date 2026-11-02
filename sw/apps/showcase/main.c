@@ -12,7 +12,7 @@ static const struct app *active;
 static const struct app *requested;
 static uint8_t returning;
 static uint8_t stopping;
-static uint8_t paused;
+static volatile uint8_t paused;
 static uint32_t step_events;
 static uint32_t input_keys;
 static struct virtual_input_state previous_virtual;

@@ -1,6 +1,6 @@
 /* File: display_irq.c
  * Spec: showcase design 4.4; SoC 7.3 R3; rnd-spec 5.4; disp-spec 5.3.
- * Description: Exercise real drivers with delayed DONE/FRAME/SWITCH and DMA snapshots.
+ * Description: Exercise real drivers with delayed DONE/SWITCH without an extra FRAME and DMA snapshots.
  * Clock domain: host test events.
  */
 #define _GNU_SOURCE
@@ -106,14 +106,6 @@ static void render_complete(void)
     rnd_irq_handle();
 }
 
-static void submit_at_frame(void)
-{
-    disp_regs[EDRV32_DISP_IRQ_STAT_OFFSET / 4] = EDRV32_DISP_IRQ_STAT_FRAME_MASK;
-    struct engine_event event = engine_poll(ENGINE_DISP);
-    nes_display_disp_irq(&event, NULL);
-    engine_irq_clear(ENGINE_DISP, event.irq);
-}
-
 static uint32_t switch_frame(void)
 {
     uint32_t released = disp_current(DISP_L0);
@@ -137,6 +129,8 @@ int main(void)
     assert(disp_regs[EDRV32_DISP_LAYER_CTRL_OFFSET / 4] == 1);
     disp_regs[EDRV32_DISP_CUR_BASE_OFFSET / 4] =
         disp_regs[EDRV32_DISP_NEXT_BASE_OFFSET / 4];
+    struct engine_event initial = {.irq = EDRV32_DISP_IRQ_STAT_FRAME_MASK};
+    nes_display_disp_irq(&initial, NULL);
     memset(pixels, 7, sizeof(pixels));
     palette[7] = (struct nes_rgb){12, 34, 56};
     nes_display_frame(pixels, palette);
@@ -151,9 +145,10 @@ int main(void)
     nes_display_frame(pixels, palette);
     assert(submissions == 1 && nes_shown == 0);
     render_complete();
+    /* DONE directly submits the complete back buffer: no FRAME is needed. */
+    assert(disp_regs[EDRV32_DISP_NEXT_BASE_OFFSET / 4] == last_command->word[1]);
     nes_display_frame(pixels, palette);
     assert(submissions == 1);
-    submit_at_frame();
     nes_display_frame(pixels, palette);
     assert(submissions == 1 && nes_shown == 0);
     uint32_t released = switch_frame();
@@ -167,7 +162,6 @@ int main(void)
     nes_display_frame(pixels, palette);
     assert(palette_snapshot[7] == 0xff0c2238 && palette_cleans == 1);
     render_complete();
-    submit_at_frame();
     released = switch_frame();
     assert(submissions == 2 && nes_shown == 2);
     nes_display_frame(pixels, palette);
@@ -178,6 +172,6 @@ int main(void)
     assert(nes_display_idle());
     nes_display_frame(pixels, palette);
     assert(submissions == 3);
-    puts("PASS IRQ NES ownership: busy skips, snapshots, palette changes, DONE/FRAME/SWITCH");
+    puts("PASS IRQ NES ownership: busy skips, snapshots, palette changes, DONE/SWITCH without an extra FRAME");
     return 0;
 }

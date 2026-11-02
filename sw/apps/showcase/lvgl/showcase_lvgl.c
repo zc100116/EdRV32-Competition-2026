@@ -285,8 +285,8 @@ static void log_message(lv_log_level_t level, const char *text)
 
 static uint32_t dirty_bytes;
 static bool clean_all_needed;
-static bool flush_pending;
-static bool flush_submitted;
+static volatile bool flush_pending;
+static volatile bool scan_started;
 static const uint16_t *pending_pixels;
 static volatile uint32_t display_events;
 
@@ -306,15 +306,21 @@ static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
         if (clean_all_needed) cache_clean_all();
         pending_pixels = (const uint16_t *)pixels;
         flush_pending = true;
-        flush_submitted = false;
         dirty_bytes = 0;
         clean_all_needed = false;
-        /* FRAME ISR wakes GUI; flush returns while DISP still owns front. */
+        /* Stride and geometry stay fixed; only the next base changes. The
+         * SWITCH IRQ releases front and resumes this asynchronous flush. */
+        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_NEXT_BASE_OFFSET,
+                     rnd_physical(pending_pixels));
     } else lv_display_flush_ready(disp);
 }
 void showcase_gui_disp_event(uint32_t irq)
 {
-    if (!flush_pending) return;
+    if (!scan_started && (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) {
+        scan_started = true;
+        sched_signal(&gui_task, 1);
+    }
+    if (!flush_pending || !(irq & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) return;
     display_events |= irq;
     sched_signal(&gui_task, 1);
 }
@@ -410,21 +416,18 @@ uint32_t showcase_gui_frames(void) { return flush_count; }
 void showcase_gui_step(struct sched_task *task)
 {
     sched_take(task);
-    if (showcase_gui_paused()) return;
+    if (showcase_gui_paused() || !scan_started) return;
     uint32_t state = virtual_input_lock();
     uint32_t events = display_events;
     display_events = 0;
     virtual_input_unlock(state);
     if (flush_pending) {
-        if (flush_submitted && (events & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) {
+        if (events & EDRV32_DISP_IRQ_STAT_SWITCH_MASK) {
             front = pending_pixels;
             flush_pending = false;
             ++flush_count;
             if (flush_count == 1) platform_puts("showcase first frame\r\n");
             lv_display_flush_ready(display);
-        } else if (!flush_submitted && (events & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) {
-            disp_submit(DISP_L0, rnd_physical(pending_pixels), STRIDE);
-            flush_submitted = true;
         }
         if (flush_pending) return;
     }
@@ -440,6 +443,8 @@ void showcase_gui_restore(void)
      * scan, the complete pending image becomes front even without SWITCH. */
     if (flush_pending) front = pending_pixels;
     flush_pending = false;
+    /* First enabled FRAME has no SWITCH; establish front before drawing back. */
+    scan_started = false;
     display_events = 0;
     lv_display_flush_ready(display);
     cache_clean_all();

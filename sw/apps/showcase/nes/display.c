@@ -16,7 +16,7 @@ _Alignas(64) static struct rnd_command command_storage;
 static struct rnd_command *command;
 static struct rnd_range sources[2];
 static unsigned back;
-static volatile enum { DISPLAY_FREE, DISPLAY_RENDERING, DISPLAY_READY,
+static volatile enum { DISPLAY_STARTING, DISPLAY_FREE, DISPLAY_RENDERING,
                        DISPLAY_SWITCH, DISPLAY_STOPPED } phase;
 static volatile uint32_t rnd_error;
 static volatile uint32_t disp_error;
@@ -27,13 +27,21 @@ void nes_display_rnd_irq(const struct rnd_result *result, void *context)
     rnd_error = result->error;
     if (result->irq & EDRV32_RND_IRQ_STAT_ERROR_MASK)
         rnd_error = result->error ? result->error : UINT32_MAX;
-    if (phase == DISPLAY_RENDERING)
-        phase = DISPLAY_READY;
+    if (!rnd_error && phase == DISPLAY_RENDERING) {
+        /* DISP 5.3: stride/geometry are fixed for this owner. Updating the
+         * single NEXT_BASE word needs no extra FRAME rendezvous. */
+        phase = DISPLAY_SWITCH;
+        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_NEXT_BASE_OFFSET,
+                     rnd_physical(surfaces[back]));
+    }
 }
 
 void nes_display_disp_irq(const struct engine_event *event, void *context)
 {
     (void)context;
+    /* DISP 5.3: first enabled FRAME establishes CUR_BASE without SWITCH. */
+    if (phase == DISPLAY_STARTING && (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK))
+        phase = DISPLAY_FREE;
     if (event->irq & EDRV32_DISP_IRQ_STAT_ERROR_MASK)
         disp_error = event->error ? event->error : UINT32_MAX;
     if (phase == DISPLAY_SWITCH && (event->irq & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) {
@@ -41,10 +49,6 @@ void nes_display_disp_irq(const struct engine_event *event, void *context)
                                  NES_SCREEN_BYTES);
         ++nes_shown;
         phase = DISPLAY_FREE;
-    }
-    if (phase == DISPLAY_READY && (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) {
-        disp_submit(DISP_L0, rnd_physical(surfaces[back]), NES_SCREEN_STRIDE);
-        phase = DISPLAY_SWITCH;
     }
 }
 
@@ -70,7 +74,7 @@ void nes_display_init(void)
     back = 1;
     rnd_error = 0;
     disp_error = 0;
-    phase = DISPLAY_FREE;
+    phase = DISPLAY_STARTING;
     engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
     cache_clean_invalidate((uintptr_t)&command_storage, sizeof(command_storage));
     command = (struct rnd_command *)((uintptr_t)&command_storage - EDRV32_DDR_BASE +
