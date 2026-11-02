@@ -375,7 +375,8 @@ swap_load_rs1_consumer:
 swap_load_rs2_producer:
     lw a2, 0(a4)
 swap_load_rs2_entry:
-    addi a3, zero, 42
+    # Hold both consumers until the producer result reaches its specified bypass stage.
+    addi a3, a2, 42
 swap_load_rs2_consumer:
     mul a6, a1, a2
     CHECK a6, 52
@@ -403,7 +404,8 @@ swap_mul_rs1_consumer:
 swap_mul_rs2_producer:
     mul a2, a0, a1
 swap_mul_rs2_entry:
-    addi a3, zero, 42
+    # Hold both consumers until the producer result reaches its specified bypass stage.
+    addi a3, a2, 42
 swap_mul_rs2_consumer:
     mul a6, a1, a2
     CHECK a6, 52
