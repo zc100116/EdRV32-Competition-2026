@@ -11,6 +11,7 @@ import time
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 from tools.regress import expand_files  # noqa: E402
+from tools.elf2mem import convert  # noqa: E402
 HERE = Path(__file__).resolve().parent
 OUT = ROOT / 'build/board_showcase'
 
@@ -23,7 +24,21 @@ def command(args, name):
 
 def main():
     command(['make', '-C', 'sw', 'PROGRAM=showcase'], 'software.log')
-    blob = (ROOT / 'build/sw/showcase/showcase.elf').read_bytes()
+    games = OUT / 'games'
+    games.mkdir(parents=True, exist_ok=True)
+    (games / 'test.nes').write_bytes(
+        (ROOT / 'sw/apps/nes/roms/nrom-template.nes').read_bytes())
+    (games / 'games.txt').write_text('测试游戏|test.nes|\n')
+    elf = OUT / 'showcase-games.elf'
+    command(['python3', 'tools/sw/pack_games.py',
+             'build/sw/showcase/showcase.elf', str(games), str(elf)], 'pack.log')
+    convert(elf, OUT / 'image')
+    blob = elf.read_bytes()
+    symbols = subprocess.check_output(['riscv-none-elf-nm', '-S', str(elf)], text=True)
+    surface = next(line.split() for line in symbols.splitlines()
+                   if line.split()[-1] == 'surfaces')
+    surface_base = int(surface[0], 16) - 0x80000000
+    surface_bytes = int(surface[1], 16)
     entry = struct.unpack_from('<I', blob, 24)[0]
     # Two real RV32 instructions at ROM reset: LUI t0, entry; JALR zero,t0,lo.
     upper = (entry + 0x800) >> 12
@@ -41,7 +56,9 @@ def main():
              '-o', 'sim'] + common, 'compile.log')
     start = time.monotonic()
     command([str(obj / 'sim'), '+ROM_HEX=' + str(rom),
-             '+DDR_HEX=' + str(ROOT / 'build/sw/showcase/ddr.hex')], 'simulation.log')
+             '+DDR_HEX=' + str(OUT / 'image/ddr.hex'),
+             f'+NES_BASE={surface_base:08x}', f'+NES_BYTES={surface_bytes:08x}'],
+            'simulation.log')
     if 'PASS board_showcase' not in (OUT / 'simulation.log').read_text():
         raise RuntimeError('board_showcase missing PASS')
     print(f'PASS board_showcase simulation={time.monotonic() - start:.2f}s')

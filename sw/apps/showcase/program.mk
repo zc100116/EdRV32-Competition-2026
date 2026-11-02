@@ -12,3 +12,4 @@ PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c \
 CFLAGS_EXTRA := -I$(ROOT)/sw/lib -I$(ROOT)/sw/lib/sched -I$(ROOT)/sw/boot \
     -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/apps/showcase
 include $(ROOT)/sw/apps/showcase/lvgl/program.mk
+include $(ROOT)/sw/apps/showcase/nes/program.mk

@@ -10,7 +10,7 @@
 #include "edrv32.h"
 #include "uart.h"
 
-static unsigned char heap[2 * 1024 * 1024] __attribute__((aligned(16)));
+static unsigned char heap[2 * 1024 * 1024] __attribute__((aligned(16), section(".noinit")));
 static ptrdiff_t heap_used;
 
 void *_sbrk(ptrdiff_t increment)

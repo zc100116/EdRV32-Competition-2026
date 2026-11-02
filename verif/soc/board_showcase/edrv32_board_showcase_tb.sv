@@ -20,6 +20,15 @@ module edrv32_board_showcase_tb;
     integer launcher_count = 0;
     bit first_frame = 0;
     bit application_entered = 0;
+    bit nes_entered = 0;
+    reg [31:0] nes_base;
+    reg [31:0] nes_bytes;
+    reg [31:0] last_surface;
+    integer nes_switches = 0;
+    initial begin
+        if (!$value$plusargs("NES_BASE=%h", nes_base)) $fatal(1, "NES_BASE required");
+        if (!$value$plusargs("NES_BYTES=%h", nes_bytes)) $fatal(1, "NES_BYTES required");
+    end
     bit rnd_irq = 0;
     bit cpu_irq = 0;
 
@@ -108,6 +117,12 @@ module edrv32_board_showcase_tb;
     always @(posedge u_board.clk_sys_w) begin
         if (u_board.irq_src_w[11]) rnd_irq <= 1;
         if (u_board.irq_meip_w) cpu_irq <= 1;
+        last_surface <= u_board.u_disp.u_regs.cur_base_r;
+        if (u_board.u_disp.u_regs.cur_base_r != last_surface &&
+            last_surface >= nes_base && last_surface < nes_base + nes_bytes &&
+            u_board.u_disp.u_regs.cur_base_r >= nes_base &&
+            u_board.u_disp.u_regs.cur_base_r < nes_base + nes_bytes)
+            nes_switches <= nes_switches + 1;
     end
     initial begin : receive
         string line_text;
@@ -122,6 +137,7 @@ module edrv32_board_showcase_tb;
                 if (line_text == "showcase launcher") launcher_count++;
                 if (line_text == "showcase first frame") first_frame = 1;
                 if (line_text == "showcase enter 系统状态") application_entered = 1;
+                if (line_text == "showcase enter NES 游戏") nes_entered = 1;
                 if (line_text.substr(0, 11) == "showcase CPU" ||
                     line_text.substr(0, 3) == "RND " || line_text.substr(0, 4) == "DISP ")
                     $fatal(1, "FAIL firmware error %s time=%0t", line_text, $time);
@@ -149,7 +165,21 @@ module edrv32_board_showcase_tb;
         if (rendered_pixel != 16'h08a4)
             $fatal(1, "FAIL launcher pixel expected=08a4 actual=%h base=%h time=%0t",
                    rendered_pixel, rendered_base, $time);
-        repeat (3) begin
+        controller(16'h0100);
+        controller(0);
+        wait (nes_entered);
+        wait (u_board.u_disp.u_regs.cur_base_r != rendered_base);
+        controller(16'h0100);
+        controller(0);
+        wait (nes_switches >= 3);
+        controller(16'h0200);
+        controller(0);
+        wait (u_board.u_disp.u_regs.cur_base_r < nes_base ||
+              u_board.u_disp.u_regs.cur_base_r >= nes_base + nes_bytes);
+        controller(16'h0200);
+        controller(0);
+        wait (launcher_count == 2);
+        repeat (4) begin
             controller(16'h0800);
             controller(0);
         end
@@ -158,10 +188,11 @@ module edrv32_board_showcase_tb;
         wait (application_entered);
         controller(16'h0200);
         controller(0);
-        wait (launcher_count == 2);
+        wait (launcher_count == 3);
         if (u_uart.frame_errors != 0)
             $fatal(1, "FAIL UART errors=%0d time=%0t", u_uart.frame_errors, $time);
-        $display("PASS board_showcase launcher, first frame, virtual input app enter/exit");
+        $display("PASS board_showcase launcher pixel, app enter/exit, NES %0d flips and exit",
+                 nes_switches);
         $finish;
     end
     initial begin

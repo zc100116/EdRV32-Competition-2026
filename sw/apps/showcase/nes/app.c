@@ -20,7 +20,7 @@ static lv_obj_t **cards;
 static lv_image_dsc_t *icons;
 static unsigned focus;
 static uint32_t previous_keys;
-static enum { BROWSER, PLAYING, STOPPING } state;
+static enum { BROWSER, STARTING, PLAYING, STOPPING } state;
 static uint64_t next_frame;
 static uint64_t report_at;
 static uint64_t busy_at;
@@ -147,6 +147,12 @@ static void start_game(void)
 {
     destroy_browser();
     app_gui_pause(1);
+    engine_control(ENGINE_DISP, 0);
+    state = STARTING;
+}
+
+static void begin_emulation(void)
+{
     platform_media_callbacks(nes_display_rnd_irq, nes_display_disp_irq, NULL);
     nes_display_init();
     rom_data = (const char *)__game_pack_start + selected->rom_offset;
@@ -212,6 +218,13 @@ static void step(void)
             return;
         }
         start_game();
+    }
+    if (state == STARTING) {
+        if (!platform_display_idle()) {
+            app_wake_at(now + platform_clock_hz() / 1000u);
+            return;
+        }
+        begin_emulation();
         now = platform_ticks();
     }
     if (state == PLAYING) {

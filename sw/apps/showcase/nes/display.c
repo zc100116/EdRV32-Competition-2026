@@ -9,7 +9,7 @@
 #include "disp.h"
 #include "display.h"
 
-_Alignas(4096) static uint8_t surfaces[2][NES_SCREEN_BYTES];
+_Alignas(4096) static uint8_t surfaces[2][NES_SCREEN_BYTES] __attribute__((section(".noinit")));
 _Alignas(64) static uint8_t dma_pixels[256 * 240];
 _Alignas(64) static uint32_t dma_palette[256];
 _Alignas(64) static struct rnd_command command_storage;
@@ -59,9 +59,7 @@ void nes_display_check(void)
 
 void nes_display_init(void)
 {
-    engine_control(ENGINE_DISP, 0);
-    while (!(engine_poll(ENGINE_DISP).status & EDRV32_DISP_STATUS_IDLE_MASK)) {
-    }
+    /* Application STARTING state already observed stopped DISP IDLE. */
     disp_layer_enable(DISP_L1, 0);
     memset(surfaces, 0, sizeof(surfaces));
     cache_clean_invalidate((uintptr_t)surfaces, sizeof(surfaces));
@@ -98,11 +96,13 @@ void nes_display_stop(void)
 {
     phase = DISPLAY_STOPPED;
     mmio_write32(EDRV32_RND_BASE + EDRV32_RND_IRQ_EN_OFFSET, 0);
-    (void)rnd_abort();
+    mmio_write32(EDRV32_RND_BASE + EDRV32_RND_CTRL_OFFSET, EDRV32_RND_CTRL_ABORT_MASK);
     engine_control(ENGINE_DISP, 0);
 }
 
 int nes_display_idle(void)
 {
-    return !!(engine_poll(ENGINE_DISP).status & EDRV32_DISP_STATUS_IDLE_MASK);
+    return (engine_poll(ENGINE_DISP).status & EDRV32_DISP_STATUS_IDLE_MASK) &&
+           !(mmio_read32(EDRV32_RND_BASE + EDRV32_RND_STATUS_OFFSET) &
+             EDRV32_RND_STATUS_BUSY_MASK);
 }

@@ -8,6 +8,7 @@
 #include "lvgl/showcase_lvgl.h"
 LV_FONT_DECLARE(showcase_title_24);
 LV_FONT_DECLARE(showcase_title_32);
+extern const struct app nes_app;
 static void no_step(void) {}
 static void no_exit(void) {}
 static const struct app widgets_app = {
@@ -23,7 +24,7 @@ static const struct app status_app = {
     "系统状态", NULL, 0, 0, status_enter, status_step, no_exit
 };
 const struct app *const showcase_apps[] = {
-    &widgets_app, &benchmark_app, &layers_app, &status_app
+    &nes_app, &widgets_app, &benchmark_app, &layers_app, &status_app
 };
 const unsigned showcase_app_count = sizeof(showcase_apps) / sizeof(showcase_apps[0]);
 static unsigned selected;
@@ -64,8 +65,8 @@ void launcher_show(void)
     lv_obj_set_style_text_font(title, &showcase_title_32, 0);
     label(screen, "选择应用，探索自主处理器与图形引擎", 64, 138, 0xa4b9cc);
     static const char *const symbols[] = {
-        LV_SYMBOL_LIST, LV_SYMBOL_CHARGE, LV_SYMBOL_IMAGE, LV_SYMBOL_SETTINGS,
-        LV_SYMBOL_PLAY
+        LV_SYMBOL_PLAY, LV_SYMBOL_LIST, LV_SYMBOL_CHARGE, LV_SYMBOL_IMAGE,
+        LV_SYMBOL_SETTINGS
     };
     for (unsigned i = 0; i < showcase_app_count; ++i) {
         const struct app *app = showcase_apps[i];
