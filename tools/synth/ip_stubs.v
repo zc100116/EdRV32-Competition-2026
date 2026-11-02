@@ -91,8 +91,10 @@ endmodule
 );
 endmodule
 
-(* blackbox *) module ip_ram_cpu_btb (
-    input wire clk,
+(* blackbox *) module ip_lutram_cpu_btb (
+    input wire wr_clk,
+    input wire rd_clk,
+    input wire rst,
     input wire wr_en,
     input wire [6:0] wr_addr,
     input wire [57:0] wr_data,
@@ -101,12 +103,13 @@ endmodule
 );
 endmodule
 
-(* blackbox *) module ip_ram_cpu_direction (
-    input wire clk,
+(* blackbox *) module ip_lutram_cpu_direction (
+    input wire wr_clk,
+    input wire rd_clk,
+    input wire rst,
     input wire wr_en,
     input wire [10:0] wr_addr,
     input wire [3:0] wr_data,
-    output wire [3:0] update_data,
     input wire [10:0] rd_addr,
     output wire [3:0] rd_data
 );

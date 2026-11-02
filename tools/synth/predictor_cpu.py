@@ -19,17 +19,19 @@ def revision_source(revision, name):
                                    cwd=ROOT, text=True)
 
 
-def predictor_model(stubs, wrapper, kind):
-    """Use exactly the wrapper behavior for the measurement IP implementation."""
-    pattern = r'\(\* blackbox \*\) module ip_ram_cpu_' + kind + r' \(.*?endmodule'
+def predictor_model(stubs, kind):
+    """Model each CPU LUTRAM IP as the simple dual-port, combinational-read memory it is."""
+    pattern = r'\(\* blackbox \*\) module ip_lutram_cpu_' + kind + r' \(.*?endmodule'
     match = re.search(pattern, stubs, re.S)
     header = match[0].split(');', 1)[0].replace('(* blackbox *) ', '') + ');\n'
-    body = wrapper.split('`else', 1)[1].split('`endif', 1)[0]
-    ports = {'clk_i': 'clk', 'wr_en_i': 'wr_en', 'wr_addr_i': 'wr_addr',
-             'wr_data_i': 'wr_data', 'rd_addr_i': 'rd_addr', 'rd_data_o': 'rd_data',
-             'update_data_o': 'update_data'}
-    for old, new in ports.items():
-        body = re.sub(r'\b' + old + r'\b', new, body)
+    address_bits = int(re.search(r'\[(\d+):0\] wr_addr', header)[1]) + 1
+    data_bits = int(re.search(r'\[(\d+):0\] wr_data', header)[1]) + 1
+    body = (f'    reg [{data_bits - 1}:0] memory_r [0:{(1 << address_bits) - 1}];\n'
+            '    assign rd_data = memory_r[rd_addr];\n'
+            '    always @(posedge wr_clk) begin\n'
+            '        if (wr_en)\n'
+            '            memory_r[wr_addr] <= wr_data;\n'
+            '    end\n')
     return stubs[:match.start()] + header + body + 'endmodule' + stubs[match.end():]
 
 
@@ -88,7 +90,7 @@ def main():
     for kind in ('btb', 'direction'):
         name = 'rtl/tech/edrv32_ram_cpu_' + kind + '.v'
         if name in sources:
-            stubs = predictor_model(stubs, sources[name], kind)
+            stubs = predictor_model(stubs, kind)
     models = output / 'ip_models.v'
     models.write_text(stubs)
     files.append(str(models))
