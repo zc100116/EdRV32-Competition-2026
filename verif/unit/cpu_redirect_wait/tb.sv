@@ -180,10 +180,10 @@ module tb;
                     dut.u_frontend.u_predictor.ras_data_r[31:0]!=12))
                     $fatal(1,"FAIL D RAS restored more than once");
             end
-            $display("PASS redirect_wait scenario=%0d RVC=%0d E=%0d D=%0d updates=%0d",
-                scenario,0,e_redirects,d_redirects,updates);
+            $display("PASS redirect_wait scenario=%0d E=%0d D=%0d updates=%0d",
+                scenario,e_redirects,d_redirects,updates);
         end
-        $display("PASS cpu_redirect_wait RVC=%0d",0);
+        $display("PASS cpu_redirect_wait");
         $finish;
     end
 endmodule

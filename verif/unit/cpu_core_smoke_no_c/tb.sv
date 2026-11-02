@@ -125,8 +125,8 @@ module tb;
                         $fatal(1,"FAIL smoke software status=%h",dc_store_data_o);
                     if(multiply_seen==0 || divide_seen==0 || csr_seen==0 || fence_i_seen==0 || pairs==0 || e1_recover_seen==0)
                         $fatal(1,"FAIL smoke missing functional coverage");
-                    $display("PASS cpu_core_smoke RVC=%0d cycles=%0d instructions=%0d pairs=%0d",
-                        0,cycles,retired,pairs);$finish;
+                    $display("PASS cpu_core_smoke cycles=%0d instructions=%0d pairs=%0d",
+                        cycles,retired,pairs);$finish;
                 end
             end
             ic_resp_valid_i<=ic_req_valid_o && ic_req_ready_i && !ic_kill_o;

@@ -14,7 +14,7 @@ module tb;
     wire predict_taken_o;
     wire [31:0] predict_target_o;
     wire [1:0] predict_position_o;
-        wire [11:0] predict_history_o;
+    wire [11:0] predict_history_o;
     wire [36:0] predict_ras_o;
     reg update_valid_i=0;
     reg [31:1] update_pc_i=0;
@@ -34,7 +34,6 @@ module tb;
     reg [31:0] target[0:127];
     reg [1:0] position[0:127];
     reg [2:0] kind[0:127];
-    reg compressed[0:127];
     integer direction[0:4095];
     reg [11:0] history=0;
     reg [31:0] stack[0:3];
@@ -45,6 +44,7 @@ module tb;
     integer q;
     integer slot;
     integer index_value;
+    reg [11:0] low_pc_index;
     integer action;
     integer pc_value;
     reg expected_hit;
@@ -124,7 +124,7 @@ module tb;
                 end
                 restore_seen=restore_seen+1;
             end else if(action==1)begin
-                stack[ptr]=32'(pc_value)+(compressed[q]?2:4);ptr=(ptr+1)%4;
+                stack[ptr]=32'(pc_value)+4;ptr=(ptr+1)%4;
                 if(depth<4)depth=depth+1;else overflow_seen=overflow_seen+1;
             end else if(action==2 && depth>0)begin ptr=(ptr+3)%4;depth=depth-1;end
             if(update_valid_i)begin
@@ -132,7 +132,7 @@ module tb;
                 if(valid[slot] && tag[slot]!=update_pc_i[31:10])alias_seen=alias_seen+1;
                 valid[slot]=1;tag[slot]=update_pc_i[31:10];
                 target[slot]=update_target_i;position[slot]=update_pc_i[2:1];
-                kind[slot]=update_type_i;compressed[slot]=0;
+                kind[slot]=update_type_i;
                 if(update_type_i==0)begin
                     history={history[10:0],update_taken_i};
                     if(update_taken_i && direction[update_index_i]<3)
@@ -142,15 +142,30 @@ module tb;
                     else saturate_seen=saturate_seen+1;
                 end
             end
+            if(clear_valid_i)valid[clear_index_i]=0;
             @(posedge clk_i);#1;check();@(negedge clk_i);
         end
     endtask
     initial begin
         for(i=0;i<128;i=i+1)begin
-            valid[i]=0;tag[i]=0;position[i]=0;target[i]=0;kind[i]=0;compressed[i]=0;
+            valid[i]=0;tag[i]=0;position[i]=0;target[i]=0;kind[i]=0;
         end
         for(i=0;i<4096;i=i+1)direction[i]=1;
-        repeat(2)@(negedge clk_i);rst_n_i=1;
+        repeat(2)@(negedge clk_i);
+        for(i=0;i<4096;i=i+1)
+            if(dut.u_direction.memory_r[i]!==2'b01)
+                $fatal(1,"FAIL PHT power-up index=%0d actual=%b",i,dut.u_direction.memory_r[i]);
+        rst_n_i=1;
+        // PC[1] is excluded; PC[13] supplies index bit 11.
+        update_valid_i=1;update_pc_i=0;update_target_i='h80;
+        update_type_i=0;update_taken_i=0;update_index_i=0;cycle();
+        update_valid_i=0;query_pc_i=0;#1;low_pc_index=dut.direction_idx_w;
+        query_pc_i=1;#1;
+        if(dut.direction_idx_w!==low_pc_index)$fatal(1,"FAIL PC[1] changed PHT index");
+        query_pc_i=31'('h2000>>1);#1;
+        if(dut.direction_idx_w!==(low_pc_index^12'h800))
+            $fatal(1,"FAIL PC[13] did not change PHT index");
+        query_pc_i=0;cycle();
         // BTB replacement and branch slot before/after query start.
         update_valid_i=1;update_pc_i=31'('h44>>1);update_target_i='h100;
         update_type_i=1;cycle();update_valid_i=0;query_pc_i=31'('h40>>1);cycle();
@@ -183,9 +198,24 @@ module tb;
             update_pc_i=31'($urandom_range(0,8191)*2);update_target_i=$urandom & 32'hfffffffc;
             update_type_i=3'($urandom_range(0,4));
             update_taken_i=i[1];update_index_i=12'($urandom);
+            clear_valid_i=(i%19==0);clear_index_i=7'($urandom);
             cycle();
             if(i%61==0)checkpoint=predict_ras_o;
         end
+        // A warm reset invalidates BTB/GHR/RAS while preserving trained counters.
+        update_valid_i=0;query_accept_i=0;restore_valid_i=0;clear_valid_i=0;rst_n_i=0;
+        repeat(2)@(negedge clk_i);
+        history=0;ptr=0;depth=0;
+        for(i=0;i<128;i=i+1)valid[i]=0;
+        if(dut.btb_valid_r!==128'b0)$fatal(1,"FAIL BTB warm reset");
+        for(i=0;i<4096;i=i+1)
+            if(dut.u_direction.memory_r[i]!==2'(direction[i]))
+                $fatal(1,"FAIL PHT warm reset index=%0d expected=%0d actual=%b",
+                    i,direction[i],dut.u_direction.memory_r[i]);
+        rst_n_i=1;cycle();
+        update_valid_i=1;update_pc_i=31'('h40>>1);update_type_i=0;update_index_i=17;
+        query_pc_i=31'('h40>>1);
+        update_taken_i=1;cycle();update_valid_i=0;cycle();
         if((overflow_seen==0) || (restore_seen==0) || (alias_seen==0) || (saturate_seen==0))
             $fatal(1,"FAIL predictor missing coverage");
         $display("PASS U-09 overflow=%0d restore=%0d alias=%0d saturation=%0d",
