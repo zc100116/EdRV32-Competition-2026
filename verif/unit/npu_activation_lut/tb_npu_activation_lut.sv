@@ -1,6 +1,6 @@
 // File: tb_npu_activation_lut.sv
 // Spec: npu-spec 2.3, 4.2, 5.2; datapath design 5.2 D1-B (OP-05, CP-03).
-// Description: Check eight different tables, all 16 independent read addresses, index
+// Description: Check eight different tables, all four independent read addresses, index
 // boundaries, concurrent block loading, enabled two-stage reads and cancelled writes.
 // Clock: clk_npu.
 module tb_npu_activation_lut;
@@ -13,13 +13,13 @@ module tb_npu_activation_lut;
     reg [7:0] wr_data = 0;
     reg rd_en = 0;
     reg [2:0] rd_block = 0;
-    reg [127:0] rd_addr = 0;
-    wire [127:0] rd_data;
+    reg [31:0] rd_addr = 0;
+    wire [31:0] rd_data;
     reg [7:0] memory [0:2047];
     reg pending = 0;
     reg [10:0] pending_addr;
     reg [7:0] pending_data;
-    reg [127:0] array_data;
+    reg [31:0] array_data;
     reg array_known = 0;
     integer checks = 0;
     integer cycles = 0;
@@ -40,7 +40,7 @@ module tb_npu_activation_lut;
     );
 
     initial begin : p_scoreboard
-        reg [127:0] expected;
+        reg [31:0] expected;
         reg known;
         forever begin
             @(posedge clk);
@@ -48,7 +48,7 @@ module tb_npu_activation_lut;
             expected = array_data;
             known = array_known;
             if (rd_en) begin
-                for (int lane = 0; lane < 16; lane++)
+                for (int lane = 0; lane < 4; lane++)
                     array_data[8*lane +: 8] = memory[256*int'(rd_block) +
                                                    int'(rd_addr[8*lane +: 8])];
                 array_known = 1;
@@ -84,7 +84,7 @@ module tb_npu_activation_lut;
                 wr_data = 8'((idx*73) ^ (block_idx*29) ^ (idx/8));
                 rd_en = block_idx != 0 && idx != 0;
                 rd_block = 3'(block_idx == 0 ? 0 : block_idx-1);
-                for (int lane = 0; lane < 16; lane++)
+                for (int lane = 0; lane < 4; lane++)
                     rd_addr[8*lane +: 8] = 8'(idx+lane*17);
                 cycle();
             end
@@ -93,14 +93,14 @@ module tb_npu_activation_lut;
         cycle();
         rd_en = 1;
         rd_block = 7;
-        rd_addr = {16{8'd255}};
+        rd_addr = {4{8'd255}};
         cycle();
         // Every lane visits every index in each block, with distinct simultaneous addresses.
         for (int block_idx = 0; block_idx < 8; block_idx++) begin
             rd_block = 3'(block_idx);
             for (int idx = 0; idx < 256; idx++) begin
                 rd_en = 1;
-                for (int lane = 0; lane < 16; lane++)
+                for (int lane = 0; lane < 4; lane++)
                     rd_addr[8*lane +: 8] = 8'(idx+lane*17);
                 cycle();
             end
@@ -109,7 +109,7 @@ module tb_npu_activation_lut;
         for (int i = 0; i < 64; i++) begin
             rd_en = i%4 != 1;
             rd_block = 3'((i*3)%8);
-            for (int lane = 0; lane < 16; lane++) begin
+            for (int lane = 0; lane < 4; lane++) begin
                 case ((lane+i)%4)
                     0: rd_addr[8*lane +: 8] = 0;
                     1: rd_addr[8*lane +: 8] = 127;
@@ -135,7 +135,7 @@ module tb_npu_activation_lut;
         repeat (2) cycle();
         rd_en = 1;
         rd_block = 7;
-        for (int lane = 0; lane < 16; lane++)
+        for (int lane = 0; lane < 4; lane++)
             rd_addr[8*lane +: 8] = lane%2 == 0 ? 8'd0 : 8'd255;
         cycle();
         rst_n = 0;

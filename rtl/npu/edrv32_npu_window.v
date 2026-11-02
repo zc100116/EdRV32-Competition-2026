@@ -123,7 +123,7 @@ module edrv32_npu_window (
     reg [10:0] k_index_r;
     reg signed [13:0] pair_x_r;
     reg [9:0] channel_offset_r;
-    reg [2:0] quant_remaining_r;
+    reg [4:0] quant_remaining_r;
     reg [48:0] pair_tag_r;
     wire unused_out_w_w;
     wire cmd_accept_w;
@@ -156,7 +156,7 @@ module edrv32_npu_window (
     // Design 4.4.3: compare the NEW K with the PREVIOUS pair's group calendar.
     assign issue_w = current_valid_r && !cancel_i && (!first_w ||
         (issue_enable_i && pair_ready_i &&
-        current_k_count_r >= {8'd0, quant_remaining_r}));
+        current_k_count_r >= {6'd0, quant_remaining_r}));
     assign command_last_w = issue_w && last_w && last_pair_w;
     assign pair_fire_o = issue_w && first_w;
     assign pair_half_o = current_half_r;
@@ -287,7 +287,7 @@ module edrv32_npu_window (
             k_index_r <= 11'd0;
             pair_x_r <= 14'sd0;
             channel_offset_r <= 10'd0;
-            quant_remaining_r <= 3'd0;
+            quant_remaining_r <= 5'd0;
         end else if (cancel_i) begin
             pair_r <= 11'd0;
             ky_r <= 2'd0;
@@ -297,12 +297,12 @@ module edrv32_npu_window (
             k_index_r <= 11'd0;
             pair_x_r <= 14'sd0;
             channel_offset_r <= 10'd0;
-            quant_remaining_r <= 3'd0;
+            quant_remaining_r <= 5'd0;
         end else begin
             if (issue_w && last_w) begin
-                quant_remaining_r <= current_half_r ? 3'd2 : 3'd4;
-            end else if (quant_remaining_r != 3'd0) begin
-                quant_remaining_r <= quant_remaining_r - 3'd1;
+                quant_remaining_r <= current_half_r ? 5'd8 : 5'd16;
+            end else if (quant_remaining_r != 5'd0) begin
+                quant_remaining_r <= quant_remaining_r - 5'd1;
             end
             if (promote_w) begin
                 pair_r <= 11'd0;

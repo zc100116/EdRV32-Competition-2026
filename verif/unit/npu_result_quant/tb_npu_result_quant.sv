@@ -1,10 +1,10 @@
 // File: tb_npu_result_quant.sv
 // Spec: npu-spec 2.3, 5.4, 5.5; TL-01, OP-05, OP-08; datapath design 5.2 D1-D.
 // Description: Independent integer formula scoreboard, two-edge memory contracts,
-// and exact Q0-Q12 calendar checks across continuous four/two group pairs.
+// and exact Q0-Q12 calendar checks across continuous sixteen/eight group pairs.
 // Clock: clk_npu, 10 simulation time units per period.
 module tb_npu_result_quant;
-    localparam integer CYCLES = 4096;
+    localparam integer CYCLES = 8192;
     reg clk = 0;
     initial forever #5 clk = ~clk;
     reg rst_n = 0;
@@ -21,9 +21,9 @@ module tb_npu_result_quant;
     reg [511:0] param_data;
     wire lut_en;
     wire [2:0] lut_block;
-    wire [127:0] lut_addr;
-    reg [127:0] lut_stage;
-    reg [127:0] lut_data;
+    wire [31:0] lut_addr;
+    reg [31:0] lut_stage;
+    reg [31:0] lut_data;
     wire residual_en;
     wire [4:0] residual_addr;
     wire quant_valid;
@@ -41,7 +41,7 @@ module tb_npu_result_quant;
     reg [4:0] param_addresses [0:CYCLES-1];
     reg lut_expected [0:CYCLES-1];
     reg [2:0] lut_blocks [0:CYCLES-1];
-    reg [127:0] lut_addresses [0:CYCLES-1];
+    reg [31:0] lut_addresses [0:CYCLES-1];
     reg residual_expected [0:CYCLES-1];
     reg [4:0] residual_addresses [0:CYCLES-1];
     reg output_expected [0:CYCLES-1];
@@ -88,7 +88,7 @@ module tb_npu_result_quant;
         end
         param_data <= param_stage;
         if (lut_en) begin
-            for (integer j = 0; j < 16; j++) begin
+            for (integer j = 0; j < 4; j++) begin
                 lut_stage[8*j +: 8] <= activation(lut_block, lut_addr[8*j +: 8]);
             end
         end
@@ -129,14 +129,14 @@ module tb_npu_result_quant;
         reg [48:0] tag_value;
         reg [2047:0] vector_value;
         reg [511:0] result_value;
-        reg [127:0] indices [0:3];
+        reg [31:0] indices [0:15];
         reg [31:0] acc_value;
         reg [7:0] q;
         integer groups;
         integer b;
         integer edge_value;
         integer destination;
-        groups = half_plane ? 2 : 4;
+        groups = half_plane ? 8 : 16;
         b = number % 8;
         tag_value = 49'd0;
         tag_value[11:0] = 12'(number+3);
@@ -179,7 +179,7 @@ module tb_npu_result_quant;
                     acc_value = pixel == 0 ? 32'd1 : -32'd1;
                 vector_value[32*(pixel*32+c) +: 32] = acc_value;
                 q = quantize(acc_value, parameters_mem[b][c][53:0], tag_value[36:29]);
-                indices[c/8][8*(pixel*8+c%8) +: 8] = q;
+                indices[4*(c/8)+2*pixel+(c%8)/4][8*(c%4) +: 8] = q;
                 destination = (c/16)*32 + pixel*16 + c%16;
                 if (!half_plane || c < 16) begin
                     result_value[8*destination +: 8] = use_lut ? activation(3'(b), q) : q;
@@ -196,7 +196,7 @@ module tb_npu_result_quant;
         for (integer g = 0; g < groups; g++) begin
             if (cancel_edge < 0 || start+g < cancel_edge) begin
                 param_expected[start+g] = 1;
-                param_addresses[start+g] = {3'(b), 2'(g)};
+                param_addresses[start+g] = {3'(b), 2'(g/4)};
             end
             edge_value = start+12+g;
             if (use_lut && (cancel_edge < 0 || edge_value < cancel_edge)) begin
@@ -278,20 +278,20 @@ module tb_npu_result_quant;
             end
         end
         start = 4;
-        // Continuous G4 -> G2 -> G4, alternating per-group block, zp and flags.
+        // Continuous G16 -> G8 -> G16, alternating per-group block, zp and flags.
         for (integer n = 0; n < 256; n++) begin
             add_pair(start, n, n%3 == 1, n%4 < 2, n%5 != 0);
-            start += (n%3 == 1) ? 2 : 4;
+            start += (n%3 == 1) ? 8 : 16;
         end
-        start += 24;
+        start += 40;
         // Cancellation at every pipeline boundary, followed by clean re-use.
-        for (integer offset = 0; offset <= 17; offset++) begin
+        for (integer offset = 0; offset <= 29; offset++) begin
             add_pair(start, offset, 0, 1, 1, start+offset);
-            start += 24;
+            start += 40;
             add_pair(start, offset+32, offset[0], offset[1], 1);
-            start += 24;
+            start += 40;
         end
-        finish_cycle = start+24;
+        finish_cycle = start+40;
         repeat (3) @(negedge clk);
         rst_n = 1;
         for (integer cycle = 0; cycle <= finish_cycle; cycle++) begin
@@ -314,7 +314,7 @@ module tb_npu_result_quant;
                     lut_expected[cycle], lut_en);
             if (lut_en) begin
                 lut_count++;
-                for (integer j = 0; j < 16; j++) begin
+                for (integer j = 0; j < 4; j++) begin
                     case (lut_addr[8*j +: 8])
                         8'd0: lut_boundaries_seen[0] = 1;
                         8'd127: lut_boundaries_seen[1] = 1;
@@ -354,7 +354,7 @@ module tb_npu_result_quant;
         if (!idle) $fatal(1, "FAIL pipeline did not drain");
         $display("PASS npu_result_quant pairs=%0d LUT_groups=%0d residual_beats=%0d",
             output_count, lut_count, residual_count);
-        $display("PASS prepare->Q12 G4=17/G2=15 cycles; Q0->Q12=12 cycles; cadence=4/2");
+        $display("PASS prepare->Q12 G16=29/G8=21 cycles; Q0->Q12=12 cycles; cadence=16/8");
         $finish;
     end
 endmodule

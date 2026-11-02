@@ -160,8 +160,8 @@ module edrv32_npu_datapath (
     wire accum_idle_w;
     wire lut_rd_en_w;
     wire [2:0] lut_rd_block_w;
-    wire [127:0] lut_rd_addr_w;
-    wire [127:0] lut_rd_data_w;
+    wire [31:0] lut_rd_addr_w;
+    wire [31:0] lut_rd_data_w;
     wire residual_rd_en_w;
     wire [4:0] residual_rd_addr_w;
     wire quant_valid_w;

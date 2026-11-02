@@ -1,6 +1,6 @@
 // File: edrv32_npu_activation_lut.v
 // Spec: npu-spec 4.2-4.3, 5.2; datapath design 4.2.4, 4.3.2, 4.5.
-// Description: Sixteen independent read ports use replicated eight-block activation tables.
+// Description: Four independent read ports use replicated eight-block activation tables.
 // Writes enter one local register; RAM reads return through two stages.
 // Clock: clk_npu (clk_i).
 module edrv32_npu_activation_lut (
@@ -18,12 +18,12 @@ module edrv32_npu_activation_lut (
     // Each lane supplies its own eight-bit index within the selected block.
     input wire lut_rd_en_i,
     input wire [2:0] lut_rd_block_i,
-    input wire [127:0] lut_rd_addr_i,
-    output wire [127:0] lut_rd_data_o
+    input wire [31:0] lut_rd_addr_i,
+    output wire [31:0] lut_rd_data_o
 );
     genvar lane;
     generate
-        for (lane = 0; lane < 16; lane = lane + 1) begin : g_lane
+        for (lane = 0; lane < 4; lane = lane + 1) begin : g_lane
             reg wr_valid_r;
             reg [10:0] wr_addr_r;
             reg [7:0] wr_data_r;

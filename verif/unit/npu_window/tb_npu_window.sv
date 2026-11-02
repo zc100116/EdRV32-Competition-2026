@@ -343,7 +343,7 @@ module tb_npu_window;
                 last_issue_cycle = cycle;
                 if (candidate.last_term) begin
                     last_pair_cycle = cycle;
-                    previous_groups = candidate.half ? 2 : 4;
+                    previous_groups = candidate.half ? 8 : 16;
                 end
                 if (candidate.command_last) command_end_cycle = cycle;
                 terms++;
@@ -476,7 +476,7 @@ module tb_npu_window;
                 finish_layer();
             end
         end
-        // K=2 -> D2 K=1 -> K=2 repeatedly tests the PREVIOUS pair's 4/2 groups.
+        // K=2 -> D2 K=1 -> K=2 repeatedly tests the PREVIOUS pair's 16/8 groups.
         configure(0, 0, 0, 1, 4, 1, 2);
         for (integer row = 0; row < 3; row++) begin
             send_command(row, 0);
