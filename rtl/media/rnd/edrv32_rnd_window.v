@@ -155,12 +155,12 @@ module edrv32_rnd_window (
             if (state_r == S_ADDRESS)
                 row_low_r <= command_i[260:256] + row_product_r[4:0] + row_x_bytes_w[4:0];
         end
-        // Apply large offsets first so a low selector cannot drive unused wide stages.
-        assign half_w = row_low_r[4] ? {128'd0, data_r[511:128]} : data_r;
-        assign quarter_w = row_low_r[3] ? {64'd0, half_w[511:64]} : half_w;
-        assign eighth_w = row_low_r[2] ? {32'd0, quarter_w[511:32]} : quarter_w;
-        assign sixteenth_w = row_low_r[1] ? {16'd0, eighth_w[511:16]} : eighth_w;
-        assign shifted_w = row_low_r[0] ? {8'd0, sixteenth_w[511:8]} : sixteenth_w;
+        // Stage constant shifts to reduce selector fanout; equivalent to one variable >>.
+        assign half_w = row_low_r[4] ? data_r >> 9'd128 : data_r;
+        assign quarter_w = row_low_r[3] ? half_w >> 9'd64 : half_w;
+        assign eighth_w = row_low_r[2] ? quarter_w >> 9'd32 : quarter_w;
+        assign sixteenth_w = row_low_r[1] ? eighth_w >> 9'd16 : eighth_w;
+        assign shifted_w = row_low_r[0] ? sixteenth_w >> 9'd8 : sixteenth_w;
         assign aligned_w[align_slice*64 +: 64] = shifted_w[align_slice*64 +: 64];
         assign unused_shifted_w = ^shifted_w;
     end endgenerate
