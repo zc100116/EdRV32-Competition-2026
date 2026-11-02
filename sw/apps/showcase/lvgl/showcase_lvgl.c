@@ -436,6 +436,9 @@ void showcase_gui_step(struct sched_task *task)
 void showcase_gui_restore(void)
 {
     platform_media_callbacks(NULL, NULL, NULL);
+    /* LVGL already swapped its draw buffer when flush returned. On a stopped
+     * scan, the complete pending image becomes front even without SWITCH. */
+    if (flush_pending) front = pending_pixels;
     flush_pending = false;
     display_events = 0;
     lv_display_flush_ready(display);

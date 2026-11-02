@@ -124,6 +124,16 @@ module edrv32_board_showcase_tb;
             u_board.u_disp.u_regs.cur_base_r < nes_base + nes_bytes)
             nes_switches <= nes_switches + 1;
     end
+    // SoC 7.3: producers may only write a released Surface, including after
+    // stopping an app with an outstanding asynchronous GUI flush.
+    always @(posedge u_board.clk_mem_w) begin
+        if (u_board.rst_mem_n_w && u_board.p4_awvalid_w && u_board.p4_awready_w &&
+            u_board.u_disp.busy_w && u_board.u_disp.u_regs.cur_layer_ctrl_r[0] &&
+            u_board.p4_awaddr_w >= u_board.u_disp.u_regs.cur_base_r &&
+            u_board.p4_awaddr_w < u_board.u_disp.u_regs.cur_base_r + 32'd1843200)
+            $fatal(1, "FAIL RND writes owned front address=%h front=%h time=%0t",
+                   u_board.p4_awaddr_w, u_board.u_disp.u_regs.cur_base_r, $time);
+    end
     initial begin : receive
         string line_text;
         byte unsigned data;
