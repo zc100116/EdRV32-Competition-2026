@@ -7,7 +7,6 @@ module edrv32_cpu_predictor (
     // Clock and control reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire [7:0] rst_sys_direction_n_i,
 
     // F1 query; accept advances speculative RAS only for an accepted prediction.
     input wire [31:1] query_pc_i,
@@ -42,6 +41,9 @@ module edrv32_cpu_predictor (
     localparam RAS_ENTRIES = 4;
     reg [BTB_ENTRIES-1:0] btb_valid_r;
     wire [57:0] btb_data_w;
+    wire [3:0] direction_word_w;
+    wire [3:0] update_word_w;
+    wire [3:0] next_word_w;
     wire [1:0] direction_w;
     wire [1:0] update_counter_w;
     wire [1:0] next_counter_w;
@@ -57,12 +59,15 @@ module edrv32_cpu_predictor (
     wire [2:0] restore_count_w;
     wire [1:0] restore_pop_ptr_w;
     wire [1:0] restore_write_ptr_w;
-    wire [10:0] unused_query_w;
-    assign unused_query_w = {rst_sys_direction_n_i, query_pc_i[1], update_pc_i[1], direction_w[0]};
+    wire [2:0] unused_query_w;
+    assign unused_query_w = {query_pc_i[1], update_pc_i[1], direction_w[0]};
     genvar ras_idx;
     assign query_idx_w = query_pc_i[9:3];
     assign branch_pc_w = {query_pc_i[31:3], {btb_data_w[3], 1'b0}, 1'b0};
-    assign direction_idx_w = branch_pc_w[13:2] ^ history_r;
+    // The word address is independent of BTB; its position selects a counter after both reads.
+    assign direction_idx_w = {query_pc_i[13:3] ^ history_r[11:1],
+        btb_data_w[3] ^ history_r[0]};
+    assign direction_w = direction_idx_w[0] ? direction_word_w[3:2] : direction_word_w[1:0];
     assign predict_hit_o = btb_valid_r[query_idx_w] &&
         btb_data_w[57:36] == query_pc_i[31:10] &&
         {btb_data_w[3], 1'b0} >= query_pc_i[2:1];
@@ -131,17 +136,20 @@ module edrv32_cpu_predictor (
         .rd_addr_i(query_idx_w),
         .rd_data_o(btb_data_w)
     );
+    assign update_counter_w = update_index_i[0] ? update_word_w[3:2] : update_word_w[1:0];
+    assign next_word_w = update_index_i[0] ?
+        {next_counter_w, update_word_w[1:0]} : {update_word_w[3:2], next_counter_w};
     assign next_counter_w = update_taken_i ?
         (update_counter_w == 3 ? 2'b11 : update_counter_w + 1'b1) :
         (update_counter_w == 0 ? 2'b00 : update_counter_w - 1'b1);
     edrv32_ram_cpu_direction u_direction (
         .clk_i(clk_i),
         .wr_en_i(update_valid_i && update_type_i == 0),
-        .wr_addr_i(update_index_i[11:0]),
-        .wr_data_i(next_counter_w),
-        .update_data_o(update_counter_w),
-        .rd_addr_i(direction_idx_w),
-        .rd_data_o(direction_w)
+        .wr_addr_i(update_index_i[11:1]),
+        .wr_data_i(next_word_w),
+        .update_data_o(update_word_w),
+        .rd_addr_i(direction_idx_w[11:1]),
+        .rd_data_o(direction_word_w)
     );
     // Decode each destination before the late redirect/recovery enable arrives.
     // A push still overrides a restored top when both select the same entry.

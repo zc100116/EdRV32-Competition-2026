@@ -7,7 +7,6 @@ module edrv32_cpu_core (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire [7:0] rst_sys_direction_n_i,
     input wire rst_sys_csr_n_i,
     input wire [9:0] rst_sys_counter_n_i,
 
@@ -116,7 +115,7 @@ module edrv32_cpu_core (
     wire [31:0] e_lane_pc_target_w [0:1];
     wire [1:0] e_lane_target_match_w;
     wire [1:0] d_map_w;
-    reg source_lane;
+    reg source_lane_w;
     assign e_old_w = e_swap_r;
     assign e_young_w = !e_swap_r;
     assign m_old_w = m_swap_r;
@@ -438,7 +437,6 @@ module edrv32_cpu_core (
     edrv32_cpu_frontend u_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction_n_i(rst_sys_direction_n_i),
         .redirect_valid_i(backend_redirect_w),
         .redirect_pc_i(backend_redirect_pc_w),
         .redirect_ras_i(backend_redirect_ras_w),
@@ -462,7 +460,7 @@ module edrv32_cpu_core (
             !e_lane_exception_w[e_branch_lane_w] && !e_lane_jump_fault_w[e_branch_lane_w]),
         .update_clear_i((e_redirect0_w && !e_control_w) ||
             (e_redirect1_w && !e_lane_control_w[1])),
-        .update_clear_index_i(e_record_r[e_redirect1_w][9:3]),
+        .update_clear_index_i(e_record_r[e_redirect1_w][REC_PC_LSB + 3 +: 7]),
         .update_pc_i(e_record_r[e_branch_lane_w][REC_PC_LSB +: 32]),
         .update_target_i(e_lane_target_w[e_branch_lane_w]),
         .update_type_i(e_lane_type_w[e_branch_lane_w]),
@@ -571,40 +569,40 @@ module edrv32_cpu_core (
     // Closest producer wins, including the younger lane on same-group WAW.
     always @(*) begin
         d_hazard_w = 0;
-        source_lane = 0;
+        source_lane_w = 0;
         for (operand_idx = 0; operand_idx < 4; operand_idx = operand_idx + 1) begin
             d_operand_w[operand_idx] = d_register_w[operand_idx];
             d_bypass_w[operand_idx] = 0;
             d_wait_kind_w[operand_idx] = 0;
             for (producer_idx = 0; producer_idx < 2; producer_idx = producer_idx + 1) begin
-                source_lane = producer_idx[0] ^ w_swap_r;
-                if (w_valid_r[source_lane] && w_write_r[source_lane] &&
-                    w_rd_r[source_lane] != 0 &&
-                    w_rd_r[source_lane] == d_source_w[operand_idx]) begin
-                    d_operand_w[operand_idx] = w_result_w[source_lane];
-                    d_bypass_w[operand_idx] = 3'd5 + {2'b0, source_lane};
+                source_lane_w = producer_idx[0] ^ w_swap_r;
+                if (w_valid_r[source_lane_w] && w_write_r[source_lane_w] &&
+                    w_rd_r[source_lane_w] != 0 &&
+                    w_rd_r[source_lane_w] == d_source_w[operand_idx]) begin
+                    d_operand_w[operand_idx] = w_result_w[source_lane_w];
+                    d_bypass_w[operand_idx] = 3'd5 + {2'b0, source_lane_w};
                 end
             end
             for (producer_idx = 0; producer_idx < 2; producer_idx = producer_idx + 1) begin
-                source_lane = producer_idx[0] ^ m_swap_r;
-                if (m_valid_r[source_lane] && m_write_r[source_lane] &&
-                    m_rd_r[source_lane] != 0 &&
-                    m_rd_r[source_lane] == d_source_w[operand_idx]) begin
-                    d_operand_w[operand_idx] = m_result_w[source_lane];
-                    d_bypass_w[operand_idx] = 3'd3 + {2'b0, source_lane};
-                    d_wait_kind_w[operand_idx] = m_class_r[source_lane] == C_MUL ? 3'd2 : 3'd0;
+                source_lane_w = producer_idx[0] ^ m_swap_r;
+                if (m_valid_r[source_lane_w] && m_write_r[source_lane_w] &&
+                    m_rd_r[source_lane_w] != 0 &&
+                    m_rd_r[source_lane_w] == d_source_w[operand_idx]) begin
+                    d_operand_w[operand_idx] = m_result_w[source_lane_w];
+                    d_bypass_w[operand_idx] = 3'd3 + {2'b0, source_lane_w};
+                    d_wait_kind_w[operand_idx] = m_class_r[source_lane_w] == C_MUL ? 3'd2 : 3'd0;
                 end
             end
             for (producer_idx = 0; producer_idx < 2; producer_idx = producer_idx + 1) begin
-                source_lane = producer_idx[0] ^ e_swap_r;
-                if (e_valid_r[source_lane] && e_write_r[source_lane] &&
-                    e_rd_r[source_lane] != 0 &&
-                    e_rd_r[source_lane] == d_source_w[operand_idx]) begin
-                    d_operand_w[operand_idx] = e_result_w[source_lane];
-                    d_bypass_w[operand_idx] = 3'd1 + {2'b0, source_lane};
-                    d_wait_kind_w[operand_idx] = e_class_r[source_lane] == C_LOAD ? 3'd1 :
-                        e_class_r[source_lane] == C_MUL ? 3'd2 :
-                        e_class_r[source_lane] == C_CSR ? 3'd3 : 3'd0;
+                source_lane_w = producer_idx[0] ^ e_swap_r;
+                if (e_valid_r[source_lane_w] && e_write_r[source_lane_w] &&
+                    e_rd_r[source_lane_w] != 0 &&
+                    e_rd_r[source_lane_w] == d_source_w[operand_idx]) begin
+                    d_operand_w[operand_idx] = e_result_w[source_lane_w];
+                    d_bypass_w[operand_idx] = 3'd1 + {2'b0, source_lane_w};
+                    d_wait_kind_w[operand_idx] = e_class_r[source_lane_w] == C_LOAD ? 3'd1 :
+                        e_class_r[source_lane_w] == C_MUL ? 3'd2 :
+                        e_class_r[source_lane_w] == C_CSR ? 3'd3 : 3'd0;
                 end
             end
             d_hazard_w[operand_idx] = d_wait_kind_w[operand_idx] != 0;
@@ -811,16 +809,14 @@ module edrv32_cpu_core (
         m_exception_r ? m_cause_r : m_class_r[0] == C_STORE ? 32'd7 : 32'd5;
     assign m_trap_value_w = m_interrupt_w ? 32'd0 : m_trap_lane_w ? m_value1_r :
         m_exception_r ? m_value_r : m_result_r[0];
-    assign m_commit0_w = m_advance_w && m_valid_r[0] && !m_fault0_w && !m_interrupt_w &&
-        !(m_swap_r && m_fault1_w);
+    assign m_commit0_w = m_advance_w && m_valid_r[0] && !m_fault0_w && !m_interrupt_w;
     assign m_commit_w[0] = m_commit0_w;
     assign m_commit_w[1] = m_advance_w && m_valid_r[1] && !m_fault1_w && !m_interrupt_w &&
         !(!m_swap_r && m_fault0_w);
     assign dc_commit_o = m_valid_r[0] && m_memory_w && !m_fault0_w && !m_interrupt_w &&
-        !(m_swap_r && m_fault1_w) &&
         !m_device_started_r && (dc_resp_device_i || dc_resp_valid_i);
     assign dc_kill_o = m_trap_w && m_memory_w && !m_exception_r &&
-        !m_device_started_r && (m_interrupt_w || m_fault0_w || m_swap_r);
+        !m_device_started_r && (m_interrupt_w || m_fault0_w);
     assign dc_fence_o = m_valid_r[0] && m_class_r[0] == C_FENCE && !m_trap_w;
     assign dc_clean_all_o = m_valid_r[0] && m_class_r[0] == C_FENCE_I &&
         !m_fence_phase_r && !m_trap_w;
@@ -841,8 +837,7 @@ module edrv32_cpu_core (
         (m_interrupt_w && csr_mtvec_w[1:0] == 1 ? {m_trap_cause_w[29:0], 2'b0} : 32'd0)) :
         m_mret_w ? csr_mepc_w :
         m_record_r[0][REC_PC_LSB +: 32] + 32'd4;
-    // M already wins the PC/RAS muxes. OR its request with the E causes directly,
-    // without serializing M -> E cancellation -> slot priority -> backend valid.
+    // Combine redirect requests; the following PC/RAS muxes give M priority over E.
     assign backend_redirect_w = m_redirect_w || e_redirect_w;
     assign backend_redirect_pc_w = m_redirect_w ? m_redirect_pc_w : e_redirect_pc_w;
     assign backend_redirect_ras_w = m_redirect_w ? committed_ras_w :
@@ -1087,18 +1082,18 @@ module edrv32_cpu_core (
     end
     assign m_call_w = (m_class_r[m_branch_lane_w] == C_JAL ||
         m_class_r[m_branch_lane_w] == C_JALR) &&
-        (m_record_r[m_branch_lane_w][43:39] == 1 ||
-        m_record_r[m_branch_lane_w][43:39] == 5);
+        (m_record_r[m_branch_lane_w][REC_INSTR_LSB + 7 +: 5] == 1 ||
+        m_record_r[m_branch_lane_w][REC_INSTR_LSB + 7 +: 5] == 5);
     assign m_return_w = m_class_r[m_branch_lane_w] == C_JALR &&
-        (m_record_r[m_branch_lane_w][51:47] == 1 ||
-        m_record_r[m_branch_lane_w][51:47] == 5) && !m_call_w;
+        (m_record_r[m_branch_lane_w][REC_INSTR_LSB + 15 +: 5] == 1 ||
+        m_record_r[m_branch_lane_w][REC_INSTR_LSB + 15 +: 5] == 5) && !m_call_w;
     assign m_link_w = m_record_r[m_branch_lane_w][REC_PC_LSB +: 32] + 32'd4;
     always @(*) begin
         committed_ras_data_w = committed_ras_data_r;
         committed_ras_ptr_w = committed_ras_ptr_r;
         committed_ras_count_w = committed_ras_count_r;
-        // C-F1 path 2: calls/returns are ready without D-cache lookup.
-        // Use their specialized commit predicate before the RAS pointer mux.
+        // Apply the committing control transfer, including an older surviving call.
+        // This next state is also the M redirect's RAS checkpoint.
         if (m_commit_w[m_branch_lane_w]) begin
             if (m_return_w && committed_ras_count_w != 0) begin
                 committed_ras_ptr_w = committed_ras_ptr_w - 1'b1;

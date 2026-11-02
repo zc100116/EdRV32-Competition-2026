@@ -59,7 +59,6 @@ module tb;
     edrv32_cpu_predictor dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction_n_i({8{rst_n_i}}),
         .query_pc_i(query_pc_i),
         .query_accept_i(query_accept_i),
         .predict_hit_o(predict_hit_o),
@@ -153,8 +152,9 @@ module tb;
         for(i=0;i<4096;i=i+1)direction[i]=1;
         repeat(2)@(negedge clk_i);
         for(i=0;i<4096;i=i+1)
-            if(dut.u_direction.memory_r[i]!==2'b01)
-                $fatal(1,"FAIL PHT power-up index=%0d actual=%b",i,dut.u_direction.memory_r[i]);
+            if(dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]!==2'b01)
+                $fatal(1,"FAIL PHT power-up index=%0d actual=%b",i,
+                    dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]);
         rst_n_i=1;
         // PC[1] is excluded; PC[13] supplies index bit 11.
         update_valid_i=1;update_pc_i=0;update_target_i='h80;
@@ -177,6 +177,15 @@ module tb;
         update_valid_i=1;update_pc_i=31'('h20>>1);update_type_i=0;update_index_i=17;
         for(j=0;j<8;j=j+1)begin update_taken_i=1;cycle();end
         for(j=0;j<8;j=j+1)begin update_taken_i=0;cycle();end
+        // Give the two counters in word 8 opposite MSBs, then query all position/GHR[0] choices.
+        update_index_i=17;update_taken_i=1;
+        for(j=0;j<3;j=j+1)cycle();
+        update_index_i=16;update_taken_i=0;
+        for(j=0;j<12;j=j+1)cycle();
+        update_index_i=0;update_pc_i=31'('h40>>1);query_pc_i=31'('h40>>1);cycle();
+        update_pc_i=31'('h44>>1);cycle();
+        update_taken_i=1;cycle();
+        update_pc_i=31'('h48>>1);query_pc_i=31'('h48>>1);cycle();
         // Train call and return groups, push beyond depth and inspect LIFO returns.
         update_type_i=3;update_pc_i=31'('h80>>1);update_target_i='h88;cycle();
         update_type_i=4;update_pc_i=31'('h88>>1);update_target_i='h90;cycle();
@@ -209,9 +218,9 @@ module tb;
         for(i=0;i<128;i=i+1)valid[i]=0;
         if(dut.btb_valid_r!==128'b0)$fatal(1,"FAIL BTB warm reset");
         for(i=0;i<4096;i=i+1)
-            if(dut.u_direction.memory_r[i]!==2'(direction[i]))
+            if(dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]!==2'(direction[i]))
                 $fatal(1,"FAIL PHT warm reset index=%0d expected=%0d actual=%b",
-                    i,direction[i],dut.u_direction.memory_r[i]);
+                    i,direction[i],dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]);
         rst_n_i=1;cycle();
         update_valid_i=1;update_pc_i=31'('h40>>1);update_type_i=0;update_index_i=17;
         query_pc_i=31'('h40>>1);

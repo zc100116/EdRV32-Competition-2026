@@ -36,8 +36,11 @@ D 级冷 JAL 重定向在无法发射时保留 IB 头，M/E 重定向清空 IB�
 （PC[13:2] XOR 12 位非推测 GHR）、RAS 4 项。
 `edrv32_ram_cpu_btb` 为 128×58：{tag22,target32,position1,type3}，
 一同步写、一异步读，无初始化或复位；有效位由预测器 FF 复位清零。
-`edrv32_ram_cpu_direction` 为 4096×2，一同步写、查询/更新各一异步读，
-上电全01、复位不清除。两包装行为阵列均名 `memory_r`，读延迟0拍，
+`edrv32_ram_cpu_direction` 为 2048×4，每字低/高2位对应逻辑索引位0为0/1的计数器，
+一同步写、查询/更新各一异步读；更新读整字并保留未选计数器，上电每字0101、复位不清除。
+查询字地址为PC[13:3] XOR GHR[11:1]，与BTB并行读，最后按BTB位置 XOR GHR[0]选计数器。
+方向表无复位端口，子系统不再生成方向表复位副本。
+两包装行为阵列均名 `memory_r`，读延迟0拍，
 写入时钟边沿后读端看到新内容；同沿更新使用沿前旧计数器值。
 IB 新增 `push_index_hi_i`/`index_hi_o`（各6位，按槽各3位），
 前端 `decode_index_hi_o` 接核心 `d_index_hi_w`；E 用 `e_predict_index_r`

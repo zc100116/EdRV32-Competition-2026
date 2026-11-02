@@ -7,7 +7,6 @@ module edrv32_cpu_frontend (
     // Clock and reset to the SoC reset vector 0.
     input wire clk_i,
     input wire rst_n_i,
-    input wire [7:0] rst_sys_direction_n_i,
 
     // Backend: older M/E redirect wins over a D-stage JAL redirect.
     input wire redirect_valid_i,
@@ -118,7 +117,6 @@ module edrv32_cpu_frontend (
     edrv32_cpu_predictor u_predictor (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction_n_i(rst_sys_direction_n_i),
         .query_pc_i(f1_pc_r[31:1]),
         .query_accept_i(request_accept_w),
         .predict_hit_o(predict_hit_w),

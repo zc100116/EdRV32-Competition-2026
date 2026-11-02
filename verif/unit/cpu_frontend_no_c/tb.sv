@@ -76,7 +76,6 @@ module tb;
     edrv32_cpu_frontend dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction_n_i({8{rst_n_i}}),
         .redirect_valid_i(redirect_valid_i),
         .redirect_pc_i(redirect_pc_i),
         .redirect_ras_i(redirect_ras_i),

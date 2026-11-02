@@ -9,7 +9,7 @@ module edrv32_ram_cpu_btb (
     input wire wr_en_i,
     input wire [6:0] wr_addr_i,
     input wire [57:0] wr_data_i,
-    // Asynchronous read ports; update reads the write address.
+    // Asynchronous query read port.
     input wire [6:0] rd_addr_i,
     output wire [57:0] rd_data_o
 );

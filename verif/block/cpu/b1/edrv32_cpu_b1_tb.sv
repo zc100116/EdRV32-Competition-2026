@@ -40,7 +40,6 @@ module edrv32_cpu_b1_tb;
     edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
-        .rst_sys_direction_n_i({8{rst_n}}),
         .rst_sys_csr_n_i(rst_n),
         .rst_sys_counter_n_i({10{rst_n}}),
         .ic_req_valid_o(ic_req_valid),
