@@ -3,9 +3,7 @@
 // Description: Execute in-order dual-issue instructions through D/E/M/W.
 //              Commit precise traps, memory transactions and architectural state.
 // Clock: clk_sys.
-module edrv32_cpu_core #(
-    parameter RVC_EN = 1
-) (
+module edrv32_cpu_core (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
@@ -363,7 +361,7 @@ module edrv32_cpu_core #(
                 mul_result_w : w_result_r[lane];
         end
     endgenerate
-    edrv32_cpu_frontend #(.RVC_EN(RVC_EN)) u_frontend (
+    edrv32_cpu_frontend u_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_direction_n_i(rst_sys_direction_n_i),
@@ -379,7 +377,7 @@ module edrv32_cpu_core #(
         .d_redirect_push_i(d_rd_w[0] == 1 || d_rd_w[0] == 5),
         .d_redirect_pop_i(1'b0),
         .d_redirect_return_pc_i(d_record_w[0][REC_PC_LSB +: 32] +
-            (d_record_w[0][REC_COMPRESSED] ? 32'd2 : 32'd4)),
+            32'd4),
         .halt_i(sleep_r || div_wait_w || m_wait_r),
         .update_valid_i(e_resolve_w && e_control_w &&
             !e_exception_r && !e_jump_misaligned_w),
@@ -432,7 +430,7 @@ module edrv32_cpu_core #(
         .write_addr1_i(w_rd_r[1]),
         .write_data1_i(w_result_w[1])
     );
-    edrv32_cpu_csr #(.RVC_EN(RVC_EN)) u_csr (
+    edrv32_cpu_csr u_csr (
         .clk_i(clk_i),
         .rst_n_i(rst_sys_csr_n_i),
         .rst_sys_counter_n_i(rst_sys_counter_n_i),
@@ -578,8 +576,7 @@ module edrv32_cpu_core #(
         !backend_redirect_w && !sleep_r &&
         d_class_w[0] == C_JAL && !d_record_w[0][REC_PRED_HIT] && !d_record_w[0][REC_FETCH_ERR] &&
         !d_record_w[0][REC_ILLEGAL] && !d_illegal_w[0];
-    assign e_next_pc_w = e_record_r[0][REC_PC_LSB +: 32] + (e_record_r[0][REC_COMPRESSED]
-        ? 32'd2 : 32'd4);
+    assign e_next_pc_w = e_record_r[0][REC_PC_LSB +: 32] + 32'd4;
     assign e_address_w = e_operand_a_r[0] + e_imm_r[0];
     assign e_branch_target_w = e_class_r[0] == C_JALR ?
         {e_address_w[31:1], 1'b0} : e_pc_target_r;
@@ -597,8 +594,7 @@ module edrv32_cpu_core #(
         !e_call_w;
     assign e_type_w = e_call_w ? 3'd3 : e_return_w ? 3'd4 :
         e_class_r[0] == C_JAL ? 3'd1 : e_class_r[0] == C_JALR ? 3'd2 : 3'd0;
-    assign e_jump_misaligned_w = RVC_EN == 0 &&
-        ((e_class_r[0] == C_JALR && e_address_w[1]) ||
+    assign e_jump_misaligned_w = ((e_class_r[0] == C_JALR && e_address_w[1]) ||
         (e_class_r[0] == C_JAL && e_pc_target_r[1]) ||
         (e_class_r[0] == C_BRANCH &&
         (e_branch_taken_w ? e_pc_target_r[1] : e_next_pc_w[1])));
@@ -616,7 +612,7 @@ module edrv32_cpu_core #(
         (!e_control_w && e_record_r[0][REC_PRED_TAKEN]));
     assign e_redirect0_w = e_resolve_w && e_redirect0_needed_w;
     assign e_second_next_pc_w = e_record_r[1][REC_PC_LSB +: 32] +
-        (e_record_r[1][REC_COMPRESSED] ? 32'd2 : 32'd4);
+        32'd4;
     assign e_redirect1_w = e_resolve_w && e_valid_r[1] && !e_redirect0_w &&
         e_record_r[1][REC_PRED_TAKEN];
     assign e_redirect_w = e_redirect0_w || e_redirect1_w;
@@ -693,7 +689,7 @@ module edrv32_cpu_core #(
         ({csr_mtvec_w[31:2], 2'b0} +
         (m_interrupt_w && csr_mtvec_w[1:0] == 1 ? {m_trap_cause_w[29:0], 2'b0} : 32'd0)) :
         m_mret_w ? csr_mepc_w :
-        m_record_r[0][REC_PC_LSB +: 32] + (m_record_r[0][REC_COMPRESSED] ? 32'd2 : 32'd4);
+        m_record_r[0][REC_PC_LSB +: 32] + 32'd4;
     // M already wins the PC/RAS muxes. OR its request with the E causes directly,
     // without serializing M -> E cancellation -> slot priority -> backend valid.
     assign backend_redirect_w = m_redirect_w ||
@@ -717,7 +713,7 @@ module edrv32_cpu_core #(
                 C_AUIPC: e_result_w[result_idx] =
                     e_record_r[result_idx][REC_PC_LSB +: 32] + e_imm_r[result_idx];
                 C_JAL, C_JALR: e_result_w[result_idx] = e_record_r[result_idx][REC_PC_LSB +: 32] +
-                    (e_record_r[result_idx][REC_COMPRESSED] ? 32'd2 : 32'd4);
+                    32'd4;
                 C_LOAD, C_STORE: e_result_w[result_idx] =
                     e_operand_a_r[result_idx] + e_imm_r[result_idx];
                 C_DIV: e_result_w[result_idx] = div_result_w;
@@ -908,8 +904,7 @@ module edrv32_cpu_core #(
     assign m_return_w = m_class_r[0] == C_JALR &&
         (m_instr_r[19:15] == 1 || m_instr_r[19:15] == 5) &&
         !m_call_w;
-    assign m_link_w = m_record_r[0][REC_PC_LSB +: 32] + (m_record_r[0][REC_COMPRESSED]
-        ? 32'd2 : 32'd4);
+    assign m_link_w = m_record_r[0][REC_PC_LSB +: 32] + 32'd4;
     always @(*) begin
         committed_ras_data_w = committed_ras_data_r;
         committed_ras_ptr_w = committed_ras_ptr_r;

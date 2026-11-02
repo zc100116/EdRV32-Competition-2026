@@ -3,9 +3,7 @@
 // Description: Maintain machine CSRs, interrupt state and architectural counters.
 // Apply CSR access permissions, WARL masks and precise trap/MRET updates.
 // Clock domain: clk_sys.
-module edrv32_cpu_csr #(
-    parameter RVC_EN = 1
-) (
+module edrv32_cpu_csr (
     // Clock and architectural reset.
     input wire clk_i,
     input wire rst_n_i,
@@ -45,8 +43,8 @@ module edrv32_cpu_csr #(
     input wire irq_mtip_i,
     input wire [63:0] mtime_i
 );
-    localparam [31:0] MISA = RVC_EN ? 32'h40001104 : 32'h40001100;
-    localparam [31:0] EPC_MASK = RVC_EN ? 32'hfffffffe : 32'hfffffffc;
+    localparam [31:0] MISA = 32'h40001100;
+    localparam [31:0] EPC_MASK = 32'hfffffffc;
     reg [31:0] mstatus_r;
     reg [31:0] mie_r;
     reg [31:0] mtvec_r;

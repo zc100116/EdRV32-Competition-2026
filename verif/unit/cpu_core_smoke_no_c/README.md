@@ -1,4 +1,4 @@
-# cpu_core_smoke_no_c
+# cpu_core_smoke
 
 Unified regression (from the repository root):
 

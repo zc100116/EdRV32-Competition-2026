@@ -1,7 +1,7 @@
 top: tb
 files: files.f
 defines: SIM_MODE
-parameters: RVC_EN=0
+parameters:
 software:
 timeout: 180
 pass: PASS

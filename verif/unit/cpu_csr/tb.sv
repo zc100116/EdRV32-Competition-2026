@@ -42,8 +42,8 @@ module tb;
     reg ro;
     reg [63:0] expected;
     reg [31:0] data;
-    wire [31:0] no_c_read;
-    wire no_c_illegal;
+    wire [31:0] peer_read;
+    wire peer_illegal;
     wire [41:0] access_select_w;
 
     edrv32_cpu_csr dut (
@@ -79,8 +79,8 @@ module tb;
         .irq_mtip_i(irq_mtip_i),
         .mtime_i(mtime_i)
     );
-    // Second configuration checks misa.C and mepc alignment with C disabled.
-    edrv32_cpu_csr #(.RVC_EN(0)) no_c (
+    // Keep access selection independent while D tests another CSR permission address.
+    edrv32_cpu_csr decode_peer (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_counter_n_i({10{rst_n_i}}),
@@ -90,8 +90,8 @@ module tb;
         .commit_i(commit_i),
         .command_i(command_i),
         .write_data_i(write_data_i),
-        .read_data_o(no_c_read),
-        .illegal_o(no_c_illegal),
+        .read_data_o(peer_read),
+        .illegal_o(peer_illegal),
         .decode_valid_i(1'b0),
         .decode_addr_i(addr_i),
         .decode_write_i(1'b0),
@@ -141,8 +141,8 @@ module tb;
     initial begin
         // Hold reset to inspect every architectural reset value before mcycle runs.
         @(negedge clk_i);
-        read_check('h300,'h1800);read_check('h301,'h40001104);
-        if(no_c_read!==32'h40001100)$fatal(1,"FAIL misa RVC_EN=0");
+        read_check('h300,'h1800);read_check('h301,'h40001100);
+        if(peer_read!==32'h40001100)$fatal(1,"FAIL misa");
         read_check('h304,0);read_check('h305,0);read_check('h320,0);
         read_check('h340,0);read_check('h341,0);read_check('h342,0);
         read_check('h343,0);read_check('h344,0);
@@ -162,7 +162,7 @@ module tb;
                 (i>='hb83 && i<='hb8a) || (i>='hc03 && i<='hc0a) ||
                 (i>='hc83 && i<='hc8a);
             ro=(i=='h344 || (i>='hc00 && i<='hcff) || i>='hf00);
-            #1;if(illegal_o!==!exists || no_c_illegal!==!exists || decode_illegal_o!==!exists)
+            #1;if(illegal_o!==!exists || peer_illegal!==!exists || decode_illegal_o!==!exists)
                 $fatal(1,"FAIL CSR read legality %h",addr_i);
             // Avoid a rising edge while probing writes: no commit is intended.
             @(negedge clk_i);write_i=1;
@@ -179,7 +179,7 @@ module tb;
         #1;if(decode_illegal_o || read_data_o!==32'h13579bdf)
             $fatal(1,"FAIL D address changed M CSR read");
         decode_override_r=0;
-        csr_write('h301,0);read_check('h301,'h40001104);
+        csr_write('h301,0);read_check('h301,'h40001100);
         csr_write('h300,32'hffffffff);read_check('h300,'h1888);
         csr_write('h300,0);read_check('h300,'h1800);
         csr_write('h304,32'hffffffff);read_check('h304,'h888);
@@ -188,8 +188,8 @@ module tb;
             csr_write('h305,32'habcdef00|32'(i));
             read_check('h305,32'habcdef00|(i==1?1:0));
         end
-        csr_write('h341,32'hffffffff);read_check('h341,32'hfffffffe);
-        if(no_c_read!==32'hfffffffc)$fatal(1,"FAIL mepc RVC_EN=0");
+        csr_write('h341,32'hffffffff);read_check('h341,32'hfffffffc);
+        if(peer_read!==32'hfffffffc)$fatal(1,"FAIL mepc");
         for(i=0;i<100;i=i+1)begin
             data=$urandom;
             csr_write('h340,data);read_check('h340,data);
@@ -298,14 +298,14 @@ module tb;
         trap_cause_i='h8000000b;trap_value_i='h87654321;
         addr_i='h300;write_i=1;command_i=1;write_data_i=0;
         @(posedge clk_i);#1;@(negedge clk_i);trap_i=0;mret_i=0;write_i=0;
-        read_check('h300,'h1880);read_check('h341,'h1234567a);
-        if(no_c_read!==32'h12345678)$fatal(1,"FAIL trap mepc alignment");
+        read_check('h300,'h1880);read_check('h341,'h12345678);
+        if(peer_read!==32'h12345678)$fatal(1,"FAIL trap mepc alignment");
         read_check('h342,'h8000000b);read_check('h343,'h87654321);
         @(negedge clk_i);mret_i=1;
         @(posedge clk_i);#1;@(negedge clk_i);mret_i=0;
         read_check('h300,'h1888);
         if(mstatus_o!==32'h1888 || mie_o!==0 || mtvec_o!==32'habcdef00 ||
-            mepc_o!==32'h1234567a)$fatal(1,"FAIL CSR state outputs");
+            mepc_o!==32'h12345678)$fatal(1,"FAIL CSR state outputs");
         $display("PASS U-10 all CSR addresses, WARL, counters, events, traps");$finish;
     end
 

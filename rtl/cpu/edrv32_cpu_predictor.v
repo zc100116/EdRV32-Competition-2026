@@ -62,6 +62,8 @@ module edrv32_cpu_predictor (
     wire [2:0] restore_count_w;
     wire [1:0] restore_pop_ptr_w;
     wire [1:0] restore_write_ptr_w;
+    wire unused_compressed_w;
+    assign unused_compressed_w = update_compressed_i;
     genvar ras_idx;
     assign query_idx_w = query_pc_i[7:3];
     assign branch_pc_w = {query_pc_i[31:3], btb_position_r[query_idx_w], 1'b0};
@@ -133,7 +135,7 @@ module edrv32_cpu_predictor (
             btb_target_r[update_pc_i[7:3]] <= update_target_i;
             btb_position_r[update_pc_i[7:3]] <= update_pc_i[2:1];
             btb_type_r[update_pc_i[7:3]] <= update_type_i;
-            btb_compressed_r[update_pc_i[7:3]] <= update_compressed_i;
+            btb_compressed_r[update_pc_i[7:3]] <= 1'b0;
         end
     end
     genvar direction_bank;
@@ -182,7 +184,7 @@ module edrv32_cpu_predictor (
                         restore_return_pc_i : restore_ras_i[31:0];
                 else if (!restore_valid_i && query_link_w)
                     ras_data_r[ras_idx*32 +: 32] <= branch_pc_w +
-                        (btb_compressed_r[query_idx_w] ? 32'd2 : 32'd4);
+                        32'd4;
             end
         end
     endgenerate

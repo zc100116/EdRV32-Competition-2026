@@ -9,9 +9,7 @@
 //               and the media APB slots have no target in this top.
 // Clock       : clk_i only (constrained to the clk_sys target in the .fdc)
 // ============================================================================
-module edrv32_fpga_cpu_sys_top #(
-    parameter RVC_EN = 0
-) (
+module edrv32_fpga_cpu_sys_top (
     // Board clock and active-low reset key.
     input wire clk_i,
     input wire rst_n_i,
@@ -98,9 +96,7 @@ module edrv32_fpga_cpu_sys_top #(
     // Outputs with no pin or target in this measurement top are left open.
     /* verilator lint_off PINCONNECTEMPTY */
 
-    edrv32_cpu_subsys #(
-        .RVC_EN(RVC_EN)
-    ) u_cpu_subsys (
+    edrv32_cpu_subsys u_cpu_subsys (
         // Clock and reset.
         .clk_i(clk_i),
         .rst_n_i(rst_sys_n_w),

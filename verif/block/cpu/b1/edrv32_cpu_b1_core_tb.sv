@@ -2,7 +2,7 @@
 // Spec: cpu-spec 3.1-3.4, 4.7; cpu-testplan 2.2-2.3, 4
 // Description: B1 wiring and real-core integration harness.
 // Clock: clk_sys.
-module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
+module edrv32_cpu_b1_core_tb;
     import edrv32_cpu_memory::*;
     logic clk;
     logic rst_n;
@@ -37,7 +37,7 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     logic irq_mtip;
     logic [63:0] mtime;
     logic done;
-    edrv32_cpu_core #(.RVC_EN(RVC_EN)) u_core (
+    edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
         .rst_sys_direction_n_i({8{rst_n}}),
@@ -421,7 +421,7 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
             $fclose(signature_descriptor);
         end
         check_directed_completion();
-        $display("PASS CPU B1 cycles=%0d RVC_EN=%0d", cycles, RVC_EN);
+        $display("PASS CPU B1 cycles=%0d no-C", cycles);
         $finish;
     end
     always @(posedge clk) begin

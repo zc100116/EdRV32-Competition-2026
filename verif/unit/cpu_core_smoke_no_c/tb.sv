@@ -4,7 +4,7 @@
 //              Check architectural traps and the common tohost completion convention.
 // Clock: clk_sys.
 `timescale 1ns/1ps
-module tb #(parameter RVC_EN=1);
+module tb;
     // The generated map also declares constants for other SoC clients.
     /* verilator lint_off UNUSEDPARAM */
     `include "edrv32_soc_map.vh"
@@ -71,7 +71,7 @@ module tb #(parameter RVC_EN=1);
             end
         end
     endfunction
-    edrv32_cpu_core #(.RVC_EN(RVC_EN)) dut (
+    edrv32_cpu_core dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_direction_n_i({8{rst_n_i}}),
@@ -126,7 +126,7 @@ module tb #(parameter RVC_EN=1);
                     if(multiply_seen==0 || divide_seen==0 || csr_seen==0 || fence_i_seen==0 || pairs==0 || e1_recover_seen==0)
                         $fatal(1,"FAIL smoke missing functional coverage");
                     $display("PASS cpu_core_smoke RVC=%0d cycles=%0d instructions=%0d pairs=%0d",
-                        RVC_EN,cycles,retired,pairs);$finish;
+                        0,cycles,retired,pairs);$finish;
                 end
             end
             ic_resp_valid_i<=ic_req_valid_o && ic_req_ready_i && !ic_kill_o;

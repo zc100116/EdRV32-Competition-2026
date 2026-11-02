@@ -34,14 +34,12 @@ def read_filelist(path, files, includes):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('top', choices=TARGETS)
-    parser.add_argument('--rvc-en', type=int, choices=(0, 1), default=1)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--xc7', action='store_true', help='LUT6/CARRY4/MUX FPGA proxy')
     mode.add_argument('--hierarchical', action='store_true',
                       help='retain module boundaries for a separate resource measurement')
     args = parser.parse_args()
-    suffix = '' if args.top == 'edrv32_sys_subsys' else f'_rvc{args.rvc_en}'
-    output = ROOT / 'build/synth' / (args.top + suffix)
+    output = ROOT / 'build/synth' / args.top
     output.mkdir(parents=True, exist_ok=True)
     files, includes = [], set()
     for name in TARGETS[args.top]:
@@ -53,12 +51,12 @@ def main():
     if args.top != 'edrv32_sys_subsys':
         source = next(ROOT / name for name in files if Path(name).stem == args.top)
         header = source.read_text().split(');', 1)[0]
-        ports = re.search(r'\)\s*\((.*)', header, re.S)[1]
+        ports = header.split('(', 1)[1]
         names = re.findall(r'(?:input|output)\s+wire\s+(?:\[[^]]+\]\s*)?(\w+)', ports)
         top += '_measure'
         wrapper = output / 'wrapper.v'
         wrapper.write_text(f'module {top} (\n' + ports + '\n);\n' +
-                           f'{args.top} #(.RVC_EN({args.rvc_en})) u_target (\n' +
+                           f'{args.top} u_target (\n' +
                            ',\n'.join(f'    .{name}({name})' for name in names) +
                            '\n);\nendmodule\n')
         files.append(wrapper.relative_to(ROOT).as_posix())

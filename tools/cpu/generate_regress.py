@@ -18,7 +18,7 @@ def emit(directory, case, tier):
     runner = f'python3 tools/cpu/run_b1.py {out.relative_to(ROOT)}/case.json'
     (out / 'test.yaml').write_text(
         'top: edrv32_cpu_b1_core_tb\nfiles: files.f\ndefines: SIM_MODE\n'
-        f'parameters: RVC_EN={int(case["rvc"])}\nsoftware:\ntimeout: 240\n'
+        'parameters:\nsoftware:\ntimeout: 240\n'
         f'pass: PASS\nsimulator: runner\ntier: {tier}\nrunner: {runner}\n')
 
 
