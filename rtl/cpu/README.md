@@ -85,3 +85,6 @@ JALR始终在管线0执行，其D级预测目标减立即数的预计算也按�
 槽1异常而槽0正常提交时，仅trace的trap/cause延迟一拍，与槽0在W的退休同拍
 输出；其他trap仍在M当拍输出，debug[18]和架构trap控制仍按M。单元场景4/10
 检查同拍先退休后trap，arch/ISA的misalign用例核对完整Spike事件顺序。
+
+`cpu_redirect_wait` 在load后放置NOP分开E分支组；D场景使用依赖load的MUL与
+槽1 JAL，保证重定向实际发生在M停顿期间，并检查两条IB记录一同保留。

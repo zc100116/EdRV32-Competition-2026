@@ -1,5 +1,5 @@
 // File: cpu_redirect_wait/tb.sv
-// Spec: cpu-spec v0.11 4.4, 4.5; C-R6 P3/P4.
+// Spec: cpu-spec v0.15 4.4, 4.5; C-R6 P3/P4.
 // Description: Hold an older load in M while E branches or D JALs redirect once.
 // Check retention, predictor/RAS updates, and simultaneous or subsequent M faults.
 // Clock domain: clk_sys.
@@ -32,6 +32,7 @@ module tb;
     reg held_d=0;
     reg [178:0] saved_e;
     reg [178:0] saved_d;
+    reg [178:0] saved_d1;
     wire d_case=scenario==1 || scenario==4;
     wire error_case=scenario>=2;
     assign dc_resp_valid=pending && delay_left==0;
@@ -104,11 +105,12 @@ module tb;
                     $fatal(1,"FAIL E slot 1 survived redirect time=%t",$time);
             end
             if (held_d && !dut.backend_redirect_w &&
-                (dut.d_count_w==0 || dut.d_record_w[0]!==saved_d))
+                (dut.d_count_w!=2 || dut.d_record_w[0]!==saved_d ||
+                 dut.d_record_w[1]!==saved_d1))
                 $fatal(1,"FAIL D lost stalled JAL time=%t",$time);
             if (dut.e_redirect_w) begin
                 e_redirects=e_redirects+1;
-                if (d_case || dut.e_record_r[0][31:0]!=4 || !dut.m_wait_w)
+                if (d_case || dut.e_record_r[0][31:0]!=8 || !dut.m_wait_w)
                     $fatal(1,"FAIL unexpected E redirect scenario=%0d time=%t",scenario,$time);
                 saved_e=dut.e_record_r[0];
                 held_e=1;
@@ -116,10 +118,12 @@ module tb;
             end
             if (dut.d_redirect_w) begin
                 d_redirects=d_redirects+1;
-                if (!d_case || dut.d_record_w[0][31:0]!=8 || dut.d_issue_w!=0)
+                if (!d_case || dut.d_record_w[0][31:0]!=8 ||
+                    dut.d_record_w[1][31:0]!=12 || !dut.d_redirect_slot_w || dut.d_issue_w!=0)
                     $fatal(1,"FAIL unexpected D redirect scenario=%0d PC=%h issue=%0d time=%t",
                         scenario,dut.d_record_w[0][31:0],dut.d_issue_w,$time);
                 saved_d=dut.d_record_w[0];
+                saved_d1=dut.d_record_w[1];
                 held_d=1;
                 early=early+1;
             end
@@ -134,7 +138,7 @@ module tb;
                     if (dut.trace_valid_w[lane] &&
                         dut.trace_instr_w[lane*32+:32]==32'h06300193)
                         $fatal(1,"FAIL retired wrong path time=%t",$time);
-                    if (dut.trace_valid_w[lane] && dut.trace_pc_w[lane*32+:32]==20) begin
+                    if (dut.trace_valid_w[lane] && dut.trace_pc_w[lane*32+:32]==24) begin
                         if (error_case || dut.trace_rd_data_w[lane*32+:32]!=7)
                             $fatal(1,"FAIL target retirement scenario=%0d",scenario);
                         scenario_done=1;
@@ -157,10 +161,14 @@ module tb;
             repeat(3) @(negedge clk_i);
             for (i=0;i<64;i=i+1) program_words[i]=32'h00000013;
             program_words[0]=32'h00002103; // lw x2,0(x0)
-            program_words[1]=d_case ? 32'h02000033 : 32'h00000863;
-            program_words[2]=d_case ? 32'h00c000ef : 32'h06300193;
-            program_words[3]=32'h06300193;
-            program_words[5]=32'h00700213; // addi x4,x0,7
+            // Keep the load and branch in different V3s issue groups.
+            program_words[1]=32'h00000013;
+            // The dependent MUL holds slot 0 until the older load is in M.
+            program_words[2]=d_case ? 32'h02010033 : 32'h00000863;
+            program_words[3]=d_case ? 32'h00c000ef : 32'h06300193;
+            program_words[4]=32'h06300193;
+            program_words[5]=32'h06300193;
+            program_words[6]=32'h00700213; // addi x4,x0,7
             cycles=0;e_redirects=0;d_redirects=0;updates=0;early=0;
             held_e=0;held_d=0;scenario_done=0;
             rst_n_i=1;
@@ -177,7 +185,7 @@ module tb;
                     $fatal(1,"FAIL training count scenario=%0d count=%0d",scenario,updates);
                 if (d_case && !error_case &&
                     (dut.u_frontend.u_predictor.ras_count_r!=1 ||
-                    dut.u_frontend.u_predictor.ras_data_r[31:0]!=12))
+                    dut.u_frontend.u_predictor.ras_data_r[31:0]!=16))
                     $fatal(1,"FAIL D RAS restored more than once");
             end
             $display("PASS redirect_wait scenario=%0d E=%0d D=%0d updates=%0d",
