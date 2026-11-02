@@ -235,7 +235,7 @@ module edrv32_cpu_b1_core_tb;
                         4: irq_armed[index] = debug[28] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         5: irq_armed[index] = u_core.e_redirect_w &&
-                            u_core.e_record_r[0][31:0] == irq_pc[index];
+                            observed_e_pc == irq_pc[index];
                         6: irq_armed[index] = debug[29] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         7: irq_armed[index] = dc_clean_all &&
