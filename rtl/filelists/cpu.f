@@ -11,3 +11,5 @@
 ../cpu/edrv32_cpu_div.v
 ../cpu/edrv32_cpu_csr.v
 ../tech/edrv32_mul_s33x33.v
+../tech/edrv32_ram_cpu_btb.v
+../tech/edrv32_ram_cpu_direction.v

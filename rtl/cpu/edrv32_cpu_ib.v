@@ -10,6 +10,8 @@ module edrv32_cpu_ib (
     // F2 input: each 179-bit record is described in rtl/cpu/README.md.
     input wire [1:0] push_count_i,
     input wire [357:0] push_data_i,
+    input wire [5:0] push_index_hi_i,
+    output wire [5:0] index_hi_o,
     output wire [2:0] free_count_o,
     // D observes the oldest two records and consumes 0, 1 or 2.
     input wire [1:0] pop_count_i,
@@ -25,6 +27,7 @@ module edrv32_cpu_ib (
     localparam RECORD_BITS = 179;
     localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
+    reg [2:0] index_hi_r [0:DEPTH-1];
     reg [1:0] read_ptr_r;
     reg [1:0] write_ptr_r;
     reg [2:0] count_r;
@@ -38,6 +41,8 @@ module edrv32_cpu_ib (
     generate
         for (read_slot = 0; read_slot < 2; read_slot = read_slot + 1) begin : g_read_slot
             localparam SLOT = read_slot;
+            assign index_hi_o[read_slot*3 +: 3] =
+                index_hi_r[read_ptr_r + SLOT[1:0]];
             for (read_slice = 0; read_slice < 6;
                 read_slice = read_slice + 1) begin : g_read_slice
                 localparam SLICE_BITS = read_slice == 5 ? 19 : 32;
@@ -90,6 +95,10 @@ module edrv32_cpu_ib (
             end
             always @(posedge clk_i) begin
                 if (!flush_i) begin
+                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
+                        index_hi_r[write_entry] <= push_index_hi_i[2:0];
+                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
+                        index_hi_r[write_entry] <= push_index_hi_i[5:3];
                     if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
                         entries_r[write_entry] <= push_data_i[178:0];
                     if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])

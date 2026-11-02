@@ -14,31 +14,29 @@ module tb;
     wire predict_taken_o;
     wire [31:0] predict_target_o;
     wire [1:0] predict_position_o;
-    wire predict_compressed_o;
-    wire [8:0] predict_history_o;
+        wire [11:0] predict_history_o;
     wire [36:0] predict_ras_o;
     reg update_valid_i=0;
     reg [31:1] update_pc_i=0;
     reg [31:0] update_target_i=0;
     reg [2:0] update_type_i=0;
     reg update_taken_i=0;
-    reg update_compressed_i=0;
-    reg [8:0] update_index_i=0;
+    reg [11:0] update_index_i=0;
     reg clear_valid_i=0;
-    reg [4:0] clear_index_i=0;
+    reg [6:0] clear_index_i=0;
     reg restore_valid_i=0;
     reg [36:0] restore_ras_i=0;
     reg restore_push_i=0;
     reg restore_pop_i=0;
     reg [31:0] restore_return_pc_i=0;
-    reg valid[0:31];
-    reg [23:0] tag[0:31];
-    reg [31:0] target[0:31];
-    reg [1:0] position[0:31];
-    reg [2:0] kind[0:31];
-    reg compressed[0:31];
-    integer direction[0:511];
-    reg [8:0] history=0;
+    reg valid[0:127];
+    reg [21:0] tag[0:127];
+    reg [31:0] target[0:127];
+    reg [1:0] position[0:127];
+    reg [2:0] kind[0:127];
+    reg compressed[0:127];
+    integer direction[0:4095];
+    reg [11:0] history=0;
     reg [31:0] stack[0:3];
     integer ptr=0;
     integer depth=0;
@@ -68,7 +66,6 @@ module tb;
         .predict_taken_o(predict_taken_o),
         .predict_target_o(predict_target_o),
         .predict_position_o(predict_position_o),
-        .predict_compressed_o(predict_compressed_o),
         .predict_history_o(predict_history_o),
         .predict_ras_o(predict_ras_o),
         .update_valid_i(update_valid_i),
@@ -76,8 +73,7 @@ module tb;
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
-        .update_compressed_i(update_compressed_i),
-        .update_index_i({16{update_index_i}}),
+        .update_index_i(update_index_i),
         .clear_valid_i(clear_valid_i),
         .clear_index_i(clear_index_i),
         .restore_valid_i(restore_valid_i),
@@ -88,9 +84,9 @@ module tb;
     );
     task automatic check;
         begin
-            q=integer'(query_pc_i[7:3]);
-            index_value={23'b0,query_pc_i[9:3],position[q]} ^ {23'b0,history};
-            expected_hit=valid[q] && tag[q]==query_pc_i[31:8] &&
+            q=integer'(query_pc_i[9:3]);
+            index_value=integer'({query_pc_i[13:3],position[q][1]}) ^ integer'(history);
+            expected_hit=valid[q] && tag[q]==query_pc_i[31:10] &&
                 position[q]>=query_pc_i[2:1];
             expected_taken=expected_hit && (kind[q]!=0 || direction[index_value]>=2);
             expected_target=(kind[q]==4 && depth>0)?stack[(ptr+3)%4]:target[q];
@@ -100,7 +96,7 @@ module tb;
                     {query_pc_i,1'b0},predict_hit_o,expected_hit,predict_taken_o,expected_taken,
                     predict_history_o,history,$time);
             if(expected_hit && (predict_target_o!==expected_target ||
-                predict_position_o!==position[q] || predict_compressed_o!==compressed[q]))
+                predict_position_o!==position[q]))
                 $fatal(1,"FAIL BTB target expected=%h actual=%h time=%t",
                     expected_target,predict_target_o,$time);
             if(predict_ras_o[36:34]!==3'(depth) || predict_ras_o[33:32]!==2'(ptr) ||
@@ -132,13 +128,13 @@ module tb;
                 if(depth<4)depth=depth+1;else overflow_seen=overflow_seen+1;
             end else if(action==2 && depth>0)begin ptr=(ptr+3)%4;depth=depth-1;end
             if(update_valid_i)begin
-                slot=integer'(update_pc_i[7:3]);
-                if(valid[slot] && tag[slot]!=update_pc_i[31:8])alias_seen=alias_seen+1;
-                valid[slot]=1;tag[slot]=update_pc_i[31:8];
+                slot=integer'(update_pc_i[9:3]);
+                if(valid[slot] && tag[slot]!=update_pc_i[31:10])alias_seen=alias_seen+1;
+                valid[slot]=1;tag[slot]=update_pc_i[31:10];
                 target[slot]=update_target_i;position[slot]=update_pc_i[2:1];
-                kind[slot]=update_type_i;compressed[slot]=update_compressed_i;
+                kind[slot]=update_type_i;compressed[slot]=0;
                 if(update_type_i==0)begin
-                    history={history[7:0],update_taken_i};
+                    history={history[10:0],update_taken_i};
                     if(update_taken_i && direction[update_index_i]<3)
                         direction[update_index_i]=direction[update_index_i]+1;
                     else if(!update_taken_i && direction[update_index_i]>0)
@@ -150,17 +146,17 @@ module tb;
         end
     endtask
     initial begin
-        for(i=0;i<32;i=i+1)begin
+        for(i=0;i<128;i=i+1)begin
             valid[i]=0;tag[i]=0;position[i]=0;target[i]=0;kind[i]=0;compressed[i]=0;
         end
-        for(i=0;i<512;i=i+1)direction[i]=1;
+        for(i=0;i<4096;i=i+1)direction[i]=1;
         repeat(2)@(negedge clk_i);rst_n_i=1;
         // BTB replacement and branch slot before/after query start.
-        update_valid_i=1;update_pc_i=31'('h46>>1);update_target_i='h100;
+        update_valid_i=1;update_pc_i=31'('h44>>1);update_target_i='h100;
         update_type_i=1;cycle();update_valid_i=0;query_pc_i=31'('h40>>1);cycle();
-        query_pc_i=31'('h46>>1);cycle();
+        query_pc_i=31'('h44>>1);cycle();
         update_valid_i=1;update_pc_i=31'('h144>>1);update_target_i='h200;cycle();
-        update_valid_i=0;cycle();query_pc_i=31'('h146>>1);cycle();
+        update_valid_i=0;cycle();query_pc_i=31'('h144>>1);cycle();
         query_pc_i=31'('h140>>1);cycle();
         // Exercise both saturation ends at a fixed saved index despite changing GHR.
         update_valid_i=1;update_pc_i=31'('h20>>1);update_type_i=0;update_index_i=17;
@@ -179,14 +175,14 @@ module tb;
         restore_valid_i=0;restore_pop_i=0;restore_push_i=0;
         // Independent model checks aliasing, gshare history and speculative recovery.
         for(i=0;i<3000;i=i+1)begin
-            query_pc_i=31'($urandom_range(0,1023));
+            query_pc_i=31'($urandom_range(0,8191)*2);
             update_valid_i=(i%3==0);query_accept_i=(i%3==1);
             restore_valid_i=(i%73==0);
             restore_ras_i=checkpoint;restore_push_i=i[0];restore_pop_i=i[1];
             restore_return_pc_i=$urandom;
-            update_pc_i=31'($urandom_range(0,1023));update_target_i=$urandom & 32'hfffffffc;
-            update_type_i=3'($urandom_range(0,4));update_compressed_i=0;
-            update_taken_i=i[1];update_index_i=9'($urandom);
+            update_pc_i=31'($urandom_range(0,8191)*2);update_target_i=$urandom & 32'hfffffffc;
+            update_type_i=3'($urandom_range(0,4));
+            update_taken_i=i[1];update_index_i=12'($urandom);
             cycle();
             if(i%61==0)checkpoint=predict_ras_o;
         end

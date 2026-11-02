@@ -228,21 +228,17 @@
                 u_core.d_record_w[0][31:0] == predictor_probe_pc) begin
                 predictor_probe_seen = 1;
                 $fdisplay(predictor_descriptor, "probe %h", u_core.d_record_w[0][141:99]);
-                $fdisplay(predictor_descriptor, "direction %h history %h",
-                    u_core.u_frontend.u_predictor.direction_r,
-                    u_core.u_frontend.u_predictor.history_r);
-                $fdisplay(predictor_descriptor, "ras %h %h",
+                $fdisplay(predictor_descriptor, "history %h ras %h %h valid %h",
+                    u_core.u_frontend.u_predictor.history_r,
                     u_core.u_frontend.u_predictor.ras_ptr_r,
-                    u_core.u_frontend.u_predictor.ras_count_r);
-                for (int entry = 0; entry < 32; entry++) begin
-                    if (u_core.u_frontend.u_predictor.btb_valid_r[entry])
-                        $fdisplay(predictor_descriptor, "btb %0d %h %h %h %h %h", entry,
-                            u_core.u_frontend.u_predictor.btb_tag_r[entry],
-                            u_core.u_frontend.u_predictor.btb_target_r[entry],
-                            u_core.u_frontend.u_predictor.btb_position_r[entry],
-                            u_core.u_frontend.u_predictor.btb_type_r[entry],
-                            u_core.u_frontend.u_predictor.btb_compressed_r[entry]);
-                end
+                    u_core.u_frontend.u_predictor.ras_count_r,
+                    u_core.u_frontend.u_predictor.btb_valid_r);
+                for (int entry = 0; entry < 128; entry++)
+                    $fdisplay(predictor_descriptor, "btb %0d %h", entry,
+                        u_core.u_frontend.u_predictor.u_btb.memory_r[entry]);
+                for (int entry = 0; entry < 4096; entry++)
+                    $fdisplay(predictor_descriptor, "direction %0d %h", entry,
+                        u_core.u_frontend.u_predictor.u_direction.memory_r[entry]);
                 $fclose(predictor_descriptor);
             end
             candidate0 = u_core.d_record_w[0][63:32];

@@ -90,3 +90,24 @@ endmodule
     output wire [65:0] p
 );
 endmodule
+
+(* blackbox *) module ip_ram_cpu_btb (
+    input wire clk,
+    input wire wr_en,
+    input wire [6:0] wr_addr,
+    input wire [57:0] wr_data,
+    input wire [6:0] rd_addr,
+    output wire [57:0] rd_data
+);
+endmodule
+
+(* blackbox *) module ip_ram_cpu_direction (
+    input wire clk,
+    input wire wr_en,
+    input wire [11:0] wr_addr,
+    input wire [1:0] wr_data,
+    output wire [1:0] update_data,
+    input wire [11:0] rd_addr,
+    output wire [1:0] rd_data
+);
+endmodule

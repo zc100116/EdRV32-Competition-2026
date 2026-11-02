@@ -37,6 +37,8 @@ module tb;
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_i),
         .push_data_i(push_data_i),
+        .push_index_hi_i(6'b0),
+        .index_hi_o(),
         .free_count_o(free_count_o),
         .pop_count_i(pop_count_i),
         .data_o(data_o),
