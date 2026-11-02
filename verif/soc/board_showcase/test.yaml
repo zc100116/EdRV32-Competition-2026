@@ -1,0 +1,10 @@
+top: edrv32_board_showcase_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software: showcase
+timeout: 1800
+pass: PASS
+tier: full
+simulator: verilator
+runner: python3 verif/soc/board_showcase/run.py
