@@ -56,6 +56,48 @@ curl -sSLO $U/xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64.tar.gz
 tar -xzf xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64.tar.gz -C ~/.local/opt
 ```
 
+### 2.1 GCC 16.1.0（仅用于 CoreMark 编译器对比）
+
+项目默认编译器仍为 xPack GCC 15.2.0；不修改 `env.sh`。比较工具链安装在
+`~/.local/opt/riscv-gcc-16.1.0/`，构建 monitor 时显式传入该目录下的 `CC`、
+`OBJDUMP` 和 `OBJCOPY`。源码为 GNU GCC 16.1.0 与 GNU binutils 2.45（与 xPack
+15.2.0-1 的 binutils 版本相同），仅构建裸机 C 编译器和 libgcc，无 libc。
+
+```sh
+mkdir -p ~/.cache/edrv32-gcc16
+cd ~/.cache/edrv32-gcc16
+curl -fLO https://ftp.gnu.org/gnu/gcc/gcc-16.1.0/gcc-16.1.0.tar.xz
+curl -fLO https://ftp.gnu.org/gnu/binutils/binutils-2.45.tar.xz
+tar -xf gcc-16.1.0.tar.xz
+tar -xf binutils-2.45.tar.xz
+cd gcc-16.1.0
+contrib/download_prerequisites --no-verify
+cd ..
+mkdir build-binutils
+cd build-binutils
+../binutils-2.45/configure --target=riscv-none-elf \
+  --prefix=$HOME/.local/opt/riscv-gcc-16.1.0 --disable-nls
+make -j3
+make install
+cd ..
+mkdir build-gcc
+cd build-gcc
+PATH=$HOME/.local/opt/riscv-gcc-16.1.0/bin:$PATH ../gcc-16.1.0/configure \
+  --target=riscv-none-elf --prefix=$HOME/.local/opt/riscv-gcc-16.1.0 \
+  --without-headers --with-newlib --enable-languages=c --disable-multilib \
+  --disable-shared --disable-threads --disable-libssp --disable-libquadmath \
+  --disable-libgomp --disable-nls --with-arch=rv32im_zicsr_zifencei --with-abi=ilp32
+PATH=$HOME/.local/opt/riscv-gcc-16.1.0/bin:$PATH make -j3 all-gcc all-target-libgcc
+PATH=$HOME/.local/opt/riscv-gcc-16.1.0/bin:$PATH make install-gcc install-target-libgcc
+~/.local/opt/riscv-gcc-16.1.0/bin/riscv-none-elf-gcc -dumpfullversion
+~/.local/opt/riscv-gcc-16.1.0/bin/riscv-none-elf-gcc -v
+```
+
+`download_prerequisites` 获取 gettext 0.22、GMP 6.3.0、MPFR 4.2.2、MPC 1.3.1
+和 ISL 0.24；按仓库规则使用 `--no-verify`。构建完成后按协调者要求清理本次源码和中间目录，
+本机保留 `~/.cache/edrv32-gcc16/monitor-logs/`；八个 monitor 的选项与大小见
+`tasks/win/20261102-40-coremark-gcc/src/variants.md`。
+
 ### 3. Spike
 
 ```sh
