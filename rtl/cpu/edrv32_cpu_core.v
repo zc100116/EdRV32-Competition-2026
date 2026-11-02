@@ -377,6 +377,20 @@ module edrv32_cpu_core (
     wire [63:0] trace_rd_data_w /* verilator public_flat_rd */;
     wire trace_trap_w /* verilator public_flat_rd */;
     wire [31:0] trace_cause_w /* verilator public_flat_rd */;
+    reg trace_trap_r;
+    reg [31:0] trace_cause_r;
+    // A younger M fault is traced after its surviving older slot reaches W.
+    // These registers drive trace only; architectural trap handling remains in M.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            trace_trap_r <= 0;
+        else
+            trace_trap_r <= m_trap_w && (|m_commit_w);
+    end
+    always @(posedge clk_i) begin
+        if (m_trap_w && (|m_commit_w))
+            trace_cause_r <= m_trap_cause_w;
+    end
     assign unused_mul_valid_w = mul_valid_w;
     assign unused_lane1_predicted_target_w = d_record_w[1][REC_PRED_TARGET_LSB +: 32];
     assign e_instr_w = e_record_r[0][REC_INSTR_LSB +: 32];
@@ -1184,13 +1198,13 @@ module edrv32_cpu_core (
     assign trace_rd_w = {w_write_r[!w_swap_r] ? w_rd_r[!w_swap_r] : 5'b0,
         w_write_r[w_swap_r] ? w_rd_r[w_swap_r] : 5'b0};
     assign trace_rd_data_w = {w_result_w[!w_swap_r], w_result_w[w_swap_r]};
-    assign trace_trap_w = m_trap_w;
-    assign trace_cause_w = m_trap_cause_w;
+    assign trace_trap_w = (m_trap_w && m_commit_w == 0) || trace_trap_r;
+    assign trace_cause_w = trace_trap_r ? trace_cause_r : m_trap_cause_w;
     assign debug_o = {trace_valid_w[0] ? trace_pc_w[31:0] :
         trace_valid_w[1] ? trace_pc_w[63:32] : 32'b0,
         2'b0, sleep_r, dc_miss_r, ic_miss_r, m_wait_w && dc_resp_device_i,
         div_busy_w, event_count_w[16], d_pair_reason_w, retire_count_w,
-        trace_trap_w, d_redirect_w, e_redirect_w, fetch_wait_w, m_wait_w,
+        m_trap_w, d_redirect_w, e_redirect_w, fetch_wait_w, m_wait_w,
         m_wait_w || div_wait_w || (d_count_w != 0 && d_issue_w == 0),
         w_valid_r, m_valid_r, e_valid_r,
         d_count_w >= 2, d_count_w != 0, ib_count_w, f2_valid_w, f1_valid_w};
