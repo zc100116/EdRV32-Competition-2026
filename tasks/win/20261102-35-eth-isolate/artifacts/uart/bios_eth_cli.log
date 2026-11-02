@@ -1,0 +1,22 @@
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+ETH link: up
+ETH load ready 192.168.1.10:5000
+Traceback (most recent call last):
+  File "G:\codex_project\EdRV32-Competition-2026\tools\board\uart_tool.py", line 392, in <module>
+    main()
+    ~~~~^^
+  File "G:\codex_project\EdRV32-Competition-2026\tools\board\uart_tool.py", line 385, in main
+    capture(args.port, args.image, args.log, args.menu, args.iterations,
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            args.elf, args.baud, args.rom, args.addr, args.entry, args.eth, args.local_ip)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\codex_project\EdRV32-Competition-2026\tools\board\uart_tool.py", line 336, in capture
+    transfer.feed_line(text)
+    ~~~~~~~~~~~~~~~~~~^^^^^^
+  File "G:\codex_project\EdRV32-Competition-2026\tools\board\uart_tool.py", line 288, in feed_line
+    resolve_arp(self.udp.getsockname()[0])
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\codex_project\EdRV32-Competition-2026\tools\board\uart_tool.py", line 42, in resolve_arp
+    raise OSError(f'ARP {local_ip} -> {board_ip}: SendARP error {result}')
+OSError: ARP 192.168.1.2 -> 192.168.1.10: SendARP error 67

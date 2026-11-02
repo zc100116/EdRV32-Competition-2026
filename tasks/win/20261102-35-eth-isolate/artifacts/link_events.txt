@@ -1,0 +1,6 @@
+Physical Ethernet if5 state changes; polling approximately1s, not exact PHY transition timestamps.
+{"time": "2026-11-02T13:32:54.0217622+08:00", "status": "Up", "linkSpeed": "1 Gbps", "interfaceIndex": 5}
+{"time": "2026-11-02T13:33:49.7241344+08:00", "status": "Disconnected", "linkSpeed": "1 Gbps", "interfaceIndex": 5}
+{"time": "2026-11-02T13:34:24.9952511+08:00", "status": "Up", "linkSpeed": "1 Gbps", "interfaceIndex": 5}
+{"time": "2026-11-02T13:37:20.3270684+08:00", "status": "Disconnected", "linkSpeed": "1 Gbps", "interfaceIndex": 5}
+{"time": "2026-11-02T13:38:02.1720284+08:00", "status": "Up", "linkSpeed": "1 Gbps", "interfaceIndex": 5}

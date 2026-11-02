@@ -1,0 +1,45 @@
+Exit=0
+
+
+IPAddress         : 192.168.1.2
+InterfaceIndex    : 5
+InterfaceAlias    : 以太网
+AddressFamily     : IPv4
+Type              : Unicast
+PrefixLength      : 24
+PrefixOrigin      : Manual
+SuffixOrigin      : Manual
+AddressState      : Preferred
+ValidLifetime     : 
+PreferredLifetime : 
+SkipAsSource      : False
+PolicyStore       : ActiveStore
+
+
+Caption            : 
+Description        : 
+ElementName        : 
+InstanceID         : ;C<8;@B8;8;:9=<55?55:8:8:8:55;
+AdminDistance      : 
+DestinationAddress : 
+IsStatic           : 
+RouteMetric        : 1
+TypeOfRoute        : 3
+AddressFamily      : IPv4
+CompartmentId      : 1
+DestinationPrefix  : 192.168.1.10/32
+InterfaceAlias     : 以太网
+InterfaceIndex     : 5
+InterfaceMetric    : 25
+NextHop            : 0.0.0.0
+PreferredLifetime  : 10675199.02:48:05.4775807
+Protocol           : NetMgmt
+Publish            : No
+State              : Alive
+Store              : ActiveStore
+ValidLifetime      : 10675199.02:48:05.4775807
+PSComputerName     : 
+ifIndex            : 5
+
+
+

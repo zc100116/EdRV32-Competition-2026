@@ -1,0 +1,4 @@
+Command: arp -d 192.168.1.10
+Exit=0
+The ARP entry deletion failed: The requested operation requires elevation.
+

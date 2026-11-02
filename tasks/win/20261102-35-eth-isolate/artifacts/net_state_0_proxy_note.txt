@@ -1,0 +1,1 @@
+Mihomo Meta Tunnel and Tailscale are UP. User previously required Clash remain on. Selected source-bound192.168.1.2 to192.168.1.10 uses physical Realtek Ethernet if5,192.168.1.10/32 On-link route. No adapter, IP, proxy or route changes were made. Captures will determine actual ARP/UDP traffic on that adapter.

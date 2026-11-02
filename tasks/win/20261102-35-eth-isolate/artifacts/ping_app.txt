@@ -1,0 +1,17 @@
+Command: ping -S 192.168.1.2 192.168.1.10 -n 10
+Exit=1
+
+Pinging 192.168.1.10 from 192.168.1.2 with 32 bytes of data:
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+Ping statistics for 192.168.1.10:
+    Packets: Sent = 10, Received = 0, Lost = 10 (100% loss),

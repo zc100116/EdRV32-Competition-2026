@@ -1,0 +1,96 @@
+Exit=0
+
+
+Name                 : 以太网 5
+InterfaceDescription : ASIX USB to Gigabit Ethernet Family Adapter
+ifIndex              : 28
+Status               : Disconnected
+LinkSpeed            : 0 bps
+InterfaceGuid        : {DDF8AE0C-6415-4593-B88C-6D45334E75CA}
+
+Name                 : 蓝牙网络连接
+InterfaceDescription : Bluetooth Device (Personal Area Network)
+ifIndex              : 27
+Status               : Disconnected
+LinkSpeed            : 3 Mbps
+InterfaceGuid        : {DD5CA50C-7C38-4009-872E-27961A265C47}
+
+Name                 : 本地连接 4
+InterfaceDescription : TAP-Windows Adapter V9 for OpenVPN Connect
+ifIndex              : 26
+Status               : Disconnected
+LinkSpeed            : 1 Gbps
+InterfaceGuid        : {CF4AB0E0-2ABA-41C5-A16C-B02E18A34522}
+
+Name                 : Mihomo
+InterfaceDescription : Meta Tunnel
+ifIndex              : 22
+Status               : Up
+LinkSpeed            : 100 Gbps
+InterfaceGuid        : {9E6FE1DA-841B-EE9D-1002-5210FB95904A}
+
+Name                 : 以太网 2
+InterfaceDescription : TAP-Windows Adapter V9
+ifIndex              : 19
+Status               : Disconnected
+LinkSpeed            : 1 Gbps
+InterfaceGuid        : {901D4335-4D6D-458F-9275-17638FF4B11E}
+
+Name                 : WLAN
+InterfaceDescription : Intel(R) Wi-Fi 6E AX211 160MHz
+ifIndex              : 18
+Status               : Up
+LinkSpeed            : 1.2 Gbps
+InterfaceGuid        : {78517FBB-B4BA-4FB0-B624-8C94824A6503}
+
+Name                 : 本地连接
+InterfaceDescription : QMTAP Adapter V9
+ifIndex              : 16
+Status               : Disconnected
+LinkSpeed            : 1 Gbps
+InterfaceGuid        : {647F51E2-E884-4C5B-92AF-3F48E8F6A2D7}
+
+Name                 : 以太网 3
+InterfaceDescription : Sangfor SSL VPN CS Support System VNIC
+ifIndex              : 12
+Status               : Disconnected
+LinkSpeed            : 10 Mbps
+InterfaceGuid        : {431C73EA-08C5-44E0-8FB2-4A4C63BBA465}
+
+Name                 : OpenVPN Connect DCO Adapter
+InterfaceDescription : OpenVPN Data Channel Offload
+ifIndex              : 10
+Status               : Disconnected
+LinkSpeed            : 1 Gbps
+InterfaceGuid        : {3939A4D4-2BC6-4FF4-A967-7BE84C728B47}
+
+Name                 : VMware Network Adapter VMnet8
+InterfaceDescription : VMware Virtual Ethernet Adapter for VMnet8
+ifIndex              : 9
+Status               : Up
+LinkSpeed            : 100 Mbps
+InterfaceGuid        : {374DDDEA-F49E-4F21-A55E-058E39108655}
+
+Name                 : Tailscale
+InterfaceDescription : Tailscale Tunnel
+ifIndex              : 83
+Status               : Up
+LinkSpeed            : 100 Gbps
+InterfaceGuid        : {37217669-42DA-4657-A55B-0D995D328250}
+
+Name                 : VMware Network Adapter VMnet1
+InterfaceDescription : VMware Virtual Ethernet Adapter for VMnet1
+ifIndex              : 6
+Status               : Up
+LinkSpeed            : 100 Mbps
+InterfaceGuid        : {12FE0827-024A-4371-8116-BD7C460B94A1}
+
+Name                 : 以太网
+InterfaceDescription : Realtek Gaming 2.5GbE Family Controller
+ifIndex              : 5
+Status               : Up
+LinkSpeed            : 1 Gbps
+InterfaceGuid        : {1287C6D1-0F4D-421B-9E12-B18DF2F60B6A}
+
+
+

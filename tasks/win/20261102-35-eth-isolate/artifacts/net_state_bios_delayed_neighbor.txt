@@ -1,0 +1,14 @@
+Command: powershell -NoProfile -Command "Get-NetNeighbor -IPAddress 192.168.1.10 | Format-List"
+Exit=0
+
+
+IPAddress        : 192.168.1.10
+InterfaceIndex   : 5
+InterfaceAlias   : 以太网
+AddressFamily    : IPv4
+LinkLayerAddress : 02-45-44-52-56-32
+State            : Reachable
+PolicyStore      : ActiveStore
+
+
+

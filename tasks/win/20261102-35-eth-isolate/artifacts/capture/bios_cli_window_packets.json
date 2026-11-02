@@ -1,0 +1,21 @@
+{
+  "start_epoch": 1793597878.0790658,
+  "result_epoch": 1793597881.7195487,
+  "packets": [],
+  "following_arp": [
+    {
+      "epoch": 1793597891.72698,
+      "type": "ARP",
+      "op": 1,
+      "source": "192.168.1.2",
+      "destination": "192.168.1.10"
+    },
+    {
+      "epoch": 1793597891.72703,
+      "type": "ARP",
+      "op": 2,
+      "source": "192.168.1.10",
+      "destination": "192.168.1.2"
+    }
+  ]
+}

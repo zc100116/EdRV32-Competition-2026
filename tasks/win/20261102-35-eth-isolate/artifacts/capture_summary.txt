@@ -1,0 +1,10 @@
+Completed steps0-4 and S3 observation.
+Application: ARP request/reply captured, boardMAC02:45:44:52:56:32, source-bound ping0/10 (ICMP not supported by RTL).
+BIOS menu2: ready seen2026-11-02T13:34:24.060112+08:00; first polled Ethernet Up13:34:24.995251+08:00. ARP request13:34:25.100... and reply captured. Immediate and delayed ARP tables both resolve expectedMAC; ping0/10 as expected for noICMP.
+CLI at13:37:58.079 to13:38:01.719: ready printed, SendARP error67, no boardARP/IPv4 packets captured in this attempt interval. First polled Ethernet Up13:38:02.172028+08:00. Sampling bounds do not identify exact physical Up instant.
+No reset after failure. At13:38:11.727 ARP request was answered by board immediately; PC learned expectedMAC. Source-bound ping afterwards0/10 is not proof of ARP failure.
+Inference: application and BIOS hardwareARP both work; CLI's immediate SendARP occurs around PC link recovery and fails before wire request/imageUDP transmission. Link readiness/host send timing is the leading cause, not a demonstrated RGMII receive defect. No delay/retry/software/hardware change was applied to make this test pass.
+ICMP caveat: eth-spec saysICMP is not processed, so card35's ping-success decision table cannot be applied literally; ARP wire evidence is used instead.
+Capture made using installedNpcap on physical Ethernetif5, filter host192.168.1.10 or arp, classicPCAPformat. Proxy/TUN stayed on, selectedroute was physicalEthernet. No network configuration changes. First capture and link monitor now stopped after step4.
+
+S3 after observing physical linkUp and one WIN3 request:60.037603s capture,1875 board-to-PC UDP packets,6000 EDTM records,continuous seq434..6433,lost0/errors0. Endpoint192.168.1.10:5000 ->192.168.1.2:6000. No automatic retries or code changes. See edtm_s3.csv,s3_*s.json,s3_udp_window_counts.txt and s3_telemetry.pcap.

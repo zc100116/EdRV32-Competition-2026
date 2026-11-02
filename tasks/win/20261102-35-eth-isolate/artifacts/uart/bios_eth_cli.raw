@@ -1,0 +1,4 @@
+Input error: type 1-4 then Enter
+BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+ETH link: up
+ETH load ready 192.168.1.10:5000

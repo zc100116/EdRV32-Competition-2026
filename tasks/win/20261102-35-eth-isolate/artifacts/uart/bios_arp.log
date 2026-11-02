@@ -1,0 +1,3 @@
+seq=1867 ts=1793597660909 [tx] 2<CR>
+seq=1868 ts=1793597664050 [rx] ETH link: up
+seq=1869 ts=1793597664050 [rx] ETH load ready 192.168.1.10:5000

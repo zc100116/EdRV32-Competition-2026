@@ -1,0 +1,19 @@
+Capturing physical Ethernet if5; filter=host192.168.1.10 or arp
+Started 2026-11-02 13:30:39
+packets=10
+packets=20
+packets=30
+packets=40
+packets=50
+packets=60
+packets=70
+packets=80
+packets=90
+packets=100
+packets=110
+packets=120
+packets=130
+packets=140
+packets=150
+packets=160
+packets=170
