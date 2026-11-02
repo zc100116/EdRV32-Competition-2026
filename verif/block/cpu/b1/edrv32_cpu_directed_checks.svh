@@ -277,9 +277,21 @@
             if (u_core.e_valid_r[0] && !u_core.m_wait_w && !u_core.m_redirect_w &&
                 !u_core.e_exception_r && !u_core.e_misaligned_w &&
                 (u_core.e_record_r[0][38:32] == 7'h03 ||
-                 u_core.e_record_r[0][38:32] == 7'h23) && !dc_req_valid)
-                $fatal(1, "FAIL D request valid suppressed pc=%08x ready=%b",
-                    u_core.e_record_r[0][31:0], dc_req_ready);
+                 u_core.e_record_r[0][38:32] == 7'h23)) begin
+                if (u_core.e_valid_r[1] &&
+                    issued_slot[u_core.e_record_r[1][31:0]] == 0 &&
+                    issued_slot[u_core.e_record_r[0][31:0]] == 1) begin
+                    if (u_core.e_redirect_w && dc_req_valid)
+                        $fatal(1, "FAIL younger D request survived older E redirect pc=%08x",
+                            u_core.e_record_r[0][31:0]);
+                    if (!u_core.e_redirect_w && !u_core.e_exception1_r &&
+                        !u_core.e_lane_jump_fault_w[1] && !dc_req_valid)
+                        $fatal(1, "FAIL D request valid suppressed pc=%08x ready=%b",
+                            u_core.e_record_r[0][31:0], dc_req_ready);
+                end else if (!dc_req_valid)
+                    $fatal(1, "FAIL D request valid suppressed pc=%08x ready=%b",
+                        u_core.e_record_r[0][31:0], dc_req_ready);
+            end
             observer_retire = int'(u_core.trace_valid_w[0]) + int'(u_core.trace_valid_w[1]);
             for (int code = 0; code <= 16; code++)
                 reference_events[code] = 0;
