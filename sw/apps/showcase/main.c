@@ -79,6 +79,7 @@ static void application_step(struct sched_task *task)
             return;
         }
         stopping = 0;
+        app_wake_at(UINT64_MAX);
         returning = 0;
         active = requested;
         requested = NULL;
