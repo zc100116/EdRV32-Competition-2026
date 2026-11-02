@@ -397,7 +397,7 @@
                 expected_debug[15] = u_core.fetch_wait_w;
                 expected_debug[16] = u_core.e_redirect_w;
                 expected_debug[17] = u_core.d_redirect_w;
-                expected_debug[18] = u_core.trace_trap_w;
+                expected_debug[18] = u_core.m_trap_w;
                 expected_debug[20:19] = 2'(observer_retire);
                 expected_debug[23:21] = u_core.d_issue_w == 1 ? 3'(reference_pair_reason) : 0;
                 expected_debug[24] = 1'(reference_events[9]);
@@ -573,8 +573,8 @@
                             cycles-redirect_start[row]);
                     redirect_start[row] = -1;
                 end
-                if (obligation_kind[row] == 7 && u_core.trace_trap_w &&
-                    u_core.trace_cause_w == 32'(obligation_arg1[row]) &&
+                if (obligation_kind[row] == 7 && u_core.m_trap_w &&
+                    u_core.m_trap_cause_w == 32'(obligation_arg1[row]) &&
                     ((u_core.m_valid_r[0] && u_core.m_record_r[0][31:0] == obligation_pc[row]) ||
                      (u_core.m_valid_r[1] &&
                       u_core.m_record_r[1][31:0] == obligation_pc[row]))) begin
