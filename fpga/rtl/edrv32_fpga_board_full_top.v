@@ -1,8 +1,7 @@
 // File: edrv32_fpga_board_full_top.v
-// Spec: board-plan B3F; edrv32-soc-spec 3, 5.2 X1-X10, 5.3, 6.1, 6.4, 7.1, 8.8; cpu-spec 7.2.
+// Spec: board-plan B3F; edrv32-soc-spec 3, 5.2 X1-X10, 5.3, 6.1, 6.4, 7.1, 8.8; cpu-spec 7.1.
 // Description: Full SoC: CPU + DDR + VIN/PIX/GEO + RND + two-layer DISP + NPU + ETH.
-//              cpu-spec 7.2 debug_o is registered in clk_sys for the PDS ILA B group
-//              (fpga/ip/ila_cpu.md).
+//              The PDS ILA taps the cpu-spec 7.1 CSR counters (fpga/ip/ila_cpu.md).
 //              DDR core_clk owns clk_mem; sys_subsys reset_ctrl owns domain resets.
 // Clock domains: sys, mem, pix/serial, npu, cam0/1, eth RX/TX.
 module edrv32_fpga_board_full_top (
@@ -150,11 +149,7 @@ module edrv32_fpga_board_full_top (
     wire [15:0] gpio_w;
     /* verilator lint_on UNUSEDSIGNAL */
     wire [15:0] unused_gpio_oe_w;
-    wire [63:0] debug_w;
-    // ILA probe point; kept without fabric loads so the inserted debug core can tap it.
-    /* verilator lint_off UNUSEDSIGNAL */
-    reg [63:0] ila_cpu_r /* synthesis syn_preserve=1 */;
-    /* verilator lint_on UNUSEDSIGNAL */
+    wire [63:0] unused_debug_w;
 
     wire [27:0] axi_awaddr_w;
     wire axi_awuser_ap_w;
@@ -476,11 +471,6 @@ module edrv32_fpga_board_full_top (
     assign unused_cam1_pwdn_w = gpio_w[14];
     assign cam1_rst_n_o = gpio_w[15];
 
-    // cpu-spec 7.2: one register stage between the core and the ILA sample inputs.
-    always @(posedge clk_sys_w) begin
-        ila_cpu_r <= debug_w;
-    end
-
     // Unbonded reset outputs and inactive master responses are intentionally open.
     /* verilator lint_off PINCONNECTEMPTY */
     // CPU interfaces retain their owning subsystem and engine signal stems.
@@ -556,7 +546,7 @@ module edrv32_fpga_board_full_top (
         .mtime_i(mtime_w),
 
         // debug interface.
-        .debug_o(debug_w),
+        .debug_o(unused_debug_w),
 
         // irq interface.
         .irq_o(irq_cache_w)
