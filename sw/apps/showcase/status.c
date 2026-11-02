@@ -18,6 +18,7 @@ void status_enter(void)
 {
     lv_obj_t *screen = lv_screen_active();
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x0b1725), 0);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
     lv_obj_set_style_text_color(screen, lv_color_hex(0xf2f7fc), 0);
     statistics = lv_label_create(screen);
     lv_obj_set_pos(statistics, 72, 80);
