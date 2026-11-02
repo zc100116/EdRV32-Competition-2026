@@ -23,7 +23,7 @@ def command(args, name):
 
 
 def main():
-    command(['make', '-C', 'sw', 'PROGRAM=showcase'], 'software.log')
+    command(['make', '-C', 'sw', 'PROGRAM=showcase', '-j', '4'], 'software.log')
     games = OUT / 'games'
     games.mkdir(parents=True, exist_ok=True)
     (games / 'test.nes').write_bytes(

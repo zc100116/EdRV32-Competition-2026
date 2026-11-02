@@ -1,8 +1,8 @@
 # Showcase 输入按下沿在消费前被覆盖
 
 ## 1. 现象
-B3R 启动到启动器，第一帧和像素检查完成后，首条串口虚拟 ENTER 未出现 NES enter 日志。
-主机调用序列进一步确认：事件等待应用处理期间，重复采样同一按键电平会清零按下沿。
+SoC 输入联调期间，主机调用序列确认一项输入交付缺陷：
+事件等待应用处理期间，重复采样同一按键电平会清零按下沿。
 
 ## 2. 复现
 环境：GCC 13.3.0、xPack GCC 15.2.0、Verilator 5.020；无随机激励。
@@ -16,7 +16,7 @@ SoC 命令：`flock /tmp/edrv32-sim.lock python3 tools/regress.py full --path ve
 旧实现每次通信服务都执行 `input_pressed = next_input & ~input_snapshot`。
 第一次采样 ENTER 得到按下沿并置应用任务 INPUT 事件，第二次采样 ENTER 得到零。
 通信优先级 0 可以连续运行；应用优先级 1 尚未读取时，其 INPUT 事件位仍保留。
-原 SoC 日志在 `build/board_showcase/simulation.log`；联调中该文件会被后续运行覆盖。
+重复采样的失败与修复证据分别在 `input-before.log`、`test-sched.log`（build/showcase/）。
 
 ## 4. 根因
 事件位按 OR 保留，关联的按下沿却按采样覆盖；两者的消费时刻不一致。

@@ -1,7 +1,7 @@
 // File: edrv32_board_showcase_tb.sv
 // Spec: Task B3-6; edrv32-soc-spec 5.3, 6.1, 7.4, 7.5; rnd-spec 2.6/4.
-// Description: Real Boot ROM BIOS menu, then reset into the preloaded SRAM application.
-//              DDR user-port model exercises RND writes and CPU uncached readback.
+// Description: Real showcase ELF from a ROM entry jumper and sparse DDR preload.
+//              Check rendered pixels, virtual input and GUI/NES Surface ownership.
 // Clock domains: 27 MHz board, 125 MHz DDR reference, modeled system/video PLLs.
 module edrv32_board_showcase_tb;
     timeunit 1ns;
@@ -185,6 +185,8 @@ module edrv32_board_showcase_tb;
         end
     end
     task automatic controller(input reg [15:0] keys);
+        $display("board_showcase controller keys=%h time=%0t", keys, $time);
+        $fflush();
         u_uart.send(8'h1b);
         u_uart.send(8'h56);
         u_uart.send(keys[7:0]);
@@ -237,9 +239,10 @@ module edrv32_board_showcase_tb;
     initial begin
         forever begin
             #10000000;
-            $display("board_showcase progress time=%0t PC=%h mtime=%0d",
+            $display("board_showcase t=%0t PC=%h mt=%0d menu=%0d NES=%0d base=%h",
                      $time, u_board.u_cpu.u_core.trace_pc_w,
-                     u_board.u_sys.u_clint.mtime_r);
+                     u_board.u_sys.u_clint.mtime_r, launcher_count, nes_switches,
+                     u_board.u_disp.u_regs.cur_base_r);
             $fflush();
         end
     end
