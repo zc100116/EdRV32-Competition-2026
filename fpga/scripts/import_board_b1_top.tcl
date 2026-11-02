@@ -40,9 +40,15 @@ proc edrv32_filelist {path} {
     return $files
 }
 
-set edrv32_sources [concat \
-    [edrv32_filelist [file join $edrv32_repo rtl filelists cpu_subsys.f]] \
-    [edrv32_filelist [file join $edrv32_repo rtl filelists sys_subsys.f]]]
+# cpu_subsys.f and sys_subsys.f share common cells (e.g. edrv32_reset_copy); add each once.
+set edrv32_sources {}
+foreach list {cpu_subsys sys_subsys} {
+    foreach f [edrv32_filelist [file join $edrv32_repo rtl filelists $list.f]] {
+        if {[lsearch -exact $edrv32_sources $f] < 0} {
+            lappend edrv32_sources $f
+        }
+    }
+}
 lappend edrv32_sources [file join $edrv32_repo fpga rtl edrv32_fpga_board_b1_top.v]
 
 foreach f $edrv32_sources {
