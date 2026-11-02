@@ -204,30 +204,30 @@ module edrv32_board_showcase_tb;
         if (rendered_pixel != 16'h08a4)
             $fatal(1, "FAIL launcher pixel expected=08a4 actual=%h base=%h time=%0t",
                    rendered_pixel, rendered_base, $time);
+        // Input is complete held state: release after the application responds.
         controller(16'h0100);
-        controller(0);
         wait (nes_entered);
+        controller(0);
         wait (u_board.u_disp.u_regs.cur_base_r != rendered_base);
         controller(16'h0100);
+        wait (u_board.u_disp.u_regs.cur_base_r >= nes_base &&
+              u_board.u_disp.u_regs.cur_base_r < nes_base + nes_bytes);
         controller(0);
         wait (nes_switches >= 3);
         controller(16'h0200);
-        controller(0);
         wait (u_board.u_disp.u_regs.cur_base_r < nes_base ||
               u_board.u_disp.u_regs.cur_base_r >= nes_base + nes_bytes);
-        controller(16'h0200);
         controller(0);
+        controller(16'h0200);
         wait (launcher_count == 2);
-        repeat (4) begin
-            controller(16'h0800);
-            controller(0);
-        end
-        controller(16'h0100);
         controller(0);
+        // PREV + ENTER selects the final (system status) card from NES index 0.
+        controller(16'h0900);
         wait (application_entered);
-        controller(16'h0200);
         controller(0);
+        controller(16'h0200);
         wait (launcher_count == 3);
+        controller(0);
         if (u_uart.frame_errors != 0)
             $fatal(1, "FAIL UART errors=%0d time=%0t", u_uart.frame_errors, $time);
         $display("PASS board_showcase launcher pixel, app enter/exit, NES %0d flips and exit",
