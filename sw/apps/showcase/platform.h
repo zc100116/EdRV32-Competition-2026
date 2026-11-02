@@ -28,6 +28,8 @@ uint32_t platform_hardware(void);
 /* Returns PLATFORM_* bits (not VI_*); KEY4/virtual ESC => PLATFORM_BACK.
  * platform_virtual_input() returns the unmodified virtual VI_* controller state. */
 uint32_t platform_keys(void);
+/* Pressed edges for the latest communication sample; use with PLATFORM_INPUT. */
+uint32_t platform_pressed(void);
 struct virtual_input_state platform_virtual_input(void);
 uint32_t platform_frames(void);
 /* NES owns RND/DISP while GUI is paused; callbacks receive captured IRQ results.

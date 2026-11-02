@@ -31,5 +31,7 @@ void app_wake_at(uint64_t mtime);
 void app_return(void);
 uint32_t app_events(void);
 uint64_t app_busy_ticks(void);
+/* Cooperative execution and synchronous GUI RND callbacks guarantee that
+ * pause(1) returns with no GUI RND batch in flight, before app callbacks register. */
 void app_gui_pause(uint8_t paused);
 #endif
