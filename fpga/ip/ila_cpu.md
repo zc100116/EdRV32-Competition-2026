@@ -35,5 +35,5 @@ monitor 的 CoreMark 测量（`sw/apps/monitor/benchmark.c`、`hpm.c`）已经�
 
 ## 运行时使用（上板时）
 
-1. **核对跑分**：monitor 在每轮 `iterate()` 结束后用 `mcountinhibit` 冻结计数器，冻结后任何时刻抓到的 A 组值都是这一轮的最终计数。串口打印 `HPM round` 结果之后，手动触发一次，或设为 `minstret` 大于 0 立即触发。抓到的值逐项与串口的 `HPM round cycles`、`HPM round instructions` 以及各事件计数对比。两轮各抓一次。
+1. **核对跑分**：`monitor_hpm_stop()` 在 `iterate()` 结束时把全部计数器同时冻结；随后 `monitor_hpm_release()` 会重新放开 mcycle/minstret（HPM 保持冻结），所以串口打印之后再手动触发，mcycle/minstret 已经不是最终值（卡 34）。正确做法：触发条件设为 `minstret` 等于该轮的指令数（串口 `HPM round instructions`，同一程序和迭代次数下每次相同；O2、5000 次为 1441025033 = 0x55E44C09）。冻结期间 minstret 停在这个值上，触发点上 mcycle 就是该轮的 `HPM round cycles`，hpm3–10 就是该轮 8 个事件的最终计数。第 1 轮触发后重新布防，抓第 2 轮（第 2 轮开始时计数器清零，minstret 会再次到达同一个值）。另有一条自洽检查：第 1 轮的事件 1–3（dual/single/zero retire）之和等于周期数，single + 2×dual 等于指令数。
 2. **流水线效率**：在 CoreMark 运行中，触发条件设为 `minstret` 等于某个中间值（例如该轮指令数的一半，从第 1 次串口结果估算），采 1024 个周期。`minstret` 每周期的增量就是这一拍退休的条数（0/1/2），可以统计 IPC 和双发射比例；HPM 各计数器每周期的增量，是对应事件（第 1 轮为事件 1–8，第 2 轮为 9–16：load-use、D$/I$ 缺失、配对失败、重定向等）发生的周期。用这些增量画出关键算法区间的流水线效率波形。
