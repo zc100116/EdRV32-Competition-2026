@@ -13,7 +13,7 @@ import struct
 import threading
 import time
 
-from tools.board.link_wait import wait_for_link
+from tools.board.link_wait import LINK_POLL_INTERVAL, wait_for_link
 
 HEADER = struct.Struct("!BBHI")
 DATA_BYTES = 1024
@@ -264,6 +264,9 @@ class EthernetTool:
 
     def wait_for_link(self, local_ip):
         name, elapsed = wait_for_link(local_ip)
+        # Log only an actual wait; virtual input calls this for every frame.
+        if elapsed < LINK_POLL_INTERVAL:
+            return
         message = f'等待网卡 {name} 就绪 … 用时 {elapsed:.1f} s'
         if self.session:
             self.session.log(message)
