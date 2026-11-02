@@ -19,7 +19,6 @@ static lv_obj_t *page;
 static lv_obj_t **cards;
 static lv_image_dsc_t *icons;
 static unsigned focus;
-static uint32_t previous_keys;
 static enum { BROWSER, STARTING, PLAYING, STOPPING } state;
 static uint64_t next_frame;
 static uint64_t report_at;
@@ -136,7 +135,6 @@ static void enter(void)
     entries = (const struct game_pack_entry *)(pack + 1);
     state = BROWSER;
     selected = NULL;
-    previous_keys = platform_keys();
     app_gui_pause(0);
     lv_obj_clean(lv_screen_active());
     browser();
@@ -192,10 +190,7 @@ static void report(uint64_t now)
 
 static void step(void)
 {
-    (void)app_events();
-    uint32_t keys = platform_keys();
-    uint32_t pressed = keys & ~previous_keys;
-    previous_keys = keys;
+    uint32_t pressed = (app_events() & PLATFORM_INPUT) ? platform_pressed() : 0;
     uint64_t now = platform_ticks();
     if (state == BROWSER) {
         if (pressed & PLATFORM_BACK) {

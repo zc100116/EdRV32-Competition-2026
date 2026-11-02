@@ -28,7 +28,7 @@ const struct app *const showcase_apps[] = {
 };
 const unsigned showcase_app_count = sizeof(showcase_apps) / sizeof(showcase_apps[0]);
 static unsigned selected;
-static lv_obj_t *cards[8];
+static lv_obj_t *cards[sizeof(showcase_apps) / sizeof(showcase_apps[0])];
 static lv_obj_t *label(lv_obj_t *parent, const char *text, int x, int y, uint32_t color)
 {
     lv_obj_t *object = lv_label_create(parent);

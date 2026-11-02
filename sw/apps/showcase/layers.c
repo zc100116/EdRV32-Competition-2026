@@ -162,14 +162,12 @@ static unsigned prepare_row;
 static unsigned phase;
 static uint32_t start;
 static uint32_t frame;
-static uint32_t previous_keys;
 void layers_enter(void)
 {
     scene = 1;
     next_scene = 1;
     phase = 0;
     prepare_row = 0;
-    previous_keys = platform_keys();
     app_wake_at(platform_ticks());
 }
 void layers_exit(void)
@@ -178,9 +176,7 @@ void layers_exit(void)
 }
 void layers_step(void)
 {
-    uint32_t keys = platform_keys();
-    uint32_t pressed = keys & ~previous_keys;
-    previous_keys = keys;
+    uint32_t pressed = (app_events() & PLATFORM_INPUT) ? platform_pressed() : 0;
     if (pressed & PLATFORM_BACK) { app_return(); return; }
     if (pressed & (PLATFORM_LEFT | PLATFORM_RIGHT)) {
         next_scene = (scene + ((pressed & PLATFORM_LEFT) ? 3u : 0u)) % 5u + 1u;

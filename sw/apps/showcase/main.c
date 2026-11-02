@@ -15,7 +15,6 @@ static uint8_t stopping;
 static uint8_t paused;
 static uint32_t step_events;
 static uint32_t input_keys;
-static uint32_t previous_keys;
 static struct virtual_input_state previous_virtual;
 static void application_step(struct sched_task *task);
 struct sched_task communication_task = {
@@ -65,8 +64,7 @@ void showcase_input_event(void)
 static void application_step(struct sched_task *task)
 {
     step_events = sched_take(task);
-    uint32_t pressed = input_keys & ~previous_keys;
-    previous_keys = input_keys;
+    uint32_t pressed = (step_events & PLATFORM_INPUT) ? platform_pressed() : 0;
     if (active && !active->owns_display && (pressed & PLATFORM_BACK)) returning = 1;
     if ((requested || returning) && !stopping) {
         if (active) active->exit();
@@ -98,6 +96,7 @@ static void application_step(struct sched_task *task)
             platform_puts("showcase launcher\r\n");
         }
         sched_signal(&gui_task, 1);
+        return;
     }
     if (active) active->step();
     else if (step_events & PLATFORM_INPUT) launcher_input(pressed);
