@@ -126,6 +126,7 @@
     assign cold_slot0_redirect = u_core.d_redirect_w &&
         u_core.d_record_w[0][38:32] == 7'h6f;
     logic observed_e_slot;
+    logic observed_e_pipe;
     logic observed_d_slot;
     logic observed_trap_slot;
     logic observed_pair_swap;
@@ -139,10 +140,9 @@
     // A synchronous trap can commit one older instruction only for a slot-1 fault.
     assign observed_trap_slot = |u_core.m_commit_w;
     always_comb begin
-        observed_e_pc = u_core.e_record_r[0][31:0];
-        if (u_core.e_valid_r[1] &&
-            control_instruction(u_core.e_record_r[1][63:32]))
-            observed_e_pc = u_core.e_record_r[1][31:0];
+        observed_e_pipe = u_core.e_valid_r[1] &&
+            control_instruction(u_core.e_record_r[1][63:32]);
+        observed_e_pc = u_core.e_record_r[observed_e_pipe][31:0];
         observed_e_slot = 1'(issued_slot[observed_e_pc]);
     end
     function automatic bit csr_instruction_write(input logic [31:0] instruction);
@@ -457,9 +457,11 @@
             end
             if (debug[26])
                 device_wait_cycles++;
-            if (u_core.m_trap_w && u_core.e_valid_r[0] && u_core.d_count_w != 0 &&
-                u_core.e_actual_pc_w != (u_core.e_record_r[0][100] ?
-                    u_core.e_record_r[0][132:101] : u_core.e_next_pc_w) &&
+            if (u_core.m_trap_w && u_core.e_valid_r[observed_e_pipe] &&
+                u_core.d_count_w != 0 &&
+                u_core.e_lane_actual_pc_w[observed_e_pipe] !=
+                (u_core.e_record_r[observed_e_pipe][100] ?
+                    u_core.e_record_r[observed_e_pipe][132:101] : observed_e_pc + 4) &&
                 candidate0[6:0] == 7'h6f && !u_core.d_record_w[0][99])
                 max_priority_overlap++;
             if (ic_miss && (observer_retire != 0 || u_core.d_issue_w != 0))
