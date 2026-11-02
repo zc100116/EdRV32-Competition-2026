@@ -4,7 +4,7 @@
 //              Check AXI contracts, observe committed tohost and print performance windows.
 // Clock domain: clk_sys.
 /* verilator lint_off BLKSEQ */
-module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
+module edrv32_cpu_b2_tb;
     import edrv32_axi64_memory_pkg::*;
     bit clk_i = 0;
     /* verilator lint_off SYNCASYNCNET */
@@ -38,9 +38,7 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
     longint unsigned start_hpm_r [0:1][0:7];
     string image;
 
-    edrv32_cpu_subsys #(
-        .RVC_EN(RVC_EN)
-    ) u_dut (
+    edrv32_cpu_subsys u_dut (
         // Clock and reset.
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -238,9 +236,9 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
             if (store_r && !store_seen_r && u_dut.dc_commit_w && !u_dut.dc_kill_w) begin
                 store_seen_r <= 1;
                 if (store_addr_r == tohost_addr_w && u_dut.dc_store_data_w[0]) begin
-                    $display("B2_TOTAL mcycle=%0d minstret=%0d RVC_EN=%0d latency=%0d",
+                    $display("B2_TOTAL mcycle=%0d minstret=%0d no-C latency=%0d",
                              u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,
-                             RVC_EN, read_latency_w);
+                             read_latency_w);
                     for (int e = 0; e < 16; e++)
                         $display("B2_HPM window=total event=%0d count=%0d", e + 1,
                                  total_events_r[e]);

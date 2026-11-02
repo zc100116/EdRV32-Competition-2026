@@ -26,7 +26,7 @@ def requirements():
                 yield (f'bypass.{source}.rs{operand}.slot{slot}',
                         f'旁路源：{source.upper()} → 槽 {slot} rs{operand}')
     for cause, label in (
-        (0, '指令地址不对齐（RVC_EN=0）'), (1, '取指访问错误'),
+        (0, '指令地址不对齐（无 C 扩展）'), (1, '取指访问错误'),
         (2, '非法指令'), (3, 'EBREAK'), (4, 'load 地址不对齐'),
         (5, 'load 访问错误'), (6, 'store 地址不对齐'),
         (7, 'store 访问错误'), (11, 'M 模式 ECALL'),

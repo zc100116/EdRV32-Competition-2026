@@ -3,9 +3,7 @@
 // Description: Connect the CPU core, instruction/data caches and APB cache control.
 //              Expose independent AXI64 masters and the PLIC source 6 interrupt.
 // Clock domain: clk_sys.
-module edrv32_cpu_subsys #(
-    parameter RVC_EN = 0
-) (
+module edrv32_cpu_subsys (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
@@ -279,9 +277,7 @@ module edrv32_cpu_subsys #(
     wire [31:0] wb_err_addr_w;
 
     // core interface connections.
-    edrv32_cpu_core #(
-        .RVC_EN(RVC_EN)
-    ) u_core (
+    edrv32_cpu_core u_core (
         // Clock.
         .clk_i(clk_i),
 

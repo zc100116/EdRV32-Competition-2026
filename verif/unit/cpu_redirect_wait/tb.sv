@@ -4,7 +4,7 @@
 // Check retention, predictor/RAS updates, and simultaneous or subsequent M faults.
 // Clock domain: clk_sys.
 `timescale 1ns/1ps
-module tb #(parameter RVC_EN=1);
+module tb;
     reg clk_i=0;
     always #5 clk_i=~clk_i;
     reg rst_n_i=0;
@@ -36,7 +36,7 @@ module tb #(parameter RVC_EN=1);
     wire error_case=scenario>=2;
     assign dc_resp_valid=pending && delay_left==0;
     assign dc_resp_err=dc_resp_valid && error_case;
-    edrv32_cpu_core #(.RVC_EN(RVC_EN)) dut (
+    edrv32_cpu_core dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_direction_n_i({8{rst_n_i}}),
@@ -181,9 +181,9 @@ module tb #(parameter RVC_EN=1);
                     $fatal(1,"FAIL D RAS restored more than once");
             end
             $display("PASS redirect_wait scenario=%0d RVC=%0d E=%0d D=%0d updates=%0d",
-                scenario,RVC_EN,e_redirects,d_redirects,updates);
+                scenario,0,e_redirects,d_redirects,updates);
         end
-        $display("PASS cpu_redirect_wait RVC=%0d",RVC_EN);
+        $display("PASS cpu_redirect_wait RVC=%0d",0);
         $finish;
     end
 endmodule

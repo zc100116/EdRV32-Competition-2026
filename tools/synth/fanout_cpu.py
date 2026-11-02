@@ -65,7 +65,6 @@ def main():
                         ' '.join('-I' + path for path in sorted(includes)) +
                         ' ' + str(destination))
     commands += [
-        'chparam -set RVC_EN 0 edrv32_cpu_subsys',
         'hierarchy -top edrv32_cpu_subsys', 'proc', 'flatten',
         'setattr -set keep 1 a:keep %ci1', 'select *',
         'synth -top edrv32_cpu_subsys -flatten -noabc',

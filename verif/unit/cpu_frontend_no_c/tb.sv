@@ -4,7 +4,7 @@
 // Stop with a diagnostic on the first mismatch; print PASS on completion.
 // Clock domain: clk_sys.
 `timescale 1ns/1ps
-module tb #(parameter RVC_EN=1);
+module tb;
     reg clk_i=0;
     always #5 clk_i=~clk_i;
     reg rst_n_i=0;
@@ -75,7 +75,7 @@ module tb #(parameter RVC_EN=1);
     reg expected_error;
 
     wire [79:0] unused_operand_addr_w;
-    edrv32_cpu_frontend #(.RVC_EN(RVC_EN)) dut (
+    edrv32_cpu_frontend dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_direction_n_i({8{rst_n_i}}),
@@ -160,7 +160,7 @@ module tb #(parameter RVC_EN=1);
                 if(decode_pop_count_i==2)pairs=pairs+1;
                 for(lane=0;lane<integer'(decode_pop_count_i);lane=lane+1)begin
                     record_value=decode_data_o[lane*179+:179];
-                    length_bytes=(RVC_EN && memory[expected_pc/2][1:0]!=3)?2:4;
+                    length_bytes=(0 && memory[expected_pc/2][1:0]!=3)?2:4;
                     expected_raw=length_bytes==2?{16'b0,memory[expected_pc/2]}:
                         {memory[expected_pc/2+1],memory[expected_pc/2]};
                     expected_instr=expected_raw;
@@ -184,7 +184,7 @@ module tb #(parameter RVC_EN=1);
                     if(record_value[141:133]!==9'(expected_pc>>1))
                         $fatal(1,"FAIL saved gshare index PC=%h",expected_pc);
                     if(record_value[100])begin
-                        if(expected_pc!=(RVC_EN?6:'hc) || record_value[132:101]!='h40)
+                        if(expected_pc!=(0?6:'hc) || record_value[132:101]!='h40)
                             $fatal(1,"FAIL predicted target PC=%h target=%h",
                                 expected_pc,record_value[132:101]);
                         predicted=predicted+1;
@@ -195,15 +195,15 @@ module tb #(parameter RVC_EN=1);
                     if(held_d_redirect)begin
                         expected_pc=held_d_target;held_d_redirect=0;
                     end else
-                        expected_pc=(expected_pc==(RVC_EN?6:'hc))?'h40:expected_pc+length_bytes;
+                        expected_pc=(expected_pc==(0?6:'hc))?'h40:expected_pc+length_bytes;
                 end
             end
         end
     end
     initial begin
         halt_i=1;
-        for(i=0;i<4096;i=i+1)memory[i]=RVC_EN?16'h0001:(i[0]?16'h0000:16'h0013);
-        if(RVC_EN)begin
+        for(i=0;i<4096;i=i+1)memory[i]=0?16'h0001:(i[0]?16'h0000:16'h0013);
+        if(0)begin
             memory[0]=16'h0085;
             memory[1]=16'h0113;memory[2]=16'h0070;
             memory[3]=16'h006f;memory[4]=16'h03a0;
@@ -211,7 +211,7 @@ module tb #(parameter RVC_EN=1);
         end
         memory['hc/2]=16'h006f;memory['he/2]=16'h0340;
         repeat(2)@(negedge clk_i);rst_n_i=1;
-        update_valid_i=1;update_pc_i=RVC_EN?6:'hc;update_target_i='h40;update_type_i=3;
+        update_valid_i=1;update_pc_i=0?6:'hc;update_target_i='h40;update_type_i=3;
         update_taken_i=1;
         @(negedge clk_i);update_valid_i=0;halt_i=0;
         for(cycle_number=0;cycle_number<1200;cycle_number=cycle_number+1)begin
@@ -233,11 +233,11 @@ module tb #(parameter RVC_EN=1);
         end
         @(negedge clk_i);halt_i=1;decode_pop_count_i=0;
         if(accepted<50 || retired<100 || pairs==0 || killed==0 || waits==0 ||
-            blocked==0 || predicted==0 || (RVC_EN && crossed==0) || errors==0 ||
+            blocked==0 || predicted==0 || (0 && crossed==0) || errors==0 ||
             high_redirects==0 || d_redirects==0)
             $fatal(1,"FAIL frontend coverage accepted=%d retired=%d kill=%d predicted=%d cross=%d errors=%d",
                 accepted,retired,killed,predicted,crossed,errors);
         $display("PASS frontend RVC=%0d requests=%0d instructions=%0d pairs=%0d kill=%0d wait=%0d backpressure=%0d cross=%0d errors=%0d",
-            RVC_EN,accepted,retired,pairs,killed,waits,blocked,crossed,errors);$finish;
+            0,accepted,retired,pairs,killed,waits,blocked,crossed,errors);$finish;
     end
 endmodule
