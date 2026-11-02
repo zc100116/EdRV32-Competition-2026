@@ -64,7 +64,7 @@ void sched_run(void)
             if (task->wake_at < deadline) deadline = task->wake_at;
         }
         if (ready) {
-            ready->wake_at = UINT64_MAX;
+            if (now >= ready->wake_at) ready->wake_at = UINT64_MAX;
             sched_port_unlock(state);
             uint64_t begin = sched_port_time();
             uint64_t idle_before = idle_ticks;

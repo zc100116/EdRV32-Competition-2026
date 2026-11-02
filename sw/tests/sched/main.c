@@ -31,8 +31,12 @@ void sched_port_wait(void)
     ++waits;
     if (waits == 1) {
         assert(compare == 100);
-        now = compare;
+        now = 50;
+        sched_signal(&low, 2);
     } else if (waits == 2) {
+        assert(compare == 100);
+        now = compare;
+    } else if (waits == 3) {
         assert(compare == UINT64_MAX);
         /* IRQ arrives after the final readiness check but before WFI.
          * The CPU wakes on pending IRQ with MIE masked; ISR then sets event.
@@ -40,10 +44,10 @@ void sched_port_wait(void)
         now += 7;
         sched_signal(&low, 4);
     } else {
-        assert(sequence == 4);
+        assert(sequence == 5);
         assert(high.busy_ticks == 10);
-        assert(low.busy_ticks == 16);
-        assert(sched_idle_ticks() == 91);
+        assert(low.busy_ticks == 21);
+        assert(sched_idle_ticks() == 86);
         longjmp(done, 1);
     }
 }
@@ -57,12 +61,16 @@ static void step_high(struct sched_task *task)
 static void step_low(struct sched_task *task)
 {
     unsigned stage = sequence++;
-    assert(stage >= 1 && stage <= 3);
+    assert(stage >= 1 && stage <= 4);
     if (stage == 1) {
         assert(sched_take(task) == 1);
         now += 6;
         sched_wake_at(task, 100);
     } else if (stage == 2) {
+        assert(now == 50 && task->wake_at == 100);
+        assert(sched_take(task) == 2);
+        now += 5;
+    } else if (stage == 3) {
         assert(now == 100);
         assert(sched_take(task) == 0);
         now += 5;
