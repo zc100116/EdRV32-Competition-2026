@@ -1,0 +1,1 @@
+Screenshot selected CongestionPlotMT_19.txt, SRB Conflict max color mapping30, Route time274.555s, Max value19. MT filename index not asserted to equal main run.log routing iteration. Congestion visible broadly in central and lower-middle chip. DDR/xbar attribution pending module placement evidence.

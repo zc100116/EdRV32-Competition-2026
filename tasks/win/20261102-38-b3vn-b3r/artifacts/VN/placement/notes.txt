@@ -1,0 +1,1 @@
+All six requested module screenshots acquired: u_npu,u_mem,u_vin,u_pix,u_geo,u_disp. Extra u_cpu retained. Original images saved unchanged. Yellow is selected-module placement; congestion comes from separate congestion_mt19.png. Layout display uses the placement database, not a completed routed result. Visual spatial overlap does not prove DDR/xbar congestion root cause.

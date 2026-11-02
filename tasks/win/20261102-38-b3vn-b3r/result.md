@@ -61,3 +61,11 @@ resource_summary.txt保存Map汇总，resource_hier.txt保存SNR完整模块层�
 artifacts/VN/native_reports/保存CMR、SNR、DMR原文；DMR约2.6MB，保留全部约束/资源/扇出信息供分析。完整原始阶段run.log、正在增长的全工程run.log、IP、数据库、网表、PDS工程和bitstream留在Windows本地目录，不上传。
 
 布局布线尚未完成，上板测试未开展；本次结果不能作为卡38整体通过。用户要求的ILA改变已明确记录，后续时序和上板报告会包含其影响。
+
+## 拥塞图及模块分布补充
+
+已取得并保存CongestionPlotMT_19.txt原始数据及GUI截图（artifacts/VN/congestion/）。截图显示Route time274.555s、Max value19、SRB Conflict映射上限30。MT文件编号不直接等同于主日志路由迭代轮数。
+
+在Design Editor加载本工程place_route/edrv32_fpga_board_vnpu_top_plc.adf后，用户分别选择模块查看黄色位置，已取得u_npu、u_mem、u_vin、u_pix、u_geo、u_disp六张图，另保留u_cpu补充图，全部原图位于artifacts/VN/placement/。GUI在模块层级上Highlight Selection不可用，改用选择实例及Locate To Device显示默认黄色位置，没有编辑布局或约束。
+
+视觉观察：NPU覆盖中下部较大范围，mem主要在中右，VIN/PIX偏上右，GEO偏中右，DISP偏中左；拥塞在芯片中部和中下部较集中，存在空间重叠。这是视觉定位线索，不足以确认DDR/xbar为根因；截图没有单独拆出u_mem内部xbar及DDR连接网络。图中黄色为模块选择标记，不是拥塞强度。未把布局图当成布线完成证据。
