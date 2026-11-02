@@ -1,0 +1,34 @@
+{
+  "test": "b-09",
+  "spike": "smoke",
+  "stimulus": [],
+  "checks": [
+    "adjacent branch/branch, branch/JAL, JAL/JALR issue singly with HPM7",
+    "mhpmevent3=7: two double-control failures; cold slot0 JAL flush counts no failure; CSR counter=2 after one-cycle event delay drains"
+  ],
+  "cases": [
+    {
+      "pc0": "bb0",
+      "pc1": "bb1",
+      "pair": false,
+      "reason": 3
+    },
+    {
+      "pc0": "bj0",
+      "pc1": "bj1",
+      "pair": false,
+      "reason": 3
+    },
+    {
+      "pc0": "jj0",
+      "pc1": "jj1",
+      "pair": false,
+      "reason": 3
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": []
+}

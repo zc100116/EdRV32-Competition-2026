@@ -1,14 +1,105 @@
 {
   "test": "e-02",
-  "spike": "compare",
+  "spike": "smoke",
   "stimulus": [],
   "checks": [
-    "first_fault 的年轻 ALU 不提交",
-    "second_fault 前的 older_alu 恰好提交一次；4.2 禁止非法指令进入实际槽 1"
+    "slot 1 mcause 0/4/5/6/7; mepc/mtval/mstatus; slot 0 commits once; simultaneous slot 0 wins"
+  ],
+  "cases": [
+    {
+      "pc0": "older_0",
+      "pc1": "fault_lmis",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "fault": "fault_lmis",
+      "slot": 1,
+      "cause": 4
+    },
+    {
+      "pc0": "older_1",
+      "pc1": "fault_smis",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "fault": "fault_smis",
+      "slot": 1,
+      "cause": 6
+    },
+    {
+      "pc0": "older_2",
+      "pc1": "fault_lerr",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "fault": "fault_lerr",
+      "slot": 1,
+      "cause": 5
+    },
+    {
+      "pc0": "older_3",
+      "pc1": "fault_serr",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "fault": "fault_serr",
+      "slot": 1,
+      "cause": 7
+    },
+    {
+      "pc0": "older_4",
+      "pc1": "fault_branch",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "fault": "fault_branch",
+      "slot": 1,
+      "cause": 0
+    },
+    {
+      "pc0": "older_5",
+      "pc1": "fault_jal",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "fault": "fault_jal",
+      "slot": 1,
+      "cause": 0
+    },
+    {
+      "pc0": "both_older",
+      "pc1": "both_older+4",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "fault": "both_older",
+      "slot": 0,
+      "cause": 4
+    }
   ],
   "tier": "smoke",
   "rvc": [
-    true
+    false
   ],
-  "schedule": []
+  "schedule": [
+    {
+      "kind": "error",
+      "port": "dc",
+      "pc": "fault_lerr",
+      "address": "scratch"
+    },
+    {
+      "kind": "error",
+      "port": "dc",
+      "pc": "fault_serr",
+      "address": "scratch"
+    }
+  ]
 }

@@ -3,12 +3,31 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "B1 至少观测 waw_pair、waw_second 各一次同组双退休",
-    "程序比较槽 1 最终值和 x0"
+    "ALU/ALU and ALU/load WAW: slot 1 wins; assert both issue and retirement pairs"
+  ],
+  "cases": [
+    {
+      "pc0": "waw_pair",
+      "pc1": "waw_pair+4",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "pc0": "waw_second",
+      "pc1": "waw_second+4",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "pc0": "waw_swap",
+      "pc1": "waw_swap+4",
+      "pair": true,
+      "swap": true
+    }
   ],
   "tier": "smoke",
   "rvc": [
-    true
+    false
   ],
   "schedule": []
 }

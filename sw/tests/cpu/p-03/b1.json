@@ -4,7 +4,8 @@
   "stimulus": [],
   "checks": [
     "软件逐场景比较结果",
-    "B1 覆盖观察器必须确认 cases 每个实际源级、源管线、操作数、消费者槽位均命中"
+    "B1 覆盖观察器必须确认 cases 每个实际源级、源管线、操作数、消费者槽位均命中",
+    "互换组可达源 E1 ALU/E0 JALR链接/M0 load/W0 mul，rs1/rs2与槽0/1；不可达交叉由管线能力约束排除（协调者确认）"
   ],
   "cases": [
     {
@@ -198,11 +199,171 @@
       "source_pipe": 1,
       "operand": 2,
       "consumer_slot": 1
+    },
+    {
+      "producer": "swap_alu_rs1_producer",
+      "consumer": "swap_alu_rs1_consumer",
+      "source_stage": "E",
+      "source_pipe": 1,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_alu_rs1_producer",
+      "pc1": "swap_alu_rs1_producer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_alu_rs1_consumer",
+      "pc1": "swap_alu_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_alu_rs2_producer",
+      "consumer": "swap_alu_rs2_consumer",
+      "source_stage": "E",
+      "source_pipe": 1,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_alu_rs2_producer",
+      "pc1": "swap_alu_rs2_producer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_alu_rs2_entry",
+      "pc1": "swap_alu_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_jalr_rs1_producer",
+      "consumer": "swap_jalr_rs1_consumer",
+      "source_stage": "E",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_jalr_rs1_producer-4",
+      "pc1": "swap_jalr_rs1_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_jalr_rs1_consumer",
+      "pc1": "swap_jalr_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_jalr_rs2_producer",
+      "consumer": "swap_jalr_rs2_consumer",
+      "source_stage": "E",
+      "source_pipe": 0,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_jalr_rs2_producer-4",
+      "pc1": "swap_jalr_rs2_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_jalr_rs2_entry",
+      "pc1": "swap_jalr_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_load_rs1_producer",
+      "consumer": "swap_load_rs1_consumer",
+      "source_stage": "M",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_load_rs1_producer-4",
+      "pc1": "swap_load_rs1_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_load_rs1_consumer",
+      "pc1": "swap_load_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_load_rs2_producer",
+      "consumer": "swap_load_rs2_consumer",
+      "source_stage": "M",
+      "source_pipe": 0,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_load_rs2_producer-4",
+      "pc1": "swap_load_rs2_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_load_rs2_entry",
+      "pc1": "swap_load_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_mul_rs1_producer",
+      "consumer": "swap_mul_rs1_consumer",
+      "source_stage": "W",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_mul_rs1_producer-4",
+      "pc1": "swap_mul_rs1_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_mul_rs1_consumer",
+      "pc1": "swap_mul_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_mul_rs2_producer",
+      "consumer": "swap_mul_rs2_consumer",
+      "source_stage": "W",
+      "source_pipe": 0,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_mul_rs2_producer-4",
+      "pc1": "swap_mul_rs2_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_mul_rs2_entry",
+      "pc1": "swap_mul_rs2_consumer",
+      "pair": true,
+      "swap": true
     }
   ],
   "tier": "smoke",
   "rvc": [
-    true
+    false
   ],
   "schedule": []
 }

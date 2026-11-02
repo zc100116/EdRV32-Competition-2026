@@ -7,6 +7,12 @@ import re
 def address(expression, names):
     if expression.endswith(' & ~7'):
         return names[expression[:-5]] & ~7
+    if '-' in expression:
+        label, offset = expression.rsplit('-', 1)
+        return names[label] - int(offset, 0)
+    if '+' in expression:
+        label, offset = expression.split('+')
+        return names[label] + int(offset, 0)
     return int(expression, 0) if expression.startswith('0x') else names[expression]
 
 
@@ -28,7 +34,20 @@ def plusargs(config, names, out):
             obligations.append((2, names[case['consumer']], names[case['producer']],
                                 case['latency'], case['gap']))
         elif 'pc0' in case:
-            obligations.append((3, names[case['pc0']], names[case['pc1']], 0, 0))
+            obligations.append((4 if 'pair' in case else 3,
+                                address(case['pc0'], names), address(case['pc1'], names),
+                                int(case.get('pair', False)), int(case.get('swap', False))))
+            if config['test'] == 'p-02':
+                obligations.append((9, address(case['pc0'], names),
+                                    address(case['pc1'], names), 0, 0))
+        elif 'redirect' in case:
+            obligations.append((5 if case['stage'] == 'E' else 6,
+                                names[case['redirect']], names[case['target']],
+                                case['slot'], case['cause']))
+        elif 'fault' in case:
+            obligations.append((7, names[case['fault']], 0, case['slot'], case['cause']))
+        elif 'no_request' in case:
+            obligations.append((8, names[case['no_request']], 0, 0, 0))
     path = out / 'obligations.txt'
     path.write_text(''.join(f'{kind} {pc:x} {other:x} {a} {b}\n'
                             for kind, pc, other, a, b in obligations))

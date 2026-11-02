@@ -19,6 +19,8 @@ from tools.regress import expand_files  # noqa: E402
 
 def run(args):
     arch = 'rv32im' + ('c' if args.rvc else '') + '_zicsr'
+    if args.test == 'r05':
+        arch += '_zifencei'
     program = 'coremark' if args.test == 'r05' else (
         'cpu_smoke' if args.test == 'cpu_smoke' else 'cpu_b2_' + args.test)
     image = ROOT / 'build/sw' / program
@@ -30,6 +32,8 @@ def run(args):
             'LDFLAGS=-nostdlib -Wl,--gc-sections -Wl,-T,sw/bsp/ld/sram.ld '
             '-Wl,--defsym,b2_console=0x40007000 -Wl,--wrap=main']
     if args.test == 'r05':
+        flags = flags.replace('-O2', '-O3 -funroll-all-loops -finline-limit=600 '
+                              '-falign-functions=4 -falign-jumps=4 -falign-loops=4')
         flags += (f' -I{ROOT}/sw/apps/coremark -I{ROOT}/third_party/coremark '
                   '-DITERATIONS=10')
     elif args.test != 'cpu_smoke':
@@ -101,6 +105,21 @@ def run(args):
         output += summary + '\n'
         if not crc_ok:
             result.returncode = 1
+        if args.check_cycles:
+            # Report 2026-11-02-perf-cpu-predictor-pipe1: specification-index
+            # V3s, BTB/PHT/RAS=128/4096/4, GCC15.2 tuned, ten iterations.
+            predicted = 2058075
+            limit = predicted * 105 // 100
+            window = re.search(r'B2_WINDOW window=0 cycles=(\d+)', output)
+            cycles = int(window[1])
+            passed = cycles <= limit
+            summary = (f'B2_R05_CYCLES {"PASS" if passed else "FAIL"} '
+                       f'actual={cycles} model_V3s_128_4096={predicted} '
+                       f'limit={limit} source=2026-11-02-perf-cpu-predictor-pipe1')
+            print(summary)
+            output += summary + '\n'
+            if not passed:
+                result.returncode = 1
     (out / 'run.log').write_text(output)
     return result.returncode
 
@@ -108,11 +127,15 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('test', choices=['cpu_smoke', 'r01', 'r02', 'r03', 'r04', 'r05'])
+    parser.add_argument('--check-cycles', action='store_true',
+                        help='R-05 perf: assert GCC15.2 tuned V3s 128/4096 report limit')
     parser.add_argument('--rvc', type=int, choices=[0, 1], default=1)
     parser.add_argument('--read-latency', type=int, default=2,
                         help='AR-to-first-R latency in cycles (minimum 2)')
     parser.add_argument('--max-cycles', type=int, default=100000000)
     args = parser.parse_args()
+    if args.check_cycles and (args.test != 'r05' or args.rvc != 0):
+        parser.error('--check-cycles requires r05 --rvc 0')
     if args.read_latency < 2:
         parser.error('the reused AXI model has a minimum read latency of 2 cycles')
     return run(args)

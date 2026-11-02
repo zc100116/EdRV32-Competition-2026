@@ -2,9 +2,9 @@ top: edrv32_cpu_b2_tb
 files: files.f
 simulator: verilator
 defines: SIM_MODE
-parameters: RVC_EN=1
+parameters: RVC_EN=0
 software: coremark
-runner: python3 tools/cpu/b2_run.py r05 --rvc 1
+runner: python3 tools/cpu/b2_run.py r05 --rvc 0 --check-cycles
 timeout: 900
 pass: PASS
 tier: perf

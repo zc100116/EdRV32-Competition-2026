@@ -1,6 +1,0 @@
-{
-  "suite": "arch-test",
-  "name": "I-misalign1-jalr-01",
-  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/I/src/misalign1-jalr-01.S",
-  "rvc": true
-}

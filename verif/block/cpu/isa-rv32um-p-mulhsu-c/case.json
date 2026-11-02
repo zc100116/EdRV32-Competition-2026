@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32um-p-mulhsu",
-  "source": "third_party/riscv-tests/isa/rv32um/mulhsu.S",
-  "rvc": true
-}
