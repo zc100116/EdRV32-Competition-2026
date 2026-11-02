@@ -1152,6 +1152,18 @@ define_attribute {p:mem_dm_o[3]} {PAP_IO_STANDARD} {HSTL15_I}
 define_attribute {p:mem_dm_o[3]} {PAP_IO_DRIVE} {8}
 define_attribute {p:mem_dm_o[3]} {PAP_IO_NONE} {TRUE}
 define_attribute {p:mem_dm_o[3]} {PAP_IO_SLEW} {SLOW}
+# RGMII RX sampling (design 2026-11-01-rgmii-rx-clock). PHY keeps strap RXDLY=1/TXDLY=1
+# (rgmii-id). The PLL feedback cancels only the clock path after CLKOUT0, so the ETH PLL
+# sits beside the RXC pin (D19, IOLHR_16_1368) to keep the uncompensated RXC-to-PLL
+# input short; the system PLL has no IO timing and takes the far-side site.
+define_attribute {i:u_rgmii.u_pll_eth.u_gpll} {PAP_LOC} {GPLL_7_1381}
+define_attribute {i:u_pll_sys.u_gpll} {PAP_LOC} {GPLL_727_463}
+# RTL8211F Rev1.4 Table 60, delay integrated in the transmitter: data is valid at
+# least 1.0 ns before and after each RXC edge (DDR, 8 ns period).
+set_input_delay -clock [get_clocks {clk_rgmii_ref}] -max 3.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+set_input_delay -clock [get_clocks {clk_rgmii_ref}] -min 1.0 [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+set_input_delay -clock [get_clocks {clk_rgmii_ref}] -clock_fall -max 3.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
+set_input_delay -clock [get_clocks {clk_rgmii_ref}] -clock_fall -min 1.0 -add_delay [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
 # Card 21 B3R: rx_data_r was placed at CLMA_579_552, 7.0 ns route from the
 # RGMII RX IDDR at IOLHR_16_1428 (BANKL3, left edge), clk_eth WNS -0.106 ns.
 # Keep the adapter's fabric registers beside BANKL3 (site y ~228-238,
