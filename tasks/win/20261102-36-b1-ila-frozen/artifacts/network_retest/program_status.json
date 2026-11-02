@@ -1,0 +1,11 @@
+{
+  "active": false,
+  "phase": "done",
+  "path": "G:\\codex_project\\EdRV32-Competition-2026\\tasks\\win\\20261101-24-b3-rnv\\src\\eth_diag.bin",
+  "sent": 4205,
+  "total": 4205,
+  "bios": false,
+  "programmedBytes": 4157,
+  "result": "Run: 0x10000000",
+  "error": null
+}

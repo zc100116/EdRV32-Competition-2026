@@ -1,0 +1,33 @@
+Card36 final frozen-counter comparison
+Capture1: redo CoreMark run beginning seq1151, round1.
+Capture2: earlier CoreMark run beginning seq1080, round2.
+Both runs5000 iterations/CoreMarkPASS; references are matched to the actual capture, not mixed across runs.
+Decode method: per-channel WDF chronological1024 bits -> groups of40, little bit index -> CSV. Then find longest constant mcycle segment with all10 values constant. No screenshot-derived values.
+
+round	counter	serial	ILA	result
+1	mcycle	1387628279	1387628279	MATCH
+1	minstret	1441025033	1441025033	MATCH
+1	hpm3	388590056	388590056	MATCH
+1	hpm4	663844921	663844921	MATCH
+1	hpm5	335193302	335193302	MATCH
+1	hpm6	304559500	304559500	MATCH
+1	hpm7	221081649	221081649	MATCH
+1	hpm8	59437531	59437531	MATCH
+1	hpm9	327692302	327692302	MATCH
+1	hpm10	36742397	36742397	MATCH
+2	mcycle	1387628281	1387628281	MATCH
+2	minstret	1441025033	1441025033	MATCH
+2	hpm3	132493703	132493703	MATCH
+2	hpm4	0	0	MATCH
+2	hpm5	0	0	MATCH
+2	hpm6	76466244	76466244	MATCH
+2	hpm7	0	0	MATCH
+2	hpm8	0	0	MATCH
+2	hpm9	0	0	MATCH
+2	hpm10	38233122	38233122	MATCH
+
+Freeze: both captures samples104..230 inclusive,127 samples/126 equal-valued adjacent intervals. Trigger value reached at sample102; comparison uses frozen interval, not the potentially earlier trigger point.
+
+First round self consistency:
+388590056 + 663844921 + 335193302 = 1387628279 = mcycle
+663844921 + 2 * 388590056 = 1441025033 = minstret

@@ -1,0 +1,3 @@
+# Run manually in Fabric Debugger after round 2 capture completes.
+dbg_save_project -file G:/codex_project/EdRV32-Competition-2026/tasks/win/20261102-36-b1-ila-frozen/artifacts/ila/round2.dprj
+dbg_export_fic -file G:/codex_project/EdRV32-Competition-2026/tasks/win/20261102-36-b1-ila-frozen/artifacts/ila/round2.fic
