@@ -22,8 +22,6 @@ static volatile uint32_t probing;
 static volatile uint32_t probe_missing;
 static volatile uint32_t frames;
 static uint32_t serial_keys;
-static uint32_t input_snapshot;
-static uint32_t input_pressed;
 static unsigned input_source;
 unsigned platform_input_source(void) { return input_source; }
 static uint32_t milliseconds;
@@ -90,8 +88,6 @@ struct virtual_input_state platform_virtual_input(void)
     virtual_input_unlock(state);
     return result;
 }
-uint32_t platform_keys(void) { return input_snapshot; }
-uint32_t platform_pressed(void) { return input_pressed; }
 static uint32_t sample_keys(void)
 {
     uint32_t keys = (~gpio_read()) & 15u;
@@ -281,9 +277,7 @@ void showcase_communication_step(struct sched_task *task)
         network_status_step();
         mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, eth_irq_mask());
     }
-    uint32_t next_input = sample_keys();
-    input_pressed = next_input & ~input_snapshot;
-    input_snapshot = next_input;
+    showcase_input_sample(sample_keys());
     showcase_input_event();
     showcase_cpu_report();
     sched_wake_at(task, platform_ticks() + system_hz / 100u);

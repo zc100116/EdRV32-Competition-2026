@@ -64,6 +64,7 @@ void showcase_input_event(void)
 static void application_step(struct sched_task *task)
 {
     step_events = sched_take(task);
+    showcase_input_dispatch();
     uint32_t pressed = (step_events & PLATFORM_INPUT) ? platform_pressed() : 0;
     if (active && !active->owns_display && (pressed & PLATFORM_BACK)) returning = 1;
     if ((requested || returning) && !stopping) {

@@ -1,7 +1,7 @@
 # File: program.mk
 # Design: showcase 4.1--4.5; single BIOS-loaded DDR application.
 MEMORY := showcase
-PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c \
+PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c sw/apps/showcase/input.c \
     sw/apps/showcase/launcher.c sw/apps/showcase/layers.c sw/apps/showcase/status.c \
     sw/lib/sched/sched.c \
     sw/drivers/rnd.c sw/drivers/disp.c sw/drivers/engine.c sw/drivers/plic.c \
