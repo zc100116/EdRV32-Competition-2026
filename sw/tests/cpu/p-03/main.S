@@ -318,7 +318,9 @@ swap_alu_rs2_consumer:
     li a0, 13
     li a1, 2
     la a5, swap_jalr_rs1_entry
+    li t6, 0
     .balign 8
+.Lswap_jalr_rs1_warm:
     csrr zero, mscratch
     csrr zero, mscratch
     addi a3, zero, 41
@@ -328,13 +330,19 @@ swap_jalr_rs1_entry:
 swap_jalr_rs1_consumer:
     add a6, a2, zero
     lw a3, 0(a4)
+    # A cold JALR redirects; measure E0 bypass on the second, predicted visit.
+    addi t6, t6, 1
+    li t5, 2
+    blt t6, t5, .Lswap_jalr_rs1_warm
     la t5, swap_jalr_rs1_entry
     bne a6, t5, fail
     la a4, scratch
     li a0, 13
     li a1, 2
     la a5, swap_jalr_rs2_entry
+    li t6, 0
     .balign 8
+.Lswap_jalr_rs2_warm:
     csrr zero, mscratch
     csrr zero, mscratch
     addi a3, zero, 41
@@ -344,6 +352,9 @@ swap_jalr_rs2_entry:
     addi a3, zero, 42
 swap_jalr_rs2_consumer:
     mul a6, a1, a2
+    addi t6, t6, 1
+    li t5, 2
+    blt t6, t5, .Lswap_jalr_rs2_warm
     la t5, swap_jalr_rs2_entry
     slli t5, t5, 1
     bne a6, t5, fail
