@@ -390,6 +390,11 @@ module edrv32_cpu_core (
     generate
         for (lane = 0; lane < 2; lane = lane + 1) begin : g_lane
             assign d_instr_w[lane] = d_record_w[lane][REC_INSTR_LSB +: 32];
+            // Capability follows the opcode family, including illegal encodings within it.
+            assign d_pipe1_w[lane] = d_instr_w[lane][6:0] == 7'h13 ||
+                d_instr_w[lane][6:0] == 7'h37 || d_instr_w[lane][6:0] == 7'h17 ||
+                (d_instr_w[lane][6:0] == 7'h33 && d_instr_w[lane][31:25] != 1) ||
+                d_instr_w[lane][6:0] == 7'h63 || d_instr_w[lane][6:0] == 7'h6f;
             edrv32_cpu_decode u_decode (
                 .instr_i(d_instr_w[lane]),
                 .rs1_o(d_rs1_w[lane]),
@@ -594,8 +599,6 @@ module edrv32_cpu_core (
     assign d_raw_w = d_write_w[0] && d_rd_w[0] != 0 &&
         ((d_use1_w[1] && d_rs1_w[1] == d_rd_w[0]) ||
         (d_use2_w[1] && d_rs2_w[1] == d_rd_w[0]));
-    assign d_pipe1_w[0] = d_class_w[0] <= C_BRANCH && d_class_w[0] != C_JALR;
-    assign d_pipe1_w[1] = d_class_w[1] <= C_BRANCH && d_class_w[1] != C_JALR;
     assign d_control_w[0] = d_class_w[0] >= C_JAL && d_class_w[0] <= C_BRANCH;
     assign d_control_w[1] = d_class_w[1] >= C_JAL && d_class_w[1] <= C_BRANCH;
     assign d_pair_type_w = (|d_pipe1_w) && !(d_control_w[0] && d_control_w[1]);
