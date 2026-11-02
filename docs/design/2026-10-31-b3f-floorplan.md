@@ -272,6 +272,8 @@ FDC 草稿未接入现有 `.fdc` 或 `fpga/scripts/import_board_b2_top.tcl`；�
 
 D2 的区域写法沿用 `fpga/constraints/edrv32_fpga_board_full_top.fdc` 中已经验证过的 `define_global_attribute {PAP_REGION}` 与 `define_attribute {i:...}`，6 个实例分别关联。
 
+调整（2026-11-02）：卡 31 续跑一整夜仍未布完，初赛时间不够分阶段推进。卡 32 取消（RTL 与卡 31 相同，卡 31 续跑的结果就是 D0）。卡 33 把 D1 和 D2 合成一轮：变体 A 为扇出优化 + 不加区域约束，变体 B 为扇出优化 + `fp_left`；机器内存够就两者并行，取时序好的上板。
+
 ### 8.6 状态
 
 方案 D 为讨论中，等卡 32（D0）的放置和 STA 结果。以下待定：第 7 节第 3 条的 32 KiB I$ 增量（右半区 LUT 加约 3.7K，到约 69%）、ILA 的实际 DRM 数，以及 D2 区域的 PCE 实际容量。
