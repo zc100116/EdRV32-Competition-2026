@@ -18,6 +18,7 @@ module edrv32_board_showcase_tb;
     wire uart_tx;
     reg [31:0] rendered_base;
     reg [15:0] rendered_pixel;
+    reg [31:0] browser_front;
     integer launcher_count = 0;
     bit first_frame = 0;
     bit application_entered = 0;
@@ -192,7 +193,9 @@ module edrv32_board_showcase_tb;
         u_uart.send(keys[7:0]);
         u_uart.send(keys[15:8]);
         repeat (6) u_uart.send(0);
-        #2000000;
+        // Zero state must span the 10 ms service deadline after GUI work.
+        if (keys == 0) #12000000;
+        else #2000000;
     endtask
     initial begin
         repeat (4) @(negedge clk);
@@ -211,6 +214,7 @@ module edrv32_board_showcase_tb;
         wait (nes_entered);
         controller(0);
         wait (u_board.u_disp.u_regs.cur_base_r != rendered_base);
+        #12000000;
         controller(16'h0100);
         wait (u_board.u_disp.u_regs.cur_base_r >= nes_base &&
               u_board.u_disp.u_regs.cur_base_r < nes_base + nes_bytes);
@@ -219,6 +223,9 @@ module edrv32_board_showcase_tb;
         controller(16'h0200);
         wait (u_board.u_disp.u_regs.cur_base_r < nes_base ||
               u_board.u_disp.u_regs.cur_base_r >= nes_base + nes_bytes);
+        browser_front = u_board.u_disp.u_regs.cur_base_r;
+        // Initial GUI FRAME establishes front; SWITCH proves browser redraw.
+        wait (u_board.u_disp.u_regs.cur_base_r != browser_front);
         controller(0);
         controller(16'h0200);
         wait (launcher_count == 2);
