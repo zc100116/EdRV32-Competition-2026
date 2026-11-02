@@ -15,11 +15,11 @@
 
 | ELF 段 | VMA | 大小（十六进制） |
 |---|---|---|
-| .text | 90000000 | 000c4514 |
-| .rodata | 900c4518 | 000be194 |
-| .data | 90184178（LMA 901826b0） | 00001ac8 |
-| .tohost / .bss | 90185c40 / 90185c88 | 48 / 50240 |
-| .noinit | 901d6000 | 02e08000 |
+| .text | 90000000 | 000c4878 |
+| .rodata | 900c4878 | 000be194 |
+| .data | 901844d8（LMA 90182a10） | 00001ac8 |
+| .tohost / .bss | 90185fc0 / 90186008 | 48 / 50240 |
+| .noinit | 901d7000 | 02e08000 |
 | .game_pack | 93000000 | 01000000（NOLOAD，无原始 PT_LOAD） |
 
 | DDR 区域（cached 地址；DMA 使用减 80000000 的物理地址） | 用途 |
@@ -28,12 +28,12 @@
 | 8a000000–8a00ffff / 8a010000–8a010007 | ETH WIN3 命令 / WIN2 虚拟输入 |
 | 8a100000–8a10001f / 8a100800–8a101bff | ETH TX 描述符 / 16 条遥测打包 |
 | 8a102000–8a151fff | ETH 遥测环 1024×320 B |
-| 90000000–901d5fff | 程序、常量、初始化数据和 BSS（含 NES DMA 快照） |
-| 901d6000–907d5fff | 图层 overlay / background |
-| 907d6000–91fd5fff | LVGL 24 MiB 堆 |
-| 91fd6000–926d5fff | RND scratch 6 MiB / 字形 cache |
-| 926d6000–92a59fff / 92a5a000–92dddfff | GUI 双缓冲 / NES 双缓冲（DISP 直接扫描） |
-| 92dde000–92fddfff / 92fde000–92ffffff | newlib 2 MiB 堆 / 向下生长的栈，顶93000000 |
+| 90000000–901d6fff | 程序、常量、初始化数据和 BSS（含 NES DMA 快照） |
+| 901d7000–907d6fff | 图层 overlay / background |
+| 907d7000–91fd6fff | LVGL 24 MiB 堆 |
+| 91fd7000–926d6fff | RND scratch 6 MiB / 字形 cache |
+| 926d7000–92a5afff / 92a5b000–92ddefff | GUI 双缓冲 / NES 双缓冲（DISP 直接扫描） |
+| 92ddf000–92fdefff / 92fdf000–92ffffff | newlib 2 MiB 堆 / 向下生长的栈，顶93000000 |
 | 93000000–93ffffff | 独立游戏包16 MiB；与上述全部区域无重叠 |
 
 复现先 `. ~/.local/opt/edrv32/env.sh`；原始日志在 `build/showcase/`、`build/board_showcase/`。
