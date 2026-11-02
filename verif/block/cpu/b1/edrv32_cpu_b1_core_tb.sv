@@ -319,7 +319,9 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
                 tohost_pending <= 1;
                 tohost_pc <= u_core.m_record_r[0][31:0];
             end
-            if (tohost_pending && trace_valid[0] && u_core.trace_pc_w[31:0] == tohost_pc)
+            if (tohost_pending &&
+                ((trace_valid[0] && u_core.trace_pc_w[31:0] == tohost_pc) ||
+                 (trace_valid[1] && u_core.trace_pc_w[63:32] == tohost_pc)))
                 trace_ended <= 1;
         end
     end
@@ -346,6 +348,11 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .trace_bypass_i(u_core.trace_bypass_w),
         .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
         .trace_stall_cause_i(u_core.trace_stall_cause_w),
+        .pair_valid_i(observed_pair_valid),
+        .pair_swap_i(observed_pair_swap),
+        .trap_slot_i(observed_trap_slot),
+        .e_redirect_slot_i(observed_e_slot),
+        .d_redirect_slot_i(observed_d_slot),
         .irq_meip_i(irq_meip),
         .irq_msip_i(irq_msip),
         .irq_mtip_i(irq_mtip)

@@ -1,6 +1,0 @@
-{
-  "suite": "arch-test",
-  "name": "C-cebreak-01",
-  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/C/src/cebreak-01.S",
-  "rvc": true
-}

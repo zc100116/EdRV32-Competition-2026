@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32mi-p-illegal",
-  "source": "third_party/riscv-tests/isa/rv32mi/illegal.S",
-  "rvc": true
-}

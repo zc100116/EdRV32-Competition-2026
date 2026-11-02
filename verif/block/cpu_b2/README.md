@@ -151,3 +151,16 @@ perf passed all seven cases, including R-01–R-05. `make smoke` passed all 65
 simulator runs (55 configurations), with zero failures. Regression logs are
 `build/cpu_b2/{perf,smoke}.log` and `build/regress/{perf,smoke}/`; per-program
 console/performance logs remain under `build/cpu_b2/<test>/rvc<0|1>/`.
+
+## v0.15 R-05 criterion
+
+R-05 CRC and perf entries use RV32IM/Zicsr/Zifencei and GCC 15.2 tuned flags:
+`-O3 -funroll-all-loops -finline-limit=600 -falign-functions=4 -falign-jumps=4
+-falign-loops=4`, ten iterations. Run perf with
+`flock /tmp/edrv32-sim.lock python3 tools/cpu/b2_run.py r05 --rvc 0 --check-cycles`.
+The limit comes from `docs/reports/2026-11-02-perf-cpu-predictor-pipe1.md`,
+specification-index V3s 128/4096/RAS4: 2,058,075 cycles × 1.05,
+so the integer B2 start_time/stop_time retirement window must be ≤ 2,160,978 cycles.
+The report uses the standalone image; B2 includes its console/HPM startup and cold
+caches. This is the requested report-based bound, not a new model calibration.
+CRC smoke omits the cycle assertion; perf prints the measured value, bound and source.

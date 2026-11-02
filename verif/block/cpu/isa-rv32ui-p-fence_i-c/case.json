@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32ui-p-fence_i",
-  "source": "third_party/riscv-tests/isa/rv32ui/fence_i.S",
-  "rvc": true
-}

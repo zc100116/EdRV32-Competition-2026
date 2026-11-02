@@ -1,0 +1,51 @@
+{
+  "test": "b-07",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "slot 1 branch direction/target redirects cost 3; older commits; slot0 branch kills swapped younger load before D request",
+    "self-modified branch offset after FENCE.I retains BTB old target"
+  ],
+  "cases": [
+    {
+      "pc0": "direction_older",
+      "pc1": "direction_slot1",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "pc0": "flush_branch",
+      "pc1": "flush_load",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "training_entry",
+      "pc1": "trained_branch",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "redirect": "direction_slot1",
+      "stage": "E",
+      "slot": 1,
+      "target": "direction_target",
+      "cause": 1
+    },
+    {
+      "redirect": "trained_branch",
+      "stage": "E",
+      "slot": 1,
+      "target": "target_b",
+      "cause": 2
+    },
+    {
+      "no_request": "flush_load"
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": []
+}

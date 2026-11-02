@@ -1,0 +1,28 @@
+{
+  "test": "b-08",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "slot 1 cold JAL pairs, D redirect penalty 2; older commits"
+  ],
+  "cases": [
+    {
+      "pc0": "jal_older",
+      "pc1": "jal_slot1",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "redirect": "jal_slot1",
+      "stage": "D",
+      "slot": 1,
+      "target": "target",
+      "cause": 0
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": []
+}

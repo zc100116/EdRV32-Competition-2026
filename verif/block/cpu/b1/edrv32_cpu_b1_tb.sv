@@ -151,6 +151,11 @@ module edrv32_cpu_b1_tb;
         .trace_bypass_i(u_core.trace_bypass_w),
         .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
         .trace_stall_cause_i(u_core.trace_stall_cause_w),
+        .pair_valid_i(1'b0),
+        .pair_swap_i(1'b0),
+        .trap_slot_i(1'b0),
+        .e_redirect_slot_i(1'b0),
+        .d_redirect_slot_i(1'b0),
         .irq_meip_i(irq_meip),
         .irq_msip_i(irq_msip),
         .irq_mtip_i(irq_mtip)

@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32ui-p-lh",
-  "source": "third_party/riscv-tests/isa/rv32ui/lh.S",
-  "rvc": true
-}
