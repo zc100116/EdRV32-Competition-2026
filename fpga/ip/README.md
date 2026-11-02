@@ -23,6 +23,8 @@
 | `ip_mul_npu_quant_high` | APM 乘法器 | 16 × 16 有符号，2 级 | `edrv32_mul_npu_quant_high` | NPU 量化 ×16 | [ip_mul_npu_quant_high.md](ip_mul_npu_quant_high.md) | 已生成（20261027-02） |
 | `ip_ram_mem_xbar_r` | DRM 简单双口 RAM | 512 × 259（用 128 项） | `edrv32_ram_mem_xbar_r` | mem_xbar 共享读缓冲 | [ip_ram_mem_xbar_r.md](ip_ram_mem_xbar_r.md) | B2 待生成 |
 | `ip_lutram_mem_xbar_w` | 分布式 RAM，组合读 | 16 × 144（288 位拆 2 个） | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_lutram_mem_xbar_w.md](ip_lutram_mem_xbar_w.md) | 已生成（卡 21） |
+| `ip_lutram_cpu_btb` | 分布式 RAM，组合读 | 128 × 58 | `edrv32_ram_cpu_btb` | CPU BTB ×1 | [ip_lutram_cpu_btb.md](ip_lutram_cpu_btb.md) | 待生成（CPU v0.15） |
+| `ip_lutram_cpu_direction` | 分布式 RAM，组合读，初始化 | 2048 × 4 | `edrv32_ram_cpu_direction` | CPU gshare ×2 份 | [ip_lutram_cpu_direction.md](ip_lutram_cpu_direction.md) | 待生成（CPU v0.15） |
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 已生成（20261028-04） |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1（B3 起 ×2：L0、L1，disp-spec v0.3） | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 已生成（20261028-04） |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 已生成（20261028-04） |
