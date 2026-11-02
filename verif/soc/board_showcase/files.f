@@ -13,7 +13,7 @@
 ../../models/ip_pll_sys.sv
 showcase_ddr.sv
 ../../models/uart_model.sv
-../board_render/ip_pll_video.sv
+ip_pll_video.sv
 ip_ddr3.sv
 ../board_render/GTP_INBUFDS.sv
 ../board_render/GTP_OUTBUFDS.sv

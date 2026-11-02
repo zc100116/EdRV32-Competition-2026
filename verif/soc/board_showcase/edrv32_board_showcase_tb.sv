@@ -8,6 +8,7 @@ module edrv32_board_showcase_tb;
     timeprecision 1ps;
     /* verilator lint_off UNUSEDPARAM */
     `include "edrv32_soc_map.vh"
+    `include "regs/edrv32_eth_regs.vh"
     /* verilator lint_on UNUSEDPARAM */
     reg clk = 0;
     reg ddr_clk = 0;
@@ -155,6 +156,34 @@ module edrv32_board_showcase_tb;
             end else if (data != 13) line_text = {line_text, string'(data)};
         end
     end
+    reg [63:0] advanced_time;
+    reg [63:0] phy_delay_ticks;
+    // PHY timing itself is outside this application test. The PHY_CTRL write
+    // arms an advance; two low-word reads let software first form its deadline.
+    initial begin : accelerate_phy_waits
+        for (integer phase = 0; phase < 2; phase = phase + 1) begin
+            do @(posedge u_board.clk_mem_w);
+            while (!(u_board.u_eth.apb_psel_i && u_board.u_eth.apb_penable_i &&
+                u_board.u_eth.apb_pready_o && u_board.u_eth.apb_pwrite_i &&
+                u_board.u_eth.apb_paddr_i == EDRV32_ETH_PHY_CTRL_OFFSET[11:0]));
+            phy_delay_ticks = u_board.u_eth.apb_pwdata_i[0] ?
+                {32'b0, EDRV32_CLK_SYS_HZ} / 100 : {32'b0, EDRV32_CLK_SYS_HZ} / 10;
+            for (integer reads = 0; reads < 2; reads = reads + 1) begin
+                do @(posedge u_board.clk_sys_w);
+                while (!(u_board.u_sys.u_clint.axi_arvalid_i &&
+                    u_board.u_sys.u_clint.axi_arready_o &&
+                    u_board.u_sys.u_clint.axi_araddr_i[15:0] == 16'hbff8));
+            end
+            @(negedge u_board.clk_sys_w);
+            advanced_time = u_board.u_sys.u_clint.mtime_r + phy_delay_ticks;
+            force u_board.u_sys.u_clint.mtime_next_w = advanced_time;
+            @(negedge u_board.clk_sys_w);
+            release u_board.u_sys.u_clint.mtime_next_w;
+            $display("board_showcase PHY_CTRL phase=%0d CLINT advance=%0d ticks time=%0t",
+                     phase, phy_delay_ticks, $time);
+            $fflush();
+        end
+    end
     task automatic controller(input reg [15:0] keys);
         u_uart.send(8'h1b);
         u_uart.send(8'h56);
@@ -204,6 +233,15 @@ module edrv32_board_showcase_tb;
         $display("PASS board_showcase launcher pixel, app enter/exit, NES %0d flips and exit",
                  nes_switches);
         $finish;
+    end
+    initial begin
+        forever begin
+            #10000000;
+            $display("board_showcase progress time=%0t PC=%h mtime=%0d",
+                     $time, u_board.u_cpu.u_core.trace_pc_w,
+                     u_board.u_sys.u_clint.mtime_r);
+            $fflush();
+        end
     end
     initial begin
         #2000000000;

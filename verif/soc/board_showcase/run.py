@@ -52,7 +52,7 @@ def main():
               '--top-module', 'edrv32_board_showcase_tb'] + sources
     command(['verilator', '--lint-only'] + common, 'lint.log')
     obj = OUT / 'obj'
-    command(['verilator', '--binary', '-j', '1', '-CFLAGS', '-O1', '--Mdir', str(obj),
+    command(['verilator', '--binary', '-j', '1', '-CFLAGS', '-O3', '--Mdir', str(obj),
              '-o', 'sim'] + common, 'compile.log')
     start = time.monotonic()
     command([str(obj / 'sim'), '+ROM_HEX=' + str(rom),

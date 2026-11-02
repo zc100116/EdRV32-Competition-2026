@@ -79,6 +79,8 @@ module showcase_ddr #(
             end
         end
         $fclose(image);
+        $display("board_showcase DDR preload complete time=%0t", $time);
+        $fflush();
     end
     integer lane;
     wire command_ready_w = ddr_init_done_o && (state_r == S_IDLE) && lfsr_r[0];
@@ -95,12 +97,22 @@ module showcase_ddr #(
     assign axi_rvalid_o = (state_r == S_READ) && (delay_r == 0) && lfsr_r[2];
     assign axi_rid_o = id_r;
     assign axi_rlast_o = left_r == 5'd1;
-    genvar g;
-    generate
-        for (g = 0; g < 32; g = g + 1) begin : g_read_byte
-            assign axi_rdata_o[g*8 +: 8] = memory_r[{2'b00, addr_r, 2'b00} + g];
+    reg [255:0] read_data_r;
+    integer read_lane;
+    assign axi_rdata_o = read_data_r;
+    // One sparse-memory lookup per byte of an accepted beat. Payload is held
+    // between beats; writes cannot interleave with this ordered read command.
+    always @(posedge core_clk_i) begin
+        if (axi_arvalid_i && axi_arready_o) begin
+            for (read_lane = 0; read_lane < 32; read_lane = read_lane + 1)
+                read_data_r[read_lane*8 +: 8] <=
+                    memory_r[{2'b00, axi_araddr_i, 2'b00} + read_lane];
+        end else if (axi_rvalid_o && !axi_rlast_o) begin
+            for (read_lane = 0; read_lane < 32; read_lane = read_lane + 1)
+                read_data_r[read_lane*8 +: 8] <=
+                    memory_r[{2'b00, addr_r, 2'b00} + 32'd32 + read_lane];
         end
-    endgenerate
+    end
 
     always @(posedge core_clk_i or negedge resetn_i) begin
         if (!resetn_i) begin

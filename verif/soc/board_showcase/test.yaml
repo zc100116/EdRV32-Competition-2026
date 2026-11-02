@@ -1,3 +1,5 @@
+# Pixel-clock RND/DISP/CPU test; TMDS serialization is covered by board_render.
+# PHY_CTRL writes arm CLINT-only 10/100 ms startup delay acceleration.
 top: edrv32_board_showcase_tb
 files: files.f
 defines: SIM_MODE
