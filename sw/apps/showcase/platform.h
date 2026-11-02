@@ -31,7 +31,7 @@ uint32_t platform_frames(void);
 /* NES owns RND/DISP while GUI is paused; callbacks receive captured IRQ results.
  * NULL restores core GUI callbacks. Call only from enter/exit, never in an IRQ.
  */
-void platform_media_callbacks(rnd_irq_callback rnd_callback,
+void platform_media_callbacks(rnd_callback rnd_callback,
                               engine_irq_callback disp_callback, void *context);
 void platform_puts(const char *text);
 void platform_put_u32(uint32_t value);
