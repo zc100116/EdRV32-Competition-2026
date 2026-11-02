@@ -1,0 +1,100 @@
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 602] 
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 603]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 604]   E         D   D   R   R   V   V      3      2 
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 605]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 606]   E         D   D   R  R     V V       3   2    
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 607]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 608] 
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 609]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 610] CHIP_ID: 0xed320001
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 611] CLK_SYS_HZ: 100000000
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 612] ROM bytes: 16384
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 613] SRAM bytes: 65536
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 614] I-cache bytes: 8192
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 615] D-cache bytes: 8192
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 616] MEM_READY: 1
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 617] Build commit: d5d16c34
+[2026-11-02T20:42:33.567+08:00] [RX] [seq 618] Compiler version: GCC 15.2.0
+[2026-11-02T20:42:33.671+08:00] [RX] [seq 619] BIOS: EdRV32
+[2026-11-02T20:42:33.671+08:00] [RX] [seq 620] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[2026-11-02T20:42:44.514+08:00] [SYS] [seq 621] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[2026-11-02T20:42:44.522+08:00] [RX] [seq 622] Input error: type 1-4 then Enter
+[2026-11-02T20:42:44.522+08:00] [SYS] [seq 623] Input error: type 1-4 then Enter
+[2026-11-02T20:42:44.522+08:00] [RX] [seq 624] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[2026-11-02T20:42:44.524+08:00] [RX] [seq 625] UART load ready
+[2026-11-02T20:42:47.071+08:00] [RX] [seq 626] Load bytes: 29232 segments: 1
+[2026-11-02T20:42:47.071+08:00] [RX] [seq 627] Load result: PASS
+[2026-11-02T20:42:47.071+08:00] [RX] [seq 628] Run: 0x10000000
+[2026-11-02T20:42:47.071+08:00] [RX] [seq 629] Monitor: EdRV32
+[2026-11-02T20:42:47.071+08:00] [RX] [seq 630] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[2026-11-02T20:42:52.562+08:00] [TX] [seq 631] 1<CR>
+[2026-11-02T20:42:52.571+08:00] [RX] [seq 632] Iterations default: 10
+[2026-11-02T20:42:52.571+08:00] [RX] [seq 633] Iterations input: decimal 1..4294967295 then Enter; Enter selects default
+[2026-11-02T20:42:55.329+08:00] [TX] [seq 634] 5000<CR>
+[2026-11-02T20:42:55.332+08:00] [RX] [seq 635] Iterations: 5000
+[2026-11-02T20:42:55.332+08:00] [RX] [seq 636] HPM rounds: 2
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 637] HPM round: 1
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 638] HPM first event: 1
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 639] HPM last event: 8
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 640] HPM round cycles: 1287533338
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 641] HPM round instructions: 1351024982
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 642] CRC seed: 0x0000e9f5
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 643] CRC list: 0x0000e714
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 644] CRC matrix: 0x00001fd7
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 645] CRC state: 0x00008e3a
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 646] CRC final: 0x0000bd59
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 647] CRC seed result: PASS
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 648] CRC list result: PASS
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 649] CRC matrix result: PASS
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 650] CRC state result: PASS
+[2026-11-02T20:43:08.248+08:00] [RX] [seq 651] CRC result: PASS
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 652] HPM round: 2
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 653] HPM first event: 9
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 654] HPM last event: 16
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 655] HPM round cycles: 1287531098
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 656] HPM round instructions: 1351024982
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 657] CRC seed: 0x0000e9f5
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 658] CRC list: 0x0000e714
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 659] CRC matrix: 0x00001fd7
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 660] CRC state: 0x00008e3a
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 661] CRC final: 0x0000bd59
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 662] CRC seed result: PASS
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 663] CRC list result: PASS
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 664] CRC matrix result: PASS
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 665] CRC state result: PASS
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 666] CRC result: PASS
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 667] Cycles: 1287533338
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 668] Instructions: 1351024982
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 669] Iterations/Sec: 388.339
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 670] CoreMark/MHz: 3.883
+[2026-11-02T20:43:21.161+08:00] [RX] [seq 671] Score status: duration >= 10 s; see CoreMark reporting rules
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 672] HPM 01 dual retire: 373052824
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 673] HPM 02 single retire: 604919334
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 674] HPM 03 zero retire: 309561180
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 675] HPM 04 branches: 276757221
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 676] HPM 05 pair RAW: 167339758
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 677] HPM 06 pair structural: 48812928
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 678] HPM 07 pair slot1 type: 338426933
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 679] HPM 08 pair missing slot1: 27265032
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 680] HPM 09 load-use stall: 155944600
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 681] HPM 10 divide stall: 0
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 682] HPM 11 device wait: 0
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 683] HPM 12 frontend empty: 85356526
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 684] HPM 13 I-cache miss: 0
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 685] HPM 14 D-cache miss: 0
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 686] HPM 15 dirty writeback: 0
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 687] HPM 16 branch mispredict: 42678263
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 688] IPC: 1.049
+[2026-11-02T20:43:21.200+08:00] [RX] [seq 689] Dual retire ratio: 0.289
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 690] Load-use stall ratio: 0.121
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 691] Divide stall ratio: 0.000
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 692] Device wait ratio: 0.000
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 693] Frontend empty ratio: 0.066
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 694] Branch mispredict rate: 0.154
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 695] I-cache MPKI: 0.000
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 696] D-cache MPKI: 0.000
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 697] Compiler version: GCC 16.1.0
+[2026-11-02T20:43:21.244+08:00] [RX] [seq 698] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10 -O2 -funroll-all-loops -mtune=sifive-7-series -mstrict-align -mbranch-cost=3 -fno-if-conversion -fno-if-conversion2
+[2026-11-02T20:43:21.252+08:00] [RX] [seq 699] ISA: rv32im_zicsr_zifencei
+[2026-11-02T20:43:21.252+08:00] [RX] [seq 700] CoreMark result: PASS
+[2026-11-02T20:43:21.252+08:00] [RX] [seq 701] Menu: 1=CoreMark 2=Peripheral tests 3=System info
