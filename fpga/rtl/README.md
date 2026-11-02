@@ -795,3 +795,16 @@ edrv32_fpga_board_imgtest_top <expanded sources>`，不关闭警告。
 解码两路 SCCB 对照软件表。日志和仿真生成物在 `build/fpga_imgtest/`，
 回归入口日志在 `build/regress/smoke/unit/fpga_imgtest_*/verilator/`。
 Linux 验证不代表 PDS 时序或摄像头/HDMI 实物已经验收。
+
+## B3F-VRN：去掉 PIX/GEO 的整版顶层
+
+`edrv32_fpga_board_vrn_top.v` 由 `edrv32_fpga_board_full_top.v` 删去 `u_pix`、`u_geo` 得到，其余例化、端口、时钟、ILA 探针路径都与 B3F 相同，因此直接使用 `edrv32_fpga_board_full_top.fdc`。用途：在 B3F 布线不收敛时，测出去掉 PIX/GEO 后能否布通（卡 37）。
+
+| 去掉的连接 | 接法 | 依据 |
+|---|---|---|
+| VIN 的 `pix_in_*` → `pix_out_*` | 直接连回（valid/data/sof/eol/eof 前送，ready 反送） | pix-spec 2.6：`ENABLE = 0` 时输出等于输入 |
+| mem_subsys P5（GEO）输入 | 全 0，响应输出不接 | SoC 6.4.1，与 B3R 相同 |
+| 媒体 APB 槽 2/3 | PRDATA=0、PREADY=1、PSLVERR=1 | SoC 6.1、sys-subsys 2.3 |
+| PLIC 源 9/10 | 0 | SoC 6.1 中断源表 |
+
+Linux 检查：在 `verif/soc/board_vnpu/files.f` 的器件模型上加 `rnd.f`、去掉 `pix.f`/`geo.f`，`verilator --lint-only -Wall --top-module edrv32_fpga_board_vrn_top` 0 告警。没有单独的板级仿真。
