@@ -30,6 +30,7 @@ class BoardSession:
         self.expected_peer = None
         self.peer_ip = None
         self.peer_port = None
+        self.discovery_stop = threading.Event()
         self.steps = {key: dict(done=False, time=None) for key in
                       ('listen', 'win3', 'peer', 'data')}
         self.counts = dict(video=0, telemetry=0)
@@ -71,17 +72,25 @@ class BoardSession:
 
     def disconnect(self):
         with self.lock:
+            self.discovery_stop.set()
             self.phase = 'disconnected'
             self.steps['peer']['done'] = False
 
     def feed_line(self, line):
         with self.lock:
             if 'BIOS menu:' in line:
+                self.discovery_stop.set()
                 self.phase = 'bios'
                 self.steps['peer']['done'] = False
-            if (re.match(r'(Demo|Render(?:er)?):', line)
+            if (re.match(r'(Demo|Render(?:er)?|Showcase):', line)
                     or line.startswith(('RND display ready', 'board_render IDs', 'S3:', 'NPU '))):
+                entering = self.phase != 'application'
                 self.phase = 'application'
+                if entering and self.network_endpoint[0]:
+                    self.discovery_stop = threading.Event()
+                    threading.Thread(target=self._discover_network,
+                                     args=(self.discovery_stop,), daemon=True,
+                                     name='network-discovery').start()
             key, separator, value = line.partition(':')
             key, value = key.strip(), value.strip()
             if key in ('DEMO ERROR', 'Input error'):
@@ -94,16 +103,45 @@ class BoardSession:
                 self.peer_port = int(value)
                 actual = [self.peer_ip, self.peer_port]
                 self.mark('peer', self.expected_peer is not None and actual == self.expected_peer)
+                if self.steps['peer']['done']:
+                    self.discovery_stop.set()
                 if self.expected_peer is not None and actual != self.expected_peer:
                     self.fail(f'ETH peer 不一致：板端 {actual}，本机 {self.expected_peer}')
 
+    def _discover_network(self, stop):
+        try:
+            self.establish_network(*self.network_endpoint, _discovery=stop)
+        except (OSError, ValueError, RuntimeError):
+            # establish_network has recorded the failure; do not retry errors.
+            return
+        while not stop.wait(2.0):
+            try:
+                self._send_connection_request(stop)
+            except (OSError, ValueError, RuntimeError) as exc:
+                self.fail(f'建立网口连接失败：{exc}')
+                return
+
+    def _send_connection_request(self, stop=None):
+        self.ethernet.wait_for_link(self.ethernet.local_ip)
+        with self.lock:
+            if stop is not None and stop.is_set():
+                return
+            self.ethernet.rx_socket.sendto(next(packets(b'\0', 3, 0)),
+                                          self.network_endpoint)
+            self.mark('win3')
+            board_ip, board_port = self.network_endpoint
+            self.log(f'连接请求已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
+
     def establish_network(self, board_ip='192.168.1.10', board_port=5000,
-                          local_ip=None):
+                          local_ip=None, *, _discovery=None):
         self.network_endpoint = (board_ip, board_port)
         if local_ip is not None:
             self.ethernet.local_ip = local_ip
         local_ip = self.ethernet.local_ip
         try:
+            with self.lock:
+                if _discovery is not None and _discovery.is_set():
+                    return self.status()
             rx = self.ethernet.status()['rx']
             if rx['active'] and (rx['localPort'] != 6000 or rx['localIp'] != local_ip):
                 self.ethernet.stop_receive()
@@ -116,11 +154,7 @@ class BoardSession:
                 self.peer_ip = self.peer_port = None
                 self.steps['peer'] = dict(done=False, time=None)
                 self.error = None
-            self.ethernet.send_datagram(next(packets(b'\0', 3, 0)),
-                                        (board_ip, board_port))
-            with self.lock:
-                self.mark('win3')
-            self.log(f'连接请求已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
+            self._send_connection_request(_discovery)
         except (OSError, ValueError, RuntimeError) as exc:
             self.fail(f'建立网口连接失败：{exc}')
             raise

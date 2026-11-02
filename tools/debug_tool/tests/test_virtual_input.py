@@ -119,6 +119,15 @@ class VirtualInputTest(unittest.TestCase):
             window.soc.toggle_panel(window.soc.monitor_card)
             window._select_page(5)
             panel = window.virtual_input
+            self.assertEqual(panel.channel.text(), '当前通道 · 串口')
+            engine.ethernet.rx_socket = object()
+            engine.board.mark('peer')
+            panel.refresh()
+            self.assertEqual(panel.channel.text(), '当前通道 · 网口')
+            engine.board.feed_line('BIOS menu: 1=UART load')
+            panel.refresh()
+            self.assertEqual(panel.channel.text(), '当前通道 · 串口')
+            engine.ethernet.rx_socket = None
             # A focus elsewhere in the window must not require a panel click.
             window.rail_group.button(5).setFocus()
             app.processEvents()
