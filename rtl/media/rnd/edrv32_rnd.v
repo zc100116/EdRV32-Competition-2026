@@ -1,5 +1,5 @@
 // File: edrv32_rnd.v
-// Spec: rnd-spec v0.3 3-6; SoC 4.2, 4.3, 7.1, 7.2, 8.11.
+// Spec: rnd-spec v0.2 3-6; SoC 4.2, 4.3, 7.1, 7.2, 8.11.
 // Description: Ordered 64-byte command execution, APB control and shared P4 DMA arbitration.
 //              Commands start only after the preceding command's final write response.
 // Clock domain: clk_mem.
@@ -51,106 +51,22 @@ module edrv32_rnd (
     // PLIC source 11.
     output wire irq_o
 );
-
-    // SoC 5.3: one preserved reset copy per destination region.
-    wire rst_mem_ctrl_n_w;
-    edrv32_reset_copy u_reset_mem_ctrl_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_ctrl_n_w)
-    );
-
-    wire rst_mem_draw_n_w;
-    edrv32_reset_copy u_reset_mem_draw_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_draw_n_w)
-    );
-    wire rst_mem_copy_n_w;
-    edrv32_reset_copy u_reset_mem_copy_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_copy_n_w)
-    );
-    wire rst_mem_fill_n_w;
-    edrv32_reset_copy u_reset_mem_fill_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_fill_n_w)
-    );
-    wire rst_mem_blur_n_w;
-    edrv32_reset_copy u_reset_mem_blur_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_blur_n_w)
-    );
-    wire rst_mem_blit_n_w;
-    edrv32_reset_copy u_reset_mem_blit_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_blit_n_w)
-    );
-    wire rst_mem_alpha_n_w;
-    edrv32_reset_copy u_reset_mem_alpha_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_alpha_n_w)
-    );
-    wire rst_mem_read_n_w;
-    edrv32_reset_copy u_reset_mem_read_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_read_n_w)
-    );
-    wire rst_mem_write_n_w;
-    edrv32_reset_copy u_reset_mem_write_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_write_n_w)
-    );
-
-    wire rst_mem_geometry_n_w;
-    edrv32_reset_copy u_reset_mem_geometry_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_geometry_n_w)
-    );
-    wire rst_mem_affine_n_w;
-    edrv32_reset_copy u_reset_mem_affine_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_affine_n_w)
-    );
-    wire rst_mem_perf_n_w;
-    edrv32_reset_copy u_reset_mem_perf_n (
-        .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_n_i),
-        .rst_n_o(rst_mem_perf_n_w)
-    );
-
-    localparam [4:0] S_IDLE = 5'd0;
-    localparam [4:0] S_FETCH = 5'd1;
-    localparam [4:0] S_FETCH_WAIT = 5'd2;
-    localparam [4:0] S_CHECK = 5'd3;
-    localparam [4:0] S_BEGIN = 5'd4;
-    localparam [4:0] S_DRAW = 5'd5;
-    localparam [4:0] S_FILL = 5'd6;
-    localparam [4:0] S_COPY = 5'd7;
-    localparam [4:0] S_BLUR = 5'd8;
-    localparam [4:0] S_SHADOW = 5'd9;
-    localparam [4:0] S_COMPLETE = 5'd10;
-    localparam [4:0] S_FINISH = 5'd11;
-    localparam [4:0] S_DRAIN = 5'd12;
-    localparam [4:0] S_BLIT = 5'd13;
-    localparam [4:0] S_CLIP = 5'd14;
-    localparam [4:0] S_PARAM = 5'd15;
-    localparam [4:0] S_PARAM_WAIT = 5'd16;
-    reg [4:0] state_r;
-    reg [4:0] state_w;
-    reg [63:0] round_area_r;
-    reg [1023:0] parameters_r;
-    wire geometry_w;
-    assign geometry_w = op_w >= 8'h09 && op_w <= 8'h0b;
+    localparam [3:0] S_IDLE = 4'd0;
+    localparam [3:0] S_FETCH = 4'd1;
+    localparam [3:0] S_FETCH_WAIT = 4'd2;
+    localparam [3:0] S_CHECK = 4'd3;
+    localparam [3:0] S_BEGIN = 4'd4;
+    localparam [3:0] S_DRAW = 4'd5;
+    localparam [3:0] S_FILL = 4'd6;
+    localparam [3:0] S_COPY = 4'd7;
+    localparam [3:0] S_BLUR = 4'd8;
+    localparam [3:0] S_SHADOW = 4'd9;
+    localparam [3:0] S_COMPLETE = 4'd10;
+    localparam [3:0] S_FINISH = 4'd11;
+    localparam [3:0] S_DRAIN = 4'd12;
+    localparam [3:0] S_BLIT = 4'd13;
+    localparam [3:0] S_CLIP = 4'd14;
+    reg [3:0] state_r;
     reg signed [17:0] rect_left_r;
     reg signed [17:0] rect_top_r;
     reg signed [17:0] rect_right_r;
@@ -164,7 +80,6 @@ module edrv32_rnd (
     wire unused_empty_w;
     reg fetch_half_r;
     reg [511:0] command_r;
-    wire [31:0] command_control_w [0:6];
     reg [31:0] list_base_r;
     reg [15:0] list_count_r;
     reg [31:0] source_stride_r;
@@ -201,16 +116,6 @@ module edrv32_rnd (
     wire [31:0] rd_addr_w;
     wire [15:0] rd_bytes_w;
     wire rd_data_valid_w;
-    wire rd_data_valid_raw_w;
-    wire [255:0] rd_data_raw_w;
-    wire rd_done_raw_w;
-    reg [255:0] rd_data_r;
-    reg rd_data_valid_r;
-    reg rd_done_r;
-    reg [1:0] rd_beat_r;
-    wire [3:0] command_load_w;
-    wire [7:0] parameter_load_w;
-    integer payload_slice;
     wire [255:0] rd_data_w;
     wire rd_done_w;
     wire rd_idle_w;
@@ -304,10 +209,6 @@ module edrv32_rnd (
     wire blend_valid_w;
     wire [63:0] blend_pixel_w;
     wire [31:0] blend_tag_w;
-    wire [39:0] blend_offset_w;
-    wire unused_blend_offset_w;
-    assign unused_blend_offset_w = ^{blend_offset_w[39:37], blend_offset_w[34:32],
-        blend_offset_w[29:27], blend_offset_w[24:22]};
     wire unused_geometry_w;
 
     assign row_pixels_w = clip_right_r - clip_left_r + 18'd1;
@@ -315,30 +216,25 @@ module edrv32_rnd (
     assign source_low_w = command_r[260:256] + {source_offset_w, 2'd0};
     assign target_low_w = command_r[36:32] + {clip_left_r[2:0], 2'd0};
     assign blit_eligible_w = op_w == 8'h04 && command_r[8] && command_r[15:12] == 4'd1 &&
-        command_r[23:16] == 0 && command_r[383:352] == 32'h0001_0000 &&
+        command_r[22:16] == 0 && command_r[383:352] == 32'h0001_0000 &&
         command_r[415:384] == 32'h0001_0000 && command_r[68:64] == 0 &&
         command_r[292:288] == 0 && row_pixels_w[2:0] == 0 &&
         target_low_w == 0 && source_low_w == 0;
     assign unused_geometry_w = ^row_pixels_w[17:3];
     assign expansion_w = op_w == 8'h06 ? $signed({13'd0, command_r[292:288]}) : 18'sd0;
     assign empty_w = inverted_r || clip_right_r < clip_left_r || clip_bottom_r < clip_top_r;
-    assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w ||
-        rd_data_valid_r || rd_done_r;
+    assign busy_w = state_r != S_IDLE || !rd_idle_w || !wr_idle_w;
     assign read_fault_w = p4_rvalid_i && p4_rready_o && p4_rresp_i != 0;
     assign write_fault_w = p4_bvalid_i && p4_bready_o && p4_bresp_i != 0;
     assign cancel_w = abort_w || soft_reset_w || read_fault_w || write_fault_w;
     assign error_w = write_fault_w ? 2'd2 : read_fault_w ? 2'd1 :
         state_r == S_CHECK && illegal_w && !abort_w ? 2'd3 : 2'd0;
-    // Engine states are exclusive; parallel selection keeps PERF1 off a priority chain.
-    assign pixels_w = ({5{state_r == S_DRAW}} & draw_pixels_w) |
-        ({5{state_r == S_COPY}} & copy_pixels_w) |
-        ({5{state_r == S_FILL}} & fill_pixels_w) |
-        ({5{state_r == S_BLUR}} & blur_pixels_w) |
-        ({5{state_r == S_BLIT}} & blit_pixels_w);
+    assign pixels_w = state_r == S_DRAW ? draw_pixels_w : state_r == S_COPY ?
+        copy_pixels_w : state_r == S_FILL ? fill_pixels_w :
+        state_r == S_BLUR ? blur_pixels_w : state_r == S_BLIT ? blit_pixels_w : 5'd0;
     edrv32_rnd_regs u_regs (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_ctrl_n_w),
-        .rst_perf_n_i(rst_mem_perf_n_w),
+        .rst_n_i(rst_mem_n_i),
         .apb_paddr_i(apb_paddr_i),
         .apb_psel_i(apb_psel_i),
         .apb_penable_i(apb_penable_i),
@@ -385,17 +281,11 @@ module edrv32_rnd (
     );
     edrv32_rnd_draw u_draw (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_draw_n_w),
-        .rst_geometry_n_i(rst_mem_geometry_n_w),
-        .rst_affine_n_i(rst_mem_affine_n_w),
+        .rst_n_i(rst_mem_n_i),
         .start_i(state_r == S_SHADOW || (state_r == S_BEGIN &&
             !fast_fill_w && !blit_eligible_w && op_w != 8'h05 && op_w != 8'h06 && op_w != 8'h07)),
-        .command_i({command_r[511:32], command_control_w[0]}),
-        .geometry_control_i(command_control_w[5]),
-        .affine_control_i(command_control_w[6]),
+        .command_i(command_r),
         .source_stride_i(source_stride_r),
-        .round_area_i(round_area_r),
-        .parameters_i(parameters_r),
         .cancel_i(cancel_w),
         .idle_o(unused_draw_idle_w),
         .done_o(draw_done_w),
@@ -424,16 +314,15 @@ module edrv32_rnd (
         .blend_dst_o(draw_blend_dst_w),
         .blend_tag_o(draw_blend_tag_w),
         .blend_tag_i(blend_tag_w),
-        .blend_offset_i(blend_offset_w[19:0]),
         .blend_valid_i(blend_valid_w && state_r == S_DRAW),
         .blend_pixel_i(blend_pixel_w)
     );
     edrv32_rnd_copy u_copy (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_copy_n_w),
+        .rst_n_i(rst_mem_n_i),
         .start_i(state_r == S_BEGIN && op_w == 8'h05),
         .cancel_i(cancel_w),
-        .command_i({command_r[511:32], command_control_w[1]}),
+        .command_i(command_r),
         .done_o(copy_done_w),
         .pixel_count_o(copy_pixels_w),
         .rd_valid_o(copy_rd_valid_w),
@@ -455,10 +344,10 @@ module edrv32_rnd (
     );
     edrv32_rnd_fill u_fill (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_fill_n_w),
+        .rst_n_i(rst_mem_n_i),
         .start_i(state_r == S_BEGIN && fast_fill_w),
         .cancel_i(cancel_w),
-        .command_i({command_r[511:32], command_control_w[2]}),
+        .command_i(command_r),
         .done_o(fill_done_w),
         .pixel_count_o(fill_pixels_w),
         .wr_valid_o(fill_wr_valid_w),
@@ -473,10 +362,10 @@ module edrv32_rnd (
     );
     edrv32_rnd_blur u_blur (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_blur_n_w),
+        .rst_n_i(rst_mem_n_i),
         .start_i(state_r == S_BEGIN && (op_w == 8'h06 || op_w == 8'h07)),
         .cancel_i(cancel_w),
-        .command_i({command_r[511:32], command_control_w[3]}),
+        .command_i(command_r),
         .done_o(blur_done_w),
         .pixel_count_o(blur_pixels_w),
         .shadow_draw_o(shadow_command_w),
@@ -496,10 +385,10 @@ module edrv32_rnd (
 
     edrv32_rnd_blit u_blit (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_blit_n_w),
+        .rst_n_i(rst_mem_n_i),
         .start_i(state_r == S_BEGIN && blit_eligible_w),
         .cancel_i(cancel_w),
-        .command_i({command_r[511:32], command_control_w[4]}),
+        .command_i(command_r),
         .done_o(blit_done_w),
         .pixel_count_o(blit_pixels_w),
         .read_wait_o(blit_read_wait_w),
@@ -527,58 +416,52 @@ module edrv32_rnd (
         .blend_tag_o(blit_blend_tag_w),
         .blend_valid_i(blend_valid_w && state_r == S_BLIT),
         .blend_pixel_i(blend_pixel_w),
-        .blend_tag_i(blend_tag_w),
-        .blend_offset_i({blend_offset_w[36:35], blend_offset_w[31:30],
-            blend_offset_w[26:25], blend_offset_w[21:20]})
+        .blend_tag_i(blend_tag_w)
     );
     edrv32_rnd_alpha_pipe u_alpha (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_alpha_n_w),
+        .rst_n_i(rst_mem_n_i),
         .in_valid_i((state_r == S_DRAW && draw_blend_valid_w) ||
             (state_r == S_BLIT && blit_blend_valid_w)),
         .in_ready_o(blend_ready_w),
         .in_src_i(state_r == S_BLIT ? blit_blend_src_w : draw_blend_src_w),
         .in_dst_i(state_r == S_BLIT ? blit_blend_dst_w : draw_blend_dst_w),
         .in_argb_i(command_r[8]),
-        .in_mode_i(op_w == 8'h04 || op_w == 8'h0d ? command_r[21:20] : 2'd0),
+        .in_mode_i(op_w == 8'h04 ? command_r[21:20] : 2'd0),
         .in_tag_i(state_r == S_BLIT ? blit_blend_tag_w : draw_blend_tag_w),
         .out_valid_o(blend_valid_w),
         .out_ready_i(1'b1),
         .out_pixel_o(blend_pixel_w),
         .out_tag_o(blend_tag_w),
-        .out_offset_o(blend_offset_w),
         .clear_i(cancel_w)
     );
 
     // The command scheduler grants one client for a descriptor; R remains ordered on ID 0.
-    assign rd_desc_valid_w = !cancel_w && (state_r == S_FETCH || state_r == S_PARAM ||
+    assign rd_desc_valid_w = !cancel_w && (state_r == S_FETCH ||
         (state_r == S_DRAW && draw_rd_valid_w) ||
         (state_r == S_COPY && copy_rd_valid_w) ||
         (state_r == S_BLUR && blur_rd_valid_w) ||
         (state_r == S_BLIT && blit_rd_valid_w));
     assign rd_addr_w = state_r == S_FETCH ? list_base_r + (cur_desc_w << 6) :
-        state_r == S_PARAM ? (geometry_w ? command_r[287:256] :
-            op_w == 8'h0d ? command_r[383:352] : command_r[447:416]) :
         state_r == S_DRAW ? draw_rd_addr_w : state_r == S_COPY ? copy_rd_addr_w :
         state_r == S_BLIT ? blit_rd_addr_w : blur_rd_addr_w;
-    assign rd_bytes_w = state_r == S_PARAM && geometry_w ? 16'd128 :
-        state_r == S_FETCH || state_r == S_PARAM ? 16'd64 :
+    assign rd_bytes_w = state_r == S_FETCH ? 16'd64 :
         state_r == S_DRAW ? draw_rd_bytes_w : state_r == S_COPY ? copy_rd_bytes_w :
         state_r == S_BLIT ? blit_rd_bytes_w : 16'd32;
     edrv32_dma2d_rd #(
         .OUTSTANDING(8)
     ) u_read (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_read_n_w),
+        .rst_n_i(rst_mem_n_i),
         .desc_valid_i(rd_desc_valid_w),
         .desc_ready_o(rd_desc_ready_w),
         .desc_base_i(rd_addr_w),
         .desc_stride_i(32'd0),
         .desc_width_bytes_i(rd_bytes_w),
         .desc_height_i(12'd1),
-        .data_valid_o(rd_data_valid_raw_w),
+        .data_valid_o(rd_data_valid_w),
         .data_ready_i(1'b1),
-        .data_o(rd_data_raw_w),
+        .data_o(rd_data_w),
         .data_sol_o(unused_sol_w),
         .data_eol_o(unused_eol_w),
         .data_eof_o(unused_eof_w),
@@ -595,65 +478,9 @@ module edrv32_rnd (
         .axi_rready_o(p4_rready_o),
         .abort_i(cancel_w),
         .idle_o(rd_idle_w),
-        .done_o(rd_done_raw_w),
+        .done_o(rd_done_w),
         .err_o(unused_rd_error_w)
     );
-    // Retiming the data and completion together preserves the final-beat/done ordering.
-    // Cancellation discards the buffered beat; DMA still owns AXI drainage (spec 5.3).
-    always @(posedge clk_mem_i) begin
-        rd_data_r <= rd_data_raw_w;
-    end
-    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-        if (!rst_mem_ctrl_n_w) begin
-            rd_data_valid_r <= 1'b0;
-            rd_done_r <= 1'b0;
-        end else if (cancel_w) begin
-            rd_data_valid_r <= 1'b0;
-            rd_done_r <= 1'b0;
-        end else begin
-            rd_data_valid_r <= rd_data_valid_raw_w;
-            rd_done_r <= rd_done_raw_w;
-        end
-    end
-    // Decode ownership alongside the read register, then give each 128-bit bank
-    // a local enable. The DMA beat counter refers to the undelayed stream.
-    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-        if (!rst_mem_ctrl_n_w)
-            rd_beat_r <= 2'd0;
-        else if (rd_desc_valid_w && rd_desc_ready_w)
-            rd_beat_r <= 2'd0;
-        else if (rd_data_valid_raw_w)
-            rd_beat_r <= rd_beat_r + 2'd1;
-    end
-    genvar capture_slice;
-    generate for (capture_slice = 0; capture_slice < 8;
-        capture_slice = capture_slice + 1) begin : g_read_capture
-        localparam integer BEAT = capture_slice/2;
-        reg parameter_load_r /* synthesis syn_preserve=1 */;
-        always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-            if (!rst_mem_ctrl_n_w)
-                parameter_load_r <= 1'b0;
-            else
-                parameter_load_r <= !cancel_w && rd_data_valid_raw_w &&
-                    state_r == S_PARAM_WAIT && {30'd0, rd_beat_r} == BEAT;
-        end
-        assign parameter_load_w[capture_slice] = parameter_load_r;
-        if (capture_slice < 4) begin : g_command
-            reg command_load_r /* synthesis syn_preserve=1 */;
-            always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-                if (!rst_mem_ctrl_n_w)
-                    command_load_r <= 1'b0;
-                else
-                    command_load_r <= !cancel_w && rd_data_valid_raw_w &&
-                        state_r == S_FETCH_WAIT && {30'd0, rd_beat_r} == BEAT;
-            end
-            assign command_load_w[capture_slice] = command_load_r;
-        end
-    end endgenerate
-    assign rd_data_w = rd_data_r;
-    assign rd_data_valid_w = rd_data_valid_r && !cancel_w;
-    assign rd_done_w = rd_done_r && !cancel_w;
-
     assign scalar_write_w = state_r == S_BLUR;
     assign wr_desc_valid_w = !cancel_w && ((state_r == S_DRAW && draw_wr_valid_w) ||
         (state_r == S_COPY && copy_wr_valid_w) || (state_r == S_FILL && fill_wr_valid_w) ||
@@ -667,87 +494,9 @@ module edrv32_rnd (
     assign wr_data_valid_w = |{scalar_write_w && simple_valid_r,
         state_r == S_DRAW && draw_data_valid_w, state_r == S_COPY && copy_data_valid_w,
         state_r == S_BLIT && blit_data_valid_w, state_r == S_FILL && fill_data_valid_w};
-    always @(*) begin
-        state_w = state_r;
-        if (cancel_w)
-            state_w = busy_w ? S_DRAIN : S_IDLE;
-        else begin
-            case (state_r)
-                S_IDLE: if (start_w && desc_count_w != 0)
-                    state_w = S_FETCH;
-                S_FETCH: if (rd_desc_ready_w) begin
-                    state_w = S_FETCH_WAIT;
-                end
-                S_FETCH_WAIT: begin
-                    if (rd_done_w)
-                        state_w = S_CLIP;
-                end
-                S_CLIP: state_w = S_CHECK;
-                S_CHECK: begin
-                    if (illegal_w)
-                        state_w = S_DRAIN;
-                    else if (empty_w)
-                        state_w = S_COMPLETE;
-                    else
-                        state_w = geometry_w || op_w == 8'h0d || (op_w == 8'h04 && command_r[23]) ?
-                            S_PARAM : S_BEGIN;
-                end
-                S_PARAM: if (rd_desc_ready_w) begin
-                    state_w = S_PARAM_WAIT;
-                end
-                S_PARAM_WAIT: begin
-                    if (rd_done_w)
-                        state_w = S_BEGIN;
-                end
-                S_BEGIN: begin
-                    if (fast_fill_w)
-                        state_w = S_FILL;
-                    else if (blit_eligible_w)
-                        state_w = S_BLIT;
-                    else if (op_w == 8'h05)
-                        state_w = S_COPY;
-                    else if (op_w == 8'h06 || op_w == 8'h07)
-                        state_w = S_BLUR;
-                    else
-                        state_w = S_DRAW;
-                end
-                S_BLIT: if (blit_done_w)
-                    state_w = S_COMPLETE;
-                S_DRAW: if (draw_done_w)
-                    state_w = S_COMPLETE;
-                S_COPY: if (copy_done_w)
-                    state_w = S_COMPLETE;
-                S_FILL: if (fill_done_w)
-                    state_w = S_COMPLETE;
-                S_BLUR: if (blur_done_w)
-                    state_w = op_w == 8'h06 ? S_SHADOW : S_COMPLETE;
-                S_SHADOW: state_w = S_DRAW;
-                S_COMPLETE: state_w = cur_desc_w + 32'd1 == {16'd0, list_count_r} ?
-                    S_FINISH : S_FETCH;
-                S_FINISH: state_w = S_IDLE;
-                S_DRAIN: if (rd_idle_w && wr_idle_w && !rd_data_valid_r && !rd_done_r)
-                    state_w = S_IDLE;
-                default: state_w = state_r;
-            endcase
-        end
-    end
-    // Same D and reset edge; each output slice owns its scheduler decode.
-    genvar scheduler_slice;
-    generate for (scheduler_slice = 0; scheduler_slice < 4;
-        scheduler_slice = scheduler_slice + 1) begin : g_write_mux
-        reg [4:0] mux_state_r /* synthesis syn_preserve=1 */;
-        always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-            if (!rst_mem_ctrl_n_w)
-                mux_state_r <= S_IDLE;
-            else
-                mux_state_r <= state_w;
-        end
-        assign wr_data_w[scheduler_slice*64 +: 64] = mux_state_r == S_BLUR ?
-            simple_data_r[scheduler_slice*64 +: 64] : mux_state_r == S_DRAW ?
-            draw_wr_data_w[scheduler_slice*64 +: 64] : mux_state_r == S_COPY ?
-            copy_data_w[scheduler_slice*64 +: 64] : mux_state_r == S_BLIT ?
-            blit_data_w[scheduler_slice*64 +: 64] : fill_data_w[scheduler_slice*64 +: 64];
-    end endgenerate
+    assign wr_data_w = scalar_write_w ? simple_data_r :
+        state_r == S_DRAW ? draw_wr_data_w :
+        state_r == S_COPY ? copy_data_w : state_r == S_BLIT ? blit_data_w : fill_data_w;
     assign wr_strb_w = scalar_write_w ? simple_strb_r :
         state_r == S_DRAW ? draw_wr_strb_w :
         state_r == S_COPY ? copy_strb_w : state_r == S_BLIT ? blit_strb_w : fill_strb_w;
@@ -755,7 +504,7 @@ module edrv32_rnd (
         .OUTSTANDING(8)
     ) u_write (
         .clk_i(clk_mem_i),
-        .rst_n_i(rst_mem_write_n_w),
+        .rst_n_i(rst_mem_n_i),
         .desc_valid_i(wr_desc_valid_w),
         .desc_ready_o(wr_desc_ready_w),
         .desc_base_i(wr_addr_w),
@@ -785,8 +534,8 @@ module edrv32_rnd (
         .done_o(wr_done_w),
         .err_o(unused_wr_error_w)
     );
-    always @(posedge clk_mem_i or negedge rst_mem_ctrl_n_w) begin
-        if (!rst_mem_ctrl_n_w) begin
+    always @(posedge clk_mem_i or negedge rst_mem_n_i) begin
+        if (!rst_mem_n_i) begin
             state_r <= S_IDLE;
             fetch_half_r <= 1'b0;
             simple_valid_r <= 1'b0;
@@ -799,11 +548,58 @@ module edrv32_rnd (
                 simple_valid_r <= 1'b1;
             else if (wr_data_valid_w && wr_data_ready_w)
                 simple_valid_r <= 1'b0;
-            state_r <= state_w;
-            if ((state_r == S_FETCH || state_r == S_PARAM) && rd_desc_ready_w)
-                fetch_half_r <= 1'b0;
-            if ((state_r == S_FETCH_WAIT || state_r == S_PARAM_WAIT) && rd_data_valid_w)
-                fetch_half_r <= 1'b1;
+            case (state_r)
+                S_IDLE: if (start_w && desc_count_w != 0)
+                    state_r <= S_FETCH;
+                S_FETCH: if (rd_desc_ready_w) begin
+                    fetch_half_r <= 1'b0;
+                    state_r <= S_FETCH_WAIT;
+                end
+                S_FETCH_WAIT: begin
+                    if (rd_data_valid_w)
+                        fetch_half_r <= 1'b1;
+                    if (rd_done_w)
+                        state_r <= S_CLIP;
+                end
+                S_CLIP: state_r <= S_CHECK;
+                S_CHECK: begin
+                    if (illegal_w)
+                        state_r <= S_DRAIN;
+                    else if (empty_w)
+                        state_r <= S_COMPLETE;
+                    else
+                        state_r <= S_BEGIN;
+                end
+                S_BEGIN: begin
+                    if (fast_fill_w)
+                        state_r <= S_FILL;
+                    else if (blit_eligible_w)
+                        state_r <= S_BLIT;
+                    else if (op_w == 8'h05)
+                        state_r <= S_COPY;
+                    else if (op_w == 8'h06 || op_w == 8'h07)
+                        state_r <= S_BLUR;
+                    else
+                        state_r <= S_DRAW;
+                end
+                S_BLIT: if (blit_done_w)
+                    state_r <= S_COMPLETE;
+                S_DRAW: if (draw_done_w)
+                    state_r <= S_COMPLETE;
+                S_COPY: if (copy_done_w)
+                    state_r <= S_COMPLETE;
+                S_FILL: if (fill_done_w)
+                    state_r <= S_COMPLETE;
+                S_BLUR: if (blur_done_w)
+                    state_r <= op_w == 8'h06 ? S_SHADOW : S_COMPLETE;
+                S_SHADOW: state_r <= S_DRAW;
+                S_COMPLETE: state_r <= cur_desc_w + 32'd1 == {16'd0, list_count_r} ?
+                    S_FINISH : S_FETCH;
+                S_FINISH: state_r <= S_IDLE;
+                S_DRAIN: if (rd_idle_w && wr_idle_w)
+                    state_r <= S_IDLE;
+                default: state_r <= state_r;
+            endcase
         end
     end
     always @(posedge clk_mem_i) begin
@@ -811,23 +607,8 @@ module edrv32_rnd (
             list_base_r <= desc_base_w;
             list_count_r <= desc_count_w;
         end
-        for (payload_slice = 0; payload_slice < 4; payload_slice = payload_slice + 1)
-            if (command_load_w[payload_slice] && !cancel_w)
-                command_r[payload_slice*128 +: 128] <= rd_data_w[(payload_slice%2)*128 +: 128];
-        for (payload_slice = 0; payload_slice < 8; payload_slice = payload_slice + 1)
-            if (parameter_load_w[payload_slice] && !cancel_w && (geometry_w || op_w == 8'h0d))
-                parameters_r[payload_slice*128 +: 128] <=
-                    rd_data_w[(payload_slice%2)*128 +: 128];
-        if (state_r == S_PARAM_WAIT && rd_data_valid_w) begin
-            if (!geometry_w && op_w != 8'h0d && !fetch_half_r) begin
-                command_r[447:416] <= rd_data_w[31:0];
-                round_area_r <= rd_data_w[95:32];
-            end
-        end
-        if (state_r == S_PARAM_WAIT && rd_done_w && op_w == 8'h09) begin
-            command_r[319:288] <= parameters_r[319:288];
-            command_r[447:320] <= parameters_r[447:320];
-        end
+        if (state_r == S_FETCH_WAIT && rd_data_valid_w)
+            command_r[fetch_half_r*256 +: 256] <= rd_data_w;
         // The final DMA beat is already in command_r when rd_done_w rises.
         if (state_r == S_FETCH_WAIT && rd_done_w) begin
             rect_left_r <= $signed({{2{command_r[175]}}, command_r[175:160]}) - expansion_w;
@@ -858,18 +639,4 @@ module edrv32_rnd (
             simple_strb_r <= blur_wr_strb_w;
         end
     end
-    // Only the high-fanout command header is copied; payload words keep their owner.
-    // Both writes retain the original D, capture enable and shadow rewrite priority.
-    genvar command_consumer;
-    generate for (command_consumer = 0; command_consumer < 7;
-        command_consumer = command_consumer + 1) begin : g_command
-        reg [31:0] command_control_r /* synthesis syn_preserve=1 */;
-        always @(posedge clk_mem_i) begin
-            if (command_load_w[0] && !cancel_w)
-                command_control_r <= rd_data_w[31:0];
-            if (state_r == S_BLUR && blur_done_w && op_w == 8'h06)
-                command_control_r <= shadow_command_w[31:0];
-        end
-        assign command_control_w[command_consumer] = command_control_r;
-    end endgenerate
 endmodule

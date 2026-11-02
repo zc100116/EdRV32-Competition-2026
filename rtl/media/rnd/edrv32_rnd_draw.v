@@ -7,17 +7,11 @@ module edrv32_rnd_draw (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire rst_geometry_n_i,
-    input wire rst_affine_n_i,
 
     // One drawing command; held constant through done.
     input wire start_i,
     input wire [511:0] command_i,
-    input wire [31:0] geometry_control_i,
-    input wire [31:0] affine_control_i,
     input wire [31:0] source_stride_i,
-    input wire [63:0] round_area_i,
-    input wire [1023:0] parameters_i,
     input wire cancel_i,
     output wire idle_o,
     output wire done_o,
@@ -52,7 +46,6 @@ module edrv32_rnd_draw (
     output wire [63:0] blend_dst_o,
     output wire [31:0] blend_tag_o,
     input wire [31:0] blend_tag_i,
-    input wire [19:0] blend_offset_i,
     input wire blend_valid_i,
     input wire [63:0] blend_pixel_i
 );
@@ -225,9 +218,7 @@ module edrv32_rnd_draw (
     reg [31:0] pipe_tag_r [0:9];
     reg [63:0] pipe_dst_r [1:9];
     reg [4:0] source_offset_r [4:5][0:1];
-    reg [26:0] sample_line_r [0:1];
-    reg [31:0] sample_next_r [0:1];
-    reg [1:0] sample_cross_r;
+    reg [31:0] sample_addr_r [0:1];
     reg [8:0] source_index_r [0:1];
     reg [2:0] source_shift_r [3:6][0:1];
     reg [7:0] source_mask_r [3:6][0:1];
@@ -263,68 +254,6 @@ module edrv32_rnd_draw (
     wire unused_empty_w;
     wire unused_fast_w;
     wire fill_w;
-    wire affine_w;
-    wire affine_ready_w;
-    wire affine_read_wait_w;
-    wire affine_valid_w;
-    wire affine_input_step_w;
-    wire affine_rd_valid_w;
-    wire [31:0] affine_rd_addr_w;
-    wire [15:0] affine_rd_bytes_w;
-    wire affine_palette_valid_w;
-    wire [15:0] affine_palette_index_w;
-    wire [31:0] affine_pixel_w;
-    wire [31:0] affine_destination_w;
-    wire [31:0] affine_tag_w;
-    wire [7:0] affine_coverage_w;
-    wire [7:0] affine_input_cov_w;
-    reg [11:0] affine_tile_left_r;
-    reg [11:0] affine_tile_right_r;
-    reg [11:0] affine_tile_top_r;
-    reg [11:0] affine_tile_bottom_r;
-    wire signed [17:0] affine_offset_x_w;
-    wire signed [17:0] affine_offset_y_w;
-    wire [12:0] affine_first_right_w;
-    wire [12:0] affine_first_bottom_w;
-    wire [12:0] affine_next_right_w;
-    wire [12:0] affine_next_bottom_w;
-    wire [11:0] affine_next_y_w;
-    wire [11:0] affine_next_left_w;
-    wire [31:0] affine_row_left_bytes_w;
-    wire [31:0] affine_row_right_bytes_w;
-    wire [31:0] write_clip_strb_w;
-    wire [31:0] affine_write_mask_w [0:1][0:7];
-    reg [1:0] affine_has_write_r;
-    wire affine_skip_write_w;
-    wire [31:0] final_tag_w;
-    wire geometry_w;
-    wire geometry_ready_w;
-    wire geometry_valid_w;
-    wire [7:0] geometry_cov_w;
-    reg [7:0] geometry_cov_r [8:9];
-    wire gradient_w;
-    wire gradient_vertical_w;
-    wire plain_fill_w;
-    wire round_fill_w;
-    wire mask_w;
-    wire cutout_w;
-    wire round_clip_w;
-    wire shape_w;
-    wire post_w;
-    wire solid_w;
-    wire [31:0] shape_start_w;
-    wire [31:0] shape_end_w;
-    wire [11:0] shape_radius_w;
-    wire signed [17:0] shape_left_w;
-    wire signed [17:0] shape_top_w;
-    wire signed [17:0] shape_right_w;
-    wire signed [17:0] shape_bottom_w;
-    reg [1:0] post_valid_r;
-    reg [63:0] post_src0_r;
-    reg [63:0] post_dst_r [0:1];
-    reg [31:0] post_tag_r [0:1];
-    reg [15:0] post_product_r [0:1];
-    reg [63:0] post_src1_r;
     wire tile_w;
     wire [2:0] bits_log2_w;
     wire [4:0] tile_log2_w;
@@ -367,6 +296,7 @@ module edrv32_rnd_draw (
     wire [255:0] palette_shift_w;
     wire sample_bank_w;
     wire source_bank_w;
+    wire palette_bank_w;
     wire render_start_w;
     wire render_finish_w;
     wire write_start_w;
@@ -454,7 +384,7 @@ module edrv32_rnd_draw (
         end
     endfunction
 
-    // Shadow shading keeps opcode 06 but uses its expanded GLYPH coordinates.
+    // Parent retags BOX_SHADOW as GLYPH; draw never receives the expanding opcode 06.
     assign op_w = command_i[7:0];
     edrv32_rnd_decode u_decode (
         .command_i({command_i[511:8], 8'h04}),
@@ -472,30 +402,8 @@ module edrv32_rnd_draw (
         .height_o(height_w),
         .fast_fill_o(unused_fast_w)
     );
-    assign affine_w = op_w == 8'h0d;
-    assign geometry_w = op_w >= 8'h09 && op_w <= 8'h0b;
-    assign round_fill_w = op_w == 8'h01 || op_w == 8'h02;
-    assign plain_fill_w = op_w == 8'h01 || geometry_w;
-    assign fill_w = round_fill_w || geometry_w;
-    assign gradient_w = op_w == 8'h09 ? flags_w[6] : op_w == 8'h01 && flags_w[0];
-    assign gradient_vertical_w = op_w == 8'h09 ? flags_w[7] : flags_w[1];
+    assign fill_w = op_w == 8'h01 || op_w == 8'h02;
     assign tile_w = op_w == 8'h08;
-    assign mask_w = op_w == 8'h0c;
-    assign cutout_w = op_w == 8'h06 && flags_w[0];
-    assign round_clip_w = (op_w == 8'h04 || affine_w) && flags_w[7];
-    assign shape_w = mask_w || cutout_w || round_clip_w;
-    assign post_w = cutout_w || round_clip_w || geometry_w;
-    assign solid_w = fill_w || mask_w || affine_w;
-    assign shape_start_w = mask_w ? command_i[319:288] :
-        cutout_w ? command_i[383:352] : affine_w ? parameters_i[223:192] : round_area_i[31:0];
-    assign shape_end_w = mask_w ? command_i[351:320] :
-        cutout_w ? command_i[415:384] : affine_w ? parameters_i[255:224] : round_area_i[63:32];
-    assign shape_radius_w = mask_w ? command_i[267:256] :
-        cutout_w ? command_i[427:416] : affine_w ? command_i[395:384] : command_i[475:464];
-    assign shape_left_w = {{2{shape_start_w[15]}}, shape_start_w[15:0]};
-    assign shape_top_w = {{2{shape_start_w[31]}}, shape_start_w[31:16]};
-    assign shape_right_w = {{2{shape_end_w[15]}}, shape_end_w[15:0]};
-    assign shape_bottom_w = {{2{shape_end_w[31]}}, shape_end_w[31:16]};
     assign bits_log2_w = format_w == 4'd0 ? 3'd4 : format_w == 4'd1 ? 3'd5 :
         format_w == 4'd2 || format_w == 4'd6 ? 3'd3 :
         format_w == 4'd3 || format_w == 4'd7 ? 3'd2 :
@@ -543,30 +451,8 @@ module edrv32_rnd_draw (
         .row_inside_i(bank_inner_inside_r[pipe_tag_r[0][31]]),
         .coverage_o(inner_cov_w)
     );
-    assign affine_offset_x_w = left_w -
-        $signed({{2{command_i[175]}}, command_i[175:160]});
-    assign affine_offset_y_w = top_w -
-        $signed({{2{command_i[191]}}, command_i[191:176]});
-    assign affine_first_right_w = {1'b0, left_w[11:0]} + 13'd31 -
-        {8'd0, affine_offset_x_w[4:0]};
-    assign affine_first_bottom_w = {1'b0, top_w[11:0]} + 13'd15 -
-        {9'd0, affine_offset_y_w[3:0]};
-    assign affine_next_right_w = {1'b0, affine_tile_right_r} + 13'd32;
-    assign affine_next_bottom_w = {1'b0, affine_tile_bottom_r} + 13'd16;
-    assign affine_next_y_w = load_y_r < affine_tile_bottom_r ? load_y_r + 12'd1 :
-        affine_tile_right_r < clip_right_r ? affine_tile_top_r : affine_tile_bottom_r + 12'd1;
-    assign affine_next_left_w = load_y_r < affine_tile_bottom_r ? affine_tile_left_r :
-        affine_tile_right_r < clip_right_r ? affine_tile_right_r + 12'd1 : clip_left_r;
-    assign affine_row_left_bytes_w = argb_w ? {18'd0, load_left_r, 2'd0} :
-        {19'd0, load_left_r, 1'b0};
-    assign affine_row_right_bytes_w = argb_w ? {18'd0, affine_tile_right_r, 2'd0} :
-        {19'd0, affine_tile_right_r, 1'b0};
-    assign affine_input_step_w = !pipe_valid_r[0] || affine_ready_w;
-    assign affine_input_cov_w = !round_clip_w || shape_radius_w == 0 ?
-        8'd255 : inner_cov_w[7:0];
     assign load_dst_w = load_dst_r;
-    assign clip_end_w = dst_row_base_r + (affine_w ? affine_row_right_bytes_w :
-        {18'd0, clip_right_bytes_r});
+    assign clip_end_w = dst_row_base_r + {18'd0, clip_right_bytes_r};
     assign next_target_word_w = load_dst_r[31:5] + (argb_w ? 27'd64 : 27'd32);
     // A chunk owns at most 64 target beats, so six bits retain the complete word difference.
     assign target_word_difference_w = clip_end_r[10:5] - load_dst_r[10:5];
@@ -585,7 +471,7 @@ module edrv32_rnd_draw (
     assign tile_row_bits_w = {3'd0, tile_row_pixel_r} << bits_log2_w;
     assign tile_row_bytes_w = ((tile_mask_w + 32'd1) << bits_log2_w) >> 3;
     // End chunks on a target beat so concurrent banks never own the same bytes.
-    assign chunk_right_w = affine_w ? {1'b0, affine_tile_right_r} : chunk_right_r;
+    assign chunk_right_w = chunk_right_r;
     // Alignment makes the low five address bits irrelevant to the lower bound.
     assign bounds_min_word_w = bounds_addr_r[0][31:5] < bounds_addr_r[1][31:5] ?
         bounds_addr_r[0][31:5] : bounds_addr_r[1][31:5];
@@ -633,106 +519,43 @@ module edrv32_rnd_draw (
         load_state_r == S_SOURCE_REQ ? load_source_bytes_r : 16'd32;
     assign rd_valid_o = !cancel_i && !read_busy_r && (miss_request_w || load_request_w);
     assign rd_addr_o = miss_request_w ? miss_query_w : load_addr_w;
-    assign rd_bytes_o = miss_request_w ?
-        (affine_w ? affine_rd_bytes_w : 16'd32) : load_bytes_w;
+    assign rd_bytes_o = miss_request_w ? 16'd32 : load_bytes_w;
     assign load_accept_w = rd_valid_o && rd_ready_i && !miss_request_w;
     assign load_data_w = rd_data_valid_i && read_busy_r && !read_render_r;
     assign load_done_w = rd_done_i && read_busy_r && !read_render_r;
 
     assign sample_bank_w = pipe_tag_r[0][31];
     assign source_bank_w = pipe_tag_r[4][31];
+    assign palette_bank_w = pipe_tag_r[5][31];
     assign render_start_w = active_r && render_state_r == S_RENDER_IDLE &&
         loaded_r[render_bank_r];
     assign render_finish_w = blend_valid_i && blend_tag_i[30];
-    assign affine_skip_write_w = active_r && affine_w &&
-        write_state_r == S_WRITE_IDLE && rendered_r[write_bank_r] &&
-        !affine_has_write_r[write_bank_r];
     assign write_start_w = active_r && write_state_r == S_WRITE_IDLE &&
-        rendered_r[write_bank_r] && !affine_skip_write_w;
-    assign write_finish_w = (write_state_r == S_WRITE_RESPONSE && wr_done_i) ||
-        affine_skip_write_w;
+        rendered_r[write_bank_r];
+    assign write_finish_w = write_state_r == S_WRITE_RESPONSE && wr_done_i;
     assign next_write_w = {1'b0, write_beat_r} + 10'd1;
-    assign issue_pair_w = !affine_w && !geometry_w && issue_x_r < bank_right_r[render_bank_r] &&
+    assign issue_pair_w = issue_x_r < bank_right_r[render_bank_r] &&
         issue_offset_w[4:0] <= (argb_w ? 5'd24 : 5'd28);
     assign issue_last_w = {1'b0, issue_x_r} + (issue_pair_w ? 13'd1 : 13'd0) >=
         {1'b0, bank_right_r[render_bank_r]};
     assign issue_offset_w = {18'd0, issue_byte_r};
     assign target_offset_w = {18'd0, pipe_tag_r[0][13:0]};
-    wire [255:0] target_selected_w;
-    genvar target_slice;
-    generate for (target_slice = 0; target_slice < 4; target_slice = target_slice + 1) begin
-        : g_target_select
-        reg bank_r /* synthesis syn_preserve=1 */;
-        wire [255:0] selected_w;
-        wire unused_selected_w;
-        always @(posedge clk_i) begin
-            if (issue_w)
-                bank_r <= render_bank_r;
-        end
-        assign selected_w = target_data_w[bank_r];
-        assign target_selected_w[target_slice*64 +: 64] = selected_w[target_slice*64 +: 64];
-        assign unused_selected_w = ^selected_w;
-    end endgenerate
-    assign target_shift_w = target_selected_w >> {target_offset_w[4:0], 3'd0};
-    assign source_ready_w = !pipe_valid_r[4] || solid_w || !bank_sparse_r[source_bank_w] ||
+    assign target_shift_w = target_data_w[sample_bank_w] >> {target_offset_w[4:0], 3'd0};
+    assign source_ready_w = !pipe_valid_r[4] || fill_w || !bank_sparse_r[source_bank_w] ||
         (lane_hit_w[0] && (!pipe_tag_r[4][29] || lane_hit_w[1]));
-    assign pipeline_step_w = (!(post_w ? post_valid_r[1] : pipe_valid_r[9]) ||
-        blend_ready_i) && source_ready_w &&
-        (!geometry_w || !pipe_valid_r[7] || geometry_valid_w);
-    genvar step_region;
-    generate for (step_region = 0; step_region < 4; step_region = step_region + 1) begin
-        : g_step_ctrl
-        reg tail_valid_r /* synthesis syn_preserve=1 */;
-        reg geometry_valid_r /* synthesis syn_preserve=1 */;
-        reg post_valid_copy_r /* synthesis syn_preserve=1 */;
-        wire step_w /* synthesis syn_keep=1 */;
-        assign step_w = (!(post_w ? post_valid_copy_r : tail_valid_r) || blend_ready_i) &&
-            source_ready_w && (!geometry_w || !geometry_valid_r || geometry_valid_w);
-        always @(posedge clk_i or negedge rst_n_i) begin
-            if (!rst_n_i) begin
-                tail_valid_r <= 1'b0;
-                geometry_valid_r <= 1'b0;
-                post_valid_copy_r <= 1'b0;
-            end else if (cancel_i || start_i) begin
-                tail_valid_r <= 1'b0;
-                geometry_valid_r <= 1'b0;
-                post_valid_copy_r <= 1'b0;
-            end else if (pipeline_step_w) begin
-                tail_valid_r <= pipe_valid_r[8];
-                geometry_valid_r <= affine_w ? affine_valid_w : pipe_valid_r[6];
-                post_valid_copy_r <= post_valid_r[0];
-            end
-        end
-    end endgenerate
-    assign issue_w = render_state_r == S_RENDER_STREAM &&
-        (affine_w ? affine_input_step_w : pipeline_step_w) &&
-        (!geometry_w || geometry_ready_w);
-    assign miss_request_w = affine_w ? affine_rd_valid_w :
-        pipe_valid_r[4] && !source_ready_w;
-    assign miss_query_w = affine_w ? affine_rd_addr_w :
-        !lane_low_hit_w[0] ? {sample_line_r[0], 5'd0} :
+    assign pipeline_step_w = (!pipe_valid_r[9] || blend_ready_i) && source_ready_w;
+    assign issue_w = render_state_r == S_RENDER_STREAM && pipeline_step_w;
+    assign miss_request_w = pipe_valid_r[4] && !source_ready_w;
+    assign miss_query_w = !lane_low_hit_w[0] ? {sample_addr_r[0][31:5], 5'd0} :
         lane_cross_w[0] && !lane_high_hit_w[0] ? lane_next_w[0] :
-        !lane_low_hit_w[1] ? {sample_line_r[1], 5'd0} : lane_next_w[1];
-    assign blend_valid_o = (post_w ? post_valid_r[1] : pipe_valid_r[9]) && source_ready_w;
-    // MASK bypasses over using the shared pipe's exact raw-destination preservation path.
-    assign blend_src_o = mask_w ? 64'd0 : post_w ? post_src1_r : pipe_src_r;
-    assign blend_dst_o = mask_w ? pipe_src_r : post_w ? post_dst_r[1] : pipe_dst_r[9];
-    assign final_tag_w = post_w ? post_tag_r[1] : pipe_tag_r[9];
-    assign blend_tag_o = affine_w ? {final_tag_w[31:29], |blend_src_o[31:24],
-        final_tag_w[27:0]} : final_tag_w;
+        !lane_low_hit_w[1] ? {sample_addr_r[1][31:5], 5'd0} : lane_next_w[1];
+    assign blend_valid_o = pipe_valid_r[9] && source_ready_w;
+    assign blend_src_o = pipe_src_r;
+    assign blend_dst_o = pipe_dst_r[9];
+    assign blend_tag_o = pipe_tag_r[9];
     assign result_pixels_w = argb_w ? blend_pixel_i :
         {32'd0, blend_pixel_i[47:32], blend_pixel_i[15:0]};
-    genvar result_quadrant;
-    generate for (result_quadrant = 0; result_quadrant < 4;
-        result_quadrant = result_quadrant + 1) begin : g_result_shift
-        wire [255:0] shifted_w;
-        assign shifted_w = {192'd0, result_pixels_w} <<
-            {blend_offset_i[result_quadrant*5 +: 5], 3'd0};
-        assign result_write_data_w[result_quadrant*64 +: 64] =
-            shifted_w[result_quadrant*64 +: 64];
-        wire unused_shifted_w;
-        assign unused_shifted_w = ^shifted_w;
-    end endgenerate
+    assign result_write_data_w = {192'd0, result_pixels_w} << {blend_tag_i[4:0], 3'd0};
     assign result_write_strb_w = (argb_w ? (blend_tag_i[29] ? 32'hff : 32'hf) :
         (blend_tag_i[29] ? 32'hf : 32'h3)) << blend_tag_i[4:0];
     assign wr_valid_o = write_state_r == S_WRITE_DESC && !cancel_i;
@@ -741,17 +564,15 @@ module edrv32_rnd_draw (
     assign wr_data_valid_o = write_state_r == S_WRITE_DATA && !cancel_i;
     assign wr_data_o = result_data_w[write_bank_r];
     // Original target bytes are preserved in the result RAM outside the drawing region.
-    assign write_clip_strb_w = (write_beat_r == 9'd0 ?
+    assign wr_strb_o = (write_beat_r == 9'd0 ?
         32'hffff_ffff << bank_first_byte_r[write_bank_r] : 32'hffff_ffff) &
         ({2'd0, next_write_w, 5'd0} == {1'b0, bank_bytes_r[write_bank_r]} ?
             32'hffff_ffff >> (5'd31 - bank_last_byte_r[write_bank_r]) : 32'hffff_ffff);
-    assign wr_strb_o = write_clip_strb_w & (affine_w ?
-        affine_write_mask_w[write_bank_r][write_beat_r[2:0]] : 32'hffff_ffff);
     assign idle_o = !active_r;
     assign done_o = done_r;
     assign pixel_count_o = blend_valid_i ? (blend_tag_i[29] ? 5'd2 : 5'd1) : 5'd0;
     assign read_wait_o = active_r && ((render_state_r == S_RENDER_IDLE &&
-        !loaded_r[render_bank_r]) || (affine_w ? affine_read_wait_w : miss_request_w));
+        !loaded_r[render_bank_r]) || miss_request_w);
     assign write_wait_o = active_r && busy_r[load_bank_r] &&
         write_state_r != S_WRITE_IDLE;
 
@@ -796,25 +617,6 @@ module edrv32_rnd_draw (
         wire [7:0] gradient_value_w [0:3];
         reg [23:0] fill_color_r [3:6];
         reg [7:0] fill_coverage_r [1:4];
-        reg [7:0] shape_coverage_r [1:9];
-        wire shape_x_inside_w;
-        wire [7:0] shape_factor_w;
-        wire [7:0] mask_alpha_w;
-        wire [7:0] post_factor_w;
-        wire [7:0] source_factor_w;
-        assign post_factor_w = geometry_w ? (pixel == 0 ? geometry_cov_r[9] : 8'd0) :
-            cutout_w ? command_i[255:248] : shape_coverage_r[9];
-        assign source_factor_w = cutout_w ?
-            8'd255 - shape_coverage_r[7] : command_i[255:248];
-        assign shape_x_inside_w = $signed(coverage_inner_x0_r) >= 0 &&
-            $signed(coverage_inner_x0_r) < inner_width_r;
-        assign shape_factor_w = round_clip_w && shape_radius_w == 0 ? 8'd255 :
-            mask_w && flags_w[0] && (!bank_inner_inside_r[pipe_tag_r[0][31]] ||
-            !(pixel == 0 ? shape_x_inside_w :
-                ($signed(coverage_inner_x0_r) + 18'sd1 >= 0 &&
-                    $signed(coverage_inner_x0_r) + 18'sd1 < inner_width_r))) ? 8'd255 :
-            inner_cov_w[pixel*8 +: 8];
-        assign mask_alpha_w = divide255(alpha_product8_r);
         reg [7:0] fill_inner_r [1:2];
         reg [7:0] fill_operand_a3_r;
         reg [7:0] fill_operand_b3_r;
@@ -832,7 +634,7 @@ module edrv32_rnd_draw (
         assign kx_w = op_w == 8'h04 && flags_w[0] ?
             {{16{command_i[207]}}, command_i[207:192]} - {20'd0, coordinate_w} :
             {20'd0, coordinate_w} - {{16{command_i[175]}}, command_i[175:160]};
-        assign gradient_k_w = gradient_vertical_w ? {20'd0, bank_y_r[render_bank_r]} -
+        assign gradient_k_w = flags_w[1] ? {20'd0, bank_y_r[render_bank_r]} -
             {{16{command_i[191]}}, command_i[191:176]} : {20'd0, coordinate_w} -
             {{16{command_i[175]}}, command_i[175:160]};
         assign issue_map_x_w = coordinate_w + map_x_offset_r[11:0];
@@ -853,40 +655,14 @@ module edrv32_rnd_draw (
         assign unused_coordinate_w = ^{kx_w[31:16], gradient_k_w[31:16],
             scaled_x1_r[15:0], issue_map_column_w[11:8], map_entry_read_w[31:23],
             map_entry_read_w[15:14], tile_base_r[3][4:0], sample_w[7:4]};
-        assign lane_cross_w[pixel] = sample_cross_r[pixel];
-        assign lane_next_w[pixel] = sample_next_r[pixel];
+        assign lane_cross_w[pixel] = format_w == 4'd1 ? sample_addr_r[pixel][4:0] > 5'd28 :
+            format_w == 4'd0 && sample_addr_r[pixel][4:0] == 5'd31;
+        assign lane_next_w[pixel] = {sample_addr_r[pixel][31:5], 5'd0} + 32'd32;
         assign lane_hit_w[pixel] = lane_low_hit_w[pixel] &&
             (!lane_cross_w[pixel] || lane_high_hit_w[pixel]);
         assign lane_cache_w[pixel] = {lane_cache_high_w[pixel], lane_cache_low_w[pixel]};
-        wire [511:0] palette_source_w;
-        wire [511:0] raw_source_w;
-        genvar palette_slice;
-        for (palette_slice = 0; palette_slice < 8; palette_slice = palette_slice + 1) begin
-            : g_palette_select
-            reg bank_r /* synthesis syn_preserve=1 */;
-            wire [511:0] bank_data_w;
-            reg sparse_r [0:1] /* synthesis syn_preserve=1 */;
-            always @(posedge clk_i) begin
-                if (load_state_r == S_BOUNDS && (solid_w || tile_w))
-                    sparse_r[load_bank_r] <= 1'b0;
-                if ((load_state_r == S_BOUNDS && bounds_ready_r) ||
-                    (bounds_valid_r[6] && load_state_r != S_CHUNK))
-                    sparse_r[load_bank_r] <= bounds_sparse_result_w;
-            end
-            assign raw_source_w[palette_slice*64 +: 64] = sparse_r[pipe_tag_r[5][31]] ?
-                sparse_data_r[pixel][palette_slice*64 +: 64] :
-                palette_source_w[palette_slice*64 +: 64];
-            always @(posedge clk_i) begin
-                if (g_step_ctrl[pixel].step_w && pipe_valid_r[4])
-                    bank_r <= pipe_tag_r[4][31];
-            end
-            assign bank_data_w = {source_next_w[bank_r][pixel], source_data_w[bank_r][pixel]};
-            assign palette_source_w[palette_slice*64 +: 64] =
-                bank_data_w[palette_slice*64 +: 64];
-            wire unused_bank_data_w;
-            assign unused_bank_data_w = ^bank_data_w;
-        end
-        assign raw_shift_w[pixel] = raw_source_w >>
+        assign raw_shift_w[pixel] = (bank_sparse_r[palette_bank_w] ? sparse_data_r[pixel] :
+            {source_next_w[palette_bank_w][pixel], source_data_w[palette_bank_w][pixel]}) >>
                 {source_offset_r[5][pixel], 3'd0};
         assign palette_index_w[pixel] =
             (raw_shift_w[pixel][7:0] >> source_shift_r[5][pixel]) & source_mask_r[5][pixel];
@@ -895,9 +671,8 @@ module edrv32_rnd_draw (
             .wr_en_i(palette_write_w),
             .wr_addr_i(palette_index_r),
             .wr_data_i(palette_shift_w[31:0]),
-            .rd_en_i((affine_w ? affine_palette_valid_w :
-                pipe_valid_r[5] && g_step_ctrl[pixel].step_w) && !cancel_i),
-            .rd_addr_i(affine_w ? affine_palette_index_w[pixel*8 +: 8] : palette_index_w[pixel]),
+            .rd_en_i(pipe_valid_r[5] && pipeline_step_w && !cancel_i),
+            .rd_addr_i(palette_index_w[pixel]),
             .rd_data_o(palette_data_w[pixel])
         );
         assign sample_w = (raw_r[pixel][7:0] >> source_shift_r[6][pixel]) &
@@ -934,16 +709,12 @@ module edrv32_rnd_draw (
             : g_color
             assign converted_w[pixel][color_channel*8 +: 8] = op_w == 8'h03 ?
                 command_i[224+color_channel*8 +: 8] :
-                (op_w == 8'h04 || affine_w) && flags_w[3] ?
+                op_w == 8'h04 && flags_w[3] ?
                     normalize_biased(recolor_back8_r[color_channel] +
                         recolor_bias_r[color_channel]) : expanded8_r[color_channel*8 +: 8];
         end
         always @(posedge clk_i) begin
-            if (g_step_ctrl[pixel].step_w) begin
-                post_product_r[pixel] <= pipe_src_r[pixel*32+24 +: 8] *
-                    post_factor_w;
-                post_src1_r[pixel*32 +: 32] <=
-                    {divide255(post_product_r[pixel]), post_src0_r[pixel*32 +: 24]};
+            if (pipeline_step_w) begin
                 if (issue_w) begin
                     kx0_r <= kx_w[15:0];
                     gradient_k0_r <= {1'b0, gradient_k_w[15:0]};
@@ -952,8 +723,7 @@ module edrv32_rnd_draw (
                     tile_slot_r[0] <= issue_map_index_w[pixel];
                 end
                 if (pipe_valid_r[0]) begin
-                    fill_coverage_r[1] <= geometry_w ? 8'd255 : outer_cov_w[pixel*8 +: 8];
-                    shape_coverage_r[1] <= shape_factor_w;
+                    fill_coverage_r[1] <= outer_cov_w[pixel*8 +: 8];
                     fill_inner_r[1] <= 8'd255 - inner_cov_w[pixel*8 +: 8];
                     scaled_x1_r <= kx0_r * command_i[383:352];
                     kx1_r <= kx0_r;
@@ -984,20 +754,17 @@ module edrv32_rnd_draw (
                         pixel_bits_w[2:0];
                     source_mask_r[3][pixel] <= bits_log2_w >= 3'd3 ? 8'hff :
                         8'hff >> (8 - (1 << bits_log2_w));
-                    fill_color_r[3] <= gradient_w ?
+                    fill_color_r[3] <= op_w == 8'h01 && flags_w[0] ?
                         {gradient_value_w[1],
                             gradient_value_w[2],
                             gradient_value_w[3]} : command_i[247:224];
-                    fill_operand_a3_r <= plain_fill_w ?
+                    fill_operand_a3_r <= op_w == 8'h01 ?
                         command_i[255:248] : fill_coverage_r[2];
-                    fill_operand_b3_r <= plain_fill_w ? (gradient_w ?
+                    fill_operand_b3_r <= op_w == 8'h01 ? (flags_w[0] ?
                         gradient_value_w[0] : 8'd255) : fill_inner_r[2];
                 end
                 if (pipe_valid_r[3]) begin
-                    sample_line_r[pixel] <= address3_r[31:5];
-                    sample_next_r[pixel] <= {address3_r[31:5], 5'd0} + 32'd32;
-                    sample_cross_r[pixel] <= format_w == 4'd1 ? address3_r[4:0] > 5'd28 :
-                        format_w == 4'd0 && address3_r[4:0] == 5'd31;
+                    sample_addr_r[pixel] <= address3_r;
                     source_index_r[pixel] <= tile_w ? tile_slot_base_w + {7'd0, tile_beat_w} :
                         address3_r[13:5] - bank_source_r[pipe_tag_r[3][31]][13:5];
                     source_offset_r[4][pixel] <= address3_r[4:0];
@@ -1007,15 +774,11 @@ module edrv32_rnd_draw (
                     sparse_data_r[pixel] <= lane_cache_w[pixel];
                     source_offset_r[5][pixel] <= source_offset_r[4][pixel];
                     fill_alpha5_r <= divide255(fill_product4_r);
-                    fill_factor5_r <= plain_fill_w ? fill_coverage_r[4] : command_i[255:248];
+                    fill_factor5_r <= op_w == 8'h01 ? fill_coverage_r[4] : command_i[255:248];
                 end
                 if (pipe_valid_r[5]) begin
                     raw_r[pixel] <= raw_shift_w[pixel][31:0];
                     fill_product6_r <= fill_alpha5_r * fill_factor5_r;
-                end
-                if (affine_w && affine_valid_w) begin
-                    expanded7_r <= pixel == 0 ? affine_pixel_w : 32'd0;
-                    shape_coverage_r[7] <= affine_coverage_w;
                 end
                 if (pipe_valid_r[6]) begin
                     expanded7_r <= expanded_w;
@@ -1023,27 +786,14 @@ module edrv32_rnd_draw (
                 end
                 if (pipe_valid_r[7]) begin
                     expanded8_r <= expanded7_r[23:0];
-                    alpha_product8_r <= mask_w ?
-                        pipe_dst_r[7][pixel*32+24 +: 8] * shape_coverage_r[7] :
-                        expanded7_r[31:24] * source_factor_w;
+                    alpha_product8_r <= expanded7_r[31:24] * command_i[255:248];
                     for (channel = 0; channel < 3; channel = channel + 1)
                         recolor_back8_r[channel] <= recolor_inverse_r *
                             expanded7_r[channel*8 +: 8];
                     fill_pixel8_r <= fill_pixel7_r;
                 end
-                if (pipe_valid_r[8]) begin
-                    if (mask_w)
-                        pipe_src_r[pixel*32 +: 32] <= mask_alpha_w == 0 ? 32'd0 :
-                            {mask_alpha_w, pipe_dst_r[8][pixel*32 +: 24]};
-                    else
-                        pipe_src_r[pixel*32 +: 32] <= fill_w ?
-                            fill_pixel8_r : converted_w[pixel];
-                end
-                for (arithmetic_stage = 2; arithmetic_stage < 10;
-                    arithmetic_stage = arithmetic_stage + 1)
-                    if (pipe_valid_r[arithmetic_stage-1])
-                        shape_coverage_r[arithmetic_stage] <=
-                            shape_coverage_r[arithmetic_stage-1];
+                if (pipe_valid_r[8])
+                    pipe_src_r[pixel*32 +: 32] <= fill_w ? fill_pixel8_r : converted_w[pixel];
                 for (arithmetic_stage = 1; arithmetic_stage < 4;
                     arithmetic_stage = arithmetic_stage + 1)
                     if (pipe_valid_r[arithmetic_stage-1])
@@ -1088,7 +838,7 @@ module edrv32_rnd_draw (
             cache_needed_w = 1'b0;
             for (cache_lane = 0; cache_lane < 2; cache_lane = cache_lane + 1) begin
                 if (cache_valid_r[cache_entry] && cache_addr_r[cache_entry] ==
-                    {sample_line_r[cache_lane], 5'd0}) begin
+                    {sample_addr_r[cache_lane][31:5], 5'd0}) begin
                     lane_low_hit_w[cache_lane] = 1'b1;
                     lane_cache_low_w[cache_lane] = cache_data_r[cache_entry];
                     if (cache_lane == 0 || pipe_tag_r[4][29])
@@ -1207,7 +957,7 @@ module edrv32_rnd_draw (
                 loaded_r[render_bank_r] <= 1'b0;
             if (render_finish_w)
                 rendered_r[blend_tag_i[31]] <= 1'b1;
-            if (write_start_w || affine_skip_write_w)
+            if (write_start_w)
                 rendered_r[write_bank_r] <= 1'b0;
             if (write_finish_w) begin
                 busy_r[write_bank_r] <= 1'b0;
@@ -1251,14 +1001,13 @@ module edrv32_rnd_draw (
         end
         // Target descriptors own their captured address; prepare the following row now.
         if (load_state_r == S_BOUNDS)
-            dst_y_r <= affine_w ? affine_next_y_w :
-                load_last_r ? load_y_r + 12'd1 : load_y_r;
+            dst_y_r <= load_last_r ? load_y_r + 12'd1 : load_y_r;
         dst_row_product_r <= dst_y_r * command_i[79:64];
         dst_row_base_r <= command_i[63:32] + dst_row_product_r;
         row_start_r <= dst_row_base_r + {18'd0, clip_left_bytes_r};
         clip_end_r <= clip_end_w[10:0];
         if (load_state_r == S_ROW) begin
-            load_dst_r <= affine_w ? dst_row_base_r + affine_row_left_bytes_w : row_start_r;
+            load_dst_r <= row_start_r;
             chunk_right_r <= {1'b0, clip_left_r} + 13'd511 -
                 (argb_w ? {10'd0, row_start_r[4:2]} : {9'd0, row_start_r[4:1]});
         end
@@ -1273,7 +1022,7 @@ module edrv32_rnd_draw (
             end
         end
         if (load_state_r == S_CHUNK && !busy_r[load_bank_r] && !loaded_all_r)
-            load_last_r <= affine_w || chunk_right_w >= {1'b0, clip_right_r};
+            load_last_r <= chunk_right_w >= {1'b0, clip_right_r};
         bounds_ky_r <= bounds_ky_w[15:0];
         bounds_scaled_y_r <= bounds_ky_r * command_i[415:384];
         bounds_y_r <= bounds_ky_r;
@@ -1379,8 +1128,7 @@ module edrv32_rnd_draw (
             inner_inside_r <= 1'b0;
         end else if (cancel_i || start_i) begin
             load_state_r <= cancel_i ? S_IDLE :
-                ((op_w == 8'h04 || tile_w || affine_w) && format_w >= 4'd6 ?
-                    S_PALETTE_REQ : S_RADIUS);
+                ((op_w == 8'h04 || tile_w) && format_w >= 4'd6 ? S_PALETTE_REQ : S_RADIUS);
             load_bank_r <= 1'b0;
             load_left_r <= left_w[11:0];
             load_y_r <= top_w[11:0];
@@ -1396,11 +1144,9 @@ module edrv32_rnd_draw (
                 S_INNER: load_state_r <= S_SIZE;
                 S_SIZE: load_state_r <= S_ROW;
                 S_ROW: begin
-                    inner_r <= shape_w;
-                    inner_inside_r <= shape_w &&
-                        $signed({6'd0, load_y_r}) >= inner_top_r &&
-                        $signed({6'd0, load_y_r}) <= inner_bottom_r;
-                    load_state_r <= round_fill_w || shape_w ? S_EDGE_REQ : S_CHUNK;
+                    inner_r <= 1'b0;
+                    inner_inside_r <= 1'b0;
+                    load_state_r <= fill_w ? S_EDGE_REQ : S_CHUNK;
                 end
                 S_EDGE_REQ: if (row_ready_w)
                     load_state_r <= S_EDGE_WAIT;
@@ -1426,7 +1172,7 @@ module edrv32_rnd_draw (
                     load_state_r <= S_TARGET_DATA;
                 end
                 S_TARGET_DATA: if (load_done_w)
-                    load_state_r <= solid_w ? S_LOADED : tile_w ? S_TILE_MAP :
+                    load_state_r <= fill_w ? S_LOADED : tile_w ? S_TILE_MAP :
                         bounds_available_w ? (bounds_sparse_w ? S_LOADED : S_SOURCE_REQ) :
                             S_TARGET_END;
                 S_TARGET_END: if (bounds_available_w)
@@ -1457,15 +1203,7 @@ module edrv32_rnd_draw (
                 end
                 S_LOADED: begin
                     load_bank_r <= !load_bank_r;
-                    if (affine_w) begin
-                        load_left_r <= affine_next_left_w;
-                        load_y_r <= affine_next_y_w;
-                        if (load_y_r == clip_bottom_r && load_right_r == clip_right_r) begin
-                            loaded_all_r <= 1'b1;
-                            load_state_r <= S_IDLE;
-                        end else
-                            load_state_r <= S_ROW;
-                    end else if (load_last_r) begin
+                    if (load_last_r) begin
                         if (load_y_r == clip_bottom_r) begin
                             loaded_all_r <= 1'b1;
                             load_state_r <= S_IDLE;
@@ -1511,11 +1249,11 @@ module edrv32_rnd_draw (
         if (load_state_r == S_RADIUS)
             radius_r <= radius_w;
         if (load_state_r == S_INNER) begin
-            inner_left_r <= shape_w ? shape_left_w : inner_left_w;
-            inner_top_r <= shape_w ? shape_top_w : inner_top_w;
-            inner_right_r <= shape_w ? shape_right_w : inner_right_w;
-            inner_bottom_r <= shape_w ? shape_bottom_w : inner_bottom_w;
-            inner_radius_r <= shape_w ? shape_radius_w : radius_r > command_i[299:288] ?
+            inner_left_r <= inner_left_w;
+            inner_top_r <= inner_top_w;
+            inner_right_r <= inner_right_w;
+            inner_bottom_r <= inner_bottom_w;
+            inner_radius_r <= radius_r > command_i[299:288] ?
                 radius_r - command_i[299:288] : 12'd0;
         end
         if (load_state_r == S_SIZE) begin
@@ -1532,7 +1270,7 @@ module edrv32_rnd_draw (
             bank_left_r[load_bank_r] <= load_left_r;
             bank_right_r[load_bank_r] <= load_right_r;
             bank_y_r[load_bank_r] <= load_y_r;
-            if (solid_w || tile_w)
+            if (fill_w || tile_w)
                 bank_sparse_r[load_bank_r] <= 1'b0;
             bank_target_r[load_bank_r] <= {load_dst_w[31:5], 5'd0};
             bank_bytes_r[load_bank_r] <= target_bytes_w[15:0];
@@ -1579,13 +1317,7 @@ module edrv32_rnd_draw (
             render_bank_r <= 1'b0;
             pipe_valid_r <= 10'd0;
         end else begin
-            if (affine_w) begin
-                if (affine_input_step_w)
-                    pipe_valid_r[0] <= issue_w;
-                pipe_valid_r[6:1] <= 6'd0;
-                if (pipeline_step_w)
-                    pipe_valid_r[9:7] <= {pipe_valid_r[8:7], affine_valid_w};
-            end else if (pipeline_step_w)
+            if (pipeline_step_w)
                 pipe_valid_r <= {pipe_valid_r[8:0], issue_w};
             case (render_state_r)
                 S_RENDER_IDLE: if (render_start_w) begin
@@ -1607,13 +1339,13 @@ module edrv32_rnd_draw (
         end
     end
     always @(posedge clk_i) begin
-        if (issue_w) begin
-            pipe_tag_r[0] <= {render_bank_r, issue_last_w, issue_pair_w,
-                15'd0, issue_offset_w[13:0]};
-            coverage_outer_x0_r <= $signed({6'd0, issue_x_r}) - rect_left_r;
-            coverage_inner_x0_r <= $signed({6'd0, issue_x_r}) - inner_left_r;
-        end
-        if (g_step_ctrl[2].step_w) begin
+        if (pipeline_step_w) begin
+            if (issue_w) begin
+                pipe_tag_r[0] <= {render_bank_r, issue_last_w, issue_pair_w,
+                    15'd0, issue_offset_w[13:0]};
+                coverage_outer_x0_r <= $signed({6'd0, issue_x_r}) - rect_left_r;
+                coverage_inner_x0_r <= $signed({6'd0, issue_x_r}) - inner_left_r;
+            end
             for (stage = 1; stage < 10; stage = stage + 1)
                 if (pipe_valid_r[stage-1])
                     pipe_tag_r[stage] <= pipe_tag_r[stage-1];
@@ -1626,10 +1358,6 @@ module edrv32_rnd_draw (
             for (stage = 2; stage < 10; stage = stage + 1)
                 if (pipe_valid_r[stage-1])
                     pipe_dst_r[stage] <= pipe_dst_r[stage-1];
-            if (affine_w && affine_valid_w) begin
-                pipe_dst_r[7] <= {32'd0, affine_destination_w};
-                pipe_tag_r[7] <= affine_tag_w;
-            end
         end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -1642,12 +1370,8 @@ module edrv32_rnd_draw (
             write_bank_r <= 1'b0;
         end else begin
             case (write_state_r)
-                S_WRITE_IDLE: begin
-                    if (affine_skip_write_w)
-                        write_bank_r <= !write_bank_r;
-                    else if (write_start_w)
-                        write_state_r <= S_WRITE_DESC;
-                end
+                S_WRITE_IDLE: if (write_start_w)
+                    write_state_r <= S_WRITE_DESC;
                 S_WRITE_DESC: if (wr_ready_i) begin
                     write_state_r <= S_WRITE_DATA;
                     write_beat_r <= 9'd0;
@@ -1665,138 +1389,10 @@ module edrv32_rnd_draw (
             endcase
         end
     end
-    edrv32_rnd_affine u_affine (
-        .clk_i(clk_i),
-        .rst_n_i(rst_affine_n_i),
-        .clear_i(cancel_i),
-        .start_i(start_i && affine_w),
-        .command_i({command_i[511:32], affine_control_i}),
-        .parameters_i(parameters_i),
-        .left_i(left_w[11:0]),
-        .top_i(top_w[11:0]),
-        .right_i(right_w[11:0]),
-        .bottom_i(bottom_w[11:0]),
-        .in_valid_i(pipe_valid_r[0] && affine_w),
-        .in_ready_o(affine_ready_w),
-        .destination_i(argb_w ? target_shift_w[31:0] : {16'd0, target_shift_w[15:0]}),
-        .tag_i(pipe_tag_r[0]),
-        .coverage_i(affine_input_cov_w),
-        .out_valid_o(affine_valid_w),
-        .out_ready_i(pipeline_step_w),
-        .pixel_o(affine_pixel_w),
-        .destination_o(affine_destination_w),
-        .tag_o(affine_tag_w),
-        .coverage_o(affine_coverage_w),
-        .read_wait_o(affine_read_wait_w),
-        .rd_valid_o(affine_rd_valid_w),
-        .rd_ready_i(rd_valid_o && rd_ready_i && miss_request_w && affine_w),
-        .rd_addr_o(affine_rd_addr_w),
-        .rd_bytes_o(affine_rd_bytes_w),
-        .rd_data_valid_i(rd_data_valid_i && read_busy_r && read_render_r && affine_w),
-        .rd_data_i(rd_data_i),
-        .rd_done_i(rd_done_i && read_busy_r && read_render_r && affine_w),
-        .palette_valid_o(affine_palette_valid_w),
-        .palette_index_o(affine_palette_index_w),
-        .palette_data_i({palette_data_w[1], palette_data_w[0]})
-    );
-    always @(posedge clk_i) begin
-        if (start_i) begin
-            // Decode is combinational, unlike RECT data registers written on this edge.
-            affine_tile_left_r <= left_w[11:0];
-            affine_tile_top_r <= top_w[11:0];
-            affine_tile_right_r <= affine_first_right_w < {1'b0, right_w[11:0]} ?
-                affine_first_right_w[11:0] : right_w[11:0];
-            affine_tile_bottom_r <= affine_first_bottom_w < {1'b0, bottom_w[11:0]} ?
-                affine_first_bottom_w[11:0] : bottom_w[11:0];
-        end else if (load_state_r == S_LOADED && affine_w && load_y_r == affine_tile_bottom_r) begin
-            if (affine_tile_right_r < clip_right_r) begin
-                affine_tile_left_r <= affine_tile_right_r + 12'd1;
-                affine_tile_right_r <= affine_next_right_w < {1'b0, clip_right_r} ?
-                    affine_next_right_w[11:0] : clip_right_r;
-            end else begin
-                affine_tile_left_r <= clip_left_r;
-                affine_tile_right_r <= affine_first_right_w < {1'b0, clip_right_r} ?
-                    affine_first_right_w[11:0] : clip_right_r;
-                affine_tile_top_r <= affine_tile_bottom_r + 12'd1;
-                affine_tile_bottom_r <= affine_next_bottom_w < {1'b0, clip_bottom_r} ?
-                    affine_next_bottom_w[11:0] : clip_bottom_r;
-            end
-        end
-    end
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i)
-            affine_has_write_r <= 2'd0;
-        else if (cancel_i || start_i)
-            affine_has_write_r <= 2'd0;
-        else begin
-            if (load_state_r == S_CHUNK && !busy_r[load_bank_r])
-                affine_has_write_r[load_bank_r] <= 1'b0;
-            if (blend_valid_i && blend_tag_i[28])
-                affine_has_write_r[blend_tag_i[31]] <= 1'b1;
-        end
-    end
-    genvar write_bank;
-    genvar write_word;
-    generate for (write_bank = 0; write_bank < 2; write_bank = write_bank + 1) begin : g_mask_bank
-        localparam [0:0] BANK = write_bank == 1;
-        for (write_word = 0; write_word < 8; write_word = write_word + 1) begin : g_mask_word
-            localparam [2:0] WORD = write_word;
-            reg [31:0] mask_r;
-            assign affine_write_mask_w[write_bank][write_word] = mask_r;
-            always @(posedge clk_i) begin
-                if (affine_w && load_data_w && load_state_r == S_TARGET_DATA &&
-                    load_bank_r == BANK && load_beat_r[2:0] == WORD)
-                    mask_r <= 32'd0;
-                if (affine_w && blend_valid_i && blend_tag_i[28] &&
-                    blend_tag_i[31] == BANK && blend_tag_i[7:5] == WORD)
-                    mask_r <= mask_r | result_write_strb_w;
-            end
-        end
-    end endgenerate
-    edrv32_rnd_geometry u_geometry (
-        .clk_i(clk_i),
-        .rst_n_i(rst_geometry_n_i),
-        .clear_i(cancel_i),
-        .start_i(start_i && geometry_w),
-        .out_ready_i(pipe_valid_r[7] && pipeline_step_w),
-        .command_i({command_i[511:32], geometry_control_i}),
-        .parameters_i(parameters_i),
-        .left_i(left_w[11:0]),
-        .top_i(top_w[11:0]),
-        .request_i(issue_w && geometry_w),
-        .ready_o(geometry_ready_w),
-        .row_end_i(issue_x_r >= clip_right_r),
-        .valid_o(geometry_valid_w),
-        .coverage_o(geometry_cov_w)
-    );
-    always @(posedge clk_i) begin
-        if (g_step_ctrl[3].step_w) begin
-            geometry_cov_r[8] <= geometry_cov_w;
-            geometry_cov_r[9] <= geometry_cov_r[8];
-        end
-    end
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i)
-            post_valid_r <= 2'd0;
-        else if (cancel_i || start_i)
-            post_valid_r <= 2'd0;
-        else if (pipeline_step_w)
-            post_valid_r <= {post_valid_r[0], pipe_valid_r[9] && post_w};
-    end
-    always @(posedge clk_i) begin
-        if (g_step_ctrl[3].step_w) begin
-            post_src0_r <= pipe_src_r;
-            post_dst_r[0] <= pipe_dst_r[9];
-            post_dst_r[1] <= post_dst_r[0];
-            post_tag_r[0] <= pipe_tag_r[9];
-            post_tag_r[1] <= post_tag_r[0];
-        end
-    end
     assign unused_geometry_w = ^{left_w[17:12], right_w[17:12], top_w[17:12], bottom_w[17:12],
         row_local_w[17], row_width_w[17], row_height_w[17], inner_width_r[17],
         inner_height_r[17], target_shift_w[255:64],
         blend_tag_i[28:14], flags_w[15:4],
-        affine_offset_x_w[17:5], affine_offset_y_w[17:4], post_src0_r[63:56], post_src0_r[31:24],
         map_shift_w[255:16], palette_shift_w[255:32],
         target_offset_w[31:5], issue_offset_w[31:14], clip_end_w[31:11],
         tile_bytes_w[31:16], tile_last_offset_w[31:6], tile_end_offset_w[4:0],

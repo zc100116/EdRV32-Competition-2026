@@ -1,10 +1,8 @@
-../common/edrv32_reset_copy.v
 +incdir+../include
 ../common/edrv32_dma2d_rd.v
 ../common/edrv32_dma2d_wr.v
 ../tech/edrv32_ram_rnd_line.v
 ../tech/edrv32_ram_rnd_palette.v
-../tech/edrv32_ram_rnd_window.v
 ../media/rnd/edrv32_rnd_alpha_pipe.v
 ../media/rnd/edrv32_rnd_blit.v
 ../media/rnd/edrv32_rnd_blur.v
@@ -13,10 +11,6 @@
 ../media/rnd/edrv32_rnd_copy.v
 ../media/rnd/edrv32_rnd_coverage.v
 ../media/rnd/edrv32_rnd_decode.v
-../media/rnd/edrv32_rnd_geometry.v
-../media/rnd/edrv32_rnd_window.v
-../media/rnd/edrv32_rnd_filter.v
-../media/rnd/edrv32_rnd_affine.v
 ../media/rnd/edrv32_rnd_draw.v
 ../media/rnd/edrv32_rnd_fill.v
 ../media/rnd/edrv32_rnd_regs.v

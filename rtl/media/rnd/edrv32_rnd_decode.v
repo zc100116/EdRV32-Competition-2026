@@ -74,9 +74,9 @@ module edrv32_rnd_decode (
     always @(*) begin
         allowed_w = 1'b0;
         case (op_o)
-            8'h01, 8'h02, 8'h06, 8'h07, 8'h09, 8'h0a, 8'h0b, 8'h0c: allowed_w = 1'b1;
+            8'h01, 8'h02, 8'h06, 8'h07: allowed_w = 1'b1;
             8'h03: allowed_w = src_fmt_o >= 4'd2 && src_fmt_o <= 4'd5;
-            8'h04, 8'h0d: allowed_w = (src_fmt_o <= 4'd1 ||
+            8'h04: allowed_w = (src_fmt_o <= 4'd1 ||
                 (src_fmt_o >= 4'd6 && src_fmt_o <= 4'd9)) && flags_o[6:4] < 3'd4;
             8'h05: allowed_w = src_fmt_o == {3'd0, argb_o};
             8'h08: allowed_w = src_fmt_o <= 4'd1 || src_fmt_o == 4'd6 || src_fmt_o == 4'd7;

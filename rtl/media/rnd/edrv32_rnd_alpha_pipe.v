@@ -20,7 +20,6 @@ module edrv32_rnd_alpha_pipe (
     input wire out_ready_i,
     output wire [63:0] out_pixel_o,
     output wire [31:0] out_tag_o,
-    output wire [39:0] out_offset_o,
 
     // Discard pending arithmetic on ABORT; bus drainage belongs to the DMA units.
     input wire clear_i
@@ -80,17 +79,6 @@ module edrv32_rnd_alpha_pipe (
                 tag_r[stage] <= tag_r[stage-1];
         end
     end
-
-    // Each result-RAM quadrant owns a same-cycle copy of the final shift control.
-    genvar quadrant;
-    generate for (quadrant = 0; quadrant < 8; quadrant = quadrant + 1) begin : g_offset
-        reg [4:0] offset_r /* synthesis syn_preserve=1 */;
-        always @(posedge clk_i) begin
-            if (advance_w)
-                offset_r <= tag_r[7][4:0];
-        end
-        assign out_offset_o[quadrant*5 +: 5] = offset_r;
-    end endgenerate
 
     genvar lane;
     generate for (lane = 0; lane < 2; lane = lane + 1) begin : g_lane
