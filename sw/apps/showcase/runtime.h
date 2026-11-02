@@ -10,6 +10,8 @@ extern struct sched_task communication_task;
 extern struct sched_task application_task;
 extern struct sched_task gui_task;
 void showcase_input_event(void);
+void showcase_cpu_report_init(void);
+void showcase_cpu_report(void);
 void showcase_gui_disp_event(uint32_t irq);
 void showcase_communication_step(struct sched_task *task);
 void showcase_gui_restore(void);

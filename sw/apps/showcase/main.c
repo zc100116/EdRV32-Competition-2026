@@ -111,6 +111,7 @@ int main(void)
     sched_add(&gui_task);
     showcase_lvgl_init();
     launcher_show();
+    showcase_cpu_report_init();
     platform_puts("showcase launcher\r\n");
     sched_run();
     return 0;

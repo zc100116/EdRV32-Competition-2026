@@ -75,3 +75,42 @@ void status_step(void)
     app_wake_at(now + platform_clock_hz());
     sched_signal(&gui_task, 1);
 }
+
+/* UART sampling belongs to the communication service, independent of the page. */
+static uint64_t report_time;
+static uint64_t report_busy[3];
+static uint64_t report_idle;
+static uint32_t report_frames;
+void showcase_cpu_report_init(void)
+{
+    report_time = platform_ticks();
+    report_busy[0] = communication_task.busy_ticks;
+    report_busy[1] = application_task.busy_ticks;
+    report_busy[2] = gui_task.busy_ticks;
+    report_idle = sched_idle_ticks();
+    report_frames = showcase_gui_frames();
+}
+void showcase_cpu_report(void)
+{
+    uint64_t now = platform_ticks();
+    uint64_t elapsed = now - report_time;
+    if (elapsed < platform_clock_hz()) return;
+    struct sched_task *tasks[] = {&communication_task, &application_task, &gui_task};
+    const char *const names[] = {"% comm=", "% app=", "% gui="};
+    uint64_t idle = sched_idle_ticks();
+    uint32_t frames = showcase_gui_frames();
+    platform_puts("Showcase CPU idle=");
+    platform_put_u32((uint32_t)((idle - report_idle) * 100u / elapsed));
+    for (unsigned i = 0; i < 3; ++i) {
+        platform_puts(names[i]);
+        platform_put_u32((uint32_t)((tasks[i]->busy_ticks - report_busy[i]) * 100u / elapsed));
+        report_busy[i] = tasks[i]->busy_ticks;
+    }
+    platform_puts("% GUI fps=");
+    platform_put_u32((uint32_t)((uint64_t)(frames - report_frames) *
+                              platform_clock_hz() / elapsed));
+    platform_puts("\r\n");
+    report_time = now;
+    report_idle = idle;
+    report_frames = frames;
+}

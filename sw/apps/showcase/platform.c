@@ -285,6 +285,7 @@ void showcase_communication_step(struct sched_task *task)
     input_pressed = next_input & ~input_snapshot;
     input_snapshot = next_input;
     showcase_input_event();
+    showcase_cpu_report();
     sched_wake_at(task, platform_ticks() + system_hz / 100u);
 }
 void platform_init(void)
