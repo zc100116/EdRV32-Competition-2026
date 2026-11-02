@@ -23,6 +23,7 @@ module edrv32_board_showcase_tb;
     bit first_frame = 0;
     bit application_entered = 0;
     bit nes_entered = 0;
+    bit expect_status = 0;
     reg [31:0] nes_base;
     reg [31:0] nes_bytes;
     reg [31:0] last_surface;
@@ -149,6 +150,10 @@ module edrv32_board_showcase_tb;
                 if (line_text == "showcase launcher") launcher_count++;
                 if (line_text == "showcase first frame") first_frame = 1;
                 if (line_text == "showcase enter 系统状态") application_entered = 1;
+                if (expect_status && line_text.substr(0, 14) == "showcase enter " &&
+                    line_text != "showcase enter 系统状态")
+                    $fatal(1, "FAIL application expected=系统状态 actual=%s time=%0t",
+                           line_text, $time);
                 if (line_text == "showcase enter NES 游戏") nes_entered = 1;
                 if (line_text.substr(0, 11) == "showcase CPU" ||
                     line_text.substr(0, 3) == "RND " || line_text.substr(0, 4) == "DISP ")
@@ -231,6 +236,7 @@ module edrv32_board_showcase_tb;
         wait (launcher_count == 2);
         controller(0);
         // PREV + ENTER selects the final (system status) card from NES index 0.
+        expect_status = 1;
         controller(16'h0900);
         wait (application_entered);
         controller(0);
