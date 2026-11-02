@@ -26,16 +26,16 @@ module edrv32_cpu_frontend (
     // Surviving E-stage branch training.
     input wire update_valid_i,
     input wire update_clear_i,
-    input wire [4:0] update_clear_index_i,
+    input wire [6:0] update_clear_index_i,
     input wire [31:0] update_pc_i,
     input wire [31:0] update_target_i,
     input wire [2:0] update_type_i,
     input wire update_taken_i,
-    input wire update_compressed_i,
-    input wire [143:0] update_index_i,
+    input wire [11:0] update_index_i,
     // Decode consumes 0, 1 or 2 records; low record is oldest.
     input wire [1:0] decode_pop_count_i,
     output wire [357:0] decode_data_o,
+    output wire [5:0] decode_index_hi_o,
     output wire [79:0] decode_operand_addr_o,
     output wire [1:0] decode_valid_count_o,
     output wire [2:0] ib_count_o,
@@ -59,7 +59,7 @@ module edrv32_cpu_frontend (
 );
     // Fixed four-byte instructions: a response contributes one or two whole words.
     localparam REC_BITS = 179;
-    localparam STREAM_BITS = 145;
+    localparam STREAM_BITS = 148;
     reg [31:0] f1_pc_r;
     reg f2_pending_r;
     reg [31:0] f2_pc_r;
@@ -68,7 +68,7 @@ module edrv32_cpu_frontend (
     reg f2_taken_r;
     reg [1:0] f2_position_r;
     reg [31:0] f2_target_r;
-    reg [8:0] f2_history_r;
+    reg [11:0] f2_history_r;
     reg [36:0] f2_ras_r;
     reg [STREAM_BITS-1:0] words_r [0:3];
     reg [1:0] read_ptr_r;
@@ -80,8 +80,7 @@ module edrv32_cpu_frontend (
     wire predict_taken_w;
     wire [31:0] predict_target_w;
     wire [1:0] predict_position_w;
-    wire unused_predict_compressed_w;
-    wire [8:0] predict_history_w;
+    wire [11:0] predict_history_w;
     wire [36:0] predict_ras_w;
     wire request_accept_w;
     wire response_accept_w;
@@ -92,6 +91,7 @@ module edrv32_cpu_frontend (
     wire [STREAM_BITS-1:0] stream_w [0:1];
     wire [1:0] push_count_w;
     wire [357:0] push_data_w;
+    wire [5:0] push_index_hi_w;
     wire [2:0] unused_update_align_w;
     assign unused_update_align_w = {update_pc_i[0], f2_pc_r[1:0]};
     assign redirect_w = redirect_valid_i || d_redirect_valid_i;
@@ -124,7 +124,6 @@ module edrv32_cpu_frontend (
         .predict_taken_o(predict_taken_w),
         .predict_target_o(predict_target_w),
         .predict_position_o(predict_position_w),
-        .predict_compressed_o(unused_predict_compressed_w),
         .predict_history_o(predict_history_w),
         .predict_ras_o(predict_ras_w),
         .update_valid_i(update_valid_i),
@@ -132,7 +131,6 @@ module edrv32_cpu_frontend (
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
-        .update_compressed_i(update_compressed_i),
         .update_index_i(update_index_i),
         .clear_valid_i(update_clear_i),
         .clear_index_i(update_clear_index_i),
@@ -147,6 +145,8 @@ module edrv32_cpu_frontend (
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_w),
         .push_data_i(push_data_w),
+        .push_index_hi_i(push_index_hi_w),
+        .index_hi_o(decode_index_hi_o),
         .free_count_o(ib_free_count_w),
         .pop_count_i(decode_pop_count_i),
         .data_o(decode_data_o),
@@ -175,9 +175,11 @@ module edrv32_cpu_frontend (
                 f2_hit_r && {position_w, 1'b0} == f2_position_r,
                 ic_resp_err_i, pc_w, ic_resp_data_i[position_w*32 +: 32]};
             assign stream_w[slot] = count_r > slot ? words_r[read_w] : response_w;
+            assign push_index_hi_w[slot*3 +: 3] =
+                stream_w[slot][110:108] ^ stream_w[slot][45:43];
             assign push_data_w[slot*REC_BITS +: REC_BITS] = {
-                stream_w[slot][144:108],
-                stream_w[slot][107:99] ^ stream_w[slot][41:33],
+                stream_w[slot][147:111],
+                stream_w[slot][107:99] ^ stream_w[slot][42:34],
                 stream_w[slot][98:64], 2'b0,
                 stream_w[slot][31:0], stream_w[slot][31:0], stream_w[slot][63:32]};
         end

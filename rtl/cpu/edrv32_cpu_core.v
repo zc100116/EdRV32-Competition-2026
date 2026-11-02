@@ -50,7 +50,6 @@ module edrv32_cpu_core (
     localparam REC_PC_LSB = 0;
     localparam REC_INSTR_LSB = 32;
     localparam REC_RAW_LSB = 64;
-    localparam REC_COMPRESSED = 96;
     localparam REC_ILLEGAL = 97;
     localparam REC_FETCH_ERR = 98;
     localparam REC_PRED_HIT = 99;
@@ -72,6 +71,7 @@ module edrv32_cpu_core (
     localparam C_FENCE = 4'd12;
     localparam C_FENCE_I = 4'd13;
     wire [357:0] d_data_w;
+    wire [5:0] d_index_hi_w;
     wire [1:0] d_count_w;
     wire [2:0] ib_count_w;
     reg [1:0] d_issue_w;
@@ -110,20 +110,15 @@ module edrv32_cpu_core (
     reg [1:0] m_valid_r;
     reg [1:0] w_valid_r;
     reg [REC_BITS-1:0] e_record_r [0:1];
-    wire [143:0] e_predict_index_w;
-    genvar predict_bank;
-    // cpu-spec 4.4: training uses the original F1 index, captured on the same E edge.
-    generate
-        for (predict_bank = 0; predict_bank < 16;
-            predict_bank = predict_bank + 1) begin : g_predict_index
-            reg [8:0] e_index_r /* synthesis syn_preserve=1 */;
-            assign e_predict_index_w[predict_bank*9 +: 9] = e_index_r;
-            always @(posedge clk_i) begin
-                if (e_operand_load_copy_w[4 + predict_bank/8])
-                    e_index_r <= d_record_w[0][REC_GHR_LSB +: 9];
-            end
-        end
-    endgenerate
+    wire [11:0] e_predict_index_w;
+    reg [11:0] e_predict_index_r;
+    assign e_predict_index_w = e_predict_index_r;
+    always @(posedge clk_i) begin
+        if (e_operand_load_copy_w[4])
+            e_predict_index_r <= {d_index_hi_w[2:0], d_record_w[0][REC_GHR_LSB +: 9]};
+    end
+    wire [2:0] unused_index_hi_w;
+    assign unused_index_hi_w = d_index_hi_w[5:3];
     reg [REC_BITS-1:0] m_record_r [0:1];
     reg [REC_BITS-1:0] w_record_r [0:1];
     reg [3:0] e_class_r [0:1];
@@ -382,15 +377,15 @@ module edrv32_cpu_core (
         .update_valid_i(e_resolve_w && e_control_w &&
             !e_exception_r && !e_jump_misaligned_w),
         .update_clear_i(e_redirect1_w || (e_redirect0_w && !e_control_w)),
-        .update_clear_index_i(e_redirect1_w ? e_record_r[1][7:3] : e_record_r[0][7:3]),
+        .update_clear_index_i(e_redirect1_w ? e_record_r[1][9:3] : e_record_r[0][9:3]),
         .update_pc_i(e_record_r[0][REC_PC_LSB +: 32]),
         .update_target_i(e_branch_target_w),
         .update_type_i(e_type_w),
         .update_taken_i(e_class_r[0] != C_BRANCH || e_branch_taken_w),
-        .update_compressed_i(e_record_r[0][REC_COMPRESSED]),
         .update_index_i(e_predict_index_w),
         .decode_pop_count_i(d_issue_w),
         .decode_data_o(d_data_w),
+        .decode_index_hi_o(d_index_hi_w),
         .decode_operand_addr_o(d_operand_addr_w),
         .decode_valid_count_o(d_count_w),
         .ib_count_o(ib_count_w),

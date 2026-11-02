@@ -26,8 +26,7 @@ module tb;
     reg [31:0] update_target_i=0;
     reg [2:0] update_type_i=0;
     reg update_taken_i=0;
-    reg update_compressed_i=0;
-    reg [8:0] update_index_i=0;
+    reg [11:0] update_index_i=0;
     reg [1:0] decode_pop_count_i=0;
     wire [357:0] decode_data_o;
     wire [1:0] decode_valid_count_o;
@@ -94,15 +93,15 @@ module tb;
         .halt_i(halt_i),
         .update_valid_i(update_valid_i),
         .update_clear_i(1'b0),
-        .update_clear_index_i(5'b0),
+        .update_clear_index_i(7'b0),
         .update_pc_i(update_pc_i),
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
-        .update_compressed_i(update_compressed_i),
-        .update_index_i({16{update_index_i}}),
+        .update_index_i(update_index_i),
         .decode_pop_count_i(decode_pop_count_i),
         .decode_data_o(decode_data_o),
+        .decode_index_hi_o(),
         .decode_operand_addr_o(unused_operand_addr_w),
         .decode_valid_count_o(decode_valid_count_o),
         .ib_count_o(ib_count_o),
@@ -181,7 +180,7 @@ module tb;
                         $fatal(1,"FAIL frontend PC expected=%h actual=%h instr=%h/%h raw=%h/%h flags=%b time=%t",
                             expected_pc,record_value[31:0],expected_instr,record_value[63:32],
                             expected_raw,record_value[95:64],record_value[100:96],$time);
-                    if(record_value[141:133]!==9'(expected_pc>>1))
+                    if(record_value[141:133]!==9'(expected_pc>>2))
                         $fatal(1,"FAIL saved gshare index PC=%h",expected_pc);
                     if(record_value[100])begin
                         if(expected_pc!=(0?6:'hc) || record_value[132:101]!='h40)
