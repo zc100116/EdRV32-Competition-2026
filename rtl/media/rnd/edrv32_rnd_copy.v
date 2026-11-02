@@ -59,8 +59,6 @@ module edrv32_rnd_copy (
     localparam [4:0] S_DRAIN = 5'd21;
     localparam [4:0] S_PRIME = 5'd22;
     reg [4:0] state_r;
-    reg [2:0] source_words_r;
-    reg [2:0] target_words_r;
     reg source_aligned_r;
     reg source_valid_r;
     reg [8:0] source_index_r;
@@ -237,7 +235,27 @@ module edrv32_rnd_copy (
                 rd_data_i[(join_slice-2)*128 +: 128];
         end
     end endgenerate
-    assign source_words_w = source_join_w >> {source_words_r, 5'd0};
+    // Each 64-bit result owns a same-edge copy of the word alignment selector.
+    genvar word_slice;
+    generate for (word_slice = 0; word_slice < 8; word_slice = word_slice + 1) begin
+        : g_word_select
+        reg [2:0] source_words_r /* synthesis syn_preserve=1 */;
+        reg [2:0] target_words_r /* synthesis syn_preserve=1 */;
+        wire [511:0] source_shift_w;
+        wire [511:0] target_result_w;
+        always @(posedge clk_i) begin
+            if (state_r == S_COUNTS) begin
+                source_words_r <= src_addr_r[4:2];
+                target_words_r <= dst_addr_r[4:2];
+            end
+        end
+        assign source_shift_w = source_join_w >> {source_words_r, 5'd0};
+        assign target_result_w = target_join_w << {target_words_r, 5'd0};
+        assign source_words_w[word_slice*64 +: 64] = source_shift_w[word_slice*64 +: 64];
+        assign target_shift_w[word_slice*64 +: 64] = target_result_w[word_slice*64 +: 64];
+        wire unused_shift_w;
+        assign unused_shift_w = ^{source_shift_w, target_result_w};
+    end endgenerate
     assign source_write_w = !cancel_i && (state_r == S_TAIL ||
         (state_r == S_CAPTURE && rd_data_valid_i &&
             (source_aligned_r || received_r != 0)));
@@ -245,7 +263,6 @@ module edrv32_rnd_copy (
     assign ram_wr_addr_w = source_index_r;
     assign current_write_w = zero_r ? 256'd0 : ram_data_w;
     assign target_join_w = {current_write_w, previous_write_r};
-    assign target_shift_w = target_join_w << {target_words_r, 5'd0};
     assign write_next_w = write_index_r + 10'd1;
     assign data_fire_w = wr_data_valid_o && wr_data_ready_i;
     assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i) ||
@@ -404,11 +421,8 @@ module edrv32_rnd_copy (
             source_valid_r <= source_write_w;
     end
     always @(posedge clk_i) begin
-        if (state_r == S_COUNTS) begin
-            source_words_r <= src_addr_r[4:2];
+        if (state_r == S_COUNTS)
             source_aligned_r <= src_addr_r[4:0] == 0;
-            target_words_r <= dst_addr_r[4:2];
-        end
         // source_valid_r qualifies this payload on the following RAM-write edge.
         source_word_r <= source_words_w[279:0];
         source_index_r <= state_r == S_TAIL ? normalized_last_r[8:0] :

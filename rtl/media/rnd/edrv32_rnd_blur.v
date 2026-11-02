@@ -104,6 +104,9 @@ module edrv32_rnd_blur (
     reg [8:0] expanded_bottom_high_r;
     reg signed [17:0] expanded_bottom_r;
     reg shadow_r;
+    reg shadow_bounds_r /* synthesis syn_preserve=1 */;
+    reg shadow_source_r /* synthesis syn_preserve=1 */;
+    reg shadow_output_r /* synthesis syn_preserve=1 */;
     reg [4:0] radius_r;
     reg [9:0] grid_width_low_r;
     reg [7:0] grid_width_high_r;
@@ -328,7 +331,7 @@ module edrv32_rnd_blur (
     assign rect_right_w = {{2{command_i[207]}}, command_i[207:192]};
     assign rect_bottom_w = {{2{command_i[223]}}, command_i[223:208]};
     assign stride_round_w = ({1'b0, grid_width_r} << (shadow_r ? 0 : 2)) + 18'd31;
-    assign temp0_w = shadow_r ? command_i[351:320] : command_i[319:288];
+    assign temp0_w = shadow_source_r ? command_i[351:320] : command_i[319:288];
     assign seed_w = shadow_r && phase_r == 0;
     assign horizontal_w = shadow_r ? phase_r == 1 : phase_r == 0;
     assign source_pixel_bytes_w = shadow_r ? 3'd1 : horizontal_w && !argb_w ? 3'd2 : 3'd4;
@@ -343,9 +346,10 @@ module edrv32_rnd_blur (
         row_distance_r[4:0] >= radius_r;
     assign next_source_row_w = first_y_advance_r ?
         src_row_result_w : source_first_row_r;
-    assign next_source_origin_w = shadow_r && phase_r == 1 ? temp1_r : temp0_w;
-    assign next_output_origin_w = shadow_r ? (phase_r == 0 ? temp1_r : temp0_w) : dst_origin_r;
-    assign packed_pixel_w = shadow_r ? {24'd0, output_pixel_r[7:0]} :
+    assign next_source_origin_w = shadow_source_r && phase_r == 1 ? temp1_r : temp0_w;
+    assign next_output_origin_w = shadow_output_r ?
+        (phase_r == 0 ? temp1_r : temp0_w) : dst_origin_r;
+    assign packed_pixel_w = shadow_output_r ? {24'd0, output_pixel_r[7:0]} :
         !horizontal_w && !argb_w ?
         {16'd0, output_pixel_r[23:19], output_pixel_r[15:10], output_pixel_r[7:3]} :
         output_pixel_r;
@@ -670,31 +674,34 @@ module edrv32_rnd_blur (
             raw_bottom_r <= rect_bottom_w;
             clip_bottom_r <= command_i[155:144];
             shadow_r <= shadow_w;
+            shadow_bounds_r <= shadow_w;
+            shadow_source_r <= shadow_w;
+            shadow_output_r <= shadow_w;
             radius_r <= radius_w;
         end
         expanded_left_low_r <= {1'b0, raw_left_r[8:0]} - {5'd0, radius_r};
         expanded_left_high_r <= raw_left_r[17:9];
         expanded_left_r <= {expanded_left_high_r -
             {8'd0, expanded_left_low_r[9]}, expanded_left_low_r[8:0]};
-        left_r <= shadow_r ? expanded_left_r :
+        left_r <= shadow_bounds_r ? expanded_left_r :
             raw_left_take_r ? raw_left_r : $signed({6'd0, clip_left_r});
         expanded_top_low_r <= {1'b0, raw_top_r[8:0]} - {5'd0, radius_r};
         expanded_top_high_r <= raw_top_r[17:9];
         expanded_top_r <= {expanded_top_high_r -
             {8'd0, expanded_top_low_r[9]}, expanded_top_low_r[8:0]};
-        top_r <= shadow_r ? expanded_top_r :
+        top_r <= shadow_bounds_r ? expanded_top_r :
             raw_top_take_r ? raw_top_r : $signed({6'd0, clip_top_r});
         expanded_right_low_r <= {1'b0, raw_right_r[8:0]} + {5'd0, radius_r};
         expanded_right_high_r <= raw_right_r[17:9];
         expanded_right_r <= {expanded_right_high_r +
             {8'd0, expanded_right_low_r[9]}, expanded_right_low_r[8:0]};
-        right_r <= shadow_r ? expanded_right_r :
+        right_r <= shadow_bounds_r ? expanded_right_r :
             raw_right_take_r ? raw_right_r : $signed({6'd0, clip_right_r});
         expanded_bottom_low_r <= {1'b0, raw_bottom_r[8:0]} + {5'd0, radius_r};
         expanded_bottom_high_r <= raw_bottom_r[17:9];
         expanded_bottom_r <= {expanded_bottom_high_r +
             {8'd0, expanded_bottom_low_r[9]}, expanded_bottom_low_r[8:0]};
-        bottom_r <= shadow_r ? expanded_bottom_r :
+        bottom_r <= shadow_bounds_r ? expanded_bottom_r :
             raw_bottom_take_r ? raw_bottom_r : $signed({6'd0, clip_bottom_r});
         drawing_left_r <= draw_left_take_r ?
             left_r : $signed({6'd0, clip_left_r});
@@ -759,13 +766,13 @@ module edrv32_rnd_blur (
             row_distance_r <= 17'd0;
             row_remaining_r <= grid_height_delta_r;
             rect_row_coordinate_r <= -$signed({13'd0, radius_r});
-            source_first_row_r <= shadow_r ? temp1_r : dst_origin_r;
-            first_addr_r <= shadow_r ? temp1_r : dst_origin_r;
+            source_first_row_r <= shadow_source_r ? temp1_r : dst_origin_r;
+            first_addr_r <= shadow_source_r ? temp1_r : dst_origin_r;
             output_row_r <= temp0_w;
             output_addr_r <= temp0_w;
-            source_stride_r <= shadow_r ? stride_r : {1'b0, command_i[79:64]};
+            source_stride_r <= shadow_source_r ? stride_r : {1'b0, command_i[79:64]};
             output_stride_r <= stride_r;
-            sample_step_r <= shadow_r ? stride_r : {14'd0, source_pixel_bytes_w};
+            sample_step_r <= shadow_source_r ? stride_r : {14'd0, source_pixel_bytes_w};
         end
         if (state_r == S_PIXEL) begin
             last_pixel_r <= x_r == right_r;
@@ -813,8 +820,8 @@ module edrv32_rnd_blur (
                 output_row_r <= next_output_origin_w;
                 output_addr_r <= next_output_origin_w;
                 source_stride_r <= stride_r;
-                output_stride_r <= shadow_r ? stride_r : {1'b0, command_i[79:64]};
-                sample_step_r <= shadow_r && phase_r == 0 ? 17'd1 : stride_r;
+                output_stride_r <= shadow_output_r ? stride_r : {1'b0, command_i[79:64]};
+                sample_step_r <= shadow_source_r && phase_r == 0 ? 17'd1 : stride_r;
             end else begin
                 row_distance_r <= row_distance_r + 17'd1;
                 row_remaining_r <= {row_remaining_r[16:9] -
@@ -852,7 +859,7 @@ module edrv32_rnd_blur (
         end
         // Prepare the byte mask and the four rotated pixel bytes before STORE.
         if (state_r == S_OUTPUT) begin
-            store_mask_r <= (shadow_r ? 32'h0000_0001 :
+            store_mask_r <= (shadow_output_r ? 32'h0000_0001 :
                 !horizontal_w && !argb_w ? 32'h0000_0003 : 32'h0000_000f) << output_addr_r[4:0];
             case (output_addr_r[1:0])
                 2'd0: store_pixel_r <= packed_pixel_w;

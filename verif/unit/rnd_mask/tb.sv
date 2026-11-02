@@ -62,8 +62,12 @@ module tb;
     edrv32_rnd_draw u_draw (
         .clk_i(clk),
         .rst_n_i(rst_n),
+        .rst_geometry_n_i(rst_n),
+        .rst_affine_n_i(rst_n),
         .start_i(start),
         .command_i(command),
+        .geometry_control_i(command[31:0]),
+        .affine_control_i(command[31:0]),
         .source_stride_i({16'd0, command[303:288]}),
         .round_area_i(round_area),
         .parameters_i(parameters),

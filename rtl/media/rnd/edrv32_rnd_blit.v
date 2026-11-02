@@ -208,7 +208,24 @@ module edrv32_rnd_blit (
     assign wr_addr_o = bank_target_r[write_bank_r];
     assign wr_bytes_o = rd_bytes_o;
     assign wr_data_valid_o = write_state_r == S_WRITE_DATA && !cancel_i;
-    assign wr_data_o = dst_data_w[write_bank_r];
+    genvar write_slice;
+    generate for (write_slice = 0; write_slice < 4; write_slice = write_slice + 1) begin
+        : g_write_select
+        reg bank_r /* synthesis syn_preserve=1 */;
+        wire [255:0] selected_w;
+        wire unused_selected_w;
+        always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i)
+                bank_r <= 1'b0;
+            else if (cancel_i || start_i)
+                bank_r <= 1'b0;
+            else if (write_state_r == S_WRITE_RESPONSE && wr_done_i)
+                bank_r <= !write_bank_r;
+        end
+        assign selected_w = dst_data_w[bank_r];
+        assign wr_data_o[write_slice*64 +: 64] = selected_w[write_slice*64 +: 64];
+        assign unused_selected_w = ^selected_w;
+    end endgenerate
     assign wr_strb_o = 32'hffff_ffff;
     assign done_o = done_r;
     assign pixel_count_o = blend_valid_i ? 5'd2 : 5'd0;

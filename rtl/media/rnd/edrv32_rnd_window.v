@@ -89,7 +89,6 @@ module edrv32_rnd_window (
     reg [2:0] fill_row_r;
     reg [31:0] row_product_r;
     reg [31:0] row_addr_r;
-    reg data_beat_r;
     reg [511:0] data_r;
     reg [255:0] row_data_r;
     reg [1:0] palette_pair_r;
@@ -141,7 +140,31 @@ module edrv32_rnd_window (
     assign row_x_bytes_w = ({16'd0, fill_x_w} << bits_log2_w) >> 3;
     assign row_end_w = {2'd0, row_addr_r[4:0]} + {1'b0, row_bytes_w};
     assign row_last_w = fill_row_r == 7 || fill_y_r + 16'd1 >= source_height_w;
-    assign aligned_w = data_r >> {row_addr_r[4:0], 3'd0};
+    // ALIGN keeps its original cycle; each 64-bit shifter has a local address copy.
+    genvar align_slice;
+    generate for (align_slice = 0; align_slice < 4; align_slice = align_slice + 1) begin
+        : g_align
+        reg [4:0] row_low_r /* synthesis syn_preserve=1 */;
+        wire [511:0] half_w;
+        wire [511:0] quarter_w;
+        wire [511:0] eighth_w;
+        wire [511:0] sixteenth_w;
+        wire [511:0] shifted_w;
+        wire unused_shifted_w;
+        always @(posedge clk_i) begin
+            if (state_r == S_ADDRESS)
+                row_low_r <= command_i[260:256] + row_product_r[4:0] + row_x_bytes_w[4:0];
+        end
+        // Apply large offsets first so a low selector cannot drive unused wide stages.
+        assign half_w = row_low_r[4] ? {128'd0, data_r[511:128]} : data_r;
+        assign quarter_w = row_low_r[3] ? {64'd0, half_w[511:64]} : half_w;
+        assign eighth_w = row_low_r[2] ? {32'd0, quarter_w[511:32]} : quarter_w;
+        assign sixteenth_w = row_low_r[1] ? {16'd0, eighth_w[511:16]} : eighth_w;
+        assign shifted_w = row_low_r[0] ? {8'd0, sixteenth_w[511:8]} : sixteenth_w;
+        assign aligned_w[align_slice*64 +: 64] = shifted_w[align_slice*64 +: 64];
+        assign unused_shifted_w = ^shifted_w;
+    end endgenerate
+    assign aligned_w[511:256] = 256'd0;
     assign rd_valid_o = state_r == S_READ && !clear_i;
     assign rd_addr_o = {row_addr_r[31:5], 5'd0};
     assign rd_bytes_o = row_end_w > 7'd32 ? 16'd64 : 16'd32;
@@ -241,6 +264,27 @@ module edrv32_rnd_window (
             end
         end
     end
+    // Same beat D and clear priority as the original selector; 128 payload bits per copy.
+    genvar data_slice;
+    generate for (data_slice = 0; data_slice < 4; data_slice = data_slice + 1) begin
+        : g_data_capture
+        localparam [0:0] BEAT = data_slice >= 2;
+        reg data_beat_r /* synthesis syn_preserve=1 */;
+        always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i)
+                data_beat_r <= 1'b0;
+            else if (!clear_i && !start_i) begin
+                if (state_r == S_READ && rd_ready_i)
+                    data_beat_r <= 1'b0;
+                if (state_r == S_DATA && rd_data_valid_i)
+                    data_beat_r <= 1'b1;
+            end
+        end
+        always @(posedge clk_i) begin
+            if (state_r == S_DATA && rd_data_valid_i && data_beat_r == BEAT)
+                data_r[data_slice*128 +: 128] <= rd_data_i[(data_slice%2)*128 +: 128];
+        end
+    end endgenerate
     genvar pixel;
     genvar parity;
     generate for (pixel = 0; pixel < 4; pixel = pixel + 1) begin : g_tap
@@ -311,7 +355,6 @@ module edrv32_rnd_window (
             sample_valid_r <= 1'b0;
             bank_valid_r <= 1'b0;
             fill_row_r <= 3'd0;
-            data_beat_r <= 1'b0;
             palette_pair_r <= 2'd0;
             palette_pending_r <= 1'b0;
         end else if (clear_i || start_i) begin
@@ -339,12 +382,9 @@ module edrv32_rnd_window (
                 S_ROW: state_r <= S_ADDRESS;
                 S_ADDRESS: state_r <= S_READ;
                 S_READ: if (rd_ready_i) begin
-                    data_beat_r <= 1'b0;
                     state_r <= S_DATA;
                 end
                 S_DATA: begin
-                    if (rd_data_valid_i)
-                        data_beat_r <= 1'b1;
                     if (rd_done_i)
                         state_r <= S_ALIGN;
                 end
@@ -399,8 +439,6 @@ module edrv32_rnd_window (
         end
         if (state_r == S_ADDRESS)
             row_addr_r <= command_i[287:256] + row_product_r + row_x_bytes_w;
-        if (state_r == S_DATA && rd_data_valid_i)
-            data_r[data_beat_r*256 +: 256] <= rd_data_i;
         if (state_r == S_ALIGN)
             row_data_r <= aligned_w[255:0];
         if (state_r == S_INDEX)

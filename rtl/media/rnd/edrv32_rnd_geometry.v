@@ -32,6 +32,7 @@ module edrv32_rnd_geometry (
     localparam [2:0] S_CENTER = 3'd5;
     localparam [2:0] S_SETUP = 3'd6;
     reg [2:0] state_r;
+    reg [2:0] state_w;
     reg [16:0] skip_x_r;
     reg [16:0] skip_y_r;
     reg [1:0] phase_r;
@@ -61,7 +62,6 @@ module edrv32_rnd_geometry (
     wire triangle_w;
     wire line_w;
     wire accept_w;
-    wire group_start_w;
     wire sample_w;
     wire [1:0] sample_phase_w;
     wire signed [17:0] offset_x_w;
@@ -102,7 +102,6 @@ module edrv32_rnd_geometry (
     assign triangle_w = triangle_r;
     assign line_w = line_r;
     assign ready_o = state_r == S_READY && phase_r == 0 && reserved_r < 8;
-    assign group_start_w = state_r == S_READY && phase_r == 0;
     assign accept_w = ready_o && request_i;
     assign sample_w = accept_w || phase_r != 0;
     assign sample_phase_w = accept_w ? 2'd0 : phase_r;
@@ -153,8 +152,60 @@ module edrv32_rnd_geometry (
         offset_x_w[17], offset_y_w[17], command_i[511:192], command_i[159:22],
         command_i[15:8], command_i[21:17]};
 
+    always @(*) begin
+        state_w = state_r;
+        case (state_r)
+            S_CENTER: state_w = S_SETUP;
+            S_SETUP: state_w = S_X;
+            S_X: if (skip_x_r == 0)
+                state_w = S_Y;
+            S_Y: if (skip_y_r == 0)
+                state_w = S_SEED;
+            S_SEED: state_w = S_READY;
+            default: state_w = state_r;
+        endcase
+    end
+    // Every circle/edge has the same state, phase and AA D as the central control.
+    // Request stays combinational, so backpressure and the sampling edge are unchanged.
+    genvar control;
+    generate for (control = 0; control < 7; control = control + 1) begin : g_sample_ctrl
+        reg [2:0] control_state_r /* synthesis syn_preserve=1 */;
+        reg [1:0] phase_copy_r /* synthesis syn_preserve=1 */;
+        reg aa_copy_r /* synthesis syn_preserve=1 */;
+        wire group_start_copy_w /* synthesis syn_keep=1 */;
+        wire sample_copy_w /* synthesis syn_keep=1 */;
+        assign group_start_copy_w = control_state_r == S_READY && phase_copy_r == 0;
+        assign sample_copy_w = (group_start_copy_w && reserved_r < 8 && request_i) ||
+            phase_copy_r != 0;
+        always @(posedge clk_i) begin
+            if (start_i)
+                aa_copy_r <= command_i[16];
+        end
+        always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i) begin
+                control_state_r <= S_IDLE;
+                phase_copy_r <= 2'd0;
+            end else if (clear_i || start_i) begin
+                control_state_r <= clear_i ? S_IDLE : S_CENTER;
+                phase_copy_r <= 2'd0;
+            end else begin
+                control_state_r <= state_w;
+                if (sample_w)
+                    phase_copy_r <= aa_w ? phase_r + 2'd1 : 2'd0;
+            end
+        end
+    end endgenerate
+
     genvar item;
     generate for (item = 0; item < 4; item = item + 1) begin : g_circle
+        wire [2:0] state_local_w;
+        assign state_local_w = g_sample_ctrl[item].control_state_r;
+        wire aa_local_w;
+        assign aa_local_w = g_sample_ctrl[item].aa_copy_r;
+        wire group_start_local_w;
+        assign group_start_local_w = g_sample_ctrl[item].group_start_copy_w;
+        wire sample_local_w;
+        assign sample_local_w = g_sample_ctrl[item].sample_copy_w;
         wire [127:0] block_w;
         wire signed [35:0] initial_w;
         wire signed [23:0] dx_w;
@@ -176,8 +227,9 @@ module edrv32_rnd_geometry (
             ($signed({{12{circle_dy_r[item][23]}}, circle_dy_r[item]}) - 36'sd48) >>> 2;
         assign center_offset_w = center_x_w + (center_x_w <<< 1) +
             center_y_w + (center_y_w <<< 1) + 36'sd18;
-        assign circle_base_w[item] = group_start_w ? circle_r[item] : circle_sample_r[item];
-        assign circle_sample_dx_w[item] = group_start_w ?
+        assign circle_base_w[item] = group_start_local_w ?
+            circle_r[item] : circle_sample_r[item];
+        assign circle_sample_dx_w[item] = group_start_local_w ?
             circle_dx_r[item] : circle_sample_dx_r[item];
         wire signed [24:0] subcolumn_delta_w;
         assign subcolumn_delta_w =
@@ -194,18 +246,19 @@ module edrv32_rnd_geometry (
         wire signed [35:0] step_result_w;
         wire signed [35:0] sample_delta_w;
         // Request qualifies the register enable, not the arithmetic operand mux.
-        assign step_base_w = state_r == S_READY && row_end_i ?
+        assign step_base_w = state_local_w == S_READY && row_end_i ?
             circle_row_r[item] : circle_r[item];
-        assign step_delta_w = state_r == S_Y ?
+        assign step_delta_w = state_local_w == S_Y ?
             {{12{circle_dy_r[item][23]}}, circle_dy_r[item]} :
-            state_r == S_READY && row_end_i ?
+            state_local_w == S_READY && row_end_i ?
                 {{12{circle_row_dy_r[item][23]}}, circle_row_dy_r[item]} :
                     {{12{circle_dx_r[item][23]}}, circle_dx_r[item]};
         assign step_result_w = step_base_w + step_delta_w;
         assign step_dx_w = circle_dx_r[item] + 24'sd128;
-        assign step_dy_w =
-            (state_r == S_READY ? circle_row_dy_r[item] : circle_dy_r[item]) + 24'sd128;
-        assign sample_delta_w = group_start_w ? (aa_w ? subrow_delta_w : 36'sd0) :
+        assign step_dy_w = (state_local_w == S_READY ?
+            circle_row_dy_r[item] : circle_dy_r[item]) + 24'sd128;
+        assign sample_delta_w = group_start_local_w ?
+            (aa_local_w ? subrow_delta_w : 36'sd0) :
             {{12{circle_sample_dy_r[item][23]}}, circle_sample_dy_r[item]};
         always @(posedge clk_i) begin
             if (start_i) begin
@@ -214,20 +267,23 @@ module edrv32_rnd_geometry (
                 circle_dy_r[item] <= dy_w + (command_i[16] ? 24'sd0 : 24'sd48);
             end else begin
                 // Decode, center adjustment and seeding occupy separate setup cycles.
-                if (state_r == S_CENTER)
+                if (state_local_w == S_CENTER)
                     center_offset_r[item] <= center_offset_w;
-                if (state_r == S_SETUP)
-                    circle_r[item] <= circle_r[item] + (aa_w ? 36'sd0 : center_offset_r[item]);
-                if ((state_r == S_X && skip_x_r != 0) ||
-                    (state_r == S_Y && skip_y_r != 0) || accept_w)
+                if (state_local_w == S_SETUP)
+                    circle_r[item] <= circle_r[item] + (aa_local_w ?
+                        36'sd0 : center_offset_r[item]);
+                if ((state_local_w == S_X && skip_x_r != 0) ||
+                    (state_local_w == S_Y && skip_y_r != 0) || accept_w)
                     circle_r[item] <= step_result_w;
-                if ((state_r == S_X && skip_x_r != 0) || (accept_w && !row_end_i))
+                if ((state_local_w == S_X && skip_x_r != 0) ||
+                    (accept_w && !row_end_i))
                     circle_dx_r[item] <= step_dx_w;
                 else if (accept_w && row_end_i)
                     circle_dx_r[item] <= circle_row_dx_r[item];
-                if ((state_r == S_Y && skip_y_r != 0) || (accept_w && row_end_i))
+                if ((state_local_w == S_Y && skip_y_r != 0) ||
+                    (accept_w && row_end_i))
                     circle_dy_r[item] <= step_dy_w;
-                if (state_r == S_SEED) begin
+                if (state_local_w == S_SEED) begin
                     circle_row_r[item] <= circle_r[item];
                     circle_row_dx_r[item] <= circle_dx_r[item];
                     circle_row_dy_r[item] <= circle_dy_r[item];
@@ -235,21 +291,35 @@ module edrv32_rnd_geometry (
                     circle_row_r[item] <= step_result_w;
                     circle_row_dy_r[item] <= step_dy_w;
                 end
-                if (sample_w)
-                    circle_sample_r[item] <= (group_start_w ? circle_r[item] :
+                if (sample_local_w)
+                    circle_sample_r[item] <= (group_start_local_w ? circle_r[item] :
                         circle_sample_r[item]) + sample_delta_w;
                 if (accept_w) begin
                     circle_sample_dx_r[item] <= circle_dx_r[item];
-                    circle_sample_dy_r[item] <= aa_w ?
+                    circle_sample_dy_r[item] <= aa_local_w ?
                         subrow_delta_w[23:0] + 24'sd8 : 24'sd0;
                 end else if (phase_r != 0)
                     circle_sample_dy_r[item] <= circle_sample_dy_r[item] +
-                        (aa_w ? 24'sd8 : 24'sd0);
+                        (aa_local_w ? 24'sd8 : 24'sd0);
+            end
+        end
+        always @(posedge clk_i) begin
+            if (sample_local_w) begin
+                circle_base_r[item] <= circle_base_w[item];
+                circle_delta_r[item] <= circle_delta_w[item];
             end
         end
     end endgenerate
 
     generate for (item = 0; item < 3; item = item + 1) begin : g_edge
+        wire [2:0] state_local_w;
+        assign state_local_w = g_sample_ctrl[item+4].control_state_r;
+        wire aa_local_w;
+        assign aa_local_w = g_sample_ctrl[item+4].aa_copy_r;
+        wire group_start_local_w;
+        assign group_start_local_w = g_sample_ctrl[item+4].group_start_copy_w;
+        wire sample_local_w;
+        assign sample_local_w = g_sample_ctrl[item+4].sample_copy_w;
         wire [95:0] block_w;
         wire signed [35:0] initial_w;
         assign block_w = command_i[7:0] != 8'h09 && command_i[7:0] != 8'h0a ?
@@ -259,13 +329,15 @@ module edrv32_rnd_geometry (
         assign dx_w = {{4{block_w[63]}}, block_w[63:32]};
         assign dy_w = {{4{block_w[95]}}, block_w[95:64]};
         assign initial_w = $signed({{4{block_w[31]}}, block_w[31:0]}) <<< 3;
-        assign edge_base_w[item] = group_start_w ? edge_r[item] : edge_sample_r[item];
+        assign edge_base_w[item] = group_start_local_w ? edge_r[item] :
+            edge_sample_r[item];
         wire signed [35:0] step_base_w;
         wire signed [35:0] step_delta_w;
         wire signed [35:0] step_result_w;
-        assign step_base_w = state_r == S_READY && row_end_i ?
+        assign step_base_w = state_local_w == S_READY && row_end_i ?
             edge_row_r[item] : edge_r[item];
-        assign step_delta_w = state_r == S_Y || (state_r == S_READY && row_end_i) ?
+        assign step_delta_w = state_local_w == S_Y ||
+            (state_local_w == S_READY && row_end_i) ?
             edge_dy_r[item] <<< 3 : edge_dx_r[item] <<< 3;
         assign step_result_w = step_base_w + step_delta_w;
         always @(posedge clk_i) begin
@@ -275,34 +347,27 @@ module edrv32_rnd_geometry (
                 edge_r[item] <= initial_w + (command_i[16] ? dx_w : dx_w <<< 2) +
                     (command_i[16] ? dy_w : dy_w <<< 2);
             end else begin
-                if ((state_r == S_X && skip_x_r != 0) ||
-                    (state_r == S_Y && skip_y_r != 0) || accept_w)
+                if ((state_local_w == S_X && skip_x_r != 0) ||
+                    (state_local_w == S_Y && skip_y_r != 0) || accept_w)
                     edge_r[item] <= step_result_w;
-                if (state_r == S_SEED)
+                if (state_local_w == S_SEED)
                     edge_row_r[item] <= edge_r[item];
                 else if (accept_w && row_end_i)
                     edge_row_r[item] <= step_result_w;
-                if (sample_w)
-                    edge_sample_r[item] <= (group_start_w ? edge_r[item] : edge_sample_r[item]) +
-                        (aa_w ? edge_dy_r[item] <<< 1 : 36'sd0);
+                if (sample_local_w)
+                    edge_sample_r[item] <= (group_start_local_w ?
+                        edge_r[item] : edge_sample_r[item]) +
+                        (aa_local_w ? edge_dy_r[item] <<< 1 : 36'sd0);
+            end
+        end
+        always @(posedge clk_i) begin
+            if (sample_local_w) begin
+                edge_base_r[item] <= edge_base_w[item];
+                edge_dx_sample_r[item] <= edge_dx_r[item][31:0];
             end
         end
     end endgenerate
 
-    // Select operands before the parallel constant offsets and full-width sums.
-    integer sample_element;
-    always @(posedge clk_i) begin
-        if (sample_w) begin
-            for (sample_element = 0; sample_element < 4; sample_element = sample_element + 1) begin
-                circle_base_r[sample_element] <= circle_base_w[sample_element];
-                circle_delta_r[sample_element] <= circle_delta_w[sample_element];
-            end
-            for (sample_element = 0; sample_element < 3; sample_element = sample_element + 1) begin
-                edge_base_r[sample_element] <= edge_base_w[sample_element];
-                edge_dx_sample_r[sample_element] <= edge_dx_r[sample_element][31:0];
-            end
-        end
-    end
     genvar pixel;
     genvar subcolumn;
     genvar element;
@@ -423,20 +488,11 @@ module edrv32_rnd_geometry (
         end else begin
             if (sample_w)
                 phase_r <= aa_w ? phase_r + 2'd1 : 2'd0;
-            case (state_r)
-                S_CENTER: state_r <= S_SETUP;
-                S_SETUP: state_r <= S_X;
-                S_X: if (skip_x_r == 0)
-                    state_r <= S_Y;
-                else
-                    skip_x_r <= skip_x_r - 17'd1;
-                S_Y: if (skip_y_r == 0)
-                    state_r <= S_SEED;
-                else
-                    skip_y_r <= skip_y_r - 17'd1;
-                S_SEED: state_r <= S_READY;
-                default: state_r <= state_r;
-            endcase
+            state_r <= state_w;
+            if (state_r == S_X && skip_x_r != 0)
+                skip_x_r <= skip_x_r - 17'd1;
+            if (state_r == S_Y && skip_y_r != 0)
+                skip_y_r <= skip_y_r - 17'd1;
             sample_valid_r <= sample_w;
             q_valid_r <= sample_valid_r;
             inside_valid_r <= q_valid_r;

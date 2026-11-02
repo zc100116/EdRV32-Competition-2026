@@ -7,6 +7,7 @@ module edrv32_rnd_regs (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire rst_perf_n_i,
 
     // Media APB slave.
     input wire [11:0] apb_paddr_i,
@@ -190,8 +191,8 @@ module edrv32_rnd_regs (
             end
         end
     end
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) begin
+    always @(posedge clk_i or negedge rst_perf_n_i) begin
+        if (!rst_perf_n_i) begin
             for (count = 0; count < 6; count = count + 1)
                 perf_r[count] <= 32'd0;
         end else if (soft_reset_o || start_o) begin

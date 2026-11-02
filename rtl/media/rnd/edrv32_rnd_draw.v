@@ -7,10 +7,14 @@ module edrv32_rnd_draw (
     // Clock and reset.
     input wire clk_i,
     input wire rst_n_i,
+    input wire rst_geometry_n_i,
+    input wire rst_affine_n_i,
 
     // One drawing command; held constant through done.
     input wire start_i,
     input wire [511:0] command_i,
+    input wire [31:0] geometry_control_i,
+    input wire [31:0] affine_control_i,
     input wire [31:0] source_stride_i,
     input wire [63:0] round_area_i,
     input wire [1023:0] parameters_i,
@@ -654,12 +658,52 @@ module edrv32_rnd_draw (
         {1'b0, bank_right_r[render_bank_r]};
     assign issue_offset_w = {18'd0, issue_byte_r};
     assign target_offset_w = {18'd0, pipe_tag_r[0][13:0]};
-    assign target_shift_w = target_data_w[sample_bank_w] >> {target_offset_w[4:0], 3'd0};
+    wire [255:0] target_selected_w;
+    genvar target_slice;
+    generate for (target_slice = 0; target_slice < 4; target_slice = target_slice + 1) begin
+        : g_target_select
+        reg bank_r /* synthesis syn_preserve=1 */;
+        wire [255:0] selected_w;
+        wire unused_selected_w;
+        always @(posedge clk_i) begin
+            if (issue_w)
+                bank_r <= render_bank_r;
+        end
+        assign selected_w = target_data_w[bank_r];
+        assign target_selected_w[target_slice*64 +: 64] = selected_w[target_slice*64 +: 64];
+        assign unused_selected_w = ^selected_w;
+    end endgenerate
+    assign target_shift_w = target_selected_w >> {target_offset_w[4:0], 3'd0};
     assign source_ready_w = !pipe_valid_r[4] || solid_w || !bank_sparse_r[source_bank_w] ||
         (lane_hit_w[0] && (!pipe_tag_r[4][29] || lane_hit_w[1]));
     assign pipeline_step_w = (!(post_w ? post_valid_r[1] : pipe_valid_r[9]) ||
         blend_ready_i) && source_ready_w &&
         (!geometry_w || !pipe_valid_r[7] || geometry_valid_w);
+    genvar step_region;
+    generate for (step_region = 0; step_region < 4; step_region = step_region + 1) begin
+        : g_step_ctrl
+        reg tail_valid_r /* synthesis syn_preserve=1 */;
+        reg geometry_valid_r /* synthesis syn_preserve=1 */;
+        reg post_valid_copy_r /* synthesis syn_preserve=1 */;
+        wire step_w /* synthesis syn_keep=1 */;
+        assign step_w = (!(post_w ? post_valid_copy_r : tail_valid_r) || blend_ready_i) &&
+            source_ready_w && (!geometry_w || !geometry_valid_r || geometry_valid_w);
+        always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i) begin
+                tail_valid_r <= 1'b0;
+                geometry_valid_r <= 1'b0;
+                post_valid_copy_r <= 1'b0;
+            end else if (cancel_i || start_i) begin
+                tail_valid_r <= 1'b0;
+                geometry_valid_r <= 1'b0;
+                post_valid_copy_r <= 1'b0;
+            end else if (pipeline_step_w) begin
+                tail_valid_r <= pipe_valid_r[8];
+                geometry_valid_r <= affine_w ? affine_valid_w : pipe_valid_r[6];
+                post_valid_copy_r <= post_valid_r[0];
+            end
+        end
+    end endgenerate
     assign issue_w = render_state_r == S_RENDER_STREAM &&
         (affine_w ? affine_input_step_w : pipeline_step_w) &&
         (!geometry_w || geometry_ready_w);
@@ -815,13 +859,25 @@ module edrv32_rnd_draw (
             (!lane_cross_w[pixel] || lane_high_hit_w[pixel]);
         assign lane_cache_w[pixel] = {lane_cache_high_w[pixel], lane_cache_low_w[pixel]};
         wire [511:0] palette_source_w;
+        wire [511:0] raw_source_w;
         genvar palette_slice;
         for (palette_slice = 0; palette_slice < 8; palette_slice = palette_slice + 1) begin
             : g_palette_select
             reg bank_r /* synthesis syn_preserve=1 */;
             wire [511:0] bank_data_w;
+            reg sparse_r [0:1] /* synthesis syn_preserve=1 */;
             always @(posedge clk_i) begin
-                if (pipeline_step_w && pipe_valid_r[4])
+                if (load_state_r == S_BOUNDS && (solid_w || tile_w))
+                    sparse_r[load_bank_r] <= 1'b0;
+                if ((load_state_r == S_BOUNDS && bounds_ready_r) ||
+                    (bounds_valid_r[6] && load_state_r != S_CHUNK))
+                    sparse_r[load_bank_r] <= bounds_sparse_result_w;
+            end
+            assign raw_source_w[palette_slice*64 +: 64] = sparse_r[pipe_tag_r[5][31]] ?
+                sparse_data_r[pixel][palette_slice*64 +: 64] :
+                palette_source_w[palette_slice*64 +: 64];
+            always @(posedge clk_i) begin
+                if (g_step_ctrl[pixel].step_w && pipe_valid_r[4])
                     bank_r <= pipe_tag_r[4][31];
             end
             assign bank_data_w = {source_next_w[bank_r][pixel], source_data_w[bank_r][pixel]};
@@ -830,8 +886,7 @@ module edrv32_rnd_draw (
             wire unused_bank_data_w;
             assign unused_bank_data_w = ^bank_data_w;
         end
-        assign raw_shift_w[pixel] = (bank_sparse_r[pipe_tag_r[5][31]] ? sparse_data_r[pixel] :
-            palette_source_w) >>
+        assign raw_shift_w[pixel] = raw_source_w >>
                 {source_offset_r[5][pixel], 3'd0};
         assign palette_index_w[pixel] =
             (raw_shift_w[pixel][7:0] >> source_shift_r[5][pixel]) & source_mask_r[5][pixel];
@@ -841,7 +896,7 @@ module edrv32_rnd_draw (
             .wr_addr_i(palette_index_r),
             .wr_data_i(palette_shift_w[31:0]),
             .rd_en_i((affine_w ? affine_palette_valid_w :
-                pipe_valid_r[5] && pipeline_step_w) && !cancel_i),
+                pipe_valid_r[5] && g_step_ctrl[pixel].step_w) && !cancel_i),
             .rd_addr_i(affine_w ? affine_palette_index_w[pixel*8 +: 8] : palette_index_w[pixel]),
             .rd_data_o(palette_data_w[pixel])
         );
@@ -884,7 +939,7 @@ module edrv32_rnd_draw (
                         recolor_bias_r[color_channel]) : expanded8_r[color_channel*8 +: 8];
         end
         always @(posedge clk_i) begin
-            if (pipeline_step_w) begin
+            if (g_step_ctrl[pixel].step_w) begin
                 post_product_r[pixel] <= pipe_src_r[pixel*32+24 +: 8] *
                     post_factor_w;
                 post_src1_r[pixel*32 +: 32] <=
@@ -1558,7 +1613,7 @@ module edrv32_rnd_draw (
             coverage_outer_x0_r <= $signed({6'd0, issue_x_r}) - rect_left_r;
             coverage_inner_x0_r <= $signed({6'd0, issue_x_r}) - inner_left_r;
         end
-        if (pipeline_step_w) begin
+        if (g_step_ctrl[2].step_w) begin
             for (stage = 1; stage < 10; stage = stage + 1)
                 if (pipe_valid_r[stage-1])
                     pipe_tag_r[stage] <= pipe_tag_r[stage-1];
@@ -1612,10 +1667,10 @@ module edrv32_rnd_draw (
     end
     edrv32_rnd_affine u_affine (
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_affine_n_i),
         .clear_i(cancel_i),
         .start_i(start_i && affine_w),
-        .command_i(command_i),
+        .command_i({command_i[511:32], affine_control_i}),
         .parameters_i(parameters_i),
         .left_i(left_w[11:0]),
         .top_i(top_w[11:0]),
@@ -1700,11 +1755,11 @@ module edrv32_rnd_draw (
     end endgenerate
     edrv32_rnd_geometry u_geometry (
         .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
+        .rst_n_i(rst_geometry_n_i),
         .clear_i(cancel_i),
         .start_i(start_i && geometry_w),
         .out_ready_i(pipe_valid_r[7] && pipeline_step_w),
-        .command_i(command_i),
+        .command_i({command_i[511:32], geometry_control_i}),
         .parameters_i(parameters_i),
         .left_i(left_w[11:0]),
         .top_i(top_w[11:0]),
@@ -1715,7 +1770,7 @@ module edrv32_rnd_draw (
         .coverage_o(geometry_cov_w)
     );
     always @(posedge clk_i) begin
-        if (pipeline_step_w) begin
+        if (g_step_ctrl[3].step_w) begin
             geometry_cov_r[8] <= geometry_cov_w;
             geometry_cov_r[9] <= geometry_cov_r[8];
         end
@@ -1729,7 +1784,7 @@ module edrv32_rnd_draw (
             post_valid_r <= {post_valid_r[0], pipe_valid_r[9] && post_w};
     end
     always @(posedge clk_i) begin
-        if (pipeline_step_w) begin
+        if (g_step_ctrl[3].step_w) begin
             post_src0_r <= pipe_src_r;
             post_dst_r[0] <= pipe_dst_r[9];
             post_dst_r[1] <= post_dst_r[0];
