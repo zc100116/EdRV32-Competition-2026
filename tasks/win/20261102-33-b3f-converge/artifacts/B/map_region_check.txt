@@ -1,0 +1,42 @@
+B rebuilt Map: E=0, elapsed3m4s, peak2901MB. Core Insertion Complete confirmed.
+PCF: def_region fp_left 0 121 0 219 {CLMA CLMS APM DRM}
+DMR attribute-entry counts (not instance/resource counts):
+{'u_disp': 7260, 'u_eth': 9258, 'u_geo': 6688, 'u_pix': 15766, 'u_rnd': 56473, 'u_vin': 13076}
+
+| Logic Utilization     | Used       | Available     | Utilization(%)     
++--------------------------------------------------------------------------+
+| APM                   | 448        | 740           | 61                 
+| FF                    | 118708     | 319600        | 38                 
+| LUT                   | 106184     | 159800        | 67                 
+| Distributed RAM       | 2252       | 39500         | 6                  
+| DRM                   | 301.5      | 415           | 73                 
+| IO                    | 137        | 400           | 35                 
+| RCKB                  | 2          | 40            | 5                  
+| SCANCHAIN             | 1          | 1             | 100                
+| USCM                  | 10         | 32            | 32                 
+| CCS                   | 1          | 1             | 100                
+| ADC                   | 0          | 1             | 0                  
+| DDR_PHY               | 7          | 40            | 18                 
+| HSSTLP                | 0          | 2             | 0                  
+| GPLL                  | 6          | 10            | 60                 
+| PPLL                  | 2          | 10            | 20                 
+| DDRPHY_CPD            | 1          | 20            | 5                  
+| HCKB                  | 0          | 120           | 0                  
+| IOCKB                 | 0          | 40            | 0                  
+| MRCKB                 | 1          | 20            | 5                  
+| PCIE                  | 0          | 1             | 0                  
+| DDRPHY_IOCLK_DIV      | 2          | 10            | 20                 
+| ANALOG                | 0          | 1             | 0                  
+| TSERDES               | 14         | 80            | 18                 
+| KEYRAM                | 0          | 1             | 0                  
++--------------------------------------------------------------------------+
+
+Virtual IO Port Info:
+NULL
+Device mapping done.
+Total device mapping takes 3.70 sec.
+
+
+Inputs and Outputs :
++-----------------------------------------------------------------------------------------------------------+
+| Type       | File Name                            

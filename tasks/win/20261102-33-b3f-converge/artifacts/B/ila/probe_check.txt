@@ -1,0 +1,2 @@
+B rebuilt Compile and Synthesize ADS: E=0. Compile2m50s/839MB; synthesis10m24s/3662MB. FIC targets local B syn ADF. 400 data bits + 80 trigger bits match rebuilt CSR networks and expected order; clk_sys_w present; depth1024. B project references left.fdc; actual fp_left application still to confirm in new Map DMR/PCF.
+Final rebuilt Map confirmed fp_left in DMR and PCF for all six target modules; Core Insertion Complete. See map_region_check.txt.

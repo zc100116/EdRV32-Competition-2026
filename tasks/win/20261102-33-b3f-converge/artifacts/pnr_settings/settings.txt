@@ -1,0 +1,11 @@
+Card33 A/B common proposed settings; GUI save not yet confirmed.
+Observed defaults/current values from user screenshots:
+General: mode normal; place_only off; hold optimization in route on; thresholds 200/100 ps; max hold paths 15000; timeout 0.
+Placement: decongestion 1; initial Quad; early block Global; auto macro off; DRM/APM prior on; distributed RAM/carry prior off; duplication on; refine Swap, cluster on, iteration20; recovery GP off.
+Router: threads5; reduce CE/RS on; series500; slack weight90; pin cost300; congestion plot off; recovery routing on; clock path check on.
+Multi-run: seed0; runs1; seed step1; save best1; parallel1.
+Route constraint iterate off.
+Proposed change for both A/B: decongestion 2 (trial, no guaranteed improvement); congestion plot on. Other values stay as observed.
+Local PDS User Guide printed p111: mode0..9, larger spreads placement but may worsen timing; usage over70% suggests mode0..4. Printed p117 confirms default1. Device Map DRM73%; choose modest mode2.
+GUI routing thread cap previously observed5; keep5. No standalone routing-effort switch seen in provided screenshots.
+Stop rule: at iteration40, unrouted>18000 stop affected variant.

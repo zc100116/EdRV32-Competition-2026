@@ -1,0 +1,21 @@
+compile
+Action compile: Real time elapsed is 0h:2m:50s
+Action compile: CPU time elapsed is 0h:0m:13s
+Action compile: Process CPU time elapsed is 0h:0m:13s
+Action compile: Peak memory pool usage is 839 MB
+Message lines: {'W': 5396}
+
+synthesize
+Action synthesize: Real time elapsed is 0h:10m:24s
+Action synthesize: CPU time elapsed is 0h:0m:38s
+Action synthesize: Process CPU time elapsed is 0h:0m:44s
+Action synthesize: Peak memory pool usage is 3,662 MB
+Message lines: {'C': 61, 'W': 19825}
+
+device_map
+Action dev_map: Real time elapsed is 0h:3m:4s
+Action dev_map: CPU time elapsed is 0h:0m:19s
+Action dev_map: Process CPU time elapsed is 0h:0m:19s
+Action dev_map: Peak memory pool usage is 2,901 MB
+Message lines: {'W': 367}
+PnR running per user; not included in this pre-PnR report.

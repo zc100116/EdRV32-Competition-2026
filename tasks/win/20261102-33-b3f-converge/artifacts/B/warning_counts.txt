@@ -1,0 +1,37 @@
+compile
+W Loop: 1340
+W Public-4030: 36
+W Sdm-2000: 297
+W Sdm-2003: 319
+W Sdm-2010: 4
+W Sdm-2014: 2
+W Verilog-2006: 10
+W Verilog-2008: 1003
+W Verilog-2019: 25
+W Verilog-2020: 1200
+W Verilog-2021: 3
+W Verilog-2023: 168
+W Verilog-2036: 16
+W Verilog-2038: 575
+W Verilog-2039: 65
+W [G: 333
+
+synthesize
+C ConstraintEditor-2002: 37
+C ConstraintEditor-2009: 24
+W Adm-4019: 2
+W Public-4008: 15563
+W Removed: 2971
+W Timing-4086: 62
+W Timing-4087: 99
+W Unable: 64
+W UserConstraintEditor-4009: 8
+W [G: 2
+W pmux: 1
+W prevent: 27
+W syn_maxfan: 1026
+
+device_map
+W DeviceMap-4011: 8
+W Public-4008: 358
+W Public-4010: 1
