@@ -221,8 +221,13 @@ module edrv32_cpu_b1_core_tb;
                     scheduled_irq = scheduled_irq & ~3'(irq_mask[index]);
                 if (!irq_fired[index]) begin
                     case (irq_kind[index])
-                        1: irq_armed[index] = u_core.m_valid_r[0] &&
-                            u_core.m_record_r[0][31:0] == irq_pc[index];
+                        1: irq_armed[index] =
+                            (u_core.m_valid_r[0] &&
+                             issued_slot[u_core.m_record_r[0][31:0]] == 0 &&
+                             u_core.m_record_r[0][31:0] == irq_pc[index]) ||
+                            (u_core.m_valid_r[1] &&
+                             issued_slot[u_core.m_record_r[1][31:0]] == 0 &&
+                             u_core.m_record_r[1][31:0] == irq_pc[index]);
                         2: irq_armed[index] = debug[25] &&
                             u_core.e_record_r[0][31:0] == irq_pc[index];
                         3: irq_armed[index] = debug[26] &&
