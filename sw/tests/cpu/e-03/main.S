@@ -17,6 +17,7 @@
 irq_resume:
 irq_ordinary:
     addi a0, a0, 1
+    lw zero, 0(a3)              # Isolate the next IRQ window; ordinary stays in pipe 1.
 irq_division:
     div a4, a1, a2
     CHECK a4, 14
