@@ -6,7 +6,8 @@ from dataclasses import replace
 import unittest
 
 from analyze import Instruction
-from pipe_model import INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, simulate
+from pipe_model import INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib, simulate
+from collections import deque
 
 
 def instruction(pc, kind='alu', rd=0, sources=(), size=4, target=0):
@@ -23,6 +24,73 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_gshare_pc_index_shift(self):
+        branch = instruction(1024, 'branch', target=16)
+        for shift, index in ((1, 7), (2, 263)):
+            predictor = Predictor(32, 512, 8, gshare_pc_shift=shift)
+            predictor.history = 7
+            predictor.btb[0] = branch, 16
+            predictor.pht[index] = 3
+            query = predictor.query(1024)
+            self.assertTrue(query[1])
+            ib = deque()
+            fill_ib({1024: branch}, ib, [(1024, query), (1026, query)],
+                    pht_size=512, gshare_pc_shift=shift)
+            self.assertEqual(ib[0].index, index)
+            predictor.history = 123
+            ib[0].next_pc = 1028
+            predictor.update(ib[0])
+            self.assertEqual(predictor.pht[index], 2)
+            self.assertEqual(predictor.pht[123], 1)
+
+    def test_predictor_scan_sizes(self):
+        for btb in (32, 64, 128, 256):
+            for pht in (512, 1024, 2048, 4096):
+                for ras in (4, 8):
+                    predictor = Predictor(btb, pht, 8, ras)
+                    first = instruction(0, 'branch', target=16)
+                    other = instruction(btb * 4, 'branch', target=16)
+                    collision = instruction(btb * 8, 'branch', target=16)
+                    for inst in (first, other):
+                        predictor.update(Record(inst, False, False, 0, pht - 1,
+                                                predictor.snapshot(), next_pc=16))
+                    self.assertIsNotNone(predictor.query(0)[0])
+                    self.assertIsNotNone(predictor.query(other.pc)[0])
+                    self.assertEqual(predictor.pht[-1], 3)
+                    self.assertEqual(predictor.pht[pht // 2 - 1], 1)
+                    predictor.update(Record(collision, False, False, 0, 0,
+                                            predictor.snapshot(), next_pc=16))
+                    self.assertIsNone(predictor.query(0)[0])
+                    predictor.history = pht - 1
+                    predictor.update(Record(first, False, False, 0, 0,
+                                            predictor.snapshot(), next_pc=4))
+                    self.assertEqual(predictor.history, pht - 2)
+                    for pc in range(0, (ras + 2) * 4, 4):
+                        predictor.action(replace(instruction(pc, 'jal'), push=True))
+                    self.assertEqual(predictor.count, ras)
+                    returns = []
+                    for _ in range(ras):
+                        returns.append(predictor.snapshot()[2])
+                        predictor.action(replace(instruction(64, 'jalr'), pop=True))
+                    self.assertEqual(returns, list(range((ras + 2) * 4, 8, -4)))
+
+    def test_predictor_parameter_defaults_and_v3s(self):
+        stream = [instruction(0), instruction(4, 'branch', target=8),
+                  instruction(8, 'branch', target=12), instruction(12, 'load')]
+        for variant, sizes in (('V0', (32, 512, 4)), ('V5', (64, 1024, 4)),
+                               ('B6', (128, 2048, 8))):
+            options = dict(zip(('btb_entries', 'gshare_entries', 'ras_entries'), sizes))
+            self.assertEqual(run(stream, variant), run(stream, variant, **options))
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for older in ('branch', 'jal'):
+            for younger in ('branch', 'jal'):
+                stream = [instruction(0, older, target=4),
+                          instruction(4, younger, target=8)]
+                self.assertEqual(run(stream, 'V3', **options)['hpm1'], 1)
+                self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 0)
+        stream = [instruction(0), instruction(4, 'load')]
+        self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 1)
+
     def test_b1_exchange_capability_and_single_control(self):
         for older in ('alu', 'branch', 'jal'):
             for younger in ('load', 'store', 'mul', 'div', 'jalr'):

@@ -12,7 +12,7 @@ import subprocess
 
 from analyze import COMMIT, CONTROL, DISASM, decode
 
-VARIANTS = ('V0', 'V1', 'V2', 'V2s', 'V2s+V5', 'V3', 'V4a', 'V3+V4a',
+VARIANTS = ('V0', 'V1', 'V2', 'V2s', 'V2s+V5', 'V3', 'V3s', 'V4a', 'V3+V4a',
             'V4b', 'V3+V4b', 'V5', 'V3+V5',
             'L1', 'L1+V5', 'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5')
 INORDER_VARIANTS = {
@@ -50,10 +50,11 @@ class Record:
 class Predictor:
     """C-E2 grouped BTB/gshare/RAS algorithm, scheduled at F1 and E like the RTL."""
 
-    def __init__(self, btb_size, pht_size, group_bytes, ras_size=4):
+    def __init__(self, btb_size, pht_size, group_bytes, ras_size=4, gshare_pc_shift=1):
         self.btb = [None] * btb_size
         self.pht = [1] * pht_size
         self.history = 0
+        self.gshare_pc_shift = gshare_pc_shift
         self.shift = group_bytes.bit_length() - 1
         self.stack = [0] * ras_size
         self.pointer = 0
@@ -85,7 +86,8 @@ class Predictor:
         target = 0
         if entry:
             instruction, target = entry
-            index = ((instruction.pc >> 1) ^ self.history) & (len(self.pht) - 1)
+            index = ((instruction.pc >> self.gshare_pc_shift) ^ self.history) & (
+                len(self.pht) - 1)
             taken = instruction.kind != 'branch' or self.pht[index] >= 2
             if instruction.pop and self.count:
                 target = self.stack[(self.pointer - 1) % len(self.stack)]
@@ -185,7 +187,7 @@ def fetch_request(predictor, pc, cross, group_bytes=8, dual_query=False,
     return response, next_fetch, next_cross, query
 
 
-def fill_ib(program, ib, halfwords, depth=4, pht_size=1024):
+def fill_ib(program, ib, halfwords, depth=4, pht_size=1024, gshare_pc_shift=1):
     """F2 appends up to two complete instructions using the saved F1 metadata."""
     for _ in range(min(2, depth - len(ib))):
         if not halfwords:
@@ -198,27 +200,28 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024):
         entry, taken, target, history, checkpoint = meta
         hit = bool(entry and entry[0].pc == pc)
         ib.append(Record(instruction, hit, hit and taken, target,
-                         ((pc >> 1) ^ history) & (pht_size - 1), checkpoint))
+                         ((pc >> gshare_pc_shift) ^ history) & (pht_size - 1), checkpoint))
         del halfwords[:length]
 
 
 def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty=2,
              load_latency=2, mul_latency=3, perfect_prediction=False,
              perfect_frontend=False, relax_raw=False, all_slot1_types=False,
-             statistics=None):
+             statistics=None, btb_entries=None, gshare_entries=None, ras_entries=None,
+             gshare_pc_shift=1):
     changes = INORDER_VARIANTS.get(variant, {})
     if variant in INORDER_VARIANTS:
         variant = 'L2b+V5'
     mul_latency = changes.get('mul_latency', mul_latency)
-    swap = variant in {'V1', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
+    swap = variant in {'V1', 'V3', 'V3s', 'V3+V4a', 'V3+V4b', 'V3+V5'}
     swap |= changes.get('swap', False)
     late_backend = variant.startswith('L')
     late_both = variant in {'L2', 'L2+V5', 'L2b', 'L2b+V5', 'L2s', 'L2s+V5'}
     late_branch = variant in {'L2b', 'L2b+V5'}
     late_store = variant in {'L2s', 'L2s+V5'}
     branch_lane = late_backend or variant in {
-        'V2', 'V2s', 'V2s+V5', 'V3', 'V3+V4a', 'V3+V4b', 'V3+V5'}
-    single_control = late_backend or variant in {'V2s', 'V2s+V5'}
+        'V2', 'V2s', 'V2s+V5', 'V3', 'V3s', 'V3+V4a', 'V3+V4b', 'V3+V5'}
+    single_control = late_backend or variant in {'V2s', 'V2s+V5', 'V3s'}
     single_control &= not changes.get('dual_control', False)
     late_controls = {'branch', 'jalr'} if changes.get('late_jalr') else {'branch'}
     dual_query = variant in {'V4b', 'V3+V4b'}
@@ -228,7 +231,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         late_backend and variant.endswith('+V5'))
     btb, pht = (64, 1024) if large_predictor else (32, 512)
     btb, pht, ras = changes.get('predictor', (btb, pht, 4))
-    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes, ras)
+    btb = btb if btb_entries is None else btb_entries
+    pht = pht if gshare_entries is None else gshare_entries
+    ras = ras if ras_entries is None else ras_entries
+    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes, ras, gshare_pc_shift)
     ib = deque()
     halfwords = []
     pending = []
@@ -329,7 +335,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 taken = instruction.kind != 'branch' or next_pc != pc + instruction.size
                 target = next_pc
             ib.append(Record(instruction, hit, hit and taken, target,
-                             ((pc >> 1) ^ history) & (pht - 1), checkpoint))
+                             ((pc >> gshare_pc_shift) ^ history) & (pht - 1), checkpoint))
             front_cursor += 1
             if next_pc != pc + instruction.size or (hit and taken):
                 ideal_group = None
@@ -530,7 +536,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if not flush and not perfect_frontend:
             halfwords.extend(pending)
             pending = []
-            fill_ib(program, ib, halfwords, depth, pht)
+            fill_ib(program, ib, halfwords, depth, pht, gshare_pc_shift)
             if fetch_delay:
                 fetch_delay -= 1
             elif len(halfwords) <= group_bytes // 2:
@@ -663,6 +669,10 @@ def main():
     parser.add_argument('--perfect-frontend', action='store_true')
     parser.add_argument('--relax-raw', action='store_true')
     parser.add_argument('--all-slot1-types', action='store_true')
+    parser.add_argument('--btb-entries', type=int, choices=(32, 64, 128, 256))
+    parser.add_argument('--gshare-entries', type=int, choices=(512, 1024, 2048, 4096))
+    parser.add_argument('--ras-entries', type=int, choices=(4, 8))
+    parser.add_argument('--gshare-pc-shift', type=int, choices=(1, 2), default=1)
     args = parser.parse_args()
     program, symbols, trace = program_and_trace(args.directory)
     print(json.dumps(simulate(program, trace, symbols['start_time'], symbols['stop_time'],
@@ -670,7 +680,11 @@ def main():
                               load_latency=args.load_latency, mul_latency=args.mul_latency,
                               perfect_prediction=args.perfect_prediction,
                               perfect_frontend=args.perfect_frontend, relax_raw=args.relax_raw,
-                              all_slot1_types=args.all_slot1_types), indent=2))
+                              all_slot1_types=args.all_slot1_types,
+                              btb_entries=args.btb_entries,
+                              gshare_entries=args.gshare_entries,
+                              ras_entries=args.ras_entries,
+                              gshare_pc_shift=args.gshare_pc_shift), indent=2))
 
 
 if __name__ == '__main__':
