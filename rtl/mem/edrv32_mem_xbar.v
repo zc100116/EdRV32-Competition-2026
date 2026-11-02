@@ -394,6 +394,9 @@ module edrv32_mem_xbar (
     reg [31:0] araddr_r [0:6];
     reg [3:0] awlen_r [0:6];
     reg [3:0] arlen_r [0:6];
+    reg [4:0] reserve_beats_r [0:6];
+    wire [34:0] reserve_port_beats_w;
+    wire [6:0] read_credit_w;
     reg [2:0] aw_error_r [0:6];
     reg [2:0] ar_error_r [0:6];
     reg [15:0] aw_wait_r [0:6];
@@ -500,9 +503,12 @@ module edrv32_mem_xbar (
     assign reserve_w = bad_read_do_w || (grant_w && !grant_write_w);
     assign reserve_port_w = bad_read_do_w ? bad_read_port_r : grant_port_w;
     assign reserve_id_w = arid_r[reserve_port_w];
-    assign reserve_beats_w = {1'b0, arlen_r[reserve_port_w]} + 5'd1;
+    assign reserve_beats_w = reserve_beats_r[reserve_port_w];
     generate
         for (p = 0; p < 7; p = p + 1) begin : g_port
+            // Capture LEN+1 with AR; credit checks precede arbitration in the same cycle.
+            assign reserve_port_beats_w[p*5 +: 5] = reserve_beats_r[p];
+            assign read_credit_w[p] = free_cnt_w >= {3'b0, reserve_beats_r[p]};
             assign starved_w[p*2] = ar_starved_r[p];
             assign starved_w[p*2+1] = aw_starved_r[p];
             assign awready_w[p] = !aw_pending_r[p] &&
@@ -568,6 +574,7 @@ module edrv32_mem_xbar (
         .reserve_port_i(reserve_port_w),
         .reserve_id_i(reserve_id_w),
         .reserve_beats_i(reserve_beats_w),
+        .reserve_port_beats_i(reserve_port_beats_w),
         .reserve_error_i(bad_read_do_w),
         .free_cnt_o(free_cnt_w),
         .slot_ready_o(slot_ready_w),
@@ -651,7 +658,7 @@ module edrv32_mem_xbar (
         bad_write_port_w = 3'b0;
         busy_w = cmd_valid_r || w_active_r || ds_count_r != 0 || free_cnt_w != 8'd128;
         for (eligible_idx = 0; eligible_idx < 7; eligible_idx = eligible_idx + 1) begin
-            beats_w[(eligible_idx*2)*5 +: 5] = {1'b0, arlen_r[eligible_idx]} + 5'd1;
+            beats_w[(eligible_idx*2)*5 +: 5] = reserve_beats_r[eligible_idx];
             beats_w[(eligible_idx*2+1)*5 +: 5] = {1'b0, awlen_r[eligible_idx]} + 5'd1;
             // Queue ownership is independent of temporary grant-capacity limits.
             queued_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
@@ -662,7 +669,7 @@ module edrv32_mem_xbar (
                 eligible_w[eligible_idx*2] = ar_pending_r[eligible_idx] &&
                     ar_error_r[eligible_idx] == 0 && slot_ready_w &&
                     rd_count_r[eligible_idx] < outst_rd_w[eligible_idx*4 +: 4] &&
-                    free_cnt_w >= {4'b0, arlen_r[eligible_idx]} + 8'd1;
+                    read_credit_w[eligible_idx];
                 eligible_w[eligible_idx*2+1] = aw_pending_r[eligible_idx] &&
                     aw_error_r[eligible_idx] == 0 && w_complete_r[eligible_idx] &&
                     !w_active_r &&
@@ -670,7 +677,7 @@ module edrv32_mem_xbar (
             end
             if (!bad_read_w && ar_pending_r[eligible_idx] &&
                 ar_error_r[eligible_idx] != 0 && rd_count_r[eligible_idx] < 8 && slot_ready_w &&
-                free_cnt_w >= {4'b0, arlen_r[eligible_idx]} + 8'd1) begin
+                read_credit_w[eligible_idx]) begin
                 bad_read_w = 1'b1;
                 bad_read_port_w = eligible_idx[2:0];
             end
@@ -886,6 +893,8 @@ module edrv32_mem_xbar (
                 arid_r[payload_idx] <= arid_w[payload_idx];
                 araddr_r[payload_idx] <= araddr_w[payload_idx*32 +: 32];
                 arlen_r[payload_idx] <= arlen_w[payload_idx*4 +: 4];
+                reserve_beats_r[payload_idx] <=
+                    {1'b0, arlen_w[payload_idx*4 +: 4]} + 5'd1;
                 ar_error_r[payload_idx] <=
                     violation(araddr_w[payload_idx*32 +: 12], arlen_w[payload_idx*4 +: 4]);
             end

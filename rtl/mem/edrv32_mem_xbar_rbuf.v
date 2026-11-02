@@ -15,6 +15,7 @@ module edrv32_mem_xbar_rbuf (
     input wire [2:0] reserve_port_i,
     input wire reserve_id_i,
     input wire [4:0] reserve_beats_i,
+    input wire [34:0] reserve_port_beats_i,
     input wire reserve_error_i,
     output reg [7:0] free_cnt_o,
     output wire slot_ready_o,
@@ -65,6 +66,11 @@ module edrv32_mem_xbar_rbuf (
     reg [258:0] skid_data_r [0:6];
     reg [6:0] skid_id_r;
     wire release_w;
+    wire [7:0] free_released_w;
+    wire [7:0] free_reserved_w [0:6];
+    wire [6:0] reserve_select_w;
+    reg [7:0] free_next_w;
+    integer credit_port;
     wire [258:0] ram_data_w;
     wire [258:0] pending_data_w;
     wire [6:0] take_w;
@@ -113,6 +119,24 @@ module edrv32_mem_xbar_rbuf (
         pending_error_r ? 2'b10 : ram_data_w[257:256], ram_data_w[255:0]};
     assign slot_ready_o = count_r < 4'd8;
     assign release_w = valid_r[head_r] && sent_r[head_r] == length_r[head_r];
+    // mem-subsys 2.2: release and reservation keep their original update edge.
+    // Compute each port's full next count before the late scheduler selection.
+    assign free_released_w = free_cnt_o +
+        (release_w ? {3'b0, length_r[head_r]} : 8'b0);
+    generate
+        for (p = 0; p < 7; p = p + 1) begin : g_credit
+            assign free_reserved_w[p] = free_released_w -
+                {3'b0, reserve_port_beats_i[p*5 +: 5]};
+            assign reserve_select_w[p] = reserve_i && reserve_port_i == p;
+        end
+    endgenerate
+    always @(*) begin
+        free_next_w = free_released_w & {8{!reserve_i}};
+        for (credit_port = 0; credit_port < 7; credit_port = credit_port + 1) begin
+            free_next_w = free_next_w |
+                (free_reserved_w[credit_port] & {8{reserve_select_w[credit_port]}});
+        end
+    end
     assign return_addr_w = start_r[return_slot_w] + {2'b0, received_r[return_slot_w]};
     // X-F1 path 1: advance each descriptor address before arbitration, not after it.
     assign preferred_ports_w = ready_ports_w & read_mask_r;
@@ -214,8 +238,7 @@ module edrv32_mem_xbar_rbuf (
             end
         end else begin
             count_r <= count_r + (reserve_i ? 4'd1 : 4'd0) - (release_w ? 4'd1 : 4'd0);
-            free_cnt_o <= free_cnt_o - (reserve_i ? {3'b0, reserve_beats_i} : 8'b0) +
-                (release_w ? {3'b0, length_r[head_r]} : 8'b0);
+            free_cnt_o <= free_next_w;
             if (release_w) begin
                 valid_r[head_r] <= 1'b0;
                 head_r <= head_r + 3'd1;
