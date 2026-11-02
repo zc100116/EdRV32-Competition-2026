@@ -14,8 +14,11 @@ module edrv32_ram_cpu_btb (
     output wire [57:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
-    ip_ram_cpu_btb u_ip (
-        .clk(clk_i),
+    // fpga/ip/ip_lutram_cpu_btb.md: simple dual-port distributed RAM, combinational read.
+    ip_lutram_cpu_btb u_ip (
+        .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),

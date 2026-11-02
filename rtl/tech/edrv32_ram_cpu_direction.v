@@ -15,14 +15,27 @@ module edrv32_ram_cpu_direction (
     output wire [3:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
-    ip_ram_cpu_direction u_ip (
-        .clk(clk_i),
+    // fpga/ip/ip_lutram_cpu_direction.md: two simple dual-port copies share every write;
+    // one reads the query address, the other the update (write) address.
+    ip_lutram_cpu_direction u_ip_query (
+        .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i),
         .wr_data(wr_data_i),
-        .update_data(update_data_o),
         .rd_addr(rd_addr_i),
         .rd_data(rd_data_o)
+    );
+    ip_lutram_cpu_direction u_ip_update (
+        .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
+        .wr_en(wr_en_i),
+        .wr_addr(wr_addr_i),
+        .wr_data(wr_data_i),
+        .rd_addr(wr_addr_i),
+        .rd_data(update_data_o)
     );
 `else
     reg [3:0] memory_r [0:2047];
