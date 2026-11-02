@@ -58,6 +58,10 @@ class HeaderTest(unittest.TestCase):
 
 class LoopbackTest(unittest.TestCase):
     def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('Ethernet', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.receiver = EthernetTool(local_ip="127.0.0.1")
@@ -121,6 +125,12 @@ class LoopbackTest(unittest.TestCase):
 
 
 class BindingTest(unittest.TestCase):
+    def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('Ethernet', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
+
     def test_default_local_address(self):
         self.assertEqual(EthernetTool().local_ip, '192.168.1.2')
 
@@ -177,3 +187,71 @@ class BindingTest(unittest.TestCase):
             data, source = receiver.recvfrom(1024)
             self.assertEqual(data, packet)
             self.assertEqual(source[0], '127.0.0.2')
+
+
+class ReadinessTest(unittest.TestCase):
+    def test_batch_waits_once_before_first_datagram(self):
+        tool = EthernetTool()
+        tool.tx['path'] = 'test.bin'
+        tool.session = Mock()
+        events = []
+        sock = Mock()
+        sock.sendto.side_effect = lambda *args: events.append('send')
+        data = list(packets(bytes(1025), 0, 0))
+        with patch('tools.debug_tool.core.ethernet.socket.socket', return_value=sock), \
+                patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      side_effect=lambda ip: (events.append('ready') or ('Ethernet', 1.2))) as wait:
+            tool._send(data, '192.168.1.10', 5000, 6000, 0, None, tool.local_ip)
+        self.assertEqual(events, ['ready', 'send', 'send'])
+        wait.assert_called_once_with(tool.local_ip)
+        tool.session.log.assert_any_call('等待网卡 Ethernet 就绪 … 用时 1.2 s')
+
+    def test_timeout_sends_no_datagrams(self):
+        tool = EthernetTool()
+        tool.session = Mock()
+        with patch('tools.debug_tool.core.ethernet.socket.socket') as factory, \
+                patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      side_effect=OSError('Ethernet timeout')):
+            tool._send(list(packets(b'probe', 3, 0)), '192.168.1.10', 5000,
+                       6000, 0, None, tool.local_ip)
+        factory.return_value.sendto.assert_not_called()
+        self.assertIn('Ethernet timeout', tool.status()['tx']['error'])
+
+    def test_send_error_is_reported_without_retry(self):
+        tool = EthernetTool()
+        tool.session = Mock()
+        packet = next(packets(b'probe', 3, 0))
+        with patch('tools.debug_tool.core.ethernet.socket.socket') as factory, \
+                patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('Ethernet', 0.0)) as wait:
+            factory.return_value.sendto.side_effect = OSError('send failed')
+            tool._send([packet], '192.168.1.10', 5000, 6000, 0, None, tool.local_ip)
+        wait.assert_called_once_with(tool.local_ip)
+        factory.return_value.sendto.assert_called_once_with(packet, ('192.168.1.10', 5000))
+        self.assertIn('send failed', tool.status()['tx']['error'])
+
+    def test_win3_and_virtual_input_wait_before_single_packet(self):
+        from tools.debug_tool.core.session import BoardSession
+        from tools.debug_tool.core.virtual_input import send_frame
+        engine = Mock()
+        engine.program.status.return_value = {'error': None}
+        board = BoardSession(engine)
+        engine.board = board
+        engine.ethernet = board.ethernet
+        tool = board.ethernet
+        tool.local_ip = '192.168.1.2'
+        tool.rx_socket = Mock()
+        tool.rx.update(active=True, localPort=6000, localIp=tool.local_ip)
+        events = []
+        tool.rx_socket.sendto.side_effect = lambda *args: events.append('send')
+        with patch('tools.debug_tool.core.ethernet.wait_for_link',
+                   side_effect=lambda ip: (events.append('ready') or ('Ethernet', .5))) as wait:
+            board.establish_network()
+            self.assertEqual(events, ['ready', 'send'])
+            self.assertEqual(tool.rx_socket.sendto.call_args.args[0],
+                             next(packets(b'\0', 3, 0)))
+            board.mark('peer')
+            send_frame(engine, b'input')
+            self.assertEqual(events, ['ready', 'send', 'ready', 'send'])
+        self.assertEqual(wait.call_count, 2)
+        self.assertEqual(tool.rx_socket.sendto.call_count, 2)

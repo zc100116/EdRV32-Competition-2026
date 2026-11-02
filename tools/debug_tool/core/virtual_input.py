@@ -57,7 +57,7 @@ def channel(engine):
 
 def send_frame(engine, frame):
     if channel(engine) == '网口':
-        engine.ethernet.rx_socket.sendto(next(packets(frame, 2, 0)),
-                                       engine.board.network_endpoint)
+        engine.ethernet.send_datagram(next(packets(frame, 2, 0)),
+                                    engine.board.network_endpoint)
     else:
         engine.send((b'\x1bV' + frame).hex(), ending='none', hex_mode=True)

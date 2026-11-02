@@ -116,8 +116,8 @@ class BoardSession:
                 self.peer_ip = self.peer_port = None
                 self.steps['peer'] = dict(done=False, time=None)
                 self.error = None
-            self.ethernet.rx_socket.sendto(next(packets(b'\0', 3, 0)),
-                                           (board_ip, board_port))
+            self.ethernet.send_datagram(next(packets(b'\0', 3, 0)),
+                                        (board_ip, board_port))
             with self.lock:
                 self.mark('win3')
             self.log(f'连接请求已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')

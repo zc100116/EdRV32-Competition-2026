@@ -26,6 +26,10 @@ from test_video import detection_wire, frame_header
 
 class SessionTest(unittest.TestCase):
     def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('loopback', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
         self.engine = SerialEngine()
         self.engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(self.engine.ethernet.stop_receive)

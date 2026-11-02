@@ -23,6 +23,12 @@ from telemetry_sim import run_detection
 
 
 class ImageDetectionTest(unittest.TestCase):
+    def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('loopback', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
+
     def test_ch2_udp_reference_and_alternating_windows(self):
         import cv2
         import numpy as np

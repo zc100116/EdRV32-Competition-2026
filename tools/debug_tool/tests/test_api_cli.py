@@ -6,6 +6,7 @@ import subprocess
 import sys
 import threading
 import unittest
+from unittest.mock import patch
 import urllib.request
 from tempfile import TemporaryDirectory
 
@@ -20,6 +21,10 @@ TOOL_DIR = Path(__file__).resolve().parents[1]
 
 class ApiCliTest(unittest.TestCase):
     def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('loopback', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.engine = SerialEngine()

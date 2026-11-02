@@ -15,6 +15,12 @@ ROOT = Path(__file__).resolve().parents[3]
 
 
 class VirtualInputTest(unittest.TestCase):
+    def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('loopback', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
+
     def test_uart_emit_repeat(self):
         output = ROOT / 'build/debug_tool/virtual-input.bin'
         output.parent.mkdir(parents=True, exist_ok=True)

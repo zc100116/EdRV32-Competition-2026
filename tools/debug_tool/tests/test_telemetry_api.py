@@ -7,6 +7,7 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 import urllib.request
 
 from tools.debug_tool.core.api import ApiServer
@@ -21,6 +22,10 @@ TOOL = Path(__file__).resolve().parents[1]
 
 class TelemetryApiTest(unittest.TestCase):
     def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('loopback', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
         self.engine = SerialEngine()
         self.engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(self.engine.ethernet.stop_receive)

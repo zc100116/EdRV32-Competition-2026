@@ -18,6 +18,9 @@ import sys
 import threading
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools.board.link_wait import wait_for_link
+
 BIOS_MENU = 'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud'
 BAUDS = (115200, 921600, 2000000)
 
@@ -199,6 +202,7 @@ class BiosTransfer:
     """Prompt-driven protocol shared by the board CLI and the desktop serial engine."""
     def __init__(self, write, set_baud):
         self.write = write
+        self.log = print
         self.set_baud = set_baud
         self.lock = threading.Lock()
         self.udp = None
@@ -285,7 +289,10 @@ class BiosTransfer:
                         self.state['phase'] = 'wait_menu'
         if packets:
             try:
-                resolve_arp(self.udp.getsockname()[0])
+                local_ip = self.udp.getsockname()[0]
+                name, elapsed = wait_for_link(local_ip)
+                self.log(f'等待网卡 {name} 就绪 … 用时 {elapsed:.1f} s')
+                resolve_arp(local_ip)
             except OSError as exc:
                 self.fail(exc)
                 raise

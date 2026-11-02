@@ -13,6 +13,8 @@ import struct
 import threading
 import time
 
+from tools.board.link_wait import wait_for_link
+
 HEADER = struct.Struct("!BBHI")
 DATA_BYTES = 1024
 DEFAULT_SAVE_DIR = Path(__file__).resolve().parents[3] / "build/debug_tool/udp-rx"
@@ -235,6 +237,7 @@ class EthernetTool:
         try:
             if receiver is None:
                 sock.bind((local_ip, local_port))
+            self.wait_for_link(local_ip)
             for index, packet in enumerate(datagrams):
                 if index and interval:
                     time.sleep(interval)
@@ -258,6 +261,19 @@ class EthernetTool:
                     self.session.fail(f"UDP 发送失败：{state['error']}")
                 else:
                     self.session.log(f"UDP 发送完成：{state['sent']} B · {state['path']}")
+
+    def wait_for_link(self, local_ip):
+        name, elapsed = wait_for_link(local_ip)
+        message = f'等待网卡 {name} 就绪 … 用时 {elapsed:.1f} s'
+        if self.session:
+            self.session.log(message)
+        else:
+            print(message)
+
+    def send_datagram(self, packet, destination):
+        """Send a single control/input packet through the listening socket."""
+        self.wait_for_link(self.local_ip)
+        self.rx_socket.sendto(packet, destination)
 
     def start_receive(self, local_port, directory=None, mode="files"):
         if self.rx_socket is not None:

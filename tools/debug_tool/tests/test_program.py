@@ -5,6 +5,7 @@ import struct
 import threading
 import time
 import unittest
+from unittest.mock import patch
 from tempfile import TemporaryDirectory
 
 from tools.board.uart_tool import BIOS_MENU, wire_bytes
@@ -346,6 +347,11 @@ class ElfProgramTest(unittest.TestCase):
 
 
 class EthProgramTest(unittest.TestCase):
+    def setUp(self):
+        ready = patch('tools.board.uart_tool.wait_for_link', return_value=('Ethernet', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
+
     def test_transport_addresses_and_retry_use_shared_bios(self):
         from unittest.mock import Mock, patch
         from tools.debug_tool.core.program import BiosProgrammer
@@ -364,6 +370,7 @@ class EthProgramTest(unittest.TestCase):
             with patch('tools.board.uart_tool.resolve_arp') as arp:
                 programmer.feed_line('ETH load ready 192.168.1.10:5000')
             arp.assert_called_once_with('192.168.1.8')
+            programmer.log.assert_any_call('等待网卡 Ethernet 就绪 … 用时 0.0 s')
             self.assertEqual(writes, [b'\r', b'2\r'])
             calls = list(udp.sendto.call_args_list)
             self.assertEqual(len(calls), 2)

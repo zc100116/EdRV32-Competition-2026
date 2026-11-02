@@ -29,6 +29,12 @@ def compiler_fixture(directory):
 
 
 class YoloTest(unittest.TestCase):
+    def setUp(self):
+        ready = patch('tools.debug_tool.core.ethernet.wait_for_link',
+                      return_value=('loopback', 0.0))
+        ready.start()
+        self.addCleanup(ready.stop)
+
     def test_rgb565_left_pixel_is_low_halfword(self):
         rgb = bytes([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255])
         data = rgb_to_rgb565(rgb)
