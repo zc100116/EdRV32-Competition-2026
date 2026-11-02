@@ -14,7 +14,7 @@ struct demo_rect {
     int16_t y1;
 };
 struct demo_dirty {
-    struct demo_rect rect[2u * DEMO_MAX_BOXES];
+    struct demo_rect rect[5u * DEMO_MAX_BOXES];
     unsigned int count;
 };
 unsigned int demo_overlay_label(char label[32], const yolo_detection *detection);

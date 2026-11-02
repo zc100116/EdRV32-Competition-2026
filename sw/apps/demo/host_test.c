@@ -231,6 +231,7 @@ void cache_clean(uintptr_t address, uint32_t size)
 {
     uintptr_t base = (uintptr_t)overlay_pixels[overlay_clean_slot];
     assert(address >= base && address + size <= base + DEMO_OVERLAY_BYTES);
+    assert((address - base) % DEMO_OVERLAY_STRIDE + size <= DEMO_OVERLAY_STRIDE);
     memcpy((uint8_t *)overlay_visible[overlay_clean_slot] + address - base,
            (const void *)address, size);
     ++overlay_cleans;
@@ -293,9 +294,9 @@ static void test_overlay(void)
     }
     overlay_clean_slot = 0;
     demo_overlay_cpu_draw(overlay_pixels[0], &dirty[0], first, 3);
-    assert(dirty[0].count == 6 && overlay_cleans == 6);
-    assert(dirty[0].rect[0].x1 == 179 && dirty[0].rect[0].y1 == 129);
-    assert(dirty[0].rect[1].x1 == 135 && dirty[0].rect[1].y0 == 44);
+    assert(dirty[0].count == 15 && overlay_cleans == 286);
+    assert(dirty[0].rect[0].x1 == 179 && dirty[0].rect[0].y1 == 60);
+    assert(dirty[0].rect[4].x1 == 135 && dirty[0].rect[4].y0 == 44);
     check_overlay(0, first, first_labels, 3);
     check_overlay(1, NULL, NULL, 0);
     overlay_clean_slot = 1;
@@ -321,6 +322,70 @@ static void test_overlay(void)
     }
 }
 
+static unsigned int dirty_pixels(const struct demo_dirty *dirty)
+{
+    unsigned int pixels = 0;
+    for (unsigned int i = 0; i < dirty->count; ++i) {
+        const struct demo_rect *r = &dirty->rect[i];
+        pixels += (unsigned int)(r->x1 - r->x0 + 1) * (unsigned int)(r->y1 - r->y0 + 1);
+    }
+    return pixels;
+}
+
+static void test_overlay_moving(void)
+{
+    struct demo_dirty dirty[2] = {0};
+    yolo_detection boxes[] = {
+        {40, 60, 640, 460, 0, 875}, {200, 160, 800, 560, 0, 875},
+        {600, 300, 1200, 700, 0, 875}
+    };
+    const char label[] = "person 0.875";
+    unsigned int glyph_writes = 0;
+    for (unsigned int j = 0; j < strlen(label); ++j) {
+        for (unsigned int row = 0; row < 16; ++row) {
+            for (unsigned int bit = 0; bit < 8; ++bit) {
+                glyph_writes += !!(font8x16[(uint8_t)label[j] - 32u][row] & (0x80u >> bit));
+            }
+        }
+    }
+    /* Count pixel stores, including repeated corners, overlaps and white glyph writes. */
+    unsigned int draw_writes = 3u * (2u * (600u + 400u) +
+                                    (unsigned int)(sizeof label - 1u) * 8u * 16u + glyph_writes);
+    memset(overlay_pixels, 0, sizeof overlay_pixels);
+    memset(overlay_visible, 0, sizeof overlay_visible);
+    overlay_clean_slot = 0;
+    demo_overlay_cpu_draw(overlay_pixels[0], &dirty[0], boxes, 3);
+    unsigned int clear_writes = dirty_pixels(&dirty[0]);
+    assert(clear_writes == 10608);
+    for (unsigned int i = 0; i < 3; ++i) {
+        boxes[i].x0 += 20;
+        boxes[i].x1 += 20;
+        boxes[i].y0 += 10;
+        boxes[i].y1 += 10;
+    }
+    overlay_cleans = 0;
+    demo_overlay_cpu_draw(overlay_pixels[0], &dirty[0], boxes, 3);
+    unsigned int moving_cleans = overlay_cleans;
+    assert(moving_cleans == 4908);
+    overlay_clean_slot = 1;
+    demo_overlay_cpu_draw(overlay_pixels[1], &dirty[1], boxes, 3);
+    /* A moved frame must equal the same frame drawn into a never-used transparent slot. */
+    assert(memcmp(overlay_pixels[0], overlay_pixels[1], sizeof overlay_pixels[0]) == 0);
+    assert(memcmp(overlay_visible[0], overlay_visible[1], sizeof overlay_visible[0]) == 0);
+    for (unsigned int slot = 0; slot < 2; ++slot) {
+        overlay_clean_slot = slot;
+        demo_overlay_cpu_draw(overlay_pixels[slot], &dirty[slot], NULL, 0);
+        for (unsigned int i = 0; i < DEMO_WIDTH * DEMO_HEIGHT; ++i) {
+            assert(overlay_pixels[slot][i] == 0 && overlay_visible[slot][i] == 0);
+        }
+    }
+    printf("CPU L1 3x600x400 steady frame before: writes=%u (clear=%u draw=%u), cleans=12\n",
+           3u * (600u * 400u + (unsigned int)(sizeof label - 1u) * 8u * 16u) + draw_writes,
+           3u * (600u * 400u + (unsigned int)(sizeof label - 1u) * 8u * 16u), draw_writes);
+    printf("CPU L1 3x600x400 steady frame after: writes=%u (clear=%u draw=%u), cleans=%u\n",
+           clear_writes + draw_writes, clear_writes, draw_writes, moving_cleans);
+}
+
 int main(void)
 {
     test_monitor();
@@ -331,6 +396,7 @@ int main(void)
     test_layout();
     test_model();
     test_overlay();
+    test_overlay_moving();
     demo_test_switching();
     puts("PASS demo: EDTM, EDVF, EDDT, menu, frame division, DDR layout, EDNM, "
          "CPU L1 pixels/dirty/cache, PIX/GEO/scene/output event sequences");

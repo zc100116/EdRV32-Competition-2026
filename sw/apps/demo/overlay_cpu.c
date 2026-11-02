@@ -42,22 +42,27 @@ static void clean(uint32_t *pixels, struct demo_rect r)
     if (r.x1 < r.x0 || r.y1 < r.y0) {
         return;
     }
-    /* One range includes row gaps; all included pixels belong to this CPU slot. */
-    uint32_t first = (uint32_t)r.y0 * DEMO_WIDTH + (uint32_t)r.x0;
-    uint32_t last = (uint32_t)r.y1 * DEMO_WIDTH + (uint32_t)r.x1;
-    cache_clean((uintptr_t)&pixels[first], (last - first + 1u) * sizeof *pixels);
+    /* Clean only written row spans; a vertical edge touches one cache line per row. */
+    for (int y = r.y0; y <= r.y1; ++y) {
+        uint32_t first = (uint32_t)y * DEMO_WIDTH + (uint32_t)r.x0;
+        cache_clean((uintptr_t)&pixels[first], (uint32_t)(r.x1 - r.x0 + 1) * sizeof *pixels);
+    }
 }
 
-static void border(uint32_t *pixels, struct demo_rect r)
+static void border(uint32_t *pixels, struct demo_dirty *dirty, struct demo_rect r)
 {
     /* rnd 2.5 empty RECT; 2.6 BORDER radius=0, width=1, sides=15. */
     if (r.x1 < r.x0 || r.y1 < r.y0) {
         return;
     }
-    fill(pixels, (struct demo_rect){r.x0, r.y0, r.x1, r.y0}, 0xff00ff00u);
-    fill(pixels, (struct demo_rect){r.x0, r.y1, r.x1, r.y1}, 0xff00ff00u);
-    fill(pixels, (struct demo_rect){r.x0, r.y0, r.x0, r.y1}, 0xff00ff00u);
-    fill(pixels, (struct demo_rect){r.x1, r.y0, r.x1, r.y1}, 0xff00ff00u);
+    const struct demo_rect edges[] = {
+        {r.x0, r.y0, r.x1, r.y0}, {r.x0, r.y1, r.x1, r.y1},
+        {r.x0, r.y0, r.x0, r.y1}, {r.x1, r.y0, r.x1, r.y1}
+    };
+    for (unsigned int i = 0; i < 4; ++i) {
+        fill(pixels, edges[i], 0xff00ff00u);
+        dirty->rect[dirty->count++] = clip(edges[i]);
+    }
 }
 
 void demo_overlay_cpu_draw(uint32_t *pixels, struct demo_dirty *dirty,
@@ -77,10 +82,9 @@ void demo_overlay_cpu_draw(uint32_t *pixels, struct demo_dirty *dirty,
                                 (int16_t)(d->y1 - 1)};
         struct demo_rect bar = {d->x0, y, (int16_t)(d->x0 + length * 8u - 1u),
                                 (int16_t)(y + 15)};
-        border(pixels, box);
+        border(pixels, dirty, box);
         fill(pixels, bar, 0xff00ff00u);
-        dirty->rect[dirty->count++] = box;
-        dirty->rect[dirty->count++] = bar;
+        dirty->rect[dirty->count++] = clip(bar);
         for (unsigned int j = 0; j < length; ++j) {
             const uint8_t *glyph = font8x16[(uint8_t)label[j] - 32u];
             for (unsigned int row = 0; row < 16u && y + row < DEMO_HEIGHT; ++row) {
