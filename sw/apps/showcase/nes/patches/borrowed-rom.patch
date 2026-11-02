@@ -1,0 +1,14 @@
+--- a/nes/nes_rom.c
++++ b/nes/nes_rom.c
+@@ -505,10 +505,7 @@
+ 
+    if ((*rominfo)->sram)
+       free((*rominfo)->sram);
+-   if ((*rominfo)->rom)
+-      free((*rominfo)->rom);
+-   if ((*rominfo)->vrom)
+-      free((*rominfo)->vrom);
++   /* PRG/CHR point into the borrowed game pack, not heap allocations. */
+    if ((*rominfo)->vram)
+       free((*rominfo)->vram);
+ 

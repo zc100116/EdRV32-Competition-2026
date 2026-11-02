@@ -1,0 +1,61 @@
+--- a/nes/nes.c
++++ b/nes/nes.c
+@@ -356,49 +356,18 @@
+    osd_getinput();
+ }
+ 
+-/* main emulation loop */
+-void nes_emulate(void)
+-{
+-   int last_ticks, frames_to_render;
+-
++/* Cooperative frame entry points: initialize counters once per cartridge. */
++void nes_emulate_init(void)
++{
+    osd_setsound(nes.apu->process);
+-
+-   last_ticks = nofrendo_ticks;
+-   frames_to_render = 0;
+    nes.scanline_cycles = 0;
+    nes.fiq_cycles = (int) NES_FIQ_PERIOD;
+-
+-   while (false == nes.poweroff)
+-   {
+-      if (nofrendo_ticks != last_ticks)
+-      {
+-         int tick_diff = nofrendo_ticks - last_ticks;
+-
+-         frames_to_render += tick_diff;
+-         gui_tick(tick_diff);
+-         last_ticks = nofrendo_ticks;
+-      }
+-
+-      if (true == nes.pause)
+-      {
+-         /* TODO: dim the screen, and pause/silence the apu */
+-         system_video(true);
+-         frames_to_render = 0;
+-      }
+-      else if (frames_to_render > 1)
+-      {
+-         frames_to_render--;
+-         nes_renderframe(false);
+-         system_video(false);
+-      }
+-      else if ((1 == frames_to_render && true == nes.autoframeskip)
+-               || false == nes.autoframeskip)
+-      {
+-         frames_to_render = 0;
+-         nes_renderframe(true);
+-         system_video(true);
+-      }
+-   }
++}
++
++void nes_emulate_frame(void)
++{
++   nes_renderframe(true);
++   system_video(true);
+ }
+ 
+ static void mem_trash(uint8 *buffer, int length)
