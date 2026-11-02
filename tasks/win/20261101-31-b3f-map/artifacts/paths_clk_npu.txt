@@ -1,0 +1,13 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	clk_npu	max (slow corner)	sequential timing path	0.236	10	u_npu/u_conv/desc_r[8]/CLK (GTP_DFF_E)	u_npu/u_conv/load_row_addr_r[0]/CE (GTP_DFF_E)
+native SNR	slow	clk_npu	max (slow corner)	sequential timing path	0.236	10	u_npu/u_conv/desc_r[8]/CLK (GTP_DFF_E)	u_npu/u_conv/load_row_addr_r[1]/CE (GTP_DFF_E)
+native SNR	slow	clk_npu	max (slow corner)	sequential timing path	0.236	10	u_npu/u_conv/desc_r[8]/CLK (GTP_DFF_E)	u_npu/u_conv/load_row_addr_r[2]/CE (GTP_DFF_E)
+native SNR	slow	clk_npu	min (slow corner)	sequential timing path	0.324	0	u_npu/u_read_dma/arlen_r[0]/CLK (GTP_DFF_E)	u_npu/u_axi_bridge/u_ar_fifo/memory_r_0/DI[0] (GTP_RAM32X2DP)
+native SNR	slow	clk_npu	min (slow corner)	sequential timing path	0.324	0	u_npu/u_read_dma/arlen_r[1]/CLK (GTP_DFF_E)	u_npu/u_axi_bridge/u_ar_fifo/memory_r_0/DI[1] (GTP_RAM32X2DP)
+native SNR	slow	clk_npu	min (slow corner)	sequential timing path	0.324	0	u_npu/u_read_dma/arlen_r[2]/CLK (GTP_DFF_E)	u_npu/u_axi_bridge/u_ar_fifo/memory_r_1/DI[0] (GTP_RAM32X2DP)
+native SNR	slow	clk_npu	max (slow corner)	async timing path	5.085	1	u_npu/u_reset_npu_ctrl_n/rst_n_o/CLK (GTP_DFF_C)	u_npu/cur_desc_r[0]/C (GTP_DFF_CE)
+native SNR	slow	clk_npu	max (slow corner)	async timing path	5.085	1	u_npu/u_reset_npu_ctrl_n/rst_n_o/CLK (GTP_DFF_C)	u_npu/cur_desc_r[1]/C (GTP_DFF_CE)
+native SNR	slow	clk_npu	max (slow corner)	async timing path	5.085	1	u_npu/u_reset_npu_ctrl_n/rst_n_o/CLK (GTP_DFF_C)	u_npu/cur_desc_r[2]/C (GTP_DFF_CE)
+native SNR	slow	clk_npu	min (slow corner)	async timing path	0.652	1	u_sys/u_reset_ctrl/u_npu/release_sync_r/CLK (GTP_DFF_C)	u_npu/u_reset_npu_conv_n/rst_n_o/C (GTP_DFF_C)
+native SNR	slow	clk_npu	min (slow corner)	async timing path	0.652	1	u_sys/u_reset_ctrl/u_npu/release_sync_r/CLK (GTP_DFF_C)	u_npu/u_reset_npu_ctrl_n/rst_n_o/C (GTP_DFF_C)
+native SNR	slow	clk_npu	min (slow corner)	async timing path	1.104	1	u_npu/u_reset_npu_conv_n/rst_n_o/CLK (GTP_DFF_C)	u_npu/u_conv/active_r/C (GTP_DFF_C)

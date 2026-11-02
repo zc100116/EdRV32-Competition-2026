@@ -1,0 +1,28 @@
+compile
+W: Verilog-2020 = 1200
+W: Verilog-2008 = 1003
+W: Verilog-2038 = 575
+W: Sdm-2003 = 319
+W: Sdm-2000 = 297
+W: Verilog-2023 = 168
+W: Verilog-2039 = 65
+W: Public-4030 = 36
+W: Verilog-2019 = 25
+W: Verilog-2036 = 16
+W: Verilog-2006 = 10
+W: Sdm-2010 = 5
+W: Verilog-2021 = 3
+W: Sdm-2014 = 2
+
+synthesize
+W: Public-4008 = 15419
+W: Timing-4087 = 99
+W: Timing-4086 = 62
+C: ConstraintEditor-2002 = 37
+C: ConstraintEditor-2009 = 24
+W: UserConstraintEditor-4009 = 2
+W: Adm-4019 = 2
+
+device_map
+W: Public-4008 = 323
+W: DeviceMap-4011 = 8

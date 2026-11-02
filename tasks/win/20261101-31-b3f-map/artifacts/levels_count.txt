@@ -1,0 +1,13 @@
+Counts cover only paths present in native SNR; no 200-path export available.
+clk_cam0: paths=12, levels>=8=0
+clk_cam1: paths=12, levels>=8=0
+clk_sys: paths=12, levels>=8=3
+clk_npu: paths=12, levels>=8=3
+clk_pix: paths=12, levels>=8=0
+clk_serial: paths=6, levels>=8=0
+rst_clk: paths=12, levels>=8=0
+clk_mem: paths=20, levels>=8=3
+phy_dq_sysclk_0: paths=6, levels>=8=0
+phy_dq_sysclk_1: paths=6, levels>=8=0
+clk_eth: paths=18, levels>=8=0
+**default**: paths=6, levels>=8=0

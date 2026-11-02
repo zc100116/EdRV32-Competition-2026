@@ -1,0 +1,1 @@
+B3F background first start 2026-11-01 17:38:05 +08:00; stopped at user request (exact stop not recorded), then user reran. Device Map completed17:54:07. Card24 R PnR completed20:33:42. Activity window17:38:05-17:54:07 overlaps R; gaps not measured.

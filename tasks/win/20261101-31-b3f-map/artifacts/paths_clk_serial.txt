@@ -1,0 +1,7 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	clk_serial	max (slow corner)	sequential timing path	0.484	0	u_tmds/g_channel[0].u_slave/OCLK (GTP_OSERDES_E2)	u_tmds/g_channel[0].u_master/OSHIFTIN0 (GTP_OSERDES_E2)
+native SNR	slow	clk_serial	max (slow corner)	sequential timing path	0.484	0	u_tmds/g_channel[1].u_slave/OCLK (GTP_OSERDES_E2)	u_tmds/g_channel[1].u_master/OSHIFTIN0 (GTP_OSERDES_E2)
+native SNR	slow	clk_serial	max (slow corner)	sequential timing path	0.484	0	u_tmds/g_channel[2].u_slave/OCLK (GTP_OSERDES_E2)	u_tmds/g_channel[2].u_master/OSHIFTIN0 (GTP_OSERDES_E2)
+native SNR	slow	clk_serial	min (slow corner)	sequential timing path	1.809	0	u_tmds/g_channel[0].u_slave/OCLK (GTP_OSERDES_E2)	u_tmds/g_channel[0].u_master/OSHIFTIN1 (GTP_OSERDES_E2)
+native SNR	slow	clk_serial	min (slow corner)	sequential timing path	1.809	0	u_tmds/g_channel[1].u_slave/OCLK (GTP_OSERDES_E2)	u_tmds/g_channel[1].u_master/OSHIFTIN1 (GTP_OSERDES_E2)
+native SNR	slow	clk_serial	min (slow corner)	sequential timing path	1.809	0	u_tmds/g_channel[2].u_slave/OCLK (GTP_OSERDES_E2)	u_tmds/g_channel[2].u_master/OSHIFTIN1 (GTP_OSERDES_E2)

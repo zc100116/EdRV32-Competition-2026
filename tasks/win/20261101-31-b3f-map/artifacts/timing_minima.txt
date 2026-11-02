@@ -1,0 +1,4 @@
+('Setup', 'Slow', -0.507, 'clk_mem                clk_mem                     -0.507     -86.999            461         141043')
+('Hold', 'Slow', -3.778, 'clk_mem                phy_dq_sysclk_1             -3.778    -950.476            420            420')
+('Recovery', 'Slow', 3.897, 'clk_mem                clk_mem                      3.897       0.000              0          16005')
+('Removal', 'Slow', 0.374, 'clk_mem                clk_mem                      0.374       0.000              0          16005')

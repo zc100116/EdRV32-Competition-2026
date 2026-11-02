@@ -1,0 +1,7 @@
+Fabric_Inserter_User_Guide.pdf (PDS_2022.2-SP6.1/doc):
+Pages 9-10: Open Inserter from PDS menu/toolbar Inserter icon or Constraints .fic. Next to JtagHub; New DebugCore Unit.
+Pages 11-12: Trigger Parameters; depth 1024; Rising; Data Same As Trigger OFF; Storage Qualification OFF; only two trigger groups (retire_pc, retire).
+Pages 12-15: Net Connections -> Modify Connection -> Select Net -> Make Connections. clk_sys 100MHz. Data: ten 40-bit counter groups plus ila_cpu_r[63:0]; total464. Net identities must be confirmed after synthesis before connecting.
+Page17: Save .fic and close Inserter; run Map in PDS; PDS automatically inserts debug core.
+Pages43-48: ins_* commands belong to Inserter Tcl console, not pds_shell. pds_shell help probe reported ins_new unsupported; no insertion attempted in that shell.
+Fabric_Debugger_User_Guide.pdf PDF page36 (printed35): Capture Settings Position is a sample index; use approximately102 of1024 for the requested10% pre-trigger position. Save configuration/screenshot from actual UI; do not claim GUI screenshot acquired before user supplies it.

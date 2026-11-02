@@ -1,0 +1,13 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	clk_pix	max (slow corner)	sequential timing path	8.746	4	u_disp/u_scan/debt1_r[28]/CLK (GTP_DFF_CE)	u_disp/u_scan/N217/X[0] (GTP_APM_E2)
+native SNR	slow	clk_pix	max (slow corner)	sequential timing path	8.746	4	u_disp/u_scan/debt1_r[28]/CLK (GTP_DFF_CE)	u_disp/u_scan/N217/X[1] (GTP_APM_E2)
+native SNR	slow	clk_pix	max (slow corner)	sequential timing path	8.746	4	u_disp/u_scan/debt1_r[28]/CLK (GTP_DFF_CE)	u_disp/u_scan/N217/X[2] (GTP_APM_E2)
+native SNR	slow	clk_pix	min (slow corner)	sequential timing path	0.619	0	u_disp/de_pipe_r[0]/CLK (GTP_DFF_C)	u_disp/de_pipe_r[1]/D (GTP_DFF_C)
+native SNR	slow	clk_pix	min (slow corner)	sequential timing path	0.619	0	u_disp/de_pipe_r[1]/CLK (GTP_DFF_C)	u_disp/de_pipe_r[2]/D (GTP_DFF_C)
+native SNR	slow	clk_pix	min (slow corner)	sequential timing path	0.619	0	u_disp/de_pipe_r[2]/CLK (GTP_DFF_C)	u_disp/de_pipe_r[3]/D (GTP_DFF_C)
+native SNR	slow	clk_pix	max (slow corner)	async timing path	11.935	1	u_disp/u_reset_pix_scan_n/rst_n_o/CLK (GTP_DFF_C)	u_disp/de_pipe_r[0]/C (GTP_DFF_C)
+native SNR	slow	clk_pix	max (slow corner)	async timing path	11.935	1	u_disp/u_reset_pix_scan_n/rst_n_o/CLK (GTP_DFF_C)	u_disp/de_pipe_r[1]/C (GTP_DFF_C)
+native SNR	slow	clk_pix	max (slow corner)	async timing path	11.935	1	u_disp/u_reset_pix_scan_n/rst_n_o/CLK (GTP_DFF_C)	u_disp/de_pipe_r[2]/C (GTP_DFF_C)
+native SNR	slow	clk_pix	min (slow corner)	async timing path	0.652	1	u_sys/u_reset_ctrl/u_pix/release_sync_r/CLK (GTP_DFF_C)	u_disp/u_reset_pix_scan_n/rst_n_o/C (GTP_DFF_C)
+native SNR	slow	clk_pix	min (slow corner)	async timing path	1.239	1	u_disp/u_reset_pix_scan_n/rst_n_o/CLK (GTP_DFF_C)	u_disp/de_pipe_r[0]/C (GTP_DFF_C)
+native SNR	slow	clk_pix	min (slow corner)	async timing path	1.239	1	u_disp/u_reset_pix_scan_n/rst_n_o/CLK (GTP_DFF_C)	u_disp/de_pipe_r[1]/C (GTP_DFF_C)

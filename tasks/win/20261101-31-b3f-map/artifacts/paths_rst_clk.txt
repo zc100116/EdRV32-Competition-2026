@@ -1,0 +1,13 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
+native SNR	slow	rst_clk	max (slow corner)	sequential timing path	4.884	4	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/D (GTP_DFF_CE)
+native SNR	slow	rst_clk	max (slow corner)	sequential timing path	4.917	4	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[1]/D (GTP_DFF_CE)
+native SNR	slow	rst_clk	max (slow corner)	sequential timing path	4.917	4	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/CLK (GTP_DFF_CE)	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[5]/D (GTP_DFF_CE)
+native SNR	slow	rst_clk	min (slow corner)	sequential timing path	0.507	0	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_en/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_EN (GTP_GPLL)
+native SNR	slow	rst_clk	min (slow corner)	sequential timing path	0.559	0	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/gpll_dps_dir/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/DPS_DIR (GTP_GPLL)
+native SNR	slow	rst_clk	min (slow corner)	sequential timing path	0.619	0	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/cpd_lock_d[0]/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/cpd_lock_d[1]/D (GTP_DFF_C)
+native SNR	slow	rst_clk	max (slow corner)	async timing path	6.816	1	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/logic_rstn/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/cpd_lock_d[0]/C (GTP_DFF_C)
+native SNR	slow	rst_clk	max (slow corner)	async timing path	6.816	1	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/logic_rstn/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/cpd_lock_d[1]/C (GTP_DFF_C)
+native SNR	slow	rst_clk	max (slow corner)	async timing path	6.816	1	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/logic_rstn/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_cpd_ctrl/cpd_offset_cnt[0]/C (GTP_DFF_CE)
+native SNR	slow	rst_clk	min (slow corner)	async timing path	0.864	1	u_ddr3/u_ddrphy_top/u_ddrphy_rst_seq_rstn_sync/sig_async_r2[0]/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[0]/C (GTP_DFF_CE)
+native SNR	slow	rst_clk	min (slow corner)	async timing path	0.864	1	u_ddr3/u_ddrphy_top/u_ddrphy_rst_seq_rstn_sync/sig_async_r2[0]/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[1]/C (GTP_DFF_CE)
+native SNR	slow	rst_clk	min (slow corner)	async timing path	0.864	1	u_ddr3/u_ddrphy_top/u_ddrphy_rst_seq_rstn_sync/sig_async_r2[0]/CLK (GTP_DFF_C)	u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/cnt[2]/C (GTP_DFF_CE)

@@ -1,0 +1,28 @@
+License checkout: fabric_shell from G:\Program\pango\PDS_2022.2-SP6.1\new_pds_F4A80DA47D72.lic
+Compiling architecture definition.
+W: Warning : The license will invalid in 2 days. In order not to affect your usage, please update the license in time.
+
+Analyzing project file 'G:/codex_project/EdRV32-Competition-2026/build/board/card31_map_timing/full_map_timing.pds'.
+Executing : set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+Executing : set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676 successfully.
+
+
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top_map.adf -delay_type max -max_path 200 -nworst 1 -input_pins TRUE -force_to_run
+
+
+Process "Report Timing" started.
+Current time: Sun Nov  1 21:17:32 2026
+Compiling architecture definition.
+Analyzing project file 'G:/codex_project/EdRV32-Competition-2026/build/board/card31_map_timing/full_map_timing.pds'.
+Compiling verification operator library.
+Compiling common defs.
+Compiling prim grid devices.
+Compiling gate devices.
+Compiling gate operators.
+Building architecture model.
+Loading device packaging model.
+Reading design from pnr DB.
+E: Flow-0013: The input DB 'G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top_map.adf' should be of phase 'PNR'.
+Program Error Out.
+W: open run.log failed.
+E: Failed to execute the script : 
