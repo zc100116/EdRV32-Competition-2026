@@ -265,6 +265,7 @@ static void network_status_step(void)
 void showcase_communication_step(struct sched_task *task)
 {
     uint32_t events = sched_take(task);
+    (void)platform_milliseconds();
     if (events & 1) {
         input_source = 1;
         virtual_input_uart_receive();

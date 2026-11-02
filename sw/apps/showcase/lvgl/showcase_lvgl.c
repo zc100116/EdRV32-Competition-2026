@@ -284,7 +284,7 @@ static void log_message(lv_log_level_t level, const char *text)
 }
 
 static uint32_t dirty_bytes;
-static bool cleaned_all;
+static bool clean_all_needed;
 static bool flush_pending;
 static bool flush_submitted;
 static const uint16_t *pending_pixels;
@@ -293,26 +293,22 @@ static volatile uint32_t display_events;
 static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
 {
     uint32_t bytes = (uint32_t)(area->x2 - area->x1 + 1) * 2u;
-    dirty_bytes += bytes * (uint32_t)(area->y2 - area->y1 + 1);
-    if (!cleaned_all) {
-        if (dirty_bytes > 32768u) {
-            cache_clean_all();
-            cleaned_all = true;
-        } else {
-            for (int32_t y = area->y1; y <= area->y2; ++y)
-                cache_clean((uintptr_t)pixels + (uint32_t)y * STRIDE +
-                            (uint32_t)area->x1 * 2u, bytes);
-        }
-    } else {
-        /* Later flush areas can be written after the earlier clean-all. */
-        cache_clean_all();
+    uint32_t covered = (((uint32_t)area->x2 * 2u + 33u) & ~31u) -
+                       (((uint32_t)area->x1 * 2u) & ~31u);
+    dirty_bytes += covered * (uint32_t)(area->y2 - area->y1 + 1);
+    if (dirty_bytes > 32768u) clean_all_needed = true;
+    if (!clean_all_needed) {
+        for (int32_t y = area->y1; y <= area->y2; ++y)
+            cache_clean((uintptr_t)pixels + (uint32_t)y * STRIDE +
+                        (uint32_t)area->x1 * 2u, bytes);
     }
     if (lv_display_flush_is_last(disp)) {
+        if (clean_all_needed) cache_clean_all();
         pending_pixels = (const uint16_t *)pixels;
         flush_pending = true;
         flush_submitted = false;
         dirty_bytes = 0;
-        cleaned_all = false;
+        clean_all_needed = false;
         /* FRAME ISR wakes GUI; flush returns while DISP still owns front. */
     } else lv_display_flush_ready(disp);
 }
