@@ -17,6 +17,7 @@ module edrv32_cpu_frontend (
     input wire redirect_pop_i,
     input wire [31:0] redirect_return_pc_i,
     input wire d_redirect_valid_i,
+    input wire d_redirect_slot_i,
     input wire [31:0] d_redirect_pc_i,
     input wire [36:0] d_redirect_ras_i,
     input wire d_redirect_push_i,
@@ -154,6 +155,7 @@ module edrv32_cpu_frontend (
         .valid_count_o(decode_valid_count_o),
         .flush_i(redirect_w),
         .keep_head_i(d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0),
+        .keep_pair_i(d_redirect_slot_i),
         .count_o(ib_count_o)
     );
     genvar slot;

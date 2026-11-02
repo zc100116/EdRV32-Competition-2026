@@ -29,6 +29,7 @@ module tb;
     reg [11:0] update_index_i=0;
     reg [1:0] decode_pop_count_i=0;
     wire [357:0] decode_data_o;
+    wire [5:0] decode_index_hi_o;
     wire [1:0] decode_valid_count_o;
     wire [2:0] ib_count_o;
     wire ic_req_valid_o;
@@ -59,7 +60,6 @@ module tb;
     integer waits=0;
     integer blocked=0;
     integer predicted=0;
-    integer crossed=0;
     integer errors=0;
     integer high_redirects=0;
     integer d_redirects=0;
@@ -67,7 +67,6 @@ module tb;
     integer held_d_target=0;
     integer i;
     integer lane;
-    integer length_bytes;
     reg [178:0] record_value;
     reg [31:0] expected_raw;
     reg [31:0] expected_instr;
@@ -85,6 +84,7 @@ module tb;
         .redirect_pop_i(redirect_pop_i),
         .redirect_return_pc_i(redirect_return_pc_i),
         .d_redirect_valid_i(d_redirect_valid_i),
+        .d_redirect_slot_i(1'b0),
         .d_redirect_pc_i(d_redirect_pc_i),
         .d_redirect_ras_i(d_redirect_ras_i),
         .d_redirect_push_i(d_redirect_push_i),
@@ -101,7 +101,7 @@ module tb;
         .update_index_i(update_index_i),
         .decode_pop_count_i(decode_pop_count_i),
         .decode_data_o(decode_data_o),
-        .decode_index_hi_o(),
+        .decode_index_hi_o(decode_index_hi_o),
         .decode_operand_addr_o(unused_operand_addr_w),
         .decode_valid_count_o(decode_valid_count_o),
         .ib_count_o(ib_count_o),
@@ -159,58 +159,49 @@ module tb;
                 if(decode_pop_count_i==2)pairs=pairs+1;
                 for(lane=0;lane<integer'(decode_pop_count_i);lane=lane+1)begin
                     record_value=decode_data_o[lane*179+:179];
-                    length_bytes=(0 && memory[expected_pc/2][1:0]!=3)?2:4;
-                    expected_raw=length_bytes==2?{16'b0,memory[expected_pc/2]}:
-                        {memory[expected_pc/2+1],memory[expected_pc/2]};
+                    expected_raw={memory[expected_pc/2+1],memory[expected_pc/2]};
                     expected_instr=expected_raw;
-                    if(length_bytes==2)begin
-                        case(expected_raw[15:0])
-                            16'h0001:expected_instr=32'h00000013;
-                            16'h0085:expected_instr=32'h00108093;
-                            default:$fatal(1,"FAIL unexpected test encoding %h",expected_raw);
-                        endcase
-                    end
-                    expected_error=((expected_pc&~7)=='h100) ||
-                        (length_bytes==4 && ((expected_pc+2)&~7)=='h100);
+                    expected_error=(expected_pc&~7)=='h100;
                     if(record_value[31:0]!==32'(expected_pc) ||
                         record_value[63:32]!==expected_instr ||
                         record_value[95:64]!==expected_raw ||
-                        record_value[96] !== (length_bytes==2) || record_value[97] ||
+                        record_value[96] || record_value[97] ||
                         record_value[98]!==expected_error)
                         $fatal(1,"FAIL frontend PC expected=%h actual=%h instr=%h/%h raw=%h/%h flags=%b time=%t",
                             expected_pc,record_value[31:0],expected_instr,record_value[63:32],
                             expected_raw,record_value[95:64],record_value[100:96],$time);
-                    if(record_value[141:133]!==9'(expected_pc>>2))
+                    if(record_value[141:133] !== (9'(expected_pc>>2)^9'h1ff) ||
+                        decode_index_hi_o[lane*3+:3] !== (3'(expected_pc>>11)^3'h7))
                         $fatal(1,"FAIL saved gshare index PC=%h",expected_pc);
                     if(record_value[100])begin
-                        if(expected_pc!=(0?6:'hc) || record_value[132:101]!='h40)
+                        if(expected_pc!='hc || record_value[132:101]!='h40)
                             $fatal(1,"FAIL predicted target PC=%h target=%h",
                                 expected_pc,record_value[132:101]);
                         predicted=predicted+1;
                     end
-                    if(expected_pc==6 && length_bytes==4)crossed=crossed+1;
                     if(expected_error)errors=errors+1;
                     retired=retired+1;
                     if(held_d_redirect)begin
                         expected_pc=held_d_target;held_d_redirect=0;
                     end else
-                        expected_pc=(expected_pc==(0?6:'hc))?'h40:expected_pc+length_bytes;
+                        expected_pc=(expected_pc=='hc)?'h40:expected_pc+4;
                 end
             end
         end
     end
     initial begin
         halt_i=1;
-        for(i=0;i<4096;i=i+1)memory[i]=0?16'h0001:(i[0]?16'h0000:16'h0013);
-        if(0)begin
-            memory[0]=16'h0085;
-            memory[1]=16'h0113;memory[2]=16'h0070;
-            memory[3]=16'h006f;memory[4]=16'h03a0;
-            memory['hfe/2]=16'h0213;memory['h100/2]=16'h0010;
-        end
+        for(i=0;i<4096;i=i+1)memory[i]=i[0]?16'h0000:16'h0013;
         memory['hc/2]=16'h006f;memory['he/2]=16'h0340;
         repeat(2)@(negedge clk_i);rst_n_i=1;
-        update_valid_i=1;update_pc_i=0?6:'hc;update_target_i='h40;update_type_i=3;
+        // Train a full 12-bit history before fetching, then keep it unchanged.
+        update_valid_i=1;update_pc_i='h1000;update_target_i='h1400;
+        update_type_i=0;update_taken_i=1;
+        for(i=0;i<12;i=i+1)begin
+            update_index_i=12'h400 ^ 12'((1<<i)-1);
+            @(negedge clk_i);
+        end
+        update_pc_i='hc;update_target_i='h40;update_type_i=3;
         update_taken_i=1;
         @(negedge clk_i);update_valid_i=0;halt_i=0;
         for(cycle_number=0;cycle_number<1200;cycle_number=cycle_number+1)begin
@@ -221,22 +212,22 @@ module tb;
             halt_i=(cycle_number>=500 && cycle_number<520);
             invalidate_i=(cycle_number==900);
             if(cycle_number>=600 && high_redirects==0 && model_pending && delay_left>1)begin
-                redirect_valid_i=1;redirect_pc_i='h180;
-                d_redirect_valid_i=1;d_redirect_pc_i='h1a0;
+                redirect_valid_i=1;redirect_pc_i='h1180;
+                d_redirect_valid_i=1;d_redirect_pc_i='h11a0;
                 high_redirects=high_redirects+1;decode_pop_count_i=0;
             end else if(cycle_number>=850 && d_redirects==0 && model_pending &&
                 decode_valid_count_o!=0)begin
-                d_redirect_valid_i=1;d_redirect_pc_i='h200;
+                d_redirect_valid_i=1;d_redirect_pc_i='h1200;
                 d_redirects=d_redirects+1;decode_pop_count_i=0;
             end
         end
         @(negedge clk_i);halt_i=1;decode_pop_count_i=0;
         if(accepted<50 || retired<100 || pairs==0 || killed==0 || waits==0 ||
-            blocked==0 || predicted==0 || (0 && crossed==0) || errors==0 ||
+            blocked==0 || predicted==0 || errors==0 ||
             high_redirects==0 || d_redirects==0)
-            $fatal(1,"FAIL frontend coverage accepted=%d retired=%d kill=%d predicted=%d cross=%d errors=%d",
-                accepted,retired,killed,predicted,crossed,errors);
-        $display("PASS frontend RVC=%0d requests=%0d instructions=%0d pairs=%0d kill=%0d wait=%0d backpressure=%0d cross=%0d errors=%0d",
-            0,accepted,retired,pairs,killed,waits,blocked,crossed,errors);$finish;
+            $fatal(1,"FAIL frontend coverage accepted=%d retired=%d kill=%d predicted=%d errors=%d",
+                accepted,retired,killed,predicted,errors);
+        $display("PASS frontend requests=%0d instructions=%0d pairs=%0d kill=%0d wait=%0d backpressure=%0d errors=%0d",
+            accepted,retired,pairs,killed,waits,blocked,errors);$finish;
     end
 endmodule

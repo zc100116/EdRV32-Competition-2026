@@ -22,6 +22,7 @@ module edrv32_cpu_ib (
     // A stalled D redirect retains its head; older redirects discard the whole queue.
     input wire flush_i,
     input wire keep_head_i,
+    input wire keep_pair_i,
     output wire [2:0] count_o
 );
     localparam RECORD_BITS = 179;
@@ -32,7 +33,9 @@ module edrv32_cpu_ib (
     reg [1:0] write_ptr_r;
     reg [2:0] count_r;
     wire [1:0] read_next_w;
-    assign read_next_w = read_ptr_r + 1'b1;
+    wire [1:0] keep_count_w;
+    assign keep_count_w = keep_pair_i ? 2'd2 : 2'd1;
+    assign read_next_w = read_ptr_r + keep_count_w;
     // Each output slice owns its read-select FFs; all copies take the same next pointer.
     genvar read_slot;
     genvar read_slice;
@@ -119,7 +122,7 @@ module edrv32_cpu_ib (
         end else if (flush_i) begin
             read_ptr_r <= keep_head_i ? read_ptr_r : 2'd0;
             write_ptr_r <= keep_head_i ? read_next_w : 2'd0;
-            count_r <= keep_head_i ? 3'd1 : 3'd0;
+            count_r <= keep_head_i ? {1'b0, keep_count_w} : 3'd0;
         end else begin
             read_ptr_r <= read_ptr_r + pop_count_i;
             write_ptr_r <= write_ptr_r + push_count_i;

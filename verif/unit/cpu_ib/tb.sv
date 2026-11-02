@@ -16,6 +16,11 @@ module tb;
     wire [1:0] valid_count_o;
     reg flush_i=0;
     reg keep_head_i=0;
+    reg keep_pair_i=0;
+    reg [5:0] push_index_hi_i=0;
+    wire [5:0] index_hi_o;
+    reg [2:0] model_index[0:dut.DEPTH-1];
+    integer keep_pair_seen=0;
     wire [2:0] count_o;
     reg [178:0] model[0:dut.DEPTH-1];
     integer count=0;
@@ -37,8 +42,8 @@ module tb;
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_i),
         .push_data_i(push_data_i),
-        .push_index_hi_i(6'b0),
-        .index_hi_o(),
+        .push_index_hi_i(push_index_hi_i),
+        .index_hi_o(index_hi_o),
         .free_count_o(free_count_o),
         .pop_count_i(pop_count_i),
         .data_o(data_o),
@@ -46,6 +51,7 @@ module tb;
         .valid_count_o(valid_count_o),
         .flush_i(flush_i),
         .keep_head_i(keep_head_i),
+        .keep_pair_i(keep_pair_i),
         .count_o(count_o)
     );
     task automatic check;
@@ -56,6 +62,9 @@ module tb;
             if(free_count_o!==3'(integer'(dut.DEPTH)-count))
                 $fatal(1,"FAIL IB next-cycle free expected=%d actual=%d time=%t",
                     integer'(dut.DEPTH)-count,free_count_o,$time);
+            if ((count>0 && index_hi_o[2:0]!==model_index[0]) ||
+                (count>1 && index_hi_o[5:3]!==model_index[1]))
+                $fatal(1,"FAIL IB index metadata");
             if(count>0 && data_o[178:0]!==model[0])
                 $fatal(1,"FAIL IB head expected=%h actual=%h time=%t",
                     model[0],data_o[178:0],$time);
@@ -82,8 +91,10 @@ module tb;
             push_count_i=2'(pushes);pop_count_i=2'(pops);
             push_data_i={19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom,
                 19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom};
+            push_index_hi_i=6'($urandom);
             flush_i=(i%29==0 && i>4);
             keep_head_i=flush_i && count>0 && (i%2==0);
+            keep_pair_i=keep_head_i && count>=2 && (i%3==0);
             #1;
             if(free_count_o!==3'(space))$fatal(1,"FAIL IB free slots");
             // U-08: changing same-cycle D consumption cannot create F2 space.
@@ -96,15 +107,22 @@ module tb;
                 delayed_space_seen++;
             end
             if(flush_i)begin
-                count=keep_head_i?1:0;
+                count=keep_head_i?(keep_pair_i?2:1):0;
+                if(keep_pair_i)keep_pair_seen++;
                 flush_seen=flush_seen+1;
                 if(keep_head_i)keep_seen=keep_seen+1;
             end
             else begin
-                for(j=0;j<count-pops;j=j+1)model[j]=model[j+pops];
+                for(j=0;j<count-pops;j=j+1)begin
+                    model[j]=model[j+pops];model_index[j]=model_index[j+pops];
+                end
                 count=count-pops;
-                if(pushes>0)model[count]=push_data_i[178:0];
-                if(pushes==2)model[count+1]=push_data_i[357:179];
+                if(pushes>0)begin
+                    model[count]=push_data_i[178:0];model_index[count]=push_index_hi_i[2:0];
+                end
+                if(pushes==2)begin
+                    model[count+1]=push_data_i[357:179];model_index[count+1]=push_index_hi_i[5:3];
+                end
                 count=count+pushes;
                 if(pushes>0 && pops>0)simultaneous_seen=simultaneous_seen+1;
             end
@@ -113,7 +131,7 @@ module tb;
             if(count==integer'(dut.DEPTH))full_seen=full_seen+1;
         end
         if((full_seen==0) || (empty_seen==0) || (simultaneous_seen==0) ||
-            (flush_seen==0) || (keep_seen==0) || (delayed_space_seen==0))
+            (flush_seen==0) || (keep_seen==0) || (keep_pair_seen==0) || (delayed_space_seen==0))
             $fatal(1,"FAIL IB missing coverage");
         $display("PASS U-08 full=%0d empty=%0d simultaneous=%0d flush=%0d",
             full_seen,empty_seen,simultaneous_seen,flush_seen);$finish;
