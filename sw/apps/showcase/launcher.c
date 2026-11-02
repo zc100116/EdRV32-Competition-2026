@@ -5,6 +5,7 @@
  */
 #include "apps.h"
 #include "platform.h"
+#include "runtime.h"
 #include "lvgl/showcase_lvgl.h"
 LV_FONT_DECLARE(showcase_title_24);
 LV_FONT_DECLARE(showcase_title_32);
@@ -45,6 +46,8 @@ static void style(lv_obj_t *card, bool focused)
 }
 static void card_event(lv_event_t *event)
 {
+    /* Deleting the old screen moves group focus while another app is active. */
+    if (!showcase_launcher_active()) return;
     unsigned index = (unsigned)(uintptr_t)lv_event_get_user_data(event);
     lv_event_code_t code = lv_event_get_code(event);
     style(lv_event_get_current_target(event), code != LV_EVENT_DEFOCUSED);

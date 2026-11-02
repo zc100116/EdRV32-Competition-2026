@@ -4,7 +4,7 @@ SHOWCASE_LVGL_SOURCES := $(shell cd $(ROOT) && find third_party/lvgl/src \
     third_party/lvgl/demos/widgets third_party/lvgl/demos/benchmark -name '*.c' | sort)
 PROGRAM_SOURCES += $(SHOWCASE_LVGL_SOURCES) third_party/lvgl/demos/lv_demos.c \
     sw/apps/showcase/lvgl/draw_rnd.c sw/apps/showcase/lvgl/showcase_lvgl.c \
-    sw/apps/showcase/lvgl/freestanding.c sw/drivers/mem_xbar.c \
+    sw/drivers/mem_xbar.c \
     sw/apps/showcase/fonts/title_24.c sw/apps/showcase/fonts/title_32.c \
     build/showcase/lvgl_assets.c
 CFLAGS_EXTRA += -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \

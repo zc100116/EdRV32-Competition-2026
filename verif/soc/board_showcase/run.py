@@ -2,7 +2,7 @@
 # File: run.py
 # Design: showcase 4.1--4.4; CLAUDE 9.2 backdoor software test.
 # Description: Run actual showcase ELF on the B3R board with sparse DDR preload.
-# Clock domain: host tool; unmodified board system/video clocks.
+# Clock domain: host tool; 100 MHz system/74.25 MHz pixels; TMDS serial abstracted.
 from pathlib import Path
 import struct
 import subprocess

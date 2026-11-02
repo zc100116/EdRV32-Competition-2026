@@ -49,7 +49,7 @@ SECTIONS
     {
         *(.noinit .noinit.*)
     } > DDR_APP :bss
-    /* Design showcase 4.5: fixed slot below the final 16 MiB stack region. */
+    /* Design showcase 4.5: last 16 MiB is the fixed game pack; stack grows below it. */
     .game_pack (ORIGIN(DDR_APP) + 0x03000000) (NOLOAD) :
     {
         __game_pack_start = .;

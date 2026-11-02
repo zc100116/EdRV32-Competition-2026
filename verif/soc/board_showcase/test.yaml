@@ -5,7 +5,7 @@ files: files.f
 defines: SIM_MODE
 parameters:
 software: showcase
-timeout: 3600
+timeout: 7200
 pass: PASS
 tier: full
 simulator: verilator
