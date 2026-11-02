@@ -30,5 +30,6 @@ struct app {
 void app_wake_at(uint64_t mtime);
 void app_return(void);
 uint32_t app_events(void);
+uint64_t app_busy_ticks(void);
 void app_gui_pause(uint8_t paused);
 #endif

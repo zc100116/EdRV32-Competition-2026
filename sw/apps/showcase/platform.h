@@ -25,14 +25,19 @@ uint64_t platform_ticks(void);
 uint32_t platform_clock_hz(void);
 uint32_t platform_milliseconds(void);
 uint32_t platform_hardware(void);
+/* Returns PLATFORM_* bits (not VI_*); KEY4/virtual ESC => PLATFORM_BACK.
+ * platform_virtual_input() returns the unmodified virtual VI_* controller state. */
 uint32_t platform_keys(void);
 struct virtual_input_state platform_virtual_input(void);
 uint32_t platform_frames(void);
 /* NES owns RND/DISP while GUI is paused; callbacks receive captured IRQ results.
- * NULL restores core GUI callbacks. Call only from enter/exit, never in an IRQ.
+ * NULL restores core GUI callbacks. Call from enter/step/exit, never in an IRQ.
  */
 void platform_media_callbacks(rnd_callback rnd_callback,
                               engine_irq_callback disp_callback, void *context);
+/* Nonblocking: after requesting stop, call from later steps until true,
+ * then restore media callbacks and call app_gui_pause(0). */
+int platform_display_idle(void);
 void platform_puts(const char *text);
 void platform_put_u32(uint32_t value);
 void platform_put_hex(uint32_t value);
