@@ -6,6 +6,7 @@
 import argparse
 from concurrent.futures import ProcessPoolExecutor
 import csv
+import importlib.util
 from itertools import product
 import json
 from pathlib import Path
@@ -49,6 +50,43 @@ def prepare():
         for command in (['git', 'rev-parse', 'HEAD'], ['riscv-none-elf-gcc', '--version'],
                         ['spike', '--help'], ['python3', '--version']):
             subprocess.run(command, stdout=log, stderr=log, check=True)
+
+
+def legacy():
+    snapshot = OUT / 'legacy'
+    snapshot.mkdir(parents=True, exist_ok=True)
+    for repo, revision, destination in ((ROOT, '7c63c3b', snapshot),
+                                       (ROOT / 'third_party/coremark', 'HEAD',
+                                        snapshot / 'third_party/coremark')):
+        archive = OUT / 'legacy.tar'
+        subprocess.run(['git', '-C', str(repo), 'archive', revision,
+                        '--output=' + str(archive)], check=True)
+        subprocess.run(['tar', '-xf', str(archive), '-C', str(destination)], check=True)
+        archive.unlink()
+    spec = importlib.util.spec_from_file_location('legacy_b2', snapshot / 'tools/cpu/b2_measure.py')
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    builder.OUT = ROOT / 'build/cpu_uarch_eval'
+    out, elf = builder.build('r05', 0, 'tuned')
+    symbols = subprocess.check_output(['riscv-none-elf-nm', str(elf)], text=True)
+    stop = next(line.split()[0] for line in symbols.splitlines()
+                if line.endswith(' T stop_time'))
+    debug = out / 'debug.cmd'
+    debug.write_text(f'until pc 0 {stop}\nrs 1\nquit\n')
+    regions = json.loads((snapshot / 'rtl/include/soc_address_map.json').read_text())['regions']
+    memory = ','.join(f"{r['base']}:{r['size']}" for r in regions
+                      if r['name'] in ('ROM', 'SRAM'))
+    command = ['spike', '--isa=rv32im_zicsr_zifencei_zicntr_zihpm', '--priv=m',
+               '--pmpregions=0', '--no-dm', '-m' + memory + ',0x40007000:0x1000',
+               '--pc=0x10000000', '--disable-dtb', '-d', f'--debug-cmd={debug}',
+               '-l', '--log-commits', f'--log={out}/spike.log', str(elf)]
+    (out / 'spike_command.txt').write_text(shlex.join(command) + '\n')
+    with (out / 'console.log').open('w') as log:
+        subprocess.run(command, stdout=log, stderr=log, check=True)
+    program, symbols, trace = program_and_trace(out)
+    result = simulate(program, trace, symbols['start_time'], symbols['stop_time'])
+    (OUT / 'legacy-v0.json').write_text(json.dumps(result, indent=2) + '\n')
+    print(f"Legacy RVC=0 tuned: {result['cycles']} cycles; report: 2306322", flush=True)
 
 
 def load_input():
@@ -107,9 +145,7 @@ def scan(jobs):
             rows.append(row)
             write_csv(OUT / 'scan.csv', rows)
             print(json.dumps(row), flush=True)
-        # Rank distinct sizes by V3 cycles, then smaller total array storage on ties.
-        best = sorted((r for r in rows if r['variant'] == 'V3'),
-                      key=lambda r: (r['cycles'], storage(r)))[:2]
+        best = best_sizes(rows)
         configs = [(variant, r['btb'], r['gshare'], r['ras'], 1) for r in best
                    for variant in ('V1', 'V2', 'V2s', 'V3s')]
         lanes = []
@@ -135,15 +171,27 @@ def storage(row):
         2 * row['gshare'] + 32 * row['ras'])
 
 
+def best_sizes(rows):
+    # Choose the fastest RAS for each BTB/PHT size; break ties by storage.
+    ranked = sorted((r for r in rows if r['variant'] == 'V3'),
+                    key=lambda r: (r['cycles'], storage(r)))
+    sizes = {}
+    for row in ranked:
+        sizes.setdefault((row['btb'], row['gshare']), row)
+    return list(sizes.values())[:2]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('phase', choices=('prepare', 'calibrate', 'scan'))
+    parser.add_argument('phase', choices=('prepare', 'calibrate', 'scan', 'legacy'))
     parser.add_argument('--jobs', type=int, default=1, help='parallel model processes')
     args = parser.parse_args()
     if args.phase == 'prepare':
         prepare()
     elif args.phase == 'calibrate':
         calibrate()
+    elif args.phase == 'legacy':
+        legacy()
     else:
         scan(args.jobs)
 

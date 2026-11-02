@@ -82,7 +82,7 @@ class Pipeline(unittest.TestCase):
             options = dict(zip(('btb_entries', 'gshare_entries', 'ras_entries'), sizes))
             self.assertEqual(run(stream, variant), run(stream, variant, **options))
         options = dict(perfect_frontend=True, perfect_prediction=True)
-        for older in ('branch', 'jal'):
+        for older in ('branch', 'jal', 'jalr'):
             for younger in ('branch', 'jal'):
                 stream = [instruction(0, older, target=4),
                           instruction(4, younger, target=8)]

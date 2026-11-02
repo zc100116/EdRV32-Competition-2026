@@ -75,3 +75,29 @@ the reported sequence IPC is instructions divided by greedy issue groups.
 The seven model tests exercise operand decoding, WAW/RAW, failure priority,
 control boundaries, fetch straddling, cold gshare saturation, BTB position/capacity
 conflicts, and RAS overflow plus correction after a cold call.
+
+The 2026-11-02 predictor / pipe-1 evaluation uses the current standalone port,
+GCC 15.2 tuned flags, `rv32im_zicsr_zifencei`, and ten iterations:
+
+```sh
+python3 tools/cpu/eval/run_predictor_eval.py prepare
+python3 tools/cpu/eval/run_predictor_eval.py calibrate
+flock -s /tmp/edrv32-sim.lock python3 tools/cpu/eval/run_predictor_eval.py scan --jobs 2
+python3 tools/cpu/eval/run_predictor_eval.py legacy
+```
+
+`calibrate` compares event/cycle ratios against card 40 (`874bbf53`); it records
+errors without fitting parameters. `scan` writes `scan.csv`, `lanes.csv`, and
+`indices.csv` under `build/cpu_predictor_eval/`. It tests all 32 predictor sizes
+on each of V0/V3, then the two fastest V3 configurations on V1/V2/V2s/V3s.
+Each BTB/PHT size keeps its fastest RAS; ties use smaller array storage. `V3s` is V3 with at most one control transfer
+per issued pair. The index comparison covers current and both winning sizes
+with `PC >> 2`; the main scan keeps current RTL's `PC >> 1`. Speedups always
+use V0 32/512/4 with `PC >> 1`. `--jobs` selects the number of model processes; this evaluation finishes
+locally with at most two, under the shared simulation lock. `legacy` reconstructs the old 7c63c3b input
+in `build/` and replays default V0 (RVC=0 tuned: 2,306,322 cycles).
+
+Individual replays accept `--btb-entries {32,64,128,256}`,
+`--gshare-entries {512,1024,2048,4096}`, `--ras-entries {4,8}`, and
+`--gshare-pc-shift {1,2}`. Omitted sizes retain the selected variant's original
+configuration; the omitted shift remains 1, preserving earlier evaluations.
