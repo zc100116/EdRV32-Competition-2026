@@ -407,7 +407,6 @@ void showcase_lvgl_init(void)
     lv_obj_set_hidden(pointer_cursor, true);
     lv_indev_set_cursor(pointer, pointer_cursor);
     lv_memzero((void *)front, sizeof(buffers[0]));
-    cache_clean_all();
     showcase_gui_restore();
     platform_puts("LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32\r\n");
 }
@@ -438,6 +437,14 @@ void showcase_gui_step(struct sched_task *task)
 }
 void showcase_gui_restore(void)
 {
+    /* The caller already observed stopped DISP/RND. Clean with IRQs enabled;
+     * only completion acknowledgement and the new scan setup are atomic. */
+    cache_clean_all();
+    uint32_t state = virtual_input_lock();
+    engine_irq_clear(ENGINE_DISP, EDRV32_DISP_IRQ_STAT_FRAME_MASK |
+        EDRV32_DISP_IRQ_STAT_SWITCH_MASK | EDRV32_DISP_IRQ_STAT_SWITCH1_MASK);
+    mmio_write32(EDRV32_RND_BASE + EDRV32_RND_IRQ_STAT_OFFSET,
+                 EDRV32_RND_IRQ_STAT_DONE_MASK);
     platform_media_callbacks(NULL, NULL, NULL);
     /* LVGL already swapped its draw buffer when flush returned. On a stopped
      * scan, the complete pending image becomes front even without SWITCH. */
@@ -446,13 +453,13 @@ void showcase_gui_restore(void)
     /* First enabled FRAME has no SWITCH; establish front before drawing back. */
     scan_started = false;
     display_events = 0;
-    lv_display_flush_ready(display);
-    cache_clean_all();
     disp_l0_scroll(0, 0);
     disp_layer_enable(DISP_L1, 0);
     disp_submit(DISP_L0, rnd_physical(front), STRIDE);
     disp_layer_enable(DISP_L0, 1);
     engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
+    virtual_input_unlock(state);
+    lv_display_flush_ready(display);
     lv_obj_invalidate(lv_screen_active());
     lv_obj_invalidate(lv_layer_top());
     lv_obj_invalidate(lv_layer_sys());
