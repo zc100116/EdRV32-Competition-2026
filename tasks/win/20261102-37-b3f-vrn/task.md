@@ -1,5 +1,7 @@
 # 任务卡 20261102-37-b3f-vrn：去掉 PIX/GEO 的整版（B3F-VRN），布局布线并上板
 
+> **暂缓（2026-11-02，用户）**：等 T-FANOUT-RND2（RND 剩余高扇出网络）合入后，协调者更新本卡的代码 commit 再下发。在此之前不要开始。
+
 ## 1. 目标
 
 用新顶层 `edrv32_fpga_board_vrn_top`（B3F 去掉 PIX 和 GEO，保留 CPU、DDR、VIN、RND、DISP、NPU、ETH 和 CPU 计数器 ILA）跑一遍综合、插入 ILA、Device Map、布局布线、bitstream、上板冒烟。看去掉这两个模块后，整版能不能在可接受的时间内布通。
