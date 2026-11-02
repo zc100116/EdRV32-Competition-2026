@@ -1,0 +1,40 @@
+Core Insertion Complete.
+W: Public-4008: Instance 'u_sys_subsys/u_reset_sys_apb_decoder_n/rst_n_o' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[2]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[3]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[9]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[10]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[11]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[12]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[13]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[14]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[15]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[17]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_rden[19]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[2]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[3]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[4]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[5]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[6]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[7]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[8]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[9]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[10]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[11]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[12]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[13]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[14]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[15]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[17]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_CORES/u_debug_core_0/u_hub_data_decode/conf_sel_int[19]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_cpu_subsys/u_core/u_frontend/u_ib/g_read_slot[1].g_read_slice[2].read_ptr_r_copy[0]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+W: Public-4008: Instance 'u_cpu_subsys/u_core/u_frontend/u_ib/g_read_slot[1].g_read_slice[2].read_ptr_r_copy[1]' of 'GTP_DFF_C' unit is dangling and will be cleaned.
+Action dev_map: Real time elapsed is 0h:0m:47s
+Action dev_map: CPU time elapsed is 0h:0m:2s
+Action dev_map: Process CPU time elapsed is 0h:0m:2s
+Action dev_map: Peak memory pool usage is 712 MB

@@ -1,0 +1,71 @@
+seq=113 ts=1793596934188 [tx] 1<CR>
+seq=114 ts=1793596934197 [rx] Iterations default: 10
+seq=115 ts=1793596934197 [rx] Iterations input: decimal 1..4294967295 then Enter; Enter selects default
+seq=116 ts=1793596936873 [tx] 5000<CR>
+seq=117 ts=1793596936877 [rx] Iterations: 5000
+seq=118 ts=1793596936877 [rx] HPM rounds: 2
+seq=119 ts=1793596950782 [rx] HPM round: 1
+seq=120 ts=1793596950782 [rx] HPM first event: 1
+seq=121 ts=1793596950782 [rx] HPM last event: 8
+seq=122 ts=1793596950782 [rx] HPM round cycles: 1387628279
+seq=123 ts=1793596950782 [rx] HPM round instructions: 1441025033
+seq=124 ts=1793596950782 [rx] CRC seed: 0x0000e9f5
+seq=125 ts=1793596950782 [rx] CRC list: 0x0000e714
+seq=126 ts=1793596950782 [rx] CRC matrix: 0x00001fd7
+seq=127 ts=1793596950782 [rx] CRC state: 0x00008e3a
+seq=128 ts=1793596950782 [rx] CRC final: 0x0000bd59
+seq=129 ts=1793596950782 [rx] CRC seed result: PASS
+seq=130 ts=1793596950782 [rx] CRC list result: PASS
+seq=131 ts=1793596950782 [rx] CRC matrix result: PASS
+seq=132 ts=1793596950782 [rx] CRC state result: PASS
+seq=133 ts=1793596950782 [rx] CRC result: PASS
+seq=134 ts=1793596964705 [rx] HPM round: 2
+seq=135 ts=1793596964705 [rx] HPM first event: 9
+seq=136 ts=1793596964705 [rx] HPM last event: 16
+seq=137 ts=1793596964705 [rx] HPM round cycles: 1387628217
+seq=138 ts=1793596964705 [rx] HPM round instructions: 1441025033
+seq=139 ts=1793596964705 [rx] CRC seed: 0x0000e9f5
+seq=140 ts=1793596964705 [rx] CRC list: 0x0000e714
+seq=141 ts=1793596964705 [rx] CRC matrix: 0x00001fd7
+seq=142 ts=1793596964705 [rx] CRC state: 0x00008e3a
+seq=143 ts=1793596964705 [rx] CRC final: 0x0000bd59
+seq=144 ts=1793596964705 [rx] CRC seed result: PASS
+seq=145 ts=1793596964705 [rx] CRC list result: PASS
+seq=146 ts=1793596964705 [rx] CRC matrix result: PASS
+seq=147 ts=1793596964705 [rx] CRC state result: PASS
+seq=148 ts=1793596964705 [rx] CRC result: PASS
+seq=149 ts=1793596964705 [rx] Cycles: 1387628279
+seq=150 ts=1793596964705 [rx] Instructions: 1441025033
+seq=151 ts=1793596964705 [rx] Iterations/Sec: 360.327
+seq=152 ts=1793596964705 [rx] CoreMark/MHz: 3.603
+seq=153 ts=1793596964705 [rx] Score status: duration >= 10 s; see CoreMark reporting rules
+seq=154 ts=1793596964746 [rx] HPM 01 dual retire: 388590056
+seq=155 ts=1793596964746 [rx] HPM 02 single retire: 663844921
+seq=156 ts=1793596964746 [rx] HPM 03 zero retire: 335193302
+seq=157 ts=1793596964746 [rx] HPM 04 branches: 304559500
+seq=158 ts=1793596964746 [rx] HPM 05 pair RAW: 221081649
+seq=159 ts=1793596964747 [rx] HPM 06 pair structural: 59437531
+seq=160 ts=1793596964747 [rx] HPM 07 pair slot1 type: 327692302
+seq=161 ts=1793596964747 [rx] HPM 08 pair missing slot1: 36742397
+seq=162 ts=1793596964747 [rx] HPM 09 load-use stall: 132493700
+seq=163 ts=1793596964747 [rx] HPM 10 divide stall: 0
+seq=164 ts=1793596964747 [rx] HPM 11 device wait: 0
+seq=165 ts=1793596964747 [rx] HPM 12 frontend empty: 76466210
+seq=166 ts=1793596964747 [rx] HPM 13 I-cache miss: 0
+seq=167 ts=1793596964747 [rx] HPM 14 D-cache miss: 0
+seq=168 ts=1793596964747 [rx] HPM 15 dirty writeback: 0
+seq=169 ts=1793596964747 [rx] HPM 16 branch mispredict: 38233105
+seq=170 ts=1793596964747 [rx] IPC: 1.038
+seq=171 ts=1793596964747 [rx] Dual retire ratio: 0.280
+seq=172 ts=1793596964788 [rx] Load-use stall ratio: 0.095
+seq=173 ts=1793596964788 [rx] Divide stall ratio: 0.000
+seq=174 ts=1793596964788 [rx] Device wait ratio: 0.000
+seq=175 ts=1793596964788 [rx] Frontend empty ratio: 0.055
+seq=176 ts=1793596964788 [rx] Branch mispredict rate: 0.125
+seq=177 ts=1793596964788 [rx] I-cache MPKI: 0.000
+seq=178 ts=1793596964788 [rx] D-cache MPKI: 0.000
+seq=179 ts=1793596964788 [rx] Compiler version: GCC 15.2.0
+seq=180 ts=1793596964788 [rx] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
+seq=181 ts=1793596964788 [rx] ISA: rv32im_zicsr_zifencei
+seq=182 ts=1793596964788 [rx] CoreMark result: PASS
+seq=183 ts=1793596964789 [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info

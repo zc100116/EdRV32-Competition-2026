@@ -1,0 +1,23 @@
+W: Warning : The license will invalid in 1 days. In order not to affect your usage, please update the license in time.
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-B1-ILA/place_route/edrv32_fpga_board_b1_top_pnr.adf -delay_type min_max -max_path 200 -nworst 1 -input_pins TRUE -force_to_run
+W: Timing-4087: Port 'led_o[0]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[1]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[2]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[3]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'led_o[4]' is not constrained, it is treated as combinational output.
+W: Timing-4087: Port 'uart_tx_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'key_n_i[0]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'key_n_i[1]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'key_n_i[2]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'key_n_i[3]' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'uart_rx_i' is not constrained, it is treated as combinational input.
+Action report_timing: Real time elapsed is 0h:0m:33s
+Action report_timing: CPU time elapsed is 0h:0m:3s
+Action report_timing: Process CPU time elapsed is 0h:0m:4s
+Action report_timing: Peak memory pool usage is 2,225 MB
+W: open run.log failed.
+Action from report_timing to report_timing: Total Real Time elapsed is 0h:0m:33s
+Action from report_timing to report_timing: Total CPU time elapsed is 0h:0m:3s
+Action from report_timing to report_timing: Total Process CPU Time elapsed is 0h:0m:4s
+Executing : report_timing -input_db_file G:/codex_project/EdRV32-FPGA/EdRV32-B1-ILA/place_route/edrv32_fpga_board_b1_top_pnr.adf -delay_type min_max -max_path 200 -nworst 1 -input_pins TRUE -force_to_run successfully.

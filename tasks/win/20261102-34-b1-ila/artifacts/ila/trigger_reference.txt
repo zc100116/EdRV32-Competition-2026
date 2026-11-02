@@ -1,0 +1,6 @@
+Reference CoreMark5000: PASS
+Round1 instructions=1441025033; cycles=1387629902
+Round2 instructions=1441025033; cycles=1387628281
+TriggerPort0=minstret low40; TriggerPort1=mcycle low40
+Half instructions floor=720512516; 40bithex=002AF22604; binary=0000000000101010111100100010011000000100
+Prefer >= if supported; Basic comparator only== means exact value may be skipped by dual retirement. Other trigger port dont-care; conditionTU0. Arm before starting new CoreMark5000.

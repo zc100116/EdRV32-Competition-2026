@@ -1,0 +1,29 @@
+{
+  "samples": 1024,
+  "observed_intervals": 1023,
+  "mcycle_delta": 1023,
+  "minstret_delta": 1189,
+  "retirement_increment_counts": {
+    "2": 381,
+    "1": 427,
+    "0": 215
+  },
+  "window_ipc": 1.1622678396871946,
+  "trigger_value": 720512516,
+  "trigger_sample_indices": [
+    102
+  ],
+  "counter_deltas": {
+    "mcycle": 1023,
+    "minstret": 1189,
+    "hpm3": 381,
+    "hpm4": 427,
+    "hpm5": 215,
+    "hpm6": 192,
+    "hpm7": 182,
+    "hpm8": 3,
+    "hpm9": 204,
+    "hpm10": 22
+  },
+  "whole_round_serial_ipc": 1.038
+}

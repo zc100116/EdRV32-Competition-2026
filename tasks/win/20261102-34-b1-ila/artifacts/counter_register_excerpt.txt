@@ -1,0 +1,6399 @@
+GTP_DFF_CE /* \cycle_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[0]  (
+            .Q (cycle_r[0]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[0]));
+
+GTP_DFF_CE /* \cycle_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[1]  (
+            .Q (cycle_r[1]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[1]));
+
+GTP_DFF_CE /* \cycle_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[2]  (
+            .Q (cycle_r[2]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[2]));
+
+GTP_DFF_CE /* \cycle_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[3]  (
+            .Q (cycle_r[3]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[3]));
+
+GTP_DFF_CE /* \cycle_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[4]  (
+            .Q (cycle_r[4]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[4]));
+
+GTP_DFF_CE /* \cycle_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[5]  (
+            .Q (cycle_r[5]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[5]));
+
+GTP_DFF_CE /* \cycle_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[6]  (
+            .Q (cycle_r[6]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[6]));
+
+GTP_DFF_CE /* \cycle_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[7]  (
+            .Q (cycle_r[7]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[7]));
+
+GTP_DFF_CE /* \cycle_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[8]  (
+            .Q (cycle_r[8]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[8]));
+
+GTP_DFF_CE /* \cycle_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[9]  (
+            .Q (cycle_r[9]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[9]));
+
+GTP_DFF_CE /* \cycle_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[10]  (
+            .Q (cycle_r[10]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[10]));
+
+GTP_DFF_CE /* \cycle_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[11]  (
+            .Q (cycle_r[11]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[11]));
+
+GTP_DFF_CE /* \cycle_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[12]  (
+            .Q (cycle_r[12]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[12]));
+
+GTP_DFF_CE /* \cycle_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[13]  (
+            .Q (cycle_r[13]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[13]));
+
+GTP_DFF_CE /* \cycle_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[14]  (
+            .Q (cycle_r[14]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[14]));
+
+GTP_DFF_CE /* \cycle_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[15]  (
+            .Q (cycle_r[15]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[15]));
+
+GTP_DFF_CE /* \cycle_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[16]  (
+            .Q (cycle_r[16]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[16]));
+
+GTP_DFF_CE /* \cycle_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[17]  (
+            .Q (cycle_r[17]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[17]));
+
+GTP_DFF_CE /* \cycle_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[18]  (
+            .Q (cycle_r[18]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[18]));
+
+GTP_DFF_CE /* \cycle_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[19]  (
+            .Q (cycle_r[19]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[19]));
+
+GTP_DFF_CE /* \cycle_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[20]  (
+            .Q (cycle_r[20]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[20]));
+
+GTP_DFF_CE /* \cycle_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[21]  (
+            .Q (cycle_r[21]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[21]));
+
+GTP_DFF_CE /* \cycle_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[22]  (
+            .Q (cycle_r[22]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[22]));
+
+GTP_DFF_CE /* \cycle_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[23]  (
+            .Q (cycle_r[23]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[23]));
+
+GTP_DFF_CE /* \cycle_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[24]  (
+            .Q (cycle_r[24]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[24]));
+
+GTP_DFF_CE /* \cycle_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[25]  (
+            .Q (cycle_r[25]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[25]));
+
+GTP_DFF_CE /* \cycle_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[26]  (
+            .Q (cycle_r[26]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[26]));
+
+GTP_DFF_CE /* \cycle_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[27]  (
+            .Q (cycle_r[27]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[27]));
+
+GTP_DFF_CE /* \cycle_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[28]  (
+            .Q (cycle_r[28]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[28]));
+
+GTP_DFF_CE /* \cycle_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[29]  (
+            .Q (cycle_r[29]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[29]));
+
+GTP_DFF_CE /* \cycle_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[30]  (
+            .Q (cycle_r[30]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[30]));
+
+GTP_DFF_CE /* \cycle_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[31]  (
+            .Q (cycle_r[31]),
+            .C (N553),
+            .CE (N1704),
+            .CLK (clk_i),
+            .D (N1705[31]));
+
+GTP_DFF_CE /* \cycle_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[32]  (
+            .Q (cycle_r[32]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[0]));
+
+GTP_DFF_CE /* \cycle_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[33]  (
+            .Q (cycle_r[33]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[1]));
+
+GTP_DFF_CE /* \cycle_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[34]  (
+            .Q (cycle_r[34]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[2]));
+
+GTP_DFF_CE /* \cycle_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[35]  (
+            .Q (cycle_r[35]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[3]));
+
+GTP_DFF_CE /* \cycle_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[36]  (
+            .Q (cycle_r[36]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[4]));
+
+GTP_DFF_CE /* \cycle_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[37]  (
+            .Q (cycle_r[37]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[5]));
+
+GTP_DFF_CE /* \cycle_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[38]  (
+            .Q (cycle_r[38]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[6]));
+
+GTP_DFF_CE /* \cycle_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[39]  (
+            .Q (cycle_r[39]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[7]));
+
+GTP_DFF_CE /* \cycle_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[40]  (
+            .Q (cycle_r[40]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[8]));
+
+GTP_DFF_CE /* \cycle_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[41]  (
+            .Q (cycle_r[41]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[9]));
+
+GTP_DFF_CE /* \cycle_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[42]  (
+            .Q (cycle_r[42]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[10]));
+
+GTP_DFF_CE /* \cycle_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[43]  (
+            .Q (cycle_r[43]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[11]));
+
+GTP_DFF_CE /* \cycle_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[44]  (
+            .Q (cycle_r[44]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[12]));
+
+GTP_DFF_CE /* \cycle_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[45]  (
+            .Q (cycle_r[45]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[13]));
+
+GTP_DFF_CE /* \cycle_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[46]  (
+            .Q (cycle_r[46]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[14]));
+
+GTP_DFF_CE /* \cycle_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[47]  (
+            .Q (cycle_r[47]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[15]));
+
+GTP_DFF_CE /* \cycle_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[48]  (
+            .Q (cycle_r[48]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[16]));
+
+GTP_DFF_CE /* \cycle_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[49]  (
+            .Q (cycle_r[49]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[17]));
+
+GTP_DFF_CE /* \cycle_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[50]  (
+            .Q (cycle_r[50]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[18]));
+
+GTP_DFF_CE /* \cycle_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[51]  (
+            .Q (cycle_r[51]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[19]));
+
+GTP_DFF_CE /* \cycle_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[52]  (
+            .Q (cycle_r[52]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[20]));
+
+GTP_DFF_CE /* \cycle_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[53]  (
+            .Q (cycle_r[53]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[21]));
+
+GTP_DFF_CE /* \cycle_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[54]  (
+            .Q (cycle_r[54]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[22]));
+
+GTP_DFF_CE /* \cycle_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[55]  (
+            .Q (cycle_r[55]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[23]));
+
+GTP_DFF_CE /* \cycle_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[56]  (
+            .Q (cycle_r[56]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[24]));
+
+GTP_DFF_CE /* \cycle_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[57]  (
+            .Q (cycle_r[57]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[25]));
+
+GTP_DFF_CE /* \cycle_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[58]  (
+            .Q (cycle_r[58]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[26]));
+
+GTP_DFF_CE /* \cycle_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[59]  (
+            .Q (cycle_r[59]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[27]));
+
+GTP_DFF_CE /* \cycle_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[60]  (
+            .Q (cycle_r[60]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[28]));
+
+GTP_DFF_CE /* \cycle_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[61]  (
+            .Q (cycle_r[61]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[29]));
+
+GTP_DFF_CE /* \cycle_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[62]  (
+            .Q (cycle_r[62]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[30]));
+
+GTP_DFF_CE /* \cycle_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \cycle_r[63]  (
+            .Q (cycle_r[63]),
+            .C (N553),
+            .CE (N1700),
+            .CLK (clk_i),
+            .D (N1701[31]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[0]  (
+            .Q (\counter_r[0] [0] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (_N241214));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[1]  (
+            .Q (\counter_r[0] [1] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[1]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[2]  (
+            .Q (\counter_r[0] [2] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[2]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[3]  (
+            .Q (\counter_r[0] [3] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[3]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[4]  (
+            .Q (\counter_r[0] [4] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[4]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[5]  (
+            .Q (\counter_r[0] [5] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[5]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[6]  (
+            .Q (\counter_r[0] [6] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[6]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[7]  (
+            .Q (\counter_r[0] [7] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[7]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[8]  (
+            .Q (\counter_r[0] [8] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[8]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[9]  (
+            .Q (\counter_r[0] [9] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[9]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[10]  (
+            .Q (\counter_r[0] [10] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[10]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[11]  (
+            .Q (\counter_r[0] [11] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[11]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[12]  (
+            .Q (\counter_r[0] [12] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[12]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[13]  (
+            .Q (\counter_r[0] [13] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[13]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[14]  (
+            .Q (\counter_r[0] [14] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (_N243668));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[15]  (
+            .Q (\counter_r[0] [15] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[15]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[16]  (
+            .Q (\counter_r[0] [16] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[16]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[17]  (
+            .Q (\counter_r[0] [17] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[17]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[18]  (
+            .Q (\counter_r[0] [18] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[18]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[19]  (
+            .Q (\counter_r[0] [19] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[19]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[20]  (
+            .Q (\counter_r[0] [20] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[20]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[21]  (
+            .Q (\counter_r[0] [21] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[21]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[22]  (
+            .Q (\counter_r[0] [22] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[22]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[23]  (
+            .Q (\counter_r[0] [23] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[23]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[24]  (
+            .Q (\counter_r[0] [24] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[24]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[25]  (
+            .Q (\counter_r[0] [25] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[25]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[26]  (
+            .Q (\counter_r[0] [26] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[26]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[27]  (
+            .Q (\counter_r[0] [27] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[27]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[28]  (
+            .Q (\counter_r[0] [28] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[28]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[29]  (
+            .Q (\counter_r[0] [29] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[29]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[30]  (
+            .Q (\counter_r[0] [30] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[30]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[31]  (
+            .Q (\counter_r[0] [31] ),
+            .C (N585),
+            .CE (N1656),
+            .CLK (clk_i),
+            .D (N1657[31]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[32]  (
+            .Q (\counter_r[0] [32] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[0]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[33]  (
+            .Q (\counter_r[0] [33] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[1]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[34]  (
+            .Q (\counter_r[0] [34] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[2]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[35]  (
+            .Q (\counter_r[0] [35] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[3]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[36]  (
+            .Q (\counter_r[0] [36] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[4]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[37]  (
+            .Q (\counter_r[0] [37] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[5]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[38]  (
+            .Q (\counter_r[0] [38] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[6]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[39]  (
+            .Q (\counter_r[0] [39] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[7]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[40]  (
+            .Q (\counter_r[0] [40] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[8]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[41]  (
+            .Q (\counter_r[0] [41] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[9]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[42]  (
+            .Q (\counter_r[0] [42] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[10]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[43]  (
+            .Q (\counter_r[0] [43] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[11]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[44]  (
+            .Q (\counter_r[0] [44] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[12]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[45]  (
+            .Q (\counter_r[0] [45] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[13]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[46]  (
+            .Q (\counter_r[0] [46] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[14]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[47]  (
+            .Q (\counter_r[0] [47] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[15]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[48]  (
+            .Q (\counter_r[0] [48] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[16]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[49]  (
+            .Q (\counter_r[0] [49] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[17]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[50]  (
+            .Q (\counter_r[0] [50] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[18]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[51]  (
+            .Q (\counter_r[0] [51] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[19]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[52]  (
+            .Q (\counter_r[0] [52] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[20]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[53]  (
+            .Q (\counter_r[0] [53] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[21]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[54]  (
+            .Q (\counter_r[0] [54] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[22]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[55]  (
+            .Q (\counter_r[0] [55] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[23]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[56]  (
+            .Q (\counter_r[0] [56] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[24]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[57]  (
+            .Q (\counter_r[0] [57] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[25]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[58]  (
+            .Q (\counter_r[0] [58] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[26]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[59]  (
+            .Q (\counter_r[0] [59] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[27]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[60]  (
+            .Q (\counter_r[0] [60] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[28]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[61]  (
+            .Q (\counter_r[0] [61] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[29]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[62]  (
+            .Q (\counter_r[0] [62] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[30]));
+
+GTP_DFF_CE /* \g_counter[2].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[2].g_hpm.count_r[63]  (
+            .Q (\counter_r[0] [63] ),
+            .C (N585),
+            .CE (N1647),
+            .CLK (clk_i),
+            .D (N1648[31]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[0]  (
+            .Q (\counter_r[1] [0] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[0]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[1]  (
+            .Q (\counter_r[1] [1] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[1]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[2]  (
+            .Q (\counter_r[1] [2] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[2]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[3]  (
+            .Q (\counter_r[1] [3] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[3]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[4]  (
+            .Q (\counter_r[1] [4] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[4]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[5]  (
+            .Q (\counter_r[1] [5] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[5]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[6]  (
+            .Q (\counter_r[1] [6] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[6]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[7]  (
+            .Q (\counter_r[1] [7] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[7]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[8]  (
+            .Q (\counter_r[1] [8] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[8]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[9]  (
+            .Q (\counter_r[1] [9] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[9]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[10]  (
+            .Q (\counter_r[1] [10] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[10]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[11]  (
+            .Q (\counter_r[1] [11] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[11]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[12]  (
+            .Q (\counter_r[1] [12] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[12]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[13]  (
+            .Q (\counter_r[1] [13] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[13]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[14]  (
+            .Q (\counter_r[1] [14] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[14]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[15]  (
+            .Q (\counter_r[1] [15] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[15]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[16]  (
+            .Q (\counter_r[1] [16] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[16]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[17]  (
+            .Q (\counter_r[1] [17] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[17]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[18]  (
+            .Q (\counter_r[1] [18] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[18]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[19]  (
+            .Q (\counter_r[1] [19] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[19]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[20]  (
+            .Q (\counter_r[1] [20] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[20]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[21]  (
+            .Q (\counter_r[1] [21] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[21]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[22]  (
+            .Q (\counter_r[1] [22] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[22]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[23]  (
+            .Q (\counter_r[1] [23] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[23]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[24]  (
+            .Q (\counter_r[1] [24] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[24]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[25]  (
+            .Q (\counter_r[1] [25] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[25]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[26]  (
+            .Q (\counter_r[1] [26] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[26]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[27]  (
+            .Q (\counter_r[1] [27] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[27]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[28]  (
+            .Q (\counter_r[1] [28] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[28]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[29]  (
+            .Q (\counter_r[1] [29] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[29]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[30]  (
+            .Q (\counter_r[1] [30] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[30]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[31]  (
+            .Q (\counter_r[1] [31] ),
+            .C (N626),
+            .CE (N1872),
+            .CLK (clk_i),
+            .D (N1873[31]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[32]  (
+            .Q (\counter_r[1] [32] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[0]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[33]  (
+            .Q (\counter_r[1] [33] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[1]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[34]  (
+            .Q (\counter_r[1] [34] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[2]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[35]  (
+            .Q (\counter_r[1] [35] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[3]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[36]  (
+            .Q (\counter_r[1] [36] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[4]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[37]  (
+            .Q (\counter_r[1] [37] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[5]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[38]  (
+            .Q (\counter_r[1] [38] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[6]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[39]  (
+            .Q (\counter_r[1] [39] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[7]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[40]  (
+            .Q (\counter_r[1] [40] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[8]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[41]  (
+            .Q (\counter_r[1] [41] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[9]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[42]  (
+            .Q (\counter_r[1] [42] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[10]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[43]  (
+            .Q (\counter_r[1] [43] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[11]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[44]  (
+            .Q (\counter_r[1] [44] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[12]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[45]  (
+            .Q (\counter_r[1] [45] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[13]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[46]  (
+            .Q (\counter_r[1] [46] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[14]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[47]  (
+            .Q (\counter_r[1] [47] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[15]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[48]  (
+            .Q (\counter_r[1] [48] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[16]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[49]  (
+            .Q (\counter_r[1] [49] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[17]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[50]  (
+            .Q (\counter_r[1] [50] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[18]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[51]  (
+            .Q (\counter_r[1] [51] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[19]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[52]  (
+            .Q (\counter_r[1] [52] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[20]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[53]  (
+            .Q (\counter_r[1] [53] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[21]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[54]  (
+            .Q (\counter_r[1] [54] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[22]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[55]  (
+            .Q (\counter_r[1] [55] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[23]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[56]  (
+            .Q (\counter_r[1] [56] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[24]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[57]  (
+            .Q (\counter_r[1] [57] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[25]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[58]  (
+            .Q (\counter_r[1] [58] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[26]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[59]  (
+            .Q (\counter_r[1] [59] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[27]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[60]  (
+            .Q (\counter_r[1] [60] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[28]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[61]  (
+            .Q (\counter_r[1] [61] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[29]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[62]  (
+            .Q (\counter_r[1] [62] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[30]));
+
+GTP_DFF_CE /* \g_counter[3].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[3].g_hpm.count_r[63]  (
+            .Q (\counter_r[1] [63] ),
+            .C (N626),
+            .CE (N1662),
+            .CLK (clk_i),
+            .D (N1663[31]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[0]  (
+            .Q (\counter_r[2] [0] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[0]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[1]  (
+            .Q (\counter_r[2] [1] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[1]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[2]  (
+            .Q (\counter_r[2] [2] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[2]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[3]  (
+            .Q (\counter_r[2] [3] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[3]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[4]  (
+            .Q (\counter_r[2] [4] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[4]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[5]  (
+            .Q (\counter_r[2] [5] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[5]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[6]  (
+            .Q (\counter_r[2] [6] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[6]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[7]  (
+            .Q (\counter_r[2] [7] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[7]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[8]  (
+            .Q (\counter_r[2] [8] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[8]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[9]  (
+            .Q (\counter_r[2] [9] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[9]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[10]  (
+            .Q (\counter_r[2] [10] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[10]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[11]  (
+            .Q (\counter_r[2] [11] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[11]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[12]  (
+            .Q (\counter_r[2] [12] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (_N289066));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[13]  (
+            .Q (\counter_r[2] [13] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[13]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[14]  (
+            .Q (\counter_r[2] [14] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[14]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[15]  (
+            .Q (\counter_r[2] [15] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[15]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[16]  (
+            .Q (\counter_r[2] [16] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[16]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[17]  (
+            .Q (\counter_r[2] [17] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[17]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[18]  (
+            .Q (\counter_r[2] [18] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[18]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[19]  (
+            .Q (\counter_r[2] [19] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[19]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[20]  (
+            .Q (\counter_r[2] [20] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[20]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[21]  (
+            .Q (\counter_r[2] [21] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[21]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[22]  (
+            .Q (\counter_r[2] [22] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[22]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[23]  (
+            .Q (\counter_r[2] [23] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[23]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[24]  (
+            .Q (\counter_r[2] [24] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[24]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[25]  (
+            .Q (\counter_r[2] [25] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[25]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[26]  (
+            .Q (\counter_r[2] [26] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[26]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[27]  (
+            .Q (\counter_r[2] [27] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[27]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[28]  (
+            .Q (\counter_r[2] [28] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[28]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[29]  (
+            .Q (\counter_r[2] [29] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[29]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[30]  (
+            .Q (\counter_r[2] [30] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[30]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[31]  (
+            .Q (\counter_r[2] [31] ),
+            .C (N667),
+            .CE (N1876),
+            .CLK (clk_i),
+            .D (N1877[31]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[32]  (
+            .Q (\counter_r[2] [32] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[0]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[33]  (
+            .Q (\counter_r[2] [33] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[1]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[34]  (
+            .Q (\counter_r[2] [34] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[2]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[35]  (
+            .Q (\counter_r[2] [35] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[3]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[36]  (
+            .Q (\counter_r[2] [36] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[4]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[37]  (
+            .Q (\counter_r[2] [37] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[5]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[38]  (
+            .Q (\counter_r[2] [38] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[6]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[39]  (
+            .Q (\counter_r[2] [39] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[7]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[40]  (
+            .Q (\counter_r[2] [40] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[8]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[41]  (
+            .Q (\counter_r[2] [41] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[9]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[42]  (
+            .Q (\counter_r[2] [42] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[10]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[43]  (
+            .Q (\counter_r[2] [43] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[11]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[44]  (
+            .Q (\counter_r[2] [44] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[12]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[45]  (
+            .Q (\counter_r[2] [45] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[13]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[46]  (
+            .Q (\counter_r[2] [46] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[14]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[47]  (
+            .Q (\counter_r[2] [47] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[15]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[48]  (
+            .Q (\counter_r[2] [48] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[16]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[49]  (
+            .Q (\counter_r[2] [49] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[17]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[50]  (
+            .Q (\counter_r[2] [50] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[18]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[51]  (
+            .Q (\counter_r[2] [51] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[19]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[52]  (
+            .Q (\counter_r[2] [52] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[20]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[53]  (
+            .Q (\counter_r[2] [53] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[21]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[54]  (
+            .Q (\counter_r[2] [54] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[22]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[55]  (
+            .Q (\counter_r[2] [55] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[23]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[56]  (
+            .Q (\counter_r[2] [56] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[24]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[57]  (
+            .Q (\counter_r[2] [57] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[25]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[58]  (
+            .Q (\counter_r[2] [58] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[26]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[59]  (
+            .Q (\counter_r[2] [59] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[27]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[60]  (
+            .Q (\counter_r[2] [60] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[28]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[61]  (
+            .Q (\counter_r[2] [61] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[29]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[62]  (
+            .Q (\counter_r[2] [62] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[30]));
+
+GTP_DFF_CE /* \g_counter[4].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[4].g_hpm.count_r[63]  (
+            .Q (\counter_r[2] [63] ),
+            .C (N667),
+            .CE (N1668),
+            .CLK (clk_i),
+            .D (N1669[31]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[0]  (
+            .Q (\counter_r[3] [0] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[0]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[1]  (
+            .Q (\counter_r[3] [1] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[1]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[2]  (
+            .Q (\counter_r[3] [2] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (_N252664));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[3]  (
+            .Q (\counter_r[3] [3] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[3]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[4]  (
+            .Q (\counter_r[3] [4] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[4]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[5]  (
+            .Q (\counter_r[3] [5] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[5]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[6]  (
+            .Q (\counter_r[3] [6] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[6]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[7]  (
+            .Q (\counter_r[3] [7] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[7]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[8]  (
+            .Q (\counter_r[3] [8] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[8]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[9]  (
+            .Q (\counter_r[3] [9] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[9]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[10]  (
+            .Q (\counter_r[3] [10] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[10]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[11]  (
+            .Q (\counter_r[3] [11] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[11]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[12]  (
+            .Q (\counter_r[3] [12] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[12]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[13]  (
+            .Q (\counter_r[3] [13] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[13]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[14]  (
+            .Q (\counter_r[3] [14] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[14]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[15]  (
+            .Q (\counter_r[3] [15] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[15]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[16]  (
+            .Q (\counter_r[3] [16] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[16]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[17]  (
+            .Q (\counter_r[3] [17] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[17]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[18]  (
+            .Q (\counter_r[3] [18] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[18]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[19]  (
+            .Q (\counter_r[3] [19] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[19]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[20]  (
+            .Q (\counter_r[3] [20] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[20]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[21]  (
+            .Q (\counter_r[3] [21] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[21]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[22]  (
+            .Q (\counter_r[3] [22] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[22]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[23]  (
+            .Q (\counter_r[3] [23] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[23]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[24]  (
+            .Q (\counter_r[3] [24] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[24]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[25]  (
+            .Q (\counter_r[3] [25] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[25]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[26]  (
+            .Q (\counter_r[3] [26] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[26]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[27]  (
+            .Q (\counter_r[3] [27] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[27]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[28]  (
+            .Q (\counter_r[3] [28] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[28]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[29]  (
+            .Q (\counter_r[3] [29] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[29]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[30]  (
+            .Q (\counter_r[3] [30] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (_N257788));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[31]  (
+            .Q (\counter_r[3] [31] ),
+            .C (N708),
+            .CE (N1880),
+            .CLK (clk_i),
+            .D (N1881[31]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[32]  (
+            .Q (\counter_r[3] [32] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[0]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[33]  (
+            .Q (\counter_r[3] [33] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[1]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[34]  (
+            .Q (\counter_r[3] [34] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[2]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[35]  (
+            .Q (\counter_r[3] [35] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[3]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[36]  (
+            .Q (\counter_r[3] [36] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[4]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[37]  (
+            .Q (\counter_r[3] [37] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[5]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[38]  (
+            .Q (\counter_r[3] [38] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[6]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[39]  (
+            .Q (\counter_r[3] [39] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[7]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[40]  (
+            .Q (\counter_r[3] [40] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[8]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[41]  (
+            .Q (\counter_r[3] [41] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[9]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[42]  (
+            .Q (\counter_r[3] [42] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[10]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[43]  (
+            .Q (\counter_r[3] [43] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[11]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[44]  (
+            .Q (\counter_r[3] [44] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[12]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[45]  (
+            .Q (\counter_r[3] [45] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[13]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[46]  (
+            .Q (\counter_r[3] [46] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[14]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[47]  (
+            .Q (\counter_r[3] [47] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[15]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[48]  (
+            .Q (\counter_r[3] [48] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[16]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[49]  (
+            .Q (\counter_r[3] [49] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[17]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[50]  (
+            .Q (\counter_r[3] [50] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[18]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[51]  (
+            .Q (\counter_r[3] [51] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[19]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[52]  (
+            .Q (\counter_r[3] [52] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[20]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[53]  (
+            .Q (\counter_r[3] [53] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[21]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[54]  (
+            .Q (\counter_r[3] [54] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[22]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[55]  (
+            .Q (\counter_r[3] [55] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[23]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[56]  (
+            .Q (\counter_r[3] [56] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[24]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[57]  (
+            .Q (\counter_r[3] [57] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[25]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[58]  (
+            .Q (\counter_r[3] [58] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[26]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[59]  (
+            .Q (\counter_r[3] [59] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[27]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[60]  (
+            .Q (\counter_r[3] [60] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[28]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[61]  (
+            .Q (\counter_r[3] [61] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[29]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[62]  (
+            .Q (\counter_r[3] [62] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[30]));
+
+GTP_DFF_CE /* \g_counter[5].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[5].g_hpm.count_r[63]  (
+            .Q (\counter_r[3] [63] ),
+            .C (N708),
+            .CE (N1674),
+            .CLK (clk_i),
+            .D (N1675[31]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[0]  (
+            .Q (\counter_r[4] [0] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[0]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[1]  (
+            .Q (\counter_r[4] [1] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[1]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[2]  (
+            .Q (\counter_r[4] [2] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[2]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[3]  (
+            .Q (\counter_r[4] [3] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[3]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[4]  (
+            .Q (\counter_r[4] [4] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[4]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[5]  (
+            .Q (\counter_r[4] [5] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[5]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[6]  (
+            .Q (\counter_r[4] [6] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[6]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[7]  (
+            .Q (\counter_r[4] [7] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[7]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[8]  (
+            .Q (\counter_r[4] [8] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[8]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[9]  (
+            .Q (\counter_r[4] [9] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[9]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[10]  (
+            .Q (\counter_r[4] [10] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[10]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[11]  (
+            .Q (\counter_r[4] [11] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[11]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[12]  (
+            .Q (\counter_r[4] [12] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[12]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[13]  (
+            .Q (\counter_r[4] [13] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[13]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[14]  (
+            .Q (\counter_r[4] [14] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[14]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[15]  (
+            .Q (\counter_r[4] [15] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[15]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[16]  (
+            .Q (\counter_r[4] [16] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[16]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[17]  (
+            .Q (\counter_r[4] [17] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[17]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[18]  (
+            .Q (\counter_r[4] [18] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[18]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[19]  (
+            .Q (\counter_r[4] [19] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[19]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[20]  (
+            .Q (\counter_r[4] [20] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[20]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[21]  (
+            .Q (\counter_r[4] [21] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[21]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[22]  (
+            .Q (\counter_r[4] [22] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[22]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[23]  (
+            .Q (\counter_r[4] [23] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[23]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[24]  (
+            .Q (\counter_r[4] [24] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[24]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[25]  (
+            .Q (\counter_r[4] [25] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[25]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[26]  (
+            .Q (\counter_r[4] [26] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[26]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[27]  (
+            .Q (\counter_r[4] [27] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[27]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[28]  (
+            .Q (\counter_r[4] [28] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[28]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[29]  (
+            .Q (\counter_r[4] [29] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[29]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[30]  (
+            .Q (\counter_r[4] [30] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[30]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[31]  (
+            .Q (\counter_r[4] [31] ),
+            .C (N749),
+            .CE (N1884),
+            .CLK (clk_i),
+            .D (N1885[31]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[32]  (
+            .Q (\counter_r[4] [32] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[0]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[33]  (
+            .Q (\counter_r[4] [33] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[1]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[34]  (
+            .Q (\counter_r[4] [34] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[2]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[35]  (
+            .Q (\counter_r[4] [35] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[3]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[36]  (
+            .Q (\counter_r[4] [36] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[4]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[37]  (
+            .Q (\counter_r[4] [37] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[5]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[38]  (
+            .Q (\counter_r[4] [38] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[6]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[39]  (
+            .Q (\counter_r[4] [39] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[7]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[40]  (
+            .Q (\counter_r[4] [40] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[8]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[41]  (
+            .Q (\counter_r[4] [41] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[9]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[42]  (
+            .Q (\counter_r[4] [42] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[10]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[43]  (
+            .Q (\counter_r[4] [43] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[11]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[44]  (
+            .Q (\counter_r[4] [44] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[12]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[45]  (
+            .Q (\counter_r[4] [45] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[13]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[46]  (
+            .Q (\counter_r[4] [46] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[14]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[47]  (
+            .Q (\counter_r[4] [47] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[15]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[48]  (
+            .Q (\counter_r[4] [48] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[16]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[49]  (
+            .Q (\counter_r[4] [49] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[17]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[50]  (
+            .Q (\counter_r[4] [50] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[18]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[51]  (
+            .Q (\counter_r[4] [51] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[19]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[52]  (
+            .Q (\counter_r[4] [52] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[20]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[53]  (
+            .Q (\counter_r[4] [53] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[21]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[54]  (
+            .Q (\counter_r[4] [54] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[22]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[55]  (
+            .Q (\counter_r[4] [55] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[23]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[56]  (
+            .Q (\counter_r[4] [56] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[24]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[57]  (
+            .Q (\counter_r[4] [57] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[25]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[58]  (
+            .Q (\counter_r[4] [58] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[26]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[59]  (
+            .Q (\counter_r[4] [59] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[27]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[60]  (
+            .Q (\counter_r[4] [60] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[28]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[61]  (
+            .Q (\counter_r[4] [61] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[29]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[62]  (
+            .Q (\counter_r[4] [62] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[30]));
+
+GTP_DFF_CE /* \g_counter[6].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[6].g_hpm.count_r[63]  (
+            .Q (\counter_r[4] [63] ),
+            .C (N749),
+            .CE (N1680),
+            .CLK (clk_i),
+            .D (N1681[31]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[0]  (
+            .Q (\counter_r[5] [0] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[0]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[1]  (
+            .Q (\counter_r[5] [1] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[1]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[2]  (
+            .Q (\counter_r[5] [2] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[2]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[3]  (
+            .Q (\counter_r[5] [3] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[3]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[4]  (
+            .Q (\counter_r[5] [4] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[4]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[5]  (
+            .Q (\counter_r[5] [5] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[5]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[6]  (
+            .Q (\counter_r[5] [6] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[6]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[7]  (
+            .Q (\counter_r[5] [7] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[7]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[8]  (
+            .Q (\counter_r[5] [8] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[8]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[9]  (
+            .Q (\counter_r[5] [9] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[9]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[10]  (
+            .Q (\counter_r[5] [10] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[10]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[11]  (
+            .Q (\counter_r[5] [11] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[11]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[12]  (
+            .Q (\counter_r[5] [12] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[12]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[13]  (
+            .Q (\counter_r[5] [13] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[13]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[14]  (
+            .Q (\counter_r[5] [14] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[14]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[15]  (
+            .Q (\counter_r[5] [15] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[15]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[16]  (
+            .Q (\counter_r[5] [16] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[16]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[17]  (
+            .Q (\counter_r[5] [17] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[17]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[18]  (
+            .Q (\counter_r[5] [18] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[18]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[19]  (
+            .Q (\counter_r[5] [19] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[19]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[20]  (
+            .Q (\counter_r[5] [20] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[20]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[21]  (
+            .Q (\counter_r[5] [21] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[21]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[22]  (
+            .Q (\counter_r[5] [22] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[22]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[23]  (
+            .Q (\counter_r[5] [23] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[23]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[24]  (
+            .Q (\counter_r[5] [24] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[24]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[25]  (
+            .Q (\counter_r[5] [25] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[25]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[26]  (
+            .Q (\counter_r[5] [26] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[26]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[27]  (
+            .Q (\counter_r[5] [27] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[27]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[28]  (
+            .Q (\counter_r[5] [28] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[28]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[29]  (
+            .Q (\counter_r[5] [29] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[29]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[30]  (
+            .Q (\counter_r[5] [30] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[30]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[31]  (
+            .Q (\counter_r[5] [31] ),
+            .C (N790),
+            .CE (N1888),
+            .CLK (clk_i),
+            .D (N1889[31]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[32]  (
+            .Q (\counter_r[5] [32] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[0]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[33]  (
+            .Q (\counter_r[5] [33] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[1]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[34]  (
+            .Q (\counter_r[5] [34] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[2]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[35]  (
+            .Q (\counter_r[5] [35] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[3]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[36]  (
+            .Q (\counter_r[5] [36] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[4]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[37]  (
+            .Q (\counter_r[5] [37] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[5]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[38]  (
+            .Q (\counter_r[5] [38] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[6]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[39]  (
+            .Q (\counter_r[5] [39] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[7]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[40]  (
+            .Q (\counter_r[5] [40] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[8]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[41]  (
+            .Q (\counter_r[5] [41] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[9]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[42]  (
+            .Q (\counter_r[5] [42] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[10]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[43]  (
+            .Q (\counter_r[5] [43] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[11]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[44]  (
+            .Q (\counter_r[5] [44] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[12]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[45]  (
+            .Q (\counter_r[5] [45] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[13]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[46]  (
+            .Q (\counter_r[5] [46] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[14]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[47]  (
+            .Q (\counter_r[5] [47] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[15]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[48]  (
+            .Q (\counter_r[5] [48] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[16]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[49]  (
+            .Q (\counter_r[5] [49] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[17]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[50]  (
+            .Q (\counter_r[5] [50] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[18]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[51]  (
+            .Q (\counter_r[5] [51] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[19]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[52]  (
+            .Q (\counter_r[5] [52] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[20]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[53]  (
+            .Q (\counter_r[5] [53] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[21]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[54]  (
+            .Q (\counter_r[5] [54] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[22]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[55]  (
+            .Q (\counter_r[5] [55] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[23]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[56]  (
+            .Q (\counter_r[5] [56] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[24]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[57]  (
+            .Q (\counter_r[5] [57] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[25]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[58]  (
+            .Q (\counter_r[5] [58] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[26]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[59]  (
+            .Q (\counter_r[5] [59] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[27]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[60]  (
+            .Q (\counter_r[5] [60] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[28]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[61]  (
+            .Q (\counter_r[5] [61] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[29]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[62]  (
+            .Q (\counter_r[5] [62] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[30]));
+
+GTP_DFF_CE /* \g_counter[7].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[7].g_hpm.count_r[63]  (
+            .Q (\counter_r[5] [63] ),
+            .C (N790),
+            .CE (N1686),
+            .CLK (clk_i),
+            .D (N1687[31]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[0]  (
+            .Q (\counter_r[6] [0] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[0]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[1]  (
+            .Q (\counter_r[6] [1] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[1]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[2]  (
+            .Q (\counter_r[6] [2] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[2]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[3]  (
+            .Q (\counter_r[6] [3] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[3]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[4]  (
+            .Q (\counter_r[6] [4] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[4]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[5]  (
+            .Q (\counter_r[6] [5] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[5]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[6]  (
+            .Q (\counter_r[6] [6] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[6]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[7]  (
+            .Q (\counter_r[6] [7] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[7]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[8]  (
+            .Q (\counter_r[6] [8] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[8]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[9]  (
+            .Q (\counter_r[6] [9] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[9]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[10]  (
+            .Q (\counter_r[6] [10] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[10]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[11]  (
+            .Q (\counter_r[6] [11] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[11]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[12]  (
+            .Q (\counter_r[6] [12] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[12]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[13]  (
+            .Q (\counter_r[6] [13] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[13]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[14]  (
+            .Q (\counter_r[6] [14] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[14]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[15]  (
+            .Q (\counter_r[6] [15] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[15]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[16]  (
+            .Q (\counter_r[6] [16] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[16]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[17]  (
+            .Q (\counter_r[6] [17] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[17]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[18]  (
+            .Q (\counter_r[6] [18] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[18]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[19]  (
+            .Q (\counter_r[6] [19] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[19]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[20]  (
+            .Q (\counter_r[6] [20] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[20]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[21]  (
+            .Q (\counter_r[6] [21] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[21]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[22]  (
+            .Q (\counter_r[6] [22] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[22]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[23]  (
+            .Q (\counter_r[6] [23] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[23]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[24]  (
+            .Q (\counter_r[6] [24] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[24]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[25]  (
+            .Q (\counter_r[6] [25] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[25]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[26]  (
+            .Q (\counter_r[6] [26] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[26]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[27]  (
+            .Q (\counter_r[6] [27] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[27]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[28]  (
+            .Q (\counter_r[6] [28] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[28]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[29]  (
+            .Q (\counter_r[6] [29] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[29]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[30]  (
+            .Q (\counter_r[6] [30] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[30]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[31]  (
+            .Q (\counter_r[6] [31] ),
+            .C (N831),
+            .CE (N1892),
+            .CLK (clk_i),
+            .D (N1893[31]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[32]  (
+            .Q (\counter_r[6] [32] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[0]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[33]  (
+            .Q (\counter_r[6] [33] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[1]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[34]  (
+            .Q (\counter_r[6] [34] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[2]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[35]  (
+            .Q (\counter_r[6] [35] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[3]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[36]  (
+            .Q (\counter_r[6] [36] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[4]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[37]  (
+            .Q (\counter_r[6] [37] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[5]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[38]  (
+            .Q (\counter_r[6] [38] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[6]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[39]  (
+            .Q (\counter_r[6] [39] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[7]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[40]  (
+            .Q (\counter_r[6] [40] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[8]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[41]  (
+            .Q (\counter_r[6] [41] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[9]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[42]  (
+            .Q (\counter_r[6] [42] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[10]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[43]  (
+            .Q (\counter_r[6] [43] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[11]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[44]  (
+            .Q (\counter_r[6] [44] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[12]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[45]  (
+            .Q (\counter_r[6] [45] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[13]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[46]  (
+            .Q (\counter_r[6] [46] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[14]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[47]  (
+            .Q (\counter_r[6] [47] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[15]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[48]  (
+            .Q (\counter_r[6] [48] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[16]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[49]  (
+            .Q (\counter_r[6] [49] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[17]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[50]  (
+            .Q (\counter_r[6] [50] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[18]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[51]  (
+            .Q (\counter_r[6] [51] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[19]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[52]  (
+            .Q (\counter_r[6] [52] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[20]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[53]  (
+            .Q (\counter_r[6] [53] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[21]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[54]  (
+            .Q (\counter_r[6] [54] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[22]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[55]  (
+            .Q (\counter_r[6] [55] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[23]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[56]  (
+            .Q (\counter_r[6] [56] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[24]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[57]  (
+            .Q (\counter_r[6] [57] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[25]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[58]  (
+            .Q (\counter_r[6] [58] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[26]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[59]  (
+            .Q (\counter_r[6] [59] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[27]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[60]  (
+            .Q (\counter_r[6] [60] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[28]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[61]  (
+            .Q (\counter_r[6] [61] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[29]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[62]  (
+            .Q (\counter_r[6] [62] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[30]));
+
+GTP_DFF_CE /* \g_counter[8].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[8].g_hpm.count_r[63]  (
+            .Q (\counter_r[6] [63] ),
+            .C (N831),
+            .CE (N1692),
+            .CLK (clk_i),
+            .D (N1693[31]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[0]  (
+            .Q (\counter_r[7] [0] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[0]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[1]  (
+            .Q (\counter_r[7] [1] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[1]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[2]  (
+            .Q (\counter_r[7] [2] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[2]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[3]  (
+            .Q (\counter_r[7] [3] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[3]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[4]  (
+            .Q (\counter_r[7] [4] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[4]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[5]  (
+            .Q (\counter_r[7] [5] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[5]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[6]  (
+            .Q (\counter_r[7] [6] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[6]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[7]  (
+            .Q (\counter_r[7] [7] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[7]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[8]  (
+            .Q (\counter_r[7] [8] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[8]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[9]  (
+            .Q (\counter_r[7] [9] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[9]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[10]  (
+            .Q (\counter_r[7] [10] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[10]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[11]  (
+            .Q (\counter_r[7] [11] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[11]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[12]  (
+            .Q (\counter_r[7] [12] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[12]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[13]  (
+            .Q (\counter_r[7] [13] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[13]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[14]  (
+            .Q (\counter_r[7] [14] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[14]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[15]  (
+            .Q (\counter_r[7] [15] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[15]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[16]  (
+            .Q (\counter_r[7] [16] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[16]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[17]  (
+            .Q (\counter_r[7] [17] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[17]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[18]  (
+            .Q (\counter_r[7] [18] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[18]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[19]  (
+            .Q (\counter_r[7] [19] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (_N278976));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[20]  (
+            .Q (\counter_r[7] [20] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[20]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[21]  (
+            .Q (\counter_r[7] [21] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[21]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[22]  (
+            .Q (\counter_r[7] [22] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[22]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[23]  (
+            .Q (\counter_r[7] [23] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[23]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[24]  (
+            .Q (\counter_r[7] [24] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[24]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[25]  (
+            .Q (\counter_r[7] [25] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[25]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[26]  (
+            .Q (\counter_r[7] [26] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[26]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[27]  (
+            .Q (\counter_r[7] [27] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[27]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[28]  (
+            .Q (\counter_r[7] [28] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[28]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[29]  (
+            .Q (\counter_r[7] [29] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[29]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[30]  (
+            .Q (\counter_r[7] [30] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[30]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[31]  (
+            .Q (\counter_r[7] [31] ),
+            .C (N872),
+            .CE (N1641),
+            .CLK (clk_i),
+            .D (N1642[31]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[32]  (
+            .Q (\counter_r[7] [32] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[0]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[33]  (
+            .Q (\counter_r[7] [33] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[1]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[34]  (
+            .Q (\counter_r[7] [34] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[2]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[35]  (
+            .Q (\counter_r[7] [35] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[3]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[36]  (
+            .Q (\counter_r[7] [36] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[4]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[37]  (
+            .Q (\counter_r[7] [37] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[5]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[38]  (
+            .Q (\counter_r[7] [38] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[6]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[39]  (
+            .Q (\counter_r[7] [39] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[7]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[40]  (
+            .Q (\counter_r[7] [40] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[8]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[41]  (
+            .Q (\counter_r[7] [41] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[9]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[42]  (
+            .Q (\counter_r[7] [42] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[10]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[43]  (
+            .Q (\counter_r[7] [43] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[11]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[44]  (
+            .Q (\counter_r[7] [44] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[12]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[45]  (
+            .Q (\counter_r[7] [45] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[13]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[46]  (
+            .Q (\counter_r[7] [46] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[14]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[47]  (
+            .Q (\counter_r[7] [47] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[15]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[48]  (
+            .Q (\counter_r[7] [48] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[16]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[49]  (
+            .Q (\counter_r[7] [49] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[17]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[50]  (
+            .Q (\counter_r[7] [50] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[18]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[51]  (
+            .Q (\counter_r[7] [51] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[19]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[52]  (
+            .Q (\counter_r[7] [52] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[20]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[53]  (
+            .Q (\counter_r[7] [53] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[21]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[54]  (
+            .Q (\counter_r[7] [54] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[22]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[55]  (
+            .Q (\counter_r[7] [55] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[23]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[56]  (
+            .Q (\counter_r[7] [56] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[24]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[57]  (
+            .Q (\counter_r[7] [57] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[25]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[58]  (
+            .Q (\counter_r[7] [58] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[26]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[59]  (
+            .Q (\counter_r[7] [59] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[27]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[60]  (
+            .Q (\counter_r[7] [60] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[28]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[61]  (
+            .Q (\counter_r[7] [61] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[29]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[62]  (
+            .Q (\counter_r[7] [62] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[30]));
+
+GTP_DFF_CE /* \g_counter[9].g_hpm.count_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \g_counter[9].g_hpm.count_r[63]  (
+            .Q (\counter_r[7] [63] ),
+            .C (N872),
+            .CE (N1695),
+            .CLK (clk_i),
+            .D (N1696[31]));
+
+GTP_DFF_CE /* \instret_r[0]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[0]  (
+            .Q (instret_r[0]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[0]));
+
+GTP_DFF_CE /* \instret_r[1]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[1]  (
+            .Q (instret_r[1]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[1]));
+
+GTP_DFF_CE /* \instret_r[2]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[2]  (
+            .Q (instret_r[2]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[2]));
+
+GTP_DFF_CE /* \instret_r[3]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[3]  (
+            .Q (instret_r[3]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[3]));
+
+GTP_DFF_CE /* \instret_r[4]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[4]  (
+            .Q (instret_r[4]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[4]));
+
+GTP_DFF_CE /* \instret_r[5]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[5]  (
+            .Q (instret_r[5]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[5]));
+
+GTP_DFF_CE /* \instret_r[6]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[6]  (
+            .Q (instret_r[6]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[6]));
+
+GTP_DFF_CE /* \instret_r[7]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[7]  (
+            .Q (instret_r[7]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[7]));
+
+GTP_DFF_CE /* \instret_r[8]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[8]  (
+            .Q (instret_r[8]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[8]));
+
+GTP_DFF_CE /* \instret_r[9]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[9]  (
+            .Q (instret_r[9]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[9]));
+
+GTP_DFF_CE /* \instret_r[10]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[10]  (
+            .Q (instret_r[10]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[10]));
+
+GTP_DFF_CE /* \instret_r[11]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[11]  (
+            .Q (instret_r[11]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[11]));
+
+GTP_DFF_CE /* \instret_r[12]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[12]  (
+            .Q (instret_r[12]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[12]));
+
+GTP_DFF_CE /* \instret_r[13]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[13]  (
+            .Q (instret_r[13]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[13]));
+
+GTP_DFF_CE /* \instret_r[14]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[14]  (
+            .Q (instret_r[14]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[14]));
+
+GTP_DFF_CE /* \instret_r[15]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[15]  (
+            .Q (instret_r[15]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[15]));
+
+GTP_DFF_CE /* \instret_r[16]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[16]  (
+            .Q (instret_r[16]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[16]));
+
+GTP_DFF_CE /* \instret_r[17]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[17]  (
+            .Q (instret_r[17]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[17]));
+
+GTP_DFF_CE /* \instret_r[18]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[18]  (
+            .Q (instret_r[18]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (_N284525));
+
+GTP_DFF_CE /* \instret_r[19]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[19]  (
+            .Q (instret_r[19]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[19]));
+
+GTP_DFF_CE /* \instret_r[20]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[20]  (
+            .Q (instret_r[20]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[20]));
+
+GTP_DFF_CE /* \instret_r[21]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[21]  (
+            .Q (instret_r[21]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[21]));
+
+GTP_DFF_CE /* \instret_r[22]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[22]  (
+            .Q (instret_r[22]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[22]));
+
+GTP_DFF_CE /* \instret_r[23]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[23]  (
+            .Q (instret_r[23]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[23]));
+
+GTP_DFF_CE /* \instret_r[24]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[24]  (
+            .Q (instret_r[24]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[24]));
+
+GTP_DFF_CE /* \instret_r[25]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[25]  (
+            .Q (instret_r[25]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[25]));
+
+GTP_DFF_CE /* \instret_r[26]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[26]  (
+            .Q (instret_r[26]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[26]));
+
+GTP_DFF_CE /* \instret_r[27]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[27]  (
+            .Q (instret_r[27]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[27]));
+
+GTP_DFF_CE /* \instret_r[28]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[28]  (
+            .Q (instret_r[28]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[28]));
+
+GTP_DFF_CE /* \instret_r[29]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[29]  (
+            .Q (instret_r[29]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[29]));
+
+GTP_DFF_CE /* \instret_r[30]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[30]  (
+            .Q (instret_r[30]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[30]));
+
+GTP_DFF_CE /* \instret_r[31]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[31]  (
+            .Q (instret_r[31]),
+            .C (N568),
+            .CE (N1708),
+            .CLK (clk_i),
+            .D (N1709[31]));
+
+GTP_DFF_CE /* \instret_r[32]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[32]  (
+            .Q (instret_r[32]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[0]));
+
+GTP_DFF_CE /* \instret_r[33]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[33]  (
+            .Q (instret_r[33]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[1]));
+
+GTP_DFF_CE /* \instret_r[34]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[34]  (
+            .Q (instret_r[34]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[2]));
+
+GTP_DFF_CE /* \instret_r[35]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[35]  (
+            .Q (instret_r[35]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[3]));
+
+GTP_DFF_CE /* \instret_r[36]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[36]  (
+            .Q (instret_r[36]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[4]));
+
+GTP_DFF_CE /* \instret_r[37]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[37]  (
+            .Q (instret_r[37]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[5]));
+
+GTP_DFF_CE /* \instret_r[38]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[38]  (
+            .Q (instret_r[38]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[6]));
+
+GTP_DFF_CE /* \instret_r[39]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[39]  (
+            .Q (instret_r[39]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[7]));
+
+GTP_DFF_CE /* \instret_r[40]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[40]  (
+            .Q (instret_r[40]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[8]));
+
+GTP_DFF_CE /* \instret_r[41]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[41]  (
+            .Q (instret_r[41]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[9]));
+
+GTP_DFF_CE /* \instret_r[42]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[42]  (
+            .Q (instret_r[42]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[10]));
+
+GTP_DFF_CE /* \instret_r[43]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[43]  (
+            .Q (instret_r[43]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[11]));
+
+GTP_DFF_CE /* \instret_r[44]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[44]  (
+            .Q (instret_r[44]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[12]));
+
+GTP_DFF_CE /* \instret_r[45]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[45]  (
+            .Q (instret_r[45]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[13]));
+
+GTP_DFF_CE /* \instret_r[46]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[46]  (
+            .Q (instret_r[46]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[14]));
+
+GTP_DFF_CE /* \instret_r[47]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[47]  (
+            .Q (instret_r[47]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[15]));
+
+GTP_DFF_CE /* \instret_r[48]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[48]  (
+            .Q (instret_r[48]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[16]));
+
+GTP_DFF_CE /* \instret_r[49]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[49]  (
+            .Q (instret_r[49]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[17]));
+
+GTP_DFF_CE /* \instret_r[50]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[50]  (
+            .Q (instret_r[50]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[18]));
+
+GTP_DFF_CE /* \instret_r[51]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[51]  (
+            .Q (instret_r[51]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[19]));
+
+GTP_DFF_CE /* \instret_r[52]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[52]  (
+            .Q (instret_r[52]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[20]));
+
+GTP_DFF_CE /* \instret_r[53]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[53]  (
+            .Q (instret_r[53]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[21]));
+
+GTP_DFF_CE /* \instret_r[54]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[54]  (
+            .Q (instret_r[54]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[22]));
+
+GTP_DFF_CE /* \instret_r[55]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[55]  (
+            .Q (instret_r[55]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[23]));
+
+GTP_DFF_CE /* \instret_r[56]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[56]  (
+            .Q (instret_r[56]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[24]));
+
+GTP_DFF_CE /* \instret_r[57]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[57]  (
+            .Q (instret_r[57]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[25]));
+
+GTP_DFF_CE /* \instret_r[58]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[58]  (
+            .Q (instret_r[58]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[26]));
+
+GTP_DFF_CE /* \instret_r[59]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[59]  (
+            .Q (instret_r[59]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[27]));
+
+GTP_DFF_CE /* \instret_r[60]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[60]  (
+            .Q (instret_r[60]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[28]));
+
+GTP_DFF_CE /* \instret_r[61]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[61]  (
+            .Q (instret_r[61]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[29]));
+
+GTP_DFF_CE /* \instret_r[62]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[62]  (
+            .Q (instret_r[62]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[30]));
+
+GTP_DFF_CE /* \instret_r[63]  */ #(
+            .GRS_EN("TRUE"), 
+            .INIT(1'b0))
+        \instret_r[63]  (
+            .Q (instret_r[63]),
+            .C (N568),
+            .CE (N1652),
+            .CLK (clk_i),
+            .D (N1653[31]));

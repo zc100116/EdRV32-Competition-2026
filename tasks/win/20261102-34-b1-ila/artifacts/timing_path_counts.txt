@@ -1,0 +1,3 @@
+Read-only PNR database export, max_path200,nworst1,min_max.
+Total samples=2936
+Negative samples=0

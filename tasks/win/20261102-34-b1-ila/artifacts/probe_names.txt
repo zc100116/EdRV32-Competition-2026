@@ -1,0 +1,19 @@
+B1 synthesized VM counter probes. 10 groups x low40 bits =400 data bits.
+Sample clock at top: clk_sys_w (u_pll_sys/clkout0, 100MHz).
+Q is the observed data net, not D/CE/C. No RTL changes.
+group	data_channels	net	register_instances	low40_Q_bits_found
+mcycle	[39:0]	u_cpu_subsys/u_core/u_csr/cycle_r[39:0]	u_cpu_subsys/u_core/u_csr/cycle_r[0..39]	40 of40
+minstret	[79:40]	u_cpu_subsys/u_core/u_csr/instret_r[39:0]	u_cpu_subsys/u_core/u_csr/instret_r[0..39]	40 of40
+hpm3	[119:80]	u_cpu_subsys/u_core/u_csr/counter_r[0][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[2].g_hpm.count_r[0..39]	40 of40
+hpm4	[159:120]	u_cpu_subsys/u_core/u_csr/counter_r[1][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[3].g_hpm.count_r[0..39]	40 of40
+hpm5	[199:160]	u_cpu_subsys/u_core/u_csr/counter_r[2][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[4].g_hpm.count_r[0..39]	40 of40
+hpm6	[239:200]	u_cpu_subsys/u_core/u_csr/counter_r[3][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[5].g_hpm.count_r[0..39]	40 of40
+hpm7	[279:240]	u_cpu_subsys/u_core/u_csr/counter_r[4][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[6].g_hpm.count_r[0..39]	40 of40
+hpm8	[319:280]	u_cpu_subsys/u_core/u_csr/counter_r[5][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[7].g_hpm.count_r[0..39]	40 of40
+hpm9	[359:320]	u_cpu_subsys/u_core/u_csr/counter_r[6][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[8].g_hpm.count_r[0..39]	40 of40
+hpm10	[399:360]	u_cpu_subsys/u_core/u_csr/counter_r[7][39:0]	u_cpu_subsys/u_core/u_csr/g_counter[9].g_hpm.count_r[0..39]	40 of40
+
+Triggers: minstret low40 and mcycle low40, 2 TriggerPorts, each40bits, basic comparison.
+Counter source hierarchy: top/u_cpu_subsys/u_core/u_csr.
+Verilog escaping backslashes/spaces belong to VM syntax; GUI may show unescaped names.
+Do not substitute event_count_r or event_r configuration registers.

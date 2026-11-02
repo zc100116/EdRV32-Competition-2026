@@ -1,0 +1,112 @@
+seq=1 ts=1793595806114 [sys] connected COM7 @ 115200 8N1
+seq=2 ts=1793595931059 [rx] 
+seq=3 ts=1793595931059 [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+seq=4 ts=1793595931059 [rx]   E         D   D   R   R   V   V      3      2 
+seq=5 ts=1793595931059 [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+seq=6 ts=1793595931059 [rx]   E         D   D   R  R     V V       3   2    
+seq=7 ts=1793595931059 [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+seq=8 ts=1793595931059 [rx] 
+seq=9 ts=1793595931059 [rx]   EdRV32 Boot ROM - UART 115200 8N1
+seq=10 ts=1793595931059 [rx] CHIP_ID: 0xed320001
+seq=11 ts=1793595931059 [rx] CLK_SYS_HZ: 100000000
+seq=12 ts=1793595931059 [rx] ROM bytes: 16384
+seq=13 ts=1793595931059 [rx] SRAM bytes: 65536
+seq=14 ts=1793595931059 [rx] I-cache bytes: 8192
+seq=15 ts=1793595931059 [rx] D-cache bytes: 8192
+seq=16 ts=1793595931059 [rx] MEM_READY: 1
+seq=17 ts=1793595931059 [rx] Build commit: d5d16c34
+seq=18 ts=1793595931059 [rx] Compiler version: GCC 15.2.0
+seq=19 ts=1793595931165 [rx] Boot SRAM
+seq=20 ts=1793595931165 [rx] Monitor: EdRV32
+seq=21 ts=1793595931165 [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+seq=22 ts=1793596759475 [rx] 
+seq=23 ts=1793596759475 [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+seq=24 ts=1793596759475 [rx]   E         D   D   R   R   V   V      3      2 
+seq=25 ts=1793596759475 [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+seq=26 ts=1793596759475 [rx]   E         D   D   R  R     V V       3   2    
+seq=27 ts=1793596759475 [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+seq=28 ts=1793596759475 [rx] 
+seq=29 ts=1793596759475 [rx]   EdRV32 Boot ROM - UART 115200 8N1
+seq=30 ts=1793596759475 [rx] CHIP_ID: 0xed320001
+seq=31 ts=1793596759475 [rx] CLK_SYS_HZ: 100000000
+seq=32 ts=1793596759475 [rx] ROM bytes: 16384
+seq=33 ts=1793596759475 [rx] SRAM bytes: 65536
+seq=34 ts=1793596759475 [rx] I-cache bytes: 8192
+seq=35 ts=1793596759476 [rx] D-cache bytes: 8192
+seq=36 ts=1793596759476 [rx] MEM_READY: 1
+seq=37 ts=1793596759476 [rx] Build commit: d5d16c34
+seq=38 ts=1793596759476 [rx] Compiler version: GCC 15.2.0
+seq=39 ts=1793596759574 [rx] Boot SRAM
+seq=40 ts=1793596759574 [rx] Monitor: EdRV32
+seq=41 ts=1793596759574 [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+seq=42 ts=1793596764908 [tx] 1<CR>
+seq=43 ts=1793596764925 [rx] Iterations default: 10
+seq=44 ts=1793596764925 [rx] Iterations input: decimal 1..4294967295 then Enter; Enter selects default
+seq=45 ts=1793596769893 [tx] 5000<CR>
+seq=46 ts=1793596769896 [rx] Iterations: 5000
+seq=47 ts=1793596769896 [rx] HPM rounds: 2
+seq=48 ts=1793596783806 [rx] HPM round: 1
+seq=49 ts=1793596783806 [rx] HPM first event: 1
+seq=50 ts=1793596783806 [rx] HPM last event: 8
+seq=51 ts=1793596783806 [rx] HPM round cycles: 1387629902
+seq=52 ts=1793596783806 [rx] HPM round instructions: 1441025033
+seq=53 ts=1793596783806 [rx] CRC seed: 0x0000e9f5
+seq=54 ts=1793596783806 [rx] CRC list: 0x0000e714
+seq=55 ts=1793596783806 [rx] CRC matrix: 0x00001fd7
+seq=56 ts=1793596783806 [rx] CRC state: 0x00008e3a
+seq=57 ts=1793596783806 [rx] CRC final: 0x0000bd59
+seq=58 ts=1793596783806 [rx] CRC seed result: PASS
+seq=59 ts=1793596783806 [rx] CRC list result: PASS
+seq=60 ts=1793596783806 [rx] CRC matrix result: PASS
+seq=61 ts=1793596783806 [rx] CRC state result: PASS
+seq=62 ts=1793596783806 [rx] CRC result: PASS
+seq=63 ts=1793596797734 [rx] HPM round: 2
+seq=64 ts=1793596797734 [rx] HPM first event: 9
+seq=65 ts=1793596797734 [rx] HPM last event: 16
+seq=66 ts=1793596797734 [rx] HPM round cycles: 1387628281
+seq=67 ts=1793596797734 [rx] HPM round instructions: 1441025033
+seq=68 ts=1793596797734 [rx] CRC seed: 0x0000e9f5
+seq=69 ts=1793596797734 [rx] CRC list: 0x0000e714
+seq=70 ts=1793596797734 [rx] CRC matrix: 0x00001fd7
+seq=71 ts=1793596797734 [rx] CRC state: 0x00008e3a
+seq=72 ts=1793596797734 [rx] CRC final: 0x0000bd59
+seq=73 ts=1793596797734 [rx] CRC seed result: PASS
+seq=74 ts=1793596797734 [rx] CRC list result: PASS
+seq=75 ts=1793596797734 [rx] CRC matrix result: PASS
+seq=76 ts=1793596797734 [rx] CRC state result: PASS
+seq=77 ts=1793596797734 [rx] CRC result: PASS
+seq=78 ts=1793596797734 [rx] Cycles: 1387629902
+seq=79 ts=1793596797734 [rx] Instructions: 1441025033
+seq=80 ts=1793596797734 [rx] Iterations/Sec: 360.326
+seq=81 ts=1793596797734 [rx] CoreMark/MHz: 3.603
+seq=82 ts=1793596797734 [rx] Score status: duration >= 10 s; see CoreMark reporting rules
+seq=83 ts=1793596797766 [rx] HPM 01 dual retire: 388590033
+seq=84 ts=1793596797766 [rx] HPM 02 single retire: 663844967
+seq=85 ts=1793596797766 [rx] HPM 03 zero retire: 335194902
+seq=86 ts=1793596797766 [rx] HPM 04 branches: 304559500
+seq=87 ts=1793596797766 [rx] HPM 05 pair RAW: 221081660
+seq=88 ts=1793596797766 [rx] HPM 06 pair structural: 59437510
+seq=89 ts=1793596797766 [rx] HPM 07 pair slot1 type: 327692230
+seq=90 ts=1793596797766 [rx] HPM 08 pair missing slot1: 36742523
+seq=91 ts=1793596797766 [rx] HPM 09 load-use stall: 132493703
+seq=92 ts=1793596797766 [rx] HPM 10 divide stall: 0
+seq=93 ts=1793596797766 [rx] HPM 11 device wait: 0
+seq=94 ts=1793596797766 [rx] HPM 12 frontend empty: 76466244
+seq=95 ts=1793596797766 [rx] HPM 13 I-cache miss: 0
+seq=96 ts=1793596797766 [rx] HPM 14 D-cache miss: 0
+seq=97 ts=1793596797766 [rx] HPM 15 dirty writeback: 0
+seq=98 ts=1793596797766 [rx] HPM 16 branch mispredict: 38233122
+seq=99 ts=1793596797766 [rx] IPC: 1.038
+seq=100 ts=1793596797766 [rx] Dual retire ratio: 0.280
+seq=101 ts=1793596797808 [rx] Load-use stall ratio: 0.095
+seq=102 ts=1793596797808 [rx] Divide stall ratio: 0.000
+seq=103 ts=1793596797808 [rx] Device wait ratio: 0.000
+seq=104 ts=1793596797808 [rx] Frontend empty ratio: 0.055
+seq=105 ts=1793596797808 [rx] Branch mispredict rate: 0.125
+seq=106 ts=1793596797808 [rx] I-cache MPKI: 0.000
+seq=107 ts=1793596797808 [rx] D-cache MPKI: 0.000
+seq=108 ts=1793596797808 [rx] Compiler version: GCC 15.2.0
+seq=109 ts=1793596797808 [rx] Compiler flags: -march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DITERATIONS=10
+seq=110 ts=1793596797808 [rx] ISA: rv32im_zicsr_zifencei
+seq=111 ts=1793596797808 [rx] CoreMark result: PASS
+seq=112 ts=1793596797808 [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info

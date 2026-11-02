@@ -1,0 +1,9 @@
+W: Verilog-2020=712
+W: Verilog-2008=269
+W: Verilog-2038=122
+W: Sdm-2003=79
+W: Verilog-2023=58
+W: Verilog-2039=14
+W: Public-4030=13
+W: Verilog-2036=4
+W: Sdm-2010=1
