@@ -1,6 +1,6 @@
 // File: edrv32_npu_conv.v
 // Spec: npu-spec 5.1, 5.2, 5.4; datapath design 4.2.2, 4.4, 4.8.
-// Description: Row-first CONV scheduler, resident model loading and five/two row slots.
+// Description: CONV scheduler, resident model loading and five/two row slots.
 // Independent input/model/residual producers share ordered DMA burst requests.
 // Clock: clk_npu.
 module edrv32_npu_conv (
@@ -285,6 +285,11 @@ module edrv32_npu_conv (
     wire residual_begin_w;
     wire line_candidate_w;
     wire model_candidate_w;
+    (* syn_preserve = 1 *) reg [1:0] prefer_model_r;
+    reg line_turn_r;
+    wire line_due_w;
+    wire model_due_w;
+    wire [12:0] required_last_row_w;
     wire residual_candidate_w;
     wire line_accept_w;
     wire model_accept_w;
@@ -392,6 +397,29 @@ module edrv32_npu_conv (
     assign line_candidate_w = active_r && (load_row_r < {1'b0, in_h_w})
         && (!slot_used_r[load_slot_r] || (load_plane_r != 6'd0) || (load_pair_r != 11'd0));
     assign model_candidate_w = active_r && (model_state_r != S_MODEL_DONE);
+    // Rows needed by the next command precede its model; later rows are prefetch.
+    // First-block model loading wins after the required input requests are queued.
+    assign required_last_row_w = ({1'b0, schedule_row_r} << unused_flags_w[5])
+        + (unused_flags_w[4] ? 13'd1 : 13'd0);
+    assign line_due_w = (load_row_r <= required_last_row_w);
+    assign model_due_w = (model_block_r <= schedule_block_r);
+    // Local copies keep the payload selection and producer enables registered.
+    always @(posedge clk_i or negedge rst_n_i[0]) begin
+        if (!rst_n_i[0]) begin
+            prefer_model_r <= 2'd0;
+            line_turn_r <= 1'b0;
+        end else if (cancel_i[0] || start_i[0]) begin
+            prefer_model_r <= 2'd0;
+            line_turn_r <= 1'b0;
+        end else begin
+            prefer_model_r <= {2{!line_due_w && (model_due_w || !line_turn_r)}};
+            if (model_accept_w) begin
+                line_turn_r <= 1'b1;
+            end else if (line_accept_w) begin
+                line_turn_r <= 1'b0;
+            end
+        end
+    end
     assign residual_candidate_w = active_r && (residual_state_r == S_RES_READ);
     assign request_prepare_w = !stop_i && (!request_valid_r || read_req_ready_i)
         && (line_candidate_w || model_candidate_w || residual_candidate_w);
@@ -420,9 +448,11 @@ module edrv32_npu_conv (
     // Qualify each priority winner directly; do not decode the shared request mux
     // back into counter enables on the APB ABORT-to-request path.
     assign line_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
-        && !residual_candidate_w && line_candidate_w;
+        && !residual_candidate_w && line_candidate_w
+        && (!model_candidate_w || !prefer_model_r[0]);
     assign model_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
-        && !residual_candidate_w && !line_candidate_w && model_candidate_w;
+        && !residual_candidate_w && model_candidate_w
+        && (!line_candidate_w || prefer_model_r[0]);
     assign residual_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
         && residual_candidate_w;
     assign line_row_last_w = (load_pair_r + {6'd0, line_beats_w} == input_row_beats_w)
@@ -443,7 +473,7 @@ module edrv32_npu_conv (
             read_tag_w[2] = residual_plane_r;
             read_tag_w[1] = residual_half_r;
             read_tag_w[0] = residual_bank_r;
-        end else if (line_candidate_w) begin
+        end else if (line_candidate_w && (!model_candidate_w || !prefer_model_r[1])) begin
             select_w = 2'd1;
             read_tag_w[31:29] = ROLE_LINE;
             read_tag_w[28] = line_row_last_w;

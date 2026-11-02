@@ -15,6 +15,10 @@ module tb_npu_prof;
     longint starts[68];
     longint spans[68];
     longint clock_count;
+    longint request_wait[3];
+    longint request_max[3];
+    bit [2:0] request_pending;
+    bit [2:0] request_accept;
     bit seen[68];
     bit [6:0] descriptor;
     bit [3:0] category;
@@ -30,6 +34,15 @@ module tb_npu_prof;
     end
     always @(posedge u_tb.clk_npu) begin
         clock_count++;
+        request_pending = {`C.residual_candidate_w, `C.model_candidate_w, `C.line_candidate_w};
+        request_accept = {`C.residual_accept_w, `C.model_accept_w, `C.line_accept_w};
+        for (int r = 0; r < 3; r++) begin
+            if (request_pending[r]) begin
+                request_wait[r]++;
+                if (request_wait[r] > request_max[r]) request_max[r] = request_wait[r];
+                if (request_accept[r]) request_wait[r] = 0;
+            end else request_wait[r] = 0;
+        end
         reason = 6;
         // A1 issue reaches the PERF1 M1 valid six edges later.
         if (`N.state_r == 6 && `N.is_conv_r) begin
@@ -66,6 +79,8 @@ module tb_npu_prof;
             else category = 6;
             counts[descriptor][category]++;
             if (`N.state_r == 8) begin
+                $display("REQUEST_WAIT line=%0d model=%0d residual=%0d",
+                    request_max[0], request_max[1], request_max[2]);
                 for (int d = 0; d < 68; d++) begin
                     $write("PROFILE d=%0d span=%0d work=%0d counts=", d, spans[d], work[d]);
                     for (int c = 0; c < 14; c++) $write("%0d,", counts[d][c]);

@@ -1,6 +1,6 @@
 // File: edrv32_npu_nonconv.v
 // Spec: npu-spec 2.1, 2.2, 5.2, 5.3, 5.5.
-// Description: Serial C16 max-pool and nearest-neighbor upsample using two scratch RAMs.
+// Description: Pipelined C16 max-pool and nearest-neighbor upsample using two scratch RAMs.
 // A POOL plane and each UPSAMPLE source row are read exactly once from DDR.
 // Clock: clk_npu.
 module edrv32_npu_nonconv (
@@ -50,8 +50,6 @@ module edrv32_npu_nonconv (
     localparam [4:0] S_CALC_INIT = 5'd5;
     localparam [4:0] S_SAMPLE_ADDR = 5'd6;
     localparam [4:0] S_SAMPLE_WAIT = 5'd7;
-    localparam [4:0] S_SAMPLE_MAX = 5'd8;
-    localparam [4:0] S_NEXT_PAIR = 5'd9;
     localparam [4:0] S_WRITE_INIT = 5'd10;
     localparam [4:0] S_WRITE_REQUEST = 5'd11;
     localparam [4:0] S_SOURCE_ADDR = 5'd12;
@@ -91,6 +89,15 @@ module edrv32_npu_nonconv (
     reg signed [31:0] center_row_base_r;
     reg signed [31:0] sample_row_base_r;
     reg sample_pixel_r;
+    reg sample_end_r;
+    reg sample_right_r;
+    reg [8:0] sample_pair_r;
+    reg sample_issue_r;
+    (* syn_preserve = 1 *) reg [3:0] compare_valid_r;
+    (* syn_preserve = 1 *) reg [3:0] compare_init_r;
+    (* syn_preserve = 1 *) reg [3:0] compare_end_r;
+    (* syn_preserve = 1 *) reg [3:0] compare_right_r;
+    reg [8:0] compare_pair_r;
     reg sample_valid_r;
     reg [127:0] sample_data_r;
     reg [127:0] maximum_r;
@@ -208,7 +215,8 @@ module edrv32_npu_nonconv (
             state_r <= S_IDLE;
             row_write_r <= 1'b0;
         end else begin
-            row_write_r <= 1'b0;
+            row_write_r <= compare_valid_r[0] && compare_end_r[0] && compare_right_r[0]
+                && !stop_i;
             if (stop_i && !source_active_w && (state_r != S_IDLE)) begin
                 state_r <= S_HALT;
             end else begin
@@ -257,19 +265,19 @@ module edrv32_npu_nonconv (
                         kernel_y_r <= 3'd0;
                         state_r <= S_SAMPLE_ADDR;
                     end
-                    S_SAMPLE_ADDR: state_r <= S_SAMPLE_WAIT;
-                    S_SAMPLE_WAIT: state_r <= S_SAMPLE_MAX;
-                    S_SAMPLE_MAX: begin
-                        state_r <= S_SAMPLE_ADDR;
+                    // Address/RAM and comparison advance independently across pixels.
+                    S_SAMPLE_ADDR: begin
                         if (kernel_x_r == 3'd4) begin
                             kernel_x_r <= 3'd0;
                             if (kernel_y_r == 3'd4) begin
                                 kernel_y_r <= 3'd0;
-                                if (!pixel_r) begin
-                                    pixel_r <= 1'b1;
-                                end else begin
-                                    row_write_r <= 1'b1;
-                                    state_r <= S_NEXT_PAIR;
+                                pixel_r <= !pixel_r;
+                                if (pixel_r) begin
+                                    if (pair_r == out_row_pairs_w - 11'd1) begin
+                                        state_r <= S_SAMPLE_WAIT;
+                                    end else begin
+                                        pair_r <= pair_r + 11'd1;
+                                    end
                                 end
                             end else begin
                                 kernel_y_r <= kernel_y_r + 3'd1;
@@ -278,13 +286,9 @@ module edrv32_npu_nonconv (
                             kernel_x_r <= kernel_x_r + 3'd1;
                         end
                     end
-                    S_NEXT_PAIR: begin
-                        if (pair_r == out_row_pairs_w - 11'd1) begin
+                    S_SAMPLE_WAIT: begin
+                        if (compare_valid_r[0] && compare_end_r[0] && compare_right_r[0]) begin
                             state_r <= S_WRITE_INIT;
-                        end else begin
-                            pair_r <= pair_r + 11'd1;
-                            pixel_r <= 1'b0;
-                            state_r <= S_SAMPLE_ADDR;
                         end
                     end
                     S_WRITE_INIT: begin
@@ -362,36 +366,28 @@ module edrv32_npu_nonconv (
         end
         if (state_r == S_CALC_INIT) begin
             sample_row_base_r <= center_row_base_r - {20'd0, in_row_pairs_w, 1'b0};
-            maximum_r <= {16{8'h80}};
         end
         if (state_r == S_SAMPLE_ADDR) begin
             sample_pixel_r <= sample_x_w[0];
             sample_valid_r <= sample_inside_w;
+            sample_end_r <= (kernel_x_r == 3'd4) && (kernel_y_r == 3'd4);
+            sample_right_r <= pixel_r;
+            sample_pair_r <= pair_r[8:0];
+            if (kernel_x_r == 3'd4) begin
+                sample_row_base_r <= (kernel_y_r == 3'd4)
+                    ? center_row_base_r - {20'd0, in_row_pairs_w, 1'b0}
+                    : sample_row_base_r + {21'd0, in_row_pairs_w};
+            end
         end
-        if (state_r == S_SAMPLE_WAIT) begin
+        if (sample_issue_r) begin
             sample_data_r <= sample_valid_r
                 ? (sample_pixel_r ? plane_rd_data_w[255:128] : plane_rd_data_w[127:0])
                 : {16{8'h80}};
+            compare_pair_r <= sample_pair_r;
         end
-        if (state_r == S_SAMPLE_MAX) begin
-            maximum_r <= maximum_w;
-            if (kernel_x_r == 3'd4) begin
-                if (kernel_y_r == 3'd4) begin
-                    sample_row_base_r <= center_row_base_r - {20'd0, in_row_pairs_w, 1'b0};
-                    if (!pixel_r) begin
-                        left_pixel_r <= maximum_w;
-                        maximum_r <= {16{8'h80}};
-                    end else begin
-                        row_write_addr_r <= pair_r[8:0];
-                        row_write_data_r <= {maximum_w, left_pixel_r};
-                    end
-                end else begin
-                    sample_row_base_r <= sample_row_base_r + {21'd0, in_row_pairs_w};
-                end
-            end
-        end
-        if (state_r == S_NEXT_PAIR) begin
-            maximum_r <= {16{8'h80}};
+        if (compare_valid_r[0] && compare_end_r[0] && compare_right_r[0]) begin
+            row_write_addr_r <= compare_pair_r;
+            row_write_data_r <= {maximum_w, left_pixel_r};
         end
         if (state_r == S_WRITE_INIT) begin
             write_addr_r <= out_row_addr_r;
@@ -419,6 +415,45 @@ module edrv32_npu_nonconv (
             end
         end
     end
+
+    // One enabled scratch read, one pixel-selection stage, then signed max.
+    // End/right ownership follows the read even for boundary padding samples.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            sample_issue_r <= 1'b0;
+            compare_valid_r <= 4'd0;
+            compare_init_r <= 4'd0;
+        end else if (cancel_i || stop_i) begin
+            sample_issue_r <= 1'b0;
+            compare_valid_r <= 4'd0;
+            compare_init_r <= 4'd0;
+        end else begin
+            sample_issue_r <= (state_r == S_SAMPLE_ADDR);
+            compare_valid_r <= {4{sample_issue_r}};
+            compare_init_r <= {4{state_r == S_CALC_INIT}};
+        end
+    end
+    always @(posedge clk_i) begin
+        compare_end_r <= {4{sample_end_r}};
+        compare_right_r <= {4{sample_right_r}};
+    end
+    genvar maximum_group;
+    generate
+        for (maximum_group = 0; maximum_group < 4; maximum_group = maximum_group + 1) begin
+            : g_maximum
+            always @(posedge clk_i) begin
+                if (compare_init_r[maximum_group]) begin
+                    maximum_r[maximum_group*32+:32] <= {4{8'h80}};
+                end else if (compare_valid_r[maximum_group]) begin
+                    maximum_r[maximum_group*32+:32] <= compare_end_r[maximum_group]
+                        ? {4{8'h80}} : maximum_w[maximum_group*32+:32];
+                    if (compare_end_r[maximum_group] && !compare_right_r[maximum_group]) begin
+                        left_pixel_r[maximum_group*32+:32] <= maximum_w[maximum_group*32+:32];
+                    end
+                end
+            end
+        end
+    endgenerate
 
     edrv32_ram_npu_scratch u_plane_scratch (
         // Clocks and domain-local resets.

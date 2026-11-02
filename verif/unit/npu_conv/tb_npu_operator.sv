@@ -132,6 +132,25 @@ module tb_npu_operator;
         .writer_idle_o(unused_writer_idle),
         .active_o(unused_active)
     );
+    int row_samples;
+    bit sampling;
+    always @(posedge clk) begin
+        if (rst_n && !u_nonconv.upsample_r) begin
+            if (u_nonconv.state_r == 5) begin
+                row_samples = 0;
+                sampling = 1;
+            end else if (sampling) begin
+                if (row_samples < int'(u_nonconv.in_w_w)*25) begin
+                    if (u_nonconv.state_r != 6)
+                        $fatal(1, "FAIL POOL sample bubble at sample=%0d time=%0t",
+                            row_samples, $time);
+                    row_samples++;
+                end else begin
+                    sampling = 0;
+                end
+            end
+        end
+    end
     always @(posedge clk) begin
         if (rst_n) begin
             if (u_nonconv.plane_wr_en_w && u_nonconv.plane_rd_en_w
