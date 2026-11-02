@@ -76,7 +76,6 @@ module edrv32_cpu_subsys (
 
     // Parallel copies share the original reset and release on the same clock edge.
     wire rst_sys_core_n_w;
-    wire [7:0] rst_sys_direction_n_w;
     wire rst_sys_csr_n_w;
     wire [9:0] rst_sys_counter_n_w;
     wire rst_sys_icache_n_w;
@@ -90,46 +89,6 @@ module edrv32_cpu_subsys (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_n_o(rst_sys_core_n_w)
-    );
-    edrv32_reset_copy u_reset_sys_direction_0_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[0])
-    );
-    edrv32_reset_copy u_reset_sys_direction_1_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[1])
-    );
-    edrv32_reset_copy u_reset_sys_direction_2_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[2])
-    );
-    edrv32_reset_copy u_reset_sys_direction_3_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[3])
-    );
-    edrv32_reset_copy u_reset_sys_direction_4_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[4])
-    );
-    edrv32_reset_copy u_reset_sys_direction_5_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[5])
-    );
-    edrv32_reset_copy u_reset_sys_direction_6_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[6])
-    );
-    edrv32_reset_copy u_reset_sys_direction_7_n (
-        .clk_i(clk_i),
-        .rst_n_i(rst_n_i),
-        .rst_n_o(rst_sys_direction_n_w[7])
     );
     edrv32_reset_copy u_reset_sys_csr_n (
         .clk_i(clk_i),
@@ -283,7 +242,6 @@ module edrv32_cpu_subsys (
 
         // Reset.
         .rst_n_i(rst_sys_core_n_w),
-        .rst_sys_direction_n_i(rst_sys_direction_n_w),
         .rst_sys_csr_n_i(rst_sys_csr_n_w),
         .rst_sys_counter_n_i(rst_sys_counter_n_w),
 

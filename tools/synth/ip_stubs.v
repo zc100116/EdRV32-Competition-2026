@@ -104,10 +104,10 @@ endmodule
 (* blackbox *) module ip_ram_cpu_direction (
     input wire clk,
     input wire wr_en,
-    input wire [11:0] wr_addr,
-    input wire [1:0] wr_data,
-    output wire [1:0] update_data,
-    input wire [11:0] rd_addr,
-    output wire [1:0] rd_data
+    input wire [10:0] wr_addr,
+    input wire [3:0] wr_data,
+    output wire [3:0] update_data,
+    input wire [10:0] rd_addr,
+    output wire [3:0] rd_data
 );
 endmodule

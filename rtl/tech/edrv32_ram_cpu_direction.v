@@ -1,18 +1,18 @@
 // File: edrv32_ram_cpu_direction.v
 // Spec: cpu-spec 4.4; CLAUDE.md 8.
-// Description: Fixed distributed RAM, synchronous write and asynchronous read.
+// Description: Paired gshare counters, synchronous word write and asynchronous reads.
 // Clock domain: clk_sys. Read data follows address and post-edge memory contents.
 `include "edrv32_build_mode.vh"
 module edrv32_ram_cpu_direction (
     // Clock and write port (no reset).
     input wire clk_i,
     input wire wr_en_i,
-    input wire [11:0] wr_addr_i,
-    input wire [1:0] wr_data_i,
+    input wire [10:0] wr_addr_i,
+    input wire [3:0] wr_data_i,
     // Asynchronous read ports; update reads the write address.
-    output wire [1:0] update_data_o,
-    input wire [11:0] rd_addr_i,
-    output wire [1:0] rd_data_o
+    output wire [3:0] update_data_o,
+    input wire [10:0] rd_addr_i,
+    output wire [3:0] rd_data_o
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_cpu_direction u_ip (
@@ -25,11 +25,11 @@ module edrv32_ram_cpu_direction (
         .rd_data(rd_data_o)
     );
 `else
-    reg [1:0] memory_r [0:4095];
+    reg [3:0] memory_r [0:2047];
     integer entry;
     initial begin
-        for (entry = 0; entry < 4096; entry = entry + 1)
-            memory_r[entry] = 2'b01;
+        for (entry = 0; entry < 2048; entry = entry + 1)
+            memory_r[entry] = 4'b0101;
     end
     assign update_data_o = memory_r[wr_addr_i];
     assign rd_data_o = memory_r[rd_addr_i];

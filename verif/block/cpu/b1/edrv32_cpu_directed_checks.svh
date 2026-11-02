@@ -236,9 +236,12 @@
                 for (int entry = 0; entry < 128; entry++)
                     $fdisplay(predictor_descriptor, "btb %0d %h", entry,
                         u_core.u_frontend.u_predictor.u_btb.memory_r[entry]);
-                for (int entry = 0; entry < 4096; entry++)
-                    $fdisplay(predictor_descriptor, "direction %0d %h", entry,
-                        u_core.u_frontend.u_predictor.u_direction.memory_r[entry]);
+                for (int entry = 0; entry < 2048; entry++) begin
+                    $fdisplay(predictor_descriptor, "direction %0d %h", entry * 2,
+                        u_core.u_frontend.u_predictor.u_direction.memory_r[entry][1:0]);
+                    $fdisplay(predictor_descriptor, "direction %0d %h", entry * 2 + 1,
+                        u_core.u_frontend.u_predictor.u_direction.memory_r[entry][3:2]);
+                end
                 $fclose(predictor_descriptor);
             end
             candidate0 = u_core.d_record_w[0][63:32];
