@@ -53,16 +53,42 @@ def rgb_to_rgb565(rgb):
     return bytes(result)
 
 
+def letterbox_geometry(width, height):
+    """The integer resize dimensions are shared by upload and result display."""
+    from PySide6.QtCore import QSize, Qt
+    size = QSize(width, height).scaled(1280, 720, Qt.KeepAspectRatio)
+    return size.width(), size.height(), (1280 - size.width()) // 2, (720 - size.height()) // 2
+
+
+def original_boxes(boxes, width, height):
+    scaled_w, scaled_h, left, top = letterbox_geometry(width, height)
+    result = []
+    for x0, y0, x1, y1, category, score in boxes:
+        x0, x1 = max(left, x0), min(left + scaled_w, x1)
+        y0, y1 = max(top, y0), min(top + scaled_h, y1)
+        if x0 < x1 and y0 < y1:
+            result.append(((x0 - left) * width / scaled_w,
+                           (y0 - top) * height / scaled_h,
+                           (x1 - left) * width / scaled_w,
+                           (y1 - top) * height / scaled_h, category, score))
+    return tuple(result)
+
+
 def image_rgb565(path):
     from PySide6.QtCore import Qt
-    from PySide6.QtGui import QImage, QImageReader
+    from PySide6.QtGui import QImage, QImageReader, QPainter
     reader = QImageReader(str(path))
     image = reader.read()
     if image.isNull():
         raise ValueError(f'Cannot read image {path}: {reader.errorString()}')
-    image = image.scaled(1280, 720, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-    image = image.convertToFormat(QImage.Format_RGB888)
-    return rgb_to_rgb565(bytes(image.constBits()))
+    width, height, left, top = letterbox_geometry(image.width(), image.height())
+    image = image.scaled(width, height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+    canvas = QImage(1280, 720, QImage.Format_RGB888)
+    canvas.fill(Qt.black)
+    painter = QPainter(canvas)
+    painter.drawImage(left, top, image)
+    painter.end()
+    return rgb_to_rgb565(bytes(canvas.constBits()))
 
 
 class YoloTool:

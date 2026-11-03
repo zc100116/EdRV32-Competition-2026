@@ -39,6 +39,8 @@ typedef struct {
     unsigned fps, npu_tenths, post_tenths, latency_tenths, count;
     ui_detection_t targets[5];
     unsigned category_count[5];
+    unsigned category_id[5];
+    unsigned category_used;
     bool boxes;
     /* Image recognition (app 2): current PC image, design 8.2 IMAGE_INFO. */
     const char *image_name;

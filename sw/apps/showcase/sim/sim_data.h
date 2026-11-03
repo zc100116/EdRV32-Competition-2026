@@ -3,6 +3,7 @@
 #define SIM_DATA_H
 #include "ui_data.h"
 void sim_data_init(void);
+void sim_data_many_categories(bool enabled);
 void sim_data_session(ui_app_t app,ui_state_t state,const char *error);
 void sim_data_image_status(int status);
 void sim_data_toggle_hardware(void);

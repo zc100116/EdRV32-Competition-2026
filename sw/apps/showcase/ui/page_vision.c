@@ -2,12 +2,13 @@
  * Only result and statistic changes invalidate L1; video frames bypass LVGL.
  */
 #include "theme.h"
+#include "detection.h"
 static lv_obj_t *boxes[5];
 static lv_obj_t *tags[5];
 static lv_obj_t *metrics[4];
 static lv_obj_t *counts[5];
 static lv_obj_t *confidence[5];
-static lv_obj_t *bars[5];
+static lv_obj_t *bars[5], *categories[5];
 static lv_obj_t *image_status;
 static lv_obj_t *pause_label;
 static lv_obj_t *box_label;
@@ -55,10 +56,9 @@ void ui_vision_build(lv_obj_t *p, bool batch)
             metrics[i] = ui_label(side, "", 20, 38 + (int)i * 67, &sim_font_28, ACCENT);
         }
         ui_label(side, "类别分布", 20, 294, &sim_font_20, TEXT);
-        const char *categories[] = {"行人", "汽车", "自行车", "公交车", "交通灯"};
         for(unsigned i = 0; i < 5; ++i) {
             int y = 334 + (int)i * 37;
-            ui_label(side, categories[i], 20, y, &sim_font_14, MUTED);
+            categories[i]=ui_label(side, "", 20, y, &sim_font_14, MUTED);
             counts[i] = ui_label(side, "", 224, y, &sim_font_14, TEXT);
             bars[i] = ui_box(side, 20, y + 24, 1, 5, ACCENT);
             lv_obj_set_style_border_width(bars[i], 0, 0);
@@ -134,8 +134,12 @@ void ui_vision_update(bool batch)
         lv_snprintf(s, sizeof(s), "%u.%u ms", d.latency_tenths/10, d.latency_tenths%10);
         ui_text(metrics[3], s);
         for(unsigned i = 0; i < 5; ++i) {
-            lv_snprintf(s, sizeof(s), "%u", d.category_count[i]); ui_text(counts[i], s);
-            int width = 1 + (int)d.category_count[i] * 40;
+            bool used=i<d.category_used;
+            ui_text(categories[i],used ? ui_coco_names[d.category_id[i]] : "—");
+            if(used) lv_snprintf(s, sizeof(s), "%u", d.category_count[i]);
+            else s[0]=0;
+            ui_text(counts[i], s);
+            int width=used ? (int)(d.category_count[i]*232/d.category_count[0]) : 0;
             if(lv_obj_get_width(bars[i]) != width) lv_obj_set_width(bars[i], width);
         }
     }

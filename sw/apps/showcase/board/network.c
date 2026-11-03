@@ -26,6 +26,8 @@
 struct message { struct message *next; unsigned bytes; uint8_t data[1024]; };
 static struct message *head,*tail;
 static unsigned tx_echo;
+static uint32_t tx_descriptors;
+unsigned board_eth_rering;
 static unsigned tx_active,tx_done,tx_count,tx_bytes,sequence,produced,consumed;
 unsigned board_tx_bytes,board_tx_packets,board_echo_count,board_echo_replies;
 char board_udp_text[1001];
@@ -39,6 +41,7 @@ int board_eth_send(uint32_t descriptors,uint32_t count)
     struct engine_event e=engine_poll(ENGINE_ETH);
     if(!(e.status&EDRV32_ETH_STATUS_IDLE_MASK)) return 0;
     tx_active=1; tx_done=e.done_count; tx_count=count; tx_bytes=0;
+    tx_descriptors=descriptors;
     /* Descriptors stay owned by the caller until the hardware completes. */
     const struct eth_tx_descriptor *d=uncached(descriptors);
     for(unsigned i=0;i<count;++i) tx_bytes+=d[i].word[1];
@@ -190,6 +193,18 @@ void board_network_step(void)
     struct engine_event e=engine_poll(ENGINE_ETH);
     if(e.error || (e.irq&EDRV32_ETH_IRQ_STAT_ERROR_MASK)) {
         platform_puts("ETH error "); platform_put_hex(e.error); platform_stop(); }
+    /* eth-spec 4.1 / P5c 10.3: RX can become BUSY after the submitter's
+     * IDLE read, causing DOORBELL to be ignored. Once IDLE is observed, a
+     * separate APB read sees DONE_COUNT (updated one clk_mem after BUSY falls;
+     * tx.v:455-461, regs.v:166-167). Accepted starts become BUSY before another
+     * APB STATUS read (tx.v:386, regs.v:569). No timeout is involved. */
+    if(tx_active && (e.status&EDRV32_ETH_STATUS_IDLE_MASK)) {
+        e=engine_poll(ENGINE_ETH);
+        if(e.done_count==tx_done) {
+            eth_send(tx_descriptors,tx_count);
+            ++board_eth_rering;
+        }
+    }
     if(tx_active && e.done_count-tx_done>=tx_count) {
         board_tx_packets+=engine_perf(ENGINE_ETH,10); board_tx_bytes+=tx_bytes;
         if(tx_echo) ++board_echo_replies;

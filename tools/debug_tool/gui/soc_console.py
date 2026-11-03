@@ -732,6 +732,9 @@ class SocConsole(QWidget):
         if mode == 1 or (mode == 2 and returned):
             image = self.static_image
             boxes = capture[2].boxes if mode == 2 and capture is not None else ()
+            if boxes:
+                from core.yolo import original_boxes
+                boxes = original_boxes(boxes, image.width(), image.height())
             source = ('静态原图' if mode == 1 else
                       '回传图像检查' if capture is not None else '等待图像检查回传')
             number = capture[2].frame_id if mode == 2 and capture is not None else '—'

@@ -342,6 +342,41 @@ static void check_four_keys(void)
     puts("PASS: four-key traversal of all page controls, slider/dropdown edit, switches, "
          "checkboxes, image states, session/retry, game/list focus and layered Esc");
 }
+static void check_media_hidden(void)
+{
+    if(!ui_data_vision().boxes) ui_data_boxes();
+    for(unsigned page=1;page<=3;++page) {
+        ui_open(page); settle();
+        for(unsigned i=0;i<lv_group_get_obj_count(lv_group_get_default());++i)
+            if((unsigned)(uintptr_t)lv_obj_get_user_data(control(i))==1005) {
+                select_control(control(i)); break;
+            }
+        if(!ui_monitor_visible()) ui_monitor_toggle();
+        tap(LV_KEY_ENTER);
+        assert(ui_interface_hidden() && !ui_monitor_visible());
+        if(page==1) capture("vision-hidden");
+        tap(LV_KEY_ESC);
+        assert(!ui_interface_hidden() && ui_page==page && ui_monitor_visible());
+        tap(LV_KEY_ESC); assert(ui_page==0);
+        ui_monitor_toggle();
+    }
+    ui_open(1); settle();
+    lv_indev_t *mouse=lv_indev_create(); lv_indev_set_type(mouse,LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(mouse,read_test_input);
+    ui_hide_interface();
+    pointer(mouse,55,24,true); pointer(mouse,55,24,false);
+    assert(!ui_interface_hidden() && ui_page==1);
+    pointer(mouse,55,24,true); pointer(mouse,55,24,false);
+    assert(ui_page==0);
+    lv_indev_delete(mouse);
+    ui_open(1); settle(); sim_data_many_categories(true); ui_refresh();
+    ui_vision_t d=ui_data_vision();
+    assert(d.count==13 && d.category_used==5 && d.category_id[0]==2 && d.category_id[1]==7);
+    capture("vision-categories"); sim_data_many_categories(false);
+    ui_open(0); ui_monitor_toggle(); capture("overlay-cpu"); ui_monitor_toggle();
+    puts("PASS media hide preserves boxes/overlay setting; "
+         "first key/click restores only; top five");
+}
 int main(void)
 {
     lv_init();
@@ -360,6 +395,6 @@ int main(void)
         if(page==6) continue;
         ui_tab=0; ui_mode=0; ui_open(page); settle(); capture(names[page]);
     }
-    check_four_keys(); measure_overlay();
+    check_four_keys(); measure_overlay(); check_media_hidden();
     lv_deinit(); return 0;
 }

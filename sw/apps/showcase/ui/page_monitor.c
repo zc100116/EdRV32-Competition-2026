@@ -5,13 +5,18 @@
 static lv_obj_t *window, *parent, *move_button, *close_button;
 static lv_obj_t *fps, *busy, *tasks[3], *ports[7], *bars[7][2], *chart;
 static lv_chart_series_t *series;
-static bool visible, compact;
+static bool visible, compact, suppressed;
 static unsigned corner, last_second=UINT32_MAX;
 static int32_t history[60];
 static unsigned history_next;
 static void update_timer(lv_timer_t *timer) { (void)timer; ui_monitor_update(); }
 void ui_monitor_init(void) { lv_timer_create(update_timer,500,NULL); }
-bool ui_monitor_visible(void) { return visible; }
+bool ui_monitor_visible(void) { return visible && !suppressed; }
+void ui_monitor_suppress(bool hide)
+{
+    suppressed=hide;
+    if(window) lv_obj_set_hidden(window,!ui_monitor_visible());
+}
 void ui_monitor_position(int *x,int *y)
 {
     *x=(corner&1) ? 960 : 0;
@@ -67,7 +72,7 @@ static void build(void)
     for(unsigned i=0;i<60;++i)
         lv_chart_set_next_value(chart,series,history[(history_next+i)%60]);
     position();
-    lv_obj_set_hidden(window,!visible);
+    lv_obj_set_hidden(window,!ui_monitor_visible());
 }
 void ui_monitor_parent(lv_obj_t *p,bool small)
 {
@@ -78,7 +83,7 @@ void ui_monitor_toggle(void)
 {
     visible=!visible;
     if(!window) { parent=lv_layer_sys(); build(); }
-    lv_obj_set_hidden(window,!visible);
+    lv_obj_set_hidden(window,!ui_monitor_visible());
     if(visible) ui_monitor_update();
 }
 void ui_monitor_update(void)
@@ -91,11 +96,12 @@ void ui_monitor_update(void)
         history_next=(history_next+1)%60;
         if(window && visible) lv_chart_set_next_value(chart,series,(int32_t)total);
     }
-    if(!window || !visible) return;
+    if(!window || !ui_monitor_visible()) return;
     char s[128];
     lv_snprintf(s,sizeof(s),"渲染 %u fps    显示 %u fps",d.fps,d.display_fps);
     ui_text(fps,s);
-    lv_snprintf(s,sizeof(s),"NPU %u%%   RND %u%%",d.npu_busy,d.rnd_busy); ui_text(busy,s);
+    lv_snprintf(s,sizeof(s),"CPU %u%%  NPU %u%%  RND %u%%",d.cpu,d.npu_busy,d.rnd_busy);
+    ui_text(busy,s);
     const char *names[]={"通信","应用","界面"};
     for(unsigned i=0;i<3;++i) {
         lv_snprintf(s,sizeof(s),"%s %u%%   最长 %u us",names[i],d.task_cpu[i],d.task_max_us[i]);

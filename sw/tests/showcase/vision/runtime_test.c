@@ -16,6 +16,7 @@
 #include "geo.h"
 #include "ov5640.h"
 #include "eth.h"
+#include "rnd.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,12 +64,21 @@ void platform_gui_wake(void) {}
 uint32_t showcase_gui_frames(void) { return display_frames; }
 ui_system_t ui_data_system(void) { return (ui_system_t){0}; }
 static unsigned invalidates;
-void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
+void showcase_rnd_run(const struct rnd_batch *batch)
 {
-    assert(address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE && bytes == VISION_OUTPUT_BYTES);
-    memcpy((void *)address, (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE+VISION_OUTPUT_BASE),bytes);
+    assert(batch->count == 1 && batch->target_count == 1);
+    const uint32_t *c = batch->commands[0].word;
+    assert(c[0] == (5u | (1u << 8) | (1u << 12)));
+    assert(c[1] == VISION_POST_BASE && c[2] == 5040);
+    assert(c[3] == 0 && c[4] == (1259u | (143u << 16)));
+    assert(c[5] == 0 && c[6] == c[4]);
+    assert(c[8] == VISION_OUTPUT_BASE && c[9] == 5040 && c[10] == 0);
+    memcpy((void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_POST_BASE),
+           (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE + VISION_OUTPUT_BASE),
+           VISION_OUTPUT_BYTES);
     ++invalidates;
 }
+
 uint32_t platform_frames(void) { return display_frames; }
 void platform_put_u32(uint32_t value) { fprintf(stderr, "%u", value); }
 void disp_submit(enum disp_layer layer, uint32_t base, uint32_t stride)
@@ -103,6 +113,7 @@ void engine_control(enum engine_id engine, uint32_t ctrl)
     if (engine == ENGINE_PIX || engine == ENGINE_GEO)
         assert((hardware & (APP_HW_PIX | APP_HW_GEO)) == (APP_HW_PIX | APP_HW_GEO));
 }
+#ifndef NETWORK_INTEGRATION
 struct engine_event engine_poll(enum engine_id engine)
 {
     if (engine == ENGINE_PIX) return (struct engine_event){.status = pix_busy ? 1 : 2};
@@ -111,6 +122,7 @@ struct engine_event engine_poll(enum engine_id engine)
     if (engine == ENGINE_PIX || engine == ENGINE_GEO) assert(hardware & APP_HW_GEO);
     return (struct engine_event){.status = 2, .done_count = done_count};
 }
+#endif
 void vin_camera_size(unsigned camera, unsigned width, unsigned height)
 { assert(camera == 0 && width == 1280 && height == 720); }
 void vin_channel_configure(unsigned channel, const struct vin_channel *c)
@@ -145,6 +157,7 @@ void geo_descriptor_pack(struct geo_descriptor *d, const struct geo_config *c)
 }
 void geo_submit(uint32_t descriptors, uint32_t count)
 { assert(count == 1); geo_descriptor = descriptors; }
+#ifndef NETWORK_INTEGRATION
 int board_eth_send(uint32_t descriptors, uint32_t count)
 {
     assert(descriptors == VISION_TX_DESCRIPTORS && count == 3);
@@ -161,6 +174,7 @@ void eth_window_configure(unsigned window, uint32_t base, uint32_t bytes)
     reopened_base = base;
     reopened_bytes = bytes;
 }
+#endif
 void eth_tx_descriptor_pack(struct eth_tx_descriptor *d, uint32_t source,
                             uint32_t bytes, unsigned window, unsigned notify, uint32_t offset)
 {
@@ -237,6 +251,62 @@ static void camera_test(void)
     display_frame(); display_frame();
     puts("PASS L0 SWITCH/REL_BASE releases VIN slots; GUI cannot release scanned frames");
 }
+static void camera_event(unsigned slot, unsigned id)
+{
+    frames[0] = (struct vin_frame){slot << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, id};
+    frames[2] = frames[0];
+    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK | EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    vision_service();
+}
+static void output_class(unsigned category)
+{
+    int8_t *output = physical(VISION_OUTPUT_BASE);
+    memset(output, 0x80, VISION_OUTPUT_BYTES);
+    const yolo_head *head = &yolo_default_heads[0];
+    output[head->class_offset + (category / 16) * head->plane_stride +
+           100 * 16 + category % 16] = 127;
+}
+static void parallel_test(void)
+{
+    vision_app_camera.enter(); drain();
+    unsigned before = npu_runs, copies = invalidates;
+    camera_event(0, 100);
+    assert(npu_runs == before + 1);
+    camera_event(1, 101); /* Retain the latest input while frame 100 is in flight. */
+    assert(npu_runs == before + 1);
+    output_class(1);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    vision_service();
+    assert(invalidates == copies + 1 && npu_runs == before + 2);
+    assert(vision_frame() == 100); /* Frame 101 runs before frame 100 post completes. */
+    output_class(3); /* The running NPU may immediately overwrite its OUTPUT. */
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    vision_service();
+    assert(invalidates == copies + 1); /* Do not overwrite a still-owned post buffer. */
+    for (unsigned i = 0; ui_data_vision().count == 0; ++i) {
+        assert(i < 4000); vision_service();
+    }
+    ui_vision_t result = ui_data_vision();
+    assert(result.count == 1 && result.targets[0].class_id == 1 && vision_frame() == 100);
+    vision_pause(true); /* Drain the completed/in-flight frame without a new start. */
+    drain();
+    result = ui_data_vision();
+    assert(vision_ready(UI_STATE_PAUSED) && npu_runs == before + 2);
+    assert(result.count == 1 && result.targets[0].class_id == 3 && vision_frame() == 101);
+    assert(invalidates == copies + 2);
+    vision_pause(false); drain();
+    camera_event(2, 102);
+    camera_event(0, 103);
+    unsigned runs = npu_runs;
+    vision_app_camera.exit();
+    output_class(5);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    display_frame(); display_frame(); drain();
+    assert(vision_ready(UI_STATE_IDLE) && npu_runs == runs);
+    display_frame(); display_frame();
+    memset(physical(VISION_OUTPUT_BASE), 0x80, VISION_OUTPUT_BYTES);
+    puts("PASS N+1 NPU overlaps N post, snapshot classes/frame IDs stay paired; pause/stop drain");
+}
 static void upload(unsigned base, unsigned index)
 {
     memset(physical(base), 0xff, VISION_IMAGE_BYTES);
@@ -263,7 +333,7 @@ static void upload(unsigned base, unsigned index)
     const struct eth_tx_descriptor *tx = physical(VISION_TX_DESCRIPTORS);
     assert(tx[0].word[0] == VISION_INPUT_BASE + (index % 2)*VISION_INPUT_SPACING &&
            tx[0].word[2] == 0);
-    assert(tx[1].word[0] == VISION_OUTPUT_BASE && tx[1].word[2] == 1);
+    assert(tx[1].word[0] == VISION_POST_BASE && tx[1].word[2] == 1);
     assert(tx[2].word[0] == VISION_TX_DETECTIONS && tx[2].word[2] == 0x102);
     assert(memcmp(physical(VISION_TX_DETECTIONS), "EDDT", 4) == 0);
     assert(vision_read32((uint8_t *)physical(VISION_TX_DETECTIONS)+12)==100+index);
@@ -305,7 +375,7 @@ static void cancel_test(void)
     unsigned npu_before = npu_runs;
     vision_cancel(2);
     assert(npu_runs==npu_before); /* No NPU abort or replacement before DONE. */
-    unsigned next = vision_upload_base(); assert(next && next!=base);
+    unsigned next = vision_upload_base(); assert(next); /* CH2 no longer reads the upload. */
     vision_image_receiving(202);
     assert(!vision_bulk_done(2,next,VISION_IMAGE_BYTES));
     unsigned memory_before = memory_starts;
@@ -483,13 +553,14 @@ static void matrix_test(void)
     assert(gamma[0] == 0 && gamma[255] == 255 && gamma[128] > 128);
     puts("PASS centered GEO inverse matrices, scale bounds, mirrors and gamma extremes");
 }
+#ifndef NETWORK_INTEGRATION
 int main(void)
 {
     matrix_test();
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE, 0x02000000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
-    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_OUTPUT_BASE), VISION_OUTPUT_BYTES,
+    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_POST_BASE), VISION_OUTPUT_BYTES,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE, 0x0b000000,
@@ -503,6 +574,7 @@ int main(void)
     assert(memcmp(physical(VISION_MODEL_BASE), showcase_model_weights,
                   showcase_model_weights_bytes) == 0);
     camera_test();
+    parallel_test();
     image_test();
     cancel_test();
     process_test();
@@ -510,3 +582,5 @@ int main(void)
     assert(invalidates >= 6);
     return 0;
 }
+
+#endif

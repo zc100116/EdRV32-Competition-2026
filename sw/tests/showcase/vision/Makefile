@@ -15,18 +15,23 @@ test:
 	    $(ROOT)/sw/lib/yolo_post.c $(ROOT)/sw/lib/yolo_tables.c -o $(OUT)/post_test
 	$(OUT)/post_test
 
-.PHONY: runtime
+RUNTIME_TEST ?= runtime_test
+.PHONY: runtime network
+network:
+	$(MAKE) runtime RUNTIME_TEST=network_test
 runtime: $(ROOT)/build/showcase/model.c
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
-	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/bsp/include \
+	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib/sched -I. \
-	    -include $(UI_CONTRACT) runtime_test.c $(VISION)/vision.c $(VISION)/post.c \
-	    $(VISION)/wire.c $(ROOT)/sw/lib/yolo_tables.c \
+	    -include $(UI_CONTRACT) $(RUNTIME_TEST).c $(VISION)/vision.c $(VISION)/post.c \
+	    $(VISION)/wire.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
-	    $(ROOT)/build/showcase/model.c $(ROOT)/sw/apps/showcase/board/session.c -lm \
-	    -o $(OUT)/runtime_test
-	$(OUT)/runtime_test
+	    $(ROOT)/build/showcase/model.c $(ROOT)/sw/apps/showcase/board/session.c \
+	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/apps/showcase/board/records.c \
+	    $(ROOT)/sw/apps/showcase/board/state.c -lm \
+	    -ffunction-sections -fdata-sections -Wl,--gc-sections -o $(OUT)/$(RUNTIME_TEST)
+	$(OUT)/$(RUNTIME_TEST)
 
 $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
     $(addprefix $(ROOT)/tasks/win/20261029-09-b3-software/src/npu/,\

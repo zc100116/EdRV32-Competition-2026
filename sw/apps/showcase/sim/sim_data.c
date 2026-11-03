@@ -78,6 +78,8 @@ void ui_data_image_step(int direction)
     if(status==UI_IMAGE_RECEIVING || status==UI_IMAGE_DETECTING) return;
     image_direction+=direction; image_override=-1;
 }
+static bool many_categories;
+void sim_data_many_categories(bool enabled) { many_categories=enabled; }
 ui_vision_t ui_data_vision(void)
 {
     bool batch=session.app==UI_APP_IMAGE;
@@ -105,7 +107,15 @@ ui_vision_t ui_data_vision(void)
     }
     ui_detection_t raw[5];
     memcpy(raw,d.targets,sizeof(raw));
-    ui_detection_filter(&d,raw,d.count);
+    if(many_categories && !batch) {
+        const unsigned ids[]={7,2,5,1,0,79,12,7,2,5,1,7,2};
+        ui_detection_t many[13];
+        for(unsigned i=0;i<13;++i) {
+            many[i]=raw[i%5]; many[i].class_id=ids[i];
+            many[i].category=ui_coco_names[ids[i]];
+        }
+        ui_detection_filter(&d,many,13);
+    } else ui_detection_filter(&d,raw,d.count);
     return d;
 }
 void ui_data_boxes(void) { boxes=!boxes; }

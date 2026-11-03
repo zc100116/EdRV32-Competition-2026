@@ -80,6 +80,22 @@ class ProtocolTest(unittest.TestCase):
         session.network_tick(now + 5)
         self.assertEqual(unpack(self.board.recv(65535))[3], b'\0')
 
+    def test_timed_out_image_info_releases_command_for_next_folder(self):
+        tool = self.eth.showcase
+        payload = struct.pack('<HHH2x', 1, 1, 5) + b'a.png'
+        with patch('tools.debug_tool.core.showcase.RESPONSE_TIMEOUT', .01):
+            with self.assertRaisesRegex(TimeoutError, '命令应答超时'):
+                tool.command_wait(IMAGE_INFO, payload, self.board.getsockname())
+        _, expired_seq, _ = self.request()
+        self.assertNotIn(IMAGE_INFO, tool.pending)
+        command = tool.command(IMAGE_INFO, payload)
+        self.assertEqual(self.request(), (IMAGE_INFO, command['seq'], payload))
+        self.reply(ACK, expired_seq, struct.pack('<HBB', IMAGE_INFO, 1, 0))
+        self.reply(ACK, expired_seq, struct.pack('<HBB', IMAGE_INFO, 2, 0))
+        self.reply(ACK, command['seq'], struct.pack('<HBB', IMAGE_INFO, 2, 0))
+        wait_for(self, lambda: IMAGE_INFO not in tool.pending)
+        self.assertIsNone(self.eth.status()['rx']['error'])
+
     def test_every_command_ack_and_latest_process_detect(self):
         tool = self.eth.showcase
         payloads = {APP: struct.pack('<BBH', 2, 0, 0),

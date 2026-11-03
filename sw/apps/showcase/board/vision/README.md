@@ -4,7 +4,7 @@ Implements P5 design 3.1–3.4 and 8.1–8.6. VIN CH0 supplies full-screen L0 ca
 CH2 supplies NPU inputs. Uploaded RGB565 images use VIN's DDR input path for CH2
 and are scanned directly from the upload slot. There is no CPU CH2 or video BLIT.
 The camera application requires VIN + NPU, image recognition VIN + NPU + ETH,
-and processing VIN + PIX + GEO. Application callbacks never wait for hardware.
+and processing VIN + PIX + GEO. NPU/CH2 and TX wait cooperatively; the shared RND output COPY uses synchronous `showcase_rnd_run`.
 
 `vision_irq` latches accelerator flags, while `vision_display_irq` latches DISP flags.
 `vision_service` runs in application-task context, including after page exit.
@@ -18,7 +18,8 @@ or zero when both remain owned. BOARD reserves this address at BULK_BEGIN and re
 DONE(status 3) if neither is free. `vision_bulk_done` returns 0 for asynchronous work,
 1 for a length error, 2 for invalid EDNM. Successful DONE follows model loading or
 all three image TX descriptors: CH2 / OUTPUT / EDDT. The EDSC single-BULK contract
-retains the source until processing and transmission finish.
+retains the source until processing and transmission finish; cancellation after CH2 releases
+its JOB/READY references immediately, while DISP ownership still waits for SWITCH.
 
 `ui_data_process_config/set/defaults` expose PIX brightness, contrast Q8, gamma,
 two 3×3 stages, grayscale/binary/invert, and GEO rotation, scale, translation and
@@ -55,3 +56,10 @@ The working-memory allocation is in `memory.h`; BOARD/vision TX partitions are i
 model, and EDNM uploads preserve sparse offsets 0 / 0x1000 / 0x100000.
 
 Run `make -C sw/tests/showcase/vision test runtime` for numerical and runtime tests.
+
+P5c copies OUTPUT to `VISION_POST_BASE` (0x05100000, 725760 B) using one ARGB8888
+1260×144 RND COPY. A separate in-flight frame record retains NPU input and VIN
+metadata while the prior snapshot is postprocessed. After COPY, the latest matched
+VIN pair starts immediately; if NPU completes before post releases its single
+buffer, its OUTPUT remains held until the previous post finishes. `vision` reports
+`period=` between NPU starts and `copy=` for the synchronous batch, both in ms.
