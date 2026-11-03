@@ -503,3 +503,38 @@ vision fps=<n> npu=<a> wait=<b> decode=<c> sort=<d> nms=<e> post_span=<f> gui=<g
 - 由工具做 letterbox：原图等比缩放到能放进 1280×720，四周补黑（RGB565 0x0000），居中放置后再上传。板端和 NPU 输入路径都不变。
 - 板端显示的就是补边后的图，EDDT 中的框是 1280×720 坐标，与画面天然一致。
 - 工具显示结果时，用相同的缩放和偏移把框换算回原图坐标。参考模型比对使用同一张补边后的 1280×720 图，逐项比对不受影响。
+
+## 11. 卡 54 第 3 轮的修订（P5d，2026-11-03）
+
+结果分支 8a2b0c03（`r3_result.md`、`artifacts/uart/r3_vision_excerpt.txt`、`r3_latency.log`）。
+
+### 11.1 实时识别 15 fps、e2e 约 175 ms（已确认）
+
+- **证据**（130 行 `vision`，稳定段典型值）：
+  npu 41.7、copy 1.0、wait 19、decode 23.6、post_span 58、gui 41、period 61、e2e 175 ms；cpu_app 约 46%、cpu_gui 约 23%，CPU 仍有约 25% 空闲。
+- **根因**：
+  1. **后处理被界面刷新切碎**：decode 的 CPU 时间只有 23.6 ms，post_span 却有 58 ms。应用任务每一步之后，只要界面有待办，就主动让出 1 ms（`main.c` 的 `sched_defer_for`），界面随即做一次完整的 LVGL 刷新。10.1 把刷新上限提到 60 Hz 以后，界面几乎一直有待办，后处理每片之间都要等一次刷新。
+  2. **下一帧 NPU 等后处理**：上一帧后处理没结束，NPU 的结果就不复制、不启动下一帧（wait 19 ms）。所以 period ≈ post_span，而不是 NPU 的 41.7 ms。
+  3. **识别页一次刷新要约 40 ms**（gui 41 ms，界面 13 fps，浮窗显示界面任务单步最长 117 ms）。原因尚未拆分。
+- **决定**：
+  1. 后处理期间，应用任务不再让给界面：一帧的后处理连续做完（约 24 ms），做完再让界面刷新。
+  2. 识别页的刷新开销降到每次 ≤ 15 ms：先按 benchmark 的 `LVGL split` 口径测量识别页的刷新，找出耗时最多的部分，再针对它优化。
+     - 例如：只有数值变化的控件才失效重绘；指标文字每秒更新一次；检测框只让边框所在的区域失效，不让整个框内区域失效。
+  3. **目标**：
+     - period ≈ NPU（≤ 45 ms，≥ 22 fps）；
+     - wait ≤ 3 ms；
+     - post_span ≤ 30 ms；
+     - gui ≤ 20 ms；
+     - e2e ≤ 110 ms。
+
+### 11.2 showcase 的 benchmark 与单独测试（卡 25）的差距（已确认）
+
+| 场景 | 卡 25（单独） | 第 3 轮 | 原因 |
+|---|---:|---:|---|
+| Empty / Single / Multiple rectangles | 60 / 60 / 57 | 55 / 59 / 56 | 持平 |
+| Multiple ARGB images / Multiple labels | 30 / 20 | 30 / 20 | 持平 |
+| Containers 系列（5 项） | 8 / 7 / 7 / 3 / 5 | 11 / 10 / 14 / 6 / 7 | 更快 |
+| Moving wallpaper / Multiple RGB images | 30 / 30 | 4 / 8 | showcase 的 `LV_COLOR_DEPTH` 为 32，benchmark 的"RGB"图片因此编译成 XRGB8888，RND 不支持这种源格式，只能 CPU 绘制（sw_ms 182 / 88） |
+| Rotated ARGB images / Multiple arcs | 30 / 28 | 5 / 14 | 最终版 F 的 RND 只有 5 条命令（c3fff4a3），旋转和弧线由 CPU 绘制。卡 25 用的是旧 R 比特流 |
+| Screen sized text / Widgets demo | 11 / 16 | 7 / 15 | L1 为全屏 ARGB8888，每像素字节数是卡 25（RGB565）的两倍 |
+| 平均 | 25 | 20 | |
