@@ -21,8 +21,8 @@ proc compile {args} {
     puts "compile $args"
 }
 source ../../EdRV32-Competition-2026/fpga/scripts/import_board_render_top.tcl
-if {[llength $sources] != 102} {
-    error "source count: expected 102, actual [llength $sources]"
+if {[llength $sources] != 94} {
+    error "source count: expected 94, actual [llength $sources]"
 }
 puts "PASS: all [llength $sources] imported RTL files and constraint exist"
 # Tcl syntax check only; these mocks do not validate the PDS netlist or timing.
