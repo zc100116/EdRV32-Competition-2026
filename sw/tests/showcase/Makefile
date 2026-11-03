@@ -14,3 +14,10 @@ test:
 	    -I$(ROOT)/sw/apps/showcase/ui -DLV_CONF_INCLUDE_SIMPLE \
 	    filter.c $(ROOT)/sw/apps/showcase/ui/detection.c -o $(BUILD)/filter
 	$(BUILD)/filter
+
+	$(CC) $(FLAGS) -ffunction-sections -fdata-sections -Wl,--gc-sections \
+	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/drivers/include \
+	    -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/lib/sched -DLV_CONF_INCLUDE_SIMPLE \
+	    gui.c -o $(BUILD)/gui
+	$(BUILD)/gui

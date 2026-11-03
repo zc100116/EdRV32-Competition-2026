@@ -23,6 +23,7 @@ static _Alignas(4096) uint32_t buffers[2][PIXELS] __attribute__((section(".noini
 static lv_display_t *display;
 static const uint32_t *front = buffers[1];
 static uint32_t input_snapshot;
+static bool input_pending;
 static uint32_t flush_count;
 static bool demo_running;
 static lv_timer_t *framework_timers[32];
@@ -467,6 +468,7 @@ uint32_t showcase_gui_frames(void) { return flush_count; }
 void showcase_gui_step(struct sched_task *task)
 {
     uint32_t task_events = sched_take(task);
+    if (task_events & PLATFORM_INPUT) input_pending = true;
     if (showcase_gui_paused() || !scan_started) return;
     uint32_t state = virtual_input_lock();
     uint32_t events = display_events;
@@ -482,9 +484,11 @@ void showcase_gui_step(struct sched_task *task)
         }
         if (flush_pending) return;
     }
-    if (task_events & PLATFORM_INPUT)
+    if (input_pending) {
+        input_pending = false;
         for (lv_indev_t *input = lv_indev_get_next(NULL); input; input = lv_indev_get_next(input))
             lv_indev_read(input);
+    }
     if(!ui_detection_settings && (ui_page==1 || ui_page==2)) ui_vision_frame(ui_page==2);
     else if(ui_page==3) ui_process_update();
     uint32_t delay = lv_timer_handler();
