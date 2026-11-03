@@ -22,7 +22,9 @@ SHOTS := home home-vrn vision image process graphics games chip debug \
     game-running renderer-list renderer-result benchmark-results overlay-home chip-coremark \
     coremark-counters games-last-row detection-settings process-collapsed \
     process-stage-off process-editing process-geo image-waiting image-receiving image-detecting \
-    image-done image-failed keyboard-focus mouse-hover session-failed session-starting session-stopping
+    image-done image-failed keyboard-focus mouse-hover session-failed session-starting \
+    session-stopping \
+    vision-hidden vision-categories overlay-cpu
 .PHONY: win shots
 win: $(BUILD)/showcase_sim.exe
 shots: $(addprefix $(BUILD)/shots/,$(addsuffix .png,$(SHOTS)))

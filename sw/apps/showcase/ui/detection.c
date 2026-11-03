@@ -20,15 +20,29 @@ void ui_detection_filter(ui_vision_t *out,const ui_detection_t *raw,unsigned cou
 {
     out->count=0;
     memset(out->category_count,0,sizeof(out->category_count));
-    static const unsigned category_ids[]={0,2,1,5,9};
+    unsigned counts[80]={0};
+    out->category_used=0;
+    memset(out->category_id,0,sizeof(out->category_id));
     for(unsigned i=0;i<count;++i) {
         const ui_detection_t *d=&raw[i];
         if(d->confidence<config.threshold ||
            !(config.classes[d->class_id/32]&(1u<<(d->class_id%32)))) continue;
-        for(unsigned c=0;c<5;++c)
-            if(d->class_id==category_ids[c]) ++out->category_count[c];
+        ++counts[d->class_id];
         if(out->count<5) out->targets[out->count]=*d;
         ++out->count;
+    }
+    /* Ascending IDs make equal-count ties deterministic without a second sort. */
+    for(unsigned id=0;id<80;++id) {
+        if(!counts[id]) continue;
+        unsigned rank=0;
+        while(rank<out->category_used && out->category_count[rank]>=counts[id]) ++rank;
+        if(rank==5) continue;
+        if(out->category_used<5) ++out->category_used;
+        for(unsigned j=out->category_used-1;j>rank;--j) {
+            out->category_count[j]=out->category_count[j-1];
+            out->category_id[j]=out->category_id[j-1];
+        }
+        out->category_count[rank]=counts[id]; out->category_id[rank]=id;
     }
 }
 const char *const ui_coco_names[80]={

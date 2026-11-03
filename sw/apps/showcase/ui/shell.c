@@ -15,7 +15,34 @@ static unsigned game_focus;
 static unsigned game_count;
 
 static lv_group_t *group;
-static lv_obj_t *content;
+static lv_obj_t *content, *top, *bottom, *restore_surface, *hidden_focus;
+static bool interface_hidden;
+bool ui_interface_hidden(void) { return interface_hidden; }
+void ui_hide_interface(void)
+{
+    hidden_focus=lv_group_get_focused(group);
+    interface_hidden=true;
+    lv_obj_set_hidden(top,true); lv_obj_set_hidden(bottom,true); lv_obj_set_hidden(content,true);
+    lv_obj_set_hidden(restore_surface,false);
+    lv_obj_update_layout(restore_surface);
+    ui_monitor_suppress(true);
+}
+bool ui_restore_interface(void)
+{
+    if(!interface_hidden) return false;
+    interface_hidden=false;
+    lv_obj_set_hidden(top,false); lv_obj_set_hidden(bottom,false); lv_obj_set_hidden(content,false);
+    lv_obj_set_hidden(restore_surface,true);
+    ui_monitor_suppress(false);
+    lv_group_focus_obj(hidden_focus);
+    return true;
+}
+static void restore_pressed(lv_event_t *e)
+{
+    (void)e;
+    ui_restore_interface();
+    lv_indev_wait_release(lv_indev_active());
+}
 static lv_obj_t *status;
 static lv_obj_t *hint;
 static lv_obj_t *session_box, *session_text, *retry;
@@ -38,7 +65,9 @@ static bool editable(lv_obj_t *o)
 }
 static lv_key_t remap(lv_indev_t *input,lv_key_t key)
 {
-    (void)input;
+    if(interface_hidden && lv_indev_get_state(input)==LV_INDEV_STATE_PRESSED) {
+        ui_restore_interface(); lv_indev_wait_release(input); return 0;
+    }
     lv_obj_t *o=lv_group_get_focused(group);
     if(key==LV_KEY_ESC) return (lv_key_t)KEY_BACK;
     if(key==LV_KEY_ENTER && o && editable(o)) return (lv_key_t)KEY_EDIT;
@@ -131,6 +160,7 @@ void ui_refresh(void)
 void ui_open(unsigned page)
 {
     if(page==6) { ui_monitor_toggle(); return; }
+    interface_hidden=false; ui_monitor_suppress(false);
     unsigned old_page=ui_page;
     if(old_page!=page) {
         ui_mode=0;
@@ -158,7 +188,7 @@ void ui_open(unsigned page)
     lv_obj_set_style_bg_color(screen, lv_color_hex(BG), 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
     lv_obj_set_scrollable(screen, false);
-    lv_obj_t *top = ui_box(screen, 0, 0, 1280, 48, PANEL);
+    top = ui_box(screen, 0, 0, 1280, 48, PANEL);
     lv_obj_set_style_radius(top, 0, 0);
     ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
     const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
@@ -169,7 +199,7 @@ void ui_open(unsigned page)
     lv_obj_set_height(lv_obj_get_child(top,-1),36);
     ui_button(top,"性能浮窗",1140,6,124,1001);
     lv_obj_set_height(lv_obj_get_child(top,-1),36);
-    lv_obj_t *bottom = ui_box(screen, 0, 680, 1280, 40, PANEL);
+    bottom = ui_box(screen, 0, 680, 1280, 40, PANEL);
     lv_obj_set_style_radius(bottom, 0, 0);
     hint = ui_label(bottom, "← → 选择    Enter 确认    Esc 返回上一级", 40, 10,
                     &sim_font_14, MUTED);
@@ -196,11 +226,22 @@ void ui_open(unsigned page)
     if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode+2));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab+2));
+    if(page>=1 && page<=3) {
+        ui_button(bottom,"隐藏界面",1104,0,160,1005);
+        lv_obj_set_height(lv_obj_get_child(bottom,-1),36);
+        restore_surface=ui_box(screen,0,0,1280,720,0);
+        lv_obj_set_style_bg_opa(restore_surface,LV_OPA_TRANSP,0);
+        lv_obj_set_style_border_width(restore_surface,0,0);
+        lv_obj_set_clickable(restore_surface,true);
+        lv_obj_add_event_cb(restore_surface,restore_pressed,LV_EVENT_PRESSED,NULL);
+        lv_obj_set_hidden(restore_surface,true);
+    }
     ui_monitor_controls();
     ui_refresh();
 }
 static void activate(unsigned action)
 {
+    if(action==1005) { ui_hide_interface(); return; }
     if(action==1000) { ui_back(); return; }
     if(action==1001) { ui_monitor_toggle(); return; }
     if(action==1003) { ui_monitor_corner(); return; }
@@ -255,6 +296,7 @@ static void activate(unsigned action)
 }
 void ui_key(uint32_t key)
 {
+    if(ui_restore_interface()) return;
     key=remap(NULL,key);
     if(key==KEY_BACK) { ui_back(); return; }
     if(key==LV_KEY_NEXT) lv_group_focus_next(group);

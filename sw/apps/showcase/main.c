@@ -79,6 +79,10 @@ void showcase_input_event(void)
     static struct virtual_input_state before;
     uint32_t keys = platform_keys();
     struct virtual_input_state v = platform_virtual_input();
+    if ((keys || v.keys || v.mouse) && ui_restore_interface()) {
+        showcase_input_owner(INPUT_GUI);
+        platform_gui_wake();
+    }
     showcase_lvgl_input(showcase_input_keys(INPUT_GUI));
     if (keys != keys_before || v.keys != before.keys || v.x != before.x ||
         v.y != before.y || v.mouse != before.mouse || v.wheel != before.wheel) {

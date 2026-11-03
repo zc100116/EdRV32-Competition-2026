@@ -39,3 +39,11 @@
 - `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests`：137 项通过。
 - 上板尚未测量：记录 vision fps/period/copy/e2e 和 rering；目标约 24 fps、period 接近 NPU+COPY，Single rectangle 接近 60 fps。
 - benchmark 必须保留 16 场景的 fps，尤其 Empty screen、Single rectangle，与第 2 轮 28 fps 对比；不以 render_ms 推算 fps。
+
+## 追加界面改动（10.5）
+- 三个媒体页增加“隐藏界面”；隐藏顶栏、底栏和控制区，保留检测框与 sys 层光标。
+- 浮窗只临时 suppress，保留开关状态；板载/虚拟按键先恢复并屏蔽本次按下，鼠标接收层消费恢复点击。
+- 实时类别按过滤后全帧统计，数量降序、类别 ID 升序取前五；不足五类显示“—”，空条宽为 0。
+- 浮窗直接显示 ui_system_t.cpu，无新增统计；ui_vision_t 仅追加 category_id[5] / category_used。
+- 新增截图：`build/sim/shots/vision-hidden.png`、`vision-categories.png`、`overlay-cpu.png`。
+- 主机 filter 覆盖排序/截断/白名单；shots 覆盖三页第一次 Esc 和鼠标点击只恢复、第二次才执行返回。
