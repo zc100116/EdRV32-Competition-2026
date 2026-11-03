@@ -1,0 +1,13 @@
+CoreMark result PASS messages: 1
+CoreMark CRC PASS messages: 2 (two internal HPM rounds are one menu run)
+NPU board PASS39/39 messages: 1
+NPU D PASS lines: 20
+RND matches: 10/10
+NES samples: 5
+NES emulation_fps: mean=58.920 min=58.700 max=59.100
+NES display_fps: mean=38.940 min=36.400 max=41.300
+NES cpu_percent: mean=95.000 min=93.000 max=103.000
+Iterations/Sec: 450.408
+CoreMark/MHz: 3.603
+NPU C-YOLO PASS PERF0=6105103 MAC=5347440 ms/frame=40.700 fps=24.569 CRC32=0738f96e
+LVGL benchmark average fps=0

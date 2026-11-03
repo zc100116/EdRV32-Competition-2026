@@ -1,0 +1,116 @@
+[1793686804672] [rx] Demo: demo_vnpu
+[1793686804672] [rx] CHIP_ID: 0xed320001
+[1793686804672] [rx] CLK_SYS_HZ: 125000000
+[1793686804672] [rx] ROM bytes: 16384
+[1793686804672] [rx] SRAM bytes: 65536
+[1793686804672] [rx] I-cache bytes: 8192
+[1793686804672] [rx] D-cache bytes: 8192
+[1793686804672] [rx] MEM_READY: 1
+[1793686804672] [rx] Build commit: e94aa0e2
+[1793686804672] [rx] Compiler version: GCC 15.2.0
+[1793686804672] [rx] VIN ID: 0x00010001
+[1793686804672] [rx] PIX ID: 0x00020001
+[1793686804672] [rx] GEO ID: 0x00030001
+[1793686804672] [rx] DISP ID: 0x00050002
+[1793686804672] [rx] NPU ID: 0x00060001
+[1793686804672] [rx] ETH ID: 0x00070001
+[1793686804672] [rx] MEM_XBAR ID: 0x00080001
+[1793686804800] [rx] Camera: 0
+[1793686804800] [rx] Camera chip ID: 0x00005640
+[1793686804898] [sys] 等待网卡 以太网 就绪 … 用时 0.2 s
+[1793686804903] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686804927] [rx] Camera: 1
+[1793686804927] [rx] Camera chip ID: 0x00005640
+[1793686805307] [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[1793686805307] [rx] Demo commands: s1 | s2 | status | help
+[1793686805307] [rx] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[1793686805307] [rx] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[1793686805307] [rx] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[1793686805307] [rx] GEO: geo off | geo rotate | geo scale
+[1793686805307] [rx] Output: output hdmi | output eth | output both | fps 1..60
+[1793686805307] [rx] Monitor: sample 10..1000 (Hz), default 100
+[1793686805307] [rx] KEY: KEY2 scene; KEY3 PIX; KEY4 GEO (PIX/GEO require S2)
+[1793686809350] [sys] 等待网卡 以太网 就绪 … 用时 2.4 s
+[1793686809356] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686810079] [sys] 等待网卡 以太网 就绪 … 用时 0.1 s
+[1793686810127] [sys] UDP 发送完成：3247136 B · G:\codex_project\EdRV32-Competition-2026\tasks\win\20261029-09-b3-software\src\npu
+[1793686810149] [rx] Model bytes: 3247136
+[1793686810744] [rx] EDNM: loaded
+[1793686811444] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686813537] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686815609] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686817655] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686819679] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686821233] [tx] s1<CR>
+[1793686821485] [rx] Demo command: OK
+[1793686821485] [rx] Switch: frames=15 mtime_ticks=30731027 HDMI FRAME
+[1793686821702] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686823718] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686824939] [tx] output both<CR>
+[1793686824990] [tx] fps 30<CR>
+[1793686824990] [tx] sample 100<CR>
+[1793686824990] [tx] status<CR>
+[1793686825124] [rx] Demo command: OK
+[1793686825124] [rx] Switch: frames=9 mtime_ticks=17349274 HDMI FRAME
+[1793686825124] [rx] Demo command: OK
+[1793686825124] [rx] Demo command: OK
+[1793686825124] [rx] Scene: 1
+[1793686825124] [rx] PIX mode: 0
+[1793686825124] [rx] GEO mode: 0
+[1793686825124] [rx] Output mode: 2
+[1793686825124] [rx] Requested video fps: 30
+[1793686825124] [rx] Video divisor: 1
+[1793686825124] [rx] Monitor Hz: 100
+[1793686825124] [rx] VIN camera0 frames: 572
+[1793686825124] [rx] VIN camera1 frames: 572
+[1793686825124] [rx] VIN CH0 frames: 569
+[1793686825124] [rx] VIN CH2 frames: 112
+[1793686825124] [rx] VIN CH0 overflow: 0
+[1793686825124] [rx] VIN CH2 overflow: 0
+[1793686825124] [rx] NPU inferences: 56
+[1793686825124] [rx] NPU cycles: 6202283
+[1793686825124] [rx] Post cycles: 2831505
+[1793686825124] [rx] Detection count: 2
+[1793686825124] [rx] Overlay CPU cycles: 501582
+[1793686825124] [rx] ETH peer IP: 0xc0a80102
+[1793686825124] [rx] ETH peer port: 6000
+[1793686825136] [rx] ETH STATUS: 0x00000002
+[1793686825136] [rx] Video skips (current window): 0
+[1793686825136] [rx] Monitor sequence: 1987
+[1793686825136] [rx] Monitor dropped records: 0
+[1793686825136] [rx] mtime: 4058570257
+[1793686825136] [rx] Demo command: OK
+[1793686860532] [tx] output hdmi<CR>
+[1793686860583] [tx] fps 30<CR>
+[1793686860583] [tx] sample 100<CR>
+[1793686860583] [tx] status<CR>
+[1793686860741] [rx] Demo command: OK
+[1793686860741] [rx] Switch: frames=10 mtime_ticks=20287195 HDMI FRAME
+[1793686860741] [rx] Demo command: OK
+[1793686860741] [rx] Demo command: OK
+[1793686860741] [rx] Scene: 1
+[1793686860741] [rx] PIX mode: 0
+[1793686860741] [rx] GEO mode: 0
+[1793686860741] [rx] Output mode: 0
+[1793686860741] [rx] Requested video fps: 30
+[1793686860741] [rx] Video divisor: 1
+[1793686860741] [rx] Monitor Hz: 100
+[1793686860741] [rx] VIN camera0 frames: 1640
+[1793686860741] [rx] VIN camera1 frames: 1640
+[1793686860741] [rx] VIN CH0 frames: 1636
+[1793686860741] [rx] VIN CH2 frames: 1180
+[1793686860741] [rx] VIN CH0 overflow: 0
+[1793686860741] [rx] VIN CH2 overflow: 0
+[1793686860741] [rx] NPU inferences: 590
+[1793686860741] [rx] NPU cycles: 6193989
+[1793686860741] [rx] Post cycles: 2903484
+[1793686860741] [rx] Detection count: 3
+[1793686860741] [rx] Overlay CPU cycles: 1412325
+[1793686860741] [rx] ETH peer IP: 0xc0a80102
+[1793686860753] [rx] ETH peer port: 6000
+[1793686860753] [rx] ETH STATUS: 0x00000002
+[1793686860753] [rx] Video skips (current window): 0
+[1793686860753] [rx] Monitor sequence: 5548
+[1793686860753] [rx] Monitor dropped records: 0
+[1793686860753] [rx] mtime: 8510729501
+[1793686860753] [rx] Demo command: OK

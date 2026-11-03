@@ -1,0 +1,11 @@
+{
+  "active": false,
+  "phase": "done",
+  "path": "G:/codex_project/EdRV32-Competition-2026/tasks/win/20261103-48-vrn-f-rnd1slim/src/demo_vnpu.bin",
+  "sent": 47908,
+  "total": 47908,
+  "bios": false,
+  "programmedBytes": 47620,
+  "result": "Run: 0x10000000",
+  "error": null
+}

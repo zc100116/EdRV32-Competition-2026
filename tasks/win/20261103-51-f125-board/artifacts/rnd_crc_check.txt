@@ -1,0 +1,11 @@
+fill_rgb565: actual=0xe9358c29 expected=0xe9358c29 PASS
+border_rgb565: actual=0x1658f064 expected=0x1658f064 PASS
+glyph_rgb565: actual=0x26bf7139 expected=0x26bf7139 PASS
+blit_rgb565: actual=0x1e6a293d expected=0x1e6a293d PASS
+copy_rgb565: actual=0x4aeeb17f expected=0x4aeeb17f PASS
+fill_argb8888: actual=0x0bda4f5e expected=0x0bda4f5e PASS
+border_argb8888: actual=0x2230a20f expected=0x2230a20f PASS
+glyph_argb8888: actual=0x004b61a5 expected=0x004b61a5 PASS
+blit_argb8888: actual=0xb0a20006 expected=0xb0a20006 PASS
+copy_argb8888: actual=0x77a2d070 expected=0x77a2d070 PASS
+actual=10 expected=10 matches=10

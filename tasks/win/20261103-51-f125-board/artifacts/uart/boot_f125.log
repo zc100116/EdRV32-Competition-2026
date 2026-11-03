@@ -1,0 +1,21 @@
+[1793685722583] [sys] connected COM7 @ 115200 8N1
+[1793685735099] [rx] 
+[1793685735099] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[1793685735099] [rx]   E         D   D   R   R   V   V      3      2 
+[1793685735099] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[1793685735099] [rx]   E         D   D   R  R     V V       3   2    
+[1793685735099] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[1793685735099] [rx] 
+[1793685735099] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[1793685735099] [rx] CHIP_ID: 0xed320001
+[1793685735099] [rx] CLK_SYS_HZ: 125000000
+[1793685735099] [rx] ROM bytes: 16384
+[1793685735099] [rx] SRAM bytes: 65536
+[1793685735099] [rx] I-cache bytes: 8192
+[1793685735099] [rx] D-cache bytes: 8192
+[1793685735099] [rx] MEM_READY: 1
+[1793685735099] [rx] Build commit: 92b38fd2
+[1793685735099] [rx] Compiler version: GCC 15.2.0
+[1793685735204] [rx] Boot SRAM
+[1793685735204] [rx] Monitor: EdRV32
+[1793685735204] [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info

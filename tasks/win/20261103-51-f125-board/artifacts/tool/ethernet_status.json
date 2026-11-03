@@ -1,0 +1,33 @@
+{
+  "tx": {
+    "active": false,
+    "sent": 3247136,
+    "total": 3247136,
+    "packets": 3173,
+    "path": "G:\\codex_project\\EdRV32-Competition-2026\\tasks\\win\\20261029-09-b3-software\\src\\npu",
+    "error": null
+  },
+  "rx": {
+    "active": true,
+    "localIp": "192.168.1.2",
+    "localPort": 6000,
+    "socketBufferBytes": 67108864,
+    "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+    "packets": 4260509,
+    "bytes": 4358692884,
+    "notifyCount": 8382,
+    "lastNotify": true,
+    "files": {
+      "0": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx\\window0.bin",
+      "1": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx\\window1.bin"
+    },
+    "error": null,
+    "receiveCpuSeconds": 0.0,
+    "lastWindow": 2,
+    "lastOffset": 0,
+    "peer": [
+      "192.168.1.10",
+      5000
+    ]
+  }
+}

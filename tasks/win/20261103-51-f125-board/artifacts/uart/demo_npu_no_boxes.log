@@ -1,0 +1,36 @@
+[1793686052818] [rx] Demo: demo_npu network image inference
+[1793686052819] [rx] CHIP_ID: 0xed320001
+[1793686052819] [rx] CLK_SYS_HZ: 125000000
+[1793686052819] [rx] ROM bytes: 16384
+[1793686052819] [rx] SRAM bytes: 65536
+[1793686052819] [rx] I-cache bytes: 8192
+[1793686052819] [rx] D-cache bytes: 8192
+[1793686052819] [rx] MEM_READY: 1
+[1793686052819] [rx] Build commit: e94aa0e2
+[1793686052819] [rx] Compiler version: GCC 15.2.0
+[1793686052819] [rx] SYS ID: 0x00060001
+[1793686052819] [rx] MEM_XBAR ID: 0x00080001
+[1793686052819] [rx] NPU ID: 0x00060001
+[1793686052819] [rx] ETH ID: 0x00070001
+[1793686052942] [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[1793686053078] [sys] 等待网卡 以太网 就绪 … 用时 0.3 s
+[1793686053078] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686056881] [sys] 等待网卡 以太网 就绪 … 用时 1.8 s
+[1793686056881] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686056886] [rx] ETH peer IP: 0xc0a80102
+[1793686056886] [rx] ETH peer port: 6000
+[1793686069008] [sys] UDP 发送完成：3247136 B · G:\codex_project\EdRV32-Competition-2026\tasks\win\20261029-09-b3-software\src\npu
+[1793686069011] [rx] Model bytes: 3247136
+[1793686069585] [rx] EDNM: loaded
+[1793686093653] [sys] UDP 发送完成：1843200 B · G:/codex_project/EdRV32-test-images/coco-val-160/quick_start/cat_000000015497.jpg
+[1793686094685] [sys] G:/codex_project/EdRV32-test-images/coco-val-160/quick_start/cat_000000015497.jpg: 回传未结束（超时 1 s）
+[1793686096843] [rx] frame_id=0 NPU_PERF0=6117993 post_cpu_cycles=2738909 detections=2
+[1793686221937] [sys] UDP 发送完成：1843200 B · G:/codex_project/EdRV32-test-images/coco-val-160/quick_start/cat_000000015497.jpg
+[1793686222973] [sys] G:/codex_project/EdRV32-test-images/coco-val-160/quick_start/cat_000000015497.jpg: 回传未结束（超时 1 s）
+[1793686225116] [rx] frame_id=1 NPU_PERF0=6121432 post_cpu_cycles=2763711 detections=2
+[1793686234525] [sys] UDP 发送完成：6 B · 回到摄像头检测
+[1793686234545] [rx] ETH peer IP: 0xc0a80102
+[1793686234545] [rx] ETH peer port: 6000
+[1793686239595] [sys] UDP 发送完成：1843200 B · G:/codex_project/EdRV32-test-images/coco-val-160/quick_start/cat_000000015497.jpg
+[1793686240609] [sys] G:/codex_project/EdRV32-test-images/coco-val-160/quick_start/cat_000000015497.jpg: 回传未结束（超时 1 s）
+[1793686242778] [rx] frame_id=2 NPU_PERF0=6122116 post_cpu_cycles=2737814 detections=2

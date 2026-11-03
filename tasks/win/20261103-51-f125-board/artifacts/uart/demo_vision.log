@@ -1,0 +1,137 @@
+[1793686696096] [rx] Demo: demo_vision
+[1793686696099] [rx] CHIP_ID: 0xed320001
+[1793686696099] [rx] CLK_SYS_HZ: 125000000
+[1793686696099] [rx] ROM bytes: 16384
+[1793686696099] [rx] SRAM bytes: 65536
+[1793686696099] [rx] I-cache bytes: 8192
+[1793686696099] [rx] D-cache bytes: 8192
+[1793686696099] [rx] MEM_READY: 1
+[1793686696099] [rx] Build commit: e94aa0e2
+[1793686696099] [rx] Compiler version: GCC 15.2.0
+[1793686696099] [rx] VIN ID: 0x00010001
+[1793686696099] [rx] PIX ID: 0x00020001
+[1793686696099] [rx] GEO ID: 0x00030001
+[1793686696099] [rx] DISP ID: 0x00050002
+[1793686696099] [rx] ETH ID: 0x00070001
+[1793686696099] [rx] MEM_XBAR ID: 0x00080001
+[1793686696225] [rx] Camera: 0
+[1793686696225] [rx] Camera chip ID: 0x00005640
+[1793686696267] [sys] 等待网卡 以太网 就绪 … 用时 0.2 s
+[1793686696267] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686696349] [rx] Camera: 1
+[1793686696349] [rx] Camera chip ID: 0x00005640
+[1793686696501] [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[1793686696501] [rx] Demo commands: s2 | status | help
+[1793686696501] [rx] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[1793686696501] [rx] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[1793686696501] [rx] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[1793686696501] [rx] GEO: geo off | geo rotate | geo scale
+[1793686696501] [rx] Output: output hdmi | output eth | output both | fps 1..60
+[1793686696501] [rx] Monitor: sample 10..1000 (Hz), default 100
+[1793686696503] [rx] KEY: KEY2 requires s2; KEY3 PIX; KEY4 GEO
+[1793686699715] [sys] 等待网卡 以太网 就绪 … 用时 1.4 s
+[1793686699715] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686700980] [rx] Demo command: OK
+[1793686701006] [tx] pix set 1 256 0 0 1000 0 0 0 0 128 0<CR>
+[1793686701781] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686701950] [tx] pix set 1 369 0 0 1000 0 0 0 0 128 0<CR>
+[1793686701980] [rx] Demo command: OK
+[1793686703185] [tx] pix set 1 206 0 0 1000 0 0 0 0 128 0<CR>
+[1793686703213] [rx] Demo command: OK
+[1793686703853] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686705153] [tx] pix set 0 206 0 0 1000 0 0 0 0 128 0<CR>
+[1793686705180] [rx] Demo command: OK
+[1793686705923] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686707945] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686709488] [tx] pix set 0 206 0 0 1000 4 0 0 0 128 0<CR>
+[1793686709514] [rx] Demo command: OK
+[1793686709974] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686711440] [tx] pix set 0 206 0 0 1000 0 0 0 0 128 0<CR>
+[1793686711447] [rx] Demo command: OK
+[1793686711994] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686712780] [rx] Demo command: OK
+[1793686712819] [tx] pix set 0 206 0 0 1000 0 0 1 0 128 0<CR>
+[1793686713683] [tx] pix set 0 206 0 0 1000 0 0 0 0 128 0<CR>
+[1793686713714] [rx] Demo command: OK
+[1793686714010] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686714928] [tx] pix set 0 206 0 0 1000 0 0 0 1 128 0<CR>
+[1793686714947] [rx] Demo command: OK
+[1793686715697] [tx] pix set 0 206 0 0 1000 0 0 0 0 128 0<CR>
+[1793686715714] [rx] Demo command: OK
+[1793686716022] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686718034] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686720050] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686722061] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686724073] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686725619] [tx] s2<CR>
+[1793686725817] [rx] Demo command: OK
+[1793686725817] [rx] Switch: frames=12 mtime_ticks=23931826 HDMI FRAME
+[1793686726088] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686728101] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686730115] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793686730277] [tx] output both<CR>
+[1793686730278] [tx] fps 30<CR>
+[1793686730278] [tx] sample 100<CR>
+[1793686730278] [tx] status<CR>
+[1793686730390] [rx] Demo command: OK
+[1793686730390] [rx] Switch: frames=4 mtime_ticks=8166673 HDMI FRAME
+[1793686730390] [rx] Demo command: OK
+[1793686730390] [rx] Demo command: OK
+[1793686730390] [rx] Scene: 2
+[1793686730390] [rx] PIX mode: 0
+[1793686730390] [rx] GEO mode: 0
+[1793686730390] [rx] Output mode: 2
+[1793686730390] [rx] Requested video fps: 30
+[1793686730390] [rx] Video divisor: 1
+[1793686730390] [rx] Monitor Hz: 100
+[1793686730390] [rx] VIN camera0 frames: 993
+[1793686730390] [rx] VIN camera1 frames: 984
+[1793686730390] [rx] VIN CH0 frames: 991
+[1793686730390] [rx] VIN CH2 frames: 0
+[1793686730390] [rx] VIN CH0 overflow: 0
+[1793686730390] [rx] VIN CH2 overflow: 0
+[1793686730390] [rx] ETH peer IP: 0xc0a80102
+[1793686730390] [rx] ETH peer port: 6000
+[1793686730390] [rx] ETH STATUS: 0x00000002
+[1793686730390] [rx] Video skips (current window): 0
+[1793686730390] [rx] Monitor sequence: 3393
+[1793686730390] [rx] Monitor dropped records: 0
+[1793686730391] [rx] mtime: 13240666313
+[1793686730392] [rx] Demo command: OK
+[1793686752823] [tx] geo set 1 0 1000 1000 0 0 0 0<CR>
+[1793686752853] [rx] Demo command: OK
+[1793686755951] [tx] geo set 1 40 1000 1000 0 0 0 0<CR>
+[1793686755983] [rx] Demo command: OK
+[1793686756249] [tx] geo set 1 450 1000 1000 0 0 0 0<CR>
+[1793686756283] [rx] Demo command: OK
+[1793686770717] [rx] Demo command: OK
+[1793686770737] [tx] geo set 0 450 1000 1000 0 0 0 0<CR>
+[1793686792713] [rx] 
+[1793686792713] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[1793686792713] [rx]   E         D   D   R   R   V   V      3      2 
+[1793686792713] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[1793686792713] [rx]   E         D   D   R  R     V V       3   2    
+[1793686792713] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[1793686792713] [rx] 
+[1793686792713] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[1793686792713] [rx] CHIP_ID: 0xed320001
+[1793686792713] [rx] CLK_SYS_HZ: 125000000
+[1793686792713] [rx] ROM bytes: 16384
+[1793686792713] [rx] SRAM bytes: 65536
+[1793686792713] [rx] I-cache bytes: 8192
+[1793686792713] [rx] D-cache bytes: 8192
+[1793686792713] [rx] MEM_READY: 1
+[1793686792713] [rx] Build commit: 92b38fd2
+[1793686792713] [rx] Compiler version: GCC 15.2.0
+[1793686792808] [rx] BIOS: EdRV32
+[1793686792808] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[1793686800992] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[1793686800999] [rx] Input error: type 1-4 then Enter
+[1793686800999] [sys] Input error: type 1-4 then Enter
+[1793686800999] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[1793686804144] [rx] ETH link: up
+[1793686804144] [rx] ETH load ready 192.168.1.10:5000
+[1793686804602] [sys] 等待网卡 以太网 就绪 … 用时 0.5 s
+[1793686804641] [rx] Load bytes: 47620 segments: 1
+[1793686804641] [rx] Load result: PASS
+[1793686804641] [rx] Run: 0x10000000

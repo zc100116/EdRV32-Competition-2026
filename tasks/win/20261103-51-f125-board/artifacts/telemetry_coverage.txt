@@ -1,0 +1,4 @@
+Rows=30832
+Types={'1': 30832}
+Scenes={'0': 5136, '1': 25696}
+Mixed live-session export; no host timestamp column, do not assign all rows to a single program.
