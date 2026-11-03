@@ -1,6 +1,6 @@
 // File: edrv32_rnd_alpha_pipe.v
 // Spec: rnd-spec 2.2, 5.2.
-// Description: Two-lane non-premultiplied over, four BLIT modes and synchronous Q lookup.
+// Description: Two-lane non-premultiplied over, normal BLIT blending and synchronous Q lookup.
 //              Registered multiplier operands/products and the ROM share an elastic enable.
 // Clock domain: clk_mem (clk_i).
 module edrv32_rnd_alpha_pipe (
@@ -14,7 +14,6 @@ module edrv32_rnd_alpha_pipe (
     input wire [63:0] in_src_i,
     input wire [63:0] in_dst_i,
     input wire in_argb_i,
-    input wire [1:0] in_mode_i,
     input wire [31:0] in_tag_i,
     output wire out_valid_o,
     input wire out_ready_i,
@@ -100,7 +99,6 @@ module edrv32_rnd_alpha_pipe (
         reg [31:0] raw_input_r;
         reg [7:0] inverse_input_r;
         reg argb_input_r;
-        reg [1:0] mode_input_r;
         reg [7:0] inverse_ratio4_r;
         reg [47:0] foreground_product5_r;
         reg [47:0] background_product5_r;
@@ -113,11 +111,7 @@ module edrv32_rnd_alpha_pipe (
         reg [31:0] src0_r;
         reg [31:0] raw0_r;
         reg argb0_r;
-        reg [1:0] mode0_r;
         reg [15:0] alpha_product0_r;
-        reg [47:0] mode_product0_r;
-        reg [26:0] add0_r;
-        reg [23:0] subtract0_r;
         reg [31:0] src1_r;
         reg [31:0] dst1_r;
         reg [31:0] raw1_r;
@@ -166,41 +160,18 @@ module edrv32_rnd_alpha_pipe (
                 raw_input_r <= in_dst_i[lane*32 +: 32];
                 inverse_input_r <= 8'd255 - in_src_i[lane*32+24 +: 8];
                 argb_input_r <= in_argb_i;
-                mode_input_r <= in_mode_i;
                 // Stage 0: products go directly to registers.
                 dst0_r <= dst_input_r;
                 src0_r <= src_input_r;
                 raw0_r <= raw_input_r;
                 argb0_r <= argb_input_r;
-                mode0_r <= mode_input_r;
                 alpha_product0_r <= inverse_input_r * dst_input_r[31:24];
-                for (channel = 0; channel < 3; channel = channel + 1) begin
-                    mode_product0_r[channel*16 +: 16] <=
-                        src_input_r[channel*8 +: 8] * dst_input_r[channel*8 +: 8];
-                    add0_r[channel*9 +: 9] <=
-                        {1'b0, src_input_r[channel*8 +: 8]} +
-                        {1'b0, dst_input_r[channel*8 +: 8]};
-                    subtract0_r[channel*8 +: 8] <=
-                        dst_input_r[channel*8 +: 8] < src_input_r[channel*8 +: 8] ?
-                        8'd0 : dst_input_r[channel*8 +: 8] - src_input_r[channel*8 +: 8];
-                end
-                // Stage 1: over alpha and the four mode colors (spec 2.2).
+                // Stage 1: over alpha and normal source color (spec 2.2).
                 dst1_r <= dst0_r;
                 raw1_r <= raw0_r;
                 argb1_r <= argb0_r;
                 oa1_r <= src0_r[31:24] + divide255(alpha_product0_r);
-                src1_r[31:24] <= src0_r[31:24];
-                for (channel = 0; channel < 3; channel = channel + 1) begin
-                    case (mode0_r)
-                        2'd0: src1_r[channel*8 +: 8] <= src0_r[channel*8 +: 8];
-                        2'd1: src1_r[channel*8 +: 8] <= add0_r[channel*9+8] ?
-                            8'd255 : add0_r[channel*9 +: 8];
-                        2'd2: src1_r[channel*8 +: 8] <= subtract0_r[channel*8 +: 8];
-                        2'd3: src1_r[channel*8 +: 8] <=
-                            divide255(mode_product0_r[channel*16 +: 16]);
-                        default: src1_r[channel*8 +: 8] <= 8'd0;
-                    endcase
-                end
+                src1_r <= src0_r;
                 // Stage 2: synchronous Q read in parallel with payload registration.
                 src2_r <= src1_r;
                 dst2_r <= dst1_r;

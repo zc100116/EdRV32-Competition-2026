@@ -14,7 +14,6 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'tools'))
 from regress import expand_files
 from vectors import generate, selections
-import v2_vectors
 
 
 # T-RND1 acceptance subset approved by the coordinator; reuse existing vectors verbatim.
@@ -24,12 +23,14 @@ SMOKE_CASES = [
     (4, (1, 1, 1, 0), 1), (5, (1, 15, 7), 1),
     (6, (0, 3, 1), 1), (6, (1, 3, 1), 1),
     (6, (1, 2, 0), 1), (6, (1, 4, 0), 1), (6, (1, 5, 0), 1),
-    (7, (1, 0, 31), 1), (7, (0, 7, 1), 1), (7, (1, 9, 7), 1),
-    (8, (1, 16 * 65536, 3), 1), (9, (1, 1, 3, 128, 255), 1),
+    (7, (1, 0, 31), 1), (7, (0, 0, 1), 1), (7, (1, 1, 7), 1), (7, (0, 6, 1), 1),
+    (8, (1, 16 * 65536, 3), 1), (9, (1, 1, 0, 128, 255), 1),
     (10, (0, 'dr'), 1), (10, (1, 'dr'), 1),
-    (11, (1, 8, 0), 1), (12, (1, 8), 1), (13, (1, 7, 1), 1),
-    (14, 'chain', 1), (15, ('op', 255), 1), (16, 'registers', 1),
+    (14, 'chain', 1), (15, ('bus', 4), 1), (15, ('op', 255), 1), (16, 'registers', 1),
     (20, 'horizontal', 1), (20, 'vertical', 1),
+    *[(15, ('op', op), 1) for op in range(6, 14)],
+    *[(15, ('format', (4, fmt)), 1) for fmt in range(7, 10)],
+    *[(15, ('mode', mode), 1) for mode in range(1, 8)],
 ]
 
 def compile_sim(stub):
@@ -37,7 +38,7 @@ def compile_sim(stub):
     obj.mkdir(parents=True, exist_ok=True)
     sources = expand_files(HERE / ('selftest/files.f' if stub else 'files.f'))
     command = ['verilator', '--binary', '--timing', '-Wall', '-j', '1',
-               '--timescale', '1ns/1ps', '--top-module', 'edrv32_rnd_tb',
+               '-CFLAGS', '-O0', '--timescale', '1ns/1ps', '--top-module', 'edrv32_rnd_tb',
                '--Mdir', str(obj), '-o', 'sim', '+define+SIM_MODE', *sources]
     with (obj / 'compile.log').open('w') as log:
         result = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
@@ -56,8 +57,7 @@ def main():
         subprocess.run([str(sim), '+PORT_STUB'], cwd=ROOT, check=True)
         return 0
     out = ROOT / 'build/rnd' / args.tier
-    cases = (SMOKE_CASES + v2_vectors.selections('smoke')
-             if args.tier == 'smoke' else selections(args.tier))
+    cases = SMOKE_CASES if args.tier == 'smoke' else selections(args.tier)
     for index, (number, variant, seed) in enumerate(cases):
         name = f'RN-{number:02d}-{index:04d}-seed{seed}'
         directory = out / name
@@ -71,9 +71,8 @@ def main():
             print(f'FAIL {name} variant={variant!r}')
             return 1
         print(f'PASS {name} variant={variant!r}', flush=True)
-        if number in (18, 29):
-            print('\n'.join(line for line in output.splitlines()
-                            if 'RN-18 kind=' in line or 'RN-29 ' in line))
+        if number == 18:
+            print('\n'.join(line for line in output.splitlines() if 'RN-18 kind=' in line))
     print(f'PASS RND {args.tier}: {len(cases)} cases')
     return 0
 

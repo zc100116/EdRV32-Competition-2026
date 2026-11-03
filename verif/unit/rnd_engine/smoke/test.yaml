@@ -8,3 +8,4 @@ pass: PASS
 tier: smoke
 simulator: verilator
 plusargs: +SPARSE_SMOKE
+verilator_flags: -CFLAGS -O0

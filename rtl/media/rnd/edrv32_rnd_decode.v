@@ -24,7 +24,6 @@ module edrv32_rnd_decode (
     wire signed [17:0] y0_w;
     wire signed [17:0] x1_w;
     wire signed [17:0] y1_w;
-    wire signed [17:0] expansion_w;
     wire signed [17:0] rect_left_w;
     wire signed [17:0] rect_top_w;
     wire signed [17:0] rect_right_w;
@@ -46,11 +45,10 @@ module edrv32_rnd_decode (
     assign y0_w = {{2{command_i[191]}}, command_i[191:176]};
     assign x1_w = {{2{command_i[207]}}, command_i[207:192]};
     assign y1_w = {{2{command_i[223]}}, command_i[223:208]};
-    assign expansion_w = op_o == 8'h06 ? $signed({13'd0, command_i[292:288]}) : 18'sd0;
-    assign rect_left_w = x0_w - expansion_w;
-    assign rect_top_w = y0_w - expansion_w;
-    assign rect_right_w = x1_w + expansion_w;
-    assign rect_bottom_w = y1_w + expansion_w;
+    assign rect_left_w = x0_w;
+    assign rect_top_w = y0_w;
+    assign rect_right_w = x1_w;
+    assign rect_bottom_w = y1_w;
     assign clip_left_w = $signed({6'd0, command_i[107:96]});
     assign clip_top_w = $signed({6'd0, command_i[123:112]});
     assign clip_right_w = $signed({6'd0, command_i[139:128]});
@@ -67,19 +65,18 @@ module edrv32_rnd_decode (
     assign fast_fill_o = op_o == 8'h01 && !flags_o[0] &&
         command_i[267:256] == 0 && command_i[255:248] == 8'd255;
     assign illegal_o = !allowed_w;
-    assign unused_command_w = ^{command_i[511:293], command_i[287:268],
+    assign unused_command_w = ^{command_i[511:268],
         command_i[247:224], command_i[159:156], command_i[143:140],
         command_i[127:124], command_i[111:108], command_i[95:32], command_i[11:9],
         width_w[17], height_w[17]};
     always @(*) begin
         allowed_w = 1'b0;
         case (op_o)
-            8'h01, 8'h02, 8'h06, 8'h07, 8'h09, 8'h0a, 8'h0b, 8'h0c: allowed_w = 1'b1;
+            8'h01, 8'h02: allowed_w = 1'b1;
             8'h03: allowed_w = src_fmt_o >= 4'd2 && src_fmt_o <= 4'd5;
-            8'h04, 8'h0d: allowed_w = (src_fmt_o <= 4'd1 ||
-                (src_fmt_o >= 4'd6 && src_fmt_o <= 4'd9)) && flags_o[6:4] < 3'd4;
+            8'h04: allowed_w = (src_fmt_o <= 4'd1 || src_fmt_o == 4'd6) &&
+                flags_o[6:4] == 3'd0;
             8'h05: allowed_w = src_fmt_o == {3'd0, argb_o};
-            8'h08: allowed_w = src_fmt_o <= 4'd1 || src_fmt_o == 4'd6 || src_fmt_o == 4'd7;
             default: allowed_w = 1'b0;
         endcase
     end

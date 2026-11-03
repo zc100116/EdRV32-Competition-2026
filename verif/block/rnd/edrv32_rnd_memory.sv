@@ -31,10 +31,6 @@ module edrv32_rnd_memory (
     int w_beats = 0;
     int source_ar_count = 0;
     int target_ar_count = 0;
-    int parameter_ar_count = 0;
-    int image_ar_count = 0;
-    int parameter_beats = 0;
-    int image_beats = 0;
     int descriptor_ar_count = 0;
     int max_desc_read = -1;
     int write_beat = 0;
@@ -76,10 +72,6 @@ module edrv32_rnd_memory (
             w_beats = 0;
             source_ar_count = 0;
             target_ar_count = 0;
-            parameter_ar_count = 0;
-            image_ar_count = 0;
-            parameter_beats = 0;
-            image_beats = 0;
             descriptor_ar_count = 0;
             max_desc_read = -1;
             write_beat = 0;
@@ -150,30 +142,20 @@ module edrv32_rnd_memory (
                     if (bus.araddr >= 32'h10000 && bus.araddr < 32'h18000)
                         target_ar_count++;
                 end
-                if (bus.araddr >= 32'h48000 && bus.araddr < 32'h50000)
-                    parameter_ar_count++;
-                if (bus.araddr >= 32'h20000 && bus.araddr < 32'h48000)
-                    image_ar_count++;
-                // RN-15/28: one selected descriptor/source/target/palette read transaction.
+                // RN-15: one selected descriptor/source/target/palette read transaction.
                 command.error = !injected && ((error_kind == 1 && descriptor)
                     || (error_kind == 2 && bus.araddr >= 32'h20000
                         && bus.araddr < 32'h40000)
                     || (error_kind == 3 && bus.araddr >= 32'h10000
                         && bus.araddr < 32'h18000)
                     || (error_kind == 4 && bus.araddr >= 32'h50000
-                        && bus.araddr < 32'h50400)
-                    || (error_kind == 6 && bus.araddr >= 32'h48000
-                        && bus.araddr < 32'h50000));
+                        && bus.araddr < 32'h50400));
                 if (command.error) injected = 1;
                 reads.push_back(command);
             end
             if (r_taken) begin
                 read_beat++;
                 r_beats++;
-                if (reads[0].addr >= 32'h48000 && reads[0].addr < 32'h50000)
-                    parameter_beats++;
-                if (reads[0].addr >= 32'h20000 && reads[0].addr < 32'h48000)
-                    image_beats++;
                 if (bus.rlast) begin
                     command = reads.pop_front();
                     read_beat = 0;

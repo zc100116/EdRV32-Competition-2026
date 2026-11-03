@@ -174,7 +174,7 @@ module tb;
         endcase
     endfunction
     function automatic reg [31:0] reference_pixel(input reg[31:0] source_value,
-        destination_value,input bit is_argb,input int mode_input);
+        destination_value,input bit is_argb);
         int sa,da,oa,ratio,q,sc,dc,tc,c;
         reg [23:0] color_value;
         sa=int'(source_value[31:24]);
@@ -186,13 +186,7 @@ module tb;
         for(c=0;c<3;c++) begin
             sc=int'(source_value[8*c+:8]);
             dc=is_argb ? int'(destination_value[8*c+:8]) : channel_expand(int'(destination_value),c);
-            case(mode_input)
-                0: tc=sc;
-                1: tc=sc+dc>255 ? 255 : sc+dc;
-                2: tc=dc<sc ? 0 : dc-sc;
-                3: tc=(sc*dc+127)/255;
-                default: tc=0;
-            endcase
+            tc=sc;
             color_value[c*8+:8]=8'((ratio*tc+(255-ratio)*dc+127)/255);
         end
         if(is_argb) return oa==0 ? 32'd0 : {8'(oa),color_value};
@@ -275,13 +269,11 @@ module tb;
     endfunction
     task automatic model_command(input int descriptor_index);
         reg[31:0] c[0:15];
-        reg[31:0] horizontal[0:16383];
         reg[31:0] snapshot[0:16383];
         int op_value,fmt_value,dformat,flags_value,x0,y0,x1,y1,l,t,r,b,w,h,bytes_value;
-        int a,rad,blur_value,ix0,iy0,ix1,iy1,inner_radius,k,sa,mode_input;
-        int sx,sy,u,v,tt,tx,ty,entry_value,grid_w,grid_h,grid_l,grid_t,m;
-        int sums[0:3];
-        reg[31:0] color_value,dest_value,address_value,pixel_value,palette_addr;
+        int a,rad,ix0,iy0,ix1,iy1,inner_radius,k;
+        int u,v;
+        reg[31:0] color_value,dest_value,address_value,palette_addr;
         for(int n=0;n<16;n++) c[n]=load_expected(BASE+32'(descriptor_index*64+n*4),4);
         op_value=int'(c[0][7:0]);
         fmt_value=int'(c[0][15:12]);
@@ -298,57 +290,6 @@ module tb;
         rad=int'(c[8][11:0]);
         a=int'(c[7][31:24]);
         palette_addr=c[13];
-        if(op_value==6 || op_value==7) begin
-            blur_value=op_value==6 ? int'(c[9][4:0]) : int'(c[8][4:0]);
-            m=(65536+blur_value)/(2*blur_value+1);
-            if(op_value==6) begin
-                grid_l=x0-blur_value; grid_t=y0-blur_value;
-                grid_w=w+2*blur_value; grid_h=h+2*blur_value;
-                l=grid_l>int'(c[3][11:0]) ? grid_l : int'(c[3][11:0]);
-                t=grid_t>int'(c[3][27:16]) ? grid_t : int'(c[3][27:16]);
-                r=x1+blur_value<int'(c[4][11:0]) ? x1+blur_value : int'(c[4][11:0]);
-                b=y1+blur_value<int'(c[4][27:16]) ? y1+blur_value : int'(c[4][27:16]);
-            end else begin
-                grid_l=l; grid_t=t; grid_w=r-l+1; grid_h=b-t+1;
-            end
-            for(int j=0;j<grid_h;j++) for(int i=0;i<grid_w;i++) begin
-                for(int ch=0;ch<4;ch++) sums[ch]=0;
-                for(int tap=-blur_value;tap<=blur_value;tap++) begin
-                    if(op_value==6) begin
-                        sums[0]+=cov(grid_l+i+tap,grid_t+j,x0,y0,x1,y1,rad);
-                    end else begin
-                        sx=i+tap<0 ? 0 : i+tap>=grid_w ? grid_w-1 : i+tap;
-                        pixel_value=expand_color(load_expected(c[1]+32'((grid_t+j)*int'(c[2][15:0])+
-                            (grid_l+sx)*bytes_value),bytes_value),dformat);
-                        if(dformat==0) pixel_value[31:24]=0;
-                        for(int ch=0;ch<4;ch++) sums[ch]+=int'(pixel_value[ch*8+:8]);
-                    end
-                end
-                pixel_value=0;
-                for(int ch=0;ch<4;ch++) pixel_value[ch*8+:8]=8'((sums[ch]*m+32768)>>16);
-                horizontal[j*grid_w+i]=pixel_value;
-            end
-            for(int j=t;j<=b;j++) for(int i=l;i<=r;i++) begin
-                for(int ch=0;ch<4;ch++) sums[ch]=0;
-                for(int tap=-blur_value;tap<=blur_value;tap++) begin
-                    sy=j-grid_t+tap;
-                    if(op_value==6 && (sy<0 || sy>=grid_h)) pixel_value=0;
-                    else begin
-                        sy=sy<0 ? 0 : sy>=grid_h ? grid_h-1 : sy;
-                        pixel_value=horizontal[sy*grid_w+i-grid_l];
-                    end
-                    for(int ch=0;ch<4;ch++) sums[ch]+=int'(pixel_value[ch*8+:8]);
-                end
-                pixel_value=0;
-                for(int ch=0;ch<4;ch++) pixel_value[ch*8+:8]=8'((sums[ch]*m+32768)>>16);
-                address_value=c[1]+32'(j*int'(c[2][15:0])+i*bytes_value);
-                if(op_value==6) pixel_value=reference_pixel({8'(norm(a*int'(pixel_value[7:0]))),c[7][23:0]},
-                    load_expected(address_value,bytes_value),1'(dformat),0);
-                else if(dformat==0) pixel_value={16'd0,pixel_value[23:19],pixel_value[15:10],pixel_value[7:3]};
-                store_expected(address_value,pixel_value,bytes_value);
-            end
-            return;
-        end
         if(op_value==5)
             for(int j=t;j<=b;j++) for(int i=l;i<=r;i++)
                 snapshot[(j-t)*(r-l+1)+i-l]=load_expected(c[8]+
@@ -358,7 +299,6 @@ module tb;
             address_value=c[1]+32'(j*int'(c[2][15:0])+i*bytes_value);
             dest_value=load_expected(address_value,bytes_value);
             color_value={8'hff,c[7][23:0]};
-            mode_input=0;
             case(op_value)
                 1: begin
                     if((flags_value&1)!=0) begin
@@ -397,23 +337,11 @@ module tb;
                             8'(norm(int'(c[15][31:24])*int'(c[15][ch*8+:8])+
                             (255-int'(c[15][31:24]))*int'(color_value[ch*8+:8])));
                     color_value[31:24]=8'(norm(a*int'(color_value[31:24])));
-                    mode_input=op_value==4 ? (flags_value>>4)&7 : 0;
                 end
                 5: color_value=snapshot[(j-t)*(r-l+1)+i-l];
-                8: begin
-                    tt=(flags_value&1)!=0 ? 16 : 8;
-                    u=int'(c[11][15:0])+i-x0; v=int'(c[11][31:16])+j-y0;
-                    entry_value=int'(load_expected(c[9]+32'((v/tt)*int'(c[10][15:0])+2*(u/tt)),2));
-                    tx=u%tt; ty=v%tt;
-                    if((entry_value&4096)!=0) tx=tt-1-tx;
-                    if((entry_value&8192)!=0) ty=tt-1-ty;
-                    color_value=source_color(c[8],palette_addr,
-                        (entry_value&4095)*tt*tt+ty*tt+tx,fmt_value,flags_value,int'(c[14][15:0]));
-                    color_value[31:24]=8'(norm(a*int'(color_value[31:24])));
-                end
                 default: $fatal(1,"model OP %0d",op_value);
             endcase
-            if(op_value!=5) color_value=reference_pixel(color_value,dest_value,1'(dformat),mode_input);
+            if(op_value!=5) color_value=reference_pixel(color_value,dest_value,1'(dformat));
             store_expected(address_value,color_value,bytes_value);
         end
     endtask
@@ -558,19 +486,6 @@ module tb;
         if(pixel_value!=320000) $fatal(1,"A4 GLYPH count=%0d",pixel_value);
         $display("PERF 1000 A4 GLYPH cycles=%0d pixels=%0d avg_cycles=%0f",
             cycles_value,pixel_value,real'(cycles_value)/1000.0);
-        setup(8,6,0,1);
-        put(1,BASE+32'h400000); put(2,2560); put(3,0); put(4,32'h02cf04ff);
-        put(5,0); put(6,32'h02cf04ff); put(8,BASE+32'h20000);
-        put(9,BASE+32'h6000); put(10,160); put(11,0); put(13,BASE+32'h9000);
-        for(int tile_index=0;tile_index<80*45;tile_index++) begin
-            memory[32'h6000+tile_index*2]=8'(tile_index%256);
-            memory[32'h6001+tile_index*2]=8'((tile_index%4)<<4);
-        end
-        execute(1,1);
-        apb_read(12'h040,cycles_value); apb_read(12'h044,pixel_value);
-        if(pixel_value!=921600 || (!$test$plusargs("R1_BASELINE") && cycles_value>921600))
-            $fatal(1,"TILEMAP throughput cycles=%0d pixels=%0d",cycles_value,pixel_value);
-        $display("PERF TILEMAP cycles=%0d pixels=%0d",cycles_value,pixel_value);
         round_performance();
         $display("PASS RND throughput and pixel comparisons");
         $finish;
@@ -621,9 +536,9 @@ module tb;
                 setup(2,0,d,0); put(8,5); put(9,(32'(sides)<<16)|3); execute(1,1);
             end
             for(int f=2;f<6;f++) begin setup(3,f,d,0); execute(1,1); end
-            for(int f=0;f<10;f++) begin
+            for(int f=0;f<7;f++) begin
                 if(f>=2 && f<=5) continue;
-                for(int mode_value=0;mode_value<4;mode_value++) begin
+                for(int mode_value=0;mode_value<1;mode_value++) begin
                     setup(4,f,d,(mode_value<<4)|15);
                     put(11,32'h0000b000); put(12,32'h00018000); execute(1,1);
                 end
@@ -633,29 +548,6 @@ module tb;
                 put(8,BASE+32'h8000+(d==1 ? 4 : 2));
                 put(10,{16'(direction<2 ? 3 : 0),16'(direction%2==0 ? 5 : 0)});
                 execute(1,1);
-            end
-            for(int tile_value=0;tile_value<2;tile_value++)
-                for(int f=0;f<8;f++) begin
-                    if(f>=2 && f<=5) continue;
-                    setup(8,f,d,tile_value|4); put(8,BASE+32'h4000);
-                    put(9,BASE+32'h6000); put(10,16); put(11,32'h00070006);
-                    for(int n=0;n<64;n++) begin
-                        memory[32'h6000+n*2]=8'(n%3);
-                        memory[32'h6001+n*2]=8'((n%4)<<4);
-                    end
-                    execute(1,1);
-                end
-            for(int radius_value=0;radius_value<3;radius_value++) begin
-                setup(7,0,d,0); put(8,32'(radius_value)); put(9,BASE+32'h10000);
-                execute(1,1);
-                setup(6,0,d,0); put(8,4); put(9,32'(radius_value)); put(10,BASE+32'h10000);
-                execute(1,1);
-            end
-        end
-        if($test$plusargs("FULL")) begin
-            for(int d=0;d<2;d++) begin
-                setup(7,0,d,0); put(8,31); put(9,BASE+32'h10000); execute(1,1);
-                setup(6,0,d,0); put(8,4095); put(9,31); put(10,BASE+32'h10000); execute(1,1);
             end
         end
         if($test$plusargs("FULL")) begin
@@ -672,18 +564,6 @@ module tb;
             put(1,BASE+32'h8002); put(2,2112); put(3,0); put(4,32'h00020416);
             put(5,0); put(6,32'h00020416); put(8,BASE+32'h4001); put(9,1053);
             put(10,0); put(13,BASE+32'h7004); execute(1,1);
-            for(int source_format=0;source_format<8;source_format++) begin
-                if(source_format>=2 && source_format<=5) continue;
-                setup(8,source_format,1,0);
-                put(1,BASE+32'h8004); put(2,4160); put(3,0); put(4,32'h0002040c);
-                put(5,0); put(6,32'h0002040c); put(8,BASE+32'h4000);
-                put(9,BASE+32'h6000); put(10,300); put(11,6); put(13,BASE+32'h7004);
-                for(int tile_index=0;tile_index<132;tile_index++) begin
-                    memory[32'h6000+tile_index*2]=8'(tile_index%3);
-                    memory[32'h6001+tile_index*2]=8'((tile_index%4)<<4);
-                end
-                execute(1,1);
-            end
         end
         // Empty and inverted primitives consume only their command beats.
         for(int empty_case=0;empty_case<3;empty_case++) begin
