@@ -13,7 +13,7 @@
 
 | 文件 | 内容 |
 |---|---|
-| `showcase_sim.exe` | 模拟器，由 Linux 用 Zig 0.17.0 从 `6f87994c` 交叉编译，单个文件，只依赖 Windows 系统 DLL |
+| `showcase_sim.exe` | 模拟器，由 Linux 用 Zig 0.17.0 从 `6be4bbcc` 交叉编译，单个文件，只依赖 Windows 系统 DLL |
 | `shots/*.png` | 19 张同一程序的 Linux 截图，可以先在 GitHub 上预览 |
 
 ## 3. 环境
