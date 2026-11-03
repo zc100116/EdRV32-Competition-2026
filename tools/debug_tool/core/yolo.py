@@ -179,6 +179,11 @@ class YoloTool:
                     output=byte_difference(reference, output),
                     detections=detection_difference(boxes, detections.boxes))
 
+    def camera_detection(self, board_ip, board_port, local_port):
+        self.return_view = False
+        return self.ethernet.send_blocks([(3, 0, b'camera')], board_ip, board_port,
+                                         local_port, name='回到摄像头检测')
+
     def send_model(self, path, board_ip, board_port, local_port):
         blocks = pack_model(path)
         self.image_bytes = sum(len(data) for _, _, data in blocks)

@@ -300,6 +300,10 @@ class SocConsole(QWidget):
         send_row = QHBoxLayout()
         self.send_image = self.button('发送图像', self._send_image)
         send_row.addWidget(self.send_image)
+        self.stop_batch = self.button('停止批量', self._stop_batch)
+        send_row.addWidget(self.stop_batch)
+        self.image_camera = self.button('回到摄像头检测', self._camera_detection)
+        send_row.addWidget(self.image_camera)
         box.addLayout(send_row)
         self.image_note = label('', 'note')
         self.image_note.setWordWrap(True)
@@ -348,6 +352,8 @@ class SocConsole(QWidget):
         box.addWidget(self.caption)
         self.video_stats = label('接收帧率 0.0 fps · 显示帧率 0.0 fps · 丢弃帧数 0 · 接收缓冲 0 MiB', 'note')
         box.addWidget(self.video_stats)
+        self.video_camera = self.button('回到摄像头检测', self._camera_detection)
+        box.addWidget(self.video_camera)
         row.addWidget(frame, 1)
 
     def _controls(self, layout):
@@ -548,6 +554,12 @@ class SocConsole(QWidget):
             self.folder_completed = 0
             self._next_image()
 
+    def _stop_batch(self):
+        self.folder_images.clear()
+        self.folder_started = None
+        self.capture_status.setText('批量已停止；等待在途图片完成或超时'
+                                    if self.engine.yolo.capture_pending else '批量已停止')
+
     def _next_image(self):
         self.image_path.setText(str(self.folder_images.pop(0)))
         self._send_image()
@@ -575,6 +587,16 @@ class SocConsole(QWidget):
             self.display.setCurrentIndex(2)
             self.comparison = None
             self.comparison_result.setText('等待本次回传')
+        self.run(send)
+
+    def _camera_detection(self):
+        def send():
+            self.engine.ethernet.local_ip = self.local_ip.text()
+            if not self.engine.ethernet.status()['rx']['active']:
+                self.engine.ethernet.start_receive(6000, mode='console')
+            self.engine.yolo.camera_detection(self.ip.text(), 5000, 6000)
+            self.display.setCurrentIndex(0)
+            self.scene.setCurrentIndex(0)
         self.run(send)
 
     def _send_model(self):
@@ -768,12 +790,17 @@ class SocConsole(QWidget):
         self.send_image.setEnabled(not tx['active'] and not waiting)
         self.send_model.setEnabled(not tx['active'] and not waiting)
         self.choose_folder.setEnabled(not tx['active'] and not waiting)
+        self.stop_batch.setEnabled(self.folder_started is not None)
+        self.image_camera.setEnabled(not tx['active'] and not waiting)
+        self.video_camera.setEnabled(not tx['active'] and not waiting)
+        self.apply_scene.setEnabled(not tx['active'] and not waiting)
         source_image = self.engine.yolo.source_image
         if source_image is not None and source_image != self.loaded_image:
             self.image_path.setText(source_image)
             self.run(self._load_image)
         generation, capture = self.engine.yolo.snapshot()
-        if generation != self.generation and self.engine.yolo.error is not None:
+        if (not tx['active'] and generation != self.generation and
+                self.engine.yolo.error is not None):
             self.generation = generation
             self.capture_status.setText(self.engine.yolo.error +
                                        f' · 失败 {self.engine.yolo.failed} 张')
@@ -782,7 +809,7 @@ class SocConsole(QWidget):
                     self._next_image()
                 else:
                     self.folder_started = None
-        elif capture is not None and generation != self.generation:
+        elif not tx['active'] and capture is not None and generation != self.generation:
             self.generation = generation
             self.last_display = None
             self.board.log(f'YOLO 回传完整：FRAME {capture[2].frame_id} · '

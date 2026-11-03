@@ -185,6 +185,89 @@ class ImageDetectionTest(unittest.TestCase):
             send.assert_called_once()
         app.processEvents()
 
+    def test_stop_batch_drains_current_success_or_timeout_then_allows_new_work(self):
+        from PySide6.QtWidgets import QApplication
+        from gui.soc_console import SocConsole
+        app = QApplication.instance() or QApplication([])
+        for timeout in (False, True):
+            engine = SerialEngine()
+            console = SocConsole(engine, lambda text: None)
+            self.addCleanup(console.close)
+            console.folder_images = [Path('queued.png')]
+            console.folder_started = time.monotonic()
+            engine.yolo.reset_capture()
+            console.refresh()
+            self.assertTrue(console.stop_batch.isEnabled())
+            console.stop_batch.click()
+            self.assertEqual(console.folder_images, [])
+            self.assertIsNone(console.folder_started)
+            self.assertTrue(engine.yolo.capture_pending)
+            console.refresh()
+            self.assertFalse(console.send_image.isEnabled())
+            self.assertFalse(console.video_camera.isEnabled())
+            with patch.object(console, '_send_image') as send:
+                if timeout:
+                    engine.yolo.image_sent(None)
+                    with patch('tools.debug_tool.core.yolo.time.monotonic',
+                               return_value=time.monotonic() + 2):
+                        engine.yolo.check_timeout()
+                    self.assertEqual(engine.yolo.error, '回传未结束（超时 1 s）')
+                else:
+                    engine.yolo.receive(0, 0, bytes(INPUT_BYTES), False)
+                    engine.yolo.receive(1, 0, bytes(OUTPUT_BYTES), False)
+                    engine.yolo.receive(2, 0,
+                        struct.pack('<4sHHII', b'EDDT', 1, 0, 9, 0), True)
+                console.refresh()
+                send.assert_not_called()
+                self.assertTrue(console.send_image.isEnabled())
+                self.assertTrue(console.choose_folder.isEnabled())
+                self.assertTrue(console.video_camera.isEnabled())
+                console.send_image.click()
+                send.assert_called_once()
+            app.processEvents()
+
+    def test_folder_waits_for_upload_completion_even_if_return_arrives_first(self):
+        from PySide6.QtWidgets import QApplication
+        from gui.soc_console import SocConsole
+        from tools.debug_tool.core.video import parse_detections
+        app = QApplication.instance() or QApplication([])
+        engine = SerialEngine()
+        console = SocConsole(engine, lambda text: None)
+        self.addCleanup(console.close)
+        console.folder_images = [Path('next.png')]
+        console.folder_started = time.monotonic()
+        capture = (bytes(INPUT_BYTES), bytes(OUTPUT_BYTES),
+                   parse_detections(struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0)))
+        with (patch.object(engine.yolo, 'snapshot', return_value=(1, capture)),
+              patch.object(console, '_send_image') as send):
+            engine.ethernet.tx['active'] = True
+            console.refresh()
+            send.assert_not_called()
+            engine.ethernet.tx['active'] = False
+            console.refresh()
+            send.assert_called_once()
+        app.processEvents()
+
+    def test_camera_buttons_send_win3_command_and_select_video(self):
+        from PySide6.QtWidgets import QApplication
+        from gui.soc_console import SocConsole
+        app = QApplication.instance() or QApplication([])
+        engine = SerialEngine()
+        console = SocConsole(engine, lambda text: None)
+        self.addCleanup(console.close)
+        with (patch.object(engine.ethernet, 'start_receive'),
+              patch.object(engine.ethernet, 'send_blocks') as send):
+            for button in (console.image_camera, console.video_camera):
+                engine.yolo.return_view = True
+                button.click()
+                self.assertEqual(send.call_args.args[0], [(3, 0, b'camera')])
+                self.assertEqual(send.call_args.args[1:], (console.ip.text(), 5000, 6000))
+                self.assertEqual(console.display.currentIndex(), 0)
+                self.assertEqual(console.scene.currentIndex(), 0)
+                self.assertFalse(engine.yolo.return_view)
+            self.assertEqual(send.call_count, 2)
+        app.processEvents()
+
     def test_malformed_return_is_still_a_fatal_protocol_error(self):
         from tools.debug_tool.core.ethernet import packets
         from test_program import wait_for
