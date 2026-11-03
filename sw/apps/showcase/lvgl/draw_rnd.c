@@ -7,6 +7,7 @@
 #include "showcase_lvgl.h"
 #include "cache.h"
 #include "src/draw/lv_draw_private.h"
+#include "src/draw/lv_draw_buf_private.h"
 #include "src/draw/lv_draw_label_private.h"
 #include "src/draw/lv_draw_image_private.h"
 #include "src/image/lv_image_decoder_private.h"
@@ -492,6 +493,51 @@ static int32_t dispatch(lv_draw_unit_t *unit, lv_layer_t *layer)
     return 1;
 }
 
+/* P5b 9.2: start.S clears this one-screen BSS source; read-only afterwards.
+ * COPY preserves zero alpha (RND 2.6/5.2), without storing zeros in the ELF. */
+static _Alignas(64) uint8_t zero_pixels[1280 * 720 * 4];
+static _Alignas(64) struct rnd_command clear_command;
+void showcase_draw_rnd_clear(lv_draw_buf_t *buf, const lv_area_t *area, lv_layer_t *layer)
+{
+    (void)layer;
+    uintptr_t address = (uintptr_t)buf->data;
+    bool ddr = address - EDRV32_DDR_BASE < EDRV32_DDR_SIZE ||
+        address - EDRV32_DDR_UNCACHED_BASE < EDRV32_DDR_SIZE;
+    lv_color_format_t cf = buf->header.cf;
+    /* RND 2.1: only DDR RGB565/ARGB8888 targets. Coordinator-approved CPU
+     * execution for other buffers; NULL layer invokes LVGL's original clear. */
+    if (!ddr || (cf != LV_COLOR_FORMAT_ARGB8888 && cf != LV_COLOR_FORMAT_RGB565)) {
+        ++stats.clear_cpu;
+        lv_area_t clipped = {0, 0, buf->header.w - 1, buf->header.h - 1};
+        if (!area) stats.clear_cpu_bytes += buf->header.h * buf->header.stride;
+        else if (lv_area_intersect(&clipped, area, &clipped))
+            stats.clear_cpu_bytes += (uint64_t)(clipped.y2 - clipped.y1 + 1) *
+                (((clipped.x2 - clipped.x1 + 1) * lv_color_format_get_bpp(cf) + 7) / 8);
+        lv_draw_buf_clear_ex(buf, area, NULL);
+        return;
+    }
+    unsigned bpp = cf == LV_COLOR_FORMAT_ARGB8888 ? 4 : 2;
+    lv_area_t clipped = {0, 0, buf->header.w - 1, buf->header.h - 1};
+    if (area) {
+        if (!lv_area_intersect(&clipped, area, &clipped)) return;
+    } else clipped.x2 = buf->header.stride / bpp - 1;
+    struct rnd_rect rectangle = {clipped.x1, clipped.y1, clipped.x2, clipped.y2};
+    struct rnd_common c = {
+        .dst_base = rnd_physical(buf->data), .dst_stride = buf->header.stride,
+        .dst_fmt = format(cf), .src_fmt = format(cf), .clip = rectangle, .rect = rectangle
+    };
+    struct rnd_source source = {rnd_physical(zero_pixels), 1280 * bpp, 0, 0};
+    struct rnd_command *command = platform_uncached(&clear_command);
+    rnd_copy(command, &c, &source);
+    /* Clean destination rows before invalidation so adjacent CPU pixels survive.
+     * The read-only zero source was cleaned once during initialization. */
+    struct rnd_range destination = {buf->data + clipped.y1 * buf->header.stride,
+        (clipped.y2 - clipped.y1 + 1) * buf->header.stride};
+    struct rnd_batch batch = {command, 1, &destination, 1, &destination, 1};
+    run_batch(&batch, true); /* Synchronous DONE precedes all following draw tasks. */
+    ++stats.clear_rnd;
+}
+
 void showcase_draw_rnd_init(void)
 {
     /* Startup zeroed the cached BSS alias; discard it before uncached writes.
@@ -499,6 +545,12 @@ void showcase_draw_rnd_init(void)
      */
     cache_clean_invalidate((uintptr_t)command_storage, sizeof(command_storage));
     commands = platform_uncached(command_storage);
+    cache_clean_invalidate((uintptr_t)&clear_command, sizeof clear_command);
+    /* SoC 7.4: publish start.S's cached BSS stores before RND reads the source. */
+    cache_clean((uintptr_t)zero_pixels, sizeof zero_pixels);
+    lv_draw_buf_get_handlers()->buf_clear_cb = showcase_draw_rnd_clear;
+    lv_draw_buf_get_font_handlers()->buf_clear_cb = showcase_draw_rnd_clear;
+    lv_draw_buf_get_image_handlers()->buf_clear_cb = showcase_draw_rnd_clear;
     lv_draw_unit_t *unit = lv_draw_create_unit(sizeof(*unit));
     unit->name = "RND";
     unit->evaluate_cb = evaluate;

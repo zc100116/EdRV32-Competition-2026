@@ -262,6 +262,7 @@ RUNNING / PAUSED ──stop──▶ STOPPING ──所有资源 IDLE──▶ I
 | 4 | 硬件不支持（本 FPGA 版本没有对应引擎） |
 | 5 | 状态不符（例如不在图片识别时发图片） |
 | 6 | 已取消 |
+| 7 | 未加载模型（9.1） |
 
 `DONE` 的 `status` 也使用这一组值。
 
@@ -403,3 +404,33 @@ vision fps=<n> npu=<a> wait=<b> decode=<c> sort=<d> nms=<e> post_span=<f> gui=<g
   - `ui_data_pause`、`ui_data_batch_stop`；
   - `ui_vision_t` 中与批量识别有关的字段；
   - `ui_game_open` 由 UI 和主循环共享的做法。主循环不再读取 UI 的全局变量。
+
+## 9. 卡 54 的修订（P5b，2026-11-03）
+
+卡 54 结果分支 `win/20261103-54-showcase-p5-board`（0f0c6912）。
+
+### 9.1 进入视觉识别后停机（已确认）
+
+- **现象**：两次进入视觉识别，不到 1 s 都打印 `showcase vision: NPU error`，随后停机。
+- **根因**：
+  - showcase 不带模型，靠 PC 上传。卡 54 重新下载比特流后，在上传模型之前就做了 A1，NPU 描述符区里不是有效内容；
+  - 程序没有判断模型是否已加载，就启动了 NPU。
+- **决定**（用户 2026-11-03，按推荐）：
+  - 把卡 09 编译出的 YOLOv8n 模型（`tasks/win/20261029-09-b3-software/src/npu/` 的 mem_desc.hex、mem_model.hex、regs.txt）在构建时转成二进制，嵌入 ELF。`vision_init` 把它复制到 VISION_DESC_BASE / VISION_MODEL_BASE，然后 `npu_configure`。
+  - PC 仍然可以上传模型替换。
+  - **模型就绪标志**：嵌入的模型复制完成，或者 PC 上传的模型加载完成，就算就绪；上传开始到加载完成之间不就绪。不就绪时打开视觉识别或图片识别，会话进入 FAILED。
+  - 新增 `error` = 7"未加载模型"（8.1 表），工具和板端都显示这个原因。
+  - NPU 错误标志仍按规格停机，不做恢复。
+
+### 9.2 LVGL 帧率低（已确认）
+
+- **数据**：Empty screen 每帧 render 94.6 ms，其中 RND 5.8 ms、软件绘制 0、其他 88.8 ms。CPU 每帧 1447 万周期、137 万条指令（IPC 0.094），D$ 缺失 9.1 万次、脏行写回 9.0 万次，约等于一整屏 ARGB8888。16 个场景平均：其他 91.4 ms / render 129.3 ms。
+- **根因**：显示格式带 alpha（ARGB8888），LVGL 在每次刷新区域之前，都用 `lv_draw_buf_clear_ex` 对整块区域做 CPU `memset`（`third_party/lvgl/src/core/lv_refr.c:1066`）。RGB565 时没有这一步。
+- **决定**：
+  - 通过 draw_buf 的 `buf_clear_cb`，改由 RND COPY 从全零缓冲复制，完成清零。RND FILL 写 ARGB8888 时 α 固定为 255（rnd-spec 5），不能用来清成透明。
+  - 全零源缓冲大小一屏，放在 DDR 中，只读不写。
+
+### 9.3 其他
+
+- benchmark 的 `LVGL split` 行与每秒的 CPU 行在串口上交错。改为由同一个不阻塞的输出队列按整行输出，任何两行不交错。
+- benchmark 中 `xbar_rnd_p4_*` 全为 0：按 SoC 规格核对 RND 所在的 mem_xbar 端口编号后改正。

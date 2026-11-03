@@ -7,6 +7,8 @@
 #include "engine.h"
 #include "../ui/ui_data.h"
 void vision_init(void);
+void vision_model_receiving(void);
+bool vision_model_ready(void);
 int vision_service(void);
 void vision_irq(const struct engine_event *event, void *context);
 /* 0 accepts asynchronous processing; 1 length error, 2 EDNM format error.

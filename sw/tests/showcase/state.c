@@ -17,5 +17,8 @@ int main(void)
         0x78,0x56,0x34,0x12,0x21,0x43,0x65,0x87,2,0,0,0};
     uint8_t output[56]; board_state_encode(output,&s);
     assert(!memcmp(output,exact,56));
+    s.error = 7; s.session.state = UI_STATE_FAILED;
+    board_state_encode(output, &s);
+    assert(output[1] == 5 && output[2] == 7);
     puts("PASS STATE exact 56-byte little endian layout");
 }

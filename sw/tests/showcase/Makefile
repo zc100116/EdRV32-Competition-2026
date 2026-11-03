@@ -50,3 +50,17 @@ test:
 	    $(ROOT)/sw/apps/showcase/board/records.c -o $(BUILD)/state
 	$(BUILD)/state
 	$(MAKE) -C vision test runtime
+	$(CC) $(FLAGS) -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
+	    -I$(ROOT)/sw/drivers/include serial.c $(ROOT)/sw/apps/showcase/board/serial.c \
+	    -o $(BUILD)/serial
+	$(BUILD)/serial
+	$(CC) $(FLAGS) -ffunction-sections -fdata-sections -Wl,--gc-sections \
+	    -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include \
+	    -DLV_CONF_INCLUDE_SIMPLE clear.c $(ROOT)/sw/apps/showcase/lvgl/draw_rnd.c \
+	    $(ROOT)/sw/drivers/rnd.c $(ROOT)/third_party/lvgl/src/misc/lv_area.c \
+	    $(ROOT)/third_party/lvgl/src/misc/lv_color.c -Wl,--wrap=rnd_read_perf -o $(BUILD)/clear
+	$(BUILD)/clear
+	$(CC) $(FLAGS) -I$(ROOT)/sw/bsp/include -I$(ROOT)/sw/drivers/include \
+	    fabric.c $(ROOT)/sw/apps/showcase/board/fabric.c -o $(BUILD)/fabric
+	$(BUILD)/fabric

@@ -29,8 +29,10 @@ struct showcase_draw_rnd_stats {
     struct showcase_rnd_measurement copy;
     struct showcase_rnd_timing timing;
     uint64_t glyph_cpu_ticks;
+    uint64_t clear_rnd, clear_cpu, clear_cpu_bytes;
 };
 void showcase_draw_rnd_init(void);
+void showcase_draw_rnd_clear(lv_draw_buf_t *buf, const lv_area_t *area, lv_layer_t *layer);
 void showcase_draw_rnd_enable(bool enabled);
 bool showcase_draw_rnd_enabled(void);
 const struct showcase_draw_rnd_stats *showcase_draw_rnd_stats(void);

@@ -13,7 +13,7 @@ READY, DONE, ECHO_REPLY = 0x81, 0x82, 0x83
 MODEL, IMAGE, GAME = 1, 2, 3
 RESPONSE_TIMEOUT = 5.0
 STATUS = {1: '长度不符', 2: '格式错误', 3: '空间不足',
-          4: '硬件不支持', 5: '状态不符', 6: '已取消'}
+          4: '硬件不支持', 5: '状态不符', 6: '已取消', 7: '未加载模型'}
 
 
 def encode(message_type, seq, payload=b''):
