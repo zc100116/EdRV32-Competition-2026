@@ -3,7 +3,10 @@
  */
 #include "sim_data.h"
 #include "detection.h"
+#include "renderer.h"
+#include "theme.h"
 #include <string.h>
+#include "src/misc/cache/instance/lv_image_cache.h"
 extern const lv_image_dsc_t sim_street;
 extern const lv_image_dsc_t sim_indoor;
 static unsigned hardware = UI_ALL;
@@ -27,9 +30,12 @@ ui_system_t ui_data_system(void)
 {
     unsigned step = lv_tick_get() / 500;
     ui_system_t d = {.seconds = lv_tick_get() / 1000, .cpu = 28 + step % 9,
-        .fps = 58 + step % 3, .idle = 72 - step % 9, .npu_busy = 65 + step % 13,
+        .fps = 28 + step % 3, .display_fps = 60, .idle = 72 - step % 9, .npu_busy = 65 + step % 13,
         .rnd_busy = 21 + step % 11, .link = true, .clock_hz = 100000000};
-    for(unsigned i = 0; i < 3; ++i) d.task_cpu[i] = 12 + i * 16 + (step / 2 * 7 + i) % 19;
+    for(unsigned i = 0; i < 3; ++i) {
+        d.task_cpu[i] = 2 + i * 7 + (step / 2 * 7 + i) % 4;
+        d.task_max_us[i]=175+i*1368;
+    }
     for(unsigned i = 0; i < 7; ++i) {
         d.ddr_read[i] = 65 + (i * 61 + step * 13) % 350;
         d.ddr_write[i] = 20 + (i * 47 + step * 7) % 210;
@@ -100,6 +106,9 @@ static const ui_benchmark_t benchmark[] = {
     {"Widgets demo", 943, 83, 1240}
 };
 const ui_benchmark_t *ui_data_benchmark(void) { return benchmark; }
+void ui_data_benchmark_stop(void) { benchmarking=false; }
+bool ui_data_benchmark_running(void)
+{ return benchmarking && (lv_tick_get()-benchmark_start)<8000; }
 void ui_data_benchmark_start(void) { benchmark_start = lv_tick_get(); benchmarking = true; }
 unsigned ui_data_benchmark_progress(void)
 {
@@ -119,8 +128,16 @@ ui_coremark_t ui_data_coremark(void)
 {
     unsigned p = core_started ? (lv_tick_get() - core_start) / 50 : 0;
     bool done = p >= 100;
-    return (ui_coremark_t){done ? 100 : p, done ? 4354 : 0, done ? 4354 : 0,
-        core_started && !done};
+    ui_coremark_t d={.progress=done ? 100 : p,.score_tenths=done ? 4354 : 0,
+        .per_mhz_thousandths=done ? 4354 : 0,.running=core_started && !done,
+        .compiler_flags="模拟数据 · g15-tuned -O3 -funroll-all-loops -finline-limit=600 "
+            "-falign-functions=4 -falign-jumps=4 -falign-loops=4 -fstrict-aliasing "
+            "-march=rv32im_zicsr_zifencei; SRAM"};
+    if(done) {
+        for(unsigned r=0;r<2;++r) { d.cycles[r]=1148443200; d.instructions[r]=1523000000; }
+        for(unsigned i=0;i<16;++i) d.events[i]=1000000+(i+1)*123456;
+    }
+    return d;
 }
 ui_debug_t ui_data_debug(void)
 {
@@ -154,3 +171,35 @@ void ui_data_debug_echo(void) { echo_count += 10; }
 const lv_image_dsc_t *ui_data_game_name(unsigned index) { (void)index; return NULL; }
 
 const lv_image_dsc_t *ui_data_game_initial(unsigned index) { (void)index; return NULL; }
+
+static ui_render_result_t render_results[RENDER_TEST_COUNT];
+_Alignas(64) static uint8_t render_pixels[2][RENDER_W*RENDER_H*4];
+static lv_image_dsc_t render_images[2];
+const ui_render_result_t *ui_data_render_results(void)
+{
+    for(unsigned i=0;i<RENDER_TEST_COUNT;++i) render_results[i].name=ui_render_names[i];
+    return render_results;
+}
+bool ui_data_render_running(void) { return false; }
+const lv_image_dsc_t *ui_data_render_image(unsigned side) { return &render_images[side]; }
+void ui_data_render_start(unsigned test)
+{
+    if(test==TEST_LAYERS) return;
+    unsigned first=test==RENDER_TEST_COUNT ? 0 : test;
+    unsigned last=test==RENDER_TEST_COUNT ? TEST_LAYERS : test+1;
+    for(unsigned n=first;n<last;++n) {
+        ui_render_source(n); ui_render_clear(n,render_pixels[1]);
+        ui_render_software(n,render_pixels[1]);
+        memcpy(render_pixels[0],render_pixels[1],ui_render_bytes(n));
+        render_results[n]=(ui_render_result_t){ui_render_names[n],125,840,
+            RENDER_W*RENDER_H,RENDER_W*RENDER_H,true};
+        for(unsigned side=0;side<2;++side) {
+            lv_image_cache_drop(&render_images[side]);
+            render_images[side]=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,
+                .cf=ui_render_format(n),.w=RENDER_W,.h=RENDER_H,
+                .stride=RENDER_W*(n==TEST_COPY_ARGB ? 4u : 2u)},
+                .data_size=ui_render_bytes(n),.data=render_pixels[side]};
+        }
+    }
+    ui_open(4);
+}

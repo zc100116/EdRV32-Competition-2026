@@ -27,6 +27,7 @@ int virtual_input_serial(uint8_t byte);
 /* Called after RX NOTIFY: read the latest eight bytes from the uncached window. */
 void virtual_input_network(const volatile uint8_t *frame);
 struct virtual_input_state virtual_input_get(void);
+unsigned virtual_input_revision(void);
 /* Accumulated signed modulo-256 deltas; each consumer drains once per read. */
 int16_t virtual_input_take_wheel(void);
 #endif

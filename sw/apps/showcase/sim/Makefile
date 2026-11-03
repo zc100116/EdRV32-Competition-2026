@@ -18,9 +18,10 @@ LINUX_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/linux/%.o,$(LV_SOURCES))
 WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
 PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
 COMMON := $(UI) sim_data.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
-SHOTS := home home-vrn home-focus-6 vision image process graphics games monitor chip debug \
-    graphics-performance graphics-comparison graphics-layers debug-uart debug-network \
-    vision-boxes-off chip-coremark games-last-row detection-settings vision-filtered process-collapsed
+SHOTS := home home-vrn home-focus-6 vision image process graphics games chip debug \
+    graphics-performance renderer-list renderer-result benchmark-results overlay-home overlay-games \
+    debug-uart debug-network vision-boxes-off chip-coremark coremark-counters games-last-row \
+    detection-settings vision-filtered process-collapsed
 .PHONY: win shots
 win: $(BUILD)/showcase_sim.exe
 shots: $(addprefix $(BUILD)/shots/,$(addsuffix .png,$(SHOTS)))

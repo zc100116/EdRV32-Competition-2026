@@ -8,6 +8,7 @@
 #include "cache.h"
 #include "disp.h"
 #include "display.h"
+#include "../board/overlay.h"
 
 _Alignas(4096) static uint8_t surfaces[2][NES_SCREEN_BYTES] __attribute__((section(".noinit")));
 _Alignas(64) static uint8_t dma_pixels[256 * 240];
@@ -39,6 +40,7 @@ void nes_display_rnd_irq(const struct rnd_result *result, void *context)
 void nes_display_disp_irq(const struct engine_event *event, void *context)
 {
     (void)context;
+    board_overlay_irq(event->irq);
     /* DISP 5.3: first enabled FRAME establishes CUR_BASE without SWITCH. */
     if (phase == DISPLAY_STARTING && (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK))
         phase = DISPLAY_FREE;

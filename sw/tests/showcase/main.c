@@ -25,6 +25,7 @@ static void message(struct edsc *s,unsigned type,const uint8_t *p,unsigned n)
 int main(int argc,char **argv)
 {
     struct edsc s={.ops={reserve,complete,camera,reply}};
+    uint8_t connect=0; edsc_message(&s,&connect,1); assert(replies==0 && !s.active);
     uint8_t p[1000]={3,0,0,0,128};
     message(&s,1,p,8); assert(reserved==3 && response[4]==0x81);
     assert(response_bytes==16 && record_u32(response+8)==0x12345678);

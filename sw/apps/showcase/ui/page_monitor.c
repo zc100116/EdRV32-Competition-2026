@@ -1,92 +1,106 @@
-/* page_monitor.c — showcase design §4.3; three task curves and DDR meters.
- * Curve updates follow seconds; other changed objects update at 2 Hz.
+/* page_monitor.c — showcase 4.6.5; persistent 320x240 performance overlay.
+ * The same objects render on the main sys layer or the NES software display.
  */
 #include "theme.h"
-static lv_obj_t *chart;
-static lv_chart_series_t *series[3];
-static lv_obj_t *band[7][2];
-static lv_obj_t *band_text[7];
-static lv_obj_t *metrics[4];
-static lv_obj_t *network;
-static unsigned last_second;
-static lv_obj_t *step_time;
-void ui_page_monitor(lv_obj_t *p)
+static lv_obj_t *window, *parent;
+static lv_obj_t *fps, *busy, *tasks[3], *ports[7], *bars[7][2], *chart;
+static lv_chart_series_t *series;
+static bool visible, compact;
+static unsigned corner, last_second=UINT32_MAX;
+static int32_t history[60];
+static unsigned history_next;
+static void update_timer(lv_timer_t *timer) { (void)timer; ui_monitor_update(); }
+void ui_monitor_init(void) { lv_timer_create(update_timer,500,NULL); }
+bool ui_monitor_visible(void) { return visible; }
+void ui_monitor_position(int *x,int *y)
 {
-    ui_title(p, "系统监控");
-    lv_obj_t *cpu = ui_box(p, 40, 123, 788, 235, PANEL);
-    ui_label(cpu, "CPU 任务占用", 22, 17, &sim_font_20, TEXT);
-    const char *legend[] = {"通信服务", "当前应用", "图形界面"};
-    uint32_t colors[] = {ACCENT, TEAL, 0x748ca6};
-    for(unsigned i = 0; i < 3; ++i)
-        ui_label(cpu, legend[i], 370 + (int)i * 130, 21, &sim_font_14, colors[i]);
-    chart = lv_chart_create(cpu);
+    *x=(corner&1) ? 960 : 0;
+    *y=(corner&2) ? 480 : 0;
+}
+static void position(void)
+{
+    int x,y; ui_monitor_position(&x,&y);
+    lv_obj_set_pos(window,compact ? 0 : x,compact ? 0 : y);
+}
+void ui_monitor_corner(void) { corner=(corner+1)%4; if(window) position(); }
+static void move_clicked(lv_event_t *e) { (void)e; ui_monitor_corner(); }
+static void close_clicked(lv_event_t *e) { (void)e; ui_monitor_toggle(); }
+static void build(void)
+{
+    window=ui_box(parent,0,0,320,240,PANEL);
+    lv_obj_set_style_radius(window,6,0);
+    ui_label(window,"性能",8,4,&sim_font_14,ACCENT);
+    lv_obj_t *move=ui_label(window,"换角",224,4,&sim_font_14,ACCENT);
+    lv_obj_set_clickable(move,true);
+    lv_obj_add_event_cb(move,move_clicked,LV_EVENT_CLICKED,NULL);
+    lv_obj_t *close=ui_label(window,"关闭",276,4,&sim_font_14,MUTED);
+    lv_obj_set_clickable(close,true);
+    lv_obj_add_event_cb(close,close_clicked,LV_EVENT_CLICKED,NULL);
+    fps=ui_label(window,"",8,24,&sim_font_14,TEXT);
+    busy=ui_label(window,"",8,42,&sim_font_14,TEXT);
+    for(unsigned i=0;i<3;++i) tasks[i]=ui_label(window,"",8,60+(int)i*17,&sim_font_14,TEXT);
+    for(unsigned i=0;i<7;++i) {
+        int x=8+(int)(i%2)*156, y=113+(int)(i/2)*21;
+        ports[i]=ui_label(window,"",x,y,&sim_font_14,MUTED);
+        for(unsigned j=0;j<2;++j) {
+            bars[i][j]=ui_box(window,x,y+16+(int)j*2,1,2,j ? TEAL : ACCENT);
+            lv_obj_set_style_border_width(bars[i][j],0,0);
+        }
+    }
+    ui_label(window,"DDR 总带宽 / 60 秒",164,178,&sim_font_14,MUTED);
+    chart=lv_chart_create(window);
     lv_obj_remove_style_all(chart);
-    lv_obj_set_pos(chart, 24, 66);
-    lv_obj_set_size(chart, 740, 141);
-    lv_obj_set_style_line_color(chart, lv_color_hex(LINE), LV_PART_MAIN);
-    lv_obj_set_style_line_width(chart, 1, LV_PART_MAIN);
-    lv_obj_set_style_line_width(chart, 2, LV_PART_ITEMS);
-    lv_obj_set_style_size(chart, 0, 0, LV_PART_INDICATOR);
-    lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
-    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
-    lv_chart_set_div_line_count(chart, 4, 9);
-    lv_chart_set_point_count(chart, 30);
-    for(unsigned i = 0; i < 3; ++i) {
-        series[i] = lv_chart_add_series(chart, lv_color_hex(colors[i]), LV_CHART_AXIS_PRIMARY_Y);
-        for(unsigned j = 0; j < 30; ++j)
-            lv_chart_set_next_value(chart, series[i], 12 + (int)i * 16 + (int)((j * 7 + i) % 19));
-    }
-    step_time = ui_label(cpu, "", 24, 211, &sim_font_14, MUTED);
-    last_second = (unsigned)-1;
-    lv_obj_t *ddr = ui_box(p, 40, 378, 788, 230, PANEL);
-    ui_label(ddr, "DDR 端口带宽", 22, 16, &sim_font_20, TEXT);
-    ui_label(ddr, "读 / 写    MB/s", 590, 20, &sim_font_14, MUTED);
-    const char *ports[] = {"显示", "摄像头", "CPU", "NPU", "渲染", "几何", "网口"};
-    for(unsigned i = 0; i < 7; ++i) {
-        int y = 48 + (int)i * 25;
-        ui_label(ddr, ports[i], 24, y, &sim_font_16, MUTED);
-        ui_bar(ddr, 110, y + 4, 450, 1, ACCENT);
-        band[i][0] = lv_obj_get_child(ddr, -1);
-        ui_bar(ddr, 110, y + 14, 450, 1, TEAL);
-        band[i][1] = lv_obj_get_child(ddr, -1);
-        lv_obj_set_height(band[i][1], 4);
-        band_text[i] = ui_label(ddr, "", 590, y, &sim_font_16, TEXT);
-    }
-    lv_obj_t *card = ui_box(p, 850, 123, 390, 485, PANEL);
-    ui_label(card, "核心运行状态", 24, 18, &sim_font_20, TEXT);
-    const char *titles[] = {"GUI 帧率", "CPU 空闲率", "NPU 忙碌率", "RND 忙碌率"};
-    for(unsigned i = 0; i < 4; ++i) {
-        int y = 75 + (int)i * 86;
-        ui_label(card, titles[i], 24, y, &sim_font_16, MUTED);
-        metrics[i] = ui_label(card, "", 24, y + 24, &sim_digits_40, ACCENT);
-    }
-    network = ui_label(card, "", 24, 442, &sim_font_16, ACCENT);
-    ui_hint("Esc 返回首页    曲线每秒更新    读 / 写带宽以 MB/s 显示");
+    lv_obj_set_pos(chart,8,201); lv_obj_set_size(chart,304,31);
+    lv_obj_set_style_line_width(chart,1,LV_PART_ITEMS);
+    lv_obj_set_style_size(chart,0,0,LV_PART_INDICATOR);
+    lv_chart_set_point_count(chart,60);
+    lv_chart_set_range(chart,LV_CHART_AXIS_PRIMARY_Y,0,4000);
+    series=lv_chart_add_series(chart,lv_color_hex(ACCENT),LV_CHART_AXIS_PRIMARY_Y);
+    for(unsigned i=0;i<60;++i)
+        lv_chart_set_next_value(chart,series,history[(history_next+i)%60]);
+    position();
+    lv_obj_set_hidden(window,!visible);
+}
+void ui_monitor_parent(lv_obj_t *p,bool small)
+{
+    if(window) lv_obj_delete(window);
+    parent=p; compact=small; build(); ui_monitor_update();
+}
+void ui_monitor_toggle(void)
+{
+    visible=!visible;
+    if(!window) { parent=lv_layer_sys(); build(); }
+    lv_obj_set_hidden(window,!visible);
+    if(visible) ui_monitor_update();
 }
 void ui_monitor_update(void)
 {
-    ui_system_t d = ui_data_system();
-    if(d.seconds != last_second) {
-        last_second = d.seconds;
-        for(unsigned i = 0; i < 3; ++i)
-            lv_chart_set_next_value(chart, series[i], (int)d.task_cpu[i]);
+    ui_system_t d=ui_data_system();
+    unsigned total=0;
+    for(unsigned i=0;i<7;++i) total+=d.ddr_read[i]+d.ddr_write[i];
+    if(d.seconds!=last_second) {
+        last_second=d.seconds; history[history_next]=total;
+        history_next=(history_next+1)%60;
+        if(window && visible) lv_chart_set_next_value(chart,series,(int32_t)total);
     }
-    char s[160];
-    lv_snprintf(s, sizeof(s), "max step us: %u / %u / %u",
-        d.task_max_us[0], d.task_max_us[1], d.task_max_us[2]);
-    ui_text(step_time, s);
-    for(unsigned i = 0; i < 7; ++i) {
-        unsigned values[] = {d.ddr_read[i], d.ddr_write[i]};
-        for(unsigned j = 0; j < 2; ++j)
-            if(lv_obj_get_width(band[i][j]) != (int)values[j])
-                lv_obj_set_width(band[i][j], (int)values[j]);
-        lv_snprintf(s, sizeof(s), "%3u / %3u", values[0], values[1]);
-        ui_text(band_text[i], s);
+    if(!window || !visible) return;
+    char s[128];
+    lv_snprintf(s,sizeof(s),"渲染 %u fps    显示 %u fps",d.fps,d.display_fps);
+    ui_text(fps,s);
+    lv_snprintf(s,sizeof(s),"NPU %u%%   RND %u%%",d.npu_busy,d.rnd_busy); ui_text(busy,s);
+    const char *names[]={"通信","应用","界面"};
+    for(unsigned i=0;i<3;++i) {
+        lv_snprintf(s,sizeof(s),"%s %u%%   最长 %u us",names[i],d.task_cpu[i],d.task_max_us[i]);
+        ui_text(tasks[i],s);
     }
-    unsigned values[] = {d.fps, d.idle, d.npu_busy, d.rnd_busy};
-    for(unsigned i = 0; i < 4; ++i) {
-        lv_snprintf(s, sizeof(s), "%u %s", values[i], i == 0 ? "FPS" : "%");
-        ui_text(metrics[i], s);
+    for(unsigned i=0;i<7;++i) {
+        lv_snprintf(s,sizeof(s),"P%u %u/%u MB/s",i,d.ddr_read[i],d.ddr_write[i]);
+        ui_text(ports[i],s);
+        unsigned values[]={d.ddr_read[i],d.ddr_write[i]};
+        for(unsigned j=0;j<2;++j) {
+            unsigned width=values[j]*144/4000;
+            if(width>144) width=144;
+            if(lv_obj_get_width(bars[i][j])!=(int)width) lv_obj_set_width(bars[i][j],(int)width);
+        }
     }
-    ui_text(network, d.link ? LV_SYMBOL_OK "  网口已连接 · 1000 Mbps" : "网口未连接");
 }

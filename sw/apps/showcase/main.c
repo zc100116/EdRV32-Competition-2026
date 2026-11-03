@@ -84,7 +84,7 @@ static void application_step(struct sched_task *task)
         last_page=ui_page; if(active) active->enter();
     }
     if(!paused && ui_page==5 && ui_game_open && active!=&nes_app) {
-        board_nes_select(ui_mode); ui_hint("游戏中按返回两次退出");
+        board_nes_select(ui_mode); ui_hint("游戏中按返回退出");
         board_request(&nes_app);
     }
     board_games_step(); board_step();

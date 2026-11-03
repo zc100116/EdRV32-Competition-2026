@@ -23,7 +23,19 @@ static uint32_t hardware;
 static volatile uint32_t probing;
 static volatile uint32_t probe_missing;
 static volatile uint32_t frames;
-static unsigned input_source;
+static unsigned input_source,input_sequence;
+static uint64_t input_tick;
+static uint16_t input_keys;
+uint64_t platform_input_tick(void) { return input_tick; }
+unsigned platform_input_sequence(void) { return input_sequence; }
+void platform_input_received(unsigned source)
+{
+    uint16_t keys=virtual_input_get().keys;
+    input_source=source;
+    if(keys!=input_keys) {
+        input_keys=keys; input_tick=platform_ticks(); ++input_sequence;
+    }
+}
 unsigned platform_input_source(void) { return input_source; }
 static uint32_t milliseconds;
 static uint64_t millisecond_base;
@@ -269,14 +281,14 @@ void showcase_communication_step(struct sched_task *task)
     uint32_t events = sched_take(task);
     (void)platform_milliseconds();
     if (events & 1) {
-        input_source = 1;
+        unsigned revision=virtual_input_revision();
         virtual_input_uart_set_raw(board_uart_active() ? board_uart_byte : NULL);
         virtual_input_uart_receive();
+        if(virtual_input_revision()!=revision) platform_input_received(1);
         mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, UART_IRQ_RX_THRESH);
     }
     if (hardware & APP_HW_ETH) {
         board_network_step();
-        if(platform_virtual_input().active) input_source=2;
         network_status_step();
         mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, eth_irq_mask());
     }

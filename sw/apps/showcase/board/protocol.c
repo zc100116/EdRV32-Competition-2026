@@ -16,6 +16,7 @@ static void done(struct edsc *s,unsigned kind,unsigned status,uint32_t index)
 }
 void edsc_message(struct edsc *s,const uint8_t *d,unsigned bytes)
 {
+    if(bytes==1 && d[0]==0) return;
     if(bytes<12) { s->seq=0; done(s,0,2,0); return; }
     s->seq=record_u32(d+8);
     unsigned n=record_u16(d+6),type=record_u16(d+4);

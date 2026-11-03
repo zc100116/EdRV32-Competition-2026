@@ -7,10 +7,13 @@
 static volatile struct virtual_input_state state;
 static uint8_t serial_frame[VIRTUAL_INPUT_BYTES];
 static unsigned serial_position;
+static unsigned revision;
+unsigned virtual_input_revision(void) { return revision; }
 static int16_t wheel_pending;
 
 void virtual_input_network(const volatile uint8_t *frame)
 {
+    ++revision;
     wheel_pending += (int8_t)(uint8_t)(frame[7] - state.wheel);
     state = (struct virtual_input_state) {
         .keys = (uint16_t)(frame[0] | (uint16_t)frame[1] << 8),

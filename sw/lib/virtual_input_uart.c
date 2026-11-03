@@ -27,9 +27,10 @@ void virtual_input_uart_receive(void)
     unsigned budget=32;
     while (budget-- && !(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
         unsigned byte=uart_getc();
-        if(raw_receive) { raw_receive(byte); continue; }
         int character = virtual_input_serial((uint8_t)byte);
-        if (character >= 0)
-            legacy_character(character);
+        if (character >= 0) {
+            if(raw_receive) raw_receive((unsigned)character);
+            else legacy_character(character);
+        }
     }
 }

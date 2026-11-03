@@ -10,6 +10,8 @@
 #include "../ui/ui_data.h"
 #include "eth_monitor.h"
 #include "eth.h"
+#include "uart.h"
+#include <stdio.h>
 #include "virtual_input.h"
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +27,8 @@ static unsigned tx_active,tx_done,tx_count,tx_bytes,sequence,produced,consumed;
 unsigned board_tx_bytes,board_tx_packets,board_echo_count,board_echo_replies;
 char board_udp_text[1001];
 static struct edsc protocol;
+static unsigned peer_report_pending;
+unsigned board_network_reporting(void) { return peer_report_pending; }
 
 static void *uncached(uint32_t physical)
 { return (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE+physical); }
@@ -78,6 +82,24 @@ void board_network_init(void)
 extern void board_memory_sample(const struct mem_xbar_stats *memory);
 void board_network_step(void)
 {
+    static uint32_t peer_ip,peer_port;
+    static char peer_report[80];
+    static unsigned report_pos,report_bytes;
+    uint32_t ip=mmio_read32(EDRV32_ETH_BASE+EDRV32_ETH_PEER_IP_OFFSET);
+    uint32_t port=mmio_read32(EDRV32_ETH_BASE+EDRV32_ETH_PEER_PORT_OFFSET);
+    if(port && (ip!=peer_ip || port!=peer_port)) {
+        peer_ip=ip; peer_port=port;
+        report_bytes=(unsigned)snprintf(peer_report,sizeof(peer_report),
+            "ETH peer IP: 0x%08lx\r\nETH peer port: %lu\r\n",
+            (unsigned long)ip,(unsigned long)port);
+        report_pos=0;
+    }
+    extern unsigned board_cpu_reporting(void);
+    unsigned report_budget=board_cpu_reporting() ? 0 : 16;
+    while(report_budget-- && report_pos<report_bytes &&
+          !(mmio_read32(EDRV32_UART0_BASE+UART_STATUS)&UART_STATUS_TX_FULL))
+        mmio_write32(EDRV32_UART0_BASE+UART_TXDATA,(uint8_t)peer_report[report_pos++]);
+    peer_report_pending=report_pos<report_bytes;
     struct engine_event e=engine_poll(ENGINE_ETH);
     if(e.error || (e.irq&EDRV32_ETH_IRQ_STAT_ERROR_MASK)) {
         platform_puts("ETH error "); platform_put_hex(e.error); platform_stop(); }
@@ -88,6 +110,7 @@ void board_network_step(void)
     }
     if(e.irq&EDRV32_ETH_IRQ_STAT_RX_NOTIFY2_MASK) {
         virtual_input_network(uncached(VIRTUAL_INPUT_BASE));
+        platform_input_received(2);
         eth_window_configure(2,VIRTUAL_INPUT_BASE,VIRTUAL_INPUT_BYTES);
     }
     if(e.irq&EDRV32_ETH_IRQ_STAT_RX_NOTIFY3_MASK) {

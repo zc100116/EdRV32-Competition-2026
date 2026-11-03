@@ -78,7 +78,7 @@ void vid_flush(void)
 void osd_getinput(void)
 {
     ++nes_frames;
-    controller.data = (int)nes_buttons();
+    /* Input was latched at nes_step entry, before the CPU emulates this frame. */
 }
 
 void osd_getsoundinfo(sndinfo_t *info)
@@ -162,6 +162,7 @@ void nes_start(void)
 
 void nes_step(void)
 {
+    controller.data = (int)nes_buttons();
     nes_emulate_frame();
 }
 

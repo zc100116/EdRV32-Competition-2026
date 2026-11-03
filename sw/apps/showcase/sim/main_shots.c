@@ -1,6 +1,8 @@
 /* main_shots.c — design P1a §5: headless RGB565 captures; scripted LVGL clock. */
 #include "theme.h"
 #include "sim_data.h"
+#include "renderer.h"
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -37,7 +39,6 @@ static void check_input_devices(void)
     key_tap(keypad,LV_KEY_ESC); assert(ui_page==0);
     ui_open(6); key_tap(keypad,LV_KEY_ESC); assert(ui_page==0);
     ui_open(5); key_tap(keypad,LV_KEY_ENTER); assert(ui_game_open);
-    key_tap(keypad,LV_KEY_ESC); assert(ui_game_open);
     key_tap(keypad,LV_KEY_ESC); assert(!ui_game_open && ui_page==5);
     ui_open(1); key_tap(keypad,LV_KEY_NEXT); key_tap(keypad,LV_KEY_NEXT);
     key_tap(keypad,LV_KEY_ENTER); assert(ui_detection_settings);
@@ -57,6 +58,10 @@ static void check_input_devices(void)
     test_input.state=LV_INDEV_STATE_RELEASED; lv_indev_read(pointer);
     assert(ui_data_detection_config().classes[0]==UINT32_MAX);
     key_tap(keypad,LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
+    test_input.point=(lv_point_t){55,24};
+    test_input.state=LV_INDEV_STATE_PRESSED; lv_indev_read(pointer);
+    test_input.state=LV_INDEV_STATE_RELEASED; lv_indev_read(pointer);
+    assert(ui_page==0);
     lv_indev_delete(pointer);
     lv_indev_delete(keypad); lv_indev_delete(encoder);
 }
@@ -118,6 +123,7 @@ static void capture(const char *name)
     lv_obj_invalidate(lv_screen_active());
     lv_refr_now(NULL);
     check_labels(lv_screen_active());
+    check_labels(lv_layer_sys());
     char path[256];
     snprintf(path, sizeof(path), "shots/%s.rgb565", name);
     FILE *file = fopen(path, "wb");
@@ -129,6 +135,37 @@ static void capture(const char *name)
     if(fclose(file)) { perror(path); exit(EXIT_FAILURE); }
 }
 
+static void measure_flush(lv_display_t *d,const lv_area_t *a,uint8_t *p)
+{ (void)a; (void)p; lv_display_flush_ready(d); }
+static uint64_t host_ns(void)
+{
+    struct timespec ts; timespec_get(&ts,TIME_UTC);
+    return (uint64_t)ts.tv_sec*1000000000u+(uint64_t)ts.tv_nsec;
+}
+static void measure_overlay(void)
+{
+    lv_display_t *main=lv_display_get_default();
+    lv_display_t *small=lv_display_create(320,240);
+    static uint32_t pixels[320*240];
+    lv_display_set_color_format(small,LV_COLOR_FORMAT_ARGB8888);
+    lv_display_set_buffers(small,pixels,NULL,sizeof(pixels),LV_DISPLAY_RENDER_MODE_DIRECT);
+    lv_display_set_flush_cb(small,measure_flush);
+    lv_display_set_default(small);
+    ui_monitor_parent(lv_screen_active(),true);
+    if(!ui_monitor_visible()) ui_monitor_toggle();
+    uint64_t total=0,max=0;
+    for(unsigned i=0;i<120;++i) {
+        lv_tick_inc(500);
+        uint64_t start=host_ns(); ui_monitor_update(); lv_refr_now(small);
+        uint64_t elapsed=host_ns()-start; total+=elapsed; if(elapsed>max) max=elapsed;
+    }
+    printf("Overlay 320x240 ARGB software, 120 refreshes: average_us=%llu max_us=%llu\n",
+        (unsigned long long)(total/120/1000),(unsigned long long)(max/1000));
+    ui_monitor_toggle();
+    lv_display_set_default(main);
+    ui_monitor_parent(lv_layer_sys(),false);
+    lv_display_delete(small);
+}
 int main(void)
 {
     lv_init();
@@ -153,6 +190,7 @@ int main(void)
     lv_timer_handler();
     for(unsigned i = 1; i <= 8; ++i) {
         ui_tab = 0;
+        if(i==6) continue;
         ui_open(i);
         if (i != 3) capture(names[i - 1]);
     }
@@ -176,14 +214,27 @@ int main(void)
     assert(lv_obj_get_scroll_y(grid) > 0);
     ui_key(LV_KEY_ENTER);
     assert(ui_game_open && ui_mode == 29);
-    ui_key(LV_KEY_ESC); ui_key(LV_KEY_ESC);
+    ui_key(LV_KEY_ESC);
     assert(!ui_game_open && ui_page == 5);
     grid = lv_obj_get_child(lv_obj_get_child(lv_screen_active(), -1), -1);
     assert(lv_obj_has_state(lv_obj_get_child(grid, 29), LV_STATE_FOCUSED));
-    ui_tab = 0; ui_open(4); capture("graphics-performance");
-    ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER); capture("graphics-comparison");
-    ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
-    capture("graphics-layers");
+    ui_tab=0; ui_open(4); capture("graphics-performance");
+    ui_data_benchmark_start(); lv_tick_inc(8000); ui_open(4); capture("benchmark-results");
+    ui_data_render_start(RENDER_TEST_COUNT);
+    for(unsigned i=0;i<TEST_LAYERS;++i) assert(ui_data_render_results()[i].complete);
+    ui_graphics_action(1); capture("renderer-list");
+    ui_graphics_action(10+TEST_GRAD_H); capture("renderer-result");
+    ui_key(LV_KEY_ESC); assert(ui_tab==1 && ui_mode==0);
+    ui_key(LV_KEY_ESC); assert(ui_tab==0 && ui_page==4);
+    ui_key(LV_KEY_ESC); assert(ui_page==0);
+    ui_monitor_toggle(); capture("overlay-home");
+    ui_open(5); capture("overlay-games");
+    for(unsigned corner=0;corner<4;++corner) {
+        int x,y; ui_monitor_position(&x,&y);
+        assert(x==((corner&1) ? 960 : 0) && y==((corner&2) ? 480 : 0));
+        ui_monitor_corner();
+    }
+    ui_monitor_toggle();
     ui_tab = 0; ui_open(8); capture("debug-uart");
     ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER); capture("debug-network");
     ui_open(1); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER); capture("vision-boxes-off");
@@ -191,6 +242,8 @@ int main(void)
     for(unsigned i = 0; i < 12; ++i) { lv_tick_inc(500); lv_timer_handler(); }
     ui_refresh();
     capture("chip-coremark");
+    ui_tab=1; ui_open(7); capture("coremark-counters");
+    ui_key(LV_KEY_ESC); assert(ui_tab==0 && ui_page==7);
     ui_open(1); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
     assert(ui_detection_settings); capture("detection-settings");
     ui_key(LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
@@ -224,7 +277,7 @@ int main(void)
     ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
     assert(ui_page == 1);
     ui_tab = 0; ui_open(4);
-    for(unsigned i = 0; i < 3; ++i) ui_key(LV_KEY_RIGHT);
+    for(unsigned i = 0; i < 2; ++i) ui_key(LV_KEY_RIGHT);
     ui_key(LV_KEY_ENTER);
     lv_tick_inc(8000); ui_refresh();
     assert(ui_data_benchmark_progress() == 16);
@@ -244,12 +297,12 @@ int main(void)
     assert(ui_data_debug().echo_count == 10);
     ui_open(5); ui_key(LV_KEY_ENTER);
     assert(ui_game_open);
-    ui_key(LV_KEY_ESC); assert(ui_game_open);
     ui_key(LV_KEY_ESC); assert(!ui_game_open && ui_page == 5);
     ui_key(LV_KEY_ESC); assert(ui_page == 0);
     check_input_devices();
     puts("PASS: keypad/encoder, four-key navigation, availability, page actions, "
          "label bounds, detection settings and filtering");
+    measure_overlay();
     lv_deinit();
     return 0;
 }

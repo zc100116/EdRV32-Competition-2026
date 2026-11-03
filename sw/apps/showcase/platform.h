@@ -33,6 +33,9 @@ uint32_t platform_keys(void);
 uint32_t platform_pressed(void);
 /* Latest input transport: 0 none, 1 UART, 2 ETH WIN2. */
 unsigned platform_input_source(void);
+uint64_t platform_input_tick(void);
+unsigned platform_input_sequence(void);
+void platform_input_received(unsigned source);
 struct virtual_input_state platform_virtual_input(void);
 uint32_t platform_frames(void);
 /* NES owns RND/DISP while GUI is paused; callbacks receive captured IRQ results.

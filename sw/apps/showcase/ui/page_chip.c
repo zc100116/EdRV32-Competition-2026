@@ -2,6 +2,7 @@
  * Rectangles and orthogonal connectors only; UI thread, LVGL tick clock.
  */
 #include "theme.h"
+#include "coremark.h"
 static lv_obj_t *score;
 static lv_obj_t *per_mhz;
 static lv_obj_t *progress;
@@ -20,8 +21,43 @@ static void module(lv_obj_t *p, const char *name, int x, int y, int w, int h,
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_center(label);
 }
+static void counters(lv_obj_t *p)
+{
+    ui_coremark_t d=ui_data_coremark();
+    char s[256];
+    ui_title(p,"CoreMark 性能计数器");
+    for(unsigned round=0;round<2;++round) {
+        lv_obj_t *card=ui_box(p,40+(int)round*612,104,588,376,PANEL);
+        lv_snprintf(s,sizeof(s),"第 %u 轮   mcycle %llu   minstret %llu",round+1,
+            (unsigned long long)d.cycles[round],(unsigned long long)d.instructions[round]);
+        ui_label(card,s,14,12,&sim_font_14,ACCENT);
+        for(unsigned slot=0;slot<8;++slot) {
+            unsigned event=ui_hpm_event(round,slot)-1;
+            lv_obj_t *name=ui_label(card,ui_hpm_names[event],14,47+(int)slot*39,
+                &sim_font_14,TEXT);
+            lv_obj_set_width(name,405);
+            lv_label_set_long_mode(name,LV_LABEL_LONG_WRAP);
+            lv_snprintf(s,sizeof(s),"%llu",(unsigned long long)d.events[event]);
+            ui_label(card,s,436,47+(int)slot*39,&sim_font_14,ACCENT);
+        }
+        uint64_t ipc=d.cycles[round] ? d.instructions[round]*1000/d.cycles[round] : 0;
+        lv_snprintf(s,sizeof(s),"IPC %llu.%03llu",(unsigned long long)(ipc/1000),
+            (unsigned long long)(ipc%1000));
+        ui_label(card,s,14,355,&sim_font_14,TEAL);
+    }
+    uint64_t ins=d.instructions[1];
+    unsigned ic=ins ? (unsigned)(d.events[12]*1000000/ins) : 0;
+    unsigned dc=ins ? (unsigned)(d.events[13]*1000000/ins) : 0;
+    lv_snprintf(s,sizeof(s),"每千条指令：I$ 缺失 %u.%03u    D$ 缺失 %u.%03u",
+        ic/1000,ic%1000,dc/1000,dc%1000);
+    ui_label(p,s,42,495,&sim_font_16,TEAL);
+    lv_obj_t *flags=ui_label(p,d.compiler_flags ? d.compiler_flags :
+        "g15-tuned · SRAM · 尚未运行",42,531,&sim_font_14,MUTED);
+    lv_obj_set_width(flags,1196); lv_label_set_long_mode(flags,LV_LABEL_LONG_WRAP);
+}
 void ui_page_chip(lv_obj_t *p)
 {
+    if(ui_tab==1) { counters(p); return; }
     ui_title(p, "芯片信息");
     lv_obj_t *diagram = ui_box(p, 40, 124, 710, 484, PANEL);
     ui_label(diagram, "clk_sys", 20, 14, &sim_font_14, MUTED);
@@ -81,9 +117,11 @@ void ui_page_chip(lv_obj_t *p)
     per_mhz = ui_label(card, "", 216, 70, &sim_font_16, MUTED);
     progress = ui_label(card, "", 24, 115, &sim_font_14, MUTED);
     ui_button(card, "运行 CoreMark", 24, 148, 210, 0);
+    ui_button(card, "性能计数器", 246, 148, 196, 1);
 }
 void ui_chip_update(void)
 {
+    if(ui_tab) return;
     ui_coremark_t d = ui_data_coremark();
     char s[100];
     if(d.score_tenths) lv_snprintf(s, sizeof(s), "%u.%u", d.score_tenths / 10,

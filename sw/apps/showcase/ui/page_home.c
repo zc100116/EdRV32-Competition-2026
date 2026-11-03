@@ -10,12 +10,9 @@ void ui_page_home(lv_obj_t *p)
     lv_obj_set_x(heading, 1240 - lv_obj_get_width(heading));
     const char *names[] = {"视觉识别", "图片识别", "图像处理", "图形引擎", "游戏",
         "系统监控", "芯片信息", "调试助手"};
-    const char *desc[] = {"发现镜头中的每一个目标", "上传图片，即刻了解结果",
-        "像素与几何的实时变换", "探索实时图形的表现力", "在经典像素世界中畅玩",
-        "洞察每一份计算与带宽", "认识这颗自主设计的芯片", "连接设备，掌握通信状态"};
     const char *icons[] = {LV_SYMBOL_VIDEO, LV_SYMBOL_IMAGE, LV_SYMBOL_TINT,
         LV_SYMBOL_EDIT, LV_SYMBOL_PLAY, LV_SYMBOL_BARS, LV_SYMBOL_SETTINGS, LV_SYMBOL_USB};
-    unsigned required[] = {UI_VIN | UI_NPU, UI_NPU | UI_ETH | UI_VIN, UI_VIN | UI_PIX | UI_GEO,
+    unsigned required[] = {UI_VIN | UI_NPU, UI_VIN | UI_NPU | UI_ETH, UI_VIN | UI_PIX | UI_GEO,
         UI_RND | UI_DISP, UI_RND | UI_DISP, 0, 0, 0};
     for(unsigned i = 0; i < 8; ++i) {
         bool enabled = (ui_data_hardware() & required[i]) == required[i];
@@ -26,8 +23,6 @@ void ui_page_home(lv_obj_t *p)
         uint32_t ink = enabled ? ACCENT : MUTED;
         ui_label(card, icons[i], 24, 22, &sim_font_40, ink);
         ui_label(card, names[i], 24, 89, &sim_font_28, enabled ? TEXT : MUTED);
-        ui_label(card, enabled ? desc[i] : "当前硬件无此模块", 24, 137,
-            &sim_font_16, MUTED);
-        ui_label(card, enabled ? "进入应用  >" : "暂不可用", 24, 177, &sim_font_14, ink);
+        if(!enabled) ui_label(card, "当前硬件无此模块", 24, 137, &sim_font_16, MUTED);
     }
 }

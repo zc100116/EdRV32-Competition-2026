@@ -8,6 +8,7 @@ enum { UI_PIX = 1, UI_GEO = 2, UI_VIN = 4, UI_NPU = 8, UI_ETH = 16,
        UI_RND = 32, UI_DISP = 64, UI_ALL = 127 };
 typedef struct {
     unsigned seconds, cpu, fps, idle, npu_busy, rnd_busy, clock_hz;
+    unsigned display_fps;
     unsigned task_max_us[3];
     unsigned task_cpu[3], ddr_read[7], ddr_write[7];
     bool link;
@@ -30,8 +31,12 @@ typedef struct {
 typedef struct { const char *name; unsigned ms_tenths, fps_tenths, software_tenths; }
     ui_benchmark_t;
 typedef struct { const char *name; const char *initial; const lv_image_dsc_t *cover; } ui_game_t;
-typedef struct { unsigned progress, score_tenths, per_mhz_thousandths; bool running; }
-    ui_coremark_t;
+typedef struct {
+    unsigned progress, score_tenths, per_mhz_thousandths;
+    bool running;
+    uint64_t cycles[2], instructions[2], events[16];
+    const char *compiler_flags;
+} ui_coremark_t;
 typedef struct {
     const char *uart_text, *uart_hex, *udp_text, *peer;
     unsigned baud, uart_rx, uart_tx, rx_packets, tx_packets, rx_bytes, tx_bytes;
@@ -71,6 +76,8 @@ const ui_benchmark_t *ui_data_benchmark(void);
 void ui_data_benchmark_start(void);
 /* Return the number of completed benchmark scenes. */
 unsigned ui_data_benchmark_progress(void);
+void ui_data_benchmark_stop(void);
+bool ui_data_benchmark_running(void);
 /* Return the build-time game names, initial characters and optional covers. */
 const ui_game_t *ui_data_games(unsigned *count);
 const lv_image_dsc_t *ui_data_game_name(unsigned index);

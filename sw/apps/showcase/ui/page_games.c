@@ -7,7 +7,7 @@ void ui_page_games(lv_obj_t *p)
     unsigned count;
     const ui_game_t *games = ui_data_games(&count);
     ui_title(p, "游戏");
-    ui_hint("← → 选择    Enter 确认    Esc 返回    游戏中按返回两次退出");
+    ui_hint("← → 选择    Enter 确认    Esc 返回    游戏中按返回退出");
     if(ui_game_open) {
         lv_obj_t *card = ui_box(p, 40, 132, 1200, 460, PANEL);
         const lv_image_dsc_t *name_image=ui_data_game_name(ui_mode);
@@ -19,7 +19,7 @@ void ui_page_games(lv_obj_t *p)
         } else ui_label(card, games[ui_mode].name, 32, 26, &sim_font_28, TEXT);
         ui_label(card, LV_SYMBOL_PLAY, 548, 146, &sim_font_40, ACCENT);
         ui_label(card, "游戏画面预览", 490, 220, &sim_font_28, MUTED);
-        ui_label(card, "按返回键两次回到游戏列表", 470, 290, &sim_font_20, MUTED);
+        ui_label(card, "按返回键回到游戏列表", 470, 290, &sim_font_20, MUTED);
         return;
     }
     lv_obj_t *grid = ui_box(p, 40, 130, 1200, 458, BG);
