@@ -13,6 +13,8 @@
 #include "uart.h"
 #include <string.h>
 static ui_system_t system_data;
+static char report_line[128];
+static unsigned report_position,report_length;
 static uint64_t report_time,previous_busy[3],previous_idle;
 static uint32_t previous_frames;
 static ui_coremark_t core;
@@ -46,6 +48,11 @@ ui_system_t ui_data_system(void)
 void showcase_cpu_report_init(void) { report_time=platform_ticks(); }
 void showcase_cpu_report(void)
 {
+    /* UART has a 16-byte FIFO: never wait for 115200-baud transmission in comm.step. */
+    unsigned budget=16;
+    while(budget-- && report_position<report_length &&
+          !(mmio_read32(EDRV32_UART0_BASE+UART_STATUS)&UART_STATUS_TX_FULL))
+        mmio_write32(EDRV32_UART0_BASE+UART_TXDATA,(uint8_t)report_line[report_position++]);
     uint64_t now=platform_ticks(),elapsed=now-report_time;
     if(elapsed<platform_clock_hz()) return;
     struct sched_task *tasks[]={&communication_task,&application_task,&gui_task};
@@ -56,15 +63,17 @@ void showcase_cpu_report(void)
     uint32_t frames=showcase_gui_frames();
     system_data.fps=(unsigned)((uint64_t)(frames-previous_frames)*platform_clock_hz()/elapsed);
     system_data.link=showcase_network_link()>0;
-    platform_puts("CPU%/max_us");
     for(unsigned i=0;i<3;++i) {
         system_data.task_cpu[i]=(unsigned)((tasks[i]->busy_ticks-previous_busy[i])*100/elapsed);
         system_data.task_max_us[i]=(unsigned)(tasks[i]->max_step_ticks*1000000/platform_clock_hz());
         previous_busy[i]=tasks[i]->busy_ticks;
-        platform_puts(" "); platform_put_u32(system_data.task_cpu[i]);
-        platform_puts("/"); platform_put_u32(system_data.task_max_us[i]);
     }
-    platform_puts("\r\n"); previous_frames=frames; previous_idle=idle; report_time=now;
+    report_length=(unsigned)lv_snprintf(report_line,sizeof(report_line),
+        "CPU%%/max_us %u/%u %u/%u %u/%u\r\n",
+        system_data.task_cpu[0],system_data.task_max_us[0],
+        system_data.task_cpu[1],system_data.task_max_us[1],
+        system_data.task_cpu[2],system_data.task_max_us[2]);
+    report_position=0; previous_frames=frames; previous_idle=idle; report_time=now;
 }
 void board_memory_sample(const struct mem_xbar_stats *m)
 {
