@@ -24,9 +24,10 @@
 #include <string.h>
 #include <stdio.h>
 #include "../../runtime.h"
+#include "../../lvgl/showcase_lvgl.h"
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
-       REF_GEO = 32 };
+       REF_NPU = 16, REF_GEO = 32 };
 enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
@@ -69,6 +70,10 @@ static struct {
     unsigned display_owned;
     uint32_t next_frame;
     uint64_t npu_start, upload_complete, post_ticks;
+    unsigned npu_busy, npu_complete, npu_input;
+    int npu_image;
+    uint32_t npu_frame;
+    uint64_t npu_vin, npu_done;
     struct vision_post post;
     yolo_detection detections[YOLO_MAX_DETECTIONS];
     int geo_source, geo_target;
@@ -91,7 +96,9 @@ static char image_name[257];
 static unsigned boxes = 1;
 static struct {
     uint64_t vin, npu_done, post_start, decode_end, sort_end, nms_end, cpu[3], handoff;
-    uint64_t sums[8], since, completed[6], handoff_vin;
+    uint64_t sums[10], since, completed[6], handoff_vin;
+    uint64_t job_npu_start, copy_ticks, last_start;
+    unsigned periods;
     uint32_t samples, gui_samples;
     bool await_gui, gui_taken, cancelled;
 } timing;
@@ -144,10 +151,20 @@ void vision_state(uint8_t payload[56])
     payload[52] = sessions[PAGE_IMAGE].data.image_status;
 }
 bool vision_process_applied(void) { return v.applied_revision == v.process_revision; }
+static void reference(int slot, unsigned add, unsigned remove);
 void vision_cancel(unsigned kind)
 {
     if (kind == 1) { v.model_pending = 0; return; }
     timing.cancelled = true;
+    /* After CH2, NPU/TX use only CH2 and the output snapshot. Release the
+     * cancelled upload surface so a new folder can immediately reserve it. */
+    if (v.page == PAGE_IMAGE && v.job >= JOB_NPU) {
+        if (v.ready == v.job_image) {
+            reference(v.ready, 0, REF_READY); v.ready = -1;
+        }
+        reference(v.job_image, 0, REF_JOB);
+        v.job_image = v.npu_image = -1;
+    }
     sessions[PAGE_IMAGE].upload = UPLOAD_EMPTY;
     if (sessions[PAGE_IMAGE].data.image_status == UI_IMAGE_RECEIVING ||
         sessions[PAGE_IMAGE].data.image_status == UI_IMAGE_DETECTING)
@@ -434,12 +451,18 @@ static void configure_capture(void)
     v.capture = 1;
     engine_control(ENGINE_VIN, EDRV32_VIN_CTRL_ENABLE_MASK);
 }
-static void start_inference(void)
+static void start_inference(unsigned input, int image, uint32_t frame, uint64_t vin)
 {
+    v.npu_input = input; v.npu_image = image; v.npu_frame = frame; v.npu_vin = vin;
+    v.npu_busy = 1;
     v.npu_start = platform_ticks();
+    if (timing.last_start) {
+        timing.sums[8] += v.npu_start - timing.last_start;
+        ++timing.periods;
+    }
+    timing.last_start = v.npu_start;
     engine_control(ENGINE_NPU, EDRV32_NPU_CTRL_ENABLE_MASK);
-    npu_start(VISION_INPUT_BASE + v.job_input * VISION_INPUT_SPACING, VISION_OUTPUT_BASE);
-    v.job = JOB_NPU;
+    npu_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING, VISION_OUTPUT_BASE);
 }
 static void camera_frame(unsigned channel)
 {
@@ -473,7 +496,6 @@ static void camera_frame(unsigned channel)
         return;
     }
     if (channel == 0) queue_image(slot);
-    if (v.job != JOB_IDLE || v.model_pending) return;
     if (channel == 0) {
         reference(v.pair_image, 0, REF_PAIR);
         v.pair_image = slot;
@@ -487,16 +509,35 @@ static void camera_frame(unsigned channel)
         v.input_busy |= 1u << slot;
         vin_slots_busy(2, v.input_busy);
     }
+}
+/* Latest matched VIN pair is retained while NPU and the previous post overlap. */
+static void camera_start(void)
+{
+    if (v.page != PAGE_CAMERA || v.state != PIPE_LIVE || v.npu_busy ||
+        !v.model_ready || v.model_pending) return;
     if (v.pair_image >= 0 && v.pair_input >= 0 && v.image_id == v.input_id) {
-        v.job_image = v.pair_image;
-        v.job_input = (unsigned)v.pair_input;
-        v.job_frame = v.image_id;
-        v.image_job = 0; timing.cancelled = false;
-        reference(v.job_image, REF_JOB, REF_PAIR);
+        reference(v.pair_image, REF_NPU, REF_PAIR);
+        start_inference((unsigned)v.pair_input, v.pair_image, v.image_id, v.image_tick);
         v.pair_image = v.pair_input = -1;
-        timing.vin = v.image_tick;
-        start_inference();
     }
+}
+/* P5c 10.2: one synchronous RND batch; the cooperative GUI cannot submit until
+ * this call returns, and its own run_batch obeys the same ownership rule. */
+static void copy_output(void)
+{
+    static _Alignas(64) struct rnd_command command;
+    struct rnd_common c = {.dst_base = VISION_POST_BASE, .dst_stride = 5040,
+        .dst_fmt = RND_ARGB8888, .src_fmt = RND_ARGB8888,
+        .clip = {0, 0, 1259, 143}, .rect = {0, 0, 1259, 143}};
+    struct rnd_source source = {VISION_OUTPUT_BASE, 5040, 0, 0};
+    rnd_copy(&command, &c, &source);
+    struct rnd_range target = {(void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_POST_BASE),
+                               VISION_OUTPUT_BYTES};
+    struct rnd_range input = {uncached(VISION_OUTPUT_BASE), VISION_OUTPUT_BYTES};
+    struct rnd_batch batch = {&command, 1, &input, 1, &target, 1};
+    uint64_t begin = platform_ticks();
+    showcase_rnd_run(&batch);
+    timing.copy_ticks = platform_ticks() - begin;
 }
 
 static void publish_result(void)
@@ -509,7 +550,8 @@ static void publish_result(void)
             d->x0,d->y0,d->x1-d->x0,d->y1-d->y0,d->class_id};
     }
     timing.handoff = platform_ticks();
-    timing.completed[0] = timing.npu_done - v.npu_start;
+    timing.completed[0] = timing.npu_done - timing.job_npu_start;
+    timing.sums[9] += timing.copy_ticks;
     timing.completed[1] = timing.post_start - timing.npu_done;
     for (unsigned i = 0; i < 3; ++i) timing.completed[2+i] = timing.cpu[i];
     timing.completed[5] = timing.nms_end - timing.post_start;
@@ -524,8 +566,10 @@ static void finish_job(void)
 {
     reference(v.job_image, 0, REF_JOB);
     v.job_image = -1;
-    v.input_busy &= ~(1u << v.job_input);
-    if (v.capture) vin_slots_busy(2, v.input_busy);
+    if (v.image_job) {
+        v.input_busy &= ~(1u << v.job_input);
+        if (v.capture) vin_slots_busy(2, v.input_busy);
+    }
     v.job = JOB_IDLE;
 }
 uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)
@@ -590,7 +634,7 @@ static void send_results(void)
                             v.detections, v.post.kept, v.job_frame, v.job_request);
     eth_tx_descriptor_pack(&tx[0], VISION_INPUT_BASE + v.job_input * VISION_INPUT_SPACING,
                            VISION_INPUT_BYTES, 0, 0, 0);
-    eth_tx_descriptor_pack(&tx[1], VISION_OUTPUT_BASE, VISION_OUTPUT_BYTES, 1, 0, 0);
+    eth_tx_descriptor_pack(&tx[1], VISION_POST_BASE, VISION_OUTPUT_BYTES, 1, 0, 0);
     eth_tx_descriptor_pack(&tx[2], VISION_TX_DETECTIONS, bytes, 2, 1, 0);
     v.tx_done = engine_poll(ENGINE_ETH).done_count;
     if (board_eth_send(VISION_TX_DESCRIPTORS, 3)) v.job = JOB_TX;
@@ -609,9 +653,10 @@ static void timing_step(void)
         ++timing.gui_samples; timing.await_gui = false;
     }
     if (now - timing.since < platform_clock_hz()) return;
-    unsigned a[8] = {0};
-    for (unsigned i = 0; i < 8; ++i) {
-        unsigned count = i < 6 ? timing.samples : timing.gui_samples;
+    unsigned a[10] = {0};
+    for (unsigned i = 0; i < 10; ++i) {
+        unsigned count = i == 8 ? timing.periods :
+            (i == 6 || i == 7) ? timing.gui_samples : timing.samples;
         if (count) a[i] = tenths(timing.sums[i] / count);
     }
     ui_vision_t *data = &sessions[v.page].data;
@@ -623,13 +668,15 @@ static void timing_step(void)
         ui_system_t sys = ui_data_system();
         snprintf(report, sizeof report,
             "vision fps=%u npu=%u.%u wait=%u.%u decode=%u.%u sort=%u.%u nms=%u.%u "
-            "post_span=%u.%u gui=%u.%u e2e=%u.%u cpu_comm=%u%% cpu_app=%u%% cpu_gui=%u%%\r\n",
+            "post_span=%u.%u gui=%u.%u e2e=%u.%u period=%u.%u copy=%u.%u "
+            "cpu_comm=%u%% cpu_app=%u%% cpu_gui=%u%%\r\n",
             data->fps, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
             a[3]/10,a[3]%10,a[4]/10,a[4]%10,a[5]/10,a[5]%10,a[6]/10,a[6]%10,
-            a[7]/10,a[7]%10,sys.task_cpu[0],sys.task_cpu[1],sys.task_cpu[2]);
+            a[7]/10,a[7]%10,a[8]/10,a[8]%10,a[9]/10,a[9]%10,
+            sys.task_cpu[0],sys.task_cpu[1],sys.task_cpu[2]);
     } else report[0] = 0;
     memset(timing.sums, 0, sizeof timing.sums);
-    timing.samples = timing.gui_samples = 0; timing.since = now;
+    timing.samples = timing.gui_samples = timing.periods = 0; timing.since = now;
 }
 int vision_service(void)
 {
@@ -668,15 +715,32 @@ int vision_service(void)
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
     }
-    if ((flags[ENGINE_NPU] & EDRV32_NPU_IRQ_STAT_DONE_MASK) && v.job == JOB_NPU) {
-        timing.npu_done = npu_done_tick;
+    if (flags[ENGINE_NPU] & EDRV32_NPU_IRQ_STAT_DONE_MASK) {
+        v.npu_complete = 1; v.npu_done = npu_done_tick;
+    }
+    if (v.npu_complete && (v.job == JOB_IDLE || v.job == JOB_NPU)) {
+        timing.npu_done = v.npu_done;
+        timing.job_npu_start = v.npu_start;
+        timing.vin = v.npu_vin;
+        v.job_input = v.npu_input; v.job_frame = v.npu_frame;
+        v.job_image = v.npu_image;
+        v.image_job = v.page == PAGE_IMAGE;
+        if (!v.image_job) {
+            reference(v.job_image, REF_JOB, REF_NPU);
+        }
+        copy_output();
+        v.npu_busy = v.npu_complete = 0;
+        if (!v.image_job) {
+            v.input_busy &= ~(1u << v.npu_input);
+            if (v.capture) vin_slots_busy(2, v.input_busy);
+        }
+        v.job = JOB_POST;
+        camera_start();
         timing.post_start = platform_ticks();
         memset(timing.cpu, 0, sizeof timing.cpu);
-        engine_dma_invalidate(EDRV32_DDR_BASE + VISION_OUTPUT_BASE, VISION_OUTPUT_BYTES);
-        vision_post_begin(&v.post, (void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_OUTPUT_BASE),
+        vision_post_begin(&v.post, (void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_POST_BASE),
                           (void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_WORKSPACE), v.detections);
         v.post_ticks = 0;
-        v.job = JOB_POST;
     }
     if (v.job == JOB_TX && engine_poll(ENGINE_ETH).done_count - v.tx_done >= 3) {
         sessions[PAGE_IMAGE].data.roundtrip_ms =
@@ -704,7 +768,8 @@ int vision_service(void)
         timing.vin = vin_done_tick[2];
         v.ch2_ticks = timing.vin - v.ch2_start;
         vin_channel_enable(2, 0);
-        start_inference();
+        start_inference(v.job_input, v.job_image, v.job_frame, timing.vin);
+        v.job = JOB_NPU;
     } else if (v.job == JOB_POST) {
         uint64_t start = platform_ticks();
         unsigned phase = v.post.phase == 0 ? 0 : v.post.phase < 3 ? 1 : 2;
@@ -726,7 +791,7 @@ int vision_service(void)
         if (timing.cancelled) finish_job(); else send_results();
     }
     if ((v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
-         v.state == PIPE_STOPPING) && v.job == JOB_IDLE && v.geo_source < 0) {
+         v.state == PIPE_STOPPING) && v.job == JOB_IDLE && !v.npu_busy && v.geo_source < 0) {
         if (v.capture && !(engine_poll(ENGINE_VIN).status & EDRV32_VIN_STATUS_IDLE_MASK))
             return 1;
         if (v.page == PAGE_PROCESS &&
@@ -744,7 +809,7 @@ int vision_service(void)
         } else if (v.state == PIPE_PAUSING) v.state = PIPE_FROZEN;
         else v.state = PIPE_STARTING;
     }
-    if (v.job == JOB_IDLE && v.geo_source < 0 && v.model_pending) {
+    if (v.job == JOB_IDLE && !v.npu_busy && v.geo_source < 0 && v.model_pending) {
         model_step(); return 1;
     }
     if (v.state == PIPE_STARTING) {
@@ -771,10 +836,11 @@ int vision_service(void)
         vin_memory_start(v.receive_base, VISION_STRIDE, VISION_WIDTH, VISION_HEIGHT);
         v.job = JOB_CH2;
     }
+    camera_start();
     timing_step();
     return v.state == PIPE_STARTING || v.state == PIPE_STOPPING ||
         v.state == PIPE_PAUSING || v.state == PIPE_CONFIGURE || v.model_pending ||
-        v.job != JOB_IDLE || v.geo_source >= 0;
+        v.job != JOB_IDLE || v.npu_busy || v.geo_source >= 0;
 }
 
 static void step(void)

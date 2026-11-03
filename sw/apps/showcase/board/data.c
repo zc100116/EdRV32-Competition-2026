@@ -54,6 +54,7 @@ ui_system_t ui_data_system(void)
     return system_data;
 }
 void showcase_cpu_report_init(void) { report_time=platform_ticks(); }
+extern unsigned board_eth_rering;
 void showcase_cpu_report(void)
 {
     uint64_t now=platform_ticks(),elapsed=now-report_time;
@@ -88,12 +89,12 @@ void showcase_cpu_report(void)
     unsigned eth_max,eth_avg;
     board_nes_latency(2,&eth_max,&eth_avg);
     report_length=(unsigned)lv_snprintf(report_line,sizeof(report_line),
-        "CPU%%/max_us %u/%u %u/%u %u/%u overlay_cpu=%u.%02u%% max_us=%u\r\n"
+        "CPU%%/max_us %u/%u %u/%u %u/%u overlay_cpu=%u.%02u%% max_us=%u rering=%u\r\n"
         "NES input ETH max_ms=%u.%03u avg_ms=%u.%03u\r\n",
         system_data.task_cpu[0],system_data.task_max_us[0],
         system_data.task_cpu[1],system_data.task_max_us[1],
         system_data.task_cpu[2],system_data.task_max_us[2],overlay_percent/100,overlay_percent%100,
-        board_overlay_max_us(),
+        board_overlay_max_us(),board_eth_rering,
         eth_max/1000,eth_max%1000,eth_avg/1000,eth_avg%1000);
     const char *vision = vision_report();
     unsigned length = (unsigned)strlen(vision);

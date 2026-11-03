@@ -44,6 +44,7 @@ class ShowcaseTool:
         self.receive_error = None
         self.seq = 0
         self.pending = {}
+        self.expired = set()
         self.latest = {}
         self.cancelled = False
         self.echo = dict(count=0, received=0, lost=0, averageMs=None)
@@ -66,6 +67,10 @@ class ShowcaseTool:
         if message_type == ACK:
             command_type, phase, error = struct.unpack('<HBB', payload)
             with self.condition:
+                if (command_type, seq) in self.expired:
+                    if phase in (2, 3):
+                        self.expired.remove((command_type, seq))
+                    return
                 command = self.pending[command_type]
                 if command['seq'] != seq:
                     raise ValueError(f'ACK sequence {seq}, expected {command["seq"]}')
@@ -109,7 +114,11 @@ class ShowcaseTool:
     def command_wait(self, command_type, payload, destination):
         command = self.command(command_type, payload, destination)
         if not command['event'].wait(RESPONSE_TIMEOUT):
-            raise TimeoutError('命令应答超时')
+            with self.condition:
+                if command['phase'] not in (2, 3):
+                    del self.pending[command_type]
+                    self.expired.add((command_type, command['seq']))
+                    raise TimeoutError('命令应答超时')
         if command['phase'] == 3:
             raise ValueError(f'命令失败：{STATUS[command["error"]]}')
 

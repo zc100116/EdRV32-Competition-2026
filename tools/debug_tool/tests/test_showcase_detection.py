@@ -147,7 +147,10 @@ class ShowcaseDetectionTest(unittest.TestCase):
             self.done()
             next_image.assert_not_called()
         self.console._display()
-        self.assertEqual(self.console.view.boxes, boxes)
+        from tools.debug_tool.core.yolo import original_boxes
+        image = self.console.static_image
+        self.assertEqual(self.console.view.boxes,
+                         original_boxes(boxes, image.width(), image.height()))
         self.assertIn('回传完整', self.console.capture_status.text())
         self.assertIsNone(self.eth.status()['tx']['error'])
         self.assertGreaterEqual(self.engine.yolo.timings[0]['seconds'], 3)

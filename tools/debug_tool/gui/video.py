@@ -45,10 +45,10 @@ class DetectionView(QWidget):
         painter.setPen(QPen(QColor('#45f5b6'), 2))
         labels = []
         for x0, y0, x1, y1, class_id, score in self.boxes:
-            x = left + x0 * size.width() / 1280
-            y = top + y0 * size.height() / 720
-            painter.drawRect(QRectF(x, y, (x1 - x0) * size.width() / 1280,
-                                   (y1 - y0) * size.height() / 720))
+            x = left + x0 * size.width() / self.image.width()
+            y = top + y0 * size.height() / self.image.height()
+            painter.drawRect(QRectF(x, y, (x1 - x0) * size.width() / self.image.width(),
+                                   (y1 - y0) * size.height() / self.image.height()))
             text = detection_label(class_id, score)
             width = painter.fontMetrics().horizontalAdvance(text) + 10
             height = painter.fontMetrics().height() + 6

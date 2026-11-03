@@ -94,5 +94,42 @@ class YoloTest(unittest.TestCase):
             self.assertTrue(image.save(str(path)))
             data = image_rgb565(path)
         self.assertEqual(len(data), 1280 * 720 * 2)
-        self.assertEqual(data[:2], bytes.fromhex('00f8'))
-        self.assertEqual(data[-2:], bytes.fromhex('1f00'))
+        self.assertEqual(data[:2], b'\0\0')
+        self.assertEqual(data[(40*1280)*2:(40*1280)*2+2], bytes.fromhex('00f8'))
+        self.assertEqual(data[(679*1280+1279)*2:(679*1280+1280)*2], bytes.fromhex('1f00'))
+        self.assertEqual(data[-2:], b'\0\0')
+
+
+class LetterboxTest(unittest.TestCase):
+    def test_landscape_portrait_and_16_9_pixels_and_inverse_boxes(self):
+        from PySide6.QtGui import QImage
+        from tools.debug_tool.core.yolo import image_rgb565, letterbox_geometry, original_boxes
+        for width, height, expected in ((1000, 500, (1280, 640, 0, 40)),
+                                        (400, 800, (360, 720, 460, 0)),
+                                        (1600, 900, (1280, 720, 0, 0))):
+            with self.subTest(size=(width, height)), TemporaryDirectory() as directory:
+                self.assertEqual(letterbox_geometry(width, height), expected)
+                image = QImage(width, height, QImage.Format_RGB888)
+                image.fill('red')
+                path = Path(directory) / 'input.png'
+                self.assertTrue(image.save(str(path)))
+                data = image_rgb565(path)
+                self.assertEqual(len(data), 1280 * 720 * 2)
+                scaled_w, scaled_h, left, top = expected
+                for x, y in ((0, 0), (1279, 719), (left, top),
+                             (left + scaled_w - 1, top + scaled_h - 1)):
+                    pixel = data[(y * 1280 + x)*2:(y * 1280 + x)*2+2]
+                    inside = left <= x < left + scaled_w and top <= y < top + scaled_h
+                    self.assertEqual(pixel, bytes.fromhex('00f8') if inside else b'\0\0')
+                boxes = ((0, 0, 1280, 720, 3, 900),
+                         (left + scaled_w/4, top + scaled_h/4,
+                          left + scaled_w*3/4, top + scaled_h*3/4, 1, 800))
+                self.assertEqual(original_boxes(boxes, width, height),
+                                 ((0, 0, width, height, 3, 900),
+                                  (width/4, height/4, width*3/4, height*3/4, 1, 800)))
+                if left:
+                    self.assertEqual(original_boxes(((0, 0, left, 720, 0, 1),),
+                                                    width, height), ())
+                if top:
+                    self.assertEqual(original_boxes(((0, 0, 1280, top, 0, 1),),
+                                                    width, height), ())

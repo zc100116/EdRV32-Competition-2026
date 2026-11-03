@@ -51,7 +51,7 @@ class ImageDetectionTest(unittest.TestCase):
             # Legal nearest-neighbor descriptor; input bytes affect the first output cells.
             words = [0] * 16
             words[0] = 2 | (2 << 12) | (3 << 14)
-            words[1] = 12 * 640 * 4  # Skip the CH2 letterbox's top padding.
+            words[1] = (12 + 180) * 640 * 4 + 320 * 4  # Center stays inside either letterbox.
             words[3] = 245760  # D0 class logits: preserve a nonempty detection return.
             words[2], words[4] = 32, 64
             words[8], words[9], words[10] = 0x10001, 0x20002, 1
