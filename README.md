@@ -10,6 +10,10 @@
 
 目标 FPGA 为紫光同创 Logos-2 PG2L200H（盘古 676 系列），外设包括 OV5640 双目摄像头、HDMI、DDR3 和 UART；开发工具为 RISC-V GCC 工具链和 Pango Design Suite（PDS）。
 
+## 当前版本
+
+正式版本 `m1-competition-release`（2026-11-03）：完整 SoC 图像系统，CPU 125 MHz，已上板运行。内容、实现结果和复现方法见 [docs/reports/2026-11-03-release-competition.md](docs/reports/2026-11-03-release-competition.md)。
+
 ## 开发入口
 
 开发规则见 [CLAUDE.md](CLAUDE.md)，系统规格见 [docs/spec/edrv32-soc-spec.md](docs/spec/edrv32-soc-spec.md)，进度见 [docs/plan/roadmap.md](docs/plan/roadmap.md)。旧工程位于 `legacy/`，仅供只读参考。
