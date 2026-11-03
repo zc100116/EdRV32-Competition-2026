@@ -5,7 +5,7 @@
 static lv_obj_t *progress;
 void ui_page_graphics(lv_obj_t *p)
 {
-    ui_title(p, "图形引擎", "高效绘制，让每一帧更从容");
+    ui_title(p, "图形引擎");
     const char *tabs[] = {"性能测试", "硬件 / 软件对比", "显示图层"};
     for(unsigned i = 0; i < 3; ++i) {
         ui_button(p, tabs[i], 40 + (int)i * 240, 119, 220, i);

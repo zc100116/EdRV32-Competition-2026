@@ -1,8 +1,7 @@
-/* page_vision.c — showcase design §4.3; 960x540 camera and detections.
- * Persistent image and labels; 1 Hz boxes, 2 Hz statistics on LVGL clock.
+/* page_vision.c — showcase design 4.6.1; full-screen L0 with L1 detection objects.
+ * Only result and statistic changes invalidate L1; video frames bypass LVGL.
  */
 #include "theme.h"
-static lv_obj_t *picture;
 static lv_obj_t *boxes[5];
 static lv_obj_t *tags[5];
 static lv_obj_t *metrics[4];
@@ -13,19 +12,15 @@ static lv_obj_t *batch_status;
 static lv_obj_t *pause_label;
 static lv_obj_t *box_label;
 static lv_obj_t *filter_label;
-static const lv_image_dsc_t *last_image;
 void ui_vision_build(lv_obj_t *p, bool batch)
 {
-    ui_vision_t d = ui_data_vision(batch);
+    ui_video_surface(p);
     ui_label(p, batch ? "图片识别" : "实时视觉", 24, 12, &sim_font_28, TEXT);
-    ui_label(p, "YOLO · 目标检测", 204, 22, &sim_font_14, MUTED);
-    filter_label=ui_label(p,"",360,22,&sim_font_14,MUTED);
-    lv_obj_t *frame = ui_box(p, 16, 56, 960, 540, BG);
+    filter_label=ui_label(p,"",250,22,&sim_font_14,MUTED);
+    lv_obj_t *frame = ui_box(lv_screen_active(), 0, 0, 1280, 720, BG);
+    lv_obj_set_style_bg_opa(frame, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(frame, 0, 0);
-    lv_obj_set_style_radius(frame, 0, 0);
-    ui_picture(frame, d.image, 0, 0, 960, 540);
-    picture = lv_obj_get_child(frame, -1);
-    last_image = d.image;
+    lv_obj_move_to_index(frame, 0);
     for(unsigned i = 0; i < 5; ++i) {
         boxes[i] = ui_box(frame, 0, 0, 1, 1, PANEL);
         lv_obj_set_style_bg_opa(boxes[i], LV_OPA_TRANSP, 0);
@@ -37,6 +32,7 @@ void ui_vision_build(lv_obj_t *p, bool batch)
         lv_obj_set_style_bg_opa(tags[i], LV_OPA_COVER, 0);
     }
     lv_obj_t *side = ui_box(p, 992, 56, 272, 540, PANEL);
+    lv_obj_set_style_bg_opa(side, LV_OPA_80, 0);
     if(batch) {
         ui_label(side, "目标列表", 20, 18, &sim_font_20, TEXT);
         for(unsigned i = 0; i < 5; ++i) {
@@ -74,7 +70,6 @@ void ui_vision_frame(bool batch)
 {
     ui_vision_t d=ui_data_vision(batch);
     char s[200];
-    if(d.image != last_image) { lv_image_set_src(picture, d.image); last_image = d.image; }
     for(unsigned i = 0; i < 5; ++i) {
         bool show = i < d.count && d.boxes && !d.waiting;
         lv_obj_set_hidden(boxes[i], !show);
@@ -85,7 +80,7 @@ void ui_vision_frame(bool batch)
             lv_obj_set_size(boxes[i], t.width, t.height);
             lv_snprintf(s, sizeof(s), "%s %u%%", t.category, t.confidence);
             ui_text(tags[i], s);
-            lv_obj_set_pos(tags[i], t.x, t.y - 22);
+            lv_obj_set_pos(tags[i], t.x, t.y < 22 ? 0 : t.y - 22);
         }
     }
 }

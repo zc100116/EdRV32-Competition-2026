@@ -12,7 +12,7 @@ static unsigned last_second;
 static lv_obj_t *step_time;
 void ui_page_monitor(lv_obj_t *p)
 {
-    ui_title(p, "系统监控", "实时计算与数据流，一目了然");
+    ui_title(p, "系统监控");
     lv_obj_t *cpu = ui_box(p, 40, 123, 788, 235, PANEL);
     ui_label(cpu, "CPU 任务占用", 22, 17, &sim_font_20, TEXT);
     const char *legend[] = {"通信服务", "当前应用", "图形界面"};

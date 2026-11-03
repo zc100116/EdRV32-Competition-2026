@@ -10,7 +10,7 @@ static lv_obj_t *network;
 static lv_obj_t *echo;
 void ui_page_debug(lv_obj_t *p)
 {
-    ui_title(p, "调试助手", "连接、观察与验证，让通信状态清晰可见");
+    ui_title(p, "调试助手");
     ui_button(p, "串口", 40, 118, 190, 0);
     ui_button(p, "网口", 250, 118, 190, 1);
     lv_obj_t *panel = ui_box(p, 40, 178, 816, 422, PANEL);

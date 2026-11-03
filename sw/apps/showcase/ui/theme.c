@@ -65,8 +65,22 @@ void ui_picture(lv_obj_t *p, const lv_image_dsc_t *src, int x, int y, int w, int
     lv_obj_set_size(o, w, h);
     lv_image_set_inner_align(o, LV_IMAGE_ALIGN_STRETCH);
 }
-void ui_title(lv_obj_t *p, const char *title, const char *subtitle)
+void ui_title(lv_obj_t *p, const char *title)
 {
     ui_label(p, title, 40, 20, &sim_font_40, TEXT);
-    ui_label(p, subtitle, 42, 76, &sim_font_16, MUTED);
+}
+
+void ui_video_surface(lv_obj_t *p)
+{
+    lv_obj_t *screen = lv_obj_get_parent(p);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_bg_opa(p, LV_OPA_TRANSP, 0);
+    lv_obj_t *header = ui_box(p, 0, 0, 1280, 48, PANEL);
+    lv_obj_set_style_bg_opa(header, LV_OPA_80, 0);
+    lv_obj_set_style_radius(header, 0, 0);
+    lv_obj_set_style_border_width(header, 0, 0);
+    for (unsigned i = 0; i < lv_obj_get_child_count(screen); ++i) {
+        lv_obj_t *child = lv_obj_get_child(screen, (int)i);
+        if (child != p) lv_obj_set_style_bg_opa(child, LV_OPA_80, 0);
+    }
 }

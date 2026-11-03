@@ -22,7 +22,7 @@ static void module(lv_obj_t *p, const char *name, int x, int y, int w, int h,
 }
 void ui_page_chip(lv_obj_t *p)
 {
-    ui_title(p, "芯片信息", "自主设计的 RISC-V 边缘视觉系统");
+    ui_title(p, "芯片信息");
     lv_obj_t *diagram = ui_box(p, 40, 124, 710, 484, PANEL);
     ui_label(diagram, "clk_sys", 20, 14, &sim_font_14, MUTED);
     wire(diagram, 310, 68, 2, 18);

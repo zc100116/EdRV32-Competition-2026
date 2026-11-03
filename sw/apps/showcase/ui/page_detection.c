@@ -20,7 +20,7 @@ static void update(void)
 }
 void ui_page_detection_settings(lv_obj_t *p)
 {
-    ui_title(p,"检测设置","仅过滤页面显示，PC 仍收到完整识别结果");
+    ui_title(p, "检测设置");
     threshold=ui_label(p,"",40,126,&sim_font_20,TEXT);
     ui_button(p,"−",284,118,64,0);
     ui_button(p,"+",364,118,64,1);

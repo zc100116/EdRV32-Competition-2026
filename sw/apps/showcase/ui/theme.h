@@ -27,7 +27,9 @@ lv_obj_t *ui_label(lv_obj_t *p, const char *s, int x, int y,
 void ui_text(lv_obj_t *label, const char *text);
 void ui_bar(lv_obj_t *p, int x, int y, int w, int value, uint32_t color);
 void ui_picture(lv_obj_t *p, const lv_image_dsc_t *src, int x, int y, int w, int h);
-void ui_title(lv_obj_t *p, const char *title, const char *subtitle);
+void ui_title(lv_obj_t *p, const char *title);
+void ui_video_surface(lv_obj_t *p);
+void ui_process_action(unsigned action);
 void ui_start(void);
 void ui_suspend(bool paused);
 void ui_open(unsigned page);
