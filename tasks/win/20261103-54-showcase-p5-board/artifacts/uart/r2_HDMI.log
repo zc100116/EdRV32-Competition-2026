@@ -1,0 +1,194 @@
+[1793710918005] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[1793710918013] [rx] Input error: type 1-4 then Enter
+[1793710918013] [sys] Input error: type 1-4 then Enter
+[1793710918013] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[1793710921136] [rx] ETH link: up
+[1793710921136] [rx] ETH load ready 192.168.1.10:5000
+[1793710921589] [sys] 等待网卡 以太网 就绪 … 用时 0.5 s
+[1793710921720] [rx] Load bytes: 12780448 segments: 5
+[1793710921720] [rx] Load result: PASS
+[1793710921720] [rx] Run: 0x90000000
+[1793710922591] [rx] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[1793710922591] [rx] Showcase: EdRV32 showcase v2
+[1793710922648] [rx] ETH peer IP: 0xc0a80102
+[1793710922658] [rx] ETH peer port: 64226
+[1793710922668] [rx] showcase first frame
+[1793710923118] [rx] CPU%/max_us 2/1164 0/121 5/46679 overlay_cpu=0.00% max_us=0
+[1793710923139] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710924119] [rx] CPU%/max_us 2/1174 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710924140] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710925120] [rx] CPU%/max_us 2/1210 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710925141] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710926136] [rx] CPU%/max_us 2/1211 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710926156] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710927145] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710927165] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710928156] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710928179] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710929167] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710929187] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710930179] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710930200] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710931188] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710931208] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710932205] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710932219] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710933209] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710933230] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710934219] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710934240] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710935228] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710935249] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710936240] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710936260] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710937248] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710937269] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710938259] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710938280] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710939270] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710939290] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710940278] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710940300] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710941290] [rx] CPU%/max_us 2/1255 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710941310] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710942299] [rx] CPU%/max_us 2/1255 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710942319] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710943309] [rx] CPU%/max_us 2/1263 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710943329] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710944319] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710944339] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710945330] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710945350] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710946341] [rx] CPU%/max_us 2/1263 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710946362] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710947350] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710947371] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710948359] [rx] CPU%/max_us 2/1263 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710948398] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710949389] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710949410] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710950389] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710950421] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710951395] [rx] CPU%/max_us 2/1263 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710951419] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710952417] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710952440] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710953419] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710953439] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710954436] [rx] CPU%/max_us 2/1263 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710954444] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710955439] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710955464] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710956444] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710956466] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710957459] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710957474] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710958464] [rx] CPU%/max_us 2/1263 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710958483] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710959472] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710959492] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710960481] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710960501] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710961490] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710961510] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710962501] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710962522] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710963512] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710963532] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710964520] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710964542] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710965532] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710965553] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710966543] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710966563] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710967552] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710967572] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710968564] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710968584] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710969573] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710969593] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710970587] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710970607] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710971597] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710971618] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710972606] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710972627] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710973616] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710973637] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710974628] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710974648] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710975636] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710975657] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710976648] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710976669] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710977659] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710977680] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710978668] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710978689] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710979679] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710979699] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710980688] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710980709] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710981700] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710981721] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710982711] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710982732] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710983722] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710983743] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710984732] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710984753] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710985741] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710985762] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710986750] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710986770] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710987759] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710987779] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710988768] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710988789] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710989779] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710989800] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710990791] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710990811] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710991799] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710991820] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710992808] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710992829] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710993819] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710993839] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710994828] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710994848] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710995838] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710995858] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710996847] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710996868] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710997856] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793710997877] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710998871] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710998892] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793710999887] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793710999909] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711000907] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793711000908] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711001913] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793711001918] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711002916] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793711002940] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711003916] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793711003943] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711004939] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793711004951] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711005952] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793711005974] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711006959] [rx] CPU%/max_us 2/1290 0/121 1/46679 overlay_cpu=0.00% max_us=0
+[1793711006969] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711007962] [rx] CPU%/max_us 2/1290 0/121 0/46679 overlay_cpu=0.00% max_us=0
+[1793711007978] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711008762] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[1793711008780] [rx] ETH peer IP: 0xc0a80102
+[1793711008789] [rx] ETH peer port: 6000
+[1793711009017] [rx] CPU%/max_us 2/1290 0/121 17/107040 overlay_cpu=0.00% max_us=0
+[1793711009046] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711010029] [rx] CPU%/max_us 2/1290 0/121 1/107040 overlay_cpu=0.00% max_us=0
+[1793711010050] [rx] NES input ETH max_ms=0.000 avg_ms=0.000
+[1793711011045] [rx] CPU%/max_us 2/1290 0/121 1/107040 overlay_cpu=0.00% max_us=0
+[1793711011074] [rx] NES input ETH max_ms=0.000 avg_ms=0.000

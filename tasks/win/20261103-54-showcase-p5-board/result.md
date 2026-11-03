@@ -1,3 +1,9 @@
+# 卡54结果索引
+
+第二轮已结束，完整结果见 [r2_result.md](r2_result.md)，用户异常反馈见 [r2_feedback.md](r2_feedback.md)。第二轮日志前缀r2_，第一轮文件保留。
+
+---
+
 # 20261103-54-showcase-p5-board 阶段结果
 
 | 项 | 内容 |

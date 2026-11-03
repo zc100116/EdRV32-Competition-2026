@@ -1,0 +1,32 @@
+{
+  "tx": {
+    "active": false,
+    "sent": 0,
+    "total": 1843200,
+    "packets": 0,
+    "error": "同类命令正在等待设备完成",
+    "path": "G:\\codex_project\\EdRV32-test-images\\coco-val-160\\images\\000000003156.jpg",
+    "index": null,
+    "phase": "失败"
+  },
+  "rx": {
+    "active": true,
+    "localIp": "192.168.1.2",
+    "localPort": 6000,
+    "socketBufferBytes": 67108864,
+    "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+    "packets": 0,
+    "bytes": 0,
+    "notifyCount": 0,
+    "lastNotify": false,
+    "files": {},
+    "error": null,
+    "receiveCpuSeconds": 0.0
+  },
+  "echo": {
+    "count": 0,
+    "received": 0,
+    "lost": 0,
+    "averageMs": null
+  }
+}

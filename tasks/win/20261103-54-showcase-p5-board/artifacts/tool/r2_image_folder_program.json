@@ -1,0 +1,11 @@
+{
+  "active": false,
+  "phase": "done",
+  "path": "G:/codex_project/EdRV32-Competition-2026/tasks/win/20261103-54-showcase-p5-board/src/showcase-p5.elf",
+  "sent": 12850360,
+  "total": 12850360,
+  "bios": false,
+  "programmedBytes": 12780448,
+  "result": "Run: 0x90000000",
+  "error": null
+}

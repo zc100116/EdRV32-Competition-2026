@@ -1,0 +1,1197 @@
+[2026-11-03T21:05:16.069+08:00] [SYS] connected COM7 @ 115200 8N1
+[2026-11-03T21:05:17.968+08:00] [RX] 
+[2026-11-03T21:05:17.968+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:05:17.968+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:05:17.968+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:05:17.968+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:05:17.968+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:05:17.968+08:00] [RX] 
+[2026-11-03T21:05:17.968+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:05:17.968+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:05:17.968+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:05:17.968+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:05:17.968+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:05:17.968+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:05:17.968+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:05:17.968+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:05:17.968+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:05:17.968+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:05:18.072+08:00] [RX] BIOS: EdRV32
+[2026-11-03T21:05:18.072+08:00] [RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[2026-11-03T21:05:39.367+08:00] [SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[2026-11-03T21:05:39.374+08:00] [RX] Input error: type 1-4 then Enter
+[2026-11-03T21:05:39.374+08:00] [SYS] Input error: type 1-4 then Enter
+[2026-11-03T21:05:39.374+08:00] [RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[2026-11-03T21:05:42.546+08:00] [RX] ETH link: up
+[2026-11-03T21:05:42.546+08:00] [RX] ETH load ready 192.168.1.10:5000
+[2026-11-03T21:05:42.939+08:00] [SYS] 等待网卡 以太网 就绪 … 用时 0.4 s
+[2026-11-03T21:05:43.071+08:00] [RX] Load bytes: 12780448 segments: 5
+[2026-11-03T21:05:43.071+08:00] [RX] Load result: PASS
+[2026-11-03T21:05:43.071+08:00] [RX] Run: 0x90000000
+[2026-11-03T21:05:43.941+08:00] [RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[2026-11-03T21:05:43.941+08:00] [RX] Showcase: EdRV32 showcase v2
+[2026-11-03T21:05:44.000+08:00] [RX] ETH peer IP: 0xc0a80102
+[2026-11-03T21:05:44.010+08:00] [RX] ETH peer port: 55957
+[2026-11-03T21:05:44.020+08:00] [RX] showcase first frame
+[2026-11-03T21:05:44.470+08:00] [RX] CPU%/max_us 2/1176 0/121 5/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:44.490+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:45.473+08:00] [RX] CPU%/max_us 2/1176 0/121 1/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:45.494+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:46.488+08:00] [RX] CPU%/max_us 2/1180 0/121 0/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:46.509+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:47.497+08:00] [RX] CPU%/max_us 2/1275 0/121 1/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:47.518+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:48.509+08:00] [RX] CPU%/max_us 2/1275 0/121 1/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:48.530+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:49.518+08:00] [RX] CPU%/max_us 2/1275 0/121 0/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:49.538+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:49.691+08:00] [SYS] UDP 已监听 192.168.1.2:6000 · console
+[2026-11-03T21:05:50.215+08:00] [SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[2026-11-03T21:05:50.215+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:05:50.228+08:00] [RX] ETH peer IP: 0xc0a80102
+[2026-11-03T21:05:50.237+08:00] [RX] ETH peer port: 6000
+[2026-11-03T21:05:50.519+08:00] [RX] CPU%/max_us 2/1275 0/121 1/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:50.544+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:50.955+08:00] [SYS] 等待网卡 以太网 就绪 … 用时 0.1 s
+[2026-11-03T21:05:51.114+08:00] [SYS] 等待网卡 以太网 就绪 … 用时 0.2 s
+[2026-11-03T21:05:51.531+08:00] [RX] CPU%/max_us 2/1275 0/121 3/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:51.551+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:52.550+08:00] [RX] CPU%/max_us 2/1275 0/121 1/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:52.570+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:53.559+08:00] [RX] CPU%/max_us 2/1275 0/121 3/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:53.579+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:54.548+08:00] [RX] CPU%/max_us 2/1275 0/121 5/46728 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:54.569+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:55.581+08:00] [RX] CPU%/max_us 2/1275 5/172 25/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:55.614+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:56.634+08:00] [RX] CPU%/max_us 2/1547 27/254 21/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:56.705+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:56.813+08:00] [RX] vision fps=7 npu=41.4 wait=0.6 decode=23.0 sort=0.0 nms=0.0 post_span=30.1 gui=53.7 e2e=140.7 cpu_comm=2% cpu_app=27% cpu_gui=24%
+[2026-11-03T21:05:57.621+08:00] [RX] CPU%/max_us 2/1547 27/298 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:57.651+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:57.739+08:00] [RX] vision fps=9 npu=41.4 wait=4.1 decode=23.0 sort=0.0 nms=0.0 post_span=31.1 gui=61.9 e2e=150.8 cpu_comm=2% cpu_app=26% cpu_gui=19%
+[2026-11-03T21:05:58.633+08:00] [RX] CPU%/max_us 2/1547 27/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:58.665+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:58.765+08:00] [RX] vision fps=9 npu=41.2 wait=1.2 decode=23.2 sort=0.0 nms=0.0 post_span=29.9 gui=38.6 e2e=114.8 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:05:59.677+08:00] [RX] CPU%/max_us 2/1547 26/298 17/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:05:59.724+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:05:59.812+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.6 gui=45.2 e2e=125.3 cpu_comm=2% cpu_app=27% cpu_gui=16%
+[2026-11-03T21:06:00.681+08:00] [RX] CPU%/max_us 2/1547 27/298 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:00.711+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:00.819+08:00] [RX] vision fps=9 npu=41.3 wait=1.3 decode=23.2 sort=0.0 nms=0.0 post_span=31.4 gui=42.3 e2e=119.7 cpu_comm=3% cpu_app=30% cpu_gui=11%
+[2026-11-03T21:06:01.685+08:00] [RX] CPU%/max_us 2/1751 29/298 6/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:01.732+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:01.816+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=30.7 gui=44.2 e2e=123.3 cpu_comm=2% cpu_app=28% cpu_gui=16%
+[2026-11-03T21:06:02.697+08:00] [RX] CPU%/max_us 3/1751 27/298 5/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:02.728+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:02.807+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=30.3 gui=48.2 e2e=125.2 cpu_comm=2% cpu_app=28% cpu_gui=15%
+[2026-11-03T21:06:03.706+08:00] [RX] CPU%/max_us 2/1751 30/298 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:03.737+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:03.816+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.5 gui=39.9 e2e=117.5 cpu_comm=2% cpu_app=26% cpu_gui=12%
+[2026-11-03T21:06:04.719+08:00] [RX] CPU%/max_us 2/1751 27/298 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:04.750+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:04.835+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.0 gui=40.9 e2e=113.4 cpu_comm=2% cpu_app=27% cpu_gui=10%
+[2026-11-03T21:06:05.725+08:00] [RX] CPU%/max_us 2/1751 27/298 10/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:05.756+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:05.837+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.7 gui=35.7 e2e=112.8 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:06:06.739+08:00] [RX] CPU%/max_us 2/1751 27/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:06.768+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:06.852+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.3 gui=39.5 e2e=115.7 cpu_comm=2% cpu_app=27% cpu_gui=10%
+[2026-11-03T21:06:07.750+08:00] [RX] CPU%/max_us 2/1751 27/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:07.771+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:07.866+08:00] [RX] vision fps=9 npu=41.3 wait=0.1 decode=23.2 sort=0.0 nms=0.0 post_span=29.0 gui=40.4 e2e=113.3 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:08.769+08:00] [RX] CPU%/max_us 2/1751 27/298 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:08.810+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:08.876+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.1 gui=38.5 e2e=116.0 cpu_comm=3% cpu_app=27% cpu_gui=12%
+[2026-11-03T21:06:09.796+08:00] [RX] CPU%/max_us 2/1751 28/298 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:09.817+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:09.882+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.1 gui=42.0 e2e=117.2 cpu_comm=3% cpu_app=28% cpu_gui=7%
+[2026-11-03T21:06:10.784+08:00] [RX] CPU%/max_us 2/1751 27/298 8/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:10.820+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:10.887+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.2 gui=32.4 e2e=104.4 cpu_comm=3% cpu_app=28% cpu_gui=12%
+[2026-11-03T21:06:11.802+08:00] [RX] CPU%/max_us 3/1751 28/298 10/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:11.822+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:11.917+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.1 gui=36.5 e2e=110.8 cpu_comm=3% cpu_app=28% cpu_gui=8%
+[2026-11-03T21:06:12.801+08:00] [RX] CPU%/max_us 2/1751 32/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:12.832+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:12.935+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.4 gui=35.7 e2e=108.0 cpu_comm=2% cpu_app=23% cpu_gui=13%
+[2026-11-03T21:06:13.834+08:00] [RX] CPU%/max_us 2/1751 27/298 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:13.865+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:13.958+08:00] [RX] vision fps=9 npu=41.3 wait=0.1 decode=23.1 sort=0.0 nms=0.0 post_span=28.9 gui=35.0 e2e=110.0 cpu_comm=2% cpu_app=26% cpu_gui=19%
+[2026-11-03T21:06:14.850+08:00] [RX] CPU%/max_us 2/1751 27/298 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:14.881+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:14.950+08:00] [RX] vision fps=9 npu=41.2 wait=0.2 decode=23.1 sort=0.0 nms=0.0 post_span=29.4 gui=35.4 e2e=115.7 cpu_comm=2% cpu_app=27% cpu_gui=12%
+[2026-11-03T21:06:15.860+08:00] [RX] CPU%/max_us 2/1751 27/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:15.891+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:15.974+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=28.9 gui=40.9 e2e=113.4 cpu_comm=2% cpu_app=27% cpu_gui=5%
+[2026-11-03T21:06:16.871+08:00] [RX] CPU%/max_us 2/1751 27/298 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:16.912+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:16.985+08:00] [RX] vision fps=9 npu=41.4 wait=0.3 decode=23.1 sort=0.0 nms=0.0 post_span=31.0 gui=41.4 e2e=118.9 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:06:17.887+08:00] [RX] CPU%/max_us 2/1751 28/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:17.915+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:18.001+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.2 gui=37.9 e2e=115.2 cpu_comm=2% cpu_app=27% cpu_gui=12%
+[2026-11-03T21:06:18.893+08:00] [RX] CPU%/max_us 2/1751 29/298 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:18.937+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:19.016+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=28.7 gui=40.0 e2e=112.8 cpu_comm=2% cpu_app=28% cpu_gui=13%
+[2026-11-03T21:06:19.912+08:00] [RX] CPU%/max_us 2/1751 27/298 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:19.945+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:20.025+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.8 gui=38.4 e2e=115.5 cpu_comm=2% cpu_app=29% cpu_gui=13%
+[2026-11-03T21:06:20.911+08:00] [RX] CPU%/max_us 2/1751 27/298 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:20.942+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:21.021+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.3 gui=38.2 e2e=115.4 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:21.951+08:00] [RX] CPU%/max_us 2/1751 27/298 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:21.983+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:22.063+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.0 gui=37.7 e2e=108.7 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:22.972+08:00] [RX] CPU%/max_us 2/1751 27/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:23.003+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:23.085+08:00] [RX] vision fps=9 npu=41.2 wait=0.9 decode=23.3 sort=0.0 nms=0.0 post_span=29.6 gui=38.0 e2e=115.0 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:06:23.975+08:00] [RX] CPU%/max_us 2/1751 27/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:24.005+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:24.091+08:00] [RX] vision fps=9 npu=41.3 wait=0.2 decode=23.2 sort=0.0 nms=0.0 post_span=30.1 gui=40.2 e2e=118.6 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:24.981+08:00] [RX] CPU%/max_us 2/1751 27/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:25.003+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:25.083+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=31.0 gui=38.8 e2e=114.9 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:06:25.996+08:00] [RX] CPU%/max_us 2/1751 27/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:26.041+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:26.115+08:00] [RX] vision fps=9 npu=41.3 wait=0.6 decode=23.2 sort=0.0 nms=0.0 post_span=29.4 gui=34.5 e2e=110.2 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:27.011+08:00] [RX] CPU%/max_us 2/1751 29/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:27.049+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:27.138+08:00] [RX] vision fps=9 npu=41.4 wait=0.7 decode=23.3 sort=0.0 nms=0.0 post_span=29.7 gui=45.1 e2e=124.5 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:06:28.040+08:00] [RX] CPU%/max_us 2/1751 30/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:28.072+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:28.160+08:00] [RX] vision fps=9 npu=41.2 wait=0.1 decode=23.3 sort=0.0 nms=0.0 post_span=30.9 gui=36.0 e2e=109.2 cpu_comm=2% cpu_app=29% cpu_gui=12%
+[2026-11-03T21:06:29.040+08:00] [RX] CPU%/max_us 3/1751 26/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:29.075+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:29.153+08:00] [RX] vision fps=9 npu=41.3 wait=0.4 decode=23.3 sort=0.0 nms=0.0 post_span=29.6 gui=36.7 e2e=112.3 cpu_comm=2% cpu_app=30% cpu_gui=12%
+[2026-11-03T21:06:30.057+08:00] [RX] CPU%/max_us 2/1751 27/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:30.088+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:30.169+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.3 sort=0.0 nms=0.0 post_span=30.1 gui=36.3 e2e=114.6 cpu_comm=3% cpu_app=26% cpu_gui=12%
+[2026-11-03T21:06:31.081+08:00] [RX] CPU%/max_us 2/1751 27/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:31.126+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:31.199+08:00] [RX] vision fps=9 npu=41.3 wait=0.7 decode=23.3 sort=0.0 nms=0.0 post_span=29.9 gui=39.9 e2e=113.8 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:32.091+08:00] [RX] CPU%/max_us 2/1751 27/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:32.120+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:32.200+08:00] [RX] vision fps=9 npu=41.4 wait=0.2 decode=23.3 sort=0.0 nms=0.0 post_span=29.5 gui=36.5 e2e=113.2 cpu_comm=2% cpu_app=27% cpu_gui=12%
+[2026-11-03T21:06:33.094+08:00] [RX] CPU%/max_us 3/1751 27/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:33.137+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:33.204+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=29.9 gui=36.0 e2e=111.5 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:34.115+08:00] [RX] CPU%/max_us 2/1751 28/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:34.148+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:34.228+08:00] [RX] vision fps=9 npu=41.3 wait=1.2 decode=23.1 sort=0.0 nms=0.0 post_span=29.2 gui=41.2 e2e=114.8 cpu_comm=3% cpu_app=27% cpu_gui=12%
+[2026-11-03T21:06:35.138+08:00] [RX] CPU%/max_us 2/1751 29/302 6/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:35.171+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:35.251+08:00] [RX] vision fps=9 npu=41.3 wait=0.4 decode=23.1 sort=0.0 nms=0.0 post_span=30.5 gui=37.2 e2e=114.8 cpu_comm=2% cpu_app=28% cpu_gui=13%
+[2026-11-03T21:06:36.150+08:00] [RX] CPU%/max_us 2/1751 29/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:36.181+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:36.261+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.1 gui=34.4 e2e=108.5 cpu_comm=2% cpu_app=29% cpu_gui=6%
+[2026-11-03T21:06:37.163+08:00] [RX] CPU%/max_us 2/1751 29/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:37.187+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:37.269+08:00] [RX] vision fps=9 npu=41.3 wait=1.2 decode=23.2 sort=0.0 nms=0.0 post_span=29.3 gui=38.5 e2e=112.0 cpu_comm=2% cpu_app=29% cpu_gui=11%
+[2026-11-03T21:06:38.167+08:00] [RX] CPU%/max_us 2/1751 27/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:38.189+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:38.282+08:00] [RX] vision fps=9 npu=41.4 wait=0.3 decode=23.2 sort=0.0 nms=0.0 post_span=30.2 gui=42.4 e2e=119.6 cpu_comm=2% cpu_app=29% cpu_gui=12%
+[2026-11-03T21:06:39.181+08:00] [RX] CPU%/max_us 2/1751 27/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:39.228+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:39.301+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=30.7 gui=37.1 e2e=112.9 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:40.217+08:00] [RX] CPU%/max_us 2/1751 28/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:40.248+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:40.330+08:00] [RX] vision fps=9 npu=41.3 wait=0.7 decode=23.2 sort=0.0 nms=0.0 post_span=29.6 gui=36.5 e2e=111.2 cpu_comm=2% cpu_app=27% cpu_gui=11%
+[2026-11-03T21:06:41.211+08:00] [RX] CPU%/max_us 2/1751 26/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:41.240+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:41.321+08:00] [RX] vision fps=9 npu=41.4 wait=0.4 decode=23.2 sort=0.0 nms=0.0 post_span=29.8 gui=39.8 e2e=117.8 cpu_comm=2% cpu_app=28% cpu_gui=12%
+[2026-11-03T21:06:42.227+08:00] [RX] CPU%/max_us 2/1751 28/302 11/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:42.259+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:42.340+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=30.0 gui=36.0 e2e=111.1 cpu_comm=2% cpu_app=26% cpu_gui=12%
+[2026-11-03T21:06:43.226+08:00] [RX] CPU%/max_us 2/1751 30/302 9/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:43.257+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:43.327+08:00] [RX] vision fps=9 npu=41.3 wait=0.7 decode=23.2 sort=0.0 nms=0.0 post_span=29.4 gui=36.6 e2e=111.1 cpu_comm=2% cpu_app=28% cpu_gui=11%
+[2026-11-03T21:06:44.234+08:00] [RX] CPU%/max_us 3/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:44.266+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:44.335+08:00] [RX] vision fps=9 npu=41.2 wait=1.3 decode=23.0 sort=0.0 nms=0.0 post_span=30.6 gui=52.6 e2e=131.6 cpu_comm=2% cpu_app=30% cpu_gui=9%
+[2026-11-03T21:06:45.242+08:00] [RX] CPU%/max_us 3/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:45.272+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:45.343+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=22.9 sort=0.0 nms=0.0 post_span=30.0 gui=98.3 e2e=167.7 cpu_comm=3% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:46.247+08:00] [RX] CPU%/max_us 3/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:46.278+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:46.344+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.9 gui=97.8 e2e=167.6 cpu_comm=3% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:47.258+08:00] [RX] CPU%/max_us 2/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:47.288+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:47.357+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.8 gui=81.5 e2e=150.9 cpu_comm=3% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:48.264+08:00] [RX] CPU%/max_us 3/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:48.291+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:48.364+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=98.0 e2e=167.5 cpu_comm=2% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:49.278+08:00] [RX] CPU%/max_us 3/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:49.306+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:49.378+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=89.7 e2e=159.1 cpu_comm=3% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:50.287+08:00] [RX] CPU%/max_us 2/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:50.317+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:50.389+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.5 gui=80.9 e2e=150.7 cpu_comm=3% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:51.301+08:00] [RX] CPU%/max_us 3/1751 28/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:51.333+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:51.401+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=22.9 sort=0.0 nms=0.0 post_span=29.3 gui=98.3 e2e=167.4 cpu_comm=2% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:52.320+08:00] [RX] CPU%/max_us 3/1751 28/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:52.351+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:52.419+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.7 gui=89.8 e2e=159.0 cpu_comm=3% cpu_app=28% cpu_gui=1%
+[2026-11-03T21:06:53.329+08:00] [RX] CPU%/max_us 3/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:53.359+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:53.430+08:00] [RX] vision fps=9 npu=41.1 wait=0.2 decode=22.9 sort=0.0 nms=0.0 post_span=29.3 gui=81.4 e2e=150.6 cpu_comm=3% cpu_app=28% cpu_gui=1%
+[2026-11-03T21:06:54.369+08:00] [RX] CPU%/max_us 2/1751 28/302 17/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:54.400+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:54.484+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=22.9 sort=0.0 nms=0.0 post_span=29.8 gui=97.9 e2e=167.2 cpu_comm=3% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:55.362+08:00] [RX] CPU%/max_us 2/1751 26/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:55.393+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:55.462+08:00] [RX] vision fps=9 npu=41.3 wait=0.4 decode=23.0 sort=0.0 nms=0.0 post_span=30.3 gui=50.1 e2e=129.7 cpu_comm=2% cpu_app=28% cpu_gui=17%
+[2026-11-03T21:06:56.369+08:00] [RX] CPU%/max_us 2/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:56.395+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:56.467+08:00] [RX] vision fps=9 npu=41.1 wait=0.8 decode=22.8 sort=0.0 nms=0.0 post_span=28.6 gui=69.0 e2e=146.3 cpu_comm=2% cpu_app=26% cpu_gui=1%
+[2026-11-03T21:06:57.384+08:00] [RX] CPU%/max_us 2/1751 27/302 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:57.399+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:57.481+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=22.8 sort=0.0 nms=0.0 post_span=29.9 gui=0.0 e2e=0.0 cpu_comm=2% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:58.387+08:00] [RX] CPU%/max_us 2/1751 27/302 8/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:58.418+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:58.490+08:00] [RX] vision fps=9 npu=41.1 wait=0.0 decode=22.9 sort=0.0 nms=0.0 post_span=29.4 gui=86.3 e2e=155.9 cpu_comm=2% cpu_app=27% cpu_gui=1%
+[2026-11-03T21:06:59.397+08:00] [RX] CPU%/max_us 2/1751 27/302 9/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:06:59.428+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:06:59.495+08:00] [RX] vision fps=9 npu=41.2 wait=0.8 decode=22.9 sort=0.0 nms=0.0 post_span=28.6 gui=45.7 e2e=116.9 cpu_comm=2% cpu_app=27% cpu_gui=7%
+[2026-11-03T21:07:00.420+08:00] [RX] CPU%/max_us 2/1751 26/302 21/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:00.451+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:00.539+08:00] [RX] vision fps=8 npu=41.4 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.3 gui=63.3 e2e=140.7 cpu_comm=2% cpu_app=27% cpu_gui=8%
+[2026-11-03T21:07:01.443+08:00] [RX] CPU%/max_us 2/1751 27/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:01.474+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:01.565+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.1 gui=35.8 e2e=110.2 cpu_comm=2% cpu_app=27% cpu_gui=15%
+[2026-11-03T21:07:02.449+08:00] [RX] CPU%/max_us 2/1751 27/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:02.480+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:02.571+08:00] [RX] vision fps=9 npu=41.3 wait=1.1 decode=23.0 sort=0.0 nms=0.0 post_span=29.3 gui=39.0 e2e=116.8 cpu_comm=2% cpu_app=27% cpu_gui=15%
+[2026-11-03T21:07:03.465+08:00] [RX] CPU%/max_us 2/1751 27/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:03.511+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:03.583+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=30.0 gui=38.4 e2e=116.8 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:04.493+08:00] [RX] CPU%/max_us 2/1751 28/302 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:04.524+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:04.615+08:00] [RX] vision fps=9 npu=41.4 wait=0.3 decode=23.0 sort=0.0 nms=0.0 post_span=29.5 gui=40.4 e2e=120.0 cpu_comm=3% cpu_app=27% cpu_gui=12%
+[2026-11-03T21:07:05.478+08:00] [RX] CPU%/max_us 2/1751 27/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:05.523+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:05.594+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.9 gui=35.2 e2e=111.7 cpu_comm=2% cpu_app=26% cpu_gui=14%
+[2026-11-03T21:07:06.509+08:00] [RX] CPU%/max_us 2/1751 27/302 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:06.539+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:06.631+08:00] [RX] vision fps=9 npu=41.4 wait=1.1 decode=23.0 sort=0.0 nms=0.0 post_span=29.3 gui=42.2 e2e=118.3 cpu_comm=2% cpu_app=30% cpu_gui=15%
+[2026-11-03T21:07:07.533+08:00] [RX] CPU%/max_us 2/1751 27/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:07.565+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:07.658+08:00] [RX] vision fps=9 npu=41.4 wait=0.5 decode=23.0 sort=0.0 nms=0.0 post_span=29.9 gui=36.6 e2e=114.9 cpu_comm=2% cpu_app=28% cpu_gui=16%
+[2026-11-03T21:07:08.551+08:00] [RX] CPU%/max_us 2/1751 27/302 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:08.591+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:08.673+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.6 gui=40.5 e2e=121.5 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:09.569+08:00] [RX] CPU%/max_us 2/1751 28/302 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:09.609+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:09.693+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=31.2 gui=39.4 e2e=118.2 cpu_comm=2% cpu_app=27% cpu_gui=15%
+[2026-11-03T21:07:10.607+08:00] [RX] CPU%/max_us 2/1751 31/302 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:10.646+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:10.743+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.3 sort=0.0 nms=0.0 post_span=31.7 gui=40.7 e2e=119.8 cpu_comm=2% cpu_app=27% cpu_gui=16%
+[2026-11-03T21:07:11.622+08:00] [RX] CPU%/max_us 2/1751 26/302 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:11.656+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:11.758+08:00] [RX] vision fps=9 npu=41.4 wait=0.9 decode=23.3 sort=0.0 nms=0.0 post_span=30.4 gui=40.9 e2e=118.1 cpu_comm=2% cpu_app=28% cpu_gui=14%
+[2026-11-03T21:07:12.643+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:12.678+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:12.767+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=30.6 gui=39.5 e2e=116.3 cpu_comm=2% cpu_app=28% cpu_gui=17%
+[2026-11-03T21:07:13.662+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:13.708+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:13.781+08:00] [RX] vision fps=9 npu=41.4 wait=1.3 decode=23.1 sort=0.0 nms=0.0 post_span=30.4 gui=39.8 e2e=118.0 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:14.672+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:14.693+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:14.781+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=37.1 e2e=114.6 cpu_comm=3% cpu_app=27% cpu_gui=15%
+[2026-11-03T21:07:15.667+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:15.716+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:15.806+08:00] [RX] vision fps=9 npu=41.3 wait=0.4 decode=23.0 sort=0.0 nms=0.0 post_span=31.0 gui=44.2 e2e=122.9 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:16.676+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:16.725+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:16.822+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.2 gui=33.9 e2e=107.8 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:17.684+08:00] [RX] CPU%/max_us 2/1751 25/304 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:17.715+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:17.823+08:00] [RX] vision fps=9 npu=41.4 wait=0.2 decode=23.0 sort=0.0 nms=0.0 post_span=29.8 gui=42.6 e2e=117.8 cpu_comm=2% cpu_app=29% cpu_gui=14%
+[2026-11-03T21:07:18.704+08:00] [RX] CPU%/max_us 2/1751 26/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:18.735+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:18.817+08:00] [RX] vision fps=9 npu=41.4 wait=0.9 decode=23.0 sort=0.0 nms=0.0 post_span=30.1 gui=41.3 e2e=121.1 cpu_comm=2% cpu_app=30% cpu_gui=14%
+[2026-11-03T21:07:19.696+08:00] [RX] CPU%/max_us 2/1751 30/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:19.742+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:19.834+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.2 gui=40.3 e2e=119.4 cpu_comm=2% cpu_app=26% cpu_gui=15%
+[2026-11-03T21:07:20.729+08:00] [RX] CPU%/max_us 2/1751 27/304 17/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:20.760+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:20.843+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=31.2 gui=38.5 e2e=116.0 cpu_comm=2% cpu_app=28% cpu_gui=14%
+[2026-11-03T21:07:21.751+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:21.775+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:21.868+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=29.6 gui=40.7 e2e=119.3 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:22.765+08:00] [RX] CPU%/max_us 2/1751 27/304 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:22.815+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:22.908+08:00] [RX] vision fps=9 npu=41.4 wait=0.2 decode=23.2 sort=0.0 nms=0.0 post_span=29.3 gui=40.8 e2e=119.2 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:23.792+08:00] [RX] CPU%/max_us 2/1751 29/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:23.823+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:23.912+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.4 gui=38.5 e2e=114.2 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:24.786+08:00] [RX] CPU%/max_us 2/1751 26/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:24.838+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:24.927+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=29.5 gui=38.8 e2e=114.1 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:25.814+08:00] [RX] CPU%/max_us 2/1751 26/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:25.845+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:25.923+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=30.4 gui=36.9 e2e=115.7 cpu_comm=2% cpu_app=32% cpu_gui=14%
+[2026-11-03T21:07:26.837+08:00] [RX] CPU%/max_us 2/1751 27/304 12/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:26.868+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:26.961+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=29.7 gui=34.5 e2e=112.4 cpu_comm=2% cpu_app=28% cpu_gui=14%
+[2026-11-03T21:07:27.862+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:27.916+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:28.007+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.4 gui=36.6 e2e=115.6 cpu_comm=2% cpu_app=26% cpu_gui=12%
+[2026-11-03T21:07:28.892+08:00] [RX] CPU%/max_us 2/1751 28/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:28.924+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:29.007+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=29.3 gui=39.8 e2e=115.6 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:29.893+08:00] [RX] CPU%/max_us 2/1751 27/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:29.934+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:30.035+08:00] [RX] vision fps=9 npu=41.5 wait=0.4 decode=23.2 sort=0.0 nms=0.0 post_span=30.4 gui=43.7 e2e=118.9 cpu_comm=2% cpu_app=26% cpu_gui=12%
+[2026-11-03T21:07:30.892+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:30.925+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:31.004+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.1 sort=0.0 nms=0.0 post_span=30.0 gui=38.5 e2e=115.5 cpu_comm=3% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:31.908+08:00] [RX] CPU%/max_us 2/1751 27/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:31.958+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:32.042+08:00] [RX] vision fps=9 npu=41.4 wait=0.2 decode=23.2 sort=0.0 nms=0.0 post_span=28.7 gui=42.0 e2e=118.8 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:32.928+08:00] [RX] CPU%/max_us 2/1751 31/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:32.959+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:33.043+08:00] [RX] vision fps=9 npu=41.2 wait=0.1 decode=23.2 sort=0.0 nms=0.0 post_span=30.6 gui=32.7 e2e=110.4 cpu_comm=2% cpu_app=27% cpu_gui=15%
+[2026-11-03T21:07:33.554+08:00] [SYS] 等待网卡 以太网 就绪 … 用时 0.3 s
+[2026-11-03T21:07:33.924+08:00] [RX] CPU%/max_us 2/1751 30/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:33.968+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:34.054+08:00] [RX] vision fps=9 npu=41.4 wait=1.2 decode=23.2 sort=0.0 nms=0.0 post_span=29.5 gui=41.5 e2e=118.7 cpu_comm=2% cpu_app=31% cpu_gui=15%
+[2026-11-03T21:07:34.946+08:00] [RX] CPU%/max_us 2/1751 26/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:34.977+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:35.070+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=30.2 gui=36.6 e2e=115.3 cpu_comm=2% cpu_app=30% cpu_gui=14%
+[2026-11-03T21:07:35.969+08:00] [RX] CPU%/max_us 2/1751 26/304 9/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:35.999+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:36.088+08:00] [RX] vision fps=9 npu=41.3 wait=0.4 decode=23.0 sort=0.0 nms=0.0 post_span=30.7 gui=44.1 e2e=125.3 cpu_comm=2% cpu_app=26% cpu_gui=14%
+[2026-11-03T21:07:36.985+08:00] [RX] CPU%/max_us 2/1751 27/304 16/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:37.007+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:37.078+08:00] [RX] vision fps=9 npu=41.3 wait=1.0 decode=23.0 sort=0.0 nms=0.0 post_span=32.6 gui=50.8 e2e=130.0 cpu_comm=2% cpu_app=26% cpu_gui=9%
+[2026-11-03T21:07:38.031+08:00] [RX] CPU%/max_us 2/1751 27/304 18/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:38.083+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:38.175+08:00] [RX] vision fps=9 npu=41.4 wait=2.5 decode=23.0 sort=0.0 nms=0.0 post_span=32.2 gui=40.4 e2e=118.9 cpu_comm=2% cpu_app=27% cpu_gui=16%
+[2026-11-03T21:07:39.022+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:39.073+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:39.164+08:00] [RX] vision fps=9 npu=41.5 wait=0.1 decode=23.0 sort=0.0 nms=0.0 post_span=30.8 gui=50.4 e2e=135.1 cpu_comm=2% cpu_app=27% cpu_gui=18%
+[2026-11-03T21:07:40.036+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:40.061+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:40.175+08:00] [RX] vision fps=9 npu=41.4 wait=0.9 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=40.1 e2e=116.6 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:41.040+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:41.087+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:41.161+08:00] [RX] vision fps=9 npu=41.4 wait=0.1 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=37.3 e2e=116.7 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:42.045+08:00] [RX] CPU%/max_us 2/1751 26/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:42.095+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:42.186+08:00] [RX] vision fps=9 npu=41.2 wait=0.3 decode=23.0 sort=0.0 nms=0.0 post_span=29.5 gui=38.5 e2e=118.7 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:43.065+08:00] [RX] CPU%/max_us 2/1751 30/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:43.096+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:43.175+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=30.7 gui=39.7 e2e=118.0 cpu_comm=2% cpu_app=26% cpu_gui=15%
+[2026-11-03T21:07:44.065+08:00] [RX] CPU%/max_us 2/1751 28/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:44.109+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:44.211+08:00] [RX] vision fps=9 npu=41.3 wait=0.9 decode=23.0 sort=0.0 nms=0.0 post_span=29.1 gui=37.8 e2e=114.9 cpu_comm=2% cpu_app=30% cpu_gui=15%
+[2026-11-03T21:07:45.092+08:00] [RX] CPU%/max_us 2/1751 26/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:45.114+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:45.213+08:00] [RX] vision fps=9 npu=41.5 wait=0.6 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=43.9 e2e=121.5 cpu_comm=2% cpu_app=28% cpu_gui=14%
+[2026-11-03T21:07:46.104+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:46.135+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:46.225+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.7 gui=41.6 e2e=121.5 cpu_comm=2% cpu_app=26% cpu_gui=14%
+[2026-11-03T21:07:47.121+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:47.167+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:47.240+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=30.7 gui=37.2 e2e=113.1 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:48.134+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:48.180+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:48.261+08:00] [RX] vision fps=9 npu=41.4 wait=0.5 decode=23.0 sort=0.0 nms=0.0 post_span=29.1 gui=41.2 e2e=116.4 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:49.152+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:49.196+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:49.286+08:00] [RX] vision fps=9 npu=41.4 wait=0.4 decode=22.9 sort=0.0 nms=0.0 post_span=29.5 gui=37.6 e2e=114.7 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:50.149+08:00] [RX] CPU%/max_us 2/1751 26/304 19/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:50.200+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:50.264+08:00] [RX] vision fps=9 npu=41.3 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.9 gui=43.0 e2e=121.3 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:51.187+08:00] [RX] CPU%/max_us 2/1751 27/304 15/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:51.217+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:51.311+08:00] [RX] vision fps=9 npu=41.3 wait=0.9 decode=23.0 sort=0.0 nms=0.0 post_span=34.0 gui=39.4 e2e=119.6 cpu_comm=2% cpu_app=26% cpu_gui=19%
+[2026-11-03T21:07:52.187+08:00] [RX] CPU%/max_us 2/1751 27/304 13/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:52.221+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:52.302+08:00] [RX] vision fps=9 npu=41.3 wait=0.1 decode=23.0 sort=0.0 nms=0.0 post_span=30.9 gui=38.4 e2e=117.9 cpu_comm=2% cpu_app=27% cpu_gui=15%
+[2026-11-03T21:07:53.190+08:00] [RX] CPU%/max_us 2/1751 27/304 17/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:53.221+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:53.305+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.4 gui=39.0 e2e=114.5 cpu_comm=2% cpu_app=27% cpu_gui=13%
+[2026-11-03T21:07:54.225+08:00] [RX] CPU%/max_us 2/1751 26/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:54.270+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:54.335+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=29.6 gui=39.6 e2e=117.8 cpu_comm=2% cpu_app=27% cpu_gui=17%
+[2026-11-03T21:07:55.225+08:00] [RX] CPU%/max_us 2/1751 27/304 14/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:55.245+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:55.342+08:00] [RX] vision fps=9 npu=41.4 wait=0.0 decode=22.9 sort=0.0 nms=0.0 post_span=29.6 gui=38.9 e2e=117.7 cpu_comm=2% cpu_app=26% cpu_gui=14%
+[2026-11-03T21:07:56.237+08:00] [RX] CPU%/max_us 2/1751 27/304 22/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:56.287+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:56.377+08:00] [RX] vision fps=9 npu=41.2 wait=0.0 decode=23.0 sort=0.0 nms=0.0 post_span=31.2 gui=36.8 e2e=116.0 cpu_comm=2% cpu_app=27% cpu_gui=14%
+[2026-11-03T21:07:57.255+08:00] [RX] CPU%/max_us 2/1751 4/304 8/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:57.268+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:58.257+08:00] [RX] CPU%/max_us 2/1751 0/304 2/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:58.281+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:07:59.293+08:00] [RX] CPU%/max_us 2/1751 0/304 18/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:07:59.322+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:00.291+08:00] [RX] CPU%/max_us 2/1751 0/304 3/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:00.309+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:01.303+08:00] [RX] CPU%/max_us 2/1751 0/304 6/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:01.324+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:02.314+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:02.342+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:03.325+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:03.363+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:04.340+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:04.372+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:05.351+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:05.370+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:06.346+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:06.375+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:07.354+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:07.383+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:08.362+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:08.390+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:09.365+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:09.396+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:10.380+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:10.409+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:11.387+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:11.412+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:12.399+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:12.426+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:13.416+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:13.445+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:14.420+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:14.447+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:15.438+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:15.455+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:16.449+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:16.475+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:17.455+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:17.478+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:18.470+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:18.491+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:19.487+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:19.517+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:20.496+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:20.524+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:21.502+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:21.527+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:22.510+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:22.535+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:23.528+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:23.554+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:24.539+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:24.565+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:25.547+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:25.572+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:26.561+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:26.590+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:27.570+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:27.600+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:28.580+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:28.610+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:29.585+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:29.619+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:30.599+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:30.632+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:30.931+08:00] [SYS] 传输完成：G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\bus_000000405205.jpg · 序号 0
+[2026-11-03T21:08:30.961+08:00] [SYS] YOLO 回传完整：FRAME 0 · 2 个框
+[2026-11-03T21:08:30.961+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\bus_000000405205.jpg · 往返 275.18 ms
+[2026-11-03T21:08:31.616+08:00] [RX] CPU%/max_us 2/1751 0/304 4/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:31.651+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:31.711+08:00] [RX] image request=2 receive=119.6 ch2=3.7 npu=40.9 wait=0.0 decode=22.9 sort=0.0 nms=0.0 post_span=29.3 upload_to_done=100
+[2026-11-03T21:08:32.639+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:32.652+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:33.644+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:33.667+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:34.657+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:34.679+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:35.097+08:00] [SYS] 传输完成：G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\cat_000000015497.jpg · 序号 1
+[2026-11-03T21:08:35.107+08:00] [SYS] YOLO 回传完整：FRAME 1 · 2 个框
+[2026-11-03T21:08:35.107+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\cat_000000015497.jpg · 往返 263.92 ms
+[2026-11-03T21:08:35.655+08:00] [RX] CPU%/max_us 2/1751 0/304 6/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:35.686+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:35.752+08:00] [RX] image request=4 receive=142.9 ch2=3.7 npu=40.9 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=28.8 upload_to_done=88
+[2026-11-03T21:08:36.662+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:36.691+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:37.679+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:37.705+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:38.691+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:38.716+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:39.706+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:39.736+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:40.513+08:00] [SYS] 传输完成：G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\person_000000402765.jpg · 序号 2
+[2026-11-03T21:08:40.565+08:00] [SYS] YOLO 回传完整：FRAME 2 · 1 个框
+[2026-11-03T21:08:40.565+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\person_000000402765.jpg · 往返 216.56 ms
+[2026-11-03T21:08:40.725+08:00] [RX] CPU%/max_us 3/1751 5/304 2/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:40.757+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:40.819+08:00] [RX] image request=6 receive=90.9 ch2=3.7 npu=40.9 wait=0.0 decode=22.8 sort=0.0 nms=0.0 post_span=28.0 upload_to_done=88
+[2026-11-03T21:08:41.732+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:41.762+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:42.743+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:42.770+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:43.748+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:43.776+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:44.751+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:44.779+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:45.756+08:00] [RX] CPU%/max_us 2/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:45.783+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:46.767+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:46.794+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:47.789+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:47.814+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:48.794+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:48.822+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:49.802+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:49.828+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:50.412+08:00] [SYS] 传输完成：G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\cat_000000015497.jpg · 序号 3
+[2026-11-03T21:08:50.480+08:00] [SYS] YOLO 回传完整：FRAME 3 · 2 个框
+[2026-11-03T21:08:50.480+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\cat_000000015497.jpg · 往返 234.00 ms
+[2026-11-03T21:08:50.839+08:00] [RX] CPU%/max_us 2/1751 5/304 5/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:50.869+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:50.933+08:00] [RX] image request=8 receive=122.0 ch2=3.7 npu=40.9 wait=0.0 decode=23.2 sort=0.0 nms=0.0 post_span=28.6 upload_to_done=89
+[2026-11-03T21:08:51.854+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:51.884+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:52.866+08:00] [RX] CPU%/max_us 2/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:52.895+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:53.875+08:00] [RX] CPU%/max_us 2/1751 8/304 4/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:53.902+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:54.879+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:54.908+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:55.888+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:55.917+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:56.395+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:08:56.899+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:56.929+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:57.903+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:57.932+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:58.435+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:08:58.482+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\person_000000402765.jpg: 设备回复超时（5 s）
+[2026-11-03T21:08:58.482+08:00] [SYS] 传输失败：设备回复超时（5 s）
+[2026-11-03T21:08:58.908+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:58.937+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:08:59.914+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:08:59.943+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:00.472+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:00.925+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:00.955+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:01.932+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:01.961+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:02.511+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:02.943+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:02.972+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:03.948+08:00] [RX] CPU%/max_us 2/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:03.978+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:04.553+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:04.957+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:04.986+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:05.961+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:05.990+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:06.599+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:06.973+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:07.001+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:07.978+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:08.006+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:08.654+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:08.988+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:09.016+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:09.992+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:10.021+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:10.654+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:10.998+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:11.026+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:12.009+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:12.038+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:12.665+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:13.012+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:13.040+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:14.016+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:14.045+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:14.710+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:15.024+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:15.053+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:16.031+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:16.060+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:16.485+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000000285.jpg: 命令应答超时
+[2026-11-03T21:09:16.485+08:00] [SYS] 传输失败：命令应答超时
+[2026-11-03T21:09:16.756+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:17.039+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:17.068+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:17.892+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000001818.jpg: 同类命令正在等待设备完成
+[2026-11-03T21:09:17.892+08:00] [SYS] 传输失败：同类命令正在等待设备完成
+[2026-11-03T21:09:18.045+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:18.073+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:18.777+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:19.054+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:19.082+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:20.060+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:20.089+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:20.814+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:21.067+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:21.095+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:22.101+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:22.107+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:22.321+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000003156.jpg: 同类命令正在等待设备完成
+[2026-11-03T21:09:22.321+08:00] [SYS] 传输失败：同类命令正在等待设备完成
+[2026-11-03T21:09:22.839+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:23.082+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:23.116+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:24.129+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:24.145+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:24.236+08:00] [SYS] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000003156.jpg: 同类命令正在等待设备完成
+[2026-11-03T21:09:24.236+08:00] [SYS] 传输失败：同类命令正在等待设备完成
+[2026-11-03T21:09:24.848+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:25.091+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:25.131+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:26.098+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:26.131+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:26.881+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:27.105+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:27.140+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:28.110+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:28.139+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:28.912+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:29.124+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:29.147+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:30.122+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:30.151+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:30.941+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:31.134+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:31.163+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:32.140+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:32.169+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:32.964+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:33.147+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:33.176+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:34.153+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:34.182+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:34.987+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:35.160+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:35.189+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:36.166+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:36.195+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:37.013+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:37.176+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:37.204+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:38.180+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:38.209+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:39.041+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:39.184+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:39.213+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:40.188+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:40.217+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:41.065+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:41.198+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:09:41.226+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:09:41.485+08:00] [SYS] disconnected COM7
+[2026-11-03T21:09:43.093+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:45.114+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:47.138+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:49.168+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:51.197+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:53.226+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:55.251+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:57.279+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:09:59.306+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:01.337+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:03.364+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:05.392+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:07.419+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:09.446+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:11.470+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:13.496+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:15.523+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:17.546+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:19.571+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:21.593+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:23.623+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:25.653+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:27.680+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:29.703+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:31.731+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:33.759+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:35.785+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:37.812+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:39.843+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:41.871+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:43.896+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:45.927+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:47.954+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:49.978+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:52.004+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:54.033+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:56.058+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:10:58.084+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:00.110+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:02.141+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:04.177+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:06.203+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:08.207+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:10.248+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:12.279+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:14.302+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:16.333+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:18.329+08:00] [SYS] connected COM7 @ 115200 8N1
+[2026-11-03T21:11:18.363+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:18.848+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:18.877+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:19.853+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:19.882+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:20.390+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:20.865+08:00] [RX] CPU%/max_us 0/1751 4/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:20.894+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:21.875+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:21.903+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:22.411+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:22.885+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:22.914+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:23.889+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:23.918+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:24.442+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:24.896+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:24.925+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:25.902+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:25.931+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:26.468+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:26.912+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:26.940+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:27.916+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:27.944+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:28.491+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:28.926+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:28.955+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:29.932+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:29.960+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:30.518+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:30.942+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:30.971+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:31.948+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:31.977+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:32.543+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:32.958+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:32.986+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:33.964+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:33.993+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:34.572+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:34.976+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:35.004+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:35.982+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:36.011+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:36.602+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:36.988+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:37.016+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:37.995+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:38.024+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:38.623+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:38.998+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:39.026+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:40.001+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:40.030+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:40.646+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:41.011+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:41.040+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:42.017+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:42.046+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:42.676+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:43.019+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:43.048+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:44.024+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:44.053+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:44.697+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:45.030+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:45.068+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:46.034+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:46.063+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:46.727+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:47.040+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:47.069+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:48.044+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:48.073+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:48.761+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:49.054+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:49.083+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:49.772+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:50.065+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:50.094+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:51.071+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:51.100+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:51.797+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:52.080+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:52.110+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:53.084+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:53.113+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:53.822+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:54.095+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:54.124+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:55.100+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:55.129+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:55.856+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:11:56.109+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:56.144+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:57.118+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:57.144+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:58.130+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:58.149+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:59.142+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:11:59.154+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:11:59.451+08:00] [SYS] UDP 已监听 192.168.1.2:6000 · console
+[2026-11-03T21:11:59.653+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:00.141+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:00.157+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:01.137+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:01.161+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:01.277+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:02.144+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:02.171+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:03.148+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:03.176+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:03.316+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:04.152+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:04.181+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:04.665+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:05.159+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:05.188+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:06.163+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:06.191+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:06.686+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:07.171+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:07.200+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:08.176+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:08.204+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:08.713+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:09.187+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:09.215+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:10.191+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:10.219+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:10.740+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:11.193+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:11.222+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:12.197+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:12.226+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:12.768+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:13.202+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:13.231+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:14.206+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:14.235+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:14.792+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:15.216+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:15.244+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:16.220+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:16.248+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:16.814+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:17.228+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:17.257+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:18.232+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:18.260+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:18.844+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:19.238+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:19.266+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:20.242+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:20.271+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:20.873+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:21.246+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:21.275+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:22.251+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:22.279+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:22.900+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:23.263+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:23.292+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:24.267+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:24.296+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:24.931+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:25.275+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:25.305+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:26.280+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:26.309+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:26.957+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:27.290+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:27.322+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:28.299+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:28.327+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:28.985+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:29.309+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:29.337+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:30.312+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:30.341+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:31.014+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:31.317+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:31.346+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:32.324+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:32.353+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:33.041+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:33.334+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:33.363+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:34.340+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:34.369+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:35.070+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:35.344+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:35.373+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:36.349+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:36.377+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:37.090+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:37.353+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:37.381+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:38.357+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:38.385+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:39.118+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:39.361+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:39.390+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:40.365+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:40.394+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:41.143+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:41.376+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:41.405+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:42.381+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:42.410+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:43.168+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:43.391+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:43.419+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:44.394+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:44.423+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:45.192+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:45.405+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:45.434+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:46.409+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:46.438+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:47.217+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:47.421+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:47.450+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:48.425+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:48.454+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:49.242+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:49.428+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:49.457+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:50.432+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:50.461+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:51.272+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:51.435+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:51.463+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:52.439+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:52.467+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:53.301+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:53.444+08:00] [RX] CPU%/max_us 0/1751 0/304 2/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:53.472+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:54.446+08:00] [RX] CPU%/max_us 0/1751 0/304 2/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:54.475+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:55.331+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:55.455+08:00] [RX] CPU%/max_us 0/1751 0/304 2/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:55.477+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:56.463+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:56.492+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:57.359+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:57.471+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:57.500+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:58.478+08:00] [RX] CPU%/max_us 0/1751 0/304 1/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:58.507+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:12:59.387+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:12:59.489+08:00] [RX] CPU%/max_us 0/1751 0/304 0/113025 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:12:59.518+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:00.611+08:00] [RX] CPU%/max_us 0/1751 0/304 35/222585 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:13:00.639+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:01.414+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:13:01.621+08:00] [RX] CPU%/max_us 0/1751 0/304 1/222585 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:13:01.646+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:02.621+08:00] [RX] CPU%/max_us 0/1751 0/304 0/222585 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:13:02.650+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:03.438+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:13:03.633+08:00] [RX] CPU%/max_us 0/1751 0/304 2/222585 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:13:03.662+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:04.639+08:00] [RX] CPU%/max_us 0/1751 0/304 1/222585 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:13:04.668+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:05.464+08:00] [SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[2026-11-03T21:13:05.647+08:00] [RX] CPU%/max_us 0/1751 0/304 0/222585 overlay_cpu=0.00% max_us=0
+[2026-11-03T21:13:05.676+08:00] [RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[2026-11-03T21:13:06.019+08:00] [RX] 
+[2026-11-03T21:13:06.019+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.019+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.019+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.019+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.019+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.019+08:00] [RX] 
+[2026-11-03T21:13:06.019+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.019+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.019+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.019+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.019+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.019+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.019+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.019+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.019+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.019+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.119+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:06.161+08:00] [RX] 
+[2026-11-03T21:13:06.161+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.161+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.161+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.161+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.161+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.161+08:00] [RX] 
+[2026-11-03T21:13:06.161+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.161+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.161+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.161+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.161+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.161+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.161+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.161+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.161+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.161+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.260+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:06.303+08:00] [RX] 
+[2026-11-03T21:13:06.303+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.303+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.303+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.303+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.303+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.303+08:00] [RX] 
+[2026-11-03T21:13:06.303+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.303+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.303+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.303+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.303+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.303+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.304+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.304+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.304+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.304+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.403+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:06.446+08:00] [RX] 
+[2026-11-03T21:13:06.446+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.446+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.446+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.446+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.446+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.446+08:00] [RX] 
+[2026-11-03T21:13:06.446+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.446+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.446+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.446+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.446+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.446+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.446+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.446+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.446+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.446+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.545+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:06.588+08:00] [RX] 
+[2026-11-03T21:13:06.588+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.588+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.588+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.588+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.588+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.588+08:00] [RX] 
+[2026-11-03T21:13:06.588+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.588+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.588+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.588+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.588+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.588+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.588+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.588+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.588+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.588+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.688+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:06.730+08:00] [RX] 
+[2026-11-03T21:13:06.730+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.730+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.730+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.731+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.731+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.731+08:00] [RX] 
+[2026-11-03T21:13:06.731+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.731+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.731+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.731+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.731+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.731+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.731+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.731+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.731+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.731+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.830+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:06.873+08:00] [RX] 
+[2026-11-03T21:13:06.873+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:06.873+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:06.873+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:06.873+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:06.873+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:06.873+08:00] [RX] 
+[2026-11-03T21:13:06.873+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:06.873+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:06.873+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:06.873+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:06.873+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:06.873+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:06.873+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:06.873+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:06.873+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:06.873+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:06.972+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:07.015+08:00] [RX] 
+[2026-11-03T21:13:07.015+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:07.015+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:07.015+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:07.015+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:07.015+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:07.015+08:00] [RX] 
+[2026-11-03T21:13:07.015+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:07.015+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:07.015+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:07.015+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:07.015+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:07.015+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:07.015+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:07.015+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:07.015+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:07.015+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:07.128+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:07.158+08:00] [RX] 
+[2026-11-03T21:13:07.158+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:07.158+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:07.158+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:07.158+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:07.158+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:07.158+08:00] [RX] 
+[2026-11-03T21:13:07.158+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:07.158+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:07.158+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:07.158+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:07.158+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:07.158+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:07.158+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:07.158+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:07.158+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:07.158+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:07.257+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:07.300+08:00] [RX] 
+[2026-11-03T21:13:07.300+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:07.300+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:07.300+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:07.300+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:07.300+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:07.300+08:00] [RX] 
+[2026-11-03T21:13:07.300+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:07.300+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:07.300+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:07.300+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:07.300+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:07.300+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:07.300+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:07.300+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:07.300+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:07.300+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:07.400+08:00] [RX] Boot SRAM
+[2026-11-03T21:13:07.442+08:00] [RX] 
+[2026-11-03T21:13:07.442+08:00] [RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[2026-11-03T21:13:07.442+08:00] [RX]   E         D   D   R   R   V   V      3      2 
+[2026-11-03T21:13:07.442+08:00] [RX]   EEEE      D   D   RRRRR    V V    3333   2222 
+[2026-11-03T21:13:07.442+08:00] [RX]   E         D   D   R  R     V V       3   2    
+[2026-11-03T21:13:07.442+08:00] [RX]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[2026-11-03T21:13:07.442+08:00] [RX] 
+[2026-11-03T21:13:07.442+08:00] [RX]   EdRV32 Boot ROM - UART 115200 8N1
+[2026-11-03T21:13:07.442+08:00] [RX] CHIP_ID: 0xed320001
+[2026-11-03T21:13:07.442+08:00] [RX] CLK_SYS_HZ: 125000000
+[2026-11-03T21:13:07.442+08:00] [RX] ROM bytes: 16384
+[2026-11-03T21:13:07.443+08:00] [RX] SRAM bytes: 65536
+[2026-11-03T21:13:07.443+08:00] [RX] I-cache bytes: 8192
+[2026-11-03T21:13:07.443+08:00] [RX] D-cache bytes: 8192
+[2026-11-03T21:13:07.443+08:00] [RX] MEM_READY: 1
+[2026-11-03T21:13:07.443+08:00] [RX] Build commit: 92b38fd2
+[2026-11-03T21:13:07.443+08:00] [RX] Compiler version: GCC 15.2.0
+[2026-11-03T21:13:07.542+08:00] [RX] Boot SRAM
