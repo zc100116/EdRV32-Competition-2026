@@ -210,7 +210,8 @@ int main(void)
     ui_key(LV_KEY_ESC); assert(!ui_game_open && ui_page == 5);
     ui_key(LV_KEY_ESC); assert(ui_page == 0);
     check_input_devices();
-    puts("PASS: keypad/encoder, four-key navigation, availability, page actions, label bounds, 19 captures");
+    puts("PASS: keypad/encoder, four-key navigation, availability, page actions, "
+         "label bounds, 19 captures");
     lv_deinit();
     return 0;
 }

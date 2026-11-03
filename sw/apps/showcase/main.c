@@ -41,7 +41,8 @@ void app_gui_pause(uint8_t p)
 void app_return(void) { returning=1; sched_signal(&application_task,0x80000000u); }
 void board_request(const struct app *app)
 {
-    requested=app; transition=1; transition_frame=showcase_gui_frames(); sched_signal(&application_task,0x80000000u);
+    requested=app; transition=1; transition_frame=showcase_gui_frames();
+    sched_signal(&application_task,0x80000000u);
 }
 void showcase_input_event(void)
 {

@@ -7,7 +7,7 @@
 enum { UI_PIX = 1, UI_GEO = 2, UI_VIN = 4, UI_NPU = 8, UI_ETH = 16,
        UI_RND = 32, UI_DISP = 64, UI_ALL = 127 };
 typedef struct {
-    unsigned seconds, cpu, fps, idle, npu_busy, rnd_busy;
+    unsigned seconds, cpu, fps, idle, npu_busy, rnd_busy, clock_hz;
     unsigned task_max_us[3];
     unsigned task_cpu[3], ddr_read[7], ddr_write[7];
     bool link;

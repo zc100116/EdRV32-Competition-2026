@@ -60,7 +60,6 @@ static unsigned reserve(unsigned kind,uint32_t total,uint32_t *base)
 static unsigned complete(unsigned kind,uint32_t base,uint32_t bytes,uint32_t *index)
 {
     if(kind==3) return board_game_append(bytes,index);
-    if(kind==2 && bytes!=1280*720*2) return 2;
     unsigned status=vision_bulk_done(kind,base,bytes);
     return status ? status : 4;
 }

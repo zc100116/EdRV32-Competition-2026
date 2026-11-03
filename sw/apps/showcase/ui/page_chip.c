@@ -68,11 +68,13 @@ void ui_page_chip(lv_obj_t *p)
     ui_label(diagram, "PG2L200H FPGA", 20, 466, &sim_font_14, MUTED);
     lv_obj_t *params = ui_box(p, 774, 124, 466, 262, PANEL);
     ui_label(params, "芯片参数", 24, 18, &sim_font_20, TEXT);
-    ui_label(params, "CPU    顺序双发射 RV32 · 100 MHz\n\n"
+    char parameters[256];
+    lv_snprintf(parameters,sizeof(parameters),"CPU    顺序双发射 RV32 · %u MHz\n\n"
         "I$ / D$    各 32 KiB    SRAM 64 KiB\n\n"
         "NPU    每拍 512 次乘加 @150 MHz\n\n"
         "DDR3    32 位 · 1000 MT/s\n\n显示    1280×720 @60 Hz",
-        24, 60, &sim_font_16, TEXT);
+        ui_data_system().clock_hz/1000000);
+    ui_label(params,parameters,24,60,&sim_font_16,TEXT);
     lv_obj_t *card = ui_box(p, 774, 406, 466, 202, PANEL);
     ui_label(card, "CoreMark", 24, 18, &sim_font_20, TEXT);
     score = ui_label(card, "", 24, 54, &sim_digits_40, ACCENT);

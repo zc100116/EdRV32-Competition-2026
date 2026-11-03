@@ -26,10 +26,15 @@ void ui_page_games(lv_obj_t *p)
     lv_obj_set_style_border_width(grid, 0, 0);
     lv_obj_set_scrollable(grid, true);
     lv_obj_set_scroll_dir(grid, LV_DIR_VER);
+    int card_height=222;
+    for(unsigned i=0;i<count;++i) {
+        const lv_image_dsc_t *name=ui_data_game_name(i);
+        if(name && card_height<192+(int)name->header.h) card_height=192+(int)name->header.h;
+    }
     for(unsigned i = 0; i < count; ++i) {
-        ui_button(grid, "", (int)(i % 6) * 200, (int)(i / 6) * 234, 184, i);
+        ui_button(grid, "", (int)(i % 6) * 200, (int)(i / 6) * (card_height+12), 184, i);
         lv_obj_t *card = lv_obj_get_child(grid, -1);
-        lv_obj_set_height(card, 222);
+        lv_obj_set_height(card, card_height);
         if(games[i].cover) ui_picture(card, games[i].cover, 32, 12, 120, 160);
         else {
             uint32_t colors[] = {ACCENT, TEAL, 0x748ca6, 0x526bb4};

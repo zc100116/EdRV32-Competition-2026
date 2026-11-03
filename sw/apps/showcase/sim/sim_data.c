@@ -26,7 +26,7 @@ ui_system_t ui_data_system(void)
     unsigned step = lv_tick_get() / 500;
     ui_system_t d = {.seconds = lv_tick_get() / 1000, .cpu = 28 + step % 9,
         .fps = 58 + step % 3, .idle = 72 - step % 9, .npu_busy = 65 + step % 13,
-        .rnd_busy = 21 + step % 11, .link = true};
+        .rnd_busy = 21 + step % 11, .link = true, .clock_hz = 100000000};
     for(unsigned i = 0; i < 3; ++i) d.task_cpu[i] = 12 + i * 16 + (step / 2 * 7 + i) % 19;
     for(unsigned i = 0; i < 7; ++i) {
         d.ddr_read[i] = 65 + (i * 61 + step * 13) % 350;

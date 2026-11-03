@@ -1,6 +1,7 @@
 /* records.c — showcase design 4.5.5; EDGP v2 and EDG2 boundary parsing.
  * Reject malformed external records explicitly; clk_sys or host tests. */
 #include "records.h"
+#include "../nes/game_pack.h"
 #include <string.h>
 uint16_t record_u16(const uint8_t *p) { return p[0] | (uint16_t)p[1] << 8; }
 uint32_t record_u32(const uint8_t *p) { return record_u16(p) | (uint32_t)record_u16(p+2)<<16; }
@@ -10,11 +11,13 @@ void record_put32(uint8_t *p, uint32_t v)
 }
 static int span(uint32_t off, uint32_t len, uint32_t total)
 {
-    return off >= 100 && !(off & 3) && off <= total && len <= total - off;
+    return off >= sizeof(struct game_record_header) && !(off & 3) &&
+           off <= total && len <= total-off;
 }
 int game_record_parse(struct game_record *r, const uint8_t *d, uint32_t bytes)
 {
-    if (bytes < 100 || memcmp(d, "EDG2", 4) || record_u16(d+4) != 2) return 2;
+    if (bytes < sizeof(struct game_record_header) || memcmp(d, "EDG2", 4) ||
+        record_u16(d+4) != GAME_RECORD_VERSION) return 2;
     uint32_t total = record_u32(d+8);
     uint32_t no = record_u32(d+16), co = record_u32(d+24), ro = record_u32(d+28);
     *r = (struct game_record){.base=d, .total=total, .name_w=record_u16(d+12),
@@ -30,14 +33,14 @@ int game_record_parse(struct game_record *r, const uint8_t *d, uint32_t bytes)
 }
 int game_pack_count(const uint8_t *d, uint32_t bytes, unsigned *count)
 {
-    if (bytes < 8 || memcmp(d,"EDGP",4) || record_u16(d+4)!=2) return 2;
+    if (bytes < 8 || memcmp(d,"EDGP",4) || record_u16(d+4)!=GAME_PACK_VERSION) return 2;
     *count=record_u16(d+6);
     return *count > (bytes-8)/4 ? 2 : 0;
 }
 int game_pack_record(struct game_record *r,const uint8_t *d,uint32_t bytes,unsigned i)
 {
     uint32_t off=record_u32(d+8+i*4);
-    if ((off&3) || off>bytes || bytes-off<100) return 2;
+    if ((off&3) || off>bytes || bytes-off<sizeof(struct game_record_header)) return 2;
     uint32_t total=record_u32(d+off+8);
     if (total>bytes-off) return 2;
     return game_record_parse(r,d+off,total);

@@ -8,6 +8,7 @@ unsigned ui_mode;
 bool ui_game_open;
 static unsigned home_focus;
 static unsigned game_focus;
+static unsigned game_count;
 static bool game_back_armed;
 static lv_group_t *group;
 static lv_obj_t *content;
@@ -63,6 +64,11 @@ void ui_refresh(void)
         case 2: ui_vision_update(true); break;
         case 3: ui_process_update(); break;
         case 4: ui_graphics_update(); break;
+        case 5: {
+            unsigned count; ui_data_games(&count);
+            if(!ui_game_open && count!=game_count) ui_open(5);
+            break;
+        }
         case 6: ui_monitor_update(); break;
         case 7: ui_chip_update(); break;
         case 8: ui_debug_update(); break;
@@ -101,6 +107,7 @@ void ui_open(unsigned page)
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, ui_page_monitor,
         ui_page_chip, ui_page_debug};
+    if(page==5) ui_data_games(&game_count);
     pages[page](content);
     if(!item_count) {
         lv_group_add_obj(group,content);

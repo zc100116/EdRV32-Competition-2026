@@ -38,7 +38,11 @@ unsigned ui_data_hardware(void)
     if(h&APP_HW_ETH) r|=UI_ETH;
     return r;
 }
-ui_system_t ui_data_system(void) { return system_data; }
+ui_system_t ui_data_system(void)
+{
+    system_data.clock_hz=platform_clock_hz();
+    return system_data;
+}
 void showcase_cpu_report_init(void) { report_time=platform_ticks(); }
 void showcase_cpu_report(void)
 {
@@ -136,7 +140,8 @@ void board_step(void)
         showcase_draw_rnd_enable(false); showcase_lvgl_start_benchmark();
     } else if(pending_benchmark==3) {
         pending_benchmark=0; showcase_lvgl_stop_demo();
-        showcase_draw_rnd_enable((platform_hardware()&APP_HW_RND)!=0); ui_open(4); ui_suspend(false);
+        showcase_draw_rnd_enable((platform_hardware()&APP_HW_RND)!=0);
+        ui_open(4); ui_suspend(false);
     }
     if(pending_core || pending_benchmark)
         app_wake_at(platform_ticks()+platform_clock_hz()/30);

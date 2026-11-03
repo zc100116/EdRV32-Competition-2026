@@ -31,3 +31,17 @@ $(addprefix $(ROOT)/,$(SHOWCASE_FONTS) build/showcase/fonts/sim_digits_40.c) &: 
 	    --sizes $(SHOWCASE_FONT_SIZES) --digit-sizes 40 -- \
 	    $(wildcard $(ROOT)/sw/apps/showcase/ui/*.[ch]) \
 	    $(ROOT)/sw/apps/showcase/sim/sim_data.c $(ROOT)/sw/apps/showcase/games/games.txt
+
+include $(ROOT)/sw/apps/showcase/board/vision/program.mk
+# The pack is regenerated from the local manifest/ROMs/covers for every ELF build.
+SHOWCASE_GAME_PACK := $(ROOT)/build/showcase/games.bin
+SHOWCASE_GAME_OBJECT := $(ROOT)/build/showcase/games.o
+$(SHOWCASE_GAME_PACK): $(ROOT)/tools/sw/game_record.py \
+    $(ROOT)/sw/apps/showcase/games/games.txt FORCE
+	$(HOME)/.local/opt/edrv32-py/bin/python $(ROOT)/tools/sw/game_record.py pack \
+	    $(ROOT)/sw/apps/showcase/games/games.txt $@
+$(SHOWCASE_GAME_OBJECT): $(SHOWCASE_GAME_PACK)
+	riscv-none-elf-objcopy -I binary -O elf32-littleriscv -B riscv \
+	    --rename-section .data=.game_pack,alloc,load,readonly,data,contents $< $@
+$(OUT)/showcase.elf: $(SHOWCASE_GAME_OBJECT)
+PROGRAM_LDLIBS += $(SHOWCASE_GAME_OBJECT)

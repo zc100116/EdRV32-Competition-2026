@@ -14,7 +14,8 @@ static unsigned complete(unsigned kind,uint32_t base,uint32_t bytes,uint32_t *in
 { if(kind==1) return 4;
   assert(kind==3 && base==0x100 && bytes==128); completed++; *index=30; return 0; }
 static void camera(void) { camera_count++; }
-static void reply(const uint8_t *d,unsigned n) { memcpy(response,d,n); response_bytes=n; ++replies; }
+static void reply(const uint8_t *d,unsigned n)
+{ memcpy(response,d,n); response_bytes=n; ++replies; }
 static void message(struct edsc *s,unsigned type,const uint8_t *p,unsigned n)
 {
     uint8_t d[1024]={0}; memcpy(d,"EDSC",4); d[4]=(uint8_t)type;

@@ -220,7 +220,11 @@ static int network_link = -1;
 
 
 int showcase_network_link(void) { return network_link; }
-uint32_t showcase_network_tx_packets(void) { extern unsigned board_tx_packets; return board_tx_packets; }
+uint32_t showcase_network_tx_packets(void)
+{
+    extern unsigned board_tx_packets;
+    return board_tx_packets;
+}
 static void mdio_start(unsigned reg)
 {
     mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_MDIO_CMD_OFFSET,
