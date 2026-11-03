@@ -326,7 +326,7 @@ static void configure_capture(void)
     /* VRN must never touch PIX/GEO, including camera configuration. */
     if (v.page == PAGE_PROCESS) pix_mode();
     else if (platform_hardware() & APP_HW_PIX) {
-        struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, 0, 256, 0, 128};
+        struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, 128};
         pix_configure(&bypass);
         engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
     }

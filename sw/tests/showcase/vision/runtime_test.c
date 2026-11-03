@@ -95,7 +95,11 @@ void npu_start(uint32_t input, uint32_t output)
 }
 void pix_configure(const struct pix_config *c) { last_pix = *c; assert(hardware & APP_HW_PIX); }
 void pix_gamma_load(unsigned bank, const uint8_t values[256])
-{ assert(hardware & APP_HW_PIX); assert(bank <= 1 && values[255] == 255); ++gamma_loads; }
+{
+    assert(hardware & APP_HW_PIX);
+    assert(bank <= 1 && bank != last_pix.gamma_bank && values[255] == 255);
+    ++gamma_loads;
+}
 int32_t geo_q16(int32_t n, int32_t d) { return (int32_t)((int64_t)n * 65536 / d); }
 void geo_descriptor_pack(struct geo_descriptor *d, const struct geo_config *c)
 {
@@ -301,7 +305,12 @@ static void process_test(void)
     vision_app_process.exit();
     drain();
     display_frame(); display_frame();
-    puts("PASS all seven PIX/GEO modes and 1280x720 RGB565 descriptors");
+    unsigned bank = last_pix.gamma_bank;
+    vision_app_camera.enter(); drain();
+    assert(last_pix.gamma_bank == bank); /* Bypass retains the shadow bank selection. */
+    vision_app_camera.exit(); drain();
+    display_frame(); display_frame();
+    puts("PASS all seven PIX/GEO modes, native surfaces and gamma bank across page changes");
 }
 static void model_test(void)
 {
