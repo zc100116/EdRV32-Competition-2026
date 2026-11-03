@@ -57,8 +57,8 @@ static void wire_test(void)
     assert(strcmp(vision_model_header(header, 0x100020), "EDNM magic/version") == 0);
     const yolo_detection d = {1, 2, 1279, 719, 79, 875};
     uint8_t bytes[28];
-    assert(vision_detection_pack(bytes, &d, 1, 123) == 28);
-    const uint8_t exact[] = {'E','D','D','T',1,0,1,0,123,0,0,0,0,0,0,0,
+    assert(vision_detection_pack(bytes, &d, 1, 123, 456) == 28);
+    const uint8_t exact[] = {'E','D','D','T',1,0,1,0,123,0,0,0,200,1,0,0,
                             1,0,2,0,255,4,207,2,79,0,107,3};
     assert(memcmp(bytes, exact, sizeof exact) == 0);
     puts("PASS sparse EDNM boundary and exact yolo.py EDDT encoding");

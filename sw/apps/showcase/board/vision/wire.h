@@ -8,5 +8,5 @@
 uint32_t vision_read32(const uint8_t *bytes);
 const char *vision_model_header(const uint8_t *header, uint32_t bytes);
 size_t vision_detection_pack(uint8_t *out, const yolo_detection *boxes,
-                             unsigned count, uint32_t frame);
+                             unsigned count, uint32_t frame, uint32_t request);
 #endif

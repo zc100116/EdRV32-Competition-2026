@@ -15,6 +15,9 @@ camera/CH2 pairing, VRN without PIX/GEO, pause/resume, L0 submission followed by
 SWITCH / REL_BASE slot release, layer disable release, two upload slots, VIN DDR
 CH2 completion before NPU, rejected/busy ETH submission, all-three TX completion,
 PIX/GEO parameter changes, original view and deferred model/image BULK completion.
+P5 adds OUTPUT invalidation/cached reads, independent bypass with retained parameters,
+selective/all defaults, per-image request encoding and cancellation immediately followed
+by another upload while the old NPU job drains.
 GUI descriptor reads cannot release the scanned frame. Scheduler tests separately
 prove that a static GUI does not delay application slices and due GUI work does.
 

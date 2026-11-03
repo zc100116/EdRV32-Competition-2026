@@ -11,6 +11,7 @@
 #include "clint.h"
 #include "eth_monitor.h"
 #include "eth.h"
+#include "board/input.h"
 #include "virtual_input_uart.h"
 #include "gpio.h"
 #include "plic.h"
@@ -30,7 +31,9 @@ uint64_t platform_input_tick(void) { return input_tick; }
 unsigned platform_input_sequence(void) { return input_sequence; }
 void platform_input_received(unsigned source)
 {
-    uint16_t keys=virtual_input_get().keys;
+    struct virtual_input_state input = virtual_input_get();
+    showcase_input_virtual(input, platform_ticks());
+    uint16_t keys=input.keys;
     input_source=source;
     if(keys!=input_keys) {
         input_keys=keys; input_tick=platform_ticks(); ++input_sequence;
@@ -97,10 +100,7 @@ void *platform_uncached(void *storage)
 }
 struct virtual_input_state platform_virtual_input(void)
 {
-    uint32_t state = virtual_input_lock();
-    struct virtual_input_state result = virtual_input_get();
-    virtual_input_unlock(state);
-    return result;
+    return showcase_input_view(showcase_input_current_owner());
 }
 static uint32_t sample_keys(void)
 {
@@ -112,7 +112,7 @@ static uint32_t sample_keys(void)
     if (virtual_keys & VI_ESC) keys |= PLATFORM_BACK;
     return keys;
 }
-static void character(int value) { board_serial_character(value); }
+
 static volatile uint64_t rnd_cycles,npu_cycles;
 uint64_t board_rnd_cycles(void) { return rnd_cycles; }
 uint64_t board_npu_cycles(void) { return npu_cycles; }
@@ -148,6 +148,8 @@ static void disp_event(const struct engine_event *event, void *context)
         platform_puts("\r\n"); platform_stop();
     }
     vision_display_irq(event->irq);
+    if (event->irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK)
+        vision_gui_presented(platform_ticks());
     sched_signal(&application_task, 0x100);
     uint32_t events = 0;
     if (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) {
@@ -281,10 +283,11 @@ void showcase_communication_step(struct sched_task *task)
     uint32_t events = sched_take(task);
     (void)platform_milliseconds();
     if (events & 1) {
-        unsigned revision=virtual_input_revision();
-        virtual_input_uart_set_raw(board_uart_active() ? board_uart_byte : NULL);
-        virtual_input_uart_receive();
-        if(virtual_input_revision()!=revision) platform_input_received(1);
+        while (!(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
+            unsigned byte = mmio_read32(EDRV32_UART0_BASE + UART_RXDATA) & UART_DATA_MASK;
+            if (board_uart_active()) board_uart_byte((unsigned)byte);
+            else board_serial_character(byte);
+        }
         mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, UART_IRQ_RX_THRESH);
     }
     if (hardware & APP_HW_ETH) {
@@ -292,6 +295,7 @@ void showcase_communication_step(struct sched_task *task)
         network_status_step();
         mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, eth_irq_mask());
     }
+    showcase_input_expire(platform_ticks(), system_hz * 3ull / 10);
     showcase_input_sample(sample_keys());
     showcase_input_event();
     showcase_cpu_report();
@@ -320,7 +324,10 @@ void platform_init(void)
     plic_set_threshold(0);
     engine_irq_clear(ENGINE_DISP, engine_poll(ENGINE_DISP).irq);
     platform_media_callbacks(NULL, NULL, NULL);
-    virtual_input_uart_start(character);
+    plic_set_priority(EDRV32_PLIC_SOURCE_UART0, 1);
+    plic_set_enable(mmio_read32(EDRV32_PLIC_BASE + PLIC_ENABLE) |
+                    (1u << EDRV32_PLIC_SOURCE_UART0));
+    mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, UART_IRQ_RX_THRESH);
     gpio_set_edges(15, 15);
     gpio_irq_clear(15);
     plic_set_priority(EDRV32_PLIC_SOURCE_GPIO0, 1);

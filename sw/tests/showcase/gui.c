@@ -43,6 +43,22 @@ int main(void)
     assert(reads == 1 && completions == 1);
     showcase_gui_step(&gui_task);
     assert(reads == 1); /* A consumed wakeup is not replayed. */
+    showcase_input_sample(PLATFORM_LEFT);
+    lv_indev_data_t key = {0}; read_keys(NULL,&key);
+    assert(key.key==LV_KEY_PREV && key.state==LV_INDEV_STATE_PRESSED);
+    showcase_input_sample(PLATFORM_ENTER); read_keys(NULL,&key);
+    assert(key.key==LV_KEY_PREV && key.state==LV_INDEV_STATE_RELEASED);
+    read_keys(NULL,&key); assert(key.key==LV_KEY_ENTER && key.state==LV_INDEV_STATE_PRESSED);
+    showcase_input_sample(PLATFORM_BACK); read_keys(NULL,&key);
+    assert(key.key==LV_KEY_ENTER && key.state==LV_INDEV_STATE_RELEASED);
+    read_keys(NULL,&key); assert(key.key==LV_KEY_ESC && key.state==LV_INDEV_STATE_PRESSED);
+    showcase_input_owner(INPUT_APP); read_keys(NULL,&key);
+    assert(key.key==LV_KEY_ESC && key.state==LV_INDEV_STATE_RELEASED);
+    showcase_input_owner(INPUT_GUI); read_keys(NULL,&key);
+    assert(key.state==LV_INDEV_STATE_RELEASED);
+    showcase_input_sample(0); showcase_input_sample(PLATFORM_RIGHT); read_keys(NULL,&key);
+    assert(key.key==LV_KEY_NEXT && key.state==LV_INDEV_STATE_PRESSED);
+    puts("PASS LVGL current-key release, NEXT/PREV/ENTER/ESC and owner handoff");
     puts("PASS GUI input survives pending L1 flush and is consumed once after SWITCH1");
     return 0;
 }

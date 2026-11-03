@@ -10,6 +10,7 @@
 #include "../runtime.h"
 #include "../app.h"
 #include "virtual_input_uart.h"
+#include "../board/input.h"
 #include "cache.h"
 #include "mem_xbar.h"
 #include "demos/lv_demos.h"
@@ -350,23 +351,31 @@ static void sync_buffers(lv_display_t *disp, const lv_area_t *area)
 static void read_keys(lv_indev_t *indev, lv_indev_data_t *data)
 {
     (void)indev;
+    static uint32_t held;
     static uint32_t last_key;
-    uint32_t keys=input_snapshot;
-    data->state=keys && !benchmark_running ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
-    if(keys&PLATFORM_LEFT) last_key=LV_KEY_PREV;
-    else if(keys&PLATFORM_RIGHT) last_key=LV_KEY_NEXT;
-    else if(keys&PLATFORM_ENTER) last_key=LV_KEY_ENTER;
-    else if(keys&PLATFORM_BACK) last_key=LV_KEY_ESC;
-    data->key=last_key;
+    uint32_t keys = showcase_input_keys(INPUT_GUI);
+    /* Report the release of this key before selecting another held key. */
+    if (held && !(keys & held)) {
+        held = 0;
+        data->state = LV_INDEV_STATE_RELEASED;
+        data->key = last_key;
+        data->continue_reading = keys != 0;
+        return;
+    }
+    if (!held) {
+        if (keys & PLATFORM_LEFT) { held = PLATFORM_LEFT; last_key = LV_KEY_PREV; }
+        else if (keys & PLATFORM_RIGHT) { held = PLATFORM_RIGHT; last_key = LV_KEY_NEXT; }
+        else if (keys & PLATFORM_ENTER) { held = PLATFORM_ENTER; last_key = LV_KEY_ENTER; }
+        else if (keys & PLATFORM_BACK) { held = PLATFORM_BACK; last_key = LV_KEY_ESC; }
+    }
+    data->key = last_key;
+    data->state = held ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 }
 static void read_encoder(lv_indev_t *indev,lv_indev_data_t *data)
 {
     (void)indev;
-    uint32_t state=virtual_input_lock();
-    int16_t delta=virtual_input_take_wheel();
-    virtual_input_unlock(state);
-    data->enc_diff=benchmark_running ? 0 : delta;
-    data->state=!benchmark_running && (platform_virtual_input().mouse&4) ?
+    data->enc_diff = showcase_input_wheel();
+    data->state = (showcase_input_view(INPUT_GUI).mouse & 4) ?
         LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 }
 static lv_obj_t *pointer_cursor;
@@ -392,7 +401,7 @@ static lv_image_dsc_t cursor_image;
 static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
 {
     (void)indev;
-    struct virtual_input_state input = platform_virtual_input();
+    struct virtual_input_state input = showcase_input_view(INPUT_GUI);
     data->point.x = input.x;
     data->point.y = input.y;
     data->state = (input.mouse & 1) ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;

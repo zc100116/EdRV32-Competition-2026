@@ -1,6 +1,6 @@
 # Showcase vision backend
 
-Implements design 4.6.1–4.6.2. VIN CH0 supplies full-screen L0 camera frames;
+Implements P5 design 3.1–3.4 and 8.1–8.6. VIN CH0 supplies full-screen L0 camera frames;
 CH2 supplies NPU inputs. Uploaded RGB565 images use VIN's DDR input path for CH2
 and are scanned directly from the upload slot. There is no CPU CH2 or video BLIT.
 The camera application requires VIN + NPU, image recognition VIN + NPU + ETH,
@@ -27,11 +27,26 @@ mirrors. Gamma is computed one sample per CPU slice, then written into the inact
 registers apply at SOF; GEO descriptors retain their matrix for the submitted job.
 Original view bypasses both engines, and the L1 parameter panel can be collapsed.
 
-Serial records use the runtime system clock:
+P5 sessions retain per-application results and image metadata; the shared pipeline
+owns capture, inference, postprocessing and display references. Session callbacks
+poll STARTING, PAUSED and STOPPING completion. Pausing drains the current NPU job
+and freezes L0; stopping waits for VIN/PIX/GEO and L0 release. An image cancellation
+does not interrupt NPU, and a following upload can wait for the cancelled job to drain.
+EDDT offset 12 carries the image BULK_BEGIN sequence. Every image is preceded by
+IMAGE_INFO; board image navigation emits IMAGE_STEP only outside receiving/detecting.
 
-- `vision npu_ms=... post_ms=... display_fps=...` once per second of results;
-- `image receive_ms=... ch2_ms=... npu_ms=... post_ms=... return_ms=...
-  upload_to_done_ms=...` for each image.
+Each processing stage uses its own `enabled` bit. Disabling preserves parameters;
+`ui_data_process_defaults(stages)` resets selected parameters, with ALL also clearing
+the enable mask. PROCESS completion while RUNNING waits for a captured frame with the new revision;
+in other states parameters are saved and acknowledged immediately. DETECT completes
+after a GUI-consumed configuration reaches the next L1 SWITCH when recognition runs.
+OUTPUT is invalidated before cached decoding; cached workspace is private to CPU.
+
+The once-per-second `vision` record uses P5 8.6 field names and recent-window averages:
+`fps npu wait decode sort nms post_span gui e2e cpu_comm cpu_app cpu_gui`.
+VIN and NPU completion timestamps come from IRQs. GUI completion is the first L1
+SWITCH after `ui_data_vision()` consumes new boxes, as agreed with the coordinator;
+gui includes the wait before consumption. UART emission shares the existing CPU report.
 
 On F CPU125 hardware, check post-processing ≤35 ms and upload completion to DONE
 ≤300 ms. Host numerical/ownership tests cannot establish FPGA timing.

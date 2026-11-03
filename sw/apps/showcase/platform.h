@@ -27,11 +27,11 @@ uint32_t platform_clock_hz(void);
 uint32_t platform_milliseconds(void);
 uint32_t platform_hardware(void);
 /* Returns PLATFORM_* bits (not VI_*); KEY4/virtual ESC => PLATFORM_BACK.
- * platform_virtual_input() returns the unmodified virtual VI_* controller state. */
+ * platform_virtual_input() returns VI_* state filtered for the current owner. */
 uint32_t platform_keys(void);
 /* Pressed edges latched for the current application step; use with PLATFORM_INPUT. */
 uint32_t platform_pressed(void);
-/* Latest input transport: 0 none, 1 UART, 2 ETH WIN2. */
+/* Latest input transport: 0 none, 2 ETH WIN2. */
 unsigned platform_input_source(void);
 uint64_t platform_input_tick(void);
 unsigned platform_input_sequence(void);

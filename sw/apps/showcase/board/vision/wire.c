@@ -23,13 +23,13 @@ uint32_t vision_read32(const uint8_t *bytes)
 }
 
 size_t vision_detection_pack(uint8_t *out, const yolo_detection *boxes,
-                           unsigned int count, uint32_t frame_id)
+                           unsigned int count, uint32_t frame_id, uint32_t request)
 {
     out[0] = 'E'; out[1] = 'D'; out[2] = 'D'; out[3] = 'T';
     put16(out + 4, 1);
     put16(out + 6, (uint16_t)count);
     put32(out + 8, frame_id);
-    put32(out + 12, 0);
+    put32(out + 12, request);
     for (unsigned int i = 0; i < count; ++i) {
         uint8_t *b = out + 16 + i * 12;
         put16(b, (uint16_t)boxes[i].x0);

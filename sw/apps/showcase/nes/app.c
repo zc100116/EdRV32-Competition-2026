@@ -6,6 +6,7 @@
 #include "display.h"
 #include "../board/overlay.h"
 #include "../board/latency.h"
+#include "../ui/ui_data.h"
 static const char *rom_data;
 static uint64_t next_frame;
 static unsigned cadence;
@@ -18,7 +19,7 @@ void board_nes_latency(unsigned source,unsigned *maximum_us,unsigned *average_us
     *average_us=s->count ? (unsigned)(s->total*1000000/platform_clock_hz()/s->count) : 0;
 }
 
-static enum { STARTING, PLAYING, STOPPING } state;
+static enum { STARTING, PLAYING, STOPPING, STOPPING_INITIAL } state;
 void board_nes_select(unsigned i) { rom_data=(const char *)board_game(i)->rom; }
 char *osd_getromdata(void) { return (char *)rom_data; }
 uint64_t nes_ticks(void) { return platform_ticks(); }
@@ -60,7 +61,7 @@ static void step(void)
         nes_display_check();
         board_overlay_step();
         if((app_events()&PLATFORM_INPUT) && (platform_pressed()&PLATFORM_BACK)) {
-            nes_display_stop(); nes_stop(); state=STOPPING;
+            app_return(); return;
         }
         if(state==PLAYING) {
             if(now>=next_frame) {
@@ -71,8 +72,22 @@ static void step(void)
             app_wake_at(next_frame); return;
         }
     }
-    if(nes_display_idle()) { platform_media_callbacks(0,0,0); app_return(); }
-    else app_wake_at(now+platform_clock_hz()/1000);
+    app_wake_at(now+platform_clock_hz()/1000);
 }
-static void leave(void) { board_overlay_exit(); platform_media_callbacks(0,0,0); }
+static void leave(void)
+{
+    if (state == PLAYING) {
+        nes_stop(); nes_display_stop(); state = STOPPING;
+    } else if (state == STARTING) {
+        engine_control(ENGINE_DISP,0); state = STOPPING_INITIAL;
+    }
+}
+bool board_nes_ready(ui_state_t target)
+{
+    if (target == UI_STATE_RUNNING) return state == PLAYING;
+    if (!nes_display_idle()) return false;
+    if (state == STOPPING) board_overlay_exit();
+    platform_media_callbacks(0,0,0);
+    return true;
+}
 const struct app nes_app={"NES",0,APP_HW_RND,1,enter,step,leave};

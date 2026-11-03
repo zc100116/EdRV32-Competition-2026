@@ -4,6 +4,9 @@
 #include "games.h"
 #include "ddr_map.h"
 #include "protocol.h"
+#include "records.h"
+#include "state.h"
+#include "../ui/detection.h"
 #include "vision_hooks.h"
 #include "../runtime.h"
 #include "../platform.h"
@@ -62,22 +65,113 @@ static unsigned reserve(unsigned kind,uint32_t total,uint32_t *base)
     }
     else { *base=board_game_destination(); capacity=board_game_available(); }
     if(total>capacity) return 3;
+    if(kind==2) vision_image_receiving(protocol.seq);
     eth_window_configure(0,*base,total); return 0;
 }
 static unsigned complete(unsigned kind,uint32_t base,uint32_t bytes,uint32_t *index)
 {
     if(kind==3) return board_game_append(bytes,index);
     unsigned status=vision_bulk_done(kind,base,bytes);
-    return status ? status : 4;
+    if(status) board_session_fail(status);
+    return status ? status : EDSC_PENDING;
 }
-void board_bulk_complete(unsigned kind) { edsc_finish(&protocol,kind); }
+void board_bulk_complete(unsigned kind)
+{ edsc_finish(&protocol,kind,kind==2 ? vision_frame() : 0); }
+void board_bulk_cancel(void) { edsc_cancel(&protocol); }
+unsigned board_peer(void) { return protocol.peer; }
+uint32_t board_image_request(void) { return vision_request(); }
+static void state(uint8_t p[56])
+{
+    uint8_t vision[56] = {0}; vision_state(vision);
+    const struct board_state snapshot = {.session=ui_data_session(),
+        .error=board_session_error(), .boxes=vision[3],
+        .detection=ui_data_detection_config(), .process=ui_data_process_config(),
+        .request=record_u32(vision+44), .frame=record_u32(vision+48),
+        .image_status=vision[52]};
+    board_state_encode(p,&snapshot);
+}
+static ui_app_t app_target;
+static ui_state_t state_target;
+static unsigned command(unsigned type,const uint8_t *p,unsigned bytes,uint32_t seq)
+{
+    (void)seq;
+    ui_session_t s=ui_data_session();
+    if(type==4) {
+        app_target=(ui_app_t)p[0];
+        if(p[0]==UI_APP_GAME && p[1]==0) {
+            unsigned count; ui_data_games(&count);
+            if(record_u16(p+2)>=count) return 2;
+        }
+        if(p[1] && s.app!=app_target) return 5;
+        if(p[1]==1 && s.state!=UI_STATE_RUNNING) return 5;
+        if(p[1]==2 && s.state!=UI_STATE_PAUSED) return 5;
+        if(p[1]==3 && s.state!=UI_STATE_FAILED) return 5;
+        state_target=p[1]==1 ? UI_STATE_PAUSED :
+            app_target==UI_APP_NONE ? UI_STATE_IDLE : UI_STATE_RUNNING;
+        if(p[1]==0) ui_data_app_open(app_target,record_u16(p+2));
+        else if(p[1]==3) ui_data_app_retry();
+        else ui_data_app_pause(p[1]==1);
+        ui_show_app(app_target,record_u16(p+2));
+        return EDSC_PENDING;
+    }
+    if(type==5) {
+        if(s.app!=UI_APP_IMAGE || s.state!=UI_STATE_RUNNING || protocol.active) return 5;
+        vision_image_info(record_u16(p),record_u16(p+2),p+8,bytes-8);
+    } else if(type==6) {
+        ui_process_config_t c={.enabled=record_u32(p),.brightness=(int16_t)record_u16(p+4),
+            .contrast=record_u16(p+6),.gamma_tenths=record_u16(p+8),
+            .stage1=p[10],.stage2=p[11],.threshold=p[12],.original=p[13],
+            .angle=(int16_t)record_u16(p+14),.scale_percent=record_u16(p+16),
+            .translate_x=(int16_t)record_u16(p+18),.translate_y=(int16_t)record_u16(p+20)};
+        ui_data_process_set(&c);
+        return s.app==UI_APP_PROCESS && s.state==UI_STATE_RUNNING ? EDSC_PENDING : 0;
+    } else if(type==7) {
+        ui_data_detection_threshold(p[0]);
+        for(unsigned i=0;i<80;++i)
+            ui_data_detection_class(i,(record_u32(p+4+4*(i/32))>>(i%32))&1);
+        vision_detection_changed(); platform_gui_wake();
+        return (s.app==UI_APP_CAMERA || s.app==UI_APP_IMAGE) &&
+            s.state==UI_STATE_RUNNING ? EDSC_PENDING : 0;
+    }
+    platform_gui_wake();
+    return 0;
+}
+static unsigned progress(unsigned type)
+{
+    ui_session_t s=ui_data_session();
+    if(type==6) {
+        if(s.app!=UI_APP_PROCESS || s.state!=UI_STATE_RUNNING) return 0;
+        return vision_process_applied() ? 0 : EDSC_PENDING;
+    }
+    if(type==7) {
+        if((s.app!=UI_APP_CAMERA && s.app!=UI_APP_IMAGE) || s.state!=UI_STATE_RUNNING)
+            return 0;
+        return vision_detection_applied() ? 0 : EDSC_PENDING;
+    }
+    if(board_session_target()!=app_target) return 6;
+    if(s.state==UI_STATE_FAILED) return board_session_error();
+    if(s.app!=app_target) return EDSC_PENDING;
+    return s.state==state_target ? 0 : EDSC_PENDING;
+}
+static void cancel(unsigned kind)
+{
+    eth_window_configure(0,0,0);
+    if(kind==1 || kind==2) vision_cancel(kind);
+}
+void ui_data_image_step(int direction)
+{
+    uint8_t snapshot[56]; state(snapshot);
+    if(snapshot[52]!=UI_IMAGE_RECEIVING && snapshot[52]!=UI_IMAGE_DETECTING)
+        edsc_image_step(&protocol,direction);
+}
 void board_network_init(void)
 {
     eth_monitor_local_init(platform_clock_hz());
     eth_window_configure(0,0,0); eth_window_configure(1,0,0);
     eth_window_configure(3,MESSAGE_BASE,1024);
     engine_control(ENGINE_ETH,EDRV32_ETH_CTRL_ENABLE_MASK);
-    protocol.ops=(struct edsc_ops){reserve,complete,vision_camera,enqueue};
+    protocol.ops=(struct edsc_ops){reserve,complete,enqueue,state,command,progress,cancel};
+    protocol.build=BUILD_COMMIT;
 }
 extern void board_memory_sample(const struct mem_xbar_stats *memory);
 void board_network_step(void)
@@ -126,6 +220,7 @@ void board_network_step(void)
         edsc_bulk(&protocol,bytes);
     }
     engine_irq_clear(ENGINE_ETH,e.irq);
+    edsc_poll(&protocol,platform_ticks(),platform_clock_hz());
     static uint64_t next_monitor;
     uint64_t now=platform_ticks();
     if(now>=next_monitor) {

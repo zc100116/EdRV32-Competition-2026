@@ -4,6 +4,7 @@
 #define _GNU_SOURCE
 #include "vision_hooks.h"
 #include "memory.h"
+#include "wire.h"
 #include "../../../apps/showcase/ui/ui_data.h"
 #include "vin.h"
 #include "disp.h"
@@ -34,6 +35,15 @@ static uint32_t memory_base;
 static unsigned gamma_loads, pix_busy;
 static struct pix_config last_pix;
 void platform_gui_wake(void) {}
+uint32_t showcase_gui_frames(void) { return display_frames; }
+ui_system_t ui_data_system(void) { return (ui_system_t){0}; }
+static unsigned invalidates;
+void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
+{
+    assert(address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE && bytes == VISION_OUTPUT_BYTES);
+    memcpy((void *)address, (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE+VISION_OUTPUT_BASE),bytes);
+    ++invalidates;
+}
 uint32_t platform_frames(void) { return display_frames; }
 void platform_put_u32(uint32_t value) { fprintf(stderr, "%u", value); }
 void disp_submit(enum disp_layer layer, uint32_t base, uint32_t stride)
@@ -141,6 +151,7 @@ static void event(enum engine_id engine, uint32_t flags)
     const struct engine_event e = {.irq = flags};
     vision_irq(&e, (void *)(uintptr_t)engine);
 }
+static void display_frame(void);
 static void drain(void)
 {
     unsigned steps = 0;
@@ -178,22 +189,25 @@ static void camera_test(void)
     vision_service();
     camera(0, 10);
     display_frame(); display_frame();
-    const lv_image_dsc_t *first = ui_data_vision(false).image;
+    vision_detection_changed(); assert(!vision_detection_applied());
+    const lv_image_dsc_t *first = ui_data_vision().image;
+    assert(!vision_detection_applied());
+    vision_gui_presented(platform_ticks()); assert(vision_detection_applied());
     assert(first && first->data == physical(VISION_IMAGE_BASE));
     camera(1, 11);
     assert((busy[0] & 3) == 3);
-    ui_data_vision(false); /* GUI never releases a video surface. */
+    ui_data_vision(); /* GUI never releases a video surface. */
     assert((busy[0] & 3) == 3);
     display_frame();
     assert((busy[0] & 3) == 3); /* Submitted, old surface still scanned. */
     display_frame();
     assert(display_released == VISION_IMAGE_BASE);
     assert((busy[0] & 3) == 2);
-    ui_data_pause(); drain();
-    assert(ui_data_vision(false).paused);
-    ui_data_pause(); drain();
-    assert(!ui_data_vision(false).paused);
-    vision_app_camera.exit(); drain();
+    vision_pause(true); drain();
+    assert(vision_ready(UI_STATE_PAUSED));
+    vision_pause(false); drain();
+    assert(vision_ready(UI_STATE_RUNNING));
+    vision_app_camera.exit(); display_frame(); display_frame(); drain();
     display_frame(); display_frame();
     puts("PASS L0 SWITCH/REL_BASE releases VIN slots; GUI cannot release scanned frames");
 }
@@ -201,6 +215,7 @@ static void upload(unsigned base, unsigned index)
 {
     memset(physical(base), 0xff, VISION_IMAGE_BYTES);
     unsigned before = npu_runs;
+    vision_image_receiving(100+index);
     assert(vision_bulk_done(2, base, VISION_IMAGE_BYTES) == 0);
     unsigned memory_before = memory_starts;
     for (unsigned step = 0; memory_starts == memory_before; ++step) {
@@ -215,7 +230,7 @@ static void upload(unsigned base, unsigned index)
     accept_send = 0;
     event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
     for (unsigned step = 0; step < 1000; ++step) vision_service();
-    assert(submitted == index && window_reopened == index);
+    assert(submitted == index);
     accept_send = 1;
     vision_service();
     assert(submitted == index+1);
@@ -225,16 +240,15 @@ static void upload(unsigned base, unsigned index)
     assert(tx[1].word[0] == VISION_OUTPUT_BASE && tx[1].word[2] == 1);
     assert(tx[2].word[0] == VISION_TX_DETECTIONS && tx[2].word[2] == 0x102);
     assert(memcmp(physical(VISION_TX_DETECTIONS), "EDDT", 4) == 0);
+    assert(vision_read32((uint8_t *)physical(VISION_TX_DETECTIONS)+12)==100+index);
     ++done_count;
     vision_service();
     assert(bulk_completions[2] == index);
-    assert(window_reopened == index); /* Partial TX must keep CH2/OUTPUT/window owned. */
+
     done_count += 2;
     drain();
-    assert(window_reopened == index+1);
     assert(bulk_completions[2] == index+1);
-    assert(reopened_base == base && reopened_bytes == VISION_IMAGE_BYTES);
-    ui_data_vision(true);
+    ui_data_vision();
     display_frame(); display_frame();
 }
 static void image_test(void)
@@ -247,13 +261,42 @@ static void image_test(void)
     assert(vision_upload_base() == 0x08200000);
     upload(0x08200000, 1);
     assert(vision_upload_base() == 0x08000000);
-    assert(ui_data_vision(true).success == 2);
-    ui_data_batch_stop();
-    assert(ui_data_vision(true).waiting);
+    assert(ui_data_vision().image_status == UI_IMAGE_DONE);
     vision_app_image.exit();
-    drain();
+    display_frame(); display_frame(); drain();
     display_frame(); display_frame();
     puts("PASS VIN DDR image CH2, BOARD TX arbitration, per-job windows and all-three TX completion");
+}
+static void cancel_test(void)
+{
+    vision_app_image.enter(); drain();
+    unsigned before = submitted;
+    unsigned base = vision_upload_base();
+    vision_image_receiving(201);
+    assert(!vision_bulk_done(2,base,VISION_IMAGE_BYTES));
+    vision_service();
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK); vision_service();
+    unsigned npu_before = npu_runs;
+    vision_cancel(2);
+    assert(npu_runs==npu_before); /* No NPU abort or replacement before DONE. */
+    unsigned next = vision_upload_base(); assert(next && next!=base);
+    vision_image_receiving(202);
+    assert(!vision_bulk_done(2,next,VISION_IMAGE_BYTES));
+    unsigned memory_before = memory_starts;
+    event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    for(unsigned i=0;memory_starts==memory_before;++i) {
+        assert(i<4000); vision_service();
+    }
+    assert(submitted==before && npu_runs==npu_before);
+    event(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK); vision_service();
+    event(ENGINE_NPU,EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    for(unsigned i=0;submitted==before;++i) { assert(i<4000); vision_service(); }
+    assert(vision_read32((uint8_t *)physical(VISION_TX_DETECTIONS)+12)==202);
+    done_count+=3; drain();
+    assert(ui_data_vision().image_status==UI_IMAGE_DONE);
+    ui_data_vision(); vision_gui_presented(platform_ticks()); vision_service();
+    vision_app_image.exit(); display_frame(); display_frame(); drain();
+    puts("PASS CANCEL drains NPU, drops old EDDT, queues next request without overwriting OUTPUT");
 }
 static void process_test(void)
 {
@@ -262,7 +305,7 @@ static void process_test(void)
     drain();
     unsigned loads = gamma_loads;
     ui_process_config_t changed = ui_data_process_config();
-    changed.gamma_tenths = 30;
+    changed.gamma_tenths = 30; changed.enabled = UI_PROC_GAMMA;
     ui_data_process_set(&changed);
     for (unsigned i = 0; i < 255; ++i) vision_service();
     assert(gamma_loads == loads);
@@ -273,26 +316,36 @@ static void process_test(void)
     vision_service();
     assert(gamma_loads == loads + 1);
     changed.brightness = -256; changed.contrast = 511;
-    changed.gray = changed.binary = changed.invert = 1; changed.threshold = 255;
-    ui_data_process_set(&changed); vision_service();
+    changed.enabled = UI_PROC_LEVEL | UI_PROC_GRAY | UI_PROC_BINARY | UI_PROC_INVERT;
+    changed.threshold = 255;
+    ui_data_process_set(&changed); drain();
     assert(last_pix.brightness == -256 && last_pix.contrast == 511 && last_pix.threshold == 255);
     assert((last_pix.flags & (EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK |
         EDRV32_PIX_CFG_INV_EN_MASK)) == (EDRV32_PIX_CFG_GRAY_EN_MASK |
         EDRV32_PIX_CFG_BIN_EN_MASK | EDRV32_PIX_CFG_INV_EN_MASK));
-    ui_data_process_defaults(); drain();
+    changed.enabled = 0; ui_data_process_set(&changed); drain();
+    assert(last_pix.flags==0 && last_pix.stage1==PIX_BYPASS && last_pix.stage2==PIX_BYPASS);
+    assert(ui_data_process_config().brightness==-256 && ui_data_process_config().contrast==511);
+    ui_data_process_defaults(UI_PROC_LEVEL); drain();
+    assert(ui_data_process_config().brightness==0 && ui_data_process_config().gamma_tenths==30);
+    ui_data_process_defaults(UI_PROC_ALL); drain();
+    assert(!ui_data_process_config().enabled && ui_data_process_config().stage1==2);
+    assert(!vision_process_applied());
     puts("PASS one gamma sample per slice, inactive-bank boundary and PIX parameter extremes");
     for (unsigned mode = 0; mode < 7; ++mode) {
         ui_process_config_t config = ui_data_process_config();
         config.original = mode == 0;
         config.angle = (int)mode * 20;
-        config.stage1 = (int)mode;
-        ui_data_process_set(&config);
+        config.stage1 = mode ? (int)mode : 2;
+        config.enabled = mode ? UI_PROC_S1 | UI_PROC_ROTATE : 0;
+        ui_data_process_set(&config); drain();
         unsigned source = 0;
         while (busy[0] & (1u << source)) ++source;
         assert(source < 4);
         frames[0] = (struct vin_frame){source << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, mode};
         event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK);
         vision_service();
+        assert(vision_process_applied());
         if (mode) {
             assert(geo_descriptor == VISION_GEO_DESCRIPTOR);
             event(ENGINE_GEO, EDRV32_GEO_IRQ_STAT_DONE_MASK);
@@ -303,12 +356,12 @@ static void process_test(void)
         assert(image && image->header.w == 1280 && image->header.h == 720);
     }
     vision_app_process.exit();
-    drain();
+    display_frame(); display_frame(); drain();
     display_frame(); display_frame();
     unsigned bank = last_pix.gamma_bank;
     vision_app_camera.enter(); drain();
     assert(last_pix.gamma_bank == bank); /* Bypass retains the shadow bank selection. */
-    vision_app_camera.exit(); drain();
+    vision_app_camera.exit(); display_frame(); display_frame(); drain();
     display_frame(); display_frame();
     puts("PASS all seven PIX/GEO modes, native surfaces and gamma bank across page changes");
 }
@@ -333,7 +386,7 @@ static void model_test(void)
     assert(bulk_completions[1] == 0);
     drain();
     assert(bulk_completions[1] == 1);
-    assert(reopened_base == base && reopened_bytes == 0x100000+2051);
+
     assert(memcmp(physical(VISION_DESC_BASE), physical(base+0x1000), 68*64) == 0);
     assert(memcmp(physical(VISION_MODEL_BASE), physical(base+0x100000), 2051) == 0);
     puts("PASS sparse EDNM sliced loading, tail bytes, boundary status and deferred DONE");
@@ -364,6 +417,12 @@ static void matrix_test(void)
 int main(void)
 {
     matrix_test();
+    assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE, 0x02000000,
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
+           != MAP_FAILED);
+    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_OUTPUT_BASE), VISION_OUTPUT_BYTES,
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
+           != MAP_FAILED);
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE, 0x0b000000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
@@ -371,7 +430,9 @@ int main(void)
     vision_init();
     camera_test();
     image_test();
+    cancel_test();
     process_test();
     model_test();
+    assert(invalidates >= 6);
     return 0;
 }

@@ -1,6 +1,8 @@
 /* data.c — showcase 4.3/4.5; measured CPU and bus counters, exclusive benchmarks.
  * Statistics use runtime CLK_SYS_HZ and snapshot CLK_MEM cycles; clk_sys. */
 #include "board.h"
+#include "vision_hooks.h"
+#include "input.h"
 #include "hpm.h"
 #include "latency.h"
 #include "overlay.h"
@@ -18,7 +20,7 @@
 #include "uart.h"
 #include <string.h>
 static ui_system_t system_data;
-static char report_line[384];
+static char report_line[768];
 static unsigned report_position,report_length;
 unsigned board_cpu_reporting(void) { return report_position<report_length; }
 static uint64_t report_time,previous_busy[3],previous_idle;
@@ -89,17 +91,20 @@ void showcase_cpu_report(void)
     uint64_t overlay=board_overlay_ticks();
     unsigned overlay_percent=(unsigned)((overlay-overlay_before)*10000/log_elapsed);
     overlay_before=overlay;
-    unsigned uart_max,uart_avg,eth_max,eth_avg;
-    board_nes_latency(1,&uart_max,&uart_avg); board_nes_latency(2,&eth_max,&eth_avg);
+    unsigned eth_max,eth_avg;
+    board_nes_latency(2,&eth_max,&eth_avg);
     report_length=(unsigned)lv_snprintf(report_line,sizeof(report_line),
         "CPU%%/max_us %u/%u %u/%u %u/%u overlay_cpu=%u.%02u%% max_us=%u\r\n"
-        "NES input UART max_ms=%u.%03u avg_ms=%u.%03u "
-        "ETH max_ms=%u.%03u avg_ms=%u.%03u\r\n",
+        "NES input ETH max_ms=%u.%03u avg_ms=%u.%03u\r\n",
         system_data.task_cpu[0],system_data.task_max_us[0],
         system_data.task_cpu[1],system_data.task_max_us[1],
         system_data.task_cpu[2],system_data.task_max_us[2],overlay_percent/100,overlay_percent%100,
-        board_overlay_max_us(),uart_max/1000,uart_max%1000,uart_avg/1000,uart_avg%1000,
+        board_overlay_max_us(),
         eth_max/1000,eth_max%1000,eth_avg/1000,eth_avg%1000);
+    const char *vision = vision_report();
+    unsigned length = (unsigned)strlen(vision);
+    memcpy(report_line + report_length, vision, length + 1);
+    report_length += length;
     report_position=0;
 }
 void board_memory_sample(const struct mem_xbar_stats *m)
@@ -146,17 +151,20 @@ void ui_data_benchmark_stop(void)
 {
     if(pending_benchmark==2) ui_benchmark_controls(false);
     showcase_benchmark_stop(); pending_benchmark=0;
+    showcase_input_owner(INPUT_GUI);
     ui_suspend(false); ui_open(4);
 }
 void ui_data_benchmark_start(void)
 {
+    ui_data_app_open(UI_APP_GRAPHICS,0);
     for(unsigned i=0;i<16;++i) rows[i].ms_tenths=rows[i].fps_tenths=0;
     ui_hint("正在运行 LVGL benchmark 场景序列");
     pending_benchmark=1; action_frame=showcase_gui_frames();
     app_wake_at(platform_ticks()+platform_clock_hz()/30);
 }
 ui_coremark_t ui_data_coremark(void) { return core; }
-void ui_data_coremark_start(void)
+void ui_data_coremark_start(void) { ui_data_app_open(UI_APP_COREMARK,0); }
+void board_coremark_begin(void)
 {
     core.running=true; core.progress=0; pending_core=1;
     action_frame=showcase_gui_frames(); app_wake_at(platform_ticks()+platform_clock_hz()/30);
@@ -183,7 +191,8 @@ void board_step(void)
     extern void board_prof_step(void);
     board_prof_step();
     extern void board_render_step(void);
-    board_render_step();
+    ui_session_t session=ui_data_session();
+    if(session.app==UI_APP_GRAPHICS && session.state==UI_STATE_RUNNING) board_render_step();
     if(pending_core && showcase_gui_frames()!=action_frame) {
         for(core_round=0;core_round<2;++core_round)
             board_coremark_stack(run_coremark,__coremark_stack_top);
@@ -192,17 +201,30 @@ void board_step(void)
             "-fstrict-aliasing -march=rv32im_zicsr_zifencei; SRAM";
         core.score_tenths=(unsigned)(5000ull*platform_clock_hz()*10/core.cycles[0]);
         core.per_mhz_thousandths=(unsigned)(5000ull*1000000000/core.cycles[0]);
-        core.progress=100; core.running=false; pending_core=0; ui_refresh();
+        core.progress=100; core.running=false; pending_core=0; app_return(); ui_refresh();
     }
-    if(pending_benchmark==1 && showcase_gui_frames()!=action_frame) {
-        pending_benchmark=2; ui_suspend(true); showcase_benchmark_start();
+    if(pending_benchmark==1 && session.app==UI_APP_GRAPHICS &&
+       session.state==UI_STATE_RUNNING && showcase_gui_frames()!=action_frame) {
+        pending_benchmark=2; showcase_input_owner(INPUT_APP);
+        ui_suspend(true); showcase_benchmark_start();
         ui_benchmark_controls(true);
     } else if(pending_benchmark==2 && !showcase_benchmark_running()) {
         pending_benchmark=0; ui_benchmark_controls(false);
-        showcase_benchmark_stop(); ui_suspend(false); ui_open(4);
+        showcase_benchmark_stop(); showcase_input_owner(INPUT_GUI);
+        ui_suspend(false); ui_open(4);
     }
     if(pending_core || pending_benchmark)
         app_wake_at(platform_ticks()+platform_clock_hz()/30);
 }
 static void layer_exit(void) { layers_exit(); }
 const struct app board_layers_app={"layers",0,APP_HW_RND,1,layers_enter,layers_step,layer_exit};
+
+void board_coremark_stop(void) { pending_core=0; core.running=false; }
+void board_graphics_stop(void)
+{
+    if(pending_benchmark==2) ui_benchmark_controls(false);
+    showcase_benchmark_stop(); pending_benchmark=0;
+    showcase_input_owner(INPUT_GUI); ui_suspend(false);
+    extern void board_render_stop(void);
+    board_render_stop();
+}

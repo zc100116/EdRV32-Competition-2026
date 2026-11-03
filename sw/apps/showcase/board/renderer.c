@@ -16,6 +16,7 @@ static lv_image_dsc_t images[2];
 static ui_render_result_t results[RENDER_TEST_COUNT];
 static unsigned next_test,all;
 static bool running;
+void board_render_stop(void) { running=false; }
 const ui_render_result_t *ui_data_render_results(void)
 {
     for(unsigned i=0;i<RENDER_TEST_COUNT;++i) results[i].name=ui_render_names[i];
@@ -25,6 +26,7 @@ bool ui_data_render_running(void) { return running; }
 const lv_image_dsc_t *ui_data_render_image(unsigned side) { return &images[side]; }
 void ui_data_render_start(unsigned test)
 {
+    ui_data_app_open(UI_APP_GRAPHICS,0);
     if(test==TEST_LAYERS) {
         extern const struct app board_layers_app;
         board_request(&board_layers_app); return;
