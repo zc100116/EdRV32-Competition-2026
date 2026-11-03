@@ -52,7 +52,10 @@ static unsigned reserve(unsigned kind,uint32_t total,uint32_t *base)
 {
     uint32_t capacity;
     if(kind==1) { *base=SHOWCASE_MODEL_BASE; capacity=SHOWCASE_MODEL_BYTES; }
-    else if(kind==2) { *base=SHOWCASE_IMAGE_BASE; capacity=SHOWCASE_IMAGE_BYTES; }
+    else if(kind==2) {
+        *base=vision_upload_base(); capacity=SHOWCASE_IMAGE_BYTES;
+        if(!*base) return 3;
+    }
     else { *base=board_game_destination(); capacity=board_game_available(); }
     if(total>capacity) return 3;
     eth_window_configure(0,*base,total); return 0;

@@ -1,48 +1,22 @@
 # Vision host tests
 
-After integrating BOARD's `ui_data_process(unsigned mode)` contract and initializing
-the LVGL submodule, run:
-
-```sh
+```
 make -C sw/tests/showcase/vision test runtime
+make -C sw/tests/showcase test
 ```
 
-Both executables use C11 `-Wall -Wextra -Werror` and undefined-behavior sanitization.
-`test` compares sliced YOLO with `sw/lib/yolo_post.c` for empty/dense OUTPUT and five
-fixed-seed dense/sparse pairs: all detections, sorted/suppressed workspace entries,
-and operation statistics match exactly. The coordinator authorized generated OUTPUT
-because this repository does not contain saved NPU OUTPUT reference files.
-It also checks sparse EDNM framing, exact EDDT bytes and all 384 CPU CH2 rows.
+C11 builds use `-Wall -Wextra -Werror`; vision tests also use undefined-behavior
+sanitization. Numerical tests compare sliced YOLO against `sw/lib/yolo_post.c`
+for empty/dense OUTPUT and five fixed-seed dense/sparse pairs, checking detections,
+workspace and operation counts exactly. They also check sparse EDNM and EDDT bytes.
 
-`runtime` executes production `vision.c` with mocked hardware/BOARD services. It checks
-camera pairing, VRN absence of PIX/GEO accesses, render-completion slot retirement,
-pause/resume, image CH2 without VIN, rejected/busy TX submission, all-three-descriptor
-TX completion, distinct per-image receive windows, seven PIX/GEO modes, sparse model
-copy including tail bytes, upload status values and deferred BULK completion.
-All cases pass. No FPGA timing claim is derived from these host tests.
+Runtime tests execute production vision logic with mocked hardware boundaries:
+camera/CH2 pairing, VRN without PIX/GEO, pause/resume, L0 submission followed by
+SWITCH / REL_BASE slot release, layer disable release, two upload slots, VIN DDR
+CH2 completion before NPU, rejected/busy ETH submission, all-three TX completion,
+PIX/GEO parameter changes, original view and deferred model/image BULK completion.
+GUI descriptor reads cannot release the scanned frame. Scheduler tests separately
+prove that a static GUI does not delay application slices and due GUI work does.
 
-Parallel-worktree validation on 2026-11-03 used the existing LVGL checkout and BOARD's
-updated header without editing either dependency:
-
-```sh
-make -C sw/tests/showcase/vision test runtime \
-  LVGL_ROOT=/home/workspace/orca/workspaces/EdRV32-Competition-2026/b3-int/third_party/lvgl \
-  UI_CONTRACT=/home/workspace/orca/workspaces/EdRV32-Competition-2026/task-show-board/sw/apps/showcase/ui/ui_data.h
-```
-
-RV32 syntax validation (zero warnings/errors):
-
-```sh
-. /home/workspace/.local/opt/edrv32/env.sh
-riscv-none-elf-gcc -std=c11 -march=rv32im_zicsr -mabi=ilp32 \
-  -Wall -Wextra -Werror -fsyntax-only -DLV_CONF_INCLUDE_SIMPLE \
-  -I/home/workspace/orca/workspaces/EdRV32-Competition-2026/b3-int/third_party/lvgl \
-  -Isw/apps/showcase/lvgl -Isw/drivers/include -Isw/bsp/include -Isw/lib \
-  -Isw/lib/sched -Isw/apps/showcase/board/vision -Isw/apps/showcase/board \
-  -Isw/tests/showcase/vision \
-  -include /home/workspace/orca/workspaces/EdRV32-Competition-2026/task-show-board/sw/apps/showcase/ui/ui_data.h \
-  sw/apps/showcase/board/vision/*.c
-```
-
-The syntax check uses the mock BOARD header only for the two frozen BOARD function
-prototypes. Tests/build outputs remain under `build/sw/showcase/vision/`.
+Host tests establish behavior and numerical equivalence, not FPGA latency.
+Artifacts remain under `build/sw/showcase/vision/` and `build/sw/tests/showcase/`.

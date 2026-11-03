@@ -13,8 +13,9 @@ void vision_irq(const struct engine_event *event, void *context);
  */
 uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes);
 void vision_camera(void);
-/* Call after LV_EVENT_RENDER_READY; all RND source reads must have completed. */
-void vision_frame_presented(void);
+uint32_t vision_upload_base(void);
+/* DISP IRQ only latches events; task context releases L0 via REL_BASE. */
+void vision_display_irq(uint32_t irq);
 extern const struct app vision_app_camera;
 extern const struct app vision_app_image;
 extern const struct app vision_app_process;

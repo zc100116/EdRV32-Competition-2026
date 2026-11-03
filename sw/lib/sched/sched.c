@@ -29,6 +29,11 @@ void sched_defer_ready(struct sched_task *task,uint64_t now,uint64_t delay)
 {
     if(task->wake_at<=now) sched_wake_at(task,now+delay);
 }
+void sched_defer_for(struct sched_task *task, const struct sched_task *gui,
+                     uint64_t now, uint64_t delay)
+{
+    if (gui->events || gui->wake_at <= now) sched_defer_ready(task, now, delay);
+}
 uint32_t sched_take(struct sched_task *task)
 {
     uint32_t state = sched_port_lock();

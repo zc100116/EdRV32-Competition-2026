@@ -90,7 +90,7 @@ static void application_step(struct sched_task *task)
     board_games_step(); board_step();
     if(vision_service()) app_wake_at(platform_ticks());
     if(active) active->step();
-    if(!paused) sched_defer_ready(task,platform_ticks(),platform_clock_hz()/1000);
+    if(!paused) sched_defer_for(task,&gui_task,platform_ticks(),platform_clock_hz()/1000);
 }
 int main(void)
 {

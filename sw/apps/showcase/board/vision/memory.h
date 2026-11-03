@@ -1,5 +1,5 @@
 /* memory.h — showcase design 4.5; physical DDR allocation inherited from demo.
- * Frame ownership is shared by VIN, NPU, GEO and LVGL/RND; clk_sys domain.
+ * Frame ownership is shared by VIN, NPU, GEO and DISP L0; clk_sys domain.
  */
 #ifndef SHOWCASE_VISION_MEMORY_H
 #define SHOWCASE_VISION_MEMORY_H

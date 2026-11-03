@@ -14,13 +14,14 @@
 #include "mem_xbar.h"
 #include "demos/lv_demos.h"
 #include "../ui/theme.h"
+#include "include/lvgl/debugging/lv_sysmon.h"
 #include "../board/board.h"
 #include "../board/vision_hooks.h"
 
-enum { WIDTH = 1280, HEIGHT = 720, STRIDE = WIDTH * 2, PIXELS = WIDTH * HEIGHT };
-static _Alignas(4096) uint16_t buffers[2][PIXELS] __attribute__((section(".noinit")));
+enum { WIDTH = 1280, HEIGHT = 720, STRIDE = WIDTH * 4, PIXELS = WIDTH * HEIGHT };
+static _Alignas(4096) uint32_t buffers[2][PIXELS] __attribute__((section(".noinit")));
 static lv_display_t *display;
-static const uint16_t *front = buffers[1];
+static const uint32_t *front = buffers[1];
 static uint32_t input_snapshot;
 static uint32_t flush_count;
 static bool demo_running;
@@ -51,6 +52,9 @@ struct benchmark_window {
     struct showcase_cpu_counters cpu;
 };
 static bool benchmark_running;
+static struct showcase_benchmark_scene benchmark_results[16];
+static unsigned benchmark_completed;
+static uint64_t benchmark_window_start;
 static bool capturing_scene_timer;
 static unsigned benchmark_scene;
 static lv_timer_cb_t scene_timer_cb;
@@ -157,6 +161,7 @@ static void benchmark_print(const char *name, const struct benchmark_window *win
 
 static void benchmark_begin_window(void)
 {
+    benchmark_window_start = platform_ticks();
     struct mem_xbar_stats discarded;
     benchmark_window = (struct benchmark_window) {0};
     benchmark_before = *showcase_draw_rnd_stats();
@@ -167,6 +172,7 @@ static void benchmark_begin_window(void)
 
 static void benchmark_finish_window(void)
 {
+    uint64_t elapsed = platform_ticks() - benchmark_window_start;
     showcase_cpu_end(&benchmark_window.cpu);
     struct mem_xbar_stats fabric;
     mem_xbar_snapshot(&fabric);
@@ -222,6 +228,11 @@ static void benchmark_finish_window(void)
     benchmark_total.copy.doorbells += w->copy.doorbells;
     benchmark_total.xbar_cycles += w->xbar_cycles;
     benchmark_print(benchmark_names[benchmark_scene], w);
+    benchmark_results[benchmark_scene] = (struct showcase_benchmark_scene){
+        benchmark_names[benchmark_scene],
+        w->frames ? (unsigned)(w->render_ticks * 10000 / platform_clock_hz() / w->frames) : 0,
+        (unsigned)((uint64_t)w->frames * platform_clock_hz() * 10 / elapsed)};
+    benchmark_completed = benchmark_scene + 1;
     board_benchmark_result(benchmark_scene,w->render_ticks,w->frames);
 }
 
@@ -250,7 +261,6 @@ lv_timer_t *__wrap_lv_timer_create(lv_timer_cb_t cb, uint32_t period, void *user
 
 static void benchmark_refresh_event(lv_event_t *event)
 {
-    if(lv_event_get_code(event)==LV_EVENT_RENDER_READY) vision_frame_presented();
     if (!benchmark_running) return;
     switch (lv_event_get_code(event)) {
     case LV_EVENT_REFR_START:
@@ -292,30 +302,30 @@ static uint32_t dirty_bytes;
 static bool clean_all_needed;
 static volatile bool flush_pending;
 static volatile bool scan_started;
-static const uint16_t *pending_pixels;
+static const uint32_t *pending_pixels;
 static volatile uint32_t display_events;
 
 static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
 {
-    uint32_t bytes = (uint32_t)(area->x2 - area->x1 + 1) * 2u;
-    uint32_t covered = (((uint32_t)area->x2 * 2u + 33u) & ~31u) -
-                       (((uint32_t)area->x1 * 2u) & ~31u);
+    uint32_t bytes = (uint32_t)(area->x2 - area->x1 + 1) * 4u;
+    uint32_t covered = (((uint32_t)area->x2 * 4u + 33u) & ~31u) -
+                       (((uint32_t)area->x1 * 4u) & ~31u);
     dirty_bytes += covered * (uint32_t)(area->y2 - area->y1 + 1);
     if (dirty_bytes > 32768u) clean_all_needed = true;
     if (!clean_all_needed) {
         for (int32_t y = area->y1; y <= area->y2; ++y)
             cache_clean((uintptr_t)pixels + (uint32_t)y * STRIDE +
-                        (uint32_t)area->x1 * 2u, bytes);
+                        (uint32_t)area->x1 * 4u, bytes);
     }
     if (lv_display_flush_is_last(disp)) {
         if (clean_all_needed) cache_clean_all();
-        pending_pixels = (const uint16_t *)pixels;
+        pending_pixels = (const uint32_t *)pixels;
         flush_pending = true;
         dirty_bytes = 0;
         clean_all_needed = false;
         /* Stride and geometry stay fixed; only the next base changes. The
          * SWITCH IRQ releases front and resumes this asynchronous flush. */
-        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_NEXT_BASE_OFFSET,
+        mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_NEXT_BASE_OFFSET,
                      rnd_physical(pending_pixels));
     } else lv_display_flush_ready(disp);
 }
@@ -323,11 +333,11 @@ void showcase_gui_disp_event(uint32_t irq)
 {
     if (!scan_started && (irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK)) {
         scan_started = true;
-        sched_signal(&gui_task, 1);
+        sched_signal(&gui_task, PLATFORM_FRAME);
     }
-    if (!flush_pending || !(irq & EDRV32_DISP_IRQ_STAT_SWITCH_MASK)) return;
+    if (!flush_pending || !(irq & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK)) return;
     display_events |= irq;
-    sched_signal(&gui_task, 1);
+    sched_signal(&gui_task, PLATFORM_SWITCH1);
 }
 static void sync_buffers(lv_display_t *disp, const lv_area_t *area)
 {
@@ -359,6 +369,12 @@ static void read_encoder(lv_indev_t *indev,lv_indev_data_t *data)
         LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 }
 static lv_obj_t *pointer_cursor;
+static lv_timer_t *cursor_timeout;
+static void hide_cursor(lv_timer_t *timer)
+{
+    (void)timer;
+    lv_obj_set_hidden(pointer_cursor, true);
+}
 /* Design 4.5.3 arrow cursor: opaque white fill with a black outline so it stays
  * visible on both light and dark pages; '.' is transparent. */
 #define CURSOR_W 11
@@ -380,12 +396,13 @@ static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
     data->point.y = input.y;
     data->state = (input.mouse & 1) ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
     static int16_t x,y;
-    static uint32_t moved;
     if(input.active && (input.x!=x || input.y!=y || input.mouse)) {
-        x=input.x; y=input.y; moved=platform_milliseconds();
+        x=input.x; y=input.y;
+        lv_timer_set_repeat_count(cursor_timeout, 1);
+        lv_timer_reset(cursor_timeout);
+        lv_timer_resume(cursor_timeout);
         lv_obj_set_hidden(pointer_cursor,false);
     }
-    if(platform_milliseconds()-moved>=5000) lv_obj_set_hidden(pointer_cursor,true);
 }
 
 void showcase_lvgl_init(void)
@@ -396,7 +413,7 @@ void showcase_lvgl_init(void)
     showcase_draw_rnd_init();
     showcase_draw_rnd_enable((platform_hardware() & APP_HW_RND) != 0);
     display = lv_display_create(WIDTH, HEIGHT);
-    lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
+    lv_display_set_color_format(display, LV_COLOR_FORMAT_ARGB8888);
     lv_display_set_buffers(display, buffers[0], buffers[1], sizeof(buffers[0]),
                            LV_DISPLAY_RENDER_MODE_DIRECT);
     lv_display_set_flush_cb(display, flush);
@@ -407,14 +424,17 @@ void showcase_lvgl_init(void)
     lv_indev_t *keys = lv_indev_create();
     lv_indev_set_type(keys, LV_INDEV_TYPE_KEYPAD);
     lv_indev_set_read_cb(keys, read_keys);
+    lv_indev_set_mode(keys, LV_INDEV_MODE_EVENT);
     lv_indev_set_group(keys, group);
     lv_indev_t *encoder=lv_indev_create();
     lv_indev_set_type(encoder,LV_INDEV_TYPE_ENCODER);
     lv_indev_set_read_cb(encoder,read_encoder);
+    lv_indev_set_mode(encoder, LV_INDEV_MODE_EVENT);
     lv_indev_set_group(encoder,group);
     lv_indev_t *pointer = lv_indev_create();
     lv_indev_set_type(pointer, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(pointer, read_pointer);
+    lv_indev_set_mode(pointer, LV_INDEV_MODE_EVENT);
     for(unsigned y = 0; y < CURSOR_H; ++y) {
         for(unsigned x = 0; x < CURSOR_W; ++x) {
             char c = cursor_art[y][x];
@@ -434,22 +454,26 @@ void showcase_lvgl_init(void)
     lv_obj_set_clickable(pointer_cursor, false);
     lv_obj_set_hidden(pointer_cursor, true);
     lv_indev_set_cursor(pointer, pointer_cursor);
+    cursor_timeout = lv_timer_create(hide_cursor, 5000, NULL);
+    lv_timer_set_auto_delete(cursor_timeout, false);
+    lv_timer_pause(cursor_timeout);
     lv_memzero((void *)front, sizeof(buffers[0]));
+    lv_sysmon_hide_performance(display);
     showcase_gui_restore();
-    platform_puts("LVGL v9.6.0 DIRECT RGB565 1280x720 batch=32\r\n");
+    platform_puts("LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32\r\n");
 }
 
 uint32_t showcase_gui_frames(void) { return flush_count; }
 void showcase_gui_step(struct sched_task *task)
 {
-    sched_take(task);
+    uint32_t task_events = sched_take(task);
     if (showcase_gui_paused() || !scan_started) return;
     uint32_t state = virtual_input_lock();
     uint32_t events = display_events;
     display_events = 0;
     virtual_input_unlock(state);
     if (flush_pending) {
-        if (events & EDRV32_DISP_IRQ_STAT_SWITCH_MASK) {
+        if (events & EDRV32_DISP_IRQ_STAT_SWITCH1_MASK) {
             front = pending_pixels;
             flush_pending = false;
             ++flush_count;
@@ -458,6 +482,9 @@ void showcase_gui_step(struct sched_task *task)
         }
         if (flush_pending) return;
     }
+    if (task_events & PLATFORM_INPUT)
+        for (lv_indev_t *input = lv_indev_get_next(NULL); input; input = lv_indev_get_next(input))
+            lv_indev_read(input);
     if(!ui_detection_settings && (ui_page==1 || ui_page==2)) ui_vision_frame(ui_page==2);
     else if(ui_page==3) ui_process_update();
     uint32_t delay = lv_timer_handler();
@@ -485,9 +512,8 @@ void showcase_gui_restore(void)
     scan_started = false;
     display_events = 0;
     disp_l0_scroll(0, 0);
-    disp_layer_enable(DISP_L1, 0);
-    disp_submit(DISP_L0, rnd_physical(front), STRIDE);
-    disp_layer_enable(DISP_L0, 1);
+    disp_layer_enable(DISP_L0, 0);
+    showcase_display_l1_full();
     engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
     virtual_input_unlock(state);
     lv_display_flush_ready(display);
@@ -513,6 +539,7 @@ void showcase_lvgl_stop_demo(void)
         showcase_cpu_end(&discarded);
     }
     benchmark_running = false;
+    lv_sysmon_hide_performance(display);
     /* Widget destructors delete their own timers. Delete the object tree first,
      * then remove remaining demo timers such as benchmark's scene timer.
      */
@@ -557,6 +584,7 @@ static void benchmark_end(const lv_demo_benchmark_summary_t *summary)
     platform_put_u32(summary->valid_scene_cnt ?
         summary->total_avg_fps / summary->valid_scene_cnt : 0);
     platform_puts("\r\n");
+    lv_sysmon_hide_performance(display);
     showcase_draw_rnd_print_stats();
     board_benchmark_end();
 }
@@ -566,8 +594,10 @@ void showcase_lvgl_start_benchmark(void)
     begin_demo();
     lv_demo_benchmark_set_end_cb(benchmark_end);
     benchmark_scene = 0;
+    benchmark_completed = 0;
     benchmark_total = (struct benchmark_window) {0};
     capturing_scene_timer = true;
+    lv_sysmon_show_performance(display);
     lv_demo_benchmark();
     benchmark_begin_window();
     benchmark_running = true;
@@ -575,3 +605,24 @@ void showcase_lvgl_start_benchmark(void)
 
 void showcase_lvgl_input(uint32_t keys) { input_snapshot = keys; }
 lv_display_t *showcase_lvgl_display(void) { return display; }
+
+void showcase_display_l1_window(int x, int y, int w, int h, const void *base,
+                                uint32_t stride)
+{
+    disp_l1_geometry((uint16_t)x, (uint16_t)y, (uint16_t)w, (uint16_t)h, 255);
+    disp_submit(DISP_L1, rnd_physical(base), stride);
+    disp_layer_enable(DISP_L1, 1);
+}
+void showcase_display_l1_full(void)
+{
+    showcase_display_l1_window(0, 0, WIDTH, HEIGHT, front, STRIDE);
+}
+
+void showcase_benchmark_start(void) { showcase_lvgl_start_benchmark(); }
+void showcase_benchmark_stop(void) { showcase_lvgl_stop_demo(); }
+bool showcase_benchmark_running(void) { return benchmark_running; }
+unsigned showcase_benchmark_result(const struct showcase_benchmark_scene **scenes)
+{
+    *scenes = benchmark_results;
+    return benchmark_completed;
+}

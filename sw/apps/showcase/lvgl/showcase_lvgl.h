@@ -6,6 +6,7 @@
 #ifndef SHOWCASE_LVGL_H
 #define SHOWCASE_LVGL_H
 #include "lvgl.h"
+#include "../ui/ui_data.h"
 #include "platform.h"
 struct showcase_rnd_timing {
     uint64_t clean_ticks;
@@ -29,4 +30,16 @@ void showcase_lvgl_start_widgets(void);
 void showcase_lvgl_start_benchmark(void);
 void showcase_lvgl_stop_demo(void);
 lv_display_t *showcase_lvgl_display(void);
+void showcase_display_l1_window(int x, int y, int w, int h, const void *base,
+                                uint32_t stride);
+void showcase_display_l1_full(void);
+void showcase_benchmark_start(void);
+void showcase_benchmark_stop(void);
+struct showcase_benchmark_scene {
+    const char *name;
+    uint32_t ms_tenths;
+    uint32_t fps_tenths;
+};
+bool showcase_benchmark_running(void);
+unsigned showcase_benchmark_result(const struct showcase_benchmark_scene **scenes);
 #endif

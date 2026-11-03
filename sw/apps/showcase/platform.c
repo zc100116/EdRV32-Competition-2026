@@ -34,6 +34,7 @@ static rnd_callback app_rnd_callback;
 static engine_irq_callback app_disp_callback;
 static void *app_context;
 
+void platform_gui_wake(void) { sched_signal(&gui_task, 0x100); }
 void platform_puts(const char *text) { uart_puts(text); }
 void platform_put_u32(uint32_t value)
 {
@@ -134,6 +135,8 @@ static void disp_event(const struct engine_event *event, void *context)
         platform_puts("DISP ERR_CODE="); platform_put_hex(event->error);
         platform_puts("\r\n"); platform_stop();
     }
+    vision_display_irq(event->irq);
+    sched_signal(&application_task, 0x100);
     uint32_t events = 0;
     if (event->irq & EDRV32_DISP_IRQ_STAT_FRAME_MASK) {
         ++frames;

@@ -21,6 +21,7 @@ enum platform_key {
     PLATFORM_ENTER = 4u, PLATFORM_BACK = 8u
 };
 void platform_init(void);
+void platform_gui_wake(void);
 uint64_t platform_ticks(void);
 uint32_t platform_clock_hz(void);
 uint32_t platform_milliseconds(void);

@@ -4,7 +4,6 @@
 #include "post.h"
 #include "wire.h"
 #include "memory.h"
-#include "ch2.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -64,23 +63,6 @@ static void wire_test(void)
     assert(memcmp(bytes, exact, sizeof exact) == 0);
     puts("PASS sparse EDNM boundary and exact yolo.py EDDT encoding");
 }
-static void ch2_test(void)
-{
-    static uint8_t rgb[VISION_IMAGE_BYTES];
-    static uint8_t tensor[VISION_INPUT_BYTES];
-    memset(rgb, 0xff, sizeof rgb);
-    memset(tensor, 0xaa, sizeof tensor);
-    for (unsigned y = 0; y < 384; ++y) {
-        vision_ch2_row(rgb, tensor, y);
-        for (unsigned x = 0; x < 640; ++x) {
-            const uint8_t *pixel = tensor + y*2560 + x*4;
-            unsigned value = y < 12 || y >= 372 ? 57 : 127;
-            assert(pixel[0] == value && pixel[1] == value && pixel[2] == value);
-            assert(pixel[3] == 0);
-        }
-    }
-    puts("PASS sliced CPU CH2: 384 rows, letterbox and C4 padding");
-}
 int main(void)
 {
     memset(output, 0x80, sizeof output);
@@ -105,6 +87,5 @@ int main(void)
         compare("sparse OUTPUT");
     }
     wire_test();
-    ch2_test();
     return 0;
 }

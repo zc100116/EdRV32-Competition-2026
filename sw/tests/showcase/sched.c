@@ -11,6 +11,7 @@ static unsigned fairness,gui_calls;
 static uint64_t gui_at;
 static volatile uint32_t flag;
 static jmp_buf finished;
+struct sched_task *test_gui;
 uint64_t sched_port_time(void) { return now; }
 uint32_t sched_port_lock(void) { return 0; }
 void sched_port_unlock(uint32_t s) { (void)s; }
@@ -27,7 +28,8 @@ static void step(struct sched_task *task)
 static void app_slice(struct sched_task *task)
 {
     sched_take(task); now+=100; sched_wake_at(task,now);
-    sched_defer_ready(task,now,1000);
+    extern struct sched_task *test_gui;
+    sched_defer_for(task,test_gui,now,1000);
 }
 static void gui_slice(struct sched_task *task)
 {
@@ -47,6 +49,12 @@ int main(void)
     fairness=1; now=0;
     struct sched_task app={"app",app_slice,1,0,0,0,0};
     struct sched_task gui={"GUI",gui_slice,2,0,0,0,0};
+    test_gui=&gui;
+    gui.wake_at=UINT64_MAX;
+    app_slice(&app);
+    assert(app.wake_at==now);
+    puts("PASS static GUI: application slice is not deferred");
+    gui.wake_at=0;
     sched_add(&app); sched_add(&gui);
     if(!setjmp(finished)) sched_run();
     assert(gui_calls==4);

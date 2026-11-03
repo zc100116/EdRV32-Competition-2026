@@ -531,7 +531,7 @@ void showcase_draw_rnd_copy(void *dst, const void *src, uint16_t stride, const l
     struct rnd_command *copy = &commands[SHOWCASE_RND_BATCH_COMMANDS];
     struct rnd_common c = {
         .dst_base = rnd_physical(dst), .dst_stride = stride,
-        .dst_fmt = RND_RGB565, .src_fmt = RND_RGB565,
+        .dst_fmt = RND_ARGB8888, .src_fmt = RND_ARGB8888,
         .clip = { area->x1, area->y1, area->x2, area->y2 },
         .rect = { area->x1, area->y1, area->x2, area->y2 }
     };

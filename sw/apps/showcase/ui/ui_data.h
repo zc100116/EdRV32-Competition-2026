@@ -54,6 +54,15 @@ void ui_data_pause(void);
 void ui_data_boxes(void);
 /* Stop the image batch and wait for the next PC upload. */
 void ui_data_batch_stop(void);
+typedef struct {
+    int brightness, contrast, gamma_tenths, stage1, stage2;
+    int gray, binary, threshold, invert;
+    int angle, scale_percent, translate_x, translate_y, mirror_x, mirror_y;
+    bool original;
+} ui_process_config_t;
+ui_process_config_t ui_data_process_config(void);
+void ui_data_process_set(const ui_process_config_t *config);
+void ui_data_process_defaults(void);
 /* Return the image used for the processing mode preview. */
 const lv_image_dsc_t *ui_data_process(unsigned mode);
 /* Return all sixteen benchmark rows. */
