@@ -1,0 +1,4 @@
+Generated PLL125MHz; I1 M2 F15.625 O0=6.75; input27MHz.
+Final report_timing clk_sys period=8.0000ns.
+Private SYS constant125000000; private include cpu125/rtl/include; DDR core125MHz; NPU150MHz.
+create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -multiply_by {125} -divide_by {27}

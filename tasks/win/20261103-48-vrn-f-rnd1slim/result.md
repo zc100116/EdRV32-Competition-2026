@@ -7,7 +7,8 @@
 | VRN CPU100MHz第一次结果 | 时序报告、关键路径、参数建议；cpu100_timing_notes.md、artifacts/VRN-cpu100m/ | CPU+0.439ns、mem-0.124ns、NPU-0.022ns；RGMII hold-0.361ns | fpga/bitstreams/EdRV32-VRN-cpu100m.sbit |
 | VRN CPU125MHz | 完整阶段汇总、原生报告gzip、层次资源、高扇出、拥塞、扩展时序；cpu125_results.md、artifacts/VRN-cpu125m/ | CPU-0.436ns、mem-0.167ns、NPU+0.051ns；RGMII hold-0.361ns | fpga/bitstreams/EdRV32-VRN-cpu125m.sbit |
 | VRN CPU100MHz参数重跑 | 用户已重新运行，本次不采集新结果，不覆盖第一次归档 | 未整理 | 未另归档 |
-| F CPU100MHz / F CPU125MHz | 本次收集范围不含F | 未整理 | 未归档 |
+| F CPU100MHz | 进行中快照：第25轮22877未布通/65077过用；artifacts/F-cpu100m-progress/ | 未取得最终时序 | 未归档 |
+| F CPU125MHz | 第117轮布通；完整报告见f_cpu125_results.md、artifacts/F-cpu125m/ | CPU-0.033ns、mem-0.010ns、NPU-0.120ns；RGMII hold-0.242ns | fpga/bitstreams/EdRV32-F-cpu125m.sbit |
 
 VRN125第174轮0未布通/0过用，PnR1h10m24s，Map LUT77175/FF82542/DRM250/APM345。CPU最终时钟周期8.0000ns，PLL和私有头文件频率一致。当前所有归档比特流仍有时序违例，不是时序签核版本。本轮没有取得这些比特流的上板结果。
 

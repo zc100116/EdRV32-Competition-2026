@@ -1,0 +1,80 @@
+    CLMA_303_846(/devAL6) : u_mem/u_xbar/u_sched/N224_17_or[1]_3/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMS_243_643(/FF1/FF) CLMA_273_919(/FF3/FF) replicated by the FF instance CLMS_291_643(/FF2/FF) .
+Origin u_sys/u_media_apb_async/request_r[7]/opit_0 replicates:
+    CLMS_243_643(/FF1/FF)  : u_sys/u_media_apb_async/request_r[7]/opit_1(gopQ)
+    CLMA_273_919(/FF3/FF)  : u_sys/u_media_apb_async/request_r[7]/opit_2(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_237_529(/devBL6) CLMS_231_517(/devCL6_S) replicated by the LUT instance CLMA_237_529(/devCL6).
+Origin u_rnd/u_draw/N6182/gateop replicates:
+    CLMA_237_529(/devBL6) : u_rnd/u_draw/N6182/gateop_1(gopLUT6)
+    CLMS_231_517(/devCL6_S) : u_rnd/u_draw/N6182/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_321_841(/devCL6_S) CLMS_321_817(/devBL6_S) replicated by the LUT instance CLMA_303_792(/devCL6).
+Origin u_mem/u_xbar/N2460/LUT6_inst replicates:
+    CLMS_321_841(/devCL6_S) : u_mem/u_xbar/N2460/LUT6_inst_1(gopLUT6)
+    CLMS_321_817(/devBL6_S) : u_mem/u_xbar/N2460/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_237_493(/devAL6) replicated by the LUT instance CLMS_243_529(/devBL6_S).
+Origin u_rnd/u_draw/N6316/gateop replicates:
+    CLMA_237_493(/devAL6) : u_rnd/u_draw/N6316/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_315_834(/devDL6) replicated by the LUT instance CLMA_315_805(/devCL6).
+Origin u_mem/u_xbar/N2860_3/LUT6_inst replicates:
+    CLMA_315_834(/devDL6) : u_mem/u_xbar/N2860_3/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_267_822(/devCL6) CLMA_267_852(/devBL6) replicated by the LUT instance CLMA_291_804(/devDL6).
+Origin u_geo/u_regs/N853_1/gateop replicates:
+    CLMA_267_822(/devCL6) : u_geo/u_regs/N853_1/gateop_1(gopLUT6)
+    CLMA_267_852(/devBL6) : u_geo/u_regs/N853_1/gateop_2(gopLUT6)
+Wirelength after detailed placement is 3103105 and checksum is ACF150CC859D0152.
+Timing-driven detailed placement takes 19.53 sec.
+
+Worst slack is 468, TNS after placement is 0.
+Placement done.
+Total placement takes 61.38 sec.
+Finished placement.
+
+Routing started.
+Build routing arch for double attribute device.
+Enter timing driven router mode.
+Route thread size: 5
+Building routing graph takes 10.40 sec.
+Init coarse delay table.
+Read place coarse delay table takes 0.22 sec.
+Build SRB system takes 0.34 sec.
+Setup STE netlist take 11429 msec.
+Dispose control chain take 3851 msec.
+Collect const net info take 1180 msec.
+Worst slack is 468, TNS before route is 0.
+Total nets for routing: 152860.
+Total loads for routing: 691833.
+Direct connect net size: 16238
+Build all design net take 9261 msec.
+Processing design graph takes 25.76 sec.
+Delay table total memory: 72.78639603 MB
+Route graph total memory: 395.13334751 MB
+Route design total memory: 221.03496552 MB
+Global routing takes 0.00 sec.
+Total 152858 subnets.
+Unrouted clock nets at iteration 0 (0.504 sec): 15
+Unrouted clock nets at iteration 1 (0.388 sec): 9
+Unrouted clock nets at iteration 2 (0.318 sec): 7
+Unrouted clock nets at iteration 3 (0.187 sec): 3
+Unrouted clock nets at iteration 4 (0.170 sec): 2
+Unrouted clock nets at iteration 5 (0.073 sec): 0
+Total route nets size: 152816
+Pre route takes 67.673 sec
+Unrouted general nets at iteration 7 (MT total route time: 17.441 sec): 135728(overused: 1032511)
+Unrouted general nets at iteration 8 (MT total route time: 19.153 sec): 121295(overused: 834223)
+Unrouted general nets at iteration 9 (MT total route time: 34.286 sec): 108725(overused: 649764)
+Unrouted general nets at iteration 10 (MT total route time: 150.647 sec): 97375(overused: 507833)
+Unrouted general nets at iteration 11 (MT total route time: 337.941 sec): 87256(overused: 407978)
+Unrouted general nets at iteration 12 (MT total route time: 304.164 sec): 75994(overused: 391748)
+Unrouted general nets at iteration 13 (MT total route time: 355.662 sec): 66111(overused: 333763)
+Unrouted general nets at iteration 14 (MT total route time: 499.488 sec): 57839(overused: 275755)
+Unrouted general nets at iteration 15 (MT total route time: 465.248 sec): 51684(overused: 227558)
+Unrouted general nets at iteration 16 (MT total route time: 518.028 sec): 46497(overused: 190584)
+Unrouted general nets at iteration 17 (MT total route time: 553.376 sec): 41564(overused: 159214)
+Unrouted general nets at iteration 18 (MT total route time: 434.851 sec): 39596(overused: 146089)
+Unrouted general nets at iteration 19 (MT total route time: 347.502 sec): 36777(overused: 129219)
+Unrouted general nets at iteration 20 (MT total route time: 321.868 sec): 33933(overused: 112196)
+Unrouted general nets at iteration 21 (MT total route time: 370.907 sec): 31553(overused: 101171)
+Unrouted general nets at iteration 22 (MT total route time: 378.822 sec): 28979(overused: 89211)
+Unrouted general nets at iteration 23 (MT total route time: 333.713 sec): 26887(overused: 79135)
+Unrouted general nets at iteration 24 (MT total route time: 333.133 sec): 24627(overused: 70794)
+Unrouted general nets at iteration 25 (MT total route time: 317.019 sec): 22877(overused: 65077)

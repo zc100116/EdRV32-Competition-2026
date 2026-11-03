@@ -6,11 +6,14 @@
 |---|---|---|---|
 | EdRV32-VRN-cpu100m.sbit | 卡48精简RND v1；VRN，无PIX/GEO、无ILA；CPU100MHz、DDR core125MHz、NPU150MHz | G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1S/generate_bitstream/edrv32_fpga_board_vrn_top.sbit | 已布通；mem setup -0.124ns、NPU setup -0.022ns；RGMII慢角hold -0.361ns。不是全时序通过版本 |
 | EdRV32-VRN-cpu125m.sbit | 卡48精简RND v1；VRN，无PIX/GEO、无ILA；CPU125MHz、DDR core125MHz、NPU150MHz | G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1S-CPU125/generate_bitstream/edrv32_fpga_board_vrn_top.sbit | 第174轮布通；CPU setup -0.436ns、mem setup -0.167ns、NPU setup +0.051ns；RGMII慢角hold -0.361ns。不是全时序通过版本；未取得本版上板结果 |
+| EdRV32-F-cpu125m.sbit | 卡48精简RND v1完整F，含PIX/GEO，无ILA；CPU125MHz、DDR core125MHz、NPU150MHz | G:/codex_project/EdRV32-FPGA/EdRV32-B3F-RND1S-CPU125/generate_bitstream/edrv32_fpga_board_full_top.sbit | 第117轮布通；CPU setup -0.033ns、mem setup -0.010ns、NPU setup -0.120ns；RGMII慢角hold -0.242ns。不是全时序通过版本；未取得本版上板结果 |
 
 该文件为用户指定名称的当前版本快照，归档时尚未修改本工程布线参数。源代码基线为卡48的11046fb0627afc3d182a072c8b150edab44191f3，器件PG2L200H-6 FBB676、PDS2022.2-SP6.1。文件大小9188552字节。
 
 本版报告及参数建议：tasks/win/20261103-48-vrn-f-rnd1slim/cpu100_timing_notes.md；原生时序报告和路径明细见该卡artifacts/VRN-cpu100m/。
 
 125MHz版大小同为9188552字节，报告见tasks/win/20261103-48-vrn-f-rnd1slim/cpu125_results.md；准备差异见cpu125_experiment.md；原生报告、日志摘录及扩展时序在artifacts/VRN-cpu125m/。125MHz归档不覆盖100MHz基线。
+
+完整F CPU125MHz版同为9188552字节，报告见该任务f_cpu125_results.md，产物在artifacts/F-cpu125m/。F CPU100MHz尚未取得布通结果，不归档其未完成或旧的bitstream。
 
 后续每个归档版本使用独立文件名，并在本表补充配置、来源和时序状态；不把“已生成bitstream”视为“时序全部通过”。
