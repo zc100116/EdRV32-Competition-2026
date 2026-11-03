@@ -678,6 +678,8 @@ static void timing_step(void)
     memset(timing.sums, 0, sizeof timing.sums);
     timing.samples = timing.gui_samples = timing.periods = 0; timing.since = now;
 }
+bool vision_post_active(void) { return v.job == JOB_POST; }
+
 int vision_service(void)
 {
     /* Design 4.5.2: software floating-point gamma work is one sample per slice. */

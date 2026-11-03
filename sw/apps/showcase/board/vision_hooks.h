@@ -10,6 +10,7 @@ void vision_init(void);
 void vision_model_receiving(void);
 bool vision_model_ready(void);
 int vision_service(void);
+bool vision_post_active(void);
 void vision_irq(const struct engine_event *event, void *context);
 /* 0 accepts asynchronous processing; 1 length error, 2 EDNM format error.
  * BOARD sends successful DONE only after board_bulk_complete(kind).

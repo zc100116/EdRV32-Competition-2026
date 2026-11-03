@@ -143,7 +143,7 @@ static void application_step(struct sched_task *task)
         active->step();
     if (media.state == UI_STATE_STARTING || media.state == UI_STATE_STOPPING || media.pausing)
         app_wake_at(platform_ticks() + platform_clock_hz() / 1000);
-    if (!gui_suspended)
+    if (!gui_suspended && !vision_post_active())
         sched_defer_for(task, &gui_task, platform_ticks(), platform_clock_hz() / 1000);
 }
 int main(void)

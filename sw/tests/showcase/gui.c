@@ -16,6 +16,7 @@ void virtual_input_unlock(uint32_t state) { (void)state; }
 uint64_t platform_ticks(void) { return 0; }
 uint32_t platform_clock_hz(void) { return 125000000; }
 void platform_puts(const char *text) { (void)text; }
+void platform_put_u32(uint32_t value) { (void)value; }
 uint32_t sched_take(struct sched_task *task)
 {
     uint32_t events = task->events;

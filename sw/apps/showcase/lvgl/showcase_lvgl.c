@@ -19,6 +19,7 @@
 #include "../board/board.h"
 #include "../board/fabric.h"
 #include "../board/vision_hooks.h"
+#include <string.h>
 
 enum { WIDTH = 1280, HEIGHT = 720, STRIDE = WIDTH * 4, PIXELS = WIDTH * HEIGHT };
 static _Alignas(4096) uint32_t buffers[2][PIXELS] __attribute__((section(".noinit")));
@@ -70,6 +71,12 @@ static uint64_t refresh_start;
 static uint64_t flush_start;
 static uint64_t flush_ticks;
 static bool frame_rendered;
+static struct {
+    uint64_t start, render, maximum, area, rnd, sw;
+    uint32_t refreshes;
+} vision_window;
+static struct showcase_draw_rnd_stats vision_before;
+static bool vision_refresh;
 
 static void put_u64(uint64_t value)
 {
@@ -273,9 +280,37 @@ lv_timer_t *__wrap_lv_timer_create(lv_timer_cb_t cb, uint32_t period, void *user
     return __real_lv_timer_create(cb, period, user_data);
 }
 
+static void vision_print(void)
+{
+    uint64_t now = platform_ticks();
+    if (ui_page != 1 || benchmark_running) {
+        memset(&vision_window, 0, sizeof(vision_window));
+        return;
+    }
+    if (!vision_window.start) vision_window.start = now;
+    if (now - vision_window.start < platform_clock_hz()) return;
+    uint64_t frames = vision_window.refreshes ? vision_window.refreshes : 1u;
+    uint64_t divisor = frames * (platform_clock_hz() / 1000u);
+    platform_puts("vision_gui refreshes="); platform_put_u32(vision_window.refreshes);
+    print_average("render_ms", vision_window.render, divisor);
+    print_average("max_ms", vision_window.maximum, platform_clock_hz() / 1000u);
+    print_average("area_px", vision_window.area, frames);
+    print_average("rnd_ms", vision_window.rnd, divisor);
+    print_average("sw_ms", vision_window.sw, divisor);
+    print_average("other_ms", (int64_t)vision_window.render - (int64_t)vision_window.rnd -
+                  (int64_t)vision_window.sw, divisor);
+    platform_puts("\r\n");
+    memset(&vision_window, 0, sizeof(vision_window));
+    vision_window.start = now;
+}
+
 static void benchmark_refresh_event(lv_event_t *event)
 {
-    if (!benchmark_running) return;
+    if (lv_event_get_code(event) == LV_EVENT_REFR_START) {
+        vision_refresh = ui_page == 1 && !benchmark_running;
+        if (vision_refresh) vision_before = *showcase_draw_rnd_stats();
+    }
+    if (!benchmark_running && !vision_refresh) return;
     switch (lv_event_get_code(event)) {
     case LV_EVENT_REFR_START:
         refresh_start = platform_ticks();
@@ -294,8 +329,19 @@ static void benchmark_refresh_event(lv_event_t *event)
         flush_ticks += platform_ticks() - flush_start;
         break;
     case LV_EVENT_REFR_READY:
-        benchmark_window.render_ticks += platform_ticks() - refresh_start - flush_ticks;
-        if (frame_rendered) benchmark_window.frames++;
+        if (benchmark_running) {
+            benchmark_window.render_ticks += platform_ticks() - refresh_start - flush_ticks;
+            if (frame_rendered) benchmark_window.frames++;
+        } else if (frame_rendered) {
+            uint64_t elapsed = platform_ticks() - refresh_start - flush_ticks;
+            const struct showcase_draw_rnd_stats *stats = showcase_draw_rnd_stats();
+            ++vision_window.refreshes;
+            vision_window.render += elapsed;
+            if (elapsed > vision_window.maximum) vision_window.maximum = elapsed;
+            vision_window.rnd += stats->rnd_ticks - vision_before.rnd_ticks +
+                                stats->copy.ticks - vision_before.copy.ticks;
+            vision_window.sw += stats->sw_ticks - vision_before.sw_ticks;
+        }
         break;
     default: break;
     }
@@ -321,6 +367,8 @@ static volatile uint32_t display_events;
 
 static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
 {
+    if (vision_refresh)
+        vision_window.area += (uint64_t)lv_area_get_width(area) * lv_area_get_height(area);
     uint32_t bytes = (uint32_t)(area->x2 - area->x1 + 1) * 4u;
     uint32_t covered = (((uint32_t)area->x2 * 4u + 33u) & ~31u) -
                        (((uint32_t)area->x1 * 4u) & ~31u);
@@ -491,6 +539,7 @@ void showcase_gui_step(struct sched_task *task)
     uint32_t task_events = sched_take(task);
     if (task_events & PLATFORM_INPUT) input_pending = true;
     if (showcase_gui_paused() || !scan_started) return;
+    vision_print();
     uint32_t state = virtual_input_lock();
     uint32_t events = display_events;
     display_events = 0;

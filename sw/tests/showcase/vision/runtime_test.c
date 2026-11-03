@@ -207,7 +207,10 @@ static void camera(unsigned slot, unsigned frame_id)
     assert(npu_runs == before + 1);
     assert(busy[0] & (1u << slot));
     event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    vision_service();
+    assert(vision_post_active());
     drain();
+    assert(!vision_post_active());
 }
 static void display_frame(void)
 {
