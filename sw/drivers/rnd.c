@@ -1,5 +1,5 @@
 /* File: rnd.c
- * Spec: rnd-spec v0.3 2.5–2.6, 4–6; SoC 7.4.
+ * Spec: rnd-spec v0.5 2.5–2.6, 4–6; SoC 7.4.
  * Description: Exact 64-byte encoding and explicit cache ownership transfers.
  * Clock domain: clk_sys CPU; engine registers in clk_mem.
  */
@@ -91,9 +91,8 @@ void rnd_blit(struct rnd_command *out, const struct rnd_common *c,
     source_words(out, &blit->source);
     out->word[11] = blit->scale_x;
     out->word[12] = blit->scale_y;
-    out->word[13] = c->flags & RND_ROUND_CLIP ? blit->round_parameters : blit->palette;
-    out->word[14] = blit->key | (c->flags & RND_ROUND_CLIP ?
-                               (uint32_t)blit->clip_radius << 16 : 0);
+    out->word[13] = blit->palette;
+    out->word[14] = blit->key;
     out->word[15] = blit->rc_color | ((uint32_t)blit->rc_opa << 24);
 }
 
@@ -102,87 +101,6 @@ void rnd_copy(struct rnd_command *out, const struct rnd_common *c,
 {
     common(out, c, 5);
     source_words(out, source);
-}
-
-void rnd_box_shadow(struct rnd_command *out, const struct rnd_common *c,
-                    uint16_t radius, uint8_t blur, uint32_t temp_base)
-{
-    common(out, c, 6);
-    out->word[8] = radius;
-    out->word[9] = blur;
-    out->word[10] = temp_base;
-}
-
-void rnd_blur(struct rnd_command *out, const struct rnd_common *c,
-              uint8_t radius, uint32_t temp_base)
-{
-    common(out, c, 7);
-    out->word[8] = radius;
-    out->word[9] = temp_base;
-}
-
-void rnd_tilemap(struct rnd_command *out, const struct rnd_common *c,
-                 const struct rnd_tilemap *tilemap)
-{
-    common(out, c, 8);
-    out->word[8] = tilemap->tile_base;
-    out->word[9] = tilemap->map_base;
-    out->word[10] = tilemap->map_stride;
-    out->word[11] = xy(tilemap->map_x, tilemap->map_y);
-    out->word[13] = tilemap->palette;
-    out->word[14] = tilemap->key;
-}
-
-void rnd_triangle(struct rnd_command *out, const struct rnd_common *c, uint32_t parameters)
-{
-    common(out, c, 9);
-    out->word[8] = parameters;
-}
-
-void rnd_line(struct rnd_command *out, const struct rnd_common *c, uint32_t parameters)
-{
-    common(out, c, 10);
-    out->word[8] = parameters;
-}
-
-void rnd_arc(struct rnd_command *out, const struct rnd_common *c, uint32_t parameters)
-{
-    common(out, c, 11);
-    out->word[8] = parameters;
-}
-
-void rnd_mask_rect(struct rnd_command *out, const struct rnd_common *c,
-                   const struct rnd_rect *mask, uint16_t radius)
-{
-    common(out, c, 12);
-    out->word[8] = radius;
-    out->word[9] = xy(mask->x0, mask->y0);
-    out->word[10] = xy(mask->x1, mask->y1);
-}
-
-void rnd_affine_blit(struct rnd_command *out, const struct rnd_common *c,
-                     const struct rnd_affine *affine)
-{
-    common(out, c, 13);
-    out->word[8] = affine->base;
-    out->word[9] = affine->stride;
-    out->word[10] = xy(affine->width, affine->height);
-    out->word[11] = affine->parameters;
-    out->word[12] = affine->clip_radius;
-    out->word[13] = affine->palette;
-    out->word[14] = affine->key;
-    out->word[15] = affine->rc_color | ((uint32_t)affine->rc_opa << 24);
-}
-
-void rnd_box_shadow_cutout(struct rnd_command *out, const struct rnd_common *c,
-                           uint16_t radius, uint8_t blur, uint32_t temp_base,
-                           const struct rnd_rect *background, uint16_t background_radius)
-{
-    rnd_box_shadow(out, c, radius, blur, temp_base);
-    out->word[0] |= (uint32_t)RND_CUTOUT << 16;
-    out->word[11] = xy(background->x0, background->y0);
-    out->word[12] = xy(background->x1, background->y1);
-    out->word[13] = background_radius;
 }
 
 uint32_t rnd_physical(const void *cpu_address)

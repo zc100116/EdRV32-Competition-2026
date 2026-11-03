@@ -1,5 +1,5 @@
 /* File: main.c
- * Spec: rnd-spec 2.6/5.4; DISP 5.3; Task T-RNDB2 v1/v2 board acceptance.
+ * Spec: rnd-spec 2.6/5.4; DISP 5.3; Task B3-3a board acceptance.
  * Description: Draw the shared scenes, print target CRCs, then display both layers.
  * Clock domain: clk_sys CPU; rendering/display engines in clk_mem.
  */

@@ -11,7 +11,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 NES = ROOT / 'sw/apps/showcase/nes'
 # The frame regression prepares exactly the same patched core as the board build.
 CORE = ROOT / 'build/sw/game-pack/frames/step/core'
-includes = [ROOT / p for p in ['third_party/lvgl', 'sw/apps/s3/lvgl',
+includes = [ROOT / p for p in ['third_party/lvgl', 'sw/apps/showcase/lvgl',
             'sw/drivers/include', 'sw/bsp/include', 'sw/lib']]
 includes += [CORE / 'cpu', NES / 'mappers']
 includes += [ROOT / 'third_party/nofrendo/components/nofrendo' / p
