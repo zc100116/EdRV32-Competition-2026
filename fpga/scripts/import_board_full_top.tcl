@@ -10,7 +10,8 @@
 # ip_ram_npu_line, ip_ram_npu_weight, ip_lutram_npu_quant, ip_ram_npu_lut,
 # ip_lutram_npu_residual, ip_lutram_npu_result, ip_ram_npu_scratch,
 # ip_mul_npu_quant_low, ip_mul_npu_quant_high (INT8 MAC uses APM primitives).
-# ip_ram_rnd_line (5), ip_ram_rnd_palette (2), ip_ram_rnd_window (4); ip_pll_eth sits in edrv32_fpga_rgmii.
+# ip_ram_rnd_line, ip_ram_rnd_palette (slim RND v1, rnd-spec v0.5; no ip_ram_rnd_window);
+# ip_pll_eth sits in edrv32_fpga_rgmii.
 # Run in the PDS Tcl console from the FPGA project directory EdRV32-FPGA/<project>.
 # The source checkout is its sibling under codex_project (Windows builds B3F).
 set edrv32_repo [file normalize ../../EdRV32-Competition-2026]
