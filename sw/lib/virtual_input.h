@@ -18,9 +18,9 @@ struct virtual_input_state {
     uint16_t keys;
     int16_t x;
     int16_t y;
-    uint8_t mouse;
+    uint8_t mouse; /* bits 0/1/2: left/right/middle */
     uint8_t active;
-    uint8_t wheel;
+    uint8_t wheel; /* wire byte 7: cumulative modulo-256, down is positive */
 };
 /* Returns the legacy character, or -1 when consumed by ESC V + state. */
 int virtual_input_serial(uint8_t byte);
