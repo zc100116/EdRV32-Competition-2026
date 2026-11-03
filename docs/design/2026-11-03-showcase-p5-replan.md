@@ -475,7 +475,11 @@ vision fps=<n> npu=<a> wait=<b> decode=<c> sort=<d> nms=<e> post_span=<f> gui=<g
   - 写 DOORBELL 前记下 `DONE_COUNT`；
   - 等待时，`DONE_COUNT` 增长就是完成；
   - 读到 `STATUS.IDLE` 而 `DONE_COUNT` 仍未增长，说明这次 DOORBELL 被忽略了（eth-spec 4.1），用同一张描述符表重新写 DOORBELL，并计数 `rering`；
-  - 这是对规格行为的正确处理，不是超时重试。前提是描述符表的最后一个包完成时，`DONE_COUNT` 不晚于 BUSY 撤销而更新，由 P5c 在 RTL 中核对。
+  - 这是对规格行为的正确处理，不是超时重试。
+  - 顺序条件（P5c 核对 RTL）：
+    - 最后一条描述符完成时，BUSY 撤销后下一拍 clk_mem，`DONE_COUNT` 才加 1（`edrv32_eth_tx.v:455–461`、`edrv32_eth_regs.v:166–167`）；
+    - 软件读到 IDLE 后，另起一笔 APB 读 `DONE_COUNT`，采样点至少晚两拍，一定能读到更新后的值；
+    - DOORBELL 被接受后，下一拍发送就置忙（`edrv32_eth_regs.v:569`、`edrv32_eth_tx.v:386`），早于软件的下一次 STATUS 读。
 - **待以后讨论**：让 DOORBELL 只在发送忙时被忽略，属于 RTL 和规格的修改，本轮不做。
 
 ### 10.5 用户追加的三项界面需求（2026-11-03）
