@@ -26,7 +26,7 @@ def generate(size, digits):
     command = ['npx', '--yes', 'lv_font_conv@1.5.3', '--font',
                str(fonts / 'noto/NotoSansSC-Regular.ttf')]
     if digits:
-        command += ['--symbols', '0123456789 FPS%']
+        command += ['--symbols', '0123456789.- FPS%']
     else:
         command += ['--range', '0x20-0x7e', '--symbols', chars, '--font',
                     str(builtin / 'FontAwesome5-Solid+Brands+Regular.woff'), '--range', symbols]
