@@ -15,7 +15,7 @@ void ui_page_home(lv_obj_t *p)
         "洞察每一份计算与带宽", "认识这颗自主设计的芯片", "连接设备，掌握通信状态"};
     const char *icons[] = {LV_SYMBOL_VIDEO, LV_SYMBOL_IMAGE, LV_SYMBOL_TINT,
         LV_SYMBOL_EDIT, LV_SYMBOL_PLAY, LV_SYMBOL_BARS, LV_SYMBOL_SETTINGS, LV_SYMBOL_USB};
-    unsigned required[] = {UI_VIN | UI_NPU, UI_NPU | UI_ETH, UI_VIN | UI_PIX | UI_GEO,
+    unsigned required[] = {UI_VIN | UI_NPU, UI_NPU | UI_ETH | UI_VIN, UI_VIN | UI_PIX | UI_GEO,
         UI_RND | UI_DISP, UI_RND | UI_DISP, 0, 0, 0};
     for(unsigned i = 0; i < 8; ++i) {
         bool enabled = (ui_data_hardware() & required[i]) == required[i];

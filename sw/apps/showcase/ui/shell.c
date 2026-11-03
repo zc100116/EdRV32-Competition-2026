@@ -129,7 +129,7 @@ static void activate(unsigned action)
 {
     if(ui_page == 0) {
         home_focus = action - 1;
-        const unsigned required[]={0,UI_VIN|UI_NPU,UI_NPU|UI_ETH,
+        const unsigned required[]={0,UI_VIN|UI_NPU,UI_NPU|UI_ETH|UI_VIN,
             UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0};
         if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
@@ -147,7 +147,7 @@ static void activate(unsigned action)
     } else if(ui_page == 2) {
         if(action == 0) { ui_data_batch_stop(); ui_refresh(); }
         else ui_open(1);
-    } else if(ui_page == 3) { ui_mode = action; ui_open(3); }
+    } else if(ui_page == 3) { ui_process_action(action); }
     else if(ui_page == 4) {
         if(action < 3) { ui_tab = action; ui_open(4); }
         else { ui_data_benchmark_start(); ui_refresh(); }
