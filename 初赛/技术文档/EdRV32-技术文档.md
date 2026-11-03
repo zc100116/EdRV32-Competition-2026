@@ -67,7 +67,8 @@ EdRV32 SoC 是一个完整可用的边缘视觉计算平台，单个比特流同
 | 视频 | 2 × OV5640，720p30 输入；HDMI 720p60 双图层输出 |
 | 存储 | DDR3 32 位 1000 MT/s，1 GB；256 位 AXI，理论 4.0 GB/s |
 | 网络 | 千兆以太网，硬件 UDP 收发 |
-| 资源（完整版 SoC） | LUT 87151（54.5%）、FF 96124、DRM 277、APM 372；其中 CPU 子系统 LUT 15585 |
+| 资源（完整版 SoC） | LUT 87151（54.5%）、FF 96124、DRM 277、APM 372 |
+| 资源（CPU 子系统：处理器核＋I$＋D$） | LUT 15585、FF 9564、DRM 18、APM 4 |
 | 时序 | clk_sys 125 MHz、clk_npu 150 MHz 布局布线后时序收敛（慢角 setup WNS +0.087 / +0.048 ns） |
 
 ### 1.5 主要创新点
@@ -294,7 +295,7 @@ ETH 实现千兆 MAC、IPv4/UDP 和 ARP 应答。接收时，UDP 载荷开头的
 
 #### 3.2.2 电路成果
 
-FPGA 实现结果如表3-1（PDS 2022.2-SP6.1，PG2L200H-6 FBB676）。完整版 SoC 布局布线通过，慢角 setup 各时钟域均收敛：clk_sys 125 MHz WNS +0.087 ns，clk_npu 150 MHz +0.048 ns，clk_mem 125 MHz +0.179 ns，clk_eth +1.864 ns，TNS 均为 0。内部 hold 全部满足；唯一的负裕度是 RGMII 输入的慢角 hold（−0.242 ns，5 个端点），属于板级接口项，上板收发正常。其中 CPU 子系统（处理器核、I$、D$）占 LUT 15585、FF 9564、DRM 18、APM 4。图3-3 为开发板及外设连接实物照片。
+FPGA 实现结果如表3-1（PDS 2022.2-SP6.1，PG2L200H-6 FBB676）。完整版 SoC 布局布线通过，慢角 setup 各时钟域均收敛：clk_sys 125 MHz WNS +0.087 ns，clk_npu 150 MHz +0.048 ns，clk_mem 125 MHz +0.179 ns，clk_eth +1.864 ns，TNS 均为 0。内部 hold 全部满足；唯一的负裕度是 RGMII 输入的慢角 hold（−0.242 ns，5 个端点），属于板级接口项，上板收发正常。CPU 子系统的资源另列于表3-1b，统计范围为处理器核、I$和D$。图3-3 为开发板及外设连接实物照片。
 
 **表3-1 FPGA 资源占用（完整版 SoC，clk_sys 125 MHz）**
 
@@ -306,6 +307,18 @@ FPGA 实现结果如表3-1（PDS 2022.2-SP6.1，PG2L200H-6 FBB676）。完整版
 | DRM | 277 | 415 | 66.7% |
 | APM | 372 | 740 | 50.3% |
 | IO | 137 | 400 | 34.3% |
+
+**表3-1b CPU子系统资源占用（处理器核＋I$＋D$）**
+
+| 资源 | CPU子系统使用量 |
+|---|---:|
+| LUT | 15585 |
+| FF | 9564 |
+| DRM | 18 |
+| APM | 4 |
+
+CPU子系统LUT为15585，不能以完整版SoC的87151 LUT作为处理器资源消耗。该统计不包含其他媒体引擎、DDR控制器及ILA调试核；未取得单独分项数据的资源不以全SoC数值替代。
+
 
 ![图3-3 开发板与外设连接实物](figures/photo3-3.png)
 
@@ -379,9 +392,7 @@ FPGA 实现结果如表3-1（PDS 2022.2-SP6.1，PG2L200H-6 FBB676）。完整版
 
 | 项目 | 结果 | 条件 |
 |---|---|---|
-| CoreMark | 4.354 CoreMark/MHz | GCC 15.2，-O3 等优化选项，代码和数据在 SRAM（100 MHz 板测） |
-| CoreMark @125 MHz | 【待实测】 Iterations/Sec | 演示程序芯片信息页，同一编译配置 |
-| CoreMark/LUT | 【待实测】 | 125 MHz 的 Iterations/Sec ÷ CPU 子系统 LUT 15585 |
+| CoreMark（最佳配置） | 4.354 CoreMark/MHz | GCC 15.2，-O3 等优化选项，代码和数据在 SRAM（100 MHz 板测） |
 | NPU 自检 | 39/39 通过，20 帧 CRC 一致 | 完整版 SoC，NPU 150 MHz |
 | YOLOv8n 推理 | 41.7 ms/帧 | NPU 150 MHz，640×384 输入，演示程序实时识别中测得 |
 | 实时识别帧率 | 【待实测】 fps | 摄像头 720p30 输入，推理与后处理并行 |
@@ -426,7 +437,7 @@ FPGA 实现结果如表3-1（PDS 2022.2-SP6.1，PG2L200H-6 FBB676）。完整版
 
 本节单独给出片上逻辑分析仪的配置、原始波形和计数比对证据，用于展示处理器真实上板运行时的双发射退休行为，以及性能计数器与软件读数的一致性。实验分为运行窗口采样和冻结快照比对两部分，分别对应卡34与卡36。
 
-实验使用 PG2L200H 上的 B1-ILA 专用工程，CPU 为 **100 MHz**，CoreMark 运行5000次，编译选项为 **-O2**，板测3.603 CoreMark/MHz。它与前文最终完整SoC的125 MHz配置、100 MHz下-O3调优的4.354 CoreMark/MHz分别记录，不能互相替代。
+实验使用 PG2L200H 上的 B1-ILA 专用工程，CPU 为 **100 MHz**，CoreMark 运行5000次，编译选项为 **-O2**，用于观察流水线行为与核对计数。报告的CoreMark性能统一采用前文最佳配置的4.354 CoreMark/MHz；ILA采样条件单独注明，波形和计数不作为最佳配置的测量结果。
 
 使用PDS Fabric Inserter在综合网表中插入调试核，Fabric Debugger通过JTAG布防、触发并读取采样。采样时钟为clk_sys_w的上升沿；深度1024点，不启用存储限定。观察对象是mcycle、minstret及hpm3–hpm10，每组取低40位，共400位DataPort。TriggerPort0接minstret低40位，TriggerPort1接mcycle低40位。本实验逐轮检查所记录值处于40位可表示范围内，不把低40位探针描述为全部64位CSR的验证。
 
