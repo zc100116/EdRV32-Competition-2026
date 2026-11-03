@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem, QVBoxLayout, QWidget,
 )
 from core.engine import fmt_ts
+from core.showcase import STATUS
 from gui.processing import ProcessingPanel
 from core.telemetry import encode
 from core.video import FrameRate
@@ -840,7 +841,8 @@ class SocConsole(QWidget):
         sessions = ['空闲', '启动中', '运行中', '已暂停', '停止中', '失败']
         self.phase.setText(('网口已连接' if connected else '网口未连接') +
                            ' · 板端版本 ' + (state['build'] or '—') + ' · ' +
-                           apps[board_state['app']] + ' / ' + sessions[board_state['state']])
+                           apps[board_state['app']] + ' / ' + sessions[board_state['state']] +
+                           (f' · {STATUS[board_state["error"]]}' if board_state['error'] else ''))
         self.phase.setWordWrap(True)
         new_state = self.state_generation != self.board.state_generation
         self.state_generation = self.board.state_generation

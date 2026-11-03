@@ -16,13 +16,19 @@ test:
 	$(OUT)/post_test
 
 .PHONY: runtime
-runtime:
+runtime: $(ROOT)/build/showcase/model.c
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/bsp/include \
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib/sched -I. \
 	    -include $(UI_CONTRACT) runtime_test.c $(VISION)/vision.c $(VISION)/post.c \
 	    $(VISION)/wire.c $(ROOT)/sw/lib/yolo_tables.c \
-	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c -lm \
+	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
+	    $(ROOT)/build/showcase/model.c $(ROOT)/sw/apps/showcase/board/session.c -lm \
 	    -o $(OUT)/runtime_test
 	$(OUT)/runtime_test
+
+$(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(addprefix $(ROOT)/tasks/win/20261029-09-b3-software/src/npu/,\
+        mem_desc.hex mem_model.hex regs.txt)
+	python3 $< $(ROOT)/tasks/win/20261029-09-b3-software/src/npu $@

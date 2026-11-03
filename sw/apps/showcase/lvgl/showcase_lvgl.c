@@ -17,6 +17,7 @@
 #include "../ui/theme.h"
 #include "include/lvgl/debugging/lv_sysmon.h"
 #include "../board/board.h"
+#include "../board/fabric.h"
 #include "../board/vision_hooks.h"
 
 enum { WIDTH = 1280, HEIGHT = 720, STRIDE = WIDTH * 4, PIXELS = WIDTH * HEIGHT };
@@ -51,6 +52,7 @@ struct benchmark_window {
     uint64_t xbar[2][5];
     struct showcase_rnd_timing timing;
     uint64_t glyph_cpu_ticks;
+    uint64_t clear_rnd, clear_cpu, clear_cpu_bytes;
     struct showcase_cpu_counters cpu;
 };
 static bool benchmark_running;
@@ -63,6 +65,7 @@ static lv_timer_cb_t scene_timer_cb;
 static struct showcase_draw_rnd_stats benchmark_before;
 static struct benchmark_window benchmark_window;
 static struct benchmark_window benchmark_total;
+static struct board_fabric_totals fabric_before;
 static uint64_t refresh_start;
 static uint64_t flush_start;
 static uint64_t flush_ticks;
@@ -134,6 +137,9 @@ static void benchmark_print(const char *name, const struct benchmark_window *win
     print_average("copy_doorbells", window->copy.doorbells, frames);
     print_average("copy_perf0_cycles", window->copy.perf[0], frames);
     print_average("copy_perf0_ms", window->copy.perf[0], (uint64_t)frames * 125000u);
+    print_average("clear_rnd", window->clear_rnd, frames);
+    print_average("clear_cpu", window->clear_cpu, frames);
+    print_average("clear_cpu_bytes", window->clear_cpu_bytes, frames);
     platform_puts(" xbar_window_cycles="); put_u64(window->xbar_cycles);
     for (unsigned p = 0; p < 2; ++p) {
         for (unsigned i = 0; i < 5; ++i) {
@@ -169,6 +175,8 @@ static void benchmark_begin_window(void)
     benchmark_before = *showcase_draw_rnd_stats();
     /* Exclude UART output between scenes from the next fabric window. */
     mem_xbar_snapshot(&discarded);
+    board_memory_sample(&discarded);
+    fabric_before = board_fabric_totals();
     showcase_cpu_begin();
 }
 
@@ -178,6 +186,8 @@ static void benchmark_finish_window(void)
     showcase_cpu_end(&benchmark_window.cpu);
     struct mem_xbar_stats fabric;
     mem_xbar_snapshot(&fabric);
+    board_memory_sample(&fabric);
+    struct board_fabric_totals fabric_now = board_fabric_totals();
     const struct showcase_draw_rnd_stats *now = showcase_draw_rnd_stats();
     struct benchmark_window *w = &benchmark_window;
     w->draw.ticks = now->rnd_ticks - benchmark_before.rnd_ticks;
@@ -188,12 +198,18 @@ static void benchmark_finish_window(void)
     w->copy.doorbells = now->copy.doorbells - benchmark_before.copy.doorbells;
     w->sw_ticks = now->sw_ticks - benchmark_before.sw_ticks;
     w->software = now->software - benchmark_before.software;
-    w->xbar_cycles = fabric.window_cycles;
+    w->xbar_cycles = fabric_now.cycles - fabric_before.cycles;
     w->timing.clean_ticks = now->timing.clean_ticks - benchmark_before.timing.clean_ticks;
     w->timing.wait_ticks = now->timing.wait_ticks - benchmark_before.timing.wait_ticks;
     w->timing.finish_ticks = now->timing.finish_ticks - benchmark_before.timing.finish_ticks;
     w->timing.cache_ops = now->timing.cache_ops - benchmark_before.timing.cache_ops;
     w->glyph_cpu_ticks = now->glyph_cpu_ticks - benchmark_before.glyph_cpu_ticks;
+    w->clear_rnd = now->clear_rnd - benchmark_before.clear_rnd;
+    w->clear_cpu = now->clear_cpu - benchmark_before.clear_cpu;
+    w->clear_cpu_bytes = now->clear_cpu_bytes - benchmark_before.clear_cpu_bytes;
+    benchmark_total.clear_rnd += w->clear_rnd;
+    benchmark_total.clear_cpu += w->clear_cpu;
+    benchmark_total.clear_cpu_bytes += w->clear_cpu_bytes;
     benchmark_total.timing.clean_ticks += w->timing.clean_ticks;
     benchmark_total.timing.wait_ticks += w->timing.wait_ticks;
     benchmark_total.timing.finish_ticks += w->timing.finish_ticks;
@@ -210,12 +226,8 @@ static void benchmark_finish_window(void)
     }
     /* SoC 6.4.1: RND P4, DISP P0; physical DDR addresses carry no port number. */
     for (unsigned p = 0; p < 2; ++p) {
-        const struct mem_xbar_port_stats *port = &fabric.port[p == 0 ? 4 : 0];
-        w->xbar[p][0] = port->rd_txn;
-        w->xbar[p][1] = port->wr_txn;
-        w->xbar[p][2] = port->rd_beat;
-        w->xbar[p][3] = port->wr_beat;
-        w->xbar[p][4] = port->wait_sum;
+        for (unsigned i = 0; i < 5; ++i)
+            w->xbar[p][i] = fabric_now.port[p][i] - fabric_before.port[p][i];
         for (unsigned i = 0; i < 5; ++i) benchmark_total.xbar[p][i] += w->xbar[p][i];
     }
     benchmark_total.frames += w->frames;

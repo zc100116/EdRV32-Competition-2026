@@ -2,6 +2,7 @@
 #ifndef VISION_TEST_BOARD_H
 #define VISION_TEST_BOARD_H
 #include <stdint.h>
+void board_session_fail(unsigned error);
 int board_eth_send(uint32_t descriptors, uint32_t count);
 void board_bulk_complete(unsigned kind);
 #endif

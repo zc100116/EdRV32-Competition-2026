@@ -4,6 +4,7 @@
 #include "vision_hooks.h"
 #include "input.h"
 #include "hpm.h"
+#include "fabric.h"
 #include "latency.h"
 #include "overlay.h"
 #include "../ui/coremark.h"
@@ -21,8 +22,7 @@
 #include <string.h>
 static ui_system_t system_data;
 static char report_line[768];
-static unsigned report_position,report_length;
-unsigned board_cpu_reporting(void) { return report_position<report_length; }
+static unsigned report_length;
 static uint64_t report_time,previous_busy[3],previous_idle;
 static uint32_t previous_frames,previous_display,previous_nes;
 static ui_coremark_t core;
@@ -56,12 +56,6 @@ ui_system_t ui_data_system(void)
 void showcase_cpu_report_init(void) { report_time=platform_ticks(); }
 void showcase_cpu_report(void)
 {
-    /* UART has a 16-byte FIFO: never wait for 115200-baud transmission in comm.step. */
-    extern unsigned board_network_reporting(void);
-    unsigned budget=board_network_reporting() && !board_cpu_reporting() ? 0 : 16;
-    while(budget-- && report_position<report_length &&
-          !(mmio_read32(EDRV32_UART0_BASE+UART_STATUS)&UART_STATUS_TX_FULL))
-        mmio_write32(EDRV32_UART0_BASE+UART_TXDATA,(uint8_t)report_line[report_position++]);
     uint64_t now=platform_ticks(),elapsed=now-report_time;
     if(elapsed<platform_clock_hz()/2) return;
     struct sched_task *tasks[]={&communication_task,&application_task,&gui_task};
@@ -105,10 +99,11 @@ void showcase_cpu_report(void)
     unsigned length = (unsigned)strlen(vision);
     memcpy(report_line + report_length, vision, length + 1);
     report_length += length;
-    report_position=0;
+    platform_puts(report_line);
 }
 void board_memory_sample(const struct mem_xbar_stats *m)
 {
+    board_fabric_sample(m);
     static uint64_t cycles,read[7],write[7];
     cycles+=m->window_cycles;
     for(unsigned i=0;i<7;++i) { read[i]+=m->port[i].rd_beat; write[i]+=m->port[i].wr_beat; }

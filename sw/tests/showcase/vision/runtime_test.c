@@ -4,6 +4,8 @@
 #define _GNU_SOURCE
 #include "vision_hooks.h"
 #include "memory.h"
+#include "model.h"
+#include "session.h"
 #include "wire.h"
 #include "../../../apps/showcase/ui/ui_data.h"
 #include "vin.h"
@@ -19,11 +21,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+static struct session model_session;
+void board_session_fail(unsigned error)
+{
+    vision_app_camera.exit();
+    session_fail(&model_session, error);
+}
+static void model_start(ui_app_t app, unsigned arg)
+{
+    (void)arg;
+    if (app == UI_APP_CAMERA) vision_app_camera.enter();
+    else vision_app_image.enter();
+}
+static void model_stop(ui_app_t app)
+{
+    (void)app;
+    vision_app_camera.exit();
+}
+static bool model_ready(ui_app_t app, ui_state_t target)
+{
+    (void)app;
+    return vision_ready(target);
+}
 static uint32_t hardware = APP_HW_VIN | APP_HW_NPU | APP_HW_ETH;
 static uint64_t ticks;
 static uint32_t busy[3];
 static struct vin_frame frames[3];
 static unsigned npu_runs, submitted, done_count, window_reopened;
+static unsigned npu_configurations;
 static uint32_t reopened_base, reopened_bytes;
 static unsigned accept_send = 1;
 static unsigned sensor_initializations;
@@ -96,7 +121,8 @@ void vin_slots_busy(unsigned channel, uint32_t slots) { busy[channel] = slots; }
 struct vin_frame vin_frame_done(unsigned channel) { return frames[channel]; }
 unsigned vin_frame_slot(uint32_t info)
 { return (info & EDRV32_VIN_CH_DONE_INFO_SLOT_MASK) >> EDRV32_VIN_CH_DONE_INFO_SLOT_POS; }
-void npu_configure(const struct npu_config *c) { assert(c->count == 68); }
+void npu_configure(const struct npu_config *c)
+{ assert(c->count == 68); ++npu_configurations; }
 void npu_start(uint32_t input, uint32_t output)
 {
     assert(input >= VISION_INPUT_BASE && input < VISION_INPUT_BASE + 3*VISION_INPUT_SPACING);
@@ -368,6 +394,17 @@ static void process_test(void)
 static void model_test(void)
 {
     hardware = APP_HW_NPU | APP_HW_ETH;
+    assert(vision_model_ready());
+    vision_model_receiving();
+    assert(!vision_model_ready());
+    for (ui_app_t app = UI_APP_CAMERA; app <= UI_APP_IMAGE; ++app) {
+        model_session = (struct session){.ops = {model_start, model_stop, NULL, model_ready}};
+        session_open(&model_session, app, 0);
+        session_step(&model_session);
+        assert(model_session.state == UI_STATE_FAILED && model_session.error == 7);
+        drain();
+    }
+    unsigned runs_before = npu_runs;
     uint32_t base = 0x09000000;
     uint32_t header[] = {0x4d4e4445, 1, 68, 68*64, 2051,
                          VISION_WORK_BASE, VISION_INPUT_BASE, VISION_OUTPUT_BASE};
@@ -386,6 +423,38 @@ static void model_test(void)
     assert(bulk_completions[1] == 0);
     drain();
     assert(bulk_completions[1] == 1);
+    assert(vision_model_ready() && npu_runs == runs_before);
+    hardware |= APP_HW_VIN;
+    session_retry(&model_session);
+    session_step(&model_session);
+    drain();
+    session_step(&model_session);
+    drain();
+    session_step(&model_session);
+    assert(model_session.state == UI_STATE_RUNNING);
+    vision_app_image.exit(); drain();
+
+    /* A replacement waits for the active inference, then prevents new starts
+     * until both descriptor and weight copies have completed (P5b 9.1). */
+    vision_app_camera.enter(); drain();
+    frames[0] = (struct vin_frame){0, 500};
+    frames[2] = (struct vin_frame){0, 500};
+    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK | EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    vision_service();
+    assert(npu_runs == runs_before + 1);
+    unsigned configured = npu_configurations;
+    vision_model_receiving();
+    assert(vision_bulk_done(1, base, 0x100000+2051) == 0);
+    for (unsigned i = 0; i < 4; ++i) vision_service();
+    assert(!vision_model_ready() && npu_configurations == configured);
+    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK | EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    vision_service();
+    assert(npu_runs == runs_before + 1);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    drain();
+    assert(vision_model_ready() && npu_configurations == configured + 1);
+    assert(npu_runs == runs_before + 1 && bulk_completions[1] == 2);
+    vision_app_camera.exit(); display_frame(); display_frame(); drain();
 
     assert(memcmp(physical(VISION_DESC_BASE), physical(base+0x1000), 68*64) == 0);
     assert(memcmp(physical(VISION_MODEL_BASE), physical(base+0x100000), 2051) == 0);
@@ -428,6 +497,11 @@ int main(void)
            != MAP_FAILED);
     memset(physical(VISION_OUTPUT_BASE), 0x80, VISION_OUTPUT_BYTES);
     vision_init();
+    assert(vision_model_ready());
+    assert(memcmp(physical(VISION_DESC_BASE), showcase_model_desc,
+                  showcase_model_desc_bytes) == 0);
+    assert(memcmp(physical(VISION_MODEL_BASE), showcase_model_weights,
+                  showcase_model_weights_bytes) == 0);
     camera_test();
     image_test();
     cancel_test();

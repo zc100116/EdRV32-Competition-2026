@@ -10,6 +10,7 @@
 #include "board/games.h"
 #include "board/vision_hooks.h"
 #include "board/board.h"
+#include "board/serial.h"
 static const struct app *active, *graphics;
 static uint8_t gui_suspended;
 static uint32_t step_events;
@@ -35,7 +36,7 @@ void app_gui_pause(uint8_t p)
 }
 static const char *const errors[] = {
     NULL, "Length mismatch", "Invalid format", "Insufficient space",
-    "Hardware unavailable", "Invalid state", "Cancelled"
+    "Hardware unavailable", "Invalid state", "Cancelled", "未加载模型"
 };
 ui_session_t ui_data_session(void)
 {
@@ -146,6 +147,8 @@ int main(void)
     media.ops = (struct session_ops){start, stop, pause_app, ready};
     platform_init(); sched_add(&communication_task); sched_add(&application_task);
     sched_add(&gui_task); showcase_lvgl_init(); board_games_init();
-    ui_start(); vision_init(); board_init(); showcase_cpu_report_init(); sched_run();
+    ui_start(); vision_init(); board_init(); showcase_cpu_report_init();
+    board_serial_drain(true);
+    sched_run();
     return 0;
 }

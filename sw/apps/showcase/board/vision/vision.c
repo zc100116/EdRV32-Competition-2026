@@ -4,6 +4,7 @@
  */
 #include "vision_hooks.h"
 #include "memory.h"
+#include "model.h"
 #include "wire.h"
 #include "post.h"
 #include "disp.h"
@@ -74,6 +75,7 @@ static struct {
     uint32_t tx_done;
     uint32_t upload_base, upload_bytes;
     unsigned model_pending;
+    bool model_ready;
     uint32_t model_base, model_bytes, model_offset;
     unsigned model_phase;
     uint32_t model_count, model_desc_bytes, model_weight_bytes;
@@ -129,6 +131,8 @@ void vision_image_receiving(uint32_t seq)
     request = seq;
     sessions[PAGE_IMAGE].data.image_status = UI_IMAGE_RECEIVING;
 }
+void vision_model_receiving(void) { v.model_ready = false; }
+bool vision_model_ready(void) { return v.model_ready; }
 uint32_t vision_request(void) { return request; }
 void vision_state(uint8_t payload[56])
 {
@@ -336,6 +340,10 @@ static void request_page(unsigned page)
 {
     initialize();
     v.page = page;
+    if (page != PAGE_PROCESS && !v.model_ready) {
+        board_session_fail(7);
+        return;
+    }
     v.state = PIPE_STARTING;
     memset(&timing, 0, sizeof timing);
     timing.since = platform_ticks();
@@ -438,7 +446,8 @@ static void camera_frame(unsigned channel)
     struct vin_frame frame = vin_frame_done(channel);
     if (frame.info & (EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_MASK |
                       EDRV32_VIN_CH_DONE_INFO_BUS_ERR_MASK)) fail("VIN frame error");
-    if (v.state != PIPE_LIVE || v.page == PAGE_IMAGE) return;
+    if (v.state != PIPE_LIVE || v.page == PAGE_IMAGE ||
+        (v.page == PAGE_CAMERA && !v.model_ready)) return;
     int slot = (int)vin_frame_slot(frame.info);
     if (v.page == PAGE_PROCESS) {
         if (channel == 0) {
@@ -567,6 +576,7 @@ static void model_step(void)
                 VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, v.model_count};
             npu_configure(&config);
             v.model_pending = 0;
+            v.model_ready = true;
             /* Each upload owns its own window metadata; no global image_window. */
             eth_window_configure(0, v.model_base, v.model_bytes);
             board_bulk_complete(1);
@@ -743,7 +753,7 @@ int vision_service(void)
         if (v.page == PAGE_PROCESS && v.process_dirty) return 1;
         v.state = PIPE_LIVE;
     }
-    if (v.state == PIPE_LIVE && v.job == JOB_IDLE &&
+    if (v.state == PIPE_LIVE && v.job == JOB_IDLE && v.model_ready &&
         sessions[PAGE_IMAGE].upload == UPLOAD_READY) {
         sessions[PAGE_IMAGE].upload = UPLOAD_EMPTY;
         timing.cancelled = false; v.job_request = request;
@@ -790,8 +800,13 @@ void vision_init(void)
         if (ov5640_init(0, platform_clock_hz())) fail("OV5640 camera 0 initialization");
     }
     if (platform_hardware() & APP_HW_NPU) {
+        /* SoC 7.4: destination uses only its uncached alias. */
+        memcpy(uncached(VISION_DESC_BASE), showcase_model_desc, showcase_model_desc_bytes);
+        memcpy(uncached(VISION_MODEL_BASE), showcase_model_weights,
+               showcase_model_weights_bytes);
         struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
-            VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, 68};
+            VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, showcase_model_count};
         npu_configure(&config);
+        v.model_ready = true;
     }
 }

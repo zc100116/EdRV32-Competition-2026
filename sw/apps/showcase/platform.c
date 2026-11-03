@@ -4,6 +4,7 @@
  * Clock domain: clk_sys, media IRQs from clk_mem.
  */
 #include "platform.h"
+#include "board/serial.h"
 #include "app.h"
 #include "runtime.h"
 #include "lvgl/showcase_lvgl.h"
@@ -50,7 +51,15 @@ static engine_irq_callback app_disp_callback;
 static void *app_context;
 
 void platform_gui_wake(void) { sched_signal(&gui_task, 0x100); }
-void platform_puts(const char *text) { uart_puts(text); }
+bool platform_serial_ready(void)
+{
+    return !(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_TX_FULL);
+}
+void platform_serial_byte(unsigned char byte)
+{
+    mmio_write32(EDRV32_UART0_BASE + UART_TXDATA, byte);
+}
+void platform_puts(const char *text) { board_serial_write(text); }
 void platform_put_u32(uint32_t value)
 {
     char digits[10];
@@ -59,17 +68,23 @@ void platform_put_u32(uint32_t value)
         digits[count++] = (char)('0' + value % 10u);
         value /= 10u;
     } while (value);
-    while (count) uart_putc((uint8_t)digits[--count]);
+    while (count) {
+        char text[2] = {digits[--count], 0};
+        platform_puts(text);
+    }
 }
 void platform_put_hex(uint32_t value)
 {
     static const char digits[] = "0123456789abcdef";
     platform_puts("0x");
-    for (int shift = 28; shift >= 0; shift -= 4)
-        uart_putc((uint8_t)digits[(value >> shift) & 15u]);
+    for (int shift = 28; shift >= 0; shift -= 4) {
+        char text[2] = {digits[(value >> shift) & 15u], 0};
+        platform_puts(text);
+    }
 }
 _Noreturn void platform_stop(void)
 {
+    board_serial_finish();
     __asm__ volatile ("csrci mstatus, 8" ::: "memory");
     for (;;) __asm__ volatile ("wfi");
 }
@@ -299,6 +314,7 @@ void showcase_communication_step(struct sched_task *task)
     showcase_input_sample(sample_keys());
     showcase_input_event();
     showcase_cpu_report();
+    board_serial_drain(false);
     sched_wake_at(task, platform_ticks() + system_hz / 100u);
 }
 void platform_init(void)

@@ -113,6 +113,30 @@ class ProtocolTest(unittest.TestCase):
                         wait_for(self, lambda: kind not in tool.pending)
                     self.assertNotIn(kind, tool.pending)
 
+    def test_model_not_loaded_error_is_displayed(self):
+        tool = self.eth.showcase
+        command = tool.command(APP, struct.pack('<BBH', 1, 0, 0))
+        kind, seq, _ = self.request()
+        self.reply(ACK, seq, struct.pack('<HBB', kind, 3, 7))
+        wait_for(self, lambda: self.engine.board.error is not None)
+        self.assertTrue(command['event'].is_set())
+        self.assertEqual(command['error'], 7)
+        self.assertIn('未加载模型', self.engine.board.error)
+
+    def test_model_not_loaded_state_is_displayed(self):
+        from PySide6.QtWidgets import QApplication
+        from gui.soc_console import SocConsole
+        app = QApplication.instance() or QApplication([])
+        console = SocConsole(self.engine, Mock())
+        self.addCleanup(console.close)
+        console.video_timer.stop()
+        payload = bytearray(state_payload(app=1, state=5))
+        payload[2] = 7
+        self.reply(STATE, 0, payload)
+        wait_for(self, lambda: self.engine.board.board_state['error'] == 7)
+        app.processEvents()
+        self.assertIn('未加载模型', console.phase.text())
+
     def test_state_updates_ui_without_refresh_timer_and_commands_do_not_own_state(self):
         os.environ['QT_QPA_PLATFORM'] = 'offscreen'
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))

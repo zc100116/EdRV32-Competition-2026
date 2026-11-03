@@ -30,8 +30,6 @@ static unsigned tx_active,tx_done,tx_count,tx_bytes,sequence,produced,consumed;
 unsigned board_tx_bytes,board_tx_packets,board_echo_count,board_echo_replies;
 char board_udp_text[1001];
 static struct edsc protocol;
-static unsigned peer_report_pending;
-unsigned board_network_reporting(void) { return peer_report_pending; }
 
 static void *uncached(uint32_t physical)
 { return (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE+physical); }
@@ -65,6 +63,7 @@ static unsigned reserve(unsigned kind,uint32_t total,uint32_t *base)
     }
     else { *base=board_game_destination(); capacity=board_game_available(); }
     if(total>capacity) return 3;
+    if(kind==1) vision_model_receiving();
     if(kind==2) vision_image_receiving(protocol.seq);
     eth_window_configure(0,*base,total); return 0;
 }
@@ -178,22 +177,16 @@ void board_network_step(void)
 {
     static uint32_t peer_ip,peer_port;
     static char peer_report[80];
-    static unsigned report_pos,report_bytes;
     uint32_t ip=mmio_read32(EDRV32_ETH_BASE+EDRV32_ETH_PEER_IP_OFFSET);
     uint32_t port=mmio_read32(EDRV32_ETH_BASE+EDRV32_ETH_PEER_PORT_OFFSET);
     if(port && (ip!=peer_ip || port!=peer_port)) {
         peer_ip=ip; peer_port=port;
-        report_bytes=(unsigned)snprintf(peer_report,sizeof(peer_report),
+        snprintf(peer_report,sizeof(peer_report),
             "ETH peer IP: 0x%08lx\r\nETH peer port: %lu\r\n",
             (unsigned long)ip,(unsigned long)port);
-        report_pos=0;
+        platform_puts(peer_report);
     }
-    extern unsigned board_cpu_reporting(void);
-    unsigned report_budget=board_cpu_reporting() ? 0 : 16;
-    while(report_budget-- && report_pos<report_bytes &&
-          !(mmio_read32(EDRV32_UART0_BASE+UART_STATUS)&UART_STATUS_TX_FULL))
-        mmio_write32(EDRV32_UART0_BASE+UART_TXDATA,(uint8_t)peer_report[report_pos++]);
-    peer_report_pending=report_pos<report_bytes;
+
     struct engine_event e=engine_poll(ENGINE_ETH);
     if(e.error || (e.irq&EDRV32_ETH_IRQ_STAT_ERROR_MASK)) {
         platform_puts("ETH error "); platform_put_hex(e.error); platform_stop(); }
