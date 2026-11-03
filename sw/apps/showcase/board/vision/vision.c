@@ -1,0 +1,576 @@
+/* vision.c — showcase design 4.3/4.5; cooperative VIN/YOLO/PIX/GEO applications.
+ * IRQs latch events; task slices retain all DMA and GUI source ownership.
+ * Clock domain: clk_sys; accelerator data/interrupts originate in clk_mem.
+ */
+#include "vision_hooks.h"
+#include "memory.h"
+#include "wire.h"
+#include "post.h"
+#include "ch2.h"
+#include "../../platform.h"
+#include "../../ui/ui_data.h"
+#include "port.h"
+#include "vin.h"
+#include "npu.h"
+#include "pix.h"
+#include "geo.h"
+#include "eth.h"
+#include "ov5640.h"
+#include "board.h"
+#include <string.h>
+
+enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_GUI = 8, REF_RETIRED = 16,
+       REF_GEO = 32 };
+enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS };
+enum { JOB_IDLE, JOB_COPY, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
+static struct {
+    unsigned page;
+    unsigned process_mode;
+    unsigned configured_mode;
+    unsigned capture;
+    unsigned reconfigure;
+    unsigned camera_source;
+    unsigned initialized;
+    unsigned refs[6];
+    int ready, current, pair_image, pair_input;
+    uint32_t image_id, input_id;
+    uint32_t input_busy;
+    lv_image_dsc_t images[6];
+    ui_vision_t data;
+    unsigned job;
+    int job_image;
+    unsigned job_input;
+    unsigned job_batch;
+    uint32_t job_frame;
+    uint32_t receive_base, receive_bytes;
+    unsigned copy_offset, row;
+    uint32_t next_frame;
+    uint64_t npu_start, batch_start, post_ticks, last_result;
+    struct vision_post post;
+    yolo_detection detections[YOLO_MAX_DETECTIONS];
+    int geo_source, geo_target;
+    unsigned geo_mode;
+    uint32_t tx_done;
+    unsigned image_pending;
+    uint32_t upload_base, upload_bytes;
+    unsigned model_pending;
+    uint32_t model_base, model_bytes, model_offset;
+    unsigned model_phase;
+    uint32_t model_count, model_desc_bytes, model_weight_bytes;
+} v = {.ready = -1, .current = -1, .pair_image = -1, .pair_input = -1,
+       .job_image = -1, .geo_source = -1, .geo_target = -1,
+       .data = {.boxes = true, .waiting = true}};
+static volatile uint32_t irq_flags[ENGINE_NPU + 1];
+static volatile uint32_t irq_errors[ENGINE_NPU + 1];
+
+static void *uncached(uint32_t address)
+{
+    return (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE + address);
+}
+static uint32_t image_address(unsigned slot)
+{
+    return slot < 4 ? VISION_IMAGE_BASE + slot * VISION_IMAGE_SPACING :
+           VISION_GEO_BASE + (slot - 4) * VISION_IMAGE_SPACING;
+}
+static _Noreturn void fail(const char *message)
+{
+    platform_puts("showcase vision: ");
+    platform_puts(message);
+    platform_puts("\r\n");
+    platform_stop();
+}
+static unsigned tenths(uint64_t ticks)
+{
+    return (unsigned)(ticks * 10000u / platform_clock_hz());
+}
+static void reference(int slot, unsigned add, unsigned remove)
+{
+    if (slot < 0) return;
+    v.refs[slot] = (v.refs[slot] & ~remove) | add;
+    if (v.capture) {
+        uint32_t busy = 0;
+        for (unsigned i = 0; i < 4; ++i) {
+            if (v.refs[i]) busy |= 1u << i;
+        }
+        vin_slots_busy(0, busy);
+    }
+}
+static int free_image(unsigned first, unsigned end)
+{
+    for (unsigned i = first; i < end; ++i) {
+        if (!v.refs[i]) return (int)i;
+    }
+    return -1;
+}
+static void initialize(void)
+{
+    if (v.initialized) return;
+    for (unsigned i = 0; i < 6; ++i) {
+        v.images[i] = (lv_image_dsc_t){
+            .header = {.magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565,
+                       .flags = LV_IMAGE_FLAGS_MODIFIABLE, .w = 1280, .h = 720,
+                       .stride = VISION_STRIDE},
+            .data_size = VISION_IMAGE_BYTES, .data = uncached(image_address(i))};
+    }
+    v.initialized = 1;
+}
+void vision_irq(const struct engine_event *event, void *context)
+{
+    unsigned engine = (unsigned)(uintptr_t)context;
+    irq_flags[engine] |= event->irq;
+    irq_errors[engine] |= event->error;
+}
+static void pair_release(void)
+{
+    reference(v.pair_image, 0, REF_PAIR);
+    v.pair_image = -1;
+    if (v.pair_input >= 0) v.input_busy &= ~(1u << v.pair_input);
+    v.pair_input = -1;
+    if (v.capture) vin_slots_busy(2, v.input_busy);
+}
+static void queue_image(int slot)
+{
+    reference(v.ready, 0, REF_READY);
+    v.ready = slot;
+    reference(slot, REF_READY, 0);
+}
+static const lv_image_dsc_t *take_image(void)
+{
+    initialize();
+    if (v.ready >= 0) {
+        if (v.current != v.ready) {
+            reference(v.current, REF_RETIRED, REF_GUI);
+            v.current = v.ready;
+        }
+        reference(v.current, REF_GUI, REF_READY);
+        v.ready = -1;
+    }
+    return v.current < 0 ? NULL : &v.images[v.current];
+}
+void vision_frame_presented(void)
+{
+    for (unsigned i = 0; i < 6; ++i) reference((int)i, 0, REF_RETIRED);
+}
+ui_vision_t ui_data_vision(bool batch)
+{
+    (void)batch;
+    v.data.image = take_image();
+    return v.data;
+}
+void ui_data_pause(void)
+{
+    v.data.paused = !v.data.paused;
+    v.reconfigure = 1;
+    app_wake_at(platform_ticks());
+}
+void ui_data_boxes(void) { v.data.boxes = !v.data.boxes; }
+void ui_data_batch_stop(void)
+{
+    v.data.waiting = true;
+    v.data.batch_total = v.data.batch_index;
+    /* A submitted inference/TX drains normally; no tensor is overwritten. */
+}
+const lv_image_dsc_t *ui_data_process(unsigned mode)
+{
+    if (mode != v.process_mode) {
+        v.process_mode = mode;
+        v.reconfigure = 1;
+        app_wake_at(platform_ticks());
+    }
+    return take_image();
+}
+static void stop_capture(void)
+{
+    if (!v.capture) return;
+    vin_channel_enable(0, 0);
+    vin_channel_enable(2, 0);
+    engine_control(ENGINE_VIN, 0);
+}
+static void request_page(unsigned page)
+{
+    initialize();
+    v.page = page;
+    v.camera_source = page != PAGE_IMAGE;
+    v.data.paused = false;
+    v.data.waiting = page == PAGE_IMAGE;
+    v.reconfigure = 1;
+    app_wake_at(platform_ticks());
+}
+static void enter_camera(void) { request_page(PAGE_CAMERA); }
+static void enter_image(void) { request_page(PAGE_IMAGE); }
+static void enter_process(void) { request_page(PAGE_PROCESS); }
+static void leave(void)
+{
+    v.page = PAGE_NONE;
+    v.reconfigure = 1;
+    stop_capture();
+    reference(v.ready, 0, REF_READY);
+    v.ready = -1;
+    reference(v.current, REF_RETIRED, REF_GUI);
+    v.current = -1;
+    app_wake_at(platform_ticks());
+}
+void vision_camera(void)
+{
+    v.camera_source = 1;
+    v.data.paused = false;
+    v.data.waiting = false;
+    v.reconfigure = 1;
+    app_wake_at(platform_ticks());
+}
+static void pix_mode(void)
+{
+    struct pix_config config = {0, PIX_BYPASS, PIX_BYPASS, 1, 256, 0, 128};
+    if (v.process_mode == 1) config.flags = EDRV32_PIX_CFG_GRAY_EN_MASK;
+    if (v.process_mode == 2) {
+        uint8_t gamma[256];
+        for (unsigned i = 0; i < 256; ++i) gamma[i] = (uint8_t)(2*i - i*i/255);
+        pix_gamma_load(1, gamma);
+        config.flags = EDRV32_PIX_CFG_GAMMA_EN_MASK;
+    }
+    if (v.process_mode == 3) {
+        config.stage1 = PIX_SOBEL;
+        config.flags = EDRV32_PIX_CFG_GRAY_EN_MASK;
+    }
+    pix_configure(&config);
+    engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
+    engine_control(ENGINE_GEO, EDRV32_GEO_CTRL_ENABLE_MASK);
+}
+static void configure_capture(void)
+{
+    struct vin_channel image = {VIN_CAM0, 4, VISION_STRIDE, {0}, 0};
+    struct vin_channel input = {VIN_CAM0, 3, VISION_STRIDE, {0}, 0};
+    for (unsigned i = 0; i < 4; ++i) {
+        image.base[i] = image_address(i);
+        if (v.refs[i]) image.busy_slots |= 1u << i;
+    }
+    for (unsigned i = 0; i < 3; ++i) input.base[i] = VISION_INPUT_BASE +
+                                                               i * VISION_INPUT_SPACING;
+    /* VRN must never touch PIX/GEO, including camera configuration. */
+    if (v.page == PAGE_PROCESS) pix_mode();
+    else if (platform_hardware() & APP_HW_PIX) {
+        struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, 0, 256, 0, 128};
+        pix_configure(&bypass);
+        engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
+    }
+    vin_camera_size(0, VISION_WIDTH, VISION_HEIGHT);
+    vin_channel_configure(0, &image);
+    if (v.page != PAGE_PROCESS) vin_channel_configure(2, &input);
+    v.capture = 1;
+    v.configured_mode = v.process_mode;
+    engine_control(ENGINE_VIN, EDRV32_VIN_CTRL_ENABLE_MASK);
+}
+static void start_inference(void)
+{
+    v.npu_start = platform_ticks();
+    engine_control(ENGINE_NPU, EDRV32_NPU_CTRL_ENABLE_MASK);
+    npu_start(VISION_INPUT_BASE + v.job_input * VISION_INPUT_SPACING, VISION_OUTPUT_BASE);
+    v.job = JOB_NPU;
+}
+static void camera_frame(unsigned channel)
+{
+    struct vin_frame frame = vin_frame_done(channel);
+    if (frame.info & (EDRV32_VIN_CH_DONE_INFO_INCOMPLETE_MASK |
+                      EDRV32_VIN_CH_DONE_INFO_BUS_ERR_MASK)) fail("VIN frame error");
+    if (v.reconfigure || v.data.paused || !v.camera_source) return;
+    int slot = (int)vin_frame_slot(frame.info);
+    if (v.page == PAGE_PROCESS) {
+        if (channel == 0) {
+            if (v.configured_mode < 4) queue_image(slot);
+            else if (v.geo_source < 0) {
+                int target = free_image(4, 6);
+                if (target < 0) return;
+                v.geo_source = slot;
+                v.geo_target = target;
+                v.geo_mode = v.configured_mode;
+                reference(slot, REF_GEO, 0);
+                reference(target, REF_GEO, 0);
+                struct geo_config config = {.src_base = image_address((unsigned)slot),
+                    .src_stride = VISION_STRIDE, .src_width = VISION_WIDTH,
+                    .src_height = VISION_HEIGHT, .dst_base = image_address((unsigned)target),
+                    .dst_stride = VISION_STRIDE, .rect_width = VISION_WIDTH,
+                    .rect_height = VISION_HEIGHT};
+                config.matrix[0] = geo_q16(1, 1);
+                config.matrix[4] = geo_q16(1, 1);
+                if (v.geo_mode == 4) {
+                    config.matrix[0] = config.matrix[4] = geo_q16(1, 2);
+                    config.matrix[2] = geo_q16(VISION_WIDTH, 4);
+                    config.matrix[5] = geo_q16(VISION_HEIGHT, 4);
+                } else {
+                    config.matrix[0] = geo_q16(-1, 1);
+                    config.matrix[2] = geo_q16(VISION_WIDTH - 1, 1);
+                    if (v.geo_mode == 5) {
+                        config.matrix[4] = geo_q16(-1, 1);
+                        config.matrix[5] = geo_q16(VISION_HEIGHT - 1, 1);
+                    }
+                }
+                geo_descriptor_pack(uncached(VISION_GEO_DESCRIPTOR), &config);
+                geo_submit(VISION_GEO_DESCRIPTOR, 1);
+            }
+        }
+        return;
+    }
+    if (v.job != JOB_IDLE || v.model_pending) return;
+    if (channel == 0) {
+        reference(v.pair_image, 0, REF_PAIR);
+        v.pair_image = slot;
+        v.image_id = frame.frame_id;
+        reference(slot, REF_PAIR, 0);
+    } else {
+        if (v.pair_input >= 0) v.input_busy &= ~(1u << v.pair_input);
+        v.pair_input = slot;
+        v.input_id = frame.frame_id;
+        v.input_busy |= 1u << slot;
+        vin_slots_busy(2, v.input_busy);
+    }
+    if (v.pair_image >= 0 && v.pair_input >= 0 && v.image_id == v.input_id) {
+        v.job_image = v.pair_image;
+        v.job_input = (unsigned)v.pair_input;
+        v.job_frame = v.image_id;
+        v.job_batch = 0;
+        reference(v.job_image, REF_JOB, REF_PAIR);
+        v.pair_image = v.pair_input = -1;
+        start_inference();
+    }
+}
+
+static const char *const class_names[80] = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+    "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+    "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",
+    "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball",
+    "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket",
+    "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
+    "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
+    "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
+    "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
+    "toothbrush"
+};
+
+static void publish_result(void)
+{
+    unsigned count = v.post.kept;
+    v.data.count = count;
+    memset(v.data.category_count, 0, sizeof v.data.category_count);
+    const unsigned category_ids[] = {0, 2, 1, 5, 9};
+    for (unsigned i = 0; i < count; ++i) {
+        const yolo_detection *d = &v.detections[i];
+        for (unsigned c = 0; c < 5; ++c) {
+            if (d->class_id == category_ids[c]) ++v.data.category_count[c];
+        }
+        if (i < 5) {
+            v.data.targets[i] = (ui_detection_t){class_names[d->class_id], d->score / 10,
+                d->x0 * 3 / 4, d->y0 * 3 / 4,
+                (d->x1 - d->x0) * 3 / 4, (d->y1 - d->y0) * 3 / 4};
+        }
+    }
+    uint64_t now = platform_ticks();
+    v.data.post_tenths = tenths(v.post_ticks);
+    if (v.last_result) v.data.fps = (unsigned)(platform_clock_hz() / (now - v.last_result));
+    v.last_result = now;
+    if (v.page != PAGE_NONE) queue_image(v.job_image);
+}
+static void finish_job(void)
+{
+    reference(v.job_image, 0, REF_JOB);
+    v.job_image = -1;
+    v.input_busy &= ~(1u << v.job_input);
+    if (v.capture) vin_slots_busy(2, v.input_busy);
+    v.job = JOB_IDLE;
+}
+uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)
+{
+    initialize();
+    if (kind == 1) {
+        if (bytes < 32) return 1;
+        const uint8_t *header = uncached(base);
+        const char *error = vision_model_header(header, bytes);
+        if (error) {
+            platform_puts(error);
+            platform_puts("\r\n");
+            return strcmp(error, "Model bytes") == 0 ? 1 : 2;
+        }
+        v.model_base = base;
+        v.model_bytes = bytes;
+        v.model_count = vision_read32(header + 8);
+        v.model_desc_bytes = vision_read32(header + 12);
+        v.model_weight_bytes = vision_read32(header + 16);
+        v.model_offset = v.model_phase = 0;
+        v.model_pending = 1;
+    } else if (kind == 2) {
+        if (bytes != VISION_IMAGE_BYTES) return 1;
+        v.upload_base = base;
+        v.upload_bytes = bytes;
+        v.image_pending = 1;
+        v.camera_source = 0;
+        v.data.waiting = false;
+        ++v.data.batch_total;
+    }
+    v.reconfigure = 1;
+    app_wake_at(platform_ticks());
+    return 0;
+}
+static void model_step(void)
+{
+    uint32_t length = v.model_phase ? v.model_weight_bytes : v.model_desc_bytes;
+    uint32_t source = v.model_base + (v.model_phase ? 0x100000u : 0x1000u);
+    uint32_t destination = v.model_phase ? VISION_MODEL_BASE : VISION_DESC_BASE;
+    unsigned bytes = length - v.model_offset;
+    if (bytes > 1024) bytes = 1024;
+    memcpy(uncached(destination + v.model_offset), uncached(source + v.model_offset), bytes);
+    v.model_offset += bytes;
+    if (v.model_offset == length) {
+        v.model_offset = 0;
+        if (++v.model_phase == 2) {
+            struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
+                VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, v.model_count};
+            npu_configure(&config);
+            v.model_pending = 0;
+            /* Each upload owns its own window metadata; no global image_window. */
+            eth_window_configure(0, v.model_base, v.model_bytes);
+            board_bulk_complete(1);
+        }
+    }
+}
+static void send_results(void)
+{
+    struct eth_tx_descriptor *tx = uncached(VISION_TX_DESCRIPTORS);
+    unsigned bytes = (unsigned)vision_detection_pack(uncached(VISION_TX_DETECTIONS),
+                            v.detections, v.post.kept, v.job_frame);
+    eth_tx_descriptor_pack(&tx[0], VISION_INPUT_BASE + v.job_input * VISION_INPUT_SPACING,
+                           VISION_INPUT_BYTES, 0, 0, 0);
+    eth_tx_descriptor_pack(&tx[1], VISION_OUTPUT_BASE, VISION_OUTPUT_BYTES, 1, 0, 0);
+    eth_tx_descriptor_pack(&tx[2], VISION_TX_DETECTIONS, bytes, 2, 1, 0);
+    v.tx_done = engine_poll(ENGINE_ETH).done_count;
+    if (board_eth_send(VISION_TX_DESCRIPTORS, 3)) v.job = JOB_TX;
+}
+int vision_service(void)
+{
+    uint32_t flags[ENGINE_NPU + 1];
+    uint32_t errors[ENGINE_NPU + 1];
+    uint32_t lock = sched_port_lock();
+    for (unsigned i = 0; i <= ENGINE_NPU; ++i) {
+        flags[i] = irq_flags[i];
+        errors[i] = irq_errors[i];
+        irq_flags[i] = irq_errors[i] = 0;
+    }
+    sched_port_unlock(lock);
+    const unsigned engines[] = {ENGINE_VIN, ENGINE_PIX, ENGINE_GEO, ENGINE_NPU};
+    const uint32_t error_masks[] = {EDRV32_VIN_IRQ_STAT_ERROR_MASK,
+        EDRV32_PIX_IRQ_STAT_ERROR_MASK, EDRV32_GEO_IRQ_STAT_ERROR_MASK,
+        EDRV32_NPU_IRQ_STAT_ERROR_MASK};
+    const char *const messages[] = {"VIN error", "PIX error", "GEO error", "NPU error"};
+    for (unsigned i = 0; i < 4; ++i) {
+        if (errors[engines[i]] || (flags[engines[i]] & error_masks[i])) fail(messages[i]);
+    }
+    if (v.reconfigure) stop_capture();
+    if (flags[ENGINE_GEO] & EDRV32_GEO_IRQ_STAT_DONE_MASK) {
+        if (!v.reconfigure && v.page == PAGE_PROCESS) queue_image(v.geo_target);
+        reference(v.geo_source, 0, REF_GEO);
+        reference(v.geo_target, 0, REF_GEO);
+        v.geo_source = v.geo_target = -1;
+    }
+    if (v.capture) {
+        if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
+        if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
+    }
+    if ((flags[ENGINE_NPU] & EDRV32_NPU_IRQ_STAT_DONE_MASK) && v.job == JOB_NPU) {
+        v.data.npu_tenths = tenths(platform_ticks() - v.npu_start);
+        /* OUTPUT and workspace use uncached aliases; no full-buffer invalidation step. */
+        vision_post_begin(&v.post, uncached(VISION_OUTPUT_BASE), uncached(VISION_WORKSPACE),
+                          v.detections);
+        v.post_ticks = 0;
+        v.job = JOB_POST;
+    }
+    if (v.job == JOB_TX && engine_poll(ENGINE_ETH).done_count - v.tx_done >= 3) {
+        ++v.data.success;
+        v.data.batch_index = v.job_frame + 1;
+        v.data.roundtrip = (unsigned)((platform_ticks() - v.batch_start) * 1000 /
+                                      platform_clock_hz());
+        eth_window_configure(0, v.receive_base, v.receive_bytes);
+        board_bulk_complete(2);
+        finish_job();
+    }
+    if (v.job == JOB_COPY) {
+        unsigned bytes = VISION_IMAGE_BYTES - v.copy_offset;
+        if (bytes > 1024) bytes = 1024;
+        memcpy(uncached(image_address((unsigned)v.job_image) + v.copy_offset),
+               uncached(v.receive_base + v.copy_offset), bytes);
+        v.copy_offset += bytes;
+        if (v.copy_offset == VISION_IMAGE_BYTES) { v.row = 0; v.job = JOB_CH2; }
+    } else if (v.job == JOB_CH2) {
+        vision_ch2_row(uncached(image_address((unsigned)v.job_image)),
+                       uncached(VISION_INPUT_BASE), v.row++);
+        if (v.row == 384) start_inference();
+    } else if (v.job == JOB_POST) {
+        uint64_t start = platform_ticks();
+        int complete = vision_post_step(&v.post);
+        v.post_ticks += platform_ticks() - start;
+        if (complete) {
+            publish_result();
+            if (v.job_batch) v.job = JOB_SEND;
+            else finish_job();
+        }
+    } else if (v.job == JOB_SEND) send_results();
+    if (v.reconfigure && v.job == JOB_IDLE && v.geo_source < 0) {
+        if (v.capture && !(engine_poll(ENGINE_VIN).status & EDRV32_VIN_STATUS_IDLE_MASK))
+            return 1;
+        pair_release();
+        v.capture = 0;
+        v.reconfigure = 0;
+    }
+    if (!v.reconfigure && v.job == JOB_IDLE && v.geo_source < 0) {
+        if (v.model_pending) {
+            model_step();
+            return 1;
+        }
+        if (v.image_pending) {
+            int slot = free_image(0, 4);
+            if (slot < 0) return 1;
+            v.job_image = slot;
+            reference(slot, REF_JOB, 0);
+            v.job_input = 0;
+            v.job_frame = v.next_frame++;
+            v.job_batch = 1;
+            v.receive_base = v.upload_base;
+            v.receive_bytes = v.upload_bytes;
+            v.copy_offset = 0;
+            v.batch_start = platform_ticks();
+            v.image_pending = 0;
+            v.job = JOB_COPY;
+        } else if (!v.capture && v.page && v.camera_source && !v.data.paused) {
+            configure_capture();
+        }
+    }
+    return v.reconfigure || v.model_pending || v.image_pending || v.job != JOB_IDLE ||
+           v.geo_source >= 0;
+}
+static void step(void)
+{
+    int busy = vision_service();
+    /* IRQ events wake idle camera work; sliced CPU work resumes immediately. */
+    unsigned cpu = v.job == JOB_COPY || v.job == JOB_CH2 || v.job == JOB_POST ||
+                   v.model_pending;
+    app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
+                      UINT64_MAX);
+}
+const struct app vision_app_camera = {
+    "视觉识别", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_camera, step, leave};
+const struct app vision_app_image = {
+    "图片识别", NULL, APP_HW_NPU | APP_HW_ETH, 0, enter_image, step, leave};
+const struct app vision_app_process = {
+    "图像处理", NULL, APP_HW_VIN | APP_HW_PIX | APP_HW_GEO, 0, enter_process, step, leave};
+
+void vision_init(void)
+{
+    initialize();
+    if (platform_hardware() & APP_HW_VIN) {
+        if (ov5640_init(0, platform_clock_hz())) fail("OV5640 camera 0 initialization");
+    }
+    if (platform_hardware() & APP_HW_NPU) {
+        struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
+            VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, 68};
+        npu_configure(&config);
+    }
+}
