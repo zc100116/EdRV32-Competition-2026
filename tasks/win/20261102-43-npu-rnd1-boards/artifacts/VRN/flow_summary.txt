@@ -1,0 +1,28 @@
+compile
+Action compile: Real time elapsed is 0h:2m:40s
+Action compile: CPU time elapsed is 0h:0m:18s
+Action compile: Process CPU time elapsed is 0h:0m:18s
+Action compile: Peak memory pool usage is 798 MB
+
+synthesize
+Action synthesize: Real time elapsed is 0h:8m:21s
+Action synthesize: CPU time elapsed is 0h:1m:12s
+Action synthesize: Process CPU time elapsed is 0h:1m:19s
+Action synthesize: Peak memory pool usage is 3,711 MB
+
+device_map
+Action dev_map: Real time elapsed is 0h:2m:2s
+Action dev_map: CPU time elapsed is 0h:0m:15s
+Action dev_map: Process CPU time elapsed is 0h:0m:16s
+Action dev_map: Peak memory pool usage is 2,264 MB
+PnR running; final total/CPU/peak not yet available.
+Worst slack after global placement is -710
+Worst slack after post global placement is -2983
+Worst slack before Replication Place is -3169.
+Worst slack before detailed placement is -2554, TNS before detailed placement is -669815. 
+Worst slack after detailed placement is 248, TNS after detailed placement is 0. 
+Worst slack is 248, TNS after placement is 0.
+Total placement takes 149.47 sec.
+Route thread size: 5
+Worst slack is 248, TNS before route is 0.
+Total nets for routing: 143912.

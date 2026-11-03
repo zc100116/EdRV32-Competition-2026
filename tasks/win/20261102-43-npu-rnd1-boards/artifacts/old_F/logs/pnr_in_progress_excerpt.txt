@@ -1,0 +1,910 @@
+Executing : def_inst_region {u_rgmii/rx_data_r[0]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[1]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[1]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[2]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[2]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[3]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[3]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[4]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[4]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[5]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[5]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[6]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[6]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[7]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[7]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_dv_r/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_dv_r/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_er_r/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_er_r/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[0]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[0]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[1]/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[1]/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[2]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[2]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[3]/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[3]/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[4]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[4]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[5]/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[5]/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[6]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[6]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[7]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[7]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_en_r/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_en_r/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/u_eth_clk/gopclkbufg} fp_rgmii
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4490)] | Region fp_rgmii does not contain USCM resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/u_eth_clk/gopclkbufg} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/u_pll_eth/u_gpll/gpll_inst} fp_rgmii
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4491)] Repeat constraints on u_rgmii/u_pll_eth/u_gpll/gpll_inst is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_rgmii/u_pll_eth/u_gpll/gpll_inst} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4492)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4492)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4493)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4493)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_1} fp_rgmii failed
+Constraint check end.
+NOTE: The technology fpga was specified.
+NOTE: delay_model specified was generic_cmos.
+NOTE: Using the fpga syntax tables...
+Totals:
+ Calls to malloc = 0
+ Calls to calloc = 5993935
+
+I: Column Clock Check open.
+Read Column Clock Map.
+
+Placement started.
+Phase 1 Pre global placement started.
+Mapping instance GRS_INST/grs_ccs to CCS_75_622.
+Mapping instance u_CORES/u_GTP_SCANCHAIN_PG/scanchain to SCANCHAIN_76_618.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst to GPLL_727_769.
+The driver clk_i_ibuf/opit_1 of pin CLKIN1 of PLL u_pll_sys/u_gpll/gpll_inst fixs in IOLHR_16_1386, and PLL fixs in GPLL_727_463, it is incompatible.
+C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst to DDRPHY_IOCLK_DIV_728_616.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst to PPLL_727_613.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[0].u_ddc_ca/ddc_inst to DDR_PHY_729_769.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[1].u_ddc_ca/ddc_inst to DDR_PHY_729_615.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[2].u_ddc_ca/ddc_inst to DDR_PHY_729_613.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst to DDRPHY_IOCLK_DIV_728_922.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst to PPLL_727_919.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_1075.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_1077.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_921.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_919.
+Phase 1.1 1st GP placement started.
+Design Utilization : 67%.
+Build SRB system takes 0.02 sec.
+Wirelength after clock region global placement is 3327117, detour is 14772 and checksum is 7EE0A8D0E7A21C3D.
+1st GP placement takes 2.33 sec.
+
+Phase 1.2 Clock placement started.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk to RCKB_723_762.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/goprclk to RCKB_723_1068.
+Mapping instance u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst to MRCKB_721_762.
+Mapping instance u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg to USCM_383_882.
+Mapping instance clkbufg_4/gopclkbufg to USCM_383_885.
+Mapping instance u_rgmii/u_eth_clk/gopclkbufg to USCM_383_930.
+Mapping instance clkbufg_7/gopclkbufg to USCM_383_888.
+Mapping instance clkbufg_8/gopclkbufg to USCM_383_891.
+Mapping instance u_pll_video/u_gpll/gpll_inst to GPLL_7_769.
+Mapping instance clkbufg_5/gopclkbufg to USCM_383_894.
+Mapping instance clkbufg_9/gopclkbufg to USCM_383_897.
+Mapping instance u_pll_npu/u_gpll/gpll_inst to GPLL_7_463.
+Mapping instance clkbufg_3/gopclkbufg to USCM_383_900.
+Mapping instance u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst to GPLL_7_157.
+Mapping instance u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg to USCM_383_903.
+C: Place-2028: GLOBAL_CLOCK: the driver u_CORES/u_GTP_SCANCHAIN_PG/scanchain fixed at SCANCHAIN_76_618 is unreasonable. Sub-optimal placement for a clock source and a clock buffer.
+Mapping instance clkbufg_6/gopclkbufg to USCM_383_906.
+Clock placement takes 0.03 sec.
+
+Wirelength after Pre Global Placement is 3327117, detour is 14772 and checksum is 7EE0A8D0E7A21C3D.
+Pre global placement takes 2.53 sec.
+
+Phase 2 Global placement started.
+Phase 2.1 Fixed placement started.
+First map gop timing takes 0.70 sec
+Init coarse delay table.
+Read place coarse delay table takes 0.14 sec.
+Placed fixed group with base inst cam0_data_i_ibuf[0]/opit_1 on IOLHR_16_798.
+Placed fixed group with base inst cam0_data_i_ibuf[1]/opit_1 on IOLHR_16_630.
+Placed fixed group with base inst cam0_data_i_ibuf[2]/opit_1 on IOLHR_16_828.
+Placed fixed group with base inst cam0_data_i_ibuf[3]/opit_1 on IOLHR_16_834.
+Placed fixed group with base inst cam0_data_i_ibuf[4]/opit_1 on IOLHR_16_792.
+Placed fixed group with base inst cam0_data_i_ibuf[5]/opit_1 on IOLHR_16_714.
+Placed fixed group with base inst cam0_data_i_ibuf[6]/opit_1 on IOLHR_16_660.
+Placed fixed group with base inst cam0_data_i_ibuf[7]/opit_1 on IOLHR_16_690.
+Placed fixed group with base inst cam0_href_i_ibuf/opit_1 on IOLHR_16_654.
+Placed fixed group with base inst cam0_pclk_i_ibuf/opit_1 on IOLHR_16_786.
+Placed fixed group with base inst cam0_rst_n_o_obuf/opit_1 on IOLHR_16_636.
+Placed fixed group with base inst cam0_vsync_i_ibuf/opit_1 on IOLHR_16_780.
+Placed fixed group with base inst cam1_data_i_ibuf[0]/opit_1 on IOLHR_16_768.
+Placed fixed group with base inst cam1_data_i_ibuf[1]/opit_1 on IOLHR_16_618.
+Placed fixed group with base inst cam1_data_i_ibuf[2]/opit_1 on IOLHR_16_624.
+Placed fixed group with base inst cam1_data_i_ibuf[3]/opit_1 on IOLHR_16_504.
+Placed fixed group with base inst cam1_data_i_ibuf[4]/opit_1 on IOLHR_16_642.
+Placed fixed group with base inst cam1_data_i_ibuf[5]/opit_1 on IOLHR_16_666.
+Placed fixed group with base inst cam1_data_i_ibuf[6]/opit_1 on IOLHR_16_528.
+Placed fixed group with base inst cam1_data_i_ibuf[7]/opit_1 on IOLHR_16_522.
+Placed fixed group with base inst cam1_href_i_ibuf/opit_1 on IOLHR_16_594.
+Placed fixed group with base inst cam1_pclk_i_ibuf/opit_1 on IOLHR_16_774.
+Placed fixed group with base inst cam1_rst_n_o_obuf/opit_1 on IOLHR_16_570.
+Placed fixed group with base inst cam1_vsync_i_ibuf/opit_1 on IOLHR_16_600.
+Placed fixed group with base inst clk_i_ibuf/opit_1 on IOLHR_16_1386.
+Placed fixed group with base inst eth_mdc_o_obuf/opit_1 on IOLHR_16_1278.
+Placed fixed group with base inst eth_mdio_o_tri/opit_1 on IOLHR_16_1308.
+Placed fixed group with base inst eth_phy_rst_n_o_obuf/opit_1 on IOLHR_16_942.
+Placed fixed group with base inst i2c0_scl_o_tri[0]/opit_1 on IOLHR_16_720.
+Placed fixed group with base inst i2c0_scl_o_tri[1]/opit_1 on IOLHR_16_498.
+Placed fixed group with base inst i2c0_sda_o_tri[0]/opit_1 on IOLHR_16_696.
+Placed fixed group with base inst i2c0_sda_o_tri[1]/opit_1 on IOLHR_16_552.
+Placed fixed group with base inst key_n_i_ibuf[0]/opit_1 on IOLHR_16_1290.
+Placed fixed group with base inst key_n_i_ibuf[1]/opit_1 on IOLHR_16_1320.
+Placed fixed group with base inst key_n_i_ibuf[2]/opit_1 on IOLHR_16_1314.
+Placed fixed group with base inst key_n_i_ibuf[3]/opit_1 on IOLHR_16_1344.
+Placed fixed group with base inst led_o_obuf[0]/opit_1 on IOLHR_16_1338.
+Placed fixed group with base inst led_o_obuf[1]/opit_1 on IOLHR_16_1380.
+Placed fixed group with base inst led_o_obuf[2]/opit_1 on IOLHR_16_1362.
+Placed fixed group with base inst led_o_obuf[3]/opit_1 on IOLHR_16_1392.
+Placed fixed group with base inst led_o_obuf[4]/opit_1 on IOLHR_16_1422.
+Placed fixed group with base inst mem_rst_n_o_obuf/opit_1 on IOLHR_724_792.
+Placed fixed group with base inst rgmii_rxc_i_ibuf/opit_1 on IOLHR_16_1368.
+Placed fixed group with base inst rst_n_i_ibuf/opit_1 on IOLHR_16_1296.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_1080.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_1140.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_1074.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_1128.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_1092.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_1104.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_1086.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_1134.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_1116.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_1098.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_1164.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_1176.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_1200.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_1206.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_1194.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_1212.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_1152.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_1158.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_1188.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_1170.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_1044.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_1050.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_1020.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_996.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_1008.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_1002.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_1026.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_1014.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_1038.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_1056.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_954.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_936.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_924.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_972.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_942.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_978.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_930.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_990.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_966.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_948.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[0].u_outbuft_addr0/opit_1 on IOLHR_724_828.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[1].u_outbuft_addr0/opit_1 on IOLHR_724_822.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[2].u_outbuft_addr0/opit_1 on IOLHR_724_780.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[3].u_outbuft_addr0/opit_1 on IOLHR_724_750.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[4].u_outbuft_addr0/opit_1 on IOLHR_724_708.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[5].u_outbuft_addr0/opit_1 on IOLHR_724_804.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[6].u_outbuft_addr0/opit_1 on IOLHR_724_690.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[7].u_outbuft_addr0/opit_1 on IOLHR_724_834.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[8].u_outbuft_addr0/opit_1 on IOLHR_724_696.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[9].u_outbuft_addr0/opit_1 on IOLHR_724_816.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[10].u_outbuft_addr0/opit_1 on IOLHR_724_714.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[11].u_outbuft_addr0/opit_1 on IOLHR_724_726.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[12].u_outbuft_addr0/opit_1 on IOLHR_724_720.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[13].u_outbuft_addr0/opit_1 on IOLHR_724_786.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[14].u_outbuft_addr0/opit_1 on IOLHR_724_810.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/k_mem_ba[0].u_outbuft_ba/opit_1 on IOLHR_724_744.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/k_mem_ba[1].u_outbuft_ba/opit_1 on IOLHR_724_702.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/k_mem_ba[2].u_outbuft_ba/opit_1 on IOLHR_724_672.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_casn/opit_1 on IOLHR_724_618.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_cke/opit_1 on IOLHR_724_732.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_csn/opit_1 on IOLHR_724_738.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_odt/opit_1 on IOLHR_724_798.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_rasn/opit_1 on IOLHR_724_684.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_wen/opit_1 on IOLHR_724_624.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuftco_ck/opit_3 on IOLHR_724_660.
+Placed fixed group with base inst u_ddr_ref_clk/opit_2 on IOLHR_724_774.
+Placed fixed group with base inst u_rgmii/g_rx[0].u_input/opit_1 on IOLHR_16_1428.
+Placed fixed group with base inst u_rgmii/g_rx[1].u_input/opit_1 on IOLHR_16_1434.
+Placed fixed group with base inst u_rgmii/g_rx[2].u_input/opit_1 on IOLHR_16_1404.
+Placed fixed group with base inst u_rgmii/g_rx[3].u_input/opit_1 on IOLHR_16_1410.
+Placed fixed group with base inst u_rgmii/g_rx[4].u_input/opit_1 on IOLHR_16_1458.
+Placed fixed group with base inst u_rgmii/g_tx_buf[0].u_output/opit_1 on IOLHR_16_1356.
+Placed fixed group with base inst u_rgmii/g_tx_buf[1].u_output/opit_1 on IOLHR_16_1326.
+Placed fixed group with base inst u_rgmii/g_tx_buf[2].u_output/opit_1 on IOLHR_16_1332.
+Placed fixed group with base inst u_rgmii/g_tx_buf[3].u_output/opit_1 on IOLHR_16_1302.
+Placed fixed group with base inst u_rgmii/g_tx_buf[4].u_output/opit_1 on IOLHR_16_1350.
+Placed fixed group with base inst u_rgmii/u_tx_clk_output/opit_1 on IOLHR_16_1452.
+Placed fixed group with base inst u_tmds/g_channel[0].u_pair/opit_2 on IOLHR_16_684.
+Placed fixed group with base inst u_tmds/g_channel[1].u_pair/opit_2 on IOLHR_16_708.
+Placed fixed group with base inst u_tmds/g_channel[2].u_pair/opit_2 on IOLHR_16_732.
+Placed fixed group with base inst u_tmds/g_channel[3].u_pair/opit_2 on IOLHR_16_756.
+Placed fixed group with base inst uart_rx_i_ibuf/opit_1 on IOLHR_16_1242.
+Placed fixed group with base inst uart_tx_o_obuf/opit_1 on IOLHR_16_1248.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[0]/opit_0_inv on CLMA_717_672.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[1]/opit_0_inv on CLMA_717_978.
+Placed fixed instance GRS_INST/grs_ccs on CCS_75_622.
+Placed fixed instance clkbufg_3/gopclkbufg on USCM_383_900.
+Placed fixed instance clkbufg_4/gopclkbufg on USCM_383_885.
+Placed fixed instance clkbufg_5/gopclkbufg on USCM_383_894.
+Placed fixed instance clkbufg_6/gopclkbufg on USCM_383_906.
+Placed fixed instance clkbufg_7/gopclkbufg on USCM_383_888.
+Placed fixed instance clkbufg_8/gopclkbufg on USCM_383_891.
+Placed fixed instance clkbufg_9/gopclkbufg on USCM_383_897.
+Placed fixed instance u_CORES/u_GTP_SCANCHAIN_PG/scanchain on SCANCHAIN_76_618.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst on GPLL_727_769.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[0].u_ddc_ca/ddc_inst on DDR_PHY_729_769.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[1].u_ddc_ca/ddc_inst on DDR_PHY_729_615.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[2].u_ddc_ca/ddc_inst on DDR_PHY_729_613.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst on PPLL_727_613.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk on RCKB_723_762.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst on DDRPHY_IOCLK_DIV_728_616.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst on PPLL_727_919.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/goprclk on RCKB_723_1068.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst on DDRPHY_IOCLK_DIV_728_922.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_1075.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_1077.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_921.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_919.
+Placed fixed instance u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst on GPLL_7_157.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst on MRCKB_721_762.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_ddrphy_cpd/cpd_inst on DDRPHY_CPD_729_772.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg on USCM_383_903.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg on USCM_383_882.
+Placed fixed instance u_pll_npu/u_gpll/gpll_inst on GPLL_7_463.
+Placed fixed instance u_pll_sys/u_gpll/gpll_inst on GPLL_727_463.
+Placed fixed instance u_pll_video/u_gpll/gpll_inst on GPLL_7_769.
+Placed fixed instance u_rgmii/u_eth_clk/gopclkbufg on USCM_383_930.
+Placed fixed instance u_rgmii/u_pll_eth/u_gpll/gpll_inst on GPLL_7_1381.
+Placed fixed instance BKCL_auto_0 on BKCL_1_1258.
+Placed fixed instance BKCL_auto_1 on BKCL_1_952.
+Placed fixed instance BKCL_auto_2 on BKCL_1_646.
+Placed fixed instance BKCL_auto_3 on BKCL_1_340.
+Placed fixed instance BKCL_auto_4 on BKCL_733_952.
+Placed fixed instance BKCL_auto_5 on BKCL_733_646.
+Fixed placement takes 0.92 sec.
+
+Phase 2.2 Process placement started.
+I: The IO driver of u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+I: The IO driver of u_pll_npu/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+I: The IO driver of u_pll_sys/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+I: The IO driver of u_pll_video/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+Process placement takes 0.00 sec.
+
+Phase 2.3 IO placement started.
+IO placement takes 0.03 sec.
+
+PBM start.
+Total cost after SA planning is 9914686.225512.
+SA total time: 5954 msec
+PBM of GP end, takes 0.33 sec.
+Phase 2.4 2nd GP placement started.
+Run super clustering :
+	Initial slack -9503.
+	21 iterations finished.
+	Final slack -4799.
+Super clustering done.
+Design Utilization : 67%.
+I: GP end with result: density(0.059135)
+Worst slack after global placement is -405
+2nd GP placement takes 22.42 sec.
+
+Wirelength after global placement is 3186191 and checksum is D165B36FD4960DB4.
+Global placement takes 23.78 sec.
+
+Phase 3 Post global placement started.
+Phase 3.1 Macro cell placement started.
+I: Process macros using "Global".
+Wirelength after macro cell placement is 3457094 and checksum is 3FFAC46B9AEC6FA.
+Macro cell placement takes 9.20 sec.
+
+PBM start.
+PBM of PostGP end, takes 0.00 sec.
+Phase 3.2 3rd GP placement started.
+Design Utilization : 67%.
+I: GP end with result: density(0.043666)
+Worst slack after post global placement is -1409
+3rd GP placement takes 1.83 sec.
+
+Wirelength after post global placement is 3215387, detour is 30 and checksum is 2BFE37CC280B7CE5.
+Packing LUT6D started.
+I: LUT6D pack result: There are 38323 LUT6 in collection, pack success:534
+Packing LUT6D takes 0.73 sec.
+Post global placement takes 11.78 sec.
+
+Phase 4 Legalization started.
+The average distance in LP is 0.522110.
+Wirelength after legalization is 3360497, detour is 30 and checksum is B8AA9BFE97D2F201.
+Legalization takes 0.08 sec.
+
+Phase 5 Timing-driven detailed placement started.
+Phase 5.1 Replication placement started.
+Worst slack before Replication Place is -1437.
+Replication placement takes 4.06 sec.
+
+Wirelength after replication placement is 3362884, detour is 30 and checksum is C978FB67A5AC9E10.
+Phase 5.2 Swapping placement started.
+Worst slack before detailed placement is -1089, TNS before detailed placement is -944676. 
+Cost at Swap iteration 0 : -1089, wslk -665, tns -185888, takes 1.25 sec.
+    wire length at Swap iteration 0 : last 3369500.00, curr 3380209.00, change rate 0.32%
+Cost at DP iteration 0 : -665, wslk -209, tns -4456, takes 3.66 sec.
+    wire length at DP iteration 0 : last 3380209.00, curr 3462235.00, change rate 2.43%
+Cost at Swap iteration 1 : -209, wslk -150, tns -883, takes 4.34 sec.
+    wire length at Swap iteration 1 : last 3462235.00, curr 3462974.00, change rate 0.02%
+Cost at Swap iteration 2 : -150, wslk -150, tns -866, takes 3.22 sec.
+    wire length at Swap iteration 2 : last 3462974.00, curr 3467600.00, change rate 0.13%
+Cost at DP iteration 2 : -150, wslk 39, tns 0, takes 2.53 sec.
+    wire length at DP iteration 2 : last 3467600.00, curr 3519260.00, change rate 1.49%
+Cost at Swap iteration 3 : 39, wslk 90, tns 0, takes 0.25 sec.
+    wire length at Swap iteration 3 : last 3519260.00, curr 3521973.00, change rate 0.08%
+Cost at Swap iteration 4 : 90, wslk 90, tns 0, takes 0.22 sec.
+    wire length at Swap iteration 4 : last 3521973.00, curr 3523493.00, change rate 0.04%
+Cost at DP iteration 4 : 90, wslk 110, tns 0, takes 0.20 sec.
+    wire length at DP iteration 4 : last 3523493.00, curr 3556433.00, change rate 0.93%
+Cost at Swap iteration 5 : 110, wslk 110, tns 0, takes 1.02 sec.
+    wire length at Swap iteration 5 : last 3556433.00, curr 3557295.00, change rate 0.02%
+Cost at Swap iteration 6 : 110, wslk 110, tns 0, takes 1.55 sec.
+    wire length at Swap iteration 6 : last 3557295.00, curr 3558328.00, change rate 0.03%
+Cost at DP iteration 6 : 110, wslk 183, tns 0, takes 1.84 sec.
+    wire length at DP iteration 6 : last 3558328.00, curr 3560664.00, change rate 0.07%
+Cost at Swap iteration 7 : 183, wslk 198, tns 0, takes 1.08 sec.
+    wire length at Swap iteration 7 : last 3560664.00, curr 3561661.00, change rate 0.03%
+Cost at Swap iteration 8 : 198, wslk 198, tns 0, takes 1.19 sec.
+    wire length at Swap iteration 8 : last 3561661.00, curr 3562253.00, change rate 0.02%
+Cost at DP iteration 8 : 198, wslk 230, tns 0, takes 1.28 sec.
+    wire length at DP iteration 8 : last 3562253.00, curr 3584368.00, change rate 0.62%
+Cost at Swap iteration 9 : 230, wslk 230, tns 0, takes 0.92 sec.
+    wire length at Swap iteration 9 : last 3584368.00, curr 3584959.00, change rate 0.02%
+Cost at Swap iteration 10 : 230, wslk 230, tns 0, takes 1.23 sec.
+    wire length at Swap iteration 10 : last 3584959.00, curr 3585325.00, change rate 0.01%
+Cost at DP iteration 10 : 230, wslk 230, tns 0, takes 0.27 sec.
+    wire length at DP iteration 10 : last 3585325.00, curr 3583951.00, change rate -0.04%
+Cost at Swap iteration 11 : 230, wslk 230, tns 0, takes 0.27 sec.
+    wire length at Swap iteration 11 : last 3583951.00, curr 3584473.00, change rate 0.01%
+Worst slack after detailed placement is 230, TNS after detailed placement is 0. 
+Swapping placement takes 27.64 sec.
+
+I: Place-6001: Add the new LUT instances CLMS_255_637(/devDL6L5Q_S) replicated by the LUT instance CLMA_285_666(/devAL6L5Q).
+Origin u_eth/u_tx/N1052_1/LUT6D_inst replicates:
+    CLMS_255_637(/devDL6L5Q_S) : u_eth/u_tx/N1052_1/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_321_660(/devCL6) CLMA_297_667(/devCL6) replicated by the LUT instance CLMA_339_661(/devAL6).
+Origin u_geo/N64_6[0]/LUT6_inst replicates:
+    CLMA_321_660(/devCL6) : u_geo/N64_6[0]/LUT6_inst_1(gopLUT6)
+    CLMA_297_667(/devCL6) : u_geo/N64_6[0]/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_297_655(/devCL6L5Q) CLMA_369_697(/devBL6L5Q) CLMA_369_685(/devDL6L5Q) CLMA_303_691(/devCL6L5Q) CLMA_285_769(/devCL6L5Q) replicated by the LUT instance CLMA_339_726(/devAL6L5Q).
+Origin u_geo/u_source/N156/LUT6D_inst replicates:
+    CLMA_297_655(/devCL6L5Q) : u_geo/u_source/N156/LUT6D_inst_1(gopLUT6L5)
+    CLMA_369_697(/devBL6L5Q) : u_geo/u_source/N156/LUT6D_inst_2(gopLUT6L5)
+    CLMA_369_685(/devDL6L5Q) : u_geo/u_source/N156/LUT6D_inst_3(gopLUT6L5)
+    CLMA_303_691(/devCL6L5Q) : u_geo/u_source/N156/LUT6D_inst_4(gopLUT6L5)
+    CLMA_285_769(/devCL6L5Q) : u_geo/u_source/N156/LUT6D_inst_5(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_303_877(/devBL6L5Q) CLMA_327_877(/devBL6L5Q) replicated by the FF instance CLMA_351_847(/FFAPP0/FF) .
+Origin u_mem/u_xbar/u_rbuf/port_head_r[5][0]/opit_0_inv_L5Q replicates:
+    CLMA_303_877(/devBL6L5Q) : u_mem/u_xbar/u_rbuf/port_head_r[5][0]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+    CLMA_327_877(/devBL6L5Q) : u_mem/u_xbar/u_rbuf/port_head_r[5][0]/opit_0_inv_L5Q_2(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_273_781(/devCL6) replicated by the LUT instance CLMA_297_828(/devDL6).
+Origin u_mem/u_xbar/N2395_1/LUT6_inst replicates:
+    CLMA_273_781(/devCL6) : u_mem/u_xbar/N2395_1/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_249_516(/devAL6) CLMA_297_499(/devDL6) replicated by the LUT instance CLMA_261_516(/devCL6).
+Origin u_rnd/u_copy/N157_4/gateop replicates:
+    CLMA_249_516(/devAL6) : u_rnd/u_copy/N157_4/gateop_1(gopLUT6)
+    CLMA_297_499(/devDL6) : u_rnd/u_copy/N157_4/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_291_853(/devCL6_S) CLMA_339_840(/devCL6) replicated by the LUT instance CLMA_339_840(/devDL6).
+Origin u_mem/u_xbar/u_rbuf/N1034[6]/gateop replicates:
+    CLMS_291_853(/devCL6_S) : u_mem/u_xbar/u_rbuf/N1034[6]/gateop_1(gopLUT6)
+    CLMA_339_840(/devCL6) : u_mem/u_xbar/u_rbuf/N1034[6]/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_327_840(/devCL6L5Q) CLMS_345_847(/devBL6L5Q_S) replicated by the LUT instance CLMA_339_859(/devCL6L5Q).
+Origin u_mem/u_xbar/u_rbuf/ND26_3[0]/LUT6D_inst replicates:
+    CLMA_327_840(/devCL6L5Q) : u_mem/u_xbar/u_rbuf/ND26_3[0]/LUT6D_inst_1(gopLUT6L5)
+    CLMS_345_847(/devBL6L5Q_S) : u_mem/u_xbar/u_rbuf/ND26_3[0]/LUT6D_inst_2(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_45_318(/devBL6) replicated by the LUT instance CLMA_231_480(/devBL6).
+Origin u_rnd/u_copy/N194/LUT6_inst replicates:
+    CLMA_45_318(/devBL6) : u_rnd/u_copy/N194/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_339_841(/devDL6) replicated by the LUT instance CLMA_339_852(/devCL6).
+Origin u_mem/u_xbar/u_rbuf/N1034[4]/gateop replicates:
+    CLMA_339_841(/devDL6) : u_mem/u_xbar/u_rbuf/N1034[4]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_231_168(/devDL6) CLMA_231_240(/devDL6) replicated by the LUT instance CLMS_231_529(/devBL6_S).
+Origin u_rnd/u_draw/N2470/gateop replicates:
+    CLMA_231_168(/devDL6) : u_rnd/u_draw/N2470/gateop_1(gopLUT6)
+    CLMA_231_240(/devDL6) : u_rnd/u_draw/N2470/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_273_792(/devDL6) CLMA_273_805(/devDL6) replicated by the LUT instance CLMA_291_816(/devCL6).
+Origin u_mem/u_xbar/u_sched/N224_22/gateop replicates:
+    CLMA_273_792(/devDL6) : u_mem/u_xbar/u_sched/N224_22/gateop_1(gopLUT6)
+    CLMA_273_805(/devDL6) : u_mem/u_xbar/u_sched/N224_22/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_291_817(/devAL6_S) replicated by the LUT instance CLMA_297_780(/devDL6).
+Origin u_mem/u_xbar/u_sched/N240_10[2]/LUT6_inst replicates:
+    CLMS_291_817(/devAL6_S) : u_mem/u_xbar/u_sched/N240_10[2]/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMS_261_481(/FFAPP3/FF) replicated by the FF instance CLMA_219_462(/FFAPP0/FF) .
+Origin u_rnd/state_r_reg[5]/opit_0_inv_L5Q replicates:
+    CLMS_261_481(/FFAPP3/FF)  : u_rnd/state_r_reg[5]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_213_264(/devDL6) replicated by the LUT instance CLMA_219_631(/devBL6).
+Origin u_rnd/u_draw/read_busy_r_3_4/LUT6_inst replicates:
+    CLMA_213_264(/devDL6) : u_rnd/u_draw/read_busy_r_3_4/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_213_265(/devAL6) replicated by the LUT instance CLMA_213_265(/devDL6).
+Origin u_rnd/u_draw/u_affine/N82/LUT6_inst replicates:
+    CLMA_213_265(/devAL6) : u_rnd/u_draw/u_affine/N82/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_273_780(/devDL6) replicated by the LUT instance CLMA_297_823(/devCL6).
+Origin u_mem/u_xbar/u_sched/N240_10[0]/LUT6_inst replicates:
+    CLMA_273_780(/devDL6) : u_mem/u_xbar/u_sched/N240_10[0]/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_99_366(/devDL6) CLMA_69_474(/devAL6) CLMA_213_282(/devBL6) replicated by the LUT instance CLMA_213_294(/devBL6).
+Origin u_rnd/u_draw/N7128_2/gateop replicates:
+    CLMA_99_366(/devDL6) : u_rnd/u_draw/N7128_2/gateop_1(gopLUT6)
+    CLMA_69_474(/devAL6) : u_rnd/u_draw/N7128_2/gateop_2(gopLUT6)
+    CLMA_213_282(/devBL6) : u_rnd/u_draw/N7128_2/gateop_3(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_231_265(/devDL6_S) replicated by the LUT instance CLMA_231_294(/devDL6).
+Origin u_rnd/u_draw/N2598/gateop replicates:
+    CLMS_231_265(/devDL6_S) : u_rnd/u_draw/N2598/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_249_1111(/devCL6) replicated by the LUT instance CLMA_249_1116(/devAL6).
+Origin u_vin/N134_5/LUT6_inst replicates:
+    CLMA_249_1111(/devCL6) : u_vin/N134_5/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_249_1105(/devCL6) replicated by the LUT instance CLMS_255_1117(/devBL6_S).
+Origin u_vin/N168_2/LUT6_inst replicates:
+    CLMA_249_1105(/devCL6) : u_vin/N168_2/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_237_402(/devAL6L5Q) replicated by the LUT instance CLMS_231_409(/devDL6L5Q_S).
+Origin u_rnd/u_draw/N562_4/LUT6D_inst replicates:
+    CLMA_237_402(/devAL6L5Q) : u_rnd/u_draw/N562_4/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMS_243_1123(/devBL6_S) CLMA_255_1146(/devDL6) replicated by the LUT instance CLMA_243_1122(/devAL6).
+Origin u_vin/u_cam1/u_items/N3_4/gateop replicates:
+    CLMS_243_1123(/devBL6_S) : u_vin/u_cam1/u_items/N3_4/gateop_1(gopLUT6)
+    CLMA_255_1146(/devDL6) : u_vin/u_cam1/u_items/N3_4/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_273_792(/devBL6) CLMA_321_804(/devAL6) replicated by the LUT instance CLMA_297_822(/devDL6).
+Origin u_mem/u_xbar/N2768_2/LUT6_inst replicates:
+    CLMA_273_792(/devBL6) : u_mem/u_xbar/N2768_2/LUT6_inst_1(gopLUT6)
+    CLMA_321_804(/devAL6) : u_mem/u_xbar/N2768_2/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_213_373(/devBL6) replicated by the LUT instance CLMA_219_385(/devCL6).
+Origin u_rnd/N204_9/gateop replicates:
+    CLMA_213_373(/devBL6) : u_rnd/N204_9/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_297_811(/devBL6) CLMS_261_817(/devCL6_S) CLMS_321_787(/devBL6_S) replicated by the LUT instance CLMA_297_823(/devBL6).
+Origin u_mem/u_xbar/N2768_1/LUT6_inst replicates:
+    CLMA_297_811(/devBL6) : u_mem/u_xbar/N2768_1/LUT6_inst_1(gopLUT6)
+    CLMS_261_817(/devCL6_S) : u_mem/u_xbar/N2768_1/LUT6_inst_2(gopLUT6)
+    CLMS_321_787(/devBL6_S) : u_mem/u_xbar/N2768_1/LUT6_inst_3(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_171_168(/FF0/FF) replicated by the FF instance CLMA_117_174(/FF0/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][31]/opit_0 replicates:
+    CLMA_171_168(/FF0/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][31]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_291_534(/FFAPP1/FF) replicated by the FF instance CLMA_327_540(/FF0/FF) .
+Origin u_rnd/u_draw/cache_addr_r[2][7]/opit_0 replicates:
+    CLMA_291_534(/FFAPP1/FF)  : u_rnd/u_draw/cache_addr_r[2][7]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_213_301(/devBL6L5Q) replicated by the LUT instance CLMA_213_517(/devBL6L5Q).
+Origin u_rnd/u_draw/N555/LUT6D_inst replicates:
+    CLMA_213_301(/devBL6L5Q) : u_rnd/u_draw/N555/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_165_313(/devBL6) replicated by the LUT instance CLMA_213_312(/devAL6).
+Origin u_rnd/u_draw/N867[218]/gateop replicates:
+    CLMA_165_313(/devBL6) : u_rnd/u_draw/N867[218]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_105_145(/devDL6) replicated by the LUT instance CLMS_111_217(/devDL6_S).
+Origin u_rnd/u_draw/u_affine/u_window/N1673_10/LUT6_inst replicates:
+    CLMA_105_145(/devDL6) : u_rnd/u_draw/u_affine/u_window/N1673_10/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_339_811(/devDL6) replicated by the LUT instance CLMA_363_804(/devDL6).
+Origin u_mem/u_xbar/u_rbuf/N5925[5]_3/LUT6_inst replicates:
+    CLMA_339_811(/devDL6) : u_mem/u_xbar/u_rbuf/N5925[5]_3/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_195_168(/FF3/FF) replicated by the FF instance CLMS_123_187(/FF0/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][29]/opit_0 replicates:
+    CLMA_195_168(/FF3/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][29]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_207_168(/FF3/FF) replicated by the FF instance CLMS_123_187(/FF1/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][30]/opit_0 replicates:
+    CLMA_207_168(/FF3/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][30]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_303_547(/FF1/FF) replicated by the FF instance CLMA_327_540(/FFAPP2/FF) .
+Origin u_rnd/u_draw/cache_addr_r[2][17]/opit_0 replicates:
+    CLMA_303_547(/FF1/FF)  : u_rnd/u_draw/cache_addr_r[2][17]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_369_672(/FFAPP2/FF) replicated by the FF instance CLMA_351_691(/FFAPP0/FF) .
+Origin u_geo/state_r_reg[2]/opit_0_inv_L5Q replicates:
+    CLMA_369_672(/FFAPP2/FF)  : u_geo/state_r_reg[2]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_303_703(/devCL6) CLMA_303_739(/devCL6) replicated by the LUT instance CLMA_327_751(/devBL6).
+Origin u_geo/u_source/N154/LUT6_inst replicates:
+    CLMA_303_703(/devCL6) : u_geo/u_source/N154/LUT6_inst_1(gopLUT6)
+    CLMA_303_739(/devCL6) : u_geo/u_source/N154/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_261_780(/devCL6L5Q) CLMA_321_840(/devDL6L5Q) CLMS_345_853(/devAL6L5Q_S) replicated by the LUT instance CLMA_303_703(/devAL6L5Q).
+Origin u_disp/u_dma/N39/LUT6D_inst replicates:
+    CLMA_261_780(/devCL6L5Q) : u_disp/u_dma/N39/LUT6D_inst_1(gopLUT6L5)
+    CLMA_321_840(/devDL6L5Q) : u_disp/u_dma/N39/LUT6D_inst_2(gopLUT6L5)
+    CLMS_345_853(/devAL6L5Q_S) : u_disp/u_dma/N39/LUT6D_inst_3(gopLUT6L5)
+I: Place-6001: Add the new FF instances CLMA_183_169(/FF0/FF) replicated by the FF instance CLMA_183_192(/FF2/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][24]/opit_0 replicates:
+    CLMA_183_169(/FF0/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][24]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_231_474(/devDL6) replicated by the LUT instance CLMA_207_426(/devCL6).
+Origin u_rnd/u_draw/N7315/gateop replicates:
+    CLMA_231_474(/devDL6) : u_rnd/u_draw/N7315/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_267_799(/devAL6L5Q_S) replicated by the LUT instance CLMS_261_805(/devDL6L5Q_S).
+Origin u_mem/u_xbar/u_sched/N938/gateop_LUT6DL5 replicates:
+    CLMS_267_799(/devAL6L5Q_S) : u_mem/u_xbar/u_sched/N938/gateop_LUT6DL5_1(gopLUT6L5)
+I: Place-6001: Add the new FF instances CLMA_201_180(/FF0/FF) replicated by the FF instance CLMA_129_163(/FF0/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][0]/opit_0 replicates:
+    CLMA_201_180(/FF0/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][0]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_195_162(/FF2/FF) replicated by the FF instance CLMA_219_241(/FF0/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][26]/opit_0 replicates:
+    CLMA_195_162(/FF2/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][26]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_183_138(/FF0/FF) replicated by the FF instance CLMA_153_204(/FF2/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][19]/opit_0 replicates:
+    CLMA_183_138(/FF0/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][19]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_183_156(/FF0/FF) replicated by the FF instance CLMA_153_186(/FF1/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][20]/opit_0 replicates:
+    CLMA_183_156(/FF0/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][20]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_315_799(/devAL6) replicated by the LUT instance CLMA_291_822(/devBL6).
+Origin u_mem/u_xbar/u_rbuf/N5925[0]_3/LUT6_inst replicates:
+    CLMA_315_799(/devAL6) : u_mem/u_xbar/u_rbuf/N5925[0]_3/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_183_138(/FF1/FF) replicated by the FF instance CLMA_171_174(/FF0/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][8]/opit_0 replicates:
+    CLMA_183_138(/FF1/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][8]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_195_132(/FF2/FF) replicated by the FF instance CLMA_177_174(/FF1/FF) .
+Origin u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][10]/opit_0 replicates:
+    CLMA_195_132(/FF2/FF)  : u_rnd/u_draw/u_geometry/edge_dx_sample_r[0][10]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_171_331(/devCL6) replicated by the LUT instance CLMA_213_312(/devBL6).
+Origin u_rnd/u_draw/N867[250]/gateop replicates:
+    CLMA_171_331(/devCL6) : u_rnd/u_draw/N867[250]/gateop_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMS_291_541(/FF3/FF) replicated by the FF instance CLMA_297_540(/FFAPP3/FF) .
+Origin u_rnd/u_draw/cache_addr_r[2][13]/opit_0 replicates:
+    CLMS_291_541(/FF3/FF)  : u_rnd/u_draw/cache_addr_r[2][13]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_255_918(/FFAPP0/FF) replicated by the FF instance CLMS_255_835(/FFAPP2/FF) .
+Origin u_mem/u_xbar/w_complete_r[1]/opit_0_inv_L5Q replicates:
+    CLMA_255_918(/FFAPP0/FF)  : u_mem/u_xbar/w_complete_r[1]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_249_871(/devBL6) replicated by the LUT instance CLMA_237_942(/devDL6).
+Origin u_mem/u_xbar/N1834_4/gateop replicates:
+    CLMA_249_871(/devBL6) : u_mem/u_xbar/N1834_4/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_231_1026(/devAL6) replicated by the LUT instance CLMA_231_1032(/devDL6).
+Origin u_vin/g_channel[1].u_channel/u_write/N45/LUT6_inst replicates:
+    CLMA_231_1026(/devAL6) : u_vin/g_channel[1].u_channel/u_write/N45/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_201_355(/devAL6) replicated by the LUT instance CLMA_195_312(/devDL6).
+Origin u_rnd/u_draw/N867[253]/gateop replicates:
+    CLMA_201_355(/devAL6) : u_rnd/u_draw/N867[253]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_351_841(/devDL6) replicated by the LUT instance CLMS_345_835(/devCL6_S).
+Origin u_mem/u_xbar/u_rbuf/N1268[5]/LUT6_inst replicates:
+    CLMA_351_841(/devDL6) : u_mem/u_xbar/u_rbuf/N1268[5]/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_291_792(/devCL6) replicated by the LUT instance CLMA_285_811(/devAL6).
+Origin u_mem/u_xbar/u_sched/N224_17_or[0]_3/LUT6_inst replicates:
+    CLMA_291_792(/devCL6) : u_mem/u_xbar/u_sched/N224_17_or[0]_3/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_273_709(/FFAPP2/FF) replicated by the FF instance CLMA_273_799(/FFAPP0/FF) .
+Origin u_mem/u_xbar/u_rbuf/pending_error_r/opit_0_L5Q replicates:
+    CLMA_273_709(/FFAPP2/FF)  : u_mem/u_xbar/u_rbuf/pending_error_r/opit_0_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_153_331(/devCL6) replicated by the LUT instance CLMA_129_336(/devAL6).
+Origin u_rnd/u_draw/N867[154]/gateop replicates:
+    CLMA_153_331(/devCL6) : u_rnd/u_draw/N867[154]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_339_727(/devDL6L5Q) CLMA_303_877(/devDL6L5Q) replicated by the LUT instance CLMA_351_703(/devAL6L5Q).
+Origin u_geo/u_rd/N39/LUT6D_inst replicates:
+    CLMA_339_727(/devDL6L5Q) : u_geo/u_rd/N39/LUT6D_inst_1(gopLUT6L5)
+    CLMA_303_877(/devDL6L5Q) : u_geo/u_rd/N39/LUT6D_inst_2(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_339_822(/devCL6) replicated by the LUT instance CLMA_315_846(/devCL6).
+Origin u_eth/u_tx/u_read/N40/gateop replicates:
+    CLMA_339_822(/devCL6) : u_eth/u_tx/u_read/N40/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_273_829(/devBL6) replicated by the LUT instance CLMA_285_822(/devDL6).
+Origin u_mem/u_xbar/N2568_2/gateop replicates:
+    CLMA_273_829(/devBL6) : u_mem/u_xbar/N2568_2/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_165_354(/devDL6) replicated by the LUT instance CLMA_201_348(/devDL6).
+Origin u_rnd/u_draw/N867[150]/gateop replicates:
+    CLMA_165_354(/devDL6) : u_rnd/u_draw/N867[150]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_219_318(/devCL6) CLMA_237_349(/devDL6) replicated by the LUT instance CLMA_237_432(/devAL6).
+Origin u_rnd/N1316/gateop replicates:
+    CLMA_219_318(/devCL6) : u_rnd/N1316/gateop_1(gopLUT6)
+    CLMA_237_349(/devDL6) : u_rnd/N1316/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_219_433(/devDL6) CLMA_201_540(/devAL6) replicated by the LUT instance CLMA_183_432(/devDL6).
+Origin u_rnd/u_draw/N56/gateop replicates:
+    CLMA_219_433(/devDL6) : u_rnd/u_draw/N56/gateop_1(gopLUT6)
+    CLMA_201_540(/devAL6) : u_rnd/u_draw/N56/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_147_372(/devBL6) replicated by the LUT instance CLMA_195_390(/devBL6).
+Origin u_rnd/u_draw/N870_3_68/LUT6_inst replicates:
+    CLMA_147_372(/devBL6) : u_rnd/u_draw/N870_3_68/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_267_396(/FFAPP0/FF) replicated by the FF instance CLMA_261_516(/FFAPP3/FF) .
+Origin u_rnd/u_copy/state_r_reg[5]/opit_0_inv_L5Q replicates:
+    CLMA_267_396(/FFAPP0/FF)  : u_rnd/u_copy/state_r_reg[5]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_237_552(/devDL6L5Q) CLMA_237_450(/devCL6L5Q) replicated by the LUT instance CLMS_231_511(/devDL6L5Q_S).
+Origin u_rnd/u_draw/N2534/LUT6D_inst replicates:
+    CLMA_237_552(/devDL6L5Q) : u_rnd/u_draw/N2534/LUT6D_inst_1(gopLUT6L5)
+    CLMA_237_450(/devCL6L5Q) : u_rnd/u_draw/N2534/LUT6D_inst_2(gopLUT6L5)
+I: Place-6001: Add the new FF instances CLMA_651_841(/FF3/FF) replicated by the FF instance CLMA_627_835(/FF0/FF) .
+Origin u_npu/u_conv/desc_r[259]/opit_0 replicates:
+    CLMA_651_841(/FF3/FF)  : u_npu/u_conv/desc_r[259]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_351_798(/devDL6) replicated by the LUT instance CLMA_351_822(/devCL6).
+Origin u_mem/u_xbar/u_rbuf/N1031_2_2/gateop replicates:
+    CLMA_351_798(/devDL6) : u_mem/u_xbar/u_rbuf/N1031_2_2/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_351_787(/devBL6) CLMS_345_811(/devDL6_S) replicated by the LUT instance CLMS_321_823(/devCL6_S).
+Origin u_mem/u_xbar/u_rbuf/N2190_2/LUT6_inst replicates:
+    CLMA_351_787(/devBL6) : u_mem/u_xbar/u_rbuf/N2190_2/LUT6_inst_1(gopLUT6)
+    CLMS_345_811(/devDL6_S) : u_mem/u_xbar/u_rbuf/N2190_2/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_555_913(/devDL6) CLMA_603_871(/devBL6) replicated by the LUT instance CLMA_603_942(/devDL6).
+Origin u_npu/u_conv/u_datapath/N8_35/LUT6_inst replicates:
+    CLMA_555_913(/devDL6) : u_npu/u_conv/u_datapath/N8_35/LUT6_inst_1(gopLUT6)
+    CLMA_603_871(/devBL6) : u_npu/u_conv/u_datapath/N8_35/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_327_852(/devDL6L5Q) replicated by the LUT instance CLMA_339_847(/devDL6L5Q).
+Origin u_mem/u_xbar/u_rbuf/ND26_8[1]/LUT6D_inst replicates:
+    CLMA_327_852(/devDL6L5Q) : u_mem/u_xbar/u_rbuf/ND26_8[1]/LUT6D_inst_1(gopLUT6L5)
+I: Place-6001: Add the new LUT instances CLMA_183_337(/devBL6) replicated by the LUT instance CLMA_195_318(/devBL6).
+Origin u_rnd/u_draw/N867[246]/gateop replicates:
+    CLMA_183_337(/devBL6) : u_rnd/u_draw/N867[246]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_183_337(/devDL6) replicated by the LUT instance CLMS_231_331(/devBL6_S).
+Origin u_rnd/u_draw/N867[220]/gateop replicates:
+    CLMA_183_337(/devDL6) : u_rnd/u_draw/N867[220]/gateop_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_255_888(/devCL6) CLMA_255_1032(/devCL6) replicated by the LUT instance CLMA_273_684(/devCL6).
+Origin u_mem/u_xbar/N1809/gateop replicates:
+    CLMA_255_888(/devCL6) : u_mem/u_xbar/N1809/gateop_1(gopLUT6)
+    CLMA_255_1032(/devCL6) : u_mem/u_xbar/N1809/gateop_2(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_297_858(/devBL6) replicated by the LUT instance CLMA_363_804(/devCL6).
+Origin u_mem/u_xbar/u_rbuf/N5925[6]_3/LUT6_inst replicates:
+    CLMA_297_858(/devBL6) : u_mem/u_xbar/u_rbuf/N5925[6]_3/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMA_117_276(/devAL6) replicated by the LUT instance CLMA_207_294(/devAL6).
+Origin u_rnd/u_draw/N867[211]/gateop replicates:
+    CLMA_117_276(/devAL6) : u_rnd/u_draw/N867[211]/gateop_1(gopLUT6)
+Wirelength after detailed placement is 3579896, detour is 30 and checksum is 5D3A2501700D40E7.
+Timing-driven detailed placement takes 31.78 sec.
+
+Worst slack is 234, TNS after placement is 0.
+Placement done.
+Total placement takes 77.58 sec.
+Finished placement.
+
+Routing started.
+Build routing arch for double attribute device.
+Enter timing driven router mode.
+Route thread size: 5
+Building routing graph takes 12.31 sec.
+Init coarse delay table.
+Read place coarse delay table takes 0.50 sec.
+Build SRB system takes 0.70 sec.
+Setup STE netlist take 13080 msec.
+Dispose control chain take 4605 msec.
+Collect const net info take 1412 msec.
+Worst slack is 234, TNS before route is 0.
+Total nets for routing: 184118.
+Total loads for routing: 818683.
+Direct connect net size: 18817
+Build all design net take 10722 msec.
+Processing design graph takes 29.87 sec.
+Delay table total memory: 72.78639603 MB
+Route graph total memory: 412.58296680 MB
+Route design total memory: 244.42203522 MB
+Global routing takes 0.00 sec.
+Total 184116 subnets.
+Unrouted clock nets at iteration 0 (0.701 sec): 18
+Unrouted clock nets at iteration 1 (0.488 sec): 12
+Unrouted clock nets at iteration 2 (0.442 sec): 8
+Unrouted clock nets at iteration 3 (0.254 sec): 4
+Unrouted clock nets at iteration 4 (0.188 sec): 4
+Unrouted clock nets at iteration 5 (0.104 sec): 2
+Unrouted clock nets at iteration 6 (0.054 sec): 2
+Unrouted clock nets at iteration 7 (0.052 sec): 2
+Unrouted clock nets at iteration 8 (0.054 sec): 2
+Unrouted clock nets at iteration 9 (0.054 sec): 2
+Unrouted clock nets at iteration 10 (0.057 sec): 2
+Unrouted clock nets at iteration 11 (0.054 sec): 2
+Unrouted clock nets at iteration 12 (0.053 sec): 0
+Total route nets size: 184071
+Pre route takes 81.421 sec
+Unrouted general nets at iteration 14 (MT total route time: 19.802 sec): 163678(overused: 1204202)
+Unrouted general nets at iteration 15 (MT total route time: 20.743 sec): 149075(overused: 991679)
+Unrouted general nets at iteration 16 (MT total route time: 25.379 sec): 135554(overused: 798174)
+Unrouted general nets at iteration 17 (MT total route time: 51.397 sec): 124132(overused: 656925)
+Unrouted general nets at iteration 18 (MT total route time: 141.391 sec): 115549(overused: 569328)
+Unrouted general nets at iteration 19 (MT total route time: 201.151 sec): 101871(overused: 538849)
+Unrouted general nets at iteration 20 (MT total route time: 276.469 sec): 92025(overused: 468225)
+Unrouted general nets at iteration 21 (MT total route time: 292.225 sec): 84253(overused: 406796)
+Unrouted general nets at iteration 22 (MT total route time: 327.767 sec): 78276(overused: 357049)
+Unrouted general nets at iteration 23 (MT total route time: 402.271 sec): 73392(overused: 316217)
+Unrouted general nets at iteration 24 (MT total route time: 359.174 sec): 68443(overused: 281481)
+Unrouted general nets at iteration 25 (MT total route time: 140.753 sec): 70279(overused: 306194)
+Unrouted general nets at iteration 26 (MT total route time: 211.290 sec): 68182(overused: 280895)
+Unrouted general nets at iteration 27 (MT total route time: 239.242 sec): 65170(overused: 256726)
+Unrouted general nets at iteration 28 (MT total route time: 244.012 sec): 62046(overused: 236761)
+Unrouted general nets at iteration 29 (MT total route time: 243.677 sec): 59320(overused: 218305)
+Unrouted general nets at iteration 30 (MT total route time: 259.303 sec): 56466(overused: 202249)
+Unrouted general nets at iteration 31 (MT total route time: 293.620 sec): 54809(overused: 191648)
+Unrouted general nets at iteration 32 (MT total route time: 275.289 sec): 52536(overused: 178534)
+Unrouted general nets at iteration 33 (MT total route time: 267.416 sec): 50396(overused: 168083)
+Unrouted general nets at iteration 34 (MT total route time: 280.528 sec): 48234(overused: 157092)
+Unrouted general nets at iteration 35 (MT total route time: 286.973 sec): 49738(overused: 168352)
+Unrouted general nets at iteration 36 (MT total route time: 364.498 sec): 48615(overused: 158674)
+Unrouted general nets at iteration 37 (MT total route time: 309.081 sec): 46834(overused: 148954)
+Unrouted general nets at iteration 38 (MT total route time: 295.916 sec): 44790(overused: 139130)
+Unrouted general nets at iteration 39 (MT total route time: 341.208 sec): 42847(overused: 129794)
+Unrouted general nets at iteration 40 (MT total route time: 306.436 sec): 40988(overused: 121104)
+Unrouted general nets at iteration 41 (MT total route time: 308.263 sec): 39514(overused: 115026)
+Unrouted general nets at iteration 42 (MT total route time: 299.507 sec): 37969(overused: 108597)
+Unrouted general nets at iteration 43 (MT total route time: 276.320 sec): 36653(overused: 103328)
+Unrouted general nets at iteration 44 (MT total route time: 266.741 sec): 35226(overused: 98137)
+Unrouted general nets at iteration 45 (MT total route time: 224.605 sec): 38071(overused: 115347)
+Unrouted general nets at iteration 46 (MT total route time: 300.791 sec): 38210(overused: 113409)
+Unrouted general nets at iteration 47 (MT total route time: 343.845 sec): 37131(overused: 107817)
+Unrouted general nets at iteration 48 (MT total route time: 308.839 sec): 36239(overused: 102754)
+Unrouted general nets at iteration 49 (MT total route time: 346.686 sec): 35254(overused: 99445)
+Unrouted general nets at iteration 50 (MT total route time: 281.038 sec): 34124(overused: 93813)
+Unrouted general nets at iteration 51 (MT total route time: 244.961 sec): 32865(overused: 88970)
+Unrouted general nets at iteration 52 (MT total route time: 257.222 sec): 31842(overused: 85335)
+Unrouted general nets at iteration 53 (MT total route time: 268.067 sec): 30512(overused: 80792)
+Unrouted general nets at iteration 54 (MT total route time: 249.068 sec): 29580(overused: 76916)
+Unrouted general nets at iteration 55 (MT total route time: 228.768 sec): 31468(overused: 87376)
+Unrouted general nets at iteration 56 (MT total route time: 286.205 sec): 31655(overused: 86620)
+Unrouted general nets at iteration 57 (MT total route time: 252.656 sec): 30670(overused: 82143)
+Unrouted general nets at iteration 58 (MT total route time: 271.102 sec): 29927(overused: 78361)
+Unrouted general nets at iteration 59 (MT total route time: 271.516 sec): 28975(overused: 74457)
+Unrouted general nets at iteration 60 (MT total route time: 255.488 sec): 28207(overused: 72144)
+Unrouted general nets at iteration 61 (MT total route time: 239.694 sec): 27433(overused: 68835)
+Unrouted general nets at iteration 62 (MT total route time: 218.075 sec): 26728(overused: 66105)
+Unrouted general nets at iteration 63 (MT total route time: 229.241 sec): 25189(overused: 61518)
+Unrouted general nets at iteration 64 (MT total route time: 224.453 sec): 24129(overused: 58682)
+Unrouted general nets at iteration 65 (MT total route time: 267.776 sec): 26450(overused: 68998)
+Unrouted general nets at iteration 66 (MT total route time: 361.797 sec): 27226(overused: 70426)
+Unrouted general nets at iteration 67 (MT total route time: 391.167 sec): 26749(overused: 67871)
+Unrouted general nets at iteration 68 (MT total route time: 490.481 sec): 25679(overused: 64142)
+Unrouted general nets at iteration 69 (MT total route time: 555.692 sec): 25080(overused: 61170)
+Unrouted general nets at iteration 70 (MT total route time: 353.299 sec): 24515(overused: 59947)
+Unrouted general nets at iteration 71 (MT total route time: 335.482 sec): 23379(overused: 56124)
+Unrouted general nets at iteration 72 (MT total route time: 334.828 sec): 22529(overused: 53576)
+Unrouted general nets at iteration 73 (MT total route time: 347.742 sec): 21788(overused: 51698)
+Unrouted general nets at iteration 74 (MT total route time: 316.584 sec): 21221(overused: 49706)
+Unrouted general nets at iteration 75 (MT total route time: 328.698 sec): 22693(overused: 56416)
+Unrouted general nets at iteration 76 (MT total route time: 313.819 sec): 23153(overused: 56122)
+Unrouted general nets at iteration 77 (MT total route time: 318.386 sec): 23005(overused: 55844)
+Unrouted general nets at iteration 78 (MT total route time: 286.788 sec): 22711(overused: 54343)
+Unrouted general nets at iteration 79 (MT total route time: 314.399 sec): 21683(overused: 51462)
+Unrouted general nets at iteration 80 (MT total route time: 322.462 sec): 20615(overused: 48103)
+Unrouted general nets at iteration 81 (MT total route time: 282.091 sec): 20214(overused: 46477)
+Unrouted general nets at iteration 82 (MT total route time: 231.998 sec): 19649(overused: 45294)
+Unrouted general nets at iteration 83 (MT total route time: 231.859 sec): 18850(overused: 43097)
+Unrouted general nets at iteration 84 (MT total route time: 205.398 sec): 18125(overused: 41130)
+Unrouted general nets at iteration 85 (MT total route time: 202.162 sec): 19330(overused: 46701)
+Unrouted general nets at iteration 86 (MT total route time: 245.996 sec): 20503(overused: 48966)
+Unrouted general nets at iteration 87 (MT total route time: 268.095 sec): 20443(overused: 48333)
+Unrouted general nets at iteration 88 (MT total route time: 272.507 sec): 20049(overused: 46603)
+Unrouted general nets at iteration 89 (MT total route time: 275.587 sec): 19430(overused: 44764)
+Unrouted general nets at iteration 90 (MT total route time: 234.887 sec): 18923(overused: 43517)
+Unrouted general nets at iteration 91 (MT total route time: 247.612 sec): 18704(overused: 42596)
+Unrouted general nets at iteration 92 (MT total route time: 329.376 sec): 17985(overused: 41098)
+Unrouted general nets at iteration 93 (MT total route time: 321.305 sec): 17524(overused: 39228)
+Unrouted general nets at iteration 94 (MT total route time: 344.035 sec): 16905(overused: 37534)
+Unrouted general nets at iteration 95 (MT total route time: 240.105 sec): 17995(overused: 42090)
+Unrouted general nets at iteration 96 (MT total route time: 191.897 sec): 18209(overused: 41553)
+Unrouted general nets at iteration 97 (MT total route time: 308.581 sec): 18101(overused: 40519)
+Unrouted general nets at iteration 98 (MT total route time: 201.141 sec): 17614(overused: 38816)
+Unrouted general nets at iteration 99 (MT total route time: 208.216 sec): 17285(overused: 38459)
+Unrouted general nets at iteration 100 (MT total route time: 219.293 sec): 17030(overused: 37277)
+Unrouted general nets at iteration 101 (MT total route time: 230.415 sec): 16333(overused: 35520)
+Unrouted general nets at iteration 102 (MT total route time: 195.661 sec): 15595(overused: 33609)
+Unrouted general nets at iteration 103 (MT total route time: 199.330 sec): 15128(overused: 32219)
+Unrouted general nets at iteration 104 (MT total route time: 186.654 sec): 14427(overused: 30765)
+Unrouted general nets at iteration 105 (MT total route time: 200.265 sec): 15479(overused: 34747)
+Unrouted general nets at iteration 106 (MT total route time: 201.509 sec): 15698(overused: 35318)
+Unrouted general nets at iteration 107 (MT total route time: 210.056 sec): 15782(overused: 34969)
+Unrouted general nets at iteration 108 (MT total route time: 210.325 sec): 16011(overused: 34813)
+Unrouted general nets at iteration 109 (MT total route time: 204.305 sec): 15550(overused: 33679)
+Unrouted general nets at iteration 110 (MT total route time: 203.269 sec): 15056(overused: 32718)
+Unrouted general nets at iteration 111 (MT total route time: 217.940 sec): 14714(overused: 31785)
+Unrouted general nets at iteration 112 (MT total route time: 209.031 sec): 14363(overused: 30771)
+Unrouted general nets at iteration 113 (MT total route time: 211.026 sec): 13951(overused: 29454)
+Unrouted general nets at iteration 114 (MT total route time: 183.498 sec): 13597(overused: 28549)
+Unrouted general nets at iteration 115 (MT total route time: 189.653 sec): 14735(overused: 32568)
+Unrouted general nets at iteration 116 (MT total route time: 232.216 sec): 14615(overused: 31870)
+Unrouted general nets at iteration 117 (MT total route time: 204.640 sec): 14573(overused: 31931)
+Unrouted general nets at iteration 118 (MT total route time: 185.148 sec): 14394(overused: 30565)
+Unrouted general nets at iteration 119 (MT total route time: 180.148 sec): 13820(overused: 29162)
+Unrouted general nets at iteration 120 (MT total route time: 201.153 sec): 13561(overused: 28764)
+Unrouted general nets at iteration 121 (MT total route time: 235.766 sec): 13193(overused: 27768)
+Unrouted general nets at iteration 122 (MT total route time: 207.168 sec): 12909(overused: 26758)
+Unrouted general nets at iteration 123 (MT total route time: 199.153 sec): 12269(overused: 25216)
+Unrouted general nets at iteration 124 (MT total route time: 200.278 sec): 11870(overused: 24497)
+Unrouted general nets at iteration 125 (MT total route time: 191.248 sec): 12412(overused: 27166)
+Unrouted general nets at iteration 126 (MT total route time: 227.045 sec): 12863(overused: 27919)
+Unrouted general nets at iteration 127 (MT total route time: 224.501 sec): 13249(overused: 28414)
+Unrouted general nets at iteration 128 (MT total route time: 210.490 sec): 13196(overused: 28007)
+Unrouted general nets at iteration 129 (MT total route time: 202.539 sec): 12772(overused: 26817)
+Unrouted general nets at iteration 130 (MT total route time: 227.822 sec): 12388(overused: 25504)
+Unrouted general nets at iteration 131 (MT total route time: 248.665 sec): 11941(overused: 24505)
+Unrouted general nets at iteration 132 (MT total route time: 240.018 sec): 11813(overused: 23923)
+Unrouted general nets at iteration 133 (MT total route time: 258.204 sec): 11505(overused: 23592)
+Unrouted general nets at iteration 134 (MT total route time: 215.650 sec): 11308(overused: 23213)
+Unrouted general nets at iteration 135 (MT total route time: 232.091 sec): 11945(overused: 25918)
+Unrouted general nets at iteration 136 (MT total route time: 240.081 sec): 12107(overused: 25423)
+Unrouted general nets at iteration 137 (MT total route time: 242.752 sec): 11969(overused: 25234)
+Unrouted general nets at iteration 138 (MT total route time: 203.194 sec): 11710(overused: 24271)
+Unrouted general nets at iteration 139 (MT total route time: 207.474 sec): 11338(overused: 23127)
+Unrouted general nets at iteration 140 (MT total route time: 312.990 sec): 11028(overused: 22741)
+Unrouted general nets at iteration 141 (MT total route time: 331.919 sec): 10652(overused: 22437)
+Unrouted general nets at iteration 142 (MT total route time: 314.657 sec): 10557(overused: 21751)
+Unrouted general nets at iteration 143 (MT total route time: 287.900 sec): 10271(overused: 20902)
+Unrouted general nets at iteration 144 (MT total route time: 251.028 sec): 9946(overused: 19683)
+Unrouted general nets at iteration 145 (MT total route time: 217.197 sec): 10393(overused: 21896)
+Unrouted general nets at iteration 146 (MT total route time: 211.816 sec): 10342(overused: 22086)
+Unrouted general nets at iteration 147 (MT total route time: 215.907 sec): 10635(overused: 22456)
+Unrouted general nets at iteration 148 (MT total route time: 185.235 sec): 10576(overused: 22068)
+Unrouted general nets at iteration 149 (MT total route time: 212.702 sec): 10390(overused: 21325)
+Unrouted general nets at iteration 150 (MT total route time: 196.541 sec): 10077(overused: 20401)
+Unrouted general nets at iteration 151 (MT total route time: 197.080 sec): 9555(overused: 19219)
+Unrouted general nets at iteration 152 (MT total route time: 242.213 sec): 9479(overused: 19162)
+Unrouted general nets at iteration 153 (MT total route time: 251.248 sec): 9133(overused: 18688)
+Unrouted general nets at iteration 154 (MT total route time: 250.551 sec): 9067(overused: 18632)
+Unrouted general nets at iteration 155 (MT total route time: 279.894 sec): 9630(overused: 20436)
+Unrouted general nets at iteration 156 (MT total route time: 242.192 sec): 9681(overused: 20451)
+Unrouted general nets at iteration 157 (MT total route time: 240.719 sec): 9734(overused: 20100)
+Unrouted general nets at iteration 158 (MT total route time: 256.556 sec): 9651(overused: 19720)
+Unrouted general nets at iteration 159 (MT total route time: 271.300 sec): 9549(overused: 19645)
+Unrouted general nets at iteration 160 (MT total route time: 263.831 sec): 9353(overused: 19248)
+Unrouted general nets at iteration 161 (MT total route time: 290.762 sec): 9006(overused: 18084)
+Unrouted general nets at iteration 162 (MT total route time: 281.390 sec): 8793(overused: 17530)
+Unrouted general nets at iteration 163 (MT total route time: 237.507 sec): 8510(overused: 16477)
+Unrouted general nets at iteration 164 (MT total route time: 225.788 sec): 8542(overused: 16871)
+Unrouted general nets at iteration 165 (MT total route time: 259.835 sec): 8950(overused: 18564)
+Unrouted general nets at iteration 166 (MT total route time: 272.659 sec): 9003(overused: 18436)
+Unrouted general nets at iteration 167 (MT total route time: 310.782 sec): 8979(overused: 18745)
+Unrouted general nets at iteration 168 (MT total route time: 304.970 sec): 8799(overused: 17895)
+Unrouted general nets at iteration 169 (MT total route time: 284.017 sec): 8771(overused: 17593)
+Unrouted general nets at iteration 170 (MT total route time: 258.032 sec): 8631(overused: 16986)
+Unrouted general nets at iteration 171 (MT total route time: 262.550 sec): 8870(overused: 17797)
+Unrouted general nets at iteration 172 (MT total route time: 306.846 sec): 8455(overused: 16743)
+Unrouted general nets at iteration 173 (MT total route time: 350.182 sec): 7998(overused: 15920)
+Unrouted general nets at iteration 174 (MT total route time: 365.220 sec): 7575(overused: 14823)
+Unrouted general nets at iteration 175 (MT total route time: 342.444 sec): 7934(overused: 16490)
+Unrouted general nets at iteration 176 (MT total route time: 336.750 sec): 7907(overused: 16233)
+Unrouted general nets at iteration 177 (MT total route time: 356.651 sec): 7990(overused: 16291)
+Unrouted general nets at iteration 178 (MT total route time: 325.486 sec): 8020(overused: 16393)
+Unrouted general nets at iteration 179 (MT total route time: 341.888 sec): 7872(overused: 15888)
+Unrouted general nets at iteration 180 (MT total route time: 303.149 sec): 7698(overused: 15420)
+Unrouted general nets at iteration 181 (MT total route time: 330.420 sec): 7613(overused: 15244)
+Unrouted general nets at iteration 182 (MT total route time: 343.276 sec): 7639(overused: 15169)
+Unrouted general nets at iteration 183 (MT total route time: 338.996 sec): 7772(overused: 15525)
+Unrouted general nets at iteration 184 (MT total route time: 373.432 sec): 7648(overused: 15106)
+Unrouted general nets at iteration 185 (MT total route time: 350.937 sec): 8186(overused: 17013)
+Unrouted general nets at iteration 186 (MT total route time: 376.607 sec): 8261(overused: 16717)
+Unrouted general nets at iteration 187 (MT total route time: 352.586 sec): 7862(overused: 15899)
+Unrouted general nets at iteration 188 (MT total route time: 369.691 sec): 7704(overused: 15576)
+Unrouted general nets at iteration 189 (MT total route time: 337.669 sec): 7703(overused: 15412)
+Unrouted general nets at iteration 190 (MT total route time: 318.512 sec): 7445(overused: 14726)
+Unrouted general nets at iteration 191 (MT total route time: 286.612 sec): 7340(overused: 14258)
+Unrouted general nets at iteration 192 (MT total route time: 287.417 sec): 7197(overused: 14132)
+Unrouted general nets at iteration 193 (MT total route time: 285.953 sec): 7042(overused: 14027)
+Unrouted general nets at iteration 194 (MT total route time: 297.894 sec): 6837(overused: 13272)
+Unrouted general nets at iteration 195 (MT total route time: 293.072 sec): 7096(overused: 14601)
+Unrouted general nets at iteration 196 (MT total route time: 297.268 sec): 7196(overused: 14537)
+Unrouted general nets at iteration 197 (MT total route time: 310.477 sec): 7166(overused: 14136)
+Unrouted general nets at iteration 198 (MT total route time: 301.753 sec): 7241(overused: 14485)
+Unrouted general nets at iteration 199 (MT total route time: 317.989 sec): 7397(overused: 14983)
+Unrouted general nets at iteration 200 (MT total route time: 331.102 sec): 7267(overused: 14612)
+Unrouted general nets at iteration 201 (MT total route time: 304.215 sec): 7187(overused: 14163)
+Unrouted general nets at iteration 202 (MT total route time: 283.580 sec): 6960(overused: 13454)
+Unrouted general nets at iteration 203 (MT total route time: 276.110 sec): 6846(overused: 13542)
+Unrouted general nets at iteration 204 (MT total route time: 286.395 sec): 6721(overused: 13245)
+Unrouted general nets at iteration 205 (MT total route time: 290.151 sec): 7272(overused: 14445)
+Unrouted general nets at iteration 206 (MT total route time: 315.222 sec): 7229(overused: 14315)
+Unrouted general nets at iteration 207 (MT total route time: 294.066 sec): 7142(overused: 14041)
+Unrouted general nets at iteration 208 (MT total route time: 261.662 sec): 6908(overused: 13325)
+Unrouted general nets at iteration 209 (MT total route time: 316.761 sec): 7116(overused: 13666)
+Unrouted general nets at iteration 210 (MT total route time: 330.763 sec): 7051(overused: 13662)
+Unrouted general nets at iteration 211 (MT total route time: 305.837 sec): 6980(overused: 13504)
+Unrouted general nets at iteration 212 (MT total route time: 303.574 sec): 6888(overused: 12826)
+Unrouted general nets at iteration 213 (MT total route time: 267.608 sec): 6901(overused: 13144)
+Unrouted general nets at iteration 214 (MT total route time: 281.494 sec): 6826(overused: 12976)
+Unrouted general nets at iteration 215 (MT total route time: 302.131 sec): 7390(overused: 14392)
+Unrouted general nets at iteration 216 (MT total route time: 327.066 sec): 7538(overused: 14643)
+Unrouted general nets at iteration 217 (MT total route time: 332.295 sec): 7579(overused: 14657)
+Unrouted general nets at iteration 218 (MT total route time: 333.770 sec): 7180(overused: 13740)
+Unrouted general nets at iteration 219 (MT total route time: 295.480 sec): 7222(overused: 13957)
+Unrouted general nets at iteration 220 (MT total route time: 273.002 sec): 6906(overused: 12850)
+Unrouted general nets at iteration 221 (MT total route time: 330.967 sec): 6792(overused: 12878)
+Unrouted general nets at iteration 222 (MT total route time: 362.149 sec): 6699(overused: 12968)
+Unrouted general nets at iteration 223 (MT total route time: 300.451 sec): 6570(overused: 12496)
+Unrouted general nets at iteration 224 (MT total route time: 286.416 sec): 6717(overused: 12956)
+Unrouted general nets at iteration 225 (MT total route time: 275.598 sec): 7014(overused: 14097)
+Unrouted general nets at iteration 226 (MT total route time: 287.372 sec): 7038(overused: 13899)
+Unrouted general nets at iteration 227 (MT total route time: 297.877 sec): 7142(overused: 13899)
+Unrouted general nets at iteration 228 (MT total route time: 272.200 sec): 7155(overused: 13695)
+Unrouted general nets at iteration 229 (MT total route time: 280.108 sec): 7225(overused: 13728)
+Unrouted general nets at iteration 230 (MT total route time: 272.599 sec): 7145(overused: 13237)
+Unrouted general nets at iteration 231 (MT total route time: 253.365 sec): 6901(overused: 13079)
+Unrouted general nets at iteration 232 (MT total route time: 272.354 sec): 6639(overused: 12322)
+Unrouted general nets at iteration 233 (MT total route time: 269.566 sec): 6215(overused: 11384)
+Unrouted general nets at iteration 234 (MT total route time: 268.803 sec): 5929(overused: 10911)
+Unrouted general nets at iteration 235 (MT total route time: 265.000 sec): 6387(overused: 12325)
+Unrouted general nets at iteration 236 (MT total route time: 361.228 sec): 6517(overused: 12561)

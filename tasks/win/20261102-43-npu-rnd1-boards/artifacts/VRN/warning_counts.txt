@@ -1,0 +1,115 @@
+compile
+W Loop: 1023
+W Public-4030: 33
+W Sdm-2000: 342
+W Sdm-2003: 319
+W Sdm-2010: 3
+W Sdm-2014: 2
+W Verilog-2006: 10
+W Verilog-2008: 949
+W Verilog-2019: 25
+W Verilog-2020: 1176
+W Verilog-2021: 9
+W Verilog-2023: 162
+W Verilog-2036: 16
+W Verilog-2038: 536
+W Verilog-2039: 61
+W [G: 260
+
+synthesize
+C ConstraintEditor-2002: 37
+C ConstraintEditor-2009: 24
+W Adm-4019: 1
+W Public-4008: 9094
+W Removed: 2599
+W Timing-4086: 62
+W Timing-4087: 99
+W Unable: 60
+W UserConstraintEditor-4009: 2
+W [G: 2
+W pmux: 1
+W prevent: 28
+W syn_maxfan: 714
+
+device_map
+W DeviceMap-4011: 8
+W Public-4008: 312
+
+PnR excerpt diagnostics:
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4422)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4422)] | Region fp_ddrphy does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4423)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4423)] | Region fp_ddrphy does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4424)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4424)] | Region fp_ddrphy does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4425)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4425)] | Region fp_ddrphy does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4426)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4426)] | Region fp_ddrphy does not contain IOBD resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4427)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4427)] | Region fp_ddrphy does not contain IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4428)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4428)] | Region fp_ddrphy does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4429)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4429)] | Region fp_ddrphy does not contain IOLHR resource, and command are ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4435)] | Region fp_ddrphy does not contain GPLL resource, and command are ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4436)] | Region fp_ddrphy does not contain MRCKB resource, and command are ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4437)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ddrphy_cpd/cpd_inst is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4454)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[2]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4455)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[3]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4456)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[4]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4457)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[5]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4458)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[6]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4459)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[7]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4460)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[8]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4461)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[9]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4475)] | Region fp_ddrphy does not contain USCM resource, and command are ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4476)] | Region fp_ddrphy does not contain USCM resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4477)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4477)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4478)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4478)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4479)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4479)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4480)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4480)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4481)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4481)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4482)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4482)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4483)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4483)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4484)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4484)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4485)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4485)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4486)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4486)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4487)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4487)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4488)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4488)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4489)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4489)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4490)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4490)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4491)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4491)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4492)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4492)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4493)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4493)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4494)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4494)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4495)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4495)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4496)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4496)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4516)] | Region fp_rgmii does not contain USCM resource, and command are ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4517)] Repeat constraints on u_rgmii/u_pll_eth/u_gpll/gpll_inst is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4518)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4518)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4519)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4519)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+C: Place-2028: GLOBAL_CLOCK: the driver u_CORES/u_GTP_SCANCHAIN_PG/scanchain fixed at SCANCHAIN_76_618 is unreasonable. Sub-optimal placement for a clock source and a clock buffer.

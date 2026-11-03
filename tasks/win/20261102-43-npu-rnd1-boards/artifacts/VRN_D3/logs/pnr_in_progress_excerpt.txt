@@ -1,0 +1,731 @@
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4435)] | Region fp_ddrphy does not contain GPLL resource, and command are ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst} fp_ddrphy failed
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst} fp_ddrphy
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4436)] | Region fp_ddrphy does not contain MRCKB resource, and command are ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst} fp_ddrphy failed
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ddrphy_cpd/cpd_inst} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4437)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ddrphy_cpd/cpd_inst is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ddrphy_cpd/cpd_inst} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ddrphy_cpd_rstn_sync/sig_async_r1[0]/opit_0_inv_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ddrphy_cpd_rstn_sync/sig_async_r1[0]/opit_0_inv_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ddrphy_rst_seq_rstn_sync/sig_async_r1[0]/opit_0_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ddrphy_rst_seq_rstn_sync/sig_async_r1[0]/opit_0_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_dll_freeze_sync/sig_async_r1[0]/opit_0_inv_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_dll_freeze_sync/sig_async_r1[0]/opit_0_inv_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_dll_update_n_sync/sig_async_r1[0]/opit_0_inv_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_dll_update_n_sync/sig_async_r1[0]/opit_0_inv_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/N4/gateop} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/N4/gateop} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/ddrphy_cpd_lock/opit_0_inv_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/ddrphy_cpd_lock/opit_0_inv_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/ddrphy_cpd_up_dnb_d[0]/opit_0_inv_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/ddrphy_cpd_up_dnb_d[0]/opit_0_inv_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/ddrphy_cpd_up_dnb_d[2]/opit_0_inv_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/ddrphy_cpd_up_dnb_d[2]/opit_0_inv_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/up_dn_cnt[1]/opit_0_inv_L6QL5Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/up_dn_cnt[1]/opit_0_inv_L6QL5Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/up_dn_cnt[2]/opit_0_inv_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_cpd_lock/up_dn_cnt[2]/opit_0_inv_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/N107_9/LUT6_inst} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/N107_9/LUT6_inst} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/N107_10/gateop} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/N107_10/gateop} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/N114_6/LUT6_inst} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/N114_6/LUT6_inst} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cnt[2]/opit_0_L6QL5Q1} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cnt[2]/opit_0_L6QL5Q1} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[0]/opit_0_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[0]/opit_0_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[1]/opit_0_AQ} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[1]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[2]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4454)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[2]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[2]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[3]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4455)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[3]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[3]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[4]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4456)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[4]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[4]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[5]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4457)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[5]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[5]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[6]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4458)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[6]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[6]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[7]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4459)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[7]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[7]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[8]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4460)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[8]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[8]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[9]/opit_0_AQ} fp_ddrphy
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4461)] Repeat constraints on u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[9]/opit_0_AQ is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_offset_cnt[9]/opit_0_AQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[0]/opit_0_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[0]/opit_0_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[1]/opit_0_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[1]/opit_0_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[2]/opit_0_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[2]/opit_0_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[3]/opit_0_L5Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/cpd_state_reg[3]/opit_0_L5Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_done/opit_0_L6QQ} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_done/opit_0_L6QQ} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_en/opit_0_L6QL5Q1} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_en/opit_0_L6QL5Q1} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_start_d[0]/opit_0_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_start_d[0]/opit_0_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_start_d[2]/opit_0_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_adj_start_d[2]/opit_0_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_dps_done_d[0]/opit_0_srl} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/rst_clk_dps_done_d[0]/opit_0_srl} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[2]/opit_0_L5Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[2]/opit_0_L5Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[3]/opit_0_L6QL5Q1} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[3]/opit_0_L6QL5Q1} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[4]/opit_0_L6Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[4]/opit_0_L6Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[5]/opit_0_L6QL5Q} fp_ddrphy
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_ips2l_ddrphy_rst_clk_phase_adj/time_out[5]/opit_0_L6QL5Q} fp_ddrphy successfully
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg} fp_ddrphy
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4475)] | Region fp_ddrphy does not contain USCM resource, and command are ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg} fp_ddrphy failed
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg} fp_ddrphy
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4476)] | Region fp_ddrphy does not contain USCM resource, and command are ignored.
+Executing : def_inst_region {u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg} fp_ddrphy failed
+Executing : def_inst_region {u_rgmii/g_rx[0].u_input/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4477)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4477)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[0].u_input/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[0].u_input/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4478)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4478)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[0].u_input/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[1].u_input/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4479)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4479)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[1].u_input/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[1].u_input/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4480)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4480)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[1].u_input/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[2].u_input/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4481)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4481)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[2].u_input/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[2].u_input/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4482)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4482)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[2].u_input/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[3].u_input/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4483)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4483)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[3].u_input/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[3].u_input/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4484)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4484)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[3].u_input/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[4].u_input/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4485)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4485)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[4].u_input/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_rx[4].u_input/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4486)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4486)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_rx[4].u_input/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[0].u_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4487)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4487)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[0].u_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[0].u_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4488)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4488)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[0].u_output/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[1].u_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4489)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4489)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[1].u_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[1].u_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4490)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4490)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[1].u_output/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[2].u_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4491)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4491)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[2].u_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[2].u_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4492)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4492)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[2].u_output/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[3].u_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4493)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4493)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[3].u_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[3].u_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4494)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4494)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[3].u_output/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[4].u_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4495)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4495)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[4].u_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/g_tx_buf[4].u_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4496)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4496)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/g_tx_buf[4].u_output/opit_1} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/rx_data_r[0]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[0]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[1]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[1]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[2]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[2]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[3]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[3]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[4]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[4]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[5]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[5]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[6]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[6]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_data_r[7]/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_data_r[7]/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_dv_r/opit_0} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_dv_r/opit_0} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/rx_er_r/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/rx_er_r/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[0]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[0]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[1]/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[1]/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[2]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[2]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[3]/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[3]/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[4]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[4]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[5]/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[5]/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[6]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[6]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_data_r[7]/opit_0_L5Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_data_r[7]/opit_0_L5Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/tx_en_r/opit_0_L6Q} fp_rgmii
+Executing : def_inst_region {u_rgmii/tx_en_r/opit_0_L6Q} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/u_eth_clk/gopclkbufg} fp_rgmii
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4516)] | Region fp_rgmii does not contain USCM resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/u_eth_clk/gopclkbufg} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/u_pll_eth/u_gpll/gpll_inst} fp_rgmii
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4517)] Repeat constraints on u_rgmii/u_pll_eth/u_gpll/gpll_inst is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+Executing : def_inst_region {u_rgmii/u_pll_eth/u_gpll/gpll_inst} fp_rgmii successfully
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_0} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4518)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4518)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_0} fp_rgmii failed
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_1} fp_rgmii
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4519)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-VRN-RND1-N-D3/device_map/edrv32_fpga_board_vrn_top.pcf(line number: 4519)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+Executing : def_inst_region {u_rgmii/u_tx_clk_output/opit_1} fp_rgmii failed
+Constraint check end.
+NOTE: The technology fpga was specified.
+NOTE: delay_model specified was generic_cmos.
+NOTE: Using the fpga syntax tables...
+Totals:
+ Calls to malloc = 0
+ Calls to calloc = 5993935
+
+I: Column Clock Check open.
+Read Column Clock Map.
+
+Placement started.
+Phase 1 Pre global placement started.
+Mapping instance GRS_INST/grs_ccs to CCS_75_622.
+Mapping instance u_CORES/u_GTP_SCANCHAIN_PG/scanchain to SCANCHAIN_76_618.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst to GPLL_727_769.
+The driver clk_i_ibuf/opit_1 of pin CLKIN1 of PLL u_pll_sys/u_gpll/gpll_inst fixs in IOLHR_16_1386, and PLL fixs in GPLL_727_463, it is incompatible.
+C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst to DDRPHY_IOCLK_DIV_728_616.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst to PPLL_727_613.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[0].u_ddc_ca/ddc_inst to DDR_PHY_729_769.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[1].u_ddc_ca/ddc_inst to DDR_PHY_729_615.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[2].u_ddc_ca/ddc_inst to DDR_PHY_729_613.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst to DDRPHY_IOCLK_DIV_728_922.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst to PPLL_727_919.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_1075.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_1077.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_921.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY to DDR_PHY_729_919.
+Phase 1.1 1st GP placement started.
+Design Utilization : 51%.
+Build SRB system takes 1.28 sec.
+Wirelength after clock region global placement is 2180139 and checksum is 5EBAED71E0A2009B.
+1st GP placement takes 15.38 sec.
+
+Phase 1.2 Clock placement started.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk to RCKB_723_762.
+Mapping instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/goprclk to RCKB_723_1068.
+Mapping instance u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst to MRCKB_721_762.
+Mapping instance u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg to USCM_383_882.
+Mapping instance clkbufg_6/gopclkbufg to USCM_383_885.
+Mapping instance u_rgmii/u_eth_clk/gopclkbufg to USCM_383_930.
+Mapping instance clkbufg_9/gopclkbufg to USCM_383_888.
+Mapping instance clkbufg_10/gopclkbufg to USCM_383_891.
+Mapping instance u_pll_video/u_gpll/gpll_inst to GPLL_7_769.
+Mapping instance clkbufg_7/gopclkbufg to USCM_383_894.
+Mapping instance clkbufg_11/gopclkbufg to USCM_383_897.
+Mapping instance u_pll_npu/u_gpll/gpll_inst to GPLL_7_463.
+Mapping instance clkbufg_5/gopclkbufg to USCM_383_900.
+Mapping instance u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst to GPLL_7_157.
+Mapping instance u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg to USCM_383_903.
+C: Place-2028: GLOBAL_CLOCK: the driver u_CORES/u_GTP_SCANCHAIN_PG/scanchain fixed at SCANCHAIN_76_618 is unreasonable. Sub-optimal placement for a clock source and a clock buffer.
+Mapping instance clkbufg_8/gopclkbufg to USCM_383_906.
+Clock placement takes 0.31 sec.
+
+Wirelength after Pre Global Placement is 2180139 and checksum is 5EBAED71E0A2009B.
+Pre global placement takes 16.70 sec.
+
+Phase 2 Global placement started.
+Phase 2.1 Fixed placement started.
+First map gop timing takes 4.72 sec
+Init coarse delay table.
+Read place coarse delay table takes 0.50 sec.
+Placed fixed group with base inst cam0_data_i_ibuf[0]/opit_1 on IOLHR_16_798.
+Placed fixed group with base inst cam0_data_i_ibuf[1]/opit_1 on IOLHR_16_630.
+Placed fixed group with base inst cam0_data_i_ibuf[2]/opit_1 on IOLHR_16_828.
+Placed fixed group with base inst cam0_data_i_ibuf[3]/opit_1 on IOLHR_16_834.
+Placed fixed group with base inst cam0_data_i_ibuf[4]/opit_1 on IOLHR_16_792.
+Placed fixed group with base inst cam0_data_i_ibuf[5]/opit_1 on IOLHR_16_714.
+Placed fixed group with base inst cam0_data_i_ibuf[6]/opit_1 on IOLHR_16_660.
+Placed fixed group with base inst cam0_data_i_ibuf[7]/opit_1 on IOLHR_16_690.
+Placed fixed group with base inst cam0_href_i_ibuf/opit_1 on IOLHR_16_654.
+Placed fixed group with base inst cam0_pclk_i_ibuf/opit_1 on IOLHR_16_786.
+Placed fixed group with base inst cam0_rst_n_o_obuf/opit_1 on IOLHR_16_636.
+Placed fixed group with base inst cam0_vsync_i_ibuf/opit_1 on IOLHR_16_780.
+Placed fixed group with base inst cam1_data_i_ibuf[0]/opit_1 on IOLHR_16_768.
+Placed fixed group with base inst cam1_data_i_ibuf[1]/opit_1 on IOLHR_16_618.
+Placed fixed group with base inst cam1_data_i_ibuf[2]/opit_1 on IOLHR_16_624.
+Placed fixed group with base inst cam1_data_i_ibuf[3]/opit_1 on IOLHR_16_504.
+Placed fixed group with base inst cam1_data_i_ibuf[4]/opit_1 on IOLHR_16_642.
+Placed fixed group with base inst cam1_data_i_ibuf[5]/opit_1 on IOLHR_16_666.
+Placed fixed group with base inst cam1_data_i_ibuf[6]/opit_1 on IOLHR_16_528.
+Placed fixed group with base inst cam1_data_i_ibuf[7]/opit_1 on IOLHR_16_522.
+Placed fixed group with base inst cam1_href_i_ibuf/opit_1 on IOLHR_16_594.
+Placed fixed group with base inst cam1_pclk_i_ibuf/opit_1 on IOLHR_16_774.
+Placed fixed group with base inst cam1_rst_n_o_obuf/opit_1 on IOLHR_16_570.
+Placed fixed group with base inst cam1_vsync_i_ibuf/opit_1 on IOLHR_16_600.
+Placed fixed group with base inst clk_i_ibuf/opit_1 on IOLHR_16_1386.
+Placed fixed group with base inst eth_mdc_o_obuf/opit_1 on IOLHR_16_1278.
+Placed fixed group with base inst eth_mdio_o_tri/opit_1 on IOLHR_16_1308.
+Placed fixed group with base inst eth_phy_rst_n_o_obuf/opit_1 on IOLHR_16_942.
+Placed fixed group with base inst i2c0_scl_o_tri[0]/opit_1 on IOLHR_16_720.
+Placed fixed group with base inst i2c0_scl_o_tri[1]/opit_1 on IOLHR_16_498.
+Placed fixed group with base inst i2c0_sda_o_tri[0]/opit_1 on IOLHR_16_696.
+Placed fixed group with base inst i2c0_sda_o_tri[1]/opit_1 on IOLHR_16_552.
+Placed fixed group with base inst key_n_i_ibuf[0]/opit_1 on IOLHR_16_1290.
+Placed fixed group with base inst key_n_i_ibuf[1]/opit_1 on IOLHR_16_1320.
+Placed fixed group with base inst key_n_i_ibuf[2]/opit_1 on IOLHR_16_1314.
+Placed fixed group with base inst key_n_i_ibuf[3]/opit_1 on IOLHR_16_1344.
+Placed fixed group with base inst led_o_obuf[0]/opit_1 on IOLHR_16_1338.
+Placed fixed group with base inst led_o_obuf[1]/opit_1 on IOLHR_16_1380.
+Placed fixed group with base inst led_o_obuf[2]/opit_1 on IOLHR_16_1362.
+Placed fixed group with base inst led_o_obuf[3]/opit_1 on IOLHR_16_1392.
+Placed fixed group with base inst led_o_obuf[4]/opit_1 on IOLHR_16_1422.
+Placed fixed group with base inst mem_rst_n_o_obuf/opit_1 on IOLHR_724_792.
+Placed fixed group with base inst rgmii_rxc_i_ibuf/opit_1 on IOLHR_16_1368.
+Placed fixed group with base inst rst_n_i_ibuf/opit_1 on IOLHR_16_1296.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_1080.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_1140.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_1074.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_1128.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_1092.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_1104.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_1086.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_1134.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_1116.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_1098.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_1164.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_1176.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_1200.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_1206.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_1194.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_1212.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_1152.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_1158.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_1188.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_1170.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_1044.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_1050.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_1020.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_996.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_1008.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_1002.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_1026.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_1014.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_1038.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_1056.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[0].u_iobuf_dq/opit_1 on IOLHR_724_954.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[1].u_iobuf_dq/opit_1 on IOLHR_724_936.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[2].u_iobuf_dq/opit_1 on IOLHR_724_924.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[3].u_iobuf_dq/opit_1 on IOLHR_724_972.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[4].u_iobuf_dq/opit_1 on IOLHR_724_942.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[5].u_iobuf_dq/opit_1 on IOLHR_724_978.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[6].u_iobuf_dq/opit_1 on IOLHR_724_930.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/dq_loop[7].u_iobuf_dq/opit_1 on IOLHR_724_990.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/genblk1.u_iobufco_dqs/opit_2 on IOLHR_724_966.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/u_outbuft_dm/opit_1 on IOLHR_724_948.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[0].u_outbuft_addr0/opit_1 on IOLHR_724_828.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[1].u_outbuft_addr0/opit_1 on IOLHR_724_822.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[2].u_outbuft_addr0/opit_1 on IOLHR_724_780.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[3].u_outbuft_addr0/opit_1 on IOLHR_724_750.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[4].u_outbuft_addr0/opit_1 on IOLHR_724_708.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[5].u_outbuft_addr0/opit_1 on IOLHR_724_804.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[6].u_outbuft_addr0/opit_1 on IOLHR_724_690.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[7].u_outbuft_addr0/opit_1 on IOLHR_724_834.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[8].u_outbuft_addr0/opit_1 on IOLHR_724_696.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[9].u_outbuft_addr0/opit_1 on IOLHR_724_816.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[10].u_outbuft_addr0/opit_1 on IOLHR_724_714.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[11].u_outbuft_addr0/opit_1 on IOLHR_724_726.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[12].u_outbuft_addr0/opit_1 on IOLHR_724_720.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[13].u_outbuft_addr0/opit_1 on IOLHR_724_786.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_mem_addr_0[14].u_outbuft_addr0/opit_1 on IOLHR_724_810.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/k_mem_ba[0].u_outbuft_ba/opit_1 on IOLHR_724_744.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/k_mem_ba[1].u_outbuft_ba/opit_1 on IOLHR_724_702.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/k_mem_ba[2].u_outbuft_ba/opit_1 on IOLHR_724_672.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_casn/opit_1 on IOLHR_724_618.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_cke/opit_1 on IOLHR_724_732.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_csn/opit_1 on IOLHR_724_738.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_odt/opit_1 on IOLHR_724_798.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_rasn/opit_1 on IOLHR_724_684.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuft_wen/opit_1 on IOLHR_724_624.
+Placed fixed group with base inst u_ddr3/u_ddrphy_top/ddrphy_slice_top/u_outbuftco_ck/opit_3 on IOLHR_724_660.
+Placed fixed group with base inst u_ddr_ref_clk/opit_2 on IOLHR_724_774.
+Placed fixed group with base inst u_rgmii/g_rx[0].u_input/opit_1 on IOLHR_16_1428.
+Placed fixed group with base inst u_rgmii/g_rx[1].u_input/opit_1 on IOLHR_16_1434.
+Placed fixed group with base inst u_rgmii/g_rx[2].u_input/opit_1 on IOLHR_16_1404.
+Placed fixed group with base inst u_rgmii/g_rx[3].u_input/opit_1 on IOLHR_16_1410.
+Placed fixed group with base inst u_rgmii/g_rx[4].u_input/opit_1 on IOLHR_16_1458.
+Placed fixed group with base inst u_rgmii/g_tx_buf[0].u_output/opit_1 on IOLHR_16_1356.
+Placed fixed group with base inst u_rgmii/g_tx_buf[1].u_output/opit_1 on IOLHR_16_1326.
+Placed fixed group with base inst u_rgmii/g_tx_buf[2].u_output/opit_1 on IOLHR_16_1332.
+Placed fixed group with base inst u_rgmii/g_tx_buf[3].u_output/opit_1 on IOLHR_16_1302.
+Placed fixed group with base inst u_rgmii/g_tx_buf[4].u_output/opit_1 on IOLHR_16_1350.
+Placed fixed group with base inst u_rgmii/u_tx_clk_output/opit_1 on IOLHR_16_1452.
+Placed fixed group with base inst u_tmds/g_channel[0].u_pair/opit_2 on IOLHR_16_684.
+Placed fixed group with base inst u_tmds/g_channel[1].u_pair/opit_2 on IOLHR_16_708.
+Placed fixed group with base inst u_tmds/g_channel[2].u_pair/opit_2 on IOLHR_16_732.
+Placed fixed group with base inst u_tmds/g_channel[3].u_pair/opit_2 on IOLHR_16_756.
+Placed fixed group with base inst uart_rx_i_ibuf/opit_1 on IOLHR_16_1242.
+Placed fixed group with base inst uart_tx_o_obuf/opit_1 on IOLHR_16_1248.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[0]/opit_0_inv on CLMA_717_672.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_reset_ctrl/ddrphy_ioclk_gate[1]/opit_0_inv on CLMA_717_978.
+Placed fixed instance GRS_INST/grs_ccs on CCS_75_622.
+Placed fixed instance clkbufg_5/gopclkbufg on USCM_383_900.
+Placed fixed instance clkbufg_6/gopclkbufg on USCM_383_885.
+Placed fixed instance clkbufg_7/gopclkbufg on USCM_383_894.
+Placed fixed instance clkbufg_8/gopclkbufg on USCM_383_906.
+Placed fixed instance clkbufg_9/gopclkbufg on USCM_383_888.
+Placed fixed instance clkbufg_10/gopclkbufg on USCM_383_891.
+Placed fixed instance clkbufg_11/gopclkbufg on USCM_383_897.
+Placed fixed instance u_CORES/u_GTP_SCANCHAIN_PG/scanchain on SCANCHAIN_76_618.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst on GPLL_727_769.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[0].u_ddc_ca/ddc_inst on DDR_PHY_729_769.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[1].u_ddc_ca/ddc_inst on DDR_PHY_729_615.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_ca_group[2].u_ddc_ca/ddc_inst on DDR_PHY_729_613.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst on PPLL_727_613.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_clkbufr/goprclk on RCKB_723_762.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst on DDRPHY_IOCLK_DIV_728_616.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst on PPLL_727_919.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_clkbufr/goprclk on RCKB_723_1068.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst on DDRPHY_IOCLK_DIV_728_922.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[0].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_1075.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[1].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_1077.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[2].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_921.
+Placed fixed instance u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_group[3].ddrphy_data_slice/u_ddc_dq/ddc_inst_PHY on DDR_PHY_729_919.
+Placed fixed instance u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst on GPLL_7_157.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_clkbufm/clkbufm_inst on MRCKB_721_762.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_ddrphy_cpd/cpd_inst on DDRPHY_CPD_729_772.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_rst_clk_bufg/gopclkbufg on USCM_383_903.
+Placed fixed instance u_ddr3/u_ddrphy_top/u_sysclk_bufg/gopclkbufg on USCM_383_882.
+Placed fixed instance u_pll_npu/u_gpll/gpll_inst on GPLL_7_463.
+Placed fixed instance u_pll_sys/u_gpll/gpll_inst on GPLL_727_463.
+Placed fixed instance u_pll_video/u_gpll/gpll_inst on GPLL_7_769.
+Placed fixed instance u_rgmii/u_eth_clk/gopclkbufg on USCM_383_930.
+Placed fixed instance u_rgmii/u_pll_eth/u_gpll/gpll_inst on GPLL_7_1381.
+Placed fixed instance BKCL_auto_0 on BKCL_1_1258.
+Placed fixed instance BKCL_auto_1 on BKCL_1_952.
+Placed fixed instance BKCL_auto_2 on BKCL_1_646.
+Placed fixed instance BKCL_auto_3 on BKCL_1_340.
+Placed fixed instance BKCL_auto_4 on BKCL_733_952.
+Placed fixed instance BKCL_auto_5 on BKCL_733_646.
+Fixed placement takes 6.14 sec.
+
+Phase 2.2 Process placement started.
+I: The IO driver of u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+I: The IO driver of u_pll_npu/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+I: The IO driver of u_pll_sys/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+I: The IO driver of u_pll_video/u_gpll/gpll_inst(CLKIN1) is not constraint at pllpad, its clock path will pass through SRB.
+Process placement takes 0.02 sec.
+
+Phase 2.3 IO placement started.
+IO placement takes 0.19 sec.
+
+PBM start.
+Total cost after SA planning is 7521443.088800.
+SA total time: 5190 msec
+PBM of GP end, takes 2.28 sec.
+Phase 2.4 2nd GP placement started.
+Run super clustering :
+	Initial slack -9709.
+	19 iterations finished.
+	Final slack -4748.
+Super clustering done.
+Design Utilization : 51%.
+I: GP end with result: density(0.073338)
+Worst slack after global placement is -399
+2nd GP placement takes 35.08 sec.
+
+Wirelength after global placement is 2916552, detour is 538 and checksum is F51A9C28423C0336.
+Global placement takes 43.75 sec.
+
+Phase 3 Post global placement started.
+Phase 3.1 Macro cell placement started.
+I: Process macros using "Global".
+Wirelength after macro cell placement is 3131027, detour is 970 and checksum is B762368FA65A9060.
+Macro cell placement takes 29.75 sec.
+
+PBM start.
+PBM of PostGP end, takes 0.00 sec.
+Phase 3.2 3rd GP placement started.
+Design Utilization : 51%.
+I: GP end with result: density(0.063785)
+Worst slack after post global placement is -1446
+3rd GP placement takes 11.94 sec.
+
+Wirelength after post global placement is 2790956, detour is 932 and checksum is 2D171182EC7FA69E.
+Packing LUT6D started.
+I: LUT6D pack result: There are 31390 LUT6 in collection, pack success:378
+Packing LUT6D takes 13.14 sec.
+Post global placement takes 54.95 sec.
+
+Phase 4 Legalization started.
+The average distance in LP is 0.470842.
+Wirelength after legalization is 2870277, detour is 916 and checksum is 7E13816F37136D11.
+Legalization takes 3.72 sec.
+
+Phase 5 Timing-driven detailed placement started.
+Phase 5.1 Replication placement started.
+Worst slack before Replication Place is -1755.
+Replication placement takes 11.44 sec.
+
+Wirelength after replication placement is 2871801, detour is 916 and checksum is F1D74D3C20B9C65D.
+Phase 5.2 Swapping placement started.
+Worst slack before detailed placement is -1132, TNS before detailed placement is -222746. 
+Cost at Swap iteration 0 : -1132, wslk -930, tns -92567, takes 11.45 sec.
+    wire length at Swap iteration 0 : last 2871533.00, curr 2877882.00, change rate 0.22%
+Cost at DP iteration 0 : -930, wslk -108, tns -528, takes 7.02 sec.
+    wire length at DP iteration 0 : last 2877882.00, curr 2956374.00, change rate 2.73%
+Cost at Swap iteration 1 : -108, wslk -108, tns -528, takes 6.39 sec.
+    wire length at Swap iteration 1 : last 2956374.00, curr 2949220.00, change rate -0.24%
+Cost at Swap iteration 2 : -108, wslk -108, tns -528, takes 2.47 sec.
+    wire length at Swap iteration 2 : last 2949220.00, curr 2951416.00, change rate 0.07%
+Cost at DP iteration 2 : -108, wslk -108, tns -318, takes 4.16 sec.
+    wire length at DP iteration 2 : last 2951416.00, curr 2984193.00, change rate 1.11%
+Cost at Swap iteration 3 : -108, wslk 22, tns 0, takes 1.14 sec.
+    wire length at Swap iteration 3 : last 2984193.00, curr 2984783.00, change rate 0.02%
+Cost at Swap iteration 4 : 22, wslk 22, tns 0, takes 1.19 sec.
+    wire length at Swap iteration 4 : last 2984783.00, curr 2984921.00, change rate 0.00%
+Cost at DP iteration 4 : 22, wslk 22, tns 0, takes 0.67 sec.
+    wire length at DP iteration 4 : last 2984921.00, curr 2986415.00, change rate 0.05%
+Cost at Swap iteration 5 : 22, wslk 22, tns 0, takes 0.38 sec.
+    wire length at Swap iteration 5 : last 2986415.00, curr 2986766.00, change rate 0.01%
+Cost at Swap iteration 6 : 22, wslk 22, tns 0, takes 0.27 sec.
+    wire length at Swap iteration 6 : last 2986766.00, curr 2986915.00, change rate 0.00%
+Cost at DP iteration 6 : 22, wslk 22, tns 0, takes 0.30 sec.
+    wire length at DP iteration 6 : last 2986915.00, curr 2987976.00, change rate 0.04%
+Worst slack after detailed placement is 22, TNS after detailed placement is 0. 
+Swapping placement takes 37.58 sec.
+
+I: Place-6001: Add the new LUT instances CLMA_519_811(/devDL6) replicated by the LUT instance CLMA_537_823(/devDL6).
+Origin u_rnd/u_copy/N72_8/gateop replicates:
+    CLMA_519_811(/devDL6) : u_rnd/u_copy/N72_8/gateop_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMS_507_913(/FF2/FF) replicated by the FF instance CLMA_483_913(/FF0/FF) .
+Origin u_sys/u_media_apb_async/request_r[52]/opit_0 replicates:
+    CLMS_507_913(/FF2/FF)  : u_sys/u_media_apb_async/request_r[52]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMS_507_871(/FF0/FF) replicated by the FF instance CLMA_501_895(/FF3/FF) .
+Origin u_sys/u_media_apb_async/request_r[38]/opit_0 replicates:
+    CLMS_507_871(/FF0/FF)  : u_sys/u_media_apb_async/request_r[38]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMS_513_859(/FF1/FF) CLMA_537_1098(/FF0/FF) replicated by the FF instance CLMS_507_889(/FF0/FF) .
+Origin u_sys/u_media_apb_async/request_r[41]/opit_0 replicates:
+    CLMS_513_859(/FF1/FF)  : u_sys/u_media_apb_async/request_r[41]/opit_1(gopQ)
+    CLMA_537_1098(/FF0/FF)  : u_sys/u_media_apb_async/request_r[41]/opit_2(gopQ)
+I: Place-6001: Add the new FF instances CLMS_561_1111(/FF0/FF) replicated by the FF instance CLMS_513_907(/FF3/FF) .
+Origin u_sys/u_media_apb_async/request_r[43]/opit_0 replicates:
+    CLMS_561_1111(/FF0/FF)  : u_sys/u_media_apb_async/request_r[43]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_519_919(/FF0/FF) CLMA_519_1099(/FF0/FF) replicated by the FF instance CLMS_495_877(/FFAPP2/FF) .
+Origin u_sys/u_media_apb_async/request_r[42]/opit_0 replicates:
+    CLMA_519_919(/FF0/FF)  : u_sys/u_media_apb_async/request_r[42]/opit_1(gopQ)
+    CLMA_519_1099(/FF0/FF)  : u_sys/u_media_apb_async/request_r[42]/opit_2(gopQ)
+I: Place-6001: Add the new FF instances CLMA_501_1027(/FFAPP0/FF) CLMA_531_942(/FFAPP0/FF) CLMA_531_1152(/FF2/FF) replicated by the FF instance CLMA_513_894(/FF1/FF) .
+Origin u_sys/u_media_apb_async/request_r[48]/opit_0 replicates:
+    CLMA_501_1027(/FFAPP0/FF)  : u_sys/u_media_apb_async/request_r[48]/opit_1(gopQ)
+    CLMA_531_942(/FFAPP0/FF)  : u_sys/u_media_apb_async/request_r[48]/opit_2(gopQ)
+    CLMA_531_1152(/FF2/FF)  : u_sys/u_media_apb_async/request_r[48]/opit_3(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_555_846(/devDL6) replicated by the LUT instance CLMS_561_847(/devCL6_S).
+Origin u_rnd/u_draw/N339_73_1/gateop replicates:
+    CLMA_555_846(/devDL6) : u_rnd/u_draw/N339_73_1/gateop_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_537_1098(/FFAPP1/FF) replicated by the FF instance CLMS_513_853(/FFAPP2/FF) .
+Origin u_sys/u_media_apb_async/request_r[44]/opit_0 replicates:
+    CLMA_537_1098(/FFAPP1/FF)  : u_sys/u_media_apb_async/request_r[44]/opit_1(gopQ)
+I: Place-6001: Add the new FF instances CLMA_501_1027(/FF2/FF) CLMA_531_942(/FF2/FF) CLMA_531_1152(/FF1/FF) replicated by the FF instance CLMA_513_894(/FFAPP0/FF) .
+Origin u_sys/u_media_apb_async/request_r[50]/opit_0 replicates:
+    CLMA_501_1027(/FF2/FF)  : u_sys/u_media_apb_async/request_r[50]/opit_1(gopQ)
+    CLMA_531_942(/FF2/FF)  : u_sys/u_media_apb_async/request_r[50]/opit_2(gopQ)
+    CLMA_531_1152(/FF1/FF)  : u_sys/u_media_apb_async/request_r[50]/opit_3(gopQ)
+I: Place-6001: Add the new FF instances CLMA_519_816(/FFAPP2/FF) replicated by the FF instance CLMA_519_805(/FFAPP3/FF) .
+Origin u_rnd/state_r_reg[6]/opit_0_inv_L5Q replicates:
+    CLMA_519_816(/FFAPP2/FF)  : u_rnd/state_r_reg[6]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new FF instances CLMA_501_1027(/FF1/FF) CLMA_531_942(/FF1/FF) CLMA_531_1152(/FFAPP3/FF) replicated by the FF instance CLMA_513_894(/FF2/FF) .
+Origin u_sys/u_media_apb_async/request_r[51]/opit_0 replicates:
+    CLMA_501_1027(/FF1/FF)  : u_sys/u_media_apb_async/request_r[51]/opit_1(gopQ)
+    CLMA_531_942(/FF1/FF)  : u_sys/u_media_apb_async/request_r[51]/opit_2(gopQ)
+    CLMA_531_1152(/FFAPP3/FF)  : u_sys/u_media_apb_async/request_r[51]/opit_3(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_201_955(/devDL6) replicated by the LUT instance CLMA_213_954(/devDL6).
+Origin u_cpu/u_core/N1474_6/LUT6_inst replicates:
+    CLMA_201_955(/devDL6) : u_cpu/u_core/N1474_6/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_501_1027(/FF3/FF) CLMA_531_942(/FF3/FF) CLMA_537_1086(/FF1/FF) replicated by the FF instance CLMA_513_894(/FFAPP3/FF) .
+Origin u_sys/u_media_apb_async/request_r[49]/opit_0 replicates:
+    CLMA_501_1027(/FF3/FF)  : u_sys/u_media_apb_async/request_r[49]/opit_1(gopQ)
+    CLMA_531_942(/FF3/FF)  : u_sys/u_media_apb_async/request_r[49]/opit_2(gopQ)
+    CLMA_537_1086(/FF1/FF)  : u_sys/u_media_apb_async/request_r[49]/opit_3(gopQ)
+I: Place-6001: Add the new FF instances CLMA_531_1152(/FF0/FF) replicated by the FF instance CLMS_507_913(/FF0/FF) .
+Origin u_sys/u_media_apb_async/request_r[47]/opit_0 replicates:
+    CLMA_531_1152(/FF0/FF)  : u_sys/u_media_apb_async/request_r[47]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_519_811(/devCL6) CLMA_519_817(/devDL6) replicated by the LUT instance CLMA_531_798(/devBL6).
+Origin u_rnd/u_fill/N377_5/gateop replicates:
+    CLMA_519_811(/devCL6) : u_rnd/u_fill/N377_5/gateop_1(gopLUT6)
+    CLMA_519_817(/devDL6) : u_rnd/u_fill/N377_5/gateop_2(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_501_871(/FF2/FF) replicated by the FF instance CLMS_507_859(/FF2/FF) .
+Origin u_sys/u_media_apb_async/request_r[40]/opit_0 replicates:
+    CLMA_501_871(/FF2/FF)  : u_sys/u_media_apb_async/request_r[40]/opit_1(gopQ)
+I: Place-6001: Add the new LUT instances CLMA_543_846(/devBL6) replicated by the LUT instance CLMS_543_853(/devDL6_S).
+Origin u_rnd/u_draw/N400_4_cpy/LUT6_inst replicates:
+    CLMA_543_846(/devBL6) : u_rnd/u_draw/N400_4_cpy/LUT6_inst_1(gopLUT6)
+I: Place-6001: Add the new LUT instances CLMS_543_853(/devBL6_S) CLMA_555_840(/devDL6) replicated by the LUT instance CLMS_513_793(/devBL6_S).
+Origin u_rnd/u_draw/N4887/LUT6_inst replicates:
+    CLMS_543_853(/devBL6_S) : u_rnd/u_draw/N4887/LUT6_inst_1(gopLUT6)
+    CLMA_555_840(/devDL6) : u_rnd/u_draw/N4887/LUT6_inst_2(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_531_996(/FFAPP3/FF) replicated by the FF instance CLMA_513_1074(/FFAPP3/FF) .
+Origin u_mem/u_xbar/u_rbuf/pending_error_r/opit_0_L5Q replicates:
+    CLMA_531_996(/FFAPP3/FF)  : u_mem/u_xbar/u_rbuf/pending_error_r/opit_0_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMA_555_841(/devDL6) CLMA_555_834(/devCL6) replicated by the LUT instance CLMS_543_811(/devBL6_S).
+Origin u_rnd/u_draw/N2073/gateop replicates:
+    CLMA_555_841(/devDL6) : u_rnd/u_draw/N2073/gateop_1(gopLUT6)
+    CLMA_555_834(/devCL6) : u_rnd/u_draw/N2073/gateop_2(gopLUT6)
+I: Place-6001: Add the new FF instances CLMA_537_1123(/FFAPP3/FF) CLMA_597_1218(/FFAPP0/FF) replicated by the FF instance CLMA_537_1219(/FFAPP0/FF) .
+Origin u_mem/u_xbar/cmd_write_r/opit_0_inv_L5Q replicates:
+    CLMA_537_1123(/FFAPP3/FF)  : u_mem/u_xbar/cmd_write_r/opit_0_inv_L5Q_1(gopLUT6L5Q)
+    CLMA_597_1218(/FFAPP0/FF)  : u_mem/u_xbar/cmd_write_r/opit_0_inv_L5Q_2(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMS_543_853(/devCL6_S) CLMS_543_847(/devBL6_S) replicated by the LUT instance CLMA_543_858(/devCL6).
+Origin u_rnd/u_draw/N5017/gateop replicates:
+    CLMS_543_853(/devCL6_S) : u_rnd/u_draw/N5017/gateop_1(gopLUT6)
+    CLMS_543_847(/devBL6_S) : u_rnd/u_draw/N5017/gateop_2(gopLUT6)
+I: Place-6001: Add the new FF instances CLMS_543_811(/FFAPP0/FF) replicated by the FF instance CLMA_537_781(/FFAPP0/FF) .
+Origin u_rnd/u_draw/load_state_r_reg[1]/opit_0_inv_L5Q replicates:
+    CLMS_543_811(/FFAPP0/FF)  : u_rnd/u_draw/load_state_r_reg[1]/opit_0_inv_L5Q_1(gopLUT6L5Q)
+I: Place-6001: Add the new LUT instances CLMS_543_757(/devL7L6CD_S) replicated by the LUT instance CLMA_531_774(/devL7L6AB).
+Origin u_rnd/state_r_fsm[3:0]_120_muxf7 replicates:
+    CLMS_543_757(/devL7L6CD_S) : u_rnd/state_r_fsm[3:0]_120_muxf7_1(gopLUT7L6AB)
+I: Place-6001: Add the new LUT instances CLMS_507_805(/devDL6_S) CLMA_501_829(/devCL6) CLMA_537_805(/devCL6) replicated by the LUT instance CLMS_513_841(/devDL6_S).
+Origin u_rnd/u_draw/N2133/LUT6_inst replicates:
+    CLMS_507_805(/devDL6_S) : u_rnd/u_draw/N2133/LUT6_inst_1(gopLUT6)
+    CLMA_501_829(/devCL6) : u_rnd/u_draw/N2133/LUT6_inst_2(gopLUT6)
+    CLMA_537_805(/devCL6) : u_rnd/u_draw/N2133/LUT6_inst_3(gopLUT6)
+Wirelength after detailed placement is 2988605, detour is 968 and checksum is 7AA35A819C7667E0.
+Timing-driven detailed placement takes 49.05 sec.
+
+Worst slack is 28, TNS after placement is 0.
+Placement done.
+Total placement takes 177.58 sec.
+Finished placement.
+
+Routing started.
+Build routing arch for double attribute device.
+Enter timing driven router mode.
+Route thread size: 5
+Building routing graph takes 18.32 sec.
+Init coarse delay table.
+Read place coarse delay table takes 0.14 sec.
+Build SRB system takes 0.25 sec.
+Setup STE netlist take 10355 msec.
+Dispose control chain take 3143 msec.
+Collect const net info take 1035 msec.
+Worst slack is 28, TNS before route is 0.
+Total nets for routing: 143935.
+Total loads for routing: 642553.
+Direct connect net size: 14601
+Build all design net take 7942 msec.
+Processing design graph takes 22.53 sec.
+Delay table total memory: 72.78639603 MB
+Route graph total memory: 389.70259190 MB
+Route design total memory: 213.99307251 MB
+Global routing takes 0.00 sec.
+Total 143933 subnets.
+Unrouted clock nets at iteration 0 (0.494 sec): 16
+Unrouted clock nets at iteration 1 (0.417 sec): 11
+Unrouted clock nets at iteration 2 (0.281 sec): 7
+Unrouted clock nets at iteration 3 (0.198 sec): 5
+Unrouted clock nets at iteration 4 (0.116 sec): 3
+Unrouted clock nets at iteration 5 (0.107 sec): 2
+Unrouted clock nets at iteration 6 (0.044 sec): 2
+Unrouted clock nets at iteration 7 (0.043 sec): 2
+Unrouted clock nets at iteration 8 (0.045 sec): 0
+Total route nets size: 143888
+Pre route takes 79.304 sec
+Unrouted general nets at iteration 10 (MT total route time: 25.803 sec): 128702(overused: 968519)
+Unrouted general nets at iteration 11 (MT total route time: 27.524 sec): 118506(overused: 800324)
+Unrouted general nets at iteration 12 (MT total route time: 32.406 sec): 108410(overused: 647500)
+Unrouted general nets at iteration 13 (MT total route time: 43.919 sec): 100088(overused: 540704)
+Unrouted general nets at iteration 14 (MT total route time: 61.601 sec): 93662(overused: 469712)
+Unrouted general nets at iteration 15 (MT total route time: 123.515 sec): 82563(overused: 451763)
+Unrouted general nets at iteration 16 (MT total route time: 224.749 sec): 75487(overused: 399620)
+Unrouted general nets at iteration 17 (MT total route time: 297.663 sec): 69702(overused: 347530)
+Unrouted general nets at iteration 18 (MT total route time: 386.964 sec): 65065(overused: 307922)
+Unrouted general nets at iteration 19 (MT total route time: 452.188 sec): 61184(overused: 273305)
+Unrouted general nets at iteration 20 (MT total route time: 458.698 sec): 57835(overused: 247967)
+Unrouted general nets at iteration 21 (MT total route time: 170.102 sec): 59662(overused: 269825)
+Unrouted general nets at iteration 22 (MT total route time: 270.102 sec): 57441(overused: 246210)
+Unrouted general nets at iteration 23 (MT total route time: 322.931 sec): 54896(overused: 226694)
+Unrouted general nets at iteration 24 (MT total route time: 349.192 sec): 52886(overused: 210140)
+Unrouted general nets at iteration 25 (MT total route time: 388.491 sec): 50362(overused: 194340)
+Unrouted general nets at iteration 26 (MT total route time: 392.789 sec): 48632(overused: 182893)
+Unrouted general nets at iteration 27 (MT total route time: 406.825 sec): 46834(overused: 170936)
+Unrouted general nets at iteration 28 (MT total route time: 400.250 sec): 45026(overused: 159935)
+Unrouted general nets at iteration 29 (MT total route time: 401.707 sec): 43256(overused: 149931)
+Unrouted general nets at iteration 30 (MT total route time: 416.112 sec): 41866(overused: 143328)
+Unrouted general nets at iteration 31 (MT total route time: 395.535 sec): 43220(overused: 152649)
+Unrouted general nets at iteration 32 (MT total route time: 478.644 sec): 42421(overused: 145098)
+Unrouted general nets at iteration 33 (MT total route time: 521.627 sec): 40719(overused: 135823)
+Unrouted general nets at iteration 34 (MT total route time: 504.435 sec): 39183(overused: 127800)
+Unrouted general nets at iteration 35 (MT total route time: 494.739 sec): 37968(overused: 122450)
+Unrouted general nets at iteration 36 (MT total route time: 503.671 sec): 36494(overused: 113286)
+Unrouted general nets at iteration 37 (MT total route time: 489.304 sec): 35114(overused: 106938)
+Unrouted general nets at iteration 38 (MT total route time: 493.364 sec): 33935(overused: 102546)
+Unrouted general nets at iteration 39 (MT total route time: 526.733 sec): 33372(overused: 99944)
+Unrouted general nets at iteration 40 (MT total route time: 507.177 sec): 31944(overused: 94070)
+Unrouted general nets at iteration 41 (MT total route time: 345.636 sec): 34651(overused: 111327)
+Unrouted general nets at iteration 42 (MT total route time: 493.662 sec): 34971(overused: 109356)
+Unrouted general nets at iteration 43 (MT total route time: 487.197 sec): 34327(overused: 105632)
+Unrouted general nets at iteration 44 (MT total route time: 533.417 sec): 32920(overused: 99216)
+Unrouted general nets at iteration 45 (MT total route time: 554.428 sec): 32033(overused: 94781)
+Unrouted general nets at iteration 46 (MT total route time: 538.757 sec): 30960(overused: 89842)
+Unrouted general nets at iteration 47 (MT total route time: 516.589 sec): 29895(overused: 86151)
+Unrouted general nets at iteration 48 (MT total route time: 496.042 sec): 29044(overused: 82743)
+Unrouted general nets at iteration 49 (MT total route time: 516.232 sec): 27926(overused: 77662)
+Unrouted general nets at iteration 50 (MT total route time: 479.641 sec): 27453(overused: 75361)
+Unrouted general nets at iteration 51 (MT total route time: 454.876 sec): 29390(overused: 86956)
+Unrouted general nets at iteration 52 (MT total route time: 560.674 sec): 29348(overused: 84823)
+Unrouted general nets at iteration 53 (MT total route time: 595.110 sec): 28559(overused: 80562)
+Unrouted general nets at iteration 54 (MT total route time: 570.955 sec): 27551(overused: 76417)
+Unrouted general nets at iteration 55 (MT total route time: 548.025 sec): 26685(overused: 72473)
+Unrouted general nets at iteration 56 (MT total route time: 563.275 sec): 25922(overused: 69527)
+Unrouted general nets at iteration 57 (MT total route time: 534.804 sec): 24895(overused: 65651)

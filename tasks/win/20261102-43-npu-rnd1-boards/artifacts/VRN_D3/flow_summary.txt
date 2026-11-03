@@ -1,0 +1,12 @@
+
+PnR running; final total/CPU/peak not yet available.
+Worst slack after global placement is -399
+Worst slack after post global placement is -1446
+Worst slack before Replication Place is -1755.
+Worst slack before detailed placement is -1132, TNS before detailed placement is -222746. 
+Worst slack after detailed placement is 22, TNS after detailed placement is 0. 
+Worst slack is 28, TNS after placement is 0.
+Total placement takes 177.58 sec.
+Route thread size: 5
+Worst slack is 28, TNS before route is 0.
+Total nets for routing: 143935.

@@ -1,0 +1,47 @@
+compile
+W Loop: 1340
+W Public-4030: 36
+W Sdm-2000: 297
+W Sdm-2003: 319
+W Sdm-2010: 4
+W Sdm-2014: 2
+W Verilog-2006: 10
+W Verilog-2008: 1003
+W Verilog-2019: 25
+W Verilog-2020: 1200
+W Verilog-2021: 3
+W Verilog-2023: 168
+W Verilog-2036: 16
+W Verilog-2038: 575
+W Verilog-2039: 65
+W [G: 333
+
+synthesize
+C ConstraintEditor-2002: 37
+C ConstraintEditor-2009: 24
+W Adm-4019: 2
+W Public-4008: 15563
+W Removed: 2971
+W Timing-4086: 62
+W Timing-4087: 99
+W Unable: 64
+W UserConstraintEditor-4009: 2
+W [G: 2
+W pmux: 1
+W prevent: 27
+W syn_maxfan: 1026
+
+device_map
+W DeviceMap-4011: 8
+W Public-4008: 358
+W Public-4010: 1
+
+PnR excerpt diagnostics:
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4490)] | Region fp_rgmii does not contain USCM resource, and command are ignored.
+W: PhysicalConstraintEditor-4048: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4491)] Repeat constraints on u_rgmii/u_pll_eth/u_gpll/gpll_inst is found, the def_inst_site command have higher priority or the instance has already done def_inst_region constraint, so that the def_inst_region command is ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4492)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4492)] | Region fp_rgmii does not contain IOBD/IOBS resource, and command are ignored.
+W: PhysicalConstraintEditor-4049: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4493)] Region constraints is not recommended for IO. this command is ignored.
+W: ConstraintEditor-4032: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F/device_map/edrv32_fpga_board_full_top.pcf(line number: 4493)] | Region fp_rgmii does not contain IOLHR resource, and command are ignored.
+C: Place-2039: The placement site of clk_i_ibuf/opit_1 and u_pll_sys/u_gpll/gpll_inst is incompatible.
+C: Place-2028: GLOBAL_CLOCK: the driver u_CORES/u_GTP_SCANCHAIN_PG/scanchain fixed at SCANCHAIN_76_618 is unreasonable. Sub-optimal placement for a clock source and a clock buffer.

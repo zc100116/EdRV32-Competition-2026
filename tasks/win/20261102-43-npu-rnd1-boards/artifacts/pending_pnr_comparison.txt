@@ -1,0 +1,35 @@
+VRN Unrouted general nets at iteration 53 (MT total route time: 717.399 sec): 26017(overused: 72517)
+40: ['Unrouted general nets at iteration 40 (MT total route time: 463.969 sec): 32181(overused: 103588)']
+Worst slack after global placement is -710
+Worst slack after post global placement is -2983
+Worst slack before Replication Place is -3169.
+Worst slack before detailed placement is -2554, TNS before detailed placement is -669815. 
+Worst slack after detailed placement is 248, TNS after detailed placement is 0. 
+Worst slack is 248, TNS after placement is 0.
+Total placement takes 149.47 sec.
+Worst slack is 248, TNS before route is 0.
+Total nets for routing: 143912.
+
+VRN_D3 Unrouted general nets at iteration 57 (MT total route time: 534.804 sec): 24895(overused: 65651)
+40: ['Unrouted general nets at iteration 40 (MT total route time: 507.177 sec): 31944(overused: 94070)']
+Worst slack after global placement is -399
+Worst slack after post global placement is -1446
+Worst slack before Replication Place is -1755.
+Worst slack before detailed placement is -1132, TNS before detailed placement is -222746. 
+Worst slack after detailed placement is 22, TNS after detailed placement is 0. 
+Worst slack is 28, TNS after placement is 0.
+Total placement takes 177.58 sec.
+Worst slack is 28, TNS before route is 0.
+Total nets for routing: 143935.
+
+old_F Unrouted general nets at iteration 236 (MT total route time: 361.228 sec): 6517(overused: 12561)
+40: ['Unrouted general nets at iteration 40 (MT total route time: 306.436 sec): 40988(overused: 121104)']
+Worst slack after global placement is -405
+Worst slack after post global placement is -1409
+Worst slack before Replication Place is -1437.
+Worst slack before detailed placement is -1089, TNS before detailed placement is -944676. 
+Worst slack after detailed placement is 230, TNS after detailed placement is 0. 
+Worst slack is 234, TNS after placement is 0.
+Total placement takes 77.58 sec.
+Worst slack is 234, TNS before route is 0.
+Total nets for routing: 184118.

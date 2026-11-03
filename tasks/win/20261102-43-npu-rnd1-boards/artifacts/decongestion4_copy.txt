@@ -1,0 +1,2 @@
+Full F D4 copied from D2, preserving synthesis/Map DB and completed states; decongestion4, congestion plots retained. FIC targets D4 local ADF. No PnR started by Codex.
+Project: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-RND1-N-D4/EdRV32-B3F-RND1-N-D4.pds
