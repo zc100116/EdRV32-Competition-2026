@@ -15,14 +15,14 @@ KEYS = ('up', 'down', 'left', 'right', 'a', 'b', 'select', 'start',
 class VirtualInput:
     def __init__(self, send):
         self.send = send
-        self.state = (0, 0, 0, 0)
+        self.state = (0, 0, 0, 0, 0)
         self.lock = threading.RLock()
         self.stopped = threading.Event()
         self.thread = None
 
-    def update(self, keys, x, y, mouse):
+    def update(self, keys, x, y, mouse, wheel=None):
         with self.lock:
-            state = (keys, x, y, mouse)
+            state = (keys, x, y, mouse, self.state[4] if wheel is None else wheel & 255)
             if state == self.state:
                 return
             self.state = state
@@ -34,7 +34,7 @@ class VirtualInput:
                 self.thread.start()
 
     def _send(self):
-        self.send(FRAME.pack(*self.state, 0))
+        self.send(FRAME.pack(*self.state))
 
     def _repeat(self):
         while not self.stopped.wait(.02):
@@ -59,5 +59,5 @@ def send_frame(engine, frame):
     if channel(engine) == '网口':
         engine.ethernet.send_datagram(next(packets(frame, 2, 0)),
                                     engine.board.network_endpoint)
-    else:
+    elif not engine.virtual_serial_paused:
         engine.send((b'\x1bV' + frame).hex(), ending='none', hex_mode=True)

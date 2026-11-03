@@ -580,8 +580,7 @@ class SocConsole(QWidget):
         def send():
             self._load_image()
             self.engine.ethernet.local_ip = self.local_ip.text()
-            if not self.engine.ethernet.status()['rx']['active']:
-                self.engine.ethernet.start_receive(6000, mode='console')
+            self.engine.ethernet.listen_console(6000)
             self.engine.yolo.send_image(self.image_path.text(), self.ip.text(), 5000,
                                         6000)
             self.display.setCurrentIndex(2)
@@ -592,17 +591,18 @@ class SocConsole(QWidget):
     def _camera_detection(self):
         def send():
             self.engine.ethernet.local_ip = self.local_ip.text()
-            if not self.engine.ethernet.status()['rx']['active']:
-                self.engine.ethernet.start_receive(6000, mode='console')
+            self.engine.ethernet.listen_console(6000)
             self.engine.yolo.camera_detection(self.ip.text(), 5000, 6000)
             self.display.setCurrentIndex(0)
             self.scene.setCurrentIndex(0)
         self.run(send)
 
     def _send_model(self):
-        self.engine.ethernet.local_ip = self.local_ip.text()
-        self.run(lambda: self.engine.yolo.send_model(
-            self.model_path.text(), self.ip.text(), 5000, 6000))
+        def send():
+            self.engine.ethernet.local_ip = self.local_ip.text()
+            self.engine.ethernet.listen_console(6000)
+            self.engine.yolo.send_model(self.model_path.text(), self.ip.text(), 5000, 6000)
+        self.run(send)
         self.model_result.setText(f'模型字节数 期望 {self.engine.yolo.image_bytes:,} B')
 
     def _apply_scene(self):
@@ -785,7 +785,7 @@ class SocConsole(QWidget):
         tx = self.engine.ethernet.status()['tx']
         self.progress.setValue(int(tx['sent'] / tx['total'] * 100) if tx['total'] else 0)
         self.transfer.setText(f"{tx['sent']:,} / {tx['total']:,} B\n" +
-                               (tx['error'] or ('发送中' if tx['active'] else '就绪')))
+                               (tx['error'] or tx.get('phase', '发送中' if tx['active'] else '就绪')))
         waiting = self.engine.yolo.capture_pending
         self.send_image.setEnabled(not tx['active'] and not waiting)
         self.send_model.setEnabled(not tx['active'] and not waiting)

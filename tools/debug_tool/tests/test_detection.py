@@ -1,7 +1,7 @@
 """test_b3n.py — T-NETN, SoC 7.2/7.4; actual CH2/OUTPUT/EDDT UDP; host clock.
 
 Exercise arbitrary input dimensions, VIN adaptation, NPU/Python post references,
-alternating windows and the shared console receiver without RTL or board access.
+showcase bulk transfers and the shared console receiver without RTL or board access.
 """
 import json
 from pathlib import Path
@@ -29,12 +29,21 @@ class ImageDetectionTest(unittest.TestCase):
         ready.start()
         self.addCleanup(ready.stop)
 
-    def test_ch2_udp_reference_and_alternating_windows(self):
+    def test_ch2_udp_reference_and_showcase_bulk(self):
         import cv2
         import numpy as np
         engine = SerialEngine()
         engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(engine.ethernet.stop_receive)
+        from tools.debug_tool.core.ethernet import packets as wire_packets
+        def paced_packets(data, window, offset):
+            for packet in wire_packets(data, window, offset):
+                if window == 0 and len(data) > 1024:
+                    time.sleep(.0002)  # Model the wire, as in the original upload test.
+                yield packet
+        pacing = patch('tools.debug_tool.core.ethernet.packets', paced_packets)
+        pacing.start()
+        self.addCleanup(pacing.stop)
         quant = json.loads((ROOT / 'tasks/win/20261029-09-b3-software/src/npu/'
                             'quantization.json').read_text())
         with TemporaryDirectory(dir=ROOT / 'build') as directory:
@@ -75,18 +84,14 @@ class ImageDetectionTest(unittest.TestCase):
                 worker.start()
                 try:
                     for window, path in enumerate(paths):
-                        send_blocks = engine.ethernet.send_blocks
-                        # Model a paced wire; localhost socket buffers are smaller than CH2.
-                        def paced(blocks, *args, **kwargs):
-                            return send_blocks(blocks, *args, interval=.0002, **kwargs)
-                        with patch.object(engine.ethernet, 'send_blocks', side_effect=paced):
-                            engine.yolo.send_image(path, '127.0.0.1', board.getsockname()[1],
-                                                   port)
+                        engine.yolo.send_image(path, '127.0.0.1', board.getsockname()[1], port)
                         deadline = time.monotonic() + 20
-                        while engine.yolo.snapshot()[0] != window + 1:
+                        while (engine.yolo.snapshot()[0] != window + 1 or
+                               engine.ethernet.status()['tx']['active']):
                             self.assertLess(time.monotonic(), deadline, errors)
                             time.sleep(.01)
                         _, capture = engine.yolo.snapshot()
+                        self.assertIsNotNone(capture, (engine.yolo.error, engine.ethernet.status(), errors))
                         self.assertEqual(capture[0], reference_input(path))
                         self.assertEqual(len(capture[0]), INPUT_BYTES)
                         self.assertEqual(len(capture[1]), OUTPUT_BYTES)
@@ -248,7 +253,7 @@ class ImageDetectionTest(unittest.TestCase):
             send.assert_called_once()
         app.processEvents()
 
-    def test_camera_buttons_send_win3_command_and_select_video(self):
+    def test_camera_buttons_send_edsc_command_and_select_video(self):
         from PySide6.QtWidgets import QApplication
         from gui.soc_console import SocConsole
         app = QApplication.instance() or QApplication([])
@@ -256,12 +261,11 @@ class ImageDetectionTest(unittest.TestCase):
         console = SocConsole(engine, lambda text: None)
         self.addCleanup(console.close)
         with (patch.object(engine.ethernet, 'start_receive'),
-              patch.object(engine.ethernet, 'send_blocks') as send):
+              patch.object(engine.ethernet.showcase, 'camera') as send):
             for button in (console.image_camera, console.video_camera):
                 engine.yolo.return_view = True
                 button.click()
-                self.assertEqual(send.call_args.args[0], [(3, 0, b'camera')])
-                self.assertEqual(send.call_args.args[1:], (console.ip.text(), 5000, 6000))
+                self.assertEqual(send.call_args.args, (console.ip.text(), 5000, 6000))
                 self.assertEqual(console.display.currentIndex(), 0)
                 self.assertEqual(console.scene.currentIndex(), 0)
                 self.assertFalse(engine.yolo.return_view)
@@ -340,7 +344,6 @@ class ImageDetectionTest(unittest.TestCase):
                                side_effect=lambda: sent.append(console.image_path.text()))):
                 console._choose_folder()
                 self.assertEqual(sent, [str(directory / 'a.png')])
-                self.assertEqual(engine.yolo.next_window, 0)
                 # Each complete capture advances the folder independently of reference setup.
                 from tools.debug_tool.core.video import parse_detections
                 from unittest.mock import patch as mock_patch

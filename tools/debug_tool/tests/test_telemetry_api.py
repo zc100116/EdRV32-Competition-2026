@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 import socket
 import subprocess
+import struct
+import threading
+import time
 import sys
 from tempfile import TemporaryDirectory
 import unittest
@@ -66,23 +69,62 @@ class TelemetryApiTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('clk_npu_hz', Path(path).read_text())
 
-    def test_rest_model_and_return_windows_offsets(self):
-        with TemporaryDirectory() as directory:
+    def test_rest_model_bulk_and_return_offsets(self):
+        from tools.debug_tool.core.ethernet import unpack
+        from tools.debug_tool.core.showcase import encode, decode, BULK_BEGIN, READY, DONE
+        from tools.debug_tool.core.ethernet import packets as wire_packets
+        def paced_packets(data, window, offset):
+            for packet in wire_packets(data, window, offset):
+                if window == 0 and len(data) > 1024:
+                    time.sleep(.0002)
+                yield packet
+        pacing = patch('tools.debug_tool.core.ethernet.packets', paced_packets)
+        pacing.start()
+        self.addCleanup(pacing.stop)
+        with TemporaryDirectory() as directory, socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as board:
             compiler_fixture(directory)
+            board.bind(('127.0.0.1', 0))
+            board.settimeout(3)
             rx = self.request('/api/ethernet/receive/start',
                               {'localIp': '127.0.0.1', 'localPort': 0,
                                'directory': str(Path(directory) / 'rx')})
+            received = bytearray()
+            errors = []
+            def simulate():
+                try:
+                    packet, peer = board.recvfrom(65535)
+                    kind, seq, payload = decode(unpack(packet)[3])
+                    self.assertEqual(kind, BULK_BEGIN)
+                    self.assertEqual(struct.unpack('<B3xI', payload), (1, 0x100000 + 1280))
+                    board.sendto(next(packets(encode(READY, seq, struct.pack('<B3x', 1)), 3, 0)), peer)
+                    while True:
+                        packet, _ = board.recvfrom(65535)
+                        window, notify, offset, data = unpack(packet)
+                        self.assertEqual((window, offset), (0, len(received)))
+                        received.extend(data)
+                        if notify:
+                            break
+                    board.sendto(next(packets(encode(DONE, seq, struct.pack('<BB2xI', 1, 0, 0)), 3, 0)), peer)
+                except Exception as exc:
+                    errors.append(exc)
+            worker = threading.Thread(target=simulate)
+            worker.start()
             self.request('/api/yolo/model', {'path': directory, 'boardIp': '127.0.0.1',
-                                             'boardPort': rx['localPort'], 'localPort': 0})
-            wait_for(self, lambda: self.engine.ethernet.status()['rx']['packets'] == 4)
+                                             'boardPort': board.getsockname()[1], 'localPort': 0})
+            worker.join(4)
+            self.assertFalse(worker.is_alive())
+            self.assertEqual(errors, [])
             wait_for(self, lambda: not self.engine.ethernet.status()['tx']['active'])
-            self.assertEqual(self.request('/api/ethernet/status')['tx']['sent'], 1376)
+            state = self.request('/api/ethernet/status')
+            self.assertIsNone(state['tx']['error'])
+            self.assertEqual(state['tx']['sent'], 0x100000 + 1280)
+            self.assertEqual(received[:4], b'EDNM')
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
                 for window in range(3):
                     data = bytes([window + 1]) * (window + 4)
                     for packet in packets(data, window, 17):
                         sock.sendto(packet, ('127.0.0.1', rx['localPort']))
-            wait_for(self, lambda: self.engine.ethernet.status()['rx']['packets'] == 7)
+            wait_for(self, lambda: self.engine.ethernet.status()['rx']['packets'] == 5)
             state = self.request('/api/ethernet/receive/stop', {})
             for window in range(3):
                 contents = Path(state['files'][str(window)]).read_bytes()

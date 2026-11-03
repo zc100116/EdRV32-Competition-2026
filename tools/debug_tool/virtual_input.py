@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--x', type=int, default=0)
     parser.add_argument('--y', type=int, default=0)
     parser.add_argument('--mouse', type=int, default=0)
+    parser.add_argument('--wheel', type=int, default=0, help='cumulative wheel count, down positive')
     parser.add_argument('--hold', type=float, default=.2, help='hold duration in seconds')
     args = parser.parse_args()
     keys = sum(1 << KEYS.index(key) for key in args.keys.split(',') if key)
@@ -33,7 +34,7 @@ def main():
 def run(send, args, keys):
     controller = VirtualInput(send)
     try:
-        controller.update(keys, args.x, args.y, args.mouse)
+        controller.update(keys, args.x, args.y, args.mouse, args.wheel)
         time.sleep(args.hold)
         controller.update(0, args.x, args.y, 0)
     finally:

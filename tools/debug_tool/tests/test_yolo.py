@@ -2,16 +2,14 @@
 
 import json
 from pathlib import Path
-import socket
 import struct
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from tools.debug_tool.core.ethernet import EthernetTool, unpack
+from tools.debug_tool.core.ethernet import EthernetTool
 from tools.debug_tool.core.scene import SceneControl
 from tools.debug_tool.core.yolo import pack_model, rgb_to_rgb565, YoloTool
-from test_program import wait_for
 
 
 def compiler_fixture(directory):
@@ -41,31 +39,31 @@ class YoloTest(unittest.TestCase):
         self.assertEqual(data, bytes.fromhex('00f8e0071f00ffff'))
         self.assertEqual(struct.unpack_from('<I', data)[0], 0x07e0f800)
 
-    def test_compiler_hex_and_ednm_sparse_blocks(self):
+    def test_compiler_hex_and_contiguous_ednm(self):
         with TemporaryDirectory() as directory:
             desc, model = compiler_fixture(directory)
-            blocks = pack_model(directory)
-        self.assertEqual([(w, o) for w, o, _ in blocks], [(2, 0), (2, 4096), (2, 0x100000)])
-        self.assertEqual(struct.unpack('<4s7I', blocks[0][2]),
+            data = pack_model(directory)
+        self.assertEqual(struct.unpack_from('<4s7I', data),
                          (b'EDNM', 1, 1, 64, 1280, 0x1000000, 0x4000000, 0x5000000))
-        self.assertEqual(blocks[1][2], desc)
-        self.assertEqual(blocks[2][2], model)
+        self.assertEqual(data[4096:4096 + len(desc)], desc)
+        self.assertEqual(data[0x100000:], model)
 
-    def test_model_udp_exact_byte_count_and_only_final_notify(self):
+    def test_model_bulk_contains_ednm_at_original_offsets(self):
         ethernet = EthernetTool(local_ip="127.0.0.1")
-        with (TemporaryDirectory() as directory,
-              socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock):
-            compiler_fixture(directory)
-            sock.bind(('127.0.0.1', 0))
-            sock.settimeout(2)
+        with TemporaryDirectory() as directory:
+            desc, model = compiler_fixture(directory)
             yolo = YoloTool(ethernet)
-            yolo.send_model(directory, '127.0.0.1', sock.getsockname()[1], 0)
-            received = [unpack(sock.recvfrom(65535)[0]) for _ in range(4)]
-            wait_for(self, lambda: not ethernet.status()['tx']['active'])
-            self.assertEqual([o for _, _, o, _ in received], [0, 4096, 0x100000, 0x100400])
-            self.assertEqual([n for _, n, _, _ in received], [False, False, False, True])
-            self.assertEqual(ethernet.status()['tx']['sent'], 32 + 64 + 1280)
-            self.assertEqual(yolo.image_bytes, 1376)
+            with patch.object(ethernet.showcase, 'bulk') as bulk:
+                yolo.send_model(directory, '127.0.0.1', 5000, 6000)
+                kind, data, ip, port, local_port, name = bulk.call_args.args
+                self.assertEqual((kind, ip, port, local_port), (1, '127.0.0.1', 5000, 6000))
+                self.assertEqual(data[:4], b'EDNM')
+                self.assertEqual(data[32:4096], bytes(4096 - 32))
+                self.assertEqual(data[4096:4096 + len(desc)], desc)
+                self.assertEqual(data[4096 + len(desc):0x100000],
+                                 bytes(0x100000 - 4096 - len(desc)))
+                self.assertEqual(data[0x100000:], model)
+                self.assertEqual(yolo.image_bytes, 0x100000 + len(model))
 
     def test_scene_mapping_template_and_rate(self):
         class Engine:

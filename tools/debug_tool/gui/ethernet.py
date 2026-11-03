@@ -41,7 +41,7 @@ class EthernetPanel(QFrame):
         layout.addWidget(choose)
         fields = QFormLayout()
         self.window = QComboBox()
-        self.window.addItems(["图像缓冲 A", "图像缓冲 B", "模型", "控制与监控"])
+        self.window.addItems(["大块数据", "未使用", "虚拟输入", "控制与监控"])
         fields.addRow("数据用途", self.window)
         self.offset = QLineEdit("0")
         self.offset.setPlaceholderText("十进制或 0x 十六进制")
@@ -76,6 +76,19 @@ class EthernetPanel(QFrame):
         self.rx_status = QLabel("未监听")
         self.rx_status.setWordWrap(True)
         layout.addWidget(self.rx_status)
+        layout.addWidget(QLabel('网口回环测试'))
+        self.echo_count = QSpinBox()
+        self.echo_count.setRange(1, 2147483647)
+        self.echo_count.setValue(10)
+        echo_form = QFormLayout()
+        echo_form.addRow('测试次数', self.echo_count)
+        layout.addLayout(echo_form)
+        self.echo_button = QPushButton('开始回环测试')
+        self.echo_button.clicked.connect(self._echo)
+        layout.addWidget(self.echo_button)
+        self.echo_result = QLabel('尚未测试')
+        self.echo_result.setWordWrap(True)
+        layout.addWidget(self.echo_result)
         layout.addStretch(1)
 
     def _choose_send(self):
@@ -99,6 +112,17 @@ class EthernetPanel(QFrame):
             self.toast.show_message(str(exc), error=True)
         self.refresh()
 
+    def _echo(self):
+        try:
+            self.ethernet.local_ip = self.local_ip.text()
+            self.ethernet.showcase.echo_test(self.echo_count.value(), self.ip.text(),
+                                             self.board_port.value(), self.local_port.value())
+        except (OSError, ValueError, RuntimeError) as exc:
+            self.toast.show_message(str(exc), error=True)
+            if self.ethernet.session:
+                self.ethernet.session.fail(str(exc))
+        self.refresh()
+
     def _listen(self):
         try:
             if self.ethernet.status()["rx"]["active"]:
@@ -114,6 +138,11 @@ class EthernetPanel(QFrame):
         state = self.ethernet.status()
         tx, rx = state["tx"], state["rx"]
         self.send.setEnabled(not tx["active"])
+        self.echo_button.setEnabled(not tx['active'])
+        echo = state['echo']
+        average = '—' if echo['averageMs'] is None else f"{echo['averageMs']:.3f} ms"
+        self.echo_result.setText(f"次数 {echo['count']} · 已返回 {echo['received']} · "
+                                 f"丢失 {echo['lost']}\n平均往返 {average}")
         self.local_ip.setEnabled(not (tx["active"] or rx["active"]))
         self.local_port.setEnabled(not (tx["active"] or rx["active"]))
         self.directory.setEnabled(not rx["active"])

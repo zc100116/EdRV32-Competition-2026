@@ -143,7 +143,8 @@ def make_handler(engine):
                     return self._json(200, engine.disconnect())
                 if path == "/api/virtual-input":
                     engine.virtual_input.update(int(body['keys']), int(body['x']),
-                                                int(body['y']), int(body['mouse']))
+                                                int(body['y']), int(body['mouse']),
+                                                int(body.get('wheel', 0)))
                     return self._json(200, {'state': engine.virtual_input.state})
                 if path == "/api/send":
                     return self._json(200, engine.send(

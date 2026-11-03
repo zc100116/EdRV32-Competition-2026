@@ -19,6 +19,7 @@ class Touchpad(QWidget):
     def __init__(self, panel):
         super().__init__()
         self.panel = panel
+        self.wheel_delta = 0
         self.setMouseTracking(True)
         self.setMinimumSize(320, 180)
         self.setFocusPolicy(Qt.ClickFocus)
@@ -42,7 +43,8 @@ class Touchpad(QWidget):
         self.panel.y = round(max(0, min(1, (event.position().y() - area.y()) /
                                          (area.height() - 1))) * 719)
         self.panel.mouse = ((1 if event.buttons() & Qt.LeftButton else 0) |
-                            (2 if event.buttons() & Qt.RightButton else 0))
+                            (2 if event.buttons() & Qt.RightButton else 0) |
+                            (4 if event.buttons() & Qt.MiddleButton else 0))
         self.panel.send()
 
     def mousePressEvent(self, event):
@@ -51,6 +53,14 @@ class Touchpad(QWidget):
 
     def mouseReleaseEvent(self, event):
         self.mouseMoveEvent(event)
+
+    def wheelEvent(self, event):
+        self.wheel_delta += event.angleDelta().y()
+        steps = int(self.wheel_delta / 120)
+        self.wheel_delta -= steps * 120
+        self.panel.wheel = (self.panel.wheel - steps) & 255
+        self.panel.send()
+        event.accept()
 
     def contextMenuEvent(self, event):
         event.accept()
@@ -61,7 +71,7 @@ class VirtualInputPanel(QWidget):
         super().__init__()
         self.engine, self.toast = engine, toast
         self.pressed = set()
-        self.x = self.y = self.mouse = 0
+        self.x = self.y = self.mouse = self.wheel = 0
         self.setFocusPolicy(Qt.StrongFocus)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(32, 18, 32, 18)
@@ -111,7 +121,8 @@ class VirtualInputPanel(QWidget):
         controls.addStretch()
         layout.addLayout(controls)
         help_text = QLabel('方向键 / WASD 移动 · J / K 为 A / B · U / I 为 Select / Start\n'
-                           'Enter 确认 · Esc 返回 · Tab 下一项 · Shift+Tab 上一项')
+                           'Enter 确认 · Esc 返回 · Tab 下一项 · Shift+Tab 上一项\n'
+                           '滚轮切换焦点 · 中键确认')
         help_text.setWordWrap(True)
         layout.addWidget(help_text)
         self.pad = Touchpad(self)
@@ -151,9 +162,10 @@ class VirtualInputPanel(QWidget):
         keys = sum(1 << KEYS.index(key) for key in names)
         self.coordinates.setText(f'X {self.x} / 1279     Y {self.y} / 719     '
                                  f'左键 {"●" if self.mouse & 1 else "○"}     '
-                                 f'右键 {"●" if self.mouse & 2 else "○"}')
+                                 f'右键 {"●" if self.mouse & 2 else "○"}     '
+                                 f'中键 {"●" if self.mouse & 4 else "○"}     滚轮 {self.wheel}')
         try:
-            self.engine.virtual_input.update(keys, self.x, self.y, self.mouse)
+            self.engine.virtual_input.update(keys, self.x, self.y, self.mouse, self.wheel)
         except (OSError, RuntimeError) as exc:
             self.toast.show_message(str(exc), error=True)
             self.engine.board.fail(str(exc))

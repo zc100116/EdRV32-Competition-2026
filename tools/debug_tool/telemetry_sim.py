@@ -165,13 +165,23 @@ def run_yolo(host, port, ch2=None, output=None):
 def run_detection(sock, model, quant_params, frames):
     """T-NETN host board: receive RGB565 and return reference CH2/OUTPUT/EDDT over real UDP."""
     from core.yolo import reference_output, reference_detections, rgb565_ch2
+    from core.showcase import decode, encode, BULK_BEGIN, READY, DONE, IMAGE
     for frame_id in range(frames):
+        packet, peer = sock.recvfrom(65535)
+        window, notify, offset, data = unpack(packet)
+        message_type, seq, payload = decode(data)
+        if (window, notify, offset, message_type) != (3, True, 0, BULK_BEGIN):
+            raise ValueError('Detection simulator: expected BULK_BEGIN')
+        kind, total = struct.unpack('<B3xI', payload)
+        if kind != IMAGE or total != 1280 * 720 * 2:
+            raise ValueError('Detection simulator: expected RGB565 image bulk')
+        send_block(sock, peer, encode(READY, seq, struct.pack('<B3x', kind)), 3)
         block = Block()
         while True:
             packet, peer = sock.recvfrom(65535)
             window, notify, offset, data = unpack(packet)
-            if window not in (0, 1):
-                continue
+            if window != 0:
+                raise ValueError('Detection simulator: image must use bulk data channel')
             block.receive(offset, data, notify)
             if notify:
                 if not block.complete(1280 * 720 * 2):
@@ -185,6 +195,7 @@ def run_detection(sock, model, quant_params, frames):
         send_block(sock, peer, ch2, 0, notify=False)
         send_block(sock, peer, output, 1, notify=False)
         send_block(sock, peer, detections, 2)
+        send_block(sock, peer, encode(DONE, seq, struct.pack('<BB2xI', kind, 0, frame_id)), 3)
         print(f'Detection frame_id={frame_id} CH2={INPUT_BYTES} '
               f'OUTPUT={len(output)} detections={len(boxes)}', flush=True)
 

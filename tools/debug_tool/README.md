@@ -104,9 +104,9 @@ Gamma 开关和任意正 Gamma 值。固件计算 Gamma 表，写入未使用的
 
 ## 目标检测
 
-选择 `compile_yolo.py` 输出目录并发送模型，等待串口 `EDNM: loaded`。
+选择 `compile_yolo.py` 输出目录并发送模型，等待界面显示设备处理完成。
 选择任意尺寸图片后点击发送，工具统一缩放到 1280×720、小端 RGB565；
-所有演示检测程序采用相同图像协议，图像缓冲自动交替。
+模型和图片均使用 showcase 的握手上传流程，上一条上传完成后才能开始下一条。
 回传顺序统一为 CH2（983040 B）、OUTPUT（725760 B）、EDDT；最后的检测通知结束该图。
 接收完成后在原图尺寸上叠框并显示与板端共用的 COCO 类名，记录从开始发送到最终通知的往返 ms 和平均检测 fps。
 
@@ -118,6 +118,45 @@ EDDT 使用 Python 后处理逐项比较，显示差异字节数、首差异和�
 
 ![目标检测，1366×768](assets/detection-1366x768.png)
 <!-- 截图：render_shot.py --state detection --page 2 --width 1366 --height 768；输入和检测结果由 telemetry_sim 通过真实 UDP 回环生成，非实板测量。 -->
+
+## 游戏上传与游戏包
+
+左侧“游戏”页选择 `.nes` ROM，名称默认取文件名，可自行修改；封面可留空，
+或选择 PNG / JPG。填写设备地址和本机地址，点击“上传游戏”。进度条显示发送量，
+完成后显示板端返回的游戏序号，可继续选择并上传下一款。上传内容复位或断电后清空。
+所有功能始终可见；控件所在页面可滚动，路径与名称提供全文提示，状态文字自动换行。
+
+GUI 与命令行共用 `tools/sw/game_record.py`：游戏名用仓库内 Noto Sans SC 20 px
+渲染为 A8，超过 180 px 自动换行；UTF-8 名称最多 63 字节。封面等比缩放到
+120×160 以内，在 120×160 白底上居中，不裁剪，按小端 RGB565 保存。
+
+```sh
+python tools/sw/game_record.py pack sw/apps/showcase/games/games.txt build/games.bin
+```
+
+`games.txt` 每行 `名字|ROM 路径|封面路径`，支持空行和 `#` 注释。
+ROM 路径相对 `third_party/nes`，封面路径相对清单文件；无封面时第三项留空。
+命令打印游戏数和总字节数。模块接口为 `build_record(name, rom, cover)` 和
+`build_pack(records)`，分别生成 EDG2 v2 记录及 EDGP v2 游戏包；旧 v1 打包器已删除。
+
+## showcase 网口通信与回环测试
+
+模型、图片和游戏的上传统一为：发送 BULK_BEGIN，等待 READY，再连续发送数据，
+最后等待 DONE；游戏序号来自 DONE。模型 DONE 表示加载完成；图片的识别结果会先于
+DONE 到达，上传状态在 DONE 到达后才结束。模型保留 EDNM 布局（头偏移 0、描述符
+0x1000、模型 0x100000，间隙补零）；图片为 1280×720 RGB565；游戏为一条 EDG2。
+识别结果的 CH2 / OUTPUT / EDDT 回传解析保持原格式。
+
+EDSC 消息位于 UDP 应用头后，字段为 `<4sHHI`：`EDSC`、类型、payload 长度、序号，
+后跟 payload。控制消息使用窗口 3、偏移 0、NOTIFY=1；大块数据使用窗口 0，
+偏移从 0 开始，仅最后一包 NOTIFY=1。完整协议见
+[设计记录 4.5.4–4.5.5](../../docs/design/2026-11-03-showcase-ui.md#454-showcase-网口协议板端与调试工具共同遵守)。
+
+“网口”页填写地址与端口，设置测试次数后点击“开始回环测试”。工具逐次发送
+ECHO，检查 ECHO_REPLY 的序号与原样数据，显示次数、已返回数、丢失数和成功样本的
+平均往返毫秒数。每次请求只发送一次，超时样本计为丢失后继续后续测试次数。
+READY / DONE / ECHO_REPLY 等待上限为 5 s，超时、板端拒绝和协议错误显示在界面和日志中，
+不重试、不切换协议。当前版本针对 showcase，不再发送旧的 ASCII 摄像头命令。
 
 ## CLI 与 REST
 
@@ -154,18 +193,18 @@ python tools/debug_tool/cli.py tail -f
 | POST / GET | `/api/file/send`、`/api/file/status` | `{path,echo?}` / 串口文件状态，取消 `/api/file/cancel` |
 | POST / GET | `/api/program`、`/api/program/status` | `{path,elf?,baud?,addr?,entry?,eth?,localIp?}` / BIOS 状态 |
 | GET | `/api/ethernet/status` | 共用 UDP 传输状态 |
-| POST | `/api/ethernet/send` | `{path,boardIp,boardPort,localPort,localIp?,window?,offset?,interval?}`；底层数据用途编号见 demo 协议表 |
+| POST | `/api/ethernet/send` | `{path,boardIp,boardPort,localPort,localIp?,window?,offset?,interval?}`；数据用途编号见本文件 showcase 协议说明 |
 | POST | `/api/ethernet/receive/start`、`/api/ethernet/receive/stop` | `{localPort,localIp?,directory?,mode?}` / `{}`；mode=files/video/yolo/console |
 | GET | `/api/telemetry`、`/api/telemetry/csv` | 监控最新值 / 原始 CSV |
 | POST | `/api/telemetry/export`、`/api/telemetry/replay`、`/api/telemetry/clear` | `{path}` / `{path}` / `{}` |
 | GET / POST | `/api/scenes`、`/api/scenes/send` | 预设映射 / `{name,rate?}` |
-| POST | `/api/yolo/model`、`/api/yolo/image` | `{path,boardIp,boardPort,localPort,localIp?}`；图像缓冲自动交替 |
+| POST | `/api/yolo/model`、`/api/yolo/image` | `{path,boardIp,boardPort,localPort,localIp?}`；showcase 握手上传 |
 
 PIX 键：`bc,contrast,brightness,gamma_en,gamma,stage1,stage2,gray,binary,threshold,invert`。
 GEO 键：`enabled,angle,scale_x,scale_y,translate_x,translate_y,mirror_x,mirror_y`。
 GUI 比例锁定只联动输入控件，线上始终发送两个独立比例。
 通用串口页保留文本 / HEX、行尾、保存、原始文件发送、快捷命令、规则和数据面板；
-通用网口页按“图像缓冲 A/B、模型、控制与监控”选择用途，保留原始偏移收发。
+通用网口页按“大块数据、未使用、虚拟输入、控制与监控”选择用途，保留原始偏移收发。
 
 ## 测试、模拟与截图
 
@@ -200,7 +239,7 @@ REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY �
 | 几何区域 | [截图](assets/geometry-1366x768.png) | [截图](assets/geometry-1920x1080.png) |
 | 目标检测 | [截图](assets/detection-1366x768.png) | [截图](assets/detection-1920x1080.png) |
 
-截图统一由 `render_shot.py` 生成，使用 `--width/--height`、`--main-page 0..5`、
+截图统一由 `render_shot.py` 生成，使用 `--width/--height`、`--main-page 0..6`、
 `--page 0..2`；`--state vision/detection` 注入模拟串口并通过 telemetry_sim 真实 UDP
 回环生成数据，`--scroll-bottom` 显示几何区域。工具实际核对窗口尺寸、完整视频/检测与 EDTM。
 
@@ -241,7 +280,7 @@ REST / CLI → SerialEngine → 模拟串口 → 状态摘要；只替换 PTY �
 按钮显示完整按键提示，键盘和鼠标按住时均以深蓝底白字显示，松开后恢复；
 W 与 ↑ 等同一按钮的多个映射全部松开后才释放。方向键 / WASD、J=A、K=B、U=Select、
 I=Start、Enter、Esc、Tab=Next、Shift+Tab=Prev。鼠标在白色 16:9 触控板内
-移动即为绝对位置，左 / 右键分别发送对应按钮；坐标显示在下方。
+移动即为绝对位置，左 / 右 / 中键分别发送对应按钮；滚轮切换焦点，中键确认。坐标与滚轮累计值显示在下方。
 触控板映射 1280×720，使用时看 HDMI 光标，**不回传屏幕画面**。
 离开面板或应用失去焦点时释放面板的按下状态。
 
@@ -263,8 +302,8 @@ I=Start、Enter、Esc、Tab=Next、Shift+Tab=Prev。鼠标在白色 16:9 触控�
 | 0–1 | u16 | bit0 上、1 下、2 左、3 右、4 A、5 B、6 Select、7 Start；8 Enter、9 Esc、10 Next、11 Prev，其余 0 |
 | 2–3 | i16 | X：0–1279 |
 | 4–5 | i16 | Y：0–719 |
-| 6 | u8 | bit0 左键、bit1 右键，其余 0 |
-| 7 | u8 | 保留，0 |
+| 6 | u8 | bit0 左键、bit1 右键、bit2 中键，其余 0 |
+| 7 | u8 | 滚轮累计计数，u8 回绕，向下为正 |
 
 串口发送 `0x1B 'V'` 后跟状态帧。板端遇 ESC 进入帧读取，帧内字节（包括
 ESC 和原有按键字符）仅作数据，其余字节继续交给应用原有单字符输入。
@@ -282,8 +321,9 @@ python tools/debug_tool/virtual_input.py --emit build/debug_tool/input.bin --key
 python tools/debug_tool/virtual_input.py --udp 127.0.0.1:5000 --keys b,start --hold .2
 ```
 
-REST `POST /api/virtual-input` 接受 `keys,x,y,mouse` 四个整数，共用 GUI 的
-发送器与自动重发。`keys` 是位图，`mouse` 是鼠标键位图。
+REST `POST /api/virtual-input` 接受 `keys,x,y,mouse` 以及可选 `wheel`（默认 0）整数，共用 GUI 的
+发送器与自动重发。`keys` 是位图，`mouse` 是鼠标键位图，`wheel` 是滚轮累计计数。
+串口页激活时暂停串口虚拟输入，离开后恢复；网口虚拟输入不受影响。
 
 ## T-VIN1 验收记录
 
@@ -384,6 +424,19 @@ Linux 回环结果不能替代 Windows 实际网卡上板结果。
 图片页“停止批量”清空未发送图片，保留当前上传和回传，等待完成或按原有 1 s
 规则报错后回到空闲；随后可发送新单张、选择新文件夹或恢复摄像头。
 下一张只在当前上传线程结束且回传完成/报错后发送，超时仍记录错误并继续未停止的队列。
-图片页和视频画面均提供“回到摄像头检测”，经 WIN3 发送 ASCII `camera`（6 B 无换行），
-适用于 `demo` / `demo_vnpu`，恢复视频画面和 S1 检测而不重载模型。
+图片页和视频画面均提供“回到摄像头检测”，发送 showcase 的 EDSC CAMERA 消息，
+恢复摄像头检测而不重载模型。
 在途图片完成或超时前，切换按钮禁用；发送图片仍自动进入图片识别模式。
+
+## showcase 工具验收（2026-11-03）
+
+实现版本见 `git log -1 --format=%H -- tools/debug_tool/core/showcase.py`。
+仅修改调试工具和共享游戏打包器，删除旧的 `tools/sw/pack_games.py`，依赖保持不变。
+
+- `QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/debug_tool/tests -v`：129 项全部通过，无跳过，56.214 s；包含新增 8 项 showcase 测试。
+- 新测试覆盖滚轮回绕及中键的串口/UDP 数据、EDSC 编解码、本地 UDP 的 READY/DONE 顺序、连续游戏上传与返回序号、拒绝/超时/序号错误、ECHO 往返及丢失、接收子进程转发控制回复、EDG2/EDGP 全字段和 PNG/JPG 封面。
+- 现有检测端到端测试保留实际 CH2 / OUTPUT / EDDT 与参考模型比对；模拟板在识别结果全部发出后回复 DONE。模型 REST 测试检查保留原偏移并补零的完整 EDNM。大图/模型回环测试显式模拟包间隔，避免本地主机突发填满模拟板 socket；不包含重传。
+- 游戏页测试检查文件名默认名称、进度、返回序号、错误与日志，以及 1366×768、1920×1080 下标签/按钮的完整尺寸。截图：`build/games-{1366x768,1920x1080}.png`；空白页面可用 `render_shot.py --main-page 6` 重现。
+- `python tools/sw/game_record.py pack sw/apps/showcase/games/games.txt build/games.bin`：30 games，7,085,120 bytes。
+- Python `compileall`、`git diff --check` 通过；目录风格检查 0 warning。本任务无 RTL，Verilator lint 不适用。
+- 完整日志：`build/t-tool-show-tests.log`，打包日志：`build/t-tool-show-pack.log`。未运行实板验收；由后续 showcase 集成与上板任务验证。

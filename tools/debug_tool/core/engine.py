@@ -102,6 +102,7 @@ class SerialEngine:
                                       lambda text: self.add_entry("sys", text),
                                       self._program_baud)
         self.board = BoardSession(self)
+        self.virtual_serial_paused = False
         self.virtual_input = VirtualInput(lambda frame: send_frame(self, frame))
         self.telemetry = self.board.telemetry
         self.ethernet = self.board.ethernet

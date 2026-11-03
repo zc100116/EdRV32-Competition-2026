@@ -32,10 +32,11 @@ def _video_process(sock, name, connection, stop, capture_event, capture_epoch,
                     return_time, mode, counts)
     except (OSError, struct.error, ValueError) as exc:
         connection.send(('error', str(exc)))
+    else:
+        connection.send(('done', time.process_time() - started))
     finally:
         memory.close()
         sock.close()
-        connection.send(('done', time.process_time() - started))
         connection.close()
 
 
@@ -175,6 +176,8 @@ def unpack(packet):
 
 class EthernetTool:
     def __init__(self, telemetry=None, local_ip="192.168.1.2"):
+        from .showcase import ShowcaseTool
+        self.showcase = ShowcaseTool(self)
         self.local_ip = local_ip
         self.session = None
         self.telemetry = telemetry
@@ -197,7 +200,8 @@ class EthernetTool:
 
     def status(self):
         with self.lock:
-            return {"tx": dict(self.tx), "rx": {**self.rx, "files": dict(self.rx["files"])}}
+            return {"tx": dict(self.tx), "rx": {**self.rx, "files": dict(self.rx["files"])},
+                    "echo": dict(self.showcase.echo)}
 
     def send_file(self, path, board_ip, board_port, local_port, window=0, offset=0,
                   interval=0):
@@ -277,6 +281,13 @@ class EthernetTool:
         """Send a single control/input packet through the listening socket."""
         self.wait_for_link(self.local_ip)
         self.rx_socket.sendto(packet, destination)
+
+    def listen_console(self, local_port):
+        """The GUI's shared receiver carries video, detections, telemetry and messages."""
+        if self.rx_socket is not None and self.mode != 'console':
+            self.stop_receive()
+        if self.rx_socket is None:
+            self.start_receive(local_port, mode='console')
 
     def start_receive(self, local_port, directory=None, mode="files"):
         if self.rx_socket is not None:
@@ -453,6 +464,14 @@ class EthernetTool:
                 window &= 3
                 notify = bool(flags & 1)
                 data = view[HEADER.size:length]
+                if window == 3 and data[:4] == b'EDSC':
+                    self.showcase.receive(data)
+                    count += 1
+                    byte_count += len(data)
+                    notifications += int(notify)
+                    last = window, offset, notify, peer
+                    publish()
+                    continue
                 fast_video = (window == 0 and offset != 0 and
                               (self.mode == 'video' or
                                (self.mode == 'console' and routes.get(0) == 'video')))
@@ -510,6 +529,7 @@ class EthernetTool:
                 if not fast_video or notify or count >= 256:
                     publish()
         except (OSError, struct.error, ValueError) as exc:
+            self.showcase.fail(str(exc))
             with self.lock:
                 self.rx["error"] = str(exc)
             if self.session:

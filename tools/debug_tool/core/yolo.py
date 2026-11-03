@@ -1,6 +1,6 @@
-"""yolo.py — B2 design 3.3–3.5a model/image transport; host clock domain.
+"""yolo.py — showcase design 4.5.4 model/image transport; host clock domain.
 
-Read compiler readmemh outputs and send sparse EDNM blocks with one NOTIFY.
+Read compiler readmemh outputs and send contiguous EDNM through BULK.
 Image decoding uses the existing PySide6 dependency, imported only when needed.
 """
 
@@ -38,7 +38,11 @@ def pack_model(directory):
     model = read_hex(directory / 'mem_model.hex', regs['MODEL_BASE'])
     header = struct.pack('<4s7I', b'EDNM', 1, regs['DESC_COUNT'], len(desc), len(model),
                          regs['WORK_BASE'], regs['INPUT_BASE'], regs['OUTPUT_BASE'])
-    return [(2, 0, header), (2, 0x1000, desc), (2, 0x100000, model)]
+    data = bytearray(0x100000 + len(model))
+    data[:len(header)] = header
+    data[0x1000:0x1000 + len(desc)] = desc
+    data[0x100000:] = model
+    return bytes(data)
 
 
 def rgb_to_rgb565(rgb):
@@ -66,7 +70,6 @@ def image_rgb565(path):
 class YoloTool:
     def __init__(self, ethernet):
         self.ethernet = ethernet
-        self.next_window = 0
         self.sent_at = None
         self.timings = []
         self.image_bytes = 0
@@ -181,24 +184,20 @@ class YoloTool:
 
     def camera_detection(self, board_ip, board_port, local_port):
         self.return_view = False
-        return self.ethernet.send_blocks([(3, 0, b'camera')], board_ip, board_port,
-                                         local_port, name='回到摄像头检测')
+        return self.ethernet.showcase.camera(board_ip, board_port, local_port)
 
     def send_model(self, path, board_ip, board_port, local_port):
-        blocks = pack_model(path)
-        self.image_bytes = sum(len(data) for _, _, data in blocks)
-        return self.ethernet.send_blocks(blocks, board_ip, board_port, local_port,
-                                         name=str(path))
+        data = pack_model(path)
+        self.image_bytes = len(data)
+        return self.ethernet.showcase.bulk(1, data, board_ip, board_port,
+                                            local_port, str(path))
 
     def send_image(self, path, board_ip, board_port, local_port):
-        window = self.next_window
-        self.next_window = 1 - window
         pixels = image_rgb565(path)
         self.source_image = str(path)
         self.reset_capture()
         self.sent_at = time.monotonic()
-        return self.ethernet.send_blocks([(window, 0, pixels)],
-                                         board_ip, board_port, local_port, name=str(path))
+        return self.ethernet.showcase.bulk(2, pixels, board_ip, board_port, local_port, str(path))
 
 
 OUTPUT_BYTES = 725760

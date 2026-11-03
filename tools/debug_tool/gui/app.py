@@ -27,6 +27,7 @@ from core.engine import ENCODINGS, fmt_ts
 from gui.ethernet import EthernetPanel
 from gui.soc_console import SocConsole
 from gui.virtual_input import VirtualInputPanel
+from gui.games import GamesPanel
 
 # Lines kept in the on-screen document. The engine buffer (and saved logs)
 # retain more; the visible cap only bounds the widget's layout cost.
@@ -1206,7 +1207,8 @@ class MainWindow(QMainWindow):
                 ("规则", "数据匹配规则", ICON_FILTER),
                 ("网口", "UDP 文件收发", ICON_NETWORK),
                 ("调试", "烧录、图像与检测", ICON_DASHBOARD),
-                ("输入", "虚拟按键与触控板", ICON_TERMINAL))):
+                ("输入", "虚拟按键与触控板", ICON_TERMINAL),
+                ("游戏", "上传游戏与封面", ICON_DASHBOARD))):
             btn = QToolButton()
             btn.setObjectName("railBtn")
             btn.setCheckable(True)
@@ -1220,6 +1222,7 @@ class MainWindow(QMainWindow):
         rail_layout.addStretch(1)
         self.rail_group.idClicked.connect(self._select_page)
         self.rail_group.button(0).setChecked(True)
+        self.engine.virtual_serial_paused = True
 
         self.conn = ConnectionPanel(engine, self.toast)
         self.cmds = CommandsPanel(engine, self.toast)
@@ -1365,6 +1368,11 @@ class MainWindow(QMainWindow):
         self.body_stack.addWidget(self.soc)
         self.virtual_input = VirtualInputPanel(engine, self.toast)
         self.body_stack.addWidget(self.virtual_input)
+        self.games = GamesPanel(engine, self.toast)
+        game_scroll = QScrollArea()
+        game_scroll.setWidgetResizable(True)
+        game_scroll.setWidget(self.games)
+        self.body_stack.addWidget(game_scroll)
         body.addWidget(rail)
         body.addSpacing(8)
         body.addWidget(self.body_stack, 1)
@@ -1474,14 +1482,17 @@ class MainWindow(QMainWindow):
 
     def _select_page(self, index):
         console = index == 4
-        self.body_stack.setCurrentIndex(2 if index == 5 else 1 if console else 0)
+        self.body_stack.setCurrentIndex(3 if index == 6 else 2 if index == 5 else 1 if console else 0)
         if index == 5:
             self.virtual_input.setFocus()
+        elif index == 6:
+            self.games.refresh()
         elif not console:
             self.left_stack.setCurrentIndex(index)
             self.main_split.setSizes([300, 680, 300])
         else:
             self.soc.refresh()
+        self.engine.virtual_serial_paused = index < 3
 
     def _poll_status(self):
         st = self.engine.status()
