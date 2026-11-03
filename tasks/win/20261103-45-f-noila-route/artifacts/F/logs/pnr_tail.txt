@@ -1,0 +1,80 @@
+Sort Original Nets take 0.324 sec
+Total net: 156950, route succeed net: 106790
+Generate routing result take 0.257 sec
+Handle PERMUX permutation take 7.169 sec
+Handle const net take 0.000 msec
+Handle route through take 0.152 sec
+Used SRB routing arc is 707633.
+E: Route-0039: Design is too congested to be routed, iteration time exceed limit 2000 sec.
+Total routing takes 5414.77 sec.
+
+
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)     
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0                  
+| Use of ANALOG                     | 0         | 1             | 0                  
+| Use of APM                        | 386       | 740           | 53                 
+| Use of BKCL                       | 6         | 10            | 60                 
+| Use of CCS                        | 1         | 1             | 100                
+| Use of CLMA                       | 23315     | 30075         | 78                 
+|   FF                              | 74407     | 240600        | 31                 
+|   LUT                             | 66427     | 120300        | 56                 
+|   LUT-FF pairs                    | 32868     | 120300        | 28                 
+| Use of CLMS                       | 7624      | 9875          | 78                 
+|   FF                              | 25361     | 79000         | 33                 
+|   LUT                             | 22144     | 39500         | 57                 
+|   LUT-FF pairs                    | 11973     | 39500         | 31                 
+|   Distributed RAM                 | 2206      | 39500         | 6                  
+| Use of DDRPHY_CPD                 | 1         | 20            | 5                  
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20                 
+| Use of DDR_PHY                    | 7         | 40            | 18                 
+| Use of DRM                        | 279       | 415           | 68                 
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0                  
+| Use of GPLL                       | 6         | 10            | 60                 
+| Use of GSEB                       | 0         | 512           | 0                  
+| Use of HARD0                      | 0         | 25050         | 0                  
+| Use of HCKB                       | 36        | 120           | 30                 
+|  HCKB dataused                    | 0         | 120           | 0                  
+| Use of HCKMUX_TEST                | 0         | 10            | 0                  
+| Use of HSSTLP                     | 0         | 2             | 0                  
+| Use of IO                         | 137       | 400           | 35                 
+|   IOBD                            | 69        | 192           | 36                 
+|   IOBS                            | 68        | 208           | 33                 
+| Use of IOCKB                      | 0         | 40            | 0                  
+| Use of IOCKMUX_TEST               | 0         | 10            | 0                  
+| Use of IOLHR                      | 136       | 500           | 28                 
+| Use of KEYRAM                     | 0         | 1             | 0                  
+| Use of MFG_TEST                   | 0         | 1             | 0                  
+| Use of MRCKB                      | 1         | 20            | 5                  
+| Use of MRCKMUX_TEST               | 0         | 10            | 0                  
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0                  
+| Use of PCIE                       | 0         | 1             | 0                  
+| Use of PCKMUX_TEST                | 0         | 20            | 0                  
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0                  
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0                  
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0                  
+| Use of PPLL                       | 2         | 10            | 20                 
+| Use of PREGMUXC_TEST              | 0         | 3             | 0                  
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0                  
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0                  
+| Use of RCKB                       | 4         | 40            | 10                 
+|  RCKB dataused                    | 2         | 40            | 5                  
+| Use of RCKMUX_TEST                | 0         | 10            | 0                  
+| Use of SCANCHAIN                  | 0         | 1             | 0                  
+| Use of SCKMUX_TEST                | 0         | 20            | 0                  
+| Use of SFB                        | 0         | 5075          | 0                  
+| Use of SPAD                       | 0         | 8             | 0                  
+| Use of TSERDES                    | 14        | 80            | 18                 
+| Use of USCM                       | 11        | 32            | 35                 
+|  USCM dataused                    | 0         | 32            | 0                  
+| Use of USCMMUX_TEST               | 0         | 32            | 0                  
++-------------------------------------------------------------------------------------+
+
+E: Route-0008: Design cannot be routed.
+Action pnr: Real time elapsed is 1h:48m:42s
+Action pnr: CPU time elapsed is 0h:15m:56s
+Action pnr: Process CPU time elapsed is 0h:19m:10s
+Current time: Tue Nov  3 10:57:16 2026
+Action pnr: Peak memory pool usage is 8,750 MB

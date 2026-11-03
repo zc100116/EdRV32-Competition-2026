@@ -1,0 +1,12 @@
+Placement done.
+Total placement takes 173.97 sec.
+Unrouted general nets at iteration 7 (MT total route time: 19.555 sec): 139286(overused: 1054455)
+Unrouted general nets at iteration 8 (MT total route time: 31.985 sec): 125248(overused: 861615)
+Unrouted general nets at iteration 9 (MT total route time: 112.719 sec): 112342(overused: 677844)
+Unrouted general nets at iteration 10 (MT total route time: 587.922 sec): 100167(overused: 539830)
+Unrouted general nets at iteration 11 (MT total route time: 1420.506 sec): 91002(overused: 442091)
+Unrouted general nets at iteration 12 (MT total route time: 3004.771 sec): 78933(overused: 430438)
+Total net: 156950, route succeed net: 106790
+E: Route-0039: Design is too congested to be routed, iteration time exceed limit 2000 sec.
+Total routing takes 5414.77 sec.
+E: Route-0008: Design cannot be routed.

@@ -1,0 +1,45 @@
+Demo: demo_npu network image inference
+CHIP_ID: 0xed320001
+CLK_SYS_HZ: 100000000
+ROM bytes: 16384
+SRAM bytes: 65536
+I-cache bytes: 8192
+D-cache bytes: 8192
+MEM_READY: 1
+Build commit: 92b38fd2
+Compiler version: GCC 15.2.0
+SYS ID: 0x00060001
+MEM_XBAR ID: 0x00080001
+NPU ID: 0x00060001
+ETH ID: 0x00070001
+Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+等待网卡 以太网 就绪 … 用时 0.3 s
+连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+等待网卡 以太网 就绪 … 用时 1.9 s
+连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+ETH peer IP: 0xc0a80102
+ETH peer port: 6000
+s1<CR>
+UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000000285.jpg
+G:\codex_project\EdRV32-test-images\coco-val-160\images\000000000285.jpg: 回传未结束（超时 1 s）
+UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000001818.jpg
+G:\codex_project\EdRV32-test-images\coco-val-160\images\000000001818.jpg: 回传未结束（超时 1 s）
+UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000003156.jpg
+frame_id=0 NPU_PERF0=1 post_cpu_cycles=18872481 detections=100
+RGB565 image bytes: 3686400
+DEMO ERROR: RGB565 image length
+DEMO ERROR: RGB565 image length
+IRQ_STAT: 0x00000000
+STATUS: 0x00000001
+ERR_CODE: 0x00000000
+DONE_COUNT: 0x0000008b
+DEMO stopped: reset to restart
+YOLO 回传完整：FRAME 0 · 100 个框
+G:\codex_project\EdRV32-test-images\coco-val-160\images\000000003156.jpg · 往返 577.69 ms
+UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000006614.jpg
+G:\codex_project\EdRV32-test-images\coco-val-160\images\000000006614.jpg: 回传未结束（超时 1 s）
+UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000007386.jpg
+G:\codex_project\EdRV32-test-images\coco-val-160\images\000000007386.jpg: 回传未结束（超时 1 s）
+Snapshot timeout messages: 104
+Upload completion messages: 107
+YOLO return messages: 1

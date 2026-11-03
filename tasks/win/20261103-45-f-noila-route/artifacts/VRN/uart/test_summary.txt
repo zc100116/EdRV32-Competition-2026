@@ -1,0 +1,124 @@
+ETH link: up
+Load result: PASS
+Run: 0x10000000
+link=0 speed=10 duplex=half
+link=0 speed=10 duplex=half
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+link=1 speed=1000 duplex=full
+ETH link: up
+Load result: PASS
+Run: 0x80000000
+NPU C-YOLO PASS PERF0=6106770 MAC=5347440 ms/frame=40.711 fps=24.562 CRC32=0738f96e
+NPU D-01 PASS CRC32=0738f96e PERF0=6106222 MAC=5347440
+NPU D-02 PASS CRC32=0738f96e PERF0=6108269 MAC=5347440
+NPU D-03 PASS CRC32=0738f96e PERF0=6110655 MAC=5347440
+NPU D-04 PASS CRC32=0738f96e PERF0=6106572 MAC=5347440
+NPU D-05 PASS CRC32=0738f96e PERF0=6108288 MAC=5347440
+NPU D-06 PASS CRC32=0738f96e PERF0=6110212 MAC=5347440
+NPU D-07 PASS CRC32=0738f96e PERF0=6112420 MAC=5347440
+NPU D-08 PASS CRC32=0738f96e PERF0=6110481 MAC=5347440
+NPU D-09 PASS CRC32=0738f96e PERF0=6107842 MAC=5347440
+NPU D-10 PASS CRC32=0738f96e PERF0=6106968 MAC=5347440
+NPU D-11 PASS CRC32=0738f96e PERF0=6106240 MAC=5347440
+NPU D-12 PASS CRC32=0738f96e PERF0=6108369 MAC=5347440
+NPU D-13 PASS CRC32=0738f96e PERF0=6107808 MAC=5347440
+NPU D-14 PASS CRC32=0738f96e PERF0=6108911 MAC=5347440
+NPU D-15 PASS CRC32=0738f96e PERF0=6106105 MAC=5347440
+NPU D-16 PASS CRC32=0738f96e PERF0=6106274 MAC=5347440
+NPU D-17 PASS CRC32=0738f96e PERF0=6107803 MAC=5347440
+NPU D-18 PASS CRC32=0738f96e PERF0=6107749 MAC=5347440
+NPU D-19 PASS CRC32=0738f96e PERF0=6106784 MAC=5347440
+NPU D-20 PASS CRC32=0738f96e PERF0=6105756 MAC=5347440
+NPU board: PASS 39/39
+ETH link: up
+Load result: PASS
+Run: 0x90000000
+ETH link: up
+Load result: PASS
+Run: 0x90000000
+LVGL benchmark scene=Empty screen fps=59
+LVGL benchmark scene=Moving wallpaper fps=30
+LVGL benchmark scene=Single rectangle fps=59
+LVGL benchmark scene=Multiple rectangles fps=57
+LVGL benchmark scene=Multiple RGB images fps=30
+LVGL benchmark scene=Multiple ARGB images fps=30
+LVGL benchmark scene=Rotated ARGB images fps=5
+LVGL benchmark scene=Multiple labels fps=19
+LVGL benchmark scene=Screen sized text fps=10
+LVGL benchmark scene=Multiple arcs fps=15
+LVGL benchmark scene=Containers fps=7
+LVGL benchmark scene=Containers with overlay fps=7
+LVGL benchmark scene=Containers with opa fps=14
+LVGL benchmark scene=Containers with opa_layer fps=3
+LVGL benchmark scene=Containers with scrolling fps=5
+LVGL benchmark scene=Widgets demo fps=16
+LVGL benchmark average fps=22
+ETH link: up
+Load result: PASS
+Run: 0x10000000
+frame_id=0 NPU_PERF0=1 post_cpu_cycles=18872481 detections=100
+DEMO ERROR: RGB565 image length
+DEMO ERROR: RGB565 image length
+DEMO stopped: reset to restart

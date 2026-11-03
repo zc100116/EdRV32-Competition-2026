@@ -1,0 +1,14 @@
+EdRV32-B3F
+Unrouted general nets at iteration 242 (MT total route time: 198.818 sec): 5796(overused: 10897)
+
+EdRV32-B3F-RND1-N-D1
+No iteration line in root run.log
+
+EdRV32-B3F-RND1-N-D4
+Unrouted general nets at iteration 9 (MT total route time: 39.679 sec): 128658(overused: 905752)
+
+EdRV32-B3F-VRN-RND1-N
+Unrouted general nets at iteration 55 (MT total route time: 770.864 sec): 24029(overused: 65273)
+
+EdRV32-B3F-VRN-RND1-N-D3
+Unrouted general nets at iteration 60 (MT total route time: 609.373 sec): 22868(overused: 58660)

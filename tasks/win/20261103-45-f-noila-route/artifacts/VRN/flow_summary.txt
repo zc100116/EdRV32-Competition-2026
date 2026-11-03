@@ -1,0 +1,34 @@
+compile
+Action compile: Real time elapsed is 0h:2m:40s
+Action compile: CPU time elapsed is 0h:0m:18s
+Action compile: Process CPU time elapsed is 0h:0m:18s
+Current time: Tue Nov  3 01:30:24 2026
+Action compile: Peak memory pool usage is 798 MB
+
+synthesize
+Action synthesize: Real time elapsed is 0h:8m:21s
+Action synthesize: CPU time elapsed is 0h:1m:12s
+Action synthesize: Process CPU time elapsed is 0h:1m:19s
+Current time: Tue Nov  3 01:38:47 2026
+Action synthesize: Peak memory pool usage is 3,711 MB
+
+device_map
+Action dev_map: Real time elapsed is 0h:1m:48s
+Action dev_map: CPU time elapsed is 0h:0m:19s
+Action dev_map: Process CPU time elapsed is 0h:0m:22s
+Current time: Tue Nov  3 09:04:50 2026
+Action dev_map: Peak memory pool usage is 2,165 MB
+
+place_route
+Action pnr: Real time elapsed is 1h:10m:8s
+Action pnr: CPU time elapsed is 0h:10m:36s
+Action pnr: Process CPU time elapsed is 0h:16m:19s
+Current time: Tue Nov  3 10:19:03 2026
+Action pnr: Peak memory pool usage is 7,854 MB
+
+report_timing
+Action report_timing: Real time elapsed is 0h:2m:2s
+Action report_timing: CPU time elapsed is 0h:0m:8s
+Action report_timing: Process CPU time elapsed is 0h:0m:11s
+Current time: Tue Nov  3 10:36:20 2026
+Action report_timing: Peak memory pool usage is 6,766 MB

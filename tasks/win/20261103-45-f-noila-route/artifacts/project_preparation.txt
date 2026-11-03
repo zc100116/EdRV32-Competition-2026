@@ -1,0 +1,2 @@
+EdRV32-B3F-RND1-N-NOILA/EdRV32-B3F-RND1-N-NOILA.pds; synthesis preserved; Map must rerun; no FIC; D2/LUT6D0/logicoptON/slack40/pincost600/threads5/congestionON.
+EdRV32-B3F-VRN-RND1-N-NOILA/EdRV32-B3F-VRN-RND1-N-NOILA.pds; synthesis preserved; Map must rerun; no FIC; D2/LUT6D0/logicoptON/slack40/pincost600/threads5/congestionON.
