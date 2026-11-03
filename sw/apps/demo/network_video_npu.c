@@ -4,6 +4,7 @@
  * Clock domain: clk_sys; CPU-built DDR objects use the uncached alias.
  */
 #include "runtime.h"
+#include <string.h>
 
 void demo_network_check_complete(void)
 {
@@ -73,6 +74,17 @@ void demo_network_receive(void)
         /* Only one image check is active; the host waits for final WIN2 NOTIFY. */
     }
     if (received & EDRV32_ETH_IRQ_STAT_RX_NOTIFY3_MASK) {
+        const uint8_t *command = demo_uncached(DEMO_COMMAND_WINDOW);
+        uint32_t bytes = eth_window_bytes(3);
+        if (bytes == 6u && memcmp(command, "camera", 6) == 0) {
+            demo_pipeline_stop();
+            demo_monitor_flush();
+            demo.scene = 1;
+            demo_pipeline_configure(VIN_CAM0);
+            info_text("YOLO source", "camera");
+        } else if (bytes != 0u && !(bytes == 1u && command[0] == 0)) {
+            info_text("Input error", "unknown WIN3 command");
+        }
         eth_window_configure(3, DEMO_COMMAND_WINDOW, DEMO_COMMAND_WINDOW_SIZE);
     }
 }

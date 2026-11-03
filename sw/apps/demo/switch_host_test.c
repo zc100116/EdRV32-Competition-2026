@@ -24,6 +24,9 @@ static unsigned int irq_depth;
 static int callback_engine = -1;
 static uint32_t callback_irq;
 static uint32_t controls[8];
+static unsigned int sample_during_flush;
+static unsigned int flush_samples;
+static unsigned int complete_tx;
 static uint32_t scanning[2];
 static unsigned int disp_stops;
 static unsigned int vin_stops;
@@ -104,6 +107,11 @@ void demo_irq_unlock(uint32_t old)
 {
     assert(irq_depth == old + 1u);
     irq_depth = old;
+    if (!irq_depth && sample_during_flush) {
+        /* A pending timer IRQ may run as soon as the main loop restores interrupts. */
+        assert(++flush_samples <= 64u);
+        demo_monitor_tick();
+    }
 }
 
 uint64_t clint_time(void)
@@ -120,8 +128,11 @@ void engine_control(enum engine_id engine, uint32_t control)
 
 struct engine_event engine_poll(enum engine_id engine)
 {
-    (void)engine;
-    return (struct engine_event){0, EDRV32_VIN_STATUS_IDLE_MASK, 0, 0};
+    uint32_t done = 0;
+    if (engine == ENGINE_ETH && demo.tx_active && complete_tx) {
+        done = demo.tx_done + demo.tx_count;
+    }
+    return (struct engine_event){0, EDRV32_VIN_STATUS_IDLE_MASK, 0, done};
 }
 
 uint32_t engine_perf(enum engine_id engine, unsigned int counter)
@@ -186,8 +197,38 @@ void info_number(const char *key, uint64_t value)
     (void)value;
 }
 
-void demo_monitor_flush(void)
+void clint_set_compare(uint64_t deadline)
 {
+    (void)deadline;
+}
+
+void mem_xbar_snapshot(struct mem_xbar_stats *stats)
+{
+    memset(stats, 0, sizeof *stats);
+}
+
+void demo_monitor_media(struct eth_monitor *record)
+{
+    memset(record->vin, 0, sizeof record->vin);
+    memset(record->disp, 0, sizeof record->disp);
+}
+
+void info_text(const char *key, const char *value)
+{
+    (void)key;
+    (void)value;
+}
+
+const uint8_t *demo_network_model_header(void)
+{
+    assert(0);
+    return NULL;
+}
+
+void demo_network_model_load(const uint8_t *header)
+{
+    (void)header;
+    assert(0);
 }
 
 void mem_xbar_error(uint32_t *port, uint32_t *address, uint32_t *type)
@@ -201,19 +242,6 @@ void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
 {
     (void)address;
     (void)bytes;
-}
-
-void demo_network_check_complete(void)
-{
-}
-
-unsigned int demo_network_detections(struct eth_tx_descriptor *tx,
-                                     unsigned int bytes, int check_buffer)
-{
-    (void)tx;
-    (void)bytes;
-    (void)check_buffer;
-    return 0;
 }
 
 uint32_t yolo_post_process(const int8_t *output, const yolo_head heads[3],
@@ -532,11 +560,70 @@ static void test_latency_wrap(void)
     assert(strcmp(serial, "Switch: frames=2 mtime_ticks=300 HDMI FRAME\r\n") == 0);
 }
 
+static void demo_test_batch(void)
+{
+    demo_pipeline_stop();
+    demo.clock_hz = 100000000;
+    demo.sample_hz = 100;
+    demo.monitor_produced = demo.monitor_consumed = 0;
+    complete_tx = 1;
+    mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_PEER_PORT_OFFSET, 6000);
+    /* A timer IRQ at each unlock keeps the old produced==consumed target moving. */
+    sample_during_flush = 1;
+    demo_monitor_flush();
+    assert(flush_samples > 0 && flush_samples <= 64u);
+    assert(demo.monitor_consumed == 1);
+    assert(demo.monitor_produced > demo.monitor_consumed);
+    assert(!demo.monitor_flush && !demo.tx_active);
+    sample_during_flush = 0;
+    for (unsigned int image = 0; image < 10; ++image) {
+        unsigned int window = image % 2;
+        mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_WIN_BYTES_OFFSET(window),
+                     DEMO_IMAGE_BYTES);
+        demo.received = EDRV32_ETH_IRQ_STAT_RX_NOTIFY0_MASK << window;
+        demo_network_receive();
+        assert(demo.checking && demo.image_window == window && !demo.transitioning);
+        assert(mmio_read32(EDRV32_VIN_BASE + EDRV32_VIN_MSRC_BASE_OFFSET) ==
+               DEMO_WINDOW_BASE + window * DEMO_WINDOW_SIZE);
+        demo.inference[0].input_slot = 0;
+        demo.inference[0].state = BUFFER_PROCESSING;
+        demo.input_busy = 1;
+        demo.tx_check_buffer = 0;
+        demo_network_check_complete();
+        demo.tx_check_buffer = -1;
+        assert(!demo.checking && !demo.input_busy);
+        assert(eth_window_bytes(window) == 0);
+    }
+    /* Existing one-byte NUL peer probe must leave the memory pipeline untouched. */
+    uint32_t epoch = demo.epoch;
+    *(uint8_t *)demo_uncached(DEMO_COMMAND_WINDOW) = 0;
+    mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_WIN_BYTES_OFFSET(3), 1);
+    demo.received = EDRV32_ETH_IRQ_STAT_RX_NOTIFY3_MASK;
+    demo_network_receive();
+    assert(demo.epoch == epoch && eth_window_bytes(3) == 0);
+    memcpy(demo_uncached(DEMO_COMMAND_WINDOW), "camera", 6);
+    mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_WIN_BYTES_OFFSET(3), 6);
+    demo.received = EDRV32_ETH_IRQ_STAT_RX_NOTIFY3_MASK;
+    demo_network_receive();
+    assert(demo.scene == 1 && !demo.checking && !demo.transitioning);
+    assert(eth_window_bytes(3) == 0);
+    uint32_t ctrl = mmio_read32(EDRV32_VIN_BASE + EDRV32_VIN_CH_CTRL_OFFSET(0));
+    assert(((ctrl & EDRV32_VIN_CH_CTRL_SRC_MASK) >> EDRV32_VIN_CH_CTRL_SRC_POS) == VIN_CAM0);
+    ctrl = mmio_read32(EDRV32_VIN_BASE + EDRV32_VIN_CH_CTRL_OFFSET(2));
+    assert(((ctrl & EDRV32_VIN_CH_CTRL_SRC_MASK) >> EDRV32_VIN_CH_CTRL_SRC_POS) == VIN_CAM0);
+    puts("PASS demo VN batch: finite monitor flush, alternating windows, WIN3 camera/peer");
+}
+
 void demo_test_switching(void)
 {
     void *send = demo_uncached(DEMO_SEND_BASE);
     assert(mmap(send, DEMO_SEND_SIZE, PROT_READ | PROT_WRITE,
                 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) == send);
+    void *command = demo_uncached(DEMO_COMMAND_WINDOW);
+    assert(mmap(command, DEMO_COMMAND_WINDOW_SIZE, PROT_READ | PROT_WRITE,
+                MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) == command);
+    demo.clock_hz = 100000000;
+    demo.sample_hz = 100;
     demo.scene = 2;
     demo.fps = 30;
     demo.pair_image = -1;
@@ -572,5 +659,7 @@ void demo_test_switching(void)
     test_scene_switches();
     test_outputs();
     test_latency_wrap();
+    demo_test_batch();
+    assert(munmap(command, DEMO_COMMAND_WINDOW_SIZE) == 0);
     assert(munmap(send, DEMO_SEND_SIZE) == 0);
 }

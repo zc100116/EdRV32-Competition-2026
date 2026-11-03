@@ -15,7 +15,8 @@ test:
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) logic.c overlay_label.c overlay_cpu.c host_test.c switch_host_test.c \
 	    $(ROOT)/sw/lib/eth_monitor_pack.c $(ROOT)/sw/lib/eth_monitor.c \
-	    pipeline.c switch.c network.c network_video.c scene_npu.c overlay_surface.c $(DRIVERS) \
+	    pipeline.c switch.c network.c network_video.c network_video_npu.c monitor.c \
+	    scene_npu.c overlay_surface.c $(DRIVERS) \
 	    -Wl,--gc-sections -o $(OUT)/host_test
 	$(OUT)/host_test
 	$(CC) $(CFLAGS) $(ROOT)/sw/lib/eth_monitor_test.c $(ROOT)/sw/lib/eth_monitor.c \

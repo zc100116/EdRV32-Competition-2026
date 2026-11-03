@@ -44,7 +44,7 @@ void demo_monitor_tick(void)
     clint_set_compare(demo.deadline);
 }
 
-void demo_monitor_send(void)
+static void monitor_send(unsigned int limit)
 {
     uint32_t lock = demo_irq_lock();
     uint32_t available = demo.monitor_produced - demo.monitor_consumed;
@@ -54,6 +54,9 @@ void demo_monitor_send(void)
         return;
     }
     unsigned int count = available < 16u ? available : 16u;
+    if (count > limit) {
+        count = limit;
+    }
     uint32_t *destination = demo_uncached(DEMO_TX_MONITOR);
     for (unsigned int i = 0; i < count; ++i) {
         const uint32_t *source = demo_uncached(DEMO_MONITOR_RING +
@@ -72,15 +75,25 @@ void demo_monitor_send(void)
     demo_irq_unlock(lock);
 }
 
+void demo_monitor_send(void)
+{
+    monitor_send(16u);
+}
+
 void demo_monitor_flush(void)
 {
     uint32_t lock = demo_irq_lock();
     demo_monitor_tick();
-    demo.monitor_flush = 1;
+    uint32_t target = demo.monitor_produced;
     demo_irq_unlock(lock);
-    while (demo.monitor_produced != demo.monitor_consumed) {
+    /* Sampling continues during TX: only the records present at entry belong to this flush. */
+    while ((int32_t)(target - demo.monitor_consumed) > 0) {
         demo_network_wait();
-        demo_monitor_send();
+        lock = demo_irq_lock();
+        demo.monitor_flush = 1;
+        monitor_send(target - demo.monitor_consumed);
+        demo_irq_unlock(lock);
     }
+    demo.monitor_flush = 0;
     demo_network_wait();
 }
