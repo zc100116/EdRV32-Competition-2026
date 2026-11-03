@@ -1,10 +1,65 @@
 #!/usr/bin/env python3
 """png2c.py — showcase design §5: shared PNG decoding and RGB565 C images.
-Host build tool; standard-library decoding shared with pack_games.
+Host build tool; standard-library decoding shared with gen_sim_games.
 """
 from pathlib import Path
+import struct
 import sys
-from pack_games import decode_png
+import zlib
+
+
+def decode_png(data):
+    """Decode the specified 8-bit RGB/RGBA noninterlaced PNG subset."""
+    if data[:8] != b'\x89PNG\r\n\x1a\n':
+        raise ValueError('icon is not PNG')
+    offset = 8
+    compressed = bytearray()
+    while offset < len(data):
+        length, kind = struct.unpack_from('>I4s', data, offset)
+        chunk = data[offset + 8:offset + 8 + length]
+        offset += length + 12
+        if kind == b'IHDR':
+            width, height, depth, color, method, filtering, interlace = struct.unpack(
+                '>IIBBBBB', chunk)
+            if depth != 8 or color not in (2, 6) or method or filtering or interlace:
+                raise ValueError('PNG requires 8-bit RGB/RGBA, noninterlaced')
+        elif kind == b'IDAT':
+            compressed.extend(chunk)
+        elif kind == b'IEND':
+            break
+    channels = 3 if color == 2 else 4
+    stride = width * channels
+    raw = zlib.decompress(compressed)
+    previous = bytearray(stride)
+    rgba = bytearray()
+    for y in range(height):
+        start = y * (stride + 1)
+        kind = raw[start]
+        row = bytearray(raw[start + 1:start + 1 + stride])
+        for x in range(stride):
+            left = row[x - channels] if x >= channels else 0
+            above = previous[x]
+            corner = previous[x - channels] if x >= channels else 0
+            if kind == 0:
+                predictor = 0
+            elif kind == 1:
+                predictor = left
+            elif kind == 2:
+                predictor = above
+            elif kind == 3:
+                predictor = (left + above) // 2
+            elif kind == 4:
+                p = left + above - corner
+                distances = (abs(p - left), abs(p - above), abs(p - corner))
+                predictor = (left, above, corner)[distances.index(min(distances))]
+            else:
+                raise ValueError(f'unsupported PNG filter {kind}')
+            row[x] = (row[x] + predictor) & 255
+        for x in range(0, stride, channels):
+            rgba.extend(row[x:x + 3])
+            rgba.append(row[x + 3] if channels == 4 else 255)
+        previous = row
+    return width, height, bytes(rgba)
 
 
 def resize_rgb565(source, width, height):

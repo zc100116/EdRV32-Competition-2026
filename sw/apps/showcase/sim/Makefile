@@ -28,11 +28,10 @@ $(FONTS) $(DIGITS) &: $(UI) $(UI_HEADERS) sim_data.c $(GAME_LIST) $(ROOT)/tools/
 	python3 $(ROOT)/tools/sw/gen_fonts.py --output-dir $(BUILD)/fonts --sizes $(FONT_SIZES) \
 	    --digit-sizes 40 -- $(UI) $(UI_HEADERS) sim_data.c $(GAME_LIST)
 
-$(ASSETS): $(wildcard assets/*.png) $(ROOT)/tools/sw/png2c.py $(ROOT)/tools/sw/pack_games.py
+$(ASSETS): $(wildcard assets/*.png) $(ROOT)/tools/sw/png2c.py
 	python3 $(ROOT)/tools/sw/png2c.py $@
 
-$(GAMES): $(GAME_LIST) $(ROOT)/tools/sw/gen_sim_games.py $(ROOT)/tools/sw/png2c.py \
-    $(ROOT)/tools/sw/pack_games.py
+$(GAMES): $(GAME_LIST) $(ROOT)/tools/sw/gen_sim_games.py $(ROOT)/tools/sw/png2c.py
 	python3 $(ROOT)/tools/sw/gen_sim_games.py $@
 
 -include $(BUILD)/game_data.d
