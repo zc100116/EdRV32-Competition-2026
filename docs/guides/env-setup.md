@@ -154,6 +154,22 @@ python3 -c "import zipfile; zipfile.ZipFile('$D/coco128.zip').extractall('$D')"
 
 在本机（3 核）上用旧工程脚本实测（2026-10-27）：检查点核对 6 s；96 张图标定并导出 INT8 镜像 1 分 24 秒；单图整网 INT8 主机模拟 6 s；32 张图精度评估 2 分 5 秒（浮点 mAP50 0.642，INT8 0.611）。
 
+### 7. Zig 0.17.0（showcase Windows 模拟器）
+
+在 Linux 上使用 `zig cc -target x86_64-windows-gnu` 静态交叉编译单个 Windows
+GUI exe；只依赖 Windows 系统 DLL，无需用户安装运行库。
+
+```sh
+curl -fL https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz -o /tmp/zig-0.17.0.tar.xz
+mkdir -p ~/.local/opt/zig-0.17.0
+tar -xJf /tmp/zig-0.17.0.tar.xz --strip-components=1 -C ~/.local/opt/zig-0.17.0
+printf '%s\n' 'export PATH=$HOME/.local/opt/zig-0.17.0:$PATH' >> ~/.local/opt/edrv32/env.sh
+. ~/.local/opt/edrv32/env.sh
+zig version
+make -C sw/apps/showcase/sim win
+```
+
+
 ## 检查
 
 ```sh
