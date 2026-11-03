@@ -93,8 +93,10 @@ void ui_monitor_update(void)
         lv_snprintf(s,sizeof(s),"%s %u%%   最长 %u us",names[i],d.task_cpu[i],d.task_max_us[i]);
         ui_text(tasks[i],s);
     }
+    /* SoC 6.4.1 port order P0..P6; user-facing names only (no port numbers). */
+    const char *ports_name[]={"显示","摄像头","CPU","NPU","渲染","几何","网口"};
     for(unsigned i=0;i<7;++i) {
-        lv_snprintf(s,sizeof(s),"P%u %u/%u MB/s",i,d.ddr_read[i],d.ddr_write[i]);
+        lv_snprintf(s,sizeof(s),"%s %u/%u MB/s",ports_name[i],d.ddr_read[i],d.ddr_write[i]);
         ui_text(ports[i],s);
         unsigned values[]={d.ddr_read[i],d.ddr_write[i]};
         for(unsigned j=0;j<2;++j) {
