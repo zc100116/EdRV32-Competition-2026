@@ -1,0 +1,3 @@
+{'STATIC_RATIOI': '1', 'STATIC_RATIOM': '2', 'STATIC_RATIO0': '6.75', 'STATIC_RATIO7': '15.625', 'STATIC_DUTY0': '6', 'STATIC_DUTY7': '15'}
+CLKOUT0_ACT_FREQ_basicPage {125.00000000 MHz} CLKOUT0_ACT_PHASE_basicPage {0.00000000 degree} CLKOUT0_ACT_DUTY_basicPage {50.00000000 %}
+Vendor ui.tcl clkFreqUpdt/dutyUpdt/phaseUpdt/dutyFracShownUnit_basicPage used without opening a GUI.
