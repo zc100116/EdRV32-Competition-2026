@@ -44,7 +44,7 @@ def main():
         name, _rom, cover = line.split('|')
         image = 'NULL'
         if cover:
-            path = root / 'third_party/nes' / cover
+            path = manifest.parent / cover
             if path.suffix.lower() in ('.jpg', '.jpeg'):
                 raise ValueError(f'{path}: JPG covers are not supported; use 8-bit RGB/RGBA PNG')
             image_name = f'sim_game_cover_{len(entries)}'
