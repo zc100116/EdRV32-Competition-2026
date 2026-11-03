@@ -13,7 +13,7 @@
 
 - **代码**：`origin/zc100116/b3` 上包含本卡的提交。从这里拉出 `win/20261103-54-showcase-p5-board`，记录 HEAD。
 - **比特流**：与卡 53 相同的最终版完整 F（CPU 125 MHz）。在 result.md 中记录它的路径和生成时间。
-- **程序**：`src/showcase-p5.elf`，12952536 字节，构建自 b3 8ee185f8（第 3 轮）。连接后，调试工具显示的板端版本应为 `8ee185f8`。
+- **程序**：`src/showcase-p5.elf`，12936432 字节，构建自 b3 0dbdc70e（第 4 轮）。连接后，调试工具显示的板端版本应为 `0dbdc70e`。
 - **对比程序**（D 节）：卡 48 的 `tasks/win/20261103-48-vrn-f-rnd1slim/src/demo_npu.bin`。
 - **NPU 模型**：`tasks/win/20261029-09-b3-software/src/npu/`。
 - **测试图片**：`EdRV32-test-images/coco-val-160/images` 中取 20 张，文件名记入 result.md。
@@ -64,6 +64,24 @@
 | R5 | F1 | 16 行 `LVGL split` 原文和结果表照片；重点看 Single rectangle 是否接近 60 fps |
 | R6 | 新功能 | 三页各试一次"隐藏界面"，分别用板载按键、虚拟按键、鼠标点击恢复；类别分布是否随画面变化；性能浮窗中的 CPU 总占用。各拍一张照片 |
 | R7 | 体验 | 鼠标移动是否流畅，特别是网口刚连接后的一段时间 |
+
+## 4c. 第 4 轮（2026-11-03）
+
+第 3 轮结果在结果分支 8a2b0c03，分析见设计记录第 11 节。第 4 轮的程序做了以下修改：
+- **识别后处理一次做完**，不再被界面刷新切碎；
+- **识别页刷新减负**：检测框只重绘边框附近，指标每秒更新一次；
+- **benchmark 的 RGB 图片改由 RND 绘制**（Moving wallpaper、Multiple RGB images 两个场景）；
+- 串口新增每秒一行 `vision_gui refreshes= render_ms= max_ms= area_px= rnd_ms= sw_ms= other_ms=`。
+
+日志加前缀 `r4_`。本轮只做以下几项：
+
+| 编号 | 内容 | 记录 |
+|---|---|---|
+| Q1 | 视觉识别，对着有人和物品的场景运行 60 s，**关闭性能浮窗** | `vision` 行和 `vision_gui` 行原文；照片一张。目标：fps ≥ 22，period ≤ 45，wait ≤ 3，post_span ≤ 30，gui ≤ 20，e2e ≤ 110 ms |
+| Q2 | 同 Q1，打开性能浮窗，运行 30 s | 同 Q1 |
+| Q3 | LVGL benchmark（关闭性能浮窗） | 16 行 `LVGL split` 原文和结果表照片；重点看 Moving wallpaper 和 Multiple RGB images 是否接近 30 fps，以及平均 fps（卡 25 单独测试为 25） |
+| Q4 | 体验 | 识别画面和检测框是否跟手；鼠标是否流畅 |
+| Q5 | 第 3 轮未完成的 R1、R2、R6（时间允许时做） | 同 4b |
 
 ## 5. 与卡 53 相比的变化（执行前请告诉用户）
 
