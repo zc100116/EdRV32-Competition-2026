@@ -1,0 +1,3 @@
+Flow Command: pnr -plc_decongestion 2 -dump_router_congestion_plot true -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0 
+Current command omits slack_weight (tool default90); previous archive explicitly used40. D2/PinCost600/LUT6D0 unchanged.
+No Compile/Synthesize/Map rerun performed for report collection; those reports retained as reused-stage references.

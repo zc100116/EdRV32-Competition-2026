@@ -9,8 +9,9 @@
 | VRN CPU100MHz参数重跑 | 用户已重新运行，本次不采集新结果，不覆盖第一次归档 | 未整理 | 未另归档 |
 | F CPU100MHz | 进行中快照：第25轮22877未布通/65077过用；artifacts/F-cpu100m-progress/ | 未取得最终时序 | 未归档 |
 | F CPU125MHz | 第117轮布通；完整报告见f_cpu125_results.md、artifacts/F-cpu125m/ | CPU-0.033ns、mem-0.010ns、NPU-0.120ns；RGMII hold-0.242ns | fpga/bitstreams/EdRV32-F-cpu125m.sbit |
+| F CPU125MHz重跑r2 | 第210轮布通；f_cpu125_r2_results.md、artifacts/F-cpu125m-r2/ | CPU+0.087ns、mem+0.179ns、NPU+0.048ns；只剩已知RGMII输入慢角hold-0.242ns/5端点 | fpga/bitstreams/EdRV32-F-cpu125m-r2.sbit |
 
-VRN125第174轮0未布通/0过用，PnR1h10m24s，Map LUT77175/FF82542/DRM250/APM345。CPU最终时钟周期8.0000ns，PLL和私有头文件频率一致。当前所有归档比特流仍有时序违例，不是时序签核版本。本轮没有取得这些比特流的上板结果。
+VRN125第174轮0未布通/0过用，PnR1h10m24s，Map LUT77175/FF82542/DRM250/APM345。CPU最终时钟周期8.0000ns，PLL和私有头文件频率一致。F125-r2内部时序满足，只剩项目已知RGMII输入hold例外；其他归档仍按各自报告列明违例。本轮没有取得r2上板结果，旧版上板反馈在卡51结果分支，不能代替r2。
 
 本地工程均位于G:/codex_project/EdRV32-FPGA；100MHz为EdRV32-B3F-VRN-RND1S，125MHz为EdRV32-B3F-VRN-RND1S-CPU125。完整日志和数据库留在各工程；本卡仅回传任务要求的报告/摘要，以及用户明确要求归档的比特流。
 
