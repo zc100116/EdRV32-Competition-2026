@@ -1,4 +1,5 @@
 SRAM: sched platform virtual_input clint plic IRQ memcpy memset
+SRAM: CoreMark tuned algorithms, seeds, work memory, 8 KiB execution stack
 DDR: nofrendo NES
 DDR: LVGL draw refresh
 DDR: ui

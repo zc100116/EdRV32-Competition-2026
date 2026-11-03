@@ -20,6 +20,7 @@ PHDRS
     bss PT_LOAD FLAGS(6);
     hot PT_LOAD FLAGS(5);
     games PT_LOAD FLAGS(4);
+    coredata PT_LOAD FLAGS(6);
 }
 SECTIONS
 {
@@ -35,8 +36,28 @@ SECTIONS
         *engine.o(.text.engine_irq_handle)
         *libc.a:libc_a-memcpy.o(.text .text.*)
         *libc.a:libc_a-memset.o(.text .text.*)
+    } > SRAM :hot
+    .sram_coremark_text ALIGN(32) :
+    {
+        *third_party/coremark/*(.text .text.*)
+        *sw/apps/coremark/*(.text .text.*)
+        *sw/apps/monitor/benchmark.o(.text .text.*)
+        *(.text.coremark_run .text.coremark_stack)
         __sram_code_end = .;
     } > SRAM :hot
+    .sram_coremark_data ALIGN(16) :
+    {
+        *third_party/coremark/*(.rodata .rodata.* .srodata .srodata.*
+            .data .data.* .sdata .sdata.* .bss .bss.* .sbss .sbss.*)
+        *sw/apps/coremark/*(.rodata .rodata.* .srodata .srodata.*
+            .data .data.* .sdata .sdata.* .bss .bss.* .sbss .sbss.*)
+        *sw/apps/monitor/benchmark.o(.data .data.* .sdata .sdata.* .bss .bss.* .sbss .sbss.*)
+    } > SRAM :coredata
+    .sram_coremark_stack ALIGN(16) (NOLOAD) :
+    {
+        . += 8192;
+        __coremark_stack_top = .;
+    } > SRAM :coredata
     .text.nes ORIGIN(DDR_APP) :
     {
         __ddr_code_start = .;

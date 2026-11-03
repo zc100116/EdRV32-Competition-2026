@@ -76,7 +76,7 @@ void ui_page_chip(lv_obj_t *p)
         ui_data_system().clock_hz/1000000);
     ui_label(params,parameters,24,60,&sim_font_16,TEXT);
     lv_obj_t *card = ui_box(p, 774, 406, 466, 202, PANEL);
-    ui_label(card, "CoreMark", 24, 18, &sim_font_20, TEXT);
+    ui_label(card, "CoreMark · Iterations/Sec", 24, 18, &sim_font_20, TEXT);
     score = ui_label(card, "", 24, 54, &sim_digits_40, ACCENT);
     per_mhz = ui_label(card, "", 216, 70, &sim_font_16, MUTED);
     progress = ui_label(card, "", 24, 115, &sim_font_14, MUTED);

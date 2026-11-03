@@ -118,17 +118,26 @@ void ui_data_coremark_start(void)
     core.running=true; core.progress=0; pending_core=1;
     action_frame=showcase_gui_frames(); app_wake_at(platform_ticks()+platform_clock_hz()/30);
 }
+extern const uint8_t __coremark_stack_top[];
+void board_coremark_stack(void (*run)(void),const void *top);
+static uint64_t core_elapsed;
+static void __attribute__((section(".text.coremark_run"))) run_coremark(void)
+{
+    core_results result;
+    monitor_core_init(&result,5000);
+    uint64_t start=platform_ticks();
+    iterate(&result);
+    core_elapsed=platform_ticks()-start;
+}
 void board_init(void) {}
 void board_step(void)
 {
     extern void board_prof_step(void);
     board_prof_step();
     if(pending_core && showcase_gui_frames()!=action_frame) {
-        core_results result; const unsigned iterations=5000;
-        monitor_core_init(&result,iterations);
-        uint64_t start=platform_ticks(); iterate(&result); uint64_t elapsed=platform_ticks()-start;
-        core.score_tenths=(unsigned)((uint64_t)iterations*platform_clock_hz()*10/elapsed);
-        core.per_mhz_thousandths=(unsigned)((uint64_t)iterations*1000000000/elapsed);
+        board_coremark_stack(run_coremark,__coremark_stack_top);
+        core.score_tenths=(unsigned)(5000ull*platform_clock_hz()*10/core_elapsed);
+        core.per_mhz_thousandths=(unsigned)(5000ull*1000000000/core_elapsed);
         core.progress=100; core.running=false; pending_core=0; ui_refresh();
     }
     if(pending_benchmark==1 && showcase_gui_frames()!=action_frame) {

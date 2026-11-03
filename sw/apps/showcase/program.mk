@@ -24,7 +24,6 @@ PROGRAM_SOURCES += $(SHOWCASE_FONTS) build/showcase/fonts/sim_digits_40.c \
 CFLAGS_EXTRA += -I$(ROOT)/sw/apps/coremark -I$(ROOT)/sw/apps/monitor \
     -I$(ROOT)/third_party/coremark -DITERATIONS=5000 -DLV_LVGL_H_INCLUDE_SIMPLE
 $(OUT)/obj/third_party/coremark/core_main.o: CORE_MAIN_FLAGS := -Dmain=coremark_main
-$(OUT)/obj/third_party/coremark/core_list_join.o: CORE_MAIN_FLAGS := -Wno-maybe-uninitialized
 $(addprefix $(ROOT)/,$(SHOWCASE_FONTS) build/showcase/fonts/sim_digits_40.c) &: \
     $(wildcard $(ROOT)/sw/apps/showcase/ui/*.[ch]) $(ROOT)/tools/sw/gen_fonts.py
 	python3 $(ROOT)/tools/sw/gen_fonts.py --output-dir $(ROOT)/build/showcase/fonts \
@@ -45,3 +44,14 @@ $(SHOWCASE_GAME_OBJECT): $(SHOWCASE_GAME_PACK)
 	    --rename-section .data=.game_pack,alloc,load,readonly,data,contents $< $@
 $(OUT)/showcase.elf: $(SHOWCASE_GAME_OBJECT)
 PROGRAM_LDLIBS += $(SHOWCASE_GAME_OBJECT)
+
+# Card 40 g15-tuned: apply only to CoreMark algorithms, port and initialization helper.
+SHOWCASE_COREMARK_SOURCES := $(addprefix third_party/coremark/,core_main.c core_list_join.c \
+    core_matrix.c core_state.c core_util.c) sw/apps/coremark/core_portme.c \
+    sw/apps/monitor/benchmark.c
+$(addprefix $(OUT)/obj/,$(SHOWCASE_COREMARK_SOURCES:.c=.o)): CFLAGS += \
+    -O3 -funroll-all-loops -finline-limit=600 -falign-functions=4 -falign-jumps=4 \
+    -falign-loops=4 -fstrict-aliasing -march=rv32im_zicsr_zifencei
+PROGRAM_SOURCES += sw/apps/showcase/board/coremark_stack.S
+# Keep the locked upstream list code unchanged; GCC 15 diagnoses its local search key.
+$(OUT)/obj/third_party/coremark/core_list_join.o: CORE_MAIN_FLAGS := -Wno-maybe-uninitialized
