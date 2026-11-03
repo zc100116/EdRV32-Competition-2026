@@ -8,6 +8,7 @@ import argparse
 import os
 from pathlib import Path
 import socket
+import struct
 from concurrent.futures import ThreadPoolExecutor
 import sys
 import time
@@ -46,6 +47,8 @@ def serial_line(engine, text):
 
 
 def seed(engine, console, state):
+    # This renderer models a ready loopback link rather than a physical NIC.
+    engine.ethernet.wait_for_link = lambda local_ip: ('loopback', 0.0)
     engine._serial = SimulatedSerial()
     engine._config.update(port='SIMULATED', baud=115200)
     serial_line(engine, 'BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud')
@@ -60,6 +63,13 @@ def seed(engine, console, state):
                  'Output mode: 2', 'Requested video fps: 30', 'Monitor Hz: 100',
                  'Switch: frames=2 mtime_ticks=6742100'):
         serial_line(engine, line)
+    from core.showcase import HELLO, encode as control_message
+    from core.processing import DEFAULTS, pack_process
+    application = 2 if state == 'detection' else 3
+    payload = (struct.pack('<5B3x3I', application, 2, 0, 1, 50, 0xffffffff, 0xffffffff, 0xffff)
+               + pack_process(DEFAULTS) + struct.pack('<IIB3x', 0, 0, 0))
+    engine.ethernet.showcase.receive(control_message(
+        HELLO, 0, struct.pack('<H2x16s', 3, b'SIMULATED') + payload))
     console.output.setCurrentIndex(2)
     console.scene.setCurrentIndex(1 if state == 'vision' else 0)
     # Feed a 60 s timeline using the same encoder and real socket as telemetry_sim.py.
@@ -85,9 +95,13 @@ def seed(engine, console, state):
         QImage(demo_pixels(), 1280, 720, 2560, QImage.Format_RGB16).copy().save(str(path))
         console.image_path.setText(os.path.relpath(path))
         console._load_image()
+        engine.yolo.request = 0
         engine.yolo.reset_capture()
+        engine.yolo.source_image = str(path)
+        engine.yolo.images = [path]
         console.display.setCurrentIndex(2)
     engine.add_entry('sys', '截图模拟数据 · 非实板测量')
+    return payload
 
 
 def main():
@@ -115,15 +129,20 @@ def main():
     executor = ThreadPoolExecutor(max_workers=1)
     try:
         if args.state != 'disconnected':
-            seed(engine, window.soc, args.state)
+            simulated_state = seed(engine, window.soc, args.state)
             if args.state == 'vision':
                 simulator = executor.submit(run_video, '127.0.0.1', 6000, 3, 3, 2)
             else:
                 simulator = executor.submit(run_yolo, '127.0.0.1', 6000)
         deadline = time.monotonic() + (3 if simulator else .3)
         while time.monotonic() < deadline:
+            if args.state != 'disconnected':
+                from core.showcase import STATE, encode as control_message
+                engine.ethernet.showcase.receive(control_message(STATE, 0, simulated_state))
             app.processEvents()
             time.sleep(.01)
+        if args.state == 'detection':
+            engine.yolo.complete_capture()
         window.soc.pages.setCurrentIndex(args.page)
         window.rail_group.button(args.main_page).setChecked(True)
         window._select_page(args.main_page)

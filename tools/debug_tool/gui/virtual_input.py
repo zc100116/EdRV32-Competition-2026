@@ -144,7 +144,16 @@ class VirtualInputPanel(QWidget):
         self.refresh()
 
     def refresh(self):
-        self.channel.setText('当前通道 · ' + channel(self.engine))
+        connected = channel(self.engine) == '网口'
+        self.channel.setText('当前通道 · 网口' if connected else '网口未连接，虚拟设备不可用')
+        self.pad.setEnabled(connected)
+        for button in self.buttons.values():
+            button.setEnabled(connected)
+        if not connected:
+            self.pressed.clear()
+            self.mouse = 0
+            for button in self.buttons.values():
+                button.setDown(False)
 
     def button(self, key, down):
         self.setFocus()
@@ -186,7 +195,7 @@ class VirtualInputPanel(QWidget):
                 self.pressed.clear()
                 self.mouse = 0
                 self.send()
-        if (self.isVisible() and in_window and
+        if (channel(self.engine) == '网口' and self.isVisible() and in_window and
                 event.type() in (QEvent.KeyPress, QEvent.KeyRelease)):
             key = event.key()
             if key in KEY_MAP or key == Qt.Key_Backtab:

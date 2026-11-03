@@ -223,6 +223,7 @@ class VideoTest(unittest.TestCase):
 
     def test_simulator_udp_yolo_return(self):
         engine = SerialEngine()
+        engine.yolo.request = 0
         engine.ethernet.local_ip = "127.0.0.1"
         self.addCleanup(engine.ethernet.stop_receive)
         tool = Path(__file__).resolve().parents[1]

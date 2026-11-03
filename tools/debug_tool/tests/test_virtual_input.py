@@ -21,21 +21,10 @@ class VirtualInputTest(unittest.TestCase):
         ready.start()
         self.addCleanup(ready.stop)
 
-    def test_uart_emit_repeat(self):
-        output = ROOT / 'build/debug_tool/virtual-input.bin'
-        output.parent.mkdir(parents=True, exist_ok=True)
-        started = time.monotonic()
-        subprocess.run([sys.executable, 'tools/debug_tool/virtual_input.py', '--emit',
-                        str(output), '--keys', 'up,a,next', '--x', '1279', '--y', '719',
-                        '--mouse', '3', '--hold', '.22'], cwd=ROOT, check=True)
-        raw = output.read_bytes()
-        self.assertEqual(len(raw) % 10, 0)
-        frames = [raw[i:i + 10] for i in range(0, len(raw), 10)]
-        self.assertTrue(10 <= len(frames) <= 15, len(frames))
-        held = b'\x1bV' + FRAME.pack(0x411, 1279, 719, 3, 0)
-        self.assertTrue(all(frame == held for frame in frames[:-1]))
-        self.assertEqual(frames[-1], b'\x1bV' + FRAME.pack(0, 1279, 719, 0, 0))
-        self.assertGreaterEqual(time.monotonic() - started, .22)
+    def test_serial_emit_option_removed(self):
+        result = subprocess.run([sys.executable, 'tools/debug_tool/virtual_input.py',
+                                 '--emit', 'unused.bin'], cwd=ROOT, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
 
     def test_udp_loopback_repeat(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
@@ -54,15 +43,15 @@ class VirtualInputTest(unittest.TestCase):
                 if packet[8:10] == b'\0\0':
                     break
             self.assertEqual(process.wait(timeout=2), 0)
-            self.assertTrue(10 <= len(packets) <= 15, len(packets))
+            self.assertTrue(3 <= len(packets) <= 5, len(packets))
             self.assertTrue(all(packet[:8] == struct.pack('!BBHI', 2, 1, 0, 0)
                                 for packet in packets))
             self.assertTrue(all(packet[8:] == FRAME.pack(0xa0, 300, 200, 0, 0)
                                 for packet in packets[:-1]))
             average = (times[-2] - times[0]) / (len(times) - 2)
-            self.assertTrue(.015 <= average <= .03, average)
+            self.assertTrue(.085 <= average <= .13, average)
 
-    def test_connected_network_else_serial(self):
+    def test_network_only_and_disconnected_error(self):
         from tools.debug_tool.core.engine import SerialEngine
         from tools.debug_tool.core.virtual_input import channel, send_frame
         engine = SerialEngine()
@@ -70,8 +59,9 @@ class VirtualInputTest(unittest.TestCase):
         serial = []
         engine.send = lambda text, ending, hex_mode: serial.append(bytes.fromhex(text))
         frame = FRAME.pack(0, 1, 2, 0, 0)
-        send_frame(engine, frame)
-        self.assertEqual(serial, [b'\x1bV' + frame])
+        with self.assertRaisesRegex(RuntimeError, '网口未连接'):
+            send_frame(engine, frame)
+        self.assertEqual(serial, [])
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver:
             receiver.bind(('127.0.0.1', 0))
             receiver.settimeout(1)
@@ -83,11 +73,11 @@ class VirtualInputTest(unittest.TestCase):
                 self.assertEqual(channel(engine), '网口')
                 send_frame(engine, frame)
                 self.assertEqual(receiver.recv(1024), struct.pack('!BBHI', 2, 1, 0, 0) + frame)
-                self.assertEqual(len(serial), 1)
+                self.assertEqual(len(serial), 0)
             engine.ethernet.rx_socket = None
         engine.virtual_input.close()
 
-    def test_changes_and_idle(self):
+    def test_changes_and_unchanged_input(self):
         frames = []
         controller = VirtualInput(frames.append)
         try:
@@ -95,6 +85,18 @@ class VirtualInputTest(unittest.TestCase):
             controller.update(0, 500, 300, 0)
             time.sleep(.07)
             self.assertEqual(frames, [FRAME.pack(0, 500, 300, 0, 0)])
+        finally:
+            controller.close()
+
+    def test_idle_state_repeats_every_100ms(self):
+        frames = []
+        controller = VirtualInput(lambda frame: frames.append((time.monotonic(), frame)))
+        try:
+            controller.start()
+            time.sleep(.24)
+            self.assertEqual(len(frames), 2)
+            self.assertTrue(all(frame == FRAME.pack(0, 0, 0, 0, 0) for _, frame in frames))
+            self.assertTrue(.08 <= frames[1][0] - frames[0][0] <= .14)
         finally:
             controller.close()
 
@@ -119,15 +121,14 @@ class VirtualInputTest(unittest.TestCase):
             window.soc.toggle_panel(window.soc.monitor_card)
             window._select_page(5)
             panel = window.virtual_input
-            self.assertEqual(panel.channel.text(), '当前通道 · 串口')
+            self.assertEqual(panel.channel.text(), '网口未连接，虚拟设备不可用')
             engine.ethernet.rx_socket = object()
             engine.board.mark('peer')
             panel.refresh()
             self.assertEqual(panel.channel.text(), '当前通道 · 网口')
             engine.board.feed_line('BIOS menu: 1=UART load')
             panel.refresh()
-            self.assertEqual(panel.channel.text(), '当前通道 · 串口')
-            engine.ethernet.rx_socket = None
+            self.assertEqual(panel.channel.text(), '当前通道 · 网口')
             # A focus elsewhere in the window must not require a panel click.
             window.rail_group.button(5).setFocus()
             app.processEvents()
@@ -215,6 +216,7 @@ class VirtualInputTest(unittest.TestCase):
                 update.assert_not_called()
         finally:
             from PySide6.QtCore import QCoreApplication, QEvent
+            engine.ethernet.rx_socket = None
             window.close()
             QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
             app.processEvents()

@@ -216,6 +216,7 @@ def udp_yolo_stress():
             [sys.executable, __file__, '--udp-yolo-sender', str(state['localPort'])],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
         for _ in range(30):
+            engine.yolo.request = 0
             engine.yolo.reset_capture()
             sender.stdin.write('send\n')
             sender.stdin.flush()

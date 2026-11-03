@@ -546,6 +546,8 @@ class EthernetTool:
                 self.rx["active"] = False
 
     def stop_receive(self):
+        if self.session:
+            self.session.disconnect_network()
         self.stop_event.set()
         if self.rx_process_stop is not None:
             self.rx_process_stop.set()

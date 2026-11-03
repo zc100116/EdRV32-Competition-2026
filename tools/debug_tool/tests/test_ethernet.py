@@ -250,7 +250,8 @@ class ReadinessTest(unittest.TestCase):
             self.assertEqual(events, ['ready', 'send'])
             self.assertEqual(tool.rx_socket.sendto.call_args.args[0],
                              next(packets(b'\0', 3, 0)))
-            board.mark('peer')
+            from test_p5_protocol import hello
+            engine.ethernet.showcase.receive(hello())
             send_frame(engine, b'input')
             self.assertEqual(events, ['ready', 'send', 'ready', 'send'])
         self.assertEqual(wait.call_count, 2)

@@ -13,7 +13,9 @@ from unittest.mock import Mock, patch
 
 from tools.debug_tool.core.engine import SerialEngine
 from tools.debug_tool.core.ethernet import packets, unpack
-from tools.debug_tool.core.showcase import BULK_BEGIN, READY, DONE, decode, encode
+from tools.debug_tool.core.showcase import (
+    BULK_BEGIN, READY, DONE, APP, IMAGE_INFO, ACK, decode, encode,
+)
 from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES, image_rgb565
 from test_program import wait_for
 
@@ -89,6 +91,18 @@ class ShowcaseDetectionTest(unittest.TestCase):
         self.console._send_image()
         packet, self.peer = self.board.recvfrom(65535)
         kind, self.seq, payload = decode(unpack(packet)[3])
+        if kind == APP:
+            self.assertEqual(payload, struct.pack('<BBH', 2, 0, 0))
+            self.reply(ACK, struct.pack('<HBB', APP, 1, 0))
+            self.reply(ACK, struct.pack('<HBB', APP, 2, 0))
+            packet, self.peer = self.board.recvfrom(65535)
+            kind, self.seq, payload = decode(unpack(packet)[3])
+        self.assertEqual(kind, IMAGE_INFO)
+        self.assertEqual(struct.unpack_from('<HH', payload), (1, 1))
+        self.assertEqual(payload[8:].decode(), Path(self.console.image_path.text()).name)
+        self.reply(ACK, struct.pack('<HBB', IMAGE_INFO, 2, 0))
+        packet, self.peer = self.board.recvfrom(65535)
+        kind, self.seq, payload = decode(unpack(packet)[3])
         self.assertEqual((kind, payload), (BULK_BEGIN, struct.pack('<B3xI', 2, 1843200)))
         self.reply(READY, struct.pack('<B3x', 2))
         received = bytearray()
@@ -105,7 +119,7 @@ class ShowcaseDetectionTest(unittest.TestCase):
 
     def return_result(self):
         boxes = ((20, 30, 100, 200, 15, 900),)
-        detection = struct.pack('<4sHHII6H', b'EDDT', 1, 1, 7, 0, *boxes[0])
+        detection = struct.pack('<4sHHII6H', b'EDDT', 1, 1, 7, self.seq, *boxes[0])
         for window, data in enumerate((bytes(INPUT_BYTES), bytes(OUTPUT_BYTES), detection)):
             for packet in packets(data, window, 0):
                 self.board.sendto(packet, self.peer)
@@ -118,7 +132,7 @@ class ShowcaseDetectionTest(unittest.TestCase):
         wait_for(self, lambda: not self.eth.status()['tx']['active'])
         self.console.refresh()
 
-    def test_three_second_return_and_batch_wait_for_done(self):
+    def test_three_second_return_waits_for_done_without_auto_advance(self):
         self.choose(self.paths[0])
         self.assertEqual(self.upload(), image_rgb565(self.paths[0]))
         from PySide6.QtTest import QTest
@@ -126,15 +140,12 @@ class ShowcaseDetectionTest(unittest.TestCase):
         self.assertTrue(self.engine.yolo.capture_pending)
         self.assertEqual(self.engine.yolo.failed, 0)
         boxes = self.return_result()
-        self.console.folder_images = [Path(self.paths[1])]
-        self.console.folder_started = time.monotonic()
-        with patch.object(self.console, '_next_image') as next_image:
+        with patch.object(self.engine.yolo, 'send_image') as next_image:
             self.console.refresh()
             self.assertTrue(self.engine.yolo.capture_pending)
             self.assertFalse(self.console.send_image.isEnabled())
-            next_image.assert_not_called()
             self.done()
-            next_image.assert_called_once()
+            next_image.assert_not_called()
         self.console._display()
         self.assertEqual(self.console.view.boxes, boxes)
         self.assertIn('回传完整', self.console.capture_status.text())
@@ -173,3 +184,40 @@ class ShowcaseDetectionTest(unittest.TestCase):
                 self.assertIn(text, self.eth.status()['tx']['error'])
                 self.assertIsNone(self.engine.yolo.snapshot()[1])
                 self.assertFalse(self.engine.yolo.capture_pending)
+
+    def test_mismatched_request_is_discarded_then_current_result_completes(self):
+        self.choose(self.paths[0])
+        self.upload()
+        stale = struct.pack('<4sHHII', b'EDDT', 1, 0, 99, self.seq + 1)
+        for window, data in enumerate((bytes(INPUT_BYTES), bytes(OUTPUT_BYTES), stale)):
+            for packet in packets(data, window, 0):
+                self.board.sendto(packet, self.peer)
+                time.sleep(.0002)
+        time.sleep(.05)
+        self.assertIsNone(self.engine.yolo.snapshot()[1])
+        self.assertTrue(self.engine.yolo.capture_pending)
+        self.return_result()
+        self.reply(DONE, struct.pack('<BB2xI', 2, 0, 7))
+        # No GUI refresh or Qt event pumping is involved in completion.
+        wait_for(self, lambda: not self.eth.tx['active'])
+        self.assertFalse(self.engine.yolo.capture_pending)
+        self.assertEqual(self.engine.yolo.image_status, '完成')
+
+    def test_cancel_ack_and_done_end_current_image_without_gui_timer(self):
+        self.choose(self.paths[0])
+        self.upload()
+        bulk_seq = self.seq
+        self.engine.board.network_endpoint = self.board.getsockname()
+        command = self.eth.showcase.cancel()
+        kind, seq, payload = decode(unpack(self.board.recv(65535))[3])
+        from tools.debug_tool.core.showcase import CANCEL
+        self.assertEqual((kind, seq, payload), (CANCEL, command['seq'], b''))
+        self.seq = seq
+        self.reply(ACK, struct.pack('<HBB', CANCEL, 2, 0))
+        self.seq = bulk_seq
+        self.reply(DONE, struct.pack('<BB2xI', 2, 6, 0))
+        wait_for(self, lambda: not self.eth.tx['active'])
+        self.assertTrue(command['event'].is_set())
+        self.assertFalse(self.engine.yolo.capture_pending)
+        self.assertIsNone(self.engine.yolo.snapshot()[1])
+        self.assertIn('已取消', self.engine.yolo.error)

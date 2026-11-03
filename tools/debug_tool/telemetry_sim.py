@@ -165,11 +165,15 @@ def run_yolo(host, port, ch2=None, output=None):
 def run_detection(sock, model, quant_params, frames):
     """T-NETN host board: receive RGB565 and return reference CH2/OUTPUT/EDDT over real UDP."""
     from core.yolo import reference_output, reference_detections, rgb565_ch2
-    from core.showcase import decode, encode, BULK_BEGIN, READY, DONE, IMAGE
+    from core.showcase import decode, encode, BULK_BEGIN, READY, DONE, IMAGE, APP, IMAGE_INFO, ACK
     for frame_id in range(frames):
         packet, peer = sock.recvfrom(65535)
         window, notify, offset, data = unpack(packet)
         message_type, seq, payload = decode(data)
+        while message_type in (APP, IMAGE_INFO):
+            send_block(sock, peer, encode(ACK, seq, struct.pack('<HBB', message_type, 2, 0)), 3)
+            window, notify, offset, data = unpack(sock.recv(65535))
+            message_type, seq, payload = decode(data)
         if (window, notify, offset, message_type) != (3, True, 0, BULK_BEGIN):
             raise ValueError('Detection simulator: expected BULK_BEGIN')
         kind, total = struct.unpack('<B3xI', payload)
@@ -190,7 +194,7 @@ def run_detection(sock, model, quant_params, frames):
         ch2 = rgb565_ch2(block.data(1280 * 720 * 2))
         output = reference_output(model, ch2)
         boxes = reference_detections(output, quant_params)
-        detections = DETECTION_HEADER.pack(b'EDDT', 1, len(boxes), frame_id, 0)
+        detections = DETECTION_HEADER.pack(b'EDDT', 1, len(boxes), frame_id, seq)
         detections += b''.join(DETECTION.pack(*box) for box in boxes)
         send_block(sock, peer, ch2, 0, notify=False)
         send_block(sock, peer, output, 1, notify=False)

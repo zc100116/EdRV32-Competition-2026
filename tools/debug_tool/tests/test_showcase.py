@@ -9,10 +9,10 @@ import sys
 from tempfile import TemporaryDirectory
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from tools.debug_tool.core.ethernet import EthernetTool, packets, unpack
-from tools.debug_tool.core.showcase import (encode, decode, BULK_BEGIN, CAMERA, ECHO,
+from tools.debug_tool.core.showcase import (encode, decode, BULK_BEGIN, APP, ACK, ECHO,
                                              READY, DONE, ECHO_REPLY)
 from tools.debug_tool.core.virtual_input import FRAME, VirtualInput, send_frame
 from tools.sw.game_record import build_record, build_pack
@@ -50,7 +50,8 @@ class ShowcaseTest(unittest.TestCase):
         self.assertEqual(decode(data), (1, 0x12345678, struct.pack('<B3xI', 3, 1234)))
         for kind, payload in ((READY, b'\x03\0\0\0'),
                               (DONE, struct.pack('<BB2xI', 3, 0, 30)),
-                              (CAMERA, b''), (ECHO, bytes(1000)), (ECHO_REPLY, b'echo')):
+                              (APP, struct.pack('<BBH', 1, 0, 0)),
+                              (ECHO, bytes(1000)), (ECHO_REPLY, b'echo')):
             self.assertEqual(decode(encode(kind, 42, payload)), (kind, 42, payload))
         for invalid in (b'FAIL' + data[4:], data[:-1], data + b'0',
                         encode(READY, 1, b''), encode(0x99, 1)):
@@ -60,7 +61,7 @@ class ShowcaseTest(unittest.TestCase):
             encode(ECHO, 1, bytes(1001))
 
     def test_bulk_waits_ready_then_done_and_allows_next_game(self):
-        for kind, index in ((1, 0), (2, 14), (3, 30), (3, 31)):
+        for kind, index in ((1, 0), (3, 30), (3, 31)):
             data = bytes(range(251)) * 11
             self.eth.showcase.bulk(kind, data, *self.destination, f'kind {kind}')
             message_type, seq, payload, peer = self.request()
@@ -111,9 +112,11 @@ class ShowcaseTest(unittest.TestCase):
         self.assertIn('sequence', self.eth.status()['tx']['error'])
 
     def test_camera_and_echo_round_trip_and_loss(self):
-        self.eth.showcase.camera(*self.destination)
-        kind, _, payload, _ = self.request()
-        self.assertEqual((kind, payload), (CAMERA, b''))
+        self.eth.start_receive(0)
+        self.eth.showcase.app(1, destination=self.board.getsockname())
+        kind, seq, payload, peer = self.request()
+        self.reply(peer, ACK, seq, struct.pack('<HBB', APP, 2, 0))
+        self.assertEqual((kind, payload), (APP, struct.pack('<BBH', 1, 0, 0)))
         wait_for(self, lambda: not self.eth.status()['tx']['active'])
         with patch('tools.debug_tool.core.showcase.RESPONSE_TIMEOUT', .08):
             self.eth.showcase.echo_test(3, *self.destination)
@@ -158,8 +161,9 @@ class ShowcaseTest(unittest.TestCase):
         engine = SerialEngine()
         self.addCleanup(engine.virtual_input.close)
         with patch.object(engine, 'send') as send:
-            send_frame(engine, frames[-1])
-            self.assertEqual(bytes.fromhex(send.call_args.args[0]), b'\x1bV' + frames[-1])
+            with self.assertRaisesRegex(RuntimeError, '网口未连接'):
+                send_frame(engine, frames[-1])
+            send.assert_not_called()
         self.eth.start_receive(0)
         engine.ethernet = self.eth
         engine.board.steps['peer']['done'] = True
@@ -234,7 +238,7 @@ class ShowcaseGuiTest(unittest.TestCase):
         app = QApplication.instance() or QApplication([])
         engine = SerialEngine()
         frames = []
-        engine.send = lambda text, ending, hex_mode: frames.append(bytes.fromhex(text))
+        engine.virtual_input.send = frames.append
         window = MainWindow(engine)
         window.setAttribute(Qt.WA_DeleteOnClose)
         try:
@@ -284,6 +288,8 @@ class ShowcaseGuiTest(unittest.TestCase):
                     self.assertGreaterEqual(button.width(), text_width + 20)
                 window.rail_group.button(6).setChecked(True)
                 window.grab().save(str(ROOT / f'build/games-{width}x{height}.png'))
+            engine.board.mark('peer')
+            engine.ethernet.rx_socket = Mock()
             window._select_page(5)
             input_panel = window.virtual_input
             # Qt's global button state can outlive widgets used by prior layout tests.
@@ -291,22 +297,22 @@ class ShowcaseGuiTest(unittest.TestCase):
             QTest.mouseRelease(input_panel.pad, Qt.RightButton)
             QTest.mouseRelease(input_panel.pad, Qt.MiddleButton)
             QTest.mousePress(input_panel.pad, Qt.MiddleButton)
-            self.assertEqual(FRAME.unpack(frames[-1][2:])[3], 4)
+            self.assertEqual(FRAME.unpack(frames[-1])[3], 4)
             QTest.mouseRelease(input_panel.pad, Qt.MiddleButton)
             for delta, expected in ((120, 255), (-120, 0)):
                 event = QWheelEvent(QPointF(100, 100), QPointF(100, 100), QPoint(),
                                     QPoint(0, delta), Qt.NoButton, Qt.NoModifier,
                                     Qt.NoScrollPhase, False)
                 app.sendEvent(input_panel.pad, event)
-                self.assertEqual(FRAME.unpack(frames[-1][2:])[4], expected)
+                self.assertEqual(FRAME.unpack(frames[-1])[4], expected)
             QTest.keyPress(input_panel, Qt.Key_J)
             window._select_page(0)
-            self.assertEqual(FRAME.unpack(frames[-1][2:])[0], 0)
-            count = len(frames)
-            send_frame(engine, FRAME.pack(1, 0, 0, 0, 1))
-            self.assertEqual(len(frames), count)  # Serial page pauses virtual UART input.
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 0)
+            engine.virtual_input.update(1, 0, 0, 0, 1)
+            self.assertEqual(FRAME.unpack(frames[-1])[0], 1)
         finally:
             engine.ethernet.tx['active'] = False
+            engine.ethernet.rx_socket = None
             window.close()
             QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
             app.processEvents()

@@ -6,11 +6,14 @@ import threading
 import time
 
 MESSAGE = struct.Struct('<4sHHI')
-BULK_BEGIN, CAMERA, ECHO = 1, 2, 3
+BULK_BEGIN, ECHO = 1, 3
+APP, IMAGE_INFO, PROCESS, DETECT, CANCEL = range(4, 9)
+HELLO, STATE, ACK, IMAGE_STEP = range(0x84, 0x88)
 READY, DONE, ECHO_REPLY = 0x81, 0x82, 0x83
 MODEL, IMAGE, GAME = 1, 2, 3
 RESPONSE_TIMEOUT = 5.0
-STATUS = {1: '长度不符', 2: '格式错误', 3: '空间不足'}
+STATUS = {1: '长度不符', 2: '格式错误', 3: '空间不足',
+          4: '硬件不支持', 5: '状态不符', 6: '已取消'}
 
 
 def encode(message_type, seq, payload=b''):
@@ -23,10 +26,12 @@ def decode(data):
     magic, message_type, length, seq = MESSAGE.unpack_from(data)
     if magic != b'EDSC' or length > 1000 or len(data) != MESSAGE.size + length:
         raise ValueError('EDSC invalid magic or payload length')
-    expected = {READY: 4, DONE: 8, CAMERA: 0, BULK_BEGIN: 8}
+    expected = {READY: 4, DONE: 8, BULK_BEGIN: 8, APP: 4, PROCESS: 24,
+                DETECT: 16, CANCEL: 0, HELLO: 76, STATE: 56, ACK: 4, IMAGE_STEP: 4}
     if message_type in expected and length != expected[message_type]:
         raise ValueError(f'EDSC invalid payload length for type {message_type:#x}')
-    if message_type not in (BULK_BEGIN, CAMERA, ECHO, READY, DONE, ECHO_REPLY):
+    if message_type not in (BULK_BEGIN, ECHO, READY, DONE, ECHO_REPLY, APP, IMAGE_INFO,
+                            PROCESS, DETECT, CANCEL, HELLO, STATE, ACK, IMAGE_STEP):
         raise ValueError(f'EDSC unknown message type {message_type:#x}')
     return message_type, seq, bytes(data[MESSAGE.size:])
 
@@ -38,6 +43,9 @@ class ShowcaseTool:
         self.replies = []
         self.receive_error = None
         self.seq = 0
+        self.pending = {}
+        self.latest = {}
+        self.cancelled = False
         self.echo = dict(count=0, received=0, lost=0, averageMs=None)
 
     def receive(self, data):
@@ -46,9 +54,71 @@ class ShowcaseTool:
         except (ValueError, struct.error) as exc:
             self.fail(str(exc))
             raise
+        message_type, seq, payload = reply
+        session = self.ethernet.session
+        if message_type in (HELLO, STATE):
+            if session:
+                session.receive_state(message_type, payload)
+            return
+        if message_type == IMAGE_STEP:
+            self.ethernet.yolo.step(struct.unpack('<b3x', payload)[0])
+            return
+        if message_type == ACK:
+            command_type, phase, error = struct.unpack('<HBB', payload)
+            with self.condition:
+                command = self.pending[command_type]
+                if command['seq'] != seq:
+                    raise ValueError(f'ACK sequence {seq}, expected {command["seq"]}')
+                command.update(phase=phase, error=error)
+                if phase in (2, 3):
+                    del self.pending[command_type]
+                    command['event'].set()
+                    if phase == 3 and session:
+                        session.fail(f'命令失败：{STATUS[error]}')
+                    if command_type in self.latest:
+                        destination, data = self.latest.pop(command_type)
+                        self.command(command_type, data, destination)
+            if session:
+                session.notify()
+            return
         with self.condition:
             self.replies.append(reply)
             self.condition.notify()
+
+    def command(self, command_type, payload=b'', destination=None):
+        session = self.ethernet.session
+        if self.ethernet.rx_socket is None:
+            raise RuntimeError('网口未监听，请先建立网口连接')
+        if destination is None:
+            destination = session.network_endpoint
+        with self.condition:
+            if command_type in self.pending:
+                if command_type in (PROCESS, DETECT):
+                    self.latest[command_type] = (destination, payload)
+                    return dict(queued=True)
+                raise RuntimeError('同类命令正在等待设备完成')
+            command = dict(seq=self.seq + 1, phase=0, error=0, event=threading.Event())
+            self.pending[command_type] = command
+            try:
+                command['seq'] = self._message(destination, command_type, payload)
+            except OSError:
+                del self.pending[command_type]
+                raise
+            return command
+
+    def command_wait(self, command_type, payload, destination):
+        command = self.command(command_type, payload, destination)
+        if not command['event'].wait(RESPONSE_TIMEOUT):
+            raise TimeoutError('命令应答超时')
+        if command['phase'] == 3:
+            raise ValueError(f'命令失败：{STATUS[command["error"]]}')
+
+    def app(self, app, action=0, arg=0, destination=None):
+        return self.command(APP, struct.pack('<BBH', app, action, arg), destination)
+
+    def cancel(self):
+        self.cancelled = True
+        return self.command(CANCEL)
 
     def fail(self, error):
         with self.condition:
@@ -119,13 +189,17 @@ class ShowcaseTool:
                     index = eth.tx['index']
                     suffix = f' · 序号 {index}' if index is not None else ''
                     eth.session.log(f"传输完成：{eth.tx['path']}{suffix}")
+                eth.session.notify()
 
     def _message(self, destination, message_type, payload=b''):
         from .ethernet import packets
-        self.seq = (self.seq + 1) & 0xffffffff
-        self.ethernet.rx_socket.sendto(next(packets(encode(message_type, self.seq, payload),
-                                                   3, 0)), destination)
-        return self.seq
+        with self.condition:
+            self.seq = (self.seq + 1) & 0xffffffff
+            if message_type == BULK_BEGIN and payload[0] == IMAGE:
+                self.ethernet.yolo.request = self.seq
+            self.ethernet.rx_socket.sendto(next(packets(encode(message_type, self.seq, payload),
+                                                       3, 0)), destination)
+            return self.seq
 
     @staticmethod
     def _done(payload, kind):
@@ -136,9 +210,19 @@ class ShowcaseTool:
             raise ValueError(f'设备拒绝传输：{STATUS.get(status, f"未知状态 {status}")}')
         return index
 
-    def bulk(self, kind, data, board_ip, board_port, local_port, name):
+    def bulk(self, kind, data, board_ip, board_port, local_port, name, image_info=None):
         def transfer(destination):
             from .ethernet import HEADER, packets
+            self.cancelled = False
+            if kind == IMAGE:
+                session = self.ethernet.session
+                if session.board_state['app'] != 2 or session.board_state['state'] != 2:
+                    self.command_wait(APP, struct.pack('<BBH', 2, 0, 0), destination)
+                if self.cancelled:
+                    raise ValueError('已取消')
+                self.command_wait(IMAGE_INFO, image_info, destination)
+                if self.cancelled:
+                    raise ValueError('已取消')
             seq = self._message(destination, BULK_BEGIN, struct.pack('<B3xI', kind, len(data)))
             message_type, payload = self._wait(seq)
             if message_type == DONE:
@@ -149,12 +233,16 @@ class ShowcaseTool:
             with self.ethernet.lock:
                 self.ethernet.tx['phase'] = '上传中'
             for packet in packets(data, 0, 0):
+                if self.cancelled:
+                    break
                 self.ethernet.rx_socket.sendto(packet, destination)
                 with self.ethernet.lock:
                     self.ethernet.tx['sent'] += len(packet) - HEADER.size
                     self.ethernet.tx['packets'] += 1
             with self.ethernet.lock:
                 self.ethernet.tx['phase'] = '等待设备处理'
+            if kind == IMAGE:
+                self.ethernet.yolo.image_status = '识别中'
             message_type, payload = self._wait(seq)
             if message_type != DONE:
                 raise ValueError('EDSC expected DONE')
@@ -164,10 +252,6 @@ class ShowcaseTool:
             with self.ethernet.lock:
                 self.ethernet.tx['index'] = index
         return self._start(transfer, board_ip, board_port, local_port, len(data), name)
-
-    def camera(self, board_ip, board_port, local_port):
-        return self._start(lambda dest: self._message(dest, CAMERA), board_ip, board_port,
-                           local_port, 0, '回到摄像头检测')
 
     def echo_test(self, count, board_ip, board_port, local_port):
         def test(destination):

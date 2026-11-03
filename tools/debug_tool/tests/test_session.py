@@ -75,7 +75,7 @@ class SessionTest(unittest.TestCase):
             self.engine._match_line('ETH peer IP: 0x7f000001')
             self.engine._match_line('ETH peer port: 6001')
             self.assertFalse(board.status()['network']['peer']['done'])
-            self.assertIn('不一致', board.status()['error'])
+            self.assertIsNone(board.status()['error'])
             # A new explicit setup requires a fresh pair of status fields.
             with patch.object(self.engine, 'send') as send:
                 board.establish_network('127.0.0.1', peer.getsockname()[1])
@@ -83,6 +83,8 @@ class SessionTest(unittest.TestCase):
             self.assertEqual(peer.recvfrom(1024)[0], HEADER.pack(3, 1, 0, 0) + b'\0')
             self.engine._match_line('ETH peer IP: 0x7f000001')
             self.engine._match_line('ETH peer port: 6000')
+            from test_p5_protocol import hello
+            peer.sendto(next(packets(hello(), 3, 0)), ('127.0.0.1', 6000))
             peer.sendto(next(packets(wire(1), 3, 0)), ('127.0.0.1', 6000))
             wait_for(self, lambda: board.status()['counts']['telemetry'] == 1)
             state = board.status()
@@ -111,6 +113,7 @@ class SessionTest(unittest.TestCase):
                 send(0, frame_header() + bytes(1280))
                 send(3, wire(1))
                 wait_for(self, lambda: self.engine.video.snapshot()['received'] == 1)
+                self.engine.yolo.request = 0
                 self.engine.yolo.reset_capture()
                 # Camera traffic can still arrive while the test image is uploading.
                 send(2, detection_wire(10))
@@ -204,95 +207,6 @@ class SessionTest(unittest.TestCase):
             self.assertEqual(request('/api/ethernet/status')['rx']['localPort'], 6000)
 
 
-class DiscoveryTest(unittest.TestCase):
-    def setUp(self):
-        self.engine = SerialEngine()
-        self.board = self.engine.board
-        self.tool = self.engine.ethernet
-        self.tool.rx_socket = Mock()
-        self.tool.rx.update(active=True, localIp=self.tool.local_ip, localPort=6000)
-        self.clock = 0.0
-        self.sent = []
-        self.tool.rx_socket.sendto.side_effect = lambda *args: self.sent.append(
-            (self.clock, args))
-        self.thread_patch = patch('tools.debug_tool.core.session.threading.Thread')
-        self.thread = self.thread_patch.start()
-        self.addCleanup(self.thread_patch.stop)
-        self.ready = patch.object(self.tool, 'wait_for_link')
-        self.wait_ready = self.ready.start()
-        self.addCleanup(self.ready.stop)
-
-    def enter(self, line='Showcase: main menu'):
-        self.board.feed_line(line)
-        self.assertEqual(self.board.phase, 'application')
-        self.thread.return_value.start.assert_called_once()
-        self.stop = self.board.discovery_stop
-
-    def run_clock(self, on_wait):
-        def wait(seconds):
-            self.assertEqual(seconds, 2.0)
-            if not self.stop.is_set():
-                self.clock += seconds
-                on_wait()
-            return self.stop.is_set()
-        with patch.object(self.stop, 'wait', side_effect=wait):
-            self.board._discover_network(self.stop)
-
-    def test_enter_requests_every_two_seconds_until_peer(self):
-        self.enter()
-        self.board.feed_line('Showcase: another status')
-        self.thread.return_value.start.assert_called_once()
-        def reply():
-            if self.clock == 2:
-                self.board.feed_line('ETH peer IP: 0xc0a80102')
-            if self.clock == 6:
-                self.board.feed_line('ETH peer port: 6000')
-        self.run_clock(reply)
-        self.assertEqual([item[0] for item in self.sent], [0, 2, 4])
-        self.assertTrue(self.board.steps['peer']['done'])
-        expected = (next(packets(b'\0', 3, 0)), self.board.network_endpoint)
-        self.assertTrue(all(args == expected for _, args in self.sent))
-        self.assertEqual(self.wait_ready.call_count, 3)
-        logs = self.engine.get_entries()[0]
-        self.assertEqual(sum('连接请求已发送' in item['text'] for item in logs), 3)
-
-    def test_bios_returns_input_to_serial_and_application_restarts_discovery(self):
-        from tools.debug_tool.core.virtual_input import channel
-        self.enter('Demo: demo')
-        def bios():
-            self.board.mark('peer')
-            self.assertEqual(channel(self.engine), '网口')
-            self.board.feed_line('BIOS menu: 1=UART load')
-        self.run_clock(bios)
-        self.assertEqual(channel(self.engine), '串口')
-        self.assertEqual(len(self.sent), 1)
-        previous = self.stop
-        self.thread.reset_mock()
-        self.enter()
-        self.assertIsNot(self.stop, previous)
-        self.run_clock(self.board.disconnect)
-        self.assertEqual(len(self.sent), 2)
-
-    def test_disconnect_while_waiting_for_link_sends_nothing(self):
-        self.enter()
-        self.wait_ready.side_effect = lambda ip: self.board.disconnect()
-        self.run_clock(lambda: self.fail('cancelled discovery waited again'))
-        self.assertEqual(self.sent, [])
-
-    def test_send_failure_is_logged_and_not_retried(self):
-        self.enter()
-        self.tool.rx_socket.sendto.side_effect = OSError('send failed')
-        self.run_clock(lambda: self.fail('failed discovery retried'))
-        self.tool.rx_socket.sendto.assert_called_once()
-        self.assertIn('send failed', self.board.status()['error'])
-
-    def test_no_configured_board_address_does_not_start_discovery(self):
-        self.board.network_endpoint = ('', 5000)
-        self.board.feed_line('Showcase: main menu')
-        self.assertEqual(self.board.phase, 'application')
-        self.thread.assert_not_called()
-
-
 class ConsoleLayoutTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -303,7 +217,9 @@ class ConsoleLayoutTest(unittest.TestCase):
 
     def test_all_pages_at_both_sizes(self):
         from PySide6.QtCore import QPoint, QRect
-        from PySide6.QtWidgets import QLabel, QPushButton, QCheckBox, QGroupBox, QAbstractSpinBox, QComboBox, QWidget
+        from PySide6.QtWidgets import (
+            QLabel, QPushButton, QCheckBox, QGroupBox, QAbstractSpinBox, QComboBox, QWidget,
+        )
         from gui.app import MainWindow
         window = MainWindow(SerialEngine())
         for panel in (window.soc, window.ethernet, window.virtual_input):
@@ -344,11 +260,19 @@ class ConsoleLayoutTest(unittest.TestCase):
                         types = (QLabel, QPushButton, QCheckBox, QComboBox, QAbstractSpinBox)
                         for field in fields:
                             if isinstance(field, types) and field.isVisible():
-                                scroll.ensureWidgetVisible(field, 0, 0)
+                                # Spin boxes expose only their editor's focus rectangle.
+                                # Scroll the entire control into view to check reachability.
+                                center = field.mapTo(scroll.widget(), field.rect().center())
+                                scroll.ensureVisible(center.x(), center.y(),
+                                                     (field.width() + 2) // 2,
+                                                     (field.height() + 2) // 2)
                                 self.app.processEvents()
-                                bounds = QRect(field.mapTo(scroll.viewport(), QPoint()), field.size())
+                                origin = field.mapTo(scroll.viewport(), QPoint())
+                                bounds = QRect(origin, field.size())
                                 self.assertTrue(scroll.viewport().rect().contains(bounds),
-                                    f'{width}x{height}: inaccessible {field.objectName()}')
+                                    f'{width}x{height}: inaccessible {type(field).__name__} '
+                                    f'{getattr(field, "text", lambda: "")()!r} '
+                                    f'bounds={bounds} viewport={scroll.viewport().rect()}')
                     if page == 2:
                         for row in window.rules._rows:
                             self.assertLessEqual(row.width(), row.parentWidget().width())
@@ -359,7 +283,7 @@ class ConsoleLayoutTest(unittest.TestCase):
                         self.assertGreaterEqual(editor.width(),
                             editor.fontMetrics().horizontalAdvance(editor.text()) + 4)
             console = window.soc
-            self.assertTrue(console.processing.lock_scale.isChecked())
+            self.assertEqual(len(console.processing.switches), 12)
             self.assertTrue(console.choose_folder.isEnabled())
             self.assertTrue(console.apply_output.isEnabled())
             self.assertTrue(console.status_query.isEnabled())

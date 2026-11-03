@@ -111,6 +111,7 @@ class ImageDetectionTest(unittest.TestCase):
 
     def test_b3n_incomplete_output_is_reported(self):
         engine = SerialEngine()
+        engine.yolo.request = 0
         engine.yolo.reset_capture()
         engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
         self.assertIsNone(engine.yolo.error)
@@ -131,6 +132,7 @@ class ImageDetectionTest(unittest.TestCase):
             destination = '127.0.0.1', state['localPort']
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
                 def send_return(missing, end=True):
+                    engine.yolo.request = 0
                     engine.yolo.reset_capture()
                     for window, size in enumerate((INPUT_BYTES, OUTPUT_BYTES)):
                         for index, packet in enumerate(packets(bytes(size), window, 0)):
@@ -177,91 +179,6 @@ class ImageDetectionTest(unittest.TestCase):
             self.assertIsNone(engine.ethernet.rx_memory)
             self.assertIsNone(engine.ethernet.rx_process)
 
-    def test_folder_continues_after_failed_return(self):
-        from PySide6.QtWidgets import QApplication
-        from gui.soc_console import SocConsole
-        app = QApplication.instance() or QApplication([])
-        engine = SerialEngine()
-        console = SocConsole(engine, lambda text: None)
-        self.addCleanup(console.close)
-        console.folder_images = [Path('next.png')]
-        console.folder_started = time.monotonic()
-        engine.yolo.reset_capture()
-        engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
-        with self.assertRaisesRegex(ValueError, '回传不完整'):
-            engine.yolo.complete_capture()
-        with patch.object(console, '_send_image') as send:
-            console.refresh()
-            send.assert_called_once()
-            self.assertEqual(console.image_path.text(), 'next.png')
-            self.assertEqual(engine.yolo.failed, 1)
-            self.assertIn('失败 1 张', console.capture_status.text())
-            console.refresh()
-            send.assert_called_once()
-        app.processEvents()
-
-    def test_stop_batch_drains_current_success_or_timeout_then_allows_new_work(self):
-        from PySide6.QtWidgets import QApplication
-        from gui.soc_console import SocConsole
-        app = QApplication.instance() or QApplication([])
-        for timeout in (False, True):
-            engine = SerialEngine()
-            console = SocConsole(engine, lambda text: None)
-            self.addCleanup(console.close)
-            console.folder_images = [Path('queued.png')]
-            console.folder_started = time.monotonic()
-            engine.yolo.reset_capture()
-            console.refresh()
-            self.assertTrue(console.stop_batch.isEnabled())
-            console.stop_batch.click()
-            self.assertEqual(console.folder_images, [])
-            self.assertIsNone(console.folder_started)
-            self.assertTrue(engine.yolo.capture_pending)
-            console.refresh()
-            self.assertFalse(console.send_image.isEnabled())
-            self.assertFalse(console.video_camera.isEnabled())
-            with patch.object(console, '_send_image') as send:
-                if timeout:
-                    with engine.yolo.lock:
-                        engine.yolo._fail_capture('设备回复超时（5 s）')
-                    self.assertEqual(engine.yolo.error, '设备回复超时（5 s）')
-                else:
-                    engine.yolo.receive(0, 0, bytes(INPUT_BYTES), False)
-                    engine.yolo.receive(1, 0, bytes(OUTPUT_BYTES), False)
-                    engine.yolo.receive(2, 0,
-                        struct.pack('<4sHHII', b'EDDT', 1, 0, 9, 0), True)
-                    engine.yolo.complete_capture()
-                console.refresh()
-                send.assert_not_called()
-                self.assertTrue(console.send_image.isEnabled())
-                self.assertTrue(console.choose_folder.isEnabled())
-                self.assertTrue(console.video_camera.isEnabled())
-                console.send_image.click()
-                send.assert_called_once()
-            app.processEvents()
-
-    def test_folder_waits_for_upload_completion_even_if_return_arrives_first(self):
-        from PySide6.QtWidgets import QApplication
-        from gui.soc_console import SocConsole
-        from tools.debug_tool.core.video import parse_detections
-        app = QApplication.instance() or QApplication([])
-        engine = SerialEngine()
-        console = SocConsole(engine, lambda text: None)
-        self.addCleanup(console.close)
-        console.folder_images = [Path('next.png')]
-        console.folder_started = time.monotonic()
-        capture = (bytes(INPUT_BYTES), bytes(OUTPUT_BYTES),
-                   parse_detections(struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0)))
-        with (patch.object(engine.yolo, 'snapshot', return_value=(1, capture)),
-              patch.object(console, '_send_image') as send):
-            engine.ethernet.tx['active'] = True
-            console.refresh()
-            send.assert_not_called()
-            engine.ethernet.tx['active'] = False
-            console.refresh()
-            send.assert_called_once()
-        app.processEvents()
-
     def test_camera_buttons_send_edsc_command_and_select_video(self):
         from PySide6.QtWidgets import QApplication
         from gui.soc_console import SocConsole
@@ -270,11 +187,12 @@ class ImageDetectionTest(unittest.TestCase):
         console = SocConsole(engine, lambda text: None)
         self.addCleanup(console.close)
         with (patch.object(engine.ethernet, 'start_receive'),
-              patch.object(engine.ethernet.showcase, 'camera') as send):
+              patch.object(engine.ethernet.showcase, 'app') as send):
             for button in (console.image_camera, console.video_camera):
                 engine.yolo.return_view = True
                 button.click()
-                self.assertEqual(send.call_args.args, (console.ip.text(), 5000, 6000))
+                self.assertEqual(send.call_args.args, (1,))
+                self.assertEqual(send.call_args.kwargs['destination'], (console.ip.text(), 5000))
                 self.assertEqual(console.display.currentIndex(), 0)
                 self.assertEqual(console.scene.currentIndex(), 0)
                 self.assertFalse(engine.yolo.return_view)
@@ -310,45 +228,3 @@ class ImageDetectionTest(unittest.TestCase):
         yolo.complete_capture()
         self.assertFalse(yolo.capture_pending)
         self.assertEqual(yolo.generation, 1)
-
-    def test_folder_order_completion_stats_and_original_image(self):
-        from PySide6.QtGui import QImage
-        from PySide6.QtWidgets import QApplication
-        from gui.soc_console import SocConsole
-        app = QApplication.instance() or QApplication([])
-        engine = SerialEngine()
-        console = SocConsole(engine, lambda text: None)
-        self.addCleanup(console.close)
-        self.assertTrue(console.choose_folder.isEnabled())
-        self.assertTrue(console.view.isEnabled())
-        self.assertTrue(console.apply_scene.isEnabled())
-        with TemporaryDirectory(dir=ROOT / 'build') as directory:
-            directory = Path(directory)
-            image = QImage(33, 17, QImage.Format_RGB888)
-            image.fill('green')
-            for name in ('b.png', 'a.png'):
-                self.assertTrue(image.save(str(directory / name)))
-            console.image_path.setText(str(directory / 'b.png'))
-            console._load_image()
-            self.assertEqual((console.static_image.width(), console.static_image.height()),
-                             (33, 17))
-            sent = []
-            with (patch('gui.soc_console.QFileDialog.getExistingDirectory',
-                        return_value=str(directory)),
-                  patch.object(console, '_send_image',
-                               side_effect=lambda: sent.append(console.image_path.text()))):
-                console._choose_folder()
-                self.assertEqual(sent, [str(directory / 'a.png')])
-                # Each complete capture advances the folder independently of reference setup.
-                from tools.debug_tool.core.video import parse_detections
-                from unittest.mock import patch as mock_patch
-                capture = (bytes(INPUT_BYTES), bytes(OUTPUT_BYTES),
-                           parse_detections(struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0)))
-                with mock_patch.object(engine.yolo, 'snapshot', return_value=(1, capture)):
-                    console.refresh()
-                self.assertEqual(sent, [str(directory / 'a.png'), str(directory / 'b.png')])
-                with mock_patch.object(engine.yolo, 'snapshot', return_value=(2, capture)):
-                    console.refresh()
-                self.assertEqual(console.folder_completed, 2)
-                self.assertIsNone(console.folder_started)
-        app.processEvents()

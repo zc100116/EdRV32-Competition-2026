@@ -82,6 +82,11 @@ class YoloTool:
         self.failed = 0
         self.error = None
         self.capture_error = None
+        self.request = None
+        self.images = []
+        self.image_index = 0
+        self.image_status = '等待'
+        self.image_destination = None
 
     def reset_capture(self):
         with self.lock:
@@ -105,7 +110,12 @@ class YoloTool:
             if window == 2 and notify:
                 # A malformed EDDT is a protocol error even when image bytes are missing.
                 if self.blocks[2].complete(offset + len(data)):
-                    parse_detections(self.blocks[2].data(offset + len(data)))
+                    result = self.blocks[2].data(offset + len(data))
+                    if (self.ethernet is not None and
+                            struct.unpack_from('<I', result, 12)[0] != self.request):
+                        self.blocks[2] = Block()
+                        return
+                    parse_detections(result)
                 sizes = (INPUT_BYTES,
                          OUTPUT_BYTES, offset + len(data))
                 missing = []
@@ -119,6 +129,8 @@ class YoloTool:
                 ch2, output, detections = (block.data(size)
                                            for block, size in zip(self.blocks, sizes))
                 self.capture = (ch2, output, parse_detections(detections))
+        if window == 2 and notify and self.ethernet is not None and self.ethernet.session:
+            self.ethernet.session.notify()
 
     def complete_capture(self):
         """Design 4.5.9: DONE commits the image after all return data arrived."""
@@ -132,9 +144,11 @@ class YoloTool:
                 self.sent_at = None
             self.generation += 1
             self.capture_pending = False
+            self.image_status = '完成'
 
     def _fail_capture(self, error):
         """Called with the capture lock held; missing UDP bytes fail this image only."""
+        self.image_status = '失败'
         self.error = error
         self.failed += 1
         self.generation += 1
@@ -167,7 +181,7 @@ class YoloTool:
 
     def camera_detection(self, board_ip, board_port, local_port):
         self.return_view = False
-        return self.ethernet.showcase.camera(board_ip, board_port, local_port)
+        return self.ethernet.showcase.app(1, destination=(board_ip, board_port))
 
     def send_model(self, path, board_ip, board_port, local_port):
         data = pack_model(path)
@@ -175,12 +189,43 @@ class YoloTool:
         return self.ethernet.showcase.bulk(1, data, board_ip, board_port,
                                             local_port, str(path))
 
+    def select_folder(self, path):
+        self.images = sorted(item for item in Path(path).iterdir()
+                             if item.suffix.lower() in ('.png', '.jpg', '.jpeg', '.bmp'))
+        if not self.images:
+            raise ValueError('文件夹没有图片')
+        self.image_index = 0
+        self.image_status = '等待'
+        self.image_destination = (*self.ethernet.session.network_endpoint, 6000)
+
+    def step(self, direction):
+        if self.capture_pending or self.ethernet.tx['active']:
+            self.ethernet.session.log('当前图片未完成，忽略翻页')
+            return
+        target = self.image_index + direction
+        if not 0 <= target < len(self.images):
+            return
+        self.image_index = target
+        self.send_image(self.images[target], *self.image_destination)
+
     def send_image(self, path, board_ip, board_port, local_port):
         pixels = image_rgb565(path)
+        path = Path(path)
+        if path not in self.images:
+            self.images = [path]
+        self.image_index = self.images.index(path)
+        self.image_destination = (board_ip, board_port, local_port)
         self.source_image = str(path)
+        self.request = None
         self.reset_capture()
+        self.image_status = '发送中'
         self.sent_at = time.monotonic()
-        return self.ethernet.showcase.bulk(2, pixels, board_ip, board_port, local_port, str(path))
+        name = path.name.encode('utf-8')
+        if len(name) > 256:
+            raise ValueError('图片文件名超过 256 字节')
+        info = struct.pack('<HHH2x', self.image_index + 1, len(self.images), len(name)) + name
+        return self.ethernet.showcase.bulk(2, pixels, board_ip, board_port, local_port,
+                                            str(path), image_info=info)
 
 
 OUTPUT_BYTES = 725760

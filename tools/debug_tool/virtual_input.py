@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Task T-VIN1: emit timed UART frames or send them over UDP using the GUI sender."""
+"""Task T-VIN1: send timed UDP frames using the GUI sender."""
 import argparse
-from pathlib import Path
 import socket
 import time
 from core.ethernet import packets
@@ -10,9 +9,7 @@ from core.virtual_input import KEYS, VirtualInput
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    output = parser.add_mutually_exclusive_group(required=True)
-    output.add_argument('--emit', type=Path, help='write raw ESC V serial frames to this file')
-    output.add_argument('--udp', help='destination IP:port')
+    parser.add_argument('--udp', required=True, help='destination IP:port')
     parser.add_argument('--keys', default='', help='comma separated: ' + ','.join(KEYS))
     parser.add_argument('--x', type=int, default=0)
     parser.add_argument('--y', type=int, default=0)
@@ -21,14 +18,10 @@ def main():
     parser.add_argument('--hold', type=float, default=.2, help='hold duration in seconds')
     args = parser.parse_args()
     keys = sum(1 << KEYS.index(key) for key in args.keys.split(',') if key)
-    if args.emit:
-        with args.emit.open('wb') as stream:
-            run(lambda frame: stream.write(b'\x1bV' + frame), args, keys)
-    else:
-        host, port = args.udp.rsplit(':', 1)
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            run(lambda frame: sock.sendto(next(packets(frame, 2, 0)), (host, int(port))),
-                args, keys)
+    host, port = args.udp.rsplit(':', 1)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        run(lambda frame: sock.sendto(next(packets(frame, 2, 0)), (host, int(port))),
+            args, keys)
 
 
 def run(send, args, keys):

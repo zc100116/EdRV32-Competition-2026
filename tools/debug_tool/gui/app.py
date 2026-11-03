@@ -1164,6 +1164,8 @@ class MainWindow(QMainWindow):
         title_box.addWidget(sub)
         h.addLayout(title_box)
         h.addStretch(1)
+        self.network_status = QLabel('网口未连接 · 板端版本 —')
+        h.addWidget(self.network_status)
         self.chip = QWidget()
         self.chip.setObjectName("chip")
         self.chip.setFixedHeight(30)
@@ -1222,7 +1224,6 @@ class MainWindow(QMainWindow):
         rail_layout.addStretch(1)
         self.rail_group.idClicked.connect(self._select_page)
         self.rail_group.button(0).setChecked(True)
-        self.engine.virtual_serial_paused = True
 
         self.conn = ConnectionPanel(engine, self.toast)
         self.cmds = CommandsPanel(engine, self.toast)
@@ -1365,8 +1366,10 @@ class MainWindow(QMainWindow):
         self.body_stack = QStackedWidget()
         self.body_stack.addWidget(main_split)
         self.soc = SocConsole(engine, self.toast)
+        self.soc.network_changed.connect(self._network_status)
         self.body_stack.addWidget(self.soc)
         self.virtual_input = VirtualInputPanel(engine, self.toast)
+        self.soc.network_changed.connect(self.virtual_input.refresh)
         self.body_stack.addWidget(self.virtual_input)
         self.games = GamesPanel(engine, self.toast)
         game_scroll = QScrollArea()
@@ -1484,6 +1487,7 @@ class MainWindow(QMainWindow):
         console = index == 4
         self.body_stack.setCurrentIndex(3 if index == 6 else 2 if index == 5 else 1 if console else 0)
         if index == 5:
+            self.virtual_input.refresh()
             self.virtual_input.setFocus()
         elif index == 6:
             self.games.refresh()
@@ -1492,9 +1496,15 @@ class MainWindow(QMainWindow):
             self.main_split.setSizes([300, 680, 300])
         else:
             self.soc.refresh()
-        self.engine.virtual_serial_paused = index < 3
+
+    def _network_status(self):
+        board = self.engine.board.status()
+        connected = board['network']['peer']['done']
+        self.network_status.setText(('网口已连接' if connected else '网口未连接') +
+                                    ' · 板端版本 ' + (board['build'] or '—'))
 
     def _poll_status(self):
+        self._network_status()
         st = self.engine.status()
         connected = st["connected"]
         cfg = st["config"]
@@ -1518,6 +1528,7 @@ class MainWindow(QMainWindow):
         self.rules.reload()
 
     def closeEvent(self, event):
+        self.soc.close()
         self.virtual_input.hide()
         self.engine.virtual_input.close()
         self.engine.ethernet.stop_receive()

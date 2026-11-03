@@ -1,10 +1,9 @@
 """session.py — SoC console design 4.2–4.3; host, no clock domain.
 
 Own the board's serial reference, UDP receiver and project capabilities.
-Serial status lines confirm the phase and the peer learned by the FPGA.
+HELLO establishes the peer; STATE owns application settings.
 """
 
-import ipaddress
 import re
 import threading
 import time
@@ -31,6 +30,15 @@ class BoardSession:
         self.peer_ip = None
         self.peer_port = None
         self.discovery_stop = threading.Event()
+        self.listeners = []
+        self.build = ''
+        self.state_generation = 0
+        self.last_state = None
+        self.last_request = None
+        from .processing import DEFAULTS
+        self.board_state = dict(app=0, state=0, error=0, boxes=0, threshold=25,
+                                classes=[0xffffffff, 0xffffffff, 0xffff],
+                                process=dict(DEFAULTS), request=0, frame=0, image_status=0)
         self.steps = {key: dict(done=False, time=None) for key in
                       ('listen', 'win3', 'peer', 'data')}
         self.counts = dict(video=0, telemetry=0)
@@ -70,62 +78,85 @@ class BoardSession:
     def log(self, text):
         self.engine.add_entry('sys', text)
 
-    def disconnect(self):
+    def disconnect_network(self):
         with self.lock:
             self.discovery_stop.set()
-            self.phase = 'disconnected'
             self.steps['peer']['done'] = False
+            self.engine.virtual_input.reset()
+
+    def disconnect(self):
+        with self.lock:
+            self.phase = 'disconnected'
 
     def feed_line(self, line):
         with self.lock:
             if 'BIOS menu:' in line:
-                self.discovery_stop.set()
                 self.phase = 'bios'
-                self.steps['peer']['done'] = False
             if (re.match(r'(Demo|Render(?:er)?|Showcase):', line)
                     or line.startswith(('RND display ready', 'board_render IDs', 'S3:', 'NPU '))):
-                entering = self.phase != 'application'
                 self.phase = 'application'
-                if entering and self.network_endpoint[0]:
-                    self.discovery_stop = threading.Event()
-                    threading.Thread(target=self._discover_network,
-                                     args=(self.discovery_stop,), daemon=True,
-                                     name='network-discovery').start()
             key, separator, value = line.partition(':')
             key, value = key.strip(), value.strip()
             if key in ('DEMO ERROR', 'Input error'):
                 self.fail(line)
             if separator and key in STATUS_KEYS:
                 self.summary[key] = value
-            if key == 'ETH peer IP':
-                self.peer_ip = str(ipaddress.IPv4Address(int(value, 16)))
-            if key == 'ETH peer port':
-                self.peer_port = int(value)
-                actual = [self.peer_ip, self.peer_port]
-                self.mark('peer', self.expected_peer is not None and actual == self.expected_peer)
-                if self.steps['peer']['done']:
-                    self.discovery_stop.set()
-                if self.expected_peer is not None and actual != self.expected_peer:
-                    self.fail(f'ETH peer 不一致：板端 {actual}，本机 {self.expected_peer}')
+    def notify(self):
+        for listener in list(self.listeners):
+            listener()
 
-    def _discover_network(self, stop):
-        try:
-            self.establish_network(*self.network_endpoint, _discovery=stop)
-        except (OSError, ValueError, RuntimeError):
-            # establish_network has recorded the failure; do not retry errors.
-            return
-        while not stop.wait(2.0):
+    def receive_state(self, message_type, payload):
+        import struct
+        from .showcase import HELLO
+        from .processing import unpack_process
+        with self.lock:
+            if message_type == HELLO:
+                proto, = struct.unpack_from('<H', payload)
+                if proto != 3:
+                    raise ValueError(f'HELLO protocol {proto}, expected 3')
+                self.build = payload[4:20].split(b'\0', 1)[0].decode('ascii')
+                payload = payload[20:]
+                self.mark('peer')
+                self.phase = 'application'
+                self.engine.virtual_input.start()
+            self.state_generation += 1
+            self.last_state = time.monotonic()
+            app, state, error, boxes, threshold = struct.unpack_from('<5B', payload)
+            classes = list(struct.unpack_from('<3I', payload, 8))
+            request, frame, image_status = struct.unpack_from('<IIB', payload, 44)
+            self.board_state = dict(app=app, state=state, error=error, boxes=boxes,
+                                    threshold=threshold, classes=classes,
+                                    process=unpack_process(payload[20:44]),
+                                    request=request, frame=frame, image_status=image_status)
+        self.notify()
+
+    def network_tick(self, now=None):
+        now = time.monotonic() if now is None else now
+        with self.lock:
+            if self.steps['peer']['done'] and now - self.last_state >= 3:
+                self.steps['peer']['done'] = False
+                self.last_request = None
+                self.engine.virtual_input.reset()
+                self.notify()
+            if not self.steps['peer']['done']:
+                if self.last_request is None or now - self.last_request >= 2:
+                    self._send_connection_request()
+                    self.last_request = now
+
+    def _monitor_network(self, stop):
+        while not stop.wait(.05):
             try:
-                self._send_connection_request(stop)
+                with self.lock:
+                    if stop.is_set():
+                        return
+                    self.network_tick()
             except (OSError, ValueError, RuntimeError) as exc:
                 self.fail(f'建立网口连接失败：{exc}')
                 return
 
-    def _send_connection_request(self, stop=None):
+    def _send_connection_request(self):
         self.ethernet.wait_for_link(self.ethernet.local_ip)
         with self.lock:
-            if stop is not None and stop.is_set():
-                return
             self.ethernet.rx_socket.sendto(next(packets(b'\0', 3, 0)),
                                           self.network_endpoint)
             self.mark('win3')
@@ -133,15 +164,12 @@ class BoardSession:
             self.log(f'连接请求已发送：{board_ip}:{board_port}；本机 {self.expected_peer}')
 
     def establish_network(self, board_ip='192.168.1.10', board_port=5000,
-                          local_ip=None, *, _discovery=None):
+                          local_ip=None):
         self.network_endpoint = (board_ip, board_port)
         if local_ip is not None:
             self.ethernet.local_ip = local_ip
         local_ip = self.ethernet.local_ip
         try:
-            with self.lock:
-                if _discovery is not None and _discovery.is_set():
-                    return self.status()
             rx = self.ethernet.status()['rx']
             if rx['active'] and (rx['localPort'] != 6000 or rx['localIp'] != local_ip):
                 self.ethernet.stop_receive()
@@ -154,7 +182,12 @@ class BoardSession:
                 self.peer_ip = self.peer_port = None
                 self.steps['peer'] = dict(done=False, time=None)
                 self.error = None
-            self._send_connection_request(_discovery)
+            self.discovery_stop.set()
+            self.discovery_stop = threading.Event()
+            self.last_request = None
+            self.network_tick()
+            threading.Thread(target=self._monitor_network, args=(self.discovery_stop,),
+                             daemon=True, name='network-discovery').start()
         except (OSError, ValueError, RuntimeError) as exc:
             self.fail(f'建立网口连接失败：{exc}')
             raise
@@ -168,4 +201,5 @@ class BoardSession:
             return dict(phase=self.phase, network=steps, counts=dict(self.counts),
                         dataTimes=dict(self.data_times), expectedPeer=self.expected_peer,
                         peer=[self.peer_ip, self.peer_port], summary=dict(self.summary),
+                        build=self.build, state=dict(self.board_state),
                         error=self.error or self.engine.program.status()['error'])

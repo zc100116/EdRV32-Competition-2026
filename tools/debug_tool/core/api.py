@@ -119,8 +119,8 @@ def make_handler(engine):
                 if path == "/api/telemetry/clear":
                     engine.telemetry.clear()
                     return self._json(200, engine.telemetry.status())
-                if path in ("/api/processing/pix", "/api/processing/geo"):
-                    return self._json(200, engine.processing.send(path.rsplit("/", 1)[1], body))
+                if path == "/api/processing":
+                    return self._json(200, engine.processing.send(body))
                 if path == "/api/scenes/send":
                     return self._json(200, engine.scenes.send(
                         body["name"], int(body.get("rate", 100))))

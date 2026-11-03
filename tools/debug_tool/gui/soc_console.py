@@ -10,10 +10,10 @@ import struct
 import threading
 import time
 
-from PySide6.QtCore import QEvent, Qt, QTimer
+from PySide6.QtCore import QEvent, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QImage, QIntValidator, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
-    QComboBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
+    QCheckBox, QSpinBox, QComboBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QPushButton,
     QSizePolicy, QStackedLayout, QStackedWidget, QTableWidget, QTabWidget, QScrollArea,
     QTableWidgetItem, QVBoxLayout, QWidget,
@@ -37,8 +37,19 @@ QWidget#socConsole QLabel[role="number"],
 QWidget#socConsole QLineEdit[role="number"] {
     font-family: "DejaVu Sans Mono", "Consolas", monospace; font-size: 12px;
 }
+QWidget#socConsole QCheckBox { spacing: 7px; min-height: 22px; }
+QWidget#socConsole QCheckBox::indicator {
+    width: 14px; height: 14px; border: 1px solid #8b98a9;
+    border-radius: 4px; background: white;
+}
+QWidget#socConsole QCheckBox::indicator:checked { background: #2f6bff; border-color: #2f6bff; }
+QWidget#socConsole QGroupBox {
+    font-size: 12px; font-weight: 600; padding-top: 14px; margin-top: 8px;
+}
+QWidget#socConsole QGroupBox::title { subcontrol-origin: margin; left: 5px; }
 QWidget#socConsole QPushButton { font-size: 12px; padding: 3px 8px; }
-QWidget#socConsole QLineEdit, QWidget#socConsole QComboBox {
+QWidget#socConsole QLineEdit, QWidget#socConsole QComboBox,
+QWidget#socConsole QSpinBox {
     font-size: 12px; min-height: 20px; padding: 2px 6px;
 }
 QWidget#socConsole QProgressBar { min-height: 7px; max-height: 7px; }
@@ -89,6 +100,7 @@ def form():
 
 
 class SocConsole(QWidget):
+    network_changed = Signal()
     def __init__(self, engine, toast):
         super().__init__()
         self.setObjectName('socConsole')
@@ -96,14 +108,12 @@ class SocConsole(QWidget):
         self.engine = engine
         self.board = engine.board
         self.toast = toast
+        self.state_generation = -1
         self.last_seq = 0
         self.last_display = None
         self.display_rate = FrameRate()
         self.displayed_frame = None
         self.generation = -1
-        self.folder_images = []
-        self.folder_started = None
-        self.folder_completed = 0
         self.loaded_image = None
         self.last_source_image = None
         self.comparing = False
@@ -150,6 +160,8 @@ class SocConsole(QWidget):
         self._controls(self.device_box)
         self.device_box.removeWidget(self.check_card)
         detection_box.addWidget(self.check_card)
+        self._session_controls(self.device_box)
+        self._detector_controls(detection_box)
         for box in (self.device_box, processing_box, detection_box):
             box.addStretch()
         self._canvas(row)
@@ -171,6 +183,73 @@ class SocConsole(QWidget):
         self.video_timer.setTimerType(Qt.PreciseTimer)
         self.video_timer.timeout.connect(self._video_tick)
         self.video_timer.start(16)
+        self.network_changed.connect(self.refresh)
+        self.board.listeners.append(self.network_changed.emit)
+
+    def _session_controls(self, layout):
+        frame, box = card('板端应用')
+        self.app_choice = QComboBox()
+        self.app_choice.addItems(['无', '实时识别', '图片识别', '图像处理', '图形测试',
+                                 '游戏', '芯片性能测试'])
+        box.addWidget(self.app_choice)
+        self.app_arg = QLineEdit('0')
+        self.app_arg.setValidator(QIntValidator(0, 65535, self))
+        self.app_arg.setToolTip('游戏序号')
+        box.addWidget(label('游戏序号', 'note'))
+        box.addWidget(self.app_arg)
+        for action, title in enumerate(['打开', '暂停', '继续', '重试']):
+            box.addWidget(self.button(title, lambda checked=False, a=action: self.run(
+                lambda: self.engine.ethernet.showcase.app(
+                    self.app_choice.currentIndex(), a,
+                    int(self.app_arg.text()) if self.app_choice.currentIndex() == 5 else 0))))
+        layout.addWidget(frame)
+
+    def _detector_controls(self, layout):
+        frame, box = card('检测设置')
+        self.detect_threshold = QSpinBox()
+        self.detect_threshold.setRange(25, 90)
+        self.detect_threshold.lineEdit().setStyleSheet('border:0; padding:0; min-height:0;')
+        self.detect_threshold.setSuffix(' %')
+        box.addWidget(self.detect_threshold)
+        self.class_checks = []
+        from core.labels import COCO_NAMES
+        for name in COCO_NAMES:
+            check = QCheckBox(name)
+            self.class_checks.append(check)
+            box.addWidget(check)
+        self.detect_threshold.valueChanged.connect(self.send_detection)
+        for check in self.class_checks:
+            check.toggled.connect(self.send_detection)
+        layout.addWidget(frame)
+        self.last_detection = None
+
+    def sync_detection(self, state, force=False):
+        if force:
+            self.app_choice.setCurrentIndex(state['app'])
+        current = (state['threshold'], tuple(state['classes']))
+        if not force and current == self.last_detection:
+            return
+        self.last_detection = current
+        self.detect_threshold.blockSignals(True)
+        self.detect_threshold.setValue(state['threshold'])
+        self.detect_threshold.blockSignals(False)
+        for index, check in enumerate(self.class_checks):
+            check.blockSignals(True)
+            check.setChecked(bool(state['classes'][index // 32] & (1 << (index % 32))))
+            check.blockSignals(False)
+
+    def send_detection(self, *_):
+        from core.showcase import DETECT
+        classes = [0, 0, 0]
+        for index, check in enumerate(self.class_checks):
+            if check.isChecked():
+                classes[index // 32] |= 1 << (index % 32)
+        payload = struct.pack('<B3x3I', self.detect_threshold.value(), *classes)
+        self.run(lambda: self.engine.ethernet.showcase.command(DETECT, payload))
+
+    def closeEvent(self, event):
+        self.board.listeners.remove(self.network_changed.emit)
+        super().closeEvent(event)
 
     def panel_header(self, panel, box):
         heading = box.takeAt(0).widget()
@@ -279,7 +358,7 @@ class SocConsole(QWidget):
         steps.setSpacing(8)
         self.step_labels = []
         for title in ('01 · 监听 UDP 6000', '02 · 连接请求已发送',
-                      '03 · PEER 对端一致', '04 · 视频 / EDTM 数据'):
+                      '03 · 板端已连接', '04 · 视频 / EDTM 数据'):
             value = label(title + '\n未完成 · —', 'note')
             value.setMinimumHeight(36)
             value.setStyleSheet('background:#f4f6fa;border-radius:6px;padding:5px 8px;')
@@ -301,11 +380,20 @@ class SocConsole(QWidget):
         send_row = QHBoxLayout()
         self.send_image = self.button('发送图像', self._send_image)
         send_row.addWidget(self.send_image)
-        self.stop_batch = self.button('停止批量', self._stop_batch)
-        send_row.addWidget(self.stop_batch)
+        self.cancel_image = self.button('取消', lambda: self.run(
+            self.engine.ethernet.showcase.cancel))
+        send_row.addWidget(self.cancel_image)
         self.image_camera = self.button('回到摄像头检测', self._camera_detection)
         send_row.addWidget(self.image_camera)
         box.addLayout(send_row)
+        navigation = QHBoxLayout()
+        self.previous_image = self.button('上一张', lambda: self.run(
+            lambda: self.engine.yolo.step(-1)))
+        self.next_image = self.button('下一张', lambda: self.run(
+            lambda: self.engine.yolo.step(1)))
+        navigation.addWidget(self.previous_image)
+        navigation.addWidget(self.next_image)
+        box.addLayout(navigation)
         self.image_note = label('', 'note')
         self.image_note.setWordWrap(True)
         box.insertWidget(1, self.image_note)
@@ -543,28 +631,15 @@ class SocConsole(QWidget):
             self.display.setCurrentIndex(1)
 
     def _choose_folder(self):
-        path = QFileDialog.getExistingDirectory(self, '选择连续识别图片文件夹')
+        path = QFileDialog.getExistingDirectory(self, '选择图片文件夹')
         if path:
-            self.folder_images = sorted(item for item in Path(path).iterdir()
-                                        if item.suffix.lower() in
-                                        ('.png', '.jpg', '.jpeg', '.bmp'))
-            if not self.folder_images:
-                self.toast.show_message('文件夹没有图片', error=True)
-                return
-            self.folder_started = time.monotonic()
-            self.folder_completed = 0
-            self._next_image()
-
-    def _stop_batch(self):
-        self.folder_images.clear()
-        self.folder_started = None
-        self.capture_status.setText('批量已停止；等待在途图片完成或超时'
-                                    if self.engine.yolo.capture_pending else '批量已停止')
-
-    def _next_image(self):
-        self.image_path.setText(str(self.folder_images.pop(0)))
-        self._send_image()
-
+            def select():
+                self.engine.yolo.select_folder(path)
+                self.image_path.setText(str(self.engine.yolo.images[0]))
+                self._load_image()
+                self.image_note.setText(f'{self.engine.yolo.images[0].name} · '
+                                        f'1 / {len(self.engine.yolo.images)} · 等待')
+            self.run(select)
 
     def _load_image(self):
         from PySide6.QtGui import QImageReader
@@ -759,10 +834,19 @@ class SocConsole(QWidget):
 
     def refresh(self):
         state = self.board.status()
-        self.phase.setText('阶段 · ' + {'disconnected': '未连接', 'bios': 'BIOS',
-                                      'application': '应用'}[state['phase']])
+        connected = state['network']['peer']['done']
+        board_state = state['state']
+        apps = ['无', '实时识别', '图片识别', '图像处理', '图形测试', '游戏', '芯片性能测试']
+        sessions = ['空闲', '启动中', '运行中', '已暂停', '停止中', '失败']
+        self.phase.setText(('网口已连接' if connected else '网口未连接') +
+                           ' · 板端版本 ' + (state['build'] or '—') + ' · ' +
+                           apps[board_state['app']] + ' / ' + sessions[board_state['state']])
+        self.phase.setWordWrap(True)
+        new_state = self.state_generation != self.board.state_generation
+        self.state_generation = self.board.state_generation
+        self.sync_detection(board_state, new_state)
         for index, (key, title) in enumerate(zip(('listen', 'win3', 'peer', 'data'),
-                ('01 · 监听 UDP 6000', '02 · 连接请求已发送', '03 · PEER 对端一致',
+                ('01 · 监听 UDP 6000', '02 · 连接请求已发送', '03 · 板端已连接',
                  '04 · 视频 / EDTM 数据'))):
             step = state['network'][key]
             stamp = fmt_ts(step['time'])[:8] if step['time'] else '—'
@@ -778,7 +862,8 @@ class SocConsole(QWidget):
         self.stop.setEnabled(state['network']['listen']['done'])
         for key, value in self.summary.items():
             value.setText(state['summary'].get(key, '—'))
-        self.peer.setText(f"Peer · {state['peer'][0] or '—'} : {state['peer'][1] or '—'}")
+        self.peer.setText('板端版本 · ' + (state['build'] or '—'))
+        self.processing.refresh(new_state)
         self.switch.setText('Switch · ' + state['summary'].get('Switch', '—'))
         self.message.setText(state['error'] or
                              ('应用运行中' if state['phase'] == 'application' else
@@ -794,7 +879,15 @@ class SocConsole(QWidget):
         self.send_image.setEnabled(not tx['active'] and not waiting)
         self.send_model.setEnabled(not tx['active'] and not waiting)
         self.choose_folder.setEnabled(not tx['active'] and not waiting)
-        self.stop_batch.setEnabled(self.folder_started is not None)
+        self.cancel_image.setEnabled(waiting or tx['active'])
+        yolo = self.engine.yolo
+        self.previous_image.setEnabled(not tx['active'] and not waiting and yolo.image_index > 0)
+        self.next_image.setEnabled(not tx['active'] and not waiting and
+                                   yolo.image_index + 1 < len(yolo.images))
+        if yolo.source_image:
+            self.image_note.setText(f'{Path(yolo.source_image).name} · '
+                                    f'{yolo.image_index + 1} / {len(yolo.images)} · '
+                                    f'{yolo.image_status}')
         self.image_camera.setEnabled(not tx['active'] and not waiting)
         self.video_camera.setEnabled(not tx['active'] and not waiting)
         self.apply_scene.setEnabled(not tx['active'] and not waiting)
@@ -808,11 +901,6 @@ class SocConsole(QWidget):
             self.generation = generation
             self.capture_status.setText(self.engine.yolo.error +
                                        f' · 失败 {self.engine.yolo.failed} 张')
-            if self.folder_started is not None:
-                if self.folder_images:
-                    self._next_image()
-                else:
-                    self.folder_started = None
         elif not tx['active'] and capture is not None and generation != self.generation:
             self.generation = generation
             self.last_display = None
@@ -826,23 +914,12 @@ class SocConsole(QWidget):
                                                           self.engine.yolo.timings)
                 self.board.log(f"{timing['path']} · 往返 {timing['seconds'] * 1000:.2f} ms")
                 self.capture_status.setText(self.capture_status.text() + f' · {fps:.2f} fps')
-            if self.folder_started is not None:
-                self.folder_completed += 1
-                elapsed = time.monotonic() - self.folder_started
-                self.capture_status.setText(self.capture_status.text() +
-                    f' · 文件夹 {self.folder_completed / elapsed:.2f} fps')
-                if self.folder_images:
-                    self._next_image()
-                else:
-                    self.folder_started = None
         self.compare.setEnabled(not self.comparing)
         if self.comparison is not None and self.comparison is not self.reported_comparison:
             self.reported_comparison = self.comparison
             if isinstance(self.comparison, str):
                 self.comparison_result.setText('参考比对失败：' + self.comparison)
                 self.board.fail(self.comparison_result.text())
-                self.folder_images = []
-                self.folder_started = None
             else:
                 result = self.comparison
                 first = result['output']['first']
