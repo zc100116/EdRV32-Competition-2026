@@ -13,6 +13,10 @@ PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c sw/apps/s
 CFLAGS_EXTRA := -I$(ROOT)/sw/lib -I$(ROOT)/sw/lib/sched -I$(ROOT)/sw/boot \
     -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/apps/showcase
 include $(ROOT)/sw/apps/showcase/lvgl/program.mk
+# P5 design 11.2: select the upstream RGB565 asset only for showcase.
+PROGRAM_SOURCES := $(filter-out \
+    third_party/lvgl/demos/benchmark/assets/img_benchmark_lvgl_logo_rgb.c,$(PROGRAM_SOURCES))
+PROGRAM_SOURCES += sw/apps/showcase/lvgl/benchmark_logo_rgb565.c
 include $(ROOT)/sw/apps/showcase/nes/program.mk
 
 # Shared P2 font subset; generated from exactly the shared UI text.
