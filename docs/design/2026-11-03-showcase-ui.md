@@ -263,6 +263,7 @@
 - `ui_data_process(unsigned mode)` 带模式参数；图像处理页像视觉页一样周期刷新。
 - 图片识别应用的 needs 为 NPU|ETH，CH2 由 CPU 按行切片计算，不依赖 VIN。
 - DDR 区域（DDR 偏移，沿用 demo.h）：模型 BULK 0x09000000 / 16 MiB；图片 BULK 0x08000000 / 2 MiB；游戏上传区 0x0b000000 / 8 MiB；vision 工作区与 demo.h 相同；BOARD 自己的缓冲放在程序 bss 中。常量集中在 `board/ddr_map.h`。
+- 运行时连接：`vision_init()` 在启动时调用（含 OV5640 I2C 配置）；`vision_irq(event, context)` 由 platform 为 VIN/NPU/PIX/GEO 注册；`vision_service()` 在应用任务中每轮调用，返回非 0 就继续调用，页面退出后也一样；网口发送只有 BOARD 一个所有者，接口为 `board_eth_send(descriptors, count)`，返回 0 表示忙，调用者下一次 step 再发。
 - 模型 BULK 数据保留 EDNM 的稀疏偏移（头 0、描述符 0x1000、模型 0x100000，间隙补零），total = 0x100000 + 模型长度。
 
 ## 5. 模拟器方案
