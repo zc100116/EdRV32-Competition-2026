@@ -245,11 +245,9 @@ ETH 实现千兆 MAC、IPv4/UDP 和 ARP 应答。接收时，UDP 载荷开头的
 
 调试工具提供串口日志终端、网口连接状态、BIOS 烧录、虚拟键盘鼠标、模型和图片上传、检测结果可视化及与 Python 参考模型的逐项比对、图像处理参数同步、游戏上传，以及 DDR 带宽等遥测数据的实时曲线（图2-12）。
 
-![图2-12 PC 端调试工具界面](figures/shot2-12.png)
+![图2-12 PC端调试工具的网口虚拟输入](figures/shot2-12.png)
 
-<p align="center">图2-12 PC 端调试工具界面</p>
-
-<span style="color:red">【待补截图：figures/shot2-12（.png 或 .jpg），见 图片需求.md】</span>
+<p align="center">图2-12 PC端调试工具的网口虚拟输入</p>
 
 板端关键函数及其输入、输出见表2-2。
 
@@ -355,11 +353,9 @@ CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为1
 <p align="center">图3-11 性能浮窗与芯片信息</p>
 
 
-![图3-12 PC 端调试工具](figures/shot3-12.png)
+![图3-12 PC端调试工具的目标检测回传](figures/shot3-12.png)
 
-<p align="center">图3-12 PC 端调试工具</p>
-
-<span style="color:red">【待补截图：figures/shot3-12（.png 或 .jpg），见 图片需求.md】</span>
+<p align="center">图3-12 PC端调试工具的目标检测回传</p>
 
 ### 3.3 特性成果
 
