@@ -5,7 +5,7 @@
 # ipcore/ddr3_test/pnr/ddr_test.fdc. Confirm PLL output hierarchy in Windows PDS.
 
 create_clock -name {clk_board} [get_ports {clk_i}] -period {37.037} -waveform {0.000 18.5185}
-create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -master_clock [get_clocks {clk_board}] -multiply_by {100} -divide_by {27}
+create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -master_clock [get_clocks {clk_board}] -multiply_by {125} -divide_by {27}
 
 define_attribute {p:clk_i} {PAP_IO_DIRECTION} {INPUT}
 define_attribute {p:clk_i} {PAP_IO_LOC} {D18}

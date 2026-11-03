@@ -3,7 +3,7 @@
 // Description: Generated address, attribute, APB slot and interrupt constants.
 //              Include inside a module; regenerate with tools/gen/soc_map.py.
 // Clock domain: none (constants).
-localparam [31:0] EDRV32_CLK_SYS_HZ = 32'h05F5E100;
+localparam [31:0] EDRV32_CLK_SYS_HZ = 32'h07735940;
 localparam [31:0] EDRV32_ROM_BASE = 32'h00000000;
 localparam [31:0] EDRV32_ROM_SIZE = 32'h00004000;
 localparam [31:0] EDRV32_ROM_CACHEABLE = 32'h00000000;
