@@ -1,0 +1,10 @@
+place_route
+C ConstraintEditor-2002: 37
+C ConstraintEditor-2009: 24
+C Place-2028: 1
+C Place-2039: 1
+E Route-0008: 1
+E Route-0039: 1
+W ConstraintEditor-4032: 191
+W PhysicalConstraintEditor-4048: 345
+W PhysicalConstraintEditor-4049: 158

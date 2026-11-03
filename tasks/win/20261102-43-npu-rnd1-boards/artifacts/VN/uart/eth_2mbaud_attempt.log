@@ -1,0 +1,48 @@
+[1] [sys] connected COM7 @ 115200 8N1
+[2] [rx] 
+[3] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[4] [rx]   E         D   D   R   R   V   V      3      2 
+[5] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[6] [rx]   E         D   D   R  R     V V       3   2    
+[7] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[8] [rx] 
+[9] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[10] [rx] CHIP_ID: 0xed320001
+[11] [rx] CLK_SYS_HZ: 100000000
+[12] [rx] ROM bytes: 16384
+[13] [rx] SRAM bytes: 65536
+[14] [rx] I-cache bytes: 8192
+[15] [rx] D-cache bytes: 8192
+[16] [rx] MEM_READY: 1
+[17] [rx] Build commit: 92b38fd2
+[18] [rx] Compiler version: GCC 15.2.0
+[19] [rx] Boot SRAM
+[20] [rx] Monitor: EdRV32
+[21] [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[22] [rx] 
+[23] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[24] [rx]   E         D   D   R   R   V   V      3      2 
+[25] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[26] [rx]   E         D   D   R  R     V V       3   2    
+[27] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[28] [rx] 
+[29] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[30] [rx] CHIP_ID: 0xed320001
+[31] [rx] CLK_SYS_HZ: 100000000
+[32] [rx] ROM bytes: 16384
+[33] [rx] SRAM bytes: 65536
+[34] [rx] I-cache bytes: 8192
+[35] [rx] D-cache bytes: 8192
+[36] [rx] MEM_READY: 1
+[37] [rx] Build commit: 92b38fd2
+[38] [rx] Compiler version: GCC 15.2.0
+[39] [rx] BIOS: EdRV32
+[40] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[41] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[42] [rx] Input error: type 1-4 then Enter
+[43] [sys] Input error: type 1-4 then Enter
+[44] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[45] [rx] Baud:
+[46] [rx] Baud result: 2000000
+[47] [rx] �t�TS��e��P��h���P��lO$�`O$�Z�
+[48] [tx] <CR>

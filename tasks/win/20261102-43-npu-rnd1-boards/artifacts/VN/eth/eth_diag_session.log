@@ -1,0 +1,1807 @@
+[1] [sys] connected COM7 @ 115200 8N1
+[2] [rx] 
+[3] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[4] [rx]   E         D   D   R   R   V   V      3      2 
+[5] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[6] [rx]   E         D   D   R  R     V V       3   2    
+[7] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[8] [rx] 
+[9] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[10] [rx] CHIP_ID: 0xed320001
+[11] [rx] CLK_SYS_HZ: 100000000
+[12] [rx] ROM bytes: 16384
+[13] [rx] SRAM bytes: 65536
+[14] [rx] I-cache bytes: 8192
+[15] [rx] D-cache bytes: 8192
+[16] [rx] MEM_READY: 1
+[17] [rx] Build commit: 92b38fd2
+[18] [rx] Compiler version: GCC 15.2.0
+[19] [rx] Boot SRAM
+[20] [rx] Monitor: EdRV32
+[21] [rx] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[22] [rx] 
+[23] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[24] [rx]   E         D   D   R   R   V   V      3      2 
+[25] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[26] [rx]   E         D   D   R  R     V V       3   2    
+[27] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[28] [rx] 
+[29] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[30] [rx] CHIP_ID: 0xed320001
+[31] [rx] CLK_SYS_HZ: 100000000
+[32] [rx] ROM bytes: 16384
+[33] [rx] SRAM bytes: 65536
+[34] [rx] I-cache bytes: 8192
+[35] [rx] D-cache bytes: 8192
+[36] [rx] MEM_READY: 1
+[37] [rx] Build commit: 92b38fd2
+[38] [rx] Compiler version: GCC 15.2.0
+[39] [rx] BIOS: EdRV32
+[40] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[41] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[42] [rx] Input error: type 1-4 then Enter
+[43] [sys] Input error: type 1-4 then Enter
+[44] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[45] [rx] Baud:
+[46] [rx] Baud result: 2000000
+[47] [rx] �t�TS��e��P��h���P��lO$�`O$�Z�
+[48] [tx] <CR>
+[49] [sys] BIOS programming failed: serial port disconnected during BIOS programming
+[50] [sys] disconnected COM7
+[51] [sys] connected COM7 @ 115200 8N1
+[52] [rx] 
+[53] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[54] [rx]   E         D   D   R   R   V   V      3      2 
+[55] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[56] [rx]   E         D   D   R  R     V V       3   2    
+[57] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[58] [rx] 
+[59] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[60] [rx] CHIP_ID: 0xed320001
+[61] [rx] CLK_SYS_HZ: 100000000
+[62] [rx] ROM bytes: 16384
+[63] [rx] SRAM bytes: 65536
+[64] [rx] I-cache bytes: 8192
+[65] [rx] D-cache bytes: 8192
+[66] [rx] MEM_READY: 1
+[67] [rx] Build commit: 92b38fd2
+[68] [rx] Compiler version: GCC 15.2.0
+[69] [rx] BIOS: EdRV32
+[70] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[71] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[72] [tx] <CR>
+[73] [rx] Input error: type 1-4 then Enter
+[74] [sys] Input error: type 1-4 then Enter
+[75] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[76] [rx] Input error: type 1-4 then Enter
+[77] [sys] Input error: type 1-4 then Enter
+[78] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[79] [rx] UART load ready
+[80] [rx] Load bytes: 4277 segments: 1
+[81] [rx] Load result: PASS
+[82] [rx] Run: 0x10000000
+[83] [rx] EDRV32 ETH diagnostic
+[84] [rx] PHY reset
+[85] [rx] PHY addr=0 PHYID1=0x0000001c PHYID2=0x0000c916
+[86] [rx] PHY addr=1 PHYID1=0x0000001c PHYID2=0x0000c916
+[87] [rx] BMCR=0x00001040
+[88] [rx] BMSR.1=0x00007989
+[89] [rx] BMSR.2=0x00007989
+[90] [rx] ANAR=0x000001e1
+[91] [rx] ANLPAR=0x00000000
+[92] [rx] 1000BASE-T status=0x00000000
+[93] [rx] PHYSR=0x00001002
+[94] [rx] D08.11=0x00000109
+[95] [rx] D08.15=0x00000019
+[96] [rx] TXDLY=1 RXDLY=1
+[97] [rx] Commands: d=next delays 0-3=set delays (TX<<1|RX) r=PHY reset s=status
+[98] [rx] link=0 speed=10 duplex=half
+[99] [rx] PERF0=0
+[100] [rx] PERF1=0
+[101] [rx] PERF2=0
+[102] [rx] PERF3=0
+[103] [rx] PERF4=0
+[104] [rx] PERF5=0
+[105] [rx] PERF6=0
+[106] [rx] PERF7=0
+[107] [rx] PERF8=0
+[108] [rx] PEER=0.0.0.0:0
+[109] [rx] STATUS=0x00000002
+[110] [rx] IRQ_STAT=0x00000000
+[111] [rx] ERR_CODE=0x00000000
+[112] [rx] TX sequence=0
+[113] [rx] link=0 speed=10 duplex=half
+[114] [rx] PERF0=0
+[115] [rx] PERF1=0
+[116] [rx] PERF2=0
+[117] [rx] PERF3=0
+[118] [rx] PERF4=0
+[119] [rx] PERF5=0
+[120] [rx] PERF6=0
+[121] [rx] PERF7=0
+[122] [rx] PERF8=0
+[123] [rx] PEER=0.0.0.0:0
+[124] [rx] STATUS=0x00000002
+[125] [rx] IRQ_STAT=0x00000001
+[126] [rx] ERR_CODE=0x00000000
+[127] [rx] TX sequence=1
+[128] [rx] link=1 speed=1000 duplex=full
+[129] [rx] PERF0=0
+[130] [rx] PERF1=0
+[131] [rx] PERF2=0
+[132] [rx] PERF3=0
+[133] [rx] PERF4=0
+[134] [rx] PERF5=0
+[135] [rx] PERF6=0
+[136] [rx] PERF7=0
+[137] [rx] PERF8=0
+[138] [rx] PEER=0.0.0.0:0
+[139] [rx] STATUS=0x00000002
+[140] [rx] IRQ_STAT=0x00000001
+[141] [rx] ERR_CODE=0x00000000
+[142] [rx] TX sequence=2
+[143] [rx] link=1 speed=1000 duplex=full
+[144] [rx] PERF0=11
+[145] [rx] PERF1=0
+[146] [rx] PERF2=0
+[147] [rx] PERF3=0
+[148] [rx] PERF4=0
+[149] [rx] PERF5=11
+[150] [rx] PERF6=0
+[151] [rx] PERF7=0
+[152] [rx] PERF8=0
+[153] [rx] PEER=0.0.0.0:0
+[154] [rx] STATUS=0x00000002
+[155] [rx] IRQ_STAT=0x00000001
+[156] [rx] ERR_CODE=0x00000000
+[157] [rx] TX sequence=3
+[158] [rx] link=1 speed=1000 duplex=full
+[159] [rx] PERF0=37
+[160] [rx] PERF1=0
+[161] [rx] PERF2=0
+[162] [rx] PERF3=0
+[163] [rx] PERF4=0
+[164] [rx] PERF5=37
+[165] [rx] PERF6=0
+[166] [rx] PERF7=0
+[167] [rx] PERF8=0
+[168] [rx] PEER=0.0.0.0:0
+[169] [rx] STATUS=0x00000002
+[170] [rx] IRQ_STAT=0x00000001
+[171] [rx] ERR_CODE=0x00000000
+[172] [rx] TX sequence=4
+[173] [rx] link=1 speed=1000 duplex=full
+[174] [rx] PERF0=50
+[175] [rx] PERF1=0
+[176] [rx] PERF2=0
+[177] [rx] PERF3=0
+[178] [rx] PERF4=0
+[179] [rx] PERF5=50
+[180] [rx] PERF6=0
+[181] [rx] PERF7=0
+[182] [rx] PERF8=0
+[183] [rx] PEER=0.0.0.0:0
+[184] [rx] STATUS=0x00000002
+[185] [rx] IRQ_STAT=0x00000001
+[186] [rx] ERR_CODE=0x00000000
+[187] [rx] TX sequence=5
+[188] [rx] link=1 speed=1000 duplex=full
+[189] [rx] PERF0=69
+[190] [rx] PERF1=0
+[191] [rx] PERF2=0
+[192] [rx] PERF3=0
+[193] [rx] PERF4=0
+[194] [rx] PERF5=69
+[195] [rx] PERF6=0
+[196] [rx] PERF7=0
+[197] [rx] PERF8=0
+[198] [rx] PEER=0.0.0.0:0
+[199] [rx] STATUS=0x00000002
+[200] [rx] IRQ_STAT=0x00000001
+[201] [rx] ERR_CODE=0x00000000
+[202] [rx] TX sequence=6
+[203] [rx] link=1 speed=1000 duplex=full
+[204] [rx] PERF0=80
+[205] [rx] PERF1=0
+[206] [rx] PERF2=0
+[207] [rx] PERF3=0
+[208] [rx] PERF4=0
+[209] [rx] PERF5=80
+[210] [rx] PERF6=0
+[211] [rx] PERF7=0
+[212] [rx] PERF8=0
+[213] [rx] PEER=0.0.0.0:0
+[214] [rx] STATUS=0x00000002
+[215] [rx] IRQ_STAT=0x00000001
+[216] [rx] ERR_CODE=0x00000000
+[217] [rx] TX sequence=7
+[218] [rx] link=1 speed=1000 duplex=full
+[219] [rx] PERF0=84
+[220] [rx] PERF1=0
+[221] [rx] PERF2=0
+[222] [rx] PERF3=0
+[223] [rx] PERF4=0
+[224] [rx] PERF5=84
+[225] [rx] PERF6=0
+[226] [rx] PERF7=0
+[227] [rx] PERF8=0
+[228] [rx] PEER=0.0.0.0:0
+[229] [rx] STATUS=0x00000002
+[230] [rx] IRQ_STAT=0x00000001
+[231] [rx] ERR_CODE=0x00000000
+[232] [rx] TX sequence=8
+[233] [rx] link=1 speed=1000 duplex=full
+[234] [rx] PERF0=89
+[235] [rx] PERF1=0
+[236] [rx] PERF2=0
+[237] [rx] PERF3=0
+[238] [rx] PERF4=0
+[239] [rx] PERF5=89
+[240] [rx] PERF6=0
+[241] [rx] PERF7=0
+[242] [rx] PERF8=0
+[243] [rx] PEER=0.0.0.0:0
+[244] [rx] STATUS=0x00000002
+[245] [rx] IRQ_STAT=0x00000001
+[246] [rx] ERR_CODE=0x00000000
+[247] [rx] TX sequence=9
+[248] [rx] link=1 speed=1000 duplex=full
+[249] [rx] PERF0=97
+[250] [rx] PERF1=0
+[251] [rx] PERF2=0
+[252] [rx] PERF3=0
+[253] [rx] PERF4=0
+[254] [rx] PERF5=97
+[255] [rx] PERF6=0
+[256] [rx] PERF7=0
+[257] [rx] PERF8=0
+[258] [rx] PEER=0.0.0.0:0
+[259] [rx] STATUS=0x00000002
+[260] [rx] IRQ_STAT=0x00000001
+[261] [rx] ERR_CODE=0x00000000
+[262] [rx] TX sequence=10
+[263] [rx] link=1 speed=1000 duplex=full
+[264] [rx] PERF0=105
+[265] [rx] PERF1=1
+[266] [rx] PERF2=1
+[267] [rx] PERF3=0
+[268] [rx] PERF4=0
+[269] [rx] PERF5=103
+[270] [rx] PERF6=0
+[271] [rx] PERF7=0
+[272] [rx] PERF8=1
+[273] [rx] PEER=192.168.1.2:6000
+[274] [rx] STATUS=0x00000002
+[275] [rx] IRQ_STAT=0x00000801
+[276] [rx] ERR_CODE=0x00000000
+[277] [rx] TX sequence=11
+[278] [rx] link=1 speed=1000 duplex=full
+[279] [rx] PERF0=119
+[280] [rx] PERF1=2
+[281] [rx] PERF2=2
+[282] [rx] PERF3=0
+[283] [rx] PERF4=0
+[284] [rx] PERF5=116
+[285] [rx] PERF6=0
+[286] [rx] PERF7=0
+[287] [rx] PERF8=1
+[288] [rx] PEER=192.168.1.2:6000
+[289] [rx] STATUS=0x00000002
+[290] [rx] IRQ_STAT=0x00000801
+[291] [rx] ERR_CODE=0x00000000
+[292] [rx] TX sequence=12
+[293] [rx] link=1 speed=1000 duplex=full
+[294] [rx] PERF0=123
+[295] [rx] PERF1=3
+[296] [rx] PERF2=3
+[297] [rx] PERF3=0
+[298] [rx] PERF4=0
+[299] [rx] PERF5=119
+[300] [rx] PERF6=0
+[301] [rx] PERF7=0
+[302] [rx] PERF8=1
+[303] [rx] PEER=192.168.1.2:6000
+[304] [rx] STATUS=0x00000002
+[305] [rx] IRQ_STAT=0x00000801
+[306] [rx] ERR_CODE=0x00000000
+[307] [rx] TX sequence=13
+[308] [rx] link=1 speed=1000 duplex=full
+[309] [rx] PERF0=131
+[310] [rx] PERF1=4
+[311] [rx] PERF2=4
+[312] [rx] PERF3=0
+[313] [rx] PERF4=0
+[314] [rx] PERF5=126
+[315] [rx] PERF6=0
+[316] [rx] PERF7=0
+[317] [rx] PERF8=1
+[318] [rx] PEER=192.168.1.2:6000
+[319] [rx] STATUS=0x00000002
+[320] [rx] IRQ_STAT=0x00000801
+[321] [rx] ERR_CODE=0x00000000
+[322] [rx] TX sequence=14
+[323] [rx] link=1 speed=1000 duplex=full
+[324] [rx] PERF0=135
+[325] [rx] PERF1=5
+[326] [rx] PERF2=5
+[327] [rx] PERF3=0
+[328] [rx] PERF4=0
+[329] [rx] PERF5=129
+[330] [rx] PERF6=0
+[331] [rx] PERF7=0
+[332] [rx] PERF8=1
+[333] [rx] PEER=192.168.1.2:6000
+[334] [rx] STATUS=0x00000002
+[335] [rx] IRQ_STAT=0x00000801
+[336] [rx] ERR_CODE=0x00000000
+[337] [rx] TX sequence=15
+[338] [rx] link=1 speed=1000 duplex=full
+[339] [rx] PERF0=138
+[340] [rx] PERF1=6
+[341] [rx] PERF2=6
+[342] [rx] PERF3=0
+[343] [rx] PERF4=0
+[344] [rx] PERF5=131
+[345] [rx] PERF6=0
+[346] [rx] PERF7=0
+[347] [rx] PERF8=1
+[348] [rx] PEER=192.168.1.2:6000
+[349] [rx] STATUS=0x00000002
+[350] [rx] IRQ_STAT=0x00000801
+[351] [rx] ERR_CODE=0x00000000
+[352] [rx] TX sequence=16
+[353] [rx] link=1 speed=1000 duplex=full
+[354] [rx] PERF0=140
+[355] [rx] PERF1=7
+[356] [rx] PERF2=7
+[357] [rx] PERF3=0
+[358] [rx] PERF4=0
+[359] [rx] PERF5=132
+[360] [rx] PERF6=0
+[361] [rx] PERF7=0
+[362] [rx] PERF8=1
+[363] [rx] PEER=192.168.1.2:6000
+[364] [rx] STATUS=0x00000002
+[365] [rx] IRQ_STAT=0x00000801
+[366] [rx] ERR_CODE=0x00000000
+[367] [rx] TX sequence=17
+[368] [rx] link=1 speed=1000 duplex=full
+[369] [rx] PERF0=144
+[370] [rx] PERF1=8
+[371] [rx] PERF2=8
+[372] [rx] PERF3=0
+[373] [rx] PERF4=0
+[374] [rx] PERF5=135
+[375] [rx] PERF6=0
+[376] [rx] PERF7=0
+[377] [rx] PERF8=1
+[378] [rx] PEER=192.168.1.2:6000
+[379] [rx] STATUS=0x00000002
+[380] [rx] IRQ_STAT=0x00000801
+[381] [rx] ERR_CODE=0x00000000
+[382] [rx] TX sequence=18
+[383] [rx] link=1 speed=1000 duplex=full
+[384] [rx] PERF0=145
+[385] [rx] PERF1=9
+[386] [rx] PERF2=9
+[387] [rx] PERF3=0
+[388] [rx] PERF4=0
+[389] [rx] PERF5=135
+[390] [rx] PERF6=0
+[391] [rx] PERF7=0
+[392] [rx] PERF8=1
+[393] [rx] PEER=192.168.1.2:6000
+[394] [rx] STATUS=0x00000002
+[395] [rx] IRQ_STAT=0x00000801
+[396] [rx] ERR_CODE=0x00000000
+[397] [rx] TX sequence=19
+[398] [rx] link=1 speed=1000 duplex=full
+[399] [rx] PERF0=148
+[400] [rx] PERF1=10
+[401] [rx] PERF2=10
+[402] [rx] PERF3=0
+[403] [rx] PERF4=0
+[404] [rx] PERF5=137
+[405] [rx] PERF6=0
+[406] [rx] PERF7=0
+[407] [rx] PERF8=1
+[408] [rx] PEER=192.168.1.2:6000
+[409] [rx] STATUS=0x00000002
+[410] [rx] IRQ_STAT=0x00000801
+[411] [rx] ERR_CODE=0x00000000
+[412] [rx] TX sequence=20
+[413] [rx] link=1 speed=1000 duplex=full
+[414] [rx] PERF0=150
+[415] [rx] PERF1=11
+[416] [rx] PERF2=11
+[417] [rx] PERF3=0
+[418] [rx] PERF4=0
+[419] [rx] PERF5=138
+[420] [rx] PERF6=0
+[421] [rx] PERF7=0
+[422] [rx] PERF8=1
+[423] [rx] PEER=192.168.1.2:6000
+[424] [rx] STATUS=0x00000002
+[425] [rx] IRQ_STAT=0x00000801
+[426] [rx] ERR_CODE=0x00000000
+[427] [rx] TX sequence=21
+[428] [rx] link=1 speed=1000 duplex=full
+[429] [rx] PERF0=152
+[430] [rx] PERF1=12
+[431] [rx] PERF2=12
+[432] [rx] PERF3=0
+[433] [rx] PERF4=0
+[434] [rx] PERF5=139
+[435] [rx] PERF6=0
+[436] [rx] PERF7=0
+[437] [rx] PERF8=1
+[438] [rx] PEER=192.168.1.2:6000
+[439] [rx] STATUS=0x00000002
+[440] [rx] IRQ_STAT=0x00000801
+[441] [rx] ERR_CODE=0x00000000
+[442] [rx] TX sequence=22
+[443] [rx] link=1 speed=1000 duplex=full
+[444] [rx] PERF0=154
+[445] [rx] PERF1=13
+[446] [rx] PERF2=13
+[447] [rx] PERF3=0
+[448] [rx] PERF4=0
+[449] [rx] PERF5=140
+[450] [rx] PERF6=0
+[451] [rx] PERF7=0
+[452] [rx] PERF8=1
+[453] [rx] PEER=192.168.1.2:6000
+[454] [rx] STATUS=0x00000002
+[455] [rx] IRQ_STAT=0x00000801
+[456] [rx] ERR_CODE=0x00000000
+[457] [rx] TX sequence=23
+[458] [rx] link=1 speed=1000 duplex=full
+[459] [rx] PERF0=156
+[460] [rx] PERF1=14
+[461] [rx] PERF2=14
+[462] [rx] PERF3=0
+[463] [rx] PERF4=0
+[464] [rx] PERF5=141
+[465] [rx] PERF6=0
+[466] [rx] PERF7=0
+[467] [rx] PERF8=1
+[468] [rx] PEER=192.168.1.2:6000
+[469] [rx] STATUS=0x00000002
+[470] [rx] IRQ_STAT=0x00000801
+[471] [rx] ERR_CODE=0x00000000
+[472] [rx] TX sequence=24
+[473] [rx] link=1 speed=1000 duplex=full
+[474] [rx] PERF0=159
+[475] [rx] PERF1=15
+[476] [rx] PERF2=15
+[477] [rx] PERF3=0
+[478] [rx] PERF4=0
+[479] [rx] PERF5=143
+[480] [rx] PERF6=0
+[481] [rx] PERF7=0
+[482] [rx] PERF8=1
+[483] [rx] PEER=192.168.1.2:6000
+[484] [rx] STATUS=0x00000002
+[485] [rx] IRQ_STAT=0x00000801
+[486] [rx] ERR_CODE=0x00000000
+[487] [rx] TX sequence=25
+[488] [rx] link=1 speed=1000 duplex=full
+[489] [rx] PERF0=161
+[490] [rx] PERF1=16
+[491] [rx] PERF2=16
+[492] [rx] PERF3=0
+[493] [rx] PERF4=0
+[494] [rx] PERF5=144
+[495] [rx] PERF6=0
+[496] [rx] PERF7=0
+[497] [rx] PERF8=1
+[498] [rx] PEER=192.168.1.2:6000
+[499] [rx] STATUS=0x00000002
+[500] [rx] IRQ_STAT=0x00000801
+[501] [rx] ERR_CODE=0x00000000
+[502] [rx] TX sequence=26
+[503] [rx] link=1 speed=1000 duplex=full
+[504] [rx] PERF0=164
+[505] [rx] PERF1=17
+[506] [rx] PERF2=17
+[507] [rx] PERF3=0
+[508] [rx] PERF4=0
+[509] [rx] PERF5=146
+[510] [rx] PERF6=0
+[511] [rx] PERF7=0
+[512] [rx] PERF8=1
+[513] [rx] PEER=192.168.1.2:6000
+[514] [rx] STATUS=0x00000002
+[515] [rx] IRQ_STAT=0x00000801
+[516] [rx] ERR_CODE=0x00000000
+[517] [rx] TX sequence=27
+[518] [rx] link=1 speed=1000 duplex=full
+[519] [rx] PERF0=167
+[520] [rx] PERF1=18
+[521] [rx] PERF2=18
+[522] [rx] PERF3=0
+[523] [rx] PERF4=0
+[524] [rx] PERF5=148
+[525] [rx] PERF6=0
+[526] [rx] PERF7=0
+[527] [rx] PERF8=1
+[528] [rx] PEER=192.168.1.2:6000
+[529] [rx] STATUS=0x00000002
+[530] [rx] IRQ_STAT=0x00000801
+[531] [rx] ERR_CODE=0x00000000
+[532] [rx] TX sequence=28
+[533] [tx] r
+[534] [rx] PHY reset
+[535] [rx] BMCR=0x00001040
+[536] [rx] BMSR.1=0x00007989
+[537] [rx] BMSR.2=0x00007989
+[538] [rx] ANAR=0x000001e1
+[539] [rx] ANLPAR=0x00000000
+[540] [rx] 1000BASE-T status=0x00000000
+[541] [rx] PHYSR=0x00001002
+[542] [rx] D08.11=0x00000109
+[543] [rx] D08.15=0x00000019
+[544] [rx] TXDLY=1 RXDLY=1
+[545] [rx] link=0 speed=10 duplex=half
+[546] [rx] PERF0=167
+[547] [rx] PERF1=18
+[548] [rx] PERF2=18
+[549] [rx] PERF3=0
+[550] [rx] PERF4=0
+[551] [rx] PERF5=148
+[552] [rx] PERF6=0
+[553] [rx] PERF7=0
+[554] [rx] PERF8=1
+[555] [rx] PEER=192.168.1.2:6000
+[556] [rx] STATUS=0x00000002
+[557] [rx] IRQ_STAT=0x00000801
+[558] [rx] ERR_CODE=0x00000000
+[559] [rx] TX sequence=29
+[560] [rx] link=0 speed=10 duplex=half
+[561] [rx] PERF0=167
+[562] [rx] PERF1=18
+[563] [rx] PERF2=18
+[564] [rx] PERF3=0
+[565] [rx] PERF4=0
+[566] [rx] PERF5=148
+[567] [rx] PERF6=0
+[568] [rx] PERF7=0
+[569] [rx] PERF8=1
+[570] [rx] PEER=192.168.1.2:6000
+[571] [rx] STATUS=0x00000002
+[572] [rx] IRQ_STAT=0x00000801
+[573] [rx] ERR_CODE=0x00000000
+[574] [rx] TX sequence=30
+[575] [rx] link=0 speed=10 duplex=half
+[576] [rx] PERF0=167
+[577] [rx] PERF1=18
+[578] [rx] PERF2=18
+[579] [rx] PERF3=0
+[580] [rx] PERF4=0
+[581] [rx] PERF5=148
+[582] [rx] PERF6=0
+[583] [rx] PERF7=0
+[584] [rx] PERF8=1
+[585] [rx] PEER=192.168.1.2:6000
+[586] [rx] STATUS=0x00000002
+[587] [rx] IRQ_STAT=0x00000801
+[588] [rx] ERR_CODE=0x00000000
+[589] [rx] TX sequence=31
+[590] [rx] link=1 speed=1000 duplex=full
+[591] [rx] PERF0=167
+[592] [rx] PERF1=18
+[593] [rx] PERF2=18
+[594] [rx] PERF3=0
+[595] [rx] PERF4=0
+[596] [rx] PERF5=148
+[597] [rx] PERF6=0
+[598] [rx] PERF7=0
+[599] [rx] PERF8=1
+[600] [rx] PEER=192.168.1.2:6000
+[601] [rx] STATUS=0x00000002
+[602] [rx] IRQ_STAT=0x00000801
+[603] [rx] ERR_CODE=0x00000000
+[604] [rx] TX sequence=32
+[605] [tx] s
+[606] [rx] link=1 speed=1000 duplex=full
+[607] [rx] PERF0=168
+[608] [rx] PERF1=18
+[609] [rx] PERF2=18
+[610] [rx] PERF3=0
+[611] [rx] PERF4=0
+[612] [rx] PERF5=149
+[613] [rx] PERF6=0
+[614] [rx] PERF7=0
+[615] [rx] PERF8=1
+[616] [rx] PEER=192.168.1.2:6000
+[617] [rx] STATUS=0x00000002
+[618] [rx] IRQ_STAT=0x00000801
+[619] [rx] ERR_CODE=0x00000000
+[620] [rx] link=1 speed=1000 duplex=full
+[621] [rx] PERF0=180
+[622] [rx] PERF1=19
+[623] [rx] PERF2=19
+[624] [rx] PERF3=0
+[625] [rx] PERF4=0
+[626] [rx] PERF5=159
+[627] [rx] PERF6=0
+[628] [rx] PERF7=0
+[629] [rx] PERF8=2
+[630] [rx] PEER=192.168.1.2:6000
+[631] [rx] STATUS=0x00000002
+[632] [rx] IRQ_STAT=0x00000801
+[633] [rx] ERR_CODE=0x00000000
+[634] [rx] TX sequence=33
+[635] [rx] link=1 speed=1000 duplex=full
+[636] [rx] PERF0=201
+[637] [rx] PERF1=20
+[638] [rx] PERF2=20
+[639] [rx] PERF3=0
+[640] [rx] PERF4=0
+[641] [rx] PERF5=179
+[642] [rx] PERF6=0
+[643] [rx] PERF7=0
+[644] [rx] PERF8=2
+[645] [rx] PEER=192.168.1.2:6000
+[646] [rx] STATUS=0x00000002
+[647] [rx] IRQ_STAT=0x00000801
+[648] [rx] ERR_CODE=0x00000000
+[649] [rx] TX sequence=34
+[650] [rx] link=1 speed=1000 duplex=full
+[651] [rx] PERF0=219
+[652] [rx] PERF1=21
+[653] [rx] PERF2=21
+[654] [rx] PERF3=0
+[655] [rx] PERF4=0
+[656] [rx] PERF5=196
+[657] [rx] PERF6=0
+[658] [rx] PERF7=0
+[659] [rx] PERF8=2
+[660] [rx] PEER=192.168.1.2:6000
+[661] [rx] STATUS=0x00000002
+[662] [rx] IRQ_STAT=0x00000801
+[663] [rx] ERR_CODE=0x00000000
+[664] [rx] TX sequence=35
+[665] [rx] link=1 speed=1000 duplex=full
+[666] [rx] PERF0=237
+[667] [rx] PERF1=22
+[668] [rx] PERF2=22
+[669] [rx] PERF3=0
+[670] [rx] PERF4=0
+[671] [rx] PERF5=213
+[672] [rx] PERF6=0
+[673] [rx] PERF7=0
+[674] [rx] PERF8=2
+[675] [rx] PEER=192.168.1.2:6000
+[676] [rx] STATUS=0x00000002
+[677] [rx] IRQ_STAT=0x00000801
+[678] [rx] ERR_CODE=0x00000000
+[679] [rx] TX sequence=36
+[680] [rx] link=1 speed=1000 duplex=full
+[681] [rx] PERF0=248
+[682] [rx] PERF1=23
+[683] [rx] PERF2=23
+[684] [rx] PERF3=0
+[685] [rx] PERF4=0
+[686] [rx] PERF5=223
+[687] [rx] PERF6=0
+[688] [rx] PERF7=0
+[689] [rx] PERF8=2
+[690] [rx] PEER=192.168.1.2:6000
+[691] [rx] STATUS=0x00000002
+[692] [rx] IRQ_STAT=0x00000801
+[693] [rx] ERR_CODE=0x00000000
+[694] [rx] TX sequence=37
+[695] [rx] link=1 speed=1000 duplex=full
+[696] [rx] PERF0=255
+[697] [rx] PERF1=24
+[698] [rx] PERF2=24
+[699] [rx] PERF3=0
+[700] [rx] PERF4=0
+[701] [rx] PERF5=229
+[702] [rx] PERF6=0
+[703] [rx] PERF7=0
+[704] [rx] PERF8=2
+[705] [rx] PEER=192.168.1.2:6000
+[706] [rx] STATUS=0x00000002
+[707] [rx] IRQ_STAT=0x00000801
+[708] [rx] ERR_CODE=0x00000000
+[709] [rx] TX sequence=38
+[710] [rx] link=1 speed=1000 duplex=full
+[711] [rx] PERF0=258
+[712] [rx] PERF1=25
+[713] [rx] PERF2=25
+[714] [rx] PERF3=0
+[715] [rx] PERF4=0
+[716] [rx] PERF5=231
+[717] [rx] PERF6=0
+[718] [rx] PERF7=0
+[719] [rx] PERF8=2
+[720] [rx] PEER=192.168.1.2:6000
+[721] [rx] STATUS=0x00000002
+[722] [rx] IRQ_STAT=0x00000801
+[723] [rx] ERR_CODE=0x00000000
+[724] [rx] TX sequence=39
+[725] [rx] link=1 speed=1000 duplex=full
+[726] [rx] PERF0=268
+[727] [rx] PERF1=26
+[728] [rx] PERF2=26
+[729] [rx] PERF3=0
+[730] [rx] PERF4=0
+[731] [rx] PERF5=240
+[732] [rx] PERF6=0
+[733] [rx] PERF7=0
+[734] [rx] PERF8=2
+[735] [rx] PEER=192.168.1.2:6000
+[736] [rx] STATUS=0x00000002
+[737] [rx] IRQ_STAT=0x00000801
+[738] [rx] ERR_CODE=0x00000000
+[739] [rx] TX sequence=40
+[740] [rx] link=1 speed=1000 duplex=full
+[741] [rx] PERF0=280
+[742] [rx] PERF1=27
+[743] [rx] PERF2=27
+[744] [rx] PERF3=0
+[745] [rx] PERF4=0
+[746] [rx] PERF5=251
+[747] [rx] PERF6=0
+[748] [rx] PERF7=0
+[749] [rx] PERF8=2
+[750] [rx] PEER=192.168.1.2:6000
+[751] [rx] STATUS=0x00000002
+[752] [rx] IRQ_STAT=0x00000801
+[753] [rx] ERR_CODE=0x00000000
+[754] [rx] TX sequence=41
+[755] [rx] link=1 speed=1000 duplex=full
+[756] [rx] PERF0=286
+[757] [rx] PERF1=28
+[758] [rx] PERF2=28
+[759] [rx] PERF3=0
+[760] [rx] PERF4=0
+[761] [rx] PERF5=256
+[762] [rx] PERF6=0
+[763] [rx] PERF7=0
+[764] [rx] PERF8=2
+[765] [rx] PEER=192.168.1.2:6000
+[766] [rx] STATUS=0x00000002
+[767] [rx] IRQ_STAT=0x00000801
+[768] [rx] ERR_CODE=0x00000000
+[769] [rx] TX sequence=42
+[770] [tx] s
+[771] [rx] link=1 speed=1000 duplex=full
+[772] [rx] PERF0=290
+[773] [rx] PERF1=28
+[774] [rx] PERF2=28
+[775] [rx] PERF3=0
+[776] [rx] PERF4=0
+[777] [rx] PERF5=260
+[778] [rx] PERF6=0
+[779] [rx] PERF7=0
+[780] [rx] PERF8=2
+[781] [rx] PEER=192.168.1.2:6000
+[782] [rx] STATUS=0x00000002
+[783] [rx] IRQ_STAT=0x00000801
+[784] [rx] ERR_CODE=0x00000000
+[785] [tx] r
+[786] [rx] link=1 speed=1000 duplex=full
+[787] [rx] PERF0=292
+[788] [rx] PERF1=29
+[789] [rx] PERF2=29
+[790] [rx] PERF3=0
+[791] [rx] PERF4=0
+[792] [rx] PERF5=261
+[793] [rx] PERF6=0
+[794] [rx] PERF7=0
+[795] [rx] PERF8=2
+[796] [rx] PEER=192.168.1.2:6000
+[797] [rx] STATUS=0x00000002
+[798] [rx] IRQ_STAT=0x00000801
+[799] [rx] ERR_CODE=0x00000000
+[800] [rx] TX sequence=43
+[801] [rx] PHY reset
+[802] [rx] BMCR=0x00001040
+[803] [rx] BMSR.1=0x00007989
+[804] [rx] BMSR.2=0x00007989
+[805] [rx] ANAR=0x000001e1
+[806] [rx] ANLPAR=0x00000000
+[807] [rx] 1000BASE-T status=0x00000000
+[808] [rx] PHYSR=0x00001002
+[809] [rx] D08.11=0x00000109
+[810] [rx] D08.15=0x00000019
+[811] [rx] TXDLY=1 RXDLY=1
+[812] [tx] s
+[813] [rx] link=0 speed=10 duplex=half
+[814] [rx] PERF0=292
+[815] [rx] PERF1=29
+[816] [rx] PERF2=29
+[817] [rx] PERF3=0
+[818] [rx] PERF4=0
+[819] [rx] PERF5=261
+[820] [rx] PERF6=0
+[821] [rx] PERF7=0
+[822] [rx] PERF8=2
+[823] [rx] PEER=192.168.1.2:6000
+[824] [rx] STATUS=0x00000002
+[825] [rx] IRQ_STAT=0x00000801
+[826] [rx] ERR_CODE=0x00000000
+[827] [rx] link=0 speed=10 duplex=half
+[828] [rx] PERF0=292
+[829] [rx] PERF1=29
+[830] [rx] PERF2=29
+[831] [rx] PERF3=0
+[832] [rx] PERF4=0
+[833] [rx] PERF5=261
+[834] [rx] PERF6=0
+[835] [rx] PERF7=0
+[836] [rx] PERF8=2
+[837] [rx] PEER=192.168.1.2:6000
+[838] [rx] STATUS=0x00000002
+[839] [rx] IRQ_STAT=0x00000801
+[840] [rx] ERR_CODE=0x00000000
+[841] [rx] TX sequence=44
+[842] [rx] link=0 speed=10 duplex=half
+[843] [rx] PERF0=292
+[844] [rx] PERF1=29
+[845] [rx] PERF2=29
+[846] [rx] PERF3=0
+[847] [rx] PERF4=0
+[848] [rx] PERF5=261
+[849] [rx] PERF6=0
+[850] [rx] PERF7=0
+[851] [rx] PERF8=2
+[852] [rx] PEER=192.168.1.2:6000
+[853] [rx] STATUS=0x00000002
+[854] [rx] IRQ_STAT=0x00000801
+[855] [rx] ERR_CODE=0x00000000
+[856] [rx] TX sequence=45
+[857] [rx] link=0 speed=10 duplex=half
+[858] [rx] PERF0=292
+[859] [rx] PERF1=29
+[860] [rx] PERF2=29
+[861] [rx] PERF3=0
+[862] [rx] PERF4=0
+[863] [rx] PERF5=261
+[864] [rx] PERF6=0
+[865] [rx] PERF7=0
+[866] [rx] PERF8=2
+[867] [rx] PEER=192.168.1.2:6000
+[868] [rx] STATUS=0x00000002
+[869] [rx] IRQ_STAT=0x00000801
+[870] [rx] ERR_CODE=0x00000000
+[871] [rx] TX sequence=46
+[872] [rx] link=1 speed=1000 duplex=full
+[873] [rx] PERF0=300
+[874] [rx] PERF1=30
+[875] [rx] PERF2=30
+[876] [rx] PERF3=0
+[877] [rx] PERF4=0
+[878] [rx] PERF5=267
+[879] [rx] PERF6=0
+[880] [rx] PERF7=0
+[881] [rx] PERF8=3
+[882] [rx] PEER=192.168.1.2:6000
+[883] [rx] STATUS=0x00000002
+[884] [rx] IRQ_STAT=0x00000801
+[885] [rx] ERR_CODE=0x00000000
+[886] [rx] TX sequence=47
+[887] [rx] link=1 speed=1000 duplex=full
+[888] [rx] PERF0=318
+[889] [rx] PERF1=31
+[890] [rx] PERF2=31
+[891] [rx] PERF3=0
+[892] [rx] PERF4=0
+[893] [rx] PERF5=286
+[894] [rx] PERF6=0
+[895] [rx] PERF7=0
+[896] [rx] PERF8=3
+[897] [rx] PEER=192.168.1.2:6000
+[898] [rx] STATUS=0x00000002
+[899] [rx] IRQ_STAT=0x00000801
+[900] [rx] ERR_CODE=0x00000000
+[901] [rx] TX sequence=48
+[902] [rx] link=1 speed=1000 duplex=full
+[903] [rx] PERF0=334
+[904] [rx] PERF1=32
+[905] [rx] PERF2=32
+[906] [rx] PERF3=0
+[907] [rx] PERF4=0
+[908] [rx] PERF5=299
+[909] [rx] PERF6=0
+[910] [rx] PERF7=0
+[911] [rx] PERF8=3
+[912] [rx] PEER=192.168.1.2:6000
+[913] [rx] STATUS=0x00000002
+[914] [rx] IRQ_STAT=0x00000801
+[915] [rx] ERR_CODE=0x00000000
+[916] [rx] TX sequence=49
+[917] [rx] link=1 speed=1000 duplex=full
+[918] [rx] PERF0=356
+[919] [rx] PERF1=33
+[920] [rx] PERF2=33
+[921] [rx] PERF3=0
+[922] [rx] PERF4=0
+[923] [rx] PERF5=320
+[924] [rx] PERF6=0
+[925] [rx] PERF7=0
+[926] [rx] PERF8=3
+[927] [rx] PEER=192.168.1.2:6000
+[928] [rx] STATUS=0x00000002
+[929] [rx] IRQ_STAT=0x00000801
+[930] [rx] ERR_CODE=0x00000000
+[931] [rx] TX sequence=50
+[932] [rx] link=1 speed=1000 duplex=full
+[933] [rx] PERF0=372
+[934] [rx] PERF1=34
+[935] [rx] PERF2=34
+[936] [rx] PERF3=0
+[937] [rx] PERF4=0
+[938] [rx] PERF5=335
+[939] [rx] PERF6=0
+[940] [rx] PERF7=0
+[941] [rx] PERF8=3
+[942] [rx] PEER=192.168.1.2:6000
+[943] [rx] STATUS=0x00000002
+[944] [rx] IRQ_STAT=0x00000801
+[945] [rx] ERR_CODE=0x00000000
+[946] [rx] TX sequence=51
+[947] [rx] link=1 speed=1000 duplex=full
+[948] [rx] PERF0=382
+[949] [rx] PERF1=35
+[950] [rx] PERF2=35
+[951] [rx] PERF3=0
+[952] [rx] PERF4=0
+[953] [rx] PERF5=344
+[954] [rx] PERF6=0
+[955] [rx] PERF7=0
+[956] [rx] PERF8=3
+[957] [rx] PEER=192.168.1.2:6000
+[958] [rx] STATUS=0x00000002
+[959] [rx] IRQ_STAT=0x00000801
+[960] [rx] ERR_CODE=0x00000000
+[961] [rx] TX sequence=52
+[962] [rx] link=1 speed=1000 duplex=full
+[963] [rx] PERF0=388
+[964] [rx] PERF1=36
+[965] [rx] PERF2=36
+[966] [rx] PERF3=0
+[967] [rx] PERF4=0
+[968] [rx] PERF5=349
+[969] [rx] PERF6=0
+[970] [rx] PERF7=0
+[971] [rx] PERF8=3
+[972] [rx] PEER=192.168.1.2:6000
+[973] [rx] STATUS=0x00000002
+[974] [rx] IRQ_STAT=0x00000801
+[975] [rx] ERR_CODE=0x00000000
+[976] [rx] TX sequence=53
+[977] [tx] s
+[978] [rx] link=1 speed=1000 duplex=full
+[979] [rx] PERF0=391
+[980] [rx] PERF1=36
+[981] [rx] PERF2=36
+[982] [rx] PERF3=0
+[983] [rx] PERF4=0
+[984] [rx] PERF5=352
+[985] [rx] PERF6=0
+[986] [rx] PERF7=0
+[987] [rx] PERF8=3
+[988] [rx] PEER=192.168.1.2:6000
+[989] [rx] STATUS=0x00000002
+[990] [rx] IRQ_STAT=0x00000801
+[991] [rx] ERR_CODE=0x00000000
+[992] [rx] link=1 speed=1000 duplex=full
+[993] [rx] PERF0=395
+[994] [rx] PERF1=37
+[995] [rx] PERF2=37
+[996] [rx] PERF3=0
+[997] [rx] PERF4=0
+[998] [rx] PERF5=355
+[999] [rx] PERF6=0
+[1000] [rx] PERF7=0
+[1001] [rx] PERF8=3
+[1002] [rx] PEER=192.168.1.2:6000
+[1003] [rx] STATUS=0x00000002
+[1004] [rx] IRQ_STAT=0x00000801
+[1005] [rx] ERR_CODE=0x00000000
+[1006] [rx] TX sequence=54
+[1007] [tx] r
+[1008] [rx] PHY reset
+[1009] [rx] BMCR=0x00001040
+[1010] [rx] BMSR.1=0x00007989
+[1011] [rx] BMSR.2=0x00007989
+[1012] [rx] ANAR=0x000001e1
+[1013] [rx] ANLPAR=0x00000000
+[1014] [rx] 1000BASE-T status=0x00000000
+[1015] [rx] PHYSR=0x00001002
+[1016] [rx] D08.11=0x00000109
+[1017] [rx] D08.15=0x00000019
+[1018] [rx] TXDLY=1 RXDLY=1
+[1019] [rx] link=0 speed=10 duplex=half
+[1020] [rx] PERF0=395
+[1021] [rx] PERF1=37
+[1022] [rx] PERF2=37
+[1023] [rx] PERF3=0
+[1024] [rx] PERF4=0
+[1025] [rx] PERF5=355
+[1026] [rx] PERF6=0
+[1027] [rx] PERF7=0
+[1028] [rx] PERF8=3
+[1029] [rx] PEER=192.168.1.2:6000
+[1030] [rx] STATUS=0x00000002
+[1031] [rx] IRQ_STAT=0x00000801
+[1032] [rx] ERR_CODE=0x00000000
+[1033] [rx] TX sequence=55
+[1034] [rx] link=0 speed=10 duplex=half
+[1035] [rx] PERF0=395
+[1036] [rx] PERF1=37
+[1037] [rx] PERF2=37
+[1038] [rx] PERF3=0
+[1039] [rx] PERF4=0
+[1040] [rx] PERF5=355
+[1041] [rx] PERF6=0
+[1042] [rx] PERF7=0
+[1043] [rx] PERF8=3
+[1044] [rx] PEER=192.168.1.2:6000
+[1045] [rx] STATUS=0x00000002
+[1046] [rx] IRQ_STAT=0x00000801
+[1047] [rx] ERR_CODE=0x00000000
+[1048] [rx] TX sequence=56
+[1049] [rx] link=0 speed=10 duplex=half
+[1050] [rx] PERF0=395
+[1051] [rx] PERF1=37
+[1052] [rx] PERF2=37
+[1053] [rx] PERF3=0
+[1054] [rx] PERF4=0
+[1055] [rx] PERF5=355
+[1056] [rx] PERF6=0
+[1057] [rx] PERF7=0
+[1058] [rx] PERF8=3
+[1059] [rx] PEER=192.168.1.2:6000
+[1060] [rx] STATUS=0x00000002
+[1061] [rx] IRQ_STAT=0x00000801
+[1062] [rx] ERR_CODE=0x00000000
+[1063] [rx] TX sequence=57
+[1064] [rx] link=1 speed=1000 duplex=full
+[1065] [rx] PERF0=402
+[1066] [rx] PERF1=38
+[1067] [rx] PERF2=38
+[1068] [rx] PERF3=0
+[1069] [rx] PERF4=0
+[1070] [rx] PERF5=360
+[1071] [rx] PERF6=0
+[1072] [rx] PERF7=0
+[1073] [rx] PERF8=4
+[1074] [rx] PEER=192.168.1.2:6000
+[1075] [rx] STATUS=0x00000002
+[1076] [rx] IRQ_STAT=0x00000801
+[1077] [rx] ERR_CODE=0x00000000
+[1078] [rx] TX sequence=58
+[1079] [tx] s
+[1080] [rx] link=1 speed=1000 duplex=full
+[1081] [rx] PERF0=402
+[1082] [rx] PERF1=38
+[1083] [rx] PERF2=38
+[1084] [rx] PERF3=0
+[1085] [rx] PERF4=0
+[1086] [rx] PERF5=360
+[1087] [rx] PERF6=0
+[1088] [rx] PERF7=0
+[1089] [rx] PERF8=4
+[1090] [rx] PEER=192.168.1.2:6000
+[1091] [rx] STATUS=0x00000002
+[1092] [rx] IRQ_STAT=0x00000801
+[1093] [rx] ERR_CODE=0x00000000
+[1094] [rx] link=1 speed=1000 duplex=full
+[1095] [rx] PERF0=418
+[1096] [rx] PERF1=39
+[1097] [rx] PERF2=39
+[1098] [rx] PERF3=0
+[1099] [rx] PERF4=0
+[1100] [rx] PERF5=375
+[1101] [rx] PERF6=0
+[1102] [rx] PERF7=0
+[1103] [rx] PERF8=4
+[1104] [rx] PEER=192.168.1.2:6000
+[1105] [rx] STATUS=0x00000002
+[1106] [rx] IRQ_STAT=0x00000801
+[1107] [rx] ERR_CODE=0x00000000
+[1108] [rx] TX sequence=59
+[1109] [rx] link=1 speed=1000 duplex=full
+[1110] [rx] PERF0=439
+[1111] [rx] PERF1=40
+[1112] [rx] PERF2=40
+[1113] [rx] PERF3=0
+[1114] [rx] PERF4=0
+[1115] [rx] PERF5=395
+[1116] [rx] PERF6=0
+[1117] [rx] PERF7=0
+[1118] [rx] PERF8=4
+[1119] [rx] PEER=192.168.1.2:6000
+[1120] [rx] STATUS=0x00000002
+[1121] [rx] IRQ_STAT=0x00000801
+[1122] [rx] ERR_CODE=0x00000000
+[1123] [rx] TX sequence=60
+[1124] [rx] link=1 speed=1000 duplex=full
+[1125] [rx] PERF0=460
+[1126] [rx] PERF1=40
+[1127] [rx] PERF2=40
+[1128] [rx] PERF3=0
+[1129] [rx] PERF4=0
+[1130] [rx] PERF5=416
+[1131] [rx] PERF6=0
+[1132] [rx] PERF7=0
+[1133] [rx] PERF8=4
+[1134] [rx] PEER=192.168.1.2:6000
+[1135] [rx] STATUS=0x00000002
+[1136] [rx] IRQ_STAT=0x00000801
+[1137] [rx] ERR_CODE=0x00000000
+[1138] [rx] TX sequence=61
+[1139] [rx] link=1 speed=1000 duplex=full
+[1140] [rx] PERF0=478
+[1141] [rx] PERF1=41
+[1142] [rx] PERF2=41
+[1143] [rx] PERF3=0
+[1144] [rx] PERF4=0
+[1145] [rx] PERF5=433
+[1146] [rx] PERF6=0
+[1147] [rx] PERF7=0
+[1148] [rx] PERF8=4
+[1149] [rx] PEER=192.168.1.2:6000
+[1150] [rx] STATUS=0x00000002
+[1151] [rx] IRQ_STAT=0x00000801
+[1152] [rx] ERR_CODE=0x00000000
+[1153] [rx] TX sequence=62
+[1154] [rx] link=1 speed=1000 duplex=full
+[1155] [rx] PERF0=485
+[1156] [rx] PERF1=42
+[1157] [rx] PERF2=42
+[1158] [rx] PERF3=0
+[1159] [rx] PERF4=0
+[1160] [rx] PERF5=439
+[1161] [rx] PERF6=0
+[1162] [rx] PERF7=0
+[1163] [rx] PERF8=4
+[1164] [rx] PEER=192.168.1.2:6000
+[1165] [rx] STATUS=0x00000002
+[1166] [rx] IRQ_STAT=0x00000801
+[1167] [rx] ERR_CODE=0x00000000
+[1168] [rx] TX sequence=63
+[1169] [rx] link=1 speed=1000 duplex=full
+[1170] [rx] PERF0=493
+[1171] [rx] PERF1=43
+[1172] [rx] PERF2=43
+[1173] [rx] PERF3=0
+[1174] [rx] PERF4=0
+[1175] [rx] PERF5=446
+[1176] [rx] PERF6=0
+[1177] [rx] PERF7=0
+[1178] [rx] PERF8=4
+[1179] [rx] PEER=192.168.1.2:6000
+[1180] [rx] STATUS=0x00000002
+[1181] [rx] IRQ_STAT=0x00000801
+[1182] [rx] ERR_CODE=0x00000000
+[1183] [rx] TX sequence=64
+[1184] [rx] link=1 speed=1000 duplex=full
+[1185] [rx] PERF0=501
+[1186] [rx] PERF1=44
+[1187] [rx] PERF2=44
+[1188] [rx] PERF3=0
+[1189] [rx] PERF4=0
+[1190] [rx] PERF5=453
+[1191] [rx] PERF6=0
+[1192] [rx] PERF7=0
+[1193] [rx] PERF8=4
+[1194] [rx] PEER=192.168.1.2:6000
+[1195] [rx] STATUS=0x00000002
+[1196] [rx] IRQ_STAT=0x00000801
+[1197] [rx] ERR_CODE=0x00000000
+[1198] [rx] TX sequence=65
+[1199] [rx] link=1 speed=1000 duplex=full
+[1200] [rx] PERF0=509
+[1201] [rx] PERF1=45
+[1202] [rx] PERF2=45
+[1203] [rx] PERF3=0
+[1204] [rx] PERF4=0
+[1205] [rx] PERF5=460
+[1206] [rx] PERF6=0
+[1207] [rx] PERF7=0
+[1208] [rx] PERF8=4
+[1209] [rx] PEER=192.168.1.2:6000
+[1210] [rx] STATUS=0x00000002
+[1211] [rx] IRQ_STAT=0x00000801
+[1212] [rx] ERR_CODE=0x00000000
+[1213] [rx] TX sequence=66
+[1214] [rx] link=1 speed=1000 duplex=full
+[1215] [rx] PERF0=519
+[1216] [rx] PERF1=46
+[1217] [rx] PERF2=46
+[1218] [rx] PERF3=0
+[1219] [rx] PERF4=0
+[1220] [rx] PERF5=469
+[1221] [rx] PERF6=0
+[1222] [rx] PERF7=0
+[1223] [rx] PERF8=4
+[1224] [rx] PEER=192.168.1.2:6000
+[1225] [rx] STATUS=0x00000002
+[1226] [rx] IRQ_STAT=0x00000801
+[1227] [rx] ERR_CODE=0x00000000
+[1228] [rx] TX sequence=67
+[1229] [rx] link=1 speed=1000 duplex=full
+[1230] [rx] PERF0=521
+[1231] [rx] PERF1=47
+[1232] [rx] PERF2=47
+[1233] [rx] PERF3=0
+[1234] [rx] PERF4=0
+[1235] [rx] PERF5=470
+[1236] [rx] PERF6=0
+[1237] [rx] PERF7=0
+[1238] [rx] PERF8=4
+[1239] [rx] PEER=192.168.1.2:6000
+[1240] [rx] STATUS=0x00000002
+[1241] [rx] IRQ_STAT=0x00000801
+[1242] [rx] ERR_CODE=0x00000000
+[1243] [rx] TX sequence=68
+[1244] [tx] s
+[1245] [rx] link=1 speed=1000 duplex=full
+[1246] [rx] PERF0=528
+[1247] [rx] PERF1=48
+[1248] [rx] PERF2=48
+[1249] [rx] PERF3=0
+[1250] [rx] PERF4=0
+[1251] [rx] PERF5=476
+[1252] [rx] PERF6=0
+[1253] [rx] PERF7=0
+[1254] [rx] PERF8=4
+[1255] [rx] PEER=192.168.1.2:6000
+[1256] [rx] STATUS=0x00000002
+[1257] [rx] IRQ_STAT=0x00000801
+[1258] [rx] ERR_CODE=0x00000000
+[1259] [tx] r
+[1260] [rx] PHY reset
+[1261] [rx] BMCR=0x00001040
+[1262] [rx] BMSR.1=0x00007989
+[1263] [rx] BMSR.2=0x00007989
+[1264] [rx] ANAR=0x000001e1
+[1265] [rx] ANLPAR=0x00000000
+[1266] [rx] 1000BASE-T status=0x00000000
+[1267] [rx] PHYSR=0x00001002
+[1268] [rx] D08.11=0x00000109
+[1269] [rx] D08.15=0x00000019
+[1270] [rx] TXDLY=1 RXDLY=1
+[1271] [rx] link=0 speed=10 duplex=half
+[1272] [rx] PERF0=534
+[1273] [rx] PERF1=48
+[1274] [rx] PERF2=48
+[1275] [rx] PERF3=0
+[1276] [rx] PERF4=0
+[1277] [rx] PERF5=482
+[1278] [rx] PERF6=0
+[1279] [rx] PERF7=0
+[1280] [rx] PERF8=4
+[1281] [rx] PEER=192.168.1.2:6000
+[1282] [rx] STATUS=0x00000002
+[1283] [rx] IRQ_STAT=0x00000801
+[1284] [rx] ERR_CODE=0x00000000
+[1285] [rx] TX sequence=69
+[1286] [rx] link=0 speed=10 duplex=half
+[1287] [rx] PERF0=534
+[1288] [rx] PERF1=48
+[1289] [rx] PERF2=48
+[1290] [rx] PERF3=0
+[1291] [rx] PERF4=0
+[1292] [rx] PERF5=482
+[1293] [rx] PERF6=0
+[1294] [rx] PERF7=0
+[1295] [rx] PERF8=4
+[1296] [rx] PEER=192.168.1.2:6000
+[1297] [rx] STATUS=0x00000002
+[1298] [rx] IRQ_STAT=0x00000801
+[1299] [rx] ERR_CODE=0x00000000
+[1300] [rx] TX sequence=70
+[1301] [rx] link=0 speed=10 duplex=half
+[1302] [rx] PERF0=534
+[1303] [rx] PERF1=48
+[1304] [rx] PERF2=48
+[1305] [rx] PERF3=0
+[1306] [rx] PERF4=0
+[1307] [rx] PERF5=482
+[1308] [rx] PERF6=0
+[1309] [rx] PERF7=0
+[1310] [rx] PERF8=4
+[1311] [rx] PEER=192.168.1.2:6000
+[1312] [rx] STATUS=0x00000002
+[1313] [rx] IRQ_STAT=0x00000801
+[1314] [rx] ERR_CODE=0x00000000
+[1315] [rx] TX sequence=71
+[1316] [rx] link=0 speed=1000 duplex=full
+[1317] [rx] PERF0=534
+[1318] [rx] PERF1=48
+[1319] [rx] PERF2=48
+[1320] [rx] PERF3=0
+[1321] [rx] PERF4=0
+[1322] [rx] PERF5=482
+[1323] [rx] PERF6=0
+[1324] [rx] PERF7=0
+[1325] [rx] PERF8=4
+[1326] [rx] PEER=192.168.1.2:6000
+[1327] [rx] STATUS=0x00000002
+[1328] [rx] IRQ_STAT=0x00000801
+[1329] [rx] ERR_CODE=0x00000000
+[1330] [rx] TX sequence=72
+[1331] [rx] link=1 speed=1000 duplex=full
+[1332] [rx] PERF0=545
+[1333] [rx] PERF1=48
+[1334] [rx] PERF2=48
+[1335] [rx] PERF3=0
+[1336] [rx] PERF4=0
+[1337] [rx] PERF5=493
+[1338] [rx] PERF6=0
+[1339] [rx] PERF7=0
+[1340] [rx] PERF8=4
+[1341] [rx] PEER=192.168.1.2:6000
+[1342] [rx] STATUS=0x00000002
+[1343] [rx] IRQ_STAT=0x00000801
+[1344] [rx] ERR_CODE=0x00000000
+[1345] [rx] TX sequence=73
+[1346] [tx] s
+[1347] [rx] link=1 speed=1000 duplex=full
+[1348] [rx] PERF0=550
+[1349] [rx] PERF1=49
+[1350] [rx] PERF2=49
+[1351] [rx] PERF3=0
+[1352] [rx] PERF4=0
+[1353] [rx] PERF5=496
+[1354] [rx] PERF6=0
+[1355] [rx] PERF7=0
+[1356] [rx] PERF8=5
+[1357] [rx] PEER=192.168.1.2:6000
+[1358] [rx] STATUS=0x00000002
+[1359] [rx] IRQ_STAT=0x00000801
+[1360] [rx] ERR_CODE=0x00000000
+[1361] [rx] link=1 speed=1000 duplex=full
+[1362] [rx] PERF0=566
+[1363] [rx] PERF1=49
+[1364] [rx] PERF2=49
+[1365] [rx] PERF3=0
+[1366] [rx] PERF4=0
+[1367] [rx] PERF5=512
+[1368] [rx] PERF6=0
+[1369] [rx] PERF7=0
+[1370] [rx] PERF8=5
+[1371] [rx] PEER=192.168.1.2:6000
+[1372] [rx] STATUS=0x00000002
+[1373] [rx] IRQ_STAT=0x00000801
+[1374] [rx] ERR_CODE=0x00000000
+[1375] [rx] TX sequence=74
+[1376] [rx] link=1 speed=1000 duplex=full
+[1377] [rx] PERF0=585
+[1378] [rx] PERF1=50
+[1379] [rx] PERF2=50
+[1380] [rx] PERF3=0
+[1381] [rx] PERF4=0
+[1382] [rx] PERF5=530
+[1383] [rx] PERF6=0
+[1384] [rx] PERF7=0
+[1385] [rx] PERF8=5
+[1386] [rx] PEER=192.168.1.2:6000
+[1387] [rx] STATUS=0x00000002
+[1388] [rx] IRQ_STAT=0x00000801
+[1389] [rx] ERR_CODE=0x00000000
+[1390] [rx] TX sequence=75
+[1391] [rx] link=1 speed=1000 duplex=full
+[1392] [rx] PERF0=603
+[1393] [rx] PERF1=51
+[1394] [rx] PERF2=51
+[1395] [rx] PERF3=0
+[1396] [rx] PERF4=0
+[1397] [rx] PERF5=547
+[1398] [rx] PERF6=0
+[1399] [rx] PERF7=0
+[1400] [rx] PERF8=5
+[1401] [rx] PEER=192.168.1.2:6000
+[1402] [rx] STATUS=0x00000002
+[1403] [rx] IRQ_STAT=0x00000801
+[1404] [rx] ERR_CODE=0x00000000
+[1405] [rx] TX sequence=76
+[1406] [rx] link=1 speed=1000 duplex=full
+[1407] [rx] PERF0=617
+[1408] [rx] PERF1=52
+[1409] [rx] PERF2=52
+[1410] [rx] PERF3=0
+[1411] [rx] PERF4=0
+[1412] [rx] PERF5=560
+[1413] [rx] PERF6=0
+[1414] [rx] PERF7=0
+[1415] [rx] PERF8=5
+[1416] [rx] PEER=192.168.1.2:6000
+[1417] [rx] STATUS=0x00000002
+[1418] [rx] IRQ_STAT=0x00000801
+[1419] [rx] ERR_CODE=0x00000000
+[1420] [rx] TX sequence=77
+[1421] [rx] link=1 speed=1000 duplex=full
+[1422] [rx] PERF0=623
+[1423] [rx] PERF1=53
+[1424] [rx] PERF2=53
+[1425] [rx] PERF3=0
+[1426] [rx] PERF4=0
+[1427] [rx] PERF5=565
+[1428] [rx] PERF6=0
+[1429] [rx] PERF7=0
+[1430] [rx] PERF8=5
+[1431] [rx] PEER=192.168.1.2:6000
+[1432] [rx] STATUS=0x00000002
+[1433] [rx] IRQ_STAT=0x00000801
+[1434] [rx] ERR_CODE=0x00000000
+[1435] [rx] TX sequence=78
+[1436] [rx] link=1 speed=1000 duplex=full
+[1437] [rx] PERF0=626
+[1438] [rx] PERF1=54
+[1439] [rx] PERF2=54
+[1440] [rx] PERF3=0
+[1441] [rx] PERF4=0
+[1442] [rx] PERF5=567
+[1443] [rx] PERF6=0
+[1444] [rx] PERF7=0
+[1445] [rx] PERF8=5
+[1446] [rx] PEER=192.168.1.2:6000
+[1447] [rx] STATUS=0x00000002
+[1448] [rx] IRQ_STAT=0x00000801
+[1449] [rx] ERR_CODE=0x00000000
+[1450] [rx] TX sequence=79
+[1451] [rx] link=1 speed=1000 duplex=full
+[1452] [rx] PERF0=635
+[1453] [rx] PERF1=55
+[1454] [rx] PERF2=55
+[1455] [rx] PERF3=0
+[1456] [rx] PERF4=0
+[1457] [rx] PERF5=575
+[1458] [rx] PERF6=0
+[1459] [rx] PERF7=0
+[1460] [rx] PERF8=5
+[1461] [rx] PEER=192.168.1.2:6000
+[1462] [rx] STATUS=0x00000002
+[1463] [rx] IRQ_STAT=0x00000801
+[1464] [rx] ERR_CODE=0x00000000
+[1465] [rx] TX sequence=80
+[1466] [rx] link=1 speed=1000 duplex=full
+[1467] [rx] PERF0=646
+[1468] [rx] PERF1=56
+[1469] [rx] PERF2=56
+[1470] [rx] PERF3=0
+[1471] [rx] PERF4=0
+[1472] [rx] PERF5=585
+[1473] [rx] PERF6=0
+[1474] [rx] PERF7=0
+[1475] [rx] PERF8=5
+[1476] [rx] PEER=192.168.1.2:6000
+[1477] [rx] STATUS=0x00000002
+[1478] [rx] IRQ_STAT=0x00000801
+[1479] [rx] ERR_CODE=0x00000000
+[1480] [rx] TX sequence=81
+[1481] [rx] link=1 speed=1000 duplex=full
+[1482] [rx] PERF0=652
+[1483] [rx] PERF1=57
+[1484] [rx] PERF2=57
+[1485] [rx] PERF3=0
+[1486] [rx] PERF4=0
+[1487] [rx] PERF5=590
+[1488] [rx] PERF6=0
+[1489] [rx] PERF7=0
+[1490] [rx] PERF8=5
+[1491] [rx] PEER=192.168.1.2:6000
+[1492] [rx] STATUS=0x00000002
+[1493] [rx] IRQ_STAT=0x00000801
+[1494] [rx] ERR_CODE=0x00000000
+[1495] [rx] TX sequence=82
+[1496] [rx] link=1 speed=1000 duplex=full
+[1497] [rx] PERF0=655
+[1498] [rx] PERF1=58
+[1499] [rx] PERF2=58
+[1500] [rx] PERF3=0
+[1501] [rx] PERF4=0
+[1502] [rx] PERF5=593
+[1503] [rx] PERF6=0
+[1504] [rx] PERF7=0
+[1505] [rx] PERF8=5
+[1506] [rx] PEER=192.168.1.2:6000
+[1507] [rx] STATUS=0x00000002
+[1508] [rx] IRQ_STAT=0x00000801
+[1509] [rx] ERR_CODE=0x00000000
+[1510] [rx] TX sequence=83
+[1511] [tx] s
+[1512] [rx] link=1 speed=1000 duplex=full
+[1513] [rx] PERF0=664
+[1514] [rx] PERF1=59
+[1515] [rx] PERF2=59
+[1516] [rx] PERF3=0
+[1517] [rx] PERF4=0
+[1518] [rx] PERF5=600
+[1519] [rx] PERF6=0
+[1520] [rx] PERF7=0
+[1521] [rx] PERF8=5
+[1522] [rx] PEER=192.168.1.2:6000
+[1523] [rx] STATUS=0x00000002
+[1524] [rx] IRQ_STAT=0x00000801
+[1525] [rx] ERR_CODE=0x00000000
+[1526] [rx] link=1 speed=1000 duplex=full
+[1527] [rx] PERF0=665
+[1528] [rx] PERF1=59
+[1529] [rx] PERF2=59
+[1530] [rx] PERF3=0
+[1531] [rx] PERF4=0
+[1532] [rx] PERF5=601
+[1533] [rx] PERF6=0
+[1534] [rx] PERF7=0
+[1535] [rx] PERF8=5
+[1536] [rx] PEER=192.168.1.2:6000
+[1537] [rx] STATUS=0x00000002
+[1538] [rx] IRQ_STAT=0x00000801
+[1539] [rx] ERR_CODE=0x00000000
+[1540] [rx] TX sequence=84
+[1541] [tx] r
+[1542] [rx] PHY reset
+[1543] [rx] BMCR=0x00001040
+[1544] [rx] BMSR.1=0x00007989
+[1545] [rx] BMSR.2=0x00007989
+[1546] [rx] ANAR=0x000001e1
+[1547] [rx] ANLPAR=0x00000000
+[1548] [rx] 1000BASE-T status=0x00000000
+[1549] [rx] PHYSR=0x00001002
+[1550] [rx] D08.11=0x00000109
+[1551] [rx] D08.15=0x00000019
+[1552] [rx] TXDLY=1 RXDLY=1
+[1553] [rx] link=0 speed=10 duplex=half
+[1554] [rx] PERF0=665
+[1555] [rx] PERF1=59
+[1556] [rx] PERF2=59
+[1557] [rx] PERF3=0
+[1558] [rx] PERF4=0
+[1559] [rx] PERF5=601
+[1560] [rx] PERF6=0
+[1561] [rx] PERF7=0
+[1562] [rx] PERF8=5
+[1563] [rx] PEER=192.168.1.2:6000
+[1564] [rx] STATUS=0x00000002
+[1565] [rx] IRQ_STAT=0x00000801
+[1566] [rx] ERR_CODE=0x00000000
+[1567] [rx] TX sequence=85
+[1568] [rx] link=0 speed=10 duplex=half
+[1569] [rx] PERF0=665
+[1570] [rx] PERF1=59
+[1571] [rx] PERF2=59
+[1572] [rx] PERF3=0
+[1573] [rx] PERF4=0
+[1574] [rx] PERF5=601
+[1575] [rx] PERF6=0
+[1576] [rx] PERF7=0
+[1577] [rx] PERF8=5
+[1578] [rx] PEER=192.168.1.2:6000
+[1579] [rx] STATUS=0x00000002
+[1580] [rx] IRQ_STAT=0x00000801
+[1581] [rx] ERR_CODE=0x00000000
+[1582] [rx] TX sequence=86
+[1583] [rx] link=0 speed=10 duplex=half
+[1584] [rx] PERF0=665
+[1585] [rx] PERF1=59
+[1586] [rx] PERF2=59
+[1587] [rx] PERF3=0
+[1588] [rx] PERF4=0
+[1589] [rx] PERF5=601
+[1590] [rx] PERF6=0
+[1591] [rx] PERF7=0
+[1592] [rx] PERF8=5
+[1593] [rx] PEER=192.168.1.2:6000
+[1594] [rx] STATUS=0x00000002
+[1595] [rx] IRQ_STAT=0x00000801
+[1596] [rx] ERR_CODE=0x00000000
+[1597] [rx] TX sequence=87
+[1598] [rx] link=1 speed=1000 duplex=full
+[1599] [rx] PERF0=668
+[1600] [rx] PERF1=59
+[1601] [rx] PERF2=59
+[1602] [rx] PERF3=0
+[1603] [rx] PERF4=0
+[1604] [rx] PERF5=604
+[1605] [rx] PERF6=0
+[1606] [rx] PERF7=0
+[1607] [rx] PERF8=5
+[1608] [rx] PEER=192.168.1.2:6000
+[1609] [rx] STATUS=0x00000002
+[1610] [rx] IRQ_STAT=0x00000801
+[1611] [rx] ERR_CODE=0x00000000
+[1612] [rx] TX sequence=88
+[1613] [tx] s
+[1614] [rx] link=1 speed=1000 duplex=full
+[1615] [rx] PERF0=675
+[1616] [rx] PERF1=60
+[1617] [rx] PERF2=60
+[1618] [rx] PERF3=0
+[1619] [rx] PERF4=0
+[1620] [rx] PERF5=609
+[1621] [rx] PERF6=0
+[1622] [rx] PERF7=0
+[1623] [rx] PERF8=6
+[1624] [rx] PEER=192.168.1.2:6000
+[1625] [rx] STATUS=0x00000002
+[1626] [rx] IRQ_STAT=0x00000801
+[1627] [rx] ERR_CODE=0x00000000
+[1628] [rx] link=1 speed=1000 duplex=full
+[1629] [rx] PERF0=678
+[1630] [rx] PERF1=60
+[1631] [rx] PERF2=60
+[1632] [rx] PERF3=0
+[1633] [rx] PERF4=0
+[1634] [rx] PERF5=612
+[1635] [rx] PERF6=0
+[1636] [rx] PERF7=0
+[1637] [rx] PERF8=6
+[1638] [rx] PEER=192.168.1.2:6000
+[1639] [rx] STATUS=0x00000002
+[1640] [rx] IRQ_STAT=0x00000801
+[1641] [rx] ERR_CODE=0x00000000
+[1642] [rx] TX sequence=89
+[1643] [rx] link=1 speed=1000 duplex=full
+[1644] [rx] PERF0=700
+[1645] [rx] PERF1=61
+[1646] [rx] PERF2=61
+[1647] [rx] PERF3=0
+[1648] [rx] PERF4=0
+[1649] [rx] PERF5=633
+[1650] [rx] PERF6=0
+[1651] [rx] PERF7=0
+[1652] [rx] PERF8=6
+[1653] [rx] PEER=192.168.1.2:6000
+[1654] [rx] STATUS=0x00000002
+[1655] [rx] IRQ_STAT=0x00000801
+[1656] [rx] ERR_CODE=0x00000000
+[1657] [rx] TX sequence=90
+[1658] [rx] link=1 speed=1000 duplex=full
+[1659] [rx] PERF0=720
+[1660] [rx] PERF1=62
+[1661] [rx] PERF2=62
+[1662] [rx] PERF3=0
+[1663] [rx] PERF4=0
+[1664] [rx] PERF5=652
+[1665] [rx] PERF6=0
+[1666] [rx] PERF7=0
+[1667] [rx] PERF8=6
+[1668] [rx] PEER=192.168.1.2:6000
+[1669] [rx] STATUS=0x00000002
+[1670] [rx] IRQ_STAT=0x00000801
+[1671] [rx] ERR_CODE=0x00000000
+[1672] [rx] TX sequence=91
+[1673] [rx] link=1 speed=1000 duplex=full
+[1674] [rx] PERF0=738
+[1675] [rx] PERF1=63
+[1676] [rx] PERF2=63
+[1677] [rx] PERF3=0
+[1678] [rx] PERF4=0
+[1679] [rx] PERF5=669
+[1680] [rx] PERF6=0
+[1681] [rx] PERF7=0
+[1682] [rx] PERF8=6
+[1683] [rx] PEER=192.168.1.2:6000
+[1684] [rx] STATUS=0x00000002
+[1685] [rx] IRQ_STAT=0x00000801
+[1686] [rx] ERR_CODE=0x00000000
+[1687] [rx] TX sequence=92
+[1688] [rx] link=1 speed=1000 duplex=full
+[1689] [rx] PERF0=751
+[1690] [rx] PERF1=64
+[1691] [rx] PERF2=64
+[1692] [rx] PERF3=0
+[1693] [rx] PERF4=0
+[1694] [rx] PERF5=683
+[1695] [rx] PERF6=0
+[1696] [rx] PERF7=0
+[1697] [rx] PERF8=6
+[1698] [rx] PEER=192.168.1.2:6000
+[1699] [rx] STATUS=0x00000002
+[1700] [rx] IRQ_STAT=0x00000801
+[1701] [rx] ERR_CODE=0x00000000
+[1702] [rx] TX sequence=93
+[1703] [rx] link=1 speed=1000 duplex=full
+[1704] [rx] PERF0=758
+[1705] [rx] PERF1=65
+[1706] [rx] PERF2=65
+[1707] [rx] PERF3=0
+[1708] [rx] PERF4=0
+[1709] [rx] PERF5=687
+[1710] [rx] PERF6=0
+[1711] [rx] PERF7=0
+[1712] [rx] PERF8=6
+[1713] [rx] PEER=192.168.1.2:6000
+[1714] [rx] STATUS=0x00000002
+[1715] [rx] IRQ_STAT=0x00000801
+[1716] [rx] ERR_CODE=0x00000000
+[1717] [rx] TX sequence=94
+[1718] [rx] link=1 speed=1000 duplex=full
+[1719] [rx] PERF0=761
+[1720] [rx] PERF1=66
+[1721] [rx] PERF2=66
+[1722] [rx] PERF3=0
+[1723] [rx] PERF4=0
+[1724] [rx] PERF5=689
+[1725] [rx] PERF6=0
+[1726] [rx] PERF7=0
+[1727] [rx] PERF8=6
+[1728] [rx] PEER=192.168.1.2:6000
+[1729] [rx] STATUS=0x00000002
+[1730] [rx] IRQ_STAT=0x00000801
+[1731] [rx] ERR_CODE=0x00000000
+[1732] [rx] TX sequence=95
+[1733] [rx] link=1 speed=1000 duplex=full
+[1734] [rx] PERF0=770
+[1735] [rx] PERF1=67
+[1736] [rx] PERF2=67
+[1737] [rx] PERF3=0
+[1738] [rx] PERF4=0
+[1739] [rx] PERF5=697
+[1740] [rx] PERF6=0
+[1741] [rx] PERF7=0
+[1742] [rx] PERF8=6
+[1743] [rx] PEER=192.168.1.2:6000
+[1744] [rx] STATUS=0x00000002
+[1745] [rx] IRQ_STAT=0x00000801
+[1746] [rx] ERR_CODE=0x00000000
+[1747] [rx] TX sequence=96
+[1748] [rx] link=1 speed=1000 duplex=full
+[1749] [rx] PERF0=778
+[1750] [rx] PERF1=68
+[1751] [rx] PERF2=68
+[1752] [rx] PERF3=0
+[1753] [rx] PERF4=0
+[1754] [rx] PERF5=704
+[1755] [rx] PERF6=0
+[1756] [rx] PERF7=0
+[1757] [rx] PERF8=6
+[1758] [rx] PEER=192.168.1.2:6000
+[1759] [rx] STATUS=0x00000002
+[1760] [rx] IRQ_STAT=0x00000801
+[1761] [rx] ERR_CODE=0x00000000
+[1762] [rx] TX sequence=97
+[1763] [rx] link=1 speed=1000 duplex=full
+[1764] [rx] PERF0=787
+[1765] [rx] PERF1=69
+[1766] [rx] PERF2=69
+[1767] [rx] PERF3=0
+[1768] [rx] PERF4=0
+[1769] [rx] PERF5=712
+[1770] [rx] PERF6=0
+[1771] [rx] PERF7=0
+[1772] [rx] PERF8=6
+[1773] [rx] PEER=192.168.1.2:6000
+[1774] [rx] STATUS=0x00000002
+[1775] [rx] IRQ_STAT=0x00000801
+[1776] [rx] ERR_CODE=0x00000000
+[1777] [rx] TX sequence=98
+[1778] [tx] s
+[1779] [rx] link=1 speed=1000 duplex=full
+[1780] [rx] PERF0=789
+[1781] [rx] PERF1=70
+[1782] [rx] PERF2=70
+[1783] [rx] PERF3=0
+[1784] [rx] PERF4=0
+[1785] [rx] PERF5=713
+[1786] [rx] PERF6=0
+[1787] [rx] PERF7=0
+[1788] [rx] PERF8=6
+[1789] [rx] PEER=192.168.1.2:6000
+[1790] [rx] STATUS=0x00000002
+[1791] [rx] IRQ_STAT=0x00000801
+[1792] [rx] ERR_CODE=0x00000000
+[1793] [rx] link=1 speed=1000 duplex=full
+[1794] [rx] PERF0=789
+[1795] [rx] PERF1=70
+[1796] [rx] PERF2=70
+[1797] [rx] PERF3=0
+[1798] [rx] PERF4=0
+[1799] [rx] PERF5=713
+[1800] [rx] PERF6=0
+[1801] [rx] PERF7=0
+[1802] [rx] PERF8=6
+[1803] [rx] PEER=192.168.1.2:6000
+[1804] [rx] STATUS=0x00000002
+[1805] [rx] IRQ_STAT=0x00000801
+[1806] [rx] ERR_CODE=0x00000000
+[1807] [rx] TX sequence=99

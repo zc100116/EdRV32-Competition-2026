@@ -1,0 +1,286 @@
+[1] [sys] connected COM7 @ 115200 8N1
+[2] [rx] 
+[3] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[4] [rx]   E         D   D   R   R   V   V      3      2 
+[5] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[6] [rx]   E         D   D   R  R     V V       3   2    
+[7] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[8] [rx] 
+[9] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[10] [rx] CHIP_ID: 0xed320001
+[11] [rx] CLK_SYS_HZ: 100000000
+[12] [rx] ROM bytes: 16384
+[13] [rx] SRAM bytes: 65536
+[14] [rx] I-cache bytes: 8192
+[15] [rx] D-cache bytes: 8192
+[16] [rx] MEM_READY: 1
+[17] [rx] Build commit: 92b38fd2
+[18] [rx] Compiler version: GCC 15.2.0
+[19] [rx] Boot SRAM
+[20] [rx] Demo: demo_vnpu
+[21] [rx] CHIP_ID: 0xed320001
+[22] [rx] CLK_SYS_HZ: 100000000
+[23] [rx] ROM bytes: 16384
+[24] [rx] SRAM bytes: 65536
+[25] [rx] I-cache bytes: 8192
+[26] [rx] D-cache bytes: 8192
+[27] [rx] MEM_READY: 1
+[28] [rx] Build commit: 92b38fd2
+[29] [rx] Compiler version: GCC 15.2.0
+[30] [rx] VIN ID: 0x00010001
+[31] [rx] PIX ID: 0x00020001
+[32] [rx] GEO ID: 0x00030001
+[33] [rx] DISP ID: 0x00050002
+[34] [rx] NPU ID: 0x00060001
+[35] [rx] ETH ID: 0x00070001
+[36] [rx] MEM_XBAR ID: 0x00080001
+[37] [sys] UDP 已监听 192.168.1.2:6000 · console
+[38] [rx] Camera: 0
+[39] [rx] Camera chip ID: 0x00005640
+[40] [rx] Camera: 1
+[41] [rx] Camera chip ID: 0x00005640
+[42] [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[43] [rx] Demo commands: s1 | s2 | status | help
+[44] [rx] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[45] [rx] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[46] [rx] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[47] [rx] GEO: geo off | geo rotate | geo scale
+[48] [rx] Output: output hdmi | output eth | output both | fps 1..60
+[49] [rx] Monitor: sample 10..1000 (Hz), default 100
+[50] [rx] KEY: KEY2 scene; KEY3 PIX; KEY4 GEO (PIX/GEO require S2)
+[51] [rx] 
+[52] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[53] [rx]   E         D   D   R   R   V   V      3      2 
+[54] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[55] [rx]   E         D   D   R  R     V V       3   2    
+[56] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[57] [rx] 
+[58] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[59] [rx] CHIP_ID: 0xed320001
+[60] [rx] CLK_SYS_HZ: 100000000
+[61] [rx] ROM bytes: 16384
+[62] [rx] SRAM bytes: 65536
+[63] [rx] I-cache bytes: 8192
+[64] [rx] D-cache bytes: 8192
+[65] [rx] MEM_READY: 1
+[66] [rx] Build commit: 92b38fd2
+[67] [rx] Compiler version: GCC 15.2.0
+[68] [rx] BIOS: EdRV32
+[69] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[70] [sys] 建立网口连接失败：等待网卡 以太网 就绪超时：local_ip=192.168.1.2，最后状态 OperStatus=Down, DAD=Deprecated，用时 10.0 s
+[71] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[72] [rx] Input error: type 1-4 then Enter
+[73] [sys] Input error: type 1-4 then Enter
+[74] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[75] [rx] ETH link: up
+[76] [rx] ETH load ready 192.168.1.10:5000
+[77] [sys] 等待网卡 以太网 就绪 … 用时 0.5 s
+[78] [rx] Load bytes: 47244 segments: 1
+[79] [rx] Load result: PASS
+[80] [rx] Run: 0x10000000
+[81] [rx] Demo: demo_vnpu
+[82] [rx] CHIP_ID: 0xed320001
+[83] [rx] CLK_SYS_HZ: 100000000
+[84] [rx] ROM bytes: 16384
+[85] [rx] SRAM bytes: 65536
+[86] [rx] I-cache bytes: 8192
+[87] [rx] D-cache bytes: 8192
+[88] [rx] MEM_READY: 1
+[89] [rx] Build commit: 92b38fd2
+[90] [rx] Compiler version: GCC 15.2.0
+[91] [rx] VIN ID: 0x00010001
+[92] [rx] PIX ID: 0x00020001
+[93] [rx] GEO ID: 0x00030001
+[94] [rx] DISP ID: 0x00050002
+[95] [rx] NPU ID: 0x00060001
+[96] [rx] ETH ID: 0x00070001
+[97] [rx] MEM_XBAR ID: 0x00080001
+[98] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[99] [rx] Camera: 0
+[100] [rx] Camera chip ID: 0x00005640
+[101] [rx] Camera: 1
+[102] [rx] Camera chip ID: 0x00005640
+[103] [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[104] [rx] Demo commands: s1 | s2 | status | help
+[105] [rx] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[106] [rx] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[107] [rx] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[108] [rx] GEO: geo off | geo rotate | geo scale
+[109] [rx] Output: output hdmi | output eth | output both | fps 1..60
+[110] [rx] Monitor: sample 10..1000 (Hz), default 100
+[111] [rx] KEY: KEY2 scene; KEY3 PIX; KEY4 GEO (PIX/GEO require S2)
+[112] [tx] s1<CR>
+[113] [rx] Demo command: OK
+[114] [rx] Switch: frames=14 mtime_ticks=23285662 HDMI FRAME
+[115] [sys] 等待网卡 以太网 就绪 … 用时 2.5 s
+[116] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[117] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[118] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[119] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[120] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[121] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[122] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[123] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[124] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[125] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[126] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[127] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[128] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[129] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[130] [tx] output both<CR>
+[131] [tx] fps 30<CR>
+[132] [tx] sample 100<CR>
+[133] [tx] status<CR>
+[134] [rx] Demo command: OK
+[135] [rx] Switch: frames=9 mtime_ticks=14301533 HDMI FRAME
+[136] [rx] Demo command: OK
+[137] [rx] Demo command: OK
+[138] [rx] Scene: 1
+[139] [rx] PIX mode: 0
+[140] [rx] GEO mode: 0
+[141] [rx] Output mode: 2
+[142] [rx] Requested video fps: 30
+[143] [rx] Video divisor: 1
+[144] [rx] Monitor Hz: 100
+[145] [rx] VIN camera0 frames: 929
+[146] [rx] VIN camera1 frames: 929
+[147] [rx] VIN CH0 frames: 927
+[148] [rx] VIN CH2 frames: 852
+[149] [rx] VIN CH0 overflow: 0
+[150] [rx] VIN CH2 overflow: 0
+[151] [rx] NPU inferences: 426
+[152] [rx] NPU cycles: 6197042
+[153] [rx] Post cycles: 2757646
+[154] [rx] Detection count: 0
+[155] [rx] Overlay CPU cycles: 76
+[156] [rx] ETH peer IP: 0xc0a80102
+[157] [rx] ETH peer port: 6000
+[158] [rx] ETH STATUS: 0x00000002
+[159] [rx] Video skips (current window): 0
+[160] [rx] Monitor sequence: 3113
+[161] [rx] Monitor dropped records: 0
+[162] [rx] mtime: 5371830455
+[163] [rx] Demo command: OK
+[164] [sys] UDP 发送完成：3247136 B · G:\codex_project\EdRV32-Competition-2026\tasks\win\20261029-09-b3-software\src\npu
+[165] [rx] Model bytes: 3247136
+[166] [rx] EDNM: loaded
+[167] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\bus_000000405205.jpg
+[168] [rx] YOLO image window: 0
+[169] [sys] YOLO 回传完整：FRAME 0 · 2 个框
+[170] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\bus_000000405205.jpg · 往返 358.83 ms
+[171] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\cat_000000015497.jpg
+[172] [rx] YOLO image window: 1
+[173] [sys] YOLO 回传完整：FRAME 1 · 2 个框
+[174] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\cat_000000015497.jpg · 往返 311.90 ms
+[175] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\person_000000402765.jpg
+[176] [rx] YOLO image window: 0
+[177] [sys] YOLO 回传完整：FRAME 2 · 1 个框
+[178] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\quick_start\person_000000402765.jpg · 往返 302.47 ms
+[179] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000000285.jpg
+[180] [rx] YOLO image window: 1
+[181] [sys] YOLO 回传完整：FRAME 3 · 1 个框
+[182] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000000285.jpg · 往返 275.06 ms
+[183] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000001818.jpg
+[184] [rx] YOLO image window: 0
+[185] [sys] YOLO 回传完整：FRAME 4 · 1 个框
+[186] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000001818.jpg · 往返 280.31 ms
+[187] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000003156.jpg
+[188] [rx] YOLO image window: 1
+[189] [sys] YOLO 回传完整：FRAME 5 · 2 个框
+[190] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000003156.jpg · 往返 298.96 ms
+[191] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000006614.jpg
+[192] [rx] YOLO image window: 0
+[193] [sys] YOLO 回传完整：FRAME 6 · 1 个框
+[194] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000006614.jpg · 往返 287.23 ms
+[195] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000007386.jpg
+[196] [rx] YOLO image window: 1
+[197] [sys] YOLO 回传完整：FRAME 7 · 1 个框
+[198] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000007386.jpg · 往返 285.66 ms
+[199] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000010363.jpg
+[200] [rx] YOLO image window: 0
+[201] [sys] YOLO 回传完整：FRAME 8 · 3 个框
+[202] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000010363.jpg · 往返 280.26 ms
+[203] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000014888.jpg
+[204] [rx] YOLO image window: 1
+[205] [sys] YOLO 回传完整：FRAME 9 · 1 个框
+[206] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000014888.jpg · 往返 262.28 ms
+[207] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000015278.jpg
+[208] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000015278.jpg: 回传未结束（超时 1 s）
+[209] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000015497.jpg
+[210] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000015497.jpg: 回传未结束（超时 1 s）
+[211] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000022623.jpg
+[212] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000022623.jpg: 回传未结束（超时 1 s）
+[213] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000025096.jpg
+[214] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000025096.jpg: 回传未结束（超时 1 s）
+[215] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000026926.jpg
+[216] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000026926.jpg: 回传未结束（超时 1 s）
+[217] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000027932.jpg
+[218] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000027932.jpg: 回传未结束（超时 1 s）
+[219] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000028452.jpg
+[220] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000028452.jpg: 回传未结束（超时 1 s）
+[221] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000039769.jpg
+[222] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000039769.jpg: 回传未结束（超时 1 s）
+[223] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000047740.jpg
+[224] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000047740.jpg: 回传未结束（超时 1 s）
+[225] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000052891.jpg
+[226] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000052891.jpg: 回传未结束（超时 1 s）
+[227] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000053994.jpg
+[228] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000053994.jpg: 回传未结束（超时 1 s）
+[229] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000055528.jpg
+[230] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000055528.jpg: 回传未结束（超时 1 s）
+[231] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000060052.jpg
+[232] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000060052.jpg: 回传未结束（超时 1 s）
+[233] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000066841.jpg
+[234] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000066841.jpg: 回传未结束（超时 1 s）
+[235] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000067315.jpg
+[236] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000067315.jpg: 回传未结束（超时 1 s）
+[237] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000067534.jpg
+[238] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000067534.jpg: 回传未结束（超时 1 s）
+[239] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000069138.jpg
+[240] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000069138.jpg: 回传未结束（超时 1 s）
+[241] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000071226.jpg
+[242] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000071226.jpg: 回传未结束（超时 1 s）
+[243] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000078170.jpg
+[244] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000078170.jpg: 回传未结束（超时 1 s）
+[245] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000079188.jpg
+[246] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000079188.jpg: 回传未结束（超时 1 s）
+[247] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000080949.jpg
+[248] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000080949.jpg: 回传未结束（超时 1 s）
+[249] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000085089.jpg
+[250] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000085089.jpg: 回传未结束（超时 1 s）
+[251] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000096493.jpg
+[252] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000096493.jpg: 回传未结束（超时 1 s）
+[253] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000099024.jpg
+[254] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000099024.jpg: 回传未结束（超时 1 s）
+[255] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000109055.jpg
+[256] [tx] status<CR>
+[257] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000109055.jpg: 回传未结束（超时 1 s）
+[258] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000110721.jpg
+[259] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000110721.jpg: 回传未结束（超时 1 s）
+[260] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000112634.jpg
+[261] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000112634.jpg: 回传未结束（超时 1 s）
+[262] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000119452.jpg
+[263] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000119452.jpg: 回传未结束（超时 1 s）
+[264] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000129812.jpg
+[265] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000129812.jpg: 回传未结束（超时 1 s）
+[266] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000131379.jpg
+[267] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000131379.jpg: 回传未结束（超时 1 s）
+[268] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000132329.jpg
+[269] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000132329.jpg: 回传未结束（超时 1 s）
+[270] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000132622.jpg
+[271] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000132622.jpg: 回传未结束（超时 1 s）
+[272] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000143931.jpg
+[273] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000143931.jpg: 回传未结束（超时 1 s）
+[274] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000146489.jpg
+[275] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000146489.jpg: 回传未结束（超时 1 s）
+[276] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000153568.jpg
+[277] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000153568.jpg: 回传未结束（超时 1 s）
+[278] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000160666.jpg
+[279] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000160666.jpg: 回传未结束（超时 1 s）
+[280] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000164363.jpg
+[281] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000164363.jpg: 回传未结束（超时 1 s）
+[282] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000176634.jpg
+[283] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000176634.jpg: 回传未结束（超时 1 s）
+[284] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000177015.jpg
+[285] [sys] G:\codex_project\EdRV32-test-images\coco-val-160\images\000000177015.jpg: 回传未结束（超时 1 s）
+[286] [sys] UDP 发送完成：1843200 B · G:\codex_project\EdRV32-test-images\coco-val-160\images\000000177539.jpg

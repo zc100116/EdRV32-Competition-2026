@@ -1,0 +1,11 @@
+{
+  "active": false,
+  "phase": "done",
+  "path": "G:/codex_project/EdRV32-Competition-2026/tasks/win/20261102-43-npu-rnd1-boards/src/eth_diag.bin",
+  "sent": 4325,
+  "total": 4325,
+  "bios": false,
+  "programmedBytes": 4277,
+  "result": "Run: 0x10000000",
+  "error": null
+}

@@ -1,0 +1,12 @@
+Logic levels>=8 in exported slow setup samples (not whole design):
+clk_cam0: 0
+clk_cam1: 0
+clk_eth: 0
+clk_mem: 90
+clk_npu: 20
+clk_pix: 1
+clk_serial: 0
+clk_sys: 167
+phy_dq_sysclk_0: 0
+phy_dq_sysclk_1: 0
+rst_clk: 0

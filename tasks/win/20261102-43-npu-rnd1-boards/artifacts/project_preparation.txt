@@ -1,0 +1,5 @@
+N: EdRV32-B3N-Q6-OPT2/EdRV32-B3N-Q6-OPT2.pds; 105 sources; 24 IPs; GUI ROM/SRAM regeneration pending.
+VN: EdRV32-B3VN-Q6-OPT2/EdRV32-B3VN-Q6-OPT2.pds; 144 sources; 29 IPs; GUI ROM/SRAM regeneration pending.
+F: EdRV32-B3F-RND1-N/EdRV32-B3F-RND1-N.pds; 159 sources; 32 IPs; GUI ROM/SRAM regeneration pending.
+VRN: EdRV32-B3F-VRN-RND1-N/EdRV32-B3F-VRN-RND1-N.pds; 142 sources; 31 IPs; GUI ROM/SRAM regeneration pending.
+All copied FIC/output/PCF references removed. N ETH PLL copied from external-feedback B3F, replacing old internal-feedback N source. No implementation process started.

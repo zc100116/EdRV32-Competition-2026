@@ -1,0 +1,71 @@
+{
+  "connected": true,
+  "config": {
+    "port": "COM7",
+    "baud": 115200,
+    "dataBits": 8,
+    "parity": "none",
+    "stopBits": "1",
+    "encoding": "utf-8",
+    "dtr": false,
+    "rts": false
+  },
+  "encoding": "utf-8",
+  "dtr": false,
+  "rts": false,
+  "rxBytes": 4171,
+  "txBytes": 50,
+  "lastSeq": 286,
+  "board": {
+    "phase": "application",
+    "network": {
+      "listen": {
+        "done": true,
+        "time": 1793644566057
+      },
+      "win3": {
+        "done": true,
+        "time": 1793644620969
+      },
+      "peer": {
+        "done": true,
+        "time": 1793644621670
+      },
+      "data": {
+        "done": true,
+        "time": 1793644701603
+      }
+    },
+    "counts": {
+      "video": 1558037,
+      "telemetry": 3347
+    },
+    "dataTimes": {
+      "video": 1793644680062,
+      "telemetry": 1793644701603
+    },
+    "expectedPeer": [
+      "192.168.1.2",
+      6000
+    ],
+    "peer": [
+      "192.168.1.2",
+      6000
+    ],
+    "summary": {
+      "PIX parameters": "pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV",
+      "GEO parameters": "geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)",
+      "Switch": "frames=9 mtime_ticks=14301533 HDMI FRAME",
+      "Scene": "1",
+      "PIX mode": "0",
+      "GEO mode": "0",
+      "Output mode": "2",
+      "Requested video fps": "30",
+      "Monitor Hz": "100",
+      "Detection count": "0",
+      "Overlay CPU cycles": "76",
+      "Monitor dropped records": "0"
+    },
+    "error": null
+  }
+}

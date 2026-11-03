@@ -1,0 +1,2 @@
+Distinct diagnostic lines, identical repetitions omitted; counts in warning_counts.txt.
+

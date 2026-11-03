@@ -1,0 +1,132 @@
+[3691] [rx] CHIP_ID: 0xed320001
+[3692] [rx] CLK_SYS_HZ: 100000000
+[3693] [rx] ROM bytes: 16384
+[3694] [rx] SRAM bytes: 65536
+[3695] [rx] I-cache bytes: 8192
+[3696] [rx] D-cache bytes: 8192
+[3697] [rx] MEM_READY: 1
+[3698] [rx] Build commit: 92b38fd2
+[3699] [rx] Compiler version: GCC 15.2.0
+[3700] [rx] VIN ID: 0x00010001
+[3701] [rx] PIX ID: 0x00020001
+[3702] [rx] GEO ID: 0x00030001
+[3703] [rx] DISP ID: 0x00050002
+[3704] [rx] NPU ID: 0x00060001
+[3705] [rx] ETH ID: 0x00070001
+[3706] [rx] MEM_XBAR ID: 0x00080001
+[3707] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3708] [rx] Camera: 0
+[3709] [rx] Camera chip ID: 0x00005640
+[3710] [rx] Camera: 1
+[3711] [rx] Camera chip ID: 0x00005640
+[3712] [rx] Network: 02:45:44:52:56:32 192.168.1.10:5000; peer from PC UDP source
+[3713] [rx] Demo commands: s1 | s2 | status | help
+[3714] [rx] PIX: pix bypass | pix brightness | pix gamma | pix gaussian | pix sobel
+[3715] [rx] PIX parameters: pix set BC CONTRAST BRIGHT GAMMA_EN GAMMA S1 S2 GRAY BIN THRESH INV
+[3716] [rx] GEO parameters: geo set EN ANGLE SX SY TX TY MX MY (0.1 deg / per mille / px)
+[3717] [rx] GEO: geo off | geo rotate | geo scale
+[3718] [rx] Output: output hdmi | output eth | output both | fps 1..60
+[3719] [rx] Monitor: sample 10..1000 (Hz), default 100
+[3720] [rx] KEY: KEY2 scene; KEY3 PIX; KEY4 GEO (PIX/GEO require S2)
+[3721] [sys] 等待网卡 以太网 就绪 … 用时 2.3 s
+[3722] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3723] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3724] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3725] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3726] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3727] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3728] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3729] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3730] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3731] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3732] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3733] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3734] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3735] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3736] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3737] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3738] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3739] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3740] [sys] UDP 已监听 192.168.1.2:6000 · console
+[3741] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3742] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3743] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3744] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3745] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3746] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3747] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3748] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3749] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3750] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3751] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3752] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3753] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3754] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3755] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3756] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3757] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3758] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3759] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3760] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3761] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3762] [tx] output both<CR>
+[3763] [tx] fps 30<CR>
+[3764] [tx] sample 100<CR>
+[3765] [tx] status<CR>
+[3766] [rx] Demo command: OK
+[3767] [rx] Switch: frames=6 mtime_ticks=9189680 HDMI FRAME
+[3768] [rx] Demo command: OK
+[3769] [rx] Demo command: OK
+[3770] [rx] Scene: 2
+[3771] [rx] PIX mode: 0
+[3772] [rx] GEO mode: 0
+[3773] [rx] Output mode: 2
+[3774] [rx] Requested video fps: 30
+[3775] [rx] Video divisor: 1
+[3776] [rx] Monitor Hz: 100
+[3777] [rx] VIN camera0 frames: 2244
+[3778] [rx] VIN camera1 frames: 2244
+[3779] [rx] VIN CH0 frames: 2242
+[3780] [rx] VIN CH2 frames: 0
+[3781] [rx] VIN CH0 overflow: 0
+[3782] [rx] VIN CH2 overflow: 0
+[3783] [rx] NPU inferences: 0
+[3784] [rx] NPU cycles: 0
+[3785] [rx] Post cycles: 0
+[3786] [rx] Detection count: 0
+[3787] [rx] Overlay CPU cycles: 0
+[3788] [rx] ETH peer IP: 0xc0a80102
+[3789] [rx] ETH peer port: 6000
+[3790] [rx] ETH STATUS: 0x00000002
+[3791] [rx] Video skips (current window): 0
+[3792] [rx] Monitor sequence: 7484
+[3793] [rx] Monitor dropped records: 0
+[3794] [rx] mtime: 10285033503
+[3795] [rx] Demo command: OK
+[3796] [tx] status<CR>
+[3797] [rx] Scene: 2
+[3798] [rx] PIX mode: 0
+[3799] [rx] GEO mode: 0
+[3800] [rx] Output mode: 2
+[3801] [rx] Requested video fps: 30
+[3802] [rx] Video divisor: 1
+[3803] [rx] Monitor Hz: 100
+[3804] [rx] VIN camera0 frames: 2314
+[3805] [rx] VIN camera1 frames: 2315
+[3806] [rx] VIN CH0 frames: 2312
+[3807] [rx] VIN CH2 frames: 0
+[3808] [rx] VIN CH0 overflow: 0
+[3809] [rx] VIN CH2 overflow: 0
+[3810] [rx] NPU inferences: 0
+[3811] [rx] NPU cycles: 0
+[3812] [rx] Post cycles: 0
+[3813] [rx] Detection count: 0
+[3814] [rx] Overlay CPU cycles: 0
+[3815] [rx] ETH peer IP: 0xc0a80102
+[3816] [rx] ETH peer port: 6000
+[3817] [rx] ETH STATUS: 0x00000002
+[3818] [rx] Video skips (current window): 0
+[3819] [rx] Monitor sequence: 7719
+[3820] [rx] Monitor dropped records: 0
+[3821] [rx] mtime: 10519900949
+[3822] [rx] Demo command: OK

@@ -1,0 +1,33 @@
+Worst slack after global placement is -533
+Worst slack after post global placement is -403
+Worst slack before Replication Place is -599.
+Worst slack before detailed placement is -419, TNS before detailed placement is -16175. 
+Worst slack after detailed placement is 342, TNS after detailed placement is 0. 
+Worst slack is 318, TNS after placement is 0.
+Total placement takes 325.80 sec.
+Worst slack is 318, TNS before route is 0.
+Unrouted general nets at iteration 6 (MT total route time: 19.097 sec): 142484(overused: 1094828)
+Unrouted general nets at iteration 7 (MT total route time: 30.175 sec): 129555(overused: 917424)
+Unrouted general nets at iteration 8 (MT total route time: 264.185 sec): 118170(overused: 767822)
+Unrouted general nets at iteration 9 (MT total route time: 1309.925 sec): 108719(overused: 659819)
+Unrouted general nets at iteration 10 (MT total route time: 2043.237 sec): 101663(overused: 578965)
+E: Route-0039: Design is too congested to be routed, iteration time exceed limit 2000 sec.
+E: Route-0008: Design cannot be routed.
+Action pnr: Real time elapsed is 1h:30m:20s
+Action pnr: CPU time elapsed is 0h:18m:10s
+Action pnr: Process CPU time elapsed is 0h:22m:45s
+Action pnr: Peak memory pool usage is 7,280 MB
+Worst slack is 318, TNS after placement is 0.
+Total placement takes 325.80 sec.
+Worst slack is 318, TNS before route is 0.
+Unrouted general nets at iteration 6 (MT total route time: 19.097 sec): 142484(overused: 1094828)
+Unrouted general nets at iteration 7 (MT total route time: 30.175 sec): 129555(overused: 917424)
+Unrouted general nets at iteration 8 (MT total route time: 264.185 sec): 118170(overused: 767822)
+Unrouted general nets at iteration 9 (MT total route time: 1309.925 sec): 108719(overused: 659819)
+Unrouted general nets at iteration 10 (MT total route time: 2043.237 sec): 101663(overused: 578965)
+E: Route-0039: Design is too congested to be routed, iteration time exceed limit 2000 sec.
+E: Route-0008: Design cannot be routed.
+Action pnr: Real time elapsed is 1h:30m:20s
+Action pnr: CPU time elapsed is 0h:18m:10s
+Action pnr: Process CPU time elapsed is 0h:22m:45s
+Action pnr: Peak memory pool usage is 7,280 MB

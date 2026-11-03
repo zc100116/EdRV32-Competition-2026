@@ -1,0 +1,2 @@
+EdRV32-B3F-RND1-N-D3/EdRV32-B3F-RND1-N-D3.pds: copied synthesis/Map DB and original stage state, decongestion3, PnR pending. No rebuild or PnR launched.
+EdRV32-B3F-VRN-RND1-N-D3/EdRV32-B3F-VRN-RND1-N-D3.pds: copied synthesis/Map DB and original stage state, decongestion3, PnR pending. No rebuild or PnR launched.

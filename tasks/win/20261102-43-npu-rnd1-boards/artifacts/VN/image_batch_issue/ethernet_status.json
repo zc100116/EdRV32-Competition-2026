@@ -1,0 +1,34 @@
+{
+  "tx": {
+    "active": false,
+    "sent": 1843200,
+    "total": 1843200,
+    "packets": 1800,
+    "path": "G:\\codex_project\\EdRV32-test-images\\coco-val-160\\images\\000000177539.jpg",
+    "error": null
+  },
+  "rx": {
+    "active": true,
+    "localIp": "192.168.1.2",
+    "localPort": 6000,
+    "socketBufferBytes": 67108864,
+    "directory": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx",
+    "packets": 1579354,
+    "bytes": 1615114060,
+    "notifyCount": 2820,
+    "lastNotify": true,
+    "files": {
+      "0": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx\\window0.bin",
+      "1": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx\\window1.bin",
+      "2": "G:\\codex_project\\EdRV32-Competition-2026\\build\\debug_tool\\udp-rx\\window2.bin"
+    },
+    "error": null,
+    "receiveCpuSeconds": 0.0,
+    "lastWindow": 3,
+    "lastOffset": 4096,
+    "peer": [
+      "192.168.1.10",
+      5000
+    ]
+  }
+}

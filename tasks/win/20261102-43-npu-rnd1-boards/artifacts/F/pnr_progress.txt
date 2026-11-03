@@ -1,0 +1,14 @@
+Unrouted clock nets at iteration 0 (0.604 sec): 18
+Unrouted clock nets at iteration 1 (0.482 sec): 9
+Unrouted clock nets at iteration 2 (0.366 sec): 7
+Unrouted clock nets at iteration 3 (0.315 sec): 3
+Unrouted clock nets at iteration 4 (0.137 sec): 3
+Unrouted clock nets at iteration 5 (0.059 sec): 3
+Unrouted clock nets at iteration 6 (0.063 sec): 3
+Unrouted clock nets at iteration 7 (0.056 sec): 2
+Unrouted clock nets at iteration 8 (0.056 sec): 0
+Unrouted general nets at iteration 10 (MT total route time: 24.153 sec): 142865(overused: 1092930)
+Unrouted general nets at iteration 11 (MT total route time: 29.441 sec): 129949(overused: 917184)
+Unrouted general nets at iteration 12 (MT total route time: 284.623 sec): 118691(overused: 770665)
+Unrouted general nets at iteration 13 (MT total route time: 1504.207 sec): 109346(overused: 659880)
+Unrouted general nets at iteration 14 (MT total route time: 3278.766 sec): 102322(overused: 581383)

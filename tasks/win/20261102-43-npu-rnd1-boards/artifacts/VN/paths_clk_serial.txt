@@ -1,0 +1,8 @@
+clk_serial | max (slow corner) | slack=1.706ns | levels=0 | u_tmds/g_channel[0].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN0
+clk_serial | max (slow corner) | slack=1.706ns | levels=0 | u_tmds/g_channel[1].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN0
+clk_serial | max (slow corner) | slack=1.706ns | levels=0 | u_tmds/g_channel[2].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN0
+clk_serial | max (slow corner) | slack=1.706ns | levels=0 | u_tmds/g_channel[3].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN0
+clk_serial | max (slow corner) | slack=1.774ns | levels=0 | u_tmds/g_channel[0].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[0].u_pair/opit_2/OSHIFTIN1
+clk_serial | max (slow corner) | slack=1.774ns | levels=0 | u_tmds/g_channel[1].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[1].u_pair/opit_2/OSHIFTIN1
+clk_serial | max (slow corner) | slack=1.774ns | levels=0 | u_tmds/g_channel[2].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[2].u_pair/opit_2/OSHIFTIN1
+clk_serial | max (slow corner) | slack=1.774ns | levels=0 | u_tmds/g_channel[3].u_pair/opit_2_com/OCLK -> u_tmds/g_channel[3].u_pair/opit_2/OSHIFTIN1

@@ -1,0 +1,6 @@
+place_route
+Action pnr: Real time elapsed is 1h:30m:20s
+Action pnr: CPU time elapsed is 0h:18m:10s
+Action pnr: Process CPU time elapsed is 0h:22m:45s
+Action pnr: Peak memory pool usage is 7,280 MB
+W/C/E lines {'C': 63, 'W': 694, 'E': 2}

@@ -1,0 +1,76 @@
+[3566] [rx] ERR_CODE=0x00000000
+[3567] [rx] TX sequence=76
+[3568] [rx] 
+[3569] [rx]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222 
+[3570] [rx]   E         D   D   R   R   V   V      3      2 
+[3571] [rx]   EEEE      D   D   RRRRR    V V    3333   2222 
+[3572] [rx]   E         D   D   R  R     V V       3   2    
+[3573] [rx]   EEEEEEE   DDDD    R    R    V     3333   2222 
+[3574] [rx] 
+[3575] [rx]   EdRV32 Boot ROM - UART 115200 8N1
+[3576] [rx] CHIP_ID: 0xed320001
+[3577] [rx] CLK_SYS_HZ: 100000000
+[3578] [rx] ROM bytes: 16384
+[3579] [rx] SRAM bytes: 65536
+[3580] [rx] I-cache bytes: 8192
+[3581] [rx] D-cache bytes: 8192
+[3582] [rx] MEM_READY: 1
+[3583] [rx] Build commit: 92b38fd2
+[3584] [rx] Compiler version: GCC 15.2.0
+[3585] [rx] BIOS: EdRV32
+[3586] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[3587] [sys] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[3588] [rx] Input error: type 1-4 then Enter
+[3589] [sys] Input error: type 1-4 then Enter
+[3590] [rx] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[3591] [rx] ETH link: up
+[3592] [rx] ETH load ready 192.168.1.10:5000
+[3593] [sys] 等待网卡 以太网 就绪 … 用时 0.3 s
+[3594] [rx] Load bytes: 5184584 segments: 1
+[3595] [rx] Load result: PASS
+[3596] [rx] Run: 0x80000000
+[3597] [rx] NPU A-ID PASS
+[3598] [rx] NPU A-empty PASS
+[3599] [rx] NPU A-reset PASS
+[3600] [rx] NPU B-OP-01-c16_32 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=566 MAC=32
+[3601] [sys] UDP 已监听 192.168.1.2:6000 · console
+[3602] [rx] NPU B-OP-01-c48_96 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1242 MAC=288
+[3603] [rx] NPU B-OP-02-w12 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1164 MAC=648
+[3604] [rx] NPU B-OP-03-h5 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=673 MAC=162
+[3605] [rx] NPU B-OP-04-c4_cout32_lut0_res0 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=457 MAC=36
+[3606] [rx] NPU B-OP-04-c4_cout16_lut1_res1 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=682 MAC=36
+[3607] [rx] NPU B-OP-05-lut1 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=829 MAC=32
+[3608] [rx] NPU B-OP-06-work PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=606 MAC=32
+[3609] [rx] NPU B-OP-06-output PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=603 MAC=32
+[3610] [rx] NPU B-OP-07-cout80 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=3599 MAC=2160
+[3611] [rx] NPU B-OP-09-negative_c48 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=20522 MAC=0
+[3612] [rx] NPU B-OP-10-w2 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=559 MAC=0
+[3613] [rx] NPU B-OP-10-w40 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=2762 MAC=0
+[3614] [rx] NPU B-OP-11-concat PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=1426 MAC=96
+[3615] [rx] NPU B-OP-12-seed00 PASS mismatches=0 desc=0 addr=00000000 expected=00000000 actual=00000000 PERF0=18366 MAC=11736
+[3616] [rx] NPU C-YOLO PASS PERF0=6105990 MAC=5347440 ms/frame=40.706 fps=24.566 CRC32=0738f96e
+[3617] [rx] NPU D-01 PASS CRC32=0738f96e PERF0=6108164 MAC=5347440
+[3618] [rx] NPU D-02 PASS CRC32=0738f96e PERF0=6107575 MAC=5347440
+[3619] [rx] NPU D-03 PASS CRC32=0738f96e PERF0=6109663 MAC=5347440
+[3620] [rx] NPU D-04 PASS CRC32=0738f96e PERF0=6106895 MAC=5347440
+[3621] [rx] NPU D-05 PASS CRC32=0738f96e PERF0=6109705 MAC=5347440
+[3622] [sys] 等待网卡 以太网 就绪 … 用时 3.2 s
+[3623] [sys] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[3624] [rx] ETH peer IP: 0xc0a80102
+[3625] [rx] ETH peer port: 6000
+[3626] [rx] NPU D-06 PASS CRC32=0738f96e PERF0=6110613 MAC=5347440
+[3627] [rx] NPU D-07 PASS CRC32=0738f96e PERF0=6112135 MAC=5347440
+[3628] [rx] NPU D-08 PASS CRC32=0738f96e PERF0=6107388 MAC=5347440
+[3629] [rx] NPU D-09 PASS CRC32=0738f96e PERF0=6106546 MAC=5347440
+[3630] [rx] NPU D-10 PASS CRC32=0738f96e PERF0=6107235 MAC=5347440
+[3631] [rx] NPU D-11 PASS CRC32=0738f96e PERF0=6108226 MAC=5347440
+[3632] [rx] NPU D-12 PASS CRC32=0738f96e PERF0=6106733 MAC=5347440
+[3633] [rx] NPU D-13 PASS CRC32=0738f96e PERF0=6106344 MAC=5347440
+[3634] [rx] NPU D-14 PASS CRC32=0738f96e PERF0=6106453 MAC=5347440
+[3635] [rx] NPU D-15 PASS CRC32=0738f96e PERF0=6106147 MAC=5347440
+[3636] [rx] NPU D-16 PASS CRC32=0738f96e PERF0=6107250 MAC=5347440
+[3637] [rx] NPU D-17 PASS CRC32=0738f96e PERF0=6106288 MAC=5347440
+[3638] [rx] NPU D-18 PASS CRC32=0738f96e PERF0=6107084 MAC=5347440
+[3639] [rx] NPU D-19 PASS CRC32=0738f96e PERF0=6105451 MAC=5347440
+[3640] [rx] NPU D-20 PASS CRC32=0738f96e PERF0=6107379 MAC=5347440
+[3641] [rx] NPU board: PASS 39/39
