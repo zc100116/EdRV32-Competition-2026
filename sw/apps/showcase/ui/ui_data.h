@@ -1,4 +1,4 @@
-/* ui_data.h — showcase design §4.3/5.1; displayed data and user actions.
+/* ui_data.h — showcase design §4.3/5.1, P5 replan 8.7; displayed data and user actions.
  * Shared UI/backend contract; LVGL tick clock, no hardware ownership here.
  */
 #ifndef UI_DATA_H
@@ -20,13 +20,30 @@ typedef struct {
     unsigned class_id;
 } ui_detection_t;
 typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_t;
+/* Media applications and session states: design 2026-11-03-showcase-p5-replan 8.1.
+ * Values equal the EDSC `app` and `state` fields. */
+typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
+               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK } ui_app_t;
+typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
+               UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
+typedef struct {
+    ui_app_t app;
+    ui_state_t state;
+    const char *error;      /* reason text in FAILED, NULL otherwise */
+    bool peer;              /* PC connected (HELLO sent, virtual input available) */
+} ui_session_t;
+typedef enum { UI_IMAGE_WAITING, UI_IMAGE_RECEIVING, UI_IMAGE_DETECTING, UI_IMAGE_DONE,
+               UI_IMAGE_FAILED } ui_image_status_t;
 typedef struct {
     const lv_image_dsc_t *image;
-    unsigned fps, npu_tenths, post_tenths, count;
+    unsigned fps, npu_tenths, post_tenths, latency_tenths, count;
     ui_detection_t targets[5];
     unsigned category_count[5];
-    bool paused, boxes, waiting;
-    unsigned batch_index, batch_total, success, failed, roundtrip;
+    bool boxes;
+    /* Image recognition (app 2): current PC image, design 8.2 IMAGE_INFO. */
+    const char *image_name;
+    unsigned image_index, image_total, roundtrip_ms;
+    ui_image_status_t image_status;
 } ui_vision_t;
 typedef struct { const char *name; unsigned ms_tenths, fps_tenths, software_tenths; }
     ui_benchmark_t;
@@ -47,27 +64,48 @@ typedef struct {
 unsigned ui_data_hardware(void);
 /* Return status, task occupancy and seven DDR port counters. */
 ui_system_t ui_data_system(void);
-/* Return the current camera or batch image and detection results. */
-ui_vision_t ui_data_vision(bool batch);
+/* Current media session; the shell shows state and FAILED reasons from here. */
+ui_session_t ui_data_session(void);
+/* Open the media application of the page being entered (UI_APP_NONE when leaving
+ * such a page). The board stops the previous application first (design 3.2, Q4).
+ * arg is the game index for UI_APP_GAME and 0 otherwise. */
+void ui_data_app_open(ui_app_t app, unsigned arg);
+/* Pause or resume the camera/process application (design Q2). */
+void ui_data_app_pause(bool paused);
+/* Restart the current application after FAILED. */
+void ui_data_app_retry(void);
+/* Implemented by the UI: open the page for app after a PC APP request. */
+void ui_show_app(ui_app_t app, unsigned arg);
+/* Return the current camera or PC image and detection results. */
+ui_vision_t ui_data_vision(void);
+/* Ask the PC for the previous (-1) or next (+1) image of its list (EDSC IMAGE_STEP). */
+void ui_data_image_step(int direction);
 ui_detection_config_t ui_data_detection_config(void);
 void ui_data_detection_threshold(unsigned percent);
 void ui_data_detection_class(unsigned class_id,bool enabled);
 void ui_data_detection_all(bool enabled);
-/* Toggle camera capture pause. */
-void ui_data_pause(void);
 /* Toggle detection box visibility. */
 void ui_data_boxes(void);
-/* Stop the image batch and wait for the next PC upload. */
-void ui_data_batch_stop(void);
+/* Image processing stages in pipeline order, design 8.3. A cleared bit bypasses the
+ * stage in hardware and keeps its parameters. */
+enum {
+    UI_PROC_LEVEL = 1u << 0, UI_PROC_GAMMA = 1u << 1, UI_PROC_S1 = 1u << 2,
+    UI_PROC_S2 = 1u << 3, UI_PROC_GRAY = 1u << 4, UI_PROC_BINARY = 1u << 5,
+    UI_PROC_INVERT = 1u << 6, UI_PROC_ROTATE = 1u << 7, UI_PROC_SCALE = 1u << 8,
+    UI_PROC_TRANSLATE = 1u << 9, UI_PROC_MIRROR_X = 1u << 10, UI_PROC_MIRROR_Y = 1u << 11,
+    UI_PROC_ALL = (1u << 12) - 1
+};
 typedef struct {
-    int brightness, contrast, gamma_tenths, stage1, stage2;
-    int gray, binary, threshold, invert;
-    int angle, scale_percent, translate_x, translate_y, mirror_x, mirror_y;
+    uint32_t enabled;
+    int brightness, contrast, gamma_tenths, stage1, stage2, threshold;
+    int angle, scale_percent, translate_x, translate_y;
     bool original;
 } ui_process_config_t;
 ui_process_config_t ui_data_process_config(void);
 void ui_data_process_set(const ui_process_config_t *config);
-void ui_data_process_defaults(void);
+/* Restore the parameters of the given stages to design 8.3 defaults.
+ * UI_PROC_ALL also clears every enable bit ("全部恢复默认", design Q3). */
+void ui_data_process_defaults(uint32_t stages);
 /* Return the image used for the processing mode preview. */
 const lv_image_dsc_t *ui_data_process(unsigned mode);
 /* Return all sixteen benchmark rows. */
