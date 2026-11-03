@@ -359,6 +359,18 @@ static void read_encoder(lv_indev_t *indev,lv_indev_data_t *data)
         LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 }
 static lv_obj_t *pointer_cursor;
+/* Design 4.5.3 arrow cursor: opaque white fill with a black outline so it stays
+ * visible on both light and dark pages; '.' is transparent. */
+#define CURSOR_W 11
+#define CURSOR_H 19
+static const char cursor_art[CURSOR_H][CURSOR_W + 1] = {
+    "#..........", "##.........", "#o#........", "#oo#.......", "#ooo#......",
+    "#oooo#.....", "#ooooo#....", "#oooooo#...", "#ooooooo#..", "#oooooooo#.",
+    "#ooooo#####", "#oo#oo#....", "#o#.#oo#...", "##..#oo#...", "#....#oo#..",
+    ".....#oo#..", "......#oo#.", "......#oo#.", ".......##.."
+};
+static uint32_t cursor_pixels[CURSOR_H * CURSOR_W];
+static lv_image_dsc_t cursor_image;
 
 static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
 {
@@ -403,13 +415,22 @@ void showcase_lvgl_init(void)
     lv_indev_t *pointer = lv_indev_create();
     lv_indev_set_type(pointer, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(pointer, read_pointer);
-    static const lv_point_precise_t arrow[] = {
-        {0, 0}, {0, 18}, {5, 13}, {10, 23}, {14, 21}, {9, 11}, {17, 11}, {0, 0}
-    };
-    pointer_cursor = lv_line_create(lv_layer_sys());
-    lv_line_set_points(pointer_cursor, arrow, sizeof(arrow) / sizeof(arrow[0]));
-    lv_obj_set_style_line_color(pointer_cursor, lv_color_hex(0xffffff), 0);
-    lv_obj_set_style_line_width(pointer_cursor, 2, 0);
+    for(unsigned y = 0; y < CURSOR_H; ++y) {
+        for(unsigned x = 0; x < CURSOR_W; ++x) {
+            char c = cursor_art[y][x];
+            cursor_pixels[y * CURSOR_W + x] =
+                c == '#' ? 0xff000000u : c == 'o' ? 0xffffffffu : 0x00000000u;
+        }
+    }
+    cursor_image.header.magic = LV_IMAGE_HEADER_MAGIC;
+    cursor_image.header.cf = LV_COLOR_FORMAT_ARGB8888;
+    cursor_image.header.w = CURSOR_W;
+    cursor_image.header.h = CURSOR_H;
+    cursor_image.header.stride = CURSOR_W * 4;
+    cursor_image.data_size = sizeof(cursor_pixels);
+    cursor_image.data = (const uint8_t *)cursor_pixels;
+    pointer_cursor = lv_image_create(lv_layer_sys());
+    lv_image_set_src(pointer_cursor, &cursor_image);
     lv_obj_set_clickable(pointer_cursor, false);
     lv_obj_set_hidden(pointer_cursor, true);
     lv_indev_set_cursor(pointer, pointer_cursor);
