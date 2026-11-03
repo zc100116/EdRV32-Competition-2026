@@ -4,6 +4,19 @@
 #include "theme.h"
 #include "renderer.h"
 static lv_obj_t *progress;
+static lv_obj_t *benchmark_back;
+static void stop_clicked(lv_event_t *e) { (void)e; ui_data_benchmark_stop(); }
+void ui_benchmark_controls(bool show)
+{
+    if(show) {
+        benchmark_back=ui_box(lv_layer_sys(),8,8,124,36,PANEL);
+        ui_label(benchmark_back,"‹ 返回",14,8,&sim_font_16,ACCENT);
+        lv_obj_set_clickable(benchmark_back,true);
+        lv_obj_add_event_cb(benchmark_back,stop_clicked,LV_EVENT_CLICKED,NULL);
+    } else {
+        lv_obj_delete(benchmark_back); benchmark_back=NULL;
+    }
+}
 void ui_graphics_action(unsigned action)
 {
     if(action<2) { ui_tab=action; ui_mode=0; ui_open(4); }
@@ -93,6 +106,6 @@ void ui_graphics_update(void)
     if(!progress) return;
     char s[96]; unsigned n=ui_data_benchmark_progress();
     lv_snprintf(s,sizeof(s),"%s · %u / 16 个场景",ui_data_benchmark_running() ?
-        "测试中，返回立即停止" : n==16 ? "测试完成" : "按确认开始",n);
+        "测试中，返回立即停止" : n==16 ? "测试完成" : n ? "已停止" : "按确认开始",n);
     ui_text(progress,s);
 }

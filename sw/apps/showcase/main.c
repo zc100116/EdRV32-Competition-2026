@@ -57,6 +57,10 @@ void showcase_input_event(void)
 static void application_step(struct sched_task *task)
 {
     step_events=sched_take(task); showcase_input_dispatch();
+    if(ui_data_benchmark_running() && (platform_pressed()&PLATFORM_BACK)) {
+        ui_data_benchmark_stop();
+        showcase_lvgl_input(0);
+    }
     if(returning) {
         if(!exiting) { active->exit(); exiting=1; }
         if(!platform_display_idle()) {

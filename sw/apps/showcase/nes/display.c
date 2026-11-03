@@ -77,7 +77,6 @@ void nes_display_init(void)
     rnd_error = 0;
     disp_error = 0;
     phase = DISPLAY_STARTING;
-    engine_control(ENGINE_DISP, EDRV32_DISP_CTRL_ENABLE_MASK);
     cache_clean_invalidate((uintptr_t)&command_storage, sizeof(command_storage));
     command = (struct rnd_command *)((uintptr_t)&command_storage - EDRV32_DDR_BASE +
                                      EDRV32_DDR_UNCACHED_BASE);

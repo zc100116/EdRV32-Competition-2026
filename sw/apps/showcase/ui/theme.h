@@ -58,6 +58,7 @@ void ui_vision_frame(bool batch);
 void ui_monitor_update(void);
 void ui_chip_update(void);
 void ui_graphics_update(void);
+void ui_benchmark_controls(bool show);
 void ui_debug_update(void);
 void ui_vision_build(lv_obj_t *p, bool batch);
 extern unsigned ui_page;

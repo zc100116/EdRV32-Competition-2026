@@ -21,7 +21,7 @@ COMMON := $(UI) sim_data.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAM
 SHOTS := home home-vrn home-focus-6 vision image process graphics games chip debug \
     graphics-performance renderer-list renderer-result benchmark-results overlay-home overlay-games \
     debug-uart debug-network vision-boxes-off chip-coremark coremark-counters games-last-row \
-    detection-settings vision-filtered process-collapsed
+    detection-settings vision-filtered process-collapsed page-back
 .PHONY: win shots
 win: $(BUILD)/showcase_sim.exe
 shots: $(addprefix $(BUILD)/shots/,$(addsuffix .png,$(SHOTS)))

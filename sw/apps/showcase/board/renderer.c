@@ -37,7 +37,9 @@ void board_render_step(void)
 {
     if(!running) return;
     unsigned test=next_test;
-    unsigned bytes=ui_render_bytes(test),bpp=test==TEST_COPY_ARGB ? 4 : 2;
+    unsigned bytes=ui_render_bytes(test);
+    unsigned bpp=lv_color_format_get_size(ui_render_format(test));
+    unsigned kind=ui_render_kind(test);
     ui_render_source(test);
     ui_render_clear(test,pixels[0]); ui_render_clear(test,pixels[1]);
     uint64_t start=platform_ticks();
@@ -49,59 +51,59 @@ void board_render_step(void)
         .dst_fmt=bpp==4 ? RND_ARGB8888 : RND_RGB565,.src_fmt=RND_RGB565,
         .clip={0,0,RENDER_W-1,RENDER_H-1},.rect={16,16,175,79},
         .color=0x3488e0,.opa=255};
-    if(test<=TEST_ROUND) {
+    if(kind<=TEST_ROUND) {
         int32_t step[4]={0};
-        if(test==TEST_ALPHA) c.opa=128;
-        if(test==TEST_GRAD_H || test==TEST_GRAD_V) {
-            unsigned length=test==TEST_GRAD_H ? 159 : 63;
-            c.flags=RND_GRAD | (test==TEST_GRAD_V ? RND_GRAD_V : 0);
+        if(kind==TEST_ALPHA) c.opa=128;
+        if(kind==TEST_GRAD_H || kind==TEST_GRAD_V) {
+            unsigned length=kind==TEST_GRAD_H ? 159 : 63;
+            c.flags=RND_GRAD | (kind==TEST_GRAD_V ? RND_GRAD_V : 0);
             step[1]=(int32_t)(192u*65536/length);
             step[2]=(int32_t)(64u*65536/length);
             step[3]=-(int32_t)(96u*65536/length);
         }
-        rnd_fill(&command,&c,test==TEST_ROUND ? 20 : 0,0xff204080,step);
-    } else if(test==TEST_BORDER) rnd_border(&command,&c,20,5,15);
+        rnd_fill(&command,&c,kind==TEST_ROUND ? 20 : 0,0xff204080,step);
+    } else if(kind==TEST_BORDER) rnd_border(&command,&c,20,5,15);
     else {
         c.rect=(struct rnd_rect){32,32,95,63};
         struct rnd_source s={rnd_physical(source),(uint16_t)src->header.stride,0,0};
-        if(test>=TEST_A8 && test<=TEST_A1) {
-            unsigned bits=8u>>(test-TEST_A8);
+        if(kind>=TEST_A8 && kind<=TEST_A1) {
+            unsigned bits=8u>>(kind-TEST_A8);
             memset(packed,0,sizeof(packed));
             for(unsigned y=0;y<RENDER_SH;++y) for(unsigned x=0;x<RENDER_SW;++x) {
                 unsigned a=source[y*RENDER_SW+x]>> (8-bits);
                 packed[y*RENDER_SW*bits/8+x*bits/8]|=(uint8_t)(a<<(8-bits-x*bits%8));
             }
-            c.src_fmt=(enum rnd_format)(RND_A8+test-TEST_A8);
+            c.src_fmt=(enum rnd_format)(RND_A8+kind-TEST_A8);
             s.base=rnd_physical(packed); s.stride=RENDER_SW*bits/8;
             rnd_glyph(&command,&c,&s);
-        } else if(test==TEST_COPY || test==TEST_COPY_ARGB) {
+        } else if(kind==TEST_COPY || kind==TEST_COPY_ARGB) {
             c.src_fmt=c.dst_fmt; rnd_copy(&command,&c,&s);
         } else {
             struct rnd_blit blit={.source=s,.scale_x=65536,.scale_y=65536};
-            if(test==TEST_ARGB8888) c.src_fmt=RND_ARGB8888;
-            if(test==TEST_I8) {
+            if(kind==TEST_ARGB8888) c.src_fmt=RND_ARGB8888;
+            if(kind==TEST_I8) {
                 c.src_fmt=RND_I8; blit.source.base+=1024;
                 blit.palette=rnd_physical(ui_render_palette());
             }
-            if(test==TEST_SCALE) {
+            if(kind==TEST_SCALE) {
                 c.rect.x1=159; c.rect.y1=95;
                 blit.scale_x=blit.scale_y=32768;
             }
-            if(test==TEST_FLIP) c.flags=RND_HFLIP|RND_VFLIP;
-            if(test==TEST_RECOLOR) {
+            if(kind==TEST_FLIP) c.flags=RND_HFLIP|RND_VFLIP;
+            if(kind==TEST_RECOLOR) {
                 c.flags=RND_RECOLOR; blit.rc_color=0xff6030; blit.rc_opa=128;
             }
-            if(test==TEST_KEY) { c.flags=RND_COLORKEY; blit.key=0xf81f; }
+            if(kind==TEST_KEY) { c.flags=RND_COLORKEY; blit.key=0xf81f; }
             rnd_blit(&command,&c,&blit);
         }
     }
     struct rnd_range sources[3]={{pixels[0],bytes}};
     unsigned source_count=1;
-    if(test>=TEST_A8 && test<=TEST_A1)
+    if(kind>=TEST_A8 && kind<=TEST_A1)
         sources[source_count++]=(struct rnd_range){packed,sizeof(packed)};
-    else if(test>=TEST_RGB565)
+    else if(kind>=TEST_RGB565)
         sources[source_count++]=(struct rnd_range){src->data,src->data_size};
-    if(test==TEST_I8)
+    if(kind==TEST_I8)
         sources[source_count++]=(struct rnd_range){ui_render_palette(),1024};
     struct rnd_range target={pixels[0],bytes};
     struct rnd_batch batch={&command,1,sources,source_count,&target,1};

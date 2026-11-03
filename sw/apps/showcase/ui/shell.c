@@ -121,7 +121,7 @@ void ui_open(unsigned page)
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
-    if(page) {
+    {
         lv_obj_t *back=ui_box(top,12,6,108,36,PANEL);
         ui_label(back,"‹ 返回",14,8,&sim_font_16,ACCENT);
         lv_obj_set_clickable(back,true);

@@ -76,13 +76,14 @@ void board_overlay_step(void)
     uint64_t now=platform_ticks();
     if(now<next_refresh || pending) return;
     next_refresh=now+platform_clock_hz()/2;
-    if(!ui_monitor_visible()) { disp_layer_enable(DISP_L1,0); scanning=false; return; }
     uint64_t start=platform_ticks();
+    ui_monitor_update();
+    if(!ui_monitor_visible()) { disp_layer_enable(DISP_L1,0); scanning=false; return; }
     /* No RND submission can overlap this cooperative software-only refresh. */
     bool accelerated=showcase_draw_rnd_enabled();
     showcase_draw_rnd_enable(false);
     lv_display_set_default(display);
-    ui_monitor_update(); lv_refr_now(display);
+    lv_refr_now(display);
     lv_display_set_default(main_display);
     showcase_draw_rnd_enable(accelerated);
     window(front); disp_layer_enable(DISP_L1,1);

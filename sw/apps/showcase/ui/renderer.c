@@ -10,7 +10,7 @@ const char *const ui_render_names[RENDER_TEST_COUNT]={
     "A8 字形着色", "A4 字形着色", "A2 字形着色", "A1 字形着色",
     "RGB565 贴图", "ARGB8888 透明贴图", "缩放贴图", "水平/垂直翻转",
     "重新着色", "RGB565 色键", "I8 调色板", "RGB565 拷贝", "ARGB8888 拷贝",
-    "DISP 双层合成"
+    "ARGB8888 纯色填充", "ARGB8888 透明填充", "ARGB8888 透明合成", "DISP 双层合成"
 };
 _Alignas(64) static uint8_t source[RENDER_SW*RENDER_SH*4+1024];
 _Alignas(64) static uint32_t palette[256];
@@ -18,13 +18,15 @@ static lv_image_dsc_t image;
 static uint16_t rgb565(unsigned r,unsigned g,unsigned b)
 { return (uint16_t)((r>>3)<<11 | (g>>2)<<5 | (b>>3)); }
 lv_color_format_t ui_render_format(unsigned test)
-{ return test==TEST_COPY_ARGB ? LV_COLOR_FORMAT_ARGB8888 : LV_COLOR_FORMAT_RGB565; }
+{ return test==TEST_COPY_ARGB || (test>=TEST_FILL_ARGB && test<=TEST_BLIT_ARGB_TARGET) ?
+    LV_COLOR_FORMAT_ARGB8888 : LV_COLOR_FORMAT_RGB565; }
 unsigned ui_render_bytes(unsigned test)
-{ return RENDER_W*RENDER_H*(test==TEST_COPY_ARGB ? 4u : 2u); }
+{ return RENDER_W*RENDER_H*lv_color_format_get_size(ui_render_format(test)); }
 const lv_image_dsc_t *ui_render_source_image(void) { return &image; }
 const uint32_t *ui_render_palette(void) { return palette; }
 void ui_render_source(unsigned test)
 {
+    test=ui_render_kind(test);
     lv_image_cache_drop(&image);
     unsigned bits=16;
     lv_color_format_t cf=LV_COLOR_FORMAT_RGB565;
@@ -43,7 +45,12 @@ void ui_render_source(unsigned test)
         unsigned n=y*RENDER_SW+x;
         unsigned r=x*4,g=y*8,b=((x/8+y/8)&1) ? 224 : 48;
         if(test>=TEST_A8 && test<=TEST_A1) {
-            unsigned levels=(1u<<bits)-1, a=x*levels/(RENDER_SW-1);
+            bool ink=(x>=8 && x<14 && y>=4 && y<29) ||
+                (x>=8 && x<44 && ((y>=4 && y<9) || (y>=14 && y<19))) ||
+                (x>=40 && x<46 && y>=8 && y<15) ||
+                (y>=18 && y<29 && x>=20+(y-18)*2 && x<27+(y-18)*2);
+            unsigned levels=(1u<<bits)-1;
+            unsigned a=ink ? 1+x*(levels-1)/(RENDER_SW-1) : 0;
             source[n]=(uint8_t)(a*255/levels);
         } else if(cf==LV_COLOR_FORMAT_I8) source[1024+n]=(uint8_t)(x+y*3);
         else if(bits==32) ((uint32_t *)source)[n]=
@@ -60,13 +67,13 @@ void ui_render_source(unsigned test)
 }
 void ui_render_clear(unsigned test,void *pixels)
 {
-    unsigned bpp=test==TEST_COPY_ARGB ? 4 : 2;
-    if(bpp==4) for(unsigned i=0;i<RENDER_W*RENDER_H;++i) ((uint32_t *)pixels)[i]=0xff203048;
+    unsigned bpp=lv_color_format_get_size(ui_render_format(test));
+    if(bpp==4) for(unsigned i=0;i<RENDER_W*RENDER_H;++i) ((uint32_t *)pixels)[i]=0x80203048;
     else for(unsigned i=0;i<RENDER_W*RENDER_H;++i) ((uint16_t *)pixels)[i]=rgb565(32,48,72);
 }
 void ui_render_software(unsigned test,void *pixels)
 {
-    unsigned bpp=test==TEST_COPY_ARGB ? 4 : 2;
+    unsigned bpp=lv_color_format_get_size(ui_render_format(test));
     lv_draw_buf_t buffer;
     lv_draw_buf_init(&buffer,RENDER_W,RENDER_H,ui_render_format(test),RENDER_W*bpp,
         pixels,ui_render_bytes(test));
@@ -76,6 +83,7 @@ void ui_render_software(unsigned test,void *pixels)
     layer.buf_area=(lv_area_t){0,0,RENDER_W-1,RENDER_H-1};
     layer._clip_area=layer.buf_area; layer.phy_clip_area=layer.buf_area;
     lv_draw_task_t task={.target_layer=&layer,.clip_area=layer.buf_area};
+    test=ui_render_kind(test);
     lv_area_t rect={16,16,175,79};
     if(test<=TEST_ROUND) {
         lv_draw_fill_dsc_t d; lv_draw_fill_dsc_init(&d);

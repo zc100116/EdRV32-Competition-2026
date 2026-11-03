@@ -16,6 +16,7 @@ static bool waiting;
 static unsigned paused_second;
 static unsigned benchmark_start;
 static bool benchmarking;
+static unsigned benchmark_completed;
 static unsigned core_start;
 static bool core_started;
 static unsigned baud_index;
@@ -106,15 +107,18 @@ static const ui_benchmark_t benchmark[] = {
     {"Widgets demo", 943, 83, 1240}
 };
 const ui_benchmark_t *ui_data_benchmark(void) { return benchmark; }
-void ui_data_benchmark_stop(void) { benchmarking=false; }
+void ui_data_benchmark_stop(void)
+{ benchmark_completed=ui_data_benchmark_progress(); benchmarking=false; }
 bool ui_data_benchmark_running(void)
 { return benchmarking && (lv_tick_get()-benchmark_start)<8000; }
-void ui_data_benchmark_start(void) { benchmark_start = lv_tick_get(); benchmarking = true; }
+void ui_data_benchmark_start(void)
+{ benchmark_start=lv_tick_get(); benchmarking=true; benchmark_completed=0; }
 unsigned ui_data_benchmark_progress(void)
 {
-    if(!benchmarking) return 0;
+    if(!benchmarking) return benchmark_completed;
     unsigned n = (lv_tick_get() - benchmark_start) / 500 + 1;
-    return n > 16 ? 16 : n;
+    benchmark_completed=n>16 ? 16 : n;
+    return benchmark_completed;
 }
 extern const ui_game_t sim_games[];
 extern const unsigned sim_game_count;
@@ -197,7 +201,7 @@ void ui_data_render_start(unsigned test)
             lv_image_cache_drop(&render_images[side]);
             render_images[side]=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,
                 .cf=ui_render_format(n),.w=RENDER_W,.h=RENDER_H,
-                .stride=RENDER_W*(n==TEST_COPY_ARGB ? 4u : 2u)},
+                .stride=RENDER_W*lv_color_format_get_size(ui_render_format(n))},
                 .data_size=ui_render_bytes(n),.data=render_pixels[side]};
         }
     }

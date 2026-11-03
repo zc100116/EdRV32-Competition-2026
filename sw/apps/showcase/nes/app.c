@@ -52,7 +52,9 @@ static void step(void)
     if(state==STARTING) {
         if(!platform_display_idle()) { app_wake_at(now+platform_clock_hz()/1000); return; }
         platform_media_callbacks(nes_display_rnd_irq,nes_display_disp_irq,0);
-        nes_display_init(); board_overlay_enter(); nes_start(); next_frame=now; state=PLAYING;
+        nes_display_init(); board_overlay_enter();
+        engine_control(ENGINE_DISP,EDRV32_DISP_CTRL_ENABLE_MASK);
+        nes_start(); next_frame=now; state=PLAYING;
     }
     if(state==PLAYING) {
         nes_display_check();

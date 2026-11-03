@@ -9,8 +9,14 @@ enum {
     TEST_FILL, TEST_ALPHA, TEST_GRAD_H, TEST_GRAD_V, TEST_ROUND, TEST_BORDER,
     TEST_A8, TEST_A4, TEST_A2, TEST_A1, TEST_RGB565, TEST_ARGB8888,
     TEST_SCALE, TEST_FLIP, TEST_RECOLOR, TEST_KEY, TEST_I8, TEST_COPY,
-    TEST_COPY_ARGB, TEST_LAYERS, RENDER_TEST_COUNT
+    TEST_COPY_ARGB, TEST_FILL_ARGB, TEST_ALPHA_ARGB, TEST_BLIT_ARGB_TARGET,
+    TEST_LAYERS, RENDER_TEST_COUNT
 };
+static inline unsigned ui_render_kind(unsigned test)
+{
+    return test==TEST_FILL_ARGB ? TEST_FILL : test==TEST_ALPHA_ARGB ? TEST_ALPHA :
+        test==TEST_BLIT_ARGB_TARGET ? TEST_ARGB8888 : test;
+}
 typedef struct {
     const char *name;
     unsigned hardware_us, software_us, equal, total;

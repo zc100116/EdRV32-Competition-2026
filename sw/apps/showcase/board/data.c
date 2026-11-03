@@ -144,11 +144,13 @@ bool ui_data_benchmark_running(void)
 { return pending_benchmark==1 || showcase_benchmark_running(); }
 void ui_data_benchmark_stop(void)
 {
+    if(pending_benchmark==2) ui_benchmark_controls(false);
     showcase_benchmark_stop(); pending_benchmark=0;
     ui_suspend(false); ui_open(4);
 }
 void ui_data_benchmark_start(void)
 {
+    for(unsigned i=0;i<16;++i) rows[i].ms_tenths=rows[i].fps_tenths=0;
     ui_hint("正在运行 LVGL benchmark 场景序列");
     pending_benchmark=1; action_frame=showcase_gui_frames();
     app_wake_at(platform_ticks()+platform_clock_hz()/30);
@@ -194,8 +196,10 @@ void board_step(void)
     }
     if(pending_benchmark==1 && showcase_gui_frames()!=action_frame) {
         pending_benchmark=2; ui_suspend(true); showcase_benchmark_start();
+        ui_benchmark_controls(true);
     } else if(pending_benchmark==2 && !showcase_benchmark_running()) {
-        pending_benchmark=0; showcase_benchmark_stop(); ui_suspend(false); ui_open(4);
+        pending_benchmark=0; ui_benchmark_controls(false);
+        showcase_benchmark_stop(); ui_suspend(false); ui_open(4);
     }
     if(pending_core || pending_benchmark)
         app_wake_at(platform_ticks()+platform_clock_hz()/30);
