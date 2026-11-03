@@ -25,6 +25,10 @@ void sched_wake_at(struct sched_task *task, uint64_t mtime)
     task->wake_at = mtime;
     sched_port_unlock(state);
 }
+void sched_defer_ready(struct sched_task *task,uint64_t now,uint64_t delay)
+{
+    if(task->wake_at<=now) sched_wake_at(task,now+delay);
+}
 uint32_t sched_take(struct sched_task *task)
 {
     uint32_t state = sched_port_lock();
