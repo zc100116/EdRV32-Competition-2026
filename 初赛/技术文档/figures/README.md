@@ -164,3 +164,11 @@ EDSC大块数据传输时序图，两条竖直生命线，左线顶端标题PC �
 - 数据：`origin/win/20261102-34-b1-ila` 的 `tasks/win/20261102-34-b1-ila/artifacts/ila/coremark_window_deltas.csv`（1023 个相邻周期差分，-O2 编译的 CoreMark）。
 - 命令：`git show <分支>:<上面的路径> > deltas.csv`，然后 `python fig3-15.py deltas.csv figures/fig3-15.png`。
 - 输出尺寸：1600×900。
+
+
+## 实物照片（2026-11-04）
+
+- photo3-1.jpg：用户提供的系统全景原照。
+- photo3-3.jpg：用户提供的开发板近照原图。
+- photo2-3.png：使用内置imagegen，在photo3-3.jpg上添加五个中文标签及蓝色箭头。标签为“电源线”“HDMI 视频输出”“网口：千兆以太网”“串口：UART 通信”“下载器：JTAG 下载与调试”。标注位置依据用户说明；HDMI箭头指向左侧带黑线的插头，JTAG指向右下角灰色排线连接器。原始近照另存，正文第二章使用标注图。
+- 原photo3-2额外全景占位合并至photo3-1；图号3-3及后续编号保持原编号。

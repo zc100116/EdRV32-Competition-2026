@@ -115,7 +115,6 @@ EdRV32 SoC 的整体结构如图2-1 所示，分为 CPU、系统总线、存储�
 
 <p align="center">图2-3 PG2L200H 开发板及外设</p>
 
-<span style="color:red">【待补实拍照片：figures/photo2-3（.png 或 .jpg），见 图片需求.md】</span>
 
 #### 2.2.2 机械设计介绍
 
@@ -273,19 +272,12 @@ ETH 实现千兆 MAC、IPv4/UDP 和 ARP 应答。接收时，UDP 载荷开头的
 
 ### 3.1 整体介绍
 
-系统实物如图3-1、图3-2 所示：PG2L200H 开发板连接两路摄像头、HDMI 显示器、千兆网线和串口，PC 运行调试工具。
+系统实物如图3-1所示：PG2L200H 开发板连接两路摄像头、HDMI 显示器、千兆网线和串口，PC 运行调试工具。
 
-![图3-1 系统实物正面](figures/photo3-1.png)
+![图3-1 系统实物全景](figures/photo3-1.jpg)
 
-<p align="center">图3-1 系统实物正面</p>
+<p align="center">图3-1 系统实物全景</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-1（.png 或 .jpg），见 图片需求.md】</span>
-
-![图3-2 系统实物斜 45° 全局](figures/photo3-2.png)
-
-<p align="center">图3-2 系统实物斜 45° 全局</p>
-
-<span style="color:red">【待补实拍照片：figures/photo3-2（.png 或 .jpg），见 图片需求.md】</span>
 
 ### 3.2 工程成果
 
@@ -320,11 +312,10 @@ FPGA 实现结果如表3-1（PDS 2022.2-SP6.1，PG2L200H-6 FBB676）。完整版
 CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为15585。
 
 
-![图3-3 开发板与外设连接实物](figures/photo3-3.png)
+![图3-3 开发板与外设连接实物](figures/photo3-3.jpg)
 
 <p align="center">图3-3 开发板与外设连接实物</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-3（.png 或 .jpg），见 图片需求.md】</span>
 
 #### 3.2.3 软件成果
 
@@ -370,13 +361,11 @@ CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为1
 
 <p align="center">图3-10 游戏</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-10（.png 或 .jpg），见 图片需求.md】</span>
 
 ![图3-11 性能浮窗与芯片信息](figures/photo3-11.png)
 
 <p align="center">图3-11 性能浮窗与芯片信息</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-11（.png 或 .jpg），见 图片需求.md】</span>
 
 ![图3-12 PC 端调试工具](figures/shot3-12.png)
 
@@ -405,13 +394,11 @@ CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为1
 
 <p align="center">图3-13 CoreMark 跑分及性能计数器</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-13（.png 或 .jpg），见 图片需求.md】</span>
 
 ![图3-14 渲染器功能测试与 LVGL benchmark](figures/photo3-14.png)
 
 <p align="center">图3-14 渲染器功能测试与 LVGL benchmark</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-14（.png 或 .jpg），见 图片需求.md】</span>
 
 表3-3 是最终编译配置下整个 CoreMark 运行期间的性能计数器统计。IPC 为 1.080，双发射退休占 27.5% 的周期；最主要的损失是槽 1 指令类型不被管线 1 支持（31.4%，管线 1 只执行 ALU 指令），其次是相关指令不能配对（12.4%）、load-use 停顿（7.9%）和前端断流（7.1%）；分支误预测率为 16.2%。因此，进一步提高性能的方向是让管线 1 支持分支和跳转、扩大 BTB 和 gshare。
 
