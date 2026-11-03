@@ -180,6 +180,8 @@ def udp_yolo_sender(port):
     """Keep telemetry_sim's board return format, replacing only its slow pacing."""
     import telemetry_sim
     from core.ethernet import packets
+    from core.showcase import encode, DONE, IMAGE
+    import struct
 
     def line_block(sock, destination, data, window, offset=0, notify=True):
         deadline = time.perf_counter()
@@ -194,6 +196,9 @@ def udp_yolo_sender(port):
     telemetry_sim.send_block = line_block
     for _ in sys.stdin:
         telemetry_sim.run_yolo('127.0.0.1', port)
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as done:
+            message = encode(DONE, 0, struct.pack('<BB2xI', IMAGE, 0, 0))
+            done.sendto(next(packets(message, 3, 0)), ('127.0.0.1', port))
         print('sent', flush=True)
 
 
@@ -201,6 +206,7 @@ def udp_yolo_stress():
     import json
     import subprocess
     from tempfile import TemporaryDirectory
+    from core.showcase import DONE, IMAGE
     engine = SerialEngine()
     engine.ethernet.local_ip = '127.0.0.1'
     complete = 0
@@ -215,11 +221,14 @@ def udp_yolo_stress():
             sender.stdin.flush()
             if sender.stdout.readline() != 'sent\n':
                 raise RuntimeError('YOLO sender exited before completing the return')
-            engine.yolo.image_sent(None)
-            while engine.yolo.capture_pending:
-                if engine.ethernet.status()['rx']['error']:
-                    raise RuntimeError(engine.ethernet.status()['rx']['error'])
-                time.sleep(.005)
+            message_type, payload = engine.ethernet.showcase._wait(0)
+            if message_type != DONE:
+                raise ValueError('YOLO sender expected DONE')
+            engine.ethernet.showcase._done(payload, IMAGE)
+            try:
+                engine.yolo.complete_capture()
+            except ValueError as exc:
+                print(f'Image {_}: {exc}', file=sys.stderr)
             complete += engine.yolo.snapshot()[1] is not None
         sender.stdin.close()
         sender.wait()

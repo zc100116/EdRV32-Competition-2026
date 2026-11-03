@@ -278,7 +278,10 @@ class ComparisonTest(unittest.TestCase):
 
     def test_yolo_missing_return_fails_loudly(self):
         yolo = YoloTool(None)
+        yolo.reset_capture()
         yolo.receive(2, 0, detection_wire(), True)
+        with self.assertRaisesRegex(ValueError, '回传不完整'):
+            yolo.complete_capture()
         self.assertIn('window 0: missing 983040 B', yolo.error)
         self.assertEqual(yolo.failed, 1)
         self.assertFalse(yolo.capture_pending)

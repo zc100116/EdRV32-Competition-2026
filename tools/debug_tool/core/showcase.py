@@ -108,8 +108,6 @@ class ShowcaseTool:
                 if eth.tx['error'] and eth.yolo.capture_pending:
                     with eth.yolo.lock:
                         eth.yolo._fail_capture(eth.tx['error'])
-                else:
-                    eth.yolo.image_sent(eth.tx['path'])
             with eth.lock:
                 eth.tx['active'] = False
                 if not eth.tx['error']:
@@ -161,6 +159,8 @@ class ShowcaseTool:
             if message_type != DONE:
                 raise ValueError('EDSC expected DONE')
             index = self._done(payload, kind)
+            if kind == IMAGE and self.ethernet.yolo is not None:
+                self.ethernet.yolo.complete_capture()
             with self.ethernet.lock:
                 self.ethernet.tx['index'] = index
         return self._start(transfer, board_ip, board_port, local_port, len(data), name)

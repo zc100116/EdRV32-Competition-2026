@@ -23,13 +23,13 @@ VIDEO_SLOTS = 3
 
 
 def _video_process(sock, name, connection, stop, capture_event, capture_epoch,
-                   return_time, mode, counts):
+                   mode, counts):
     """Own the socket and frame assembly outside Qt's Python interpreter."""
     memory = shared_memory.SharedMemory(name=name)
     started = time.process_time()
     try:
         _video_loop(sock, memory.buf, connection, stop, capture_event, capture_epoch,
-                    return_time, mode, counts)
+                    mode, counts)
     except (OSError, struct.error, ValueError) as exc:
         connection.send(('error', str(exc)))
     else:
@@ -41,7 +41,7 @@ def _video_process(sock, name, connection, stop, capture_event, capture_epoch,
 
 
 def _video_loop(sock, storage, connection, stop, capture_event, capture_epoch,
-                return_time, mode, counts):
+                mode, counts):
     from .video import VideoReceiver
     from .yolo import YoloTool, INPUT_BYTES, OUTPUT_BYTES
 
@@ -109,7 +109,6 @@ def _video_loop(sock, storage, connection, stop, capture_event, capture_epoch,
                         routes[window] = window in (0, 1, 2) and capture_event.is_set()
                 is_yolo = routes.get(window, False)
             if is_yolo:
-                return_time.value = time.monotonic()
                 if not capture_started:
                     yolo.reset_capture()
                     capture_started = True
@@ -117,8 +116,8 @@ def _video_loop(sock, storage, connection, stop, capture_event, capture_epoch,
                 if window == 2 and notify:
                     capture_started = False
                     capture_event.clear()
-                    if yolo.error is not None:
-                        connection.send(('yolo_failed', epoch, yolo.error))
+                    if yolo.capture_error is not None:
+                        connection.send(('yolo_failed', epoch, yolo.capture_error))
                     else:
                         slot = take_slot()
                         start = slot * VIDEO_SLOT_BYTES
@@ -192,7 +191,6 @@ class EthernetTool:
         self.rx_process_stop = None
         self.rx_capture_event = None
         self.rx_capture_epoch = None
-        self.rx_return_time = None
         self.stop_event = threading.Event()
         self.tx = {"active": False, "sent": 0, "total": 0, "packets": 0, "error": None}
         self.rx = {"active": False, "packets": 0, "bytes": 0, "notifyCount": 0,
@@ -255,8 +253,6 @@ class EthernetTool:
         finally:
             if receiver is None:
                 sock.close()
-            if self.yolo is not None:
-                self.yolo.image_sent(self.tx['path'])
             with self.lock:
                 self.tx["active"] = False
             if self.session:
@@ -326,14 +322,13 @@ class EthernetTool:
             self.rx_process_stop = context.Event()
             self.rx_capture_event = context.Event()
             self.rx_capture_epoch = context.Value('Q', 0)
-            self.rx_return_time = context.Value('d', 0)
             if self.yolo.capture_pending:
                 self.rx_capture_event.set()
             counts = self.video.snapshot()
             self.rx_process = context.Process(
                 target=_video_process,
                 args=(sock, self.rx_memory.name, child, self.rx_process_stop,
-                      self.rx_capture_event, self.rx_capture_epoch, self.rx_return_time, mode,
+                      self.rx_capture_event, self.rx_capture_epoch, mode,
                       (counts['received'], counts['dropped'])),
                 name='udp-video-rx', daemon=True)
             self.rx_process.start()
@@ -376,7 +371,6 @@ class EthernetTool:
         try:
             while connection is not None or not self.stop_event.is_set():
                 if connection is not None:
-                    self.yolo.check_timeout()
                     if not connection.poll(.05):
                         continue
                     message = connection.recv()
@@ -422,7 +416,7 @@ class EthernetTool:
                         if message[1] != self.rx_capture_epoch.value:
                             continue
                         with self.yolo.lock:
-                            self.yolo._fail_capture(message[2])
+                            self.yolo.capture_error = message[2]
                         continue
                     if message[0] == 'yolo':
                         from .yolo import INPUT_BYTES, OUTPUT_BYTES
@@ -568,7 +562,6 @@ class EthernetTool:
             self.rx_process_stop = None
             self.rx_capture_event = None
             self.rx_capture_epoch = None
-            self.rx_return_time = None
             self.rx_memory.close()
             self.rx_memory.unlink()
             self.rx_memory = None

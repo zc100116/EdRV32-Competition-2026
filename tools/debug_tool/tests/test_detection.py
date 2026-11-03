@@ -113,6 +113,9 @@ class ImageDetectionTest(unittest.TestCase):
         engine = SerialEngine()
         engine.yolo.reset_capture()
         engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
+        self.assertIsNone(engine.yolo.error)
+        with self.assertRaisesRegex(ValueError, '回传不完整'):
+            engine.yolo.complete_capture()
         self.assertIn('window 0: missing 983040 B', engine.yolo.error)
         self.assertEqual(engine.yolo.failed, 1)
 
@@ -140,7 +143,10 @@ class ImageDetectionTest(unittest.TestCase):
                         source.sendto(next(packets(detections, 2, 0)), destination)
 
                 send_return(True)
-                wait_for(self, lambda: engine.yolo.failed == 1)
+                wait_for(self, lambda: engine.yolo.capture_error is not None)
+                self.assertTrue(engine.yolo.capture_pending)
+                with self.assertRaisesRegex(ValueError, '回传不完整'):
+                    engine.yolo.complete_capture()
                 self.assertIn('window 0: missing 1024 B', engine.yolo.error)
                 self.assertIn('window 1: missing 1024 B', engine.yolo.error)
                 self.assertTrue(engine.ethernet.status()['rx']['active'])
@@ -154,12 +160,14 @@ class ImageDetectionTest(unittest.TestCase):
                 self.assertEqual(engine.yolo.snapshot()[1][2].frame_id, 7)
                 self.assertTrue(engine.ethernet.status()['rx']['active'])
                 send_return(False, end=False)
-                # Other windows must not postpone the missing-EDDT deadline.
-                for seq in range(2, 25):
+                # Telemetry does not finish an image; only BULK DONE does.
+                for seq in range(2, 5):
                     source.sendto(next(packets(wire(seq), 3, 0)), destination)
                     time.sleep(.05)
-                wait_for(self, lambda: engine.yolo.failed == 2)
-                self.assertEqual(engine.yolo.error, '回传未结束（超时 1 s）')
+                self.assertTrue(engine.yolo.capture_pending)
+                with self.assertRaisesRegex(ValueError, '回传不完整'):
+                    engine.yolo.complete_capture()
+                self.assertEqual(engine.yolo.failed, 2)
                 send_return(False)
                 wait_for(self, lambda: engine.yolo.snapshot()[1] is not None)
                 self.assertEqual(engine.yolo.failed, 2)
@@ -180,6 +188,8 @@ class ImageDetectionTest(unittest.TestCase):
         console.folder_started = time.monotonic()
         engine.yolo.reset_capture()
         engine.yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 0, 0), True)
+        with self.assertRaisesRegex(ValueError, '回传不完整'):
+            engine.yolo.complete_capture()
         with patch.object(console, '_send_image') as send:
             console.refresh()
             send.assert_called_once()
@@ -212,16 +222,15 @@ class ImageDetectionTest(unittest.TestCase):
             self.assertFalse(console.video_camera.isEnabled())
             with patch.object(console, '_send_image') as send:
                 if timeout:
-                    engine.yolo.image_sent(None)
-                    with patch('tools.debug_tool.core.yolo.time.monotonic',
-                               return_value=time.monotonic() + 2):
-                        engine.yolo.check_timeout()
-                    self.assertEqual(engine.yolo.error, '回传未结束（超时 1 s）')
+                    with engine.yolo.lock:
+                        engine.yolo._fail_capture('设备回复超时（5 s）')
+                    self.assertEqual(engine.yolo.error, '设备回复超时（5 s）')
                 else:
                     engine.yolo.receive(0, 0, bytes(INPUT_BYTES), False)
                     engine.yolo.receive(1, 0, bytes(OUTPUT_BYTES), False)
                     engine.yolo.receive(2, 0,
                         struct.pack('<4sHHII', b'EDDT', 1, 0, 9, 0), True)
+                    engine.yolo.complete_capture()
                 console.refresh()
                 send.assert_not_called()
                 self.assertTrue(console.send_image.isEnabled())
@@ -289,32 +298,18 @@ class ImageDetectionTest(unittest.TestCase):
             engine.ethernet.stop_receive()
             self.assertIsNone(engine.ethernet.rx_memory)
 
-    def test_return_timeout_uses_last_packet_or_send_completion(self):
+    def test_return_stays_pending_until_done(self):
         from tools.debug_tool.core.yolo import YoloTool
         yolo = YoloTool(None)
-        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=10):
-            yolo.reset_capture()
-            yolo.image_sent(None)
-        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=10.9):
-            yolo.check_timeout()
-            self.assertEqual(yolo.failed, 0)
-            yolo.receive(0, 0, bytes(1024), False)
-        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=11.5):
-            yolo.check_timeout()
-            self.assertEqual(yolo.failed, 0)
-        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=11.9):
-            yolo.check_timeout()
-            self.assertEqual(yolo.failed, 1)
-            self.assertEqual(yolo.error, '回传未结束（超时 1 s）')
-            yolo.check_timeout()
-            self.assertEqual(yolo.failed, 1)
-            yolo.reset_capture()
-            yolo.check_timeout()
-            self.assertEqual(yolo.failed, 1)  # Upload has not finished yet.
-            yolo.image_sent(None)
-        with patch('tools.debug_tool.core.yolo.time.monotonic', return_value=12.9):
-            yolo.check_timeout()
-            self.assertEqual(yolo.failed, 2)
+        yolo.reset_capture()
+        yolo.receive(0, 0, bytes(INPUT_BYTES), False)
+        yolo.receive(1, 0, bytes(OUTPUT_BYTES), False)
+        yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 9, 0), True)
+        self.assertTrue(yolo.capture_pending)
+        self.assertEqual(yolo.generation, 0)
+        yolo.complete_capture()
+        self.assertFalse(yolo.capture_pending)
+        self.assertEqual(yolo.generation, 1)
 
     def test_folder_order_completion_stats_and_original_image(self):
         from PySide6.QtGui import QImage

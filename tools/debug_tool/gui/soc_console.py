@@ -105,6 +105,7 @@ class SocConsole(QWidget):
         self.folder_started = None
         self.folder_completed = 0
         self.loaded_image = None
+        self.last_source_image = None
         self.comparing = False
         self.comparison = None
         self.reported_comparison = None
@@ -573,6 +574,8 @@ class SocConsole(QWidget):
             raise ValueError(f'无法读取图片：{reader.errorString()}')
         self.static_image = image
         self.loaded_image = self.image_path.text()
+        # Observe the last send without replacing a newer local selection on refresh.
+        self.last_source_image = self.engine.yolo.source_image
         self.last_display = None
         self._display()
 
@@ -583,6 +586,7 @@ class SocConsole(QWidget):
             self.engine.ethernet.listen_console(6000)
             self.engine.yolo.send_image(self.image_path.text(), self.ip.text(), 5000,
                                         6000)
+            self.last_source_image = self.engine.yolo.source_image
             self.display.setCurrentIndex(2)
             self.comparison = None
             self.comparison_result.setText('等待本次回传')
@@ -795,7 +799,7 @@ class SocConsole(QWidget):
         self.video_camera.setEnabled(not tx['active'] and not waiting)
         self.apply_scene.setEnabled(not tx['active'] and not waiting)
         source_image = self.engine.yolo.source_image
-        if source_image is not None and source_image != self.loaded_image:
+        if source_image is not None and source_image != self.last_source_image:
             self.image_path.setText(source_image)
             self.run(self._load_image)
         generation, capture = self.engine.yolo.snapshot()

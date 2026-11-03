@@ -11,8 +11,6 @@ import time
 
 from .video import Block, parse_detections
 
-RETURN_TIMEOUT = 1.0
-
 
 def read_hex(path, base):
     data = bytearray()
@@ -83,8 +81,7 @@ class YoloTool:
         self.generation = 0
         self.failed = 0
         self.error = None
-        self.last_return_at = None
-        self.send_finished_at = None
+        self.capture_error = None
 
     def reset_capture(self):
         with self.lock:
@@ -94,19 +91,16 @@ class YoloTool:
             self.capture_started = False
             self.return_view = True
             self.error = None
-            self.last_return_at = None
-            self.send_finished_at = None
+            self.capture_error = None
             if self.ethernet is not None and self.ethernet.rx_capture_event is not None:
                 self.ethernet.rx_capture_event.set()
                 with self.ethernet.rx_capture_epoch.get_lock():
                     self.ethernet.rx_capture_epoch.value += 1
-                self.ethernet.rx_return_time.value = 0
 
     def receive(self, window, offset, data, notify):
         if window not in (0, 1, 2):
             return
         with self.lock:
-            self.last_return_at = time.monotonic()
             self.blocks[window].receive(offset, data, notify)
             if window == 2 and notify:
                 # A malformed EDDT is a protocol error even when image bytes are missing.
@@ -120,17 +114,24 @@ class YoloTool:
                         covered = sum(end - start for start, end in self.blocks[index].ranges)
                         missing.append(f'window {index}: missing {size - covered} B / {size} B')
                 if missing:
-                    self._fail_capture('YOLO incomplete return: ' + '; '.join(missing))
+                    self.capture_error = '回传不完整：' + '; '.join(missing)
                     return
                 ch2, output, detections = (block.data(size)
                                            for block, size in zip(self.blocks, sizes))
                 self.capture = (ch2, output, parse_detections(detections))
-                if self.sent_at is not None:
-                    self.timings.append(dict(path=self.source_image,
-                                             seconds=time.monotonic() - self.sent_at))
-                    self.sent_at = None
-                self.generation += 1
-                self.capture_pending = False
+
+    def complete_capture(self):
+        """Design 4.5.9: DONE commits the image after all return data arrived."""
+        with self.lock:
+            if self.capture is None:
+                self._fail_capture(self.capture_error or '回传不完整：未收到完整 CH2 / OUTPUT / EDDT')
+                raise ValueError(self.error)
+            if self.sent_at is not None:
+                self.timings.append(dict(path=self.source_image,
+                                         seconds=time.monotonic() - self.sent_at))
+                self.sent_at = None
+            self.generation += 1
+            self.capture_pending = False
 
     def _fail_capture(self, error):
         """Called with the capture lock held; missing UDP bytes fail this image only."""
@@ -147,24 +148,6 @@ class YoloTool:
                 self.ethernet.rx_capture_epoch.value += 1
         if self.ethernet is not None and self.ethernet.session:
             self.ethernet.session.log(f'{self.source_image}: {error}')
-
-    def image_sent(self, path):
-        with self.lock:
-            if self.capture_pending and path == self.source_image:
-                self.send_finished_at = time.monotonic()
-
-    def check_timeout(self):
-        with self.lock:
-            if not self.capture_pending:
-                return
-            last = self.last_return_at
-            if self.ethernet is not None and self.ethernet.rx_return_time is not None:
-                if not self.ethernet.rx_capture_event.is_set():
-                    return  # The process has EDDT; its completed result is in transit.
-                last = self.ethernet.rx_return_time.value or None
-            started = self.send_finished_at if last is None else last
-            if started is not None and time.monotonic() - started >= RETURN_TIMEOUT:
-                self._fail_capture('回传未结束（超时 1 s）')
 
     def snapshot(self):
         with self.lock:
