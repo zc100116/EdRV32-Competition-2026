@@ -105,8 +105,16 @@ void vision_gui_presented(uint64_t tick)
     detection_applied = detection_armed;
 }
 static char report[320];
+/* Design P5 8.6 / card 54: one line per completed PC image, emitted once. */
+static char image_line[240];
 const char *vision_report(void)
-{ return v.page == PAGE_CAMERA && v.state == PIPE_LIVE ? report : ""; }
+{
+    static char taken[sizeof image_line];
+    if (v.page == PAGE_CAMERA && v.state == PIPE_LIVE) return report;
+    memcpy(taken, image_line, sizeof taken);
+    image_line[0] = 0;
+    return taken;
+}
 uint32_t vision_frame(void) { return v.job_frame; }
 void vision_image_info(unsigned index, unsigned total, const uint8_t *name, unsigned bytes)
 {
@@ -666,6 +674,14 @@ int vision_service(void)
         if (!timing.cancelled) {
             sessions[PAGE_IMAGE].data.image_status = UI_IMAGE_DONE;
             board_bulk_complete(2);
+            unsigned t[8] = {tenths(v.receive_ticks), tenths(v.ch2_ticks)};
+            for (unsigned i = 0; i < 6; ++i) t[2 + i] = tenths(timing.completed[i]);
+            snprintf(image_line, sizeof image_line,
+                "image request=%lu receive=%u.%u ch2=%u.%u npu=%u.%u wait=%u.%u "
+                "decode=%u.%u sort=%u.%u nms=%u.%u post_span=%u.%u upload_to_done=%u\r\n",
+                (unsigned long)v.job_request, t[0]/10,t[0]%10, t[1]/10,t[1]%10,
+                t[2]/10,t[2]%10, t[3]/10,t[3]%10, t[4]/10,t[4]%10, t[5]/10,t[5]%10,
+                t[6]/10,t[6]%10, t[7]/10,t[7]%10, sessions[PAGE_IMAGE].data.roundtrip_ms);
         }
         finish_job();
     }
