@@ -437,6 +437,8 @@ void showcase_gui_step(struct sched_task *task)
         }
         if (flush_pending) return;
     }
+    if(!ui_detection_settings && (ui_page==1 || ui_page==2)) ui_vision_frame(ui_page==2);
+    else if(ui_page==3) ui_process_update();
     uint32_t delay = lv_timer_handler();
     sched_signal(&application_task,1);
     if (!flush_pending && delay != LV_NO_TIMER_READY)

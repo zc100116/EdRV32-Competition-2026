@@ -46,6 +46,7 @@ void ui_page_monitor(lv_obj_t *p);
 void ui_page_chip(lv_obj_t *p);
 void ui_page_debug(lv_obj_t *p);
 void ui_vision_update(bool batch);
+void ui_vision_frame(bool batch);
 void ui_monitor_update(void);
 void ui_chip_update(void);
 void ui_graphics_update(void);

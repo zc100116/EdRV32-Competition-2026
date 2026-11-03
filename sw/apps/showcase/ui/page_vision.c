@@ -13,7 +13,6 @@ static lv_obj_t *batch_status;
 static lv_obj_t *pause_label;
 static lv_obj_t *box_label;
 static lv_obj_t *filter_label;
-static unsigned last_frame;
 static const lv_image_dsc_t *last_image;
 void ui_vision_build(lv_obj_t *p, bool batch)
 {
@@ -27,7 +26,6 @@ void ui_vision_build(lv_obj_t *p, bool batch)
     ui_picture(frame, d.image, 0, 0, 960, 540);
     picture = lv_obj_get_child(frame, -1);
     last_image = d.image;
-    last_frame = (unsigned)-1;
     for(unsigned i = 0; i < 5; ++i) {
         boxes[i] = ui_box(frame, 0, 0, 1, 1, PANEL);
         lv_obj_set_style_bg_opa(boxes[i], LV_OPA_TRANSP, 0);
@@ -72,6 +70,25 @@ void ui_vision_build(lv_obj_t *p, bool batch)
     box_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
     ui_button(p,"检测设置",992,6,272,2);
 }
+void ui_vision_frame(bool batch)
+{
+    ui_vision_t d=ui_data_vision(batch);
+    char s[200];
+    if(d.image != last_image) { lv_image_set_src(picture, d.image); last_image = d.image; }
+    for(unsigned i = 0; i < 5; ++i) {
+        bool show = i < d.count && d.boxes && !d.waiting;
+        lv_obj_set_hidden(boxes[i], !show);
+        lv_obj_set_hidden(tags[i], !show);
+        if(show) {
+            ui_detection_t t = d.targets[i];
+            lv_obj_set_pos(boxes[i], t.x, t.y);
+            lv_obj_set_size(boxes[i], t.width, t.height);
+            lv_snprintf(s, sizeof(s), "%s %u%%", t.category, t.confidence);
+            ui_text(tags[i], s);
+            lv_obj_set_pos(tags[i], t.x, t.y - 22);
+        }
+    }
+}
 void ui_vision_update(bool batch)
 {
     ui_vision_t d = ui_data_vision(batch);
@@ -81,24 +98,7 @@ void ui_vision_update(bool batch)
     for(unsigned i=0;i<80;++i) selected+=(config.classes[i/32]>>(i%32))&1u;
     lv_snprintf(s,sizeof(s),"≥%u.%02u · %u 类",config.threshold/100,
         config.threshold%100,selected); ui_text(filter_label,s);
-    if(d.image != last_image) { lv_image_set_src(picture, d.image); last_image = d.image; }
-    unsigned frame = ui_data_system().seconds;
-    if(frame != last_frame || !d.boxes || batch) {
-        last_frame = frame;
-        for(unsigned i = 0; i < 5; ++i) {
-            bool show = i < d.count && d.boxes && !d.waiting;
-            lv_obj_set_hidden(boxes[i], !show);
-            lv_obj_set_hidden(tags[i], !show);
-            if(show) {
-                ui_detection_t t = d.targets[i];
-                lv_obj_set_pos(boxes[i], t.x, t.y);
-                lv_obj_set_size(boxes[i], t.width, t.height);
-                lv_snprintf(s, sizeof(s), "%s %u%%", t.category, t.confidence);
-                ui_text(tags[i], s);
-                lv_obj_set_pos(tags[i], t.x, t.y - 22);
-            }
-        }
-    }
+    ui_vision_frame(batch);
     if(batch) {
         for(unsigned i = 0; i < 5; ++i) {
             bool available = i < d.count && !d.waiting;

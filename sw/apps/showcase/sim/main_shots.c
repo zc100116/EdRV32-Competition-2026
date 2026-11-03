@@ -39,6 +39,25 @@ static void check_input_devices(void)
     ui_open(5); key_tap(keypad,LV_KEY_ENTER); assert(ui_game_open);
     key_tap(keypad,LV_KEY_ESC); assert(ui_game_open);
     key_tap(keypad,LV_KEY_ESC); assert(!ui_game_open && ui_page==5);
+    ui_open(1); key_tap(keypad,LV_KEY_NEXT); key_tap(keypad,LV_KEY_NEXT);
+    key_tap(keypad,LV_KEY_ENTER); assert(ui_detection_settings);
+    key_tap(keypad,LV_KEY_ENTER); assert(ui_data_detection_config().threshold==45);
+    key_tap(keypad,LV_KEY_NEXT); key_tap(keypad,LV_KEY_ENTER);
+    assert(ui_data_detection_config().threshold==50);
+    key_tap(keypad,LV_KEY_NEXT); key_tap(keypad,LV_KEY_NEXT);
+    key_tap(keypad,LV_KEY_ENTER); assert(!ui_data_detection_config().classes[0]);
+    test_input.enc_diff=80; lv_indev_read(encoder);
+    key_tap(encoder,LV_KEY_ENTER);
+    assert(ui_data_detection_config().classes[2]==(1u<<15));
+    lv_indev_t *pointer=lv_indev_create();
+    lv_indev_set_type(pointer,LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(pointer,read_test_input); lv_obj_update_layout(lv_screen_active());
+    test_input.point=(lv_point_t){920,186};
+    test_input.state=LV_INDEV_STATE_PRESSED; lv_indev_read(pointer);
+    test_input.state=LV_INDEV_STATE_RELEASED; lv_indev_read(pointer);
+    assert(ui_data_detection_config().classes[0]==UINT32_MAX);
+    key_tap(keypad,LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
+    lv_indev_delete(pointer);
     lv_indev_delete(keypad); lv_indev_delete(encoder);
 }
 
@@ -166,10 +185,13 @@ int main(void)
     ui_open(1); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
     assert(ui_detection_settings); capture("detection-settings");
     ui_key(LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
+    bool saved_boxes=ui_data_vision(false).boxes;
+    if(!saved_boxes) ui_data_boxes();
     ui_data_detection_threshold(70); ui_data_detection_all(false);
     ui_data_detection_class(0,true); ui_data_detection_class(2,true);
     ui_refresh(); assert(ui_data_vision(false).count==3); capture("vision-filtered");
     ui_data_detection_threshold(50); ui_data_detection_all(true);
+    if(!saved_boxes) ui_data_boxes();
     /* Exercise the four-key contract and data actions through real page focus. */
     sim_data_toggle_hardware();
     ui_open(0);
