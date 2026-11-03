@@ -54,8 +54,8 @@ ui_vision_t ui_data_vision(bool batch)
         int *r = batch ? indoor_rect[i] : street_rect[i];
         unsigned id=batch ? indoor[i] : street[i];
         d.targets[i] = (ui_detection_t){ui_coco_names[id],
-            97 - i * 3 + second % 2, r[0] + (int)(second % 3) * 2,
-            r[1], r[2], r[3],id};
+            97 - i * 3 + second % 2, (r[0] + (int)(second % 3) * 2)*4/3,
+            r[1]*4/3, r[2]*4/3, r[3]*4/3,id};
     }
     ui_detection_t raw[5];
     memcpy(raw,d.targets,sizeof(raw));
@@ -69,7 +69,16 @@ void ui_data_pause(void)
 }
 void ui_data_boxes(void) { boxes = !boxes; }
 void ui_data_batch_stop(void) { waiting = true; }
-const lv_image_dsc_t *ui_data_process(unsigned mode) { (void)mode; return &sim_indoor; }
+static ui_process_config_t process = {.contrast = 256, .gamma_tenths = 10,
+    .threshold = 128, .scale_percent = 100};
+ui_process_config_t ui_data_process_config(void) { return process; }
+void ui_data_process_set(const ui_process_config_t *config) { process = *config; }
+void ui_data_process_defaults(void)
+{
+    process = (ui_process_config_t){.contrast = 256, .gamma_tenths = 10,
+        .threshold = 128, .scale_percent = 100};
+}
+const lv_image_dsc_t *ui_data_process(unsigned mode) { (void)mode; return sim_process_image(&process); }
 /* Card 46 values supplied by coordinator. Software-off comparison is a fixed
  * estimated workload, as authorized for P2; P3 replaces it with board data. */
 static const ui_benchmark_t benchmark[] = {

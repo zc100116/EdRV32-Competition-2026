@@ -1,8 +1,8 @@
 /* lv_conf.h — design P1a §3/5; RGB565 software desktop rendering. */
 #ifndef LV_CONF_H
 #define LV_CONF_H
-#define LV_COLOR_DEPTH 16
-#define LV_COLOR_FORMAT_DEFAULT LV_COLOR_FORMAT_RGB565
+#define LV_COLOR_DEPTH 32
+#define LV_COLOR_FORMAT_DEFAULT LV_COLOR_FORMAT_ARGB8888
 #define LV_USE_STDLIB_MALLOC LV_STDLIB_CLIB
 #define LV_USE_STDLIB_STRING LV_STDLIB_CLIB
 #define LV_USE_STDLIB_SPRINTF LV_STDLIB_CLIB
@@ -26,7 +26,7 @@
 #define LV_USE_ANIMIMG 0
 #define LV_USE_ARC 0
 #define LV_USE_ARCLABEL 0
-#define LV_USE_BAR 0
+#define LV_USE_BAR 1
 #define LV_USE_BARCODE 0
 #define LV_USE_BUTTON 0
 #define LV_USE_BUTTONMATRIX 1 /* LVGL 9.6 Windows 驱动 IME 引用。 */
@@ -55,7 +55,7 @@
 #define LV_USE_RLOTTIE 0
 #define LV_USE_ROLLER 0
 #define LV_USE_SCALE 0
-#define LV_USE_SLIDER 0
+#define LV_USE_SLIDER 1
 #define LV_USE_SPAN 0
 #define LV_USE_SPINBOX 0
 #define LV_USE_SPINNER 0

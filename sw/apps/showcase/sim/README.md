@@ -24,4 +24,10 @@ Windows 使用系统 DLL，无额外运行库。← / → 移动焦点，Enter �
 游戏卡片以四键线性选择，超出一屏时立即滚动到焦点位置。
 性能页数值由协调者提供的卡 46 数据固定生成；RND 关闭值为 P2 授权的固定估算，P3 改接板上数据。
 
-现有板上 showcase 不变，本目录不参与其构建。
+本目录与板上 showcase 共用 ui/，模拟器后端独立于硬件驱动。
+
+P4 显示模拟：GUI 使用 ARGB8888 L1；示例图片模拟全屏 L0。Linux 截图在 flush
+时按 DISP alpha 公式合成两层，再输出 PNG。Windows 用 bottom layer 模拟底图。
+`process.c` 在参数改变时按 PIX/GEO 公式计算处理预览，与界面渲染分离。
+`vision.png`、`image.png`、`process.png`、`process-collapsed.png` 分别为视频类
+三页和图像处理参数面板收起状态。

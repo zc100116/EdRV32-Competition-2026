@@ -11,15 +11,16 @@ ASSETS := $(BUILD)/sample_images.c
 GAMES := $(BUILD)/game_data.c
 GAME_LIST := ../games/games.txt
 LV_SOURCES := $(shell find $(LVGL)/src -name '*.c')
-INCLUDES := -I. -I../ui -I$(LVGL) -DLV_CONF_INCLUDE_SIMPLE -DLV_LVGL_H_INCLUDE_SIMPLE
+INCLUDES := -I. -I../ui -I$(ROOT)/sw/lib -I$(LVGL) -DLV_CONF_INCLUDE_SIMPLE -DLV_LVGL_H_INCLUDE_SIMPLE
 FLAGS := -std=c11 -O2 -Wall -Wextra $(INCLUDES)
 WINCC := zig cc -target x86_64-windows-gnu
 LINUX_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/linux/%.o,$(LV_SOURCES))
 WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
-COMMON := $(UI) sim_data.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
+PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
+COMMON := $(UI) sim_data.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
 SHOTS := home home-vrn home-focus-6 vision image process graphics games monitor chip debug \
     graphics-performance graphics-comparison graphics-layers debug-uart debug-network \
-    vision-boxes-off chip-coremark games-last-row detection-settings vision-filtered
+    vision-boxes-off chip-coremark games-last-row detection-settings vision-filtered process-collapsed
 .PHONY: win shots
 win: $(BUILD)/showcase_sim.exe
 shots: $(addprefix $(BUILD)/shots/,$(addsuffix .png,$(SHOTS)))
@@ -44,7 +45,7 @@ $(BUILD)/win/%.o: $(LVGL)/%.c lv_conf.h
 	@mkdir -p $(@D)
 	$(WINCC) $(FLAGS) -DLV_USE_WINDOWS=1 -c $< -o $@
 
-$(BUILD)/showcase_shots: main_shots.c sim_data.c sim_data.h $(UI) $(UI_HEADERS) \
+$(BUILD)/showcase_shots: main_shots.c sim_data.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) $(UI_HEADERS) \
     lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
@@ -55,7 +56,7 @@ $(addprefix $(BUILD)/shots/,$(addsuffix .rgb565,$(SHOTS))) &: $(BUILD)/showcase_
 	mkdir -p $(BUILD)/shots
 	cd $(BUILD) && ./showcase_shots
 
-$(BUILD)/showcase_sim.exe: main_windows.c sim_data.c sim_data.h $(UI) \
+$(BUILD)/showcase_sim.exe: main_windows.c sim_data.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) \
     $(UI_HEADERS) lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(WIN_LV)
 	$(WINCC) $(FLAGS) -Werror -DLV_USE_WINDOWS=1 main_windows.c $(COMMON) \
 	    $(WIN_LV) -static -Wl,--subsystem,windows -luser32 -lgdi32 -lkernel32 -o $@

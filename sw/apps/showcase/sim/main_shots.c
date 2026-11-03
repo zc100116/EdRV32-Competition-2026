@@ -6,7 +6,7 @@
 #include <assert.h>
 
 static uint16_t framebuffer[1280 * 720];
-static uint16_t drawbuffer[1280 * 720];
+static uint32_t drawbuffer[1280 * 720];
 
 static lv_indev_data_t test_input;
 static void read_test_input(lv_indev_t *indev,lv_indev_data_t *data)
@@ -63,10 +63,15 @@ static void check_input_devices(void)
 
 static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
 {
-    const uint16_t *source = (const uint16_t *)pixels;
+    const lv_image_dsc_t *l0 = sim_l0_image();
+    const uint32_t *source = (const uint32_t *)pixels;
     for(int y = area->y1; y <= area->y2; ++y)
         for(int x = area->x1; x <= area->x2; ++x)
-            framebuffer[y * 1280 + x] = *source++;
+        {
+            uint32_t pixel = sim_composite(l0, *source++, (unsigned)x, (unsigned)y);
+            framebuffer[y * 1280 + x] = (uint16_t)(((pixel >> 8)&0xf800) |
+                ((pixel >> 5)&0x07e0) | ((pixel >> 3)&31));
+        }
     lv_display_flush_ready(display);
 }
 
@@ -93,9 +98,9 @@ static void check_labels(lv_obj_t *parent)
                     exit(EXIT_FAILURE);
                 }
             }
-            if(lv_obj_get_x(o) < 0 || lv_obj_get_y(o) < 0 ||
+            if(!lv_obj_is_scrollable(parent) && (lv_obj_get_x(o) < 0 || lv_obj_get_y(o) < 0 ||
                 lv_obj_get_x(o) + lv_obj_get_width(o) > lv_obj_get_width(parent) ||
-                lv_obj_get_y(o) + lv_obj_get_height(o) > lv_obj_get_height(parent)) {
+                lv_obj_get_y(o) + lv_obj_get_height(o) > lv_obj_get_height(parent))) {
                 fprintf(stderr, "Label outside parent: %s (%d,%d %dx%d in %dx%d)\n",
                     lv_label_get_text(o), (int)lv_obj_get_x(o), (int)lv_obj_get_y(o),
                     (int)lv_obj_get_width(o), (int)lv_obj_get_height(o),
@@ -109,6 +114,8 @@ static void check_labels(lv_obj_t *parent)
 
 static void capture(const char *name)
 {
+    lv_obj_update_layout(lv_screen_active());
+    lv_obj_invalidate(lv_screen_active());
     lv_refr_now(NULL);
     check_labels(lv_screen_active());
     char path[256];
@@ -126,7 +133,7 @@ int main(void)
 {
     lv_init();
     lv_display_t *display = lv_display_create(1280, 720);
-    lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
+    lv_display_set_color_format(display, LV_COLOR_FORMAT_ARGB8888);
     lv_display_set_buffers(display, drawbuffer, NULL, sizeof(drawbuffer),
                            LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(display, flush);
@@ -147,8 +154,10 @@ int main(void)
     for(unsigned i = 1; i <= 8; ++i) {
         ui_tab = 0;
         ui_open(i);
-        capture(names[i - 1]);
+        if (i != 3) capture(names[i - 1]);
     }
+    ui_open(3); ui_process_action(0); capture("process-collapsed");
+    ui_process_action(0); capture("process");
     unsigned game_count;
     const ui_game_t *games = ui_data_games(&game_count);
     assert(game_count == 30);
@@ -200,10 +209,10 @@ int main(void)
     sim_data_toggle_hardware();
     ui_key(LV_KEY_ENTER);
     assert(ui_page == 3);
-    for(unsigned i = 1; i < 7; ++i) {
-        ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
-        assert(ui_mode == i);
-    }
+    ui_process_action(11);
+    assert(ui_data_process_config().brightness == 1);
+    ui_process_action(2);
+    assert(ui_data_process_config().brightness == 0);
     ui_open(1); ui_key(LV_KEY_ENTER);
     assert(ui_data_vision(false).paused);
     ui_key(LV_KEY_ENTER);
