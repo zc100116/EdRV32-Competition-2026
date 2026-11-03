@@ -1,0 +1,88 @@
+{
+  "connected": false,
+  "config": {
+    "port": "COM7",
+    "baud": 115200,
+    "dataBits": 8,
+    "parity": "none",
+    "stopBits": "1",
+    "encoding": "utf-8",
+    "dtr": false,
+    "rts": false
+  },
+  "encoding": "utf-8",
+  "dtr": false,
+  "rts": false,
+  "rxBytes": 85131,
+  "txBytes": 3,
+  "lastSeq": 975,
+  "board": {
+    "phase": "disconnected",
+    "network": {
+      "listen": {
+        "done": true,
+        "time": 1793715072922
+      },
+      "win3": {
+        "done": true,
+        "time": 1793715073196
+      },
+      "peer": {
+        "done": true,
+        "time": 1793715073197
+      },
+      "data": {
+        "done": true,
+        "time": 1793715501748
+      }
+    },
+    "counts": {
+      "video": 0,
+      "telemetry": 9105
+    },
+    "dataTimes": {
+      "video": null,
+      "telemetry": 1793715501748
+    },
+    "expectedPeer": [
+      "192.168.1.2",
+      6000
+    ],
+    "peer": [
+      null,
+      null
+    ],
+    "summary": {},
+    "build": "8ee185f8",
+    "state": {
+      "app": 0,
+      "state": 0,
+      "error": 0,
+      "boxes": 1,
+      "threshold": 50,
+      "classes": [
+        4294967295,
+        4294967295,
+        65535
+      ],
+      "process": {
+        "enabled": 0,
+        "brightness": 0,
+        "contrast": 256,
+        "gamma_tenths": 10,
+        "stage1": 2,
+        "stage2": 2,
+        "threshold": 128,
+        "view": 0,
+        "angle": 0,
+        "scale_percent": 100,
+        "translate_x": 0,
+        "translate_y": 0
+      },
+      "request": 0,
+      "frame": 0,
+      "image_status": 3
+    },
+    "error": null
+  }
+}

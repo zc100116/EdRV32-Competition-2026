@@ -1,3 +1,5 @@
+第3轮实时识别性能反馈与日志索引见 [r3_result.md](r3_result.md)。本次按用户要求上传供Claude分析，未改程序或补打印。
+
 # 卡54结果索引
 
 第二轮已结束，完整结果见 [r2_result.md](r2_result.md)，用户异常反馈见 [r2_feedback.md](r2_feedback.md)。第二轮日志前缀r2_，第一轮文件保留。
