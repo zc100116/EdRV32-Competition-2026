@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 更新日期 | 2026-10-27 |
+| 更新日期 | 2026-11-02（NPU 集成、四工程卡 43 下发） |
 | 维护者 | 协调者（每次派发、完成、合并、Windows 结果回传后更新） |
 
 状态标记：`[ ]` 未开始，`[~]` 进行中，`[x]` 完成，`[!]` 阻塞。
@@ -15,7 +15,8 @@
 |---|---|
 | 当前阶段 | P1 CPU 和 cache（orca Run `run_6e42f8ce0f9c`）；P0、cache、CPU（d411035）已合入 main |
 | 正在进行 | B2（`plan/board-plan.md` v0.3，设计记录 `design/2026-10-29-b2-software.md` 已确认）：完整 SoC 顶层 B2-1a、VIN CH2 RTL B2-1b 与独立验证 B2-1c 开发中；媒体 V-R8 已合入，第四轮 PDS V-W5 已下发（`tasks/win/20261029-01-media-r4/`）；B1 完成：100 MHz 下 CoreMark O2 3.603、tuned 4.310 CoreMark/MHz；BIOS 已合入，上板验证并入 B2-6；CPU 频率在 C-S1 依据布局实验定 |
-| 等待用户 | 无 |
+| NPU 优化 | Q6 + OPT2 已合入并推送 b3 `92b38fd2`（OPT2 RTL `a7306e22`）；按既定收窄范围审阅已有日志，未重复仿真。详见 `plan/board-plan.md` T-NPU-OPT2 |
+| 等待 Windows | 卡 43 `tasks/win/20261102-43-npu-rnd1-boards` 已推送：实验分支 `zc100116/b3f-rnd1-npu-opt`，固定提交 `13a17403ef38b27aedbfa9a816d5103aff1dce8d`；B3N、B3VN、B3F-RND1-N、去 PIX/GEO 的 B3F-VRN-RND1-N 一起下发，等待实现及上板结果。新版 BIOS/ETH/NPU/视频软件本轮重建，RND v1 沿用卡 21/39 配套程序 |
 | 阻塞 | 无 |
 
 ---
