@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # File: expect.py
-# Spec: Task T-RNDB2; rnd-spec v0.3 2.6 integer rendering.
+# Spec: Task B3-3a; rnd-spec 2.6 integer rendering.
 # Description: Compute reference CRCs and compare a captured UART log.
 # Clock domain: host.
 import argparse

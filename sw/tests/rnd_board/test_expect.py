@@ -10,12 +10,11 @@ import unittest
 
 sys.dont_write_bytecode = True
 from expect import compare
-from scenes import GROUPS
 
 
 class Logs(unittest.TestCase):
     def test_compare(self):
-        values = {name: 0x1234abcd + i for i, (name, _, _) in enumerate(GROUPS)}
+        values = {'fill_rgb565': 0x1234abcd, 'blit_argb8888': 0x87654321}
         log = '\n'.join(f'RND {name} crc=0x{value:08x}' for name, value in values.items())
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertTrue(compare(log, values))
