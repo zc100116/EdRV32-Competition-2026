@@ -147,6 +147,115 @@
 - 离开串口页后恢复串口虚拟输入。日志仍从串口输出。
 - 网口页使用网口已有的 PEER，不改变 EDTM 遥测；回环测试的协议在 P3 中定。
 
+### 4.5 上板程序设计（P3，用户 2026-11-03 确认）
+
+**目标硬件**：卡 48 的 F CPU125 比特流为主（全部 9 个应用可用）；VRN 上图像处理置灰。所有计时都按运行时读到的 `CLK_SYS_HZ` 换算，不写死频率。
+
+#### 4.5.1 代码结构
+
+| 目录 | 内容 |
+|---|---|
+| `sw/apps/showcase/ui/` | 与模拟器共用的页面，不变 |
+| `sw/apps/showcase/board/` | `ui_data.h` 的板上实现；输入设备；应用入口（替换旧的 `launcher.c`、`status.c`）；showcase 网口协议（4.5.4） |
+| `sw/apps/showcase/board/vision/` | 视觉识别、图片识别、图像处理（从 `sw/apps/demo` 移植） |
+| `sw/apps/showcase/nes/`、`lvgl/`、`layers.c`、`sw/lib/sched/` | 沿用 |
+
+上板验收通过后删除 `sw/apps/demo` 中被移植的独立程序（demo_vnpu、demo_npu、demo_vision）和旧启动器。
+
+#### 4.5.2 CPU 调度
+
+沿用协作式调度器（2026-11-02 设计记录 4.1），规则如下：
+
+| 任务 | 优先级 | 内容 | 单次 step 上限 |
+|---|---|---|---|
+| 通信服务 | 0 | UART/网口接收、虚拟输入、4.5.4 协议消息、EDTM 遥测 | 1 ms |
+| 当前应用 | 1 | 应用逻辑；长计算（YOLO 后处理、游戏包解析等）切成小片，每片做完返回 | 5 ms |
+| 图形界面 | 2 | `lv_timer_handler()`；有动画时最多 30 fps，静止时不唤醒 | 一帧渲染时间 |
+
+- 加速器（NPU、RND、DISP、VIN、PIX、GEO、ETH）全部中断驱动，中断里只置事件，不做计算。
+- 只有三种情况允许独占 CPU，进入前先在界面上给出提示：
+  1. NES 运行时独占显示，每次 step 运行一帧；
+  2. CoreMark 跑分运行到结束，界面显示"正在跑分"，跑完恢复；
+  3. LVGL benchmark 场景序列。
+- 调度器为每个任务记录**最长单次 step 时间**，系统监控页显示、串口日志输出。验收时检查是否满足上表上限。
+
+#### 4.5.3 输入设备
+
+- **板上按键**：KEY1–4 → ← → 确认 返回（沿用）。
+- **虚拟键盘**：调试工具的虚拟输入帧（8 字节）。按键位沿用 `sw/lib/virtual_input.h`：方向键、ENTER、ESC 映射到 LVGL 键盘输入设备，NES 中映射到手柄。
+- **虚拟鼠标**：帧中的 x、y（绝对坐标，0–1279 / 0–719）和 mouse 位 → LVGL 指针输入设备；画一个小箭头光标（LVGL 光标对象，有鼠标输入时显示，5 s 无移动后隐藏）。
+- **虚拟编码器（滚轮）**：虚拟输入帧的**第 8 字节**（目前固定为 0）定义为滚轮累计计数，`uint8_t` 回绕，向下为正。板端取与上一帧的差值（按 `int8_t` 解释）作为 LVGL 编码器的 `enc_diff`，帧丢失时不会少计步数。mouse 字节 **bit2 = 中键**，作为编码器按下。编码器滚动等同 ← →，在焦点组内移动；按下等同确认。
+- 串口虚拟输入（ESC V + 8 字节）格式相同，同样带滚轮字节。
+
+#### 4.5.4 showcase 网口协议（板端与调试工具共同遵守）
+
+接收窗口分配：
+
+| 窗口 | 用途 | 基址 / 大小 |
+|---|---|---|
+| 0 | 大块数据（模型、图片、游戏），由 BULK_BEGIN 配置 | 按类型配置，见下 |
+| 1 | 不使用 | — |
+| 2 | 虚拟输入帧（沿用） | `0x0a010000` / 8 B |
+| 3 | 消息（PC → 板） | `0x0a011000` / 1024 B |
+
+**消息格式**（UDP 应用头之后，小端）：`magic "EDSC"`(4) + `type`(u16) + `len`(u16) + `seq`(u32) + `payload[len]`。
+
+- PC 发到窗口 3，偏移 0，NOTIFY = 1。板端处理完后重新配置窗口 3，清零字节计数。
+- 板端回复使用相同格式，用发送描述符发出，应用头窗口号 = 3。
+
+| type | 方向 | payload | 说明 |
+|---|---|---|---|
+| 0x01 BULK_BEGIN | PC → 板 | `kind`(u8：1 模型，2 图片，3 游戏) + 3 字节 0 + `total`(u32) | 板端把窗口 0 配置到该类型的 DDR 区域，大小 = total，然后回复 READY；区域不够时回复 DONE(status = 3) |
+| 0x81 READY | 板 → PC | `kind`(u8) + 3 字节 0 | PC 收到后把数据发到窗口 0，偏移从 0 开始，最后一包 NOTIFY = 1 |
+| 0x82 DONE | 板 → PC | `kind`(u8) + `status`(u8：0 成功，1 长度不符，2 格式错误，3 空间不足) + 2 字节 0 + `index`(u32) | 窗口 0 的 NOTIFY 到达后，比对字节数并处理。`index`：游戏为新游戏在列表中的序号，图片为帧号 |
+| 0x02 CAMERA | PC → 板 | 无 | 视觉识别切回摄像头（取代旧的 ASCII `camera`） |
+| 0x03 ECHO | PC → 板 | 任意数据，≤ 1000 B | 回环测试，板端立即回复 0x83 ECHO_REPLY，`seq` 和 payload 原样返回 |
+
+- **模型**沿用 EDNM 格式；**图片**沿用 1280×720 RGB565；识别结果沿用现有的检测框和张量回传格式（调试工具 `yolo.py`）。
+- **游戏**为下面的 EDG2 记录。
+- 一次只进行一个大块传输：PC 收到 DONE 之后才能发下一个 BULK_BEGIN。
+
+#### 4.5.5 游戏记录 EDG2 和嵌入游戏包
+
+- **EDG2 记录**（小端）：
+  - 头：`magic "EDG2"`、`version`(u16 = 2)、`reserved`(u16)、`total`(u32，含头的整条记录长度)、`name_w`、`name_h`(u16)、`name_off`(u32)、`cover_w`、`cover_h`(u16)、`cover_off`(u32，0 表示没有封面)、`rom_off`、`rom_len`(u32)、`utf8_name[64]`；
+  - 名字位图：A8；
+  - 封面：RGB565，≤ 120×160；
+  - ROM：原样。
+  - 各段偏移相对记录起点，4 字节对齐。
+- **生成**：名字位图用 Noto Sans SC（`third_party/lvgl/tests/src/test_files/fonts/noto/NotoSansSC-Regular.ttf`）20 px 渲染，宽度不超过 180 px；用 PySide6（已在 `tools/requirements.txt` 中）。封面缩放沿用 4.4 的规则。
+  - 共享模块 `tools/sw/game_record.py`，调试工具上传和 Linux 构建都用它。
+- **嵌入游戏包**：`magic "EDGP"`、`version`(u16 = 2)、`count`(u16)、`count` 个 u32 记录偏移，后接各条 EDG2 记录。
+  - showcase 构建时由 `games.txt` 生成游戏包，链接进 ELF 的 `.game_pack` 段，取代旧的 v1 游戏包和 Windows 端打包流程。
+- **上传的游戏**放在 DDR 的上传区（8 MB），依次追加，复位后清空。
+- **板上显示**：名字位图作为 A8 图片重新着色显示，由 RND GLYPH 绘制；封面由 RND BLIT 绘制。
+
+#### 4.5.6 视觉类页面的显示
+
+- 摄像头画面、上传的图片、图像处理的输出都是 DDR 中 1280×720 的 RGB565 帧，在页面中作为 LVGL 图片对象，由 RND BLIT 缩放到 960×540 显示。检测框是 LVGL 对象，每次推理结果到达后更新。
+- 帧缓冲的所有权沿用 VIN 槽位的占用标记：显示或推理正在使用的槽不被覆盖。
+
+#### 4.5.7 代码布局（减少 I$ 缺失）
+
+依据：I$/D$ 各 32 KiB、2 路、32 B 行（cache-spec 2.1）。卡 46 实测 LVGL 运行时 I$ 缺失每千条指令 6–13 次，前端空等周期占 20–30%。
+
+1. 全部代码用 `-ffunction-sections -fdata-sections` 编译。showcase 链接脚本按任务分组放置：
+   - 片上 SRAM：调度器、陷入/中断入口、各中断处理、`memcpy`/`memset`、虚拟输入、`platform` 热路径；
+   - DDR 中，依次连续放置：NES 模拟核心（nofrendo CPU/PPU/APU 和 mapper）、LVGL 绘制与刷新热路径、`ui/` 页面；其余代码放在最后。
+2. **热点测量**：通信服务支持串口命令 `prof <秒数>`。用 CLINT 定时中断按 10 kHz 采样 `mepc`，按 32 B 行统计，结束后串口输出前 256 行的地址和次数。主机脚本 `tools/sw/prof_map.py` 用 ELF 符号表换算成函数热度表。
+3. 根据热度表生成链接顺序文件（`sw/apps/showcase/layout/*.txt`，入库），在每组内按热度排列。
+4. 效果用 HPM 的 I$ 缺失次数和 benchmark 每帧时间做布局前后对比，写进测量报告。
+
+#### 4.5.8 并行开发的分工
+
+| 任务 | 归属 | 依赖 |
+|---|---|---|
+| T-SHOW-BOARD | `sw/apps/showcase/`（除 `board/vision/`）、`sw/lib/sched/`、`sw/lib/virtual_input*`、`sw/boot/info.h`（cache 容量改为 32 KiB）、`sw/bsp/ld/` 中新增的 showcase 链接脚本、`tools/sw/prof_map.py` | 4.5.1–4.5.5、4.5.7 |
+| T-SHOW-VISION | `sw/apps/showcase/board/vision/` | 实现 `ui_data.h` 中视觉类函数；需要 BOARD 提供以下钩子：`vision_bulk_done(kind, base, bytes)`、`vision_camera()`，以及应用 enter/step/exit |
+| T-TOOL-SHOW | `tools/debug_tool/`、`tools/sw/game_record.py`、`tools/sw/pack_games.py` | 4.5.3 滚轮字节、4.5.4 协议、4.5.5 记录格式；调试工具新增"游戏"上传页和回环测试 |
+
+三个任务按本节冻结的接口并行开发，最后由 T-SHOW-BOARD 的 worker 集成并构建 ELF。
+
 ## 5. 模拟器方案
 
 ### 5.1 代码划分
@@ -188,4 +297,4 @@ P1 和 P2 可以由同一个 worker 连续完成。P2 的迭代只涉及界面�
 
 ## 8. 状态
 
-已决定：功能清单、视觉风格（B）、页面内容（4.3）。P1b + P2 进行中。
+已决定：功能清单、视觉风格（B）、页面内容（4.3）、游戏包（4.4）、上板程序设计（4.5）。P1b + P2 已完成（卡 50 用户认可），P3 进行中。
