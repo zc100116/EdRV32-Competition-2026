@@ -69,7 +69,9 @@ void sched_run(void)
             uint64_t begin = sched_port_time();
             uint64_t idle_before = idle_ticks;
             ready->step(ready);
-            ready->busy_ticks += sched_port_time() - begin - (idle_ticks - idle_before);
+            uint64_t elapsed = sched_port_time() - begin;
+            ready->busy_ticks += elapsed - (idle_ticks - idle_before);
+            if (elapsed > ready->max_step_ticks) ready->max_step_ticks = elapsed;
         } else {
             sched_port_compare(deadline);
             /* IRQs remain masked from readiness check through WFI. A pending,

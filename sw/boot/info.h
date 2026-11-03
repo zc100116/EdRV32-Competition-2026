@@ -8,8 +8,8 @@
 #include <stdint.h>
 
 /* cache-spec 2.1: configuration constants, not discoverable registers. */
-#define SYSTEM_ICACHE_BYTES 8192u
-#define SYSTEM_DCACHE_BYTES 8192u
+#define SYSTEM_ICACHE_BYTES 32768u
+#define SYSTEM_DCACHE_BYTES 32768u
 #define SYSTEM_CACHE_WAYS 2u
 #define SYSTEM_CACHE_LINE_BYTES 32u
 

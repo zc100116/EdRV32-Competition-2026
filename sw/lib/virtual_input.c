@@ -7,14 +7,17 @@
 static volatile struct virtual_input_state state;
 static uint8_t serial_frame[VIRTUAL_INPUT_BYTES];
 static unsigned serial_position;
+static int16_t wheel_pending;
 
 void virtual_input_network(const volatile uint8_t *frame)
 {
+    wheel_pending += (int8_t)(uint8_t)(frame[7] - state.wheel);
     state = (struct virtual_input_state) {
         .keys = (uint16_t)(frame[0] | (uint16_t)frame[1] << 8),
         .x = (int16_t)(frame[2] | (uint16_t)frame[3] << 8),
         .y = (int16_t)(frame[4] | (uint16_t)frame[5] << 8),
         .mouse = frame[6],
+        .wheel = frame[7],
         .active = 1
     };
 }
@@ -40,4 +43,11 @@ int virtual_input_serial(uint8_t byte)
 struct virtual_input_state virtual_input_get(void)
 {
     return state;
+}
+
+int16_t virtual_input_take_wheel(void)
+{
+    int16_t value = wheel_pending;
+    wheel_pending = 0;
+    return value;
 }

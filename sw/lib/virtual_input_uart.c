@@ -9,6 +9,8 @@
 #include "plic.h"
 
 static void (*legacy_character)(int);
+static void (*raw_receive)(unsigned);
+void virtual_input_uart_set_raw(void (*receive)(unsigned)) { raw_receive=receive; }
 
 void virtual_input_uart_start(void (*character)(int))
 {
@@ -22,8 +24,11 @@ void virtual_input_uart_start(void (*character)(int))
 
 void virtual_input_uart_receive(void)
 {
-    while (!(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
-        int character = virtual_input_serial(uart_getc());
+    unsigned budget=32;
+    while (budget-- && !(mmio_read32(EDRV32_UART0_BASE + UART_STATUS) & UART_STATUS_RX_EMPTY)) {
+        unsigned byte=uart_getc();
+        if(raw_receive) { raw_receive(byte); continue; }
+        int character = virtual_input_serial((uint8_t)byte);
         if (character >= 0)
             legacy_character(character);
     }

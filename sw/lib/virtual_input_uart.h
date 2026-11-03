@@ -9,6 +9,7 @@
 /* Caller disables interrupts and owns mtvec/mie and the PLIC threshold. */
 void virtual_input_uart_start(void (*character)(int));
 void virtual_input_uart_receive(void);
+void virtual_input_uart_set_raw(void (*receive)(unsigned));
 uint32_t virtual_input_lock(void);
 void virtual_input_unlock(uint32_t state);
 #endif

@@ -81,8 +81,8 @@ static void step_low(struct sched_task *task)
 }
 int main(void)
 {
-    high = (struct sched_task){"high", step_high, 0, 0, UINT64_MAX, 0};
-    low = (struct sched_task){"low", step_low, 2, 0, UINT64_MAX, 0};
+    high = (struct sched_task){"high", step_high, 0, 0, UINT64_MAX, 0, 0};
+    low = (struct sched_task){"low", step_low, 2, 0, UINT64_MAX, 0, 0};
     sched_add(&low);
     sched_add(&high);
     sched_signal(&low, 1);

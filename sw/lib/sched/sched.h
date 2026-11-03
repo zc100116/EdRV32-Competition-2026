@@ -13,6 +13,7 @@ struct sched_task {
     volatile uint32_t events;
     uint64_t wake_at;
     uint64_t busy_ticks;
+    uint64_t max_step_ticks;
 };
 void sched_add(struct sched_task *task);
 void sched_signal(struct sched_task *task, uint32_t events);

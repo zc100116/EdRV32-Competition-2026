@@ -20,10 +20,13 @@ struct virtual_input_state {
     int16_t y;
     uint8_t mouse;
     uint8_t active;
+    uint8_t wheel;
 };
 /* Returns the legacy character, or -1 when consumed by ESC V + state. */
 int virtual_input_serial(uint8_t byte);
 /* Called after RX NOTIFY: read the latest eight bytes from the uncached window. */
 void virtual_input_network(const volatile uint8_t *frame);
 struct virtual_input_state virtual_input_get(void);
+/* Accumulated signed modulo-256 deltas; each consumer drains once per read. */
+int16_t virtual_input_take_wheel(void);
 #endif
