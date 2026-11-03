@@ -20,8 +20,12 @@ void geo_matrix(int32_t m[6], int angle, int scale_percent, int tx, int ty,
     m[4] = (int32_t)lround(d * 65536);
     m[5] = (int32_t)lround((cy - c*(cx + tx) - d*(cy + ty)) * 65536);
 }
+uint8_t pix_gamma_value(unsigned input, unsigned gamma_tenths)
+{
+    return (uint8_t)lround(pow(input / 255.0, 10.0 / gamma_tenths) * 255);
+}
 void pix_gamma_table(uint8_t table[256], unsigned gamma_tenths)
 {
     for (unsigned i = 0; i < 256; ++i)
-        table[i] = (uint8_t)lround(pow(i / 255.0, 10.0 / gamma_tenths) * 255);
+        table[i] = pix_gamma_value(i, gamma_tenths);
 }

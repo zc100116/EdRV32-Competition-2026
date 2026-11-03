@@ -22,7 +22,7 @@ retains the source until processing and transmission finish.
 
 `ui_data_process_config/set/defaults` expose PIX brightness, contrast Q8, gamma,
 two 3×3 stages, grayscale/binary/invert, and GEO rotation, scale, translation and
-mirrors. Gamma is computed on CPU into the inactive bank. Matrices use
+mirrors. Gamma is computed one sample per CPU slice, then written into the inactive bank. Matrices use
 `sw/lib/geo_matrix.c`; scale is displayed as output/input (50–400%). PIX shadow
 registers apply at SOF; GEO descriptors retain their matrix for the submitted job.
 Original view bypasses both engines, and the L1 parameter panel can be collapsed.

@@ -31,6 +31,8 @@ static uint32_t geo_descriptor;
 static uint32_t display_current, display_next, display_released;
 static unsigned display_enabled, display_scanned, display_frames, memory_starts;
 static uint32_t memory_base;
+static unsigned gamma_loads, pix_busy;
+static struct pix_config last_pix;
 void platform_gui_wake(void) {}
 uint32_t platform_frames(void) { return display_frames; }
 void platform_put_u32(uint32_t value) { fprintf(stderr, "%u", value); }
@@ -68,6 +70,7 @@ void engine_control(enum engine_id engine, uint32_t ctrl)
 }
 struct engine_event engine_poll(enum engine_id engine)
 {
+    if (engine == ENGINE_PIX) return (struct engine_event){.status = pix_busy ? 1 : 2};
     if (engine == ENGINE_DISP) return (struct engine_event){.status =
         display_enabled || display_scanned ? 1 : 2};
     if (engine == ENGINE_PIX || engine == ENGINE_GEO) assert(hardware & APP_HW_GEO);
@@ -90,9 +93,9 @@ void npu_start(uint32_t input, uint32_t output)
     assert(output == VISION_OUTPUT_BASE);
     ++npu_runs;
 }
-void pix_configure(const struct pix_config *c) { (void)c; assert(hardware & APP_HW_PIX); }
+void pix_configure(const struct pix_config *c) { last_pix = *c; assert(hardware & APP_HW_PIX); }
 void pix_gamma_load(unsigned bank, const uint8_t values[256])
-{ assert(hardware & APP_HW_PIX); assert(bank <= 1 && values[255] == 255); }
+{ assert(hardware & APP_HW_PIX); assert(bank <= 1 && values[255] == 255); ++gamma_loads; }
 int32_t geo_q16(int32_t n, int32_t d) { return (int32_t)((int64_t)n * 65536 / d); }
 void geo_descriptor_pack(struct geo_descriptor *d, const struct geo_config *c)
 {
@@ -201,7 +204,7 @@ static void upload(unsigned base, unsigned index)
         vision_service();
     }
     assert(memory_base == base && npu_runs == before);
-    frames[2] = (struct vin_frame){0, index};
+    frames[2] = (struct vin_frame){(index % 2) << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, index};
     event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
     vision_service();
     assert(npu_runs == before + 1);
@@ -213,7 +216,8 @@ static void upload(unsigned base, unsigned index)
     vision_service();
     assert(submitted == index+1);
     const struct eth_tx_descriptor *tx = physical(VISION_TX_DESCRIPTORS);
-    assert(tx[0].word[0] == VISION_INPUT_BASE && tx[0].word[2] == 0);
+    assert(tx[0].word[0] == VISION_INPUT_BASE + (index % 2)*VISION_INPUT_SPACING &&
+           tx[0].word[2] == 0);
     assert(tx[1].word[0] == VISION_OUTPUT_BASE && tx[1].word[2] == 1);
     assert(tx[2].word[0] == VISION_TX_DETECTIONS && tx[2].word[2] == 0x102);
     assert(memcmp(physical(VISION_TX_DETECTIONS), "EDDT", 4) == 0);
@@ -252,6 +256,27 @@ static void process_test(void)
     hardware = APP_HW_VIN | APP_HW_PIX | APP_HW_GEO;
     vision_app_process.enter();
     drain();
+    unsigned loads = gamma_loads;
+    ui_process_config_t changed = ui_data_process_config();
+    changed.gamma_tenths = 30;
+    ui_data_process_set(&changed);
+    for (unsigned i = 0; i < 255; ++i) vision_service();
+    assert(gamma_loads == loads);
+    pix_busy = 1;
+    vision_service();
+    assert(gamma_loads == loads); /* Complete table waits for an inactive bank boundary. */
+    pix_busy = 0;
+    vision_service();
+    assert(gamma_loads == loads + 1);
+    changed.brightness = -256; changed.contrast = 511;
+    changed.gray = changed.binary = changed.invert = 1; changed.threshold = 255;
+    ui_data_process_set(&changed); vision_service();
+    assert(last_pix.brightness == -256 && last_pix.contrast == 511 && last_pix.threshold == 255);
+    assert((last_pix.flags & (EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK |
+        EDRV32_PIX_CFG_INV_EN_MASK)) == (EDRV32_PIX_CFG_GRAY_EN_MASK |
+        EDRV32_PIX_CFG_BIN_EN_MASK | EDRV32_PIX_CFG_INV_EN_MASK));
+    ui_data_process_defaults(); drain();
+    puts("PASS one gamma sample per slice, inactive-bank boundary and PIX parameter extremes");
     for (unsigned mode = 0; mode < 7; ++mode) {
         ui_process_config_t config = ui_data_process_config();
         config.original = mode == 0;

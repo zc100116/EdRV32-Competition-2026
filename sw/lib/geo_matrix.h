@@ -6,5 +6,6 @@
 #include <stdint.h>
 void geo_matrix(int32_t matrix[6], int angle, int scale_percent, int tx, int ty,
                 int mirror_x, int mirror_y, unsigned width, unsigned height);
+uint8_t pix_gamma_value(unsigned input, unsigned gamma_tenths);
 void pix_gamma_table(uint8_t table[256], unsigned gamma_tenths);
 #endif

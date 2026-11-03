@@ -31,6 +31,8 @@ static struct {
     ui_process_config_t process;
     unsigned process_dirty, gamma_bank;
     int gamma_loaded;
+    unsigned gamma_target, gamma_index;
+    uint8_t gamma_table[256];
     int32_t matrix[6];
     unsigned capture;
     unsigned reconfigure;
@@ -71,7 +73,7 @@ static struct {
        .submitted = -1, .job_image = -1, .geo_source = -1, .geo_target = -1,
        .process = {.contrast = 256, .gamma_tenths = 10, .threshold = 128,
                    .scale_percent = 100},
-       .gamma_loaded = -1,
+       .gamma_loaded = -1, .gamma_target = 10, .gamma_index = 256,
        .data = {.boxes = true, .waiting = true}};
 static volatile uint32_t irq_flags[ENGINE_NPU + 1];
 static volatile uint32_t irq_errors[ENGINE_NPU + 1];
@@ -134,6 +136,7 @@ static void initialize(void)
                        .stride = VISION_STRIDE},
             .data_size = VISION_IMAGE_BYTES, .data = uncached(image_address(i))};
     }
+    for (unsigned i = 0; i < 256; ++i) v.gamma_table[i] = (uint8_t)i;
     v.initialized = 1;
 }
 void vision_irq(const struct engine_event *event, void *context)
@@ -229,6 +232,10 @@ void ui_data_batch_stop(void)
 ui_process_config_t ui_data_process_config(void) { return v.process; }
 void ui_data_process_set(const ui_process_config_t *config)
 {
+    if ((unsigned)config->gamma_tenths != v.gamma_target) {
+        v.gamma_target = (unsigned)config->gamma_tenths;
+        v.gamma_index = 0;
+    }
     v.process = *config;
     v.process_dirty = 1;
     app_wake_at(platform_ticks());
@@ -285,10 +292,12 @@ static void pix_mode(void)
 {
     const ui_process_config_t *p = &v.process;
     if (v.gamma_loaded != p->gamma_tenths) {
-        uint8_t table[256];
-        pix_gamma_table(table, (unsigned)p->gamma_tenths);
+        if (v.gamma_index < 256) return;
+        /* PIX 2.3: with no active frame, the bank opposite the shadow selection
+         * is writable, including if SOF arrives during the APB table writes. */
+        if (!(engine_poll(ENGINE_PIX).status & EDRV32_PIX_STATUS_IDLE_MASK)) return;
         v.gamma_bank ^= 1;
-        pix_gamma_load(v.gamma_bank, table);
+        pix_gamma_load(v.gamma_bank, v.gamma_table);
         v.gamma_loaded = p->gamma_tenths;
     }
     uint32_t flags = EDRV32_PIX_CFG_BC_EN_MASK | EDRV32_PIX_CFG_GAMMA_EN_MASK;
@@ -492,6 +501,11 @@ static void send_results(void)
 }
 int vision_service(void)
 {
+    /* Design 4.5.2: software floating-point gamma work is one sample per slice. */
+    if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
+        v.gamma_table[v.gamma_index] = pix_gamma_value(v.gamma_index, v.gamma_target);
+        ++v.gamma_index;
+    }
     uint32_t flags[ENGINE_NPU + 1];
     uint32_t errors[ENGINE_NPU + 1];
     uint32_t lock = sched_port_lock();
@@ -518,8 +532,7 @@ int vision_service(void)
         v.geo_source = v.geo_target = -1;
     }
     if (v.capture) {
-        if (v.page == PAGE_PROCESS && v.process_dirty &&
-            (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK)) pix_mode();
+        if (v.page == PAGE_PROCESS && v.process_dirty) pix_mode();
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
     }
@@ -603,13 +616,13 @@ int vision_service(void)
         }
     }
     return v.reconfigure || v.model_pending || v.image_pending || v.job != JOB_IDLE ||
-           v.geo_source >= 0;
+           v.geo_source >= 0 || (v.page == PAGE_PROCESS && v.process_dirty);
 }
 static void step(void)
 {
     int busy = vision_service();
     /* IRQ events wake idle camera work; sliced CPU work resumes immediately. */
-    unsigned cpu = v.job == JOB_POST ||
+    unsigned cpu = v.job == JOB_POST || (v.page == PAGE_PROCESS && v.gamma_index < 256) ||
                    v.model_pending;
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);
