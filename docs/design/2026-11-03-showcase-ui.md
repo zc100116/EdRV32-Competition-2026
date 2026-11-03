@@ -256,6 +256,15 @@
 
 三个任务按本节冻结的接口并行开发，最后由 T-SHOW-BOARD 的 worker 集成并构建 ELF。
 
+#### 4.5.9 开发中冻结的接口（2026-11-03，回答 worker 提问）
+
+- `board/vision_hooks.h`：`uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)` 返回 DONE 的 status（0 成功、2 格式错误；kind 1/2 的 index 填 0）；`void vision_camera(void)`；`void vision_frame_presented(void)`，由 BOARD 在 LVGL 显示的 RENDER_READY 事件中调用；`extern const struct app vision_app_camera, vision_app_image, vision_app_process`，按 app.h 约定实现。
+- 帧槽位释放：`ui_data_vision` / `ui_data_process` 返回的图片所在槽位必须保持占用，直到有更新的图片返回给页面，并且此后至少调用过一次 `vision_frame_presented`。
+- `ui_data_process(unsigned mode)` 带模式参数；图像处理页像视觉页一样周期刷新。
+- 图片识别应用的 needs 为 NPU|ETH，CH2 由 CPU 按行切片计算，不依赖 VIN。
+- DDR 区域（DDR 偏移，沿用 demo.h）：模型 BULK 0x09000000 / 16 MiB；图片 BULK 0x08000000 / 2 MiB；游戏上传区 0x0b000000 / 8 MiB；vision 工作区与 demo.h 相同；BOARD 自己的缓冲放在程序 bss 中。常量集中在 `board/ddr_map.h`。
+- 模型 BULK 数据保留 EDNM 的稀疏偏移（头 0、描述符 0x1000、模型 0x100000，间隙补零），total = 0x100000 + 模型长度。
+
 ## 5. 模拟器方案
 
 ### 5.1 代码划分
