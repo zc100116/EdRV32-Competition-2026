@@ -19,7 +19,7 @@
 
 本作品在紫光同创 PG2L200H FPGA 上设计并实现了一颗以自研 RISC-V 处理器为核心的边缘视觉片上系统 EdRV32 SoC，自主设计了处理器、总线、存储子系统、多媒体引擎、神经网络加速器，以及引导程序、驱动、演示系统和上位机工具。
 
-处理器 EdRV32 实现 RV32IM 指令集，采用 6 级顺序双发射流水线，配备 gshare 分支预测、返回地址栈和各 32 KiB 的两路组相联指令/数据 Cache，工作在 125 MHz，CoreMark 达到 4.354 CoreMark/MHz。围绕 CPU 构建了控制面与数据面分离的异构架构：CPU 经 APB 配置各引擎，像素、特征图和网络数据由各引擎的 DMA 经 7 端口 256 位 DDR 交叉开关直接访问 DDR3，模块之间以 DDR 中的 Surface 零拷贝交接。
+处理器 EdRV32 实现 RV32IM 指令集，采用 6 级顺序双发射流水线，配备 gshare 分支预测、返回地址栈和各 32 KiB 的两路组相联指令/数据 Cache，工作在 125 MHz，CoreMark 达到 4.390 CoreMark/MHz。围绕 CPU 构建了控制面与数据面分离的异构架构：CPU 经 APB 配置各引擎，像素、特征图和网络数据由各引擎的 DMA 经 7 端口 256 位 DDR 交叉开关直接访问 DDR3，模块之间以 DDR 中的 Surface 零拷贝交接。
 
 系统集成了双路 OV5640 视频采集与流式像素处理（VIN/PIX）、DDR 到 DDR 的仿射几何变换引擎（GEO）、面向 YOLOv8n 的 INT8 推理加速器（NPU，512 MAC/周期）、作为 LVGL 绘制后端的 2D 渲染引擎（RND）、双图层合成的 720p60 HDMI 显示（DISP），以及硬件 UDP 收发直通 DDR 的千兆以太网引擎（ETH）。NPU 在 150 MHz 下完成 640×384 输入的 YOLOv8n 推理，单帧 41.7 ms；CPU 后处理与下一帧推理并行，实时识别帧率由 NPU 决定。
 
@@ -61,7 +61,7 @@ EdRV32 SoC 是一个完整可用的边缘视觉计算平台，单个比特流同
 
 | 项目 | 指标 |
 |---|---|
-| 处理器 | RV32IM，6 级双发射，125 MHz；CoreMark 4.354 CoreMark/MHz |
+| 处理器 | RV32IM，6 级双发射，125 MHz；CoreMark 4.390 CoreMark/MHz |
 | Cache | I$ / D$ 各 32 KiB，2 路组相联，32 B 行 |
 | NPU | 512 INT8 MAC/周期 @150 MHz；YOLOv8n（640×384）41.7 ms/帧；实时识别【待实测】fps |
 | 视频 | 2 × OV5640，720p30 输入；HDMI 720p60 双图层输出 |
@@ -75,7 +75,7 @@ EdRV32 SoC 是一个完整可用的边缘视觉计算平台，单个比特流同
 
 （1）全栈自研：处理器、总线、DDR 交叉开关、六类多媒体与 AI 引擎、引导程序、驱动、调度器和上位机工具均为自主设计，不使用第三方处理器 IP。第三方组件只有 LVGL 图形库、nofrendo NES 模拟器内核、CoreMark、YOLOv8n 模型，以及 PDS 的 DDR3 控制器和 PLL IP。
 
-（2）双发射 RISC-V 处理器在国产 FPGA 上达到 125 MHz、4.354 CoreMark/MHz。
+（2）双发射 RISC-V 处理器在国产 FPGA 上达到 125 MHz、4.390 CoreMark/MHz。
 
 （3）视频与界面分层、引擎间零拷贝交接，CPU 只做编排不搬数据。
 
@@ -325,37 +325,25 @@ CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为1
 
 <p align="center">图3-4 首页</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-4（.png 或 .jpg），见 图片需求.md】</span>
-
 ![图3-5 视觉识别（实时目标检测）](figures/photo3-5.png)
 
 <p align="center">图3-5 视觉识别（实时目标检测）</p>
-
-<span style="color:red">【待补实拍照片：figures/photo3-5（.png 或 .jpg），见 图片需求.md】</span>
 
 ![图3-6 检测设置（门槛与类别白名单）](figures/photo3-6.png)
 
 <p align="center">图3-6 检测设置（门槛与类别白名单）</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-6（.png 或 .jpg），见 图片需求.md】</span>
-
 ![图3-7 图片识别](figures/photo3-7.png)
 
 <p align="center">图3-7 图片识别</p>
-
-<span style="color:red">【待补实拍照片：figures/photo3-7（.png 或 .jpg），见 图片需求.md】</span>
 
 ![图3-8 图像处理（PIX/GEO 参数调节）](figures/photo3-8.png)
 
 <p align="center">图3-8 图像处理（PIX/GEO 参数调节）</p>
 
-<span style="color:red">【待补实拍照片：figures/photo3-8（.png 或 .jpg），见 图片需求.md】</span>
-
 ![图3-9 图形引擎与渲染器功能测试](figures/photo3-9.png)
 
 <p align="center">图3-9 图形引擎与渲染器功能测试</p>
-
-<span style="color:red">【待补实拍照片：figures/photo3-9（.png 或 .jpg），见 图片需求.md】</span>
 
 ![图3-10 游戏](figures/photo3-10.png)
 
@@ -375,13 +363,13 @@ CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为1
 
 ### 3.3 特性成果
 
-表3-2 汇总了主要功能和性能的上板实测结果。NPU 在 150 MHz 下完成 YOLOv8n 推理需要 41.7 ms；CPU 后处理与下一帧推理并行，实时识别帧率由 NPU 决定。视频以 720p60 输出，界面与视频分层显示。渲染引擎与软件渲染逐像素一致，LVGL benchmark 的结果见图3-14。
+表3-2 汇总了主要功能和性能的上板实测结果。NPU 在 150 MHz 下完成 YOLOv8n 推理需要 41.7 ms；CPU 后处理与下一帧推理并行，实时识别帧率由 NPU 决定。视频以 720p60 输出，界面与视频分层显示。LVGL benchmark 的16个场景结果见图3-9。图3-14的水平渐变测试中，RND与LVGL软件渲染分别耗时84 μs和1439 μs，加速比为17.13倍，像素一致率为88.19%。
 
 **表3-2 上板实测结果**
 
 | 项目 | 结果 | 条件 |
 |---|---|---|
-| CoreMark（最佳配置） | 4.354 CoreMark/MHz | GCC 15.2，-O3 等优化选项，代码和数据在 SRAM（100 MHz 板测） |
+| CoreMark（最佳实测） | 548.7 Iterations/Sec，4.390 CoreMark/MHz | 125 MHz，上板结果见图3-13 |
 | NPU 自检 | 39/39 通过，20 帧 CRC 一致 | 完整版 SoC，NPU 150 MHz |
 | YOLOv8n 推理 | 41.7 ms/帧 | NPU 150 MHz，640×384 输入，演示程序实时识别中测得 |
 | 实时识别帧率 | 【待实测】 fps | 摄像头 720p30 输入，推理与后处理并行 |
@@ -390,14 +378,14 @@ CPU子系统资源统计范围为处理器核、I$和D$，其中LUT使用量为1
 | LVGL benchmark | 【待实测】 fps（16 个场景平均） | RND 作为 LVGL 绘制后端，L1 为 ARGB8888 全屏 |
 | 连续运行 | 【待实测】 15 min 无异常 | 实时识别，摄像头输入无溢出 |
 
-![图3-13 CoreMark 跑分及性能计数器](figures/photo3-13.png)
+![图3-13 CoreMark 跑分](figures/photo3-13.png)
 
-<p align="center">图3-13 CoreMark 跑分及性能计数器</p>
+<p align="center">图3-13 CoreMark 跑分</p>
 
 
-![图3-14 渲染器功能测试与 LVGL benchmark](figures/photo3-14.png)
+![图3-14 水平渐变的硬件与软件渲染对比](figures/photo3-14.png)
 
-<p align="center">图3-14 渲染器功能测试与 LVGL benchmark</p>
+<p align="center">图3-14 水平渐变的硬件与软件渲染对比</p>
 
 
 表3-3 是最终编译配置下整个 CoreMark 运行期间的性能计数器统计。IPC 为 1.080，双发射退休占 27.5% 的周期；最主要的损失是槽 1 指令类型不被管线 1 支持（31.4%，管线 1 只执行 ALU 指令），其次是相关指令不能配对（12.4%）、load-use 停顿（7.9%）和前端断流（7.1%）；分支误预测率为 16.2%。因此，进一步提高性能的方向是让管线 1 支持分支和跳转、扩大 BTB 和 gshare。
