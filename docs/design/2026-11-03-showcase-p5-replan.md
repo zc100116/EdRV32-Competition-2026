@@ -538,3 +538,5 @@ vision fps=<n> npu=<a> wait=<b> decode=<c> sort=<d> nms=<e> post_span=<f> gui=<g
 | Rotated ARGB images / Multiple arcs | 30 / 28 | 5 / 14 | 最终版 F 的 RND 只有 5 条命令（c3fff4a3），旋转和弧线由 CPU 绘制。卡 25 用的是旧 R 比特流 |
 | Screen sized text / Widgets demo | 11 / 16 | 7 / 15 | L1 为全屏 ARGB8888，每像素字节数是卡 25（RGB565）的两倍 |
 | 平均 | 25 | 20 | |
+
+- **决定**（用户 2026-11-03 同意）：benchmark 的 `img_benchmark_lvgl_logo_rgb` 在 showcase 中改用 RGB565 版本，由 RND BLIT 绘制，与卡 25 单独测试时的图片格式一致。不改 `third_party/`，也不影响演示界面。旋转、弧线和 ARGB8888 带来的差距不处理。
