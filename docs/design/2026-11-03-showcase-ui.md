@@ -259,6 +259,7 @@
 #### 4.5.9 开发中冻结的接口（2026-11-03，回答 worker 提问）
 
 - `board/vision_hooks.h`：`uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)` 返回 DONE 的 status（0 成功、2 格式错误；kind 1/2 的 index 填 0）；`void vision_camera(void)`；`void vision_frame_presented(void)`，由 BOARD 在 LVGL 显示的 RENDER_READY 事件中调用；`extern const struct app vision_app_camera, vision_app_image, vision_app_process`，按 app.h 约定实现。
+- 模型/图片 BULK 的 DONE 时机：`vision_bulk_done` 同步检查长度和 EDNM 格式，返回非 0 时 BOARD 立即回复带该 status 的 DONE；返回 0 时 BOARD 不回复，等 vision 处理完（模型加载完成，或本张图的识别结果发完）调用 `board_bulk_complete(kind)` 后再回复 DONE(0)。DONE 之前收到新的 BULK_BEGIN，回复 DONE(status 3)。所以对图片而言，识别结果先于 DONE 到达 PC。游戏 BULK 仍然立即回复。
 - 帧槽位释放：`ui_data_vision` / `ui_data_process` 返回的图片所在槽位必须保持占用，直到有更新的图片返回给页面，并且此后至少调用过一次 `vision_frame_presented`。
 - `ui_data_process(unsigned mode)` 带模式参数；图像处理页像视觉页一样周期刷新。
 - 图片识别应用的 needs 为 NPU|ETH，CH2 由 CPU 按行切片计算，不依赖 VIN。
