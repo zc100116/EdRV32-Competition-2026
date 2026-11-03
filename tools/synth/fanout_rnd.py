@@ -44,6 +44,8 @@ def trace_loads(output):
     counts = collections.Counter(cell['type'] for cell in top['cells'].values())
     summary = {'lut6': counts['$lut'],
                'ff': sum(n for kind, n in counts.items() if 'DFF' in kind),
+               'line_ram_instances': counts['edrv32_ram_rnd_line'],
+               'palette_ram_instances': counts['edrv32_ram_rnd_palette'],
                'variable_multipliers': sum(n for kind, n in counts.items()
                                            if kind.startswith('ip_hard_mul_'))}
     (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
@@ -62,7 +64,16 @@ def main():
     (output / 'commit.txt').write_text(revision + ('' if args.revision else ' (working tree)') + '\n')
     (output / 'version.txt').write_text(subprocess.check_output(['yosys', '-V'], text=True))
     files, includes = [], set()
-    read_filelist(ROOT / 'rtl/filelists/rnd.f', files, includes)
+    if args.revision:
+        filelist = subprocess.check_output(
+            ['git', 'show', args.revision + ':rtl/filelists/rnd.f'], cwd=ROOT, text=True)
+        for line in filelist.splitlines():
+            if line.startswith('+incdir+'):
+                includes.add((ROOT / 'rtl/filelists' / line[8:]).resolve().relative_to(ROOT).as_posix())
+            elif line.strip():
+                files.append((ROOT / 'rtl/filelists' / line).resolve().relative_to(ROOT).as_posix())
+    else:
+        read_filelist(ROOT / 'rtl/filelists/rnd.f', files, includes)
     commands = []
     for name in dict.fromkeys(files):
         source = (subprocess.check_output(['git', 'show', args.revision + ':' + name],

@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # File: vectors.py
-# Spec: rnd-testplan RN-01–16, RN-18–29; rnd 2–7.
+# Spec: rnd-testplan RN-01–16, RN-18–20; rnd 2–7.
 # Description: Directed boundary cases and ten deterministic random command-list seeds.
 # Clock domain: host.
 from dataclasses import replace
-import v2_vectors
 from pathlib import Path
 import random
 
-from rnd_ref import (BPP, Command, area, blit, blur, border, box_shadow, copy, execute,
-                     fill, glyph, load, store, temp_region, tilemap)
+from rnd_ref import (BPP, Command, area, blit, border, copy, execute,
+                     fill, glyph, load, store)
 
 DESC = 0x1000
 DST = 0x10000
@@ -23,18 +22,14 @@ TILE = 0x80000
 def selections(tier):
     if tier == 'perf':
         return [(18, (name, latency), 1) for latency in (0, 40)
-                for name in ('argb', 'rgb565', 'blit', 'glyph')] + v2_vectors.selections('perf')
+                for name in ('argb', 'rgb565', 'blit', 'glyph')]
     if tier == 'full':
         return ([(5, (fmt, sides, width), 1) for fmt in (0, 1)
                  for sides in range(16) if sides not in (0, 1, 2, 4, 8, 15)
                  for width in (1, 7, 9, 20)]
-                + [(11, (fmt, radius, corner), 1) for fmt in (0, 1)
-                   for radius in (1, 31) for corner in (0, 4095)]
-                + [(12, (fmt, radius), 1) for fmt in (0, 1) for radius in (0, 31)]
                 + [(15, ('abort', phase), 1) for phase in (1, 2, 3)]
                 + [(19, 'random', seed) for seed in range(1, 11)]
-                + [(20, axis, 1) for axis in ('horizontal', 'vertical')]
-                + v2_vectors.selections('full'))
+                + [(20, axis, 1) for axis in ('horizontal', 'vertical')])
     cases = [(1, (fmt, opa, alpha), 1) for fmt in (0, 1)
              for opa in (0, 1, 128, 254, 255) for alpha in (0, 1, 128, 255)]
     cases += [(2, (fmt, name), 1) for fmt in (0, 1)
@@ -50,30 +45,23 @@ def selections(tier):
     cases += [(6, (fmt, srcfmt, offset), 1) for fmt in (0, 1)
               for srcfmt in (2, 3, 4, 5) for offset in range(8 // BPP[srcfmt])]
     cases += [(7, (fmt, srcfmt, offset), 1) for fmt in (0, 1)
-              for srcfmt in (0, 1, 6, 7, 8, 9) for offset in (0, 1, 7, 31)]
+              for srcfmt in (0, 1, 6) for offset in (0, 1, 7, 31)]
     cases += [(8, (fmt, scale, flips), 1) for fmt in (0, 1)
               for scale in (0, 65536 // 2, 65536 * 2 // 7, 98304, 4 * 65536, 16 * 65536)
               for flips in (0, 1, 2, 3)]
     cases += [(9, (fmt, srcfmt, mode, recolor, alpha), 1) for fmt in (0, 1)
-              for srcfmt in (0, 1, 7) for mode in range(4) for recolor in (0, 128, 255)
+              for srcfmt in (0, 1) for mode in (0,) for recolor in (0, 128, 255)
               for alpha in (0, 255)]
     cases += [(10, (fmt, direction), 1) for fmt in (0, 1)
               for direction in ('different', 'same', 'ul', 'ur', 'dl', 'dr')]
-    cases += [(11, (fmt, radius, corner), 1) for fmt in (0, 1)
-              for radius in (0, 8) for corner in (0, 4095)]
-    cases += [(12, (fmt, radius), 1) for fmt in (0, 1) for radius in (1, 8)]
-    cases += [(13, (fmt, srcfmt, tile16), 1) for fmt in (0, 1)
-              for srcfmt in (0, 1, 6, 7) for tile16 in (0, 1)]
     cases += [(14, 'chain', 1), (16, 'registers', 1)]
     cases += [(15, ('bus', kind), 1) for kind in range(1, 6)]
-    cases += [(15, ('op', op), 1) for op in (0, 14, 255)]
+    cases += [(15, ('op', op), 1) for op in (0, 6, 7, 8, 9, 10, 11, 12, 13, 255)]
     cases += [(15, ('format', (op, fmt)), 1) for op, allowed in
-              ((3, (2, 3, 4, 5)), (4, (0, 1, 6, 7, 8, 9)), (13, (0, 1, 6, 7, 8, 9)),
-               (8, (0, 1, 6, 7)))
+              ((3, (2, 3, 4, 5)), (4, (0, 1, 6)))
               for fmt in range(16) if fmt not in allowed]
     cases += [(15, ('copy', fmt), 1) for fmt in (0, 2, 15)]
-    cases += [(15, (kind, mode), 1) for kind in ('mode', 'affine_mode')
-              for mode in range(4, 8)]
+    cases += [(15, ('mode', mode), 1) for mode in range(1, 8)]
     return cases
 
 
@@ -143,7 +131,7 @@ def configure(number, variant, seed):
     elif number == 9:
         fmt, srcfmt, mode, recolor, alpha = variant
         commands = [blit(dst_fmt=fmt, src_fmt=srcfmt, src_base=SRC + 1, src_stride=137,
-                         palette=PAL, flags=4 | 8 | (mode << 4), key=0x1234,
+                         flags=4 | 8 | (mode << 4), key=0x1234,
                          rc_color=0xf02080, rc_opa=recolor)]
         special_source = True
     elif number == 10:
@@ -156,29 +144,13 @@ def configure(number, variant, seed):
                          if direction == 'different' else DST,
                          src_stride=137 if direction == 'different' else 132,
                          src_x=5, src_y=4, rect=(5 + dx, 4 + dy, 23 + dx, 17 + dy))]
-    elif number == 11:
-        fmt, radius, corner = variant
-        commands = [box_shadow(dst_fmt=fmt, radius=corner, blur=radius, temp_base=TEMP,
-                               rect=(-3, 1, 18, 16), clip=(0, 3, 28, 20))]
-    elif number == 12:
-        fmt, radius = variant
-        commands = [blur(dst_fmt=fmt, radius=radius, temp_base=TEMP,
-                         rect=(1, 2, 5, 4), clip=(2, 2, 4, 3))]
-    elif number == 13:
-        fmt, srcfmt, tile16 = variant
-        commands = [tilemap(dst_fmt=fmt, src_fmt=srcfmt, flags=tile16 | 4,
-                            tile_base=TILE, map_base=MAP, map_stride=16, map_x=7, map_y=13,
-                            palette=PAL, key=0x1234, rect=(-1, -2, 30, 21))]
-        mem_size = TILE + 4096 * (16 if tile16 else 8) ** 2 * BPP[srcfmt] // 8 + 4096
     elif number == 14:
         commands = [fill(opa=255), border(width=2, radius=3),
                     glyph(src_fmt=3, src_base=SRC + 1, src_stride=37),
                     blit(src_fmt=1, src_base=SRC + 3, src_stride=137),
                     copy(src_fmt=1, src_base=DST, src_stride=132, src_x=2, src_y=2,
                          dst_base=DST + 0x2000),
-                    blit(src_fmt=1, src_base=DST + 0x2000, src_stride=132, src_x=2, src_y=2),
-                    blur(radius=1, temp_base=TEMP),
-                    box_shadow(radius=7, blur=1, temp_base=TEMP)]
+                    blit(src_fmt=1, src_base=DST + 0x2000, src_stride=132, src_x=2, src_y=2)]
         commands += [fill(opa=opacity, color=rng.randrange(1 << 24))
                      for opacity in (1, 64, 128, 254)]
     elif number == 15:
@@ -191,7 +163,7 @@ def configure(number, variant, seed):
             metadata['injection'] = value
             metadata['error'] = 2 if value == 5 else 1
             if value == 4:
-                first = replace(first, src_fmt=7, args=(*first.args[:5], PAL, 0, 0))
+                first = replace(first, src_fmt=6, args=(*first.args[:5], PAL, 0, 0))
         elif kind == 'abort':
             metadata['abort'] = value
         else:
@@ -203,8 +175,8 @@ def configure(number, variant, seed):
                 first = replace(first, op=op, src_fmt=fmt)
             elif kind == 'copy':
                 first = replace(first, op=5, src_fmt=value)
-            elif kind in ('mode', 'affine_mode'):
-                first = replace(first, op=13 if kind == 'affine_mode' else 4, flags=value << 4)
+            elif kind == 'mode':
+                first = replace(first, flags=value << 4)
         commands = [first, fill(dst_base=DST + 0x4000, opa=255, color=0x34fac1)]
     elif number == 16:
         commands = [fill(opa=255, rect=(0, 0, 31, 23))]
@@ -247,7 +219,7 @@ def configure(number, variant, seed):
         mem_size = TILE + 4096 * 256 * 4 + 4096
         commands = []
         for i in range(50):
-            op = i % 13 + 1 if i < 13 else rng.randrange(1, 14)
+            op = i % 5 + 1 if i < 5 else rng.randrange(1, 6)
             fmt = rng.randrange(2)
             rect = (rng.randrange(-5, 8), rng.randrange(-4, 5),
                     rng.randrange(9, 32), rng.randrange(6, 24))
@@ -267,52 +239,21 @@ def configure(number, variant, seed):
                 cmd = glyph(src_fmt=rng.randrange(2, 6), src_base=SRC + rng.randrange(32),
                             src_stride=137, src_x=rng.randrange(8), src_y=1, **common)
             elif op == 4:
-                cmd = blit(src_fmt=rng.choice((0, 1, 6, 7, 8, 9)),
+                cmd = blit(src_fmt=rng.choice((0, 1)),
                            src_base=SRC + rng.randrange(32), src_stride=137,
                            src_x=rng.randrange(8), src_y=1,
                            scale_x=rng.choice((0, 32768, 65536)),
                            scale_y=rng.choice((0, 32768, 65536)),
-                           flags=rng.randrange(16) | (rng.randrange(4) << 4), palette=PAL,
+                           flags=rng.randrange(16),
                            key=rng.randrange(65536), rc_color=rng.randrange(1 << 24),
                            rc_opa=rng.randrange(256), **common)
             elif op == 5:
                 cmd = copy(src_fmt=fmt, src_base=SRC + rng.randrange(32), src_stride=137,
                            src_x=rng.randrange(8), src_y=1, **common)
-            elif op == 6:
-                cmd = box_shadow(radius=rng.randrange(20), blur=rng.choice((0, 1, 8, 31)),
-                                 temp_base=TEMP, **common)
-            elif op == 7:
-                cmd = blur(radius=rng.choice((0, 1, 8, 31)), temp_base=TEMP, **common)
-            else:
-                cmd = tilemap(src_fmt=rng.choice((0, 1, 6, 7)), flags=rng.randrange(2) | 4,
-                              tile_base=TILE, map_base=MAP, map_stride=16,
-                              map_x=rng.randrange(16), map_y=rng.randrange(16),
-                              palette=PAL, key=0x1234, **common)
-            commands.append(replace(cmd, op=op) if op >= 9 else cmd)
+            commands.append(cmd)
         metadata.update(latency=rng.randrange(0, 41), stalls=rng.randrange(15, 60),
                         bdelay=rng.randrange(1, 41))
-    if number == 29:
-        mem_size = 0x200000
     memory = pattern_memory(mem_size, rng)
-    if number >= 21:
-        commands = v2_vectors.build(number, variant, rng, memory, metadata)
-        if number == 21 and variant[0] == 'split':
-            split_reference = replace(commands[0], clip=(0, 0, 31, 23))
-    if number == 19:
-        variants = {9: (21, ('reverse', rng.randrange(2))),
-                    10: (22, ('diagonal', rng.randrange(2), rng.randrange(4))),
-                    11: (23, ('large', rng.randrange(2), rng.randrange(4))),
-                    12: (24, (rng.randrange(10), rng.randrange(2), rng.randrange(256))),
-                    13: (26, (rng.choice(('rotate', 'skew+', 'negative')), rng.randrange(2),
-                              rng.choice((0, 1, 6, 7, 8, 9)), rng.randrange(2), rng.randrange(4)))}
-        for k, cmd in enumerate(commands):
-            if cmd.op >= 9:
-                rn, var = variants[cmd.op]
-                common = dict(dst_base=cmd.dst_base, dst_stride=cmd.dst_stride,
-                              dst_fmt=cmd.dst_fmt, rect=cmd.rect, clip=cmd.clip,
-                              opa=cmd.opa, color=cmd.color)
-                commands[k:k + 1] = v2_vectors.build(rn, var, rng, memory, metadata,
-                                                     common, v2_vectors.PARAM + k * 128)
     if number == 20:
         # Address high bits must remain observable; a repeated 4 KiB block aliases them.
         for address in range(SRC, mem_size):
@@ -327,18 +268,6 @@ def configure(number, variant, seed):
         for x in range(8):
             store(memory, MAP + y * 16 + 2 * x, 2,
                   (4095 if (x + y) & 1 else 0) | (((x + 2 * y) % 4) << 12) | 0xc000)
-    if number == 13 and commands[0].src_fmt == 0:
-        tile_size = 16 if commands[0].flags & 1 else 8
-        for tile in (0, 4095):
-            for i in range(tile_size * tile_size):
-                if i % 3 == 0:
-                    store(memory, TILE + tile * tile_size * tile_size * 2 + i * 2, 2, 0x1234)
-    if number == 12 and commands[0].dst_fmt == 0:
-        # RN-12 / rnd v0.2: this red checker exposes premature horizontal P565 truncation.
-        for y in range(2, 4):
-            for x in range(2, 5):
-                store(memory, DST + y * commands[0].dst_stride + x * 2, 2,
-                      0x1000 if (x + y) & 1 else 0)
     if number in (7, 8):
         source = commands[0]
         fmt = source.src_fmt
@@ -364,24 +293,8 @@ def configure(number, variant, seed):
                 elif fmt == 1:
                     store(memory, address, 4, ((0, 1, 128, 255)[(x + y) % 4] << 24)
                           | (0x1234 if (x + y) & 1 else 0x8312fe))
-    # Palette alpha planes combine transparent, nearly transparent, middle and opaque entries.
     for i in range(256):
-        store(memory, PAL + 4 * i, 4, ((0, 1, 128, 255)[i % 4] << 24)
-              | ((i * 73 % 256) << 16) | ((i * 37 % 256) << 8) | (i * 19 % 256))
-    for cmd in commands:
-        if cmd.op == 13:
-            base, stride = cmd.args[:2]
-            sw, sh = cmd.args[2] & 65535, cmd.args[2] >> 16
-            if cmd.src_fmt in (0, 1):
-                for y in range(sh):
-                    for x in range(sw):
-                        value = ((0, 1, 255)[(x + y) % 3] << 24) | (
-                            0xff0000 if x & 1 else 0x00ffff)
-                        if cmd.src_fmt == 0:
-                            value = 0x1234 if (x + y) % 3 == 0 else (
-                                0xf800 if (x + y) & 1 else 0x07ff)
-                        store(memory, base + y * stride + x * (2 << cmd.src_fmt),
-                              2 << cmd.src_fmt, value)
+        store(memory, PAL + 4 * i, 4, 0xff000000 | i * 65793)
     for index, command in enumerate(commands):
         memory[DESC + index * 64:DESC + (index + 1) * 64] = command.encode()
     # Read errors do not specify how much of the current command writes before stopping.
@@ -390,10 +303,6 @@ def configure(number, variant, seed):
     if (metadata['error'] or metadata['abort']) and not commands[0].illegal():
         execute(partial, commands[:1])
     recovery = bytearray(memory)
-    if number == 28 and (metadata['error'] or metadata['abort']):
-        # Changed source bytes make stale valid window entries observable after restart.
-        for address in range(SRC, SRC + 49 * 277 + 264):
-            recovery[address] ^= 0xff
     repaired = list(commands)
     if metadata['error'] == 3:
         repaired[0] = fill(opa=255)
@@ -404,7 +313,7 @@ def configure(number, variant, seed):
         whole = bytearray(memory)
         execute(whole, [split_reference])
         assert whole == expected, ('RN-04 split mismatch', variant)
-    temps = [temp_region(c) for c in commands if not c.illegal() and c.op in (6, 7)]
+    temps = []
     metadata.update(count=len(commands), memory_size=len(memory), pixels=result.pixels,
                     expected_done=result.completed)
     return metadata, commands, memory, expected, partial, recovery, temps

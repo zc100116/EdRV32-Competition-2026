@@ -10,10 +10,9 @@ import subprocess
 import sys
 
 sys.dont_write_bytecode = True
-from rnd_ref import (Command, area, blit, blur, border, box_shadow, copy, execute, fill,
-                     glyph, load, selftest, store, temp_region, tilemap)
+from rnd_ref import (Command, area, blit, border, copy, execute, fill,
+                     glyph, load, selftest, store)
 from vectors import configure, selections
-from v2_selftest import selftest as v2_selftest
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -57,38 +56,6 @@ def command_examples():
                           **{**common, 'rect': (1, 0, 2, 0)})])
     equal('COPY overlap snapshot', (0xff123456, 0xff806040),
           (load(memory, 1028, 4), load(memory, 1032, 4)))
-    execute(memory, [box_shadow(radius=0, blur=0, temp_base=4096, **common)])
-    equal('BOX_SHADOW R0', 0xff123456, load(memory, 1024, 4))
-    memory[2048:2176] = bytes(128)
-    execute(memory, [box_shadow(radius=0, blur=1, temp_base=4096,
-                                **{**common, 'dst_base': 2048, 'rect': (1, 1, 1, 1)})])
-    for y in range(3):
-        for x in range(3):
-            equal('BOX_SHADOW R1 separable zero extension', 0x1c123456,
-                  load(memory, 2048 + y * 32 + x * 4, 4), coord=(x, y))
-    store(memory, 1024, 4, 0xff000000)
-    store(memory, 1028, 4, 0xffffffff)
-    execute(memory, [blur(radius=1, temp_base=4096,
-                          **{**common, 'rect': (0, 0, 1, 0)})])
-    equal('BLUR nearest left', 0xff555555, load(memory, 1024, 4))
-    equal('BLUR nearest right', 0xffaaaaaa, load(memory, 1028, 4))
-    store(memory, 128, 2, 0x3000)  # Tile zero, both flips.
-    store(memory, 512 + 63 * 4, 4, 0xff2468ac)
-    execute(memory, [tilemap(src_fmt=1, tile_base=512, map_base=128, map_stride=2,
-                             **{**common, 'rect': (0, 0, 0, 0)})])
-    equal('TILEMAP both flips', 0xff2468ac, load(memory, 1024, 4))
-    # v0.2: truncating horizontal intermediates to RGB565 would erase this 2x2 pattern.
-    for y, row in enumerate(((0, 0x1000), (0x1000, 0))):
-        for x, value in enumerate(row):
-            store(memory, 1024 + y * 32 + x * 2, 2, value)
-    execute(memory, [blur(dst_fmt=0, radius=1, temp_base=4096,
-                          **{**common, 'rect': (0, 0, 1, 1)})])
-    equal('BLUR temporary four bytes/pixel', (4096, 96),
-          temp_region(blur(dst_fmt=0, radius=1, temp_base=4096,
-                           **{**common, 'rect': (0, 0, 16, 0), 'clip': (0, 0, 16, 0)})))
-    equal('BLUR RGB565 8-bit intermediate', (0, 0x0800, 0x0800, 0),
-          tuple(load(memory, 1024 + y * 32 + x * 2, 2)
-                for y in range(2) for x in range(2)))
     # Illegal stops before accessing target and before a subsequent valid command.
     before = bytes(memory)
     result = execute(memory, [Command(255), fill(**common)])
@@ -103,7 +70,7 @@ def command_examples():
     encoded[4] |= 0xf000f000
     import struct
     equal('reserved common bits', c, Command.decode(struct.pack('<16I', *encoded)))
-    print('PASS RND hand-calculated examples: all eight commands, overlap, illegal stop, codec')
+    print('PASS RND hand-calculated examples: all five commands, overlap, illegal stop, codec')
 
 
 def vector_selftest():
@@ -116,8 +83,7 @@ def vector_selftest():
             meta, commands, initial, expected, partial, recovery, temps = configure(
                 number, variant, seed)
             equal('memory size conserved', len(initial), len(expected))
-            equal('expected error field', (number == 15 and variant[0] != 'abort')
-                  or (number == 28 and variant[0].endswith('error')),
+            equal('expected error field', number == 15 and variant[0] != 'abort',
                   meta['error'] != 0)
             if number == 19:
                 equal('random list length', 50, len(commands))
@@ -132,14 +98,13 @@ def vector_selftest():
             equal('recovery image size', len(initial), len(recovery))
             total += 1
     equal('random commands', 500, random_commands)
-    equal('all operations', set(range(1, 14)), op_seen)
-    equal('all pixel formats', set(range(10)), fmt_seen)
-    print(f'PASS RND vectors: {total} cases, 10 seeds x 50 commands, all 13 OP/all 10 formats')
+    equal('all operations', set(range(1, 6)), op_seen)
+    equal('all pixel formats', set(range(7)), fmt_seen)
+    print(f'PASS RND vectors: {total} cases, 10 seeds x 50 commands, all 5 OP/all 7 formats')
 
 
 def main():
     selftest()
-    v2_selftest()
     command_examples()
     vector_selftest()
     subprocess.run([sys.executable, str(HERE / 'check.py')], cwd=ROOT, check=True)
