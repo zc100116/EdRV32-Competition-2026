@@ -8,7 +8,7 @@ void ui_page_games(lv_obj_t *p)
     const ui_game_t *games = ui_data_games(&count);
     ui_title(p, "游戏");
     ui_hint("← → 选择    Enter 确认    Esc 返回    游戏中按返回退出");
-    if(ui_game_open) {
+    if(ui_game_active()) {
         lv_obj_t *card = ui_box(p, 40, 132, 1200, 460, PANEL);
         const lv_image_dsc_t *name_image=ui_data_game_name(ui_mode);
         if(name_image) {

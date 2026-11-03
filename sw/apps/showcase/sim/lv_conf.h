@@ -28,15 +28,15 @@
 #define LV_USE_ARCLABEL 0
 #define LV_USE_BAR 1
 #define LV_USE_BARCODE 0
-#define LV_USE_BUTTON 0
+#define LV_USE_BUTTON 1
 #define LV_USE_BUTTONMATRIX 1 /* LVGL 9.6 Windows 驱动 IME 引用。 */
 #define LV_USE_CALENDAR 0
 #define LV_USE_CALENDAR_HEADER_ARROW 0
 #define LV_USE_CALENDAR_HEADER_DROPDOWN 0
 #define LV_USE_CALENDAR_CHINESE 0
 #define LV_USE_CANVAS 0
-#define LV_USE_CHECKBOX 0
-#define LV_USE_DROPDOWN 0
+#define LV_USE_CHECKBOX 1
+#define LV_USE_DROPDOWN 1
 #define LV_USE_FFMPEG 0
 #define LV_USE_GIF 0
 #define LV_USE_GLTF 0
@@ -59,7 +59,7 @@
 #define LV_USE_SPAN 0
 #define LV_USE_SPINBOX 0
 #define LV_USE_SPINNER 0
-#define LV_USE_SWITCH 0
+#define LV_USE_SWITCH 1
 #define LV_USE_TEXTAREA 1 /* LVGL 9.6 Windows 驱动 IME 引用。 */
 #define LV_USE_TABLE 0
 #define LV_USE_TABVIEW 0

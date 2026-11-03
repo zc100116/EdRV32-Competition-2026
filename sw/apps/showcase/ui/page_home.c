@@ -19,7 +19,7 @@ void ui_page_home(lv_obj_t *p)
         ui_button(p, "", 40 + (int)(i % 4) * 306, 133 + (int)(i / 4) * 238, 282, i + 1);
         lv_obj_t *card = lv_obj_get_child(p, -1);
         lv_obj_set_height(card, 216);
-        if(!enabled) lv_obj_set_style_bg_color(card, lv_color_hex(DISABLED), 0);
+        if(!enabled) lv_obj_add_state(card,LV_STATE_DISABLED);
         uint32_t ink = enabled ? ACCENT : MUTED;
         ui_label(card, icons[i], 24, 22, &sim_font_40, ink);
         ui_label(card, names[i], 24, 89, &sim_font_28, enabled ? TEXT : MUTED);

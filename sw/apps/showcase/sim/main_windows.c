@@ -42,7 +42,6 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previous, LPSTR command, int sh
             (GetAsyncKeyState(VK_F1) & 1)) {
             lv_lock();
             sim_data_toggle_hardware();
-            ui_game_open = false;
             ui_tab = 0;
             ui_open(0);
             lv_unlock();

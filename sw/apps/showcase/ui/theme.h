@@ -11,8 +11,8 @@
 #define LINE 0xd6e0ec
 #define TEXT 0x152b45
 #define MUTED 0x61748b
-#define ACCENT 0x2468df
-#define TEAL 0x168d8f
+#define ACCENT 0x2563EB
+#define TEAL 0x0D9488
 #define DISABLED 0xe4e9f0
 LV_FONT_DECLARE(sim_font_14);
 LV_FONT_DECLARE(sim_font_16);
@@ -35,6 +35,7 @@ void ui_open(unsigned page);
 void ui_key(uint32_t key);
 void ui_back(void);
 void ui_monitor_init(void);
+void ui_monitor_controls(void);
 void ui_monitor_toggle(void);
 void ui_monitor_corner(void);
 bool ui_monitor_visible(void);
@@ -64,6 +65,11 @@ void ui_vision_build(lv_obj_t *p, bool batch);
 extern unsigned ui_page;
 extern unsigned ui_tab;
 extern unsigned ui_mode;
-extern bool ui_game_open;
+bool ui_game_active(void);
+void ui_control(lv_obj_t *obj);
+void ui_control_style(lv_obj_t *obj);
+lv_obj_t *ui_switch(lv_obj_t *p, int x, int y);
+lv_obj_t *ui_dropdown(lv_obj_t *p, int x, int y, int w, const char *options);
+lv_obj_t *ui_slider(lv_obj_t *p, int x, int y, int w, int low, int high);
 extern bool ui_detection_settings;
 #endif

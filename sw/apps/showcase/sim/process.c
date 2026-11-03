@@ -72,28 +72,33 @@ const lv_image_dsc_t *sim_process_image(const ui_process_config_t *config)
         uint32_t value = 0;
         for (unsigned shift = 0; shift <= 16; shift += 8) {
             int c = (p >> shift) & 255;
-            c = clamp(((c-128)*config->contrast >> 8) + 128 + config->brightness);
-            value |= (uint32_t)gamma[c] << shift;
+            if(config->enabled&UI_PROC_LEVEL)
+                c = clamp(((c-128)*config->contrast >> 8) + 128 + config->brightness);
+            value |= (uint32_t)((config->enabled&UI_PROC_GAMMA) ? gamma[c] : c) << shift;
         }
         rgb[0][y*1280+x] = config->original ? p : value;
     }
     unsigned bank = 0;
     if (!config->original) {
-        if (config->stage1) { stage(rgb[1], rgb[0], config->stage1); bank = 1; }
-        if (config->stage2) { stage(rgb[bank^1], rgb[bank], config->stage2); bank ^= 1; }
+        if (config->enabled&UI_PROC_S1) { stage(rgb[1], rgb[0], config->stage1); bank = 1; }
+        if (config->enabled&UI_PROC_S2) {
+            stage(rgb[bank^1], rgb[bank], config->stage2); bank ^= 1;
+        }
         for (unsigned i = 0; i < 1280*720; ++i) {
             uint32_t p = rgb[bank][i];
-            if (config->gray) p = (uint32_t)gray(p) * 0x010101;
-            if (config->binary) p = gray(p) >= config->threshold ? 0xffffff : 0;
-            if (config->invert) p ^= 0xffffff;
+            if (config->enabled&UI_PROC_GRAY) p = (uint32_t)gray(p) * 0x010101;
+            if (config->enabled&UI_PROC_BINARY) p = gray(p) >= config->threshold ? 0xffffff : 0;
+            if (config->enabled&UI_PROC_INVERT) p ^= 0xffffff;
             rgb[bank][i] = expand(pack(p));
         }
     }
     int32_t m[6];
-    geo_matrix(m, config->original ? 0 : config->angle,
-        config->original ? 100 : config->scale_percent,
-        config->original ? 0 : config->translate_x, config->original ? 0 : config->translate_y,
-        !config->original && config->mirror_x, !config->original && config->mirror_y, 1280, 720);
+    geo_matrix(m, !config->original && (config->enabled&UI_PROC_ROTATE) ? config->angle : 0,
+        !config->original && (config->enabled&UI_PROC_SCALE) ? config->scale_percent : 100,
+        !config->original && (config->enabled&UI_PROC_TRANSLATE) ? config->translate_x : 0,
+        !config->original && (config->enabled&UI_PROC_TRANSLATE) ? config->translate_y : 0,
+        !config->original && (config->enabled&UI_PROC_MIRROR_X),
+        !config->original && (config->enabled&UI_PROC_MIRROR_Y),1280,720);
     for (unsigned y = 0; y < 720; ++y) for (unsigned x = 0; x < 1280; ++x) {
         int32_t sx = (int32_t)((int64_t)m[0]*x + (int64_t)m[1]*y + m[2]);
         int32_t sy = (int32_t)((int64_t)m[3]*x + (int64_t)m[4]*y + m[5]);
@@ -116,8 +121,8 @@ const lv_image_dsc_t *sim_process_image(const ui_process_config_t *config)
 }
 const lv_image_dsc_t *sim_l0_image(void)
 {
-    if (ui_page == 1) return ui_data_vision(false).image;
-    if (ui_page == 2) return ui_data_vision(true).image;
+    if (ui_page == 1) return ui_data_vision().image;
+    if (ui_page == 2) return ui_data_vision().image;
     if (ui_page == 3) return ui_data_process(0);
     return NULL;
 }

@@ -10,9 +10,11 @@
 extern const lv_image_dsc_t sim_street;
 extern const lv_image_dsc_t sim_indoor;
 static unsigned hardware = UI_ALL;
-static bool paused;
+static ui_session_t session={.peer=true};
+static unsigned session_tick;
+static int image_direction;
+static int image_override=-1;
 static bool boxes = true;
-static bool waiting;
 static unsigned paused_second;
 static unsigned benchmark_start;
 static bool benchmarking;
@@ -43,15 +45,52 @@ ui_system_t ui_data_system(void)
     }
     return d;
 }
-ui_vision_t ui_data_vision(bool batch)
+ui_session_t ui_data_session(void)
 {
+    if((session.state==UI_STATE_STARTING || session.state==UI_STATE_STOPPING) &&
+        lv_tick_get()-session_tick>=100) {
+        session.state=session.state==UI_STATE_STARTING ? UI_STATE_RUNNING : UI_STATE_IDLE;
+    }
+    if(session.app==UI_APP_COREMARK && core_started && lv_tick_get()-core_start>=5000)
+        session.state=UI_STATE_IDLE;
+    return session;
+}
+void ui_data_app_open(ui_app_t app,unsigned arg)
+{
+    (void)arg;
+    session=(ui_session_t){.app=app,.state=app ? UI_STATE_STARTING : UI_STATE_IDLE,.peer=true};
+    session_tick=lv_tick_get();
+    if(app==UI_APP_COREMARK) ui_data_coremark_start();
+}
+void ui_data_app_pause(bool pause)
+{
+    session.state=pause ? UI_STATE_PAUSED : UI_STATE_RUNNING;
+    if(pause) paused_second=lv_tick_get()/1000;
+}
+void ui_data_app_retry(void)
+{ session.state=UI_STATE_STARTING; session.error=NULL; session_tick=lv_tick_get(); }
+void sim_data_session(ui_app_t app,ui_state_t state,const char *error)
+{ session=(ui_session_t){app,state,error,true}; session_tick=lv_tick_get(); }
+void sim_data_image_status(int status) { image_override=status; }
+void ui_data_image_step(int direction)
+{
+    ui_image_status_t status=ui_data_vision().image_status;
+    if(status==UI_IMAGE_RECEIVING || status==UI_IMAGE_DETECTING) return;
+    image_direction+=direction; image_override=-1;
+}
+ui_vision_t ui_data_vision(void)
+{
+    bool batch=session.app==UI_APP_IMAGE;
+    bool paused=session.state==UI_STATE_PAUSED;
     unsigned second = paused && !batch ? paused_second : lv_tick_get() / 1000;
     ui_vision_t d = {.image = batch ? &sim_indoor : &sim_street,
         .fps = 24 + second % 2, .npu_tenths = 410 + second % 7,
         .post_tenths = 23 + second % 4, .count = batch ? 5 : 4,
-        .paused = paused, .boxes = batch || boxes, .waiting = batch && waiting,
-        .batch_index = 1 + second / 3 % 24, .batch_total = 24,
-        .success = second / 3 % 24, .failed = 0, .roundtrip = 63 + second % 5};
+        .boxes = boxes, .latency_tenths=713+second%5,
+        .image_name="street-001.png",.image_index=1+(unsigned)(image_direction+24)%24,
+        .image_total=24,.roundtrip_ms=263+second%5,
+        .image_status=image_override<0 ? (ui_image_status_t)(second%5) :
+            (ui_image_status_t)image_override};
     const unsigned street[]={0,1,2,2,9},indoor[]={16,57,60,41,58};
     int street_rect[5][4] = {{120, 177, 116, 300}, {338, 177, 110, 225},
         {460, 215, 155, 92}, {638, 220, 310, 143}, {770, 60, 50, 100}};
@@ -69,23 +108,25 @@ ui_vision_t ui_data_vision(bool batch)
     ui_detection_filter(&d,raw,d.count);
     return d;
 }
-void ui_data_pause(void)
-{
-    paused = !paused;
-    if(paused) paused_second = lv_tick_get() / 1000;
-}
-void ui_data_boxes(void) { boxes = !boxes; }
-void ui_data_batch_stop(void) { waiting = true; }
-static ui_process_config_t process = {.contrast = 256, .gamma_tenths = 10,
-    .threshold = 128, .scale_percent = 100};
+void ui_data_boxes(void) { boxes=!boxes; }
+static ui_process_config_t process={.contrast=256,.gamma_tenths=10,.stage1=2,.stage2=2,
+    .threshold=128,.scale_percent=100};
 ui_process_config_t ui_data_process_config(void) { return process; }
-void ui_data_process_set(const ui_process_config_t *config) { process = *config; }
-void ui_data_process_defaults(void)
+void ui_data_process_set(const ui_process_config_t *config) { process=*config; }
+void ui_data_process_defaults(uint32_t stages)
 {
-    process = (ui_process_config_t){.contrast = 256, .gamma_tenths = 10,
-        .threshold = 128, .scale_percent = 100};
+    if(stages&UI_PROC_LEVEL) { process.brightness=0; process.contrast=256; }
+    if(stages&UI_PROC_GAMMA) process.gamma_tenths=10;
+    if(stages&UI_PROC_S1) process.stage1=2;
+    if(stages&UI_PROC_S2) process.stage2=2;
+    if(stages&UI_PROC_BINARY) process.threshold=128;
+    if(stages&UI_PROC_ROTATE) process.angle=0;
+    if(stages&UI_PROC_SCALE) process.scale_percent=100;
+    if(stages&UI_PROC_TRANSLATE) { process.translate_x=0; process.translate_y=0; }
+    if(stages==UI_PROC_ALL) { process.enabled=0; process.original=false; }
 }
-const lv_image_dsc_t *ui_data_process(unsigned mode) { (void)mode; return sim_process_image(&process); }
+const lv_image_dsc_t *ui_data_process(unsigned mode)
+{ (void)mode; return sim_process_image(&process); }
 /* Card 46 values supplied by coordinator. Software-off comparison is a fixed
  * estimated workload, as authorized for P2; P3 replaces it with board data. */
 static const ui_benchmark_t benchmark[] = {

@@ -5,14 +5,12 @@
 #include "renderer.h"
 static lv_obj_t *progress;
 static lv_obj_t *benchmark_back;
-static void stop_clicked(lv_event_t *e) { (void)e; ui_data_benchmark_stop(); }
 void ui_benchmark_controls(bool show)
 {
     if(show) {
-        benchmark_back=ui_box(lv_layer_sys(),8,8,124,36,PANEL);
-        ui_label(benchmark_back,"‹ 返回",14,8,&sim_font_16,ACCENT);
-        lv_obj_set_clickable(benchmark_back,true);
-        lv_obj_add_event_cb(benchmark_back,stop_clicked,LV_EVENT_CLICKED,NULL);
+        ui_button(lv_layer_sys(),"‹ 返回",8,8,124,1004);
+        benchmark_back=lv_obj_get_child(lv_layer_sys(),-1);
+        lv_obj_set_height(benchmark_back,36);
     } else {
         lv_obj_delete(benchmark_back); benchmark_back=NULL;
     }
@@ -61,7 +59,10 @@ void ui_page_graphics(lv_obj_t *p)
 {
     ui_title(p,"图形引擎");
     const char *tabs[]={"LVGL benchmark","渲染器功能测试"};
-    for(unsigned i=0;i<2;++i) ui_button(p,tabs[i],40+(int)i*280,104,260,i);
+    for(unsigned i=0;i<2;++i) {
+        ui_button(p,tabs[i],40+(int)i*280,104,260,i);
+        if(i==ui_tab) lv_obj_add_state(lv_obj_get_child(p,-1),LV_STATE_CHECKED);
+    }
     progress=NULL;
     if(ui_tab==1) {
         if(ui_mode) { result(p,ui_mode-1); return; }

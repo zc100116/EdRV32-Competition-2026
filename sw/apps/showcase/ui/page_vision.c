@@ -8,10 +8,13 @@ static lv_obj_t *metrics[4];
 static lv_obj_t *counts[5];
 static lv_obj_t *confidence[5];
 static lv_obj_t *bars[5];
-static lv_obj_t *batch_status;
+static lv_obj_t *image_status;
 static lv_obj_t *pause_label;
 static lv_obj_t *box_label;
 static lv_obj_t *filter_label;
+static lv_obj_t *previous_button, *next_button, *box_switch;
+static void boxes_changed(lv_event_t *e)
+{ (void)e; ui_data_boxes(); ui_refresh(); }
 void ui_vision_build(lv_obj_t *p, bool batch)
 {
     ui_video_surface(p);
@@ -42,10 +45,11 @@ void ui_vision_build(lv_obj_t *p, bool batch)
             lv_obj_set_width(confidence[i], 70);
             lv_obj_set_style_text_align(confidence[i], LV_TEXT_ALIGN_RIGHT, 0);
         }
-        ui_label(side, "批量进度", 20, 282, &sim_font_20, TEXT);
-        batch_status = ui_label(side, "", 20, 328, &sim_font_16, MUTED);
+        ui_label(side, "当前图片", 20, 282, &sim_font_20, TEXT);
+        image_status = ui_label(side, "", 20, 328, &sim_font_16, MUTED);
+        lv_obj_set_width(image_status,232);
     } else {
-        const char *titles[] = {"识别帧率", "NPU / 每帧", "后处理", "目标总数"};
+        const char *titles[] = {"识别帧率", "NPU / 每帧", "后处理", "端到端延迟"};
         for(unsigned i = 0; i < 4; ++i) {
             ui_label(side, titles[i], 20, 18 + (int)i * 67, &sim_font_14, MUTED);
             metrics[i] = ui_label(side, "", 20, 38 + (int)i * 67, &sim_font_28, ACCENT);
@@ -60,18 +64,25 @@ void ui_vision_build(lv_obj_t *p, bool batch)
             lv_obj_set_style_border_width(bars[i], 0, 0);
         }
     }
-    ui_button(p, batch ? "停止批量" : "暂停画面", 614, 6, 160, 0);
-    pause_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
-    ui_button(p, batch ? "切回摄像头识别" : "检测框：开启", 790, 6, 186, 1);
-    box_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
+    ui_button(p, batch ? "上一张" : "暂停画面", 614, 6, 160, 0);
+    previous_button=lv_obj_get_child(p,-1);
+    pause_label = lv_obj_get_child(previous_button, 0);
+    if(batch) {
+        ui_button(p,"下一张",790,6,186,1);
+        next_button=lv_obj_get_child(p,-1);
+    } else {
+        box_label=ui_label(p,"检测框",790,17,&sim_font_16,TEXT);
+        box_switch=ui_switch(p,918,14);
+        lv_obj_add_event_cb(box_switch,boxes_changed,LV_EVENT_VALUE_CHANGED,NULL);
+    }
     ui_button(p,"检测设置",992,6,272,2);
 }
 void ui_vision_frame(bool batch)
 {
-    ui_vision_t d=ui_data_vision(batch);
+    ui_vision_t d=ui_data_vision();
     char s[200];
     for(unsigned i = 0; i < 5; ++i) {
-        bool show = i < d.count && d.boxes && !d.waiting;
+        bool show = i < d.count && d.boxes && (!batch || d.image_status==UI_IMAGE_DONE);
         lv_obj_set_hidden(boxes[i], !show);
         lv_obj_set_hidden(tags[i], !show);
         if(show) {
@@ -86,7 +97,7 @@ void ui_vision_frame(bool batch)
 }
 void ui_vision_update(bool batch)
 {
-    ui_vision_t d = ui_data_vision(batch);
+    ui_vision_t d = ui_data_vision();
     char s[200];
     ui_detection_config_t config=ui_data_detection_config();
     unsigned selected=0;
@@ -95,26 +106,33 @@ void ui_vision_update(bool batch)
         config.threshold%100,selected); ui_text(filter_label,s);
     ui_vision_frame(batch);
     if(batch) {
+        bool busy=d.image_status==UI_IMAGE_RECEIVING || d.image_status==UI_IMAGE_DETECTING;
+        lv_obj_set_state(previous_button,LV_STATE_DISABLED,busy);
+        lv_obj_set_state(next_button,LV_STATE_DISABLED,busy);
+        lv_group_t *g=lv_group_get_default();
+        lv_obj_t *focus=lv_group_get_focused(g);
+        if(busy && (focus==previous_button || focus==next_button)) lv_group_focus_next(g);
         for(unsigned i = 0; i < 5; ++i) {
-            bool available = i < d.count && !d.waiting;
+            bool available = i < d.count && (!batch || d.image_status==UI_IMAGE_DONE);
             ui_text(counts[i], available ? d.targets[i].category : "—");
             if(available) lv_snprintf(s, sizeof(s), "%u%%", d.targets[i].confidence);
             else lv_snprintf(s, sizeof(s), "—");
             ui_text(confidence[i], s);
         }
-        if(d.waiting) lv_snprintf(s, sizeof(s), "等待 PC 发送图片\n\n通过网口上传图片\n即可开始识别");
-        else lv_snprintf(s, sizeof(s), "第 %u / %u 张\n\n成功 %u    失败 %u\n\n平均往返 %u ms",
-            d.batch_index, d.batch_total, d.success, d.failed, d.roundtrip);
-        ui_text(batch_status, s);
+        const char *states[]={"等待","接收中","识别中","完成","失败"};
+        lv_snprintf(s,sizeof s,"%s\n\n%u / %u 张 · %s\n\n往返时间  %u ms",
+            d.image_name,d.image_index,d.image_total,states[d.image_status],d.roundtrip_ms);
+        ui_text(image_status, s);
     } else {
-        ui_text(pause_label, d.paused ? "继续画面" : "暂停画面");
-        ui_text(box_label, d.boxes ? "检测框：开启" : "检测框：关闭");
+        ui_text(pause_label, ui_data_session().state==UI_STATE_PAUSED ? "继续画面" : "暂停画面");
+        lv_obj_set_state(box_switch,LV_STATE_CHECKED,d.boxes);
         lv_snprintf(s, sizeof(s), "%u fps", d.fps); ui_text(metrics[0], s);
         lv_snprintf(s, sizeof(s), "%u.%u ms", d.npu_tenths / 10, d.npu_tenths % 10);
         ui_text(metrics[1], s);
         lv_snprintf(s, sizeof(s), "%u.%u ms", d.post_tenths / 10, d.post_tenths % 10);
         ui_text(metrics[2], s);
-        lv_snprintf(s, sizeof(s), "%u", d.count); ui_text(metrics[3], s);
+        lv_snprintf(s, sizeof(s), "%u.%u ms", d.latency_tenths/10, d.latency_tenths%10);
+        ui_text(metrics[3], s);
         for(unsigned i = 0; i < 5; ++i) {
             lv_snprintf(s, sizeof(s), "%u", d.category_count[i]); ui_text(counts[i], s);
             int width = 1 + (int)d.category_count[i] * 40;

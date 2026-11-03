@@ -3,6 +3,8 @@
 #define SIM_DATA_H
 #include "ui_data.h"
 void sim_data_init(void);
+void sim_data_session(ui_app_t app,ui_state_t state,const char *error);
+void sim_data_image_status(int status);
 void sim_data_toggle_hardware(void);
 const lv_image_dsc_t *sim_process_image(const ui_process_config_t *config);
 const lv_image_dsc_t *sim_l0_image(void);

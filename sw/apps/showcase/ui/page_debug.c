@@ -8,11 +8,21 @@ static lv_obj_t *format;
 static lv_obj_t *baud;
 static lv_obj_t *network;
 static lv_obj_t *echo;
+static void format_changed(lv_event_t *e)
+{ (void)e; ui_data_debug_format(); ui_debug_update(); }
+static void baud_changed(lv_event_t *e)
+{
+    const unsigned rates[]={115200,921600,2000000};
+    unsigned target=lv_dropdown_get_selected(lv_event_get_target_obj(e));
+    while(ui_data_debug().baud!=rates[target]) ui_data_debug_baud();
+    ui_debug_update();
+}
 void ui_page_debug(lv_obj_t *p)
 {
     ui_title(p, "调试助手");
     ui_button(p, "串口", 40, 118, 190, 0);
     ui_button(p, "网口", 250, 118, 190, 1);
+    lv_obj_add_state(lv_obj_get_child(p,ui_tab==0 ? 1 : 2),LV_STATE_CHECKED);
     lv_obj_t *panel = ui_box(p, 40, 178, 816, 422, PANEL);
     ui_label(panel, ui_tab ? "收到的 UDP 数据" : "收发数据", 24, 20, &sim_font_20, TEXT);
     data_text = ui_label(panel, "", 24, 70, &sim_font_16, TEXT);
@@ -21,10 +31,11 @@ void ui_page_debug(lv_obj_t *p)
     ui_label(side, "通信状态", 24, 20, &sim_font_20, TEXT);
     counters = ui_label(side, "", 24, 70, &sim_font_16, TEXT);
     if(ui_tab == 0) {
-        ui_button(panel, "文本 / 十六进制", 24, 348, 200, 2);
-        format = lv_obj_get_child(lv_obj_get_child(panel, -1), 0);
-        ui_button(panel, "波特率", 240, 348, 240, 3);
-        baud = lv_obj_get_child(lv_obj_get_child(panel, -1), 0);
+        ui_label(panel,"十六进制",24,356,&sim_font_16,TEXT);
+        format=ui_switch(panel,130,355);
+        lv_obj_add_event_cb(format,format_changed,LV_EVENT_VALUE_CHANGED,NULL);
+        baud=ui_dropdown(panel,240,348,240,"115200\n921600\n2000000");
+        lv_obj_add_event_cb(baud,baud_changed,LV_EVENT_VALUE_CHANGED,NULL);
         ui_button(side, "发送预置测试串", 24, 292, 312, 4);
         ui_button(side, "清空", 24, 348, 312, 5);
         ui_label(side, "测试串：Hello EdRV32!", 24, 236, &sim_font_16, MUTED);
@@ -42,8 +53,9 @@ void ui_debug_update(void)
     if(ui_tab == 0) {
         lv_snprintf(s, sizeof(s), "接收    %u 字节\n\n发送    %u 字节", d.uart_rx, d.uart_tx);
         ui_text(counters, s);
-        ui_text(format, d.hex ? "显示：十六进制" : "显示：文本");
-        lv_snprintf(s, sizeof(s), "波特率：%u", d.baud); ui_text(baud, s);
+        lv_obj_set_state(format,LV_STATE_CHECKED,d.hex);
+        if(!lv_dropdown_is_open(baud))
+            lv_dropdown_set_selected(baud,d.baud==115200 ? 0 : d.baud==921600 ? 1 : 2);
     } else {
         lv_snprintf(s, sizeof(s), "接收    %u 包 / %u B\n\n发送    %u 包 / %u B",
             d.rx_packets, d.rx_bytes, d.tx_packets, d.tx_bytes); ui_text(counters, s);

@@ -2,7 +2,7 @@
  * The same objects render on the main sys layer or the NES software display.
  */
 #include "theme.h"
-static lv_obj_t *window, *parent;
+static lv_obj_t *window, *parent, *move_button, *close_button;
 static lv_obj_t *fps, *busy, *tasks[3], *ports[7], *bars[7][2], *chart;
 static lv_chart_series_t *series;
 static bool visible, compact;
@@ -23,19 +23,27 @@ static void position(void)
     lv_obj_set_pos(window,compact ? 0 : x,compact ? 0 : y);
 }
 void ui_monitor_corner(void) { corner=(corner+1)%4; if(window) position(); }
-static void move_clicked(lv_event_t *e) { (void)e; ui_monitor_corner(); }
-static void close_clicked(lv_event_t *e) { (void)e; ui_monitor_toggle(); }
+void ui_monitor_controls(void)
+{
+    if(!window) return;
+    lv_group_add_obj(lv_group_get_default(),move_button);
+    lv_group_add_obj(lv_group_get_default(),close_button);
+}
 static void build(void)
 {
     window=ui_box(parent,0,0,320,240,PANEL);
     lv_obj_set_style_radius(window,6,0);
     ui_label(window,"性能",8,4,&sim_font_14,ACCENT);
-    lv_obj_t *move=ui_label(window,"换角",224,4,&sim_font_14,ACCENT);
-    lv_obj_set_clickable(move,true);
-    lv_obj_add_event_cb(move,move_clicked,LV_EVENT_CLICKED,NULL);
-    lv_obj_t *close=ui_label(window,"关闭",276,4,&sim_font_14,MUTED);
-    lv_obj_set_clickable(close,true);
-    lv_obj_add_event_cb(close,close_clicked,LV_EVENT_CLICKED,NULL);
+    ui_button(window,"换角",204,2,50,1003);
+    move_button=lv_obj_get_child(window,-1);
+    lv_obj_set_height(move_button,22);
+    lv_obj_set_style_text_font(lv_obj_get_child(move_button,0),&sim_font_14,0);
+    lv_obj_set_pos(lv_obj_get_child(move_button,0),10,2);
+    ui_button(window,"关闭",260,2,52,1001);
+    close_button=lv_obj_get_child(window,-1);
+    lv_obj_set_height(close_button,22);
+    lv_obj_set_style_text_font(lv_obj_get_child(close_button,0),&sim_font_14,0);
+    lv_obj_set_pos(lv_obj_get_child(close_button,0),10,2);
     fps=ui_label(window,"",8,24,&sim_font_14,TEXT);
     busy=ui_label(window,"",8,42,&sim_font_14,TEXT);
     for(unsigned i=0;i<3;++i) tasks[i]=ui_label(window,"",8,60+(int)i*17,&sim_font_14,TEXT);
