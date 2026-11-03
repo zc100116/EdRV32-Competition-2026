@@ -41,7 +41,7 @@
 #define LV_USE_GIF 0
 #define LV_USE_GLTF 0
 #define LV_USE_GSTREAMER 0
-#define LV_USE_IMAGE 0
+#define LV_USE_IMAGE 1
 #define LV_USE_IMAGEBUTTON 0
 #define LV_USE_IME_PINYIN 0
 #define LV_USE_KEYBOARD 1 /* LVGL 9.6 Windows 驱动 IME 引用。 */

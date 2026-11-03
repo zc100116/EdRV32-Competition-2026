@@ -1,18 +1,22 @@
-# Showcase 风格样板（P1a，一次性）
+# Showcase 桌面界面
 
-1280×720 RGB565；三套界面共用 `style_samples.c`，只有入口不同。
-先初始化子模块：`git submodule update --init third_party/lvgl`。
-工具需要 C11 编译器、Python 3、Node.js/npx 和 Zig 0.17.0。
-执行 `. ~/.local/opt/edrv32/env.sh` 加载工具环境。
-Linux 截图：`make -C sw/apps/showcase/sim shots`。
-截图输出：`build/sim/shots/`（三套首页、监控页和一次焦点移动）。
-Windows 构建：`make -C sw/apps/showcase/sim win`。
-程序输出：`build/sim/showcase_sim.exe`，直接双击启动。
-字体首次构建时由 `npx lv_font_conv@1.5.3` 生成到 `build/sim/fonts/`。
-字体使用 Noto Sans SC（OFL）和 LVGL 自带 FontAwesome 符号字体。
-按 `1` / `2` / `3` 切换 A 深色科技 / B 浅色简洁 / C 深紫仪表。
-按左右箭头移动卡片焦点，包含置灰卡片。
-选中“系统监控”按 Enter，或直接点击该卡片进入。
-其他卡片保留为视觉样板，点击及 Enter 均不进入页面。
-按 Esc 返回首页；模拟统计每 0.5 秒更新。
-样板选定风格后删除，不作为板上 UI 框架。
+先执行 `. ~/.local/opt/edrv32/env.sh`，再运行：
+
+```
+make -C sw/apps/showcase/sim shots win
+```
+
+生成 `build/sim/showcase_sim.exe` 和 `build/sim/shots/*.png`（1280×720）。
+Windows 使用系统 DLL，无额外运行库。← / → 移动焦点，Enter 激活，Esc 返回；
+鼠标点击等价于选择并确认。F1 切换全部模块与无 PIX/GEO 两种硬件能力。
+游戏画面中按返回两次回到列表。
+
+`ui/` 使用共享静态样式和 `ui_data.h`，`sim_data.c` 按 LVGL 时钟提供固定脚本数据。
+图表每秒更新；统计每秒两次，仅修改变化的对象。默认主题关闭，无切换动画。
+示例照片由内置 imagegen 生成，提示词见 `assets/README.md`，构建脚本只用 Python 标准库。
+
+协调者在 P2 实施期间明确调整：两个桌面版本均使用 `sim_data.c` 的八个固定游戏条目，
+以首字和色块作图标，不读取 games.txt 或 ROM。游戏来源和字体覆盖留待 P3 确定。
+性能页数值由协调者提供的卡 46 数据固定生成；RND 关闭值为 P2 授权的固定估算，P3 改接板上数据。
+
+现有板上 showcase 不变，本目录不参与其构建。
