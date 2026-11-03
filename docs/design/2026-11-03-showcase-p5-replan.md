@@ -286,7 +286,7 @@ RUNNING / PAUSED ──stop──▶ STOPPING ──所有资源 IDLE──▶ I
 | 0x84 HELLO | 板 → PC | `proto`(u16 = 3) + 2 字节 0 + `build`(16 B ASCII，提交号，不足补 0) + STATE payload | 回复连接请求。PC 收到 HELLO 才建立 PEER |
 | 0x85 STATE | 板 → PC | 8.4 | 状态变化时发送，此外每 1 s 发送一次 |
 | 0x86 ACK | 板 → PC | `type`(u16，所应答命令的 type) + `phase`(u8：1 已收到，2 完成，3 错误) + `error`(u8) | `seq` 等于所应答命令的 `seq` |
-| 0x87 IMAGE_STEP | 板 → PC | `direction`(i8：−1 上一张，+1 下一张) + 3 字节 0 | 用户在板端图片识别页按"上一张 / 下一张"时发出。PC 按自己的图片列表发送对应的图片 |
+| 0x87 IMAGE_STEP | 板 → PC | `direction`(i8：−1 上一张，+1 下一张) + 3 字节 0 | 用户在板端图片识别页按"上一张 / 下一张"时发出。PC 按自己的图片列表发送对应的图片。板端只在 `image_status` 为等待、完成或失败时发出（接收中和识别中，板端的翻页按钮为禁用状态）。PC 在当前图片还在进行时收到 IMAGE_STEP，就丢弃它并在日志中写明，不排队 |
 
 - 删除 0x02 CAMERA：实时识别改用 APP(1, 打开)。
 - PC 在收到同一命令的 ACK(2) 或 ACK(3) 之前，不发同类型的下一条命令。例外是 PROCESS 和 DETECT：PC 可以只保留最新的一组参数，等上一条完成后再发。
