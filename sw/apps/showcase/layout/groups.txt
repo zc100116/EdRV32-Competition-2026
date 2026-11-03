@@ -1,0 +1,5 @@
+SRAM: sched platform virtual_input clint plic IRQ memcpy memset
+DDR: nofrendo NES
+DDR: LVGL draw refresh
+DDR: ui
+DDR: remaining code

@@ -8,6 +8,7 @@ enum { UI_PIX = 1, UI_GEO = 2, UI_VIN = 4, UI_NPU = 8, UI_ETH = 16,
        UI_RND = 32, UI_DISP = 64, UI_ALL = 127 };
 typedef struct {
     unsigned seconds, cpu, fps, idle, npu_busy, rnd_busy;
+    unsigned task_max_us[3];
     unsigned task_cpu[3], ddr_read[7], ddr_write[7];
     bool link;
 } ui_system_t;
@@ -32,7 +33,7 @@ typedef struct { unsigned progress, score_tenths, per_mhz_thousandths; bool runn
 typedef struct {
     const char *uart_text, *uart_hex, *udp_text, *peer;
     unsigned baud, uart_rx, uart_tx, rx_packets, tx_packets, rx_bytes, tx_bytes;
-    unsigned echo_count, echo_tenths, echo_lost;
+    unsigned echo_count, echo_replies;
     bool hex, link;
 } ui_debug_t;
 /* Return the modules available to this hardware configuration. */
@@ -48,7 +49,7 @@ void ui_data_boxes(void);
 /* Stop the image batch and wait for the next PC upload. */
 void ui_data_batch_stop(void);
 /* Return the image used for the processing mode preview. */
-const lv_image_dsc_t *ui_data_process(void);
+const lv_image_dsc_t *ui_data_process(unsigned mode);
 /* Return all sixteen benchmark rows. */
 const ui_benchmark_t *ui_data_benchmark(void);
 /* Start the fixed benchmark sequence. */
@@ -57,6 +58,8 @@ void ui_data_benchmark_start(void);
 unsigned ui_data_benchmark_progress(void);
 /* Return the build-time game names, initial characters and optional covers. */
 const ui_game_t *ui_data_games(unsigned *count);
+const lv_image_dsc_t *ui_data_game_name(unsigned index);
+const lv_image_dsc_t *ui_data_game_initial(unsigned index);
 /* Return CoreMark progress and the completed score. */
 ui_coremark_t ui_data_coremark(void);
 /* Start a CoreMark run. */

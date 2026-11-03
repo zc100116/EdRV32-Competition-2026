@@ -8,6 +8,40 @@
 static uint16_t framebuffer[1280 * 720];
 static uint16_t drawbuffer[1280 * 720];
 
+static lv_indev_data_t test_input;
+static void read_test_input(lv_indev_t *indev,lv_indev_data_t *data)
+{
+    (void)indev; *data=test_input; test_input.enc_diff=0;
+}
+static void key_tap(lv_indev_t *indev,uint32_t key)
+{
+    test_input.key=key; test_input.state=LV_INDEV_STATE_PRESSED; lv_indev_read(indev);
+    test_input.state=LV_INDEV_STATE_RELEASED; lv_indev_read(indev);
+}
+static void check_input_devices(void)
+{
+    lv_indev_t *keypad=lv_indev_create();
+    lv_indev_set_type(keypad,LV_INDEV_TYPE_KEYPAD);
+    lv_indev_set_read_cb(keypad,read_test_input);
+    lv_indev_t *encoder=lv_indev_create();
+    lv_indev_set_type(encoder,LV_INDEV_TYPE_ENCODER);
+    lv_indev_set_read_cb(encoder,read_test_input);
+    ui_open(1);
+    bool paused=ui_data_vision(false).paused;
+    key_tap(keypad,LV_KEY_ENTER); assert(ui_data_vision(false).paused!=paused);
+    key_tap(keypad,LV_KEY_NEXT);
+    bool boxes=ui_data_vision(false).boxes;
+    key_tap(keypad,LV_KEY_ENTER); assert(ui_data_vision(false).boxes!=boxes);
+    test_input.enc_diff=-1; lv_indev_read(encoder);
+    key_tap(encoder,LV_KEY_ENTER); assert(ui_data_vision(false).paused==paused);
+    key_tap(keypad,LV_KEY_ESC); assert(ui_page==0);
+    ui_open(6); key_tap(keypad,LV_KEY_ESC); assert(ui_page==0);
+    ui_open(5); key_tap(keypad,LV_KEY_ENTER); assert(ui_game_open);
+    key_tap(keypad,LV_KEY_ESC); assert(ui_game_open);
+    key_tap(keypad,LV_KEY_ESC); assert(!ui_game_open && ui_page==5);
+    lv_indev_delete(keypad); lv_indev_delete(encoder);
+}
+
 static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
 {
     const uint16_t *source = (const uint16_t *)pixels;
@@ -175,7 +209,8 @@ int main(void)
     ui_key(LV_KEY_ESC); assert(ui_game_open);
     ui_key(LV_KEY_ESC); assert(!ui_game_open && ui_page == 5);
     ui_key(LV_KEY_ESC); assert(ui_page == 0);
-    puts("PASS: four-key navigation, availability, page actions, label bounds, 19 captures");
+    check_input_devices();
+    puts("PASS: keypad/encoder, four-key navigation, availability, page actions, label bounds, 19 captures");
     lv_deinit();
     return 0;
 }

@@ -9,6 +9,7 @@ static lv_obj_t *band_text[7];
 static lv_obj_t *metrics[4];
 static lv_obj_t *network;
 static unsigned last_second;
+static lv_obj_t *step_time;
 void ui_page_monitor(lv_obj_t *p)
 {
     ui_title(p, "系统监控", "实时计算与数据流，一目了然");
@@ -35,6 +36,7 @@ void ui_page_monitor(lv_obj_t *p)
         for(unsigned j = 0; j < 30; ++j)
             lv_chart_set_next_value(chart, series[i], 12 + (int)i * 16 + (int)((j * 7 + i) % 19));
     }
+    step_time = ui_label(cpu, "", 24, 211, &sim_font_14, MUTED);
     last_second = (unsigned)-1;
     lv_obj_t *ddr = ui_box(p, 40, 378, 788, 230, PANEL);
     ui_label(ddr, "DDR 端口带宽", 22, 16, &sim_font_20, TEXT);
@@ -69,7 +71,10 @@ void ui_monitor_update(void)
         for(unsigned i = 0; i < 3; ++i)
             lv_chart_set_next_value(chart, series[i], (int)d.task_cpu[i]);
     }
-    char s[96];
+    char s[160];
+    lv_snprintf(s, sizeof(s), "max step us: %u / %u / %u",
+        d.task_max_us[0], d.task_max_us[1], d.task_max_us[2]);
+    ui_text(step_time, s);
     for(unsigned i = 0; i < 7; ++i) {
         unsigned values[] = {d.ddr_read[i], d.ddr_write[i]};
         for(unsigned j = 0; j < 2; ++j)

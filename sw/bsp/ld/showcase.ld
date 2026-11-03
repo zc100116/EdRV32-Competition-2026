@@ -18,10 +18,36 @@ PHDRS
     text PT_LOAD FLAGS(5);
     data PT_LOAD FLAGS(6);
     bss PT_LOAD FLAGS(6);
+    hot PT_LOAD FLAGS(5);
+    games PT_LOAD FLAGS(4);
 }
 SECTIONS
 {
-    .text : { KEEP(*(.text.start)) *(.text .text.*) } > DDR_APP :text
+    .sram_text ORIGIN(SRAM) :
+    {
+        __sram_code_start = .;
+        *sched.o(.text .text.*)
+        *platform.o(.text .text.*)
+        *virtual_input*.o(.text .text.*)
+        *clint.o(.text .text.*)
+        *plic.o(.text .text.*)
+        *rnd.o(.text.rnd_irq_handle)
+        *engine.o(.text.engine_irq_handle)
+        *libc.a:libc_a-memcpy.o(.text .text.*)
+        *libc.a:libc_a-memset.o(.text .text.*)
+        __sram_code_end = .;
+    } > SRAM :hot
+    .text.nes ORIGIN(DDR_APP) :
+    {
+        __ddr_code_start = .;
+        KEEP(*(.text.start))
+        *nofrendo/*(.text .text.*)
+        *showcase/nes/*(.text .text.*)
+    } > DDR_APP :text
+    .text.lvgl ALIGN(32) : { *lvgl/src/draw/*(.text .text.*)
+        *lvgl/src/core/lv_refr.o(.text .text.*) } > DDR_APP :text
+    .text.ui ALIGN(32) : { *showcase/ui/*(.text .text.*) } > DDR_APP :text
+    .text ALIGN(32) : { *(.text .text.*) __ddr_code_end = .; } > DDR_APP :text
     .rodata : { *(.rodata .rodata.* .srodata .srodata.*) } > DDR_APP :text
     /* Preserve initial values across re-entry, as for SRAM applications. */
     __data_image = ALIGN(MAX(4, ALIGNOF(.data)));
@@ -49,13 +75,12 @@ SECTIONS
     {
         *(.noinit .noinit.*)
     } > DDR_APP :bss
-    /* Design showcase 4.5: last 16 MiB is the fixed game pack; stack grows below it. */
-    .game_pack (ORIGIN(DDR_APP) + 0x03000000) (NOLOAD) :
+    .game_pack ALIGN(64) : AT(ADDR(.game_pack))
     {
         __game_pack_start = .;
-        . += 0x01000000;
+        KEEP(*(.game_pack))
         __game_pack_end = .;
-    } > DDR_APP :NONE
-    __stack_top = ADDR(.game_pack);
+    } > DDR_APP :games
+    __stack_top = ORIGIN(DDR_APP) + LENGTH(DDR_APP);
     /DISCARD/ : { *(.comment .eh_frame .riscv.attributes) }
 }

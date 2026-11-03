@@ -69,7 +69,7 @@ void ui_page_chip(lv_obj_t *p)
     lv_obj_t *params = ui_box(p, 774, 124, 466, 262, PANEL);
     ui_label(params, "芯片参数", 24, 18, &sim_font_20, TEXT);
     ui_label(params, "CPU    顺序双发射 RV32 · 100 MHz\n\n"
-        "I$ / D$    各 8 KiB    SRAM 64 KiB\n\n"
+        "I$ / D$    各 32 KiB    SRAM 64 KiB\n\n"
         "NPU    每拍 512 次乘加 @150 MHz\n\n"
         "DDR3    32 位 · 1000 MT/s\n\n显示    1280×720 @60 Hz",
         24, 60, &sim_font_16, TEXT);

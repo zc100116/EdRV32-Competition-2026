@@ -12,7 +12,7 @@
 #define LV_USE_STDLIB_SPRINTF LV_STDLIB_BUILTIN
 #define LV_ATTRIBUTE_LARGE_RAM_ARRAY __attribute__((section(".noinit")))
 #define LV_MEM_SIZE (24 * 1024 * 1024)
-#define LV_DEF_REFR_PERIOD 16
+#define LV_DEF_REFR_PERIOD 34
 #define LV_DRAW_BUF_ALIGN 64
 #define LV_DRAW_BUF_STRIDE_ALIGN 32
 /* 96 KiB > 1280 * 720 * 2 / 20 = 92160 B, as benchmark recommends for opa_layer. */

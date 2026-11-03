@@ -13,6 +13,9 @@
 #include "cache.h"
 #include "mem_xbar.h"
 #include "demos/lv_demos.h"
+#include "../ui/theme.h"
+#include "../board/board.h"
+#include "../board/vision_hooks.h"
 
 enum { WIDTH = 1280, HEIGHT = 720, STRIDE = WIDTH * 2, PIXELS = WIDTH * HEIGHT };
 static _Alignas(4096) uint16_t buffers[2][PIXELS] __attribute__((section(".noinit")));
@@ -219,6 +222,7 @@ static void benchmark_finish_window(void)
     benchmark_total.copy.doorbells += w->copy.doorbells;
     benchmark_total.xbar_cycles += w->xbar_cycles;
     benchmark_print(benchmark_names[benchmark_scene], w);
+    board_benchmark_result(benchmark_scene,w->render_ticks,w->frames);
 }
 
 static void benchmark_next_scene(lv_timer_t *timer)
@@ -246,6 +250,7 @@ lv_timer_t *__wrap_lv_timer_create(lv_timer_cb_t cb, uint32_t period, void *user
 
 static void benchmark_refresh_event(lv_event_t *event)
 {
+    if(lv_event_get_code(event)==LV_EVENT_RENDER_READY) vision_frame_presented();
     if (!benchmark_running) return;
     switch (lv_event_get_code(event)) {
     case LV_EVENT_REFR_START:
@@ -334,33 +339,25 @@ static void sync_buffers(lv_display_t *disp, const lv_area_t *area)
 static void read_keys(lv_indev_t *indev, lv_indev_data_t *data)
 {
     (void)indev;
-    if (showcase_launcher_active()) {
-        data->state = LV_INDEV_STATE_RELEASED;
-        return;
-    }
-    uint32_t keys = input_snapshot;
-    uint16_t virtual_keys = platform_virtual_input().keys;
-    static const uint32_t lv_keys[] = {
-        LV_KEY_UP, LV_KEY_DOWN, LV_KEY_LEFT, LV_KEY_RIGHT,
-        LV_KEY_ENTER, LV_KEY_ESC, LV_KEY_NEXT, LV_KEY_PREV
-    };
-    static const uint16_t bits[] = {
-        VI_UP, VI_DOWN, VI_LEFT, VI_RIGHT, VI_ENTER, VI_ESC, VI_NEXT, VI_PREV
-    };
-    data->state = LV_INDEV_STATE_PRESSED;
-    for (unsigned i = 0; i < 8; ++i) {
-        if (virtual_keys & bits[i]) {
-            data->key = lv_keys[i];
-            return;
-        }
-    }
-    data->state = keys ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
-    if (keys & PLATFORM_LEFT) data->key = LV_KEY_PREV;
-    else if (keys & PLATFORM_RIGHT) data->key = LV_KEY_NEXT;
-    else if (keys & PLATFORM_ENTER) data->key = LV_KEY_ENTER;
-    else if (keys & PLATFORM_BACK) data->key = LV_KEY_ESC;
+    static uint32_t last_key;
+    uint32_t keys=input_snapshot;
+    data->state=keys && !benchmark_running ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+    if(keys&PLATFORM_LEFT) last_key=LV_KEY_PREV;
+    else if(keys&PLATFORM_RIGHT) last_key=LV_KEY_NEXT;
+    else if(keys&PLATFORM_ENTER) last_key=LV_KEY_ENTER;
+    else if(keys&PLATFORM_BACK) last_key=LV_KEY_ESC;
+    data->key=last_key;
 }
-
+static void read_encoder(lv_indev_t *indev,lv_indev_data_t *data)
+{
+    (void)indev;
+    uint32_t state=virtual_input_lock();
+    int16_t delta=virtual_input_take_wheel();
+    virtual_input_unlock(state);
+    data->enc_diff=benchmark_running ? 0 : delta;
+    data->state=!benchmark_running && (platform_virtual_input().mouse&4) ?
+        LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+}
 static lv_obj_t *pointer_cursor;
 
 static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
@@ -370,7 +367,13 @@ static void read_pointer(lv_indev_t *indev, lv_indev_data_t *data)
     data->point.x = input.x;
     data->point.y = input.y;
     data->state = (input.mouse & 1) ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
-    if (input.active) lv_obj_set_hidden(pointer_cursor, false);
+    static int16_t x,y;
+    static uint32_t moved;
+    if(input.active && (input.x!=x || input.y!=y || input.mouse)) {
+        x=input.x; y=input.y; moved=platform_milliseconds();
+        lv_obj_set_hidden(pointer_cursor,false);
+    }
+    if(platform_milliseconds()-moved>=5000) lv_obj_set_hidden(pointer_cursor,true);
 }
 
 void showcase_lvgl_init(void)
@@ -393,6 +396,10 @@ void showcase_lvgl_init(void)
     lv_indev_set_type(keys, LV_INDEV_TYPE_KEYPAD);
     lv_indev_set_read_cb(keys, read_keys);
     lv_indev_set_group(keys, group);
+    lv_indev_t *encoder=lv_indev_create();
+    lv_indev_set_type(encoder,LV_INDEV_TYPE_ENCODER);
+    lv_indev_set_read_cb(encoder,read_encoder);
+    lv_indev_set_group(encoder,group);
     lv_indev_t *pointer = lv_indev_create();
     lv_indev_set_type(pointer, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(pointer, read_pointer);
@@ -431,6 +438,7 @@ void showcase_gui_step(struct sched_task *task)
         if (flush_pending) return;
     }
     uint32_t delay = lv_timer_handler();
+    sched_signal(&application_task,1);
     if (!flush_pending && delay != LV_NO_TIMER_READY)
         sched_wake_at(task, platform_ticks() +
                       (uint64_t)delay * (platform_clock_hz() / 1000u));
@@ -527,7 +535,7 @@ static void benchmark_end(const lv_demo_benchmark_summary_t *summary)
         summary->total_avg_fps / summary->valid_scene_cnt : 0);
     platform_puts("\r\n");
     showcase_draw_rnd_print_stats();
-    lv_demo_benchmark_summary_display(summary);
+    board_benchmark_end();
 }
 
 void showcase_lvgl_start_benchmark(void)

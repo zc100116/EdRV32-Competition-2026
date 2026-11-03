@@ -67,7 +67,7 @@ void ui_data_pause(void)
 }
 void ui_data_boxes(void) { boxes = !boxes; }
 void ui_data_batch_stop(void) { waiting = true; }
-const lv_image_dsc_t *ui_data_process(void) { return &sim_indoor; }
+const lv_image_dsc_t *ui_data_process(unsigned mode) { (void)mode; return &sim_indoor; }
 /* Card 46 values supplied by coordinator. Software-off comparison is a fixed
  * estimated workload, as authorized for P2; P3 replaces it with board data. */
 static const ui_benchmark_t benchmark[] = {
@@ -127,8 +127,7 @@ ui_debug_t ui_data_debug(void)
         .uart_rx = step * 24, .uart_tx = sent * 15,
         .rx_packets = 248 + step * 3, .tx_packets = 232 + step * 2,
         .rx_bytes = 31744 + step * 384, .tx_bytes = 29696 + step * 256,
-        .echo_count = echo_count, .echo_tenths = echo_count ? 12 : 0,
-        .echo_lost = 0, .hex = hex, .link = true};
+        .echo_count = echo_count, .echo_replies = echo_count, .hex = hex, .link = true};
     if(sent && !hex) d.uart_text = "TX  Hello EdRV32!\nRX  EdRV32 ready\nRX  Link established";
     if(sent && hex) d.uart_hex =
         "TX  48 65 6C 6C 6F 20 45 64 52 56 33 32 21 0D 0A\n"
@@ -140,3 +139,7 @@ void ui_data_debug_baud(void) { baud_index = (baud_index + 1) % 3; }
 void ui_data_debug_send(void) { ++sent; }
 void ui_data_debug_clear(void) { clear_tick = lv_tick_get(); sent = 0; }
 void ui_data_debug_echo(void) { echo_count += 10; }
+
+const lv_image_dsc_t *ui_data_game_name(unsigned index) { (void)index; return NULL; }
+
+const lv_image_dsc_t *ui_data_game_initial(unsigned index) { (void)index; return NULL; }

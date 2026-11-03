@@ -48,12 +48,14 @@ void ui_page_graphics(lv_obj_t *p)
         }
         lv_obj_t *card = ui_box(p, 900, 230, 340, 244, SELECTED);
         ui_label(card, "加速比", 28, 24, &sim_font_28, TEXT);
-        unsigned ratio = rows[1].software_tenths * 100 / rows[1].ms_tenths;
+        unsigned ratio = rows[1].ms_tenths ? rows[1].software_tenths * 100 / rows[1].ms_tenths : 0;
         char s[40];
         lv_snprintf(s, sizeof(s), "%u.%02u", ratio / 100, ratio % 100);
         ui_label(card, s, 28, 88, &sim_digits_40, ACCENT);
         ui_label(card, "倍 · 相同画面内容", 28, 160, &sim_font_16, MUTED);
+        ui_button(p, "开始测试", 40, 548, 180, 3);
     } else {
+        ui_button(p, "开始测试", 854, 548, 180, 3);
         lv_obj_t *card = ui_box(p, 40, 182, 770, 410, PANEL);
         ui_label(card, "显示图层预览", 26, 20, &sim_font_20, TEXT);
         lv_obj_t *base = ui_box(card, 28, 72, 520, 284, SELECTED);

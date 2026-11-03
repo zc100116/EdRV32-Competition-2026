@@ -31,7 +31,7 @@ void ui_page_debug(lv_obj_t *p)
     } else {
         network = ui_label(side, "", 24, 198, &sim_font_16, TEXT);
         echo = ui_label(panel, "", 24, 238, &sim_font_16, MUTED);
-        ui_button(side, "回环测试", 24, 348, 312, 6);
+        ui_button(side, "清零回环统计", 24, 348, 312, 6);
     }
 }
 void ui_debug_update(void)
@@ -49,8 +49,8 @@ void ui_debug_update(void)
             d.rx_packets, d.rx_bytes, d.tx_packets, d.tx_bytes); ui_text(counters, s);
         lv_snprintf(s, sizeof(s), "%s · 1000 Mbps\n\nPEER\n%s",
             d.link ? "已连接" : "未连接", d.peer); ui_text(network, s);
-        lv_snprintf(s, sizeof(s), "回环测试\n\n次数 %u    平均往返 %u.%u ms    丢失 %u",
-            d.echo_count, d.echo_tenths / 10, d.echo_tenths % 10, d.echo_lost);
+        lv_snprintf(s, sizeof(s), "回环测试\n\n收到 ECHO %u    已回复 %u",
+            d.echo_count, d.echo_replies);
         ui_text(echo, s);
     }
 }

@@ -14,12 +14,23 @@ static lv_obj_t *content;
 static lv_obj_t *status;
 static lv_obj_t *hint;
 static unsigned item_count;
+static lv_timer_t *refresh_timer;
+void ui_suspend(bool paused)
+{
+    if(paused) lv_timer_pause(refresh_timer);
+    else lv_timer_resume(refresh_timer);
+}
 static void activate(unsigned action);
 static void clicked(lv_event_t *e)
 {
     lv_obj_t *o = lv_event_get_target_obj(e);
     lv_group_focus_obj(o);
     activate((unsigned)(uintptr_t)lv_obj_get_user_data(o));
+}
+static void key_event(lv_event_t *e)
+{
+    uint32_t key=lv_event_get_key(e);
+    if(key==LV_KEY_ESC || key==LV_KEY_LEFT || key==LV_KEY_RIGHT) ui_key(key);
 }
 static void focused(lv_event_t *e)
 {
@@ -32,6 +43,7 @@ void ui_button(lv_obj_t *p, const char *s, int x, int y, int w, unsigned action)
     lv_obj_set_clickable(o, true);
     lv_obj_set_scroll_on_focus(o, false);
     lv_obj_add_event_cb(o, focused, LV_EVENT_FOCUSED, NULL);
+    lv_obj_add_event_cb(o, key_event, LV_EVENT_KEY, NULL);
     lv_obj_add_event_cb(o, clicked, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(o, (void *)(uintptr_t)action);
     ++item_count;
@@ -49,6 +61,7 @@ void ui_refresh(void)
     switch(ui_page) {
         case 1: ui_vision_update(false); break;
         case 2: ui_vision_update(true); break;
+        case 3: ui_process_update(); break;
         case 4: ui_graphics_update(); break;
         case 6: ui_monitor_update(); break;
         case 7: ui_chip_update(); break;
@@ -62,6 +75,9 @@ void ui_open(unsigned page)
     item_count = 0;
     if(group) lv_group_delete(group);
     group = lv_group_create();
+    lv_group_set_default(group);
+    for(lv_indev_t *input=lv_indev_get_next(NULL);input;input=lv_indev_get_next(input))
+        if(lv_indev_get_type(input)!=LV_INDEV_TYPE_POINTER) lv_indev_set_group(input,group);
     lv_obj_t *screen = lv_screen_active();
     lv_obj_clean(screen);
     lv_obj_remove_style_all(screen);
@@ -86,6 +102,10 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, ui_page_monitor,
         ui_page_chip, ui_page_debug};
     pages[page](content);
+    if(!item_count) {
+        lv_group_add_obj(group,content);
+        lv_obj_add_event_cb(content,key_event,LV_EVENT_KEY,NULL);
+    }
     if(page == 0) lv_group_focus_obj(lv_group_get_obj_by_index(group, home_focus));
     if(page == 5 && !ui_game_open)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, game_focus));
@@ -98,8 +118,9 @@ static void activate(unsigned action)
 {
     if(ui_page == 0) {
         home_focus = action - 1;
-        if(action == 3 && (ui_data_hardware() & (UI_PIX | UI_GEO)) != (UI_PIX | UI_GEO))
-            return;
+        const unsigned required[]={0,UI_VIN|UI_NPU,UI_NPU|UI_ETH,
+            UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0};
+        if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
         ui_mode = 0;
         game_focus = 0;
@@ -167,5 +188,5 @@ void ui_start(void)
 {
     theme_init();
     ui_open(0);
-    lv_timer_create(timer, 500, NULL);
+    refresh_timer=lv_timer_create(timer, 500, NULL);
 }

@@ -5,13 +5,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void keyboard(lv_event_t *event)
-{
-    lv_indev_t *indev = lv_event_get_target(event);
-    if(lv_indev_get_state(indev) == LV_INDEV_STATE_PRESSED)
-        ui_key(lv_indev_get_key(indev));
-}
-
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previous, LPSTR command, int show)
 {
     (void)instance;
@@ -27,8 +20,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previous, LPSTR command, int sh
     }
     lv_lock();
     lv_windows_acquire_pointer_indev(display);
-    lv_indev_t *keypad = lv_windows_acquire_keypad_indev(display);
-    lv_indev_add_event_cb(keypad, keyboard, LV_EVENT_KEY, NULL);
+    lv_windows_acquire_keypad_indev(display);
     sim_data_init();
     ui_start();
     lv_unlock();

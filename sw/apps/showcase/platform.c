@@ -16,12 +16,13 @@
 #include "plic.h"
 #include "sysctrl.h"
 #include "uart.h"
+#include "board/board.h"
+#include "board/vision_hooks.h"
 static uint32_t system_hz;
 static uint32_t hardware;
 static volatile uint32_t probing;
 static volatile uint32_t probe_missing;
 static volatile uint32_t frames;
-static uint32_t serial_keys;
 static unsigned input_source;
 unsigned platform_input_source(void) { return input_source; }
 static uint32_t milliseconds;
@@ -75,7 +76,7 @@ uint32_t platform_milliseconds(void)
 uint64_t sched_port_time(void) { return platform_ticks(); }
 uint32_t sched_port_lock(void) { return virtual_input_lock(); }
 void sched_port_unlock(uint32_t state) { virtual_input_unlock(state); }
-void sched_port_compare(uint64_t deadline) { clint_set_compare(deadline); }
+void sched_port_compare(uint64_t deadline) { clint_set_compare(board_prof_deadline(deadline)); }
 void sched_port_wait(void) { __asm__ volatile ("wfi" ::: "memory"); }
 void *platform_uncached(void *storage)
 {
@@ -91,8 +92,6 @@ struct virtual_input_state platform_virtual_input(void)
 static uint32_t sample_keys(void)
 {
     uint32_t keys = (~gpio_read()) & 15u;
-    keys |= serial_keys;
-    serial_keys = 0;
     uint16_t virtual_keys = platform_virtual_input().keys;
     if (virtual_keys & (VI_LEFT | VI_PREV)) keys |= PLATFORM_LEFT;
     if (virtual_keys & (VI_RIGHT | VI_NEXT)) keys |= PLATFORM_RIGHT;
@@ -100,20 +99,22 @@ static uint32_t sample_keys(void)
     if (virtual_keys & VI_ESC) keys |= PLATFORM_BACK;
     return keys;
 }
-static void character(int value)
+static void character(int value) { board_serial_character(value); }
+static volatile uint64_t rnd_cycles,npu_cycles;
+uint64_t board_rnd_cycles(void) { return rnd_cycles; }
+uint64_t board_npu_cycles(void) { return npu_cycles; }
+static void vision_event(const struct engine_event *event,void *context)
 {
-    switch (value) {
-    case 'a': serial_keys |= PLATFORM_LEFT; break;
-    case 'd': serial_keys |= PLATFORM_RIGHT; break;
-    case 'w': serial_keys |= PLATFORM_ENTER; break;
-    case 'p': serial_keys |= PLATFORM_BACK; break;
-    default: break;
-    }
+    if((uintptr_t)context==ENGINE_NPU && (event->irq&EDRV32_NPU_IRQ_STAT_DONE_MASK))
+        npu_cycles+=engine_perf(ENGINE_NPU,0);
+    vision_irq(event,context);
+    sched_signal(&application_task,0x100);
 }
 static void rnd_event(const struct rnd_result *result, void *context)
 {
     (void)context;
     rnd_irq_tick = platform_ticks();
+    uint32_t perf[6]; rnd_read_perf(perf); rnd_cycles+=perf[0];
     if (result->error) {
         platform_puts("RND ERR_CODE=");
         platform_put_hex(result->error);
@@ -167,7 +168,9 @@ static void __attribute__((interrupt("machine"), aligned(4))) interrupt_entry(vo
         pc += 4;
         __asm__ volatile ("csrw mepc, %0" :: "r"(pc));
     } else if (cause == 0x80000007u) {
-        clint_set_compare(UINT64_MAX);
+        uint32_t pc; __asm__ volatile ("csrr %0, mepc" : "=r"(pc));
+        board_prof_sample(pc);
+        clint_set_compare(board_prof_deadline(UINT64_MAX));
     } else if (cause == 0x8000000bu) {
         unsigned source = plic_claim();
         if (source == EDRV32_PLIC_SOURCE_RND) rnd_irq_handle();
@@ -182,6 +185,9 @@ static void __attribute__((interrupt("machine"), aligned(4))) interrupt_entry(vo
             gpio_irq_clear(gpio_irq_status());
             sched_signal(&communication_task, 4);
         }
+        else if(source==EDRV32_PLIC_SOURCE_VIN || source==EDRV32_PLIC_SOURCE_NPU ||
+                source==EDRV32_PLIC_SOURCE_PIX || source==EDRV32_PLIC_SOURCE_GEO)
+            engine_irq_handle(source);
         if (source != EDRV32_PLIC_SOURCE_NONE) plic_complete(source);
     } else {
         uint32_t pc;
@@ -201,27 +207,20 @@ static uint32_t probe(uintptr_t address)
     (void)value;
     return !probe_missing;
 }
-static void network_receive(uint32_t irq)
-{
-    if (irq & EDRV32_ETH_IRQ_STAT_RX_NOTIFY2_MASK) {
-        input_source = 2;
-        virtual_input_network((const volatile uint8_t *)(uintptr_t)
-            (EDRV32_DDR_UNCACHED_BASE + VIRTUAL_INPUT_BASE));
-    }
-}
 static uint32_t eth_irq_mask(void)
 {
     return EDRV32_ETH_IRQ_EN_DONE_MASK | EDRV32_ETH_IRQ_EN_ERROR_MASK |
-           EDRV32_ETH_IRQ_EN_RX_NOTIFY2_MASK | EDRV32_ETH_IRQ_EN_RX_NOTIFY3_MASK;
+           EDRV32_ETH_IRQ_EN_RX_NOTIFY0_MASK | EDRV32_ETH_IRQ_EN_RX_NOTIFY2_MASK |
+           EDRV32_ETH_IRQ_EN_RX_NOTIFY3_MASK;
 }
 static unsigned phy_address;
 static unsigned phy_phase;
 static uint16_t phy_id1;
 static int network_link = -1;
-static uint32_t network_tx_packets;
-static uint32_t network_tx_done;
+
+
 int showcase_network_link(void) { return network_link; }
-uint32_t showcase_network_tx_packets(void) { return network_tx_packets; }
+uint32_t showcase_network_tx_packets(void) { extern unsigned board_tx_packets; return board_tx_packets; }
 static void mdio_start(unsigned reg)
 {
     mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_MDIO_CMD_OFFSET,
@@ -264,16 +263,13 @@ void showcase_communication_step(struct sched_task *task)
     (void)platform_milliseconds();
     if (events & 1) {
         input_source = 1;
+        virtual_input_uart_set_raw(board_uart_active() ? board_uart_byte : NULL);
         virtual_input_uart_receive();
         mmio_write32(EDRV32_UART0_BASE + UART_IRQ_EN, UART_IRQ_RX_THRESH);
     }
     if (hardware & APP_HW_ETH) {
-        uint32_t done = engine_poll(ENGINE_ETH).done_count;
-        if (done != network_tx_done) {
-            network_tx_packets += engine_perf(ENGINE_ETH, 10);
-            network_tx_done = done;
-        }
-        if (eth_monitor_board_tick()) platform_stop();
+        board_network_step();
+        if(platform_virtual_input().active) input_source=2;
         network_status_step();
         mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, eth_irq_mask());
     }
@@ -312,14 +308,21 @@ void platform_init(void)
     plic_set_enable(mmio_read32(EDRV32_PLIC_BASE + PLIC_ENABLE) |
                     (1u << EDRV32_PLIC_SOURCE_GPIO0));
     if (hardware & APP_HW_ETH) {
-        eth_monitor_board_init(system_hz);
+        board_network_init();
         eth_window_configure(VIRTUAL_INPUT_WINDOW, VIRTUAL_INPUT_BASE, VIRTUAL_INPUT_BYTES);
-        eth_monitor_board_set_receive(network_receive);
+
         plic_set_priority(EDRV32_PLIC_SOURCE_ETH, 1);
         plic_set_enable(mmio_read32(EDRV32_PLIC_BASE + PLIC_ENABLE) |
                         (1u << EDRV32_PLIC_SOURCE_ETH));
         mmio_write32(EDRV32_ETH_BASE + EDRV32_ETH_IRQ_EN_OFFSET, eth_irq_mask());
     }
+    const enum engine_id engines[]={ENGINE_VIN,ENGINE_NPU,ENGINE_PIX,ENGINE_GEO};
+    const unsigned bits[]={APP_HW_VIN,APP_HW_NPU,APP_HW_PIX,APP_HW_GEO};
+    const uint32_t masks[]={EDRV32_VIN_IRQ_EN_ERROR_MASK|EDRV32_VIN_IRQ_EN_FRAME_MASK|
+        EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK,EDRV32_NPU_IRQ_EN_ERROR_MASK|EDRV32_NPU_IRQ_EN_DONE_MASK,
+        EDRV32_PIX_IRQ_EN_ERROR_MASK,EDRV32_GEO_IRQ_EN_ERROR_MASK|EDRV32_GEO_IRQ_EN_DONE_MASK};
+    for(unsigned i=0;i<4;++i) if(hardware&bits[i])
+        engine_irq_register(engines[i],masks[i],1,vision_event,(void *)(uintptr_t)engines[i]);
     clint_set_compare(UINT64_MAX);
     __asm__ volatile ("csrw mie, %0" :: "r"(0x880u) : "memory");
     __asm__ volatile ("csrsi mstatus, 8" ::: "memory");

@@ -118,7 +118,8 @@ static enum rnd_format format(lv_color_format_t cf)
 
 static bool image_format(lv_color_format_t cf)
 {
-    return cf == LV_COLOR_FORMAT_RGB565 || cf == LV_COLOR_FORMAT_ARGB8888;
+    return cf == LV_COLOR_FORMAT_A8 || cf == LV_COLOR_FORMAT_RGB565 ||
+           cf == LV_COLOR_FORMAT_ARGB8888;
 }
 
 static struct rnd_common common(lv_draw_task_t *t, const lv_area_t *area,
@@ -335,14 +336,19 @@ static void image_core(lv_draw_task_t *t, const lv_draw_image_dsc_t *d,
         return;
     }
     c.src_fmt = format(image->header.cf);
+    lv_area_t destination;
+    lv_image_buf_get_transformed_area(&destination,lv_area_get_width(coords),
+        lv_area_get_height(coords),0,d->scale_x,d->scale_y,&d->pivot);
+    lv_area_move(&destination,coords->x1,coords->y1);
+    c.rect=rect(&destination,t->target_layer);
     lv_area_t clip;
     lv_area_intersect(&clip, clipped, &t->clip_area);
     lv_area_intersect(&clip, &clip, &t->target_layer->buf_area);
     c.clip = rect(&clip, t->target_layer);
     struct rnd_blit blit = {
         .source = { rnd_physical(image->data), image->header.stride, 0, 0 },
-        .scale_x = 65536,
-        .scale_y = 65536,
+        .scale_x = (1u<<24)/d->scale_x,
+        .scale_y = (1u<<24)/d->scale_y,
         .rc_color = rgb(d->recolor), .rc_opa = d->recolor_opa
     };
     if (d->recolor_opa) c.flags |= RND_RECOLOR;
@@ -395,7 +401,7 @@ static bool supported(lv_draw_task_t *t)
             !lv_color_eq(d->colorkey->low, d->colorkey->high))) return false;
         if (a8) return d->rotation == 0 && d->skew_x == 0 && d->skew_y == 0 &&
                        d->clip_radius == 0 && d->bitmap_mask_src == NULL;
-        return d->bitmap_mask_src == NULL && d->scale_x == 256 && d->scale_y == 256 &&
+        return d->bitmap_mask_src == NULL && d->scale_x > 0 && d->scale_y > 0 &&
                d->rotation == 0 && d->skew_x == 0 && d->skew_y == 0 &&
                d->clip_radius == 0 && image_format(cf) &&
                d->blend_mode == LV_BLEND_MODE_NORMAL;
