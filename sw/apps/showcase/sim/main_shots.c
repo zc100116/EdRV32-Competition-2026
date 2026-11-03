@@ -163,6 +163,13 @@ int main(void)
     for(unsigned i = 0; i < 12; ++i) { lv_tick_inc(500); lv_timer_handler(); }
     ui_refresh();
     capture("chip-coremark");
+    ui_open(1); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
+    assert(ui_detection_settings); capture("detection-settings");
+    ui_key(LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
+    ui_data_detection_threshold(70); ui_data_detection_all(false);
+    ui_data_detection_class(0,true); ui_data_detection_class(2,true);
+    ui_refresh(); assert(ui_data_vision(false).count==3); capture("vision-filtered");
+    ui_data_detection_threshold(50); ui_data_detection_all(true);
     /* Exercise the four-key contract and data actions through real page focus. */
     sim_data_toggle_hardware();
     ui_open(0);
@@ -211,7 +218,7 @@ int main(void)
     ui_key(LV_KEY_ESC); assert(ui_page == 0);
     check_input_devices();
     puts("PASS: keypad/encoder, four-key navigation, availability, page actions, "
-         "label bounds, 19 captures");
+         "label bounds, detection settings and filtering");
     lv_deinit();
     return 0;
 }

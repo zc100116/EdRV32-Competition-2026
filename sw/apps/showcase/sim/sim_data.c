@@ -2,6 +2,8 @@
  * LVGL tick clock; game loader supplies names/icons without opening ROMs.
  */
 #include "sim_data.h"
+#include "detection.h"
+#include <string.h>
 extern const lv_image_dsc_t sim_street;
 extern const lv_image_dsc_t sim_indoor;
 static unsigned hardware = UI_ALL;
@@ -43,21 +45,21 @@ ui_vision_t ui_data_vision(bool batch)
         .paused = paused, .boxes = batch || boxes, .waiting = batch && waiting,
         .batch_index = 1 + second / 3 % 24, .batch_total = 24,
         .success = second / 3 % 24, .failed = 0, .roundtrip = 63 + second % 5};
-    const char *street[] = {"行人", "自行车", "汽车", "汽车", "交通灯"};
-    const char *indoor[] = {"狗", "沙发", "餐桌", "杯子", "盆栽"};
+    const unsigned street[]={0,1,2,2,9},indoor[]={16,57,60,41,58};
     int street_rect[5][4] = {{120, 177, 116, 300}, {338, 177, 110, 225},
         {460, 215, 155, 92}, {638, 220, 310, 143}, {770, 60, 50, 100}};
     int indoor_rect[5][4] = {{150, 285, 235, 210}, {0, 135, 368, 315},
         {400, 250, 316, 220}, {610, 253, 55, 43}, {790, 60, 165, 290}};
     for(unsigned i = 0; i < 5; ++i) {
         int *r = batch ? indoor_rect[i] : street_rect[i];
-        d.targets[i] = (ui_detection_t){batch ? indoor[i] : street[i],
+        unsigned id=batch ? indoor[i] : street[i];
+        d.targets[i] = (ui_detection_t){ui_coco_names[id],
             97 - i * 3 + second % 2, r[0] + (int)(second % 3) * 2,
-            r[1], r[2], r[3]};
+            r[1], r[2], r[3],id};
     }
-    d.category_count[0] = 1;
-    d.category_count[1] = 2;
-    d.category_count[2] = 1;
+    ui_detection_t raw[5];
+    memcpy(raw,d.targets,sizeof(raw));
+    ui_detection_filter(&d,raw,d.count);
     return d;
 }
 void ui_data_pause(void)

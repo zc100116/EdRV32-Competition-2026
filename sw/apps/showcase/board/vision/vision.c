@@ -9,6 +9,7 @@
 #include "ch2.h"
 #include "../../platform.h"
 #include "../../ui/ui_data.h"
+#include "../../ui/detection.h"
 #include "port.h"
 #include "vin.h"
 #include "npu.h"
@@ -37,6 +38,8 @@ static struct {
     uint32_t input_busy;
     lv_image_dsc_t images[6];
     ui_vision_t data;
+    ui_detection_t display_raw[YOLO_MAX_DETECTIONS];
+    unsigned display_count;
     unsigned job;
     int job_image;
     unsigned job_input;
@@ -155,7 +158,9 @@ ui_vision_t ui_data_vision(bool batch)
 {
     (void)batch;
     v.data.image = take_image();
-    return v.data;
+    ui_vision_t result=v.data;
+    ui_detection_filter(&result,v.display_raw,v.display_count);
+    return result;
 }
 void ui_data_pause(void)
 {
@@ -334,36 +339,13 @@ static void camera_frame(unsigned channel)
     }
 }
 
-static const char *const class_names[80] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
-    "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
-    "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",
-    "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball",
-    "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket",
-    "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
-    "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
-    "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
-    "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
-    "toothbrush"
-};
-
 static void publish_result(void)
 {
-    unsigned count = v.post.kept;
-    v.data.count = count;
-    memset(v.data.category_count, 0, sizeof v.data.category_count);
-    const unsigned category_ids[] = {0, 2, 1, 5, 9};
-    for (unsigned i = 0; i < count; ++i) {
-        const yolo_detection *d = &v.detections[i];
-        for (unsigned c = 0; c < 5; ++c) {
-            if (d->class_id == category_ids[c]) ++v.data.category_count[c];
-        }
-        if (i < 5) {
-            v.data.targets[i] = (ui_detection_t){class_names[d->class_id], d->score / 10,
-                d->x0 * 3 / 4, d->y0 * 3 / 4,
-                (d->x1 - d->x0) * 3 / 4, (d->y1 - d->y0) * 3 / 4};
-        }
+    v.display_count=v.post.kept;
+    for(unsigned i=0;i<v.display_count;++i) {
+        const yolo_detection *d=&v.detections[i];
+        v.display_raw[i]=(ui_detection_t){ui_coco_names[d->class_id],d->score/10,
+            d->x0*3/4,d->y0*3/4,(d->x1-d->x0)*3/4,(d->y1-d->y0)*3/4,d->class_id};
     }
     uint64_t now = platform_ticks();
     v.data.post_tenths = tenths(v.post_ticks);

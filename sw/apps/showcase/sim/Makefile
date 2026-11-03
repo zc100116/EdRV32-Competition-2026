@@ -19,7 +19,7 @@ WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
 COMMON := $(UI) sim_data.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
 SHOTS := home home-vrn home-focus-6 vision image process graphics games monitor chip debug \
     graphics-performance graphics-comparison graphics-layers debug-uart debug-network \
-    vision-boxes-off chip-coremark games-last-row
+    vision-boxes-off chip-coremark games-last-row detection-settings vision-filtered
 .PHONY: win shots
 win: $(BUILD)/showcase_sim.exe
 shots: $(addprefix $(BUILD)/shots/,$(addsuffix .png,$(SHOTS)))

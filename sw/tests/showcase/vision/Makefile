@@ -23,5 +23,6 @@ runtime:
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib/sched -I. \
 	    -include $(UI_CONTRACT) runtime_test.c $(VISION)/vision.c $(VISION)/post.c \
 	    $(VISION)/wire.c $(VISION)/ch2.c $(ROOT)/sw/lib/yolo_tables.c \
+	    $(ROOT)/sw/apps/showcase/ui/detection.c \
 	    -o $(OUT)/runtime_test
 	$(OUT)/runtime_test

@@ -55,4 +55,5 @@ extern unsigned ui_page;
 extern unsigned ui_tab;
 extern unsigned ui_mode;
 extern bool ui_game_open;
+extern bool ui_detection_settings;
 #endif

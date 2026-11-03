@@ -10,3 +10,7 @@ test:
 	$(BUILD)/protocol
 	$(CC) $(FLAGS) -I$(ROOT)/sw/lib/sched sched.c $(ROOT)/sw/lib/sched/sched.c -o $(BUILD)/sched
 	$(BUILD)/sched
+	$(CC) $(FLAGS) -I$(ROOT)/third_party/lvgl -I$(ROOT)/sw/apps/showcase/lvgl \
+	    -I$(ROOT)/sw/apps/showcase/ui -DLV_CONF_INCLUDE_SIMPLE \
+	    filter.c $(ROOT)/sw/apps/showcase/ui/detection.c -o $(BUILD)/filter
+	$(BUILD)/filter

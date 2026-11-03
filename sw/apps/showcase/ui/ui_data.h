@@ -16,7 +16,9 @@ typedef struct {
     const char *category;
     unsigned confidence;
     int x, y, width, height;
+    unsigned class_id;
 } ui_detection_t;
+typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_t;
 typedef struct {
     const lv_image_dsc_t *image;
     unsigned fps, npu_tenths, post_tenths, count;
@@ -42,6 +44,10 @@ unsigned ui_data_hardware(void);
 ui_system_t ui_data_system(void);
 /* Return the current camera or batch image and detection results. */
 ui_vision_t ui_data_vision(bool batch);
+ui_detection_config_t ui_data_detection_config(void);
+void ui_data_detection_threshold(unsigned percent);
+void ui_data_detection_class(unsigned class_id,bool enabled);
+void ui_data_detection_all(bool enabled);
 /* Toggle camera capture pause. */
 void ui_data_pause(void);
 /* Toggle detection box visibility. */

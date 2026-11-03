@@ -12,6 +12,7 @@ static lv_obj_t *bars[5];
 static lv_obj_t *batch_status;
 static lv_obj_t *pause_label;
 static lv_obj_t *box_label;
+static lv_obj_t *filter_label;
 static unsigned last_frame;
 static const lv_image_dsc_t *last_image;
 void ui_vision_build(lv_obj_t *p, bool batch)
@@ -19,6 +20,7 @@ void ui_vision_build(lv_obj_t *p, bool batch)
     ui_vision_t d = ui_data_vision(batch);
     ui_label(p, batch ? "图片识别" : "实时视觉", 24, 12, &sim_font_28, TEXT);
     ui_label(p, "YOLO · 目标检测", 204, 22, &sim_font_14, MUTED);
+    filter_label=ui_label(p,"",360,22,&sim_font_14,MUTED);
     lv_obj_t *frame = ui_box(p, 16, 56, 960, 540, BG);
     lv_obj_set_style_border_width(frame, 0, 0);
     lv_obj_set_style_radius(frame, 0, 0);
@@ -68,11 +70,17 @@ void ui_vision_build(lv_obj_t *p, bool batch)
     pause_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
     ui_button(p, batch ? "切回摄像头识别" : "检测框：开启", 790, 6, 186, 1);
     box_label = lv_obj_get_child(lv_obj_get_child(p, -1), 0);
+    ui_button(p,"检测设置",992,6,272,2);
 }
 void ui_vision_update(bool batch)
 {
     ui_vision_t d = ui_data_vision(batch);
     char s[200];
+    ui_detection_config_t config=ui_data_detection_config();
+    unsigned selected=0;
+    for(unsigned i=0;i<80;++i) selected+=(config.classes[i/32]>>(i%32))&1u;
+    lv_snprintf(s,sizeof(s),"≥%u.%02u · %u 类",config.threshold/100,
+        config.threshold%100,selected); ui_text(filter_label,s);
     if(d.image != last_image) { lv_image_set_src(picture, d.image); last_image = d.image; }
     unsigned frame = ui_data_system().seconds;
     if(frame != last_frame || !d.boxes || batch) {

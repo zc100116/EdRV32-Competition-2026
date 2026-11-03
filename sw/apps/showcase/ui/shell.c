@@ -2,10 +2,12 @@
  * One group per active page; 2 Hz counters and 1 Hz monitoring curves.
  */
 #include "theme.h"
+#include "detection.h"
 unsigned ui_page;
 unsigned ui_tab;
 unsigned ui_mode;
 bool ui_game_open;
+bool ui_detection_settings;
 static unsigned home_focus;
 static unsigned game_focus;
 static unsigned game_count;
@@ -60,8 +62,8 @@ void ui_refresh(void)
         d.link ? "已连接" : "未连接", d.fps);
     ui_text(status, s);
     switch(ui_page) {
-        case 1: ui_vision_update(false); break;
-        case 2: ui_vision_update(true); break;
+        case 1: if(!ui_detection_settings) ui_vision_update(false); break;
+        case 2: if(!ui_detection_settings) ui_vision_update(true); break;
         case 3: ui_process_update(); break;
         case 4: ui_graphics_update(); break;
         case 5: {
@@ -78,6 +80,7 @@ void ui_refresh(void)
 void ui_open(unsigned page)
 {
     ui_page = page;
+    if(page!=1 && page!=2) ui_detection_settings=false;
     item_count = 0;
     if(group) lv_group_delete(group);
     group = lv_group_create();
@@ -108,7 +111,8 @@ void ui_open(unsigned page)
         ui_page_process, ui_page_graphics, ui_page_games, ui_page_monitor,
         ui_page_chip, ui_page_debug};
     if(page==5) ui_data_games(&game_count);
-    pages[page](content);
+    if(ui_detection_settings) ui_page_detection_settings(content);
+    else pages[page](content);
     if(!item_count) {
         lv_group_add_obj(group,content);
         lv_obj_add_event_cb(content,key_event,LV_EVENT_KEY,NULL);
@@ -132,6 +136,10 @@ static void activate(unsigned action)
         ui_mode = 0;
         game_focus = 0;
         ui_open(action);
+    } else if((ui_page==1 || ui_page==2) && ui_detection_settings) {
+        ui_detection_settings_action(action);
+    } else if((ui_page==1 || ui_page==2) && action==2) {
+        ui_detection_settings=true; ui_open(ui_page);
     } else if(ui_page == 1) {
         if(action == 0) ui_data_pause();
         else ui_data_boxes();
@@ -165,6 +173,7 @@ static void activate(unsigned action)
 void ui_key(uint32_t key)
 {
     if(key == LV_KEY_ESC) {
+        if(ui_detection_settings) { ui_detection_settings=false; ui_open(ui_page); return; }
         if(ui_game_open) {
             if(game_back_armed) {
                 ui_game_open = false;
