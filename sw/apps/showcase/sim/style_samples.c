@@ -15,15 +15,17 @@ LV_FONT_DECLARE(sim_digits_48);
 
 typedef struct {
     uint32_t background, gradient, panel, selected, line, text, muted, accent;
+    uint32_t secondary, tertiary;
     const char *name;
 } palette_t;
 static const palette_t palettes[] = {
     {0x08141f, 0x08141f, 0x102431, 0x153e49, 0x254452, 0xeaf6fa, 0x91aab9,
-     0x43e0ba, "深色科技"},
+     0x43e0ba, 0x73a9df, 0xb2c7d9, "深色科技"},
     {0xeff3f8, 0xeff3f8, 0xffffff, 0xeaf2ff, 0xd6e0ec, 0x152b45, 0x61748b,
-     0x2468df, "浅色简洁"},
-    {0x191329, 0x302042, 0x2a203b, 0x493046, 0x55405f, 0xfff4e8, 0xc2afc9,
-     0xffbd69, "深紫仪表"}
+     0x2468df, 0x168d8f, 0x748ca6, "浅色简洁"},
+    /* Equal gradient endpoints keep the purple background uniform in RGB565. */
+    {0x191329, 0x191329, 0x2a203b, 0x493046, 0x55405f, 0xfff4e8, 0xc2afc9,
+     0xffbd69, 0xe68759, 0xcdbb99, "深紫仪表"}
 };
 static const char *names[] = {"视觉识别", "图片识别", "图像处理", "图形引擎",
     "游戏", "系统监控", "芯片信息", "调试助手"};
@@ -96,7 +98,9 @@ static void home_page(lv_obj_t *screen)
 {
     label(screen, "探索芯片的无限可能", 40, 76, &sim_font_40, p->text);
     label(screen, "边缘视觉 · 自主计算 · 实时交互", 42, 132, &sim_font_16, p->muted);
-    label(screen, "应用中心  /  08", 1090, 136, &sim_font_16, p->accent);
+    lv_obj_t *heading = label(screen, "应用中心  /  08", 0, 136, &sim_font_16, p->accent);
+    lv_obj_update_layout(heading);
+    lv_obj_set_x(heading, 1240 - lv_obj_get_width(heading));
     for(unsigned i = 0; i < 8; ++i) {
         int x = 40 + (int)(i % 4) * 306;
         int y = 181 + (int)(i / 4) * 238;
@@ -119,9 +123,11 @@ static void monitor_page(lv_obj_t *screen)
     lv_obj_t *cpu = box(screen, 40, 171, 788, 235, p->panel, p->line, 14);
     label(cpu, "CPU 任务占用", 22, 17, &sim_font_20, p->text);
     const char *legend[] = {"通信服务", "当前应用", "图形界面"};
-    uint32_t colors[] = {p->accent, 0x779ef2, 0xdb85b6};
-    for(unsigned i = 0; i < 3; ++i)
+    uint32_t colors[] = {p->accent, p->secondary, p->tertiary};
+    for(unsigned i = 0; i < 3; ++i) {
+        box(cpu, 352 + (int)i * 130, 26, 10, 10, colors[i], colors[i], 0);
         label(cpu, legend[i], 370 + (int)i * 130, 21, &sim_font_14, colors[i]);
+    }
     chart = lv_chart_create(cpu);
     lv_obj_remove_style_all(chart);
     lv_obj_set_pos(chart, 24, 66);
@@ -141,7 +147,11 @@ static void monitor_page(lv_obj_t *screen)
     }
     lv_obj_t *ddr = box(screen, 40, 426, 788, 230, p->panel, p->line, 14);
     label(ddr, "DDR 端口带宽", 22, 16, &sim_font_20, p->text);
-    label(ddr, "读 / 写    MB/s", 592, 20, &sim_font_14, p->muted);
+    box(ddr, 590, 25, 10, 10, p->accent, p->accent, 0);
+    label(ddr, "读", 608, 20, &sim_font_14, p->muted);
+    box(ddr, 646, 25, 10, 10, p->secondary, p->secondary, 0);
+    label(ddr, "写", 664, 20, &sim_font_14, p->muted);
+    label(ddr, "MB/s", 704, 20, &sim_font_14, p->muted);
     const char *ports[] = {"CPU", "显示", "摄像头", "NPU", "渲染", "网口"};
     for(unsigned i = 0; i < 6; ++i) {
         int y = 54 + (int)i * 27;
@@ -149,7 +159,8 @@ static void monitor_page(lv_obj_t *screen)
         box(ddr, 110, y + 4, 450, 7, p->line, p->line, 3);
         box(ddr, 110, y + 14, 450, 4, p->line, p->line, 2);
         bandwidth[i][0] = box(ddr, 110, y + 4, 200, 7, p->accent, p->accent, 3);
-        bandwidth[i][1] = box(ddr, 110, y + 14, 100, 4, 0x779ef2, 0x779ef2, 2);
+        bandwidth[i][1] = box(ddr, 110, y + 14, 100, 4,
+                              p->secondary, p->secondary, 2);
         bandwidth_text[i] = label(ddr, "", 590, y, &sim_font_16, p->text);
     }
     lv_obj_t *metrics = box(screen, 850, 171, 390, 485, p->panel, p->line, 14);
