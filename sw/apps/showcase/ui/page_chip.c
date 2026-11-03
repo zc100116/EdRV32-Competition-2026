@@ -11,39 +11,61 @@ static void wire(lv_obj_t *p, int x, int y, int w, int h)
     lv_obj_set_style_border_width(o, 0, 0);
     lv_obj_set_style_radius(o, 0, 0);
 }
-static void module(lv_obj_t *p, const char *name, int x, int y, int w, unsigned mask)
+static void module(lv_obj_t *p, const char *name, int x, int y, int w, int h,
+                   unsigned mask)
 {
     bool present = (ui_data_hardware() & mask) == mask;
-    lv_obj_t *o = ui_box(p, x, y, w, 46, present ? SELECTED : DISABLED);
-    ui_label(o, name, 12, 12, &sim_font_16, present ? ACCENT : MUTED);
+    lv_obj_t *o = ui_box(p, x, y, w, h, present ? SELECTED : DISABLED);
+    lv_obj_t *label = ui_label(o, name, 0, 0, &sim_font_14, present ? ACCENT : MUTED);
+    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_center(label);
 }
 void ui_page_chip(lv_obj_t *p)
 {
     ui_title(p, "芯片信息", "自主设计的 RISC-V 边缘视觉系统");
     lv_obj_t *diagram = ui_box(p, 40, 124, 710, 484, PANEL);
-    ui_label(diagram, "EdRV32 SoC", 24, 18, &sim_font_28, TEXT);
-    wire(diagram, 83, 140, 2, 260);
-    wire(diagram, 83, 140, 542, 2);
-    wire(diagram, 623, 140, 2, 260);
-    wire(diagram, 353, 110, 2, 322);
-    wire(diagram, 83, 297, 542, 2);
-    module(diagram, "CPU", 285, 65, 140, 0);
-    module(diagram, "I$", 184, 116, 100, 0);
-    module(diagram, "D$", 426, 116, 100, 0);
-    module(diagram, "sys_xbar", 268, 187, 174, 0);
-    module(diagram, "SRAM", 24, 187, 130, 0);
-    module(diagram, "ROM", 556, 187, 130, 0);
-    module(diagram, "mem_xbar", 268, 273, 174, 0);
-    module(diagram, "DDR3", 268, 368, 174, 0);
-    const char *names[] = {"VIN", "PIX", "GEO", "DISP", "RND", "NPU", "ETH", "UART"};
-    unsigned masks[] = {UI_VIN, UI_PIX, UI_GEO, UI_DISP, UI_RND, UI_NPU, UI_ETH, 0};
-    for(unsigned i = 0; i < 8; ++i) {
-        int x = i < 4 ? 24 : 556;
-        int y = 240 + (int)(i % 4) * 50;
-        module(diagram, names[i], x, y, 130, masks[i]);
+    ui_label(diagram, "clk_sys", 20, 14, &sim_font_14, MUTED);
+    wire(diagram, 310, 68, 2, 18);
+    wire(diagram, 398, 68, 2, 18);
+    module(diagram, "EdRV32 CPU · I$ / D$", 240, 18, 230, 50, 0);
+    module(diagram, "sys_xbar", 20, 86, 670, 30, 0);
+    const char *slaves[] = {"ROM", "SRAM", "ddr_gateway", "CLINT", "PLIC",
+        "sys_apb", "media_\napb_brg"};
+    for(unsigned i = 0; i < 7; ++i) {
+        int x = 20 + (int)i * 96;
+        wire(diagram, x + 43, 116, 2, 19);
+        module(diagram, slaves[i], x, 135, 88, 44, 0);
     }
-    ui_label(diagram, "PG2L200H  ·  160K LUT / 415 DRM / 740 APM", 24, 442,
-        &sim_font_16, MUTED);
+    wire(diagram, 543, 179, 2, 14);
+    module(diagram, "UART · GPIO · I2C\nCACHE_CTRL · SYSCTRL", 320, 193, 275, 42, 0);
+    for(int x = 20; x < 684; x += 16) wire(diagram, x, 246, 8, 1);
+    ui_label(diagram, "clk_mem", 20, 256, &sim_font_14, MUTED);
+    ui_label(diagram, "NPU：clk_npu", 310, 272, &sim_font_14, MUTED);
+    wire(diagram, 639, 179, 2, 85);
+    module(diagram, "media_apb", 590, 264, 100, 28, 0);
+    wire(diagram, 255, 179, 2, 200);
+    const char *masters[] = {"DISP", "VIN + PIX", "", "NPU", "RND", "GEO", "ETH"};
+    unsigned masks[] = {UI_DISP, UI_VIN | UI_PIX, 0, UI_NPU, UI_RND, UI_GEO, UI_ETH};
+    for(unsigned i = 0; i < 7; ++i) {
+        int x = 20 + (int)i * 96;
+        wire(diagram, x + 43, 346, 2, 33);
+        if(i == 1) {
+            wire(diagram, x + 20, 346, 2, 5);
+            wire(diagram, x + 66, 346, 2, 5);
+            wire(diagram, x + 20, 350, 48, 2);
+            module(diagram, "VIN", x, 310, 42, 36, UI_VIN);
+            module(diagram, "PIX", x + 46, 310, 42, 36, UI_PIX);
+        } else if(i != 2) module(diagram, masters[i], x, 310, 88, 36, masks[i]);
+        char port[8];
+        lv_snprintf(port, sizeof(port), "P%u", i);
+        lv_obj_t *label = ui_label(diagram, port, x + 49, 353, &sim_font_14, MUTED);
+        lv_obj_set_style_bg_color(label, lv_color_hex(PANEL), 0);
+        lv_obj_set_style_bg_opa(label, LV_OPA_COVER, 0);
+    }
+    module(diagram, "mem_xbar · 7 主 × 1 从", 20, 379, 670, 32, 0);
+    wire(diagram, 354, 411, 2, 18);
+    module(diagram, "DDR3", 290, 429, 130, 32, 0);
+    ui_label(diagram, "PG2L200H FPGA", 20, 466, &sim_font_14, MUTED);
     lv_obj_t *params = ui_box(p, 774, 124, 466, 262, PANEL);
     ui_label(params, "芯片参数", 24, 18, &sim_font_20, TEXT);
     ui_label(params, "CPU    顺序双发射 RV32 · 100 MHz\n\n"

@@ -7,6 +7,7 @@ unsigned ui_tab;
 unsigned ui_mode;
 bool ui_game_open;
 static unsigned home_focus;
+static unsigned game_focus;
 static bool game_back_armed;
 static lv_group_t *group;
 static lv_obj_t *content;
@@ -20,11 +21,17 @@ static void clicked(lv_event_t *e)
     lv_group_focus_obj(o);
     activate((unsigned)(uintptr_t)lv_obj_get_user_data(o));
 }
+static void focused(lv_event_t *e)
+{
+    lv_obj_scroll_to_view_recursive(lv_event_get_target_obj(e), LV_ANIM_OFF);
+}
 void ui_button(lv_obj_t *p, const char *s, int x, int y, int w, unsigned action)
 {
     lv_obj_t *o = ui_box(p, x, y, w, 40, PANEL);
     ui_label(o, s, 14, 9, &sim_font_16, TEXT);
     lv_obj_set_clickable(o, true);
+    lv_obj_set_scroll_on_focus(o, false);
+    lv_obj_add_event_cb(o, focused, LV_EVENT_FOCUSED, NULL);
     lv_obj_add_event_cb(o, clicked, LV_EVENT_CLICKED, NULL);
     lv_obj_set_user_data(o, (void *)(uintptr_t)action);
     ++item_count;
@@ -80,6 +87,8 @@ void ui_open(unsigned page)
         ui_page_chip, ui_page_debug};
     pages[page](content);
     if(page == 0) lv_group_focus_obj(lv_group_get_obj_by_index(group, home_focus));
+    if(page == 5 && !ui_game_open)
+        lv_group_focus_obj(lv_group_get_obj_by_index(group, game_focus));
     if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab));
@@ -93,6 +102,7 @@ static void activate(unsigned action)
             return;
         ui_tab = 0;
         ui_mode = 0;
+        game_focus = 0;
         ui_open(action);
     } else if(ui_page == 1) {
         if(action == 0) ui_data_pause();
@@ -105,7 +115,12 @@ static void activate(unsigned action)
     else if(ui_page == 4) {
         if(action < 3) { ui_tab = action; ui_open(4); }
         else { ui_data_benchmark_start(); ui_refresh(); }
-    } else if(ui_page == 5) { ui_game_open = true; ui_mode = action; ui_open(5); }
+    } else if(ui_page == 5) {
+        game_focus = action;
+        ui_game_open = true;
+        ui_mode = action;
+        ui_open(5);
+    }
     else if(ui_page == 7) { ui_data_coremark_start(); ui_refresh(); }
     else if(ui_page == 8) {
         if(action < 2) { ui_tab = action; ui_open(8); }

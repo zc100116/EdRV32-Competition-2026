@@ -4,8 +4,8 @@
 #include "theme.h"
 static lv_obj_t *chart;
 static lv_chart_series_t *series[3];
-static lv_obj_t *band[6][2];
-static lv_obj_t *band_text[6];
+static lv_obj_t *band[7][2];
+static lv_obj_t *band_text[7];
 static lv_obj_t *metrics[4];
 static lv_obj_t *network;
 static unsigned last_second;
@@ -39,9 +39,9 @@ void ui_page_monitor(lv_obj_t *p)
     lv_obj_t *ddr = ui_box(p, 40, 378, 788, 230, PANEL);
     ui_label(ddr, "DDR 端口带宽", 22, 16, &sim_font_20, TEXT);
     ui_label(ddr, "读 / 写    MB/s", 590, 20, &sim_font_14, MUTED);
-    const char *ports[] = {"CPU", "显示", "摄像头", "NPU", "渲染", "网口"};
-    for(unsigned i = 0; i < 6; ++i) {
-        int y = 54 + (int)i * 27;
+    const char *ports[] = {"显示", "摄像头", "CPU", "NPU", "渲染", "几何", "网口"};
+    for(unsigned i = 0; i < 7; ++i) {
+        int y = 48 + (int)i * 25;
         ui_label(ddr, ports[i], 24, y, &sim_font_16, MUTED);
         ui_bar(ddr, 110, y + 4, 450, 1, ACCENT);
         band[i][0] = lv_obj_get_child(ddr, -1);
@@ -70,7 +70,7 @@ void ui_monitor_update(void)
             lv_chart_set_next_value(chart, series[i], (int)d.task_cpu[i]);
     }
     char s[96];
-    for(unsigned i = 0; i < 6; ++i) {
+    for(unsigned i = 0; i < 7; ++i) {
         unsigned values[] = {d.ddr_read[i], d.ddr_write[i]};
         for(unsigned j = 0; j < 2; ++j)
             if(lv_obj_get_width(band[i][j]) != (int)values[j])

@@ -8,7 +8,7 @@ enum { UI_PIX = 1, UI_GEO = 2, UI_VIN = 4, UI_NPU = 8, UI_ETH = 16,
        UI_RND = 32, UI_DISP = 64, UI_ALL = 127 };
 typedef struct {
     unsigned seconds, cpu, fps, idle, npu_busy, rnd_busy;
-    unsigned task_cpu[3], ddr_read[6], ddr_write[6];
+    unsigned task_cpu[3], ddr_read[7], ddr_write[7];
     bool link;
 } ui_system_t;
 typedef struct {
@@ -26,7 +26,7 @@ typedef struct {
 } ui_vision_t;
 typedef struct { const char *name; unsigned ms_tenths, fps_tenths, software_tenths; }
     ui_benchmark_t;
-typedef struct { const char *name; const char *initial; } ui_game_t;
+typedef struct { const char *name; const char *initial; const lv_image_dsc_t *cover; } ui_game_t;
 typedef struct { unsigned progress, score_tenths, per_mhz_thousandths; bool running; }
     ui_coremark_t;
 typedef struct {
@@ -37,7 +37,7 @@ typedef struct {
 } ui_debug_t;
 /* Return the modules available to this hardware configuration. */
 unsigned ui_data_hardware(void);
-/* Return status, task occupancy and six DDR port counters. */
+/* Return status, task occupancy and seven DDR port counters. */
 ui_system_t ui_data_system(void);
 /* Return the current camera or batch image and detection results. */
 ui_vision_t ui_data_vision(bool batch);
@@ -55,7 +55,7 @@ const ui_benchmark_t *ui_data_benchmark(void);
 void ui_data_benchmark_start(void);
 /* Return the number of completed benchmark scenes. */
 unsigned ui_data_benchmark_progress(void);
-/* Return the eight fixed example names and their initial characters. */
+/* Return the build-time game names, initial characters and optional covers. */
 const ui_game_t *ui_data_games(unsigned *count);
 /* Return CoreMark progress and the completed score. */
 ui_coremark_t ui_data_coremark(void);

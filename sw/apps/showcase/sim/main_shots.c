@@ -96,6 +96,28 @@ int main(void)
         ui_open(i);
         capture(names[i - 1]);
     }
+    unsigned game_count;
+    const ui_game_t *games = ui_data_games(&game_count);
+    assert(game_count == 30);
+    assert(lv_strcmp(games[0].name, "超级马里奥") == 0);
+    assert(lv_strcmp(games[29].name, "中国象棋") == 0);
+    ui_open(5);
+    for(unsigned i = 1; i < game_count; ++i) ui_key(LV_KEY_RIGHT);
+    capture("games-last-row");
+    lv_obj_t *grid = lv_obj_get_child(lv_obj_get_child(lv_screen_active(), -1), -1);
+    lv_obj_t *last_game = lv_obj_get_child(grid, 29);
+    lv_area_t viewport, selected;
+    lv_obj_get_coords(grid, &viewport);
+    lv_obj_get_coords(last_game, &selected);
+    assert(lv_obj_has_state(last_game, LV_STATE_FOCUSED));
+    assert(selected.y1 >= viewport.y1 && selected.y2 <= viewport.y2);
+    assert(lv_obj_get_scroll_y(grid) > 0);
+    ui_key(LV_KEY_ENTER);
+    assert(ui_game_open && ui_mode == 29);
+    ui_key(LV_KEY_ESC); ui_key(LV_KEY_ESC);
+    assert(!ui_game_open && ui_page == 5);
+    grid = lv_obj_get_child(lv_obj_get_child(lv_screen_active(), -1), -1);
+    assert(lv_obj_has_state(lv_obj_get_child(grid, 29), LV_STATE_FOCUSED));
     ui_tab = 0; ui_open(4); capture("graphics-performance");
     ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER); capture("graphics-comparison");
     ui_key(LV_KEY_RIGHT); ui_key(LV_KEY_ENTER);
@@ -153,7 +175,7 @@ int main(void)
     ui_key(LV_KEY_ESC); assert(ui_game_open);
     ui_key(LV_KEY_ESC); assert(!ui_game_open && ui_page == 5);
     ui_key(LV_KEY_ESC); assert(ui_page == 0);
-    puts("PASS: four-key navigation, availability, page actions, label bounds, 18 captures");
+    puts("PASS: four-key navigation, availability, page actions, label bounds, 19 captures");
     lv_deinit();
     return 0;
 }

@@ -7,6 +7,7 @@ static lv_obj_t *boxes[5];
 static lv_obj_t *tags[5];
 static lv_obj_t *metrics[4];
 static lv_obj_t *counts[5];
+static lv_obj_t *confidence[5];
 static lv_obj_t *bars[5];
 static lv_obj_t *batch_status;
 static lv_obj_t *pause_label;
@@ -38,8 +39,13 @@ void ui_vision_build(lv_obj_t *p, bool batch)
     lv_obj_t *side = ui_box(p, 992, 56, 272, 540, PANEL);
     if(batch) {
         ui_label(side, "目标列表", 20, 18, &sim_font_20, TEXT);
-        for(unsigned i = 0; i < 5; ++i)
-            counts[i] = ui_label(side, "", 20, 62 + (int)i * 36, &sim_font_16, TEXT);
+        for(unsigned i = 0; i < 5; ++i) {
+            int y = 62 + (int)i * 36;
+            counts[i] = ui_label(side, "", 20, y, &sim_font_16, TEXT);
+            confidence[i] = ui_label(side, "", 182, y, &sim_font_16, TEXT);
+            lv_obj_set_width(confidence[i], 70);
+            lv_obj_set_style_text_align(confidence[i], LV_TEXT_ALIGN_RIGHT, 0);
+        }
         ui_label(side, "批量进度", 20, 282, &sim_font_20, TEXT);
         batch_status = ui_label(side, "", 20, 328, &sim_font_16, MUTED);
     } else {
@@ -87,11 +93,11 @@ void ui_vision_update(bool batch)
     }
     if(batch) {
         for(unsigned i = 0; i < 5; ++i) {
-            if(i < d.count && !d.waiting)
-                lv_snprintf(s, sizeof(s), "%s                 %u%%",
-                    d.targets[i].category, d.targets[i].confidence);
+            bool available = i < d.count && !d.waiting;
+            ui_text(counts[i], available ? d.targets[i].category : "—");
+            if(available) lv_snprintf(s, sizeof(s), "%u%%", d.targets[i].confidence);
             else lv_snprintf(s, sizeof(s), "—");
-            ui_text(counts[i], s);
+            ui_text(confidence[i], s);
         }
         if(d.waiting) lv_snprintf(s, sizeof(s), "等待 PC 发送图片\n\n通过网口上传图片\n即可开始识别");
         else lv_snprintf(s, sizeof(s), "第 %u / %u 张\n\n成功 %u    失败 %u\n\n平均往返 %u ms",

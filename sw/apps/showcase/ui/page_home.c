@@ -5,7 +5,9 @@
 void ui_page_home(lv_obj_t *p)
 {
     ui_title(p, "探索芯片的无限可能", "边缘视觉 · 自主计算 · 实时交互");
-    ui_label(p, "应用中心  /  08", 1100, 84, &sim_font_16, ACCENT);
+    lv_obj_t *heading = ui_label(p, "应用中心  /  08", 0, 84, &sim_font_16, ACCENT);
+    lv_obj_update_layout(heading);
+    lv_obj_set_x(heading, 1240 - lv_obj_get_width(heading));
     const char *names[] = {"视觉识别", "图片识别", "图像处理", "图形引擎", "游戏",
         "系统监控", "芯片信息", "调试助手"};
     const char *desc[] = {"发现镜头中的每一个目标", "上传图片，即刻了解结果",

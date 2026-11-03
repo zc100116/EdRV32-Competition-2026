@@ -1,4 +1,4 @@
-/* page_games.c — showcase design §4.3; eight example entries; no ROM access.
+/* page_games.c — showcase design §4.3; portrait covers and build-time entries; no ROM access.
  * One linear group scrolls through the game grid on the UI thread.
  */
 #include "theme.h"
@@ -13,21 +13,27 @@ void ui_page_games(lv_obj_t *p)
         ui_label(card, games[ui_mode].name, 32, 26, &sim_font_28, TEXT);
         ui_label(card, LV_SYMBOL_PLAY, 548, 146, &sim_font_40, ACCENT);
         ui_label(card, "游戏画面预览", 490, 220, &sim_font_28, MUTED);
-        ui_label(card, "按返回键回到游戏列表", 480, 290, &sim_font_20, MUTED);
+        ui_label(card, "按返回键两次回到游戏列表", 470, 290, &sim_font_20, MUTED);
         return;
     }
-    lv_obj_t *grid = ui_box(p, 40, 130, 1200, 470, BG);
+    lv_obj_t *grid = ui_box(p, 40, 130, 1200, 458, BG);
     lv_obj_set_style_border_width(grid, 0, 0);
     lv_obj_set_scrollable(grid, true);
+    lv_obj_set_scroll_dir(grid, LV_DIR_VER);
     for(unsigned i = 0; i < count; ++i) {
-        ui_button(grid, "", (int)(i % 4) * 300, (int)(i / 4) * 234, 280, i);
+        ui_button(grid, "", (int)(i % 6) * 200, (int)(i / 6) * 234, 184, i);
         lv_obj_t *card = lv_obj_get_child(grid, -1);
-        lv_obj_set_height(card, 210);
-        uint32_t colors[] = {ACCENT, TEAL, 0x748ca6, 0x526bb4};
-        lv_obj_t *icon = ui_box(card, 22, 20, 64, 64, colors[i % 4]);
-        lv_obj_set_style_border_width(icon, 0, 0);
-        ui_label(icon, games[i].initial, 18, 12, &sim_font_28, PANEL);
-        ui_label(card, games[i].name, 22, 108, &sim_font_28, TEXT);
-        ui_label(card, "进入游戏  >", 22, 171, &sim_font_14, ACCENT);
+        lv_obj_set_height(card, 222);
+        if(games[i].cover) ui_picture(card, games[i].cover, 32, 12, 120, 160);
+        else {
+            uint32_t colors[] = {ACCENT, TEAL, 0x748ca6, 0x526bb4};
+            lv_obj_t *cover = ui_box(card, 32, 12, 120, 160, colors[i % 4]);
+            lv_obj_set_style_border_width(cover, 0, 0);
+            lv_obj_t *initial = ui_label(cover, games[i].initial, 0, 0, &sim_font_40, PANEL);
+            lv_obj_center(initial);
+        }
+        lv_obj_t *name = ui_label(card, games[i].name, 12, 184, &sim_font_20, TEXT);
+        lv_obj_set_width(name, 160);
+        lv_obj_set_style_text_align(name, LV_TEXT_ALIGN_CENTER, 0);
     }
 }

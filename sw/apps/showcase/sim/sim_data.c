@@ -28,7 +28,7 @@ ui_system_t ui_data_system(void)
         .fps = 58 + step % 3, .idle = 72 - step % 9, .npu_busy = 65 + step % 13,
         .rnd_busy = 21 + step % 11, .link = true};
     for(unsigned i = 0; i < 3; ++i) d.task_cpu[i] = 12 + i * 16 + (step / 2 * 7 + i) % 19;
-    for(unsigned i = 0; i < 6; ++i) {
+    for(unsigned i = 0; i < 7; ++i) {
         d.ddr_read[i] = 65 + (i * 61 + step * 13) % 350;
         d.ddr_write[i] = 20 + (i * 47 + step * 7) % 210;
     }
@@ -96,14 +96,12 @@ unsigned ui_data_benchmark_progress(void)
     unsigned n = (lv_tick_get() - benchmark_start) / 500 + 1;
     return n > 16 ? 16 : n;
 }
+extern const ui_game_t sim_games[];
+extern const unsigned sim_game_count;
 const ui_game_t *ui_data_games(unsigned *count)
 {
-    static const ui_game_t games[] = {
-        {"魂斗罗", "魂"}, {"超级玛丽", "超"}, {"坦克大战", "坦"}, {"双截龙", "双"},
-        {"冒险岛", "冒"}, {"松鼠大作战", "松"}, {"赤色要塞", "赤"}, {"NROM 测试", "N"}
-    };
-    *count = 8;
-    return games;
+    *count = sim_game_count;
+    return sim_games;
 }
 void ui_data_coremark_start(void) { core_start = lv_tick_get(); core_started = true; }
 ui_coremark_t ui_data_coremark(void)
@@ -123,9 +121,9 @@ ui_debug_t ui_data_debug(void)
             "RX  Vision pipeline active" : "",
         .uart_hex = received ? "RX  45 64 52 56 33 32 20 72 65 61 64 79\n"
             "RX  4C 69 6E 6B 20 65 73 74 61 62 6C 69 73 68 65 64" : "",
-        .udp_text = "192.168.1.100:5000\n\nEDRV32 / telemetry\n"
+        .udp_text = "192.168.1.2:6000\n\nEDRV32 / telemetry\n"
             "frame=0248  targets=04\nstatus=ready",
-        .peer = "192.168.1.100:5000", .baud = baud[baud_index],
+        .peer = "192.168.1.2:6000", .baud = baud[baud_index],
         .uart_rx = step * 24, .uart_tx = sent * 15,
         .rx_packets = 248 + step * 3, .tx_packets = 232 + step * 2,
         .rx_bytes = 31744 + step * 384, .tx_bytes = 29696 + step * 256,
