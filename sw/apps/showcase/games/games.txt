@@ -29,4 +29,4 @@
 气球大战|FC游戏 536款 含封面/气球大战/气球大战.nes|covers/balloon-fight.png
 打砖块|FC游戏 536款 含封面/打砖块/打砖块.nes|covers/arkanoid.png
 马戏团|FC游戏 536款 含封面/马戏团/马戏团.nes|covers/circus-charlie.png
-中国象棋|FC游戏 536款 含封面/中国象棋/中国象棋.nes|
+中国象棋|FC游戏 536款 含封面/中国象棋/中国象棋.nes|covers/chinese-chess.png
