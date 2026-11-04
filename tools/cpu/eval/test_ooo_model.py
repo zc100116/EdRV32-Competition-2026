@@ -95,7 +95,7 @@ class OutOfOrder(unittest.TestCase):
         self.assertGreaterEqual(when(timeline, 'execute', 3), when(timeline, 'execute', 1) + 34)
 
     def test_mispredict_squash_penalty(self):
-        for penalty in (5, 7, 9):
+        for penalty in (5, 6, 7, 8, 9):
             stream = [instruction(0), instruction(4, 'branch', target=32), instruction(32)]
             _, timeline = run(stream, penalty=penalty)
             self.assertEqual(when(timeline, 'execute', 2) - when(timeline, 'execute', 1),
@@ -158,8 +158,37 @@ class OutOfOrder(unittest.TestCase):
                 groups.setdefault(tick, []).append(stream[index].kind)
         self.assertTrue(any(len(kinds) == 3 for kinds in groups.values()))
         for kinds in groups.values():
-            self.assertLessEqual(kinds.count('alu'), 2)
+            self.assertLessEqual(kinds.count('alu'), 3)
             self.assertLessEqual(kinds.count('mul'), 1)
+
+    def test_four_wide_and_slot_accounting(self):
+        stream = [instruction(pc) for pc in range(0, 96, 4)]
+        result, timeline = run(stream, issue_width=4, rob_size=64, iq_size=32)
+        for name in ('rename', 'select', 'commit'):
+            counts = {}
+            for tick, event, index, _ in timeline:
+                if event == name and index >= 0:
+                    counts[tick] = counts.get(tick, 0) + 1
+            self.assertEqual(max(counts.values()), 4, name)
+        self.assertEqual(sum(result['rename_slots_' + k] for k in RENAME_CAUSES),
+                         4 * result['cycles'])
+
+    def test_two_lsus_and_committing_stores(self):
+        stream = [instruction(0, 'load', rd=1), instruction(4, 'load', rd=2)]
+        _, timeline = run(stream, lsus=2)
+        self.assertEqual(when(timeline, 'execute', 0), when(timeline, 'execute', 1))
+        stores = [instruction(0, 'store', sources=(0, 0)),
+                  instruction(4, 'store', sources=(0, 0))]
+        _, timeline = run(stores, [0x1000, 0x2000], lsus=2)
+        self.assertEqual(when(timeline, 'commit', 0), when(timeline, 'commit', 1))
+
+    def test_recovery_at_all_widths(self):
+        for width in (2, 3, 4):
+            stream = [instruction(0), instruction(4, 'branch', target=64),
+                      instruction(64), instruction(68), instruction(72)]
+            _, timeline = run(stream, issue_width=width)
+            committed = [index for _, name, index, _ in timeline if name == 'commit']
+            self.assertEqual(committed, list(range(len(stream))))
 
 
 if __name__ == '__main__':

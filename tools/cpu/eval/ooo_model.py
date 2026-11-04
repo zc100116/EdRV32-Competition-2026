@@ -5,13 +5,14 @@
 """Hit-only renamed CPU model; dynamic memory addresses come from Spike commits."""
 import argparse
 from array import array
-from collections import deque
+from collections import Counter, deque
 from dataclasses import dataclass
 import json
 from pathlib import Path
 
 from analyze import COMMIT, CONTROL
-from pipe_model import Predictor, Record, fetch_request, fill_ib, program_and_trace
+from pipe_model import Predictor, Record, program_and_trace
+from wide_model import fill_width, request
 
 NEVER = float('inf')
 LATENCY = {'alu': 1, 'branch': 1, 'jal': 1, 'jalr': 1,
@@ -83,9 +84,9 @@ def load_order(entry, stores, execute, known_at):
 
 
 def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
-             penalty=7, issue_width=2, timeline=None):
+             penalty=7, issue_width=2, lsus=1, timeline=None):
     """Select oldest ready entries; timeline is a directed-test event sink."""
-    predictor = Predictor(64, 1024, 8)
+    predictor = Predictor(128, 4096, 8, 4, 2)
     ib = deque()
     halfwords, pending = [], []
     fetch_pc, cross = trace[0], None
@@ -93,7 +94,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
     rob, iq, stores = deque(), [], []
     mapping = [None] * 32
     executing = {}
-    load_ports = set()
+    load_ports = Counter()
     divider_until = 0
     fetch_delay = 0
     recovering = False
@@ -116,7 +117,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
         seen = set()
         retiring = []
         for entry in rob:
-            if len(retiring) == 2:
+            if len(retiring) == issue_width:
                 break
             inst = entry.instruction
             done = max(entry.address_ready, ready_at(entry.data_dep)) if (
@@ -125,7 +126,8 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
                 seen.add('commit_wait')
                 break
             if inst.kind == 'store':
-                if tick in load_ports or any(e.instruction.kind == 'store' for e in retiring):
+                if load_ports[tick] + sum(
+                        e.instruction.kind == 'store' for e in retiring) >= lsus:
                     seen.add('commit_store_port')
                     break
             retiring.append(entry)
@@ -145,7 +147,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
 
         # RR has no variable stall: IS checks availability at its future EX boundary.
         resolved = executing.pop(tick, [])
-        load_ports.discard(tick)
+        load_ports.pop(tick, None)
         redirect = None
         updates = []
         for entry in resolved:
@@ -172,8 +174,8 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
             stores = [e for e in stores if e.age <= cut]
             for cycle in list(executing):
                 executing[cycle] = [e for e in executing[cycle] if e.age <= cut]
-            load_ports = {cycle for cycle, entries in executing.items()
-                          if any(e.instruction.kind == 'load' for e in entries)}
+            load_ports = Counter({cycle: sum(e.instruction.kind == 'load' for e in entries)
+                                  for cycle, entries in executing.items()})
             divider_until = max((e.ready for e in rob if e.instruction.kind == 'div'
                                  and e.execute >= 0), default=0)
             mapping = [None] * 32
@@ -187,12 +189,14 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
             fetch_pc, cross = redirect.record.next_pc, None
             predictor.restore(redirect.record)
             fetch_delay = max(0, penalty - 7)
-            if penalty == 5:
-                # Parameterized fast recovery overlaps F1/F2 with redirect resolution.
-                pending, fetch_pc, cross, query = fetch_request(predictor, fetch_pc, cross)
-                halfwords.extend(pending)
-                pending = []
-                fill_ib(program, ib, halfwords)
+            if penalty < 7:
+                # F1 overlaps redirect for 6; 5 additionally overlaps F2.
+                pending, fetch_pc, cross, query = request(
+                    predictor, fetch_pc, cross, issue_width)
+                if penalty == 5:
+                    halfwords.extend(pending)
+                    pending = []
+                    fill_width(program, ib, halfwords, issue_width)
             rename_cause = 'mispredict'
             recovering = True
             if active:
@@ -202,7 +206,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
                                                  and e.record.trace_index < 0 for e in killed)
             event('redirect', redirect)
         else:
-            used = dict(alu=0, lsu=0, mul=0, div=0)
+            used = dict(alu=0, lsu=0, mul=0, div=0, branch=0)
             selected = []
             for entry in iq:
                 if len(selected) == issue_width:
@@ -216,8 +220,9 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
                     seen.add('operand_wait')
                     continue
                 unit = ('lsu' if inst.kind in {'load', 'store'} else
+                        'branch' if inst.kind in CONTROL else
                         inst.kind if inst.kind in {'mul', 'div'} else 'alu')
-                if used[unit] == (2 if unit == 'alu' else 1):
+                if used[unit] == (issue_width if unit == 'alu' else lsus if unit == 'lsu' else 1):
                     if unit == 'lsu':
                         seen.add('lsu_conflict')
                     continue
@@ -234,7 +239,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
                         continue
                     if reason == 'forward' and active:
                         events['forwarded'] += 1
-                    load_ports.add(execute)
+                    load_ports[execute] += 1
                 entry.execute = execute
                 if inst.kind == 'store':
                     entry.address_ready = execute + 1
@@ -252,14 +257,14 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
                 selected_ids = {e.age for e in selected}
                 iq = [e for e in iq if e.age not in selected_ids]
 
-            # DS, RN and D are distinct one-cycle stages with two-entry latches.
+            # DS, RN and D are distinct one-cycle stages with width-entry latches.
             if renamed and len(iq) + len(renamed) <= iq_size:
                 iq.extend(renamed)
                 renamed = []
             if renamed:
                 rename_cause = 'iq_full'
             elif decoded:
-                capacity = min(2, rob_size - len(rob))
+                capacity = min(issue_width, rob_size - len(rob))
                 if not capacity:
                     rename_cause = 'rob_full'
                 for record in decoded[:capacity]:
@@ -288,7 +293,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
                 if decoded:
                     rename_cause = 'rob_full'
             if not decoded:
-                for _ in range(min(2, len(ib))):
+                for _ in range(min(issue_width, len(ib))):
                     record = ib.popleft()
                     inst = record.instruction
                     # Once the predicted stream diverges, no later coincidental PC can rejoin it.
@@ -310,11 +315,11 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
 
             halfwords.extend(pending)
             pending = []
-            fill_ib(program, ib, halfwords)
+            fill_width(program, ib, halfwords, issue_width)
             if fetch_delay:
                 fetch_delay -= 1
-            elif len(halfwords) <= 4:
-                pending, fetch_pc, cross, query = fetch_request(predictor, fetch_pc, cross)
+            elif len(halfwords) <= (4 if issue_width == 2 else 8):
+                pending, fetch_pc, cross, query = request(predictor, fetch_pc, cross, issue_width)
 
         # Preserve concurrent F1 query / EX update order from the calibrated predictor.
         for record in updates:
@@ -324,7 +329,7 @@ def simulate(program, trace, addresses, begin, end, *, rob_size=32, iq_size=16,
         if active:
             cycles += 1
             rename_slots['renamed'] += renamed_count
-            rename_slots[rename_cause] += 2 - renamed_count
+            rename_slots[rename_cause] += issue_width - renamed_count
             for name in seen:
                 events[name] += 1
         tick += 1
@@ -339,15 +344,16 @@ def main():
     parser.add_argument('directory', type=Path)
     parser.add_argument('--rob', type=int, choices=(16, 32, 64), default=32)
     parser.add_argument('--iq', type=int, choices=(8, 16, 32), default=16)
-    parser.add_argument('--penalty', type=int, choices=(5, 7, 9), default=7)
-    parser.add_argument('--issue-width', type=int, choices=(2, 3), default=2)
+    parser.add_argument('--penalty', type=int, choices=(5, 6, 7, 8, 9), default=7)
+    parser.add_argument('--issue-width', type=int, choices=(2, 3, 4), default=2)
+    parser.add_argument('--lsus', type=int, choices=(1, 2), default=1)
     args = parser.parse_args()
     program, symbols, trace = program_and_trace(args.directory)
     addresses = memory_trace(args.directory, program, trace)
     print(json.dumps(simulate(program, trace, addresses, symbols['start_time'],
                               symbols['stop_time'],
                               rob_size=args.rob, iq_size=args.iq, penalty=args.penalty,
-                              issue_width=args.issue_width), indent=2))
+                              issue_width=args.issue_width, lsus=args.lsus), indent=2))
 
 
 if __name__ == '__main__':
