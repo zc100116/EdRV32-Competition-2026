@@ -208,7 +208,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              load_latency=2, mul_latency=3, perfect_prediction=False,
              perfect_frontend=False, relax_raw=False, all_slot1_types=False,
              statistics=None, btb_entries=None, gshare_entries=None, ras_entries=None,
-             gshare_pc_shift=1):
+             gshare_pc_shift=1, taken_bubble=0):
     changes = INORDER_VARIANTS.get(variant, {})
     if variant in INORDER_VARIANTS:
         variant = 'L2b+V5'
@@ -481,7 +481,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
                         supported = False
                     older_supported = older.kind == 'alu' or (
-                        changes.get('swap') and older.kind in {'branch', 'jal'})
+                        branch_lane and older.kind in {'branch', 'jal'})
                     exchanged = swap and older_supported and not supported
                     exchanged = exchanged and younger.kind not in {'csr', 'serial', 'illegal'}
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
@@ -541,6 +541,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 fetch_delay -= 1
             elif len(halfwords) <= group_bytes // 2:
                 pending, fetch_pc, cross_target, query = request(fetch_pc, cross_target)
+                if query[1]:
+                    fetch_delay = taken_bubble
 
         # All predictor mutations occur at the edge, after the concurrent F1 query.
         m_updates = []

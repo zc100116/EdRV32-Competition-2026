@@ -91,6 +91,25 @@ class Pipeline(unittest.TestCase):
         stream = [instruction(0), instruction(4, 'load')]
         self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 1)
 
+    def test_v3s_older_branch_exchange(self):
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        for younger in ('load', 'store', 'mul', 'jalr'):
+            stream = [instruction(0, 'branch', target=4), instruction(4, younger)]
+            expected = 0 if younger == 'jalr' else 1
+            self.assertEqual(run(stream, 'V3s', **options)['hpm1'], expected)
+            self.assertEqual(run(stream, 'V2s', **options)['hpm1'], 0)
+
+    def test_taken_fetch_bubble(self):
+        stream = [instruction(0, 'alu'), instruction(4, 'branch', target=0)]
+        program = {i.pc: i for i in stream}
+        program.update({pc: instruction(pc) for pc in range(8, 80, 4)})
+        program[8] = instruction(8, 'serial')
+        trace = [0, 4] * 20 + [8]
+        base = simulate(program, trace, 0, 8, 'V3s')
+        delayed = simulate(program, trace, 0, 8, 'V3s', taken_bubble=1)
+        self.assertGreater(delayed['cycles'], base['cycles'])
+        self.assertEqual(delayed['instructions'], base['instructions'])
+
     def test_b1_exchange_capability_and_single_control(self):
         for older in ('alu', 'branch', 'jal'):
             for younger in ('load', 'store', 'mul', 'div', 'jalr'):
