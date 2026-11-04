@@ -250,10 +250,10 @@ module tb_npu_datapath;
             end
             if (dut.writeback_valid_w) begin
                 if (cycle - last_cycle[dut.writeback_tag_w[42:38]] !=
-                    (dut.writeback_tag_w[26] ? 38 : 46)) begin
+                    (dut.writeback_tag_w[26] ? 42 : 50)) begin
                     $fatal(1, "FAIL WB2 latency at %0d: actual=%0d expected=%0d", cycle,
                         cycle-last_cycle[dut.writeback_tag_w[42:38]],
-                        dut.writeback_tag_w[26] ? 38 : 46);
+                        dut.writeback_tag_w[26] ? 42 : 50);
                 end
             end
             if (result_credit_o == 0) full_cycles = full_cycles + 1;
@@ -278,7 +278,7 @@ module tb_npu_datapath;
                 read_block = read_count % cout_blocks;
                 if (int'(cmd_read_done_row_o) != read_row ||
                     int'(cmd_read_done_block_o) != read_block ||
-                    cycle-issued_cycle[read_count] != 2)
+                    cycle-issued_cycle[read_count] != 3)
                     $fatal(1, "FAIL read_done tag/latency at %0t", $time);
                 read_count = read_count + 1;
             end
@@ -289,7 +289,7 @@ module tb_npu_datapath;
                     $fatal(1, "FAIL done tag actual=%0d/%0d expected=%0d/%0d at %0t",
                         cmd_done_row_o, cmd_done_block_o, done_row, done_block, $time);
                 if (cycle-issued_cycle[done_count] !=
-                    ((cfg_half_tail_i && done_block == cout_blocks-1) ? 38 : 46))
+                    ((cfg_half_tail_i && done_block == cout_blocks-1) ? 42 : 50))
                     $fatal(1, "FAIL done latency at %0t", $time);
                 done_count = done_count + 1;
             end
@@ -603,7 +603,7 @@ module tb_npu_datapath;
             $fatal(1, "FAIL final ownership");
         $display("PASS datapath: %0d commands %0d pairs %0d beats %0d MAC beats",
             command_count, pair_count, output_count, mac_count);
-        $display("latency dual=46 half=38; overlap=%0d (row=%0d block=%0d) full_cycles=%0d",
+        $display("latency dual=50 half=42; overlap=%0d (row=%0d block=%0d) full_cycles=%0d",
             overlap_count, row_overlap_count, block_overlap_count, full_cycles);
         $finish;
     end

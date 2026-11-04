@@ -69,7 +69,7 @@ module tb_npu_input_unpack;
                         cycle, previous_accept, c4);
                 previous_accept = cycle;
                 for (integer item = 0; item < (c4 ? 4 : 1); item++) begin
-                    due[tail] = cycle + (c4 ? item + 1 : 0);
+                    due[tail] = cycle + (c4 ? item + 2 : 1);
                     expected_bank[tail] = c4 ? 1'(item % 2) : bank;
                     expected_addr[tail] = c4 ? addr + 10'(item / 2) : addr;
                     expected_data[tail] = c4 ?

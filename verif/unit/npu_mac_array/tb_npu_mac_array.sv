@@ -17,16 +17,16 @@ module tb_npu_mac_array;
     wire sum_first_o;
     wire sum_last_o;
     wire [48:0] sum_tag_o;
-    wire [31:0] sum_fold_o;
+    wire [63:0] sum_fold_o;
     wire [1215:0] sum_data_o;
     wire mac_beat_o;
     wire idle_o;
 
-    bit [9:0] expected_valid = 0;
-    bit [9:0] expected_first = 0;
-    bit [9:0] expected_last = 0;
-    bit [48:0] expected_tag [0:9];
-    bit [1215:0] expected_data [0:9];
+    bit [11:0] expected_valid = 0;
+    bit [11:0] expected_first = 0;
+    bit [11:0] expected_last = 0;
+    bit [48:0] expected_tag [0:11];
+    bit [1215:0] expected_data [0:11];
     wire [2047:0] skew_weight_w;
     genvar skew_item;
     genvar skew_channel;
@@ -84,12 +84,12 @@ module tb_npu_mac_array;
         int dot;
         int offset;
         cycle++;
-        for (int stage = 9; stage > 0; stage--) begin
+        for (int stage = 11; stage > 0; stage--) begin
             expected_tag[stage] = expected_tag[stage-1];
             expected_data[stage] = expected_data[stage-1];
         end
-        expected_first = {expected_first[8:0], term_first_i};
-        expected_last = {expected_last[8:0], term_last_i};
+        expected_first = {expected_first[10:0], term_first_i};
+        expected_last = {expected_last[10:0], term_last_i};
         expected_tag[0] = term_tag_i;
         for (int pixel = 0; pixel < 2; pixel++) begin
             for (int channel = 0; channel < 32; channel++) begin
@@ -105,22 +105,22 @@ module tb_npu_mac_array;
             end
         end
         if (!rst_n_i || cancel_i) expected_valid = 0;
-        else expected_valid = {expected_valid[8:0], term_valid_i};
+        else expected_valid = {expected_valid[10:0], term_valid_i};
         #1;
-        if (sum_valid_o !== expected_valid[9] || mac_beat_o !== expected_valid[0] ||
+        if (sum_valid_o !== expected_valid[11] || mac_beat_o !== expected_valid[0] ||
             idle_o !== !(|expected_valid))
             $fatal(1, "FAIL MAC valid/beat/idle cycle=%0d expected=%b actual=%b/%b/%b t=%0t",
                 cycle, expected_valid, sum_valid_o, mac_beat_o, idle_o, $time);
         if (sum_valid_o) begin
-            if (sum_first_o !== expected_first[9] || sum_last_o !== expected_last[9] ||
-                sum_tag_o !== expected_tag[9] ||
-                sum_fold_o !== {32{expected_tag[9][48]}})
+            if (sum_first_o !== expected_first[11] || sum_last_o !== expected_last[11] ||
+                sum_tag_o !== expected_tag[11] ||
+                sum_fold_o !== {64{expected_tag[11][48]}})
                 $fatal(1, "FAIL MAC control cycle=%0d tag exp=%h actual=%h t=%0t",
-                    cycle, expected_tag[9], sum_tag_o, $time);
+                    cycle, expected_tag[11], sum_tag_o, $time);
             for (int item = 0; item < 64; item++) begin
-                if (sum_data_o[19*item +: 19] !== expected_data[9][19*item +: 19])
+                if (sum_data_o[19*item +: 19] !== expected_data[11][19*item +: 19])
                     $fatal(1, "FAIL MAC item=%0d exp=%0d actual=%0d cycle=%0d t=%0t",
-                        item, $signed(expected_data[9][19*item +: 19]),
+                        item, $signed(expected_data[11][19*item +: 19]),
                         $signed(sum_data_o[19*item +: 19]), cycle, $time);
             end
             checked++;
@@ -208,7 +208,7 @@ module tb_npu_mac_array;
         end
         bubble(12);
         // Cancel at every occupied boundary, then restart without resetting data.
-        for (int depth = 0; depth < 10; depth++) begin
+        for (int depth = 0; depth < 12; depth++) begin
             drive_term(1, 0, 1, 1, 49'(depth));
             bubble(depth);
             @(negedge clk_i);
@@ -232,7 +232,7 @@ module tb_npu_mac_array;
         bubble(12);
         @(negedge clk_i);
         if (checked < 1000) $fatal(1, "FAIL insufficient MAC coverage: %0d", checked);
-        $display("PASS MAC: %0d terms, 10 boundaries M1/M2/C1-C8, seed=326ac851", checked);
+        $display("PASS MAC: %0d terms, 12 boundaries local/M1/M2/C1-C8/tail, seed=326ac851", checked);
         $finish;
     end
 endmodule

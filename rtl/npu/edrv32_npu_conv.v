@@ -200,6 +200,17 @@ module edrv32_npu_conv (
     wire [31:0] load_next_plane_addr_w;
     wire [31:0] load_next_row_addr_w;
     reg [12:0] retire_min_r;
+    reg retire_valid_r;
+    reg [12:0] retire_value_r;
+    reg [1:0] retire_offset_r;
+    reg [10:0] input_row_beats_r;
+    reg [5:0] last_plane_r;
+    reg [3:0] last_block_r;
+    reg [31:0] plane_stride_r;
+    reg [31:0] row_stride_r;
+    wire line_plane_last_w;
+    wire [10:0] line_remaining_w;
+    wire [4:0] line_boundary_w;
     reg cmd_valid_r;
     reg [11:0] cmd_row_r;
     reg [2:0] cmd_block_r;
@@ -245,7 +256,6 @@ module edrv32_npu_conv (
     wire [19:0] weight_block_bytes_w;
     wire [10:0] input_row_beats_w;
     wire [10:0] output_row_pairs_w;
-    wire [31:0] input_row_bytes_w;
     wire [31:0] output_row_bytes_w;
     wire [2:0] response_role_w;
     wire [4:0] response_record_w;
@@ -385,15 +395,18 @@ module edrv32_npu_conv (
     assign cout_blocks_w = desc_r[331:328];
     assign unused_row_slot_beats_w = desc_r[362:352];
     assign weight_block_bytes_w = desc_r[403:384];
-    assign input_row_beats_w = unused_flags_w[8] ? {2'd0, in_w_w[11:3]} : in_w_w[11:1];
+    assign input_row_beats_w = input_row_beats_r;
     assign output_row_pairs_w = out_w_w[11:1];
-    assign input_row_bytes_w = {16'd0, input_row_beats_w, 5'd0};
     assign output_row_bytes_w = {16'd0, output_row_pairs_w, 5'd0};
     assign model_future_weight_count_w = unused_flags_w[9] && !unused_flags_w[8]
         && ({1'b0, model_block_r} == cout_blocks_w - 4'd3)
         ? {1'b0, weight_block_bytes_w[19:6]} : weight_block_bytes_w[19:5];
-    assign line_beats_w = burst_beats(load_addr_r,
-        {4'd0, input_row_beats_w - load_pair_r});
+    assign line_remaining_w = input_row_beats_w - load_pair_r;
+    assign line_boundary_w = 5'd16 - {1'b0, load_addr_r[8:5]};
+    assign line_beats_w = line_plane_last_w ? line_remaining_w[4:0] : line_boundary_w;
+    // Legal bursts have positive remaining: min(remaining,boundary)==remaining
+    // iff remaining<=boundary. No selected beat-count addition precedes this CE.
+    assign line_plane_last_w = line_remaining_w <= {6'd0, line_boundary_w};
     assign line_candidate_w = active_r && (load_row_r < {1'b0, in_h_w})
         && (!slot_used_r[load_slot_r] || (load_plane_r != 6'd0) || (load_pair_r != 11'd0));
     assign model_candidate_w = active_r && (model_state_r != S_MODEL_DONE);
@@ -455,8 +468,8 @@ module edrv32_npu_conv (
         && (!line_candidate_w || prefer_model_r[0]);
     assign residual_accept_w = !stop_i && (!request_valid_r || read_req_ready_i)
         && residual_candidate_w;
-    assign line_row_last_w = (load_pair_r + {6'd0, line_beats_w} == input_row_beats_w)
-        && (load_plane_r == cin_blocks_w - 6'd1);
+    assign line_row_last_w = line_plane_last_w
+        && (load_plane_r == last_plane_r);
     assign model_record_last_w = model_burst_last_r
         && ((model_state_r == S_MODEL_LUT) ||
         ((model_state_r == S_MODEL_QUANT) && !unused_flags_w[6]));
@@ -783,6 +796,33 @@ module edrv32_npu_conv (
         end
     end
 
+    // Predecode descriptor choices once, rather than putting them in each burst CE.
+    always @(posedge clk_i) begin
+        if (start_i[3]) begin
+            input_row_beats_r <= desc_i[8] ? {2'd0, desc_i[267:259]} : desc_i[267:257];
+            last_plane_r <= desc_i[325:320] - 6'd1;
+            last_block_r <= desc_i[331:328] - 4'd1;
+            plane_stride_r <= desc_i[95:64];
+            row_stride_r <= (desc_i[8] ? {18'd0, desc_i[267:259], 5'd0}
+                : {16'd0, desc_i[267:257], 5'd0}) << (!desc_i[4] && desc_i[5]);
+            retire_offset_r <= desc_i[5] ? (desc_i[4] ? 2'd1 : 2'd2)
+                : (desc_i[4] ? 2'd0 : 2'd1);
+        end
+        // ((row+1)<<s2)-k3 == (row<<s2)+((1<<s2)-k3).
+        retire_value_r <= ({1'b0, dp_cmd_read_done_row_w} << unused_flags_w[5])
+            + {11'd0, retire_offset_r};
+    end
+    always @(posedge clk_i or negedge rst_n_i[2]) begin
+        if (!rst_n_i[2]) begin
+            retire_valid_r <= 1'b0;
+        end else if (cancel_i[2] || start_i[3]) begin
+            retire_valid_r <= 1'b0;
+        end else begin
+            retire_valid_r <= dp_cmd_read_done_w
+                && ({1'b0, dp_cmd_read_done_block_w} == last_block_r);
+        end
+    end
+
     // W1/W4b: a row occupies its slot until the last output block has passed A3.
     always @(posedge clk_i or negedge rst_n_i[2]) begin
         if (!rst_n_i[2]) begin
@@ -821,16 +861,14 @@ module edrv32_npu_conv (
                     slot_ready_r[slot_idx] <= 1'b0;
                 end
             end
-            if (dp_cmd_read_done_w &&
-                ({1'b0, dp_cmd_read_done_block_w} == cout_blocks_w - 4'd1)) begin
-                retire_min_r <= (({1'b0, dp_cmd_read_done_row_w} + 13'd1) << unused_flags_w[5])
-                    - (unused_flags_w[4] ? 13'd1 : 13'd0);
+            if (retire_valid_r) begin
+                retire_min_r <= retire_value_r;
             end
             if (line_accept_w) begin
                 slot_used_r[load_slot_r] <= 1'b1;
-                if (load_pair_r + {6'd0, line_beats_w} == input_row_beats_w) begin
+                if (line_plane_last_w) begin
                     load_pair_r <= 11'd0;
-                    if (load_plane_r == cin_blocks_w - 6'd1) begin
+                    if (load_plane_r == last_plane_r) begin
                         load_plane_r <= 6'd0;
                         load_row_r <= load_row_r
                             + ((!unused_flags_w[4] && unused_flags_w[5]) ? 13'd2 : 13'd1);
@@ -854,9 +892,8 @@ module edrv32_npu_conv (
     end
     // Descriptor shadow -> plane base -> load pointer: one addition per stage.
     // Independent plane/row bases also permit consecutive single-burst rows.
-    assign load_next_plane_addr_w = load_plane_addr_r + desc_r[95:64];
-    assign load_next_row_addr_w = load_row_addr_r
-        + (input_row_bytes_w << (!unused_flags_w[4] && unused_flags_w[5]));
+    assign load_next_plane_addr_w = load_plane_addr_r + plane_stride_r;
+    assign load_next_row_addr_w = load_row_addr_r + row_stride_r;
     always @(posedge clk_i) begin
         if (start_i[3]) begin
             for (slot_base_idx = 0; slot_base_idx < 5; slot_base_idx = slot_base_idx + 1) begin
@@ -870,8 +907,8 @@ module edrv32_npu_conv (
         if (line_accept_w) begin
             slot_row_r[load_slot_r] <= load_row_r[11:0];
             load_addr_r <= load_addr_r + {22'd0, line_beats_w, 5'd0};
-            if (load_pair_r + {6'd0, line_beats_w} == input_row_beats_w) begin
-                if (load_plane_r == cin_blocks_w - 6'd1) begin
+            if (line_plane_last_w) begin
+                if (load_plane_r == last_plane_r) begin
                     load_row_addr_r <= load_next_row_addr_w;
                     load_addr_r <= load_next_row_addr_w;
                     load_plane_addr_r <= load_next_row_addr_w;

@@ -149,7 +149,7 @@ module edrv32_npu_datapath (
     wire sum_first_w;
     wire sum_last_w;
     wire [48:0] sum_tag_w;
-    wire [31:0] sum_fold_w;
+    wire [63:0] sum_fold_w;
     wire [1215:0] sum_data_w;
     wire mac_array_idle_w;
     wire quant_prepare_valid_w;

@@ -119,7 +119,7 @@ module tb_npu_window;
         reg [10:0] weight_addr;
     } expected_t;
     expected_t waiting_terms[$];
-    expected_t pipeline [0:11];
+    expected_t pipeline [0:12];
     expected_t candidate;
 
     edrv32_npu_window dut (
@@ -285,7 +285,7 @@ module tb_npu_window;
         sampled_cancel = cancel_i;
         sampled_slot = pair_result_slot_i;
         sampled_residual = pair_residual_addr_i;
-        for (integer stage = 11; stage > 0; stage--) pipeline[stage] = pipeline[stage-1];
+        for (integer stage = 12; stage > 0; stage--) pipeline[stage] = pipeline[stage-1];
         pipeline[0] = '0;
         if (checking && !sampled_cancel && cmd_valid_i && cmd_ready_o) queue_command();
         expected_issue = 0;
@@ -305,7 +305,7 @@ module tb_npu_window;
         end
         if (sampled_cancel) begin
             waiting_terms.delete();
-            for (integer stage = 0; stage < 12; stage++) pipeline[stage] = '0;
+            for (integer stage = 0; stage < 13; stage++) pipeline[stage] = '0;
             last_issue_cycle = -100;
             last_pair_cycle = -100;
             command_end_cycle = -100;
@@ -313,7 +313,7 @@ module tb_npu_window;
         end
         #1;
         if (checking) begin
-            if (weight_rd_en_o !== expected_issue) begin
+            if (dut.a0_valid_r !== expected_issue) begin
                 $fatal(1, "FAIL A1 schedule cycle=%0d expected=%b got=%b queued=%0d start=%0d",
                     cycle, expected_issue, weight_rd_en_o, waiting_terms.size(), expected_start);
             end
@@ -329,15 +329,6 @@ module tb_npu_window;
                 end
                 candidate.tag = pair_tag;
                 pipeline[0] = candidate;
-                if (cache_rd_en_o !== candidate.read_en ||
-                    (candidate.read_en[0] && cache_rd_addr0_o !== candidate.addr0) ||
-                    (candidate.read_en[1] && cache_rd_addr1_o !== candidate.addr1) ||
-                    weight_rd_addr_o !== candidate.weight_addr) begin
-                    $fatal(1, "FAIL A1 cycle=%0d bank=%b/%b addr=%0d,%0d/%0d,%0d weight=%0d/%0d",
-                        cycle, cache_rd_en_o, candidate.read_en, cache_rd_addr0_o,
-                        cache_rd_addr1_o, candidate.addr0, candidate.addr1,
-                        weight_rd_addr_o, candidate.weight_addr);
-                end
                 if (candidate.first_term && sampled_half !== candidate.half)
                     $fatal(1, "FAIL candidate half cycle=%0d", cycle);
                 last_issue_cycle = cycle;
@@ -347,7 +338,21 @@ module tb_npu_window;
                 end
                 if (candidate.command_last) command_end_cycle = cycle;
                 terms++;
-            end else if (cache_rd_en_o !== 0) $fatal(1, "FAIL stray cache read cycle=%0d", cycle);
+            end
+            if (weight_rd_en_o !== pipeline[1].valid)
+                $fatal(1, "FAIL memory read latency cycle=%0d", cycle);
+            if (pipeline[1].valid) begin
+                if (cache_rd_en_o !== pipeline[1].read_en ||
+                    (pipeline[1].read_en[0] && cache_rd_addr0_o !== pipeline[1].addr0) ||
+                    (pipeline[1].read_en[1] && cache_rd_addr1_o !== pipeline[1].addr1) ||
+                    weight_rd_addr_o !== pipeline[1].weight_addr) begin
+                    $fatal(1, "FAIL A1 cycle=%0d bank=%b/%b addr=%0d,%0d/%0d,%0d weight=%0d/%0d",
+                        cycle, cache_rd_en_o, pipeline[1].read_en, cache_rd_addr0_o,
+                        cache_rd_addr1_o, pipeline[1].addr0, pipeline[1].addr1,
+                        weight_rd_addr_o, pipeline[1].weight_addr);
+                end
+            end else if (cache_rd_en_o !== 0)
+                $fatal(1, "FAIL stray cache read cycle=%0d", cycle);
             if (cmd_issued_o !== (pipeline[0].valid && pipeline[0].command_last))
                 $fatal(1, "FAIL issued latency cycle=%0d", cycle);
             if (cmd_issued_o) begin
@@ -355,32 +360,32 @@ module tb_npu_window;
                     $fatal(1, "FAIL issued tag cycle=%0d", cycle);
                 commands++;
             end
-            if (cmd_read_done_o !== (pipeline[2].valid && pipeline[2].command_last))
-                $fatal(1, "FAIL read_done must be A1+2 cycle=%0d", cycle);
+            if (cmd_read_done_o !== (pipeline[3].valid && pipeline[3].command_last))
+                $fatal(1, "FAIL read_done must be A1+3 cycle=%0d", cycle);
             if (cmd_read_done_o) begin
-                if ({cmd_read_done_block_o, cmd_read_done_row_o} !== pipeline[2].tag[14:0])
+                if ({cmd_read_done_block_o, cmd_read_done_row_o} !== pipeline[3].tag[14:0])
                     $fatal(1, "FAIL read_done tag cycle=%0d", cycle);
                 read_done_count++;
             end
-            if (term_valid_o !== pipeline[4].valid)
-                $fatal(1, "FAIL term must be A1+4 cycle=%0d", cycle);
+            if (term_valid_o !== pipeline[5].valid)
+                $fatal(1, "FAIL term must be A1+5 cycle=%0d", cycle);
             for (integer k = 0; k < 8; k++) begin
-                if (pipeline[4+k].valid) begin
+                if (pipeline[5+k].valid) begin
                     for (integer c = 0; c < 32; c++) begin
                         if (term_weight_o[8*(8*c+k) +: 8] !==
-                            8'(int'(pipeline[4+k].weight_addr)*19+(8*c+k)*13))
+                            8'(int'(pipeline[5+k].weight_addr)*19+(8*c+k)*13))
                             $fatal(1, "FAIL A5 weight item=%0d channel=%0d cycle=%0d", k,c,cycle);
                     end
                 end
             end
             if (term_valid_o) begin
                 if ({term_first_o, term_last_o, term_tag_o} !==
-                    {pipeline[4].first_term, pipeline[4].last_term, pipeline[4].tag})
+                    {pipeline[5].first_term, pipeline[5].last_term, pipeline[5].tag})
                     $fatal(1, "FAIL A5 tag cycle=%0d expected=%h got=%h", cycle,
-                        pipeline[4].tag, term_tag_o);
-                if (term_activation_o !== {4{pipeline[4].activation}})
+                        pipeline[5].tag, term_tag_o);
+                if (term_activation_o !== {4{pipeline[5].activation}})
                     $fatal(1, "FAIL A5 activation cycle=%0d expected=%h got=%h", cycle,
-                        pipeline[4].activation, term_activation_o[255:0]);
+                        pipeline[5].activation, term_activation_o[255:0]);
 
             end
         end

@@ -68,7 +68,6 @@ module edrv32_npu_regs (
     wire write_w;
     wire irq_clear_w;
     wire unused_pstrb_w;
-    integer counter_idx;
     assign unused_pstrb_w = |apb_pstrb_r;
     assign write_w = apb_psel_i && apb_penable_i && apb_pwrite_r;
     assign irq_clear_w = write_w && (apb_paddr_r == 12'h010);
@@ -135,84 +134,93 @@ module edrv32_npu_regs (
         endcase
     end
 
+    // Small status fields retain their access-edge side effects.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             enable_r <= 1'b0;
-            irq_en_r <= 32'd0;
             irq_stat_r <= 2'd0;
             error_code_r <= 3'd0;
-            desc_base_r <= 32'd0;
-            desc_count_r <= 32'd0;
-            done_count_r <= 32'd0;
-            for (counter_idx = 0; counter_idx < 4; counter_idx = counter_idx + 1) begin
-                bases_r[counter_idx] <= 32'd0;
-            end
+        end else if (soft_reset_w) begin
+            enable_r <= 1'b0;
+            irq_stat_r <= 2'd0;
+            error_code_r <= 3'd0;
         end else begin
-            if (soft_reset_w) begin
-                enable_r <= 1'b0;
-                irq_en_r <= 32'd0;
-                irq_stat_r <= 2'd0;
-                error_code_r <= 3'd0;
-                desc_base_r <= 32'd0;
-                desc_count_r <= 32'd0;
-                done_count_r <= 32'd0;
-                for (counter_idx = 0; counter_idx < 4; counter_idx = counter_idx + 1) begin
-                    bases_r[counter_idx] <= 32'd0;
+            if (write_w && apb_paddr_r == 12'h004) begin
+                enable_r <= apb_pwdata_r[0];
+            end
+            if (irq_clear_w) begin
+                irq_stat_r <= irq_stat_r & ~apb_pwdata_r[1:0];
+                if (apb_pwdata_r[1]) begin
+                    error_code_r <= 3'd0;
                 end
-            end else begin
-                if (write_w) begin
-                    case (apb_paddr_r)
-                        12'h004: begin
-                            enable_r <= apb_pwdata_r[0];
-                        end
-                        12'h00c: begin
-                            irq_en_r <= apb_pwdata_r;
-                        end
-                        12'h020: begin
-                            desc_base_r <= apb_pwdata_r;
-                        end
-                        12'h024: begin
-                            desc_count_r <= apb_pwdata_r;
-                        end
-                        12'h100: begin
-                            bases_r[0] <= apb_pwdata_r;
-                        end
-                        12'h104: begin
-                            bases_r[1] <= apb_pwdata_r;
-                        end
-                        12'h108: begin
-                            bases_r[2] <= apb_pwdata_r;
-                        end
-                        12'h10c: begin
-                            bases_r[3] <= apb_pwdata_r;
-                        end
-                        default: begin end
-                    endcase
-                end
-                if (irq_clear_w) begin
-                    irq_stat_r <= irq_stat_r & ~apb_pwdata_r[1:0];
-                    if (apb_pwdata_r[1]) begin
-                        error_code_r <= 3'd0;
-                    end
-                end
-                if (done_i) begin
-                    irq_stat_r[0] <= 1'b1;
-                    done_count_r <= done_count_r + 32'd1;
-                end
-                if (error_i) begin
-                    irq_stat_r[1] <= 1'b1;
-                    error_code_r <= error_code_i;
-                end
+            end
+            if (done_i) begin
+                irq_stat_r[0] <= 1'b1;
+            end
+            if (error_i) begin
+                irq_stat_r[1] <= 1'b1;
+                error_code_r <= error_code_i;
             end
         end
     end
+    genvar config_bank;
+    generate
+        for (config_bank = 0; config_bank < 8; config_bank = config_bank + 1)
+            begin : g_config_bank
+            localparam [11:0] BANK = config_bank;
+            localparam [11:0] ADDR = (config_bank == 0) ? 12'h00c
+                : (config_bank == 1) ? 12'h020 : (config_bank == 2) ? 12'h024
+                : (config_bank == 3) ? 12'h02c : 12'h0f0 + (BANK << 2);
+            (* keep = "true", syn_preserve = 1 *) reg soft_select_r;
+            (* keep = "true", syn_preserve = 1 *) reg write_select_r;
+            (* keep = "true", syn_keep = 1 *) wire soft_w;
+            wire unused_write_bank_w;
+            always @(posedge clk_i) begin
+                soft_select_r <= apb_paddr_i == 12'h004 && apb_pwdata_i[3];
+                write_select_r <= apb_paddr_i == ADDR;
+            end
+            assign soft_w = write_w && soft_select_r && !busy_i;
+            assign unused_write_bank_w = write_w && write_select_r;
+            if (config_bank == 0) begin : g_irq
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) irq_en_r <= 32'd0;
+                    else if (soft_w) irq_en_r <= 32'd0;
+                    else if (unused_write_bank_w) irq_en_r <= apb_pwdata_r;
+                end
+            end else if (config_bank == 1) begin : g_base
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) desc_base_r <= 32'd0;
+                    else if (soft_w) desc_base_r <= 32'd0;
+                    else if (unused_write_bank_w) desc_base_r <= apb_pwdata_r;
+                end
+            end else if (config_bank == 2) begin : g_count
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) desc_count_r <= 32'd0;
+                    else if (soft_w) desc_count_r <= 32'd0;
+                    else if (unused_write_bank_w) desc_count_r <= apb_pwdata_r;
+                end
+            end else if (config_bank == 3) begin : g_done
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) done_count_r <= 32'd0;
+                    else if (soft_w) done_count_r <= 32'd0;
+                    else if (done_i) done_count_r <= done_count_r + 32'd1;
+                end
+            end else begin : g_surface
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) bases_r[config_bank-4] <= 32'd0;
+                    else if (soft_w) bases_r[config_bank-4] <= 32'd0;
+                    else if (unused_write_bank_w) bases_r[config_bank-4] <= apb_pwdata_r;
+                end
+            end
+        end
+    endgenerate
     // Capture identical APB payload copies at SETUP for each performance bank.
     genvar perf_bank;
     generate
         for (perf_bank = 0; perf_bank < 8; perf_bank = perf_bank + 1) begin : g_perf_bank
-            reg [11:0] soft_addr_r /* synthesis syn_preserve=1 */;
-            reg soft_data_r /* synthesis syn_preserve=1 */;
-            wire soft_w;
+            (* keep = "true", syn_preserve = 1 *) reg [11:0] soft_addr_r;
+            (* keep = "true", syn_preserve = 1 *) reg soft_data_r;
+            (* keep = "true", syn_keep = 1 *) wire soft_w;
             always @(posedge clk_i) begin
                 if (apb_psel_i && !apb_penable_i) begin
                     soft_addr_r <= apb_paddr_i;
