@@ -558,6 +558,16 @@ class Pipeline(unittest.TestCase):
             self.assertEqual(result['instructions'], 3)
             self.assertEqual(result['cycles'], 4)
 
+    def test_jalr_to_fallthrough_replays_squashed_trace_match(self):
+        stream = [instruction(pc) for pc in range(0, 40, 4)]
+        stream[0] = instruction(0, 'load', rd=11)
+        stream[1] = instruction(4, 'jalr', sources=(11,))
+        for variant in ('V0', 'V3s'):
+            result = run(stream, variant)
+            self.assertEqual(result['instructions'], len(stream))
+            self.assertEqual(result['hpm4'], 1)
+            self.assertEqual(result['hpm16'], 1)
+
     def test_hpm_raw_priority_and_load_use(self):
         stream = [instruction(pc) for pc in range(0, 32, 4)]
         stream += [instruction(32, rd=10), instruction(36, 'load', rd=11, sources=(10,)),

@@ -1,0 +1,18 @@
+/* lv_conf.h — cpu-spec 4.1–4.4 evaluation, LVGL 9.6 software; Spike CPU domain. */
+#ifndef LV_CONF_H
+#define LV_CONF_H
+#define LV_COLOR_FORMAT_DEFAULT LV_COLOR_FORMAT_RGB565
+#define LV_USE_OS LV_OS_NONE
+#define LV_USE_STDLIB_MALLOC LV_STDLIB_BUILTIN
+#define LV_USE_STDLIB_STRING LV_STDLIB_BUILTIN
+#define LV_USE_STDLIB_SPRINTF LV_STDLIB_BUILTIN
+#define LV_MEM_SIZE (2 * 1024 * 1024)
+#define LV_USE_FLOAT 0
+#define LV_USE_LOG 0
+#define LV_USE_ASSERT_NULL 0
+#define LV_USE_ASSERT_MALLOC 0
+#define LV_USE_THEME_DEFAULT 0
+#define LV_USE_THEME_SIMPLE 1
+#define LV_USE_DRAW_SW 1
+#define LV_USE_SYSMON 0
+#endif

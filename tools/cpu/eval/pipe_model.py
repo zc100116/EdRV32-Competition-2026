@@ -575,10 +575,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             cross_target = None
             recovery = 'redirect_m' if m_redirect else 'redirect_e' if redirect else 'redirect_d'
             penalty = e_penalty if m_redirect or redirect else d_penalty
-            if late_backend and (m_redirect or redirect):
-                cursor = flush.trace_index + 1
+            # A JALR can target PC+4: a younger instruction can match the trace
+            # before being squashed by its older redirect. Replay it as well.
+            cursor = flush.trace_index + 1
             if perfect_frontend:
-                cursor = flush.trace_index + 1
                 front_cursor = cursor
                 ideal_group = None
                 tail_pc = end + program[end].size

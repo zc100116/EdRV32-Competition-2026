@@ -163,6 +163,64 @@ Trace从start_time首条至stop_time前，共2,479,576指令；动态相邻对�
 探索建议优先试局部load/compare与静态RAW融合，再以循环缓存解决物理长环路；不首先加双LSU，因为all_slot1_types只是理想能力，未计双DRM读口与store顺序代价。
 复现追加：`flock -s /tmp/edrv32-sim.lock python3 tools/cpu/eval/run_fmax_eval.py explore`；五配置各一次、最多2模型；`build/fmax-eval/{limits.jsonl,trace.json}`存上限结果与本节统计。
 
+### 7. 第二负载复核
+
+输入源码 `dc00c1e8`，GCC 15.2.0、Spike 1.1.1-dev；harness/脚本在 `tools/cpu/eval/workloads/`，不改软件/RTL，不访问VM。
+共同编译选项：`-march=rv32im_zicsr_zifencei -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O3 -funroll-all-loops -finline-limit=600 -falign-functions=4 -falign-jumps=4 -falign-loops=4 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections`，链接section GC。
+视觉：直接编译 `sw/apps/showcase/board/vision/post.c`、`sw/lib/yolo_tables.c`；本提交无 `showcase/model/`，用固定合成INT8输出：每head 75个候选cell=`37n%cells`、class=`n%5`、logit=`threshold+n%16`，其余class=−128，DFL第3bin=32、其余=−32；覆盖解码/排序/NMS/框整理，非实拍推理样本。
+LVGL：锁定 `third_party/lvgl` `80ca777e`，builtin内存/字符串、simple主题、软件绘制；160×120 RGB565内存帧缓冲，标签、按钮、8行flex列表，预热一帧后滚动24像素并全屏刷新一帧；不代表板上1280×720/RND性能。
+窗口均为 `start_time` 首条至 `stop_time` 前，初始化只预热预测状态、不计周期；全命中模型，配置同§3 base：V3s/128/4096/RAS4/PC>>2。
+LVGL初始化暴露模型缺陷：`jalr`目标为PC+4时，已消费且被清除的年轻指令未重放；现统一从重定向指令的trace索引+1恢复。协调者批准修复后一次复核CoreMark base，仍为 **1,877,663周期**，§3/6原值不变；已通过的视觉配置未重跑。
+
+| 负载 | 窗口指令数 | base周期（模型估算） | IPC |
+|---|---:|---:|---:|
+| 视觉后处理 | 1,901,338 | 1,850,040 | 1.027728 |
+| LVGL软件渲染 | 527,757 | 505,611 | 1.043800 |
+
+五个理想开关各独立一次；单元格为 **周期 / 节省周期 / IPC / 速度收益**，速度收益=`Cbase/C开关−1`；理想开关受调度/训练影响，不能相加，也不是数学上界。
+
+| 开关 | CoreMark（§6） | 视觉后处理 | LVGL软件渲染 |
+|---|---:|---:|---:|
+| perfect_prediction | 1,700,649 / +177,014 / 1.458017 / +10.409% | 1,690,192 / +159,848 / 1.124924 / +9.457% | 400,166 / +105,445 / 1.318845 / +26.350% |
+| perfect_frontend | 1,852,621 / +25,042 / 1.338415 / +1.352% | 1,857,116 / -7,076 / 1.023812 / -0.381% | 500,300 / +5,311 / 1.054881 / +1.062% |
+| all_slot1_types | 1,846,830 / +30,833 / 1.342612 / +1.670% | 1,790,438 / +59,602 / 1.061940 / +3.329% | 463,427 / +42,184 / 1.138814 / +9.103% |
+| relax_raw | 1,780,179 / +97,484 / 1.392880 / +5.476% | 1,425,289 / +424,751 / 1.334002 / +29.801% | 446,077 / +59,534 / 1.183107 / +13.346% |
+| load1 | 1,669,781 / +207,882 / 1.484971 / +12.450% | 1,421,881 / +428,159 / 1.337199 / +30.112% | 475,164 / +30,447 / 1.110684 / +6.408% |
+
+结构收益均为**估算**：load→条件分支 `Δ≤min(N比较, Cbase−Cload1)`；宏操作 `Δ≤min(Naddi→andi+Nsrli→or, Cbase−Crelax_raw)`；指针簇只按 `Δ≤min(Nlw→lbu, Cbase−Cload1)`，每对乐观省1拍，速度收益=`Cbase/(Cbase−Δ)−1`。
+短循环限≤8条静态指令，取最热两条回边区间的动态PC并集，覆盖率f；按§6均匀收益假设 `Δ估=f×(Cbase−Cperfect_frontend)`，不是局部实测；负数不改成正收益。比较分支晚重定向还应减去“受影响误预测数×额外拍”，本次未模拟该交集。
+为统一口径，CoreMark任意load→条件分支重数为87,650（§6选定两种对86,690），循环区间并集340,740（§6回边下界339,900）；五个上限配置沿用§6，只有base按协调者要求重跑一次。频率分母为窗口指令数。
+
+| 模式：次数（频率）；估算节省/速度收益 | CoreMark | 视觉后处理 | LVGL软件渲染 |
+|---|---|---|---|
+| load→比较分支 | 87,650（3.5349%）；Δ≤87,650，+4.897% | 428,264（22.5243%）；Δ≤428,159，+30.112% | 15,216（2.8831%）；Δ≤15,216，+3.103% |
+| RAW宏操作：addi→andi、srli→or | 64,308（2.5935%）；Δ≤64,308，+3.546% | 0（0.0000%）；Δ≤0，+0.000% | 6,264（1.1869%）；Δ≤6,264，+1.254% |
+| 短热循环覆盖 | 340,740（13.7419%）；Δ估=3,441.24，+0.183609% | 24（0.0013%）；Δ估=-0.09，-0.000005% | 1,590（0.3013%）；Δ估=16.00，+0.003165% |
+| 总load-use / 其中lw→lbu；仅后者归因指针簇 | 153,882（6.2060%） / 27,910（1.1256%）；Δ≤27,910，+1.509% | 431,016（22.6691%） / 0（0.0000%）；Δ≤0，+0.000% | 22,446（4.2531%） / 112（0.0212%）；Δ≤112，+0.022% |
+
+相邻RAW总计：视觉611,338（32.1530%）、LVGL127,987（24.2511%）；动态相邻依赖不等于实际同周期发射/可融合对。各自最热5对如下：
+视觉：`lb→bge` 403,200；`addi→sw` 46,563；`slli→srli` 27,000；`addi→slli` 25,649；`lw→beq` 16,951。
+LVGL：`lbu→beq` 6,973；`add→and` 6,462；`addi→bgeu` 5,421；`lui→addi` 5,404；`addi→srli` 4,933。
+短循环热点：视觉 `0x80002118…212c` 6条/3次回边；LVGL `0x80021f4c…21f5c` 5条/181次、`0x80009d30…9d3c` 4条/48次；没有CoreMark那两个高覆盖6指令循环。
+
+切分IPC损失=`1−Cbase/C切分`，参数沿用§3；A仍为redirect+mul4，不把load3/taken1算入A。
+
+| 配置 | CoreMark（§3） | 视觉后处理 | LVGL软件渲染 |
+|---|---:|---:|---:|
+| redirect | 2.430% | 2.351% | 6.143% |
+| mul4 | 1.678% | 0.468% | 0.869% |
+| load3 | 15.113% | 20.397% | 9.229% |
+| taken1 | 3.354% | 3.152% | 1.426% |
+| A | 4.028% | 2.798% | 6.909% |
+
+判定：**load→比较分支：通用**，三个窗口均有正的机会估算，且新增热点是lb→bge/lbu→beq；只保留为跨负载探索候选，尚未证明晚判定RTL净收益。
+**相邻RAW宏操作：证据不足**，指定两种组合在LVGL有机会、视觉为零；不能把所有RAW或CoreMark挑选的融合模板当作通用收益。
+**短热循环：只对CoreMark有效（本次IPC估算）**，新增窗口覆盖不足0.31%，视觉perfect_frontend还变慢；物理时序/能耗价值未被这个模型否定或证明。
+**load-use指针簇：证据不足**，一般load延迟仍重要，但具体lw→lbu链在视觉为零、LVGL仅112次；不得把总load-use收益归给指针簇。
+主线A的损失不与CoreMark保持固定比例：视觉对load3更敏感，LVGL对redirect更敏感，mul4在两者均更轻；taken1视觉接近CoreMark、LVGL更轻，故A仍需按负载权衡。
+复现按 `tools/cpu/eval/workloads/README.md`，本机 `flock -s /tmp/edrv32-sim.lock`、最多2模型；原始数据 `build/second-workloads/{vision,render}/{commands.txt,spike.log,statistics.json,results.jsonl}`，CoreMark同口径统计在 `build/cpu_predictor_eval/tuned/statistics.json`。
+验证：C构建零告警；修复前36项通过后发现新问题，经协调者批准，修复版 `python3 tools/cpu/eval/test_pipe_model.py` 单次37项通过；Python编译与 `git diff --check` 通过，无RTL改动、不跑Verilator。
+
 ## 影响
 
 本次仅修正周期模型的V3s能力、增加taken反馈延迟评估及单次配置运行脚本，未改变任何硬件契约。
