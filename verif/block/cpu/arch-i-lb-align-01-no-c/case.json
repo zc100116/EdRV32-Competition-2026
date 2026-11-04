@@ -1,6 +1,0 @@
-{
-  "suite": "arch-test",
-  "name": "I-lb-align-01",
-  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/I/src/lb-align-01.S",
-  "rvc": false
-}

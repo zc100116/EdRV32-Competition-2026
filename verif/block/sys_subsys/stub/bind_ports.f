@@ -1,6 +1,0 @@
-edrv32_bus_sys_xbar.sv
-edrv32_bus_apb_decoder.sv
-edrv32_periph_uart.sv
-edrv32_periph_gpio.sv
-edrv32_periph_i2c.sv
-edrv32_periph_sysctrl.sv

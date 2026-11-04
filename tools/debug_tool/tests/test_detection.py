@@ -44,7 +44,7 @@ class ImageDetectionTest(unittest.TestCase):
         pacing = patch('tools.debug_tool.core.ethernet.packets', paced_packets)
         pacing.start()
         self.addCleanup(pacing.stop)
-        quant = json.loads((ROOT / 'tasks/win/20261029-09-b3-software/src/npu/'
+        quant = json.loads((ROOT / 'sw/apps/showcase/model/'
                             'quantization.json').read_text())
         with TemporaryDirectory(dir=ROOT / 'build') as directory:
             directory = Path(directory)

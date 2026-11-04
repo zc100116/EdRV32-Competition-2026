@@ -1,6 +1,0 @@
-{
-  "suite": "arch-test",
-  "name": "I-srl-01",
-  "source": "third_party/riscv-arch-test/riscv-test-suite/rv32i_m/I/src/srl-01.S",
-  "rvc": true
-}

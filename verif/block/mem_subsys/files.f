@@ -1,2 +1,0 @@
--f environment.f
--f dut.f

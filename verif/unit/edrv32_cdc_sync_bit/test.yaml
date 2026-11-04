@@ -1,9 +1,0 @@
-top: tb_edrv32_cdc_sync_bit
-files: files.f
-simulator: verilator iverilog
-defines:
-parameters:
-software:
-timeout: 60
-pass: PASS
-tier: smoke

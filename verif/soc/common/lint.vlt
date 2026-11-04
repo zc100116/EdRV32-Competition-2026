@@ -1,6 +1,0 @@
-`verilator_config
-// Timed external models deliberately update their protocol state with blocking assignments.
-lint_off -rule BLKSEQ -file "*/verif/models/*"
-lint_off -rule UNUSEDSIGNAL -file "*/verif/models/*"
-// The harness drives an asynchronous DUT reset and synchronous external model resets.
-lint_off -rule SYNCASYNCNET -file "*/verif/soc/common/edrv32_soc_tb.sv"

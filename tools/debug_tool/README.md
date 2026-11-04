@@ -2,7 +2,7 @@
 
 PySide6 桌面工具。GUI、CLI 和 REST 共用串口、UDP 接收端和板端会话。
 所有功能均可见；页面垂直滚动，长状态与日志自动换行，路径提供全文提示。
-本版协议依据[演示系统设计](../../docs/design/2026-11-03-showcase-p5-replan.md)第 8 节。
+本版协议与板端演示程序 `sw/apps/showcase` 配套。
 
 ## 安装和启动
 
@@ -15,7 +15,7 @@ python tools/debug_tool/main.py --headless
 ```
 
 Linux 验收使用 `~/.local/opt/edrv32-py/bin/python`，已安装 PySide6、pyserial、numpy、
-torch 等 requirements 依赖。参考模型使用 `third_party/ultralytics`；游戏名称位图使用
+torch 等 requirements 依赖。游戏名称位图使用
 `third_party/lvgl` 中的 Noto Sans SC 字体，首次使用需初始化相应子模块。
 
 ## 连接与输入

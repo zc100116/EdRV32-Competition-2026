@@ -1,9 +1,0 @@
-top: tb_example
-files: files.f
-simulator: verilator iverilog
-defines:
-parameters:
-software:
-timeout: 60
-pass: PASS
-tier: smoke

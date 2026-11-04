@@ -1,44 +1,12 @@
-# Infrastructure tools
+# 工具
 
-Use `. ~/.local/opt/edrv32/env.sh` before simulation, lint or software builds.
-
-`python3 tools/regress.py smoke|full|perf` discovers `verif/**/test.yaml`.
-`full` also includes smoke tests. `make smoke`, `make full` and `make lint`
-are the repository entry points. Each simulator run writes `compile.log` and
-`run.log` under `build/regress/<tier>/<test>/<simulator>/`. A nonzero compile or
-simulation exit, timeout, missing pass token, or `FAIL` token fails the test.
-The command prints per-test results and a total; an empty tier returns nonzero.
-
-Each test directory contains `test.yaml`, `files.f` and its testbench. YAML is
-restricted to one unquoted `key: value` per line, with `#` comments; all fields
-below are required, and empty values are permitted where shown. Values containing
-multiple words are separated by spaces; no nested YAML structures are used.
-
-| Field | Value |
+| 路径 | 用途 |
 |---|---|
-| `top` | Testbench top module |
-| `files` | File list relative to the test directory, normally `files.f` |
-| `simulator` | `verilator`, `iverilog`, or both separated by a space |
-| `defines` | Space-separated `NAME` or `NAME=value`, or empty |
-| `parameters` | Space-separated top-level `NAME=value`, or empty |
-| `software` | Program name built by `sw/Makefile`, or empty |
-| `timeout` | Maximum seconds for each compilation and simulation |
-| `pass` | Required standalone pass token, normally `PASS` |
-| `tier` | Space-separated membership among `smoke full perf` |
-
-File lists use paths relative to the containing file list, `-f nested.f`,
-`+incdir+path` and `+define+NAME`. Software tests receive `+ROM_HEX=`,
-`+SRAM_HEX=` and `+DDR_HEX=` paths from `build/sw/<program>/`.
-Testbenches print `PASS` and finish on success, or print the actual/expected
-values and time and call `$fatal(1)` on failure.
-
-`python3 tools/check/verilog_style.py rtl/` checks mechanically recognizable
-language, naming and formatting rules. Structural properties such as latch
-inference and multiple drivers are checked by Verilator. The existing global
-build-mode header is the explicit conditional-compilation exception in
-CLAUDE.md 12.2. `tools/check/lint.sh <sources or -f files.f>` runs
-`verilator --lint-only -Wall`; `make lint` checks each common primitive as a top.
-
-`test.yaml` 可选 `runner` 字段指定在仓库根目录执行的命令；回归按退出码和 `pass` 字段判定，未指定时使用常规 HDL 编译流程。
-
-`tools/debug_tool/`：EdRV32 调试工具（Windows PySide6 GUI、串口 CLI / REST API、BIOS 烧录与 UDP 文件收发）。
+| `debug_tool/` | 自研 PC 调试工具：串口与网口会话、程序加载、虚拟键鼠、识别结果与参考模型比对、性能遥测（见其 README） |
+| `board/` | 调试工具使用的串口加载协议和网卡等待 |
+| `npu/` | NPU 与 YOLOv8n 后处理参考模型，供调试工具比对 |
+| `sw/` | showcase 构建脚本：内嵌 NPU 模型、字体、图片、游戏记录 |
+| `s3/lvgl_assets.py` | LVGL 资源生成，showcase 构建使用 |
+| `elf2mem.py` | 把 ELF 切分为 ROM / SRAM / DDR 镜像 |
+| `fpga/mem_init.py` | 生成 Boot ROM 和 SRAM IP 的初始化文件 |
+| `requirements.txt` | Python 依赖 |

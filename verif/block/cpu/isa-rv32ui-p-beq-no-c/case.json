@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32ui-p-beq",
-  "source": "third_party/riscv-tests/isa/rv32ui/beq.S",
-  "rvc": false
-}

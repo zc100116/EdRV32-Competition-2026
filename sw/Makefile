@@ -1,18 +1,15 @@
 # Unified RV32 software build; invoke from any directory with make -C sw.
 .DEFAULT_GOAL := all
 ROOT := $(abspath ..)
-PROGRAM ?= minimal
+PROGRAM ?= showcase
 MEMORY ?= rom
 CC := riscv-none-elf-gcc
 OBJDUMP := riscv-none-elf-objdump
 OBJCOPY := riscv-none-elf-objcopy
 OUT := $(ROOT)/build/sw/$(PROGRAM)
 ARCH ?= rv32im_zicsr
-SYS_PROGRAMS := sc01 sc02 sc03 sc04 sc05 sc06 sys_spike
-PROGRAM_DIR := $(if $(filter demo_vision demo_vnpu demo_npu,$(PROGRAM)),sw/apps/demo/$(PROGRAM),$(if \
-               $(filter bootloader,$(PROGRAM)),sw/boot,$(if \
-               $(filter monitor demo nes s3 showcase,$(PROGRAM)),sw/apps/$(PROGRAM),$(if \
-               $(filter $(SYS_PROGRAMS),$(PROGRAM)),sw/tests/sys,sw/tests/$(PROGRAM)))))
+# bootloader: Boot ROM BIOS; monitor: SRAM image; showcase: the demo program.
+PROGRAM_DIR := $(if $(filter bootloader,$(PROGRAM)),sw/boot,sw/apps/$(PROGRAM))
 -include $(ROOT)/$(PROGRAM_DIR)/program.mk
 ISA_FLAGS := -march=$(ARCH) -mabi=ilp32
 CFLAGS := $(ISA_FLAGS) -std=c11 -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin \
@@ -28,8 +25,6 @@ CORE := third_party/coremark
 SOURCES := $(BSP) $(addprefix $(CORE)/,core_main.c core_list_join.c core_matrix.c \
            core_state.c core_util.c) sw/apps/coremark/core_portme.c sw/apps/coremark/ee_printf.c
 CFLAGS += -I$(ROOT)/sw/apps/coremark -I$(ROOT)/$(CORE) -DITERATIONS=1
-else
-SOURCES := $(BSP) sw/tests/$(PROGRAM)/main.c
 endif
 OBJECTS := $(addprefix $(OUT)/obj/,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 # Report the compile flags used below without host include paths; metadata is separate.
@@ -37,12 +32,12 @@ CPPFLAGS := '-DBUILD_COMMIT="$(shell git -C $(ROOT) rev-parse --short HEAD)"' \
             '-DBUILD_COMPILER="GCC $(shell $(CC) -dumpfullversion)"' \
             '-DBUILD_CFLAGS="$(filter-out -I%,$(CFLAGS))"' '-DBUILD_ISA="$(ARCH)"'
 
-.PHONY: all coremark sys FORCE
+.PHONY: all coremark FORCE
 FORCE:
 all: $(OUT)/$(PROGRAM).elf
 	cd $(ROOT) && $(OBJDUMP) -d -S $< > $(OUT)/$(PROGRAM).dis
 	cd $(ROOT) && python3 tools/elf2mem.py $< $(OUT)
-ifneq ($(filter bootloader monitor demo demo_vision demo_vnpu demo_npu nes rnd_board eth_diag $(SYS_PROGRAMS),$(PROGRAM)),)
+ifneq ($(filter bootloader monitor,$(PROGRAM)),)
 	$(OBJCOPY) -O binary $< $(OUT)/$(PROGRAM).bin
 endif
 
@@ -69,8 +64,3 @@ $(OUT)/obj/%.o: $(ROOT)/%.S FORCE
 
 coremark:
 	$(MAKE) PROGRAM=coremark MEMORY=sram
-
-# ROM bootloader and the SC-01--SC-06 applications, plus software-only Spike checks.
-sys:
-	$(MAKE) PROGRAM=bootloader
-	$(foreach program,$(SYS_PROGRAMS),$(MAKE) PROGRAM=$(program) &&) true

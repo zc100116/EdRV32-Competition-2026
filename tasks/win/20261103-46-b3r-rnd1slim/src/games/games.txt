@@ -1,1 +1,0 @@
-NROM 测试|nrom-template.nes

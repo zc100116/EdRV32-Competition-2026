@@ -225,7 +225,7 @@ class BiosToolTest(unittest.TestCase):
 
     def test_rom_is_part_of_same_session(self):
         self.path.write_bytes(elf_fixture(rom_slot=True))
-        rom = ROOT / 'sw/apps/nes/roms/nrom-template.nes'
+        rom = ROOT / 'third_party/nes/FC游戏 536款 含封面/坦克大战/坦克大战.nes'
         op = operations(self.path, True, 115200, rom)[0]
         self.assertEqual(op.payload, expected_steps(115200, rom.read_bytes())[1][0])
         with self.assertRaisesRegex(ValueError, '--rom requires --elf'):
