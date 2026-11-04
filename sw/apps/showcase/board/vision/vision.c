@@ -96,7 +96,8 @@ static char image_name[257];
 static unsigned boxes = 1;
 static struct {
     uint64_t vin, npu_done, post_start, decode_end, sort_end, nms_end, cpu[3], handoff;
-    uint64_t sums[10], since, completed[6], handoff_vin;
+    uint64_t sums[13], since, completed[6], handoff_vin;
+    uint64_t copy_start, gui_take;
     uint64_t job_npu_start, copy_ticks, last_start;
     unsigned periods;
     uint32_t samples, gui_samples;
@@ -113,7 +114,7 @@ void vision_gui_presented(uint64_t tick)
     if (gui_armed) { gui_done = tick; gui_armed = 0; gui_ready = 1; }
     detection_applied = detection_armed;
 }
-static char report[320];
+static char report[400];
 /* Design P5 8.6 / card 54: one line per completed PC image, emitted once. */
 static char image_line[240];
 const char *vision_report(void)
@@ -304,6 +305,7 @@ static const lv_image_dsc_t *take_image(void)
 ui_vision_t ui_data_vision(void)
 {
     if (timing.await_gui && !timing.gui_taken) {
+        timing.gui_take = platform_ticks();
         timing.gui_taken = true; gui_armed = 1;
     }
     sessions[v.page].data.image = take_image();
@@ -536,6 +538,7 @@ static void copy_output(void)
     struct rnd_range input = {uncached(VISION_OUTPUT_BASE), VISION_OUTPUT_BYTES};
     struct rnd_batch batch = {&command, 1, &input, 1, &target, 1};
     uint64_t begin = platform_ticks();
+    timing.copy_start = begin;
     showcase_rnd_run(&batch);
     timing.copy_ticks = platform_ticks() - begin;
 }
@@ -552,6 +555,8 @@ static void publish_result(void)
     timing.handoff = platform_ticks();
     timing.completed[0] = timing.npu_done - timing.job_npu_start;
     timing.sums[9] += timing.copy_ticks;
+    timing.sums[10] += timing.job_npu_start - timing.vin;
+    timing.sums[11] += timing.copy_start - timing.npu_done;
     timing.completed[1] = timing.post_start - timing.npu_done;
     for (unsigned i = 0; i < 3; ++i) timing.completed[2+i] = timing.cpu[i];
     timing.completed[5] = timing.nms_end - timing.post_start;
@@ -650,13 +655,14 @@ static void timing_step(void)
     if (timing.await_gui && presented) {
         timing.sums[6] += tick - timing.handoff;
         timing.sums[7] += tick - timing.handoff_vin;
+        timing.sums[12] += timing.gui_take - timing.handoff;
         ++timing.gui_samples; timing.await_gui = false;
     }
     if (now - timing.since < platform_clock_hz()) return;
-    unsigned a[10] = {0};
-    for (unsigned i = 0; i < 10; ++i) {
+    unsigned a[13] = {0};
+    for (unsigned i = 0; i < 13; ++i) {
         unsigned count = i == 8 ? timing.periods :
-            (i == 6 || i == 7) ? timing.gui_samples : timing.samples;
+            (i == 6 || i == 7 || i == 12) ? timing.gui_samples : timing.samples;
         if (count) a[i] = tenths(timing.sums[i] / count);
     }
     ui_vision_t *data = &sessions[v.page].data;
@@ -669,11 +675,13 @@ static void timing_step(void)
         snprintf(report, sizeof report,
             "vision fps=%u npu=%u.%u wait=%u.%u decode=%u.%u sort=%u.%u nms=%u.%u "
             "post_span=%u.%u gui=%u.%u e2e=%u.%u period=%u.%u copy=%u.%u "
-            "cpu_comm=%u%% cpu_app=%u%% cpu_gui=%u%%\r\n",
+            "cpu_comm=%u%% cpu_app=%u%% cpu_gui=%u%% "
+            "vin_wait=%u.%u dispatch=%u.%u take=%u.%u\r\n",
             data->fps, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
             a[3]/10,a[3]%10,a[4]/10,a[4]%10,a[5]/10,a[5]%10,a[6]/10,a[6]%10,
             a[7]/10,a[7]%10,a[8]/10,a[8]%10,a[9]/10,a[9]%10,
-            sys.task_cpu[0],sys.task_cpu[1],sys.task_cpu[2]);
+            sys.task_cpu[0],sys.task_cpu[1],sys.task_cpu[2],
+            a[10]/10,a[10]%10,a[11]/10,a[11]%10,a[12]/10,a[12]%10);
     } else report[0] = 0;
     memset(timing.sums, 0, sizeof timing.sums);
     timing.samples = timing.gui_samples = timing.periods = 0; timing.since = now;
