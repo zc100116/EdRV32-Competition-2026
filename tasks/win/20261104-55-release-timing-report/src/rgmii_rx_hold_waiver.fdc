@@ -1,0 +1,10 @@
+# Report-only constraint for the m1-competition-release timing report (card 55).
+# Not used for implementation: the release bitstream (card 48 F125 r2) was built
+# without it, and fpga/constraints/edrv32_fpga_board_full_top.fdc stays unchanged.
+#
+# RGMII RX hold waiver: design record docs/design/2026-11-01-rgmii-rx-clock.md.
+# The input delay (+-1.0 ns window, RTL8211F Table 60 minimum) leaves slow-corner
+# setup + hold negative for any fixed sampling phase, so no shift can meet both;
+# card 30 board test: 10/10 PHY resets error-free, ETH video 0 dropped frames.
+# Only the hold check on these input ports is removed; setup stays analysed.
+set_false_path -hold -from [get_ports {rgmii_rxd_i[*] rgmii_rx_ctl_i}]
