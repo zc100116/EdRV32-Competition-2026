@@ -1,20 +1,25 @@
 // File: edrv32_npu_timing_probe.v
 // Spec: card 57; npu-spec 3, 5; CLAUDE.md 10.3.
 // Description: Real NPU with serial registered stimulus and registered XOR observation.
-// Both domain clocks share the probe pin; this measures internal paths without DDR/CPU.
-// Clock: clk_i.
+//              APB/AXI ports live in clk_mem and are registered in clk_mem; irq_o is
+//              registered in clk_npu, so each domain keeps its own constraint.
+// Clock: clk_npu_i (probe target), clk_mem_i (125 MHz as on the board).
 module edrv32_npu_timing_probe (
-    // Clock and reset.
-    input wire clk_i,
+    // Clocks and reset.
+    input wire clk_npu_i,
+    input wire clk_mem_i,
     input wire rst_n_i,
 
     // Serial test access.
     input wire scan_i,
-    output wire scan_o
+    output wire scan_o,
+    output wire irq_scan_o
 );
     localparam IN_W = 319;
-    localparam OUT_W = 403;
-    wire rst_n_w;
+    localparam OUT_W = 402;
+    wire rst_mem_n_w;
+    wire rst_npu_n_w;
+    reg irq_r;
     reg scan_r;
     reg [IN_W-1:0] in_r;
     reg [OUT_W-1:0] out_r;
@@ -55,12 +60,17 @@ module edrv32_npu_timing_probe (
     wire axi_rready_w;
     wire irq_w;
 
-    edrv32_reset_sync u_reset (
-        .clk_i(clk_i),
+    edrv32_reset_sync u_reset_mem (
+        .clk_i(clk_mem_i),
         .rst_n_i(rst_n_i),
-        .rst_n_o(rst_n_w)
+        .rst_n_o(rst_mem_n_w)
     );
-    always @(posedge clk_i) begin
+    edrv32_reset_sync u_reset_npu (
+        .clk_i(clk_npu_i),
+        .rst_n_i(rst_n_i),
+        .rst_n_o(rst_npu_n_w)
+    );
+    always @(posedge clk_mem_i) begin
         scan_r <= scan_i;
         in_r <= {in_r[IN_W-2:0], scan_r};
     end
@@ -83,7 +93,7 @@ module edrv32_npu_timing_probe (
         axi_rlast_w,
         axi_rvalid_w
     } = in_r;
-    always @(posedge clk_i) begin
+    always @(posedge clk_mem_i) begin
         out_r <= {
             apb_pready_w,
             apb_prdata_w,
@@ -101,18 +111,21 @@ module edrv32_npu_timing_probe (
             axi_araddr_w,
             axi_arlen_w,
             axi_arvalid_w,
-            axi_rready_w,
-            irq_w
+            axi_rready_w
         };
         fold_r <= {fold_r[OUT_W-2:0], 1'b0} ^ out_r;
     end
     assign scan_o = fold_r[OUT_W-1];
+    always @(posedge clk_npu_i) begin
+        irq_r <= irq_w;
+    end
+    assign irq_scan_o = irq_r;
 
     edrv32_npu u_npu (
-        .clk_npu_i(clk_i),
-        .rst_npu_n_i(rst_n_w),
-        .clk_mem_i(clk_i),
-        .rst_mem_n_i(rst_n_w),
+        .clk_npu_i(clk_npu_i),
+        .rst_npu_n_i(rst_npu_n_w),
+        .clk_mem_i(clk_mem_i),
+        .rst_mem_n_i(rst_mem_n_w),
         .apb_paddr_i(apb_paddr_w),
         .apb_psel_i(apb_psel_w),
         .apb_penable_i(apb_penable_w),
