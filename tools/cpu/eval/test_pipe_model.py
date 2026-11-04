@@ -5,6 +5,7 @@
 from dataclasses import replace
 import unittest
 
+from ipc_structures import Direction, FUSIONS
 from analyze import Instruction
 from pipe_model import INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib, simulate
 from collections import deque
@@ -24,6 +25,144 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_lcb_m_compare_and_registered_redirect(self):
+        stream = [instruction(0, 'load', rd=10),
+                  instruction(4, 'branch', sources=(10,), target=8), instruction(8)]
+        base = run(stream, 'V3s')
+        result = run(stream, 'V3s', lcb='same-cycle')
+        self.assertEqual(result['cycles'], base['cycles'] - 1)
+        self.assertEqual(result['lcb_branches'], 1)
+        self.assertEqual(result['lcb_misses'], 0)
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[0], program[4] = stream[:2]
+        program[4] = replace(program[4], target=32)
+        program[36] = instruction(36, 'serial')
+        same = simulate(program, [0, 4, 32, 36], 0, 36, 'V3s', lcb='same-cycle')
+        registered = simulate(program, [0, 4, 32, 36], 0, 36, 'V3s', lcb='registered')
+        self.assertEqual(same['lcb_misses'], 1)
+        self.assertEqual(registered['cycles'], same['cycles'] + 1)
+        # An intervening instruction makes this an ordinary branch.
+        stream = [instruction(0, 'load', rd=10), instruction(4),
+                  instruction(8, 'branch', sources=(10,), target=12), instruction(12)]
+        self.assertEqual(run(stream, 'V3s', lcb='same-cycle')['lcb_branches'], 0)
+
+    def test_all_fusion_templates_and_dual_retirement(self):
+        encodings = ((0x13, 0x7013), (0x5013, 0x6033), (0x37, 0x13),
+                     (0x1013, 0x33), (0x33, 0x2003), (0x17, 0x67))
+        for template, (a, b) in zip(FUSIONS, encodings):
+            first = replace(instruction(0, rd=10, sources=(2,)), bits=a)
+            second = replace(instruction(4, rd=11, sources=(10, 3)), bits=b)
+            if template == 'add-load':
+                second = replace(second, kind='load', sources=(10,))
+            if template == 'auipc-jalr':
+                second = replace(second, kind='jalr', sources=(10,))
+            result = run([first, second], 'V3s', fusion=(template,),
+                         perfect_frontend=True, perfect_prediction=True)
+            self.assertEqual(result['instructions'], 2, template)
+            self.assertEqual(result['fused'], 1, template)
+            self.assertEqual(result['cycles'], 1, template)
+            # A fused unit occupies one slot and can pair with a third instruction.
+            third = instruction(8, sources=(4,))
+            result = run([first, second, third], 'V3s', fusion=(template,),
+                         perfect_frontend=True, perfect_prediction=True)
+            self.assertEqual(result['cycles'], 1, template)
+            self.assertEqual(result['instructions'], 3, template)
+        first = replace(instruction(0, rd=10), bits=0x37)
+        second = instruction(4, rd=11, sources=(10,))
+        for rd in (10, 11):
+            result = run([first, second, instruction(8, sources=(rd,))],
+                         fusion=('lui-addi',))
+            self.assertEqual(result['cycles'], 2)
+        second = replace(second, sources=(3,))
+        self.assertEqual(run([first, second], fusion=('lui-addi',))['fused'], 0)
+
+    def test_early_address_history_and_same_group_base(self):
+        for gap, expected in ((0, 0), (1, 1), (2, 1)):
+            stream = [instruction(0, rd=10)]
+            stream += [instruction(4 + i * 4, 'load', rd=20 + i, sources=(2,))
+                       for i in range(gap)]
+            pc = 4 + gap * 4
+            stream += [instruction(pc, 'load', rd=11, sources=(10,)),
+                       instruction(pc + 4, sources=(11,))]
+            one = run(stream, early_address=1)
+            two = run(stream, early_address=2)
+            self.assertEqual(one['early_loads'] - gap, expected)
+            self.assertEqual(two['early_loads'] - gap, int(gap == 2))
+            self.assertEqual(one['adjacent_load_base'], int(gap == 0))
+        stream = [instruction(0, 'load', rd=10, sources=(2,)),
+                  instruction(4, sources=(10,))]
+        self.assertEqual(run(stream, early_address=1)['cycles'], 2)
+
+    def test_fused_address_is_not_an_early_load(self):
+        first = replace(instruction(0, rd=10, sources=(2, 3)), bits=0x33)
+        second = replace(instruction(4, 'load', rd=11, sources=(10,)), bits=0x2003)
+        result = run([first, second, instruction(8, sources=(11,))], 'V3s',
+                     fusion=('add-load',), early_address=1)
+        self.assertEqual(result['instructions'], 3)
+        self.assertEqual(result['early_loads'], 0)
+        self.assertEqual(result['adjacent_load_base'], 1)
+
+    def test_serial_alu_producer_restriction(self):
+        for bits, simple in ((0x13, True), (0x37, True), (0x7013, True),
+                             (0x1013, True), (0x33, False), (0x40000033, False)):
+            first = replace(instruction(0, rd=10), bits=bits)
+            stream = [first, instruction(4, sources=(10,))]
+            self.assertEqual(run(stream, serial_alu='any')['cycles'], 1)
+            self.assertEqual(run(stream, serial_alu='simple')['cycles'], 1 if simple else 2)
+        stream[0] = instruction(0, 'load', rd=10)
+        self.assertEqual(run(stream, serial_alu='any')['cycles'], 3)
+        # V3s exchanges a younger LSU into lane 0: it cannot consume lane 1.
+        stream = [instruction(0, rd=10), instruction(4, 'load', sources=(10,))]
+        self.assertEqual(run(stream, 'V3s', serial_alu='any')['hpm1'], 0)
+
+    def test_loop_cache_replays_groups_and_exits(self):
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[12] = instruction(12, 'branch', target=0)
+        program[20] = instruction(20, 'serial')
+        trace = [0, 4, 8, 12] * 30 + [16, 20]
+        base = simulate(program, trace, 0, 20, 'V3s', taken_bubble=1)
+        result = simulate(program, trace, 0, 20, 'V3s', loop_cache=True, taken_bubble=1)
+        self.assertEqual(result['instructions'], 121)
+        self.assertGreater(result['cache_hits'], 0)
+        self.assertGreater(result['cache_instructions'], 100)
+        self.assertLess(result['cycles'], base['cycles'])
+        # A head inside an existing normal pair is still cacheable on re-entry.
+        program[0] = instruction(0)
+        program[12] = instruction(12, 'branch', target=4)
+        trace = [0] + [4, 8, 12] * 30 + [16, 20]
+        result = simulate(program, trace, 0, 20, 'V3s', loop_cache=True)
+        self.assertEqual(result['instructions'], 92)
+        self.assertGreater(result['cache_hits'], 0)
+        self.assertGreater(result['cache_instructions'], 60)
+        # The 17-instruction static interval exceeds the cache's loop-length limit.
+        program[12] = instruction(12)
+        program[64] = instruction(64, 'branch', target=0)
+        program[72] = instruction(72, 'serial')
+        trace = list(range(0, 68, 4)) * 5 + [68, 72]
+        result = simulate(program, trace, 0, 72, 'V3s', loop_cache=True)
+        self.assertEqual(result['cache_hits'], 0)
+
+    def test_second_level_predictors_train_saved_metadata(self):
+        branch = instruction(0, 'branch', target=0)
+        for kind in ('loop', 'tournament', 'tage'):
+            predictor = Predictor(128, 4096, 8, direction=kind)
+            predictor.btb[0] = branch, 0
+            for taken in ([True] * 7 + [False]) * 16:
+                query = predictor.query(0)
+                ib = deque()
+                fill_ib({0: branch}, ib, [(0, query), (2, query)], pht_size=4096)
+                record = ib[0]
+                self.assertIsNotNone(record.direction_meta)
+                record.next_pc = 0 if taken else 4
+                predictor.update(record)
+            self.assertLessEqual(predictor.direction.bits, 32768)
+            self.assertEqual(predictor.history & 255, 254)
+        direction = Direction('loop')
+        for taken in ([True] * 3 + [False]) * 8:
+            prediction, token = direction.predict(0, False, 0)
+            direction.update(0, taken, token)
+        self.assertTrue(direction.predict(0, False, 0)[0])
+
     def test_gshare_pc_index_shift(self):
         branch = instruction(1024, 'branch', target=16)
         for shift, index in ((1, 7), (2, 263)):

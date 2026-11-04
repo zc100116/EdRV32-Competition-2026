@@ -4,12 +4,15 @@
 # Retain speculative fetch/F1 indices; train surviving E/M controls under C-E7 late execution.
 """Cycle approximation, with HPM windows defined by retired start_time/stop_time PCs."""
 import argparse
+from bisect import bisect_left, bisect_right
 from collections import deque
 from dataclasses import dataclass, replace
 import json
 from pathlib import Path
 import subprocess
 
+from ipc_structures import (Direction, FUSIONS, Macro, SavedHistory, destinations,
+                            fuse_program, operation)
 from analyze import COMMIT, CONTROL, DISASM, decode
 
 VARIANTS = ('V0', 'V1', 'V2', 'V2s', 'V2s+V5', 'V3', 'V3s', 'V4a', 'V3+V4a',
@@ -45,15 +48,24 @@ class Record:
     late: bool = False
     late_store_data: bool = False
     deferred_control: bool = False
+    lcb: bool = False
+    result_latency: int = 0
+    direction_meta: object = None
+    cache_group: int = -1
+    early_load: bool = False
+    adjacent_base: bool = False
+    serial_pair: bool = False
 
 
 class Predictor:
     """C-E2 grouped BTB/gshare/RAS algorithm, scheduled at F1 and E like the RTL."""
 
-    def __init__(self, btb_size, pht_size, group_bytes, ras_size=4, gshare_pc_shift=1):
+    def __init__(self, btb_size, pht_size, group_bytes, ras_size=4,
+                 gshare_pc_shift=1, direction=None):
         self.btb = [None] * btb_size
         self.pht = [1] * pht_size
         self.history = 0
+        self.direction = Direction(direction) if direction else None
         self.gshare_pc_shift = gshare_pc_shift
         self.shift = group_bytes.bit_length() - 1
         self.stack = [0] * ras_size
@@ -91,7 +103,12 @@ class Predictor:
             taken = instruction.kind != 'branch' or self.pht[index] >= 2
             if instruction.pop and self.count:
                 target = self.stack[(self.pointer - 1) % len(self.stack)]
-        return entry, taken, target, self.history, self.snapshot()
+        history = self.history
+        if self.direction and entry and instruction.kind == 'branch':
+            taken, token = self.direction.predict(instruction.pc, taken, index)
+            history = SavedHistory(history)
+            history.direction = (instruction.pc, token)
+        return entry, taken, target, history, self.snapshot()
 
     def update(self, record):
         instruction = record.instruction
@@ -101,6 +118,8 @@ class Predictor:
         target = record.next_pc if instruction.kind == 'jalr' else instruction.target
         self.btb[(instruction.pc >> self.shift) & (len(self.btb) - 1)] = instruction, target
         if instruction.kind == 'branch':
+            if self.direction and record.direction_meta is not None:
+                self.direction.update(instruction.pc, taken, record.direction_meta)
             delta = 1 if taken else -1
             self.pht[record.index] = min(3, max(0, self.pht[record.index] + delta))
             self.history = ((self.history << 1) | taken) & (len(self.pht) - 1)
@@ -201,6 +220,9 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024, gshare_pc_shift=1):
         hit = bool(entry and entry[0].pc == pc)
         ib.append(Record(instruction, hit, hit and taken, target,
                          ((pc >> gshare_pc_shift) ^ history) & (pht_size - 1), checkpoint))
+        saved = getattr(history, 'direction', None)
+        if saved and saved[0] == pc:
+            ib[-1].direction_meta = saved[1]
         del halfwords[:length]
 
 
@@ -208,7 +230,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              load_latency=2, mul_latency=3, perfect_prediction=False,
              perfect_frontend=False, relax_raw=False, all_slot1_types=False,
              statistics=None, btb_entries=None, gshare_entries=None, ras_entries=None,
-             gshare_pc_shift=1, taken_bubble=0):
+             gshare_pc_shift=1, taken_bubble=0, lcb=None, fusion=(), loop_cache=False,
+             early_address=0, direction_predictor=None, serial_alu=None):
+    if fusion:
+        program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
     if variant in INORDER_VARIANTS:
         variant = 'L2b+V5'
@@ -234,7 +259,20 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     btb = btb if btb_entries is None else btb_entries
     pht = pht if gshare_entries is None else gshare_entries
     ras = ras if ras_entries is None else ras_entries
-    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes, ras, gshare_pc_shift)
+    predictor = Predictor(btb, pht, 8 if dual_query else group_bytes, ras,
+                          gshare_pc_shift, direction_predictor)
+    experimental = dict(lcb_branches=0, lcb_misses=0, fused=0, early_loads=0,
+                        loads=0, adjacent_load_base=0, serial_pairs=0,
+                        cache_instructions=0, cache_hits=0, branches=0, direction_misses=0)
+    retired_instructions = 0
+    last_writes = {}
+    previous_instruction = None
+    cache = {}
+    static_pcs = sorted(program) if loop_cache else []
+    learned_groups = deque(maxlen=16)
+    replay = None
+    replay_position = 0
+    cache_sequence = 0
     ib = deque()
     halfwords = []
     pending = []
@@ -244,6 +282,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     cursor = 0
     active = False
     cycles = 0
+    tick = 0
     counters = [0] * 17
     late_retired = [0, 0, 0]
     training_pending = deque()
@@ -265,10 +304,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     if statistics is not None:
         statistics.update(load_use_load_address_cycles=0, load_use_store_address_cycles=0)
 
-    def hazard(instruction, forwarded=0):
+    def hazard(instruction, forwarded=()):
         waits = 0
         for source in instruction.sources:
-            if source != forwarded:
+            if source not in forwarded:
                 waits |= wait_kind.get(source, 0)
         return waits
 
@@ -336,11 +375,50 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 target = next_pc
             ib.append(Record(instruction, hit, hit and taken, target,
                              ((pc >> gshare_pc_shift) ^ history) & (pht - 1), checkpoint))
+            saved = getattr(history, 'direction', None)
+            if saved and saved[0] == pc:
+                ib[-1].direction_meta = saved[1]
             front_cursor += 1
             if next_pc != pc + instruction.size or (hit and taken):
                 ideal_group = None
 
     while True:
+        if loop_cache:
+            if replay is None and ib:
+                # A loop head may be in the second half of a normal issue group.
+                # Preserve older queued instructions; enter at any cached group start.
+                starts = {group[0][0].pc: (groups, position)
+                          for groups in cache.values() for position, group in enumerate(groups)}
+                entry = next(((index, starts[record.instruction.pc])
+                              for index, record in enumerate(ib)
+                              if record.instruction.pc in starts), None)
+                if entry is not None:
+                    index, (replay, replay_position) = entry
+                    prefix = list(ib)[:index]
+                    ib.clear()
+                    ib.extend(prefix)
+                    halfwords, pending = [], []
+                    if active:
+                        experimental['cache_hits'] += 1
+            if replay is not None and len(ib) <= depth - 2:
+                group = replay[replay_position]
+                cache_sequence += 1
+                for instruction, next_pc in group:
+                    query = predictor.query(instruction.pc)
+                    _, _, _, history, checkpoint = query
+                    taken = instruction.kind in CONTROL and (
+                        instruction.kind != 'branch' or
+                        next_pc != instruction.pc + instruction.size)
+                    rec = Record(instruction, instruction.kind in CONTROL, taken, next_pc,
+                                 ((instruction.pc >> gshare_pc_shift) ^ history) & (pht - 1),
+                                 checkpoint, cache_group=cache_sequence)
+                    saved = getattr(history, 'direction', None)
+                    if saved and saved[0] == instruction.pc:
+                        rec.direction_meta = saved[1]
+                    ib.append(rec)
+                    if taken:
+                        predictor.action(instruction)
+                replay_position = (replay_position + 1) % len(replay)
         ending = False
         retired_controls = 0
         retired_late = [0, 0, 0]
@@ -349,6 +427,24 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             ending |= pc == end
             active |= pc == begin
             retired_controls += record.instruction.kind in CONTROL
+            if active and pc != end:
+                inst = record.instruction
+                retired_instructions += len(inst.members) if isinstance(inst, Macro) else 1
+                experimental['fused'] += isinstance(inst, Macro)
+                if inst.kind == 'load':
+                    experimental['loads'] += 1
+                    experimental['early_loads'] += record.early_load
+                    experimental['adjacent_load_base'] += record.adjacent_base
+                experimental['serial_pairs'] += record.serial_pair
+                experimental['lcb_branches'] += record.lcb
+                taken = record.next_pc != pc + inst.size
+                wrong = record.taken != taken or (taken and record.target != record.next_pc)
+                experimental['lcb_misses'] += record.lcb and wrong
+                if inst.kind == 'branch':
+                    experimental['branches'] += 1
+                    experimental['direction_misses'] += record.taken != taken
+                if record.cache_group >= 0:
+                    experimental['cache_instructions'] += 1
             if record.late:
                 retired_late[0 if record.instruction.kind == 'alu' else 1] += 1
             retired_late[2] += record.late_store_data
@@ -368,10 +464,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         # A deferred M branch is older than every E record and resolves first.
         m_redirect = None
         m_surviving = m
-        if late_branch:
+        if late_branch or lcb:
             for index, record in enumerate(m):
                 instruction = record.instruction
-                if (record.late and instruction.kind in late_controls) or record.deferred_control:
+                if ((record.late and instruction.kind in late_controls) or
+                        record.deferred_control or record.lcb):
                     taken = (instruction.kind in {'jal', 'jalr'} or
                              record.next_pc != instruction.pc + instruction.size)
                     if not record.d_redirect and (record.taken != taken or (
@@ -380,7 +477,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         m_surviving = m[:index + 1]
                         break
         m_training = [r for r in m_surviving if (
-            r.late and r.instruction.kind in late_controls) or r.deferred_control]
+            r.late and r.instruction.kind in late_controls) or r.deferred_control or r.lcb]
         bounded_training = changes.get('training_capacity') == 1
         m_stall = bounded_training and len(training_pending) + len(m_training) > 2
         if m_stall:
@@ -392,7 +489,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         for record in (() if m_redirect or m_stall else e):
             instruction = record.instruction
             surviving.append(record)
-            if (record.late and instruction.kind in late_controls) or record.deferred_control:
+            if ((record.late and instruction.kind in late_controls) or
+                    record.deferred_control or record.lcb):
                 continue
             actual_taken = (instruction.kind in {'jal', 'jalr'} or
                             (instruction.kind == 'branch' and
@@ -403,7 +501,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 redirect = record
                 break
         e_training = [r for r in surviving if r.instruction.kind in CONTROL and not (
-            (r.late and r.instruction.kind in late_controls) or r.deferred_control)]
+            (r.late and r.instruction.kind in late_controls) or r.deferred_control or r.lcb)]
         e_stall = m_stall or (bounded_training and
             len(training_pending) + len(m_training) + len(e_training) > 2)
         if e_stall:
@@ -433,13 +531,17 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         for age, records in stages:
             for record in records:
                 producer = record.instruction
-                if producer.rd:
+                for destination in destinations(producer):
+                    if not destination:
+                        continue
                     code = 1 if producer.kind == 'load' else 2
-                    latency = 2 if record.late and producer.kind == 'alu' else latencies.get(
-                        producer.kind, 1)
-                    wait_kind[producer.rd] = code if latency > age else 0
+                    latency = record.result_latency or (2 if record.late and producer.kind == 'alu'
+                                                       else latencies.get(producer.kind, 1))
+                    if isinstance(producer, Macro) and destination != producer.rd:
+                        latency = 1
+                    wait_kind[destination] = code if latency > age else 0
                     if late_backend:
-                        ready_in[producer.rd] = max(0, latency - age)
+                        ready_in[destination] = max(0, latency - age)
         front_empty = not ib
         trace_exhausted = cursor >= len(trace)
         older_waits = hazard(ib[0].instruction) if ib else 0
@@ -448,6 +550,17 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             allowed, older_late, older_store = schedule(ib[0].instruction, 0)
             if allowed:
                 older_waits = 0
+        older_lcb = False
+        if lcb and ib and ib[0].instruction.kind == 'branch' and previous_instruction:
+            inst = ib[0].instruction
+            preceding, issue_cycle = previous_instruction
+            if (preceding.kind == 'load' and preceding.rd in inst.sources and preceding.rd
+                    and inst.pc == preceding.pc + preceding.size):
+                # M comparison can consume the previous cycle's load in M; other inputs
+                # must already be available. Never pair a load and its branch in E.
+                if issue_cycle == tick - 1 and not hazard(inst, (preceding.rd,)):
+                    older_waits = 0
+                    older_lcb = True
         csr_wait = bool(ib and ib[0].instruction.kind == 'csr' and (e or m))
         if ib and available and cursor < len(trace):
             older = ib[0].instruction
@@ -457,8 +570,14 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 younger_late = younger_store = False
                 if len(ib) >= 2:
                     younger = ib[1].instruction
-                    raw = not relax_raw and older.rd and older.rd in younger.sources
-                    forwarded = older.rd if relax_raw else 0
+                    chain = serial_alu and older.kind == 'alu' and (
+                        serial_alu == 'any' or operation(older) in {
+                            'addi', 'lui', 'andi', 'ori', 'xori', 'and', 'or', 'xor',
+                            'slli', 'srli', 'srai', 'sll', 'srl', 'sra'})
+                    forward = relax_raw or chain
+                    writes = destinations(older)
+                    raw = not forward and any(rd and rd in younger.sources for rd in writes)
+                    forwarded = writes if forward else ()
                     structural = older.kind in {'csr', 'serial'} or hazard(younger, forwarded)
                     if late_backend:
                         allowed, younger_late, younger_store = schedule(
@@ -486,10 +605,17 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     exchanged = exchanged and younger.kind not in {'csr', 'serial', 'illegal'}
                     if single_control and older.kind in CONTROL and younger.kind in CONTROL:
                         exchanged = False
+                    if chain and exchanged and not relax_raw:
+                        raw = any(rd and rd in younger.sources for rd in writes)
+                    if ((ib[0].cache_group >= 0 or ib[1].cache_group >= 0) and
+                            ib[0].cache_group != ib[1].cache_group):
+                        supported = exchanged = False
                     reason = 5 if raw else 6 if structural else 7 if not (
                         supported or exchanged) else 0
                     if not reason:
                         count = 2
+                        if chain and any(rd and rd in younger.sources for rd in writes):
+                            ib[1].serial_pair = True
                 if older.kind == 'jal' and not ib[0].hit and not perfect_prediction:
                     count = 1
                     d_redirect = ib[0]
@@ -505,6 +631,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 for slot in range(count):
                     record = ib.popleft()
                     instruction = record.instruction
+                    record.lcb = slot == 0 and older_lcb
                     record.trace_index = cursor
                     record.counted_issue = active
                     record.late = older_late if slot == 0 else younger_late
@@ -516,9 +643,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     if cursor < len(trace) and instruction.pc == trace[cursor]:
                         cursor += 1
                     else:
-                        speculative = late_branch and any(
+                        speculative = (late_branch or lcb) and any(
                             (r.late and r.instruction.kind in late_controls) or
-                            r.deferred_control for r in e)
+                            r.deferred_control or r.lcb for r in e)
                         if slot == 0 and not speculative:
                             raise ValueError(f'trace mismatch at commit {cursor}: '
                                              f'fetch PC {instruction.pc:08x}, '
@@ -526,6 +653,22 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         # M-resolved branches also permit an entire younger E group to be wrong.
                         record.trace_index = -1
                         record.next_pc = instruction.pc + instruction.size
+                    if instruction.kind == 'load' and early_address:
+                        base = instruction.sources[-1] if instruction.sources else 0
+                        recent = last_writes.get(base)
+                        early = not base or recent is None or tick - recent > early_address
+                        if isinstance(instruction, Macro):
+                            # The fused ADD is itself writing the load's architectural base.
+                            early = False
+                        record.result_latency = 1 if early else load_latency
+                        record.early_load = early
+                        record.adjacent_base = isinstance(instruction, Macro) or bool(
+                            record.trace_index > 0 and base and
+                            base in destinations(program[trace[record.trace_index - 1]]))
+                    for destination in destinations(instruction):
+                        if destination:
+                            last_writes[destination] = tick
+                    previous_instruction = instruction, tick
                     issued.append(record)
                 if any(r.instruction.kind == 'div' for r in issued):
                     division_left = 33
@@ -533,7 +676,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         # F2 can append the arriving hit and drain two instructions into IB in the same cycle.
         flush = m_redirect or redirect or d_redirect
         query = None
-        if not flush and not perfect_frontend:
+        if not flush and not perfect_frontend and replay is None:
             halfwords.extend(pending)
             pending = []
             fill_ib(program, ib, halfwords, depth, pht, gshare_pc_shift)
@@ -546,19 +689,19 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
 
         # All predictor mutations occur at the edge, after the concurrent F1 query.
         m_updates = []
-        if late_branch and not m_stall:
+        if (late_branch or lcb) and not m_stall:
             for record in m_surviving:
                 if (record.late and record.instruction.kind in late_controls) or (
-                        record.deferred_control):
+                        record.deferred_control) or record.lcb:
                     m_updates.append(record)
         e_updates = []
         if not div_wait and not e_stall:
             for record in surviving:
                 if record.instruction.kind in CONTROL and not (
                         (record.late and record.instruction.kind in late_controls) or
-                        record.deferred_control):
+                        record.deferred_control or record.lcb):
                     e_updates.append(record)
-        if late_branch:
+        if late_branch or lcb:
             training_pending.extend(m_updates)
             training_pending.extend(e_updates)
             if training_pending:
@@ -566,7 +709,36 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         else:
             for record in e_updates:
                 predictor.update(record)
+        if loop_cache and not div_wait and not e_stall:
+            if m_redirect:
+                learned_groups.clear()
+            elif surviving:
+                learned_groups.append(tuple((r.instruction, r.next_pc) for r in surviving))
+                history = list(learned_groups)
+                for slot, last in enumerate(surviving):
+                    head = last.next_pc
+                    if last.instruction.kind not in CONTROL or head > last.instruction.pc:
+                        continue
+                    static = (bisect_right(static_pcs, last.instruction.pc) -
+                              bisect_left(static_pcs, head))
+                    if static > 16:
+                        continue
+                    # Trim both boundary groups at the architectural loop boundary.
+                    # Use the latest head, so the entry describes one observed iteration.
+                    groups = history[:-1] + [history[-1][:slot + 1]]
+                    start = next(((i, j) for i in range(len(groups) - 1, -1, -1)
+                                  for j in range(len(groups[i]) - 1, -1, -1)
+                                  if groups[i][j][0].pc == head), None)
+                    if start is not None:
+                        i, j = start
+                        groups = [groups[i][j:]] + groups[i + 1:]
+                        cache.pop(head, None)
+                        while cache and sum(map(len, cache.values())) + len(groups) > 32:
+                            del cache[next(iter(cache))]
+                        cache[head] = groups
         if flush:
+            replay = None
+            learned_groups.clear()
             predictor.restore(flush)
             fetch_pc = flush.next_pc
             ib.clear()
@@ -575,6 +747,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             cross_target = None
             recovery = 'redirect_m' if m_redirect else 'redirect_e' if redirect else 'redirect_d'
             penalty = e_penalty if m_redirect or redirect else d_penalty
+            if m_redirect and m_redirect.lcb and lcb == 'registered':
+                penalty += 1
             # A JALR can target PC+4: a younger instruction can match the trace
             # before being squashed by its older redirect. Replay it as well.
             cursor = flush.trace_index + 1
@@ -646,8 +820,13 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             training_conflicts += (len(m_updates) + len(e_updates) > 1)
             training_over_one += len(training_pending) > 1
             training_peak = max(training_peak, len(training_pending))
+        tick += 1
     result = dict(cycles=cycles, instructions=2 * counters[1] + counters[2],
                   **{f'hpm{i}': counters[i] for i in range(1, 17)})
+    if fusion:
+        result['instructions'] = retired_instructions
+    result.update(experimental)
+    result['predictor_bits'] = predictor.direction.bits if predictor.direction else 2 * pht
     result['ipc'] = result['instructions'] / result['cycles']
     result.update({f'slots_{cause}': count for cause, count in slots.items()})
     result.update(late_alu=late_retired[0], late_branch=late_retired[1],
@@ -675,6 +854,12 @@ def main():
     parser.add_argument('--gshare-entries', type=int, choices=(512, 1024, 2048, 4096))
     parser.add_argument('--ras-entries', type=int, choices=(4, 8))
     parser.add_argument('--gshare-pc-shift', type=int, choices=(1, 2), default=1)
+    parser.add_argument('--lcb', choices=('same-cycle', 'registered'))
+    parser.add_argument('--fusion', nargs='+', choices=FUSIONS, default=())
+    parser.add_argument('--loop-cache', action='store_true')
+    parser.add_argument('--early-address', type=int, choices=(1, 2), default=0)
+    parser.add_argument('--direction-predictor', choices=('loop', 'tournament', 'tage'))
+    parser.add_argument('--serial-alu', choices=('any', 'simple'))
     args = parser.parse_args()
     program, symbols, trace = program_and_trace(args.directory)
     print(json.dumps(simulate(program, trace, symbols['start_time'], symbols['stop_time'],
@@ -686,7 +871,11 @@ def main():
                               btb_entries=args.btb_entries,
                               gshare_entries=args.gshare_entries,
                               ras_entries=args.ras_entries,
-                              gshare_pc_shift=args.gshare_pc_shift), indent=2))
+                              gshare_pc_shift=args.gshare_pc_shift, lcb=args.lcb,
+                              fusion=args.fusion, loop_cache=args.loop_cache,
+                              early_address=args.early_address,
+                              direction_predictor=args.direction_predictor,
+                              serial_alu=args.serial_alu), indent=2))
 
 
 if __name__ == '__main__':
