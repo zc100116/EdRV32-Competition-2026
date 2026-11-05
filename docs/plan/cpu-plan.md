@@ -129,6 +129,9 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-MODEL | 周期模型按 v0.17 条款精确实现，给出 R-05 期望值；评估 tournament（计纠正气泡）、宏操作融合、串联 ALU 在 v0.17 上的净收益 | Codex sol | — | 模型定向测试；设计记录 | task-cpu-n-model | [x] f809053c：S2 1,868,156 / S3 1,867,923；推荐 tournament（+3.7%/+4.3%/+2.1%） |
 | N-INT | D$ 提前查询副本 RAM（用户 2026-11-05）、删除 4.11 LCB（用户 2026-11-05）、合并 N-FE/N-VERIF、B1 按路模型、回归 | 复用 N-BE 终端（ctx_055d0565607f） | 以上 | 回归通过，R-05 达标 | task-cpu-n-be → cpu-n16 | [x] fcc983f3：B1 46/46、arch 63、单元 15 目录、R01–R05 通过；R-05 1,869,203（模型 S2 +0.056%），提前查询成功率 97.55% |
 | N-PDS | 卡 59：v0.17 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-INT | WNS ≥ 0，或得到下一轮路径分类 | win/20261105-59-cpu-v017-timing-probe | [~] 已下发 |
+| N-FIX | v0.17 缺陷：寄存 D 重定向强制单发射时 d_swap 未同步，导致跳过 JAL（tournament 时序下由随机测试暴露） | Codex（N-TOUR 中发现） | — | cpu_v3s scenario21 修复前失败、修复后通过 | cpu-n16 6aae76e5/9cfd69a3 | [x] |
+| N-TOUR | v0.18 tournament（用户 2026-11-05）：三张 LUTRAM 表、F2 纠正 1 拍、E 寄存训练 | Codex sol | N-INT | B1 47/47、R01–R05；R-05 1,807,583（模型 +0.33%，比 v0.17 少 3.3%） | task-cpu-n-tour b4fd7a63 | [x] |
+| N-PDS2 | 卡 60：v0.18 CPU+L1 独立 150 MHz 探针，新 IP 2 个（local_history 256×10、tournament 1024×2） | 用户 + Windows Codex | N-TOUR | 频率 ≥ 卡 59 的 98% | win/20261105-60-cpu-v018-tournament-probe | [~] 已下发 |
 
 ## 6. 变更记录
 
