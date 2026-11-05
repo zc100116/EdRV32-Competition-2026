@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # File: b2_early_stats.py
-# Spec: cpu-spec 4.10; T-CPU-N-INT.
-# Description: Count early-load outcomes in the R-05 window.
+# Spec: cpu-spec 4.4, 4.10; T-CPU-N-TOUR.
+# Description: Count early-load and tournament outcomes in the R-05 window.
 # Use the working tree or a requested git commit; instrumentation is testbench-only.
 # Clock: none (host tool).
 import argparse
@@ -36,12 +36,26 @@ def main():
     longint unsigned load_issued=0, eligible=0, successes=0;
     longint unsigned fail_port=0, fail_store=0, fail_device=0, fail_miss=0;
     longint unsigned fail_hold=0, fail_maintenance=0, repair_cycles=0;
+    longint unsigned f2_corrections=0, branches=0, direction_misses=0;
+    longint unsigned global_misses=0;
     int reason_r=0;
 '''
     stats += '''
     always @(posedge clk_i) begin
         if (rst_n_i) begin
             if (measuring_r[0]) begin
+                if (u_dut.u_core.u_frontend.f2_correct_w) f2_corrections++;
+                if (u_dut.u_core.e_resolve_w &&
+                    u_dut.u_core.e_survive_w[u_dut.u_core.e_branch_lane_w] &&
+                    u_dut.u_core.e_class_r[u_dut.u_core.e_branch_lane_w]==5) begin
+                    branches++;
+                    if (u_dut.u_core.e_record_r[u_dut.u_core.e_branch_lane_w][100] !=
+                        u_dut.u_core.e_lane_taken_w[u_dut.u_core.e_branch_lane_w])
+                        direction_misses++;
+                    if (u_dut.u_core.e_tournament_r[11] !=
+                        u_dut.u_core.e_lane_taken_w[u_dut.u_core.e_branch_lane_w])
+                        global_misses++;
+                end
                 if (u_dut.u_core.d_issue_w!=0 &&
                     u_dut.u_core.d_class_w[u_dut.u_core.d_map_w[0]]==6) load_issued++;
                 if (u_dut.dc_early_valid_w) eligible++;
@@ -85,6 +99,9 @@ def main():
     text = text[:pos] + stats + text[pos:]
     text = text.replace('    task automatic report_window(input int w);', '''
     task automatic report_window(input int w);
+        $display("TOURNAMENT_STATS corrections=%0d branches=%0d direction_misses=%0d global_misses=%0d direction_miss_pct=%0.6f",
+            f2_corrections,branches,direction_misses,global_misses,
+            100.0*real'(direction_misses)/real'(branches));
         $display("EARLY_STATS issued=%0d eligible=%0d success=%0d port=%0d store=%0d device=%0d miss=%0d hold=%0d maintenance=%0d repair_cycles=%0d",
             load_issued,eligible,successes,fail_port,fail_store,fail_device,fail_miss,
             fail_hold,fail_maintenance,repair_cycles);
@@ -120,7 +137,7 @@ def main():
         subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     print(f'SOURCE commit={revision} snapshot={bool(args.commit)}')
     print('\n'.join(line for line in (out / 'run.log').read_text().splitlines()
-                    if any(label in line for label in ('EARLY_STATS', 'B2_WINDOW'))))
+                    if any(label in line for label in ('EARLY_STATS', 'TOURNAMENT_STATS', 'B2_WINDOW'))))
 
 
 if __name__ == '__main__':
