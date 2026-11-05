@@ -1,0 +1,7 @@
+PDS 2022.2-SP6.1 build 138931; Logos2 PG2L200H-6 FBB676; ADS.
+Baseline round: default PnR, project contains no explicit PnR option overrides.
+Actual flow command: pnr
+Clock period 6.667 ns; setup uncertainty in FDC 0.15 ns.
+RTL commit: e54e471e
+Source FDC has the local LVCMOS33 correction for clk_i.
+Local snapshot: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-REL/report-captures/card56-default

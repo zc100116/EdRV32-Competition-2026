@@ -1,0 +1,1 @@
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint

@@ -1,0 +1,11 @@
+起点模块	终点模块	条数	最差slack_ns	逻辑级数范围
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[39]	4	-1.398	10-12
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/f1_pc_r[29]/opit_0_inv_AQ_perm	2	-1.384	17-18
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[82]	4	-1.378	11-13
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[64]	3	-1.370	11-12
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[65]	3	-1.370	11-12
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[81]	4	-1.368	11-12
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[84]	5	-1.368	9-13
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[77]	4	-1.366	11-12
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[72]	4	-1.364	10-12
+u_cpu/u_core/e_operand_b_r[1][9]/opit_0_L6Q_perm	u_cpu/u_core/u_frontend/u_predictor/ras_data_r[78]	4	-1.364	11-12

@@ -1,0 +1,7 @@
+PDS 2022.2-SP6.1 build 138931; Logos2 PG2L200H-6 FBB676; ADS.
+Supplementary R1-d2 round; existing synthesis and Device Map reused.
+Actual flow command: pnr -plc_decongestion 2 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0
+Clock period 6.667 ns; setup uncertainty in FDC 0.15 ns.
+RTL commit: b35f8349
+Source FDC has the local LVCMOS33 correction for clk_i.
+Local snapshot: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V015/report-captures/card56-d2

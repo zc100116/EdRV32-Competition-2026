@@ -1,0 +1,3 @@
+Counter({('slow', 'max (slow corner)', 'sequential timing path'): 5000, ('slow', 'min (slow corner)', 'sequential timing path'): 5000, ('fast', 'max (fast corner)', 'sequential timing path'): 5000, ('fast', 'min (fast corner)', 'sequential timing path'): 5000, ('slow', 'max (slow corner)', 'async timing path'): 4011, ('slow', 'min (slow corner)', 'async timing path'): 4011, ('fast', 'max (fast corner)', 'async timing path'): 4011, ('fast', 'min (fast corner)', 'async timing path'): 4011})
+Near-positive setup paths exported: 1436
+Full report: G:/codex_project/EdRV32-Competition-2026/build/card56/timing5000-R2/report_timing/edrv32_cpu_l1_timing_probe.rtr
