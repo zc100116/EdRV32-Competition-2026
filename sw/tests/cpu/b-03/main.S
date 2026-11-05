@@ -4,6 +4,9 @@
 #include "test.h"
     START
     li a0, 0
+    .balign 8
+    csrr zero, mscratch
+    csrr zero, mscratch
 cold_jal:
     jal ra, cold_target
     addi a0, a0, 100
