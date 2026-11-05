@@ -1,0 +1,28 @@
+{
+  "test": "l-03",
+  "spike": "smoke",
+  "stimulus": [],
+  "checks": [
+    "M compare redirect flushes younger illegal instruction; older M load exception or interrupt wins; exact mepc and no younger retirement"
+  ],
+  "cases": [
+    {
+      "no_retire": "young_fault"
+    },
+    {
+      "no_retire": "oldest_lcb_branch"
+    }
+  ],
+  "tier": "full",
+  "rvc": [
+    false
+  ],
+  "schedule": [
+    {
+      "kind": "irq",
+      "when": "M.pc=irq_lcb_load",
+      "source": "MEIP",
+      "clear": "trap entry"
+    }
+  ]
+}

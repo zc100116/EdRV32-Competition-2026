@@ -1,0 +1,71 @@
+{
+  "test": "a-01",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "rs1 source: same older slot, E ALU, M ALU/load/CSR, unfinished multiply, W and x0; immediate consumer latency 2 or 1"
+  ],
+  "cases": [
+    {
+      "producer": "load_same_slot",
+      "consumer": "use_same_slot",
+      "gap": 0,
+      "latency": 2,
+      "early_condition": "same_slot"
+    },
+    {
+      "producer": "load_e_alu",
+      "consumer": "use_e_alu",
+      "gap": 0,
+      "latency": 2,
+      "early_condition": "e_alu"
+    },
+    {
+      "producer": "load_m_alu",
+      "consumer": "use_m_alu",
+      "gap": 0,
+      "latency": 1,
+      "early_condition": "m_alu"
+    },
+    {
+      "producer": "load_m_load",
+      "consumer": "use_m_load",
+      "gap": 0,
+      "latency": 2,
+      "early_condition": "m_load"
+    },
+    {
+      "producer": "load_m_csr",
+      "consumer": "use_m_csr",
+      "gap": 0,
+      "latency": 2,
+      "early_condition": "m_csr"
+    },
+    {
+      "producer": "load_multiply",
+      "consumer": "use_multiply",
+      "gap": 0,
+      "latency": 2,
+      "early_condition": "multiply"
+    },
+    {
+      "producer": "load_w",
+      "consumer": "use_w",
+      "gap": 0,
+      "latency": 1,
+      "early_condition": "w"
+    },
+    {
+      "producer": "load_x0",
+      "consumer": "use_x0",
+      "gap": 0,
+      "latency": 1,
+      "early_condition": "x0"
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": []
+}

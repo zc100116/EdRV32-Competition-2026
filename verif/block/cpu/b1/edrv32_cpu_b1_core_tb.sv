@@ -2,10 +2,15 @@
 // Spec: cpu-spec 3.1-3.4, 4.7; cpu-testplan 2.2-2.3, 4
 // Description: B1 wiring and real-core integration harness.
 // Clock: clk_sys.
+// Ordered observer/model updates intentionally use blocking assignments.
+/* verilator lint_off BLKSEQ */
 module edrv32_cpu_b1_core_tb;
     import edrv32_cpu_memory::*;
     logic clk;
+    // The stimulus reset drives asynchronous DUT reset and synchronous observers.
+    /* verilator lint_off SYNCASYNCNET */
     logic rst_n;
+    /* verilator lint_on SYNCASYNCNET */
     logic ic_req_valid;
     logic [31:0] ic_req_addr;
     logic ic_kill;
@@ -36,7 +41,6 @@ module edrv32_cpu_b1_core_tb;
     logic irq_msip;
     logic irq_mtip;
     logic [63:0] mtime;
-    logic done;
     edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
@@ -74,8 +78,8 @@ module edrv32_cpu_b1_core_tb;
         .mtime_i(mtime)
     );
     logic ic_miss;
-    logic ic_killed_fill;
-    logic dc_miss;
+    logic unused_ic_killed_fill;
+    logic unused_dc_miss;
     logic device_execute;
     logic write_buffer_valid;
     logic checker_device_execute;
@@ -92,7 +96,7 @@ module edrv32_cpu_b1_core_tb;
         .ic_inv_i(ic_inv),
         .ic_inv_done_o(ic_inv_done),
         .miss_o(ic_miss),
-        .killed_fill_o(ic_killed_fill)
+        .killed_fill_o(unused_ic_killed_fill)
     );
     edrv32_cpu_dc_model u_dc_model (
         .clk_i(clk),
@@ -113,7 +117,7 @@ module edrv32_cpu_b1_core_tb;
         .dc_clean_all_i(dc_clean_all),
         .dc_fence_done_o(dc_fence_done),
         .dc_wb_event_o(dc_wb_event),
-        .miss_o(dc_miss),
+        .miss_o(unused_dc_miss),
         .device_execute_o(device_execute),
         .write_buffer_valid_o(write_buffer_valid)
     );
@@ -148,8 +152,6 @@ module edrv32_cpu_b1_core_tb;
     bit hpm_dc_injected = 0;
     integer hpm_active_cycles = 0;
     integer default_ic_miss;
-    integer default_ic_min;
-    integer default_ic_max;
     integer default_dc_miss;
     integer default_dc_min;
     integer default_dc_max;
@@ -157,6 +159,15 @@ module edrv32_cpu_b1_core_tb;
     bit buffer_hold_enabled;
     logic [31:0] buffer_hold_pc;
     integer buffer_hold_cycles;
+    logic [31:0] ready_low_pc;
+    integer ready_low_cycles;
+    integer ready_low_remaining = 0;
+    bit ready_low_enabled;
+    bit ready_low_started = 0;
+    initial begin
+        ready_low_enabled = $value$plusargs("DC_READY_LOW_PC=%h", ready_low_pc);
+        void'($value$plusargs("DC_READY_LOW_CYCLES=%d", ready_low_cycles));
+    end
     initial begin
         buffer_hold_enabled = $value$plusargs("WB_HOLD_PC=%h", buffer_hold_pc);
         void'($value$plusargs("WB_HOLD_CYCLES=%d", buffer_hold_cycles));
@@ -180,8 +191,6 @@ module edrv32_cpu_b1_core_tb;
         end
         @(negedge clk);
         default_ic_miss = u_ic_model.miss_pct;
-        default_ic_min = u_ic_model.delay_min;
-        default_ic_max = u_ic_model.delay_max;
         default_dc_miss = u_dc_model.miss_pct;
         default_dc_min = u_dc_model.delay_min;
         default_dc_max = u_dc_model.delay_max;
@@ -250,6 +259,15 @@ module edrv32_cpu_b1_core_tb;
                             irq_wait[index]++;
                     end
                 end
+            end
+            if (ready_low_enabled && !ready_low_started && u_core.d_count_w != 0 &&
+                u_core.d_record_w[0][31:0] == ready_low_pc) begin
+                ready_low_remaining = ready_low_cycles;
+                ready_low_started = 1;
+            end
+            u_dc_model.forced_ready_low = ready_low_remaining > 0;
+            if (ready_low_remaining > 0) begin
+                ready_low_remaining--;
             end
             u_dc_model.buffer_hold_cycles = buffer_hold_enabled && u_core.m_valid_r[0] &&
                 u_core.m_record_r[0][31:0] == buffer_hold_pc ? buffer_hold_cycles : 0;
@@ -438,3 +456,5 @@ module edrv32_cpu_b1_core_tb;
     end
     `include "edrv32_cpu_directed_checks.svh"
 endmodule
+
+/* verilator lint_on BLKSEQ */

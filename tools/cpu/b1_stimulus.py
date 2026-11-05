@@ -41,11 +41,15 @@ def plusargs(config, names, out):
                 obligations.append((9, address(case['pc0'], names),
                                     address(case['pc1'], names), 0, 0))
         elif 'redirect' in case:
-            obligations.append((5 if case['stage'] == 'E' else 6,
+            obligations.append(({'E': 5, 'D': 6, 'M': 11}[case['stage']],
                                 names[case['redirect']], names[case['target']],
                                 case['slot'], case['cause']))
         elif 'fault' in case:
             obligations.append((7, names[case['fault']], 0, case['slot'], case['cause']))
+        elif 'no_commit' in case:
+            obligations.append((12, names[case['no_commit']], 0, 0, 0))
+        elif 'no_retire' in case:
+            obligations.append((10, names[case['no_retire']], 0, 0, 0))
         elif 'no_request' in case:
             obligations.append((8, names[case['no_request']], 0, 0, 0))
     path = out / 'obligations.txt'
@@ -74,6 +78,9 @@ def plusargs(config, names, out):
                          '+IC_DELAY_CYCLES=' + str(event['cycles'])]
             else:
                 delays.append((names[event['pc']], event['cycles']))
+        elif kind == 'ready_low':
+            args += [f'+DC_READY_LOW_PC={names[event["pc"]]:x}',
+                     '+DC_READY_LOW_CYCLES=' + str(event['cycles'])]
         elif kind == 'irq':
             when = event['when']
             if 'current_wfi_pc' in when:

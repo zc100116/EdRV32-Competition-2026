@@ -1,0 +1,31 @@
+{
+  "test": "a-03",
+  "spike": "smoke",
+  "stimulus": [],
+  "checks": [
+    "prepared branch/trap speculative load and later same-address probes; early cache-state comparison and interrupt binding pending approved D$ contract"
+  ],
+  "cases": [
+    {
+      "no_retire": "spec_branch_load"
+    },
+    {
+      "no_retire": "spec_trap_load"
+    },
+    {
+      "no_retire": "spec_irq_load"
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": [
+    {
+      "kind": "irq",
+      "when": "M.pc=spec_irq",
+      "source": "MEIP",
+      "clear": "trap entry"
+    }
+  ]
+}

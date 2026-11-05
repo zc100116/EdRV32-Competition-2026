@@ -30,6 +30,7 @@ module edrv32_cpu_dc_model (
     int delay_min = 5;
     int delay_max = 40;
     int ready_low_pct = 0;
+    bit forced_ready_low = 0;
     int wb_event_cycle = -1;
     int cycle_r;
     int clean_delay = 1;
@@ -73,7 +74,7 @@ module edrv32_cpu_dc_model (
         tohost_enabled = $value$plusargs("TOHOST_ADDR=%h", tohost_addr);
     end
 
-    assign dc_req_ready_o = rst_n_i && ready_r && !dc_fence_i && !dc_clean_all_i
+    assign dc_req_ready_o = rst_n_i && ready_r && !forced_ready_low && !dc_fence_i && !dc_clean_all_i
         && (!active_r || (!device_r && responded_r && dc_commit_i && !dc_kill_i));
     assign dc_resp_device_o = (active_r || resp_valid_r) && device_r;
     assign dc_resp_valid_o = resp_valid_r;

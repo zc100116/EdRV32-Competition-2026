@@ -3,12 +3,21 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "cold_jal 冷启动 BTB 未命中，D 重定向代价 2 周期",
-    "链接值为 PC+4，顺序年轻指令无副作用"
+    "cold_jal \u51b7\u542f\u52a8 BTB \u672a\u547d\u4e2d\uff0cD \u91cd\u5b9a\u5411\u4ee3\u4ef7 2 \u5468\u671f",
+    "\u94fe\u63a5\u503c\u4e3a PC+4\uff0c\u987a\u5e8f\u5e74\u8f7b\u6307\u4ee4\u65e0\u526f\u4f5c\u7528"
   ],
   "tier": "smoke",
   "rvc": [
     true
   ],
-  "schedule": []
+  "schedule": [],
+  "cases": [
+    {
+      "redirect": "cold_jal",
+      "target": "cold_target",
+      "stage": "D",
+      "slot": 0,
+      "cause": 0
+    }
+  ]
 }

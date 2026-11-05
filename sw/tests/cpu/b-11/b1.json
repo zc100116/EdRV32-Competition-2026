@@ -1,0 +1,40 @@
+{
+  "test": "b-11",
+  "spike": "smoke",
+  "stimulus": [],
+  "checks": [
+    "older ECALL/MRET/FENCE.I vs younger branch at zero/one/two instruction separation; M interrupt wins and precise mepc; no younger commit"
+  ],
+  "cases": [
+    {
+      "no_retire": "priority_trap_0_branch"
+    },
+    {
+      "no_retire": "priority_trap_1_branch"
+    },
+    {
+      "no_retire": "priority_trap_2_branch"
+    },
+    {
+      "no_retire": "priority_mret_0_branch"
+    },
+    {
+      "no_retire": "priority_mret_1_branch"
+    },
+    {
+      "no_retire": "priority_mret_2_branch"
+    }
+  ],
+  "tier": "full",
+  "rvc": [
+    false
+  ],
+  "schedule": [
+    {
+      "kind": "irq",
+      "when": "M.pc=priority_irq",
+      "source": "MEIP",
+      "clear": "trap entry"
+    }
+  ]
+}

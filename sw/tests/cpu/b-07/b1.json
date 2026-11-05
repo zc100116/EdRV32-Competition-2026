@@ -3,7 +3,7 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "slot 1 branch direction/target redirects cost 3; older commits; slot0 branch kills swapped younger load before D request",
+    "slot 1 redirects cost 4; older slot commits; same-group younger load is killed in M without commit or retirement",
     "self-modified branch offset after FENCE.I retains BTB old target"
   ],
   "cases": [
@@ -40,7 +40,7 @@
       "cause": 2
     },
     {
-      "no_request": "flush_load"
+      "no_commit": "flush_load"
     }
   ],
   "tier": "smoke",

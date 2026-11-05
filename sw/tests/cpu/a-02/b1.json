@@ -1,0 +1,26 @@
+{
+  "test": "a-02",
+  "spike": "smoke",
+  "stimulus": [],
+  "checks": [
+    "prepared miss/device/byte/halfword/ready-low stimulus; early access failure observation pending approved D$ contract"
+  ],
+  "cases": [],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": [
+    {
+      "kind": "delay",
+      "port": "dc",
+      "pc": "fallback_miss",
+      "cycles": 12
+    },
+    {
+      "kind": "ready_low",
+      "pc": "fallback_ready",
+      "cycles": 4
+    }
+  ]
+}

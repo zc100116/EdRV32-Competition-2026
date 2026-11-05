@@ -1,0 +1,33 @@
+{
+  "test": "l-02",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "slot0 branch with younger member uses ordinary load latency; early-load and multiply cases use 2.3 latency"
+  ],
+  "cases": [
+    {
+      "producer": "slot0_load",
+      "consumer": "slot0_branch",
+      "gap": 0,
+      "latency": 2
+    },
+    {
+      "producer": "early_load",
+      "consumer": "early_branch",
+      "gap": 0,
+      "latency": 1
+    },
+    {
+      "producer": "multiply_load",
+      "consumer": "multiply_branch",
+      "gap": 0,
+      "latency": 4
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": []
+}

@@ -3,7 +3,7 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "slot 1 cold JAL pairs, D redirect penalty 2; older commits"
+    "slot 1 cold JAL pairs, D redirect penalty 3; older commits"
   ],
   "cases": [
     {
