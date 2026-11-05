@@ -12,6 +12,8 @@ module edrv32_cpu_ib (
     input wire [357:0] push_data_i,
     input wire [5:0] push_index_hi_i,
     output wire [5:0] index_hi_o,
+    input wire [23:0] push_tournament_i,
+    output wire [23:0] tournament_o,
     // D observes the oldest two records and consumes 0, 1 or 2.
     input wire [1:0] pop_count_i,
     output wire [357:0] data_o,
@@ -28,6 +30,7 @@ module edrv32_cpu_ib (
     localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
     reg [2:0] index_hi_r [0:DEPTH-1];
+    reg [11:0] tournament_r [0:DEPTH-1];
     reg [1:0] read_ptr_r;
     reg [1:0] write_ptr_r;
     reg [2:0] count_r;
@@ -43,6 +46,8 @@ module edrv32_cpu_ib (
     generate
         for (read_slot = 0; read_slot < 2; read_slot = read_slot + 1) begin : g_read_slot
             localparam SLOT = read_slot;
+            assign tournament_o[read_slot*12 +: 12] =
+                tournament_r[read_ptr_r + SLOT[1:0]];
             assign index_hi_o[read_slot*3 +: 3] =
                 index_hi_r[read_ptr_r + SLOT[1:0]];
             for (read_slice = 0; read_slice < 6;
@@ -99,8 +104,12 @@ module edrv32_cpu_ib (
                 if (!flush_i) begin
                     if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
                         index_hi_r[write_entry] <= push_index_hi_i[2:0];
+                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
+                        tournament_r[write_entry] <= push_tournament_i[11:0];
                     if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
                         index_hi_r[write_entry] <= push_index_hi_i[5:3];
+                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
+                        tournament_r[write_entry] <= push_tournament_i[23:12];
                     if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
                         entries_r[write_entry] <= push_data_i[178:0];
                     if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])

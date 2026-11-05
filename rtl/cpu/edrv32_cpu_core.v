@@ -116,6 +116,7 @@ module edrv32_cpu_core (
     reg [2:0] update_type_r;
     reg update_taken_r;
     reg [11:0] update_index_r;
+    reg [11:0] update_tournament_r;
     wire e_flush_w;
     wire frontend_redirect_w;
     wire [31:0] frontend_redirect_pc_w;
@@ -265,6 +266,7 @@ module edrv32_cpu_core (
     assign e_survive_w[1] = e_valid_r[1] && !(!e_swap_r && e_kill_young_w);
     wire [357:0] d_data_w;
     wire [5:0] d_index_hi_w;
+    wire [23:0] d_tournament_w;
     wire [1:0] d_count_w;
     wire [2:0] ib_count_w;
     reg [1:0] d_issue_w;
@@ -313,8 +315,12 @@ module edrv32_cpu_core (
     reg [REC_BITS-1:0] e_record_r [0:1];
     wire [11:0] e_predict_index_w;
     reg [11:0] e_predict_index_r;
+    reg [11:0] e_tournament_r;
     assign e_predict_index_w = e_predict_index_r;
     always @(posedge clk_i) begin
+        if (e_operand_load_copy_w[4])
+            e_tournament_r <= d_control_w[1] && d_pair_w ?
+                d_tournament_w[23:12] : d_tournament_w[11:0];
         if (e_operand_load_copy_w[4])
             e_predict_index_r <= d_control_w[1] && d_pair_w ?
                 {d_index_hi_w[5:3], d_record_w[1][REC_GHR_LSB +: 9]} :
@@ -650,9 +656,11 @@ module edrv32_cpu_core (
         .update_type_i(update_type_r),
         .update_taken_i(update_taken_r),
         .update_index_i(update_index_r),
+        .update_tournament_i(update_tournament_r),
         .decode_pop_count_i(d_issue_w),
         .decode_data_o(d_data_w),
         .decode_index_hi_o(d_index_hi_w),
+        .decode_tournament_o(d_tournament_w),
         .decode_operand_addr_o(d_operand_addr_w),
         .decode_valid_count_o(d_count_w),
         .ib_count_o(ib_count_w),
@@ -1104,6 +1112,7 @@ module edrv32_cpu_core (
         update_type_r <= e_lane_type_w[e_branch_lane_w];
         update_taken_r <= e_lane_taken_w[e_branch_lane_w];
         update_index_r <= e_predict_index_w;
+        update_tournament_r <= e_tournament_r;
     end
     assign csr_m_access_w = m_valid_r[0] && m_class_r[0] == C_CSR;
     assign csr_d_access_w = d_count_w != 0 && d_class_w[0] == C_CSR && !csr_m_access_w;

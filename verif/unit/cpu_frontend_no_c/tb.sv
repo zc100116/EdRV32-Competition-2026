@@ -27,6 +27,9 @@ module tb;
     reg [2:0] update_type_i=0;
     reg update_taken_i=0;
     reg [11:0] update_index_i=0;
+    reg [11:0] update_tournament_i=0;
+    wire [23:0] decode_tournament_o;
+    reg directed_mode=0;
     reg [1:0] decode_pop_count_i=0;
     wire [357:0] decode_data_o;
     wire [5:0] decode_index_hi_o;
@@ -98,6 +101,8 @@ module tb;
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
         .update_index_i(update_index_i),
+        .update_tournament_i(update_tournament_i),
+        .decode_tournament_o(decode_tournament_o),
         .decode_pop_count_i(decode_pop_count_i),
         .decode_data_o(decode_data_o),
         .decode_index_hi_o(decode_index_hi_o),
@@ -147,6 +152,7 @@ module tb;
             if(fetch_wait_o)waits=waits+1;
             if(ic_req_valid_o && !ic_req_ready_i)blocked=blocked+1;
             if(invalidate_done_o!==ic_inv_done_i)$fatal(1,"FAIL invalidate completion");
+            if(!directed_mode)begin
             if(redirect_valid_i)begin
                 expected_pc=integer'(redirect_pc_i);held_d_redirect=0;
             end else if(d_redirect_valid_i)begin
@@ -185,6 +191,7 @@ module tb;
                     end else
                         expected_pc=(expected_pc=='hc)?'h40:expected_pc+4;
                 end
+            end
             end
         end
     end
@@ -226,6 +233,29 @@ module tb;
             high_redirects==0 || d_redirects==0)
             $fatal(1,"FAIL frontend coverage accepted=%d retired=%d kill=%d predicted=%d errors=%d",
                 accepted,retired,killed,predicted,errors);
+        // B-12: public training makes local=1 override gshare=0 at PC 0x400.
+        directed_mode=1;allow_request=1;update_valid_i=1;update_pc_i='h400;
+        update_target_i='h480;update_type_i=0;update_taken_i=1;
+        update_index_i=12'h100;update_tournament_i={2'b01,10'd1022};
+        repeat(3)@(negedge clk_i);
+        update_valid_i=0;rst_n_i=0;@(negedge clk_i);rst_n_i=1;
+        update_valid_i=1;update_taken_i=0;update_tournament_i=12'd1022;
+        @(negedge clk_i);update_valid_i=0;
+        redirect_valid_i=1;redirect_pc_i='h400;
+        @(negedge clk_i);redirect_valid_i=0;halt_i=0;
+        wait(ic_req_valid_o && ic_req_ready_i);
+        @(posedge clk_i);#1;
+        if(!dut.f2_correct_w || ic_req_valid_o || dut.f2_correct_pc_w!='h480)
+            $fatal(1,"FAIL F2 correction expected target=480 actual=%h correction=%b req=%b",
+                dut.f2_correct_pc_w,dut.f2_correct_w,ic_req_valid_o);
+        @(posedge clk_i);#1;
+        if(!ic_req_valid_o || ic_req_addr_o!='h480)
+            $fatal(1,"FAIL correction next-cycle request expected=480 actual=%h",ic_req_addr_o);
+        if(decode_valid_count_o!=1 || decode_data_o[31:0]!='h400 ||
+            !decode_data_o[100] || decode_tournament_o[10:0]!={1'b1,10'd1022})
+            $fatal(1,"FAIL corrected record/count/token count=%d pc=%h token=%h",
+                decode_valid_count_o,decode_data_o[31:0],decode_tournament_o);
+        @(negedge clk_i);halt_i=1;
         $display("PASS frontend requests=%0d instructions=%0d pairs=%0d kill=%0d wait=%0d backpressure=%0d errors=%0d",
             accepted,retired,pairs,killed,waits,blocked,errors);$finish;
     end

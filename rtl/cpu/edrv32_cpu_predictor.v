@@ -17,6 +17,14 @@ module edrv32_cpu_predictor (
     output wire [1:0] predict_position_o,
     output wire [11:0] predict_history_o,
     output wire [36:0] predict_ras_o,
+    // F1 captures histories and both gshare directions; F2 reads the second level.
+    output wire predict_conditional_o,
+    output wire [19:0] predict_local_history_o,
+    output wire [1:0] predict_global_o,
+    input wire [19:0] f2_local_history_i,
+    input wire [11:0] f2_index_i,
+    output wire [1:0] f2_local_o,
+    output wire f2_use_local_o,
     // E trains only surviving branches, using their original query index.
     // Types: 0 conditional, 1 JAL, 2 JALR, 3 call, 4 return.
     input wire update_valid_i,
@@ -25,6 +33,8 @@ module edrv32_cpu_predictor (
     input wire [2:0] update_type_i,
     input wire update_taken_i,
     input wire [11:0] update_index_i,
+
+    input wire [11:0] update_tournament_i,
 
     // F2 clears the stale fetch-group prediction after boundary or length mismatch.
     input wire clear_valid_i,
@@ -163,6 +173,63 @@ module edrv32_cpu_predictor (
         .update_data_o(update_word_w),
         .rd_addr_i(direction_idx_w[11:1]),
         .rd_data_o(direction_word_w)
+    );
+    // cpu-spec 4.4: query tokens retain directions, while training reads current counters.
+    wire [2:0] unused_tournament_w;
+    assign unused_tournament_w = {update_local_history_w[9], chooser_w[0], 1'b0};
+    wire [9:0] update_local_history_w;
+    wire [1:0] local_counter_w [0:1];
+    wire [1:0] update_local_counter_w;
+    wire [1:0] chooser_w;
+    wire [1:0] update_chooser_w;
+    wire [1:0] next_local_counter_w;
+    wire [1:0] next_chooser_w;
+    wire conditional_update_w;
+    wire local_correct_w;
+    assign predict_conditional_o = btb_data_w[2:0] == 0;
+    assign predict_global_o = history_r[0] ?
+        {direction_word_w[1], direction_word_w[3]} :
+        {direction_word_w[3], direction_word_w[1]};
+    assign f2_local_o = {local_counter_w[1][1], local_counter_w[0][1]};
+    assign f2_use_local_o = chooser_w[1];
+    assign conditional_update_w = update_valid_i && update_type_i == 0;
+    assign local_correct_w = update_tournament_i[10] == update_taken_i;
+    assign next_local_counter_w = update_taken_i ?
+        (update_local_counter_w == 3 ? 2'd3 : update_local_counter_w + 1'b1) :
+        (update_local_counter_w == 0 ? 2'd0 : update_local_counter_w - 1'b1);
+    assign next_chooser_w = local_correct_w ?
+        (update_chooser_w == 3 ? 2'd3 : update_chooser_w + 1'b1) :
+        (update_chooser_w == 0 ? 2'd0 : update_chooser_w - 1'b1);
+    edrv32_ram_cpu_local_history u_local_history (
+        .clk_i(clk_i),
+        .wr_en_i(conditional_update_w),
+        .wr_addr_i(update_pc_i[9:2]),
+        .wr_data_i({update_local_history_w[8:0], update_taken_i}),
+        .update_data_o(update_local_history_w),
+        .rd0_addr_i({query_pc_i[9:3], 1'b0}),
+        .rd0_data_o(predict_local_history_o[9:0]),
+        .rd1_addr_i({query_pc_i[9:3], 1'b1}),
+        .rd1_data_o(predict_local_history_o[19:10])
+    );
+    edrv32_ram_cpu_local_direction u_local_direction (
+        .clk_i(clk_i),
+        .wr_en_i(conditional_update_w),
+        .wr_addr_i(update_tournament_i[9:0]),
+        .wr_data_i(next_local_counter_w),
+        .update_data_o(update_local_counter_w),
+        .rd0_addr_i(f2_local_history_i[9:0]),
+        .rd0_data_o(local_counter_w[0]),
+        .rd1_addr_i(f2_local_history_i[19:10]),
+        .rd1_data_o(local_counter_w[1])
+    );
+    edrv32_ram_cpu_chooser u_chooser (
+        .clk_i(clk_i),
+        .wr_en_i(conditional_update_w && update_tournament_i[10] != update_tournament_i[11]),
+        .wr_addr_i(update_index_i),
+        .wr_data_i(next_chooser_w),
+        .update_data_o(update_chooser_w),
+        .rd0_addr_i(f2_index_i),
+        .rd0_data_o(chooser_w)
     );
     // Decode each destination before the late redirect/recovery enable arrives.
     // A push still overrides a restored top when both select the same entry.

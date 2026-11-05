@@ -22,6 +22,18 @@ module tb;
     reg [2:0] update_type_i=0;
     reg update_taken_i=0;
     reg [11:0] update_index_i=0;
+    reg [11:0] update_tournament_i=0;
+    reg [19:0] f2_local_history_i=0;
+    reg [11:0] f2_index_i=0;
+    wire predict_conditional_o;
+    wire [19:0] predict_local_history_o;
+    wire [1:0] predict_global_o;
+    wire [1:0] f2_local_o;
+    wire f2_use_local_o;
+    integer local_history[0:255];
+    integer local_direction[0:1023];
+    integer chooser[0:4095];
+    integer training_slot;
     reg clear_valid_i=0;
     reg [6:0] clear_index_i=0;
     reg restore_valid_i=0;
@@ -73,6 +85,14 @@ module tb;
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
         .update_index_i(update_index_i),
+        .update_tournament_i(update_tournament_i),
+        .predict_conditional_o(predict_conditional_o),
+        .predict_local_history_o(predict_local_history_o),
+        .predict_global_o(predict_global_o),
+        .f2_local_history_i(f2_local_history_i),
+        .f2_index_i(f2_index_i),
+        .f2_local_o(f2_local_o),
+        .f2_use_local_o(f2_use_local_o),
         .clear_valid_i(clear_valid_i),
         .clear_index_i(clear_index_i),
         .restore_valid_i(restore_valid_i),
@@ -98,6 +118,19 @@ module tb;
                 predict_position_o!==position[q]))
                 $fatal(1,"FAIL BTB target expected=%h actual=%h time=%t",
                     expected_target,predict_target_o,$time);
+            if(predict_local_history_o !==
+                {10'(local_history[2*q+1]),10'(local_history[2*q])} ||
+                f2_local_o !== {1'(local_direction[f2_local_history_i[19:10]]>=2),
+                1'(local_direction[f2_local_history_i[9:0]]>=2)} ||
+                f2_use_local_o !== (chooser[f2_index_i]>=2))
+                $fatal(1,"FAIL tournament query pc=%h history=%h local=%b chooser=%b t=%t",
+                    query_pc_i,predict_local_history_o,f2_local_o,f2_use_local_o,$time);
+            if(expected_hit && predict_conditional_o !== (kind[q]==0))
+                $fatal(1,"FAIL conditional metadata");
+            if(predict_global_o !==
+                {1'(direction[integer'({query_pc_i[13:3],1'b1})^integer'(history)]>=2),
+                1'(direction[integer'({query_pc_i[13:3],1'b0})^integer'(history)]>=2)})
+                $fatal(1,"FAIL global direction metadata");
             if(predict_ras_o[36:34]!==3'(depth) || predict_ras_o[33:32]!==2'(ptr) ||
                 (depth>0 && predict_ras_o[31:0]!==stack[(ptr+3)%4]))
                 $fatal(1,"FAIL RAS expected ptr=%d depth=%d actual=%h time=%t",
@@ -133,6 +166,20 @@ module tb;
                 target[slot]=update_target_i;position[slot]=update_pc_i[2:1];
                 kind[slot]=update_type_i;
                 if(update_type_i==0)begin
+                    training_slot=integer'(update_pc_i[9:2]);
+                    local_history[training_slot]=((local_history[training_slot]<<1) |
+                        integer'(update_taken_i)) & 1023;
+                    training_slot=integer'(update_tournament_i[9:0]);
+                    if(update_taken_i && local_direction[training_slot]<3)
+                        local_direction[training_slot]++;
+                    if(!update_taken_i && local_direction[training_slot]>0)
+                        local_direction[training_slot]--;
+                    if(update_tournament_i[10]!=update_tournament_i[11])begin
+                        if(update_tournament_i[10]==update_taken_i && chooser[update_index_i]<3)
+                            chooser[update_index_i]++;
+                        if(update_tournament_i[10]!=update_taken_i && chooser[update_index_i]>0)
+                            chooser[update_index_i]--;
+                    end
                     history={history[10:0],update_taken_i};
                     if(update_taken_i && direction[update_index_i]<3)
                         direction[update_index_i]=direction[update_index_i]+1;
@@ -149,7 +196,9 @@ module tb;
         for(i=0;i<128;i=i+1)begin
             valid[i]=0;tag[i]=0;position[i]=0;target[i]=0;kind[i]=0;
         end
-        for(i=0;i<4096;i=i+1)direction[i]=1;
+        for(i=0;i<4096;i=i+1)begin direction[i]=1;chooser[i]=1;end
+        for(i=0;i<256;i=i+1)local_history[i]=0;
+        for(i=0;i<1024;i=i+1)local_direction[i]=1;
         repeat(2)@(negedge clk_i);
         for(i=0;i<4096;i=i+1)
             if(dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]!==2'b01)
@@ -207,6 +256,8 @@ module tb;
             update_pc_i=31'($urandom_range(0,8191)*2);update_target_i=$urandom & 32'hfffffffc;
             update_type_i=3'($urandom_range(0,4));
             update_taken_i=i[1];update_index_i=12'($urandom);
+            update_tournament_i=12'($urandom);
+            f2_local_history_i=20'($urandom);f2_index_i=12'($urandom);
             clear_valid_i=(i%19==0);clear_index_i=7'($urandom);
             cycle();
             if(i%61==0)checkpoint=predict_ras_o;
@@ -221,6 +272,16 @@ module tb;
             if(dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]!==2'(direction[i]))
                 $fatal(1,"FAIL PHT warm reset index=%0d expected=%0d actual=%b",
                     i,direction[i],dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]);
+        for(i=0;i<4096;i=i+1)
+            if(dut.u_chooser.memory_r[i]!==2'(chooser[i]))
+                $fatal(1,"FAIL chooser index=%0d expected=%0d actual=%0d",i,
+                    chooser[i],dut.u_chooser.memory_r[i]);
+        for(i=0;i<1024;i=i+1)
+            if(dut.u_local_direction.memory_r[i]!==2'(local_direction[i]))
+                $fatal(1,"FAIL local counter index=%0d",i);
+        for(i=0;i<256;i=i+1)
+            if(dut.u_local_history.memory_r[i]!==10'(local_history[i]))
+                $fatal(1,"FAIL local history index=%0d",i);
         rst_n_i=1;cycle();
         update_valid_i=1;update_pc_i=31'('h40>>1);update_type_i=0;update_index_i=17;
         query_pc_i=31'('h40>>1);
