@@ -40,10 +40,16 @@ def requirements():
     for suffix, label in (
         ('e_direction', 'E 级方向误预测'),
         ('e_target', 'E 级目标误预测'),
-        ('d', 'D 级'), ('exception', '异常'), ('interrupt', '中断'),
+        ('d', 'D 级'), ('m', 'M 级 load 比较分支'), ('exception', '异常'), ('interrupt', '中断'),
         ('mret', 'MRET'), ('fence_i', 'FENCE.I'),
     ):
         yield f'redirect.{suffix}', f'重定向类型：{label}'
+    yield 'early.bypass.e0', '提前 load 的 E0 旁路（编码 1）'
+    for suffix in ('older_slot', 'e', 'm_alu', 'm_load', 'm_csr',
+                   'multiply', 'w', 'x0', 'register_file'):
+        yield f'early.condition.{suffix}', f'提前地址条件：{suffix}'
+    for suffix in ('port', 'miss', 'device', 'write_buffer', 'accepted_store'):
+        yield f'early.failure.{suffix}', f'提前访问失败：{suffix}'
     for suffix, label in (
         ('load_use', 'load-use'),
         ('multiply', '乘法'),

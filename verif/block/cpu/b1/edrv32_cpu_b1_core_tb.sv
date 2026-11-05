@@ -15,6 +15,10 @@ module edrv32_cpu_b1_core_tb;
     logic [31:0] ic_req_addr;
     logic ic_kill;
     logic ic_inv;
+    logic dc_early_valid;
+    logic [31:0] dc_early_addr;
+    logic dc_early_hit;
+    logic [31:0] dc_early_data;
     logic dc_req_valid;
     logic [31:0] dc_req_addr;
     logic dc_req_store;
@@ -50,6 +54,10 @@ module edrv32_cpu_b1_core_tb;
         .ic_req_addr_o(ic_req_addr),
         .ic_kill_o(ic_kill),
         .ic_inv_o(ic_inv),
+        .dc_early_valid_o(dc_early_valid),
+        .dc_early_addr_o(dc_early_addr),
+        .dc_early_hit_i(dc_early_hit),
+        .dc_early_data_i(dc_early_data),
         .dc_req_valid_o(dc_req_valid),
         .dc_req_addr_o(dc_req_addr),
         .dc_req_store_o(dc_req_store),
@@ -101,6 +109,10 @@ module edrv32_cpu_b1_core_tb;
     edrv32_cpu_dc_model u_dc_model (
         .clk_i(clk),
         .rst_n_i(rst_n),
+        .dc_early_valid_i(dc_early_valid),
+        .dc_early_addr_i(dc_early_addr),
+        .dc_early_hit_o(dc_early_hit),
+        .dc_early_data_o(dc_early_data),
         .dc_req_valid_i(dc_req_valid),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
@@ -231,19 +243,19 @@ module edrv32_cpu_b1_core_tb;
                     case (irq_kind[index])
                         1: irq_armed[index] =
                             (u_core.m_valid_r[0] &&
-                             issued_slot[u_core.m_record_r[0][31:0]] == 0 &&
-                             u_core.m_record_r[0][31:0] == irq_pc[index]) ||
+                                issued_slot[u_core.m_record_r[0][31:0]] == 0 &&
+                                u_core.m_record_r[0][31:0] == irq_pc[index]) ||
                             (u_core.m_valid_r[1] &&
-                             issued_slot[u_core.m_record_r[1][31:0]] == 0 &&
-                             u_core.m_record_r[1][31:0] == irq_pc[index]);
+                                issued_slot[u_core.m_record_r[1][31:0]] == 0 &&
+                                u_core.m_record_r[1][31:0] == irq_pc[index]);
                         2: irq_armed[index] = debug[25] &&
                             u_core.e_record_r[0][31:0] == irq_pc[index];
                         3: irq_armed[index] = debug[26] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         4: irq_armed[index] = debug[28] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
-                        5: irq_armed[index] = u_core.e_redirect_w &&
-                            observed_e_pc == irq_pc[index];
+                        5: irq_armed[index] = u_core.trace_redirect_stage_w == 2 &&
+                            u_core.trace_redirect_pc_w == irq_pc[index];
                         6: irq_armed[index] = debug[29] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         7: irq_armed[index] = dc_clean_all &&
@@ -343,7 +355,7 @@ module edrv32_cpu_b1_core_tb;
             end
             if (tohost_pending &&
                 ((trace_valid[0] && u_core.trace_pc_w[31:0] == tohost_pc) ||
-                 (trace_valid[1] && u_core.trace_pc_w[63:32] == tohost_pc)))
+                    (trace_valid[1] && u_core.trace_pc_w[63:32] == tohost_pc)))
                 trace_ended <= 1;
         end
     end
@@ -368,6 +380,13 @@ module edrv32_cpu_b1_core_tb;
         .trace_trap_i(u_core.trace_trap_w),
         .trace_cause_i(u_core.trace_cause_w),
         .trace_bypass_i(u_core.trace_bypass_w),
+        .trace_redirect_stage_i(u_core.trace_redirect_stage_w),
+        .early_condition_i(early_condition),
+        .early_bypass_i(early_query_previous && dc_early_hit && u_core.e_valid_r[0] &&
+            u_core.e_record_r[0][38:32] == 7'h03 &&
+            (u_core.trace_bypass_w[2:0] == 1 || u_core.trace_bypass_w[5:3] == 1 ||
+                u_core.trace_bypass_w[8:6] == 1 || u_core.trace_bypass_w[11:9] == 1)),
+        .early_failure_i(u_dc_model.early_failure_r),
         .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
         .trace_stall_cause_i(u_core.trace_stall_cause_w),
         .pair_valid_i(observed_pair_valid),
@@ -398,9 +417,48 @@ module edrv32_cpu_b1_core_tb;
         .dc_resp_device_i(dc_resp_device),
         .dc_kill_i(dc_kill),
         .dc_commit_i(dc_commit),
+        .redirect_flush_i(u_core.trace_redirect_stage_w != 0 || u_core.trace_trap_w),
         .m_enter_i(u_core.e_advance_w),
         .device_execute_i(checker_device_execute)
     );
+    integer dc_probe_count = 0;
+    logic [31:0] dc_probe_pc[16];
+    integer dc_probe_descriptor;
+    string dc_probe_path;
+    integer dc_probe_start = -1;
+    logic [31:0] dc_probe_addr;
+    initial begin
+        if ($value$plusargs("DC_PROBE_FILE=%s", dc_probe_path)) begin
+            dc_probe_descriptor = $fopen(dc_probe_path, "w");
+            void'($value$plusargs("DC_PROBE_COUNT=%d", dc_probe_count));
+            for (int index = 0; index < dc_probe_count; index++)
+                void'($value$plusargs($sformatf("DC_PROBE%0d_PC=%%h", index),
+                    dc_probe_pc[index]));
+        end
+    end
+    always @(posedge clk) begin
+        if (rst_n && dc_probe_count != 0) begin
+            if (dc_probe_start >= 0 && dc_resp_valid && !dc_kill) begin
+                $fdisplay(dc_probe_descriptor, "response %h %h %b %0d",
+                    dc_probe_addr, dc_resp_data, dc_resp_err, cycles-dc_probe_start);
+                dc_probe_start = -1;
+            end
+            for (int index = 0; index < dc_probe_count; index++) begin
+                if (dc_req_valid && dc_req_ready &&
+                    u_core.e_record_r[0][31:0] == dc_probe_pc[index]) begin
+                    dc_probe_start = cycles;
+                    dc_probe_addr = dc_req_addr;
+                    $fdisplay(dc_probe_descriptor, "request %h %b %h %h %0d",
+                        dc_probe_addr, write_buffer_valid, u_dc_model.buffer_addr_r,
+                        u_dc_model.buffer_data_r, device_accesses);
+                end
+            end
+            for (int index = 0; index < dc_probe_count; index++) begin
+                if (dc_commit && u_core.m_record_r[0][31:0] == dc_probe_pc[index])
+                    $fdisplay(dc_probe_descriptor, "commit %h", u_core.m_result_r[0]);
+            end
+        end
+    end
     integer image_descriptor;
     integer cycles = 0;
     integer timeout_cycles = 1000000;
@@ -431,6 +489,9 @@ module edrv32_cpu_b1_core_tb;
         @(negedge clk);
         if (tohost_value != 1)
             $fatal(1, "FAIL tohost=%08x cycle=%0d", tohost_value, cycles);
+        // Architectural termination includes the tohost store in W2.
+        wait (trace_ended);
+        @(negedge clk);
         if ($value$plusargs("SIGNATURE_FILE=%s", signature_path)) begin
             if (!$value$plusargs("SIGNATURE_BEGIN=%h", signature_begin)
                 || !$value$plusargs("SIGNATURE_END=%h", signature_end))
@@ -442,6 +503,8 @@ module edrv32_cpu_b1_core_tb;
                 $fdisplay(signature_descriptor, "%08x", read_data(addr, 2));
             $fclose(signature_descriptor);
         end
+        if (dc_probe_count != 0)
+            $fclose(dc_probe_descriptor);
         check_directed_completion();
         $display("PASS CPU B1 cycles=%0d no-C", cycles);
         $finish;

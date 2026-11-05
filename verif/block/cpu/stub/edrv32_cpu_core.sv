@@ -48,6 +48,9 @@ module edrv32_cpu_core (
     input logic irq_mtip_i,
     input logic [63:0] mtime_i
 );
+    // The fixed-table stub does not implement CSR or HPM state.
+    wire unused_reset_w = &{1'b0, rst_sys_csr_n_i, rst_sys_counter_n_i};
+
     logic done_w;
     logic [1:0] trace_valid_w = 0;
     logic [63:0] trace_pc_w = 0;

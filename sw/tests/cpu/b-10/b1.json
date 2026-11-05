@@ -20,6 +20,12 @@
     },
     {
       "no_retire": "wrong_branch"
+    },
+    {
+      "no_retire": "wrong_fault"
+    },
+    {
+      "no_request": "wrong_fault"
     }
   ],
   "tier": "smoke",

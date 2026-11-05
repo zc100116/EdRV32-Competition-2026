@@ -27,7 +27,7 @@ def main():
         subprocess.run([str(out / 'obj/sim'), '+COVERAGE_FILE=' + str(fixture)],
                         cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     counts = json.loads(fixture.read_text())['counts']
-    assert len(counts) == 70 and all(value > 0 for value in counts.values()), counts
+    assert len(counts) == 86 and all(value > 0 for value in counts.values()), counts
     assert all(value == 1 for key, value in counts.items() if key.startswith('bypass.'))
     assert all(value == 1 for key, value in counts.items() if key.startswith('pair.'))
     assert all(value == 1 for key, value in counts.items() if key.startswith('exception.'))
@@ -40,7 +40,7 @@ def main():
     merged = subprocess.run(['python3', str(report), str(fixture), str(fixture)],
                             capture_output=True, text=True, check=True)
     rows = [line.split('|') for line in merged.stdout.splitlines() if line.startswith('| ')][1:]
-    assert len(rows) == 70, merged.stdout
+    assert len(rows) == 86, merged.stdout
     for row in rows:
         assert int(row[3]) == 2 * counts[row[1].strip()], row
         assert row[4].strip() == '已覆盖', row
@@ -50,7 +50,7 @@ def main():
     result = subprocess.run(['python3', str(report), str(incomplete)],
                             capture_output=True, text=True)
     assert result.returncode == 1 and '未覆盖 1 项' in result.stdout, result
-    print('PASS coverage decoding: 70 bins; IRQ hold and simultaneous arrivals')
+    print('PASS coverage decoding: 86 bins; IRQ hold and simultaneous arrivals')
     print('PASS report merging: exact sums, all-covered exit=0, uncovered exit=1')
     return 0
 

@@ -14,6 +14,10 @@ module edrv32_cpu_coverage_tb;
     logic [11:0] bypass = 0;
     logic [1:0] redirect = 0;
     logic [2:0] stall = 0;
+    logic [1:0] redirect_stage = 2;
+    logic [3:0] early_condition = 0;
+    logic early_bypass = 0;
+    logic [2:0] early_failure = 0;
     logic [2:0] irq = 0;
     logic pair_valid = 0;
     logic pair_swap = 0;
@@ -31,6 +35,10 @@ module edrv32_cpu_coverage_tb;
         .trace_cause_i(cause),
         .trace_bypass_i(bypass),
         .trace_redirect_cause_i(redirect),
+        .trace_redirect_stage_i(redirect_stage),
+        .early_condition_i(early_condition),
+        .early_bypass_i(early_bypass),
+        .early_failure_i(early_failure),
         .trace_stall_cause_i(stall),
         .pair_valid_i(pair_valid),
         .pair_swap_i(pair_swap),
@@ -161,6 +169,25 @@ module edrv32_cpu_coverage_tb;
         redirect = 1;
         irq = 1;
         tick();
+        irq = 0;
+        debug = 0;
+        redirect_stage = 3;
+        tick();
+        redirect_stage = 0;
+        redirect = 0;
+        for (int index = 1; index <= 9; index++) begin
+            early_condition = 4'(index);
+            tick();
+        end
+        early_condition = 0;
+        for (int index = 1; index <= 5; index++) begin
+            early_failure = 3'(index);
+            tick();
+        end
+        early_failure = 0;
+        early_bypass = 1;
+        tick();
+        early_bypass = 0;
         $display("PASS coverage observations");
         $finish;
     end

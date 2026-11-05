@@ -10,7 +10,6 @@
     csrr zero, mscratch
 spec_branch:
     beq zero, zero, spec_resume
-    nop
 spec_branch_load:
     lw a1, 32(a4)
     addi a0, a0, 1
@@ -25,7 +24,9 @@ spec_trap_load:
     addi a0, a0, 1
 spec_trap_resume:
     CHECK a0, 0
+after_branch_probe:
     lw a1, 32(a4)
+after_trap_probe:
     lw a2, 64(a4)
     CHECK a1, 0
     CHECK a2, 0
@@ -42,6 +43,7 @@ spec_irq_load:
     lw a1, 96(a4)
 spec_irq_resume:
     csrw mie, zero
+after_irq_probe:
     lw a1, 96(a4)
     CHECK a1, 0
 #endif

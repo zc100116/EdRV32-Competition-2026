@@ -23,6 +23,12 @@
       "consumer": "multiply_branch",
       "gap": 0,
       "latency": 4
+    },
+    {
+      "pc0": "slot0_branch",
+      "pc1": "slot0_younger",
+      "pair": true,
+      "swap": false
     }
   ],
   "tier": "smoke",

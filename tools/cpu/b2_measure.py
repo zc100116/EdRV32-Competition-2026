@@ -115,6 +115,8 @@ def execute(sim, out, elf, test, latency, inner=False):
                 first, last = offsets[test]
                 begin_pc, end_pc = body + first, body + last
             command += [f'+{prefix}_BEGIN={begin_pc:x}', f'+{prefix}_END={end_pc:x}']
+    if test == 'r04':
+        command.append('+R04_CHECK')
     log = out / (f'inner_l{latency}.log' if inner else f'run_l{latency}.log')
     logged(command, log)
     return log.read_text()

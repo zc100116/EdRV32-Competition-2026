@@ -366,6 +366,8 @@ swap_jalr_rs2_consumer:
     .balign 8
     csrr zero, mscratch
     csrr zero, mscratch
+    addi a4, a4, 0
+    nop
     addi a3, zero, 41
 swap_load_rs1_producer:
     lw a2, 0(a4)
@@ -382,6 +384,8 @@ swap_load_rs1_consumer:
     .balign 8
     csrr zero, mscratch
     csrr zero, mscratch
+    addi a4, a4, 0
+    nop
     addi a3, zero, 41
 swap_load_rs2_producer:
     lw a2, 0(a4)
@@ -420,4 +424,18 @@ swap_mul_rs2_entry:
 swap_mul_rs2_consumer:
     mul a6, a1, a2
     CHECK a6, 52
+    la a4, scratch
+    li t0, 26
+    sw t0, 0(a4)
+    fence
+    .balign 8
+    csrr zero, mscratch
+    csrr zero, mscratch
+early_load_producer:
+    lw a2, 0(a4)
+    addi a3, zero, 41
+early_load_consumer:
+    add a6, a2, zero
+    lw a3, 4(a4)
+    CHECK a6, 26
     FINISH

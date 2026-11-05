@@ -26,9 +26,18 @@ def plusargs(config, names, out):
         args.append(f'+STORES_BEGIN={names["stores_begin"]:x}')
     obligations = []
     for case in config.get('cases', []):
-        if 'source_stage' in case:
+        if 'early_query' in case:
+            obligations.append((16, names[case['early_query']], 0, 0, 0))
+        elif 'early_failure' in case:
+            obligations.append((17, names[case['early_failure']], 0, case['reason'], 0))
+        elif 'overlap_m' in case:
+            obligations.append((14, names[case['overlap_m']],
+                                names[case['overlap_e']], 0, 0))
+        elif 'early_source' in case:
+            obligations.append((13, names[case['load']], 0, case['early_source'], 0))
+        elif 'source_stage' in case:
             field = case['consumer_slot'] * 2 + case['operand'] - 1
-            source = {'E': 1, 'M': 3, 'W': 5}[case['source_stage']] + case['source_pipe']
+            source = {'RF': 0, 'E': 1, 'M': 3, 'W': 5}[case['source_stage']] + case['source_pipe']
             obligations.append((1, names[case['consumer']], names[case['producer']], field, source))
         elif 'latency' in case:
             obligations.append((2, names[case['consumer']], names[case['producer']],
@@ -78,6 +87,15 @@ def plusargs(config, names, out):
                          '+IC_DELAY_CYCLES=' + str(event['cycles'])]
             else:
                 delays.append((names[event['pc']], event['cycles']))
+        elif kind == 'early_miss':
+            args += ['+DC_EARLY_MISS_ADDR=' + format(address(event['address'], names), 'x'),
+                     '+DC_DELAY_MIN=' + str(event['cycles']),
+                     '+DC_DELAY_MAX=' + str(event['cycles'])]
+        elif kind == 'cache_paired_run':
+            args += ['+DC_PROBE_FILE=' + str(out / 'dc_probe.txt'),
+                     '+DC_PROBE_COUNT=' + str(len(event['probes']))]
+            args += [f'+DC_PROBE{i}_PC={names[pc]:x}'
+                     for i, pc in enumerate(event['probes'])]
         elif kind == 'ready_low':
             args += [f'+DC_READY_LOW_PC={names[event["pc"]]:x}',
                      '+DC_READY_LOW_CYCLES=' + str(event['cycles'])]

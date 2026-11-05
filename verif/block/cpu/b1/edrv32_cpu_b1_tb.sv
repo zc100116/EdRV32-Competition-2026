@@ -10,6 +10,9 @@ module edrv32_cpu_b1_tb;
     logic [31:0] ic_req_addr;
     logic ic_kill;
     logic ic_inv;
+    logic unused_early_hit;
+    logic [31:0] unused_early_data;
+    wire unused_early_failure_w = &{1'b0, u_dc_model.early_failure_r};
     logic dc_req_valid;
     logic [31:0] dc_req_addr;
     logic dc_req_store;
@@ -97,6 +100,10 @@ module edrv32_cpu_b1_tb;
     edrv32_cpu_dc_model u_dc_model (
         .clk_i(clk),
         .rst_n_i(rst_n),
+        .dc_early_valid_i(1'b0),
+        .dc_early_addr_i(32'b0),
+        .dc_early_hit_o(unused_early_hit),
+        .dc_early_data_o(unused_early_data),
         .dc_req_valid_i(dc_req_valid),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
@@ -148,6 +155,10 @@ module edrv32_cpu_b1_tb;
         .trace_trap_i(u_core.trace_trap_w),
         .trace_cause_i(u_core.trace_cause_w),
         .trace_bypass_i(u_core.trace_bypass_w),
+        .trace_redirect_stage_i(debug[17] ? 2'd1 : (debug[16] ? 2'd2 : 2'd0)),
+        .early_condition_i(4'b0),
+        .early_bypass_i(1'b0),
+        .early_failure_i(3'b0),
         .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
         .trace_stall_cause_i(u_core.trace_stall_cause_w),
         .pair_valid_i(1'b0),
@@ -178,6 +189,7 @@ module edrv32_cpu_b1_tb;
         .dc_resp_device_i(dc_resp_device),
         .dc_kill_i(dc_kill),
         .dc_commit_i(dc_commit),
+        .redirect_flush_i(1'b0),
         .m_enter_i(u_core.m_enter_w && violation != 3),
         .device_execute_i(checker_device_execute)
     );

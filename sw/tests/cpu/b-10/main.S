@@ -5,6 +5,7 @@
     START
     la a4, scratch
     li a0, 0
+    li a1, 0x1234
     sw zero, 0(a4)
     fence
     .balign 8
@@ -40,6 +41,15 @@ wrong_branch:
     addi a0, a0, 77
 flush_branch_target:
     CHECK a0, 0
+    .balign 8
+    csrr zero, mscratch
+    csrr zero, mscratch
+flush_fault_branch:
+    beq zero, zero, flush_fault_target
+    nop
+wrong_fault:
+    lw a1, 1(a4)
+flush_fault_target:
 probe_branch:
     bne a0, zero, fail
     lw a1, 0(a4)

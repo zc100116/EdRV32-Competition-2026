@@ -3,7 +3,7 @@
   "spike": "smoke",
   "stimulus": [],
   "checks": [
-    "prepared branch/trap speculative load and later same-address probes; early cache-state comparison and interrupt binding pending approved D$ contract"
+    "compare same-address ordinary responses, commits, buffer contents and device count with speculative loads replaced by NOPs; real tag/LRU state is covered by cache unit tests"
   ],
   "cases": [
     {
@@ -14,6 +14,15 @@
     },
     {
       "no_retire": "spec_irq_load"
+    },
+    {
+      "early_query": "spec_branch_load"
+    },
+    {
+      "early_query": "spec_trap_load"
+    },
+    {
+      "early_query": "spec_irq_load"
     }
   ],
   "tier": "smoke",
@@ -26,6 +35,24 @@
       "when": "M.pc=spec_irq",
       "source": "MEIP",
       "clear": "trap entry"
+    },
+    {
+      "kind": "early_miss",
+      "address": "scratch+32",
+      "cycles": 9
+    },
+    {
+      "kind": "cache_paired_run",
+      "patches": [
+        "spec_branch_load",
+        "spec_trap_load",
+        "spec_irq_load"
+      ],
+      "probes": [
+        "after_branch_probe",
+        "after_trap_probe",
+        "after_irq_probe"
+      ]
     }
   ]
 }

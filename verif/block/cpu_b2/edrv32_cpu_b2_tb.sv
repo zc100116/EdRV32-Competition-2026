@@ -166,7 +166,18 @@ module edrv32_cpu_b2_tb;
         $fclose(fd);
     endtask
 
+    // R-04 uses 256 distinct always-taken branches. Ignore the first pass,
+    // which fills I$, then measure retirement spacing for each adjacent pair.
+    bit r04_check;
+    integer r04_branches = 0;
+    integer r04_checked = 0;
+    longint unsigned r04_previous_cycle;
+    logic [31:0] r04_previous_pc;
+    integer r04_penalty[logic [31:0]];
+    integer r04_expected;
+    integer r04_actual;
     initial begin
+        r04_check = $test$plusargs("R04_CHECK");
         random_stalls = 0;
         delay_max = 0;
         void'($value$plusargs("READ_LATENCY=%d", read_latency_w));
@@ -194,19 +205,43 @@ module edrv32_cpu_b2_tb;
 
     task automatic report_window(input int w);
         $display("B2_WINDOW window=%0d cycles=%0d instret=%0d", w,
-                 u_dut.u_core.u_csr.cycle_r - start_cycle_r[w],
-                 u_dut.u_core.u_csr.instret_r - start_instret_r[w]);
+                    u_dut.u_core.u_csr.cycle_r - start_cycle_r[w],
+                    u_dut.u_core.u_csr.instret_r - start_instret_r[w]);
         for (int e = 0; e < 16; e++)
             $display("B2_HPM window=%0d event=%0d count=%0d", w, e + 1, events_r[w][e]);
         for (int c = 0; c < 8; c++)
             $display("B2_CSR_HPM window=%0d counter=%0d event=%0d count=%0d", w, c + 3,
-                     u_dut.u_core.u_csr.event_r[c],
-                     u_dut.u_core.u_csr.counter_r[c] - start_hpm_r[w][c]);
+                        u_dut.u_core.u_csr.event_r[c],
+                        u_dut.u_core.u_csr.counter_r[c] - start_hpm_r[w][c]);
     endtask
 
     always @(posedge clk_i) begin
         if (rst_n_i) begin
             cycles_r <= cycles_r + 1;
+            if (r04_check) begin
+                if (u_dut.u_core.trace_redirect_stage_w inside {2, 3})
+                    r04_penalty[u_dut.u_core.trace_redirect_pc_w] =
+                        u_dut.u_core.trace_redirect_stage_w == 3 ? 5 : 4;
+                for (int lane = 0; lane < 2; lane++) begin
+                    if (u_dut.u_core.trace_valid_w[lane] &&
+                        u_dut.u_core.trace_instr_w[lane*32 +: 32] == 32'h00000463) begin
+                        if (r04_branches > 256 &&
+                            u_dut.u_core.trace_pc_w[lane*32 +: 32] == r04_previous_pc + 8) begin
+                            if (!r04_penalty.exists(r04_previous_pc))
+                                $fatal(1, "FAIL R-04 missing redirect pc=%08x", r04_previous_pc);
+                            r04_expected = r04_penalty[r04_previous_pc];
+                            r04_actual = int'(cycles_r-r04_previous_cycle)-1;
+                            if (r04_actual != r04_expected)
+                                $fatal(1, "FAIL R-04 penalty expected=%0d actual=%0d pc=%08x",
+                                    r04_expected, r04_actual, r04_previous_pc);
+                            r04_checked++;
+                        end
+                        r04_previous_pc = u_dut.u_core.trace_pc_w[lane*32 +: 32];
+                        r04_previous_cycle = cycles_r;
+                        r04_branches++;
+                    end
+                end
+            end
             for (int e = 0; e < 16; e++)
                 total_events_r[e] += 64'(u_dut.u_core.event_count_w[e*2 +: 2]);
             if (dbus.awvalid && dbus.awready) bus_write_addr_r <= dbus.awaddr;
@@ -236,16 +271,21 @@ module edrv32_cpu_b2_tb;
             if (store_r && !store_seen_r && u_dut.dc_commit_w && !u_dut.dc_kill_w) begin
                 store_seen_r <= 1;
                 if (store_addr_r == tohost_addr_w && u_dut.dc_store_data_w[0]) begin
+                    if (r04_check) begin
+                        if (r04_checked == 0)
+                            $fatal(1, "FAIL R-04 no warmed misprediction measured");
+                        $display("PASS R-04 penalty E=4 M=5 checked=%0d", r04_checked);
+                    end
                     $display("B2_TOTAL mcycle=%0d minstret=%0d no-C latency=%0d",
-                             u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,
-                             read_latency_w);
+                                u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,
+                                read_latency_w);
                     for (int e = 0; e < 16; e++)
                         $display("B2_HPM window=total event=%0d count=%0d", e + 1,
-                                 total_events_r[e]);
+                                    total_events_r[e]);
                     for (int c = 0; c < 8; c++)
                         $display("B2_CSR_HPM window=total counter=%0d event=%0d count=%0d",
-                                 c + 3, u_dut.u_core.u_csr.event_r[c],
-                                 u_dut.u_core.u_csr.counter_r[c]);
+                                    c + 3, u_dut.u_core.u_csr.event_r[c],
+                                    u_dut.u_core.u_csr.counter_r[c]);
                     if (u_dut.dc_store_data_w != 1)
                         $fatal(1, "FAIL tohost status=%0d", u_dut.dc_store_data_w >> 1);
                     $display("PASS cpu_b2");

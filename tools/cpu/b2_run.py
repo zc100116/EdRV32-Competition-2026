@@ -76,6 +76,8 @@ def run(args):
             prefix = 'PERF2' if index else 'PERF'
             command += [f'+{prefix}_BEGIN={symbols[begin]:x}',
                         f'+{prefix}_END={symbols[end]:x}']
+    if args.test == 'r04':
+        command.append('+R04_CHECK')
     result = subprocess.run(command, cwd=ROOT, text=True, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     output = result.stdout

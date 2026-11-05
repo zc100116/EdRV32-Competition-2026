@@ -3,9 +3,75 @@
   "spike": "smoke",
   "stimulus": [],
   "checks": [
-    "prepared miss/device/byte/halfword/ready-low stimulus; early access failure observation pending approved D$ contract"
+    "early miss, ready-low, byte/halfword write-buffer merge, accepted store and device all fall back correctly; unaligned load traps and its younger consumer never retires"
   ],
-  "cases": [],
+  "cases": [
+    {
+      "no_retire": "fallback_unaligned_younger"
+    },
+    {
+      "early_failure": "fallback_miss",
+      "reason": 2
+    },
+    {
+      "early_failure": "fallback_ready",
+      "reason": 1
+    },
+    {
+      "early_failure": "fallback_byte",
+      "reason": 4
+    },
+    {
+      "early_failure": "fallback_store",
+      "reason": 5
+    },
+    {
+      "early_failure": "fallback_device",
+      "reason": 3
+    },
+    {
+      "pc0": "accepted_store_older",
+      "pc1": "accepted_store_older+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "fallback_miss",
+      "consumer": "fallback_miss_consumer",
+      "latency": 1,
+      "gap": 0
+    },
+    {
+      "producer": "fallback_ready",
+      "consumer": "fallback_ready_consumer",
+      "latency": 1,
+      "gap": 0
+    },
+    {
+      "producer": "fallback_byte",
+      "consumer": "fallback_byte_consumer",
+      "latency": 1,
+      "gap": 0
+    },
+    {
+      "producer": "fallback_half",
+      "consumer": "fallback_half_consumer",
+      "latency": 1,
+      "gap": 0
+    },
+    {
+      "producer": "fallback_store",
+      "consumer": "fallback_store_consumer",
+      "latency": 1,
+      "gap": 0
+    },
+    {
+      "producer": "fallback_device",
+      "consumer": "fallback_device_consumer",
+      "latency": 1,
+      "gap": 0
+    }
+  ],
   "tier": "smoke",
   "rvc": [
     false
@@ -21,6 +87,16 @@
       "kind": "ready_low",
       "pc": "fallback_ready",
       "cycles": 4
+    },
+    {
+      "kind": "early_miss",
+      "address": "scratch",
+      "cycles": 12
+    },
+    {
+      "kind": "write_buffer_hold",
+      "pc": "held_byte_store",
+      "cycles": 12
     }
   ]
 }

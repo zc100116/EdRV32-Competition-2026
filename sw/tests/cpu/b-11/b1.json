@@ -23,6 +23,22 @@
     },
     {
       "no_retire": "priority_mret_2_branch"
+    },
+    {
+      "overlap_m": "priority_trap_0",
+      "overlap_e": "priority_trap_0_branch"
+    },
+    {
+      "overlap_m": "priority_mret_0",
+      "overlap_e": "priority_mret_0_branch"
+    },
+    {
+      "overlap_m": "priority_fence_0",
+      "overlap_e": "priority_fence_0_branch"
+    },
+    {
+      "overlap_m": "priority_irq",
+      "overlap_e": "priority_irq_branch"
     }
   ],
   "tier": "full",

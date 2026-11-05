@@ -51,6 +51,16 @@
     logic [31:0] predictor_probe_pc;
     string predictor_path;
     integer predictor_descriptor;
+    logic early_query_previous = 0;
+    logic [31:0] early_query_pc;
+    always @(posedge clk) begin
+        early_query_previous <= rst_n && dc_early_valid;
+        for (int slot = 0; slot < 2; slot++) begin
+            if (rst_n && dc_early_valid && int'(u_core.d_issue_w) > slot &&
+                u_core.d_record_w[slot][38:32] == 7'h03)
+                early_query_pc <= u_core.d_record_w[slot][31:0];
+        end
+    end
     integer observer_file;
     integer observer_rows = 0;
     integer observer_status;
@@ -121,9 +131,12 @@
     /* verilator lint_on UNUSEDSIGNAL */
     integer issued_slot[logic [31:0]];
     integer issued_pipe[logic [31:0]];
+    integer issued_order[logic [31:0]];
+    integer issue_serial = 0;
     bit cold_jal_flushed[logic [31:0]];
     logic cold_slot0_redirect;
-    assign cold_slot0_redirect = u_core.d_redirect_w &&
+    assign cold_slot0_redirect = u_core.d_count_w != 0 &&
+        !u_core.d_record_w[0][99] &&
         u_core.d_record_w[0][38:32] == 7'h6f;
     logic observed_e_slot;
     logic observed_e_pipe;
@@ -133,19 +146,68 @@
     logic observed_pair_valid;
     logic [31:0] observed_e_pc;
     integer redirect_start[1024];
+    bit obligation_redirect_seen[1024];
     integer expected_pipe;
     assign observed_pair_valid = u_core.d_issue_w == 2;
     assign observed_pair_swap = !pipe1_instruction(u_core.d_record_w[1][63:32]);
-    assign observed_d_slot = u_core.d_record_w[0][38:32] != 7'h6f;
+    assign observed_d_slot = 1'(issued_slot[u_core.trace_redirect_pc_w]);
     // A synchronous trap can commit one older instruction only for a slot-1 fault.
     assign observed_trap_slot = |u_core.m_commit_w;
     always_comb begin
         observed_e_pipe = u_core.e_valid_r[1] &&
             control_instruction(u_core.e_record_r[1][63:32]);
         observed_e_pc = u_core.e_record_r[observed_e_pipe][31:0];
-        observed_e_slot = 1'(issued_slot[observed_e_pc]);
+        observed_e_slot = 1'(issued_slot[u_core.trace_redirect_pc_w]);
     end
     /* verilator lint_off UNUSEDSIGNAL */
+    logic [3:0] early_condition;
+    logic [31:0] early_candidate;
+    logic [31:0] early_producer;
+    logic [4:0] early_source;
+    always_comb begin
+        early_condition = 0;
+        early_candidate = 0;
+        early_producer = 0;
+        early_source = 0;
+        for (int slot = 0; slot < 2; slot++) begin
+            if (early_condition == 0 && int'(u_core.d_count_w) > slot &&
+                u_core.d_record_w[slot][38:32] == 7'h03) begin
+                early_candidate = u_core.d_record_w[slot][63:32];
+                early_source = early_candidate[19:15];
+                early_condition = early_source == 0 ? 8 : 9;
+                for (int pipe = 0; pipe < 2; pipe++) begin
+                    early_producer = u_core.w_record_r[pipe][95:64];
+                    if (early_source != 0 && u_core.w_valid_r[pipe] &&
+                        writes_rd(early_producer) && early_producer[11:7] == early_source)
+                        early_condition = early_producer[6:0] == 7'h33 &&
+                            early_producer[31:25] == 1 && !early_producer[14] ? 6 : 7;
+                end
+                for (int pipe = 0; pipe < 2; pipe++) begin
+                    early_producer = u_core.m_record_r[pipe][63:32];
+                    if (early_source != 0 && u_core.m_valid_r[pipe] &&
+                        writes_rd(early_producer) && early_producer[11:7] == early_source) begin
+                        early_condition = 3;
+                        if (early_producer[6:0] == 7'h03) early_condition = 4;
+                        if (early_producer[6:0] == 7'h73) early_condition = 5;
+                        if (early_producer[6:0] == 7'h33 &&
+                            early_producer[31:25] == 1 && !early_producer[14])
+                            early_condition = 6;
+                    end
+                end
+                for (int pipe = 0; pipe < 2; pipe++) begin
+                    early_producer = u_core.e_record_r[pipe][63:32];
+                    if (early_source != 0 && u_core.e_valid_r[pipe] &&
+                        writes_rd(early_producer) && early_producer[11:7] == early_source)
+                        early_condition = early_producer[6:0] == 7'h33 &&
+                            early_producer[31:25] == 1 && !early_producer[14] ? 6 : 2;
+                end
+                early_producer = u_core.d_record_w[0][63:32];
+                if (slot == 1 && early_source != 0 && writes_rd(early_producer) &&
+                    early_producer[11:7] == early_source)
+                    early_condition = 1;
+            end
+        end
+    end
     function automatic bit csr_instruction_write(input logic [31:0] instruction);
         return instruction[6:0] == 7'h73 && instruction[14:12] != 0 &&
             (instruction[13:12] == 1 || instruction[19:15] != 0);
@@ -166,14 +228,17 @@
             instruction = u_core.e_record_r[lane][63:32];
             if (source != 0 && u_core.e_valid_r[lane] && writes_rd(instruction) &&
                 instruction[11:7] == source)
-                pending = instruction[6:0] == 7'h03 || instruction[6:0] == 7'h73 ||
+                pending = (instruction[6:0] == 7'h03 &&
+                    !(early_query_previous && early_query_pc ==
+                        u_core.e_record_r[lane][31:0]) && candidate1[6:0] != 7'h63) ||
+                    instruction[6:0] == 7'h73 ||
                     (instruction[6:0] == 7'h33 && instruction[31:25] == 1 && !instruction[14]);
         end
         return pending;
     endfunction
     function automatic logic [31:0] csr_operation(input logic [31:0] old_value,
-                                                 input logic [31:0] operand,
-                                                 input logic [1:0] command);
+                                                    input logic [31:0] operand,
+                                                    input logic [1:0] command);
         case (command)
             2: return old_value | operand;
             3: return old_value & ~operand;
@@ -253,7 +318,7 @@
                 reference_pair_reason = 4;
             else if (writes_rd(candidate0) && candidate0[11:7] != 0 &&
                 ((uses_rs1(candidate1) && candidate1[19:15] == candidate0[11:7]) ||
-                 (uses_rs2(candidate1) && candidate1[24:20] == candidate0[11:7])))
+                    (uses_rs2(candidate1) && candidate1[24:20] == candidate0[11:7])))
                 reference_pair_reason = 1;
             else if (candidate0[6:0] == 7'h73 || candidate0[6:0] == 7'h0f ||
                 candidate1[6:0] == 7'h73 || candidate1[6:0] == 7'h0f ||
@@ -279,6 +344,15 @@
                     $fatal(1, "FAIL pairing reason pc=%08x expected=%0d actual=%0d",
                         u_core.d_record_w[0][31:0], reference_pair_reason, debug[23:21]);
             end
+            if (dc_early_valid && (early_condition inside {1, 2, 4, 5, 6} ||
+                u_core.d_issue_w == 0))
+                $fatal(1, "FAIL ineligible early query condition=%0d issue=%0d cycle=%0d",
+                    early_condition, u_core.d_issue_w, cycles);
+            if (u_core.trace_redirect_stage_w != 0 && dc_req_valid &&
+                u_core.e_valid_r[0] && issued_order[u_core.e_record_r[0][31:0]] >
+                issued_order[u_core.trace_redirect_pc_w])
+                $fatal(1, "FAIL wrong-path E request pc=%08x redirect=%08x cycle=%0d",
+                    u_core.e_record_r[0][31:0], u_core.trace_redirect_pc_w, cycles);
             observer_retire = int'(u_core.trace_valid_w[0]) + int'(u_core.trace_valid_w[1]);
             for (int code = 0; code <= 16; code++)
                 reference_events[code] = 0;
@@ -293,10 +367,9 @@
             end
             if (u_core.d_issue_w == 1 && !cold_slot0_redirect && reference_pair_reason > 0)
                 reference_events[reference_pair_reason + 4] = 1;
-            reference_events[9] = int'(u_core.d_count_w != 0 && u_core.e_valid_r[0] &&
-                u_core.e_record_r[0][38:32] == 7'h03 && u_core.e_rd_r[0] != 0 &&
-                ((uses_rs1(candidate0) && candidate0[19:15] == u_core.e_rd_r[0]) ||
-                (uses_rs2(candidate0) && candidate0[24:20] == u_core.e_rd_r[0])));
+            // The documented stall reason also covers early failure repair and
+            // excludes a comparison branch accepted by 4.11 without a D stall.
+            reference_events[9] = int'(u_core.trace_stall_cause_w == 1);
             reference_events[10] = int'(u_core.e_valid_r[0] &&
                 u_core.e_record_r[0][38:32] == 7'h33 && u_core.e_record_r[0][63:57] == 1 &&
                 u_core.e_record_r[0][46] && !(u_core.div_done_r || u_core.div_valid_w));
@@ -306,13 +379,13 @@
             reference_events[14] = int'(reference_dc_expect && !dc_resp_valid &&
                 !dc_resp_device && !dc_kill);
             reference_events[15] = int'(dc_wb_event);
-            reference_events[16] = int'(u_core.e_redirect_w || u_core.d_redirect_w);
+            reference_events[16] = int'(u_core.trace_redirect_stage_w != 0);
             reference_ic_expect = ic_req_valid && ic_req_ready;
             reference_dc_expect = dc_req_valid && dc_req_ready;
             if (!reference_inhibit[2] && !(u_core.trace_valid_w[0] &&
-                csr_instruction_write(u_core.w_record_r[0][95:64]) &&
-                (u_core.w_record_r[0][95:84] == 12'hb02 ||
-                 u_core.w_record_r[0][95:84] == 12'hb82)))
+                csr_instruction_write(u_core.trace_instr_w[31:0]) &&
+                (u_core.trace_instr_w[31:20] == 12'hb02 ||
+                    u_core.trace_instr_w[31:20] == 12'hb82)))
                 reference_instret += 64'(observer_retire);
             if (test_id == "c-03" && hpm_reference_window) begin
                 for (int code = 1; code <= 16; code++)
@@ -377,13 +450,17 @@
                 expected_debug[6] = u_core.d_count_w >= 2;
                 expected_debug[8:7] = u_core.e_valid_r;
                 expected_debug[10:9] = u_core.m_valid_r;
-                expected_debug[12:11] = u_core.w_valid_r;
+                // debug bits describe physical W2 lanes; retirement trace is ordered.
+                for (int slot = 0; slot < 2; slot++) begin
+                    if (u_core.trace_valid_w[slot])
+                        expected_debug[11+issued_pipe[u_core.trace_pc_w[slot*32 +: 32]]] = 1;
+                end
                 expected_debug[13] = u_core.m_wait_w || u_core.div_wait_w ||
                     (u_core.d_count_w != 0 && u_core.d_issue_w == 0);
                 expected_debug[14] = u_core.m_wait_w;
                 expected_debug[15] = u_core.fetch_wait_w;
-                expected_debug[16] = u_core.e_redirect_w;
-                expected_debug[17] = u_core.d_redirect_w;
+                expected_debug[16] = u_core.trace_redirect_stage_w inside {2, 3};
+                expected_debug[17] = u_core.trace_redirect_stage_w == 1;
                 expected_debug[18] = u_core.m_trap_w;
                 expected_debug[20:19] = 2'(observer_retire);
                 expected_debug[23:21] = u_core.d_issue_w == 1 ? 3'(reference_pair_reason) : 0;
@@ -410,9 +487,10 @@
                     cold_jal_flushed[u_core.d_record_w[1][31:0]] = 1;
             end
             for (int pipe = 0; pipe < 2; pipe++) begin
-                if (u_core.e_valid_r[pipe] && cold_jal_flushed[u_core.e_record_r[pipe][31:0]])
-                    $fatal(1, "FAIL cold JAL younger instruction executed pc=%08x",
-                        u_core.e_record_r[pipe][31:0]);
+                if (u_core.trace_valid_w[pipe] &&
+                    cold_jal_flushed[u_core.trace_pc_w[pipe*32 +: 32]])
+                    $fatal(1, "FAIL cold JAL younger instruction retired pc=%08x",
+                        u_core.trace_pc_w[pipe*32 +: 32]);
                 if (u_core.e_valid_r[pipe] && issued_pipe[u_core.e_record_r[pipe][31:0]] != pipe)
                     $fatal(1, "FAIL pipeline assignment pc=%08x expected=%0d actual=%0d cycle=%0d",
                         u_core.e_record_r[pipe][31:0],
@@ -420,12 +498,14 @@
             end
             for (int slot = 0; slot < int'(u_core.d_issue_w); slot++) begin
                 expected_pipe = int'(u_core.d_issue_w == 2 && observed_pair_swap) ^ slot;
+                issued_order[u_core.d_record_w[slot][31:0]] = issue_serial;
+                issue_serial++;
                 issued_slot[u_core.d_record_w[slot][31:0]] = slot;
                 issued_pipe[u_core.d_record_w[slot][31:0]] = expected_pipe;
             end
             if (observer_retire == 2)
                 dual_retire_count++;
-            if (u_core.e_redirect_w || u_core.d_redirect_w)
+            if (u_core.trace_redirect_stage_w != 0)
                 redirect_count++;
             if (debug[26])
                 device_wait_cycles++;
@@ -523,6 +603,14 @@
                             obligation_pc[row], debug[23:21], cold_slot0_redirect ? 0 : 3);
                     obligation_seen[row]++;
                 end
+                if (obligation_kind[row] inside {5, 6, 11} &&
+                    u_core.trace_redirect_pc_w == obligation_pc[row] &&
+                    int'(u_core.trace_redirect_stage_w) ==
+                    (obligation_kind[row] == 5 ? 2 : (obligation_kind[row] == 6 ? 1 : 3))) begin
+                    if (int'(u_core.trace_redirect_cause_w) == obligation_arg1[row] ||
+                        obligation_kind[row] == 6)
+                        obligation_redirect_seen[row] = 1;
+                end
                 // Measure from the labelled instruction's D -> E transition, not
                 // from current E/D records: the redirect now comes from a register.
                 if (obligation_kind[row] inside {5, 6, 11}) begin
@@ -530,6 +618,7 @@
                         if (int'(u_core.d_issue_w) > slot &&
                             u_core.d_record_w[slot][31:0] == obligation_pc[row]) begin
                             redirect_start[row] = cycles;
+                            obligation_redirect_seen[row] = 0;
                             if (slot != obligation_arg0[row])
                                 $fatal(1, "FAIL redirect slot pc=%08x expected=%0d actual=%0d",
                                     obligation_pc[row], obligation_arg0[row], slot);
@@ -537,6 +626,9 @@
                     end
                     if (redirect_start[row] >= 0 && u_core.d_issue_w != 0 &&
                         u_core.d_record_w[0][31:0] == obligation_other[row]) begin
+                        if (!obligation_redirect_seen[row])
+                            $fatal(1, "FAIL missing registered redirect pc=%08x stage-kind=%0d",
+                                obligation_pc[row], obligation_kind[row]);
                         // Penalty excludes the clock in which the source issues.
                         expected_pipe = obligation_kind[row] == 5 ? 4 :
                             (obligation_kind[row] == 6 ? 3 : 5);
@@ -547,20 +639,21 @@
                                 cycles-redirect_start[row]-1, cycles);
                         obligation_seen[row]++;
                         redirect_start[row] = -1;
+                        obligation_redirect_seen[row] = 0;
                     end
                 end
                 if (obligation_kind[row] == 7 && u_core.m_trap_w &&
                     u_core.m_trap_cause_w == 32'(obligation_arg1[row]) &&
                     ((u_core.m_valid_r[0] && u_core.m_record_r[0][31:0] == obligation_pc[row]) ||
-                     (u_core.m_valid_r[1] &&
-                      u_core.m_record_r[1][31:0] == obligation_pc[row]))) begin
+                        (u_core.m_valid_r[1] &&
+                        u_core.m_record_r[1][31:0] == obligation_pc[row]))) begin
                     if (int'(observed_trap_slot) != obligation_arg0[row])
                         $fatal(1, "FAIL trap slot expected=%0d actual=%b cause=%0d",
                             obligation_arg0[row], observed_trap_slot, obligation_arg1[row]);
                     obligation_seen[row]++;
                 end
                 if (obligation_kind[row] == 8) begin
-                    if (dc_req_valid && dc_req_ready &&
+                    if (dc_req_valid && u_core.e_valid_r[0] &&
                         u_core.e_record_r[0][31:0] == obligation_pc[row])
                         $fatal(1, "FAIL flushed load reached D$ pc=%08x", obligation_pc[row]);
                     obligation_seen[row]++;
@@ -577,6 +670,35 @@
                         $fatal(1, "FAIL flushed D$ access committed pc=%08x cycle=%0d",
                             obligation_pc[row], cycles);
                     obligation_seen[row]++;
+                end
+                if (obligation_kind[row] == 16 && early_query_previous &&
+                    early_query_pc == obligation_pc[row])
+                    obligation_seen[row]++;
+                if (obligation_kind[row] == 17 && early_query_previous &&
+                    early_query_pc == obligation_pc[row]) begin
+                    if (dc_early_hit || int'(u_dc_model.early_failure_r) != obligation_arg0[row])
+                        $fatal(1, "FAIL early fallback pc=%08x expected=%0d actual=%0d hit=%b",
+                            obligation_pc[row], obligation_arg0[row],
+                            u_dc_model.early_failure_r, dc_early_hit);
+                    obligation_seen[row]++;
+                end
+                if (obligation_kind[row] == 14) begin
+                    for (int m_pipe = 0; m_pipe < 2; m_pipe++) begin
+                        for (int e_pipe = 0; e_pipe < 2; e_pipe++) begin
+                            if (u_core.m_valid_r[m_pipe] && u_core.e_valid_r[e_pipe] &&
+                                u_core.m_record_r[m_pipe][31:0] == obligation_pc[row] &&
+                                u_core.e_record_r[e_pipe][31:0] == obligation_other[row])
+                                obligation_seen[row]++;
+                        end
+                    end
+                end
+                if (obligation_kind[row] == 13 && early_condition ==
+                    4'(obligation_arg0[row])) begin
+                    for (int slot = 0; slot < 2; slot++) begin
+                        if (int'(u_core.d_count_w) > slot &&
+                            u_core.d_record_w[slot][31:0] == obligation_pc[row])
+                            obligation_seen[row]++;
+                    end
                 end
                 if (obligation_kind[row] == 9 && u_core.trace_valid_w == 3 &&
                     u_core.trace_pc_w[31:0] == obligation_pc[row] &&

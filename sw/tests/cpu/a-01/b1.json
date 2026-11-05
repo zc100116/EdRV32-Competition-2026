@@ -45,7 +45,7 @@
       "producer": "load_multiply",
       "consumer": "use_multiply",
       "gap": 0,
-      "latency": 2,
+      "latency": 1,
       "early_condition": "multiply"
     },
     {
@@ -61,6 +61,38 @@
       "gap": 0,
       "latency": 1,
       "early_condition": "x0"
+    },
+    {
+      "load": "load_same_slot",
+      "early_source": 1
+    },
+    {
+      "load": "load_e_alu",
+      "early_source": 2
+    },
+    {
+      "load": "load_m_alu",
+      "early_source": 3
+    },
+    {
+      "load": "load_m_load",
+      "early_source": 4
+    },
+    {
+      "load": "load_m_csr",
+      "early_source": 5
+    },
+    {
+      "load": "load_multiply",
+      "early_source": 6
+    },
+    {
+      "load": "load_w",
+      "early_source": 7
+    },
+    {
+      "load": "load_x0",
+      "early_source": 8
     }
   ],
   "tier": "smoke",

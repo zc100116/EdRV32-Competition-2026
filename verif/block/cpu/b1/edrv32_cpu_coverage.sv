@@ -17,6 +17,10 @@ module edrv32_cpu_coverage (
     input logic [31:0] trace_cause_i,
     input logic [11:0] trace_bypass_i,
     input logic [1:0] trace_redirect_cause_i,
+    input logic [1:0] trace_redirect_stage_i,
+    input logic [3:0] early_condition_i,
+    input logic early_bypass_i,
+    input logic [2:0] early_failure_i,
     input logic [2:0] trace_stall_cause_i,
 
     // Environment observations of logical age and physical assignment (spec 4.2).
@@ -34,6 +38,9 @@ module edrv32_cpu_coverage (
     longint unsigned counts[string];
     string sources[6] = '{"e0", "e1", "m0", "m1", "w0", "w1"};
     int causes[9] = '{0, 1, 2, 3, 4, 5, 6, 7, 11};
+    string early_conditions[9] = '{"older_slot", "e", "m_alu", "m_load", "m_csr",
+        "multiply", "w", "x0", "register_file"};
+    string early_failures[5] = '{"port", "miss", "device", "write_buffer", "accepted_store"};
     string path = "build/cpu-coverage.json";
     integer descriptor;
     bit first;
@@ -70,6 +77,12 @@ module edrv32_cpu_coverage (
         counts["redirect.e_direction"] = 0;
         counts["redirect.e_target"] = 0;
         counts["redirect.d"] = 0;
+        counts["redirect.m"] = 0;
+        counts["early.bypass.e0"] = 0;
+        foreach (early_conditions[index])
+            counts[{"early.condition.", early_conditions[index]}] = 0;
+        foreach (early_failures[index])
+            counts[{"early.failure.", early_failures[index]}] = 0;
         counts["redirect.exception"] = 0;
         counts["redirect.interrupt"] = 0;
         counts["redirect.mret"] = 0;
@@ -131,14 +144,22 @@ module edrv32_cpu_coverage (
                 counts["redirect.d"] += 1;
                 counts[$sformatf("redirect.d.slot%0d", d_redirect_slot_i)] += 1;
             end
-            if (trace_redirect_cause_i == 1) begin
+            if (trace_redirect_stage_i == 2 && trace_redirect_cause_i == 1) begin
                 counts["redirect.e_direction"] += 1;
                 counts[$sformatf("redirect.e_direction.slot%0d", e_redirect_slot_i)] += 1;
             end
-            if (trace_redirect_cause_i == 2) begin
+            if (trace_redirect_stage_i == 2 && trace_redirect_cause_i == 2) begin
                 counts["redirect.e_target"] += 1;
                 counts[$sformatf("redirect.e_target.slot%0d", e_redirect_slot_i)] += 1;
             end
+            if (trace_redirect_stage_i == 3)
+                counts["redirect.m"] += 1;
+            if (early_bypass_i)
+                counts["early.bypass.e0"] += 1;
+            if (early_condition_i != 0)
+                counts[{"early.condition.", early_conditions[early_condition_i-1]}] += 1;
+            if (early_failure_i != 0)
+                counts[{"early.failure.", early_failures[early_failure_i-1]}] += 1;
             for (int slot = 0; slot < 2; slot++) begin
                 if (trace_valid_i[slot]) begin
                     if (trace_instr_i[slot*32 +: 32] == 32'h30200073)
@@ -173,8 +194,10 @@ module edrv32_cpu_coverage (
                         counts["irq.dc_miss"] += 1;
                     if (irq_arrival_debug_i[16] || irq_arrival_debug_i[17])
                         counts["irq.branch_flush"] += 1;
-                    if (!(irq_arrival_debug_i[25] || irq_arrival_debug_i[26] || irq_arrival_debug_i[28]
-                        || irq_arrival_debug_i[16] || irq_arrival_debug_i[17] || irq_arrival_debug_i[18] || irq_arrival_debug_i[29])
+                    if (!(irq_arrival_debug_i[25] || irq_arrival_debug_i[26] ||
+                        irq_arrival_debug_i[28] || irq_arrival_debug_i[16] ||
+                        irq_arrival_debug_i[17] || irq_arrival_debug_i[18] ||
+                        irq_arrival_debug_i[29])
                         && ((|irq_arrival_debug_i[12:5]) || (|trace_valid_i)))
                         counts["irq.normal"] += 1;
                 end

@@ -3,7 +3,7 @@
   "spike": "smoke",
   "stimulus": [],
   "checks": [
-    "M compare redirect flushes younger illegal instruction; older M load exception or interrupt wins; exact mepc and no younger retirement"
+    "M compare redirect flushes younger illegal instruction; same-group older misaligned store or interrupt wins over M comparison; precise mepc and no younger retirement"
   ],
   "cases": [
     {
@@ -11,6 +11,22 @@
     },
     {
       "no_retire": "oldest_lcb_branch"
+    },
+    {
+      "overlap_m": "young_fault_branch",
+      "overlap_e": "young_fault"
+    },
+    {
+      "pc0": "oldest_lcb_fault",
+      "pc1": "oldest_lcb_branch",
+      "pair": true,
+      "swap": false
+    },
+    {
+      "pc0": "irq_lcb_oldest",
+      "pc1": "irq_lcb_branch",
+      "pair": true,
+      "swap": false
     }
   ],
   "tier": "full",
@@ -20,7 +36,7 @@
   "schedule": [
     {
       "kind": "irq",
-      "when": "M.pc=irq_lcb_load",
+      "when": "M.pc=irq_lcb_oldest",
       "source": "MEIP",
       "clear": "trap entry"
     }
