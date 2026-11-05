@@ -98,8 +98,11 @@ module tb;
     // Scenario 18 retains a redirected JAL while an older E load waits for request ready.
     always @(posedge clk_i) begin
         if (!rst_n_i) begin
-            dc_ready <= scenario==18 ? 0 : 1;
+            dc_ready <= (scenario==18 || scenario==21) ? 0 : 1;
             dc_ready_delay <= 0;
+        end else if (scenario==21 && dut.d_capture_w && dut.d_record_w[0][31:0]==8) begin
+            // Release the old load exactly as the registered JAL redirect becomes visible.
+            dc_ready <= 1;
         end else if (scenario==18 && dut.d_redirect_w && dut.d_record_w[0][31:0]==8) begin
             dc_ready_delay <= 6;
         end else if (dc_ready_delay!=0) begin
