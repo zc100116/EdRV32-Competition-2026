@@ -28,6 +28,7 @@ module tb;
     wire [63:0] unused_debug;
     reg pending=0;
     reg pending_store;
+    reg pending_way;
     reg [31:0] pending_addr;
     integer delay_left=0;
     integer load_count=0;
@@ -58,7 +59,8 @@ module tb;
         .dc_req_size_o(unused_dc_size),
         .dc_req_ready_i(!pending || delay_left==0),
         .dc_resp_valid_i(pending && delay_left==0),
-        .dc_resp_data_i(32'd1),
+        .dc_resp_way_data_i(pending_way ? 64'h0000000100000000 : 64'd1),
+        .dc_resp_way_hit_i(pending_way ? 2'b10 : 2'b01),
         .dc_resp_err_i(1'b0),
         .dc_resp_device_i(1'b0),
         .dc_kill_o(dc_kill),
@@ -70,8 +72,8 @@ module tb;
         .dc_wb_event_i(1'b0),
         .dc_early_valid_o(unused_early_valid),
         .dc_early_addr_o(unused_early_addr),
-        .dc_early_hit_i(1'b0),
-        .dc_early_data_i(32'b0),
+        .dc_early_way_hit_i(2'b0),
+        .dc_early_way_data_i(64'b0),
         .irq_meip_i(1'b0),
         .irq_msip_i(1'b0),
         .irq_mtip_i(1'b0),
@@ -92,6 +94,7 @@ module tb;
             end
             if (dc_req_valid && (!pending || delay_left==0)) begin
                 pending<=1; pending_store<=dc_req_store; pending_addr<=dc_req_addr;
+                pending_way<=load_count[0];
                 delay_left<=dc_req_store ? 0 : (load_count%3==0 ? 3 : 0);
                 if (!dc_req_store) load_count<=load_count+1;
             end

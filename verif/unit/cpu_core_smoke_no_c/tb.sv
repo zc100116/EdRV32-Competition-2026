@@ -30,6 +30,7 @@ module tb;
     reg dc_req_ready_i=0;
     reg dc_resp_valid_i=0;
     reg [31:0] dc_resp_data_i=0;
+    reg dc_resp_lane_i=0;
     reg dc_resp_err_i=0;
     reg dc_resp_device_i=0;
     wire dc_kill_o;
@@ -90,15 +91,17 @@ module tb;
         .ic_inv_done_i(ic_inv_done_i),
         .dc_early_valid_o(dc_early_valid_o),
         .dc_early_addr_o(dc_early_addr_o),
-        .dc_early_hit_i(1'b0),
-        .dc_early_data_i(32'b0),
+        .dc_early_way_hit_i(2'b0),
+        .dc_early_way_data_i(64'b0),
         .dc_req_valid_o(dc_req_valid_o),
         .dc_req_addr_o(dc_req_addr_o),
         .dc_req_store_o(dc_req_store_o),
         .dc_req_size_o(dc_req_size_o),
         .dc_req_ready_i(dc_req_ready_i),
         .dc_resp_valid_i(dc_resp_valid_i),
-        .dc_resp_data_i(dc_resp_data_i),
+        .dc_resp_way_data_i(dc_resp_lane_i ? {dc_resp_data_i,32'b0} :
+            {32'b0,dc_resp_data_i}),
+        .dc_resp_way_hit_i(dc_resp_lane_i ? 2'b10 : 2'b01),
         .dc_resp_err_i(dc_resp_err_i),
         .dc_resp_device_i(dc_resp_device_i),
         .dc_kill_o(dc_kill_o),
@@ -145,6 +148,7 @@ module tb;
                 store_addr_r<=dc_req_addr_o;store_size_r<=dc_req_size_o;
                 store_pending_r<=dc_req_store_o;
                 dc_resp_err_i<=!mapped(dc_req_addr_o);
+                dc_resp_lane_i<=dc_req_addr_o[2];
                 dc_resp_data_i<=0;
                 for(i=0;i<4;i=i+1)
                     if(i<(1<<dc_req_size_o))

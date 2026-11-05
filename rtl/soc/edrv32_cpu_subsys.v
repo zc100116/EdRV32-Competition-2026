@@ -212,15 +212,16 @@ module edrv32_cpu_subsys (
     wire ic_inv_done_w;
     wire dc_early_valid_w;
     wire [31:0] dc_early_addr_w;
-    wire dc_early_hit_w;
-    wire [31:0] dc_early_data_w;
+    wire [1:0] dc_early_way_hit_w;
+    wire [63:0] dc_early_way_data_w;
     wire dc_req_valid_w;
     wire [31:0] dc_req_addr_w;
     wire dc_req_store_w;
     wire [1:0] dc_req_size_w;
     wire dc_req_ready_w;
     wire dc_resp_valid_w;
-    wire [31:0] dc_resp_data_w;
+    wire [63:0] dc_resp_way_data_w;
+    wire [1:0] dc_resp_way_hit_w;
     wire dc_resp_err_w;
     wire dc_resp_device_w;
     wire dc_kill_w;
@@ -264,15 +265,16 @@ module edrv32_cpu_subsys (
         // Core data interface.
         .dc_early_valid_o(dc_early_valid_w),
         .dc_early_addr_o(dc_early_addr_w),
-        .dc_early_hit_i(dc_early_hit_w),
-        .dc_early_data_i(dc_early_data_w),
+        .dc_early_way_hit_i(dc_early_way_hit_w),
+        .dc_early_way_data_i(dc_early_way_data_w),
         .dc_req_valid_o(dc_req_valid_w),
         .dc_req_addr_o(dc_req_addr_w),
         .dc_req_store_o(dc_req_store_w),
         .dc_req_size_o(dc_req_size_w),
         .dc_req_ready_i(dc_req_ready_w),
         .dc_resp_valid_i(dc_resp_valid_w),
-        .dc_resp_data_i(dc_resp_data_w),
+        .dc_resp_way_data_i(dc_resp_way_data_w),
+        .dc_resp_way_hit_i(dc_resp_way_hit_w),
         .dc_resp_err_i(dc_resp_err_w),
         .dc_resp_device_i(dc_resp_device_w),
         .dc_kill_o(dc_kill_w),
@@ -346,15 +348,16 @@ module edrv32_cpu_subsys (
         // Core data interface.
         .dc_early_valid_i(dc_early_valid_w),
         .dc_early_addr_i(dc_early_addr_w),
-        .dc_early_hit_o(dc_early_hit_w),
-        .dc_early_data_o(dc_early_data_w),
+        .dc_early_way_hit_o(dc_early_way_hit_w),
+        .dc_early_way_data_o(dc_early_way_data_w),
         .dc_req_valid_i(dc_req_valid_w),
         .dc_req_addr_i(dc_req_addr_w),
         .dc_req_store_i(dc_req_store_w),
         .dc_req_size_i(dc_req_size_w),
         .dc_req_ready_o(dc_req_ready_w),
         .dc_resp_valid_o(dc_resp_valid_w),
-        .dc_resp_data_o(dc_resp_data_w),
+        .dc_resp_way_data_o(dc_resp_way_data_w),
+        .dc_resp_way_hit_o(dc_resp_way_hit_w),
         .dc_resp_err_o(dc_resp_err_w),
         .dc_resp_device_o(dc_resp_device_w),
         .dc_kill_i(dc_kill_w),

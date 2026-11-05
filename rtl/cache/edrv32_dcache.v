@@ -17,7 +17,8 @@ module edrv32_dcache (
     input wire [1:0] dc_req_size_i,
     output wire dc_req_ready_o,
     output wire dc_resp_valid_o,
-    output wire [31:0] dc_resp_data_o,
+    output wire [63:0] dc_resp_way_data_o,
+    output wire [1:0] dc_resp_way_hit_o,
     output wire dc_resp_err_o,
     output wire dc_resp_device_o,
     input wire dc_kill_i,
@@ -31,8 +32,8 @@ module edrv32_dcache (
     // Read-only D-stage query; ordinary requests retain array priority.
     input wire dc_early_valid_i,
     input wire [31:0] dc_early_addr_i,
-    output wire dc_early_hit_o,
-    output wire [31:0] dc_early_data_o,
+    output wire [1:0] dc_early_way_hit_o,
+    output wire [63:0] dc_early_way_data_o,
 
     // AXI64 read/write master.
     output wire [3:0] axi_awid_o,
@@ -79,7 +80,11 @@ module edrv32_dcache (
     reg [31:0] early_addr_r;
     reg [17:0] early_tag_r;
     reg early_response_r;
-    reg [31:0] early_response_data_r;
+    reg [63:0] early_response_data_r;
+    reg [1:0] early_response_way_r;
+    reg [7:0] early_byte_select_r;
+    reg [7:0] lookup_byte_select_r;
+    wire early_hit_enable_w;
     wire early_read_w;
     wire early_cacheable_w;
     wire unused_early_device_w;
@@ -89,8 +94,6 @@ module edrv32_dcache (
     wire early_hit1_w;
     wire early_promote_w;
     wire lookup_accept_w;
-    wire [31:0] early_word0_w;
-    wire [31:0] early_word1_w;
     wire [31:0] early_shift0_w;
     wire [31:0] early_shift1_w;
     edrv32_cache_pma u_early_pma (
@@ -113,17 +116,36 @@ module edrv32_dcache (
     // Six LUT6 comparisons and one reduction precede the final way/source selection.
     assign early_hit0_w = tag0_w[17:0] == early_tag_r;
     assign early_hit1_w = tag1_w[17:0] == early_tag_r;
-    assign dc_early_hit_o = early_valid_r &&
-        ((tag0_w[19] && early_hit0_w) || (tag1_w[19] && early_hit1_w)) &&
+    assign early_hit_enable_w = early_valid_r &&
         !(buffer_valid_r && buffer_addr_r[31:2] == early_addr_r[31:2]) &&
         !(store_pending_r && store_addr_r[31:2] == early_addr_r[31:2]) &&
         !(lookup_valid_r && store_r && addr_r[31:2] == early_addr_r[31:2]);
-    assign early_word0_w = early_addr_r[2] ? data0_w[63:32] : data0_w[31:0];
-    assign early_word1_w = early_addr_r[2] ? data1_w[63:32] : data1_w[31:0];
-    assign early_shift0_w = early_word0_w >> {early_addr_r[1:0], 3'b0};
-    assign early_shift1_w = early_word1_w >> {early_addr_r[1:0], 3'b0};
-    assign dc_early_data_o = early_hit0_w ? early_shift0_w : early_shift1_w;
-    assign early_promote_w = accept_w && !dc_req_store_i && dc_early_hit_o &&
+    assign dc_early_way_hit_o = {2{early_hit_enable_w}} &
+        {tag1_w[19] && early_hit1_w, tag0_w[19] && early_hit0_w};
+    // One-hot byte positions are prepared before the synchronous RAM edge.
+    // Align both ways independently; tag comparison never selects these data.
+    function [31:0] shifted_word;
+        input [63:0] data_i;
+        input [7:0] select_i;
+        integer offset;
+        integer byte_number;
+        begin
+            shifted_word = 0;
+            for (offset = 0; offset < 8; offset = offset + 1) begin
+                for (byte_number = 0; byte_number < 4;
+                    byte_number = byte_number + 1) begin
+                    if ((offset%4 + byte_number) < 4)
+                        shifted_word[byte_number*8 +: 8] =
+                            shifted_word[byte_number*8 +: 8] |
+                            ({8{select_i[offset]}} & data_i[(offset+byte_number)*8 +: 8]);
+                end
+            end
+        end
+    endfunction
+    assign early_shift0_w = shifted_word(data0_w, early_byte_select_r);
+    assign early_shift1_w = shifted_word(data1_w, early_byte_select_r);
+    assign dc_early_way_data_o = {early_shift1_w, early_shift0_w};
+    assign early_promote_w = accept_w && !dc_req_store_i && (|dc_early_way_hit_o) &&
         dc_req_addr_i == early_addr_r;
     assign lookup_accept_w = accept_w && !early_promote_w;
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -139,9 +161,14 @@ module edrv32_dcache (
         if (early_read_w) begin
             early_addr_r <= dc_early_addr_i;
             early_tag_r <= dc_early_addr_i[31:14];
+            early_byte_select_r <= 8'b1 << dc_early_addr_i[2:0];
         end
-        if (early_promote_w)
-            early_response_data_r <= dc_early_data_o;
+        if (early_promote_w) begin
+            early_response_data_r <= dc_early_way_data_o;
+            early_response_way_r <= dc_early_way_hit_o;
+        end
+        if (lookup_accept_w)
+            lookup_byte_select_r <= 8'b1 << dc_req_addr_i[2:0];
     end
     localparam [3:0] S_IDLE = 4'd0;
     localparam [3:0] S_AR = 4'd1;
@@ -175,7 +202,7 @@ module edrv32_dcache (
     reg lookup_hit_enable_r;
     wire lookup_valid0_w;
     wire lookup_valid1_w;
-    reg [35:0] lookup_tag_r;
+    reg [17:0] lookup_tag_r;
     reg [31:0] addr_r;
     reg store_r;
     reg [1:0] size_r;
@@ -241,8 +268,8 @@ module edrv32_dcache (
     wire request_device_w;
     wire request_pma_err_w;
     wire device_accept_w;
-    wire [8:0] tag0_match_w;
-    wire [8:0] tag1_match_w;
+    wire [5:0] tag0_match_w;
+    wire [5:0] tag1_match_w;
     wire hit0_w;
     wire hit1_w;
     wire hit_w;
@@ -294,16 +321,13 @@ module edrv32_dcache (
     wire maintenance_array_start_w;
     wire device_bus_free_w;
     wire device_bus_active_w;
-    wire [31:0] raw_load0_w;
-    wire [31:0] raw_load1_w;
     wire [31:0] raw_return_w;
-    reg [31:0] merged_load0_w;
-    reg [31:0] merged_load1_w;
     reg [31:0] merged_return_w;
     wire [31:0] shifted_load0_w;
     wire [31:0] shifted_load1_w;
     wire [31:0] shifted_return_w;
     wire [31:0] nonlookup_data_w;
+    wire [31:0] nonlookup_data1_w;
     wire lookup_data_select_w;
     wire [63:0] device_shifted_w;
     wire unused_axi_w;
@@ -345,21 +369,19 @@ module edrv32_dcache (
         .device_o(device_w),
         .err_o(pma_err_w)
     );
-    // C-F1 paths 2-4: decode request-tag pairs before the synchronous read.
-    // Each returned pair then selects a four-bit table in a single LUT6.
+    // Six three-bit comparisons and one reduction; no data-way mux follows hit.
     generate
-        for (tag_idx = 0; tag_idx < 9; tag_idx = tag_idx + 1) begin : g_tag_match
-            wire [3:0] select_w;
-            assign select_w = lookup_tag_r[tag_idx*4 +: 4];
-            assign tag0_match_w[tag_idx] = select_w[tag0_w[tag_idx*2 +: 2]];
-            assign tag1_match_w[tag_idx] = select_w[tag1_w[tag_idx*2 +: 2]];
-            always @(posedge clk_i) begin
-                if (lookup_accept_w)
-                    lookup_tag_r[tag_idx*4 +: 4] <=
-                        4'b1 << dc_req_addr_i[14 + tag_idx*2 +: 2];
-            end
+        for (tag_idx = 0; tag_idx < 6; tag_idx = tag_idx + 1) begin : g_tag_match
+            assign tag0_match_w[tag_idx] =
+                tag0_w[tag_idx*3 +: 3] == lookup_tag_r[tag_idx*3 +: 3];
+            assign tag1_match_w[tag_idx] =
+                tag1_w[tag_idx*3 +: 3] == lookup_tag_r[tag_idx*3 +: 3];
         end
     endgenerate
+    always @(posedge clk_i) begin
+        if (lookup_accept_w)
+            lookup_tag_r <= dc_req_addr_i[31:14];
+    end
     assign hit0_w = lookup_valid0_w && (&tag0_match_w);
     assign hit1_w = lookup_valid1_w && (&tag1_match_w);
     assign hit_w = hit0_w || hit1_w;
@@ -381,43 +403,68 @@ module edrv32_dcache (
     assign dc_resp_err_o = device_state_r == D_RETURN ? device_err_r :
         (state_r == S_RETURN ? (!killed_r && fill_err_r) :
         pma_result_w);
-    // C-F1 paths 3-4: shift and merge each way before the late tag selection.
-    assign raw_load0_w = addr_r[2] ? data0_w[63:32] : data0_w[31:0];
-    assign raw_load1_w = addr_r[2] ? data1_w[63:32] : data1_w[31:0];
+    // RAM alignment runs in parallel with forwarding control and registered data.
     assign raw_return_w = addr_r[2] ? result_r[63:32] : result_r[31:0];
+    wire [31:0] aligned_ram0_w;
+    wire [31:0] aligned_ram1_w;
+    wire [31:0] aligned_forward_w;
+    wire [31:0] aligned_buffer_w;
+    wire [3:0] aligned_forward_mask_w;
+    wire [3:0] aligned_buffer_mask_w;
+    wire [31:0] forwarded_data_w;
+    wire [31:0] ram_mask_w;
+    assign aligned_ram0_w = shifted_word(data0_w, lookup_byte_select_r);
+    assign aligned_ram1_w = shifted_word(data1_w, lookup_byte_select_r);
+    assign aligned_forward_w = forward_data_r >> {addr_r[1:0], 3'b0};
+    assign aligned_buffer_w = buffer_data_r >> {addr_r[1:0], 3'b0};
+    assign aligned_forward_mask_w = forward_mask_r >> addr_r[1:0];
+    assign aligned_buffer_mask_w = (buffer_mask_r >> addr_r[1:0]) &
+        {4{buffer_valid_r && buffer_addr_r[31:2] == addr_r[31:2]}};
+    genvar forward_byte;
+    generate
+        for (forward_byte = 0; forward_byte < 4;
+            forward_byte = forward_byte + 1) begin : g_forward_byte
+            wire buffer_select_w;
+            wire forward_select_w;
+            assign buffer_select_w = aligned_buffer_mask_w[forward_byte];
+            assign forward_select_w = aligned_forward_mask_w[forward_byte] && !buffer_select_w;
+            assign ram_mask_w[forward_byte*8 +: 8] =
+                {8{!buffer_select_w && !forward_select_w}};
+            assign forwarded_data_w[forward_byte*8 +: 8] =
+                ({8{buffer_select_w}} & aligned_buffer_w[forward_byte*8 +: 8]) |
+                ({8{forward_select_w}} & aligned_forward_w[forward_byte*8 +: 8]);
+        end
+    endgenerate
+    assign shifted_load0_w = (aligned_ram0_w & ram_mask_w) | forwarded_data_w;
+    assign shifted_load1_w = (aligned_ram1_w & ram_mask_w) | forwarded_data_w;
+    // Fill returns are FF-originated and do not consume the DRM timing budget.
     always @(*) begin
-        merged_load0_w = raw_load0_w;
-        merged_load1_w = raw_load1_w;
         merged_return_w = raw_return_w;
         for (byte_idx_w = 0; byte_idx_w < 4; byte_idx_w = byte_idx_w + 1) begin
-            if (forward_mask_r[byte_idx_w]) begin
-                merged_load0_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
-                merged_load1_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
+            if (forward_mask_r[byte_idx_w])
                 merged_return_w[byte_idx_w*8 +: 8] = forward_data_r[byte_idx_w*8 +: 8];
-            end
             if (buffer_valid_r && buffer_addr_r[31:2] == addr_r[31:2] &&
-                buffer_mask_r[byte_idx_w]) begin
-                merged_load0_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
-                merged_load1_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
+                buffer_mask_r[byte_idx_w])
                 merged_return_w[byte_idx_w*8 +: 8] = buffer_data_r[byte_idx_w*8 +: 8];
-            end
         end
     end
-    assign shifted_load0_w = merged_load0_w >> {addr_r[1:0], 3'b0};
-    assign shifted_load1_w = merged_load1_w >> {addr_r[1:0], 3'b0};
     assign shifted_return_w = merged_return_w >> {addr_r[1:0], 3'b0};
     // cpu-spec 4.9: select slow responses independently of tag RAM output.
     // The final cached-way selection and response gating fit one LUT6 per bit.
     assign lookup_data_select_w = !early_response_r &&
         device_state_r != D_RETURN && state_r != S_RETURN;
     assign nonlookup_data_w =
-        ({32{early_response_r}} & early_response_data_r) |
+        ({32{early_response_r}} & early_response_data_r[31:0]) |
         ({32{!early_response_r && device_state_r == D_RETURN}} & device_result_r) |
         ({32{!early_response_r && device_state_r != D_RETURN && state_r == S_RETURN}} &
             shifted_return_w);
-    assign dc_resp_data_o = nonlookup_data_w |
-        ({32{lookup_data_select_w && hit0_w}} & shifted_load0_w) |
-        ({32{lookup_data_select_w && !hit0_w}} & shifted_load1_w);
+    assign nonlookup_data1_w = {32{early_response_r}} & early_response_data_r[63:32];
+    assign dc_resp_way_data_o = {
+        nonlookup_data1_w | ({32{lookup_data_select_w}} & shifted_load1_w),
+        nonlookup_data_w | ({32{lookup_data_select_w}} & shifted_load0_w)};
+    assign dc_resp_way_hit_o = early_response_r ? early_response_way_r :
+        device_state_r == D_RETURN || state_r == S_RETURN || pma_result_w ? 2'b01 :
+        {2{lookup_hit_enable_r}} & {hit1_w, hit0_w};
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
     assign store_result_w = (state_r == S_IDLE && lookup_done_w && !pma_err_w && store_r) ||
                             return_store_w;

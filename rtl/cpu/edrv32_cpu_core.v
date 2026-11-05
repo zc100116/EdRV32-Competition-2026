@@ -27,7 +27,8 @@ module edrv32_cpu_core (
     output wire [1:0] dc_req_size_o,
     input wire dc_req_ready_i,
     input wire dc_resp_valid_i,
-    input wire [31:0] dc_resp_data_i,
+    input wire [63:0] dc_resp_way_data_i,
+    input wire [1:0] dc_resp_way_hit_i,
     input wire dc_resp_err_i,
     input wire dc_resp_device_i,
     output wire dc_kill_o,
@@ -40,8 +41,8 @@ module edrv32_cpu_core (
     // Read-only D-stage cache query (cpu-spec 3.3, 4.10).
     output wire dc_early_valid_o,
     output wire [31:0] dc_early_addr_o,
-    input wire dc_early_hit_i,
-    input wire [31:0] dc_early_data_i,
+    input wire [1:0] dc_early_way_hit_i,
+    input wire [63:0] dc_early_way_data_i,
     // Interrupts, CLINT time and observation.
     input wire irq_meip_i,
     input wire irq_msip_i,
@@ -162,7 +163,8 @@ module edrv32_cpu_core (
     reg e_repair_pending_r;
     reg [3:0] e_repair_mask_r;
     wire e_repair_w;
-    wire [31:0] e_early_result_w;
+    wire [31:0] e_early_result_w [0:1];
+    wire [31:0] m_load_result_w [0:1];
     reg e_swap_r;
     reg m_swap_r;
     reg w_swap_r;
@@ -217,11 +219,29 @@ module edrv32_cpu_core (
             w_rd_r[0] == d_rs1_w[d_map_w[0]] && w_class_r[0] == C_MUL);
     assign dc_early_addr_o = e_forward_w[0] + d_imm_w[d_map_w[0]];
     assign dc_early_valid_o = d_issue_w != 0 && d_early_eligible_w;
-    assign e_early_result_w = e_instr_w[14:12] == 0 ?
-        {{24{dc_early_data_i[7]}}, dc_early_data_i[7:0]} :
-        e_instr_w[14:12] == 1 ? {{16{dc_early_data_i[15]}}, dc_early_data_i[15:0]} :
-        e_instr_w[14:12] == 4 ? {24'b0, dc_early_data_i[7:0]} :
-        e_instr_w[14:12] == 5 ? {16'b0, dc_early_data_i[15:0]} : dc_early_data_i;
+    // Format each way before its late hit selects an operand (cpu-spec 4.9).
+    function [31:0] load_value;
+        input [31:0] data_i;
+        input [2:0] format_i;
+        begin
+            case (format_i)
+                0: load_value = {{24{data_i[7]}}, data_i[7:0]};
+                1: load_value = {{16{data_i[15]}}, data_i[15:0]};
+                4: load_value = {24'b0, data_i[7:0]};
+                5: load_value = {16'b0, data_i[15:0]};
+                default: load_value = data_i;
+            endcase
+        end
+    endfunction
+    genvar load_way;
+    generate
+        for (load_way = 0; load_way < 2; load_way = load_way + 1) begin : g_load_way
+            assign e_early_result_w[load_way] =
+                load_value(dc_early_way_data_i[load_way*32 +: 32], e_instr_w[14:12]);
+            assign m_load_result_w[load_way] =
+                load_value(dc_resp_way_data_i[load_way*32 +: 32], m_instr_r[14:12]);
+        end
+    endgenerate
     assign e_repair_w = e_repair_pending_r && !m_wait_w && !m_redirect_w;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
@@ -231,7 +251,7 @@ module edrv32_cpu_core (
             // A query is usable only in the immediately following E cycle.
             e_early_r <= dc_early_valid_o;
             if (d_issue_w != 0)
-                e_repair_pending_r <= e_early_r && e_advance_w && !dc_early_hit_i &&
+                e_repair_pending_r <= e_early_r && e_advance_w && !(|dc_early_way_hit_i) &&
                     (|e_repair_mask_next_w);
             if (e_repair_w || m_redirect_w || e_flush_w)
                 e_repair_pending_r <= 0;
@@ -616,14 +636,26 @@ module edrv32_cpu_core (
             assign select_w = 7'b1 << source_w;
             assign register_w = d_register_w[d_map_w[forward_operand/2]*2 +
                 forward_operand%2];
-            assign e_forward_w[forward_operand] =
+            wire early_w;
+            wire memory_w;
+            wire [31:0] ready_data_w;
+            assign early_w = e_early_r && e_class_r[0] == C_LOAD;
+            assign memory_w = m_class_r[0] == C_LOAD;
+            // All registered sources are premerged before late E/DRM results.
+            assign ready_data_w =
                 ({32{select_w[0]}} & register_w) |
-                ({32{select_w[1]}} & e_result_w[0]) |
-                ({32{select_w[2]}} & e_result_w[1]) |
-                ({32{select_w[3]}} & m_result_w[0]) |
+                ({32{select_w[3] && !memory_w}} & m_result_w[0]) |
                 ({32{select_w[4]}} & m_result_w[1]) |
                 ({32{select_w[5]}} & w_result_w[0]) |
                 ({32{select_w[6]}} & w_result_w[1]);
+            // No tag-selected data mux precedes this final one-hot merge.
+            assign e_forward_w[forward_operand] = ready_data_w |
+                ({32{select_w[1] && !early_w}} & e_result_w[0]) |
+                ({32{select_w[2]}} & e_result_w[1]) |
+                ({32{select_w[1] && early_w && dc_early_way_hit_i[0]}} & e_early_result_w[0]) |
+                ({32{select_w[1] && early_w && dc_early_way_hit_i[1]}} & e_early_result_w[1]) |
+                ({32{select_w[3] && memory_w && dc_resp_way_hit_i[0]}} & m_load_result_w[0]) |
+                ({32{select_w[3] && memory_w && dc_resp_way_hit_i[1]}} & m_load_result_w[1]);
         end
     endgenerate
     edrv32_cpu_frontend u_frontend (
@@ -1203,8 +1235,8 @@ module edrv32_cpu_core (
                     e_record_r[result_idx][REC_PC_LSB +: 32] + e_imm_r[result_idx];
                 C_JAL, C_JALR: e_result_w[result_idx] = e_record_r[result_idx][REC_PC_LSB +: 32] +
                     32'd4;
-                C_LOAD: e_result_w[result_idx] = result_idx == 0 && e_early_r ?
-                    e_early_result_w : e_operand_a_r[result_idx] + e_imm_r[result_idx];
+                C_LOAD: e_result_w[result_idx] =
+                    e_operand_a_r[result_idx] + e_imm_r[result_idx];
                 C_STORE: e_result_w[result_idx] =
                     e_operand_a_r[result_idx] + e_imm_r[result_idx];
                 C_DIV: e_result_w[result_idx] = div_result_w;
@@ -1214,17 +1246,10 @@ module edrv32_cpu_core (
             if (result_idx == 0) begin
                 if (m_class_r[result_idx] == C_CSR)
                     m_result_w[result_idx] = csr_read_w;
-                if (m_class_r[result_idx] == C_LOAD) begin
-                    case (m_instr_r[14:12])
-                        0: m_result_w[result_idx] =
-                            {{24{dc_resp_data_i[7]}}, dc_resp_data_i[7:0]};
-                        1: m_result_w[result_idx] =
-                            {{16{dc_resp_data_i[15]}}, dc_resp_data_i[15:0]};
-                        4: m_result_w[result_idx] = {24'b0, dc_resp_data_i[7:0]};
-                        5: m_result_w[result_idx] = {16'b0, dc_resp_data_i[15:0]};
-                        default: m_result_w[result_idx] = dc_resp_data_i;
-                    endcase
-                end
+                if (m_class_r[result_idx] == C_LOAD)
+                    m_result_w[result_idx] =
+                        ({32{dc_resp_way_hit_i[0]}} & m_load_result_w[0]) |
+                        ({32{dc_resp_way_hit_i[1]}} & m_load_result_w[1]);
             end
         end
     end

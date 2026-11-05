@@ -7,15 +7,26 @@ module tb;
     logic rst_n_i = 0;
     logic dc_early_valid_i = 0;
     logic [31:0] dc_early_addr_i = 0;
-    logic dc_early_hit_o;
-    logic [31:0] dc_early_data_o;
+    wire dc_early_hit_o;
+    wire [31:0] dc_early_data_o;
+    wire [1:0] dc_early_way_hit_o;
+    wire [63:0] dc_early_way_data_o;
+    assign dc_early_hit_o = |dc_early_way_hit_o;
+    assign dc_early_data_o =
+        ({32{dc_early_way_hit_o[0]}} & dc_early_way_data_o[31:0]) |
+        ({32{dc_early_way_hit_o[1]}} & dc_early_way_data_o[63:32]);
     logic dc_req_valid_i = 0;
     logic [31:0] dc_req_addr_i = 0;
     logic dc_req_store_i = 0;
     logic [1:0] dc_req_size_i = 0;
     logic dc_req_ready_o;
     logic dc_resp_valid_o;
-    logic [31:0] dc_resp_data_o;
+    wire [31:0] dc_resp_data_o;
+    wire [1:0] dc_resp_way_hit_o;
+    wire [63:0] dc_resp_way_data_o;
+    assign dc_resp_data_o =
+        ({32{dc_resp_way_hit_o[0]}} & dc_resp_way_data_o[31:0]) |
+        ({32{dc_resp_way_hit_o[1]}} & dc_resp_way_data_o[63:32]);
     logic dc_resp_err_o;
     logic dc_resp_device_o;
     logic dc_kill_i = 0;
@@ -80,15 +91,16 @@ module tb;
         .rst_sys_dlru_n_i({2{rst_n_i}}),
         .dc_early_valid_i(dc_early_valid_i),
         .dc_early_addr_i(dc_early_addr_i),
-        .dc_early_hit_o(dc_early_hit_o),
-        .dc_early_data_o(dc_early_data_o),
+        .dc_early_way_hit_o(dc_early_way_hit_o),
+        .dc_early_way_data_o(dc_early_way_data_o),
         .dc_req_valid_i(dc_req_valid_i),
         .dc_req_addr_i(dc_req_addr_i),
         .dc_req_store_i(dc_req_store_i),
         .dc_req_size_i(dc_req_size_i),
         .dc_req_ready_o(dc_req_ready_o),
         .dc_resp_valid_o(dc_resp_valid_o),
-        .dc_resp_data_o(dc_resp_data_o),
+        .dc_resp_way_data_o(dc_resp_way_data_o),
+        .dc_resp_way_hit_o(dc_resp_way_hit_o),
         .dc_resp_err_o(dc_resp_err_o),
         .dc_resp_device_o(dc_resp_device_o),
         .dc_kill_i(dc_kill_i),
