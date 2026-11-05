@@ -118,7 +118,6 @@ module edrv32_cpu_predictor (
                 btb_valid_r[update_pc_i[9:3]] <= 1'b1;
                 if (update_type_i == 0) begin
                     history_r <= {history_r[10:0], update_taken_i};
-
                 end
             end
             if (clear_valid_i)
@@ -175,8 +174,8 @@ module edrv32_cpu_predictor (
         .rd_data_o(direction_word_w)
     );
     // cpu-spec 4.4: query tokens retain directions, while training reads current counters.
-    wire [2:0] unused_tournament_w;
-    assign unused_tournament_w = {update_local_history_w[9], chooser_w[0], 1'b0};
+    wire [1:0] unused_tournament_w;
+    assign unused_tournament_w = {update_local_history_w[9], chooser_w[0]};
     wire [9:0] update_local_history_w;
     wire [1:0] local_counter_w [0:1];
     wire [1:0] update_local_counter_w;

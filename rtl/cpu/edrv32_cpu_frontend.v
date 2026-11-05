@@ -293,7 +293,8 @@ module edrv32_cpu_frontend (
             always @(posedge clk_i) begin
                 if (f2_pending_r && ic_resp_valid_i && offset_w < f2_count_w)
                     words_r[entry] <= {f2_global_r[position_w], f2_saved_local_w[position_w],
-                        f2_local_history_r[position_w*10 +: 10], f2_ras_r, f2_history_r, f2_target_r,
+                        f2_local_history_r[position_w*10 +: 10], f2_ras_r,
+                        f2_history_r, f2_target_r,
                         f2_taken_w && {position_w, 1'b0} == f2_position_r,
                         f2_hit_r && {position_w, 1'b0} == f2_position_r,
                         ic_resp_err_i, f2_pc_r[31:3], position_w, 2'b0,
