@@ -2,6 +2,7 @@
 // Spec: cpu-testplan 3.3-3.7; cpu-spec 5, 7
 // Description: Independent issue/retirement event reference and directed obligations.
 // Clock: clk_sys; included in the real-core B1 harness.
+    `include "edrv32_cpu_tournament_checks.svh"
     string test_id;
     logic [31:0] expected_instret_addr;
     logic [31:0] expected_hpm_addr;
@@ -310,6 +311,15 @@
                     $fdisplay(predictor_descriptor, "direction %0d %h", entry * 2 + 1,
                         u_core.u_frontend.u_predictor.u_direction.memory_r[entry][3:2]);
                 end
+                for (int entry = 0; entry < 256; entry++)
+                    $fdisplay(predictor_descriptor, "local_history %0d %h", entry,
+                        u_core.u_frontend.u_predictor.u_local_history.memory_r[entry]);
+                for (int entry = 0; entry < 1024; entry++)
+                    $fdisplay(predictor_descriptor, "local_direction %0d %h", entry,
+                        u_core.u_frontend.u_predictor.u_local_direction.memory_r[entry]);
+                for (int entry = 0; entry < 4096; entry++)
+                    $fdisplay(predictor_descriptor, "chooser %0d %h", entry,
+                        u_core.u_frontend.u_predictor.u_chooser.memory_r[entry]);
                 $fclose(predictor_descriptor);
             end
             candidate0 = u_core.d_record_w[0][63:32];
@@ -747,6 +757,14 @@
         end
     end
     task automatic check_directed_completion;
+        if (test_id == "b-12") begin
+            if (tournament_corrections == 0 || tournament_agreements == 0 ||
+                tournament_local_wins == 0)
+                $fatal(1, "FAIL B-12 coverage corrections=%0d agreements=%0d local_wins=%0d",
+                    tournament_corrections, tournament_agreements, tournament_local_wins);
+            $display("PASS B-12 corrections=%0d agreements=%0d local_wins=%0d",
+                tournament_corrections, tournament_agreements, tournament_local_wins);
+        end
         if (predictor_probe_enabled && !predictor_probe_seen)
             $fatal(1, "FAIL predictor probe not reached pc=%08x", predictor_probe_pc);
         for (int row = 0; row < observer_rows; row++) begin
