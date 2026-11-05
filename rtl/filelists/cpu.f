@@ -13,3 +13,6 @@
 ../tech/edrv32_mul_s33x33.v
 ../tech/edrv32_ram_cpu_btb.v
 ../tech/edrv32_ram_cpu_direction.v
+../tech/edrv32_ram_cpu_local_history.v
+../tech/edrv32_ram_cpu_local_direction.v
+../tech/edrv32_ram_cpu_chooser.v
