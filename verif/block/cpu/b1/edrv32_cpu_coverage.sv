@@ -152,7 +152,7 @@ module edrv32_cpu_coverage (
                 counts["redirect.e_target"] += 1;
                 counts[$sformatf("redirect.e_target.slot%0d", e_redirect_slot_i)] += 1;
             end
-            if (trace_redirect_stage_i == 3)
+            if (trace_redirect_stage_i == 3 && trace_redirect_cause_i != 0)
                 counts["redirect.m"] += 1;
             if (early_bypass_i)
                 counts["early.bypass.e0"] += 1;

@@ -348,7 +348,9 @@
                 u_core.d_issue_w == 0))
                 $fatal(1, "FAIL ineligible early query condition=%0d issue=%0d cycle=%0d",
                     early_condition, u_core.d_issue_w, cycles);
-            if (u_core.trace_redirect_stage_w != 0 && dc_req_valid &&
+            // A D redirect may be emitted while its JAL has not issued: all E
+            // instructions are then older. E/M redirects have issued age records.
+            if (u_core.trace_redirect_stage_w inside {2, 3} && dc_req_valid &&
                 u_core.e_valid_r[0] && issued_order[u_core.e_record_r[0][31:0]] >
                 issued_order[u_core.trace_redirect_pc_w])
                 $fatal(1, "FAIL wrong-path E request pc=%08x redirect=%08x cycle=%0d",
@@ -379,7 +381,8 @@
             reference_events[14] = int'(reference_dc_expect && !dc_resp_valid &&
                 !dc_resp_device && !dc_kill);
             reference_events[15] = int'(dc_wb_event);
-            reference_events[16] = int'(u_core.trace_redirect_stage_w != 0);
+            reference_events[16] = int'(u_core.trace_redirect_stage_w == 1 ||
+                u_core.trace_redirect_cause_w != 0);
             reference_ic_expect = ic_req_valid && ic_req_ready;
             reference_dc_expect = dc_req_valid && dc_req_ready;
             if (!reference_inhibit[2] && !(u_core.trace_valid_w[0] &&
