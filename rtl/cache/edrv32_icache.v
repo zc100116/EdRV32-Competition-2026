@@ -158,6 +158,8 @@ module edrv32_icache (
     wire cacheable_w;
     wire device_unused_w;
     wire pma_err_w;
+    (* keep = 1 *) wire [1:0] tag0_half_hit_w /* synthesis syn_keep=1 */;
+    (* keep = 1 *) wire [1:0] tag1_half_hit_w /* synthesis syn_keep=1 */;
     wire hit0_w;
     wire hit1_w;
     wire hit_w;
@@ -187,8 +189,14 @@ module edrv32_icache (
     assign lookup_valid0_w = |(lookup_valid0_bank_r & lookup_bank_r);
     assign lookup_valid1_w = |(lookup_valid1_bank_r & lookup_bank_r);
     assign lookup_lru_w = |(lookup_lru_bank_r & lookup_bank_r);
-    assign hit0_w = lookup_valid0_w && tag0_w == addr_r[31:14];
-    assign hit1_w = lookup_valid1_w && tag1_w == addr_r[31:14];
+    // cpu-spec 4.9: each nine-bit compare takes two LUT levels; combine the
+    // halves and way validity in one LUT before the response/data selection.
+    assign tag0_half_hit_w[0] = tag0_w[8:0] == addr_r[22:14];
+    assign tag0_half_hit_w[1] = tag0_w[17:9] == addr_r[31:23];
+    assign tag1_half_hit_w[0] = tag1_w[8:0] == addr_r[22:14];
+    assign tag1_half_hit_w[1] = tag1_w[17:9] == addr_r[31:23];
+    assign hit0_w = lookup_valid0_w && (&tag0_half_hit_w);
+    assign hit1_w = lookup_valid1_w && (&tag1_half_hit_w);
     assign hit_w = hit0_w || hit1_w;
     assign lookup_hit_w = state_r == S_IDLE && lookup_valid_r &&
         !pma_err_r && cacheable_r && hit_w;
