@@ -142,7 +142,7 @@ I$ 和 D$ 位于 CPU 核与 sys_xbar 之间，属于 clk_sys 域：
 | 情况 | 时序 |
 |---|---|
 | load 命中 | 请求被接受的下一个周期 `dc_resp_valid_i = 1`，`dc_resp_data_i` 为按地址移到低位的数据；每周期可以接受一个新请求 |
-| 提前查询（cpu-spec 4.10） | `dc_early_valid_i` 有效的周期用 `dc_early_addr_i` 读 tag 和数据 RAM，下一周期给出 `dc_early_hit_o` / `dc_early_data_o`；普通请求、缺失处理和维护操作优先占用读口，被占用时 hit 为 0。不改变 LRU、填充、写缓冲、缺失状态机。写缓冲或 M 级已接受的 store 中有同一个字、缺失、设备或非缓存、PMA 错误、未对齐时 hit 为 0。成功且对应的 load 在下一周期发出普通请求时，M 级响应使用寄存的提前结果，不再读 RAM。没有握手，`dc_kill_o` 不影响提前结果，由 core 丢弃 |
+| 提前查询（cpu-spec 4.10） | `dc_early_valid_i` 有效的周期用 `dc_early_addr_i` 读 tag 和数据 RAM，下一周期给出 `dc_early_hit_o` / `dc_early_data_o`；普通请求、缺失处理和维护操作优先占用读口，被占用时 hit 为 0。不改变 LRU、填充、写缓冲、缺失状态机。写缓冲或 M 级已接受的 store 中有同一个字、缺失、设备或非缓存时 hit 为 0；不检查对齐（未对齐 load 由 core 在 M 级报异常）。成功且对应的 load 在下一周期发出普通请求时，M 级响应使用寄存的提前结果，不再读 RAM。没有握手，`dc_kill_o` 不影响提前结果，由 core 丢弃 |
 | store 命中 | 下一个周期 `dc_resp_valid_i = 1`，表示 tag 检查通过；数据在 `dc_commit_o` 时进入写缓冲 |
 | 写缓冲 | 1 项，保存地址、32 位数据、4 位字节使能；进入后的下一个周期通过数据 RAM 的写口写入并置脏位。写入与接收新一项可以在同一周期完成，因此连续提交的 store 不停顿 |
 | 写缓冲旁路 | load 的字地址与写缓冲中的地址相同时，返回数据按字节使能合并写缓冲中的字节 |
