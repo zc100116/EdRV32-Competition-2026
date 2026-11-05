@@ -230,6 +230,18 @@ module tb;
             end
         end else if (axi_bvalid_i && axi_bready_o) axi_bvalid_i <= 0;
     end
+    task automatic check_replicas;
+        for (int i=0;i<512;i++) begin
+            if (dut.u_tag0.memory_r[i] !== dut.u_early_tag0.memory_r[i] ||
+                dut.u_tag1.memory_r[i] !== dut.u_early_tag1.memory_r[i])
+                $fatal(1,"FAIL replica tag/valid/dirty group=%0d",i);
+        end
+        for (int i=0;i<2048;i++) begin
+            if (dut.u_data0.memory_r[i] !== dut.u_early_data0.memory_r[i] ||
+                dut.u_data1.memory_r[i] !== dut.u_early_data1.memory_r[i])
+                $fatal(1,"FAIL replica data/byte-enable word=%0d",i);
+        end
+    endtask
     task automatic access_word(input logic [31:0] addr, input logic store_access,
                                input logic [1:0] size, input logic [31:0] data);
         step(); dc_req_valid_i = 1; dc_req_addr_i = addr;
@@ -249,6 +261,7 @@ module tb;
             tick(); step(); dc_commit_i = 0;
         end
         tick();
+        check_replicas();
     endtask
     task automatic maintenance(input logic [2:0] cmd, input logic [31:0] addr,
                                input logic [31:0] size);
@@ -269,6 +282,7 @@ module tb;
                          cmd, addr, size, int'(($time-started-4)/10),
                          wb_bursts-before_bursts, wb_bus_cycles-before_bus_cycles);
         end
+        check_replicas();
     endtask
     // Compare externally visible bus traces with/without discarded early queries.
     logic compare_active = 0;
@@ -367,8 +381,8 @@ module tb;
         step(); dc_req_valid_i=1; dc_req_store_i=0; dc_req_size_i=2;
         dc_req_addr_i=32'h10001000; dc_early_addr_i=32'h10009000;
         #1;
-        if (!dut.early_promote_w || dut.read_addr_w != 11'h200)
-            $fatal(1,"FAIL early promotion did not free RAM port");
+        if (!dut.early_promote_w || !dut.early_read_w)
+            $fatal(1,"FAIL early promotion/concurrent query");
         tick();
         if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef || !dc_early_hit_o)
             $fatal(1,"FAIL early chain first response/second query");
@@ -377,11 +391,19 @@ module tb;
         if (!dc_resp_valid_o || dc_resp_data_o!=32'h9abc)
             $fatal(1,"FAIL early chain second response");
         step(); dc_req_valid_i=0; dc_commit_i=0; tick();
-        // A normal store wins the port, and pending stores forbid early same-word data.
+        // A normal request and a different-word early query read concurrently.
+        step(); dc_req_valid_i=1; dc_req_store_i=0; dc_req_addr_i=32'h10001000;
+        dc_early_valid_i=1; dc_early_addr_i=32'h10009000;
+        tick();
+        if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef ||
+            !dc_early_hit_o || dc_early_data_o!=32'h9abc)
+            $fatal(1,"FAIL independent main/early RAM read");
+        step(); dc_req_valid_i=0; dc_early_valid_i=0; tick();
+        // Pending stores and buffered writes still forbid early same-word data.
         step(); dc_req_valid_i=1; dc_req_store_i=1; dc_req_addr_i=32'h10001000;
         dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
         tick();
-        if (dc_early_hit_o) $fatal(1,"FAIL ordinary request priority");
+        if (dc_early_hit_o) $fatal(1,"FAIL accepted same-word store conflict");
         step(); dc_req_valid_i=0;
         tick();
         if (dc_early_hit_o) $fatal(1,"FAIL pending store early conflict");
@@ -580,6 +602,7 @@ module tb;
             tick();
         end
         check_early_queries();
+        check_replicas();
         $display("PASS cache_dcache WB events=%0d", wb_events); $finish;
     end
 endmodule

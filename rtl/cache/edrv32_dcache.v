@@ -85,6 +85,11 @@ module edrv32_dcache (
     reg [7:0] early_byte_select_r;
     reg [7:0] lookup_byte_select_r;
     wire early_hit_enable_w;
+    wire [18:0] early_tag0_w;
+    wire [1:0] unused_early_dirty_w;
+    wire [18:0] early_tag1_w;
+    wire [63:0] early_data0_w;
+    wire [63:0] early_data1_w;
     wire early_read_w;
     wire early_cacheable_w;
     wire unused_early_device_w;
@@ -108,20 +113,18 @@ module edrv32_dcache (
         (buffer_valid_r && buffer_addr_r[31:2] == dc_early_addr_i[31:2]) ||
         (store_pending_r && store_addr_r[31:2] == dc_early_addr_i[31:2]) ||
         (lookup_valid_r && store_r && addr_r[31:2] == dc_early_addr_i[31:2]);
-    assign early_read_w = dc_early_valid_i && state_r == S_IDLE &&
-        device_state_r == D_IDLE && !maintenance_r && !maintenance_array_start_w &&
-        !lookup_accept_w && early_cacheable_w &&
-        !early_conflict_w && (!lookup_valid_r || lookup_done_w);
+    // cache-spec 2.2/5.2: replicas always read independently of main-array traffic.
+    assign early_read_w = dc_early_valid_i;
     // Equality chooses speculative data even when invalid; only hit grants its use.
     // Six LUT6 comparisons and one reduction precede the final way/source selection.
-    assign early_hit0_w = tag0_w[17:0] == early_tag_r;
-    assign early_hit1_w = tag1_w[17:0] == early_tag_r;
-    assign early_hit_enable_w = early_valid_r &&
+    assign early_hit0_w = early_tag0_w[17:0] == early_tag_r;
+    assign early_hit1_w = early_tag1_w[17:0] == early_tag_r;
+    assign early_hit_enable_w = early_valid_r && !maintenance_r && !maintenance_start_w &&
         !(buffer_valid_r && buffer_addr_r[31:2] == early_addr_r[31:2]) &&
         !(store_pending_r && store_addr_r[31:2] == early_addr_r[31:2]) &&
         !(lookup_valid_r && store_r && addr_r[31:2] == early_addr_r[31:2]);
     assign dc_early_way_hit_o = {2{early_hit_enable_w}} &
-        {tag1_w[19] && early_hit1_w, tag0_w[19] && early_hit0_w};
+        {early_tag1_w[18] && early_hit1_w, early_tag0_w[18] && early_hit0_w};
     // One-hot byte positions are prepared before the synchronous RAM edge.
     // Align both ways independently; tag comparison never selects these data.
     function [31:0] shifted_word;
@@ -142,8 +145,8 @@ module edrv32_dcache (
             end
         end
     endfunction
-    assign early_shift0_w = shifted_word(data0_w, early_byte_select_r);
-    assign early_shift1_w = shifted_word(data1_w, early_byte_select_r);
+    assign early_shift0_w = shifted_word(early_data0_w, early_byte_select_r);
+    assign early_shift1_w = shifted_word(early_data1_w, early_byte_select_r);
     assign dc_early_way_data_o = {early_shift1_w, early_shift0_w};
     assign early_promote_w = accept_w && !dc_req_store_i && (|dc_early_way_hit_o) &&
         dc_req_addr_i == early_addr_r;
@@ -153,7 +156,8 @@ module edrv32_dcache (
             early_valid_r <= 0;
             early_response_r <= 0;
         end else begin
-            early_valid_r <= early_read_w;
+            early_valid_r <= dc_early_valid_i && early_cacheable_w && !early_conflict_w &&
+                !maintenance_r && !maintenance_start_w;
             early_response_r <= early_promote_w;
         end
     end
@@ -495,9 +499,8 @@ module edrv32_dcache (
     assign read_addr_w = state_r == S_WB_READ ? {victim_idx_r, beat_r} :
         scan_read_w ? {scan_read_idx_w, 2'b0} :
         state_r == S_REPLAY ? addr_r[13:3] :
-        early_read_w ? dc_early_addr_i[13:3] : dc_req_addr_i[13:3];
-    assign ram_read_w = early_read_w ||
-        (lookup_accept_w && !maintenance_r && !maintenance_array_start_w &&
+        dc_req_addr_i[13:3];
+    assign ram_read_w = (lookup_accept_w && !maintenance_r && !maintenance_array_start_w &&
                         !request_device_w) || state_r == S_REPLAY ||
                         state_r == S_WB_READ || scan_read_w;
     // cache-spec 5.4: prefetch the next group while checking both current tags.
@@ -577,6 +580,15 @@ module edrv32_dcache (
         .rd_addr_i(read_addr_w[10:2]),
         .rd_data_o(tag0_w)
     );
+    edrv32_ram_dcache_tag u_early_tag0 (
+        .clk_i(clk_i),
+        .wr_en_i(tag_update_w[0]),
+        .wr_addr_i(tag_update_idx_w),
+        .wr_data_i(tag_update0_w),
+        .rd_en_i(early_read_w),
+        .rd_addr_i(dc_early_addr_i[13:5]),
+        .rd_data_o({early_tag0_w[18], unused_early_dirty_w[0], early_tag0_w[17:0]})
+    );
     edrv32_ram_dcache_data u_data0 (
         .clk_i(clk_i),
         .wr_en_i((buffer_valid_r && buffer_way_r == 1'b0) ||
@@ -588,6 +600,17 @@ module edrv32_dcache (
         .rd_addr_i(read_addr_w),
         .rd_data_o(data0_w)
     );
+    edrv32_ram_dcache_data u_early_data0 (
+        .clk_i(clk_i),
+        .wr_en_i((buffer_valid_r && buffer_way_r == 1'b0) ||
+                    (fill_write_w && victim_r == 1'b0)),
+        .wr_addr_i(write_addr_w),
+        .wr_data_i(write_data_w),
+        .wr_byte_en_i(write_mask_w),
+        .rd_en_i(early_read_w),
+        .rd_addr_i(dc_early_addr_i[13:3]),
+        .rd_data_o(early_data0_w)
+    );
     edrv32_ram_dcache_tag u_tag1 (
         .clk_i(clk_i),
         .wr_en_i(tag_update_w[1]),
@@ -596,6 +619,15 @@ module edrv32_dcache (
         .rd_en_i(ram_read_w && state_r != S_WB_READ),
         .rd_addr_i(read_addr_w[10:2]),
         .rd_data_o(tag1_w)
+    );
+    edrv32_ram_dcache_tag u_early_tag1 (
+        .clk_i(clk_i),
+        .wr_en_i(tag_update_w[1]),
+        .wr_addr_i(tag_update_idx_w),
+        .wr_data_i(tag_update1_w),
+        .rd_en_i(early_read_w),
+        .rd_addr_i(dc_early_addr_i[13:5]),
+        .rd_data_o({early_tag1_w[18], unused_early_dirty_w[1], early_tag1_w[17:0]})
     );
     edrv32_ram_dcache_data u_data1 (
         .clk_i(clk_i),
@@ -607,6 +639,17 @@ module edrv32_dcache (
         .rd_en_i(ram_read_w),
         .rd_addr_i(read_addr_w),
         .rd_data_o(data1_w)
+    );
+    edrv32_ram_dcache_data u_early_data1 (
+        .clk_i(clk_i),
+        .wr_en_i((buffer_valid_r && buffer_way_r == 1'b1) ||
+                    (fill_write_w && victim_r == 1'b1)),
+        .wr_addr_i(write_addr_w),
+        .wr_data_i(write_data_w),
+        .wr_byte_en_i(write_mask_w),
+        .rd_en_i(early_read_w),
+        .rd_addr_i(dc_early_addr_i[13:3]),
+        .rd_data_o(early_data1_w)
     );
     // Payload registers deliberately have no reset (cache-spec 5.5).
     always @(posedge clk_i) begin
@@ -816,7 +859,7 @@ module edrv32_dcache (
                 (early_promote_w && dc_req_addr_i[13:9] == bank[4:0]);
             assign lru_set_w = (lookup_bank_r[bank] &&
                 ((state_r == S_IDLE && lookup_done_w && hit0_w) || (tag_write_w && !victim_r))) ||
-                (early_promote_w && dc_req_addr_i[13:9] == bank[4:0] && early_hit0_w);
+                (early_promote_w && dc_req_addr_i[13:9] == bank[4:0] && dc_early_way_hit_o[0]);
             assign rst_dlru_n_w = rst_sys_dlru_n_i[bank/16];
             always @(posedge clk_i) begin
                 lookup_lru_bank_r[bank] <= state_r == S_IDLE && lookup_done_w && hit_w &&
