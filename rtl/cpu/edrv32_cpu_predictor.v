@@ -54,7 +54,11 @@ module edrv32_cpu_predictor (
     wire [6:0] query_idx_w;
     wire [11:0] direction_idx_w;
     wire [1:0] ras_top_w;
-    wire [31:0] branch_pc_w;
+    wire [31:0] branch_return_pc_w;
+    wire [31:0] group_return_pc_w;
+    (* keep = 1 *) wire [1:0] tag_half_hit_w /* synthesis syn_keep=1 */;
+    wire position_hit_w;
+    wire direction_taken_w;
     wire [1:0] restore_ptr_w;
     wire [2:0] restore_count_w;
     wire [1:0] restore_pop_ptr_w;
@@ -63,16 +67,25 @@ module edrv32_cpu_predictor (
     assign unused_query_w = {query_pc_i[1], update_pc_i[1], direction_w[0]};
     genvar ras_idx;
     assign query_idx_w = query_pc_i[9:3];
-    assign branch_pc_w = {query_pc_i[31:3], {btb_data_w[3], 1'b0}, 1'b0};
+    // cpu-spec 4.9: the LUTRAM position selects precomputed return addresses.
+    // In particular it must not start a carry into the RAS write data.
+    assign group_return_pc_w = {query_pc_i[31:3] + 29'd1, 3'b0};
+    assign branch_return_pc_w = btb_data_w[3] ? group_return_pc_w :
+        {query_pc_i[31:3], 3'b100};
     // The word address is independent of BTB; its position selects a counter after both reads.
     assign direction_idx_w = {query_pc_i[13:3] ^ history_r[11:1],
         btb_data_w[3] ^ history_r[0]};
     assign direction_w = direction_idx_w[0] ? direction_word_w[3:2] : direction_word_w[1:0];
-    assign predict_hit_o = btb_valid_r[query_idx_w] &&
-        btb_data_w[57:36] == query_pc_i[31:10] &&
-        {btb_data_w[3], 1'b0} >= query_pc_i[2:1];
-    assign predict_taken_o = predict_hit_o &&
-        (btb_data_w[2:0] != 0 || direction_w[1]);
+    // Two parallel eleven-bit compares leave one LUT for valid/position/direction.
+    // Retain the halves so mapping cannot serialize equality and prediction tests.
+    assign tag_half_hit_w[0] = btb_data_w[46:36] == query_pc_i[20:10];
+    assign tag_half_hit_w[1] = btb_data_w[57:47] == query_pc_i[31:21];
+    assign position_hit_w = {btb_data_w[3], 1'b0} >= query_pc_i[2:1];
+    assign direction_taken_w = btb_data_w[2:0] != 0 || direction_w[1];
+    // Keep the independent tests parallel up to the final prediction decision.
+    assign predict_hit_o = btb_valid_r[query_idx_w] && (&tag_half_hit_w) && position_hit_w;
+    assign predict_taken_o = btb_valid_r[query_idx_w] && (&tag_half_hit_w) &&
+        position_hit_w && direction_taken_w;
     assign ras_top_w = ras_ptr_r - 1'b1;
     assign predict_target_o = btb_data_w[2:0] == 4 && ras_count_r != 0 ?
         ras_data_r[ras_top_w * 32 +: 32] : btb_data_w[35:4];
@@ -167,8 +180,7 @@ module edrv32_cpu_predictor (
                     ras_data_r[ras_idx*32 +: 32] <= restore_link_w ?
                         restore_return_pc_i : restore_ras_i[31:0];
                 else if (!restore_valid_i && query_link_w)
-                    ras_data_r[ras_idx*32 +: 32] <= branch_pc_w +
-                        32'd4;
+                    ras_data_r[ras_idx*32 +: 32] <= branch_return_pc_w;
             end
         end
     endgenerate

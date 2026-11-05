@@ -52,6 +52,8 @@ module edrv32_icache (
     reg lookup_valid_r;
     reg [31:0] addr_r;
     reg cacheable_r;
+    reg response_lookup_r;
+    reg response_pma_err_r;
     wire lookup_valid0_w;
     wire lookup_valid1_w;
     wire lookup_lru_w;
@@ -195,8 +197,8 @@ module edrv32_icache (
                             (!lookup_valid_r || pma_err_r || (cacheable_r && hit_w));
     assign accept_w = ic_req_valid_i && ic_req_ready_o;
     assign ic_resp_valid_o =
-        ((state_r == S_IDLE && lookup_valid_r && (pma_err_r || (cacheable_r && hit_w))) ||
-            (state_r == S_RETURN && !killed_r));
+        response_pma_err_r || (response_lookup_r && hit_w) ||
+        (state_r == S_RETURN && !killed_r);
     assign ic_resp_data_o = state_r == S_RETURN ? result_r : (hit0_w ? data0_w : data1_w);
     assign ic_resp_err_o = state_r == S_RETURN ? fill_err_r : pma_err_r;
     assign ic_inv_done_o = inv_done_r;
@@ -246,6 +248,18 @@ module edrv32_icache (
         .rd_addr_i(ic_req_addr_i[13:3]),
         .rd_data_o(data1_w)
     );
+    // cache-spec 5.1 / cpu-spec 4.9: qualify the synchronous tag result at its
+    // launching edge. An accepted lookup always occupies S_IDLE next cycle;
+    // misses clear these pulses while retaining their refill ownership.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            response_lookup_r <= 0;
+            response_pma_err_r <= 0;
+        end else begin
+            response_lookup_r <= accept_w && cacheable_w && !pma_err_w;
+            response_pma_err_r <= accept_w && pma_err_w;
+        end
+    end
     always @(posedge clk_i) begin
         if (accept_w) begin
             addr_r <= ic_req_addr_i;
