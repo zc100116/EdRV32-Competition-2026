@@ -8,14 +8,23 @@ module edrv32_cpu_early_tb;
     logic rst_n = 0;
     logic early_valid = 0;
     logic [31:0] early_addr = 0;
-    logic early_hit;
-    logic [31:0] early_data;
+    wire early_hit;
+    assign early_hit = |early_way_hit;
+    wire [31:0] early_data;
+    wire [1:0] early_way_hit;
+    wire [63:0] early_way_data;
+    assign early_data = ({32{early_way_hit[0]}} & early_way_data[31:0]) |
+        ({32{early_way_hit[1]}} & early_way_data[63:32]);
     logic req_valid = 0;
     logic [31:0] req_addr = 0;
     logic req_store = 0;
     logic ready;
     logic resp_valid;
-    logic [31:0] resp_data;
+    wire [31:0] resp_data;
+    wire [1:0] resp_way_hit;
+    wire [63:0] resp_way_data;
+    assign resp_data = ({32{resp_way_hit[0]}} & resp_way_data[31:0]) |
+        ({32{resp_way_hit[1]}} & resp_way_data[63:32]);
     logic resp_err;
     logic unused_device;
     logic kill = 0;
@@ -32,15 +41,16 @@ module edrv32_cpu_early_tb;
         .rst_n_i(rst_n),
         .dc_early_valid_i(early_valid),
         .dc_early_addr_i(early_addr),
-        .dc_early_hit_o(early_hit),
-        .dc_early_data_o(early_data),
+        .dc_early_way_hit_o(early_way_hit),
+        .dc_early_way_data_o(early_way_data),
         .dc_req_valid_i(req_valid),
         .dc_req_addr_i(req_addr),
         .dc_req_store_i(req_store),
         .dc_req_size_i(2'd2),
         .dc_req_ready_o(ready),
         .dc_resp_valid_o(resp_valid),
-        .dc_resp_data_o(resp_data),
+        .dc_resp_way_data_o(resp_way_data),
+        .dc_resp_way_hit_o(resp_way_hit),
         .dc_resp_err_o(resp_err),
         .dc_resp_device_o(unused_device),
         .dc_kill_i(kill),
@@ -105,7 +115,7 @@ module edrv32_cpu_early_tb;
             $fatal(1, "FAIL speculative miss allocated a transaction");
         u_model.early_miss_enabled = 0;
         u_model.forced_ready_low = 1;
-        expect_query(0, 1);
+        expect_query(1, 0);
         u_model.forced_ready_low = 0;
         u_model.early_fail_pct = 100;
         // The random sample is registered; one clock establishes the setting.
@@ -142,7 +152,7 @@ module edrv32_cpu_early_tb;
             buffer_valid || device_accesses != 0 ||
             read_data(BASE, 2) != 32'h55667788)
             $fatal(1, "FAIL killed speculative query changed architectural state");
-        $display("PASS early model: reuse, port/miss/device/buffer/store failures, speculation");
+        $display("PASS early model: reuse, injected/miss/device/buffer/store failures, speculation");
         $finish;
     end
 endmodule

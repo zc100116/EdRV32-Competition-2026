@@ -10,8 +10,11 @@ module edrv32_cpu_b1_tb;
     logic [31:0] ic_req_addr;
     logic ic_kill;
     logic ic_inv;
-    logic unused_early_hit;
-    logic [31:0] unused_early_data;
+    wire [31:0] unused_early_data;
+    wire [1:0] unused_early_way_hit;
+    wire [63:0] unused_early_way_data;
+    assign unused_early_data = ({32{unused_early_way_hit[0]}} & unused_early_way_data[31:0]) |
+        ({32{unused_early_way_hit[1]}} & unused_early_way_data[63:32]);
     wire unused_early_failure_w = &{1'b0, u_dc_model.early_failure_r};
     logic dc_req_valid;
     logic [31:0] dc_req_addr;
@@ -30,7 +33,11 @@ module edrv32_cpu_b1_tb;
     logic ic_inv_done;
     logic dc_req_ready;
     logic dc_resp_valid;
-    logic [31:0] dc_resp_data;
+    wire [31:0] dc_resp_data;
+    wire [1:0] dc_resp_way_hit;
+    wire [63:0] dc_resp_way_data;
+    assign dc_resp_data = ({32{dc_resp_way_hit[0]}} & dc_resp_way_data[31:0]) |
+        ({32{dc_resp_way_hit[1]}} & dc_resp_way_data[63:32]);
     logic dc_resp_err;
     logic dc_resp_device;
     logic dc_fence_done;
@@ -66,7 +73,8 @@ module edrv32_cpu_b1_tb;
         .ic_inv_done_i(ic_inv_done),
         .dc_req_ready_i(dc_req_ready),
         .dc_resp_valid_i(dc_resp_valid),
-        .dc_resp_data_i(dc_resp_data),
+        .dc_resp_way_data_i(dc_resp_way_data),
+        .dc_resp_way_hit_i(dc_resp_way_hit),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(dc_resp_device),
         .dc_fence_done_i(dc_fence_done),
@@ -102,15 +110,16 @@ module edrv32_cpu_b1_tb;
         .rst_n_i(rst_n),
         .dc_early_valid_i(1'b0),
         .dc_early_addr_i(32'b0),
-        .dc_early_hit_o(unused_early_hit),
-        .dc_early_data_o(unused_early_data),
+        .dc_early_way_hit_o(unused_early_way_hit),
+        .dc_early_way_data_o(unused_early_way_data),
         .dc_req_valid_i(dc_req_valid),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
         .dc_req_size_i(dc_req_size),
         .dc_req_ready_o(dc_req_ready),
         .dc_resp_valid_o(dc_resp_valid),
-        .dc_resp_data_o(dc_resp_data),
+        .dc_resp_way_data_o(dc_resp_way_data),
+        .dc_resp_way_hit_o(dc_resp_way_hit),
         .dc_resp_err_o(dc_resp_err),
         .dc_resp_device_o(dc_resp_device),
         .dc_kill_i(dc_kill),

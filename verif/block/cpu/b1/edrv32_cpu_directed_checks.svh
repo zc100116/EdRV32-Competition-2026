@@ -136,6 +136,7 @@
     bit cold_jal_flushed[logic [31:0]];
     logic cold_slot0_redirect;
     assign cold_slot0_redirect = u_core.d_count_w != 0 &&
+        !u_core.d_redirected_r && !u_core.d_redirect_r &&
         !u_core.d_record_w[0][99] &&
         u_core.d_record_w[0][38:32] == 7'h6f;
     logic observed_e_slot;
@@ -369,8 +370,7 @@
             end
             if (u_core.d_issue_w == 1 && !cold_slot0_redirect && reference_pair_reason > 0)
                 reference_events[reference_pair_reason + 4] = 1;
-            // The documented stall reason also covers early failure repair and
-            // excludes a comparison branch accepted by 4.11 without a D stall.
+            // The documented stall reason also covers early failure repair.
             reference_events[9] = int'(u_core.trace_stall_cause_w == 1);
             reference_events[10] = int'(u_core.e_valid_r[0] &&
                 u_core.e_record_r[0][38:32] == 7'h33 && u_core.e_record_r[0][63:57] == 1 &&
@@ -462,7 +462,7 @@
                     (u_core.d_count_w != 0 && u_core.d_issue_w == 0);
                 expected_debug[14] = u_core.m_wait_w;
                 expected_debug[15] = u_core.fetch_wait_w;
-                expected_debug[16] = u_core.trace_redirect_stage_w inside {2, 3};
+                expected_debug[16] = u_core.trace_redirect_stage_w == 2;
                 expected_debug[17] = u_core.trace_redirect_stage_w == 1;
                 expected_debug[18] = u_core.m_trap_w;
                 expected_debug[20:19] = 2'(observer_retire);
@@ -483,7 +483,8 @@
                             bit_index, cycles, expected_debug[bit_index], debug[bit_index]);
                 end
             end
-            if (test_id == "p-01" && cold_slot0_redirect && u_core.d_count_w >= 2) begin
+            if (test_id == "p-01" && cold_slot0_redirect &&
+                u_core.d_issue_w != 0 && u_core.d_count_w >= 2) begin
                 if (u_core.d_issue_w != 1)
                     $fatal(1, "FAIL cold slot0 JAL issued younger slot cycle=%0d", cycles);
                 if (u_core.d_target_w != u_core.d_record_w[1][31:0])
@@ -606,17 +607,17 @@
                             obligation_pc[row], debug[23:21], cold_slot0_redirect ? 0 : 3);
                     obligation_seen[row]++;
                 end
-                if (obligation_kind[row] inside {5, 6, 11} &&
+                if (obligation_kind[row] inside {5, 6} &&
                     u_core.trace_redirect_pc_w == obligation_pc[row] &&
                     int'(u_core.trace_redirect_stage_w) ==
-                    (obligation_kind[row] == 5 ? 2 : (obligation_kind[row] == 6 ? 1 : 3))) begin
+                    (obligation_kind[row] == 5 ? 2 : 1)) begin
                     if (int'(u_core.trace_redirect_cause_w) == obligation_arg1[row] ||
                         obligation_kind[row] == 6)
                         obligation_redirect_seen[row] = 1;
                 end
                 // Measure from the labelled instruction's D -> E transition, not
                 // from current E/D records: the redirect now comes from a register.
-                if (obligation_kind[row] inside {5, 6, 11}) begin
+                if (obligation_kind[row] inside {5, 6}) begin
                     for (int slot = 0; slot < 2; slot++) begin
                         if (int'(u_core.d_issue_w) > slot &&
                             u_core.d_record_w[slot][31:0] == obligation_pc[row]) begin
@@ -633,8 +634,7 @@
                             $fatal(1, "FAIL missing registered redirect pc=%08x stage-kind=%0d",
                                 obligation_pc[row], obligation_kind[row]);
                         // Penalty excludes the clock in which the source issues.
-                        expected_pipe = obligation_kind[row] == 5 ? 4 :
-                            (obligation_kind[row] == 6 ? 3 : 5);
+                        expected_pipe = obligation_kind[row] == 5 ? 4 : 3;
                         if (cycles-redirect_start[row]-1 != expected_pipe)
                             $fatal(1,
                                 "FAIL redirect penalty pc=%08x expected=%0d actual=%0d cycle=%0d",
@@ -727,14 +727,12 @@
                         if (obligation_kind[row] == 2) begin
                             if (obligation_producer_cycle[row] < 0 ||
                                 cycles - obligation_producer_cycle[row] < obligation_arg0[row])
-                                $fatal(1, {"FAIL result latency pc=%08x expected=%0d ",
-                                    "actual=%0d cycle=%0d"},
+                                $fatal(1, "FAIL result latency pc=%08x expected=%0d actual=%0d cycle=%0d",
                                     obligation_pc[row], obligation_arg0[row],
                                     cycles-obligation_producer_cycle[row], cycles);
                             if (obligation_arg1[row] == 0 &&
                                 cycles-obligation_producer_cycle[row] != obligation_arg0[row])
-                                $fatal(1, {"FAIL consumer latency pc=%08x expected=%0d ",
-                                    "actual=%0d cycle=%0d"},
+                                $fatal(1, "FAIL consumer latency pc=%08x expected=%0d actual=%0d cycle=%0d",
                                     obligation_pc[row], obligation_arg0[row],
                                     cycles-obligation_producer_cycle[row], cycles);
                             obligation_seen[row]++;

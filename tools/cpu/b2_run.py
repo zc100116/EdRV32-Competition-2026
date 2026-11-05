@@ -108,16 +108,16 @@ def run(args):
         if not crc_ok:
             result.returncode = 1
         if args.check_cycles:
-            # Report 2026-11-02-perf-cpu-predictor-pipe1: specification-index
-            # V3s, BTB/PHT/RAS=128/4096/4, GCC15.2 tuned, ten iterations.
-            predicted = 2058075
-            limit = predicted * 105 // 100
+            # v0.17 S2 model, GCC15.2 tuned, ten iterations.
+            # docs/design/2026-11-05-cpu-v017-model.md (T-CPU-N-MODEL).
+            predicted = 1868156
+            limit = (predicted * 105 + 99) // 100
             window = re.search(r'B2_WINDOW window=0 cycles=(\d+)', output)
             cycles = int(window[1])
             passed = cycles <= limit
             summary = (f'B2_R05_CYCLES {"PASS" if passed else "FAIL"} '
-                       f'actual={cycles} model_V3s_128_4096={predicted} '
-                       f'limit={limit} source=2026-11-02-perf-cpu-predictor-pipe1')
+                       f'actual={cycles} model_S2={predicted} '
+                       f'limit={limit} source=2026-11-05-cpu-v017-model')
             print(summary)
             output += summary + '\n'
             if not passed:
@@ -130,7 +130,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('test', choices=['cpu_smoke', 'r01', 'r02', 'r03', 'r04', 'r05'])
     parser.add_argument('--check-cycles', action='store_true',
-                        help='R-05 perf: assert GCC15.2 tuned V3s 128/4096 report limit')
+                        help='R-05 perf: assert GCC15.2 tuned v0.17 S2 model limit')
     parser.add_argument('--read-latency', type=int, default=2,
                         help='AR-to-first-R latency in cycles (minimum 2)')
     parser.add_argument('--max-cycles', type=int, default=100000000)

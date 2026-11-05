@@ -32,7 +32,6 @@ def main():
     assert all(value == 1 for key, value in counts.items() if key.startswith('pair.'))
     assert all(value == 1 for key, value in counts.items() if key.startswith('exception.'))
     assert counts['redirect.e_direction'] == 3 and counts['redirect.e_target'] == 2
-    assert counts['redirect.m'] == 1
     assert counts['redirect.exception'] == 14 and counts['redirect.interrupt'] == 1
     assert counts['stall.csr'] == 2 and counts['stall.multiply'] == 1
     assert counts['irq.normal'] == 1 and counts['irq.divide'] == 2

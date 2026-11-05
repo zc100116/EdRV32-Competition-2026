@@ -95,7 +95,6 @@ module edrv32_cpu_frontend (
     wire request_space_w;
     wire [31:0] sequential_pc_w;
     (* keep = 1 *) wire [31:0] default_pc_w /* synthesis syn_keep=1 */;
-    wire [2:0] unused_ib_free_count_w;
     wire ib_one_free_w;
     wire ib_two_free_w;
     wire buffered_space_w;
@@ -185,7 +184,6 @@ module edrv32_cpu_frontend (
         .push_data_i(push_data_w),
         .push_index_hi_i(push_index_hi_w),
         .index_hi_o(decode_index_hi_o),
-        .free_count_o(unused_ib_free_count_w),
         .pop_count_i(decode_pop_count_i),
         .data_o(decode_data_o),
         .operand_addr_o(decode_operand_addr_o),
@@ -216,22 +214,22 @@ module edrv32_cpu_frontend (
             // the fanout of the selects feeding the IB record write mux.
             for (slice = 0; slice < 19; slice = slice + 1) begin : g_slice
                 localparam WIDTH = slice == 18 ? 4 : 8;
-                reg [1:0] read_ptr_r_copy /* synthesis syn_preserve=1 */;
-                reg [2:0] count_r_copy /* synthesis syn_preserve=1 */;
+                reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
+                reg [2:0] count_copy_r /* synthesis syn_preserve=1 */;
                 wire [1:0] read_w;
-                assign read_w = read_ptr_r_copy + slot[1:0];
-                assign stream_w[slot][slice*8 +: WIDTH] = count_r_copy > slot ?
+                assign read_w = read_ptr_copy_r + slot[1:0];
+                assign stream_w[slot][slice*8 +: WIDTH] = count_copy_r > slot ?
                     words_r[read_w][slice*8 +: WIDTH] : response_w[slice*8 +: WIDTH];
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i) begin
-                        read_ptr_r_copy <= 0;
-                        count_r_copy <= 0;
+                        read_ptr_copy_r <= 0;
+                        count_copy_r <= 0;
                     end else if (redirect_w) begin
-                        read_ptr_r_copy <= 0;
-                        count_r_copy <= 0;
+                        read_ptr_copy_r <= 0;
+                        count_copy_r <= 0;
                     end else begin
-                        read_ptr_r_copy <= read_ptr_r + push_count_w;
-                        count_r_copy <= remaining_w;
+                        read_ptr_copy_r <= read_ptr_r + push_count_w;
+                        count_copy_r <= remaining_w;
                     end
                 end
             end

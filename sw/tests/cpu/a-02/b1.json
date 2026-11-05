@@ -14,10 +14,6 @@
       "reason": 2
     },
     {
-      "early_failure": "fallback_ready",
-      "reason": 1
-    },
-    {
       "early_failure": "fallback_byte",
       "reason": 4
     },
@@ -44,8 +40,8 @@
     {
       "producer": "fallback_ready",
       "consumer": "fallback_ready_consumer",
-      "latency": 1,
-      "gap": 0
+      "latency": 2,
+      "gap": 1
     },
     {
       "producer": "fallback_byte",

@@ -1,4 +1,4 @@
-/* File: b-10/main.S; Spec: cpu-spec 4.4, 4.10-4.11; cpu-testplan B-10.
+/* File: b-10/main.S; Spec: cpu-spec 4.4, 4.10; cpu-testplan B-10.
  * Description: Directed architectural and timing obligations for v0.17.
  * Clock: clk_sys. */
 #include "test.h"

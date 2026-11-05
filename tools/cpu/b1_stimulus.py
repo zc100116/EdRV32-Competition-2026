@@ -50,7 +50,7 @@ def plusargs(config, names, out):
                 obligations.append((9, address(case['pc0'], names),
                                     address(case['pc1'], names), 0, 0))
         elif 'redirect' in case:
-            obligations.append(({'E': 5, 'D': 6, 'M': 11}[case['stage']],
+            obligations.append(({'E': 5, 'D': 6}[case['stage']],
                                 names[case['redirect']], names[case['target']],
                                 case['slot'], case['cause']))
         elif 'fault' in case:

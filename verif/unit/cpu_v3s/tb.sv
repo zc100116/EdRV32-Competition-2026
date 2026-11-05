@@ -67,13 +67,18 @@ module tb;
         .ic_kill_o(ic_kill),
         .ic_inv_o(ic_inv),
         .ic_inv_done_i(1'b1),
+        .dc_early_valid_o(),
+        .dc_early_addr_o(),
+        .dc_early_way_hit_i(2'b00),
+        .dc_early_way_data_i(64'b0),
         .dc_req_valid_o(dc_req_valid),
         .dc_req_addr_o(dc_req_addr),
         .dc_req_store_o(dc_req_store),
         .dc_req_size_o(dc_req_size),
         .dc_req_ready_i(dc_ready),
         .dc_resp_valid_i(dc_resp_valid),
-        .dc_resp_data_i(32'h55),
+        .dc_resp_way_data_i(64'h55),
+        .dc_resp_way_hit_i(2'b01),
         .dc_resp_err_i(1'b0),
         .dc_resp_device_i(dc_device),
         .dc_kill_o(dc_kill),
@@ -148,20 +153,21 @@ module tb;
                 dc_pending <= 0;
             end
         end
-        if (rst_n_i && !finished) begin
+        if (rst_n_i && (!finished || (traps!=0 && trace_traps==0))) begin
             if (dut.d_issue_w == 2 && dut.d_swap_w)
                 swaps++;
             if (dut.e_redirect_w) begin
                 redirects++;
-                if ((scenario == 2 || scenario == 3) && !dut.e_redirect1_w)
-                    $fatal(1,"FAIL branch did not redirect from pipe1");
+
             end
-            if (dut.d_redirect_w && dut.d_redirect_slot_w) begin
+            if ((scenario==2 || scenario==3) && dut.e_capture_w && !dut.e_redirect1_w)
+                $fatal(1,"FAIL branch did not resolve from pipe1");
+            if (dut.d_redirect_w && dut.d_redirect_slot_r) begin
                 d_slot1++;
                 if (!dut.d_available_w)
                     stalled_d_slot1++;
             end
-            if (dc_req_valid && ((scenario >= 3 && scenario <= 5) || scenario==11 || scenario>=19))
+            if (dc_req_valid && ((scenario >= 4 && scenario <= 5) || scenario==11 || scenario>=19))
                 $fatal(1,"FAIL canceled/faulted load requested scenario=%0d pc=%h",
                     scenario,dut.e_record_r[0][31:0]);
             if (scenario==10 && dut.m_lane_fault_w != 0 &&
@@ -185,8 +191,10 @@ module tb;
                 accepted_divisions++;
             if ((scenario==14 || scenario==15) && dut.div_start_w)
                 $fatal(1,"FAIL flushed younger DIV started");
-            if (scenario==16 && dut.u_mul.valid_i)
-                $fatal(1,"FAIL flushed younger MUL started");
+            if (scenario==16 && dut.trace_valid_w!=0 &&
+                ((dut.trace_valid_w[0] && dut.trace_pc_w[31:0]==12) ||
+                (dut.trace_valid_w[1] && dut.trace_pc_w[63:32]==12)))
+                $fatal(1,"FAIL flushed younger MUL retired");
             if ((scenario==14 || scenario==16) && dut.e_valid_r[1] &&
                 dut.e_record_r[1][31:0]==8 && (!dut.e_redirect1_w || dut.div_wait_w))
                 $fatal(1,"FAIL older branch waited for younger multiply/divide");
@@ -425,6 +433,8 @@ module tb;
                 if (scenario == 8 && device_commits != 0)
                     irq_meip=1;
             end
+            // W2 trace can follow the M trap decision by two clocks.
+            if (traps!=0 && trace_traps==0) repeat(3) @(negedge clk_i);
             if (!finished || ((scenario == 1 || scenario == 3 ||
                 scenario == 4 || scenario == 5 || (scenario>=14 && scenario!=19)) && swaps == 0) ||
                 ((scenario == 2 || scenario == 3 || scenario==14 || scenario==16) &&

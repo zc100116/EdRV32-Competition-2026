@@ -219,15 +219,15 @@ module edrv32_cpu_b2_tb;
         if (rst_n_i) begin
             cycles_r <= cycles_r + 1;
             if (r04_check) begin
-                if (u_dut.u_core.trace_redirect_stage_w inside {2, 3})
+                if (u_dut.u_core.trace_redirect_stage_w == 2)
                     r04_penalty[u_dut.u_core.trace_redirect_pc_w] =
-                        u_dut.u_core.trace_redirect_stage_w == 3 ? 5 : 4;
+                        4;
                 for (int lane = 0; lane < 2; lane++) begin
                     if (u_dut.u_core.trace_valid_w[lane] &&
                         u_dut.u_core.trace_instr_w[lane*32 +: 32] == 32'h00000463) begin
                         if (r04_branches > 256 &&
                             u_dut.u_core.trace_pc_w[lane*32 +: 32] == r04_previous_pc + 8) begin
-                            if (!r04_penalty.exists(r04_previous_pc))
+                            if (r04_penalty.exists(r04_previous_pc)==0)
                                 $fatal(1, "FAIL R-04 missing redirect pc=%08x", r04_previous_pc);
                             r04_expected = r04_penalty[r04_previous_pc];
                             r04_actual = int'(cycles_r-r04_previous_cycle)-1;
@@ -274,7 +274,7 @@ module edrv32_cpu_b2_tb;
                     if (r04_check) begin
                         if (r04_checked == 0)
                             $fatal(1, "FAIL R-04 no warmed misprediction measured");
-                        $display("PASS R-04 penalty E=4 M=5 checked=%0d", r04_checked);
+                        $display("PASS R-04 penalty E=4 checked=%0d", r04_checked);
                     end
                     $display("B2_TOTAL mcycle=%0d minstret=%0d no-C latency=%0d",
                                 u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,

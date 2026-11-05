@@ -1,4 +1,4 @@
-/* File: a-02/main.S; Spec: cpu-spec 4.4, 4.10-4.11; cpu-testplan A-02.
+/* File: a-02/main.S; Spec: cpu-spec 4.4, 4.10; cpu-testplan A-02.
  * Description: Directed architectural and timing obligations for v0.17.
  * Clock: clk_sys. */
 #include "test.h"
@@ -10,11 +10,15 @@
     sw a1, 8(a4)
     sw a1, 12(a4)
     fence
+    nop
+    nop
+    .balign 8
 fallback_miss:
     lw a3, 0(a4)
 fallback_miss_consumer:
     addi a5, a3, 1
     CHECK a5, 0x11223345
+    .balign 8
 fallback_ready:
     lw a3, 4(a4)
 fallback_ready_consumer:
@@ -27,6 +31,9 @@ held_byte_store:
     nop
     nop
     nop
+    nop
+    nop
+    .balign 8
 fallback_byte:
     lw a3, 8(a4)
 fallback_byte_consumer:
@@ -34,6 +41,7 @@ fallback_byte_consumer:
     CHECK a5, 0x11225545
     li a2, 0x6677
     sh a2, 14(a4)
+    .balign 8
 fallback_half:
     lw a3, 12(a4)
 fallback_half_consumer:
@@ -48,6 +56,7 @@ accepted_store_older:
     sw a1, 16(a4)
     addi a6, zero, 1
     addi a7, zero, 1
+    .balign 8
 fallback_store:
     lw a3, 16(a4)
 fallback_store_consumer:
@@ -64,6 +73,9 @@ fallback_unaligned_resume:
     la a4, device_registers
     li a1, 23
     sw a1, 0(a4)
+    nop
+    nop
+    .balign 8
 fallback_device:
     lw a3, 0(a4)
 fallback_device_consumer:

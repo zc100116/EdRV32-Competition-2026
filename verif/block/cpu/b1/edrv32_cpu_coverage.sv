@@ -40,7 +40,7 @@ module edrv32_cpu_coverage (
     int causes[9] = '{0, 1, 2, 3, 4, 5, 6, 7, 11};
     string early_conditions[9] = '{"older_slot", "e", "m_alu", "m_load", "m_csr",
         "multiply", "w", "x0", "register_file"};
-    string early_failures[5] = '{"port", "miss", "device", "write_buffer", "accepted_store"};
+    string early_failures[6] = '{"injected", "miss", "device", "write_buffer", "accepted_store", "maintenance"};
     string path = "build/cpu-coverage.json";
     integer descriptor;
     bit first;
@@ -77,7 +77,6 @@ module edrv32_cpu_coverage (
         counts["redirect.e_direction"] = 0;
         counts["redirect.e_target"] = 0;
         counts["redirect.d"] = 0;
-        counts["redirect.m"] = 0;
         counts["early.bypass.e0"] = 0;
         foreach (early_conditions[index])
             counts[{"early.condition.", early_conditions[index]}] = 0;
@@ -152,8 +151,6 @@ module edrv32_cpu_coverage (
                 counts["redirect.e_target"] += 1;
                 counts[$sformatf("redirect.e_target.slot%0d", e_redirect_slot_i)] += 1;
             end
-            if (trace_redirect_stage_i == 3 && trace_redirect_cause_i != 0)
-                counts["redirect.m"] += 1;
             if (early_bypass_i)
                 counts["early.bypass.e0"] += 1;
             if (early_condition_i != 0)

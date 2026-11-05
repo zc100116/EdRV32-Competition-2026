@@ -172,8 +172,7 @@ module edrv32_cpu_coverage_tb;
         irq = 0;
         debug = 0;
         redirect_stage = 3;
-        tick();
-        // A registered system redirect is stage M but is not a 4.11 branch.
+        // Registered M system redirect.
         redirect = 0;
         tick();
         redirect_stage = 0;
@@ -182,7 +181,7 @@ module edrv32_cpu_coverage_tb;
             tick();
         end
         early_condition = 0;
-        for (int index = 1; index <= 5; index++) begin
+        for (int index = 1; index <= 6; index++) begin
             early_failure = 3'(index);
             tick();
         end

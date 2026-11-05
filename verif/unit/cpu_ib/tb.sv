@@ -10,7 +10,6 @@ module tb;
     reg rst_n_i=0;
     reg [1:0] push_count_i=0;
     reg [357:0] push_data_i=0;
-    wire [2:0] free_count_o;
     reg [1:0] pop_count_i=0;
     wire [357:0] data_o;
     wire [1:0] valid_count_o;
@@ -44,7 +43,6 @@ module tb;
         .push_data_i(push_data_i),
         .push_index_hi_i(push_index_hi_i),
         .index_hi_o(index_hi_o),
-        .free_count_o(free_count_o),
         .pop_count_i(pop_count_i),
         .data_o(data_o),
         .operand_addr_o(operand_addr_w),
@@ -59,9 +57,6 @@ module tb;
         begin
             if(count_o!==3'(count) || valid_count_o!==2'(count>=2?2:count))
                 $fatal(1,"FAIL IB count expected=%d actual=%d time=%t",count,count_o,$time);
-            if(free_count_o!==3'(integer'(dut.DEPTH)-count))
-                $fatal(1,"FAIL IB next-cycle free expected=%d actual=%d time=%t",
-                    integer'(dut.DEPTH)-count,free_count_o,$time);
             if ((count>0 && index_hi_o[2:0]!==model_index[0]) ||
                 (count>1 && index_hi_o[5:3]!==model_index[1]))
                 $fatal(1,"FAIL IB index metadata");
@@ -96,12 +91,6 @@ module tb;
             keep_head_i=flush_i && count>0 && (i%2==0);
             keep_pair_i=keep_head_i && count>=2 && (i%3==0);
             #1;
-            if(free_count_o!==3'(space))$fatal(1,"FAIL IB free slots");
-            // U-08: changing same-cycle D consumption cannot create F2 space.
-            pop_count_i=0;#1;
-            if(free_count_o!==3'(space))$fatal(1,"FAIL IB free depends on pop=0");
-            pop_count_i=2'(pops);#1;
-            if(free_count_o!==3'(space))$fatal(1,"FAIL IB free depends on pop");
             if(count==integer'(dut.DEPTH) && pops>0)begin
                 if(pushes!=0)$fatal(1,"FAIL IB full accepts same-cycle slots");
                 delayed_space_seen++;

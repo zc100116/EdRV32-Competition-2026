@@ -88,25 +88,25 @@ Run locally with `flock /tmp/edrv32-sim.lock python3 tools/regress.py smoke
 
 结果延迟为普通 load 2、满足提前地址条件的 load 1、乘法 4、CSR 2。
 P-04 覆盖间隔 0–4；A-01 独立观察基址的生产者阶段，并检查消费者发射间隔。
-B-01/07 的误预测代价为 4，B-03/08 的冷 JAL 代价为 3，L-01 的 M 级代价为 5。
+B-01/07 的误预测代价为 4，B-03/08 的冷 JAL 代价为 3。
 检查按源指令与目标指令的 D→E 周期差减 1 计代价，避免绑定发出脉冲时的 E/D 内容。
 `trace_redirect_stage_w/pc_w` 用于发出脉冲的来源和 PC；槽号按此前的发射记录取得。
-MRET/FENCE.I/WFI 也用 stage=3；M 比较分支覆盖和误预测 HPM 只计有原因编码的脉冲。
+MRET/FENCE.I/WFI 使用 stage=3；分支在 E 级判定。
 同组年轻 load 可以已经请求 D$，但必须 kill、不得 commit/退休；错路 E 级访存不得请求。
 未接受的普通请求在寄存重定向或陷阱冲刷时允许撤销；其余反压周期保持稳定。
 退休追踪在 W2；tohost 结束判定等待对应 store 的退休。debug[11:12] 也对应 W2。
 
 提前查询使用规格 3.3 的四个 `dc_early_*` 端口，没有握手或 size。
 模型下一拍返回查询结果；成功查询供下一拍同地址的普通 load 直接复用，
-同时允许下一次提前查询。失败原因包括读口占用/反压、确定性或随机缺失、设备、
-同字写缓冲和 M 级已接受 store；`+DC_EARLY_FAIL_PCT` 可随机占用读口。
+同时允许普通请求和下一次提前查询独立读取。失败原因包括注入失败、确定性或随机缺失、
+设备、同字写缓冲、M 级已接受 store 和维护；`+DC_EARLY_FAIL_PCT` 可随机注入失败。
 `+DC_EARLY_MISS_ADDR` 配置确定性缺失地址，供 A-02/A-03 的配对运行。
 查询只更新查询结果寄存器，不创建普通事务、写缓冲或设备访问。
 A-02 检查失败原因、回退数据及未对齐 load 陷阱；A-03 要求确实发出错路查询，
 再把错路 load 替为 NOP，比较后续同地址的响应时延、数据、提交、缓冲和设备计数。
 真实 D$ 的 tag/LRU/脏位由 cache 单元测试覆盖。
 
-新增覆盖包括 M 重定向、9 类提前地址来源、5 类提前失败和提前 load 的 E0 旁路，共 86 项。
+覆盖包括系统指令 M 重定向、9 类提前地址来源、6 类提前失败和提前 load 的 E0 旁路，共 86 项。
 独立检查模型和覆盖器（都不读取/实例化 CPU RTL）：
 
 ```sh
@@ -114,5 +114,5 @@ flock /tmp/edrv32-sim.lock python3 verif/block/cpu/b1/early_selftest.py
 flock /tmp/edrv32-sim.lock python3 verif/block/cpu/b1/coverage_selftest.py
 ```
 
-R-04 在 I$ 预热后的相邻分支间测退休间隔，按已寄存的来源检查 E=4 / M=5。
-R-05 的模型上限在收到 N-MODEL 数值前仍保留旧值，测量报告明确标注。
+R-04 在 I$ 预热后的相邻分支间测退休间隔，按已寄存的来源检查 E=4。
+R-05 使用 N-MODEL S2 的 1,868,156 周期预测，105% 上限为 1,961,564。

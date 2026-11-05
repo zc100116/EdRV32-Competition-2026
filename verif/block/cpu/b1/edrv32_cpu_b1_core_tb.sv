@@ -17,8 +17,11 @@ module edrv32_cpu_b1_core_tb;
     logic ic_inv;
     logic dc_early_valid;
     logic [31:0] dc_early_addr;
-    logic dc_early_hit;
-    logic [31:0] dc_early_data;
+    wire dc_early_hit;
+    assign dc_early_hit = |dc_early_way_hit;
+    wire [1:0] dc_early_way_hit;
+    wire [63:0] dc_early_way_data;
+
     logic dc_req_valid;
     logic [31:0] dc_req_addr;
     logic dc_req_store;
@@ -36,7 +39,11 @@ module edrv32_cpu_b1_core_tb;
     logic ic_inv_done;
     logic dc_req_ready;
     logic dc_resp_valid;
-    logic [31:0] dc_resp_data;
+    wire [31:0] dc_resp_data;
+    wire [1:0] dc_resp_way_hit;
+    wire [63:0] dc_resp_way_data;
+    assign dc_resp_data = ({32{dc_resp_way_hit[0]}} & dc_resp_way_data[31:0]) |
+        ({32{dc_resp_way_hit[1]}} & dc_resp_way_data[63:32]);
     logic dc_resp_err;
     logic dc_resp_device;
     logic dc_fence_done;
@@ -56,8 +63,8 @@ module edrv32_cpu_b1_core_tb;
         .ic_inv_o(ic_inv),
         .dc_early_valid_o(dc_early_valid),
         .dc_early_addr_o(dc_early_addr),
-        .dc_early_hit_i(dc_early_hit),
-        .dc_early_data_i(dc_early_data),
+        .dc_early_way_hit_i(dc_early_way_hit),
+        .dc_early_way_data_i(dc_early_way_data),
         .dc_req_valid_o(dc_req_valid),
         .dc_req_addr_o(dc_req_addr),
         .dc_req_store_o(dc_req_store),
@@ -75,7 +82,8 @@ module edrv32_cpu_b1_core_tb;
         .ic_inv_done_i(ic_inv_done),
         .dc_req_ready_i(dc_req_ready),
         .dc_resp_valid_i(dc_resp_valid),
-        .dc_resp_data_i(dc_resp_data),
+        .dc_resp_way_data_i(dc_resp_way_data),
+        .dc_resp_way_hit_i(dc_resp_way_hit),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(dc_resp_device),
         .dc_fence_done_i(dc_fence_done),
@@ -111,15 +119,16 @@ module edrv32_cpu_b1_core_tb;
         .rst_n_i(rst_n),
         .dc_early_valid_i(dc_early_valid),
         .dc_early_addr_i(dc_early_addr),
-        .dc_early_hit_o(dc_early_hit),
-        .dc_early_data_o(dc_early_data),
+        .dc_early_way_hit_o(dc_early_way_hit),
+        .dc_early_way_data_o(dc_early_way_data),
         .dc_req_valid_i(dc_req_valid),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
         .dc_req_size_i(dc_req_size),
         .dc_req_ready_o(dc_req_ready),
         .dc_resp_valid_o(dc_resp_valid),
-        .dc_resp_data_o(dc_resp_data),
+        .dc_resp_way_data_o(dc_resp_way_data),
+        .dc_resp_way_hit_o(dc_resp_way_hit),
         .dc_resp_err_o(dc_resp_err),
         .dc_resp_device_o(dc_resp_device),
         .dc_kill_i(dc_kill),
@@ -153,6 +162,7 @@ module edrv32_cpu_b1_core_tb;
     bit irq_fired[16];
     bit irq_armed[16];
     bit wake_every_wfi;
+    logic [31:0] sleeping_wfi_pc=0;
     bit irq_taken;
     logic [31:0] taken_cause;
     integer dc_error_count = 0;
@@ -221,6 +231,8 @@ module edrv32_cpu_b1_core_tb;
     // Inject between active edges so the next edge samples the precise pipeline window.
     always @(negedge clk) begin
         if (rst_n) begin
+            if (debug[29] && u_core.trace_redirect_stage_w==3)
+                sleeping_wfi_pc=u_core.trace_redirect_pc_w;
             if (irq_taken) begin
                 case (taken_cause)
                     32'h8000000b: scheduled_irq[0] = 0;
@@ -256,8 +268,7 @@ module edrv32_cpu_b1_core_tb;
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         5: irq_armed[index] = u_core.trace_redirect_stage_w == 2 &&
                             u_core.trace_redirect_pc_w == irq_pc[index];
-                        6: irq_armed[index] = debug[29] &&
-                            u_core.m_record_r[0][31:0] == irq_pc[index];
+                        6: irq_armed[index] = debug[29] && sleeping_wfi_pc == irq_pc[index];
                         7: irq_armed[index] = dc_clean_all &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         default: irq_armed[index] = 0;
@@ -272,8 +283,8 @@ module edrv32_cpu_b1_core_tb;
                     end
                 end
             end
-            if (ready_low_enabled && !ready_low_started && u_core.d_count_w != 0 &&
-                u_core.d_record_w[0][31:0] == ready_low_pc) begin
+            if (ready_low_enabled && !ready_low_started && u_core.e_valid_r[0] &&
+                u_core.e_record_r[0][31:0] == ready_low_pc) begin
                 ready_low_remaining = ready_low_cycles;
                 ready_low_started = 1;
             end

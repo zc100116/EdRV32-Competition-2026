@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # File: b2_early_stats.py
-# Spec: cpu-spec 4.10/4.11; T-CPU-N-INT.
-# Description: Count early-load outcomes and LCB issue/recovery in the R-05 window.
+# Spec: cpu-spec 4.10; T-CPU-N-INT.
+# Description: Count early-load outcomes in the R-05 window.
 # Use the working tree or a requested git commit; instrumentation is testbench-only.
 # Clock: none (host tool).
 import argparse
@@ -29,7 +29,6 @@ def main():
                                            cwd=ROOT, text=True)
         return (ROOT / path).read_text()
 
-    core = source('rtl/cpu/edrv32_cpu_core.v')
     subsys = source('rtl/soc/edrv32_cpu_subsys.v')
     early_hit = ('(|u_dut.dc_early_way_hit_w)' if 'dc_early_way_hit_w' in subsys else
                  'u_dut.dc_early_hit_w')
@@ -37,19 +36,7 @@ def main():
     longint unsigned load_issued=0, eligible=0, successes=0;
     longint unsigned fail_port=0, fail_store=0, fail_device=0, fail_miss=0;
     longint unsigned fail_hold=0, fail_maintenance=0, repair_cycles=0;
-    longint unsigned lcb_eligible=0, lcb_issued=0, lcb_mispredict=0;
-    longint unsigned lcb_solo=0, lcb_paired=0;
-    longint unsigned lcb_head_stall=0, lcb_pair_block=0;
     int reason_r=0;
-'''
-    if 'm_lcb_redirect_w' in core:
-        stats += '''
-    longint unsigned stream_index=0;
-    bit lcb_seen[longint unsigned];
-    wire lcb_in_e = |(u_dut.u_core.e_lcb_r & u_dut.u_core.e_valid_r);
-    wire lcb_base_ready = !u_dut.u_core.sleep_r && !u_dut.u_core.backend_redirect_w &&
-        !u_dut.u_core.m_wait_w && !u_dut.u_core.e_repair_pending_r &&
-        (u_dut.u_core.e_valid_r==0 || u_dut.u_core.e_advance_w);
 '''
     stats += '''
     always @(posedge clk_i) begin
@@ -77,36 +64,6 @@ def main():
                     else fail_miss++;
                 end
 '''.replace('EARLY_HIT', early_hit)
-    if 'm_lcb_redirect_w' in core:
-        stats += '''
-                // Queue stream IDs count each qualifying branch once while D is held.
-                for (int slot=0;slot<2;slot++) begin
-                    if (slot<int'(u_dut.u_core.d_count_w) && u_dut.u_core.d_lcb_w[slot] &&
-                        lcb_seen.exists(stream_index+64'(slot))==0) begin
-                        lcb_seen[stream_index+64'(slot)]=1;
-                        lcb_eligible++;
-                    end
-                    if (u_dut.u_core.d_lcb_w[slot] &&
-                        int'(u_dut.u_core.d_issue_w)>slot) begin
-                        lcb_issued++;
-                        if (u_dut.u_core.d_issue_w==1) lcb_solo++;
-                        else lcb_paired++;
-                    end
-                end
-                if (u_dut.u_core.m_lcb_redirect_w) lcb_mispredict++;
-                if (lcb_in_e && lcb_base_ready && u_dut.u_core.d_count_w!=0 &&
-                    u_dut.u_core.d_control_w[0] &&
-                    (!(u_dut.u_core.d_use1_w[0] && u_dut.u_core.d_hazard_w[0]) ||
-                        u_dut.u_core.d_lcb_w[0]) &&
-                    (!(u_dut.u_core.d_use2_w[0] && u_dut.u_core.d_hazard_w[1]) ||
-                        u_dut.u_core.d_lcb_w[0])) lcb_head_stall++;
-                if (lcb_in_e && u_dut.u_core.d_issue_w==1 &&
-                    u_dut.u_core.d_pair_base_w && u_dut.u_core.d_control_w[1] &&
-                    (!(u_dut.u_core.d_use1_w[1] && u_dut.u_core.d_hazard_w[2]) ||
-                        u_dut.u_core.d_lcb_w[1]) &&
-                    (!(u_dut.u_core.d_use2_w[1] && u_dut.u_core.d_hazard_w[3]) ||
-                        u_dut.u_core.d_lcb_w[1])) lcb_pair_block++;
-'''
     stats += '''
             end
             if (u_dut.dc_early_valid_w) begin
@@ -117,12 +74,6 @@ def main():
                 else if (!u_dut.u_dcache.early_read_w) reason_r<=3;
                 else reason_r<=0;
             end
-'''
-    if 'm_lcb_redirect_w' in core:
-        stats += '''
-            if (u_dut.u_core.frontend_redirect_w || u_dut.u_core.frontend_d_redirect_w)
-                stream_index=stream_index+8;
-            else stream_index=stream_index+64'(u_dut.u_core.d_issue_w);
 '''
     stats += '''
         end
@@ -137,8 +88,6 @@ def main():
         $display("EARLY_STATS issued=%0d eligible=%0d success=%0d port=%0d store=%0d device=%0d miss=%0d hold=%0d maintenance=%0d repair_cycles=%0d",
             load_issued,eligible,successes,fail_port,fail_store,fail_device,fail_miss,
             fail_hold,fail_maintenance,repair_cycles);
-        $display("LCB_STATS eligible=%0d issued=%0d mispredict=%0d head_stall=%0d pair_block=%0d solo=%0d paired=%0d",
-            lcb_eligible,lcb_issued,lcb_mispredict,lcb_head_stall,lcb_pair_block,lcb_solo,lcb_paired);
 ''')
     bench.write_text(text)
     sources = []
@@ -171,7 +120,7 @@ def main():
         subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     print(f'SOURCE commit={revision} snapshot={bool(args.commit)}')
     print('\n'.join(line for line in (out / 'run.log').read_text().splitlines()
-                    if any(label in line for label in ('EARLY_STATS', 'LCB_STATS', 'B2_WINDOW'))))
+                    if any(label in line for label in ('EARLY_STATS', 'B2_WINDOW'))))
 
 
 if __name__ == '__main__':

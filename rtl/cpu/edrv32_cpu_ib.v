@@ -12,7 +12,6 @@ module edrv32_cpu_ib (
     input wire [357:0] push_data_i,
     input wire [5:0] push_index_hi_i,
     output wire [5:0] index_hi_o,
-    output wire [2:0] free_count_o,
     // D observes the oldest two records and consumes 0, 1 or 2.
     input wire [1:0] pop_count_i,
     output wire [357:0] data_o,
@@ -49,18 +48,18 @@ module edrv32_cpu_ib (
             for (read_slice = 0; read_slice < 6;
                 read_slice = read_slice + 1) begin : g_read_slice
                 localparam SLICE_BITS = read_slice == 5 ? 19 : 32;
-                reg [1:0] read_ptr_r_copy /* synthesis syn_preserve=1 */;
+                reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
                 wire [1:0] slot_w;
-                assign slot_w = read_ptr_r_copy + SLOT[1:0];
+                assign slot_w = read_ptr_copy_r + SLOT[1:0];
                 assign data_o[read_slot*RECORD_BITS + read_slice*32 +: SLICE_BITS] =
                     entries_r[slot_w][read_slice*32 +: SLICE_BITS];
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i)
-                        read_ptr_r_copy <= 0;
+                        read_ptr_copy_r <= 0;
                     else if (flush_i)
-                        read_ptr_r_copy <= keep_head_i ? read_ptr_r : 2'd0;
+                        read_ptr_copy_r <= keep_head_i ? read_ptr_r : 2'd0;
                     else
-                        read_ptr_r_copy <= read_ptr_r + pop_count_i;
+                        read_ptr_copy_r <= read_ptr_r + pop_count_i;
                 end
             end
         end
@@ -68,18 +67,18 @@ module edrv32_cpu_ib (
             operand_slice = operand_slice + 1) begin : g_operand_read
             localparam SLOT = operand_slice % 2;
             localparam SLICE = operand_slice / 2;
-            reg [1:0] read_ptr_r_copy /* synthesis syn_preserve=1 */;
+            reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
             wire [1:0] slot_w;
-            assign slot_w = read_ptr_r_copy + SLOT[1:0];
+            assign slot_w = read_ptr_copy_r + SLOT[1:0];
             // Record[56:47] is {instruction.rs2, instruction.rs1}.
             assign operand_addr_o[SLICE*20 + SLOT*10 +: 10] = entries_r[slot_w][56:47];
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    read_ptr_r_copy <= 0;
+                    read_ptr_copy_r <= 0;
                 else if (flush_i)
-                    read_ptr_r_copy <= keep_head_i ? read_ptr_r : 2'd0;
+                    read_ptr_copy_r <= keep_head_i ? read_ptr_r : 2'd0;
                 else
-                    read_ptr_r_copy <= read_ptr_r + pop_count_i;
+                    read_ptr_copy_r <= read_ptr_r + pop_count_i;
             end
         end
         // Decode each destination locally instead of a dynamic 716-bit write mux.
@@ -111,8 +110,6 @@ module edrv32_cpu_ib (
         end
     endgenerate
     assign valid_count_o = count_r >= 2 ? 2'd2 : count_r[1:0];
-    // cpu-spec 4.1: only slots empty at cycle start can accept F2 records.
-    assign free_count_o = DEPTH - count_r;
     assign count_o = count_r;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

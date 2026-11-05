@@ -1,4 +1,4 @@
-/* File: a-03/main.S; Spec: cpu-spec 4.4, 4.10-4.11; cpu-testplan A-03.
+/* File: a-03/main.S; Spec: cpu-spec 4.4, 4.10; cpu-testplan A-03.
  * Description: Directed architectural and timing obligations for v0.17.
  * Clock: clk_sys. */
 #include "test.h"

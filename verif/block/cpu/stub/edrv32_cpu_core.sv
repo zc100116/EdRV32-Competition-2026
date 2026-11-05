@@ -33,7 +33,8 @@ module edrv32_cpu_core (
     output logic dc_clean_all_o,
     input logic dc_req_ready_i,
     input logic dc_resp_valid_i,
-    input logic [31:0] dc_resp_data_i,
+    input logic [63:0] dc_resp_way_data_i,
+    input logic [1:0] dc_resp_way_hit_i,
     input logic dc_resp_err_i,
     input logic dc_resp_device_i,
     input logic dc_fence_done_i,
@@ -48,6 +49,9 @@ module edrv32_cpu_core (
     input logic irq_mtip_i,
     input logic [63:0] mtime_i
 );
+    wire [31:0] dc_resp_data_i =
+        ({32{dc_resp_way_hit_i[0]}} & dc_resp_way_data_i[31:0]) |
+        ({32{dc_resp_way_hit_i[1]}} & dc_resp_way_data_i[63:32]);
     // The fixed-table stub does not implement CSR or HPM state.
     wire unused_reset_w = &{1'b0, rst_sys_csr_n_i, rst_sys_counter_n_i};
 
