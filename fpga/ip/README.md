@@ -6,8 +6,8 @@
 |---|---|---|---|---|---|---|
 | `ip_ram_icache_tag` | DRM 简单双口 RAM | 512 × 18 | `edrv32_ram_icache_tag` | I$ ×2 | [ip_ram_icache_tag.md](ip_ram_icache_tag.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
 | `ip_ram_icache_data` | DRM 简单双口 RAM | 2048 × 64 | `edrv32_ram_icache_data` | I$ ×2 | [ip_ram_icache_data.md](ip_ram_icache_data.md) | 32 KiB（用户 2026-10-31 采用），卡 21 重新生成（模块名不变） |
-| `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20 | `edrv32_ram_dcache_tag` | D$ ×2 | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 需重新生成（cache-spec v0.9：{valid, dirty, tag}） |
-| `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 2048 × 64 | `edrv32_ram_dcache_data` | D$ ×2 | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 需重新生成（D$ 32 KiB） |
+| `ip_ram_dcache_tag` | DRM 简单双口 RAM | 512 × 20 | `edrv32_ram_dcache_tag` | D$ ×4（2 路 + 2 份提前查询副本，cache-spec v0.10） | [ip_ram_dcache_tag.md](ip_ram_dcache_tag.md) | 需重新生成（cache-spec v0.9：{valid, dirty, tag}） |
+| `ip_ram_dcache_data` | DRM 简单双口 RAM，字节写使能 | 2048 × 64 | `edrv32_ram_dcache_data` | D$ ×4（2 路 + 2 份提前查询副本） | [ip_ram_dcache_data.md](ip_ram_dcache_data.md) | 需重新生成（D$ 32 KiB） |
 | `ip_mul_s33x33` | APM 乘法器 | 33 × 33 有符号，2 级 | `edrv32_mul_s33x33` | CPU | [ip_mul_s33x33.md](ip_mul_s33x33.md) | 已生成（20261025-01） |
 | `ip_rom_boot` | DRM ROM，带初始化 | 2048 × 64 | `edrv32_rom_boot` | Boot ROM | [ip_rom_boot.md](ip_rom_boot.md) | 已生成（20261025-01） |
 | `ip_ram_sram` | DRM 单口 RAM，字节写使能，可初始化 | 8192 × 64 | `edrv32_ram_sram` | SRAM | [ip_ram_sram.md](ip_ram_sram.md) | 已生成（8192 深，20261027-02） |
