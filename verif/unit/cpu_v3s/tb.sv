@@ -50,6 +50,7 @@ module tb;
     integer accepted_divisions;
     integer stalled_jal0;
     integer deferred_jal_swap;
+    integer retained_jal_mapping;
     integer traps;
     integer trace_traps;
     reg finished;
@@ -167,7 +168,7 @@ module tb;
                 if (!dut.d_available_w)
                     stalled_d_slot1++;
             end
-            if (dc_req_valid && ((scenario >= 4 && scenario <= 5) || scenario==11 || scenario>=19))
+            if (dc_req_valid && ((scenario >= 4 && scenario <= 5) || scenario==11 || (scenario==19 || scenario==20)))
                 $fatal(1,"FAIL canceled/faulted load requested scenario=%0d pc=%h",
                     scenario,dut.e_record_r[0][31:0]);
             if (scenario==10 && dut.m_lane_fault_w != 0 &&
@@ -198,6 +199,12 @@ module tb;
             if ((scenario==14 || scenario==16) && dut.e_valid_r[1] &&
                 dut.e_record_r[1][31:0]==8 && (!dut.e_redirect1_w || dut.div_wait_w))
                 $fatal(1,"FAIL older branch waited for younger multiply/divide");
+            if (scenario==21 && dut.d_redirect_r && !dut.d_redirect_issued_r &&
+                dut.d_record_w[0][31:0]==8 && dut.d_record_w[1][31:0]==12) begin
+                retained_jal_mapping++;
+                if (dut.d_swap_w)
+                    $fatal(1,"FAIL retained slot0 JAL swapped with unissued load");
+            end
             if (scenario==18 && dut.d_redirect_w && dut.d_record_w[0][31:0]==8) begin
                 if (dut.d_issue_w!=0)
                     $fatal(1,"FAIL JAL0 redirect did not overlap backend request stall");
@@ -208,7 +215,7 @@ module tb;
                     $fatal(1,"FAIL retained JAL0 did not swap with its target load");
                 deferred_jal_swap++;
             end
-            if (scenario>=19 && dut.d_issue_w!=0 && dut.d_record_w[0][31:0]==0 &&
+            if ((scenario==19 || scenario==20) && dut.d_issue_w!=0 && dut.d_record_w[0][31:0]==0 &&
                 dut.d_issue_w!=(scenario==19 ? 1 : 2))
                 $fatal(1,"FAIL illegal opcode family pairing");
             if (dut.trace_trap_w) begin
@@ -248,7 +255,7 @@ module tb;
                         dut.m_trap_value_w!=10 || dut.m_commit_w!=0 || dut.div_busy_w)
                         $fatal(1,"FAIL older branch fault started younger DIV");
                     finished=1;
-                end else if (scenario>=19) begin
+                end else if ((scenario==19 || scenario==20)) begin
                     if (dut.m_trap_pc_w!=0 || dut.m_trap_cause_w!=2 ||
                         dut.m_trap_value_w!=memory[0] || dut.m_commit_w!=0)
                         $fatal(1,"FAIL illegal opcode family exception");
@@ -306,14 +313,14 @@ module tb;
     end
     initial begin
         finished=1;
-        for (scenario=1;scenario<=20;scenario++) begin
+        for (scenario=1;scenario<=21;scenario++) begin
             rst_n_i=0;
             repeat(3) @(negedge clk_i);
             for (i=0;i<64;i++) memory[i]=32'h00000013;
             retired=0;redirects=0;swaps=0;d_slot1=0;traps=0;trace_traps=0;
             device_commits=0;irq_meip=0;stalled_d_slot1=0;
             warm_jalr=0;wrong_jalr=0;accepted_divisions=0;
-            stalled_jal0=0;deferred_jal_swap=0;
+            stalled_jal0=0;deferred_jal_swap=0;retained_jal_mapping=0;
             expected_count=3;
             expected_pc[0]=0;expected_pc[1]=4;expected_pc[2]=8;
             case (scenario)
@@ -423,6 +430,14 @@ module tb;
                     memory[1]=32'h00002303;
                     expected_count=0;
                 end
+                21: begin
+                    memory[0]=32'h00002283; // delayed older load holds the cold JAL in D
+                    memory[1]=32'h00700413;
+                    memory[2]=32'h008000ef; // retained head JAL x1,+8
+                    memory[3]=32'h00002303; // adjacent load can execute only on pipe0
+                    memory[4]=32'h00100393;
+                    expected_count=4;expected_pc[3]=16;
+                end
                 default: $fatal(1,"FAIL scenario");
             endcase
             finished=0;rst_n_i=1;cycles=0;
@@ -436,18 +451,19 @@ module tb;
             // W2 trace can follow the M trap decision by two clocks.
             if (traps!=0 && trace_traps==0) repeat(3) @(negedge clk_i);
             if (!finished || ((scenario == 1 || scenario == 3 ||
-                scenario == 4 || scenario == 5 || (scenario>=14 && scenario!=19)) && swaps == 0) ||
+                scenario == 4 || scenario == 5 || (scenario>=14 && scenario<=20 && scenario!=19)) && swaps == 0) ||
                 ((scenario == 2 || scenario == 3 || scenario==14 || scenario==16) &&
                 redirects != 1) ||
                 (scenario == 6 && d_slot1 != 1) ||
                 ((scenario == 4 || scenario == 5 || scenario==7 || scenario==8 ||
-                scenario==10 || scenario==11 || scenario==15 || scenario>=19) && (traps != 1 || trace_traps != 1)) ||
+                scenario==10 || scenario==11 || scenario==15 || (scenario==19 || scenario==20)) && (traps != 1 || trace_traps != 1)) ||
                 ((scenario==7 || scenario==8) && (device_commits != (scenario == 8 ? 1 : 0) ||
                 retired != expected_count)) ||
                 (scenario==9 && (stalled_d_slot1 != 1 || d_slot1 != 1 || redirects != 0)) ||
                 (scenario==12 && warm_jalr==0) || (scenario==13 && wrong_jalr==0) ||
                 (scenario==15 && retired!=2) || (scenario==17 && accepted_divisions!=1) ||
-                (scenario==18 && (stalled_jal0!=1 || deferred_jal_swap!=1)))
+                (scenario==18 && (stalled_jal0!=1 || deferred_jal_swap!=1)) ||
+                (scenario==21 && retained_jal_mapping!=1))
                 $fatal(1,"FAIL coverage scenario=%0d retired=%0d swap=%0d E=%0d D1=%0d trap=%0d",
                     scenario,retired,swaps,redirects,d_slot1,traps);
             $display("PASS V3s scenario=%0d cycles=%0d",scenario,cycles);

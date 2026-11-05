@@ -807,7 +807,10 @@ module edrv32_cpu_core (
     assign d_jal_redirect0_w = !d_redirected_r && d_class_w[0] == C_JAL &&
         !d_record_w[0][REC_PRED_HIT] && !d_record_w[0][REC_FETCH_ERR] &&
         !d_record_w[0][REC_ILLEGAL] && !d_illegal_w[0];
-    assign d_swap_w = d_pair_w && !d_pipe1_w[1] && !d_jal_redirect0_w;
+    // The registered redirect also forces a retained slot-0 JAL to issue alone.
+    // Keep its mapping in slot 0 on that cycle, even if the younger IB entry pairs.
+    assign d_swap_w = d_pair_w && !d_pipe1_w[1] && !d_jal_redirect0_w &&
+        !(d_redirect_r && !d_redirect_issued_r && !d_redirect_slot_w);
     assign d_csr_wait_w = d_class_w[0] == C_CSR &&
         (e_valid_r != 0 || m_valid_r != 0);
     // C-F1 path 3: test E ownership before applying the shared M backpressure.
