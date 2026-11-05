@@ -108,9 +108,9 @@ endmodule
     input wire rd_clk,
     input wire rst,
     input wire wr_en,
-    input wire [10:0] wr_addr,
+    input wire [9:0] wr_addr,
     input wire [3:0] wr_data,
-    input wire [10:0] rd_addr,
+    input wire [9:0] rd_addr,
     output wire [3:0] rd_data
 );
 endmodule

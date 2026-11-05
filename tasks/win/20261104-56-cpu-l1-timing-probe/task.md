@@ -30,7 +30,7 @@ PDS 2022.2-SP6.1，PG2L200H-6 FBB676，与卡 48 相同。
 |---|---|---|---|
 | `ip_ram_icache_tag`、`ip_ram_icache_data`、`ip_ram_dcache_tag`、`ip_ram_dcache_data`、`ip_mul_s33x33` | `fpga/ip/` 下同名 `.md` | 要 | 要 |
 | `ip_lutram_cpu_btb` | R1 检出里的 `fpga/ip/ip_lutram_cpu_btb.md` | 要（**新生成**） | 不要 |
-| `ip_lutram_cpu_direction` | R1 检出里的 `fpga/ip/ip_lutram_cpu_direction.md` | 要（**新生成**，带 `.dat` 初始化文件） | 不要 |
+| `ip_lutram_cpu_direction` | R1 检出里的 `fpga/ip/ip_lutram_cpu_direction.md` | 要（**新生成 1024×4**，带 1024 行 `.dat` 初始化文件；包装把两个 bank 拼成 2048×4，2026-11-05 修订） | 不要 |
 
 前五个 IP 的配置和卡 48 的 B3F 工程完全相同，可以直接复制那边已经生成的 IP。如果分布式 RAM 不提供初始化文件选项，按创建说明停止并回报。
 
