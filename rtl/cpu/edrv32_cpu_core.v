@@ -37,6 +37,11 @@ module edrv32_cpu_core (
     output wire dc_clean_all_o,
     input wire dc_fence_done_i,
     input wire dc_wb_event_i,
+    // Read-only D-stage cache query (cpu-spec 3.3, 4.10).
+    output wire dc_early_valid_o,
+    output wire [31:0] dc_early_addr_o,
+    input wire dc_early_hit_i,
+    input wire [31:0] dc_early_data_i,
     // Interrupts, CLINT time and observation.
     input wire irq_meip_i,
     input wire irq_msip_i,
@@ -112,6 +117,12 @@ module edrv32_cpu_core (
     wire frontend_d_redirect_w;
     wire d_capture_w;
     wire e_capture_w;
+    wire d_early_eligible_w;
+    reg e_early_r;
+    reg e_repair_pending_r;
+    reg [3:0] e_repair_mask_r;
+    wire e_repair_w;
+    wire [31:0] e_early_result_w;
     reg e_swap_r;
     reg m_swap_r;
     reg w_swap_r;
@@ -152,6 +163,56 @@ module edrv32_cpu_core (
     wire [1:0] e_lane_target_match_w;
     wire [1:0] d_map_w;
     reg source_lane_w;
+    // Only registered/architectural producers may feed the D address adder.
+    // The exclusion list is independent of cache hit and current issue handshakes.
+    assign d_early_eligible_w = d_class_w[d_map_w[0]] == C_LOAD &&
+        !(e_valid_r[0] && e_write_r[0] && e_rd_r[0] != 0 &&
+            e_rd_r[0] == d_rs1_w[d_map_w[0]]) &&
+        !(e_valid_r[1] && e_write_r[1] && e_rd_r[1] != 0 &&
+            e_rd_r[1] == d_rs1_w[d_map_w[0]]) &&
+        !(m_valid_r[0] && m_write_r[0] && m_rd_r[0] != 0 &&
+            m_rd_r[0] == d_rs1_w[d_map_w[0]] &&
+            (m_class_r[0] == C_LOAD || m_class_r[0] == C_CSR || m_class_r[0] == C_MUL)) &&
+        !(w_valid_r[0] && w_write_r[0] && w_rd_r[0] != 0 &&
+            w_rd_r[0] == d_rs1_w[d_map_w[0]] && w_class_r[0] == C_MUL);
+    assign dc_early_addr_o = e_forward_w[0] + d_imm_w[d_map_w[0]];
+    assign dc_early_valid_o = d_issue_w != 0 && d_early_eligible_w;
+    assign e_early_result_w = e_instr_w[14:12] == 0 ?
+        {{24{dc_early_data_i[7]}}, dc_early_data_i[7:0]} :
+        e_instr_w[14:12] == 1 ? {{16{dc_early_data_i[15]}}, dc_early_data_i[15:0]} :
+        e_instr_w[14:12] == 4 ? {24'b0, dc_early_data_i[7:0]} :
+        e_instr_w[14:12] == 5 ? {16'b0, dc_early_data_i[15:0]} : dc_early_data_i;
+    assign e_repair_w = e_repair_pending_r && !m_wait_w && !m_redirect_w;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            e_early_r <= 0;
+            e_repair_pending_r <= 0;
+        end else begin
+            // A query is usable only in the immediately following E cycle.
+            e_early_r <= dc_early_valid_o;
+            if (d_issue_w != 0)
+                e_repair_pending_r <= e_early_r && e_advance_w && !dc_early_hit_i &&
+                    (|e_repair_mask_next_w);
+            if (e_repair_w || m_redirect_w || e_flush_w)
+                e_repair_pending_r <= 0;
+        end
+    end
+    wire [3:0] e_repair_mask_next_w;
+    genvar repair_operand;
+    generate
+        for (repair_operand = 0; repair_operand < 4;
+            repair_operand = repair_operand + 1) begin : g_repair_mask
+            assign e_repair_mask_next_w[repair_operand] =
+                d_bypass_w[d_map_w[repair_operand/2]*2 + repair_operand%2] == 1 &&
+                (repair_operand%2 == 0 ? d_use1_w[d_map_w[repair_operand/2]] :
+                d_use2_w[d_map_w[repair_operand/2]]) &&
+                (repair_operand/2 == 0 || d_issue_w == 2);
+        end
+    endgenerate
+    always @(posedge clk_i) begin
+        if (d_issue_w != 0)
+            e_repair_mask_r <= e_repair_mask_next_w;
+    end
     assign e_old_w = e_swap_r;
     assign e_young_w = !e_swap_r;
     assign m_old_w = m_swap_r;
@@ -313,7 +374,8 @@ module edrv32_cpu_core (
                     (!(e_valid_r_copy && m_valid_r[0] && m_wait_dc_r) || dc_resp_valid_i);
             end else begin : g_advance
                 assign e_advance_copy_w[enable_group-5] = e_valid_r_copy &&
-                    !m_wait_w && !m_redirect_w && !e_flush_w && !div_wait_w &&
+                    !m_wait_w && !m_redirect_w && !e_flush_w &&
+                    !e_repair_pending_r && !div_wait_w &&
                     (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
             end
         end
@@ -678,7 +740,8 @@ module edrv32_cpu_core (
                     e_rd_r[source_lane_w] != 0 &&
                     e_rd_r[source_lane_w] == d_source_w[operand_idx]) begin
                     d_bypass_w[operand_idx] = 3'd1 + {2'b0, source_lane_w};
-                    d_wait_kind_w[operand_idx] = e_class_r[source_lane_w] == C_LOAD ? 3'd1 :
+                    d_wait_kind_w[operand_idx] =
+                        e_class_r[source_lane_w] == C_LOAD && !e_early_r ? 3'd1 :
                         e_class_r[source_lane_w] == C_MUL ? 3'd2 :
                         e_class_r[source_lane_w] == C_CSR ? 3'd3 : 3'd0;
                 end
@@ -707,7 +770,7 @@ module edrv32_cpu_core (
         (e_valid_r != 0 || m_valid_r != 0);
     // C-F1 path 3: test E ownership before applying the shared M backpressure.
     assign d_available_w = !m_wait_w && !backend_redirect_w && !sleep_r &&
-        !(d_redirect_r && d_redirect_issued_r) &&
+        !(d_redirect_r && d_redirect_issued_r) && !e_repair_pending_r &&
         (e_valid_r == 0 || (!div_wait_w &&
         (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i)));
     always @(*) begin
@@ -817,7 +880,7 @@ module edrv32_cpu_core (
         e_operand_a_r[0] == e_jalr_expected_odd_r)) : e_pc_target_match_r;
     // A younger M fault can wait for its older load; E is already on the discarded path.
     assign e_resolve_w = (|e_valid_r) && !e_resolved_r && !m_redirect_w &&
-        m_lane_fault_w == 0 && !e_flush_w && !div_wait_w;
+        m_lane_fault_w == 0 && !e_flush_w && !e_repair_pending_r && !div_wait_w;
     assign e_redirect0_w = e_resolve_w && e_valid_r[0] && e_lane_redirect_needed_w[0] &&
         !(e_swap_r && (e_older_fault_w ||
         (e_valid_r[1] && e_lane_redirect_needed_w[1])));
@@ -838,10 +901,11 @@ module edrv32_cpu_core (
         (e_lane_exception_w[1] || e_lane_jump_fault_w[1] || e_lane_redirect_needed_w[1]);
     assign div_start_w = e_valid_r[0] && !e_div_cancel_w &&
         e_class_r[0] == C_DIV && !div_started_r &&
-        m_valid_r == 0 && w_valid_r == 0 && !m_redirect_w;
+        m_valid_r == 0 && w_valid_r == 0 && !m_redirect_w && !e_repair_pending_r;
     assign div_wait_w = e_valid_r[0] && !e_div_cancel_w &&
         e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
-    assign e_advance_w = (|e_valid_r) && !m_wait_w && !m_redirect_w && !e_flush_w && !div_wait_w &&
+    assign e_advance_w = (|e_valid_r) && !m_wait_w && !m_redirect_w && !e_flush_w &&
+                    !e_repair_pending_r && !div_wait_w &&
         (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
     // C-F1 path 3: M's memory-wait class is prepared in E. Apply the two
     // late D-cache handshakes directly to the operand load, before valid issue.
@@ -850,14 +914,15 @@ module edrv32_cpu_core (
         ((m_class_r[0] == C_FENCE && !dc_fence_done_i) ||
         (m_class_r[0] == C_FENCE_I && !(m_fence_phase_r && ic_inv_done_i)));
     // Prepare early hold reasons in parallel; the late hit only releases one mux.
-    assign e_payload_block_w = div_wait_w || m_wait_other_w ||
+    assign e_payload_block_w = e_repair_pending_r || div_wait_w || m_wait_other_w ||
         (e_memory_w && !e_exception_r && !e_misaligned_w && !dc_req_ready_i);
     assign e_payload_hold_w = (|e_valid_r) && e_payload_block_w;
     assign e_payload_wait_dc_w = (|e_valid_r) && m_valid_r[0] && m_wait_dc_r;
     assign e_operand_load_w = !e_payload_hold_w && (!e_payload_wait_dc_w || dc_resp_valid_i);
     // spec 3.3: valid is independent of ready; acceptance advances E into M.
     assign dc_req_valid_o = (|e_valid_r) && !m_wait_w && !m_redirect_w &&
-        !e_flush_w && !div_wait_w && e_memory_w && !e_exception_r && !e_misaligned_w;
+        !e_flush_w && !e_repair_pending_r && !div_wait_w &&
+        e_memory_w && !e_exception_r && !e_misaligned_w;
     assign dc_req_addr_o = e_address_w;
     assign dc_req_store_o = e_class_r[0] == C_STORE;
     assign dc_req_size_o = e_instr_w[13:12];
@@ -999,7 +1064,9 @@ module edrv32_cpu_core (
                     e_record_r[result_idx][REC_PC_LSB +: 32] + e_imm_r[result_idx];
                 C_JAL, C_JALR: e_result_w[result_idx] = e_record_r[result_idx][REC_PC_LSB +: 32] +
                     32'd4;
-                C_LOAD, C_STORE: e_result_w[result_idx] =
+                C_LOAD: e_result_w[result_idx] = result_idx == 0 && e_early_r ?
+                    e_early_result_w : e_operand_a_r[result_idx] + e_imm_r[result_idx];
+                C_STORE: e_result_w[result_idx] =
                     e_operand_a_r[result_idx] + e_imm_r[result_idx];
                 C_DIV: e_result_w[result_idx] = div_result_w;
                 default: e_result_w[result_idx] = e_alu_w[result_idx];
@@ -1160,6 +1227,18 @@ module edrv32_cpu_core (
                 e_branch_a_r[stage_idx] <= e_forward_w[stage_idx*2];
                 e_branch_b_r[stage_idx] <= e_forward_w[stage_idx*2+1];
             end
+            // Failed early queries repair consumers using the ordinary M response.
+            // The registered pending flag suppresses execution throughout this edge.
+            if (e_repair_w) begin
+                if (e_repair_mask_r[stage_idx*2]) begin
+                    e_operand_a_r[stage_idx] <= m_result_w[0];
+                    e_branch_a_r[stage_idx] <= m_result_w[0];
+                end
+                if (e_repair_mask_r[stage_idx*2+1]) begin
+                    e_operand_b_r[stage_idx] <= m_result_w[0];
+                    e_branch_b_r[stage_idx] <= m_result_w[0];
+                end
+            end
             // A live stalled E holds all payload; otherwise validity owns its use.
             // Keep the late D$ handshake out of issue/hazard/redirect selection.
             if (e_operand_load_copy_w[stage_idx+2]) begin
@@ -1300,7 +1379,7 @@ module edrv32_cpu_core (
         event_count_w[13:12] = {1'b0, d_issue_w == 1 && d_pair_reason_w == 3};
         event_count_w[15:14] = {1'b0, d_issue_w == 1 && d_pair_reason_w == 4};
         event_count_w[17:16] = {1'b0, d_count_w != 0 && e_valid_r[0] &&
-            e_class_r[0] == C_LOAD && ((d_use1_w[0] && d_rs1_w[0] == e_rd_r[0]) ||
+            e_class_r[0] == C_LOAD && !e_early_r && ((d_use1_w[0] && d_rs1_w[0] == e_rd_r[0]) ||
             (d_use2_w[0] && d_rs2_w[0] == e_rd_r[0])) && e_rd_r[0] != 0};
         event_count_w[19:18] = {1'b0, div_wait_w};
         event_count_w[21:20] = {1'b0, m_wait_w && dc_resp_device_i};

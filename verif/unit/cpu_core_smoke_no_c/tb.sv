@@ -21,6 +21,8 @@ module tb;
     wire ic_kill_o;
     wire ic_inv_o;
     reg ic_inv_done_i=0;
+    wire dc_early_valid_o;
+    wire [31:0] dc_early_addr_o;
     wire dc_req_valid_o;
     wire [31:0] dc_req_addr_o;
     wire dc_req_store_o;
@@ -86,6 +88,10 @@ module tb;
         .ic_kill_o(ic_kill_o),
         .ic_inv_o(ic_inv_o),
         .ic_inv_done_i(ic_inv_done_i),
+        .dc_early_valid_o(dc_early_valid_o),
+        .dc_early_addr_o(dc_early_addr_o),
+        .dc_early_hit_i(1'b0),
+        .dc_early_data_i(32'b0),
         .dc_req_valid_o(dc_req_valid_o),
         .dc_req_addr_o(dc_req_addr_o),
         .dc_req_store_o(dc_req_store_o),

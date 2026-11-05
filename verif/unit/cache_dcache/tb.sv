@@ -5,6 +5,10 @@
 module tb;
     logic clk_i = 0;
     logic rst_n_i = 0;
+    logic dc_early_valid_i = 0;
+    logic [31:0] dc_early_addr_i = 0;
+    logic dc_early_hit_o;
+    logic [31:0] dc_early_data_o;
     logic dc_req_valid_i = 0;
     logic [31:0] dc_req_addr_i = 0;
     logic dc_req_store_i = 0;
@@ -74,6 +78,10 @@ module tb;
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_dlru_n_i({2{rst_n_i}}),
+        .dc_early_valid_i(dc_early_valid_i),
+        .dc_early_addr_i(dc_early_addr_i),
+        .dc_early_hit_o(dc_early_hit_o),
+        .dc_early_data_o(dc_early_data_o),
         .dc_req_valid_i(dc_req_valid_i),
         .dc_req_addr_i(dc_req_addr_i),
         .dc_req_store_i(dc_req_store_i),
@@ -135,7 +143,7 @@ module tb;
                 $fatal(1, "FAIL D error without response time=%0t", $time);
             // P1 preserves the old error on every valid response cycle.
             if (dc_resp_err_o !== (dc_resp_valid_o &&
-                (dut.device_state_r == dut.D_RETURN ? dut.device_err_r :
+                (dut.early_response_r ? 1'b0 : dut.device_state_r == dut.D_RETURN ? dut.device_err_r :
                 (dut.state_r == dut.S_RETURN ? dut.fill_err_r : dut.pma_err_w))))
                 $fatal(1, "FAIL D effective error changed time=%0t", $time);
             if (dc_wb_event_o !== (axi_awvalid_o && axi_awready_i && axi_awlen_o == 3))
@@ -249,6 +257,128 @@ module tb;
                          cmd, addr, size, int'(($time-started-4)/10),
                          wb_bursts-before_bursts, wb_bus_cycles-before_bus_cycles);
         end
+    endtask
+    // Compare externally visible bus traces with/without discarded early queries.
+    logic compare_active = 0;
+    int compare_phase = 0;
+    int ar_count = 0;
+    int aw_count = 0;
+    int w_count = 0;
+    int ar_expected;
+    int aw_expected;
+    int w_expected;
+    logic [31:0] ar_reference[0:31];
+    logic [31:0] aw_reference[0:31];
+    logic [71:0] w_reference[0:127];
+    always @(posedge clk_i) begin
+        if (compare_active) begin
+            if (axi_arvalid_o && axi_arready_i) begin
+                if (compare_phase == 0) ar_reference[ar_count] = axi_araddr_o;
+                else if (ar_reference[ar_count] != axi_araddr_o)
+                    $fatal(1,"FAIL early query changed AR sequence index=%0d",ar_count);
+                ar_count++;
+            end
+            if (axi_awvalid_o && axi_awready_i) begin
+                if (compare_phase == 0) aw_reference[aw_count] = axi_awaddr_o;
+                else if (aw_reference[aw_count] != axi_awaddr_o)
+                    $fatal(1,"FAIL early query changed AW sequence index=%0d",aw_count);
+                aw_count++;
+            end
+            if (axi_wvalid_o && axi_wready_i) begin
+                if (compare_phase == 0) w_reference[w_count] = {axi_wstrb_o,axi_wdata_o};
+                else if (w_reference[w_count] != {axi_wstrb_o,axi_wdata_o})
+                    $fatal(1,"FAIL early query changed W sequence index=%0d",w_count);
+                w_count++;
+            end
+        end
+    end
+    task automatic discarded_query(input logic [31:0] address,
+                                   input logic expected_hit,
+                                   input logic [31:0] expected_data);
+        logic [19:0] tags0[0:511];
+        logic [19:0] tags1[0:511];
+        logic [511:0] lru;
+        int before_reads;
+        int before_writes;
+        for (int i=0;i<512;i++) begin
+            tags0[i]=dut.u_tag0.memory_r[i];
+            tags1[i]=dut.u_tag1.memory_r[i];
+        end
+        lru=dut.lru_r; before_reads=reads; before_writes=writes;
+        step(); dc_early_valid_i=1; dc_early_addr_i=address;
+        tick();
+        if (dc_early_hit_o !== expected_hit ||
+            (expected_hit && dc_early_data_o !== expected_data))
+            $fatal(1,"FAIL early query address=%h hit=%b/%b data=%h/%h",
+                address,dc_early_hit_o,expected_hit,dc_early_data_o,expected_data);
+        step(); dc_early_valid_i=0; dc_kill_i=1;
+        tick(); step(); dc_kill_i=0; tick();
+        for (int i=0;i<512;i++)
+            if (tags0[i] !== dut.u_tag0.memory_r[i] || tags1[i] !== dut.u_tag1.memory_r[i])
+                $fatal(1,"FAIL early query modified tag/dirty/valid group=%0d",i);
+        if (lru !== dut.lru_r || reads != before_reads || writes != before_writes ||
+            dut.buffer_valid_r || dut.store_pending_r || dut.state_r != dut.S_IDLE)
+            $fatal(1,"FAIL discarded query changed cache state/bus address=%h",address);
+    endtask
+    task automatic check_early_queries;
+        // Identical ordinary accesses must retain the same replacement and bus trace.
+        for (int phase=0;phase<2;phase++) begin
+            step(); rst_n_i=0; tick(); step(); rst_n_i=1;
+            repeat(512) tick();
+            memory[512]=64'h1122334400001234;
+            memory[2560]=64'h5566778800005678;
+            memory[4608]=64'h99aabbcc00009abc;
+            compare_phase=phase; ar_count=0; aw_count=0; w_count=0; compare_active=1;
+            access_word(32'h10001000,0,2,32'h1234);
+            access_word(32'h10005000,0,2,32'h5678);
+            access_word(32'h10001000,1,2,32'hdeadbeef);
+            tick();
+            if (phase==1) begin
+                discarded_query(32'h10005000,1,32'h5678);
+                discarded_query(32'h10009000,0,0);
+                discarded_query(32'h40000000,0,0);
+            end
+            access_word(32'h10009000,0,2,32'h9abc);
+            access_word(32'h10001000,0,2,32'hdeadbeef);
+            maintenance(4,0,0);
+            compare_active=0;
+            if (phase==0) begin
+                ar_expected=ar_count; aw_expected=aw_count; w_expected=w_count;
+            end else if (ar_count!=ar_expected || aw_count!=aw_expected || w_count!=w_expected)
+                $fatal(1,"FAIL early query changed transaction counts AR=%0d AW=%0d W=%0d",
+                    ar_count,aw_count,w_count);
+        end
+        // Successful E requests reuse data while the port reads the next D load.
+        step(); dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
+        tick();
+        if (!dc_early_hit_o) $fatal(1,"FAIL early chain first hit");
+        step(); dc_req_valid_i=1; dc_req_store_i=0; dc_req_size_i=2;
+        dc_req_addr_i=32'h10001000; dc_early_addr_i=32'h10009000;
+        #1;
+        if (!dut.early_promote_w || dut.read_addr_w != 11'h200)
+            $fatal(1,"FAIL early promotion did not free RAM port");
+        tick();
+        if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef || !dc_early_hit_o)
+            $fatal(1,"FAIL early chain first response/second query");
+        step(); dc_commit_i=1; dc_req_addr_i=32'h10009000; dc_early_valid_i=0;
+        tick();
+        if (!dc_resp_valid_o || dc_resp_data_o!=32'h9abc)
+            $fatal(1,"FAIL early chain second response");
+        step(); dc_req_valid_i=0; dc_commit_i=0; tick();
+        // A normal store wins the port, and pending stores forbid early same-word data.
+        step(); dc_req_valid_i=1; dc_req_store_i=1; dc_req_addr_i=32'h10001000;
+        dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
+        tick();
+        if (dc_early_hit_o) $fatal(1,"FAIL ordinary request priority");
+        step(); dc_req_valid_i=0;
+        tick();
+        if (dc_early_hit_o) $fatal(1,"FAIL pending store early conflict");
+        step(); dc_commit_i=1; dc_store_data_i=32'hcafebabe;
+        tick();
+        if (dc_early_hit_o) $fatal(1,"FAIL committed buffer early conflict");
+        step(); dc_commit_i=0; dc_early_valid_i=0; tick(); tick();
+        access_word(32'h10001000,0,2,32'hcafebabe);
+        $display("PASS early query readonly/promotion/store-conflict");
     endtask
     initial begin
         for (int i = 0; i < 8192; i++) memory[i] = {32'(i+8192), 32'(i+4096)};
@@ -437,6 +567,7 @@ module tb;
                        writes, before_writes+1, memory[0][31:0]);
             tick();
         end
+        check_early_queries();
         $display("PASS cache_dcache WB events=%0d", wb_events); $finish;
     end
 endmodule

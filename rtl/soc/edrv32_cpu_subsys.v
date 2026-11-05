@@ -210,6 +210,10 @@ module edrv32_cpu_subsys (
     wire ic_kill_w;
     wire ic_inv_w;
     wire ic_inv_done_w;
+    wire dc_early_valid_w;
+    wire [31:0] dc_early_addr_w;
+    wire dc_early_hit_w;
+    wire [31:0] dc_early_data_w;
     wire dc_req_valid_w;
     wire [31:0] dc_req_addr_w;
     wire dc_req_store_w;
@@ -258,6 +262,10 @@ module edrv32_cpu_subsys (
         .ic_inv_done_i(ic_inv_done_w),
 
         // Core data interface.
+        .dc_early_valid_o(dc_early_valid_w),
+        .dc_early_addr_o(dc_early_addr_w),
+        .dc_early_hit_i(dc_early_hit_w),
+        .dc_early_data_i(dc_early_data_w),
         .dc_req_valid_o(dc_req_valid_w),
         .dc_req_addr_o(dc_req_addr_w),
         .dc_req_store_o(dc_req_store_w),
@@ -336,6 +344,10 @@ module edrv32_cpu_subsys (
         .rst_sys_dlru_n_i(rst_sys_dlru_n_w),
 
         // Core data interface.
+        .dc_early_valid_i(dc_early_valid_w),
+        .dc_early_addr_i(dc_early_addr_w),
+        .dc_early_hit_o(dc_early_hit_w),
+        .dc_early_data_o(dc_early_data_w),
         .dc_req_valid_i(dc_req_valid_w),
         .dc_req_addr_i(dc_req_addr_w),
         .dc_req_store_i(dc_req_store_w),
