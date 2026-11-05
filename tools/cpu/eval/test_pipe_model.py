@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-# File: test_pipe_model.py; Spec: cpu-spec 2.3, 4.2-4.4; Clock: host.
+# File: test_pipe_model.py; Spec: cpu-spec 2.3, 4.2-4.4, 4.10-4.11; Clock: host.
 # Check pipeline latencies, exchange dependencies and prediction timing on directed streams.
 """Run with python3 tools/cpu/eval/test_pipe_model.py."""
 from dataclasses import replace
 import unittest
 
-from ipc_structures import Direction, FUSIONS
+from ipc_structures import Direction, FUSIONS, Macro
 from analyze import Instruction
-from pipe_model import INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib, simulate
+from pipe_model import (INORDER_VARIANTS, Predictor, Record, SLOT_CAUSES, fill_ib,
+                        simulate, early_address_allowed, lcb_allowed)
 from collections import deque
 
 
@@ -25,6 +26,231 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_v017_early_address_exclusion_list(self):
+        load = instruction(0, 'load', rd=11, sources=(10,))
+        def producer(kind, rd=10, latency=0):
+            return Record(instruction(4, kind, rd=rd), False, False, 0, 0, (0, 0, 0),
+                          result_latency=latency)
+        for kind in ('alu', 'load', 'csr', 'mul', 'div', 'jal', 'jalr'):
+            record = producer(kind)
+            self.assertFalse(early_address_allowed(load, [record], [], [], [], 4), kind)
+            self.assertFalse(early_address_allowed(load, [], [record], [], [], 4), kind)
+        for kind in ('load', 'csr', 'mul'):
+            self.assertFalse(early_address_allowed(load, [], [], [producer(kind)], [], 4))
+        # Even an early load in M is excluded: do not replace the list with readiness.
+        self.assertFalse(early_address_allowed(load, [], [], [producer('load', latency=1)],
+                                              [], 4))
+        self.assertFalse(early_address_allowed(load, [], [], [], [producer('mul')], 4))
+        self.assertTrue(early_address_allowed(load, [], [], [], [producer('mul')], 3))
+        self.assertTrue(early_address_allowed(load, [], [], [producer('alu')], [], 4))
+        self.assertTrue(early_address_allowed(load, [], [], [], [producer('load')], 4))
+        # A fused ADD+load has an ALU destination as well as the load destination.
+        first = instruction(4, rd=10)
+        second = instruction(8, 'load', rd=12, sources=(10,))
+        macro = Macro(4, second.bits, 8, 'load', 12, (), 0, False, False,
+                      (first, second), 'add-load')
+        record = replace(producer('load'), instruction=macro)
+        self.assertTrue(early_address_allowed(load, [], [], [record], [], 4))
+        self.assertFalse(early_address_allowed(replace(load, sources=(12,)), [], [],
+                                              [record], [], 4))
+        self.assertTrue(early_address_allowed(load, [], [producer('alu', 12)], [], [], 4))
+        self.assertTrue(early_address_allowed(replace(load, sources=(0,)), [], [], [], [], 4))
+        stream = [instruction(0, 'load', rd=10, sources=(2,)),
+                  instruction(4, sources=(10,))]
+        self.assertEqual(run(stream, early_address='v017')['cycles'], 2)
+        self.assertEqual(run(stream, early_address='v017')['early_loads'], 1)
+
+    def test_v017_lcb_sources_and_youngest(self):
+        branch = instruction(12, 'branch', sources=(10, 11), target=16)
+        def producer(kind, rd, latency):
+            return Record(instruction(0, kind, rd=rd), False, False, 0, 0, (0, 0, 0),
+                          result_latency=latency)
+        loads = [producer('load', 10, 2), producer('load', 11, 2)]
+        self.assertTrue(lcb_allowed(branch, loads, {10: 1, 11: 1}))
+        self.assertTrue(lcb_allowed(branch, loads[:1], {10: 1, 11: 0}))
+        self.assertFalse(lcb_allowed(branch, loads[:1], {10: 1, 11: 2}))
+        self.assertFalse(lcb_allowed(branch, [producer('mul', 10, 4)], {10: 2}))
+        self.assertFalse(lcb_allowed(branch, [producer('load', 10, 1)], {}))
+        self.assertFalse(lcb_allowed(branch, [producer('load', 10, 3)], {10: 1}))
+        self.assertFalse(lcb_allowed(replace(branch, kind='jalr'), loads, {10: 1}))
+        options = dict(perfect_frontend=True, perfect_prediction=True, lcb='v017')
+        # Slot one may consume an E load even without static adjacency.
+        stream = [instruction(0, 'load', rd=10), instruction(4), instruction(8),
+                  instruction(12, 'branch', sources=(10,), target=16)]
+        self.assertEqual(run(stream, 'V3s', **options)['lcb_branches'], 1)
+        # A slot-zero branch paired with an independent younger ALU must wait.
+        stream = [instruction(0, 'load', rd=10), instruction(4),
+                  instruction(8, 'branch', sources=(10,), target=12), instruction(12)]
+        self.assertEqual(run(stream, 'V3s', **options)['lcb_branches'], 0)
+        # A same-group producer cannot use LCB.
+        stream = [instruction(0, 'load', rd=10),
+                  instruction(4, 'branch', sources=(10,), target=8)]
+        self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 0)
+        self.assertEqual(run(stream, 'V3s', **options)['lcb_branches'], 1)
+
+    def test_v017_registered_training_visibility(self):
+        predictor = Predictor(128, 4096, 8, gshare_pc_shift=2, registered=True,
+                              direction='tournament', second_level=True)
+        branch = instruction(0, 'branch', target=0)
+        record = Record(branch, False, False, 0, 0, (0, 0, 0), next_pc=0)
+        _, token = predictor.direction.predict(0, False, 0)
+        record.direction_meta = token
+        predictor.edge([record])
+        self.assertIsNone(predictor.query(0)[0])
+        self.assertEqual((predictor.pht[0], predictor.history), (1, 0))
+        self.assertEqual(predictor.direction.local_history[0], 0)
+        predictor.edge([])
+        self.assertIsNotNone(predictor.query(0)[0])
+        self.assertEqual((predictor.pht[0], predictor.history), (2, 1))
+        self.assertEqual(predictor.direction.local_history[0], 1)
+        # A concurrent query sees the state before the training edge.
+        self.assertFalse(predictor.query(0)[1])  # history=1 selects untouched counter 1.
+
+    def test_v017_registered_redirect_costs_and_w2(self):
+        from run_v017_eval import S1, S3
+        for kind, expected in (('branch', 6), ('jal', 5)):
+            program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+            program[0] = instruction(0, kind, target=32)
+            program[36] = instruction(36, 'serial')
+            timeline = []
+            result = simulate(program, [0, 32, 36], 0, 36, 'V3s', timeline=timeline, **S1)
+            self.assertEqual(result['cycles'], expected)
+            resolved = next(e[0] for e in timeline if e[1] == 'resolve')
+            applied = next(e[0] for e in timeline if e[1] == 'redirect')
+            self.assertEqual(applied, resolved + 1)
+        program[0] = instruction(0, 'load', rd=10)
+        program[4] = instruction(4, 'branch', sources=(10,), target=32)
+        program[8] = instruction(8, 'serial')
+        timeline = []
+        result = simulate(program, [0, 4, 32, 36], 4, 36, 'V3s', timeline=timeline,
+                          **dict(S3, early_address=0))
+        self.assertEqual(result['lcb_misses'], 1)
+        self.assertEqual(result['cycles'], 7)  # branch + five lost cycles + successor.
+        resolved = next(e[0] for e in timeline if e[1:2] == ('resolve',) and e[2] == 4)
+        applied = next(e[0] for e in timeline if e[1:2] == ('redirect',) and e[2] == 4)
+        self.assertEqual(applied, resolved + 1)
+        stream = [instruction(0, 'mul', rd=10), instruction(4, sources=(10,))]
+        self.assertEqual(run(stream, 'V3s', **S1)['cycles'], 5)
+        self.assertEqual(run([instruction(0), instruction(4)], 'V3s', **S1)['cycles'], 1)
+
+    def test_v017_lcb_control_issue_restriction_and_split(self):
+        from run_v017_eval import S3
+        stream = [instruction(0, 'load', rd=10), instruction(4),
+                  instruction(8, 'branch', sources=(10,), target=12), instruction(12)]
+        options = dict(S3, early_address=0, perfect_frontend=True, perfect_prediction=True)
+        self.assertEqual(run(stream, 'V3s', **options)['lcb_branches'], 0)
+        self.assertEqual(run(stream, 'V3s', lcb_split=True, **options)['lcb_branches'], 1)
+        warm = [instruction(pc) for pc in range(0, 32, 4)]
+        warm += [replace(inst, pc=inst.pc + 32,
+                         target=inst.target + 32 if inst.kind == 'branch' else 0)
+                 for inst in stream]
+        self.assertEqual(run(warm, 'V3s', lcb_split=True, **options)['lcb_branches'], 1)
+        for kind in ('branch', 'jal', 'jalr'):
+            stream = [instruction(0, 'load', rd=10), instruction(4), instruction(8),
+                      instruction(12, 'branch', sources=(10,), target=16),
+                      instruction(16, kind, target=20), instruction(20)]
+            timeline = []
+            result = run(stream, 'V3s', timeline=timeline, **options)
+            self.assertEqual(result['lcb_branches'], 1)
+            trains = [(t, pc) for t, event, pc, meta in timeline if event == 'train_capture']
+            first = next(t for t, pc in trains if pc == 12)
+            second = next(t for t, pc in trains if pc == 16)
+            self.assertGreater(second, first)
+            self.assertEqual(result['training_conflicts'], 0)
+
+    def test_v017_f2_correction_bubble(self):
+        from unittest.mock import patch
+        from pipe_model import Predictor as BasePredictor
+        class FixedPredictor(BasePredictor):
+            def __init__(self, *args):
+                super().__init__(*args)
+                branch = instruction(4, 'branch', target=0)
+                self.btb[0] = branch, 0
+                self.direction.chooser = [3] * len(self.direction.chooser)
+                self.direction.local = [3] * len(self.direction.local)
+            def update(self, record):
+                pass  # Hold the directed F1=false / F2=true conflict constant.
+        program = {pc: instruction(pc) for pc in range(0, 96, 4)}
+        program[4] = instruction(4, 'branch', target=0)
+        program[12] = instruction(12, 'serial')
+        trace = [0, 4] * 10 + [8, 12]
+        options = dict(direction_predictor='tournament', registered_control=True,
+                       e_penalty=4, d_penalty=3)
+        with patch('pipe_model.Predictor', FixedPredictor):
+            ideal = simulate(program, trace, 0, 12, 'V3s', **options)
+            real = simulate(program, trace, 0, 12, 'V3s', second_level=True, **options)
+        self.assertEqual(real['instructions'], 21)
+        self.assertGreater(real['f2_corrections'], 0)
+        # Nine measured loop intervals each pay one F2-to-F1 correction bubble.
+        self.assertEqual(real['cycles'] - ideal['cycles'], 9)
+        self.assertEqual(real['hpm16'], ideal['hpm16'])
+        class FallthroughPredictor(FixedPredictor):
+            def __init__(self, *args):
+                super().__init__(*args)
+                self.btb[0] = instruction(0, 'branch', target=32), 32
+                self.pht = [3] * len(self.pht)
+                self.direction.local = [0] * len(self.direction.local)
+        program[0] = instruction(0, 'branch', target=32)
+        program[4] = instruction(4)
+        with patch('pipe_model.Predictor', FallthroughPredictor):
+            real = simulate(program, [0, 4, 8, 12], 0, 12, 'V3s', second_level=True,
+                            **options)
+        self.assertEqual(real['instructions'], 3)
+        self.assertEqual(real['hpm16'], 0)  # F2 restores the fall-through group tail.
+
+    def test_v017_registered_system_restart(self):
+        from run_v017_eval import S1
+        for bits in (0x30200073, 0x10500073, 0x0000100f):
+            program = {pc: instruction(pc) for pc in range(0, 96, 4)}
+            program[0] = replace(instruction(0, 'serial'), bits=bits)
+            program[36] = instruction(36, 'serial')
+            timeline = []
+            trace = [0, 32, 36] if bits == 0x30200073 else list(range(0, 40, 4))
+            result = simulate(program, trace, 0, 36, 'V3s', timeline=timeline, **S1)
+            resolve = next(t for t, event, pc, meta in timeline if event == 'resolve')
+            redirect = next(t for t, event, pc, meta in timeline if event == 'redirect')
+            self.assertEqual(redirect, resolve + 1)
+            self.assertEqual(result['instructions'], len(trace) - 1)
+
+    def test_v017_cold_slot_zero_jal_during_active_window(self):
+        from run_v017_eval import S1
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[32] = instruction(32, 'jal', target=64)
+        program[68] = instruction(68, 'serial')
+        trace = list(range(0, 36, 4)) + [64, 68]
+        result = simulate(program, trace, 0, 68, 'V3s', **S1)
+        self.assertEqual(result['instructions'], 10)
+        self.assertEqual(result['hpm16'], 1)
+
+    def test_v017_dual_lsu_program_order_pairing(self):
+        from run_v017_eval import S3
+        options = dict(S3, perfect_frontend=True, perfect_prediction=True)
+        for older in ('load', 'store'):
+            for younger in ('load', 'store'):
+                stream = [instruction(0, older, rd=10 if older == 'load' else 0,
+                                      sources=(2,)),
+                          instruction(4, younger, sources=(3,))]
+                self.assertEqual(run(stream, 'V3s', **options)['hpm1'], 0)
+                self.assertEqual(run(stream, 'V3s', dual_lsu=True, **options)['hpm1'], 1)
+        stream = [instruction(0, 'load', rd=10, sources=(2,)),
+                  instruction(4, 'store', sources=(10, 2))]
+        self.assertEqual(run(stream, 'V3s', dual_lsu=True, **options)['hpm1'], 0)
+
+    def test_v017_tournament_confidence(self):
+        for kind, confident in (('tournament', False), ('tournament-confident', True)):
+            predictor = Predictor(128, 4096, 8, direction=kind, second_level=True)
+            branch = instruction(0, 'branch', target=32)
+            predictor.btb[0] = branch, 32
+            predictor.direction.chooser[0] = 2
+            predictor.direction.local[0] = 3
+            query = predictor.query(0)
+            self.assertFalse(query[1])  # F1 remains gshare.
+            self.assertEqual(query[3].second, not confident)
+            predictor.direction.chooser[0] = 3
+            self.assertTrue(predictor.query(0)[3].second)
+            predictor.direction.local[0] = 2
+            self.assertEqual(predictor.query(0)[3].second, not confident)
+
     def test_lcb_m_compare_and_registered_redirect(self):
         stream = [instruction(0, 'load', rd=10),
                   instruction(4, 'branch', sources=(10,), target=8), instruction(8)]

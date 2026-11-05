@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# File: ipc_structures.py; Spec: T-CPU-IPC2; Clock: host.
-# Experimental macro instructions and ideal second-level direction predictors.
+# File: ipc_structures.py; Spec: T-CPU-IPC2, T-CPU-N-MODEL; Clock: host.
+# Experimental macro instructions and saved-query second-level direction predictors.
 """State sizes exclude the shared BTB and RAS; no speculative direction training."""
 from dataclasses import dataclass, replace
 
@@ -96,7 +96,7 @@ class Direction:
             # valid, PC tag24, trip13, current12, confidence2, direction1; GHR12.
             self.bits = 8192 + 12 + 64 * 53
             self.loops = [None] * 64
-        elif kind == 'tournament':
+        elif kind in {'tournament', 'tournament-confident'}:
             self.bits = 8192 + 12 + 256 * 10 + 1024 * 2 + 4096 * 2
             self.local_history = [0] * 256
             self.local = [1] * 1024
@@ -117,11 +117,14 @@ class Direction:
             if row and row[0] == pc >> 8 and row[3] == 3 and row[1]:
                 prediction = row[4] if row[2] + 1 < row[1] else not row[4]
             return prediction, (slot,)
-        if self.kind == 'tournament':
+        if self.kind in {'tournament', 'tournament-confident'}:
             slot = (pc >> 2) & 255
             local_index = self.local_history[slot]
             local = self.local[local_index] >= 2
-            prediction = local if self.chooser[index] >= 2 else global_prediction
+            use_local = self.chooser[index] >= 2
+            if self.kind == 'tournament-confident':
+                use_local = self.chooser[index] == 3 and self.local[local_index] in (0, 3)
+            prediction = local if use_local else global_prediction
             return prediction, (slot, local_index, index, local, global_prediction)
         keys = []
         prediction = global_prediction
@@ -154,7 +157,7 @@ class Direction:
                 row[3] = min(3, row[3] + 1) if trip == row[1] else 0
                 row[1], row[2] = trip, 0
             return
-        if self.kind == 'tournament':
+        if self.kind in {'tournament', 'tournament-confident'}:
             slot, local_index, index, local, glob = token
             if local != glob:
                 self.chooser[index] = saturate(self.chooser[index], local == taken)
