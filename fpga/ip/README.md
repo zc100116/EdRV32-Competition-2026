@@ -25,6 +25,8 @@
 | `ip_lutram_mem_xbar_w` | 分布式 RAM，组合读 | 16 × 144（288 位拆 2 个） | `edrv32_ram_mem_xbar_w` | mem_xbar 写缓冲 ×6 | [ip_lutram_mem_xbar_w.md](ip_lutram_mem_xbar_w.md) | 已生成（卡 21） |
 | `ip_lutram_cpu_btb` | 分布式 RAM，组合读 | 128 × 58 | `edrv32_ram_cpu_btb` | CPU BTB ×1 | [ip_lutram_cpu_btb.md](ip_lutram_cpu_btb.md) | 待生成（CPU v0.15） |
 | `ip_lutram_cpu_direction` | 分布式 RAM，组合读，初始化 | 1024 × 4 | `edrv32_ram_cpu_direction` | CPU gshare ×4 份（2 份 × 2 bank，合成 2048 × 4） | [ip_lutram_cpu_direction.md](ip_lutram_cpu_direction.md) | 待生成（CPU v0.15） |
+| `ip_lutram_cpu_local_history` | 分布式 RAM，组合读，初始化 | 256 × 10 | `edrv32_ram_cpu_local_history` | CPU 局部历史 ×3 | [ip_lutram_cpu_local_history.md](ip_lutram_cpu_local_history.md) | 待生成（CPU v0.18） |
+| `ip_lutram_cpu_tournament` | 分布式 RAM，组合读，初始化 | 1024 × 2 | `edrv32_ram_cpu_local_direction` / `edrv32_ram_cpu_chooser` | CPU 局部方向 ×3、选择器 ×8 | [ip_lutram_cpu_tournament.md](ip_lutram_cpu_tournament.md) | 待生成（CPU v0.18） |
 | `ip_ram_vin_wfifo` | DRM 简单双口 RAM | 512 × 288 | `edrv32_ram_vin_wfifo` | VIN 写 FIFO ×2、内存源输入缓冲 ×1 | [ip_ram_vin_wfifo.md](ip_ram_vin_wfifo.md) | 已生成（20261028-04） |
 | `ip_ram_disp_scan` | DRM 简单双口 RAM，读写独立时钟 | 512 × 256 | `edrv32_ram_disp_scan` | DISP 扫描 FIFO ×1（B3 起 ×2：L0、L1，disp-spec v0.3） | [ip_ram_disp_scan.md](ip_ram_disp_scan.md) | 已生成（20261028-04） |
 | `ip_ram_pix_line` | DRM 简单双口 RAM | 1024 × 48 | `edrv32_ram_pix_line` | PIX 3×3 行缓存 ×4 | [ip_ram_pix_line.md](ip_ram_pix_line.md) | 已生成（20261028-04） |

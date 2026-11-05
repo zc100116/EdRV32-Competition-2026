@@ -32,10 +32,12 @@ module edrv32_cpu_frontend (
     input wire [2:0] update_type_i,
     input wire update_taken_i,
     input wire [11:0] update_index_i,
+    input wire [11:0] update_tournament_i,
     // Decode consumes 0, 1 or 2 records; low record is oldest.
     input wire [1:0] decode_pop_count_i,
     output wire [357:0] decode_data_o,
     output wire [5:0] decode_index_hi_o,
+    output wire [23:0] decode_tournament_o,
     output wire [79:0] decode_operand_addr_o,
     output wire [1:0] decode_valid_count_o,
     output wire [2:0] ib_count_o,
@@ -59,12 +61,27 @@ module edrv32_cpu_frontend (
 );
     // Fixed four-byte instructions: a response contributes one or two whole words.
     localparam REC_BITS = 179;
-    localparam STREAM_BITS = 148;
+    localparam STREAM_BITS = 160;
     reg [31:0] f1_pc_r /* synthesis syn_maxfan=16 */;
     reg [31:3] f1_icache_pc_r /* synthesis syn_preserve=1 */;
     reg f2_pending_r;
     reg [31:0] f2_pc_r;
-    reg [1:0] f2_count_r;
+    wire [1:0] f2_count_w;
+    reg f2_checked_r;
+    reg f2_conditional_r;
+    reg [19:0] f2_local_history_r;
+    reg [1:0] f2_global_r;
+    reg [1:0] f2_local_r;
+    wire [1:0] f2_local_w;
+    wire [1:0] f2_saved_local_w;
+    wire f2_use_local_w;
+    wire f2_final_taken_w;
+    wire f2_taken_w;
+    wire f2_correct_w;
+    wire [31:0] f2_correct_pc_w;
+    wire [19:0] predict_local_history_w;
+    wire [1:0] predict_global_w;
+    wire predict_conditional_w;
     reg f2_hit_r;
     reg f2_taken_r;
     reg [1:0] f2_position_r;
@@ -103,15 +120,29 @@ module edrv32_cpu_frontend (
     wire [1:0] push_count_w;
     wire [357:0] push_data_w;
     wire [5:0] push_index_hi_w;
+    wire [23:0] push_tournament_w;
     wire [2:0] unused_update_align_w;
     assign unused_update_align_w = {update_pc_i[0], f2_pc_r[1:0]};
     assign redirect_w = redirect_valid_i || d_redirect_valid_i;
     assign redirect_pc_w = redirect_valid_i ? redirect_pc_i : d_redirect_pc_i;
+    // cpu-spec 4.4: evaluate once, even when the I$ response is delayed.
+    // The correction rejects this cycle's F1 request and preserves the older F2 response.
+    assign f2_saved_local_w = f2_checked_r ? f2_local_r : f2_local_w;
+    assign f2_final_taken_w = f2_use_local_w ?
+        f2_local_w[f2_position_r[1]] : f2_global_r[f2_position_r[1]];
+    assign f2_taken_w = !f2_checked_r && f2_hit_r && f2_conditional_r ?
+        f2_final_taken_w : f2_taken_r;
+    assign f2_correct_w = f2_pending_r && !f2_checked_r && f2_hit_r &&
+        f2_conditional_r && f2_final_taken_w != f2_taken_r && !redirect_w;
+    assign f2_correct_pc_w = f2_final_taken_w ? f2_target_r :
+        {f2_pc_r[31:3] + 29'd1, 3'b0};
+    assign f2_count_w = {!f2_pc_r[2] && (!f2_taken_w || f2_position_r[1]),
+        f2_pc_r[2] ^ (f2_taken_w && !f2_position_r[1])};
     assign response_accept_w = f2_pending_r && ic_resp_valid_i && !redirect_w;
-    assign append_count_w = response_accept_w ? f2_count_r : 2'd0;
+    assign append_count_w = response_accept_w ? f2_count_w : 2'd0;
     // cpu-spec 4.9: compute both queue outcomes before the I$ response arrives.
     // The late hit must select a result, never feed the add/push/subtract chain.
-    assign response_available_w = count_r + {1'b0, f2_count_r};
+    assign response_available_w = count_r + {1'b0, f2_count_w};
     // Read occupancy directly: avoid subtracting it from four and comparing the result.
     assign ib_one_free_w = ib_count_o < 4;
     assign ib_two_free_w = ib_count_o <= 2;
@@ -129,20 +160,21 @@ module edrv32_cpu_frontend (
         (response_available_w == 4 && ib_two_free_w);
     // Encode only at the interface; buffered records never wait for an I$ hit.
     assign push_one_w = !redirect_w && ib_one_free_w &&
-        (count_r != 0 || (f2_pending_r && ic_resp_valid_i && f2_count_r != 0));
+        (count_r != 0 || (f2_pending_r && ic_resp_valid_i && f2_count_w != 0));
     assign push_two_w = !redirect_w && ib_two_free_w &&
         (count_r >= 2 || (f2_pending_r && ic_resp_valid_i &&
-        (f2_count_r == 2 || (count_r == 1 && f2_count_r != 0))));
+        (f2_count_w == 2 || (count_r == 1 && f2_count_w != 0))));
     assign push_count_w = {push_two_w, push_one_w && !push_two_w};
     assign remaining_w = response_accept_w ? response_remaining_w : buffered_remaining_w;
     // Reserve response storage using only IB slots free at cycle start (spec 4.1).
     assign request_space_w = (!f2_pending_r && buffered_space_w) ||
         (ic_resp_valid_i && response_space_w);
-    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && request_space_w;
+    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !f2_correct_w && request_space_w;
     assign sequential_pc_w = {f1_icache_pc_r + 29'd1, 3'b0};
     // Compute redirect/hold/sequential selection independently of the prediction.
     // The late BTB/direction decision then crosses a single data mux.
     assign default_pc_w = redirect_w ? redirect_pc_w :
+        f2_correct_w ? f2_correct_pc_w :
         request_accept_w ? sequential_pc_w : f1_pc_r;
     assign ic_req_addr_o = {f1_icache_pc_r, 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
@@ -169,6 +201,14 @@ module edrv32_cpu_frontend (
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
         .update_index_i(update_index_i),
+        .update_tournament_i(update_tournament_i),
+        .predict_conditional_o(predict_conditional_w),
+        .predict_local_history_o(predict_local_history_w),
+        .predict_global_o(predict_global_w),
+        .f2_local_history_i(f2_local_history_r),
+        .f2_index_i({f2_pc_r[13:3], f2_position_r[1]} ^ f2_history_r),
+        .f2_local_o(f2_local_w),
+        .f2_use_local_o(f2_use_local_w),
         .clear_valid_i(update_clear_i),
         .clear_index_i(update_clear_index_i),
         .restore_valid_i(redirect_w),
@@ -183,6 +223,8 @@ module edrv32_cpu_frontend (
         .push_count_i(push_count_w),
         .push_data_i(push_data_w),
         .push_index_hi_i(push_index_hi_w),
+        .push_tournament_i(push_tournament_w),
+        .tournament_o(decode_tournament_o),
         .index_hi_o(decode_index_hi_o),
         .pop_count_i(decode_pop_count_i),
         .data_o(decode_data_o),
@@ -206,14 +248,15 @@ module edrv32_cpu_frontend (
             assign position_w = f2_pc_r[2] ^ offset_w;
             assign pc_w = {f2_pc_r[31:3], position_w, 2'b0};
             // {RAS, history, target, taken, hit, error, PC, instruction}.
-            assign response_w = {f2_ras_r, f2_history_r, f2_target_r,
-                f2_taken_r && {position_w, 1'b0} == f2_position_r,
+            assign response_w = {f2_global_r[position_w], f2_saved_local_w[position_w],
+                f2_local_history_r[position_w*10 +: 10], f2_ras_r, f2_history_r, f2_target_r,
+                f2_taken_w && {position_w, 1'b0} == f2_position_r,
                 f2_hit_r && {position_w, 1'b0} == f2_position_r,
                 ic_resp_err_i, pc_w, ic_resp_data_i[position_w*32 +: 32]};
             // Each eight-bit slice owns its queue-select registers. This bounds
             // the fanout of the selects feeding the IB record write mux.
-            for (slice = 0; slice < 19; slice = slice + 1) begin : g_slice
-                localparam WIDTH = slice == 18 ? 4 : 8;
+            for (slice = 0; slice < 20; slice = slice + 1) begin : g_slice
+                localparam WIDTH = 8;
                 reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
                 reg [2:0] count_copy_r /* synthesis syn_preserve=1 */;
                 wire [1:0] read_w;
@@ -233,6 +276,7 @@ module edrv32_cpu_frontend (
                     end
                 end
             end
+            assign push_tournament_w[slot*12 +: 12] = stream_w[slot][159:148];
             assign push_index_hi_w[slot*3 +: 3] =
                 stream_w[slot][110:108] ^ stream_w[slot][45:43];
             assign push_data_w[slot*REC_BITS +: REC_BITS] = {
@@ -247,9 +291,10 @@ module edrv32_cpu_frontend (
             assign offset_w = entry[1:0] - write_ptr_r;
             assign position_w = f2_pc_r[2] ^ offset_w[0];
             always @(posedge clk_i) begin
-                if (f2_pending_r && ic_resp_valid_i && offset_w < f2_count_r)
-                    words_r[entry] <= {f2_ras_r, f2_history_r, f2_target_r,
-                        f2_taken_r && {position_w, 1'b0} == f2_position_r,
+                if (f2_pending_r && ic_resp_valid_i && offset_w < f2_count_w)
+                    words_r[entry] <= {f2_global_r[position_w], f2_saved_local_w[position_w],
+                        f2_local_history_r[position_w*10 +: 10], f2_ras_r, f2_history_r, f2_target_r,
+                        f2_taken_w && {position_w, 1'b0} == f2_position_r,
                         f2_hit_r && {position_w, 1'b0} == f2_position_r,
                         ic_resp_err_i, f2_pc_r[31:3], position_w, 2'b0,
                         ic_resp_data_i[position_w*32 +: 32]};
@@ -269,11 +314,13 @@ module edrv32_cpu_frontend (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             f2_pending_r <= 0;
+            f2_checked_r <= 0;
             read_ptr_r <= 0;
             write_ptr_r <= 0;
             count_r <= 0;
         end else if (redirect_w) begin
             f2_pending_r <= 0;
+            f2_checked_r <= 0;
             read_ptr_r <= 0;
             write_ptr_r <= 0;
             count_r <= 0;
@@ -281,21 +328,28 @@ module edrv32_cpu_frontend (
             count_r <= remaining_w;
             read_ptr_r <= read_ptr_r + push_count_w;
             write_ptr_r <= write_ptr_r + append_count_w;
+            if (f2_pending_r)
+                f2_checked_r <= 1;
             if (response_accept_w)
                 f2_pending_r <= 0;
             if (request_accept_w) begin
                 f2_pending_r <= 1;
+                f2_checked_r <= 0;
             end
         end
     end
     always @(posedge clk_i) begin
+        if (f2_pending_r && !f2_checked_r) begin
+            f2_taken_r <= f2_taken_w;
+            f2_local_r <= f2_local_w;
+        end
         if (!f2_pending_r || ic_resp_valid_i) begin
             f2_pc_r <= f1_pc_r;
-            // Two-word group truncation without arithmetic after the BTB hit.
-            f2_count_r <= {!f1_pc_r[2] && (!predict_taken_w || predict_position_w[1]),
-                f1_pc_r[2] ^ (predict_taken_w && !predict_position_w[1])};
             f2_hit_r <= predict_hit_w;
             f2_taken_r <= predict_taken_w;
+            f2_conditional_r <= predict_conditional_w;
+            f2_local_history_r <= predict_local_history_w;
+            f2_global_r <= predict_global_w;
             f2_position_r <= predict_position_w;
             f2_target_r <= predict_target_w;
             f2_history_r <= predict_history_w;
