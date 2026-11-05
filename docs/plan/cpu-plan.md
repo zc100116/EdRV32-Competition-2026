@@ -124,10 +124,10 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
 |---|---|---|---|---|---|---|
 | N-FE | 前端时序：F1 下一 PC 环、F2→IB、I$ tag→前端满足 4.9，周期行为不变 | Codex sol | — | 前端/预测器/I$ 单元测试、B1 smoke 子集、Yosys 级数参考 | task-cpu-n-fe | [x] e7fe212e：R01–R05 与 v0.16 周期完全一致，B1 40/40；Yosys F1 环仍 8 级、I$ tag→resp 5 级，待卡 59 |
-| N-BE | 后端：寄存重定向、mul4、ALU 旁路环、D$ tag 后选择、扇出复制；再做 4.10 提前地址、4.11 LCB（分步提交） | Codex sol | — | 单元测试、B1 smoke 子集；各步 R-05 周期 | task-cpu-n-be | [~] |
+| N-BE | 后端：寄存重定向、mul4、ALU 旁路环、D$ tag 后选择、扇出复制；再做 4.10 提前地址、4.11 LCB（分步提交） | Codex sol | — | 单元测试、B1 smoke 子集；各步 R-05 周期 | task-cpu-n-be | [x] 0c3ef8e0/c03b5f35/c04919db/66fd009d：R-05 1,955,141 / 1,900,245 / 1,900,158 / 1,900,158；提前查询读口冲突 34% |
 | N-VERIF | B1 按 testplan v0.4 修改期望值并新增 B-10/B-11、A-01–A-04、L-01–L-03；B1 D$ 模型加提前访问 | Codex sol（独立验证） | 4.10 接口确认后做 A-02/A-03 | 在 v0.16 上新测试能运行；联调后全部通过 | task-cpu-n-verif | [x] 9897d4a5：v0.16 基线 39/47，8 项按 v0.17 期望失败；接线编译留 N-INT；R-05 上限待模型值 |
 | N-MODEL | 周期模型按 v0.17 条款精确实现，给出 R-05 期望值；评估 tournament（计纠正气泡）、宏操作融合、串联 ALU 在 v0.17 上的净收益 | Codex sol | — | 模型定向测试；设计记录 | task-cpu-n-model | [~] |
-| N-INT | 合并 N-FE/N-BE/N-VERIF，跑 B1 smoke + 新测试 + R-05 | 由 N-BE worker 继续 | 以上 | 回归通过，R-05 达标 | cpu-n16 | [ ] |
+| N-INT | D$ 提前查询副本 RAM（用户 2026-11-05）、LCB 收益核查、合并 N-FE/N-VERIF、B1 按路模型、回归 | 复用 N-BE 终端（ctx_055d0565607f） | 以上 | 回归通过，R-05 达标 | task-cpu-n-be → cpu-n16 | [~] |
 | N-PDS | 卡 59：v0.17 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-INT | WNS ≥ 0，或得到下一轮路径分类 | win/ | [ ] |
 
 ## 6. 变更记录
