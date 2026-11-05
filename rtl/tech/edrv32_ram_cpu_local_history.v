@@ -21,41 +21,36 @@ module edrv32_ram_cpu_local_history (
     wire [9:0] copy0_data_w;
     wire [9:0] copy1_data_w;
     wire [9:0] copy2_data_w;
-    genvar bank;
-    generate
-        for (bank = 0; bank < 1; bank = bank + 1) begin : g_bank
-            ip_lutram_cpu_local_history u_copy0 (
-                .wr_clk(clk_i),
-                .rd_clk(clk_i),
-                .rst(1'b0),
-                .wr_en(wr_en_i),
-                .wr_addr(wr_addr_i[7:0]),
-                .wr_data(wr_data_i),
-                .rd_addr(rd0_addr_i[7:0]),
-                .rd_data(copy0_data_w[bank*10 +: 10])
-            );
-            ip_lutram_cpu_local_history u_copy1 (
-                .wr_clk(clk_i),
-                .rd_clk(clk_i),
-                .rst(1'b0),
-                .wr_en(wr_en_i),
-                .wr_addr(wr_addr_i[7:0]),
-                .wr_data(wr_data_i),
-                .rd_addr(rd1_addr_i[7:0]),
-                .rd_data(copy1_data_w[bank*10 +: 10])
-            );
-            ip_lutram_cpu_local_history u_copy2 (
-                .wr_clk(clk_i),
-                .rd_clk(clk_i),
-                .rst(1'b0),
-                .wr_en(wr_en_i),
-                .wr_addr(wr_addr_i[7:0]),
-                .wr_data(wr_data_i),
-                .rd_addr(wr_addr_i[7:0]),
-                .rd_data(copy2_data_w[bank*10 +: 10])
-            );
-        end
-    endgenerate
+    ip_lutram_cpu_local_history u_copy0 (
+        .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
+        .wr_en(wr_en_i),
+        .wr_addr(wr_addr_i[7:0]),
+        .wr_data(wr_data_i),
+        .rd_addr(rd0_addr_i[7:0]),
+        .rd_data(copy0_data_w)
+    );
+    ip_lutram_cpu_local_history u_copy1 (
+        .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
+        .wr_en(wr_en_i),
+        .wr_addr(wr_addr_i[7:0]),
+        .wr_data(wr_data_i),
+        .rd_addr(rd1_addr_i[7:0]),
+        .rd_data(copy1_data_w)
+    );
+    ip_lutram_cpu_local_history u_copy2 (
+        .wr_clk(clk_i),
+        .rd_clk(clk_i),
+        .rst(1'b0),
+        .wr_en(wr_en_i),
+        .wr_addr(wr_addr_i[7:0]),
+        .wr_data(wr_data_i),
+        .rd_addr(wr_addr_i[7:0]),
+        .rd_data(copy2_data_w)
+    );
     assign rd0_data_o = copy0_data_w;
     assign rd1_data_o = copy1_data_w;
     assign update_data_o = copy2_data_w;
