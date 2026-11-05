@@ -240,7 +240,11 @@ module tb;
         repeat(3)@(negedge clk_i);
         update_valid_i=0;rst_n_i=0;@(negedge clk_i);rst_n_i=1;
         update_valid_i=1;update_taken_i=0;update_tournament_i=12'd1022;
-        @(negedge clk_i);update_valid_i=0;
+        @(negedge clk_i);
+        // Drive gshare below two without changing PC 0x400's saved local history.
+        update_pc_i='h408;update_tournament_i=0;
+        repeat(2)@(negedge clk_i);
+        update_valid_i=0;
         redirect_valid_i=1;redirect_pc_i='h400;
         @(negedge clk_i);redirect_valid_i=0;halt_i=0;
         wait(ic_req_valid_o && ic_req_ready_i);
