@@ -15,8 +15,8 @@ module tb;
     reg [1:0] operation_i;
     wire valid_o;
     wire [31:0] result_o;
-    reg [31:0] expected[0:1];
-    reg [1:0] expected_valid=0;
+    reg [31:0] expected[0:2];
+    reg [2:0] expected_valid=0;
     reg signed [32:0] a;
     reg signed [32:0] b;
     reg signed [65:0] product;
@@ -50,15 +50,16 @@ module tb;
             b={operand_b_i[31] && operation_i==1,operand_b_i};
             product=a*b;
             if(enable_i) begin
+                expected[2]=expected[1];
                 expected[1]=expected[0];
                 expected[0]=operation_i==0?product[31:0]:product[63:32];
-                expected_valid={expected_valid[0],valid_i};
+                expected_valid={expected_valid[1:0],valid_i};
             end
             @(posedge clk_i); #1;
-            if(valid_o!==expected_valid[1] ||
-                (valid_o && result_o!==expected[1]))
+            if(valid_o!==expected_valid[2] ||
+                (valid_o && result_o!==expected[2]))
                 $fatal(1,"FAIL MUL i=%d exp=%h actual=%h valid=%b time=%t",
-                    i,expected[1],result_o,valid_o,$time);
+                    i,expected[2],result_o,valid_o,$time);
             @(negedge clk_i);
         end
         $display("PASS U-05"); $finish;

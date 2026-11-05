@@ -65,11 +65,12 @@ module tb;
             if(address<16384)byte_at=rom[address];
             else if(address>=EDRV32_SRAM_BASE && address<EDRV32_SRAM_BASE+EDRV32_SRAM_SIZE)
                 byte_at=sram[address-32'h10000000];
-            else begin
-                $fatal(1,"FAIL smoke unmapped address %h",address);
-                byte_at=0;
-            end
+            else byte_at=0;
         end
+    endfunction
+    function automatic mapped(input reg [31:0] address);
+        mapped=address<16384 ||
+            (address>=EDRV32_SRAM_BASE && address<EDRV32_SRAM_BASE+EDRV32_SRAM_SIZE);
     endfunction
     edrv32_cpu_core dut (
         .clk_i(clk_i),
@@ -130,16 +131,22 @@ module tb;
             end
             ic_resp_valid_i<=ic_req_valid_o && ic_req_ready_i && !ic_kill_o;
             if(ic_req_valid_o && ic_req_ready_i)
+                ic_resp_err_i<=!mapped(ic_req_addr_o);
+            if(ic_req_valid_o && ic_req_ready_i)
                 for(i=0;i<8;i=i+1)ic_resp_data_i[i*8+:8]<=byte_at(ic_req_addr_o+32'(i));
             dc_resp_valid_i<=dc_req_valid_o && dc_req_ready_i && !dc_kill_o;
             if(dc_req_valid_o && dc_req_ready_i)begin
                 store_addr_r<=dc_req_addr_o;store_size_r<=dc_req_size_o;
                 store_pending_r<=dc_req_store_o;
+                dc_resp_err_i<=!mapped(dc_req_addr_o);
                 dc_resp_data_i<=0;
                 for(i=0;i<4;i=i+1)
                     if(i<(1<<dc_req_size_o))
                         dc_resp_data_i[i*8+:8]<=byte_at(dc_req_addr_o+32'(i));
-            end else if(dc_commit_o || dc_kill_o)store_pending_r<=0;
+            end else begin
+                dc_resp_err_i<=0;
+                if(dc_commit_o || dc_kill_o)store_pending_r<=0;
+            end
             dc_fence_done_i<=dc_fence_o || dc_clean_all_o;
             ic_inv_done_i<=ic_inv_o;
             if(dut.trace_trap_w)

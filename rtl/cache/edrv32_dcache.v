@@ -229,6 +229,8 @@ module edrv32_dcache (
     wire [31:0] shifted_load0_w;
     wire [31:0] shifted_load1_w;
     wire [31:0] shifted_return_w;
+    wire [31:0] nonlookup_data_w;
+    wire lookup_data_select_w;
     wire [63:0] device_shifted_w;
     wire unused_axi_w;
     integer byte_idx_w;
@@ -330,9 +332,15 @@ module edrv32_dcache (
     assign shifted_load0_w = merged_load0_w >> {addr_r[1:0], 3'b0};
     assign shifted_load1_w = merged_load1_w >> {addr_r[1:0], 3'b0};
     assign shifted_return_w = merged_return_w >> {addr_r[1:0], 3'b0};
-    assign dc_resp_data_o = device_state_r == D_RETURN ? device_result_r :
-        state_r == S_RETURN ? shifted_return_w :
-        hit0_w ? shifted_load0_w : shifted_load1_w;
+    // cpu-spec 4.9: select slow responses independently of tag RAM output.
+    // The final cached-way selection and response gating fit one LUT6 per bit.
+    assign lookup_data_select_w = device_state_r != D_RETURN && state_r != S_RETURN;
+    assign nonlookup_data_w =
+        ({32{device_state_r == D_RETURN}} & device_result_r) |
+        ({32{device_state_r != D_RETURN && state_r == S_RETURN}} & shifted_return_w);
+    assign dc_resp_data_o = nonlookup_data_w |
+        ({32{lookup_data_select_w && hit0_w}} & shifted_load0_w) |
+        ({32{lookup_data_select_w && !hit0_w}} & shifted_load1_w);
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
     assign store_result_w = (state_r == S_IDLE && lookup_done_w && !pma_err_w && store_r) ||
                             return_store_w;
