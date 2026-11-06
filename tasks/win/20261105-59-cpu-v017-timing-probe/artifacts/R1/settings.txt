@@ -1,0 +1,37 @@
+RTL revision: b1e9d08b
+PDS 2022.2-SP6.1 build 138931
+G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V017
+
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+compile -include_path {G:/codex_project/EdRV32-Competition-2026-v017/rtl/include} -compiler_directives {FPGA_MODE} -top_module edrv32_cpu_l1_timing_probe
+synthesize -ads -selected_syn_tool_opt 2
+dev_map
+pnr
+report_timing
+gen_bit_stream
+
+Applied FDC
+# File: edrv32_cpu_l1_timing_probe.fdc
+# Card 59 (same as card 56): timing-only constraints for edrv32_cpu_l1_timing_probe (no bitstream, no board run).
+# clk_i enters on the board oscillator pin D18 and is constrained directly at the
+# probe frequency; edit only the period/waveform pair when the card asks for another rate.
+create_clock -name {clk_sys} [get_ports {clk_i}] -period {6.667} -waveform {0 3.3335}
+# Match the 0.150 ns setup uncertainty seen on clk_sys in card 48 (F125 r2).
+set_clock_uncertainty {0.15} -from [get_clocks {clk_sys}] -to [get_clocks {clk_sys}] -setup
+# Probe pins are test access only; internal paths stay fully constrained.
+set_false_path -from [get_ports {rst_n_i scan_i}]
+set_false_path -to [get_ports {scan_o}]
+
+define_attribute {p:clk_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:clk_i} {PAP_IO_LOC} {D18}
+define_attribute {p:clk_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:clk_i} {PAP_IO_STANDARD} {LVCMOS33}
+
+
+Timing export command
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V017/place_route/edrv32_cpu_l1_timing_probe_pnr.adf} -delay_type min_max -max_path 5000 -nworst 1 -input_pins TRUE -force_to_run
+
+Near-positive export command
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V017/place_route/edrv32_cpu_l1_timing_probe_pnr.adf} -delay_type max -max_path 200 -nworst 1 -slack_greater_than 0 -slack_less_than 0.2 -input_pins TRUE -force_to_run
