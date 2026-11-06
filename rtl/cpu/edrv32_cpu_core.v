@@ -683,6 +683,7 @@ module edrv32_cpu_core (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .redirect_valid_i(frontend_redirect_w),
+        .redirect_valid_copy_i({17{frontend_redirect_w}}),
         .redirect_pc_i(frontend_redirect_pc_w),
         .redirect_ras_i(frontend_redirect_ras_w),
         .redirect_push_i(!m_redirect_r && (e_redirect_r ?

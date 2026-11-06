@@ -80,6 +80,7 @@ module tb;
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .redirect_valid_i(redirect_valid_i),
+        .redirect_valid_copy_i({17{redirect_valid_i}}),
         .redirect_pc_i(redirect_pc_i),
         .redirect_ras_i(redirect_ras_i),
         .redirect_push_i(redirect_push_i),

@@ -96,6 +96,7 @@ module tb;
         .clear_valid_i(clear_valid_i),
         .clear_index_i(clear_index_i),
         .restore_valid_i(restore_valid_i),
+        .restore_valid_copy_i({16{restore_valid_i}}),
         .restore_ras_i(restore_ras_i),
         .restore_push_i(restore_push_i),
         .restore_pop_i(restore_pop_i),

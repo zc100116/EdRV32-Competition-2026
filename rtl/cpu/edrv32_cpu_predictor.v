@@ -42,6 +42,7 @@ module edrv32_cpu_predictor (
 
     // Redirect restores the saved state and applies the actual call/return action.
     input wire restore_valid_i,
+    input wire [15:0] restore_valid_copy_i,
     input wire [36:0] restore_ras_i,
     input wire restore_push_i,
     input wire restore_pop_i,
@@ -76,6 +77,7 @@ module edrv32_cpu_predictor (
     wire [2:0] unused_query_w;
     assign unused_query_w = {query_pc_i[1], update_pc_i[1], direction_w[0]};
     genvar ras_idx;
+    genvar ras_byte;
     assign query_idx_w = query_pc_i[9:3];
     // cpu-spec 4.9: the LUTRAM position selects precomputed return addresses.
     // In particular it must not start a carry into the RAS write data.
@@ -241,12 +243,19 @@ module edrv32_cpu_predictor (
             assign restore_link_w = restore_push_i && restore_write_ptr_w == ras_idx[1:0];
             assign query_link_w = query_accept_i && predict_taken_o &&
                 btb_data_w[2:0] == 3 && ras_ptr_r == ras_idx[1:0];
-            always @(posedge clk_i) begin
-                if (restore_valid_i && (restore_top_w || restore_link_w))
-                    ras_data_r[ras_idx*32 +: 32] <= restore_link_w ?
-                        restore_return_pc_i : restore_ras_i[31:0];
-                else if (!restore_valid_i && query_link_w)
-                    ras_data_r[ras_idx*32 +: 32] <= branch_return_pc_w;
+            // Each backend redirect replica owns eight RAS data bits.
+            for (ras_byte = 0; ras_byte < 4; ras_byte = ras_byte + 1) begin : g_byte
+                wire restore_valid_w;
+                assign restore_valid_w = restore_valid_copy_i[ras_idx*4 + ras_byte];
+                always @(posedge clk_i) begin
+                    if (restore_valid_w && (restore_top_w || restore_link_w))
+                        ras_data_r[ras_idx*32 + ras_byte*8 +: 8] <= restore_link_w ?
+                            restore_return_pc_i[ras_byte*8 +: 8] :
+                            restore_ras_i[ras_byte*8 +: 8];
+                    else if (!restore_valid_w && query_link_w)
+                        ras_data_r[ras_idx*32 + ras_byte*8 +: 8] <=
+                            branch_return_pc_w[ras_byte*8 +: 8];
+                end
             end
         end
     endgenerate
