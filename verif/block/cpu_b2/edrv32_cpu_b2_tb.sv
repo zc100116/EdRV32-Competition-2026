@@ -26,6 +26,9 @@ module edrv32_cpu_b2_tb;
     bit [31:0] bus_write_addr_r;
     bit [31:0] store_addr_r;
     longint unsigned total_events_r [0:15];
+    longint unsigned total_icache_misses_r;
+    longint unsigned icache_misses_r [0:1];
+    wire icache_miss_w;
     bit store_r;
     bit store_seen_r;
     bit [31:0] begin_pc_w [0:1];
@@ -37,6 +40,11 @@ module edrv32_cpu_b2_tb;
     longint unsigned events_r [0:1][0:15];
     longint unsigned start_hpm_r [0:1][0:7];
     string image;
+
+    // One event when a cacheable lookup starts a line fill, including killed fills.
+    assign icache_miss_w = u_dut.u_icache.state_r == u_dut.u_icache.S_IDLE &&
+        u_dut.u_icache.lookup_valid_r && !u_dut.u_icache.pma_err_r &&
+        u_dut.u_icache.cacheable_r && !u_dut.u_icache.hit_w;
 
     edrv32_cpu_subsys u_dut (
         // Clock and reset.
@@ -194,9 +202,11 @@ module edrv32_cpu_b2_tb;
         enabled_w[1] = $value$plusargs("PERF2_BEGIN=%h", begin_pc_w[1]);
         void'($value$plusargs("PERF_END=%h", end_pc_w[0]));
         void'($value$plusargs("PERF2_END=%h", end_pc_w[1]));
+        total_icache_misses_r = 0;
         for (int e = 0; e < 16; e++) total_events_r[e] = 0;
         for (int w = 0; w < 2; w++) begin
             measuring_r[w] = 0;
+            icache_misses_r[w] = 0;
             for (int e = 0; e < 16; e++) events_r[w][e] = 0;
         end
         repeat (5) @(negedge clk_i);
@@ -207,6 +217,7 @@ module edrv32_cpu_b2_tb;
         $display("B2_WINDOW window=%0d cycles=%0d instret=%0d", w,
                     u_dut.u_core.u_csr.cycle_r - start_cycle_r[w],
                     u_dut.u_core.u_csr.instret_r - start_instret_r[w]);
+        $display("B2_ICACHE_MISSES window=%0d count=%0d", w, icache_misses_r[w]);
         for (int e = 0; e < 16; e++)
             $display("B2_HPM window=%0d event=%0d count=%0d", w, e + 1, events_r[w][e]);
         for (int c = 0; c < 8; c++)
@@ -218,6 +229,7 @@ module edrv32_cpu_b2_tb;
     always @(posedge clk_i) begin
         if (rst_n_i) begin
             cycles_r <= cycles_r + 1;
+            total_icache_misses_r += 64'(icache_miss_w);
             if (r04_check) begin
                 if (u_dut.u_core.trace_redirect_stage_w == 2)
                     r04_penalty[u_dut.u_core.trace_redirect_pc_w] =
@@ -264,6 +276,8 @@ module edrv32_cpu_b2_tb;
                     end
                 end
                 if (measuring_r[w])
+                    icache_misses_r[w] += 64'(icache_miss_w);
+                if (measuring_r[w])
                     for (int e = 0; e < 16; e++)
                         events_r[w][e] += 64'(u_dut.u_core.event_count_w[e*2 +: 2]);
             end
@@ -279,6 +293,8 @@ module edrv32_cpu_b2_tb;
                     $display("B2_TOTAL mcycle=%0d minstret=%0d no-C latency=%0d",
                                 u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,
                                 read_latency_w);
+                    $display("B2_ICACHE_MISSES window=total count=%0d",
+                                total_icache_misses_r);
                     for (int e = 0; e < 16; e++)
                         $display("B2_HPM window=total event=%0d count=%0d", e + 1,
                                     total_events_r[e]);
