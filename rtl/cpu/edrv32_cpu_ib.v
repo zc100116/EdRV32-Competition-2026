@@ -17,6 +17,9 @@ module edrv32_cpu_ib (
     // D observes the oldest two records and consumes 0, 1 or 2.
     input wire [1:0] pop_count_i,
     output wire [357:0] data_o,
+    // Per-slot predecode: {jal,slow,dest,serial,memory,control,csr,mul,load,
+    // immediate[31:0],ALU[3:0],class[3:0],pipe1,illegal,imm,write,use2,use1,rd,rs2,rs1}.
+    output wire [139:0] predecode_o,
     // Four 8-bit register-file slices each get their own four source-register addresses.
     output wire [79:0] operand_addr_o,
     output wire [1:0] valid_count_o,
@@ -29,6 +32,8 @@ module edrv32_cpu_ib (
     localparam RECORD_BITS = 179;
     localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
+    (* keep = "true", syn_preserve = 1 *) reg [69:0] predecode_r [0:DEPTH-1];
+    wire [69:0] push_predecode_w [0:1];
     reg [2:0] index_hi_r [0:DEPTH-1];
     reg [11:0] tournament_r [0:DEPTH-1];
     reg [1:0] read_ptr_r;
@@ -43,7 +48,74 @@ module edrv32_cpu_ib (
     genvar read_slice;
     genvar write_entry;
     genvar operand_slice;
+    genvar decode_slot;
+    genvar decode_slice;
     generate
+        for (decode_slot = 0; decode_slot < 2;
+            decode_slot = decode_slot + 1) begin : g_predecode
+            localparam SLOT = decode_slot;
+            wire [31:0] instr_w;
+            wire [4:0] rs1_w;
+            wire [4:0] rs2_w;
+            wire [4:0] rd_w;
+            wire use1_w;
+            wire use2_w;
+            wire write_w;
+            wire [31:0] immediate_w;
+            wire [3:0] class_w;
+            wire [3:0] operation_w;
+            wire operand_imm_w;
+            wire illegal_w;
+            wire pipe1_w;
+            assign instr_w = push_data_i[decode_slot*RECORD_BITS+32 +: 32];
+            edrv32_cpu_decode u_decode (
+                .instr_i(instr_w),
+                .rs1_o(rs1_w),
+                .rs2_o(rs2_w),
+                .rd_o(rd_w),
+                .rs1_used_o(use1_w),
+                .rs2_used_o(use2_w),
+                .rd_write_o(write_w),
+                .imm_o(immediate_w),
+                .class_o(class_w),
+                .alu_operation_o(operation_w),
+                .operand_imm_o(operand_imm_w),
+                .illegal_o(illegal_w)
+            );
+            // Capability follows opcode families, including their illegal encodings.
+            assign pipe1_w = instr_w[6:0] == 7'h13 || instr_w[6:0] == 7'h37 ||
+                instr_w[6:0] == 7'h17 ||
+                (instr_w[6:0] == 7'h33 && instr_w[31:25] != 1) ||
+                instr_w[6:0] == 7'h63 || instr_w[6:0] == 7'h6f;
+            assign push_predecode_w[decode_slot] = {
+                class_w == 4'd3,
+                class_w == 4'd6 || class_w == 4'd8 || class_w == 4'd10,
+                write_w && rd_w != 0,
+                class_w >= 4'd10,
+                class_w == 4'd6 || class_w == 4'd7,
+                class_w >= 4'd3 && class_w <= 4'd5,
+                class_w == 4'd10,
+                class_w == 4'd8,
+                class_w == 4'd6,
+                immediate_w, operation_w, class_w, pipe1_w, illegal_w, operand_imm_w,
+                write_w, use2_w, use1_w, rd_w, rs2_w, rs1_w};
+            for (decode_slice = 0; decode_slice < 5;
+                decode_slice = decode_slice + 1) begin : g_read
+                localparam SLICE_BITS = decode_slice == 4 ? 6 : 16;
+                (* keep = "true", syn_preserve = 1 *) reg [1:0] read_ptr_copy1_r;
+                assign predecode_o[decode_slot*70 + decode_slice*16 +: SLICE_BITS] =
+                    predecode_r[read_ptr_copy1_r][decode_slice*16 +: SLICE_BITS];
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i)
+                        read_ptr_copy1_r <= SLOT[1:0];
+                    else if (flush_i)
+                        read_ptr_copy1_r <= keep_head_i ?
+                            read_ptr_r + SLOT[1:0] : SLOT[1:0];
+                    else
+                        read_ptr_copy1_r <= read_ptr_r + pop_count_i + SLOT[1:0];
+                end
+            end
+        end
         for (read_slot = 0; read_slot < 2; read_slot = read_slot + 1) begin : g_read_slot
             localparam SLOT = read_slot;
             assign tournament_o[read_slot*12 +: 12] =
@@ -110,10 +182,14 @@ module edrv32_cpu_ib (
                         index_hi_r[write_entry] <= push_index_hi_i[5:3];
                     if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
                         tournament_r[write_entry] <= push_tournament_i[23:12];
-                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
+                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0]) begin
                         entries_r[write_entry] <= push_data_i[178:0];
-                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
+                        predecode_r[write_entry] <= push_predecode_w[0];
+                    end
+                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0]) begin
                         entries_r[write_entry] <= push_data_i[357:179];
+                        predecode_r[write_entry] <= push_predecode_w[1];
+                    end
                 end
             end
         end

@@ -36,6 +36,7 @@ module edrv32_cpu_frontend (
     // Decode consumes 0, 1 or 2 records; low record is oldest.
     input wire [1:0] decode_pop_count_i,
     output wire [357:0] decode_data_o,
+    output wire [139:0] decode_predecode_o,
     output wire [5:0] decode_index_hi_o,
     output wire [23:0] decode_tournament_o,
     output wire [79:0] decode_operand_addr_o,
@@ -228,6 +229,7 @@ module edrv32_cpu_frontend (
         .index_hi_o(decode_index_hi_o),
         .pop_count_i(decode_pop_count_i),
         .data_o(decode_data_o),
+        .predecode_o(decode_predecode_o),
         .operand_addr_o(decode_operand_addr_o),
         .valid_count_o(decode_valid_count_o),
         .flush_i(redirect_w),

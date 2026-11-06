@@ -105,6 +105,7 @@ module tb;
         .decode_tournament_o(decode_tournament_o),
         .decode_pop_count_i(decode_pop_count_i),
         .decode_data_o(decode_data_o),
+        .decode_predecode_o(),
         .decode_index_hi_o(decode_index_hi_o),
         .decode_operand_addr_o(unused_operand_addr_w),
         .decode_valid_count_o(decode_valid_count_o),

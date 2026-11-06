@@ -12,6 +12,7 @@ module tb;
     reg [357:0] push_data_i=0;
     reg [1:0] pop_count_i=0;
     wire [357:0] data_o;
+    wire [139:0] predecode_o;
     wire [1:0] valid_count_o;
     reg flush_i=0;
     reg keep_head_i=0;
@@ -42,9 +43,12 @@ module tb;
         .push_count_i(push_count_i),
         .push_data_i(push_data_i),
         .push_index_hi_i(push_index_hi_i),
+        .push_tournament_i(24'b0),
+        .tournament_o(),
         .index_hi_o(index_hi_o),
         .pop_count_i(pop_count_i),
         .data_o(data_o),
+        .predecode_o(predecode_o),
         .operand_addr_o(operand_addr_w),
         .valid_count_o(valid_count_o),
         .flush_i(flush_i),
@@ -54,6 +58,9 @@ module tb;
     );
     task automatic check;
         integer slice;
+        integer slot;
+        reg [31:0] instr;
+        reg [69:0] decoded;
         begin
             if(count_o!==3'(count) || valid_count_o!==2'(count>=2?2:count))
                 $fatal(1,"FAIL IB count expected=%d actual=%d time=%t",count,count_o,$time);
@@ -71,6 +78,26 @@ module tb;
                     $fatal(1,"FAIL IB operand second slice=%0d expected=%h actual=%h time=%t",
                         slice,model[1][56:47],operand_addr_w[slice*20+10 +: 10],$time);
             end
+            for (slot=0;slot<2;slot++) begin
+                if (count>slot) begin
+                    instr=model[slot][63:32];
+                    decoded=predecode_o[slot*70 +: 70];
+                    if (decoded[14:0]!=={instr[11:7],instr[24:20],instr[19:15]} ||
+                        decoded[61]!== (instr[6:0]==7'h03) ||
+                        decoded[64]!== (instr[6:0]==7'h6f || instr[6:0]==7'h67 ||
+                            instr[6:0]==7'h63) ||
+                        decoded[65]!== (instr[6:0]==7'h03 || instr[6:0]==7'h23) ||
+                        decoded[66]!== (instr[6:0]==7'h73 || instr[6:0]==7'h0f) ||
+                        decoded[69]!== (instr[6:0]==7'h6f))
+                        $fatal(1,"FAIL IB predecode slot=%0d instruction=%h",slot,instr);
+                    if (instr[6:0]==7'h03 &&
+                        (decoded[24:21]!==4'd6 ||
+                        decoded[60:29]!=={{20{instr[31]}},instr[31:20]} ||
+                        decoded[17:15]!==3'b101 ||
+                        decoded[67]!== (instr[11:7]!=0)))
+                        $fatal(1,"FAIL IB load predecode slot=%0d instruction=%h",slot,instr);
+                end
+            end
             if(count>1 && data_o[357:179]!==model[1])
                 $fatal(1,"FAIL IB second expected=%h actual=%h time=%t",
                     model[1],data_o[357:179],$time);
@@ -86,6 +113,10 @@ module tb;
             push_count_i=2'(pushes);pop_count_i=2'(pops);
             push_data_i={19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom,
                 19'($urandom),$urandom,$urandom,$urandom,$urandom,$urandom};
+            if (i==0) begin
+                push_data_i[32 +: 32]=32'h00c12303;
+                push_data_i[211 +: 32]=32'hfff08293;
+            end
             push_index_hi_i=6'($urandom);
             flush_i=(i%29==0 && i>4);
             keep_head_i=flush_i && count>0 && (i%2==0);
