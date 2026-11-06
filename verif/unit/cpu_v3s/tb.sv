@@ -49,6 +49,15 @@ module tb;
     integer wrong_jalr;
     integer accepted_divisions;
     integer accepted_requests;
+    integer ras_ref_ptr;
+    integer ras_ref_count;
+    integer ras_ref_slot;
+    integer ras_ref_lane;
+    integer ras_checkpoints;
+    reg [31:0] ras_ref_data [0:3];
+    reg [31:0] ras_ref_instr;
+    reg ras_ref_call;
+    reg ras_ref_return;
     integer stalled_jal0;
     integer deferred_jal_swap;
     integer retained_jal_mapping;
@@ -96,6 +105,43 @@ module tb;
         .mtime_i(64'b0),
         .debug_o(debug_value)
     );
+    // cpu-spec 4.4/4.5: an M redirect restores the stack after every older commit.
+    always @(posedge clk_i) begin
+        if (!rst_n_i) begin
+            ras_ref_ptr = 0;
+            ras_ref_count = 0;
+        end else begin
+            for (ras_ref_slot=0;ras_ref_slot<2;ras_ref_slot++) begin
+                ras_ref_lane = ras_ref_slot ^ int'(dut.m_swap_r);
+                ras_ref_instr = dut.m_record_r[ras_ref_lane][63:32];
+                ras_ref_call = (ras_ref_instr[6:0]==7'h6f || ras_ref_instr[6:0]==7'h67) &&
+                    (ras_ref_instr[11:7]==1 || ras_ref_instr[11:7]==5);
+                ras_ref_return = ras_ref_instr[6:0]==7'h67 && !ras_ref_call &&
+                    (ras_ref_instr[19:15]==1 || ras_ref_instr[19:15]==5);
+                if (dut.m_commit_w[ras_ref_lane]) begin
+                    if (ras_ref_return && ras_ref_count!=0) begin
+                        ras_ref_ptr = (ras_ref_ptr+3)%4;
+                        ras_ref_count--;
+                    end
+                    if (ras_ref_call) begin
+                        ras_ref_data[ras_ref_ptr] = dut.m_record_r[ras_ref_lane][31:0]+4;
+                        ras_ref_ptr = (ras_ref_ptr+1)%4;
+                        if (ras_ref_count<4) ras_ref_count++;
+                    end
+                end
+            end
+        end
+    end
+    always @(negedge clk_i) begin
+        if (rst_n_i && dut.m_redirect_r) begin
+            ras_checkpoints++;
+            if (dut.u_frontend.redirect_ras_i[36:34]!=3'(ras_ref_count) ||
+                dut.u_frontend.redirect_ras_i[33:32]!=2'(ras_ref_ptr) ||
+                (ras_ref_count!=0 && dut.u_frontend.redirect_ras_i[31:0]!=
+                ras_ref_data[(ras_ref_ptr+3)%4]))
+                $fatal(1,"FAIL committed RAS checkpoint scenario=%0d",scenario);
+        end
+    end
     // Scenario 18 retains a redirected JAL while an older E load waits for request ready.
     always @(posedge clk_i) begin
         if (!rst_n_i) begin
@@ -246,6 +292,11 @@ module tb;
                         !dc_kill || dc_commit)
                         $fatal(1,"FAIL older branch fault");
                     finished=1;
+                end else if (scenario == 23) begin
+                    if (dut.m_trap_pc_w!=8 || dut.m_trap_cause_w!=4 ||
+                        dut.m_trap_value_w!=2 || dut.m_commit_w!=0)
+                        $fatal(1,"FAIL target load trap after call");
+                    finished=1;
                 end else if (scenario == 10) begin
                     if (dut.m_trap_pc_w != 4 || dut.m_trap_cause_w != 0 ||
                         dut.m_trap_value_w != 6 ||
@@ -314,7 +365,7 @@ module tb;
                         $fatal(1,"FAIL pipe1 JAL link");
                     retired++;
                     if (retired == expected_count && scenario!=7 && scenario!=8 &&
-                        scenario!=15)
+                        scenario!=15 && scenario!=23)
                         finished=1;
                 end
             end
@@ -322,14 +373,14 @@ module tb;
     end
     initial begin
         finished=1;
-        for (scenario=1;scenario<=22;scenario++) begin
+        for (scenario=1;scenario<=23;scenario++) begin
             rst_n_i=0;
             repeat(3) @(negedge clk_i);
             for (i=0;i<64;i++) memory[i]=32'h00000013;
             retired=0;redirects=0;swaps=0;d_slot1=0;traps=0;trace_traps=0;
             device_commits=0;irq_meip=0;stalled_d_slot1=0;
             warm_jalr=0;wrong_jalr=0;accepted_divisions=0;
-            accepted_requests=0;
+            accepted_requests=0;ras_checkpoints=0;
             stalled_jal0=0;deferred_jal_swap=0;retained_jal_mapping=0;
             expected_count=3;
             expected_pc[0]=0;expected_pc[1]=4;expected_pc[2]=8;
@@ -456,6 +507,11 @@ module tb;
                     memory[4]=32'h00128313;
                     expected_count=5;expected_pc[3]=12;expected_pc[4]=16;
                 end
+                23: begin
+                    memory[0]=32'h008000ef; // call, then trap in its target
+                    memory[2]=32'h00202303;
+                    expected_count=1;
+                end
                 default: $fatal(1,"FAIL scenario");
             endcase
             finished=0;rst_n_i=1;cycles=0;
@@ -482,7 +538,8 @@ module tb;
                 (scenario==15 && retired!=2) ||
                 ((scenario==17 || scenario==22) && accepted_divisions!=1) ||
                 (scenario==18 && (stalled_jal0!=1 || deferred_jal_swap!=1)) ||
-                (scenario==21 && retained_jal_mapping!=1))
+                (scenario==21 && retained_jal_mapping!=1) ||
+                (scenario==23 && (traps!=1 || trace_traps!=1 || ras_checkpoints!=1)))
                 $fatal(1,"FAIL coverage scenario=%0d retired=%0d swap=%0d E=%0d D1=%0d trap=%0d",
                     scenario,retired,swaps,redirects,d_slot1,traps);
             $display("PASS V3s scenario=%0d cycles=%0d",scenario,cycles);

@@ -14,6 +14,8 @@ module edrv32_cpu_csr (
     input wire [41:0] select_i,
     input wire write_i,
     input wire commit_i,
+    // M prepares cancellation separately from the trap-state update data path.
+    input wire write_cancel_i,
     input wire [1:0] command_i,
     input wire [31:0] write_data_i,
     output reg [31:0] read_data_o,
@@ -167,7 +169,7 @@ module edrv32_cpu_csr (
                 event_r[update_idx] <= 0;
             end
         end else begin
-            if (write_enable_w && !trap_i) begin
+            if (write_enable_w && !write_cancel_i) begin
                 if (select_i[0])
                     mstatus_r <= (write_data_w & 32'h88) | 32'h1800;
                 if (select_i[2])
@@ -212,8 +214,8 @@ module edrv32_cpu_csr (
             assign rst_counter_n_w = rst_sys_counter_n_i[counter_group];
             if (counter_group < 2) begin : g_arch
                 localparam LOW_SELECT = counter_group == 0 ? 10 : 12;
-                assign write_low_w = write_enable_w && !trap_i && select_i[LOW_SELECT];
-                assign write_high_w = write_enable_w && !trap_i && select_i[LOW_SELECT+1];
+                assign write_low_w = write_enable_w && !write_cancel_i && select_i[LOW_SELECT];
+                assign write_high_w = write_enable_w && !write_cancel_i && select_i[LOW_SELECT+1];
                 if (counter_group == 0) begin : g_cycle
                     always @(posedge clk_i or negedge rst_counter_n_w) begin
                         if (!rst_counter_n_w)
@@ -240,8 +242,8 @@ module edrv32_cpu_csr (
                 localparam INDEX = counter_group - 2;
                 reg [63:0] count_r;
                 assign counter_r[INDEX] = count_r;
-                assign write_low_w = write_enable_w && !trap_i && select_i[24+INDEX];
-                assign write_high_w = write_enable_w && !trap_i && select_i[32+INDEX];
+                assign write_low_w = write_enable_w && !write_cancel_i && select_i[24+INDEX];
+                assign write_high_w = write_enable_w && !write_cancel_i && select_i[32+INDEX];
                 always @(posedge clk_i or negedge rst_counter_n_w) begin
                     if (!rst_counter_n_w)
                         count_r <= 0;

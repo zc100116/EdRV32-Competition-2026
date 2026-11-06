@@ -107,7 +107,6 @@ module edrv32_cpu_core (
     wire [31:0] e_redirect_origin_w;
     reg [31:0] d_redirect_origin_r;
     reg [31:0] m_redirect_pc_r;
-    reg [36:0] m_redirect_ras_r;
     reg d_redirect_r;
     reg d_redirect_issued_r;
     reg d_redirect_slot_r;
@@ -167,6 +166,7 @@ module edrv32_cpu_core (
     wire [1:0] m_lane_fault_w;
     wire m_fault1_w;
     wire m_fault_old_w;
+    wire m_block_early_w;
     wire m_trap_lane_w;
     reg e_exception1_r;
     reg m_exception1_r;
@@ -217,7 +217,7 @@ module edrv32_cpu_core (
                 load_value(dc_resp_way_data_i[load_way*32 +: 32], m_instr_r[14:12]);
         end
     endgenerate
-    assign e_repair_w = e_repair_pending_r && !m_wait_w && !m_redirect_w;
+    assign e_repair_w = e_repair_pending_r && !m_wait_w && !m_block_early_w;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             e_early_r <= 0;
@@ -415,7 +415,7 @@ module edrv32_cpu_core (
                     (!(e_valid_r_copy && m_valid_r[0] && m_wait_dc_r) || dc_resp_valid_i);
             end else begin : g_advance
                 assign e_advance_copy_w[enable_group-5] = e_valid_r_copy &&
-                    !m_wait_w && !m_redirect_w && !e_flush_w &&
+                    !m_wait_w && !m_block_early_w && !e_flush_w &&
                     !e_repair_pending_r && !div_wait_w &&
                     (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
             end
@@ -495,11 +495,17 @@ module edrv32_cpu_core (
     reg [127:0] committed_ras_data_r;
     reg [1:0] committed_ras_ptr_r;
     reg [2:0] committed_ras_count_r;
-    reg [127:0] committed_ras_data_w;
     reg [1:0] committed_ras_ptr_w;
     reg [2:0] committed_ras_count_w;
     wire [36:0] committed_ras_w;
-    wire [1:0] committed_top_w;
+    reg w_ras_call_r;
+    reg w_ras_return_r;
+    reg [31:0] w_ras_link_r;
+    (* keep = "true", syn_preserve = 1 *) reg [10:0] w_ras_commit_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [15:0] committed_ras_ptr_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] committed_ras_top_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] committed_ras_second_copy1_r;
+    wire [31:0] committed_ras_top_w;
     wire m_call_w;
     wire m_return_w;
     wire [31:0] m_link_w;
@@ -717,6 +723,8 @@ module edrv32_cpu_core (
         .write_i(csr_write_w),
         // CSR is ready immediately in M, with the same exception/interrupt priority.
         .commit_i(m_system_commit_w && csr_m_access_w),
+        // A CSR is alone in M; its cancellation never needs a cache response.
+        .write_cancel_i(!m_system_commit_w),
         .command_i(csr_command_w),
         .write_data_i(csr_operand_w),
         .read_data_o(csr_read_w),
@@ -829,7 +837,8 @@ module edrv32_cpu_core (
     assign d_csr_wait_w = d_class_w[0] == C_CSR &&
         (e_valid_r != 0 || m_valid_r != 0);
     // C-F1 path 3: test E ownership before applying the shared M backpressure.
-    assign d_available_w = !m_wait_w && !backend_redirect_w && !sleep_r &&
+    assign d_available_w = !m_wait_w && !m_block_early_w &&
+        !m_redirect_r && !e_redirect_r && !sleep_r &&
         !(d_redirect_r && d_redirect_issued_r) && !e_repair_pending_r &&
         (e_valid_r == 0 || (!div_wait_w &&
         (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i)));
@@ -875,7 +884,8 @@ module edrv32_cpu_core (
         d_imm_w[d_map_w[0]];
     // cpu-spec 4.4: a stalled JAL redirects once, then remains at the IB head.
     assign d_capture_w = d_count_w != 0 && !d_redirected_r &&
-        !backend_redirect_w && !d_redirect_r && !sleep_r && m_lane_fault_w == 0 &&
+        !m_block_early_w && !m_redirect_r && !e_redirect_r &&
+        !d_redirect_r && !sleep_r &&
         (!d_redirect_slot_w || (d_pair_w &&
         !(d_use1_w[0] && d_hazard_w[0]) && !(d_use2_w[0] && d_hazard_w[1]))) &&
         d_class_w[d_redirect_slot_w] == C_JAL &&
@@ -937,8 +947,8 @@ module edrv32_cpu_core (
         (e_operand_a_r[0] == e_jalr_expected_even_r ||
         e_operand_a_r[0] == e_jalr_expected_odd_r)) : e_pc_target_match_r;
     // A younger M fault can wait for its older load; E is already on the discarded path.
-    assign e_resolve_w = (|e_valid_r) && !e_resolved_r && !m_front_capture_w &&
-        m_lane_fault_w == 0 && !e_flush_w && !e_repair_pending_r &&
+    assign e_resolve_w = (|e_valid_r) && !e_resolved_r && !m_block_early_w &&
+        !m_mret_w && !m_fence_i_done_w && !m_wfi_w && !e_flush_w && !e_repair_pending_r &&
         (!div_wait_w || e_old_control_unresolved_w);
     assign e_redirect0_w = e_resolve_w && e_valid_r[0] && e_lane_redirect_needed_w[0] &&
         !(e_swap_r && (e_older_fault_w ||
@@ -962,10 +972,10 @@ module edrv32_cpu_core (
     assign e_div_cancel_w = e_swap_r && e_valid_r[1] && e_kill_young_w;
     assign div_start_w = e_valid_r[0] && !e_div_cancel_w &&
         e_class_r[0] == C_DIV && !div_started_r && !e_old_control_unresolved_w &&
-        m_valid_r == 0 && w_valid_r == 0 && !m_redirect_w && !e_repair_pending_r;
+        m_valid_r == 0 && w_valid_r == 0 && !e_repair_pending_r;
     assign div_wait_w = e_valid_r[0] && !e_div_cancel_w &&
         e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
-    assign e_advance_w = (|e_valid_r) && !m_wait_w && !m_redirect_w && !e_flush_w &&
+    assign e_advance_w = (|e_valid_r) && !m_wait_w && !m_block_early_w && !e_flush_w &&
                     !e_repair_pending_r && !div_wait_w &&
         (!e_memory_w || e_exception_r || e_misaligned_w || dc_req_ready_i);
     // C-F1 path 3: M's memory-wait class is prepared in E. Apply the two
@@ -981,7 +991,7 @@ module edrv32_cpu_core (
     assign e_payload_wait_dc_w = (|e_valid_r) && m_valid_r[0] && m_wait_dc_r;
     assign e_operand_load_w = !e_payload_hold_w && (!e_payload_wait_dc_w || dc_resp_valid_i);
     // spec 3.3: valid is independent of ready; acceptance advances E into M.
-    assign dc_req_valid_o = (|e_valid_r) && !m_wait_w && !m_redirect_w &&
+    assign dc_req_valid_o = (|e_valid_r) && !m_wait_w && !m_block_early_w &&
         !e_flush_w && !e_repair_pending_r && !div_wait_w &&
         e_memory_w && !e_exception_r && !e_misaligned_w;
     assign dc_req_addr_o = e_address_w;
@@ -1012,6 +1022,9 @@ module edrv32_cpu_core (
         !(m_memory_w && !m_old_w && dc_resp_device_i) &&
         m_class_r[m_old_w] != C_DIV && m_class_r[m_old_w] != C_FENCE_I &&
         !(div_started_r && !div_done_r);
+    // With M ready, any known M fault traps; with M waiting, issue is blocked anyway.
+    // This equivalent early predicate keeps cache-hit -> trap priority out of issue.
+    assign m_block_early_w = (|m_lane_fault_w) || m_interrupt_w;
     assign m_trap_w = (|m_valid_r) && (m_fault_old_w || m_interrupt_w ||
         (m_lane_fault_w[m_young_w] &&
         (!m_memory_w || m_fault0_w || dc_resp_valid_i)));
@@ -1059,7 +1072,7 @@ module edrv32_cpu_core (
     assign backend_redirect_w = m_redirect_w || m_redirect_r || e_redirect_r;
     assign backend_redirect_pc_w = m_redirect_r ? m_redirect_pc_r :
         e_redirect_pc_w;
-    assign backend_redirect_ras_w = m_redirect_r ? m_redirect_ras_r :
+    assign backend_redirect_ras_w = m_redirect_r ? committed_ras_w :
         e_redirect_ras_w;
     assign frontend_redirect_w = m_redirect_r || e_redirect_r ||
         (d_redirect_r && d_redirect_issued_r);
@@ -1134,7 +1147,6 @@ module edrv32_cpu_core (
         m_redirect_trap_r <= m_trap_w;
         m_redirect_origin_r <= m_record_r[0][REC_PC_LSB +: 32];
         d_redirect_origin_r <= d_record_w[d_redirect_slot_w][REC_PC_LSB +: 32];
-        m_redirect_ras_r <= committed_ras_w;
         d_redirect_issued_r <= d_issue_w != 0;
         d_redirect_slot_r <= d_redirect_slot_w;
         d_redirect_pc_r <= d_target_w;
@@ -1431,42 +1443,81 @@ module edrv32_cpu_core (
     assign m_return_w = m_class_r[m_branch_lane_w] == C_JALR &&
         (m_record_r[m_branch_lane_w][REC_INSTR_LSB + 15 +: 5] == 1 ||
         m_record_r[m_branch_lane_w][REC_INSTR_LSB + 15 +: 5] == 5) && !m_call_w;
-    assign m_link_w = m_record_r[m_branch_lane_w][REC_PC_LSB +: 32] + 32'd4;
+    assign m_link_w = m_result_r[m_branch_lane_w];
+    // Delay the physical committed-RAS update to W. During an M redirect's emit
+    // cycle, W is exactly that M group's commit: this lookahead is its checkpoint.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            w_ras_commit_copy1_r <= 0;
+        else
+            w_ras_commit_copy1_r <= {11{m_commit_w[m_branch_lane_w]}};
+    end
+    always @(posedge clk_i) begin
+        w_ras_call_r <= m_call_w;
+        w_ras_return_r <= m_return_w;
+        w_ras_link_r <= m_link_w;
+    end
     always @(*) begin
-        committed_ras_data_w = committed_ras_data_r;
         committed_ras_ptr_w = committed_ras_ptr_r;
         committed_ras_count_w = committed_ras_count_r;
-        // Apply the committing control transfer, including an older surviving call.
-        // This next state is also the M redirect's RAS checkpoint.
-        if (m_commit_w[m_branch_lane_w]) begin
-            if (m_return_w && committed_ras_count_w != 0) begin
-                committed_ras_ptr_w = committed_ras_ptr_w - 1'b1;
-                committed_ras_count_w = committed_ras_count_w - 1'b1;
+        if (w_ras_commit_copy1_r[8]) begin
+            if (w_ras_return_r && committed_ras_count_r != 0) begin
+                committed_ras_ptr_w = committed_ras_ptr_r - 1'b1;
+                committed_ras_count_w = committed_ras_count_r - 1'b1;
             end
-            if (m_call_w) begin
-                committed_ras_data_w[committed_ras_ptr_w * 32 +: 32] = m_link_w;
-                committed_ras_ptr_w = committed_ras_ptr_w + 1'b1;
-                if (committed_ras_count_w < 4)
-                    committed_ras_count_w = committed_ras_count_w + 1'b1;
+            if (w_ras_call_r) begin
+                committed_ras_ptr_w = committed_ras_ptr_r + 1'b1;
+                if (committed_ras_count_r < 4)
+                    committed_ras_count_w = committed_ras_count_r + 1'b1;
             end
         end
     end
-    assign committed_top_w = committed_ras_ptr_w - 1'b1;
-    assign committed_ras_w = {committed_ras_count_w, committed_ras_ptr_w,
-        committed_ras_data_w[committed_top_w * 32 +: 32]};
+    assign committed_ras_w =
+        {committed_ras_count_w, committed_ras_ptr_w, committed_ras_top_w};
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             committed_ras_ptr_r <= 0;
             committed_ras_count_r <= 0;
+            committed_ras_ptr_copy1_r <= 0;
+            committed_ras_top_copy1_r <= {2{2'd3}};
+            committed_ras_second_copy1_r <= {2{2'd2}};
         end else begin
             committed_ras_ptr_r <= committed_ras_ptr_w;
             committed_ras_count_r <= committed_ras_count_w;
+            committed_ras_ptr_copy1_r <= {8{committed_ras_ptr_w}};
+            committed_ras_top_copy1_r <= {2{committed_ras_ptr_w - 2'd1}};
+            committed_ras_second_copy1_r <= {2{committed_ras_ptr_w - 2'd2}};
         end
     end
-    always @(posedge clk_i) begin
-        if (m_commit_w[m_branch_lane_w] && (m_call_w || m_return_w))
-            committed_ras_data_r <= committed_ras_data_w;
-    end
+    genvar ras_bank;
+    genvar ras_half;
+    generate
+        for (ras_bank = 0; ras_bank < 8; ras_bank = ras_bank + 1) begin : g_committed_ras
+            localparam WORD = ras_bank / 2;
+            // Each late write enable owns one 16-bit bank.
+            always @(posedge clk_i) begin
+                if (w_ras_commit_copy1_r[ras_bank] && w_ras_call_r &&
+                    committed_ras_ptr_copy1_r[ras_bank*2 +: 2] == WORD[1:0])
+                    committed_ras_data_r[ras_bank*16 +: 16] <=
+                        w_ras_link_r[(ras_bank%2)*16 +: 16];
+            end
+        end
+        for (ras_half = 0; ras_half < 2; ras_half = ras_half + 1) begin : g_committed_top
+            wire [15:0] top_w;
+            wire [15:0] second_w;
+            wire push_w;
+            wire pop_w;
+            assign top_w = committed_ras_data_r[
+                committed_ras_top_copy1_r[ras_half*2 +: 2]*32 + ras_half*16 +: 16];
+            assign second_w = committed_ras_data_r[
+                committed_ras_second_copy1_r[ras_half*2 +: 2]*32 + ras_half*16 +: 16];
+            assign push_w = w_ras_commit_copy1_r[ras_half+9] && w_ras_call_r;
+            assign pop_w = w_ras_commit_copy1_r[ras_half+9] && w_ras_return_r &&
+                committed_ras_count_r != 0;
+            assign committed_ras_top_w[ras_half*16 +: 16] = push_w ?
+                w_ras_link_r[ras_half*16 +: 16] : pop_w ? second_w : top_w;
+        end
+    endgenerate
     assign retire_count_w = {1'b0, w2_valid_r[0]} + {1'b0, w2_valid_r[1]};
     // spec 5: a minstret write replaces the count including its own retirement.
     // The write commits in M, one cycle before its instruction retires in W.
