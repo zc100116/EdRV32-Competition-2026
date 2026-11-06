@@ -77,6 +77,7 @@ module edrv32_cpu_b1_core_tb;
         .debug_o(debug),
         .ic_req_ready_i(ic_req_ready),
         .ic_resp_valid_i(ic_resp_valid),
+        .ic_resp_valid_copy_i({8{ic_resp_valid}}),
         .ic_resp_data_i(ic_resp_data),
         .ic_resp_err_i(ic_resp_err),
         .ic_inv_done_i(ic_inv_done),

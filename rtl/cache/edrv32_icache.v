@@ -18,6 +18,7 @@ module edrv32_icache (
     input wire [31:0] ic_req_addr_i,
     output wire ic_req_ready_o,
     output wire ic_resp_valid_o,
+    output wire [7:0] ic_resp_valid_copy_o,
     output wire [63:0] ic_resp_data_o,
     output wire ic_resp_err_o,
     input wire ic_kill_i,
@@ -73,79 +74,107 @@ module edrv32_icache (
     wire [7:0] hit0_copy_w;
     wire [7:0] lookup_hit_copy_w;
     wire [7:0] tag_write_copy_w;
+    wire [7:0] lookup_accept_copy_w;
     genvar victim_group;
     generate
         for (victim_group = 0; victim_group < 8;
             victim_group = victim_group + 1) begin : g_victim
-            reg victim_r_copy /* synthesis syn_preserve=1 */;
-            reg lookup_valid_r_copy /* synthesis syn_preserve=1 */;
-            reg [17:0] addr_tag_r_copy /* synthesis syn_preserve=1 */;
-            reg fill_err_r_copy /* synthesis syn_preserve=1 */;
-            reg fill_invalidated_r_copy /* synthesis syn_preserve=1 */;
+            (* keep = "true", syn_preserve = 1 *) reg victim_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg lookup_valid_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg [17:0] addr_tag_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg fill_err_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg fill_invalidated_copy1_r;
             wire hit1_w_copy;
+            (* keep = "true" *) wire [1:0] tag0_half_copy_w;
+            (* keep = "true" *) wire [1:0] tag1_half_copy_w;
+            (* keep = "true", syn_preserve = 1 *) reg response_lookup_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg response_pma_err_copy1_r;
             wire lookup_ready_w_copy;
             assign lookup_ready_w_copy = state_r == S_IDLE &&
-                (!lookup_valid_r_copy || pma_err_r ||
+                (!lookup_valid_copy1_r || pma_err_r ||
                 (cacheable_r && (hit0_copy_w[victim_group] || hit1_w_copy)));
-            assign hit0_copy_w[victim_group] = lookup_valid0_w && tag0_w == addr_tag_r_copy;
-            assign hit1_w_copy = lookup_valid1_w && tag1_w == addr_tag_r_copy;
+            assign lookup_accept_copy_w[victim_group] = ic_req_valid_i && lookup_ready_w_copy;
+            assign tag0_half_copy_w[0] = tag0_w[8:0] == addr_tag_copy1_r[8:0];
+            assign tag0_half_copy_w[1] = tag0_w[17:9] == addr_tag_copy1_r[17:9];
+            assign tag1_half_copy_w[0] = tag1_w[8:0] == addr_tag_copy1_r[8:0];
+            assign tag1_half_copy_w[1] = tag1_w[17:9] == addr_tag_copy1_r[17:9];
+            assign hit0_copy_w[victim_group] = lookup_valid0_w && (&tag0_half_copy_w);
+            assign hit1_w_copy = lookup_valid1_w && (&tag1_half_copy_w);
+            assign ic_resp_valid_copy_o[victim_group] = response_pma_err_copy1_r ||
+                (response_lookup_copy1_r && (hit0_copy_w[victim_group] || hit1_w_copy)) ||
+                (state_r == S_RETURN && !killed_r);
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    response_lookup_copy1_r <= 0;
+                    response_pma_err_copy1_r <= 0;
+                end else begin
+                    response_lookup_copy1_r <= lookup_accept_copy_w[victim_group] &&
+                        cacheable_w && !pma_err_w;
+                    response_pma_err_copy1_r <= lookup_accept_copy_w[victim_group] && pma_err_w;
+                end
+            end
+            if (victim_group < 4) begin : g_request_address
+                always @(posedge clk_i) begin
+                    if (lookup_accept_copy_w[victim_group])
+                        addr_r[victim_group*8 +: 8] <= ic_req_addr_i[victim_group*8 +: 8];
+                end
+            end
             assign lookup_hit_copy_w[victim_group] = state_r == S_IDLE &&
-                lookup_valid_r_copy && !pma_err_r && cacheable_r &&
+                lookup_valid_copy1_r && !pma_err_r && cacheable_r &&
                 (hit0_copy_w[victim_group] || hit1_w_copy);
             assign tag_write_copy_w[victim_group] = fill_write_w && axi_rlast_i &&
-                !fill_err_r_copy && axi_rresp_i == 0 && !fill_invalidated_r_copy && !ic_inv_i;
+                !fill_err_copy1_r && axi_rresp_i == 0 && !fill_invalidated_copy1_r && !ic_inv_i;
             always @(posedge clk_i) begin
-                if (accept_w)
-                    addr_tag_r_copy <= ic_req_addr_i[31:14];
+                // Only a valid lookup owns these snapshots; inactive values are not consumed.
+                addr_tag_copy1_r <= ic_req_addr_i[31:14];
             end
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i) begin
-                    fill_err_r_copy <= 0;
-                    fill_invalidated_r_copy <= 0;
+                    fill_err_copy1_r <= 0;
+                    fill_invalidated_copy1_r <= 0;
                 end else begin
                     if (ic_inv_i && state_r != S_IDLE)
-                        fill_invalidated_r_copy <= 1;
+                        fill_invalidated_copy1_r <= 1;
                     if (state_r == S_IDLE && lookup_valid_r && !pma_err_r &&
                         (!cacheable_r || !hit_w)) begin
-                        fill_err_r_copy <= 0;
-                        fill_invalidated_r_copy <= ic_inv_i;
+                        fill_err_copy1_r <= 0;
+                        fill_invalidated_copy1_r <= ic_inv_i;
                     end
                     if (state_r == S_FILL && axi_rvalid_i)
-                        fill_err_r_copy <= fill_err_r || axi_rresp_i != 0;
+                        fill_err_copy1_r <= fill_err_r || axi_rresp_i != 0;
                 end
             end
-            reg [31:0] lookup_bank_r_copy /* synthesis syn_preserve=1 */;
-            reg [31:0] lookup_lru_bank_r_copy /* synthesis syn_preserve=1 */;
+            (* keep = "true", syn_preserve = 1 *) reg [31:0] lookup_bank_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg [31:0] lookup_lru_bank_copy1_r;
             integer lookup_idx;
             assign lookup_lru_copy_w[victim_group] =
-                |(lookup_bank_r_copy & lookup_lru_bank_r_copy);
+                |(lookup_bank_copy1_r & lookup_lru_bank_copy1_r);
             assign lookup_miss_copy_w[victim_group] = state_r == S_IDLE &&
-                lookup_valid_r_copy && !pma_err_r && cacheable_r &&
+                lookup_valid_copy1_r && !pma_err_r && cacheable_r &&
                 !(hit0_copy_w[victim_group] || hit1_w_copy);
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    lookup_valid_r_copy <= 0;
+                    lookup_valid_copy1_r <= 0;
                 else if (state_r == S_IDLE)
-                    lookup_valid_r_copy <= accept_w;
+                    lookup_valid_copy1_r <= lookup_accept_copy_w[victim_group];
             end
             // Snapshot the same set and LRU data as the original lookup registers.
             always @(posedge clk_i) begin
-                if (lookup_ready_w_copy)
-                    lookup_bank_r_copy <= 32'b1 << ic_req_addr_i[13:9];
+                lookup_bank_copy1_r <= 32'b1 << ic_req_addr_i[13:9];
                 for (lookup_idx = 0; lookup_idx < 32; lookup_idx = lookup_idx + 1) begin
-                    lookup_lru_bank_r_copy[lookup_idx] <=
+                    lookup_lru_bank_copy1_r[lookup_idx] <=
                         lookup_hit_copy_w[victim_group] && lookup_bank_r[lookup_idx] &&
                         addr_r[8:5] == ic_req_addr_i[8:5] ? hit0_copy_w[victim_group] :
                         (|(lru_r[lookup_idx*16 +: 16] & request_slot_w));
                 end
             end
-            assign victim_copy_w[victim_group] = victim_r_copy;
+            assign victim_copy_w[victim_group] = victim_copy1_r;
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    victim_r_copy <= 0;
+                    victim_copy1_r <= 0;
                 else if (state_r == S_IDLE && lookup_valid_r && !pma_err_r &&
                     (!cacheable_r || !hit_w))
-                    victim_r_copy <= lookup_lru_w;
+                    victim_copy1_r <= lookup_lru_w;
             end
         end
     endgenerate
@@ -269,8 +298,7 @@ module edrv32_icache (
         end
     end
     always @(posedge clk_i) begin
-        if (accept_w) begin
-            addr_r <= ic_req_addr_i;
+        if (lookup_accept_copy_w[4]) begin
             cacheable_r <= cacheable_w;
             pma_err_r <= pma_err_w;
         end

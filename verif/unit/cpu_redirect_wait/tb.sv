@@ -46,6 +46,7 @@ module tb;
         .ic_req_addr_o(ic_req_addr),
         .ic_req_ready_i(1'b1),
         .ic_resp_valid_i(ic_resp_valid),
+        .ic_resp_valid_copy_i({8{ic_resp_valid}}),
         .ic_resp_data_i(ic_resp_data),
         .ic_resp_err_i(1'b0),
         .ic_kill_o(ic_kill),

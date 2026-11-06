@@ -205,6 +205,7 @@ module edrv32_cpu_subsys (
     wire [31:0] ic_req_addr_w;
     wire ic_req_ready_w;
     wire ic_resp_valid_w;
+    wire [7:0] ic_resp_valid_copy_w;
     wire [63:0] ic_resp_data_w;
     wire ic_resp_err_w;
     wire ic_kill_w;
@@ -256,6 +257,7 @@ module edrv32_cpu_subsys (
         .ic_req_addr_o(ic_req_addr_w),
         .ic_req_ready_i(ic_req_ready_w),
         .ic_resp_valid_i(ic_resp_valid_w),
+        .ic_resp_valid_copy_i(ic_resp_valid_copy_w),
         .ic_resp_data_i(ic_resp_data_w),
         .ic_resp_err_i(ic_resp_err_w),
         .ic_kill_o(ic_kill_w),
@@ -314,6 +316,7 @@ module edrv32_cpu_subsys (
         .ic_req_addr_i(ic_req_addr_w),
         .ic_req_ready_o(ic_req_ready_w),
         .ic_resp_valid_o(ic_resp_valid_w),
+        .ic_resp_valid_copy_o(ic_resp_valid_copy_w),
         .ic_resp_data_o(ic_resp_data_w),
         .ic_resp_err_o(ic_resp_err_w),
         .ic_kill_i(ic_kill_w),

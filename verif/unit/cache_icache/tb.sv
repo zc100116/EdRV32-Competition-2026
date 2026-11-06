@@ -9,6 +9,7 @@ module tb;
     logic [31:0] ic_req_addr_i = 0;
     logic ic_req_ready_o;
     logic ic_resp_valid_o;
+    logic [7:0] ic_resp_valid_copy_o;
     logic [63:0] ic_resp_data_o;
     logic ic_resp_err_o;
     logic ic_kill_i = 0;
@@ -28,6 +29,11 @@ module tb;
     logic axi_rvalid_i = 0;
     logic axi_rready_o;
     always #5 clk_i = ~clk_i;
+    always @(negedge clk_i) begin
+        if (rst_n_i && ic_resp_valid_copy_o !== {8{ic_resp_valid_o}})
+            $fatal(1, "FAIL I$ response qualifier copies=%b expected=%b time=%t",
+                ic_resp_valid_copy_o, ic_resp_valid_o, $time);
+    end
     edrv32_icache dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -38,6 +44,7 @@ module tb;
         .ic_req_addr_i(ic_req_addr_i),
         .ic_req_ready_o(ic_req_ready_o),
         .ic_resp_valid_o(ic_resp_valid_o),
+        .ic_resp_valid_copy_o(ic_resp_valid_copy_o),
         .ic_resp_data_o(ic_resp_data_o),
         .ic_resp_err_o(ic_resp_err_o),
         .ic_kill_i(ic_kill_i),

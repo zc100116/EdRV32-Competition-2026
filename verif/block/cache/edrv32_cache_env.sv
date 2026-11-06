@@ -62,6 +62,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
     logic [31:0] apb_prdata;
     logic apb_pslverr;
     logic irq;
+    wire [7:0] unused_ic_resp_valid_copy_w;
     edrv32_icache u_icache (
         // Clock and reset
         .clk_i(clk),
@@ -75,6 +76,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
         .ic_req_addr_i(ic_req_addr),
         .ic_req_ready_o(ic_req_ready),
         .ic_resp_valid_o(ic_resp_valid),
+        .ic_resp_valid_copy_o(unused_ic_resp_valid_copy_w),
         .ic_resp_data_o(ic_resp_data),
         .ic_resp_err_o(ic_resp_err),
         .ic_kill_i(ic_kill),

@@ -15,6 +15,7 @@ module edrv32_icache (
     input logic [31:0] ic_req_addr_i,
     output logic ic_req_ready_o,
     output logic ic_resp_valid_o,
+    output wire [7:0] ic_resp_valid_copy_o,
     output logic [63:0] ic_resp_data_o,
     output logic ic_resp_err_o,
     input logic ic_kill_i,
@@ -36,6 +37,7 @@ module edrv32_icache (
     input logic axi_rvalid_i,
     output logic axi_rready_o
 );
+    assign ic_resp_valid_copy_o = {8{ic_resp_valid_o}};
     bit active;
     bit killed;
     bit [31:0] addr;
