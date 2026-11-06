@@ -1,0 +1,517 @@
+Other High Fanout Signal:
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                                     | Driver                                                                      | Fanout
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ntclkbufg_0                                                                  | clkbufg_0                                                                   | 31850
+| ntclkbufg_1                                                                  | clkbufg_1                                                                   | 1319
+| u_npu/u_regs/N26                                                             | u_npu/u_regs/N26                                                            | 537
+| u_npu/u_conv/u_datapath/u_writeback/rd_en_w                                  | u_npu/u_conv/u_datapath/u_writeback/N12                                     | 513
+| u_npu/u_write_dma/data_accept_w_1                                            | u_npu/u_write_dma/wdata_r                                                   | 512
+| u_npu/u_conv/u_datapath/param_rd_en_w                                        | u_npu/u_conv/u_datapath/u_result_quant/N3                                   | 433
+| u_npu/u_conv/serial_valid_r                                                  | u_npu/u_conv/serial_valid_r                                                 | 319
+| u_npu/u_nonconv/upsample_r                                                   | u_npu/u_nonconv/upsample_r                                                  | 293
+| u_npu/u_conv/N1340                                                           | u_npu/u_conv/N1340                                                          | 286
+| u_npu/u_axi_bridge/u_r_fifo/read_w                                           | u_npu/u_axi_bridge/u_r_fifo/N3                                              | 286
+| u_npu/u_conv/N837                                                            | u_npu/u_conv/N837                                                           | 272
+| u_npu/u_conv/N2401                                                           | u_npu/u_conv/N1911_4                                                        | 271
+| u_npu/u_nonconv/N1343 [16]                                                   | u_npu/u_nonconv/N202                                                        | 268
+| u_npu/u_conv/u_datapath/residual_rd_en_w                                     | u_npu/u_conv/u_datapath/u_result_quant/N16                                  | 263
+| u_npu/u_conv/N1430                                                           | u_npu/u_conv/N1430_7                                                        | 262
+| u_npu/u_nonconv/state_r_reg [11]                                             | u_npu/u_nonconv/state_r_reg[11]                                             | 260
+| u_npu/u_conv/u_datapath/writeback_tag_w [39]                                 | u_npu/u_conv/u_datapath/u_residual_add/wb1_tag_r[39]                        | 258
+| u_npu/u_conv/u_datapath/writeback_tag_w [38]                                 | u_npu/u_conv/u_datapath/u_residual_add/wb1_tag_r[38]                        | 258
+| u_npu/u_conv/u_datapath/writeback_tag_w [42]                                 | u_npu/u_conv/u_datapath/u_residual_add/wb1_tag_r[42]                        | 258
+| u_npu/u_conv/u_datapath/writeback_tag_w [41]                                 | u_npu/u_conv/u_datapath/u_residual_add/wb1_tag_r[41]                        | 258
+| u_npu/u_conv/u_datapath/writeback_tag_w [40]                                 | u_npu/u_conv/u_datapath/u_residual_add/wb1_tag_r[40]                        | 258
+| u_npu/u_conv/u_datapath/u_weight_store/N3                                    | u_npu/u_conv/u_datapath/u_weight_store/N3                                   | 257
+| u_npu/u_conv/u_datapath/writeback_valid_w                                    | u_npu/u_conv/u_datapath/u_residual_add/N1                                   | 257
+| u_npu/u_conv/u_datapath/u_input_unpack/N77                                   | u_npu/u_conv/u_conv_write/N454_1                                            | 257
+| u_npu/u_conv/u_datapath/residual_rd_valid_w                                  | u_npu/u_conv/u_datapath/u_residual_buffer/rd_valid_r[1]                     | 257
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/dp_result_rd_index_w [1]                                        | u_npu/u_conv/u_conv_write/result_rd_index_r[1]                              | 256
+| u_npu/u_conv/dp_result_rd_index_w [0]                                        | u_npu/u_conv/u_conv_write/result_rd_index_r[0]                              | 256
+| u_npu/u_conv/dp_result_rd_index_w [2]                                        | u_npu/u_conv/u_conv_write/result_rd_index_r[2]                              | 256
+| u_npu/u_conv/dp_result_rd_index_w [3]                                        | u_npu/u_conv/u_conv_write/result_rd_index_r[3]                              | 256
+| u_npu/u_conv/dp_result_rd_index_w [4]                                        | u_npu/u_conv/u_conv_write/result_rd_index_r[4]                              | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N13                                   | u_npu/u_conv/u_datapath/u_weight_store/N13                                  | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N25                                   | u_npu/u_conv/u_datapath/u_weight_store/N25                                  | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N37                                   | u_npu/u_conv/u_datapath/u_weight_store/N37                                  | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N49                                   | u_npu/u_conv/u_datapath/u_weight_store/N49                                  | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N61                                   | u_npu/u_conv/u_datapath/u_weight_store/N61                                  | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/N2415                                                           | u_npu/u_conv/N2415                                                          | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].rd_segment_output_r [1]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].rd_segment_output_r[1]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].rd_segment_output_r[0]     | 256
+| u_npu/u_write_dma/_N512                                                      | u_npu/u_write_dma/wdata_r[255:0]_3_ret_2                                    | 256
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [0]     | u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r[0]     | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N85                                   | u_npu/u_conv/u_datapath/u_weight_store/N85                                  | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N73                                   | u_npu/u_conv/u_datapath/u_weight_store/N73                                  | 256
+| u_npu/u_conv/serial_lut_r                                                    | u_npu/u_conv/serial_lut_r                                                   | 251
+| u_npu/u_descriptor/N226                                                      | u_npu/u_descriptor/N226                                                     | 240
+| u_npu/start_w                                                                | u_npu/u_regs/start_o                                                        | 221
+| u_npu/u_conv/u_datapath/param_rd_block_w [0]                                 | u_npu/u_conv/u_datapath/u_result_quant/N4[0]                                | 216
+| u_npu/u_conv/u_datapath/param_rd_block_w [1]                                 | u_npu/u_conv/u_datapath/u_result_quant/N4[1]                                | 216
+| u_npu/u_conv/u_datapath/param_rd_block_w [2]                                 | u_npu/u_conv/u_datapath/u_result_quant/N4[2]                                | 216
+| u_npu/u_conv/u_datapath/param_rd_phase_w [1]                                 | u_npu/u_conv/u_datapath/u_result_quant/N5[1]                                | 216
+| u_npu/u_conv/u_datapath/param_rd_phase_w [0]                                 | u_npu/u_conv/u_datapath/u_result_quant/N5[0]                                | 216
+| u_npu/u_regs/apb_paddr_r [2]                                                 | u_npu/u_regs/apb_paddr_r[2]                                                 | 203
+| u_npu/u_conv/u_datapath/quant_tag_w [36]                                     | u_npu/u_conv/u_datapath/u_result_quant/q_tag_r[12][36]                      | 192
+| u_npu/nonconv_start_w                                                        | u_npu/N88                                                                   | 179
+| u_npu/u_regs/apb_paddr_r [8]                                                 | u_npu/u_regs/apb_paddr_r[8]                                                 | 174
+| u_npu/u_regs/apb_paddr_r [3]                                                 | u_npu/u_regs/apb_paddr_r[3]                                                 | 168
+| u_npu/decode_w                                                               | u_npu/state_r_reg[3]                                                        | 168
+| u_npu/u_conv/u_datapath/u_window/promote_w                                   | u_npu/u_conv/u_datapath/u_window/N6                                         | 154
+| u_npu/u_regs/N1                                                              | u_npu/u_regs/N1                                                             | 149
+| u_npu/u_conv/line_accept_w                                                   | u_npu/u_conv/N135_3                                                         | 145
+| u_npu/u_conv/u_datapath/u_input_unpack/N29                                   | u_npu/u_conv/u_datapath/u_input_unpack/N29                                  | 144
+| u_npu/u_nonconv/sample_issue_r                                               | u_npu/u_nonconv/sample_issue_r                                              | 138
+| u_npu/u_axi_bridge/u_r_fifo/read_bin_r [0]                                   | u_npu/u_axi_bridge/u_r_fifo/read_bin_r[0]                                   | 137
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].q0_phase_r [3]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].q0_phase_r[3]              | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].q0_phase_r [2]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].q0_phase_r[2]              | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].q0_phase_r [3]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].q0_phase_r[3]              | 136
+| u_npu/u_conv/N149                                                            | u_npu/u_conv/N149.eq_5                                                      | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].q0_phase_r [2]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].q0_phase_r[2]              | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].q0_phase_r [3]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].q0_phase_r[3]              | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].q0_phase_r [3]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].q0_phase_r[3]              | 136
+| u_npu/u_axi_bridge/u_r_fifo/read_bin_r [1]                                   | u_npu/u_axi_bridge/u_r_fifo/read_bin_r[1]                                   | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].q0_phase_r [2]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].q0_phase_r[2]              | 136
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].q0_phase_r [2]              | u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].q0_phase_r[2]              | 136
+| u_npu/u_nonconv/write_pair_r [0]                                             | u_npu/u_nonconv/write_pair_r[0]                                             | 135
+| u_npu/u_axi_bridge/u_r_fifo/read_bin_r [2]                                   | u_npu/u_axi_bridge/u_r_fifo/read_bin_r[2]                                   | 135
+| u_npu/conv_start_w [2]                                                       | u_npu/N73_9                                                                 | 135
+| u_npu/u_axi_bridge/u_r_fifo/write_bin_r [0]                                  | u_npu/u_axi_bridge/u_r_fifo/write_bin_r[0]                                  | 135
+| u_npu/u_axi_bridge/u_r_fifo/write_w                                          | u_npu/u_axi_bridge/u_r_fifo/N2                                              | 135
+| u_npu/u_axi_bridge/u_r_fifo/write_bin_r [1]                                  | u_npu/u_axi_bridge/u_r_fifo/write_bin_r[1]                                  | 135
+| u_npu/u_axi_bridge/u_r_fifo/write_bin_r [2]                                  | u_npu/u_axi_bridge/u_r_fifo/write_bin_r[2]                                  | 134
+| u_npu/u_conv/u_datapath/residual_rd_addr_w [4]                               | u_npu/u_conv/u_datapath/u_result_quant/N17[4]                               | 134
+| u_npu/u_conv/u_datapath/u_input_unpack/N61_inv                               | u_npu/u_conv/u_datapath/u_input_unpack/N61                                  | 134
+| u_npu/u_conv/dp_result_rd_valid_w                                            | u_npu/u_conv/u_datapath/u_writeback/rd_valid_r[1]                           | 133
+| u_npu/u_conv/u_datapath/u_window/a3_d2_r                                     | u_npu/u_conv/u_datapath/u_window/a3_d2_r                                    | 130
+| u_npu/u_conv/u_conv_write/write_ptr_r [1]                                    | u_npu/u_conv/u_conv_write/write_ptr_r[1]                                    | 129
+| u_npu/u_conv/u_conv_write/write_ptr_r [0]                                    | u_npu/u_conv/u_conv_write/write_ptr_r[0]                                    | 129
+| u_npu/u_conv/u_conv_write/read_ptr_r [1]                                     | u_npu/u_conv/u_conv_write/read_ptr_r[1]                                     | 129
+| u_npu/u_conv/u_datapath/term_tag_w [48]                                      | u_npu/u_conv/u_datapath/u_window/a5_tag_r[48]                               | 129
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Clock Signal:
++-----------------------------------------------------------------------------------------------+
+| Driver_Pin_Name     | Clk_Source_Inst     | Clk_Inst_Name     | Net_Name        | Fanout
++-----------------------------------------------------------------------------------------------+
+| O                   | clk_npu_i_ibuf      | clkbufg_0         | ntclkbufg_0     | 31850
+| O                   | clk_mem_i_ibuf      | clkbufg_1         | ntclkbufg_1     | 1319
++-----------------------------------------------------------------------------------------------+
+
+
+
+Reset Signal:
++-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                         | Rst_Source_Inst                                              | Fanout
++-----------------------------------------------------------------------------------------------------------------------------------------------+
+| u_npu/N37                                                        | u_npu/N37                                                    | 77
+| u_reset_mem/N0                                                   | u_reset_mem/N0                                               | 4
+| u_npu/g_rst_npu_conv_n_w[0].u_reset/N0                           | u_npu/g_rst_npu_conv_n_w[0].u_reset/N0                       | 12
+| u_npu/u_apb_bridge/N40                                           | u_npu/u_apb_bridge/N40                                       | 10
+| u_npu/u_apb_bridge/N17                                           | u_npu/u_apb_bridge/N17                                       | 89
+| u_npu/u_conv/N254                                                | u_npu/u_conv/N254                                            | 46
+| u_npu/u_conv/N1340                                               | u_npu/u_conv/N1340                                           | 286
+| u_npu/u_conv/N820                                                | u_npu/u_conv/N820                                            | 102
+| u_npu/u_conv/N81                                                 | u_npu/u_conv/N81                                             | 48
+| u_npu/u_conv/N3435                                               | u_npu/u_conv/N3435                                           | 10
+| u_npu/u_conv/N620_1                                              | u_npu/u_conv/model_lut_addr_r[31:0]_inv_4                    | 4
+| u_npu/u_conv/N641_inv                                            | u_npu/u_conv/N641_mux1                                       | 4
+| u_npu/u_conv/N564_1                                              | u_npu/u_conv/model_quant_addr_r[31:0]_inv_4                  | 4
+| u_npu/u_conv/N585_inv                                            | u_npu/u_conv/N585_mux1                                       | 4
+| u_npu/u_conv/N2939                                               | u_npu/u_conv/N2939                                           | 11
+| u_npu/u_descriptor/N0                                            | u_npu/u_descriptor/N0                                        | 5
+| u_npu/u_nonconv/N1285                                            | u_npu/u_nonconv/N1266_9                                      | 9
+| u_npu/u_nonconv/N186                                             | u_npu/u_nonconv/N186                                         | 124
+| u_npu/u_nonconv/compare_init_r [0]                               | u_npu/u_nonconv/compare_init_r[0]                            | 32
+| u_npu/u_nonconv/compare_init_r [1]                               | u_npu/u_nonconv/compare_init_r[1]                            | 32
+| u_npu/u_nonconv/compare_init_r [2]                               | u_npu/u_nonconv/compare_init_r[2]                            | 32
+| u_npu/u_nonconv/compare_init_r [3]                               | u_npu/u_nonconv/compare_init_r[3]                            | 32
+| u_npu/u_read_dma/N23                                             | u_npu/u_read_dma/N23                                         | 13
+| u_npu/u_regs/N26                                                 | u_npu/u_regs/N26                                             | 537
+| u_npu/u_reset_mem_bridge_n/N0                                    | u_npu/u_reset_mem_bridge_n/N0                                | 1
+| u_npu/u_write_dma/N35                                            | u_npu/u_write_dma/N35                                        | 12
+| u_npu/u_axi_bridge/u_ar_fifo/N21                                 | u_npu/u_axi_bridge/u_ar_fifo/N21                             | 80
+| _$$_GND_$$_                                                      | _$$_GND_$$_                                                  | 250
+| u_npu/u_conv/u_datapath/sum_fold_w [16]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[16].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [17]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[17].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [18]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[18].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [19]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[19].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [20]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[20].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [21]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[21].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [22]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[22].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [23]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[23].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [24]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[24].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [25]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[25].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [26]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[26].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [27]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[27].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [28]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[28].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [29]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[29].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [30]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[30].fold_r     | 38
+| u_npu/u_conv/u_datapath/sum_fold_w [31]                          | u_npu/u_conv/u_datapath/u_mac_array/g_channel[31].fold_r     | 38
+| u_npu/u_conv/u_datapath/u_result_quant/N242                      | u_npu/u_conv/u_datapath/u_result_quant/N242_6                | 64
+| u_npu/u_conv/u_datapath/u_result_quant/N337                      | u_npu/u_conv/u_datapath/u_result_quant/N337_mux49            | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N466                      | u_npu/u_conv/u_datapath/u_result_quant/N466_6                | 64
+| u_npu/u_conv/u_datapath/u_result_quant/N561                      | u_npu/u_conv/u_datapath/u_result_quant/N561_mux49            | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N690                      | u_npu/u_conv/u_datapath/u_result_quant/N690_6                | 64
+| u_npu/u_conv/u_datapath/u_result_quant/N785                      | u_npu/u_conv/u_datapath/u_result_quant/N785_mux49            | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N914                      | u_npu/u_conv/u_datapath/u_result_quant/N914_6                | 64
+| u_npu/u_conv/u_datapath/u_result_quant/N1009                     | u_npu/u_conv/u_datapath/u_result_quant/N1009_mux49           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/quant_prepare_valid_i     | u_npu/u_conv/u_datapath/u_result_quant/N10234_2              | 8
+| u_npu/u_conv/u_datapath/u_window/a3_pixel_valid_r[0]_inv         | u_npu/u_conv/u_datapath/u_window/a3_pixel_valid_r[0]_inv     | 32
+| u_npu/u_conv/u_datapath/u_window/_N38719_inv                     | u_npu/u_conv/u_datapath/u_window/N307_13[49]_1_inv           | 32
+| u_npu/u_conv/u_datapath/u_window/_N38717_inv                     | u_npu/u_conv/u_datapath/u_window/N307_13[55]_1_inv           | 64
+| u_npu/u_conv/u_datapath/u_window/a3_pixel_valid_r[1]_inv         | u_npu/u_conv/u_datapath/u_window/a3_pixel_valid_r[1]_inv     | 32
+| u_npu/u_conv/u_datapath/u_window/_N38720_inv                     | u_npu/u_conv/u_datapath/u_window/N307_13[48]_1_inv           | 32
+| u_npu/u_conv/u_datapath/u_window/_N38718_inv                     | u_npu/u_conv/u_datapath/u_window/N307_13[54]_1_inv           | 64
++-----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+CE Signal:
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                                 | CE_Source_Inst                                                           | Fanout
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| u_npu/start_w                                                            | u_npu/u_regs/start_o                                                     | 160
+| u_npu/N1452                                                              | u_npu/N1452                                                              | 32
+| u_npu/N1467                                                              | u_npu/N1467                                                              | 32
+| u_npu/N1420                                                              | u_npu/N1420_5                                                            | 43
+| u_npu/u_apb_bridge/N150                                                  | u_npu/u_apb_bridge/N150                                                  | 4
+| u_npu/u_apb_bridge/N62                                                   | u_npu/u_apb_bridge/N62                                                   | 45
+| u_npu/local_apb_penable_w                                                | u_npu/u_apb_bridge/master_state_r_reg[2]                                 | 32
+| u_npu/u_apb_bridge/N38                                                   | u_npu/u_apb_bridge/N38                                                   | 32
+| u_npu/u_apb_bridge/N123                                                  | u_npu/u_apb_bridge/N38                                                   | 3
+| u_npu/u_conv/N2447                                                       | u_npu/u_conv/N1407_1                                                     | 3
+| u_npu/u_conv/N2361                                                       | u_npu/u_conv/N2344                                                       | 2
+| u_npu/u_conv/cmd_prepare_w                                               | u_npu/u_conv/N1339_9                                                     | 70
+| u_npu/u_conv/N2682                                                       | u_npu/u_conv/N3300                                                       | 3
+| u_npu/u_conv/N2679                                                       | u_npu/u_conv/N2128_1_inv                                                 | 3
+| u_npu/conv_start_w [0]                                                   | u_npu/N55_9                                                              | 38
+| u_npu/conv_start_w [1]                                                   | u_npu/N64_9                                                              | 32
+| u_npu/conv_start_w [2]                                                   | u_npu/N73_9                                                              | 96
+| u_npu/conv_start_w [3]                                                   | u_npu/N82_9                                                              | 39
+| u_npu/u_conv/N837                                                        | u_npu/u_conv/N837                                                        | 271
+| u_npu/u_conv/N2829                                                       | u_npu/u_conv/N2829                                                       | 32
+| u_npu/u_conv/N2792                                                       | u_npu/u_conv/N2792                                                       | 11
+| u_npu/u_conv/N3417                                                       | u_npu/u_conv/N3417                                                       | 32
+| u_npu/u_conv/N2716                                                       | u_npu/u_conv/N2716                                                       | 10
+| u_npu/u_conv/N2128_1                                                     | u_npu/u_conv/N2128_1_inv                                                 | 6
+| u_npu/u_conv/start_i[3]_inv_1_inv_1                                      | u_npu/u_conv/N2749_2                                                     | 32
+| u_npu/u_conv/N2128_3                                                     | u_npu/u_conv/N2128_3                                                     | 16
+| u_npu/u_conv/serial_valid_r                                              | u_npu/u_conv/serial_valid_r                                              | 65
+| u_npu/u_conv/N2396                                                       | u_npu/u_conv/N2396                                                       | 32
+| u_npu/u_conv/N2471                                                       | u_npu/u_conv/N2471                                                       | 44
+| u_npu/u_conv/N2162_1                                                     | u_npu/u_conv/N2162_1_inv                                                 | 3
+| u_npu/u_conv/_N23342_1_inv_1                                             | u_npu/u_conv/model_lut_addr_r[31:0]_1                                    | 96
+| u_npu/u_conv/N2637                                                       | u_npu/u_conv/N2637                                                       | 23
+| u_npu/u_conv/_N23352_1_inv                                               | u_npu/u_conv/model_next_weight_count_r[14:0]_1_inv                       | 15
+| u_npu/u_conv/N2162                                                       | u_npu/u_conv/N2162                                                       | 4
+| u_npu/u_conv/request_prepare_w                                           | u_npu/u_conv/N105                                                        | 54
+| u_npu/u_conv/N3198                                                       | u_npu/u_conv/N3198_5                                                     | 32
+| u_npu/u_conv/N2983                                                       | u_npu/u_conv/N2983                                                       | 17
+| u_npu/u_conv/N2475                                                       | u_npu/u_conv/N2475                                                       | 11
+| u_npu/u_conv/N3311                                                       | u_npu/u_conv/N3311_1                                                     | 33
+| u_npu/u_conv/N2952_1                                                     | u_npu/u_conv/N2952_1                                                     | 3
+| u_npu/u_conv/N2457                                                       | u_npu/u_conv/N2457                                                       | 23
+| u_npu/u_conv/residual_begin_w                                            | u_npu/u_conv/N1663                                                       | 75
+| u_npu/u_conv/N2164_2_inv_1                                               | u_npu/u_conv/N2164_2                                                     | 32
+| u_npu/u_conv/N2952_2                                                     | u_npu/u_conv/N2952_2_inv                                                 | 12
+| u_npu/u_conv/N3145                                                       | u_npu/u_conv/N3145                                                       | 5
+| u_npu/u_conv/N1430                                                       | u_npu/u_conv/N1430_7                                                     | 261
+| u_npu/u_conv/N2804                                                       | u_npu/u_conv/N2804                                                       | 13
+| u_npu/u_conv/N2909                                                       | u_npu/u_conv/N2909                                                       | 3
+| u_npu/u_conv/N2867_1                                                     | u_npu/u_conv/N1331_5                                                     | 12
+| u_npu/u_conv/N335                                                        | u_npu/u_conv/N1910_3                                                     | 11
+| u_npu/u_conv/N2415                                                       | u_npu/u_conv/N2415                                                       | 256
+| u_npu/u_conv/N2380                                                       | u_npu/u_conv/N2380                                                       | 5
+| u_npu/u_conv/N2135                                                       | u_npu/u_conv/N1153[0][0]_1                                               | 12
+| u_npu/u_conv/N3216                                                       | u_npu/u_conv/N3216                                                       | 12
+| u_npu/u_conv/N3228                                                       | u_npu/u_conv/N3228                                                       | 12
+| u_npu/u_conv/N3240                                                       | u_npu/u_conv/N3228                                                       | 12
+| u_npu/u_conv/N2686                                                       | u_npu/u_conv/N3216                                                       | 12
+| u_npu/u_conv/N2401                                                       | u_npu/u_conv/N1911_4                                                     | 270
+| u_npu/u_conv/N2284_1                                                     | u_npu/u_conv/N2162_1_inv                                                 | 14
+| u_npu/u_descriptor/N229                                                  | u_npu/u_descriptor/N229                                                  | 109
+| u_npu/decode_w                                                           | u_npu/state_r_reg[3]                                                     | 162
+| u_npu/u_descriptor/N226                                                  | u_npu/u_descriptor/N226                                                  | 240
+| u_npu/u_descriptor/N239                                                  | u_npu/u_descriptor/N239_1_4                                              | 3
+| u_npu/u_descriptor/pending_r                                             | u_npu/u_descriptor/pending_r                                             | 96
+| u_npu/u_nonconv/N1138                                                    | u_npu/u_nonconv/N1138                                                    | 9
+| u_npu/u_nonconv/sample_issue_r                                           | u_npu/u_nonconv/sample_issue_r                                           | 137
+| u_npu/u_nonconv/N1012                                                    | u_npu/u_nonconv/N1012                                                    | 21
+| u_npu/nonconv_start_w                                                    | u_npu/N88                                                                | 118
+| u_npu/nonconv_start_w_inv_1_inv_1                                        | u_npu/nonconv_start_w_inv_1                                              | 64
+| u_npu/u_nonconv/N1265                                                    | u_npu/u_nonconv/N1265_1                                                  | 32
+| u_npu/u_nonconv/N1113                                                    | u_npu/u_nonconv/N1113                                                    | 3
+| u_npu/u_nonconv/N1127                                                    | u_npu/u_nonconv/N1127                                                    | 3
+| u_npu/u_nonconv/N1258                                                    | u_npu/u_nonconv/N1258_3                                                  | 32
+| u_npu/u_nonconv/N1237                                                    | u_npu/u_nonconv/N1237_4                                                  | 32
+| u_npu/u_nonconv/N1244                                                    | u_npu/u_nonconv/N1244_4                                                  | 32
+| u_npu/u_nonconv/N1251                                                    | u_npu/u_nonconv/N1251_4                                                  | 32
+| u_npu/u_nonconv/compare_valid_r [0]                                      | u_npu/u_nonconv/compare_valid_r[0]                                       | 32
+| u_npu/u_nonconv/compare_valid_r [1]                                      | u_npu/u_nonconv/compare_valid_r[1]                                       | 32
+| u_npu/u_nonconv/compare_valid_r [2]                                      | u_npu/u_nonconv/compare_valid_r[2]                                       | 32
+| u_npu/u_nonconv/compare_valid_r [3]                                      | u_npu/u_nonconv/compare_valid_r[3]                                       | 32
+| u_npu/u_nonconv/N1180                                                    | u_npu/u_nonconv/N1138                                                    | 32
+| u_npu/u_nonconv/N952                                                     | u_npu/u_nonconv/N952                                                     | 11
+| u_npu/u_nonconv/N890                                                     | u_npu/u_nonconv/N890                                                     | 6
+| u_npu/u_nonconv/N1032                                                    | u_npu/u_nonconv/N1032                                                    | 32
+| u_npu/u_nonconv/N1038                                                    | u_npu/u_nonconv/N1062                                                    | 18
+| u_npu/u_nonconv/N922                                                     | u_npu/u_nonconv/N922                                                     | 12
+| u_npu/u_nonconv/N1343 [16]                                               | u_npu/u_nonconv/N202                                                     | 265
+| u_npu/u_nonconv/state_r_reg [6]                                          | u_npu/u_nonconv/state_r_reg[6]                                           | 13
+| u_npu/u_nonconv/N1298                                                    | u_npu/u_nonconv/N1298                                                    | 9
+| u_npu/u_nonconv/N853                                                     | u_npu/u_nonconv/N853_23                                                  | 17
+| u_npu/u_nonconv/N1056                                                    | u_npu/u_nonconv/N1056                                                    | 32
+| u_npu/u_nonconv/N1087                                                    | u_npu/u_nonconv/N1087                                                    | 5
+| u_npu/u_nonconv/state_r_reg [11]                                         | u_npu/u_nonconv/state_r_reg[11]                                          | 256
+| u_npu/u_nonconv/N1062                                                    | u_npu/u_nonconv/N1062                                                    | 11
+| u_npu/u_nonconv/N1104                                                    | u_npu/u_nonconv/N1104                                                    | 5
+| u_npu/u_read_dma/accept_w                                                | u_npu/u_read_dma/N6_5                                                    | 38
+| u_npu/u_read_dma/N89                                                     | u_npu/u_read_dma/N89                                                     | 3
+| u_npu/u_axi_bridge/u_r_fifo/read_w                                       | u_npu/u_axi_bridge/u_r_fifo/N3                                           | 283
+| u_npu/u_read_dma/finish_w                                                | u_npu/u_read_dma/N89                                                     | 2
+| u_npu/u_regs/N1                                                          | u_npu/u_regs/N1                                                          | 149
+| u_npu/u_regs/N721                                                        | u_npu/u_regs/N721                                                        | 32
+| u_npu/u_regs/N745                                                        | u_npu/u_regs/N745                                                        | 32
+| u_npu/u_regs/N522                                                        | u_npu/u_regs/N522                                                        | 32
+| u_npu/u_regs/N665                                                        | u_npu/u_regs/N665                                                        | 32
+| u_npu/u_regs/N615                                                        | u_npu/u_regs/N615                                                        | 32
+| u_npu/u_regs/N639                                                        | u_npu/u_regs/N615                                                        | 32
+| u_npu/u_regs/N641                                                        | u_npu/u_regs/N641                                                        | 32
+| u_npu/u_regs/N587                                                        | u_npu/u_regs/N641                                                        | 3
+| u_npu/u_regs/N572                                                        | u_npu/u_regs/N572                                                        | 32
+| u_npu/u_regs/N669                                                        | u_npu/u_regs/N669                                                        | 32
+| u_npu/u_regs/N673                                                        | u_npu/u_regs/N673                                                        | 32
+| u_npu/u_regs/N677                                                        | u_npu/u_regs/N677                                                        | 32
+| u_npu/u_regs/N681                                                        | u_npu/u_regs/N681                                                        | 32
+| u_npu/u_regs/N685                                                        | u_npu/u_regs/N685                                                        | 32
+| u_npu/u_regs/N689                                                        | u_npu/u_regs/N689                                                        | 32
+| u_npu/u_regs/N693                                                        | u_npu/u_regs/N693                                                        | 32
+| u_npu/u_regs/N697                                                        | u_npu/u_regs/N697                                                        | 32
+| u_npu/u_write_dma/accept_w                                               | u_npu/u_write_dma/N10                                                    | 36
+| u_npu/u_write_dma/N109                                                   | u_npu/u_write_dma/N30_2                                                  | 4
+| u_npu/u_write_dma/N105                                                   | u_npu/u_write_dma/N105                                                   | 5
+| u_npu/u_write_dma/data_accept_w_1                                        | u_npu/u_write_dma/wdata_r                                                | 256
+| u_npu/u_apb_bridge/N20                                                   | u_npu/u_apb_bridge/N20_4                                                 | 45
+| u_npu/u_apb_bridge/u_response/N4                                         | u_npu/u_apb_bridge/master_state_r_fsm[1:0]_1                             | 32
+| _$$_VCC_$$_                                                              | _$$_VCC_$$_                                                              | 358
+| u_npu/u_conv/u_conv_write/N525                                           | u_npu/u_conv/u_conv_write/N525_3                                         | 32
+| u_npu/u_conv/u_conv_write/N71                                            | u_npu/u_conv/N2893_17                                                    | 26
+| u_npu/u_conv/u_conv_write/N483                                           | u_npu/u_conv/u_conv_write/N483                                           | 32
+| u_npu/u_conv/u_conv_write/N407                                           | u_npu/u_conv/N1497_1                                                     | 5
+| u_npu/u_conv/u_conv_write/state_r_reg [1]                                | u_npu/u_conv/u_conv_write/state_r_reg[1]                                 | 32
+| u_npu/u_conv/u_conv_write/N403                                           | u_npu/u_conv/u_conv_write/N403                                           | 5
+| u_npu/u_conv/u_conv_write/N451                                           | u_npu/u_conv/u_conv_write/N451                                           | 2
+| u_npu/u_conv/u_conv_write/N462                                           | u_npu/u_conv/u_conv_write/N462_1                                         | 3
+| u_npu/u_conv/u_conv_write/N428                                           | u_npu/u_conv/u_conv_write/N428                                           | 5
+| u_npu/u_conv/u_conv_write/N454                                           | u_npu/u_conv/u_conv_write/N454_5                                         | 3
+| u_npu/u_conv/u_conv_write/read_w                                         | u_npu/u_conv/u_conv_write/N13_3                                          | 6
+| u_npu/u_conv/u_conv_write/N509                                           | u_npu/u_conv/u_conv_write/N509_1                                         | 32
+| u_npu/u_conv/u_conv_write/N330                                           | u_npu/u_conv/u_conv_write/N330_15                                        | 7
+| u_npu/u_conv/u_conv_write/N449                                           | u_npu/u_conv/u_conv_write/N449                                           | 5
+| u_npu/u_conv/u_conv_write/N450                                           | u_npu/u_conv/u_conv_write/N450                                           | 2
+| u_npu/u_conv/N279                                                        | u_npu/u_conv/N279_5                                                      | 58
+| u_npu/u_conv/u_datapath/u_accum/g_channel[0].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[0].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[1].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[1].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[2].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[2].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[3].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[3].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[4].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[4].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[5].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[5].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[6].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[6].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[7].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[7].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[8].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[8].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[9].r4_valid_r                  | u_npu/u_conv/u_datapath/u_accum/g_channel[9].r4_valid_r                  | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[10].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[10].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[11].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[11].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[12].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[12].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[13].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[13].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[14].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[14].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[15].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[15].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[16].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[16].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[17].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[17].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[18].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[18].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[19].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[19].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[20].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[20].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[21].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[21].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[22].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[22].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[23].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[23].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[24].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[24].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[25].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[25].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[26].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[26].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[27].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[27].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[28].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[28].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[29].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[29].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[30].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[30].r4_valid_r                 | 64
+| u_npu/u_conv/u_datapath/u_accum/g_channel[31].r4_valid_r                 | u_npu/u_conv/u_datapath/u_accum/g_channel[31].r4_valid_r                 | 64
+| u_npu/u_conv/dp_lut_wr_valid_w                                           | u_npu/u_conv/lut_valid_r                                                 | 19
+| u_npu/u_conv/u_datapath/u_input_unpack/N29                               | u_npu/u_conv/u_datapath/u_input_unpack/N29                               | 11
+| u_npu/u_conv/u_datapath/u_input_unpack/N77                               | u_npu/u_conv/u_conv_write/N454_1                                         | 256
+| u_npu/u_conv/u_datapath/u_input_unpack/N64                               | u_npu/u_conv/u_datapath/u_input_unpack/N64                               | 5
+| u_npu/u_conv/u_datapath/u_quant_param_store/N5                           | u_npu/u_conv/u_datapath/u_quant_param_store/N173                         | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N29                          | u_npu/u_conv/u_datapath/u_quant_param_store/N29                          | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N53                          | u_npu/u_conv/u_datapath/u_quant_param_store/N29                          | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N77                          | u_npu/u_conv/u_datapath/u_quant_param_store/N77                          | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N101                         | u_npu/u_conv/u_datapath/u_quant_param_store/N77                          | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N125                         | u_npu/u_conv/u_datapath/u_quant_param_store/N125                         | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N149                         | u_npu/u_conv/u_datapath/u_quant_param_store/N125                         | 59
+| u_npu/u_conv/u_datapath/u_quant_param_store/N173                         | u_npu/u_conv/u_datapath/u_quant_param_store/N173                         | 59
+| u_npu/u_conv/u_datapath/residual_rd_valid_w                              | u_npu/u_conv/u_datapath/u_residual_buffer/rd_valid_r[1]                  | 256
+| u_npu/u_conv/u_datapath/u_residual_buffer/N311                           | u_npu/u_conv/u_datapath/u_residual_buffer/N311                           | 5
+| u_npu/u_conv/u_datapath/u_residual_buffer/N349                           | u_npu/u_conv/u_datapath/u_residual_buffer/N311                           | 5
+| u_npu/u_conv/u_datapath/u_residual_buffer/N271                           | u_npu/u_conv/u_datapath/u_residual_buffer/N271                           | 2
+| u_npu/u_conv/u_datapath/u_residual_buffer/N337                           | u_npu/u_conv/u_datapath/u_residual_buffer/N305                           | 9
+| u_npu/u_conv/u_datapath/u_residual_buffer/N305                           | u_npu/u_conv/u_datapath/u_residual_buffer/N305                           | 9
+| u_npu/u_conv/u_datapath/u_residual_buffer/N283                           | u_npu/u_conv/u_datapath/u_residual_buffer/N271                           | 2
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[0].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[0].capture_r     | 96
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[1].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[1].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[2].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[2].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[3].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[0].g_hold[3].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/N1241                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1242                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1243                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1244                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1245                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1246                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1247                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1248                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1249                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1250                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1251                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1252                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1253                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1254                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1255                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1256                             | u_npu/u_conv/u_datapath/u_result_quant/ND46[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[0].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[0].capture_r     | 96
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[1].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[1].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[2].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[2].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[3].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[1].g_hold[3].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/N1321                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1322                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1323                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1324                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1325                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1326                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1327                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1328                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1329                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1330                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1331                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1332                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1333                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1334                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1335                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1336                             | u_npu/u_conv/u_datapath/u_result_quant/ND47[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[0].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[0].capture_r     | 96
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[1].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[1].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[2].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[2].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[3].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[2].g_hold[3].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/N1401                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1402                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1403                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1404                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1405                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1406                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1407                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1408                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1409                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1410                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1411                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1412                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1413                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1414                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1415                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1416                             | u_npu/u_conv/u_datapath/u_result_quant/ND48[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[0].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[0].capture_r     | 96
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[1].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[1].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[2].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[2].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[3].capture_r     | u_npu/u_conv/u_datapath/u_result_quant/g_lane[3].g_hold[3].capture_r     | 128
+| u_npu/u_conv/u_datapath/u_result_quant/N1481                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1482                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[15]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1483                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1484                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[2]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1485                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1486                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[4]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1487                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1488                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[6]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1489                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1490                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[8]                           | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1491                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1492                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[10]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1493                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1494                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[12]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1495                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[14]                          | 8
+| u_npu/u_conv/u_datapath/u_result_quant/N1496                             | u_npu/u_conv/u_datapath/u_result_quant/ND49[15]                          | 8
+| u_npu/u_conv/u_datapath/accum_valid_w                                    | u_npu/u_conv/u_datapath/u_accum/g_channel[0].accum_valid_r               | 36
+| u_npu/u_conv/u_datapath/u_result_quant/quant_prepare_valid_i             | u_npu/u_conv/u_datapath/u_result_quant/N10234_2                          | 4
+| u_npu/u_conv/u_datapath/u_result_quant/request_active_r                  | u_npu/u_conv/u_datapath/u_result_quant/request_active_r                  | 4
+| u_npu/u_conv/u_datapath/u_result_quant/residual_low_w                    | u_npu/u_conv/u_datapath/u_result_quant/N14_11                            | 5
+| u_npu/u_conv/u_datapath/u_weight_store/N13                               | u_npu/u_conv/u_datapath/u_weight_store/N13                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N25                               | u_npu/u_conv/u_datapath/u_weight_store/N25                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N37                               | u_npu/u_conv/u_datapath/u_weight_store/N37                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N49                               | u_npu/u_conv/u_datapath/u_weight_store/N49                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N61                               | u_npu/u_conv/u_datapath/u_weight_store/N61                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N73                               | u_npu/u_conv/u_datapath/u_weight_store/N73                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N85                               | u_npu/u_conv/u_datapath/u_weight_store/N85                               | 256
+| u_npu/u_conv/u_datapath/u_weight_store/N3                                | u_npu/u_conv/u_datapath/u_weight_store/N3                                | 256
+| u_npu/u_conv/u_datapath/weight_rd_en_w                                   | u_npu/u_conv/u_datapath/u_window/a1_valid_r                              | 14
+| u_npu/u_conv/dp_weight_wr_valid_w                                        | u_npu/u_conv/weight_valid_r                                              | 11
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_en_w                 | u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].g_skew.rd_en_r[0]       | 14
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_skew.rd_en_r [1]      | u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].g_skew.rd_en_r[1]       | 14
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_skew.rd_en_r [2]      | u_npu/u_conv/u_datapath/u_weight_store/g_bank[3].g_skew.rd_en_r[2]       | 14
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_skew.rd_en_r [3]      | u_npu/u_conv/u_datapath/u_weight_store/g_bank[4].g_skew.rd_en_r[3]       | 14
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].g_skew.rd_en_r [4]      | u_npu/u_conv/u_datapath/u_weight_store/g_bank[5].g_skew.rd_en_r[4]       | 14
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].g_skew.rd_en_r [5]      | u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].g_skew.rd_en_r[5]       | 14
+| u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].g_skew.rd_en_r [6]      | u_npu/u_conv/u_datapath/u_weight_store/g_bank[7].g_skew.rd_en_r[6]       | 14
+| u_npu/u_conv/u_datapath/u_window/issue_w                                 | u_npu/u_conv/u_datapath/u_window/N18.lt_5                                | 92
+| u_npu/u_conv/u_datapath/u_window/N765                                    | u_npu/u_conv/u_datapath/u_window/N765                                    | 12
+| u_npu/u_conv/u_datapath/u_window/N754                                    | u_npu/u_conv/u_datapath/u_window/N754                                    | 16
+| u_npu/u_conv/u_datapath/u_window/promote_w                               | u_npu/u_conv/u_datapath/u_window/N6                                      | 114
+| u_npu/u_conv/u_datapath/u_window/N734                                    | u_npu/u_conv/u_datapath/u_window/N734                                    | 2
+| u_npu/u_conv/u_datapath/u_window/N707                                    | u_npu/u_conv/u_datapath/u_window/N707                                    | 2
+| u_npu/u_conv/u_datapath/u_window/cmd_accept_w                            | u_npu/u_conv/u_datapath/u_window/N3_5                                    | 114
+| u_npu/u_conv/u_datapath/u_window/N678                                    | u_npu/u_conv/N2361_1                                                     | 25
+| u_npu/u_conv/u_datapath/pair_fire_w                                      | u_npu/u_conv/u_datapath/u_window/N25                                     | 49
+| u_npu/u_conv/u_datapath/u_window/N814                                    | u_npu/u_conv/u_datapath/u_window/N814_6                                  | 5
+| u_npu/u_conv/u_datapath/u_writeback/N157                                 | u_npu/u_conv/u_datapath/u_writeback/N157                                 | 5
+| u_npu/u_conv/u_datapath/u_writeback/N159                                 | u_npu/u_conv/u_datapath/u_result_quant/N23_1                             | 5
+| u_npu/u_conv/u_datapath/u_writeback/N169                                 | u_npu/u_conv/u_datapath/u_writeback/N169_4                               | 6
+| u_npu/u_conv/u_datapath/u_writeback/chunk_start_r[31:0]_and              | u_npu/u_conv/u_datapath/u_writeback/N6                                   | 20
+| u_npu/u_conv/u_datapath/u_writeback/N161                                 | u_npu/u_conv/u_datapath/u_writeback/N157                                 | 5
+| u_npu/u_conv/u_datapath/u_writeback/N151                                 | u_npu/u_conv/u_datapath/u_writeback/N169_4                               | 5
+| u_npu/u_conv/u_datapath/param_rd_en_w                                    | u_npu/u_conv/u_datapath/u_result_quant/N3                                | 432
+| u_npu/u_conv/u_datapath/residual_rd_en_w                                 | u_npu/u_conv/u_datapath/u_result_quant/N16                               | 256
+| u_npu/u_conv/u_datapath/u_writeback/rd_en_w                              | u_npu/u_conv/u_datapath/u_writeback/N12                                  | 512
+| u_npu/u_nonconv/plane_rd_en_w                                            | u_npu/u_nonconv/state_r_fsm[4:0]_22                                      | 4
+| _$$_GND_$$_                                                              | _$$_GND_$$_                                                              | 16
+| u_npu/u_nonconv/row_rd_en_w                                              | u_npu/u_nonconv/state_r_reg[10]                                          | 4
+| u_npu/u_conv/u_datapath/lut_rd_en_w                                      | u_npu/u_conv/u_datapath/u_result_quant/N8                                | 4
+| u_npu/u_conv/u_datapath/cache_rd_en_w [0]                                | u_npu/u_conv/u_datapath/u_window/cache_rd_en_o[0]                        | 8
+| u_npu/u_conv/u_datapath/cache_rd_en_w [1]                                | u_npu/u_conv/u_datapath/u_window/cache_rd_en_o[1]                        | 8
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Global Clock Info:
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst               | Driver Pin     | Site Of Driver Inst
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 25795           | 0                   | clk_npu_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386
+| clkbufg_1/gopclkbufg     | USCM_383_882          | ntclkbufg_1         | 927             | 0                   | clk_mem_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_724_786
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

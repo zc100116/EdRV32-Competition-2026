@@ -1,0 +1,3 @@
+Source: synthesize/edrv32_npu_timing_probe_syn.vm
+GTP_DFF declarations for local g_read_slice rd_en_r with PAP_PRESERVE: 32
+GTP_DFF declarations for local channel/pixel r4_valid_r: 64
