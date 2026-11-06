@@ -274,7 +274,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              gshare_pc_shift=1, taken_bubble=0, lcb=None, fusion=(), loop_cache=False,
              early_address=0, direction_predictor=None, serial_alu=None,
              registered_control=False, second_level=False, dual_lsu=False, timeline=None,
-             lcb_split=False, alu_latency=1, shift_latency=None):
+             lcb_split=False, alu_latency=1, shift_latency=None,
+             frontend_probe=None, frontend_registered_margin=False):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -379,7 +380,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         return False, False, False
 
     def request(pc, cross):
-        nonlocal oracle_cursor
+        nonlocal oracle_cursor, fetch_delay
+        if frontend_probe is not None:
+            fetch_delay += frontend_probe.query(pc, active)
         query = None
         group_end = (pc & -group_bytes) + group_bytes
         if perfect_prediction and cross is None:
@@ -429,6 +432,9 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 ideal_group = None
 
     while True:
+        # T2 FE option: reserve from the eight physical IB/stream entries at
+        # cycle start, including the outstanding response; D pops are not credits yet.
+        frontend_margin = 8 - len(ib) - (len(halfwords) + len(pending)) // 2
         applied_redirect = registered_redirect
         registered_redirect = None
         if loop_cache:
@@ -473,6 +479,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         retirement = w2 if registered_control else w
         for record in retirement:
             pc = record.instruction.pc
+            if frontend_probe is not None and record.instruction.bits == 0x0000100f:
+                frontend_probe.invalidate()
             ending |= pc == end
             active |= pc == begin
             retired_controls += record.instruction.kind in CONTROL
@@ -806,10 +814,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 pass
             elif fetch_delay:
                 fetch_delay -= 1
-            elif len(halfwords) <= group_bytes // 2:
+            elif len(halfwords) <= group_bytes // 2 and (
+                    not frontend_registered_margin or frontend_margin >= 2):
                 pending, fetch_pc, cross_target, query = request(fetch_pc, cross_target)
                 if query[1]:
-                    fetch_delay = taken_bubble
+                    fetch_delay += taken_bubble
 
         # All predictor mutations occur at the edge, after the concurrent F1 query.
         m_updates = []
