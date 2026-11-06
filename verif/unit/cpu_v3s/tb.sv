@@ -48,6 +48,7 @@ module tb;
     integer warm_jalr;
     integer wrong_jalr;
     integer accepted_divisions;
+    integer accepted_requests;
     integer stalled_jal0;
     integer deferred_jal_swap;
     integer retained_jal_mapping;
@@ -171,7 +172,7 @@ module tb;
                 if (!dut.d_available_w)
                     stalled_d_slot1++;
             end
-            if (dc_req_valid && ((scenario >= 4 && scenario <= 5) || scenario==11 || (scenario==19 || scenario==20)))
+            if (dc_req_valid && (scenario==4 || scenario==11 || scenario==19 || scenario==20))
                 $fatal(1,"FAIL canceled/faulted load requested scenario=%0d pc=%h",
                     scenario,dut.e_record_r[0][31:0]);
             if (scenario==10 && dut.m_lane_fault_w != 0 &&
@@ -188,19 +189,21 @@ module tb;
                 dut.e_record_r[0][38:32]==7'h67 && dut.e_record_r[0][100]) begin
                 wrong_jalr++;
                 if (!dut.e_swap_r || dut.e_target_match_w || !dut.e_redirect0_w ||
-                    dut.e_record_r[0][132:101]!=32 || dut.e_redirect_pc_w!=48)
+                    dut.e_record_r[0][132:101]!=32 || dut.e_lane_target_w[0]!=48)
                     $fatal(1,"FAIL swapped JALR missed wrong target");
             end
             if (dut.div_start_w)
                 accepted_divisions++;
+            if (dc_req_valid && dc_ready)
+                accepted_requests++;
             if ((scenario==14 || scenario==15) && dut.div_start_w)
                 $fatal(1,"FAIL flushed younger DIV started");
             if (scenario==16 && dut.trace_valid_w!=0 &&
                 ((dut.trace_valid_w[0] && dut.trace_pc_w[31:0]==12) ||
                 (dut.trace_valid_w[1] && dut.trace_pc_w[63:32]==12)))
                 $fatal(1,"FAIL flushed younger MUL retired");
-            if ((scenario==14 || scenario==16) && dut.e_valid_r[1] &&
-                dut.e_record_r[1][31:0]==8 && (!dut.e_redirect1_w || dut.div_wait_w))
+            if ((scenario==14 || scenario==16) && dut.e_valid_r[1] && !dut.e_resolved_r &&
+                dut.e_record_r[1][31:0]==8 && (!dut.e_redirect1_w || !dut.e_resolve_w))
                 $fatal(1,"FAIL older branch waited for younger multiply/divide");
             if (scenario==21 && dut.d_redirect_r && !dut.d_redirect_issued_r &&
                 dut.d_record_w[0][31:0]==8 && dut.d_record_w[1][31:0]==12) begin
@@ -239,7 +242,8 @@ module tb;
                 end else if (scenario == 5) begin
                     if (dut.m_trap_pc_w != 0 || dut.m_trap_cause_w != 0 ||
                         dut.m_trap_value_w != 2 ||
-                        dut.m_commit_w != 0)
+                        dut.m_commit_w != 0 || accepted_requests != 1 ||
+                        !dc_kill || dc_commit)
                         $fatal(1,"FAIL older branch fault");
                     finished=1;
                 end else if (scenario == 10) begin
@@ -294,10 +298,12 @@ module tb;
                         (dut.trace_rd_w[lane*5+:5]!=1 ||
                         dut.trace_rd_data_w[lane*32+:32]!=16))
                         $fatal(1,"FAIL swapped JALR link");
-                    if (scenario==17 && dut.trace_pc_w[lane*32+:32]==12 &&
+                    if ((scenario==17 || scenario==22) &&
+                        dut.trace_pc_w[lane*32+:32]==12 &&
                         (dut.trace_rd_w[lane*5+:5]!=5 || dut.trace_rd_data_w[lane*32+:32]!=33))
                         $fatal(1,"FAIL swapped DIV result");
-                    if (scenario==17 && dut.trace_pc_w[lane*32+:32]==16 &&
+                    if ((scenario==17 || scenario==22) &&
+                        dut.trace_pc_w[lane*32+:32]==16 &&
                         dut.trace_rd_data_w[lane*32+:32]!=34)
                         $fatal(1,"FAIL swapped DIV WAW forwarding");
                     if (scenario==18 && dut.trace_pc_w[lane*32+:32]==20 &&
@@ -316,13 +322,14 @@ module tb;
     end
     initial begin
         finished=1;
-        for (scenario=1;scenario<=21;scenario++) begin
+        for (scenario=1;scenario<=22;scenario++) begin
             rst_n_i=0;
             repeat(3) @(negedge clk_i);
             for (i=0;i<64;i++) memory[i]=32'h00000013;
             retired=0;redirects=0;swaps=0;d_slot1=0;traps=0;trace_traps=0;
             device_commits=0;irq_meip=0;stalled_d_slot1=0;
             warm_jalr=0;wrong_jalr=0;accepted_divisions=0;
+            accepted_requests=0;
             stalled_jal0=0;deferred_jal_swap=0;retained_jal_mapping=0;
             expected_count=3;
             expected_pc[0]=0;expected_pc[1]=4;expected_pc[2]=8;
@@ -441,6 +448,14 @@ module tb;
                     memory[4]=32'h00100393;
                     expected_count=4;expected_pc[3]=16;
                 end
+                22: begin
+                    memory[0]=32'h06400493;
+                    memory[1]=32'h00300513;
+                    memory[2]=32'h00001663; // correct not-taken branch, older in pipe1
+                    memory[3]=32'h02a4c2b3; // younger DIV waits for registered resolution
+                    memory[4]=32'h00128313;
+                    expected_count=5;expected_pc[3]=12;expected_pc[4]=16;
+                end
                 default: $fatal(1,"FAIL scenario");
             endcase
             finished=0;rst_n_i=1;cycles=0;
@@ -464,7 +479,8 @@ module tb;
                 retired != expected_count)) ||
                 (scenario==9 && (stalled_d_slot1 != 1 || d_slot1 != 1 || redirects != 0)) ||
                 (scenario==12 && warm_jalr==0) || (scenario==13 && wrong_jalr==0) ||
-                (scenario==15 && retired!=2) || (scenario==17 && accepted_divisions!=1) ||
+                (scenario==15 && retired!=2) ||
+                ((scenario==17 || scenario==22) && accepted_divisions!=1) ||
                 (scenario==18 && (stalled_jal0!=1 || deferred_jal_swap!=1)) ||
                 (scenario==21 && retained_jal_mapping!=1))
                 $fatal(1,"FAIL coverage scenario=%0d retired=%0d swap=%0d E=%0d D1=%0d trap=%0d",

@@ -87,17 +87,24 @@ module edrv32_cpu_core (
     reg e_redirect_advanced_r;
     reg e_redirect_old_r;
     wire [1:0] m_squash_w;
-    reg [31:0] e_redirect_pc_r;
-    reg [36:0] e_redirect_ras_r;
-    reg e_redirect_push_r;
-    reg e_redirect_pop_r;
-    reg [31:0] e_redirect_link_r;
-    reg [1:0] e_redirect_cause_r;
+    wire [36:0] e_redirect_ras_w;
+    wire e_redirect_push_w;
+    wire e_redirect_pop_w;
+    wire [31:0] e_redirect_link_w;
+    wire [1:0] e_redirect_cause_w;
+    reg [31:0] e_redirect_target_lane_r [0:1];
+    reg [31:0] e_redirect_next_lane_r [0:1];
+    reg [36:0] e_redirect_ras_lane_r [0:1];
+    reg [31:0] e_redirect_origin_lane_r [0:1];
+    reg [1:0] e_redirect_action_lane_r [0:1];
+    reg [1:0] e_redirect_cause_lane_r [0:1];
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] e_redirect_lane_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] e_redirect_taken_copy1_r;
     reg m_redirect_r;
     reg m_redirect_trap_r;
     wire m_front_capture_w;
     reg [31:0] m_redirect_origin_r;
-    reg [31:0] e_redirect_origin_r;
+    wire [31:0] e_redirect_origin_w;
     reg [31:0] d_redirect_origin_r;
     reg [31:0] m_redirect_pc_r;
     reg [36:0] m_redirect_ras_r;
@@ -110,7 +117,7 @@ module edrv32_cpu_core (
     reg [31:0] d_redirect_link_r;
     reg update_valid_r;
     reg update_clear_r;
-    reg [6:0] update_clear_index_r;
+    wire [6:0] update_clear_index_w;
     reg [31:0] update_pc_r;
     reg [31:0] update_target_r;
     reg [2:0] update_type_r;
@@ -150,10 +157,11 @@ module edrv32_cpu_core (
     wire [1:0] e_lane_call_w;
     wire [1:0] e_lane_return_w;
     wire [1:0] e_lane_jump_fault_w;
+    reg [1:0] e_jump_fault_r;
+    wire e_old_control_unresolved_w;
     wire [1:0] e_lane_redirect_needed_w;
     wire [31:0] e_lane_target_w [0:1];
     wire [31:0] e_lane_next_pc_w [0:1];
-    wire [31:0] e_lane_actual_pc_w [0:1];
     wire [2:0] e_lane_type_w [0:1];
     wire [1:0] e_lane_exception_w;
     wire [1:0] m_lane_fault_w;
@@ -253,7 +261,7 @@ module edrv32_cpu_core (
     assign m_branch_lane_w = m_valid_r[1] &&
         (m_class_r[1] == C_BRANCH || m_class_r[1] == C_JAL);
     assign e_older_fault_w = e_valid_r[e_old_w] &&
-        (e_lane_exception_w[e_old_w] || e_lane_jump_fault_w[e_old_w] ||
+        (e_lane_exception_w[e_old_w] || e_jump_fault_r[e_old_w] ||
         (!e_old_w && (e_class_r[0] == C_LOAD || e_class_r[0] == C_STORE) &&
         e_misaligned_w));
     assign e_kill_young_w = e_older_fault_w ||
@@ -368,7 +376,6 @@ module edrv32_cpu_core (
     wire [31:0] e_instr_w;
     wire [31:0] e_next_pc_w;
     wire [31:0] e_address_w;
-    wire [31:0] e_actual_pc_w;
     wire e_control_w;
     wire e_redirect_w;
     wire e_redirect0_w;
@@ -527,7 +534,7 @@ module edrv32_cpu_core (
         (m_redirect_trap_r ? 2'd0 : 2'd3) :
         e_redirect_w ? 2'd2 : d_redirect_w ? 2'd1 : 2'd0;
     assign trace_redirect_pc_w = m_redirect_r ? m_redirect_origin_r :
-        e_redirect_r ? e_redirect_origin_r : d_redirect_origin_r;
+        e_redirect_r ? e_redirect_origin_w : d_redirect_origin_r;
     reg trace_trap_r;
     reg trace_trap_pending_r;
     reg [31:0] trace_cause_pending_r;
@@ -636,10 +643,10 @@ module edrv32_cpu_core (
         .redirect_pc_i(frontend_redirect_pc_w),
         .redirect_ras_i(frontend_redirect_ras_w),
         .redirect_push_i(!m_redirect_r && (e_redirect_r ?
-            e_redirect_push_r : d_redirect_push_r)),
+            e_redirect_push_w : d_redirect_push_r)),
         .redirect_pop_i(!m_redirect_r &&
-            e_redirect_r && e_redirect_pop_r),
-        .redirect_return_pc_i(e_redirect_r ? e_redirect_link_r : d_redirect_link_r),
+            e_redirect_r && e_redirect_pop_w),
+        .redirect_return_pc_i(e_redirect_r ? e_redirect_link_w : d_redirect_link_r),
         .d_redirect_valid_i(frontend_d_redirect_w),
         .d_redirect_pc_i(d_redirect_pc_r),
         .d_redirect_slot_i(d_redirect_slot_r),
@@ -650,7 +657,7 @@ module edrv32_cpu_core (
         .halt_i(sleep_r || div_wait_front_r || m_wait_r),
         .update_valid_i(update_valid_r),
         .update_clear_i(update_clear_r),
-        .update_clear_index_i(update_clear_index_r),
+        .update_clear_index_i(update_clear_index_w),
         .update_pc_i(update_pc_r),
         .update_target_i(update_target_r),
         .update_type_i(update_type_r),
@@ -900,8 +907,6 @@ module edrv32_cpu_core (
             assign e_lane_taken_w[branch_lane] = e_class_r[branch_lane] == C_BRANCH ?
                 e_lane_branch_taken_w[branch_lane] :
                 e_class_r[branch_lane] == C_JAL || e_class_r[branch_lane] == C_JALR;
-            assign e_lane_actual_pc_w[branch_lane] = e_lane_taken_w[branch_lane] ?
-                e_lane_target_w[branch_lane] : e_lane_next_pc_w[branch_lane];
             assign e_lane_call_w[branch_lane] =
                 (e_class_r[branch_lane] == C_JAL || e_class_r[branch_lane] == C_JALR) &&
                 (instr_w[11:7] == 1 || instr_w[11:7] == 5);
@@ -926,7 +931,6 @@ module edrv32_cpu_core (
     assign unused_next_pc_w = e_next_pc_w;
     assign e_address_w = e_operand_a_r[0] + e_imm_r[0];
     assign e_control_w = e_lane_control_w[0];
-    assign e_actual_pc_w = e_lane_actual_pc_w[0];
     assign e_jump_misaligned_w = e_lane_jump_fault_w[0];
     assign e_target_match_w = e_class_r[0] == C_JALR ?
         (!e_record_r[0][REC_PRED_TARGET_LSB] &&
@@ -935,7 +939,7 @@ module edrv32_cpu_core (
     // A younger M fault can wait for its older load; E is already on the discarded path.
     assign e_resolve_w = (|e_valid_r) && !e_resolved_r && !m_front_capture_w &&
         m_lane_fault_w == 0 && !e_flush_w && !e_repair_pending_r &&
-        !div_wait_w;
+        (!div_wait_w || e_old_control_unresolved_w);
     assign e_redirect0_w = e_resolve_w && e_valid_r[0] && e_lane_redirect_needed_w[0] &&
         !(e_swap_r && (e_older_fault_w ||
         (e_valid_r[1] && e_lane_redirect_needed_w[1])));
@@ -947,16 +951,17 @@ module edrv32_cpu_core (
     assign d_redirect_w = d_redirect_r;
     assign e_flush_w = (e_redirect_r && e_redirect_advanced_r) || m_redirect_r;
     assign m_kill_all_w = m_redirect_r && !m_redirect_trap_r;
-    assign e_redirect_pc_w = e_lane_actual_pc_w[e_redirect1_w];
     assign e_memory_w = e_survive_w[0] &&
         (e_class_r[0] == C_LOAD || e_class_r[0] == C_STORE);
     assign e_misaligned_w = (e_instr_w[13:12] == 1 && e_address_w[0]) ||
         (e_instr_w[13:12] == 2 && e_address_w[1:0] != 0);
-    // A younger divide cannot stall resolution of an older pipe-1 branch or fault.
-    assign e_div_cancel_w = e_swap_r && e_valid_r[1] &&
-        (e_lane_exception_w[1] || e_lane_jump_fault_w[1] || e_lane_redirect_needed_w[1]);
+    // Resolve an older control instruction before starting its younger divide.
+    // cpu-spec 4.4/4.9: this cycle's comparison only enters result registers.
+    assign e_old_control_unresolved_w = e_swap_r && e_valid_r[1] &&
+        e_lane_control_w[1] && !e_resolved_r;
+    assign e_div_cancel_w = e_swap_r && e_valid_r[1] && e_kill_young_w;
     assign div_start_w = e_valid_r[0] && !e_div_cancel_w &&
-        e_class_r[0] == C_DIV && !div_started_r &&
+        e_class_r[0] == C_DIV && !div_started_r && !e_old_control_unresolved_w &&
         m_valid_r == 0 && w_valid_r == 0 && !m_redirect_w && !e_repair_pending_r;
     assign div_wait_w = e_valid_r[0] && !e_div_cancel_w &&
         e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
@@ -1017,17 +1022,19 @@ module edrv32_cpu_core (
     assign m_trap_value_w = m_interrupt_w ? 32'd0 : m_trap_lane_w ? m_value1_r :
         m_exception_r ? m_value_r : m_result_r[0];
     assign m_commit0_w = m_advance_w && m_valid_r[0] && !m_squash_w[0] &&
-        !m_fault0_w && !m_interrupt_w;
+        !m_fault0_w && !m_interrupt_w && !(m_swap_r && m_fault1_w);
     assign m_commit_w[0] = m_commit0_w;
     assign m_commit_w[1] = m_advance_w && m_valid_r[1] && !m_squash_w[1] &&
         !m_fault1_w && !m_interrupt_w &&
         !(!m_swap_r && m_fault0_w);
     assign dc_commit_o = m_valid_r[0] && m_memory_w && !m_fault0_w && !m_interrupt_w &&
+        !(m_swap_r && m_fault1_w) &&
         !m_device_started_r && (dc_resp_device_i || dc_resp_valid_i);
     assign dc_kill_o = m_valid_r[0] &&
         (m_class_r[0] == C_LOAD || m_class_r[0] == C_STORE) && !m_exception_r &&
         !m_device_started_r &&
-        (m_squash_w[0] || (m_trap_w && (m_interrupt_w || m_fault0_w)));
+        (m_squash_w[0] || (m_trap_w &&
+        (m_interrupt_w || m_fault0_w || (m_swap_r && m_fault1_w))));
     assign dc_fence_o = m_valid_r[0] && !m_squash_w[0] && m_class_r[0] == C_FENCE && !m_trap_w;
     assign dc_clean_all_o = m_valid_r[0] && !m_squash_w[0] && m_class_r[0] == C_FENCE_I &&
         !m_fence_phase_r && !m_trap_w;
@@ -1051,9 +1058,9 @@ module edrv32_cpu_core (
         m_record_r[0][REC_PC_LSB +: 32] + 32'd4;
     assign backend_redirect_w = m_redirect_w || m_redirect_r || e_redirect_r;
     assign backend_redirect_pc_w = m_redirect_r ? m_redirect_pc_r :
-        e_redirect_pc_r;
+        e_redirect_pc_w;
     assign backend_redirect_ras_w = m_redirect_r ? m_redirect_ras_r :
-        e_redirect_ras_r;
+        e_redirect_ras_w;
     assign frontend_redirect_w = m_redirect_r || e_redirect_r ||
         (d_redirect_r && d_redirect_issued_r);
     assign frontend_redirect_pc_w = m_redirect_r || e_redirect_r ?
@@ -1062,6 +1069,43 @@ module edrv32_cpu_core (
         backend_redirect_ras_w : d_redirect_ras_r;
     assign frontend_d_redirect_w = d_redirect_r && !d_redirect_issued_r &&
         !m_redirect_r && !e_redirect_r;
+    // Each comparison drives result FFs, then local FF copies select <=16 payload bits.
+    genvar redirect_slice;
+    generate
+        for (redirect_slice = 0; redirect_slice < 2;
+            redirect_slice = redirect_slice + 1) begin : g_redirect_slice
+            wire [15:0] pc0_w;
+            wire [15:0] pc1_w;
+            assign pc0_w = e_redirect_taken_copy1_r[redirect_slice] ?
+                e_redirect_target_lane_r[0][redirect_slice*16 +: 16] :
+                e_redirect_next_lane_r[0][redirect_slice*16 +: 16];
+            assign pc1_w = e_redirect_taken_copy1_r[redirect_slice+2] ?
+                e_redirect_target_lane_r[1][redirect_slice*16 +: 16] :
+                e_redirect_next_lane_r[1][redirect_slice*16 +: 16];
+            assign e_redirect_pc_w[redirect_slice*16 +: 16] =
+                e_redirect_lane_copy1_r[redirect_slice] ? pc1_w : pc0_w;
+            assign e_redirect_ras_w[redirect_slice*16 +: 16] =
+                e_redirect_lane_copy1_r[redirect_slice+2] ?
+                e_redirect_ras_lane_r[1][redirect_slice*16 +: 16] :
+                e_redirect_ras_lane_r[0][redirect_slice*16 +: 16];
+            assign e_redirect_link_w[redirect_slice*16 +: 16] =
+                e_redirect_lane_copy1_r[redirect_slice+5] ?
+                e_redirect_next_lane_r[1][redirect_slice*16 +: 16] :
+                e_redirect_next_lane_r[0][redirect_slice*16 +: 16];
+            assign e_redirect_origin_w[redirect_slice*16 +: 16] =
+                e_redirect_lane_copy1_r[redirect_slice+7] ?
+                e_redirect_origin_lane_r[1][redirect_slice*16 +: 16] :
+                e_redirect_origin_lane_r[0][redirect_slice*16 +: 16];
+        end
+    endgenerate
+    assign e_redirect_ras_w[36:32] = e_redirect_lane_copy1_r[4] ?
+        e_redirect_ras_lane_r[1][36:32] : e_redirect_ras_lane_r[0][36:32];
+    assign {e_redirect_push_w, e_redirect_pop_w} = e_redirect_lane_copy1_r[9] ?
+        e_redirect_action_lane_r[1] : e_redirect_action_lane_r[0];
+    assign e_redirect_cause_w = e_redirect_lane_copy1_r[9] ?
+        e_redirect_cause_lane_r[1] : e_redirect_cause_lane_r[0];
+    assign update_clear_index_w = e_redirect_lane_copy1_r[9] ?
+        e_redirect_origin_lane_r[1][9:3] : e_redirect_origin_lane_r[0][9:3];
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             e_redirect_r <= 0;
@@ -1084,19 +1128,11 @@ module edrv32_cpu_core (
     always @(posedge clk_i) begin
         e_redirect_advanced_r <= e_advance_w;
         e_redirect_old_r <= e_redirect1_w == e_old_w;
-        e_redirect_pc_r <= e_redirect_pc_w;
-        e_redirect_ras_r <= e_record_r[e_redirect1_w][REC_RAS_LSB +: 37];
-        e_redirect_push_r <= e_lane_call_w[e_redirect1_w];
-        e_redirect_pop_r <= e_lane_return_w[e_redirect1_w];
-        e_redirect_link_r <= e_lane_next_pc_w[e_redirect1_w];
-        e_redirect_cause_r <= !e_lane_control_w[e_redirect1_w] ? 2'd3 :
-            e_class_r[e_redirect1_w] == C_BRANCH &&
-            e_record_r[e_redirect1_w][REC_PRED_TAKEN] !=
-            e_lane_branch_taken_w[e_redirect1_w] ? 2'd1 : 2'd2;
+        e_redirect_lane_copy1_r <= {10{e_redirect1_w}};
+        e_redirect_taken_copy1_r <= {{2{e_lane_taken_w[1]}}, {2{e_lane_taken_w[0]}}};
         m_redirect_pc_r <= m_redirect_pc_w;
         m_redirect_trap_r <= m_trap_w;
         m_redirect_origin_r <= m_record_r[0][REC_PC_LSB +: 32];
-        e_redirect_origin_r <= e_record_r[e_redirect1_w][REC_PC_LSB +: 32];
         d_redirect_origin_r <= d_record_w[d_redirect_slot_w][REC_PC_LSB +: 32];
         m_redirect_ras_r <= committed_ras_w;
         d_redirect_issued_r <= d_issue_w != 0;
@@ -1106,7 +1142,6 @@ module edrv32_cpu_core (
         d_redirect_push_r <= d_rd_w[d_redirect_slot_w] == 1 ||
             d_rd_w[d_redirect_slot_w] == 5;
         d_redirect_link_r <= d_record_w[d_redirect_slot_w][REC_PC_LSB +: 32] + 32'd4;
-        update_clear_index_r <= e_record_r[e_redirect1_w][REC_PC_LSB + 3 +: 7];
         update_pc_r <= e_record_r[e_branch_lane_w][REC_PC_LSB +: 32];
         update_target_r <= e_lane_target_w[e_branch_lane_w];
         update_type_r <= e_lane_type_w[e_branch_lane_w];
@@ -1170,6 +1205,7 @@ module edrv32_cpu_core (
             m_wait_r <= 0;
             div_wait_front_r <= 0;
             e_resolved_r <= 0;
+            e_jump_fault_r <= 0;
             d_redirected_r <= 0;
         end else begin
             // The frontend observes M backpressure one cycle after D-cache lookup.
@@ -1199,8 +1235,12 @@ module edrv32_cpu_core (
                 e_valid_r <= 0;
             if (e_resolve_w)
                 e_resolved_r <= 1;
+            if (e_resolve_w)
+                e_jump_fault_r <= e_lane_jump_fault_w;
             if (e_advance_w || m_redirect_w || d_issue_w != 0)
                 e_resolved_r <= 0;
+            if (e_advance_w || m_redirect_w || e_flush_w || d_issue_w != 0)
+                e_jump_fault_r <= 0;
             if (m_redirect_w || m_kill_all_w)
                 m_valid_r <= 0;
             if (div_start_w)
@@ -1236,6 +1276,16 @@ module edrv32_cpu_core (
     end
     always @(posedge clk_i) begin
         for (stage_idx = 0; stage_idx < 2; stage_idx = stage_idx + 1) begin
+            e_redirect_target_lane_r[stage_idx] <= e_lane_target_w[stage_idx];
+            e_redirect_next_lane_r[stage_idx] <= e_lane_next_pc_w[stage_idx];
+            e_redirect_ras_lane_r[stage_idx] <= e_record_r[stage_idx][REC_RAS_LSB +: 37];
+            e_redirect_origin_lane_r[stage_idx] <= e_record_r[stage_idx][REC_PC_LSB +: 32];
+            e_redirect_action_lane_r[stage_idx] <=
+                {e_lane_call_w[stage_idx], e_lane_return_w[stage_idx]};
+            e_redirect_cause_lane_r[stage_idx] <= !e_lane_control_w[stage_idx] ? 2'd3 :
+                e_class_r[stage_idx] == C_BRANCH &&
+                e_record_r[stage_idx][REC_PRED_TAKEN] != e_lane_branch_taken_w[stage_idx] ?
+                2'd1 : 2'd2;
             w2_record_r[stage_idx] <= w_record_r[stage_idx];
             w2_result_r[stage_idx] <= w_result_w[stage_idx];
             w2_rd_r[stage_idx] <= w_rd_r[stage_idx];
@@ -1267,17 +1317,17 @@ module edrv32_cpu_core (
                             m_exception_r <= 1;
                             m_cause_r <= e_class_r[stage_idx] == C_STORE ? 32'd6 : 32'd4;
                             m_value_r <= e_address_w;
-                        end else if (e_jump_misaligned_w) begin
-                            m_exception_r <= 1;
+                        end else if (e_control_w) begin
+                            m_exception_r <= e_jump_misaligned_w;
                             m_cause_r <= 0;
-                            m_value_r <= e_actual_pc_w;
+                            m_value_r <= e_lane_target_w[0];
                         end
                     end
                 end
                 if (stage_idx == 1) begin
                     m_exception1_r <= e_exception1_r || e_lane_jump_fault_w[1];
                     m_cause1_r <= e_exception1_r ? e_cause1_r : 32'd0;
-                    m_value1_r <= e_exception1_r ? e_value1_r : e_lane_actual_pc_w[1];
+                    m_value1_r <= e_exception1_r ? e_value1_r : e_lane_target_w[1];
                 end
             end
             // C-F1 path 3: load operands whenever E is free; e_valid_r alone
@@ -1459,7 +1509,7 @@ module edrv32_cpu_core (
         d_issue_w != 0 && d_use1_w[0] ? d_bypass_w[0] : 3'b0};
     always @(*) begin
         trace_redirect_cause_w = m_redirect_r ? 2'd0 :
-            e_redirect_r ? e_redirect_cause_r : 2'd0;
+            e_redirect_r ? e_redirect_cause_w : 2'd0;
         trace_stall_cause_w = e_repair_pending_r ? 3'd1 : div_wait_w ? 3'd5 : 3'd0;
         if (d_count_w != 0 && d_issue_w == 0) begin
             if (d_csr_wait_w && !e_repair_pending_r)
