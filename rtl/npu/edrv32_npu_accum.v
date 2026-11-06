@@ -27,7 +27,13 @@ module edrv32_npu_accum (
     // Occupancy of the R4/R5/ACC valid chain.
     output wire idle_o
 );
-    wire [63:0] pixel_busy_w;
+    // One kept copy of the valid chain drives only idle_o and accum_valid_o, so
+    // conv control sees one register instead of an OR tree over 64 lanes.
+    (* keep = "true", syn_preserve = 1 *) reg ctrl_r4_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg ctrl_r5_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg ctrl_accum_valid_r;
+    reg ctrl_r4_last_r;
+    reg ctrl_r5_last_r;
     reg [48:0] r5_tag_r;
     reg r4_prepare_r;
     reg [48:0] r4_tag_r;
@@ -37,6 +43,27 @@ module edrv32_npu_accum (
         r4_tag_r <= sum_tag_i;
         r5_tag_r <= r4_tag_r;
         accum_tag_r <= r5_tag_r;
+    end
+
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            ctrl_r4_valid_r <= 1'b0;
+            ctrl_r5_valid_r <= 1'b0;
+            ctrl_accum_valid_r <= 1'b0;
+        end else if (cancel_i) begin
+            ctrl_r4_valid_r <= 1'b0;
+            ctrl_r5_valid_r <= 1'b0;
+            ctrl_accum_valid_r <= 1'b0;
+        end else begin
+            ctrl_r4_valid_r <= sum_valid_i;
+            ctrl_r5_valid_r <= ctrl_r4_valid_r;
+            ctrl_accum_valid_r <= ctrl_r5_valid_r && ctrl_r5_last_r;
+        end
+    end
+
+    always @(posedge clk_i) begin
+        ctrl_r4_last_r <= sum_last_i;
+        ctrl_r5_last_r <= ctrl_r4_last_r;
     end
 
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -55,10 +82,7 @@ module edrv32_npu_accum (
                 (* keep = "true", syn_preserve = 1 *) reg r5_valid_r;
                 (* keep = "true", syn_preserve = 1 *) reg r5_first_r;
                 (* keep = "true", syn_preserve = 1 *) reg r4_first_r;
-                (* keep = "true", syn_preserve = 1 *) reg r4_last_r;
                 (* keep = "true", syn_preserve = 1 *) reg r4_fold_r;
-                (* keep = "true", syn_preserve = 1 *) reg r5_last_r;
-                reg accum_valid_r;
                 wire signed [18:0] sum_w;
                 reg signed [19:0] r4_folded_r;
                 reg signed [19:0] r4_plain_r;
@@ -67,33 +91,22 @@ module edrv32_npu_accum (
                 wire signed [31:0] extended_w;
                 assign sum_w = sum_data_i[19*(32*pixel+CHANNEL) +: 19];
                 assign extended_w = {{12{r5_data_r[19]}}, r5_data_r};
-                assign pixel_busy_w[32*pixel+CHANNEL] = r4_valid_r || r5_valid_r
-                    || accum_valid_r;
-                // PDS cannot resolve nested generate names; the owner drives the port.
-                if (CHANNEL == 0 && pixel == 0) begin : g_valid_out
-                    assign accum_valid_o = accum_valid_r;
-                end
 
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i) begin
                         r4_valid_r <= 1'b0;
                         r5_valid_r <= 1'b0;
-                        accum_valid_r <= 1'b0;
                     end else if (cancel_i) begin
                         r4_valid_r <= 1'b0;
                         r5_valid_r <= 1'b0;
-                        accum_valid_r <= 1'b0;
                     end else begin
                         r4_valid_r <= sum_valid_i;
                         r5_valid_r <= r4_valid_r;
-                        accum_valid_r <= r5_valid_r && r5_last_r;
                     end
                 end
                 always @(posedge clk_i) begin
                     r4_first_r <= sum_first_i;
                     r5_first_r <= r4_first_r;
-                    r4_last_r <= sum_last_i;
-                    r5_last_r <= r4_last_r;
                     r4_fold_r <= sum_fold_i[32*pixel+CHANNEL];
                     r4_plain_r <= {sum_w[18], sum_w};
                     r5_data_r <= r4_fold_r ? r4_folded_r : r4_plain_r;
@@ -126,5 +139,6 @@ module edrv32_npu_accum (
     assign quant_prepare_valid_o = r4_prepare_r && !cancel_i;
     assign quant_prepare_tag_o = r4_tag_r;
     assign accum_tag_o = accum_tag_r;
-    assign idle_o = ~|pixel_busy_w;
+    assign accum_valid_o = ctrl_accum_valid_r;
+    assign idle_o = !(ctrl_r4_valid_r || ctrl_r5_valid_r || ctrl_accum_valid_r);
 endmodule
