@@ -403,7 +403,7 @@ module edrv32_cpu_core (
     reg [31:0] e_value_r;
     reg [31:0] m_value_r;
     wire [31:0] e_alu_w [0:1];
-    wire [31:0] e_alu_b_w [0:1];
+    (* keep = "true", syn_preserve = 1 *) reg [31:0] e_alu_operand_b_copy1_r [0:1];
     reg [31:0] e_result_w [0:1];
     reg [31:0] m_result_r [0:1];
     reg [31:0] w_result_r [0:1];
@@ -609,6 +609,7 @@ module edrv32_cpu_core (
     assign d_source_w[2] = d_rs1_w[1];
     assign d_source_w[3] = d_rs2_w[1];
     genvar lane;
+    genvar shift_bank;
     generate
         for (lane = 0; lane < 2; lane = lane + 1) begin : g_lane
             assign d_instr_w[lane] = d_record_w[lane][REC_INSTR_LSB +: 32];
@@ -619,11 +620,23 @@ module edrv32_cpu_core (
                 d_illegal_w[lane], d_immediate_w[lane], d_write_w[lane],
                 d_use2_w[lane], d_use1_w[lane], d_rd_w[lane], d_rs2_w[lane],
                 d_rs1_w[lane]} = d_predecode_w[lane*70 +: 70];
-            assign e_alu_b_w[lane] = e_immediate_r[lane] ?
-                e_imm_r[lane] : e_operand_b_r[lane];
+            wire [29:0] shift_amount_w;
+            for (shift_bank = 0; shift_bank < 6;
+                shift_bank = shift_bank + 1) begin : g_shift_bank
+                (* keep = "true", syn_preserve = 1 *) reg [4:0] amount_copy1_r;
+                assign shift_amount_w[shift_bank*5 +: 5] = amount_copy1_r;
+                always @(posedge clk_i) begin
+                    if (e_operand_load_copy_w[lane])
+                        amount_copy1_r <= d_immediate_w[d_map_w[lane]] ?
+                            d_imm_w[d_map_w[lane]][4:0] : e_forward_w[lane*2+1][4:0];
+                    if (e_repair_w && e_repair_mask_r[lane*2+1] && !e_immediate_r[lane])
+                        amount_copy1_r <= m_result_w[0][4:0];
+                end
+            end
             edrv32_cpu_alu u_alu (
                 .operand_a_i(e_operand_a_r[lane]),
-                .operand_b_i(e_alu_b_w[lane]),
+                .operand_b_i(e_alu_operand_b_copy1_r[lane]),
+                .shift_amount_i(shift_amount_w),
                 .operation_i(e_operation_r[lane]),
                 .result_o(e_alu_w[lane])
             );
@@ -1398,6 +1411,8 @@ module edrv32_cpu_core (
             if (e_operand_load_copy_w[stage_idx]) begin
                 e_operand_a_r[stage_idx] <= e_forward_w[stage_idx*2];
                 e_operand_b_r[stage_idx] <= e_forward_w[stage_idx*2+1];
+                e_alu_operand_b_copy1_r[stage_idx] <= d_immediate_w[d_map_w[stage_idx]] ?
+                    d_imm_w[d_map_w[stage_idx]] : e_forward_w[stage_idx*2+1];
                 e_branch_a_r[stage_idx] <= e_forward_w[stage_idx*2];
                 e_branch_b_r[stage_idx] <= e_forward_w[stage_idx*2+1];
             end
@@ -1410,6 +1425,9 @@ module edrv32_cpu_core (
                 end
                 if (e_repair_mask_r[stage_idx*2+1]) begin
                     e_operand_b_r[stage_idx] <= m_result_w[0];
+                    if (!e_immediate_r[stage_idx]) begin
+                        e_alu_operand_b_copy1_r[stage_idx] <= m_result_w[0];
+                    end
                     e_branch_b_r[stage_idx] <= m_result_w[0];
                 end
             end
