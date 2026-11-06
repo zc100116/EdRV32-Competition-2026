@@ -69,6 +69,10 @@ module edrv32_npu_accum (
                 assign extended_w = {{12{r5_data_r[19]}}, r5_data_r};
                 assign pixel_busy_w[32*pixel+CHANNEL] = r4_valid_r || r5_valid_r
                     || accum_valid_r;
+                // PDS cannot resolve nested generate names; the owner drives the port.
+                if (CHANNEL == 0 && pixel == 0) begin : g_valid_out
+                    assign accum_valid_o = accum_valid_r;
+                end
 
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i) begin
@@ -121,7 +125,6 @@ module edrv32_npu_accum (
     // Preparation follows R4, one edge ahead of the final ACC vector.
     assign quant_prepare_valid_o = r4_prepare_r && !cancel_i;
     assign quant_prepare_tag_o = r4_tag_r;
-    assign accum_valid_o = g_channel[0].g_pixel[0].accum_valid_r;
     assign accum_tag_o = accum_tag_r;
     assign idle_o = ~|pixel_busy_w;
 endmodule

@@ -188,14 +188,17 @@ module edrv32_npu_mac_array (
 
             assign sum_data_o[19*channel +: 19] = local_sum_r[18:0];
             assign sum_data_o[19*(32+channel) +: 19] = local_sum_r[37:19];
+            // PDS resolves generate names poorly; channel 0 drives the shared ports.
+            if (channel == 0) begin : g_control_out
+                assign sum_valid_o = valid_r[11];
+                assign sum_first_o = first_r[11];
+                assign sum_last_o = last_r[11];
+                assign mac_beat_o = valid_r[0];
+            end
         end
     endgenerate
 
     // All 32 local control chains describe the same term stream.
-    assign sum_valid_o = g_channel[0].valid_r[11];
-    assign sum_first_o = g_channel[0].first_r[11];
-    assign sum_last_o = g_channel[0].last_r[11];
     assign sum_tag_o = tag_r[11];
-    assign mac_beat_o = g_channel[0].valid_r[0];
     assign idle_o = ~|channel_busy_w;
 endmodule
