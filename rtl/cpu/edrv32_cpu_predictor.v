@@ -62,9 +62,27 @@ module edrv32_cpu_predictor (
     reg [127:0] ras_data_r;
     reg [1:0] ras_ptr_r;
     reg [2:0] ras_count_r;
+    wire [127:0] ras_effective_data_w;
+    reg [1:0] ras_effective_ptr_w;
+    reg [2:0] ras_effective_count_w;
+    reg ras_accept_r;
+    reg ras_taken_r;
+    reg [2:0] ras_type_r;
+    reg [31:0] ras_return_pc_r;
+    reg ras_restore_r;
+    (* keep = "true", syn_preserve = 1 *) reg [15:0] ras_restore_copy1_r;
+    reg [36:0] ras_restore_state_r;
+    reg ras_restore_push_r;
+    reg ras_restore_pop_r;
+    reg [31:0] ras_restore_return_pc_r;
     wire [6:0] query_idx_w;
     wire [11:0] direction_idx_w;
-    wire [1:0] ras_top_w;
+    wire [1:0] ras_pop_top_w;
+    wire [1:0] ras_restore_pop_top_w;
+    reg [31:0] ras_hold_top_r;
+    reg [31:0] ras_pop_top_r;
+    reg [31:0] ras_restore_pop_top_r;
+    wire [31:0] ras_effective_top_w;
     wire [31:0] branch_return_pc_w;
     wire [31:0] group_return_pc_w;
     (* keep = 1 *) wire [1:0] tag_half_hit_w /* synthesis syn_keep=1 */;
@@ -98,23 +116,32 @@ module edrv32_cpu_predictor (
     assign predict_hit_o = btb_valid_r[query_idx_w] && (&tag_half_hit_w) && position_hit_w;
     assign predict_taken_o = btb_valid_r[query_idx_w] && (&tag_half_hit_w) &&
         position_hit_w && direction_taken_w;
-    assign ras_top_w = ras_ptr_r - 1'b1;
-    assign predict_target_o = btb_data_w[2:0] == 4 && ras_count_r != 0 ?
-        ras_data_r[ras_top_w * 32 +: 32] : btb_data_w[35:4];
+    assign ras_pop_top_w = ras_effective_ptr_w - 2'd2;
+    assign ras_restore_pop_top_w = restore_ras_i[33:32] - 2'd2;
+    // Register all stack-top candidates before the F1 target selection. No
+    // pending-operation forwarding mux precedes the four-entry array read.
+    assign ras_effective_top_w = ras_restore_r ?
+        (ras_restore_push_r ? ras_restore_return_pc_r :
+        ras_restore_pop_r && restore_count_w != 0 ? ras_restore_pop_top_r :
+        ras_restore_state_r[31:0]) :
+        ras_accept_r && ras_taken_r && ras_type_r == 3 ? ras_return_pc_r :
+        ras_accept_r && ras_taken_r && ras_type_r == 4 && ras_count_r != 0 ?
+        ras_pop_top_r : ras_hold_top_r;
+    assign predict_target_o = btb_data_w[2:0] == 4 && ras_effective_count_w != 0 ?
+        ras_effective_top_w : btb_data_w[35:4];
     assign predict_position_o = {btb_data_w[3], 1'b0};
     assign predict_history_o = history_r;
-    assign predict_ras_o = {ras_count_r, ras_ptr_r, ras_data_r[ras_top_w * 32 +: 32]};
-    assign restore_ptr_w = restore_ras_i[33:32];
-    assign restore_count_w = restore_ras_i[36:34];
+    assign predict_ras_o = {ras_effective_count_w, ras_effective_ptr_w,
+        ras_effective_top_w};
+    assign restore_ptr_w = ras_restore_state_r[33:32];
+    assign restore_count_w = ras_restore_state_r[36:34];
     assign restore_pop_ptr_w = restore_ptr_w - 1'b1;
-    assign restore_write_ptr_w = restore_pop_i && restore_count_w != 0 ?
+    assign restore_write_ptr_w = ras_restore_pop_r && restore_count_w != 0 ?
         restore_pop_ptr_w : restore_ptr_w;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             btb_valid_r <= 0;
             history_r <= 0;
-            ras_ptr_r <= 0;
-            ras_count_r <= 0;
         end else begin
             if (update_valid_i) begin
                 btb_valid_r[update_pc_i[9:3]] <= 1'b1;
@@ -124,31 +151,63 @@ module edrv32_cpu_predictor (
             end
             if (clear_valid_i)
                 btb_valid_r[clear_index_i] <= 1'b0;
-            if (restore_valid_i) begin
-                ras_ptr_r <= restore_ptr_w;
-                ras_count_r <= restore_count_w;
-                if (restore_pop_i && restore_count_w != 0) begin
-                    ras_ptr_r <= restore_pop_ptr_w;
-                    ras_count_r <= restore_count_w - 1'b1;
-                end
-                if (restore_push_i) begin
-                    ras_ptr_r <= (restore_pop_i && restore_count_w != 0 ?
-                        restore_pop_ptr_w : restore_ptr_w) + 1'b1;
-                    if (restore_pop_i && restore_count_w != 0)
-                        ras_count_r <= restore_count_w;
-                    else
-                        ras_count_r <= restore_count_w == RAS_ENTRIES ?
-                            restore_count_w : restore_count_w + 1'b1;
-                end
-            end else if (query_accept_i && predict_taken_o) begin
-                if (btb_data_w[2:0] == 3) begin
-                    ras_ptr_r <= ras_ptr_r + 1'b1;
-                    if (ras_count_r != RAS_ENTRIES)
-                        ras_count_r <= ras_count_r + 1'b1;
-                end else if (btb_data_w[2:0] == 4 && ras_count_r != 0) begin
-                    ras_ptr_r <= ras_ptr_r - 1'b1;
-                    ras_count_r <= ras_count_r - 1'b1;
-                end
+        end
+    end
+    // cpu-spec 4.4: pending operations forward into the logical RAS seen by
+    // each F1 query. Physical RAS state consumes only registered metadata.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            ras_accept_r <= 0;
+            ras_restore_r <= 0;
+            ras_restore_copy1_r <= 0;
+            ras_ptr_r <= 0;
+            ras_count_r <= 0;
+        end else begin
+            ras_accept_r <= query_accept_i;
+            ras_restore_r <= restore_valid_i;
+            ras_restore_copy1_r <= restore_valid_copy_i;
+            ras_ptr_r <= ras_effective_ptr_w;
+            ras_count_r <= ras_effective_count_w;
+        end
+    end
+    always @(posedge clk_i) begin
+        ras_hold_top_r <= ras_effective_top_w;
+        ras_pop_top_r <= ras_effective_data_w[ras_pop_top_w * 32 +: 32];
+        ras_restore_pop_top_r <= ras_effective_data_w[ras_restore_pop_top_w * 32 +: 32];
+        ras_taken_r <= predict_taken_o;
+        ras_type_r <= btb_data_w[2:0];
+        ras_return_pc_r <= branch_return_pc_w;
+        ras_restore_state_r <= restore_ras_i;
+        ras_restore_push_r <= restore_push_i;
+        ras_restore_pop_r <= restore_pop_i;
+        ras_restore_return_pc_r <= restore_return_pc_i;
+    end
+    always @(*) begin
+        ras_effective_ptr_w = ras_ptr_r;
+        ras_effective_count_w = ras_count_r;
+        if (ras_restore_r) begin
+            ras_effective_ptr_w = restore_ptr_w;
+            ras_effective_count_w = restore_count_w;
+            if (ras_restore_pop_r && restore_count_w != 0) begin
+                ras_effective_ptr_w = restore_pop_ptr_w;
+                ras_effective_count_w = restore_count_w - 1'b1;
+            end
+            if (ras_restore_push_r) begin
+                ras_effective_ptr_w = restore_write_ptr_w + 1'b1;
+                if (ras_restore_pop_r && restore_count_w != 0)
+                    ras_effective_count_w = restore_count_w;
+                else
+                    ras_effective_count_w = restore_count_w == RAS_ENTRIES ?
+                        restore_count_w : restore_count_w + 1'b1;
+            end
+        end else if (ras_accept_r && ras_taken_r) begin
+            if (ras_type_r == 3) begin
+                ras_effective_ptr_w = ras_ptr_r + 1'b1;
+                if (ras_count_r != RAS_ENTRIES)
+                    ras_effective_count_w = ras_count_r + 1'b1;
+            end else if (ras_type_r == 4 && ras_count_r != 0) begin
+                ras_effective_ptr_w = ras_ptr_r - 1'b1;
+                ras_effective_count_w = ras_count_r - 1'b1;
             end
         end
     end
@@ -240,21 +299,22 @@ module edrv32_cpu_predictor (
             wire restore_link_w;
             wire query_link_w;
             assign restore_top_w = restore_count_w != 0 && restore_pop_ptr_w == ras_idx[1:0];
-            assign restore_link_w = restore_push_i && restore_write_ptr_w == ras_idx[1:0];
-            assign query_link_w = query_accept_i && predict_taken_o &&
-                btb_data_w[2:0] == 3 && ras_ptr_r == ras_idx[1:0];
+            assign restore_link_w = ras_restore_push_r && restore_write_ptr_w == ras_idx[1:0];
+            assign query_link_w = ras_accept_r && ras_taken_r &&
+                ras_type_r == 3 && ras_ptr_r == ras_idx[1:0];
             // Each backend redirect replica owns eight RAS data bits.
             for (ras_byte = 0; ras_byte < 4; ras_byte = ras_byte + 1) begin : g_byte
                 wire restore_valid_w;
-                assign restore_valid_w = restore_valid_copy_i[ras_idx*4 + ras_byte];
+                assign restore_valid_w = ras_restore_copy1_r[ras_idx*4 + ras_byte];
+                assign ras_effective_data_w[ras_idx*32 + ras_byte*8 +: 8] =
+                    restore_valid_w && (restore_top_w || restore_link_w) ?
+                        (restore_link_w ? ras_restore_return_pc_r[ras_byte*8 +: 8] :
+                        ras_restore_state_r[ras_byte*8 +: 8]) :
+                    !restore_valid_w && query_link_w ? ras_return_pc_r[ras_byte*8 +: 8] :
+                        ras_data_r[ras_idx*32 + ras_byte*8 +: 8];
                 always @(posedge clk_i) begin
-                    if (restore_valid_w && (restore_top_w || restore_link_w))
-                        ras_data_r[ras_idx*32 + ras_byte*8 +: 8] <= restore_link_w ?
-                            restore_return_pc_i[ras_byte*8 +: 8] :
-                            restore_ras_i[ras_byte*8 +: 8];
-                    else if (!restore_valid_w && query_link_w)
-                        ras_data_r[ras_idx*32 + ras_byte*8 +: 8] <=
-                            branch_return_pc_w[ras_byte*8 +: 8];
+                    ras_data_r[ras_idx*32 + ras_byte*8 +: 8] <=
+                        ras_effective_data_w[ras_idx*32 + ras_byte*8 +: 8];
                 end
             end
         end
