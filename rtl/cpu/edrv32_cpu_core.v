@@ -132,6 +132,8 @@ module edrv32_cpu_core (
     wire e_capture_w;
     wire m_kill_all_w;
     wire d_early_eligible_w;
+    wire [4:0] d_early_select_w;
+    wire [31:0] d_early_base_w;
     reg e_early_r;
     reg e_repair_pending_r;
     reg [3:0] e_repair_mask_r;
@@ -191,7 +193,17 @@ module edrv32_cpu_core (
             m_slow_r) &&
         !(w_valid_r[0] && w_dest_r[0] &&
             w_rd_r[0] == d_rs1_w[d_map_w[0]] && w_mul_r[0]);
-    assign dc_early_addr_o = e_forward_w[0] + d_imm_w[d_map_w[0]];
+    // Qualifying queries exclude E and unregistered M/W producers. Select
+    // registered data directly so those excluded results never feed this adder.
+    assign d_early_select_w = {d_bypass_select_w[d_map_w[0]*2][6:3],
+        d_bypass_select_w[d_map_w[0]*2][0]};
+    assign d_early_base_w =
+        ({32{d_early_select_w[0]}} & d_register_w[d_map_w[0]*2]) |
+        ({32{d_early_select_w[1]}} & m_result_r[0]) |
+        ({32{d_early_select_w[2]}} & m_result_r[1]) |
+        ({32{d_early_select_w[3]}} & w_result_r[0]) |
+        ({32{d_early_select_w[4]}} & w_result_r[1]);
+    assign dc_early_addr_o = d_early_base_w + d_imm_w[d_map_w[0]];
     assign dc_early_valid_o = d_issue_valid_w && d_early_eligible_w;
     // Format each way before its late hit selects an operand (cpu-spec 4.9).
     function [31:0] load_value;
