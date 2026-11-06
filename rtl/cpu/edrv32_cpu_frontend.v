@@ -63,8 +63,9 @@ module edrv32_cpu_frontend (
     // Fixed four-byte instructions: a response contributes one or two whole words.
     localparam REC_BITS = 179;
     localparam STREAM_BITS = 160;
-    reg [31:0] f1_pc_r /* synthesis syn_maxfan=16 */;
-    reg [31:3] f1_icache_pc_r /* synthesis syn_preserve=1 */;
+    reg [31:0] f1_pc_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:1] f1_pc_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy2_r;
     reg f2_pending_r;
     reg [31:0] f2_pc_r;
     wire [1:0] f2_count_w;
@@ -112,7 +113,11 @@ module edrv32_cpu_frontend (
     wire [2:0] response_remaining_w;
     wire request_space_w;
     wire [31:0] sequential_pc_w;
-    (* keep = 1 *) wire [31:0] default_pc_w /* synthesis syn_keep=1 */;
+    wire [31:0] next_pc_w;
+    wire pc_hold_w;
+    wire pc_sequential_w;
+    wire pc_predict_w;
+    wire pc_correct_w;
     wire ib_one_free_w;
     wire ib_two_free_w;
     wire buffered_space_w;
@@ -171,13 +176,19 @@ module edrv32_cpu_frontend (
     assign request_space_w = (!f2_pending_r && buffered_space_w) ||
         (ic_resp_valid_i && response_space_w);
     assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !f2_correct_w && request_space_w;
-    assign sequential_pc_w = {f1_icache_pc_r + 29'd1, 3'b0};
-    // Compute redirect/hold/sequential selection independently of the prediction.
-    // The late BTB/direction decision then crosses a single data mux.
-    assign default_pc_w = redirect_w ? redirect_pc_w :
-        f2_correct_w ? f2_correct_pc_w :
-        request_accept_w ? sequential_pc_w : f1_pc_r;
-    assign ic_req_addr_o = {f1_icache_pc_r, 3'b0};
+    assign sequential_pc_w = {f1_pc_copy2_r + 29'd1, 3'b0};
+    // cpu-spec 4.4/4.9: all addresses are parallel candidates. The late cache
+    // handshake only selects a candidate; it never enters a PC incrementer.
+    assign pc_hold_w = !redirect_w && !f2_correct_w && !request_accept_w;
+    assign pc_sequential_w = request_accept_w && !predict_taken_w;
+    assign pc_predict_w = request_accept_w && predict_taken_w;
+    assign pc_correct_w = !redirect_w && f2_correct_w;
+    assign next_pc_w = ({32{redirect_w}} & redirect_pc_w) |
+        ({32{pc_correct_w}} & f2_correct_pc_w) |
+        ({32{pc_predict_w}} & predict_target_w) |
+        ({32{pc_sequential_w}} & sequential_pc_w) |
+        ({32{pc_hold_w}} & f1_pc_r);
+    assign ic_req_addr_o = {f1_pc_copy2_r, 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
     assign ic_kill_o = redirect_w && f2_pending_r;
     assign ic_inv_o = invalidate_i;
@@ -188,7 +199,7 @@ module edrv32_cpu_frontend (
     edrv32_cpu_predictor u_predictor (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .query_pc_i(f1_pc_r[31:1]),
+        .query_pc_i(f1_pc_copy1_r[31:1]),
         .query_accept_i(request_accept_w),
         .predict_hit_o(predict_hit_w),
         .predict_taken_o(predict_taken_w),
@@ -307,11 +318,12 @@ module edrv32_cpu_frontend (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             f1_pc_r <= 0;
-            f1_icache_pc_r <= 0;
+            f1_pc_copy1_r <= 0;
+            f1_pc_copy2_r <= 0;
         end else begin
-            f1_pc_r <= request_accept_w && predict_taken_w ? predict_target_w : default_pc_w;
-            f1_icache_pc_r <= request_accept_w && predict_taken_w ? predict_target_w[31:3] :
-                default_pc_w[31:3];
+            f1_pc_r <= next_pc_w;
+            f1_pc_copy1_r <= next_pc_w[31:1];
+            f1_pc_copy2_r <= next_pc_w[31:3];
         end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
