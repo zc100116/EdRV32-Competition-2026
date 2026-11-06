@@ -525,7 +525,9 @@
                 device_wait_cycles++;
             if (u_core.m_trap_w && u_core.e_valid_r[observed_e_pipe] &&
                 u_core.d_count_w != 0 &&
-                u_core.e_lane_actual_pc_w[observed_e_pipe] !=
+                (u_core.e_lane_taken_w[observed_e_pipe] ?
+                    u_core.e_lane_target_w[observed_e_pipe] :
+                    u_core.e_lane_next_pc_w[observed_e_pipe]) !=
                 (u_core.e_record_r[observed_e_pipe][100] ?
                     u_core.e_record_r[observed_e_pipe][132:101] : observed_e_pc + 4) &&
                 candidate0[6:0] == 7'h6f && !u_core.d_record_w[0][99])
