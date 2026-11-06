@@ -8,6 +8,8 @@
 
 结果用来确认 `docs/reports/2026-11-04-npu-fmax-rtl.md` 的路径切分实际能达到多少频率。本卡只做时序分析，不生成 bitstream，也不上板。
 
+> **2026-11-06 修订**：第一次在 PDS 编译时报 `Verilog-4123: Could not resolve hierarchical name g_pixel.accum_valid_r`（`edrv32_npu_accum.v` 第 124 行）。原因是 PDS 不能解析跨两层 generate 的层次名。已在 `d04321f7` 改成由 generate 内部直接驱动端口，`edrv32_npu_mac_array.v` 的控制输出也按同样方式改了。R1 请使用本修订所在的提交。已经建好的检出更新到该提交后，在 PDS 中重新 Compile 即可，IP 和工程设置都不用改。
+
 ## 2. 输入
 
 | 轮次 | RTL 检出 | 说明 |
