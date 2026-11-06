@@ -1,0 +1,68 @@
+compile W=855 C=0 E=0
+Action compile: Real time elapsed is 0h:0m:31s
+Action compile: CPU time elapsed is 0h:0m:1s
+Action compile: Process CPU time elapsed is 0h:0m:1s
+Action compile: Peak memory pool usage is 250 MB
+
+synthesize W=1784 C=0 E=0
+W: ConstraintEditor-4019: Port 'rst_n_i' unspecified I/O constraint.
+W: ConstraintEditor-4019: Port 'scan_i' unspecified I/O constraint.
+W: ConstraintEditor-4019: Port 'scan_o' unspecified I/O constraint.
+W: Timing-4087: Port 'scan_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'scan_i' is not constrained, it is treated as combinational input.
+Action synthesize: Real time elapsed is 0h:1m:56s
+Action synthesize: CPU time elapsed is 0h:0m:9s
+Action synthesize: Process CPU time elapsed is 0h:0m:10s
+Action synthesize: Peak memory pool usage is 1,157 MB
+
+device_map W=23 C=0 E=0
+W: ConstraintEditor-4019: Port 'rst_n_i' unspecified I/O constraint.
+W: ConstraintEditor-4019: Port 'scan_i' unspecified I/O constraint.
+W: ConstraintEditor-4019: Port 'scan_o' unspecified I/O constraint.
+Action dev_map: Real time elapsed is 0h:0m:24s
+Action dev_map: CPU time elapsed is 0h:0m:1s
+Action dev_map: Process CPU time elapsed is 0h:0m:1s
+Action dev_map: Peak memory pool usage is 661 MB
+
+place_route W=3 C=0 E=0
+W: ConstraintEditor-4019: Port 'rst_n_i' unspecified I/O constraint.
+W: ConstraintEditor-4019: Port 'scan_i' unspecified I/O constraint.
+W: ConstraintEditor-4019: Port 'scan_o' unspecified I/O constraint.
+Design 'edrv32_cpu_l1_timing_probe' has been placed and routed successfully.
+Action pnr: Real time elapsed is 0h:24m:1s
+Action pnr: CPU time elapsed is 0h:2m:14s
+Action pnr: Process CPU time elapsed is 0h:2m:46s
+Action pnr: Peak memory pool usage is 2,484 MB
+
+report_timing W=3 C=0 E=0
+W: Timing-4087: Port 'scan_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'scan_i' is not constrained, it is treated as combinational input.
+Report timing is finished successfully.
+Action report_timing: Real time elapsed is 0h:0m:35s
+Action report_timing: CPU time elapsed is 0h:0m:3s
+Action report_timing: Process CPU time elapsed is 0h:0m:4s
+Action report_timing: Peak memory pool usage is 2,052 MB
+
+generate_bitstream W=0 C=1 E=0
+C: Bitstream-2001: SCBV has not been set. Please set SCBV value based on PCB board, where is in configuration tab of bit stream options.
+The bitstream file is "G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V018/generate_bitstream/edrv32_cpu_l1_timing_probe.sbit"
+Action gen_bit_stream: Real time elapsed is 0h:0m:55s
+Action gen_bit_stream: CPU time elapsed is 0h:0m:6s
+Action gen_bit_stream: Process CPU time elapsed is 0h:0m:6s
+Action gen_bit_stream: Peak memory pool usage is 2,282 MB
+
+Post-route I/O table
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| PORT        | DIRECTION     | LOC     | BANK       | VCCIO     | IOSTANDARD     | DRIVE     | BUS_KEEPER     | SLEW     | OFF_CHIP_TERMINATION     | VREF_MODE     | VREF_IN_MODE     | VREF_OUT_MODE     | DDR_TERM_MODE     | DIFF_IN_TERM_MODE     | OPEN_DRAIN     | DDR_RES     | IN_MAG     | HYS     | DYN_TERM     | CONSTRAINT     | IO_REGISTER
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clk_i       | input         | D18     | BANKL3     | 3.3       | LVCMOS33       | NA        | NONE           | NA       | NA                       | NA            | NA               | NA                | NA                | NA                    | NA             | NA          | NA         | ON      | NA           | YES            | NA
+| rst_n_i     | input         | L2      | BANKR5     | 3.3       | LVCMOS33       | NA        | NONE           | NA       | NA                       | NA            | NA               | NA                | NA                | NA                    | NA             | NA          | NA         | OFF     | NA           | NO             | NA
+| scan_i      | input         | J1      | BANKR5     | 3.3       | LVCMOS33       | NA        | NONE           | NA       | NA                       | NA            | NA               | NA                | NA                | NA                    | NA             | NA          | NA         | OFF     | NA           | NO             | NA
+| scan_o      | output        | R20     | BANKL5     | 3.3       | LVCMOS33       | 8         | NONE           | SLOW     | NA                       | NA            | NA               | NA                | NA                | NA                    | OFF            | NA          | NA         | NA      | NA           | NO             | NA
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0
