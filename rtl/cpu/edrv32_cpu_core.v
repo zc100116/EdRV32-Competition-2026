@@ -1101,11 +1101,13 @@ module edrv32_cpu_core (
     assign dc_kill_o = m_valid_r[0] &&
         (m_class_r[0] == C_LOAD || m_class_r[0] == C_STORE) && !m_exception_r &&
         !m_device_started_r &&
-        (m_squash_w[0] || (m_trap_w &&
-        (m_interrupt_w || m_fault0_w || (m_swap_r && m_fault1_w))));
-    assign dc_fence_o = m_valid_r[0] && !m_squash_w[0] && m_class_r[0] == C_FENCE && !m_trap_w;
+        (m_squash_w[0] || m_interrupt_w || m_fault0_w || (m_swap_r && m_fault1_w));
+    // Each kill reason already implies a trap; do not feed trap acceptance back
+    // through cache controls. Serial fences have no younger M lane to await.
+    assign dc_fence_o = m_valid_r[0] && !m_squash_w[0] &&
+        m_class_r[0] == C_FENCE && !m_block_early_w;
     assign dc_clean_all_o = m_valid_r[0] && !m_squash_w[0] && m_class_r[0] == C_FENCE_I &&
-        !m_fence_phase_r && !m_trap_w;
+        !m_fence_phase_r && !m_block_early_w;
     // cpu-spec 4.5: system instructions are ready in M without a D-cache response.
     // Specialize their commit predicate so D-cache hit/ready cannot feed MRET or WFI.
     assign m_system_commit_w = m_valid_r[0] && !m_squash_w[0] && !m_exception_r &&
