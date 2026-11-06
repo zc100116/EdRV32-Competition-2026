@@ -9,11 +9,23 @@ import tempfile
 
 from tools.synth.cpu_calibrate import read_pds
 
-from tools.synth.cpu_levels import pairs
+from tools.synth.cpu_levels import pairs, worst
 from tools.synth.test_netlist_paths import fixture, cell
 
 
 class PairLevelsTest(unittest.TestCase):
+    def test_global_reduction_matches_full_pair_extrema(self):
+        design = fixture()
+        design['modules']['test']['cells']['l2']['connections']['A'].append(8)
+        for start, end in [(None, None), ('^a ', 'ff.D'), ('ip_r', '^q_r '),
+                           ('q_r', 'ff.D'), (None, 'no_such_endpoint')]:
+            rows = list(pairs(design, start, end))
+            expected = {kind: max((row[5], row[6]) for row in rows if row[2] == kind)
+                        for kind in {row[2] for row in rows}}
+            actual = {kind: (row['levels'], row['max_fanout'])
+                      for kind, row in worst(design, start, end).items()}
+            self.assertEqual(actual, expected)
+
     def test_shorter_start_is_not_lost_and_enable_has_own_pair(self):
         design = fixture()
         design['modules']['test']['cells']['l2']['connections']['A'].append(8)

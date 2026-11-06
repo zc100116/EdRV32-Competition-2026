@@ -99,6 +99,41 @@ def pairs(design, start=None, end=None):
                        endpoint['pin'], depth, fanout)
 
 
+def worst(design, start=None, end=None):
+    """Compute each launch category's global maximum using the same mapped graph.
+
+    The full pair enumeration remains the default; this equivalent reduction is
+    useful for comparing candidate netlists without writing every pair again.
+    """
+    graph, logic, roots, endpoints, loads, _ = analyze(design, graph_only=True)
+    order = list(TopologicalSorter(graph).static_order())
+    chosen = [point for point in endpoints if not end or
+              re.search(end, point['signal'] + ' ' + point['pin'])]
+    selected = {bit: point for bit, point in roots.items() if not start or
+                re.search(start, point['signal'] + ' ' + point['pin'])}
+    result = {}
+    for kind in sorted({category(point) for point in selected.values()}):
+        state = {bit: (0, len(loads[bit]), bit) for bit, point in selected.items()
+                 if category(point) == kind}
+        for bit in order:
+            if bit in roots:
+                continue
+            candidates = [state[prev] for prev in graph[bit] if prev in state]
+            if candidates:
+                depth, fanout, root = max(candidates, key=lambda value: value[:2])
+                typ = logic[bit][1]
+                weight = int(is_lut(typ) or is_mux(typ) or is_carry(typ))
+                state[bit] = (depth + weight, max(fanout, len(loads[bit])), root)
+        reached = [point for point in chosen if point['bit'] in state]
+        if reached:
+            endpoint = max(reached, key=lambda point: state[point['bit']][:2])
+            depth, fanout, root = state[endpoint['bit']]
+            result[kind] = dict(start=roots[root]['signal'], start_pin=roots[root]['pin'],
+                                end=endpoint['signal'], end_pin=endpoint['pin'],
+                                levels=depth, max_fanout=fanout)
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
@@ -106,11 +141,18 @@ def main():
     parser.add_argument('--netlist', type=Path, help='reuse a synthesized XC7 JSON')
     parser.add_argument('--start', help='start register/IP signal or pin regex')
     parser.add_argument('--end', help='end register/IP signal or pin regex')
+    parser.add_argument('--worst-only', action='store_true',
+                        help='write equivalent global maxima per category instead of all pairs')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     netlist = args.netlist or synthesize(output, args.commit)
     design = json.loads(netlist.read_text())
+    if args.worst_only:
+        summary = output / 'worst.json'
+        summary.write_text(json.dumps(worst(design, args.start, args.end), indent=2) + '\n')
+        print(summary)
+        return
     with (output / 'pairs.tsv').open('w') as stream:
         writer = csv.writer(stream, delimiter='\t')
         writer.writerow(['start', 'start_pin', 'category', 'end', 'end_pin',
