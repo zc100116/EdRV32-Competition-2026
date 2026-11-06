@@ -274,7 +274,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              gshare_pc_shift=1, taken_bubble=0, lcb=None, fusion=(), loop_cache=False,
              early_address=0, direction_predictor=None, serial_alu=None,
              registered_control=False, second_level=False, dual_lsu=False, timeline=None,
-             lcb_split=False):
+             lcb_split=False, alu_latency=1, shift_latency=None):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -741,6 +741,12 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         # M-resolved branches also permit an entire younger E group to be wrong.
                         record.trace_index = -1
                         record.next_pc = instruction.pc + instruction.size
+                    if instruction.kind == 'alu' and (alu_latency != 1 or
+                                                       shift_latency is not None):
+                        shift = operation(instruction) in {
+                            'slli', 'srli', 'srai', 'sll', 'srl', 'sra'}
+                        record.result_latency = max(2 if record.late else 1,
+                            shift_latency if shift and shift_latency is not None else alu_latency)
                     if instruction.kind == 'load' and early_address:
                         base = instruction.sources[-1] if instruction.sources else 0
                         recent = last_writes.get(base)

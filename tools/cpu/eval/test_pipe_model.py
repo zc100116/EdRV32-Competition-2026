@@ -26,6 +26,22 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_two_cycle_alu_and_shift_results(self):
+        producer = instruction(0, rd=1, sources=(2,))
+        consumer = instruction(4, rd=3, sources=(1,))
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        base = run([producer, consumer], **options)['cycles']
+        self.assertEqual(run([producer, consumer], alu_latency=2, **options)['cycles'],
+                         base + 1)
+        self.assertEqual(run([producer, consumer], shift_latency=2, **options)['cycles'],
+                         base)
+        shift = replace(producer, bits=0x1013)
+        self.assertEqual(run([shift, consumer], shift_latency=2, **options)['cycles'],
+                         base + 1)
+        independent = replace(consumer, sources=(4,))
+        self.assertEqual(run([shift, independent], shift_latency=2, **options)['cycles'],
+                         run([shift, independent], **options)['cycles'])
+
     def test_v017_early_address_exclusion_list(self):
         load = instruction(0, 'load', rd=11, sources=(10,))
         def producer(kind, rd=10, latency=0):
