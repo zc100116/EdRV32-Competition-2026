@@ -620,8 +620,8 @@ module edrv32_cpu_core (
                 d_illegal_w[lane], d_immediate_w[lane], d_write_w[lane],
                 d_use2_w[lane], d_use1_w[lane], d_rd_w[lane], d_rs2_w[lane],
                 d_rs1_w[lane]} = d_predecode_w[lane*70 +: 70];
-            wire [29:0] shift_amount_w;
-            for (shift_bank = 0; shift_bank < 6;
+            wire [119:0] shift_amount_w;
+            for (shift_bank = 0; shift_bank < 24;
                 shift_bank = shift_bank + 1) begin : g_shift_bank
                 (* keep = "true", syn_preserve = 1 *) reg [4:0] amount_copy1_r;
                 assign shift_amount_w[shift_bank*5 +: 5] = amount_copy1_r;

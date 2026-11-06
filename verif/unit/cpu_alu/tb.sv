@@ -17,7 +17,7 @@ module tb;
         .operand_a_i(operand_a_i),
         .operand_b_i(operand_b_i),
         .operation_i(operation_i),
-        .shift_amount_i({6{operand_b_i[4:0]}}),
+        .shift_amount_i({24{operand_b_i[4:0]}}),
         .result_o(result_o)
     );
     initial begin

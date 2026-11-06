@@ -9,17 +9,17 @@ module edrv32_cpu_alu (
     input wire [31:0] operand_b_i,
     input wire [3:0] operation_i,
     // Equivalent registered amount, isolated from arithmetic operand loads.
-    input wire [29:0] shift_amount_i,
+    input wire [119:0] shift_amount_i,
     // Execute result.
     output reg [31:0] result_o
 );
-    // Each 16-bit slice has independent amount FFs for all three shift kinds.
+    // Each 4-bit slice has independent amount FFs for all three shift kinds.
     // The first mux group shifts 0..3, the second shifts multiples of four.
-    function [15:0] shift_half;
+    function [3:0] shift_part;
         input [31:0] value_i;
         input [4:0] amount_i;
         input [1:0] kind_i;
-        input upper_i;
+        input [2:0] slice_i;
         reg [31:0] shifted_v;
         begin
             case (kind_i)
@@ -27,7 +27,7 @@ module edrv32_cpu_alu (
                 1: shifted_v = value_i >> amount_i;
                 default: shifted_v = $signed(value_i) >>> amount_i;
             endcase
-            shift_half = upper_i ? shifted_v[31:16] : shifted_v[15:0];
+            shift_part = shifted_v[slice_i*4 +: 4];
         end
     endfunction
     wire [31:0] left_low_w;
@@ -38,21 +38,21 @@ module edrv32_cpu_alu (
     wire [31:0] signed_w;
     genvar shift_slice;
     generate
-        for (shift_slice = 0; shift_slice < 2;
+        for (shift_slice = 0; shift_slice < 8;
             shift_slice = shift_slice + 1) begin : g_shift
             localparam SLICE = shift_slice;
-            assign left_low_w[shift_slice*16 +: 16] = shift_half(operand_a_i,
-                {3'b0, shift_amount_i[shift_slice*15 +: 2]}, 2'd0, SLICE[0]);
-            assign right_low_w[shift_slice*16 +: 16] = shift_half(operand_a_i,
-                {3'b0, shift_amount_i[shift_slice*15+5 +: 2]}, 2'd1, SLICE[0]);
-            assign signed_low_w[shift_slice*16 +: 16] = shift_half(operand_a_i,
-                {3'b0, shift_amount_i[shift_slice*15+10 +: 2]}, 2'd2, SLICE[0]);
-            assign left_w[shift_slice*16 +: 16] = shift_half(left_low_w,
-                {shift_amount_i[shift_slice*15+2 +: 3], 2'b0}, 2'd0, SLICE[0]);
-            assign right_w[shift_slice*16 +: 16] = shift_half(right_low_w,
-                {shift_amount_i[shift_slice*15+7 +: 3], 2'b0}, 2'd1, SLICE[0]);
-            assign signed_w[shift_slice*16 +: 16] = shift_half(signed_low_w,
-                {shift_amount_i[shift_slice*15+12 +: 3], 2'b0}, 2'd2, SLICE[0]);
+            assign left_low_w[shift_slice*4 +: 4] = shift_part(operand_a_i,
+                {3'b0, shift_amount_i[shift_slice*15 +: 2]}, 2'd0, SLICE[2:0]);
+            assign right_low_w[shift_slice*4 +: 4] = shift_part(operand_a_i,
+                {3'b0, shift_amount_i[shift_slice*15+5 +: 2]}, 2'd1, SLICE[2:0]);
+            assign signed_low_w[shift_slice*4 +: 4] = shift_part(operand_a_i,
+                {3'b0, shift_amount_i[shift_slice*15+10 +: 2]}, 2'd2, SLICE[2:0]);
+            assign left_w[shift_slice*4 +: 4] = shift_part(left_low_w,
+                {shift_amount_i[shift_slice*15+2 +: 3], 2'b0}, 2'd0, SLICE[2:0]);
+            assign right_w[shift_slice*4 +: 4] = shift_part(right_low_w,
+                {shift_amount_i[shift_slice*15+7 +: 3], 2'b0}, 2'd1, SLICE[2:0]);
+            assign signed_w[shift_slice*4 +: 4] = shift_part(signed_low_w,
+                {shift_amount_i[shift_slice*15+12 +: 3], 2'b0}, 2'd2, SLICE[2:0]);
         end
     endgenerate
     always @(*) begin
