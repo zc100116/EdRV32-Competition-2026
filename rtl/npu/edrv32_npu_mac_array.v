@@ -30,7 +30,10 @@ module edrv32_npu_mac_array (
     output wire mac_beat_o,
     output wire idle_o
 );
-    wire [31:0] channel_busy_w;
+    // A kept control chain tracks the shared term stream for idle_o only. busy_r
+    // holds "any chain stage valid" for this cycle, so idle_o is one register.
+    (* keep = "true", syn_preserve = 1 *) reg [10:0] ctrl_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg busy_r;
     wire [255:0] unused_activation_w;
     reg [48:0] tag_r [0:11];
     (* keep = "true", syn_preserve = 1 *) reg [1:0] fold_source_r;
@@ -100,10 +103,10 @@ module edrv32_npu_mac_array (
             end
             wire [9:0] unused_sum_w;
             assign unused_sum_w = {sum_w[47:43], sum_w[23:19]};
-            wire [1:0] unused_control_w;
+            wire [2:0] unused_control_w;
 
             // The scalar interface exports copy 0; other local copies remain identical.
-            assign unused_control_w = {first_r[11], last_r[11]};
+            assign unused_control_w = {valid_r[11], first_r[11], last_r[11]};
 
             // spec npu 5.4: valid is local control, never a global datapath CE.
             always @(posedge clk_i or negedge rst_n_i) begin
@@ -129,8 +132,6 @@ module edrv32_npu_mac_array (
                 first_r <= {first_r[10:0], term_first_i};
                 last_r <= {last_r[10:0], term_last_i};
             end
-
-            assign channel_busy_w[channel] = |valid_r;
 
             for (lane = 0; lane < 8; lane = lane + 1) begin : g_lane
                 wire [15:0] lane_activation_w;
@@ -200,5 +201,18 @@ module edrv32_npu_mac_array (
 
     // All 32 local control chains describe the same term stream.
     assign sum_tag_o = tag_r[11];
-    assign idle_o = ~|channel_busy_w;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            ctrl_valid_r <= 11'b0;
+            busy_r <= 1'b0;
+        end else if (cancel_i) begin
+            ctrl_valid_r <= 11'b0;
+            busy_r <= 1'b0;
+        end else begin
+            ctrl_valid_r <= {ctrl_valid_r[9:0], term_valid_i};
+            busy_r <= term_valid_i || (|ctrl_valid_r);
+        end
+    end
+
+    assign idle_o = !busy_r;
 endmodule
