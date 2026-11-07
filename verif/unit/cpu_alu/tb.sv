@@ -8,6 +8,10 @@ module tb;
     reg [31:0] operand_a_i;
     reg [31:0] operand_b_i;
     reg [3:0] operation_i;
+    wire [9:0] operation_select_w;
+    assign operation_select_w = {operation_i==7, operation_i==6, operation_i==13,
+        operation_i==5, operation_i==4, operation_i==3, operation_i==2,
+        operation_i==1, operation_i==8, operation_i==0};
     wire [31:0] result_o;
     reg [31:0] expected;
     integer i;
@@ -16,7 +20,8 @@ module tb;
     edrv32_cpu_alu dut (
         .operand_a_i(operand_a_i),
         .operand_b_i(operand_b_i),
-        .operation_i(operation_i),
+        .operation_select_i(operation_select_w),
+        .other_result_i(32'b0),
         .shift_amount_i({24{operand_b_i[4:0]}}),
         .result_o(result_o)
     );
