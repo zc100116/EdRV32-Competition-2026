@@ -595,10 +595,13 @@ module edrv32_cpu_frontend (
     // Both correction addresses and the chooser index are ready in F2 before
     // the LUTRAM decision. Initial direction selects the opposite stored address.
     always @(posedge clk_i) begin
-        // These candidates are consumed only on an owner's first F2 cycle.
-        f2_taken_count_r <= {!owner_query_w[109] && owner_query_w[82],
-            owner_query_w[109] ^ !owner_query_w[82]};
-        f2_sequential_count_r <= {!owner_query_w[109], owner_query_w[109]};
+        // The response may arrive after F1/replay has changed owners. Retain
+        // the pending F2 owner's instruction counts for its eventual response.
+        if (!f2_pending_r || ic_resp_valid_i) begin
+            f2_taken_count_r <= {!owner_query_w[109] && owner_query_w[82],
+                owner_query_w[109] ^ !owner_query_w[82]};
+            f2_sequential_count_r <= {!owner_query_w[109], owner_query_w[109]};
+        end
         f2_correct_eligible_r <= owner_query_w[106] && owner_query_w[105];
         f2_direction_history_r <= owner_query_w[82] ?
             {owner_query_w[94:85], owner_query_w[104:95]} : owner_query_w[104:85];
