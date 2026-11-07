@@ -12,6 +12,7 @@ from run_pipeline_cut_eval import BASE, MemoryProbe
 
 CONFIGS = {
     'baseline': {},
+    'C3-coarse': dict(load_latency=3),
     'C3': dict(load_latency=3, late_load_result=True),
     'C3-M2': dict(load_latency=3, memory_capture=True),
 }
@@ -26,6 +27,8 @@ def main():
         addresses = memory_trace(directory, program, trace)
         with (output / (workload + '.jsonl')).open('w') as stream:
             for name, changes in CONFIGS.items():
+                if name == 'C3-coarse' and workload != 'coremark':
+                    continue
                 probe = MemoryProbe(addresses, repair=int(name != 'baseline'))
                 result = simulate(program, trace, symbols['start_time'], symbols['stop_time'],
                                   'V3s', **dict(BASE, **changes),
