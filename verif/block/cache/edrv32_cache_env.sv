@@ -101,7 +101,6 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
     );
     edrv32_dcache u_dcache (
         // Clock and reset
-        .dc_resp_way_hit_copy_o(),
         .clk_i(clk),
         .rst_n_i(rst_n),
         .rst_sys_dlru_n_i({2{rst_n}}),
