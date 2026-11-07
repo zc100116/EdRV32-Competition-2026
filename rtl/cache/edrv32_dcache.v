@@ -860,14 +860,14 @@ module edrv32_dcache (
         end
     end
     // Registered hit packets update LRU one edge later. Copies keep each
-    // 16-bit bank local; slot copies serve eight banks and at most 16 uses.
-    wire [63:0] metadata_slot_w;
-    wire [35:0] early_response_index_w;
-    wire [3:0] early_response_copy_w;
-    wire [15:0] early_response_lookup_slot_w;
+    // 16-bit bank local; slot copies serve four banks and at most eight uses.
+    wire [127:0] metadata_slot_w;
+    wire [71:0] early_response_index_w;
+    wire [7:0] early_response_copy_w;
+    wire [31:0] early_response_lookup_slot_w;
     genvar metadata_group;
     generate
-        for (metadata_group = 0; metadata_group < 4;
+        for (metadata_group = 0; metadata_group < 8;
             metadata_group = metadata_group + 1) begin : g_metadata_slot
             (* keep = "true", syn_preserve = 1 *) reg [15:0] slot_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg early_response_copy1_r;
@@ -909,11 +909,11 @@ module edrv32_dcache (
             wire normal_forward_w;
             wire early_forward_w;
             wire rst_dlru_n_w;
-            assign metadata_slot_w_local = metadata_slot_w[(bank/8)*16 +: 16];
-            assign early_index_w = early_response_index_w[(bank/8)*9 +: 9];
-            assign early_lookup_slot_w = early_response_lookup_slot_w[(bank/8)*4 +: 4];
+            assign metadata_slot_w_local = metadata_slot_w[(bank/4)*16 +: 16];
+            assign early_index_w = early_response_index_w[(bank/4)*9 +: 9];
+            assign early_lookup_slot_w = early_response_lookup_slot_w[(bank/4)*4 +: 4];
             assign normal_update_w = metadata_valid_r && metadata_bank_r && (|hit_copy1_r);
-            assign early_update_w = early_response_copy_w[bank/8] &&
+            assign early_update_w = early_response_copy_w[bank/4] &&
                 early_index_w[8:4] == bank[4:0];
             assign normal_mask_w = metadata_slot_w_local & {16{normal_update_w}};
             assign early_mask_w = (16'b1 << early_index_w[3:0]) &
