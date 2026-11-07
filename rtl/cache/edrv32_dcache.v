@@ -82,7 +82,6 @@ module edrv32_dcache (
     reg [17:0] early_tag_r;
     reg early_response_r;
     (* keep = "true", syn_preserve = 1 *) reg [1:0] early_response_copy1_r;
-    reg [8:0] early_response_index_r;
     reg [63:0] early_response_data_r;
     reg [1:0] early_response_way_r;
     reg [7:0] early_byte_select_r;
@@ -180,7 +179,6 @@ module edrv32_dcache (
         end
     end
     always @(posedge clk_i) begin
-        early_response_index_r <= dc_req_addr_i[13:5];
         if (early_read_w) begin
             early_addr_r <= dc_early_addr_i;
             early_tag_r <= dc_early_addr_i[31:14];
@@ -867,14 +865,23 @@ module edrv32_dcache (
     // Registered hit packets update LRU one edge later. Copies keep each
     // 16-bit bank local; slot copies serve eight banks and at most 16 uses.
     wire [63:0] metadata_slot_w;
+    wire [35:0] early_response_index_w;
+    wire [15:0] early_response_lookup_slot_w;
     genvar metadata_group;
     generate
         for (metadata_group = 0; metadata_group < 4;
             metadata_group = metadata_group + 1) begin : g_metadata_slot
             (* keep = "true", syn_preserve = 1 *) reg [15:0] slot_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg [8:0] early_response_index_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg [3:0] early_response_lookup_copy1_r;
             assign metadata_slot_w[metadata_group*16 +: 16] = slot_copy1_r;
+            assign early_response_index_w[metadata_group*9 +: 9] = early_response_index_copy1_r;
+            assign early_response_lookup_slot_w[metadata_group*4 +: 4] =
+                early_response_lookup_copy1_r;
             always @(posedge clk_i) begin
                 slot_copy1_r <= lookup_slot_r;
+                early_response_index_copy1_r <= dc_req_addr_i[13:5];
+                early_response_lookup_copy1_r <= dc_req_addr_i[8:5];
             end
         end
         for (bank = 0; bank < 32; bank = bank + 1) begin : g_metadata
@@ -887,6 +894,8 @@ module edrv32_dcache (
             (* keep = "true", syn_preserve = 1 *) reg early_way_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg early_lookup_way_copy1_r;
             wire [15:0] metadata_slot_w_local;
+            wire [8:0] early_index_w;
+            wire [3:0] early_lookup_slot_w;
             wire [15:0] normal_mask_w;
             wire [15:0] early_mask_w;
             wire normal_update_w;
@@ -895,16 +904,18 @@ module edrv32_dcache (
             wire early_forward_w;
             wire rst_dlru_n_w;
             assign metadata_slot_w_local = metadata_slot_w[(bank/8)*16 +: 16];
+            assign early_index_w = early_response_index_w[(bank/8)*9 +: 9];
+            assign early_lookup_slot_w = early_response_lookup_slot_w[(bank/8)*4 +: 4];
             assign normal_update_w = metadata_valid_r && metadata_bank_r && (|hit_copy1_r);
             assign early_update_w = early_response_copy1_r[bank/16] &&
-                early_response_index_r[8:4] == bank[4:0];
+                early_index_w[8:4] == bank[4:0];
             assign normal_mask_w = metadata_slot_w_local & {16{normal_update_w}};
-            assign early_mask_w = (16'b1 << early_response_index_r[3:0]) &
+            assign early_mask_w = (16'b1 << early_index_w[3:0]) &
                 {16{early_update_w}};
             assign normal_forward_w = normal_update_w &&
                 (|(metadata_slot_w_local & read_slot_w));
             assign early_forward_w = early_update_w &&
-                early_response_index_r[3:0] == read_addr_w[5:2];
+                early_lookup_slot_w == read_addr_w[5:2];
             assign lru_r[bank*16 +: 16] = lru_bank_r;
             assign rst_dlru_n_w = rst_sys_dlru_n_i[bank/16];
             always @(posedge clk_i) begin
