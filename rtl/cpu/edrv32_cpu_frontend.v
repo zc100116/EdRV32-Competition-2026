@@ -127,7 +127,7 @@ module edrv32_cpu_frontend (
     wire predict_hit_w;
     wire predict_taken_w;
     wire [7:0] predict_taken_copy_w;
-    (* keep = "true", syn_preserve = 1 *) reg [7:0] query_bank_copy1_r;
+    wire [7:0] query_bank_copy_w;
     wire [31:0] predict_target_w;
     wire [1:0] predict_position_w;
     wire [11:0] predict_history_w;
@@ -236,7 +236,7 @@ module edrv32_cpu_frontend (
         .rst_n_i(rst_n_i),
         .query_pc_i(f1_pc_copy1_r[31:1]),
         .query_valid_index_i(query_valid_index_w),
-        .query_bank_copy_i(query_bank_copy1_r),
+        .query_bank_copy_i(query_bank_copy_w),
         .query_accept_i(new_request_w),
         .predict_hit_o(predict_hit_w),
         .predict_taken_o(predict_taken_w),
@@ -292,35 +292,54 @@ module edrv32_cpu_frontend (
     genvar slice;
     genvar f2_group;
     genvar pc_group;
+    genvar bank_copy;
     generate
-        for (pc_group = 0; pc_group < 4; pc_group = pc_group + 1) begin : g_pc
+        for (bank_copy = 0; bank_copy < 8; bank_copy = bank_copy + 1) begin : g_query_bank
+            (* keep = "true", syn_preserve = 1 *) reg query_bank_copy1_r;
+            assign query_bank_copy_w[bank_copy] = query_bank_copy1_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    query_bank_copy1_r <= 0;
+                else
+                    query_bank_copy1_r <= next_pc_w[9];
+            end
+        end
+        for (pc_group = 0; pc_group < 8; pc_group = pc_group + 1) begin : g_pc
             (* keep = "true", syn_preserve = 1 *) reg f2_taken_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg correct_active_copy1_r;
             wire correct_w;
-            (* keep = "true" *) wire [7:0] unpredicted_w;
-            (* keep = "true" *) wire [7:0] predicted_w;
-            assign correct_w = f2_pending_r && !f2_checked_r && f2_correct_eligible_r &&
-                f2_use_local_w && (f2_branch_local_w[0] != f2_taken_copy1_r);
-            assign unpredicted_w = redirect_w ? redirect_pc_w[pc_group*8 +: 8] :
-                correct_w ? f2_correct_pc_w[pc_group*8 +: 8] :
-                unpredicted_pc_w[pc_group*8 +: 8];
-            assign predicted_w = redirect_w ? redirect_pc_w[pc_group*8 +: 8] :
-                correct_w ? f2_correct_pc_w[pc_group*8 +: 8] :
-                predicted_pc_w[pc_group*8 +: 8];
-            assign next_pc_w[pc_group*8 +: 8] = predict_taken_copy_w[pc_group] ?
+            (* keep = "true" *) wire [3:0] unpredicted_w;
+            (* keep = "true" *) wire [3:0] predicted_w;
+            assign correct_w = correct_active_copy1_r && f2_use_local_w &&
+                (f2_branch_local_w[0] != f2_taken_copy1_r);
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    correct_active_copy1_r <= 0;
+                else
+                    correct_active_copy1_r <= owner_accept_w &&
+                        owner_query_w[106] && owner_query_w[105];
+            end
+            assign unpredicted_w = redirect_w ? redirect_pc_w[pc_group*4 +: 4] :
+                correct_w ? f2_correct_pc_w[pc_group*4 +: 4] :
+                unpredicted_pc_w[pc_group*4 +: 4];
+            assign predicted_w = redirect_w ? redirect_pc_w[pc_group*4 +: 4] :
+                correct_w ? f2_correct_pc_w[pc_group*4 +: 4] :
+                predicted_pc_w[pc_group*4 +: 4];
+            assign next_pc_w[pc_group*4 +: 4] = predict_taken_copy_w[pc_group] ?
                 predicted_w : unpredicted_w;
             always @(posedge clk_i) begin
                 if (!replay_valid_copy1_r)
-                    replay_resume_pc_r[pc_group*8 +: 8] <= predict_taken_copy_w[pc_group] ?
-                        predict_target_w[pc_group*8 +: 8] : sequential_pc_w[pc_group*8 +: 8];
+                    replay_resume_pc_r[pc_group*4 +: 4] <= predict_taken_copy_w[pc_group] ?
+                        predict_target_w[pc_group*4 +: 4] : sequential_pc_w[pc_group*4 +: 4];
             end
             wire owner_taken_copy_w;
             assign owner_taken_copy_w = replay_valid_r ? replay_taken_r :
-                predict_taken_copy_w[pc_group+4];
+                predict_taken_copy_w[pc_group];
             always @(posedge clk_i) begin
                 f2_taken_copy1_r <= owner_taken_w;
-                f2_correct_pc_r[pc_group*8 +: 8] <= owner_taken_copy_w ?
-                    owner_sequential_pc_w[pc_group*8 +: 8] :
-                    owner_query_w[49+pc_group*8 +: 8];
+                f2_correct_pc_r[pc_group*4 +: 4] <= owner_taken_copy_w ?
+                    owner_sequential_pc_w[pc_group*4 +: 4] :
+                    owner_query_w[49+pc_group*4 +: 4];
             end
         end
         for (f2_group = 0; f2_group < 8; f2_group = f2_group + 1) begin : g_query_index
@@ -476,13 +495,11 @@ module edrv32_cpu_frontend (
             f1_pc_copy1_r <= 0;
             f1_pc_copy2_r <= 0;
             f1_pc_copy3_r <= 0;
-            query_bank_copy1_r <= 0;
         end else begin
             f1_pc_r <= next_pc_w;
             f1_pc_copy1_r <= next_pc_w[31:1];
             f1_pc_copy2_r <= next_pc_w[31:3];
             f1_pc_copy3_r <= next_pc_w[31:3];
-            query_bank_copy1_r <= {8{next_pc_w[9]}};
         end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
