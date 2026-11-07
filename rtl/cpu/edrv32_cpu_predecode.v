@@ -6,7 +6,7 @@
 module edrv32_cpu_predecode (
     // Canonical fixed-width instruction.
     input wire [31:0] instr_i,
-    // {S,B,J,jal,slow,serial,memory,control,csr,mul,load,class,alu_high,
+    // {S,B,U,jal,slow,serial,memory,control,csr,mul,load,class,alu_high,
     // pipe1,illegal,operand_imm,write,use2,use1}.
     output wire [21:0] predecode_o
 );
@@ -44,7 +44,7 @@ module edrv32_cpu_predecode (
         (instr_i[6:0] == 7'h33 && instr_i[31:25] != 1) ||
         instr_i[6:0] == 7'h63 || instr_i[6:0] == 7'h6f;
     assign predecode_o = {instr_i[6:0] == 7'h23, instr_i[6:0] == 7'h63,
-        instr_i[6:0] == 7'h6f, class_w == 4'd3,
+        class_w == 4'd1 || class_w == 4'd2, class_w == 4'd3,
         class_w == 4'd6 || class_w == 4'd8 || class_w == 4'd10,
         class_w >= 4'd10, class_w == 4'd6 || class_w == 4'd7,
         class_w >= 4'd3 && class_w <= 4'd5, class_w == 4'd10,

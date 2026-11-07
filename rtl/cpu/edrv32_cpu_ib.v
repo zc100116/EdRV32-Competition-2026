@@ -9,6 +9,8 @@ module edrv32_cpu_ib (
     input wire rst_n_i,
     // F2 input: each 179-bit record is described in rtl/cpu/README.md.
     input wire [1:0] push_count_i,
+    input wire push_one_i,
+    input wire push_two_i,
     input wire [357:0] push_data_i,
     input wire [43:0] push_predecode_i,
     input wire [5:0] push_index_hi_i,
@@ -41,6 +43,9 @@ module edrv32_cpu_ib (
     reg [1:0] write_ptr_r;
     reg [2:0] count_r;
     wire [1:0] read_next_w;
+    wire [1:0] write_next_w;
+    assign write_next_w = push_two_i ? write_ptr_r + 2'd2 :
+        push_one_i ? write_ptr_r + 2'd1 : write_ptr_r;
     wire [1:0] keep_count_w;
     assign keep_count_w = keep_pair_i ? 2'd2 : 2'd1;
     assign read_next_w = read_ptr_r + keep_count_w;
@@ -64,8 +69,8 @@ module edrv32_cpu_ib (
             wire format_i_w;
             assign instr_w = push_data_i[decode_slot*RECORD_BITS+32 +: 32];
             assign stored_w = push_predecode_i[decode_slot*22 +: 22];
-            assign format_u_w = stored_w[10:7] == 4'd1 || stored_w[10:7] == 4'd2;
-            assign format_i_w = !(|stored_w[21:19]) && !format_u_w;
+            assign format_u_w = stored_w[19];
+            assign format_i_w = !(|stored_w[21:18]);
             // One-hot immediate formats select raw instruction fragments in parallel.
             assign immediate_w =
                 ({32{format_i_w}} & {{20{instr_w[31]}}, instr_w[31:20]}) |
@@ -74,7 +79,7 @@ module edrv32_cpu_ib (
                     {{20{instr_w[31]}}, instr_w[31:25], instr_w[11:7]}) |
                 ({32{stored_w[20]}} & {{19{instr_w[31]}}, instr_w[31], instr_w[7],
                     instr_w[30:25], instr_w[11:8], 1'b0}) |
-                ({32{stored_w[19]}} & {{11{instr_w[31]}}, instr_w[31], instr_w[19:12],
+                ({32{stored_w[18]}} & {{11{instr_w[31]}}, instr_w[31], instr_w[19:12],
                     instr_w[20], instr_w[30:21], 1'b0});
             assign push_predecode_w[decode_slot] = {
                 stored_w[18:17], stored_w[2] && instr_w[11:7] != 0, stored_w[16:11],
@@ -170,23 +175,23 @@ module edrv32_cpu_ib (
                 else if (flush_i)
                     write_ptr_r_copy <= keep_head_i ? read_next_w : 2'd0;
                 else
-                    write_ptr_r_copy <= write_ptr_r + push_count_i;
+                    write_ptr_r_copy <= write_next_w;
             end
             always @(posedge clk_i) begin
                 if (!flush_i) begin
-                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
+                    if (push_one_i && write_ptr_r_copy == write_entry[1:0])
                         index_hi_r[write_entry] <= push_index_hi_i[2:0];
-                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0])
+                    if (push_one_i && write_ptr_r_copy == write_entry[1:0])
                         tournament_r[write_entry] <= push_tournament_i[11:0];
-                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
+                    if (push_two_i && write_next_w_copy == write_entry[1:0])
                         index_hi_r[write_entry] <= push_index_hi_i[5:3];
-                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0])
+                    if (push_two_i && write_next_w_copy == write_entry[1:0])
                         tournament_r[write_entry] <= push_tournament_i[23:12];
-                    if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0]) begin
+                    if (push_one_i && write_ptr_r_copy == write_entry[1:0]) begin
                         entries_r[write_entry] <= push_data_i[178:0];
                         predecode_r[write_entry] <= push_predecode_w[0];
                     end
-                    if (push_count_i == 2 && write_next_w_copy == write_entry[1:0]) begin
+                    if (push_two_i && write_next_w_copy == write_entry[1:0]) begin
                         entries_r[write_entry] <= push_data_i[357:179];
                         predecode_r[write_entry] <= push_predecode_w[1];
                     end
@@ -207,7 +212,7 @@ module edrv32_cpu_ib (
             count_r <= keep_head_i ? {1'b0, keep_count_w} : 3'd0;
         end else begin
             read_ptr_r <= read_ptr_r + pop_count_i;
-            write_ptr_r <= write_ptr_r + push_count_i;
+            write_ptr_r <= write_next_w;
             count_r <= count_r + {1'b0, push_count_i} - {1'b0, pop_count_i};
         end
     end

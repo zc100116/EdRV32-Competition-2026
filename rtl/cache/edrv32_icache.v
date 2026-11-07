@@ -55,7 +55,17 @@ module edrv32_icache (
     genvar metadata_part;
     genvar compare_part;
     reg lookup_valid_r;
-    reg [31:0] addr_r;
+    wire [31:0] addr_r;
+    reg [31:0] lookup_addr_r;
+    reg [31:0] miss_addr_r;
+    assign addr_r = state_r == S_IDLE ? lookup_addr_r : miss_addr_r;
+    // A miss discovers ownership one cycle after the synchronous lookup launch.
+    // Snapshot its address before accepting the speculative successor internally.
+    always @(posedge clk_i) begin
+        lookup_addr_r <= ic_req_addr_i;
+        if (state_r == S_IDLE)
+            miss_addr_r <= lookup_addr_r;
+    end
     reg cacheable_r;
     reg response_lookup_r;
     reg response_pma_err_r;
@@ -150,12 +160,6 @@ module edrv32_icache (
                     response_lookup_copy1_r <= lookup_accept_copy_w[victim_group] &&
                         cacheable_w && !pma_err_w;
                     response_pma_err_copy1_r <= lookup_accept_copy_w[victim_group] && pma_err_w;
-                end
-            end
-            if (victim_group < 4) begin : g_request_address
-                always @(posedge clk_i) begin
-                    if (lookup_accept_copy_w[victim_group])
-                        addr_r[victim_group*8 +: 8] <= ic_req_addr_i[victim_group*8 +: 8];
                 end
             end
             assign tag_write_copy_w[victim_group] = fill_write_w && fill_last_r &&

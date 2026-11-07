@@ -17,6 +17,7 @@ module edrv32_icache (
     output logic ic_resp_valid_o,
     output wire [7:0] ic_resp_valid_copy_o,
     output logic [63:0] ic_resp_data_o,
+    output wire [43:0] ic_resp_predecode_o,
     output logic ic_resp_err_o,
     input logic ic_kill_i,
     input logic ic_inv_i,
@@ -52,6 +53,12 @@ module edrv32_icache (
                          ($test$plusargs("BAD_AXI_LEN") ? 2 : 3);
     assign axi_araddr_o = addr < 32'h4000 ? addr : {addr[31:5], 5'b0};
     assign axi_rready_o = 1;
+    for (genvar slot = 0; slot < 2; slot++) begin : g_predecode
+        edrv32_cpu_predecode u_predecode (
+            .instr_i(ic_resp_data_o[slot*32 +: 32]),
+            .predecode_o(ic_resp_predecode_o[slot*22 +: 22])
+        );
+    end
     always @(posedge clk_i) begin
         ic_resp_valid_o <= 0;
         ic_inv_done_o <= ic_inv_i;
