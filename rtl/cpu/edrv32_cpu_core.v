@@ -199,7 +199,7 @@ module edrv32_cpu_core (
         !(m_valid_r[0] && m_dest_r[0] &&
             m_rd_r[0] == d_rs1_w[d_early_slot_w] &&
             m_slow_r) &&
-        !(w_valid_r[0] && w_dest_r[0] &&
+        !(w_valid_r[0] && w_dest_r &&
             w_rd_r[0] == d_rs1_w[d_early_slot_w] && w_mul_r[0]);
     // Qualifying queries exclude E and unregistered M/W producers. Select
     // registered data directly so those excluded results never feed this adder.
@@ -316,7 +316,7 @@ module edrv32_cpu_core (
     reg [1:0] m_dest_r;
     reg m_slow_r;
     reg [1:0] w_mul_r;
-    reg [1:0] w_dest_r;
+    reg w_dest_r;
     wire [5:0] d_index_hi_w;
     wire [23:0] d_tournament_w;
     wire [1:0] d_count_w;
@@ -540,6 +540,7 @@ module edrv32_cpu_core (
     wire div_valid_w;
     wire [31:0] div_result_w;
     wire div_start_w;
+    wire [7:0] div_start_copy_w;
     wire e_div_cancel_w;
     wire div_wait_w;
     reg div_started_r;
@@ -677,12 +678,13 @@ module edrv32_cpu_core (
             // All registered sources are premerged before late E/DRM results.
             assign ready_data_w =
                 ({32{select_w[0]}} & register_w) |
-                ({32{select_w[3] && !memory_w}} & m_result_w[0]) |
+                ({32{select_w[3] && !memory_w && !m_csr_r}} & m_result_r[0]) |
                 ({32{select_w[4]}} & m_result_w[1]) |
                 ({32{select_w[5]}} & w_result_w[0]) |
                 ({32{select_w[6]}} & w_result_w[1]);
             // No tag-selected data mux precedes this final one-hot merge.
             assign e_forward_w[forward_operand] = ready_data_w |
+                ({32{select_w[3] && m_csr_r}} & csr_read_w) |
                 ({32{select_w[1] && !early_w}} & e_result_w[0]) |
                 ({32{select_w[2]}} & e_result_w[1]) |
                 ({32{select_w[1] && early_w && dc_early_way_hit_i[0]}} & e_early_result_w[0]) |
@@ -818,6 +820,7 @@ module edrv32_cpu_core (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .start_i(div_start_w),
+        .start_payload_i(div_start_copy_w),
         .operand_a_i(e_operand_a_r[0]),
         .operand_b_i(e_operand_b_r[0]),
         .operation_i(e_instr_w[13:12]),
@@ -844,6 +847,21 @@ module edrv32_cpu_core (
             wire load_wait_w;
             wire mul_wait_w;
             wire csr_wait_w;
+            // Prepare W's destination validity and WAW winner with its payload.
+            // Each operand owns a local copy, keeping W-valid out of the mux chain.
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] w_forward_valid_copy1_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    w_forward_valid_copy1_r <= 0;
+                else begin
+                    w_forward_valid_copy1_r[0] <= m_commit_w[0] && m_dest_r[0] &&
+                        (!(m_commit_w[1] && m_dest_r[1]) ||
+                        m_rd_r[0] != m_rd_r[1] || m_swap_r);
+                    w_forward_valid_copy1_r[1] <= m_commit_w[1] && m_dest_r[1] &&
+                        (!(m_commit_w[0] && m_dest_r[0]) ||
+                        m_rd_r[0] != m_rd_r[1] || !m_swap_r);
+                end
+            end
             assign e_match_w[0] = e_valid_r[0] && e_dest_r[0] &&
                 e_rd_r[0] == d_source_w[bypass_operand];
             assign e_match_w[1] = e_valid_r[1] && e_dest_r[1] &&
@@ -852,9 +870,9 @@ module edrv32_cpu_core (
                 m_rd_r[0] == d_source_w[bypass_operand];
             assign m_match_w[1] = m_valid_r[1] && m_dest_r[1] &&
                 m_rd_r[1] == d_source_w[bypass_operand];
-            assign w_match_w[0] = w_valid_r[0] && w_dest_r[0] &&
+            assign w_match_w[0] = w_forward_valid_copy1_r[0] &&
                 w_rd_r[0] == d_source_w[bypass_operand];
-            assign w_match_w[1] = w_valid_r[1] && w_dest_r[1] &&
+            assign w_match_w[1] = w_forward_valid_copy1_r[1] &&
                 w_rd_r[1] == d_source_w[bypass_operand];
             assign e_any_w = |e_match_w;
             assign m_any_w = |m_match_w;
@@ -865,10 +883,8 @@ module edrv32_cpu_core (
                 (!m_match_w[1] || m_swap_r);
             assign m_select_w[1] = !e_any_w && m_match_w[1] &&
                 (!m_match_w[0] || !m_swap_r);
-            assign w_select_w[0] = !e_any_w && !m_any_w && w_match_w[0] &&
-                (!w_match_w[1] || w_swap_r);
-            assign w_select_w[1] = !e_any_w && !m_any_w && w_match_w[1] &&
-                (!w_match_w[0] || !w_swap_r);
+            assign w_select_w[0] = !e_any_w && !m_any_w && w_match_w[0];
+            assign w_select_w[1] = !e_any_w && !m_any_w && w_match_w[1];
             assign d_bypass_select_w[bypass_operand] =
                 {w_select_w, m_select_w, e_select_w, !e_any_w && !m_any_w && !w_any_w};
             // Binary codes remain only at the documented trace interface.
@@ -1044,10 +1060,34 @@ module edrv32_cpu_core (
     // Resolve an older control instruction before starting its younger divide.
     // cpu-spec 4.4/4.9: this cycle's comparison only enters result registers.
     assign e_old_control_unresolved_w = e_swap_r && e_valid_r[1] &&
-        e_lane_control_w[1] && !e_resolved_r;
-    assign e_div_cancel_w = e_swap_r && e_valid_r[1] && e_kill_young_w;
-    assign div_start_w = e_valid_r[0] && !e_div_cancel_w &&
-        e_class_r[0] == C_DIV && !div_started_r && !e_old_control_unresolved_w &&
+        e_control_r[1] && !e_resolved_r;
+    // A swapped divide can only be canceled by its older pipe-1 slot.
+    // Specialize that fault instead of routing pipe-0 load alignment through start.
+    assign e_div_cancel_w = e_swap_r && e_valid_r[1] &&
+        (e_exception1_r || e_jump_fault_r[1] ||
+        (e_redirect_r && !e_redirect_advanced_r && e_redirect_old_r));
+    // Each divider payload slice owns its E-class copy and local start gate.
+    genvar div_start_group;
+    generate
+        for (div_start_group = 0; div_start_group < 8;
+            div_start_group = div_start_group + 1) begin : g_div_start
+            (* keep = "true", syn_preserve = 1 *) reg e_div_copy1_r;
+            always @(posedge clk_i) begin
+                if (e_operand_load_w)
+                    e_div_copy1_r <= d_class_w[d_map_w[0]] == C_DIV;
+            end
+            assign div_start_copy_w[div_start_group] = e_valid_r[0] && !e_div_cancel_w &&
+                e_div_copy1_r && !div_started_r && !e_old_control_unresolved_w &&
+                m_valid_r == 0 && w_valid_r == 0 && !e_repair_pending_r;
+        end
+    endgenerate
+    (* keep = "true", syn_preserve = 1 *) reg e_div_valid_r;
+    always @(posedge clk_i) begin
+        if (e_operand_load_w)
+            e_div_valid_r <= d_class_w[d_map_w[0]] == C_DIV;
+    end
+    assign div_start_w = e_valid_r[0] && !e_div_cancel_w && e_div_valid_r &&
+        !div_started_r && !e_old_control_unresolved_w &&
         m_valid_r == 0 && w_valid_r == 0 && !e_repair_pending_r;
     assign div_wait_w = e_valid_r[0] && !e_div_cancel_w &&
         e_class_r[0] == C_DIV && !(div_done_r || div_valid_w);
@@ -1433,7 +1473,8 @@ module edrv32_cpu_core (
                 w_write_r[stage_idx] <= m_write_r[stage_idx];
                 w_class_r[stage_idx] <= m_class_r[stage_idx];
                 w_mul_r[stage_idx] <= m_mul_r[stage_idx];
-                w_dest_r[stage_idx] <= m_dest_r[stage_idx];
+                if (stage_idx == 0)
+                    w_dest_r <= m_dest_r[0];
             end
             if (e_advance_copy_w[stage_idx]) begin
                 m_record_r[stage_idx] <= e_record_r[stage_idx];
