@@ -184,7 +184,10 @@ module edrv32_dcache (
         // early_response_r owns the payload. Capture continuously so tag hit
         // and request acceptance do not drive the 64-bit response clock enable.
         early_response_data_r <= dc_early_way_data_o;
-        early_response_way_r <= dc_early_way_hit_o;
+        // Promotion already requires early-hit eligibility. Its registered
+        // valid qualifies this raw tag match, so eligibility need not gate data.
+        early_response_way_r <= {early_tag1_w[18] && early_hit1_w,
+            early_tag0_w[18] && early_hit0_w};
         if (lookup_accept_w)
             lookup_byte_select_r <= 8'b1 << dc_req_addr_i[2:0];
     end
