@@ -50,6 +50,36 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(probe.query(a, True), 0)
         self.assertEqual((probe.way_hits, probe.way_errors), (2, 2))
 
+    def test_way_prediction_early_miss_still_repairs_in_m2(self):
+        from run_v021_analysis import WayProbe
+        probe = WayProbe([0x10000000])
+        load = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0),
+                      trace_index=0, early_load=True)
+        consumer = Record(instruction(4, sources=(2,)), False, False, 0, 0, (0, 0, 0))
+        self.assertEqual(probe.query(load, True, [consumer]), 1)
+        self.assertEqual(probe.repairs, 1)
+
+    def test_way_m2_early_repair_adds_recorded_global_holds(self):
+        from run_pipeline_cut_eval import BASE
+        from run_v021_analysis import WayProbe
+        stream = [instruction(0)]
+        addresses = [0]
+        for index in range(8):
+            stream.extend((instruction(4 + index*8, 'load', rd=1, sources=(2,)),
+                           instruction(8 + index*8, sources=(1,))))
+            addresses.extend((0x10000000 + index*32, 0))
+        addresses.append(0)
+        results = []
+        for repair in (0, 1):
+            probe = WayProbe(addresses)
+            probe.repair = repair
+            result = run(stream, 'V3s', **BASE, memory_capture=True, memory_probe=probe)
+            results.append((result, probe.repairs))
+        self.assertGreater(results[1][1], 0)
+        self.assertEqual(results[1][0]['cycles'] - results[0][0]['cycles'], results[1][1])
+        self.assertEqual(results[1][0]['instructions'], results[0][0]['instructions'])
+        self.assertEqual(results[1][0]['early_loads'], results[0][0]['early_loads'])
+
     def test_m2_load_and_csr_dependencies(self):
         from run_pipeline_cut_eval import BASE
         for kind in ('load', 'csr'):
