@@ -157,7 +157,7 @@ module edrv32_npu_conv (
     reg [13:0] weight_index_r;
     reg [3:0] record_index_r;
     reg [7:0] block_ready_r;
-    reg [1:0] block_finish_r;
+    reg [2:0] block_finish_r;
     reg [2:0] block_finish_idx_r;
     reg serial_valid_r;
     reg serial_lut_r;
@@ -223,11 +223,10 @@ module edrv32_npu_conv (
     reg [2:0] schedule_block_r;
     reg [10:0] schedule_weight_base_r;
     reg all_submitted_r;
-    reg rows_ready_w;
-    reg [9:0] schedule_base_w [0:2];
-    reg [2:0] schedule_row_valid_w;
-    reg signed [13:0] required_row_w;
-    reg row_found_w;
+    wire rows_ready_w;
+    wire [9:0] schedule_base_w [0:2];
+    wire [2:0] schedule_row_valid_w;
+    wire [2:0] schedule_row_ready_w;
     reg [1:0] residual_state_r;
     reg residual_bank_r;
     reg [11:0] residual_row_r;
@@ -324,8 +323,7 @@ module edrv32_npu_conv (
     reg [31:0] read_tag_w;
     integer slot_base_idx;
     integer slot_idx;
-    integer row_idx;
-    integer scan_idx;
+
 
     // Capture only at layer entry; live scheduler and datapath fields stay local.
     always @(posedge clk_i) begin
@@ -577,7 +575,7 @@ module edrv32_npu_conv (
             weight_index_r <= 14'd0;
             record_index_r <= 4'd0;
             block_ready_r <= 8'd0;
-            block_finish_r <= 2'd0;
+            block_finish_r <= 3'd0;
             serial_valid_r <= 1'b0;
             serial_phase_r <= 5'd0;
             quant_valid_r <= 1'b0;
@@ -588,7 +586,7 @@ module edrv32_npu_conv (
             active_r <= 1'b0;
             model_state_r <= S_MODEL_DONE;
             block_ready_r <= 8'd0;
-            block_finish_r <= 2'd0;
+            block_finish_r <= 3'd0;
             serial_valid_r <= 1'b0;
             quant_valid_r <= 1'b0;
             lut_valid_r <= 1'b0;
@@ -647,13 +645,13 @@ module edrv32_npu_conv (
                     || (serial_lut_r && (serial_phase_r == 5'd31))) begin
                     serial_valid_r <= 1'b0;
                     if (serial_last_r) begin
-                        block_finish_r <= 2'd3;
+                        block_finish_r <= 3'd4;
                     end
                 end
             end
-            if (block_finish_r != 2'd0) begin
-                block_finish_r <= block_finish_r - 2'd1;
-                if (block_finish_r == 2'd1) begin
+            if (block_finish_r != 3'd0) begin
+                block_finish_r <= block_finish_r - 3'd1;
+                if (block_finish_r == 3'd1) begin
                     block_ready_r[block_finish_idx_r] <= 1'b1;
                 end
             end
@@ -933,32 +931,48 @@ module edrv32_npu_conv (
         end
     end
 
-    // Prepare the next context before the current command retires; no WB/B barrier here.
-    always @(*) begin
-        rows_ready_w = 1'b1;
-        schedule_row_valid_w = 3'd0;
-        required_row_w = 14'sd0;
-        row_found_w = 1'b0;
-        for (row_idx = 0; row_idx < 3; row_idx = row_idx + 1) begin
-            schedule_base_w[row_idx] = 10'd0;
-            if (unused_flags_w[4] || (row_idx == 0)) begin
-                required_row_w = $signed({2'd0, schedule_row_r} << unused_flags_w[5])
-                    + $signed(row_idx[13:0]) - (unused_flags_w[4] ? 14'sd1 : 14'sd0);
-                row_found_w = 1'b0;
-                if ((required_row_w >= 14'sd0) && (required_row_w < $signed({2'd0, in_h_w}))) begin
-                    for (scan_idx = 0; scan_idx < 5; scan_idx = scan_idx + 1) begin
-                        if (slot_used_r[scan_idx] && slot_ready_r[scan_idx]
-                            && (slot_row_r[scan_idx] == required_row_w[11:0])) begin
-                            schedule_base_w[row_idx] = slot_base_r[scan_idx];
-                            row_found_w = 1'b1;
-                        end
-                    end
-                    schedule_row_valid_w[row_idx] = row_found_w;
-                    rows_ready_w = rows_ready_w && row_found_w;
+    // Maintain the three padded input-row coordinates alongside schedule_row_r.
+    // Slot comparisons and base selection are parallel, without serial priority muxes.
+    genvar schedule_row;
+    genvar schedule_slot;
+    generate
+        for (schedule_row = 0; schedule_row < 3;
+            schedule_row = schedule_row + 1) begin : g_schedule_row
+            localparam [13:0] ROW_OFFSET = schedule_row;
+            reg signed [13:0] required_row_r;
+            wire row_needed_w;
+            wire row_inside_w;
+            wire [4:0] slot_match_w;
+            always @(posedge clk_i) begin
+                if (start_i[2]) begin
+                    required_row_r <= $signed(ROW_OFFSET) - (desc_i[4] ? 14'sd1 : 14'sd0);
+                end else if (cmd_prepare_w
+                    && ({1'b0, schedule_block_r} == cout_blocks_w - 4'd1)) begin
+                    required_row_r <= required_row_r + (unused_flags_w[5] ? 14'sd2 : 14'sd1);
                 end
             end
+            assign row_needed_w = unused_flags_w[4] || (schedule_row == 0);
+            assign row_inside_w = (required_row_r >= 14'sd0)
+                && (required_row_r < $signed({2'd0, in_h_w}));
+            for (schedule_slot = 0; schedule_slot < 5;
+                schedule_slot = schedule_slot + 1) begin : g_slot
+                assign slot_match_w[schedule_slot] = slot_used_r[schedule_slot]
+                    && slot_ready_r[schedule_slot]
+                    && (slot_row_r[schedule_slot] == required_row_r[11:0]);
+            end
+            assign schedule_row_valid_w[schedule_row] = row_needed_w && row_inside_w
+                && (|slot_match_w);
+            assign schedule_row_ready_w[schedule_row] = !row_needed_w || !row_inside_w
+                || (|slot_match_w);
+            assign schedule_base_w[schedule_row] =
+                ({10{row_needed_w && row_inside_w && slot_match_w[0]}} & slot_base_r[0])
+                | ({10{row_needed_w && row_inside_w && slot_match_w[1]}} & slot_base_r[1])
+                | ({10{row_needed_w && row_inside_w && slot_match_w[2]}} & slot_base_r[2])
+                | ({10{row_needed_w && row_inside_w && slot_match_w[3]}} & slot_base_r[3])
+                | ({10{row_needed_w && row_inside_w && slot_match_w[4]}} & slot_base_r[4]);
         end
-    end
+    endgenerate
+    assign rows_ready_w = &schedule_row_ready_w;
     assign cmd_prepare_w = active_r && !all_submitted_r && !stop_i
         && (!cmd_valid_r || dp_cmd_ready_w) && rows_ready_w && block_ready_r[schedule_block_r];
     always @(posedge clk_i or negedge rst_n_i[3]) begin
@@ -1133,8 +1147,8 @@ module edrv32_npu_conv (
                 residual_addr_r <= residual_next_chunk_addr_r;
             end
         end
+        residual_wr_data_r <= read_data_i;
         if (response_accept_w && (response_role_w == ROLE_RESIDUAL)) begin
-            residual_wr_data_r <= read_data_i;
             residual_wr_bank_r <= read_data_tag_i[0];
             residual_wr_index_r <= read_data_tag_i[1] ? unused_response_residual_pair_w[3:0]
                 : {unused_response_residual_pair_w[2:0], read_data_tag_i[2]};

@@ -9,7 +9,7 @@ module edrv32_npu_mac_array (
     input wire rst_n_i,
     input wire cancel_i,
 
-    // A5 terms, with eight local activation copies serving four channels each.
+    // A5 terms, eight activation sources, with chain-local final skew copies.
     input wire term_valid_i,
     input wire term_first_i,
     input wire term_last_i,
@@ -55,18 +55,24 @@ module edrv32_npu_mac_array (
     genvar lane;
     genvar copy;
     genvar pixel;
-    wire [127:0] activation_w [0:7];
+    genvar local_channel;
+    wire [127:0] activation_w [0:31];
     generate
         // D2 selection belongs to the term before item skew, including across bubbles.
         for (copy = 0; copy < 8; copy = copy + 1) begin : g_activation_copy
-            wire [127:0] local_activation_w;
-            assign activation_w[copy] = local_activation_w;
+            localparam CHANNEL_BASE = 4 * copy;
             for (lane = 0; lane < 8; lane = lane + 1) begin : g_lane
                 localparam BASE = 256 * (copy/2) + 8 * lane;
                 wire [15:0] selected_w;
-                (* keep = "true", syn_preserve = 1 *) reg [15:0] local_activation_r;
-                always @(posedge clk_i) begin
-                    local_activation_r <= selected_w;
+                wire [15:0] unused_local_activation_w;
+                if (lane > 0) begin : g_local
+                    (* keep = "true", syn_preserve = 1 *) reg [15:0] local_activation_r;
+                    always @(posedge clk_i) begin
+                        local_activation_r <= selected_w;
+                    end
+                    assign unused_local_activation_w = local_activation_r;
+                end else begin : g_unused_local
+                    assign unused_local_activation_w = 16'd0;
                 end
                 if (copy < 4) begin : g_low
                     assign selected_w = {term_activation_i[BASE+128 +: 8],
@@ -77,17 +83,28 @@ module edrv32_npu_mac_array (
                             term_activation_i[BASE+64 +: 8]} :
                         {term_activation_i[BASE+128 +: 8], term_activation_i[BASE +: 8]};
                 end
+                wire [15:0] final_activation_w;
                 if (lane == 0) begin : g_direct
-                    assign local_activation_w[16*lane +: 16] = local_activation_r;
+                    assign final_activation_w = selected_w;
+                end else if (lane == 1) begin : g_first_skew
+                    assign final_activation_w = unused_local_activation_w;
                 end else begin : g_skew
                     (* keep = "true", syn_preserve = 1 *)
-                    reg [16*lane-1:0] activation_r;
+                    reg [16*(lane-1)-1:0] activation_r;
                     always @(posedge clk_i) begin
-                        activation_r <= (activation_r << 16) | {{(16*lane-16){1'b0}},
-                            local_activation_r};
+                        activation_r <= (activation_r << 16) | {{(16*lane-32){1'b0}},
+                            unused_local_activation_w};
                     end
-                    assign local_activation_w[16*lane +: 16] =
-                        activation_r[16*(lane-1) +: 16];
+                    assign final_activation_w = activation_r[16*(lane-2) +: 16];
+                end
+                // Only the final existing skew edge is replicated at each APM chain.
+                for (local_channel = 0; local_channel < 4;
+                    local_channel = local_channel + 1) begin : g_chain_input
+                    (* keep = "true", syn_preserve = 1 *) reg [15:0] activation_r;
+                    always @(posedge clk_i) begin
+                        activation_r <= final_activation_w;
+                    end
+                    assign activation_w[CHANNEL_BASE+local_channel][16*lane +: 16] = activation_r;
                 end
             end
         end
@@ -135,10 +152,10 @@ module edrv32_npu_mac_array (
 
             for (lane = 0; lane < 8; lane = lane + 1) begin : g_lane
                 wire [15:0] lane_activation_w;
-                (* keep = "true", syn_preserve = 1 *) reg [7:0] lane_weight_r;
-                assign lane_activation_w = activation_w[channel/4][16*lane +: 16];
+                (* keep = "true", syn_preserve = 1 *) reg [15:0] lane_weight_r;
+                assign lane_activation_w = activation_w[channel][16*lane +: 16];
                 always @(posedge clk_i) begin
-                    lane_weight_r <= term_weight_i[8*(8*channel+lane) +: 8];
+                    lane_weight_r <= {2{term_weight_i[8*(8*channel+lane) +: 8]}};
                 end
                 if (lane == 0) begin : g_head
                     wire [47:0] unused_p_w;
@@ -147,9 +164,9 @@ module edrv32_npu_mac_array (
                         .clk_i(clk_i),
 
                         .a0_i(lane_activation_w[7:0]),
-                        .b0_i(lane_weight_r),
+                        .b0_i(lane_weight_r[7:0]),
                         .a1_i(lane_activation_w[15:8]),
-                        .b1_i(lane_weight_r),
+                        .b1_i(lane_weight_r[15:8]),
 
                         .cpo_o(cascade_w[1]),
                         .p_o(unused_p_w)
@@ -161,9 +178,9 @@ module edrv32_npu_mac_array (
                         .clk_i(clk_i),
 
                         .a0_i(lane_activation_w[7:0]),
-                        .b0_i(lane_weight_r),
+                        .b0_i(lane_weight_r[7:0]),
                         .a1_i(lane_activation_w[15:8]),
-                        .b1_i(lane_weight_r),
+                        .b1_i(lane_weight_r[15:8]),
 
                         .cpi_i(cascade_w[lane]),
                         .cpo_o(cascade_w[lane+1]),
@@ -175,9 +192,9 @@ module edrv32_npu_mac_array (
                         .clk_i(clk_i),
 
                         .a0_i(lane_activation_w[7:0]),
-                        .b0_i(lane_weight_r),
+                        .b0_i(lane_weight_r[7:0]),
                         .a1_i(lane_activation_w[15:8]),
-                        .b1_i(lane_weight_r),
+                        .b1_i(lane_weight_r[15:8]),
 
                         // The last P drives logic; CPO only connects APMs.
                         .cpi_i(cascade_w[lane]),

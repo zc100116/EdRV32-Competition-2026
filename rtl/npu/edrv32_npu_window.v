@@ -414,7 +414,7 @@ module edrv32_npu_window (
     reg [48:0] a3_tag_r;
     reg [1:0] a3_pixel_valid_r;
     reg [1:0] a3_bank_r;
-    reg [1:0] a3_pixel_r;
+    (* keep = "true", syn_preserve = 1 *) reg [7:0] a3_pixel_r;
     reg a3_c8_half_r;
     reg a3_d2_r;
     reg a3_in_c4_r;
@@ -435,8 +435,16 @@ module edrv32_npu_window (
 
     assign pixel0_beat_w = a3_bank_r[0] ? cache_rd_data1_i : cache_rd_data0_i;
     assign pixel1_beat_w = a3_bank_r[1] ? cache_rd_data1_i : cache_rd_data0_i;
-    assign pixel0_data_w = a3_pixel_r[0] ? pixel0_beat_w[255:128] : pixel0_beat_w[127:0];
-    assign pixel1_data_w = a3_pixel_r[1] ? pixel1_beat_w[255:128] : pixel1_beat_w[127:0];
+    // Four local selectors per pixel each drive 32 bits instead of one 128-bit mux.
+    genvar pixel_slice;
+    generate
+        for (pixel_slice = 0; pixel_slice < 4; pixel_slice = pixel_slice + 1) begin : g_pixel_slice
+            assign pixel0_data_w[32*pixel_slice +: 32] = a3_pixel_r[pixel_slice] ?
+                pixel0_beat_w[128+32*pixel_slice +: 32] : pixel0_beat_w[32*pixel_slice +: 32];
+            assign pixel1_data_w[32*pixel_slice +: 32] = a3_pixel_r[4+pixel_slice] ?
+                pixel1_beat_w[128+32*pixel_slice +: 32] : pixel1_beat_w[32*pixel_slice +: 32];
+        end
+    endgenerate
     always @(*) begin
         pixel0_activation_w = 128'd0;
         pixel1_activation_w = 128'd0;
@@ -536,7 +544,7 @@ module edrv32_npu_window (
         a3_tag_r <= a2_tag_r;
         a3_pixel_valid_r <= a2_pixel_valid_r;
         a3_bank_r <= a2_bank_r;
-        a3_pixel_r <= a2_pixel_r;
+        a3_pixel_r <= {{4{a2_pixel_r[1]}}, {4{a2_pixel_r[0]}}};
         a3_c8_half_r <= a2_c8_half_r;
         a3_d2_r <= a2_d2_r;
         a3_in_c4_r <= a2_in_c4_r;
