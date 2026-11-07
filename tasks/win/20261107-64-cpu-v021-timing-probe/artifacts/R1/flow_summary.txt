@@ -1,0 +1,42 @@
+compile  W=1560  C=0  E=0
+Action compile: Real time elapsed is 0h:0m:37s
+Action compile: CPU time elapsed is 0h:0m:1s
+Action compile: Process CPU time elapsed is 0h:0m:1s
+Current time: Sat Nov  7 19:31:54 2026
+Action compile: Peak memory pool usage is 265 MB
+
+synthesize  W=1839  C=0  E=0
+W: Timing-4087: Port 'scan_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'scan_i' is not constrained, it is treated as combinational input.
+Action synthesize: Real time elapsed is 0h:1m:44s
+Action synthesize: CPU time elapsed is 0h:0m:4s
+Action synthesize: Process CPU time elapsed is 0h:0m:4s
+Current time: Sat Nov  7 19:33:38 2026
+Action synthesize: Peak memory pool usage is 1,230 MB
+
+device_map  W=26  C=0  E=0
+Action dev_map: Real time elapsed is 0h:0m:23s
+Action dev_map: CPU time elapsed is 0h:0m:1s
+Action dev_map: Process CPU time elapsed is 0h:0m:1s
+Current time: Sat Nov  7 19:34:00 2026
+Action dev_map: Peak memory pool usage is 692 MB
+
+place_route  W=3  C=0  E=0
+Design 'edrv32_cpu_l1_timing_probe' has been placed and routed successfully.
+Action pnr: Real time elapsed is 0h:13m:57s
+Action pnr: CPU time elapsed is 0h:0m:54s
+Action pnr: Process CPU time elapsed is 0h:1m:21s
+Current time: Sat Nov  7 19:47:57 2026
+Action pnr: Peak memory pool usage is 3,081 MB
+
+report_timing  W=3  C=0  E=0
+W: Timing-4087: Port 'scan_o' is not constrained, it is treated as combinational output.
+W: Timing-4086: Port 'rst_n_i' is not constrained, it is treated as combinational input.
+W: Timing-4086: Port 'scan_i' is not constrained, it is treated as combinational input.
+Report timing is finished successfully.
+Action report_timing: Real time elapsed is 0h:0m:47s
+Action report_timing: CPU time elapsed is 0h:0m:7s
+Action report_timing: Process CPU time elapsed is 0h:0m:9s
+Current time: Sat Nov  7 19:48:46 2026
+Action report_timing: Peak memory pool usage is 2,164 MB
