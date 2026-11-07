@@ -207,6 +207,10 @@ module tb;
             end
         end
         if (rst_n_i && (!finished || (traps!=0 && trace_traps==0))) begin
+            // The replicated RAS interface must preserve the original redirect cycle.
+            if (dut.frontend_redirect_copy_w !==
+                {17{dut.frontend_redirect_w || dut.frontend_d_redirect_w}})
+                $fatal(1,"FAIL RAS redirect replicas changed restoration cycle");
             if (dut.d_issue_w == 2 && dut.d_swap_w)
                 swaps++;
             if (dut.e_redirect_w) begin

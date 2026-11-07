@@ -127,6 +127,7 @@ module edrv32_cpu_core (
     reg [11:0] update_tournament_r;
     wire e_flush_w;
     wire frontend_redirect_w;
+    wire [16:0] frontend_redirect_copy_w;
     wire [31:0] frontend_redirect_pc_w;
     wire [36:0] frontend_redirect_ras_w;
     wire frontend_d_redirect_w;
@@ -474,6 +475,9 @@ module edrv32_cpu_core (
     wire m_wait_other_w;
     wire e_resolve_w;
     reg e_resolved_r;
+    wire e_resolve_ready_w;
+    wire e_capture_reason_w;
+    wire [3:0] e_capture_copy_w;
     wire m_advance_w;
     wire m_memory_w;
     wire m_wait_w;
@@ -691,7 +695,7 @@ module edrv32_cpu_core (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .redirect_valid_i(frontend_redirect_w),
-        .redirect_valid_copy_i({17{frontend_redirect_w}}),
+        .redirect_valid_copy_i(frontend_redirect_copy_w),
         .redirect_pc_i(frontend_redirect_pc_w),
         .redirect_ras_i(frontend_redirect_ras_w),
         .redirect_push_i(!m_redirect_r && (e_redirect_r ?
@@ -1014,9 +1018,10 @@ module edrv32_cpu_core (
         (e_operand_a_r[0] == e_jalr_expected_even_r ||
         e_operand_a_r[0] == e_jalr_expected_odd_r)) : e_pc_target_match_r;
     // A younger M fault can wait for its older load; E is already on the discarded path.
-    assign e_resolve_w = (|e_valid_r) && !e_resolved_r && !m_block_early_w &&
+    assign e_resolve_ready_w = (|e_valid_r) && !m_block_early_w &&
         !m_mret_w && !m_fence_i_done_w && !m_wfi_w && !e_flush_w && !e_repair_pending_r &&
         (!div_wait_w || e_old_control_unresolved_w);
+    assign e_resolve_w = e_resolve_ready_w && !e_resolved_r;
     assign e_redirect0_w = e_resolve_w && e_valid_r[0] && e_lane_redirect_needed_w[0] &&
         !(e_swap_r && (e_older_fault_w ||
         (e_valid_r[1] && e_lane_redirect_needed_w[1])));
@@ -1024,6 +1029,11 @@ module edrv32_cpu_core (
         !(!e_swap_r && (e_older_fault_w ||
         (e_valid_r[0] && e_lane_redirect_needed_w[0])));
     assign e_capture_w = e_redirect0_w || e_redirect1_w;
+    assign e_capture_reason_w =
+        (e_valid_r[0] && e_lane_redirect_needed_w[0] &&
+        !(e_swap_r && (e_older_fault_w || (e_valid_r[1] && e_lane_redirect_needed_w[1])))) ||
+        (e_valid_r[1] && e_lane_redirect_needed_w[1] &&
+        !(!e_swap_r && (e_older_fault_w || (e_valid_r[0] && e_lane_redirect_needed_w[0]))));
     assign e_redirect_w = e_redirect_r;
     assign d_redirect_w = d_redirect_r;
     assign e_flush_w = (e_redirect_r && e_redirect_advanced_r) || m_redirect_r;
@@ -1150,6 +1160,49 @@ module edrv32_cpu_core (
         backend_redirect_ras_w : d_redirect_ras_r;
     assign frontend_d_redirect_w = d_redirect_r && !d_redirect_issued_r &&
         !m_redirect_r && !e_redirect_r;
+    // RAS restoration occurs for every registered M/E/D redirect. The ordinary
+    // frontend PC/payload ports retain their existing M-before-E-before-D priority.
+    genvar redirect_bank;
+    genvar capture_bank;
+    generate
+        for (capture_bank = 0; capture_bank < 4;
+            capture_bank = capture_bank + 1) begin : g_capture_bank
+            // Four groups limit each final decision to at most five replica FFs.
+            (* keep = "true", syn_preserve = 1 *) reg e_resolved_copy1_r;
+            assign e_capture_copy_w[capture_bank] = e_resolve_ready_w &&
+                !e_resolved_copy1_r && e_capture_reason_w;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    e_resolved_copy1_r <= 0;
+                else begin
+                    if (e_resolve_w)
+                        e_resolved_copy1_r <= 1;
+                    if (e_advance_w || m_redirect_w || d_issue_valid_w)
+                        e_resolved_copy1_r <= 0;
+                end
+            end
+        end
+        for (redirect_bank = 0; redirect_bank < 17;
+            redirect_bank = redirect_bank + 1) begin : g_redirect_bank
+            localparam CAPTURE_BANK = redirect_bank < 12 ? redirect_bank/4 : 3;
+            (* keep = "true", syn_preserve = 1 *) reg e_redirect_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg m_redirect_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg d_redirect_copy1_r;
+            assign frontend_redirect_copy_w[redirect_bank] =
+                m_redirect_copy1_r ? 1'b1 : e_redirect_copy1_r ? 1'b1 : d_redirect_copy1_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    e_redirect_copy1_r <= 0;
+                    m_redirect_copy1_r <= 0;
+                    d_redirect_copy1_r <= 0;
+                end else begin
+                    e_redirect_copy1_r <= e_capture_copy_w[CAPTURE_BANK];
+                    m_redirect_copy1_r <= m_front_capture_w;
+                    d_redirect_copy1_r <= d_capture_w;
+                end
+            end
+        end
+    endgenerate
     // Each comparison drives result FFs, then local FF copies select <=16 payload bits.
     genvar redirect_slice;
     generate

@@ -10,7 +10,7 @@ module edrv32_cpu_frontend (
 
     // Backend: older M/E redirect wins over a D-stage JAL redirect.
     input wire redirect_valid_i,
-    // Same-cycle backend replicas: 16 RAS byte slices and one pointer/count bank.
+    // Same-cycle M/E/D restoration replicas: 16 RAS bytes and one pointer/count bank.
     input wire [16:0] redirect_valid_copy_i,
     input wire [31:0] redirect_pc_i,
     input wire [36:0] redirect_ras_i,
@@ -237,8 +237,8 @@ module edrv32_cpu_frontend (
         .f2_use_local_o(f2_use_local_w),
         .clear_valid_i(update_clear_i),
         .clear_index_i(update_clear_index_i),
-        .restore_valid_i(redirect_valid_copy_i[16] || d_redirect_valid_i),
-        .restore_valid_copy_i(redirect_valid_copy_i[15:0] | {16{d_redirect_valid_i}}),
+        .restore_valid_i(redirect_valid_copy_i[16]),
+        .restore_valid_copy_i(redirect_valid_copy_i[15:0]),
         .restore_ras_i(redirect_valid_i ? redirect_ras_i : d_redirect_ras_i),
         .restore_push_i(redirect_valid_i ? redirect_push_i : d_redirect_push_i),
         .restore_pop_i(redirect_valid_i ? redirect_pop_i : d_redirect_pop_i),
