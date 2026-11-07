@@ -132,8 +132,8 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-FIX | v0.17 缺陷：寄存 D 重定向强制单发射时 d_swap 未同步，导致跳过 JAL（tournament 时序下由随机测试暴露） | Codex（N-TOUR 中发现） | — | cpu_v3s scenario21 修复前失败、修复后通过 | cpu-n16 6aae76e5/9cfd69a3 | [x] |
 | N-TOUR | v0.18 tournament（用户 2026-11-05）：三张 LUTRAM 表、F2 纠正 1 拍、E 寄存训练 | Codex sol | N-INT | B1 47/47、R01–R05；R-05 1,807,583（模型 +0.33%，比 v0.17 少 3.3%） | task-cpu-n-tour b4fd7a63 | [x] |
 | N-PDS2 | 卡 60：v0.18 CPU+L1 独立 150 MHz 探针，新 IP 2 个（local_history 256×10、tournament 1024×2） | 用户 + Windows Codex | N-TOUR | 频率 ≥ 卡 59 的 98% | win/20261105-60-cpu-v018-tournament-probe | [x] 109.0 MHz，卡 59 的 98.31%；v0.18 并入 cpu-n16（dc018e50） |
-| N-T2BE | 时序第二轮后端（用户 2026-11-06）：级数工具对卡 59/60 校准、P1 E 判定只进寄存器、P2 M 停顿网络、P3/P4 D 级预译码与提前查询、P5 ALU 环、P6/P10 扇出；最后集成 N-T2FE | Codex sol（task_1b2c7ad2a925 / ctx_65c4e1f57c5e） | N-PDS2 | 工具实测级数；B1、R01–R05；R-05 增加 ≤ 1.5% | task-cpu-n-t2be | [~] |
-| N-T2FE | 时序第二轮前端：P7 I$→F1、P8 F1→RAS、P9 F1 环、P10 前端扇出 | Codex sol（task_932990e44e9b / ctx_5fe7d53b009c） | N-T2BE 第 0 步工具 | 工具实测级数；前端单元、B1 | task-cpu-n-t2fe | [~] |
+| N-T2BE | 时序第二轮后端（用户 2026-11-06）：级数工具对卡 59/60 校准、P1 E 判定只进寄存器、P2 M 停顿网络、P3/P4 D 级预译码与提前查询、P5 ALU 环、P6/P10 扇出；最后集成 N-T2FE | Codex sol（task_1b2c7ad2a925 / ctx_65c4e1f57c5e） | N-PDS2 | 工具实测级数；B1、R01–R05；R-05 增加 ≤ 1.5% | task-cpu-n-t2be | [~] 第一轮 eaf250a8：校准工具 503c2ea2；P1 禁止路径 0 条；P2–P6 等价减级，R-05 不变（1,807,583）；残余进入 PDS 复核。v0.20 放宽 4.10（用户 2026-11-07）；N-T2BE2 task_f8d9c4473201 / ctx_c9f1881ca832：P4 按 v0.20、P10 副本、集成前端 |
+| N-T2FE | 时序第二轮前端：P7 I$→F1、P8 F1→RAS、P9 F1 环、P10 前端扇出 | Codex sol（task_932990e44e9b / ctx_5fe7d53b009c） | N-T2BE 第 0 步工具 | 工具实测级数；前端单元、B1 | task-cpu-n-t2fe | [~] 第一轮 b8f07fb5：等价改动，R-05 不变，381 扇出降到 14；P7 13 级、P9 11 级仍超预算。v0.19 I$ 缺失重发和 IB 寄存余量（用户 2026-11-07）；N-T2FE2 task_f719f2ce321b / ctx_891757b8fb27 |
 | N-PDS3 | 第二轮结果的 CPU+L1 独立探针 | 用户 + Windows Codex | N-T2BE 集成 | ≥ 135 MHz，再冲 150 MHz | — | [ ] |
 
 ## 6. 变更记录
