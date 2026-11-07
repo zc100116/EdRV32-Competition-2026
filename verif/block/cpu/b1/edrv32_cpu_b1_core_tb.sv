@@ -423,7 +423,6 @@ module edrv32_cpu_b1_core_tb;
         .ic_resp_err_i(ic_resp_err),
         .ic_kill_i(ic_kill),
         .dc_req_valid_i(dc_req_valid),
-        .dc_req_early_i(dc_req_early),
         .dc_req_ready_i(dc_req_ready),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
