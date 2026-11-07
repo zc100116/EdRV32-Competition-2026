@@ -26,6 +26,59 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_m2_early_source_is_an_already_registered_result(self):
+        consumer = instruction(8, 'load', rd=3, sources=(2,))
+        producer = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0))
+        self.assertFalse(early_address_allowed(consumer, [], [], [], [], 4, m2=[producer]))
+        producer.early_load = True
+        self.assertTrue(early_address_allowed(consumer, [], [], [], [], 4, m2=[producer]))
+        self.assertFalse(early_address_allowed(consumer, [], [], [], [], 4,
+                                              m2=[producer], registered_early=False))
+        producer.instruction = instruction(0, 'csr', rd=2)
+        self.assertFalse(early_address_allowed(consumer, [], [], [], [], 4, m2=[producer]))
+
+    def test_way_prediction_counts_repairs_on_ordinary_hits(self):
+        from run_v021_analysis import WayProbe
+        probe = WayProbe([0x10000000, 0x10004000])
+        a = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0), trace_index=0)
+        b = Record(instruction(4, 'load', rd=3), False, False, 0, 0, (0, 0, 0), trace_index=1)
+        self.assertEqual(probe.query(a, True), 0)
+        self.assertEqual(probe.query(b, True), 0)
+        self.assertEqual(probe.query(a, True), 1)
+        self.assertEqual(probe.query(b, True), 1)
+        a.early_load = True
+        self.assertEqual(probe.query(a, True), 0)
+        self.assertEqual((probe.way_hits, probe.way_errors), (2, 2))
+
+    def test_m2_load_and_csr_dependencies(self):
+        from run_pipeline_cut_eval import BASE
+        for kind in ('load', 'csr'):
+            stream = [instruction(0, kind, rd=1, sources=(2,)),
+                      instruction(4, rd=3, sources=(1,))]
+            timeline = []
+            result = run(stream, **dict(BASE, early_address=0), load_latency=3,
+                         decode_split=True, memory_capture=True, timeline=timeline)
+            entries = {pc: tick for tick, name, *data in timeline if name == 'stages'
+                       for pc in data[0]}
+            self.assertEqual(entries[4] - entries[0], 3)
+            self.assertEqual(result['instructions'], 2)
+
+    def test_m2_system_restart_is_one_cycle_later(self):
+        from run_pipeline_cut_eval import BASE
+        for bits in (0x30200073, 0x10500073, 0x0000100f):
+            program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+            program[0] = replace(instruction(0, 'serial'), bits=bits)
+            program[36] = instruction(36, 'serial')
+            trace = [0, 32, 36] if bits == 0x30200073 else list(range(0, 40, 4))
+            resolves = []
+            for capture in (False, True):
+                timeline = []
+                result = simulate(program, trace, 0, 36, 'V3s', **BASE,
+                                  decode_split=True, memory_capture=capture, timeline=timeline)
+                resolves.append(next(t for t, event, pc, meta in timeline if event == 'resolve'))
+                self.assertEqual(result['instructions'], len(trace) - 1)
+            self.assertEqual(resolves[1], resolves[0] + 1)
+
     def test_pipeline_cut_redirect_and_training_edges(self):
         from run_pipeline_cut_eval import BASE
         for kind in ('branch', 'jal'):

@@ -240,7 +240,8 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024, gshare_pc_shift=1):
         del halfwords[:length]
 
 
-def early_address_allowed(instruction, older, e, m, w, mul_latency):
+def early_address_allowed(instruction, older, e, m, w, mul_latency, m2=None,
+                          registered_early=True):
     """4.10 exclusion list, using stage occupancy at the start of D."""
     base = instruction.sources[-1] if instruction.sources else 0
     if not base:
@@ -250,12 +251,15 @@ def early_address_allowed(instruction, older, e, m, w, mul_latency):
     if any(base in destinations(r.instruction) for r in older + e):
         return False
     # A fused ADD+load's first destination belongs to its registered ALU result.
-    if any(r.instruction.kind in {'load', 'csr'} and
-           base == r.instruction.rd for r in m):
+    if any((r.instruction.kind == 'csr' or
+            r.instruction.kind == 'load' and
+            (m2 is None or not registered_early or not r.early_load)) and
+           base == r.instruction.rd for r in m + (m2 or [])):
         return False
     return not any(r.instruction.kind == 'mul' and age < mul_latency and
                    base in destinations(r.instruction)
-                   for age, group in ((1, e), (2, m), (3, w)) for r in group)
+                   for age, group in (((1, e), (2, m), (3, w)) if m2 is None else
+                                     ((1, e), (2, m), (3, m2), (4, w))) for r in group)
 
 
 def lcb_allowed(instruction, e, wait_kind):
@@ -278,7 +282,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              lcb_split=False, frontend_probe=None, frontend_registered_margin=False,
              alu_latency=1, shift_latency=None, compare_latency=None,
              decode_split=False, branch_register=False, memory_probe=None,
-             line_predictor=False):
+             line_predictor=False, memory_capture=False, capture_early='registered',
+             csr_latency=None, system_capture=True):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -327,6 +332,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     fetch_pc = trace[0]
     cross_target = None
     e, m, w = [], [], []
+    m1 = []
     w2 = []
     cursor = 0
     active = False
@@ -353,7 +359,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
     ideal_group = None
     ideal_query = None
     tail_pc = end + program[end].size
-    latencies = {'load': load_latency, 'mul': mul_latency, 'csr': 2}
+    latencies = {'load': load_latency, 'mul': mul_latency, 'csr': csr_latency if csr_latency is not None else 3 if memory_capture else 2}
     long_results = max(load_latency, mul_latency) > 3
     if statistics is not None:
         statistics.update(load_use_load_address_cycles=0, load_use_store_address_cycles=0)
@@ -448,7 +454,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         # Incremental registered miss/failure repair freezes all stages before retirement.
         memory_delay = 0
         if memory_probe is not None:
-            for record in m:
+            for record in (m1 if memory_capture else m):
                 if not record.memory_checked and record.trace_index >= 0:
                     record.memory_checked = True
                     memory_delay += memory_probe.query(record, active, e)
@@ -545,7 +551,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         m_redirect = None
         m_surviving = m
         if (late_branch or lcb or registered_control) and not applied_redirect:
-            for index, record in enumerate(m):
+            resolving_m = m1 if memory_capture and not system_capture else m
+            for index, record in enumerate(resolving_m):
                 instruction = record.instruction
                 system_restart = registered_control and instruction.bits in {
                     0x30200073, 0x10500073, 0x0000100f}
@@ -556,7 +563,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                     if system_restart or (not record.d_redirect and (
                             record.taken != taken or (taken and record.target != record.next_pc))):
                         m_redirect = record
-                        m_surviving = m[:index + 1]
+                        m_surviving = m if resolving_m is m1 else m[:index + 1]
                         break
         m_training = [r for r in m_surviving if (
             r.late and r.instruction.kind in late_controls) or r.deferred_control or r.lcb]
@@ -615,7 +622,8 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         # Build closest-producer readiness once, including younger WAW priority.
         wait_kind = {}
         ready_in = {}
-        stages = ((3, w), (2, m), (1, e)) if long_results else ((2, m), (1, e))
+        stages = (((4, w), (3, m), (2, m1), (1, e)) if memory_capture else
+                  ((3, w), (2, m), (1, e)) if long_results else ((2, m), (1, e)))
         if decode_split:
             # D1 reserves operands for next-cycle D2. A pending D2 producer is
             # one E-entry interval older; E/M/W producers are two/three/four older.
@@ -662,7 +670,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 if issue_cycle == tick - 1 and not hazard(inst, (preceding.rd,)):
                     older_waits = 0
                     older_lcb = True
-        csr_wait = bool(ib and ib[0].instruction.kind == 'csr' and (decode_pending or e or m))
+        csr_wait = bool(ib and ib[0].instruction.kind == 'csr' and (decode_pending or e or m1 or m))
         if ib and available and cursor < len(trace):
             older = ib[0].instruction
             if not older_waits and not csr_wait:
@@ -762,9 +770,11 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                         speculative = bool(
                             applied_redirect or registered_redirect or registered_control and (
                             m_redirect or redirect or any(r.instruction.bits in {
-                                0x30200073, 0x10500073, 0x0000100f} for r in e + m)))
+                                0x30200073, 0x10500073, 0x0000100f} for r in e + m1 + m)))
                         speculative |= decode_split and any(
-                            r.instruction.kind in CONTROL for r in decode_pending)
+                            r.instruction.kind in CONTROL or r.instruction.bits in {
+                                0x30200073, 0x10500073, 0x0000100f}
+                            for r in decode_pending)
                         speculative |= bool(late_branch or lcb) and any(
                             (r.late and r.instruction.kind in late_controls) or
                             r.deferred_control or r.lcb for r in e)
@@ -794,10 +804,17 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                             if decode_split:
                                 # Query is in D2 next cycle: present D2/E/M become E/M/W.
                                 early = early_address_allowed(
-                                    instruction, issued, decode_pending, e, m, mul_latency)
+                                    instruction, issued, decode_pending, e,
+                                    m1 if memory_capture and capture_early == 'legacy' else m,
+                                    mul_latency,
+                                    m2=m1 if memory_capture and capture_early != 'legacy' else None,
+                                    registered_early=capture_early == 'registered')
                             else:
-                                early = early_address_allowed(instruction, issued, e, m, w,
-                                                              mul_latency)
+                                early = early_address_allowed(
+                                    instruction, issued, e, m1 if memory_capture else m, w,
+                                    mul_latency,
+                                    m2=m if memory_capture and capture_early != 'legacy' else None,
+                                    registered_early=capture_early == 'registered')
                         else:
                             early = not base or recent is None or tick - recent > early_address
                         if isinstance(instruction, Macro):
@@ -950,7 +967,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             if flush_stage == 'm' and flush.lcb and lcb in {'registered', 'v017'}:
                 penalty += 1
             if registered_control and flush_stage == 'm' and not flush.lcb:
-                penalty = 5
+                penalty = 5 + int(decode_split) + int(memory_capture and system_capture)
             # A JALR can target PC+4: a younger instruction can match the trace
             # before being squashed by its older redirect. Replay it as well.
             cursor = flush.trace_index + 1
@@ -965,6 +982,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                 normal = (3 if flush_stage != 'd' else 2) + int(registered_control)
                 # M comparison itself consumes one of the five lost cycles.
                 normal += int(registered_control and flush_stage == 'm')
+                normal += int(memory_capture and system_capture and flush_stage == 'm')
                 normal += int(decode_split) + int(branch_register and flush_stage == 'e')
                 fetch_delay = max(0, penalty - normal)
                 if penalty < normal:
@@ -982,29 +1000,50 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
             elif not (div_wait or e_stall or m_stall):
                 decode_pending = issued
         killed = 0
-        if applied_redirect:
-            if flush_stage == 'd':
-                surviving = e[:e.index(flush) + 1]
-                w, m, e = m, surviving, []
-            elif flush_stage == 'e':
-                w, m, e = m, [], []
-            else:
-                w, m, e = [], [], []
-            division_left = 0
-        elif m_stall:
-            w = []
-        elif e_stall:
-            w, m = m_surviving, []
-        elif div_wait:
-            w, m = m, []
-        else:
-            if m_redirect and not registered_control:
-                killed = sum(r.counted_issue for r in m[len(m_surviving):] + e)
-                w, m, e = m_surviving, [], []
+        if memory_capture:
+            if applied_redirect:
+                if flush_stage == 'd':
+                    surviving = e[:e.index(flush) + 1]
+                    w, m, m1, e = m, m1, surviving, []
+                elif flush_stage == 'e':
+                    kept = m1[:m1.index(flush) + 1] if flush in m1 else m1
+                    w, m, m1, e = m, kept, [], []
+                else:
+                    w, m, m1, e = ([flush] if not system_capture else []), [], [], []
                 division_left = 0
+            elif m_stall:
+                w = []
+            elif e_stall:
+                w, m, m1 = m_surviving, m1, []
+            elif div_wait:
+                w, m, m1 = m, m1, []
             else:
                 killed = sum(r.counted_issue for r in e[len(surviving):]) if redirect else 0
-                w, m, e = m_surviving, surviving, entering_e
+                w, m, m1, e = m_surviving, m1, surviving, entering_e
+        else:
+            if applied_redirect:
+                if flush_stage == 'd':
+                    surviving = e[:e.index(flush) + 1]
+                    w, m, e = m, surviving, []
+                elif flush_stage == 'e':
+                    w, m, e = m, [], []
+                else:
+                    w, m, e = [], [], []
+                division_left = 0
+            elif m_stall:
+                w = []
+            elif e_stall:
+                w, m = m_surviving, []
+            elif div_wait:
+                w, m = m, []
+            else:
+                if m_redirect and not registered_control:
+                    killed = sum(r.counted_issue for r in m[len(m_surviving):] + e)
+                    w, m, e = m_surviving, [], []
+                    division_left = 0
+                else:
+                    killed = sum(r.counted_issue for r in e[len(surviving):]) if redirect else 0
+                    w, m, e = m_surviving, surviving, entering_e
         if active:
             cycles += 1
             killed = 0 if div_wait else killed
