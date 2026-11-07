@@ -32,6 +32,7 @@ module edrv32_cpu_core (
     input wire dc_resp_valid_i,
     input wire [63:0] dc_resp_way_data_i,
     input wire [1:0] dc_resp_way_hit_i,
+    input wire [47:0] dc_resp_way_hit_copy_i,
     input wire dc_resp_err_i,
     input wire dc_resp_device_i,
     output wire dc_kill_o,
@@ -616,6 +617,7 @@ module edrv32_cpu_core (
     wire unused_mul_valid_w;
     wire [31:0] unused_lane1_predicted_target_w;
     integer result_idx;
+    integer response_slice_w;
     integer stage_idx;
     wire [11:0] trace_bypass_w /* verilator public_flat_rd */;
     reg [1:0] trace_redirect_cause_w /* verilator public_flat_rd */;
@@ -749,6 +751,10 @@ module edrv32_cpu_core (
     // Mapping and same-group WAW priority affect only these one-hot enables.
     genvar forward_operand;
     genvar forward_copy;
+    genvar forward_slice;
+    genvar forward_data;
+    wire unused_response_hit_w;
+    assign unused_response_hit_w = &{1'b0, dc_resp_way_hit_i};
     generate
         for (forward_operand = 0; forward_operand < 4;
             forward_operand = forward_operand + 1) begin : g_forward
@@ -777,25 +783,13 @@ module edrv32_cpu_core (
             wire capture_w;
             wire hold_w;
             wire repair_w;
-            wire [1:0] repair_select_w;
             assign repair_w = e_repair_w &&
                 e_repair_mask_r[physical_lane_w*2 + forward_operand%2];
             assign capture_w = e_data_load_copy_w[forward_operand/2] && !repair_w;
             assign hold_w = !e_data_load_copy_w[forward_operand/2] && !repair_w;
-            assign repair_select_w = dc_resp_way_hit_i & {2{repair_w}};
-            wire [9:0] data_select_w;
-            wire [31:0] data_w [1:9];
             assign early_w = e_early_r && e_load_r[0];
             assign memory_w = m_load_r;
-            // Capture program slots independently; the registered E map chooses their lanes.
-            assign data_select_w = {10{capture_w}} & {
-                select_w[3] && memory_w && dc_resp_way_hit_i[1],
-                select_w[3] && memory_w && dc_resp_way_hit_i[0],
-                select_w[1] && early_w && dc_early_way_hit_i[1],
-                select_w[1] && early_w && dc_early_way_hit_i[0],
-                select_w[3] && m_csr_r,
-                select_w[6], select_w[5], select_w[4],
-                select_w[3] && !memory_w && !m_csr_r, select_w[0]};
+            wire [31:0] data_w [1:9];
             assign data_w[1] = m_result_r[0];
             assign data_w[2] = m_result_w[1];
             assign data_w[3] = w_result_w[0];
@@ -812,41 +806,70 @@ module edrv32_cpu_core (
                 e_operand_a_w[physical_lane_w] : e_operand_b_w[physical_lane_w];
             assign held_branch_w = forward_operand%2 == 0 ?
                 e_branch_a_w[physical_lane_w] : e_branch_b_w[physical_lane_w];
-            assign selected_data_w =
-                ({32{data_select_w[0]}} & d_register_w[forward_operand]) |
-                ({32{data_select_w[1]}} & data_w[1]) |
-                ({32{data_select_w[2]}} & data_w[2]) |
-                ({32{data_select_w[3]}} & data_w[3]) |
-                ({32{data_select_w[4]}} & data_w[4]) |
-                ({32{data_select_w[5]}} & data_w[5]) |
-                ({32{data_select_w[6]}} & data_w[6]) |
-                ({32{data_select_w[7]}} & data_w[7]) |
-                ({32{data_select_w[8] || repair_select_w[0]}} & data_w[8]) |
-                ({32{data_select_w[9] || repair_select_w[1]}} & data_w[9]);
             assign e_forward_w[forward_operand] = selected_data_w |
                 ({32{hold_w}} & held_data_w);
             assign e_branch_forward_w[forward_operand] = selected_data_w |
                 ({32{hold_w}} & held_branch_w);
-            if (forward_operand%2 == 1) begin : g_alu_input
-                wire [9:0] select_alu_w;
-                assign select_alu_w[7:0] = data_select_w[7:0] &
-                    {8{!d_immediate_w[forward_operand/2]}};
-                assign select_alu_w[9:8] = (data_select_w[9:8] &
-                    {2{!d_immediate_w[forward_operand/2]}}) | repair_select_w;
-                assign e_alu_input_w[forward_operand/2] =
-                    ({32{select_alu_w[0]}} & d_register_w[forward_operand]) |
-                    ({32{select_alu_w[1]}} & data_w[1]) |
-                    ({32{select_alu_w[2]}} & data_w[2]) |
-                    ({32{select_alu_w[3]}} & data_w[3]) |
-                    ({32{select_alu_w[4]}} & data_w[4]) |
-                    ({32{select_alu_w[5]}} & data_w[5]) |
-                    ({32{select_alu_w[6]}} & data_w[6]) |
-                    ({32{select_alu_w[7]}} & data_w[7]) |
-                    ({32{select_alu_w[8]}} & data_w[8]) |
-                    ({32{select_alu_w[9]}} & data_w[9]) |
-                    ({32{capture_w && d_immediate_w[forward_operand/2]}} &
-                        d_imm_w[forward_operand/2]) |
-                    ({32{hold_w}} & e_alu_operand_b_w[physical_lane_w]);
+            for (forward_slice = 0; forward_slice < 4;
+                forward_slice = forward_slice + 1) begin : g_response_slice
+                wire [7:0] register_w;
+                wire [7:0] slice_data_w [1:9];
+                assign register_w = d_register_w[forward_operand][forward_slice*8 +: 8];
+                for (forward_data = 1; forward_data < 10;
+                    forward_data = forward_data + 1) begin : g_data
+                    assign slice_data_w[forward_data] = data_w[forward_data][forward_slice*8 +: 8];
+                end
+                wire [1:0] hit_w;
+                wire [1:0] repair_select_w;
+                wire [9:0] data_select_w;
+                assign hit_w = dc_resp_way_hit_copy_i[
+                    (forward_operand*4+forward_slice)*2 +: 2];
+                assign repair_select_w = hit_w & {2{repair_w}};
+                assign data_select_w = {10{capture_w}} & {
+                    select_w[3] && memory_w && hit_w[1],
+                    select_w[3] && memory_w && hit_w[0],
+                    select_w[1] && early_w && dc_early_way_hit_i[1],
+                    select_w[1] && early_w && dc_early_way_hit_i[0],
+                    select_w[3] && m_csr_r,
+                    select_w[6], select_w[5], select_w[4],
+                    select_w[3] && !memory_w && !m_csr_r, select_w[0]};
+                assign selected_data_w[forward_slice*8 +: 8] =
+                    ({8{data_select_w[0]}} & register_w) |
+                    ({8{data_select_w[1]}} & slice_data_w[1]) |
+                    ({8{data_select_w[2]}} & slice_data_w[2]) |
+                    ({8{data_select_w[3]}} & slice_data_w[3]) |
+                    ({8{data_select_w[4]}} & slice_data_w[4]) |
+                    ({8{data_select_w[5]}} & slice_data_w[5]) |
+                    ({8{data_select_w[6]}} & slice_data_w[6]) |
+                    ({8{data_select_w[7]}} & slice_data_w[7]) |
+                    ({8{data_select_w[8] || repair_select_w[0]}} & slice_data_w[8]) |
+                    ({8{data_select_w[9] || repair_select_w[1]}} & slice_data_w[9]);
+                if (forward_operand%2 == 1) begin : g_alu_input
+                    wire [7:0] immediate_w;
+                    wire [7:0] held_alu_w;
+                    assign immediate_w = d_imm_w[forward_operand/2][forward_slice*8 +: 8];
+                    assign held_alu_w =
+                        e_alu_operand_b_w[physical_lane_w][forward_slice*8 +: 8];
+                    wire [9:0] select_alu_w;
+                    assign select_alu_w[7:0] = data_select_w[7:0] &
+                        {8{!d_immediate_w[forward_operand/2]}};
+                    assign select_alu_w[9:8] = (data_select_w[9:8] &
+                        {2{!d_immediate_w[forward_operand/2]}}) | repair_select_w;
+                    assign e_alu_input_w[forward_operand/2][forward_slice*8 +: 8] =
+                        ({8{select_alu_w[0]}} & register_w) |
+                        ({8{select_alu_w[1]}} & slice_data_w[1]) |
+                        ({8{select_alu_w[2]}} & slice_data_w[2]) |
+                        ({8{select_alu_w[3]}} & slice_data_w[3]) |
+                        ({8{select_alu_w[4]}} & slice_data_w[4]) |
+                        ({8{select_alu_w[5]}} & slice_data_w[5]) |
+                        ({8{select_alu_w[6]}} & slice_data_w[6]) |
+                        ({8{select_alu_w[7]}} & slice_data_w[7]) |
+                        ({8{select_alu_w[8]}} & slice_data_w[8]) |
+                        ({8{select_alu_w[9]}} & slice_data_w[9]) |
+                        ({8{capture_w && d_immediate_w[forward_operand/2]}} &
+                            immediate_w) |
+                        ({8{hold_w}} & held_alu_w);
+                end
             end
         end
     endgenerate
@@ -1589,10 +1612,16 @@ module edrv32_cpu_core (
             if (result_idx == 0) begin
                 if (m_csr_r)
                     m_result_w[result_idx] = csr_read_w;
-                if (m_load_r)
-                    m_result_w[result_idx] =
-                        ({32{dc_resp_way_hit_i[0]}} & m_load_result_w[0]) |
-                        ({32{dc_resp_way_hit_i[1]}} & m_load_result_w[1]);
+                if (m_load_r) begin
+                    for (response_slice_w = 0; response_slice_w < 8;
+                        response_slice_w = response_slice_w + 1) begin
+                        m_result_w[result_idx][response_slice_w*4 +: 4] =
+                            ({4{dc_resp_way_hit_copy_i[32+response_slice_w*2]}} &
+                                m_load_result_w[0][response_slice_w*4 +: 4]) |
+                            ({4{dc_resp_way_hit_copy_i[33+response_slice_w*2]}} &
+                                m_load_result_w[1][response_slice_w*4 +: 4]);
+                    end
+                end
             end
         end
     end

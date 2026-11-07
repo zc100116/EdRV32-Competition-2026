@@ -225,6 +225,7 @@ module edrv32_cpu_subsys (
     wire dc_resp_valid_w;
     wire [63:0] dc_resp_way_data_w;
     wire [1:0] dc_resp_way_hit_w;
+    wire [47:0] dc_resp_way_hit_copy_w;
     wire dc_resp_err_w;
     wire dc_resp_device_w;
     wire dc_kill_w;
@@ -281,6 +282,7 @@ module edrv32_cpu_subsys (
         .dc_resp_valid_i(dc_resp_valid_w),
         .dc_resp_way_data_i(dc_resp_way_data_w),
         .dc_resp_way_hit_i(dc_resp_way_hit_w),
+        .dc_resp_way_hit_copy_i(dc_resp_way_hit_copy_w),
         .dc_resp_err_i(dc_resp_err_w),
         .dc_resp_device_i(dc_resp_device_w),
         .dc_kill_o(dc_kill_w),
@@ -367,6 +369,7 @@ module edrv32_cpu_subsys (
         .dc_resp_valid_o(dc_resp_valid_w),
         .dc_resp_way_data_o(dc_resp_way_data_w),
         .dc_resp_way_hit_o(dc_resp_way_hit_w),
+        .dc_resp_way_hit_copy_o(dc_resp_way_hit_copy_w),
         .dc_resp_err_o(dc_resp_err_w),
         .dc_resp_device_o(dc_resp_device_w),
         .dc_kill_i(dc_kill_w),

@@ -20,6 +20,7 @@ module edrv32_dcache (
     output wire dc_resp_valid_o,
     output wire [63:0] dc_resp_way_data_o,
     output wire [1:0] dc_resp_way_hit_o,
+    output wire [47:0] dc_resp_way_hit_copy_o,
     output wire dc_resp_err_o,
     output wire dc_resp_device_o,
     input wire dc_kill_i,
@@ -491,6 +492,54 @@ module edrv32_dcache (
     assign dc_resp_way_hit_o = early_response_r ? early_response_way_r :
         device_state_r == D_RETURN || state_r == S_RETURN || pma_result_w ? 2'b01 :
         {2{lookup_hit_enable_r}} & {hit1_w, hit0_w};
+    // Eight query-tag copies bound the DRM comparator load. Each comparator
+    // serves three response groups with independent registered qualifiers.
+    wire [15:0] response_match_w;
+    genvar response_group;
+    generate
+        for (response_group = 0; response_group < 8;
+            response_group = response_group + 1) begin : g_response_match
+            (* keep = "true", syn_preserve = 1 *) reg [17:0] tag_copy_r;
+            always @(posedge clk_i) begin
+                if (lookup_accept_w)
+                    tag_copy_r <= dc_req_addr_i[31:14];
+            end
+            assign response_match_w[response_group*2 +: 2] =
+                {tag1_w[19] && tag1_w[17:0] == tag_copy_r,
+                    tag0_w[19] && tag0_w[17:0] == tag_copy_r};
+        end
+        for (response_group = 0; response_group < 24;
+            response_group = response_group + 1) begin : g_response_hit
+            (* keep = "true", syn_preserve = 1 *) reg early_copy_r;
+            (* keep = "true", syn_preserve = 1 *) reg enable_copy_r;
+            (* keep = "true", syn_preserve = 1 *) reg [1:0] early_way_copy_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    early_copy_r <= 0;
+                    enable_copy_r <= 0;
+                end else begin
+                    early_copy_r <= early_promote_w;
+                    if (state_r == S_IDLE)
+                        enable_copy_r <= 0;
+                    if (state_r == S_REPLAY)
+                        enable_copy_r <= 1;
+                    if (dc_kill_i)
+                        enable_copy_r <= 0;
+                    if (lookup_accept_w)
+                        enable_copy_r <= !maintenance_r && !maintenance_array_start_w &&
+                            !request_device_w && !request_pma_err_w;
+                end
+            end
+            always @(posedge clk_i) begin
+                early_way_copy_r <= {early_tag1_w[18] && early_hit1_w,
+                    early_tag0_w[18] && early_hit0_w};
+            end
+            assign dc_resp_way_hit_copy_o[response_group*2 +: 2] = early_copy_r ?
+                early_way_copy_r : device_state_r == D_RETURN || state_r == S_RETURN ||
+                pma_result_w ? 2'b01 : {2{enable_copy_r}} &
+                response_match_w[(response_group%8)*2 +: 2];
+        end
+    endgenerate
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
     assign store_result_w = (state_r == S_IDLE && lookup_done_w && !pma_err_w && store_r) ||
                             return_store_w;

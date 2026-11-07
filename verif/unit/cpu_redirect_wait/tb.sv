@@ -75,6 +75,7 @@ module tb;
         .dc_resp_valid_i(dc_resp_valid),
         .dc_resp_way_data_i(64'd0),
         .dc_resp_way_hit_i(2'b01),
+        .dc_resp_way_hit_copy_i({24{2'b01}}),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(1'b0),
         .dc_kill_o(dc_kill),

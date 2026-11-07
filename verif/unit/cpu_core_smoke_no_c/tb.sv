@@ -114,6 +114,7 @@ module tb;
         .dc_resp_way_data_i(dc_resp_lane_i ? {dc_resp_data_i,32'b0} :
             {32'b0,dc_resp_data_i}),
         .dc_resp_way_hit_i(dc_resp_lane_i ? 2'b10 : 2'b01),
+        .dc_resp_way_hit_copy_i({24{dc_resp_lane_i ? 2'b10 : 2'b01}}),
         .dc_resp_err_i(dc_resp_err_i),
         .dc_resp_device_i(dc_resp_device_i),
         .dc_kill_o(dc_kill_o),

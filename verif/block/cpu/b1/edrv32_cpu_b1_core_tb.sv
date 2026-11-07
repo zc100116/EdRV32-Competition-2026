@@ -97,6 +97,7 @@ module edrv32_cpu_b1_core_tb;
         .dc_resp_valid_i(dc_resp_valid),
         .dc_resp_way_data_i(dc_resp_way_data),
         .dc_resp_way_hit_i(dc_resp_way_hit),
+        .dc_resp_way_hit_copy_i({24{dc_resp_way_hit}}),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(dc_resp_device),
         .dc_fence_done_i(dc_fence_done),
