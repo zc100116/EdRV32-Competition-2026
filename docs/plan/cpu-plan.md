@@ -138,7 +138,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-PDS3 | 卡 62：v0.20 CPU+L1 独立 150 MHz 探针，分组 P1–P10 | 用户 + Windows Codex | N-T2BE2 | ≥ 135 MHz，再冲 150 MHz | win/20261107-62-cpu-v020-timing-probe | [x] 134.8 MHz（WNS −0.752，3896 个端点）；剩余为 cache tag → LRU/有效位、D$ 数据 → E、F2 纠正 → F1、F2 → IB 预译码 |
 | N-T3BE | 第三轮后端（用户 2026-11-07 选择"等价修复 + 切分 C1+C3"，目标 150 MHz）：起草 v0.21（M2 级、D1/D2），D$ 内部等价修复，F 类，实现后集成 | Codex sol（task_0b43cba72d51 / ctx_8d67795d602e） | N-PDS3 | 起草稿经审定；B1、R01–R05；工具级数 | task-cpu-n-t3be | [~] |
 | N-T3FE | 第三轮前端等价修复：F2 纠正 → F1、F1 环、I$ tag → 有效位/LRU、F2 → IB | Codex sol（task_f717515b3011 / ctx_e7dd11e97e61） | N-PDS3 | 工具级数；前端单元、B1、R05 | task-cpu-n-t3fe | [~] |
-| N-PDS4 | 卡 63：v0.21 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-T3BE | WNS ≥ 0 | — | [ ] |
+| N-PDS4 | 卡 64：v0.21 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-T3BE | WNS ≥ 0 | — | [ ] |
 
 ## 6. 变更记录
 
