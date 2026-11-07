@@ -72,9 +72,21 @@ def category(point):
     return kind
 
 
-def pairs(design, start=None, end=None):
+def pairs(design, start=None, end=None, carry_chain_two=False):
     graph, logic, roots, endpoints, loads, _ = analyze(design, graph_only=True)
     order = list(TopologicalSorter(graph).static_order())
+    top, = [m for m in design['modules'].values()
+            if int(m.get('attributes', {}).get('top', '0'), 2)]
+    # Only a native carry output into the next cell's CI/CYINIT continues a chain.
+    # A sum feeding S/DI, or a LUT between adders, starts a separate two-level chain.
+    carry_outputs = {bit for cell in top['cells'].values() if is_carry(cell['type'])
+                     for bit in cell['connections'].get('CO', [])}
+    carry_links = {}
+    for bit, (name, kind, _) in logic.items():
+        if is_carry(kind):
+            conn = top['cells'][name]['connections']
+            carry_links[bit] = {prev for p in ('CI', 'CYINIT') for prev in conn.get(p, [])
+                                if prev in carry_outputs}
     chosen = [point for point in endpoints if not end or
               re.search(end, point['signal'] + ' ' + point['pin'])]
     # Each start is propagated independently; unlike global longest-path ranking,
@@ -86,12 +98,18 @@ def pairs(design, start=None, end=None):
         for bit in order:
             if bit in roots:
                 continue
-            candidates = [state[prev] for prev in graph[bit] if prev in state]
+            kind = logic[bit][1]
+            weight = int(is_lut(kind) or is_mux(kind) or is_carry(kind))
+            candidates = []
+            for prev in graph[bit]:
+                if prev in state:
+                    cost = weight
+                    if carry_chain_two and is_carry(kind):
+                        cost = 0 if prev in carry_links[bit] else 2
+                    depth, fanout = state[prev]
+                    candidates.append((depth + cost, max(fanout, len(loads[bit]))))
             if candidates:
-                depth, fanout = max(candidates)
-                kind = logic[bit][1]
-                weight = int(is_lut(kind) or is_mux(kind) or is_carry(kind))
-                state[bit] = (depth + weight, max(fanout, len(loads[bit])))
+                state[bit] = max(candidates)
         for endpoint in chosen:
             if endpoint['bit'] in state:
                 depth, fanout = state[endpoint['bit']]
@@ -139,6 +157,8 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--commit', default='worktree')
     parser.add_argument('--netlist', type=Path, help='reuse a synthesized XC7 JSON')
+    parser.add_argument('--carry-chain-two', action='store_true',
+                        help='count each continuous native carry chain as two levels')
     parser.add_argument('--start', help='start register/IP signal or pin regex')
     parser.add_argument('--end', help='end register/IP signal or pin regex')
     parser.add_argument('--worst-only', action='store_true',
@@ -157,7 +177,7 @@ def main():
         writer = csv.writer(stream, delimiter='\t')
         writer.writerow(['start', 'start_pin', 'category', 'end', 'end_pin',
                          'levels', 'max_fanout'])
-        writer.writerows(pairs(design, args.start, args.end))
+        writer.writerows(pairs(design, args.start, args.end, args.carry_chain_two))
     print(output / 'pairs.tsv')
 
 

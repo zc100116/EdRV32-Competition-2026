@@ -63,6 +63,55 @@ class PairLevelsTest(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0][5], 3)
 
+    def carry_fixture(self, length):
+        design = fixture()
+        module = design['modules']['test']
+        previous = 6
+        for index in range(length):
+            base = 100 + index*8
+            module['cells']['carry' + str(index)] = cell('CARRY4',
+                {'S': ['0']*4, 'DI': ['0']*4, 'CI': [previous], 'CYINIT': ['0']},
+                {'O': list(range(base, base+4)), 'CO': list(range(base+4, base+8))}, 30)
+            previous = base + 7
+        module['ports']['result'] = {'direction': 'output', 'bits': [previous]}
+        return design
+
+    def test_continuous_carry_chain_has_two_levels_and_default_is_unchanged(self):
+        design = self.carry_fixture(8)
+        raw, = pairs(design, start='^a ', end='result')
+        normalized, = pairs(design, start='^a ', end='result', carry_chain_two=True)
+        self.assertEqual(raw[5], 10)
+        self.assertEqual(normalized[5], 4)
+
+    def test_new_sum_input_path_can_overtake_longer_raw_carry_path(self):
+        design = self.carry_fixture(8)
+        module = design['modules']['test']
+        previous = 2
+        for index in range(4):
+            bit = 200 + index
+            module['cells']['detour' + str(index)] = cell('LUT1', {'I': [previous]},
+                                                        {'O': [bit]}, 31)
+            previous = bit
+        module['cells']['carry7']['connections']['S'][3] = previous
+        raw, = pairs(design, start='^a ', end='result')
+        normalized, = pairs(design, start='^a ', end='result', carry_chain_two=True)
+        self.assertEqual(raw[5], 10)
+        self.assertEqual(normalized[5], 6)
+
+    def test_sum_output_does_not_continue_native_carry_chain(self):
+        design = self.carry_fixture(8)
+        design['modules']['test']['cells']['carry4']['connections']['CI'] = [127]
+        normalized, = pairs(design, start='^a ', end='result', carry_chain_two=True)
+        self.assertEqual(normalized[5], 6)
+
+    def test_lut_between_carry_chains_counts_two_separate_chains(self):
+        design = self.carry_fixture(8)
+        module = design['modules']['test']
+        module['cells']['break'] = cell('LUT1', {'I': [131]}, {'O': [220]}, 32)
+        module['cells']['carry4']['connections']['CI'] = [220]
+        normalized, = pairs(design, start='^a ', end='result', carry_chain_two=True)
+        self.assertEqual(normalized[5], 7)
+
 
 class PdsParserTest(unittest.TestCase):
     def test_clock_fanout_and_async_paths_are_excluded(self):
