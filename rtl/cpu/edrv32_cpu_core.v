@@ -154,6 +154,8 @@ module edrv32_cpu_core (
     wire e_branch_lane_w;
     wire m_branch_lane_w;
     wire e_older_fault_w;
+    wire [1:0] e_lane_fault_w;
+    wire e_old_redirect_w;
     wire e_kill_young_w;
     wire [1:0] e_survive_w;
     wire [1:0] e_lane_control_w;
@@ -279,18 +281,22 @@ module edrv32_cpu_core (
     assign e_lane_exception_w = {e_exception1_r, e_exception_r};
     assign e_branch_lane_w = e_valid_r[1] && e_lane_control_w[1];
     assign m_branch_lane_w = m_valid_r[1] && m_control_r;
-    assign e_older_fault_w = e_valid_r[e_old_w] &&
-        (e_lane_exception_w[e_old_w] || e_jump_fault_r[e_old_w] ||
-        (!e_old_w && (e_class_r[0] == C_LOAD || e_class_r[0] == C_STORE) &&
-        e_misaligned_w));
-    assign e_kill_young_w = e_older_fault_w ||
-        (e_redirect_r && !e_redirect_advanced_r && e_redirect_old_r);
+    // Each survivor tests only its older lane. A younger pipe-0 address must
+    // not enter the pipe-0 ownership/operand-enable loop through the old-lane mux.
+    assign e_lane_fault_w[0] = e_valid_r[0] &&
+        (e_exception_r || e_jump_fault_r[0] || (e_memory_r && e_misaligned_w));
+    assign e_lane_fault_w[1] = e_valid_r[1] && (e_exception1_r || e_jump_fault_r[1]);
+    assign e_old_redirect_w = e_redirect_r && !e_redirect_advanced_r && e_redirect_old_r;
+    assign e_older_fault_w = e_swap_r ? e_lane_fault_w[1] : e_lane_fault_w[0];
+    assign e_kill_young_w = e_older_fault_w || e_old_redirect_w;
     assign m_squash_w[0] = m_kill_all_w ||
         (e_redirect_r && e_redirect_advanced_r && e_redirect_old_r && m_swap_r);
     assign m_squash_w[1] = m_kill_all_w ||
         (e_redirect_r && e_redirect_advanced_r && e_redirect_old_r && !m_swap_r);
-    assign e_survive_w[0] = e_valid_r[0] && !(e_swap_r && e_kill_young_w);
-    assign e_survive_w[1] = e_valid_r[1] && !(!e_swap_r && e_kill_young_w);
+    assign e_survive_w[0] = e_valid_r[0] &&
+        !(e_swap_r && (e_lane_fault_w[1] || e_old_redirect_w));
+    assign e_survive_w[1] = e_valid_r[1] &&
+        !(!e_swap_r && (e_lane_fault_w[0] || e_old_redirect_w));
     wire [357:0] d_data_w;
     wire [139:0] d_predecode_w;
     wire [1:0] d_load_w;
