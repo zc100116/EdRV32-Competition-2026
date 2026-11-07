@@ -900,8 +900,8 @@ module edrv32_dcache (
                 hit_copy1_r <= {hit1_w, hit0_w};
                 way_copy1_r <= hit0_w;
                 lookup_way_copy1_r <= hit0_w;
-                early_way_copy1_r <= dc_early_way_hit_o[0];
-                early_lookup_way_copy1_r <= dc_early_way_hit_o[0];
+                early_way_copy1_r <= early_tag0_w[18] && early_hit0_w;
+                early_lookup_way_copy1_r <= early_tag0_w[18] && early_hit0_w;
                 metadata_bank_r <= lookup_bank_r[bank];
                 lookup_lru_bank_r[bank] <= early_forward_w ? early_lookup_way_copy1_r :
                     normal_forward_w ? lookup_way_copy1_r :
