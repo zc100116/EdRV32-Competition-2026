@@ -27,7 +27,7 @@ def run(args):
     flags = (f'-march={arch} -mabi=ilp32 -std=c11 -Wall -Wextra -Werror -O2 '
              '-ffreestanding -fno-builtin -ffunction-sections -fdata-sections '
              f'-I{ROOT}/sw/bsp/include')
-    make = ['make', '-C', str(ROOT / 'sw'), f'PROGRAM={program}', 'MEMORY=sram',
+    make = ['make', '-j', '1', '-C', str(ROOT / 'sw'), f'PROGRAM={program}', 'MEMORY=sram',
             f'ARCH={arch}', 'BSP=sw/bsp/start.S sw/tests/cpu_perf/host.c',
             'LDFLAGS=-nostdlib -Wl,--gc-sections -Wl,-T,sw/bsp/ld/sram.ld '
             '-Wl,--defsym,b2_console=0x40007000 -Wl,--wrap=main']
