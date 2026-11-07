@@ -143,6 +143,7 @@ module edrv32_dcache (
     function [31:0] shifted_word;
         input [63:0] data_i;
         input [7:0] select_i;
+        input [3:0] mask_i;
         integer offset;
         integer byte_number;
         begin
@@ -153,13 +154,14 @@ module edrv32_dcache (
                     if ((offset%4 + byte_number) < 4)
                         shifted_word[byte_number*8 +: 8] =
                             shifted_word[byte_number*8 +: 8] |
-                            ({8{select_i[offset]}} & data_i[(offset+byte_number)*8 +: 8]);
+                            ({8{select_i[offset] && mask_i[byte_number]}} &
+                                data_i[(offset+byte_number)*8 +: 8]);
                 end
             end
         end
     endfunction
-    assign early_shift0_w = shifted_word(early_data0_w, early_byte_select_r);
-    assign early_shift1_w = shifted_word(early_data1_w, early_byte_select_r);
+    assign early_shift0_w = shifted_word(early_data0_w, early_byte_select_r, 4'hf);
+    assign early_shift1_w = shifted_word(early_data1_w, early_byte_select_r, 4'hf);
     assign dc_early_way_data_o = {early_shift1_w, early_shift0_w};
     assign early_promote_w = accept_w && dc_req_early_i && !dc_req_store_i &&
         (|dc_early_way_hit_o) &&
@@ -433,9 +435,9 @@ module edrv32_dcache (
     wire [3:0] aligned_forward_mask_w;
     wire [3:0] aligned_buffer_mask_w;
     wire [31:0] forwarded_data_w;
-    wire [31:0] ram_mask_w;
-    assign aligned_ram0_w = shifted_word(data0_w, lookup_byte_select_r);
-    assign aligned_ram1_w = shifted_word(data1_w, lookup_byte_select_r);
+    wire [3:0] ram_mask_w;
+    assign aligned_ram0_w = shifted_word(data0_w, lookup_byte_select_r, ram_mask_w);
+    assign aligned_ram1_w = shifted_word(data1_w, lookup_byte_select_r, ram_mask_w);
     assign aligned_forward_w = forward_data_r >> {addr_r[1:0], 3'b0};
     assign aligned_buffer_w = buffer_data_r >> {addr_r[1:0], 3'b0};
     assign aligned_forward_mask_w = forward_mask_r >> addr_r[1:0];
@@ -449,15 +451,17 @@ module edrv32_dcache (
             wire forward_select_w;
             assign buffer_select_w = aligned_buffer_mask_w[forward_byte];
             assign forward_select_w = aligned_forward_mask_w[forward_byte] && !buffer_select_w;
-            assign ram_mask_w[forward_byte*8 +: 8] =
-                {8{!buffer_select_w && !forward_select_w}};
+            assign ram_mask_w[forward_byte] = lookup_data_select_w &&
+                !buffer_select_w && !forward_select_w;
             assign forwarded_data_w[forward_byte*8 +: 8] =
-                ({8{buffer_select_w}} & aligned_buffer_w[forward_byte*8 +: 8]) |
-                ({8{forward_select_w}} & aligned_forward_w[forward_byte*8 +: 8]);
+                ({8{lookup_data_select_w && buffer_select_w}} &
+                    aligned_buffer_w[forward_byte*8 +: 8]) |
+                ({8{lookup_data_select_w && forward_select_w}} &
+                    aligned_forward_w[forward_byte*8 +: 8]);
         end
     endgenerate
-    assign shifted_load0_w = (aligned_ram0_w & ram_mask_w) | forwarded_data_w;
-    assign shifted_load1_w = (aligned_ram1_w & ram_mask_w) | forwarded_data_w;
+    assign shifted_load0_w = aligned_ram0_w | forwarded_data_w;
+    assign shifted_load1_w = aligned_ram1_w | forwarded_data_w;
     // Fill returns are FF-originated and do not consume the DRM timing budget.
     always @(*) begin
         merged_return_w = raw_return_w;
@@ -481,8 +485,8 @@ module edrv32_dcache (
             shifted_return_w);
     assign nonlookup_data1_w = {32{early_response_r}} & early_response_data_r[63:32];
     assign dc_resp_way_data_o = {
-        nonlookup_data1_w | ({32{lookup_data_select_w}} & shifted_load1_w),
-        nonlookup_data_w | ({32{lookup_data_select_w}} & shifted_load0_w)};
+        nonlookup_data1_w | shifted_load1_w,
+        nonlookup_data_w | shifted_load0_w};
     assign dc_resp_way_hit_o = early_response_r ? early_response_way_r :
         device_state_r == D_RETURN || state_r == S_RETURN || pma_result_w ? 2'b01 :
         {2{lookup_hit_enable_r}} & {hit1_w, hit0_w};
