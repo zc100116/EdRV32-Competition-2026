@@ -101,9 +101,8 @@ module edrv32_cpu_frontend (
     wire f2_final_taken_w;
     wire f2_taken_w;
     wire f2_correct_w;
-    reg [31:0] f2_correct_pc_r;
+    reg [31:0] f2_sequential_pc_r;
     wire [31:0] f2_correct_pc_w;
-    assign f2_correct_pc_w = f2_correct_pc_r;
     reg f2_correct_eligible_r;
     reg [11:0] f2_index_r;
     wire [19:0] predict_local_history_w;
@@ -306,6 +305,8 @@ module edrv32_cpu_frontend (
         end
         for (pc_group = 0; pc_group < 8; pc_group = pc_group + 1) begin : g_pc
             (* keep = "true", syn_preserve = 1 *) reg f2_taken_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg f2_target_select_copy1_r;
+            wire owner_target_select_w;
             (* keep = "true", syn_preserve = 1 *) reg correct_active_copy1_r;
             wire correct_w;
             (* keep = "true" *) wire [3:0] unpredicted_w;
@@ -332,14 +333,15 @@ module edrv32_cpu_frontend (
                     replay_resume_pc_r[pc_group*4 +: 4] <= predict_taken_copy_w[pc_group] ?
                         predict_target_w[pc_group*4 +: 4] : sequential_pc_w[pc_group*4 +: 4];
             end
-            wire owner_taken_copy_w;
-            assign owner_taken_copy_w = replay_valid_r ? replay_taken_r :
+            // Distinct initial-direction FFs prevent synthesis from expanding
+            // the late RAM comparison into every correction address bit.
+            assign owner_target_select_w = replay_valid_r ? replay_taken_r :
                 predict_taken_copy_w[pc_group];
+            assign f2_correct_pc_w[pc_group*4 +: 4] = f2_target_select_copy1_r ?
+                f2_sequential_pc_r[pc_group*4 +: 4] : f2_target_r[pc_group*4 +: 4];
             always @(posedge clk_i) begin
                 f2_taken_copy1_r <= owner_taken_w;
-                f2_correct_pc_r[pc_group*4 +: 4] <= owner_taken_copy_w ?
-                    owner_sequential_pc_w[pc_group*4 +: 4] :
-                    owner_query_w[49+pc_group*4 +: 4];
+                f2_target_select_copy1_r <= owner_target_select_w;
             end
         end
         for (f2_group = 0; f2_group < 8; f2_group = f2_group + 1) begin : g_query_index
@@ -529,10 +531,11 @@ module edrv32_cpu_frontend (
             end
         end
     end
-    // A correction always reverses the original conditional direction. Register
-    // that opposite candidate and the chooser index before the LUTRAM read.
+    // Both correction addresses and the chooser index are ready in F2 before
+    // the LUTRAM decision. Initial direction selects the opposite stored address.
     always @(posedge clk_i) begin
         // These candidates are consumed only on an owner's first F2 cycle.
+        f2_sequential_pc_r <= owner_sequential_pc_w;
         f2_correct_eligible_r <= owner_query_w[106] && owner_query_w[105];
         f2_direction_history_r <= owner_query_w[82] ?
             {owner_query_w[94:85], owner_query_w[104:95]} : owner_query_w[104:85];
