@@ -1,0 +1,47 @@
+Generated module: ip_ram_icache_data
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V018/ipcore/ip_ram_icache_data/ip_ram_icache_data.v
+IP settings: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V018/ipcore/ip_ram_icache_data/ip_ram_icache_data.idf
+
+Direction	Port	Width (bits)
+input	wr_data	108
+input	wr_addr	11
+input	wr_en	1
+input	wr_clk	1
+input	wr_rst	1
+output	rd_data	108
+input	rd_addr	11
+input	rd_clk	1
+input	rd_clk_en	1
+input	rd_rst	1
+
+IDF parameters
+BE_WIDTH = 1
+BYTE_SIZE = 8
+CAS_MODE = 36K
+CAS_MODE_SEL = AUTO
+FAB_REG = false
+INIT_EN = false
+INIT_FILE = NONE
+INIT_FORMAT = BIN
+OUTPUT_REG = false
+POWER_OPT = false
+RD_ADDR_STROBE_EN = false
+RD_ADDR_WIDTH = 11
+RD_BE_WIDTH = 1
+RD_CLK_EN = true
+RD_CLK_OR_POL_INV = false
+RD_DATA_WIDTH = 108
+RD_OCE_EN = false
+RESET_TYPE = ASYNC
+RST_VAL = 0
+RST_VAL_EN = false
+SAMEWIDTH_EN = true
+WR_ADDR_STROBE_EN = false
+WR_ADDR_WIDTH = 11
+WR_BYTE_EN = false
+WR_CLK_EN = false
+WR_DATA_WIDTH = 108
+
+Current Compile log: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V018/compile/run.log
+I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-Competition-2026-v018/rtl/cpu/edrv32_cpu_predecode.v
+I: Verilog-0001: Analyzing file G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-V018/ipcore/ip_ram_icache_data/ip_ram_icache_data.v
