@@ -72,21 +72,26 @@ def category(point):
     return kind
 
 
-def pairs(design, start=None, end=None, carry_chain_two=False):
-    graph, logic, roots, endpoints, loads, _ = analyze(design, graph_only=True)
-    order = list(TopologicalSorter(graph).static_order())
+def carry_chain_links(design, logic):
     top, = [m for m in design['modules'].values()
             if int(m.get('attributes', {}).get('top', '0'), 2)]
     # Only a native carry output into the next cell's CI/CYINIT continues a chain.
     # A sum feeding S/DI, or a LUT between adders, starts a separate two-level chain.
     carry_outputs = {bit for cell in top['cells'].values() if is_carry(cell['type'])
                      for bit in cell['connections'].get('CO', [])}
-    carry_links = {}
+    links = {}
     for bit, (name, kind, _) in logic.items():
         if is_carry(kind):
             conn = top['cells'][name]['connections']
-            carry_links[bit] = {prev for p in ('CI', 'CYINIT') for prev in conn.get(p, [])
+            links[bit] = {prev for p in ('CI', 'CYINIT') for prev in conn.get(p, [])
                                 if prev in carry_outputs}
+    return links
+
+
+def pairs(design, start=None, end=None, carry_chain_two=False):
+    graph, logic, roots, endpoints, loads, _ = analyze(design, graph_only=True)
+    order = list(TopologicalSorter(graph).static_order())
+    carry_links = carry_chain_links(design, logic)
     chosen = [point for point in endpoints if not end or
               re.search(end, point['signal'] + ' ' + point['pin'])]
     # Each start is propagated independently; unlike global longest-path ranking,
@@ -117,7 +122,7 @@ def pairs(design, start=None, end=None, carry_chain_two=False):
                        endpoint['pin'], depth, fanout)
 
 
-def worst(design, start=None, end=None):
+def worst(design, start=None, end=None, carry_chain_two=False):
     """Compute each launch category's global maximum using the same mapped graph.
 
     The full pair enumeration remains the default; this equivalent reduction is
@@ -125,6 +130,7 @@ def worst(design, start=None, end=None):
     """
     graph, logic, roots, endpoints, loads, _ = analyze(design, graph_only=True)
     order = list(TopologicalSorter(graph).static_order())
+    carry_links = carry_chain_links(design, logic)
     chosen = [point for point in endpoints if not end or
               re.search(end, point['signal'] + ' ' + point['pin'])]
     selected = {bit: point for bit, point in roots.items() if not start or
@@ -136,12 +142,18 @@ def worst(design, start=None, end=None):
         for bit in order:
             if bit in roots:
                 continue
-            candidates = [state[prev] for prev in graph[bit] if prev in state]
+            typ = logic[bit][1]
+            weight = int(is_lut(typ) or is_mux(typ) or is_carry(typ))
+            candidates = []
+            for prev in graph[bit]:
+                if prev in state:
+                    cost = weight
+                    if carry_chain_two and is_carry(typ):
+                        cost = 0 if prev in carry_links[bit] else 2
+                    depth, fanout, root = state[prev]
+                    candidates.append((depth + cost, max(fanout, len(loads[bit])), root))
             if candidates:
-                depth, fanout, root = max(candidates, key=lambda value: value[:2])
-                typ = logic[bit][1]
-                weight = int(is_lut(typ) or is_mux(typ) or is_carry(typ))
-                state[bit] = (depth + weight, max(fanout, len(loads[bit])), root)
+                state[bit] = max(candidates, key=lambda value: value[:2])
         reached = [point for point in chosen if point['bit'] in state]
         if reached:
             endpoint = max(reached, key=lambda point: state[point['bit']][:2])
@@ -170,7 +182,7 @@ def main():
     design = json.loads(netlist.read_text())
     if args.worst_only:
         summary = output / 'worst.json'
-        summary.write_text(json.dumps(worst(design, args.start, args.end), indent=2) + '\n')
+        summary.write_text(json.dumps(worst(design, args.start, args.end, args.carry_chain_two), indent=2) + '\n')
         print(summary)
         return
     with (output / 'pairs.tsv').open('w') as stream:

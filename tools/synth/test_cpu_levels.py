@@ -76,6 +76,20 @@ class PairLevelsTest(unittest.TestCase):
         module['ports']['result'] = {'direction': 'output', 'bits': [previous]}
         return design
 
+    def test_carry_reduction_matches_full_pair_extrema(self):
+        for sum_break in (False, True):
+            design = self.carry_fixture(8)
+            if sum_break:
+                design['modules']['test']['cells']['carry4']['connections']['CI'] = [127]
+            for carry_two in (False, True):
+                for start, end in [(None, None), ('^a ', 'result'), ('ip_r', '^q_r ')]:
+                    rows = list(pairs(design, start, end, carry_two))
+                    expected = {kind: max((row[5], row[6]) for row in rows if row[2] == kind)
+                                for kind in {row[2] for row in rows}}
+                    actual = {kind: (row['levels'], row['max_fanout']) for kind, row in
+                              worst(design, start, end, carry_two).items()}
+                    self.assertEqual(actual, expected)
+
     def test_continuous_carry_chain_has_two_levels_and_default_is_unchanged(self):
         design = self.carry_fixture(8)
         raw, = pairs(design, start='^a ', end='result')
