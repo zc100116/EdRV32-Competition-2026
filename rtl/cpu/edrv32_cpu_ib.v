@@ -32,6 +32,7 @@ module edrv32_cpu_ib (
     localparam RECORD_BITS = 179;
     localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
+    (* keep = "true", syn_preserve = 1 *) reg [69:0] predecode_r [0:DEPTH-1];
     wire [69:0] push_predecode_w [0:1];
     reg [2:0] index_hi_r [0:DEPTH-1];
     reg [11:0] tournament_r [0:DEPTH-1];
@@ -48,9 +49,11 @@ module edrv32_cpu_ib (
     genvar write_entry;
     genvar operand_slice;
     genvar decode_slot;
+    genvar decode_slice;
     generate
         for (decode_slot = 0; decode_slot < 2;
             decode_slot = decode_slot + 1) begin : g_predecode
+            localparam SLOT = decode_slot;
             wire [31:0] instr_w;
             wire [4:0] rs1_w;
             wire [4:0] rs2_w;
@@ -64,7 +67,7 @@ module edrv32_cpu_ib (
             wire operand_imm_w;
             wire illegal_w;
             wire pipe1_w;
-            assign instr_w = data_o[decode_slot*RECORD_BITS+32 +: 32];
+            assign instr_w = push_data_i[decode_slot*RECORD_BITS+32 +: 32];
             edrv32_cpu_decode u_decode (
                 .instr_i(instr_w),
                 .rs1_o(rs1_w),
@@ -96,8 +99,22 @@ module edrv32_cpu_ib (
                 class_w == 4'd6,
                 immediate_w, operation_w, class_w, pipe1_w, illegal_w, operand_imm_w,
                 write_w, use2_w, use1_w, rd_w, rs2_w, rs1_w};
-            // cpu-spec v0.21: decode belongs to D1, after the IB read mux.
-            assign predecode_o[decode_slot*70 +: 70] = push_predecode_w[decode_slot];
+            for (decode_slice = 0; decode_slice < 5;
+                decode_slice = decode_slice + 1) begin : g_read
+                localparam SLICE_BITS = decode_slice == 4 ? 6 : 16;
+                (* keep = "true", syn_preserve = 1 *) reg [1:0] read_ptr_copy1_r;
+                assign predecode_o[decode_slot*70 + decode_slice*16 +: SLICE_BITS] =
+                    predecode_r[read_ptr_copy1_r][decode_slice*16 +: SLICE_BITS];
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i)
+                        read_ptr_copy1_r <= SLOT[1:0];
+                    else if (flush_i)
+                        read_ptr_copy1_r <= keep_head_i ?
+                            read_ptr_r + SLOT[1:0] : SLOT[1:0];
+                    else
+                        read_ptr_copy1_r <= read_ptr_r + pop_count_i + SLOT[1:0];
+                end
+            end
         end
         for (read_slot = 0; read_slot < 2; read_slot = read_slot + 1) begin : g_read_slot
             localparam SLOT = read_slot;
@@ -167,9 +184,11 @@ module edrv32_cpu_ib (
                         tournament_r[write_entry] <= push_tournament_i[23:12];
                     if (push_count_i != 0 && write_ptr_r_copy == write_entry[1:0]) begin
                         entries_r[write_entry] <= push_data_i[178:0];
+                        predecode_r[write_entry] <= push_predecode_w[0];
                     end
                     if (push_count_i == 2 && write_next_w_copy == write_entry[1:0]) begin
                         entries_r[write_entry] <= push_data_i[357:179];
+                        predecode_r[write_entry] <= push_predecode_w[1];
                     end
                 end
             end

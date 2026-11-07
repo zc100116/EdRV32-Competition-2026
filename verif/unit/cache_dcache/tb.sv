@@ -250,7 +250,6 @@ module tb;
         dc_req_store_i = store_access; dc_req_size_i = size; #1;
         while (!dc_req_ready_o) tick();
         tick(); step(); dc_req_valid_i = 0;
-        while (!dc_resp_valid_o && !dc_resp_device_o) tick();
         if (dc_resp_device_o) begin
             dc_commit_i = 1; dc_store_data_i = data;
             tick(); step(); dc_commit_i = 0;
@@ -383,15 +382,13 @@ module tb;
         if (!dc_early_hit_o) $fatal(1,"FAIL discarded-query setup hit");
         step(); dc_early_valid_i=0; dc_req_valid_i=1; dc_req_store_i=0;
         dc_req_addr_i=32'h10001000; dc_req_early_i=0; #1;
-        if (dut.early_promote_w || !dut.m_accept_w)
+        if (dut.early_promote_w || !dut.lookup_accept_w)
             $fatal(1,"FAIL unissued query promoted unrelated same-address load");
         tick();
-        if (dc_resp_valid_o) $fatal(1,"FAIL ordinary response before M2");
-        step(); dc_req_valid_i=0; tick();
         if (dut.early_response_r || !dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef)
             $fatal(1,"FAIL unrelated load expected ordinary deadbeef response");
         step(); dc_req_valid_i=0; tick();
-        // The early port remains one cycle; promoted ordinary responses are M2.
+        // Successful E requests reuse data while the port reads the next D load.
         step(); dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
         tick();
         if (!dc_early_hit_o) $fatal(1,"FAIL early chain first hit");
@@ -401,27 +398,21 @@ module tb;
         if (!dut.early_promote_w || !dut.early_read_w)
             $fatal(1,"FAIL early promotion/concurrent query");
         tick();
-        if (dc_resp_valid_o || !dc_early_hit_o)
-            $fatal(1,"FAIL early M stage/second query");
-        step(); dc_req_addr_i=32'h10009000; dc_early_valid_i=0;
-        tick();
-        if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef)
-            $fatal(1,"FAIL early chain first M2 response");
-        step(); dc_commit_i=1; dc_req_valid_i=0; dc_req_early_i=0;
+        if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef || !dc_early_hit_o)
+            $fatal(1,"FAIL early chain first response/second query");
+        step(); dc_commit_i=1; dc_req_addr_i=32'h10009000; dc_early_valid_i=0;
         tick();
         if (!dc_resp_valid_o || dc_resp_data_o!=32'h9abc)
-            $fatal(1,"FAIL early chain second M2 response");
-        step(); dc_commit_i=0; tick();
-        // Main M-stage output capture and next-cycle early data are independent.
+            $fatal(1,"FAIL early chain second response");
+        step(); dc_req_valid_i=0; dc_req_early_i=0; dc_commit_i=0; tick();
+        // A normal request and a different-word early query read concurrently.
         step(); dc_req_valid_i=1; dc_req_store_i=0; dc_req_addr_i=32'h10001000;
         dc_early_valid_i=1; dc_early_addr_i=32'h10009000;
         tick();
-        if (dc_resp_valid_o || !dc_early_hit_o || dc_early_data_o!=32'h9abc)
+        if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef ||
+            !dc_early_hit_o || dc_early_data_o!=32'h9abc)
             $fatal(1,"FAIL independent main/early RAM read");
         step(); dc_req_valid_i=0; dc_early_valid_i=0; tick();
-        if (!dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef)
-            $fatal(1,"FAIL independent main M2 response");
-        tick();
         // Pending stores and buffered writes still forbid early same-word data.
         step(); dc_req_valid_i=1; dc_req_store_i=1; dc_req_addr_i=32'h10001000;
         dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
@@ -513,35 +504,33 @@ module tb;
         if (reads != 4) $fatal(1, "FAIL invalidate miss");
         access_word(32'h40000003, 1, 0, 32'h5a);
         access_word(32'h40000000, 0, 2, 32'h5aadbeef);
-        // Two in-flight hit requests sustain one committed store per cycle.
+        // Four successive stores retire without a gap; the final write forwards
+        // across a simultaneous RAM read/write collision.
         step(); dc_req_valid_i = 1; dc_req_store_i = 1; dc_req_size_i = 2;
         dc_req_addr_i = 32'h10008000;
         tick();
-        if (dc_resp_valid_o) $fatal(1, "FAIL store response before M2");
-        step(); dc_req_addr_i = 32'h10008004; tick();
         for (int n = 0; n < 4; n++) begin
             if (!dc_resp_valid_o || !dc_req_ready_o) $fatal(1, "FAIL store throughput");
             step(); dc_commit_i = 1; dc_store_data_i = 32'h11223300 + 32'(n);
-            dc_req_addr_i = 32'h10008000 + 32'((n+2)*4);
-            dc_req_valid_i = n < 2;
+            dc_req_addr_i = 32'h10008000 + 32'((n+1)*4);
+            if (n == 3) dc_req_valid_i = 0;
             tick();
         end
         step(); dc_commit_i = 0; dc_req_valid_i = 1; dc_req_store_i = 0;
         dc_req_addr_i = 32'h1000800c;
-        tick(); step(); dc_req_valid_i = 0; tick();
+        tick();
         if (!dc_resp_valid_o || dc_resp_data_o != 32'h11223303)
             $fatal(1, "FAIL buffer drain forwarding got=%h", dc_resp_data_o);
-        tick();
-        // A store commits while its younger M read advances to M2.
+        step(); dc_req_valid_i = 0; tick();
+        // A byte store committed with a same-word load must merge into RAM data.
         step(); dc_req_valid_i = 1; dc_req_store_i = 1; dc_req_size_i = 0;
         dc_req_addr_i = 32'h1000800d; tick();
-        step(); dc_req_addr_i = 32'h1000800c; dc_req_store_i = 0; dc_req_size_i = 2;
-        tick();
-        step(); dc_commit_i = 1; dc_store_data_i = 32'haa; dc_req_valid_i = 0;
+        step(); dc_commit_i = 1; dc_store_data_i = 32'haa;
+        dc_req_addr_i = 32'h1000800c; dc_req_store_i = 0; dc_req_size_i = 2;
         tick();
         if (!dc_resp_valid_o || dc_resp_data_o != 32'h1122aa03)
             $fatal(1, "FAIL partial buffer forwarding got=%h", dc_resp_data_o);
-        step(); dc_commit_i = 0; tick();
+        step(); dc_req_valid_i = 0; dc_commit_i = 0; tick();
         // Device polling remains live while the array walker is busy.
         step(); maint_cmd_i = 4; maint_req_valid_i = 1;
         while (!maint_req_ready_o) tick();
@@ -561,8 +550,6 @@ module tb;
         if (!dc_req_ready_o || !maint_req_ready_o)
             $fatal(1, "FAIL empty maintenance simultaneous acceptance");
         tick();
-        if (dc_resp_valid_o) $fatal(1,"FAIL empty maintenance response before M2");
-        step(); maint_req_valid_i = 0; dc_req_valid_i = 0; tick();
         if (maint_busy_o || !dc_resp_valid_o || dc_resp_data_o != 32'h1122aa03)
             $fatal(1, "FAIL empty maintenance hit latency/data got=%h", dc_resp_data_o);
         step(); maint_req_valid_i = 0; dc_req_valid_i = 0; tick();
@@ -579,8 +566,6 @@ module tb;
         // A PMA error must drop with response valid even though the registered address retains its PMA error.
         step(); dc_req_valid_i = 1; dc_req_addr_i = 32'h50000000;
         tick();
-        if (dc_resp_valid_o) $fatal(1,"FAIL PMA response before M2");
-        step(); dc_req_valid_i = 0; tick();
         if (!dc_resp_valid_o || !dc_resp_err_o) $fatal(1, "FAIL D PMA response");
         step(); dc_req_valid_i = 0; tick();
         if (dc_resp_valid_o || dc_resp_err_o) $fatal(1, "FAIL D stale PMA error");
@@ -614,16 +599,15 @@ module tb;
             step(); dc_req_valid_i = 1; dc_req_addr_i = 32'h10000000;
             dc_req_store_i = 1; dc_req_size_i = 2;
             tick();
-            step(); dc_req_addr_i = 32'h10004000; dc_req_store_i = 0;
-            tick();
             if (!dc_resp_valid_o) $fatal(1, "FAIL drain store hit");
             step(); dc_commit_i = 1; dc_store_data_i = 32'hf00d1234;
-            dc_req_addr_i = 32'h10008000;
+            dc_req_addr_i = 32'h10004000; dc_req_store_i = 0;
             tick();
             if (!dc_resp_valid_o) $fatal(1, "FAIL drain LRU hit");
-            step(); dc_commit_i = 0; dc_req_valid_i = 0;
+            step(); dc_commit_i = 0; dc_req_addr_i = 32'h10008000;
             tick();
             if (dc_resp_valid_o) $fatal(1, "FAIL drain conflict expected miss");
+            step(); dc_req_valid_i = 0;
             while (!dc_resp_valid_o) tick();
             if (dc_resp_data_o != expected_c || writes != before_writes + 1 ||
                 memory[0][31:0] != 32'hf00d1234)
