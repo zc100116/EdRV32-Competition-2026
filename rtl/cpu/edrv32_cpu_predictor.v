@@ -292,7 +292,7 @@ module edrv32_cpu_predictor (
     wire conditional_update_w;
     wire local_correct_w;
     wire chooser_update_w;
-    wire [9:0] local_history_current_w;
+    wire [8:0] local_history_current_w;
     wire [1:0] local_counter_current_w;
     wire [1:0] chooser_current_w;
     reg [9:0] local_history_write_r;
@@ -311,7 +311,7 @@ module edrv32_cpu_predictor (
     // consecutive training must see the value written at this preparation edge.
     assign local_history_current_w = conditional_update_w &&
         update_pc_i[9:2] == update_prepare_pc_i ?
-        local_history_write_r : update_local_history_w;
+        local_history_write_r[8:0] : update_local_history_w[8:0];
     assign local_counter_current_w = conditional_update_w &&
         update_tournament_i[9:0] == update_prepare_tournament_i[9:0] ?
         local_counter_write_r : update_local_counter_w;
@@ -325,7 +325,7 @@ module edrv32_cpu_predictor (
         (chooser_current_w == 3 ? 2'd3 : chooser_current_w + 1'b1) :
         (chooser_current_w == 0 ? 2'd0 : chooser_current_w - 1'b1);
     always @(posedge clk_i) begin
-        local_history_write_r <= {local_history_current_w[8:0], update_prepare_taken_i};
+        local_history_write_r <= {local_history_current_w, update_prepare_taken_i};
         local_counter_write_r <= next_local_counter_w;
         chooser_write_r <= next_chooser_w;
     end
