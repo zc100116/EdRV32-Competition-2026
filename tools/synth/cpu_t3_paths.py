@@ -27,6 +27,8 @@ QUERIES = {
                               r'u_dcache.*(lru_bank_r|lookup_lru_bank_r)'),
     'A3_tag_store_payload': (r'u_dcache.u_tag[01]',
                              r'u_dcache.*(buffer_data_r|buffer_mask_r|store_size_r)'),
+    'A3_registered_payload': (r'u_dcache.(addr_r|size_r|store_.*_r)|u_core.m_store_r',
+                              r'u_dcache.*(buffer_data_r|buffer_mask_r|store_size_r)'),
     'B1_tag_operands': (r'u_dcache.u_(early_)?tag[01]',
                         r'u_core.*(e_operand|e_alu_operand|e_branch|amount_copy1|e_csr_select)'),
     'B2_tag_m_result': (r'u_dcache.u_(early_)?tag[01]', r'u_core.m_result_r'),
