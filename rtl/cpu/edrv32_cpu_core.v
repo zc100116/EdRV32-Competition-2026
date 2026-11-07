@@ -664,6 +664,22 @@ module edrv32_cpu_core (
     assign d_source_w[2] = d_operand_addr_w[14:10];
     assign d_source_w[3] = d_operand_addr_w[19:15];
     wire [119:0] e_shift_slot_w [0:1];
+    wire [19:0] e_shift_result_w [0:1];
+    genvar shift_result_group;
+    generate
+        for (shift_result_group = 0; shift_result_group < 4;
+            shift_result_group = shift_result_group + 1) begin : g_shift_result
+            // Each result FF bit feeds six banks in each of two instruction slots.
+            (* keep = "true", syn_preserve = 1 *) reg [4:0] result0_copy_r;
+            (* keep = "true", syn_preserve = 1 *) reg [4:0] result1_copy_r;
+            assign e_shift_result_w[0][shift_result_group*5 +: 5] = result0_copy_r;
+            assign e_shift_result_w[1][shift_result_group*5 +: 5] = result1_copy_r;
+            always @(posedge clk_i) begin
+                result0_copy_r <= e_alu_w[0][4:0];
+                result1_copy_r <= e_alu_w[1][4:0];
+            end
+        end
+    endgenerate
     genvar lane;
     genvar shift_bank;
     generate
@@ -684,8 +700,6 @@ module edrv32_cpu_core (
             for (shift_bank = 0; shift_bank < 24;
                 shift_bank = shift_bank + 1) begin : g_shift_bank
                 (* keep = "true", syn_preserve = 1 *) reg [4:0] amount_copy1_r;
-                (* keep = "true", syn_preserve = 1 *) reg [4:0] result0_copy_r;
-                (* keep = "true", syn_preserve = 1 *) reg [4:0] result1_copy_r;
                 (* keep = "true", syn_preserve = 1 *) reg [1:0] select_copy_r;
                 (* keep = "true", syn_preserve = 1 *) reg map_copy_r;
                 always @(posedge clk_i or negedge rst_n_i) begin
@@ -698,12 +712,10 @@ module edrv32_cpu_core (
                     e_shift_slot_w[1-lane][shift_bank*5 +: 5] :
                     e_shift_slot_w[lane][shift_bank*5 +: 5];
                 assign shift_payload_w[shift_bank*5 +: 5] =
-                    ({5{select_copy_r[0]}} & result0_copy_r) |
-                    ({5{select_copy_r[1]}} & result1_copy_r) |
+                    ({5{select_copy_r[0]}} & e_shift_result_w[0][(shift_bank/6)*5 +: 5]) |
+                    ({5{select_copy_r[1]}} & e_shift_result_w[1][(shift_bank/6)*5 +: 5]) |
                     ({5{!(|select_copy_r)}} & amount_copy1_r);
                 always @(posedge clk_i) begin
-                    result0_copy_r <= e_alu_w[0][4:0];
-                    result1_copy_r <= e_alu_w[1][4:0];
                     if (e_data_load_copy_w[lane]) begin
                         select_copy_r <= d_immediate_w[lane] ? 2'b0 :
                             {d_bypass_select_w[lane*2+1][2],
