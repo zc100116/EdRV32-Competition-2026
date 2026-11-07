@@ -120,8 +120,20 @@ module edrv32_dcache (
     assign early_read_w = dc_early_valid_i;
     // Equality chooses speculative data even when invalid; only hit grants its use.
     // Six LUT6 comparisons and one reduction precede the final way/source selection.
-    assign early_hit0_w = early_tag0_w[17:0] == early_tag_r;
-    assign early_hit1_w = early_tag1_w[17:0] == early_tag_r;
+    (* keep = "true" *) wire [5:0] early_tag0_match_w;
+    (* keep = "true" *) wire [5:0] early_tag1_match_w;
+    genvar early_tag_part;
+    generate
+        for (early_tag_part = 0; early_tag_part < 6;
+            early_tag_part = early_tag_part + 1) begin : g_early_tag_match
+            assign early_tag0_match_w[early_tag_part] =
+                early_tag0_w[early_tag_part*3 +: 3] == early_tag_r[early_tag_part*3 +: 3];
+            assign early_tag1_match_w[early_tag_part] =
+                early_tag1_w[early_tag_part*3 +: 3] == early_tag_r[early_tag_part*3 +: 3];
+        end
+    endgenerate
+    assign early_hit0_w = &early_tag0_match_w;
+    assign early_hit1_w = &early_tag1_match_w;
     assign early_hit_enable_w = early_valid_r && !maintenance_r && !maintenance_start_w &&
         !(buffer_valid_r && buffer_addr_r[31:2] == early_addr_r[31:2]) &&
         !(store_pending_r && store_addr_r[31:2] == early_addr_r[31:2]) &&
@@ -279,8 +291,8 @@ module edrv32_dcache (
     wire request_device_w;
     wire request_pma_err_w;
     wire device_accept_w;
-    wire [5:0] tag0_match_w;
-    wire [5:0] tag1_match_w;
+    (* keep = "true" *) wire [5:0] tag0_match_w;
+    (* keep = "true" *) wire [5:0] tag1_match_w;
     wire hit0_w;
     wire hit1_w;
     wire hit_w;
