@@ -53,6 +53,8 @@ module tb;
         .push_count_i(push_count_i),
         .push_one_i(push_count_i != 0),
         .push_two_i(push_count_i == 2),
+        .push_one_copy_i({8{push_count_i != 0}}),
+        .push_two_copy_i({8{push_count_i == 2}}),
         .push_data_i(push_data_i),
         .push_predecode_i(t4_predecode_w),
         .push_index_hi_i(push_index_hi_i),

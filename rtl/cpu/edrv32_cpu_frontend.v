@@ -147,6 +147,8 @@ module edrv32_cpu_frontend (
     wire [2:0] response_available_w;
     wire push_one_w;
     wire push_two_w;
+    wire [7:0] push_one_copy_w;
+    wire [7:0] push_two_copy_w;
     wire [1:0] buffered_push_count_w;
     wire [1:0] response_push_count_w;
     wire [1:0] buffered_read_next_w;
@@ -292,6 +294,8 @@ module edrv32_cpu_frontend (
         .push_count_i(push_count_w),
         .push_one_i(push_one_w),
         .push_two_i(push_two_w),
+        .push_one_copy_i(push_one_copy_w),
+        .push_two_copy_i(push_two_copy_w),
         .push_data_i(push_data_w),
         .push_predecode_i(push_predecode_w),
         .push_index_hi_i(push_index_hi_w),
@@ -316,6 +320,12 @@ module edrv32_cpu_frontend (
     genvar bank_copy;
     generate
         for (bank_copy = 0; bank_copy < 8; bank_copy = bank_copy + 1) begin : g_query_bank
+            assign push_one_copy_w[bank_copy] = !redirect_w && ib_one_free_w &&
+                (count_r != 0 || (f2_pending_r &&
+                ic_resp_valid_copy_i[bank_copy] && f2_count_w != 0));
+            assign push_two_copy_w[bank_copy] = !redirect_w && ib_two_free_w &&
+                (count_r >= 2 || (f2_pending_r && ic_resp_valid_copy_i[bank_copy] &&
+                (f2_count_w == 2 || (count_r == 1 && f2_count_w != 0))));
             (* keep = "true", syn_preserve = 1 *) reg query_bank_copy1_r;
             assign query_bank_copy_w[bank_copy] = query_bank_copy1_r;
             always @(posedge clk_i or negedge rst_n_i) begin
@@ -330,7 +340,8 @@ module edrv32_cpu_frontend (
             wire owner_target_select_w;
             (* keep = "true", syn_preserve = 1 *) reg correct_active_copy1_r;
             wire correct_w;
-            wire [3:0] predicted_w;
+            (* keep = "true" *) wire [3:0] unpredicted_w;
+            (* keep = "true" *) wire [3:0] predicted_w;
             assign correct_w = correct_active_copy1_r && f2_use_local_w &&
                 (f2_branch_local_w[0] != f2_taken_copy1_r);
             always @(posedge clk_i or negedge rst_n_i) begin
@@ -340,13 +351,14 @@ module edrv32_cpu_frontend (
                     correct_active_copy1_r <= owner_accept_w &&
                         owner_query_w[106] && owner_query_w[105];
             end
-            // Common redirect/correction priority sits after the prediction choice.
-            // Removing duplicated priority cones shortens the F2 correction path.
-            assign predicted_w = predict_taken_copy_w[pc_group] ?
-                predicted_pc_w[pc_group*4 +: 4] : unpredicted_pc_w[pc_group*4 +: 4];
-            assign next_pc_w[pc_group*4 +: 4] = redirect_w ?
-                redirect_pc_w[pc_group*4 +: 4] : correct_w ?
-                f2_correct_pc_w[pc_group*4 +: 4] : predicted_w;
+            assign unpredicted_w = redirect_w ? redirect_pc_w[pc_group*4 +: 4] :
+                correct_w ? f2_correct_pc_w[pc_group*4 +: 4] :
+                unpredicted_pc_w[pc_group*4 +: 4];
+            assign predicted_w = redirect_w ? redirect_pc_w[pc_group*4 +: 4] :
+                correct_w ? f2_correct_pc_w[pc_group*4 +: 4] :
+                predicted_pc_w[pc_group*4 +: 4];
+            assign next_pc_w[pc_group*4 +: 4] = predict_taken_copy_w[pc_group] ?
+                predicted_w : unpredicted_w;
             always @(posedge clk_i) begin
                 if (!replay_valid_copy1_r)
                     replay_resume_pc_r[pc_group*4 +: 4] <= predict_taken_copy_w[pc_group] ?

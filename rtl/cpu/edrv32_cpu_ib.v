@@ -11,6 +11,8 @@ module edrv32_cpu_ib (
     input wire [1:0] push_count_i,
     input wire push_one_i,
     input wire push_two_i,
+    input wire [7:0] push_one_copy_i,
+    input wire [7:0] push_two_copy_i,
     input wire [357:0] push_data_i,
     input wire [43:0] push_predecode_i,
     input wire [5:0] push_index_hi_i,
@@ -56,6 +58,7 @@ module edrv32_cpu_ib (
     genvar operand_slice;
     genvar decode_slot;
     genvar decode_slice;
+    genvar write_slice;
     generate
         for (decode_slot = 0; decode_slot < 2;
             decode_slot = decode_slot + 1) begin : g_predecode
@@ -187,13 +190,43 @@ module edrv32_cpu_ib (
                         index_hi_r[write_entry] <= push_index_hi_i[5:3];
                     if (push_two_i && write_next_w_copy == write_entry[1:0])
                         tournament_r[write_entry] <= push_tournament_i[23:12];
-                    if (push_one_i && write_ptr_r_copy == write_entry[1:0]) begin
-                        entries_r[write_entry] <= push_data_i[178:0];
-                        predecode_r[write_entry] <= push_predecode_w[0];
+                end
+            end
+            // Wide record slices own both pointer and late-response enable copies.
+            // A response event never drives a whole 249-bit slot-selection cone.
+            for (write_slice = 0; write_slice < 17;
+                write_slice = write_slice + 1) begin : g_slice
+                localparam GROUP = (write_entry*17 + write_slice) % 8;
+                localparam WIDTH = write_slice == 11 ? 3 : write_slice == 16 ? 6 : 16;
+                (* keep = "true", syn_preserve = 1 *) reg [1:0] write_ptr_copy1_r;
+                wire write0_w;
+                wire write1_w;
+                assign write0_w = !flush_i && push_one_copy_i[GROUP] &&
+                    write_ptr_copy1_r == write_entry[1:0];
+                assign write1_w = !flush_i && push_two_copy_i[GROUP] &&
+                    (write_ptr_copy1_r + 2'd1) == write_entry[1:0];
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i)
+                        write_ptr_copy1_r <= 0;
+                    else if (flush_i)
+                        write_ptr_copy1_r <= keep_head_i ? read_next_w : 2'd0;
+                    else
+                        write_ptr_copy1_r <= write_next_w;
+                end
+                if (write_slice < 12) begin : g_record
+                    always @(posedge clk_i) begin
+                        if (write0_w || write1_w)
+                            entries_r[write_entry][write_slice*16 +: WIDTH] <=
+                                ({WIDTH{write0_w}} & push_data_i[write_slice*16 +: WIDTH]) |
+                                ({WIDTH{write1_w}} & push_data_i[179+write_slice*16 +: WIDTH]);
                     end
-                    if (push_two_i && write_next_w_copy == write_entry[1:0]) begin
-                        entries_r[write_entry] <= push_data_i[357:179];
-                        predecode_r[write_entry] <= push_predecode_w[1];
+                end else begin : g_controls
+                    localparam OFFSET = (write_slice-12)*16;
+                    always @(posedge clk_i) begin
+                        if (write0_w || write1_w)
+                            predecode_r[write_entry][OFFSET +: WIDTH] <=
+                                ({WIDTH{write0_w}} & push_predecode_w[0][OFFSET +: WIDTH]) |
+                                ({WIDTH{write1_w}} & push_predecode_w[1][OFFSET +: WIDTH]);
                     end
                 end
             end
