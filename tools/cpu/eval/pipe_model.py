@@ -822,6 +822,10 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
         if decode_split and decision_stage in {'e', 'm'} and decision:
             decode_pending = []
         if registered_control and decision:
+            # An older E/M redirect cancels a younger D redirect still in its register.
+            if decision_stage in {'e', 'm'} and registered_redirect and (
+                    registered_redirect[0] == 'd'):
+                registered_redirect = None
             if (branch_register and decision_stage == 'e' or
                     decode_split and decision_stage == 'd'):
                 extra_redirect = (decision_stage, decision)

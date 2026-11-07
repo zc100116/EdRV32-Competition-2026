@@ -2,7 +2,7 @@
 # File: run_pipeline_cut_eval.py; Spec: T-CPU-N-CUT; Clock: host.
 # Replay v0.20 plus v0.19 frontend costs, then individual and combined pipeline cuts.
 # D$ probes add only incremental cut costs; original bus/refill time remains absent.
-"""Source edrv32 env; flock /tmp/edrv32-sim.lock python3 tools/cpu/eval/run_pipeline_cut_eval.py."""
+"""Source edrv32 env; python3 tools/cpu/eval/run_pipeline_cut_eval.py."""
 import json
 from pathlib import Path
 

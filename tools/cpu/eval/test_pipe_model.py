@@ -48,6 +48,22 @@ class Pipeline(unittest.TestCase):
                                  (branch and kind == 'branch'))
                 self.assertEqual(edge['train_capture'], base['train_capture'] + split + branch)
 
+    def test_older_e_redirect_cancels_pending_wrong_path_d_redirect(self):
+        from run_pipeline_cut_eval import BASE
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[0] = instruction(0, 'branch', target=16)
+        program[32] = instruction(32, 'serial')
+        options = dict(BASE, decode_split=True, branch_register=True)
+        trace = [0, 16, 20, 24, 28, 32]
+        base = simulate(program, trace, 0, 32, 'V3s', **options)
+        program[8] = instruction(8, 'jal', target=48)
+        timeline = []
+        result = simulate(program, trace, 0, 32, 'V3s', **options, timeline=timeline)
+        self.assertEqual(result['cycles'], base['cycles'])
+        self.assertEqual(result['instructions'], base['instructions'])
+        self.assertFalse(any(name == 'redirect' and pc == 8
+                             for tick, name, pc, *rest in timeline))
+
     def test_split_decode_projected_load_use(self):
         from run_pipeline_cut_eval import BASE
         for latency, stalls in ((2, 1), (3, 2)):
