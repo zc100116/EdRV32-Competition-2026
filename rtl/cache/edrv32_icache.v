@@ -363,8 +363,10 @@ module edrv32_icache (
                     metadata_lookup_r <= state_r == S_IDLE && lookup_valid_r &&
                         !pma_err_r && cacheable_r;
             end
-            wire lru_update_w;
-            wire lru_set_w;
+            integer lru_slot;
+            (* keep = "true" *) wire lru_data_w;
+            assign lru_data_w = tag_write_copy_w[bank/4] ?
+                !victim_copy_w[bank/4] : metadata_way_w;
             assign valid0_r[bank*16 +: 16] = valid0_bank_r;
             assign valid1_r[bank*16 +: 16] = valid1_bank_r;
             assign lru_r[bank*16 +: 16] = lru_bank_r;
@@ -379,10 +381,6 @@ module edrv32_icache (
                 {16{lookup_bank_r[bank] && tag_write_copy_w[bank/4] && !victim_copy_w[bank/4]}};
             assign fill1_w[bank*16 +: 16] = lookup_slot_r &
                 {16{lookup_bank_r[bank] && tag_write_copy_w[bank/4] && victim_copy_w[bank/4]}};
-            assign lru_update_w = (metadata_bank_r[bank] && metadata_hit_w) ||
-                (lookup_bank_r[bank] && tag_write_copy_w[bank/4]);
-            assign lru_set_w = tag_write_copy_w[bank/4] ? !victim_copy_w[bank/4] :
-                metadata_way_w;
             always @(posedge clk_i) begin
                 lookup_valid0_bank_r[bank] <= !ic_inv_i && !invalidate_bank_r[bank] &&
                     (|(valid0_r[bank*16 +: 16] & request_slot_w));
@@ -413,14 +411,20 @@ module edrv32_icache (
                         (valid1_r[bank*16 +: 16] & ~evict1_w[bank*16 +: 16]) |
                         fill1_w[bank*16 +: 16];
             end
+            // Keep late hit qualification on per-slot enables. Data is the
+            // common way value; it never passes through the old-bit feedback mux.
+            // Refill and delayed lookup events cannot overlap in the blocking FSM.
             always @(posedge clk_i or negedge rst_ilru_n_w) begin
                 if (!rst_ilru_n_w) begin
                     lru_bank_r <= 16'b0;
                 end else begin
-                    lru_bank_r <= (lru_bank_r & ~((tag_write_copy_w[bank/4] ? lookup_slot_r :
-                        metadata_slot_r) & {16{lru_update_w}})) |
-                        ((tag_write_copy_w[bank/4] ? lookup_slot_r : metadata_slot_r) &
-                        {16{lru_update_w && lru_set_w}});
+                    for (lru_slot = 0; lru_slot < 16; lru_slot = lru_slot + 1) begin
+                        if ((lookup_bank_r[bank] && tag_write_copy_w[bank/4] &&
+                            lookup_slot_r[lru_slot]) ||
+                            (metadata_bank_r[bank] && metadata_hit_w &&
+                            metadata_slot_r[lru_slot]))
+                            lru_bank_r[lru_slot] <= lru_data_w;
+                    end
                 end
             end
         end
