@@ -20,6 +20,7 @@ module edrv32_icache (
     output wire ic_resp_valid_o,
     output wire [7:0] ic_resp_valid_copy_o,
     output wire [63:0] ic_resp_data_o,
+    output wire [43:0] ic_resp_predecode_o,
     output wire ic_resp_err_o,
     input wire ic_kill_i,
     input wire ic_inv_i,
@@ -44,6 +45,7 @@ module edrv32_icache (
     localparam [2:0] S_AR = 3'd1;
     localparam [2:0] S_FILL = 3'd2;
     localparam [2:0] S_RETURN = 3'd3;
+    localparam [2:0] S_DRAIN = 3'd4;
     reg [2:0] state_r;
     wire [511:0] valid0_r;
     wire [511:0] valid1_r;
@@ -125,6 +127,18 @@ module edrv32_icache (
                 result_r[victim_group*8 +: 8] :
                 (valid_data0_w & {8{&tag0_half_copy_w}}) |
                 (valid_data1_w & {8{&tag1_half_copy_w}});
+            if (victim_group < 4) begin : g_predecode_response
+                wire [10:0] valid_predecode0_w;
+                wire [10:0] valid_predecode1_w;
+                assign valid_predecode0_w = data0_w[64+victim_group*11 +: 11] &
+                    {11{lookup_valid0_w}};
+                assign valid_predecode1_w = data1_w[64+victim_group*11 +: 11] &
+                    {11{lookup_valid1_w}};
+                assign ic_resp_predecode_o[victim_group*11 +: 11] = state_r == S_RETURN ?
+                    result_predecode_r[victim_group*11 +: 11] :
+                    (valid_predecode0_w & {11{&tag0_half_copy_w}}) |
+                    (valid_predecode1_w & {11{&tag1_half_copy_w}});
+            end
             assign ic_resp_valid_copy_o[victim_group] = response_pma_err_copy1_r ||
                 (response_lookup_copy1_r && (hit0_copy_w[victim_group] || hit1_w_copy)) ||
                 (state_r == S_RETURN && !killed_r);
@@ -144,8 +158,8 @@ module edrv32_icache (
                         addr_r[victim_group*8 +: 8] <= ic_req_addr_i[victim_group*8 +: 8];
                 end
             end
-            assign tag_write_copy_w[victim_group] = fill_write_w && axi_rlast_i &&
-                !fill_err_copy1_r && axi_rresp_i == 0 && !fill_invalidated_copy1_r && !ic_inv_i;
+            assign tag_write_copy_w[victim_group] = fill_write_w && fill_last_r &&
+                !fill_err_copy1_r && !fill_invalidated_copy1_r && !ic_inv_i;
             always @(posedge clk_i) begin
                 // Only a valid lookup owns these snapshots; inactive values are not consumed.
                 addr_tag_copy1_r <= ic_req_addr_i[31:14];
@@ -186,6 +200,35 @@ module edrv32_icache (
     reg fill_err_r;
     reg [1:0] beat_r;
     reg [63:0] result_r;
+    reg [43:0] result_predecode_r;
+    reg fill_pending_r;
+    reg [63:0] fill_data_r;
+    reg [1:0] fill_beat_r;
+    reg fill_last_r;
+    wire [43:0] fill_predecode_w;
+    genvar instruction;
+    generate
+        for (instruction = 0; instruction < 2;
+            instruction = instruction + 1) begin : g_fill_predecode
+            edrv32_cpu_predecode u_predecode (
+                .instr_i(fill_data_r[instruction*32 +: 32]),
+                .predecode_o(fill_predecode_w[instruction*22 +: 22])
+            );
+        end
+    endgenerate
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            fill_pending_r <= 0;
+        else
+            fill_pending_r <= state_r == S_FILL && axi_rvalid_i;
+    end
+    always @(posedge clk_i) begin
+        if (state_r == S_FILL && axi_rvalid_i) begin
+            fill_data_r <= axi_rdata_i;
+            fill_beat_r <= beat_r;
+            fill_last_r <= axi_rlast_i;
+        end
+    end
     reg inv_done_r;
     reg fill_invalidated_r;
     wire cacheable_w;
@@ -207,8 +250,8 @@ module edrv32_icache (
     wire tag_write_w;
     wire [17:0] tag0_w;
     wire [17:0] tag1_w;
-    wire [63:0] data0_w;
-    wire [63:0] data1_w;
+    wire [107:0] data0_w;
+    wire [107:0] data1_w;
     wire unused_axi_w;
 
     assign unused_axi_w = &{1'b0, axi_rid_i, device_unused_w};
@@ -259,8 +302,8 @@ module edrv32_icache (
     assign axi_arburst_o = 2'b01;
     assign axi_arvalid_o = state_r == S_AR;
     assign axi_rready_o = state_r == S_FILL;
-    assign fill_write_w = state_r == S_FILL && axi_rvalid_i && cacheable_r;
-    assign tag_write_w = fill_write_w && axi_rlast_i && !fill_err_r && axi_rresp_i == 0 &&
+    assign fill_write_w = fill_pending_r && cacheable_r;
+    assign tag_write_w = fill_write_w && fill_last_r && !fill_err_r &&
                             !fill_invalidated_r && !ic_inv_i;
     edrv32_ram_icache_tag u_tag0 (
         .clk_i(clk_i),
@@ -274,8 +317,8 @@ module edrv32_icache (
     edrv32_ram_icache_data u_data0 (
         .clk_i(clk_i),
         .wr_en_i(fill_write_w && victim_r == 1'b0),
-        .wr_addr_i({addr_r[13:5], beat_r}),
-        .wr_data_i(axi_rdata_i),
+        .wr_addr_i({addr_r[13:5], fill_beat_r}),
+        .wr_data_i({fill_predecode_w, fill_data_r}),
         .rd_en_i(accept_w),
         .rd_addr_i(ic_req_addr_i[13:3]),
         .rd_data_o(data0_w)
@@ -292,8 +335,8 @@ module edrv32_icache (
     edrv32_ram_icache_data u_data1 (
         .clk_i(clk_i),
         .wr_en_i(fill_write_w && victim_r == 1'b1),
-        .wr_addr_i({addr_r[13:5], beat_r}),
-        .wr_data_i(axi_rdata_i),
+        .wr_addr_i({addr_r[13:5], fill_beat_r}),
+        .wr_data_i({fill_predecode_w, fill_data_r}),
         .rd_en_i(accept_w),
         .rd_addr_i(ic_req_addr_i[13:3]),
         .rd_data_o(data1_w)
@@ -322,9 +365,9 @@ module edrv32_icache (
             lookup_bank_r <= 32'b1 << ic_req_addr_i[13:9];
             lookup_slot_r <= request_slot_w;
         end
-        if (state_r == S_FILL && axi_rvalid_i &&
-            (!cacheable_r || beat_r == addr_r[4:3])) begin
-            result_r <= axi_rdata_i;
+        if (fill_pending_r && (!cacheable_r || fill_beat_r == addr_r[4:3])) begin
+            result_r <= fill_data_r;
+            result_predecode_r <= fill_predecode_w;
         end
     end
 
@@ -489,9 +532,10 @@ module edrv32_icache (
                     fill_err_r <= fill_err_r || axi_rresp_i != 0;
                     beat_r <= beat_r + 1'b1;
                     if (axi_rlast_i) begin
-                        state_r <= S_RETURN;
+                        state_r <= S_DRAIN;
                     end
                 end
+                S_DRAIN: state_r <= S_RETURN;
                 S_RETURN: state_r <= S_IDLE;
                 default: begin end
             endcase

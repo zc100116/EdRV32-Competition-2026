@@ -37,6 +37,15 @@ module tb;
     wire error_case=scenario>=2;
     assign dc_resp_valid=pending && delay_left==0;
     assign dc_resp_err=dc_resp_valid && error_case;
+    wire [43:0] t4_predecode_w;
+    edrv32_cpu_predecode u_t4_predecode0 (
+        .instr_i(ic_resp_data[0 +: 32]),
+        .predecode_o(t4_predecode_w[0 +: 22])
+    );
+    edrv32_cpu_predecode u_t4_predecode1 (
+        .instr_i(ic_resp_data[32 +: 32]),
+        .predecode_o(t4_predecode_w[22 +: 22])
+    );
     edrv32_cpu_core dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -48,6 +57,7 @@ module tb;
         .ic_resp_valid_i(ic_resp_valid),
         .ic_resp_valid_copy_i({8{ic_resp_valid}}),
         .ic_resp_data_i(ic_resp_data),
+        .ic_resp_predecode_i(t4_predecode_w),
         .ic_resp_err_i(1'b0),
         .ic_kill_o(ic_kill),
         .ic_inv_o(),

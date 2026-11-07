@@ -14,3 +14,5 @@
 ../edrv32_cache_core_checker.sv
 ../edrv32_cache_env.sv
 edrv32_cache_mt_06_tb.sv
+../../../../rtl/cpu/edrv32_cpu_decode.v
+../../../../rtl/cpu/edrv32_cpu_predecode.v

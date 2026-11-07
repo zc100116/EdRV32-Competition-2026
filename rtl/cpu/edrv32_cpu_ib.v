@@ -10,6 +10,7 @@ module edrv32_cpu_ib (
     // F2 input: each 179-bit record is described in rtl/cpu/README.md.
     input wire [1:0] push_count_i,
     input wire [357:0] push_data_i,
+    input wire [43:0] push_predecode_i,
     input wire [5:0] push_index_hi_i,
     output wire [5:0] index_hi_o,
     input wire [23:0] push_tournament_i,
@@ -55,50 +56,30 @@ module edrv32_cpu_ib (
             decode_slot = decode_slot + 1) begin : g_predecode
             localparam SLOT = decode_slot;
             wire [31:0] instr_w;
-            wire [4:0] rs1_w;
-            wire [4:0] rs2_w;
-            wire [4:0] rd_w;
-            wire use1_w;
-            wire use2_w;
-            wire write_w;
+            wire unused_opcode_w;
+            assign unused_opcode_w = &{1'b0, instr_w[6:0]};
+            wire [21:0] stored_w;
             wire [31:0] immediate_w;
-            wire [3:0] class_w;
-            wire [3:0] operation_w;
-            wire operand_imm_w;
-            wire illegal_w;
-            wire pipe1_w;
+            wire format_u_w;
+            wire format_i_w;
             assign instr_w = push_data_i[decode_slot*RECORD_BITS+32 +: 32];
-            edrv32_cpu_decode u_decode (
-                .instr_i(instr_w),
-                .rs1_o(rs1_w),
-                .rs2_o(rs2_w),
-                .rd_o(rd_w),
-                .rs1_used_o(use1_w),
-                .rs2_used_o(use2_w),
-                .rd_write_o(write_w),
-                .imm_o(immediate_w),
-                .class_o(class_w),
-                .alu_operation_o(operation_w),
-                .operand_imm_o(operand_imm_w),
-                .illegal_o(illegal_w)
-            );
-            // Capability follows opcode families, including their illegal encodings.
-            assign pipe1_w = instr_w[6:0] == 7'h13 || instr_w[6:0] == 7'h37 ||
-                instr_w[6:0] == 7'h17 ||
-                (instr_w[6:0] == 7'h33 && instr_w[31:25] != 1) ||
-                instr_w[6:0] == 7'h63 || instr_w[6:0] == 7'h6f;
+            assign stored_w = push_predecode_i[decode_slot*22 +: 22];
+            assign format_u_w = stored_w[10:7] == 4'd1 || stored_w[10:7] == 4'd2;
+            assign format_i_w = !(|stored_w[21:19]) && !format_u_w;
+            // One-hot immediate formats select raw instruction fragments in parallel.
+            assign immediate_w =
+                ({32{format_i_w}} & {{20{instr_w[31]}}, instr_w[31:20]}) |
+                ({32{format_u_w}} & {instr_w[31:12], 12'b0}) |
+                ({32{stored_w[21]}} &
+                    {{20{instr_w[31]}}, instr_w[31:25], instr_w[11:7]}) |
+                ({32{stored_w[20]}} & {{19{instr_w[31]}}, instr_w[31], instr_w[7],
+                    instr_w[30:25], instr_w[11:8], 1'b0}) |
+                ({32{stored_w[19]}} & {{11{instr_w[31]}}, instr_w[31], instr_w[19:12],
+                    instr_w[20], instr_w[30:21], 1'b0});
             assign push_predecode_w[decode_slot] = {
-                class_w == 4'd3,
-                class_w == 4'd6 || class_w == 4'd8 || class_w == 4'd10,
-                write_w && rd_w != 0,
-                class_w >= 4'd10,
-                class_w == 4'd6 || class_w == 4'd7,
-                class_w >= 4'd3 && class_w <= 4'd5,
-                class_w == 4'd10,
-                class_w == 4'd8,
-                class_w == 4'd6,
-                immediate_w, operation_w, class_w, pipe1_w, illegal_w, operand_imm_w,
-                write_w, use2_w, use1_w, rd_w, rs2_w, rs1_w};
+                stored_w[18:17], stored_w[2] && instr_w[11:7] != 0, stored_w[16:11],
+                immediate_w, stored_w[6], instr_w[14:12], stored_w[10:7], stored_w[5:0],
+                instr_w[11:7], instr_w[24:20], instr_w[19:15]};
             for (decode_slice = 0; decode_slice < 5;
                 decode_slice = decode_slice + 1) begin : g_read
                 localparam SLICE_BITS = decode_slice == 4 ? 6 : 16;

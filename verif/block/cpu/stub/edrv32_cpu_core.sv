@@ -19,6 +19,7 @@ module edrv32_cpu_core (
     input logic ic_resp_valid_i,
     input logic [7:0] ic_resp_valid_copy_i,
     input logic [63:0] ic_resp_data_i,
+    input logic [43:0] ic_resp_predecode_i,
     input logic ic_resp_err_i,
     input logic ic_inv_done_i,
 

@@ -63,6 +63,7 @@ module tb;
     wire axi_rlast_i;
     wire axi_rvalid_i;
     wire axi_rready_o;
+    wire [43:0] t4_predecode_w;
     edrv32_cpu_frontend u_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -104,6 +105,7 @@ module tb;
         .ic_resp_valid_i(ic_resp_valid_i),
         .ic_resp_valid_copy_i(ic_resp_valid_copy_i),
         .ic_resp_data_i(ic_resp_data_i),
+        .ic_resp_predecode_i(t4_predecode_w),
         .ic_resp_err_i(ic_resp_err_i),
         .ic_kill_o(ic_kill_o),
         .invalidate_i(invalidate_i),
@@ -126,6 +128,7 @@ module tb;
         .ic_resp_valid_o(ic_resp_valid_i),
         .ic_resp_valid_copy_o(ic_resp_valid_copy_i),
         .ic_resp_data_o(ic_resp_data_i),
+        .ic_resp_predecode_o(t4_predecode_w),
         .ic_resp_err_o(ic_resp_err_i),
         .ic_kill_i(ic_kill_o),
         .ic_inv_i(ic_inv_o),

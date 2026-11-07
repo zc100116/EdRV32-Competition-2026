@@ -4,6 +4,7 @@
 ../cpu/edrv32_cpu_ib.v
 ../cpu/edrv32_cpu_predictor.v
 ../cpu/edrv32_cpu_decode.v
+../cpu/edrv32_cpu_predecode.v
 ../cpu/edrv32_cpu_regfile.v
 ../cpu/edrv32_cpu_alu.v
 ../cpu/edrv32_cpu_branch.v

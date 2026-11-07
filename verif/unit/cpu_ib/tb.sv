@@ -38,11 +38,21 @@ module tb;
 
     wire [79:0] operand_addr_w;
     wire [23:0] unused_tournament_w;
+    wire [43:0] t4_predecode_w;
+    edrv32_cpu_predecode u_t4_predecode0 (
+        .instr_i(push_data_i[32 +: 32]),
+        .predecode_o(t4_predecode_w[0 +: 22])
+    );
+    edrv32_cpu_predecode u_t4_predecode1 (
+        .instr_i(push_data_i[211 +: 32]),
+        .predecode_o(t4_predecode_w[22 +: 22])
+    );
     edrv32_cpu_ib dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_i),
         .push_data_i(push_data_i),
+        .push_predecode_i(t4_predecode_w),
         .push_index_hi_i(push_index_hi_i),
         .push_tournament_i(24'b0),
         .tournament_o(unused_tournament_w),

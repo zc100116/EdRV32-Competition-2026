@@ -4,3 +4,5 @@
 ../../../rtl/tech/edrv32_ram_icache_tag.v
 ../../../rtl/tech/edrv32_ram_icache_data.v
 tb.sv
+../../../rtl/cpu/edrv32_cpu_decode.v
+../../../rtl/cpu/edrv32_cpu_predecode.v

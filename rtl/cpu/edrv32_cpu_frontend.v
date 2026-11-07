@@ -51,6 +51,7 @@ module edrv32_cpu_frontend (
     input wire ic_resp_valid_i,
     input wire [7:0] ic_resp_valid_copy_i,
     input wire [63:0] ic_resp_data_i,
+    input wire [43:0] ic_resp_predecode_i,
     input wire ic_resp_err_i,
     output wire ic_kill_o,
     // FENCE.I sequencing belongs to the backend.
@@ -65,7 +66,7 @@ module edrv32_cpu_frontend (
 );
     // Fixed four-byte instructions: a response contributes one or two whole words.
     localparam REC_BITS = 179;
-    localparam STREAM_BITS = 160;
+    localparam STREAM_BITS = 182;
     reg [31:0] f1_pc_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:1] f1_pc_copy1_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy2_r;
@@ -150,6 +151,7 @@ module edrv32_cpu_frontend (
     wire [STREAM_BITS-1:0] stream_w [0:1];
     wire [1:0] push_count_w;
     wire [357:0] push_data_w;
+    wire [43:0] push_predecode_w;
     wire [5:0] push_index_hi_w;
     wire [23:0] push_tournament_w;
     wire [2:0] unused_update_align_w;
@@ -272,6 +274,7 @@ module edrv32_cpu_frontend (
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_w),
         .push_data_i(push_data_w),
+        .push_predecode_i(push_predecode_w),
         .push_index_hi_i(push_index_hi_w),
         .push_tournament_i(push_tournament_w),
         .tournament_o(decode_tournament_o),
@@ -391,15 +394,16 @@ module edrv32_cpu_frontend (
             assign position_w = f2_pc_r[2] ^ offset_w;
             assign pc_w = {f2_pc_r[31:3], position_w, 2'b0};
             // {RAS, history, target, taken, hit, error, PC, instruction}.
-            assign response_w = {f2_global_r[position_w], f2_saved_local_w[position_w],
+            assign response_w = {ic_resp_predecode_i[position_w*22 +: 22],
+                f2_global_r[position_w], f2_saved_local_w[position_w],
                 f2_local_history_r[position_w*10 +: 10], f2_ras_r, f2_history_r, f2_target_r,
                 f2_taken_w && {position_w, 1'b0} == f2_position_r,
                 f2_hit_r && {position_w, 1'b0} == f2_position_r,
                 ic_resp_err_i, pc_w, ic_resp_data_i[position_w*32 +: 32]};
             // Each eight-bit slice owns its queue-select registers. This bounds
             // the fanout of the selects feeding the IB record write mux.
-            for (slice = 0; slice < 20; slice = slice + 1) begin : g_slice
-                localparam WIDTH = 8;
+            for (slice = 0; slice < 23; slice = slice + 1) begin : g_slice
+                localparam WIDTH = slice == 22 ? 6 : 8;
                 reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
                 reg [2:0] count_copy_r /* synthesis syn_preserve=1 */;
                 wire [1:0] read_w;
@@ -419,6 +423,7 @@ module edrv32_cpu_frontend (
                     end
                 end
             end
+            assign push_predecode_w[slot*22 +: 22] = stream_w[slot][181:160];
             assign push_tournament_w[slot*12 +: 12] = stream_w[slot][159:148];
             assign push_index_hi_w[slot*3 +: 3] =
                 stream_w[slot][110:108] ^ stream_w[slot][45:43];
@@ -434,7 +439,8 @@ module edrv32_cpu_frontend (
             wire [STREAM_BITS-1:0] response_w;
             assign offset_w = entry[1:0] - write_ptr_r;
             assign position_w = f2_pc_r[2] ^ offset_w[0];
-            assign response_w = {f2_global_r[position_w], f2_saved_local_w[position_w],
+            assign response_w = {ic_resp_predecode_i[position_w*22 +: 22],
+                f2_global_r[position_w], f2_saved_local_w[position_w],
                 f2_local_history_r[position_w*10 +: 10], f2_ras_r,
                 f2_history_r, f2_target_r,
                 f2_taken_w && {position_w, 1'b0} == f2_position_r,
@@ -444,11 +450,12 @@ module edrv32_cpu_frontend (
             // Every request reserves two stream slots. Capture speculatively
             // while it owns F2; append_count_w alone grants record ownership.
             // A delayed response overwrites unowned data on its returning edge.
-            for (slice = 0; slice < 20; slice = slice + 1) begin : g_slice
-                localparam GROUP = entry*20 + slice;
+            for (slice = 0; slice < 23; slice = slice + 1) begin : g_slice
+                localparam GROUP = entry*23 + slice;
+                localparam WIDTH = slice == 22 ? 6 : 8;
                 always @(posedge clk_i) begin
                     if (f2_pending_copy_w[GROUP % 9] && !offset_w[1])
-                        words_r[entry][slice*8 +: 8] <= response_w[slice*8 +: 8];
+                        words_r[entry][slice*8 +: WIDTH] <= response_w[slice*8 +: WIDTH];
                 end
             end
         end
