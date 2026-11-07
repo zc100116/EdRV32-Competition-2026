@@ -26,6 +26,18 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_c3_w_result_is_not_an_early_address_register(self):
+        consumer = instruction(8, 'load', rd=3, sources=(2,))
+        producer = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0))
+        self.assertTrue(early_address_allowed(consumer, [], [], [], [producer], 4))
+        self.assertFalse(early_address_allowed(consumer, [], [], [], [producer], 4,
+                                              late_load_result=True))
+        producer.early_load = True
+        self.assertTrue(early_address_allowed(consumer, [], [], [], [producer], 4,
+                                             late_load_result=True))
+        self.assertFalse(early_address_allowed(consumer, [], [], [producer], [], 4,
+                                              late_load_result=True))
+
     def test_m2_early_source_is_an_already_registered_result(self):
         consumer = instruction(8, 'load', rd=3, sources=(2,))
         producer = Record(instruction(0, 'load', rd=2), False, False, 0, 0, (0, 0, 0))
