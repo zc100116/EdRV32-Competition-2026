@@ -598,9 +598,8 @@ module edrv32_cpu_core (
     reg w_ras_return_r;
     reg [31:0] w_ras_link_r;
     (* keep = "true", syn_preserve = 1 *) reg [10:0] w_ras_commit_copy1_r;
-    (* keep = "true", syn_preserve = 1 *) reg [15:0] committed_ras_ptr_copy1_r;
-    (* keep = "true", syn_preserve = 1 *) reg [3:0] committed_ras_top_copy1_r;
-    (* keep = "true", syn_preserve = 1 *) reg [3:0] committed_ras_second_copy1_r;
+    reg [1:0] committed_ras_top_index_r;
+    reg [1:0] committed_ras_second_index_r;
     wire [31:0] committed_ras_top_w;
     wire m_call_w;
     wire m_return_w;
@@ -1933,15 +1932,13 @@ module edrv32_cpu_core (
         if (!rst_n_i) begin
             committed_ras_ptr_r <= 0;
             committed_ras_count_r <= 0;
-            committed_ras_ptr_copy1_r <= 0;
-            committed_ras_top_copy1_r <= {2{2'd3}};
-            committed_ras_second_copy1_r <= {2{2'd2}};
+            committed_ras_top_index_r <= 2'd3;
+            committed_ras_second_index_r <= 2'd2;
         end else begin
             committed_ras_ptr_r <= committed_ras_ptr_w;
             committed_ras_count_r <= committed_ras_count_w;
-            committed_ras_ptr_copy1_r <= {8{committed_ras_ptr_w}};
-            committed_ras_top_copy1_r <= {2{committed_ras_ptr_w - 2'd1}};
-            committed_ras_second_copy1_r <= {2{committed_ras_ptr_w - 2'd2}};
+            committed_ras_top_index_r <= committed_ras_ptr_w - 2'd1;
+            committed_ras_second_index_r <= committed_ras_ptr_w - 2'd2;
         end
     end
     genvar ras_bank;
@@ -1952,7 +1949,7 @@ module edrv32_cpu_core (
             // Each late write enable owns one 16-bit bank.
             always @(posedge clk_i) begin
                 if (w_ras_commit_copy1_r[ras_bank] && w_ras_call_r &&
-                    committed_ras_ptr_copy1_r[ras_bank*2 +: 2] == WORD[1:0])
+                    committed_ras_ptr_r == WORD[1:0])
                     committed_ras_data_r[ras_bank*16 +: 16] <=
                         w_ras_link_r[(ras_bank%2)*16 +: 16];
             end
@@ -1963,9 +1960,9 @@ module edrv32_cpu_core (
             wire push_w;
             wire pop_w;
             assign top_w = committed_ras_data_r[
-                committed_ras_top_copy1_r[ras_half*2 +: 2]*32 + ras_half*16 +: 16];
+                committed_ras_top_index_r*32 + ras_half*16 +: 16];
             assign second_w = committed_ras_data_r[
-                committed_ras_second_copy1_r[ras_half*2 +: 2]*32 + ras_half*16 +: 16];
+                committed_ras_second_index_r*32 + ras_half*16 +: 16];
             assign push_w = w_ras_commit_copy1_r[ras_half+9] && w_ras_call_r;
             assign pop_w = w_ras_commit_copy1_r[ras_half+9] && w_ras_return_r &&
                 committed_ras_count_r != 0;
