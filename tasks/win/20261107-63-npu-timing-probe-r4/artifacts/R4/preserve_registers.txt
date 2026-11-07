@@ -1,0 +1,124 @@
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-NPU-FMAX/synthesize/edrv32_npu_timing_probe_syn.vm
+Module: edrv32_npu_mac_array (u_mac_array)
+PAP_PRESERVE busy_r instances: 1
+PAP_PRESERVE ctrl_valid_r bits: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+Separate synthesized DFF declarations named g_channel[0].valid_r: 12
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* busy_r */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        busy_r_vname (
+            .Q (busy_r),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1802));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[0]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[0]  (
+            .Q (ctrl_valid_r[0]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1803[0]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[1]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[1]  (
+            .Q (ctrl_valid_r[1]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[1]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[2]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[2]  (
+            .Q (ctrl_valid_r[2]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[2]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[3]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[3]  (
+            .Q (ctrl_valid_r[3]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[3]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[4]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[4]  (
+            .Q (ctrl_valid_r[4]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[4]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[5]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[5]  (
+            .Q (ctrl_valid_r[5]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[5]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[6]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[6]  (
+            .Q (ctrl_valid_r[6]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[6]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[7]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[7]  (
+            .Q (ctrl_valid_r[7]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[7]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[8]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[8]  (
+            .Q (ctrl_valid_r[8]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[8]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[9]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[9]  (
+            .Q (ctrl_valid_r[9]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[9]));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* \ctrl_valid_r[10]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \ctrl_valid_r[10]  (
+            .Q (ctrl_valid_r[10]),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1804_alias[10]));
+
+Example channel register
+
+GTP_DFF_C /* \g_channel[0].valid_r[0]  */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        \g_channel[0].valid_r[0]  (
+            .Q (mac_beat_o),
+            .C (N557),
+            .CLK (clk_i),
+            .D (N1803[0]));
