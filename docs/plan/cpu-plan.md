@@ -139,7 +139,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-T3BE | 第三轮后端（用户 2026-11-07 选择"等价修复 + 切分 C1+C3"，目标 150 MHz）：起草 v0.21（M2 级、D1/D2），D$ 内部等价修复，F 类，实现后集成 | Codex sol（task_0b43cba72d51 / ctx_8d67795d602e） | N-PDS3 | 起草稿经审定；B1、R01–R05；工具级数 | task-cpu-n-t3be | [x] 10495649 → cpu-n16：单元 10 目录、B1 48/48、R01–R05 通过，R-05 1,807,726；剩余项交卡 64 复核。之前：v0.21 切分草稿（M2、D1/D2）已经审定，但精确模型给出 CoreMark +11.2%，用户 2026-11-07 撤回（fa8aeb8f）。本任务改为只做等价修复并负责集成 |
 | N-T3FE | 第三轮前端等价修复：F2 纠正 → F1、F1 环、I$ tag → 有效位/LRU、F2 → IB | Codex sol（task_f717515b3011 / ctx_e7dd11e97e61） | N-PDS3 | 工具级数；前端单元、B1、R05 | task-cpu-n-t3fe | [x] ab9224cd 已集成：C1 5 级、A1 3/6 级；C2 F1 环 7 级、F1 请求地址 → LRU 快照 6/F98 交卡 64 |
 | N-WAYP | D$ 路预测原型 d0（用户 2026-11-07 选择'先 e，并行试 d0'）：预测路数据直通 E，下一拍校验后冻结修复 | Codex sol（task_f3fb445e93ee / ctx_d7e2804e22e7） | — | DRM → E 的工具级数，R-05 周期和失败率 | task-cpu-n-wayp（原型，不并入） | [x] 19423faf：R-05 +0.026%，失败率 0.44%；DRM → E 13 → 12 级，没有达到 ≤ 3，不采用 |
-| N-PDS4 | 卡 64：v0.21 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-T3BE | WNS ≥ +0.3 ns（为整片留余量，用户 2026-11-07） | win/20261107-64-cpu-v021-timing-probe | [~] 已下发 |
+| N-PDS4 | 卡 64：v0.21 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-T3BE | WNS ≥ +0.3 ns（为整片留余量，用户 2026-11-07） | win/20261107-64-cpu-v021-timing-probe | [x] 138.3 MHz（WNS −0.562，1625 端点），未达标；分类见 docs/reports/2026-11-07-timing-cpu-v021.md |
 
 ## 6. 变更记录
 
