@@ -102,17 +102,25 @@ module edrv32_cpu_ib (
             for (decode_slice = 0; decode_slice < 5;
                 decode_slice = decode_slice + 1) begin : g_read
                 localparam SLICE_BITS = decode_slice == 4 ? 6 : 16;
-                (* keep = "true", syn_preserve = 1 *) reg [1:0] read_ptr_copy1_r;
+                (* keep = "true", syn_preserve = 1 *) reg [3:0] read_select_copy1_r;
+                wire [1:0] next_ptr_w;
+                assign next_ptr_w = read_ptr_r + pop_count_i + SLOT[1:0];
                 assign predecode_o[decode_slot*70 + decode_slice*16 +: SLICE_BITS] =
-                    predecode_r[read_ptr_copy1_r][decode_slice*16 +: SLICE_BITS];
+                    ({SLICE_BITS{read_select_copy1_r[0]}} &
+                        predecode_r[0][decode_slice*16 +: SLICE_BITS]) |
+                    ({SLICE_BITS{read_select_copy1_r[1]}} &
+                        predecode_r[1][decode_slice*16 +: SLICE_BITS]) |
+                    ({SLICE_BITS{read_select_copy1_r[2]}} &
+                        predecode_r[2][decode_slice*16 +: SLICE_BITS]) |
+                    ({SLICE_BITS{read_select_copy1_r[3]}} &
+                        predecode_r[3][decode_slice*16 +: SLICE_BITS]);
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i)
-                        read_ptr_copy1_r <= SLOT[1:0];
+                        read_select_copy1_r <= 4'b1 << SLOT;
                     else if (flush_i)
-                        read_ptr_copy1_r <= keep_head_i ?
-                            read_ptr_r + SLOT[1:0] : SLOT[1:0];
+                        read_select_copy1_r <= keep_head_i ? read_select_copy1_r : 4'b1 << SLOT;
                     else
-                        read_ptr_copy1_r <= read_ptr_r + pop_count_i + SLOT[1:0];
+                        read_select_copy1_r <= 4'b1 << next_ptr_w;
                 end
             end
         end
@@ -125,19 +133,25 @@ module edrv32_cpu_ib (
             for (read_slice = 0; read_slice < 12;
                 read_slice = read_slice + 1) begin : g_read_slice
                 localparam SLICE_BITS = read_slice == 11 ? 3 : 16;
-                reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
-                wire [1:0] slot_w;
-                assign slot_w = read_ptr_copy_r;
+                reg [3:0] read_select_copy_r /* synthesis syn_preserve=1 */;
+                wire [1:0] next_ptr_w;
+                assign next_ptr_w = read_ptr_r + pop_count_i + SLOT[1:0];
                 assign data_o[read_slot*RECORD_BITS + read_slice*16 +: SLICE_BITS] =
-                    entries_r[slot_w][read_slice*16 +: SLICE_BITS];
+                    ({SLICE_BITS{read_select_copy_r[0]}} &
+                        entries_r[0][read_slice*16 +: SLICE_BITS]) |
+                    ({SLICE_BITS{read_select_copy_r[1]}} &
+                        entries_r[1][read_slice*16 +: SLICE_BITS]) |
+                    ({SLICE_BITS{read_select_copy_r[2]}} &
+                        entries_r[2][read_slice*16 +: SLICE_BITS]) |
+                    ({SLICE_BITS{read_select_copy_r[3]}} &
+                        entries_r[3][read_slice*16 +: SLICE_BITS]);
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i)
-                        read_ptr_copy_r <= SLOT[1:0];
+                        read_select_copy_r <= 4'b1 << SLOT;
                     else if (flush_i)
-                        read_ptr_copy_r <= keep_head_i ?
-                            read_ptr_r + SLOT[1:0] : SLOT[1:0];
+                        read_select_copy_r <= keep_head_i ? read_select_copy_r : 4'b1 << SLOT;
                     else
-                        read_ptr_copy_r <= read_ptr_r + pop_count_i + SLOT[1:0];
+                        read_select_copy_r <= 4'b1 << next_ptr_w;
                 end
             end
         end
@@ -145,19 +159,22 @@ module edrv32_cpu_ib (
             operand_slice = operand_slice + 1) begin : g_operand_read
             localparam SLOT = operand_slice % 2;
             localparam SLICE = operand_slice / 2;
-            reg [1:0] read_ptr_copy_r /* synthesis syn_preserve=1 */;
-            wire [1:0] slot_w;
-            assign slot_w = read_ptr_copy_r;
+            reg [3:0] read_select_copy_r /* synthesis syn_preserve=1 */;
+            wire [1:0] next_ptr_w;
+            assign next_ptr_w = read_ptr_r + pop_count_i + SLOT[1:0];
             // Record[56:47] is {instruction.rs2, instruction.rs1}.
-            assign operand_addr_o[SLICE*20 + SLOT*10 +: 10] = entries_r[slot_w][56:47];
+            assign operand_addr_o[SLICE*20 + SLOT*10 +: 10] =
+                ({10{read_select_copy_r[0]}} & entries_r[0][56:47]) |
+                ({10{read_select_copy_r[1]}} & entries_r[1][56:47]) |
+                ({10{read_select_copy_r[2]}} & entries_r[2][56:47]) |
+                ({10{read_select_copy_r[3]}} & entries_r[3][56:47]);
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    read_ptr_copy_r <= SLOT[1:0];
+                    read_select_copy_r <= 4'b1 << SLOT;
                 else if (flush_i)
-                    read_ptr_copy_r <= keep_head_i ?
-                            read_ptr_r + SLOT[1:0] : SLOT[1:0];
+                    read_select_copy_r <= keep_head_i ? read_select_copy_r : 4'b1 << SLOT;
                 else
-                    read_ptr_copy_r <= read_ptr_r + pop_count_i + SLOT[1:0];
+                    read_select_copy_r <= 4'b1 << next_ptr_w;
             end
         end
         // Decode each destination locally instead of a dynamic 716-bit write mux.
