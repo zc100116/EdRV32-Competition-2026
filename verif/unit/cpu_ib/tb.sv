@@ -37,6 +37,7 @@ module tb;
     integer delayed_space_seen=0;
 
     wire [79:0] operand_addr_w;
+    wire [23:0] unused_tournament_w;
     edrv32_cpu_ib dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -44,7 +45,7 @@ module tb;
         .push_data_i(push_data_i),
         .push_index_hi_i(push_index_hi_i),
         .push_tournament_i(24'b0),
-        .tournament_o(),
+        .tournament_o(unused_tournament_w),
         .index_hi_o(index_hi_o),
         .pop_count_i(pop_count_i),
         .data_o(data_o),

@@ -110,6 +110,26 @@ module tb;
             $fatal(1, "FAIL I %h data=%h reads=%0d", addr, ic_resp_data_o, reads);
         tick();
     endtask
+    task automatic discarded_successor(input logic [31:0] first_pc,
+                                        input logic [31:0] next_pc,
+                                        input logic [63:0] first_data);
+        step(); ic_req_valid_i=1;ic_req_addr_i=first_pc;
+        while(!ic_req_ready_o)tick();
+        tick();
+        if(!ic_req_ready_o || ic_resp_valid_o)
+            $fatal(1,"FAIL discovery ready=%b response=%b",ic_req_ready_o,ic_resp_valid_o);
+        step();ic_req_addr_i=next_pc;tick();
+        if(ic_req_ready_o || ic_resp_valid_o)
+            $fatal(1,"FAIL successor was not discarded");
+        step();ic_req_valid_i=0;
+        while(!ic_resp_valid_o)tick();
+        if(ic_resp_data_o!==first_data)$fatal(1,"FAIL miss owner changed to successor");
+        tick();
+        repeat(3)begin
+            tick();
+            if(ic_resp_valid_o)$fatal(1,"FAIL discarded successor produced response");
+        end
+    endtask
     initial begin
         for (int i = 0; i < 8192; i++) memory[i] = {32'(i), 32'(i+4096)};
         tick(); step(); rst_n_i = 1;
@@ -205,6 +225,13 @@ module tb;
         tick();
         for (int i = 1; i < 1024; i++)
             fetch(32'h10000000 + 32'(i*32), memory[i*4], reads_before + i + 1);
+        // B-13: retain the first owner through a miss/ROM access and drop its successor.
+        reads_before=reads;
+        discarded_successor(32'h80000000,32'h80000008,memory[0]);
+        fetch(32'h80000008,memory[1],reads_before+1);
+        reads_before=reads;
+        discarded_successor(32'h00000200,32'h00000208,memory[64]);
+        fetch(32'h00000208,memory[65],reads_before+2);
         $display("PASS cache_icache"); $finish;
     end
 endmodule

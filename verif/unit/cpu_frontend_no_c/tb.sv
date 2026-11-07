@@ -51,6 +51,9 @@ module tb;
     wire fetch_wait_o;
     reg [15:0] memory[0:4095];
     reg model_pending=0;
+    reg model_miss_r=0;
+    reg model_busy_r=0;
+    reg model_canceled_r=0;
     reg [31:0] model_addr=0;
     integer delay_left=0;
     reg allow_request=1;
@@ -129,28 +132,41 @@ module tb;
     );
     // Single-outstanding I$ model supports hit response plus a new request in one cycle.
     always @(*)begin
-        ic_req_ready_i=allow_request && (!model_pending || delay_left==0);
-        ic_resp_valid_i=model_pending && delay_left==0;
+        ic_req_ready_i=allow_request && !model_busy_r;
+        ic_resp_valid_i=model_pending && delay_left==0 && !model_canceled_r;
         ic_resp_err_i=model_addr==32'h100;
         ic_resp_data_i={memory[(model_addr>>1)+3],memory[(model_addr>>1)+2],
             memory[(model_addr>>1)+1],memory[model_addr>>1]};
         ic_inv_done_i=ic_inv_o;
     end
     always @(posedge clk_i)begin
-        if(!rst_n_i)begin model_pending<=0;delay_left<=0;end
+        if(!rst_n_i)begin
+            model_pending<=0;delay_left<=0;model_miss_r<=0;
+            model_busy_r<=0;model_canceled_r<=0;
+        end
         else begin
-            if(ic_kill_o)begin
-                model_pending<=0;killed=killed+1;
-            end else begin
-                if(model_pending && delay_left>0)delay_left<=delay_left-1;
-                if(ic_resp_valid_i)model_pending<=0;
-                if(ic_req_valid_o && ic_req_ready_i)begin
-                    if(ic_req_addr_o[2:0]!=0)$fatal(1,"FAIL unaligned I$ request");
+            model_miss_r<=0;
+            if(model_miss_r)model_busy_r<=1;
+            if(model_pending && delay_left>0)delay_left<=delay_left-1;
+            if(model_pending && delay_left==0)begin
+                model_pending<=0;model_busy_r<=0;
+            end
+            if(ic_kill_o)begin model_canceled_r<=1;killed=killed+1;end
+            // v0.19 discovery accepts and discards one successor.
+            if(ic_req_valid_o && ic_req_ready_i)begin
+                if(ic_req_addr_o[2:0]!=0)$fatal(1,"FAIL unaligned I$ request");
+                accepted=accepted+1;
+                if(!model_miss_r)begin
                     model_pending<=1;model_addr<=ic_req_addr_o;
+                    model_canceled_r<=ic_kill_o;
                     delay_left<=((ic_req_addr_o>>3)%9==0)?8:0;
-                    accepted=accepted+1;
+                    model_miss_r<=((ic_req_addr_o>>3)%9==0);
                 end
             end
+            if(integer'(dut.credit_r)+integer'(ib_count_o)+integer'(dut.count_r)+
+                2*(integer'(dut.f2_pending_r)+integer'(dut.replay_valid_r))!=8)
+                $fatal(1,"FAIL credit=%0d ib=%0d stream=%0d owner=%b replay=%b time=%t",
+                    dut.credit_r,ib_count_o,dut.count_r,dut.f2_pending_r,dut.replay_valid_r,$time);
             if(halt_i && ic_req_valid_o)$fatal(1,"FAIL halt issued a request");
             if(fetch_wait_o)waits=waits+1;
             if(ic_req_valid_o && !ic_req_ready_i)blocked=blocked+1;

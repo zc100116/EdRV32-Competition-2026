@@ -193,6 +193,7 @@ module edrv32_icache (
     wire hit1_w;
     wire hit_w;
     wire accept_w;
+    wire lookup_ready_w;
     wire lookup_hit_w;
     wire [511:0] evict0_w;
     wire [511:0] evict1_w;
@@ -229,10 +230,12 @@ module edrv32_icache (
     assign hit_w = hit0_w || hit1_w;
     assign lookup_hit_w = state_r == S_IDLE && lookup_valid_r &&
         !pma_err_r && cacheable_r && hit_w;
-    // C-F1 path 5: decode the set and read its metadata alongside the tag RAM.
-    assign ic_req_ready_o = state_r == S_IDLE &&
-                            (!lookup_valid_r || pma_err_r || (cacheable_r && hit_w));
-    assign accept_w = ic_req_valid_i && ic_req_ready_o;
+    // cache-spec v0.11 5.1: externally accept through the miss-discovery cycle.
+    // The speculative successor is discarded internally; the miss keeps its address/set.
+    assign ic_req_ready_o = state_r == S_IDLE;
+    assign lookup_ready_w = state_r == S_IDLE &&
+        (!lookup_valid_r || pma_err_r || (cacheable_r && hit_w));
+    assign accept_w = ic_req_valid_i && lookup_ready_w;
     assign ic_resp_valid_o =
         response_pma_err_r || (response_lookup_r && hit_w) ||
         (state_r == S_RETURN && !killed_r);
@@ -305,7 +308,7 @@ module edrv32_icache (
         // cache-spec 5.1: snapshot the next set whenever the lookup slot is free.
         // Only accept_w gives it an owner; misses retain the set through refill.
         // Removing request-valid from this enable cuts E JALR resolution -> I$ set decode.
-        if (ic_req_ready_o) begin
+        if (lookup_ready_w) begin
             lookup_bank_r <= 32'b1 << ic_req_addr_i[13:9];
             lookup_slot_r <= request_slot_w;
         end

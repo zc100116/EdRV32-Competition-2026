@@ -71,6 +71,19 @@ module edrv32_cpu_frontend (
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy2_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy3_r;
     reg f2_pending_r;
+    reg miss_wait_r;
+    reg replay_valid_r;
+    (* keep = "true", syn_preserve = 1 *) reg replay_valid_copy1_r;
+    reg [138:0] replay_payload_r;
+    reg replay_taken_r;
+    reg [31:0] replay_resume_pc_r;
+    reg [3:0] credit_r;
+    wire [31:0] replay_pc_w;
+    wire [138:0] owner_query_w;
+    wire owner_taken_w;
+    wire owner_accept_w;
+    wire new_request_w;
+    wire miss_notice_w;
     wire [31:0] f2_pc_r;
     wire [1:0] f2_count_w;
     reg f2_checked_r;
@@ -118,7 +131,6 @@ module edrv32_cpu_frontend (
     wire push_two_w;
     wire [2:0] buffered_remaining_w;
     wire [2:0] response_remaining_w;
-    wire request_space_w;
     wire [31:0] sequential_pc_w;
     wire [31:0] next_pc_w;
     wire pc_hold_w;
@@ -127,8 +139,6 @@ module edrv32_cpu_frontend (
     wire pc_correct_w;
     wire ib_one_free_w;
     wire ib_two_free_w;
-    wire buffered_space_w;
-    wire response_space_w;
     wire [STREAM_BITS-1:0] stream_w [0:1];
     wire [1:0] push_count_w;
     wire [357:0] push_data_w;
@@ -141,6 +151,9 @@ module edrv32_cpu_frontend (
     assign f2_query_w = {f1_pc_r, predict_hit_w, predict_conditional_w,
         predict_local_history_w, predict_global_w, predict_position_w, predict_target_w,
         predict_history_w, predict_ras_w};
+    assign replay_pc_w = replay_payload_r[138:107];
+    assign owner_query_w = replay_valid_r ? replay_payload_r : f2_query_w;
+    assign owner_taken_w = replay_valid_r ? replay_taken_r : predict_taken_w;
     assign {f2_pc_r, f2_hit_r, f2_conditional_r, f2_local_history_r, f2_global_r,
         f2_position_r, f2_target_r, f2_history_r, f2_ras_r} = f2_payload_r;
     // cpu-spec 4.4: evaluate once, even when the I$ response is delayed.
@@ -171,11 +184,6 @@ module edrv32_cpu_frontend (
         (response_available_w >= 2 ? response_available_w - 3'd2 : 3'd0) :
         ib_one_free_w ? (response_available_w != 0 ? response_available_w - 3'd1 : 3'd0) :
         response_available_w;
-    assign buffered_space_w = count_r <= 2 ||
-        (count_r == 3 && ib_one_free_w) || (count_r == 4 && ib_two_free_w);
-    assign response_space_w = response_available_w <= 2 ||
-        (response_available_w == 3 && ib_one_free_w) ||
-        (response_available_w == 4 && ib_two_free_w);
     // Encode only at the interface; buffered records never wait for an I$ hit.
     assign push_one_w = !redirect_w && ib_one_free_w &&
         (count_r != 0 || (f2_pending_r && ic_resp_valid_i && f2_count_w != 0));
@@ -184,35 +192,41 @@ module edrv32_cpu_frontend (
         (f2_count_w == 2 || (count_r == 1 && f2_count_w != 0))));
     assign push_count_w = {push_two_w, push_one_w && !push_two_w};
     assign remaining_w = response_accept_w ? response_remaining_w : buffered_remaining_w;
-    // Reserve response storage using only IB slots free at cycle start (spec 4.1).
-    assign request_space_w = (!f2_pending_r && buffered_space_w) ||
-        (ic_resp_valid_i && response_space_w);
-    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !f2_correct_w && request_space_w;
+    // cpu-spec v0.19 4.1: credit covers IB4 + stream4, with two slots reserved
+    // for every issued request. This cycle's D pop/response only affects next credit.
+    assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !f2_correct_w &&
+        (replay_valid_r || (!miss_wait_r && credit_r >= 2));
+    assign new_request_w = request_accept_w && !replay_valid_r;
+    assign owner_accept_w = request_accept_w && (!f2_pending_r || ic_resp_valid_i);
+    assign miss_notice_w = f2_pending_r && !miss_wait_r && !ic_resp_valid_i && !redirect_w;
     assign sequential_pc_w = {f1_pc_copy3_r + 29'd1, 3'b0};
     // cpu-spec 4.4/4.9: all addresses are parallel candidates. The late cache
     // handshake only selects a candidate; it never enters a PC incrementer.
-    assign pc_hold_w = !redirect_w && !f2_correct_w && !request_accept_w;
-    assign pc_sequential_w = request_accept_w && !predict_taken_w;
-    assign pc_predict_w = request_accept_w && predict_taken_w;
+    assign pc_hold_w = !redirect_w && !f2_correct_w && !replay_valid_r && !request_accept_w;
+    assign pc_sequential_w = new_request_w && !predict_taken_w;
+    assign pc_predict_w = new_request_w && predict_taken_w;
     assign pc_correct_w = !redirect_w && f2_correct_w;
     assign next_pc_w = ({32{redirect_w}} & redirect_pc_w) |
         ({32{pc_correct_w}} & f2_correct_pc_w) |
         ({32{pc_predict_w}} & predict_target_w) |
         ({32{pc_sequential_w}} & sequential_pc_w) |
-        ({32{pc_hold_w}} & f1_pc_r);
-    assign ic_req_addr_o = {f1_pc_copy2_r, 3'b0};
+        ({32{pc_hold_w}} & f1_pc_r) |
+        ({32{!redirect_w && !f2_correct_w && replay_valid_r}} &
+        (request_accept_w ? replay_resume_pc_r : replay_pc_w));
+    assign ic_req_addr_o = replay_valid_r ? {replay_pc_w[31:3], 3'b0} :
+        {f1_pc_copy2_r, 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
     assign ic_kill_o = redirect_w && f2_pending_r;
     assign ic_inv_o = invalidate_i;
     assign invalidate_done_o = ic_inv_done_i;
     assign f1_valid_o = ic_req_valid_o;
-    assign f2_valid_o = f2_pending_r || count_r != 0;
-    assign fetch_wait_o = f2_pending_r && !ic_resp_valid_i;
+    assign f2_valid_o = f2_pending_r || replay_valid_r || count_r != 0;
+    assign fetch_wait_o = miss_wait_r;
     edrv32_cpu_predictor u_predictor (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .query_pc_i(f1_pc_copy1_r[31:1]),
-        .query_accept_i(request_accept_w),
+        .query_accept_i(new_request_w),
         .predict_hit_o(predict_hit_w),
         .predict_taken_o(predict_taken_w),
         .predict_target_o(predict_target_w),
@@ -272,14 +286,11 @@ module edrv32_cpu_frontend (
             localparam WIDTH = f2_group == 8 ? 11 : 16;
             (* keep = "true", syn_preserve = 1 *) reg f2_pending_copy1_r;
             wire response_valid_w;
-            wire capture_space_w;
             wire capture_accept_w;
             assign f2_pending_copy_w[f2_group] = f2_pending_copy1_r;
             assign response_valid_w = ic_resp_valid_copy_i[f2_group % 8];
-            assign capture_space_w = (!f2_pending_copy1_r && buffered_space_w) ||
-                (response_valid_w && response_space_w);
-            assign capture_accept_w = rst_n_i && !halt_i && !redirect_w &&
-                !f2_correct_w && capture_space_w && ic_req_ready_i;
+            assign capture_accept_w = request_accept_w &&
+                (!f2_pending_copy1_r || response_valid_w);
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
                     f2_pending_copy1_r <= 0;
@@ -294,7 +305,7 @@ module edrv32_cpu_frontend (
             end
             always @(posedge clk_i) begin
                 if (!f2_pending_copy1_r || response_valid_w)
-                    f2_payload_r[f2_group*16 +: WIDTH] <= f2_query_w[f2_group*16 +: WIDTH];
+                    f2_payload_r[f2_group*16 +: WIDTH] <= owner_query_w[f2_group*16 +: WIDTH];
             end
         end
         for (slot = 0; slot < 2; slot = slot + 1) begin : g_read
@@ -368,6 +379,45 @@ module edrv32_cpu_frontend (
             end
         end
     endgenerate
+    // The discarded successor keeps its original prediction/RAS checkpoint.
+    // Reissuing that token consumes no second credit or speculative RAS action.
+    // Snapshot until replay owns it; the dedicated hold copy isolates the wide CE load.
+    always @(posedge clk_i) begin
+        if (!replay_valid_copy1_r) begin
+            replay_payload_r <= f2_query_w;
+            replay_taken_r <= predict_taken_w;
+            replay_resume_pc_r <= predict_taken_w ? predict_target_w : sequential_pc_w;
+        end
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            miss_wait_r <= 0;
+            replay_valid_r <= 0;
+            replay_valid_copy1_r <= 0;
+            credit_r <= 8;
+        end else if (redirect_w) begin
+            miss_wait_r <= 0;
+            replay_valid_r <= 0;
+            replay_valid_copy1_r <= 0;
+            credit_r <= d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0 ?
+                (d_redirect_slot_i ? 4'd6 : 4'd7) : 4'd8;
+        end else begin
+            if (miss_notice_w) begin
+                miss_wait_r <= 1;
+                replay_valid_r <= new_request_w;
+                replay_valid_copy1_r <= new_request_w;
+            end
+            if (response_accept_w)
+                miss_wait_r <= 0;
+            if (request_accept_w && replay_valid_r) begin
+                replay_valid_r <= 0;
+                replay_valid_copy1_r <= 0;
+            end
+            credit_r <= credit_r + {2'b0, decode_pop_count_i} -
+                (new_request_w ? 4'd2 : 4'd0) +
+                (response_accept_w ? 4'd2 - {2'b0, f2_count_w} : 4'd0);
+        end
+    end
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             f1_pc_r <= 0;
@@ -402,7 +452,7 @@ module edrv32_cpu_frontend (
                 f2_checked_r <= 1;
             if (response_accept_w)
                 f2_pending_r <= 0;
-            if (request_accept_w) begin
+            if (owner_accept_w) begin
                 f2_pending_r <= 1;
                 f2_checked_r <= 0;
             end
@@ -413,8 +463,7 @@ module edrv32_cpu_frontend (
             f2_taken_r <= f2_taken_w;
             f2_local_r <= f2_local_w;
         end
-        if (!f2_pending_r || ic_resp_valid_i) begin
-            f2_taken_r <= predict_taken_w;
-        end
+        if (!f2_pending_r || ic_resp_valid_i)
+            f2_taken_r <= owner_taken_w;
     end
 endmodule
