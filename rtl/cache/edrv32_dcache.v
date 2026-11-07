@@ -20,7 +20,7 @@ module edrv32_dcache (
     output wire dc_resp_valid_o,
     output wire [63:0] dc_resp_way_data_o,
     output wire [1:0] dc_resp_way_hit_o,
-    output wire [47:0] dc_resp_way_hit_copy_o,
+    (* keep = "true" *) output wire [47:0] dc_resp_way_hit_copy_o,
     output wire dc_resp_err_o,
     output wire dc_resp_device_o,
     input wire dc_kill_i,
@@ -494,7 +494,7 @@ module edrv32_dcache (
         {2{lookup_hit_enable_r}} & {hit1_w, hit0_w};
     // Eight query-tag copies bound the DRM comparator load. Each comparator
     // serves three response groups with independent registered qualifiers.
-    wire [15:0] response_match_w;
+    (* keep = "true" *) wire [15:0] response_match_w;
     genvar response_group;
     generate
         for (response_group = 0; response_group < 8;
