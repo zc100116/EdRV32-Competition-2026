@@ -70,7 +70,6 @@ module edrv32_cpu_frontend (
     (* keep = "true", syn_preserve = 1 *) reg [31:1] f1_pc_copy1_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy2_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy3_r;
-    wire [31:0] predict_index_copy_w;
     reg f2_pending_r;
     wire [31:0] f2_pc_r;
     wire [1:0] f2_count_w;
@@ -213,7 +212,6 @@ module edrv32_cpu_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .query_pc_i(f1_pc_copy1_r[31:1]),
-        .query_index_copy_i(predict_index_copy_w),
         .query_accept_i(request_accept_w),
         .predict_hit_o(predict_hit_w),
         .predict_taken_o(predict_taken_w),
@@ -266,20 +264,8 @@ module edrv32_cpu_frontend (
     genvar slot;
     genvar entry;
     genvar slice;
-    genvar predict_bank;
     genvar f2_group;
     generate
-        // Each sixteen-entry BTB-valid bank owns its low query-index replica.
-        for (predict_bank = 0; predict_bank < 8; predict_bank = predict_bank + 1) begin : g_index
-            (* keep = "true", syn_preserve = 1 *) reg [3:0] f1_index_copy1_r;
-            assign predict_index_copy_w[predict_bank*4 +: 4] = f1_index_copy1_r;
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i)
-                    f1_index_copy1_r <= 0;
-                else
-                    f1_index_copy1_r <= next_pc_w[6:3];
-            end
-        end
         // Each capture group retains one owner bit and no more than sixteen data bits.
         // Owner copies use their own registered state when computing the next request.
         for (f2_group = 0; f2_group < 9; f2_group = f2_group + 1) begin : g_f2_capture

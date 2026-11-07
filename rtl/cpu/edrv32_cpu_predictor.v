@@ -10,8 +10,6 @@ module edrv32_cpu_predictor (
 
     // F1 query; accept advances speculative RAS only for an accepted prediction.
     input wire [31:1] query_pc_i,
-    // Eight same-cycle copies of query_pc_i[6:3], one per BTB-valid bank.
-    input wire [31:0] query_index_copy_i,
     input wire query_accept_i,
     output wire predict_hit_o,
     output wire predict_taken_o,
@@ -78,8 +76,6 @@ module edrv32_cpu_predictor (
     reg ras_restore_pop_r;
     reg [31:0] ras_restore_return_pc_r;
     wire [6:0] query_idx_w;
-    wire [7:0] query_valid_bank_w;
-    wire query_valid_w;
     wire [11:0] direction_idx_w;
     wire [1:0] ras_pop_top_w;
     wire [1:0] ras_restore_pop_top_w;
@@ -100,17 +96,7 @@ module edrv32_cpu_predictor (
     assign unused_query_w = {query_pc_i[1], update_pc_i[1], direction_w[0]};
     genvar ras_idx;
     genvar ras_byte;
-    genvar valid_bank;
     assign query_idx_w = query_pc_i[9:3];
-    generate
-        for (valid_bank = 0; valid_bank < 8; valid_bank = valid_bank + 1) begin : g_valid_query
-            wire [15:0] valid_w;
-            assign valid_w = btb_valid_r[valid_bank*16 +: 16];
-            assign query_valid_bank_w[valid_bank] =
-                valid_w[query_index_copy_i[valid_bank*4 +: 4]];
-        end
-    endgenerate
-    assign query_valid_w = query_valid_bank_w[query_pc_i[9:7]];
     // cpu-spec 4.9: the LUTRAM position selects precomputed return addresses.
     // In particular it must not start a carry into the RAS write data.
     assign group_return_pc_w = {query_pc_i[31:3] + 29'd1, 3'b0};
@@ -127,8 +113,8 @@ module edrv32_cpu_predictor (
     assign position_hit_w = {btb_data_w[3], 1'b0} >= query_pc_i[2:1];
     assign direction_taken_w = btb_data_w[2:0] != 0 || direction_w[1];
     // Keep the independent tests parallel up to the final prediction decision.
-    assign predict_hit_o = query_valid_w && (&tag_half_hit_w) && position_hit_w;
-    assign predict_taken_o = query_valid_w && (&tag_half_hit_w) &&
+    assign predict_hit_o = btb_valid_r[query_idx_w] && (&tag_half_hit_w) && position_hit_w;
+    assign predict_taken_o = btb_valid_r[query_idx_w] && (&tag_half_hit_w) &&
         position_hit_w && direction_taken_w;
     assign ras_pop_top_w = ras_effective_ptr_w - 2'd2;
     assign ras_restore_pop_top_w = restore_ras_i[33:32] - 2'd2;
