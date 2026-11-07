@@ -36,6 +36,8 @@ QUERIES = {
                           r'u_core.u_frontend.u_ib.*read_ptr'),
     'C1_F2_correction': (r'u_core.u_frontend.f2_payload_r',
                          r'u_core.u_frontend.f1_pc.*_r'),
+    'C1_registered_correction': (r'u_core.u_frontend.*correct.*_r',
+                                 r'u_core.u_frontend.f1_pc.*_r'),
     'C2_F1_loop': (r'u_core.u_frontend.f1_pc.*_r', r'u_core.u_frontend.f1_pc.*_r'),
     'D1_tag_IB': (r'u_icache.u_tag[01]',
                   r'u_core.u_frontend.u_ib.*(predecode_r|words_r|entries_r)'),
