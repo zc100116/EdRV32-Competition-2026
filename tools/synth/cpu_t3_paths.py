@@ -38,6 +38,8 @@ QUERIES = {
                           r'u_core.u_frontend.u_ib.*read_ptr'),
     'B_early_payload_capture': (r'u_dcache.u_(early_)?tag[01]',
                                 r'u_dcache.early_response_data_r'),
+    'B_early_way_capture': (r'u_dcache.u_(early_)?tag[01]',
+                            r'u_dcache.early_response_way_r'),
     'C1_F2_correction': (r'u_core.u_frontend.f2_payload_r',
                          r'u_core.u_frontend.(f1_pc.*_r|.*query_.*copy1_r)'),
     'C1_registered_correction': (
