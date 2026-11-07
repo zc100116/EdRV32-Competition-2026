@@ -135,7 +135,10 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-T2BE | 时序第二轮后端（用户 2026-11-06）：级数工具对卡 59/60 校准、P1 E 判定只进寄存器、P2 M 停顿网络、P3/P4 D 级预译码与提前查询、P5 ALU 环、P6/P10 扇出；最后集成 N-T2FE | Codex sol（task_1b2c7ad2a925 / ctx_65c4e1f57c5e） | N-PDS2 | 工具实测级数；B1、R01–R05；R-05 增加 ≤ 1.5% | task-cpu-n-t2be | [x] N-T2BE2 5273bd6b → cpu-n16：11 单元、B1 48/48、R01–R05 通过，R-05 1,807,726（+0.008%）。第一轮 eaf250a8：校准工具 503c2ea2；P1 禁止路径 0 条；P2–P6 等价减级，R-05 不变（1,807,583）；残余进入 PDS 复核。v0.20 放宽 4.10（用户 2026-11-07）；N-T2BE2 task_f8d9c4473201 / ctx_c9f1881ca832：P4 按 v0.20、P10 副本、集成前端 |
 | N-T2FE | 时序第二轮前端：P7 I$→F1、P8 F1→RAS、P9 F1 环、P10 前端扇出 | Codex sol（task_932990e44e9b / ctx_5fe7d53b009c） | N-T2BE 第 0 步工具 | 工具实测级数；前端单元、B1 | task-cpu-n-t2fe | [x] N-T2FE2 v0.19 已集成。第一轮 b8f07fb5：等价改动，R-05 不变，381 扇出降到 14；P7 13 级、P9 11 级仍超预算。v0.19 I$ 缺失重发和 IB 寄存余量（用户 2026-11-07）；N-T2FE2 task_f719f2ce321b / ctx_891757b8fb27 |
 | N-CUT | 流水线切分评估（用户 2026-11-07）：C1–C6 及组合的三负载周期、频率上限 | Codex sol（task_94c390a9105b） | — | 设计记录 | task-cpu-n-cut → cpu-n16 | [x] `docs/design/2026-11-07-cpu-pipeline-cut-eval.md`；C4 约 0%，C1 +1.4%，C2 +1.3%，C3 +2.9%，C6 行预测 +2.3%，C5 移位 +7% |
-| N-PDS3 | 卡 62：v0.20 CPU+L1 独立 150 MHz 探针，分组 P1–P10 | 用户 + Windows Codex | N-T2BE2 | ≥ 135 MHz，再冲 150 MHz | win/20261107-62-cpu-v020-timing-probe | [~] 已下发 |
+| N-PDS3 | 卡 62：v0.20 CPU+L1 独立 150 MHz 探针，分组 P1–P10 | 用户 + Windows Codex | N-T2BE2 | ≥ 135 MHz，再冲 150 MHz | win/20261107-62-cpu-v020-timing-probe | [x] 134.8 MHz（WNS −0.752，3896 个端点）；剩余为 cache tag → LRU/有效位、D$ 数据 → E、F2 纠正 → F1、F2 → IB 预译码 |
+| N-T3BE | 第三轮后端（用户 2026-11-07 选择"等价修复 + 切分 C1+C3"，目标 150 MHz）：起草 v0.21（M2 级、D1/D2），D$ 内部等价修复，F 类，实现后集成 | Codex sol（task_0b43cba72d51 / ctx_8d67795d602e） | N-PDS3 | 起草稿经审定；B1、R01–R05；工具级数 | task-cpu-n-t3be | [~] |
+| N-T3FE | 第三轮前端等价修复：F2 纠正 → F1、F1 环、I$ tag → 有效位/LRU、F2 → IB | Codex sol（task_f717515b3011 / ctx_e7dd11e97e61） | N-PDS3 | 工具级数；前端单元、B1、R05 | task-cpu-n-t3fe | [~] |
+| N-PDS4 | 卡 63：v0.21 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-T3BE | WNS ≥ 0 | — | [ ] |
 
 ## 6. 变更记录
 
