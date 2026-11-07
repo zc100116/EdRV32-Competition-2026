@@ -263,6 +263,8 @@ module tb;
             tick(); step(); dc_commit_i = 0;
         end
         tick();
+        // Retire the registered LRU packet before quiescent-query snapshots.
+        tick();
         check_replicas();
     endtask
     task automatic maintenance(input logic [2:0] cmd, input logic [31:0] addr,
@@ -586,9 +588,9 @@ module tb;
         if (reads != reads_before + 2) $fatal(1, "FAIL range end was not exclusive");
         access_word(32'h10004000, 0, 2, 32'(4096 + 2048));
         if (reads != reads_before + 3) $fatal(1, "FAIL range did not invalidate first line");
-        // A store drains on the same acceptance edge as a conflicting miss.
-        // The dirty snapshot must include that drain, while LRU bypass selects A.
-        begin : dirty_drain_snapshot
+        // Delayed LRU protects A at the back-to-back B/C accesses, so C evicts B.
+        // A later same-set miss must still write the correctly drained A data.
+        begin : delayed_lru_drain_snapshot
             int before_writes;
             logic [31:0] expected_c;
             maintenance(2, 32'h10000000, 65536);
@@ -609,11 +611,14 @@ module tb;
             if (dc_resp_valid_o) $fatal(1, "FAIL drain conflict expected miss");
             step(); dc_req_valid_i = 0;
             while (!dc_resp_valid_o) tick();
-            if (dc_resp_data_o != expected_c || writes != before_writes + 1 ||
-                memory[0][31:0] != 32'hf00d1234)
-                $fatal(1, "FAIL drained store lost on miss writes=%0d expected=%0d data=%h",
-                       writes, before_writes+1, memory[0][31:0]);
+            if (dc_resp_data_o != expected_c || writes != before_writes)
+                $fatal(1, "FAIL delayed LRU expected clean B victim writes=%0d expected=%0d",
+                       writes, before_writes);
             tick();
+            access_word(32'h1000c000, 0, 2, memory[6144][31:0]);
+            if (writes != before_writes + 1 || memory[0][31:0] != 32'hf00d1234)
+                $fatal(1, "FAIL drained A data lost on later eviction writes=%0d data=%h",
+                       writes, memory[0][31:0]);
         end
         check_early_queries();
         check_replicas();
