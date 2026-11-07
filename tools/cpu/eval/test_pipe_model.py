@@ -26,6 +26,83 @@ def run(instructions, variant='V0', **options):
 
 
 class Pipeline(unittest.TestCase):
+    def test_pipeline_cut_redirect_and_training_edges(self):
+        from run_pipeline_cut_eval import BASE
+        for kind in ('branch', 'jal'):
+            program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+            program[0] = instruction(0, kind, target=16)
+            program[32] = instruction(32, 'serial')
+            values = {}
+            for split, branch in ((False, False), (True, False),
+                                  (False, True), (True, True)):
+                timeline = []
+                result = simulate(program, [0, 16, 20, 24, 28, 32], 0, 32, 'V3s',
+                                  **BASE, decode_split=split, branch_register=branch,
+                                  timeline=timeline)
+                edge = {name: tick for tick, name, *rest in timeline if name != 'stages'}
+                values[split, branch] = result['cycles'], edge
+            base_cycles, base = values[False, False]
+            for (split, branch), (cycles, edge) in values.items():
+                self.assertEqual(cycles, base_cycles + split + (branch and kind == 'branch'))
+                self.assertEqual(edge['redirect'], base['redirect'] + split +
+                                 (branch and kind == 'branch'))
+                self.assertEqual(edge['train_capture'], base['train_capture'] + split + branch)
+
+    def test_split_decode_projected_load_use(self):
+        from run_pipeline_cut_eval import BASE
+        for latency, stalls in ((2, 1), (3, 2)):
+            stream = [instruction(0, 'load', rd=1, sources=(2,)),
+                      instruction(4, rd=3, sources=(1,))]
+            for split in (False, True):
+                timeline = []
+                run(stream, **dict(BASE, early_address=0), load_latency=latency,
+                    decode_split=split, timeline=timeline)
+                entries = {pc: tick for tick, name, *data in timeline if name == 'stages'
+                           for pc in data[0]}
+                self.assertEqual(entries[4] - entries[0], stalls + 1)
+
+    def test_shift_and_compare_class_selection(self):
+        stream = [replace(instruction(0, rd=1), bits=0x00002033),
+                  instruction(4, rd=2, sources=(1,))]
+        options = dict(perfect_frontend=True, perfect_prediction=True)
+        base = run(stream, **options)['cycles']
+        self.assertEqual(run(stream, shift_latency=2, **options)['cycles'], base)
+        self.assertEqual(run(stream, compare_latency=2, **options)['cycles'], base + 1)
+
+    def test_registered_line_predictor_recovers_taken_bubbles(self):
+        from run_pipeline_cut_eval import BASE
+        program = {pc: instruction(pc) for pc in range(0, 128, 4)}
+        program[4] = instruction(4, 'branch', target=0)
+        program[8] = instruction(8, 'serial')
+        trace = [0, 4] * 32 + [8]
+        bubble = simulate(program, trace, 0, 8, 'V3s', **BASE, taken_bubble=1)
+        line = simulate(program, trace, 0, 8, 'V3s', **BASE, taken_bubble=1,
+                        line_predictor=True)
+        self.assertLess(line['cycles'], bubble['cycles'])
+        self.assertEqual(line['instructions'], bubble['instructions'])
+
+    def test_memory_cut_increment_and_early_repair(self):
+        from run_pipeline_cut_eval import MemoryProbe
+        load = Record(instruction(0, 'load', rd=1), False, False, 0, 0, (0, 0, 0),
+                      trace_index=0, early_load=True)
+        for registered, repair, expected in ((False, 0, 0), (True, 0, 1),
+                                             (False, 1, 1), (True, 1, 2)):
+            probe = MemoryProbe([0x10000000], registered, repair)
+            self.assertEqual(probe.query(load, True, [Record(
+                instruction(4, sources=(1,)), False, False, 0, 0, (0, 0, 0))]), expected)
+            self.assertEqual(probe.query(load, True), 0)
+            self.assertEqual(probe.misses, 1)
+            probe.addresses = [0x40000000]
+            self.assertEqual(probe.query(load, True, [Record(
+                instruction(4, sources=(1,)), False, False, 0, 0, (0, 0, 0))]), expected)
+            self.assertEqual(probe.devices, 1)
+        # The global registered freeze contributes precisely one cycle in the ROI.
+        stream = [instruction(pc) for pc in range(0, 40, 4)]
+        stream[8] = instruction(32, 'load', rd=1)
+        base = run(stream)['cycles']
+        probe = MemoryProbe([0] * 8 + [0x10000000, 0, 0], True)
+        self.assertEqual(run(stream, memory_probe=probe)['cycles'], base + 1)
+
     def test_two_cycle_alu_and_shift_results(self):
         producer = instruction(0, rd=1, sources=(2,))
         consumer = instruction(4, rd=3, sources=(1,))
