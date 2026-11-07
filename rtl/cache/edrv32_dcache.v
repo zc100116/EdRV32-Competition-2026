@@ -81,7 +81,6 @@ module edrv32_dcache (
     reg [31:0] early_addr_r;
     reg [17:0] early_tag_r;
     reg early_response_r;
-    (* keep = "true", syn_preserve = 1 *) reg [1:0] early_response_copy1_r;
     reg [63:0] early_response_data_r;
     reg [1:0] early_response_way_r;
     reg [7:0] early_byte_select_r;
@@ -170,12 +169,10 @@ module edrv32_dcache (
         if (!rst_n_i) begin
             early_valid_r <= 0;
             early_response_r <= 0;
-            early_response_copy1_r <= 0;
         end else begin
             early_valid_r <= dc_early_valid_i && early_cacheable_w && !early_conflict_w &&
                 !maintenance_r && !maintenance_start_w;
             early_response_r <= early_promote_w;
-            early_response_copy1_r <= {2{early_promote_w}};
         end
     end
     always @(posedge clk_i) begin
@@ -866,15 +863,24 @@ module edrv32_dcache (
     // 16-bit bank local; slot copies serve eight banks and at most 16 uses.
     wire [63:0] metadata_slot_w;
     wire [35:0] early_response_index_w;
+    wire [3:0] early_response_copy_w;
     wire [15:0] early_response_lookup_slot_w;
     genvar metadata_group;
     generate
         for (metadata_group = 0; metadata_group < 4;
             metadata_group = metadata_group + 1) begin : g_metadata_slot
             (* keep = "true", syn_preserve = 1 *) reg [15:0] slot_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg early_response_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg [8:0] early_response_index_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg [3:0] early_response_lookup_copy1_r;
             assign metadata_slot_w[metadata_group*16 +: 16] = slot_copy1_r;
+            assign early_response_copy_w[metadata_group] = early_response_copy1_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    early_response_copy1_r <= 0;
+                else
+                    early_response_copy1_r <= early_promote_w;
+            end
             assign early_response_index_w[metadata_group*9 +: 9] = early_response_index_copy1_r;
             assign early_response_lookup_slot_w[metadata_group*4 +: 4] =
                 early_response_lookup_copy1_r;
@@ -907,7 +913,7 @@ module edrv32_dcache (
             assign early_index_w = early_response_index_w[(bank/8)*9 +: 9];
             assign early_lookup_slot_w = early_response_lookup_slot_w[(bank/8)*4 +: 4];
             assign normal_update_w = metadata_valid_r && metadata_bank_r && (|hit_copy1_r);
-            assign early_update_w = early_response_copy1_r[bank/16] &&
+            assign early_update_w = early_response_copy_w[bank/8] &&
                 early_index_w[8:4] == bank[4:0];
             assign normal_mask_w = metadata_slot_w_local & {16{normal_update_w}};
             assign early_mask_w = (16'b1 << early_index_w[3:0]) &
