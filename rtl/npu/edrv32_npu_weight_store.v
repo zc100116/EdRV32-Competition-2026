@@ -35,10 +35,14 @@ module edrv32_npu_weight_store (
             wire [255:0] rd_bank_data_w;
             wire rd_en_w;
             wire [10:0] rd_addr_w;
+            // Plain bank-scope nets: PDS ADS cannot resolve generate-scope hierarchical names.
+            wire rd_en_prev_w;
+            wire wr_last_beat_valid_w;
 
             if (bank == 0) begin : g_direct
                 assign rd_en_w = weight_rd_en_i;
                 assign rd_addr_w = weight_rd_addr_i;
+                assign rd_en_prev_w = weight_rd_en_i;
             end else begin : g_skew
                 reg [bank-1:0] rd_en_r;
                 reg [11*bank-1:0] rd_addr_r;
@@ -50,6 +54,12 @@ module edrv32_npu_weight_store (
                 end
                 assign rd_en_w = rd_en_r[bank-1];
                 assign rd_addr_w = rd_addr_r[11*(bank-1) +: 11];
+                // Input of the last skew stage, copied per segment below.
+                if (bank == 1) begin : g_prev_input
+                    assign rd_en_prev_w = weight_rd_en_i;
+                end else begin : g_prev_skew
+                    assign rd_en_prev_w = rd_en_r[bank-2];
+                end
             end
 
             always @(posedge clk_i) begin
@@ -67,6 +77,9 @@ module edrv32_npu_weight_store (
                 (* keep = "true", syn_preserve = 1 *) reg wr_beat_valid_r;
                 reg [31:0] wr_slice_r;
                 assign wr_data_w[32*beat +: 32] = wr_slice_r;
+                if (beat == 7) begin : g_last
+                    assign wr_last_beat_valid_w = wr_beat_valid_r;
+                end
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i) begin
                         wr_beat_valid_r <= 1'b0;
@@ -90,17 +103,11 @@ module edrv32_npu_weight_store (
 
                 wire rd_en_local_w;
                 if (bank == 0) begin : g_read_direct
-                    assign rd_en_local_w = weight_rd_en_i;
+                    assign rd_en_local_w = rd_en_prev_w;
                 end else begin : g_read_skew
                     (* keep = "true", syn_preserve = 1 *) reg rd_en_r;
-                    if (bank == 1) begin : g_first
-                        always @(posedge clk_i) begin
-                            rd_en_r <= weight_rd_en_i;
-                        end
-                    end else begin : g_later
-                        always @(posedge clk_i) begin
-                            rd_en_r <= g_skew.rd_en_r[bank-2];
-                        end
+                    always @(posedge clk_i) begin
+                        rd_en_r <= rd_en_prev_w;
                     end
                     assign rd_en_local_w = rd_en_r;
                 end
@@ -113,7 +120,7 @@ module edrv32_npu_weight_store (
                         wr_valid_r <= 1'b0;
                     end else begin
                         // Already accepted beat seven drains even when cancel arrives.
-                        wr_valid_r <= g_write_beat[7].wr_beat_valid_r
+                        wr_valid_r <= wr_last_beat_valid_w
                             && wr_bank_addr_r[10:9] == segment;
                     end
                 end
