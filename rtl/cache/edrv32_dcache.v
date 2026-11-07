@@ -358,8 +358,11 @@ module edrv32_dcache (
     integer byte_idx_w;
     genvar tag_idx;
     genvar bank;
-    reg [31:0] lookup_bank_r;
-    reg [15:0] lookup_slot_r;
+    reg [8:0] lookup_index_r;
+    wire [31:0] lookup_bank_r;
+    wire [15:0] lookup_slot_r;
+    assign lookup_bank_r = 32'b1 << lookup_index_r[8:4];
+    assign lookup_slot_r = 16'b1 << lookup_index_r[3:0];
     wire [15:0] read_slot_w;
     assign read_slot_w = 16'b1 << read_addr_w[5:2];
     // cache-spec 2.2/5.2: metadata shares the synchronous tag read. Old-data
@@ -680,8 +683,7 @@ module edrv32_dcache (
         buffer_match_r <= push_addr_w[31:2] ==
             (lookup_accept_w ? dc_req_addr_i[31:2] : addr_r[31:2]);
         if (ram_read_w) begin
-            lookup_bank_r <= 32'b1 << read_addr_w[10:6];
-            lookup_slot_r <= read_slot_w;
+            lookup_index_r <= read_addr_w[10:2];
         end
         if (lookup_accept_w) begin
             addr_r <= dc_req_addr_i;
