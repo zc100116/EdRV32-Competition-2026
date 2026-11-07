@@ -397,7 +397,7 @@ module edrv32_cpu_b1_core_tb;
         .trace_bypass_i(u_core.trace_bypass_w),
         .trace_redirect_stage_i(u_core.trace_redirect_stage_w),
         .early_condition_i(early_condition),
-        .early_bypass_i(early_query_previous && dc_early_hit && u_core.e_valid_r[0] &&
+        .early_bypass_i(early_issue_previous && dc_early_hit && u_core.e_valid_r[0] &&
             u_core.e_record_r[0][38:32] == 7'h03 &&
             (u_core.trace_bypass_w[2:0] == 1 || u_core.trace_bypass_w[5:3] == 1 ||
                 u_core.trace_bypass_w[8:6] == 1 || u_core.trace_bypass_w[11:9] == 1)),

@@ -53,14 +53,16 @@
     string predictor_path;
     integer predictor_descriptor;
     logic early_query_previous = 0;
+    logic early_issue_previous = 0;
+    logic early_query_slot;
     logic [31:0] early_query_pc;
+    assign early_query_slot = u_core.d_record_w[0][38:32] != 7'h03;
     always @(posedge clk) begin
         early_query_previous <= rst_n && dc_early_valid;
-        for (int slot = 0; slot < 2; slot++) begin
-            if (rst_n && dc_early_valid && int'(u_core.d_issue_w) > slot &&
-                u_core.d_record_w[slot][38:32] == 7'h03)
-                early_query_pc <= u_core.d_record_w[slot][31:0];
-        end
+        early_issue_previous <= rst_n && dc_early_valid &&
+            int'(u_core.d_issue_w) > int'(early_query_slot);
+        if (rst_n && dc_early_valid)
+            early_query_pc <= u_core.d_record_w[early_query_slot][31:0];
     end
     integer observer_file;
     integer observer_rows = 0;
@@ -231,7 +233,7 @@
             if (source != 0 && u_core.e_valid_r[lane] && writes_rd(instruction) &&
                 instruction[11:7] == source)
                 pending = (instruction[6:0] == 7'h03 &&
-                    !(early_query_previous && early_query_pc ==
+                    !(early_issue_previous && early_query_pc ==
                         u_core.e_record_r[lane][31:0]) && candidate1[6:0] != 7'h63) ||
                     instruction[6:0] == 7'h73 ||
                     (instruction[6:0] == 7'h33 && instruction[31:25] == 1 && !instruction[14]);
@@ -355,10 +357,19 @@
                     $fatal(1, "FAIL pairing reason pc=%08x expected=%0d actual=%0d",
                         u_core.d_record_w[0][31:0], reference_pair_reason, debug[23:21]);
             end
+            // v0.20 permits an eligible read-only query without issuing it.
             if (dc_early_valid && (early_condition inside {1, 2, 4, 5, 6} ||
-                u_core.d_issue_w == 0))
+                int'(u_core.d_count_w) <= int'(early_query_slot) ||
+                u_core.d_record_w[early_query_slot][38:32] != 7'h03 ||
+                (early_query_slot && !pipe1_instruction(candidate0))))
                 $fatal(1, "FAIL ineligible early query condition=%0d issue=%0d cycle=%0d",
                     early_condition, u_core.d_issue_w, cycles);
+            if (dc_req_valid && dc_req_ready &&
+                (dc_req_early !== early_issue_previous ||
+                (dc_req_early && (u_core.e_record_r[0][38:32] != 7'h03 ||
+                    u_core.e_record_r[0][31:0] != early_query_pc))))
+                $fatal(1,"FAIL ordinary request does not match issued early query cycle=%0d",
+                    cycles);
             // A D redirect may be emitted while its JAL has not issued: all E
             // instructions are then older. E/M redirects have issued age records.
             if (u_core.trace_redirect_stage_w inside {2, 3} && dc_req_valid &&
@@ -689,7 +700,7 @@
                 if (obligation_kind[row] == 16 && early_query_previous &&
                     early_query_pc == obligation_pc[row])
                     obligation_seen[row]++;
-                if (obligation_kind[row] == 17 && early_query_previous &&
+                if (obligation_kind[row] == 17 && early_issue_previous &&
                     early_query_pc == obligation_pc[row]) begin
                     if (dc_early_hit || int'(u_dc_model.early_failure_r) != obligation_arg0[row])
                         $fatal(1, "FAIL early fallback pc=%08x expected=%0d actual=%0d hit=%b",
