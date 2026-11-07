@@ -540,7 +540,7 @@ module edrv32_cpu_core (
     wire div_valid_w;
     wire [31:0] div_result_w;
     wire div_start_w;
-    wire [7:0] div_start_copy_w;
+    wire [9:0] div_start_copy_w;
     wire e_div_cancel_w;
     wire div_wait_w;
     reg div_started_r;
@@ -1069,14 +1069,24 @@ module edrv32_cpu_core (
     // Each divider payload slice owns its E-class copy and local start gate.
     genvar div_start_group;
     generate
-        for (div_start_group = 0; div_start_group < 8;
+        for (div_start_group = 0; div_start_group < 10;
             div_start_group = div_start_group + 1) begin : g_div_start
             (* keep = "true", syn_preserve = 1 *) reg e_div_copy1_r;
+            (* keep = "true", syn_preserve = 1 *) reg e_exception1_copy1_r;
+            wire cancel_w;
+            assign cancel_w = e_swap_r && e_valid_r[1] &&
+                (e_exception1_copy1_r || e_jump_fault_r[1] ||
+                (e_redirect_r && !e_redirect_advanced_r && e_redirect_old_r));
+            always @(posedge clk_i) begin
+                if (e_operand_load_copy_w[3])
+                    e_exception1_copy1_r <= d_record_w[d_map_w[1]][REC_FETCH_ERR] ||
+                        d_record_w[d_map_w[1]][REC_ILLEGAL] || d_illegal_w[d_map_w[1]];
+            end
             always @(posedge clk_i) begin
                 if (e_operand_load_w)
                     e_div_copy1_r <= d_class_w[d_map_w[0]] == C_DIV;
             end
-            assign div_start_copy_w[div_start_group] = e_valid_r[0] && !e_div_cancel_w &&
+            assign div_start_copy_w[div_start_group] = e_valid_r[0] && !cancel_w &&
                 e_div_copy1_r && !div_started_r && !e_old_control_unresolved_w &&
                 m_valid_r == 0 && w_valid_r == 0 && !e_repair_pending_r;
         end
