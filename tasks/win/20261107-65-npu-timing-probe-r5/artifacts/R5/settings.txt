@@ -1,0 +1,38 @@
+RTL revision: 953268f0
+PDS 2022.2-SP6.1 build 138931
+G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-NPU-FMAX
+
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+compile -include_path {G:/codex_project/EdRV32-Competition-2026-npu57/rtl/include} -compiler_directives {FPGA_MODE} -top_module edrv32_npu_timing_probe
+synthesize -ads -selected_syn_tool_opt 2
+dev_map
+pnr
+report_timing
+report_power
+
+Applied FDC
+# File: edrv32_npu_timing_probe.fdc
+# Card 57: timing-only constraints. R1/R2 use clk_npu 5.000 ns (200 MHz); clk_mem stays
+# 8.000 ns (125 MHz) as on the board. Edit only the clk_npu period/waveform pair if asked.
+create_clock -name {clk_npu} [get_ports {clk_npu_i}] -period {5.000} -waveform {0 2.500}
+create_clock -name {clk_mem} [get_ports {clk_mem_i}] -period {8.000} -waveform {0 4.000}
+set_clock_uncertainty {0.15} -from [get_clocks {clk_npu}] -to [get_clocks {clk_npu}] -setup
+set_clock_uncertainty {0.15} -from [get_clocks {clk_mem}] -to [get_clocks {clk_mem}] -setup
+# Same relation as fpga/constraints/edrv32_fpga_board_full_top.fdc: CDC primitives only.
+set_clock_groups -asynchronous -group [get_clocks {clk_mem}] -group [get_clocks {clk_npu}]
+# Probe pins are test access only; internal paths stay fully constrained.
+set_false_path -from [get_ports {rst_n_i scan_i}]
+set_false_path -to [get_ports {scan_o irq_scan_o}]
+
+define_attribute {p:clk_npu_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:clk_npu_i} {PAP_IO_LOC} {D18}
+define_attribute {p:clk_npu_i} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:clk_npu_i} {PAP_IO_STANDARD} {LVCMOS33}
+
+Timing export
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-NPU-FMAX/place_route/edrv32_npu_timing_probe_pnr.adf} -delay_type min_max -max_path 5000 -nworst 1 -input_pins TRUE -force_to_run
+
+Near-positive export
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+report_timing -input_db_file {G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-NPU-FMAX/place_route/edrv32_npu_timing_probe_pnr.adf} -delay_type max -max_path 200 -nworst 1 -slack_greater_than 0 -slack_less_than 0.3 -input_pins TRUE -force_to_run

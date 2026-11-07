@@ -1,0 +1,3 @@
+clk_npu slow setup: 0 failing endpoints in PDS summary and 0 in the index.
+
+source	corner	clock	type	class	slack_ns	logic_levels	startpoint	endpoint
