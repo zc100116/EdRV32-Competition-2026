@@ -79,7 +79,16 @@ module edrv32_cpu_frontend (
     reg [138:0] replay_payload_r;
     reg replay_taken_r;
     reg [31:0] replay_resume_pc_r;
-    reg [3:0] credit_r;
+    wire [3:0] credit_r;
+    reg direction_taken_r;
+    reg [3:0] credit_candidate_r [0:1];
+    assign credit_r = credit_candidate_r[direction_taken_r];
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i)
+            direction_taken_r <= 0;
+        else
+            direction_taken_r <= f2_taken_w;
+    end
     wire [31:0] replay_pc_w;
     wire [31:0] owner_sequential_pc_w;
     wire [138:0] owner_query_w;
@@ -123,13 +132,19 @@ module edrv32_cpu_frontend (
     wire [8:0] f2_pending_copy_w;
     wire [1:0] read_ptr_r;
     reg [1:0] buffered_read_ptr_r;
-    reg [1:0] response_read_ptr_r;
+    wire [1:0] response_read_ptr_r;
+    reg [1:0] response_read_ptr_candidate_r [0:1];
+    assign response_read_ptr_r = response_read_ptr_candidate_r[direction_taken_r];
     reg buffered_response_r;
     reg [2:0] buffered_count_r;
-    reg [2:0] response_count_r;
+    wire [2:0] response_count_r;
+    reg [2:0] response_count_candidate_r [0:1];
+    assign response_count_r = response_count_candidate_r[direction_taken_r];
     assign read_ptr_r = buffered_response_r ? response_read_ptr_r : buffered_read_ptr_r;
     assign count_r = buffered_response_r ? response_count_r : buffered_count_r;
-    reg [1:0] write_ptr_r;
+    wire [1:0] write_ptr_r;
+    reg [1:0] write_ptr_candidate_r [0:1];
+    assign write_ptr_r = write_ptr_candidate_r[direction_taken_r];
     wire [2:0] count_r;
     wire redirect_w;
     wire [31:0] redirect_pc_w;
@@ -143,25 +158,20 @@ module edrv32_cpu_frontend (
     wire [36:0] predict_ras_w;
     wire request_accept_w;
     wire response_accept_w;
-    wire [1:0] append_count_w;
-    wire [2:0] response_available_w;
     wire push_one_w;
     wire push_two_w;
     wire [7:0] push_one_copy_w;
     wire [7:0] push_two_copy_w;
     wire [1:0] buffered_push_count_w;
-    wire [1:0] response_push_count_w;
     wire [1:0] buffered_read_next_w;
-    wire [1:0] response_read_next_w;
     assign buffered_push_count_w = ib_two_free_w && count_r >= 2 ? 2'd2 :
         ib_one_free_w && count_r != 0 ? 2'd1 : 2'd0;
-    assign response_push_count_w = ib_two_free_w && response_available_w >= 2 ? 2'd2 :
-        ib_one_free_w && response_available_w != 0 ? 2'd1 : 2'd0;
     assign buffered_read_next_w = read_ptr_r + buffered_push_count_w;
-    assign response_read_next_w = f2_pending_r ?
-        read_ptr_r + response_push_count_w : buffered_read_next_w;
+    wire [1:0] candidate_push_w [0:1];
+    wire [1:0] candidate_read_next_w [0:1];
+    wire [2:0] candidate_remaining_w [0:1];
+    wire [1:0] candidate_count_w [0:1];
     wire [2:0] buffered_remaining_w;
-    wire [2:0] response_remaining_w;
     wire [31:0] sequential_pc_w;
     wire [31:0] next_pc_w;
     wire pc_advance_w;
@@ -170,7 +180,6 @@ module edrv32_cpu_frontend (
     wire ib_one_free_w;
     wire ib_two_free_w;
     wire [STREAM_BITS-1:0] stream_w [0:1];
-    wire [1:0] push_count_w;
     wire [357:0] push_data_w;
     wire [43:0] push_predecode_w;
     wire [5:0] push_index_hi_w;
@@ -201,27 +210,20 @@ module edrv32_cpu_frontend (
         f2_use_local_w && (f2_branch_local_w[0] != f2_taken_r) && !redirect_w;
     assign f2_count_w = f2_taken_w ? f2_taken_count_r : f2_sequential_count_r;
     assign response_accept_w = f2_pending_r && ic_resp_valid_i && !redirect_w;
-    assign append_count_w = response_accept_w ? f2_count_w : 2'd0;
     // cpu-spec 4.9: compute both queue outcomes before the I$ response arrives.
     // The late hit must select a result, never feed the add/push/subtract chain.
-    assign response_available_w = count_r + {1'b0, f2_count_w};
     // Read occupancy directly: avoid subtracting it from four and comparing the result.
     assign ib_one_free_w = ib_count_o < 4;
     assign ib_two_free_w = ib_count_o <= 2;
     // Constant decrements are parallel candidates, selected by the early IB occupancy.
     assign buffered_remaining_w = ib_two_free_w ? (count_r >= 2 ? count_r - 3'd2 : 3'd0) :
         ib_one_free_w ? (count_r != 0 ? count_r - 3'd1 : 3'd0) : count_r;
-    assign response_remaining_w = ib_two_free_w ?
-        (response_available_w >= 2 ? response_available_w - 3'd2 : 3'd0) :
-        ib_one_free_w ? (response_available_w != 0 ? response_available_w - 3'd1 : 3'd0) :
-        response_available_w;
     // Encode only at the interface; buffered records never wait for an I$ hit.
     assign push_one_w = !redirect_w && ib_one_free_w &&
         (count_r != 0 || (f2_pending_r && ic_resp_valid_i && f2_count_w != 0));
     assign push_two_w = !redirect_w && ib_two_free_w &&
         (count_r >= 2 || (f2_pending_r && ic_resp_valid_i &&
         (f2_count_w == 2 || (count_r == 1 && f2_count_w != 0))));
-    assign push_count_w = {push_two_w, push_one_w && !push_two_w};
     // cpu-spec v0.19 4.1: credit covers IB4 + stream4, with two slots reserved
     // for every issued request. This cycle's D pop/response only affects next credit.
     assign ic_req_valid_o = rst_n_i && !halt_i && !redirect_w && !f2_correct_w &&
@@ -291,7 +293,9 @@ module edrv32_cpu_frontend (
     edrv32_cpu_ib u_ib (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .push_count_i(push_count_w),
+        .push_count_i(candidate_push_w[0]),
+        .push_taken_count_i(candidate_push_w[1]),
+        .direction_taken_i(f2_taken_w),
         .push_one_i(push_one_w),
         .push_two_i(push_two_w),
         .push_one_copy_i(push_one_copy_w),
@@ -318,7 +322,52 @@ module edrv32_cpu_frontend (
     genvar f2_group;
     genvar pc_group;
     genvar bank_copy;
+    genvar candidate;
     generate
+        // cpu-spec 4.4: resolve direction after capturing both occupancy outcomes.
+        // No direction LUTRAM output feeds the candidate add/subtract chains.
+        for (candidate = 0; candidate < 2; candidate = candidate + 1) begin : g_response
+            wire [2:0] available_w;
+            wire [1:0] push_w;
+            wire [2:0] remaining_w;
+            assign candidate_count_w[candidate] = candidate == 0 ?
+                f2_sequential_count_r : f2_taken_count_r;
+            assign available_w = count_r + {1'b0, candidate_count_w[candidate]};
+            assign push_w = ib_two_free_w && available_w >= 2 ? 2'd2 :
+                ib_one_free_w && available_w != 0 ? 2'd1 : 2'd0;
+            assign remaining_w = ib_two_free_w ?
+                (available_w >= 2 ? available_w - 3'd2 : 3'd0) :
+                ib_one_free_w ? (available_w != 0 ? available_w - 3'd1 : 3'd0) : available_w;
+            assign candidate_push_w[candidate] = redirect_w ? 2'd0 :
+                f2_pending_r && ic_resp_valid_i ? push_w : buffered_push_count_w;
+            assign candidate_read_next_w[candidate] = f2_pending_r ?
+                read_ptr_r + push_w : buffered_read_next_w;
+            assign candidate_remaining_w[candidate] = f2_pending_r ?
+                remaining_w : buffered_remaining_w;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    response_read_ptr_candidate_r[candidate] <= 0;
+                    response_count_candidate_r[candidate] <= 0;
+                    write_ptr_candidate_r[candidate] <= 0;
+                    credit_candidate_r[candidate] <= 8;
+                end else if (redirect_w) begin
+                    response_read_ptr_candidate_r[candidate] <= 0;
+                    response_count_candidate_r[candidate] <= 0;
+                    write_ptr_candidate_r[candidate] <= 0;
+                    credit_candidate_r[candidate] <= d_redirect_valid_i &&
+                        !redirect_valid_i && decode_pop_count_i == 0 ?
+                        (d_redirect_slot_i ? 4'd6 : 4'd7) : 4'd8;
+                end else begin
+                    response_read_ptr_candidate_r[candidate] <= candidate_read_next_w[candidate];
+                    response_count_candidate_r[candidate] <= candidate_remaining_w[candidate];
+                    write_ptr_candidate_r[candidate] <= write_ptr_r +
+                        (response_accept_w ? candidate_count_w[candidate] : 2'd0);
+                    credit_candidate_r[candidate] <= credit_r + {2'b0, decode_pop_count_i} -
+                        (new_request_w ? 4'd2 : 4'd0) + (response_accept_w ?
+                        4'd2 - {2'b0, candidate_count_w[candidate]} : 4'd0);
+                end
+            end
+        end
         for (bank_copy = 0; bank_copy < 8; bank_copy = bank_copy + 1) begin : g_query_bank
             assign push_one_copy_w[bank_copy] = !redirect_w && ib_one_free_w &&
                 (count_r != 0 || (f2_pending_r &&
@@ -435,9 +484,14 @@ module edrv32_cpu_frontend (
             for (slice = 0; slice < 23; slice = slice + 1) begin : g_slice
                 localparam WIDTH = slice == 22 ? 6 : 8;
                 reg [1:0] buffered_read_ptr_copy_r /* synthesis syn_preserve=1 */;
-                reg [1:0] response_read_ptr_copy_r /* synthesis syn_preserve=1 */;
+                wire [1:0] response_read_ptr_copy_r;
+                reg [1:0] response_ptr_candidate_r [0:1] /* synthesis syn_preserve=1 */;
                 reg [2:0] buffered_count_copy_r /* synthesis syn_preserve=1 */;
-                reg [2:0] response_count_copy_r /* synthesis syn_preserve=1 */;
+                wire [2:0] response_count_copy_r;
+                reg [2:0] slice_count_candidate_r [0:1] /* synthesis syn_preserve=1 */;
+                (* keep = "true", syn_preserve = 1 *) reg direction_copy_r;
+                assign response_read_ptr_copy_r = response_ptr_candidate_r[direction_copy_r];
+                assign response_count_copy_r = slice_count_candidate_r[direction_copy_r];
                 reg response_select_copy_r /* synthesis syn_preserve=1 */;
                 wire [1:0] read_ptr_copy_w;
                 wire [2:0] count_copy_w;
@@ -449,22 +503,33 @@ module edrv32_cpu_frontend (
                 assign read_w = read_ptr_copy_w + slot[1:0];
                 assign stream_w[slot][slice*8 +: WIDTH] = count_copy_w > slot ?
                     words_r[read_w][slice*8 +: WIDTH] : response_w[slice*8 +: WIDTH];
+                for (candidate = 0; candidate < 2;
+                    candidate = candidate + 1) begin : g_candidate
+                    always @(posedge clk_i or negedge rst_n_i) begin
+                        if (!rst_n_i) begin
+                            response_ptr_candidate_r[candidate] <= 0;
+                            slice_count_candidate_r[candidate] <= 0;
+                        end else begin
+                            response_ptr_candidate_r[candidate] <= redirect_w ? 2'd0 :
+                                candidate_read_next_w[candidate];
+                            slice_count_candidate_r[candidate] <= redirect_w ? 3'd0 :
+                                candidate_remaining_w[candidate];
+                        end
+                    end
+                end
                 // Retiming the late hit select preserves the cycle's queue state.
                 // Both next-state candidates are captured from registers alone.
                 always @(posedge clk_i or negedge rst_n_i) begin
                     if (!rst_n_i) begin
                         response_select_copy_r <= 0;
                         buffered_read_ptr_copy_r <= 0;
-                        response_read_ptr_copy_r <= 0;
+                        direction_copy_r <= 0;
                         buffered_count_copy_r <= 0;
-                        response_count_copy_r <= 0;
                     end else begin
                         response_select_copy_r <= ic_resp_valid_copy_i[(slot*23+slice)%8];
                         buffered_read_ptr_copy_r <= redirect_w ? 2'd0 : buffered_read_next_w;
-                        response_read_ptr_copy_r <= redirect_w ? 2'd0 : response_read_next_w;
+                        direction_copy_r <= f2_taken_w;
                         buffered_count_copy_r <= redirect_w ? 3'd0 : buffered_remaining_w;
-                        response_count_copy_r <= redirect_w ? 3'd0 :
-                            f2_pending_r ? response_remaining_w : buffered_remaining_w;
                     end
                 end
             end
@@ -493,7 +558,7 @@ module edrv32_cpu_frontend (
                 ic_resp_err_i, f2_pc_r[31:3], position_w, 2'b0,
                 ic_resp_data_i[position_w*32 +: 32]};
             // Every request reserves two stream slots. Capture speculatively
-            // while it owns F2; append_count_w alone grants record ownership.
+            // while it owns F2; the captured count alone grants record ownership.
             // A delayed response overwrites unowned data on its returning edge.
             for (slice = 0; slice < 23; slice = slice + 1) begin : g_slice
                 localparam GROUP = entry*23 + slice;
@@ -519,13 +584,10 @@ module edrv32_cpu_frontend (
             miss_wait_r <= 0;
             replay_valid_r <= 0;
             replay_valid_copy1_r <= 0;
-            credit_r <= 8;
         end else if (redirect_w) begin
             miss_wait_r <= 0;
             replay_valid_r <= 0;
             replay_valid_copy1_r <= 0;
-            credit_r <= d_redirect_valid_i && !redirect_valid_i && decode_pop_count_i == 0 ?
-                (d_redirect_slot_i ? 4'd6 : 4'd7) : 4'd8;
         end else begin
             if (miss_notice_w) begin
                 miss_wait_r <= 1;
@@ -538,9 +600,6 @@ module edrv32_cpu_frontend (
                 replay_valid_r <= 0;
                 replay_valid_copy1_r <= 0;
             end
-            credit_r <= credit_r + {2'b0, decode_pop_count_i} -
-                (new_request_w ? 4'd2 : 4'd0) +
-                (response_accept_w ? 4'd2 - {2'b0, f2_count_w} : 4'd0);
         end
     end
     always @(posedge clk_i or negedge rst_n_i) begin
@@ -561,27 +620,18 @@ module edrv32_cpu_frontend (
             f2_pending_r <= 0;
             f2_checked_r <= 0;
             buffered_read_ptr_r <= 0;
-            response_read_ptr_r <= 0;
             buffered_response_r <= 0;
             buffered_count_r <= 0;
-            response_count_r <= 0;
-            write_ptr_r <= 0;
         end else if (redirect_w) begin
             f2_pending_r <= 0;
             f2_checked_r <= 0;
             buffered_read_ptr_r <= 0;
-            response_read_ptr_r <= 0;
             buffered_response_r <= 0;
             buffered_count_r <= 0;
-            response_count_r <= 0;
-            write_ptr_r <= 0;
         end else begin
             buffered_response_r <= ic_resp_valid_i;
             buffered_read_ptr_r <= buffered_read_next_w;
-            response_read_ptr_r <= response_read_next_w;
             buffered_count_r <= buffered_remaining_w;
-            response_count_r <= f2_pending_r ? response_remaining_w : buffered_remaining_w;
-            write_ptr_r <= write_ptr_r + append_count_w;
             if (f2_pending_r)
                 f2_checked_r <= 1;
             if (response_accept_w)

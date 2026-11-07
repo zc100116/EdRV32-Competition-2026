@@ -9,6 +9,8 @@ module edrv32_cpu_ib (
     input wire rst_n_i,
     // F2 input: each 179-bit record is described in rtl/cpu/README.md.
     input wire [1:0] push_count_i,
+    input wire [1:0] push_taken_count_i,
+    input wire direction_taken_i,
     input wire push_one_i,
     input wire push_two_i,
     input wire [7:0] push_one_copy_i,
@@ -35,7 +37,8 @@ module edrv32_cpu_ib (
     output wire [2:0] count_o
 );
     wire unused_push_copy_w;
-    assign unused_push_copy_w = &{1'b0, push_one_copy_i, push_two_copy_i};
+    assign unused_push_copy_w = &{1'b0, push_one_copy_i, push_two_copy_i,
+        push_one_i, push_two_i};
     localparam RECORD_BITS = 179;
     localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
@@ -44,14 +47,19 @@ module edrv32_cpu_ib (
     reg [2:0] index_hi_r [0:DEPTH-1];
     reg [11:0] tournament_r [0:DEPTH-1];
     reg [1:0] read_ptr_r;
-    reg [1:0] write_ptr_r;
-    reg [2:0] count_r;
-    wire [2:0] count_next_w;
-    assign count_next_w = count_r + {1'b0, push_count_i} - {1'b0, pop_count_i};
+    wire [1:0] write_ptr_r;
+    reg [1:0] write_ptr_candidate_r [0:1];
+    reg direction_taken_r;
+    assign write_ptr_r = write_ptr_candidate_r[direction_taken_r];
+    wire [2:0] count_r;
+    reg [2:0] count_candidate_r [0:1];
+    assign count_r = count_candidate_r[direction_taken_r];
+    wire [2:0] count_next_w [0:1];
+    wire [1:0] push_candidate_w [0:1];
+    assign push_candidate_w[0] = push_count_i;
+    assign push_candidate_w[1] = push_taken_count_i;
     wire [1:0] read_next_w;
-    wire [1:0] write_next_w;
-    assign write_next_w = push_two_i ? write_ptr_r + 2'd2 :
-        push_one_i ? write_ptr_r + 2'd1 : write_ptr_r;
+    wire [1:0] write_next_w [0:1];
     wire [1:0] keep_count_w;
     assign keep_count_w = keep_pair_i ? 2'd2 : 2'd1;
     assign read_next_w = read_ptr_r + keep_count_w;
@@ -63,7 +71,25 @@ module edrv32_cpu_ib (
     genvar decode_slot;
     genvar decode_slice;
     genvar write_slice;
+    genvar candidate;
     generate
+        for (candidate = 0; candidate < 2; candidate = candidate + 1) begin : g_state
+            assign count_next_w[candidate] = count_r + {1'b0, push_candidate_w[candidate]} -
+                {1'b0, pop_count_i};
+            assign write_next_w[candidate] = write_ptr_r + push_candidate_w[candidate];
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i) begin
+                    write_ptr_candidate_r[candidate] <= 0;
+                    count_candidate_r[candidate] <= 0;
+                end else if (flush_i) begin
+                    write_ptr_candidate_r[candidate] <= keep_head_i ? read_next_w : 2'd0;
+                    count_candidate_r[candidate] <= keep_head_i ? {1'b0, keep_count_w} : 3'd0;
+                end else begin
+                    write_ptr_candidate_r[candidate] <= write_next_w[candidate];
+                    count_candidate_r[candidate] <= count_next_w[candidate];
+                end
+            end
+        end
         for (decode_slot = 0; decode_slot < 2;
             decode_slot = decode_slot + 1) begin : g_predecode
             localparam SLOT = decode_slot;
@@ -173,16 +199,28 @@ module edrv32_cpu_ib (
         // Decode each destination locally instead of a dynamic 716-bit write mux.
         for (write_entry = 0; write_entry < 4;
             write_entry = write_entry + 1) begin : g_write_entry
-            reg [1:0] write_ptr_r_copy /* synthesis syn_preserve=1 */;
+            wire [1:0] write_ptr_r_copy;
+            (* keep = "true", syn_preserve = 1 *) reg entry_direction_r;
+            reg [1:0] entry_pointer_candidate_r [0:1] /* synthesis syn_preserve=1 */;
+            assign write_ptr_r_copy = entry_pointer_candidate_r[entry_direction_r];
             wire [1:0] write_next_w_copy;
             assign write_next_w_copy = write_ptr_r_copy + 1'b1;
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
-                    write_ptr_r_copy <= 0;
-                else if (flush_i)
-                    write_ptr_r_copy <= keep_head_i ? read_next_w : 2'd0;
+                    entry_direction_r <= 0;
                 else
-                    write_ptr_r_copy <= write_next_w;
+                    entry_direction_r <= direction_taken_i;
+            end
+            for (candidate = 0; candidate < 2;
+                candidate = candidate + 1) begin : g_pointer_candidate
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i)
+                        entry_pointer_candidate_r[candidate] <= 0;
+                    else if (flush_i)
+                        entry_pointer_candidate_r[candidate] <= keep_head_i ? read_next_w : 2'd0;
+                    else
+                        entry_pointer_candidate_r[candidate] <= write_next_w[candidate];
+                end
             end
             always @(posedge clk_i) begin
                 begin
@@ -201,9 +239,16 @@ module edrv32_cpu_ib (
             for (write_slice = 0; write_slice < 17;
                 write_slice = write_slice + 1) begin : g_slice
                 localparam WIDTH = write_slice == 11 ? 3 : write_slice == 16 ? 6 : 16;
-                (* keep = "true", syn_preserve = 1 *) reg [1:0] write_ptr_copy1_r;
-                (* keep = "true", syn_preserve = 1 *) reg one_free_copy_r;
-                (* keep = "true", syn_preserve = 1 *) reg two_free_copy_r;
+                wire [1:0] write_ptr_copy1_r;
+                (* keep = "true", syn_preserve = 1 *) reg direction_copy_r;
+                reg [1:0] pointer_candidate_r [0:1] /* synthesis syn_preserve=1 */;
+                assign write_ptr_copy1_r = pointer_candidate_r[direction_copy_r];
+                wire one_free_copy_r;
+                wire two_free_copy_r;
+                reg [1:0] one_free_candidate_r /* synthesis syn_preserve=1 */;
+                reg [1:0] two_free_candidate_r /* synthesis syn_preserve=1 */;
+                assign one_free_copy_r = one_free_candidate_r[direction_copy_r];
+                assign two_free_copy_r = two_free_candidate_r[direction_copy_r];
                 wire write0_w;
                 wire write1_w;
                 assign write0_w = one_free_copy_r &&
@@ -211,18 +256,32 @@ module edrv32_cpu_ib (
                 assign write1_w = two_free_copy_r &&
                     (write_ptr_copy1_r + 2'd1) == write_entry[1:0];
                 always @(posedge clk_i or negedge rst_n_i) begin
-                    if (!rst_n_i) begin
-                        write_ptr_copy1_r <= 0;
-                        one_free_copy_r <= 1;
-                        two_free_copy_r <= 1;
-                    end else if (flush_i) begin
-                        write_ptr_copy1_r <= keep_head_i ? read_next_w : 2'd0;
-                        one_free_copy_r <= 1;
-                        two_free_copy_r <= 1;
-                    end else begin
-                        write_ptr_copy1_r <= write_next_w;
-                        one_free_copy_r <= count_next_w < 4;
-                        two_free_copy_r <= count_next_w <= 2;
+                    if (!rst_n_i)
+                        direction_copy_r <= 0;
+                    else
+                        direction_copy_r <= direction_taken_i;
+                end
+                for (candidate = 0; candidate < 2;
+                    candidate = candidate + 1) begin : g_pointer_candidate
+                    always @(posedge clk_i or negedge rst_n_i) begin
+                        if (!rst_n_i)
+                            pointer_candidate_r[candidate] <= 0;
+                        else if (flush_i)
+                            pointer_candidate_r[candidate] <= keep_head_i ? read_next_w : 2'd0;
+                        else
+                            pointer_candidate_r[candidate] <= write_next_w[candidate];
+                    end
+                    always @(posedge clk_i or negedge rst_n_i) begin
+                        if (!rst_n_i) begin
+                            one_free_candidate_r[candidate] <= 1;
+                            two_free_candidate_r[candidate] <= 1;
+                        end else if (flush_i) begin
+                            one_free_candidate_r[candidate] <= 1;
+                            two_free_candidate_r[candidate] <= 1;
+                        end else begin
+                            one_free_candidate_r[candidate] <= count_next_w[candidate] < 4;
+                            two_free_candidate_r[candidate] <= count_next_w[candidate] <= 2;
+                        end
                     end
                 end
                 if (write_slice < 12) begin : g_record
@@ -249,16 +308,13 @@ module edrv32_cpu_ib (
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             read_ptr_r <= 0;
-            write_ptr_r <= 0;
-            count_r <= 0;
+            direction_taken_r <= 0;
         end else if (flush_i) begin
             read_ptr_r <= keep_head_i ? read_ptr_r : 2'd0;
-            write_ptr_r <= keep_head_i ? read_next_w : 2'd0;
-            count_r <= keep_head_i ? {1'b0, keep_count_w} : 3'd0;
+            direction_taken_r <= direction_taken_i;
         end else begin
             read_ptr_r <= read_ptr_r + pop_count_i;
-            write_ptr_r <= write_next_w;
-            count_r <= count_next_w;
+            direction_taken_r <= direction_taken_i;
         end
     end
 endmodule

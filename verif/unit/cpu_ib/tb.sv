@@ -51,6 +51,8 @@ module tb;
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_i),
+        .push_taken_count_i(push_count_i),
+        .direction_taken_i(1'b0),
         .push_one_i(push_count_i != 0),
         .push_two_i(push_count_i == 2),
         .push_one_copy_i({8{push_count_i != 0}}),
