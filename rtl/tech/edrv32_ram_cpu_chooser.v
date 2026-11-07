@@ -10,6 +10,7 @@ module edrv32_ram_cpu_chooser (
     input wire wr_en_i,
     input wire [11:0] wr_addr_i,
     input wire [1:0] wr_data_i,
+    input wire [11:0] update_addr_i,
     output wire [1:0] update_data_o,
     // Independent asynchronous query ports.
     input wire [11:0] rd0_addr_i,
@@ -38,13 +39,13 @@ module edrv32_ram_cpu_chooser (
                 .wr_en(wr_en_i && wr_addr_i[11:10] == bank[1:0]),
                 .wr_addr(wr_addr_i[9:0]),
                 .wr_data(wr_data_i),
-                .rd_addr(wr_addr_i[9:0]),
+                .rd_addr(update_addr_i[9:0]),
                 .rd_data(copy1_data_w[bank*2 +: 2])
             );
         end
     endgenerate
     assign rd0_data_o = copy0_data_w[rd0_addr_i[11:10]*2 +: 2];
-    assign update_data_o = copy1_data_w[wr_addr_i[11:10]*2 +: 2];
+    assign update_data_o = copy1_data_w[update_addr_i[11:10]*2 +: 2];
 `else
     reg [1:0] memory_r [0:4095];
     integer entry;
@@ -52,7 +53,7 @@ module edrv32_ram_cpu_chooser (
         for (entry = 0; entry < 4096; entry = entry + 1)
             memory_r[entry] = 2'd1;
     end
-    assign update_data_o = memory_r[wr_addr_i];
+    assign update_data_o = memory_r[update_addr_i];
     assign rd0_data_o = memory_r[rd0_addr_i];
     always @(posedge clk_i) begin
         if (wr_en_i)

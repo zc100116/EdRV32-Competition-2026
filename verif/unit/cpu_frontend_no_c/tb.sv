@@ -28,6 +28,26 @@ module tb;
     reg update_taken_i=0;
     reg [11:0] update_index_i=0;
     reg [11:0] update_tournament_i=0;
+    // Model E preparation followed by the existing registered training write.
+    reg train_valid_r=0;
+    reg [31:0] train_pc_r=0;
+    reg [31:0] train_target_r=0;
+    reg [2:0] train_type_r=0;
+    reg train_taken_r=0;
+    reg [11:0] train_index_r=0;
+    reg [11:0] train_tournament_r=0;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if(!rst_n_i)train_valid_r<=0;
+        else train_valid_r<=update_valid_i;
+    end
+    always @(posedge clk_i) begin
+        train_pc_r<=update_pc_i;
+        train_target_r<=update_target_i;
+        train_type_r<=update_type_i;
+        train_taken_r<=update_taken_i;
+        train_index_r<=update_index_i;
+        train_tournament_r<=update_tournament_i;
+    end
     wire [23:0] decode_tournament_o;
     reg directed_mode=0;
     reg [1:0] decode_pop_count_i=0;
@@ -106,15 +126,19 @@ module tb;
         .d_redirect_pop_i(d_redirect_pop_i),
         .d_redirect_return_pc_i(d_redirect_return_pc_i),
         .halt_i(halt_i),
-        .update_valid_i(update_valid_i),
+        .update_valid_i(train_valid_r),
         .update_clear_i(1'b0),
         .update_clear_index_i(7'b0),
-        .update_pc_i(update_pc_i),
-        .update_target_i(update_target_i),
-        .update_type_i(update_type_i),
-        .update_taken_i(update_taken_i),
-        .update_index_i(update_index_i),
-        .update_tournament_i(update_tournament_i),
+        .update_pc_i(train_pc_r),
+        .update_target_i(train_target_r),
+        .update_type_i(train_type_r),
+        .update_taken_i(train_taken_r),
+        .update_index_i(train_index_r),
+        .update_tournament_i(train_tournament_r),
+        .update_prepare_pc_i(update_pc_i[9:2]),
+        .update_prepare_taken_i(update_taken_i),
+        .update_prepare_index_i(update_index_i),
+        .update_prepare_tournament_i(update_tournament_i[10:0]),
         .decode_tournament_o(decode_tournament_o),
         .decode_pop_count_i(decode_pop_count_i),
         .decode_data_o(decode_data_o),
