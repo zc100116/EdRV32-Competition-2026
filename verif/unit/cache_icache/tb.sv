@@ -173,7 +173,8 @@ module tb;
         tick();
         fetch(32'h1000c000, memory[6144], 9);
         // C-F1 path 5: a hit updating LRU and a following same-set miss are
-        // accepted on adjacent edges; the miss must evict the other way.
+        // accepted on adjacent edges. Deferred LRU permits the miss to use the
+        // snapshot from before the hit, replacing way 0 here (cache-spec v0.12 2.1).
         step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
         reads_before = reads;
         fetch(32'h10000000, memory[0], reads_before + 1);
@@ -189,13 +190,13 @@ module tb;
         if (ic_resp_data_o != memory[4096] || reads != reads_before + 3)
             $fatal(1, "FAIL I LRU bypass miss");
         tick();
-        fetch(32'h10000000, memory[0], reads_before + 3);
-        fetch(32'h10004000, memory[2048], reads_before + 4);
+        fetch(32'h10000000, memory[0], reads_before + 4);
+        fetch(32'h10004000, memory[2048], reads_before + 5);
         // Invalidate at request acceptance must be reflected by its metadata snapshot.
         step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10004000; ic_inv_i = 1;
         tick(); step(); ic_req_valid_i = 0; ic_inv_i = 0;
         while (!ic_resp_valid_o) tick();
-        if (ic_resp_data_o != memory[2048] || reads != reads_before + 5)
+        if (ic_resp_data_o != memory[2048] || reads != reads_before + 6)
             $fatal(1, "FAIL I acceptance invalidate");
         tick();
         // T-IC1 / IC-01, IC-02, IC-06: retain both ways in every one of 512 sets.
