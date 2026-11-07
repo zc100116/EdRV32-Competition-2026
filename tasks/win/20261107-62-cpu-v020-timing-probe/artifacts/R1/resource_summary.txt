@@ -1,0 +1,67 @@
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0
+| Use of ANALOG                     | 0         | 1             | 0
+| Use of APM                        | 4         | 740           | 1
+| Use of BKCL                       | 1         | 10            | 10
+| Use of CCS                        | 1         | 1             | 100
+| Use of CLMA                       | 4723      | 30075         | 16
+|   FF                              | 9498      | 240600        | 4
+|   LUT                             | 14947     | 120300        | 13
+|   LUT-FF pairs                    | 5847      | 120300        | 5
+| Use of CLMS                       | 1462      | 9875          | 15
+|   FF                              | 2732      | 79000         | 4
+|   LUT                             | 4637      | 39500         | 12
+|   LUT-FF pairs                    | 1668      | 39500         | 5
+|   Distributed RAM                 | 680       | 39500         | 2
+| Use of DDRPHY_CPD                 | 0         | 20            | 0
+| Use of DDRPHY_IOCLK_DIV           | 0         | 10            | 0
+| Use of DDR_PHY                    | 0         | 40            | 0
+| Use of DRM                        | 27        | 415           | 7
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0
+| Use of GPLL                       | 0         | 10            | 0
+| Use of GSEB                       | 0         | 512           | 0
+| Use of HARD0                      | 1214      | 25050         | 5
+| Use of HCKB                       | 5         | 120           | 5
+|  HCKB dataused                    | 0         | 120           | 0
+| Use of HCKMUX_TEST                | 0         | 10            | 0
+| Use of HSSTLP                     | 0         | 2             | 0
+| Use of IO                         | 4         | 400           | 1
+|   IOBD                            | 2         | 192           | 2
+|   IOBS                            | 2         | 208           | 1
+| Use of IOCKB                      | 0         | 40            | 0
+| Use of IOCKMUX_TEST               | 0         | 10            | 0
+| Use of IOLHR                      | 4         | 500           | 1
+| Use of KEYRAM                     | 0         | 1             | 0
+| Use of MFG_TEST                   | 0         | 1             | 0
+| Use of MRCKB                      | 0         | 20            | 0
+| Use of MRCKMUX_TEST               | 0         | 10            | 0
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0
+| Use of PCIE                       | 0         | 1             | 0
+| Use of PCKMUX_TEST                | 0         | 20            | 0
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0
+| Use of PPLL                       | 0         | 10            | 0
+| Use of PREGMUXC_TEST              | 0         | 3             | 0
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0
+| Use of RCKB                       | 0         | 40            | 0
+|  RCKB dataused                    | 0         | 40            | 0
+| Use of RCKMUX_TEST                | 0         | 10            | 0
+| Use of SCANCHAIN                  | 0         | 1             | 0
+| Use of SCKMUX_TEST                | 0         | 20            | 0
+| Use of SFB                        | 0         | 5075          | 0
+| Use of SPAD                       | 0         | 8             | 0
+| Use of TSERDES                    | 0         | 80            | 0
+| Use of USCM                       | 1         | 32            | 4
+|  USCM dataused                    | 0         | 32            | 0
+| Use of USCMMUX_TEST               | 0         | 32            | 0
++-------------------------------------------------------------------------------------+
+
+
+LUT / FF / DRM36K-equivalent / APM / distributed RAM
+Probe top: 18986 / 12230 / 27 / 4 / 680
+Subsystem: 18727 / 11487 / 27 / 4 / 680

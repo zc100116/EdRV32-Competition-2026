@@ -1,0 +1,455 @@
+Mapped design
+
+Other High Fanout Signal:
++----------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                              | Driver                                               | Fanout
++----------------------------------------------------------------------------------------------------------------------------+
+| ntclkbufg_0                                           | clkbufg_0                                            | 12634
+| u_cpu/u_core/N179_1                                   | u_cpu/u_core/N179_1                                  | 705
+| u_cpu/dc_early_way_hit_w [0]                          | u_cpu/u_dcache/N35_0_5                               | 627
+| u_cpu/u_core/d_swap_w                                 | u_cpu/u_core/N1823_4                                 | 387
+| u_cpu/u_core/m_system_commit_w                        | u_cpu/u_core/N2434_5                                 | 358
+| u_cpu/u_core/u_csr/_N113316                           | u_cpu/u_core/u_csr/N463_8                            | 357
+| u_cpu/u_core/d_predecode_w [90]                       | u_cpu/u_core/u_frontend/u_ib/N223_4[20]              | 325
+| u_cpu/u_core/w2_rd_r[0] [2]                           | u_cpu/u_core/w2_rd_r[0][2]                           | 299
+| u_cpu/u_core/w2_rd_r[0] [3]                           | u_cpu/u_core/w2_rd_r[0][3]                           | 299
+| u_cpu/u_core/d_head_single_w                          | u_cpu/u_core/N1858_1                                 | 295
+| u_cpu/u_core/_N115795                                 | u_cpu/u_core/N1803_14                                | 294
+| u_cpu/u_core/N1801                                    | u_cpu/u_core/N1801                                   | 293
+| u_cpu/u_dcache/N1691                                  | u_cpu/u_dcache/N1691                                 | 256
+| u_cpu/u_icache/N4692                                  | u_cpu/u_icache/N4692                                 | 256
+| u_cpu/u_icache/N3420                                  | u_cpu/u_icache/N3420                                 | 256
+| u_cpu/u_icache/N3412                                  | u_cpu/u_icache/N3412                                 | 256
+| u_cpu/u_icache/N3404                                  | u_cpu/u_icache/N3404                                 | 256
+| u_cpu/u_dcache/N2459                                  | u_cpu/u_dcache/N2459                                 | 256
+| u_cpu/u_icache/N4708                                  | u_cpu/u_icache/N4708                                 | 256
+| u_cpu/u_icache/N4700                                  | u_cpu/u_icache/N4700                                 | 256
+| u_cpu/u_core/g_forward[3].early_w                     | u_cpu/u_core/N941                                    | 241
+| u_cpu/u_core/u_frontend/_N120871                      | u_cpu/u_core/u_frontend/N138_4                       | 241
+| u_cpu/u_core/u_frontend/N137                          | u_cpu/u_core/u_frontend/N137                         | 240
+| u_cpu/u_dcache/maintenance_start_w                    | u_cpu/u_dcache/N1109                                 | 239
+| u_cpu/u_core/u_frontend/u_ib/N1279                    | u_cpu/u_core/u_frontend/u_ib/N1279                   | 228
+| u_cpu/u_core/u_csr/N426                               | u_cpu/u_core/u_csr/N426                              | 228
+| u_cpu/u_core/u_frontend/u_ib/N1233                    | u_cpu/u_core/u_frontend/u_ib/N1233                   | 228
+| u_cpu/u_core/u_frontend/u_ib/N1187                    | u_cpu/u_core/u_frontend/u_ib/N1187                   | 228
+| u_cpu/u_core/u_frontend/u_ib/N1325                    | u_cpu/u_core/u_frontend/u_ib/N1325                   | 228
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [7]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[7]             | 214
+| u_cpu/u_core/update_pc_r [6]                          | u_cpu/u_core/update_pc_r[6]                          | 213
+| u_cpu/u_core/update_pc_r [5]                          | u_cpu/u_core/update_pc_r[5]                          | 213
+| u_cpu/u_core/e_operand_load_copy_w [2]                | _N106507_1_inv                                       | 209
+| u_cpu/u_core/update_pc_r [3]                          | u_cpu/u_core/update_pc_r[3]                          | 209
+| u_cpu/u_core/update_pc_r [4]                          | u_cpu/u_core/update_pc_r[4]                          | 209
+| u_cpu/u_core/update_pc_r [7]                          | u_cpu/u_core/update_pc_r[7]                          | 209
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [6]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[6]             | 206
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [4]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[4]             | 200
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [5]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[5]             | 200
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [3]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[3]             | 199
+| u_cpu/u_core/e_operand_load_w_rnmt                    | _N106526_1_inv                                       | 171
+| u_cpu/u_core/w2_rd_r[0] [1]                           | u_cpu/u_core/w2_rd_r[0][1]                           | 171
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [8]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[8]             | 170
+| u_cpu/u_core/u_frontend/N1551                         | u_cpu/u_core/u_frontend/N1551                        | 169
+| u_cpu/u_core/e_operand_load_copy_w [3]                | _N106508_1_inv                                       | 166
+| u_cpu/u_core/g_forward[3].memory_w                    | u_cpu/u_core/m_load_r                                | 165
+| u_cpu/u_core/update_index_r [3]                       | u_cpu/u_core/update_index_r[3]                       | 160
+| u_cpu/u_core/update_index_r [1]                       | u_cpu/u_core/update_index_r[1]                       | 160
+| u_cpu/u_core/update_index_r [6]                       | u_cpu/u_core/update_index_r[6]                       | 160
+| u_cpu/u_core/update_index_r [4]                       | u_cpu/u_core/update_index_r[4]                       | 160
+| u_cpu/u_core/update_index_r [5]                       | u_cpu/u_core/update_index_r[5]                       | 160
+| u_cpu/u_core/update_index_r [2]                       | u_cpu/u_core/update_index_r[2]                       | 160
+| u_cpu/u_core/u_frontend/u_predictor/N56               | u_cpu/u_core/u_frontend/u_predictor/N56              | 154
+| u_cpu/u_core/u_frontend/u_ib/N1321                    | u_cpu/u_core/u_frontend/u_ib/N1321_3                 | 151
+| u_cpu/u_core/e_advance_w                              | u_cpu/u_core/N2226                                   | 151
+| u_cpu/u_core/u_frontend/u_ib/N1183                    | u_cpu/u_core/u_frontend/u_ib/N1183_3                 | 151
+| u_cpu/u_core/u_frontend/u_ib/N1229                    | u_cpu/u_core/u_frontend/u_ib/N1229_3                 | 151
+| u_cpu/u_core/u_frontend/u_ib/N1275                    | u_cpu/u_core/u_frontend/u_ib/N1275_3                 | 151
+| u_cpu/u_dcache/read_addr_w [4]                        | u_cpu/u_dcache/read_addr_w_23[4]                     | 148
+| u_cpu/u_dcache/read_addr_w [5]                        | u_cpu/u_dcache/read_addr_w_23[5]                     | 148
+| u_cpu/u_core/e_advance_copy_w [0]                     | u_cpu/u_core/N378                                    | 141
+| u_cpu/u_icache/state_r_reg [3]                        | u_cpu/u_icache/state_r_reg[3]                        | 139
+| u_cpu/u_dcache/buffer_valid_r                         | u_cpu/u_dcache/buffer_valid_r                        | 138
+| u_cpu/u_core/u_frontend/replay_valid_r                | u_cpu/u_core/u_frontend/replay_valid_r               | 135
+| u_cpu/u_core/update_pc_r [8]                          | u_cpu/u_core/update_pc_r[8]                          | 135
+| u_cpu/u_dcache/N312                                   | u_cpu/u_dcache/N312                                  | 135
+| u_cpu/u_dcache/_N11157                                | u_cpu/u_dcache/N331_1_0                              | 132
+| u_cpu/u_dcache/_N11158                                | u_cpu/u_dcache/N331_1_1                              | 132
+| u_cpu/u_core/u_frontend/f1_pc_copy1_r [9]             | u_cpu/u_core/u_frontend/f1_pc_copy1_r[9]             | 131
+| u_cpu/u_core/N2357                                    | u_cpu/u_core/N2357                                   | 131
+| u_cpu/_N121784                                        | u_cpu/u_dcache/N30_11                                | 129
+| u_cpu/_N116343                                        | u_cpu/u_dcache/N13.eq_8                              | 128
+| u_cpu/u_core/update_clear_r                           | u_cpu/u_core/update_clear_r                          | 128
+| u_cpu/u_core/update_index_r [7]                       | u_cpu/u_core/update_index_r[7]                       | 128
+| u_cpu/u_dcache/addr_r [0]                             | u_cpu/u_dcache/addr_r[0]                             | 124
+| u_cpu/u_core/u_frontend/u_predictor/ras_ptr_r [0]     | u_cpu/u_core/u_frontend/u_predictor/ras_ptr_r[0]     | 124
+| u_cpu/u_core/u_frontend/u_predictor/ras_ptr_r [1]     | u_cpu/u_core/u_frontend/u_predictor/ras_ptr_r[1]     | 123
+| u_cpu/u_core/N5186                                    | u_cpu/u_core/N6773_4                                 | 120
+| u_cpu/u_core/N5136                                    | u_cpu/u_core/N7253_1                                 | 120
+| u_cpu/u_core/e_advance_copy_w [1]                     | u_cpu/u_core/N393                                    | 118
+| u_cpu/u_dcache/device_addr_r [0]                      | u_cpu/u_dcache/device_addr_r[0]                      | 117
+| u_cpu/u_dcache/device_addr_r [2]                      | u_cpu/u_dcache/device_addr_r[2]                      | 117
+| u_cpu/u_core/e_redirect_w_rnmt                        | u_cpu/u_core/e_redirect_r                            | 116
+| u_cpu/u_dcache/early_promote_w                        | u_cpu/u_dcache/N309_10                               | 115
+| u_cpu/u_core/w2_rd_r[0] [0]                           | u_cpu/u_core/w2_rd_r[0][0]                           | 107
+| u_cpu/u_core/e_operation_r[0] [0]                     | u_cpu/u_core/e_operation_r[0][0]                     | 107
+| u_cpu/u_core/e_operation_r[1] [0]                     | u_cpu/u_core/e_operation_r[1][0]                     | 107
+| u_cpu/u_dcache/victim_r                               | u_cpu/u_dcache/victim_r                              | 106
+| u_cpu/u_core/u_frontend/redirect_w                    | u_cpu/u_core/u_frontend/N2_9[64]                     | 105
+| u_cpu/dc_req_size_w [1]                               | u_cpu/u_core/e_record_r[0][45]                       | 105
+| u_cpu/u_dcache/addr_r [1]                             | u_cpu/u_dcache/addr_r[1]                             | 102
+| u_cpu/u_core/u_frontend/g_read[1].position_w          | u_cpu/u_core/u_frontend/N736                         | 101
+| u_cpu/u_dcache/device_addr_r [1]                      | u_cpu/u_dcache/device_addr_r[1]                      | 101
+| u_cpu/u_icache/N31                                    | u_cpu/u_icache/N3285                                 | 98
+| u_cpu/u_core/update_index_r [8]                       | u_cpu/u_core/update_index_r[8]                       | 98
+| u_cpu/dc_resp_way_hit_w [1]                           | u_cpu/u_dcache/N832_6[1]                             | 98
+| u_cpu/u_icache/request_slot_w [1]                     | u_cpu/u_icache/N1_3_1                                | 97
+| u_cpu/u_icache/request_slot_w [6]                     | u_cpu/u_icache/N1_3_6                                | 97
+| u_cpu/u_icache/request_slot_w [7]                     | u_cpu/u_icache/N1_3_7                                | 97
+| u_cpu/u_icache/request_slot_w [8]                     | u_cpu/u_icache/N1_3_8                                | 97
++----------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Clock Signal:
++-----------------------------------------------------------------------------------------------+
+| Driver_Pin_Name     | Clk_Source_Inst     | Clk_Inst_Name     | Net_Name        | Fanout
++-----------------------------------------------------------------------------------------------+
+| O                   | clk_i_ibuf          | clkbufg_0         | ntclkbufg_0     | 12634
++-----------------------------------------------------------------------------------------------+
+
+
+
+Reset Signal:
++---------------------------------------------------------------------------------------------+
+| Net_Name                              | Rst_Source_Inst                       | Fanout
++---------------------------------------------------------------------------------------------+
+| u_cpu/u_cache_ctrl/N124_rnmt          | u_cpu/u_cache_ctrl/N124               | 3
+| daxi_arlen_w_0                        | u_cpu/u_dcache/N3397_1                | 15
+| iaxi_arlen_w[0]                       | u_cpu/u_icache/cacheable_r            | 2
+| u_reset/N0                            | u_reset/N0                            | 2
+| u_cpu/u_cache_ctrl/N44                | u_cpu/u_cache_ctrl/N44                | 94
+| u_cpu/u_core/N179_1                   | u_cpu/u_core/N179_1                   | 705
+| u_cpu/u_dcache/N312                   | u_cpu/u_dcache/N312                   | 135
+| u_cpu/u_dcache/N1691                  | u_cpu/u_dcache/N1691                  | 256
+| u_cpu/u_dcache/N2459                  | u_cpu/u_dcache/N2459                  | 256
+| u_cpu/u_icache/N34                    | u_cpu/u_icache/N34                    | 94
+| u_cpu/u_icache/N3420                  | u_cpu/u_icache/N3420                  | 256
+| u_cpu/u_icache/N3404                  | u_cpu/u_icache/N3404                  | 256
+| u_cpu/u_icache/N3412                  | u_cpu/u_icache/N3412                  | 256
+| u_cpu/u_icache/N4708                  | u_cpu/u_icache/N4708                  | 256
+| u_cpu/u_icache/N4692                  | u_cpu/u_icache/N4692                  | 256
+| u_cpu/u_icache/N4700                  | u_cpu/u_icache/N4700                  | 256
+| u_cpu/u_icache/N3379_inv_1            | u_cpu/u_icache/N3379                  | 2
+| u_cpu/u_icache/N3459_inv_1            | u_cpu/u_icache/N3459                  | 2
+| u_cpu/u_icache/N3539_inv_1            | u_cpu/u_icache/N3539                  | 2
+| u_cpu/u_icache/N3619_inv_1            | u_cpu/u_icache/N3619                  | 2
+| u_cpu/u_icache/N3701_inv_1            | u_cpu/u_icache/N3701                  | 2
+| u_cpu/u_icache/N3781_inv_1            | u_cpu/u_icache/N3781                  | 2
+| u_cpu/u_icache/N3861_inv_1            | u_cpu/u_icache/N3861                  | 2
+| u_cpu/u_icache/N3941_inv_1            | u_cpu/u_icache/N3941                  | 2
+| u_cpu/u_icache/N4023_inv_1            | u_cpu/u_icache/N4023                  | 2
+| u_cpu/u_icache/N4103_inv_1            | u_cpu/u_icache/N4103                  | 2
+| u_cpu/u_icache/N4183_inv_1            | u_cpu/u_icache/N4183                  | 2
+| u_cpu/u_icache/N4263_inv_1            | u_cpu/u_icache/N4263                  | 2
+| u_cpu/u_icache/N4345_inv_1            | u_cpu/u_icache/N4345                  | 2
+| u_cpu/u_icache/N4425_inv_1            | u_cpu/u_icache/N4425                  | 2
+| u_cpu/u_icache/N4505_inv_1            | u_cpu/u_icache/N4505                  | 2
+| u_cpu/u_icache/N4585_inv_1            | u_cpu/u_icache/N4585                  | 2
+| u_cpu/u_icache/N4667_inv_1            | u_cpu/u_icache/N4667                  | 2
+| u_cpu/u_icache/N4747_inv_1            | u_cpu/u_icache/N4747                  | 2
+| u_cpu/u_icache/N4827_inv_1            | u_cpu/u_icache/N4827                  | 2
+| u_cpu/u_icache/N4907_inv_1            | u_cpu/u_icache/N4907                  | 2
+| u_cpu/u_icache/N4989_inv_1            | u_cpu/u_icache/N4989                  | 2
+| u_cpu/u_icache/N5069_inv_1            | u_cpu/u_icache/N5069                  | 2
+| u_cpu/u_icache/N5149_inv_1            | u_cpu/u_icache/N5149                  | 2
+| u_cpu/u_icache/N5229_inv_1            | u_cpu/u_icache/N5229                  | 2
+| u_cpu/u_icache/N5311_inv_1            | u_cpu/u_icache/N5311                  | 2
+| u_cpu/u_icache/N5391_inv_1            | u_cpu/u_icache/N5391                  | 2
+| u_cpu/u_icache/N5471_inv_1            | u_cpu/u_icache/N5471                  | 2
+| u_cpu/u_icache/N5551_inv_1            | u_cpu/u_icache/N5551                  | 2
+| u_cpu/u_icache/N5633_inv_1            | u_cpu/u_icache/N5633                  | 2
+| u_cpu/u_icache/N5713_inv_1            | u_cpu/u_icache/N5713                  | 2
+| u_cpu/u_icache/N5793_inv_1            | u_cpu/u_icache/N5793                  | 2
+| u_cpu/u_icache/N5873_inv_1            | u_cpu/u_icache/N5873                  | 2
+| u_cpu/u_reset_sys_cache_ctrl_n/N0     | u_cpu/u_reset_sys_cache_ctrl_n/N0     | 23
+| u_cpu/u_core/u_csr/N553               | u_cpu/u_core/u_csr/N553               | 64
+| u_cpu/u_core/u_csr/N426               | u_cpu/u_core/u_csr/N426               | 228
+| u_cpu/u_core/u_csr/N585               | u_cpu/u_core/u_csr/N585               | 64
+| u_cpu/u_core/u_csr/N626               | u_cpu/u_core/u_csr/N626               | 64
+| u_cpu/u_core/u_csr/N667               | u_cpu/u_core/u_csr/N667               | 64
+| u_cpu/u_core/u_csr/N708               | u_cpu/u_core/u_csr/N708               | 64
+| u_cpu/u_core/u_csr/N749               | u_cpu/u_core/u_csr/N749               | 64
+| u_cpu/u_core/u_csr/N790               | u_cpu/u_core/u_csr/N790               | 64
+| u_cpu/u_core/u_csr/N831               | u_cpu/u_core/u_csr/N831               | 64
+| u_cpu/u_core/u_csr/N872               | u_cpu/u_core/u_csr/N872               | 64
+| u_cpu/u_core/u_csr/N568               | u_cpu/u_core/u_csr/N568               | 64
+| u_cpu/u_core/u_div/N11                | u_cpu/u_core/u_div/N11                | 32
+| u_cpu/u_core/u_div/N258               | u_cpu/u_core/u_div/N258               | 32
+| u_cpu/u_core/m_redirect_r_rnmt        | u_cpu/u_core/m_redirect_r             | 2
+| _$$_GND_$$_                           | _$$_GND_$$_                           | 60
++---------------------------------------------------------------------------------------------+
+
+
+
+CE Signal:
++-----------------------------------------------------------------------------------------------------------------------------+
+| Net_Name                                                     | CE_Source_Inst                                 | Fanout
++-----------------------------------------------------------------------------------------------------------------------------+
+| u_cpu/wb_err_w                                               | u_cpu/u_dcache/N1133                           | 27
+| u_cpu/u_cache_ctrl/launch_w                                  | u_cpu/u_cache_ctrl/N16_45                      | 67
+| u_cpu/u_cache_ctrl/N306                                      | u_cpu/u_cache_ctrl/N306                        | 8
+| u_cpu/u_cache_ctrl/N287                                      | u_cpu/u_cache_ctrl/N287                        | 8
+| u_cpu/u_cache_ctrl/N267                                      | u_cpu/u_cache_ctrl/N267                        | 8
+| u_cpu/u_cache_ctrl/N247                                      | u_cpu/u_cache_ctrl/N247                        | 8
+| u_cpu/u_cache_ctrl/N228                                      | u_cpu/u_cache_ctrl/N306_1                      | 8
+| u_cpu/u_cache_ctrl/N344                                      | u_cpu/u_cache_ctrl/N344                        | 8
+| u_cpu/u_cache_ctrl/N325                                      | u_cpu/u_cache_ctrl/N325                        | 8
+| u_cpu/u_cache_ctrl/N209                                      | u_cpu/u_cache_ctrl/N209                        | 8
+| u_cpu/u_core/w_ras_commit_copy1_r [8]                        | u_cpu/u_core/w_ras_commit_copy1_r[8]           | 5
+| u_cpu/u_core/N3392                                           | u_cpu/u_core/N3392_7                           | 16
+| u_cpu/u_core/N3400                                           | u_cpu/u_core/N3400_4                           | 16
+| u_cpu/u_core/N3408                                           | u_cpu/u_core/N3408_4                           | 16
+| u_cpu/u_core/N3416                                           | u_cpu/u_core/N3416_4                           | 16
+| u_cpu/u_core/N3424                                           | u_cpu/u_core/N3424_4                           | 16
+| u_cpu/u_core/N3432                                           | u_cpu/u_core/N3432_4                           | 16
+| u_cpu/u_core/N3440                                           | u_cpu/u_core/N3440_4                           | 16
+| u_cpu/u_core/N3448                                           | u_cpu/u_core/N3448_4                           | 16
+| u_cpu/u_core/N8305                                           | u_cpu/u_core/N8305                             | 64
+| u_cpu/u_core/N8371                                           | u_cpu/u_core/N8371                             | 64
+| u_cpu/u_core/N8292                                           | u_cpu/u_core/N8292                             | 64
+| u_cpu/u_core/N9679                                           | u_cpu/u_core/N9679                             | 32
+| u_cpu/u_core/e_operand_load_copy_w [3]                       | _N106508_1_inv                                 | 166
+| u_cpu/u_core/e_operand_load_copy_w [2]                       | _N106507_1_inv                                 | 209
+| u_cpu/u_core/e_operand_load_w_rnmt                           | _N106526_1_inv                                 | 171
+| u_cpu/u_core/N5281                                           | u_cpu/u_core/N5236                             | 2
+| u_cpu/u_core/e_operand_load_copy_w [4]                       | _N106509_1_inv                                 | 24
+| u_cpu/u_core/d_issue_valid_w                                 | u_cpu/u_core/N1874_7                           | 4
+| u_cpu/u_core/N5236                                           | u_cpu/u_core/N5236                             | 5
+| u_cpu/u_core/N2827                                           | u_cpu/u_core/N2827                             | 7
+| u_cpu/u_core/N5136                                           | u_cpu/u_core/N7253_1                           | 120
+| u_cpu/u_core/N5186                                           | u_cpu/u_core/N6773_4                           | 120
+| u_cpu/u_core/e_advance_copy_w [1]                            | u_cpu/u_core/N393                              | 118
+| u_cpu/u_core/e_advance_copy_w [0]                            | u_cpu/u_core/N378                              | 141
+| u_cpu/u_core/e_advance_w                                     | u_cpu/u_core/N2226                             | 139
+| u_cpu/u_core/N5252                                           | u_cpu/u_core/N2456_3                           | 2
+| u_cpu/u_dcache/lookup_accept_w                               | u_cpu/u_dcache/N35_1_6                         | 79
+| u_cpu/u_dcache/N4709                                         | u_cpu/u_dcache/N4709_5                         | 2
+| u_cpu/u_dcache/buffer_push_w                                 | u_cpu/u_dcache/N850_5                          | 67
+| u_cpu/u_dcache/device_accept_w                               | u_cpu/u_dcache/N395                            | 35
+| u_cpu/u_dcache/N1317                                         | u_cpu/u_dcache/N1317                           | 32
+| u_cpu/u_dcache/N1321                                         | u_cpu/u_dcache/N1321                           | 32
+| u_cpu/u_dcache/N4253                                         | u_cpu/u_dcache/N4253_8                         | 9
+| u_cpu/dc_early_valid_w                                       | u_cpu/u_core/N86_13                            | 50
+| u_cpu/u_dcache/early_promote_w                               | u_cpu/u_dcache/N309_10                         | 66
+| u_cpu/u_dcache/ram_read_w                                    | u_cpu/u_core/N356_4                            | 58
+| u_cpu/u_dcache/maintenance_start_w                           | u_cpu/u_dcache/N1109                           | 83
+| u_cpu/u_dcache/state_r_reg [14]                              | u_cpu/u_dcache/state_r_reg[14]                 | 19
+| u_cpu/u_dcache/state_r_reg [13]                              | u_cpu/u_dcache/state_r_reg[13]                 | 28
+| u_cpu/u_dcache/N4808                                         | u_cpu/u_dcache/N4808_3                         | 19
+| u_cpu/u_dcache/_N116                                         | u_cpu/u_dcache/state_r_fsm[3:0]_84             | 2
+| u_cpu/u_dcache/N1363                                         | u_cpu/u_dcache/N1363                           | 18
+| u_cpu/u_dcache/state_r_reg [15]                              | u_cpu/u_dcache/state_r_reg[15]                 | 9
+| u_cpu/u_dcache/N1300                                         | u_cpu/u_dcache/N1300_5                         | 64
+| u_cpu/u_dcache/N4172                                         | u_cpu/u_dcache/N959[0]                         | 38
+| u_cpu/u_dcache/scan_read_w                                   | u_cpu/u_dcache/N953                            | 9
+| u_cpu/u_dcache/N4889                                         | u_cpu/u_dcache/N4889                           | 16
+| u_cpu/u_dcache/N4873                                         | u_cpu/u_dcache/N4873_3                         | 5
+| u_cpu/u_dcache/N4495                                         | u_cpu/u_dcache/N4495                           | 16
+| u_cpu/u_dcache/store_result_w                                | u_cpu/u_dcache/N845                            | 35
+| u_cpu/u_dcache/N4551                                         | u_cpu/u_dcache/N4709_1                         | 9
+| u_cpu/u_dcache/N4164                                         | u_cpu/u_dcache/N4164                           | 27
+| u_cpu/u_icache/lookup_accept_copy_w [0]                      | u_cpu/u_icache/N10                             | 5
+| u_cpu/u_icache/lookup_accept_copy_w [1]                      | u_cpu/u_icache/N421                            | 8
+| u_cpu/u_icache/lookup_accept_copy_w [2]                      | u_cpu/u_icache/N825                            | 8
+| u_cpu/u_icache/lookup_accept_copy_w [3]                      | u_cpu/u_icache/N1229                           | 8
+| u_cpu/u_icache/N6117                                         | u_cpu/u_icache/N6121_1                         | 11
+| u_cpu/u_icache/lookup_accept_copy_w [4]                      | u_cpu/u_icache/N1633                           | 2
+| u_cpu/u_icache/N6120                                         | u_cpu/u_icache/N6120                           | 8
+| u_cpu/ic_req_ready_w                                         | u_cpu/u_icache/state_r_reg[0]                  | 9
+| u_cpu/u_icache/N80                                           | u_cpu/u_icache/N80                             | 9
+| u_cpu/u_icache/lookup_ready_w                                | u_cpu/u_icache/N80                             | 48
+| u_cpu/u_icache/N3344                                         | u_cpu/u_icache/N3344                           | 64
+| u_cpu/u_icache/N6157                                         | u_cpu/u_icache/N6157_4                         | 4
+| u_cpu/u_core/u_csr/N1696                                     | u_cpu/u_core/u_csr/N1696                       | 32
+| u_cpu/u_core/u_csr/N1692                                     | u_cpu/u_core/u_csr/N1692                       | 32
+| u_cpu/u_core/u_csr/N1844                                     | u_cpu/u_core/u_csr/N1824                       | 5
+| u_cpu/u_core/u_csr/N1824                                     | u_cpu/u_core/u_csr/N1824                       | 5
+| u_cpu/u_core/u_csr/N1804                                     | u_cpu/u_core/u_csr/N1784                       | 5
+| u_cpu/u_core/u_csr/N1784                                     | u_cpu/u_core/u_csr/N1784                       | 5
+| u_cpu/u_core/u_csr/N1764                                     | u_cpu/u_core/u_csr/N1764                       | 5
+| u_cpu/u_core/u_csr/N1744                                     | u_cpu/u_core/u_csr/N1744                       | 5
+| u_cpu/u_core/u_csr/N1724                                     | u_cpu/u_core/u_csr/N1724                       | 5
+| u_cpu/u_core/u_csr/N1704                                     | u_cpu/u_core/u_csr/N1704                       | 5
+| u_cpu/u_core/u_csr/N1648                                     | u_cpu/u_core/u_csr/N1648                       | 32
+| u_cpu/u_core/u_csr/N1639                                     | u_cpu/u_core/u_csr/N1639                       | 32
+| u_cpu/u_core/u_csr/N1864                                     | u_cpu/u_core/u_csr/N1864                       | 32
+| u_cpu/u_core/u_csr/N1654                                     | u_cpu/u_core/u_csr/N1654                       | 32
+| u_cpu/u_core/u_csr/N1868                                     | u_cpu/u_core/u_csr/N1868                       | 32
+| u_cpu/u_core/u_csr/N1660                                     | u_cpu/u_core/u_csr/N1660                       | 32
+| u_cpu/u_core/u_csr/N1872                                     | u_cpu/u_core/u_csr/N1872                       | 32
+| u_cpu/u_core/u_csr/N1666                                     | u_cpu/u_core/u_csr/N1666                       | 32
+| u_cpu/u_core/u_csr/N1876                                     | u_cpu/u_core/u_csr/N1876                       | 32
+| u_cpu/u_core/u_csr/N1672                                     | u_cpu/u_core/u_csr/N1672                       | 32
+| u_cpu/u_core/u_csr/N1880                                     | u_cpu/u_core/u_csr/N1880                       | 32
+| u_cpu/u_core/u_csr/N1678                                     | u_cpu/u_core/u_csr/N1678                       | 32
+| u_cpu/u_core/u_csr/N1884                                     | u_cpu/u_core/u_csr/N1884                       | 32
+| u_cpu/u_core/u_csr/N1684                                     | u_cpu/u_core/u_csr/N1684                       | 32
+| u_cpu/u_core/u_csr/N1633                                     | u_cpu/u_core/u_csr/N1633                       | 32
+| u_cpu/u_core/u_csr/N1687                                     | u_cpu/u_core/u_csr/N1687                       | 32
+| u_cpu/u_core/u_csr/N1626                                     | u_cpu/u_core/u_csr/N1626                       | 10
+| u_cpu/u_core/u_csr/N1700                                     | u_cpu/u_core/u_csr/N1700                       | 32
+| u_cpu/u_core/u_csr/N1644                                     | u_cpu/u_core/u_csr/N1644                       | 32
+| u_cpu/u_core/u_csr/N1616                                     | u_cpu/u_core/u_csr/N1610                       | 32
+| u_cpu/u_core/u_csr/N1610                                     | u_cpu/u_core/u_csr/N1610                       | 30
+| u_cpu/u_core/u_csr/N1596                                     | u_cpu/u_core/u_csr/N1596                       | 3
+| u_cpu/u_core/u_csr/N1604                                     | u_cpu/u_core/u_csr/N1604                       | 32
+| u_cpu/u_core/u_csr/N1588                                     | u_cpu/u_core/u_csr/N1588_3                     | 2
+| u_cpu/u_core/u_csr/N1622                                     | u_cpu/u_core/u_csr/N1622                       | 32
+| u_cpu/u_core/u_csr/N1600                                     | u_cpu/u_core/u_csr/N1600                       | 31
+| u_cpu/u_core/u_div/N201                                      | u_cpu/u_core/u_div/N201                        | 6
+| u_cpu/u_core/u_div/N11                                       | u_cpu/u_core/u_div/N11                         | 35
+| u_cpu/u_core/u_div/N207                                      | u_cpu/u_core/u_div/N207                        | 32
+| u_cpu/u_core/debug_o [25]                                    | u_cpu/u_core/u_div/busy_o                      | 32
+| u_cpu/u_core/u_div/N259                                      | u_cpu/u_core/u_div/N259_1                      | 32
+| u_cpu/u_core/u_frontend/N23                                  | u_cpu/u_core/u_frontend/N23                    | 2
+| u_cpu/u_core/u_frontend/N245                                 | u_cpu/u_core/u_frontend/N245                   | 16
+| u_cpu/u_core/u_frontend/N257                                 | u_cpu/u_core/u_frontend/N257                   | 16
+| u_cpu/u_core/u_frontend/N268                                 | u_cpu/u_core/u_frontend/N268                   | 16
+| u_cpu/u_core/u_frontend/N279                                 | u_cpu/u_core/u_frontend/N279                   | 16
+| u_cpu/u_core/u_frontend/N290                                 | u_cpu/u_core/u_frontend/N290                   | 16
+| u_cpu/u_core/u_frontend/N301                                 | u_cpu/u_core/u_frontend/N301                   | 15
+| u_cpu/u_core/u_frontend/N312                                 | u_cpu/u_core/u_frontend/N312                   | 14
+| u_cpu/u_core/u_frontend/N323                                 | u_cpu/u_core/u_frontend/N323                   | 16
+| u_cpu/u_core/u_frontend/N334                                 | u_cpu/u_core/u_frontend/N334                   | 11
+| u_cpu/u_core/u_frontend/N1551                                | u_cpu/u_core/u_frontend/N1551                  | 169
+| u_cpu/u_core/u_frontend/N2474                                | u_cpu/u_core/u_frontend/N2474                  | 2
+| u_cpu/u_core/u_frontend/N1154                                | u_cpu/u_core/u_frontend/N1154                  | 8
+| u_cpu/u_core/u_frontend/N1158                                | u_cpu/u_core/u_frontend/N1158                  | 8
+| u_cpu/u_core/u_frontend/N1162                                | u_cpu/u_core/u_frontend/N1162                  | 8
+| u_cpu/u_core/u_frontend/N1166                                | u_cpu/u_core/u_frontend/N1166                  | 8
+| u_cpu/u_core/u_frontend/N1170                                | u_cpu/u_core/u_frontend/N1170                  | 6
+| u_cpu/u_core/u_frontend/N1174                                | u_cpu/u_core/u_frontend/N1174                  | 8
+| u_cpu/u_core/u_frontend/N1178                                | u_cpu/u_core/u_frontend/N1178                  | 8
+| u_cpu/u_core/u_frontend/N1182                                | u_cpu/u_core/u_frontend/N1182                  | 8
+| u_cpu/u_core/u_frontend/N1186                                | u_cpu/u_core/u_frontend/N1186                  | 8
+| u_cpu/u_core/u_frontend/N1190                                | u_cpu/u_core/u_frontend/N1190                  | 8
+| u_cpu/u_core/u_frontend/N1194                                | u_cpu/u_core/u_frontend/N1194                  | 8
+| u_cpu/u_core/u_frontend/N1198                                | u_cpu/u_core/u_frontend/N1198_5                | 8
+| u_cpu/u_core/u_frontend/N1202                                | u_cpu/u_core/u_frontend/N1202_5                | 8
+| u_cpu/u_core/u_frontend/N1206                                | u_cpu/u_core/u_frontend/N1206_5                | 8
+| u_cpu/u_core/u_frontend/N1210                                | u_cpu/u_core/u_frontend/N1210_5                | 8
+| u_cpu/u_core/u_frontend/N1214                                | u_cpu/u_core/u_frontend/N1214_5                | 8
+| u_cpu/u_core/u_frontend/N1218                                | u_cpu/u_core/u_frontend/N1218_6                | 8
+| u_cpu/u_core/u_frontend/N1222                                | u_cpu/u_core/u_frontend/N1222                  | 8
+| u_cpu/u_core/u_frontend/N1226                                | u_cpu/u_core/u_frontend/N1226                  | 8
+| u_cpu/u_core/u_frontend/N1230                                | u_cpu/u_core/u_frontend/N1230                  | 8
+| u_cpu/u_core/u_frontend/N1260                                | u_cpu/u_core/u_frontend/N1260                  | 8
+| u_cpu/u_core/u_frontend/N1264                                | u_cpu/u_core/u_frontend/N1264                  | 8
+| u_cpu/u_core/u_frontend/N1268                                | u_cpu/u_core/u_frontend/N1268                  | 8
+| u_cpu/u_core/u_frontend/N1272                                | u_cpu/u_core/u_frontend/N1272                  | 8
+| u_cpu/u_core/u_frontend/N1276                                | u_cpu/u_core/u_frontend/N1276                  | 6
+| u_cpu/u_core/u_frontend/N1280                                | u_cpu/u_core/u_frontend/N1280                  | 8
+| u_cpu/u_core/u_frontend/N1284                                | u_cpu/u_core/u_frontend/N1284                  | 8
+| u_cpu/u_core/u_frontend/N1288                                | u_cpu/u_core/u_frontend/N1288                  | 8
+| u_cpu/u_core/u_frontend/N1292                                | u_cpu/u_core/u_frontend/N1292                  | 8
+| u_cpu/u_core/u_frontend/N1296                                | u_cpu/u_core/u_frontend/N1296                  | 8
+| u_cpu/u_core/u_frontend/N1300                                | u_cpu/u_core/u_frontend/N1300                  | 8
+| u_cpu/u_core/u_frontend/N1304                                | u_cpu/u_core/u_frontend/N1304                  | 8
+| u_cpu/u_core/u_frontend/N1308                                | u_cpu/u_core/u_frontend/N1308                  | 8
+| u_cpu/u_core/u_frontend/N1312                                | u_cpu/u_core/u_frontend/N1312                  | 8
+| u_cpu/u_core/u_frontend/N1316                                | u_cpu/u_core/u_frontend/N1316                  | 8
+| u_cpu/u_core/u_frontend/N1320                                | u_cpu/u_core/u_frontend/N1320                  | 8
+| u_cpu/u_core/u_frontend/N1324                                | u_cpu/u_core/u_frontend/N1324                  | 8
+| u_cpu/u_core/u_frontend/N1328                                | u_cpu/u_core/u_frontend/N1328                  | 8
+| u_cpu/u_core/u_frontend/N1332                                | u_cpu/u_core/u_frontend/N1332                  | 8
+| u_cpu/u_core/u_frontend/N1336                                | u_cpu/u_core/u_frontend/N1336                  | 8
+| u_cpu/u_core/u_frontend/N1366                                | u_cpu/u_core/u_frontend/N1366                  | 8
+| u_cpu/u_core/u_frontend/N1370                                | u_cpu/u_core/u_frontend/N1370                  | 8
+| u_cpu/u_core/u_frontend/N1374                                | u_cpu/u_core/u_frontend/N1374                  | 8
+| u_cpu/u_core/u_frontend/N1378                                | u_cpu/u_core/u_frontend/N1378                  | 8
+| u_cpu/u_core/u_frontend/N1382                                | u_cpu/u_core/u_frontend/N1382                  | 6
+| u_cpu/u_core/u_frontend/N1386                                | u_cpu/u_core/u_frontend/N1386                  | 8
+| u_cpu/u_core/u_frontend/N1390                                | u_cpu/u_core/u_frontend/N1390                  | 8
+| u_cpu/u_core/u_frontend/N1394                                | u_cpu/u_core/u_frontend/N1394                  | 8
+| u_cpu/u_core/u_frontend/N1398                                | u_cpu/u_core/u_frontend/N1398                  | 8
+| u_cpu/u_core/u_frontend/N1402                                | u_cpu/u_core/u_frontend/N1402                  | 8
+| u_cpu/u_core/u_frontend/N1406                                | u_cpu/u_core/u_frontend/N1406                  | 8
+| u_cpu/u_core/u_frontend/N1410                                | u_cpu/u_core/u_frontend/N1410                  | 8
+| u_cpu/u_core/u_frontend/N1414                                | u_cpu/u_core/u_frontend/N1414                  | 8
+| u_cpu/u_core/u_frontend/N1418                                | u_cpu/u_core/u_frontend/N1418                  | 8
+| u_cpu/u_core/u_frontend/N1422                                | u_cpu/u_core/u_frontend/N1422                  | 8
+| u_cpu/u_core/u_frontend/N1426                                | u_cpu/u_core/u_frontend/N1426                  | 8
+| u_cpu/u_core/u_frontend/N1430                                | u_cpu/u_core/u_frontend/N1430                  | 8
+| u_cpu/u_core/u_frontend/N1434                                | u_cpu/u_core/u_frontend/N1434                  | 8
+| u_cpu/u_core/u_frontend/N1438                                | u_cpu/u_core/u_frontend/N1438                  | 8
+| u_cpu/u_core/u_frontend/N1442                                | u_cpu/u_core/u_frontend/N1442                  | 8
+| u_cpu/u_core/u_frontend/N1472                                | u_cpu/u_core/u_frontend/N1472                  | 8
+| u_cpu/u_core/u_frontend/N1476                                | u_cpu/u_core/u_frontend/N1476                  | 8
+| u_cpu/u_core/u_frontend/N1480                                | u_cpu/u_core/u_frontend/N1480                  | 8
+| u_cpu/u_core/u_frontend/N1484                                | u_cpu/u_core/u_frontend/N1484_3                | 8
+| u_cpu/u_core/u_frontend/N1488                                | u_cpu/u_core/u_frontend/N1488_3                | 6
+| u_cpu/u_core/u_frontend/N1492                                | u_cpu/u_core/u_frontend/N1492_3                | 8
+| u_cpu/u_core/u_frontend/N1496                                | u_cpu/u_core/u_frontend/N1496_3                | 8
+| u_cpu/u_core/u_frontend/N1500                                | u_cpu/u_core/u_frontend/N1500_3                | 8
+| u_cpu/u_core/u_frontend/N1504                                | u_cpu/u_core/u_frontend/N1504_3                | 8
+| u_cpu/u_core/u_frontend/N1508                                | u_cpu/u_core/u_frontend/N1508                  | 8
+| u_cpu/u_core/u_frontend/N1512                                | u_cpu/u_core/u_frontend/N1512                  | 8
+| u_cpu/u_core/u_frontend/N1516                                | u_cpu/u_core/u_frontend/N1516                  | 8
+| u_cpu/u_core/u_frontend/N1520                                | u_cpu/u_core/u_frontend/N1520                  | 8
+| u_cpu/u_core/u_frontend/N1524                                | u_cpu/u_core/u_frontend/N1524                  | 8
+| u_cpu/u_core/u_frontend/N1528                                | u_cpu/u_core/u_frontend/N1528                  | 8
+| u_cpu/u_core/u_frontend/N1532                                | u_cpu/u_core/u_frontend/N1532                  | 8
+| u_cpu/u_core/u_frontend/N1536                                | u_cpu/u_core/u_frontend/N1536                  | 8
+| u_cpu/u_core/u_frontend/N1540                                | u_cpu/u_core/u_frontend/N1540                  | 8
+| u_cpu/u_core/u_frontend/N1544                                | u_cpu/u_core/u_frontend/N1544                  | 8
+| u_cpu/u_core/u_frontend/N1548                                | u_cpu/u_core/u_frontend/N1548                  | 8
+| u_cpu/u_core/u_regfile/N1647                                 | u_cpu/u_core/u_regfile/N1647_1                 | 32
+| u_cpu/u_core/u_regfile/N1493                                 | u_cpu/u_core/u_regfile/N1493_1                 | 32
+| u_cpu/u_core/u_regfile/N1577                                 | u_cpu/u_core/u_regfile/N1577_1                 | 32
+| u_cpu/u_core/u_regfile/N1605                                 | u_cpu/u_core/u_regfile/N1605_1                 | 32
+| u_cpu/u_core/u_regfile/N1297                                 | u_cpu/u_core/u_regfile/N1297_1                 | 32
+| u_cpu/u_core/u_regfile/N1521                                 | u_cpu/u_core/u_regfile/N1521_1                 | 32
+| u_cpu/u_core/u_regfile/N1395                                 | u_cpu/u_core/u_regfile/N1395_1                 | 32
+| u_cpu/u_core/u_regfile/N1661                                 | u_cpu/u_core/u_regfile/N1661_1                 | 32
+| u_cpu/u_core/u_regfile/N1535                                 | u_cpu/u_core/u_regfile/N1535_1                 | 32
+| u_cpu/u_core/u_regfile/N1437                                 | u_cpu/u_core/u_regfile/N1437_1                 | 32
+| u_cpu/u_core/u_regfile/N1339                                 | u_cpu/u_core/u_regfile/N1339_1                 | 32
+| u_cpu/u_core/u_regfile/N1689                                 | u_cpu/u_core/u_regfile/N1689_1                 | 32
+| u_cpu/u_core/u_regfile/N1619                                 | u_cpu/u_core/u_regfile/N1619_1                 | 32
+| u_cpu/u_core/u_regfile/N1549                                 | u_cpu/u_core/u_regfile/N1549_1                 | 32
+| u_cpu/u_core/u_regfile/N1465                                 | u_cpu/u_core/u_regfile/N1465_1                 | 32
+| u_cpu/u_core/u_regfile/N1423                                 | u_cpu/u_core/u_regfile/N1423_1                 | 32
+| u_cpu/u_core/u_regfile/N1367                                 | u_cpu/u_core/u_regfile/N1367_1                 | 32
+| u_cpu/u_core/u_regfile/N1311                                 | u_cpu/u_core/u_regfile/N1311_1                 | 32
+| u_cpu/u_core/u_regfile/N1703                                 | u_cpu/u_core/u_regfile/N1703_1                 | 32
+| u_cpu/u_core/u_regfile/N1633                                 | u_cpu/u_core/u_regfile/N1633_1                 | 32
+| u_cpu/u_core/u_regfile/N1591                                 | u_cpu/u_core/u_regfile/N1591_1                 | 32
+| u_cpu/u_core/u_regfile/N1563                                 | u_cpu/u_core/u_regfile/N1563_1                 | 32
+| u_cpu/u_core/u_regfile/N1507                                 | u_cpu/u_core/u_regfile/N1507_1                 | 32
+| u_cpu/u_core/u_regfile/N1479                                 | u_cpu/u_core/u_regfile/N1479_1                 | 32
+| u_cpu/u_core/u_regfile/N1451                                 | u_cpu/u_core/u_regfile/N1451_1                 | 32
+| u_cpu/u_core/u_regfile/N1409                                 | u_cpu/u_core/u_regfile/N1409_1                 | 32
+| u_cpu/u_core/u_regfile/N1381                                 | u_cpu/u_core/u_regfile/N1381_1                 | 32
+| u_cpu/u_core/u_regfile/N1353                                 | u_cpu/u_core/u_regfile/N1353_1                 | 32
+| u_cpu/u_core/u_regfile/N1325                                 | u_cpu/u_core/u_regfile/N1325_1                 | 32
+| u_cpu/u_core/u_regfile/N1717                                 | u_cpu/u_core/u_regfile/N1717_1                 | 32
+| u_cpu/u_core/u_regfile/N1675                                 | u_cpu/u_core/u_regfile/N1675_1                 | 32
+| u_cpu/u_core/u_frontend/u_ib/N1325                           | u_cpu/u_core/u_frontend/u_ib/N1325             | 228
+| u_cpu/u_core/u_frontend/u_ib/N1187                           | u_cpu/u_core/u_frontend/u_ib/N1187             | 228
+| u_cpu/u_core/u_frontend/u_ib/N1233                           | u_cpu/u_core/u_frontend/u_ib/N1233             | 228
+| u_cpu/u_core/u_frontend/u_ib/N1279                           | u_cpu/u_core/u_frontend/u_ib/N1279             | 228
+| u_cpu/u_core/u_frontend/u_predictor/conditional_update_w     | u_cpu/u_core/u_frontend/u_predictor/N256_4     | 12
+| _$$_VCC_$$_                                                  | _$$_VCC_$$_                                    | 30
+| _$$_GND_$$_                                                  | _$$_GND_$$_                                    | 60
+| u_cpu/u_dcache/N1237                                         | u_cpu/u_dcache/N1237                           | 2
+| u_cpu/u_icache/accept_w                                      | u_cpu/u_icache/N3272                           | 10
++-----------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Routed clock tree
+
+Global Clock Info:
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GClk Inst                | Site Of GClk Inst     | GClk Fanout Net     | Clock Loads     | Non_Clock Loads     | Driver Inst           | Driver Pin     | Site Of Driver Inst
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clkbufg_0/gopclkbufg     | USCM_383_930          | ntclkbufg_0         | 11216           | 0                   | clk_i_ibuf/opit_1     | DI_TO_CLK      | IOLHR_16_1386
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
