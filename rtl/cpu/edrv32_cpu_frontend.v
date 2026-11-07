@@ -70,6 +70,7 @@ module edrv32_cpu_frontend (
     (* keep = "true", syn_preserve = 1 *) reg [31:1] f1_pc_copy1_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy2_r;
     (* keep = "true", syn_preserve = 1 *) reg [31:3] f1_pc_copy3_r;
+    wire [31:0] query_valid_index_w;
     reg f2_pending_r;
     reg miss_wait_r;
     reg replay_valid_r;
@@ -92,12 +93,18 @@ module edrv32_cpu_frontend (
     wire [1:0] f2_global_r;
     reg [1:0] f2_local_r;
     wire [1:0] f2_local_w;
+    wire [1:0] f2_branch_local_w;
+    reg [19:0] f2_direction_history_r;
     wire [1:0] f2_saved_local_w;
     wire f2_use_local_w;
     wire f2_final_taken_w;
     wire f2_taken_w;
     wire f2_correct_w;
+    reg [31:0] f2_correct_pc_r;
     wire [31:0] f2_correct_pc_w;
+    assign f2_correct_pc_w = f2_correct_pc_r;
+    reg f2_correct_eligible_r;
+    reg [11:0] f2_index_r;
     wire [19:0] predict_local_history_w;
     wire [1:0] predict_global_w;
     wire predict_conditional_w;
@@ -136,7 +143,9 @@ module edrv32_cpu_frontend (
     wire pc_hold_w;
     wire pc_sequential_w;
     wire pc_predict_w;
-    wire pc_correct_w;
+    wire pc_advance_w;
+    wire [31:0] normal_pc_w;
+    (* keep = "true" *) wire [31:0] uncorrected_pc_w;
     wire ib_one_free_w;
     wire ib_two_free_w;
     wire [STREAM_BITS-1:0] stream_w [0:1];
@@ -158,15 +167,15 @@ module edrv32_cpu_frontend (
         f2_position_r, f2_target_r, f2_history_r, f2_ras_r} = f2_payload_r;
     // cpu-spec 4.4: evaluate once, even when the I$ response is delayed.
     // The correction rejects this cycle's F1 request and preserves the older F2 response.
+    assign f2_local_w = f2_position_r[1] ?
+        {f2_branch_local_w[0], f2_branch_local_w[1]} : f2_branch_local_w;
     assign f2_saved_local_w = f2_checked_r ? f2_local_r : f2_local_w;
     assign f2_final_taken_w = f2_use_local_w ?
-        f2_local_w[f2_position_r[1]] : f2_global_r[f2_position_r[1]];
+        f2_branch_local_w[0] : f2_global_r[f2_position_r[1]];
     assign f2_taken_w = !f2_checked_r && f2_hit_r && f2_conditional_r ?
         f2_final_taken_w : f2_taken_r;
-    assign f2_correct_w = f2_pending_r && !f2_checked_r && f2_hit_r &&
-        f2_conditional_r && f2_final_taken_w != f2_taken_r && !redirect_w;
-    assign f2_correct_pc_w = f2_final_taken_w ? f2_target_r :
-        {f2_pc_r[31:3] + 29'd1, 3'b0};
+    assign f2_correct_w = f2_pending_r && !f2_checked_r && f2_correct_eligible_r &&
+        f2_use_local_w && (f2_branch_local_w[0] != f2_taken_r) && !redirect_w;
     assign f2_count_w = {!f2_pc_r[2] && (!f2_taken_w || f2_position_r[1]),
         f2_pc_r[2] ^ (f2_taken_w && !f2_position_r[1])};
     assign response_accept_w = f2_pending_r && ic_resp_valid_i && !redirect_w;
@@ -202,17 +211,19 @@ module edrv32_cpu_frontend (
     assign sequential_pc_w = {f1_pc_copy3_r + 29'd1, 3'b0};
     // cpu-spec 4.4/4.9: all addresses are parallel candidates. The late cache
     // handshake only selects a candidate; it never enters a PC incrementer.
-    assign pc_hold_w = !redirect_w && !f2_correct_w && !replay_valid_r && !request_accept_w;
-    assign pc_sequential_w = new_request_w && !predict_taken_w;
-    assign pc_predict_w = new_request_w && predict_taken_w;
-    assign pc_correct_w = !redirect_w && f2_correct_w;
-    assign next_pc_w = ({32{redirect_w}} & redirect_pc_w) |
-        ({32{pc_correct_w}} & f2_correct_pc_w) |
-        ({32{pc_predict_w}} & predict_target_w) |
+    assign pc_advance_w = rst_n_i && !halt_i && !miss_wait_r &&
+        credit_r >= 2 && ic_req_ready_i;
+    assign pc_hold_w = !pc_advance_w;
+    assign pc_sequential_w = pc_advance_w && !predict_taken_w;
+    assign pc_predict_w = pc_advance_w && predict_taken_w;
+    assign normal_pc_w = ({32{pc_predict_w}} & predict_target_w) |
         ({32{pc_sequential_w}} & sequential_pc_w) |
-        ({32{pc_hold_w}} & f1_pc_r) |
-        ({32{!redirect_w && !f2_correct_w && replay_valid_r}} &
-        (request_accept_w ? replay_resume_pc_r : replay_pc_w));
+        ({32{pc_hold_w}} & f1_pc_r);
+    // Correction and redirect select after the ordinary F1 candidates. Their
+    // qualifiers never pass through request acceptance and prediction decoding.
+    assign uncorrected_pc_w = replay_valid_r ?
+        (rst_n_i && !halt_i && ic_req_ready_i ? replay_resume_pc_r : replay_pc_w) :
+        normal_pc_w;
     assign ic_req_addr_o = replay_valid_r ? {replay_pc_w[31:3], 3'b0} :
         {f1_pc_copy2_r, 3'b0};
     assign request_accept_w = ic_req_valid_o && ic_req_ready_i;
@@ -226,6 +237,7 @@ module edrv32_cpu_frontend (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .query_pc_i(f1_pc_copy1_r[31:1]),
+        .query_valid_index_i(query_valid_index_w),
         .query_accept_i(new_request_w),
         .predict_hit_o(predict_hit_w),
         .predict_taken_o(predict_taken_w),
@@ -243,9 +255,9 @@ module edrv32_cpu_frontend (
         .predict_conditional_o(predict_conditional_w),
         .predict_local_history_o(predict_local_history_w),
         .predict_global_o(predict_global_w),
-        .f2_local_history_i(f2_local_history_r),
-        .f2_index_i({f2_pc_r[13:3], f2_position_r[1]} ^ f2_history_r),
-        .f2_local_o(f2_local_w),
+        .f2_local_history_i(f2_direction_history_r),
+        .f2_index_i(f2_index_r),
+        .f2_local_o(f2_branch_local_w),
         .f2_use_local_o(f2_use_local_w),
         .clear_valid_i(update_clear_i),
         .clear_index_i(update_clear_index_i),
@@ -279,7 +291,31 @@ module edrv32_cpu_frontend (
     genvar entry;
     genvar slice;
     genvar f2_group;
+    genvar pc_group;
     generate
+        for (pc_group = 0; pc_group < 4; pc_group = pc_group + 1) begin : g_pc
+            (* keep = "true", syn_preserve = 1 *) reg f2_taken_copy1_r;
+            wire correct_w;
+            assign correct_w = f2_pending_r && !f2_checked_r && f2_correct_eligible_r &&
+                f2_use_local_w && (f2_branch_local_w[0] != f2_taken_copy1_r);
+            assign next_pc_w[pc_group*8 +: 8] = redirect_w ?
+                redirect_pc_w[pc_group*8 +: 8] : correct_w ?
+                f2_correct_pc_w[pc_group*8 +: 8] : uncorrected_pc_w[pc_group*8 +: 8];
+            always @(posedge clk_i) begin
+                if (!f2_pending_r || ic_resp_valid_i)
+                    f2_taken_copy1_r <= owner_taken_w;
+            end
+        end
+        for (f2_group = 0; f2_group < 8; f2_group = f2_group + 1) begin : g_query_index
+            (* keep = "true", syn_preserve = 1 *) reg [3:0] query_valid_index_copy1_r;
+            assign query_valid_index_w[f2_group*4 +: 4] = query_valid_index_copy1_r;
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    query_valid_index_copy1_r <= 0;
+                else
+                    query_valid_index_copy1_r <= next_pc_w[6:3];
+            end
+        end
         // Each capture group retains one owner bit and no more than sixteen data bits.
         // Owner copies use their own registered state when computing the next request.
         for (f2_group = 0; f2_group < 9; f2_group = f2_group + 1) begin : g_f2_capture
@@ -367,13 +403,13 @@ module edrv32_cpu_frontend (
                 f2_hit_r && {position_w, 1'b0} == f2_position_r,
                 ic_resp_err_i, f2_pc_r[31:3], position_w, 2'b0,
                 ic_resp_data_i[position_w*32 +: 32]};
-            // Every request reserves two stream slots. Write both; append_count_w
-            // alone decides whether one or two records acquire ownership.
+            // Every request reserves two stream slots. Capture speculatively
+            // while it owns F2; append_count_w alone grants record ownership.
+            // A delayed response overwrites unowned data on its returning edge.
             for (slice = 0; slice < 20; slice = slice + 1) begin : g_slice
                 localparam GROUP = entry*20 + slice;
                 always @(posedge clk_i) begin
-                    if (f2_pending_copy_w[GROUP % 9] &&
-                        ic_resp_valid_copy_i[GROUP % 8] && !offset_w[1])
+                    if (f2_pending_copy_w[GROUP % 9] && !offset_w[1])
                         words_r[entry][slice*8 +: 8] <= response_w[slice*8 +: 8];
                 end
             end
@@ -458,7 +494,20 @@ module edrv32_cpu_frontend (
             end
         end
     end
+    // A correction always reverses the original conditional direction. Register
+    // that opposite candidate and the chooser index before the LUTRAM read.
     always @(posedge clk_i) begin
+        if (!f2_pending_r || ic_resp_valid_i) begin
+            f2_correct_pc_r <= owner_taken_w ?
+                {owner_query_w[138:110] + 29'd1, 3'b0} : owner_query_w[80:49];
+            f2_correct_eligible_r <= owner_query_w[106] && owner_query_w[105];
+            // Read the branch's local counter on port zero; undo the swap only
+            // for carried training metadata, outside the correction path.
+            f2_direction_history_r <= owner_query_w[82] ?
+                {owner_query_w[94:85], owner_query_w[104:95]} : owner_query_w[104:85];
+            f2_index_r <= {owner_query_w[120:110], owner_query_w[82]} ^
+                owner_query_w[48:37];
+        end
         if (f2_pending_r && !f2_checked_r) begin
             f2_taken_r <= f2_taken_w;
             f2_local_r <= f2_local_w;
