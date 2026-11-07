@@ -34,6 +34,8 @@ module edrv32_cpu_ib (
     input wire keep_pair_i,
     output wire [2:0] count_o
 );
+    wire unused_push_copy_w;
+    assign unused_push_copy_w = &{1'b0, push_one_copy_i, push_two_copy_i};
     localparam RECORD_BITS = 179;
     localparam [2:0] DEPTH = 3'd4;
     reg [RECORD_BITS-1:0] entries_r [0:DEPTH-1];
@@ -44,6 +46,8 @@ module edrv32_cpu_ib (
     reg [1:0] read_ptr_r;
     reg [1:0] write_ptr_r;
     reg [2:0] count_r;
+    wire [2:0] count_next_w;
+    assign count_next_w = count_r + {1'b0, push_count_i} - {1'b0, pop_count_i};
     wire [1:0] read_next_w;
     wire [1:0] write_next_w;
     assign write_next_w = push_two_i ? write_ptr_r + 2'd2 :
@@ -181,37 +185,45 @@ module edrv32_cpu_ib (
                     write_ptr_r_copy <= write_next_w;
             end
             always @(posedge clk_i) begin
-                if (!flush_i) begin
-                    if (push_one_i && write_ptr_r_copy == write_entry[1:0])
+                begin
+                    if (count_r < 4 && write_ptr_r_copy == write_entry[1:0])
                         index_hi_r[write_entry] <= push_index_hi_i[2:0];
-                    if (push_one_i && write_ptr_r_copy == write_entry[1:0])
+                    if (count_r < 4 && write_ptr_r_copy == write_entry[1:0])
                         tournament_r[write_entry] <= push_tournament_i[11:0];
-                    if (push_two_i && write_next_w_copy == write_entry[1:0])
+                    if (count_r <= 2 && write_next_w_copy == write_entry[1:0])
                         index_hi_r[write_entry] <= push_index_hi_i[5:3];
-                    if (push_two_i && write_next_w_copy == write_entry[1:0])
+                    if (count_r <= 2 && write_next_w_copy == write_entry[1:0])
                         tournament_r[write_entry] <= push_tournament_i[23:12];
                 end
             end
-            // Wide record slices own both pointer and late-response enable copies.
-            // A response event never drives a whole 249-bit slot-selection cone.
+            // Speculative data writes own only empty slots. Registered occupancy
+            // and pointer copies isolate the data CE from this cycle's I$ hit.
             for (write_slice = 0; write_slice < 17;
                 write_slice = write_slice + 1) begin : g_slice
-                localparam GROUP = (write_entry*17 + write_slice) % 8;
                 localparam WIDTH = write_slice == 11 ? 3 : write_slice == 16 ? 6 : 16;
                 (* keep = "true", syn_preserve = 1 *) reg [1:0] write_ptr_copy1_r;
+                (* keep = "true", syn_preserve = 1 *) reg one_free_copy_r;
+                (* keep = "true", syn_preserve = 1 *) reg two_free_copy_r;
                 wire write0_w;
                 wire write1_w;
-                assign write0_w = !flush_i && push_one_copy_i[GROUP] &&
+                assign write0_w = one_free_copy_r &&
                     write_ptr_copy1_r == write_entry[1:0];
-                assign write1_w = !flush_i && push_two_copy_i[GROUP] &&
+                assign write1_w = two_free_copy_r &&
                     (write_ptr_copy1_r + 2'd1) == write_entry[1:0];
                 always @(posedge clk_i or negedge rst_n_i) begin
-                    if (!rst_n_i)
+                    if (!rst_n_i) begin
                         write_ptr_copy1_r <= 0;
-                    else if (flush_i)
+                        one_free_copy_r <= 1;
+                        two_free_copy_r <= 1;
+                    end else if (flush_i) begin
                         write_ptr_copy1_r <= keep_head_i ? read_next_w : 2'd0;
-                    else
+                        one_free_copy_r <= 1;
+                        two_free_copy_r <= 1;
+                    end else begin
                         write_ptr_copy1_r <= write_next_w;
+                        one_free_copy_r <= count_next_w < 4;
+                        two_free_copy_r <= count_next_w <= 2;
+                    end
                 end
                 if (write_slice < 12) begin : g_record
                     always @(posedge clk_i) begin
@@ -246,7 +258,7 @@ module edrv32_cpu_ib (
         end else begin
             read_ptr_r <= read_ptr_r + pop_count_i;
             write_ptr_r <= write_next_w;
-            count_r <= count_r + {1'b0, push_count_i} - {1'b0, pop_count_i};
+            count_r <= count_next_w;
         end
     end
 endmodule
