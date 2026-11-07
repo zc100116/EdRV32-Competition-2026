@@ -220,7 +220,6 @@ module edrv32_dcache (
     localparam [3:0] D_RETURN = 4'd8;
     reg [3:0] state_r;
     reg [3:0] device_state_r;
-    wire [511:0] lru_r;
     reg lookup_valid_r;
     reg lookup_hit_enable_r;
     wire lookup_valid0_w;
@@ -282,7 +281,7 @@ module edrv32_dcache (
     wire lookup_dirty0_w;
     wire lookup_dirty1_w;
     wire lookup_lru_w;
-    reg [31:0] lookup_lru_bank_r;
+    wire [31:0] lookup_lru_bank_r;
     reg fence_done_r;
     wire cacheable_w;
     wire device_w;
@@ -363,8 +362,6 @@ module edrv32_dcache (
     wire [15:0] lookup_slot_r;
     assign lookup_bank_r = 32'b1 << lookup_index_r[8:4];
     assign lookup_slot_r = 16'b1 << lookup_index_r[3:0];
-    wire [15:0] read_slot_w;
-    assign read_slot_w = 16'b1 << read_addr_w[5:2];
     // cache-spec 2.2/5.2: metadata shares the synchronous tag read. Old-data
     // collisions need only a dirty bypass for the buffer draining on that edge.
     assign scan_valid_w = {tag1_w[19], tag0_w[19]};
@@ -878,7 +875,6 @@ module edrv32_dcache (
     wire [127:0] metadata_slot_w;
     wire [71:0] early_response_index_w;
     wire [7:0] early_response_copy_w;
-    wire [31:0] early_response_lookup_slot_w;
     genvar metadata_group;
     generate
         for (metadata_group = 0; metadata_group < 8;
@@ -886,7 +882,6 @@ module edrv32_dcache (
             (* keep = "true", syn_preserve = 1 *) reg [15:0] slot_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg early_response_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg [8:0] early_response_index_copy1_r;
-            (* keep = "true", syn_preserve = 1 *) reg [3:0] early_response_lookup_copy1_r;
             assign metadata_slot_w[metadata_group*16 +: 16] = slot_copy1_r;
             assign early_response_copy_w[metadata_group] = early_response_copy1_r;
             always @(posedge clk_i or negedge rst_n_i) begin
@@ -896,59 +891,47 @@ module edrv32_dcache (
                     early_response_copy1_r <= early_promote_w;
             end
             assign early_response_index_w[metadata_group*9 +: 9] = early_response_index_copy1_r;
-            assign early_response_lookup_slot_w[metadata_group*4 +: 4] =
-                early_response_lookup_copy1_r;
             always @(posedge clk_i) begin
                 slot_copy1_r <= lookup_slot_r;
                 early_response_index_copy1_r <= dc_req_addr_i[13:5];
-                early_response_lookup_copy1_r <= dc_req_addr_i[8:5];
             end
         end
         for (bank = 0; bank < 32; bank = bank + 1) begin : g_metadata
             reg [15:0] lru_bank_r;
+            reg [15:0] lookup_lru_data_r;
             reg metadata_valid_r;
             reg metadata_bank_r;
             (* keep = "true", syn_preserve = 1 *) reg [1:0] hit_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg way_copy1_r;
-            (* keep = "true", syn_preserve = 1 *) reg lookup_way_copy1_r;
             (* keep = "true", syn_preserve = 1 *) reg early_way_copy1_r;
-            (* keep = "true", syn_preserve = 1 *) reg early_lookup_way_copy1_r;
             wire [15:0] metadata_slot_w_local;
             wire [8:0] early_index_w;
-            wire [3:0] early_lookup_slot_w;
             wire [15:0] normal_mask_w;
             wire [15:0] early_mask_w;
             wire normal_update_w;
             wire early_update_w;
-            wire normal_forward_w;
-            wire early_forward_w;
             wire rst_dlru_n_w;
             assign metadata_slot_w_local = metadata_slot_w[(bank/4)*16 +: 16];
             assign early_index_w = early_response_index_w[(bank/4)*9 +: 9];
-            assign early_lookup_slot_w = early_response_lookup_slot_w[(bank/4)*4 +: 4];
             assign normal_update_w = metadata_valid_r && metadata_bank_r && (|hit_copy1_r);
             assign early_update_w = early_response_copy_w[bank/4] &&
                 early_index_w[8:4] == bank[4:0];
             assign normal_mask_w = metadata_slot_w_local & {16{normal_update_w}};
             assign early_mask_w = (16'b1 << early_index_w[3:0]) &
                 {16{early_update_w}};
-            assign normal_forward_w = normal_update_w &&
-                (|(metadata_slot_w_local & read_slot_w));
-            assign early_forward_w = early_update_w &&
-                early_lookup_slot_w == read_addr_w[5:2];
-            assign lru_r[bank*16 +: 16] = lru_bank_r;
+            assign lookup_lru_bank_r[bank] = |(lookup_lru_data_r & lookup_slot_r);
             assign rst_dlru_n_w = rst_sys_dlru_n_i[bank/16];
             always @(posedge clk_i) begin
                 // Raw compare results enter FFs before bank writes or forwarding.
                 hit_copy1_r <= {hit1_w, hit0_w};
                 way_copy1_r <= hit0_w;
-                lookup_way_copy1_r <= hit0_w;
                 early_way_copy1_r <= early_tag0_w[18] && early_hit0_w;
-                early_lookup_way_copy1_r <= early_tag0_w[18] && early_hit0_w;
                 metadata_bank_r <= lookup_bank_r[bank];
-                lookup_lru_bank_r[bank] <= early_forward_w ? early_lookup_way_copy1_r :
-                    normal_forward_w ? lookup_way_copy1_r :
-                    (|(lru_r[bank*16 +: 16] & read_slot_w));
+                // Capture all slot values; the registered raw index selects next cycle.
+                // Forward both pending metadata writes without this cycle's E address.
+                lookup_lru_data_r <= (lru_bank_r & ~normal_mask_w & ~early_mask_w) |
+                    (normal_mask_w & {16{way_copy1_r}} & ~early_mask_w) |
+                    (early_mask_w & {16{early_way_copy1_r}});
             end
             always @(posedge clk_i or negedge rst_dlru_n_w) begin
                 if (!rst_dlru_n_w) begin
