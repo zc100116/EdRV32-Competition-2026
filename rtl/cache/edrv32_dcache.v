@@ -181,10 +181,10 @@ module edrv32_dcache (
             early_tag_r <= dc_early_addr_i[31:14];
             early_byte_select_r <= 8'b1 << dc_early_addr_i[2:0];
         end
-        if (early_promote_w) begin
-            early_response_data_r <= dc_early_way_data_o;
-            early_response_way_r <= dc_early_way_hit_o;
-        end
+        // early_response_r owns the payload. Capture continuously so tag hit
+        // and request acceptance do not drive the 64-bit response clock enable.
+        early_response_data_r <= dc_early_way_data_o;
+        early_response_way_r <= dc_early_way_hit_o;
         if (lookup_accept_w)
             lookup_byte_select_r <= 8'b1 << dc_req_addr_i[2:0];
     end

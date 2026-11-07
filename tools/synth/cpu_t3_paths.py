@@ -34,6 +34,8 @@ QUERIES = {
     'B2_tag_m_result': (r'u_dcache.u_(early_)?tag[01]', r'u_core.m_result_r'),
     'B3_tag_IB_pointer': (r'u_dcache.u_(early_)?tag[01]',
                           r'u_core.u_frontend.u_ib.*read_ptr'),
+    'B_early_payload_capture': (r'u_dcache.u_(early_)?tag[01]',
+                                r'u_dcache.early_response_data_r'),
     'C1_F2_correction': (r'u_core.u_frontend.f2_payload_r',
                          r'u_core.u_frontend.f1_pc.*_r'),
     'C1_registered_correction': (r'u_core.u_frontend.*correct.*_r',
