@@ -1,0 +1,33 @@
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-PROBE-NPU-FMAX/synthesize/edrv32_npu_timing_probe_syn.vm
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* ctrl_accum_valid_r */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        ctrl_accum_valid_r (
+            .Q (accum_valid_o),
+            .C (N0),
+            .CLK (clk_i),
+            .D (N916));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* ctrl_r4_valid_r */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        ctrl_r4_valid_r_vname (
+            .Q (ctrl_r4_valid_r),
+            .C (N0),
+            .CLK (clk_i),
+            .D (N914));
+
+(* PAP_PRESERVE="TRUE" *)    GTP_DFF_C /* ctrl_r5_valid_r */ #(
+            .GRS_EN("TRUE"),
+            .INIT(1'b0))
+        ctrl_r5_valid_r_vname (
+            .Q (ctrl_r5_valid_r),
+            .C (N0),
+            .CLK (clk_i),
+            .D (N915));
+
+Local per-pixel DFF declarations
+r4: 64
+r5: 64
+accum: 0
