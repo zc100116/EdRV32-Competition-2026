@@ -86,10 +86,6 @@ module tb;
     logic wb_err_o;
     logic [31:0] wb_err_addr_o;
     always #5 clk_i = ~clk_i;
-    wire [511:0] lru_observe_w;
-    for (genvar bank = 0; bank < 32; bank++) begin : g_lru_observe
-        assign lru_observe_w[bank*16 +: 16] = dut.g_metadata[bank].lru_bank_r;
-    end
     edrv32_dcache dut (
         .dc_resp_way_hit_copy_o(),
         .clk_i(clk_i),
@@ -339,7 +335,7 @@ module tb;
             tags0[i]=dut.u_tag0.memory_r[i];
             tags1[i]=dut.u_tag1.memory_r[i];
         end
-        lru=lru_observe_w; before_reads=reads; before_writes=writes;
+        lru=dut.lru_r; before_reads=reads; before_writes=writes;
         step(); dc_early_valid_i=1; dc_early_addr_i=address;
         tick();
         if (dc_early_hit_o !== expected_hit ||
@@ -351,7 +347,7 @@ module tb;
         for (int i=0;i<512;i++)
             if (tags0[i] !== dut.u_tag0.memory_r[i] || tags1[i] !== dut.u_tag1.memory_r[i])
                 $fatal(1,"FAIL early query modified tag/dirty/valid group=%0d",i);
-        if (lru !== lru_observe_w || reads != before_reads || writes != before_writes ||
+        if (lru !== dut.lru_r || reads != before_reads || writes != before_writes ||
             dut.buffer_valid_r || dut.store_pending_r || dut.state_r != dut.S_IDLE)
             $fatal(1,"FAIL discarded query changed cache state/bus address=%h",address);
     endtask
@@ -483,12 +479,12 @@ module tb;
             $finish;
         end
         access_word(32'h10000000, 0, 2, 4096);
-        if (reads != 1 || lru_observe_w[0] != 1) $fatal(1, "FAIL D cold fill LRU");
+        if (reads != 1 || dut.lru_r[0] != 1) $fatal(1, "FAIL D cold fill LRU");
         access_word(32'h10004000, 0, 2, 6144);
-        if (reads != 2 || lru_observe_w[0] != 0) $fatal(1, "FAIL D second fill LRU");
+        if (reads != 2 || dut.lru_r[0] != 0) $fatal(1, "FAIL D second fill LRU");
         access_word(32'h10000000, 1, 2, 32'hdeadbeef);
         access_word(32'h10000000, 0, 2, 32'hdeadbeef);
-        if (reads != 2 || lru_observe_w[0] != 1) $fatal(1, "FAIL D hit LRU");
+        if (reads != 2 || dut.lru_r[0] != 1) $fatal(1, "FAIL D hit LRU");
         access_word(32'h10004000, 0, 2, 6144);
         allow_aw = 0;
         fork
