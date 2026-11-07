@@ -35,12 +35,6 @@ module edrv32_cpu_frontend (
     input wire update_taken_i,
     input wire [11:0] update_index_i,
     input wire [11:0] update_tournament_i,
-    // E metadata preceding the registered training write by one cycle.
-    input wire [9:2] update_prepare_pc_i,
-    input wire update_prepare_taken_i,
-    input wire [11:0] update_prepare_index_i,
-    input wire [10:0] update_prepare_tournament_i,
-
     // Decode consumes 0, 1 or 2 records; low record is oldest.
     input wire [1:0] decode_pop_count_i,
     output wire [357:0] decode_data_o,
@@ -278,10 +272,6 @@ module edrv32_cpu_frontend (
         .update_taken_i(update_taken_i),
         .update_index_i(update_index_i),
         .update_tournament_i(update_tournament_i),
-        .update_prepare_pc_i(update_prepare_pc_i),
-        .update_prepare_taken_i(update_prepare_taken_i),
-        .update_prepare_index_i(update_prepare_index_i),
-        .update_prepare_tournament_i(update_prepare_tournament_i),
         .predict_conditional_o(predict_conditional_w),
         .predict_local_history_o(predict_local_history_w),
         .predict_global_o(predict_global_w),

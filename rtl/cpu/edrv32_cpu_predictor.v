@@ -38,12 +38,6 @@ module edrv32_cpu_predictor (
     input wire [11:0] update_index_i,
 
     input wire [11:0] update_tournament_i,
-    // E metadata preceding the registered training write by one cycle.
-    input wire [9:2] update_prepare_pc_i,
-    input wire update_prepare_taken_i,
-    input wire [11:0] update_prepare_index_i,
-    input wire [10:0] update_prepare_tournament_i,
-
 
     // F2 clears the stale fetch-group prediction after boundary or length mismatch.
     input wire clear_valid_i,
@@ -291,13 +285,6 @@ module edrv32_cpu_predictor (
     wire [1:0] next_chooser_w;
     wire conditional_update_w;
     wire local_correct_w;
-    wire chooser_update_w;
-    wire [8:0] local_history_current_w;
-    wire [1:0] local_counter_current_w;
-    wire [1:0] chooser_current_w;
-    reg [9:0] local_history_write_r;
-    reg [1:0] local_counter_write_r;
-    reg [1:0] chooser_write_r;
     assign predict_conditional_o = btb_data_w[2:0] == 0;
     assign predict_global_o = history_r[0] ?
         {direction_word_w[1], direction_word_w[3]} :
@@ -305,36 +292,18 @@ module edrv32_cpu_predictor (
     assign f2_local_o = {local_counter_w[1][1], local_counter_w[0][1]};
     assign f2_use_local_o = chooser_w[1];
     assign conditional_update_w = update_valid_i && update_type_i == 0;
-    assign chooser_update_w = conditional_update_w &&
-        update_tournament_i[10] != update_tournament_i[11];
-    // The existing update read replica reads E's next write address. Same-address
-    // consecutive training must see the value written at this preparation edge.
-    assign local_history_current_w = conditional_update_w &&
-        update_pc_i[9:2] == update_prepare_pc_i ?
-        local_history_write_r[8:0] : update_local_history_w[8:0];
-    assign local_counter_current_w = conditional_update_w &&
-        update_tournament_i[9:0] == update_prepare_tournament_i[9:0] ?
-        local_counter_write_r : update_local_counter_w;
-    assign chooser_current_w = chooser_update_w && update_index_i == update_prepare_index_i ?
-        chooser_write_r : update_chooser_w;
-    assign local_correct_w = update_prepare_tournament_i[10] == update_prepare_taken_i;
-    assign next_local_counter_w = update_prepare_taken_i ?
-        (local_counter_current_w == 3 ? 2'd3 : local_counter_current_w + 1'b1) :
-        (local_counter_current_w == 0 ? 2'd0 : local_counter_current_w - 1'b1);
+    assign local_correct_w = update_tournament_i[10] == update_taken_i;
+    assign next_local_counter_w = update_taken_i ?
+        (update_local_counter_w == 3 ? 2'd3 : update_local_counter_w + 1'b1) :
+        (update_local_counter_w == 0 ? 2'd0 : update_local_counter_w - 1'b1);
     assign next_chooser_w = local_correct_w ?
-        (chooser_current_w == 3 ? 2'd3 : chooser_current_w + 1'b1) :
-        (chooser_current_w == 0 ? 2'd0 : chooser_current_w - 1'b1);
-    always @(posedge clk_i) begin
-        local_history_write_r <= {local_history_current_w, update_prepare_taken_i};
-        local_counter_write_r <= next_local_counter_w;
-        chooser_write_r <= next_chooser_w;
-    end
+        (update_chooser_w == 3 ? 2'd3 : update_chooser_w + 1'b1) :
+        (update_chooser_w == 0 ? 2'd0 : update_chooser_w - 1'b1);
     edrv32_ram_cpu_local_history u_local_history (
         .clk_i(clk_i),
         .wr_en_i(conditional_update_w),
         .wr_addr_i(update_pc_i[9:2]),
-        .wr_data_i(local_history_write_r),
-        .update_addr_i(update_prepare_pc_i),
+        .wr_data_i({update_local_history_w[8:0], update_taken_i}),
         .update_data_o(update_local_history_w),
         .rd0_addr_i({query_pc_i[9:3], 1'b0}),
         .rd0_data_o(predict_local_history_o[9:0]),
@@ -345,8 +314,7 @@ module edrv32_cpu_predictor (
         .clk_i(clk_i),
         .wr_en_i(conditional_update_w),
         .wr_addr_i(update_tournament_i[9:0]),
-        .wr_data_i(local_counter_write_r),
-        .update_addr_i(update_prepare_tournament_i[9:0]),
+        .wr_data_i(next_local_counter_w),
         .update_data_o(update_local_counter_w),
         .rd0_addr_i(f2_local_history_i[9:0]),
         .rd0_data_o(local_counter_w[0]),
@@ -355,10 +323,9 @@ module edrv32_cpu_predictor (
     );
     edrv32_ram_cpu_chooser u_chooser (
         .clk_i(clk_i),
-        .wr_en_i(chooser_update_w),
+        .wr_en_i(conditional_update_w && update_tournament_i[10] != update_tournament_i[11]),
         .wr_addr_i(update_index_i),
-        .wr_data_i(chooser_write_r),
-        .update_addr_i(update_prepare_index_i),
+        .wr_data_i(next_chooser_w),
         .update_data_o(update_chooser_w),
         .rd0_addr_i(f2_index_i),
         .rd0_data_o(chooser_w)

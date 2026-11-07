@@ -10,7 +10,6 @@ module edrv32_ram_cpu_local_direction (
     input wire wr_en_i,
     input wire [9:0] wr_addr_i,
     input wire [1:0] wr_data_i,
-    input wire [9:0] update_addr_i,
     output wire [1:0] update_data_o,
     // Independent asynchronous query ports.
     input wire [9:0] rd0_addr_i,
@@ -49,7 +48,7 @@ module edrv32_ram_cpu_local_direction (
         .wr_en(wr_en_i),
         .wr_addr(wr_addr_i[9:0]),
         .wr_data(wr_data_i),
-        .rd_addr(update_addr_i[9:0]),
+        .rd_addr(wr_addr_i[9:0]),
         .rd_data(copy2_data_w)
     );
     assign rd0_data_o = copy0_data_w;
@@ -62,7 +61,7 @@ module edrv32_ram_cpu_local_direction (
         for (entry = 0; entry < 1024; entry = entry + 1)
             memory_r[entry] = 2'd1;
     end
-    assign update_data_o = memory_r[update_addr_i];
+    assign update_data_o = memory_r[wr_addr_i];
     assign rd0_data_o = memory_r[rd0_addr_i];
     assign rd1_data_o = memory_r[rd1_addr_i];
     always @(posedge clk_i) begin

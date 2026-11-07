@@ -23,26 +23,6 @@ module tb;
     reg update_taken_i=0;
     reg [11:0] update_index_i=0;
     reg [11:0] update_tournament_i=0;
-    // Model E preparation followed by the existing registered training write.
-    reg train_valid_r=0;
-    reg [31:1] train_pc_r=0;
-    reg [31:0] train_target_r=0;
-    reg [2:0] train_type_r=0;
-    reg train_taken_r=0;
-    reg [11:0] train_index_r=0;
-    reg [11:0] train_tournament_r=0;
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if(!rst_n_i)train_valid_r<=0;
-        else train_valid_r<=update_valid_i;
-    end
-    always @(posedge clk_i) begin
-        train_pc_r<=update_pc_i;
-        train_target_r<=update_target_i;
-        train_type_r<=update_type_i;
-        train_taken_r<=update_taken_i;
-        train_index_r<=update_index_i;
-        train_tournament_r<=update_tournament_i;
-    end
     reg [19:0] f2_local_history_i=0;
     reg [11:0] f2_index_i=0;
     wire predict_conditional_o;
@@ -102,17 +82,13 @@ module tb;
         .predict_position_o(predict_position_o),
         .predict_history_o(predict_history_o),
         .predict_ras_o(predict_ras_o),
-        .update_valid_i(train_valid_r),
-        .update_pc_i(train_pc_r),
-        .update_target_i(train_target_r),
-        .update_type_i(train_type_r),
-        .update_taken_i(train_taken_r),
-        .update_index_i(train_index_r),
-        .update_tournament_i(train_tournament_r),
-        .update_prepare_pc_i(update_pc_i[9:2]),
-        .update_prepare_taken_i(update_taken_i),
-        .update_prepare_index_i(update_index_i),
-        .update_prepare_tournament_i(update_tournament_i[10:0]),
+        .update_valid_i(update_valid_i),
+        .update_pc_i(update_pc_i),
+        .update_target_i(update_target_i),
+        .update_type_i(update_type_i),
+        .update_taken_i(update_taken_i),
+        .update_index_i(update_index_i),
+        .update_tournament_i(update_tournament_i),
         .predict_conditional_o(predict_conditional_o),
         .predict_local_history_o(predict_local_history_o),
         .predict_global_o(predict_global_o),
@@ -187,32 +163,32 @@ module tb;
                 stack[ptr]=32'(pc_value)+4;ptr=(ptr+1)%4;
                 if(depth<4)depth=depth+1;else overflow_seen=overflow_seen+1;
             end else if(action==2 && depth>0)begin ptr=(ptr+3)%4;depth=depth-1;end
-            if(train_valid_r)begin
-                slot=integer'(train_pc_r[9:3]);
-                if(valid[slot] && tag[slot]!=train_pc_r[31:10])alias_seen=alias_seen+1;
-                valid[slot]=1;tag[slot]=train_pc_r[31:10];
-                target[slot]=train_target_r;position[slot]=train_pc_r[2:1];
-                kind[slot]=train_type_r;
-                if(train_type_r==0)begin
-                    training_slot=integer'(train_pc_r[9:2]);
+            if(update_valid_i)begin
+                slot=integer'(update_pc_i[9:3]);
+                if(valid[slot] && tag[slot]!=update_pc_i[31:10])alias_seen=alias_seen+1;
+                valid[slot]=1;tag[slot]=update_pc_i[31:10];
+                target[slot]=update_target_i;position[slot]=update_pc_i[2:1];
+                kind[slot]=update_type_i;
+                if(update_type_i==0)begin
+                    training_slot=integer'(update_pc_i[9:2]);
                     local_history[training_slot]=((local_history[training_slot]<<1) |
-                        integer'(train_taken_r)) & 1023;
-                    training_slot=integer'(train_tournament_r[9:0]);
-                    if(train_taken_r && local_direction[training_slot]<3)
+                        integer'(update_taken_i)) & 1023;
+                    training_slot=integer'(update_tournament_i[9:0]);
+                    if(update_taken_i && local_direction[training_slot]<3)
                         local_direction[training_slot]++;
-                    if(!train_taken_r && local_direction[training_slot]>0)
+                    if(!update_taken_i && local_direction[training_slot]>0)
                         local_direction[training_slot]--;
-                    if(train_tournament_r[10]!=train_tournament_r[11])begin
-                        if(train_tournament_r[10]==train_taken_r && chooser[train_index_r]<3)
-                            chooser[train_index_r]++;
-                        if(train_tournament_r[10]!=train_taken_r && chooser[train_index_r]>0)
-                            chooser[train_index_r]--;
+                    if(update_tournament_i[10]!=update_tournament_i[11])begin
+                        if(update_tournament_i[10]==update_taken_i && chooser[update_index_i]<3)
+                            chooser[update_index_i]++;
+                        if(update_tournament_i[10]!=update_taken_i && chooser[update_index_i]>0)
+                            chooser[update_index_i]--;
                     end
-                    history={history[10:0],train_taken_r};
-                    if(train_taken_r && direction[train_index_r]<3)
-                        direction[train_index_r]=direction[train_index_r]+1;
-                    else if(!train_taken_r && direction[train_index_r]>0)
-                        direction[train_index_r]=direction[train_index_r]-1;
+                    history={history[10:0],update_taken_i};
+                    if(update_taken_i && direction[update_index_i]<3)
+                        direction[update_index_i]=direction[update_index_i]+1;
+                    else if(!update_taken_i && direction[update_index_i]>0)
+                        direction[update_index_i]=direction[update_index_i]-1;
                     else saturate_seen=saturate_seen+1;
                 end
             end
