@@ -16,6 +16,7 @@ module edrv32_cpu_early_tb;
     assign early_data = ({32{early_way_hit[0]}} & early_way_data[31:0]) |
         ({32{early_way_hit[1]}} & early_way_data[63:32]);
     logic req_valid = 0;
+    logic req_early = 0;
     logic [31:0] req_addr = 0;
     logic req_store = 0;
     logic ready;
@@ -44,6 +45,7 @@ module edrv32_cpu_early_tb;
         .dc_early_way_hit_o(early_way_hit),
         .dc_early_way_data_o(early_way_data),
         .dc_req_valid_i(req_valid),
+        .dc_req_early_i(req_early),
         .dc_req_addr_i(req_addr),
         .dc_req_store_i(req_store),
         .dc_req_size_i(2'd2),
@@ -88,6 +90,7 @@ module edrv32_cpu_early_tb;
         // A successful query supplies M while the read port serves the next query.
         if (!ready) $fatal(1, "FAIL model unexpectedly not ready");
         req_valid = 1;
+        req_early = 1;
         req_addr = BASE;
         early_addr = BASE+4;
         expect_query(1, 0);
@@ -100,6 +103,7 @@ module edrv32_cpu_early_tb;
         if (!resp_valid || resp_data != 32'haabbccdd)
             $fatal(1, "FAIL consecutive reuse expected=aabbccdd actual=%08x", resp_data);
         req_valid = 0;
+        req_early = 0;
         tick();
         commit = 0;
         early_valid = 1;

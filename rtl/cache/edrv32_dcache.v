@@ -12,6 +12,7 @@ module edrv32_dcache (
 
     // Core data interface.
     input wire dc_req_valid_i,
+    input wire dc_req_early_i,
     input wire [31:0] dc_req_addr_i,
     input wire dc_req_store_i,
     input wire [1:0] dc_req_size_i,
@@ -148,7 +149,8 @@ module edrv32_dcache (
     assign early_shift0_w = shifted_word(early_data0_w, early_byte_select_r);
     assign early_shift1_w = shifted_word(early_data1_w, early_byte_select_r);
     assign dc_early_way_data_o = {early_shift1_w, early_shift0_w};
-    assign early_promote_w = accept_w && !dc_req_store_i && (|dc_early_way_hit_o) &&
+    assign early_promote_w = accept_w && dc_req_early_i && !dc_req_store_i &&
+        (|dc_early_way_hit_o) &&
         dc_req_addr_i == early_addr_r;
     assign lookup_accept_w = accept_w && !early_promote_w;
     always @(posedge clk_i or negedge rst_n_i) begin

@@ -56,6 +56,7 @@ module tb;
         .dc_early_addr_o(),
         .dc_early_way_hit_i(2'b00),
         .dc_early_way_data_i(64'b0),
+        .dc_req_early_o(),
         .dc_req_valid_o(dc_req_valid),
         .dc_req_addr_o(),
         .dc_req_store_o(),

@@ -47,6 +47,7 @@ module edrv32_cpu_b1_tb;
     logic irq_mtip;
     logic [63:0] mtime;
     logic done;
+    wire dc_req_early;
     edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
@@ -57,6 +58,7 @@ module edrv32_cpu_b1_tb;
         .ic_kill_o(ic_kill),
         .ic_inv_o(ic_inv),
         .dc_req_valid_o(dc_req_valid),
+        .dc_req_early_o(dc_req_early),
         .dc_req_addr_o(dc_req_addr),
         .dc_req_store_o(dc_req_store),
         .dc_req_size_o(dc_req_size),
@@ -114,6 +116,7 @@ module edrv32_cpu_b1_tb;
         .dc_early_way_hit_o(unused_early_way_hit),
         .dc_early_way_data_o(unused_early_way_data),
         .dc_req_valid_i(dc_req_valid),
+        .dc_req_early_i(dc_req_early),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
         .dc_req_size_i(dc_req_size),
@@ -190,6 +193,7 @@ module edrv32_cpu_b1_tb;
         .ic_resp_err_i(ic_resp_err),
         .ic_kill_i(ic_kill),
         .dc_req_valid_i(dc_req_valid),
+        .dc_req_early_i(dc_req_early),
         .dc_req_ready_i(dc_req_ready),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),

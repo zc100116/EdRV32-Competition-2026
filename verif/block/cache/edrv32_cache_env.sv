@@ -106,6 +106,7 @@ module edrv32_cache_env #(parameter int TEST = 0, parameter int SEEDS = 1);
 
         // Core interface
         .dc_req_valid_i(dc_req_valid),
+        .dc_req_early_i(1'b0),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
         .dc_req_size_i(dc_req_size),

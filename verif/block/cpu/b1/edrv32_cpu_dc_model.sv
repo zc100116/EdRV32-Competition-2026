@@ -12,6 +12,7 @@ module edrv32_cpu_dc_model (
     output wire [63:0] dc_early_way_data_o,
 
     input logic dc_req_valid_i,
+    input logic dc_req_early_i,
     input logic [31:0] dc_req_addr_i,
     input logic dc_req_store_i,
     input logic [1:0] dc_req_size_i,
@@ -118,7 +119,7 @@ module edrv32_cpu_dc_model (
     assign miss_o = active_r && !device_r && delay_r != 0;
     assign write_buffer_valid_o = buffer_valid_r;
 
-    assign early_reuse_w = (|dc_early_way_hit_o) && dc_req_valid_i &&
+    assign early_reuse_w = (|dc_early_way_hit_o) && dc_req_valid_i && dc_req_early_i &&
         !dc_req_store_i && dc_req_addr_i == early_addr_r;
     // The replica read is independent of ordinary request readiness and RAM usage.
     // Failure reasons are observations for cpu-testplan A-02 coverage, not DUT ports.

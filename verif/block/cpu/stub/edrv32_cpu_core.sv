@@ -24,6 +24,7 @@ module edrv32_cpu_core (
 
     // D$ interface.
     output logic dc_req_valid_o,
+    output wire dc_req_early_o,
     output logic [31:0] dc_req_addr_o,
     output logic dc_req_store_o,
     output logic [1:0] dc_req_size_o,
@@ -80,6 +81,7 @@ module edrv32_cpu_core (
     bit dc_error_enabled;
     bit ic_error_enabled;
 
+    assign dc_req_early_o = 1'b0;
     assign m_enter_w = dc_req_valid_o && dc_req_ready_i;
     // Expose counters/debug hooks for C-V5, without attempting coverage statistics here.
     assign debug_o = {trace_pc_w[31:0], 11'b0, trace_valid_w, 19'b0};

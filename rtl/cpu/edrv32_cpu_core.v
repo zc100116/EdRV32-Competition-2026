@@ -23,6 +23,7 @@ module edrv32_cpu_core (
     input wire ic_inv_done_i,
     // Data cache.
     output wire dc_req_valid_o,
+    output wire dc_req_early_o,
     output wire [31:0] dc_req_addr_o,
     output wire dc_req_store_o,
     output wire [1:0] dc_req_size_o,
@@ -133,6 +134,7 @@ module edrv32_cpu_core (
     wire e_capture_w;
     wire m_kill_all_w;
     wire d_early_eligible_w;
+    wire d_early_slot_w;
     wire [4:0] d_early_select_w;
     wire [31:0] d_early_base_w;
     reg e_early_r;
@@ -182,30 +184,34 @@ module edrv32_cpu_core (
     wire [31:0] e_lane_pc_target_w [0:1];
     wire [1:0] e_lane_target_match_w;
     wire [1:0] d_map_w;
+    // v0.20: choose a load using queue contents and pipeline capabilities only.
+    assign d_early_slot_w = !d_load_w[0] && d_load_w[1] &&
+        d_count_w >= 2 && d_pipe1_w[0];
     // Only registered/architectural producers may feed the D address adder.
     // The exclusion list is independent of cache hit and current issue handshakes.
-    assign d_early_eligible_w = d_load_w[d_map_w[0]] &&
+    assign d_early_eligible_w = d_load_w[d_early_slot_w] &&
+        !(d_early_slot_w && d_dest_w[0] && d_rd_w[0] == d_rs1_w[1]) &&
         !(e_valid_r[0] && e_dest_r[0] &&
-            e_rd_r[0] == d_rs1_w[d_map_w[0]]) &&
+            e_rd_r[0] == d_rs1_w[d_early_slot_w]) &&
         !(e_valid_r[1] && e_dest_r[1] &&
-            e_rd_r[1] == d_rs1_w[d_map_w[0]]) &&
+            e_rd_r[1] == d_rs1_w[d_early_slot_w]) &&
         !(m_valid_r[0] && m_dest_r[0] &&
-            m_rd_r[0] == d_rs1_w[d_map_w[0]] &&
+            m_rd_r[0] == d_rs1_w[d_early_slot_w] &&
             m_slow_r) &&
         !(w_valid_r[0] && w_dest_r[0] &&
-            w_rd_r[0] == d_rs1_w[d_map_w[0]] && w_mul_r[0]);
+            w_rd_r[0] == d_rs1_w[d_early_slot_w] && w_mul_r[0]);
     // Qualifying queries exclude E and unregistered M/W producers. Select
     // registered data directly so those excluded results never feed this adder.
-    assign d_early_select_w = {d_bypass_select_w[d_map_w[0]*2][6:3],
-        d_bypass_select_w[d_map_w[0]*2][0]};
+    assign d_early_select_w = {d_bypass_select_w[d_early_slot_w*2][6:3],
+        d_bypass_select_w[d_early_slot_w*2][0]};
     assign d_early_base_w =
-        ({32{d_early_select_w[0]}} & d_register_w[d_map_w[0]*2]) |
+        ({32{d_early_select_w[0]}} & d_register_w[d_early_slot_w*2]) |
         ({32{d_early_select_w[1]}} & m_result_r[0]) |
         ({32{d_early_select_w[2]}} & m_result_r[1]) |
         ({32{d_early_select_w[3]}} & w_result_r[0]) |
         ({32{d_early_select_w[4]}} & w_result_r[1]);
-    assign dc_early_addr_o = d_early_base_w + d_imm_w[d_map_w[0]];
-    assign dc_early_valid_o = d_issue_valid_w && d_early_eligible_w;
+    assign dc_early_addr_o = d_early_base_w + d_imm_w[d_early_slot_w];
+    assign dc_early_valid_o = d_count_w != 0 && d_early_eligible_w;
     // Format each way before its late hit selects an operand (cpu-spec 4.9).
     function [31:0] load_value;
         input [31:0] data_i;
@@ -236,7 +242,8 @@ module edrv32_cpu_core (
             e_repair_pending_r <= 0;
         end else begin
             // A query is usable only in the immediately following E cycle.
-            e_early_r <= dc_early_valid_o;
+            e_early_r <= dc_early_valid_o && d_issue_valid_w &&
+                d_early_slot_w == d_map_w[0];
             if (d_issue_valid_w)
                 e_repair_pending_r <= e_early_r && e_advance_w && !(|dc_early_way_hit_i) &&
                     (|e_repair_mask_next_w);
@@ -1053,6 +1060,7 @@ module edrv32_cpu_core (
     assign dc_req_valid_o = (|e_valid_r) && !m_wait_w && !m_block_early_w &&
         !e_flush_w && !e_repair_pending_r && !div_wait_w &&
         e_memory_w && !e_exception_r && !e_misaligned_w;
+    assign dc_req_early_o = e_early_r;
     assign dc_req_addr_o = e_address_w;
     assign dc_req_store_o = e_class_r[0] == C_STORE;
     assign dc_req_size_o = e_instr_w[13:12];

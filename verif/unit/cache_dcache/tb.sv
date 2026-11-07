@@ -6,6 +6,7 @@ module tb;
     logic clk_i = 0;
     logic rst_n_i = 0;
     logic dc_early_valid_i = 0;
+    logic dc_req_early_i = 0;
     logic [31:0] dc_early_addr_i = 0;
     wire dc_early_hit_o;
     wire [31:0] dc_early_data_o;
@@ -89,6 +90,7 @@ module tb;
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_dlru_n_i({2{rst_n_i}}),
+        .dc_req_early_i(dc_req_early_i),
         .dc_early_valid_i(dc_early_valid_i),
         .dc_early_addr_i(dc_early_addr_i),
         .dc_early_way_hit_o(dc_early_way_hit_o),
@@ -374,12 +376,24 @@ module tb;
                 $fatal(1,"FAIL early query changed transaction counts AR=%0d AW=%0d W=%0d",
                     ar_count,aw_count,w_count);
         end
+        // A discarded query must not promote another same-address load.
+        step(); dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
+        tick();
+        if (!dc_early_hit_o) $fatal(1,"FAIL discarded-query setup hit");
+        step(); dc_early_valid_i=0; dc_req_valid_i=1; dc_req_store_i=0;
+        dc_req_addr_i=32'h10001000; dc_req_early_i=0; #1;
+        if (dut.early_promote_w || !dut.lookup_accept_w)
+            $fatal(1,"FAIL unissued query promoted unrelated same-address load");
+        tick();
+        if (dut.early_response_r || !dc_resp_valid_o || dc_resp_data_o!=32'hdeadbeef)
+            $fatal(1,"FAIL unrelated load expected ordinary deadbeef response");
+        step(); dc_req_valid_i=0; tick();
         // Successful E requests reuse data while the port reads the next D load.
         step(); dc_early_valid_i=1; dc_early_addr_i=32'h10001000;
         tick();
         if (!dc_early_hit_o) $fatal(1,"FAIL early chain first hit");
         step(); dc_req_valid_i=1; dc_req_store_i=0; dc_req_size_i=2;
-        dc_req_addr_i=32'h10001000; dc_early_addr_i=32'h10009000;
+        dc_req_addr_i=32'h10001000; dc_early_addr_i=32'h10009000; dc_req_early_i=1;
         #1;
         if (!dut.early_promote_w || !dut.early_read_w)
             $fatal(1,"FAIL early promotion/concurrent query");
@@ -390,7 +404,7 @@ module tb;
         tick();
         if (!dc_resp_valid_o || dc_resp_data_o!=32'h9abc)
             $fatal(1,"FAIL early chain second response");
-        step(); dc_req_valid_i=0; dc_commit_i=0; tick();
+        step(); dc_req_valid_i=0; dc_req_early_i=0; dc_commit_i=0; tick();
         // A normal request and a different-word early query read concurrently.
         step(); dc_req_valid_i=1; dc_req_store_i=0; dc_req_addr_i=32'h10001000;
         dc_early_valid_i=1; dc_early_addr_i=32'h10009000;
