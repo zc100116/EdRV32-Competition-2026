@@ -91,6 +91,7 @@ module tb;
         .update_index_i(update_index_i),
         .update_tournament_i(update_tournament_i),
         .decode_pop_count_i(decode_pop_count_i),
+        .decode_predecode_o(),
         .decode_data_o(decode_data_o),
         .decode_index_hi_o(decode_index_hi_o),
         .decode_tournament_o(decode_tournament_o),
