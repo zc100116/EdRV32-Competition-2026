@@ -9,8 +9,8 @@ module edrv32_cpu_div (
     input wire rst_n_i,
     // Request accepted when busy_o is low; operation is funct3[1:0].
     input wire start_i,
-    // Identical start decisions, copied by the core for local payload regions.
-    input wire [9:0] start_payload_i,
+    // Identical start decisions, copied by the core for 16-bit payload regions.
+    input wire [7:0] start_payload_i,
     input wire [31:0] operand_a_i,
     input wire [31:0] operand_b_i,
     input wire [1:0] operation_i,
@@ -80,7 +80,6 @@ module edrv32_cpu_div (
         end
     end
     genvar payload_half;
-    genvar result_byte;
     generate
         for (payload_half = 0; payload_half < 2;
             payload_half = payload_half + 1) begin : g_payload
@@ -95,16 +94,12 @@ module edrv32_cpu_div (
                     remainder_r[payload_half*16 +: 16] <= 0;
                 else if (busy_o)
                     remainder_r[payload_half*16 +: 16] <= remainder_w[payload_half*16 +: 16];
-            end
-        end
-        for (result_byte = 0; result_byte < 4;
-            result_byte = result_byte + 1) begin : g_result_byte
-            // valid_o owns result visibility; each late start gate serves eight bits.
-            always @(posedge clk_i) begin
-                if (start_payload_i[result_byte+6] && !busy_o)
-                    result_o[result_byte*8 +: 8] <= exceptional_w[result_byte*8 +: 8];
+                // valid_o owns result visibility; a free-running result register
+                // keeps start/count enables out of its 32-bit capture network.
+                if (start_payload_i[payload_half+6] && !busy_o)
+                    result_o[payload_half*16 +: 16] <= exceptional_w[payload_half*16 +: 16];
                 else
-                    result_o[result_byte*8 +: 8] <= final_w[result_byte*8 +: 8];
+                    result_o[payload_half*16 +: 16] <= final_w[payload_half*16 +: 16];
             end
         end
     endgenerate

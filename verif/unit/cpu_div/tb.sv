@@ -24,7 +24,7 @@ module tb;
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .start_i(start_i),
-        .start_payload_i({10{start_i}}),
+        .start_payload_i({8{start_i}}),
         .operand_a_i(operand_a_i),
         .operand_b_i(operand_b_i),
         .operation_i(operation_i),
