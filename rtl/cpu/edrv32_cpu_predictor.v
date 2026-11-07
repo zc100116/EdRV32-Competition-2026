@@ -11,9 +11,11 @@ module edrv32_cpu_predictor (
     // F1 query; accept advances speculative RAS only for an accepted prediction.
     input wire [31:1] query_pc_i,
     input wire [31:0] query_valid_index_i,
+    input wire [7:0] query_bank_copy_i,
     input wire query_accept_i,
     output wire predict_hit_o,
     output wire predict_taken_o,
+    output wire [7:0] predict_taken_copy_o,
     output wire [31:0] predict_target_o,
     output wire [1:0] predict_position_o,
     output wire [11:0] predict_history_o,
@@ -87,10 +89,12 @@ module edrv32_cpu_predictor (
     wire [31:0] branch_return_pc_w;
     wire [31:0] group_return_pc_w;
     (* keep = 1 *) wire [7:0] tag_half_hit_w /* synthesis syn_keep=1 */;
-    wire [7:0] valid_bank_w;
+    (* keep = "true" *) wire [7:0] valid_bank_w;
+    (* keep = "true" *) wire [1:0] valid_group_w;
+    (* keep = "true" *) wire tag_hit_w;
     wire query_valid_w;
-    wire position_hit_w;
-    wire direction_taken_w;
+    (* keep = "true" *) wire position_hit_w;
+    (* keep = "true" *) wire direction_taken_w;
     wire [1:0] restore_ptr_w;
     wire [2:0] restore_count_w;
     wire [1:0] restore_pop_ptr_w;
@@ -112,6 +116,8 @@ module edrv32_cpu_predictor (
     // Three tag bits fit one LUT6. Keep all eight compares parallel so the
     // mapper cannot turn the 22-bit equality into a serial comparison chain.
     genvar tag_group;
+    genvar valid_quarter;
+    genvar predict_group;
     generate
         for (tag_group = 0; tag_group < 8; tag_group = tag_group + 1) begin : g_tag
             localparam WIDTH = tag_group == 7 ? 1 : 3;
@@ -120,15 +126,34 @@ module edrv32_cpu_predictor (
                 query_pc_i[10+tag_group*3 +: WIDTH];
             wire [15:0] valid_w;
             assign valid_w = btb_valid_r[tag_group*16 +: 16];
-            assign valid_bank_w[tag_group] = valid_w[query_valid_index_i[tag_group*4 +: 4]];
+            (* keep = "true" *) wire [3:0] quarter_w;
+            for (valid_quarter = 0; valid_quarter < 4;
+                valid_quarter = valid_quarter + 1) begin : g_quarter
+                wire [3:0] valid_w_copy;
+                assign valid_w_copy = valid_w[valid_quarter*4 +: 4];
+                assign quarter_w[valid_quarter] =
+                    valid_w_copy[query_valid_index_i[tag_group*4 +: 2]];
+            end
+            assign valid_bank_w[tag_group] = quarter_w[query_valid_index_i[tag_group*4+2 +: 2]];
         end
     endgenerate
-    assign query_valid_w = valid_bank_w[query_pc_i[9:7]];
+    assign valid_group_w[0] = valid_bank_w[{1'b0, query_pc_i[8:7]}];
+    assign valid_group_w[1] = valid_bank_w[{1'b1, query_pc_i[8:7]}];
+    assign query_valid_w = valid_group_w[query_pc_i[9]];
+    assign tag_hit_w = &tag_half_hit_w;
+    generate
+        for (predict_group = 0; predict_group < 8;
+            predict_group = predict_group + 1) begin : g_predict
+            assign predict_taken_copy_o[predict_group] =
+                valid_group_w[query_bank_copy_i[predict_group]] &&
+                tag_hit_w && position_hit_w && direction_taken_w;
+        end
+    endgenerate
     assign position_hit_w = {btb_data_w[3], 1'b0} >= query_pc_i[2:1];
     assign direction_taken_w = btb_data_w[2:0] != 0 || direction_w[1];
     // Keep the independent tests parallel up to the final prediction decision.
-    assign predict_hit_o = query_valid_w && (&tag_half_hit_w) && position_hit_w;
-    assign predict_taken_o = query_valid_w && (&tag_half_hit_w) &&
+    assign predict_hit_o = query_valid_w && tag_hit_w && position_hit_w;
+    assign predict_taken_o = query_valid_w && tag_hit_w &&
         position_hit_w && direction_taken_w;
     assign ras_pop_top_w = ras_effective_ptr_w - 2'd2;
     assign ras_restore_pop_top_w = restore_ras_i[33:32] - 2'd2;

@@ -73,6 +73,8 @@ module tb;
         .rst_n_i(rst_n_i),
         .query_pc_i(query_pc_i),
         .query_valid_index_i({8{query_pc_i[6:3]}}),
+        .query_bank_copy_i({8{query_pc_i[9]}}),
+        .predict_taken_copy_o(),
         .query_accept_i(query_accept_i),
         .predict_hit_o(predict_hit_o),
         .predict_taken_o(predict_taken_o),
