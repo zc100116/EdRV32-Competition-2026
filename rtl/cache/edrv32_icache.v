@@ -66,13 +66,36 @@ module edrv32_icache (
     reg [31:0] lookup_valid0_bank_r;
     reg [31:0] lookup_valid1_bank_r;
     reg [31:0] lookup_lru_bank_r;
+    // Tag comparison retires into local metadata controls before bank writes.
+    reg [31:0] metadata_bank_r;
+    reg [15:0] metadata_slot_r;
+    reg metadata_hit_r;
+    reg metadata_miss_r;
+    reg metadata_way_r;
+    reg metadata_victim_r;
+    wire replacement_w;
+    assign replacement_w = metadata_hit_r && |(metadata_bank_r & lookup_bank_r) &&
+        metadata_slot_r == lookup_slot_r ? metadata_way_r : lookup_lru_w;
+    always @(posedge clk_i) begin
+        metadata_bank_r <= lookup_bank_r;
+        metadata_slot_r <= lookup_slot_r;
+        metadata_way_r <= hit0_w;
+        metadata_victim_r <= replacement_w;
+    end
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            metadata_hit_r <= 0;
+            metadata_miss_r <= 0;
+        end else begin
+            metadata_hit_r <= lookup_hit_w;
+            metadata_miss_r <= state_r == S_IDLE && lookup_valid_r &&
+                !pma_err_r && cacheable_r && !hit_w;
+        end
+    end
     reg pma_err_r;
     reg victim_r;
     wire [7:0] victim_copy_w;
-    wire [7:0] lookup_lru_copy_w;
-    wire [7:0] lookup_miss_copy_w;
     wire [7:0] hit0_copy_w;
-    wire [7:0] lookup_hit_copy_w;
     wire [7:0] tag_write_copy_w;
     wire [7:0] lookup_accept_copy_w;
     genvar victim_group;
@@ -119,9 +142,6 @@ module edrv32_icache (
                         addr_r[victim_group*8 +: 8] <= ic_req_addr_i[victim_group*8 +: 8];
                 end
             end
-            assign lookup_hit_copy_w[victim_group] = state_r == S_IDLE &&
-                lookup_valid_copy1_r && !pma_err_r && cacheable_r &&
-                (hit0_copy_w[victim_group] || hit1_w_copy);
             assign tag_write_copy_w[victim_group] = fill_write_w && axi_rlast_i &&
                 !fill_err_copy1_r && axi_rresp_i == 0 && !fill_invalidated_copy1_r && !ic_inv_i;
             always @(posedge clk_i) begin
@@ -144,29 +164,11 @@ module edrv32_icache (
                         fill_err_copy1_r <= fill_err_r || axi_rresp_i != 0;
                 end
             end
-            (* keep = "true", syn_preserve = 1 *) reg [31:0] lookup_bank_copy1_r;
-            (* keep = "true", syn_preserve = 1 *) reg [31:0] lookup_lru_bank_copy1_r;
-            integer lookup_idx;
-            assign lookup_lru_copy_w[victim_group] =
-                |(lookup_bank_copy1_r & lookup_lru_bank_copy1_r);
-            assign lookup_miss_copy_w[victim_group] = state_r == S_IDLE &&
-                lookup_valid_copy1_r && !pma_err_r && cacheable_r &&
-                !(hit0_copy_w[victim_group] || hit1_w_copy);
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
                     lookup_valid_copy1_r <= 0;
                 else if (state_r == S_IDLE)
                     lookup_valid_copy1_r <= lookup_accept_copy_w[victim_group];
-            end
-            // Snapshot the same set and LRU data as the original lookup registers.
-            always @(posedge clk_i) begin
-                lookup_bank_copy1_r <= 32'b1 << ic_req_addr_i[13:9];
-                for (lookup_idx = 0; lookup_idx < 32; lookup_idx = lookup_idx + 1) begin
-                    lookup_lru_bank_copy1_r[lookup_idx] <=
-                        lookup_hit_copy_w[victim_group] && lookup_bank_r[lookup_idx] &&
-                        addr_r[8:5] == ic_req_addr_i[8:5] ? hit0_copy_w[victim_group] :
-                        (|(lru_r[lookup_idx*16 +: 16] & request_slot_w));
-                end
             end
             assign victim_copy_w[victim_group] = victim_copy1_r;
             always @(posedge clk_i or negedge rst_n_i) begin
@@ -174,7 +176,7 @@ module edrv32_icache (
                     victim_copy1_r <= 0;
                 else if (state_r == S_IDLE && lookup_valid_r && !pma_err_r &&
                     (!cacheable_r || !hit_w))
-                    victim_copy1_r <= lookup_lru_w;
+                    victim_copy1_r <= replacement_w;
             end
         end
     endgenerate
@@ -339,29 +341,26 @@ module edrv32_icache (
             assign rst_ivalid0_n_w = rst_sys_ivalid0_n_i[bank/16];
             assign rst_ivalid1_n_w = rst_sys_ivalid1_n_i[bank/16];
             assign rst_ilru_n_w = rst_sys_ilru_n_i[bank/16];
-            assign evict0_w[bank*16 +: 16] = lookup_slot_r &
-                {16{lookup_bank_r[bank] && lookup_miss_copy_w[bank/4] &&
-                    !lookup_lru_copy_w[bank/4]}};
-            assign evict1_w[bank*16 +: 16] = lookup_slot_r &
-                {16{lookup_bank_r[bank] && lookup_miss_copy_w[bank/4] &&
-                    lookup_lru_copy_w[bank/4]}};
+            assign evict0_w[bank*16 +: 16] = metadata_slot_r &
+                {16{metadata_bank_r[bank] && metadata_miss_r && !metadata_victim_r}};
+            assign evict1_w[bank*16 +: 16] = metadata_slot_r &
+                {16{metadata_bank_r[bank] && metadata_miss_r && metadata_victim_r}};
             assign fill0_w[bank*16 +: 16] = lookup_slot_r &
                 {16{lookup_bank_r[bank] && tag_write_copy_w[bank/4] && !victim_copy_w[bank/4]}};
             assign fill1_w[bank*16 +: 16] = lookup_slot_r &
                 {16{lookup_bank_r[bank] && tag_write_copy_w[bank/4] && victim_copy_w[bank/4]}};
-            assign lru_update_w = lookup_bank_r[bank] &&
-                (lookup_hit_copy_w[bank/4] || tag_write_copy_w[bank/4]);
-            assign lru_set_w = lookup_bank_r[bank] &&
-                (tag_write_copy_w[bank/4] ? !victim_copy_w[bank/4] :
-                lookup_hit_copy_w[bank/4] && hit0_copy_w[bank/4]);
+            assign lru_update_w = (metadata_bank_r[bank] && metadata_hit_r) ||
+                (lookup_bank_r[bank] && tag_write_copy_w[bank/4]);
+            assign lru_set_w = tag_write_copy_w[bank/4] ? !victim_copy_w[bank/4] :
+                metadata_way_r;
             always @(posedge clk_i) begin
                 lookup_valid0_bank_r[bank] <= !ic_inv_i && !invalidate_bank_r[bank] &&
                     (|(valid0_r[bank*16 +: 16] & request_slot_w));
                 lookup_valid1_bank_r[bank] <= !ic_inv_i && !invalidate_bank_r[bank] &&
                     (|(valid1_r[bank*16 +: 16] & request_slot_w));
-                lookup_lru_bank_r[bank] <= lookup_hit_w && lookup_bank_r[bank] &&
-                    addr_r[8:5] == ic_req_addr_i[8:5] ?
-                    hit0_w : (|(lru_r[bank*16 +: 16] & request_slot_w));
+                lookup_lru_bank_r[bank] <= metadata_hit_r && metadata_bank_r[bank] &&
+                    metadata_slot_r == request_slot_w ? metadata_way_r :
+                    (|(lru_r[bank*16 +: 16] & request_slot_w));
             end
             always @(posedge clk_i or negedge rst_n_i) begin
                 if (!rst_n_i)
@@ -390,8 +389,10 @@ module edrv32_icache (
                 if (!rst_ilru_n_w) begin
                     lru_bank_r <= 16'b0;
                 end else begin
-                    lru_bank_r <= (lru_bank_r & ~(lookup_slot_r & {16{lru_update_w}})) |
-                        (lookup_slot_r & {16{lru_set_w}});
+                    lru_bank_r <= (lru_bank_r & ~((tag_write_copy_w[bank/4] ? lookup_slot_r :
+                        metadata_slot_r) & {16{lru_update_w}})) |
+                        ((tag_write_copy_w[bank/4] ? lookup_slot_r : metadata_slot_r) &
+                        {16{lru_update_w && lru_set_w}});
                 end
             end
         end
@@ -417,7 +418,7 @@ module edrv32_icache (
                     if (lookup_valid_r && !pma_err_r) begin
                         if (!cacheable_r || !hit_w) begin
                             state_r <= S_AR;
-                            victim_r <= lookup_lru_w;
+                            victim_r <= replacement_w;
                             killed_r <= ic_kill_i;
                             fill_invalidated_r <= ic_inv_i;
                             fill_err_r <= 1'b0;

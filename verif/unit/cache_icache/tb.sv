@@ -138,6 +138,8 @@ module tb;
         fetch(32'h10004000, memory[2048], 2);
         if (dut.lru_r[0] != 0) $fatal(1, "FAIL I fill LRU way1");
         fetch(32'h10000008, memory[1], 2);
+        // Hit metadata retires one edge after the response is consumed.
+        tick();
         if (dut.lru_r[0] != 1) $fatal(1, "FAIL I hit LRU way0");
         fetch(32'h10008000, memory[4096], 3);
         fetch(32'h10000000, memory[0], 3);
