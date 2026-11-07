@@ -248,6 +248,7 @@ module edrv32_dcache (
     reg [3:0] buffer_mask_r;
     reg [31:0] forward_data_r;
     reg [3:0] forward_mask_r;
+    reg buffer_match_r;
     reg [31:0] device_addr_r;
     reg [1:0] device_size_r;
     reg device_store_r;
@@ -442,7 +443,7 @@ module edrv32_dcache (
     assign aligned_buffer_w = buffer_data_r >> {addr_r[1:0], 3'b0};
     assign aligned_forward_mask_w = forward_mask_r >> addr_r[1:0];
     assign aligned_buffer_mask_w = (buffer_mask_r >> addr_r[1:0]) &
-        {4{buffer_valid_r && buffer_addr_r[31:2] == addr_r[31:2]}};
+        {4{buffer_valid_r && buffer_match_r}};
     genvar forward_byte;
     generate
         for (forward_byte = 0; forward_byte < 4;
@@ -674,6 +675,10 @@ module edrv32_dcache (
     );
     // Payload registers deliberately have no reset (cache-spec 5.5).
     always @(posedge clk_i) begin
+        // Match the store entering the buffer against the request entering M.
+        // A held lookup retains its address while the one-cycle buffer drains.
+        buffer_match_r <= push_addr_w[31:2] ==
+            (lookup_accept_w ? dc_req_addr_i[31:2] : addr_r[31:2]);
         if (ram_read_w) begin
             lookup_bank_r <= 32'b1 << read_addr_w[10:6];
             lookup_slot_r <= read_slot_w;
