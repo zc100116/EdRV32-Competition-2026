@@ -73,7 +73,8 @@ module tb;
     );
     wire [69:0] reference_w [0:1];
     for (genvar slot = 0; slot < 2; slot++) begin : g_reference
-        wire [31:0] instr_w = model[slot][63:32];
+        wire [31:0] instr_w;
+        assign instr_w = data_o[slot*179+32 +: 32];
         wire [4:0] rs1_w;
         wire [4:0] rs2_w;
         wire [4:0] rd_w;
