@@ -94,10 +94,11 @@ module edrv32_cpu_div (
                     remainder_r[payload_half*16 +: 16] <= 0;
                 else if (busy_o)
                     remainder_r[payload_half*16 +: 16] <= remainder_w[payload_half*16 +: 16];
-                // valid_o alone exposes the exceptional value prepared at start.
+                // valid_o owns result visibility; a free-running result register
+                // keeps start/count enables out of its 32-bit capture network.
                 if (start_payload_i[payload_half+6] && !busy_o)
                     result_o[payload_half*16 +: 16] <= exceptional_w[payload_half*16 +: 16];
-                else if (busy_o && count_r == 1)
+                else
                     result_o[payload_half*16 +: 16] <= final_w[payload_half*16 +: 16];
             end
         end
