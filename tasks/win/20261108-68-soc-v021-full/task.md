@@ -56,6 +56,24 @@ python -c "open('ip_lutram_cpu_local_history.dat','w').write('000\n' * 256)"
 python -c "open('ip_lutram_cpu_tournament.dat','w').write('1\n' * 1024)"
 ```
 
+## 4b. 第 2 轮（2026-11-08）
+
+第 1 轮在第 21 轮时仍有 49,566 条未布通网络，单轮约 1,400 s，用户决定停止。原因有两个：
+- 仿真虚拟机与 PnR 同时运行，内存只剩 746 MiB；
+- NPU 为提频复制的约 6.1K 个 FF 加重了拥塞。
+
+第 2 轮的改动：
+- NPU 的 RTL 退回卡 63 版本 `b5be940c`（独立探针 198.9 MHz），clk_npu 保持 180 MHz。CPU、软件、IP 和约束都不变。
+- 本卡所在分支更新后，`rtl/npu/` 中的 5 个文件改为卡 63 版本。文件路径不变，所以不需要重新导入。
+
+| 步骤 | 执行者 | 内容 |
+|---|---|---|
+| R2-0 | 用户（U） | 停止第 1 轮的 PnR。**确认仿真虚拟机已关机**，关掉其他占内存的程序。 |
+| R2-1 | Windows Codex（C） | 在 `win/20261108-68-soc-v021-full` 分支上 `git fetch origin`，然后 `git merge origin/zc100116/b3`，取得本轮代码，记录 HEAD。记录系统空闲物理内存。 |
+| R2-2 | U | 在 `EdRV32-B3F-V021` 工程中重新运行 Compile、`synthesize -ads`、`dev_map`、`pnr`，PnR 参数与第 1 轮相同。 |
+| R2-3 | C | 每小时记录布线轮次、单轮耗时、未布通数、过用数、系统空闲内存。止损条件与第 1 轮相同；另外，单轮耗时持续超过 600 s 时回报。 |
+| R2-4 | U + C | 布通后照第 5 节第 7–11 步执行，即 `report_timing`、比特流和上板。产物放进 `artifacts/R2/`，result.md 增加第 2 轮一节，第 1 轮的记录保留。 |
+
 ## 5. 操作步骤
 
 | 步骤 | 执行者 | 内容 |
