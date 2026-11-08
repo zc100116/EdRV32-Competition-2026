@@ -63,7 +63,9 @@ A 检查 ID、空描述符列表完成（DONE_COUNT=1、IDLE）、SOFT_RST 后�
 寄存器复位值（含 16 个 PERF）。复位前令配置、ENABLE、IRQ_EN、DONE_COUNT、DONE
 非零。B 比较 `check.txt` 的全部输出字节，包括平面填充。
 C 的 68 条描述符为 63 CONV + 3 POOL + 2 UPSAMPLE；逐字节比较六个检测头的
-全部 OUTPUT 区，共 725760 B。D 每次保留相同输入/模型和描述符，连续运行 20 帧，
+全部 raw OUTPUT 区，共 725760 B。board_npu 保持 POST_CTRL.EN=0，
+用于原始算子/整网核对；正常 showcase/demo 启用硬件候选，不读取禁写 cls 空洞。
+PP-SW-01/02 分别由 `make -C sw PROGRAM=pp_sw_01/pp_sw_02` 构建。D 每次保留相同输入/模型和描述符，连续运行 20 帧，
 对按 `check.txt` 顺序连接的 OUTPUT 计算 CRC32，与 C 实际输出的 CRC32 比较。
 CRC32 为反射 IEEE 多项式 `0xedb88320`，初值和最终异或均为 `0xffffffff`。
 每次 D 单独报告，通过计入 39 项；首个失败即结束。

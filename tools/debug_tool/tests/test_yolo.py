@@ -9,7 +9,8 @@ from unittest.mock import patch
 
 from tools.debug_tool.core.ethernet import EthernetTool
 from tools.debug_tool.core.scene import SceneControl
-from tools.debug_tool.core.yolo import pack_model, rgb_to_rgb565, YoloTool
+from tools.debug_tool.core.yolo import (pack_model, rgb_to_rgb565, YoloTool,
+    pack_candidates, parse_candidates, candidate_difference, INPUT_BYTES)
 
 
 def compiler_fixture(directory):
@@ -32,6 +33,35 @@ class YoloTest(unittest.TestCase):
                       return_value=('loopback', 0.0))
         ready.start()
         self.addCleanup(ready.stop)
+
+    def test_candidate_wire_and_enqueue_order(self):
+        items = [([-256, 0, 25600, 12800], 8388608, 4, 3840),
+                 ([0, 256, 512, 1024], 4194305, 79, 4800)]
+        wire = pack_candidates(items)
+        self.assertEqual(len(wire), 52)
+        self.assertEqual(parse_candidates(wire)[0], (-256, 0, 25600, 12800,
+                                                   8388608, 4, 3840))
+        self.assertEqual(candidate_difference(wire, pack_candidates(items[::-1])),
+                         dict(count=0, first=None))
+        yolo = YoloTool(None)
+        yolo.receive(0, 0, bytes(INPUT_BYTES), False)
+        # Header and records can arrive out of order and split within a record.
+        yolo.receive(1, 27, wire[27:], False)
+        yolo.receive(1, 0, wire[:27], False)
+        eddt = struct.pack('<4sHHII', b'EDDT', 1, 0, 123, 456)
+        yolo.receive(2, 0, eddt, True)
+        self.assertEqual(yolo.capture[1], wire)
+        with self.assertRaisesRegex(ValueError, 'count/length'):
+            parse_candidates(wire[:-1])
+
+    def test_default_model_rebuilds_post_tables(self):
+        ethernet = EthernetTool(local_ip="127.0.0.1")
+        with (patch('tools.debug_tool.core.yolo.subprocess.run') as compile_model,
+              patch('tools.debug_tool.core.yolo.pack_model', return_value=b'EDNM') as pack,
+              patch.object(ethernet.showcase, 'bulk')):
+            YoloTool(ethernet).send_model('', '127.0.0.1', 5000, 6000)
+        self.assertIn('--model-source', compile_model.call_args.args[0])
+        self.assertTrue(str(pack.call_args.args[0]).endswith('build/npu/software_model'))
 
     def test_rgb565_left_pixel_is_low_halfword(self):
         rgb = bytes([255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255])

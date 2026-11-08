@@ -19,6 +19,7 @@ void demo_monitor_tick(void)
     record.npu[0] = demo.inference_count - previous_inferences;
     previous_inferences = demo.inference_count;
     record.npu[1] = demo.inference_cycles;
+    /* CPU candidate sorting/NMS/mapping; hardware DFL is included in npu[1]. */
     record.npu[2] = demo.post_cycles;
     record.npu[3] = demo.detection_count;
     uint32_t received = engine_perf(ENGINE_ETH, 2);

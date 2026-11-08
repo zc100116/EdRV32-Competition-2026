@@ -6,6 +6,8 @@ Image decoding uses the existing PySide6 dependency, imported only when needed.
 
 from pathlib import Path
 import struct
+import subprocess
+import sys
 import threading
 import time
 
@@ -142,8 +144,14 @@ class YoloTool:
                         self.blocks[2] = Block()
                         return
                     parse_detections(result)
-                sizes = (INPUT_BYTES,
-                         OUTPUT_BYTES, offset + len(data))
+                if not self.blocks[1].ranges or self.blocks[1].ranges[0][0] != 0 or (
+                        self.blocks[1].ranges[0][1] < 4):
+                    self.capture_error = '回传不完整：window 1 missing candidate count'
+                    return
+                candidate_count = struct.unpack_from('<I', self.blocks[1].data(4))[0]
+                if candidate_count > 5040:
+                    raise ValueError('NPU candidate count exceeds 5040')
+                sizes = (INPUT_BYTES, 4 + candidate_count * 24, offset + len(data))
                 missing = []
                 for index, size in enumerate(sizes):
                     if size and not self.blocks[index].complete(size):
@@ -154,6 +162,7 @@ class YoloTool:
                     return
                 ch2, output, detections = (block.data(size)
                                            for block, size in zip(self.blocks, sizes))
+                parse_candidates(output)
                 self.capture = (ch2, output, parse_detections(detections))
         if window == 2 and notify and self.ethernet is not None and self.ethernet.session:
             self.ethernet.session.notify()
@@ -162,7 +171,7 @@ class YoloTool:
         """Design 4.5.9: DONE commits the image after all return data arrived."""
         with self.lock:
             if self.capture is None:
-                self._fail_capture(self.capture_error or '回传不完整：未收到完整 CH2 / OUTPUT / EDDT')
+                self._fail_capture(self.capture_error or '回传不完整：未收到完整 CH2 / candidates / EDDT')
                 raise ValueError(self.error)
             if self.sent_at is not None:
                 self.timings.append(dict(path=self.source_image,
@@ -198,11 +207,13 @@ class YoloTool:
         if capture is None:
             raise ValueError('YOLO: no complete return received')
         ch2, output, detections = capture
+        directory = directory or Path(__file__).resolve().parents[3] / 'build/npu/software_model'
         reference = reference_output(directory, ch2)
         boxes = reference_detections(reference, quant_params)
         expected_input = reference_input(image)
         return dict(input=byte_difference(expected_input, ch2),
-                    output=byte_difference(reference, output),
+                    output=candidate_difference(
+                        reference_candidates(reference, quant_params), output),
                     detections=detection_difference(boxes, detections.boxes))
 
     def camera_detection(self, board_ip, board_port, local_port):
@@ -210,6 +221,13 @@ class YoloTool:
         return self.ethernet.showcase.app(1, destination=(board_ip, board_port))
 
     def send_model(self, path, board_ip, board_port, local_port):
+        if not path:
+            root = Path(__file__).resolve().parents[3]
+            path = root / 'build/npu/software_model'
+            subprocess.run([sys.executable, str(root / 'tools/npu/compile_yolo.py'),
+                            '--model-source',
+                            str(root / 'tasks/win/20261029-09-b3-software/src/npu'),
+                            '--out', str(path)], check=True)
         data = pack_model(path)
         self.image_bytes = len(data)
         return self.ethernet.showcase.bulk(1, data, board_ip, board_port,
@@ -256,6 +274,37 @@ class YoloTool:
 
 OUTPUT_BYTES = 725760
 INPUT_BYTES = 983040
+
+
+CANDIDATE_BYTES = 4 + 5040 * 24
+
+
+def pack_candidates(candidates):
+    return struct.pack('<I', len(candidates)) + b''.join(
+        struct.pack('<4iIHH', *box, probability, category, anchor)
+        for box, probability, category, anchor in candidates)
+
+
+def parse_candidates(data):
+    count, = struct.unpack_from('<I', data)
+    if count > 5040 or len(data) != 4 + count * 24:
+        raise ValueError('NPU candidate count/length')
+    return tuple(struct.unpack_from('<4iIHH', data, 4 + i * 24) for i in range(count))
+
+
+def reference_candidates(output, quant_params):
+    from tools.npu import yolo_post_ref as reference
+    stats = dict.fromkeys(reference.STAT_KEYS, 0)
+    return pack_candidates(reference.decode_candidates(output,
+        reference.make_heads(quant_params), stats))
+
+
+def candidate_difference(expected, actual):
+    # Hardware enqueue order is independent of the oracle head/cell traversal.
+    left = sorted(parse_candidates(expected), key=lambda row: row[-1])
+    right = sorted(parse_candidates(actual), key=lambda row: row[-1])
+    return byte_difference(b''.join(struct.pack('<4iIHH', *row) for row in left),
+                           b''.join(struct.pack('<4iIHH', *row) for row in right))
 
 
 def byte_difference(expected, actual):

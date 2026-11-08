@@ -29,3 +29,39 @@ uint32_t npu_current_descriptor(void)
 {
     return mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_CUR_DESC_OFFSET);
 }
+
+void npu_post_configure(void)
+{
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_CTRL_OFFSET,
+                 EDRV32_NPU_POST_CTRL_EN_MASK);
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_INT8_TH0_OFFSET, 103u);
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_INT8_TH1_OFFSET, 105u);
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_INT8_TH2_OFFSET, 103u);
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_PROB_TH_OFFSET, 4194304u);
+}
+
+void npu_post_start(uint32_t input, uint32_t output, uint32_t post)
+{
+    /* SoC 7.4.4: old CPU sorting may have dirtied any of the 5040 records. */
+    engine_dma_clean(EDRV32_DDR_BASE + post, 120960u);
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET, post);
+    npu_start(input, output);
+}
+
+uint32_t npu_post_count(void)
+{
+    return mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_POST_COUNT_OFFSET);
+}
+
+uint32_t npu_post_status(void)
+{
+    return mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_POST_STATUS_OFFSET);
+}
+
+uint32_t npu_post_acquire(uint32_t post)
+{
+    uint32_t count = npu_post_count();
+    /* 4 KiB-aligned base; SoC cache lines are 32 B, including the packed tail. */
+    if (count) engine_dma_invalidate(EDRV32_DDR_BASE + post, (count * 24u + 31u) & ~31u);
+    return count;
+}

@@ -28,6 +28,7 @@ struct demo_inference {
     unsigned int image_slot;
     unsigned int input_slot;
     uint32_t frame_id;
+    uint32_t post_count;
     unsigned int checking;
 };
 struct demo_state {

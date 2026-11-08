@@ -20,13 +20,60 @@ static uint32_t random32(void)
     random_state ^= random_state << 5;
     return random_state;
 }
+uint32_t test_decode(const int8_t *raw, yolo_candidate *items)
+{
+    uint32_t count = 0;
+    uint32_t anchor = 0;
+    for (unsigned h = 0; h < 3; ++h) {
+        const yolo_head *head = &yolo_default_heads[h];
+        for (unsigned cell = 0; cell < head->width * head->height; ++cell, ++anchor) {
+            int best = -129;
+            unsigned category = 0;
+            for (unsigned c = 0; c < 80; ++c) {
+                int value = raw[head->class_offset + c / 16 * head->plane_stride +
+                                cell * 16 + c % 16];
+                if (value > best) { best = value; category = c; }
+            }
+            if (best < head->class_threshold) continue;
+            yolo_candidate *item = &items[count++];
+            item->anchor = (uint16_t)anchor;
+            item->class_id = (uint16_t)category;
+            item->probability_q24 = head->probability_q24[best + 128];
+            for (unsigned side = 0; side < 4; ++side) {
+                const int8_t *bins = raw + head->box_offset +
+                    side * head->plane_stride + cell * 16;
+                int peak = -128;
+                for (unsigned b = 0; b < 16; ++b) if (bins[b] > peak) peak = bins[b];
+                uint32_t num = 0;
+                uint32_t den = 0;
+                for (unsigned b = 0; b < 16; ++b) {
+                    uint32_t weight = head->exp_q20[peak - bins[b]];
+                    num += b * weight;
+                    den += weight;
+                }
+                int32_t distance = (int32_t)(((uint64_t)num * 256 + den / 2) / den);
+                int32_t center = (int32_t)(side & 1 ? cell / head->width :
+                                                     cell % head->width) * 256 + 128;
+                item->xyxy_q8[side] = (center + (side < 2 ? -distance : distance)) *
+                                      head->stride;
+            }
+        }
+    }
+    return count;
+}
 static void compare(const char *name)
 {
     yolo_post_stats stats;
     uint32_t count = yolo_post_process(output, yolo_default_heads, reference_workspace,
                                      expected, &stats);
+    uint32_t candidates = stats.decoded_anchors;
+    /* Raw reference leaves sorted/suppressed records; regenerate the input below. */
+    test_decode(output, sliced_workspace);
+    stats.class_comparisons = 0;
+    stats.dfl_bin_comparisons = 0;
+    stats.exp_lookups = 0;
     struct vision_post post;
-    vision_post_begin(&post, output, sliced_workspace, actual);
+    vision_post_begin(&post, sliced_workspace, candidates, actual);
     unsigned slices = 1;
     while (!vision_post_step(&post)) ++slices;
     assert(post.kept == count);

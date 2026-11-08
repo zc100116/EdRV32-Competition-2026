@@ -1,9 +1,10 @@
-/* yolo_post.c — npu-spec 2.2; B2 software design 3.4/3.5a.
- * DFL Q8, deterministic score ordering and integer class-aware IoU suppression.
+/* yolo_post.c — npu-spec 2.6/4.5; SoC 7.4/8.9.
+ * Hardware candidate ordering, integer class-aware NMS and display mapping.
  * Clock domain: CPU. Numerical contract: sw/lib/README.md.
  */
 #include "yolo_post.h"
 
+_Static_assert(sizeof(yolo_candidate) == 24, "NPU candidate must be 24 bytes");
 _Static_assert(sizeof(yolo_detection) == 12, "EDDT detection must be 12 bytes");
 
 static int32_t minimum(int32_t a, int32_t b)
@@ -147,6 +148,21 @@ uint32_t yolo_post_process(const int8_t *output, const yolo_head heads[3],
         }
         anchor_base += cells;
     }
+    yolo_post_stats decode_stats = *stats;
+    kept = yolo_post_candidates(workspace, count, detections, stats);
+    stats->class_comparisons = decode_stats.class_comparisons;
+    stats->dfl_bin_comparisons = decode_stats.dfl_bin_comparisons;
+    stats->exp_lookups = decode_stats.exp_lookups;
+    return kept;
+}
+
+/* npu-spec 2.6: hardware already performed class selection, thresholding and DFL. */
+uint32_t yolo_post_candidates(yolo_candidate workspace[YOLO_ANCHORS], uint32_t count,
+                             yolo_detection detections[YOLO_MAX_DETECTIONS],
+                             yolo_post_stats *stats)
+{
+    uint32_t kept = 0;
+    *stats = (yolo_post_stats){.decoded_anchors = count};
     sort(workspace, count, stats);
     for (uint32_t i = 0; i < count && kept < YOLO_MAX_DETECTIONS; ++i) {
         yolo_candidate *candidate = &workspace[i];

@@ -29,8 +29,8 @@ unsigned int demo_network_detections(struct eth_tx_descriptor *tx,
             DEMO_INPUT_BASE + job->input_slot * DEMO_INPUT_SPACING,
             DEMO_INPUT_BYTES, 0, 0, 0);
         eth_tx_descriptor_pack(&tx[count++],
-            DEMO_OUTPUT_BASE + (unsigned int)check_buffer * DEMO_OUTPUT_SPACING,
-            DEMO_OUTPUT_BYTES, 1, 0, 0);
+            DEMO_POST_TX,
+            4u + demo.inference[check_buffer].post_count * 24u, 1, 0, 0);
     }
     if (detection_bytes) {
         eth_tx_descriptor_pack(&tx[count++], DEMO_TX_DETECTIONS,

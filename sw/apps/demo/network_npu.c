@@ -53,6 +53,7 @@ void demo_network_model_load(const uint8_t *header)
     struct npu_config config = {DEMO_MODEL_BASE, DEMO_WORK_BASE, DEMO_INPUT_BASE,
         DEMO_OUTPUT_BASE, DEMO_DESC_BASE, demo_read32(header + 8)};
     npu_configure(&config);
+    npu_post_configure();
     eth_window_configure(2, DEMO_MODEL_WINDOW, DEMO_MODEL_WINDOW_SIZE);
     info_text("EDNM", "loaded");
 }

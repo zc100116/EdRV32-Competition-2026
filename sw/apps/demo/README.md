@@ -91,15 +91,15 @@ GUI 按功能命名，图像缓冲由工具自动交替。
 | PC→板，2 | EDNM 32 B 头在偏移 0，描述符在 0x1000、模型在 0x100000；仅最后一包 NOTIFY |
 | PC→板，3 | 偏移 0、末包 NOTIFY；空负载或单字节 `00` 建立对端；`camera`（ASCII 6 B，无换行）恢复摄像头检测 |
 | 板→PC，0 | 图像检查的 CH2，983,040 B，不置 NOTIFY |
-| 板→PC，1 | 图像检查的 OUTPUT，725,760 B，不置 NOTIFY |
+| 板→PC，1 | 图像检查的 NMS 前候选，u32 count + count×24 B，不置 NOTIFY |
 | 板→PC，2 | EDDT 检测结果，末包 NOTIFY；结束本张图像检查 |
 | 板→PC，3 | EDTM 监控批次 |
 
-所有支持检测的程序都接收同一种 RGB565 图像，回传顺序都是 **CH2 → OUTPUT → EDDT**。
+所有支持检测的程序都接收同一种 RGB565 图像，回传顺序都是 **CH2 → 候选快照 → EDDT**。
 `demo_npu` 的 CPU 严格执行 VIN 2.8：RGB565 位复制展开到 8 位，2×2 求和后
 `(sum+2)>>2`，量化 `(254*c+255)/510`，上下各补 12 行 `[57,57,57,0]`，
 最终 640×384 INT8_C4，每像素内存顺序 R/G/B/0。输入使用非缓存 DDR 别名，
-NPU 和回传共同使用该张量。原始图像缓冲及 CH2/OUTPUT 在最终发送 DONE 前保持占用，
+NPU 和回传共同使用该张量。原始图像缓冲、CH2 及候选快照 在最终发送 DONE 前保持占用，
 完成后清图像接收计数，主机才发送下一张；`demo_npu` 的 frame_id 从 0 自增。
 
 摄像头检测程序收到图像后切换 VIN 内存源，同时生成 CH0 和 CH2；图像检查期间
@@ -136,7 +136,9 @@ NPU 和回传共同使用该张量。原始图像缓冲及 CH2/OUTPUT 在最终�
 | NPU 模型 | `0x00100000` | 4 MiB |
 | NPU WORK | `0x01000000` | 8 MiB |
 | CH2 输入 | `0x04000000` | 3×1 MiB，实际每槽 983040 B |
-| NPU OUTPUT | `0x05000000` | 2×1 MiB，实际每份 725760 B |
+| NPU raw box/debug OUTPUT | `0x05000000` | 2×1 MiB，保留 725760 B 布局，正常不读 cls |
+| NPU 候选双缓冲 | `0x05200000` | 两槽间隔 0x20000，各独占 120960 B |
+| NMS 前 TX 快照 | `0x05240000` | u32 count + 最多 120960 B，非缓存 CPU/TX |
 | CH0 底图 | `0x06000000` | 4×2 MiB，实际每槽 1843200 B |
 | GEO 输出 | `0x07000000` | 2×2 MiB |
 | 图像接收 | `0x08000000` | 2×2 MiB |
@@ -144,18 +146,24 @@ NPU 和回传共同使用该张量。原始图像缓冲及 CH2/OUTPUT 在最终�
 | 控制接收 | `0x0a000000` | 64 KiB |
 | 发送缓冲 | `0x0a100000` | 4 MiB |
 
-后处理所需 5040 项候选工作区另分配在原布局的空闲区 `0x01800000`，
-有效 120,960 B（到 `0x0181d880`，右开），位于 WORK 分配区之后、CH2 输入之前，
-不占发送缓冲；只有 CPU 使用，走缓存别名。100 项最终检测结果在 SRAM，占 1200 B。
+后处理直接在 NPU 候选双缓冲上原地排序/NMS；旧 CPU workspace 不再使用。
+100 项最终检测结果在 SRAM，占 1200 B。
 发送缓冲内部：TX 描述符 `+0`（最多三条），EDVF `+0x100`，
 EDDT `+0x200`（最多 1216 B），GEO 描述符 `+0x700`，
 监控发送暂存 `+0x800`（5120 B），监控环 `+0x2000`（1024×320 B）。
 主机测试覆盖上述区域边界，包含 EDDT 与 GEO 描述符不重叠。
 
 VIN 中断及时锁住同 frame_id 的 CH0/CH2；NPU 忙则跳过摄像头帧。
-NPU DONE 后释放普通推理的 CH2 输入，当前 OUTPUT 交 CPU，另一 OUTPUT 可供下一帧。
-真实 `yolo_post_process(output,yolo_default_heads,workspace,detections,&stats)` 接口
-接在 `scene_npu.c`。CPU 访问前只对 NPU OUTPUT 作废 cache；不再读写摄像头像素。
+NPU DONE 包含硬件类别筛选/DFL 和最后候选写响应，之后释放普通推理的 CH2 输入。
+中断保存本帧候选数，下一帧启动清 POST_COUNT 不影响上一帧 CPU 处理。
+`scene_npu.c` 调用 `yolo_post_candidates(candidates,count,detections,&stats)`，
+按 Q24 降序/anchor 升序，未裁剪框按类执行严格 IoU>0.45 NMS（最多100），再映射/裁剪。
+候选区交 NPU 前 BSP clean 整个 120960 B，DONE 后 invalidate 有效记录覆盖的完整32B行。
+CPU 排序期间下一帧 NPU 只写另一槽；图像检查另存 NMS 前 TX 快照，最终 TX DONE 后释放。
+EDTM 保留原字段位置；post_cycles 现在只含 CPU 候选排序/NMS/映射，不含 DFL。
+模型上传目录用 `build/npu/software_model`，生成命令为
+`python3 tools/npu/compile_yolo.py --model-source tasks/win/20261029-09-b3-software/src/npu --out build/npu/software_model`。
+PC 模型路径留空时按同一命令生成并上传；归档 Windows 模型不直接上传。
 L0 显示摄像头帧；`overlay.c` 用 RND 的 BORDER/FILL/GLYPH 在 L1 画框及原有 COCO 标签。
 L1 两块 ARGB8888 缓冲分别保留上次的框/标签脏矩形；复用时先 COPY 全透明源的对应
 矩形，再重画，其他像素保持透明。OPA=0 的 FILL 不会清像素，因此不用于清除。

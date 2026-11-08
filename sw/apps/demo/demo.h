@@ -59,6 +59,9 @@
 #define DEMO_CAMERA_FPS 30u
 
 /* Design 3.3 leaves 0x01800000..0x03ffffff unallocated, outside TX storage. */
+#define DEMO_POST_BASE 0x05200000u
+#define DEMO_POST_SPACING 0x00020000u
+#define DEMO_POST_TX 0x05240000u
 #define DEMO_WORKSPACE 0x01800000u
 #define DEMO_WORKSPACE_BYTES (YOLO_ANCHORS * sizeof(yolo_candidate))
 #define DEMO_TX_DESCRIPTORS DEMO_SEND_BASE

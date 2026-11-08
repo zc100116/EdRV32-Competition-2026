@@ -15,7 +15,7 @@ import unittest
 from unittest.mock import patch
 
 from tools.debug_tool.core.engine import SerialEngine
-from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES, reference_input
+from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES, reference_input, parse_candidates
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'tools/debug_tool'))
@@ -94,7 +94,8 @@ class ImageDetectionTest(unittest.TestCase):
                         self.assertIsNotNone(capture, (engine.yolo.error, engine.ethernet.status(), errors))
                         self.assertEqual(capture[0], reference_input(path))
                         self.assertEqual(len(capture[0]), INPUT_BYTES)
-                        self.assertEqual(len(capture[1]), OUTPUT_BYTES)
+                        self.assertEqual(len(capture[1]),
+                                         4 + 24 * len(parse_candidates(capture[1])))
                         self.assertEqual(capture[2].frame_id, window)
                         self.assertGreater(len(capture[2].boxes), 0)
                         result = engine.yolo.compare(path, directory, quant)
@@ -117,7 +118,7 @@ class ImageDetectionTest(unittest.TestCase):
         self.assertIsNone(engine.yolo.error)
         with self.assertRaisesRegex(ValueError, '回传不完整'):
             engine.yolo.complete_capture()
-        self.assertIn('window 0: missing 983040 B', engine.yolo.error)
+        self.assertIn('window 1 missing candidate count', engine.yolo.error)
         self.assertEqual(engine.yolo.failed, 1)
 
     def test_missing_return_then_complete_preserves_receiver_and_telemetry(self):
@@ -134,7 +135,7 @@ class ImageDetectionTest(unittest.TestCase):
                 def send_return(missing, end=True):
                     engine.yolo.request = 0
                     engine.yolo.reset_capture()
-                    for window, size in enumerate((INPUT_BYTES, OUTPUT_BYTES)):
+                    for window, size in enumerate((INPUT_BYTES, 4)):
                         for index, packet in enumerate(packets(bytes(size), window, 0)):
                             if missing and index == 5:
                                 continue
@@ -150,7 +151,6 @@ class ImageDetectionTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, '回传不完整'):
                     engine.yolo.complete_capture()
                 self.assertIn('window 0: missing 1024 B', engine.yolo.error)
-                self.assertIn('window 1: missing 1024 B', engine.yolo.error)
                 self.assertTrue(engine.ethernet.status()['rx']['active'])
                 self.assertTrue(engine.ethernet.rx_process.is_alive())
                 source.sendto(next(packets(wire(1), 3, 0)), destination)
@@ -221,7 +221,7 @@ class ImageDetectionTest(unittest.TestCase):
         yolo = YoloTool(None)
         yolo.reset_capture()
         yolo.receive(0, 0, bytes(INPUT_BYTES), False)
-        yolo.receive(1, 0, bytes(OUTPUT_BYTES), False)
+        yolo.receive(1, 0, bytes(4), False)
         yolo.receive(2, 0, struct.pack('<4sHHII', b'EDDT', 1, 0, 9, 0), True)
         self.assertTrue(yolo.capture_pending)
         self.assertEqual(yolo.generation, 0)

@@ -65,18 +65,23 @@ uint32_t showcase_gui_frames(void) { return display_frames; }
 ui_system_t ui_data_system(void) { return (ui_system_t){0}; }
 static unsigned invalidates;
 void showcase_rnd_run(const struct rnd_batch *batch)
+{ (void)batch; assert(0); }
+void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
 {
-    assert(batch->count == 1 && batch->target_count == 1);
-    const uint32_t *c = batch->commands[0].word;
-    assert(c[0] == (5u | (1u << 8) | (1u << 12)));
-    assert(c[1] == VISION_POST_BASE && c[2] == 5040);
-    assert(c[3] == 0 && c[4] == (1259u | (143u << 16)));
-    assert(c[5] == 0 && c[6] == c[4]);
-    assert(c[8] == VISION_OUTPUT_BASE && c[9] == 5040 && c[10] == 0);
-    memcpy((void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_POST_BASE),
-           (void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE + VISION_OUTPUT_BASE),
-           VISION_OUTPUT_BYTES);
+    assert(address == EDRV32_DDR_BASE + VISION_POST_BASE ||
+           address == EDRV32_DDR_BASE + VISION_POST_BASE + VISION_POST_SPACING);
+    assert(bytes == 32);
     ++invalidates;
+}
+static uint32_t candidate_base;
+static uint32_t candidate_count;
+void npu_post_configure(void) {}
+uint32_t npu_post_count(void) { return candidate_count; }
+void npu_post_start(uint32_t input, uint32_t output, uint32_t post)
+{
+    candidate_base = post;
+    candidate_count = 0;
+    npu_start(input, output);
 }
 
 uint32_t platform_frames(void) { return display_frames; }
@@ -263,11 +268,10 @@ static void camera_event(unsigned slot, unsigned id)
 }
 static void output_class(unsigned category)
 {
-    int8_t *output = physical(VISION_OUTPUT_BASE);
-    memset(output, 0x80, VISION_OUTPUT_BYTES);
-    const yolo_head *head = &yolo_default_heads[0];
-    output[head->class_offset + (category / 16) * head->plane_stride +
-           100 * 16 + category % 16] = 127;
+    yolo_candidate *candidate = (void *)(uintptr_t)(EDRV32_DDR_BASE + candidate_base);
+    *candidate = (yolo_candidate){{256, 4096, 25600, 25600}, 16700000,
+                                  (uint16_t)category, 100};
+    candidate_count = 1;
 }
 static void parallel_test(void)
 {
@@ -336,7 +340,7 @@ static void upload(unsigned base, unsigned index)
     const struct eth_tx_descriptor *tx = physical(VISION_TX_DESCRIPTORS);
     assert(tx[0].word[0] == VISION_INPUT_BASE + (index % 2)*VISION_INPUT_SPACING &&
            tx[0].word[2] == 0);
-    assert(tx[1].word[0] == VISION_POST_BASE && tx[1].word[2] == 1);
+    assert(tx[1].word[0] == VISION_POST_TX && tx[1].word[2] == 1);
     assert(tx[2].word[0] == VISION_TX_DETECTIONS && tx[2].word[2] == 0x102);
     assert(memcmp(physical(VISION_TX_DETECTIONS), "EDDT", 4) == 0);
     assert(vision_read32((uint8_t *)physical(VISION_TX_DETECTIONS)+12)==100+index);
@@ -582,7 +586,7 @@ int main(void)
     cancel_test();
     process_test();
     model_test();
-    assert(invalidates >= 6);
+    assert(invalidates >= 3);
     return 0;
 }
 

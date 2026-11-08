@@ -12,7 +12,7 @@ import struct
 import time
 from core.ethernet import packets, HEADER, unpack
 from core.video import VIDEO_HEADER, DETECTION_HEADER, DETECTION, Block
-from core.yolo import INPUT_BYTES, OUTPUT_BYTES
+from core.yolo import INPUT_BYTES, reference_candidates
 from core.telemetry import FIELDS, encode
 
 
@@ -151,10 +151,10 @@ def run_video(host, port, seconds, fps, scene=1):
 
 
 def run_yolo(host, port, ch2=None, output=None):
-    """Synthetic raw returns by default; explicit files exercise real model comparisons."""
+    """Synthetic empty candidates by default; explicit files exercise real comparisons."""
     from pathlib import Path
     inputs = bytes(INPUT_BYTES) if ch2 is None else Path(ch2).read_bytes()
-    outputs = bytes(OUTPUT_BYTES) if output is None else Path(output).read_bytes()
+    outputs = bytes(4) if output is None else Path(output).read_bytes()
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         destination = host, port
         send_block(sock, destination, inputs, 0, notify=False)
@@ -163,7 +163,7 @@ def run_yolo(host, port, ch2=None, output=None):
 
 
 def run_detection(sock, model, quant_params, frames):
-    """T-NETN host board: receive RGB565 and return reference CH2/OUTPUT/EDDT over real UDP."""
+    """T-NETN host board: receive RGB565 and return reference CH2/candidates/EDDT over real UDP."""
     from core.yolo import reference_output, reference_detections, rgb565_ch2
     from core.showcase import decode, encode, BULK_BEGIN, READY, DONE, IMAGE, APP, IMAGE_INFO, ACK
     for frame_id in range(frames):
@@ -197,11 +197,12 @@ def run_detection(sock, model, quant_params, frames):
         detections = DETECTION_HEADER.pack(b'EDDT', 1, len(boxes), frame_id, seq)
         detections += b''.join(DETECTION.pack(*box) for box in boxes)
         send_block(sock, peer, ch2, 0, notify=False)
-        send_block(sock, peer, output, 1, notify=False)
+        send_block(sock, peer, reference_candidates(output, quant_params), 1, notify=False)
         send_block(sock, peer, detections, 2)
         send_block(sock, peer, encode(DONE, seq, struct.pack('<BB2xI', kind, 0, frame_id)), 3)
         print(f'Detection frame_id={frame_id} CH2={INPUT_BYTES} '
-              f'OUTPUT={len(output)} detections={len(boxes)}', flush=True)
+              f'candidate_bytes={len(reference_candidates(output, quant_params))} '
+              f'detections={len(boxes)}', flush=True)
 
 def run_processing(stream, commands=2):
     """UART peer for end-to-end parameter transport through a real serial engine."""
@@ -233,7 +234,7 @@ def main():
     parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo', 'detection', 'processing'], default='telemetry')
     parser.add_argument('--fps', type=int, choices=range(1, 61), default=10, metavar='1..60')
     parser.add_argument('--ch2', help='YOLO mode: raw CH2 input file')
-    parser.add_argument('--output', help='YOLO mode: raw NPU OUTPUT file')
+    parser.add_argument('--output', help='YOLO mode: u32 count followed by 24-byte NPU candidates')
     parser.add_argument('--model', help='Detection: compiled NPU model directory')
     parser.add_argument('--quant', help='Detection: quantization JSON')
     parser.add_argument('--serial', help='Processing: serial port for a paired UART simulator')

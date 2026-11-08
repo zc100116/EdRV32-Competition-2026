@@ -55,8 +55,9 @@ void demo_try_inference(void)
     demo.pair_image = -1;
     demo.pair_input = -1;
     demo.active_npu = buffer;
-    npu_start(DEMO_INPUT_BASE + job->input_slot * DEMO_INPUT_SPACING,
-              DEMO_OUTPUT_BASE + (unsigned int)buffer * DEMO_OUTPUT_SPACING);
+    npu_post_start(DEMO_INPUT_BASE + job->input_slot * DEMO_INPUT_SPACING,
+        DEMO_OUTPUT_BASE + (unsigned int)buffer * DEMO_OUTPUT_SPACING,
+        DEMO_POST_BASE + (unsigned int)buffer * DEMO_POST_SPACING);
 }
 
 void demo_scene_frame(unsigned int channel, unsigned int slot, uint32_t frame_id)
@@ -110,6 +111,7 @@ static void npu_event(const struct engine_event *event, void *context)
         if (!job->checking) {
             input_release(job->input_slot);
         }
+        job->post_count = npu_post_count();
         job->state = BUFFER_READY;
         demo.active_npu = -1;
         ++demo.inference_count;
@@ -153,6 +155,7 @@ void demo_model_init(void)
     struct npu_config npu = {DEMO_MODEL_BASE, DEMO_WORK_BASE, DEMO_INPUT_BASE,
                             DEMO_OUTPUT_BASE, DEMO_DESC_BASE, 68};
     npu_configure(&npu);
+    npu_post_configure();
 }
 
 void demo_scene_configure(enum vin_source source)
@@ -202,13 +205,22 @@ void demo_scene_service(void)
         job->state = BUFFER_PROCESSING;
         demo_try_inference();
         demo_irq_unlock(lock);
-        uint32_t output = DEMO_OUTPUT_BASE + buffer * DEMO_OUTPUT_SPACING;
-        engine_dma_invalidate(demo_cached(output), DEMO_OUTPUT_BYTES);
+        uint32_t post = DEMO_POST_BASE + buffer * DEMO_POST_SPACING;
+        /* The saved count belongs to this frame; next DOORBELL clears POST_COUNT. */
+        if (job->post_count) engine_dma_invalidate(demo_cached(post),
+            (job->post_count * 24u + 31u) & ~31u);
+        yolo_candidate *candidates = (void *)demo_cached(post);
+        demo_network_wait();
+        if (job->checking) {
+            uint32_t *tx = demo_uncached(DEMO_POST_TX);
+            tx[0] = job->post_count;
+            const uint32_t *source = (const uint32_t *)candidates;
+            for (uint32_t i = 0; i < job->post_count * 6u; ++i) tx[i + 1] = source[i];
+        }
         uint64_t start = clint_time();
         yolo_post_stats stats;
-        unsigned int count = yolo_post_process((const int8_t *)demo_cached(output),
-            yolo_default_heads, (yolo_candidate *)demo_cached(DEMO_WORKSPACE),
-            detections, &stats);
+        unsigned int count = yolo_post_candidates(candidates, job->post_count,
+                                                  detections, &stats);
         demo.post_cycles = (uint32_t)(clint_time() - start);
         demo.detection_count = count;
         if (demo.output != DEMO_ETHERNET) {

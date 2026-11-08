@@ -1,0 +1,6 @@
+`verilator_config
+// External timed models use procedural protocol state and expose debug signals.
+lint_off -rule BLKSEQ -file "*/verif/models/*"
+lint_off -rule UNUSEDSIGNAL -file "*/verif/models/*"
+// The harness drives asynchronous DUT and synchronous external resets.
+lint_off -rule SYNCASYNCNET -file "*/verif/soc/pp_sw_01/edrv32_npu_post_tb.sv"

@@ -238,19 +238,20 @@ void mem_xbar_error(uint32_t *port, uint32_t *address, uint32_t *type)
     *type = 0;
 }
 
+void engine_dma_clean(uintptr_t address, uint32_t bytes)
+{ (void)address; (void)bytes; }
+
 void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
 {
     (void)address;
     (void)bytes;
 }
 
-uint32_t yolo_post_process(const int8_t *output, const yolo_head heads[3],
-                           yolo_candidate workspace[YOLO_ANCHORS],
+uint32_t yolo_post_candidates(yolo_candidate workspace[YOLO_ANCHORS], uint32_t count,
                            yolo_detection detections[YOLO_MAX_DETECTIONS],
                            yolo_post_stats *stats)
 {
-    (void)output;
-    (void)heads;
+    (void)count;
     (void)workspace;
     (void)detections;
     (void)stats;

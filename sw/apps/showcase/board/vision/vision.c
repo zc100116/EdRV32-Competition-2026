@@ -71,6 +71,8 @@ static struct {
     uint32_t next_frame;
     uint64_t npu_start, upload_complete, post_ticks;
     unsigned npu_busy, npu_complete, npu_input;
+    unsigned npu_buffer, post_buffer;
+    uint32_t npu_post_count;
     int npu_image;
     uint32_t npu_frame;
     uint64_t npu_vin, npu_done;
@@ -462,7 +464,8 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
     }
     timing.last_start = v.npu_start;
     engine_control(ENGINE_NPU, EDRV32_NPU_CTRL_ENABLE_MASK);
-    npu_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING, VISION_OUTPUT_BASE);
+    npu_post_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING, VISION_OUTPUT_BASE,
+                   VISION_POST_BASE + v.npu_buffer * VISION_POST_SPACING);
 }
 static void camera_frame(unsigned channel)
 {
@@ -521,25 +524,6 @@ static void camera_start(void)
         v.pair_image = v.pair_input = -1;
     }
 }
-/* P5c 10.2: one synchronous RND batch; the cooperative GUI cannot submit until
- * this call returns, and its own run_batch obeys the same ownership rule. */
-static void copy_output(void)
-{
-    static _Alignas(64) struct rnd_command command;
-    struct rnd_common c = {.dst_base = VISION_POST_BASE, .dst_stride = 5040,
-        .dst_fmt = RND_ARGB8888, .src_fmt = RND_ARGB8888,
-        .clip = {0, 0, 1259, 143}, .rect = {0, 0, 1259, 143}};
-    struct rnd_source source = {VISION_OUTPUT_BASE, 5040, 0, 0};
-    rnd_copy(&command, &c, &source);
-    struct rnd_range target = {(void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_POST_BASE),
-                               VISION_OUTPUT_BYTES};
-    struct rnd_range input = {uncached(VISION_OUTPUT_BASE), VISION_OUTPUT_BYTES};
-    struct rnd_batch batch = {&command, 1, &input, 1, &target, 1};
-    uint64_t begin = platform_ticks();
-    showcase_rnd_run(&batch);
-    timing.copy_ticks = platform_ticks() - begin;
-}
-
 static void publish_result(void)
 {
     platform_gui_wake();
@@ -619,6 +603,7 @@ static void model_step(void)
             struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
                 VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, v.model_count};
             npu_configure(&config);
+            npu_post_configure();
             v.model_pending = 0;
             v.model_ready = true;
             /* Each upload owns its own window metadata; no global image_window. */
@@ -634,7 +619,7 @@ static void send_results(void)
                             v.detections, v.post.kept, v.job_frame, v.job_request);
     eth_tx_descriptor_pack(&tx[0], VISION_INPUT_BASE + v.job_input * VISION_INPUT_SPACING,
                            VISION_INPUT_BYTES, 0, 0, 0);
-    eth_tx_descriptor_pack(&tx[1], VISION_POST_BASE, VISION_OUTPUT_BYTES, 1, 0, 0);
+    eth_tx_descriptor_pack(&tx[1], VISION_POST_TX, 4u + v.post.count * 24u, 1, 0, 0);
     eth_tx_descriptor_pack(&tx[2], VISION_TX_DETECTIONS, bytes, 2, 1, 0);
     v.tx_done = engine_poll(ENGINE_ETH).done_count;
     if (board_eth_send(VISION_TX_DESCRIPTORS, 3)) v.job = JOB_TX;
@@ -719,6 +704,7 @@ int vision_service(void)
     }
     if (flags[ENGINE_NPU] & EDRV32_NPU_IRQ_STAT_DONE_MASK) {
         v.npu_complete = 1; v.npu_done = npu_done_tick;
+        v.npu_post_count = npu_post_count();
     }
     if (v.npu_complete && (v.job == JOB_IDLE || v.job == JOB_NPU)) {
         timing.npu_done = v.npu_done;
@@ -730,7 +716,19 @@ int vision_service(void)
         if (!v.image_job) {
             reference(v.job_image, REF_JOB, REF_NPU);
         }
-        copy_output();
+        v.post_buffer = v.npu_buffer;
+        uint32_t post_base = VISION_POST_BASE + v.post_buffer * VISION_POST_SPACING;
+        uint64_t acquire_start = platform_ticks();
+        if (v.npu_post_count) engine_dma_invalidate(EDRV32_DDR_BASE + post_base,
+            (v.npu_post_count * 24u + 31u) & ~31u);
+        yolo_candidate *candidates = (void *)(uintptr_t)(EDRV32_DDR_BASE + post_base);
+        if (v.image_job) {
+            uint32_t *tx = uncached(VISION_POST_TX);
+            tx[0] = v.npu_post_count;
+            memcpy(tx + 1, candidates, v.npu_post_count * 24u);
+        }
+        timing.copy_ticks = 0;
+        v.npu_buffer ^= 1u;
         v.npu_busy = v.npu_complete = 0;
         if (!v.image_job) {
             v.input_busy &= ~(1u << v.npu_input);
@@ -738,10 +736,10 @@ int vision_service(void)
         }
         v.job = JOB_POST;
         camera_start();
-        timing.post_start = platform_ticks();
+        timing.post_start = acquire_start;
         memset(timing.cpu, 0, sizeof timing.cpu);
-        vision_post_begin(&v.post, (void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_POST_BASE),
-                          (void *)(uintptr_t)(EDRV32_DDR_BASE + VISION_WORKSPACE), v.detections);
+        vision_post_begin(&v.post, candidates, v.npu_post_count, v.detections);
+        timing.cpu[0] = platform_ticks() - acquire_start;
         v.post_ticks = 0;
     }
     if (v.job == JOB_TX && engine_poll(ENGINE_ETH).done_count - v.tx_done >= 3) {
@@ -875,6 +873,7 @@ void vision_init(void)
         struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
             VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, showcase_model_count};
         npu_configure(&config);
+        npu_post_configure();
         v.model_ready = true;
     }
 }

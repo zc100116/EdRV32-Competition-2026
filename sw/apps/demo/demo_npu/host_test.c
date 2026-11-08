@@ -62,9 +62,9 @@ uint32_t demo_npu_cpu_cycles(void) { static uint32_t cycles; return cycles += 12
 void cache_clean(uintptr_t address, uint32_t bytes) { (void)address; (void)bytes; }
 void cache_invalidate(uintptr_t address, uint32_t bytes)
 {
-    assert(address == demo_cached(DEMO_OUTPUT_BASE) ||
-           address == demo_cached(DEMO_OUTPUT_BASE + DEMO_OUTPUT_SPACING));
-    assert(bytes == DEMO_OUTPUT_BYTES);
+    assert(address == demo_cached(DEMO_POST_BASE) ||
+           address == demo_cached(DEMO_POST_BASE + DEMO_POST_SPACING));
+    assert(bytes == 32);
     ++invalidations;
 }
 void uart_putc(uint8_t byte)
@@ -135,21 +135,26 @@ static void frame_test(unsigned int window)
            DEMO_INPUT_BASE + window * DEMO_INPUT_SPACING);
     assert(mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_OUTPUT_BASE_OFFSET) ==
            DEMO_OUTPUT_BASE + window * DEMO_OUTPUT_SPACING);
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_COUNT_OFFSET, 1);
+    yolo_candidate *candidate = (void *)demo_cached(DEMO_POST_BASE + window * DEMO_POST_SPACING);
+    *candidate = (yolo_candidate){{0, 0, 256, 256}, 8388608, 0, 0};
     mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_IRQ_STAT_OFFSET,
                  EDRV32_NPU_IRQ_STAT_DONE_MASK);
     mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_PERF_OFFSET(0), 789);
     engine_irq_handle(EDRV32_PLIC_SOURCE_NPU);
     assert(demo.inference_cycles == 789);
     demo_npu_service();
-    assert(demo.post_cycles == 123 && demo.detection_count == 0);
+    assert(demo.post_cycles == 123 && demo.detection_count == 1);
     assert(demo.tx_count == 3 && demo.tx_active);
     const struct eth_tx_descriptor *tx = demo_uncached(DEMO_TX_DESCRIPTORS);
     assert(tx[0].word[0] == DEMO_INPUT_BASE + window * DEMO_INPUT_SPACING);
     assert(tx[0].word[1] == DEMO_INPUT_BYTES && tx[0].word[2] == 0);
-    assert(tx[1].word[0] == DEMO_OUTPUT_BASE + window * DEMO_OUTPUT_SPACING);
-    assert(tx[1].word[1] == DEMO_OUTPUT_BYTES && tx[1].word[2] == 1);
+    assert(tx[1].word[0] == DEMO_POST_TX);
+    assert(tx[1].word[1] == 28 && tx[1].word[2] == 1);
+    assert(*(uint32_t *)demo_uncached(DEMO_POST_TX) == 1);
+    assert(!memcmp((uint32_t *)demo_uncached(DEMO_POST_TX) + 1, candidate, 24));
     assert(tx[2].word[0] == DEMO_TX_DETECTIONS);
-    assert(tx[2].word[1] == 16 && tx[2].word[2] == 0x102);
+    assert(tx[2].word[1] == 28 && tx[2].word[2] == 0x102);
     assert(!memcmp(demo_uncached(DEMO_TX_DETECTIONS), "EDDT", 4));
     assert(demo_read32((uint8_t *)demo_uncached(DEMO_TX_DETECTIONS) + 8) == window);
     assert(eth_window_bytes(window) == DEMO_IMAGE_BYTES);
@@ -173,8 +178,8 @@ int main(void)
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE, bytes,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) !=
            MAP_FAILED);
-    memset((void *)demo_cached(DEMO_OUTPUT_BASE), 0x80, DEMO_OUTPUT_BYTES);
-    memset((void *)demo_cached(DEMO_OUTPUT_BASE + DEMO_OUTPUT_SPACING), 0x80,
+    memset((void *)demo_cached(DEMO_POST_BASE), 0x80, DEMO_OUTPUT_BYTES);
+    memset((void *)demo_cached(DEMO_POST_BASE + DEMO_POST_SPACING), 0x80,
            DEMO_OUTPUT_BYTES);
     demo.clock_hz = 100000000;
     demo.sample_hz = 100;
@@ -193,8 +198,8 @@ int main(void)
     frame_test(0);
     frame_test(1);
     assert(invalidations == 2);
-    assert(strstr(serial, "frame_id=0 NPU_PERF0=789 post_cpu_cycles=123 detections=0"));
-    assert(strstr(serial, "frame_id=1 NPU_PERF0=789 post_cpu_cycles=123 detections=0"));
+    assert(strstr(serial, "frame_id=0 NPU_PERF0=789 post_cpu_cycles=123 detections=1"));
+    assert(strstr(serial, "frame_id=1 NPU_PERF0=789 post_cpu_cycles=123 detections=1"));
     notify(3, 1);
     assert(eth_window_bytes(3) == 0);
     demo_monitor_tick();

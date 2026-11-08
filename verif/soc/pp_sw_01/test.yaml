@@ -1,0 +1,11 @@
+top: edrv32_npu_post_tb
+files: files.f
+defines: SIM_MODE
+parameters:
+software: pp_sw_01
+timeout: 600
+pass: PASS
+tier: full
+simulator: verilator
+group: soc_full
+runner: python3 verif/soc/pp_sw_01/run.py
