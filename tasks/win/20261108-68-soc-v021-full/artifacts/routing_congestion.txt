@@ -1,0 +1,40 @@
+Card 68 source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/place_route/run.log
+Snapshot: 2026-11-08 14:58:39 +0800; log last write: 2026-11-08 14:45:58 +0800
+Iteration	seconds	unrouted	overused
+6	18.607	154948	1162882
+7	19.605	140043	967745
+8	27.615	127487	777448
+9	74.645	116142	638865
+10	213.665	106495	533013
+11	369.591	94911	532929
+12	715.870	84552	457732
+13	971.633	77138	387959
+14	1127.033	70433	327750
+15	1294.384	65228	282036
+
+Release F reference: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-RND1S-CPU125/place_route/run.log
+Iteration	seconds	unrouted	overused
+6	23.455	121787	814902
+10	43.697	75343	365781
+15	70.621	41530	155660
+40	40.452	14040	33127
+
+Current route-log evidence
+Route thread size: 5
+Unrouted clock nets at iteration 0 (0.513 sec): 15
+Unrouted clock nets at iteration 1 (0.410 sec): 8
+Unrouted clock nets at iteration 2 (0.345 sec): 5
+Unrouted clock nets at iteration 3 (0.143 sec): 2
+Unrouted clock nets at iteration 4 (0.058 sec): 0
+Total route nets size: 173301
+Pre route takes 66.692 sec
+Unrouted general nets at iteration 6 (MT total route time: 18.607 sec): 154948(overused: 1162882)
+Unrouted general nets at iteration 7 (MT total route time: 19.605 sec): 140043(overused: 967745)
+Unrouted general nets at iteration 8 (MT total route time: 27.615 sec): 127487(overused: 777448)
+Unrouted general nets at iteration 9 (MT total route time: 74.645 sec): 116142(overused: 638865)
+Unrouted general nets at iteration 10 (MT total route time: 213.665 sec): 106495(overused: 533013)
+Unrouted general nets at iteration 11 (MT total route time: 369.591 sec): 94911(overused: 532929)
+Unrouted general nets at iteration 12 (MT total route time: 715.870 sec): 84552(overused: 457732)
+Unrouted general nets at iteration 13 (MT total route time: 971.633 sec): 77138(overused: 387959)
+Unrouted general nets at iteration 14 (MT total route time: 1127.033 sec): 70433(overused: 327750)
+Unrouted general nets at iteration 15 (MT total route time: 1294.384 sec): 65228(overused: 282036)

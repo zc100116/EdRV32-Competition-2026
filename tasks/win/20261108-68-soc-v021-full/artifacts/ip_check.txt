@@ -1,0 +1,11 @@
+Generated PLL: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_pll_npu/ip_pll_npu.v
+localparam real    CLKIN_FREQ       = 27.0; //@IPC float 10.0,500.0
+localparam integer STATIC_RATIOI    = 1; //@IPC int 1,80
+localparam integer STATIC_RATIOM    = 2; //@IPC int 1,128
+localparam real    STATIC_RATIO0    = 6.375; //@IPC int 1.0000,128.0000
+localparam real    STATIC_RATIOF    = 21.25; //@IPC int 1.0000,128.0000
+
+CPU LUTRAM initialization loaded by current Compile
+I: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_direction/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_cpu_direction.v(line number: 63)] Loading memory data from file G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_direction/rtl/ip_lutram_cpu_direction_ip_lutram_cpu_direction.dat
+I: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_local_history/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_cpu_local_history.v(line number: 63)] Loading memory data from file G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_local_history/rtl/ip_lutram_cpu_local_history_ip_lutram_cpu_local_history.dat
+I: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_tournament/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_cpu_tournament.v(line number: 63)] Loading memory data from file G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_tournament/rtl/ip_lutram_cpu_tournament_ip_lutram_cpu_tournament.dat

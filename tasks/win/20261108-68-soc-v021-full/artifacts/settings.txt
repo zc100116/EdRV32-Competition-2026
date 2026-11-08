@@ -1,0 +1,12 @@
+HEAD 4d8752ff0dc744cfad2908dea5b6e5a17078004f
+PDS 2022.2-SP6.1 build 138931, PG2L200H-6 FBB676
+Project: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021
+Imported RTL files: 160
+
+add_constraint "C:/Users/86183/.codex/worktrees/card68-soc-v021/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_full_top.fdc"
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+compile -force_to_run -include_path {C:/Users/86183/.codex/worktrees/card68-soc-v021/EdRV32-Competition-2026/rtl/include} -compiler_directives {FPGA_MODE} -top_module edrv32_fpga_board_full_top
+synthesize -ads -selected_syn_tool_opt 2
+dev_map -force_to_run -fanout_number 1000
+
+Route thread size: 5

@@ -1,0 +1,29 @@
+compile W=8608 C=0 E=0
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/compile/run.log
+Action compile: Real time elapsed is 0h:2m:20s
+Action compile: CPU time elapsed is 0h:0m:33s
+Action compile: Process CPU time elapsed is 0h:0m:33s
+Action compile: Peak memory pool usage is 862 MB
+Current time: Sun Nov  8 12:59:08 2026
+
+synthesize W=14390 C=61 E=0
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/synthesize/run.log
+Action synthesize: Real time elapsed is 0h:8m:13s
+Action synthesize: CPU time elapsed is 0h:2m:3s
+Action synthesize: Process CPU time elapsed is 0h:2m:12s
+Action synthesize: Peak memory pool usage is 4,381 MB
+Current time: Sun Nov  8 13:07:21 2026
+
+device_map W=524 C=0 E=0
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/device_map/run.log
+Action dev_map: Real time elapsed is 0h:1m:31s
+Action dev_map: CPU time elapsed is 0h:0m:29s
+Action dev_map: Process CPU time elapsed is 0h:0m:30s
+Action dev_map: Peak memory pool usage is 2,464 MB
+Current time: Sun Nov  8 13:08:55 2026
+
+place_route W=694 C=62 E=0
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/place_route/run.log
+
+
+Previous GUI import errors: see project pds.log. It records Flow-0245 / Verilog-4104 before the successful Compile. Current impl.tcl uses the dedicated include path without the trailing tab.
