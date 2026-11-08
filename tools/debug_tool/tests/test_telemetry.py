@@ -25,7 +25,7 @@ def wire(seq=0, kind=1):
                              2, 31250 * (port + 1), 3, 15625, 45, 72, port)
         struct.pack_into('<13I', data, 232, 11, 12, 13, 14, 15, 16,
                          1, 6_000_000, 1_000_000, 7, 99, 100, 101)
-        struct.pack_into('<3I', data, 284, 100_000_000, 150_000_000, 17)
+        struct.pack_into('<3I', data, 284, 100_000_000, 180_000_000, 17)
     else:
         struct.pack_into('<5I', data, 24, 16, 100, 12, 300, 2600)
         struct.pack_into('<16I', data, 44, *range(16))
@@ -42,7 +42,7 @@ class TelemetryTest(unittest.TestCase):
         self.assertEqual(row['disp_underflow'], 15)
         self.assertEqual(row['npu_completed'], 1)
         self.assertEqual(row['cpu_idle'], 101)
-        self.assertEqual(row['clk_npu_hz'], 150_000_000)
+        self.assertEqual(row['clk_npu_hz'], 180_000_000)
         self.assertEqual(row['vid_skip'], 17)
         self.assertEqual(encode(row), wire())
 
@@ -66,7 +66,7 @@ class TelemetryTest(unittest.TestCase):
         self.assertEqual(value['ports'][0]['wait_avg'], 9)
         self.assertEqual(value['ports'][0]['wait_max'], 72)
         self.assertEqual(value['utilization'], .5)
-        self.assertEqual(value['npu_ms'], 40)
+        self.assertEqual(value['npu_ms'], 100 / 3)
         self.assertEqual(value['post_ms'], 10)
         self.assertEqual(value['detection_fps'], 100)
         self.assertAlmostEqual(value['time_s'], 1.23456789)

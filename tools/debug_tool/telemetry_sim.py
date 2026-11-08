@@ -20,7 +20,7 @@ def periodic(seq, tick, hz):
     record = dict.fromkeys(FIELDS, 0)
     record.update(version=1, type=1, seq=seq, scene=1 if tick < hz * 5 else 2,
                   mtime=int((tick + 1) * 100e6 / hz), window_cyc=int(125e6 / hz),
-                  clk_sys_hz=100_000_000, clk_npu_hz=150_000_000)
+                  clk_sys_hz=100_000_000, clk_npu_hz=180_000_000)
     record['ds_busy'] = int(record['window_cyc'] * (.46 + .12 * math.sin(tick / hz)))
     for p in range(7):
         scale = (1 + .18 * math.sin(tick / hz * 2 + p))

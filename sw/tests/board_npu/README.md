@@ -107,7 +107,7 @@ NPU A-empty PASS
 NPU A-reset PASS
 NPU B-OP-01-c16_32 PASS PERF0=1200 MAC=32
 ...其余 14 个 B 项...
-NPU C-YOLO PASS PERF0=7500000 MAC=6000000 ms/frame=50.000 fps=20.000 CRC32=12345678
+NPU C-YOLO PASS PERF0=7500000 MAC=6000000 ms/frame=41.667 fps=24.000 CRC32=12345678
 NPU D-01 PASS CRC32=12345678 PERF0=7500000 MAC=6000000
 ...D-02 至 D-19...
 NPU D-20 PASS CRC32=12345678 PERF0=7500000 MAC=6000000
@@ -115,8 +115,8 @@ NPU board: PASS 39/39
 ```
 
 `PERF0` 是 NPU 总周期，`MAC` 是 MAC 有效拍（npu-spec 4 的计数器开发初值）。
-`ms/frame = PERF0 × 1000 / 150000000`，`fps = 150000000 / PERF0`，打印三位小数。
-150 MHz 固定值来自 npu-spec 第 7 节；SYSCTRL 只提供 clk_sys，不用它代替 clk_npu。
+`ms/frame = PERF0 × 1000 / 180000000`，`fps = 180000000 / PERF0`，打印三位小数。
+180 MHz 固定值来自 npu-spec 第 7 节；SYSCTRL 只提供 clk_sys，不用它代替 clk_npu。
 失败示例：
 
 ```text

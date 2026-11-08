@@ -55,7 +55,7 @@
 #define DEMO_VIDEO_BYTES 32u
 #define DEMO_MAX_BOXES 100u
 #define DEMO_DETECTION_BYTES (16u + 12u * DEMO_MAX_BOXES)
-#define DEMO_NPU_HZ 150000000u
+#define DEMO_NPU_HZ 180000000u
 #define DEMO_CAMERA_FPS 30u
 
 /* Design 3.3 leaves 0x01800000..0x03ffffff unallocated, outside TX storage. */

@@ -118,7 +118,7 @@ NPU 和回传共同使用该张量。原始图像缓冲及 CH2/OUTPUT 在最终�
 
 | 块 | 布局 |
 |---|---|
-| EDTM | 320 B；type/version 各 u16；seq@8、scene@12、mtime u64@16；采样窗口@24；七端口统计@36；VIN@232；DISP@248；NPU@256；ETH@272；WFI@280；系统频率@284；NPU 150 MHz@288；视频跳帧@292；296–319 为零 |
+| EDTM | 320 B；type/version 各 u16；seq@8、scene@12、mtime u64@16；采样窗口@24；七端口统计@36；VIN@232；DISP@248；NPU@256；ETH@272；WFI@280；系统频率@284；NPU 180 MHz@288；视频跳帧@292；296–319 为零 |
 | EDVF | 32 B；magic、version=1、format=1、width/height=1280/720；stride@12、frame_id@16、mtime u64@20、scene@28；后接 RGB565 |
 | EDDT | 16 B；magic、version=1、count u16、frame_id u32、reserved=0；随后 count×12 B：x0/y0/x1/y1 i16、class/score u16，1280×720 坐标、COCO 类别、千分比分数，最多 100 框 |
 
@@ -187,7 +187,7 @@ L1 在 FRAME 事件后写关闭，下一 FRAME 等待 SWITCH1 释放，S2 不再
 
 CLINT 默认 100 Hz；每次中断 SNAPSHOT|CLEAR，记录精确 WINDOW_CYC；
 VIN 使用 PERF3/5/6/8 差值，DISP 读空用 PERF1 差值、提交数为软件计数差值；
-NPU 最近周期取 PERF0（150 MHz），后处理周期由 CLINT 测量（100 MHz）。
+NPU 最近周期取 PERF0（180 MHz），后处理周期由 CLINT 测量（100 MHz）。
 CPU WFI 周期从睡眠到中断入口测量，不包括中断处理；配置处理/等待不计为空闲。
 ETH 收发字节均指应用数据：RX 取 PERF2 差值；TX 由 PERF10 已发 UDP 包数与
 本列表各段长度换算，短尾包按实际长度计数，不含以太网/IP/UDP/应用头。

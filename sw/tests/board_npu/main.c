@@ -2,7 +2,7 @@
  * Spec: npu-spec 2-5, 7; SoC 3.5, 7.1, 7.4; board-npu-test design section 4.
  * Description: Check registers, small operators, YOLO output and 20 repeated frames.
  *              Compare host reference bytes and report counters over the BIOS UART.
- * Clock domain: clk_sys CPU, clk_npu engine (150 MHz, npu-spec 7).
+ * Clock domain: clk_sys CPU, clk_npu engine (180 MHz, npu-spec 7).
  */
 #include "cache.h"
 #include "edrv32.h"
@@ -14,7 +14,7 @@
 #include "board_data.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define NPU_CLOCK_HZ 150000000u
+#define NPU_CLOCK_HZ 180000000u
 #define STABILITY_RUNS 20u
 #define TOTAL_ITEMS (3u + ARRAY_SIZE(board_cases) + STABILITY_RUNS)
 #define LED_PASS (1u << 4)

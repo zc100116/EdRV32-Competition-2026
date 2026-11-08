@@ -54,7 +54,7 @@ def check_system_info(text, commit, compiler):
     expected = {
         'CHIP_ID': '0xed320001', 'CLK_SYS_HZ': str(CONSTANTS['EDRV32_CLK_SYS_HZ']),
         'ROM bytes': '16384', 'SRAM bytes': str(int(REGIONS['SRAM']['size'], 0)),
-        'I-cache bytes': '8192', 'D-cache bytes': '8192', 'MEM_READY': '1',
+        'I-cache bytes': '32768', 'D-cache bytes': '32768', 'MEM_READY': '1',
         'Build commit': commit, 'Compiler version': compiler,
     }
     for key, value in expected.items():

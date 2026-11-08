@@ -67,7 +67,7 @@ static void test_monitor(void)
     assert(word(out + 276) == 1002);
     assert(word(out + 280) == 12345);
     assert(word(out + 284) == 100000000);
-    assert(word(out + 288) == 150000000);
+    assert(word(out + 288) == 180000000);
     assert(word(out + 292) == 0xfedcba98);
     for (unsigned int i = 296; i < 320; ++i) {
         assert(out[i] == 0);

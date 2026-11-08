@@ -107,7 +107,7 @@ void ui_page_chip(lv_obj_t *p)
     char parameters[256];
     lv_snprintf(parameters,sizeof(parameters),"CPU    顺序双发射 RV32 · %u MHz\n\n"
         "I$ / D$    各 32 KiB    SRAM 64 KiB\n\n"
-        "NPU    每拍 512 次乘加 @150 MHz\n\n"
+        "NPU    每拍 512 次乘加 @180 MHz\n\n"
         "DDR3    32 位 · 1000 MT/s\n\n显示    1280×720 @60 Hz",
         ui_data_system().clock_hz/1000000);
     ui_label(params,parameters,24,60,&sim_font_16,TEXT);
