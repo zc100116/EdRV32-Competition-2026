@@ -112,7 +112,7 @@ module edrv32_npu (
     wire [2:0] decode_error_w;
     wire [3:0] conv_start_w;
     wire stop_w;
-    (* keep = "true", syn_preserve = 1 *) reg [1:0] stop_r;
+    reg stop_r;
     wire conv_read_req_valid_w;
     wire conv_read_req_ready_w;
     wire [31:0] conv_read_req_addr_w;
@@ -252,9 +252,9 @@ module edrv32_npu (
     // The top-level request and DONE masks below still use the immediate stop.
     always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
         if (!rst_npu_ctrl_n_w) begin
-            stop_r <= 2'b0;
+            stop_r <= 1'b0;
         end else begin
-            stop_r <= {2{stop_w}};
+            stop_r <= stop_w;
         end
     end
     assign cancel_w = (state_r == S_CANCEL) || soft_reset_w;
@@ -468,7 +468,7 @@ module edrv32_npu (
 
         // Execution lifetime.
         .start_i(conv_start_w),
-        .stop_i(stop_r[0]),
+        .stop_i(stop_r),
         .cancel_i(conv_cancel_w),
 
         // Descriptor configuration and execution status.
@@ -566,7 +566,7 @@ module edrv32_npu (
         .rst_n_i(rst_npu_ctrl_n_units_w[3]),
 
         // Execution lifetime.
-        .stop_i(stop_r[1]),
+        .stop_i(stop_r),
 
         // Descriptor configuration and execution status.
         .req_valid_i(read_req_valid_w),
