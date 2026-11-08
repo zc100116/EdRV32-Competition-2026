@@ -15,7 +15,7 @@ import sys
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from fixtures import BUILD, ROOT, TIERS, fixture, variants
-from stream import beats  # noqa: E402
+from stream import Acceptance, beats  # noqa: E402
 from oracle import check_image  # noqa: E402
 sys.path.insert(0, str(ROOT))
 from tools.regress import expand_files  # noqa: E402
@@ -67,6 +67,45 @@ def network_raw(path):
     return bytes(data[regs['OUTPUT_BASE'] + i] for i in range(725760))
 
 
+def stream_test(path):
+    """Adapt only the branch ports documented in the RTL delivery report."""
+    import struct
+    target = BUILD / 'post_stream_sim'
+    target.mkdir(parents=True, exist_ok=True)
+    sources = [str(HERE.parent / 'lint.vlt'), str(HERE / 'tb_post_stream.sv')]
+    sources += expand_files(HERE.parent / 'dut.f')
+    command = ['verilator', '--binary', '--timing', '-Wall', '-j', '1',
+               '+define+SIM_MODE', '--top-module', 'tb_post_stream',
+               '--Mdir', str(target), '-o', 'sim', *sources]
+    with (target / 'compile.log').open('w') as log:
+        subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
+    log_path = path / 'run.log'
+    with log_path.open('w') as log:
+        subprocess.run([str(target / 'sim'), f'+CASE_DIR={path}'], cwd=ROOT,
+                       stdout=log, stderr=subprocess.STDOUT, check=True, timeout=1200)
+    scoreboard = Acceptance()
+    first_enqueue = None
+    for line in log_path.read_text().splitlines():
+        fields = line.split()
+        if fields[0] == 'ACCEPT':
+            cycle, head, row, block, plane, pair = map(int, fields[1:7])
+            base, width = ((0, 80), (3840, 40), (4800, 20))[head]
+            left = base + row * width + pair * 2
+            scoreboard.accept(cycle, (head, row, block, block * 2 + plane, pair,
+                                      left, left + 1, bytes.fromhex(fields[7])[::-1]))
+        elif fields[0] == 'FIRST_ENQUEUE':
+            first_enqueue = int(fields[1])
+    packed = b''.join(bytes.fromhex(line)[::-1]
+                      for line in (path / 'output.hex').read_text().splitlines())
+    assert len(packed) == 5040 * 24
+    for record in struct.iter_unpack('<4iIHH', packed):
+        assert record[4:6] == (16777216, 0), record
+        scoreboard.enqueue(record[6])
+    result = scoreboard.finish(first_enqueue)
+    (path / 'performance.json').write_text(json.dumps(result, indent=2) + '\n')
+    print(f'PASS PP-P-02 {result}: {log_path}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--test', choices=list(TIERS), required=True)
@@ -91,16 +130,15 @@ def main():
     if args.network is None:
         args.network = BUILD / 'yolo'
     if args.test == 'PP-P-02':
-        if args.prepare_only:
-            path = BUILD / 'post' / 'pp-p-02'
-            path.mkdir(parents=True, exist_ok=True)
-            (path / 'stream.txt').write_text(''.join(
-                ' '.join(str(value) for value in beat[:-1]) + ' ' + beat[-1].hex() + '\n'
-                for beat in beats()))
-            (path / 'anchors.txt').write_text(''.join(f'{n}\n' for n in range(5040)))
-            print(f'PASS PP-P-02 stimulus: {path}, 12600 beats / 5040 anchors')
-            return
-        raise RuntimeError('PP-P-02: frozen internal stream port contract required; see README')
+        path = BUILD / 'post' / 'pp-p-02'
+        path.mkdir(parents=True, exist_ok=True)
+        (path / 'stream.txt').write_text(''.join(
+            ' '.join(str(value) for value in beat[:-1]) + ' ' + beat[-1].hex() + '\n'
+            for beat in beats()))
+        if not args.prepare_only:
+            stream_test(path)
+        print(f'PASS PP-P-02 stimulus: {path}, 12600 beats / 5040 anchors')
+        return
     executable = None if args.prepare_only else build()
     performance = []
     baselines = {}

@@ -2,7 +2,7 @@
 # Spec: npu-spec 2.2, 5.6; npu-testplan PP-P-02.
 # Description: 12600 labelled beats and acceptance scoreboard for the branch adapter.
 # Clock domain: host; cycle values are clk_npu edges supplied by the adapter.
-"""The RTL interface adapter is intentionally pending the coordinator's interface report."""
+"""The documented-port adapter records acceptance edges and drains the actual queue."""
 from oracle import SHAPES
 
 
