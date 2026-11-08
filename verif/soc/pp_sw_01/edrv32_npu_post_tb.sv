@@ -246,6 +246,8 @@ module edrv32_npu_post_tb;
         .tx_i(uart0_tx_o),
         .rx_o(uart0_rx_i)
     );
+    // sys-subsys 2.6: reset divider uses the generated clock, while this bench is 100 MHz.
+    initial u_uart.baud = 115200.0 * 100000000.0 / EDRV32_CLK_SYS_HZ;
     string uart_log = "";
     initial begin
         forever begin
