@@ -19,8 +19,17 @@ module tb_npu_operator;
     wire [31:0] unused_quant_addr = meta[20];
     edrv32_axi256_if bus();
     wire [31:0] unused_checker_errors;
-    npu_axi256_mem u_memory(.clk_i(clk), .rst_n_i(rst_n), .bus(bus));
-    edrv32_axi256_checker u_checker(.clk_i(clk), .rst_n_i(rst_n), .bus(bus), .errors_o(unused_checker_errors));
+    npu_axi256_mem u_memory (
+        .clk_i(clk),
+        .rst_n_i(rst_n),
+        .bus(bus)
+    );
+    edrv32_axi256_checker u_checker (
+        .clk_i(clk),
+        .rst_n_i(rst_n),
+        .bus(bus),
+        .errors_o(unused_checker_errors)
+    );
     always #4 clk = !clk;
     always @(posedge clk) begin
         if (rst_n && (read_error || write_error)) $fatal(1, "FAIL unexpected AXI error");

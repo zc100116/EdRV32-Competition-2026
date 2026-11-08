@@ -147,7 +147,8 @@ module tb;
         end
         if (write_req && !write_active) begin
             if (write_addr != 32'('h200000+write_bytes))
-                $fatal(1, "FAIL output address expected=%x got=%x", 'h200000+write_bytes, write_addr);
+                $fatal(1, "FAIL output address expected=%x got=%x",
+                    'h200000+write_bytes, write_addr);
             write_active <= 1;
         end
         if (write_valid && write_active) begin
