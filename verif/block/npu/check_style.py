@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCES = [ROOT/'verif/models/npu_axi256_mem.sv',
            ROOT/'verif/unit/npu_axi256_mem/tb_npu_axi256_mem.sv',
            ROOT/'verif/block/npu/tb_npu.sv']
+SOURCES += sorted((ROOT/'verif/block/npu/post').glob('*.sv'))
 
 
 def main():
