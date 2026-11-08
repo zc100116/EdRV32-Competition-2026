@@ -112,14 +112,33 @@ module edrv32_npu_write_dma (
             endcase
         end
     end
+    genvar slice;
+    generate
+        for (slice = 0; slice < 9; slice = slice + 1) begin : g_data_slice
+            (* keep = "true", syn_keep = 1 *) wire local_accept_w;
+            assign local_accept_w = data_valid_i && active_r && (remaining_r != 5'd0)
+                && (!wvalid_r || axi_wready_i);
+            if (slice < 8) begin : g_data
+                always @(posedge clk_i) begin
+                    if (local_accept_w) begin
+                        wdata_r[32*slice +: 32] <= data_i[32*slice +: 32];
+                    end
+                end
+            end else begin : g_strb
+                always @(posedge clk_i) begin
+                    if (local_accept_w) begin
+                        wstrb_r <= data_strb_i;
+                    end
+                end
+            end
+        end
+    endgenerate
     always @(posedge clk_i) begin
         if (accept_w) begin
             awaddr_r <= req_addr_i;
             awlen_r <= req_beats_i[3:0] - 4'd1;
         end
         if (data_accept_w) begin
-            wdata_r <= data_i;
-            wstrb_r <= data_strb_i;
             wlast_r <= (remaining_r == 5'd1);
         end
     end

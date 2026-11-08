@@ -23,21 +23,26 @@ module edrv32_npu_weight_store (
     genvar segment;
     genvar channel;
     genvar beat;
+    genvar group_idx;
     generate
         for (bank = 0; bank < 8; bank = bank + 1) begin : g_bank
-            reg wr_valid_r;
-            reg [10:0] wr_addr_r;
+            // One bank-local DMA boundary; each byte now drives eight slices only.
+            (* keep = "true", syn_preserve = 1 *) reg [31:0] wr_bank_data_r;
             wire [255:0] wr_data_w;
             reg [1:0] rd_segment_array_r;
-            reg [1:0] rd_segment_output_r;
+
             wire [767:0] rd_segment_data_w;
             wire [255:0] rd_bank_data_w;
             wire rd_en_w;
             wire [10:0] rd_addr_w;
+            // Plain bank-scope nets: PDS ADS cannot resolve generate-scope hierarchical names.
+            wire rd_en_prev_w;
+            wire wr_last_beat_valid_w;
 
             if (bank == 0) begin : g_direct
                 assign rd_en_w = weight_rd_en_i;
                 assign rd_addr_w = weight_rd_addr_i;
+                assign rd_en_prev_w = weight_rd_en_i;
             end else begin : g_skew
                 reg [bank-1:0] rd_en_r;
                 reg [11*bank-1:0] rd_addr_r;
@@ -49,59 +54,99 @@ module edrv32_npu_weight_store (
                 end
                 assign rd_en_w = rd_en_r[bank-1];
                 assign rd_addr_w = rd_addr_r[11*(bank-1) +: 11];
-            end
-
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i) begin
-                    wr_valid_r <= 1'b0;
-                end else if (cancel_i) begin
-                    wr_valid_r <= 1'b0;
-                end else begin
-                    wr_valid_r <= weight_wr_valid_i && weight_wr_addr_i[2:0] == 3'd7;
+                // Input of the last skew stage, copied per segment below.
+                if (bank == 1) begin : g_prev_input
+                    assign rd_en_prev_w = weight_rd_en_i;
+                end else begin : g_prev_skew
+                    assign rd_en_prev_w = rd_en_r[bank-2];
                 end
             end
 
             always @(posedge clk_i) begin
-                if (weight_wr_valid_i) begin
-                    wr_addr_r <= weight_wr_addr_i[13:3];
-                end
-                // Mirror the wrapper's enabled array and always-enabled output register.
+                wr_bank_data_r <= {weight_wr_data_i[8*(24+bank) +: 8],
+                    weight_wr_data_i[8*(16+bank) +: 8],
+                    weight_wr_data_i[8*(8+bank) +: 8],
+                    weight_wr_data_i[8*bank +: 8]};
                 if (rd_en_w) begin
                     rd_segment_array_r <= rd_addr_w[10:9];
                 end
-                rd_segment_output_r <= rd_segment_array_r;
             end
 
             // Fixed slices expose a word enable instead of a 256-bit feedback mux.
             for (beat = 0; beat < 8; beat = beat + 1) begin : g_write_beat
+                (* keep = "true", syn_preserve = 1 *) reg wr_beat_valid_r;
                 reg [31:0] wr_slice_r;
                 assign wr_data_w[32*beat +: 32] = wr_slice_r;
+                if (beat == 7) begin : g_last
+                    assign wr_last_beat_valid_w = wr_beat_valid_r;
+                end
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) begin
+                        wr_beat_valid_r <= 1'b0;
+                    end else begin
+                        wr_beat_valid_r <= !cancel_i && weight_wr_valid_i
+                            && weight_wr_addr_i[2:0] == beat;
+                    end
+                end
                 always @(posedge clk_i) begin
-                    if (weight_wr_valid_i && weight_wr_addr_i[2:0] == beat) begin
-                        wr_slice_r <= {weight_wr_data_i[8*(24+bank) +: 8],
-                            weight_wr_data_i[8*(16+bank) +: 8],
-                            weight_wr_data_i[8*(8+bank) +: 8],
-                            weight_wr_data_i[8*bank +: 8]};
+                    if (wr_beat_valid_r) begin
+                        wr_slice_r <= wr_bank_data_r;
                     end
                 end
             end
 
             for (segment = 0; segment < 3; segment = segment + 1) begin : g_segment
+                // A 256-bit wrapper is four DRM slices: address/enable fanout is four.
+                (* keep = "true", syn_preserve = 1 *) reg [10:0] wr_bank_addr_r;
+                (* keep = "true", syn_preserve = 1 *) reg [8:0] wr_addr_r;
+                (* keep = "true", syn_preserve = 1 *) reg wr_valid_r;
+
+                wire rd_en_local_w;
+                if (bank == 0) begin : g_read_direct
+                    assign rd_en_local_w = rd_en_prev_w;
+                end else begin : g_read_skew
+                    (* keep = "true", syn_preserve = 1 *) reg rd_en_r;
+                    always @(posedge clk_i) begin
+                        rd_en_r <= rd_en_prev_w;
+                    end
+                    assign rd_en_local_w = rd_en_r;
+                end
+                always @(posedge clk_i) begin
+                    wr_bank_addr_r <= weight_wr_addr_i[13:3];
+                    wr_addr_r <= wr_bank_addr_r[8:0];
+                end
+                always @(posedge clk_i or negedge rst_n_i) begin
+                    if (!rst_n_i) begin
+                        wr_valid_r <= 1'b0;
+                    end else begin
+                        // Already accepted beat seven drains even when cancel arrives.
+                        wr_valid_r <= wr_last_beat_valid_w
+                            && wr_bank_addr_r[10:9] == segment;
+                    end
+                end
                 edrv32_ram_npu_weight u_ram (
                     .clk_i(clk_i),
-                    .wr_en_i(wr_valid_r && wr_addr_r[10:9] == segment),
-                    .wr_addr_i(wr_addr_r[8:0]),
+                    .wr_en_i(wr_valid_r),
+                    .wr_addr_i(wr_addr_r),
                     .wr_data_i(wr_data_w),
-                    .rd_en_i(rd_en_w),
+                    .rd_en_i(rd_en_local_w),
                     .rd_addr_i(rd_addr_w[8:0]),
                     .rd_data_o(rd_segment_data_w[256*segment +: 256])
                 );
             end
 
-            // Selection is combinational after the RAM output boundary: no third read stage.
-            assign rd_bank_data_w = rd_segment_output_r == 2'd0 ?
-                rd_segment_data_w[0 +: 256] : rd_segment_output_r == 2'd1 ?
-                rd_segment_data_w[256 +: 256] : rd_segment_data_w[512 +: 256];
+            // Eight destination groups each select only four channels (32 mux bits).
+            // The RAM read boundary and item skew retain their original latency.
+            for (group_idx = 0; group_idx < 8; group_idx = group_idx + 1) begin : g_read_group
+                (* keep = "true", syn_preserve = 1 *) reg [1:0] rd_segment_output_r;
+                always @(posedge clk_i) begin
+                    rd_segment_output_r <= rd_segment_array_r;
+                end
+                assign rd_bank_data_w[32*group_idx +: 32] = rd_segment_output_r == 2'd0 ?
+                    rd_segment_data_w[32*group_idx +: 32] : rd_segment_output_r == 2'd1 ?
+                    rd_segment_data_w[256+32*group_idx +: 32] :
+                    rd_segment_data_w[512+32*group_idx +: 32];
+            end
             for (channel = 0; channel < 32; channel = channel + 1) begin : g_channel
                 assign weight_rd_data_o[8*(8*channel+bank) +: 8] =
                     rd_bank_data_w[8*channel +: 8];

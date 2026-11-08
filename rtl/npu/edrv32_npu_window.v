@@ -122,7 +122,22 @@ module edrv32_npu_window (
     reg c8_half_r;
     reg [10:0] k_index_r;
     reg signed [13:0] pair_x_r;
-    reg [9:0] channel_offset_r;
+    reg signed [13:0] pair_x1_r;
+    reg [9:0] row_channel_r [0:2];
+    reg signed [13:0] a0_x0_r;
+    reg signed [13:0] a0_x1_r;
+    reg [9:0] a0_row_base_r;
+    reg a0_row_valid_r;
+    reg [11:0] a0_in_w_r;
+    reg [10:0] a0_weight_addr_r;
+    reg a0_valid_r;
+    reg a0_first_r;
+    reg a0_last_r;
+    reg a0_command_last_r;
+    reg [48:0] a0_tag_r;
+    reg a0_c8_half_r;
+    reg a0_d2_r;
+    reg a0_in_c4_r;
     reg [4:0] quant_remaining_r;
     reg [48:0] pair_tag_r;
     wire unused_out_w_w;
@@ -161,39 +176,39 @@ module edrv32_npu_window (
     assign pair_fire_o = issue_w && first_w;
     assign pair_half_o = current_half_r;
     assign x0_w = pair_x_r + $signed({12'd0, kx_r});
-    assign x1_w = x0_w + (current_s2_r ? 14'sd2 : 14'sd1);
-    assign pixel0_valid_w = current_row_valid_r[ky_r] &&
-        !x0_w[13] && x0_w < $signed({2'd0, current_in_w_r});
-    assign pixel1_valid_w = current_row_valid_r[ky_r] &&
-        !x1_w[13] && x1_w < $signed({2'd0, current_in_w_r});
-    assign addr0_w = row_base_w + channel_offset_r + x0_w[11:2];
-    assign addr1_w = row_base_w + channel_offset_r + x1_w[11:2];
+    assign x1_w = pair_x1_r + $signed({12'd0, kx_r});
+    assign pixel0_valid_w = a0_row_valid_r &&
+        !a0_x0_r[13] && a0_x0_r < $signed({2'd0, a0_in_w_r});
+    assign pixel1_valid_w = a0_row_valid_r &&
+        !a0_x1_r[13] && a0_x1_r < $signed({2'd0, a0_in_w_r});
+    assign addr0_w = a0_row_base_r + a0_x0_r[11:2];
+    assign addr1_w = a0_row_base_r + a0_x1_r[11:2];
     assign tag_w = first_w ? {current_d2_r, pair_residual_addr_i, pair_result_slot_i,
         last_pair_w, current_out_zp_r, current_res_en_r, current_lut_en_r,
         current_half_r, pair_r, current_block_r, current_row_r} : pair_tag_r;
 
     always @(*) begin
-        row_base_w = current_row_base0_r;
+        row_base_w = row_channel_r[0];
         case (ky_r)
-            2'd0: row_base_w = current_row_base0_r;
-            2'd1: row_base_w = current_row_base1_r;
-            2'd2: row_base_w = current_row_base2_r;
-            default: row_base_w = current_row_base0_r;
+            2'd0: row_base_w = row_channel_r[0];
+            2'd1: row_base_w = row_channel_r[1];
+            2'd2: row_base_w = row_channel_r[2];
+            default: row_base_w = row_channel_r[0];
         endcase
         cache_en_w = 2'b00;
         cache_addr0_w = 10'd0;
         cache_addr1_w = 10'd0;
         if (pixel0_valid_w) begin
-            cache_en_w[x0_w[1]] = 1'b1;
-            if (x0_w[1]) begin
+            cache_en_w[a0_x0_r[1]] = 1'b1;
+            if (a0_x0_r[1]) begin
                 cache_addr1_w = addr0_w;
             end else begin
                 cache_addr0_w = addr0_w;
             end
         end
         if (pixel1_valid_w) begin
-            cache_en_w[x1_w[1]] = 1'b1;
-            if (x1_w[1]) begin
+            cache_en_w[a0_x1_r[1]] = 1'b1;
+            if (a0_x1_r[1]) begin
                 cache_addr1_w = addr1_w;
             end else begin
                 cache_addr0_w = addr1_w;
@@ -286,7 +301,7 @@ module edrv32_npu_window (
             c8_half_r <= 1'b0;
             k_index_r <= 11'd0;
             pair_x_r <= 14'sd0;
-            channel_offset_r <= 10'd0;
+            pair_x1_r <= 14'sd0;
             quant_remaining_r <= 5'd0;
         end else if (cancel_i) begin
             pair_r <= 11'd0;
@@ -296,7 +311,7 @@ module edrv32_npu_window (
             c8_half_r <= 1'b0;
             k_index_r <= 11'd0;
             pair_x_r <= 14'sd0;
-            channel_offset_r <= 10'd0;
+            pair_x1_r <= 14'sd0;
             quant_remaining_r <= 5'd0;
         end else begin
             if (issue_w && last_w) begin
@@ -312,7 +327,8 @@ module edrv32_npu_window (
                 c8_half_r <= 1'b0;
                 k_index_r <= 11'd0;
                 pair_x_r <= next_k3_r ? -14'sd1 : 14'sd0;
-                channel_offset_r <= 10'd0;
+                pair_x1_r <= next_s2_r ? (next_k3_r ? 14'sd1 : 14'sd2)
+                    : (next_k3_r ? 14'sd0 : 14'sd1);
             end else if (issue_w) begin
                 if (last_w) begin
                     pair_r <= pair_r + 11'd1;
@@ -322,7 +338,7 @@ module edrv32_npu_window (
                     c8_half_r <= 1'b0;
                     k_index_r <= 11'd0;
                     pair_x_r <= pair_x_r + (current_s2_r ? 14'sd4 : 14'sd2);
-                    channel_offset_r <= 10'd0;
+                    pair_x1_r <= pair_x1_r + (current_s2_r ? 14'sd4 : 14'sd2);
                 end else begin
                     k_index_r <= k_index_r + 11'd1;
                     if (!current_d2_r && !current_in_c4_r && !c8_half_r) begin
@@ -331,10 +347,8 @@ module edrv32_npu_window (
                         c8_half_r <= 1'b0;
                         if (!current_in_c4_r && c16_r != current_cin_blocks_r - 6'd1) begin
                             c16_r <= c16_r + 6'd1;
-                            channel_offset_r <= channel_offset_r + current_stride_r;
                         end else begin
                             c16_r <= 6'd0;
-                            channel_offset_r <= 10'd0;
                             if (current_k3_r && kx_r != 2'd2) begin
                                 kx_r <= kx_r + 2'd1;
                             end else begin
@@ -348,6 +362,28 @@ module edrv32_npu_window (
         end
     end
 
+    // Each row/channel base has only one carry increment on its feedback path.
+    // A0 selects a base; A1 independently adds the registered pixel word offset.
+    always @(posedge clk_i) begin
+        if (promote_w) begin
+            row_channel_r[0] <= next_row_base0_r;
+            row_channel_r[1] <= next_row_base1_r;
+            row_channel_r[2] <= next_row_base2_r;
+        end else if (issue_w) begin
+            if (last_w || ((current_d2_r || current_in_c4_r || c8_half_r)
+                && (current_in_c4_r || c16_r == current_cin_blocks_r - 6'd1))) begin
+                row_channel_r[0] <= current_row_base0_r;
+                row_channel_r[1] <= current_row_base1_r;
+                row_channel_r[2] <= current_row_base2_r;
+            end else if ((current_d2_r || current_in_c4_r || c8_half_r)
+                && !current_in_c4_r) begin
+                row_channel_r[0] <= row_channel_r[0] + current_stride_r;
+                row_channel_r[1] <= row_channel_r[1] + current_stride_r;
+                row_channel_r[2] <= row_channel_r[2] + current_stride_r;
+            end
+        end
+    end
+
     reg a1_valid_r;
     reg a2_valid_r;
     reg a3_valid_r;
@@ -355,7 +391,6 @@ module edrv32_npu_window (
     reg a5_valid_r;
     reg a1_first_r;
     reg a1_last_r;
-    reg a1_command_last_r;
     reg [48:0] a1_tag_r;
     reg [1:0] a1_pixel_valid_r;
     reg [1:0] a1_bank_r;
@@ -379,7 +414,7 @@ module edrv32_npu_window (
     reg [48:0] a3_tag_r;
     reg [1:0] a3_pixel_valid_r;
     reg [1:0] a3_bank_r;
-    reg [1:0] a3_pixel_r;
+    (* keep = "true", syn_preserve = 1 *) reg [7:0] a3_pixel_r;
     reg a3_c8_half_r;
     reg a3_d2_r;
     reg a3_in_c4_r;
@@ -400,8 +435,16 @@ module edrv32_npu_window (
 
     assign pixel0_beat_w = a3_bank_r[0] ? cache_rd_data1_i : cache_rd_data0_i;
     assign pixel1_beat_w = a3_bank_r[1] ? cache_rd_data1_i : cache_rd_data0_i;
-    assign pixel0_data_w = a3_pixel_r[0] ? pixel0_beat_w[255:128] : pixel0_beat_w[127:0];
-    assign pixel1_data_w = a3_pixel_r[1] ? pixel1_beat_w[255:128] : pixel1_beat_w[127:0];
+    // Four local selectors per pixel each drive 32 bits instead of one 128-bit mux.
+    genvar pixel_slice;
+    generate
+        for (pixel_slice = 0; pixel_slice < 4; pixel_slice = pixel_slice + 1) begin : g_pixel_slice
+            assign pixel0_data_w[32*pixel_slice +: 32] = a3_pixel_r[pixel_slice] ?
+                pixel0_beat_w[128+32*pixel_slice +: 32] : pixel0_beat_w[32*pixel_slice +: 32];
+            assign pixel1_data_w[32*pixel_slice +: 32] = a3_pixel_r[4+pixel_slice] ?
+                pixel1_beat_w[128+32*pixel_slice +: 32] : pixel1_beat_w[32*pixel_slice +: 32];
+        end
+    endgenerate
     always @(*) begin
         pixel0_activation_w = 128'd0;
         pixel1_activation_w = 128'd0;
@@ -429,6 +472,7 @@ module edrv32_npu_window (
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
+            a0_valid_r <= 1'b0;
             a1_valid_r <= 1'b0;
             a2_valid_r <= 1'b0;
             a3_valid_r <= 1'b0;
@@ -436,6 +480,7 @@ module edrv32_npu_window (
             a5_valid_r <= 1'b0;
             cache_rd_en_o <= 2'd0;
         end else if (cancel_i) begin
+            a0_valid_r <= 1'b0;
             a1_valid_r <= 1'b0;
             a2_valid_r <= 1'b0;
             a3_valid_r <= 1'b0;
@@ -443,34 +488,49 @@ module edrv32_npu_window (
             a5_valid_r <= 1'b0;
             cache_rd_en_o <= 2'd0;
         end else begin
-            a1_valid_r <= issue_w;
+            a0_valid_r <= issue_w;
+            a1_valid_r <= a0_valid_r;
             a2_valid_r <= a1_valid_r;
             a3_valid_r <= a2_valid_r;
             a4_valid_r <= a3_valid_r;
             a5_valid_r <= a4_valid_r;
-            cache_rd_en_o <= issue_w ? cache_en_w : 2'b00;
+            cache_rd_en_o <= a0_valid_r ? cache_en_w : 2'b00;
         end
     end
 
     always @(posedge clk_i) begin
         if (issue_w) begin
+            a0_x0_r <= x0_w;
+            a0_x1_r <= x1_w;
+            a0_row_base_r <= row_base_w;
+            a0_row_valid_r <= current_row_valid_r[ky_r];
+            a0_in_w_r <= current_in_w_r;
+            a0_weight_addr_r <= current_weight_base_r + k_index_r;
+            a0_first_r <= first_w;
+            a0_last_r <= last_w;
+            a0_command_last_r <= last_w && last_pair_w;
+            a0_tag_r <= tag_w;
+            a0_c8_half_r <= c8_half_r;
+            a0_d2_r <= current_d2_r;
+            a0_in_c4_r <= current_in_c4_r;
+        end
+        if (a0_valid_r) begin
             cache_rd_addr0_o <= cache_addr0_w;
             cache_rd_addr1_o <= cache_addr1_w;
-            weight_rd_addr_o <= current_weight_base_r + k_index_r;
-            a1_first_r <= first_w;
-            a1_last_r <= last_w;
-            a1_command_last_r <= last_w && last_pair_w;
-            a1_tag_r <= tag_w;
-            a1_pixel_valid_r <= {pixel1_valid_w, pixel0_valid_w};
-            a1_bank_r <= {x1_w[1], x0_w[1]};
-            a1_pixel_r <= {x1_w[0], x0_w[0]};
-            a1_c8_half_r <= c8_half_r;
-            a1_d2_r <= current_d2_r;
-            a1_in_c4_r <= current_in_c4_r;
+            weight_rd_addr_o <= a0_weight_addr_r;
         end
+        a1_first_r <= a0_first_r;
+        a1_last_r <= a0_last_r;
+        a1_tag_r <= a0_tag_r;
+        a1_pixel_valid_r <= {pixel1_valid_w, pixel0_valid_w};
+        a1_bank_r <= {a0_x1_r[1], a0_x0_r[1]};
+        a1_pixel_r <= {a0_x1_r[0], a0_x0_r[0]};
+        a1_c8_half_r <= a0_c8_half_r;
+        a1_d2_r <= a0_d2_r;
+        a1_in_c4_r <= a0_in_c4_r;
         a2_first_r <= a1_first_r;
         a2_last_r <= a1_last_r;
-        a2_command_last_r <= a1_command_last_r;
+        a2_command_last_r <= a1_last_r && a1_tag_r[37];
         a2_tag_r <= a1_tag_r;
         a2_pixel_valid_r <= a1_pixel_valid_r;
         a2_bank_r <= a1_bank_r;
@@ -484,7 +544,7 @@ module edrv32_npu_window (
         a3_tag_r <= a2_tag_r;
         a3_pixel_valid_r <= a2_pixel_valid_r;
         a3_bank_r <= a2_bank_r;
-        a3_pixel_r <= a2_pixel_r;
+        a3_pixel_r <= {{4{a2_pixel_r[1]}}, {4{a2_pixel_r[0]}}};
         a3_c8_half_r <= a2_c8_half_r;
         a3_d2_r <= a2_d2_r;
         a3_in_c4_r <= a2_in_c4_r;
@@ -527,9 +587,9 @@ module edrv32_npu_window (
     endgenerate
 
     assign weight_rd_en_o = a1_valid_r;
-    assign cmd_issued_o = a1_valid_r && a1_command_last_r;
-    assign cmd_issued_row_o = a1_tag_r[11:0];
-    assign cmd_issued_block_o = a1_tag_r[14:12];
+    assign cmd_issued_o = a0_valid_r && a0_command_last_r;
+    assign cmd_issued_row_o = a0_tag_r[11:0];
+    assign cmd_issued_block_o = a0_tag_r[14:12];
     assign cmd_read_done_o = a3_valid_r && a3_command_last_r;
     assign cmd_read_done_row_o = a3_tag_r[11:0];
     assign cmd_read_done_block_o = a3_tag_r[14:12];
@@ -537,6 +597,6 @@ module edrv32_npu_window (
     assign term_first_o = a5_first_r;
     assign term_last_o = a5_last_r;
     assign term_tag_o = a5_tag_r;
-    assign idle_o = !(current_valid_r || next_valid_r || a1_valid_r || a2_valid_r ||
+    assign idle_o = !(current_valid_r || next_valid_r || a0_valid_r || a1_valid_r || a2_valid_r ||
         a3_valid_r || a4_valid_r || a5_valid_r);
 endmodule

@@ -1,7 +1,7 @@
 // File: tb_npu_accum.sv
 // Spec: npu-testplan OP-01/02/07/08; datapath design 4.2/4.3/5.2 D1-C.
 // Description: Model complete pair sums from independent signed physical channel terms.
-// Check first replacement, D2, final-only output and combinational early preparation.
+// Check first replacement, D2, final-only output and preparation after R4.
 // Clock: clk_npu, 10 ns test clock.
 module tb_npu_accum;
     bit clk_i = 0;
@@ -19,10 +19,11 @@ module tb_npu_accum;
     wire [2047:0] accum_data_o;
     wire idle_o;
 
-    bit [1:0] expected_valid = 0;
-    bit [48:0] expected_tag [0:1];
-    bit [2047:0] expected_data [0:1];
+    bit [2:0] expected_valid = 0;
+    bit [48:0] expected_tag [0:2];
+    bit [2047:0] expected_data [0:2];
     int working [0:63];
+    bit expected_r5_valid = 0;
     bit expected_r4_valid;
     bit sampled_prepare;
     bit previous_prepare = 0;
@@ -44,7 +45,7 @@ module tb_npu_accum;
         .sum_first_i(sum_first_i),
         .sum_last_i(sum_last_i),
         .sum_tag_i(sum_tag_i),
-        .sum_fold_i({32{sum_tag_i[48]}}),
+        .sum_fold_i({64{sum_tag_i[48]}}),
         .sum_data_i(sum_data_i),
 
         .quant_prepare_valid_o(quant_prepare_valid_o),
@@ -59,25 +60,29 @@ module tb_npu_accum;
     always @(posedge clk_i) begin : monitor
         int value;
         cycle++;
-        // Sample like the parameter RAM: prepare must already be present before R4.
+        // Sample like the parameter RAM: prepare is present before the R5 edge.
         sampled_prepare = quant_prepare_valid_o;
         sampled_prepare_tag = quant_prepare_tag_o;
-        if (rst_n_i && sampled_prepare !== (sum_valid_i && sum_last_i && !cancel_i))
+        if (rst_n_i && sampled_prepare !== (expected_valid[0] && !cancel_i))
             $fatal(1, "FAIL prepare before R4 cycle=%0d expected=%b actual=%b t=%0t",
-                cycle, (sum_valid_i && sum_last_i && !cancel_i), sampled_prepare, $time);
-        if (sampled_prepare && sampled_prepare_tag !== sum_tag_i)
+                cycle, (expected_valid[0] && !cancel_i), sampled_prepare, $time);
+        if (sampled_prepare && sampled_prepare_tag !== expected_tag[0])
             $fatal(1, "FAIL prepare tag cycle=%0d exp=%h actual=%h t=%0t",
                 cycle, sum_tag_i, sampled_prepare_tag, $time);
         if (rst_n_i && sampled_prepare) prepared++;
 
+        expected_data[2] = expected_data[1];
         expected_data[1] = expected_data[0];
+        expected_tag[2] = expected_tag[1];
         expected_tag[1] = expected_tag[0];
         if (!rst_n_i || cancel_i) begin
             expected_valid = 0;
             expected_r4_valid = 0;
+            expected_r5_valid = 0;
             previous_prepare = 0;
         end else begin
-            expected_valid = {expected_valid[0], sum_valid_i && sum_last_i};
+            expected_valid = {expected_valid[1:0], sum_valid_i && sum_last_i};
+            expected_r5_valid = expected_r4_valid;
             expected_r4_valid = sum_valid_i;
             if (sum_valid_i) begin
                 for (int pixel = 0; pixel < 2; pixel++) begin
@@ -99,22 +104,22 @@ module tb_npu_accum;
             end
         end
         #1;
-        if (accum_valid_o !== expected_valid[1] ||
-            idle_o !== !(expected_r4_valid || expected_valid[1]))
+        if (accum_valid_o !== expected_valid[2] ||
+            idle_o !== !(expected_r4_valid || expected_r5_valid || expected_valid[2]))
             $fatal(1, "FAIL ACC valid/idle cycle=%0d exp=%b/%b actual=%b/%b t=%0t",
-                cycle, expected_valid[1], !(expected_r4_valid || expected_valid[1]),
+                cycle, expected_valid[2], !(expected_r4_valid || expected_r5_valid || expected_valid[2]),
                 accum_valid_o, idle_o, $time);
         if (rst_n_i && !cancel_i && accum_valid_o !== previous_prepare)
             $fatal(1, "FAIL prepare-to-ACC latency cycle=%0d exp=%b actual=%b t=%0t",
                 cycle, previous_prepare, accum_valid_o, $time);
         if (accum_valid_o) begin
-            if (accum_tag_o !== expected_tag[1] || accum_tag_o !== previous_prepare_tag)
+            if (accum_tag_o !== expected_tag[2] || accum_tag_o !== previous_prepare_tag)
                 $fatal(1, "FAIL ACC tag cycle=%0d exp=%h actual=%h prepared=%h t=%0t",
-                    cycle, expected_tag[1], accum_tag_o, previous_prepare_tag, $time);
+                    cycle, expected_tag[2], accum_tag_o, previous_prepare_tag, $time);
             for (int item = 0; item < 64; item++) begin
-                if (accum_data_o[32*item +: 32] !== expected_data[1][32*item +: 32])
+                if (accum_data_o[32*item +: 32] !== expected_data[2][32*item +: 32])
                     $fatal(1, "FAIL ACC item=%0d exp=%0d actual=%0d cycle=%0d t=%0t",
-                        item, $signed(expected_data[1][32*item +: 32]),
+                        item, $signed(expected_data[2][32*item +: 32]),
                         $signed(accum_data_o[32*item +: 32]), cycle, $time);
             end
             checked++;
@@ -146,11 +151,13 @@ module tb_npu_accum;
                 sum_data_i[19*(32*pixel+channel) +: 19] = 19'(value);
             end
         end
-        // Detect a registered prepare immediately, before any posedge is available.
+        // Preparation now describes the term registered at the preceding R4 edge.
         #1;
-        if (quant_prepare_valid_o !== last || quant_prepare_tag_o !== sum_tag_i)
-            $fatal(1, "FAIL combinational prepare exp=%b/%h actual=%b/%h t=%0t",
-                last, sum_tag_i, quant_prepare_valid_o, quant_prepare_tag_o, $time);
+        if (quant_prepare_valid_o !== expected_valid[0] ||
+            (expected_valid[0] && quant_prepare_tag_o !== expected_tag[0]))
+            $fatal(1, "FAIL R4 prepare exp=%b/%h actual=%b/%h t=%0t",
+                expected_valid[0], expected_tag[0], quant_prepare_valid_o,
+                quant_prepare_tag_o, $time);
     endtask
 
     task automatic bubble(input int count);
@@ -220,7 +227,7 @@ module tb_npu_accum;
         bubble(4);
         @(negedge clk_i);
         if (checked != 257) $fatal(1, "FAIL ACC coverage expected=257 actual=%0d", checked);
-        $display("PASS ACC: %0d vectors, %0d prepares, R4/ACC=2 boundaries, seed=1accc602",
+        $display("PASS ACC: %0d vectors, %0d prepares, R4/R5/ACC=3 boundaries, seed=1accc602",
             checked, prepared);
         $display("PASS prepare sampled at R4; final vector follows one register boundary later");
         $finish;

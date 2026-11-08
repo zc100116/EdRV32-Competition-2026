@@ -1,7 +1,7 @@
 // File: edrv32_ram_npu_quant.v
 // Spec: npu-spec 5.2; docs/design/2026-10-27-npu-datapath.md 4.5, 4.9; CLAUDE.md 8.
 // Description: Fixed 32x64 distributed RAM simple dual-port storage.
-// Enabled reads have two-cycle latency; rd_en_i gates the first register only.
+// Enabled reads have two-cycle latency; local read-enable copies gate the second register.
 // The wrapper samples the combinational read before the write edge updates memory,
 // so same-address reads return old data. Contents and output data are not initialized or reset.
 // Clock: clk_npu.
@@ -48,14 +48,23 @@ module edrv32_ram_npu_quant (
         end
     end
 `endif
-    // Capture the pre-write value; a disabled read holds this register.
+    // Capture pre-write data unconditionally; move the holding CE to edge two.
+    // The common logic below is identical for vendor IP and behavioural storage.
     always @(posedge clk_i) begin
-        if (rd_en_i) begin
-            rd_array_r <= memory_data_w;
+        rd_array_r <= memory_data_w;
+    end
+    genvar slice;
+    generate
+        for (slice = 0; slice < 2; slice = slice + 1) begin : g_read_slice
+            (* keep = "true", syn_preserve = 1 *) reg rd_en_r;
+            always @(posedge clk_i) begin
+                rd_en_r <= rd_en_i;
+            end
+            always @(posedge clk_i) begin
+                if (rd_en_r) begin
+                    rd_data_r[32*slice +: 32] <= rd_array_r[32*slice +: 32];
+                end
+            end
         end
-    end
-    // Output register is always enabled, so a held read stays held one edge later.
-    always @(posedge clk_i) begin
-        rd_data_r <= rd_array_r;
-    end
+    endgenerate
 endmodule

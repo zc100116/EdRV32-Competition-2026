@@ -15,6 +15,9 @@ module tb_npu_weight_store;
     wire [2047:0] rd_data;
     reg [255:0] memory [0:9215];
     reg pending = 0;
+    reg accepted_last = 0;
+    reg [10:0] accepted_addr;
+    reg [255:0] accepted_row [0:7];
     reg [10:0] pending_addr;
     reg [2047:0] array_data;
     integer checks = 0;
@@ -70,11 +73,16 @@ module tb_npu_weight_store;
                 end
             end
             if (pending) begin
-                for (int b = 0; b < 8; b++) memory[8*int'(pending_addr)+b] = row_beats[b];
+                for (int b = 0; b < 8; b++) memory[8*int'(pending_addr)+b] = accepted_row[b];
             end
+            pending = accepted_last;
+            pending_addr = accepted_addr;
             if (wr_valid) row_beats[wr_addr[2:0]] = wr_data;
-            pending = rst_n && !cancel && wr_valid && wr_addr[2:0] == 7;
-            pending_addr = wr_addr[13:3];
+            accepted_last = rst_n && !cancel && wr_valid && wr_addr[2:0] == 7;
+            accepted_addr = wr_addr[13:3];
+            if (accepted_last) begin
+                for (int b = 0; b < 8; b++) accepted_row[b] = row_beats[b];
+            end
             #1;
             for (int k = 0; k < 8; k++) begin
                 if (known[k]) begin
@@ -141,7 +149,8 @@ module tb_npu_weight_store;
         end
         wr_valid = 0;
         cycle();
-        // First legal read of the last loaded row: final write input e, read array at e+2.
+        cycle();
+        // First legal read of the last loaded row: final write input e, read array at e+3.
         rd_en = 1;
         rd_addr = 1151;
         cycle();
@@ -209,7 +218,7 @@ module tb_npu_weight_store;
             rd_en = 0;
             repeat (10) cycle();
         end
-        $display("PASS weight_store checks=%0d cycles=%0d row_commit=beat7+1 read=2+k", checks, cycles);
+        $display("PASS weight_store checks=%0d cycles=%0d row_commit=beat7+2 read=2+k", checks, cycles);
         $finish;
     end
 endmodule
