@@ -1,3 +1,4 @@
+../common/edrv32_reset_copy.v
 +incdir+../include
 ../npu/edrv32_npu_accum.v
 ../npu/edrv32_npu_activation_lut.v
@@ -23,3 +24,9 @@
 ../tech/edrv32_ram_npu_result.v
 ../tech/edrv32_ram_npu_scratch.v
 ../tech/edrv32_ram_npu_weight.v
+../tech/edrv32_ram_npu_post_best.v
+../tech/edrv32_ram_npu_post_queue.v
+../tech/edrv32_ram_npu_post_table.v
+../npu/edrv32_npu_post_classify.v
+../npu/edrv32_npu_post_dfl.v
+../npu/edrv32_npu_post.v

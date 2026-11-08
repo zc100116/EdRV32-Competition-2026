@@ -27,9 +27,18 @@ module tb_npu_regs;
     wire [31:0] desc_base_o;
     wire [31:0] desc_count_o;
     wire [127:0] bases_o;
+    wire [1:0] unused_post_ctrl_w;
+    wire [31:0] unused_post_base_w;
+    wire [26:0] unused_post_int8_th_w;
+    wire [31:0] unused_post_prob_th_w;
     wire  irq_o;
     always #5 clk_i = !clk_i;
     edrv32_npu_regs u_dut (
+        .post_ctrl_o(unused_post_ctrl_w),
+        .post_base_o(unused_post_base_w),
+        .post_int8_th_o(unused_post_int8_th_w),
+        .post_prob_th_o(unused_post_prob_th_w),
+        .post_count_i(13'd37),
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .apb_paddr_i(apb_paddr_i),
@@ -178,6 +187,41 @@ module tb_npu_regs;
         read_check(12'h00c, 0);
         check(bases_o == 0, "soft reset clears configuration");
         for (int n = 0; n < 16; n++) read_check(12'h040+12'(4*n), 0);
+        for (int n = 0; n < 8; n++) read_check(12'h114+12'(4*n), 0);
+        write_reg(12'h114, 3);
+        write_reg(12'h118, 32'h02000000);
+        write_reg(12'h11c, 32'h180);
+        write_reg(12'h120, 128);
+        write_reg(12'h124, 127);
+        write_reg(12'h128, 32'd4194304);
+        read_check(12'h114, 3);
+        read_check(12'h118, 32'h02000000);
+        read_check(12'h11c, 32'h180);
+        read_check(12'h120, 128);
+        read_check(12'h124, 127);
+        read_check(12'h128, 32'd4194304);
+        // The execution event represents the final candidate B fence.
+        busy_i = 1;
+        read_check(12'h12c, 0);
+        read_check(12'h130, 0);
+        read_check(12'h02c, 0);
+        done_i = 1;
+        tick;
+        done_i = 0;
+        busy_i = 0;
+        read_check(12'h12c, 37);
+        read_check(12'h130, 1);
+        read_check(12'h02c, 1);
+        write_reg(12'h028, 0);
+        read_check(12'h12c, 0);
+        read_check(12'h130, 0);
+        error_i = 1;
+        error_code_i = 1;
+        tick;
+        error_i = 0;
+        read_check(12'h130, 0);
+        write_reg(12'h004, 8);
+        for (int n = 0; n < 8; n++) read_check(12'h114+12'(4*n), 0);
         $display("PASS register architecture, triggers, interrupts, PERF and soft reset");
         $finish;
     end

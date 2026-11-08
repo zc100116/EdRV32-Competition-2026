@@ -210,6 +210,29 @@ module edrv32_npu (
     wire write_response_wait_w;
     wire [15:0] unused_apb_addr_w;
 
+    wire [1:0] post_ctrl_w;
+    wire [31:0] post_base_w;
+    wire [26:0] post_int8_th_w;
+    wire [31:0] post_prob_th_w;
+    wire [12:0] post_count_w;
+    wire post_load_done_w;
+    wire post_tail_done_w;
+    wire post_writer_idle_w;
+    wire cls_valid_w;
+    wire [255:0] cls_data_w;
+    wire [1:0] cls_head_w;
+    wire [11:0] cls_row_w;
+    wire [10:0] cls_pair_w;
+    wire [2:0] cls_block_w;
+    wire cls_plane_w;
+    wire post_read_req_valid_w;
+    wire [31:0] post_read_req_addr_w;
+    wire post_write_req_valid_w;
+    wire [31:0] post_write_req_addr_w;
+    wire post_write_data_valid_w;
+    wire [255:0] post_write_data_w;
+    reg post_active_r;
+
     localparam [3:0] S_IDLE = 4'd0;
     localparam [3:0] S_FETCH = 4'd1;
     localparam [3:0] S_FETCH_WAIT = 4'd2;
@@ -221,6 +244,10 @@ module edrv32_npu (
     localparam [3:0] S_COMPLETE = 4'd8;
     localparam [3:0] S_STOP = 4'd9;
     localparam [3:0] S_CANCEL = 4'd10;
+    localparam [3:0] S_LOAD = 4'd11;
+    localparam [3:0] S_LOAD_WAIT = 4'd12;
+    localparam [3:0] S_POST_START = 4'd13;
+    localparam [3:0] S_POST_WAIT = 4'd14;
     reg [3:0] state_r;
     reg [31:0] cur_desc_r;
     reg [31:0] desc_addr_r;
@@ -271,20 +298,24 @@ module edrv32_npu (
     endgenerate
     assign nonconv_start_w = (state_r == S_START) && !is_conv_r && !stop_w;
     assign local_done_w = is_conv_r ? conv_done_w : nonconv_done_w;
-    assign local_writer_idle_w = conv_writer_idle_w && nonconv_writer_idle_w;
+    assign local_writer_idle_w = conv_writer_idle_w && nonconv_writer_idle_w
+        && post_writer_idle_w;
     assign desc_data_valid_w = (state_r == S_FETCH_WAIT) && read_data_valid_w && !stop_w;
 
     assign read_req_valid_w = !stop_w && ((state_r == S_FETCH)
+        || (post_active_r && post_read_req_valid_w)
         || ((state_r == S_RUN) && (is_conv_r ? conv_read_req_valid_w : nonconv_read_req_valid_w)));
     assign read_req_addr_w = (state_r == S_FETCH) ? desc_addr_r
+        : post_active_r ? post_read_req_addr_w
         : is_conv_r ? conv_read_req_addr_w : nonconv_read_req_addr_w;
     assign read_req_beats_w = (state_r == S_FETCH) ? 5'd2
+        : post_active_r ? 5'd1
         : is_conv_r ? conv_read_req_beats_w : nonconv_read_req_beats_w;
     assign read_req_tag_w = (state_r == S_FETCH) ? 32'd0
         : is_conv_r ? conv_read_req_tag_w : nonconv_read_req_tag_w;
     assign conv_read_req_ready_w = read_req_ready_w && (state_r == S_RUN) && is_conv_r;
     assign nonconv_read_req_ready_w = read_req_ready_w && (state_r == S_RUN) && !is_conv_r;
-    assign read_data_ready_w = (state_r == S_FETCH_WAIT) || stop_w
+    assign read_data_ready_w = (state_r == S_FETCH_WAIT) || stop_w || post_active_r
         || (is_conv_r ? conv_read_data_ready_w : nonconv_read_data_ready_w);
     assign conv_read_data_valid_w = read_data_valid_w && (state_r == S_RUN) && is_conv_r;
     assign nonconv_read_data_valid_w = read_data_valid_w && (state_r == S_RUN) && !is_conv_r;
@@ -297,15 +328,20 @@ module edrv32_npu (
     assign conv_read_data_last_w = read_data_last_w;
     assign nonconv_read_data_last_w = read_data_last_w;
     assign write_req_valid_w = !stop_w
-        && (is_conv_r ? conv_write_req_valid_w : nonconv_write_req_valid_w);
-    assign write_req_addr_w = is_conv_r ? conv_write_req_addr_w : nonconv_write_req_addr_w;
-    assign write_req_beats_w = is_conv_r ? conv_write_req_beats_w : nonconv_write_req_beats_w;
-    assign conv_write_req_ready_w = write_req_ready_w && is_conv_r;
-    assign nonconv_write_req_ready_w = write_req_ready_w && !is_conv_r;
-    assign write_data_valid_w = is_conv_r ? conv_write_data_valid_w : nonconv_write_data_valid_w;
-    assign write_data_w = is_conv_r ? conv_write_data_w : nonconv_write_data_w;
-    assign conv_write_data_ready_w = write_data_ready_w && is_conv_r;
-    assign nonconv_write_data_ready_w = write_data_ready_w && !is_conv_r;
+        && (post_active_r ? post_write_req_valid_w
+            : is_conv_r ? conv_write_req_valid_w : nonconv_write_req_valid_w);
+    assign write_req_addr_w = post_active_r ? post_write_req_addr_w
+        : is_conv_r ? conv_write_req_addr_w : nonconv_write_req_addr_w;
+    assign write_req_beats_w = post_active_r ? 5'd1
+        : is_conv_r ? conv_write_req_beats_w : nonconv_write_req_beats_w;
+    assign conv_write_req_ready_w = write_req_ready_w && is_conv_r && !post_active_r;
+    assign nonconv_write_req_ready_w = write_req_ready_w && !is_conv_r && !post_active_r;
+    assign write_data_valid_w = post_active_r ? post_write_data_valid_w
+        : is_conv_r ? conv_write_data_valid_w : nonconv_write_data_valid_w;
+    assign write_data_w = post_active_r ? post_write_data_w
+        : is_conv_r ? conv_write_data_w : nonconv_write_data_w;
+    assign conv_write_data_ready_w = write_data_ready_w && is_conv_r && !post_active_r;
+    assign nonconv_write_data_ready_w = write_data_ready_w && !is_conv_r && !post_active_r;
     assign perf_event_w = {nonconv_active_w, write_response_wait_w, conv_model_wait_w,
         conv_input_wait_w, write_beat_w, read_beat_w, conv_mac_beat_w, busy_w};
 
@@ -327,7 +363,8 @@ module edrv32_npu (
                     if (start_w) begin
                         // With no descriptors, the completed index is COUNT-1 as in spec 4.
                         cur_desc_r <= (desc_count_w == 32'd0) ? 32'hffffffff : 32'd0;
-                        state_r <= (desc_count_w == 32'd0) ? S_COMPLETE : S_FETCH;
+                        state_r <= (desc_count_w == 32'd0)
+                            ? (post_ctrl_w[0] ? S_POST_START : S_COMPLETE) : S_FETCH;
                     end
                 end
                 S_FETCH: begin
@@ -344,9 +381,14 @@ module edrv32_npu (
                 S_DECODE_WAIT: begin
                     if (decode_done_w) begin
                         is_conv_r <= (desc_w[3:0] == 4'd0);
-                        state_r <= S_START;
+                        state_r <= post_ctrl_w[0] && desc_w[417:416] == 2'd1
+                            ? S_LOAD : S_START;
                     end
                 end
+                S_LOAD: state_r <= S_LOAD_WAIT;
+                S_LOAD_WAIT: if (post_load_done_w) state_r <= S_START;
+                S_POST_START: state_r <= S_POST_WAIT;
+                S_POST_WAIT: if (post_tail_done_w) state_r <= S_COMPLETE;
                 S_START: state_r <= S_RUN;
                 S_RUN: begin
                     if (local_done_w) begin
@@ -356,7 +398,7 @@ module edrv32_npu (
                 S_FENCE: begin
                     if (read_idle_w && write_idle_w) begin
                         if (cur_desc_r == command_desc_count_r - 32'd1) begin
-                            state_r <= S_COMPLETE;
+                            state_r <= post_ctrl_w[0] ? S_POST_START : S_COMPLETE;
                         end else begin
                             cur_desc_r <= cur_desc_r + 32'd1;
                             state_r <= S_FETCH;
@@ -381,6 +423,53 @@ module edrv32_npu (
             desc_addr_r <= desc_addr_r + 32'd64;
         end
     end
+    always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
+        if (!rst_npu_ctrl_n_w) post_active_r <= 1'b0;
+        else if (state_r == S_LOAD || state_r == S_POST_START) post_active_r <= 1'b1;
+        else if (state_r == S_START || state_r == S_IDLE) post_active_r <= 1'b0;
+    end
+    edrv32_npu_post u_post (
+        .clk_i(clk_npu_i),
+        .rst_n_i(rst_npu_ctrl_n_w),
+        .clear_i(start_w),
+        .stop_i(stop_w),
+        .cancel_i(cancel_w),
+        .int8_th_i(post_int8_th_w),
+        .prob_th_i(post_prob_th_w),
+        .post_base_i(post_base_w),
+        .output_base_i(command_bases_r[127:96]),
+        .load_i(state_r == S_LOAD && !stop_w),
+        .load_head_i(desc_w[419:418]),
+        .load_addr_i(command_bases_r[31:0] + desc_w[479:448]),
+        .box_offset_i(desc_w[127:96]),
+        .box_stride_i(desc_w[159:128]),
+        .load_done_o(post_load_done_w),
+        .tail_i(state_r == S_POST_START && !stop_w),
+        .tail_done_o(post_tail_done_w),
+        .writer_idle_o(post_writer_idle_w),
+        .count_o(post_count_w),
+        .cls_valid_i(cls_valid_w),
+        .cls_data_i(cls_data_w),
+        .cls_head_i(cls_head_w),
+        .cls_row_i(cls_row_w),
+        .cls_pair_i(cls_pair_w),
+        .cls_block_i(cls_block_w),
+        .cls_plane_i(cls_plane_w),
+        .read_req_valid_o(post_read_req_valid_w),
+        .read_req_ready_i(read_req_ready_w && post_active_r),
+        .read_req_addr_o(post_read_req_addr_w),
+        .read_data_valid_i(read_data_valid_w && post_active_r),
+        .read_data_i(read_data_w),
+        .write_req_valid_o(post_write_req_valid_w),
+        .write_req_ready_i(write_req_ready_w && post_active_r),
+        .write_req_addr_o(post_write_req_addr_w),
+        .write_data_valid_o(post_write_data_valid_w),
+        .write_data_ready_i(write_data_ready_w && post_active_r),
+        .write_data_o(post_write_data_w),
+        .write_stream_idle_i(write_stream_idle_w),
+        .write_idle_i(write_idle_w)
+    );
+
     edrv32_npu_regs u_regs (
         // Clocks and domain-local resets.
         .clk_i(clk_npu_i),
@@ -422,6 +511,11 @@ module edrv32_npu (
         .desc_base_o(desc_base_w),
         .desc_count_o(desc_count_w),
         .bases_o(bases_w),
+        .post_ctrl_o(post_ctrl_w),
+        .post_base_o(post_base_w),
+        .post_int8_th_o(post_int8_th_w),
+        .post_prob_th_o(post_prob_th_w),
+        .post_count_i(post_count_w),
 
         // Interrupt and activity events.
         .irq_o(irq_o)
@@ -509,6 +603,15 @@ module edrv32_npu (
         .write_stream_idle_i(write_stream_idle_w),
 
         // Descriptor configuration and execution status.
+        .post_enable_i(post_ctrl_w[0]),
+        .raw_cls_write_i(post_ctrl_w[1]),
+        .cls_valid_o(cls_valid_w),
+        .cls_data_o(cls_data_w),
+        .cls_head_o(cls_head_w),
+        .cls_row_o(cls_row_w),
+        .cls_pair_o(cls_pair_w),
+        .cls_block_o(cls_block_w),
+        .cls_plane_o(cls_plane_w),
         .done_o(conv_done_w),
         .writer_idle_o(conv_writer_idle_w),
         .mac_beat_o(conv_mac_beat_w),
@@ -758,7 +861,8 @@ module edrv32_npu (
                                 S_IDLE: begin
                                     if (start_w) begin
                                         state_control_r[control_copy] <=
-                                            (desc_count_w == 32'd0) ? S_COMPLETE : S_FETCH;
+                                            (desc_count_w == 32'd0)
+                            ? (post_ctrl_w[0] ? S_POST_START : S_COMPLETE) : S_FETCH;
                                     end
                                 end
                                 S_FETCH: begin
@@ -776,8 +880,20 @@ module edrv32_npu (
                                 end
                                 S_DECODE_WAIT: begin
                                     if (decode_done_w) begin
-                                        state_control_r[control_copy] <= S_START;
+                                        state_control_r[control_copy] <=
+                                            post_ctrl_w[0] && desc_w[417:416] == 2'd1
+                                                ? S_LOAD : S_START;
                                     end
+                                end
+                                S_LOAD: state_control_r[control_copy] <= S_LOAD_WAIT;
+                                S_LOAD_WAIT: begin
+                                    if (post_load_done_w)
+                                        state_control_r[control_copy] <= S_START;
+                                end
+                                S_POST_START: state_control_r[control_copy] <= S_POST_WAIT;
+                                S_POST_WAIT: begin
+                                    if (post_tail_done_w)
+                                        state_control_r[control_copy] <= S_COMPLETE;
                                 end
                                 S_START: begin
                                     state_control_r[control_copy] <= S_RUN;
@@ -790,7 +906,8 @@ module edrv32_npu (
                                 S_FENCE: begin
                                     if (read_idle_w && write_idle_w) begin
                                         if (cur_desc_r == command_desc_count_r - 32'd1) begin
-                                            state_control_r[control_copy] <= S_COMPLETE;
+                                            state_control_r[control_copy] <=
+                                                post_ctrl_w[0] ? S_POST_START : S_COMPLETE;
                                         end else begin
                                             state_control_r[control_copy] <= S_FETCH;
                                         end

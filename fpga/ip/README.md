@@ -133,3 +133,11 @@ python3 tools/fpga/mem_init.py build/sw/bootloader/rom.hex build/sw/monitor/sram
 未定义的尾部内容。HEX 的行顺序按地址 0 起递增使用；Windows B1 任务卡需确认 IP
 Compiler 接受这两份文件、ROM 最初几条指令和 SRAM 首字正确，并通过真实启动 logo
 与监控菜单验证。Linux 没有执行 PDS 初始化导入。
+
+后处理（npu-spec v0.10）：
+
+| IP | 创建说明 | 包装实例 |
+|---|---|---|
+| ip_ram_npu_post_best | [创建说明](ip_ram_npu_post_best.md) | classify ×2 |
+| ip_ram_npu_post_queue | [创建说明](ip_ram_npu_post_queue.md) | post ×2 |
+| ip_ram_npu_post_table | [创建说明](ip_ram_npu_post_table.md) | post exp/probability 各1 |

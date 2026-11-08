@@ -1,0 +1,4 @@
+`verilator_config
+// Testbench clocks and reset observation use blocking assignments.
+lint_off -rule BLKSEQ -file "*/verif/unit/npu_post_empty/tb_npu_post_empty.sv"
+lint_off -rule SYNCASYNCNET -file "*/verif/unit/npu_post_empty/tb_npu_post_empty.sv"

@@ -40,6 +40,17 @@ module edrv32_npu_conv (
     output wire [255:0] write_data_o,
     input wire write_stream_idle_i,
 
+    // Postprocessing result RAM outlet (spec 5.6).
+    input wire post_enable_i,
+    input wire raw_cls_write_i,
+    output wire cls_valid_o,
+    output wire [255:0] cls_data_o,
+    output wire [1:0] cls_head_o,
+    output wire [11:0] cls_row_o,
+    output wire [10:0] cls_pair_o,
+    output wire [2:0] cls_block_o,
+    output wire cls_plane_o,
+
     // Local completion and PERF events.
     output wire done_o,
     output wire writer_idle_o,
@@ -107,7 +118,7 @@ module edrv32_npu_conv (
     wire dp_result_chunk_ready_w;
     wire [4:0] dp_result_chunk_base_w;
     wire [4:0] dp_result_chunk_pairs_w;
-    wire [11:0] unused_dp_result_chunk_row_w;
+    wire [11:0] dp_result_chunk_row_w;
     wire [2:0] dp_result_chunk_block_w;
     wire [10:0] dp_result_chunk_pair_w;
     wire dp_result_chunk_half_w;
@@ -1209,6 +1220,18 @@ module edrv32_npu_conv (
         .result_rd_valid_i(dp_result_rd_valid_w),
         .result_rd_data_i(dp_result_rd_data_w),
         .result_release_o(dp_result_release_w),
+        .post_enable_i(post_enable_i),
+        .raw_cls_write_i(raw_cls_write_i),
+        .post_kind_i(desc_i[417:416]),
+        .head_i(desc_i[419:418]),
+        .result_chunk_row_i(dp_result_chunk_row_w),
+        .cls_valid_o(cls_valid_o),
+        .cls_data_o(cls_data_o),
+        .cls_head_o(cls_head_o),
+        .cls_row_o(cls_row_o),
+        .cls_pair_o(cls_pair_o),
+        .cls_block_o(cls_block_o),
+        .cls_plane_o(cls_plane_o),
 
         // Write DMA requests and data.
         .write_req_valid_o(write_req_valid_o),
@@ -1306,7 +1329,7 @@ module edrv32_npu_conv (
         .result_chunk_ready_i(dp_result_chunk_ready_w),
         .result_chunk_base_o(dp_result_chunk_base_w),
         .result_chunk_pairs_o(dp_result_chunk_pairs_w),
-        .result_chunk_row_o(unused_dp_result_chunk_row_w),
+        .result_chunk_row_o(dp_result_chunk_row_w),
         .result_chunk_block_o(dp_result_chunk_block_w),
         .result_chunk_pair_o(dp_result_chunk_pair_w),
         .result_chunk_half_o(dp_result_chunk_half_w),

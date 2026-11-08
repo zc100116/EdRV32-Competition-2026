@@ -33,6 +33,13 @@ module edrv32_npu_regs (
     output wire [31:0] desc_count_o,
     output wire [127:0] bases_o,
 
+    // Post configuration and the final write-response publication event (spec 2.4).
+    output wire [1:0] post_ctrl_o,
+    output wire [31:0] post_base_o,
+    output wire [26:0] post_int8_th_o,
+    output wire [31:0] post_prob_th_o,
+    input wire [12:0] post_count_i,
+
     // Level interrupt in clk_npu.
     output wire irq_o
 );
@@ -51,6 +58,56 @@ module edrv32_npu_regs (
         end
     end
 
+    reg [1:0] post_ctrl_r;
+    reg [31:0] post_base_r;
+    reg [8:0] post_int8_th_r [0:2];
+    reg [31:0] post_prob_th_r;
+    reg [12:0] post_count_r;
+    reg post_done_r;
+    assign post_ctrl_o = post_ctrl_r;
+    assign post_base_o = post_base_r;
+    assign post_int8_th_o = {post_int8_th_r[2], post_int8_th_r[1], post_int8_th_r[0]};
+    assign post_prob_th_o = post_prob_th_r;
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            post_ctrl_r <= 2'd0;
+            post_base_r <= 32'd0;
+            post_int8_th_r[0] <= 9'd0;
+            post_int8_th_r[1] <= 9'd0;
+            post_int8_th_r[2] <= 9'd0;
+            post_prob_th_r <= 32'd0;
+            post_count_r <= 13'd0;
+            post_done_r <= 1'b0;
+        end else if (soft_reset_w) begin
+            post_ctrl_r <= 2'd0;
+            post_base_r <= 32'd0;
+            post_int8_th_r[0] <= 9'd0;
+            post_int8_th_r[1] <= 9'd0;
+            post_int8_th_r[2] <= 9'd0;
+            post_prob_th_r <= 32'd0;
+            post_count_r <= 13'd0;
+            post_done_r <= 1'b0;
+        end else begin
+            if (write_w && !busy_i) begin
+                case (apb_paddr_r)
+                    12'h114: post_ctrl_r <= apb_pwdata_r[1:0];
+                    12'h118: post_base_r <= apb_pwdata_r;
+                    12'h11c: post_int8_th_r[0] <= apb_pwdata_r[8:0];
+                    12'h120: post_int8_th_r[1] <= apb_pwdata_r[8:0];
+                    12'h124: post_int8_th_r[2] <= apb_pwdata_r[8:0];
+                    12'h128: post_prob_th_r <= apb_pwdata_r;
+                    default: begin end
+                endcase
+            end
+            if (start_w) begin
+                post_count_r <= 13'd0;
+                post_done_r <= 1'b0;
+            end else if (done_i && post_ctrl_r[0]) begin
+                post_count_r <= post_count_i;
+                post_done_r <= 1'b1;
+            end
+        end
+    end
     reg enable_r;
     reg [31:0] irq_en_r;
     reg [1:0] irq_stat_r;
@@ -125,6 +182,14 @@ module edrv32_npu_regs (
             12'h108: apb_prdata_o = bases_r[2];
             12'h10c: apb_prdata_o = bases_r[3];
             12'h110: apb_prdata_o = cur_desc_i;
+            12'h114: apb_prdata_o = {30'd0, post_ctrl_r};
+            12'h118: apb_prdata_o = post_base_r;
+            12'h11c: apb_prdata_o = {23'd0, post_int8_th_r[0]};
+            12'h120: apb_prdata_o = {23'd0, post_int8_th_r[1]};
+            12'h124: apb_prdata_o = {23'd0, post_int8_th_r[2]};
+            12'h128: apb_prdata_o = post_prob_th_r;
+            12'h12c: apb_prdata_o = {19'd0, post_count_r};
+            12'h130: apb_prdata_o = {31'd0, post_done_r};
             default: begin
                 if ((apb_paddr_r >= 12'h040) && (apb_paddr_r < 12'h060)
                     && (apb_paddr_r[1:0] == 2'd0)) begin

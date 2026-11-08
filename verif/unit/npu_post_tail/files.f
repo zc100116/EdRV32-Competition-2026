@@ -1,0 +1,10 @@
+lint.vlt
+tb.sv
++incdir+../../../rtl/include
+../../../rtl/npu/edrv32_npu_post.v
+../../../rtl/npu/edrv32_npu_post_classify.v
+../../../rtl/npu/edrv32_npu_post_dfl.v
+../../../rtl/tech/edrv32_ram_npu_post_best.v
+../../../rtl/tech/edrv32_ram_npu_post_queue.v
+../../../rtl/tech/edrv32_ram_npu_post_table.v
+../../../rtl/common/edrv32_reset_copy.v

@@ -1,0 +1,2 @@
+`verilator_config
+lint_off -rule BLKSEQ -file "*/npu_post_dfl/tb.sv"

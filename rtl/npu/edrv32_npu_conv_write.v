@@ -31,6 +31,20 @@ module edrv32_npu_conv_write (
     input wire [255:0] result_rd_data_i,
     output wire result_release_o,
 
+    // Spec 5.6: labels accompany the two-cycle result RAM return, without ready chains.
+    input wire post_enable_i,
+    input wire raw_cls_write_i,
+    input wire [1:0] post_kind_i,
+    input wire [1:0] head_i,
+    input wire [11:0] result_chunk_row_i,
+    output wire cls_valid_o,
+    output wire [255:0] cls_data_o,
+    output wire [1:0] cls_head_o,
+    output wire [11:0] cls_row_o,
+    output wire [10:0] cls_pair_o,
+    output wire [2:0] cls_block_o,
+    output wire cls_plane_o,
+
     // Burst requests and W data to the common write DMA.
     output wire write_req_valid_o,
     input wire write_req_ready_i,
@@ -51,6 +65,16 @@ module edrv32_npu_conv_write (
     localparam [2:0] S_RELEASE = 3'd6;
     wire unused_out_w_w;
     assign unused_out_w_w = out_w_i[0];
+    reg post_cls_r;
+    reg suppress_raw_r;
+    reg [1:0] head_r;
+    reg [11:0] row_r;
+    reg [10:0] pair_r;
+    reg [26:0] read_tag_r [0:2];
+    assign cls_valid_o = result_rd_valid_i && post_cls_r;
+    assign cls_data_o = result_rd_data_i;
+    assign cls_head_o = head_r;
+    assign {cls_row_o, cls_pair_o, cls_block_o, cls_plane_o} = read_tag_r[2];
     reg [2:0] state_r;
     reg [4:0] base_r;
     reg [4:0] pairs_r;
@@ -80,7 +104,7 @@ module edrv32_npu_conv_write (
     wire [4:0] boundary_w;
     wire [4:0] remaining_w;
     assign result_chunk_ready_o = (state_r == S_IDLE) && !stop_i;
-    assign write_req_valid_o = (state_r == S_REQUEST) && !stop_i;
+    assign write_req_valid_o = (state_r == S_REQUEST) && !stop_i && !suppress_raw_r;
     assign write_req_addr_o = addr_r;
     assign write_req_beats_o = burst_beats_r;
     assign read_w = (state_r == S_STREAM) && (requested_r < burst_beats_r)
@@ -88,9 +112,10 @@ module edrv32_npu_conv_write (
     assign result_rd_en_o = result_rd_en_r;
     assign result_rd_index_o = result_rd_index_r;
     assign result_rd_plane_o = result_rd_plane_r;
-    assign write_data_valid_o = (state_r == S_STREAM) && (ready_r != 3'd0);
+    assign write_data_valid_o = (state_r == S_STREAM) && (ready_r != 3'd0) && !suppress_raw_r;
     assign write_data_o = data_r[read_ptr_r];
-    assign send_w = write_data_valid_o && write_data_ready_i;
+    assign send_w = (state_r == S_STREAM) && (ready_r != 3'd0)
+        && (suppress_raw_r || write_data_ready_i);
     // On stop, cancel will reclaim the loan after AXI drains; an incomplete chunk
     // must not use the normal all-planes-complete release handshake.
     assign result_release_o = (state_r == S_RELEASE) && !stop_i;
@@ -150,7 +175,7 @@ module edrv32_npu_conv_write (
                 S_REQUEST: begin
                     if (stop_i) begin
                         state_r <= S_RELEASE;
-                    end else if (write_req_ready_i) begin
+                    end else if (write_req_ready_i || suppress_raw_r) begin
                         state_r <= S_STREAM;
                         requested_r <= 5'd0;
                         streamed_r <= 5'd0;
@@ -189,13 +214,20 @@ module edrv32_npu_conv_write (
         end
     end
     always @(posedge clk_i) begin
+        read_tag_r[1] <= read_tag_r[0];
+        read_tag_r[2] <= read_tag_r[1];
         if (start_i) begin
+            post_cls_r <= post_enable_i && post_kind_i == 2'd2;
+            suppress_raw_r <= post_enable_i && post_kind_i == 2'd2 && !raw_cls_write_i;
+            head_r <= head_i;
             row_addr_r <= out_addr_i;
             block_addr_r <= out_addr_i;
         end
         if (read_w) begin
             result_rd_index_r <= base_r + plane_sent_r + requested_r;
             result_rd_plane_r <= plane_r;
+            read_tag_r[0] <= {row_r, pair_r + {6'd0, plane_sent_r}
+                + {6'd0, requested_r}, block_r, plane_r};
         end
         if ((state_r == S_RELEASE) && last_r) begin
             if ({1'b0, block_r} == cout_blocks_i - 4'd1) begin
@@ -206,6 +238,8 @@ module edrv32_npu_conv_write (
             end
         end
         if (result_chunk_valid_i && result_chunk_ready_o) begin
+            row_r <= result_chunk_row_i;
+            pair_r <= result_chunk_pair_i;
             base_r <= result_chunk_base_i;
             pairs_r <= result_chunk_pairs_i;
             half_r <= result_chunk_half_i;
