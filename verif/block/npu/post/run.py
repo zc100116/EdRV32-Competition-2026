@@ -178,6 +178,9 @@ def main():
                 row = dict(variant=name)
                 row.update({key: int(value) for key, value in
                             re.findall(r'(\w+)=(-?\d+)', log.read_text())})
+                # EN=0 has no table/gather/candidate-B events or post tail.
+                if options['ctrl'] == 0:
+                    row.update(table_last=0, drain_gather=0, tail_cycles=0)
                 key = (options['count'], name.rsplit('_', 1)[1])
                 if options['ctrl'] == 0:
                     baselines[key] = row['core_cycles']
