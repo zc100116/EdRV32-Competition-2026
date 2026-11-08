@@ -146,6 +146,7 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | N-T5 | 修卡 66 退步路径后冻结（用户 2026-11-07 选择'修三处后冻结'）：IB 数据写使能脱离本拍命中、F2 纠正寄存后进 IB、写缓冲比较前移、E 地址 → D$ 译码、命中扇出、删无用副本 | Codex sol（task_6e372e1b8529 / ctx_19d88744a02e） | N-PDS5 | B1、R01–R05（R-05 = 1,808,045），代理级数 | task-cpu-n-t5 | [x] f1e0d42f → cpu-n16，RTL 冻结候选：IB 数据 CE、F2 → IB 计数路径已切断，写缓冲比较前移、命中分组（最大扇出 8）；LRU 快照撤回；B1 48/48、R01–R05 通过，R-05 = 1,808,045 |
 | N-PDS6 | 卡 67：T5 冻结候选的 CPU+L1 独立 150 MHz 探针；与卡 64 取高者冻结 | 用户 + Windows Codex | N-T5 | 时序报告 | win/20261107-67-cpu-t5-timing-probe | [x] 133.3 MHz（WNS −0.834），低于卡 64；按用户决定冻结卡 64 的 v0.21（9fa3f649），见 docs/reports/2026-11-08-timing-cpu-t5.md |
 | N-FRZ | 冻结 CPU v0.21（用户 2026-11-08）：RTL 恢复为 9fa3f649，规格回退为 cpu-spec v0.23 / cache-spec v0.14 / cache-testplan v0.6，I$ 数据 IP 回到 64 位 | 协调者 | N-PDS6 | 树与 9fa3f649 一致 | cpu-n16 | [x] 224fb4b7 + 规格提交 |
+| N-SPEC | 投机补偿的流水切分评估（用户 2026-11-08）：C3 + 地址预测 / W 基址 / 编译器重排，ALU 环分簇旁路等，组合 C6-line、C1，估等效跑分；只做模型 | Codex sol（task_283409578182 / ctx_4e278ab607c4） | N-FRZ | 等效跑分比 v0.21 高 ≥5% 才考虑 RTL | task-cpu-spec-eval | [~] 已派发 |
 | N-SOC | 冻结 CPU 并入整片 SoC，整片时钟目标待定 | — | N-FRZ | 整片 P&R、上板 | — | [ ] 待讨论 |
 
 ## 6. 变更记录
