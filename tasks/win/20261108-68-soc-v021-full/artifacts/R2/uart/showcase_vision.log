@@ -1,0 +1,107 @@
+[21:10:09.298][RX] vision_gui refreshes=18 render_ms=19.818 max_ms=36.908 area_px=64241.777 rnd_ms=3.925 sw_ms=0.000 other_ms=15.893
+[21:10:09.524][RX] vision fps=16 npu=35.0 wait=10.5 decode=20.8 sort=0.0 nms=0.0 post_span=25.6 gui=26.1 e2e=112.2 period=48.4 copy=1.0 cpu_comm=2% cpu_app=42% cpu_gui=32%
+[21:10:10.311][RX] vision_gui refreshes=20 render_ms=20.074 max_ms=37.940 area_px=15880.350 rnd_ms=3.739 sw_ms=0.000 other_ms=16.334
+[21:10:10.565][RX] vision fps=19 npu=35.0 wait=12.5 decode=20.9 sort=0.0 nms=0.0 post_span=25.9 gui=27.8 e2e=117.5 period=50.4 copy=1.0 cpu_comm=2% cpu_app=47% cpu_gui=35%
+[21:10:11.284][RX] vision_gui refreshes=20 render_ms=20.161 max_ms=43.894 area_px=16532.050 rnd_ms=4.407 sw_ms=0.000 other_ms=15.753
+[21:10:11.572][RX] vision fps=19 npu=35.0 wait=13.2 decode=20.6 sort=0.0 nms=0.0 post_span=25.6 gui=29.0 e2e=121.7 period=50.0 copy=1.0 cpu_comm=2% cpu_app=45% cpu_gui=35%
+[21:10:12.288][RX] vision_gui refreshes=20 render_ms=21.909 max_ms=31.777 area_px=16791.350 rnd_ms=4.866 sw_ms=0.000 other_ms=17.042
+[21:10:12.578][RX] vision fps=17 npu=35.0 wait=13.2 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=32.2 e2e=124.0 period=55.2 copy=1.0 cpu_comm=2% cpu_app=45% cpu_gui=36%
+[21:10:13.321][RX] vision_gui refreshes=19 render_ms=20.509 max_ms=29.178 area_px=18127.631 rnd_ms=4.797 sw_ms=0.000 other_ms=15.711
+[21:10:13.618][RX] vision fps=18 npu=35.0 wait=12.1 decode=20.5 sort=0.0 nms=0.0 post_span=25.6 gui=31.6 e2e=123.9 period=52.3 copy=1.0 cpu_comm=2% cpu_app=47% cpu_gui=33%
+[21:10:14.411][RX] vision_gui refreshes=18 render_ms=26.198 max_ms=35.948 area_px=18250.833 rnd_ms=5.619 sw_ms=0.000 other_ms=20.579
+[21:10:14.708][RX] vision fps=17 npu=35.0 wait=16.4 decode=20.5 sort=0.0 nms=0.0 post_span=25.6 gui=35.2 e2e=129.3 period=57.9 copy=1.0 cpu_comm=2% cpu_app=38% cpu_gui=37%
+[21:10:15.376][RX] vision_gui refreshes=18 render_ms=25.212 max_ms=51.132 area_px=15930.500 rnd_ms=5.063 sw_ms=0.000 other_ms=20.148
+[21:10:15.680][RX] vision fps=17 npu=35.0 wait=18.3 decode=20.5 sort=0.0 nms=0.0 post_span=25.6 gui=34.5 e2e=129.4 period=55.9 copy=1.0 cpu_comm=2% cpu_app=41% cpu_gui=40%
+[21:10:16.430][RX] vision_gui refreshes=17 render_ms=24.455 max_ms=33.504 area_px=16203.470 rnd_ms=4.893 sw_ms=0.000 other_ms=19.561
+[21:10:16.702][RX] vision fps=15 npu=35.0 wait=14.4 decode=20.3 sort=0.0 nms=0.0 post_span=25.3 gui=33.5 e2e=128.4 period=61.8 copy=1.0 cpu_comm=2% cpu_app=39% cpu_gui=37%
+[21:10:17.459][RX] vision_gui refreshes=19 render_ms=22.266 max_ms=34.561 area_px=15510.210 rnd_ms=4.643 sw_ms=0.000 other_ms=17.623
+[21:10:17.728][RX] vision fps=18 npu=35.0 wait=14.0 decode=20.5 sort=0.0 nms=0.0 post_span=25.6 gui=30.0 e2e=125.5 period=54.2 copy=1.0 cpu_comm=2% cpu_app=44% cpu_gui=38%
+[21:10:18.480][RX] vision_gui refreshes=20 render_ms=22.096 max_ms=31.946 area_px=15886.950 rnd_ms=4.645 sw_ms=0.000 other_ms=17.451
+[21:10:18.745][RX] vision fps=19 npu=35.0 wait=14.4 decode=20.6 sort=0.0 nms=0.0 post_span=25.6 gui=31.1 e2e=121.3 period=50.7 copy=1.0 cpu_comm=2% cpu_app=46% cpu_gui=41%
+[21:10:19.469][RX] vision_gui refreshes=19 render_ms=23.016 max_ms=33.930 area_px=16260.578 rnd_ms=4.913 sw_ms=0.000 other_ms=18.103
+[21:10:19.784][RX] vision fps=18 npu=35.0 wait=15.3 decode=20.6 sort=0.0 nms=0.0 post_span=25.7 gui=29.3 e2e=122.1 period=53.0 copy=1.0 cpu_comm=2% cpu_app=45% cpu_gui=37%
+[21:10:20.491][RX] vision_gui refreshes=19 render_ms=23.530 max_ms=35.244 area_px=17447.842 rnd_ms=5.176 sw_ms=0.000 other_ms=18.354
+[21:10:20.775][RX] vision fps=18 npu=35.0 wait=15.2 decode=20.6 sort=0.0 nms=0.0 post_span=25.7 gui=33.5 e2e=126.2 period=54.3 copy=1.0 cpu_comm=2% cpu_app=47% cpu_gui=38%
+[21:10:21.516][RX] vision_gui refreshes=22 render_ms=16.487 max_ms=29.603 area_px=13261.954 rnd_ms=3.740 sw_ms=0.000 other_ms=12.747
+[21:10:21.784][RX] vision fps=21 npu=35.0 wait=11.0 decode=20.6 sort=0.0 nms=0.0 post_span=25.5 gui=26.5 e2e=119.0 period=45.3 copy=1.0 cpu_comm=2% cpu_app=53% cpu_gui=32%
+[21:10:22.551][RX] vision_gui refreshes=24 render_ms=14.934 max_ms=24.908 area_px=12866.083 rnd_ms=3.340 sw_ms=0.000 other_ms=11.594
+[21:10:22.840][RX] vision fps=22 npu=35.0 wait=8.1 decode=20.7 sort=0.0 nms=0.0 post_span=25.6 gui=23.5 e2e=110.2 period=43.0 copy=1.0 cpu_comm=2% cpu_app=57% cpu_gui=30%
+[21:12:30.612][RX] vision_gui refreshes=21 render_ms=17.219 max_ms=34.966 area_px=55863.476 rnd_ms=3.572 sw_ms=0.000 other_ms=13.647
+[21:12:31.574][RX] vision fps=18 npu=35.0 wait=8.9 decode=20.6 sort=0.0 nms=0.0 post_span=25.6 gui=25.4 e2e=110.9 period=43.9 copy=1.0 cpu_comm=2% cpu_app=55% cpu_gui=33%
+[21:12:31.690][RX] vision_gui refreshes=22 render_ms=17.833 max_ms=37.545 area_px=15193.590 rnd_ms=3.319 sw_ms=0.000 other_ms=14.514
+[21:12:32.604][RX] vision fps=21 npu=35.0 wait=10.9 decode=20.7 sort=0.0 nms=0.0 post_span=25.8 gui=28.1 e2e=115.6 period=46.1 copy=1.0 cpu_comm=2% cpu_app=55% cpu_gui=33%
+[21:12:32.703][RX] vision_gui refreshes=23 render_ms=16.796 max_ms=27.247 area_px=13859.260 rnd_ms=3.162 sw_ms=0.000 other_ms=13.633
+[21:12:33.584][RX] vision fps=21 npu=35.0 wait=9.7 decode=20.8 sort=0.0 nms=0.0 post_span=25.7 gui=25.2 e2e=112.1 period=45.0 copy=1.0 cpu_comm=2% cpu_app=56% cpu_gui=32%
+[21:12:33.698][RX] vision_gui refreshes=22 render_ms=17.041 max_ms=33.823 area_px=14433.090 rnd_ms=3.284 sw_ms=0.000 other_ms=13.757
+[21:12:34.622][RX] vision fps=21 npu=35.0 wait=10.2 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=26.7 e2e=110.5 period=46.2 copy=1.0 cpu_comm=2% cpu_app=53% cpu_gui=35%
+[21:12:34.711][RX] vision_gui refreshes=23 render_ms=15.959 max_ms=22.752 area_px=12862.913 rnd_ms=2.964 sw_ms=0.000 other_ms=12.994
+[21:12:35.626][RX] vision fps=22 npu=35.0 wait=8.6 decode=20.8 sort=0.0 nms=0.0 post_span=25.7 gui=23.4 e2e=109.9 period=44.1 copy=1.0 cpu_comm=2% cpu_app=56% cpu_gui=32%
+[21:12:35.706][RX] vision_gui refreshes=23 render_ms=15.225 max_ms=25.094 area_px=12513.260 rnd_ms=2.991 sw_ms=0.000 other_ms=12.234
+[21:12:36.628][RX] vision fps=22 npu=35.0 wait=8.7 decode=20.8 sort=0.0 nms=0.0 post_span=25.7 gui=23.9 e2e=109.1 period=43.5 copy=1.0 cpu_comm=2% cpu_app=55% cpu_gui=33%
+[21:12:36.718][RX] vision_gui refreshes=24 render_ms=14.624 max_ms=19.096 area_px=12082.958 rnd_ms=2.834 sw_ms=0.000 other_ms=11.790
+[21:12:37.671][RX] vision fps=22 npu=35.0 wait=7.7 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=25.2 e2e=109.8 period=43.1 copy=1.0 cpu_comm=2% cpu_app=56% cpu_gui=32%
+[21:12:37.757][RX] vision_gui refreshes=23 render_ms=16.949 max_ms=25.516 area_px=14175.347 rnd_ms=3.240 sw_ms=0.000 other_ms=13.709
+[21:12:38.682][RX] vision fps=22 npu=35.0 wait=8.8 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=25.2 e2e=110.4 period=44.5 copy=1.0 cpu_comm=2% cpu_app=56% cpu_gui=32%
+[21:12:38.777][RX] vision_gui refreshes=24 render_ms=13.943 max_ms=31.004 area_px=10751.541 rnd_ms=2.371 sw_ms=0.000 other_ms=11.572
+[21:12:39.667][RX] vision fps=22 npu=35.0 wait=8.0 decode=20.8 sort=0.0 nms=0.0 post_span=25.7 gui=23.9 e2e=113.3 period=43.1 copy=1.0 cpu_comm=2% cpu_app=58% cpu_gui=30%
+[21:12:39.746][RX] vision_gui refreshes=23 render_ms=14.364 max_ms=29.757 area_px=10603.347 rnd_ms=2.324 sw_ms=0.000 other_ms=12.039
+[21:12:40.653][RX] vision fps=22 npu=35.0 wait=8.7 decode=20.8 sort=0.0 nms=0.0 post_span=25.8 gui=24.1 e2e=108.9 period=44.2 copy=1.0 cpu_comm=2% cpu_app=52% cpu_gui=36%
+[21:12:40.819][RX] vision_gui refreshes=18 render_ms=12.352 max_ms=23.433 area_px=9043.722 rnd_ms=1.829 sw_ms=0.000 other_ms=10.522
+[21:12:41.700][RX] vision fps=24 npu=35.0 wait=5.1 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=21.6 e2e=103.1 period=39.7 copy=1.0 cpu_comm=3% cpu_app=61% cpu_gui=19%
+[21:12:41.811][RX] vision_gui refreshes=23 render_ms=14.302 max_ms=26.545 area_px=10797.608 rnd_ms=2.401 sw_ms=0.000 other_ms=11.901
+[21:12:42.691][RX] vision fps=23 npu=35.0 wait=6.6 decode=20.8 sort=0.0 nms=0.0 post_span=25.8 gui=22.7 e2e=105.9 period=42.4 copy=1.0 cpu_comm=2% cpu_app=58% cpu_gui=30%
+[21:12:42.872][RX] vision_gui refreshes=17 render_ms=9.750 max_ms=18.965 area_px=7559.176 rnd_ms=1.423 sw_ms=0.000 other_ms=8.327
+[21:12:43.676][RX] vision fps=24 npu=35.0 wait=4.0 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=20.2 e2e=105.2 period=38.9 copy=1.0 cpu_comm=3% cpu_app=64% cpu_gui=13%
+[21:12:43.873][RX] vision_gui refreshes=20 render_ms=13.320 max_ms=29.376 area_px=9562.350 rnd_ms=1.976 sw_ms=0.000 other_ms=11.343
+[21:12:44.714][RX] vision fps=24 npu=35.0 wait=4.8 decode=20.7 sort=0.0 nms=0.0 post_span=25.8 gui=22.4 e2e=107.7 period=40.5 copy=1.0 cpu_comm=2% cpu_app=57% cpu_gui=25%
+[21:12:44.856][RX] vision_gui refreshes=25 render_ms=10.784 max_ms=21.093 area_px=7417.240 rnd_ms=1.692 sw_ms=0.000 other_ms=9.091
+[21:12:45.700][RX] vision fps=26 npu=35.0 wait=2.6 decode=20.6 sort=0.0 nms=0.0 post_span=25.6 gui=19.7 e2e=102.8 period=37.5 copy=1.0 cpu_comm=2% cpu_app=62% cpu_gui=22%
+[21:12:45.894][RX] vision_gui refreshes=7 render_ms=10.131 max_ms=14.348 area_px=9159.000 rnd_ms=1.575 sw_ms=0.000 other_ms=8.555
+[21:12:46.722][RX] vision fps=24 npu=35.0 wait=4.6 decode=20.6 sort=0.0 nms=0.0 post_span=25.7 gui=23.1 e2e=107.5 period=41.0 copy=1.0 cpu_comm=3% cpu_app=65% cpu_gui=12%
+[21:12:46.915][RX] vision_gui refreshes=16 render_ms=13.050 max_ms=31.918 area_px=10343.937 rnd_ms=2.139 sw_ms=0.000 other_ms=10.911
+[21:12:47.782][RX] vision fps=24 npu=35.0 wait=3.4 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=19.0 e2e=100.8 period=38.4 copy=1.0 cpu_comm=3% cpu_app=64% cpu_gui=15%
+[21:12:47.941][RX] vision_gui refreshes=18 render_ms=14.354 max_ms=33.058 area_px=11042.833 rnd_ms=2.407 sw_ms=0.000 other_ms=11.947
+[21:12:48.725][RX] vision fps=25 npu=35.0 wait=4.4 decode=20.7 sort=0.0 nms=0.0 post_span=25.8 gui=23.8 e2e=112.4 period=39.4 copy=1.0 cpu_comm=2% cpu_app=56% cpu_gui=27%
+[21:12:48.959][RX] vision_gui refreshes=13 render_ms=9.808 max_ms=14.228 area_px=8384.769 rnd_ms=1.523 sw_ms=0.000 other_ms=8.285
+[21:12:49.764][RX] vision fps=25 npu=35.0 wait=3.7 decode=20.7 sort=0.0 nms=0.0 post_span=25.6 gui=19.9 e2e=104.5 period=38.8 copy=1.0 cpu_comm=3% cpu_app=62% cpu_gui=21%
+[21:12:49.950][RX] vision_gui refreshes=20 render_ms=11.283 max_ms=21.407 area_px=9128.400 rnd_ms=1.998 sw_ms=0.000 other_ms=9.285
+[21:12:50.762][RX] vision fps=24 npu=35.0 wait=2.9 decode=20.6 sort=0.0 nms=0.0 post_span=25.6 gui=18.5 e2e=100.7 period=39.1 copy=1.0 cpu_comm=3% cpu_app=63% cpu_gui=12%
+[21:12:50.999][RX] vision_gui refreshes=18 render_ms=11.126 max_ms=26.616 area_px=8424.944 rnd_ms=1.839 sw_ms=0.000 other_ms=9.286
+[21:15:11.213][RX] vision_gui refreshes=18 render_ms=20.272 max_ms=35.597 area_px=64820.277 rnd_ms=4.241 sw_ms=0.000 other_ms=16.030
+[21:15:11.942][RX] vision fps=15 npu=35.0 wait=12.0 decode=20.7 sort=0.0 nms=0.0 post_span=25.7 gui=27.1 e2e=115.8 period=49.6 copy=1.0 cpu_comm=2% cpu_app=37% cpu_gui=26%
+[21:15:12.221][RX] vision_gui refreshes=22 render_ms=18.469 max_ms=35.282 area_px=14781.909 rnd_ms=3.385 sw_ms=0.000 other_ms=15.083
+[21:15:12.947][RX] vision fps=21 npu=35.0 wait=12.0 decode=20.8 sort=0.0 nms=0.0 post_span=25.7 gui=27.0 e2e=115.0 period=46.8 copy=1.0 cpu_comm=2% cpu_app=52% cpu_gui=36%
+[21:15:13.279][RX] vision_gui refreshes=23 render_ms=14.859 max_ms=29.566 area_px=11242.130 rnd_ms=3.112 sw_ms=0.000 other_ms=11.747
+[21:15:13.972][RX] vision fps=22 npu=35.0 wait=8.3 decode=20.6 sort=0.0 nms=0.0 post_span=25.5 gui=22.8 e2e=111.2 period=44.0 copy=1.0 cpu_comm=2% cpu_app=60% cpu_gui=24%
+[21:15:14.289][RX] vision_gui refreshes=21 render_ms=20.669 max_ms=40.622 area_px=15587.857 rnd_ms=4.594 sw_ms=0.000 other_ms=16.074
+[21:15:14.997][RX] vision fps=19 npu=35.0 wait=12.9 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=29.0 e2e=120.5 period=49.0 copy=1.0 cpu_comm=2% cpu_app=49% cpu_gui=37%
+[21:15:15.335][RX] vision_gui refreshes=21 render_ms=20.157 max_ms=42.987 area_px=15952.523 rnd_ms=4.679 sw_ms=0.000 other_ms=15.477
+[21:15:15.997][RX] vision fps=20 npu=35.0 wait=13.8 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=30.1 e2e=120.8 period=48.6 copy=1.0 cpu_comm=2% cpu_app=49% cpu_gui=36%
+[21:15:16.350][RX] vision_gui refreshes=22 render_ms=18.067 max_ms=29.168 area_px=14428.045 rnd_ms=4.234 sw_ms=0.000 other_ms=13.833
+[21:15:17.003][RX] vision fps=20 npu=35.0 wait=9.5 decode=20.5 sort=0.0 nms=0.0 post_span=25.4 gui=26.4 e2e=114.0 period=46.7 copy=1.0 cpu_comm=2% cpu_app=51% cpu_gui=30%
+[21:15:17.383][RX] vision_gui refreshes=22 render_ms=17.265 max_ms=31.049 area_px=13385.636 rnd_ms=4.034 sw_ms=0.000 other_ms=13.230
+[21:15:18.029][RX] vision fps=20 npu=35.0 wait=11.8 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=28.7 e2e=118.3 period=48.1 copy=1.0 cpu_comm=2% cpu_app=48% cpu_gui=33%
+[21:15:18.436][RX] vision_gui refreshes=23 render_ms=16.371 max_ms=25.822 area_px=12704.304 rnd_ms=3.652 sw_ms=0.000 other_ms=12.719
+[21:15:19.074][RX] vision fps=22 npu=35.0 wait=9.2 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=24.2 e2e=110.2 period=44.2 copy=1.0 cpu_comm=2% cpu_app=52% cpu_gui=35%
+[21:15:19.433][RX] vision_gui refreshes=23 render_ms=16.974 max_ms=25.303 area_px=13620.521 rnd_ms=3.900 sw_ms=0.000 other_ms=13.073
+[21:15:20.063][RX] vision fps=21 npu=35.0 wait=9.8 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=26.6 e2e=111.6 period=45.1 copy=1.0 cpu_comm=2% cpu_app=55% cpu_gui=31%
+[21:15:20.455][RX] vision_gui refreshes=22 render_ms=17.735 max_ms=25.821 area_px=13142.772 rnd_ms=3.949 sw_ms=0.000 other_ms=13.786
+[21:15:21.088][RX] vision fps=21 npu=35.0 wait=9.8 decode=20.5 sort=0.0 nms=0.0 post_span=25.4 gui=26.4 e2e=114.6 period=44.6 copy=1.0 cpu_comm=2% cpu_app=52% cpu_gui=34%
+[21:15:21.517][RX] vision_gui refreshes=23 render_ms=16.624 max_ms=26.622 area_px=11630.826 rnd_ms=3.842 sw_ms=0.000 other_ms=12.782
+[21:15:22.205][RX] vision fps=21 npu=35.0 wait=11.4 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=28.1 e2e=117.8 period=46.5 copy=1.0 cpu_comm=2% cpu_app=50% cpu_gui=36%
+[21:15:22.530][RX] vision_gui refreshes=20 render_ms=23.476 max_ms=37.755 area_px=15488.650 rnd_ms=4.953 sw_ms=0.000 other_ms=18.522
+[21:15:23.183][RX] vision fps=19 npu=35.0 wait=13.7 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=32.5 e2e=125.5 period=50.3 copy=1.0 cpu_comm=2% cpu_app=47% cpu_gui=40%
+[21:15:23.549][RX] vision_gui refreshes=21 render_ms=19.661 max_ms=38.056 area_px=16387.476 rnd_ms=4.256 sw_ms=0.000 other_ms=15.404
+[21:15:24.242][RX] vision fps=20 npu=35.0 wait=11.9 decode=20.5 sort=0.0 nms=0.0 post_span=25.5 gui=27.3 e2e=116.7 period=46.4 copy=1.0 cpu_comm=2% cpu_app=55% cpu_gui=32%
+[21:15:24.534][RX] vision_gui refreshes=18 render_ms=28.093 max_ms=50.051 area_px=18076.222 rnd_ms=5.871 sw_ms=0.000 other_ms=22.221
+[21:15:25.188][RX] vision fps=17 npu=35.0 wait=20.3 decode=20.6 sort=0.0 nms=0.0 post_span=25.7 gui=35.0 e2e=130.7 period=57.2 copy=1.0 cpu_comm=2% cpu_app=43% cpu_gui=44%
+[21:15:25.559][RX] vision_gui refreshes=20 render_ms=22.194 max_ms=42.842 area_px=17971.850 rnd_ms=4.211 sw_ms=0.000 other_ms=17.982
+[21:15:26.262][RX] vision fps=19 npu=35.0 wait=14.9 decode=20.6 sort=0.0 nms=0.0 post_span=25.5 gui=29.7 e2e=122.9 period=50.8 copy=1.0 cpu_comm=2% cpu_app=50% cpu_gui=38%
+[21:15:26.570][RX] vision_gui refreshes=16 render_ms=33.336 max_ms=37.405 area_px=22278.875 rnd_ms=6.022 sw_ms=0.000 other_ms=27.313
+[21:15:27.304][RX] vision fps=16 npu=35.0 wait=23.0 decode=20.9 sort=0.0 nms=0.0 post_span=25.9 gui=41.0 e2e=144.4 period=60.4 copy=1.0 cpu_comm=1% cpu_app=38% cpu_gui=50%
+[21:15:27.576][RX] vision_gui refreshes=19 render_ms=24.356 max_ms=45.013 area_px=19232.631 rnd_ms=4.738 sw_ms=0.000 other_ms=19.617
+[21:15:28.217][RX] vision fps=17 npu=35.0 wait=17.5 decode=20.9 sort=0.0 nms=0.0 post_span=25.9 gui=32.4 e2e=125.8 period=54.9 copy=1.0 cpu_comm=1% cpu_app=48% cpu_gui=39%
+[21:15:28.620][RX] vision_gui refreshes=21 render_ms=23.323 max_ms=39.286 area_px=16083.333 rnd_ms=4.526 sw_ms=0.000 other_ms=18.796
+[21:15:29.245][RX] vision fps=17 npu=35.0 wait=17.5 decode=20.8 sort=0.0 nms=0.0 post_span=25.8 gui=35.0 e2e=128.6 period=57.4 copy=1.0 cpu_comm=1% cpu_app=41% cpu_gui=41%
+[21:15:29.645][RX] vision_gui refreshes=21 render_ms=22.037 max_ms=37.526 area_px=16019.714 rnd_ms=4.104 sw_ms=0.000 other_ms=17.933
+[21:15:30.338][RX] vision fps=16 npu=35.0 wait=18.9 decode=20.8 sort=0.0 nms=0.0 post_span=25.9 gui=36.4 e2e=134.1 period=57.4 copy=1.0 cpu_comm=1% cpu_app=44% cpu_gui=44%

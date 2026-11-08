@@ -75,7 +75,7 @@
 
 ## 第 2 轮
 
-整片已布通并生成比特流。PDS 2022.2-SP6.1 build 138931，PG2L200H-6 FBB676。布线后报告于 2026-11-08 20:18:42 +0800 写出。当前只完成实现侧验证。
+整片已布通并生成比特流。PDS 2022.2-SP6.1 build 138931，PG2L200H-6 FBB676。布线后报告于 2026-11-08 20:18:42 +0800 写出。R2 已上板运行 Showcase，取得启动日志、一次 CoreMark 成绩、完整 LVGL benchmark、分段视觉识别和一次 NES 进出记录。
 
 | 项 | 内容 |
 |---|---|
@@ -83,7 +83,7 @@
 | 工程 | `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021` |
 | 比特流 | `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/generate_bitstream/edrv32_fpga_board_full_top.sbit`（9,188,552 字节） |
 | ip_pll_npu | 生成分频参数对应 180.000 MHz，布线后 clk_npu 周期为 5.5556 ns |
-| CLK_SYS_HZ | 未取得，待上板读取启动串口 |
+| CLK_SYS_HZ | BIOS 串口报告 `125000000`，EDTM 报告 `clk_sys_hz=125000000`、`clk_npu_hz=180000000` |
 
 ### 时序
 
@@ -120,14 +120,40 @@ PnR 总用时 2h:25m:5s，成功布线 167,053 / 167,053 条网络。第 21 轮�
 
 ### 上板
 
-待下载比特流。当前未取得 BIOS 串口、board_npu、CoreMark、视觉识别、benchmark 和 NES 结果。
+2026-11-08 +0800，在 EdRV32 调试工具以 COM7、115200 8N1 采集串口。21:08:59 Boot ROM 报告 `MEM_READY: 1`、构建 `92b38fd2` 和 GCC 15.2.0。通过 BIOS 网口加载 `src/showcase-v021.elf`，串口报告 `Load result: PASS`、写入 12,769,664 字节（5 段），21:09:05 跳转 `0x90000000`，21:09:06 输出 `showcase first frame`。调试工具从 HELLO 取得板端程序版本 `48b84d67`。
+
+| 项目 | 日志确认的结果 | 任务卡验收 |
+|---|---|---|
+| CoreMark | Showcase 芯片信息页显示运行完成。CPU 125 MHz，696.0 Iterations/Sec，5.568 CoreMark/MHz。见[跑分截图](artifacts/R2/photos/showcase-coremark.png) | 取得 1 次成绩，其余两次成绩、编译参数、16 个性能计数器、IPC、I/D MPKI 和 CRC 未取得 |
+| 视觉识别 | 53 条 `vision fps=`。识别帧率 15–26 fps，NPU 单帧耗时 35.0 ms，端到端延迟 100.7–144.4 ms。独立 NPU 帧率未取得 | 仅有三段短时记录，未取得连续 15 分钟和每 5 分钟的遥测记录 |
+| LVGL benchmark | 16 个场景及 `ALL` 齐全，串口报告平均 23 fps。Moving wallpaper 30 fps、Multiple RGB images 28 fps，`ALL` 平均渲染 42.637 ms | 已完整跑一遍，HDMI 结果照片未取得 |
+| NES | 21:14:27.547 输出 `NES powered on`、`NES ROM prg=32 chr=8 mapper=0`，21:15:02.363 输出 `ROM freed`。两条日志间隔约 35 s。退出前最后一条输入时延记录为最大 8.373 ms、平均 1.621 ms | 确认加载和退出，未取得连续 5 分钟记录或 HDMI 照片 |
+
+视觉识别按连续串口样本分段。下表的区间为首末样本时间，帧率取固件的 `vision fps`，端到端耗时取 `e2e`。
+
+| 串口样本区间（+0800） | 样本 | 识别帧率 (fps) | NPU 单帧 (ms) | 端到端延迟 (ms) |
+|---|---:|---:|---:|---:|
+| 21:10:09.524–21:10:22.840 | 14 | 15–22 | 35.0 | 110.2–129.4 |
+| 21:12:31.574–21:12:50.762 | 20 | 18–26 | 35.0 | 100.7–115.6 |
+| 21:15:11.942–21:15:30.338 | 19 | 15–22 | 35.0 | 110.2–144.4 |
+
+Showcase 启动前，同一串口会话另有一条完整 NPU 自检记录。21:08:04 输出 `NPU board: PASS 39/39`，C-YOLO 的 PERF0 为 6,190,102、MAC 为 5,347,440、34.389 ms/frame、29.078 fps。D-01 至 D-20 均为 PASS，CRC32 与 C-YOLO 一致（`0738f96e`）。该段由 BIOS 网口加载，任务卡要求的串口加载三轮结果仍未取得。原文在本地 `showcase_session.log`。
+
+### 上板日志与遥测
+
+- `artifacts/R2/uart/showcase_boot_network.log`、`showcase_vision.log`、`showcase_nes.log` 为按阶段摘出的原文。
+- `artifacts/R2/benchmark.txt` 保留 16 场景和 `ALL` 的拆分计数、逐场景 fps、平均 fps 和 RND 汇总。
+- 21:16:38 导出的 EDTM 缓冲有 11,712 条原始记录，板上 `mtime` 覆盖约 206 s。调试工具报告序号丢失和解码错误均为 0。`artifacts/R2/edtm_showcase_1s.csv` 保留每秒第一条原始记录和最后一条，完整 CSV 留在本地。
 
 ### 问题与偏离
 
-未取得运行期间逐小时空闲内存采样、IP/PnR 设置页截图和上板证据。原始 PDS 拥塞数据以网格文本输出，报告中的 PNG 为同一数据的重绘。压缩的 PDS 时序原文约 2.7 MiB，保留各时钟域的逐级延迟和扇出。
+未取得运行期间逐小时空闲内存采样和 IP/PnR 设置页截图。原始 PDS 拥塞数据以网格文本输出，报告中的 PNG 为同一数据的重绘。压缩的 PDS 时序原文约 2.7 MiB，保留各时钟域的逐级延迟和扇出。
+
+Showcase 启动后，PC 端因 NI Citadel 4 Service 占用 UDP 6000，调试工具记录 8 次 `WinError 10013`。停止该服务后，21:12:25 成功监听 `192.168.1.2:6000` 并收到板端数据。21:16:12 工具另记录 PC 有线网卡就绪超时（`OperStatus=Down`）。Showcase 运行段的串口未见再次启动或异常陷入记录。视觉识别、LVGL benchmark 和 NES 的画面异常无法从串口确认。
 
 ### 原始文件
 
 - PDS 工程及各阶段原始日志位于 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021`。
 - PDS 拥塞网格位于 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/place_route/CongestionPlot/`。
+- 本次会话完整串口缓冲 `showcase_session.log` 和原始 EDTM `showcase_telemetry.csv` 位于 `C:/Users/86183/.codex/worktrees/card68-soc-v021/EdRV32-Competition-2026/build/card68/R2/board/`。
 - 整理后的日志、时序和资源报告位于 `artifacts/R2/`。

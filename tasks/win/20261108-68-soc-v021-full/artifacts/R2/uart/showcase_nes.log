@@ -1,0 +1,76 @@
+[21:14:27.547][RX] Head: 0x9359c238 (4e 45 53 1a)
+[21:14:27.547][RX] ROM loaded:  [0] 32k/8k V
+[21:14:27.547][RX] created memory mapper: None
+[21:14:27.547][RX] setting up mapper 0
+[21:14:27.547][RX] reset memory mapper
+[21:14:27.547][RX] NES powered on
+[21:14:27.547][RX] NES ROM prg=32 chr=8 mapper=0
+[21:14:28.136][RX] CPU%/max_us 2/1828 64/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:28.170][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:14:29.138][RX] CPU%/max_us 2/1828 96/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:29.171][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:14:30.139][RX] CPU%/max_us 2/1828 96/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:30.172][RX] NES input ETH max_ms=0.000 avg_ms=0.000
+[21:14:31.155][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:31.189][RX] NES input ETH max_ms=8.373 avg_ms=4.469
+[21:14:32.189][RX] CPU%/max_us 2/1828 91/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:32.222][RX] NES input ETH max_ms=8.373 avg_ms=4.469
+[21:14:33.189][RX] CPU%/max_us 2/1828 91/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:33.222][RX] NES input ETH max_ms=8.373 avg_ms=4.469
+[21:14:34.208][RX] CPU%/max_us 2/1828 96/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:34.241][RX] NES input ETH max_ms=8.373 avg_ms=3.162
+[21:14:35.209][RX] CPU%/max_us 2/1828 96/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:35.242][RX] NES input ETH max_ms=8.373 avg_ms=2.502
+[21:14:36.213][RX] CPU%/max_us 2/1828 97/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:36.246][RX] NES input ETH max_ms=8.373 avg_ms=2.105
+[21:14:37.194][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:37.227][RX] NES input ETH max_ms=8.373 avg_ms=1.821
+[21:14:38.247][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:38.280][RX] NES input ETH max_ms=8.373 avg_ms=2.008
+[21:14:39.263][RX] CPU%/max_us 2/1828 90/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:39.292][RX] NES input ETH max_ms=8.373 avg_ms=1.326
+[21:14:40.296][RX] CPU%/max_us 2/1828 91/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:40.330][RX] NES input ETH max_ms=8.373 avg_ms=1.312
+[21:14:41.313][RX] CPU%/max_us 2/1828 90/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:41.346][RX] NES input ETH max_ms=8.373 avg_ms=1.303
+[21:14:42.327][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:42.360][RX] NES input ETH max_ms=8.373 avg_ms=1.365
+[21:14:43.346][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:43.379][RX] NES input ETH max_ms=8.373 avg_ms=1.425
+[21:14:44.346][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:44.382][RX] NES input ETH max_ms=8.373 avg_ms=1.535
+[21:14:45.360][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:45.394][RX] NES input ETH max_ms=8.373 avg_ms=1.512
+[21:14:46.380][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:46.413][RX] NES input ETH max_ms=8.373 avg_ms=1.535
+[21:14:47.380][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:47.413][RX] NES input ETH max_ms=8.373 avg_ms=1.522
+[21:14:48.394][RX] CPU%/max_us 2/1828 90/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:48.413][RX] NES input ETH max_ms=8.373 avg_ms=1.570
+[21:14:49.426][RX] CPU%/max_us 2/1828 87/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:49.460][RX] NES input ETH max_ms=8.373 avg_ms=1.515
+[21:14:50.427][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:50.461][RX] NES input ETH max_ms=8.373 avg_ms=1.520
+[21:14:51.460][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:51.493][RX] NES input ETH max_ms=8.373 avg_ms=1.479
+[21:14:52.480][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:52.513][RX] NES input ETH max_ms=8.373 avg_ms=1.608
+[21:14:53.480][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:53.513][RX] NES input ETH max_ms=8.373 avg_ms=1.634
+[21:14:54.513][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:54.546][RX] NES input ETH max_ms=8.373 avg_ms=1.647
+[21:14:55.528][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:55.560][RX] NES input ETH max_ms=8.373 avg_ms=1.694
+[21:14:56.547][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:56.580][RX] NES input ETH max_ms=8.373 avg_ms=1.658
+[21:14:57.548][RX] CPU%/max_us 2/1828 91/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:57.581][RX] NES input ETH max_ms=8.373 avg_ms=1.624
+[21:14:58.549][RX] CPU%/max_us 2/1828 91/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:58.583][RX] NES input ETH max_ms=8.373 avg_ms=1.601
+[21:14:59.550][RX] CPU%/max_us 2/1828 91/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:14:59.583][RX] NES input ETH max_ms=8.373 avg_ms=1.557
+[21:15:00.583][RX] CPU%/max_us 2/1828 89/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:15:00.616][RX] NES input ETH max_ms=8.373 avg_ms=1.608
+[21:15:01.597][RX] CPU%/max_us 2/1828 88/14367249 0/694234 overlay_cpu=0.00% max_us=0 rering=0
+[21:15:01.630][RX] NES input ETH max_ms=8.373 avg_ms=1.621
+[21:15:02.363][RX] ROM freed

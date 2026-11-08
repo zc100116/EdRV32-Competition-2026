@@ -1,0 +1,48 @@
+[21:06:58.302][SYS] connected COM7 @ 115200 8N1
+[21:08:59.089][RX]
+[21:08:59.089][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[21:08:59.089][RX]   E         D   D   R   R   V   V      3      2
+[21:08:59.089][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[21:08:59.089][RX]   E         D   D   R  R     V V       3   2
+[21:08:59.089][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[21:08:59.089][RX]
+[21:08:59.089][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[21:08:59.089][RX] CHIP_ID: 0xed320001
+[21:08:59.089][RX] CLK_SYS_HZ: 125000000
+[21:08:59.089][RX] ROM bytes: 16384
+[21:08:59.089][RX] SRAM bytes: 65536
+[21:08:59.089][RX] I-cache bytes: 8192
+[21:08:59.089][RX] D-cache bytes: 8192
+[21:08:59.089][RX] MEM_READY: 1
+[21:08:59.089][RX] Build commit: 92b38fd2
+[21:08:59.089][RX] Compiler version: GCC 15.2.0
+[21:08:59.193][RX] BIOS: EdRV32
+[21:08:59.193][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:09:01.837][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[21:09:01.845][RX] Input error: type 1-4 then Enter
+[21:09:01.845][SYS] Input error: type 1-4 then Enter
+[21:09:01.845][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:09:04.766][RX] ETH link: up
+[21:09:04.766][RX] ETH load ready 192.168.1.10:5000
+[21:09:05.167][SYS] 等待网卡 以太网 就绪 … 用时 0.4 s
+[21:09:05.299][RX] Load bytes: 12769664 segments: 5
+[21:09:05.299][RX] Load result: PASS
+[21:09:05.299][RX] Run: 0x90000000
+[21:09:06.168][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[21:09:06.168][RX] Showcase: EdRV32 showcase v2
+[21:09:06.210][RX] ETH peer IP: 0xc0a80102
+[21:09:06.221][RX] ETH peer port: 54319
+[21:09:06.231][RX] showcase first frame
+[21:09:19.438][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:09:23.368][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:09:26.263][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:09:28.385][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:09:31.092][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:09:32.307][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:09:34.197][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:12:04.121][SYS] 建立网口连接失败：UDP bind 192.168.1.2:6000: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+[21:12:25.285][SYS] UDP 已监听 192.168.1.2:6000 · console
+[21:12:25.710][SYS] 连接请求已发送：192.168.1.10:5000；本机 ['192.168.1.2', 6000]
+[21:12:25.722][RX] ETH peer IP: 0xc0a80102
+[21:12:25.732][RX] ETH peer port: 6000
+[21:16:12.883][SYS] 建立网口连接失败：等待网卡 以太网 就绪超时：local_ip=192.168.1.2，最后状态 OperStatus=Down, DAD=Deprecated，用时 10.0 s
