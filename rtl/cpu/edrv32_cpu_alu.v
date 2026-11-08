@@ -7,13 +7,11 @@ module edrv32_cpu_alu (
     // Execute operands and operation (funct3; bit 3 selects SUB/SRA).
     input wire [31:0] operand_a_i,
     input wire [31:0] operand_b_i,
-    // D-registered one-hot: AND,OR,SRA,SRL,XOR,SLTU,SLT,SLL,SUB,ADD.
-    input wire [9:0] operation_select_i,
-    input wire [31:0] other_result_i,
+    input wire [3:0] operation_i,
     // Equivalent registered amount, isolated from arithmetic operand loads.
     input wire [119:0] shift_amount_i,
     // Execute result.
-    output wire [31:0] result_o
+    output reg [31:0] result_o
 );
     // Each 4-bit slice has independent amount FFs for all three shift kinds.
     // The first mux group shifts 0..3, the second shifts multiples of four.
@@ -57,25 +55,20 @@ module edrv32_cpu_alu (
                 {shift_amount_i[shift_slice*15+12 +: 3], 2'b0}, 2'd2, SLICE[2:0]);
         end
     endgenerate
-    wire [31:0] logic_result_w;
-    wire [31:0] shift_result_w;
-    wire [31:0] arithmetic_result_w;
-    wire [31:0] compare_result_w;
-    assign logic_result_w =
-        ({32{operation_select_i[5]}} & (operand_a_i ^ operand_b_i)) |
-        ({32{operation_select_i[8]}} & (operand_a_i | operand_b_i)) |
-        ({32{operation_select_i[9]}} & (operand_a_i & operand_b_i));
-    assign shift_result_w =
-        ({32{operation_select_i[2]}} & left_w) |
-        ({32{operation_select_i[6]}} & right_w) |
-        ({32{operation_select_i[7]}} & signed_w);
-    assign arithmetic_result_w =
-        ({32{operation_select_i[0]}} & (operand_a_i + operand_b_i)) |
-        ({32{operation_select_i[1]}} & (operand_a_i - operand_b_i));
-    assign compare_result_w = {31'b0,
-        (operation_select_i[3] && $signed(operand_a_i) < $signed(operand_b_i)) |
-        (operation_select_i[4] && operand_a_i < operand_b_i)};
-    // Merge the FF-originated link/LUI/AUIPC value with the ALU at its final level.
-    assign result_o = logic_result_w | shift_result_w | arithmetic_result_w |
-        compare_result_w | other_result_i;
+    always @(*) begin
+        result_o = 32'b0;
+        case (operation_i)
+            4'b0000: result_o = operand_a_i + operand_b_i;
+            4'b1000: result_o = operand_a_i - operand_b_i;
+            4'b0001: result_o = left_w;
+            4'b0010: result_o = {31'b0, $signed(operand_a_i) < $signed(operand_b_i)};
+            4'b0011: result_o = {31'b0, operand_a_i < operand_b_i};
+            4'b0100: result_o = operand_a_i ^ operand_b_i;
+            4'b0101: result_o = right_w;
+            4'b1101: result_o = signed_w;
+            4'b0110: result_o = operand_a_i | operand_b_i;
+            4'b0111: result_o = operand_a_i & operand_b_i;
+            default: result_o = 32'b0;
+        endcase
+    end
 endmodule

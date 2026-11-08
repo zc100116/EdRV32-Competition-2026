@@ -38,27 +38,11 @@ module tb;
 
     wire [79:0] operand_addr_w;
     wire [23:0] unused_tournament_w;
-    wire [43:0] t4_predecode_w;
-    edrv32_cpu_predecode u_t4_predecode0 (
-        .instr_i(push_data_i[32 +: 32]),
-        .predecode_o(t4_predecode_w[0 +: 22])
-    );
-    edrv32_cpu_predecode u_t4_predecode1 (
-        .instr_i(push_data_i[211 +: 32]),
-        .predecode_o(t4_predecode_w[22 +: 22])
-    );
     edrv32_cpu_ib dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .push_count_i(push_count_i),
-        .push_taken_count_i(push_count_i),
-        .direction_taken_i(1'b0),
-        .push_one_i(push_count_i != 0),
-        .push_two_i(push_count_i == 2),
-        .push_one_copy_i({8{push_count_i != 0}}),
-        .push_two_copy_i({8{push_count_i == 2}}),
         .push_data_i(push_data_i),
-        .push_predecode_i(t4_predecode_w),
         .push_index_hi_i(push_index_hi_i),
         .push_tournament_i(24'b0),
         .tournament_o(unused_tournament_w),
@@ -73,48 +57,6 @@ module tb;
         .keep_pair_i(keep_pair_i),
         .count_o(count_o)
     );
-    wire [69:0] reference_w [0:1];
-    for (genvar slot = 0; slot < 2; slot++) begin : g_reference
-        wire [31:0] instr_w;
-        assign instr_w = data_o[slot*179+32 +: 32];
-        wire [4:0] rs1_w;
-        wire [4:0] rs2_w;
-        wire [4:0] rd_w;
-        wire use1_w;
-        wire use2_w;
-        wire write_w;
-        wire [31:0] immediate_w;
-        wire [3:0] class_w;
-        wire [3:0] operation_w;
-        wire operand_imm_w;
-        wire illegal_w;
-        wire pipe1_w;
-        edrv32_cpu_decode u_reference (
-            .instr_i(instr_w),
-            .rs1_o(rs1_w),
-            .rs2_o(rs2_w),
-            .rd_o(rd_w),
-            .rs1_used_o(use1_w),
-            .rs2_used_o(use2_w),
-            .rd_write_o(write_w),
-            .imm_o(immediate_w),
-            .class_o(class_w),
-            .alu_operation_o(operation_w),
-            .operand_imm_o(operand_imm_w),
-            .illegal_o(illegal_w)
-        );
-        assign pipe1_w = instr_w[6:0] == 7'h13 || instr_w[6:0] == 7'h37 ||
-            instr_w[6:0] == 7'h17 ||
-            (instr_w[6:0] == 7'h33 && instr_w[31:25] != 1) ||
-            instr_w[6:0] == 7'h63 || instr_w[6:0] == 7'h6f;
-        assign reference_w[slot] = {class_w == 4'd3,
-            class_w == 4'd6 || class_w == 4'd8 || class_w == 4'd10,
-            write_w && rd_w != 0, class_w >= 4'd10,
-            class_w == 4'd6 || class_w == 4'd7,
-            class_w >= 4'd3 && class_w <= 4'd5, class_w == 4'd10,
-            class_w == 4'd8, class_w == 4'd6, immediate_w, operation_w, class_w,
-            pipe1_w, illegal_w, operand_imm_w, write_w, use2_w, use1_w, rd_w, rs2_w, rs1_w};
-    end
     task automatic check;
         integer slice;
         integer slot;
@@ -141,9 +83,6 @@ module tb;
                 if (count>slot) begin
                     instr=model[slot][63:32];
                     decoded=predecode_o[slot*70 +: 70];
-                    if (decoded !== reference_w[slot])
-                        $fatal(1,"FAIL IB full decode instruction=%h expected=%h actual=%h",
-                            instr,reference_w[slot],decoded);
                     if (decoded[14:0]!=={instr[11:7],instr[24:20],instr[19:15]} ||
                         decoded[61]!== (instr[6:0]==7'h03) ||
                         decoded[64]!== (instr[6:0]==7'h6f || instr[6:0]==7'h67 ||

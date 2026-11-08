@@ -21,13 +21,13 @@ endmodule
     input wire wr_clk,
     input wire wr_en,
     input wire [10:0] wr_addr,
-    input wire [107:0] wr_data,
+    input wire [63:0] wr_data,
     input wire rd_clk,
     input wire rd_clk_en,
     input wire wr_rst,
     input wire rd_rst,
     input wire [10:0] rd_addr,
-    output wire [107:0] rd_data
+    output wire [63:0] rd_data
 );
 endmodule
 

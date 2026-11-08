@@ -17,7 +17,6 @@ module edrv32_cpu_core (
     input wire ic_resp_valid_i,
     input wire [7:0] ic_resp_valid_copy_i,
     input wire [63:0] ic_resp_data_i,
-    input wire [43:0] ic_resp_predecode_i,
     input wire ic_resp_err_i,
     output wire ic_kill_o,
     output wire ic_inv_o,
@@ -32,7 +31,6 @@ module edrv32_cpu_core (
     input wire dc_resp_valid_i,
     input wire [63:0] dc_resp_way_data_i,
     input wire [1:0] dc_resp_way_hit_i,
-    input wire [47:0] dc_resp_way_hit_copy_i,
     input wire dc_resp_err_i,
     input wire dc_resp_device_i,
     output wire dc_kill_o,
@@ -66,7 +64,6 @@ module edrv32_cpu_core (
     localparam REC_PRED_TARGET_LSB = 101;
     localparam REC_GHR_LSB = 133;
     localparam REC_RAS_LSB = 142;
-    localparam C_ALU = 4'd0;
     localparam C_LUI = 4'd1;
     localparam C_AUIPC = 4'd2;
     localparam C_JAL = 4'd3;
@@ -221,39 +218,24 @@ module edrv32_cpu_core (
     // Format each way before its late hit selects an operand (cpu-spec 4.9).
     function [31:0] load_value;
         input [31:0] data_i;
-        input [3:0] format_i;
-        integer bit_index;
+        input [2:0] format_i;
         begin
-            load_value[7:0] = data_i[7:0];
-            for (bit_index = 8; bit_index < 16; bit_index = bit_index + 1)
-                load_value[bit_index] = (data_i[bit_index] && format_i[2]) |
-                    (data_i[7] && format_i[0]);
-            for (bit_index = 16; bit_index < 32; bit_index = bit_index + 1)
-                load_value[bit_index] = (data_i[bit_index] && format_i[3]) |
-                    (data_i[15] && format_i[1]) | (data_i[7] && format_i[0]);
+            case (format_i)
+                0: load_value = {{24{data_i[7]}}, data_i[7:0]};
+                1: load_value = {{16{data_i[15]}}, data_i[15:0]};
+                4: load_value = {24'b0, data_i[7:0]};
+                5: load_value = {16'b0, data_i[15:0]};
+                default: load_value = data_i;
+            endcase
         end
     endfunction
-    // Decode size/sign before the RAM edge, in parallel with address generation.
-    reg [3:0] e_load_format_r;
-    reg [3:0] m_load_format_r;
-    wire [2:0] d_load_format_w;
-    assign d_load_format_w = d_instr_w[d_map_w[0]][14:12];
-    always @(posedge clk_i) begin
-        if (e_operand_load_copy_w[0]) begin
-            e_load_format_r <= {d_load_format_w[1],
-                d_load_format_w[1] || d_load_format_w[0],
-                d_load_format_w == 1, d_load_format_w == 0};
-        end
-        if (e_advance_copy_w[0])
-            m_load_format_r <= e_load_format_r;
-    end
     genvar load_way;
     generate
         for (load_way = 0; load_way < 2; load_way = load_way + 1) begin : g_load_way
             assign e_early_result_w[load_way] =
-                load_value(dc_early_way_data_i[load_way*32 +: 32], e_load_format_r);
+                load_value(dc_early_way_data_i[load_way*32 +: 32], e_instr_w[14:12]);
             assign m_load_result_w[load_way] =
-                load_value(dc_resp_way_data_i[load_way*32 +: 32], m_load_format_r);
+                load_value(dc_resp_way_data_i[load_way*32 +: 32], m_instr_r[14:12]);
         end
     endgenerate
     assign e_repair_w = e_repair_pending_r && !m_wait_w && !m_block_early_w;
@@ -367,8 +349,6 @@ module edrv32_cpu_core (
     wire [4:0] d_source_w [0:3];
     wire [79:0] d_operand_addr_w;
     wire [31:0] e_forward_w [0:3];
-    wire [31:0] e_alu_input_w [0:1];
-    wire [31:0] e_branch_forward_w [0:3];
     wire [3:0] d_hazard_w;
     wire [2:0] d_bypass_w [0:3];
     wire [6:0] d_bypass_select_w [0:3];
@@ -414,23 +394,13 @@ module edrv32_cpu_core (
     reg [3:0] e_class_r [0:1];
     reg [3:0] m_class_r [0:1];
     reg [3:0] w_class_r [0:1];
-    reg [9:0] e_operation_select_r [0:1];
+    reg [3:0] e_operation_r [0:1];
     reg e_immediate_r [0:1];
     reg [31:0] e_imm_r [0:1];
     reg [31:0] e_operand_a_r [0:1];
-    wire [31:0] e_operand_a_w [0:1];
     reg [31:0] e_operand_b_r [0:1];
-    wire [31:0] e_operand_b_w [0:1];
     reg [31:0] e_branch_a_r [0:1] /* synthesis syn_preserve=1 */;
     reg [31:0] e_branch_b_r [0:1] /* synthesis syn_preserve=1 */;
-    wire [31:0] e_branch_a_w [0:1];
-    wire [31:0] e_branch_b_w [0:1];
-    wire [15:0] e_alu_forward_w [0:3];
-    reg [31:0] e_forward_result_r [0:1];
-    (* keep = "true", syn_preserve = 1 *) reg [31:0] e_branch_result_copy_r [0:1];
-    reg [31:0] e_nonalu_result_r [0:1];
-    reg e_div_result_r [0:1];
-    wire [31:0] e_alu_operand_b_w [0:1];
     reg [31:0] e_pc_target_r;
     reg e_pc_target_match_r;
     reg [31:0] e_jalr_expected_even_r;
@@ -473,8 +443,6 @@ module edrv32_cpu_core (
     wire e_advance_w;
     wire e_operand_load_w;
     wire [4:0] e_operand_load_copy_w;
-    wire [1:0] e_data_load_copy_w;
-    wire e_data_payload_block_w;
     wire [1:0] e_advance_copy_w;
     wire e_payload_block_w;
     genvar enable_group;
@@ -495,11 +463,6 @@ module edrv32_cpu_core (
                     if (m_redirect_w || e_flush_w)
                         e_valid_r_copy <= 0;
                 end
-            end
-            if (enable_group < 2) begin : g_data_load
-                assign e_data_load_copy_w[enable_group] =
-                    !(e_valid_r_copy && e_data_payload_block_w) &&
-                    (!(e_valid_r_copy && m_valid_r[0] && m_wait_dc_r) || dc_resp_valid_i);
             end
             if (enable_group < 5) begin : g_load
                 assign e_operand_load_copy_w[enable_group] =
@@ -598,8 +561,9 @@ module edrv32_cpu_core (
     reg w_ras_return_r;
     reg [31:0] w_ras_link_r;
     (* keep = "true", syn_preserve = 1 *) reg [10:0] w_ras_commit_copy1_r;
-    reg [1:0] committed_ras_top_index_r;
-    reg [1:0] committed_ras_second_index_r;
+    (* keep = "true", syn_preserve = 1 *) reg [15:0] committed_ras_ptr_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] committed_ras_top_copy1_r;
+    (* keep = "true", syn_preserve = 1 *) reg [3:0] committed_ras_second_copy1_r;
     wire [31:0] committed_ras_top_w;
     wire m_call_w;
     wire m_return_w;
@@ -616,7 +580,6 @@ module edrv32_cpu_core (
     wire unused_mul_valid_w;
     wire [31:0] unused_lane1_predicted_target_w;
     integer result_idx;
-    integer response_slice_w;
     integer stage_idx;
     wire [11:0] trace_bypass_w /* verilator public_flat_rd */;
     reg [1:0] trace_redirect_cause_w /* verilator public_flat_rd */;
@@ -660,27 +623,10 @@ module edrv32_cpu_core (
     assign e_instr_w = e_record_r[0][REC_INSTR_LSB +: 32];
     assign d_record_w[0] = d_data_w[REC_BITS-1:0];
     assign d_record_w[1] = d_data_w[2*REC_BITS-1:REC_BITS];
-    assign d_source_w[0] = d_operand_addr_w[4:0];
-    assign d_source_w[1] = d_operand_addr_w[9:5];
-    assign d_source_w[2] = d_operand_addr_w[14:10];
-    assign d_source_w[3] = d_operand_addr_w[19:15];
-    wire [119:0] e_shift_slot_w [0:1];
-    wire [19:0] e_shift_result_w [0:1];
-    genvar shift_result_group;
-    generate
-        for (shift_result_group = 0; shift_result_group < 4;
-            shift_result_group = shift_result_group + 1) begin : g_shift_result
-            // Each result FF bit feeds six banks in each of two instruction slots.
-            (* keep = "true", syn_preserve = 1 *) reg [4:0] result0_copy_r;
-            (* keep = "true", syn_preserve = 1 *) reg [4:0] result1_copy_r;
-            assign e_shift_result_w[0][shift_result_group*5 +: 5] = result0_copy_r;
-            assign e_shift_result_w[1][shift_result_group*5 +: 5] = result1_copy_r;
-            always @(posedge clk_i) begin
-                result0_copy_r <= e_alu_w[0][4:0];
-                result1_copy_r <= e_alu_w[1][4:0];
-            end
-        end
-    endgenerate
+    assign d_source_w[0] = d_rs1_w[0];
+    assign d_source_w[1] = d_rs2_w[0];
+    assign d_source_w[2] = d_rs1_w[1];
+    assign d_source_w[3] = d_rs2_w[1];
     genvar lane;
     genvar shift_bank;
     generate
@@ -693,52 +639,24 @@ module edrv32_cpu_core (
                 d_illegal_w[lane], d_immediate_w[lane], d_write_w[lane],
                 d_use2_w[lane], d_use1_w[lane], d_rd_w[lane], d_rs2_w[lane],
                 d_rs1_w[lane]} = d_predecode_w[lane*70 +: 70];
-            wire repair_lane_w;
-            assign repair_lane_w = lane == 0 ? e_swap_r : !e_swap_r;
             wire [119:0] shift_amount_w;
-            wire [119:0] shift_payload_w;
-            assign e_shift_slot_w[lane] = shift_payload_w;
             for (shift_bank = 0; shift_bank < 24;
                 shift_bank = shift_bank + 1) begin : g_shift_bank
                 (* keep = "true", syn_preserve = 1 *) reg [4:0] amount_copy1_r;
-                (* keep = "true", syn_preserve = 1 *) reg [1:0] select_copy_r;
-                (* keep = "true", syn_preserve = 1 *) reg map_copy_r;
-                always @(posedge clk_i or negedge rst_n_i) begin
-                    if (!rst_n_i)
-                        map_copy_r <= 0;
-                    else if (d_issue_valid_w)
-                        map_copy_r <= d_swap_w;
-                end
-                assign shift_amount_w[shift_bank*5 +: 5] = map_copy_r ?
-                    e_shift_slot_w[1-lane][shift_bank*5 +: 5] :
-                    e_shift_slot_w[lane][shift_bank*5 +: 5];
-                assign shift_payload_w[shift_bank*5 +: 5] =
-                    ({5{select_copy_r[0]}} & e_shift_result_w[0][(shift_bank/6)*5 +: 5]) |
-                    ({5{select_copy_r[1]}} & e_shift_result_w[1][(shift_bank/6)*5 +: 5]) |
-                    ({5{!(|select_copy_r)}} & amount_copy1_r);
+                assign shift_amount_w[shift_bank*5 +: 5] = amount_copy1_r;
                 always @(posedge clk_i) begin
-                    if (e_data_load_copy_w[lane]) begin
-                        select_copy_r <= d_immediate_w[lane] ? 2'b0 :
-                            {d_bypass_select_w[lane*2+1][2],
-                            d_bypass_select_w[lane*2+1][1] &&
-                            !(e_early_r && e_load_r[0])};
-                    end else begin
-                        select_copy_r <= 0;
-                    end
-                    amount_copy1_r <= e_alu_input_w[lane][4:0];
-                    if (e_repair_w && e_repair_mask_r[repair_lane_w*2+1] &&
-                        !e_immediate_r[repair_lane_w]) begin
-                        select_copy_r <= 0;
-                    end
+                    if (e_operand_load_copy_w[lane])
+                        amount_copy1_r <= d_immediate_w[d_map_w[lane]] ?
+                            d_imm_w[d_map_w[lane]][4:0] : e_forward_w[lane*2+1][4:0];
+                    if (e_repair_w && e_repair_mask_r[lane*2+1] && !e_immediate_r[lane])
+                        amount_copy1_r <= m_result_w[0][4:0];
                 end
             end
             edrv32_cpu_alu u_alu (
-                .operand_a_i(e_operand_a_w[lane]),
-                .operand_b_i(e_alu_operand_b_w[lane]),
+                .operand_a_i(e_operand_a_r[lane]),
+                .operand_b_i(e_alu_operand_b_copy1_r[lane]),
                 .shift_amount_i(shift_amount_w),
-                .operation_select_i(e_operation_select_r[lane]),
-                .other_result_i(e_nonalu_result_r[lane] |
-                    ({32{e_div_result_r[lane]}} & div_result_w)),
+                .operation_i(e_operation_r[lane]),
                 .result_o(e_alu_w[lane])
             );
             assign w_result_w[lane] = w_result_r[lane];
@@ -749,204 +667,36 @@ module edrv32_cpu_core (
     // cpu-spec 4.9: choose the forwarding source before the data path.
     // Mapping and same-group WAW priority affect only these one-hot enables.
     genvar forward_operand;
-    genvar forward_copy;
-    genvar forward_slice;
-    genvar forward_data;
-    wire unused_response_hit_w;
-    assign unused_response_hit_w = &{1'b0, dc_resp_way_hit_i};
     generate
         for (forward_operand = 0; forward_operand < 4;
             forward_operand = forward_operand + 1) begin : g_forward
             wire [6:0] select_w;
-            assign select_w = d_bypass_select_w[forward_operand];
-            wire physical_lane_w;
-            assign physical_lane_w = forward_operand/2 != 0 ? !e_swap_r : e_swap_r;
-            wire [1:0] alu_select_w;
-            assign alu_select_w = {select_w[2], select_w[1] && !early_w};
-            for (forward_copy = 0; forward_copy < 8;
-                forward_copy = forward_copy + 1) begin : g_select_copy
-                (* keep = "true", syn_preserve = 1 *) reg [1:0] select_copy_r;
-                assign e_alu_forward_w[forward_operand][forward_copy*2 +: 2] = select_copy_r;
-                always @(posedge clk_i) begin
-                    if (e_data_load_copy_w[forward_operand/2])
-                        select_copy_r <= alu_select_w;
-                    else
-                        select_copy_r <= 0;
-                    if (e_repair_w &&
-                        e_repair_mask_r[physical_lane_w*2 + forward_operand%2])
-                        select_copy_r <= 0;
-                end
-            end
+            wire [31:0] register_w;
+            assign select_w = d_bypass_select_w[d_map_w[forward_operand/2]*2 +
+                forward_operand%2];
+            assign register_w = d_register_w[d_map_w[forward_operand/2]*2 +
+                forward_operand%2];
             wire early_w;
             wire memory_w;
-            wire capture_w;
-            wire hold_w;
-            wire repair_w;
-            assign repair_w = e_repair_w &&
-                e_repair_mask_r[physical_lane_w*2 + forward_operand%2];
-            assign capture_w = e_data_load_copy_w[forward_operand/2] && !repair_w;
-            assign hold_w = !e_data_load_copy_w[forward_operand/2] && !repair_w;
+            wire [31:0] ready_data_w;
             assign early_w = e_early_r && e_load_r[0];
             assign memory_w = m_load_r;
-            wire [31:0] data_w [1:9];
-            assign data_w[1] = m_result_r[0];
-            assign data_w[2] = m_result_w[1];
-            assign data_w[3] = w_result_w[0];
-            assign data_w[4] = w_result_w[1];
-            assign data_w[5] = csr_read_w;
-            assign data_w[6] = e_early_result_w[0];
-            assign data_w[7] = e_early_result_w[1];
-            assign data_w[8] = m_load_result_w[0];
-            assign data_w[9] = m_load_result_w[1];
-            wire [31:0] selected_data_w;
-            wire [31:0] held_data_w;
-            wire [31:0] held_branch_w;
-            assign held_data_w = forward_operand%2 == 0 ?
-                e_operand_a_w[physical_lane_w] : e_operand_b_w[physical_lane_w];
-            assign held_branch_w = forward_operand%2 == 0 ?
-                e_branch_a_w[physical_lane_w] : e_branch_b_w[physical_lane_w];
-            assign e_forward_w[forward_operand] = selected_data_w |
-                ({32{hold_w}} & held_data_w);
-            assign e_branch_forward_w[forward_operand] = selected_data_w |
-                ({32{hold_w}} & held_branch_w);
-            for (forward_slice = 0; forward_slice < 4;
-                forward_slice = forward_slice + 1) begin : g_response_slice
-                wire [7:0] register_w;
-                wire [7:0] slice_data_w [1:9];
-                assign register_w = d_register_w[forward_operand][forward_slice*8 +: 8];
-                for (forward_data = 1; forward_data < 10;
-                    forward_data = forward_data + 1) begin : g_data
-                    assign slice_data_w[forward_data] = data_w[forward_data][forward_slice*8 +: 8];
-                end
-                wire [1:0] hit_w;
-                wire [1:0] repair_select_w;
-                wire [9:0] data_select_w;
-                assign hit_w = dc_resp_way_hit_copy_i[
-                    (forward_operand*4+forward_slice)*2 +: 2];
-                assign repair_select_w = hit_w & {2{repair_w}};
-                assign data_select_w = {10{capture_w}} & {
-                    select_w[3] && memory_w && hit_w[1],
-                    select_w[3] && memory_w && hit_w[0],
-                    select_w[1] && early_w && dc_early_way_hit_i[1],
-                    select_w[1] && early_w && dc_early_way_hit_i[0],
-                    select_w[3] && m_csr_r,
-                    select_w[6], select_w[5], select_w[4],
-                    select_w[3] && !memory_w && !m_csr_r, select_w[0]};
-                assign selected_data_w[forward_slice*8 +: 8] =
-                    ({8{data_select_w[0]}} & register_w) |
-                    ({8{data_select_w[1]}} & slice_data_w[1]) |
-                    ({8{data_select_w[2]}} & slice_data_w[2]) |
-                    ({8{data_select_w[3]}} & slice_data_w[3]) |
-                    ({8{data_select_w[4]}} & slice_data_w[4]) |
-                    ({8{data_select_w[5]}} & slice_data_w[5]) |
-                    ({8{data_select_w[6]}} & slice_data_w[6]) |
-                    ({8{data_select_w[7]}} & slice_data_w[7]) |
-                    ({8{data_select_w[8] || repair_select_w[0]}} & slice_data_w[8]) |
-                    ({8{data_select_w[9] || repair_select_w[1]}} & slice_data_w[9]);
-                if (forward_operand%2 == 1) begin : g_alu_input
-                    wire [7:0] immediate_w;
-                    wire [7:0] held_alu_w;
-                    assign immediate_w = d_imm_w[forward_operand/2][forward_slice*8 +: 8];
-                    assign held_alu_w =
-                        e_alu_operand_b_w[physical_lane_w][forward_slice*8 +: 8];
-                    wire [9:0] select_alu_w;
-                    assign select_alu_w[7:0] = data_select_w[7:0] &
-                        {8{!d_immediate_w[forward_operand/2]}};
-                    assign select_alu_w[9:8] = (data_select_w[9:8] &
-                        {2{!d_immediate_w[forward_operand/2]}}) | repair_select_w;
-                    assign e_alu_input_w[forward_operand/2][forward_slice*8 +: 8] =
-                        ({8{select_alu_w[0]}} & register_w) |
-                        ({8{select_alu_w[1]}} & slice_data_w[1]) |
-                        ({8{select_alu_w[2]}} & slice_data_w[2]) |
-                        ({8{select_alu_w[3]}} & slice_data_w[3]) |
-                        ({8{select_alu_w[4]}} & slice_data_w[4]) |
-                        ({8{select_alu_w[5]}} & slice_data_w[5]) |
-                        ({8{select_alu_w[6]}} & slice_data_w[6]) |
-                        ({8{select_alu_w[7]}} & slice_data_w[7]) |
-                        ({8{select_alu_w[8]}} & slice_data_w[8]) |
-                        ({8{select_alu_w[9]}} & slice_data_w[9]) |
-                        ({8{capture_w && d_immediate_w[forward_operand/2]}} &
-                            immediate_w) |
-                        ({8{hold_w}} & held_alu_w);
-                end
-            end
-        end
-    endgenerate
-    genvar operand_lane;
-    genvar operand_slice;
-    generate
-        for (operand_lane = 0; operand_lane < 2;
-            operand_lane = operand_lane + 1) begin : g_registered_forward
-            always @(posedge clk_i) begin
-                // A stalled consumer snapshots its selected value before these
-                // producer copies are overwritten by the held E computation.
-                e_forward_result_r[operand_lane] <= e_alu_w[operand_lane];
-                e_branch_result_copy_r[operand_lane] <= e_alu_w[operand_lane];
-            end
-            for (operand_slice = 0; operand_slice < 4;
-                operand_slice = operand_slice + 1) begin : g_slice
-                (* keep = "true", syn_preserve = 1 *) reg [4:0] map_copy_r;
-                wire slot_a_w;
-                wire slot_b_w;
-                wire branch_slot_a_w;
-                wire branch_slot_b_w;
-                wire alu_slot_b_w;
-                wire [1:0] select_a_w;
-                wire [1:0] select_b_w;
-                wire [1:0] branch_select_a_w;
-                wire [1:0] branch_select_b_w;
-                wire [7:0] result_a_w;
-                wire [7:0] result_b_w;
-                wire [7:0] branch_result_a_w;
-                wire [7:0] branch_result_b_w;
-                always @(posedge clk_i or negedge rst_n_i) begin
-                    if (!rst_n_i)
-                        map_copy_r <= 0;
-                    else if (d_issue_valid_w)
-                        map_copy_r <= {5{d_swap_w}};
-                end
-                assign slot_a_w = operand_lane[0] ^ map_copy_r[0];
-                assign slot_b_w = operand_lane[0] ^ map_copy_r[1];
-                assign branch_slot_a_w = operand_lane[0] ^ map_copy_r[2];
-                assign branch_slot_b_w = operand_lane[0] ^ map_copy_r[3];
-                assign alu_slot_b_w = operand_lane[0] ^ map_copy_r[4];
-                assign select_a_w = e_alu_forward_w[slot_a_w*2][operand_slice*2 +: 2];
-                assign select_b_w = e_alu_forward_w[slot_b_w*2+1][operand_slice*2 +: 2];
-                assign branch_select_a_w =
-                    e_alu_forward_w[branch_slot_a_w*2][8+operand_slice*2 +: 2];
-                assign branch_select_b_w =
-                    e_alu_forward_w[branch_slot_b_w*2+1][8+operand_slice*2 +: 2];
-                assign result_a_w =
-                    ({8{select_a_w[0]}} & e_forward_result_r[0][operand_slice*8 +: 8]) |
-                    ({8{select_a_w[1]}} & e_forward_result_r[1][operand_slice*8 +: 8]);
-                assign result_b_w =
-                    ({8{select_b_w[0]}} & e_forward_result_r[0][operand_slice*8 +: 8]) |
-                    ({8{select_b_w[1]}} & e_forward_result_r[1][operand_slice*8 +: 8]);
-                assign branch_result_a_w =
-                    ({8{branch_select_a_w[0]}} &
-                        e_branch_result_copy_r[0][operand_slice*8 +: 8]) |
-                    ({8{branch_select_a_w[1]}} &
-                        e_branch_result_copy_r[1][operand_slice*8 +: 8]);
-                assign branch_result_b_w =
-                    ({8{branch_select_b_w[0]}} &
-                        e_branch_result_copy_r[0][operand_slice*8 +: 8]) |
-                    ({8{branch_select_b_w[1]}} &
-                        e_branch_result_copy_r[1][operand_slice*8 +: 8]);
-                assign e_operand_a_w[operand_lane][operand_slice*8 +: 8] = result_a_w |
-                    ({8{!(|select_a_w)}} & e_operand_a_r[slot_a_w][operand_slice*8 +: 8]);
-                assign e_operand_b_w[operand_lane][operand_slice*8 +: 8] = result_b_w |
-                    ({8{!(|select_b_w)}} & e_operand_b_r[slot_b_w][operand_slice*8 +: 8]);
-                assign e_branch_a_w[operand_lane][operand_slice*8 +: 8] = branch_result_a_w |
-                    ({8{!(|branch_select_a_w)}} &
-                        e_branch_a_r[branch_slot_a_w][operand_slice*8 +: 8]);
-                assign e_branch_b_w[operand_lane][operand_slice*8 +: 8] = branch_result_b_w |
-                    ({8{!(|branch_select_b_w)}} &
-                        e_branch_b_r[branch_slot_b_w][operand_slice*8 +: 8]);
-                assign e_alu_operand_b_w[operand_lane][operand_slice*8 +: 8] =
-                    ({8{!e_immediate_r[operand_lane]}} & result_b_w) |
-                    ({8{e_immediate_r[operand_lane] || !(|select_b_w)}} &
-                        e_alu_operand_b_copy1_r[alu_slot_b_w][operand_slice*8 +: 8]);
-            end
+            // All registered sources are premerged before late E/DRM results.
+            assign ready_data_w =
+                ({32{select_w[0]}} & register_w) |
+                ({32{select_w[3] && !memory_w && !m_csr_r}} & m_result_r[0]) |
+                ({32{select_w[4]}} & m_result_w[1]) |
+                ({32{select_w[5]}} & w_result_w[0]) |
+                ({32{select_w[6]}} & w_result_w[1]);
+            // No tag-selected data mux precedes this final one-hot merge.
+            assign e_forward_w[forward_operand] = ready_data_w |
+                ({32{select_w[3] && m_csr_r}} & csr_read_w) |
+                ({32{select_w[1] && !early_w}} & e_result_w[0]) |
+                ({32{select_w[2]}} & e_result_w[1]) |
+                ({32{select_w[1] && early_w && dc_early_way_hit_i[0]}} & e_early_result_w[0]) |
+                ({32{select_w[1] && early_w && dc_early_way_hit_i[1]}} & e_early_result_w[1]) |
+                ({32{select_w[3] && memory_w && dc_resp_way_hit_i[0]}} & m_load_result_w[0]) |
+                ({32{select_w[3] && memory_w && dc_resp_way_hit_i[1]}} & m_load_result_w[1]);
         end
     endgenerate
     edrv32_cpu_frontend u_frontend (
@@ -992,7 +742,6 @@ module edrv32_cpu_core (
         .ic_resp_valid_i(ic_resp_valid_i),
         .ic_resp_valid_copy_i(ic_resp_valid_copy_i),
         .ic_resp_data_i(ic_resp_data_i),
-        .ic_resp_predecode_i(ic_resp_predecode_i),
         .ic_resp_err_i(ic_resp_err_i),
         .ic_kill_o(ic_kill_o),
         .invalidate_i(m_valid_r[0] && m_class_r[0] == C_FENCE_I && m_fence_phase_r),
@@ -1067,8 +816,8 @@ module edrv32_cpu_core (
         .rst_n_i(rst_n_i),
         .enable_i(1'b1),
         .valid_i(e_advance_w && e_survive_w[0] && e_class_r[0] == C_MUL),
-        .operand_a_i(e_operand_a_w[0]),
-        .operand_b_i(e_operand_b_w[0]),
+        .operand_a_i(e_operand_a_r[0]),
+        .operand_b_i(e_operand_b_r[0]),
         .operation_i(e_instr_w[13:12]),
         .valid_o(mul_valid_w),
         .result_o(mul_result_w)
@@ -1078,8 +827,8 @@ module edrv32_cpu_core (
         .rst_n_i(rst_n_i),
         .start_i(div_start_w),
         .start_payload_i(div_start_copy_w),
-        .operand_a_i(e_operand_a_w[0]),
-        .operand_b_i(e_operand_b_w[0]),
+        .operand_a_i(e_operand_a_r[0]),
+        .operand_b_i(e_operand_b_r[0]),
         .operation_i(e_instr_w[13:12]),
         .busy_o(div_busy_w),
         .valid_o(div_valid_w),
@@ -1246,10 +995,10 @@ module edrv32_cpu_core (
             wire [19:0] unused_instr_w;
             assign unused_instr_w = {instr_w[31:20], instr_w[6:0], address_w[0]};
             assign instr_w = e_record_r[branch_lane][REC_INSTR_LSB +: 32];
-            assign address_w = e_operand_a_w[branch_lane] + e_imm_r[branch_lane];
+            assign address_w = e_operand_a_r[branch_lane] + e_imm_r[branch_lane];
             edrv32_cpu_branch u_branch (
-                .operand_a_i(e_branch_a_w[branch_lane]),
-                .operand_b_i(e_branch_b_w[branch_lane]),
+                .operand_a_i(e_branch_a_r[branch_lane]),
+                .operand_b_i(e_branch_b_r[branch_lane]),
                 .condition_i(instr_w[14:12]),
                 .taken_o(e_lane_branch_taken_w[branch_lane])
             );
@@ -1283,13 +1032,13 @@ module edrv32_cpu_core (
     assign e_next_pc_w = e_lane_next_pc_w[0];
     wire [31:0] unused_next_pc_w;
     assign unused_next_pc_w = e_next_pc_w;
-    assign e_address_w = e_operand_a_w[0] + e_imm_r[0];
+    assign e_address_w = e_operand_a_r[0] + e_imm_r[0];
     assign e_control_w = e_lane_control_w[0];
     assign e_jump_misaligned_w = e_lane_jump_fault_w[0];
     assign e_target_match_w = e_class_r[0] == C_JALR ?
         (!e_record_r[0][REC_PRED_TARGET_LSB] &&
-        (e_operand_a_w[0] == e_jalr_expected_even_r ||
-        e_operand_a_w[0] == e_jalr_expected_odd_r)) : e_pc_target_match_r;
+        (e_operand_a_r[0] == e_jalr_expected_even_r ||
+        e_operand_a_r[0] == e_jalr_expected_odd_r)) : e_pc_target_match_r;
     // A younger M fault can wait for its older load; E is already on the discarded path.
     assign e_resolve_ready_w = (|e_valid_r) && !m_block_early_w &&
         !m_mret_w && !m_fence_i_done_w && !m_wfi_w && !e_flush_w && !e_repair_pending_r &&
@@ -1360,11 +1109,6 @@ module edrv32_cpu_core (
     // Prepare early hold reasons in parallel; the late hit only releases one mux.
     assign e_payload_block_w = e_repair_pending_r || div_wait_w || m_wait_other_w ||
         (e_memory_w && !e_exception_r && !e_misaligned_w && !dc_req_ready_i);
-    // Operand data may conservatively hold when an E memory exception bypasses
-    // request-ready: M will discard every younger incoming instruction. Metadata
-    // retains the exact advance rule, while alignment never enters the data ring.
-    assign e_data_payload_block_w = e_repair_pending_r || div_wait_w || m_wait_other_w ||
-        (e_valid_r[0] && e_memory_r && !dc_req_ready_i);
     assign e_payload_hold_w = (|e_valid_r) && e_payload_block_w;
     assign e_payload_wait_dc_w = (|e_valid_r) && m_valid_r[0] && m_wait_dc_r;
     assign e_operand_load_w = !e_payload_hold_w && (!e_payload_wait_dc_w || dc_resp_valid_i);
@@ -1601,9 +1345,9 @@ module edrv32_cpu_core (
                 C_JAL, C_JALR: e_result_w[result_idx] = e_record_r[result_idx][REC_PC_LSB +: 32] +
                     32'd4;
                 C_LOAD: e_result_w[result_idx] =
-                    e_operand_a_w[result_idx] + e_imm_r[result_idx];
+                    e_operand_a_r[result_idx] + e_imm_r[result_idx];
                 C_STORE: e_result_w[result_idx] =
-                    e_operand_a_w[result_idx] + e_imm_r[result_idx];
+                    e_operand_a_r[result_idx] + e_imm_r[result_idx];
                 C_DIV: e_result_w[result_idx] = div_result_w;
                 default: e_result_w[result_idx] = e_alu_w[result_idx];
             endcase
@@ -1611,16 +1355,10 @@ module edrv32_cpu_core (
             if (result_idx == 0) begin
                 if (m_csr_r)
                     m_result_w[result_idx] = csr_read_w;
-                if (m_load_r) begin
-                    for (response_slice_w = 0; response_slice_w < 8;
-                        response_slice_w = response_slice_w + 1) begin
-                        m_result_w[result_idx][response_slice_w*4 +: 4] =
-                            ({4{dc_resp_way_hit_copy_i[32+response_slice_w*2]}} &
-                                m_load_result_w[0][response_slice_w*4 +: 4]) |
-                            ({4{dc_resp_way_hit_copy_i[33+response_slice_w*2]}} &
-                                m_load_result_w[1][response_slice_w*4 +: 4]);
-                    end
-                end
+                if (m_load_r)
+                    m_result_w[result_idx] =
+                        ({32{dc_resp_way_hit_i[0]}} & m_load_result_w[0]) |
+                        ({32{dc_resp_way_hit_i[1]}} & m_load_result_w[1]);
             end
         end
     end
@@ -1744,12 +1482,11 @@ module edrv32_cpu_core (
                 if (stage_idx == 0)
                     w_dest_r <= m_dest_r[0];
             end
-            if (!m_wait_w)
+            if (e_advance_copy_w[stage_idx]) begin
+                m_record_r[stage_idx] <= e_record_r[stage_idx];
                 m_result_r[stage_idx] <= stage_idx == 0 &&
                     (e_class_r[stage_idx] == C_LOAD || e_class_r[stage_idx] == C_STORE) ?
                     e_address_w : e_result_w[stage_idx];
-            if (e_advance_copy_w[stage_idx]) begin
-                m_record_r[stage_idx] <= e_record_r[stage_idx];
                 m_rd_r[stage_idx] <= e_rd_r[stage_idx];
                 m_write_r[stage_idx] <= e_write_r[stage_idx];
                 m_class_r[stage_idx] <= e_class_r[stage_idx];
@@ -1782,13 +1519,31 @@ module edrv32_cpu_core (
                     m_value1_r <= e_exception1_r ? e_value1_r : e_lane_target_w[1];
                 end
             end
-            // Per-source enables include capture, hold and failed-early repair.
-            // No data mux follows the final one-hot merge.
-            e_operand_a_r[stage_idx] <= e_forward_w[stage_idx*2];
-            e_operand_b_r[stage_idx] <= e_forward_w[stage_idx*2+1];
-            e_alu_operand_b_copy1_r[stage_idx] <= e_alu_input_w[stage_idx];
-            e_branch_a_r[stage_idx] <= e_branch_forward_w[stage_idx*2];
-            e_branch_b_r[stage_idx] <= e_branch_forward_w[stage_idx*2+1];
+            // C-F1 path 3: load operands whenever E is free; e_valid_r alone
+            // decides whether the D instruction was actually issued.
+            if (e_operand_load_copy_w[stage_idx]) begin
+                e_operand_a_r[stage_idx] <= e_forward_w[stage_idx*2];
+                e_operand_b_r[stage_idx] <= e_forward_w[stage_idx*2+1];
+                e_alu_operand_b_copy1_r[stage_idx] <= d_immediate_w[d_map_w[stage_idx]] ?
+                    d_imm_w[d_map_w[stage_idx]] : e_forward_w[stage_idx*2+1];
+                e_branch_a_r[stage_idx] <= e_forward_w[stage_idx*2];
+                e_branch_b_r[stage_idx] <= e_forward_w[stage_idx*2+1];
+            end
+            // Failed early queries repair consumers using the ordinary M response.
+            // The registered pending flag suppresses execution throughout this edge.
+            if (e_repair_w) begin
+                if (e_repair_mask_r[stage_idx*2]) begin
+                    e_operand_a_r[stage_idx] <= m_result_w[0];
+                    e_branch_a_r[stage_idx] <= m_result_w[0];
+                end
+                if (e_repair_mask_r[stage_idx*2+1]) begin
+                    e_operand_b_r[stage_idx] <= m_result_w[0];
+                    if (!e_immediate_r[stage_idx]) begin
+                        e_alu_operand_b_copy1_r[stage_idx] <= m_result_w[0];
+                    end
+                    e_branch_b_r[stage_idx] <= m_result_w[0];
+                end
+            end
             // A live stalled E holds all payload; otherwise validity owns its use.
             // Keep the late D$ handshake out of issue/hazard/redirect selection.
             if (e_operand_load_copy_w[stage_idx+2]) begin
@@ -1805,27 +1560,7 @@ module edrv32_cpu_core (
                 e_csr_r[stage_idx] <= d_csr_w[d_map_w[stage_idx]];
                 e_control_r[stage_idx] <= d_control_w[d_map_w[stage_idx]];
                 e_dest_r[stage_idx] <= d_dest_w[d_map_w[stage_idx]];
-                e_operation_select_r[stage_idx] <=
-                    {10{d_class_w[d_map_w[stage_idx]] == C_ALU}} & {
-                    d_operation_w[d_map_w[stage_idx]] == 4'h7,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h6,
-                    d_operation_w[d_map_w[stage_idx]] == 4'hd,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h5,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h4,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h3,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h2,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h1,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h8,
-                    d_operation_w[d_map_w[stage_idx]] == 4'h0};
-                e_div_result_r[stage_idx] <= d_class_w[d_map_w[stage_idx]] == C_DIV;
-                e_nonalu_result_r[stage_idx] <=
-                    ({32{d_class_w[d_map_w[stage_idx]] == C_LUI}} &
-                        d_imm_w[d_map_w[stage_idx]]) |
-                    ({32{d_class_w[d_map_w[stage_idx]] == C_AUIPC}} &
-                        d_slot_target_w[d_map_w[stage_idx]]) |
-                    ({32{d_class_w[d_map_w[stage_idx]] == C_JAL ||
-                        d_class_w[d_map_w[stage_idx]] == C_JALR}} &
-                        (d_record_w[d_map_w[stage_idx]][REC_PC_LSB +: 32] + 32'd4));
+                e_operation_r[stage_idx] <= d_operation_w[d_map_w[stage_idx]];
                 e_immediate_r[stage_idx] <= d_immediate_w[d_map_w[stage_idx]];
                 e_imm_r[stage_idx] <= d_imm_w[d_map_w[stage_idx]];
                 e_rd_r[stage_idx] <= d_rd_w[d_map_w[stage_idx]];
@@ -1866,10 +1601,10 @@ module edrv32_cpu_core (
         end
         if (e_advance_w) begin
             m_wait_dc_r <= e_memory_w && !e_exception_r && !e_misaligned_w;
-            m_store_r <= e_operand_b_w[0];
+            m_store_r <= e_operand_b_r[0];
             m_instr_r <= e_instr_w;
             m_csr_select_r <= e_csr_select_r;
-            m_csr_data_r <= e_instr_w[14] ? {27'b0, e_instr_w[19:15]} : e_operand_a_w[0];
+            m_csr_data_r <= e_instr_w[14] ? {27'b0, e_instr_w[19:15]} : e_operand_a_r[0];
         end
         // Speculative D payload uses the same free-E enable as operands; no extra cycle.
         if (e_operand_load_w) begin
@@ -1932,13 +1667,15 @@ module edrv32_cpu_core (
         if (!rst_n_i) begin
             committed_ras_ptr_r <= 0;
             committed_ras_count_r <= 0;
-            committed_ras_top_index_r <= 2'd3;
-            committed_ras_second_index_r <= 2'd2;
+            committed_ras_ptr_copy1_r <= 0;
+            committed_ras_top_copy1_r <= {2{2'd3}};
+            committed_ras_second_copy1_r <= {2{2'd2}};
         end else begin
             committed_ras_ptr_r <= committed_ras_ptr_w;
             committed_ras_count_r <= committed_ras_count_w;
-            committed_ras_top_index_r <= committed_ras_ptr_w - 2'd1;
-            committed_ras_second_index_r <= committed_ras_ptr_w - 2'd2;
+            committed_ras_ptr_copy1_r <= {8{committed_ras_ptr_w}};
+            committed_ras_top_copy1_r <= {2{committed_ras_ptr_w - 2'd1}};
+            committed_ras_second_copy1_r <= {2{committed_ras_ptr_w - 2'd2}};
         end
     end
     genvar ras_bank;
@@ -1949,7 +1686,7 @@ module edrv32_cpu_core (
             // Each late write enable owns one 16-bit bank.
             always @(posedge clk_i) begin
                 if (w_ras_commit_copy1_r[ras_bank] && w_ras_call_r &&
-                    committed_ras_ptr_r == WORD[1:0])
+                    committed_ras_ptr_copy1_r[ras_bank*2 +: 2] == WORD[1:0])
                     committed_ras_data_r[ras_bank*16 +: 16] <=
                         w_ras_link_r[(ras_bank%2)*16 +: 16];
             end
@@ -1960,9 +1697,9 @@ module edrv32_cpu_core (
             wire push_w;
             wire pop_w;
             assign top_w = committed_ras_data_r[
-                committed_ras_top_index_r*32 + ras_half*16 +: 16];
+                committed_ras_top_copy1_r[ras_half*2 +: 2]*32 + ras_half*16 +: 16];
             assign second_w = committed_ras_data_r[
-                committed_ras_second_index_r*32 + ras_half*16 +: 16];
+                committed_ras_second_copy1_r[ras_half*2 +: 2]*32 + ras_half*16 +: 16];
             assign push_w = w_ras_commit_copy1_r[ras_half+9] && w_ras_call_r;
             assign pop_w = w_ras_commit_copy1_r[ras_half+9] && w_ras_return_r &&
                 committed_ras_count_r != 0;

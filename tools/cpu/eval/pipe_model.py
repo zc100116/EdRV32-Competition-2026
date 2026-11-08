@@ -241,7 +241,7 @@ def fill_ib(program, ib, halfwords, depth=4, pht_size=1024, gshare_pc_shift=1):
 
 
 def early_address_allowed(instruction, older, e, m, w, mul_latency, m2=None,
-                          registered_early=True, late_load_result=False):
+                          registered_early=True):
     """4.10 exclusion list, using stage occupancy at the start of D."""
     base = instruction.sources[-1] if instruction.sources else 0
     if not base:
@@ -255,9 +255,6 @@ def early_address_allowed(instruction, older, e, m, w, mul_latency, m2=None,
             r.instruction.kind == 'load' and
             (m2 is None or not registered_early or not r.early_load)) and
            base == r.instruction.rd for r in m + (m2 or [])):
-        return False
-    if late_load_result and any(r.instruction.kind == 'load' and not r.early_load and
-                                base == r.instruction.rd for r in w):
         return False
     return not any(r.instruction.kind == 'mul' and age < mul_latency and
                    base in destinations(r.instruction)
@@ -286,7 +283,7 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
              alu_latency=1, shift_latency=None, compare_latency=None,
              decode_split=False, branch_register=False, memory_probe=None,
              line_predictor=False, memory_capture=False, capture_early='registered',
-             csr_latency=None, system_capture=True, late_load_result=False):
+             csr_latency=None, system_capture=True):
     if fusion:
         program, trace = fuse_program(program, trace, fusion, begin, end)
     changes = INORDER_VARIANTS.get(variant, {})
@@ -811,15 +808,13 @@ def simulate(program, trace, begin, end, variant='V0', *, e_penalty=3, d_penalty
                                     m1 if memory_capture and capture_early == 'legacy' else m,
                                     mul_latency,
                                     m2=m1 if memory_capture and capture_early != 'legacy' else None,
-                                    registered_early=capture_early == 'registered',
-                                    late_load_result=late_load_result)
+                                    registered_early=capture_early == 'registered')
                             else:
                                 early = early_address_allowed(
                                     instruction, issued, e, m1 if memory_capture else m, w,
                                     mul_latency,
                                     m2=m if memory_capture and capture_early != 'legacy' else None,
-                                    registered_early=capture_early == 'registered',
-                                    late_load_result=late_load_result)
+                                    registered_early=capture_early == 'registered')
                         else:
                             early = not base or recent is None or tick - recent > early_address
                         if isinstance(instruction, Macro):

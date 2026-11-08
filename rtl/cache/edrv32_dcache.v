@@ -20,7 +20,6 @@ module edrv32_dcache (
     output wire dc_resp_valid_o,
     output wire [63:0] dc_resp_way_data_o,
     output wire [1:0] dc_resp_way_hit_o,
-    (* keep = "true" *) output wire [47:0] dc_resp_way_hit_copy_o,
     output wire dc_resp_err_o,
     output wire dc_resp_device_o,
     input wire dc_kill_i,
@@ -144,7 +143,6 @@ module edrv32_dcache (
     function [31:0] shifted_word;
         input [63:0] data_i;
         input [7:0] select_i;
-        input [3:0] mask_i;
         integer offset;
         integer byte_number;
         begin
@@ -155,14 +153,13 @@ module edrv32_dcache (
                     if ((offset%4 + byte_number) < 4)
                         shifted_word[byte_number*8 +: 8] =
                             shifted_word[byte_number*8 +: 8] |
-                            ({8{select_i[offset] && mask_i[byte_number]}} &
-                                data_i[(offset+byte_number)*8 +: 8]);
+                            ({8{select_i[offset]}} & data_i[(offset+byte_number)*8 +: 8]);
                 end
             end
         end
     endfunction
-    assign early_shift0_w = shifted_word(early_data0_w, early_byte_select_r, 4'hf);
-    assign early_shift1_w = shifted_word(early_data1_w, early_byte_select_r, 4'hf);
+    assign early_shift0_w = shifted_word(early_data0_w, early_byte_select_r);
+    assign early_shift1_w = shifted_word(early_data1_w, early_byte_select_r);
     assign dc_early_way_data_o = {early_shift1_w, early_shift0_w};
     assign early_promote_w = accept_w && dc_req_early_i && !dc_req_store_i &&
         (|dc_early_way_hit_o) &&
@@ -249,7 +246,6 @@ module edrv32_dcache (
     reg [3:0] buffer_mask_r;
     reg [31:0] forward_data_r;
     reg [3:0] forward_mask_r;
-    reg buffer_match_r;
     reg [31:0] device_addr_r;
     reg [1:0] device_size_r;
     reg device_store_r;
@@ -359,11 +355,8 @@ module edrv32_dcache (
     integer byte_idx_w;
     genvar tag_idx;
     genvar bank;
-    reg [8:0] lookup_index_r;
-    wire [31:0] lookup_bank_r;
-    wire [15:0] lookup_slot_r;
-    assign lookup_bank_r = 32'b1 << lookup_index_r[8:4];
-    assign lookup_slot_r = 16'b1 << lookup_index_r[3:0];
+    reg [31:0] lookup_bank_r;
+    reg [15:0] lookup_slot_r;
     wire [15:0] read_slot_w;
     assign read_slot_w = 16'b1 << read_addr_w[5:2];
     // cache-spec 2.2/5.2: metadata shares the synchronous tag read. Old-data
@@ -440,14 +433,14 @@ module edrv32_dcache (
     wire [3:0] aligned_forward_mask_w;
     wire [3:0] aligned_buffer_mask_w;
     wire [31:0] forwarded_data_w;
-    wire [3:0] ram_mask_w;
-    assign aligned_ram0_w = shifted_word(data0_w, lookup_byte_select_r, ram_mask_w);
-    assign aligned_ram1_w = shifted_word(data1_w, lookup_byte_select_r, ram_mask_w);
+    wire [31:0] ram_mask_w;
+    assign aligned_ram0_w = shifted_word(data0_w, lookup_byte_select_r);
+    assign aligned_ram1_w = shifted_word(data1_w, lookup_byte_select_r);
     assign aligned_forward_w = forward_data_r >> {addr_r[1:0], 3'b0};
     assign aligned_buffer_w = buffer_data_r >> {addr_r[1:0], 3'b0};
     assign aligned_forward_mask_w = forward_mask_r >> addr_r[1:0];
     assign aligned_buffer_mask_w = (buffer_mask_r >> addr_r[1:0]) &
-        {4{buffer_valid_r && buffer_match_r}};
+        {4{buffer_valid_r && buffer_addr_r[31:2] == addr_r[31:2]}};
     genvar forward_byte;
     generate
         for (forward_byte = 0; forward_byte < 4;
@@ -456,17 +449,15 @@ module edrv32_dcache (
             wire forward_select_w;
             assign buffer_select_w = aligned_buffer_mask_w[forward_byte];
             assign forward_select_w = aligned_forward_mask_w[forward_byte] && !buffer_select_w;
-            assign ram_mask_w[forward_byte] = lookup_data_select_w &&
-                !buffer_select_w && !forward_select_w;
+            assign ram_mask_w[forward_byte*8 +: 8] =
+                {8{!buffer_select_w && !forward_select_w}};
             assign forwarded_data_w[forward_byte*8 +: 8] =
-                ({8{lookup_data_select_w && buffer_select_w}} &
-                    aligned_buffer_w[forward_byte*8 +: 8]) |
-                ({8{lookup_data_select_w && forward_select_w}} &
-                    aligned_forward_w[forward_byte*8 +: 8]);
+                ({8{buffer_select_w}} & aligned_buffer_w[forward_byte*8 +: 8]) |
+                ({8{forward_select_w}} & aligned_forward_w[forward_byte*8 +: 8]);
         end
     endgenerate
-    assign shifted_load0_w = aligned_ram0_w | forwarded_data_w;
-    assign shifted_load1_w = aligned_ram1_w | forwarded_data_w;
+    assign shifted_load0_w = (aligned_ram0_w & ram_mask_w) | forwarded_data_w;
+    assign shifted_load1_w = (aligned_ram1_w & ram_mask_w) | forwarded_data_w;
     // Fill returns are FF-originated and do not consume the DRM timing budget.
     always @(*) begin
         merged_return_w = raw_return_w;
@@ -490,59 +481,11 @@ module edrv32_dcache (
             shifted_return_w);
     assign nonlookup_data1_w = {32{early_response_r}} & early_response_data_r[63:32];
     assign dc_resp_way_data_o = {
-        nonlookup_data1_w | shifted_load1_w,
-        nonlookup_data_w | shifted_load0_w};
+        nonlookup_data1_w | ({32{lookup_data_select_w}} & shifted_load1_w),
+        nonlookup_data_w | ({32{lookup_data_select_w}} & shifted_load0_w)};
     assign dc_resp_way_hit_o = early_response_r ? early_response_way_r :
         device_state_r == D_RETURN || state_r == S_RETURN || pma_result_w ? 2'b01 :
         {2{lookup_hit_enable_r}} & {hit1_w, hit0_w};
-    // Eight query-tag copies bound the DRM comparator load. Each comparator
-    // serves three response groups with independent registered qualifiers.
-    (* keep = "true" *) wire [15:0] response_match_w;
-    genvar response_group;
-    generate
-        for (response_group = 0; response_group < 8;
-            response_group = response_group + 1) begin : g_response_match
-            (* keep = "true", syn_preserve = 1 *) reg [17:0] tag_copy_r;
-            always @(posedge clk_i) begin
-                if (lookup_accept_w)
-                    tag_copy_r <= dc_req_addr_i[31:14];
-            end
-            assign response_match_w[response_group*2 +: 2] =
-                {tag1_w[19] && tag1_w[17:0] == tag_copy_r,
-                    tag0_w[19] && tag0_w[17:0] == tag_copy_r};
-        end
-        for (response_group = 0; response_group < 24;
-            response_group = response_group + 1) begin : g_response_hit
-            (* keep = "true", syn_preserve = 1 *) reg early_copy_r;
-            (* keep = "true", syn_preserve = 1 *) reg enable_copy_r;
-            (* keep = "true", syn_preserve = 1 *) reg [1:0] early_way_copy_r;
-            always @(posedge clk_i or negedge rst_n_i) begin
-                if (!rst_n_i) begin
-                    early_copy_r <= 0;
-                    enable_copy_r <= 0;
-                end else begin
-                    early_copy_r <= early_promote_w;
-                    if (state_r == S_IDLE)
-                        enable_copy_r <= 0;
-                    if (state_r == S_REPLAY)
-                        enable_copy_r <= 1;
-                    if (dc_kill_i)
-                        enable_copy_r <= 0;
-                    if (lookup_accept_w)
-                        enable_copy_r <= !maintenance_r && !maintenance_array_start_w &&
-                            !request_device_w && !request_pma_err_w;
-                end
-            end
-            always @(posedge clk_i) begin
-                early_way_copy_r <= {early_tag1_w[18] && early_hit1_w,
-                    early_tag0_w[18] && early_hit0_w};
-            end
-            assign dc_resp_way_hit_copy_o[response_group*2 +: 2] = early_copy_r ?
-                early_way_copy_r : device_state_r == D_RETURN || state_r == S_RETURN ||
-                pma_result_w ? 2'b01 : {2{enable_copy_r}} &
-                response_match_w[(response_group%8)*2 +: 2];
-        end
-    endgenerate
     assign return_store_w = state_r == S_RETURN && store_r && !fill_err_r && !killed_r;
     assign store_result_w = (state_r == S_IDLE && lookup_done_w && !pma_err_w && store_r) ||
                             return_store_w;
@@ -727,12 +670,9 @@ module edrv32_dcache (
     );
     // Payload registers deliberately have no reset (cache-spec 5.5).
     always @(posedge clk_i) begin
-        // Match the store entering the buffer against the request entering M.
-        // A held lookup retains its address while the one-cycle buffer drains.
-        buffer_match_r <= push_addr_w[31:2] ==
-            (lookup_accept_w ? dc_req_addr_i[31:2] : addr_r[31:2]);
         if (ram_read_w) begin
-            lookup_index_r <= read_addr_w[10:2];
+            lookup_bank_r <= 32'b1 << read_addr_w[10:6];
+            lookup_slot_r <= read_slot_w;
         end
         if (lookup_accept_w) begin
             addr_r <= dc_req_addr_i;

@@ -8,5 +8,3 @@ edrv32_cpu_coverage.sv
 edrv32_cpu_protocol_checker.sv
 ../stub/edrv32_cpu_core.sv
 edrv32_cpu_b1_tb.sv
-../../../../rtl/cpu/edrv32_cpu_decode.v
-../../../../rtl/cpu/edrv32_cpu_predecode.v

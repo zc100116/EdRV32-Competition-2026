@@ -19,7 +19,6 @@ module edrv32_cpu_core (
     input logic ic_resp_valid_i,
     input logic [7:0] ic_resp_valid_copy_i,
     input logic [63:0] ic_resp_data_i,
-    input logic [43:0] ic_resp_predecode_i,
     input logic ic_resp_err_i,
     input logic ic_inv_done_i,
 
@@ -272,5 +271,5 @@ module edrv32_cpu_core (
         done_w = 1;
     end
     // These interface inputs are observed by the TB through their own checks.
-    wire unused_w = &{1'b0, ic_resp_predecode_i, irq_meip_i, irq_msip_i, irq_mtip_i, dc_wb_event_i};
+    wire unused_w = &{1'b0, irq_meip_i, irq_msip_i, irq_mtip_i, dc_wb_event_i};
 endmodule

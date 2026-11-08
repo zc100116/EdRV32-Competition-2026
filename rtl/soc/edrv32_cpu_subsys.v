@@ -207,7 +207,6 @@ module edrv32_cpu_subsys (
     wire ic_resp_valid_w;
     wire [7:0] ic_resp_valid_copy_w;
     wire [63:0] ic_resp_data_w;
-    wire [43:0] ic_resp_predecode_w;
     wire ic_resp_err_w;
     wire ic_kill_w;
     wire ic_inv_w;
@@ -225,7 +224,6 @@ module edrv32_cpu_subsys (
     wire dc_resp_valid_w;
     wire [63:0] dc_resp_way_data_w;
     wire [1:0] dc_resp_way_hit_w;
-    wire [47:0] dc_resp_way_hit_copy_w;
     wire dc_resp_err_w;
     wire dc_resp_device_w;
     wire dc_kill_w;
@@ -262,7 +260,6 @@ module edrv32_cpu_subsys (
         .ic_resp_valid_i(ic_resp_valid_w),
         .ic_resp_valid_copy_i(ic_resp_valid_copy_w),
         .ic_resp_data_i(ic_resp_data_w),
-        .ic_resp_predecode_i(ic_resp_predecode_w),
         .ic_resp_err_i(ic_resp_err_w),
         .ic_kill_o(ic_kill_w),
         .ic_inv_o(ic_inv_w),
@@ -282,7 +279,6 @@ module edrv32_cpu_subsys (
         .dc_resp_valid_i(dc_resp_valid_w),
         .dc_resp_way_data_i(dc_resp_way_data_w),
         .dc_resp_way_hit_i(dc_resp_way_hit_w),
-        .dc_resp_way_hit_copy_i(dc_resp_way_hit_copy_w),
         .dc_resp_err_i(dc_resp_err_w),
         .dc_resp_device_i(dc_resp_device_w),
         .dc_kill_o(dc_kill_w),
@@ -324,7 +320,6 @@ module edrv32_cpu_subsys (
         .ic_resp_valid_o(ic_resp_valid_w),
         .ic_resp_valid_copy_o(ic_resp_valid_copy_w),
         .ic_resp_data_o(ic_resp_data_w),
-        .ic_resp_predecode_o(ic_resp_predecode_w),
         .ic_resp_err_o(ic_resp_err_w),
         .ic_kill_i(ic_kill_w),
         .ic_inv_i(ic_inv_w),
@@ -369,7 +364,6 @@ module edrv32_cpu_subsys (
         .dc_resp_valid_o(dc_resp_valid_w),
         .dc_resp_way_data_o(dc_resp_way_data_w),
         .dc_resp_way_hit_o(dc_resp_way_hit_w),
-        .dc_resp_way_hit_copy_o(dc_resp_way_hit_copy_w),
         .dc_resp_err_o(dc_resp_err_w),
         .dc_resp_device_o(dc_resp_device_w),
         .dc_kill_i(dc_kill_w),

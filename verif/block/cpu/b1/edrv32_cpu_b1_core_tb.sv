@@ -53,15 +53,6 @@ module edrv32_cpu_b1_core_tb;
     logic irq_mtip;
     logic [63:0] mtime;
     wire dc_req_early;
-    wire [43:0] t4_predecode_w;
-    edrv32_cpu_predecode u_t4_predecode0 (
-        .instr_i(ic_resp_data[0 +: 32]),
-        .predecode_o(t4_predecode_w[0 +: 22])
-    );
-    edrv32_cpu_predecode u_t4_predecode1 (
-        .instr_i(ic_resp_data[32 +: 32]),
-        .predecode_o(t4_predecode_w[22 +: 22])
-    );
     edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
@@ -90,14 +81,12 @@ module edrv32_cpu_b1_core_tb;
         .ic_resp_valid_i(ic_resp_valid),
         .ic_resp_valid_copy_i({8{ic_resp_valid}}),
         .ic_resp_data_i(ic_resp_data),
-        .ic_resp_predecode_i(t4_predecode_w),
         .ic_resp_err_i(ic_resp_err),
         .ic_inv_done_i(ic_inv_done),
         .dc_req_ready_i(dc_req_ready),
         .dc_resp_valid_i(dc_resp_valid),
         .dc_resp_way_data_i(dc_resp_way_data),
         .dc_resp_way_hit_i(dc_resp_way_hit),
-        .dc_resp_way_hit_copy_i({24{dc_resp_way_hit}}),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(dc_resp_device),
         .dc_fence_done_i(dc_fence_done),

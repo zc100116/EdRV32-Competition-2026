@@ -87,7 +87,6 @@ module tb;
     logic [31:0] wb_err_addr_o;
     always #5 clk_i = ~clk_i;
     edrv32_dcache dut (
-        .dc_resp_way_hit_copy_o(),
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .rst_sys_dlru_n_i({2{rst_n_i}}),

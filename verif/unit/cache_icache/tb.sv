@@ -34,7 +34,6 @@ module tb;
             $fatal(1, "FAIL I$ response qualifier copies=%b expected=%b time=%t",
                 ic_resp_valid_copy_o, ic_resp_valid_o, $time);
     end
-    wire [43:0] t4_predecode_w;
     edrv32_icache dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -47,7 +46,6 @@ module tb;
         .ic_resp_valid_o(ic_resp_valid_o),
         .ic_resp_valid_copy_o(ic_resp_valid_copy_o),
         .ic_resp_data_o(ic_resp_data_o),
-        .ic_resp_predecode_o(t4_predecode_w),
         .ic_resp_err_o(ic_resp_err_o),
         .ic_kill_i(ic_kill_i),
         .ic_inv_i(ic_inv_i),
@@ -66,29 +64,6 @@ module tb;
         .axi_rvalid_i(axi_rvalid_i),
         .axi_rready_o(axi_rready_o)
     );
-    wire [43:0] reference_predecode_w;
-    reg [127:0] opcode_seen_r = 0;
-    integer illegal_seen = 0;
-    integer checked_words = 0;
-    for (genvar slot = 0; slot < 2; slot++) begin : g_reference
-        edrv32_cpu_predecode u_reference (
-            .instr_i(ic_resp_data_o[slot*32 +: 32]),
-            .predecode_o(reference_predecode_w[slot*22 +: 22])
-        );
-    end
-    // IC-09: check every returned word, independent of hit/refill/ROM origin.
-    always @(negedge clk_i) begin
-        if (rst_n_i && ic_resp_valid_o && !ic_resp_err_o) begin
-            if (t4_predecode_w !== reference_predecode_w)
-                $fatal(1, "FAIL IC-09 data=%h expected=%h actual=%h time=%t",
-                    ic_resp_data_o, reference_predecode_w, t4_predecode_w, $time);
-            for (integer slot = 0; slot < 2; slot++) begin
-                opcode_seen_r[ic_resp_data_o[slot*32 +: 7]] = 1;
-                if (reference_predecode_w[slot*22+4]) illegal_seen++;
-                checked_words++;
-            end
-        end
-    end
     task automatic tick;
         @(posedge clk_i); #1;
     endtask
@@ -127,15 +102,10 @@ module tb;
     end
     task automatic fetch(input logic [31:0] addr, input logic [63:0] expected,
                          input integer expected_reads);
-        integer latency;
-        integer prior_reads;
-        step(); prior_reads = reads; ic_req_valid_i = 1; ic_req_addr_i = addr;
+        step(); ic_req_valid_i = 1; ic_req_addr_i = addr;
         while (!ic_req_ready_o) tick();
         tick(); step(); ic_req_valid_i = 0;
-        latency = 0;
-        while (!ic_resp_valid_o) begin tick(); latency++; end
-        if (reads != prior_reads && latency != (addr < 32'h4000 ? 4 : 7))
-            $fatal(1, "FAIL IC-09 response latency addr=%h cycles=%0d", addr, latency);
+        while (!ic_resp_valid_o) tick();
         if (ic_resp_err_o || ic_resp_data_o !== expected || reads != expected_reads)
             $fatal(1, "FAIL I %h data=%h reads=%0d", addr, ic_resp_data_o, reads);
         tick();
@@ -161,9 +131,7 @@ module tb;
         end
     endtask
     initial begin
-        for (int i = 0; i < 8192; i++)
-            memory[i] = {32'((i*7919 & 'hffffff80) | ((i*2+1) & 127)),
-                32'((i*3571 & 'hffffff80) | ((i*2) & 127))};
+        for (int i = 0; i < 8192; i++) memory[i] = {32'(i), 32'(i+4096)};
         tick(); step(); rst_n_i = 1;
         fetch(32'h10000000, memory[0], 1);
         if (dut.lru_r[0] != 1) $fatal(1, "FAIL I fill LRU way0");
@@ -267,23 +235,6 @@ module tb;
         reads_before=reads;
         discarded_successor(32'h00000200,32'h00000208,memory[64]);
         fetch(32'h00000208,memory[65],reads_before+2);
-        // IC-09: all opcode values through fill, hit, ROM and post-invalidate refill.
-        step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
-        reads_before = reads;
-        for (int i = 0; i < 64; i++) begin
-            fetch(32'h10000000 + 32'(i*8), memory[i], reads_before + i/4 + 1);
-            fetch(32'h10000000 + 32'(i*8), memory[i], reads_before + i/4 + 1);
-        end
-        for (int i = 0; i < 64; i++)
-            fetch(32'(i*8), memory[i], reads_before + 16 + i + 1);
-        step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
-        reads_before = reads;
-        for (int i = 0; i < 64; i++)
-            fetch(32'h10000000 + 32'(i*8), memory[i], reads_before + i/4 + 1);
-        if (!(&opcode_seen_r) || illegal_seen == 0)
-            $fatal(1, "FAIL IC-09 opcode coverage=%h illegal=%0d", opcode_seen_r, illegal_seen);
-        $display("PASS IC-09 words=%0d illegal=%0d opcodes=%h",
-            checked_words, illegal_seen, opcode_seen_r);
         $display("PASS cache_icache"); $finish;
     end
 endmodule

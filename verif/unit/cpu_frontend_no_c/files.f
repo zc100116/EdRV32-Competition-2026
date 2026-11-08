@@ -9,4 +9,3 @@ tb.sv
 ../../../rtl/tech/edrv32_ram_cpu_local_direction.v
 ../../../rtl/tech/edrv32_ram_cpu_chooser.v
 ../../../rtl/cpu/edrv32_cpu_decode.v
-../../../rtl/cpu/edrv32_cpu_predecode.v

@@ -75,15 +75,6 @@ module tb;
         mapped=address<16384 ||
             (address>=EDRV32_SRAM_BASE && address<EDRV32_SRAM_BASE+EDRV32_SRAM_SIZE);
     endfunction
-    wire [43:0] t4_predecode_w;
-    edrv32_cpu_predecode u_t4_predecode0 (
-        .instr_i(ic_resp_data_i[0 +: 32]),
-        .predecode_o(t4_predecode_w[0 +: 22])
-    );
-    edrv32_cpu_predecode u_t4_predecode1 (
-        .instr_i(ic_resp_data_i[32 +: 32]),
-        .predecode_o(t4_predecode_w[22 +: 22])
-    );
     edrv32_cpu_core dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -95,7 +86,6 @@ module tb;
         .ic_resp_valid_i(ic_resp_valid_i),
         .ic_resp_valid_copy_i({8{ic_resp_valid_i}}),
         .ic_resp_data_i(ic_resp_data_i),
-        .ic_resp_predecode_i(t4_predecode_w),
         .ic_resp_err_i(ic_resp_err_i),
         .ic_kill_o(ic_kill_o),
         .ic_inv_o(ic_inv_o),
@@ -114,7 +104,6 @@ module tb;
         .dc_resp_way_data_i(dc_resp_lane_i ? {dc_resp_data_i,32'b0} :
             {32'b0,dc_resp_data_i}),
         .dc_resp_way_hit_i(dc_resp_lane_i ? 2'b10 : 2'b01),
-        .dc_resp_way_hit_copy_i({24{dc_resp_lane_i ? 2'b10 : 2'b01}}),
         .dc_resp_err_i(dc_resp_err_i),
         .dc_resp_device_i(dc_resp_device_i),
         .dc_kill_o(dc_kill_o),

@@ -13,4 +13,3 @@ tb.sv
 ../../../../rtl/cache/edrv32_cache_pma.v
 ../../../../rtl/tech/edrv32_ram_icache_tag.v
 ../../../../rtl/tech/edrv32_ram_icache_data.v
-../../../../rtl/cpu/edrv32_cpu_predecode.v
