@@ -1,0 +1,344 @@
+
+----------------------------------------------------------------------------------------------------
+| Tool Version : Fabric Compiler (version 2022.2-SP6.1 <build 138931>)
+| Date         : Sun Nov  8 20:18:09 2026
+| Design       : edrv32_fpga_board_full_top
+| Device       : PG2L200H
+| Speed Grade  : -6
+| Package      : FBB676
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| Timing Models: Pre-silicon
+| Tcl Command  : report_timing -force_to_run -max_path 200 -input_pins true
+----------------------------------------------------------------------------------------------------
+
+Timing analysis mode : multi corner
+
+ Clock Summary:
+**************************************************************************************************************************************************************************************************************
+                                                                                       Clock   Non-clock
+ Clock                    Period       Waveform            Type                        Loads       Loads  Sources
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ clk_board                37.0370      {0.0000 18.5180}    Declared                        0           4  {clk_i}
+   clk_sys                8.0000       {0.0000 3.9990}     Generated (clk_board)       12277         753  {u_pll_sys/u_gpll/gpll_inst/CLKOUT0}
+   clk_npu                5.5556       {0.0000 2.7770}     Generated (clk_board)       27675        3757  {u_pll_npu/u_gpll/gpll_inst/CLKOUT0}
+   clk_pix                13.4680      {0.0000 6.7340}     Generated (clk_board)        1577         246  {u_pll_video/u_gpll/gpll_inst/CLKOUT0}
+   clk_serial             2.6936       {0.0000 1.3460}     Generated (clk_board)          16           0  {u_pll_video/u_gpll/gpll_inst/CLKOUT1}
+ clk_ddr_ref              8.0000       {0.0000 4.0000}     Declared                        0           4  {ddr_ref_clk_p_i}
+   rst_clk                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)       102          19  {u_ddr3/u_ddrphy_top/rst_clk_gpll/u_gpll/gpll_inst/CLKOUT0}
+   clk_mem                8.0000       {0.0000 4.0000}     Generated (clk_ddr_ref)     38408        6944  {u_ddr3/u_ddrphy_top/ddrphy_gpll/u_gpll/gpll_inst/CLKOUT0}
+   phy_dq_clk_0           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)        35           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY}
+     phy_dq_sysclk_0      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_0)       35           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[0].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT}
+   phy_dq_clk_1           1.0000       {0.0000 0.5000}     Generated (clk_ddr_ref)        84           1  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].ddrphy_ppll/u_ppll/ppll_inst/CLKOUTPHY}
+     phy_dq_sysclk_1      8.0000       {2.0000 6.0000}     Generated (phy_dq_clk_1)       84           0  {u_ddr3/u_ddrphy_top/ddrphy_slice_top/i_dqs_bank[1].u_ddrphy_ioclkdiv/ddrphy_ioclk_div_inst/CLKOUT}
+ clk_cam0                 10.0000      {0.0000 5.0000}     Declared                      100           0  {cam0_pclk_i}
+ clk_cam1                 10.0000      {0.0000 5.0000}     Declared                      100           0  {cam1_pclk_i}
+ clk_rgmii_ref            8.0000       {0.0000 4.0000}     Declared                        0           1  {rgmii_rxc_i}
+   clk_eth                8.0000       {0.0000 4.0000}     Generated (clk_rgmii_ref)     173          29  {u_rgmii/u_pll_eth/u_gpll/gpll_inst/CLKOUT0}
+     clk_rgmii_tx         8.0000       {1.0000 5.0000}     Generated (clk_eth)             0           1  {rgmii_txc_o}
+==============================================================================================================================================================================================================
+
+ Clock Groups:
+****************************************************************************************************
+ Clock Group                   Group Type                 Clocks
+----------------------------------------------------------------------------------------------------
+ rst_clk                       asynchronous               rst_clk
+ phy_dq_clk_0                  asynchronous               phy_dq_clk_0
+ phy_dq_clk_1                  asynchronous               phy_dq_clk_1
+ clock_group_0                 asynchronous
+     clock_group_0_0                                      clk_sys
+     clock_group_0_1                                      clk_mem
+ clock_group_1                 asynchronous
+     clock_group_1_0                                      clk_sys
+     clock_group_1_1                                      clk_pix  clk_serial
+ clock_group_2                 asynchronous
+     clock_group_2_0                                      clk_sys
+     clock_group_2_1                                      clk_npu
+ clock_group_3                 asynchronous
+     clock_group_3_0                                      clk_sys
+     clock_group_3_1                                      clk_cam0
+ clock_group_4                 asynchronous
+     clock_group_4_0                                      clk_sys
+     clock_group_4_1                                      clk_cam1
+ clock_group_5                 asynchronous
+     clock_group_5_0                                      clk_sys
+     clock_group_5_1                                      clk_eth  clk_rgmii_tx
+ clock_group_6                 asynchronous
+     clock_group_6_0                                      clk_mem
+     clock_group_6_1                                      clk_pix  clk_serial
+ clock_group_7                 asynchronous
+     clock_group_7_0                                      clk_mem
+     clock_group_7_1                                      clk_npu
+ clock_group_8                 asynchronous
+     clock_group_8_0                                      clk_mem
+     clock_group_8_1                                      clk_cam0
+ clock_group_9                 asynchronous
+     clock_group_9_0                                      clk_mem
+     clock_group_9_1                                      clk_cam1
+ clock_group_10                asynchronous
+     clock_group_10_0                                     clk_mem
+     clock_group_10_1                                     clk_eth  clk_rgmii_tx
+ clock_group_11                asynchronous
+     clock_group_11_0                                     clk_pix  clk_serial
+     clock_group_11_1                                     clk_npu
+ clock_group_12                asynchronous
+     clock_group_12_0                                     clk_pix  clk_serial
+     clock_group_12_1                                     clk_cam0
+ clock_group_13                asynchronous
+     clock_group_13_0                                     clk_pix  clk_serial
+     clock_group_13_1                                     clk_cam1
+ clock_group_14                asynchronous
+     clock_group_14_0                                     clk_pix  clk_serial
+     clock_group_14_1                                     clk_eth  clk_rgmii_tx
+ clock_group_15                asynchronous
+     clock_group_15_0                                     clk_npu
+     clock_group_15_1                                     clk_cam0
+ clock_group_16                asynchronous
+     clock_group_16_0                                     clk_npu
+     clock_group_16_1                                     clk_cam1
+ clock_group_17                asynchronous
+     clock_group_17_0                                     clk_npu
+     clock_group_17_1                                     clk_eth  clk_rgmii_tx
+ clock_group_18                asynchronous
+     clock_group_18_0                                     clk_cam0
+     clock_group_18_1                                     clk_cam1
+ clock_group_19                asynchronous
+     clock_group_19_0                                     clk_cam0
+     clock_group_19_1                                     clk_eth  clk_rgmii_tx
+ clock_group_20                asynchronous
+     clock_group_20_0                                     clk_cam1
+     clock_group_20_1                                     clk_eth  clk_rgmii_tx
+====================================================================================================
+
+ Performance Summary:
+****************************************************************************************************
+                              Requested       Estimated      Requested      Estimated
+ Clock                        Frequency       Frequency      Period         Period             Slack
+----------------------------------------------------------------------------------------------------
+ clk_cam0                  100.0000 MHz    186.1158 MHz        10.0000         5.3730          4.627
+ clk_cam1                  100.0000 MHz    192.6782 MHz        10.0000         5.1900          4.810
+ clk_sys                   125.0001 MHz    123.6399 MHz         8.0000         8.0880         -0.088
+ clk_npu                   180.0002 MHz    173.5939 MHz         5.5556         5.7606         -0.205
+ clk_pix                    74.2501 MHz    108.2251 MHz        13.4680         9.2400          4.228
+ clk_serial                371.2504 MHz   1012.9455 MHz         2.6936         0.9872          1.706
+ rst_clk                   125.0000 MHz    336.5870 MHz         8.0000         2.9710          5.029
+ clk_mem                   125.0000 MHz    124.6106 MHz         8.0000         8.0250         -0.025
+ clk_eth                   125.0000 MHz    185.0824 MHz         8.0000         5.4030          2.597
+====================================================================================================
+
+Design Summary : Some Constraints Violated.
+
+Setup Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     4.627       0.000              0            296
+ clk_cam1               clk_cam1                     4.810       0.000              0            296
+ clk_sys                clk_sys                     -0.088      -0.194             10          59543
+ clk_npu                clk_npu                     -0.205      -2.292             47         122736
+ clk_pix                clk_pix                      4.228       0.000              0           5826
+ clk_serial             clk_serial                   1.706       0.000              0              8
+ rst_clk                rst_clk                      5.029       0.000              0            428
+ clk_mem                clk_mem                     -0.025      -0.089              5         174411
+ phy_dq_sysclk_1        clk_mem                      2.613       0.000              0            260
+ phy_dq_sysclk_0        clk_mem                      3.831       0.000              0              1
+ clk_mem                phy_dq_sysclk_0              1.780       0.000              0            196
+ clk_mem                phy_dq_sysclk_1              1.003       0.000              0            420
+ clk_eth                clk_eth                      2.597       0.000              0            729
+ clk_rgmii_ref          clk_eth                      0.130       0.000              0              5
+====================================================================================================
+
+Hold Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     0.145       0.000              0            296
+ clk_cam1               clk_cam1                     0.145       0.000              0            296
+ clk_sys                clk_sys                      0.148       0.000              0          59543
+ clk_npu                clk_npu                      0.108       0.000              0         122736
+ clk_pix                clk_pix                      0.178       0.000              0           5826
+ clk_serial             clk_serial                   0.346       0.000              0              8
+ rst_clk                rst_clk                      0.261       0.000              0            428
+ clk_mem                clk_mem                      0.104       0.000              0         174411
+ phy_dq_sysclk_1        clk_mem                      0.548       0.000              0            260
+ phy_dq_sysclk_0        clk_mem                      0.982       0.000              0              1
+ clk_mem                phy_dq_sysclk_0              0.453       0.000              0            196
+ clk_mem                phy_dq_sysclk_1              0.475       0.000              0            420
+ clk_eth                clk_eth                      0.244       0.000              0            729
+ clk_rgmii_ref          clk_eth                     -0.242      -1.103              5              5
+====================================================================================================
+
+Recovery Summary(Slow Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     8.364       0.000              0             25
+ clk_cam1               clk_cam1                     7.831       0.000              0             25
+ clk_sys                clk_sys                      2.268       0.000              0           4691
+ clk_npu                clk_npu                      0.126       0.000              0            911
+ clk_pix                clk_pix                      7.032       0.000              0            397
+ rst_clk                rst_clk                      5.033       0.000              0            100
+ clk_mem                clk_mem                      0.859       0.000              0          11318
+ clk_eth                clk_eth                      6.018       0.000              0             65
+====================================================================================================
+
+Removal Summary(Slow Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     0.538       0.000              0             25
+ clk_cam1               clk_cam1                     0.668       0.000              0             25
+ clk_sys                clk_sys                      0.292       0.000              0           4691
+ clk_npu                clk_npu                      0.364       0.000              0            911
+ clk_pix                clk_pix                      0.347       0.000              0            397
+ rst_clk                rst_clk                      0.428       0.000              0            100
+ clk_mem                clk_mem                      0.303       0.000              0          11318
+ clk_eth                clk_eth                      0.364       0.000              0             65
+====================================================================================================
+
+Minimum Pulse Width Summary(Slow Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0                                            4.800       0.000              0            100
+ clk_cam1                                            4.800       0.000              0            100
+ clk_sys                                             3.039       0.000              0          12277
+ clk_npu                                             1.817       0.000              0          27675
+ clk_pix                                             5.134       0.000              0           1577
+ clk_serial                                          0.930       0.000              0             16
+ rst_clk                                             3.800       0.000              0            101
+ clk_mem                                             3.040       0.000              0          38407
+ phy_dq_clk_0                                        0.035       0.000              0             35
+ phy_dq_sysclk_0                                     1.850       0.000              0             35
+ phy_dq_clk_1                                        0.035       0.000              0             84
+ phy_dq_sysclk_1                                     2.400       0.000              0             84
+ clk_eth                                             3.040       0.000              0            173
+====================================================================================================
+
+Setup Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     6.999       0.000              0            296
+ clk_cam1               clk_cam1                     6.971       0.000              0            296
+ clk_sys                clk_sys                      3.048       0.000              0          59543
+ clk_npu                clk_npu                      1.910       0.000              0         122736
+ clk_pix                clk_pix                      7.923       0.000              0           5826
+ clk_serial             clk_serial                   2.084       0.000              0              8
+ rst_clk                rst_clk                      6.275       0.000              0            428
+ clk_mem                clk_mem                      2.982       0.000              0         174411
+ phy_dq_sysclk_1        clk_mem                      4.525       0.000              0            260
+ phy_dq_sysclk_0        clk_mem                      5.144       0.000              0              1
+ clk_mem                phy_dq_sysclk_0              3.997       0.000              0            196
+ clk_mem                phy_dq_sysclk_1              3.633       0.000              0            420
+ clk_eth                clk_eth                      4.749       0.000              0            729
+ clk_rgmii_ref          clk_eth                      0.446       0.000              0              5
+====================================================================================================
+
+Hold Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     0.101       0.000              0            296
+ clk_cam1               clk_cam1                     0.102       0.000              0            296
+ clk_sys                clk_sys                      0.100       0.000              0          59543
+ clk_npu                clk_npu                      0.100       0.000              0         122736
+ clk_pix                clk_pix                      0.132       0.000              0           5826
+ clk_serial             clk_serial                   0.225       0.000              0              8
+ rst_clk                rst_clk                      0.167       0.000              0            428
+ clk_mem                clk_mem                      0.098       0.000              0         174411
+ phy_dq_sysclk_1        clk_mem                      0.101       0.000              0            260
+ phy_dq_sysclk_0        clk_mem                      0.266       0.000              0              1
+ clk_mem                phy_dq_sysclk_0              0.100       0.000              0            196
+ clk_mem                phy_dq_sysclk_1              0.101       0.000              0            420
+ clk_eth                clk_eth                      0.157       0.000              0            729
+ clk_rgmii_ref          clk_eth                      0.216       0.000              0              5
+====================================================================================================
+
+Recovery Summary(Fast Corner):
+****************************************************************************************************
+                                                                          TNS Failing      TNS Total
+ Launch Clock           Capture Clock              WNS(ns)     TNS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     9.050       0.000              0             25
+ clk_cam1               clk_cam1                     8.792       0.000              0             25
+ clk_sys                clk_sys                      4.390       0.000              0           4691
+ clk_npu                clk_npu                      2.250       0.000              0            911
+ clk_pix                clk_pix                      9.472       0.000              0            397
+ rst_clk                rst_clk                      6.186       0.000              0            100
+ clk_mem                clk_mem                      3.608       0.000              0          11318
+ clk_eth                clk_eth                      6.724       0.000              0             65
+====================================================================================================
+
+Removal Summary(Fast Corner):
+****************************************************************************************************
+                                                                          THS Failing      THS Total
+ Launch Clock           Capture Clock              WHS(ns)     THS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0               clk_cam0                     0.353       0.000              0             25
+ clk_cam1               clk_cam1                     0.445       0.000              0             25
+ clk_sys                clk_sys                      0.192       0.000              0           4691
+ clk_npu                clk_npu                      0.239       0.000              0            911
+ clk_pix                clk_pix                      0.234       0.000              0            397
+ rst_clk                rst_clk                      0.290       0.000              0            100
+ clk_mem                clk_mem                      0.167       0.000              0          11318
+ clk_eth                clk_eth                      0.247       0.000              0             65
+====================================================================================================
+
+Minimum Pulse Width Summary(Fast Corner):
+****************************************************************************************************
+                                                                         WPWS Failing     WPWS Total
+ Clock                                            WPWS(ns)    TPWS(ns)      Endpoints      Endpoints
+----------------------------------------------------------------------------------------------------
+ clk_cam0                                            4.800       0.000              0            100
+ clk_cam1                                            4.800       0.000              0            100
+ clk_sys                                             3.344       0.000              0          12277
+ clk_npu                                             2.122       0.000              0          27675
+ clk_pix                                             5.134       0.000              0           1577
+ clk_serial                                          0.930       0.000              0             16
+ rst_clk                                             3.800       0.000              0            101
+ clk_mem                                             3.345       0.000              0          38407
+ phy_dq_clk_0                                        0.035       0.000              0             35
+ phy_dq_sysclk_0                                     1.850       0.000              0             35
+ phy_dq_clk_1                                        0.035       0.000              0             84
+ phy_dq_sysclk_1                                     2.400       0.000              0             84
+ clk_eth                                             3.430       0.000              0            173
+====================================================================================================
+
+Setup and hold by launch/capture clock and corner
+launch_clock	capture_clock	corner	wns_ns	tns_ns	setup_failing_endpoints	whs_ns	ths_ns	hold_failing_endpoints
+clk_cam0	clk_cam0	slow	4.627	0.000	0	0.145	0.000	0
+clk_cam1	clk_cam1	slow	4.810	0.000	0	0.145	0.000	0
+clk_sys	clk_sys	slow	-0.088	-0.194	10	0.148	0.000	0
+clk_npu	clk_npu	slow	-0.205	-2.292	47	0.108	0.000	0
+clk_pix	clk_pix	slow	4.228	0.000	0	0.178	0.000	0
+clk_serial	clk_serial	slow	1.706	0.000	0	0.346	0.000	0
+rst_clk	rst_clk	slow	5.029	0.000	0	0.261	0.000	0
+clk_mem	clk_mem	slow	-0.025	-0.089	5	0.104	0.000	0
+phy_dq_sysclk_1	clk_mem	slow	2.613	0.000	0	0.548	0.000	0
+phy_dq_sysclk_0	clk_mem	slow	3.831	0.000	0	0.982	0.000	0
+clk_mem	phy_dq_sysclk_0	slow	1.780	0.000	0	0.453	0.000	0
+clk_mem	phy_dq_sysclk_1	slow	1.003	0.000	0	0.475	0.000	0
+clk_eth	clk_eth	slow	2.597	0.000	0	0.244	0.000	0
+clk_rgmii_ref	clk_eth	slow	0.130	0.000	0	-0.242	-1.103	5
+clk_cam0	clk_cam0	fast	6.999	0.000	0	0.101	0.000	0
+clk_cam1	clk_cam1	fast	6.971	0.000	0	0.102	0.000	0
+clk_sys	clk_sys	fast	3.048	0.000	0	0.100	0.000	0
+clk_npu	clk_npu	fast	1.910	0.000	0	0.100	0.000	0
+clk_pix	clk_pix	fast	7.923	0.000	0	0.132	0.000	0
+clk_serial	clk_serial	fast	2.084	0.000	0	0.225	0.000	0
+rst_clk	rst_clk	fast	6.275	0.000	0	0.167	0.000	0
+clk_mem	clk_mem	fast	2.982	0.000	0	0.098	0.000	0
+phy_dq_sysclk_1	clk_mem	fast	4.525	0.000	0	0.101	0.000	0
+phy_dq_sysclk_0	clk_mem	fast	5.144	0.000	0	0.266	0.000	0
+clk_mem	phy_dq_sysclk_0	fast	3.997	0.000	0	0.100	0.000	0
+clk_mem	phy_dq_sysclk_1	fast	3.633	0.000	0	0.101	0.000	0
+clk_eth	clk_eth	fast	4.749	0.000	0	0.157	0.000	0
+clk_rgmii_ref	clk_eth	fast	0.446	0.000	0	0.216	0.000	0

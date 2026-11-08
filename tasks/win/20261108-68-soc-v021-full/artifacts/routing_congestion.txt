@@ -1,5 +1,5 @@
-Card 68 source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/place_route/run.log
-Snapshot: 2026-11-08 14:58:39 +0800; log last write: 2026-11-08 14:45:58 +0800
+Card 68 R1 final source: C:/Users/86183/.codex/worktrees/card68-soc-v021/EdRV32-Competition-2026/build/card68/R1/place_route.log
+Last route log write: 2026-11-08 17:03:50 +0800; run stopped by user.
 Iteration	seconds	unrouted	overused
 6	18.607	154948	1162882
 7	19.605	140043	967745
@@ -11,6 +11,12 @@ Iteration	seconds	unrouted	overused
 13	971.633	77138	387959
 14	1127.033	70433	327750
 15	1294.384	65228	282036
+16	1539.154	61125	248409
+17	1341.139	59305	235184
+18	1288.325	56649	214473
+19	1291.707	53960	196282
+20	1321.638	51615	181251
+21	1456.794	49566	168890
 
 Release F reference: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-RND1S-CPU125/place_route/run.log
 Iteration	seconds	unrouted	overused
@@ -19,7 +25,7 @@ Iteration	seconds	unrouted	overused
 15	70.621	41530	155660
 40	40.452	14040	33127
 
-Current route-log evidence
+R1 route-log evidence
 Route thread size: 5
 Unrouted clock nets at iteration 0 (0.513 sec): 15
 Unrouted clock nets at iteration 1 (0.410 sec): 8
@@ -38,3 +44,9 @@ Unrouted general nets at iteration 12 (MT total route time: 715.870 sec): 84552(
 Unrouted general nets at iteration 13 (MT total route time: 971.633 sec): 77138(overused: 387959)
 Unrouted general nets at iteration 14 (MT total route time: 1127.033 sec): 70433(overused: 327750)
 Unrouted general nets at iteration 15 (MT total route time: 1294.384 sec): 65228(overused: 282036)
+Unrouted general nets at iteration 16 (MT total route time: 1539.154 sec): 61125(overused: 248409)
+Unrouted general nets at iteration 17 (MT total route time: 1341.139 sec): 59305(overused: 235184)
+Unrouted general nets at iteration 18 (MT total route time: 1288.325 sec): 56649(overused: 214473)
+Unrouted general nets at iteration 19 (MT total route time: 1291.707 sec): 53960(overused: 196282)
+Unrouted general nets at iteration 20 (MT total route time: 1321.638 sec): 51615(overused: 181251)
+Unrouted general nets at iteration 21 (MT total route time: 1456.794 sec): 49566(overused: 168890)

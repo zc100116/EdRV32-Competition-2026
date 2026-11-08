@@ -1,0 +1,5 @@
+Current Compile LUTRAM initialization evidence
+
+I: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_direction/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_cpu_direction.v(line number: 63)] Loading memory data from file G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_direction/rtl/ip_lutram_cpu_direction_ip_lutram_cpu_direction.dat
+I: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_local_history/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_cpu_local_history.v(line number: 63)] Loading memory data from file G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_local_history/rtl/ip_lutram_cpu_local_history_ip_lutram_cpu_local_history.dat
+I: [G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_tournament/rtl/ipm_distributed_sdpram_v1_3_ip_lutram_cpu_tournament.v(line number: 63)] Loading memory data from file G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/ipcore/ip_lutram_cpu_tournament/rtl/ip_lutram_cpu_tournament_ip_lutram_cpu_tournament.dat

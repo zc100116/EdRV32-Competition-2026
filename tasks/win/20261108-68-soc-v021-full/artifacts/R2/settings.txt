@@ -1,0 +1,17 @@
+HEAD 49448d0c89ccecda82aa7bf23a5b9c82fdf98791
+Sample time 2026-11-08 17:38:54 +08:00
+Available / total physical memory before R2: 19.09 / 31.67 GiB
+
+PDS 2022.2-SP6.1 build 138931, PG2L200H-6 FBB676
+Project: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021
+add_constraint "C:/Users/86183/.codex/worktrees/card68-soc-v021/EdRV32-Competition-2026/fpga/constraints/edrv32_fpga_board_full_top.fdc"
+
+set_arch -family Logos2 -device PG2L200H -speedgrade -6 -package FBB676
+compile -force_to_run -include_path {C:/Users/86183/.codex/worktrees/card68-soc-v021/EdRV32-Competition-2026/rtl/include} -compiler_directives {FPGA_MODE} -top_module edrv32_fpga_board_full_top
+synthesize -ads -selected_syn_tool_opt 2
+dev_map -force_to_run -fanout_number 1000
+pnr -plc_decongestion 2 -dump_router_congestion_plot true -slack_weight 40 -pin_cost_increasing_speed 600 -logic_optimize_lut6d_combing_strategy 0
+report_timing -force_to_run -max_path 200 -input_pins true
+gen_bit_stream
+
+Route thread size: 5

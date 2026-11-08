@@ -1,0 +1,99 @@
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/place_route/edrv32_fpga_board_full_top.prr
+
+Device Utilization Summary :
++-------------------------------------------------------------------------------------+
+| Logic Utilization                 | Used      | Available     | Utilization(%)
++-------------------------------------------------------------------------------------+
+| Use of ADC                        | 0         | 1             | 0
+| Use of ANALOG                     | 0         | 1             | 0
+| Use of APM                        | 372       | 740           | 51
+| Use of BKCL                       | 6         | 10            | 60
+| Use of CCS                        | 1         | 1             | 100
+| Use of CLMA                       | 25871     | 30075         | 87
+|   FF                              | 80118     | 240600        | 34
+|   LUT                             | 73742     | 120300        | 62
+|   LUT-FF pairs                    | 32514     | 120300        | 28
+| Use of CLMS                       | 8473      | 9875          | 86
+|   FF                              | 26993     | 79000         | 35
+|   LUT                             | 25018     | 39500         | 64
+|   LUT-FF pairs                    | 11031     | 39500         | 28
+|   Distributed RAM                 | 2743      | 39500         | 7
+| Use of DDRPHY_CPD                 | 1         | 20            | 5
+| Use of DDRPHY_IOCLK_DIV           | 2         | 10            | 20
+| Use of DDR_PHY                    | 7         | 40            | 18
+| Use of DRM                        | 286       | 415           | 69
+| Use of GCLK_INBUF_SYN             | 0         | 40            | 0
+| Use of GPLL                       | 6         | 10            | 60
+| Use of GSEB                       | 0         | 512           | 0
+| Use of HARD0                      | 9734      | 25050         | 39
+| Use of HCKB                       | 38        | 120           | 32
+|  HCKB dataused                    | 0         | 120           | 0
+| Use of HCKMUX_TEST                | 0         | 10            | 0
+| Use of HSSTLP                     | 0         | 2             | 0
+| Use of IO                         | 137       | 400           | 35
+|   IOBD                            | 69        | 192           | 36
+|   IOBS                            | 68        | 208           | 33
+| Use of IOCKB                      | 0         | 40            | 0
+| Use of IOCKMUX_TEST               | 0         | 10            | 0
+| Use of IOLHR                      | 136       | 500           | 28
+| Use of KEYRAM                     | 0         | 1             | 0
+| Use of MFG_TEST                   | 0         | 1             | 0
+| Use of MRCKB                      | 1         | 20            | 5
+| Use of MRCKMUX_TEST               | 0         | 10            | 0
+| Use of MRPOSTMUX_TEST             | 0         | 10            | 0
+| Use of PCIE                       | 0         | 1             | 0
+| Use of PCKMUX_TEST                | 0         | 20            | 0
+| Use of PLLMRMUX_TEST              | 0         | 10            | 0
+| Use of PLLREFMUX_TEST             | 0         | 10            | 0
+| Use of POSTGMUXLR_TEST            | 0         | 4             | 0
+| Use of PPLL                       | 2         | 10            | 20
+| Use of PREGMUXC_TEST              | 0         | 3             | 0
+| Use of PREGMUXC_X16_200H_TEST     | 0         | 4             | 0
+| Use of PREGMUXLR_TEST             | 0         | 10            | 0
+| Use of RCKB                       | 4         | 40            | 10
+|  RCKB dataused                    | 2         | 40            | 5
+| Use of RCKMUX_TEST                | 0         | 10            | 0
+| Use of SCANCHAIN                  | 0         | 1             | 0
+| Use of SCKMUX_TEST                | 0         | 20            | 0
+| Use of SFB                        | 0         | 5075          | 0
+| Use of SPAD                       | 0         | 8             | 0
+| Use of TSERDES                    | 14        | 80            | 18
+| Use of USCM                       | 11        | 32            | 35
+|  USCM dataused                    | 0         | 32            | 0
+| Use of USCMMUX_TEST               | 0         | 32            | 0
++-------------------------------------------------------------------------------------+
+
+
+Logical hierarchy top LUT / FF: 91342 / 107111
+
+Device Map comparison source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021/device_map/edrv32_fpga_board_full_top.dmr
+
+Device Utilization Summary:
++--------------------------------------------------------------------------+
+| Logic Utilization     | Used       | Available     | Utilization(%)
++--------------------------------------------------------------------------+
+| APM                   | 372        | 740           | 51
+| FF                    | 107042     | 319600        | 34
+| LUT                   | 91208      | 159800        | 58
+| Distributed RAM       | 2743       | 39500         | 7
+| DRM                   | 286        | 415           | 69
+| IO                    | 137        | 400           | 35
+| RCKB                  | 2          | 40            | 5
+| SCANCHAIN             | 0          | 1             | 0
+| USCM                  | 9          | 32            | 29
+| CCS                   | 1          | 1             | 100
+| ADC                   | 0          | 1             | 0
+| DDR_PHY               | 7          | 40            | 18
+| HSSTLP                | 0          | 2             | 0
+| GPLL                  | 6          | 10            | 60
+| PPLL                  | 2          | 10            | 20
+| DDRPHY_CPD            | 1          | 20            | 5
+| HCKB                  | 0          | 120           | 0
+| IOCKB                 | 0          | 40            | 0
+| MRCKB                 | 1          | 20            | 5
+| PCIE                  | 0          | 1             | 0
+| DDRPHY_IOCLK_DIV      | 2          | 10            | 20
+| ANALOG                | 0          | 1             | 0
+| TSERDES               | 14         | 80            | 18
+| KEYRAM                | 0          | 1             | 0
++--------------------------------------------------------------------------+
