@@ -168,10 +168,17 @@ class Planner:
             if command["kind"] == "conv":
                 command["quant_base"] = quant_cursor
                 quant_cursor += command["quant_bytes"]
+        post_lut_offset = align(quant_cursor) - MODEL_BASE
+        for head in range(3):
+            for branch, post_kind in (("box", 1), ("cls", 2)):
+                command = next(c for c in self.commands if c["name"] == f"D{head}.{branch}.out")
+                command.update(post_kind=post_kind, head_id=head,
+                               post_lut_offset=post_lut_offset + head * 2048)
         return {
+            "post_lut_offset": post_lut_offset,
             "model_base": MODEL_BASE,
             "weight_bytes": self.weight_cursor - MODEL_BASE,
-            "image_bytes": align(quant_cursor) - MODEL_BASE,
+            "image_bytes": post_lut_offset + 3 * 2048,
             "work_bytes": self.head1_base + 307200 - ACT_BASE,
             "tensors": {name: asdict(tensor) | {
                 "plane_stride": tensor.plane_stride, "bytes": tensor.size}
@@ -262,7 +269,9 @@ def convolution_descriptor(command: dict, zero_point: int = 0) -> Descriptor:
         in_w=command["input_width"], in_h=command["input_height"],
         out_w=command["output_width_pairs"] * 2, out_h=command["output_height"],
         cin_blocks=command["cin_blocks"], cout_blocks=command["output_blocks"],
-        out_zp=zero_point)
+        out_zp=zero_point, post_kind=command.get("post_kind", 0),
+        head_id=command.get("head_id", 0),
+        post_lut_offset=command.get("post_lut_offset", 0))
 
 
 def descriptors(plan: dict, rows: list[dict]) -> list[Descriptor]:

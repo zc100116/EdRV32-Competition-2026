@@ -1,14 +1,16 @@
-"""format.py — NPU spec 2.2, 4.1–4.3: encode descriptors and DDR images.
+"""format.py — NPU spec 2.2, 4.1–4.4: encode descriptors and DDR images.
 
 Byte order follows DDR addresses; hex lines reverse bytes for $readmemh.
 Clock domain: offline host tool.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 import struct
 
-import numpy as np
+from yolo_post_ref import make_heads
 
 
 BASES = {"MODEL_BASE": 0x00100000, "WORK_BASE": 0x01000000,
@@ -47,6 +49,9 @@ class Descriptor:
     cin_blocks: int = 1
     cout_blocks: int = 1
     out_zp: int = 0
+    post_kind: int = 0
+    head_id: int = 0
+    post_lut_offset: int = 0
 
     @property
     def k_count(self) -> int:
@@ -79,12 +84,15 @@ class Descriptor:
                  self.cin_blocks | self.cout_blocks << 8 | (self.out_zp & 255) << 16,
                  self.cin_blocks * self.in_w // 4 |
                  (self.k_count << 16 if self.op == 0 else 0),
-                 self.weight_block_bytes if self.op == 0 else 0, 0, 0, 0]
+                 self.weight_block_bytes if self.op == 0 else 0,
+                 self.post_kind | self.head_id << 2, self.post_lut_offset, 0]
         return struct.pack("<16I", *words)
 
 
 def pack_weights(weight: np.ndarray, desc: Descriptor) -> bytes:
     """Spec 4.3: ordinary, folded HALF_TAIL, or IN_C4 rows of 256 bytes."""
+    import numpy as np
+
     cout, cin, kernel, _ = weight.shape
     physical_cin = 8 if desc.in_c4 else desc.cin_blocks * 16
     padded = np.zeros((desc.cout_blocks * 32, physical_cin, kernel, kernel), np.int8)
@@ -115,7 +123,20 @@ def pack_quant(bias, mult, shift, cout_blocks: int, lut: bytes = bytes(256)) -> 
     return bytes(result)
 
 
+def pack_post_tables(head: dict) -> bytes:
+    """Spec 4.4: 256 little-endian u32 exp entries followed by probabilities."""
+    return struct.pack("<512I", *head["exp_q20"], *head["probability_q24"])
+
+
+def model_with_post_tables(image: bytes, rows: list[dict], plan: dict) -> bytes:
+    """Keep weights/quantization offsets fixed; append spec 4.4 tables."""
+    heads = make_heads({"convolutions": rows})
+    return bytes(image[:plan["post_lut_offset"]]) + b"".join(map(pack_post_tables, heads))
+
+
 def pack_c4(rgb: np.ndarray) -> bytes:
+    import numpy as np
+
     physical = np.zeros((*rgb.shape[:2], 4), dtype=np.int8)
     physical[:, :, :3] = rgb
     return physical.tobytes()

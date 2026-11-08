@@ -62,9 +62,13 @@ PROGRAM_SOURCES += sw/apps/showcase/board/coremark_stack.S
 # Keep the locked upstream list code unchanged; GCC 15 diagnoses its local search key.
 $(OUT)/obj/third_party/coremark/core_list_join.o: CORE_MAIN_FLAGS := -Wno-maybe-uninitialized
 
-# P5b 9.1: compiler model, decoded exactly like the PC EDNM uploader.
-SHOWCASE_MODEL_DIR := $(ROOT)/tasks/win/20261029-09-b3-software/src/npu
+# Spec npu 2.5/4.4: rebuild tags/tables from the checked-in offline snapshot.
+SHOWCASE_MODEL_SOURCE := $(ROOT)/tasks/win/20261029-09-b3-software/src/npu
+SHOWCASE_MODEL_DIR := $(ROOT)/build/npu/software_model
 PROGRAM_SOURCES += build/showcase/model.c
 $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(addprefix $(SHOWCASE_MODEL_DIR)/,mem_desc.hex mem_model.hex regs.txt)
-	python3 $< $(SHOWCASE_MODEL_DIR) $@
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_MODEL_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
+	    --out $(SHOWCASE_MODEL_DIR)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@

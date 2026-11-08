@@ -18,7 +18,7 @@ from ultralytics import YOLO
 
 from checkpoint_audit import audit, resolve_conv
 from fixed_plan import convolution_descriptor
-from format import pack_weights
+from format import model_with_post_tables, pack_weights
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path.home() / ".local/share/edrv32/npu"
@@ -304,6 +304,7 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
         image[quant_offset:quant_offset + len(params)] = params
         rows.append({"index": command["index"], "name": command["name"],
                      "input_scales": owner_scales, **metrics})
+    image = model_with_post_tables(image, rows, plan)
     CACHE.mkdir(parents=True, exist_ok=True)
     (CACHE / "model.bin").write_bytes(image)
     (CACHE / "quantization.json").write_text(json.dumps({
@@ -317,5 +318,7 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
 def load_quantized(plan: dict) -> tuple[bytes, list[dict]]:
     if (CACHE / "model.bin").exists():
         rows = json.loads((CACHE / "quantization.json").read_text())["convolutions"]
-        return (CACHE / "model.bin").read_bytes(), rows
+        image = model_with_post_tables((CACHE / "model.bin").read_bytes(), rows, plan)
+        (CACHE / "model.bin").write_bytes(image)
+        return image, rows
     return calibrate(plan)

@@ -33,7 +33,11 @@ runtime: $(ROOT)/build/showcase/model.c
 	    -ffunction-sections -fdata-sections -Wl,--gc-sections -o $(OUT)/$(RUNTIME_TEST)
 	$(OUT)/$(RUNTIME_TEST)
 
+SHOWCASE_MODEL_SOURCE := $(ROOT)/tasks/win/20261029-09-b3-software/src/npu
+SHOWCASE_MODEL_DIR := $(ROOT)/build/npu/software_model
 $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
-    $(addprefix $(ROOT)/tasks/win/20261029-09-b3-software/src/npu/,\
-        mem_desc.hex mem_model.hex regs.txt)
-	python3 $< $(ROOT)/tasks/win/20261029-09-b3-software/src/npu $@
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_MODEL_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
+	    --out $(SHOWCASE_MODEL_DIR)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@

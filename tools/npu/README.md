@@ -390,3 +390,41 @@ PY
 0.623 的假设；线程设置和 NMS 后端应随以后精度测量一并记录。
 旧 Windows 原始候选、完整 eval JSON、依赖版本和实际线程/NMS 后端仍缺失，
 无法将上述环境敏感项认定为旧差异的根因，结论保留“未查明”。
+
+## NPU 后处理方案 (b)
+
+`compile_yolo.py` 为 `D{h}.box.out/cls.out` 的六条描述符写入字 13/14；
+普通描述符字 13/14/15 保持零。模型末尾追加三份 2048 B 小端表，
+每份先是 256×u32 exp_q20，再是 256×u32 probability_q24；权重、量化参数和地址不变。
+缓存 `model.bin` 在装载时也会按当前量化参数写入这三份表。
+
+软件构建可直接使用仓库离线快照，仅需 Python 标准库，无需重新标定：
+
+```sh
+python3 tools/npu/compile_yolo.py \
+    --model-source tasks/win/20261029-09-b3-software/src/npu \
+    --out build/npu/software_model
+```
+
+showcase 的模型嵌入规则使用此入口；board_npu 的 `board_cases.py` 继续调用
+`--image` 入口并打包完整镜像。demo 的 EDNM 上传使用新编译目录的完整
+`mem_desc.hex` 和 `mem_model.hex`，上传格式不变。
+
+`yolo_post_ref.py` 默认两阈值为表推导的 103/105/103 和严格 Q24 >4194304。
+指定概率阈值时，未显式指定的 INT8 前筛由相同概率表推导；128 表示全拒绝。
+Python API `decode_candidates(output, heads, stats=None, int8_thresholds=None,
+probability_threshold=4194304)` 返回 NMS 前全部 `[xyxy_q8, probability_q24,
+class_id, anchor]`；`pack_candidates` 生成连续的小端 `<4iIHH` 24 B 记录。
+`postprocess_candidates` 执行 CPU 排序/NMS/映射且保留调用者的原始候选。
+
+```sh
+python3 tools/npu/yolo_post_ref.py build/npu/post_tools/output.bin \
+    --candidates-bin build/npu/post_tools/candidates.bin \
+    > build/npu/post_tools/candidates.json
+# 可加 --int8-thresholds 110 110 110 --probability-threshold 8388608
+```
+
+JSON 包含未裁剪 signed Q8 坐标、Q24 概率、类别、全局 anchor 和最终 EDDT。
+二进制文件仅含有效 24 B 记录；RTL AXI 尾拍的零填充不计入文件长度。
+`check_post_tools.py` 的 TL-05、真实帧新旧路径对比和边界自检复现命令见
+`docs/reports/2026-11-08-npu-post-tools.md`。
