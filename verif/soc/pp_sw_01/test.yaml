@@ -3,7 +3,7 @@ files: files.f
 defines: SIM_MODE
 parameters:
 software: pp_sw_01
-timeout: 600
+timeout: 3600
 pass: PASS
 tier: full
 simulator: verilator

@@ -259,12 +259,6 @@ module edrv32_npu_post_tb;
             end
         end
     end
-    int case_number;
-
-    initial begin
-        case_number = 0;
-    end
-
     // The same byte image plusarg convention as ROM/SRAM, through the model API.
     initial begin : preload_ddr
         string path;
@@ -386,9 +380,12 @@ module edrv32_npu_post_tb;
     end
 
     initial begin
-        #1000000;
-        $display("SIM SC-%02d time=%0t debug=%h", case_number, $time, unused_debug_o);
-        $fflush();
+        forever begin
+            #1000000;
+            $display("SIM PP-SW time=%0t debug=%h starts=%0d invalidates=%0d cpu_addr=%h",
+                $time, unused_debug_o, starts, invalidations, u_dut.u_cpu.dc_req_addr_w);
+            $fflush();
+        end
     end
 
     initial begin
