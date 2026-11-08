@@ -3,8 +3,7 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "程序比较消费者结果",
-    "按 cases 的 E 入口周期差验证延迟，D 停顿恰好覆盖尚未满足的延迟，load-use 对应 debug[24]"
+    "load 2/1, multiply 4, CSR 2; gaps 0 through 4; issue-cycle latency and architectural value"
   ],
   "cases": [
     {
@@ -32,28 +31,70 @@
       "latency": 2
     },
     {
+      "producer": "latency_load_4_producer",
+      "consumer": "latency_load_4_consumer",
+      "gap": 4,
+      "latency": 2
+    },
+    {
+      "producer": "latency_early_0_producer",
+      "consumer": "latency_early_0_consumer",
+      "gap": 0,
+      "latency": 1
+    },
+    {
+      "producer": "latency_early_1_producer",
+      "consumer": "latency_early_1_consumer",
+      "gap": 1,
+      "latency": 1
+    },
+    {
+      "producer": "latency_early_2_producer",
+      "consumer": "latency_early_2_consumer",
+      "gap": 2,
+      "latency": 1
+    },
+    {
+      "producer": "latency_early_3_producer",
+      "consumer": "latency_early_3_consumer",
+      "gap": 3,
+      "latency": 1
+    },
+    {
+      "producer": "latency_early_4_producer",
+      "consumer": "latency_early_4_consumer",
+      "gap": 4,
+      "latency": 1
+    },
+    {
       "producer": "latency_mul_0_producer",
       "consumer": "latency_mul_0_consumer",
       "gap": 0,
-      "latency": 3
+      "latency": 4
     },
     {
       "producer": "latency_mul_1_producer",
       "consumer": "latency_mul_1_consumer",
       "gap": 1,
-      "latency": 3
+      "latency": 4
     },
     {
       "producer": "latency_mul_2_producer",
       "consumer": "latency_mul_2_consumer",
       "gap": 2,
-      "latency": 3
+      "latency": 4
     },
     {
       "producer": "latency_mul_3_producer",
       "consumer": "latency_mul_3_consumer",
       "gap": 3,
-      "latency": 3
+      "latency": 4
+    },
+    {
+      "producer": "latency_mul_4_producer",
+      "consumer": "latency_mul_4_consumer",
+      "gap": 4,
+      "latency": 4
     },
     {
       "producer": "latency_csr_0_producer",
@@ -78,11 +119,17 @@
       "consumer": "latency_csr_3_consumer",
       "gap": 3,
       "latency": 2
+    },
+    {
+      "producer": "latency_csr_4_producer",
+      "consumer": "latency_csr_4_consumer",
+      "gap": 4,
+      "latency": 2
     }
   ],
   "tier": "smoke",
   "rvc": [
-    true
+    false
   ],
   "schedule": []
 }

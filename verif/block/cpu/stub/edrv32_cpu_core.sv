@@ -6,7 +6,6 @@ module edrv32_cpu_core (
     // Clock and reset.
     input logic clk_i,
     input logic rst_n_i,
-    input logic [7:0] rst_sys_direction_n_i,
     input logic rst_sys_csr_n_i,
     input logic [9:0] rst_sys_counter_n_i,
 
@@ -18,12 +17,14 @@ module edrv32_cpu_core (
     output logic ic_inv_o,
     input logic ic_req_ready_i,
     input logic ic_resp_valid_i,
+    input logic [7:0] ic_resp_valid_copy_i,
     input logic [63:0] ic_resp_data_i,
     input logic ic_resp_err_i,
     input logic ic_inv_done_i,
 
     // D$ interface.
     output logic dc_req_valid_o,
+    output wire dc_req_early_o,
     output logic [31:0] dc_req_addr_o,
     output logic dc_req_store_o,
     output logic [1:0] dc_req_size_o,
@@ -34,7 +35,8 @@ module edrv32_cpu_core (
     output logic dc_clean_all_o,
     input logic dc_req_ready_i,
     input logic dc_resp_valid_i,
-    input logic [31:0] dc_resp_data_i,
+    input logic [63:0] dc_resp_way_data_i,
+    input logic [1:0] dc_resp_way_hit_i,
     input logic dc_resp_err_i,
     input logic dc_resp_device_i,
     input logic dc_fence_done_i,
@@ -49,6 +51,13 @@ module edrv32_cpu_core (
     input logic irq_mtip_i,
     input logic [63:0] mtime_i
 );
+    wire [31:0] dc_resp_data_i =
+        ({32{dc_resp_way_hit_i[0]}} & dc_resp_way_data_i[31:0]) |
+        ({32{dc_resp_way_hit_i[1]}} & dc_resp_way_data_i[63:32]);
+    // The fixed-table stub does not implement CSR or HPM state.
+    wire unused_reset_w = &{1'b0, rst_sys_csr_n_i, rst_sys_counter_n_i,
+        ic_resp_valid_copy_i};
+
     logic done_w;
     logic [1:0] trace_valid_w = 0;
     logic [63:0] trace_pc_w = 0;
@@ -72,6 +81,7 @@ module edrv32_cpu_core (
     bit dc_error_enabled;
     bit ic_error_enabled;
 
+    assign dc_req_early_o = 1'b0;
     assign m_enter_w = dc_req_valid_o && dc_req_ready_i;
     // Expose counters/debug hooks for C-V5, without attempting coverage statistics here.
     assign debug_o = {trace_pc_w[31:0], 11'b0, trace_valid_w, 19'b0};

@@ -1,0 +1,15 @@
+tb.sv
++incdir+../../../../rtl/include
+../../../../rtl/cpu/edrv32_cpu_frontend.v
+../../../../rtl/cpu/edrv32_cpu_ib.v
+../../../../rtl/cpu/edrv32_cpu_decode.v
+../../../../rtl/cpu/edrv32_cpu_predictor.v
+../../../../rtl/tech/edrv32_ram_cpu_btb.v
+../../../../rtl/tech/edrv32_ram_cpu_direction.v
+../../../../rtl/tech/edrv32_ram_cpu_local_history.v
+../../../../rtl/tech/edrv32_ram_cpu_local_direction.v
+../../../../rtl/tech/edrv32_ram_cpu_chooser.v
+../../../../rtl/cache/edrv32_icache.v
+../../../../rtl/cache/edrv32_cache_pma.v
+../../../../rtl/tech/edrv32_ram_icache_tag.v
+../../../../rtl/tech/edrv32_ram_icache_data.v

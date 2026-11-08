@@ -3,12 +3,21 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "branch_direction 必须发生 E 重定向，年轻指令不退休",
-    "E 重定向后下一拍 F1 正确地址，代价 3 周期"
+    "branch_direction \u5fc5\u987b\u53d1\u751f E \u91cd\u5b9a\u5411\uff0c\u5e74\u8f7b\u6307\u4ee4\u4e0d\u9000\u4f11",
+    "E \u91cd\u5b9a\u5411\u540e\u4e0b\u4e00\u62cd F1 \u6b63\u786e\u5730\u5740\uff0c\u4ee3\u4ef7 3 \u5468\u671f"
   ],
   "tier": "smoke",
   "rvc": [
     true
   ],
-  "schedule": []
+  "schedule": [],
+  "cases": [
+    {
+      "redirect": "branch_direction",
+      "target": "taken",
+      "stage": "E",
+      "slot": 0,
+      "cause": 1
+    }
+  ]
 }

@@ -11,6 +11,7 @@
     .balign 8
 oldest_fault:
     lw a2, 0(a1)
+    nop                         # Keep the faulting load in an older issue group.
 priority_branch:
     beq zero, zero, wrong_target
 priority_jal:

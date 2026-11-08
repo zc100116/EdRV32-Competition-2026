@@ -3,8 +3,10 @@
   "spike": "compare",
   "stimulus": [],
   "checks": [
-    "软件逐场景比较结果",
-    "B1 覆盖观察器必须确认 cases 每个实际源级、源管线、操作数、消费者槽位均命中"
+    "\u8f6f\u4ef6\u9010\u573a\u666f\u6bd4\u8f83\u7ed3\u679c",
+    "B1 \u8986\u76d6\u89c2\u5bdf\u5668\u5fc5\u987b\u786e\u8ba4 cases \u6bcf\u4e2a\u5b9e\u9645\u6e90\u7ea7\u3001\u6e90\u7ba1\u7ebf\u3001\u64cd\u4f5c\u6570\u3001\u6d88\u8d39\u8005\u69fd\u4f4d\u5747\u547d\u4e2d",
+    "\u4e92\u6362\u7ec4\u53ef\u8fbe\u6e90 E1 ALU/E0 JALR\u94fe\u63a5/M0 load/W0 mul\uff0crs1/rs2\u4e0e\u69fd0/1\uff1b\u4e0d\u53ef\u8fbe\u4ea4\u53c9\u7531\u7ba1\u7ebf\u80fd\u529b\u7ea6\u675f\u6392\u9664\uff08\u534f\u8c03\u8005\u786e\u8ba4\uff09",
+    "v0.17: mul4 immediate consumers use RF=0; ordinary swapped loads retain M0=3; early load uses E0=1"
   ],
   "cases": [
     {
@@ -198,11 +200,179 @@
       "source_pipe": 1,
       "operand": 2,
       "consumer_slot": 1
+    },
+    {
+      "producer": "swap_alu_rs1_producer",
+      "consumer": "swap_alu_rs1_consumer",
+      "source_stage": "E",
+      "source_pipe": 1,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_alu_rs1_producer",
+      "pc1": "swap_alu_rs1_producer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_alu_rs1_consumer",
+      "pc1": "swap_alu_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_alu_rs2_producer",
+      "consumer": "swap_alu_rs2_consumer",
+      "source_stage": "E",
+      "source_pipe": 1,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_alu_rs2_producer",
+      "pc1": "swap_alu_rs2_producer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_alu_rs2_entry",
+      "pc1": "swap_alu_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_jalr_rs1_producer",
+      "consumer": "swap_jalr_rs1_consumer",
+      "source_stage": "E",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_jalr_rs1_producer-4",
+      "pc1": "swap_jalr_rs1_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_jalr_rs1_consumer",
+      "pc1": "swap_jalr_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_jalr_rs2_producer",
+      "consumer": "swap_jalr_rs2_consumer",
+      "source_stage": "E",
+      "source_pipe": 0,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_jalr_rs2_producer-4",
+      "pc1": "swap_jalr_rs2_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_jalr_rs2_entry",
+      "pc1": "swap_jalr_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_load_rs1_producer",
+      "consumer": "swap_load_rs1_consumer",
+      "source_stage": "M",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_load_rs1_producer-4",
+      "pc1": "swap_load_rs1_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_load_rs1_consumer",
+      "pc1": "swap_load_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_load_rs2_producer",
+      "consumer": "swap_load_rs2_consumer",
+      "source_stage": "M",
+      "source_pipe": 0,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_load_rs2_producer-4",
+      "pc1": "swap_load_rs2_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_load_rs2_entry",
+      "pc1": "swap_load_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_mul_rs1_producer",
+      "consumer": "swap_mul_rs1_consumer",
+      "source_stage": "RF",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
+    },
+    {
+      "pc0": "swap_mul_rs1_producer-4",
+      "pc1": "swap_mul_rs1_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_mul_rs1_consumer",
+      "pc1": "swap_mul_rs1_consumer+4",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "swap_mul_rs2_producer",
+      "consumer": "swap_mul_rs2_consumer",
+      "source_stage": "RF",
+      "source_pipe": 0,
+      "operand": 2,
+      "consumer_slot": 1
+    },
+    {
+      "pc0": "swap_mul_rs2_producer-4",
+      "pc1": "swap_mul_rs2_producer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "pc0": "swap_mul_rs2_entry",
+      "pc1": "swap_mul_rs2_consumer",
+      "pair": true,
+      "swap": true
+    },
+    {
+      "producer": "early_load_producer",
+      "consumer": "early_load_consumer",
+      "source_stage": "E",
+      "source_pipe": 0,
+      "operand": 1,
+      "consumer_slot": 0
     }
   ],
   "tier": "smoke",
   "rvc": [
-    true
+    false
   ],
   "schedule": []
 }

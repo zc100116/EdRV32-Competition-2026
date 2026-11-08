@@ -1,0 +1,14 @@
+{
+  "test": "a-04",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "four consecutive stores followed by early-eligible loads; byte/halfword merge matches Spike"
+  ],
+  "cases": [],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": []
+}

@@ -117,8 +117,41 @@ CPU 内部各单元之间的接口没有在规格中冻结，因此 RTL 由同�
 | 双发射使 LUT 超出 10K 预算 | C-W2 后对照资源分布，优先简化旁路网络和配对逻辑 |
 | Spike 在本机构建困难 | I-02 中解决；仍不行时另行讨论参考模型 |
 
+## 7. v0.17（国赛：Fmax 与 IPC）
+
+目标：cpu-spec v0.17、testplan v0.4。完成标准：B1 smoke 与本节新增测试通过；R-05 周期数 ≤ 模型值 105%；卡 59 CPU+L1 独立 150 MHz WNS ≥ 0。集成分支 `zc100116/cpu-n16`（b3 `e54e471e` + v0.16 + 评估模型）。
+
+| 编号 | 内容 | 执行者 | 依赖 | 验收 | 分支 | 状态 |
+|---|---|---|---|---|---|---|
+| N-FE | 前端时序：F1 下一 PC 环、F2→IB、I$ tag→前端满足 4.9，周期行为不变 | Codex sol | — | 前端/预测器/I$ 单元测试、B1 smoke 子集、Yosys 级数参考 | task-cpu-n-fe | [x] e7fe212e：R01–R05 与 v0.16 周期完全一致，B1 40/40；Yosys F1 环仍 8 级、I$ tag→resp 5 级，待卡 59 |
+| N-BE | 后端：寄存重定向、mul4、ALU 旁路环、D$ tag 后选择、扇出复制；再做 4.10 提前地址、4.11 LCB（分步提交） | Codex sol | — | 单元测试、B1 smoke 子集；各步 R-05 周期 | task-cpu-n-be | [x] 0c3ef8e0/c03b5f35/c04919db/66fd009d：R-05 1,955,141 / 1,900,245 / 1,900,158 / 1,900,158；提前查询读口冲突 34% |
+| N-VERIF | B1 按 testplan v0.4 修改期望值并新增 B-10/B-11、A-01–A-04、L-01–L-03；B1 D$ 模型加提前访问 | Codex sol（独立验证） | 4.10 接口确认后做 A-02/A-03 | 在 v0.16 上新测试能运行；联调后全部通过 | task-cpu-n-verif | [x] 9897d4a5：v0.16 基线 39/47，8 项按 v0.17 期望失败；接线编译留 N-INT；R-05 上限待模型值 |
+| N-MODEL | 周期模型按 v0.17 条款精确实现，给出 R-05 期望值；评估 tournament（计纠正气泡）、宏操作融合、串联 ALU 在 v0.17 上的净收益 | Codex sol | — | 模型定向测试；设计记录 | task-cpu-n-model | [x] f809053c：S2 1,868,156 / S3 1,867,923；推荐 tournament（+3.7%/+4.3%/+2.1%） |
+| N-INT | D$ 提前查询副本 RAM（用户 2026-11-05）、删除 4.11 LCB（用户 2026-11-05）、合并 N-FE/N-VERIF、B1 按路模型、回归 | 复用 N-BE 终端（ctx_055d0565607f） | 以上 | 回归通过，R-05 达标 | task-cpu-n-be → cpu-n16 | [x] fcc983f3：B1 46/46、arch 63、单元 15 目录、R01–R05 通过；R-05 1,869,203（模型 S2 +0.056%），提前查询成功率 97.55% |
+| N-PDS | 卡 59：v0.17 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-INT | WNS ≥ 0，或得到下一轮路径分类 | win/20261105-59-cpu-v017-timing-probe | [x] 110.9 MHz（WNS −2.350，7890 端点），低于 v0.16 的 124.9；结构估计比实测少 4–6 级 |
+| N-FIX | v0.17 缺陷：寄存 D 重定向强制单发射时 d_swap 未同步，导致跳过 JAL（tournament 时序下由随机测试暴露） | Codex（N-TOUR 中发现） | — | cpu_v3s scenario21 修复前失败、修复后通过 | cpu-n16 6aae76e5/9cfd69a3 | [x] |
+| N-TOUR | v0.18 tournament（用户 2026-11-05）：三张 LUTRAM 表、F2 纠正 1 拍、E 寄存训练 | Codex sol | N-INT | B1 47/47、R01–R05；R-05 1,807,583（模型 +0.33%，比 v0.17 少 3.3%） | task-cpu-n-tour b4fd7a63 | [x] |
+| N-PDS2 | 卡 60：v0.18 CPU+L1 独立 150 MHz 探针，新 IP 2 个（local_history 256×10、tournament 1024×2） | 用户 + Windows Codex | N-TOUR | 频率 ≥ 卡 59 的 98% | win/20261105-60-cpu-v018-tournament-probe | [x] 109.0 MHz，卡 59 的 98.31%；v0.18 并入 cpu-n16（dc018e50） |
+| N-T2BE | 时序第二轮后端（用户 2026-11-06）：级数工具对卡 59/60 校准、P1 E 判定只进寄存器、P2 M 停顿网络、P3/P4 D 级预译码与提前查询、P5 ALU 环、P6/P10 扇出；最后集成 N-T2FE | Codex sol（task_1b2c7ad2a925 / ctx_65c4e1f57c5e） | N-PDS2 | 工具实测级数；B1、R01–R05；R-05 增加 ≤ 1.5% | task-cpu-n-t2be | [x] N-T2BE2 5273bd6b → cpu-n16：11 单元、B1 48/48、R01–R05 通过，R-05 1,807,726（+0.008%）。第一轮 eaf250a8：校准工具 503c2ea2；P1 禁止路径 0 条；P2–P6 等价减级，R-05 不变（1,807,583）；残余进入 PDS 复核。v0.20 放宽 4.10（用户 2026-11-07）；N-T2BE2 task_f8d9c4473201 / ctx_c9f1881ca832：P4 按 v0.20、P10 副本、集成前端 |
+| N-T2FE | 时序第二轮前端：P7 I$→F1、P8 F1→RAS、P9 F1 环、P10 前端扇出 | Codex sol（task_932990e44e9b / ctx_5fe7d53b009c） | N-T2BE 第 0 步工具 | 工具实测级数；前端单元、B1 | task-cpu-n-t2fe | [x] N-T2FE2 v0.19 已集成。第一轮 b8f07fb5：等价改动，R-05 不变，381 扇出降到 14；P7 13 级、P9 11 级仍超预算。v0.19 I$ 缺失重发和 IB 寄存余量（用户 2026-11-07）；N-T2FE2 task_f719f2ce321b / ctx_891757b8fb27 |
+| N-CUT | 流水线切分评估（用户 2026-11-07）：C1–C6 及组合的三负载周期、频率上限 | Codex sol（task_94c390a9105b） | — | 设计记录 | task-cpu-n-cut → cpu-n16 | [x] `docs/design/2026-11-07-cpu-pipeline-cut-eval.md`；C4 约 0%，C1 +1.4%，C2 +1.3%，C3 +2.9%，C6 行预测 +2.3%，C5 移位 +7% |
+| N-PDS3 | 卡 62：v0.20 CPU+L1 独立 150 MHz 探针，分组 P1–P10 | 用户 + Windows Codex | N-T2BE2 | ≥ 135 MHz，再冲 150 MHz | win/20261107-62-cpu-v020-timing-probe | [x] 134.8 MHz（WNS −0.752，3896 个端点）；剩余为 cache tag → LRU/有效位、D$ 数据 → E、F2 纠正 → F1、F2 → IB 预译码 |
+| N-T3BE | 第三轮后端（用户 2026-11-07 选择"等价修复 + 切分 C1+C3"，目标 150 MHz）：起草 v0.21（M2 级、D1/D2），D$ 内部等价修复，F 类，实现后集成 | Codex sol（task_0b43cba72d51 / ctx_8d67795d602e） | N-PDS3 | 起草稿经审定；B1、R01–R05；工具级数 | task-cpu-n-t3be | [x] 10495649 → cpu-n16：单元 10 目录、B1 48/48、R01–R05 通过，R-05 1,807,726；剩余项交卡 64 复核。之前：v0.21 切分草稿（M2、D1/D2）已经审定，但精确模型给出 CoreMark +11.2%，用户 2026-11-07 撤回（fa8aeb8f）。本任务改为只做等价修复并负责集成 |
+| N-T3FE | 第三轮前端等价修复：F2 纠正 → F1、F1 环、I$ tag → 有效位/LRU、F2 → IB | Codex sol（task_f717515b3011 / ctx_e7dd11e97e61） | N-PDS3 | 工具级数；前端单元、B1、R05 | task-cpu-n-t3fe | [x] ab9224cd 已集成：C1 5 级、A1 3/6 级；C2 F1 环 7 级、F1 请求地址 → LRU 快照 6/F98 交卡 64 |
+| N-WAYP | D$ 路预测原型 d0（用户 2026-11-07 选择'先 e，并行试 d0'）：预测路数据直通 E，下一拍校验后冻结修复 | Codex sol（task_f3fb445e93ee / ctx_d7e2804e22e7） | — | DRM → E 的工具级数，R-05 周期和失败率 | task-cpu-n-wayp（原型，不并入） | [x] 19423faf：R-05 +0.026%，失败率 0.44%；DRM → E 13 → 12 级，没有达到 ≤ 3，不采用 |
+| N-PDS4 | 卡 64：v0.21 CPU+L1 独立 150 MHz 探针 | 用户 + Windows Codex | N-T3BE | WNS ≥ +0.3 ns（为整片留余量，用户 2026-11-07） | win/20261107-64-cpu-v021-timing-probe | [x] 138.3 MHz（WNS −0.562，1625 端点），未达标；分类见 docs/reports/2026-11-07-timing-cpu-v021.md |
+| N-T4FE | 第四轮前端（用户 2026-11-07 选择"填充时预译码 + 先算 C3"）：I$ 填充时预译码（cpu-spec v0.22、cache-spec v0.13），B 类等价修复 | Codex sol（task_029551b16182 / ctx_bb7726248811） | N-PDS4 | 工具级数；IC-09、前端单元、B1、R05 | task-cpu-n-t4fe | [x] 36ffc12d..21850314 已集成：P=22，I$ 数据 RAM 108 位；A 类代理 15→11 级，B 类 13→9 级 |
+| N-T4BE | 第四轮后端：C/D/E/F 类等价修复，C3 单独精确代价（只做模型），最后负责集成 | Codex sol（task_794226fc0dae / ctx_dbc51bb12b34） | N-PDS4 | 工具级数；C3 三负载周期；B1、R01–R05 | task-cpu-n-t4be | [x] 3dccacae → cpu-n16：B1 48/48、R01–R05 通过，R-05 1,808,045（+319，I$ 缺失 +1 拍）；D 17→6 级，E 16→11，C 15→10/14；C3 精确代价 CoreMark +10.75%、视觉 +3.08%、LVGL +2.17% |
+| N-PDS5 | 卡 66：v0.22 CPU+L1 独立 150 MHz 探针（重新生成 I$ 数据 IP 为 108 位） | 用户 + Windows Codex | N-T4BE | WNS ≥ +0.3 ns | win/20261107-66-cpu-v022-timing-probe | [x] 133.0 MHz（WNS −0.849，2961 端点），比卡 64 退步；分析见 docs/reports/2026-11-07-timing-cpu-v022.md |
+| N-T5 | 修卡 66 退步路径后冻结（用户 2026-11-07 选择'修三处后冻结'）：IB 数据写使能脱离本拍命中、F2 纠正寄存后进 IB、写缓冲比较前移、E 地址 → D$ 译码、命中扇出、删无用副本 | Codex sol（task_6e372e1b8529 / ctx_19d88744a02e） | N-PDS5 | B1、R01–R05（R-05 = 1,808,045），代理级数 | task-cpu-n-t5 | [x] f1e0d42f → cpu-n16，RTL 冻结候选：IB 数据 CE、F2 → IB 计数路径已切断，写缓冲比较前移、命中分组（最大扇出 8）；LRU 快照撤回；B1 48/48、R01–R05 通过，R-05 = 1,808,045 |
+| N-PDS6 | 卡 67：T5 冻结候选的 CPU+L1 独立 150 MHz 探针；与卡 64 取高者冻结 | 用户 + Windows Codex | N-T5 | 时序报告 | win/20261107-67-cpu-t5-timing-probe | [x] 133.3 MHz（WNS −0.834），低于卡 64；按用户决定冻结卡 64 的 v0.21（9fa3f649），见 docs/reports/2026-11-08-timing-cpu-t5.md |
+| N-FRZ | 冻结 CPU v0.21（用户 2026-11-08）：RTL 恢复为 9fa3f649，规格回退为 cpu-spec v0.23 / cache-spec v0.14 / cache-testplan v0.6，I$ 数据 IP 回到 64 位 | 协调者 | N-PDS6 | 树与 9fa3f649 一致 | cpu-n16 | [x] 224fb4b7 + 规格提交 |
+| N-SPEC | 投机补偿的流水切分评估（用户 2026-11-08）：C3 + 地址预测 / W 基址 / 编译器重排，ALU 环分簇旁路等，组合 C6-line、C1，估等效跑分；只做模型 | Codex sol（task_283409578182 / ctx_4e278ab607c4） | N-FRZ | 等效跑分比 v0.21 高 ≥5% 才考虑 RTL | task-cpu-spec-eval | [~] 已派发 |
+| N-SOC | 冻结 CPU 并入整片 SoC，整片时钟目标待定 | — | N-FRZ | 整片 P&R、上板 | — | [ ] 待讨论 |
+
 ## 6. 变更记录
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-10-25 | v0.1 | 初稿 |
+| 2026-11-05 | v0.x | 增加第 7 节 v0.17 待办 |

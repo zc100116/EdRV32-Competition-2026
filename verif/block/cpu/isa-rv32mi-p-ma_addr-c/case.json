@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32mi-p-ma_addr",
-  "source": "third_party/riscv-tests/isa/rv32mi/ma_addr.S",
-  "rvc": true
-}

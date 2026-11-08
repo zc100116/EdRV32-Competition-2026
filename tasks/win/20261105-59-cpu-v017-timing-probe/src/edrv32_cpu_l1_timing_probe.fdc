@@ -1,0 +1,14 @@
+# File: edrv32_cpu_l1_timing_probe.fdc
+# Card 59 (same as card 56): timing-only constraints for edrv32_cpu_l1_timing_probe (no bitstream, no board run).
+# clk_i enters on the board oscillator pin D18 and is constrained directly at the
+# probe frequency; edit only the period/waveform pair when the card asks for another rate.
+create_clock -name {clk_sys} [get_ports {clk_i}] -period {6.667} -waveform {0 3.3335}
+# Match the 0.150 ns setup uncertainty seen on clk_sys in card 48 (F125 r2).
+set_clock_uncertainty {0.15} -from [get_clocks {clk_sys}] -to [get_clocks {clk_sys}] -setup
+# Probe pins are test access only; internal paths stay fully constrained.
+set_false_path -from [get_ports {rst_n_i scan_i}]
+set_false_path -to [get_ports {scan_o}]
+
+define_attribute {p:clk_i} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:clk_i} {PAP_IO_LOC} {D18}
+define_attribute {p:clk_i} {PAP_IO_VCCIO} {3.3}

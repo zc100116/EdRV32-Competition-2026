@@ -2,14 +2,26 @@
 // Spec: cpu-spec 3.1-3.4, 4.7; cpu-testplan 2.2-2.3, 4
 // Description: B1 wiring and real-core integration harness.
 // Clock: clk_sys.
-module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
+// Ordered observer/model updates intentionally use blocking assignments.
+/* verilator lint_off BLKSEQ */
+module edrv32_cpu_b1_core_tb;
     import edrv32_cpu_memory::*;
     logic clk;
+    // The stimulus reset drives asynchronous DUT reset and synchronous observers.
+    /* verilator lint_off SYNCASYNCNET */
     logic rst_n;
+    /* verilator lint_on SYNCASYNCNET */
     logic ic_req_valid;
     logic [31:0] ic_req_addr;
     logic ic_kill;
     logic ic_inv;
+    logic dc_early_valid;
+    logic [31:0] dc_early_addr;
+    wire dc_early_hit;
+    assign dc_early_hit = |dc_early_way_hit;
+    wire [1:0] dc_early_way_hit;
+    wire [63:0] dc_early_way_data;
+
     logic dc_req_valid;
     logic [31:0] dc_req_addr;
     logic dc_req_store;
@@ -27,7 +39,11 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     logic ic_inv_done;
     logic dc_req_ready;
     logic dc_resp_valid;
-    logic [31:0] dc_resp_data;
+    wire [31:0] dc_resp_data;
+    wire [1:0] dc_resp_way_hit;
+    wire [63:0] dc_resp_way_data;
+    assign dc_resp_data = ({32{dc_resp_way_hit[0]}} & dc_resp_way_data[31:0]) |
+        ({32{dc_resp_way_hit[1]}} & dc_resp_way_data[63:32]);
     logic dc_resp_err;
     logic dc_resp_device;
     logic dc_fence_done;
@@ -36,18 +52,22 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     logic irq_msip;
     logic irq_mtip;
     logic [63:0] mtime;
-    logic done;
-    edrv32_cpu_core #(.RVC_EN(RVC_EN)) u_core (
+    wire dc_req_early;
+    edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
-        .rst_sys_direction_n_i({8{rst_n}}),
         .rst_sys_csr_n_i(rst_n),
         .rst_sys_counter_n_i({10{rst_n}}),
         .ic_req_valid_o(ic_req_valid),
         .ic_req_addr_o(ic_req_addr),
         .ic_kill_o(ic_kill),
         .ic_inv_o(ic_inv),
+        .dc_early_valid_o(dc_early_valid),
+        .dc_early_addr_o(dc_early_addr),
+        .dc_early_way_hit_i(dc_early_way_hit),
+        .dc_early_way_data_i(dc_early_way_data),
         .dc_req_valid_o(dc_req_valid),
+        .dc_req_early_o(dc_req_early),
         .dc_req_addr_o(dc_req_addr),
         .dc_req_store_o(dc_req_store),
         .dc_req_size_o(dc_req_size),
@@ -59,12 +79,14 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .debug_o(debug),
         .ic_req_ready_i(ic_req_ready),
         .ic_resp_valid_i(ic_resp_valid),
+        .ic_resp_valid_copy_i({8{ic_resp_valid}}),
         .ic_resp_data_i(ic_resp_data),
         .ic_resp_err_i(ic_resp_err),
         .ic_inv_done_i(ic_inv_done),
         .dc_req_ready_i(dc_req_ready),
         .dc_resp_valid_i(dc_resp_valid),
-        .dc_resp_data_i(dc_resp_data),
+        .dc_resp_way_data_i(dc_resp_way_data),
+        .dc_resp_way_hit_i(dc_resp_way_hit),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(dc_resp_device),
         .dc_fence_done_i(dc_fence_done),
@@ -75,8 +97,8 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .mtime_i(mtime)
     );
     logic ic_miss;
-    logic ic_killed_fill;
-    logic dc_miss;
+    logic unused_ic_killed_fill;
+    logic unused_dc_miss;
     logic device_execute;
     logic write_buffer_valid;
     logic checker_device_execute;
@@ -93,18 +115,24 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .ic_inv_i(ic_inv),
         .ic_inv_done_o(ic_inv_done),
         .miss_o(ic_miss),
-        .killed_fill_o(ic_killed_fill)
+        .killed_fill_o(unused_ic_killed_fill)
     );
     edrv32_cpu_dc_model u_dc_model (
         .clk_i(clk),
         .rst_n_i(rst_n),
+        .dc_early_valid_i(dc_early_valid),
+        .dc_early_addr_i(dc_early_addr),
+        .dc_early_way_hit_o(dc_early_way_hit),
+        .dc_early_way_data_o(dc_early_way_data),
         .dc_req_valid_i(dc_req_valid),
+        .dc_req_early_i(dc_req_early),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
         .dc_req_size_i(dc_req_size),
         .dc_req_ready_o(dc_req_ready),
         .dc_resp_valid_o(dc_resp_valid),
-        .dc_resp_data_o(dc_resp_data),
+        .dc_resp_way_data_o(dc_resp_way_data),
+        .dc_resp_way_hit_o(dc_resp_way_hit),
         .dc_resp_err_o(dc_resp_err),
         .dc_resp_device_o(dc_resp_device),
         .dc_kill_i(dc_kill),
@@ -114,7 +142,7 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .dc_clean_all_i(dc_clean_all),
         .dc_fence_done_o(dc_fence_done),
         .dc_wb_event_o(dc_wb_event),
-        .miss_o(dc_miss),
+        .miss_o(unused_dc_miss),
         .device_execute_o(device_execute),
         .write_buffer_valid_o(write_buffer_valid)
     );
@@ -138,6 +166,7 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     bit irq_fired[16];
     bit irq_armed[16];
     bit wake_every_wfi;
+    logic [31:0] sleeping_wfi_pc=0;
     bit irq_taken;
     logic [31:0] taken_cause;
     integer dc_error_count = 0;
@@ -149,8 +178,6 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     bit hpm_dc_injected = 0;
     integer hpm_active_cycles = 0;
     integer default_ic_miss;
-    integer default_ic_min;
-    integer default_ic_max;
     integer default_dc_miss;
     integer default_dc_min;
     integer default_dc_max;
@@ -158,6 +185,15 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     bit buffer_hold_enabled;
     logic [31:0] buffer_hold_pc;
     integer buffer_hold_cycles;
+    logic [31:0] ready_low_pc;
+    integer ready_low_cycles;
+    integer ready_low_remaining = 0;
+    bit ready_low_enabled;
+    bit ready_low_started = 0;
+    initial begin
+        ready_low_enabled = $value$plusargs("DC_READY_LOW_PC=%h", ready_low_pc);
+        void'($value$plusargs("DC_READY_LOW_CYCLES=%d", ready_low_cycles));
+    end
     initial begin
         buffer_hold_enabled = $value$plusargs("WB_HOLD_PC=%h", buffer_hold_pc);
         void'($value$plusargs("WB_HOLD_CYCLES=%d", buffer_hold_cycles));
@@ -181,8 +217,6 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         end
         @(negedge clk);
         default_ic_miss = u_ic_model.miss_pct;
-        default_ic_min = u_ic_model.delay_min;
-        default_ic_max = u_ic_model.delay_max;
         default_dc_miss = u_dc_model.miss_pct;
         default_dc_min = u_dc_model.delay_min;
         default_dc_max = u_dc_model.delay_max;
@@ -201,6 +235,8 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     // Inject between active edges so the next edge samples the precise pipeline window.
     always @(negedge clk) begin
         if (rst_n) begin
+            if (debug[29] && u_core.trace_redirect_stage_w==3)
+                sleeping_wfi_pc=u_core.trace_redirect_pc_w;
             if (irq_taken) begin
                 case (taken_cause)
                     32'h8000000b: scheduled_irq[0] = 0;
@@ -221,18 +257,22 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
                     scheduled_irq = scheduled_irq & ~3'(irq_mask[index]);
                 if (!irq_fired[index]) begin
                     case (irq_kind[index])
-                        1: irq_armed[index] = u_core.m_valid_r[0] &&
-                            u_core.m_record_r[0][31:0] == irq_pc[index];
+                        1: irq_armed[index] =
+                            (u_core.m_valid_r[0] &&
+                                issued_slot[u_core.m_record_r[0][31:0]] == 0 &&
+                                u_core.m_record_r[0][31:0] == irq_pc[index]) ||
+                            (u_core.m_valid_r[1] &&
+                                issued_slot[u_core.m_record_r[1][31:0]] == 0 &&
+                                u_core.m_record_r[1][31:0] == irq_pc[index]);
                         2: irq_armed[index] = debug[25] &&
                             u_core.e_record_r[0][31:0] == irq_pc[index];
                         3: irq_armed[index] = debug[26] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         4: irq_armed[index] = debug[28] &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
-                        5: irq_armed[index] = u_core.e_redirect_w &&
-                            u_core.e_record_r[0][31:0] == irq_pc[index];
-                        6: irq_armed[index] = debug[29] &&
-                            u_core.m_record_r[0][31:0] == irq_pc[index];
+                        5: irq_armed[index] = u_core.trace_redirect_stage_w == 2 &&
+                            u_core.trace_redirect_pc_w == irq_pc[index];
+                        6: irq_armed[index] = debug[29] && sleeping_wfi_pc == irq_pc[index];
                         7: irq_armed[index] = dc_clean_all &&
                             u_core.m_record_r[0][31:0] == irq_pc[index];
                         default: irq_armed[index] = 0;
@@ -246,6 +286,15 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
                             irq_wait[index]++;
                     end
                 end
+            end
+            if (ready_low_enabled && !ready_low_started && u_core.e_valid_r[0] &&
+                u_core.e_record_r[0][31:0] == ready_low_pc) begin
+                ready_low_remaining = ready_low_cycles;
+                ready_low_started = 1;
+            end
+            u_dc_model.forced_ready_low = ready_low_remaining > 0;
+            if (ready_low_remaining > 0) begin
+                ready_low_remaining--;
             end
             u_dc_model.buffer_hold_cycles = buffer_hold_enabled && u_core.m_valid_r[0] &&
                 u_core.m_record_r[0][31:0] == buffer_hold_pc ? buffer_hold_cycles : 0;
@@ -319,7 +368,9 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
                 tohost_pending <= 1;
                 tohost_pc <= u_core.m_record_r[0][31:0];
             end
-            if (tohost_pending && trace_valid[0] && u_core.trace_pc_w[31:0] == tohost_pc)
+            if (tohost_pending &&
+                ((trace_valid[0] && u_core.trace_pc_w[31:0] == tohost_pc) ||
+                    (trace_valid[1] && u_core.trace_pc_w[63:32] == tohost_pc)))
                 trace_ended <= 1;
         end
     end
@@ -344,8 +395,20 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .trace_trap_i(u_core.trace_trap_w),
         .trace_cause_i(u_core.trace_cause_w),
         .trace_bypass_i(u_core.trace_bypass_w),
+        .trace_redirect_stage_i(u_core.trace_redirect_stage_w),
+        .early_condition_i(early_condition),
+        .early_bypass_i(early_issue_previous && dc_early_hit && u_core.e_valid_r[0] &&
+            u_core.e_record_r[0][38:32] == 7'h03 &&
+            (u_core.trace_bypass_w[2:0] == 1 || u_core.trace_bypass_w[5:3] == 1 ||
+                u_core.trace_bypass_w[8:6] == 1 || u_core.trace_bypass_w[11:9] == 1)),
+        .early_failure_i(u_dc_model.early_failure_r),
         .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
         .trace_stall_cause_i(u_core.trace_stall_cause_w),
+        .pair_valid_i(observed_pair_valid),
+        .pair_swap_i(observed_pair_swap),
+        .trap_slot_i(observed_trap_slot),
+        .e_redirect_slot_i(observed_e_slot),
+        .d_redirect_slot_i(observed_d_slot),
         .irq_meip_i(irq_meip),
         .irq_msip_i(irq_msip),
         .irq_mtip_i(irq_mtip)
@@ -369,9 +432,48 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         .dc_resp_device_i(dc_resp_device),
         .dc_kill_i(dc_kill),
         .dc_commit_i(dc_commit),
+        .redirect_flush_i(u_core.trace_redirect_stage_w != 0 || u_core.trace_trap_w),
         .m_enter_i(u_core.e_advance_w),
         .device_execute_i(checker_device_execute)
     );
+    integer dc_probe_count = 0;
+    logic [31:0] dc_probe_pc[16];
+    integer dc_probe_descriptor;
+    string dc_probe_path;
+    integer dc_probe_start = -1;
+    logic [31:0] dc_probe_addr;
+    initial begin
+        if ($value$plusargs("DC_PROBE_FILE=%s", dc_probe_path)) begin
+            dc_probe_descriptor = $fopen(dc_probe_path, "w");
+            void'($value$plusargs("DC_PROBE_COUNT=%d", dc_probe_count));
+            for (int index = 0; index < dc_probe_count; index++)
+                void'($value$plusargs($sformatf("DC_PROBE%0d_PC=%%h", index),
+                    dc_probe_pc[index]));
+        end
+    end
+    always @(posedge clk) begin
+        if (rst_n && dc_probe_count != 0) begin
+            if (dc_probe_start >= 0 && dc_resp_valid && !dc_kill) begin
+                $fdisplay(dc_probe_descriptor, "response %h %h %b %0d",
+                    dc_probe_addr, dc_resp_data, dc_resp_err, cycles-dc_probe_start);
+                dc_probe_start = -1;
+            end
+            for (int index = 0; index < dc_probe_count; index++) begin
+                if (dc_req_valid && dc_req_ready &&
+                    u_core.e_record_r[0][31:0] == dc_probe_pc[index]) begin
+                    dc_probe_start = cycles;
+                    dc_probe_addr = dc_req_addr;
+                    $fdisplay(dc_probe_descriptor, "request %h %b %h %h %0d",
+                        dc_probe_addr, write_buffer_valid, u_dc_model.buffer_addr_r,
+                        u_dc_model.buffer_data_r, device_accesses);
+                end
+            end
+            for (int index = 0; index < dc_probe_count; index++) begin
+                if (dc_commit && u_core.m_record_r[0][31:0] == dc_probe_pc[index])
+                    $fdisplay(dc_probe_descriptor, "commit %h", u_core.m_result_r[0]);
+            end
+        end
+    end
     integer image_descriptor;
     integer cycles = 0;
     integer timeout_cycles = 1000000;
@@ -402,6 +504,9 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
         @(negedge clk);
         if (tohost_value != 1)
             $fatal(1, "FAIL tohost=%08x cycle=%0d", tohost_value, cycles);
+        // Architectural termination includes the tohost store in W2.
+        wait (trace_ended);
+        @(negedge clk);
         if ($value$plusargs("SIGNATURE_FILE=%s", signature_path)) begin
             if (!$value$plusargs("SIGNATURE_BEGIN=%h", signature_begin)
                 || !$value$plusargs("SIGNATURE_END=%h", signature_end))
@@ -413,8 +518,10 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
                 $fdisplay(signature_descriptor, "%08x", read_data(addr, 2));
             $fclose(signature_descriptor);
         end
+        if (dc_probe_count != 0)
+            $fclose(dc_probe_descriptor);
         check_directed_completion();
-        $display("PASS CPU B1 cycles=%0d RVC_EN=%0d", cycles, RVC_EN);
+        $display("PASS CPU B1 cycles=%0d no-C", cycles);
         $finish;
     end
     always @(posedge clk) begin
@@ -427,3 +534,5 @@ module edrv32_cpu_b1_core_tb #(parameter RVC_EN = 1);
     end
     `include "edrv32_cpu_directed_checks.svh"
 endmodule
+
+/* verilator lint_on BLKSEQ */

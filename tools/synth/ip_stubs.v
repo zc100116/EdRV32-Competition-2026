@@ -90,3 +90,51 @@ endmodule
     output wire [65:0] p
 );
 endmodule
+
+(* blackbox *) module ip_lutram_cpu_btb (
+    input wire wr_clk,
+    input wire rd_clk,
+    input wire rst,
+    input wire wr_en,
+    input wire [6:0] wr_addr,
+    input wire [57:0] wr_data,
+    input wire [6:0] rd_addr,
+    output wire [57:0] rd_data
+);
+endmodule
+
+(* blackbox *) module ip_lutram_cpu_direction (
+    input wire wr_clk,
+    input wire rd_clk,
+    input wire rst,
+    input wire wr_en,
+    input wire [9:0] wr_addr,
+    input wire [3:0] wr_data,
+    input wire [9:0] rd_addr,
+    output wire [3:0] rd_data
+);
+endmodule
+
+(* blackbox *) module ip_lutram_cpu_local_history (
+    input wire wr_clk,
+    input wire rd_clk,
+    input wire rst,
+    input wire wr_en,
+    input wire [7:0] wr_addr,
+    input wire [9:0] wr_data,
+    input wire [7:0] rd_addr,
+    output wire [9:0] rd_data
+);
+endmodule
+
+(* blackbox *) module ip_lutram_cpu_tournament (
+    input wire wr_clk,
+    input wire rd_clk,
+    input wire rst,
+    input wire wr_en,
+    input wire [9:0] wr_addr,
+    input wire [1:0] wr_data,
+    input wire [9:0] rd_addr,
+    output wire [1:0] rd_data
+);
+endmodule

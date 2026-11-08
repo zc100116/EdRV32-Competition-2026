@@ -9,6 +9,7 @@ module tb;
     logic [31:0] ic_req_addr_i = 0;
     logic ic_req_ready_o;
     logic ic_resp_valid_o;
+    logic [7:0] ic_resp_valid_copy_o;
     logic [63:0] ic_resp_data_o;
     logic ic_resp_err_o;
     logic ic_kill_i = 0;
@@ -28,6 +29,11 @@ module tb;
     logic axi_rvalid_i = 0;
     logic axi_rready_o;
     always #5 clk_i = ~clk_i;
+    always @(negedge clk_i) begin
+        if (rst_n_i && ic_resp_valid_copy_o !== {8{ic_resp_valid_o}})
+            $fatal(1, "FAIL I$ response qualifier copies=%b expected=%b time=%t",
+                ic_resp_valid_copy_o, ic_resp_valid_o, $time);
+    end
     edrv32_icache dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -38,6 +44,7 @@ module tb;
         .ic_req_addr_i(ic_req_addr_i),
         .ic_req_ready_o(ic_req_ready_o),
         .ic_resp_valid_o(ic_resp_valid_o),
+        .ic_resp_valid_copy_o(ic_resp_valid_copy_o),
         .ic_resp_data_o(ic_resp_data_o),
         .ic_resp_err_o(ic_resp_err_o),
         .ic_kill_i(ic_kill_i),
@@ -103,6 +110,26 @@ module tb;
             $fatal(1, "FAIL I %h data=%h reads=%0d", addr, ic_resp_data_o, reads);
         tick();
     endtask
+    task automatic discarded_successor(input logic [31:0] first_pc,
+                                        input logic [31:0] next_pc,
+                                        input logic [63:0] first_data);
+        step(); ic_req_valid_i=1;ic_req_addr_i=first_pc;
+        while(!ic_req_ready_o)tick();
+        tick();
+        if(!ic_req_ready_o || ic_resp_valid_o)
+            $fatal(1,"FAIL discovery ready=%b response=%b",ic_req_ready_o,ic_resp_valid_o);
+        step();ic_req_addr_i=next_pc;tick();
+        if(ic_req_ready_o || ic_resp_valid_o)
+            $fatal(1,"FAIL successor was not discarded");
+        step();ic_req_valid_i=0;
+        while(!ic_resp_valid_o)tick();
+        if(ic_resp_data_o!==first_data)$fatal(1,"FAIL miss owner changed to successor");
+        tick();
+        repeat(3)begin
+            tick();
+            if(ic_resp_valid_o)$fatal(1,"FAIL discarded successor produced response");
+        end
+    endtask
     initial begin
         for (int i = 0; i < 8192; i++) memory[i] = {32'(i), 32'(i+4096)};
         tick(); step(); rst_n_i = 1;
@@ -111,6 +138,8 @@ module tb;
         fetch(32'h10004000, memory[2048], 2);
         if (dut.lru_r[0] != 0) $fatal(1, "FAIL I fill LRU way1");
         fetch(32'h10000008, memory[1], 2);
+        // Hit metadata retires one edge after the response is consumed.
+        tick();
         if (dut.lru_r[0] != 1) $fatal(1, "FAIL I hit LRU way0");
         fetch(32'h10008000, memory[4096], 3);
         fetch(32'h10000000, memory[0], 3);
@@ -144,7 +173,8 @@ module tb;
         tick();
         fetch(32'h1000c000, memory[6144], 9);
         // C-F1 path 5: a hit updating LRU and a following same-set miss are
-        // accepted on adjacent edges; the miss must evict the other way.
+        // accepted on adjacent edges. Deferred LRU permits the miss to use the
+        // snapshot from before the hit, replacing way 0 here (cache-spec v0.12 2.1).
         step(); ic_inv_i = 1; tick(); step(); ic_inv_i = 0;
         reads_before = reads;
         fetch(32'h10000000, memory[0], reads_before + 1);
@@ -160,13 +190,13 @@ module tb;
         if (ic_resp_data_o != memory[4096] || reads != reads_before + 3)
             $fatal(1, "FAIL I LRU bypass miss");
         tick();
-        fetch(32'h10000000, memory[0], reads_before + 3);
-        fetch(32'h10004000, memory[2048], reads_before + 4);
+        fetch(32'h10000000, memory[0], reads_before + 4);
+        fetch(32'h10004000, memory[2048], reads_before + 5);
         // Invalidate at request acceptance must be reflected by its metadata snapshot.
         step(); ic_req_valid_i = 1; ic_req_addr_i = 32'h10004000; ic_inv_i = 1;
         tick(); step(); ic_req_valid_i = 0; ic_inv_i = 0;
         while (!ic_resp_valid_o) tick();
-        if (ic_resp_data_o != memory[2048] || reads != reads_before + 5)
+        if (ic_resp_data_o != memory[2048] || reads != reads_before + 6)
             $fatal(1, "FAIL I acceptance invalidate");
         tick();
         // T-IC1 / IC-01, IC-02, IC-06: retain both ways in every one of 512 sets.
@@ -198,6 +228,13 @@ module tb;
         tick();
         for (int i = 1; i < 1024; i++)
             fetch(32'h10000000 + 32'(i*32), memory[i*4], reads_before + i + 1);
+        // B-13: retain the first owner through a miss/ROM access and drop its successor.
+        reads_before=reads;
+        discarded_successor(32'h80000000,32'h80000008,memory[0]);
+        fetch(32'h80000008,memory[1],reads_before+1);
+        reads_before=reads;
+        discarded_successor(32'h00000200,32'h00000208,memory[64]);
+        fetch(32'h00000208,memory[65],reads_before+2);
         $display("PASS cache_icache"); $finish;
     end
 endmodule

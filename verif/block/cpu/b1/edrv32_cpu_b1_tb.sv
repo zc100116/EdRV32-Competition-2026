@@ -10,6 +10,12 @@ module edrv32_cpu_b1_tb;
     logic [31:0] ic_req_addr;
     logic ic_kill;
     logic ic_inv;
+    wire [31:0] unused_early_data;
+    wire [1:0] unused_early_way_hit;
+    wire [63:0] unused_early_way_data;
+    assign unused_early_data = ({32{unused_early_way_hit[0]}} & unused_early_way_data[31:0]) |
+        ({32{unused_early_way_hit[1]}} & unused_early_way_data[63:32]);
+    wire unused_early_failure_w = &{1'b0, u_dc_model.early_failure_r};
     logic dc_req_valid;
     logic [31:0] dc_req_addr;
     logic dc_req_store;
@@ -27,7 +33,11 @@ module edrv32_cpu_b1_tb;
     logic ic_inv_done;
     logic dc_req_ready;
     logic dc_resp_valid;
-    logic [31:0] dc_resp_data;
+    wire [31:0] dc_resp_data;
+    wire [1:0] dc_resp_way_hit;
+    wire [63:0] dc_resp_way_data;
+    assign dc_resp_data = ({32{dc_resp_way_hit[0]}} & dc_resp_way_data[31:0]) |
+        ({32{dc_resp_way_hit[1]}} & dc_resp_way_data[63:32]);
     logic dc_resp_err;
     logic dc_resp_device;
     logic dc_fence_done;
@@ -37,10 +47,10 @@ module edrv32_cpu_b1_tb;
     logic irq_mtip;
     logic [63:0] mtime;
     logic done;
+    wire dc_req_early;
     edrv32_cpu_core u_core (
         .clk_i(clk),
         .rst_n_i(rst_n),
-        .rst_sys_direction_n_i({8{rst_n}}),
         .rst_sys_csr_n_i(rst_n),
         .rst_sys_counter_n_i({10{rst_n}}),
         .ic_req_valid_o(ic_req_valid),
@@ -48,6 +58,7 @@ module edrv32_cpu_b1_tb;
         .ic_kill_o(ic_kill),
         .ic_inv_o(ic_inv),
         .dc_req_valid_o(dc_req_valid),
+        .dc_req_early_o(dc_req_early),
         .dc_req_addr_o(dc_req_addr),
         .dc_req_store_o(dc_req_store),
         .dc_req_size_o(dc_req_size),
@@ -59,12 +70,14 @@ module edrv32_cpu_b1_tb;
         .debug_o(debug),
         .ic_req_ready_i(ic_req_ready),
         .ic_resp_valid_i(ic_resp_valid),
+        .ic_resp_valid_copy_i({8{ic_resp_valid}}),
         .ic_resp_data_i(ic_resp_data),
         .ic_resp_err_i(ic_resp_err),
         .ic_inv_done_i(ic_inv_done),
         .dc_req_ready_i(dc_req_ready),
         .dc_resp_valid_i(dc_resp_valid),
-        .dc_resp_data_i(dc_resp_data),
+        .dc_resp_way_data_i(dc_resp_way_data),
+        .dc_resp_way_hit_i(dc_resp_way_hit),
         .dc_resp_err_i(dc_resp_err),
         .dc_resp_device_i(dc_resp_device),
         .dc_fence_done_i(dc_fence_done),
@@ -98,13 +111,19 @@ module edrv32_cpu_b1_tb;
     edrv32_cpu_dc_model u_dc_model (
         .clk_i(clk),
         .rst_n_i(rst_n),
+        .dc_early_valid_i(1'b0),
+        .dc_early_addr_i(32'b0),
+        .dc_early_way_hit_o(unused_early_way_hit),
+        .dc_early_way_data_o(unused_early_way_data),
         .dc_req_valid_i(dc_req_valid),
+        .dc_req_early_i(dc_req_early),
         .dc_req_addr_i(dc_req_addr),
         .dc_req_store_i(dc_req_store),
         .dc_req_size_i(dc_req_size),
         .dc_req_ready_o(dc_req_ready),
         .dc_resp_valid_o(dc_resp_valid),
-        .dc_resp_data_o(dc_resp_data),
+        .dc_resp_way_data_o(dc_resp_way_data),
+        .dc_resp_way_hit_o(dc_resp_way_hit),
         .dc_resp_err_o(dc_resp_err),
         .dc_resp_device_o(dc_resp_device),
         .dc_kill_i(dc_kill),
@@ -149,8 +168,17 @@ module edrv32_cpu_b1_tb;
         .trace_trap_i(u_core.trace_trap_w),
         .trace_cause_i(u_core.trace_cause_w),
         .trace_bypass_i(u_core.trace_bypass_w),
+        .trace_redirect_stage_i(debug[17] ? 2'd1 : (debug[16] ? 2'd2 : 2'd0)),
+        .early_condition_i(4'b0),
+        .early_bypass_i(1'b0),
+        .early_failure_i(3'b0),
         .trace_redirect_cause_i(u_core.trace_redirect_cause_w),
         .trace_stall_cause_i(u_core.trace_stall_cause_w),
+        .pair_valid_i(1'b0),
+        .pair_swap_i(1'b0),
+        .trap_slot_i(1'b0),
+        .e_redirect_slot_i(1'b0),
+        .d_redirect_slot_i(1'b0),
         .irq_meip_i(irq_meip),
         .irq_msip_i(irq_msip),
         .irq_mtip_i(irq_mtip)
@@ -174,6 +202,7 @@ module edrv32_cpu_b1_tb;
         .dc_resp_device_i(dc_resp_device),
         .dc_kill_i(dc_kill),
         .dc_commit_i(dc_commit),
+        .redirect_flush_i(1'b0),
         .m_enter_i(u_core.m_enter_w && violation != 3),
         .device_execute_i(checker_device_execute)
     );

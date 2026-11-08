@@ -1,1 +1,19 @@
--f ../cpu_core_smoke/files.f
++incdir+../../../rtl/include
+tb.sv
+../../../rtl/cpu/edrv32_cpu_alu.v
+../../../rtl/cpu/edrv32_cpu_branch.v
+../../../rtl/cpu/edrv32_cpu_core.v
+../../../rtl/cpu/edrv32_cpu_csr.v
+../../../rtl/cpu/edrv32_cpu_decode.v
+../../../rtl/cpu/edrv32_cpu_div.v
+../../../rtl/cpu/edrv32_cpu_frontend.v
+../../../rtl/cpu/edrv32_cpu_ib.v
+../../../rtl/cpu/edrv32_cpu_mul.v
+../../../rtl/cpu/edrv32_cpu_predictor.v
+../../../rtl/cpu/edrv32_cpu_regfile.v
+../../../rtl/tech/edrv32_mul_s33x33.v
+../../../rtl/tech/edrv32_ram_cpu_btb.v
+../../../rtl/tech/edrv32_ram_cpu_direction.v
+../../../rtl/tech/edrv32_ram_cpu_local_history.v
+../../../rtl/tech/edrv32_ram_cpu_local_direction.v
+../../../rtl/tech/edrv32_ram_cpu_chooser.v

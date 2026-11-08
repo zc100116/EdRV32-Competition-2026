@@ -14,31 +14,40 @@ module tb;
     wire predict_taken_o;
     wire [31:0] predict_target_o;
     wire [1:0] predict_position_o;
-    wire predict_compressed_o;
-    wire [8:0] predict_history_o;
+    wire [11:0] predict_history_o;
     wire [36:0] predict_ras_o;
     reg update_valid_i=0;
     reg [31:1] update_pc_i=0;
     reg [31:0] update_target_i=0;
     reg [2:0] update_type_i=0;
     reg update_taken_i=0;
-    reg update_compressed_i=0;
-    reg [8:0] update_index_i=0;
+    reg [11:0] update_index_i=0;
+    reg [11:0] update_tournament_i=0;
+    reg [19:0] f2_local_history_i=0;
+    reg [11:0] f2_index_i=0;
+    wire predict_conditional_o;
+    wire [19:0] predict_local_history_o;
+    wire [1:0] predict_global_o;
+    wire [1:0] f2_local_o;
+    wire f2_use_local_o;
+    integer local_history[0:255];
+    integer local_direction[0:1023];
+    integer chooser[0:4095];
+    integer training_slot;
     reg clear_valid_i=0;
-    reg [4:0] clear_index_i=0;
+    reg [6:0] clear_index_i=0;
     reg restore_valid_i=0;
     reg [36:0] restore_ras_i=0;
     reg restore_push_i=0;
     reg restore_pop_i=0;
     reg [31:0] restore_return_pc_i=0;
-    reg valid[0:31];
-    reg [23:0] tag[0:31];
-    reg [31:0] target[0:31];
-    reg [1:0] position[0:31];
-    reg [2:0] kind[0:31];
-    reg compressed[0:31];
-    integer direction[0:511];
-    reg [8:0] history=0;
+    reg valid[0:127];
+    reg [21:0] tag[0:127];
+    reg [31:0] target[0:127];
+    reg [1:0] position[0:127];
+    reg [2:0] kind[0:127];
+    integer direction[0:4095];
+    reg [11:0] history=0;
     reg [31:0] stack[0:3];
     integer ptr=0;
     integer depth=0;
@@ -47,6 +56,7 @@ module tb;
     integer q;
     integer slot;
     integer index_value;
+    reg [11:0] low_pc_index;
     integer action;
     integer pc_value;
     reg expected_hit;
@@ -61,14 +71,15 @@ module tb;
     edrv32_cpu_predictor dut (
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
-        .rst_sys_direction_n_i({8{rst_n_i}}),
         .query_pc_i(query_pc_i),
+        .query_valid_index_i({8{query_pc_i[6:3]}}),
+        .query_bank_copy_i({8{query_pc_i[9]}}),
+        .predict_taken_copy_o(),
         .query_accept_i(query_accept_i),
         .predict_hit_o(predict_hit_o),
         .predict_taken_o(predict_taken_o),
         .predict_target_o(predict_target_o),
         .predict_position_o(predict_position_o),
-        .predict_compressed_o(predict_compressed_o),
         .predict_history_o(predict_history_o),
         .predict_ras_o(predict_ras_o),
         .update_valid_i(update_valid_i),
@@ -76,11 +87,19 @@ module tb;
         .update_target_i(update_target_i),
         .update_type_i(update_type_i),
         .update_taken_i(update_taken_i),
-        .update_compressed_i(update_compressed_i),
-        .update_index_i({16{update_index_i}}),
+        .update_index_i(update_index_i),
+        .update_tournament_i(update_tournament_i),
+        .predict_conditional_o(predict_conditional_o),
+        .predict_local_history_o(predict_local_history_o),
+        .predict_global_o(predict_global_o),
+        .f2_local_history_i(f2_local_history_i),
+        .f2_index_i(f2_index_i),
+        .f2_local_o(f2_local_o),
+        .f2_use_local_o(f2_use_local_o),
         .clear_valid_i(clear_valid_i),
         .clear_index_i(clear_index_i),
         .restore_valid_i(restore_valid_i),
+        .restore_valid_copy_i({16{restore_valid_i}}),
         .restore_ras_i(restore_ras_i),
         .restore_push_i(restore_push_i),
         .restore_pop_i(restore_pop_i),
@@ -88,9 +107,9 @@ module tb;
     );
     task automatic check;
         begin
-            q=integer'(query_pc_i[7:3]);
-            index_value={23'b0,query_pc_i[9:3],position[q]} ^ {23'b0,history};
-            expected_hit=valid[q] && tag[q]==query_pc_i[31:8] &&
+            q=integer'(query_pc_i[9:3]);
+            index_value=integer'({query_pc_i[13:3],position[q][1]}) ^ integer'(history);
+            expected_hit=valid[q] && tag[q]==query_pc_i[31:10] &&
                 position[q]>=query_pc_i[2:1];
             expected_taken=expected_hit && (kind[q]!=0 || direction[index_value]>=2);
             expected_target=(kind[q]==4 && depth>0)?stack[(ptr+3)%4]:target[q];
@@ -100,9 +119,22 @@ module tb;
                     {query_pc_i,1'b0},predict_hit_o,expected_hit,predict_taken_o,expected_taken,
                     predict_history_o,history,$time);
             if(expected_hit && (predict_target_o!==expected_target ||
-                predict_position_o!==position[q] || predict_compressed_o!==compressed[q]))
+                predict_position_o!==position[q]))
                 $fatal(1,"FAIL BTB target expected=%h actual=%h time=%t",
                     expected_target,predict_target_o,$time);
+            if(predict_local_history_o !==
+                {10'(local_history[2*q+1]),10'(local_history[2*q])} ||
+                f2_local_o !== {1'(local_direction[f2_local_history_i[19:10]]>=2),
+                1'(local_direction[f2_local_history_i[9:0]]>=2)} ||
+                f2_use_local_o !== (chooser[f2_index_i]>=2))
+                $fatal(1,"FAIL tournament query pc=%h history=%h local=%b chooser=%b t=%t",
+                    query_pc_i,predict_local_history_o,f2_local_o,f2_use_local_o,$time);
+            if(expected_hit && predict_conditional_o !== (kind[q]==0))
+                $fatal(1,"FAIL conditional metadata");
+            if(predict_global_o !==
+                {1'(direction[integer'({query_pc_i[13:3],1'b1})^integer'(history)]>=2),
+                1'(direction[integer'({query_pc_i[13:3],1'b0})^integer'(history)]>=2)})
+                $fatal(1,"FAIL global direction metadata");
             if(predict_ras_o[36:34]!==3'(depth) || predict_ras_o[33:32]!==2'(ptr) ||
                 (depth>0 && predict_ras_o[31:0]!==stack[(ptr+3)%4]))
                 $fatal(1,"FAIL RAS expected ptr=%d depth=%d actual=%h time=%t",
@@ -128,17 +160,31 @@ module tb;
                 end
                 restore_seen=restore_seen+1;
             end else if(action==1)begin
-                stack[ptr]=32'(pc_value)+(compressed[q]?2:4);ptr=(ptr+1)%4;
+                stack[ptr]=32'(pc_value)+4;ptr=(ptr+1)%4;
                 if(depth<4)depth=depth+1;else overflow_seen=overflow_seen+1;
             end else if(action==2 && depth>0)begin ptr=(ptr+3)%4;depth=depth-1;end
             if(update_valid_i)begin
-                slot=integer'(update_pc_i[7:3]);
-                if(valid[slot] && tag[slot]!=update_pc_i[31:8])alias_seen=alias_seen+1;
-                valid[slot]=1;tag[slot]=update_pc_i[31:8];
+                slot=integer'(update_pc_i[9:3]);
+                if(valid[slot] && tag[slot]!=update_pc_i[31:10])alias_seen=alias_seen+1;
+                valid[slot]=1;tag[slot]=update_pc_i[31:10];
                 target[slot]=update_target_i;position[slot]=update_pc_i[2:1];
-                kind[slot]=update_type_i;compressed[slot]=update_compressed_i;
+                kind[slot]=update_type_i;
                 if(update_type_i==0)begin
-                    history={history[7:0],update_taken_i};
+                    training_slot=integer'(update_pc_i[9:2]);
+                    local_history[training_slot]=((local_history[training_slot]<<1) |
+                        integer'(update_taken_i)) & 1023;
+                    training_slot=integer'(update_tournament_i[9:0]);
+                    if(update_taken_i && local_direction[training_slot]<3)
+                        local_direction[training_slot]++;
+                    if(!update_taken_i && local_direction[training_slot]>0)
+                        local_direction[training_slot]--;
+                    if(update_tournament_i[10]!=update_tournament_i[11])begin
+                        if(update_tournament_i[10]==update_taken_i && chooser[update_index_i]<3)
+                            chooser[update_index_i]++;
+                        if(update_tournament_i[10]!=update_taken_i && chooser[update_index_i]>0)
+                            chooser[update_index_i]--;
+                    end
+                    history={history[10:0],update_taken_i};
                     if(update_taken_i && direction[update_index_i]<3)
                         direction[update_index_i]=direction[update_index_i]+1;
                     else if(!update_taken_i && direction[update_index_i]>0)
@@ -146,26 +192,53 @@ module tb;
                     else saturate_seen=saturate_seen+1;
                 end
             end
+            if(clear_valid_i)valid[clear_index_i]=0;
             @(posedge clk_i);#1;check();@(negedge clk_i);
         end
     endtask
     initial begin
-        for(i=0;i<32;i=i+1)begin
-            valid[i]=0;tag[i]=0;position[i]=0;target[i]=0;kind[i]=0;compressed[i]=0;
+        for(i=0;i<128;i=i+1)begin
+            valid[i]=0;tag[i]=0;position[i]=0;target[i]=0;kind[i]=0;
         end
-        for(i=0;i<512;i=i+1)direction[i]=1;
-        repeat(2)@(negedge clk_i);rst_n_i=1;
+        for(i=0;i<4096;i=i+1)begin direction[i]=1;chooser[i]=1;end
+        for(i=0;i<256;i=i+1)local_history[i]=0;
+        for(i=0;i<1024;i=i+1)local_direction[i]=1;
+        repeat(2)@(negedge clk_i);
+        for(i=0;i<4096;i=i+1)
+            if(dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]!==2'b01)
+                $fatal(1,"FAIL PHT power-up index=%0d actual=%b",i,
+                    dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]);
+        rst_n_i=1;
+        // PC[1] is excluded; PC[13] supplies index bit 11.
+        update_valid_i=1;update_pc_i=0;update_target_i='h80;
+        update_type_i=0;update_taken_i=0;update_index_i=0;cycle();
+        update_valid_i=0;query_pc_i=0;#1;low_pc_index=dut.direction_idx_w;
+        query_pc_i=1;#1;
+        if(dut.direction_idx_w!==low_pc_index)$fatal(1,"FAIL PC[1] changed PHT index");
+        query_pc_i=31'('h2000>>1);#1;
+        if(dut.direction_idx_w!==(low_pc_index^12'h800))
+            $fatal(1,"FAIL PC[13] did not change PHT index");
+        query_pc_i=0;cycle();
         // BTB replacement and branch slot before/after query start.
-        update_valid_i=1;update_pc_i=31'('h46>>1);update_target_i='h100;
+        update_valid_i=1;update_pc_i=31'('h44>>1);update_target_i='h100;
         update_type_i=1;cycle();update_valid_i=0;query_pc_i=31'('h40>>1);cycle();
-        query_pc_i=31'('h46>>1);cycle();
+        query_pc_i=31'('h44>>1);cycle();
         update_valid_i=1;update_pc_i=31'('h144>>1);update_target_i='h200;cycle();
-        update_valid_i=0;cycle();query_pc_i=31'('h146>>1);cycle();
+        update_valid_i=0;cycle();query_pc_i=31'('h144>>1);cycle();
         query_pc_i=31'('h140>>1);cycle();
         // Exercise both saturation ends at a fixed saved index despite changing GHR.
         update_valid_i=1;update_pc_i=31'('h20>>1);update_type_i=0;update_index_i=17;
         for(j=0;j<8;j=j+1)begin update_taken_i=1;cycle();end
         for(j=0;j<8;j=j+1)begin update_taken_i=0;cycle();end
+        // Give the two counters in word 8 opposite MSBs, then query all position/GHR[0] choices.
+        update_index_i=17;update_taken_i=1;
+        for(j=0;j<3;j=j+1)cycle();
+        update_index_i=16;update_taken_i=0;
+        for(j=0;j<12;j=j+1)cycle();
+        update_index_i=0;update_pc_i=31'('h40>>1);query_pc_i=31'('h40>>1);cycle();
+        update_pc_i=31'('h44>>1);cycle();
+        update_taken_i=1;cycle();
+        update_pc_i=31'('h48>>1);query_pc_i=31'('h48>>1);cycle();
         // Train call and return groups, push beyond depth and inspect LIFO returns.
         update_type_i=3;update_pc_i=31'('h80>>1);update_target_i='h88;cycle();
         update_type_i=4;update_pc_i=31'('h88>>1);update_target_i='h90;cycle();
@@ -179,17 +252,44 @@ module tb;
         restore_valid_i=0;restore_pop_i=0;restore_push_i=0;
         // Independent model checks aliasing, gshare history and speculative recovery.
         for(i=0;i<3000;i=i+1)begin
-            query_pc_i=31'($urandom_range(0,1023));
+            query_pc_i=31'($urandom_range(0,8191)*2);
             update_valid_i=(i%3==0);query_accept_i=(i%3==1);
             restore_valid_i=(i%73==0);
             restore_ras_i=checkpoint;restore_push_i=i[0];restore_pop_i=i[1];
             restore_return_pc_i=$urandom;
-            update_pc_i=31'($urandom_range(0,1023));update_target_i=$urandom & 32'hfffffffe;
-            update_type_i=3'($urandom_range(0,4));update_compressed_i=i[0];
-            update_taken_i=i[1];update_index_i=9'($urandom);
+            update_pc_i=31'($urandom_range(0,8191)*2);update_target_i=$urandom & 32'hfffffffc;
+            update_type_i=3'($urandom_range(0,4));
+            update_taken_i=i[1];update_index_i=12'($urandom);
+            update_tournament_i=12'($urandom);
+            f2_local_history_i=20'($urandom);f2_index_i=12'($urandom);
+            clear_valid_i=(i%19==0);clear_index_i=7'($urandom);
             cycle();
             if(i%61==0)checkpoint=predict_ras_o;
         end
+        // A warm reset invalidates BTB/GHR/RAS while preserving trained counters.
+        update_valid_i=0;query_accept_i=0;restore_valid_i=0;clear_valid_i=0;rst_n_i=0;
+        repeat(2)@(negedge clk_i);
+        history=0;ptr=0;depth=0;
+        for(i=0;i<128;i=i+1)valid[i]=0;
+        if(dut.btb_valid_r!==128'b0)$fatal(1,"FAIL BTB warm reset");
+        for(i=0;i<4096;i=i+1)
+            if(dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]!==2'(direction[i]))
+                $fatal(1,"FAIL PHT warm reset index=%0d expected=%0d actual=%b",
+                    i,direction[i],dut.u_direction.memory_r[i >> 1][(i & 1) * 2 +: 2]);
+        for(i=0;i<4096;i=i+1)
+            if(dut.u_chooser.memory_r[i]!==2'(chooser[i]))
+                $fatal(1,"FAIL chooser index=%0d expected=%0d actual=%0d",i,
+                    chooser[i],dut.u_chooser.memory_r[i]);
+        for(i=0;i<1024;i=i+1)
+            if(dut.u_local_direction.memory_r[i]!==2'(local_direction[i]))
+                $fatal(1,"FAIL local counter index=%0d",i);
+        for(i=0;i<256;i=i+1)
+            if(dut.u_local_history.memory_r[i]!==10'(local_history[i]))
+                $fatal(1,"FAIL local history index=%0d",i);
+        rst_n_i=1;cycle();
+        update_valid_i=1;update_pc_i=31'('h40>>1);update_type_i=0;update_index_i=17;
+        query_pc_i=31'('h40>>1);
+        update_taken_i=1;cycle();update_valid_i=0;cycle();
         if((overflow_seen==0) || (restore_seen==0) || (alias_seen==0) || (saturate_seen==0))
             $fatal(1,"FAIL predictor missing coverage");
         $display("PASS U-09 overflow=%0d restore=%0d alias=%0d saturation=%0d",

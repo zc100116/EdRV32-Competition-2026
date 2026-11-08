@@ -15,4 +15,14 @@ waw_second:
     addi a1, zero, -1
     addi a1, zero, 42
     CHECK a1, 42
+    la a4, scratch
+    li t0, 61
+    sw t0, 0(a4)
+    .balign 8
+    csrr zero, mscratch
+    csrr zero, mscratch
+waw_swap:
+    addi a0, zero, 17
+    lw a0, 0(a4)
+    CHECK a0, 61
     FINISH

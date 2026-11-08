@@ -40,7 +40,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     sources = regress.expand_files(Path(__file__).with_name('files.f'))
     with (out / 'compile.log').open('w') as log:
-        subprocess.run(['verilator', '--binary', '--timing', '-Wall', '--top-module',
+        subprocess.run(['verilator', '--binary', '--timing', '-Wall', '-j', '1', '--top-module',
                         'edrv32_cpu_b1_tb', '--Mdir', str(out / 'obj'), '-o', 'sim'] + sources,
                        cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     cases = [

@@ -1,4 +1,9 @@
-# cpu_frontend_no_c
+# CPU frontend unit test
+
+Run from the repository root (create `build/unit` first):
+
+Also exercise fixed 32-bit instruction fetch:
+
 
 Unified regression (from the repository root):
 

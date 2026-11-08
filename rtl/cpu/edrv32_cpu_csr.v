@@ -3,9 +3,7 @@
 // Description: Maintain machine CSRs, interrupt state and architectural counters.
 // Apply CSR access permissions, WARL masks and precise trap/MRET updates.
 // Clock domain: clk_sys.
-module edrv32_cpu_csr #(
-    parameter RVC_EN = 1
-) (
+module edrv32_cpu_csr (
     // Clock and architectural reset.
     input wire clk_i,
     input wire rst_n_i,
@@ -16,6 +14,8 @@ module edrv32_cpu_csr #(
     input wire [41:0] select_i,
     input wire write_i,
     input wire commit_i,
+    // M prepares cancellation separately from the trap-state update data path.
+    input wire write_cancel_i,
     input wire [1:0] command_i,
     input wire [31:0] write_data_i,
     output reg [31:0] read_data_o,
@@ -45,8 +45,8 @@ module edrv32_cpu_csr #(
     input wire irq_mtip_i,
     input wire [63:0] mtime_i
 );
-    localparam [31:0] MISA = RVC_EN ? 32'h40001104 : 32'h40001100;
-    localparam [31:0] EPC_MASK = RVC_EN ? 32'hfffffffe : 32'hfffffffc;
+    localparam [31:0] MISA = 32'h40001100;
+    localparam [31:0] EPC_MASK = 32'hfffffffc;
     reg [31:0] mstatus_r;
     reg [31:0] mie_r;
     reg [31:0] mtvec_r;
@@ -62,7 +62,6 @@ module edrv32_cpu_csr #(
     reg [31:0] event_count_r;
     reg [31:0] write_data_w;
     wire write_enable_w;
-    integer read_idx;
     integer update_idx;
     assign mstatus_o = mstatus_r;
     assign mie_o = mie_r;
@@ -113,31 +112,54 @@ module edrv32_cpu_csr #(
     assign decode_illegal_o = decode_valid_i &&
         (!decode_select_o[40] || (decode_write_i && decode_select_o[41]));
     assign write_enable_w = access_valid_i && write_i && commit_i && !illegal_o;
-    // Disjoint registered selects form a parallel read mux, before CSR set/clear.
-    always @(*) begin
-        read_data_o =
-            ({32{select_i[0]}} & mstatus_r) |
-            ({32{select_i[1]}} & MISA) |
-            ({32{select_i[2]}} & mie_r) |
-            ({32{select_i[3]}} & mtvec_r) |
-            ({32{select_i[4]}} & inhibit_r) |
-            ({32{select_i[5]}} & mscratch_r) |
-            ({32{select_i[6]}} & mepc_r) |
-            ({32{select_i[7]}} & mcause_r) |
-            ({32{select_i[8]}} & mtval_r) |
-            ({32{select_i[9]}} & {20'b0, irq_meip_i, 3'b0, irq_mtip_i, 3'b0, irq_msip_i, 3'b0}) |
-            ({32{select_i[10]}} & cycle_r[31:0]) |
-            ({32{select_i[11]}} & cycle_r[63:32]) |
-            ({32{select_i[12]}} & instret_r[31:0]) |
-            ({32{select_i[13]}} & instret_r[63:32]) |
-            ({32{select_i[14]}} & mtime_i[31:0]) |
-            ({32{select_i[15]}} & mtime_i[63:32]);
-        for (read_idx = 0; read_idx < 8; read_idx = read_idx + 1) begin
-            read_data_o = read_data_o |
-                ({32{select_i[16 + read_idx]}} & {27'b0, event_r[read_idx]}) |
-                ({32{select_i[24 + read_idx]}} & counter_r[read_idx][31:0]) |
-                ({32{select_i[32 + read_idx]}} & counter_r[read_idx][63:32]);
+    // Group independent one-hot terms before the final read merge. Keep HPM
+    // data out of the serial accumulator shape produced by a procedural loop.
+    wire [31:0] read_value_w [0:39];
+    wire [31:0] read_term_w [0:39];
+    wire [31:0] read_group_w [0:3];
+    assign read_value_w[0] = mstatus_r;
+    assign read_value_w[1] = MISA;
+    assign read_value_w[2] = mie_r;
+    assign read_value_w[3] = mtvec_r;
+    assign read_value_w[4] = inhibit_r;
+    assign read_value_w[5] = mscratch_r;
+    assign read_value_w[6] = mepc_r;
+    assign read_value_w[7] = mcause_r;
+    assign read_value_w[8] = mtval_r;
+    assign read_value_w[9] = {20'b0, irq_meip_i, 3'b0, irq_mtip_i, 3'b0, irq_msip_i, 3'b0};
+    assign read_value_w[10] = cycle_r[31:0];
+    assign read_value_w[11] = cycle_r[63:32];
+    assign read_value_w[12] = instret_r[31:0];
+    assign read_value_w[13] = instret_r[63:32];
+    assign read_value_w[14] = mtime_i[31:0];
+    assign read_value_w[15] = mtime_i[63:32];
+    genvar read_counter;
+    genvar read_term;
+    genvar read_group;
+    generate
+        for (read_counter = 0; read_counter < 8;
+            read_counter = read_counter + 1) begin : g_read_counter
+            assign read_value_w[16+read_counter] = {27'b0, event_r[read_counter]};
+            assign read_value_w[24+read_counter] = counter_r[read_counter][31:0];
+            assign read_value_w[32+read_counter] = counter_r[read_counter][63:32];
         end
+        for (read_term = 0; read_term < 40;
+            read_term = read_term + 1) begin : g_read_term
+            assign read_term_w[read_term] = {32{select_i[read_term]}} & read_value_w[read_term];
+        end
+        for (read_group = 0; read_group < 4;
+            read_group = read_group + 1) begin : g_read_group
+            assign read_group_w[read_group] =
+                ((read_term_w[read_group*10] | read_term_w[read_group*10+1]) |
+                (read_term_w[read_group*10+2] | read_term_w[read_group*10+3])) |
+                ((read_term_w[read_group*10+4] | read_term_w[read_group*10+5]) |
+                (read_term_w[read_group*10+6] | read_term_w[read_group*10+7])) |
+                (read_term_w[read_group*10+8] | read_term_w[read_group*10+9]);
+        end
+    endgenerate
+    always @(*) begin
+        read_data_o = (read_group_w[0] | read_group_w[1]) |
+            (read_group_w[2] | read_group_w[3]);
     end
     always @(*) begin
         write_data_w = write_data_i;
@@ -169,7 +191,7 @@ module edrv32_cpu_csr #(
                 event_r[update_idx] <= 0;
             end
         end else begin
-            if (write_enable_w && !trap_i) begin
+            if (write_enable_w && !write_cancel_i) begin
                 if (select_i[0])
                     mstatus_r <= (write_data_w & 32'h88) | 32'h1800;
                 if (select_i[2])
@@ -214,8 +236,8 @@ module edrv32_cpu_csr #(
             assign rst_counter_n_w = rst_sys_counter_n_i[counter_group];
             if (counter_group < 2) begin : g_arch
                 localparam LOW_SELECT = counter_group == 0 ? 10 : 12;
-                assign write_low_w = write_enable_w && !trap_i && select_i[LOW_SELECT];
-                assign write_high_w = write_enable_w && !trap_i && select_i[LOW_SELECT+1];
+                assign write_low_w = write_enable_w && !write_cancel_i && select_i[LOW_SELECT];
+                assign write_high_w = write_enable_w && !write_cancel_i && select_i[LOW_SELECT+1];
                 if (counter_group == 0) begin : g_cycle
                     always @(posedge clk_i or negedge rst_counter_n_w) begin
                         if (!rst_counter_n_w)
@@ -242,8 +264,8 @@ module edrv32_cpu_csr #(
                 localparam INDEX = counter_group - 2;
                 reg [63:0] count_r;
                 assign counter_r[INDEX] = count_r;
-                assign write_low_w = write_enable_w && !trap_i && select_i[24+INDEX];
-                assign write_high_w = write_enable_w && !trap_i && select_i[32+INDEX];
+                assign write_low_w = write_enable_w && !write_cancel_i && select_i[24+INDEX];
+                assign write_high_w = write_enable_w && !write_cancel_i && select_i[32+INDEX];
                 always @(posedge clk_i or negedge rst_counter_n_w) begin
                     if (!rst_counter_n_w)
                         count_r <= 0;

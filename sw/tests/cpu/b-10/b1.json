@@ -1,0 +1,45 @@
+{
+  "test": "b-10",
+  "spike": "compare",
+  "stimulus": [],
+  "checks": [
+    "younger M member and E wrong path never retire; E load/store issue no ordinary D request; misalignment raises no trap; wrong branch never trains"
+  ],
+  "cases": [
+    {
+      "no_retire": "wrong_load"
+    },
+    {
+      "no_request": "wrong_load"
+    },
+    {
+      "no_retire": "wrong_store"
+    },
+    {
+      "no_request": "wrong_store"
+    },
+    {
+      "no_retire": "wrong_branch"
+    },
+    {
+      "no_retire": "wrong_fault"
+    },
+    {
+      "no_request": "wrong_fault"
+    }
+  ],
+  "tier": "smoke",
+  "rvc": [
+    false
+  ],
+  "schedule": [
+    {
+      "kind": "paired_run",
+      "patch": {
+        "pc": "wrong_branch",
+        "word": "0x00000013"
+      },
+      "compare": "predictor state and probe prediction after flushed branch"
+    }
+  ]
+}

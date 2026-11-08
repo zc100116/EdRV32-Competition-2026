@@ -1,1 +1,11 @@
--f ../cpu_frontend/files.f
+tb.sv
++incdir+../../../rtl/include
+../../../rtl/cpu/edrv32_cpu_frontend.v
+../../../rtl/cpu/edrv32_cpu_ib.v
+../../../rtl/cpu/edrv32_cpu_predictor.v
+../../../rtl/tech/edrv32_ram_cpu_btb.v
+../../../rtl/tech/edrv32_ram_cpu_direction.v
+../../../rtl/tech/edrv32_ram_cpu_local_history.v
+../../../rtl/tech/edrv32_ram_cpu_local_direction.v
+../../../rtl/tech/edrv32_ram_cpu_chooser.v
+../../../rtl/cpu/edrv32_cpu_decode.v

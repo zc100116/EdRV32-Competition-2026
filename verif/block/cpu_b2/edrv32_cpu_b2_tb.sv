@@ -4,7 +4,7 @@
 //              Check AXI contracts, observe committed tohost and print performance windows.
 // Clock domain: clk_sys.
 /* verilator lint_off BLKSEQ */
-module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
+module edrv32_cpu_b2_tb;
     import edrv32_axi64_memory_pkg::*;
     bit clk_i = 0;
     /* verilator lint_off SYNCASYNCNET */
@@ -26,6 +26,9 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
     bit [31:0] bus_write_addr_r;
     bit [31:0] store_addr_r;
     longint unsigned total_events_r [0:15];
+    longint unsigned total_icache_misses_r;
+    longint unsigned icache_misses_r [0:1];
+    wire icache_miss_w;
     bit store_r;
     bit store_seen_r;
     bit [31:0] begin_pc_w [0:1];
@@ -38,9 +41,12 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
     longint unsigned start_hpm_r [0:1][0:7];
     string image;
 
-    edrv32_cpu_subsys #(
-        .RVC_EN(RVC_EN)
-    ) u_dut (
+    // One event when a cacheable lookup starts a line fill, including killed fills.
+    assign icache_miss_w = u_dut.u_icache.state_r == u_dut.u_icache.S_IDLE &&
+        u_dut.u_icache.lookup_valid_r && !u_dut.u_icache.pma_err_r &&
+        u_dut.u_icache.cacheable_r && !u_dut.u_icache.hit_w;
+
+    edrv32_cpu_subsys u_dut (
         // Clock and reset.
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
@@ -168,7 +174,18 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
         $fclose(fd);
     endtask
 
+    // R-04 uses 256 distinct always-taken branches. Ignore the first pass,
+    // which fills I$, then measure retirement spacing for each adjacent pair.
+    bit r04_check;
+    integer r04_branches = 0;
+    integer r04_checked = 0;
+    longint unsigned r04_previous_cycle;
+    logic [31:0] r04_previous_pc;
+    integer r04_penalty[logic [31:0]];
+    integer r04_expected;
+    integer r04_actual;
     initial begin
+        r04_check = $test$plusargs("R04_CHECK");
         random_stalls = 0;
         delay_max = 0;
         void'($value$plusargs("READ_LATENCY=%d", read_latency_w));
@@ -185,9 +202,11 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
         enabled_w[1] = $value$plusargs("PERF2_BEGIN=%h", begin_pc_w[1]);
         void'($value$plusargs("PERF_END=%h", end_pc_w[0]));
         void'($value$plusargs("PERF2_END=%h", end_pc_w[1]));
+        total_icache_misses_r = 0;
         for (int e = 0; e < 16; e++) total_events_r[e] = 0;
         for (int w = 0; w < 2; w++) begin
             measuring_r[w] = 0;
+            icache_misses_r[w] = 0;
             for (int e = 0; e < 16; e++) events_r[w][e] = 0;
         end
         repeat (5) @(negedge clk_i);
@@ -196,19 +215,45 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
 
     task automatic report_window(input int w);
         $display("B2_WINDOW window=%0d cycles=%0d instret=%0d", w,
-                 u_dut.u_core.u_csr.cycle_r - start_cycle_r[w],
-                 u_dut.u_core.u_csr.instret_r - start_instret_r[w]);
+                    u_dut.u_core.u_csr.cycle_r - start_cycle_r[w],
+                    u_dut.u_core.u_csr.instret_r - start_instret_r[w]);
+        $display("B2_ICACHE_MISSES window=%0d count=%0d", w, icache_misses_r[w]);
         for (int e = 0; e < 16; e++)
             $display("B2_HPM window=%0d event=%0d count=%0d", w, e + 1, events_r[w][e]);
         for (int c = 0; c < 8; c++)
             $display("B2_CSR_HPM window=%0d counter=%0d event=%0d count=%0d", w, c + 3,
-                     u_dut.u_core.u_csr.event_r[c],
-                     u_dut.u_core.u_csr.counter_r[c] - start_hpm_r[w][c]);
+                        u_dut.u_core.u_csr.event_r[c],
+                        u_dut.u_core.u_csr.counter_r[c] - start_hpm_r[w][c]);
     endtask
 
     always @(posedge clk_i) begin
         if (rst_n_i) begin
             cycles_r <= cycles_r + 1;
+            total_icache_misses_r += 64'(icache_miss_w);
+            if (r04_check) begin
+                if (u_dut.u_core.trace_redirect_stage_w == 2)
+                    r04_penalty[u_dut.u_core.trace_redirect_pc_w] =
+                        4;
+                for (int lane = 0; lane < 2; lane++) begin
+                    if (u_dut.u_core.trace_valid_w[lane] &&
+                        u_dut.u_core.trace_instr_w[lane*32 +: 32] == 32'h00000463) begin
+                        if (r04_branches > 256 &&
+                            u_dut.u_core.trace_pc_w[lane*32 +: 32] == r04_previous_pc + 8) begin
+                            if (r04_penalty.exists(r04_previous_pc)==0)
+                                $fatal(1, "FAIL R-04 missing redirect pc=%08x", r04_previous_pc);
+                            r04_expected = r04_penalty[r04_previous_pc];
+                            r04_actual = int'(cycles_r-r04_previous_cycle)-1;
+                            if (r04_actual != r04_expected)
+                                $fatal(1, "FAIL R-04 penalty expected=%0d actual=%0d pc=%08x",
+                                    r04_expected, r04_actual, r04_previous_pc);
+                            r04_checked++;
+                        end
+                        r04_previous_pc = u_dut.u_core.trace_pc_w[lane*32 +: 32];
+                        r04_previous_cycle = cycles_r;
+                        r04_branches++;
+                    end
+                end
+            end
             for (int e = 0; e < 16; e++)
                 total_events_r[e] += 64'(u_dut.u_core.event_count_w[e*2 +: 2]);
             if (dbus.awvalid && dbus.awready) bus_write_addr_r <= dbus.awaddr;
@@ -231,6 +276,8 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
                     end
                 end
                 if (measuring_r[w])
+                    icache_misses_r[w] += 64'(icache_miss_w);
+                if (measuring_r[w])
                     for (int e = 0; e < 16; e++)
                         events_r[w][e] += 64'(u_dut.u_core.event_count_w[e*2 +: 2]);
             end
@@ -238,16 +285,23 @@ module edrv32_cpu_b2_tb #(parameter RVC_EN = 1);
             if (store_r && !store_seen_r && u_dut.dc_commit_w && !u_dut.dc_kill_w) begin
                 store_seen_r <= 1;
                 if (store_addr_r == tohost_addr_w && u_dut.dc_store_data_w[0]) begin
-                    $display("B2_TOTAL mcycle=%0d minstret=%0d RVC_EN=%0d latency=%0d",
-                             u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,
-                             RVC_EN, read_latency_w);
+                    if (r04_check) begin
+                        if (r04_checked == 0)
+                            $fatal(1, "FAIL R-04 no warmed misprediction measured");
+                        $display("PASS R-04 penalty E=4 checked=%0d", r04_checked);
+                    end
+                    $display("B2_TOTAL mcycle=%0d minstret=%0d no-C latency=%0d",
+                                u_dut.u_core.u_csr.cycle_r, u_dut.u_core.u_csr.instret_r,
+                                read_latency_w);
+                    $display("B2_ICACHE_MISSES window=total count=%0d",
+                                total_icache_misses_r);
                     for (int e = 0; e < 16; e++)
                         $display("B2_HPM window=total event=%0d count=%0d", e + 1,
-                                 total_events_r[e]);
+                                    total_events_r[e]);
                     for (int c = 0; c < 8; c++)
                         $display("B2_CSR_HPM window=total counter=%0d event=%0d count=%0d",
-                                 c + 3, u_dut.u_core.u_csr.event_r[c],
-                                 u_dut.u_core.u_csr.counter_r[c]);
+                                    c + 3, u_dut.u_core.u_csr.event_r[c],
+                                    u_dut.u_core.u_csr.counter_r[c]);
                     if (u_dut.dc_store_data_w != 1)
                         $fatal(1, "FAIL tohost status=%0d", u_dut.dc_store_data_w >> 1);
                     $display("PASS cpu_b2");

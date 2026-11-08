@@ -1,0 +1,56 @@
+{
+  "test": "b-11",
+  "spike": "smoke",
+  "stimulus": [],
+  "checks": [
+    "older ECALL/MRET/FENCE.I vs younger branch at zero/one/two instruction separation; M interrupt wins and precise mepc; no younger commit"
+  ],
+  "cases": [
+    {
+      "no_retire": "priority_trap_0_branch"
+    },
+    {
+      "no_retire": "priority_trap_1_branch"
+    },
+    {
+      "no_retire": "priority_trap_2_branch"
+    },
+    {
+      "no_retire": "priority_mret_0_branch"
+    },
+    {
+      "no_retire": "priority_mret_1_branch"
+    },
+    {
+      "no_retire": "priority_mret_2_branch"
+    },
+    {
+      "overlap_m": "priority_trap_0",
+      "overlap_e": "priority_trap_0_branch"
+    },
+    {
+      "overlap_m": "priority_mret_0",
+      "overlap_e": "priority_mret_0_branch"
+    },
+    {
+      "overlap_m": "priority_fence_0",
+      "overlap_e": "priority_fence_0_branch"
+    },
+    {
+      "overlap_m": "priority_irq",
+      "overlap_e": "priority_irq_branch"
+    }
+  ],
+  "tier": "full",
+  "rvc": [
+    false
+  ],
+  "schedule": [
+    {
+      "kind": "irq",
+      "when": "M.pc=priority_irq",
+      "source": "MEIP",
+      "clear": "trap entry"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 # File: b2_measure.py
 # Spec: cpu-testplan 3.8 R-01..R-05; cpu-plan C-I3.
 # Description: Measure the requested B2/CoreMark matrix and preserve commands and raw logs.
-#              Compile each RVC bench once, with one compilation job.
+#              Compile the no-C bench once, with one compilation job.
 # Clock domain: none (host tool).
 """Run from the repository root after sourcing ~/.local/opt/edrv32/env.sh."""
 import csv
@@ -38,13 +38,13 @@ def logged(command, path, check=True):
     return result
 
 
-def compile_bench(rvc):
-    obj = OUT / f'obj_rvc{rvc}'
+def compile_bench():
+    obj = OUT / 'obj'
     command = ['verilator', '--binary', '--timing', '-Wall', '+define+SIM_MODE',
-               '--top-module', 'edrv32_cpu_b2_tb', f'-GRVC_EN={rvc}',
+               '--top-module', 'edrv32_cpu_b2_tb',
                '--Mdir', str(obj), '-o', 'sim', '-j', '1',
                *expand_files(ROOT / 'verif/block/cpu_b2/files.f')]
-    logged(command, OUT / f'compile_rvc{rvc}.log')
+    logged(command, OUT / 'compile.log')
     return obj / 'sim'
 
 
@@ -52,7 +52,7 @@ def build(test, rvc, option):
     name = f'rvc{rvc}_{test}_{option}'
     out = OUT / name
     out.mkdir(parents=True, exist_ok=True)
-    arch = 'rv32im' + ('c' if rvc else '') + '_zicsr'
+    arch = 'rv32im_zicsr'
     if option == 'legacy':
         arch += '_zifencei'
     program = 'coremark' if test == 'r05' else 'cpu_b2_' + test
@@ -115,6 +115,8 @@ def execute(sim, out, elf, test, latency, inner=False):
                 first, last = offsets[test]
                 begin_pc, end_pc = body + first, body + last
             command += [f'+{prefix}_BEGIN={begin_pc:x}', f'+{prefix}_END={end_pc:x}']
+    if test == 'r04':
+        command.append('+R04_CHECK')
     log = out / (f'inner_l{latency}.log' if inner else f'run_l{latency}.log')
     logged(command, log)
     return log.read_text()
@@ -149,40 +151,36 @@ def main():
     with (OUT / 'coremark.csv').open('w') as table:
         writer = csv.DictWriter(table, fieldnames=fields)
         writer.writeheader()
-        for rvc in (1, 0):
-            print(f'Compiling B2 RVC_EN={rvc} (-j 1)', flush=True)
-            sim = compile_bench(rvc)
-            for test in ('r01', 'r02', 'r03', 'r04'):
-                out, elf = build(test, rvc, 'o2')
-                output = execute(sim, out, elf, test, 2)
-                print(f'RVC={rvc} {test}: '
-                      + ' '.join(re.findall(r'B2_WINDOW[^\n]+', output)), flush=True)
-                execute(sim, out, elf, test, 2, inner=True)
-            measured = []
-            images = {}
-            for option in ('o2', 'o3', 'unroll', 'tuned'):
-                out, elf = build('r05', rvc, option)
-                if elf is None:
-                    writer.writerow({'rvc': rvc, 'option': option, 'latency': 2,
-                                     'crc': 'SRAM overflow'})
-                else:
-                    images[option] = (out, elf)
-                    row = coremark_row(rvc, option, 2, execute(sim, out, elf, 'r05', 2))
-                    writer.writerow(row)
-                    measured.append(row)
-                table.flush()
-            best = min((row for row in measured if row['crc'] == 'PASS'),
-                       key=lambda row: row['cycles'])['option']
-            for option in dict.fromkeys(('o2', best)):
-                out, elf = images[option]
-                writer.writerow(coremark_row(rvc, option, 3,
-                                             execute(sim, out, elf, 'r05', 3)))
-                table.flush()
-            if rvc:
-                out, elf = build('r05', rvc, 'legacy')
-                writer.writerow(coremark_row(rvc, 'legacy', 2,
-                                             execute(sim, out, elf, 'r05', 2)))
-                table.flush()
+        rvc = 0
+        print(f'Compiling B2 RVC_EN={rvc} (-j 1)', flush=True)
+        sim = compile_bench()
+        for test in ('r01', 'r02', 'r03', 'r04'):
+            out, elf = build(test, rvc, 'o2')
+            output = execute(sim, out, elf, test, 2)
+            print(f'RVC={rvc} {test}: '
+                  + ' '.join(re.findall(r'B2_WINDOW[^\n]+', output)), flush=True)
+            execute(sim, out, elf, test, 2, inner=True)
+        measured = []
+        images = {}
+        for option in ('o2', 'o3', 'unroll', 'tuned'):
+            out, elf = build('r05', rvc, option)
+            if elf is None:
+                writer.writerow({'rvc': rvc, 'option': option, 'latency': 2,
+                                 'crc': 'SRAM overflow'})
+            else:
+                images[option] = (out, elf)
+                row = coremark_row(rvc, option, 2, execute(sim, out, elf, 'r05', 2))
+                writer.writerow(row)
+                measured.append(row)
+            table.flush()
+        best = min((row for row in measured if row['crc'] == 'PASS'),
+                   key=lambda row: row['cycles'])['option']
+        for option in dict.fromkeys(('o2', best)):
+            out, elf = images[option]
+            writer.writerow(coremark_row(rvc, option, 3,
+                                         execute(sim, out, elf, 'r05', 3)))
+            table.flush()
+
 
 
 if __name__ == '__main__':

@@ -1,0 +1,10 @@
+top: edrv32_cpu_early_tb
+files: files.f
+defines:
+parameters:
+software:
+timeout: 120
+pass: PASS
+simulator: runner
+tier: smoke
+runner: python3 verif/block/cpu/b1/early_selftest.py

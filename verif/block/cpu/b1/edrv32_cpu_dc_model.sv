@@ -5,13 +5,21 @@
 module edrv32_cpu_dc_model (
     input logic clk_i,
     input logic rst_n_i,
+    // cpu-spec 3.3/4.10: speculative, synchronous query, without a handshake.
+    input logic dc_early_valid_i,
+    input logic [31:0] dc_early_addr_i,
+    output wire [1:0] dc_early_way_hit_o,
+    output wire [63:0] dc_early_way_data_o,
+
     input logic dc_req_valid_i,
+    input logic dc_req_early_i,
     input logic [31:0] dc_req_addr_i,
     input logic dc_req_store_i,
     input logic [1:0] dc_req_size_i,
     output logic dc_req_ready_o,
     output logic dc_resp_valid_o,
-    output logic [31:0] dc_resp_data_o,
+    output wire [1:0] dc_resp_way_hit_o,
+    output wire [63:0] dc_resp_way_data_o,
     output logic dc_resp_err_o,
     output logic dc_resp_device_o,
     input logic dc_kill_i,
@@ -26,10 +34,36 @@ module edrv32_cpu_dc_model (
     output logic write_buffer_valid_o
 );
     import edrv32_cpu_memory::*;
+    logic early_hit_r;
+    logic [31:0] early_data_r;
+    logic [31:0] resp_data_r;
+    bit early_way_r;
+    bit resp_way_r;
+    assign dc_early_way_hit_o = early_hit_r && early_failure_r==0 ? (early_way_r ? 2'b10 : 2'b01) : 2'b00;
+    assign dc_early_way_data_o = early_way_r ? {early_data_r,32'b0} : {32'b0,early_data_r};
+    assign dc_resp_way_hit_o = dc_resp_valid_o ? (resp_way_r ? 2'b10 : 2'b01) : 2'b00;
+    assign dc_resp_way_data_o = resp_way_r ? {resp_data_r,32'b0} : {32'b0,resp_data_r};
+    int early_fail_pct = 0;
+    logic [31:0] early_addr_r;
+    wire [2:0] early_failure_r;
+    logic [2:0] early_query_failure_r;
+    assign early_failure_r = early_query_failure_r != 0 ? early_query_failure_r :
+        buffer_valid_r && (physical(early_addr_r)>>2)==(physical(buffer_addr_r)>>2) ? 3'd4 :
+        active_r && store_r && (physical(early_addr_r)>>2)==(physical(addr_r)>>2) ? 3'd5 :
+        dc_clean_all_i ? 3'd6 : 3'd0;
+    logic [31:0] early_miss_addr;
+    bit early_miss_enabled;
+    logic [31:0] early_block_addr;
+    bit early_block_enabled;
+    logic early_reuse_w;
+    logic [2:0] early_failure_w;
+    int early_random_r;
+    int early_miss_random_r;
     int miss_pct = 0;
     int delay_min = 5;
     int delay_max = 40;
     int ready_low_pct = 0;
+    bit forced_ready_low = 0;
     int wb_event_cycle = -1;
     int cycle_r;
     int clean_delay = 1;
@@ -62,6 +96,9 @@ module edrv32_cpu_dc_model (
     bit tohost_enabled;
 
     initial begin
+        void'($value$plusargs("DC_EARLY_FAIL_PCT=%d", early_fail_pct));
+        early_miss_enabled = $value$plusargs("DC_EARLY_MISS_ADDR=%h", early_miss_addr);
+        early_block_enabled = $value$plusargs("DC_EARLY_BLOCK_ADDR=%h", early_block_addr);
         void'($value$plusargs("DC_CLEAN_ALL_DELAY=%d", clean_delay));
         void'($value$plusargs("WB_HOLD_CYCLES=%d", buffer_hold_cycles));
         void'($value$plusargs("DC_MISS_PCT=%d", miss_pct));
@@ -73,7 +110,8 @@ module edrv32_cpu_dc_model (
         tohost_enabled = $value$plusargs("TOHOST_ADDR=%h", tohost_addr);
     end
 
-    assign dc_req_ready_o = rst_n_i && ready_r && !dc_fence_i && !dc_clean_all_i
+    assign dc_req_ready_o = rst_n_i && ready_r && !forced_ready_low &&
+        !dc_fence_i && !dc_clean_all_i
         && (!active_r || (!device_r && responded_r && dc_commit_i && !dc_kill_i));
     assign dc_resp_device_o = (active_r || resp_valid_r) && device_r;
     assign dc_resp_valid_o = resp_valid_r;
@@ -81,8 +119,53 @@ module edrv32_cpu_dc_model (
     assign miss_o = active_r && !device_r && delay_r != 0;
     assign write_buffer_valid_o = buffer_valid_r;
 
+    assign early_reuse_w = (|dc_early_way_hit_o) && dc_req_valid_i && dc_req_early_i &&
+        !dc_req_store_i && dc_req_addr_i == early_addr_r;
+    // The replica read is independent of ordinary request readiness and RAM usage.
+    // Failure reasons are observations for cpu-testplan A-02 coverage, not DUT ports.
+    always_comb begin
+        early_failure_w = 0;
+        if (early_random_r < early_fail_pct ||
+            (early_block_enabled && dc_early_addr_i == early_block_addr))
+            early_failure_w = 1;
+        if (early_miss_random_r < miss_pct ||
+            (early_miss_enabled && dc_early_addr_i == early_miss_addr))
+            early_failure_w = 2;
+        if (device(dc_early_addr_i))
+            early_failure_w = 3;
+        if (buffer_valid_r && (physical(dc_early_addr_i) >> 2) ==
+            (physical(buffer_addr_r) >> 2))
+            early_failure_w = 4;
+        if (active_r && store_r && (physical(dc_early_addr_i) >> 2) ==
+            (physical(addr_r) >> 2))
+            early_failure_w = 5;
+        if (dc_clean_all_i) early_failure_w = 6;
+    end
+    // The query updates only response registers. It never starts a transaction,
+    // allocates a fill, touches memory, drains a buffer or executes a device.
+    always @(posedge clk_i) begin
+        if (!rst_n_i) begin
+            early_hit_r <= 0;
+            early_data_r <= 0;
+            early_addr_r <= 0;
+            early_query_failure_r <= 0;
+            early_random_r <= 100;
+            early_miss_random_r <= 100;
+        end else begin
+            early_random_r <= int'($urandom_range(0, 99));
+            early_miss_random_r <= int'($urandom_range(0, 99));
+            early_hit_r <= dc_early_valid_i && early_failure_w == 0;
+            early_query_failure_r <= dc_early_valid_i ? early_failure_w : 0;
+            if (dc_early_valid_i) begin
+                early_way_r <= 1'($urandom_range(0,1));
+                early_addr_r <= dc_early_addr_i;
+                early_data_r <= read_data(dc_early_addr_i, 2);
+            end
+        end
+    end
+
     function automatic logic [31:0] forwarded(input logic [31:0] addr,
-                                               input logic [1:0] size);
+                                                input logic [1:0] size);
         logic [31:0] value;
         value = read_data(addr, size);
         // spec 4.7: merge only byte lanes covered by the pending store.
@@ -103,11 +186,12 @@ module edrv32_cpu_dc_model (
     endfunction
 
     task automatic report_result(input logic [31:0] addr,
-                                  input logic [1:0] size,
-                                  input bit error);
+                                    input logic [1:0] size,
+                                    input bit error, input bit fill_return);
         resp_valid_r <= 1;
         resp_err_r <= error;
-        dc_resp_data_o <= forwarded(addr, size);
+        resp_way_r <= error || fill_return ? 1'b0 : 1'($urandom_range(0,1));
+        resp_data_r <= forwarded(addr, size);
         responded_r <= 1;
     endtask
 
@@ -192,7 +276,8 @@ module edrv32_cpu_dc_model (
                                 resp_valid_r <= 1;
                                 resp_err_r <= error_r;
                                 if (!error_r) begin
-                                    dc_resp_data_o <= access_device(addr_r, store_r,
+                                    resp_way_r <= 0;
+                                    resp_data_r <= access_device(addr_r, store_r,
                                         size_r, store_data_r);
                                     device_execute_o <= 1;
                                     if (store_r && tohost_enabled && addr_r == tohost_addr) begin
@@ -203,7 +288,7 @@ module edrv32_cpu_dc_model (
                                 active_r <= 0;
                                 responded_r <= 1;
                             end else if (!device_r) begin
-                                report_result(addr_r, size_r, error_r);
+                                report_result(addr_r, size_r, error_r, 1'b1);
                             end
                         end
                     end
@@ -221,11 +306,19 @@ module edrv32_cpu_dc_model (
                 responded_r <= 0;
                 delay_r <= 0;
                 if (!device(dc_req_addr_i)) begin
-                    if (int'($urandom_range(0, 99)) < miss_pct)
+                    if (early_reuse_w) begin
+                        resp_valid_r <= 1;
+                        resp_err_r <= error_enabled && dc_req_addr_i == error_addr;
+                        resp_data_r <= early_data_r;
+                        resp_way_r <= error_enabled && dc_req_addr_i == error_addr ?
+                            1'b0 : early_way_r;
+                        responded_r <= 1;
+                    end else if ((early_miss_enabled && dc_req_addr_i == early_miss_addr) ||
+                        int'($urandom_range(0, 99)) < miss_pct)
                         delay_r <= int'($urandom_range(32'(delay_min), 32'(delay_max))) - 1;
                     else
                         report_result(dc_req_addr_i, dc_req_size_i,
-                            error_enabled && dc_req_addr_i == error_addr);
+                            error_enabled && dc_req_addr_i == error_addr, 1'b0);
                 end
             end
         end

@@ -1,6 +1,0 @@
-{
-  "suite": "riscv-tests",
-  "name": "rv32mi-p-instret_overflow",
-  "source": "third_party/riscv-tests/isa/rv32mi/instret_overflow.S",
-  "rvc": true
-}

@@ -24,6 +24,7 @@ module edrv32_cpu_protocol_checker (
     input logic dc_kill_i,
     input logic dc_commit_i,
     input logic m_enter_i,
+    input logic redirect_flush_i,
     input logic device_execute_i
 );
     bit dc_held_r;
@@ -57,10 +58,10 @@ module edrv32_cpu_protocol_checker (
             end
             if (ic_req_valid_i && ic_req_ready_i && !ic_kill_i)
                 ic_pending_r++;
-            if (dc_held_r && !dc_kill_i && (!dc_req_valid_i
+            if (dc_held_r && !dc_kill_i && !redirect_flush_i && (!dc_req_valid_i
                 || {dc_req_addr_i, dc_req_store_i, dc_req_size_i} != dc_held_payload_r))
                 $fatal(1, "FAIL cpu-spec 3.3: stalled D$ request changed at %0t", $time);
-            dc_held_r = dc_req_valid_i && !dc_req_ready_i && !dc_kill_i;
+            dc_held_r = dc_req_valid_i && !dc_req_ready_i && !dc_kill_i && !redirect_flush_i;
             dc_held_payload_r = {dc_req_addr_i, dc_req_store_i, dc_req_size_i};
             if (dc_req_valid_i && dc_req_ready_i && !m_enter_i)
                 $fatal(1, "FAIL cpu-spec 3.3: D$ request without entering M at %0t", $time);

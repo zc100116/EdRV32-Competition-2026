@@ -69,7 +69,7 @@ def memory_write_port(kind, port):
     return port in {'D', 'WE'} or port.startswith('A')
 
 
-def analyze(design, starts=None, ends=None, end_nets=None):
+def analyze(design, starts=None, ends=None, end_nets=None, graph_only=False):
     """Find longest paths between optional sets of signal/pin regular expressions.
 
     Selected internal start nets become cuts: their driver is excluded from the
@@ -171,6 +171,7 @@ def analyze(design, starts=None, ends=None, end_nets=None):
         memory = is_lutram(kind) or is_srl(kind)
         blackbox = kind.startswith('ip_') and kind in design['modules'] and int(
             design['modules'][kind]['attributes'].get('blackbox', '0'), 2)
+        async_ip = blackbox and kind.startswith('ip_lutram_')
         output_pins = [(port, index, bit) for port, bits in cell['connections'].items()
                        if cell['port_directions'][port] == 'output'
                        for index, bit in enumerate(bits) if isinstance(bit, int)]
@@ -219,7 +220,9 @@ def analyze(design, starts=None, ends=None, end_nets=None):
                 if clock:
                     continue
                 inputs.append(bit)
-                if ff or blackbox or (memory and memory_write_port(kind, port)):
+                if (ff or (blackbox and not async_ip) or
+                        (async_ip and port in {'wr_en', 'wr_addr', 'wr_data'}) or
+                        (memory and memory_write_port(kind, port))):
                     reference = q[index] if ff else bit
                     endpoint(point(bit, 'FF' if ff else kind,
                                    f'{name}.{port}[{index}]',
@@ -228,10 +231,10 @@ def analyze(design, starts=None, ends=None, end_nets=None):
             info = point(bit, 'FF' if ff else kind, f'{name}.{port}[{index}]',
                          cell['attributes'].get('src', ''))
             drivers[bit] = info
-            if ff or blackbox:
+            if ff or (blackbox and not async_ip):
                 roots[bit] = info
                 graph[bit] = set()
-            elif memory:
+            elif memory or async_ip:
                 state = dict(info, signal=info['signal'] + ' <storage>', bit=state_bit,
                              pin=f'{name}.storage.{port}[{index}]')
                 roots[state_bit] = state
@@ -240,7 +243,8 @@ def analyze(design, starts=None, ends=None, end_nets=None):
                     roots[bit] = info
                     graph[bit] = set()
                 else:
-                    address = memory_address_ports(kind, port, cell['connections'])
+                    address = (['rd_addr'] if async_ip else
+                               memory_address_ports(kind, port, cell['connections']))
                     graph[bit] = {b for p in address for b in cell['connections'][p]
                                   if isinstance(b, int)} | {state_bit}
                     logic[bit] = (name, kind, info['src'])
@@ -275,6 +279,11 @@ def analyze(design, starts=None, ends=None, end_nets=None):
         for bit in aliases:
             if selected(end_nets, bit, ''):
                 endpoints.append(point(bit, 'net', drivers[bit]['pin']))
+    if graph_only:
+        setup_endpoints = [point for point in endpoints
+                           if not (point['boundary'] == 'FF' and
+                                   re.search(r'\.(CLR|PRE)\[', point['pin']))]
+        return graph, logic, roots, setup_endpoints, loads, active_roots
     # One maximal-depth predecessor per bit; ties follow ascending net number.
     depth = {}
     predecessor = {}

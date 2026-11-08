@@ -20,8 +20,8 @@ from trace_compare import compare, rtl_events, spike_events
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def simulator(compressed):
-    out = ROOT / 'build/cpu/b1' / ('c' if compressed else 'no-c')
+def simulator():
+    out = ROOT / 'build/cpu/b1' / 'no-c'
     out.mkdir(parents=True, exist_ok=True)
     binary = out / 'obj/sim'
     files = expand_files(ROOT / 'verif/block/cpu/b1/core.f')
@@ -30,9 +30,9 @@ def simulator(compressed):
     sources += [ROOT / 'verif/block/cpu/b1/core.f', ROOT / 'rtl/filelists/cpu.f']
     sources += list((ROOT / 'verif/block/cpu/b1').glob('*.svh'))
     if not binary.exists() or any(p.stat().st_mtime > binary.stat().st_mtime for p in sources):
-        command = ['verilator', '--binary', '--timing', '-j', '1', '--top-module',
+        command = ['verilator', '--binary', '--timing', '-Wall', '-j', '1', '--top-module',
                    'edrv32_cpu_b1_core_tb', '--Mdir', str(out / 'obj'), '-o', 'sim',
-                   '+define+SIM_MODE', '-GRVC_EN=' + str(int(compressed))]
+                   '+define+SIM_MODE']
         with (out / 'compile.log').open('w') as log:
             subprocess.run(command + files, stdout=log, stderr=subprocess.STDOUT, check=True)
     return binary
@@ -43,10 +43,10 @@ def main():
     parser.add_argument('case', type=Path)
     args = parser.parse_args()
     case = json.loads(args.case.read_text())
-    compressed = case['rvc']
+    compressed = False
     suite = case['suite']
     name = case['name']
-    binary = simulator(compressed)
+    binary = simulator()
     config = None
     if suite in ('riscv-tests', 'arch-test'):
         elf = build_tests.build(ROOT / case['source'], name, suite == 'arch-test', compressed)
@@ -58,7 +58,7 @@ def main():
     elif suite == 'directed':
         source = ROOT / 'sw/tests/cpu' / name / 'main.S'
         config = json.loads((source.parent / 'b1.json').read_text())
-        out = ROOT / 'build/cpu/directed' / name / ('c' if compressed else 'no-c')
+        out = ROOT / 'build/cpu/directed' / name / 'no-c'
         if case.get('fence_irq'):
             out /= 'irq'
         elf = build_directed.build(source, out, False, compressed,
@@ -102,6 +102,34 @@ def main():
                         str(out / 'rtl.signature'), str(out / 'reference.signature')], check=True)
     if config is not None:
         for event in config['schedule']:
+            if event['kind'] == 'cache_paired_run':
+                paired = out / 'cache-paired'
+                paired.mkdir(exist_ok=True)
+                image = (out / 'mem.hex').read_text()
+                for pc in event['patches']:
+                    image += f'@{names[pc]:08x}\n13\n00\n00\n00\n'
+                (paired / 'mem.hex').write_text(image)
+                reference_config = dict(config, cases=[row for row in config['cases']
+                                                       if 'early_query' not in row])
+                stimulus_plusargs(reference_config, names, paired)
+                arguments = []
+                for arg in plusargs:
+                    for filename in ('mem.hex', 'rtl.trace', 'coverage.json', 'dc_probe.txt',
+                                     'obligations.txt'):
+                        arg = arg.replace(str(out / filename), str(paired / filename))
+                    arguments.append(arg)
+                with (paired / 'run.log').open('w') as log:
+                    result = subprocess.run([str(binary)] + arguments, stdout=log,
+                                            stderr=subprocess.STDOUT, timeout=120)
+                result.check_returncode()
+                if compare(rtl_events(out / 'rtl.trace'), rtl_events(paired / 'rtl.trace')):
+                    return 1
+                actual = (out / 'dc_probe.txt').read_text()
+                expected = (paired / 'dc_probe.txt').read_text()
+                if actual != expected:
+                    raise AssertionError(f'A-03 observable D$ state expected={expected!r} '
+                                         f'actual={actual!r}')
+                print('PASS A-03 speculative/no-speculative interface observations match')
             if event['kind'] == 'paired_run':
                 paired = out / 'paired'
                 paired.mkdir(exist_ok=True)
@@ -125,10 +153,10 @@ def main():
                     return 1
                 if (out / 'predictor.txt').read_text() != (paired / 'predictor.txt').read_text():
                     raise AssertionError('B-06 predictor state/probe differs after flushed branch patch')
-                print('PASS B-06 paired predictor state and probe prediction')
+                print('PASS paired predictor state and probe prediction')
     mode = 'b1-selfcheck' if config is not None and config['spike'] != 'compare' else \
         'tohost-only' if name == 'rv32mi-p-ma_fetch' else 'spike-compare'
-    print(f'PASS {suite} {name} RVC_EN={int(compressed)} mode={mode}')
+    print(f'PASS {suite} {name} no-C mode={mode}')
     return 0
 
 

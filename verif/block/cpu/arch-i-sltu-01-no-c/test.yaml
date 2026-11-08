@@ -1,7 +1,7 @@
 top: edrv32_cpu_b1_core_tb
 files: files.f
 defines: SIM_MODE
-parameters: RVC_EN=0
+parameters:
 software:
 timeout: 240
 pass: PASS

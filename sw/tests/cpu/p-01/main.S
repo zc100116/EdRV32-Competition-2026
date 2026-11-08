@@ -1,5 +1,5 @@
 /* File: p-01/main.S; Spec: cpu-testplan 3.3–3.7, cpu-spec 2–7.
- * Description: 全类型配对矩阵，覆盖无相关、RAW、WAW及系统指令串行化。
+ * Description: v0.15 全类型矩阵：按槽龄配对、互换管线、RAW/WAW及双控制排斥。
  * Clock: clk_sys. */
 #include "test.h"
     START

@@ -7,18 +7,27 @@ module edrv32_cpu_predictor (
     // Clock and control reset.
     input wire clk_i,
     input wire rst_n_i,
-    input wire [7:0] rst_sys_direction_n_i,
 
     // F1 query; accept advances speculative RAS only for an accepted prediction.
     input wire [31:1] query_pc_i,
+    input wire [31:0] query_valid_index_i,
+    input wire [7:0] query_bank_copy_i,
     input wire query_accept_i,
     output wire predict_hit_o,
     output wire predict_taken_o,
+    output wire [7:0] predict_taken_copy_o,
     output wire [31:0] predict_target_o,
     output wire [1:0] predict_position_o,
-    output wire predict_compressed_o,
-    output wire [8:0] predict_history_o,
+    output wire [11:0] predict_history_o,
     output wire [36:0] predict_ras_o,
+    // F1 captures histories and both gshare directions; F2 reads the second level.
+    output wire predict_conditional_o,
+    output wire [19:0] predict_local_history_o,
+    output wire [1:0] predict_global_o,
+    input wire [19:0] f2_local_history_i,
+    input wire [11:0] f2_index_i,
+    output wire [1:0] f2_local_o,
+    output wire f2_use_local_o,
     // E trains only surviving branches, using their original query index.
     // Types: 0 conditional, 1 JAL, 2 JALR, 3 call, 4 return.
     input wire update_valid_i,
@@ -26,145 +35,301 @@ module edrv32_cpu_predictor (
     input wire [31:0] update_target_i,
     input wire [2:0] update_type_i,
     input wire update_taken_i,
-    input wire update_compressed_i,
-    input wire [143:0] update_index_i,
+    input wire [11:0] update_index_i,
+
+    input wire [11:0] update_tournament_i,
 
     // F2 clears the stale fetch-group prediction after boundary or length mismatch.
     input wire clear_valid_i,
-    input wire [4:0] clear_index_i,
+    input wire [6:0] clear_index_i,
 
     // Redirect restores the saved state and applies the actual call/return action.
     input wire restore_valid_i,
+    input wire [15:0] restore_valid_copy_i,
     input wire [36:0] restore_ras_i,
     input wire restore_push_i,
     input wire restore_pop_i,
     input wire [31:0] restore_return_pc_i
 );
-    localparam BTB_ENTRIES = 32;
-    localparam DIRECTION_ENTRIES = 512;
+    localparam BTB_ENTRIES = 128;
     localparam RAS_ENTRIES = 4;
     reg [BTB_ENTRIES-1:0] btb_valid_r;
-    reg [23:0] btb_tag_r [0:BTB_ENTRIES-1];
-    reg [31:0] btb_target_r [0:BTB_ENTRIES-1];
-    reg [1:0] btb_position_r [0:BTB_ENTRIES-1];
-    reg [2:0] btb_type_r [0:BTB_ENTRIES-1];
-    reg btb_compressed_r [0:BTB_ENTRIES-1];
-    wire [DIRECTION_ENTRIES*2-1:0] direction_r;
-    reg [8:0] history_r;
+    wire [57:0] btb_data_w;
+    wire [3:0] direction_word_w;
+    wire [3:0] update_word_w;
+    wire [3:0] next_word_w;
+    wire [1:0] direction_w;
+    wire [1:0] update_counter_w;
+    wire [1:0] next_counter_w;
+    reg [11:0] history_r;
     reg [127:0] ras_data_r;
     reg [1:0] ras_ptr_r;
     reg [2:0] ras_count_r;
-    wire [4:0] query_idx_w;
-    wire [8:0] direction_idx_w;
-    wire [1:0] ras_top_w;
-    wire [31:0] branch_pc_w;
+    wire [127:0] ras_effective_data_w;
+    reg [1:0] ras_effective_ptr_w;
+    reg [2:0] ras_effective_count_w;
+    reg ras_accept_r;
+    reg ras_taken_r;
+    reg [2:0] ras_type_r;
+    reg [31:0] ras_return_pc_r;
+    reg ras_restore_r;
+    (* keep = "true", syn_preserve = 1 *) reg [15:0] ras_restore_copy1_r;
+    reg [36:0] ras_restore_state_r;
+    reg ras_restore_push_r;
+    reg ras_restore_pop_r;
+    reg [31:0] ras_restore_return_pc_r;
+    wire [6:0] query_idx_w;
+    wire [11:0] direction_idx_w;
+    wire [1:0] ras_pop_top_w;
+    wire [1:0] ras_restore_pop_top_w;
+    reg [31:0] ras_hold_top_r;
+    reg [31:0] ras_pop_top_r;
+    reg [31:0] ras_restore_pop_top_r;
+    wire [31:0] ras_effective_top_w;
+    wire [31:0] branch_return_pc_w;
+    wire [31:0] group_return_pc_w;
+    (* keep = 1 *) wire [7:0] tag_half_hit_w /* synthesis syn_keep=1 */;
+    (* keep = "true" *) wire [7:0] valid_bank_w;
+    (* keep = "true" *) wire [1:0] valid_group_w;
+    (* keep = "true" *) wire tag_hit_w;
+    wire query_valid_w;
+    (* keep = "true" *) wire position_hit_w;
+    (* keep = "true" *) wire direction_taken_w;
     wire [1:0] restore_ptr_w;
     wire [2:0] restore_count_w;
     wire [1:0] restore_pop_ptr_w;
     wire [1:0] restore_write_ptr_w;
+    wire [2:0] unused_query_w;
+    assign unused_query_w = {query_pc_i[1], update_pc_i[1], direction_w[0]};
     genvar ras_idx;
-    assign query_idx_w = query_pc_i[7:3];
-    assign branch_pc_w = {query_pc_i[31:3], btb_position_r[query_idx_w], 1'b0};
-    assign direction_idx_w = branch_pc_w[9:1] ^ history_r;
-    assign predict_hit_o = btb_valid_r[query_idx_w] &&
-        btb_tag_r[query_idx_w] == query_pc_i[31:8] &&
-        btb_position_r[query_idx_w] >= query_pc_i[2:1];
-    assign predict_taken_o = predict_hit_o &&
-        (btb_type_r[query_idx_w] != 0 || direction_r[direction_idx_w * 2 + 1]);
-    assign ras_top_w = ras_ptr_r - 1'b1;
-    assign predict_target_o = btb_type_r[query_idx_w] == 4 && ras_count_r != 0 ?
-        ras_data_r[ras_top_w * 32 +: 32] : btb_target_r[query_idx_w];
-    assign predict_position_o = btb_position_r[query_idx_w];
-    assign predict_compressed_o = btb_compressed_r[query_idx_w];
+    genvar ras_byte;
+    assign query_idx_w = query_pc_i[9:3];
+    // cpu-spec 4.9: the LUTRAM position selects precomputed return addresses.
+    // In particular it must not start a carry into the RAS write data.
+    assign group_return_pc_w = {query_pc_i[31:3] + 29'd1, 3'b0};
+    assign branch_return_pc_w = btb_data_w[3] ? group_return_pc_w :
+        {query_pc_i[31:3], 3'b100};
+    // The word address is independent of BTB; its position selects a counter after both reads.
+    assign direction_idx_w = {query_pc_i[13:3] ^ history_r[11:1],
+        btb_data_w[3] ^ history_r[0]};
+    assign direction_w = direction_idx_w[0] ? direction_word_w[3:2] : direction_word_w[1:0];
+    // Three tag bits fit one LUT6. Keep all eight compares parallel so the
+    // mapper cannot turn the 22-bit equality into a serial comparison chain.
+    genvar tag_group;
+    genvar valid_quarter;
+    genvar predict_group;
+    generate
+        for (tag_group = 0; tag_group < 8; tag_group = tag_group + 1) begin : g_tag
+            localparam WIDTH = tag_group == 7 ? 1 : 3;
+            assign tag_half_hit_w[tag_group] =
+                btb_data_w[36+tag_group*3 +: WIDTH] ==
+                query_pc_i[10+tag_group*3 +: WIDTH];
+            wire [15:0] valid_w;
+            assign valid_w = btb_valid_r[tag_group*16 +: 16];
+            (* keep = "true" *) wire [3:0] quarter_w;
+            for (valid_quarter = 0; valid_quarter < 4;
+                valid_quarter = valid_quarter + 1) begin : g_quarter
+                wire [3:0] valid_w_copy;
+                assign valid_w_copy = valid_w[valid_quarter*4 +: 4];
+                assign quarter_w[valid_quarter] =
+                    valid_w_copy[query_valid_index_i[tag_group*4 +: 2]];
+            end
+            assign valid_bank_w[tag_group] = quarter_w[query_valid_index_i[tag_group*4+2 +: 2]];
+        end
+    endgenerate
+    assign valid_group_w[0] = valid_bank_w[{1'b0, query_pc_i[8:7]}];
+    assign valid_group_w[1] = valid_bank_w[{1'b1, query_pc_i[8:7]}];
+    assign query_valid_w = valid_group_w[query_pc_i[9]];
+    assign tag_hit_w = &tag_half_hit_w;
+    generate
+        for (predict_group = 0; predict_group < 8;
+            predict_group = predict_group + 1) begin : g_predict
+            assign predict_taken_copy_o[predict_group] =
+                valid_group_w[query_bank_copy_i[predict_group]] &&
+                tag_hit_w && position_hit_w && direction_taken_w;
+        end
+    endgenerate
+    assign position_hit_w = {btb_data_w[3], 1'b0} >= query_pc_i[2:1];
+    assign direction_taken_w = btb_data_w[2:0] != 0 || direction_w[1];
+    // Keep the independent tests parallel up to the final prediction decision.
+    assign predict_hit_o = query_valid_w && tag_hit_w && position_hit_w;
+    assign predict_taken_o = query_valid_w && tag_hit_w &&
+        position_hit_w && direction_taken_w;
+    assign ras_pop_top_w = ras_effective_ptr_w - 2'd2;
+    assign ras_restore_pop_top_w = restore_ras_i[33:32] - 2'd2;
+    // Register all stack-top candidates before the F1 target selection. No
+    // pending-operation forwarding mux precedes the four-entry array read.
+    assign ras_effective_top_w = ras_restore_r ?
+        (ras_restore_push_r ? ras_restore_return_pc_r :
+        ras_restore_pop_r && restore_count_w != 0 ? ras_restore_pop_top_r :
+        ras_restore_state_r[31:0]) :
+        ras_accept_r && ras_taken_r && ras_type_r == 3 ? ras_return_pc_r :
+        ras_accept_r && ras_taken_r && ras_type_r == 4 && ras_count_r != 0 ?
+        ras_pop_top_r : ras_hold_top_r;
+    assign predict_target_o = btb_data_w[2:0] == 4 && ras_effective_count_w != 0 ?
+        ras_effective_top_w : btb_data_w[35:4];
+    assign predict_position_o = {btb_data_w[3], 1'b0};
     assign predict_history_o = history_r;
-    assign predict_ras_o = {ras_count_r, ras_ptr_r, ras_data_r[ras_top_w * 32 +: 32]};
-    assign restore_ptr_w = restore_ras_i[33:32];
-    assign restore_count_w = restore_ras_i[36:34];
+    assign predict_ras_o = {ras_effective_count_w, ras_effective_ptr_w,
+        ras_effective_top_w};
+    assign restore_ptr_w = ras_restore_state_r[33:32];
+    assign restore_count_w = ras_restore_state_r[36:34];
     assign restore_pop_ptr_w = restore_ptr_w - 1'b1;
-    assign restore_write_ptr_w = restore_pop_i && restore_count_w != 0 ?
+    assign restore_write_ptr_w = ras_restore_pop_r && restore_count_w != 0 ?
         restore_pop_ptr_w : restore_ptr_w;
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
             btb_valid_r <= 0;
             history_r <= 0;
-            ras_ptr_r <= 0;
-            ras_count_r <= 0;
         end else begin
             if (update_valid_i) begin
-                btb_valid_r[update_pc_i[7:3]] <= 1'b1;
+                btb_valid_r[update_pc_i[9:3]] <= 1'b1;
                 if (update_type_i == 0) begin
-                    history_r <= {history_r[7:0], update_taken_i};
-
+                    history_r <= {history_r[10:0], update_taken_i};
                 end
             end
             if (clear_valid_i)
                 btb_valid_r[clear_index_i] <= 1'b0;
-            if (restore_valid_i) begin
-                ras_ptr_r <= restore_ptr_w;
-                ras_count_r <= restore_count_w;
-                if (restore_pop_i && restore_count_w != 0) begin
-                    ras_ptr_r <= restore_pop_ptr_w;
-                    ras_count_r <= restore_count_w - 1'b1;
-                end
-                if (restore_push_i) begin
-                    ras_ptr_r <= (restore_pop_i && restore_count_w != 0 ?
-                        restore_pop_ptr_w : restore_ptr_w) + 1'b1;
-                    if (restore_pop_i && restore_count_w != 0)
-                        ras_count_r <= restore_count_w;
-                    else
-                        ras_count_r <= restore_count_w == RAS_ENTRIES ?
-                            restore_count_w : restore_count_w + 1'b1;
-                end
-            end else if (query_accept_i && predict_taken_o) begin
-                if (btb_type_r[query_idx_w] == 3) begin
-                    ras_ptr_r <= ras_ptr_r + 1'b1;
-                    if (ras_count_r != RAS_ENTRIES)
-                        ras_count_r <= ras_count_r + 1'b1;
-                end else if (btb_type_r[query_idx_w] == 4 && ras_count_r != 0) begin
-                    ras_ptr_r <= ras_ptr_r - 1'b1;
-                    ras_count_r <= ras_count_r - 1'b1;
-                end
-            end
+        end
+    end
+    // cpu-spec 4.4: pending operations forward into the logical RAS seen by
+    // each F1 query. Physical RAS state consumes only registered metadata.
+    always @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            ras_accept_r <= 0;
+            ras_restore_r <= 0;
+            ras_restore_copy1_r <= 0;
+            ras_ptr_r <= 0;
+            ras_count_r <= 0;
+        end else begin
+            ras_accept_r <= query_accept_i;
+            ras_restore_r <= restore_valid_i;
+            ras_restore_copy1_r <= restore_valid_copy_i;
+            ras_ptr_r <= ras_effective_ptr_w;
+            ras_count_r <= ras_effective_count_w;
         end
     end
     always @(posedge clk_i) begin
-        if (update_valid_i) begin
-            btb_tag_r[update_pc_i[7:3]] <= update_pc_i[31:8];
-            btb_target_r[update_pc_i[7:3]] <= update_target_i;
-            btb_position_r[update_pc_i[7:3]] <= update_pc_i[2:1];
-            btb_type_r[update_pc_i[7:3]] <= update_type_i;
-            btb_compressed_r[update_pc_i[7:3]] <= update_compressed_i;
-        end
+        ras_hold_top_r <= ras_effective_top_w;
+        ras_pop_top_r <= ras_effective_data_w[ras_pop_top_w * 32 +: 32];
+        ras_restore_pop_top_r <= ras_effective_data_w[ras_restore_pop_top_w * 32 +: 32];
+        ras_taken_r <= predict_taken_o;
+        ras_type_r <= btb_data_w[2:0];
+        ras_return_pc_r <= branch_return_pc_w;
+        ras_restore_state_r <= restore_ras_i;
+        ras_restore_push_r <= restore_push_i;
+        ras_restore_pop_r <= restore_pop_i;
+        ras_restore_return_pc_r <= restore_return_pc_i;
     end
-    genvar direction_bank;
-    generate
-        for (direction_bank = 0; direction_bank < 16;
-            direction_bank = direction_bank + 1) begin : g_direction
-            reg [63:0] counters_r;
-            wire rst_direction_n_w;
-            wire [8:0] update_index_w;
-            wire [1:0] update_counter_w;
-            wire update_w /* synthesis syn_keep=1 */;
-            assign direction_r[direction_bank*64 +: 64] = counters_r;
-            assign rst_direction_n_w = rst_sys_direction_n_i[direction_bank/2];
-            assign update_index_w = update_index_i[direction_bank*9 +: 9];
-            // Each bank reads and increments only its own selected counter.
-            // No global 512-entry update mux broadcasts its result back to every entry.
-            assign update_counter_w = counters_r[update_index_w[4:0]*2 +: 2];
-            assign update_w = update_valid_i && update_type_i == 0 &&
-                update_index_w[8:5] == direction_bank[3:0];
-            always @(posedge clk_i or negedge rst_direction_n_w) begin
-                if (!rst_direction_n_w) begin
-                    counters_r <= {32{2'b01}};
-                end else if (update_w) begin
-                    if (update_taken_i && update_counter_w != 3)
-                        counters_r[update_index_w[4:0]*2 +: 2] <= update_counter_w + 1'b1;
-                    else if (!update_taken_i && update_counter_w != 0)
-                        counters_r[update_index_w[4:0]*2 +: 2] <= update_counter_w - 1'b1;
-                end
+    always @(*) begin
+        ras_effective_ptr_w = ras_ptr_r;
+        ras_effective_count_w = ras_count_r;
+        if (ras_restore_r) begin
+            ras_effective_ptr_w = restore_ptr_w;
+            ras_effective_count_w = restore_count_w;
+            if (ras_restore_pop_r && restore_count_w != 0) begin
+                ras_effective_ptr_w = restore_pop_ptr_w;
+                ras_effective_count_w = restore_count_w - 1'b1;
+            end
+            if (ras_restore_push_r) begin
+                ras_effective_ptr_w = restore_write_ptr_w + 1'b1;
+                if (ras_restore_pop_r && restore_count_w != 0)
+                    ras_effective_count_w = restore_count_w;
+                else
+                    ras_effective_count_w = restore_count_w == RAS_ENTRIES ?
+                        restore_count_w : restore_count_w + 1'b1;
+            end
+        end else if (ras_accept_r && ras_taken_r) begin
+            if (ras_type_r == 3) begin
+                ras_effective_ptr_w = ras_ptr_r + 1'b1;
+                if (ras_count_r != RAS_ENTRIES)
+                    ras_effective_count_w = ras_count_r + 1'b1;
+            end else if (ras_type_r == 4 && ras_count_r != 0) begin
+                ras_effective_ptr_w = ras_ptr_r - 1'b1;
+                ras_effective_count_w = ras_count_r - 1'b1;
             end
         end
-    endgenerate
+    end
+    edrv32_ram_cpu_btb u_btb (
+        .clk_i(clk_i),
+        .wr_en_i(update_valid_i),
+        .wr_addr_i(update_pc_i[9:3]),
+        .wr_data_i({update_pc_i[31:10], update_target_i, update_pc_i[2], update_type_i}),
+        .rd_addr_i(query_idx_w),
+        .rd_data_o(btb_data_w)
+    );
+    assign update_counter_w = update_index_i[0] ? update_word_w[3:2] : update_word_w[1:0];
+    assign next_word_w = update_index_i[0] ?
+        {next_counter_w, update_word_w[1:0]} : {update_word_w[3:2], next_counter_w};
+    assign next_counter_w = update_taken_i ?
+        (update_counter_w == 3 ? 2'b11 : update_counter_w + 1'b1) :
+        (update_counter_w == 0 ? 2'b00 : update_counter_w - 1'b1);
+    edrv32_ram_cpu_direction u_direction (
+        .clk_i(clk_i),
+        .wr_en_i(update_valid_i && update_type_i == 0),
+        .wr_addr_i(update_index_i[11:1]),
+        .wr_data_i(next_word_w),
+        .update_data_o(update_word_w),
+        .rd_addr_i(direction_idx_w[11:1]),
+        .rd_data_o(direction_word_w)
+    );
+    // cpu-spec 4.4: query tokens retain directions, while training reads current counters.
+    wire [1:0] unused_tournament_w;
+    assign unused_tournament_w = {update_local_history_w[9], chooser_w[0]};
+    wire [9:0] update_local_history_w;
+    wire [1:0] local_counter_w [0:1];
+    wire [1:0] update_local_counter_w;
+    wire [1:0] chooser_w;
+    wire [1:0] update_chooser_w;
+    wire [1:0] next_local_counter_w;
+    wire [1:0] next_chooser_w;
+    wire conditional_update_w;
+    wire local_correct_w;
+    assign predict_conditional_o = btb_data_w[2:0] == 0;
+    assign predict_global_o = history_r[0] ?
+        {direction_word_w[1], direction_word_w[3]} :
+        {direction_word_w[3], direction_word_w[1]};
+    assign f2_local_o = {local_counter_w[1][1], local_counter_w[0][1]};
+    assign f2_use_local_o = chooser_w[1];
+    assign conditional_update_w = update_valid_i && update_type_i == 0;
+    assign local_correct_w = update_tournament_i[10] == update_taken_i;
+    assign next_local_counter_w = update_taken_i ?
+        (update_local_counter_w == 3 ? 2'd3 : update_local_counter_w + 1'b1) :
+        (update_local_counter_w == 0 ? 2'd0 : update_local_counter_w - 1'b1);
+    assign next_chooser_w = local_correct_w ?
+        (update_chooser_w == 3 ? 2'd3 : update_chooser_w + 1'b1) :
+        (update_chooser_w == 0 ? 2'd0 : update_chooser_w - 1'b1);
+    edrv32_ram_cpu_local_history u_local_history (
+        .clk_i(clk_i),
+        .wr_en_i(conditional_update_w),
+        .wr_addr_i(update_pc_i[9:2]),
+        .wr_data_i({update_local_history_w[8:0], update_taken_i}),
+        .update_data_o(update_local_history_w),
+        .rd0_addr_i({query_pc_i[9:3], 1'b0}),
+        .rd0_data_o(predict_local_history_o[9:0]),
+        .rd1_addr_i({query_pc_i[9:3], 1'b1}),
+        .rd1_data_o(predict_local_history_o[19:10])
+    );
+    edrv32_ram_cpu_local_direction u_local_direction (
+        .clk_i(clk_i),
+        .wr_en_i(conditional_update_w),
+        .wr_addr_i(update_tournament_i[9:0]),
+        .wr_data_i(next_local_counter_w),
+        .update_data_o(update_local_counter_w),
+        .rd0_addr_i(f2_local_history_i[9:0]),
+        .rd0_data_o(local_counter_w[0]),
+        .rd1_addr_i(f2_local_history_i[19:10]),
+        .rd1_data_o(local_counter_w[1])
+    );
+    edrv32_ram_cpu_chooser u_chooser (
+        .clk_i(clk_i),
+        .wr_en_i(conditional_update_w && update_tournament_i[10] != update_tournament_i[11]),
+        .wr_addr_i(update_index_i),
+        .wr_data_i(next_chooser_w),
+        .update_data_o(update_chooser_w),
+        .rd0_addr_i(f2_index_i),
+        .rd0_data_o(chooser_w)
+    );
     // Decode each destination before the late redirect/recovery enable arrives.
     // A push still overrides a restored top when both select the same entry.
     generate
@@ -173,16 +338,23 @@ module edrv32_cpu_predictor (
             wire restore_link_w;
             wire query_link_w;
             assign restore_top_w = restore_count_w != 0 && restore_pop_ptr_w == ras_idx[1:0];
-            assign restore_link_w = restore_push_i && restore_write_ptr_w == ras_idx[1:0];
-            assign query_link_w = query_accept_i && predict_taken_o &&
-                btb_type_r[query_idx_w] == 3 && ras_ptr_r == ras_idx[1:0];
-            always @(posedge clk_i) begin
-                if (restore_valid_i && (restore_top_w || restore_link_w))
-                    ras_data_r[ras_idx*32 +: 32] <= restore_link_w ?
-                        restore_return_pc_i : restore_ras_i[31:0];
-                else if (!restore_valid_i && query_link_w)
-                    ras_data_r[ras_idx*32 +: 32] <= branch_pc_w +
-                        (btb_compressed_r[query_idx_w] ? 32'd2 : 32'd4);
+            assign restore_link_w = ras_restore_push_r && restore_write_ptr_w == ras_idx[1:0];
+            assign query_link_w = ras_accept_r && ras_taken_r &&
+                ras_type_r == 3 && ras_ptr_r == ras_idx[1:0];
+            // Each backend redirect replica owns eight RAS data bits.
+            for (ras_byte = 0; ras_byte < 4; ras_byte = ras_byte + 1) begin : g_byte
+                wire restore_valid_w;
+                assign restore_valid_w = ras_restore_copy1_r[ras_idx*4 + ras_byte];
+                assign ras_effective_data_w[ras_idx*32 + ras_byte*8 +: 8] =
+                    restore_valid_w && (restore_top_w || restore_link_w) ?
+                        (restore_link_w ? ras_restore_return_pc_r[ras_byte*8 +: 8] :
+                        ras_restore_state_r[ras_byte*8 +: 8]) :
+                    !restore_valid_w && query_link_w ? ras_return_pc_r[ras_byte*8 +: 8] :
+                        ras_data_r[ras_idx*32 + ras_byte*8 +: 8];
+                always @(posedge clk_i) begin
+                    ras_data_r[ras_idx*32 + ras_byte*8 +: 8] <=
+                        ras_effective_data_w[ras_idx*32 + ras_byte*8 +: 8];
+                end
             end
         end
     endgenerate

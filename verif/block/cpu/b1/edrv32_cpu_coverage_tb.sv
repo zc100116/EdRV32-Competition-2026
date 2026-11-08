@@ -14,7 +14,14 @@ module edrv32_cpu_coverage_tb;
     logic [11:0] bypass = 0;
     logic [1:0] redirect = 0;
     logic [2:0] stall = 0;
+    logic [1:0] redirect_stage = 2;
+    logic [3:0] early_condition = 0;
+    logic early_bypass = 0;
+    logic [2:0] early_failure = 0;
     logic [2:0] irq = 0;
+    logic pair_valid = 0;
+    logic pair_swap = 0;
+    logic slot = 0;
     int causes[9] = '{0, 1, 2, 3, 4, 5, 6, 7, 11};
 
     edrv32_cpu_coverage u_coverage (
@@ -28,7 +35,16 @@ module edrv32_cpu_coverage_tb;
         .trace_cause_i(cause),
         .trace_bypass_i(bypass),
         .trace_redirect_cause_i(redirect),
+        .trace_redirect_stage_i(redirect_stage),
+        .early_condition_i(early_condition),
+        .early_bypass_i(early_bypass),
+        .early_failure_i(early_failure),
         .trace_stall_cause_i(stall),
+        .pair_valid_i(pair_valid),
+        .pair_swap_i(pair_swap),
+        .trap_slot_i(slot),
+        .e_redirect_slot_i(slot),
+        .d_redirect_slot_i(slot),
         .irq_meip_i(irq[0]),
         .irq_msip_i(irq[1]),
         .irq_mtip_i(irq[2])
@@ -46,6 +62,11 @@ module edrv32_cpu_coverage_tb;
         instr = {32'h00000013, 32'h00000013};
         tick();
         valid = 0;
+        pair_valid = 1;
+        tick();
+        pair_swap = 1;
+        tick();
+        pair_valid = 0;
         for (int reason = 1; reason <= 4; reason++) begin
             debug[23:21] = 3'(reason);
             tick();
@@ -65,6 +86,14 @@ module edrv32_cpu_coverage_tb;
             cause = 32'(causes[index]);
             tick();
         end
+        slot = 1;
+        for (int code = 0; code <= 7; code++) begin
+            if (code == 0 || code >= 4) begin
+                cause = 32'(code);
+                tick();
+            end
+        end
+        slot = 0;
         cause = 32'h8000000b;
         tick();
         trap = 0;
@@ -73,12 +102,21 @@ module edrv32_cpu_coverage_tb;
         tick();
         redirect = 2;
         tick();
+        slot = 1;
+        redirect = 1;
+        tick();
+        redirect = 2;
+        tick();
+        slot = 0;
         // The third E redirect cause is not direction or target misprediction.
         redirect = 3;
         tick();
         redirect = 0;
         debug = 64'h00020000;
         tick();
+        slot = 1;
+        tick();
+        slot = 0;
         debug = 0;
         valid = 1;
         instr = 64'h30200073;
@@ -131,6 +169,26 @@ module edrv32_cpu_coverage_tb;
         redirect = 1;
         irq = 1;
         tick();
+        irq = 0;
+        debug = 0;
+        redirect_stage = 3;
+        // Registered M system redirect.
+        redirect = 0;
+        tick();
+        redirect_stage = 0;
+        for (int index = 1; index <= 9; index++) begin
+            early_condition = 4'(index);
+            tick();
+        end
+        early_condition = 0;
+        for (int index = 1; index <= 6; index++) begin
+            early_failure = 3'(index);
+            tick();
+        end
+        early_failure = 0;
+        early_bypass = 1;
+        tick();
+        early_bypass = 0;
         $display("PASS coverage observations");
         $finish;
     end

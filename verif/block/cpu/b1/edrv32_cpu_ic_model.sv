@@ -36,6 +36,9 @@ module edrv32_cpu_ic_model (
     bit ready_r;
     bit resp_valid_r;
     bit resp_err_r;
+    bit lookup_miss_r;
+    bit busy_r;
+    bit return_r;
 
     initial begin
         void'($value$plusargs("IC_MISS_PCT=%d", miss_pct));
@@ -48,7 +51,7 @@ module edrv32_cpu_ic_model (
         error_enabled = $value$plusargs("IC_ERROR_ADDR=%h", error_addr);
     end
 
-    assign ic_req_ready_o = rst_n_i && ready_r && delay_r == 0 && !ic_inv_i;
+    assign ic_req_ready_o = rst_n_i && ready_r && !busy_r && !return_r;
     assign ic_resp_valid_o = resp_valid_r;
     assign ic_resp_err_o = resp_err_r && ic_resp_valid_o;
     assign miss_o = delay_r != 0;
@@ -62,6 +65,9 @@ module edrv32_cpu_ic_model (
     always @(posedge clk_i) begin
         if (!rst_n_i) begin
             delay_r <= 0;
+            lookup_miss_r <= 0;
+            busy_r <= 0;
+            return_r <= 0;
             canceled_r <= 0;
             ready_r <= 1;
             resp_valid_r <= 0;
@@ -72,6 +78,10 @@ module edrv32_cpu_ic_model (
             killed_fill_o <= 0;
         end else begin
             ready_r <= int'($urandom_range(0, 99)) >= ready_low_pct;
+            lookup_miss_r <= 0;
+            return_r <= 0;
+            if (lookup_miss_r)
+                busy_r <= 1;
             resp_valid_r <= 0;
             resp_err_r <= 0;
             ic_inv_done_o <= 0;
@@ -94,19 +104,26 @@ module edrv32_cpu_ic_model (
             if (delay_r != 0) begin
                 delay_r <= delay_r - 1;
                 if (delay_r == 1) begin
+                    busy_r <= 0;
+                    return_r <= 1;
                     if (!canceled_r && !ic_kill_i)
                         respond(addr_r);
                     else
                         killed_fill_o <= 1;
                 end
             end
-            if (ic_req_valid_i && ic_req_ready_o) begin
+            // cache-spec v0.11: ready remains high while discovering the miss;
+            // accept the handshake but discard this successor without a response.
+            if (ic_req_valid_i && ic_req_ready_o && !lookup_miss_r) begin
                 addr_r <= ic_req_addr_i;
                 canceled_r <= ic_kill_i;
-                if (delay_enabled && ic_req_addr_i == delay_addr)
+                if (delay_enabled && ic_req_addr_i == delay_addr) begin
                     delay_r <= address_delay - 1;
-                else if (int'($urandom_range(0, 99)) < miss_pct)
+                    lookup_miss_r <= 1;
+                end else if (int'($urandom_range(0, 99)) < miss_pct) begin
                     delay_r <= int'($urandom_range(32'(delay_min), 32'(delay_max))) - 1;
+                    lookup_miss_r <= 1;
+                end
                 else if (!ic_kill_i)
                     respond(ic_req_addr_i);
             end
