@@ -29,6 +29,8 @@ module tb_post;
     bit [31:0] output_base;
     bit [31:0] post_base;
     bit [31:0] model_base;
+    bit [31:0] desc_base;
+    bit [31:0] table_base[3];
     int desc_count;
     int expected_count;
     int expected_post;
@@ -199,6 +201,8 @@ assign apb.pslverr[15:1] = 0;
         bit [31:0] beat;
         bit [255:0] data;
         int status;
+        bit [3:0] tag;
+        bit [31:0] offset_value;
         u_mem.load_hex({path, "/mem_state.hex"});
         fd = $fopen({path, "/regs.txt"}, "r");
         check(fd != 0, "missing regs.txt");
@@ -210,11 +214,20 @@ assign apb.pslverr[15:1] = 0;
                 "OUTPUT_BASE": output_base = value;
                 "POST_BASE": post_base = value;
                 "DESC_COUNT": desc_count = int'(value);
+                "DESC_BASE": desc_base = value;
                 "POST_CTRL": post_ctrl = int'(value);
                 default: begin end
             endcase
         end
         $fclose(fd);
+        for (int n = 0; n < desc_count; n++) begin
+            tag = 4'(u_mem.peek(desc_base+32'(n*64+52)));
+            offset_value = 0;
+            for (int b = 0; b < 4; b++) begin
+                offset_value[b*8+:8] = u_mem.peek(desc_base+32'(n*64+56+b));
+            end
+            if (tag[1:0] == 1) table_base[tag[3:2]] = model_base+offset_value;
+        end
         fd = $fopen({path, "/expected.txt"}, "r");
         check(fd != 0, "missing expected.txt");
         status = $fscanf(fd, "%d %d", expected_count, expected_post);
@@ -279,8 +292,7 @@ assign apb.pslverr[15:1] = 0;
                     gather_bytes += (int'(axi.arlen)+1)*32;
                 end
                 for (int h = 0; h < 3; h++) begin
-                    if (axi.araddr >= model_base+'h10000+32'(h*2048) &&
-                        axi.araddr < model_base+'h10800+32'(h*2048))
+                    if (axi.araddr >= table_base[h] && axi.araddr < table_base[h]+2048)
                         begin
                             table_bytes[h] += (int'(axi.arlen)+1)*32;
                             table_pending++;
@@ -289,10 +301,12 @@ assign apb.pslverr[15:1] = 0;
             end
             if (axi.rvalid && axi.rready && axi.rlast) begin
                 request = pending_r.pop_front();
-                if (request.addr >= model_base+'h10000 && request.addr < model_base+'h11800) begin
-                    last_table = npu_cycle;
-                    table_pending--;
-                end
+                for (int h = 0; h < 3; h++)
+                    if (request.addr >= table_base[h] && request.addr < table_base[h]+2048)
+                        begin
+                            last_table = npu_cycle;
+                            table_pending--;
+                        end
             end
         end
     end
@@ -367,6 +381,7 @@ assign apb.pslverr[15:1] = 0;
     task automatic finish_frame();
         bit [31:0] value;
         int finish_cycle;
+        int dump_file;
         do rd('h010, value); while (value == 0);
         check(value == 1, $sformatf("IRQ expected DONE actual=%h", value));
         finish_cycle = npu_cycle;
@@ -388,6 +403,10 @@ assign apb.pslverr[15:1] = 0;
                 $sformatf("addr=%08h expected=%02h actual=%02h", address,
                 reference[address], u_mem.peek(address)));
         end
+        dump_file = $fopen({case_dir, "/actual_candidates.hex"}, "w");
+        for (int b = 0; b < ((expected_count*24+31)/32)*32; b++)
+            $fdisplay(dump_file, "%02x", u_mem.peek(post_base+32'(b)));
+        $fclose(dump_file);
         repeat (200) @(negedge clk_mem);
         equals('h02c, 32'(done_before+1));
         $display("PERF table_wait_cycles=%0d", table_wait_cycles);
@@ -396,6 +415,8 @@ assign apb.pslverr[15:1] = 0;
             last_candidate_b-last_raw_b);
         $display("PERF done_cycles=%0d gather_bytes=%0d candidate_bytes=%0d budget=%0d",
             finish_cycle-start_cycle, gather_bytes, candidate_bytes, expected_count*320);
+        $display("PERF read_beats=%0d write_beats=%0d raw_bytes=%0d",
+            u_mem.read_beats, u_mem.write_beats, raw_bytes);
     endtask
 
     task automatic start();
