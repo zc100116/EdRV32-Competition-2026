@@ -60,6 +60,13 @@ module tb_npu_operator;
     wire  write_error;
     wire  unused_write_beat;
     wire  unused_write_response_wait;
+    wire unused_cls_valid;
+    wire [255:0] unused_cls_data;
+    wire [1:0] unused_cls_head;
+    wire [11:0] unused_cls_row;
+    wire [10:0] unused_cls_pair;
+    wire [2:0] unused_cls_block;
+    wire unused_cls_plane;
 
     generate if (!NONCONV) begin : g_conv
     edrv32_npu_conv u_conv (
@@ -74,6 +81,15 @@ module tb_npu_operator;
         .residual_addr_i(unused_residual_addr),
         .weight_addr_i(unused_weight_addr),
         .quant_addr_i(unused_quant_addr),
+        .post_enable_i(1'b0),
+        .raw_cls_write_i(1'b0),
+        .cls_valid_o(unused_cls_valid),
+        .cls_data_o(unused_cls_data),
+        .cls_head_o(unused_cls_head),
+        .cls_row_o(unused_cls_row),
+        .cls_pair_o(unused_cls_pair),
+        .cls_block_o(unused_cls_block),
+        .cls_plane_o(unused_cls_plane),
         .read_req_valid_o(read_req_valid),
         .read_req_ready_i(read_req_ready),
         .read_req_addr_o(read_req_addr),
