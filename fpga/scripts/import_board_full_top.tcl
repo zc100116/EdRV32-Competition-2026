@@ -3,7 +3,9 @@
 # In the open PG2L200H-6/FBB676 PDS project, generate the IPs from fpga/ip first.
 # Required generated IP (fpga/ip/README.md): ip_pll_sys, ip_pll_video, ip_pll_eth, ip_pll_npu, ip_ddr3;
 # ip_ram_icache_tag, ip_ram_icache_data, ip_ram_dcache_tag, ip_ram_dcache_data,
-# ip_mul_s33x33, ip_rom_boot, ip_ram_sram, ip_ram_mem_xbar_r, ip_lutram_mem_xbar_w,
+# ip_mul_s33x33, ip_lutram_cpu_btb, ip_lutram_cpu_direction, ip_lutram_cpu_local_history,
+# ip_lutram_cpu_tournament (CPU v0.21 predictor), ip_rom_boot, ip_ram_sram,
+# ip_ram_mem_xbar_r, ip_lutram_mem_xbar_w,
 # ip_ram_vin_wfifo, ip_ram_pix_line, ip_ram_geo_src, ip_ram_eth_buf, ip_ram_eth_fifo,
 # ip_ram_disp_scan (two instances, DISP v0.3 L0/L1).
 # TMDS/RGMII and DDR reference use device primitives listed in fpga/ip/README.md.
