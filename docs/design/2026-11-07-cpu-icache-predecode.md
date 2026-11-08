@@ -64,4 +64,4 @@
 
 ## 状态
 
-已决定：用户 2026-11-07 确认，写入 cpu-spec v0.22、cache-spec v0.13、cache-testplan v0.5（e63bbd75）。
+已撤回（2026-11-08）：曾写入 cpu-spec v0.22、cache-spec v0.13（e63bbd75）。卡 66/67 实测 133.0/133.3 MHz，低于 v0.21 的 138.3 MHz，用户决定冻结 v0.21，规格回退为 cpu-spec v0.23、cache-spec v0.14（报告 `docs/reports/2026-11-08-timing-cpu-t5.md`）。
