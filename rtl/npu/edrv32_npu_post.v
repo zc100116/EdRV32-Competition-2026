@@ -259,7 +259,8 @@ module edrv32_npu_post (
         .clk_i(clk_i),
         .a_en_i(load_prob_w || prob_en_w || tail_prob_w),
         .a_write_i(load_prob_w),
-        .a_addr_i(load_prob_w ? load_index_w
+        // spec 4.4: DDR indexes signed best+128; internal reads use raw INT8 bits.
+        .a_addr_i(load_prob_w ? (load_index_w ^ 10'h080)
             : tail_prob_w ? {head_r, candidate_r[27:20]} : prob_addr0_w),
         .a_data_i(load_word_w),
         .a_data_o(prob_data0_w),

@@ -114,7 +114,9 @@ module tb;
                     if (index < 256)
                         read_data[32*w+:32] <= (index+w) == 0 ? 1048576
                             : (index+w) == 255 && h != 0 ? (h == 1 ? 524288 : 262144) : 0;
-                    else read_data[32*w+:32] <= 32'((index+w-256+1)*100000+h*1000);
+                    // spec 4.4: probability entry index is signed best+128.
+                    else read_data[32*w+:32] <=
+                        32'((((index+w-256)^128)+1)*100000+h*1000);
                 end
             end else begin
                 c = gather_beats/4;
