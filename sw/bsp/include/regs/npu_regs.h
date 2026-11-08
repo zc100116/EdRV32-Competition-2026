@@ -140,9 +140,73 @@
 #define EDRV32_NPU_CUR_DESC_OFFSET 0x00000110u
 #define EDRV32_NPU_CUR_DESC_RESET 0x00000000u
 
+/* npu-spec.md 4; RW; reset: 0. */
+/* Configure only in IDLE; raw box is always written. */
+#define EDRV32_NPU_POST_CTRL_OFFSET 0x00000114u
+#define EDRV32_NPU_POST_CTRL_RESET 0x00000000u
+/* npu-spec.md 4 */
+#define EDRV32_NPU_POST_CTRL_EN_POS 0x00000000u
+#define EDRV32_NPU_POST_CTRL_EN_WIDTH 0x00000001u
+#define EDRV32_NPU_POST_CTRL_EN_MASK 0x00000001u
+/* npu-spec.md 4 */
+#define EDRV32_NPU_POST_CTRL_RAW_CLS_WRITE_POS 0x00000001u
+#define EDRV32_NPU_POST_CTRL_RAW_CLS_WRITE_WIDTH 0x00000001u
+#define EDRV32_NPU_POST_CTRL_RAW_CLS_WRITE_MASK 0x00000002u
+
+/* npu-spec.md 4; RW; reset: 0. */
+/* 4 KiB aligned; exclusive fixed 120960-byte candidate region. */
+#define EDRV32_NPU_POST_BASE_OFFSET 0x00000118u
+#define EDRV32_NPU_POST_BASE_RESET 0x00000000u
+
+/* npu-spec.md 4; RW; reset: 0. */
+/* Signed threshold -128..128; best >= threshold; 128 rejects all. */
+#define EDRV32_NPU_POST_INT8_TH0_OFFSET 0x0000011Cu
+#define EDRV32_NPU_POST_INT8_TH0_RESET 0x00000000u
+/* npu-spec.md 4 */
+#define EDRV32_NPU_POST_INT8_TH0_VALUE_POS 0x00000000u
+#define EDRV32_NPU_POST_INT8_TH0_VALUE_WIDTH 0x00000009u
+#define EDRV32_NPU_POST_INT8_TH0_VALUE_MASK 0x000001FFu
+
+/* npu-spec.md 4; RW; reset: 0. */
+/* Signed threshold -128..128; best >= threshold; 128 rejects all. */
+#define EDRV32_NPU_POST_INT8_TH1_OFFSET 0x00000120u
+#define EDRV32_NPU_POST_INT8_TH1_RESET 0x00000000u
+/* npu-spec.md 4 */
+#define EDRV32_NPU_POST_INT8_TH1_VALUE_POS 0x00000000u
+#define EDRV32_NPU_POST_INT8_TH1_VALUE_WIDTH 0x00000009u
+#define EDRV32_NPU_POST_INT8_TH1_VALUE_MASK 0x000001FFu
+
+/* npu-spec.md 4; RW; reset: 0. */
+/* Signed threshold -128..128; best >= threshold; 128 rejects all. */
+#define EDRV32_NPU_POST_INT8_TH2_OFFSET 0x00000124u
+#define EDRV32_NPU_POST_INT8_TH2_RESET 0x00000000u
+/* npu-spec.md 4 */
+#define EDRV32_NPU_POST_INT8_TH2_VALUE_POS 0x00000000u
+#define EDRV32_NPU_POST_INT8_TH2_VALUE_WIDTH 0x00000009u
+#define EDRV32_NPU_POST_INT8_TH2_VALUE_MASK 0x000001FFu
+
+/* npu-spec.md 4; RW; reset: 0. */
+/* Unsigned Q24; probability must be strictly greater than threshold. */
+#define EDRV32_NPU_POST_PROB_TH_OFFSET 0x00000128u
+#define EDRV32_NPU_POST_PROB_TH_RESET 0x00000000u
+
+/* npu-spec.md 4; RO; reset: 0. */
+/* Cleared by DOORBELL; final candidate count published on successful completion. */
+#define EDRV32_NPU_POST_COUNT_OFFSET 0x0000012Cu
+#define EDRV32_NPU_POST_COUNT_RESET 0x00000000u
+
+/* npu-spec.md 4; RO; reset: 0. */
+/* Cleared by DOORBELL; set only after successful post-processing completion. */
+#define EDRV32_NPU_POST_STATUS_OFFSET 0x00000130u
+#define EDRV32_NPU_POST_STATUS_RESET 0x00000000u
+/* npu-spec.md 4 */
+#define EDRV32_NPU_POST_STATUS_POST_DONE_POS 0x00000000u
+#define EDRV32_NPU_POST_STATUS_POST_DONE_WIDTH 0x00000001u
+#define EDRV32_NPU_POST_STATUS_POST_DONE_MASK 0x00000001u
+
 /* npu-spec.md 4.1; little endian 32-bit words. */
 #define EDRV32_NPU_DESC_SIZE 0x00000040u
-/* Words 13–15 are reserved; write zero. Layout is a development initial value. */
+/* Reserved: word 13 bits 31:4 and word 15. Ordinary word 13/14: zero. */
 #define EDRV32_NPU_DESC_OP_OFFSET 0x00000000u
 /* npu-spec.md 4.1 */
 #define EDRV32_NPU_DESC_OP_POS 0x00000000u
@@ -278,5 +342,20 @@
 #define EDRV32_NPU_DESC_WEIGHT_BLOCK_BYTES_POS 0x00000000u
 #define EDRV32_NPU_DESC_WEIGHT_BLOCK_BYTES_WIDTH 0x00000014u
 #define EDRV32_NPU_DESC_WEIGHT_BLOCK_BYTES_MASK 0x000FFFFFu
+#define EDRV32_NPU_DESC_POST_KIND_OFFSET 0x00000034u
+/* npu-spec.md 4.1 */
+#define EDRV32_NPU_DESC_POST_KIND_POS 0x00000000u
+#define EDRV32_NPU_DESC_POST_KIND_WIDTH 0x00000002u
+#define EDRV32_NPU_DESC_POST_KIND_MASK 0x00000003u
+#define EDRV32_NPU_DESC_HEAD_ID_OFFSET 0x00000034u
+/* npu-spec.md 4.1 */
+#define EDRV32_NPU_DESC_HEAD_ID_POS 0x00000002u
+#define EDRV32_NPU_DESC_HEAD_ID_WIDTH 0x00000002u
+#define EDRV32_NPU_DESC_HEAD_ID_MASK 0x0000000Cu
+#define EDRV32_NPU_DESC_POST_LUT_OFFSET_OFFSET 0x00000038u
+/* npu-spec.md 4.1 */
+#define EDRV32_NPU_DESC_POST_LUT_OFFSET_POS 0x00000000u
+#define EDRV32_NPU_DESC_POST_LUT_OFFSET_WIDTH 0x00000020u
+#define EDRV32_NPU_DESC_POST_LUT_OFFSET_MASK 0xFFFFFFFFu
 
 #endif
