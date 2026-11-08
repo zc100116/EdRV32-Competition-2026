@@ -1,7 +1,7 @@
 # File: edrv32_fpga_board_b2_top_regions.fdc
 # Design: docs/design/2026-10-31-b3f-floorplan.md, sections 2-4; discussion draft.
 # Function: Candidate B regions for edrv32_fpga_board_b2_top; not imported.
-# Clocks: clk_sys 100, clk_mem 125, clk_npu 150, clk_pix 74.25 MHz.
+# Clocks: clk_sys 100, clk_mem 125, clk_npu 180, clk_pix 74.25 MHz.
 # Syntax: UCE V1.7 PDF pp.89-90,95-96; card 11 b3v-placement.fdc instance syntax.
 # Coordinates: card 11 clock-region/site tables; partial CLM capacities are estimates.
 # Pending user confirmation: LUT/FF <=80%, DRM/APM <=90%, not 80% for all resources.

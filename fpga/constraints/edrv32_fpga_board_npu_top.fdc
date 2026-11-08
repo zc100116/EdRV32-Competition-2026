@@ -6,7 +6,7 @@ create_clock -name {clk_board} [get_ports {clk_i}] -period {37.037037} -waveform
 create_clock -name {clk_ddr_ref} [get_ports {ddr_ref_clk_p_i}] -period {8} -waveform {0 4}
 create_clock -name {clk_rgmii_ref} [get_ports {rgmii_rxc_i}] -period {8} -waveform {0 4}
 create_generated_clock -name {clk_sys} -source [get_ports {clk_i}] [get_pins {u_pll_sys/clkout0}] -multiply_by {125} -divide_by {27}
-create_generated_clock -name {clk_npu} -source [get_ports {clk_i}] [get_pins {u_pll_npu/clkout0}] -multiply_by {50} -divide_by {9}
+create_generated_clock -name {clk_npu} -source [get_ports {clk_i}] [get_pins {u_pll_npu/clkout0}] -multiply_by {20} -divide_by {3}
 # DDR PHY clocks, timing and physical placement from vendor pnr/ddr_test.fdc.
 create_generated_clock -name {rst_clk} -source [get_ports {ddr_ref_clk_p_i}] [get_pins {u_ddr3.u_ddrphy_top.rst_clk_gpll/clkout0}] -master_clock [get_clocks {clk_ddr_ref}] -multiply_by {16} -divide_by {16}
 create_generated_clock -name {clk_mem} -source [get_ports {ddr_ref_clk_p_i}] [get_pins {u_ddr3.u_ddrphy_top.ddrphy_gpll/clkout0}] -master_clock [get_clocks {clk_ddr_ref}] -multiply_by {16} -divide_by {16}

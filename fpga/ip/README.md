@@ -38,7 +38,7 @@
 | `ip_ram_rnd_window` | DRM 简单双口 RAM | 512 × 64（用256项） | `edrv32_ram_rnd_window` | AFFINE源窗口 ×4 | [ip_ram_rnd_window.md](ip_ram_rnd_window.md) | RND v2单独上板生成，不进卡21 |
 | `ip_pll_sys` | PLL（板级） | 27 MHz → clk_sys 100 MHz | 无（板级顶层直接例化，仿真用 `verif/models/ip_pll_sys.sv`） | B1/B2 板级顶层 | [ip_pll_sys.md](ip_pll_sys.md) | B1 已生成 |
 | `ip_ddr3` | DDR3 Controller + PHY | x32、1000 Mbps，core_clk 125 MHz、用户口 256 位 | 无（板级直接例化） | B2 DDR 及 clk_mem | [ip_ddr3.md](ip_ddr3.md) | B2 待生成 |
-| `ip_pll_npu` | PLL | 27 → 150 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
+| `ip_pll_npu` | PLL | 27 → 180 MHz | 无（板级直接例化） | B2 NPU | [ip_pll_npu.md](ip_pll_npu.md) | B2 待生成 |
 | `ip_pll_video` | PLL | 27 → 74.25 / 371.25 MHz，同相 | 无（板级直接例化） | B2 DISP / TMDS | [ip_pll_video.md](ip_pll_video.md) | B2 待生成 |
 | `ip_pll_eth` | PLL | 125 → 125 MHz，0°，外部反馈 | 无（板级直接例化） | B2 RGMII RX/TX | [ip_pll_eth.md](ip_pll_eth.md) | B2 待生成 |
 | `ila_cpu` | 调试核（Inserter 插入，非 IP Compiler） | 400 位 × 1024，clk_sys | 无（探针：CSR 计数器） | B3F CPU 计数器核对与流水线效率 | [ila_cpu.md](ila_cpu.md) | 卡 33 首次插入 |
