@@ -1,7 +1,7 @@
 // File: edrv32_npu_window.v
 // Spec: npu-spec 5.1, 5.4; datapath design 4.2.4, 4.3, 4.4.
 // Description: Two prepared command contexts drive incremental D3b window reads.
-//              A1-A5 preserve tags and reserve only at pair entry; no global CE.
+//              A1-A6 preserve tags and reserve only at pair entry; no global CE.
 // Clock: clk_npu.
 module edrv32_npu_window (
     // Clock and cancellation.
@@ -54,7 +54,7 @@ module edrv32_npu_window (
     output reg [10:0] weight_rd_addr_o,
     input wire [2047:0] weight_rd_data_i,
 
-    // A5 control/activation; weight item k follows at A5+k.
+    // A6 control/activation; weight item k follows at A6+k.
     output wire term_valid_o,
     output wire term_first_o,
     output wire term_last_o,
@@ -389,6 +389,7 @@ module edrv32_npu_window (
     reg a3_valid_r;
     reg a4_valid_r;
     reg a5_valid_r;
+    reg a6_valid_r;
     reg a1_first_r;
     reg a1_last_r;
     reg [48:0] a1_tag_r;
@@ -424,6 +425,11 @@ module edrv32_npu_window (
     reg a5_first_r;
     reg a5_last_r;
     reg [48:0] a5_tag_r;
+    reg a6_first_r;
+    reg a6_last_r;
+    reg [48:0] a6_tag_r;
+    (* keep = "true", syn_preserve = 1, syn_srlstyle = "registers" *)
+    reg [255:0] a5_activation_r;
     reg [255:0] a4_activation_r;
     reg [2047:0] a4_weight_r;
     wire [255:0] pixel0_beat_w;
@@ -470,6 +476,7 @@ module edrv32_npu_window (
             a3_valid_r <= 1'b0;
             a4_valid_r <= 1'b0;
             a5_valid_r <= 1'b0;
+            a6_valid_r <= 1'b0;
             cache_rd_en_o <= 2'd0;
         end else if (cancel_i) begin
             a0_valid_r <= 1'b0;
@@ -478,6 +485,7 @@ module edrv32_npu_window (
             a3_valid_r <= 1'b0;
             a4_valid_r <= 1'b0;
             a5_valid_r <= 1'b0;
+            a6_valid_r <= 1'b0;
             cache_rd_en_o <= 2'd0;
         end else begin
             a0_valid_r <= issue_w;
@@ -486,6 +494,7 @@ module edrv32_npu_window (
             a3_valid_r <= a2_valid_r;
             a4_valid_r <= a3_valid_r;
             a5_valid_r <= a4_valid_r;
+            a6_valid_r <= a5_valid_r;
             cache_rd_en_o <= a0_valid_r ? cache_en_w : 2'b00;
         end
     end
@@ -547,6 +556,11 @@ module edrv32_npu_window (
         a5_first_r <= a4_first_r;
         a5_last_r <= a4_last_r;
         a5_tag_r <= a4_tag_r;
+        a6_first_r <= a5_first_r;
+        a6_last_r <= a5_last_r;
+        a6_tag_r <= a5_tag_r;
+        // Align activation before its four physical copies with the added weight edge.
+        a5_activation_r <= a4_activation_r;
     end
 
     // Payload advances on every edge; valid alone owns bubbles.
@@ -560,20 +574,24 @@ module edrv32_npu_window (
     genvar lane;
     generate
         for (copy = 0; copy < 4; copy = copy + 1) begin : g_activation_copy
-            (* syn_preserve = 1 *) reg [255:0] activation_r;
+            (* keep = "true", syn_preserve = 1, syn_srlstyle = "registers" *)
+            reg [255:0] activation_r;
             (* syn_keep = 1 *) wire [255:0] activation_w;
             assign activation_w = activation_r;
             assign term_activation_o[256*copy+:256] = activation_w;
             always @(posedge clk_i) begin
-                activation_r <= a4_activation_r;
+                activation_r <= a5_activation_r;
             end
         end
-        // Each weight byte feeds one APM; a preserved per-byte register lets PDS place it there.
+        // Split the route from window weights to the APM-local lane_weight_r boundary.
         for (lane = 0; lane < 256; lane = lane + 1) begin : g_weight_byte
-            reg [7:0] weight_r /* synthesis syn_preserve=1 */;
-            assign term_weight_o[8*lane+:8] = weight_r;
+            (* keep = "true", syn_preserve = 1, syn_srlstyle = "registers" *) reg [7:0] weight_r;
+            (* keep = "true", syn_preserve = 1, syn_srlstyle = "registers" *)
+            reg [7:0] weight_route_r;
+            assign term_weight_o[8*lane+:8] = weight_route_r;
             always @(posedge clk_i) begin
                 weight_r <= a4_weight_r[8*lane+:8];
+                weight_route_r <= weight_r;
             end
         end
     endgenerate
@@ -585,10 +603,10 @@ module edrv32_npu_window (
     assign cmd_read_done_o = a3_valid_r && a3_command_last_r;
     assign cmd_read_done_row_o = a3_tag_r[11:0];
     assign cmd_read_done_block_o = a3_tag_r[14:12];
-    assign term_valid_o = a5_valid_r;
-    assign term_first_o = a5_first_r;
-    assign term_last_o = a5_last_r;
-    assign term_tag_o = a5_tag_r;
+    assign term_valid_o = a6_valid_r;
+    assign term_first_o = a6_first_r;
+    assign term_last_o = a6_last_r;
+    assign term_tag_o = a6_tag_r;
     assign idle_o = !(current_valid_r || next_valid_r || a0_valid_r || a1_valid_r || a2_valid_r ||
-        a3_valid_r || a4_valid_r || a5_valid_r);
+        a3_valid_r || a4_valid_r || a5_valid_r || a6_valid_r);
 endmodule
