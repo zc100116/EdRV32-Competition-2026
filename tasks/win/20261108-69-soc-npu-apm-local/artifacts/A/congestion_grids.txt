@@ -1,0 +1,6 @@
+Original PDS MT grid text. Index 0 is iteration 7.
+Grid dimensions are rows x columns. PNG column index increases rightward and row index downward.
+Coordinates use original file order. Negative cells are masked. PNG color scale is shared across A/B.
+These files represent the in-progress snapshot.
+Iteration 7: CongestionPlotMT_0.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 21: CongestionPlotMT_14.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0

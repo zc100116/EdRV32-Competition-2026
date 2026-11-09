@@ -1,0 +1,10 @@
+Source: synthesize/edrv32_fpga_board_full_top_syn.vm
+Named GTP cells for the three target register names in the two NPU modules.
+
+Module | Register | Cell type | Count | Example
+edrv32_npu_mac_array | activation_r | GTP_DFF | 3472 | L1274505: (* PAP_PRESERVE="TRUE", PAP_SRL_STYLE="registers" *)    GTP_DFF /* \g_activation_copy[0].g_lane[1].g_skew.activation_r[0]  */ #(
+edrv32_npu_mac_array | local_sum_r | GTP_DFF | 1216 | L1315418: (* PAP_PRESERVE="TRUE", PAP_SRL_STYLE="registers" *)    GTP_DFF /* \g_channel[0].local_sum_r[0]  */ #(
+edrv32_npu_window | activation_r | GTP_DFF | 1024 | L1616868: (* PAP_PRESERVE="TRUE", PAP_SRL_STYLE="registers" *)    GTP_DFF /* \g_activation_copy[0].activation_r[0]  */ #(
+edrv32_npu_window | weight_route_r | GTP_DFF | 2048 | L1626156: (* PAP_PRESERVE="TRUE", PAP_SRL_STYLE="registers" *)    GTP_DFF /* \g_weight_byte[0].weight_route_r[0]  */ #(
+
+Target lines containing _srl (excluding PAP_SRL_STYLE attribute text): 0
