@@ -4,5 +4,6 @@ Coordinates use original file order. Negative cells are masked. PNG color scale 
 These files represent the in-progress snapshot.
 Iteration 7: CongestionPlotMT_0.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
 Iteration 21: CongestionPlotMT_14.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 22: CongestionPlotMT_15.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
 Iteration 27: CongestionPlotMT_20.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
 Iteration 28: CongestionPlotMT_21.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
