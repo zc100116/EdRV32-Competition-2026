@@ -7,3 +7,9 @@ Iteration 21: CongestionPlotMT_14.txt; 255 x 123; x_div : 6, y_div : 6, x_offset
 Iteration 22: CongestionPlotMT_15.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
 Iteration 27: CongestionPlotMT_20.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
 Iteration 28: CongestionPlotMT_21.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 39: CongestionPlotMT_32.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 40: CongestionPlotMT_33.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 41: CongestionPlotMT_34.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 172: CongestionPlotMT_165.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 206: CongestionPlotMT_199.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 215: CongestionPlotMT_208.txt; 255 x 123; x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
