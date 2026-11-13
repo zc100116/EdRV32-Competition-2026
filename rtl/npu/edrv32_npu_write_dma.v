@@ -36,11 +36,9 @@ module edrv32_npu_write_dma (
     input wire axi_bvalid_i,
     output wire axi_bready_o,
 
-    // Fence and statistics.
+    // Fence and specified response errors.
     output wire idle_o,
-    output wire error_o,
-    output wire beat_o,
-    output wire response_wait_o
+    output wire error_o
 );
     reg active_r;
     reg awvalid_r;
@@ -76,8 +74,6 @@ module edrv32_npu_write_dma (
     assign axi_wvalid_o = wvalid_r;
     assign axi_bready_o = 1'b1;
     assign error_o = axi_bvalid_i && ((axi_bresp_i == 2'd2) || (axi_bresp_i == 2'd3));
-    assign beat_o = wvalid_r && axi_wready_i;
-    assign response_wait_o = (outstanding_r != 4'd0);
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

@@ -29,8 +29,6 @@ module tb_npu #(
     int expect_desc;
     int abort_phase;
     int desc_count;
-    longint unsigned frame_read_start;
-    longint unsigned frame_write_start;
     int done_before;
     bit abort_sent;
     int abort_ar;
@@ -454,7 +452,7 @@ module tb_npu #(
         equals('h010, 1, "IRQ_STAT before SOFT_RST");
         equals('h02c, 1, "DONE_COUNT before SOFT_RST");
         equals('h110, 32'(desc_count-1), "CUR_DESC before SOFT_RST");
-        for (int n = 0; n < 8; n++) begin
+        for (int n = 0; n < 2; n++) begin
             rd(12'('h040+n*4), actual);
             check(actual != 0,
                 $sformatf("reg=PERF[%0d] before SOFT_RST expected=nonzero actual=%08h", n, actual));
@@ -493,8 +491,6 @@ module tb_npu #(
         done_before = int'(value);
         busy_cycles = 0;
         tracking = 0;
-        frame_read_start = u_mem.read_beats;
-        frame_write_start = u_mem.write_beats;
         wr('h00c, 3);
         wr('h028, 0);
     endtask
@@ -548,15 +544,11 @@ module tb_npu #(
                 int'(perf) >= frame_busy_cycles-16,
                 $sformatf("PERF0 expected=[%0d,%0d] actual=%0d",
                         frame_busy_cycles-16, frame_busy_cycles+16, perf));
-            for (int n = 1; n < 8; n++) begin
-                rd(12'('h040+n*4), perf);
-                check(perf != 0, $sformatf("PERF%0d expected nonzero actual=0", n));
-                if (n == 1) check(perf <= perf_total, "PERF1 exceeds PERF0");
-                if (n == 2) check(64'(perf) == u_mem.read_beats-frame_read_start,
-                    "PERF2 read beat count/DOORBELL clear");
-                if (n == 3) check(64'(perf) == u_mem.write_beats-frame_write_start,
-                    "PERF3 write beat count/DOORBELL clear");
-            end
+            rd('h044, perf);
+            check(perf != 0 && perf <= perf_total,
+                $sformatf("PERF1 expected=1..%0d actual=%0d", perf_total, perf));
+            for (int n = 2; n < 16; n++)
+                equals(12'('h040+n*4), 0, $sformatf("PERF[%0d] reserved", n));
         end
         for (int n = 0; n < 16; n++) begin
             rd(12'('h040+n*4), perf);

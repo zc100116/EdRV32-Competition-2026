@@ -54,9 +54,7 @@ module edrv32_npu_conv (
     // Local completion and PERF events.
     output wire done_o,
     output wire writer_idle_o,
-    output wire mac_beat_o,
-    output wire input_wait_o,
-    output wire model_wait_o
+    output wire mac_beat_o
 );
     wire dp_cfg_k3_w;
     wire dp_cfg_s2_w;
@@ -557,8 +555,6 @@ module edrv32_npu_conv (
     assign dp_cmd_row_base2_w = cmd_base2_r;
     assign dp_cmd_row_valid_w = cmd_row_valid_r;
     assign mac_beat_o = dp_mac_beat_w;
-    assign input_wait_o = active_r && !all_submitted_r && !rows_ready_w;
-    assign model_wait_o = active_r && !all_submitted_r && !block_ready_r[schedule_block_r];
     assign done_o = active_r && all_submitted_r && !cmd_valid_r && dp_idle_w && writer_idle_o;
     assign response_role_w = read_data_tag_i[31:29];
     assign response_record_w = {1'b0, read_data_tag_i[7:4]} + {1'b0, read_data_index_i};

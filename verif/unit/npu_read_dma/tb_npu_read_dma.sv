@@ -31,7 +31,6 @@ module tb_npu_read_dma;
     wire  axi_rready_o;
     wire  idle_o;
     wire  error_o;
-    wire  beat_o;
     always #5 clk_i = !clk_i;
     edrv32_npu_read_dma u_dut (
         .clk_i(clk_i),
@@ -60,8 +59,7 @@ module tb_npu_read_dma;
         .axi_rvalid_i(axi_rvalid_i),
         .axi_rready_o(axi_rready_o),
         .idle_o(idle_o),
-        .error_o(error_o),
-        .beat_o(beat_o)
+        .error_o(error_o)
     );
     task automatic tick;
         @(posedge clk_i);
@@ -119,11 +117,10 @@ module tb_npu_read_dma;
                 end
             end
             if (error_o) errors++;
-            check(beat_o == (axi_rvalid_i && axi_rready_o), "read PERF beat");
         end
     end
     task automatic request(input logic [31:0] addr, input logic [4:0] length,
-                           input logic [31:0] tag);
+        input logic [31:0] tag);
         req_addr_i = addr;
         req_beats_i = length;
         req_tag_i = tag;
@@ -179,7 +176,8 @@ module tb_npu_read_dma;
         tick;
         response(32'he0, 2, 0);
         repeat (3) tick;
-        check(idle_o && !data_valid_o && checked == 21, "ABORT discards internal data and drains R");
+        check(idle_o && !data_valid_o && checked == 21,
+            "ABORT discards internal data and drains R");
         stop_i = 0;
         request(32'h4000, 1, 32'hf0);
         tick;

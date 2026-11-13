@@ -33,7 +33,7 @@ module post_mem (
     bit hold_w = 0;
     bit hold_b;
     bit stalls;
-    bit [31:0] random_r = 32'h1aceb00c;
+    bit [31:0] random_r;
     bit [1:0] error_resp = 2;
 
     int read_beat;
@@ -92,6 +92,7 @@ module post_mem (
 
     initial begin : configure
         string path;
+        random_r = 32'h1aceb00c;
         stalls = $test$plusargs("POST_STALLS");
         void'($value$plusargs("POST_ERROR_RESP=%b", error_resp));
         void'($value$plusargs("MEM_MODE=%s", mode));

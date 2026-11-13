@@ -90,7 +90,7 @@ module edrv32_npu (
     wire done_w;
     wire error_w;
     wire [2:0] error_code_w;
-    wire [7:0] perf_event_w;
+    wire [1:0] perf_event_w;
     wire start_w;
     wire abort_w;
     wire soft_reset_w;
@@ -135,8 +135,6 @@ module edrv32_npu (
     wire conv_done_w;
     wire conv_writer_idle_w;
     wire conv_mac_beat_w;
-    wire conv_input_wait_w;
-    wire conv_model_wait_w;
     wire nonconv_start_w;
     wire nonconv_read_req_valid_w;
     wire nonconv_read_req_ready_w;
@@ -158,7 +156,6 @@ module edrv32_npu (
     wire [255:0] nonconv_write_data_w;
     wire nonconv_done_w;
     wire nonconv_writer_idle_w;
-    wire nonconv_active_w;
     wire read_req_valid_w;
     wire read_req_ready_w;
     wire [31:0] read_req_addr_w;
@@ -182,7 +179,6 @@ module edrv32_npu (
     wire local_axi_rready_w;
     wire read_idle_w;
     wire read_error_w;
-    wire read_beat_w;
     wire write_req_valid_w;
     wire write_req_ready_w;
     wire [31:0] write_req_addr_w;
@@ -206,8 +202,6 @@ module edrv32_npu (
     wire local_axi_bready_w;
     wire write_idle_w;
     wire write_error_w;
-    wire write_beat_w;
-    wire write_response_wait_w;
     wire [15:0] unused_apb_addr_w;
 
     wire [1:0] post_ctrl_w;
@@ -342,8 +336,7 @@ module edrv32_npu (
         : is_conv_r ? conv_write_data_w : nonconv_write_data_w;
     assign conv_write_data_ready_w = write_data_ready_w && is_conv_r && !post_active_r;
     assign nonconv_write_data_ready_w = write_data_ready_w && !is_conv_r && !post_active_r;
-    assign perf_event_w = {nonconv_active_w, write_response_wait_w, conv_model_wait_w,
-        conv_input_wait_w, write_beat_w, read_beat_w, conv_mac_beat_w, busy_w};
+    assign perf_event_w = {conv_mac_beat_w, busy_w};
 
     always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
         if (!rst_npu_ctrl_n_w) begin
@@ -614,9 +607,7 @@ module edrv32_npu (
         .cls_plane_o(cls_plane_w),
         .done_o(conv_done_w),
         .writer_idle_o(conv_writer_idle_w),
-        .mac_beat_o(conv_mac_beat_w),
-        .input_wait_o(conv_input_wait_w),
-        .model_wait_o(conv_model_wait_w)
+        .mac_beat_o(conv_mac_beat_w)
     );
 
     edrv32_npu_nonconv u_nonconv (
@@ -659,8 +650,7 @@ module edrv32_npu (
 
         // Descriptor configuration and execution status.
         .done_o(nonconv_done_w),
-        .writer_idle_o(nonconv_writer_idle_w),
-        .active_o(nonconv_active_w)
+        .writer_idle_o(nonconv_writer_idle_w)
     );
 
     edrv32_npu_read_dma u_read_dma (
@@ -701,10 +691,7 @@ module edrv32_npu (
         .idle_o(read_idle_w),
 
         // Interrupt and activity events.
-        .error_o(read_error_w),
-
-        // Descriptor configuration and execution status.
-        .beat_o(read_beat_w)
+        .error_o(read_error_w)
     );
 
     edrv32_npu_write_dma u_write_dma (
@@ -746,11 +733,7 @@ module edrv32_npu (
         .idle_o(write_idle_w),
 
         // Interrupt and activity events.
-        .error_o(write_error_w),
-
-        // Descriptor configuration and execution status.
-        .beat_o(write_beat_w),
-        .response_wait_o(write_response_wait_w)
+        .error_o(write_error_w)
     );
 
     edrv32_apb_async_bridge u_apb_bridge (

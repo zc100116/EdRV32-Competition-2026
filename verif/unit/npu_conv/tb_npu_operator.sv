@@ -59,16 +59,10 @@ module tb_npu_operator;
     wire  done;
     wire  unused_writer_idle;
     wire  unused_mac_beat;
-    wire  unused_input_wait;
-    wire  unused_model_wait;
-    wire  unused_active;
     wire  read_idle;
     wire  read_error;
-    wire  unused_read_beat;
     wire  write_idle;
     wire  write_error;
-    wire  unused_write_beat;
-    wire  unused_write_response_wait;
     wire unused_cls_valid;
     wire [255:0] unused_cls_data;
     wire [1:0] unused_cls_head;
@@ -120,9 +114,7 @@ module tb_npu_operator;
         .write_stream_idle_i(write_stream_idle),
         .done_o(done),
         .writer_idle_o(unused_writer_idle),
-        .mac_beat_o(unused_mac_beat),
-        .input_wait_o(unused_input_wait),
-        .model_wait_o(unused_model_wait)
+        .mac_beat_o(unused_mac_beat)
     );
     end else begin : g_nonconv
     edrv32_npu_nonconv u_nonconv (
@@ -154,8 +146,7 @@ module tb_npu_operator;
         .write_data_o(write_data),
         .write_stream_idle_i(write_stream_idle),
         .done_o(done),
-        .writer_idle_o(unused_writer_idle),
-        .active_o(unused_active)
+        .writer_idle_o(unused_writer_idle)
     );
     int row_samples;
     bit sampling;
@@ -214,8 +205,7 @@ module tb_npu_operator;
         .axi_rvalid_i(bus.rvalid),
         .axi_rready_o(bus.rready),
         .idle_o(read_idle),
-        .error_o(read_error),
-        .beat_o(unused_read_beat)
+        .error_o(read_error)
     );
     edrv32_npu_write_dma u_write_dma (
         .clk_i(clk),
@@ -245,9 +235,7 @@ module tb_npu_operator;
         .axi_bvalid_i(bus.bvalid),
         .axi_bready_o(bus.bready),
         .idle_o(write_idle),
-        .error_o(write_error),
-        .beat_o(unused_write_beat),
-        .response_wait_o(unused_write_response_wait)
+        .error_o(write_error)
     );
 
     initial begin : run

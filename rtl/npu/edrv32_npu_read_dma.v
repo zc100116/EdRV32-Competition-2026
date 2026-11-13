@@ -37,8 +37,7 @@ module edrv32_npu_read_dma (
 
     // Activity and specified response errors.
     output wire idle_o,
-    output wire error_o,
-    output wire beat_o
+    output wire error_o
 );
     reg arvalid_r;
     reg [31:0] araddr_r;
@@ -76,7 +75,6 @@ module edrv32_npu_read_dma (
     assign data_last_o = data_last_r;
     assign idle_o = (count_r == 3'd0) && !arvalid_r && !data_valid_r;
     assign error_o = response_w && ((axi_rresp_i == 2'd2) || (axi_rresp_i == 2'd3));
-    assign beat_o = response_w;
 
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin

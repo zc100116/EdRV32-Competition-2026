@@ -1,6 +1,6 @@
 // File: edrv32_npu_regs.v
 // Spec: npu-spec 4; edrv32-soc-spec 7.1.
-// Description: APB register bank, doorbell, specified interrupts and eight counters.
+// Description: APB register bank, doorbell, specified interrupts and two counters.
 // IDLE soft reset restores every architectural register (N-C1 coordinator answer).
 // Clock: clk_npu.
 module edrv32_npu_regs (
@@ -25,7 +25,7 @@ module edrv32_npu_regs (
     input wire error_i,
     input wire [2:0] error_code_i,
     input wire [31:0] cur_desc_i,
-    input wire [7:0] perf_event_i,
+    input wire [1:0] perf_event_i,
     output reg start_o,
     output reg abort_o,
     output reg soft_reset_o,
@@ -116,9 +116,9 @@ module edrv32_npu_regs (
     reg [31:0] desc_count_r;
     reg [31:0] done_count_r;
     reg [31:0] bases_r [0:3];
-    reg [31:0] perf_r [0:7];
-    reg [7:0] perf_event_r;
-    reg [7:0] perf_clear_r /* synthesis syn_preserve=1 */;
+    reg [31:0] perf_r [0:1];
+    reg [1:0] perf_event_r;
+    reg [1:0] perf_clear_r /* synthesis syn_preserve=1 */;
     wire start_w;
     wire abort_w;
     wire soft_reset_w;
@@ -154,14 +154,14 @@ module edrv32_npu_regs (
     // SoC 7.1: events and DOORBELL clear take effect together one edge later.
     always @(posedge clk_i or negedge rst_n_i) begin
         if (!rst_n_i) begin
-            perf_event_r <= 8'd0;
-            perf_clear_r <= 8'd0;
+            perf_event_r <= 2'd0;
+            perf_clear_r <= 2'd0;
         end else if (soft_reset_w) begin
-            perf_event_r <= 8'd0;
-            perf_clear_r <= 8'd0;
+            perf_event_r <= 2'd0;
+            perf_clear_r <= 2'd0;
         end else begin
             perf_event_r <= perf_event_i;
-            perf_clear_r <= {8{start_w}};
+            perf_clear_r <= {2{start_w}};
         end
     end
 
@@ -191,9 +191,9 @@ module edrv32_npu_regs (
             12'h12c: apb_prdata_o = {19'd0, post_count_r};
             12'h130: apb_prdata_o = {31'd0, post_done_r};
             default: begin
-                if ((apb_paddr_r >= 12'h040) && (apb_paddr_r < 12'h060)
+                if ((apb_paddr_r >= 12'h040) && (apb_paddr_r < 12'h048)
                     && (apb_paddr_r[1:0] == 2'd0)) begin
-                    apb_prdata_o = perf_r[apb_paddr_r[4:2]];
+                    apb_prdata_o = perf_r[apb_paddr_r[2]];
                 end
             end
         endcase
@@ -282,7 +282,7 @@ module edrv32_npu_regs (
     // Capture identical APB payload copies at SETUP for each performance bank.
     genvar perf_bank;
     generate
-        for (perf_bank = 0; perf_bank < 8; perf_bank = perf_bank + 1) begin : g_perf_bank
+        for (perf_bank = 0; perf_bank < 2; perf_bank = perf_bank + 1) begin : g_perf_bank
             (* keep = "true", syn_preserve = 1 *) reg [11:0] soft_addr_r;
             (* keep = "true", syn_preserve = 1 *) reg soft_data_r;
             (* keep = "true", syn_keep = 1 *) wire soft_w;

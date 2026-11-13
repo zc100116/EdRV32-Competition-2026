@@ -32,8 +32,6 @@ module tb_npu_write_dma;
     wire  axi_bready_o;
     wire  idle_o;
     wire  error_o;
-    wire  beat_o;
-    wire  response_wait_o;
     always #5 clk_i = !clk_i;
     edrv32_npu_write_dma u_dut (
         .clk_i(clk_i),
@@ -63,9 +61,7 @@ module tb_npu_write_dma;
         .axi_bvalid_i(axi_bvalid_i),
         .axi_bready_o(axi_bready_o),
         .idle_o(idle_o),
-        .error_o(error_o),
-        .beat_o(beat_o),
-        .response_wait_o(response_wait_o)
+        .error_o(error_o)
     );
     task automatic tick;
         @(posedge clk_i);
@@ -129,7 +125,6 @@ module tb_npu_write_dma;
             end
             if (error_o) errors++;
             check(axi_bready_o, "always drain B");
-            check(beat_o == (axi_wvalid_o && axi_wready_i), "write PERF beat");
         end
     end
     task automatic request(input logic [31:0] addr, input logic [4:0] count);
@@ -168,7 +163,7 @@ module tb_npu_write_dma;
         stall_w = 1;
         request(32'h1e00, 16);
         data(16, 100);
-        check(!idle_o && response_wait_o && bursts == 1, "B-independent stream completion");
+        check(!idle_o && bursts == 1, "B-independent stream completion");
         request(32'h2000, 2);
         data(2, 200);
         check(bursts == 2 && addresses == 2, "next burst precedes previous B");
@@ -181,7 +176,7 @@ module tb_npu_write_dma;
             request(32'h3000+32'(n*32), 1);
             data(1, n);
         end
-        check(!req_ready_o && response_wait_o, "eight B credits");
+        check(!req_ready_o, "eight B credits");
         for (int n = 0; n < 8; n++) response(0);
         check(idle_o, "all B credits returned");
         axi_awready_i = 0;

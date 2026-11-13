@@ -4,7 +4,7 @@
 // Clock: clk_npu.
 `timescale 1ns/1ps
 module tb_npu_regs;
-    logic  clk_i = 0;
+    logic  clk_i;
     logic  rst_n_i = 0;
     logic [11:0] apb_paddr_i = 0;
     logic  apb_psel_i = 0;
@@ -20,7 +20,7 @@ module tb_npu_regs;
     logic  error_i = 0;
     logic [2:0] error_code_i = 0;
     logic [31:0] cur_desc_i = 0;
-    logic [7:0] perf_event_i = 0;
+    logic [1:0] perf_event_i = 0;
     wire  start_o;
     wire  abort_o;
     wire  soft_reset_o;
@@ -32,6 +32,7 @@ module tb_npu_regs;
     wire [26:0] unused_post_int8_th_w;
     wire [31:0] unused_post_prob_th_w;
     wire  irq_o;
+    initial clk_i = 0;
     always #5 clk_i = !clk_i;
     edrv32_npu_regs u_dut (
         .post_ctrl_o(unused_post_ctrl_w),
@@ -133,7 +134,7 @@ module tb_npu_regs;
         check(!start_o, "busy doorbell ignored");
         apb_psel_i = 0;
         apb_penable_i = 0;
-        perf_event_i = 8'hff;
+        perf_event_i = 2'b11;
         repeat (7) tick;
         perf_event_i = 0;
         // SoC 7.1: the seventh event is still pending until the next edge.
@@ -148,7 +149,7 @@ module tb_npu_regs;
         tick;
         apb_psel_i = 0;
         apb_penable_i = 0;
-        for (int n = 0; n < 8; n++) read_check(12'h040+12'(4*n), 7);
+        for (int n = 0; n < 16; n++) read_check(12'h040+12'(4*n), n < 2 ? 7 : 0);
         read_check(12'h060, 0);
         write_reg(12'h004, 9);
         read_check(12'h004, 1);
