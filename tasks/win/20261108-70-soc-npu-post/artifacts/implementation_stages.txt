@@ -1,0 +1,15 @@
+compile/run.log
+Action compile: Real time elapsed is 0h:2m:42s
+Current time: Fri Nov 13 20:45:04 2026
+Action compile: Peak memory pool usage is 872 MB
+
+synthesize/run.log
+Action synthesize: Real time elapsed is 0h:8m:6s
+Current time: Fri Nov 13 20:53:19 2026
+Action synthesize: Peak memory pool usage is 4,477 MB
+
+device_map/run.log
+Device mapping done.
+Action dev_map: Real time elapsed is 0h:1m:34s
+Current time: Fri Nov 13 20:54:55 2026
+Action dev_map: Peak memory pool usage is 2,488 MB

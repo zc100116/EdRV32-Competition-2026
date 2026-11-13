@@ -1,0 +1,6 @@
+PDS CongestionPlotMT index 0 corresponds to general routing iteration 7.
+PNG columns increase to the right. Rows increase downward. Negative cells are masked.
+Each map uses the same color scale. Grid values come directly from PDS.
+Iteration 7: CongestionPlotMT_0.txt, 255 rows x 123 columns, x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 8: CongestionPlotMT_1.txt, 255 rows x 123 columns, x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
+Iteration 9: CongestionPlotMT_2.txt, 255 rows x 123 columns, x_div : 6, y_div : 6, x_offset : 0, y_offset : 0
