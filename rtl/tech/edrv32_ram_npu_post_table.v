@@ -23,20 +23,20 @@ module edrv32_ram_npu_post_table (
 );
 `ifdef EDRV32_FPGA_MEMORY_MODE
     ip_ram_npu_post_table u_ip (
-        .clk_a(clk_i),
-        .rst_a(1'b0),
-        .clk_en_a(a_en_i),
-        .wr_en_a(a_write_i),
-        .addr_a(a_addr_i),
-        .wr_data_a(a_data_i),
-        .rd_data_a(a_data_o),
-        .clk_b(clk_i),
-        .rst_b(1'b0),
-        .clk_en_b(b_en_i),
-        .wr_en_b(1'b0),
-        .addr_b(b_addr_i),
-        .wr_data_b(32'd0),
-        .rd_data_b(b_data_o)
+        .a_clk(clk_i),
+        .a_rst(1'b0),
+        .a_clk_en(a_en_i),
+        .a_wr_en(a_write_i),
+        .a_addr(a_addr_i),
+        .a_wr_data(a_data_i),
+        .a_rd_data(a_data_o),
+        .b_clk(clk_i),
+        .b_rst(1'b0),
+        .b_clk_en(b_en_i),
+        .b_wr_en(1'b0),
+        .b_addr(b_addr_i),
+        .b_wr_data(32'd0),
+        .b_rd_data(b_data_o)
     );
 `else
     reg [31:0] memory_r [0:1023];
