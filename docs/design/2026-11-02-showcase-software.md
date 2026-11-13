@@ -87,6 +87,17 @@ struct app {
 
 第一版应用（B3R 上可运行）：NES 游戏（游戏选择页 + 游戏）、LVGL 组件示例、LVGL benchmark、图层示例、系统状态（每个任务 CPU 占用、空闲率、帧率、网口/串口状态）。YOLO、图像处理在后续把 `sw/apps/demo` 的场景移植成应用后加入（不预留空应用）。
 
+实时识别页采用中断重启 NPU（T-VIS-ISR，2026-11-13）：VIN 中断保留最新同帧号的
+图像/输入配对；NPU DONE 中断记录完成时刻、候选数及帧关联，释放输入槽，并在
+PIPE_LIVE 且下一候选区未被 CPU 持有时直接启动下一帧。两块候选区各自从 DONE
+保留到应用任务完成排序/NMS、经 BSP clean 后释放；被候选区流控阻塞时由释放它的
+应用任务启动 NPU。共享流水线状态、图像引用及 VIN busy 位统一在
+`sched_port_lock()/unlock()` 下转移；后处理、LVGL 和打印仍由任务完成，离页、暂停和
+模型切换先关闭启动条件再排空。原因是卡 68 第 2 轮上板（
+`origin/win/20261108-68-soc-v021-full` 的 `artifacts/R2/uart/showcase_vision.log`）中，
+NPU 约 35 ms 不变，GUI 从 19.7 增至 34.5 ms 时 wait 从 2.6 增至 18.3 ms、fps 从
+26 降至 17；中断重启消除等待应用任务调度的依赖，协作式调度器保持不变。
+
 ### 4.3 LVGL 部分的修改
 
 1. GUI 任务：`step` 调用 `lv_timer_handler()`，返回值设为下一次 `wake_at`；输入中断或虚拟按键事件提前唤醒。

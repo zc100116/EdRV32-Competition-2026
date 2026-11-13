@@ -127,8 +127,11 @@ static void liveness(void)
 }
 int main(void)
 {
+    assert(mmap((void *)(uintptr_t)EDRV32_NPU_BASE,4096,PROT_READ|PROT_WRITE,
+        MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
     /* Keep runtime fixture helpers available without executing its standalone suite. */
-    (void)camera_test; (void)parallel_test; (void)image_test; (void)cancel_test;
+    (void)camera_test; (void)parallel_test; (void)interrupt_restart_test;
+    (void)image_test; (void)cancel_test;
     (void)process_test; (void)model_test; (void)matrix_test;
     (void)window_reopened; (void)reopened_base; (void)reopened_bytes; (void)accept_send;
     (void)bulk_completions;

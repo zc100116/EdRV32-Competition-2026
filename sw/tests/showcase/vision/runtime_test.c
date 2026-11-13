@@ -48,6 +48,7 @@ static uint32_t hardware = APP_HW_VIN | APP_HW_NPU | APP_HW_ETH;
 static uint64_t ticks;
 static uint32_t busy[3];
 static struct vin_frame frames[3];
+static uint32_t last_input;
 static unsigned npu_runs, submitted, done_count, window_reopened;
 static unsigned npu_configurations;
 static uint32_t reopened_base, reopened_bytes;
@@ -64,6 +65,14 @@ void platform_gui_wake(void) {}
 uint32_t showcase_gui_frames(void) { return display_frames; }
 ui_system_t ui_data_system(void) { return (ui_system_t){0}; }
 static unsigned invalidates;
+static unsigned cleaned[2];
+void engine_dma_clean(uintptr_t address, uint32_t bytes)
+{
+    assert(bytes == 120960u);
+    assert(address == EDRV32_DDR_BASE + VISION_POST_BASE ||
+           address == EDRV32_DDR_BASE + VISION_POST_BASE + VISION_POST_SPACING);
+    ++cleaned[(address - EDRV32_DDR_BASE - VISION_POST_BASE) / VISION_POST_SPACING];
+}
 void showcase_rnd_run(const struct rnd_batch *batch)
 { (void)batch; assert(0); }
 void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
@@ -79,8 +88,7 @@ void npu_post_configure(void) {}
 uint32_t npu_post_count(void) { return candidate_count; }
 void npu_post_start(uint32_t input, uint32_t output, uint32_t post)
 {
-    candidate_base = post;
-    candidate_count = 0;
+    mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET, post);
     npu_start(input, output);
 }
 
@@ -104,8 +112,10 @@ uint32_t platform_hardware(void) { return hardware; }
 void platform_puts(const char *s) { fputs(s, stderr); }
 _Noreturn void platform_stop(void) { abort(); }
 void app_wake_at(uint64_t deadline) { (void)deadline; }
-uint32_t sched_port_lock(void) { return 0; }
-void sched_port_unlock(uint32_t state) { (void)state; }
+static uint32_t lock_depth;
+uint32_t sched_port_lock(void) { return lock_depth++; }
+void sched_port_unlock(uint32_t state) { assert(lock_depth == state + 1); lock_depth = state; }
+uint64_t sched_idle_ticks(void) { return ticks / 4; }
 int ov5640_init(unsigned camera, uint32_t hz)
 {
     assert(camera == 0 && hz == 125000000);
@@ -143,7 +153,13 @@ void npu_configure(const struct npu_config *c)
 void npu_start(uint32_t input, uint32_t output)
 {
     assert(input >= VISION_INPUT_BASE && input < VISION_INPUT_BASE + 3*VISION_INPUT_SPACING);
+    last_input = input;
     assert(output == VISION_OUTPUT_BASE);
+    assert(lock_depth);
+    candidate_base = mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET);
+    unsigned buffer = (candidate_base - VISION_POST_BASE) / VISION_POST_SPACING;
+    assert(buffer < 2 && cleaned[buffer]);
+    candidate_count = 0;
     ++npu_runs;
 }
 void pix_configure(const struct pix_config *c) { last_pix = *c; assert(hardware & APP_HW_PIX); }
@@ -206,8 +222,8 @@ static void camera(unsigned slot, unsigned frame_id)
 {
     frames[0] = (struct vin_frame){slot << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, frame_id};
     frames[2] = (struct vin_frame){slot << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, frame_id};
-    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK | EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
     unsigned before = npu_runs;
+    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK | EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
     vision_service();
     assert(npu_runs == before + 1);
     assert(busy[0] & (1u << slot));
@@ -283,6 +299,7 @@ static void parallel_test(void)
     assert(npu_runs == before + 1);
     output_class(1);
     event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    assert(npu_runs == before + 2); /* Restart precedes any application slice. */
     vision_service();
     assert(invalidates == copies + 1 && npu_runs == before + 2);
     assert(vision_frame() == 100); /* Frame 101 runs before frame 100 post completes. */
@@ -313,6 +330,61 @@ static void parallel_test(void)
     display_frame(); display_frame();
     memset(physical(VISION_OUTPUT_BASE), 0x80, VISION_OUTPUT_BYTES);
     puts("PASS N+1 NPU overlaps N post, snapshot classes/frame IDs stay paired; pause/stop drain");
+}
+/* No vision_service between VIN and DONE events: model a GUI draw occupying CPU. */
+static void irq_pair(unsigned image, unsigned input, unsigned id)
+{
+    frames[0] = (struct vin_frame){image << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, id};
+    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK);
+    frames[2] = (struct vin_frame){input << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, id};
+    event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+}
+static void interrupt_restart_test(void)
+{
+    vision_app_camera.enter(); vision_service();
+    unsigned before = npu_runs;
+    irq_pair(0, 0, 200);
+    assert(npu_runs == before + 1);
+    irq_pair(1, 1, 201);
+    irq_pair(2, 2, 202); /* Latest complete pair supersedes frame 201 without a task. */
+    assert(!(busy[2] & 2));
+    output_class(1);
+    uint32_t first = candidate_base;
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    assert(npu_runs == before + 2 && candidate_base != first);
+    assert(last_input == VISION_INPUT_BASE + 2 * VISION_INPUT_SPACING);
+    assert(busy[2] == 4); /* DONE immediately frees frame 200's NPU input. */
+    output_class(3);
+    irq_pair(3, 0, 203);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    assert(npu_runs == before + 2); /* Both candidate blocks await CPU consumption. */
+    assert(busy[2] == 1);
+    vision_service();
+    assert(vision_frame() == 200 && vision_post_active());
+    for (unsigned i = 0; npu_runs == before + 2; ++i) {
+        assert(i < 4000); vision_service();
+    }
+    assert(npu_runs == before + 3 && candidate_base == first);
+    assert(vision_frame() == 200); /* CPU release itself restarts the waiting NPU. */
+    assert(ui_data_vision().targets[0].class_id == 1);
+    irq_pair(1, 1, 204);
+    vision_pause(true);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    assert(npu_runs == before + 3); /* Paused gate applies before task drains. */
+    drain();
+    assert(vision_ready(UI_STATE_PAUSED) && vision_frame() == 203);
+    vision_pause(false); vision_service();
+    irq_pair(0, 0, 205);
+    irq_pair(2, 2, 206);
+    unsigned runs = npu_runs;
+    vision_app_camera.exit();
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    assert(npu_runs == runs);
+    display_frame(); display_frame(); drain();
+    assert(vision_ready(UI_STATE_IDLE));
+    display_frame(); display_frame();
+    assert(!lock_depth);
+    puts("PASS IRQ-only latest VIN pair/restart, two completed buffers, CPU release, pause/exit");
 }
 static void upload(unsigned base, unsigned index)
 {
@@ -563,6 +635,9 @@ static void matrix_test(void)
 #ifndef NETWORK_INTEGRATION
 int main(void)
 {
+    assert(mmap((void *)(uintptr_t)EDRV32_NPU_BASE, 4096,
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
+           != MAP_FAILED);
     matrix_test();
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE, 0x02000000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
@@ -582,6 +657,7 @@ int main(void)
                   showcase_model_weights_bytes) == 0);
     camera_test();
     parallel_test();
+    interrupt_restart_test();
     image_test();
     cancel_test();
     process_test();
