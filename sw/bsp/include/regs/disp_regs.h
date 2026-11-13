@@ -129,7 +129,7 @@
 #define EDRV32_DISP_DONE_COUNT_RESET 0x00000000u
 
 /* edrv32-soc-spec.md 7.1; disp-spec.md 4.1; disp-spec.md 4.3; RO; reset: 0. */
-/* PERF0 scan frames; PERF1/2 L0 underflow frames/beats; PERF3 urgent cycles; PERF4 delayed requests; PERF5/6 L1 underflow frames/beats; PERF7..15 unused. */
+/* PERF0 scan frames; PERF1 L0 underflow frames; PERF2..15 read as 0 (disp-spec v0.4). */
 #define EDRV32_DISP_PERF_N_COUNT 0x00000010u
 #define EDRV32_DISP_PERF_OFFSET(n) \
     (0x00000040u + 0x00000004u * (n))
