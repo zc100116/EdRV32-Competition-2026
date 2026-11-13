@@ -18,7 +18,7 @@
 | Port A / B 深度 | 都为 1024，地址都是 10 bit |
 | 时钟 | 两端口均连接 clk_npu，同频同相 |
 | Port A / B clock enable | 都使能；读阵列仅在 clk_en 为 1 时更新 |
-| Port A / B output register | 都勾选，阵列读加输出寄存器共 2 拍；输出寄存器始终使能（如生成 oce_a/oce_b，包装须接 1） |
+| Port A / B output register | 都勾选，阵列读加输出寄存器共 2 拍；输出寄存器始终使能（如生成 a_oce/b_oce，包装须接 1） |
 | Byte write enable | 关闭；32 bit 整字写 |
 | Reset | 不复位内容或输出；复位端口接无效电平 0 |
 | 初始化 | 无初始化文件；上电内容不确定 |
@@ -28,13 +28,13 @@
 
 | 端口 | 方向/宽度 | 包装连接 |
 |---|---|---|
-| clk_a / clk_b | in 1 | clk_i |
-| rst_a / rst_b | in 1 | 0 |
-| clk_en_a / clk_en_b | in 1 | a_en_i / b_en_i |
-| wr_en_a / wr_en_b | in 1 | a_write_i / 0 |
-| addr_a / addr_b | in 10 | a_addr_i / b_addr_i |
-| wr_data_a / wr_data_b | in 32 | a_data_i / 0 |
-| rd_data_a / rd_data_b | out 32 | a_data_o / b_data_o |
+| a_clk / b_clk | in 1 | clk_i |
+| a_rst / b_rst | in 1 | 0 |
+| a_clk_en / b_clk_en | in 1 | a_en_i / b_en_i |
+| a_wr_en / b_wr_en | in 1 | a_write_i / 0 |
+| a_addr / b_addr | in 10 | a_addr_i / b_addr_i |
+| a_wr_data / b_wr_data | in 32 | a_data_i / 0 |
+| a_rd_data / b_rd_data | out 32 | a_data_o / b_data_o |
 
 地址为 `{head[1:0], index[7:0]}`，使用 0..767，其余未使用。
 exp 实例仅使用 A 端口，probability 实例在分类时双端口各服务一个像素，尾处理使用 A。
