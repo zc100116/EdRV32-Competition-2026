@@ -119,7 +119,7 @@ module tb_npu_window;
         reg [10:0] weight_addr;
     } expected_t;
     expected_t waiting_terms[$];
-    expected_t pipeline [0:13];
+    expected_t pipeline [0:12];
     expected_t candidate;
 
     edrv32_npu_window dut (
@@ -285,7 +285,7 @@ module tb_npu_window;
         sampled_cancel = cancel_i;
         sampled_slot = pair_result_slot_i;
         sampled_residual = pair_residual_addr_i;
-        for (integer stage = 13; stage > 0; stage--) pipeline[stage] = pipeline[stage-1];
+        for (integer stage = 12; stage > 0; stage--) pipeline[stage] = pipeline[stage-1];
         pipeline[0] = '0;
         if (checking && !sampled_cancel && cmd_valid_i && cmd_ready_o) queue_command();
         expected_issue = 0;
@@ -305,7 +305,7 @@ module tb_npu_window;
         end
         if (sampled_cancel) begin
             waiting_terms.delete();
-            for (integer stage = 0; stage < 14; stage++) pipeline[stage] = '0;
+            for (integer stage = 0; stage < 13; stage++) pipeline[stage] = '0;
             last_issue_cycle = -100;
             last_pair_cycle = -100;
             command_end_cycle = -100;
@@ -367,25 +367,25 @@ module tb_npu_window;
                     $fatal(1, "FAIL read_done tag cycle=%0d", cycle);
                 read_done_count++;
             end
-            if (term_valid_o !== pipeline[6].valid)
-                $fatal(1, "FAIL term must be A1+6 cycle=%0d", cycle);
+            if (term_valid_o !== pipeline[5].valid)
+                $fatal(1, "FAIL term must be A1+5 cycle=%0d", cycle);
             for (integer k = 0; k < 8; k++) begin
-                if (pipeline[6+k].valid) begin
+                if (pipeline[5+k].valid) begin
                     for (integer c = 0; c < 32; c++) begin
                         if (term_weight_o[8*(8*c+k) +: 8] !==
-                            8'(int'(pipeline[6+k].weight_addr)*19+(8*c+k)*13))
-                            $fatal(1, "FAIL A6 weight item=%0d channel=%0d cycle=%0d", k,c,cycle);
+                            8'(int'(pipeline[5+k].weight_addr)*19+(8*c+k)*13))
+                            $fatal(1, "FAIL A5 weight item=%0d channel=%0d cycle=%0d", k,c,cycle);
                     end
                 end
             end
             if (term_valid_o) begin
                 if ({term_first_o, term_last_o, term_tag_o} !==
-                    {pipeline[6].first_term, pipeline[6].last_term, pipeline[6].tag})
-                    $fatal(1, "FAIL A6 tag cycle=%0d expected=%h got=%h", cycle,
-                        pipeline[6].tag, term_tag_o);
-                if (term_activation_o !== {4{pipeline[6].activation}})
-                    $fatal(1, "FAIL A6 activation cycle=%0d expected=%h got=%h", cycle,
-                        pipeline[6].activation, term_activation_o[255:0]);
+                    {pipeline[5].first_term, pipeline[5].last_term, pipeline[5].tag})
+                    $fatal(1, "FAIL A5 tag cycle=%0d expected=%h got=%h", cycle,
+                        pipeline[5].tag, term_tag_o);
+                if (term_activation_o !== {4{pipeline[5].activation}})
+                    $fatal(1, "FAIL A5 activation cycle=%0d expected=%h got=%h", cycle,
+                        pipeline[5].activation, term_activation_o[255:0]);
 
             end
         end
@@ -537,7 +537,7 @@ module tb_npu_window;
         if (!idle_o) $fatal(1, "FAIL cancel did not clear local state");
         send_command(1, 0);
         finish_layer();
-        $display("PASS window: %0d terms, %0d pairs, %0d commands; A3=+2 A6=+5",
+        $display("PASS window: %0d terms, %0d pairs, %0d commands; A3=+2 A5=+4",
             terms, pairs, commands);
         $finish;
     end

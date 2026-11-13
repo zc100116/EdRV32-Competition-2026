@@ -253,7 +253,7 @@ module edrv32_npu_datapath (
         .cache_rd_data1_o(cache_rd_data1_w)
     );
 
-    // Window owns both contexts and all A1-A6 address/data alignment.
+    // Window owns both contexts and all A1-A5 address/data alignment.
     edrv32_npu_window u_window (
         // Clock and cancellation.
         .clk_i(clk_i),
@@ -305,7 +305,7 @@ module edrv32_npu_datapath (
         .weight_rd_addr_o(weight_rd_addr_w),
         .weight_rd_data_i(weight_rd_data_w),
 
-        // A6 control/activation; weight item k follows at A6+k.
+        // A5 control/activation; weight item k follows at A5+k.
         .term_valid_o(term_valid_w),
         .term_first_o(term_first_w),
         .term_last_o(term_last_w),
@@ -325,7 +325,7 @@ module edrv32_npu_datapath (
         .idle_o(window_idle_w)
     );
 
-    // Weight item k returns at A3+k and advances through window A4/A5/A6 unconditionally.
+    // Weight item k returns at A3+k and advances through window A4/A5 unconditionally.
     edrv32_npu_weight_store u_weight_store (
         // Clock and local control; only the pending write enable is cleared.
         .clk_i(clk_i),
@@ -365,14 +365,14 @@ module edrv32_npu_datapath (
         .param_rd_data_o(param_rd_data_w)
     );
 
-    // A6 item zero directly feeds M1; there is no extra top-level register.
+    // A5 item zero directly feeds M1; there is no extra top-level register.
     edrv32_npu_mac_array u_mac_array (
         // Clock and control reset; payload registers are not reset.
         .clk_i(clk_i),
         .rst_n_i(rst_n_i),
         .cancel_i(cancel_i),
 
-        // A6 terms, with four activation copies serving eight channels each.
+        // A5 terms, with four activation copies serving eight channels each.
         .term_valid_i(term_valid_w),
         .term_first_i(term_first_w),
         .term_last_i(term_last_w),
