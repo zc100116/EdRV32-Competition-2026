@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 版本 | v0.6 |
-| 日期 | 2026-11-08 |
+| 版本 | v0.7 |
+| 日期 | 2026-11-13 |
 | 对应规格 | `docs/spec/npu-spec.md` v0.10；SoC 规格 v0.23 的 4.2、4.3、5.2 X9/X10、7.1、7.2、7.4、8.9 |
 | 关联 | `docs/plan/npu-plan.md`；`docs/design/2026-10-26-npu-architecture.md`；`docs/design/2026-11-08-npu-post-b.md` |
 
@@ -86,7 +86,7 @@
 |---|---|---|---|---|---|
 | RG-01 | 4、SoC 7.1 | 公共和私有寄存器（含 0x114–0x130）复位值、读写、只读位、ID；IDLE 时写 SOFT_RST 后全部寄存器回到复位值（规格 v0.4） | 定向 | 读回值 | S |
 | RG-02 | 2.4、SoC 7.1 | 门铃启动：DESC_BASE/COUNT，执行中 `STATUS.BUSY`、`CUR_DESC` 逐条前进，完成后 `DONE_COUNT` 加 1、`IRQ_STAT.DONE`、`irq_o` 按 IRQ_EN | 定向（3 条描述符） | 寄存器、中断 | S |
-| RG-03 | 4 | PERF 计数器：DOORBELL 清零；0 号（总周期）与测试侧计数 W 比对：W = DOORBELL 的 APB 写访问完成后到 `irq_o`（IRQ_EN.DONE = 1）上升沿的 clk_npu 周期数，要求 `W − 16 ≤ PERF[0] ≤ W + 16`（NPU 在 APB 响应跨域返回前已接受 DOORBELL，PERF[0] 可比 W 多出桥的返回延迟；`irq_o` 晚于 DONE 的延迟使 PERF[0] 可比 W 少；两者上界均取 16，开发初值）；1–7 号非零且 1 号不超过 0 号 | 定向 | 黑盒：只用 APB 和 `irq_o` | F |
+| RG-03 | 4 | PERF 计数器：DOORBELL 清零；0 号（总周期）与测试侧计数 W 比对：W = DOORBELL 的 APB 写访问完成后到 `irq_o`（IRQ_EN.DONE = 1）上升沿的 clk_npu 周期数，要求 `W − 16 ≤ PERF[0] ≤ W + 16`（NPU 在 APB 响应跨域返回前已接受 DOORBELL，PERF[0] 可比 W 多出桥的返回延迟；`irq_o` 晚于 DONE 的延迟使 PERF[0] 可比 W 少；两者上界均取 16，开发初值）；1 号非零且不超过 0 号，2–15 号读为 0 | 定向 | 黑盒：只用 APB 和 `irq_o` | F |
 | RG-04 | 2.4 | 连续两帧：只改 INPUT_BASE、OUTPUT_BASE（后处理另见 PP-13 的 POST_BASE）再写 DOORBELL，两帧输出各自正确 | 小网络（4 条） | 参考输出 | S |
 
 ### 3.3 算子和描述符标志（OP）
@@ -244,3 +244,4 @@ PP-SW-01/02 必须在 SoC 软件集成运行；PP-P-03 必须经 Windows 任务�
 | 2026-10-28 | v0.4 | RG-01 增加 SOFT_RST 恢复全部寄存器复位值的检查（对应规格 v0.4） |
 | 2026-10-30 | v0.5 | 新增 3.8 EQ-01：APM SIMD 级联包装模块与厂商模型等价性（对应规格 v0.5 5.4 C1–C8） |
 | 2026-11-08 | v0.6 | 对应 NPU 规格 v0.10：增加 TL-05、PP-01–13、PP-SW-01/02、PP-P-01–03，规定完整候选 oracle、两阈值、标签/前递、DFL/打包、全容量、错误/ABORT/DONE 栅栏、双缓冲/cache 和 Windows 时序/板测；按固定章节补齐环境、覆盖和 S/F/P 判据。原因见 `docs/design/2026-11-08-npu-post-b.md`；用户 2026-11-08 确认 |
+| 2026-11-13 | v0.7 | RG-03：PERF2–7 改为读 0；对应规格删除无程序读取的 PERF（设计记录 `docs/design/2026-11-13-soc-slim.md`） |
