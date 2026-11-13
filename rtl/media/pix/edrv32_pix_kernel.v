@@ -34,28 +34,27 @@ module edrv32_pix_kernel (
     reg [9:0] s7_abs_x_r;
     reg [9:0] s7_abs_y_r;
     wire [10:0] magnitude_w;
-    reg [7:0] s5_min_r [0:4];
-    reg [7:0] s5_max_r [0:4];
-    reg [7:0] s6_min_r [0:2];
-    reg [7:0] s6_max_r [0:2];
-    reg [7:0] s7_min_r [0:1];
-    reg [7:0] s7_max_r [0:1];
-    wire [7:0] minimum_w;
-    wire [7:0] maximum_w;
+    reg [7:0] s5_extreme_r [0:4];
+    reg [7:0] s6_extreme_r [0:2];
+    reg [7:0] s7_extreme_r [0:1];
+    wire [7:0] extreme_w;
+    wire minimum_select_w;
+    wire unused_max_advance_w;
     wire [7:0] spatial_w;
     wire [23:0] color_w;
     integer idx_r;
-    integer min_idx_r;
-    integer max_idx_r;
+    integer extreme_idx_r;
     genvar pixel;
     genvar channel;
 
     assign unused_advance_w = advance_i[10:2];
     assign magnitude_w = {1'b0, s7_abs_x_r} + {1'b0, s7_abs_y_r};
-    assign minimum_w = s7_min_r[0] < s7_min_r[1] ? s7_min_r[0] : s7_min_r[1];
-    assign maximum_w = s7_max_r[0] > s7_max_r[1] ? s7_max_r[0] : s7_max_r[1];
-    assign spatial_w = op_spatial_r == 3'd5 ? minimum_w : (op_spatial_r == 3'd6 ? maximum_w
-        : (|magnitude_w[10:8] ? 8'd255 : magnitude_w[7:0]));
+    assign minimum_select_w = op_spatial_r == 3'd5;
+    assign unused_max_advance_w = advance_i[19];
+    assign extreme_w = ((s7_extreme_r[0] < s7_extreme_r[1]) == minimum_select_w)
+        ? s7_extreme_r[0] : s7_extreme_r[1];
+    assign spatial_w = op_spatial_r == 3'd5 || op_spatial_r == 3'd6 ? extreme_w
+        : (|magnitude_w[10:8] ? 8'd255 : magnitude_w[7:0]);
 
     generate
         for (pixel = 0; pixel < 9; pixel = pixel + 1) begin : g_gray
@@ -173,38 +172,22 @@ module edrv32_pix_kernel (
     end
     always @(posedge clk_i) begin
         if (advance_i[18]) begin
-            for (min_idx_r = 0; min_idx_r < 4; min_idx_r = min_idx_r + 1) begin
-                s5_min_r[min_idx_r] <= gray_w[min_idx_r*2] <
-                    gray_w[min_idx_r*2+1] ? gray_w[min_idx_r*2]
-                    : gray_w[min_idx_r*2+1];
+            for (extreme_idx_r = 0; extreme_idx_r < 4; extreme_idx_r = extreme_idx_r + 1) begin
+                s5_extreme_r[extreme_idx_r] <= ((gray_w[extreme_idx_r*2] <
+                    gray_w[extreme_idx_r*2+1]) == minimum_select_w) ? gray_w[extreme_idx_r*2]
+                    : gray_w[extreme_idx_r*2+1];
             end
-            s5_min_r[4] <= gray_w[8];
-            for (min_idx_r = 0; min_idx_r < 2; min_idx_r = min_idx_r + 1) begin
-                s6_min_r[min_idx_r] <= s5_min_r[min_idx_r*2] <
-                    s5_min_r[min_idx_r*2+1] ? s5_min_r[min_idx_r*2]
-                    : s5_min_r[min_idx_r*2+1];
+            s5_extreme_r[4] <= gray_w[8];
+            for (extreme_idx_r = 0; extreme_idx_r < 2; extreme_idx_r = extreme_idx_r + 1) begin
+                s6_extreme_r[extreme_idx_r] <= ((s5_extreme_r[extreme_idx_r*2] <
+                    s5_extreme_r[extreme_idx_r*2+1]) == minimum_select_w)
+                    ? s5_extreme_r[extreme_idx_r*2]
+                    : s5_extreme_r[extreme_idx_r*2+1];
             end
-            s6_min_r[2] <= s5_min_r[4];
-            s7_min_r[0] <= s6_min_r[0] < s6_min_r[1] ? s6_min_r[0] : s6_min_r[1];
-            s7_min_r[1] <= s6_min_r[2];
-        end
-    end
-    always @(posedge clk_i) begin
-        if (advance_i[19]) begin
-            for (max_idx_r = 0; max_idx_r < 4; max_idx_r = max_idx_r + 1) begin
-                s5_max_r[max_idx_r] <= gray_w[max_idx_r*2] >
-                    gray_w[max_idx_r*2+1] ? gray_w[max_idx_r*2]
-                    : gray_w[max_idx_r*2+1];
-            end
-            s5_max_r[4] <= gray_w[8];
-            for (max_idx_r = 0; max_idx_r < 2; max_idx_r = max_idx_r + 1) begin
-                s6_max_r[max_idx_r] <= s5_max_r[max_idx_r*2] >
-                    s5_max_r[max_idx_r*2+1] ? s5_max_r[max_idx_r*2]
-                    : s5_max_r[max_idx_r*2+1];
-            end
-            s6_max_r[2] <= s5_max_r[4];
-            s7_max_r[0] <= s6_max_r[0] > s6_max_r[1] ? s6_max_r[0] : s6_max_r[1];
-            s7_max_r[1] <= s6_max_r[2];
+            s6_extreme_r[2] <= s5_extreme_r[4];
+            s7_extreme_r[0] <= ((s6_extreme_r[0] < s6_extreme_r[1]) == minimum_select_w)
+                ? s6_extreme_r[0] : s6_extreme_r[1];
+            s7_extreme_r[1] <= s6_extreme_r[2];
         end
     end
 endmodule

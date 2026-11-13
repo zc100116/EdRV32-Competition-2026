@@ -21,11 +21,6 @@ module tb;
     reg r_desc_done_i;
     reg [15:0] r_cur_desc_i;
     reg [1:0] r_error_i;
-    reg [4:0] r_pixel_i;
-    reg r_read_beat_i;
-    reg r_write_beat_i;
-    reg r_source_wait_i;
-    reg r_writer_wait_i;
     wire r_start_o;
     wire r_abort_o;
     wire r_soft_reset_o;
@@ -49,11 +44,6 @@ module tb;
         .desc_done_i(r_desc_done_i),
         .cur_desc_i(r_cur_desc_i),
         .error_i(r_error_i),
-        .pixel_i(r_pixel_i),
-        .read_beat_i(r_read_beat_i),
-        .write_beat_i(r_write_beat_i),
-        .source_wait_i(r_source_wait_i),
-        .writer_wait_i(r_writer_wait_i),
         .start_o(r_start_o),
         .abort_o(r_abort_o),
         .soft_reset_o(r_soft_reset_o),
@@ -84,7 +74,6 @@ module tb;
         end
     endtask
     initial begin
-
         r_rst_n_i = 0;
         r_apb_paddr_i = 0;
         r_apb_psel_i = 0;
@@ -97,11 +86,6 @@ module tb;
         r_desc_done_i = 0;
         r_cur_desc_i = 0;
         r_error_i = 0;
-        r_pixel_i = 0;
-        r_read_beat_i = 0;
-        r_write_beat_i = 0;
-        r_source_wait_i = 0;
-        r_writer_wait_i = 0;
         repeat(2) @(negedge clk);r_rst_n_i=1;
         read_check(12'h000,32'h00030001);
         read_check(12'h008,2);
@@ -135,21 +119,19 @@ module tb;
         if(r_start_o) $fatal(1,"FAIL busy doorbell was accepted");
         @(negedge clk);r_apb_psel_i=0;
         write_reg(12'h004,8);read_check(12'h024,5);
-        @(negedge clk);r_pixel_i=1;r_read_beat_i=1;r_write_beat_i=1;
-        r_source_wait_i=1;r_writer_wait_i=1;r_desc_done_i=1;
+        @(negedge clk);
+        r_desc_done_i=1;
         @(negedge clk);r_desc_done_i=0;
         repeat(2) @(negedge clk);
-        r_pixel_i=0;r_read_beat_i=0;r_write_beat_i=0;
-        r_source_wait_i=0;r_writer_wait_i=0;
         @(negedge clk);
         read_check(12'h02c,1);
-        read_check(12'h044,3);read_check(12'h048,3);read_check(12'h04c,3);
-        read_check(12'h050,3);read_check(12'h054,3);
+        read_check(12'h044,0);read_check(12'h048,0);read_check(12'h04c,0);
+        read_check(12'h050,0);read_check(12'h054,0);
         read_check(12'h058,0);
-        @(negedge clk);r_pixel_i=16;
-        @(negedge clk);r_pixel_i=0;
         @(negedge clk);
-        read_check(12'h044,19);
+        @(negedge clk);
+        @(negedge clk);
+        read_check(12'h044,0);
         @(negedge clk);r_error_i=2;
         @(negedge clk);r_error_i=0;
         read_check(12'h014,2);read_check(12'h010,2);read_check(12'h008,5);

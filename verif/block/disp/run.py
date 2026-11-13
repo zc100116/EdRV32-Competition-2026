@@ -19,16 +19,19 @@ from blend_ref import generate as generate_blend, self_test  # noqa: E402
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('tier', choices=('smoke', 'full'))
+    parser.add_argument('tier', choices=('smoke', 'full', 'slim1'))
     args = parser.parse_args()
     out = ROOT / 'build/disp'
     out.mkdir(parents=True, exist_ok=True)
-    self_test()
+    if args.tier != 'slim1':
+        self_test()
     if args.tier == 'smoke':
         return 0
     sources = expand_files(ROOT / 'verif/block/disp/files.f')
-    for top, directory in (('tb', 'obj'), ('tb_layers', 'obj_layers'),
-                            ('tb_blend_ref', 'obj_ref')):
+    tops = [('tb', 'obj'), ('tb_layers', 'obj_layers')]
+    if args.tier == 'full':
+        tops.append(('tb_blend_ref', 'obj_ref'))
+    for top, directory in tops:
         started = time.monotonic()
         compile_args = ['verilator', '--binary', '--timing', '-j', '1', '-Wall',
                         '--timescale', '1ns/1ps', '-Wno-BLKSEQ', '-Wno-UNUSEDSIGNAL',
@@ -54,22 +57,27 @@ def main():
     cases += [(15, 1, 4096, 999, 0)]
     cases += [(16, 1, 4096, 999, v) for v in range(3)]
     cases += [(17, 1, 4096, 999, 0)]
-    generate(out / 'tmds.hex')
+    if args.tier == 'full':
+        generate(out / 'tmds.hex')
     cases += [(n, 1, 4096, 999, 0) for n in (2, 8, 9, 10, 19)]
     cases += [(10, 1, 4096, phase, 0) for phase in (-8, -2, 4)]
     cases += [(13, seed, 4096, 999, 0) for seed in range(1, 11)]
     cases += [(18, 1, 4096, 999, v) for v in range(18)]
-    started = time.monotonic()
-    generate_blend(out / 'blend.hex')
-    with (out / 'blend-ref-sv.log').open('w') as log:
-        result = subprocess.run([str(out / 'obj_ref/sim'),
-                                    f'+BLEND_REF={out / "blend.hex"}'], cwd=ROOT,
-                                stdout=log, stderr=subprocess.STDOUT, timeout=300)
-    reference_result = (out / 'blend-ref-sv.log').read_text()
-    print(reference_result, flush=True)
-    print(f'Blend reference: {time.monotonic() - started:.2f}s', flush=True)
-    if result.returncode:
-        return 1
+    if args.tier == 'slim1':
+        cases = [(7, 1, 4096, 999, 2), (8, 1, 4096, 999, 0),
+                 (9, 1, 4096, 999, 0)]
+    if args.tier == 'full':
+        started = time.monotonic()
+        generate_blend(out / 'blend.hex')
+        with (out / 'blend-ref-sv.log').open('w') as log:
+            result = subprocess.run([str(out / 'obj_ref/sim'),
+                                        f'+BLEND_REF={out / "blend.hex"}'], cwd=ROOT,
+                                    stdout=log, stderr=subprocess.STDOUT, timeout=300)
+        reference_result = (out / 'blend-ref-sv.log').read_text()
+        print(reference_result, flush=True)
+        print(f'Blend reference: {time.monotonic() - started:.2f}s', flush=True)
+        if result.returncode:
+            return 1
     failures = 0
     for case, seed, stride, phase, variant in cases:
         started = time.monotonic()

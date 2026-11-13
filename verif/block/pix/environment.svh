@@ -435,15 +435,9 @@
     endtask
 
     task automatic check_counters;
-        int before_input;
-        int before_output;
-        before_input = input_stalls;
-        before_output = output_stalls;
         read_expect(12'h02c, 32'(completed));
         read_expect(12'h040, 32'(completed));
-        read_expect(12'h044, 32'(before_input));
-        read_expect(12'h048, 32'(before_output));
-        read_expect(12'h04c, 32'(dropped));
+        for (int p = 1; p < 16; p++) read_expect(12'(64+p*4), 0);
         // No stream transfer occurs while these snapshots are read.
         read_expect(12'h008, 2);
         read_expect(12'h014, 0);

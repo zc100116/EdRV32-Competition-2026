@@ -36,15 +36,10 @@ module edrv32_disp_regs (
     input wire underflow_i,
     input wire underflow1_i,
     input wire dma_err_i,
-    input wire urgent_i,
-    input wire delayed_req_i,
 
     // Synchronized scan counts; raw counts survive a local SOFT_RST.
     input wire [31:0] perf0_i,
     input wire [31:0] perf1_i,
-    input wire [31:0] perf2_i,
-    input wire [31:0] perf5_i,
-    input wire [31:0] perf6_i,
     output wire [31:0] scan_cnt_o,
 
     // Interrupt output.
@@ -96,27 +91,8 @@ module edrv32_disp_regs (
     reg [5:0] perf1_less_r;
     reg [5:1] perf1_equal_r;
     wire [23:0] perf1_base_w;
-    reg [31:0] perf2_r;
-    reg [5:0] perf2_less_r;
-    reg [5:1] perf2_equal_r;
-    wire [23:0] perf2_base_w;
-    reg [31:0] perf5_r;
-    reg [5:0] perf5_less_r;
-    reg [5:1] perf5_equal_r;
-    wire [23:0] perf5_base_w;
-    reg [31:0] perf6_r;
-    reg [5:0] perf6_less_r;
-    reg [5:1] perf6_equal_r;
-    wire [23:0] perf6_base_w;
-    reg urgent_r;
-    reg delayed_req_r;
     reg [31:0] perf0_base_r;
     reg [31:0] perf1_base_r;
-    reg [31:0] perf2_base_r;
-    reg [31:0] perf5_base_r;
-    reg [31:0] perf6_base_r;
-    reg [31:0] perf3_r;
-    reg [31:0] perf4_r;
     wire write_w;
     wire ctrl_write_w;
     wire switch_w;
@@ -130,9 +106,6 @@ module edrv32_disp_regs (
     // On SOFT_RST the newly installed baseline is the previous raw count sample.
     assign perf0_base_w = soft_clear_o ? perf0_r[23:0] : perf0_base_r[23:0];
     assign perf1_base_w = soft_clear_o ? perf1_r[23:0] : perf1_base_r[23:0];
-    assign perf2_base_w = soft_clear_o ? perf2_r[23:0] : perf2_base_r[23:0];
-    assign perf5_base_w = soft_clear_o ? perf5_r[23:0] : perf5_base_r[23:0];
-    assign perf6_base_w = soft_clear_o ? perf6_r[23:0] : perf6_base_r[23:0];
 
     function [31:0] count_delta;
         input [31:0] count_i;
@@ -184,17 +157,6 @@ module edrv32_disp_regs (
             perf1_r <= 32'd0;
             perf1_less_r <= 6'd0;
             perf1_equal_r <= 5'b11111;
-            perf2_r <= 32'd0;
-            perf2_less_r <= 6'd0;
-            perf2_equal_r <= 5'b11111;
-            perf5_r <= 32'd0;
-            perf5_less_r <= 6'd0;
-            perf5_equal_r <= 5'b11111;
-            perf6_r <= 32'd0;
-            perf6_less_r <= 6'd0;
-            perf6_equal_r <= 5'b11111;
-            urgent_r <= 1'b0;
-            delayed_req_r <= 1'b0;
         end else begin
             busy_r <= busy_i;
             soft_pending_d_r <= soft_pending_r;
@@ -223,44 +185,6 @@ module edrv32_disp_regs (
                 perf1_i[15:12] == perf1_base_w[15:12],
                 perf1_i[11:8] == perf1_base_w[11:8],
                 perf1_i[7:4] == perf1_base_w[7:4]};
-            perf2_r <= perf2_i;
-            perf2_less_r <= {perf2_i[23:20] < perf2_base_w[23:20],
-                perf2_i[19:16] < perf2_base_w[19:16],
-                perf2_i[15:12] < perf2_base_w[15:12],
-                perf2_i[11:8] < perf2_base_w[11:8],
-                perf2_i[7:4] < perf2_base_w[7:4],
-                perf2_i[3:0] < perf2_base_w[3:0]};
-            perf2_equal_r <= {perf2_i[23:20] == perf2_base_w[23:20],
-                perf2_i[19:16] == perf2_base_w[19:16],
-                perf2_i[15:12] == perf2_base_w[15:12],
-                perf2_i[11:8] == perf2_base_w[11:8],
-                perf2_i[7:4] == perf2_base_w[7:4]};
-            perf5_r <= perf5_i;
-            perf5_less_r <= {perf5_i[23:20] < perf5_base_w[23:20],
-                perf5_i[19:16] < perf5_base_w[19:16],
-                perf5_i[15:12] < perf5_base_w[15:12],
-                perf5_i[11:8] < perf5_base_w[11:8],
-                perf5_i[7:4] < perf5_base_w[7:4],
-                perf5_i[3:0] < perf5_base_w[3:0]};
-            perf5_equal_r <= {perf5_i[23:20] == perf5_base_w[23:20],
-                perf5_i[19:16] == perf5_base_w[19:16],
-                perf5_i[15:12] == perf5_base_w[15:12],
-                perf5_i[11:8] == perf5_base_w[11:8],
-                perf5_i[7:4] == perf5_base_w[7:4]};
-            perf6_r <= perf6_i;
-            perf6_less_r <= {perf6_i[23:20] < perf6_base_w[23:20],
-                perf6_i[19:16] < perf6_base_w[19:16],
-                perf6_i[15:12] < perf6_base_w[15:12],
-                perf6_i[11:8] < perf6_base_w[11:8],
-                perf6_i[7:4] < perf6_base_w[7:4],
-                perf6_i[3:0] < perf6_base_w[3:0]};
-            perf6_equal_r <= {perf6_i[23:20] == perf6_base_w[23:20],
-                perf6_i[19:16] == perf6_base_w[19:16],
-                perf6_i[15:12] == perf6_base_w[15:12],
-                perf6_i[11:8] == perf6_base_w[11:8],
-                perf6_i[7:4] == perf6_base_w[7:4]};
-            urgent_r <= urgent_i && !soft_clear_o;
-            delayed_req_r <= delayed_req_i && !soft_clear_o;
         end
     end
     assign scan_cnt_o = count_delta(perf0_r, perf0_base_r, perf0_less_r, perf0_equal_r);
@@ -325,11 +249,6 @@ module edrv32_disp_regs (
         case (read_addr2_r)
             5'h00: read_group2_w = scan_cnt_o;
             5'h04: read_group2_w = count_delta(perf1_r, perf1_base_r, perf1_less_r, perf1_equal_r);
-            5'h08: read_group2_w = count_delta(perf2_r, perf2_base_r, perf2_less_r, perf2_equal_r);
-            5'h0c: read_group2_w = perf3_r;
-            5'h10: read_group2_w = perf4_r;
-            5'h14: read_group2_w = count_delta(perf5_r, perf5_base_r, perf5_less_r, perf5_equal_r);
-            5'h18: read_group2_w = count_delta(perf6_r, perf6_base_r, perf6_less_r, perf6_equal_r);
             default: begin end
         endcase
     end
@@ -540,34 +459,9 @@ module edrv32_disp_regs (
         if (!rst_n_i[3]) begin
             perf0_base_r <= 32'd0;
             perf1_base_r <= 32'd0;
-            perf2_base_r <= 32'd0;
-            perf5_base_r <= 32'd0;
-            perf6_base_r <= 32'd0;
-            perf3_r <= 32'd0;
-            perf4_r <= 32'd0;
-        end else begin
-            if (clear_local_r[3]) begin
-                perf0_base_r <= perf0_r;
-                perf1_base_r <= perf1_r;
-                perf2_base_r <= perf2_r;
-                perf5_base_r <= perf5_r;
-                perf6_base_r <= perf6_r;
-                perf3_r <= 32'd0;
-                perf4_r <= 32'd0;
-            end else begin
-                if (urgent_r) begin
-                    perf3_r[15:0] <= perf3_r[15:0] + 16'd1;
-                    if (perf3_r[15:0] == 16'hffff) begin
-                        perf3_r[31:16] <= perf3_r[31:16] + 16'd1;
-                    end
-                end
-                if (delayed_req_r) begin
-                    perf4_r[15:0] <= perf4_r[15:0] + 16'd1;
-                    if (perf4_r[15:0] == 16'hffff) begin
-                        perf4_r[31:16] <= perf4_r[31:16] + 16'd1;
-                    end
-                end
-            end
+        end else if (clear_local_r[3]) begin
+            perf0_base_r <= perf0_r;
+            perf1_base_r <= perf1_r;
         end
     end
     reg [3:0] clear_local_r /* synthesis syn_preserve=1 */;

@@ -282,7 +282,10 @@ module tb;
         configure(1,32'h00000006); frame(16,3);
         configure(1,32'h00000420); frame(1280,5);
         read_check(12'h02c,32'(completed)); read_check(12'h040,32'(completed));
-        read_check(12'h044,32'(stall_in)); read_check(12'h048,32'(stall_out));
+        if (stall_in == 0 || stall_out == 0)
+            $fatal(1,"FAIL directed input/output backpressure not observed");
+        for (int p = 1; p < 16; p++) read_check(12'(64+p*4),0);
+        read_check(12'h044,0); read_check(12'h048,0);
         read_check(12'h010,4); read_check(12'h014,0);
         write_reg(12'h00c,4); if (!irq) $fatal(1,"FAIL FRAME irq enable");
         write_reg(12'h010,1); if (!irq) $fatal(1,"FAIL reserved RW1C bit");
@@ -325,7 +328,7 @@ module tb;
             @(posedge clk); #1;
             if (!accepted) $fatal(1,"FAIL next SOF after discard");
             for (int n=1; n<9; n++) send_beat(n,n==8,1);
-            drain(); read_check(12'h04c,32'(cut+1));
+            drain(); read_check(12'h04c,0);
         end
         // Busy reset must preserve the frame and register values until output EOF.
         configure(1,32'h00000420); prepare(16,3); checking=1;

@@ -268,12 +268,8 @@ module edrv32_geo_tb;
         logic [31:0] status;
         logic [31:0] completed;
         logic [31:0] observed;
-        logic [31:0] unused_field;
         int last_count;
-        int pixels;
         int frame_ns;
-        logic [31:0] source_wait;
-        logic [31:0] writer_wait;
         last_count = expected_done;
         do begin
             read_reg(12'h008, status);
@@ -300,23 +296,16 @@ module edrv32_geo_tb;
         expect_reg(12'h100, 32'(descriptor_count));
         equal("DONE IRQ enabled", 1, 32'(irq));
         check_perf_stopped();
-        pixels = 0;
-        for (int index = 0; index < descriptor_count; index++) begin
-            unused_field = memory_word(32'h1000 + index * 64 + 24);
-            pixels += int'(unused_field[11:1]) * 2 * int'(unused_field[27:16]);
-        end
-        expect_reg(12'h044, 32'(pixels));
-        expect_reg(12'h048, 32'(u_memory.r_beats));
-        expect_reg(12'h04c, 32'(u_memory.w_beats));
-        for (int index = 6; index < 16; index++) expect_reg(12'(64 + index * 4), 0);
+        expect_reg(12'h044, 0);
+        expect_reg(12'h048, 0);
+        expect_reg(12'h04c, 0);
+        for (int index = 1; index < 16; index++) expect_reg(12'(64 + index * 4), 0);
         if (perf_limit_ns != 0) begin
             read_reg(12'h040, observed);
-            read_reg(12'h050, source_wait);
-            read_reg(12'h054, writer_wait);
             // GE-12: frame time comes exclusively from PERF0, at 125 MHz (8 ns/cycle).
             frame_ns = int'(observed) * 8;
-            $display("GE-12 PERF0=%0d frame_ns=%0d limit_ns=%0d PERF4=%0d PERF5=%0d",
-                observed, frame_ns, perf_limit_ns, source_wait, writer_wait);
+            $display("GE-12 PERF0=%0d frame_ns=%0d limit_ns=%0d",
+                observed, frame_ns, perf_limit_ns);
             equal("PERF0 frame time within limit", 1, 32'(frame_ns <= perf_limit_ns));
         end
         for (int index = 0; index < surface_count; index++) compare_surface(2'(index));
@@ -413,7 +402,6 @@ module edrv32_geo_tb;
     task automatic ge11_registers;
         logic [31:0] first_perf;
         logic [31:0] next_perf;
-        int elapsed;
         reset_registers();
         write_reg(12'h000, 32'hffffffff);
         expect_reg(12'h000, 32'h00030001);
@@ -479,15 +467,8 @@ module edrv32_geo_tb;
         expect_reg(12'h044, 0);
         expect_reg(12'h048, 0);
         expect_reg(12'h04c, 0);
-        // Waiting may resume immediately after the clear, bounded by elapsed cycles.
-        for (int index = 4; index < 6; index++) begin
-            read_reg(12'(64 + index * 4), next_perf);
-            elapsed = int'(($time - 4 - doorbell_time) / 8);
-            if (next_perf > 32'(elapsed))
-                $fatal(1, string'({"FAIL GE-11 PERF%0d clear desc=0 coord=(-1,-1) ",
-                    "expected_max=%0d actual=%0d time=%0t"}),
-                    index, elapsed, next_perf, $time);
-        end
+        for (int index = 1; index < 16; index++)
+            expect_reg(12'(64 + index * 4), 0);
         read_reg(12'h040, next_perf);
         equal("new DOORBELL clears PERF0", 1, 32'(next_perf < first_perf));
         @(negedge clk_mem);

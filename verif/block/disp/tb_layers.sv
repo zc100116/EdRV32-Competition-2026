@@ -531,10 +531,10 @@ module tb_layers;
         end
         rd_check(12'h040, 32'(scanned));
         rd_check(12'h044, 32'(missing_frames[0]));
-        rd_check(12'h048, 32'(missing[0]));
-        rd_check(12'h054, 32'(missing_frames[1]));
-        rd_check(12'h058, 32'(missing[1]));
-        rd_check(12'h04c, 32'(urgent_cycles));
+        rd_check(12'h048, 0);
+        rd_check(12'h054, 0);
+        rd_check(12'h058, 0);
+        rd_check(12'h04c, 0);
         rd_check(12'h110, 32'(latest));
     endtask
 
@@ -692,7 +692,7 @@ module tb_layers;
                 position(2, 300);
                 stopped = 0;
                 position(2, 600);
-                check("L1 PERF6 populated before SOFT_RST", 1, 32'(missing[1] > 0), 1);
+                check("L1 missing groups observed before SOFT_RST", 1, 32'(missing[1] > 0), 1);
                 wr(12'h004, 8);
                 do transfer(0, 12'h008, 0, value); while (!value[1]);
                 check("SOFT_RST leaves no outstanding responses", 0, 32'(outstanding));

@@ -395,7 +395,10 @@ module edrv32_rnd_tb;
     task automatic check_abort;
         logic [31:0] stopped_cycles;
         if (abort_phase == 1) wait (u_memory.descriptor_ar_count != 0);
-        else if (abort_phase == 2) wait (u_memory.target_ar_count != 0);
+        else if (abort_phase == 2) begin
+            if (u_memory.mem[32'h1000] == 8'h05) wait (u_memory.source_ar_count != 0);
+            else wait (u_memory.target_ar_count != 0);
+        end
         else wait (u_memory.w_beats != 0);
         if (abort_phase != 3) equal("ABORT with R pending", 1,
             32'(u_memory.ar_count > u_memory.r_count));

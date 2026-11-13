@@ -50,14 +50,19 @@ def compile_sim(stub):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('tier', choices=('smoke', 'directed', 'full', 'perf', 'stub'))
+    parser.add_argument('tier', choices=('smoke', 'directed', 'full', 'perf', 'stub', 'copy'))
     args = parser.parse_args()
     sim = compile_sim(args.tier == 'stub')
     if args.tier == 'stub':
         subprocess.run([str(sim), '+PORT_STUB'], cwd=ROOT, check=True)
         return 0
     out = ROOT / 'build/rnd' / args.tier
-    cases = SMOKE_CASES if args.tier == 'smoke' else selections(args.tier)
+    cases = (SMOKE_CASES if args.tier == 'smoke' else
+             ([(10, (fmt, direction), 1) for fmt in (0, 1)
+               for direction in ('different', 'same', 'ul', 'ur', 'dl', 'dr',
+                                 'boundary', 'maximum')]
+              + [(15, ('copy_abort', phase), 1) for phase in (1, 2, 3)]
+              if args.tier == 'copy' else selections(args.tier)))
     for index, (number, variant, seed) in enumerate(cases):
         name = f'RN-{number:02d}-{index:04d}-seed{seed}'
         directory = out / name

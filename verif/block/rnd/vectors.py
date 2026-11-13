@@ -138,12 +138,22 @@ def configure(number, variant, seed):
         fmt, direction = variant
         size = 2 << fmt
         offsets = {'ul': (-2, -1), 'ur': (2, -1), 'dl': (-2, 1),
-                   'dr': (2, 1), 'same': (0, 0), 'different': (1, 1)}
+                   'dr': (2, 1), 'same': (0, 0), 'different': (1, 1),
+                   'boundary': (0, 0), 'maximum': (0, 0)}
         dx, dy = offsets[direction]
         commands = [copy(dst_fmt=fmt, src_fmt=fmt, src_base=SRC + 3
                          if direction == 'different' else DST,
                          src_stride=137 if direction == 'different' else 132,
                          src_x=5, src_y=4, rect=(5 + dx, 4 + dy, 23 + dx, 17 + dy))]
+        if direction == 'boundary':
+            commands = [copy(dst_fmt=fmt, src_fmt=fmt, src_base=SRC+4095,
+                             dst_base=DST+4092, src_stride=512, dst_stride=512,
+                             src_x=0, src_y=0, rect=(0, 0, 69, 1), clip=(0, 0, 69, 1))]
+        elif direction == 'maximum':
+            commands = [copy(dst_fmt=fmt, src_fmt=fmt, src_base=SRC+31,
+                             dst_base=DST+28, src_stride=16384, dst_stride=16384,
+                             src_x=0, src_y=0, rect=(0, 0, 4095, 0),
+                             clip=(0, 0, 4095, 0))]
     elif number == 14:
         commands = [fill(opa=255), border(width=2, radius=3),
                     glyph(src_fmt=3, src_base=SRC + 1, src_stride=37),
@@ -164,8 +174,10 @@ def configure(number, variant, seed):
             metadata['error'] = 2 if value == 5 else 1
             if value == 4:
                 first = replace(first, src_fmt=6, args=(*first.args[:5], PAL, 0, 0))
-        elif kind == 'abort':
+        elif kind in ('abort', 'copy_abort'):
             metadata['abort'] = value
+            if kind == 'copy_abort':
+                first = copy(src_fmt=1, src_base=SRC+3, src_stride=137)
         else:
             metadata['error'] = 3
             if kind == 'op':

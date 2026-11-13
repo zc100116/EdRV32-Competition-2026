@@ -24,13 +24,8 @@ module tb;
     reg underflow = 0;
     reg dma_err = 0;
     reg underflow1 = 0;
-    reg [31:0] perf5 = 0;
-    reg [31:0] perf6 = 0;
-    reg urgent = 0;
-    reg delayed_req = 0;
     reg [31:0] perf0 = 0;
     reg [31:0] perf1 = 0;
-    reg [31:0] perf2 = 0;
     wire [31:0] scan_cnt;
     wire irq;
     edrv32_disp_regs dut (
@@ -40,11 +35,11 @@ module tb;
         .apb_pslverr_o(pslverr), .enable_o(enable), .next_base_o(next_base),
         .l0_scroll_o(), .layer_ctrl_o(), .l1_next_base_o(), .l1_stride_o(),
         .l1_pos_o(), .l1_size_o(), .l1_opa_o(), .underflow1_i(underflow1),
-        .perf5_i(perf5), .perf6_i(perf6), .stride_o(stride),
+        .stride_o(stride),
         .soft_clear_o(soft_clear), .busy_i(busy),
         .frame_start_i(frame_start), .underflow_i(underflow), .dma_err_i(dma_err),
-        .urgent_i(urgent), .delayed_req_i(delayed_req), .perf0_i(perf0),
-        .perf1_i(perf1), .perf2_i(perf2), .scan_cnt_o(scan_cnt), .irq_o(irq)
+        .perf0_i(perf0),
+        .perf1_i(perf1), .scan_cnt_o(scan_cnt), .irq_o(irq)
     );
     task automatic tick;
         @(posedge clk);
@@ -159,19 +154,14 @@ module tb;
         check_reg('h010, 'h106);
         perf0 = 7;
         perf1 = 2;
-        perf2 = 93;
-        urgent = 1;
-        delayed_req = 1;
         tick();
-        delayed_req = 0;
         repeat (8) tick();
-        urgent = 0;
         tick();
         check_reg('h040, 7);
         check_reg('h044, 2);
-        check_reg('h048, 93);
-        check_reg('h04c, 9);
-        check_reg('h050, 1);
+        check_reg('h048, 0);
+        check_reg('h04c, 0);
+        check_reg('h050, 0);
         write_reg('h004, 5);
         check_reg('h004, 0);
         write_reg('h020, '1);
@@ -189,7 +179,6 @@ module tb;
         check_reg('h110, 3);
         perf0 = 10;
         perf1 = 3;
-        perf2 = 99;
         busy = 0;
         // STATUS and the drain decision use the registered BUSY sample.
         repeat (2) tick();
@@ -208,11 +197,10 @@ module tb;
         if (scan_cnt != 0 || irq) $fatal(1, "FAIL reset bases/IRQ");
         perf0++;
         perf1++;
-        perf2 += 5;
         tick();
         check_reg('h040, 1);
         check_reg('h044, 1);
-        check_reg('h048, 5);
+        check_reg('h048, 0);
         // New shadow registers mask reserved bits, with independent per-layer release.
         write_reg('h114, '1);
         check_reg('h114, 'h0fff7fff);
@@ -259,20 +247,16 @@ module tb;
         check_reg('h014, 3);
         write_reg('h010, 2);
         check_reg('h014, 0);
-        perf5 = 17;
-        perf6 = 987;
         tick();
-        check_reg('h054, 17);
-        check_reg('h058, 987);
+        check_reg('h054, 0);
+        check_reg('h058, 0);
         write_reg('h004, 8);
         repeat (4) tick();
         check_reg('h054, 0);
         check_reg('h058, 0);
-        perf5++;
-        perf6 += 11;
         tick();
-        check_reg('h054, 1);
-        check_reg('h058, 11);
+        check_reg('h054, 0);
+        check_reg('h058, 0);
         check_reg('h114, 0);
         check_reg('h118, 1);
         check_reg('h124, 'h1400);

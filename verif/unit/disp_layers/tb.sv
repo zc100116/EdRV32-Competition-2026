@@ -34,9 +34,6 @@ module tb;
     wire [9:0] read1;
     wire [31:0] perf0;
     wire [31:0] perf1;
-    wire [31:0] perf2;
-    wire [31:0] perf5;
-    wire [31:0] perf6;
     int pops0 = 0;
     int pops1 = 0;
     int receipts = 0;
@@ -142,8 +139,7 @@ module tb;
         .fifo_valid_i(valid0_pipe2), .fifo_ready_o(ready0), .fifo_data_i(data0_pipe2),
         .fifo1_valid_i(valid1_pipe2), .fifo1_ready_o(ready1), .fifo1_data_i(data1_pipe2), .rgb_o(rgb),
         .frame_req_o(frame_req), .underflow_o(error0), .underflow1_o(error1),
-        .read_cnt_o(read0), .read1_cnt_o(read1), .perf0_o(perf0), .perf1_o(perf1),
-        .perf2_o(perf2), .perf5_o(perf5), .perf6_o(perf6)
+        .read_cnt_o(read0), .read1_cnt_o(read1), .perf0_o(perf0), .perf1_o(perf1)
     );
     always @(posedge clk) if (rst_n && params_valid) receipts++;
     function automatic [15:0] pixel0(input int index, input int row);
@@ -284,7 +280,7 @@ module tb;
             idle();
         end
         drain();
-        if (perf0 != 1 || perf1 != 0 || perf2 != 0 || perf5 != 0 || perf6 != 0)
+        if (perf0 != 1 || perf1 != 0)
             $fatal(1, "FAIL good scan statistics");
         // L1 rectangle begins at x=8: L0 misses a beat, L1 remains visible.
         config_frame(1, 3, 1, 8, 0, 16, 1, 255);
@@ -302,7 +298,7 @@ module tb;
                    column == 8 || column == 16, column == 0, 0);
         end
         drain();
-        if (perf1 != 1 || perf2 != 1 || perf5 != 0) $fatal(1, "FAIL independent L0 debt");
+        if (perf1 != 1) $fatal(1, "FAIL independent L0 debt");
         // L1 misses at x=8 and x=16; a late beat at x=16 repays while missing again.
         config_frame(1, 0, 1, 8, 0, 24, 1, 255);
         boundary();
@@ -318,7 +314,6 @@ module tb;
                    0, column == 8);
         end
         drain();
-        if (perf5 != 1 || perf6 != 2) $fatal(1, "FAIL independent L1 debt");
         // Both layers miss, retain debts across frames and repay while not scanning.
         boundary();
         @(negedge clk);
@@ -336,7 +331,7 @@ module tb;
         @(negedge clk);
         sample(0,0,0);
         drain();
-        if (perf1 != 2 || perf2 != 2 || perf5 != 2 || perf6 != 3)
+        if (perf1 != 2)
             $fatal(1, "FAIL cross-frame disabled debt counts");
         // A requested frame with both layers disabled is black and consumes nothing.
         config_frame(0, 0, 0, 0, 0, 1280, 720, 255);
@@ -350,7 +345,7 @@ module tb;
         x = 1279; y = 719;
         sample(0,0,0);
         drain();
-        if (perf0 != 2 || perf1 != 2 || perf2 != 2 || perf5 != 2 || perf6 != 3)
+        if (perf0 != 2 || perf1 != 2)
             $fatal(1, "FAIL both-disabled frame accounting");
         // Repeat a parameter transfer with the memory clock slower than pixel clock.
         mem_half = 11; pix_half = 3;

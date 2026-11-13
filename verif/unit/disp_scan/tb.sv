@@ -20,7 +20,6 @@ module tb;
     wire [9:0] read_cnt;
     wire [31:0] perf0;
     wire [31:0] perf1;
-    wire [31:0] perf2;
     int pops = 0;
     int events = 0;
     // disp-spec 2.7 specifies pixel correspondence, without a fixed output latency.
@@ -102,11 +101,10 @@ module tb;
         .frame_start_i(de && x == 0 && y == 0),
         .vblank_i(vblank), .params_valid_i(1'b0), .params_i(56'd0),
         .fifo1_valid_i(1'b0), .fifo1_ready_o(), .fifo1_data_i(256'd0),
-        .underflow1_o(), .read1_cnt_o(), .perf5_o(), .perf6_o(),
-        .fifo_valid_i(fifo_valid_pipe2), .fifo_ready_o(fifo_ready),
+        .underflow1_o(), .read1_cnt_o(), .fifo_valid_i(fifo_valid_pipe2), .fifo_ready_o(fifo_ready),
         .fifo_data_i(fifo_data_pipe2), .rgb_o(rgb), .frame_req_o(frame_req),
         .underflow_o(underflow), .read_cnt_o(read_cnt),
-        .perf0_o(perf0), .perf1_o(perf1), .perf2_o(perf2)
+        .perf0_o(perf0), .perf1_o(perf1)
     );
     function automatic [255:0] packet(input int id);
         for (int index = 0; index < 16; index++)
@@ -182,7 +180,7 @@ module tb;
         group(6, 0);
         group(7, 0);
         drain();
-        if (perf1 != 1 || perf2 != 5) $fatal(1, "FAIL first-frame underflow counts");
+        if (perf1 != 1) $fatal(1, "FAIL first-frame underflow counts");
         boundary(1);
         group(8, 0, 6, 7, 8, -1, 1);
         group(9, 1, 9);
@@ -197,7 +195,7 @@ module tb;
             sample(expand(16'(99*37+pixel*2049)), pixel == 0);
         end
         drain();
-        if (perf0 != 1 || perf1 != 2 || perf2 != 6 || events != 2)
+        if (perf0 != 1 || perf1 != 2 || events != 2)
             $fatal(1, "FAIL completed-frame/per-frame error counts");
         group(10, 0);
         boundary(0);
@@ -211,7 +209,7 @@ module tb;
         fifo_data = packet(11);
         sample(0, 0);
         drain();
-        if (perf2 != 7 || perf1 != 2) $fatal(1, "FAIL disable created underflow");
+        if (perf1 != 2) $fatal(1, "FAIL disable created underflow");
         // Debt can also be repaid in blanking before the next group.
         boundary(1);
         group(11, 1, 11);

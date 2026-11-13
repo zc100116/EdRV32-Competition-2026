@@ -38,7 +38,7 @@ module edrv32_rnd_copy (
     localparam [4:0] S_IDLE = 5'd0;
     localparam [4:0] S_READ = 5'd1;
     localparam [4:0] S_CAPTURE = 5'd2;
-    localparam [4:0] S_TAIL = 5'd3;
+    localparam [4:0] S_PREFETCH = 5'd3;
     localparam [4:0] S_WRITE = 5'd4;
     localparam [4:0] S_STREAM = 5'd5;
     localparam [4:0] S_RESPONSE = 5'd6;
@@ -102,10 +102,7 @@ module edrv32_rnd_copy (
     reg [15:0] target_bytes_r;
     reg [5:0] src_span_low_r;
     reg [5:0] dst_span_low_r;
-    reg [9:0] normalized_beats_r;
-    reg [9:0] source_beats_r;
     reg [9:0] target_last_r;
-    reg [9:0] normalized_last_r;
     reg [11:0] left_r;
     reg [11:0] right_r;
     wire [31:0] src_init_a_w;
@@ -141,15 +138,15 @@ module edrv32_rnd_copy (
     reg [12:0] dst_row_mid_carry_r;
     reg [7:0] dst_row_high_delay_r;
     wire [19:0] source_x_bytes_w;
-    wire [15:0] rounded_bytes_w;
-    wire [15:0] source_rounded_w;
     wire [15:0] target_last_bytes_w;
-    wire [14:0] row_last_bytes_w;
-    wire [511:0] source_join_w;
-    wire [255:0] source_word_w;
     wire [255:0] ram_data_w;
     wire [255:0] current_write_w;
     wire [511:0] target_join_w;
+    wire [511:0] aligned_w;
+    reg [4:0] align_offset_r;
+    reg align_ahead_r;
+    wire [9:0] read_index_w;
+    wire [8:0] read_next_w;
     wire [9:0] write_next_w;
     wire ram_wr_en_w;
     wire [8:0] ram_wr_addr_w;
@@ -193,70 +190,33 @@ module edrv32_rnd_copy (
     assign dst_row_a_w = dst_addr_r;
     assign dst_row_b_w = {{15{dst_step_r[16]}}, dst_step_r};
     assign source_x_bytes_w = {3'd0, source_x_r} << (argb_w ? 2 : 1);
-    assign rounded_bytes_w = {1'b0, row_bytes_r} + 16'd31;
-    assign source_rounded_w = source_bytes_r + 16'd31;
     assign target_last_bytes_w = target_bytes_r - 16'd1;
-    assign row_last_bytes_w = row_bytes_r - 15'd1;
-    assign source_join_w = {rd_data_i, previous_read_r};
-    genvar align_slice;
-    generate for (align_slice = 0; align_slice < 8; align_slice = align_slice + 1) begin
-        : g_alignment
-        reg [4:0] source_offset_r /* synthesis syn_preserve=1 */;
-        reg [4:0] target_offset_r /* synthesis syn_preserve=1 */;
-        wire [511:0] source_shift_w;
-        wire [255:0] tail_shift_w;
-        wire [511:0] target_shift_slice_w;
-        wire unused_shift_w;
-        reg zero_copy_r /* synthesis syn_preserve=1 */;
-        always @(posedge clk_i) begin
-            if (state_r == S_COUNTS) begin
-                source_offset_r <= src_addr_r[4:0];
-                target_offset_r <= dst_addr_r[4:0];
-            end
-        end
-        always @(posedge clk_i or negedge rst_n_i) begin
-            if (!rst_n_i)
-                zero_copy_r <= 1'b0;
-            else if (cancel_i)
-                zero_copy_r <= 1'b0;
-            else if (state_r == S_WRITE && wr_ready_i)
-                zero_copy_r <= 1'b0;
-            else if (state_r == S_STREAM && wr_data_ready_i)
-                zero_copy_r <= write_index_r >= normalized_last_r;
-        end
-        assign source_shift_w = source_join_w >> {source_offset_r, 3'd0};
-        assign tail_shift_w = previous_read_r >> {source_offset_r, 3'd0};
-        assign source_word_w[align_slice*32 +: 32] = state_r == S_TAIL ?
-            tail_shift_w[align_slice*32 +: 32] : source_offset_r == 0 ?
-            rd_data_i[align_slice*32 +: 32] : source_shift_w[align_slice*32 +: 32];
-        assign current_write_w[align_slice*32 +: 32] = zero_copy_r ? 32'd0 :
-            ram_data_w[align_slice*32 +: 32];
-        assign target_shift_slice_w = target_join_w << {target_offset_r, 3'd0};
-        assign wr_data_o[align_slice*32 +: 32] = target_offset_r == 0 ?
-            current_write_w[align_slice*32 +: 32] : target_shift_slice_w[256+align_slice*32 +: 32];
-        assign unused_shift_w = ^{source_shift_w, tail_shift_w, target_shift_slice_w};
-    end endgenerate
-    assign ram_wr_en_w = !cancel_i && (state_r == S_TAIL ||
-        (state_r == S_CAPTURE && rd_data_valid_i &&
-            (src_addr_r[4:0] == 0 || received_r != 0)));
-    assign ram_wr_addr_w = state_r == S_TAIL ? normalized_last_r[8:0] :
-        received_r[8:0] - (src_addr_r[4:0] == 0 ? 9'd0 : 9'd1);
+    // Raw source beats are retained until the whole row has been captured.
+    // The 513th beat of a maximal unaligned row uses the existing capture register.
+    assign ram_wr_en_w = !cancel_i && state_r == S_CAPTURE && rd_data_valid_i
+        && !received_r[9];
+    assign ram_wr_addr_w = received_r[8:0];
+    assign read_index_w = write_index_r + {9'd0, align_ahead_r};
+    assign read_next_w = read_index_w[8:0] + 9'd1;
+    assign current_write_w = read_index_w[9] ? previous_read_r : ram_data_w;
     assign target_join_w = {current_write_w, previous_write_r};
+    assign aligned_w = target_join_w >> {align_offset_r, 3'd0};
+    assign wr_data_o = aligned_w[255:0];
     assign write_next_w = write_index_r + 10'd1;
     assign data_fire_w = wr_data_valid_o && wr_data_ready_i;
-    assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i) ||
-        (data_fire_w && write_index_r < normalized_last_r));
-    assign ram_rd_addr_w = state_r == S_WRITE ? 9'd0 : write_next_w[8:0];
+    assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i)
+        || state_r == S_PREFETCH || data_fire_w);
+    assign ram_rd_addr_w = state_r == S_WRITE ? 9'd0 :
+        state_r == S_PREFETCH ? 9'd1 : read_next_w[8:0];
     assign unused_geometry_w = ^{command_i[7:0], head_bytes_w[0], tail_bytes_w[0],
         left_w[17:12], top_w[17:12], right_w[17:12],
         bottom_w[17:12], source_x_bytes_w[19:18],
-        source_rounded_w[15], source_rounded_w[4:0], target_last_bytes_w[15],
-        target_last_bytes_w[4:0], row_last_bytes_w[4:0], rounded_bytes_w[15], rounded_bytes_w[4:0]};
+        target_last_bytes_w[15], target_last_bytes_w[4:0], aligned_w[511:256]};
     edrv32_ram_rnd_line u_row (
         .clk_i(clk_i),
         .wr_en_i(ram_wr_en_w),
         .wr_addr_i(ram_wr_addr_w),
-        .wr_data_i(source_word_w),
+        .wr_data_i(rd_data_i),
         .wr_strb_i(32'hffff_ffff),
         .rd_en_i(ram_rd_en_w),
         .rd_addr_i(ram_rd_addr_w),
@@ -330,13 +290,12 @@ module edrv32_rnd_copy (
                     if (rd_data_valid_i)
                         received_r <= received_r + 10'd1;
                     if (rd_done_i)
-                        state_r <= src_addr_r[4:0] != 0 &&
-                            source_beats_r == normalized_beats_r ? S_TAIL : S_WRITE;
+                        state_r <= S_WRITE;
                 end
-                S_TAIL: state_r <= S_WRITE;
+                S_PREFETCH: state_r <= S_STREAM;
                 S_WRITE: if (wr_ready_i) begin
                     write_index_r <= 10'd0;
-                    state_r <= S_STREAM;
+                    state_r <= align_ahead_r ? S_PREFETCH : S_STREAM;
                 end
                 S_STREAM: if (wr_data_ready_i) begin
                     write_index_r <= write_next_w;
@@ -456,8 +415,6 @@ module edrv32_rnd_copy (
             dst_bytes_r <= {2'd0, left_r} << (argb_w ? 2 : 1);
             row_bytes_r <= {2'd0, row_pixels_r} << (argb_w ? 2 : 1);
         end
-        if (state_r == S_BASE3)
-            normalized_beats_r <= rounded_bytes_w[14:5];
         if (state_r == S_SETUP) begin
             src_step_r <= dst_addr_r > src_addr_r ? src_neg_step_r :
                 $signed({1'b0, command_i[303:288]});
@@ -479,9 +436,9 @@ module edrv32_rnd_copy (
                 dst_span_low_r[4:0]};
         end
         if (state_r == S_COUNTS) begin
-            source_beats_r <= source_rounded_w[14:5];
+            align_offset_r <= src_addr_r[4:0] - dst_addr_r[4:0];
+            align_ahead_r <= src_addr_r[4:0] >= dst_addr_r[4:0];
             target_last_r <= target_last_bytes_w[14:5];
-            normalized_last_r <= row_last_bytes_w[14:5];
         end
     end
     always @(posedge clk_i) begin
@@ -489,6 +446,8 @@ module edrv32_rnd_copy (
             previous_read_r <= rd_data_i;
         if (state_r == S_WRITE && wr_ready_i)
             previous_write_r <= 256'd0;
+        else if (state_r == S_PREFETCH)
+            previous_write_r <= ram_data_w;
         else if (data_fire_w)
             previous_write_r <= current_write_w;
     end
