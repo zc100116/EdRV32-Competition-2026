@@ -2,7 +2,7 @@
 
 ## 1. 目标
 
-在卡 69 选出的整片工程上加入 NPU 硬件后处理 (b)：
+在卡 68 第 2 轮的整片工程上加入 NPU 硬件后处理 (b)：
 - 类别最大值、阈值、候选压缩在 NPU 写回时流式完成；
 - DFL 在网络结束后按候选完成；
 - CPU 只做排序和 NMS。
@@ -12,9 +12,9 @@
 2. 实时识别的 CPU 后处理（`decode`）从约 21 ms 降到 1 ms 左右；
 3. 端到端延迟下降。
 
-**本卡在卡 69 之后执行**，使用卡 69 选中的那份工程（A 或 B）及其 PnR 参数。
+卡 69（NPU APM 本地化）布不通，见 `docs/reports/2026-11-10-route-soc-card69.md`；其 RTL 已在 b3 `ea11656c` 撤销。本卡的 NPU 主体与卡 68 相同，只多后处理，PnR 参数与卡 68 相同（Slack Weight 40）。
 
-**Linux 端证据**（`zc100116/b3` `1bfcb123`）
+**Linux 端证据**（`zc100116/b3` `1bfcb123`，撤销 APM 本地化后在 `ea11656c` 重跑了 NPU 单元和后处理模块测试）
 - 规格：npu-spec v0.10、SoC 规格 v0.23；
 - 联调报告 `docs/reports/2026-11-08-npu-post-integ.md`：
   - 单元、模块、F/P 档、SoC 软件测试 PP-SW-01/02 全部通过；
@@ -28,15 +28,15 @@
   - NPU 35.0 ms；
   - `decode` 20.8 ms，`post_span` 25.6 ms；
   - 端到端 100–144 ms。
-- 卡 69：时序、资源、拥塞，以选中的那份为准。
+- 卡 68 第 2 轮：第 176 轮收敛，PnR 2h25m；慢角 WNS clk_sys −0.088 / clk_npu −0.205 / clk_mem −0.025 ns；LUT 91,208、FF 107,042。
 
 ## 2. 输入
 
 | 项 | 内容 |
 |---|---|
 | 代码 | `origin/zc100116/b3` 上包含本卡的提交。从这里拉出 `win/20261108-70-soc-npu-post`，记录 HEAD |
-| 顶层 / 导入脚本 / 约束 | 与卡 68/69 相同。导入脚本按 `rtl/filelists/*.f` 收集源文件，新增的 `rtl/npu/edrv32_npu_post*.v` 和 `rtl/tech/edrv32_ram_npu_post_*.v` 会自动导入 |
-| 程序 | `src/showcase-post.elf`：12936548 字节，构建自 b3 `1bfcb123`。`src/board_npu.elf`：5200248 字节，同一提交构建。board_npu 保持后处理关闭（POST_CTRL.EN=0），用来回归核心推理 |
+| 顶层 / 导入脚本 / 约束 | 与卡 68 相同。导入脚本按 `rtl/filelists/*.f` 收集源文件，新增的 `rtl/npu/edrv32_npu_post*.v` 和 `rtl/tech/edrv32_ram_npu_post_*.v` 会自动导入 |
+| 程序 | `src/showcase-post.elf`：12936548 字节，构建自 b3 `1bfcb123`（撤销只涉及 RTL，软件不变）。`src/board_npu.elf`：5200248 字节，同一提交构建。board_npu 保持后处理关闭（POST_CTRL.EN=0），用来回归核心推理 |
 | 调试工具 | 本 checkout 的 `tools/debug_tool`：网口 channel 1 已改为接收候选，内容为 count 加 count×24 B |
 
 ## 3. 环境
@@ -46,7 +46,7 @@
 
 ## 4. 需要的 IP
 
-把卡 69 选中的工程（`EdRV32-B3F-V021-A` 或 `-B`）复制为 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST`，沿用其中全部 IP，另外**新增 3 个**：
+把卡 68 的工程 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-V021` 复制为 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST`，沿用其中全部 IP，另外**新增 3 个**：
 
 | IP | 创建说明 | 要点 |
 |---|---|---|
@@ -65,8 +65,8 @@
 | 0 | Windows Codex（C） | `git fetch origin`，`git switch -c win/20261108-70-soc-npu-post origin/zc100116/b3`，记录 HEAD 和空闲物理内存。 |
 | 1 | 用户（U） | 复制工程（第 4 节），生成 3 个新 IP。 |
 | 2 | U 或 C | 清空源文件列表，在工程目录下 `source ../../EdRV32-Competition-2026/fpga/scripts/import_board_full_top.tcl`；然后 Compile、`synthesize -ads`、`dev_map`。记录综合资源，特别是 `u_npu` 下 post 相关模块的 LUT / FF / DRM / APM。 |
-| 3 | U | PnR 参数与卡 69 选中的那份**完全相同**，运行 `pnr`。截图设置页。 |
-| 4 | C | 每小时记录布线轮次、单轮耗时、未布通数、过用数和空闲内存。止损条件同卡 69：<br>- Route-0039 / Route-0008；<br>- 第 40 轮时未布通数大于 18000；<br>- 单轮耗时持续超过 600 s。 |
+| 3 | U | PnR 参数与卡 68 **完全相同**（Slack Weight 40），运行 `pnr`。截图设置页。 |
+| 4 | C | 每小时记录布线轮次、单轮耗时、未布通数、过用数和空闲内存。止损条件：<br>- Route-0039 / Route-0008；<br>- 第 40 轮时未布通数大于 18000；<br>- 单轮耗时持续超过 600 s。 |
 | 5 | U + C | 布通后按第 6 节导出，生成比特流。有时序违例也照常上板，时序和功能分开报告。 |
 | 6 | U | 下载比特流，KEY1 复位进入 BIOS，记录 `CLK_SYS_HZ`。 |
 | 7 | U + C | **board_npu** 跑 1 次：39/39，D 组 CRC 一致；记录 C-YOLO 的 PERF0 和 fps。 |
@@ -76,7 +76,7 @@
 ## 6. 产物
 
 放在 `tasks/win/20261108-70-soc-npu-post/artifacts/`：
-- **时序**：格式同卡 69。包括：
+- **时序**：格式同卡 69 任务卡第 6 节。包括：
   - 三个时钟域 slack ≤ +1.0 ns 的全部 setup 路径；
   - clk_npu 的 recovery；
   - 每个域最差 50 条路径的逐级明细；
@@ -110,7 +110,7 @@
 | 项 | 内容 |
 |---|---|
 | 代码 HEAD | |
-| 工程 / 基于卡 69 的 A 或 B / Slack Weight | |
+| 工程 / Slack Weight | |
 | 收敛轮次 / PnR 用时 | |
 | CLK_SYS_HZ | |
 
