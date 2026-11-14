@@ -65,6 +65,7 @@ bool vision_pipe_start(unsigned input, uint32_t frame, uint64_t tick)
     if (npu_active) return false;
     npu_active = 1; ++npu_runs; return true;
 }
+void vision_pipe_clear(void) {}
 void vision_pipe_image_done(uint32_t frame) { (void)frame; }
 bool vision_pipe_idle(void) { return !npu_active; }
 unsigned vision_pipe_boxes(ui_detection_t *boxes)
@@ -125,6 +126,8 @@ int main(void)
     assert(mmap((void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE + SHOWCASE_PIPE_BASE),
         0x04f00000,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)
         != MAP_FAILED);
+    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_UNCACHED_BASE + SHOWCASE_IMAGE_BASE),
+        0x400000,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0) != MAP_FAILED);
     load(1);
     assert(channels[1].source == VIN_CAM0 && channels[1].ring_count == 3);
     unsigned mem = memory_runs, rnd = rnd_runs;
@@ -141,10 +144,16 @@ int main(void)
     puts("PASS CAM CH1 -> CH2/NPU + RND IRQ starts, asynchronous latest NPU input");
 
     load(7); assert(p.capture_channel == 0);
+    assert(channels[1].source == VIN_CAM0 && channels[1].base[0] == SHOWCASE_PIPE_BASE);
     camera(51,0); assert(channels[0].source == VIN_MEMORY);
     memory_done(); assert(channels[0].source == VIN_CAM0);
     assert(p.latest[1] >= 0 && p.token[p.latest[1]].frame == 51);
-    puts("PASS fused CAM CH0 -> MEM CH0 -> restored camera, original frame ID");
+    assert(p.source < 3 && p.latest[0] >= 3);
+    puts("PASS fused CAM CH0 -> MEM CH0, concurrent CH1 raw source, original frame ID");
+    ui_chain_t original = ui_data_chain(); original.view = UI_VIEW_SOURCE;
+    assert(!ui_data_chain_set(&original)); pipe_enter(); pipe_service(); camera(52,0);
+    assert(p.selected == p.source && p.selected < 3);
+    puts("PASS source view selects CH1 raw camera independently of fused PIX");
 
     load(3); camera(61,0); unsigned before = memory_runs;
     irq(ENGINE_GEO,EDRV32_GEO_IRQ_STAT_DONE_MASK);
@@ -158,6 +167,28 @@ int main(void)
     ui_detection_t box = {.x=100,.y=100,.width=200,.height=100};
     pipe_map_detections(&box,1); assert(box.width > 0 && box.height > 100);
     puts("PASS UI-layer pin, RND DONE starts GEO, arbitrary-angle bounding box");
+
+    load(8);
+    ui_chain_t shared = {.source=UI_SOURCE_PC_IMAGE, .count=4, .view=UI_VIEW_FINAL,
+        .block={{UI_BLOCK_DETECT,0,{0}}, {UI_BLOCK_GRAY,0,{0}},
+            {UI_BLOCK_GEO,0,{0,100,0,0,0}}, {UI_BLOCK_OVERLAY,1,{0}}}};
+    assert(!ui_data_chain_set(&shared)); pipe_enter(); pipe_upload(SHOWCASE_IMAGE_BASE);
+    pipe_service();
+    assert(p.memory_need == 3 && channels[0].ring_count == 2 && channels[2].ring_count == 2);
+    assert(p.block_output[0] == p.source && p.active[0].output != p.source);
+    before = geo_runs;
+    irq(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK);
+    assert(geo_runs == before + 1 && p.active[0].hop >= 0);
+    irq(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    assert(npu_active && p.active[0].hop == -1);
+    puts("PASS PC source and shared CH0/CH2; CH0 starts GEO before CH2 completes");
+    npu_active = 0; pipe_enter(); pipe_upload(SHOWCASE_IMAGE_BASE); pipe_service();
+    before = geo_runs;
+    irq(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK);
+    assert(npu_active && geo_runs == before && p.active[0].hop >= 0);
+    irq(ENGINE_VIN,EDRV32_VIN_IRQ_STAT_FRAME_MASK);
+    assert(geo_runs == before + 1 && p.active[0].hop == -1);
+    puts("PASS shared memory CH2-first completion retains CH0 ownership");
 
     load(8); ui_chain_t c = ui_data_chain(), saved = c;
     uint32_t rev = pipe_revision(); c.block[0].flags = 1;
@@ -177,5 +208,24 @@ int main(void)
     assert(p.thumbs[8].header.w == 160 && p.thumbs[8].header.h == 90);
     pipe_rnd_done();
     puts("PASS test-source GEO upscale and 5 Hz RND BLIT thumbnail");
+    load(7); camera(81,0); memory_done(); frame(); frame();
+    assert(p.display >= 0);
+    camera(82,1); memory_done(); frame(); frame();
+    struct mem_xbar_stats traffic = {0};
+    traffic.port[0].rd_beat = 1000000; traffic.port[6].wr_beat = 2000000;
+    pipe_memory_sample(&traffic); pipe_npu_time(100); pipe_npu_time(300);
+    pipe_detection_published(ticks); ticks += 1000000; pipe_service();
+    ui_pipe_stats_t stats = ui_data_pipe_stats();
+    assert(stats.ddr_limit_mbps == 1950 && stats.ddr_mbps >= 95 && stats.ddr_mbps <= 96);
+    assert(stats.npu_us == 200 && stats.box_lag_us == 1000000 && stats.fps > 0);
+    assert(strstr(pipe_report(),"pipe fps=") && !*pipe_report());
+    while (p.thumb_active || p.thumb_pending) {
+        if (p.thumb_active) pipe_rnd_done();
+        pipe_service();
+    }
+    pipe_stop(false); frame(); frame(); pipe_service();
+    assert(pipe_ready(UI_STATE_IDLE));
+    for (unsigned i = 0; i < TOKEN_COUNT; ++i) assert(!p.ref[i]);
+    puts("PASS measured hop/fps/latency/DDR/NPU statistics, one UART line and full drain");
     puts("PASS pipeline runtime");
 }

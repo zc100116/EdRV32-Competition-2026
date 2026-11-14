@@ -8,6 +8,7 @@
 #include "rnd.h"
 #include "mem_xbar.h"
 uint32_t pipe_revision(void);
+bool pipe_pc_image(void);
 void pipe_enter(void);
 void pipe_stop(bool pause);
 void pipe_resume(void);
@@ -16,6 +17,7 @@ int pipe_service(void);
 void pipe_irq(const struct engine_event *event, unsigned engine);
 void pipe_display_irq(uint32_t irq);
 void pipe_rnd_done(void);
+void pipe_rnd_failed(uint32_t error);
 void pipe_npu_done(void);
 void pipe_npu_time(uint64_t ticks);
 const char *pipe_report(void);
@@ -29,6 +31,7 @@ void pipe_map_detections(ui_detection_t *boxes, unsigned count);
 void board_pipe_rnd_submit(const struct rnd_batch *batch);
 /* vision.c retains the established NPU/POST_CTRL and CPU postprocessing path. */
 bool vision_pipe_idle(void);
+void vision_pipe_clear(void);
 void vision_pipe_image_done(uint32_t frame);
 void pipe_detection_available(void);
 bool vision_pipe_start(unsigned input, uint32_t frame, uint64_t tick);

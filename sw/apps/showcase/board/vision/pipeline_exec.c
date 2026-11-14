@@ -23,6 +23,7 @@ enum { TOKEN_COUNT = 39, NO_TOKEN = -1, STOPPED, PREPARE, RUNNING, DRAIN, PAUSED
 static ui_chain_t requested = {.view = UI_VIEW_FINAL, .preset = 1, .count = 2,
     .block = {{UI_BLOCK_DETECT, 0, {0}}, {UI_BLOCK_OVERLAY, 1, {0}}}};
 static uint32_t revision = 1;
+static uint32_t pending_upload;
 static struct {
     ui_chain_t chain;
     struct pipe_plan plan;
@@ -34,13 +35,14 @@ static struct {
     int source, display, submitted, selected;
     int block_output[UI_BLOCK_MAX];
     struct { int hop, input, output; uint64_t start; } active[3];
-    unsigned memory_done, memory_need, input_used;
+    unsigned memory_done, memory_need, memory_published, input_used;
     int writing_input, waiting_input, npu_input;
     uint32_t input_frame[3]; uint64_t input_tick[3], input_start[3];
     unsigned input_hop[3], input_cancelled[3];
-    uint32_t upload;
     unsigned has_detection, image_done, image_done_frame, pc_cancelled;
     uint32_t source_frame;
+    unsigned test_ready;
+    unsigned test_copied;
     uint64_t source_due;
     struct pix_config pix[UI_HOP_MAX];
     uint8_t gamma[UI_HOP_MAX][256];
@@ -53,7 +55,7 @@ static struct {
     ui_pipe_stats_t stats;
     lv_image_dsc_t thumbs[9];
     int thumb_token[9];
-    unsigned thumb_pending, thumb_active, thumb_index, l1_owned;
+    unsigned thumb_pending, thumb_active, thumb_index, thumb_valid, l1_owned;
     struct rnd_batch batch;
     char report[320];
 } p;
@@ -88,7 +90,7 @@ static void publish(unsigned hop, int token)
                 replace(&p.block_output[b], token);
     }
     unsigned selected = p.chain.view == UI_VIEW_FINAL ? p.plan.count - 1 :
-        p.plan.block_hop[p.chain.view];
+        p.chain.view == UI_VIEW_SOURCE ? UI_HOP_MAX : p.plan.block_hop[p.chain.view];
     if (hop == selected && (p.chain.view == UI_VIEW_FINAL ||
         p.plan.sample[hop] != p.chain.view || p.plan.hop[hop].engine == UI_HOP_MEM_NPU))
         replace(&p.selected, token);
@@ -106,6 +108,7 @@ static void enqueue(unsigned hop, int token)
 static void source(int token)
 {
     replace(&p.source, token);
+    if (p.chain.view == UI_VIEW_SOURCE) replace(&p.selected, token);
     if (p.plan.count) enqueue(0, token);
     else {
         replace(&p.selected, token);
@@ -250,7 +253,7 @@ static void start_hop(unsigned h, int kind, int output)
     }
     if (kind == 0) {
         unsigned sample = p.plan.sample[h] != PIPE_NO_BLOCK;
-        p.memory_done = 0; p.memory_need = (engine == UI_HOP_MEM_PIX ? 1 : 0) |
+        p.memory_done = p.memory_published = 0; p.memory_need = (engine == UI_HOP_MEM_PIX ? 1 : 0) |
             (sample ? 2 : 0);
         if (sample) {
             p.writing_input = allocate_input(); npu_channel(p.writing_input);
@@ -315,10 +318,11 @@ static void complete(int kind)
 {
     unsigned h = (unsigned)p.active[kind].hop;
     int output = p.active[kind].output;
-    if (p.plan.hop[h].engine != UI_HOP_MEM_NPU) {
+    if (p.plan.hop[h].engine != UI_HOP_MEM_NPU && !(kind == 0 && p.memory_published)) {
         p.sums[h] += platform_ticks() - p.active[kind].start; ++p.samples[h];
     }
-    if (p.state == RUNNING && output >= 0) publish(h, output);
+    if (p.state == RUNNING && output >= 0 && !(kind == 0 && p.memory_published))
+        publish(h, output);
     release(p.active[kind].input); release(output);
     p.active[kind].hop = -1;
     if (kind == 0) {
@@ -343,6 +347,13 @@ void pipe_irq(const struct engine_event *e, unsigned engine)
                           EDRV32_VIN_CH_DONE_INFO_BUS_ERR_MASK)) { p.error = 1; continue; }
             if (p.active[0].hop >= 0 && ((ch == 0 && (p.memory_need & 1)) || ch == 2)) {
                 p.memory_done |= ch == 0 ? 1 : 2;
+                if (ch == 0 && p.memory_need == 3) {
+                    unsigned h = (unsigned)p.active[0].hop;
+                    p.sums[h] += platform_ticks() - p.active[0].start; ++p.samples[h];
+                    p.memory_published = 1;
+                    if (p.state == RUNNING) publish(h, p.active[0].output);
+                    kick();
+                }
                 if (ch == 2) {
                     if (p.waiting_input >= 0) p.input_used &= ~(1u << p.waiting_input);
                     p.waiting_input = p.writing_input; p.writing_input = -1; input_start();
@@ -352,20 +363,27 @@ void pipe_irq(const struct engine_event *e, unsigned engine)
                        ch == 1 && p.state == RUNNING) {
                 int token = (int)vin_frame_slot(f.info);
                 p.token[token].frame = f.frame_id; p.token[token].tick = platform_ticks();
-                replace(&p.source, token); camera_busy();
+                replace(&p.source, token);
+                if (p.chain.view == UI_VIEW_SOURCE) replace(&p.selected, token);
+                camera_busy();
             } else if (p.chain.source == UI_SOURCE_CAMERA && ch == p.capture_channel &&
                        p.state == RUNNING) {
                 int token = 3 + (int)vin_frame_slot(f.info);
                 p.token[token].frame = f.frame_id;
                 p.token[token].tick = platform_ticks();
-                if (p.capture_channel == 1) replace(&p.source, token);
+                if (p.capture_channel == 1) {
+                    replace(&p.source, token);
+                    if (p.chain.view == UI_VIEW_SOURCE) replace(&p.selected, token);
+                }
                 publish(0, token); kick();
             }
         }
     } else if (engine == ENGINE_GEO && (e->irq & EDRV32_GEO_IRQ_STAT_DONE_MASK)) {
         if (p.active[1].hop == -2) {
             int token = p.active[1].output; p.active[1].hop = -1;
-            if (p.state == RUNNING) source(token);
+            if (p.state == RUNNING) {
+                p.test_ready = 1; p.test_copied |= 1u << token; source(token);
+            }
             release(token); kick();
         } else if (p.active[1].hop >= 0) complete(1);
     }
@@ -374,6 +392,7 @@ void pipe_rnd_done(void)
 {
     if (p.thumb_active) {
         release(p.thumb_token[p.thumb_index]); p.thumb_token[p.thumb_index] = -1;
+        p.thumb_valid |= 1u << p.thumb_index;
         p.thumb_active = 0;
     } else if (p.active[2].hop >= 0) complete(2);
     kick();
@@ -398,10 +417,10 @@ void pipe_detection_release(void)
     kick();
 }
 void pipe_detection_published(uint64_t tick) { p.box_tick = tick; }
-void pipe_upload(uint32_t base) { p.upload = base; p.pc_cancelled = 0; }
+void pipe_upload(uint32_t base) { pending_upload = base; p.pc_cancelled = 0; }
 void pipe_cancel_upload(void)
 {
-    p.upload = 0; p.image_done = 0; p.pc_cancelled = 1;
+    pending_upload = 0; p.image_done = 0; p.pc_cancelled = 1;
     if (p.writing_input >= 0) p.input_cancelled[p.writing_input] = 1;
     if (p.waiting_input >= 0) {
         p.input_used &= ~(1u << p.waiting_input); p.waiting_input = -1;
@@ -414,7 +433,9 @@ void pipe_memory_sample(const struct mem_xbar_stats *sample)
 }
 static void prepare(void)
 {
+    vision_pipe_clear();
     p.chain = requested; p.revision = revision;
+    p.test_ready = p.test_copied = 0;
     pipe_compile(&p.chain, &p.plan);
     p.has_detection = 0;
     for (unsigned i = 0; i < p.chain.count; ++i)
@@ -574,17 +595,38 @@ static void thumbnails(void)
 }
 static void image_source(void)
 {
-    if (p.chain.source == UI_SOURCE_CAMERA || p.active[1].hop != -1) return;
-    if (p.chain.source == UI_SOURCE_PC_IMAGE && !p.upload) return;
+    if (p.chain.source == UI_SOURCE_CAMERA) return;
+    if (p.chain.source == UI_SOURCE_TEST_IMAGE && p.test_ready) {
+        if (platform_ticks() >= p.source_due) {
+            /* Upscale once, then resubmit the immutable source at the demo cadence. */
+            int token = free_token(0);
+            if (token < 0) return;
+            if (!(p.test_copied & (1u << token))) {
+                memcpy(uncached(address(token)), uncached(address(p.source)), VISION_IMAGE_BYTES);
+                p.test_copied |= 1u << token;
+            }
+            uint32_t lock = sched_port_lock();
+            p.token[token].frame = p.source_frame++;
+            p.token[token].tick = platform_ticks();
+            source(token); kick();
+            p.source_due = platform_ticks() + platform_clock_hz()/30;
+            sched_port_unlock(lock);
+        }
+        return;
+    }
+    if (p.active[1].hop != -1) return;
+    if (p.chain.source == UI_SOURCE_PC_IMAGE && !pending_upload) return;
     if (p.chain.source == UI_SOURCE_TEST_IMAGE && platform_ticks() < p.source_due) return;
     int output = free_token(0);
     if (output < 0) return;
     if (p.chain.source == UI_SOURCE_PC_IMAGE) {
         /* The upload buffer is copied once; later uploads can reuse its window. */
-        memcpy(uncached(address(output)), uncached(p.upload), VISION_IMAGE_BYTES);
-        p.upload = 0;
+        memcpy(uncached(address(output)), uncached(pending_upload), VISION_IMAGE_BYTES);
+        pending_upload = 0;
+        uint32_t lock = sched_port_lock();
         p.token[output].frame = p.source_frame++;
         p.token[output].tick = platform_ticks(); source(output); kick();
+        sched_port_unlock(lock);
     } else {
         struct geo_config c = {.src_base = rnd_physical(
             _binary_build_showcase_pipe_test_bin_start), .src_stride = 1280,
@@ -612,14 +654,22 @@ static void statistics(void)
         p.stats.fps, p.stats.e2e_us);
     for (unsigned h = 0; h < p.plan.count; ++h) {
         p.stats.hop[h].us = p.samples[h] ? us(p.sums[h]/p.samples[h]) : 0;
+        const char *const names[] = {"CAM-CH0/PIX", "CAM-CH1", "MEMSRC-CH0/PIX",
+            "MEMSRC-CH2/NPU", "GEO", "RND"};
         offset += (unsigned)snprintf(p.report + offset, sizeof p.report - offset,
-            "%s%u:%u", h ? "," : "", p.plan.hop[h].engine, (unsigned)p.stats.hop[h].us);
+            "%s%s:%u", h ? "," : "", names[p.plan.hop[h].engine],
+            (unsigned)p.stats.hop[h].us);
         p.sums[h] = 0; p.samples[h] = 0;
     }
     snprintf(p.report + offset, sizeof p.report - offset, " ddr=%u\r\n", p.stats.ddr_mbps);
     p.bytes = p.e2e_sum = p.frames = 0; p.since = now;
 }
-const char *pipe_report(void) { return p.report; }
+const char *pipe_report(void)
+{
+    static char taken[sizeof p.report];
+    memcpy(taken, p.report, sizeof taken); p.report[0] = 0;
+    return taken;
+}
 void pipe_npu_time(uint64_t ticks)
 { p.npu_sum += ticks; ++p.npu_samples; }
 int pipe_service(void)
@@ -647,6 +697,8 @@ int pipe_service(void)
         }
         if (idle) {
             engine_control(ENGINE_VIN, 0);
+            engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
+            engine_control(ENGINE_NPU, 0);
             showcase_gui_pipeline_overlay(false);
             unsigned next = p.stopping;
             if (next == 2) { pipe_enter(); }
@@ -683,10 +735,15 @@ void ui_data_chain_preset(unsigned preset)
     sched_port_unlock(lock); app_wake_at(platform_ticks());
 }
 uint32_t pipe_revision(void) { return revision; }
+bool pipe_pc_image(void) { return p.chain.source == UI_SOURCE_PC_IMAGE; }
 ui_pipe_stats_t ui_data_pipe_stats(void)
 {
     uint32_t lock = sched_port_lock(); ui_pipe_stats_t result = p.stats;
     sched_port_unlock(lock); return result;
 }
 const lv_image_dsc_t *ui_data_thumb(unsigned block)
-{ return &p.thumbs[block == UI_VIEW_FINAL ? 8 : block]; }
+{
+    unsigned index = block == UI_VIEW_FINAL ? 8 : block;
+    return p.thumb_valid & (1u << index) ? &p.thumbs[index] : NULL;
+}
+void pipe_rnd_failed(uint32_t error) { p.error = error; }

@@ -7,7 +7,7 @@ static int in(int value, int low, int high) { return value >= low && value <= hi
 unsigned pipe_chain_validate(const ui_chain_t *c)
 {
     if (c->source > UI_SOURCE_TEST_IMAGE || c->count > UI_BLOCK_MAX || c->preset > 8 ||
-        (c->view != UI_VIEW_FINAL && c->view >= c->count)) return 2;
+        (c->view != UI_VIEW_FINAL && c->view != UI_VIEW_SOURCE && c->view >= c->count)) return 2;
     unsigned detected = 0;
     for (unsigned i = 0; i < UI_BLOCK_MAX; ++i) {
         const ui_block_t *b = &c->block[i];

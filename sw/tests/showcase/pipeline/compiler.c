@@ -53,6 +53,7 @@ static void validation(void)
     reset(0); chain.count = 9; bad(&chain); reset(3); bad(&chain);
     reset(0); chain.view = 0; bad(&chain); block(4,0,0,0,0,0);
     assert(!pipe_chain_validate(&chain)); chain.view = 1; bad(&chain);
+    reset(0); chain.view = UI_VIEW_SOURCE; assert(!pipe_chain_validate(&chain));
     reset(0); chain.preset = 9; bad(&chain);
     for (unsigned i = 0; i < 8; ++i) {
         reset(0); chain.block[i].type = 4; bad(&chain);

@@ -38,6 +38,16 @@ int main(int argc,char **argv)
     assert(!memcmp(previous_response+16,"abc123",6) && previous_response[32]==1);
     edsc_poll(&s,100,100); assert(response[4]==0x85 && response_bytes==68);
     assert(!memcmp(response+12,current,56));
+    uint8_t chain[100]={1,0,255,0};
+    edsc_chain_snapshot(&s,7,chain); edsc_poll(&s,101,100);
+    assert(response[4]==0x88 && record_u32(response+12)==7 && response[16]==1);
+    uint8_t stats[24]={0};
+    edsc_pipe_stats(&s,stats,sizeof stats,100,100);
+    assert(response[4]==0x89 && response_bytes==36);
+    unsigned stats_replies=replies;
+    edsc_pipe_stats(&s,stats,sizeof stats,199,100); assert(replies==stats_replies);
+    current[0]=4; edsc_pipe_stats(&s,stats,sizeof stats,200,100);
+    assert(replies==stats_replies); current[0]=1;
     unsigned before=replies; edsc_poll(&s,199,100); assert(replies==before);
     current[3]=1; edsc_poll(&s,199,100); assert(replies==before+1);
     edsc_poll(&s,299,100); assert(replies==before+2);
@@ -88,7 +98,7 @@ int main(int argc,char **argv)
     message(&s,7,p,15); assert(response[15]==1);
     p[0]=24; message(&s,7,p,16); assert(response[15]==2);
     memset(p,0,sizeof p); p[0]=2; record_put32(p+4,16);
-    current[0]=1; message(&s,1,p,8); assert(response[13]==5);
+    current[0]=1; s.chain[0]=0; message(&s,1,p,8); assert(response[13]==5);
     current[0]=1; s.chain[0]=1; s.image_info=0; message(&s,1,p,8); assert(response[13]==5);
     const uint8_t info[9]={1,0,1,0,1,0,0,0,'x'};
     message(&s,5,info,9); assert(response[14]==2);

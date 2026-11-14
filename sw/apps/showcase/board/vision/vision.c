@@ -164,7 +164,7 @@ void vision_state(uint8_t payload[56])
 {
     payload[3] = (uint8_t)boxes;
     bool image = v.page == PAGE_IMAGE ||
-        (v.page == PAGE_PIPELINE && ui_data_chain().source == UI_SOURCE_PC_IMAGE);
+        (v.page == PAGE_PIPELINE && pipe_pc_image());
     uint32_t values[2] = {image ? request : 0, image ? sessions[PAGE_IMAGE].frame : 0};
     for (unsigned j = 0; j < 2; ++j)
         for (unsigned i = 0; i < 4; ++i) payload[44+j*4+i] = values[j] >> (i*8);
@@ -852,7 +852,7 @@ int vision_service(void)
         v.job_input = v.done[buffer].input;
         v.job_frame = v.done[buffer].frame;
         v.image_job = v.page == PAGE_IMAGE ||
-            (v.page == PAGE_PIPELINE && ui_data_chain().source == UI_SOURCE_PC_IMAGE);
+            (v.page == PAGE_PIPELINE && pipe_pc_image());
         if (!v.image_job) v.job_image = v.done[buffer].image;
         v.post_buffer = buffer;
         unsigned post_count = v.done[buffer].count;
@@ -1018,6 +1018,7 @@ static void enter_pipeline(void)
 {
     request_page(PAGE_PIPELINE); v.state = PIPE_LIVE; pipe_enter();
 }
+void vision_pipe_clear(void) { sessions[PAGE_PIPELINE].count = 0; }
 void vision_pipe_image_done(uint32_t frame)
 {
     v.job_frame = sessions[PAGE_IMAGE].frame = frame;
@@ -1028,7 +1029,7 @@ bool vision_pipe_idle(void)
 { return !v.npu_busy && !v.done_mask && v.job == JOB_IDLE; }
 bool vision_pipe_start(unsigned input, uint32_t frame, uint64_t tick)
 {
-    if (v.page == PAGE_PIPELINE && ui_data_chain().source == UI_SOURCE_PC_IMAGE &&
+    if (v.page == PAGE_PIPELINE && pipe_pc_image() &&
         v.job != JOB_IDLE) return false;
     if (v.npu_busy || !v.model_ready || v.model_pending ||
         (v.post_owned & (1u << v.npu_buffer))) return false;

@@ -148,6 +148,14 @@ int main(void)
     vision_init(); ui_data_chain_preset(8); board_network_init(); vision_app_image.enter(); drain();
     memset(physical(VISION_OUTPUT_BASE),0x80,VISION_OUTPUT_BYTES);
     protocol.peer=1;
+    ui_chain_t old=ui_data_chain(); uint32_t revision=pipe_revision();
+    uint8_t wire[100]; pipe_chain_encode(wire,&old); wire[5]=1;
+    message(9,wire,sizeof wire);
+    assert(pipe_revision()==revision && ui_data_chain().preset==8);
+    wire[5]=0; message(9,wire,sizeof wire);
+    assert(pipe_revision()==revision+1 && !ui_data_chain().preset);
+    const uint8_t preset[]={8,0,0,0}; message(10,preset,sizeof preset);
+    assert(ui_data_chain().preset==8 && protocol.chain[0]==UI_SOURCE_PC_IMAGE);
     for(unsigned scenario=0;scenario<4;++scenario) {
         fprintf(stderr,"scenario %u\n",scenario);
         unsigned before=npu_runs;

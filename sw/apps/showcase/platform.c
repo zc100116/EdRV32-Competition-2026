@@ -161,6 +161,11 @@ static void rnd_event(const struct rnd_result *result, void *context)
     (void)context;
     rnd_irq_tick = platform_ticks();
     uint32_t perf[6]; rnd_read_perf(perf); rnd_cycles+=perf[0];
+    if (result->error && rnd_owner == 2) {
+        pipe_rnd_failed(result->error);
+        sched_signal(&application_task, PLATFORM_RND);
+        return;
+    }
     if (result->error) {
         platform_puts("RND ERR_CODE=");
         platform_put_hex(result->error);
