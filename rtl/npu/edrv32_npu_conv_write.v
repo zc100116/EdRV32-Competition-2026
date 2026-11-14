@@ -25,7 +25,7 @@ module edrv32_npu_conv_write (
     input wire result_chunk_half_i,
     input wire result_chunk_last_i,
     output wire result_rd_en_o,
-    output wire [4:0] result_rd_index_o,
+    output wire [9:0] result_rd_index_o,
     output wire result_rd_plane_o,
     input wire result_rd_valid_i,
     input wire [255:0] result_rd_data_i,
@@ -70,11 +70,14 @@ module edrv32_npu_conv_write (
     reg [1:0] head_r;
     reg [11:0] row_r;
     reg [10:0] pair_r;
-    reg [26:0] read_tag_r [0:2];
+    reg [26:0] read_tag_r [0:1];
+    reg [25:0] read_tag_output_r;
+    (* keep = "true", syn_preserve = 1 *) reg cls_plane_r;
     assign cls_valid_o = result_rd_valid_i && post_cls_r;
     assign cls_data_o = result_rd_data_i;
     assign cls_head_o = head_r;
-    assign {cls_row_o, cls_pair_o, cls_block_o, cls_plane_o} = read_tag_r[2];
+    assign {cls_row_o, cls_pair_o, cls_block_o} = read_tag_output_r;
+    assign cls_plane_o = cls_plane_r;
     reg [2:0] state_r;
     reg [4:0] base_r;
     reg [4:0] pairs_r;
@@ -97,7 +100,8 @@ module edrv32_npu_conv_write (
     reg [2:0] reserved_r;
     reg [2:0] ready_r;
     reg result_rd_en_r;
-    reg [4:0] result_rd_index_r;
+    // Two absolute ring-slot copies keep the existing read_w enable and cycle.
+    (* keep = "true", syn_preserve = 1 *) reg [9:0] result_rd_index_r;
     reg result_rd_plane_r;
     wire read_w;
     wire send_w;
@@ -215,7 +219,8 @@ module edrv32_npu_conv_write (
     end
     always @(posedge clk_i) begin
         read_tag_r[1] <= read_tag_r[0];
-        read_tag_r[2] <= read_tag_r[1];
+        read_tag_output_r <= read_tag_r[1][26:1];
+        cls_plane_r <= read_tag_r[1][0];
         if (start_i) begin
             post_cls_r <= post_enable_i && post_kind_i == 2'd2;
             suppress_raw_r <= post_enable_i && post_kind_i == 2'd2 && !raw_cls_write_i;
@@ -224,7 +229,8 @@ module edrv32_npu_conv_write (
             block_addr_r <= out_addr_i;
         end
         if (read_w) begin
-            result_rd_index_r <= base_r + plane_sent_r + requested_r;
+            result_rd_index_r[4:0] <= base_r + plane_sent_r + requested_r;
+            result_rd_index_r[9:5] <= base_r + plane_sent_r + requested_r;
             result_rd_plane_r <= plane_r;
             read_tag_r[0] <= {row_r, pair_r + {6'd0, plane_sent_r}
                 + {6'd0, requested_r}, block_r, plane_r};

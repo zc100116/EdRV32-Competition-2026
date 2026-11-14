@@ -15,9 +15,9 @@ module edrv32_ram_npu_result (
     input wire [4:0] wr_addr_i,
     input wire [511:0] wr_data_i,
 
-    // Read port.
+    // Read port; low/high five-bit copies address the low/high 256-bit IP.
     input wire rd_en_i,
-    input wire [4:0] rd_addr_i,
+    input wire [9:0] rd_addr_i,
     output wire [511:0] rd_data_o
 );
     wire [511:0] memory_data_w;
@@ -27,7 +27,7 @@ module edrv32_ram_npu_result (
 
 `ifdef EDRV32_FPGA_MEMORY_MODE
     // The distributed RAM IP is at most 256 bits wide; two side-by-side
-    // 256-bit instances share the address and write enable.
+    // 256-bit instances share write control but use separate read-address copies.
     ip_lutram_npu_result u_ip_lo (
         // Synchronous write port.
         .wr_clk(clk_i),
@@ -38,7 +38,7 @@ module edrv32_ram_npu_result (
         .wr_data(wr_data_i[255:0]),
 
         // Unregistered combinational read port.
-        .rd_addr(rd_addr_i),
+        .rd_addr(rd_addr_i[4:0]),
         .rd_data(memory_data_w[255:0])
     );
     ip_lutram_npu_result u_ip_hi (
@@ -51,15 +51,17 @@ module edrv32_ram_npu_result (
         .wr_data(wr_data_i[511:256]),
 
         // Unregistered combinational read port.
-        .rd_addr(rd_addr_i),
+        .rd_addr(rd_addr_i[9:5]),
         .rd_data(memory_data_w[511:256])
     );
 `else
-    reg [511:0] memory_r [0:31];
-    assign memory_data_w = memory_r[rd_addr_i];
+    reg [255:0] memory_lo_r [0:31];
+    reg [255:0] memory_hi_r [0:31];
+    assign memory_data_w = {memory_hi_r[rd_addr_i[9:5]], memory_lo_r[rd_addr_i[4:0]]};
     always @(posedge clk_i) begin
         if (wr_en_i) begin
-            memory_r[wr_addr_i] <= wr_data_i;
+            memory_lo_r[wr_addr_i] <= wr_data_i[255:0];
+            memory_hi_r[wr_addr_i] <= wr_data_i[511:256];
         end
     end
 `endif

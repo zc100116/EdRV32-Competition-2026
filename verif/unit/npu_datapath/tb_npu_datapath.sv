@@ -168,7 +168,7 @@ module tb_npu_datapath;
         .result_chunk_last_o(result_chunk_last_o),
         .result_release_i(result_release_i),
         .result_rd_en_i(result_rd_en_i),
-        .result_rd_index_i(result_rd_index_i),
+        .result_rd_index_i({result_rd_index_i, result_rd_index_i}),
         .result_rd_plane_i(result_rd_plane_i),
         .result_rd_valid_o(result_rd_valid_o),
         .result_rd_data_o(result_rd_data_o),

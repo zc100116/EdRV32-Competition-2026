@@ -27,7 +27,7 @@ module tb_npu_conv_write;
     logic [10:0] result_chunk_pair_i = 0;
     logic  result_chunk_half_i = 0;
     wire  result_rd_en_o;
-    wire [4:0] result_rd_index_o;
+    wire [9:0] result_rd_index_o;
     wire  result_rd_plane_o;
     logic  result_rd_valid_i = 0;
     logic [255:0] result_rd_data_i = 0;
@@ -149,7 +149,9 @@ module tb_npu_conv_write;
         if (read_pending) result_rd_data_i <= pattern(read_plane, read_index);
         read_pending <= result_rd_en_o;
         if (result_rd_en_o) begin
-            read_index <= result_rd_index_o;
+            read_index <= result_rd_index_o[4:0];
+            check(result_rd_index_o[9:5] == result_rd_index_o[4:0],
+                "read index copies differ");
             read_plane <= result_rd_plane_o;
         end
         if (rst_n_i) begin

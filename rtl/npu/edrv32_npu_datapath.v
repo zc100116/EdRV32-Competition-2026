@@ -87,7 +87,7 @@ module edrv32_npu_datapath (
     output wire result_chunk_last_o,
     input wire result_release_i,
     input wire result_rd_en_i,
-    input wire [4:0] result_rd_index_i,
+    input wire [9:0] result_rd_index_i,
     input wire result_rd_plane_i,
     output wire result_rd_valid_o,
     output wire [255:0] result_rd_data_o,
@@ -557,7 +557,7 @@ module edrv32_npu_datapath (
         .result_chunk_last_o(result_chunk_last_o),
         .result_release_i(result_release_i),
 
-        // DMA read port; index is the absolute ring slot.
+        // DMA read port; low/high five-bit copies address the two 256-bit RAM halves.
         .result_rd_en_i(result_rd_en_i),
         .result_rd_index_i(result_rd_index_i),
         .result_rd_plane_i(result_rd_plane_i),

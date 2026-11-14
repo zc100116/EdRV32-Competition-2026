@@ -123,7 +123,7 @@ module edrv32_npu_conv (
     wire dp_result_chunk_last_w;
     wire dp_result_release_w;
     wire dp_result_rd_en_w;
-    wire [4:0] dp_result_rd_index_w;
+    wire [9:0] dp_result_rd_index_w;
     wire dp_result_rd_plane_w;
     wire dp_result_rd_valid_w;
     wire [255:0] dp_result_rd_data_w;

@@ -84,7 +84,7 @@ module tb_npu_writeback;
         .result_chunk_last_o(chunk_last),
         .result_release_i(result_release),
         .result_rd_en_i(rd_en),
-        .result_rd_index_i(rd_index),
+        .result_rd_index_i({rd_index, rd_index}),
         .result_rd_plane_i(rd_plane),
         .result_rd_valid_o(rd_valid),
         .result_rd_data_o(rd_data),
