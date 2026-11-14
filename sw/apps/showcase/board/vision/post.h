@@ -9,6 +9,8 @@ struct vision_post {
     const int8_t *output;
     uint32_t head, cell, anchor_base;
 #endif
+    const yolo_head *heads;
+    uint16_t anchors[YOLO_MAX_DETECTIONS];
     yolo_candidate *workspace;
     yolo_detection *detections;
     yolo_post_stats stats;

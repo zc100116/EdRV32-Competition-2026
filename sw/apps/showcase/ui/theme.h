@@ -52,6 +52,8 @@ void ui_button(lv_obj_t *p, const char *s, int x, int y, int w, unsigned action)
 void ui_hint(const char *s);
 void ui_page_home(lv_obj_t *p);
 void ui_page_vision(lv_obj_t *p);
+void ui_page_pose(lv_obj_t *p);
+void ui_pose_update(void);
 void ui_page_image(lv_obj_t *p);
 void ui_page_process(lv_obj_t *p);
 void ui_page_graphics(lv_obj_t *p);

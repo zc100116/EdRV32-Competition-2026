@@ -5,6 +5,7 @@
 #include "vision_hooks.h"
 #include "memory.h"
 #include "model.h"
+#include "pose.h"
 #include "session.h"
 #include "wire.h"
 #include "../../../apps/showcase/ui/ui_data.h"
@@ -51,6 +52,8 @@ static struct vin_frame frames[3];
 static uint32_t last_input;
 static unsigned npu_runs, submitted, done_count, window_reopened;
 static unsigned npu_configurations;
+static struct npu_config last_npu;
+static uint32_t last_output;
 static uint32_t reopened_base, reopened_bytes;
 static unsigned accept_send = 1;
 static unsigned sensor_initializations;
@@ -77,9 +80,14 @@ void showcase_rnd_run(const struct rnd_batch *batch)
 { (void)batch; assert(0); }
 void engine_dma_invalidate(uintptr_t address, uint32_t bytes)
 {
-    assert(address == EDRV32_DDR_BASE + VISION_POST_BASE ||
-           address == EDRV32_DDR_BASE + VISION_POST_BASE + VISION_POST_SPACING);
-    assert(bytes == 32);
+    if (bytes == VISION_POSE_OUTPUT_BYTES) {
+        assert(address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE ||
+               address == EDRV32_DDR_BASE + VISION_OUTPUT_BASE + VISION_OUTPUT_SPACING);
+    } else {
+        assert(address == EDRV32_DDR_BASE + VISION_POST_BASE ||
+               address == EDRV32_DDR_BASE + VISION_POST_BASE + VISION_POST_SPACING);
+        assert(bytes == 32);
+    }
     ++invalidates;
 }
 static uint32_t candidate_base;
@@ -149,12 +157,20 @@ struct vin_frame vin_frame_done(unsigned channel) { return frames[channel]; }
 unsigned vin_frame_slot(uint32_t info)
 { return (info & EDRV32_VIN_CH_DONE_INFO_SLOT_MASK) >> EDRV32_VIN_CH_DONE_INFO_SLOT_POS; }
 void npu_configure(const struct npu_config *c)
-{ assert(c->count == 68); ++npu_configurations; }
+{
+    assert(c->count == 68 || c->count == 77);
+    assert(c->model == (c->count == 77 ? VISION_POSE_MODEL_BASE : VISION_MODEL_BASE));
+    assert(c->descriptors == (c->count == 77 ? VISION_POSE_DESC_BASE : VISION_DESC_BASE));
+    last_npu = *c;
+    ++npu_configurations;
+}
 void npu_start(uint32_t input, uint32_t output)
 {
     assert(input >= VISION_INPUT_BASE && input < VISION_INPUT_BASE + 3*VISION_INPUT_SPACING);
     last_input = input;
-    assert(output == VISION_OUTPUT_BASE);
+    assert(output == VISION_OUTPUT_BASE ||
+           (last_npu.count == 77 && output == VISION_OUTPUT_BASE + VISION_OUTPUT_SPACING));
+    last_output = output;
     assert(lock_depth);
     candidate_base = mmio_read32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET);
     unsigned buffer = (candidate_base - VISION_POST_BASE) / VISION_POST_SPACING;
@@ -609,6 +625,44 @@ static void model_test(void)
     assert(memcmp(physical(VISION_MODEL_BASE), physical(base+0x100000), 2051) == 0);
     puts("PASS sparse EDNM sliced loading, tail bytes, boundary status and deferred DONE");
 }
+static void pose_test(void)
+{
+    assert(memcmp(physical(VISION_POSE_DESC_BASE), showcase_pose_desc,
+                  showcase_pose_desc_bytes) == 0);
+    assert(memcmp(physical(VISION_POSE_MODEL_BASE), showcase_pose_weights,
+                  showcase_pose_weights_bytes) == 0);
+    vision_app_pose.enter(); drain();
+    assert(last_npu.count == 77);
+    camera_event(0, 700);
+    uint32_t first_output = last_output;
+    int8_t *raw = (void *)(uintptr_t)(EDRV32_DDR_BASE + last_output);
+    const yolo_head *head = &showcase_pose_heads[0];
+    const struct pose_head *quant = &showcase_pose_keypoints[0];
+    const unsigned joints[] = {5, 6, 9, 10};
+    for (unsigned j = 0; j < 4; ++j) {
+        unsigned channel = joints[j] * 3 + 2;
+        raw[quant->offset + channel / 16 * head->plane_stride + 100 * 16 +
+            channel % 16] = 127;
+        --channel;
+        raw[quant->offset + channel / 16 * head->plane_stride + 100 * 16 +
+            channel % 16] = (j == 0 || j == 3) ? 127 : -128;
+    }
+    output_class(0);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    const ui_pose_t *pose = ui_data_pose();
+    assert(pose->count == 1 && pose->left_up && !pose->right_up);
+    camera_event(1, 701);
+    assert(last_output != first_output);
+    vision_app_pose.exit();
+    vision_service();
+    assert(last_npu.count == 77); /* In-flight inference retains pose configuration. */
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    display_frame(); display_frame(); drain();
+    assert(vision_ready(UI_STATE_IDLE) && last_npu.count == 68);
+    display_frame(); display_frame();
+    puts("PASS pose model/OUTPUT alternation, largest-person hand indicators, "
+         "drain and detect restore");
+}
 static void matrix_test(void)
 {
     int32_t m[6];
@@ -642,7 +696,7 @@ int main(void)
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE, 0x02000000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
-    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_POST_BASE), VISION_OUTPUT_BYTES,
+    assert(mmap((void *)(uintptr_t)(EDRV32_DDR_BASE+VISION_OUTPUT_BASE), 0x00300000,
                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0)
            != MAP_FAILED);
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_UNCACHED_BASE, 0x0b000000,
@@ -662,6 +716,7 @@ int main(void)
     cancel_test();
     process_test();
     model_test();
+    pose_test();
     assert(invalidates >= 3);
     return 0;
 }

@@ -33,7 +33,7 @@ static unsigned validate(unsigned type, const uint8_t *p, unsigned n)
     static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 24, 16, 0};
     if (type != 5 && n != lengths[type]) return 1;
     if (type == 4) {
-        if (p[0] > 6 || p[1] > 3 || (p[0] != 5 && record_u16(p + 2))) return 2;
+        if (p[0] > 7 || p[1] > 3 || (p[0] != 5 && record_u16(p + 2))) return 2;
         if ((p[1] == 1 || p[1] == 2) && p[0] != 1 && p[0] != 3) return 5;
     } else if (type == 5) {
         if (n < 8 || record_u16(p + 4) != n - 8) return 1;

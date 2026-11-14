@@ -95,7 +95,7 @@ static int16_t display_coordinate(int32_t coordinate, int32_t padding, int32_t l
 void vision_post_begin(struct vision_post *p, const int8_t *output,
                        yolo_candidate *workspace, yolo_detection *detections)
 {
-    *p = (struct vision_post){.output = output, .workspace = workspace,
+    *p = (struct vision_post){.heads = yolo_default_heads, .output = output, .workspace = workspace,
                               .detections = detections};
 }
 
@@ -118,7 +118,7 @@ int vision_post_step(struct vision_post *p)
     yolo_post_stats *stats = &p->stats;
     if (p->phase == 0) {
 #ifdef SHOWCASE_POST_CPU
-        const yolo_head *head = &yolo_default_heads[p->head];
+        const yolo_head *head = &p->heads[p->head];
         uint32_t cells = (uint32_t)head->width * head->height;
         uint32_t row_end = (p->cell / head->width + 1) * head->width;
         for (unsigned part = 0; part < 8 && p->cell < row_end; ++part, ++p->cell) {
@@ -193,6 +193,7 @@ int vision_post_step(struct vision_post *p)
             ++p->i;
             return 0;
         }
+        p->anchors[p->kept] = candidate->anchor;
         yolo_detection *result = &p->detections[p->kept++];
         result->x0 = display_coordinate(candidate->xyxy_q8[0], 0, 1280);
         result->y0 = display_coordinate(candidate->xyxy_q8[1], 12, 720);

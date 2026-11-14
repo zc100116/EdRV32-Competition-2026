@@ -94,6 +94,7 @@ void showcase_input_event(void)
 static void start(ui_app_t app, unsigned arg)
 {
     active = app == UI_APP_CAMERA ? &vision_app_camera :
+        app == UI_APP_POSE ? &vision_app_pose :
         app == UI_APP_IMAGE ? &vision_app_image : app == UI_APP_PROCESS ? &vision_app_process :
         app == UI_APP_GAME ? &nes_app : app == UI_APP_GRAPHICS && arg == 1 ? graphics : NULL;
     if (active && (active->needs & platform_hardware()) != active->needs) {
@@ -110,7 +111,7 @@ static void start(ui_app_t app, unsigned arg)
 }
 static void stop(ui_app_t app)
 {
-    if (app <= UI_APP_PROCESS) board_bulk_cancel();
+    if (app <= UI_APP_PROCESS || app == UI_APP_POSE) board_bulk_cancel();
     if (active) active->exit();
     if (app == UI_APP_GRAPHICS) board_graphics_stop();
     if (app == UI_APP_COREMARK) board_coremark_stop();
@@ -119,7 +120,8 @@ static void pause_app(ui_app_t app, bool p) { (void)app; vision_pause(p); }
 static bool ready(ui_app_t app, ui_state_t target)
 {
     bool complete;
-    if (app >= UI_APP_CAMERA && app <= UI_APP_PROCESS) complete = vision_ready(target);
+    if ((app >= UI_APP_CAMERA && app <= UI_APP_PROCESS) || app == UI_APP_POSE)
+        complete = vision_ready(target);
     else if (app == UI_APP_GAME) complete = board_nes_ready(target);
     else complete = !active || !active->owns_display || platform_display_idle();
     if (target == UI_STATE_IDLE && complete) {

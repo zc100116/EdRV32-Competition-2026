@@ -23,7 +23,7 @@ typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_
 /* Media applications and session states: design 2026-11-03-showcase-p5-replan 8.1.
  * Values equal the EDSC `app` and `state` fields. */
 typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
-               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK } ui_app_t;
+               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK, UI_APP_POSE } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
 typedef struct {
@@ -80,6 +80,15 @@ void ui_data_app_retry(void);
 void ui_show_app(ui_app_t app, unsigned arg);
 /* Return the current camera or PC image and detection results. */
 ui_vision_t ui_data_vision(void);
+/* Pose page owns all retained people, independently of detection display filters. */
+typedef struct { float x, y, visibility; } ui_pose_point_t;
+typedef struct {
+    unsigned count;
+    ui_detection_t people[100];
+    ui_pose_point_t points[100][17];
+    bool left_up, right_up;
+} ui_pose_t;
+const ui_pose_t *ui_data_pose(void);
 /* Ask the PC for the previous (-1) or next (+1) image of its list (EDSC IMAGE_STEP). */
 void ui_data_image_step(int direction);
 ui_detection_config_t ui_data_detection_config(void);

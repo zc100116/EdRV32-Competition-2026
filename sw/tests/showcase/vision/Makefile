@@ -23,15 +23,16 @@ RUNTIME_TEST ?= runtime_test
 .PHONY: runtime network
 network:
 	$(MAKE) runtime RUNTIME_TEST=network_test
-runtime: $(ROOT)/build/showcase/model.c
+runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib/sched -I. \
 	    -include $(UI_CONTRACT) $(RUNTIME_TEST).c $(VISION)/vision.c $(VISION)/post.c \
-	    $(VISION)/wire.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
+	    $(VISION)/wire.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
-	    $(ROOT)/build/showcase/model.c $(ROOT)/sw/apps/showcase/board/session.c \
+	    $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
+	    $(ROOT)/sw/apps/showcase/board/session.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/state.c -lm \
 	    -ffunction-sections -fdata-sections -Wl,--gc-sections -o $(OUT)/$(RUNTIME_TEST)
@@ -45,3 +46,21 @@ $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
 	    --out $(SHOWCASE_MODEL_DIR)
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@
+
+SHOWCASE_POSE_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-pose
+$(ROOT)/build/showcase/pose_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_POSE_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --task pose \
+	    --model-source $(SHOWCASE_POSE_SOURCE) --out $(ROOT)/build/npu/software_pose
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(ROOT)/build/npu/software_pose $@ \
+	    --pose-quantization $(SHOWCASE_POSE_SOURCE)/quantization.json
+
+.PHONY: pose
+pose: $(ROOT)/build/showcase/pose_model.c
+	mkdir -p $(OUT)
+	$(CC) $(CFLAGS) -DSHOWCASE_POST_CPU -ffunction-sections -fdata-sections \
+	    pose_test.c $(VISION)/post.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c \
+	    $(ROOT)/build/showcase/pose_model.c -Wl,--gc-sections -lm -o $(OUT)/pose_test
+	PYTHONPATH=$(ROOT)/third_party/ultralytics OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+	    $(HOME)/.local/opt/edrv32-py/bin/python pose_fixture.py $(OUT)/pose_test

@@ -191,7 +191,7 @@ class SocConsole(QWidget):
         frame, box = card('板端应用')
         self.app_choice = QComboBox()
         self.app_choice.addItems(['无', '实时识别', '图片识别', '图像处理', '图形测试',
-                                 '游戏', '芯片性能测试'])
+                                 '游戏', '芯片性能测试', '人体姿态'])
         box.addWidget(self.app_choice)
         self.app_arg = QLineEdit('0')
         self.app_arg.setValidator(QIntValidator(0, 65535, self))
@@ -840,7 +840,7 @@ class SocConsole(QWidget):
         state = self.board.status()
         connected = state['network']['peer']['done']
         board_state = state['state']
-        apps = ['无', '实时识别', '图片识别', '图像处理', '图形测试', '游戏', '芯片性能测试']
+        apps = ['无', '实时识别', '图片识别', '图像处理', '图形测试', '游戏', '芯片性能测试', '人体姿态']
         sessions = ['空闲', '启动中', '运行中', '已暂停', '停止中', '失败']
         self.phase.setText(('网口已连接' if connected else '网口未连接') +
                            ' · 板端版本 ' + (state['build'] or '—') + ' · ' +

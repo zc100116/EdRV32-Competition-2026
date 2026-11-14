@@ -144,6 +144,7 @@ void ui_refresh(void)
     switch(ui_page) {
         case 1: if(!ui_detection_settings) ui_vision_update(false); break;
         case 2: if(!ui_detection_settings) ui_vision_update(true); break;
+        case 9: ui_pose_update(); break;
         case 3: ui_process_update(); break;
         case 4: ui_graphics_update(); break;
         case 5: {
@@ -165,7 +166,8 @@ void ui_open(unsigned page)
     if(old_page!=page) {
         ui_mode=0;
         static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
-            UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE};
+            UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,
+            UI_APP_POSE};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
@@ -192,7 +194,7 @@ void ui_open(unsigned page)
     lv_obj_set_style_radius(top, 0, 0);
     ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
     const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
-        "游戏", "系统监控", "芯片信息", "调试助手"};
+        "游戏", "系统监控", "芯片信息", "调试助手", "人体姿态"};
     ui_label(top, names[page], 260, 12, &sim_font_16, TEXT);
     status = ui_label(top, "", 420, 14, &sim_font_14, MUTED);
     ui_button(top,"‹ 返回",12,6,108,1000);
@@ -208,7 +210,7 @@ void ui_open(unsigned page)
     lv_obj_set_style_radius(content, 0, 0);
     void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
         ui_page_process, ui_page_graphics, ui_page_games, NULL,
-        ui_page_chip, ui_page_debug};
+        ui_page_chip, ui_page_debug, ui_page_pose};
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
     else pages[page](content);
@@ -226,7 +228,7 @@ void ui_open(unsigned page)
     if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode+2));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab+2));
-    if(page>=1 && page<=3) {
+    if((page>=1 && page<=3) || page==9) {
         ui_button(bottom,"隐藏界面",1104,0,160,1005);
         lv_obj_set_height(lv_obj_get_child(bottom,-1),36);
         restore_surface=ui_box(screen,0,0,1280,720,0);
@@ -250,7 +252,7 @@ static void activate(unsigned action)
     if(ui_page == 0) {
         home_focus = action - 1;
         const unsigned required[]={0,UI_VIN|UI_NPU,UI_VIN|UI_NPU|UI_ETH,
-            UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0};
+            UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0,UI_VIN|UI_NPU};
         if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
         ui_mode = 0;
@@ -261,7 +263,7 @@ static void activate(unsigned action)
         ui_detection_settings_action(action);
     } else if((ui_page==1 || ui_page==2) && action==2) {
         ui_detection_settings=true; ui_open(ui_page);
-    } else if(ui_page == 1) {
+    } else if(ui_page == 1 || ui_page == 9) {
         if(action == 0) ui_data_app_pause(ui_data_session().state!=UI_STATE_PAUSED);
         else ui_data_boxes();
         ui_refresh();
@@ -347,7 +349,7 @@ void ui_start(void)
 
 void ui_show_app(ui_app_t app,unsigned arg)
 {
-    static const unsigned pages[]={0,1,2,3,4,5,7};
+    static const unsigned pages[]={0,1,2,3,4,5,7,9};
     ui_detection_settings=false; ui_tab=0; ui_mode=0;
     game_active=app==UI_APP_GAME;
     if(game_active) { game_focus=arg; ui_mode=arg; }

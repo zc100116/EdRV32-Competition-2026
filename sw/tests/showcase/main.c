@@ -69,7 +69,8 @@ int main(int argc,char **argv)
     command_result=EDSC_PENDING; message(&s,4,p,4);
     command_result=4; edsc_poll(&s,301,100); assert(response[14]==3 && response[15]==4);
     message(&s,4,p,3); assert(response[14]==3 && response[15]==1);
-    p[0]=7; message(&s,4,p,4); assert(response[15]==2);
+    command_result=0; p[0]=7; message(&s,4,p,4); assert(response[14]==2);
+    p[0]=8; message(&s,4,p,4); assert(response[15]==2);
     p[0]=5; p[1]=1; message(&s,4,p,4); assert(response[15]==5);
     memset(p,0,sizeof p); p[0]=1; p[2]=2; p[4]=4; memcpy(p+8,"a.jpg",4);
     command_result=0; message(&s,5,p,12); assert(response[14]==2);

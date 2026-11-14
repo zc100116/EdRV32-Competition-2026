@@ -77,3 +77,15 @@ $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
 	    --out $(SHOWCASE_MODEL_DIR)
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@
+
+# T-POSE-BOARD: both immutable snapshots rebuild with standard-library Python only.
+SHOWCASE_POSE_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-pose
+SHOWCASE_POSE_DIR := $(ROOT)/build/npu/software_pose
+PROGRAM_SOURCES += build/showcase/pose_model.c
+$(ROOT)/build/showcase/pose_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_POSE_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --task pose \
+	    --model-source $(SHOWCASE_POSE_SOURCE) --out $(SHOWCASE_POSE_DIR)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_POSE_DIR) $@ \
+	    --pose-quantization $(SHOWCASE_POSE_SOURCE)/quantization.json
