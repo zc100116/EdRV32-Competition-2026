@@ -29,8 +29,8 @@
 #include "../../lvgl/showcase_lvgl.h"
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
-       REF_NPU = 16, REF_GEO = 32 };
-enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_PIPELINE };
+       REF_NPU = 16 };
+enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PIPELINE };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
                       PIPE_STOPPING, PIPE_CONFIGURE };
@@ -41,18 +41,11 @@ static struct vision_session {
     unsigned count;
     uint32_t frame;
     enum { UPLOAD_EMPTY, UPLOAD_READY } upload;
-} sessions[5];
-static ui_process_config_t process = {.contrast = 256, .gamma_tenths = 10,
-    .stage1 = 2, .stage2 = 2, .threshold = 128, .scale_percent = 100};
+} sessions[PAGE_PIPELINE + 1];
 static struct {
     unsigned page;
     enum pipeline_state state;
-    unsigned process_dirty, gamma_bank;
-    uint32_t process_revision, shadow_revision, applied_revision;
-    int gamma_loaded;
-    unsigned gamma_target, gamma_index;
-    uint8_t gamma_table[256];
-    int32_t matrix[6];
+    unsigned gamma_bank;
     unsigned capture;
     unsigned initialized;
     unsigned refs[8];
@@ -88,7 +81,6 @@ static struct {
     uint64_t npu_vin;
     struct vision_post post;
     yolo_detection detections[YOLO_MAX_DETECTIONS];
-    int geo_source, geo_target;
     uint32_t tx_done;
     uint32_t upload_base, upload_bytes;
     unsigned model_pending;
@@ -97,8 +89,7 @@ static struct {
     unsigned model_phase;
     uint32_t model_count, model_desc_bytes, model_weight_bytes;
 } v = {.ready = -1, .current = -1, .pair_image = -1, .pair_input = -1,
-       .submitted = -1, .job_image = -1, .geo_source = -1, .geo_target = -1,
-       .gamma_loaded = -1, .gamma_target = 10, .gamma_index = 256};
+       .submitted = -1, .job_image = -1};
 static volatile uint32_t irq_flags[ENGINE_NPU + 1];
 static volatile uint32_t irq_errors[ENGINE_NPU + 1];
 static volatile uint64_t vin_done_tick[3];
@@ -170,7 +161,6 @@ void vision_state(uint8_t payload[56])
         for (unsigned i = 0; i < 4; ++i) payload[44+j*4+i] = values[j] >> (i*8);
     payload[52] = sessions[PAGE_IMAGE].data.image_status;
 }
-bool vision_process_applied(void) { return v.applied_revision == v.process_revision; }
 /* Shared ownership (all accesses under sched_port_lock/unlock):
  * task: page/state/capture/model_ready/model_pending gate IRQ starts;
  * VIN IRQ: pair_image/input, IDs/tick; NPU IRQ consumes the pair;
@@ -241,13 +231,6 @@ static void reference(int slot, unsigned add, unsigned remove)
     }
     sched_port_unlock(lock);
 }
-static int free_image(unsigned first, unsigned end)
-{
-    for (unsigned i = first; i < end; ++i) {
-        if (!v.refs[i]) return (int)i;
-    }
-    return -1;
-}
 static void initialize(void)
 {
     if (v.initialized) return;
@@ -258,7 +241,6 @@ static void initialize(void)
                        .stride = VISION_STRIDE},
             .data_size = VISION_IMAGE_BYTES, .data = uncached(image_address(i))};
     }
-    for (unsigned i = 0; i < 256; ++i) v.gamma_table[i] = (uint8_t)i;
     v.initialized = 1;
 }
 void vision_irq(const struct engine_event *event, void *context)
@@ -402,40 +384,6 @@ ui_vision_t ui_data_vision(void)
     return result;
 }
 void ui_data_boxes(void) { boxes = !boxes; }
-ui_process_config_t ui_data_process_config(void) { return process; }
-void ui_data_process_set(const ui_process_config_t *config)
-{
-    if ((unsigned)config->gamma_tenths != v.gamma_target) {
-        v.gamma_target = (unsigned)config->gamma_tenths;
-        v.gamma_index = 0;
-    }
-    process = *config;
-    ++v.process_revision;
-    v.process_dirty = 1;
-    uint32_t lock = sched_port_lock();
-    if (v.state == PIPE_LIVE && v.page == PAGE_PROCESS) v.state = PIPE_CONFIGURE;
-    sched_port_unlock(lock);
-    app_wake_at(platform_ticks());
-}
-void ui_data_process_defaults(uint32_t stages)
-{
-    ui_process_config_t p = process;
-    if (stages & UI_PROC_LEVEL) { p.brightness = 0; p.contrast = 256; }
-    if (stages & UI_PROC_GAMMA) p.gamma_tenths = 10;
-    if (stages & UI_PROC_S1) p.stage1 = 2;
-    if (stages & UI_PROC_S2) p.stage2 = 2;
-    if (stages & UI_PROC_BINARY) p.threshold = 128;
-    if (stages & UI_PROC_ROTATE) p.angle = 0;
-    if (stages & UI_PROC_SCALE) p.scale_percent = 100;
-    if (stages & UI_PROC_TRANSLATE) p.translate_x = p.translate_y = 0;
-    if (stages == UI_PROC_ALL) { p.enabled = 0; p.original = false; }
-    ui_data_process_set(&p);
-}
-const lv_image_dsc_t *ui_data_process(unsigned mode)
-{
-    (void)mode;
-    return take_image();
-}
 static void stop_capture(void)
 {
     if (!v.capture) return;
@@ -448,7 +396,7 @@ static void request_page(unsigned page)
     uint32_t lock = sched_port_lock();
     initialize();
     v.page = page;
-    if (page != PAGE_PROCESS && !v.model_ready) {
+    if (!v.model_ready) {
         board_session_fail(7);
         sched_port_unlock(lock);
         return;
@@ -464,7 +412,6 @@ static void request_page(unsigned page)
 }
 static void enter_camera(void) { request_page(PAGE_CAMERA); }
 static void enter_image(void) { request_page(PAGE_IMAGE); }
-static void enter_process(void) { request_page(PAGE_PROCESS); }
 static void leave(void)
 {
     if (v.page == PAGE_PIPELINE) {
@@ -498,40 +445,6 @@ bool vision_ready(ui_state_t target)
     if (target == UI_STATE_PAUSED) return v.state == PIPE_FROZEN;
     return v.state == PIPE_LIVE;
 }
-static void pix_mode(void)
-{
-    const ui_process_config_t *p = &process;
-    if (v.gamma_loaded != p->gamma_tenths) {
-        if (v.gamma_index < 256) return;
-        /* PIX 2.3: with no active frame, the bank opposite the shadow selection
-         * is writable, including if SOF arrives during the APB table writes. */
-        if (!(engine_poll(ENGINE_PIX).status & EDRV32_PIX_STATUS_IDLE_MASK)) return;
-        v.gamma_bank ^= 1;
-        pix_gamma_load(v.gamma_bank, v.gamma_table);
-        v.gamma_loaded = p->gamma_tenths;
-    }
-    uint32_t flags = 0;
-    if (p->enabled & UI_PROC_LEVEL) flags |= EDRV32_PIX_CFG_BC_EN_MASK;
-    if (p->enabled & UI_PROC_GAMMA) flags |= EDRV32_PIX_CFG_GAMMA_EN_MASK;
-    if (p->enabled & UI_PROC_GRAY) flags |= EDRV32_PIX_CFG_GRAY_EN_MASK;
-    if (p->enabled & UI_PROC_BINARY) flags |= EDRV32_PIX_CFG_BIN_EN_MASK;
-    if (p->enabled & UI_PROC_INVERT) flags |= EDRV32_PIX_CFG_INV_EN_MASK;
-    struct pix_config config = {flags,
-        (p->enabled & UI_PROC_S1) ? (enum pix_operation)p->stage1 : PIX_BYPASS,
-        (p->enabled & UI_PROC_S2) ? (enum pix_operation)p->stage2 : PIX_BYPASS,
-        v.gamma_bank, (unsigned)p->contrast,
-        p->brightness, (unsigned)p->threshold};
-    pix_configure(&config);
-    engine_control(ENGINE_PIX, p->original ? 0 : EDRV32_PIX_CTRL_ENABLE_MASK);
-    geo_matrix(v.matrix, (p->enabled & UI_PROC_ROTATE) ? p->angle : 0,
-        (p->enabled & UI_PROC_SCALE) ? p->scale_percent : 100,
-        (p->enabled & UI_PROC_TRANSLATE) ? p->translate_x : 0,
-        (p->enabled & UI_PROC_TRANSLATE) ? p->translate_y : 0,
-        !!(p->enabled & UI_PROC_MIRROR_X), !!(p->enabled & UI_PROC_MIRROR_Y),
-        VISION_WIDTH, VISION_HEIGHT);
-    v.shadow_revision = v.process_revision;
-    v.process_dirty = 0;
-}
 static void configure_capture(void)
 {
     struct vin_channel image = {VIN_CAM0, 4, VISION_STRIDE, {0}, 0};
@@ -542,19 +455,14 @@ static void configure_capture(void)
     }
     for (unsigned i = 0; i < 3; ++i) input.base[i] = VISION_INPUT_BASE +
                                                                i * VISION_INPUT_SPACING;
-    /* VRN must never touch PIX/GEO, including camera configuration. */
-    if (v.page == PAGE_PROCESS) {
-        pix_mode();
-        if (v.process_dirty) return;
-    }
-    else if (platform_hardware() & APP_HW_PIX) {
+    if (platform_hardware() & APP_HW_PIX) {
         struct pix_config bypass = {0, PIX_BYPASS, PIX_BYPASS, v.gamma_bank, 256, 0, 128};
         pix_configure(&bypass);
         engine_control(ENGINE_PIX, EDRV32_PIX_CTRL_ENABLE_MASK);
     }
     vin_camera_size(0, VISION_WIDTH, VISION_HEIGHT);
     vin_channel_configure(0, &image);
-    if (v.page != PAGE_PROCESS) vin_channel_configure(2, &input);
+    vin_channel_configure(2, &input);
     v.capture = 1;
     engine_control(ENGINE_VIN, EDRV32_VIN_CTRL_ENABLE_MASK);
 }
@@ -596,29 +504,6 @@ static void camera_frame(unsigned channel)
     if (v.state != PIPE_LIVE || v.page == PAGE_IMAGE ||
         (v.page == PAGE_CAMERA && !v.model_ready)) return;
     int slot = (int)vin_frame_slot(frame.info);
-    if (v.page == PAGE_PROCESS) {
-        if (channel == 0) {
-            v.applied_revision = v.shadow_revision;
-            if (process.original || !(process.enabled & 0xf80u)) queue_image(slot);
-            else if (v.geo_source < 0) {
-                int target = free_image(4, 6);
-                if (target < 0) return;
-                v.geo_source = slot;
-                v.geo_target = target;
-                reference(slot, REF_GEO, 0);
-                reference(target, REF_GEO, 0);
-                struct geo_config config = {.src_base = image_address((unsigned)slot),
-                    .src_stride = VISION_STRIDE, .src_width = VISION_WIDTH,
-                    .src_height = VISION_HEIGHT, .dst_base = image_address((unsigned)target),
-                    .dst_stride = VISION_STRIDE, .rect_width = VISION_WIDTH,
-                    .rect_height = VISION_HEIGHT};
-                memcpy(config.matrix, v.matrix, sizeof(config.matrix));
-                geo_descriptor_pack(uncached(VISION_GEO_DESCRIPTOR), &config);
-                geo_submit(VISION_GEO_DESCRIPTOR, 1);
-            }
-        }
-        return;
-    }
     if (channel == 0) queue_image(slot);
     if (channel == 0) {
         reference(v.pair_image, 0, REF_PAIR);
@@ -809,11 +694,6 @@ bool vision_post_active(void) { return v.job == JOB_POST; }
 
 int vision_service(void)
 {
-    /* Design 4.5.2: software floating-point gamma work is one sample per slice. */
-    if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
-        v.gamma_table[v.gamma_index] = pix_gamma_value(v.gamma_index, v.gamma_target);
-        ++v.gamma_index;
-    }
     uint32_t flags[ENGINE_NPU + 1];
     uint32_t errors[ENGINE_NPU + 1];
     uint32_t lock = sched_port_lock();
@@ -833,12 +713,6 @@ int vision_service(void)
     if (v.page != PAGE_PIPELINE) display_step(flags[ENGINE_DISP]);
     if (v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
         v.state == PIPE_STOPPING) stop_capture();
-    if (flags[ENGINE_GEO] & EDRV32_GEO_IRQ_STAT_DONE_MASK) {
-        if (v.state == PIPE_LIVE && v.page == PAGE_PROCESS) queue_image(v.geo_target);
-        reference(v.geo_source, 0, REF_GEO);
-        reference(v.geo_target, 0, REF_GEO);
-        v.geo_source = v.geo_target = -1;
-    }
     if (v.capture && v.page != PAGE_CAMERA) {
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
@@ -940,13 +814,8 @@ int vision_service(void)
     if (v.page != PAGE_PIPELINE &&
         (v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
          v.state == PIPE_STOPPING) && v.job == JOB_IDLE && !v.npu_busy &&
-        !v.done_mask && v.geo_source < 0) {
+        !v.done_mask) {
         if (v.capture && !(engine_poll(ENGINE_VIN).status & EDRV32_VIN_STATUS_IDLE_MASK)) {
-            sched_port_unlock(lock); return 1;
-        }
-        if (v.page == PAGE_PROCESS &&
-            (!(engine_poll(ENGINE_PIX).status & EDRV32_PIX_STATUS_IDLE_MASK) ||
-             !(engine_poll(ENGINE_GEO).status & EDRV32_GEO_STATUS_IDLE_MASK))) {
             sched_port_unlock(lock); return 1;
         }
         pair_release(); v.capture = 0;
@@ -954,25 +823,16 @@ int vision_service(void)
             if (v.display_owned) { sched_port_unlock(lock); return 1; }
             engine_control(ENGINE_VIN, 0);
             if (v.page == PAGE_CAMERA || v.page == PAGE_IMAGE) engine_control(ENGINE_NPU, 0);
-            if (v.page == PAGE_PROCESS) {
-                engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
-            }
             v.current = -1; v.page = PAGE_NONE; v.state = PIPE_OFF;
         } else if (v.state == PIPE_PAUSING) v.state = PIPE_FROZEN;
         else v.state = PIPE_STARTING;
     }
     if (v.job == JOB_IDLE && !v.npu_busy && !v.done_mask &&
-        v.geo_source < 0 && v.model_pending) {
+        v.model_pending) {
         model_step(); sched_port_unlock(lock); return 1;
     }
     if (v.state == PIPE_STARTING && v.page != PAGE_PIPELINE) {
-        if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
-            sched_port_unlock(lock); return 1;
-        }
         if (v.page != PAGE_IMAGE) configure_capture();
-        if (v.page == PAGE_PROCESS && v.process_dirty) {
-            sched_port_unlock(lock); return 1;
-        }
         v.state = PIPE_LIVE;
     }
     if (v.state == PIPE_LIVE && v.job == JOB_IDLE && v.model_ready &&
@@ -1000,7 +860,7 @@ int vision_service(void)
     lock = sched_port_lock();
     int busy = v.state == PIPE_STARTING || v.state == PIPE_STOPPING ||
         v.state == PIPE_PAUSING || v.state == PIPE_CONFIGURE || v.model_pending ||
-        v.job != JOB_IDLE || v.npu_busy || v.done_mask || v.geo_source >= 0;
+        v.job != JOB_IDLE || v.npu_busy || v.done_mask;
     sched_port_unlock(lock);
     return busy;
 }
@@ -1009,8 +869,7 @@ static void step(void)
 {
     int busy = vision_service();
     /* IRQ events wake idle camera work; sliced CPU work resumes immediately. */
-    unsigned cpu = v.job == JOB_POST || (v.page == PAGE_PROCESS && v.gamma_index < 256) ||
-                   v.model_pending;
+    unsigned cpu = v.job == JOB_POST || v.model_pending;
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);
 }
@@ -1053,8 +912,6 @@ const struct app vision_app_camera = {
     "视觉识别", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_camera, step, leave};
 const struct app vision_app_image = {
     "图片识别", NULL, APP_HW_NPU | APP_HW_ETH | APP_HW_VIN, 0, enter_image, step, leave};
-const struct app vision_app_process = {
-    "图像处理", NULL, APP_HW_VIN | APP_HW_PIX | APP_HW_GEO, 0, enter_process, step, leave};
 
 void vision_init(void)
 {

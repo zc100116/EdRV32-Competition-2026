@@ -134,7 +134,7 @@ int main(void)
     /* Keep runtime fixture helpers available without executing its standalone suite. */
     (void)camera_test; (void)parallel_test; (void)interrupt_restart_test;
     (void)image_test; (void)cancel_test;
-    (void)process_test; (void)model_test; (void)matrix_test;
+    (void)model_test; (void)matrix_test;
     (void)window_reopened; (void)reopened_base; (void)reopened_bytes; (void)accept_send;
     (void)bulk_completions;
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE,0x02000000,PROT_READ|PROT_WRITE,

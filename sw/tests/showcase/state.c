@@ -5,11 +5,11 @@
 #include <stdio.h>
 int main(void)
 {
-    struct board_state s={.session={.app=UI_APP_IMAGE,.state=UI_STATE_RUNNING},.error=6,
+    struct board_state s={.session={.app=UI_APP_PIPELINE,.state=UI_STATE_RUNNING},.error=6,
         .boxes=true,.detection={50,{0x12345678,0x9abcdef0,0x4321}},
         .chain_rev=0x12345678,
         .request=0x12345678,.frame=0x87654321,.image_status=UI_IMAGE_DETECTING};
-    const uint8_t exact[56]={2,2,6,1,50,0,0,0,0x78,0x56,0x34,0x12,
+    const uint8_t exact[56]={1,2,6,1,50,0,0,0,0x78,0x56,0x34,0x12,
         0xf0,0xde,0xbc,0x9a,0x21,0x43,0,0,0x78,0x56,0x34,0x12,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0x78,0x56,0x34,0x12,0x21,0x43,0x65,0x87,2,0,0,0};

@@ -19,7 +19,6 @@ uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes);
 void vision_pause(bool paused);
 bool vision_ready(ui_state_t target);
 void vision_cancel(unsigned kind);
-bool vision_process_applied(void);
 void vision_detection_changed(void);
 bool vision_detection_applied(void);
 const char *vision_report(void);
@@ -35,5 +34,4 @@ void vision_gui_presented(uint64_t tick);
 extern const struct app vision_app_pipeline;
 extern const struct app vision_app_camera;
 extern const struct app vision_app_image;
-extern const struct app vision_app_process;
 #endif
