@@ -30,7 +30,7 @@ void sched_port_unlock(uint32_t lock) { assert(locks == lock + 1); locks = lock;
 void app_wake_at(uint64_t tick) { (void)tick; }
 void engine_control(enum engine_id engine, uint32_t value) { (void)engine; (void)value; }
 struct engine_event engine_poll(enum engine_id engine)
-{ (void)engine; return (struct engine_event){.status = 2}; }
+{ return (struct engine_event){.status = engine == ENGINE_DISP && enabled ? 0 : 2}; }
 void vin_camera_size(unsigned camera, unsigned w, unsigned h)
 { assert(camera == 0 && w == 1280 && h == 720); }
 void vin_channel_configure(unsigned channel, const struct vin_channel *c)
@@ -223,6 +223,12 @@ int main(void)
         if (p.thumb_active) pipe_rnd_done();
         pipe_service();
     }
+    ui_data_chain_preset(1); pipe_service();
+    assert(p.state == DRAIN);
+    frame(); assert(!enabled); frame(); pipe_service();
+    assert(p.state == PREPARE); pipe_service();
+    assert(p.state == RUNNING && p.chain.preset == 1);
+    puts("PASS chain revision drains the old display before next-frame reconfiguration");
     pipe_stop(false); frame(); frame(); pipe_service();
     assert(pipe_ready(UI_STATE_IDLE));
     for (unsigned i = 0; i < TOKEN_COUNT; ++i) assert(!p.ref[i]);

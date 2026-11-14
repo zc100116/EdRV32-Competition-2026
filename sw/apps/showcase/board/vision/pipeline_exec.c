@@ -559,7 +559,7 @@ void pipe_display_irq(uint32_t irq)
             p.display = p.submitted; p.submitted = -1;
             p.e2e_sum += platform_ticks() - p.token[p.display].tick; ++p.frames;
         }
-        if (p.state == DRAIN && !p.stopping) disp_layer_enable(DISP_L0, 0);
+        if (p.state == DRAIN && p.stopping != 1) disp_layer_enable(DISP_L0, 0);
         else if (p.selected >= 0 && p.submitted < 0 && p.selected != p.display) {
             p.submitted = p.selected; retain(p.submitted);
             disp_submit(DISP_L0, address(p.submitted), VISION_STRIDE);
