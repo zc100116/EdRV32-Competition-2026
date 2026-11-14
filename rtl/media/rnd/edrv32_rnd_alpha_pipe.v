@@ -16,6 +16,8 @@ module edrv32_rnd_alpha_pipe (
     input wire in_argb_i,
     input wire [31:0] in_tag_i,
     output wire out_valid_o,
+    output wire [7:0] out_slice_valid_o,
+    output wire [7:0] out_slice_bank_o,
     input wire out_ready_i,
     output wire [63:0] out_pixel_o,
     output wire [31:0] out_tag_o,
@@ -47,6 +49,8 @@ module edrv32_rnd_alpha_pipe (
 
     wire advance_w;
     reg [8:0] valid_r;
+    wire valid_stage7_w;
+    assign valid_stage7_w = valid_r[7];
     reg [31:0] tag_r [0:8];
     wire [15:0] oa_w;
     reg [47:0] q_r;
@@ -79,6 +83,28 @@ module edrv32_rnd_alpha_pipe (
                 tag_r[stage] <= tag_r[stage-1];
         end
     end
+
+    // Final-stage controls are copied on the original elastic pipeline edge.
+    genvar result_slice;
+    generate for (result_slice = 0; result_slice < 8;
+        result_slice = result_slice + 1) begin : g_result_control
+        (* keep = "true", syn_preserve = 1 *) reg slice_valid_r;
+        (* keep = "true", syn_preserve = 1 *) reg bank_r;
+        always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i)
+                slice_valid_r <= 1'b0;
+            else if (clear_i)
+                slice_valid_r <= 1'b0;
+            else if (advance_w)
+                slice_valid_r <= valid_stage7_w;
+        end
+        always @(posedge clk_i) begin
+            if (advance_w)
+                bank_r <= tag_r[7][31];
+        end
+        assign out_slice_valid_o[result_slice] = slice_valid_r;
+        assign out_slice_bank_o[result_slice] = bank_r;
+    end endgenerate
 
     // Each result-RAM quadrant owns a same-cycle copy of the final shift control.
     genvar quadrant;

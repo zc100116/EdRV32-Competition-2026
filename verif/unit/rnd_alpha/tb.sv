@@ -28,6 +28,8 @@ module tb;
         .clk_i(clk), .rst_n_i(rst_n), .in_valid_i(valid), .in_ready_o(ready),
         .in_src_i(src), .in_dst_i(dst), .in_argb_i(argb_value),
         .in_tag_i(tag), .out_valid_o(out_valid), .out_ready_i(out_ready),
+        .out_slice_valid_o(),
+        .out_slice_bank_o(),
         .out_pixel_o(pixels), .out_tag_o(out_tag), .out_offset_o(offsets), .clear_i(clear_value)
     );
     function automatic int channel_expand(input int value,input int channel_value);

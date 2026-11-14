@@ -46,6 +46,8 @@ module edrv32_rnd_blit (
     input wire blend_valid_i,
     input wire [63:0] blend_pixel_i,
     input wire [31:0] blend_tag_i,
+    input wire [3:0] blend_slice_valid_i,
+    input wire [3:0] blend_slice_bank_i,
     input wire [7:0] blend_offset_i
 );
     localparam [2:0] S_LOAD_IDLE = 3'd0;
@@ -183,8 +185,34 @@ module edrv32_rnd_blit (
         rendered_r[write_bank_r];
     assign write_finish_w = write_state_r == S_WRITE_RESPONSE && wr_done_i;
     assign issue_w = render_state_r == S_RENDER_STREAM && issue_pair_r < row_pairs_w;
-    assign render_src_shift_w = src_data_w[render_bank_r] >> {memory_pair_r[1:0], 6'd0};
-    assign render_dst_shift_w = dst_data_w[render_bank_r] >> {memory_pair_r[1:0], 6'd0};
+    wire [255:0] render_src_w;
+    wire [255:0] render_dst_w;
+    genvar render_slice;
+    generate for (render_slice = 0; render_slice < 8;
+        render_slice = render_slice + 1) begin : g_render_select
+        (* keep = "true", syn_preserve = 1 *) reg bank_r;
+        wire [255:0] selected_w;
+        wire unused_selected_w;
+        always @(posedge clk_i or negedge rst_n_i) begin
+            if (!rst_n_i)
+                bank_r <= 1'b0;
+            else if (cancel_i || start_i)
+                bank_r <= 1'b0;
+            else if (render_state_r == S_RENDER_DRAIN && render_finish_w)
+                bank_r <= !render_bank_r;
+        end
+        if (render_slice < 4) begin : g_source
+            assign selected_w = src_data_w[bank_r];
+            assign render_src_w[render_slice*64 +: 64] = selected_w[render_slice*64 +: 64];
+        end else begin : g_target
+            assign selected_w = dst_data_w[bank_r];
+            assign render_dst_w[(render_slice-4)*64 +: 64] =
+                selected_w[(render_slice-4)*64 +: 64];
+        end
+        assign unused_selected_w = ^selected_w;
+    end endgenerate
+    assign render_src_shift_w = render_src_w >> {memory_pair_r[1:0], 6'd0};
+    assign render_dst_shift_w = render_dst_w >> {memory_pair_r[1:0], 6'd0};
     assign raw_src_w = render_src_shift_w[63:0];
     assign blend_src_o = {opacity(opacity_product_r[1]), source_pixel2_r[55:32],
         opacity(opacity_product_r[0]), source_pixel2_r[23:0]};
@@ -268,11 +296,21 @@ module edrv32_rnd_blit (
             .rd_addr_i(issue_pair_r[10:2]),
             .rd_data_o(src_data_w[bank])
         );
+        wire [255:0] result_data_slice_w;
+        genvar data_quadrant;
+        for (data_quadrant = 0; data_quadrant < 4;
+            data_quadrant = data_quadrant + 1) begin : g_result_data
+            (* keep = "true", syn_keep = 1 *) wire slice_write_w;
+            assign slice_write_w = blend_slice_valid_i[data_quadrant] &&
+                blend_slice_bank_i[data_quadrant] == bank;
+            assign result_data_slice_w[data_quadrant*64 +: 64] = slice_write_w ?
+                result_w[data_quadrant*64 +: 64] : rd_data_i[data_quadrant*64 +: 64];
+        end
         edrv32_ram_rnd_line u_target (
             .clk_i(clk_i),
             .wr_en_i((load_target_w || result_write_w) && !cancel_i),
             .wr_addr_i(result_write_w ? blend_tag_i[10:2] : load_beat_r),
-            .wr_data_i(result_write_w ? result_w : rd_data_i),
+            .wr_data_i(result_data_slice_w),
             .wr_strb_i(result_write_w ? result_strb_w : 32'hffff_ffff),
             .rd_en_i((render_read_w || write_read_w) && !cancel_i),
             .rd_addr_i(dst_read_addr_w),

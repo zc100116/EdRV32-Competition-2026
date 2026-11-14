@@ -12,6 +12,7 @@ module edrv32_rnd_fill (
     input wire start_i,
     input wire cancel_i,
     input wire [511:0] command_i,
+    input wire [3:0] argb_slice_i,
     output wire done_o,
     output wire [4:0] pixel_count_o,
 
@@ -119,7 +120,11 @@ module edrv32_rnd_fill (
     assign next_row_b_w = {16'd0, command_i[79:64]};
     assign span_last_w = span_bytes_r - 16'd1;
     assign color565_w = {command_i[247:243], command_i[239:234], command_i[231:227]};
-    assign wr_data_o = argb_w ? {8{{8'hff, command_i[247:224]}}} : {16{color565_w}};
+    genvar data_slice;
+    generate for (data_slice = 0; data_slice < 4; data_slice = data_slice + 1) begin : g_data
+        assign wr_data_o[data_slice*64 +: 64] = argb_slice_i[data_slice] ?
+            {2{{8'hff, command_i[247:224]}}} : {4{color565_w}};
+    end endgenerate
     assign wr_addr_o = {dst_addr_r[31:5], 5'd0};
     assign wr_bytes_o = span_bytes_r[15:0];
     assign wr_valid_o = state_r == S_DESC && !cancel_i;

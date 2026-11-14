@@ -45,6 +45,8 @@ module edrv32_rnd_draw (
     output wire [63:0] blend_dst_o,
     output wire [31:0] blend_tag_o,
     input wire [31:0] blend_tag_i,
+    input wire [3:0] blend_slice_valid_i,
+    input wire [3:0] blend_slice_bank_i,
     input wire blend_valid_i,
     input wire [63:0] blend_pixel_i,
     input wire [39:0] blend_offset_i
@@ -264,6 +266,7 @@ module edrv32_rnd_draw (
     wire issue_last_w;
     wire issue_w;
     wire pipeline_step_w;
+    wire [3:0] region_step_w;
     wire source_ready_w;
     wire miss_request_w;
     wire [31:0] miss_query_w;
@@ -489,6 +492,7 @@ module edrv32_rnd_draw (
         reg tail_r /* synthesis syn_preserve=1 */;
         wire step_w /* synthesis syn_keep=1 */;
         assign step_w = (!tail_r || blend_ready_i) && source_ready_w;
+        assign region_step_w[region] = step_w;
         always @(posedge clk_i or negedge rst_n_i) begin
             if (!rst_n_i)
                 tail_r <= 1'b0;
@@ -641,7 +645,7 @@ module edrv32_rnd_draw (
             .wr_en_i(palette_write_w),
             .wr_addr_i(palette_index_r),
             .wr_data_i(palette_shift_w[31:0]),
-            .rd_en_i(pipe_valid_r[5] && g_step[3].step_w && !cancel_i),
+            .rd_en_i(pipe_valid_r[5] && region_step_w[3] && !cancel_i),
             .rd_addr_i(raw_shift_w[pixel][7:0]),
             .rd_data_o(palette_data_w[pixel])
         );
@@ -684,7 +688,7 @@ module edrv32_rnd_draw (
                         recolor_bias_r[color_channel]) : expanded8_r[color_channel*8 +: 8];
         end
         always @(posedge clk_i) begin
-            if (g_step[pixel].step_w) begin
+            if (region_step_w[pixel]) begin
                 if (issue_w) begin
                     kx0_r <= kx_w[15:0];
                     gradient_k0_r <= {1'b0, gradient_k_w[15:0]};
@@ -842,11 +846,21 @@ module edrv32_rnd_draw (
             .rd_addr_i(issue_offset_w[13:5]),
             .rd_data_o(target_data_w[bank])
         );
+        wire [255:0] result_data_slice_w;
+        genvar data_quadrant;
+        for (data_quadrant = 0; data_quadrant < 4;
+            data_quadrant = data_quadrant + 1) begin : g_result_data
+            (* keep = "true", syn_keep = 1 *) wire slice_write_w;
+            assign slice_write_w = blend_slice_valid_i[data_quadrant] &&
+                blend_slice_bank_i[data_quadrant] == bank && !cancel_i;
+            assign result_data_slice_w[data_quadrant*64 +: 64] = slice_write_w ?
+                result_write_data_w[data_quadrant*64 +: 64] : rd_data_i[data_quadrant*64 +: 64];
+        end
         edrv32_ram_rnd_line u_result (
             .clk_i(clk_i),
             .wr_en_i(target_load_w || result_write_w),
             .wr_addr_i(result_write_w ? blend_tag_i[13:5] : load_beat_r),
-            .wr_data_i(result_write_w ? result_write_data_w : rd_data_i),
+            .wr_data_i(result_data_slice_w),
             .wr_strb_i(result_write_w ? result_write_strb_w : 32'hffff_ffff),
             .rd_en_i(write_read_w),
             .rd_addr_i(write_state_r == S_WRITE_DESC ? 9'd0 : next_write_w[8:0]),
@@ -1227,7 +1241,7 @@ module edrv32_rnd_draw (
         end
     end
     always @(posedge clk_i) begin
-        if (g_step[2].step_w) begin
+        if (region_step_w[2]) begin
             if (issue_w) begin
                 pipe_tag_r[0] <= {render_bank_r, issue_last_w, issue_pair_w,
                     15'd0, issue_offset_w[13:0]};
