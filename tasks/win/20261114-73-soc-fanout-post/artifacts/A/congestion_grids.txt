@@ -1,7 +1,8 @@
-Snapshot: 2026-11-14T15:46:14+08:00
+Snapshot: 2026-11-14T16:20:43+08:00
 Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/place_route/CongestionPlot
 Rows increase downward. Negative cells are masked. PDS grid values are shown using a common A/B scale.
 general_round | pds_iteration | PDS file | shape | max | positive cells | peak (column,row), first of ties
 1 | 7 | CongestionPlotMT_0.txt | 255 x 123 | 67 | 21617 | (30,189)
 7 | 13 | CongestionPlotMT_6.txt | 255 x 123 | 36 | 19987 | (12,188)
 8 | 14 | CongestionPlotMT_7.txt | 255 x 123 | 36 | 19492 | (14,210)
+9 | 15 | CongestionPlotMT_8.txt | 255 x 123 | 29 | 19009 | (24,193)
