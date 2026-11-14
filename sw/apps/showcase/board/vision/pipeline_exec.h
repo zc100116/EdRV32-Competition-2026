@@ -17,7 +17,7 @@ int pipe_service(void);
 void pipe_irq(const struct engine_event *event, unsigned engine);
 void pipe_display_irq(uint32_t irq);
 void pipe_rnd_done(void);
-void pipe_rnd_failed(uint32_t error);
+void pipe_hardware_error(uint32_t error);
 void pipe_npu_done(void);
 void pipe_npu_time(uint64_t ticks);
 const char *pipe_report(void);

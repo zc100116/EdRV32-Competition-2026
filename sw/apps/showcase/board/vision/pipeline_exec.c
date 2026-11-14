@@ -746,4 +746,4 @@ const lv_image_dsc_t *ui_data_thumb(unsigned block)
     unsigned index = block == UI_VIEW_FINAL ? 8 : block;
     return p.thumb_valid & (1u << index) ? &p.thumbs[index] : NULL;
 }
-void pipe_rnd_failed(uint32_t error) { p.error = error; }
+void pipe_hardware_error(uint32_t error) { p.error = error; }

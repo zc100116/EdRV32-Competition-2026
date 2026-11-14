@@ -162,7 +162,7 @@ static void rnd_event(const struct rnd_result *result, void *context)
     rnd_irq_tick = platform_ticks();
     uint32_t perf[6]; rnd_read_perf(perf); rnd_cycles+=perf[0];
     if (result->error && rnd_owner == 2) {
-        pipe_rnd_failed(result->error);
+        pipe_hardware_error(result->error);
         sched_signal(&application_task, PLATFORM_RND);
         return;
     }
@@ -185,6 +185,11 @@ static void rnd_event(const struct rnd_result *result, void *context)
 static void disp_event(const struct engine_event *event, void *context)
 {
     (void)context;
+    if (event->error && ui_data_session().app == UI_APP_PIPELINE) {
+        pipe_hardware_error(event->error);
+        sched_signal(&application_task, 0x100);
+        return;
+    }
     if (event->error) {
         platform_puts("DISP ERR_CODE="); platform_put_hex(event->error);
         platform_puts("\r\n"); platform_stop();
