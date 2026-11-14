@@ -1,0 +1,45 @@
+General round 1 | PDS iteration 7
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST-B/place_route/CongestionNetInfo/CongestionNetInfo_0.txt
+congestion value : 674, drive info : CLMS_543_619:Y1, design net name : u_rnd/cancel_region_w [6]
+congestion value : 589, drive info : CLMA_165_300:Y0, design net name : u_cpu/u_core/d_swap_w
+congestion value : 587, drive info : CLMS_513_799:Q0, design net name : u_mem/u_xbar/w_port_r [2]
+congestion value : 584, drive info : CLMA_93_132:Q3, design net name : u_cpu/u_dcache/victim_r
+congestion value : 583, drive info : CLMA_591_534:CR0, design net name : u_rnd/state_r_reg [5]
+congestion value : 580, drive info : CLMA_519_775:Q3, design net name : u_mem/u_xbar/w_port_r [1]
+congestion value : 486, drive info : CLMA_699_828:Q1, design net name : u_ddr3/u_ddrphy_top/calib_done
+congestion value : 471, drive info : CLMS_513_247:CR0, design net name : u_rnd/blend_tag_w [31]
+congestion value : 466, drive info : CLMA_519_775:Q2, design net name : u_mem/u_xbar/w_port_r [0]
+congestion value : 450, drive info : CLMA_453_408:CR1, design net name : u_rnd/blend_valid_w
+congestion value : 380, drive info : CLMA_99_66:Y1, design net name : u_cpu/u_dcache/tag_write_w
+congestion value : 351, drive info : CLMA_171_355:Y0, design net name : u_cpu/u_core/m_system_commit_w
+congestion value : 350, drive info : CLMA_117_409:Y0, design net name : u_cpu/u_core/u_csr/_N441517
+congestion value : 348, drive info : CLMA_537_678:CR3, design net name : u_mem/u_xbar/u_rbuf/skid_valid_r [6]
+congestion value : 344, drive info : CLMA_537_1152:Q1, design net name : u_vin/u_regs/apb_paddr_r [2]
+congestion value : 344, drive info : CLMA_171_330:CR3, design net name : u_cpu/u_core/update_index_r [4]
+congestion value : 344, drive info : CLMA_177_276:Q3, design net name : u_cpu/u_core/update_index_r [3]
+congestion value : 337, drive info : CLMA_231_288:CR3, design net name : u_cpu/u_core/update_index_r [2]
+congestion value : 296, drive info : CLMA_663_864:CR3, design net name : u_disp/u_scan/group_start_r
+congestion value : 291, drive info : CLMA_237_330:Q1, design net name : u_cpu/u_core/update_index_r [5]
+
+General round 7 | PDS iteration 13
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST-B/place_route/CongestionNetInfo/CongestionNetInfo_6.txt
+congestion value : 550, drive info : CLMA_591_534:CR0, design net name : u_rnd/state_r_reg [5]
+congestion value : 517, drive info : CLMA_453_408:CR1, design net name : u_rnd/blend_valid_w
+congestion value : 510, drive info : CLMS_543_619:Y1, design net name : u_rnd/cancel_region_w [6]
+congestion value : 490, drive info : CLMS_513_799:Q0, design net name : u_mem/u_xbar/w_port_r [2]
+congestion value : 354, drive info : CLMA_165_300:Y0, design net name : u_cpu/u_core/d_swap_w
+congestion value : 351, drive info : CLMA_171_355:Y0, design net name : u_cpu/u_core/m_system_commit_w
+congestion value : 336, drive info : CLMA_171_330:CR3, design net name : u_cpu/u_core/update_index_r [4]
+congestion value : 310, drive info : CLMA_519_775:Q3, design net name : u_mem/u_xbar/w_port_r [1]
+congestion value : 290, drive info : CLMS_681_715:Q0, design net name : u_ddr3/u_ips_ddrc_top/mcdq_wdatapath/data_out [1]
+congestion value : 266, drive info : CLMA_591_438:Q2, design net name : u_rnd/u_blit/render_bank_r
+congestion value : 263, drive info : CLMA_237_973:CR0, design net name : u_npu/u_conv/serial_valid_r
+congestion value : 256, drive info : CLMA_165_937:Q3, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [0]
+congestion value : 256, drive info : CLMA_153_907:Q3, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [1]
+congestion value : 256, drive info : CLMA_165_906:Q2, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [1]
+congestion value : 256, drive info : CLMS_195_1045:Q1, design net name : u_npu/u_conv/dp_result_rd_index_w [1]
+congestion value : 256, drive info : CLMS_195_1045:Q0, design net name : u_npu/u_conv/dp_result_rd_index_w [0]
+congestion value : 256, drive info : CLMA_171_942:Q3, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [0]
+congestion value : 256, drive info : CLMS_147_919:Q0, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[0].rd_segment_output_r [1]
+congestion value : 256, drive info : CLMS_195_1051:Q0, design net name : u_npu/u_conv/dp_result_rd_index_w [4]
+congestion value : 256, drive info : CLMA_147_882:Q2, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[6].rd_segment_output_r [1]

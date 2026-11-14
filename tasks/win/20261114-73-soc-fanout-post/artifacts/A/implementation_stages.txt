@@ -1,0 +1,15 @@
+G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/compile/run.log
+Action compile: Real time elapsed is 0h:2m:53s
+Current time: Sat Nov 14 13:21:39 2026
+Action compile: Peak memory pool usage is 864 MB
+
+G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/synthesize/run.log
+Action synthesize: Real time elapsed is 0h:9m:10s
+Current time: Sat Nov 14 13:33:07 2026
+Action synthesize: Peak memory pool usage is 4,289 MB
+
+G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/device_map/run.log
+Device mapping done.
+Action dev_map: Real time elapsed is 0h:1m:38s
+Current time: Sat Nov 14 13:34:48 2026
+Action dev_map: Peak memory pool usage is 2,424 MB

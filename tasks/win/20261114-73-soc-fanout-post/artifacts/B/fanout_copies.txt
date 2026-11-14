@@ -1,0 +1,151 @@
+PDS 工程 B
+ADS 综合网表: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST-B/synthesize/edrv32_fpga_board_full_top_syn.vm
+Device Map 报告: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST-B/device_map/edrv32_fpga_board_full_top.dmr
+Other High Fanout Signal 共 1000 条，末位扇出 64。低于列表门限表示未上榜，报告未给出精确扇出。
+
+卡 72 的高扇出网 | 卡 72 扇出 | 卡 73 扇出
+u_npu/u_conv/u_datapath/quant_tag_w[28] | 640 | 低于列表门限
+u_npu/post_active_r | 357 | 99
+u_npu/is_conv_r | 373 | 120
+u_rnd/u_copy/align_offset_r[0..4] | 256–496 | 低于列表门限
+u_rnd/u_copy/read_index_w[9] | 504 | 低于列表门限
+
+复制寄存器 | ADS 原语（PAP_PRESERVE=TRUE） | ADS 网表行 | Device Map 扇出
+
+wb1_res_en_r：64/64 个 FF
+g_lane[0].wb1_res_en_r | GTP_DFF | 1377397 | 低于列表门限
+g_lane[1].wb1_res_en_r | GTP_DFF | 1377579 | 低于列表门限
+g_lane[2].wb1_res_en_r | GTP_DFF | 1377761 | 低于列表门限
+g_lane[3].wb1_res_en_r | GTP_DFF | 1377943 | 低于列表门限
+g_lane[4].wb1_res_en_r | GTP_DFF | 1378125 | 低于列表门限
+g_lane[5].wb1_res_en_r | GTP_DFF | 1378307 | 低于列表门限
+g_lane[6].wb1_res_en_r | GTP_DFF | 1378489 | 低于列表门限
+g_lane[7].wb1_res_en_r | GTP_DFF | 1378671 | 低于列表门限
+g_lane[8].wb1_res_en_r | GTP_DFF | 1378853 | 低于列表门限
+g_lane[9].wb1_res_en_r | GTP_DFF | 1379035 | 低于列表门限
+g_lane[10].wb1_res_en_r | GTP_DFF | 1379217 | 低于列表门限
+g_lane[11].wb1_res_en_r | GTP_DFF | 1379399 | 低于列表门限
+g_lane[12].wb1_res_en_r | GTP_DFF | 1379581 | 低于列表门限
+g_lane[13].wb1_res_en_r | GTP_DFF | 1379763 | 低于列表门限
+g_lane[14].wb1_res_en_r | GTP_DFF | 1379945 | 低于列表门限
+g_lane[15].wb1_res_en_r | GTP_DFF | 1380127 | 低于列表门限
+g_lane[16].wb1_res_en_r | GTP_DFF | 1380309 | 低于列表门限
+g_lane[17].wb1_res_en_r | GTP_DFF | 1380491 | 低于列表门限
+g_lane[18].wb1_res_en_r | GTP_DFF | 1380673 | 低于列表门限
+g_lane[19].wb1_res_en_r | GTP_DFF | 1380855 | 低于列表门限
+g_lane[20].wb1_res_en_r | GTP_DFF | 1381037 | 低于列表门限
+g_lane[21].wb1_res_en_r | GTP_DFF | 1381219 | 低于列表门限
+g_lane[22].wb1_res_en_r | GTP_DFF | 1381401 | 低于列表门限
+g_lane[23].wb1_res_en_r | GTP_DFF | 1381583 | 低于列表门限
+g_lane[24].wb1_res_en_r | GTP_DFF | 1381765 | 低于列表门限
+g_lane[25].wb1_res_en_r | GTP_DFF | 1381947 | 低于列表门限
+g_lane[26].wb1_res_en_r | GTP_DFF | 1382129 | 低于列表门限
+g_lane[27].wb1_res_en_r | GTP_DFF | 1382311 | 低于列表门限
+g_lane[28].wb1_res_en_r | GTP_DFF | 1382493 | 低于列表门限
+g_lane[29].wb1_res_en_r | GTP_DFF | 1382675 | 低于列表门限
+g_lane[30].wb1_res_en_r | GTP_DFF | 1382857 | 低于列表门限
+g_lane[31].wb1_res_en_r | GTP_DFF | 1383039 | 低于列表门限
+g_lane[32].wb1_res_en_r | GTP_DFF | 1383221 | 低于列表门限
+g_lane[33].wb1_res_en_r | GTP_DFF | 1383403 | 低于列表门限
+g_lane[34].wb1_res_en_r | GTP_DFF | 1383585 | 低于列表门限
+g_lane[35].wb1_res_en_r | GTP_DFF | 1383767 | 低于列表门限
+g_lane[36].wb1_res_en_r | GTP_DFF | 1383949 | 低于列表门限
+g_lane[37].wb1_res_en_r | GTP_DFF | 1384131 | 低于列表门限
+g_lane[38].wb1_res_en_r | GTP_DFF | 1384313 | 低于列表门限
+g_lane[39].wb1_res_en_r | GTP_DFF | 1384495 | 低于列表门限
+g_lane[40].wb1_res_en_r | GTP_DFF | 1384677 | 低于列表门限
+g_lane[41].wb1_res_en_r | GTP_DFF | 1384859 | 低于列表门限
+g_lane[42].wb1_res_en_r | GTP_DFF | 1385041 | 低于列表门限
+g_lane[43].wb1_res_en_r | GTP_DFF | 1385223 | 低于列表门限
+g_lane[44].wb1_res_en_r | GTP_DFF | 1385405 | 低于列表门限
+g_lane[45].wb1_res_en_r | GTP_DFF | 1385587 | 低于列表门限
+g_lane[46].wb1_res_en_r | GTP_DFF | 1385769 | 低于列表门限
+g_lane[47].wb1_res_en_r | GTP_DFF | 1385951 | 低于列表门限
+g_lane[48].wb1_res_en_r | GTP_DFF | 1386133 | 低于列表门限
+g_lane[49].wb1_res_en_r | GTP_DFF | 1386315 | 低于列表门限
+g_lane[50].wb1_res_en_r | GTP_DFF | 1386497 | 低于列表门限
+g_lane[51].wb1_res_en_r | GTP_DFF | 1386679 | 低于列表门限
+g_lane[52].wb1_res_en_r | GTP_DFF | 1386861 | 低于列表门限
+g_lane[53].wb1_res_en_r | GTP_DFF | 1387043 | 低于列表门限
+g_lane[54].wb1_res_en_r | GTP_DFF | 1387225 | 低于列表门限
+g_lane[55].wb1_res_en_r | GTP_DFF | 1387407 | 低于列表门限
+g_lane[56].wb1_res_en_r | GTP_DFF | 1387589 | 低于列表门限
+g_lane[57].wb1_res_en_r | GTP_DFF | 1387771 | 低于列表门限
+g_lane[58].wb1_res_en_r | GTP_DFF | 1387953 | 低于列表门限
+g_lane[59].wb1_res_en_r | GTP_DFF | 1388135 | 低于列表门限
+g_lane[60].wb1_res_en_r | GTP_DFF | 1388317 | 低于列表门限
+g_lane[61].wb1_res_en_r | GTP_DFF | 1388499 | 低于列表门限
+g_lane[62].wb1_res_en_r | GTP_DFF | 1388681 | 低于列表门限
+g_lane[63].wb1_res_en_r | GTP_DFF | 1388863 | 低于列表门限
+
+post_active_slice_r：8/8 个 FF
+g_write_slice[0].post_active_slice_r | GTP_DFF_CE | 1831170 | 低于列表门限
+g_write_slice[1].post_active_slice_r | GTP_DFF_CE | 1831194 | 低于列表门限
+g_write_slice[2].post_active_slice_r | GTP_DFF_CE | 1831218 | 低于列表门限
+g_write_slice[3].post_active_slice_r | GTP_DFF_CE | 1831242 | 低于列表门限
+g_write_slice[4].post_active_slice_r | GTP_DFF_CE | 1831266 | 低于列表门限
+g_write_slice[5].post_active_slice_r | GTP_DFF_CE | 1831290 | 低于列表门限
+g_write_slice[6].post_active_slice_r | GTP_DFF_CE | 1831314 | 低于列表门限
+g_write_slice[7].post_active_slice_r | GTP_DFF_CE | 1831338 | 低于列表门限
+
+is_conv_slice_r：8/8 个 FF
+g_write_slice[0].is_conv_slice_r | GTP_DFF_CE | 1831158 | 低于列表门限
+g_write_slice[1].is_conv_slice_r | GTP_DFF_CE | 1831182 | 低于列表门限
+g_write_slice[2].is_conv_slice_r | GTP_DFF_CE | 1831206 | 低于列表门限
+g_write_slice[3].is_conv_slice_r | GTP_DFF_CE | 1831230 | 低于列表门限
+g_write_slice[4].is_conv_slice_r | GTP_DFF_CE | 1831254 | 低于列表门限
+g_write_slice[5].is_conv_slice_r | GTP_DFF_CE | 1831278 | 低于列表门限
+g_write_slice[6].is_conv_slice_r | GTP_DFF_CE | 1831302 | 低于列表门限
+g_write_slice[7].is_conv_slice_r | GTP_DFF_CE | 1831326 | 低于列表门限
+
+align_offset_r：40/40 个 FF
+g_alignment[0].align_offset_r[0] | GTP_DFF_E | 2108119 | 低于列表门限
+g_alignment[0].align_offset_r[1] | GTP_DFF_E | 2108129 | 低于列表门限
+g_alignment[0].align_offset_r[2] | GTP_DFF_E | 2108139 | 低于列表门限
+g_alignment[0].align_offset_r[3] | GTP_DFF_E | 2108149 | 低于列表门限
+g_alignment[0].align_offset_r[4] | GTP_DFF_E | 2108159 | 低于列表门限
+g_alignment[1].align_offset_r[0] | GTP_DFF_E | 2108181 | 低于列表门限
+g_alignment[1].align_offset_r[1] | GTP_DFF_E | 2108191 | 低于列表门限
+g_alignment[1].align_offset_r[2] | GTP_DFF_E | 2108201 | 低于列表门限
+g_alignment[1].align_offset_r[3] | GTP_DFF_E | 2108211 | 低于列表门限
+g_alignment[1].align_offset_r[4] | GTP_DFF_E | 2108221 | 低于列表门限
+g_alignment[2].align_offset_r[0] | GTP_DFF_E | 2108243 | 低于列表门限
+g_alignment[2].align_offset_r[1] | GTP_DFF_E | 2108253 | 低于列表门限
+g_alignment[2].align_offset_r[2] | GTP_DFF_E | 2108263 | 低于列表门限
+g_alignment[2].align_offset_r[3] | GTP_DFF_E | 2108273 | 低于列表门限
+g_alignment[2].align_offset_r[4] | GTP_DFF_E | 2108283 | 低于列表门限
+g_alignment[3].align_offset_r[0] | GTP_DFF_E | 2108305 | 低于列表门限
+g_alignment[3].align_offset_r[1] | GTP_DFF_E | 2108315 | 低于列表门限
+g_alignment[3].align_offset_r[2] | GTP_DFF_E | 2108325 | 低于列表门限
+g_alignment[3].align_offset_r[3] | GTP_DFF_E | 2108335 | 低于列表门限
+g_alignment[3].align_offset_r[4] | GTP_DFF_E | 2108345 | 低于列表门限
+g_alignment[4].align_offset_r[0] | GTP_DFF_E | 2108367 | 低于列表门限
+g_alignment[4].align_offset_r[1] | GTP_DFF_E | 2108377 | 低于列表门限
+g_alignment[4].align_offset_r[2] | GTP_DFF_E | 2108387 | 低于列表门限
+g_alignment[4].align_offset_r[3] | GTP_DFF_E | 2108397 | 低于列表门限
+g_alignment[4].align_offset_r[4] | GTP_DFF_E | 2108407 | 低于列表门限
+g_alignment[5].align_offset_r[0] | GTP_DFF_E | 2108429 | 低于列表门限
+g_alignment[5].align_offset_r[1] | GTP_DFF_E | 2108439 | 低于列表门限
+g_alignment[5].align_offset_r[2] | GTP_DFF_E | 2108449 | 低于列表门限
+g_alignment[5].align_offset_r[3] | GTP_DFF_E | 2108459 | 低于列表门限
+g_alignment[5].align_offset_r[4] | GTP_DFF_E | 2108469 | 低于列表门限
+g_alignment[6].align_offset_r[0] | GTP_DFF_E | 2108491 | 低于列表门限
+g_alignment[6].align_offset_r[1] | GTP_DFF_E | 2108501 | 低于列表门限
+g_alignment[6].align_offset_r[2] | GTP_DFF_E | 2108511 | 低于列表门限
+g_alignment[6].align_offset_r[3] | GTP_DFF_E | 2108521 | 低于列表门限
+g_alignment[6].align_offset_r[4] | GTP_DFF_E | 2108531 | 低于列表门限
+g_alignment[7].align_offset_r[0] | GTP_DFF_E | 2108553 | 低于列表门限
+g_alignment[7].align_offset_r[1] | GTP_DFF_E | 2108563 | 低于列表门限
+g_alignment[7].align_offset_r[2] | GTP_DFF_E | 2108573 | 低于列表门限
+g_alignment[7].align_offset_r[3] | GTP_DFF_E | 2108583 | 低于列表门限
+g_alignment[7].align_offset_r[4] | GTP_DFF_E | 2108593 | 低于列表门限
+
+read_overflow_r：8/8 个 FF
+g_alignment[0].read_overflow_r | GTP_DFF_CE | 2108169 | 低于列表门限
+g_alignment[1].read_overflow_r | GTP_DFF_CE | 2108231 | 低于列表门限
+g_alignment[2].read_overflow_r | GTP_DFF_CE | 2108293 | 低于列表门限
+g_alignment[3].read_overflow_r | GTP_DFF_CE | 2108355 | 低于列表门限
+g_alignment[4].read_overflow_r | GTP_DFF_CE | 2108417 | 低于列表门限
+g_alignment[5].read_overflow_r | GTP_DFF_CE | 2108479 | 低于列表门限
+g_alignment[6].read_overflow_r | GTP_DFF_CE | 2108541 | 低于列表门限
+g_alignment[7].read_overflow_r | GTP_DFF_CE | 2108603 | 低于列表门限
