@@ -1,0 +1,88 @@
+[21:01:08.084][RX]
+[21:01:08.084][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[21:01:08.084][RX]   E         D   D   R   R   V   V      3      2
+[21:01:08.084][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[21:01:08.084][RX]   E         D   D   R  R     V V       3   2
+[21:01:08.084][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[21:01:08.084][RX]
+[21:01:08.084][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[21:01:08.084][RX] CHIP_ID: 0xed320001
+[21:01:08.084][RX] CLK_SYS_HZ: 125000000
+[21:01:08.084][RX] ROM bytes: 16384
+[21:01:08.084][RX] SRAM bytes: 65536
+[21:01:08.084][RX] I-cache bytes: 8192
+[21:01:08.084][RX] D-cache bytes: 8192
+[21:01:08.084][RX] MEM_READY: 1
+[21:01:08.084][RX] Build commit: 92b38fd2
+[21:01:08.084][RX] Compiler version: GCC 15.2.0
+[21:01:08.208][RX] Boot SRAM
+[21:01:08.208][RX] Monitor: EdRV32
+[21:01:08.208][RX] Menu: 1=CoreMark 2=Peripheral tests 3=System info
+[21:01:35.510][RX]
+[21:01:35.510][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[21:01:35.510][RX]   E         D   D   R   R   V   V      3      2
+[21:01:35.510][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[21:01:35.510][RX]   E         D   D   R  R     V V       3   2
+[21:01:35.510][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[21:01:35.510][RX]
+[21:01:35.510][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[21:01:35.510][RX] CHIP_ID: 0xed320001
+[21:01:35.510][RX] CLK_SYS_HZ: 125000000
+[21:01:35.510][RX] ROM bytes: 16384
+[21:01:35.510][RX] SRAM bytes: 65536
+[21:01:35.510][RX] I-cache bytes: 8192
+[21:01:35.510][RX] D-cache bytes: 8192
+[21:01:35.510][RX] MEM_READY: 1
+[21:01:35.511][RX] Build commit: 92b38fd2
+[21:01:35.511][RX] Compiler version: GCC 15.2.0
+[21:01:35.631][RX] BIOS: EdRV32
+[21:01:35.631][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:01:43.524][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[21:01:43.531][RX] Input error: type 1-4 then Enter
+[21:01:43.531][SYS] Input error: type 1-4 then Enter
+[21:01:43.531][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:01:46.670][RX] ETH link: up
+[21:01:46.670][RX] ETH load ready 192.168.1.10:5000
+[21:01:47.109][SYS] 等待网卡 以太网 就绪 … 用时 0.4 s
+[21:01:47.245][RX] Load bytes: 12769664 segments: 5
+[21:01:47.245][RX] Load result: PASS
+[21:01:47.245][RX] Run: 0x90000000
+[21:01:48.117][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[21:01:48.117][RX] Showcase: EdRV32 showcase v2
+[21:01:48.175][RX] ETH peer IP: 0xc0a80102
+[21:01:48.186][RX] ETH peer port: 60019
+[21:01:48.195][RX] showcase first frame
+[21:04:44.698][RX] NES input�
+[21:04:44.698][RX]   EEEEEEE   DDDD    RRRRR   V   V   3333   2222
+[21:04:44.698][RX]   E         D   D   R   R   V   V      3      2
+[21:04:44.698][RX]   EEEE      D   D   RRRRR    V V    3333   2222
+[21:04:44.698][RX]   E         D   D   R  R     V V       3   2
+[21:04:44.698][RX]   EEEEEEE   DDDD    R    R    V     3333   2222
+[21:04:44.698][RX]
+[21:04:44.698][RX]   EdRV32 Boot ROM - UART 115200 8N1
+[21:04:44.698][RX] CHIP_ID: 0xed320001
+[21:04:44.698][RX] CLK_SYS_HZ: 125000000
+[21:04:44.698][RX] ROM bytes: 16384
+[21:04:44.698][RX] SRAM bytes: 65536
+[21:04:44.698][RX] I-cache bytes: 8192
+[21:04:44.698][RX] D-cache bytes: 8192
+[21:04:44.698][RX] MEM_READY: 1
+[21:04:44.698][RX] Build commit: 92b38fd2
+[21:04:44.698][RX] Compiler version: GCC 15.2.0
+[21:04:44.802][RX] BIOS: EdRV32
+[21:04:44.802][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:04:55.380][SYS] 已在 BIOS 菜单时直接开始；否则按住 KEY1 并复位
+[21:04:55.389][RX] Input error: type 1-4 then Enter
+[21:04:55.389][SYS] Input error: type 1-4 then Enter
+[21:04:55.389][RX] BIOS menu: 1=UART load 2=ETH load 3=Run 4=Baud
+[21:04:58.570][RX] ETH link: up
+[21:04:58.570][RX] ETH load ready 192.168.1.10:5000
+[21:04:58.896][SYS] 等待网卡 以太网 就绪 … 用时 0.3 s
+[21:04:59.182][RX] Load bytes: 12777688 segments: 5
+[21:04:59.182][RX] Load result: PASS
+[21:04:59.182][RX] Run: 0x90000000
+[21:05:00.053][RX] LVGL v9.6.0 DIRECT ARGB8888 1280x720 batch=32
+[21:05:00.053][RX] Showcase: EdRV32 showcase v2
+[21:05:00.113][RX] ETH peer IP: 0xc0a80102
+[21:05:00.123][RX] ETH peer port: 61344
+[21:05:00.133][RX] showcase first frame
