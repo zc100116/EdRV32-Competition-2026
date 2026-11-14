@@ -116,7 +116,7 @@ enum { UI_BLOCK_MAX = 8 };
 enum { UI_BLOCK_NONE, UI_BLOCK_LEVEL, UI_BLOCK_GAMMA, UI_BLOCK_FILTER, UI_BLOCK_GRAY,
        UI_BLOCK_BINARY, UI_BLOCK_INVERT, UI_BLOCK_GEO, UI_BLOCK_DETECT, UI_BLOCK_OVERLAY };
 enum { UI_SOURCE_CAMERA, UI_SOURCE_PC_IMAGE, UI_SOURCE_TEST_IMAGE };
-enum { UI_VIEW_FINAL = 0xff };
+enum { UI_VIEW_FINAL = 0xff, UI_VIEW_SOURCE = 0xfe };
 typedef struct { uint8_t type, flags; int16_t p[5]; } ui_block_t;
 typedef struct {
     uint8_t source, count, view, preset;
