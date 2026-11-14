@@ -32,9 +32,9 @@ def preset(number):
         [detect, overlay],
         [block(4), block(3, p=[4]), detect, overlay],
         [block(7, p=[90, 100]), detect, overlay],
-        [block(7, p=[0, 200, -320, -180]), detect, overlay],
-        [detect, block(9, 3), block(7, p=[30, 80])],
-        [block(2, p=[16]), block(1, p=[0, 320]), block(3), detect, overlay],
+        [block(7, p=[0, 200, -160, -90]), detect, overlay],
+        [detect, block(9, 3), block(7, p=[30, 75])],
+        [block(2, p=[18]), block(1, p=[16, 320]), block(3), detect, overlay],
         [block(3), block(3, p=[4]), block(5), block(3, p=[6]), block(3)],
         [detect, overlay],
     ]

@@ -73,7 +73,7 @@ void pipe_chain_preset(ui_chain_t *c, unsigned preset)
     default: break;
     }
     add(c, UI_BLOCK_DETECT, 0, 0, 0, 0);
-    if (preset != 8) add(c, UI_BLOCK_OVERLAY, preset == 5 ? 3 : 1, 0, 0, 0);
+    add(c, UI_BLOCK_OVERLAY, preset == 5 ? 3 : 1, 0, 0, 0);
     if (preset == 5) add(c, UI_BLOCK_GEO, 0, 30, 75, 0);
 }
 static int pix(unsigned type) { return type >= UI_BLOCK_LEVEL && type <= UI_BLOCK_INVERT; }

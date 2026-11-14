@@ -103,9 +103,9 @@ static void compile(void)
 }
 static void presets(void)
 {
-    const unsigned count[] = {3,4,4,4,4,4,2,1};
+    const unsigned count[] = {3,4,4,4,4,4,2,2};
     const unsigned engine[][4] = {{1,3,5},{0,2,3,5},{1,4,3,5},{1,4,3,5},
-        {1,3,5,4},{0,2,3,5},{0,2},{3}};
+        {1,3,5,4},{0,2,3,5},{0,2},{3,5}};
     for (unsigned i = 1; i <= 8; ++i) {
         pipe_chain_preset(&chain,i); expect(count[i-1], engine[i-1]);
         assert(chain.preset == i);

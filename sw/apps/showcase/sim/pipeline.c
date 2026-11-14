@@ -54,7 +54,7 @@ void ui_data_chain_preset(unsigned preset)
         {.count=2,.block={{.type=8},{.type=9,.flags=1}}},
         {.count=4,.block={{.type=4},{.type=3,.p={4}},{.type=8},{.type=9,.flags=1}}},
         {.count=3,.block={{.type=7,.p={90,100}},{.type=8},{.type=9,.flags=1}}},
-        {.count=3,.block={{.type=7,.p={0,200,-320,-120}},{.type=8},{.type=9,.flags=1}}},
+        {.count=3,.block={{.type=7,.p={0,200,-160,-90}},{.type=8},{.type=9,.flags=1}}},
         {.count=3,.block={{.type=8},{.type=9,.flags=3},{.type=7,.p={30,75}}}},
         {.count=5,.block={{.type=2,.p={18}},{.type=1,.p={16,320}},{.type=3,.p={2}},
             {.type=8},{.type=9,.flags=1}}},

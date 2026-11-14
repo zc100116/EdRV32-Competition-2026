@@ -327,8 +327,15 @@ void ui_pipeline_update(void)
         else lv_snprintf(s,sizeof s,"%u–%u  %u.%u ms",h.first+1,h.last+1,h.us/1000,h.us/100%10);
         ui_label(path_rows,s,222,(int)i*22,&sim_font_14,MUTED);
     }
-    lv_snprintf(s,sizeof s,"端到端 %u.%u ms   ·   %u fps   ·   框滞后 %u ms",
-        stats.e2e_us/1000,stats.e2e_us/100%10,stats.fps,stats.box_lag_us/1000);
+    // Box lag only exists when the chain samples frames for detection.
+    bool detect=false;
+    for(unsigned i=0;i<c.count;++i) detect=detect || c.block[i].type==UI_BLOCK_DETECT;
+    if(detect)
+        lv_snprintf(s,sizeof s,"端到端 %u.%u ms   ·   %u fps   ·   框滞后 %u ms",
+            stats.e2e_us/1000,stats.e2e_us/100%10,stats.fps,stats.box_lag_us/1000);
+    else
+        lv_snprintf(s,sizeof s,"端到端 %u.%u ms   ·   %u fps",
+            stats.e2e_us/1000,stats.e2e_us/100%10,stats.fps);
     ui_text(metrics,s);
     lv_snprintf(s,sizeof s,"DDR  %u.%02u / %u.%02u GB/s",stats.ddr_mbps/1000,
         stats.ddr_mbps/10%100,stats.ddr_limit_mbps/1000,stats.ddr_limit_mbps/10%100);
