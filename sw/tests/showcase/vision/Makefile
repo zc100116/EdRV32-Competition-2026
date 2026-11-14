@@ -18,13 +18,13 @@ test:
 RUNTIME_TEST ?= runtime_test
 .PHONY: runtime network
 network:
-	$(MAKE) runtime RUNTIME_TEST=network_test
+	$(MAKE) runtime RUNTIME_TEST=network_test EXTRA_FLAGS=-DNETWORK_INTEGRATION
 runtime: $(ROOT)/build/showcase/model.c
 	mkdir -p $(OUT)
-	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
+	$(CC) $(CFLAGS) $(EXTRA_FLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
 	    -I$(ROOT)/sw/drivers/include -I$(ROOT)/sw/lib/sched -I. \
-	    -include $(UI_CONTRACT) $(RUNTIME_TEST).c $(VISION)/vision.c $(VISION)/post.c \
+	    -include $(UI_CONTRACT) $(RUNTIME_TEST).c pipe_stubs.c 	    $(VISION)/pipeline.c $(VISION)/pipeline_exec.c $(VISION)/vision.c $(VISION)/post.c \
 	    $(VISION)/wire.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
 	    $(ROOT)/build/showcase/model.c $(ROOT)/sw/apps/showcase/board/session.c \

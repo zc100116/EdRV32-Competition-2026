@@ -20,6 +20,9 @@ struct edsc {
     uint32_t pending_seq[3];
     uint8_t previous[EDSC_STATE_BYTES];
     uint64_t state_time;
+    uint8_t chain[100];
+    uint32_t chain_rev, sent_chain_rev;
+    uint64_t pipe_time;
     const char *build;
 };
 void edsc_message(struct edsc *s, const uint8_t *data, unsigned bytes);
@@ -27,5 +30,8 @@ void edsc_finish(struct edsc *s, unsigned kind, uint32_t index);
 void edsc_bulk(struct edsc *s, uint32_t bytes);
 void edsc_cancel(struct edsc *s);
 void edsc_poll(struct edsc *s, uint64_t now, uint32_t hz);
+void edsc_chain_snapshot(struct edsc *s, uint32_t revision, const uint8_t chain[100]);
+void edsc_pipe_stats(struct edsc *s, const uint8_t *payload, unsigned bytes,
+                     uint64_t now, uint32_t hz);
 void edsc_image_step(struct edsc *s, int direction);
 #endif

@@ -7,6 +7,7 @@
 #include "model.h"
 #include "wire.h"
 #include "post.h"
+#include "pipeline_exec.h"
 #include "disp.h"
 #include "../ddr_map.h"
 #include "geo_matrix.h"
@@ -29,7 +30,7 @@
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
        REF_NPU = 16, REF_GEO = 32 };
-enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS };
+enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_PIPELINE };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
                       PIPE_STOPPING, PIPE_CONFIGURE };
@@ -40,7 +41,7 @@ static struct vision_session {
     unsigned count;
     uint32_t frame;
     enum { UPLOAD_EMPTY, UPLOAD_READY } upload;
-} sessions[4];
+} sessions[5];
 static ui_process_config_t process = {.contrast = 256, .gamma_tenths = 10,
     .stage1 = 2, .stage2 = 2, .threshold = 128, .scale_percent = 100};
 static struct {
@@ -131,6 +132,7 @@ static char image_line[240];
 const char *vision_report(void)
 {
     static char taken[sizeof image_line];
+    if (v.page == PAGE_PIPELINE) return pipe_report();
     if (v.page == PAGE_CAMERA && v.state == PIPE_LIVE) return report;
     memcpy(taken, image_line, sizeof taken);
     image_line[0] = 0;
@@ -161,8 +163,9 @@ uint32_t vision_request(void) { return request; }
 void vision_state(uint8_t payload[56])
 {
     payload[3] = (uint8_t)boxes;
-    uint32_t values[2] = {v.page == PAGE_IMAGE ? request : 0,
-        v.page == PAGE_IMAGE ? sessions[PAGE_IMAGE].frame : 0};
+    bool image = v.page == PAGE_IMAGE ||
+        (v.page == PAGE_PIPELINE && ui_data_chain().source == UI_SOURCE_PC_IMAGE);
+    uint32_t values[2] = {image ? request : 0, image ? sessions[PAGE_IMAGE].frame : 0};
     for (unsigned j = 0; j < 2; ++j)
         for (unsigned i = 0; i < 4; ++i) payload[44+j*4+i] = values[j] >> (i*8);
     payload[52] = sessions[PAGE_IMAGE].data.image_status;
@@ -185,6 +188,7 @@ void vision_cancel(unsigned kind)
     uint32_t lock = sched_port_lock();
     if (kind == 1) { v.model_pending = 0; sched_port_unlock(lock); return; }
     timing.cancelled = true;
+    if (v.page == PAGE_PIPELINE) pipe_cancel_upload();
     /* After CH2, NPU/TX use only CH2 and the output snapshot. Release the
      * cancelled upload surface so a new folder can immediately reserve it. */
     if (v.page == PAGE_IMAGE && v.job >= JOB_NPU) {
@@ -261,6 +265,7 @@ void vision_irq(const struct engine_event *event, void *context)
 {
     uint32_t lock = sched_port_lock();
     unsigned engine = (unsigned)(uintptr_t)context;
+    if (v.page == PAGE_PIPELINE) pipe_irq(event, engine);
     irq_flags[engine] |= event->irq;
     irq_errors[engine] |= event->error;
     if (engine == ENGINE_VIN) {
@@ -288,6 +293,10 @@ void vision_irq(const struct engine_event *event, void *context)
         v.post_owned |= 1u << buffer;
         v.npu_buffer ^= 1u;
         v.npu_busy = 0;
+        if (v.page == PAGE_PIPELINE) {
+            pipe_npu_time(v.done[buffer].done - v.done[buffer].start);
+            pipe_npu_done();
+        }
         timing.last_done = v.done[buffer].done;
         timing.gap_pending = true;
         if (v.page == PAGE_CAMERA) {
@@ -318,6 +327,7 @@ static void queue_image(int slot)
 void vision_display_irq(uint32_t irq)
 {
     uint32_t lock = sched_port_lock();
+    if (v.page == PAGE_PIPELINE) pipe_display_irq(irq);
     irq_flags[ENGINE_DISP] |= irq;
     sched_port_unlock(lock);
 }
@@ -374,9 +384,20 @@ ui_vision_t ui_data_vision(void)
         timing.gui_taken = true; gui_armed = 1;
     }
     sessions[v.page].data.image = take_image();
+    if (v.page == PAGE_PIPELINE) {
+        ui_pipe_stats_t stats = ui_data_pipe_stats();
+        sessions[v.page].data.fps = stats.fps;
+        sessions[v.page].data.npu_tenths = stats.npu_us/100;
+        sessions[v.page].data.latency_tenths = stats.e2e_us/100;
+        sessions[v.page].data.image_name = sessions[PAGE_IMAGE].data.image_name;
+        sessions[v.page].data.image_index = sessions[PAGE_IMAGE].data.image_index;
+        sessions[v.page].data.image_total = sessions[PAGE_IMAGE].data.image_total;
+        sessions[v.page].data.image_status = sessions[PAGE_IMAGE].data.image_status;
+    }
     ui_vision_t result=sessions[v.page].data;
     result.boxes = boxes;
     ui_detection_filter(&result,sessions[v.page].raw,sessions[v.page].count);
+    if (v.page == PAGE_PIPELINE) pipe_map_detections(result.targets, result.count);
     detection_armed = detection_revision;
     return result;
 }
@@ -446,6 +467,9 @@ static void enter_image(void) { request_page(PAGE_IMAGE); }
 static void enter_process(void) { request_page(PAGE_PROCESS); }
 static void leave(void)
 {
+    if (v.page == PAGE_PIPELINE) {
+        pipe_stop(false); vision_cancel(2); v.state = PIPE_STOPPING; return;
+    }
     uint32_t lock = sched_port_lock();
     v.state = PIPE_STOPPING;
     vision_cancel(2);
@@ -456,6 +480,10 @@ static void leave(void)
 }
 void vision_pause(bool paused)
 {
+    if (v.page == PAGE_PIPELINE) {
+        if (paused) pipe_stop(true); else pipe_resume();
+        return;
+    }
     uint32_t lock = sched_port_lock();
     if (paused) { v.state = PIPE_PAUSING; stop_capture(); }
     else v.state = PIPE_STARTING;
@@ -464,6 +492,8 @@ void vision_pause(bool paused)
 }
 bool vision_ready(ui_state_t target)
 {
+    if (v.page == PAGE_PIPELINE)
+        return pipe_ready(target) && (target == UI_STATE_RUNNING || vision_pipe_idle());
     if (target == UI_STATE_IDLE) return v.state == PIPE_OFF;
     if (target == UI_STATE_PAUSED) return v.state == PIPE_FROZEN;
     return v.state == PIPE_LIVE;
@@ -545,7 +575,7 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
     timing.last_start = v.npu_start;
     engine_control(ENGINE_NPU, EDRV32_NPU_CTRL_ENABLE_MASK);
     uint32_t post = VISION_POST_BASE + v.npu_buffer * VISION_POST_SPACING;
-    if (v.page == PAGE_CAMERA) {
+    if (v.page == PAGE_CAMERA || v.page == PAGE_PIPELINE) {
         /* Task cleaned the whole block before releasing post_owned (SoC 7.4).
          * IRQ restart only selects registers; no cache operation or post work. */
         mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET, post);
@@ -627,6 +657,7 @@ static void publish_result(void)
         sessions[v.page].raw[i]=(ui_detection_t){ui_coco_names[d->class_id],d->score/10,
             d->x0,d->y0,d->x1-d->x0,d->y1-d->y0,d->class_id};
     }
+    if (v.page == PAGE_PIPELINE) pipe_detection_published(timing.vin);
     timing.handoff = platform_ticks();
     timing.completed[0] = timing.npu_done - timing.job_npu_start;
     timing.sums[9] += timing.copy_ticks;
@@ -649,6 +680,7 @@ static void finish_job(void)
         if (v.capture) vin_slots_busy(2, v.input_busy);
     }
     v.job = JOB_IDLE;
+    if (v.page == PAGE_PIPELINE && v.image_job) pipe_detection_release();
 }
 uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)
 {
@@ -677,7 +709,8 @@ uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)
         v.receive_ticks = v.upload_complete - v.receive_start;
         v.upload_base = base;
         v.upload_bytes = bytes;
-        sessions[PAGE_IMAGE].upload = UPLOAD_READY;
+        if (v.page == PAGE_PIPELINE) pipe_upload(base);
+        else sessions[PAGE_IMAGE].upload = UPLOAD_READY;
         sessions[PAGE_IMAGE].data.image_status = UI_IMAGE_DETECTING;
     }
     uint32_t lock = sched_port_lock();
@@ -797,7 +830,7 @@ int vision_service(void)
     for (unsigned i = 0; i < 4; ++i) {
         if (errors[engines[i]] || (flags[engines[i]] & error_masks[i])) fail(messages[i]);
     }
-    display_step(flags[ENGINE_DISP]);
+    if (v.page != PAGE_PIPELINE) display_step(flags[ENGINE_DISP]);
     if (v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
         v.state == PIPE_STOPPING) stop_capture();
     if (flags[ENGINE_GEO] & EDRV32_GEO_IRQ_STAT_DONE_MASK) {
@@ -818,7 +851,8 @@ int vision_service(void)
         timing.vin = v.done[buffer].vin;
         v.job_input = v.done[buffer].input;
         v.job_frame = v.done[buffer].frame;
-        v.image_job = v.page == PAGE_IMAGE;
+        v.image_job = v.page == PAGE_IMAGE ||
+            (v.page == PAGE_PIPELINE && ui_data_chain().source == UI_SOURCE_PC_IMAGE);
         if (!v.image_job) v.job_image = v.done[buffer].image;
         v.post_buffer = buffer;
         unsigned post_count = v.done[buffer].count;
@@ -894,6 +928,7 @@ int vision_service(void)
         if (complete) {
             v.post_owned &= ~(1u << v.post_buffer);
             camera_start();
+            if (v.page == PAGE_PIPELINE) pipe_detection_available();
             if (!timing.cancelled) publish_result();
             if (v.image_job && !timing.cancelled) {
                 v.send_start = platform_ticks(); v.job = JOB_SEND;
@@ -902,7 +937,8 @@ int vision_service(void)
     } else if (v.job == JOB_SEND) {
         if (timing.cancelled) finish_job(); else send_results();
     }
-    if ((v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
+    if (v.page != PAGE_PIPELINE &&
+        (v.state == PIPE_CONFIGURE || v.state == PIPE_PAUSING ||
          v.state == PIPE_STOPPING) && v.job == JOB_IDLE && !v.npu_busy &&
         !v.done_mask && v.geo_source < 0) {
         if (v.capture && !(engine_poll(ENGINE_VIN).status & EDRV32_VIN_STATUS_IDLE_MASK)) {
@@ -929,7 +965,7 @@ int vision_service(void)
         v.geo_source < 0 && v.model_pending) {
         model_step(); sched_port_unlock(lock); return 1;
     }
-    if (v.state == PIPE_STARTING) {
+    if (v.state == PIPE_STARTING && v.page != PAGE_PIPELINE) {
         if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
             sched_port_unlock(lock); return 1;
         }
@@ -959,6 +995,7 @@ int vision_service(void)
     }
     camera_start();
     sched_port_unlock(lock);
+    if (v.page == PAGE_PIPELINE) return pipe_service();
     timing_step();
     lock = sched_port_lock();
     int busy = v.state == PIPE_STARTING || v.state == PIPE_STOPPING ||
@@ -977,6 +1014,40 @@ static void step(void)
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);
 }
+static void enter_pipeline(void)
+{
+    request_page(PAGE_PIPELINE); v.state = PIPE_LIVE; pipe_enter();
+}
+void vision_pipe_image_done(uint32_t frame)
+{
+    v.job_frame = sessions[PAGE_IMAGE].frame = frame;
+    sessions[PAGE_IMAGE].data.image_status = UI_IMAGE_DONE;
+    board_bulk_complete(2);
+}
+bool vision_pipe_idle(void)
+{ return !v.npu_busy && !v.done_mask && v.job == JOB_IDLE; }
+bool vision_pipe_start(unsigned input, uint32_t frame, uint64_t tick)
+{
+    if (v.page == PAGE_PIPELINE && ui_data_chain().source == UI_SOURCE_PC_IMAGE &&
+        v.job != JOB_IDLE) return false;
+    if (v.npu_busy || !v.model_ready || v.model_pending ||
+        (v.post_owned & (1u << v.npu_buffer))) return false;
+    timing.cancelled = false;
+    sessions[PAGE_IMAGE].frame = frame;
+    start_inference(input, -1, frame, tick);
+    v.job_request = request;
+    return true;
+}
+unsigned vision_pipe_boxes(ui_detection_t *boxes)
+{
+    ui_vision_t result = {0};
+    ui_detection_filter(&result, sessions[PAGE_PIPELINE].raw, sessions[PAGE_PIPELINE].count);
+    memcpy(boxes, result.targets, result.count * sizeof *boxes);
+    return result.count;
+}
+const struct app vision_app_pipeline = {
+    "视觉流水线", NULL, APP_HW_VIN | APP_HW_NPU | APP_HW_PIX | APP_HW_GEO | APP_HW_RND,
+    0, enter_pipeline, step, leave};
 const struct app vision_app_camera = {
     "视觉识别", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_camera, step, leave};
 const struct app vision_app_image = {

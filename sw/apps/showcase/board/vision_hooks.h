@@ -32,6 +32,7 @@ uint32_t vision_upload_base(void);
 /* DISP IRQ only latches events; task context releases L0 via REL_BASE. */
 void vision_display_irq(uint32_t irq);
 void vision_gui_presented(uint64_t tick);
+extern const struct app vision_app_pipeline;
 extern const struct app vision_app_camera;
 extern const struct app vision_app_image;
 extern const struct app vision_app_process;

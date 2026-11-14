@@ -358,12 +358,30 @@ static void log_message(lv_log_level_t level, const char *text)
     platform_puts(text);
 }
 
+static bool pipeline_overlay, pipeline_l1_pin, pipeline_gui_busy;
+void showcase_gui_pipeline_overlay(bool enabled)
+{
+    pipeline_overlay = enabled;
+    mmio_write32(EDRV32_DISP_BASE + EDRV32_DISP_L1_OPA_OFFSET, enabled ? 0 : 255);
+}
+const void *showcase_gui_l1_front(void) { return front; }
 static uint32_t dirty_bytes;
 static bool clean_all_needed;
 static volatile bool flush_pending;
 static volatile bool scan_started;
 static const uint32_t *pending_pixels;
 static volatile uint32_t display_events;
+bool showcase_gui_l1_acquire(void)
+{
+    if (pipeline_gui_busy || flush_pending) return false;
+    pipeline_l1_pin = true;
+    return true;
+}
+void showcase_gui_l1_release(void)
+{
+    pipeline_l1_pin = false;
+    sched_signal(&gui_task, 1);
+}
 
 static void flush(lv_display_t *disp, const lv_area_t *area, uint8_t *pixels)
 {
@@ -538,6 +556,7 @@ void showcase_gui_step(struct sched_task *task)
 {
     uint32_t task_events = sched_take(task);
     if (task_events & PLATFORM_INPUT) input_pending = true;
+    if (pipeline_l1_pin) return;
     if (showcase_gui_paused() || !scan_started) return;
     vision_print();
     uint32_t state = virtual_input_lock();
@@ -554,6 +573,7 @@ void showcase_gui_step(struct sched_task *task)
         }
         if (flush_pending) return;
     }
+    pipeline_gui_busy = true;
     if (input_pending) {
         input_pending = false;
         for (lv_indev_t *input = lv_indev_get_next(NULL); input; input = lv_indev_get_next(input))
@@ -562,6 +582,7 @@ void showcase_gui_step(struct sched_task *task)
     if(!ui_detection_settings && (ui_page==1 || ui_page==2)) ui_vision_frame(ui_page==2);
     else if(ui_page==3) ui_process_update();
     uint32_t delay = lv_timer_handler();
+    pipeline_gui_busy = false;
     sched_signal(&application_task,1);
     if (!flush_pending && delay != LV_NO_TIMER_READY)
         sched_wake_at(task, platform_ticks() +
@@ -683,7 +704,8 @@ lv_display_t *showcase_lvgl_display(void) { return display; }
 void showcase_display_l1_window(int x, int y, int w, int h, const void *base,
                                 uint32_t stride)
 {
-    disp_l1_geometry((uint16_t)x, (uint16_t)y, (uint16_t)w, (uint16_t)h, 255);
+    disp_l1_geometry((uint16_t)x, (uint16_t)y, (uint16_t)w, (uint16_t)h,
+        pipeline_overlay ? 0 : 255);
     disp_submit(DISP_L1, rnd_physical(base), stride);
     disp_layer_enable(DISP_L1, 1);
 }

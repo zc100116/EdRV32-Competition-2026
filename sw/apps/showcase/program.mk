@@ -72,3 +72,17 @@ $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
 	    --out $(SHOWCASE_MODEL_DIR)
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@
+
+# PIPE-SPEC 3.1: the half-resolution test image adds exactly 460800 payload bytes.
+SHOWCASE_PIPE_TEST := $(ROOT)/build/showcase/pipe_test.bin
+SHOWCASE_PIPE_OBJECT := $(ROOT)/build/showcase/pipe_test.o
+$(SHOWCASE_PIPE_TEST): $(ROOT)/tools/sw/pipe_test_image.py \
+    $(ROOT)/sw/apps/showcase/sim/assets/street-scene.png
+	python3 $(ROOT)/tools/sw/pipe_test_image.py \
+	    $(ROOT)/sw/apps/showcase/sim/assets/street-scene.png $@
+$(SHOWCASE_PIPE_OBJECT): $(SHOWCASE_PIPE_TEST)
+	cd $(ROOT) && riscv-none-elf-objcopy -I binary -O elf32-littleriscv -B riscv \
+	    --rename-section .data=.rodata,alloc,load,readonly,data,contents \
+	    build/showcase/pipe_test.bin build/showcase/pipe_test.o
+$(OUT)/showcase.elf: $(SHOWCASE_PIPE_OBJECT)
+PROGRAM_LDLIBS += $(SHOWCASE_PIPE_OBJECT)
