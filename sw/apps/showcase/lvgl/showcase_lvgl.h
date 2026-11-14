@@ -42,10 +42,4 @@ struct showcase_benchmark_scene {
 };
 bool showcase_benchmark_running(void);
 unsigned showcase_benchmark_result(const struct showcase_benchmark_scene **scenes);
-/* PIPE-SPEC 7.4: L1 remains scanned while its pixels are mixed into L0.
- * Acquire excludes the entire GUI step, CPU drawing and pending front swaps. */
-void showcase_gui_pipeline_overlay(bool enabled);
-bool showcase_gui_l1_acquire(void);
-void showcase_gui_l1_release(void);
-const void *showcase_gui_l1_front(void);
 #endif

@@ -20,7 +20,6 @@
 #include "uart.h"
 #include "board/board.h"
 #include "board/vision_hooks.h"
-#include "board/vision/pipeline_exec.h"
 static uint32_t system_hz;
 static uint32_t hardware;
 static volatile uint32_t probing;
@@ -45,23 +44,6 @@ unsigned platform_input_source(void) { return input_source; }
 static uint32_t milliseconds;
 static uint64_t millisecond_base;
 static volatile uint32_t rnd_done;
-static unsigned rnd_owner;
-static const struct rnd_batch *rnd_gui_pending, *rnd_pipe_pending;
-static void rnd_dispatch(void)
-{
-    if (rnd_owner) return;
-    const struct rnd_batch *batch;
-    if (rnd_gui_pending) {
-        batch = rnd_gui_pending; rnd_gui_pending = NULL; rnd_owner = 1;
-    } else if (rnd_pipe_pending) {
-        batch = rnd_pipe_pending; rnd_pipe_pending = NULL; rnd_owner = 2;
-    } else return;
-    rnd_submit(batch);
-}
-void board_pipe_rnd_submit(const struct rnd_batch *batch)
-{
-    rnd_pipe_pending = batch; rnd_dispatch();
-}
 static uint64_t rnd_elapsed;
 static uint64_t rnd_irq_tick;
 static rnd_callback app_rnd_callback;
@@ -161,11 +143,6 @@ static void rnd_event(const struct rnd_result *result, void *context)
     (void)context;
     rnd_irq_tick = platform_ticks();
     uint32_t perf[6]; rnd_read_perf(perf); rnd_cycles+=perf[0];
-    if (result->error && rnd_owner == 2) {
-        pipe_hardware_error(result->error);
-        sched_signal(&application_task, PLATFORM_RND);
-        return;
-    }
     if (result->error) {
         platform_puts("RND ERR_CODE=");
         platform_put_hex(result->error);
@@ -174,22 +151,13 @@ static void rnd_event(const struct rnd_result *result, void *context)
         platform_puts("\r\n");
         platform_stop();
     }
-    unsigned owner = rnd_owner;
-    rnd_owner = 0;
-    if (owner == 2) pipe_rnd_done();
-    else rnd_done = 1;
-    rnd_dispatch();
-    if (owner != 2 && app_rnd_callback) app_rnd_callback(result, app_context);
+    rnd_done = 1;
+    if (app_rnd_callback) app_rnd_callback(result, app_context);
     if (showcase_gui_paused()) sched_signal(&application_task, PLATFORM_RND);
 }
 static void disp_event(const struct engine_event *event, void *context)
 {
     (void)context;
-    if (event->error && ui_data_session().app == UI_APP_PIPELINE) {
-        pipe_hardware_error(event->error);
-        sched_signal(&application_task, 0x100);
-        return;
-    }
     if (event->error) {
         platform_puts("DISP ERR_CODE="); platform_put_hex(event->error);
         platform_puts("\r\n"); platform_stop();
@@ -393,7 +361,7 @@ void platform_init(void)
     const enum engine_id engines[]={ENGINE_VIN,ENGINE_NPU,ENGINE_PIX,ENGINE_GEO};
     const unsigned bits[]={APP_HW_VIN,APP_HW_NPU,APP_HW_PIX,APP_HW_GEO};
     const uint32_t masks[]={EDRV32_VIN_IRQ_EN_ERROR_MASK|EDRV32_VIN_IRQ_EN_FRAME_MASK|
-        EDRV32_VIN_IRQ_EN_CH1_FRAME_MASK|EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK,EDRV32_NPU_IRQ_EN_ERROR_MASK|EDRV32_NPU_IRQ_EN_DONE_MASK,
+        EDRV32_VIN_IRQ_EN_CH2_FRAME_MASK,EDRV32_NPU_IRQ_EN_ERROR_MASK|EDRV32_NPU_IRQ_EN_DONE_MASK,
         EDRV32_PIX_IRQ_EN_ERROR_MASK,EDRV32_GEO_IRQ_EN_ERROR_MASK|EDRV32_GEO_IRQ_EN_DONE_MASK};
     for(unsigned i=0;i<4;++i) if(hardware&bits[i])
         engine_irq_register(engines[i],masks[i],1,vision_event,(void *)(uintptr_t)engines[i]);
@@ -404,10 +372,8 @@ void platform_init(void)
 void showcase_rnd_run(const struct rnd_batch *batch)
 {
     uint64_t begin = platform_ticks();
-    uint32_t lock = sched_port_lock();
     rnd_done = 0;
-    rnd_gui_pending = batch; rnd_dispatch();
-    sched_port_unlock(lock);
+    rnd_submit(batch);
     sched_wait_flag(&rnd_done);
     rnd_elapsed = platform_ticks() - begin;
 }

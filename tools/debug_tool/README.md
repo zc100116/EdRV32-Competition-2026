@@ -51,40 +51,41 @@ python tools/debug_tool/virtual_input.py --udp 127.0.0.1:5000 --keys b,start --h
 ## 应用、状态和命令
 
 “调试 → 设备与输出”的板端应用区域可以打开应用、暂停、继续、重试，并输入游戏序号。
-板端应用、会话状态、检测门槛与类别由 STATE 更新；积木链由 CHAIN_STATE 更新；
+板端当前应用、会话状态、图像处理参数、检测门槛与类别均由 STATE 更新；
 发送命令或收到 ACK 不会将请求参数当作板端实际状态。
 
-APP、IMAGE_INFO、CHAIN、PRESET、DETECT、CANCEL 都有独立序号和 ACK 流程。
+APP、IMAGE_INFO、PROCESS、DETECT、CANCEL 都有独立序号和 ACK 流程。
 ACK(1) 表示收到；ACK(2) 表示完成；ACK(3) 表示错误并给出原因。
-同类型命令在 ACK(2/3) 前不再发送；DETECT 只保留最新整组参数，
+同类型命令在 ACK(2/3) 前不再发送；PROCESS 和 DETECT 只保留最新整组参数，
 上一条完成时立即发送保留的一组。不存在 CAMERA 命令，切回摄像头发送 APP(1, 打开)。
 
 HELLO、STATE、ACK、DONE、完整检测结果由网口接收路径直接处理；
 完成判定、后续命令和板端翻图请求均不等待 GUI 周期刷新。Qt 信号负责跨线程刷新界面。
 
-## 视觉流水线
+## 图像处理
 
-“调试 → 视觉流水线”合并图像处理与目标检测，提供 8 个预设、来源选择、
-横向积木链和硬件路径。积木库支持拖入或双击添加；链内拖动排序，选中后可删除、
-查看此级输出、看来源原图、返回最终输出，或编辑全部参数（包括几何镜像和叠加选项）。
-检测门槛和类别在同页下方的检测设置中编辑。
+“调试 → 图像处理”按硬件顺序显示全部 12 项，每项先是启用开关，再是参数与
+“本项恢复默认”。关闭开关保留参数；“本项恢复默认”恢复该项参数；
+“全部恢复默认”恢复所有参数并关闭所有功能。
 
-每次修改整组发送 CHAIN（100 字节），预设按钮发送 PRESET；接受后的链以
-CHAIN_STATE 为准。修改后 preset 清零；ACK(3) 显示对应中文规则，板端原链保持不变。
-最多 8 块积木、1 块检测；叠加框之前必须有检测，叠加必须选框或界面。
-硬件路径显示 PIPE_STATS 中每跳的引擎、积木范围和耗时，以及端到端延迟、帧率、
-框滞后、NPU 耗时和 DDR 带宽（预算 1.95 GB/s）。
-流水线页集中显示链与图像；完整 DDR 端口监控和日志在设备与输出页。
+- PIX：亮度 / 对比度 → 伽马 → 第一级滤波 S1 → 第二级滤波 S2 → 灰度 → 二值化 → 反色。
+- GEO：旋转 → 缩放 → 平移 → 水平镜像 → 垂直镜像。
+- 亮度 −256…255，对比度 Q8 0…512，伽马十分值 3…30。
+- S1 / S2 各选均值、高斯、锐化、Sobel、腐蚀、膨胀；独立开关负责旁路。
+- 二值化阈值 0…255，旋转 −180…180°，缩放 50…400%，平移 X ±1280、Y ±720。
+- 提供原图 / 处理结果切换。编辑停顿 200 ms 后整组发送 24 字节 PROCESS。
+
+默认：全部关闭、亮度 0、对比度 256、伽马 10、S1/S2 高斯、阈值 128、
+处理结果视图、角度 0、比例 100%、平移 0。
 
 ## 图片识别
 
-“调试 → 视觉流水线”可发送模型，选择单张图片或文件夹。
+“调试 → 目标检测”可发送模型，选择单张图片或文件夹。
 文件夹按文件名排序建立 png/jpg/jpeg/bmp 列表；选择后等待手动发送，
 “上一张 / 下一张”每次只发送并识别一张，不自动继续。
 界面显示文件名、序号 / 总数，以及发送中 / 识别中 / 完成 / 失败。
 
-每张图片发送前先发送 APP(1, 打开)，等 ACK(2)，再发 CHAIN（来源改为 PC 图片、
-保留当前积木并清除预设编号），等 ACK(2)；
+发送前，若板端不在图片识别应用的运行状态，先发送 APP(2, 打开)，等 ACK(2)；
 然后发送 IMAGE_INFO（序号从 1 开始、总数、UTF-8 文件名），等 ACK(2) 后发送 BULK_BEGIN。
 收到 READY 后上传统一转换的 1280×720 小端 RGB565，等待 CH2 / OUTPUT / EDDT 和 DONE。
 只接受 EDDT `request` 等于当前 BULK_BEGIN 序号的结果，其余丢弃。
@@ -125,7 +126,7 @@ READY / DONE / ECHO_REPLY 应答上限为 5 秒，错误明确显示，不切换
 ```sh
 python tools/debug_tool/cli.py connect COM7 --baud 115200
 python tools/debug_tool/cli.py program app.elf --elf --eth --local-ip 192.168.1.2
-python tools/debug_tool/cli.py pipeline '{"source":0,"view":255,"preset":0,"blocks":[]}'
+python tools/debug_tool/cli.py processing '{"enabled":129,"brightness":24,"angle":30}'
 python tools/debug_tool/cli.py yolo model build/npu/yolo
 python tools/debug_tool/cli.py yolo image image.png
 python tools/debug_tool/cli.py telemetry export build/debug_tool/capture.csv
@@ -136,7 +137,7 @@ python tools/debug_tool/cli.py tail -f
 |---|---|---|
 | GET | `/api/status`、`/api/board` | 串口状态；连接、版本、STATE、日志摘要与错误 |
 | POST | `/api/board/network` | `{boardIp?,boardPort?,localIp?}` 建立网口连接 |
-| GET / POST | `/api/pipeline` | 已确认的积木链 / 整组替换积木链 |
+| GET / POST | `/api/processing` | STATE 参数 / 修改参数，省略项沿用 STATE，发送整组 PROCESS |
 | POST | `/api/yolo/model`、`/api/yolo/image` | `{path,boardIp,boardPort,localPort,localIp?}` |
 | POST | `/api/virtual-input` | `{keys,x,y,mouse,wheel?}`，未连接明确报错 |
 | GET | `/api/ethernet/status` | UDP、上传、ECHO 状态 |
@@ -146,9 +147,8 @@ python tools/debug_tool/cli.py tail -f
 | POST | `/api/telemetry/export`、`/api/telemetry/replay`、`/api/telemetry/clear` | 导出 / 回放 / 清空 |
 
 串口连接、快捷命令、规则、文件传输和 BIOS API 保持原用途。
-CHAIN JSON 为 `{source,view,preset,blocks:[{type,flags,p:[p0,p1,p2,p3,p4]}]}`，
-二进制字段及范围见 `docs/design/2026-11-14-showcase-vision-pipeline.md` 第 7 节。
-旧 PROCESS、串口 PIX/GEO 参数接口已删除。
+PROCESS 的 JSON 字段与冻结协议同名：`enabled,brightness,contrast,gamma_tenths,stage1,stage2,`
+`threshold,view,angle,scale_percent,translate_x,translate_y`。不再使用旧的串口 PIX/GEO 参数接口。
 
 ## 验证与截图
 
@@ -160,29 +160,18 @@ python3 tools/check/verilog_style.py tools/debug_tool
 git diff --check
 ```
 
-假板端覆盖 HELLO、STATE 断开和重新连接、无串口虚拟输入、100 ms 快照、链命令的
-ACK、DETECT 参数合并、STATE 驱动界面、IMAGE_INFO 顺序、手动翻图、IMAGE_STEP、CANCEL、
-请求号过滤、链编解码与规则拒绝，以及不依赖 GUI 定时器的完成处理。
+假板端覆盖 HELLO、STATE 断开和重新连接、无串口虚拟输入、100 ms 快照、五种命令的
+ACK、参数合并、STATE 驱动界面、IMAGE_INFO 顺序、手动翻图、IMAGE_STEP、CANCEL、
+请求号过滤、逐项启用与默认值，以及不依赖 GUI 定时器的完成处理。
 原有实际 UDP CH2 / OUTPUT / EDDT 与 NPU 参考比对测试仍保留。
 
 截图脚本使用模拟串口和 UDP 数据，显示的版本为 SIMULATED，不是实板测量。
 
 ```sh
 QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python tools/debug_tool/render_shot.py \
-  build/debug_tool/pipeline/pipeline-1366x768.png --state pipeline --width 1366 --height 768
+  build/debug_tool/processing.png --state vision --page 1 --width 1366 --height 768
 ```
 
-`--page 0/1` 选择设备 / 视觉流水线，`--scroll-bottom` 或 `--scroll-position 0.5`
+`--page 0/1/2` 选择设备 / 处理 / 图片，`--scroll-bottom` 或 `--scroll-position 0.5`
 显示其他滚动区域，`--main-page 5` 显示输入，`--state detection` 生成图片回传。
 P5 验收截图保存在任务指定的 `SOC系统设计/outputs/p5-tool/`，不提交。
-
-流水线模拟板端（纯主机 UDP，所有耗时均为示例）：
-
-```sh
-python tools/debug_tool/telemetry_sim.py --mode pipeline --host 127.0.0.1 --port 5000 --seconds 60
-QT_QPA_PLATFORM=offscreen ~/.local/opt/edrv32-py/bin/python -m unittest discover \
-  -s tools/debug_tool/tests -p test_pipeline.py
-```
-
-GUI 本机地址和板端地址均选 127.0.0.1，建立连接后打开视觉流水线应用。
-完整流程测试实际运行 UDP 模拟端、点击预设、投递 Qt 拖放事件并检查中文拒绝原因。

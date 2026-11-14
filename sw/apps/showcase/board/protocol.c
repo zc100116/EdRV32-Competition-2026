@@ -22,42 +22,37 @@ static void done(struct edsc *s, unsigned kind, unsigned status, uint32_t index)
     uint8_t p[8] = {(uint8_t)kind, (uint8_t)status};
     record_put32(p + 4, index); reply(s, 0x82, p, 8);
 }
+static int between(const uint8_t *p, int low, int high, int signed_value)
+{
+    int v = record_u16(p);
+    if (signed_value) v = (int16_t)v;
+    return v >= low && v <= high;
+}
 static unsigned validate(unsigned type, const uint8_t *p, unsigned n)
 {
-    static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 0, 16, 0, 100, 4};
+    static const unsigned lengths[] = {0, 0, 0, 0, 4, 0, 24, 16, 0};
     if (type != 5 && n != lengths[type]) return 1;
     if (type == 4) {
-        if (p[0] > 6 || p[0] == 2 || p[0] == 3 || p[1] > 3 || (p[0] != 5 && record_u16(p + 2))) return 2;
-        if ((p[1] == 1 || p[1] == 2) && p[0] != 1) return 5;
+        if (p[0] > 6 || p[1] > 3 || (p[0] != 5 && record_u16(p + 2))) return 2;
+        if ((p[1] == 1 || p[1] == 2) && p[0] != 1 && p[0] != 3) return 5;
     } else if (type == 5) {
         if (n < 8 || record_u16(p + 4) != n - 8) return 1;
         if (!record_u16(p) || record_u16(p) > record_u16(p + 2) || n > 264 ||
             record_u16(p + 6)) return 2;
         for (unsigned i = 8; i < n; ++i)
             if (!p[i] || p[i] == '/' || p[i] == '\\') return 2;
+    } else if (type == 6) {
+        if (record_u32(p) & ~4095u || !between(p+4, -256, 255, 1) ||
+            !between(p+6, 0, 512, 0) || !between(p+8, 3, 30, 0) ||
+            p[10] < 1 || p[10] > 6 || p[11] < 1 || p[11] > 6 || p[13] > 1 ||
+            !between(p+14, -180, 180, 1) || !between(p+16, 50, 400, 0) ||
+            !between(p+18, -1280, 1280, 1) || !between(p+20, -720, 720, 1) ||
+            record_u16(p+22)) return 2;
     } else if (type == 7) {
         if (p[0] < 25 || p[0] > 90 || p[1] || p[2] || p[3] ||
             record_u32(p+12) & 0xffff0000u) return 2;
-    } else if (type == 10) {
-        if (p[0] < 1 || p[0] > 8 || p[1] || p[2] || p[3]) return 2;
     }
     return 0;
-}
-static void chain_reply(struct edsc *s)
-{
-    uint8_t payload[104];
-    record_put32(payload, s->chain_rev); memcpy(payload + 4, s->chain, 100);
-    reply(s, 0x88, payload, sizeof payload); s->sent_chain_rev = s->chain_rev;
-}
-void edsc_chain_snapshot(struct edsc *s, uint32_t revision, const uint8_t chain[100])
-{ s->chain_rev = revision; memcpy(s->chain, chain, 100); }
-void edsc_pipe_stats(struct edsc *s, const uint8_t *payload, unsigned bytes,
-                     uint64_t now, uint32_t hz)
-{
-    uint8_t state[56]; s->ops.state(state);
-    if (s->peer && state[0] == 1 && state[1] == 2 && now - s->pipe_time >= hz) {
-        s->seq = 0; reply(s, 0x89, payload, bytes); s->pipe_time = now;
-    }
 }
 void edsc_cancel(struct edsc *s)
 {
@@ -72,7 +67,7 @@ void edsc_message(struct edsc *s, const uint8_t *d, unsigned bytes)
         uint8_t p[76] = {3};
         if (s->build) memcpy(p + 4, s->build, strlen(s->build) < 16 ? strlen(s->build) : 16);
         s->ops.state(p + 20); s->peer = 1; s->seq = 0;
-        reply(s, 0x84, p, sizeof p); chain_reply(s); return;
+        reply(s, 0x84, p, sizeof p); return;
     }
     if (bytes < 12) { s->seq = 0; done(s, 0, 2, 0); return; }
     s->seq = record_u32(d + 8);
@@ -88,7 +83,7 @@ void edsc_message(struct edsc *s, const uint8_t *d, unsigned bytes)
             done(s, kind, 2, 0); return;
         }
         uint8_t state[56]; s->ops.state(state);
-        if (kind == 2 && (state[0] != 1 || state[1] != 2 || s->chain[0] != 1 || !s->image_info)) {
+        if (kind == 2 && (state[0] != 2 || state[1] != 2 || !s->image_info)) {
             done(s, kind, 5, 0); return;
         }
         if (s->active) { done(s, kind, 3, 0); return; }
@@ -101,7 +96,7 @@ void edsc_message(struct edsc *s, const uint8_t *d, unsigned bytes)
             uint8_t ready[4] = {(uint8_t)kind}; reply(s, 0x81, ready, 4);
         }
     } else if (type == 3 && n <= 1000) reply(s, 0x83, p, n);
-    else if (type >= 4 && type <= 10 && type != 6) {
+    else if (type >= 4 && type <= 8) {
         unsigned error = validate(type, p, n);
         if (error) { ack(s, type, 3, error); return; }
         if (type == 8) {
@@ -142,7 +137,6 @@ void edsc_poll(struct edsc *s, uint64_t now, uint32_t hz)
             s->pending[i] = 0;
         }
     }
-    if (s->peer && s->sent_chain_rev != s->chain_rev) { s->seq = 0; chain_reply(s); }
     uint8_t state[56]; s->ops.state(state);
     if (s->peer && (memcmp(state, s->previous, 56) || now - s->state_time >= hz)) {
         s->seq = 0; reply(s, 0x85, state, 56);

@@ -8,7 +8,6 @@
 #include "state.h"
 #include "../ui/detection.h"
 #include "vision_hooks.h"
-#include "vision/pipeline_exec.h"
 #include "../runtime.h"
 #include "../platform.h"
 #include "../ui/ui_data.h"
@@ -88,7 +87,7 @@ static void state(uint8_t p[56])
     uint8_t vision[56] = {0}; vision_state(vision);
     const struct board_state snapshot = {.session=ui_data_session(),
         .error=board_session_error(), .boxes=vision[3],
-        .detection=ui_data_detection_config(), .chain_rev=pipe_revision(),
+        .detection=ui_data_detection_config(), .process=ui_data_process_config(),
         .request=record_u32(vision+44), .frame=record_u32(vision+48),
         .image_status=vision[52]};
     board_state_encode(p,&snapshot);
@@ -118,30 +117,36 @@ static unsigned command(unsigned type,const uint8_t *p,unsigned bytes,uint32_t s
         return EDSC_PENDING;
     }
     if(type==5) {
-        if(s.app!=UI_APP_PIPELINE || ui_data_chain().source!=UI_SOURCE_PC_IMAGE ||
-           s.state!=UI_STATE_RUNNING || protocol.active) return 5;
+        if(s.app!=UI_APP_IMAGE || s.state!=UI_STATE_RUNNING || protocol.active) return 5;
         vision_image_info(record_u16(p),record_u16(p+2),p+8,bytes-8);
+    } else if(type==6) {
+        ui_process_config_t c={.enabled=record_u32(p),.brightness=(int16_t)record_u16(p+4),
+            .contrast=record_u16(p+6),.gamma_tenths=record_u16(p+8),
+            .stage1=p[10],.stage2=p[11],.threshold=p[12],.original=p[13],
+            .angle=(int16_t)record_u16(p+14),.scale_percent=record_u16(p+16),
+            .translate_x=(int16_t)record_u16(p+18),.translate_y=(int16_t)record_u16(p+20)};
+        ui_data_process_set(&c);
+        return s.app==UI_APP_PROCESS && s.state==UI_STATE_RUNNING ? EDSC_PENDING : 0;
     } else if(type==7) {
         ui_data_detection_threshold(p[0]);
         for(unsigned i=0;i<80;++i)
             ui_data_detection_class(i,(record_u32(p+4+4*(i/32))>>(i%32))&1);
         vision_detection_changed(); platform_gui_wake();
-        return s.app==UI_APP_PIPELINE &&
+        return (s.app==UI_APP_CAMERA || s.app==UI_APP_IMAGE) &&
             s.state==UI_STATE_RUNNING ? EDSC_PENDING : 0;
     }
-    if(type==9) {
-        ui_chain_t chain; pipe_chain_decode(&chain,p);
-        return ui_data_chain_set(&chain);
-    }
-    if(type==10) ui_data_chain_preset(p[0]);
     platform_gui_wake();
     return 0;
 }
 static unsigned progress(unsigned type)
 {
     ui_session_t s=ui_data_session();
+    if(type==6) {
+        if(s.app!=UI_APP_PROCESS || s.state!=UI_STATE_RUNNING) return 0;
+        return vision_process_applied() ? 0 : EDSC_PENDING;
+    }
     if(type==7) {
-        if((s.app!=UI_APP_PIPELINE) || s.state!=UI_STATE_RUNNING)
+        if((s.app!=UI_APP_CAMERA && s.app!=UI_APP_IMAGE) || s.state!=UI_STATE_RUNNING)
             return 0;
         return vision_detection_applied() ? 0 : EDSC_PENDING;
     }
@@ -173,9 +178,6 @@ void board_network_init(void)
 extern void board_memory_sample(const struct mem_xbar_stats *memory);
 void board_network_step(void)
 {
-    uint8_t chain_bytes[100]; ui_chain_t chain=ui_data_chain();
-    pipe_chain_encode(chain_bytes,&chain);
-    edsc_chain_snapshot(&protocol,pipe_revision(),chain_bytes);
     static uint32_t peer_ip,peer_port;
     static char peer_report[80];
     uint32_t ip=mmio_read32(EDRV32_ETH_BASE+EDRV32_ETH_PEER_IP_OFFSET);
@@ -226,28 +228,12 @@ void board_network_step(void)
         edsc_bulk(&protocol,bytes);
     }
     engine_irq_clear(ENGINE_ETH,e.irq);
-    /* Commands may have replaced the chain during this communication slice. */
-    chain=ui_data_chain(); pipe_chain_encode(chain_bytes,&chain);
-    edsc_chain_snapshot(&protocol,pipe_revision(),chain_bytes);
     edsc_poll(&protocol,platform_ticks(),platform_clock_hz());
-    ui_pipe_stats_t stats=ui_data_pipe_stats();
-    uint8_t pipe_payload[24+8*UI_HOP_MAX]={0};
-    const unsigned values[]={stats.fps,stats.e2e_us,stats.box_lag_us,stats.npu_us,stats.ddr_mbps};
-    for(unsigned i=0;i<5;++i) record_put32(pipe_payload+4*i,values[i]);
-    pipe_payload[20]=(uint8_t)stats.hop_count;
-    for(unsigned i=0;i<stats.hop_count;++i) {
-        uint8_t *hop=pipe_payload+24+8*i;
-        hop[0]=stats.hop[i].engine; hop[1]=stats.hop[i].first; hop[2]=stats.hop[i].last;
-        record_put32(hop+4,stats.hop[i].us);
-    }
-    edsc_pipe_stats(&protocol,pipe_payload,24+8*stats.hop_count,
-        platform_ticks(),platform_clock_hz());
     static uint64_t next_monitor;
     uint64_t now=platform_ticks();
     if(now>=next_monitor) {
         struct eth_monitor r={.sequence=sequence++,.time=now,.system_hz=platform_clock_hz()};
         mem_xbar_snapshot(&r.memory); board_memory_sample(&r.memory);
-        pipe_memory_sample(&r.memory);
         r.eth[0]=engine_perf(ENGINE_ETH,2); r.eth[1]=board_tx_bytes;
         if(eth_monitor_peer_known() && produced-consumed<MONITOR_CAPACITY) {
             eth_monitor_pack(uncached(MONITOR_RING+

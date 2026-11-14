@@ -7,7 +7,7 @@ struct board_state {
     unsigned error;
     bool boxes;
     ui_detection_config_t detection;
-    uint32_t chain_rev;
+    ui_process_config_t process;
     uint32_t request, frame;
     ui_image_status_t image_status;
 };

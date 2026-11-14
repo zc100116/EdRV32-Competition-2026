@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 from tools.debug_tool.core.engine import SerialEngine
 from tools.debug_tool.core.ethernet import packets, unpack
 from tools.debug_tool.core.showcase import (
-    BULK_BEGIN, READY, DONE, APP, CHAIN, IMAGE_INFO, ACK, decode, encode,
+    BULK_BEGIN, READY, DONE, APP, IMAGE_INFO, ACK, decode, encode,
 )
 from tools.debug_tool.core.yolo import INPUT_BYTES, OUTPUT_BYTES, image_rgb565
 from test_program import wait_for
@@ -92,18 +92,11 @@ class ShowcaseDetectionTest(unittest.TestCase):
         packet, self.peer = self.board.recvfrom(65535)
         kind, self.seq, payload = decode(unpack(packet)[3])
         if kind == APP:
-            self.assertEqual(payload, struct.pack('<BBH', 1, 0, 0))
+            self.assertEqual(payload, struct.pack('<BBH', 2, 0, 0))
             self.reply(ACK, struct.pack('<HBB', APP, 1, 0))
             self.reply(ACK, struct.pack('<HBB', APP, 2, 0))
             packet, self.peer = self.board.recvfrom(65535)
             kind, self.seq, payload = decode(unpack(packet)[3])
-        self.assertEqual(kind, CHAIN)
-        from tools.debug_tool.core.pipeline import unpack_chain
-        self.assertEqual(unpack_chain(payload)['source'], 1)
-        self.assertEqual(unpack_chain(payload)['blocks'], self.engine.board.chain['blocks'])
-        self.reply(ACK, struct.pack('<HBB', CHAIN, 2, 0))
-        packet, self.peer = self.board.recvfrom(65535)
-        kind, self.seq, payload = decode(unpack(packet)[3])
         self.assertEqual(kind, IMAGE_INFO)
         self.assertEqual(struct.unpack_from('<HH', payload), (1, 1))
         self.assertEqual(payload[8:].decode(), Path(self.console.image_path.text()).name)

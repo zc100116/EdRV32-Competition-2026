@@ -218,14 +218,7 @@ class YoloTool:
 
     def camera_detection(self, board_ip, board_port, local_port):
         self.return_view = False
-        from .pipeline import pack_chain
-        from .showcase import CHAIN
-        destination = board_ip, board_port
-        result = self.ethernet.showcase.app(1, destination=destination)
-        chain = self.ethernet.session.engine.pipeline.status()
-        chain.update(source=0, preset=0)
-        self.ethernet.showcase.command(CHAIN, pack_chain(chain), destination)
-        return result
+        return self.ethernet.showcase.app(1, destination=(board_ip, board_port))
 
     def send_model(self, path, board_ip, board_port, local_port):
         if not path:

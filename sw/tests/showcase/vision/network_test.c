@@ -2,9 +2,7 @@
  * Hardware model ignores DOORBELL when an RX write wins the submission race.
  * Host clock; production protocol, cancellation, TX ownership and post slices.
  */
-#ifndef NETWORK_INTEGRATION
 #define NETWORK_INTEGRATION
-#endif
 #define BUILD_COMMIT "p5c-test"
 #include "runtime_test.c"
 #include "../../../apps/showcase/board/network.c"
@@ -13,9 +11,9 @@ static unsigned tx_busy, rx_busy, ignore_next, ignored, rings, states, hellos, i
 static uint32_t hardware_desc, hardware_count;
 static struct eth_tx_descriptor held[3];
 static uint32_t wire_seq;
-ui_session_t ui_data_session(void) { return (ui_session_t){UI_APP_PIPELINE, UI_STATE_RUNNING,0,1}; }
+ui_session_t ui_data_session(void) { return (ui_session_t){UI_APP_IMAGE, UI_STATE_RUNNING,0,1}; }
 unsigned board_session_error(void) { return 0; }
-ui_app_t board_session_target(void) { return UI_APP_PIPELINE; }
+ui_app_t board_session_target(void) { return UI_APP_IMAGE; }
 void ui_data_app_open(ui_app_t app, unsigned arg) { (void)app; (void)arg; }
 void ui_data_app_retry(void) {}
 void ui_data_app_pause(bool paused) { vision_pause(paused); }
@@ -134,7 +132,7 @@ int main(void)
     /* Keep runtime fixture helpers available without executing its standalone suite. */
     (void)camera_test; (void)parallel_test; (void)interrupt_restart_test;
     (void)image_test; (void)cancel_test;
-    (void)model_test; (void)matrix_test;
+    (void)process_test; (void)model_test; (void)matrix_test;
     (void)window_reopened; (void)reopened_base; (void)reopened_bytes; (void)accept_send;
     (void)bulk_completions;
     assert(mmap((void *)(uintptr_t)EDRV32_DDR_BASE,0x02000000,PROT_READ|PROT_WRITE,
@@ -145,17 +143,9 @@ int main(void)
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
     assert(mmap((void *)(uintptr_t)EDRV32_ETH_BASE,4096,PROT_READ|PROT_WRITE,
         MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0)!=MAP_FAILED);
-    vision_init(); ui_data_chain_preset(8); board_network_init(); vision_app_image.enter(); drain();
+    vision_init(); board_network_init(); vision_app_image.enter(); drain();
     memset(physical(VISION_OUTPUT_BASE),0x80,VISION_OUTPUT_BYTES);
     protocol.peer=1;
-    ui_chain_t old=ui_data_chain(); uint32_t revision=pipe_revision();
-    uint8_t wire[100]; pipe_chain_encode(wire,&old); wire[5]=1;
-    message(9,wire,sizeof wire);
-    assert(pipe_revision()==revision && ui_data_chain().preset==8);
-    wire[5]=0; message(9,wire,sizeof wire);
-    assert(pipe_revision()==revision+1 && !ui_data_chain().preset);
-    const uint8_t preset[]={8,0,0,0}; message(10,preset,sizeof preset);
-    assert(ui_data_chain().preset==8 && protocol.chain[0]==UI_SOURCE_PC_IMAGE);
     for(unsigned scenario=0;scenario<4;++scenario) {
         fprintf(stderr,"scenario %u\n",scenario);
         unsigned before=npu_runs;

@@ -64,18 +64,14 @@ def seed(engine, console, state):
                  'Switch: frames=2 mtime_ticks=6742100'):
         serial_line(engine, line)
     from core.showcase import HELLO, encode as control_message
-    from telemetry_sim import PipelineBoard
-    from core.pipeline import preset
-    simulated = PipelineBoard()
-    simulated.app, simulated.state = 1, 2
-    simulated.chain, simulated.revision = preset(5), 1
-    payload = simulated.state_payload()
+    from core.processing import DEFAULTS, pack_process
+    application = 2 if state == 'detection' else 3
+    payload = (struct.pack('<5B3x3I', application, 2, 0, 1, 50, 0xffffffff, 0xffffffff, 0xffff)
+               + pack_process(DEFAULTS) + struct.pack('<IIB3x', 0, 0, 0))
     engine.ethernet.showcase.receive(control_message(
         HELLO, 0, struct.pack('<H2x16s', 3, b'SIMULATED') + payload))
-    for message in simulated.messages()[1:]:
-        engine.ethernet.showcase.receive(message)
     console.output.setCurrentIndex(2)
-    console.scene.setCurrentIndex(0)
+    console.scene.setCurrentIndex(1 if state == 'vision' else 0)
     # Feed a 60 s timeline using the same encoder and real socket as telemetry_sim.py.
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as source:
         for batch in range(38):
@@ -111,7 +107,7 @@ def seed(engine, console, state):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('out')
-    parser.add_argument('--state', choices=['disconnected', 'vision', 'detection', 'pipeline'],
+    parser.add_argument('--state', choices=['disconnected', 'vision', 'detection'],
                         default='disconnected')
     parser.add_argument('--scroll-position', type=float, default=0)
     parser.add_argument('--scroll-bottom', action='store_true')
@@ -134,7 +130,7 @@ def main():
     try:
         if args.state != 'disconnected':
             simulated_state = seed(engine, window.soc, args.state)
-            if args.state in ('vision', 'pipeline'):
+            if args.state == 'vision':
                 simulator = executor.submit(run_video, '127.0.0.1', 6000, 3, 3, 2)
             else:
                 simulator = executor.submit(run_yolo, '127.0.0.1', 6000)
@@ -147,7 +143,7 @@ def main():
             time.sleep(.01)
         if args.state == 'detection':
             engine.yolo.complete_capture()
-        window.soc.pages.setCurrentIndex(1 if args.state == 'pipeline' else args.page)
+        window.soc.pages.setCurrentIndex(args.page)
         window.rail_group.button(args.main_page).setChecked(True)
         window._select_page(args.main_page)
         window.soc.refresh()

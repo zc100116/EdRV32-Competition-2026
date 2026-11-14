@@ -182,7 +182,7 @@ def main():
     p.add_argument("--board-port", type=int, default=5000)
     p.add_argument("--local-ip", default="192.168.1.2")
     p.add_argument("--local-port", type=int, default=6000)
-    p = sub.add_parser("pipeline", help="replace the vision pipeline chain")
+    p = sub.add_parser("processing", help="set PIX/GEO parameters in firmware wire units")
     p.add_argument("values", help='JSON object, e.g. {"angle":12,"scale_percent":150}')
     p = sub.add_parser("scene")
     p.add_argument("name")
@@ -207,8 +207,8 @@ def main():
         print_json(request("POST", "/api/ethernet/receive/start",
                            {"localIp": args.local_ip, "localPort": args.port,
                             "directory": args.directory, "mode": args.mode}))
-    elif args.cmd == "pipeline":
-        print_json(request("POST", "/api/pipeline", json.loads(args.values)))
+    elif args.cmd == "processing":
+        print_json(request("POST", "/api/processing", json.loads(args.values)))
     elif args.cmd == "scene":
         print_json(request("POST", "/api/scenes/send", {"name": args.name, "rate": args.rate}))
     elif args.cmd == "yolo":

@@ -19,7 +19,7 @@ from .program import BiosProgrammer
 from .session import BoardSession
 from .virtual_input import VirtualInput, send_frame
 from .scene import SceneControl
-from .pipeline import PipelineControl
+from .processing import ProcessingControl
 
 try:
     import serial
@@ -109,7 +109,7 @@ class SerialEngine:
         self.yolo = self.board.yolo
         self.video = self.board.video
         self.scenes = SceneControl(self)
-        self.pipeline = PipelineControl(self)
+        self.processing = ProcessingControl(self)
 
     # ---------------------------------------------------------- observer --
     def add_listener(self, callback):

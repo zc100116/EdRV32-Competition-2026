@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <string.h>
 
 static uint16_t framebuffer[1280 * 720];
 static uint32_t drawbuffer[1280 * 720];
@@ -67,18 +66,6 @@ static void check_labels(lv_obj_t *parent)
                     (int)lv_obj_get_width(parent), (int)lv_obj_get_height(parent));
                 exit(EXIT_FAILURE);
             }
-            if(ui_page==1) for(unsigned j=i+1;j<lv_obj_get_child_count(parent);++j) {
-                lv_obj_t *other=lv_obj_get_child(parent,(int)j);
-                if(!lv_obj_check_type(other,&lv_label_class) ||
-                    !lv_label_get_text(other)[0] || lv_obj_is_hidden(other)) continue;
-                lv_area_t a, b;
-                lv_obj_get_coords(o,&a); lv_obj_get_coords(other,&b);
-                if(a.x1<=b.x2 && b.x1<=a.x2 && a.y1<=b.y2 && b.y1<=a.y2) {
-                    fprintf(stderr,"Overlapping labels: %s / %s\n",
-                        lv_label_get_text(o),lv_label_get_text(other));
-                    exit(EXIT_FAILURE);
-                }
-            }
         }
         check_labels(o);
     }
@@ -102,30 +89,41 @@ static void capture(const char *name)
     if(fclose(file)) { perror(path); exit(EXIT_FAILURE); }
 }
 
+static void measure_flush(lv_display_t *d,const lv_area_t *a,uint8_t *p)
+{ (void)a; (void)p; lv_display_flush_ready(d); }
+static uint64_t host_ns(void)
+{
+    struct timespec ts; timespec_get(&ts,TIME_UTC);
+    return (uint64_t)ts.tv_sec*1000000000u+(uint64_t)ts.tv_nsec;
+}
+static void measure_overlay(void)
+{
+    lv_display_t *main=lv_display_get_default();
+    lv_display_t *small=lv_display_create(320,240);
+    static uint32_t pixels[320*240];
+    lv_display_set_color_format(small,LV_COLOR_FORMAT_ARGB8888);
+    lv_display_set_buffers(small,pixels,NULL,sizeof(pixels),LV_DISPLAY_RENDER_MODE_DIRECT);
+    lv_display_set_flush_cb(small,measure_flush);
+    lv_display_set_default(small);
+    ui_monitor_parent(lv_screen_active(),true);
+    if(!ui_monitor_visible()) ui_monitor_toggle();
+    uint64_t total=0,max=0;
+    for(unsigned i=0;i<120;++i) {
+        lv_tick_inc(500);
+        uint64_t start=host_ns(); ui_monitor_update(); lv_refr_now(small);
+        uint64_t elapsed=host_ns()-start; total+=elapsed; if(elapsed>max) max=elapsed;
+    }
+    printf("Overlay 320x240 ARGB software, 120 refreshes: average_us=%llu max_us=%llu\n",
+        (unsigned long long)(total/120/1000),(unsigned long long)(max/1000));
+    ui_monitor_toggle();
+    lv_display_set_default(main);
+    ui_monitor_parent(lv_layer_sys(),false);
+    lv_display_delete(small);
+}
 static lv_indev_t *keypad;
 static void tap(uint32_t key) { key_tap(keypad,key); }
 static lv_obj_t *focus(void) { return lv_group_get_focused(lv_group_get_default()); }
-static void settle(void) { lv_tick_inc(200); ui_refresh(); }
-static void select_action(unsigned action)
-{
-    lv_group_t *g=lv_group_get_default();
-    unsigned n=lv_group_get_obj_count(g);
-    for(unsigned i=0;i<n;++i) {
-        lv_obj_t *o=lv_group_get_obj_by_index(g,i);
-        if((unsigned)(uintptr_t)lv_obj_get_user_data(o)==action) {
-            lv_group_focus_obj(o); return;
-        }
-    }
-    fprintf(stderr,"Missing action %u\n",action); exit(EXIT_FAILURE);
-}
-static void click(unsigned action) { select_action(action); tap(LV_KEY_ENTER); }
-static bool label_contains(lv_obj_t *p,const char *s)
-{
-    if(lv_obj_check_type(p,&lv_label_class) && strstr(lv_label_get_text(p),s)) return true;
-    for(unsigned i=0;i<lv_obj_get_child_count(p);++i)
-        if(label_contains(lv_obj_get_child(p,(int)i),s)) return true;
-    return false;
-}
+static void settle(void) { lv_tick_inc(150); ui_refresh(); }
 static void select_control(lv_obj_t *target)
 {
     unsigned n=lv_group_get_obj_count(lv_group_get_default());
@@ -175,8 +173,94 @@ static void pointer(lv_indev_t *mouse,int x,int y,bool pressed)
     test_input.state=pressed ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
     lv_indev_read(mouse);
 }
-static void check_other_controls(void)
+static void check_four_keys(void)
 {
+    for(unsigned page=0;page<=8;++page) {
+        if(page==6) continue;
+        ui_tab=0; ui_mode=0; ui_open(page); settle();
+        if(page==2) sim_data_image_status(UI_IMAGE_DONE);
+        if(page==3) {
+            ui_process_config_t c=ui_data_process_config(); c.enabled=UI_PROC_ALL;
+            ui_data_process_set(&c);
+        }
+        ui_refresh(); traverse();
+    }
+    ui_open(1); settle();
+    select_control(control(2)); tap(LV_KEY_ENTER);
+    assert(ui_data_session().state==UI_STATE_PAUSED);
+    tap(LV_KEY_ENTER); assert(ui_data_session().state==UI_STATE_RUNNING);
+    tap(LV_KEY_NEXT); bool boxes=ui_data_vision().boxes;
+    tap(LV_KEY_ENTER); assert(ui_data_vision().boxes!=boxes);
+    tap(LV_KEY_NEXT); tap(LV_KEY_ENTER); assert(ui_detection_settings);
+    traverse();
+    select_control(control(2));
+    unsigned threshold=ui_data_detection_config().threshold;
+    tap(LV_KEY_ENTER); assert(lv_group_get_editing(lv_group_get_default()));
+    tap(LV_KEY_PREV); assert(ui_data_detection_config().threshold==threshold-5);
+    tap(LV_KEY_ESC); assert(ui_detection_settings && !lv_group_get_editing(lv_group_get_default()));
+    tap(LV_KEY_NEXT); tap(LV_KEY_NEXT); tap(LV_KEY_ENTER);
+    assert(ui_data_detection_config().classes[0]==0);
+    tap(LV_KEY_NEXT); tap(LV_KEY_ENTER); assert(ui_data_detection_config().classes[0]==1);
+    capture("detection-settings");
+    tap(LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
+    tap(LV_KEY_ESC); assert(ui_page==0);
+    ui_data_detection_threshold(50); ui_data_detection_all(true);
+    if(!ui_data_vision().boxes) ui_data_boxes();
+
+    ui_open(3); settle();
+    ui_process_config_t preview=ui_data_process_config();
+    preview.enabled=UI_PROC_LEVEL | UI_PROC_GAMMA | UI_PROC_S1;
+    ui_data_process_set(&preview); ui_refresh();
+    select_control(control(5)); /* first enable switch after page toolbar */
+    ui_process_config_t c=ui_data_process_config();
+    if(!(c.enabled&UI_PROC_LEVEL)) tap(LV_KEY_ENTER);
+    select_control(control(6));
+    int value=ui_data_process_config().brightness;
+    tap(LV_KEY_ENTER); assert(lv_group_get_editing(lv_group_get_default()));
+    tap(LV_KEY_NEXT); assert(ui_data_process_config().brightness==value+1);
+    capture("process-editing");
+    tap(LV_KEY_ENTER); assert(!lv_group_get_editing(lv_group_get_default()));
+    tap(LV_KEY_PREV); tap(LV_KEY_ENTER);
+    assert(!(ui_data_process_config().enabled&UI_PROC_LEVEL));
+    assert(ui_data_process_config().brightness==value+1);
+    capture("process-stage-off");
+    tap(LV_KEY_ENTER); assert(ui_data_process_config().brightness==value+1);
+    /* S1 dropdown: enter edit, next selects, Esc commits one level. */
+    lv_obj_t *dropdown=NULL;
+    for(unsigned i=0;i<lv_group_get_obj_count(lv_group_get_default());++i)
+        if(lv_obj_check_type(control(i),&lv_dropdown_class)) { dropdown=control(i); break; }
+    select_control(dropdown); int stage=ui_data_process_config().stage1;
+    tap(LV_KEY_ENTER); tap(LV_KEY_NEXT); tap(LV_KEY_ESC);
+    assert(ui_page==3 && !lv_group_get_editing(lv_group_get_default()));
+    assert(ui_data_process_config().stage1==stage+1);
+    select_control(control(8)); tap(LV_KEY_ENTER);
+    assert(ui_data_process_config().brightness==0);
+    assert(ui_data_process_config().enabled==preview.enabled);
+    assert(ui_data_process_config().stage1==stage+1);
+    select_control(control(31)); capture("process-geo");
+    select_control(control(4)); tap(LV_KEY_ENTER);
+    assert(ui_data_process_config().enabled==0 && ui_data_process_config().brightness==0);
+    select_control(control(2)); tap(LV_KEY_ENTER); traverse(); capture("process-collapsed");
+    select_control(control(2)); tap(LV_KEY_ENTER); capture("process");
+
+    ui_open(2); settle(); sim_data_image_status(UI_IMAGE_DONE); ui_refresh();
+    select_control(control(3)); unsigned image=ui_data_vision().image_index;
+    tap(LV_KEY_ENTER); assert(ui_data_vision().image_index==image+1);
+    sim_data_image_status(UI_IMAGE_DONE); ui_refresh();
+    select_control(control(2)); tap(LV_KEY_ENTER); assert(ui_data_vision().image_index==image);
+    const char *image_names[]={"image-waiting","image-receiving","image-detecting",
+        "image-done","image-failed"};
+    for(unsigned i=0;i<5;++i) {
+        sim_data_image_status((int)i); ui_refresh();
+        bool busy=i==1 || i==2;
+        assert(lv_obj_has_state(control(2),LV_STATE_DISABLED)==busy);
+        assert(lv_obj_has_state(control(3),LV_STATE_DISABLED)==busy);
+        if(busy) { ui_data_image_step(1); assert(ui_data_vision().image_index==image); }
+        capture(image_names[i]);
+    }
+    sim_data_image_status(UI_IMAGE_DONE); ui_refresh(); select_control(control(2));
+    sim_data_image_status(UI_IMAGE_RECEIVING); ui_refresh(); tap(LV_KEY_ESC);
+    assert(ui_page==0);
     ui_open(5); settle();
     unsigned games; ui_data_games(&games);
     select_control(control(games+1)); capture("games-last-row");
@@ -210,125 +294,88 @@ static void check_other_controls(void)
     tap(LV_KEY_ENTER); assert(ui_data_debug().baud==921600);
     tap(LV_KEY_NEXT); tap(LV_KEY_ENTER); assert(ui_data_debug().uart_tx==15);
     tap(LV_KEY_NEXT); tap(LV_KEY_ENTER); assert(ui_data_debug().uart_tx==0);
+    ui_open(0); ui_monitor_toggle(); traverse(); capture("overlay-home");
+    if(ui_monitor_visible()) ui_monitor_toggle();
+    ui_open(1); sim_data_session(UI_APP_CAMERA,UI_STATE_FAILED,"格式错误"); ui_refresh();
+    traverse(); capture("session-failed");
+    for(unsigned i=0;i<lv_group_get_obj_count(lv_group_get_default());++i)
+        if((unsigned)(uintptr_t)lv_obj_get_user_data(control(i))==1002) {
+            select_control(control(i)); break;
+        }
+    tap(LV_KEY_ENTER); assert(ui_data_session().state==UI_STATE_STARTING);
+    capture("session-starting");
+    sim_data_session(UI_APP_CAMERA,UI_STATE_STOPPING,NULL);
+    ui_refresh(); capture("session-stopping");
+    for(unsigned app=0;app<=UI_APP_COREMARK;++app) {
+        sim_data_session((ui_app_t)app,UI_STATE_RUNNING,NULL);
+        ui_show_app((ui_app_t)app,0);
+        assert(ui_data_session().app==(ui_app_t)app);
+        assert(ui_page==(app==UI_APP_COREMARK ? 7 : app));
+    }
     ui_open(0);
     lv_indev_t *mouse=lv_indev_create(); lv_indev_set_type(mouse,LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(mouse,read_test_input);
+    select_control(control(2)); capture("keyboard-focus");
+    lv_obj_update_layout(lv_screen_active());
     pointer(mouse,70,220,false); pointer(mouse,70,220,true); pointer(mouse,70,220,false);
     assert(ui_page==1);
-    ui_hide_interface(); assert(ui_interface_hidden());
+    lv_obj_t *button=control(2); lv_area_t a; lv_obj_get_coords(button,&a);
+    pointer(mouse,(a.x1+a.x2)/2,(a.y1+a.y2)/2,false);
+    assert(lv_obj_has_state(button,LV_STATE_HOVERED));
+    pointer(mouse,(a.x1+a.x2)/2,(a.y1+a.y2)/2,true);
+    pointer(mouse,(a.x1+a.x2)/2,(a.y1+a.y2)/2,false);
+    assert(!lv_obj_has_state(button,LV_STATE_FOCUS_KEY));
+    assert(!lv_obj_has_state(button,LV_STATE_PRESSED)); capture("mouse-hover");
+    pointer(mouse,55,24,true); pointer(mouse,55,24,false); assert(ui_page==0);
+    ui_open(4); ui_data_benchmark_start(); ui_benchmark_controls(true);
+    pointer(mouse,55,24,true); pointer(mouse,55,24,false);
+    assert(!ui_data_benchmark_running()); ui_benchmark_controls(false);
+    lv_indev_delete(mouse);
+    lv_indev_t *encoder=lv_indev_create();
+    lv_indev_set_type(encoder,LV_INDEV_TYPE_ENCODER);
+    lv_indev_set_read_cb(encoder,read_test_input);
+    ui_open(1); settle(); select_control(control(2));
+    bool before=ui_data_vision().boxes;
+    test_input.enc_diff=1; lv_indev_read(encoder); assert(focus()==control(3));
+    key_tap(encoder,LV_KEY_ENTER); assert(ui_data_vision().boxes!=before);
+    lv_indev_delete(encoder);
+    puts("PASS: four-key traversal of all page controls, slider/dropdown edit, switches, "
+         "checkboxes, image states, session/retry, game/list focus and layered Esc");
+}
+static void check_media_hidden(void)
+{
+    if(!ui_data_vision().boxes) ui_data_boxes();
+    for(unsigned page=1;page<=3;++page) {
+        ui_open(page); settle();
+        for(unsigned i=0;i<lv_group_get_obj_count(lv_group_get_default());++i)
+            if((unsigned)(uintptr_t)lv_obj_get_user_data(control(i))==1005) {
+                select_control(control(i)); break;
+            }
+        if(!ui_monitor_visible()) ui_monitor_toggle();
+        tap(LV_KEY_ENTER);
+        assert(ui_interface_hidden() && !ui_monitor_visible());
+        if(page==1) capture("vision-hidden");
+        tap(LV_KEY_ESC);
+        assert(!ui_interface_hidden() && ui_page==page && ui_monitor_visible());
+        tap(LV_KEY_ESC); assert(ui_page==0);
+        ui_monitor_toggle();
+    }
+    ui_open(1); settle();
+    lv_indev_t *mouse=lv_indev_create(); lv_indev_set_type(mouse,LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(mouse,read_test_input);
+    ui_hide_interface();
     pointer(mouse,55,24,true); pointer(mouse,55,24,false);
     assert(!ui_interface_hidden() && ui_page==1);
+    pointer(mouse,55,24,true); pointer(mouse,55,24,false);
+    assert(ui_page==0);
     lv_indev_delete(mouse);
-    sim_data_session(UI_APP_PIPELINE,UI_STATE_FAILED,"格式错误"); ui_refresh();
-    click(1002); assert(ui_data_session().state==UI_STATE_STARTING);
-    settle(); assert(ui_data_session().state==UI_STATE_RUNNING);
-    ui_open(0);
-    puts("PASS existing game, renderer, CoreMark, debug, pointer and session controls");
-}
-static void check_pipeline(void)
-{
-    ui_open(1); settle();
-    assert(ui_data_chain().preset==1);
-    capture("pipeline-standard");
-    select_action(2200); tap(LV_KEY_RIGHT);
-    assert((unsigned)(uintptr_t)lv_obj_get_user_data(focus())==2201);
-    tap(LV_KEY_LEFT);
-    assert((unsigned)(uintptr_t)lv_obj_get_user_data(focus())==2200);
-    tap(LV_KEY_ENTER);
-    assert(lv_group_get_obj_count(lv_group_get_default())==5);
-    capture("pipeline-menu");
-    click(2012); click(2024); /* Insert gray after detection. */
-    ui_chain_t c=ui_data_chain();
-    assert(c.count==3 && c.block[1].type==UI_BLOCK_GRAY && c.preset==0);
-    click(2201); click(2010); click(2022); /* Change to gamma. */
-    assert(ui_data_chain().block[1].type==UI_BLOCK_GAMMA);
-    click(2201); click(2011); /* Enter the selected parameter. */
-    assert(lv_obj_check_type(focus(),&lv_slider_class));
-    tap(LV_KEY_ENTER); assert(lv_group_get_editing(lv_group_get_default()));
-    tap(LV_KEY_RIGHT); assert(ui_data_chain().block[1].p[0]==11);
-    tap(LV_KEY_ESC); assert(!lv_group_get_editing(lv_group_get_default()));
-    tap(LV_KEY_ESC); assert(ui_page==1);
-    const uint8_t *final_pixels=sim_l0_image()->data;
-    click(2201); click(2014); assert(ui_data_chain().view==1);
-    assert(sim_l0_image()->data!=final_pixels);
-    assert(sim_l0_image()==sim_pipeline_image());
-    click(2001); assert(ui_data_chain().view==UI_VIEW_FINAL);
-    click(2201); click(2013); assert(ui_data_chain().count==2);
-    /* A second detector is rejected atomically and explained in Chinese. */
-    c=ui_data_chain();
-    click(2200); click(2012); click(2028);
-    ui_chain_t after=ui_data_chain();
-    assert(!memcmp(&c,&after,sizeof c));
-    assert(label_contains(lv_screen_active(),"NPU 只有一个"));
-    capture("pipeline-rejected");
-    /* Removing the producer is rejected while its box overlay remains. */
-    click(2200); click(2013);
-    assert(ui_data_chain().count==2);
-    assert(label_contains(lv_screen_active(),"必须先放置检测积木"));
-    click(2200); click(2011); assert(ui_detection_settings);
-    lv_obj_t *slider=lv_group_get_obj_by_index(lv_group_get_default(),2);
-    lv_group_focus_obj(slider); tap(LV_KEY_ENTER); tap(LV_KEY_LEFT);
-    assert(ui_data_detection_config().threshold==45);
-    tap(LV_KEY_ESC); tap(LV_KEY_ESC); assert(!ui_detection_settings && ui_page==1);
-    click(2105); assert(ui_data_chain().preset==5); settle();
-    select_action(2202); capture("pipeline-rotation");
-    click(2107); assert(ui_data_chain().preset==7); settle(); capture("pipeline-filter");
-    ui_pipe_stats_t stats=ui_data_pipe_stats();
-    assert(stats.hop_count==2 && stats.hop[0].engine==UI_HOP_CAM_PIX &&
-        stats.hop[0].first==0 && stats.hop[0].last==2 && stats.hop[1].first==3);
-    assert(ui_data_thumb(0)==ui_data_thumb(1) && ui_data_thumb(1)==ui_data_thumb(2));
-    assert(label_contains(lv_screen_active(),"与摄像头融合"));
-    click(2201); click(2014);
-    assert(label_contains(lv_screen_active(),"显示本次 PIX 处理的输出"));
-    click(2001);
-    /* Check all source/parameter kinds with actual native controls. */
-    for(unsigned preset=1;preset<=8;++preset) {
-        click(2100+preset); settle();
-        ui_chain_t chain=ui_data_chain();
-        assert(chain.preset==preset);
-        for(unsigned i=0;i<chain.count;++i) {
-            select_action(2200+i); lv_obj_update_layout(lv_screen_active());
-            capture("pipeline-control-check");
-            const lv_image_dsc_t *thumb=ui_data_thumb(i);
-            assert(thumb->header.w==160 && thumb->header.h==90);
-        }
-    }
-    sim_data_image_status(UI_IMAGE_DONE); ui_refresh();
-    unsigned image=ui_data_vision().image_index;
-    click(2003); assert(ui_data_vision().image_index==image+1);
-    sim_data_image_status(UI_IMAGE_DONE); ui_refresh(); click(2002);
-    assert(ui_data_vision().image_index==image);
-    click(2000); click(2042); assert(ui_data_chain().source==UI_SOURCE_TEST_IMAGE);
-    click(2000); click(2061); assert(ui_data_chain().view==UI_VIEW_SOURCE);
-    assert(label_contains(lv_screen_active(),"来源原图"));
-    const lv_image_dsc_t *original=sim_l0_image();
-    click(2200); click(2012); click(2024);
-    assert(ui_data_chain().view==UI_VIEW_SOURCE && sim_l0_image()==original);
-    click(2201); click(2013); assert(ui_data_chain().view==UI_VIEW_SOURCE);
-    /* Empty and full chains remain editable; extra insertion is refused. */
-    c=(ui_chain_t){.view=UI_VIEW_FINAL}; assert(!ui_data_chain_set(&c)); ui_refresh();
-    click(2000); tap(LV_KEY_ESC); assert(ui_page==1);
-    /* Source insertion Esc returns to the source menu, including an empty chain. */
-    click(2000); click(2060); tap(LV_KEY_ESC);
-    assert(lv_group_get_obj_count(lv_group_get_default())==5);
-    tap(LV_KEY_ESC); assert(ui_page==1);
-    /* Source menu also offers insertion when the chain is empty. */
-    click(2000); click(2060); click(2024); assert(ui_data_chain().count==1);
-    c=ui_data_chain(); c.count=8;
-    for(unsigned i=0;i<8;++i) c.block[i]=(ui_block_t){.type=UI_BLOCK_GRAY};
-    assert(!ui_data_chain_set(&c)); ui_refresh();
-    click(2200); click(2012); click(2024);
-    assert(ui_data_chain().count==8 && label_contains(lv_screen_active(),"最多 8 块"));
-    capture("pipeline-full");
-    select_action(2207); lv_obj_update_layout(lv_screen_active());
-    lv_area_t last; lv_obj_get_coords(focus(),&last);
-    assert(last.x1>=0 && last.x2<1280);
-    tap(LV_KEY_ENTER); click(2010); tap(LV_KEY_ESC);
-    assert(lv_group_get_obj_count(lv_group_get_default())==5);
-    tap(LV_KEY_ESC); assert(ui_page==1);
-    tap(LV_KEY_ESC); assert(ui_page==0);
-    puts("PASS pipeline: movement, insert/delete, function/parameters, stage view, presets, "
-        "atomic rejection/reasons, detection settings, PC image step, empty/full chains");
+    ui_open(1); settle(); sim_data_many_categories(true); ui_refresh();
+    ui_vision_t d=ui_data_vision();
+    assert(d.count==13 && d.category_used==5 && d.category_id[0]==2 && d.category_id[1]==7);
+    capture("vision-categories"); sim_data_many_categories(false);
+    ui_open(0); ui_monitor_toggle(); capture("overlay-cpu"); ui_monitor_toggle();
+    puts("PASS media hide preserves boxes/overlay setting; "
+         "first key/click restores only; top five");
 }
 int main(void)
 {
@@ -340,10 +387,14 @@ int main(void)
     keypad=lv_indev_create(); lv_indev_set_type(keypad,LV_INDEV_TYPE_KEYPAD);
     lv_indev_set_read_cb(keypad,read_test_input);
     sim_data_init(); ui_start(); capture("home");
-    check_pipeline(); check_other_controls();
-    const unsigned pages[]={0,4,5,7,8};
-    for(unsigned i=0;i<sizeof pages/sizeof pages[0];++i) {
-        ui_open(pages[i]); settle(); capture("other-page-check");
+    sim_data_toggle_hardware(); ui_open(0); capture("home-vrn");
+    sim_data_toggle_hardware();
+    const char *names[]={"home","vision","image","process","graphics","games","monitor",
+        "chip","debug"};
+    for(unsigned page=1;page<=8;++page) {
+        if(page==6) continue;
+        ui_tab=0; ui_mode=0; ui_open(page); settle(); capture(names[page]);
     }
+    check_four_keys(); measure_overlay(); check_media_hidden();
     lv_deinit(); return 0;
 }

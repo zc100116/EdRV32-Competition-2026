@@ -1,6 +1,6 @@
 """soc_console.py — SoC console design 4.1–4.5; host Qt thread.
 
-One shared canvas and UDP session serve device and vision pipeline pages.
+One shared canvas and UDP session serve device, processing and detection pages.
 Scrollable controls keep complete groups readable at both desktop sizes.
 """
 
@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 from core.engine import fmt_ts
 from core.showcase import STATUS
-from gui.pipeline import PipelinePanel
+from gui.processing import ProcessingPanel
 from core.telemetry import encode
 from core.video import FrameRate
 from gui.program import ProgramPanel
@@ -153,29 +153,20 @@ class SocConsole(QWidget):
         self.device_box = self.page('设备与输出')
         self.program = ProgramPanel(engine, toast)
         self.device_box.addWidget(self.program)
-        detection_box = self.page('视觉流水线')
-        self.pipeline = PipelinePanel(engine, self.run)
-        self.pipeline_strip = QScrollArea()
-        self.pipeline_strip.setWidgetResizable(True)
-        self.pipeline_strip.setFrameShape(QFrame.NoFrame)
-        self.pipeline_strip.setFixedHeight(270)
-        self.pipeline_strip.setWidget(self.pipeline)
-        layout.addWidget(self.pipeline_strip)
-        detection_box.addWidget(self.pipeline.details)
+        processing_box = self.page('图像处理')
+        self.processing = ProcessingPanel(engine.processing, self.run)
+        processing_box.addWidget(self.processing)
+        detection_box = self.page('目标检测')
         self._transfers(detection_box)
         self._controls(self.device_box)
         self.device_box.removeWidget(self.check_card)
         detection_box.addWidget(self.check_card)
         self._session_controls(self.device_box)
         self._detector_controls(detection_box)
-        for box in (self.device_box, detection_box):
+        for box in (self.device_box, processing_box, detection_box):
             box.addStretch()
         self._canvas(row)
-        self.workspace_frame = QScrollArea()
-        self.workspace_frame.setWidgetResizable(True)
-        self.workspace_frame.setFrameShape(QFrame.NoFrame)
-        self.workspace_frame.setWidget(self.workspace)
-        layout.addWidget(self.workspace_frame, 1)
+        layout.addWidget(self.workspace, 1)
         self.lower = QWidget()
         self.lower.setFixedHeight(278)
         lower_box = QHBoxLayout(self.lower)
@@ -195,19 +186,12 @@ class SocConsole(QWidget):
         self.video_timer.start(16)
         self.network_changed.connect(self.refresh)
         self.board.listeners.append(self.network_changed.emit)
-        self.pages.currentChanged.connect(self.pipeline_page)
-        self.pipeline_page(0)
-
-    def pipeline_page(self, index):
-        self.pipeline_strip.setVisible(index == 1)
-        self.lower.setVisible(index != 1)
 
     def _session_controls(self, layout):
         frame, box = card('板端应用')
         self.app_choice = QComboBox()
-        for title, value in (('无', 0), ('视觉流水线', 1), ('图形测试', 4),
-                             ('游戏', 5), ('芯片性能测试', 6)):
-            self.app_choice.addItem(title, value)
+        self.app_choice.addItems(['无', '实时识别', '图片识别', '图像处理', '图形测试',
+                                 '游戏', '芯片性能测试'])
         box.addWidget(self.app_choice)
         self.app_arg = QLineEdit('0')
         self.app_arg.setValidator(QIntValidator(0, 65535, self))
@@ -217,8 +201,8 @@ class SocConsole(QWidget):
         for action, title in enumerate(['打开', '暂停', '继续', '重试']):
             box.addWidget(self.button(title, lambda checked=False, a=action: self.run(
                 lambda: self.engine.ethernet.showcase.app(
-                    self.app_choice.currentData(), a,
-                    int(self.app_arg.text()) if self.app_choice.currentData() == 5 else 0))))
+                    self.app_choice.currentIndex(), a,
+                    int(self.app_arg.text()) if self.app_choice.currentIndex() == 5 else 0))))
         layout.addWidget(frame)
 
     def _detector_controls(self, layout):
@@ -242,7 +226,7 @@ class SocConsole(QWidget):
 
     def sync_detection(self, state, force=False):
         if force:
-            self.app_choice.setCurrentIndex(self.app_choice.findData(state['app']))
+            self.app_choice.setCurrentIndex(state['app'])
         current = (state['threshold'], tuple(state['classes']))
         if not force and current == self.last_detection:
             return
@@ -400,7 +384,7 @@ class SocConsole(QWidget):
         self.cancel_image = self.button('取消', lambda: self.run(
             self.engine.ethernet.showcase.cancel))
         send_row.addWidget(self.cancel_image)
-        self.image_camera = self.button('回到摄像头流水线', self._camera_detection)
+        self.image_camera = self.button('回到摄像头检测', self._camera_detection)
         send_row.addWidget(self.image_camera)
         box.addLayout(send_row)
         navigation = QHBoxLayout()
@@ -458,17 +442,17 @@ class SocConsole(QWidget):
         box.addWidget(self.caption)
         self.video_stats = label('接收帧率 0.0 fps · 显示帧率 0.0 fps · 丢弃帧数 0 · 接收缓冲 0 MiB', 'note')
         box.addWidget(self.video_stats)
-        self.video_camera = self.button('回到摄像头流水线', self._camera_detection)
+        self.video_camera = self.button('回到摄像头检测', self._camera_detection)
         box.addWidget(self.video_camera)
         row.addWidget(frame, 1)
 
     def _controls(self, layout):
-        self.scene_card, box = card('流水线来源')
+        self.scene_card, box = card('摄像头输入')
         self.scene = QComboBox()
-        self.scene.addItems(['摄像头', 'PC 图片', '测试图'])
-        self.scene.setCurrentIndex(0)
+        self.scene.addItems(['摄像头目标检测', '摄像头图像处理'])
+        self.scene.setCurrentIndex(1)
         box.addWidget(self.scene)
-        self.apply_scene = self.button('切换来源，保留积木', self._apply_scene)
+        self.apply_scene = self.button('切换摄像头功能', self._apply_scene)
         box.addWidget(self.apply_scene)
         layout.addWidget(self.scene_card)
         self.output_card, box = card('输出与采样')
@@ -703,9 +687,7 @@ class SocConsole(QWidget):
 
     def _apply_scene(self):
         def send():
-            chain = self.engine.pipeline.status()
-            chain.update(source=self.scene.currentIndex(), preset=0)
-            self.engine.pipeline.send(chain)
+            self.engine.scenes.send(['s1', 's2'][self.scene.currentIndex()])
         self.run(send)
 
     def _apply_output(self):
@@ -858,7 +840,7 @@ class SocConsole(QWidget):
         state = self.board.status()
         connected = state['network']['peer']['done']
         board_state = state['state']
-        apps = ['无', '视觉流水线', '未使用', '未使用', '图形测试', '游戏', '芯片性能测试']
+        apps = ['无', '实时识别', '图片识别', '图像处理', '图形测试', '游戏', '芯片性能测试']
         sessions = ['空闲', '启动中', '运行中', '已暂停', '停止中', '失败']
         self.phase.setText(('网口已连接' if connected else '网口未连接') +
                            ' · 板端版本 ' + (state['build'] or '—') + ' · ' +
@@ -886,7 +868,7 @@ class SocConsole(QWidget):
         for key, value in self.summary.items():
             value.setText(state['summary'].get(key, '—'))
         self.peer.setText('板端版本 · ' + (state['build'] or '—'))
-        self.pipeline.refresh()
+        self.processing.refresh(new_state)
         self.switch.setText('Switch · ' + state['summary'].get('Switch', '—'))
         self.message.setText(state['error'] or
                              ('应用运行中' if state['phase'] == 'application' else

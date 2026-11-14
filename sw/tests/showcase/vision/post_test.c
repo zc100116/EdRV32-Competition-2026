@@ -66,10 +66,6 @@ static void compare(const char *name)
     yolo_post_stats stats;
     uint32_t count = yolo_post_process(output, yolo_default_heads, reference_workspace,
                                      expected, &stats);
-#ifdef SHOWCASE_POST_CPU
-    struct vision_post post;
-    vision_post_begin(&post, output, sliced_workspace, actual);
-#else
     uint32_t candidates = stats.decoded_anchors;
     /* Raw reference leaves sorted/suppressed records; regenerate the input below. */
     test_decode(output, sliced_workspace);
@@ -78,7 +74,6 @@ static void compare(const char *name)
     stats.exp_lookups = 0;
     struct vision_post post;
     vision_post_begin(&post, sliced_workspace, candidates, actual);
-#endif
     unsigned slices = 1;
     while (!vision_post_step(&post)) ++slices;
     assert(post.kept == count);

@@ -1,10 +1,5 @@
 # File: program.mk
 # Design: showcase 4.1--4.5; single BIOS-loaded DDR application.
-# Temporary card 68 R2 option; remove after card 75 board acceptance (CLAUDE.md 1.2).
-SHOWCASE_POST ?= hw
-ifeq ($(SHOWCASE_POST),cpu)
-OUT := $(ROOT)/build/sw/showcase-cpupost
-endif
 MEMORY := showcase
 PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c sw/apps/showcase/input.c \
     sw/apps/showcase/layers.c $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/showcase/board/*.c)) \
@@ -77,17 +72,3 @@ $(ROOT)/build/showcase/model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	python3 $(ROOT)/tools/npu/compile_yolo.py --model-source $(SHOWCASE_MODEL_SOURCE) \
 	    --out $(SHOWCASE_MODEL_DIR)
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_MODEL_DIR) $@
-
-# PIPE-SPEC 3.1: the half-resolution test image adds exactly 460800 payload bytes.
-SHOWCASE_PIPE_TEST := $(ROOT)/build/showcase/pipe_test.bin
-SHOWCASE_PIPE_OBJECT := $(ROOT)/build/showcase/pipe_test.o
-$(SHOWCASE_PIPE_TEST): $(ROOT)/tools/sw/pipe_test_image.py \
-    $(ROOT)/sw/apps/showcase/sim/assets/street-scene.png
-	python3 $(ROOT)/tools/sw/pipe_test_image.py \
-	    $(ROOT)/sw/apps/showcase/sim/assets/street-scene.png $@
-$(SHOWCASE_PIPE_OBJECT): $(SHOWCASE_PIPE_TEST)
-	cd $(ROOT) && riscv-none-elf-objcopy -I binary -O elf32-littleriscv -B riscv \
-	    --rename-section .data=.rodata,alloc,load,readonly,data,contents \
-	    build/showcase/pipe_test.bin build/showcase/pipe_test.o
-$(OUT)/showcase.elf: $(SHOWCASE_PIPE_OBJECT)
-PROGRAM_LDLIBS += $(SHOWCASE_PIPE_OBJECT)

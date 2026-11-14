@@ -30,8 +30,8 @@ void board_session_fail(unsigned error)
 }
 static void model_start(ui_app_t app, unsigned arg)
 {
-    (void)app;
-    if (!arg) vision_app_camera.enter();
+    (void)arg;
+    if (app == UI_APP_CAMERA) vision_app_camera.enter();
     else vision_app_image.enter();
 }
 static void model_stop(ui_app_t app)
@@ -473,15 +473,82 @@ static void cancel_test(void)
     vision_app_image.exit(); display_frame(); display_frame(); drain();
     puts("PASS CANCEL drains NPU, drops old EDDT, queues next request without overwriting OUTPUT");
 }
+static void process_test(void)
+{
+    hardware = APP_HW_VIN | APP_HW_PIX | APP_HW_GEO;
+    vision_app_process.enter();
+    drain();
+    unsigned loads = gamma_loads;
+    ui_process_config_t changed = ui_data_process_config();
+    changed.gamma_tenths = 30; changed.enabled = UI_PROC_GAMMA;
+    ui_data_process_set(&changed);
+    for (unsigned i = 0; i < 255; ++i) vision_service();
+    assert(gamma_loads == loads);
+    pix_busy = 1;
+    vision_service();
+    assert(gamma_loads == loads); /* Complete table waits for an inactive bank boundary. */
+    pix_busy = 0;
+    vision_service();
+    assert(gamma_loads == loads + 1);
+    changed.brightness = -256; changed.contrast = 511;
+    changed.enabled = UI_PROC_LEVEL | UI_PROC_GRAY | UI_PROC_BINARY | UI_PROC_INVERT;
+    changed.threshold = 255;
+    ui_data_process_set(&changed); drain();
+    assert(last_pix.brightness == -256 && last_pix.contrast == 511 && last_pix.threshold == 255);
+    assert((last_pix.flags & (EDRV32_PIX_CFG_GRAY_EN_MASK | EDRV32_PIX_CFG_BIN_EN_MASK |
+        EDRV32_PIX_CFG_INV_EN_MASK)) == (EDRV32_PIX_CFG_GRAY_EN_MASK |
+        EDRV32_PIX_CFG_BIN_EN_MASK | EDRV32_PIX_CFG_INV_EN_MASK));
+    changed.enabled = 0; ui_data_process_set(&changed); drain();
+    assert(last_pix.flags==0 && last_pix.stage1==PIX_BYPASS && last_pix.stage2==PIX_BYPASS);
+    assert(ui_data_process_config().brightness==-256 && ui_data_process_config().contrast==511);
+    ui_data_process_defaults(UI_PROC_LEVEL); drain();
+    assert(ui_data_process_config().brightness==0 && ui_data_process_config().gamma_tenths==30);
+    ui_data_process_defaults(UI_PROC_ALL); drain();
+    assert(!ui_data_process_config().enabled && ui_data_process_config().stage1==2);
+    assert(!vision_process_applied());
+    puts("PASS one gamma sample per slice, inactive-bank boundary and PIX parameter extremes");
+    for (unsigned mode = 0; mode < 7; ++mode) {
+        ui_process_config_t config = ui_data_process_config();
+        config.original = mode == 0;
+        config.angle = (int)mode * 20;
+        config.stage1 = mode ? (int)mode : 2;
+        config.enabled = mode ? UI_PROC_S1 | UI_PROC_ROTATE : 0;
+        ui_data_process_set(&config); drain();
+        unsigned source = 0;
+        while (busy[0] & (1u << source)) ++source;
+        assert(source < 4);
+        frames[0] = (struct vin_frame){source << EDRV32_VIN_CH_DONE_INFO_SLOT_POS, mode};
+        event(ENGINE_VIN, EDRV32_VIN_IRQ_STAT_FRAME_MASK);
+        vision_service();
+        assert(vision_process_applied());
+        if (mode) {
+            assert(geo_descriptor == VISION_GEO_DESCRIPTOR);
+            event(ENGINE_GEO, EDRV32_GEO_IRQ_STAT_DONE_MASK);
+            drain();
+        }
+        display_frame(); display_frame();
+        const lv_image_dsc_t *image = ui_data_process(0);
+        assert(image && image->header.w == 1280 && image->header.h == 720);
+    }
+    vision_app_process.exit();
+    display_frame(); display_frame(); drain();
+    display_frame(); display_frame();
+    unsigned bank = last_pix.gamma_bank;
+    vision_app_camera.enter(); drain();
+    assert(last_pix.gamma_bank == bank); /* Bypass retains the shadow bank selection. */
+    vision_app_camera.exit(); display_frame(); display_frame(); drain();
+    display_frame(); display_frame();
+    puts("PASS all seven PIX/GEO modes, native surfaces and gamma bank across page changes");
+}
 static void model_test(void)
 {
     hardware = APP_HW_NPU | APP_HW_ETH;
     assert(vision_model_ready());
     vision_model_receiving();
     assert(!vision_model_ready());
-    for (unsigned image = 0; image < 2; ++image) {
+    for (ui_app_t app = UI_APP_CAMERA; app <= UI_APP_IMAGE; ++app) {
         model_session = (struct session){.ops = {model_start, model_stop, NULL, model_ready}};
-        session_open(&model_session, UI_APP_PIPELINE, image);
+        session_open(&model_session, app, 0);
         session_step(&model_session);
         assert(model_session.state == UI_STATE_FAILED && model_session.error == 7);
         drain();
@@ -593,6 +660,7 @@ int main(void)
     interrupt_restart_test();
     image_test();
     cancel_test();
+    process_test();
     model_test();
     assert(invalidates >= 3);
     return 0;

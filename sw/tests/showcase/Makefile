@@ -50,7 +50,6 @@ test:
 	    $(ROOT)/sw/apps/showcase/board/records.c -o $(BUILD)/state
 	$(BUILD)/state
 	$(MAKE) -C vision test runtime network
-	$(MAKE) -C pipeline test
 	$(CC) $(FLAGS) -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
 	    -I$(ROOT)/sw/drivers/include serial.c $(ROOT)/sw/apps/showcase/board/serial.c \
 	    -o $(BUILD)/serial

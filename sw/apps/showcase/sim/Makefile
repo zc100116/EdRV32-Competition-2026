@@ -17,11 +17,14 @@ WINCC := zig cc -target x86_64-windows-gnu
 LINUX_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/linux/%.o,$(LV_SOURCES))
 WIN_LV := $(patsubst $(LVGL)/%.c,$(BUILD)/win/%.o,$(LV_SOURCES))
 PROCESS_HELPERS := $(ROOT)/sw/lib/geo_matrix.c $(ROOT)/sw/lib/geo_matrix.h
-COMMON := $(UI) sim_data.c pipeline.c process.c $(ROOT)/sw/lib/geo_matrix.c \
-    $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
-SHOTS := home pipeline-standard pipeline-rotation pipeline-filter pipeline-menu \
-    games-last-row game-running renderer-list renderer-result benchmark-results \
-    coremark-counters chip-coremark debug-network
+COMMON := $(UI) sim_data.c process.c $(ROOT)/sw/lib/geo_matrix.c $(ASSETS) $(GAMES) $(FONTS) $(DIGITS)
+SHOTS := home home-vrn vision image process graphics games chip debug \
+    game-running renderer-list renderer-result benchmark-results overlay-home chip-coremark \
+    coremark-counters games-last-row detection-settings process-collapsed \
+    process-stage-off process-editing process-geo image-waiting image-receiving image-detecting \
+    image-done image-failed keyboard-focus mouse-hover session-failed session-starting \
+    session-stopping \
+    vision-hidden vision-categories overlay-cpu
 .PHONY: win shots
 win: $(BUILD)/showcase_sim.exe
 shots: $(addprefix $(BUILD)/shots/,$(addsuffix .png,$(SHOTS)))
@@ -46,7 +49,7 @@ $(BUILD)/win/%.o: $(LVGL)/%.c lv_conf.h
 	@mkdir -p $(@D)
 	$(WINCC) $(FLAGS) -DLV_USE_WINDOWS=1 -c $< -o $@
 
-$(BUILD)/showcase_shots: main_shots.c sim_data.c pipeline.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) $(UI_HEADERS) \
+$(BUILD)/showcase_shots: main_shots.c sim_data.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) $(UI_HEADERS) \
     lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(LINUX_LV)
 	$(CC) $(FLAGS) -Werror main_shots.c $(COMMON) $(LINUX_LV) -lm -o $@
 
@@ -57,7 +60,7 @@ $(addprefix $(BUILD)/shots/,$(addsuffix .rgb565,$(SHOTS))) &: $(BUILD)/showcase_
 	mkdir -p $(BUILD)/shots
 	cd $(BUILD) && ./showcase_shots
 
-$(BUILD)/showcase_sim.exe: main_windows.c sim_data.c pipeline.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) \
+$(BUILD)/showcase_sim.exe: main_windows.c sim_data.c process.c sim_data.h $(PROCESS_HELPERS) $(UI) \
     $(UI_HEADERS) lv_conf.h $(ASSETS) $(GAMES) $(FONTS) $(DIGITS) $(WIN_LV)
 	$(WINCC) $(FLAGS) -Werror -DLV_USE_WINDOWS=1 main_windows.c $(COMMON) \
 	    $(WIN_LV) -static -Wl,--subsystem,windows -luser32 -lgdi32 -lkernel32 -o $@

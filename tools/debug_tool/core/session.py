@@ -35,13 +35,10 @@ class BoardSession:
         self.state_generation = 0
         self.last_state = None
         self.last_request = None
-        from .pipeline import preset
-        self.chain = preset(1)
-        self.chain_rev = 0
-        self.pipe_stats = None
+        from .processing import DEFAULTS
         self.board_state = dict(app=0, state=0, error=0, boxes=0, threshold=25,
                                 classes=[0xffffffff, 0xffffffff, 0xffff],
-                                chain_rev=0, request=0, frame=0, image_status=0)
+                                process=dict(DEFAULTS), request=0, frame=0, image_status=0)
         self.steps = {key: dict(done=False, time=None) for key in
                       ('listen', 'win3', 'peer', 'data')}
         self.counts = dict(video=0, telemetry=0)
@@ -110,20 +107,8 @@ class BoardSession:
 
     def receive_state(self, message_type, payload):
         import struct
-        from .showcase import HELLO, CHAIN_STATE, PIPE_STATS
-        from .pipeline import unpack_chain, unpack_stats
-        if message_type == CHAIN_STATE:
-            with self.lock:
-                self.chain_rev = struct.unpack_from("<I", payload)[0]
-                self.chain = unpack_chain(payload[4:])
-                self.error = None
-            self.notify()
-            return
-        if message_type == PIPE_STATS:
-            with self.lock:
-                self.pipe_stats = unpack_stats(payload)
-            self.notify()
-            return
+        from .showcase import HELLO
+        from .processing import unpack_process
         with self.lock:
             if message_type == HELLO:
                 proto, = struct.unpack_from('<H', payload)
@@ -141,7 +126,7 @@ class BoardSession:
             request, frame, image_status = struct.unpack_from('<IIB', payload, 44)
             self.board_state = dict(app=app, state=state, error=error, boxes=boxes,
                                     threshold=threshold, classes=classes,
-                                    chain_rev=struct.unpack_from('<I', payload, 20)[0],
+                                    process=unpack_process(payload[20:44]),
                                     request=request, frame=frame, image_status=image_status)
         self.notify()
 

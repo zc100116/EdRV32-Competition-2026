@@ -13,7 +13,7 @@ static unsigned reserve(unsigned kind,uint32_t total,uint32_t *base)
 static unsigned complete(unsigned kind,uint32_t base,uint32_t bytes,uint32_t *index)
 { if(kind==1 || kind==2) return EDSC_PENDING;
   assert(kind==3 && base==0x100 && bytes==128); completed++; *index=30; return 0; }
-static uint8_t current[56]={1,2};
+static uint8_t current[56]={2,2};
 static unsigned command_result, cancelled;
 static void state(uint8_t p[56]) { memcpy(p,current,56); }
 static unsigned command(unsigned type,const uint8_t *p,unsigned n,uint32_t seq)
@@ -33,21 +33,10 @@ int main(int argc,char **argv)
 {
     struct edsc s={.ops={reserve,complete,reply,state,command,progress,cancel},.build="abc123"};
     uint8_t connect=0; edsc_message(&s,&connect,1);
-    assert(response[4]==0x88 && response_bytes==116);
-    assert(previous_response[4]==0x84 && record_u16(previous_response+12)==3);
-    assert(!memcmp(previous_response+16,"abc123",6) && previous_response[32]==1);
+    assert(response[4]==0x84 && response_bytes==88 && record_u16(response+12)==3);
+    assert(!memcmp(response+16,"abc123",6) && response[32]==2 && response[33]==2);
     edsc_poll(&s,100,100); assert(response[4]==0x85 && response_bytes==68);
     assert(!memcmp(response+12,current,56));
-    uint8_t chain[100]={1,0,255,0};
-    edsc_chain_snapshot(&s,7,chain); edsc_poll(&s,101,100);
-    assert(response[4]==0x88 && record_u32(response+12)==7 && response[16]==1);
-    uint8_t stats[24]={0};
-    edsc_pipe_stats(&s,stats,sizeof stats,100,100);
-    assert(response[4]==0x89 && response_bytes==36);
-    unsigned stats_replies=replies;
-    edsc_pipe_stats(&s,stats,sizeof stats,199,100); assert(replies==stats_replies);
-    current[0]=4; edsc_pipe_stats(&s,stats,sizeof stats,200,100);
-    assert(replies==stats_replies); current[0]=1;
     unsigned before=replies; edsc_poll(&s,199,100); assert(replies==before);
     current[3]=1; edsc_poll(&s,199,100); assert(replies==before+1);
     edsc_poll(&s,299,100); assert(replies==before+2);
@@ -86,20 +75,20 @@ int main(int argc,char **argv)
     command_result=0; message(&s,5,p,12); assert(response[14]==2);
     message(&s,5,p,11); assert(response[15]==1);
     p[8]='/'; message(&s,5,p,12); assert(response[15]==2);
-    message(&s,6,p,24); assert(response[4]==0x82 && response[13]==2);
-    memset(p,0,sizeof p); message(&s,9,p,99); assert(response[15]==1);
-    message(&s,9,p,100); assert(response[14]==2);
-    message(&s,10,p,4); assert(response[15]==2);
-    p[0]=1; message(&s,10,p,4); assert(response[14]==2);
-    p[1]=1; message(&s,10,p,4); assert(response[15]==2);
+    memset(p,0,sizeof p); p[7]=1; p[8]=10; p[10]=p[11]=2; p[12]=128;
+    p[16]=100; message(&s,6,p,24); assert(response[14]==2);
+    message(&s,6,p,23); assert(response[15]==1);
+    p[8]=2; message(&s,6,p,24); assert(response[15]==2); p[8]=10;
+    command_result=EDSC_PENDING; message(&s,6,p,24);
+    command_result=0; edsc_poll(&s,302,100); assert(response[14]==2);
     memset(p,0,sizeof p); p[0]=50; message(&s,7,p,16); assert(response[14]==2);
     command_result=EDSC_PENDING; message(&s,7,p,16);
     command_result=0; edsc_poll(&s,303,100); assert(response[14]==2 && response[12]==7);
     message(&s,7,p,15); assert(response[15]==1);
     p[0]=24; message(&s,7,p,16); assert(response[15]==2);
     memset(p,0,sizeof p); p[0]=2; record_put32(p+4,16);
-    current[0]=1; s.chain[0]=0; message(&s,1,p,8); assert(response[13]==5);
-    current[0]=1; s.chain[0]=1; s.image_info=0; message(&s,1,p,8); assert(response[13]==5);
+    current[0]=1; message(&s,1,p,8); assert(response[13]==5);
+    current[0]=2; s.image_info=0; message(&s,1,p,8); assert(response[13]==5);
     const uint8_t info[9]={1,0,1,0,1,0,0,0,'x'};
     message(&s,5,info,9); assert(response[14]==2);
     message(&s,1,p,8); assert(s.active);
@@ -143,5 +132,5 @@ int main(int argc,char **argv)
         for(unsigned i=0;i<count;++i) assert(!game_pack_record(&r,data,(uint32_t)bytes,i));
         printf("PASS real EDGP: %u games, %ld bytes\n",count,bytes); free(data);
     }
-    puts("PASS EDSC v3 HELLO/STATE/APP/IMAGE_INFO/CHAIN/PRESET/DETECT/CANCEL/ACK, records and wheel");
+    puts("PASS EDSC v3 HELLO/STATE/APP/IMAGE_INFO/PROCESS/DETECT/CANCEL/ACK, records and wheel");
 }
