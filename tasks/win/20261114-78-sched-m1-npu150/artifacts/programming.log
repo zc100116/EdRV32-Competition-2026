@@ -1,0 +1,6 @@
+[Info] [2026-11-14 20:58:55] set OpenLastPath: G:/codex_project/EdRV32-FPGA/m1-release.sbit
+[Error] [2026-11-14 21:00:37] MsgOut: JtagServer-0014: Fail to write instruction or data to PANGO USB CABLE II cable using JTAG protocol.
+[Error] [2026-11-14 21:00:37] MsgOut: Configuration-0008: The command 'Program' execute fail.
+[Debug] [2026-11-14 21:01:08] COMMAND[Program] execute successfully, takes 8.1 secs.
+[Debug] [2026-11-14 21:01:08] Log::Print : The done bit is 1
+[Debug] [2026-11-14 21:01:08] Log::Print : COMMAND[Program] execute successfully, takes 8.1 secs.
