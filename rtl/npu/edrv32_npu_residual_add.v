@@ -58,8 +58,9 @@ module edrv32_npu_residual_add (
             wire signed [9:0] quant_signed_w;
             wire signed [9:0] residual_signed_w;
             wire signed [9:0] zp_signed_w;
-            wire signed [9:0] residual_input_w;
             reg signed [9:0] wb1_sum_r;
+            reg [7:0] wb1_bypass_r;
+            (* keep = "true", syn_preserve = 1 *) reg wb1_res_en_r;
             (* keep = "true", syn_preserve = 1 *) reg wb1_half_r;
             wire [7:0] saturated_w;
 
@@ -73,21 +74,22 @@ module edrv32_npu_residual_add (
             assign residual_signed_w = {{2{residual_w[7]}}, residual_w};
             assign zp_signed_w = {{2{quant_tag_i[36]}}, quant_tag_i[36:29]};
 
-            // Bypass uses y+zp-zp, retaining the same WB1/WB2 latency.
-            assign residual_input_w = quant_tag_i[28] ? residual_signed_w : zp_signed_w;
+            // Carry mode alongside the arithmetic, then select at this lane's WB2.
             always @(posedge clk_i) begin
-                wb1_sum_r <= quant_signed_w + residual_input_w - zp_signed_w;
+                wb1_sum_r <= quant_signed_w + residual_signed_w - zp_signed_w;
+                wb1_bypass_r <= quant_w;
             end
 
             (* keep = "true" *)
             always @(posedge clk_i) begin
+                wb1_res_en_r <= quant_tag_i[28];
                 wb1_half_r <= (lane >= 32) && quant_tag_i[26];
             end
 
             assign saturated_w = (wb1_sum_r > 10'sd127) ? 8'h7f
                 : (wb1_sum_r < -10'sd128) ? 8'h80 : wb1_sum_r[7:0];
             assign writeback_data_o[8*lane +: 8] = wb1_half_r ? 8'd0
-                : saturated_w;
+                : wb1_res_en_r ? saturated_w : wb1_bypass_r;
         end
     endgenerate
 endmodule

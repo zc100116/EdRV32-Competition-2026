@@ -332,8 +332,37 @@ module edrv32_npu (
     assign nonconv_write_req_ready_w = write_req_ready_w && !is_conv_r && !post_active_r;
     assign write_data_valid_w = post_active_r ? post_write_data_valid_w
         : is_conv_r ? conv_write_data_valid_w : nonconv_write_data_valid_w;
-    assign write_data_w = post_active_r ? post_write_data_w
-        : is_conv_r ? conv_write_data_w : nonconv_write_data_w;
+    // Keep each write-data selector local to its 32-bit slice.
+    genvar write_slice;
+    generate
+        for (write_slice = 0; write_slice < 8; write_slice = write_slice + 1) begin : g_write_slice
+            (* keep = "true", syn_preserve = 1 *) reg post_active_slice_r;
+            (* keep = "true", syn_preserve = 1 *) reg is_conv_slice_r;
+
+            always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
+                if (!rst_npu_ctrl_n_w) post_active_slice_r <= 1'b0;
+                else if (state_r == S_LOAD || state_r == S_POST_START) post_active_slice_r <= 1'b1;
+                else if (state_r == S_START || state_r == S_IDLE) post_active_slice_r <= 1'b0;
+            end
+
+            always @(posedge clk_npu_i or negedge rst_npu_ctrl_n_w) begin
+                if (!rst_npu_ctrl_n_w) begin
+                    is_conv_slice_r <= 1'b0;
+                end else if (soft_reset_w) begin
+                    is_conv_slice_r <= 1'b0;
+                end else if (busy_w && (abort_w || response_error_w || descriptor_error_w)
+                    && (state_r != S_STOP) && (state_r != S_CANCEL)) begin
+                end else if ((state_r == S_DECODE_WAIT) && decode_done_w) begin
+                    is_conv_slice_r <= (desc_w[3:0] == 4'd0);
+                end
+            end
+
+            assign write_data_w[32*write_slice +: 32] = post_active_slice_r
+                ? post_write_data_w[32*write_slice +: 32]
+                : is_conv_slice_r ? conv_write_data_w[32*write_slice +: 32]
+                : nonconv_write_data_w[32*write_slice +: 32];
+        end
+    endgenerate
     assign conv_write_data_ready_w = write_data_ready_w && is_conv_r && !post_active_r;
     assign nonconv_write_data_ready_w = write_data_ready_w && !is_conv_r && !post_active_r;
     assign perf_event_w = {conv_mac_beat_w, busy_w};
