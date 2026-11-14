@@ -31,7 +31,7 @@ void board_session_fail(unsigned error)
 static void model_start(ui_app_t app, unsigned arg)
 {
     (void)arg;
-    if (app == UI_APP_CAMERA) vision_app_camera.enter();
+    if (app == UI_APP_PIPELINE) vision_app_camera.enter();
     else vision_app_image.enter();
 }
 static void model_stop(ui_app_t app)
@@ -546,7 +546,7 @@ static void model_test(void)
     assert(vision_model_ready());
     vision_model_receiving();
     assert(!vision_model_ready());
-    for (ui_app_t app = UI_APP_CAMERA; app <= UI_APP_IMAGE; ++app) {
+    for (ui_app_t app = UI_APP_PIPELINE; app <= UI_APP_IMAGE; ++app) {
         model_session = (struct session){.ops = {model_start, model_stop, NULL, model_ready}};
         session_open(&model_session, app, 0);
         session_step(&model_session);

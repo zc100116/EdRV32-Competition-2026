@@ -161,8 +161,110 @@
 - 测试：
   - 主机测试：编译规则，覆盖融合、拆分、检测取样、叠加位置；
   - 上板验收：8 个预设逐一运行，记录每跳耗时、帧率、DDR 带宽。
-- 时间顺序：卡 73 的硬件后处理上板通过后开始，卡 71 的调度对比结果会决定执行器跑在协作式调度还是 FreeRTOS 上。
+- 时间顺序：
+  - 软件开发现在就开始，不依赖卡 73；
+  - 先在卡 68 R2 的比特流上联调，此时检测由 CPU 做后处理；
+  - 卡 73 上板后再换成硬件后处理；
+  - 执行器在中断里启动下一跳，这与卡 71 的结论无关。
 
-## 6. 状态
+## 6. 决策（用户 2026-11-14）
 
-讨论中（2026-11-14）。
+- 视觉识别、图片识别、图像处理三页合并为"视觉流水线"一页，采用积木链加预设的方式。
+- 下面的规则由协调者确定：
+  - 积木最多 8 块，检测最多 1 块；
+  - 链首能融合的就融合；
+  - 叠加放在几何之后时，框按仿射变换映射，任意角度画外接矩形；
+  - PC 工具可以编辑积木链。
+
+## 7. 冻结接口（PIPE-SPEC，2026-11-14）
+
+### 7.1 积木链数据（板端、UI、PC 共用，小端）
+
+链块 100 B：
+
+| 偏移 | 字段 | 类型 | 含义 |
+|---|---|---|---|
+| 0 | `source` | u8 | 0 摄像头，1 PC 图片，2 测试图 |
+| 1 | `count` | u8 | 积木数，0–8 |
+| 2 | `view` | u8 | 主画面显示第几块积木的输出（0 起）；0xFF 为最终输出 |
+| 3 | `preset` | u8 | 0 自定义，1–8 对应 4.1 节预设表的顺序；任何修改都会把它置 0 |
+| 4 + 12k | 积木 k | 12 B | 见下表；`k ≥ count` 的积木全为 0 |
+
+积木 12 B：`type`(u8) + `flags`(u8) + `p[5]`(5 × i16)
+
+| type | 积木 | flags | p0 | p1 | p2 | p3 | p4 |
+|---|---|---|---|---|---|---|---|
+| 1 | 亮度/对比度 | 0 | brightness −256…255 | contrast Q8 0…512 | 0 | 0 | 0 |
+| 2 | 伽马 | 0 | gamma_tenths 3…30 | 0 | 0 | 0 | 0 |
+| 3 | 滤波 | 0 | op 1…6：均值、高斯、锐化、Sobel、腐蚀、膨胀 | 0 | 0 | 0 | 0 |
+| 4 | 灰度 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 5 | 二值化 | 0 | threshold 0…255 | 0 | 0 | 0 | 0 |
+| 6 | 反色 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 7 | 几何 | bit0 水平镜像，bit1 垂直镜像 | angle −180…180 | scale_percent 50…400 | translate_x −1280…1280 | translate_y −720…720 | 0 |
+| 8 | 检测 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 9 | 叠加 | bit0 检测框，bit1 界面 | 0 | 0 | 0 | 0 | 0 |
+
+- 检测的门槛和类别沿用 DETECT（8.2 节 0x07），对整条链生效。
+- 合法性规则（板端检查；不合法时整组拒绝，原链不变）：
+  1. `count` ≤ 8，各字段在表中范围内，未用字段为 0；
+  2. 检测最多 1 块；
+  3. 叠加的 bit0 只能在其前面有检测时置位；
+  4. 叠加的 flags 不为 0；
+  5. `view` < `count` 或 `view` = 0xFF。
+- 错误码沿用 8.1 节：长度不符 1，格式或范围不符 2。
+
+### 7.2 UI 接口（`ui_data.h`，以头文件中的声明为准）
+
+```c
+enum { UI_BLOCK_MAX = 8 };
+typedef struct { uint8_t type, flags; int16_t p[5]; } ui_block_t;
+typedef struct { uint8_t source, count, view, preset; ui_block_t block[UI_BLOCK_MAX]; } ui_chain_t;
+ui_chain_t ui_data_chain(void);
+/* 0 = accepted, else 8.1 error code; rejected chains leave the current one unchanged. */
+unsigned ui_data_chain_set(const ui_chain_t *chain);
+void ui_data_chain_preset(unsigned preset);              /* 1..8 */
+typedef struct {
+    uint8_t engine;          /* 0 CAM-CH0/PIX fused, 1 CAM-CH1, 2 MEMSRC-CH0/PIX,
+                                3 MEMSRC-CH2/NPU, 4 GEO, 5 RND overlay */
+    uint8_t first, last;     /* block range served by this hop */
+    uint32_t us;             /* measured average duration over the last second */
+} ui_hop_t;
+typedef struct {
+    unsigned hop_count; ui_hop_t hop[12];
+    unsigned fps, e2e_us, box_lag_us, npu_us;
+    unsigned ddr_mbps, ddr_limit_mbps;      /* limit = 1950 */
+} ui_pipe_stats_t;
+ui_pipe_stats_t ui_data_pipe_stats(void);
+/* 160x90 RGB565 thumbnail of block k's output, refreshed at 5 fps; k = 0xFF is the source. */
+const lv_image_dsc_t *ui_data_thumb(unsigned block);
+```
+
+- `ui_app_t` 中，`UI_APP_CAMERA` 改名为 `UI_APP_PIPELINE`，值 1，删除 `UI_APP_IMAGE` 和 `UI_APP_PROCESS`。值 2、3 保留不用。
+- `ui_vision_t` 继续提供检测结果和 PC 图片信息。
+- 以下接口全部删除：`ui_process_config_t`、`ui_data_process*`、`UI_PROC_*`。
+
+### 7.3 EDSC（8.2 节的修改）
+
+- `app` = 1 为视觉流水线，2 和 3 不再使用。图片的 BULK_BEGIN 只在 `app` = 1、`source` = 1 且状态为 RUNNING 时接受。
+- 删除 0x06 PROCESS。STATE payload 偏移 20 的 24 B 改为：`chain_rev`(u32，每次链变化加 1) + 20 字节 0。
+- 新增：
+
+| type | 方向 | payload | 说明 |
+|---|---|---|---|
+| 0x09 CHAIN | PC → 板 | 7.1 节链块，100 B | 整组替换。合法时下一帧生效，回复 ACK(2)；否则回复 ACK(3, error)，原链不变 |
+| 0x0A PRESET | PC → 板 | `preset`(u8，1–8) + 3 字节 0 | 回复 ACK(2) |
+| 0x88 CHAIN_STATE | 板 → PC | `chain_rev`(u32) + 7.1 节链块 | HELLO 之后、链变化时发送 |
+| 0x89 PIPE_STATS | 板 → PC | `fps`, `e2e_us`, `box_lag_us`, `npu_us`, `ddr_mbps`(5 × u32) + `hop_count`(u8) + 3 字节 0 + `hop_count` × (`engine`, `first`, `last`, 0 各 u8 + `us` u32) | `app` = 1 且 RUNNING 时每 1 s 发送 |
+
+### 7.4 编译规则（板端；主机测试覆盖）
+
+1. 来源为摄像头，且链首有连续的 PIX 积木符合 PIX 固定顺序（pix-spec 1）时，链首这段与摄像头融合，走 CAM-CH0/PIX；否则先走 CAM-CH1。
+2. 其余连续的 PIX 积木，按固定顺序尽量合并成一次 MEMSRC-CH0/PIX。顺序倒退处，或同一功能第二次出现处，开始下一次。滤波依次占用 S1、S2。
+3. 几何：每块一次 GEO；叠加：每块一次 RND。
+4. 检测：如果检测的输入就是下一次 MEMSRC-CH0 处理的输入，这一帧内存源同时送 CH0 和 CH2；否则单独一次 MEMSRC-CH2。NPU 按最新帧异步运行。
+5. 来源为 PC 图片或测试图时，第一跳的输入是该图片所在的 DDR 缓冲。
+6. 最后一跳的输出接 DISP L0。叠加 bit1（界面）置位时隐藏 L1。
+
+## 8. 状态
+
+已决定（2026-11-14），接口按第 7 节冻结。

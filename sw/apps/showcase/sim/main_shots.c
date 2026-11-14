@@ -296,7 +296,7 @@ static void check_four_keys(void)
     tap(LV_KEY_NEXT); tap(LV_KEY_ENTER); assert(ui_data_debug().uart_tx==0);
     ui_open(0); ui_monitor_toggle(); traverse(); capture("overlay-home");
     if(ui_monitor_visible()) ui_monitor_toggle();
-    ui_open(1); sim_data_session(UI_APP_CAMERA,UI_STATE_FAILED,"格式错误"); ui_refresh();
+    ui_open(1); sim_data_session(UI_APP_PIPELINE,UI_STATE_FAILED,"格式错误"); ui_refresh();
     traverse(); capture("session-failed");
     for(unsigned i=0;i<lv_group_get_obj_count(lv_group_get_default());++i)
         if((unsigned)(uintptr_t)lv_obj_get_user_data(control(i))==1002) {
@@ -304,7 +304,7 @@ static void check_four_keys(void)
         }
     tap(LV_KEY_ENTER); assert(ui_data_session().state==UI_STATE_STARTING);
     capture("session-starting");
-    sim_data_session(UI_APP_CAMERA,UI_STATE_STOPPING,NULL);
+    sim_data_session(UI_APP_PIPELINE,UI_STATE_STOPPING,NULL);
     ui_refresh(); capture("session-stopping");
     for(unsigned app=0;app<=UI_APP_COREMARK;++app) {
         sim_data_session((ui_app_t)app,UI_STATE_RUNNING,NULL);

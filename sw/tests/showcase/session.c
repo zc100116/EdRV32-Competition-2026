@@ -42,7 +42,7 @@ int main(void)
             assert(s.app==b && s.arg==2 && s.state==UI_STATE_RUNNING && owner==b);
         }
     }
-    struct session s=fresh(UI_APP_CAMERA);
+    struct session s=fresh(UI_APP_PIPELINE);
     session_pause(&s,true); session_step(&s); assert(s.state==UI_STATE_PAUSED);
     session_pause(&s,false); session_step(&s); assert(s.state==UI_STATE_RUNNING);
     session_fail(&s,2); assert(s.state==UI_STATE_FAILED && s.error==2);

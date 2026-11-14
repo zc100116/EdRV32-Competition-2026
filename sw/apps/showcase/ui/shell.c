@@ -164,7 +164,7 @@ void ui_open(unsigned page)
     unsigned old_page=ui_page;
     if(old_page!=page) {
         ui_mode=0;
-        static const ui_app_t apps[]={UI_APP_NONE,UI_APP_CAMERA,UI_APP_IMAGE,
+        static const ui_app_t apps[]={UI_APP_NONE,UI_APP_PIPELINE,UI_APP_IMAGE,
             UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);

@@ -132,7 +132,7 @@ static unsigned command(unsigned type,const uint8_t *p,unsigned bytes,uint32_t s
         for(unsigned i=0;i<80;++i)
             ui_data_detection_class(i,(record_u32(p+4+4*(i/32))>>(i%32))&1);
         vision_detection_changed(); platform_gui_wake();
-        return (s.app==UI_APP_CAMERA || s.app==UI_APP_IMAGE) &&
+        return (s.app==UI_APP_PIPELINE || s.app==UI_APP_IMAGE) &&
             s.state==UI_STATE_RUNNING ? EDSC_PENDING : 0;
     }
     platform_gui_wake();
@@ -146,7 +146,7 @@ static unsigned progress(unsigned type)
         return vision_process_applied() ? 0 : EDSC_PENDING;
     }
     if(type==7) {
-        if((s.app!=UI_APP_CAMERA && s.app!=UI_APP_IMAGE) || s.state!=UI_STATE_RUNNING)
+        if((s.app!=UI_APP_PIPELINE && s.app!=UI_APP_IMAGE) || s.state!=UI_STATE_RUNNING)
             return 0;
         return vision_detection_applied() ? 0 : EDSC_PENDING;
     }

@@ -22,7 +22,7 @@ typedef struct {
 typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_t;
 /* Media applications and session states: design 2026-11-03-showcase-p5-replan 8.1.
  * Values equal the EDSC `app` and `state` fields. */
-typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
+typedef enum { UI_APP_NONE, UI_APP_PIPELINE, UI_APP_IMAGE, UI_APP_PROCESS,
                UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
@@ -110,6 +110,40 @@ void ui_data_process_set(const ui_process_config_t *config);
 void ui_data_process_defaults(uint32_t stages);
 /* Return the image used for the processing mode preview. */
 const lv_image_dsc_t *ui_data_process(unsigned mode);
+/* Vision pipeline page, design 2026-11-14-showcase-vision-pipeline section 7.
+ * The ui_process_* interface above is removed when the pipeline page is integrated. */
+enum { UI_BLOCK_MAX = 8 };
+enum { UI_BLOCK_NONE, UI_BLOCK_LEVEL, UI_BLOCK_GAMMA, UI_BLOCK_FILTER, UI_BLOCK_GRAY,
+       UI_BLOCK_BINARY, UI_BLOCK_INVERT, UI_BLOCK_GEO, UI_BLOCK_DETECT, UI_BLOCK_OVERLAY };
+enum { UI_SOURCE_CAMERA, UI_SOURCE_PC_IMAGE, UI_SOURCE_TEST_IMAGE };
+enum { UI_VIEW_FINAL = 0xff };
+typedef struct { uint8_t type, flags; int16_t p[5]; } ui_block_t;
+typedef struct {
+    uint8_t source, count, view, preset;
+    ui_block_t block[UI_BLOCK_MAX];
+} ui_chain_t;
+ui_chain_t ui_data_chain(void);
+/* 0 = accepted, else design 8.1 error code; a rejected chain leaves the current one. */
+unsigned ui_data_chain_set(const ui_chain_t *chain);
+/* Load preset 1..8 (design 4.1 table order). */
+void ui_data_chain_preset(unsigned preset);
+enum { UI_HOP_CAM_PIX, UI_HOP_CAM_RAW, UI_HOP_MEM_PIX, UI_HOP_MEM_NPU, UI_HOP_GEO,
+       UI_HOP_RND };
+typedef struct {
+    uint8_t engine;       /* UI_HOP_* */
+    uint8_t first, last;  /* block range served by this hop */
+    uint32_t us;          /* average duration over the last second */
+} ui_hop_t;
+enum { UI_HOP_MAX = 12 };
+typedef struct {
+    unsigned hop_count;
+    ui_hop_t hop[UI_HOP_MAX];
+    unsigned fps, e2e_us, box_lag_us, npu_us;
+    unsigned ddr_mbps, ddr_limit_mbps;
+} ui_pipe_stats_t;
+ui_pipe_stats_t ui_data_pipe_stats(void);
+/* 160x90 RGB565 thumbnail of block k's output (5 fps); UI_VIEW_FINAL is the source. */
+const lv_image_dsc_t *ui_data_thumb(unsigned block);
 /* Return all sixteen benchmark rows. */
 const ui_benchmark_t *ui_data_benchmark(void);
 /* Start the fixed benchmark sequence. */
