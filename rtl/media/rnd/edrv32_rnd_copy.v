@@ -142,12 +142,11 @@ module edrv32_rnd_copy (
     wire [255:0] ram_data_w;
     wire [255:0] current_write_w;
     wire [511:0] target_join_w;
-    wire [511:0] aligned_w;
-    reg [4:0] align_offset_r;
     reg align_ahead_r;
     wire [9:0] read_index_w;
     wire [8:0] read_next_w;
     wire [9:0] write_next_w;
+    wire [9:0] read_after_write_w;
     wire ram_wr_en_w;
     wire [8:0] ram_wr_addr_w;
     wire ram_rd_en_w;
@@ -198,11 +197,9 @@ module edrv32_rnd_copy (
     assign ram_wr_addr_w = received_r[8:0];
     assign read_index_w = write_index_r + {9'd0, align_ahead_r};
     assign read_next_w = read_index_w[8:0] + 9'd1;
-    assign current_write_w = read_index_w[9] ? previous_read_r : ram_data_w;
     assign target_join_w = {current_write_w, previous_write_r};
-    assign aligned_w = target_join_w >> {align_offset_r, 3'd0};
-    assign wr_data_o = aligned_w[255:0];
     assign write_next_w = write_index_r + 10'd1;
+    assign read_after_write_w = write_next_w + {9'd0, align_ahead_r};
     assign data_fire_w = wr_data_valid_o && wr_data_ready_i;
     assign ram_rd_en_w = !cancel_i && ((state_r == S_WRITE && wr_ready_i)
         || state_r == S_PREFETCH || data_fire_w);
@@ -211,7 +208,8 @@ module edrv32_rnd_copy (
     assign unused_geometry_w = ^{command_i[7:0], head_bytes_w[0], tail_bytes_w[0],
         left_w[17:12], top_w[17:12], right_w[17:12],
         bottom_w[17:12], source_x_bytes_w[19:18],
-        target_last_bytes_w[15], target_last_bytes_w[4:0], aligned_w[511:256]};
+        target_last_bytes_w[15], target_last_bytes_w[4:0], target_join_w[511:504],
+        read_index_w[9], read_after_write_w[8:0]};
     edrv32_ram_rnd_line u_row (
         .clk_i(clk_i),
         .wr_en_i(ram_wr_en_w),
@@ -436,11 +434,48 @@ module edrv32_rnd_copy (
                 dst_span_low_r[4:0]};
         end
         if (state_r == S_COUNTS) begin
-            align_offset_r <= src_addr_r[4:0] - dst_addr_r[4:0];
             align_ahead_r <= src_addr_r[4:0] >= dst_addr_r[4:0];
             target_last_r <= target_last_bytes_w[14:5];
         end
     end
+    // Byte shifts preserve bit positions within each byte: each column owns 32 output bits.
+    genvar column;
+    genvar byte_index;
+    generate
+        for (column = 0; column < 8; column = column + 1) begin : g_alignment
+            (* keep = "true", syn_preserve = 1 *) reg [4:0] align_offset_r;
+            (* keep = "true", syn_preserve = 1 *) reg read_overflow_r;
+            wire [63:0] column_w;
+            wire [63:0] aligned_w;
+            wire unused_aligned_w;
+
+            always @(posedge clk_i) begin
+                if (state_r == S_COUNTS)
+                    align_offset_r <= src_addr_r[4:0] - dst_addr_r[4:0];
+            end
+            // Follow write_index_r on the same edge; no extra streaming stage.
+            always @(posedge clk_i or negedge rst_n_i) begin
+                if (!rst_n_i)
+                    read_overflow_r <= 1'b0;
+                else if (!cancel_i) begin
+                    if (state_r == S_WRITE && wr_ready_i)
+                        read_overflow_r <= 1'b0;
+                    else if (state_r == S_STREAM && wr_data_ready_i)
+                        read_overflow_r <= read_after_write_w[9];
+                end
+            end
+            for (byte_index = 0; byte_index < 64; byte_index = byte_index + 1) begin : g_join
+                assign column_w[byte_index] = target_join_w[byte_index*8+column];
+            end
+            assign aligned_w = column_w >> align_offset_r;
+            for (byte_index = 0; byte_index < 32; byte_index = byte_index + 1) begin : g_data
+                assign current_write_w[byte_index*8+column] = read_overflow_r ?
+                    previous_read_r[byte_index*8+column] : ram_data_w[byte_index*8+column];
+                assign wr_data_o[byte_index*8+column] = aligned_w[byte_index];
+            end
+            assign unused_aligned_w = ^aligned_w[63:32];
+        end
+    endgenerate
     always @(posedge clk_i) begin
         if (state_r == S_CAPTURE && rd_data_valid_i)
             previous_read_r <= rd_data_i;
