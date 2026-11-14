@@ -263,7 +263,8 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
     # one thread makes every rebuild of the model image byte-identical.
     torch.set_num_threads(1)
     images = calibration_images(DATA / "coco128/images/train2017", 96)
-    network = YOLO(str(DEFAULT_WEIGHTS)).model.eval().fuse(verbose=False)
+    weights = DATA / "yolov8n-pose.pt" if plan.get("task") == "pose" else DEFAULT_WEIGHTS
+    network = YOLO(str(weights)).model.eval().fuse(verbose=False)
     checked = audit(network, plan)
     print(f"checkpoint: {checked['conv_count']} fused convolutions, output shapes checked")
     pre_max, post_max, add_max, linear_min, linear_max = collect_ranges(
@@ -280,6 +281,13 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
         weight = convolution.weight.detach().cpu().numpy()
         bias = convolution.bias.detach().cpu().numpy()
         owner_scales = [flow.scale(owner) for owner in flow.sources[command["index"]]]
+
+        if plan.get("task") == "pose" and command["layer"] == 22:
+            physical_cout = command["output_blocks"] * 32 - 16 * command["last_c16_only"]
+            physical_cin = command["cin_blocks"] * 16
+            weight = np.pad(weight, ((0, physical_cout - weight.shape[0]),
+                                     (0, physical_cin - weight.shape[1]), (0, 0), (0, 0)))
+            bias = np.pad(bias, (0, physical_cout - len(bias)))
         input_scales = np.repeat(owner_scales, 16)[:weight.shape[1]]
         if command["lut_enable"]:
             pre_scale = max(pre_max[command["index"]] / 127.0 * 1.05, 1e-12)
@@ -298,6 +306,14 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
         packed_weight, params, metrics = quantize_conv(
             weight, bias, input_scales, pre_scale, post_scale,
             zero_point, command)
+
+        if plan.get("task") == "pose" and command["name"].endswith("cls.out"):
+            # Zero weights plus exact integer bias force dummy classes to -128.
+            params = bytearray(params)
+            for channel in range(1, 80):
+                block, within = divmod(channel, 32)
+                struct.pack_into("<ihBB", params, block * 512 + within * 8,
+                                 -256, 1, 0, 0)
         weight_offset = command["weight_base"] - plan["model_base"]
         quant_offset = command["quant_base"] - plan["model_base"]
         image[weight_offset:weight_offset + len(packed_weight)] = packed_weight
@@ -305,9 +321,10 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
         rows.append({"index": command["index"], "name": command["name"],
                      "input_scales": owner_scales, **metrics})
     image = model_with_post_tables(image, rows, plan)
-    CACHE.mkdir(parents=True, exist_ok=True)
-    (CACHE / "model.bin").write_bytes(image)
-    (CACHE / "quantization.json").write_text(json.dumps({
+    cache = cache_directory(plan)
+    cache.mkdir(parents=True, exist_ok=True)
+    (cache / "model.bin").write_bytes(image)
+    (cache / "quantization.json").write_text(json.dumps({
         "calibration_images": [str(path) for path in images],
         "percentile": 95, "margin": 1.05,
         "torch_version": torch.__version__, "convolutions": rows,
@@ -315,10 +332,15 @@ def calibrate(plan: dict) -> tuple[bytes, list[dict]]:
     return bytes(image), rows
 
 
+def cache_directory(plan: dict) -> Path:
+    return CACHE.parent / "quantized_pose" if plan.get("task") == "pose" else CACHE
+
+
 def load_quantized(plan: dict) -> tuple[bytes, list[dict]]:
-    if (CACHE / "model.bin").exists():
-        rows = json.loads((CACHE / "quantization.json").read_text())["convolutions"]
-        image = model_with_post_tables((CACHE / "model.bin").read_bytes(), rows, plan)
-        (CACHE / "model.bin").write_bytes(image)
+    cache = cache_directory(plan)
+    if (cache / "model.bin").exists():
+        rows = json.loads((cache / "quantization.json").read_text())["convolutions"]
+        image = model_with_post_tables((cache / "model.bin").read_bytes(), rows, plan)
+        (cache / "model.bin").write_bytes(image)
         return image, rows
     return calibrate(plan)

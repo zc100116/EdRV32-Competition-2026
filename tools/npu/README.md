@@ -428,3 +428,69 @@ JSON 包含未裁剪 signed Q8 坐标、Q24 概率、类别、全局 anchor 和�
 二进制文件仅含有效 24 B 记录；RTL AXI 尾拍的零填充不计入文件长度。
 `check_post_tools.py` 的 TL-05、真实帧新旧路径对比和边界自检复现命令见
 `docs/reports/2026-11-08-npu-post-tools.md`。
+
+## YOLOv8n-pose 离线评估（T-POSE-EVAL）
+
+编译入口增加 `--task detect|pose`，默认 detect；detect 的字节回归基线为
+`69e96488`。pose 使用原始 cv3 中间宽度 64，末层从 1 类补成 80 类；
+通道 1–79 为零权重，并直接编码整数 bias=-256、mult=1、shift=0，
+在任意输出零点下饱和到 −128。cv4 的三层物理通道均为 64，逻辑通道为 51；
+补齐输出权重和后续输入权重为零。末层按线性头标定，不使用激活 LUT。
+三个关键点输出紧随原有六个 box/cls 输出，C16 布局与 box 相同。
+OUTPUT 为 1,048,320 B，距 1 MiB 上限仅余 256 B；WORK 不变。
+pose 缓存为 `build/npu/quantized_pose/`，不与 detect 缓存混用。
+
+数据和权重来自 [Ultralytics 官方模型](https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt)
+和 [COCO 官方 2017 标注及图像](https://cocodataset.org/#download)。
+以下下载标注包（不下载完整 val2017 图像包），只提取关键点验证标注，
+再按 image_id 升序选择有 person 标注的前 300 张，仅下载这些图像。
+数据、权重均在 `~/.local/share/edrv32/npu/`；COCO128 标定数据沿用上面的安装步骤。
+COCO 官方图像主机使用其提供的 HTTP 地址。
+
+```sh
+git submodule update --init third_party/ultralytics
+python3 -m pip --python ~/.local/opt/edrv32-py/bin/python install -r tools/npu/requirements-pose.txt
+mkdir -p ~/.local/share/edrv32/npu
+curl -L --fail https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt \
+    -o ~/.local/share/edrv32/npu/yolov8n-pose.pt
+curl -L --fail http://images.cocodataset.org/annotations/annotations_trainval2017.zip \
+    -o ~/.local/share/edrv32/npu/annotations_trainval2017.zip
+unzip ~/.local/share/edrv32/npu/annotations_trainval2017.zip \
+    annotations/person_keypoints_val2017.json -d ~/.local/share/edrv32/npu
+export PYTHONPATH="$PWD/third_party/ultralytics"
+export OPENBLAS_NUM_THREADS=1
+~/.local/opt/edrv32-py/bin/python tools/npu/pose_eval.py --download-images
+~/.local/opt/edrv32-py/bin/python tools/npu/compile_yolo.py --task pose \
+    --image ~/.local/share/edrv32/npu/val2017/000000000139.jpg \
+    --out build/npu/pose_eval/compiled
+~/.local/opt/edrv32-py/bin/python tools/npu/pose_eval.py \
+    --out build/npu/pose_eval > build/npu/pose_eval/eval.log 2>&1
+~/.local/opt/edrv32-py/bin/python -m unittest discover -s tools/npu -p test_compile.py
+```
+
+标定固定 COCO128 排序前 96 张、percentile 95、margin 1.05、torch 1 线程；
+删除对应 `build/npu/quantized_pose/` 缓存才会重新标定。
+FP32 使用 Ultralytics 融合模型，384 和 640 两种输入均居中 letterbox、填充 114；
+INT8 直接运行 `ref/npu_ref.py` 的描述符执行器，由 `yolo_post_ref.py` 做
+80 类最大值、Q24 概率、DFL、概率降序/anchor 升序排序以及严格 IoU>0.45 的 NMS。
+三条路径统一 confidence>0.25、最多 100 人；这是板端工作阈值下的 COCO AP，
+不是 Ultralytics 默认 confidence=0.001 验证指标。COCOeval 使用官方 17 点 OKS
+sigma 和 0.50:0.05:0.95 阈值，box 指标只统计 person。
+NMS 后按全局 anchor 读取原始关键点，用官方 `kpts_decode` 公式
+`xy=(raw*2+cell)*stride`、`visibility=sigmoid(raw)` 解码，再逆 letterbox。
+
+上半身偏差以框 IoU≥0.5 按 FP32 分数顺序一对一配对；
+仅取 FP32 visibility>0.5 的鼻/肩/肘/腕，像素差按原图 x/y 分别缩放到 1280/720。
+偏差包括 INT8 不可见的对应点；漏可见比例分母是配对人的 FP32 可见点。
+另记录匹配人数和两条路径总人数，未配对人不混入像素偏差。
+三套逐人预测、每图偏差和汇总分别保存在输出目录的
+`fp32_384.json`、`int8_384.json`、`fp32_640.json`、
+`comparisons.json`、`summary.json`。
+前四张评估图以固定 800×300、128 色 PNG 并排展示两套骨架；
+图片由实际预测绘制，不是生成式示意图。
+
+性能估算沿用 `eval/npu_model.py:conv_stages` 的 MAC 日历：
+每卷积 `C32输出块数×输出高度×输出像素对数×K_COUNT`；
+包含 C16 尾块及关键点填充的实际计算，不计 DMA/控制/后处理开销。
+pose/detect 的 MAC 周期比乘板端实测 detect 35.0 ms@180 MHz、
+41.2 ms@150 MHz；这只给出估算，不代表 pose 上板测量。

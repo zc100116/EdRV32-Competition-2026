@@ -6,6 +6,9 @@ Clock domain: offline host unittest.
 
 from collections import Counter
 from pathlib import Path
+import os
+import subprocess
+import sys
 from types import SimpleNamespace
 import struct
 import tempfile
@@ -84,6 +87,79 @@ class DescriptorTest(unittest.TestCase):
         heads = [d for d in encoded if d.out_sel == 3]
         self.assertEqual(len(heads), 6)
         self.assertTrue(all(not d.lut_en for d in heads))
+
+
+class PoseCompileTest(unittest.TestCase):
+    def test_detect_bytes_and_pose_compile(self):
+        # Compare real calibration/export against the pre-task compiler, without hashes.
+        root = Path(__file__).resolve().parents[2]
+        build = root / "build/npu"
+        build.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=build) as directory:
+            work = Path(directory)
+            old = work / "before"
+            old.mkdir()
+            for name in ("fixed_plan.py", "quantize.py", "compile_yolo.py",
+                         "checkpoint_audit.py", "format.py"):
+                source = subprocess.check_output(
+                    ["git", "show", f"69e96488:tools/npu/{name}"], cwd=root)
+                (old / name).write_bytes(source)
+            env = os.environ | {
+                "PYTHONPATH": str(root / "tools/npu") + os.pathsep +
+                              str(root / "third_party/ultralytics"),
+                "OPENBLAS_NUM_THREADS": "1",
+            }
+            image = Path.home() / (
+                ".local/share/edrv32/npu/coco128/images/train2017/000000000009.jpg")
+            for label, source in (("before", old), ("after", root / "tools/npu")):
+                script = (
+                    "import sys; from pathlib import Path; "
+                    "sys.path.insert(0, sys.argv[1]); "
+                    "import quantize, compile_yolo; "
+                    "quantize.CACHE = Path(sys.argv[2]); "
+                    "sys.argv = ['compile_yolo', '--image', sys.argv[3], "
+                    "'--out', sys.argv[4]]; compile_yolo.main()"
+                )
+                subprocess.run([sys.executable, "-c", script, str(source),
+                                str(work / f"{label}_cache"), str(image),
+                                str(work / f"{label}_case")],
+                               env=env, cwd=root, check=True, capture_output=True, text=True)
+            for name in ("model.bin", "quantization.json"):
+                self.assertEqual((work / "before_cache" / name).read_bytes(),
+                                 (work / "after_cache" / name).read_bytes(), name)
+            for before in (work / "before_case").iterdir():
+                self.assertEqual(before.read_bytes(),
+                                 (work / "after_case" / before.name).read_bytes(), before.name)
+            from quantize import load_quantized
+            from ref.npu_ref import Memory, Descriptor as RefDescriptor, read_quant, quantize
+            from format import BASES
+            plan = build_plan("pose")
+            model, rows = load_quantized(plan)
+            encoded = descriptors(plan, rows)
+            self.assertEqual(len(model), 3505408)
+            self.assertEqual(len(encoded), 77)
+            tensors = plan["tensors"]
+            end = tensors["D2.kpt"]["base"] + tensors["D2.kpt"]["bytes"]
+            self.assertEqual(end - BASES["OUTPUT_BASE"], 1048320)
+            self.assertLess(end - BASES["OUTPUT_BASE"], 1024 * 1024)
+            memory = Memory()
+            memory.write(BASES["MODEL_BASE"], model)
+            for command in plan["commands"]:
+                if command["kind"] != "conv" or not command["name"].endswith("cls.out"):
+                    continue
+                desc = next(d for d in encoded
+                            if d.quant_offset == command["quant_base"] - BASES["MODEL_BASE"])
+                ref_desc = RefDescriptor(struct.unpack("<16I", desc.encode()))
+                bias, mult, shift, _ = read_quant(memory, command["quant_base"], ref_desc)
+                output = quantize(np.zeros(80, dtype=np.int64), bias, mult, shift, desc.out_zp)
+                np.testing.assert_array_equal(output[1:], np.full(79, -128))
+            for command in plan["commands"]:
+                if command["name"].endswith("kpt.out"):
+                    row = next(r for r in rows if r["index"] == command["index"])
+                    self.assertFalse(command["lut_enable"])
+                    self.assertEqual(row["output_scale"], row["pre_scale"])
+            self.assertTrue(any(r["output_zero_point"] != 0 for r in rows
+                                if r["name"].endswith("kpt.out")))
 
 
 class WeightLayoutTest(unittest.TestCase):

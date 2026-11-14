@@ -140,11 +140,11 @@ class Planner:
         self.conv("L9.cv2", 9, workspace, dest, 1, 1, "model.9.cv2")
 
     def detect(self, scale: int, source: Tensor,
-               box: Tensor, cls: Tensor) -> None:
+               box: Tensor, cls: Tensor, task: str) -> None:
         box0 = self.view(f"D{scale}.box0", self.head0_base, source, 64)
         box1 = self.view(f"D{scale}.box1", self.head1_base, source, 64)
-        cls0 = self.view(f"D{scale}.cls0", self.head0_base, source, 80)
-        cls1 = self.view(f"D{scale}.cls1", self.head1_base, source, 80)
+        cls0 = self.view(f"D{scale}.cls0", self.head0_base, source, 80 if task == "detect" else 64)
+        cls1 = self.view(f"D{scale}.cls1", self.head1_base, source, 80 if task == "detect" else 64)
         prefix = f"model.22.cv2.{scale}"
         self.conv(f"D{scale}.box.cv0", 22, source, box0, 3, 1,
                   f"{prefix}.0")
@@ -160,6 +160,14 @@ class Planner:
         self.conv(f"D{scale}.cls.out", 22, cls1, cls, 1, 1,
                   f"{prefix}.2", activation=False)
 
+        if task == "pose":
+            kpt0 = self.view(f"D{scale}.kpt0", self.head0_base, source, 64)
+            kpt1 = self.view(f"D{scale}.kpt1", self.head1_base, source, 64)
+            prefix = f"model.22.cv4.{scale}"
+            self.conv(f"D{scale}.kpt.cv0", 22, source, kpt0, 3, 1, f"{prefix}.0")
+            self.conv(f"D{scale}.kpt.cv1", 22, kpt0, kpt1, 3, 1, f"{prefix}.1")
+            self.conv(f"D{scale}.kpt.out", 22, kpt1, self.tensors[f"D{scale}.kpt"],
+                      1, 1, f"{prefix}.2", activation=False)
 
     def finish(self):
         quant_cursor = align(self.weight_cursor)
@@ -187,7 +195,7 @@ class Planner:
         }
 
 
-def build_plan() -> dict:
+def build_plan(task: str = "detect") -> dict:
     plan = Planner()
     t = plan.tensors
     # Reserve consumers' concat surfaces in channel order before producers run.
@@ -210,6 +218,9 @@ def build_plan() -> dict:
         plan.reserve_group([(f"D{scale}.box", width, height, 64),
                             (f"D{scale}.cls", width, height, 80)])
         plan.alias(f"D{scale}.logits", f"D{scale}.box", f"D{scale}.cls")
+    if task == "pose":
+        for scale, width, height in [(0, 80, 48), (1, 40, 24), (2, 20, 12)]:
+            plan.reserve(f"D{scale}.kpt", width, height, 64)
     plan.alias("L11", "L10", "L6")
     plan.alias("L14", "L13", "L4")
     plan.alias("L17", "L16", "L12")
@@ -240,10 +251,13 @@ def build_plan() -> dict:
     plan.c2f(18, t["L17"], t["L18"], 64, 1, False)
     plan.conv("L19", 19, t["L18"], t["L19"], 3, 2, "model.19")
     plan.c2f(21, t["L20"], t["L21"], 128, 1, False)
-    plan.detect(0, t["L15"], t["D0.box"], t["D0.cls"])
-    plan.detect(1, t["L18"], t["D1.box"], t["D1.cls"])
-    plan.detect(2, t["L21"], t["D2.box"], t["D2.cls"])
-    return plan.finish()
+    plan.detect(0, t["L15"], t["D0.box"], t["D0.cls"], task)
+    plan.detect(1, t["L18"], t["D1.box"], t["D1.cls"], task)
+    plan.detect(2, t["L21"], t["D2.box"], t["D2.cls"], task)
+    result = plan.finish()
+    if task == "pose":
+        result["task"] = task
+    return result
 
 
 def port(address: int) -> tuple[int, int]:

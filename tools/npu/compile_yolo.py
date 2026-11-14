@@ -36,9 +36,10 @@ def main() -> None:
     source.add_argument("--model-source", type=Path,
                         help="rebuild model/descriptor hex from an offline compiler snapshot")
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--task", choices=("detect", "pose"), default="detect")
     args = parser.parse_args()
     started = perf_counter()
-    plan = build_plan()
+    plan = build_plan(args.task)
     segments = {}
     if args.model_source is None:
         from input_pack import pack
@@ -53,7 +54,7 @@ def main() -> None:
     desc = descriptors(plan, rows)
     checks = []
     for scale in range(3):
-        for branch in ("box", "cls"):
+        for branch in (("box", "cls", "kpt") if args.task == "pose" else ("box", "cls")):
             name = f"D{scale}.{branch}"
             tensor = plan["tensors"][name]
             checks.append((name, tensor["base"], tensor["bytes"]))
