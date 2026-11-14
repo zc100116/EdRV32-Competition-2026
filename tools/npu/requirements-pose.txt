@@ -1,2 +1,0 @@
-# Additional COCO evaluation dependency; base environment: tools/requirements.txt.
-pycocotools==2.0.11

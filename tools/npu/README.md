@@ -449,7 +449,7 @@ COCO 官方图像主机使用其提供的 HTTP 地址。
 
 ```sh
 git submodule update --init third_party/ultralytics
-python3 -m pip --python ~/.local/opt/edrv32-py/bin/python install -r tools/npu/requirements-pose.txt
+python3 -m pip --python ~/.local/opt/edrv32-py/bin/python install -r tools/requirements.txt
 mkdir -p ~/.local/share/edrv32/npu
 curl -L --fail https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt \
     -o ~/.local/share/edrv32/npu/yolov8n-pose.pt
