@@ -48,7 +48,7 @@
 | 代码 | `origin/zc100116/b3` 上包含本卡的提交，从这里拉出 `win/20261114-75-soc-fan2-post`，记录 HEAD |
 | 工程 | 沿用 `G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST`。卡 73 的 B 工程 `EdRV32-B3F-POST-B` 不用，可以删除 |
 | 导入脚本 / 约束 | 与卡 68、73 相同 |
-| 程序 | 沿用卡 70 的 `tasks/win/20261108-70-soc-npu-post/src/showcase-post.elf` 和 `src/board_npu.elf`。b3 上的 showcase 源码已改为视觉流水线，本卡不要重新编译 |
+| 程序 | 沿用卡 70 的 `tasks/win/20261108-70-soc-npu-post/src/showcase-post.elf` 和 `src/board_npu.elf`，本卡不要重新编译 |
 | 调试工具 | 卡 70 程序对应的调试工具：`git show cc5df889:tools/debug_tool` 导出到临时目录后使用。b3 HEAD 的调试工具已改为新协议，不能用 |
 
 ## 3. 环境
