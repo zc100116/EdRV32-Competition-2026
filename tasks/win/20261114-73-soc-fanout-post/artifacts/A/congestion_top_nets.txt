@@ -43,3 +43,26 @@ congestion value : 256, drive info : CLMA_165_937:Q3, design net name : u_npu/u_
 congestion value : 256, drive info : CLMA_153_907:Q3, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [1]
 congestion value : 256, drive info : CLMA_165_919:Q1, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [0]
 congestion value : 256, drive info : CLMA_165_906:Q2, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [1]
+
+General round 8 | PDS iteration 14
+Source: G:/codex_project/EdRV32-FPGA/EdRV32-B3F-POST/place_route/CongestionNetInfo/CongestionNetInfo_7.txt
+congestion value : 618, drive info : CLMS_543_619:Y1, design net name : u_rnd/cancel_region_w [6]
+congestion value : 510, drive info : CLMA_453_408:CR1, design net name : u_rnd/blend_valid_w
+congestion value : 452, drive info : CLMA_591_534:CR0, design net name : u_rnd/state_r_reg [5]
+congestion value : 382, drive info : CLMS_513_247:CR0, design net name : u_rnd/blend_tag_w [31]
+congestion value : 381, drive info : CLMA_519_775:Q2, design net name : u_mem/u_xbar/w_port_r [0]
+congestion value : 350, drive info : CLMA_117_409:Y0, design net name : u_cpu/u_core/u_csr/_N441517
+congestion value : 346, drive info : CLMA_171_355:Y0, design net name : u_cpu/u_core/m_system_commit_w
+congestion value : 342, drive info : CLMA_165_300:Y0, design net name : u_cpu/u_core/d_swap_w
+congestion value : 312, drive info : CLMA_237_330:Q1, design net name : u_cpu/u_core/update_index_r [5]
+congestion value : 280, drive info : CLMS_243_325:Q1, design net name : u_cpu/u_core/update_index_r [6]
+congestion value : 272, drive info : CLMA_591_438:Q2, design net name : u_rnd/u_blit/render_bank_r
+congestion value : 261, drive info : CLMA_537_678:CR3, design net name : u_mem/u_xbar/u_rbuf/skid_valid_r [6]
+congestion value : 260, drive info : CLMA_705_798:Q2, design net name : u_ddr3/u_ddrphy_top/ddrphy_calib_top/wrcal_start
+congestion value : 256, drive info : CLMA_165_937:Q3, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [0]
+congestion value : 256, drive info : CLMA_153_907:Q3, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[2].rd_segment_output_r [1]
+congestion value : 256, drive info : CLMA_165_919:Q1, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [0]
+congestion value : 256, drive info : CLMA_165_906:Q2, design net name : u_npu/u_conv/u_datapath/u_weight_store/g_bank[1].rd_segment_output_r [1]
+congestion value : 256, drive info : CLMS_195_1045:Q1, design net name : u_npu/u_conv/dp_result_rd_index_w [1]
+congestion value : 256, drive info : CLMS_195_1045:Q0, design net name : u_npu/u_conv/dp_result_rd_index_w [0]
+congestion value : 256, drive info : CLMS_195_1045:Q2, design net name : u_npu/u_conv/dp_result_rd_index_w [2]
