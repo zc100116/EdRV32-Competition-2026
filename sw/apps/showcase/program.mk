@@ -1,5 +1,10 @@
 # File: program.mk
 # Design: showcase 4.1--4.5; single BIOS-loaded DDR application.
+# Temporary card 68 R2 option; remove after card 75 board acceptance (CLAUDE.md 1.2).
+SHOWCASE_POST ?= hw
+ifeq ($(SHOWCASE_POST),cpu)
+OUT := $(ROOT)/build/sw/showcase-cpupost
+endif
 MEMORY := showcase
 PROGRAM_SOURCES := sw/apps/showcase/main.c sw/apps/showcase/platform.c sw/apps/showcase/input.c \
     sw/apps/showcase/layers.c $(patsubst $(ROOT)/%,%,$(wildcard $(ROOT)/sw/apps/showcase/board/*.c)) \

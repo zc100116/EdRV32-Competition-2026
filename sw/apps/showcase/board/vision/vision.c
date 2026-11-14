@@ -265,7 +265,9 @@ void vision_irq(const struct engine_event *event, void *context)
         !event->error && !(event->irq & EDRV32_NPU_IRQ_STAT_ERROR_MASK)) {
         unsigned buffer = v.npu_buffer;
         v.done[buffer].done = platform_ticks();
+#ifndef SHOWCASE_POST_CPU
         v.done[buffer].count = npu_post_count();
+#endif
         v.done[buffer].input = v.npu_input;
         v.done[buffer].image = v.npu_image;
         v.done[buffer].frame = v.npu_frame;
@@ -482,6 +484,12 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
     }
     timing.last_start = v.npu_start;
     engine_control(ENGINE_NPU, EDRV32_NPU_CTRL_ENABLE_MASK);
+#ifdef SHOWCASE_POST_CPU
+    /* The second raw OUTPUT is beyond both candidate blocks and TX snapshot.
+     * done_mask/post_owned retain each raw buffer through task-side decoding. */
+    npu_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING,
+              VISION_OUTPUT_BASE + v.npu_buffer * 0x00200000u);
+#else
     uint32_t post = VISION_POST_BASE + v.npu_buffer * VISION_POST_SPACING;
     if (v.page == PAGE_CAMERA || v.page == PAGE_PIPELINE) {
         /* Task cleaned the whole block before releasing post_owned (SoC 7.4).
@@ -492,6 +500,7 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
         npu_post_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING,
                        VISION_OUTPUT_BASE, post);
     }
+#endif
 }
 static void camera_frame(unsigned channel)
 {
@@ -619,7 +628,9 @@ static void model_step(void)
             struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
                 VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, v.model_count};
             npu_configure(&config);
+#ifndef SHOWCASE_POST_CPU
             npu_post_configure();
+#endif
             v.model_pending = 0;
             v.model_ready = true;
             /* Each upload owns its own window metadata; no global image_window. */
@@ -729,13 +740,25 @@ int vision_service(void)
             (v.page == PAGE_PIPELINE && pipe_pc_image());
         if (!v.image_job) v.job_image = v.done[buffer].image;
         v.post_buffer = buffer;
+#ifndef SHOWCASE_POST_CPU
         unsigned post_count = v.done[buffer].count;
+#endif
         v.done_mask &= ~(1u << buffer);
         v.acquire_buffer ^= 1u;
         v.job = JOB_POST;
         sched_port_unlock(lock);
         uint32_t post_base = VISION_POST_BASE + v.post_buffer * VISION_POST_SPACING;
         uint64_t acquire_start = platform_ticks();
+#ifdef SHOWCASE_POST_CPU
+        uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * 0x00200000u;
+        engine_dma_invalidate(EDRV32_DDR_BASE + output, VISION_OUTPUT_BYTES);
+        yolo_candidate *candidates = (void *)(uintptr_t)(EDRV32_DDR_BASE + post_base);
+        timing.copy_ticks = 0;
+        timing.post_start = acquire_start;
+        memset(timing.cpu, 0, sizeof timing.cpu);
+        vision_post_begin(&v.post, (void *)(uintptr_t)(EDRV32_DDR_BASE + output),
+                          candidates, v.detections);
+#else
         if (post_count) engine_dma_invalidate(EDRV32_DDR_BASE + post_base,
             (post_count * 24u + 31u) & ~31u);
         yolo_candidate *candidates = (void *)(uintptr_t)(EDRV32_DDR_BASE + post_base);
@@ -748,6 +771,7 @@ int vision_service(void)
         timing.post_start = acquire_start;
         memset(timing.cpu, 0, sizeof timing.cpu);
         vision_post_begin(&v.post, candidates, post_count, v.detections);
+#endif
         timing.cpu[0] = platform_ticks() - acquire_start;
         v.post_ticks = 0;
         lock = sched_port_lock();
@@ -785,6 +809,14 @@ int vision_service(void)
         uint64_t start = platform_ticks();
         unsigned phase = v.post.phase == 0 ? 0 : v.post.phase < 3 ? 1 : 2;
         int complete = vision_post_step(&v.post);
+#ifdef SHOWCASE_POST_CPU
+        /* Preserve the debug tool's pre-sort candidate wire format. */
+        if (phase == 0 && v.post.phase != 0 && v.image_job) {
+            uint32_t *tx = uncached(VISION_POST_TX);
+            tx[0] = v.post.count;
+            memcpy(tx + 1, v.post.workspace, v.post.count * 24u);
+        }
+#endif
         uint64_t end = platform_ticks();
         uint64_t elapsed = end - start;
         if (phase == 0 && v.post.phase != 0) timing.decode_end = end;
@@ -930,7 +962,9 @@ void vision_init(void)
         struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
             VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, showcase_model_count};
         npu_configure(&config);
+#ifndef SHOWCASE_POST_CPU
         npu_post_configure();
+#endif
         v.model_ready = true;
     }
 }

@@ -5,3 +5,9 @@ PROGRAM_SOURCES += $(addprefix sw/apps/showcase/board/vision/,vision.c post.c wi
 CFLAGS_EXTRA += -I$(ROOT)/sw/apps/showcase/board -I$(ROOT)/sw/apps/showcase/board/vision
 
 PROGRAM_LDLIBS += -lm
+
+ifeq ($(SHOWCASE_POST),cpu)
+CFLAGS_EXTRA += -DSHOWCASE_POST_CPU
+else ifneq ($(SHOWCASE_POST),hw)
+$(error SHOWCASE_POST must be hw or cpu)
+endif
