@@ -7,12 +7,13 @@
 #include <string.h>
 #include <stdlib.h>
 extern const lv_image_dsc_t sim_indoor;
+extern const lv_image_dsc_t sim_street;
 static uint32_t rgb[2][1280 * 720];
-static uint16_t output[1280 * 720];
-static lv_image_dsc_t image = {.header = {.magic = LV_IMAGE_HEADER_MAGIC,
-    .cf = LV_COLOR_FORMAT_RGB565, .w = 1280, .h = 720, .stride = 2560},
-    .data_size = sizeof(output), .data = (const uint8_t *)output};
-static ui_process_config_t previous;
+static uint16_t output[UI_BLOCK_MAX+1][1280 * 720];
+static lv_image_dsc_t images[UI_BLOCK_MAX+1];
+static uint16_t thumbnail[UI_BLOCK_MAX+1][160 * 90];
+static lv_image_dsc_t thumbnails[UI_BLOCK_MAX+1];
+static ui_chain_t previous;
 static bool valid;
 static int clamp(int x) { return x < 0 ? 0 : x > 255 ? 255 : x; }
 static uint32_t expand(uint16_t p)
@@ -58,73 +59,112 @@ static void stage(uint32_t *dst, const uint32_t *src, int op)
         dst[y*1280+x] = result;
     }
 }
-const lv_image_dsc_t *sim_process_image(const ui_process_config_t *config)
+static void geometric(uint32_t *dst,const uint32_t *src,const ui_block_t *b)
 {
-    if (valid && memcmp(&previous, config, sizeof previous) == 0) return &image;
-    previous = *config;
-    valid = true;
-    uint8_t gamma[256];
-    pix_gamma_table(gamma, (unsigned)config->gamma_tenths);
-    const uint16_t *source = (const uint16_t *)sim_indoor.data;
-    for (unsigned y = 0; y < 720; ++y) for (unsigned x = 0; x < 1280; ++x) {
-        uint32_t p = expand(source[(y*sim_indoor.header.h/720)*sim_indoor.header.w +
-                                  x*sim_indoor.header.w/1280]);
-        uint32_t value = 0;
-        for (unsigned shift = 0; shift <= 16; shift += 8) {
-            int c = (p >> shift) & 255;
-            if(config->enabled&UI_PROC_LEVEL)
-                c = clamp(((c-128)*config->contrast >> 8) + 128 + config->brightness);
-            value |= (uint32_t)((config->enabled&UI_PROC_GAMMA) ? gamma[c] : c) << shift;
-        }
-        rgb[0][y*1280+x] = config->original ? p : value;
-    }
-    unsigned bank = 0;
-    if (!config->original) {
-        if (config->enabled&UI_PROC_S1) { stage(rgb[1], rgb[0], config->stage1); bank = 1; }
-        if (config->enabled&UI_PROC_S2) {
-            stage(rgb[bank^1], rgb[bank], config->stage2); bank ^= 1;
-        }
-        for (unsigned i = 0; i < 1280*720; ++i) {
-            uint32_t p = rgb[bank][i];
-            if (config->enabled&UI_PROC_GRAY) p = (uint32_t)gray(p) * 0x010101;
-            if (config->enabled&UI_PROC_BINARY) p = gray(p) >= config->threshold ? 0xffffff : 0;
-            if (config->enabled&UI_PROC_INVERT) p ^= 0xffffff;
-            rgb[bank][i] = expand(pack(p));
-        }
-    }
     int32_t m[6];
-    geo_matrix(m, !config->original && (config->enabled&UI_PROC_ROTATE) ? config->angle : 0,
-        !config->original && (config->enabled&UI_PROC_SCALE) ? config->scale_percent : 100,
-        !config->original && (config->enabled&UI_PROC_TRANSLATE) ? config->translate_x : 0,
-        !config->original && (config->enabled&UI_PROC_TRANSLATE) ? config->translate_y : 0,
-        !config->original && (config->enabled&UI_PROC_MIRROR_X),
-        !config->original && (config->enabled&UI_PROC_MIRROR_Y),1280,720);
-    for (unsigned y = 0; y < 720; ++y) for (unsigned x = 0; x < 1280; ++x) {
-        int32_t sx = (int32_t)((int64_t)m[0]*x + (int64_t)m[1]*y + m[2]);
-        int32_t sy = (int32_t)((int64_t)m[3]*x + (int64_t)m[4]*y + m[5]);
-        int ix = sx >> 16, iy = sy >> 16;
-        unsigned fx = (sx >> 8) & 255, fy = (sy >> 8) & 255;
-        uint32_t p[4];
-        for (int dy = 0; dy < 2; ++dy) for (int dx = 0; dx < 2; ++dx)
-            p[dy*2+dx] = ix+dx < 0 || ix+dx >= 1280 || iy+dy < 0 || iy+dy >= 720 ?
-                         0 : rgb[bank][(iy+dy)*1280+ix+dx];
-        uint32_t result = 0;
-        for (unsigned shift = 0; shift <= 16; shift += 8) {
-            unsigned a = (p[0] >> shift)&255, b = (p[1] >> shift)&255;
-            unsigned c = (p[2] >> shift)&255, d = (p[3] >> shift)&255;
-            unsigned value = (a*(256-fx)*(256-fy)+b*fx*(256-fy)+c*(256-fx)*fy+d*fx*fy+32768)>>16;
-            result |= value << shift;
-        }
-        output[y*1280+x] = pack(result);
+    geo_matrix(m,b->p[0],b->p[1],b->p[2],b->p[3],b->flags&1,b->flags&2,1280,720);
+    for(int y=0;y<720;++y) for(int x=0;x<1280;++x) {
+        int sx=(int)(((int64_t)m[0]*x+(int64_t)m[1]*y+m[2])>>16);
+        int sy=(int)(((int64_t)m[3]*x+(int64_t)m[4]*y+m[5])>>16);
+        dst[y*1280+x]=sx<0 || sx>=1280 || sy<0 || sy>=720 ? 0 : src[sy*1280+sx];
     }
-    return &image;
+}
+static void rectangle(uint32_t *pixels,int x,int y,int w,int h)
+{
+    for(int py=y;py<y+h;++py) for(int px=x;px<x+w;++px)
+        if(px<x+3 || px>=x+w-3 || py<y+3 || py>=y+h-3)
+            pixels[py*1280+px]=0x28ddbb;
+}
+static void update_images(void)
+{
+    ui_chain_t c=ui_data_chain();
+    ui_chain_t content=c; content.view=0; content.preset=0;
+    if(valid && !memcmp(&previous,&content,sizeof content)) return;
+    previous=content; valid=true;
+    const lv_image_dsc_t *source=c.source==UI_SOURCE_PC_IMAGE ? &sim_indoor : &sim_street;
+    const uint16_t *pixels=(const uint16_t *)source->data;
+    for(unsigned y=0;y<720;++y) for(unsigned x=0;x<1280;++x)
+        rgb[0][y*1280+x]=expand(pixels[y*source->header.h/720*source->header.w+
+            x*source->header.w/1280]);
+    unsigned bank=0;
+    for(unsigned i=0;i<=c.count;++i) {
+        if(i) {
+            const ui_block_t *b=&c.block[i-1];
+            if(b->type==UI_BLOCK_FILTER) {
+                stage(rgb[bank^1],rgb[bank],b->p[0]); bank^=1;
+            } else if(b->type==UI_BLOCK_GEO) {
+                geometric(rgb[bank^1],rgb[bank],b); bank^=1;
+            } else if(b->type==UI_BLOCK_OVERLAY) {
+                if(b->flags&1) {
+                    static const int boxes[][4]={{160,236,155,400},{451,236,147,300},
+                        {613,287,207,123},{851,293,413,191}};
+                    for(unsigned j=0;j<4;++j)
+                        rectangle(rgb[bank],boxes[j][0],boxes[j][1],boxes[j][2],boxes[j][3]);
+                }
+                if(b->flags&2) {
+                    for(unsigned y=0;y<54;++y) for(unsigned x=0;x<1280;++x)
+                        rgb[bank][y*1280+x]=0xeaf2ff;
+                    rectangle(rgb[bank],24,12,180,30);
+                }
+            } else if(b->type!=UI_BLOCK_DETECT) {
+                uint8_t gamma[256];
+                if(b->type==UI_BLOCK_GAMMA) pix_gamma_table(gamma,(unsigned)b->p[0]);
+                for(unsigned j=0;j<1280*720;++j) {
+                    uint32_t p=rgb[bank][j];
+                    if(b->type==UI_BLOCK_GRAY) p=(uint32_t)gray(p)*0x010101;
+                    if(b->type==UI_BLOCK_BINARY) p=gray(p)>=b->p[0] ? 0xffffff : 0;
+                    if(b->type==UI_BLOCK_INVERT) p^=0xffffff;
+                    if(b->type==UI_BLOCK_LEVEL || b->type==UI_BLOCK_GAMMA) {
+                        uint32_t result=0;
+                        for(unsigned shift=0;shift<=16;shift+=8) {
+                            int n=(p>>shift)&255;
+                            n=b->type==UI_BLOCK_LEVEL ?
+                                clamp(((n-128)*b->p[1]>>8)+128+b->p[0]) : gamma[n];
+                            result|=(uint32_t)n<<shift;
+                        }
+                        p=result;
+                    }
+                    rgb[bank][j]=p;
+                }
+            }
+        }
+        for(unsigned j=0;j<1280*720;++j) output[i][j]=pack(rgb[bank][j]);
+        images[i]=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,
+            .cf=LV_COLOR_FORMAT_RGB565,.w=1280,.h=720,.stride=2560},
+            .data_size=sizeof output[i],.data=(const uint8_t *)output[i]};
+        for(unsigned y=0;y<90;++y) for(unsigned x=0;x<160;++x)
+            thumbnail[i][y*160+x]=output[i][y*8*1280+x*8];
+        thumbnails[i]=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,
+            .cf=LV_COLOR_FORMAT_RGB565,.w=160,.h=90,.stride=320},
+            .data_size=sizeof thumbnail[i],.data=(const uint8_t *)thumbnail[i]};
+    }
+}
+/* A fused PIX pass exposes its final DDR output, not its internal register stages. */
+static unsigned output_index(unsigned block)
+{
+    ui_pipe_stats_t stats=ui_data_pipe_stats();
+    for(unsigned i=0;i<stats.hop_count;++i) {
+        ui_hop_t h=stats.hop[i];
+        if((h.engine==UI_HOP_CAM_PIX || h.engine==UI_HOP_MEM_PIX) &&
+            block>=h.first && block<=h.last) return h.last+1u;
+    }
+    return block+1;
+}
+const lv_image_dsc_t *sim_pipeline_image(void)
+{
+    update_images();
+    ui_chain_t c=ui_data_chain();
+    return &images[c.view==UI_VIEW_SOURCE ? 0 :
+        c.view==UI_VIEW_FINAL ? c.count : output_index(c.view)];
+}
+const lv_image_dsc_t *ui_data_thumb(unsigned block)
+{
+    update_images();
+    return &thumbnails[block==UI_VIEW_FINAL ? 0 : output_index(block)];
 }
 const lv_image_dsc_t *sim_l0_image(void)
 {
-    if (ui_page == 1) return ui_data_vision().image;
-    if (ui_page == 2) return ui_data_vision().image;
-    if (ui_page == 3) return ui_data_process(0);
-    return NULL;
+    return ui_page==1 ? sim_pipeline_image() : NULL;
 }
 uint32_t sim_composite(const lv_image_dsc_t *l0, uint32_t foreground, unsigned x, unsigned y)
 {

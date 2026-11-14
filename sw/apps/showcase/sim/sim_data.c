@@ -26,7 +26,7 @@ static bool hex;
 static unsigned clear_tick;
 static unsigned sent;
 static unsigned echo_count;
-void sim_data_init(void) { clear_tick = lv_tick_get(); }
+void sim_data_init(void) { clear_tick = lv_tick_get(); ui_data_chain_preset(1); }
 void sim_data_toggle_hardware(void) { hardware ^= UI_PIX | UI_GEO; }
 unsigned ui_data_hardware(void) { return hardware; }
 ui_system_t ui_data_system(void)
@@ -82,7 +82,7 @@ static bool many_categories;
 void sim_data_many_categories(bool enabled) { many_categories=enabled; }
 ui_vision_t ui_data_vision(void)
 {
-    bool batch=session.app==UI_APP_IMAGE;
+    bool batch=ui_data_chain().source==UI_SOURCE_PC_IMAGE;
     bool paused=session.state==UI_STATE_PAUSED;
     unsigned second = paused && !batch ? paused_second : lv_tick_get() / 1000;
     ui_vision_t d = {.image = batch ? &sim_indoor : &sim_street,
@@ -116,27 +116,10 @@ ui_vision_t ui_data_vision(void)
         }
         ui_detection_filter(&d,many,13);
     } else ui_detection_filter(&d,raw,d.count);
+    d.image=sim_pipeline_image();
     return d;
 }
 void ui_data_boxes(void) { boxes=!boxes; }
-static ui_process_config_t process={.contrast=256,.gamma_tenths=10,.stage1=2,.stage2=2,
-    .threshold=128,.scale_percent=100};
-ui_process_config_t ui_data_process_config(void) { return process; }
-void ui_data_process_set(const ui_process_config_t *config) { process=*config; }
-void ui_data_process_defaults(uint32_t stages)
-{
-    if(stages&UI_PROC_LEVEL) { process.brightness=0; process.contrast=256; }
-    if(stages&UI_PROC_GAMMA) process.gamma_tenths=10;
-    if(stages&UI_PROC_S1) process.stage1=2;
-    if(stages&UI_PROC_S2) process.stage2=2;
-    if(stages&UI_PROC_BINARY) process.threshold=128;
-    if(stages&UI_PROC_ROTATE) process.angle=0;
-    if(stages&UI_PROC_SCALE) process.scale_percent=100;
-    if(stages&UI_PROC_TRANSLATE) { process.translate_x=0; process.translate_y=0; }
-    if(stages==UI_PROC_ALL) { process.enabled=0; process.original=false; }
-}
-const lv_image_dsc_t *ui_data_process(unsigned mode)
-{ (void)mode; return sim_process_image(&process); }
 /* Card 46 values supplied by coordinator. Software-off comparison is a fixed
  * estimated workload, as authorized for P2; P3 replaces it with board data. */
 static const ui_benchmark_t benchmark[] = {

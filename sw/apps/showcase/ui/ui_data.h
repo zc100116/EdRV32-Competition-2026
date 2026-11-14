@@ -22,8 +22,8 @@ typedef struct {
 typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_t;
 /* Media applications and session states: design 2026-11-03-showcase-p5-replan 8.1.
  * Values equal the EDSC `app` and `state` fields. */
-typedef enum { UI_APP_NONE, UI_APP_PIPELINE, UI_APP_IMAGE, UI_APP_PROCESS,
-               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK } ui_app_t;
+typedef enum { UI_APP_NONE = 0, UI_APP_PIPELINE = 1, UI_APP_GRAPHICS = 4,
+               UI_APP_GAME = 5, UI_APP_COREMARK = 6 } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
 typedef struct {
@@ -42,7 +42,7 @@ typedef struct {
     unsigned category_id[5];
     unsigned category_used;
     bool boxes;
-    /* Image recognition (app 2): current PC image, design 8.2 IMAGE_INFO. */
+    /* PC image source (app 1): current PC image, design 8.2 IMAGE_INFO. */
     const char *image_name;
     unsigned image_index, image_total, roundtrip_ms;
     ui_image_status_t image_status;
@@ -88,30 +88,7 @@ void ui_data_detection_class(unsigned class_id,bool enabled);
 void ui_data_detection_all(bool enabled);
 /* Toggle detection box visibility. */
 void ui_data_boxes(void);
-/* Image processing stages in pipeline order, design 8.3. A cleared bit bypasses the
- * stage in hardware and keeps its parameters. */
-enum {
-    UI_PROC_LEVEL = 1u << 0, UI_PROC_GAMMA = 1u << 1, UI_PROC_S1 = 1u << 2,
-    UI_PROC_S2 = 1u << 3, UI_PROC_GRAY = 1u << 4, UI_PROC_BINARY = 1u << 5,
-    UI_PROC_INVERT = 1u << 6, UI_PROC_ROTATE = 1u << 7, UI_PROC_SCALE = 1u << 8,
-    UI_PROC_TRANSLATE = 1u << 9, UI_PROC_MIRROR_X = 1u << 10, UI_PROC_MIRROR_Y = 1u << 11,
-    UI_PROC_ALL = (1u << 12) - 1
-};
-typedef struct {
-    uint32_t enabled;
-    int brightness, contrast, gamma_tenths, stage1, stage2, threshold;
-    int angle, scale_percent, translate_x, translate_y;
-    bool original;
-} ui_process_config_t;
-ui_process_config_t ui_data_process_config(void);
-void ui_data_process_set(const ui_process_config_t *config);
-/* Restore the parameters of the given stages to design 8.3 defaults.
- * UI_PROC_ALL also clears every enable bit ("全部恢复默认", design Q3). */
-void ui_data_process_defaults(uint32_t stages);
-/* Return the image used for the processing mode preview. */
-const lv_image_dsc_t *ui_data_process(unsigned mode);
-/* Vision pipeline page, design 2026-11-14-showcase-vision-pipeline section 7.
- * The ui_process_* interface above is removed when the pipeline page is integrated. */
+/* Vision pipeline page, design 2026-11-14-showcase-vision-pipeline section 7. */
 enum { UI_BLOCK_MAX = 8 };
 enum { UI_BLOCK_NONE, UI_BLOCK_LEVEL, UI_BLOCK_GAMMA, UI_BLOCK_FILTER, UI_BLOCK_GRAY,
        UI_BLOCK_BINARY, UI_BLOCK_INVERT, UI_BLOCK_GEO, UI_BLOCK_DETECT, UI_BLOCK_OVERLAY };

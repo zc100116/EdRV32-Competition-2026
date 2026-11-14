@@ -142,9 +142,7 @@ void ui_refresh(void)
     if(show) ui_text(session_text,session.state==UI_STATE_FAILED ? session.error :
         session.state==UI_STATE_STARTING ? "正在启动" : "正在停止");
     switch(ui_page) {
-        case 1: if(!ui_detection_settings) ui_vision_update(false); break;
-        case 2: if(!ui_detection_settings) ui_vision_update(true); break;
-        case 3: ui_process_update(); break;
+        case 1: if(!ui_detection_settings) ui_pipeline_update(); break;
         case 4: ui_graphics_update(); break;
         case 5: {
             unsigned count; ui_data_games(&count);
@@ -164,15 +162,15 @@ void ui_open(unsigned page)
     unsigned old_page=ui_page;
     if(old_page!=page) {
         ui_mode=0;
-        static const ui_app_t apps[]={UI_APP_NONE,UI_APP_PIPELINE,UI_APP_IMAGE,
-            UI_APP_PROCESS,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE};
+        static const ui_app_t apps[]={UI_APP_NONE,UI_APP_PIPELINE,UI_APP_NONE,
+            UI_APP_NONE,UI_APP_GRAPHICS,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE,UI_APP_NONE};
         if(apps[old_page]!=UI_APP_NONE || game_active ||
            ui_data_session().app==UI_APP_COREMARK) ui_data_app_open(UI_APP_NONE,0);
         game_active=false;
         if(apps[page]!=UI_APP_NONE) ui_data_app_open(apps[page],0);
     }
     ui_page = page;
-    if(page!=1 && page!=2) ui_detection_settings=false;
+    if(page!=1) ui_detection_settings=false;
     if(group) lv_group_delete(group);
     group = lv_group_create();
     lv_group_set_default(group);
@@ -191,7 +189,7 @@ void ui_open(unsigned page)
     top = ui_box(screen, 0, 0, 1280, 48, PANEL);
     lv_obj_set_style_radius(top, 0, 0);
     ui_label(top, "EdRV32", 140, 9, &sim_font_20, ACCENT);
-    const char *names[] = {"首页", "视觉识别", "图片识别", "图像处理", "图形引擎",
+    const char *names[] = {"首页", "视觉流水线", "", "", "图形引擎",
         "游戏", "系统监控", "芯片信息", "调试助手"};
     ui_label(top, names[page], 260, 12, &sim_font_16, TEXT);
     status = ui_label(top, "", 420, 14, &sim_font_14, MUTED);
@@ -206,8 +204,8 @@ void ui_open(unsigned page)
     content = ui_box(screen, 0, 48, 1280, 632, BG);
     lv_obj_set_style_border_width(content, 0, 0);
     lv_obj_set_style_radius(content, 0, 0);
-    void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_vision, ui_page_image,
-        ui_page_process, ui_page_graphics, ui_page_games, NULL,
+    void (*pages[])(lv_obj_t *) = {ui_page_home, ui_page_pipeline, NULL,
+        NULL, ui_page_graphics, ui_page_games, NULL,
         ui_page_chip, ui_page_debug};
     if(page==5) ui_data_games(&game_count);
     if(ui_detection_settings) ui_page_detection_settings(content);
@@ -218,15 +216,14 @@ void ui_open(unsigned page)
     ui_button(session_box,"重试",24,102,160,1002);
     retry=lv_obj_get_child(session_box,-1);
     lv_obj_set_hidden(session_box,true);
-    if(page!=5 || !game_active)
+    if((page!=1 || ui_detection_settings) && (page!=5 || !game_active))
         lv_group_focus_obj(lv_group_get_obj_by_index(group,2));
     if(page == 0) lv_group_focus_obj(lv_group_get_obj_by_index(group, home_focus+2));
     if(page == 5 && !game_active)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, game_focus+2));
-    if(page == 3) lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_mode+2));
     if(page == 4 || page == 8)
         lv_group_focus_obj(lv_group_get_obj_by_index(group, ui_tab+2));
-    if(page>=1 && page<=3) {
+    if(page==1) {
         ui_button(bottom,"隐藏界面",1104,0,160,1005);
         lv_obj_set_height(lv_obj_get_child(bottom,-1),36);
         restore_surface=ui_box(screen,0,0,1280,720,0);
@@ -238,6 +235,7 @@ void ui_open(unsigned page)
     }
     ui_monitor_controls();
     ui_refresh();
+    if(page==1 && !ui_detection_settings) ui_pipeline_ready();
 }
 static void activate(unsigned action)
 {
@@ -248,27 +246,19 @@ static void activate(unsigned action)
     if(action==1004) { ui_data_benchmark_stop(); return; }
     if(action==1002) { ui_data_app_retry(); ui_refresh(); return; }
     if(ui_page == 0) {
-        home_focus = action - 1;
-        const unsigned required[]={0,UI_VIN|UI_NPU,UI_VIN|UI_NPU|UI_ETH,
-            UI_VIN|UI_PIX|UI_GEO,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0};
+        const unsigned entries[]={1,4,5,6,7,8};
+        for(unsigned i=0;i<6;++i) if(entries[i]==action) home_focus=i;
+        const unsigned required[]={0,UI_VIN|UI_NPU,0,
+            0,UI_RND|UI_DISP,UI_RND|UI_DISP,0,0,0};
         if((ui_data_hardware()&required[action])!=required[action]) return;
         ui_tab = 0;
         ui_mode = 0;
         game_focus = 0;
         if(action==6) ui_monitor_toggle();
         else ui_open(action);
-    } else if((ui_page==1 || ui_page==2) && ui_detection_settings) {
+    } else if(ui_page==1 && ui_detection_settings) {
         ui_detection_settings_action(action);
-    } else if((ui_page==1 || ui_page==2) && action==2) {
-        ui_detection_settings=true; ui_open(ui_page);
-    } else if(ui_page == 1) {
-        if(action == 0) ui_data_app_pause(ui_data_session().state!=UI_STATE_PAUSED);
-        else ui_data_boxes();
-        ui_refresh();
-    } else if(ui_page == 2) {
-        if(action==0 || action==1) ui_data_image_step(action==0 ? -1 : 1);
-        ui_refresh();
-    } else if(ui_page == 3) { ui_process_action(action); }
+    } else if(ui_page==1) { ui_pipeline_action(action); }
     else if(ui_page == 4) {
         ui_graphics_action(action);
     } else if(ui_page == 5) {
@@ -327,6 +317,7 @@ void ui_back(void)
         lv_group_set_editing(group,false); return;
     }
     if(ui_detection_settings) { ui_detection_settings=false; ui_open(ui_page); }
+    else if(ui_page==1 && ui_pipeline_back()) { return; }
     else if(game_active) { game_active=false; ui_data_app_open(UI_APP_NONE,0); ui_open(5); }
     else if(ui_page==4 && ui_data_benchmark_running()) {
         ui_data_benchmark_stop();
