@@ -8,12 +8,16 @@ UI_CONTRACT ?= $(ROOT)/sw/apps/showcase/ui/ui_data.h
 CFLAGS := -std=c11 -O2 -g -Wall -Wextra -Werror -fsanitize=undefined \
     -fno-sanitize-recover=all -I$(VISION) -I$(ROOT)/sw/lib \
     -I$(ROOT)/sw/apps/showcase/board
-.PHONY: test
+.PHONY: test cpu
 test:
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) post_test.c $(VISION)/post.c $(VISION)/wire.c \
 	    $(ROOT)/sw/lib/yolo_post.c $(ROOT)/sw/lib/yolo_tables.c -o $(OUT)/post_test
 	$(OUT)/post_test
+
+cpu:
+	$(MAKE) test OUT=$(ROOT)/build/sw/showcase-cpupost/vision \
+	    CFLAGS='$(CFLAGS) -DSHOWCASE_POST_CPU'
 
 RUNTIME_TEST ?= runtime_test
 .PHONY: runtime network
