@@ -230,7 +230,7 @@ class ConsoleLayoutTest(unittest.TestCase):
             window.resize(width, height)
             for page in range(5):
                 window._select_page(page)
-                for subpage in range(3) if page == 4 else [0]:
+                for subpage in range(2) if page == 4 else [0]:
                     window.soc.pages.setCurrentIndex(subpage)
                     self.app.processEvents()
                     self.assertEqual((window.width(), window.height()), (width, height))
@@ -278,12 +278,12 @@ class ConsoleLayoutTest(unittest.TestCase):
                             self.assertLessEqual(row.width(), row.parentWidget().width())
                             for button in row.findChildren(QPushButton):
                                 self.assertTrue(row.rect().contains(button.geometry()))
-                    for spin in window.soc.processing.findChildren(QAbstractSpinBox):
+                    for spin in window.soc.pipeline.details.findChildren(QAbstractSpinBox):
                         editor = spin.lineEdit()
                         self.assertGreaterEqual(editor.width(),
                             editor.fontMetrics().horizontalAdvance(editor.text()) + 4)
             console = window.soc
-            self.assertEqual(len(console.processing.switches), 12)
+            self.assertEqual(console.pipeline.library.count(), 9)
             self.assertTrue(console.choose_folder.isEnabled())
             self.assertTrue(console.apply_output.isEnabled())
             self.assertTrue(console.status_query.isEnabled())

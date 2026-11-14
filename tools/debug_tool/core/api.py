@@ -61,8 +61,8 @@ def make_handler(engine):
                     return self._json(200, engine.board.status())
                 if path == "/api/telemetry":
                     return self._json(200, engine.telemetry.status())
-                if path == "/api/processing":
-                    return self._json(200, engine.processing.status())
+                if path == "/api/pipeline":
+                    return self._json(200, engine.pipeline.status())
                 if path == "/api/scenes":
                     return self._json(200, engine.scenes.mapping())
                 if path == "/api/telemetry/csv":
@@ -119,8 +119,8 @@ def make_handler(engine):
                 if path == "/api/telemetry/clear":
                     engine.telemetry.clear()
                     return self._json(200, engine.telemetry.status())
-                if path == "/api/processing":
-                    return self._json(200, engine.processing.send(body))
+                if path == "/api/pipeline":
+                    return self._json(200, engine.pipeline.send(body))
                 if path == "/api/scenes/send":
                     return self._json(200, engine.scenes.send(
                         body["name"], int(body.get("rate", 100))))

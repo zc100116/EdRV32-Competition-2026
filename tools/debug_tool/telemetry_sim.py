@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""telemetry_sim.py — B2 design 3.5 synthetic UDP sender; host clock domain.
+"""telemetry_sim.py — telemetry and vision pipeline 7.3 UDP peers; host clock domain.
 
-Generate v1 records at 100 Hz in batches of 16, without any GUI imports.
+Generate telemetry records, image returns or pipeline control replies without GUI imports.
 Run beside main.py: python3 telemetry_sim.py --seconds 10 --port 6000
 """
 
@@ -165,12 +165,13 @@ def run_yolo(host, port, ch2=None, output=None):
 def run_detection(sock, model, quant_params, frames):
     """T-NETN host board: receive RGB565 and return reference CH2/candidates/EDDT over real UDP."""
     from core.yolo import reference_output, reference_detections, rgb565_ch2
-    from core.showcase import decode, encode, BULK_BEGIN, READY, DONE, IMAGE, APP, IMAGE_INFO, ACK
+    from core.showcase import (decode, encode, BULK_BEGIN, READY, DONE, IMAGE, APP,
+                               CHAIN, IMAGE_INFO, ACK)
     for frame_id in range(frames):
         packet, peer = sock.recvfrom(65535)
         window, notify, offset, data = unpack(packet)
         message_type, seq, payload = decode(data)
-        while message_type in (APP, IMAGE_INFO):
+        while message_type in (APP, CHAIN, IMAGE_INFO):
             send_block(sock, peer, encode(ACK, seq, struct.pack('<HBB', message_type, 2, 0)), 3)
             window, notify, offset, data = unpack(sock.recv(65535))
             message_type, seq, payload = decode(data)
@@ -204,25 +205,128 @@ def run_detection(sock, model, quant_params, frames):
               f'candidate_bytes={len(reference_candidates(output, quant_params))} '
               f'detections={len(boxes)}', flush=True)
 
-def run_processing(stream, commands=2):
-    """UART peer for end-to-end parameter transport through a real serial engine."""
-    received = []
-    line = bytearray()
-    while len(received) < commands:
-        byte = stream.read(1)
-        if not byte:
-            raise EOFError('Processing serial stream closed')
-        if byte in (b'\r', b'\n'):
-            command = line.decode('ascii')
-            line.clear()
-            kind, action, values = command.split(' ', 2)
-            if kind not in ('pix', 'geo') or action != 'set':
-                raise ValueError(f'Unexpected processing command: {command}')
-            received.append(command)
-            stream.write(f'{kind.upper()} parameters: {values}\r\n'.encode())
+def simulated_stats(chain):
+    """Illustrative timings, never presented as hardware measurements."""
+    hops = []
+    blocks = chain['blocks']
+    rank = {1: 0, 2: 1, 3: 2, 4: 4, 5: 5, 6: 6}
+    index = 0
+    if chain['source'] == 0 and (not blocks or blocks[0]['type'] not in rank):
+        hops.append(dict(engine=1, first=255, last=255, us=0))
+    while index < len(blocks):
+        first = index
+        kind = blocks[index]['type']
+        if kind in rank:
+            used, previous, filters = set(), -1, 0
+            while index < len(blocks) and blocks[index]['type'] in rank:
+                current = blocks[index]['type']
+                order = rank[current] + (1 if current == 3 and filters else 0)
+                if order < previous or (current != 3 and current in used) or (
+                        current == 3 and filters == 2):
+                    break
+                used.add(current)
+                filters += int(current == 3)
+                previous = order
+                index += 1
+            engine = 0 if first == 0 and chain['source'] == 0 else 2
+            duration = 0 if engine == 0 else 3800
         else:
-            line.extend(byte)
-    return received
+            engine = {7: 4, 8: 3, 9: 5}[kind]
+            duration = {7: 15200, 8: 38900, 9: 4100}[kind]
+            index += 1
+        hops.append(dict(engine=engine, first=first, last=index - 1, us=duration))
+    return dict(fps=28, e2e_us=sum(h['us'] for h in hops), box_lag_us=39000,
+                npu_us=35000, ddr_mbps=1250 + len(hops) * 75, hops=hops)
+
+
+class PipelineBoard:
+    """Frozen EDSC board boundary, suitable for real UDP tests and screenshots."""
+    def __init__(self):
+        from core.pipeline import preset
+        self.chain = preset(1)
+        self.revision = 0
+        self.app = 0
+        self.state = 0
+        self.threshold = 50
+        self.classes = [0xffffffff, 0xffffffff, 0xffff]
+
+    def state_payload(self):
+        return (struct.pack('<5B3x3I', self.app, self.state, 0, 1, self.threshold,
+                            *self.classes) + struct.pack('<I20x', self.revision)
+                + struct.pack('<IIB3x', 0, 0, 0))
+
+    def messages(self):
+        from core.showcase import STATE, CHAIN_STATE, PIPE_STATS, encode
+        from core.pipeline import pack_chain, pack_stats
+        result = [encode(STATE, 0, self.state_payload()),
+                  encode(CHAIN_STATE, 0, struct.pack('<I', self.revision)
+                         + pack_chain(self.chain))]
+        if self.app == 1 and self.state == 2:
+            result.append(encode(PIPE_STATS, 0, pack_stats(simulated_stats(self.chain))))
+        return result
+
+    def handle(self, data):
+        from core.showcase import (APP, ACK, CHAIN, PRESET, DETECT, CANCEL, HELLO, CHAIN_STATE,
+                                   IMAGE_INFO, MESSAGE, decode, encode)
+        from core.pipeline import chain_error, unpack_chain, preset
+        if data == b'\0':
+            return [encode(HELLO, 0, struct.pack('<H2x16s', 3, b'SIMULATED')
+                           + self.state_payload())] + self.messages()[1:]
+        _, kind, length, seq = MESSAGE.unpack_from(data)
+        if kind in (CHAIN, PRESET) and length != (100 if kind == CHAIN else 4):
+            return [encode(ACK, seq, struct.pack('<HBB', kind, 3, 1))]
+        kind, seq, payload = decode(data)
+        error = 0
+        if kind == CHAIN:
+            error, _ = chain_error(payload)
+            if not error:
+                self.chain = unpack_chain(payload)
+                self.revision += 1
+        elif kind == PRESET:
+            if not 1 <= payload[0] <= 8 or any(payload[1:]):
+                error = 2
+            else:
+                self.chain = preset(payload[0])
+                self.revision += 1
+        elif kind == APP:
+            app, action, _ = struct.unpack('<BBH', payload)
+            if app in (2, 3) or app > 6 or action > 3:
+                error = 2
+            else:
+                self.app = app
+                self.state = 0 if app == 0 else 3 if action == 1 else 2
+        elif kind == DETECT:
+            self.threshold, *self.classes = struct.unpack('<B3x3I', payload)
+        elif kind not in (CANCEL, IMAGE_INFO):
+            raise ValueError(f'Pipeline simulator does not implement command {kind:#x}')
+        return [encode(ACK, seq, struct.pack('<HBB', kind, 3 if error else 2, error))
+                ] + ([] if error else self.messages() if kind in (CHAIN, PRESET) else
+                     [message for message in self.messages() if decode(message)[0] != CHAIN_STATE])
+
+
+def run_pipeline(sock, seconds):
+    board = PipelineBoard()
+    deadline = time.monotonic() + seconds
+    peer, last = None, 0
+    sock.settimeout(.1)
+    print(f'Pipeline listening {sock.getsockname()} (synthetic metrics)', flush=True)
+    while time.monotonic() < deadline:
+        try:
+            packet, sender = sock.recvfrom(65535)
+        except socket.timeout:
+            packet = None
+        if packet is not None:
+            window, notify, offset, data = unpack(packet)
+            if window == 3:
+                peer = sender
+                for message in board.handle(data):
+                    send_block(sock, peer, message, 3)
+        if peer and time.monotonic() - last >= 1:
+            from core.showcase import decode, CHAIN_STATE
+            for message in board.messages():
+                if decode(message)[0] != CHAIN_STATE:
+                    send_block(sock, peer, message, 3)
+            last = time.monotonic()
 
 
 def main():
@@ -231,20 +335,19 @@ def main():
     parser.add_argument('--port', type=int, default=6000)
     parser.add_argument('--seconds', type=float, default=60)
     parser.add_argument('--hz', type=int, choices=range(10, 1001), default=100, metavar='10..1000')
-    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo', 'detection', 'processing'], default='telemetry')
+    parser.add_argument('--mode', choices=['telemetry', 'video', 'yolo', 'detection', 'pipeline'],
+                        default='telemetry')
     parser.add_argument('--fps', type=int, choices=range(1, 61), default=10, metavar='1..60')
     parser.add_argument('--ch2', help='YOLO mode: raw CH2 input file')
     parser.add_argument('--output', help='YOLO mode: u32 count followed by 24-byte NPU candidates')
     parser.add_argument('--model', help='Detection: compiled NPU model directory')
     parser.add_argument('--quant', help='Detection: quantization JSON')
-    parser.add_argument('--serial', help='Processing: serial port for a paired UART simulator')
-    parser.add_argument('--commands', type=int, default=2)
     parser.add_argument('--frames', type=int, default=1, help='Detection: image count')
     args = parser.parse_args()
-    if args.mode == 'processing':
-        import serial
-        with serial.Serial(args.serial, 115200) as stream:
-            print(run_processing(stream, args.commands))
+    if args.mode == 'pipeline':
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.bind((args.host, args.port))
+            run_pipeline(sock, args.seconds)
     elif args.mode == 'telemetry':
         run(args.host, args.port, args.seconds, args.hz)
     elif args.mode == 'video':

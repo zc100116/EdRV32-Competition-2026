@@ -187,7 +187,8 @@ class ImageDetectionTest(unittest.TestCase):
         console = SocConsole(engine, lambda text: None)
         self.addCleanup(console.close)
         with (patch.object(engine.ethernet, 'start_receive'),
-              patch.object(engine.ethernet.showcase, 'app') as send):
+              patch.object(engine.ethernet.showcase, 'app') as send,
+              patch.object(engine.ethernet.showcase, 'command') as chain_send):
             for button in (console.image_camera, console.video_camera):
                 engine.yolo.return_view = True
                 button.click()
@@ -196,6 +197,8 @@ class ImageDetectionTest(unittest.TestCase):
                 self.assertEqual(console.display.currentIndex(), 0)
                 self.assertEqual(console.scene.currentIndex(), 0)
                 self.assertFalse(engine.yolo.return_view)
+                from tools.debug_tool.core.pipeline import unpack_chain
+                self.assertEqual(unpack_chain(chain_send.call_args.args[1])['source'], 0)
             self.assertEqual(send.call_count, 2)
         app.processEvents()
 

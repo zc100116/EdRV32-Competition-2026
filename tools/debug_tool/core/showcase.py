@@ -7,7 +7,8 @@ import time
 
 MESSAGE = struct.Struct('<4sHHI')
 BULK_BEGIN, ECHO = 1, 3
-APP, IMAGE_INFO, PROCESS, DETECT, CANCEL = range(4, 9)
+APP, IMAGE_INFO, DETECT, CANCEL = 4, 5, 7, 8
+CHAIN, PRESET, CHAIN_STATE, PIPE_STATS = 9, 10, 0x88, 0x89
 HELLO, STATE, ACK, IMAGE_STEP = range(0x84, 0x88)
 READY, DONE, ECHO_REPLY = 0x81, 0x82, 0x83
 MODEL, IMAGE, GAME = 1, 2, 3
@@ -26,13 +27,17 @@ def decode(data):
     magic, message_type, length, seq = MESSAGE.unpack_from(data)
     if magic != b'EDSC' or length > 1000 or len(data) != MESSAGE.size + length:
         raise ValueError('EDSC invalid magic or payload length')
-    expected = {READY: 4, DONE: 8, BULK_BEGIN: 8, APP: 4, PROCESS: 24,
+    expected = {READY: 4, DONE: 8, BULK_BEGIN: 8, APP: 4, CHAIN: 100, PRESET: 4, CHAIN_STATE: 104,
                 DETECT: 16, CANCEL: 0, HELLO: 76, STATE: 56, ACK: 4, IMAGE_STEP: 4}
     if message_type in expected and length != expected[message_type]:
         raise ValueError(f'EDSC invalid payload length for type {message_type:#x}')
     if message_type not in (BULK_BEGIN, ECHO, READY, DONE, ECHO_REPLY, APP, IMAGE_INFO,
-                            PROCESS, DETECT, CANCEL, HELLO, STATE, ACK, IMAGE_STEP):
+                            CHAIN, PRESET, CHAIN_STATE, PIPE_STATS, DETECT, CANCEL,
+                            HELLO, STATE, ACK, IMAGE_STEP):
         raise ValueError(f'EDSC unknown message type {message_type:#x}')
+    if message_type == PIPE_STATS:
+        from .pipeline import unpack_stats
+        unpack_stats(data[MESSAGE.size:])
     return message_type, seq, bytes(data[MESSAGE.size:])
 
 
@@ -57,7 +62,7 @@ class ShowcaseTool:
             raise
         message_type, seq, payload = reply
         session = self.ethernet.session
-        if message_type in (HELLO, STATE):
+        if message_type in (HELLO, STATE, CHAIN_STATE, PIPE_STATS):
             if session:
                 session.receive_state(message_type, payload)
             return
@@ -75,11 +80,17 @@ class ShowcaseTool:
                 if command['seq'] != seq:
                     raise ValueError(f'ACK sequence {seq}, expected {command["seq"]}')
                 command.update(phase=phase, error=error)
+                if phase == 3:
+                    reason = STATUS[error]
+                    if command_type == CHAIN and error in (1, 2):
+                        from .pipeline import chain_error
+                        reason = chain_error(command['payload'])[1] or reason
+                    command['reason'] = f'命令被拒绝：{reason}'
                 if phase in (2, 3):
                     del self.pending[command_type]
                     command['event'].set()
                     if phase == 3 and session:
-                        session.fail(f'命令失败：{STATUS[error]}')
+                        session.fail(command['reason'])
                     if command_type in self.latest:
                         destination, data = self.latest.pop(command_type)
                         self.command(command_type, data, destination)
@@ -98,11 +109,12 @@ class ShowcaseTool:
             destination = session.network_endpoint
         with self.condition:
             if command_type in self.pending:
-                if command_type in (PROCESS, DETECT):
+                if command_type == DETECT:
                     self.latest[command_type] = (destination, payload)
                     return dict(queued=True)
                 raise RuntimeError('同类命令正在等待设备完成')
-            command = dict(seq=self.seq + 1, phase=0, error=0, event=threading.Event())
+            command = dict(seq=self.seq + 1, phase=0, error=0,
+                           event=threading.Event(), payload=payload)
             self.pending[command_type] = command
             try:
                 command['seq'] = self._message(destination, command_type, payload)
@@ -120,7 +132,7 @@ class ShowcaseTool:
                     self.expired.add((command_type, command['seq']))
                     raise TimeoutError('命令应答超时')
         if command['phase'] == 3:
-            raise ValueError(f'命令失败：{STATUS[command["error"]]}')
+            raise ValueError(command['reason'])
 
     def app(self, app, action=0, arg=0, destination=None):
         return self.command(APP, struct.pack('<BBH', app, action, arg), destination)
@@ -225,8 +237,11 @@ class ShowcaseTool:
             self.cancelled = False
             if kind == IMAGE:
                 session = self.ethernet.session
-                if session.board_state['app'] != 2 or session.board_state['state'] != 2:
-                    self.command_wait(APP, struct.pack('<BBH', 2, 0, 0), destination)
+                from .pipeline import pack_chain
+                self.command_wait(APP, struct.pack('<BBH', 1, 0, 0), destination)
+                chain = session.engine.pipeline.status()
+                chain.update(source=1, preset=0)
+                self.command_wait(CHAIN, pack_chain(chain), destination)
                 if self.cancelled:
                     raise ValueError('已取消')
                 self.command_wait(IMAGE_INFO, image_info, destination)

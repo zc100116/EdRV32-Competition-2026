@@ -10,18 +10,18 @@ from unittest.mock import Mock, patch
 
 from tools.debug_tool.core.engine import SerialEngine
 from tools.debug_tool.core.ethernet import packets, unpack
-from tools.debug_tool.core.processing import DEFAULTS, pack_process
+from tools.debug_tool.core.pipeline import preset, pack_chain, unpack_chain
 from tools.debug_tool.core.showcase import (
-    APP, IMAGE_INFO, PROCESS, DETECT, CANCEL, HELLO, STATE, ACK, IMAGE_STEP, encode, decode,
+    APP, IMAGE_INFO, CHAIN, PRESET, CHAIN_STATE, DETECT, CANCEL, HELLO, STATE, ACK, IMAGE_STEP, encode, decode,
 )
 from test_program import wait_for
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-def state_payload(app=2, state=2, process=None, threshold=50, classes=(1, 2, 4), request=0):
+def state_payload(app=1, state=2, chain_rev=0, threshold=50, classes=(1, 2, 4), request=0):
     return (struct.pack('<5B3x3I', app, state, 0, 1, threshold, *classes) +
-            pack_process(dict(DEFAULTS, **(process or {}))) +
+            struct.pack('<I20x', chain_rev) +
             struct.pack('<IIB3x', request, 7, 0))
 
 
@@ -96,11 +96,11 @@ class ProtocolTest(unittest.TestCase):
         wait_for(self, lambda: IMAGE_INFO not in tool.pending)
         self.assertIsNone(self.eth.status()['rx']['error'])
 
-    def test_every_command_ack_and_latest_process_detect(self):
+    def test_every_command_ack_and_latest_detect(self):
         tool = self.eth.showcase
-        payloads = {APP: struct.pack('<BBH', 2, 0, 0),
+        payloads = {APP: struct.pack('<BBH', 1, 0, 0),
                     IMAGE_INFO: struct.pack('<HHH2x', 1, 1, 5) + b'a.png',
-                    PROCESS: pack_process(DEFAULTS), DETECT: struct.pack('<B3x3I', 50, 1, 2, 4),
+                    CHAIN: pack_chain(preset(1)), PRESET: struct.pack('<B3x', 1), DETECT: struct.pack('<B3x3I', 50, 1, 2, 4),
                     CANCEL: b''}
         for kind, payload in payloads.items():
             for phase in (2, 3):
@@ -109,11 +109,9 @@ class ProtocolTest(unittest.TestCase):
                     self.assertEqual(self.request(), (kind, command['seq'], payload))
                     self.reply(ACK, command['seq'], struct.pack('<HBB', kind, 1, 0))
                     wait_for(self, lambda: command['phase'] == 1)
-                    if kind in (PROCESS, DETECT):
+                    if kind == DETECT:
                         tool.command(kind, payload)
-                        latest_payload = (pack_process(dict(DEFAULTS, brightness=137))
-                                          if kind == PROCESS else
-                                          struct.pack('<B3x3I', 89, 5, 6, 7))
+                        latest_payload = struct.pack('<B3x3I', 89, 5, 6, 7)
                         tool.command(kind, latest_payload)
                         self.assertEqual(len(tool.latest), 1)
                     else:
@@ -122,7 +120,7 @@ class ProtocolTest(unittest.TestCase):
                     self.reply(ACK, command['seq'], struct.pack('<HBB', kind, phase,
                                                                2 if phase == 3 else 0))
                     self.assertTrue(command['event'].wait(1))
-                    if kind in (PROCESS, DETECT):
+                    if kind == DETECT:
                         next_kind, seq, data = self.request()
                         self.assertEqual((next_kind, data), (kind, latest_payload))
                         self.reply(ACK, seq, struct.pack('<HBB', kind, 2, 0))
@@ -153,39 +151,23 @@ class ProtocolTest(unittest.TestCase):
         app.processEvents()
         self.assertIn('未加载模型', console.phase.text())
 
-    def test_state_updates_ui_without_refresh_timer_and_commands_do_not_own_state(self):
+    def test_state_and_chain_updates_ui_without_refresh_timer(self):
         os.environ['QT_QPA_PLATFORM'] = 'offscreen'
-        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from PySide6.QtWidgets import QApplication
         from gui.soc_console import SocConsole
         app = QApplication.instance() or QApplication([])
         console = SocConsole(self.engine, Mock())
         self.addCleanup(console.close)
-        console.video_timer.stop()
-        self.reply(STATE, 0, state_payload(app=3, state=3, threshold=72,
-                                          process={'enabled': 513, 'brightness': -23}))
-        wait_for(self, lambda: self.engine.board.board_state['threshold'] == 72)
+        self.reply(STATE, 0, state_payload(state=3, threshold=72, chain_rev=31))
+        self.reply(CHAIN_STATE, 0, struct.pack('<I', 31) + pack_chain(preset(3)))
+        wait_for(self, lambda: self.engine.board.chain_rev == 31)
         app.processEvents()
-        self.assertEqual(console.app_choice.currentIndex(), 3)
+        self.assertEqual(console.app_choice.currentData(), 1)
         self.assertIn('已暂停', console.phase.text())
         self.assertEqual(console.detect_threshold.value(), 72)
-        self.assertTrue(console.class_checks[0].isChecked())
-        self.assertFalse(console.class_checks[1].isChecked())
-        self.assertEqual(console.processing.inputs['brightness'].value(), -23)
-        self.assertTrue(console.processing.switches[9].isChecked())
-        console.processing.inputs['brightness'].setValue(100)
-        generation = self.engine.board.state_generation
-        self.reply(STATE, 0, state_payload(app=3, state=3, threshold=72,
-                                          process={'enabled': 513, 'brightness': -23}))
-        wait_for(self, lambda: self.engine.board.state_generation > generation)
-        app.processEvents()
-        self.assertEqual(console.processing.inputs['brightness'].value(), -23)
-        self.engine.processing.send({'brightness': 100})
-        self.assertEqual(self.engine.processing.status()['brightness'], -23)
-        kind, seq, _ = self.request()
-        self.reply(ACK, seq, struct.pack('<HBB', kind, 2, 0))
-        wait_for(self, lambda: kind not in self.eth.showcase.pending)
-        self.assertEqual(self.engine.processing.status()['brightness'], -23)
+        self.assertEqual(self.engine.board.board_state['chain_rev'], 31)
+        self.assertEqual(console.pipeline.chain.count(), 3)
+        self.assertEqual(console.pipeline.chain.item(0).data(256)['type'], 7)
 
     def test_image_step_uses_local_list_immediately(self):
         yolo = self.engine.yolo
@@ -238,7 +220,7 @@ class ProtocolTest(unittest.TestCase):
                 send.assert_not_called()
         app.processEvents()
 
-    def test_rest_and_cli_send_process_blocks_without_serial(self):
+    def test_rest_and_cli_send_chain_without_serial(self):
         import json
         import subprocess
         import urllib.request
@@ -247,21 +229,21 @@ class ProtocolTest(unittest.TestCase):
         api.start()
         self.addCleanup(api.stop)
         url = f'http://127.0.0.1:{api._httpd.server_port}'
-        body = dict(DEFAULTS, enabled=4095, brightness=37)
-        request = urllib.request.Request(url + '/api/processing', data=json.dumps(body).encode(),
+        body = preset(5)
+        request = urllib.request.Request(url + '/api/pipeline', data=json.dumps(body).encode(),
                                          headers={'Content-Type': 'application/json'})
         with patch.object(self.engine, 'send') as serial:
             with urllib.request.urlopen(request, timeout=2) as response:
                 self.assertEqual(response.status, 200)
             kind, seq, payload = self.request()
-            self.assertEqual((kind, payload), (PROCESS, pack_process(body)))
-            self.reply(ACK, seq, struct.pack('<HBB', PROCESS, 2, 0))
-            wait_for(self, lambda: PROCESS not in self.eth.showcase.pending)
+            self.assertEqual((kind, payload), (CHAIN, pack_chain(body)))
+            self.reply(ACK, seq, struct.pack('<HBB', CHAIN, 2, 0))
+            wait_for(self, lambda: CHAIN not in self.eth.showcase.pending)
             result = subprocess.run([sys.executable, 'tools/debug_tool/cli.py', '--url', url,
-                                     'processing', json.dumps(dict(scale_percent=125))],
+                                     'pipeline', json.dumps(preset(3))],
                                     capture_output=True, text=True, timeout=3)
             self.assertEqual(result.returncode, 0, result.stderr)
             kind, seq, payload = self.request()
-            self.assertEqual(payload, pack_process(dict(DEFAULTS, scale_percent=125)))
-            self.reply(ACK, seq, struct.pack('<HBB', PROCESS, 2, 0))
+            self.assertEqual(unpack_chain(payload), preset(3))
+            self.reply(ACK, seq, struct.pack('<HBB', CHAIN, 2, 0))
             serial.assert_not_called()
