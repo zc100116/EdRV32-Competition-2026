@@ -12,4 +12,9 @@ extern const uint32_t showcase_pose_desc_bytes;
 extern const uint32_t showcase_pose_weights_bytes;
 extern const uint8_t showcase_pose_desc[];
 extern const uint8_t showcase_pose_weights[];
+extern const uint32_t showcase_hand_count;
+extern const uint32_t showcase_hand_desc_bytes;
+extern const uint32_t showcase_hand_weights_bytes;
+extern const uint8_t showcase_hand_desc[];
+extern const uint8_t showcase_hand_weights[];
 #endif

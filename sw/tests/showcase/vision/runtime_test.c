@@ -159,8 +159,12 @@ unsigned vin_frame_slot(uint32_t info)
 void npu_configure(const struct npu_config *c)
 {
     assert(c->count == 68 || c->count == 77);
-    assert(c->model == (c->count == 77 ? VISION_POSE_MODEL_BASE : VISION_MODEL_BASE));
-    assert(c->descriptors == (c->count == 77 ? VISION_POSE_DESC_BASE : VISION_DESC_BASE));
+    assert((c->count == 68 && c->model == VISION_MODEL_BASE &&
+            c->descriptors == VISION_DESC_BASE) ||
+           (c->count == 77 && c->model == VISION_POSE_MODEL_BASE &&
+            c->descriptors == VISION_POSE_DESC_BASE) ||
+           (c->count == 77 && c->model == VISION_HAND_MODEL_BASE &&
+            c->descriptors == VISION_HAND_DESC_BASE));
     last_npu = *c;
     ++npu_configurations;
 }
@@ -663,6 +667,43 @@ static void pose_test(void)
     puts("PASS pose model/OUTPUT alternation, largest-person hand indicators, "
          "drain and detect restore");
 }
+static void hand_test(void)
+{
+    assert(memcmp(physical(VISION_HAND_DESC_BASE), showcase_hand_desc,
+                  showcase_hand_desc_bytes) == 0);
+    assert(memcmp(physical(VISION_HAND_MODEL_BASE), showcase_hand_weights,
+                  showcase_hand_weights_bytes) == 0);
+    vision_app_hand.enter(); drain();
+    assert(last_npu.model == VISION_HAND_MODEL_BASE);
+    camera_event(0, 800);
+    uint32_t first_output = last_output;
+    int8_t *raw = (void *)(uintptr_t)(EDRV32_DDR_BASE + last_output);
+    const yolo_head *head = &showcase_hand_heads[0];
+    const struct pose_head *quant = &showcase_hand_keypoints[0];
+    for (unsigned k = 0; k < 21; ++k) {
+        unsigned channel = k * 3;
+        raw[quant->offset + channel / 16 * head->plane_stride + 100 * 16 +
+            channel % 16] = (int8_t)k;
+    }
+    output_class(0);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK); drain();
+    const ui_hand_t *hand = ui_data_hand();
+    assert(hand->count == 1 && hand->size > 0);
+    assert(hand->points[0][20].x > hand->points[0][0].x);
+    ticks += platform_clock_hz();
+    vision_service();
+    assert(!strncmp(vision_report(), "hand fps=", 9));
+    assert(!*vision_report()); /* Half-second CPU reports consume each hand line once. */
+    camera_event(1, 801);
+    assert(last_output != first_output);
+    vision_app_hand.exit(); vision_service();
+    assert(last_npu.model == VISION_HAND_MODEL_BASE);
+    event(ENGINE_NPU, EDRV32_NPU_IRQ_STAT_DONE_MASK);
+    display_frame(); display_frame(); drain();
+    assert(vision_ready(UI_STATE_IDLE) && last_npu.model == VISION_MODEL_BASE);
+    display_frame(); display_frame();
+    puts("PASS hand snapshot/model/21 points/OUTPUT alternation, drain and detect restore");
+}
 static void matrix_test(void)
 {
     int32_t m[6];
@@ -717,6 +758,7 @@ int main(void)
     process_test();
     model_test();
     pose_test();
+    hand_test();
     assert(invalidates >= 3);
     return 0;
 }

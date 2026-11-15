@@ -260,6 +260,8 @@ void ui_data_render_start(unsigned test)
 }
 
 /* T-POSE-GUI: deterministic people and two-pixel motion for host GUI measurement. */
+static ui_hand_t hand;
+const ui_hand_t *ui_data_hand(void) { return &hand; }
 static ui_pose_t pose;
 const ui_pose_t *ui_data_pose(void) { return &pose; }
 void sim_data_pose(unsigned count, unsigned frame)

@@ -54,6 +54,8 @@ void ui_page_home(lv_obj_t *p);
 void ui_page_vision(lv_obj_t *p);
 void ui_page_pose(lv_obj_t *p);
 void ui_pose_update(void);
+void ui_page_hand(lv_obj_t *p);
+void ui_hand_update(void);
 void ui_page_image(lv_obj_t *p);
 void ui_page_process(lv_obj_t *p);
 void ui_page_graphics(lv_obj_t *p);

@@ -31,7 +31,7 @@
 
 enum { REF_PAIR = 1, REF_JOB = 2, REF_READY = 4, REF_DISPLAY = 8,
        REF_NPU = 16, REF_GEO = 32 };
-enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE };
+enum { PAGE_NONE, PAGE_CAMERA, PAGE_IMAGE, PAGE_PROCESS, PAGE_POSE, PAGE_HAND };
 enum { JOB_IDLE, JOB_CH2, JOB_NPU, JOB_POST, JOB_SEND, JOB_TX };
 enum pipeline_state { PIPE_OFF, PIPE_STARTING, PIPE_LIVE, PIPE_PAUSING, PIPE_FROZEN,
                       PIPE_STOPPING, PIPE_CONFIGURE };
@@ -42,7 +42,10 @@ static struct vision_session {
     unsigned count;
     uint32_t frame;
     enum { UPLOAD_EMPTY, UPLOAD_READY } upload;
-} sessions[5];
+} sessions[6];
+static ui_hand_t hand;
+static bool hand_event_valid;
+const ui_hand_t *ui_data_hand(void) { return &hand; }
 static ui_pose_t pose;
 const ui_pose_t *ui_data_pose(void) { return &pose; }
 static ui_process_config_t process = {.contrast = 256, .gamma_tenths = 10,
@@ -95,7 +98,8 @@ static struct {
     uint32_t tx_done;
     uint32_t upload_base, upload_bytes;
     unsigned model_pending;
-    bool model_ready, pose_model;
+    bool model_ready;
+    unsigned model; /* 0 detect, 1 pose, 2 hand. */
     uint32_t model_base, model_bytes, model_offset;
     unsigned model_phase;
     uint32_t model_count, model_desc_bytes, model_weight_bytes;
@@ -136,6 +140,12 @@ static char image_line[240];
 const char *vision_report(void)
 {
     static char taken[sizeof image_line];
+    if (v.page == PAGE_HAND && v.state == PIPE_LIVE) {
+        static char hand_taken[sizeof report];
+        memcpy(hand_taken, report, sizeof hand_taken);
+        report[0] = 0;
+        return hand_taken;
+    }
     if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE) && v.state == PIPE_LIVE) return report;
     memcpy(taken, image_line, sizeof taken);
     image_line[0] = 0;
@@ -272,7 +282,9 @@ void vision_irq(const struct engine_event *event, void *context)
         uint64_t now = platform_ticks();
         if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) vin_done_tick[0] = now;
         if (event->irq & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) vin_done_tick[2] = now;
-        if (v.capture && (v.page == PAGE_CAMERA || v.page == PAGE_POSE) && !event->error &&
+        if (v.capture &&
+            (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND) &&
+            !event->error &&
             !(event->irq & EDRV32_VIN_IRQ_STAT_ERROR_MASK)) {
             if (event->irq & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
             if (event->irq & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
@@ -297,7 +309,7 @@ void vision_irq(const struct engine_event *event, void *context)
         v.npu_busy = 0;
         timing.last_done = v.done[buffer].done;
         timing.gap_pending = true;
-        if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE)) {
+        if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND)) {
             reference(v.npu_image, REF_JOB, REF_NPU);
             v.input_busy &= ~(1u << v.npu_input);
             if (v.capture) vin_slots_busy(2, v.input_busy);
@@ -429,25 +441,29 @@ static void stop_capture(void)
     vin_channel_enable(2, 0);
     engine_control(ENGINE_VIN, 0);
 }
-static void select_model(bool use_pose)
+static void select_model(unsigned model)
 {
     struct npu_config config = {
-        use_pose ? VISION_POSE_MODEL_BASE : VISION_MODEL_BASE, VISION_WORK_BASE,
+        model == 2 ? VISION_HAND_MODEL_BASE :
+            model == 1 ? VISION_POSE_MODEL_BASE : VISION_MODEL_BASE, VISION_WORK_BASE,
         VISION_INPUT_BASE, VISION_OUTPUT_BASE,
-        use_pose ? VISION_POSE_DESC_BASE : VISION_DESC_BASE,
-        use_pose ? showcase_pose_count : v.model_count};
+        model == 2 ? VISION_HAND_DESC_BASE :
+            model == 1 ? VISION_POSE_DESC_BASE : VISION_DESC_BASE,
+        model == 2 ? showcase_hand_count :
+            model == 1 ? showcase_pose_count : v.model_count};
     npu_configure(&config);
 #ifndef SHOWCASE_POST_CPU
     npu_post_configure();
-    if (use_pose) {
+    if (model) {
+        const yolo_head *heads = model == 2 ? showcase_hand_heads : showcase_pose_heads;
         const uint32_t offsets[] = {EDRV32_NPU_POST_INT8_TH0_OFFSET,
             EDRV32_NPU_POST_INT8_TH1_OFFSET, EDRV32_NPU_POST_INT8_TH2_OFFSET};
         for (unsigned h = 0; h < 3; ++h)
             mmio_write32(EDRV32_NPU_BASE + offsets[h],
-                         (uint8_t)showcase_pose_heads[h].class_threshold);
+                         (uint8_t)heads[h].class_threshold);
     }
 #endif
-    v.pose_model = use_pose;
+    v.model = model;
 }
 static void request_page(unsigned page)
 {
@@ -466,9 +482,11 @@ static void request_page(unsigned page)
     gui_armed = gui_ready = 0; report[0] = 0;
     sessions[page].data.boxes = boxes;
     if (page == PAGE_POSE) memset(&pose, 0, sizeof pose);
+    if (page == PAGE_HAND) { memset(&hand, 0, sizeof hand); hand_event_valid = false; }
     app_wake_at(platform_ticks());
     sched_port_unlock(lock);
 }
+static void enter_hand(void) { request_page(PAGE_HAND); }
 static void enter_pose(void) { request_page(PAGE_POSE); }
 static void enter_camera(void) { request_page(PAGE_CAMERA); }
 static void enter_image(void) { request_page(PAGE_IMAGE); }
@@ -580,12 +598,12 @@ static void start_inference(unsigned input, int image, uint32_t frame, uint64_t 
               VISION_OUTPUT_BASE + v.npu_buffer * VISION_OUTPUT_SPACING);
 #else
     uint32_t post = VISION_POST_BASE + v.npu_buffer * VISION_POST_SPACING;
-    if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE)) {
+    if ((v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND)) {
         /* Task cleaned the whole block before releasing post_owned (SoC 7.4).
          * IRQ restart only selects registers; no cache operation or post work. */
         mmio_write32(EDRV32_NPU_BASE + EDRV32_NPU_POST_BASE_OFFSET, post);
         npu_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING,
-                  VISION_OUTPUT_BASE + (v.page == PAGE_POSE ?
+                  VISION_OUTPUT_BASE + ((v.page == PAGE_POSE || v.page == PAGE_HAND) ?
                   v.npu_buffer * VISION_OUTPUT_SPACING : 0));
     } else {
         npu_post_start(VISION_INPUT_BASE + input * VISION_INPUT_SPACING,
@@ -602,7 +620,8 @@ static void camera_frame(unsigned channel)
         return;
     }
     if (v.state != PIPE_LIVE || v.page == PAGE_IMAGE ||
-        ((v.page == PAGE_CAMERA || v.page == PAGE_POSE) && !v.model_ready)) return;
+        ((v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND) &&
+         !v.model_ready)) return;
     int slot = (int)vin_frame_slot(frame.info);
     if (v.page == PAGE_PROCESS) {
         if (channel == 0) {
@@ -645,7 +664,8 @@ static void camera_frame(unsigned channel)
 /* Latest matched VIN pair is retained while NPU and the previous post overlap. */
 static void camera_start(void)
 {
-    if ((v.page != PAGE_CAMERA && v.page != PAGE_POSE) || v.state != PIPE_LIVE || v.npu_busy ||
+    if ((v.page != PAGE_CAMERA && v.page != PAGE_POSE && v.page != PAGE_HAND) ||
+        v.state != PIPE_LIVE || v.npu_busy ||
         !v.model_ready || v.model_pending || (v.post_owned & (1u << v.npu_buffer)) ||
         irq_errors[ENGINE_VIN] || irq_errors[ENGINE_NPU] ||
         (irq_flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_ERROR_MASK) ||
@@ -719,7 +739,7 @@ uint32_t vision_bulk_done(unsigned kind, uint32_t base, uint32_t bytes)
         sessions[PAGE_IMAGE].data.image_status = UI_IMAGE_DETECTING;
     }
     uint32_t lock = sched_port_lock();
-    if (kind == 1 && (v.page == PAGE_CAMERA || v.page == PAGE_POSE) &&
+    if (kind == 1 && (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND) &&
         v.state == PIPE_LIVE) v.state = PIPE_CONFIGURE;
     sched_port_unlock(lock);
     app_wake_at(platform_ticks());
@@ -737,7 +757,7 @@ static void model_step(void)
     if (v.model_offset == length) {
         v.model_offset = 0;
         if (++v.model_phase == 2) {
-            select_model(v.page == PAGE_POSE);
+            select_model(v.page == PAGE_HAND ? 2 : v.page == PAGE_POSE ? 1 : 0);
             v.model_pending = 0;
             v.model_ready = true;
             /* Each upload owns its own window metadata; no global image_window. */
@@ -795,7 +815,19 @@ static void timing_step(void)
                            (now - timing.since));
     data->npu_tenths = a[0]; data->post_tenths = a[2] + a[3] + a[4];
     data->latency_tenths = a[7];
-    if (v.page == PAGE_POSE && v.state == PIPE_LIVE) {
+    if (v.page == PAGE_HAND && v.state == PIPE_LIVE) {
+        unsigned kpt = timing.samples ? tenths(timing.kpt_ticks / timing.samples) : 0;
+        char bits[6];
+        ui_hand_bits(hand.state.fingers, bits);
+        snprintf(report, sizeof report,
+            "hand fps=%u npu=%u.%u wait=%u.%u decode=%u.%u kpt=%u.%u gui=%u.%u "
+            "e2e=%u.%u period=%u.%u hands=%u size=%u d=%.2f fingers=%s rps=%s "
+            "idle=%u%% npu_gap=%u.%u\r\n",
+            data->fps, a[0]/10,a[0]%10,a[1]/10,a[1]%10,a[2]/10,a[2]%10,
+            kpt/10,kpt%10,a[6]/10,a[6]%10,a[7]/10,a[7]%10,a[8]/10,a[8]%10,
+            hand.count, hand.size/2, (double)hand.state.d, bits, ui_hand_rps(hand.state.rps),
+            idle, gap/10, gap%10);
+    } else if (v.page == PAGE_POSE && v.state == PIPE_LIVE) {
         unsigned kpt = timing.samples ? tenths(timing.kpt_ticks / timing.samples) : 0;
         unsigned jitter[4];
         for (unsigned j = 0; j < 4; ++j) {
@@ -860,7 +892,7 @@ int vision_service(void)
         reference(v.geo_target, 0, REF_GEO);
         v.geo_source = v.geo_target = -1;
     }
-    if (v.capture && (v.page != PAGE_CAMERA && v.page != PAGE_POSE)) {
+    if (v.capture && (v.page != PAGE_CAMERA && v.page != PAGE_POSE && v.page != PAGE_HAND)) {
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_FRAME_MASK) camera_frame(0);
         if (flags[ENGINE_VIN] & EDRV32_VIN_IRQ_STAT_CH2_FRAME_MASK) camera_frame(2);
     }
@@ -887,7 +919,8 @@ int vision_service(void)
 #ifdef SHOWCASE_POST_CPU
         uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * VISION_OUTPUT_SPACING;
         engine_dma_invalidate(EDRV32_DDR_BASE + output,
-            v.page == PAGE_POSE ? VISION_POSE_OUTPUT_BYTES : VISION_OUTPUT_BYTES);
+            (v.page == PAGE_POSE || v.page == PAGE_HAND) ?
+            VISION_POSE_OUTPUT_BYTES : VISION_OUTPUT_BYTES);
         yolo_candidate *candidates = (void *)(uintptr_t)(EDRV32_DDR_BASE + post_base);
         timing.copy_ticks = 0;
         timing.post_start = acquire_start;
@@ -895,6 +928,7 @@ int vision_service(void)
         vision_post_begin(&v.post, (void *)(uintptr_t)(EDRV32_DDR_BASE + output),
                           candidates, v.detections);
         if (v.page == PAGE_POSE) v.post.heads = showcase_pose_heads;
+        if (v.page == PAGE_HAND) v.post.heads = showcase_hand_heads;
 #else
         if (post_count) engine_dma_invalidate(EDRV32_DDR_BASE + post_base,
             (post_count * 24u + 31u) & ~31u);
@@ -961,6 +995,52 @@ int vision_service(void)
         if (complete) timing.nms_end = end;
         timing.cpu[phase] += elapsed;
         v.post_ticks += elapsed;
+        if (complete && v.page == PAGE_HAND && !timing.cancelled) {
+            uint64_t start = platform_ticks();
+            uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * VISION_OUTPUT_SPACING;
+#ifndef SHOWCASE_POST_CPU
+            engine_dma_invalidate(EDRV32_DDR_BASE + output, VISION_POSE_OUTPUT_BYTES);
+#endif
+            hand.count = v.post.kept;
+            unsigned largest = 0;
+            int largest_area = -1;
+            for (unsigned i = 0; i < hand.count; ++i) {
+                pose_point points[21];
+                vision_keypoints_decode((const int8_t *)(uintptr_t)(EDRV32_DDR_BASE + output),
+                    v.post.anchors[i], showcase_hand_heads, showcase_hand_keypoints, 21, points);
+                for (unsigned k = 0; k < 21; ++k)
+                    hand.points[i][k] = (ui_pose_point_t){points[k].x, points[k].y,
+                                                         points[k].visibility};
+                const yolo_detection *d = &v.detections[i];
+                hand.people[i] = (ui_detection_t){"手", d->score / 10,
+                    d->x0, d->y0, d->x1 - d->x0, d->y1 - d->y0, 0};
+                int area = (d->x1 - d->x0) * (d->y1 - d->y0);
+                if (area > largest_area) { largest_area = area; largest = i; }
+            }
+            if (hand.count) {
+                ui_hand_state_t before = hand.state;
+                ui_hand_classify(hand.points[largest], &hand.state);
+                const ui_detection_t *box = &hand.people[largest];
+                hand.size = box->width > box->height ? box->width : box->height;
+                if (!hand_event_valid || before.pinch != hand.state.pinch ||
+                    before.fingers != hand.state.fingers || before.rps != hand.state.rps) {
+                    char line[180], bits[6];
+                    ui_hand_bits(hand.state.fingers, bits);
+                    snprintf(line, sizeof line,
+                        "hand_evt ms=%llu pinch=%u d=%.2f fingers=%s rps=%s size=%u\r\n",
+                        (unsigned long long)(platform_ticks() * 1000 / platform_clock_hz()),
+                        hand.state.pinch, (double)hand.state.d, bits,
+                        ui_hand_rps(hand.state.rps), hand.size / 2);
+                    platform_puts(line);
+                }
+                hand_event_valid = true;
+            } else {
+                hand.size = 0;
+                memset(&hand.state, 0, sizeof hand.state);
+                hand_event_valid = false;
+            }
+            timing.kpt_ticks += platform_ticks() - start;
+        }
         if (complete && v.page == PAGE_POSE && !timing.cancelled) {
             uint64_t kpt_start = platform_ticks();
             uint32_t output = VISION_OUTPUT_BASE + v.post_buffer * VISION_OUTPUT_SPACING;
@@ -1040,12 +1120,13 @@ int vision_service(void)
         if (v.state == PIPE_STOPPING) {
             if (v.display_owned) { sched_port_unlock(lock); return 1; }
             engine_control(ENGINE_VIN, 0);
-            if (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_IMAGE)
+            if (v.page == PAGE_CAMERA || v.page == PAGE_POSE || v.page == PAGE_HAND ||
+                v.page == PAGE_IMAGE)
                 engine_control(ENGINE_NPU, 0);
             if (v.page == PAGE_PROCESS) {
                 engine_control(ENGINE_PIX, 0); engine_control(ENGINE_GEO, 0);
             }
-            if (v.pose_model) select_model(false);
+            if (v.model) select_model(0);
             v.current = -1; v.page = PAGE_NONE; v.state = PIPE_OFF;
         } else if (v.state == PIPE_PAUSING) v.state = PIPE_FROZEN;
         else v.state = PIPE_STARTING;
@@ -1055,7 +1136,8 @@ int vision_service(void)
         model_step(); sched_port_unlock(lock); return 1;
     }
     if (v.state == PIPE_STARTING) {
-        if ((v.page == PAGE_POSE) != v.pose_model) select_model(v.page == PAGE_POSE);
+        unsigned model = v.page == PAGE_HAND ? 2 : v.page == PAGE_POSE ? 1 : 0;
+        if (model != v.model) select_model(model);
         if (v.page == PAGE_PROCESS && v.gamma_index < 256) {
             sched_port_unlock(lock); return 1;
         }
@@ -1103,6 +1185,8 @@ static void step(void)
     app_wake_at(busy ? platform_ticks() + (cpu ? 0 : platform_clock_hz() / 1000) :
                       UINT64_MAX);
 }
+const struct app vision_app_hand = {
+    "手部关键点", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_hand, step, leave};
 const struct app vision_app_pose = {
     "人体姿态", NULL, APP_HW_VIN | APP_HW_NPU, 0, enter_pose, step, leave};
 const struct app vision_app_camera = {
@@ -1129,6 +1213,9 @@ void vision_init(void)
         memcpy(uncached(VISION_POSE_DESC_BASE), showcase_pose_desc, showcase_pose_desc_bytes);
         memcpy(uncached(VISION_POSE_MODEL_BASE), showcase_pose_weights,
                showcase_pose_weights_bytes);
+        memcpy(uncached(VISION_HAND_DESC_BASE), showcase_hand_desc, showcase_hand_desc_bytes);
+        memcpy(uncached(VISION_HAND_MODEL_BASE), showcase_hand_weights,
+               showcase_hand_weights_bytes);
         v.model_count = showcase_model_count;
         struct npu_config config = {VISION_MODEL_BASE, VISION_WORK_BASE,
             VISION_INPUT_BASE, VISION_OUTPUT_BASE, VISION_DESC_BASE, showcase_model_count};

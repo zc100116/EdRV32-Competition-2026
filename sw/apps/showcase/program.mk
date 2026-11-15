@@ -89,3 +89,15 @@ $(ROOT)/build/showcase/pose_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
 	    --model-source $(SHOWCASE_POSE_SOURCE) --out $(SHOWCASE_POSE_DIR)
 	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_POSE_DIR) $@ \
 	    --pose-quantization $(SHOWCASE_POSE_SOURCE)/quantization.json
+
+# T-HAND-BOARD: immutable hand snapshot, rebuilt without torch.
+SHOWCASE_HAND_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-hand
+SHOWCASE_HAND_DIR := $(ROOT)/build/npu/software_hand
+PROGRAM_SOURCES += build/showcase/hand_model.c
+$(ROOT)/build/showcase/hand_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_HAND_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --task hand \
+	    --model-source $(SHOWCASE_HAND_SOURCE) --out $(SHOWCASE_HAND_DIR)
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(SHOWCASE_HAND_DIR) $@ \
+	    --hand-quantization $(SHOWCASE_HAND_SOURCE)/quantization.json

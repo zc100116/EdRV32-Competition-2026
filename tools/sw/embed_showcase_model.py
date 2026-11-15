@@ -24,8 +24,10 @@ def read_hex(path, base):
     return data
 
 
-def generate(directory, output, pose_quantization=None):
-    prefix = "showcase_pose" if pose_quantization else "showcase_model"
+def generate(directory, output, pose_quantization=None, hand_quantization=None):
+    task = "hand" if hand_quantization else "pose"
+    pose_quantization = hand_quantization or pose_quantization
+    prefix = f"showcase_{task}" if pose_quantization else "showcase_model"
     regs = {key: int(value, 16) for key, value in
             (line.split() for line in (directory / 'regs.txt').read_text().splitlines())}
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -48,7 +50,7 @@ def generate(directory, output, pose_quantization=None):
             from yolo_post_ref import make_heads
             quant = json.loads(pose_quantization.read_text())
             source.write('#include "pose.h"\n')
-            source.write('const yolo_head showcase_pose_heads[3] = {\n')
+            source.write(f'const yolo_head {prefix}_heads[3] = {{\n')
             for head in make_heads(quant):
                 source.write('    {\n')
                 for key, value in head.items():
@@ -56,9 +58,9 @@ def generate(directory, output, pose_quantization=None):
                         value = '{' + ','.join(map(str, value)) + '}'
                     source.write(f'        .{key} = {value},\n')
                 source.write('    },\n')
-            source.write('};\nconst struct pose_head showcase_pose_keypoints[3] = {\n')
+            source.write(f'}};\nconst struct pose_head {prefix}_keypoints[3] = {{\n')
             rows = {row['name']: row for row in quant['convolutions']}
-            plan = build_plan('pose')
+            plan = build_plan(task)
             for i in range(3):
                 tensor = plan['tensors'][f'D{i}.kpt']
                 row = rows[f'D{i}.kpt.out']
@@ -72,5 +74,6 @@ if __name__ == '__main__':
     parser.add_argument('directory', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--pose-quantization', type=Path)
+    parser.add_argument('--hand-quantization', type=Path)
     args = parser.parse_args()
-    generate(args.directory, args.output, args.pose_quantization)
+    generate(args.directory, args.output, args.pose_quantization, args.hand_quantization)

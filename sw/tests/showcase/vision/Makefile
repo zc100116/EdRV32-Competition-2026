@@ -23,7 +23,8 @@ RUNTIME_TEST ?= runtime_test
 .PHONY: runtime network
 network:
 	$(MAKE) runtime RUNTIME_TEST=network_test
-runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c
+runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
+    $(ROOT)/build/showcase/hand_model.c
 	mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -DLV_CONF_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
 	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase -I$(ROOT)/sw/bsp/include \
@@ -32,6 +33,7 @@ runtime: $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c
 	    $(VISION)/wire.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c $(ROOT)/sw/drivers/rnd.c \
 	    $(ROOT)/sw/apps/showcase/ui/detection.c $(ROOT)/sw/lib/geo_matrix.c \
 	    $(ROOT)/build/showcase/model.c $(ROOT)/build/showcase/pose_model.c \
+	    $(ROOT)/build/showcase/hand_model.c $(ROOT)/sw/apps/showcase/ui/page_hand.c \
 	    $(ROOT)/sw/apps/showcase/board/session.c \
 	    $(ROOT)/sw/apps/showcase/board/protocol.c $(ROOT)/sw/apps/showcase/board/records.c \
 	    $(ROOT)/sw/apps/showcase/board/state.c -lm \
@@ -64,3 +66,24 @@ pose: $(ROOT)/build/showcase/pose_model.c
 	    $(ROOT)/build/showcase/pose_model.c -Wl,--gc-sections -lm -o $(OUT)/pose_test
 	PYTHONPATH=$(ROOT)/third_party/ultralytics OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 	    $(HOME)/.local/opt/edrv32-py/bin/python pose_fixture.py $(OUT)/pose_test
+
+SHOWCASE_HAND_SOURCE := $(ROOT)/sw/apps/showcase/models/yolov8n-hand
+$(ROOT)/build/showcase/hand_model.c: $(ROOT)/tools/sw/embed_showcase_model.py \
+    $(wildcard $(ROOT)/tools/npu/*.py) \
+    $(addprefix $(SHOWCASE_HAND_SOURCE)/,mem_model.hex quantization.json)
+	python3 $(ROOT)/tools/npu/compile_yolo.py --task hand \
+	    --model-source $(SHOWCASE_HAND_SOURCE) --out $(ROOT)/build/npu/software_hand
+	python3 $(ROOT)/tools/sw/embed_showcase_model.py $(ROOT)/build/npu/software_hand $@ \
+	    --hand-quantization $(SHOWCASE_HAND_SOURCE)/quantization.json
+
+.PHONY: hand
+hand: $(ROOT)/build/showcase/hand_model.c
+	mkdir -p $(OUT)
+	$(CC) $(CFLAGS) -DSHOWCASE_POST_CPU -ffunction-sections -fdata-sections \
+	    -DLV_CONF_INCLUDE_SIMPLE -DLV_LVGL_H_INCLUDE_SIMPLE -I$(LVGL_ROOT) \
+	    -I$(ROOT)/sw/apps/showcase/lvgl -I$(ROOT)/sw/apps/showcase \
+	    hand_test.c $(VISION)/post.c $(VISION)/pose.c $(ROOT)/sw/lib/yolo_tables.c \
+	    $(ROOT)/sw/apps/showcase/ui/page_hand.c $(ROOT)/build/showcase/hand_model.c \
+	    -Wl,--gc-sections -lm -o $(OUT)/hand_test
+	PYTHONPATH=$(ROOT)/third_party/ultralytics OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+	    $(HOME)/.local/opt/edrv32-py/bin/python hand_fixture.py $(OUT)/hand_test

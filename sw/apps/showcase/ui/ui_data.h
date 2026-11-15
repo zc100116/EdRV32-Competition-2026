@@ -23,7 +23,7 @@ typedef struct { unsigned threshold; uint32_t classes[3]; } ui_detection_config_
 /* Media applications and session states: design 2026-11-03-showcase-p5-replan 8.1.
  * Values equal the EDSC `app` and `state` fields. */
 typedef enum { UI_APP_NONE, UI_APP_CAMERA, UI_APP_IMAGE, UI_APP_PROCESS,
-               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK, UI_APP_POSE } ui_app_t;
+               UI_APP_GRAPHICS, UI_APP_GAME, UI_APP_COREMARK, UI_APP_POSE, UI_APP_HAND = 8 } ui_app_t;
 typedef enum { UI_STATE_IDLE, UI_STATE_STARTING, UI_STATE_RUNNING, UI_STATE_PAUSED,
                UI_STATE_STOPPING, UI_STATE_FAILED } ui_state_t;
 typedef struct {
@@ -89,6 +89,21 @@ typedef struct {
     bool left_up, right_up;
 } ui_pose_t;
 const ui_pose_t *ui_data_pose(void);
+typedef struct {
+    float d;
+    bool pinch;
+    unsigned fingers, rps; /* bit 0 thumb; rps: 0 none, 1 rock, 2 scissors, 3 paper. */
+} ui_hand_state_t;
+typedef struct {
+    unsigned count, size;
+    ui_detection_t people[100];
+    ui_pose_point_t points[100][21];
+    ui_hand_state_t state;
+} ui_hand_t;
+const ui_hand_t *ui_data_hand(void);
+void ui_hand_classify(const ui_pose_point_t points[21], ui_hand_state_t *state);
+const char *ui_hand_rps(unsigned rps);
+void ui_hand_bits(unsigned fingers, char bits[6]);
 /* Ask the PC for the previous (-1) or next (+1) image of its list (EDSC IMAGE_STEP). */
 void ui_data_image_step(int direction);
 ui_detection_config_t ui_data_detection_config(void);
